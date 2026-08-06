@@ -822,6 +822,48 @@ ipcMain.on('pont:fermer', (e) => {
   if (w && !w.isDestroyed()) w.close();
 });
 
+// ── Fabrique commune des fenêtres natives ───────────────────────────────────
+// ⚠ UNE SEULE PAR CLÉ. Sans ce registre, cliquer deux fois sur « Nouveau
+// fournisseur » ouvrirait deux formulaires sur la même fiche : deux verrous
+// demandés, un seul obtenu, et la deuxième fenêtre travaillerait pour rien.
+const fenetresNatives = new Map();
+const ouvrirNative = (cle, titre, html, opts = {}) => {
+  const deja = fenetresNatives.get(cle);
+  if (deja && !deja.isDestroyed()) { if (deja.isMinimized()) deja.restore(); deja.focus(); return deja; }
+  const b = (reglages.get('fenetres') || {})[cle] || {};
+  const win = new BrowserWindow({
+    width: b.width || opts.width || 760, height: b.height || opts.height || 640,
+    ...(Number.isFinite(b.x) && Number.isFinite(b.y) ? { x: b.x, y: b.y } : {}),
+    minWidth: opts.minWidth || 520, minHeight: opts.minHeight || 420, show: false,
+    title: titre, autoHideMenuBar: true, backgroundColor: '#0e1522',
+    webPreferences: {
+      preload: path.join(__dirname, 'pont-preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
+    },
+  });
+  fenetresNatives.set(cle, win);
+  // Le titre reste celui qu'on a demandé, pas celui que la page annonce.
+  win.on('page-title-updated', (ev) => { ev.preventDefault(); });
+  win.setTitle(titre);
+  // Place retenue PAR CLÉ : un second écran reste un second écran.
+  let minuterie = null;
+  const retenir = () => {
+    clearTimeout(minuterie);
+    minuterie = setTimeout(() => {
+      if (win.isDestroyed()) return;
+      const tout = reglages.get('fenetres') || {};
+      tout[cle] = win.getBounds();
+      reglages.set('fenetres', tout);
+    }, 400);
+  };
+  win.on('moved', retenir);
+  win.on('resized', retenir);
+  win.on('closed', () => { fenetresNatives.delete(cle); });
+  win.once('ready-to-show', () => win.show());
+  win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+  return win;
+};
+
 // ── Fenêtre « Imprimantes », entièrement native ──────────────────────────────
 let imprimantesWin = null;
 const ouvrirImprimantes = () => {
@@ -1157,6 +1199,8 @@ const verifierAuLancement = async () => {
 
 const { pageDetachee } = require('./menubar');
 const { pageImprimantes } = require('./fenetres/imprimantes');
+const { pageFournisseur } = require('./fenetres/fournisseur');
+const { pageCollection } = require('./fenetres/collection');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
@@ -1180,6 +1224,12 @@ const actionApp = (nom) => {
     case 'update-check': checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
     case 'imprimantes': ouvrirImprimantes(); break;
+    case 'fournisseur-nouveau':
+      ouvrirNative('fournisseur', 'Nouveau fournisseur', pageFournisseur(''), { width: 800, height: 700 });
+      break;
+    case 'collection-nouvelle':
+      ouvrirNative('collection', 'Nouvelle collection', pageCollection(''), { width: 860, height: 760 });
+      break;
     case 'about-copy':
       try { require('electron').clipboard.writeText(texteApropos()); } catch {}
       break;
