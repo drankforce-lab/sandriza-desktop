@@ -74,7 +74,7 @@ function pageFournisseur(id) {
 
   function dessiner(fiche){
     var h = [];
-    h.push('<div class="etape"><div class="carte plein"><h2>Identification</h2><div class="grille">'
+    h.push('<div class="etape"><div class="carte"><h2>Identification</h2><div class="grille">'
       + ch('f-nom', 'Nom du fournisseur', { requis: true, large: true })
       + ch('f-contact', 'Personne-ressource')
       + ch('f-courriel', 'Courriel', { type: 'email' })
@@ -82,14 +82,14 @@ function pageFournisseur(id) {
       + ch('f-web', 'Site web', { placeholder: 'https://…' })
       + '</div></div></div>');
 
-    h.push('<div class="etape"><div class="carte plein"><h2>Adresse</h2><div class="grille">'
+    h.push('<div class="etape"><div class="carte"><h2>Adresse</h2><div class="grille">'
       + ch('f-rue', 'Rue', { large: true })
       + ch('f-ville', 'Ville')
       + sel('f-prov', 'Province', CTX.provinces)
       + ch('f-cp', 'Code postal', { placeholder: 'G1H 1T4' })
       + '</div></div></div>');
 
-    h.push('<div class="etape"><div class="carte plein"><h2>Approvisionnement</h2>'
+    h.push('<div class="etape"><div class="carte"><h2>Approvisionnement</h2>'
       + '<div class="ch large" style="margin-bottom:.65rem"><label>Catégories fournies</label><div class="cases">'
       + CTX.categories.map(function(c){
           return '<label><input type="checkbox" class="f-cat" value="' + esc(c.cle) + '">' + esc(c.libelle) + '</label>';
@@ -127,7 +127,7 @@ function pageFournisseur(id) {
     ]);
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
-    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d enregistrer.', 'att');
+    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d’enregistrer.', 'att');
   }
 
   // ⚠ LE VERROU EST PRIS A L OUVERTURE, pas seulement a l enregistrement.
@@ -138,7 +138,7 @@ function pageFournisseur(id) {
     return P.appeler('verrou:prendre', 'suppliers', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 fiche réservée'; return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu un d autre');
+      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
       dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
     });

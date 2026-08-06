@@ -73,7 +73,7 @@ function pageCommande(id) {
 (function(){
   'use strict';
   ${JS_SOCLE}
-  MOTIFS.suivi_requis = 'Entrez un numero de suivi, ou cochez « expedier sans numero ».';
+  MOTIFS.suivi_requis = 'Entrez un numéro de suivi, ou cochez « expédier sans numéro ».';
 
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
@@ -170,7 +170,7 @@ function pageCommande(id) {
     });
 
     bEnr.disabled = !CTX.peutExpedier;
-    if (!CTX.peutExpedier) dire('Votre role ne permet pas d expedier.', 'att');
+    if (!CTX.peutExpedier) dire('Votre rôle ne permet pas d’expédier.', 'att');
   }
 
   var PAGI2 = null;
@@ -249,11 +249,11 @@ function pageCommande(id) {
   }
 
   function imprimer(genre, b){
-    b.disabled = true; dire('Envoi a l impression…');
+    b.disabled = true; dire('Envoi à l’impression…');
     P.appeler('commande:bon', ID, genre).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Envoye a l impression.', 'bon');
+      dire('Envoyé à l’impression.', 'bon');
     });
   }
 
@@ -263,10 +263,10 @@ function pageCommande(id) {
     P.appeler('commande:etiquette', ID, val('c-transp')).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      if (r.suivi) { poser('c-suivi', r.suivi); dire('Etiquette generee — suivi ' + r.suivi, 'bon'); }
+      if (r.suivi) { poser('c-suivi', r.suivi); dire('Étiquette générée — suivi ' + r.suivi, 'bon'); }
       // ⚠ Pas de numero = pas d etiquette, meme si l appel n a pas leve d erreur.
       // Annoncer un succes ici ferait expedier une commande sans etiquette.
-      else dire('Aucun numero recu : l etiquette n a PAS ete generee. Voyez l avis dans la fenetre principale.', 'err');
+      else dire('Aucun numéro reçu : l’étiquette n’a PAS été générée. Voyez l’avis dans la fenêtre principale.', 'err');
     });
   }
 
@@ -274,15 +274,15 @@ function pageCommande(id) {
     return P.appeler('verrou:prendre', 'orders', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 commande réservée'; return; }
-      sous.textContent = '⚠ en traitement par ' + (v.parQui || 'quelqu un d autre');
+      sous.textContent = '⚠ en traitement par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
-      dire('Cette commande est deja en traitement ailleurs.', 'err');
+      dire('Cette commande est déjà en traitement ailleurs.', 'err');
     });
   }
 
   function charger(){
     P.appeler('commande:contexte').then(function(c){
-      if (!c || !c.ok) { vide('Preparation indisponible', expliquer(c)); return; }
+      if (!c || !c.ok) { vide('Préparation indisponible', expliquer(c)); return; }
       CTX = c;
       return P.appeler('commande:lire', ID).then(function(r){
         if (!r || !r.ok) { vide('Commande indisponible', expliquer(r)); return; }
@@ -300,17 +300,17 @@ function pageCommande(id) {
     // bloquerait les cas legitimes (envoi partiel assume).
     if (!toutVerifie() && window._szForcer !== true) {
       window._szForcer = true;
-      dire('Colis INCOMPLET (' + comptes() + ' sur ' + attendus() + '). Recliquez « Expedier » pour assumer un envoi partiel.', 'att');
+      dire('Colis INCOMPLET (' + comptes() + ' sur ' + attendus() + '). Recliquez « Expédier » pour assumer un envoi partiel.', 'att');
       return;
     }
     bEnr.disabled = true;
-    dire('Expedition…');
+    dire('Expédition…');
     var pret = coché('c-pret');
     P.appeler('commande:prete', ID, pret).then(function(){
       return P.appeler('commande:expedier', ID, val('c-transp'), val('c-suivi'), coché('c-sans'));
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; window._szForcer = false; dire(expliquer(r), 'err'); return; }
-      dire(r.sansSuivi ? 'Expediee sans numero de suivi.' : 'Expediee — courriel envoye.', 'bon');
+      dire(r.sansSuivi ? 'Expédiée sans numéro de suivi.' : 'Expédiée — courriel envoyé.', 'bon');
       setTimeout(function(){ P.fermer(); }, 900);
     });
   }

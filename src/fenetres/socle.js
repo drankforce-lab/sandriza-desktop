@@ -58,8 +58,13 @@ body{background:#0e1522;color:#e8edf5;
 .etape.on{display:flex}
 
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
-  padding:.85rem .95rem;min-height:0}
+  padding:.85rem .95rem;min-height:0;flex:0 0 auto}
+/* « plein » : pour les cartes qui portent une LISTE, qui doit occuper la place
+   disponible pour montrer le plus de lignes possible. Une carte ordinaire epouse
+   son contenu — sinon quatorze jetons laissent quatre cents pixels de vide. */
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+/* Une etape dont AUCUNE carte n est « plein » se tasse en haut au lieu de s etirer. */
+.etape{justify-content:flex-start}
 .carte h2{margin:0 0 .6rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.09em;color:#8fa1b8;font-weight:700}
 
@@ -126,16 +131,16 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 const JS_SOCLE = `
 var P = window.szPont;
 var MOTIFS = {
-  session:            'Aucune session ouverte dans l application. Connectez-vous dans la fenetre principale.',
-  droit:              'Votre role ne donne pas acces a cette operation.',
-  indisponible:       'L administration n est pas encore chargee dans la fenetre principale.',
-  pont_indisponible:  'La fenetre principale ne repond pas.',
-  operation_inconnue: 'Cette version de l application ne connait pas cette operation.',
-  introuvable:        'Cette fiche n existe plus.',
+  session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
+  droit:              'Votre rôle ne donne pas accès à cette opération.',
+  indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
+  pont_indisponible:  'La fenêtre principale ne répond pas.',
+  operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
+  introuvable:        'Cette fiche n’existe plus.',
   nom_requis:         'Le nom est obligatoire.',
-  televersement:      'Le depot de l image a echoue. Rien n a ete enregistre.',
-  verrou:             'Fiche ouverte par quelqu un d autre.',
-  echec:              'L operation a echoue.'
+  televersement:      'Le dépôt de l’image a échoué. Rien n’a été enregistré.',
+  verrou:             'Fiche ouverte par quelqu’un d’autre.',
+  echec:              'L’opération a échoué.'
 };
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
   return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -213,7 +218,7 @@ var Assist = {
   toutValide: function(){
     for (var k = 0; k < this.etapes.length; k++) {
       var m = this.manquant(k);
-      if (m) { this.aller(k); this.pointer(m, 'Il manque un renseignement a l etape « ' + this.etapes[k].t + ' ».'); return false; }
+      if (m) { this.aller(k); this.pointer(m, 'Il manque un renseignement à l’étape « ' + this.etapes[k].t + ' ».'); return false; }
     }
     return true;
   }
@@ -248,10 +253,10 @@ Pagi.prototype.dessiner = function(){
   var l = this.zone.querySelector('.liste');
   var self = this;
   l.innerHTML = vues.length ? vues.map(function(x){ return self.ligne(x); }).join('')
-    : '<div class="aide" style="padding:.4rem .3rem">Aucun resultat.</div>';
+    : '<div class="aide" style="padding:.4rem .3rem">Aucun résultat.</div>';
   var p = this.zone.querySelector('.pagi');
   if (p) {
-    p.innerHTML = '<button type="button" data-pg="-1"' + (this.page === 0 ? ' disabled' : '') + '>Precedent</button>'
+    p.innerHTML = '<button type="button" data-pg="-1"' + (this.page === 0 ? ' disabled' : '') + '>Précédent</button>'
       + '<button type="button" data-pg="1"' + (this.page >= nb - 1 ? ' disabled' : '') + '>Suivant</button>'
       + '<span class="pos">' + (f.length ? (deb + 1) + '–' + Math.min(deb + pp, f.length) : 0)
       + ' sur ' + f.length + (nb > 1 ? '  ·  page ' + (this.page + 1) + ' / ' + nb : '') + '</span>';

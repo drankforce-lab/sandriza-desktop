@@ -74,14 +74,12 @@ function pageCollection(id) {
   function dessiner(fiche){
     var h = [];
 
-    h.push('<div class="etape"><div class="carte plein"><h2>La collection</h2><div class="grille">'
+    h.push('<div class="etape"><div class="carte"><h2>La collection</h2><div class="grille">'
       + '<div class="ch large"><label for="c-nom">Nom <span class="req">*</span></label><input id="c-nom"></div>'
       + '<div class="ch large"><label for="c-desc">Description</label>'
       + '<textarea id="c-desc" rows="4"></textarea>'
-      + '<div style="display:flex;gap:.4rem;align-items:center;margin-top:.35rem">'
-      + '<button type="button" id="c-ia">✨ Rédiger avec l IA</button>'
-      + '<span class="aide" id="c-ia-note">demande une image a l etape « Image »</span>'
-      + '</div></div>'
+      + '<div style="margin-top:.35rem">'
+      + '<button type="button" id="c-ia">✨ Rédiger avec l’IA</button></div></div>'
       + '<div class="ch"><label for="c-saison">Saison</label><select id="c-saison">'
       + CTX.saisons.map(function(s){ return '<option value="' + esc(s) + '">' + (s ? esc(s) : '—') + '</option>'; }).join('')
       + '</select></div>'
@@ -92,12 +90,12 @@ function pageCollection(id) {
       + '<option value="1">Active</option><option value="0">Inactive</option></select></div>'
       + '</div></div></div>');
 
-    h.push('<div class="etape"><div class="carte plein"><h2>Image de couverture</h2><div class="photo">'
+    h.push('<div class="etape"><div class="carte"><h2>Image de couverture</h2><div class="photo">'
       + '<div class="vign" id="c-vign">aucune image</div><div class="cmd">'
       + '<input type="file" id="c-fichier" accept="image/*">'
-      + '<button type="button" id="c-vider">Retirer l image</button>'
-      + '<div class="aide">L image est déposée dans le stockage au moment de l enregistrement, '
-      + 'comme partout ailleurs dans l administration. Maximum 8 Mo.</div>'
+      + '<button type="button" id="c-vider">Retirer l’image</button>'
+      + '<div class="aide">L’image est déposée dans le stockage au moment de l’enregistrement, '
+      + 'comme partout ailleurs dans l’administration. Maximum 8 Mo.</div>'
       + '</div></div></div></div>');
 
     h.push('<div class="etape"><div class="carte plein" id="c-zone"><h2>Produits de la collection</h2>'
@@ -159,25 +157,27 @@ function pageCollection(id) {
     ], function(i){ if (i === 2 && PAGI) PAGI.dessiner(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
-    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d enregistrer.', 'att');
+    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d’enregistrer.', 'att');
   }
 
   // Le bouton n a de sens qu avec une image : le service la regarde. On le DIT
   // au lieu de laisser cliquer pour rien.
   function majIa(){
-    var b = document.getElementById('c-ia'), n = document.getElementById('c-ia-note');
+    var b = document.getElementById('c-ia');
     if (!b) return;
     b.disabled = !IMAGE;
-    if (n) n.textContent = IMAGE ? 'analyse l image de couverture' : 'demande une image a l etape « Image »';
+    b.title = IMAGE
+      ? 'Analyse l’image de couverture et propose une description.'
+      : 'Ajoutez d’abord une image à l’étape « Image » : le service la regarde.';
   }
   function rediger(){
     var b = document.getElementById('c-ia');
-    b.disabled = true; dire('Redaction en cours…');
+    b.disabled = true; dire('Rédaction en cours…');
     P.appeler('collection:decrire', { nom: val('c-nom'), imageDataUrl: IMAGE }).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
       poser('c-desc', r.texte);
-      dire('Description redigee — relisez-la avant d enregistrer.', 'bon');
+      dire('Description rédigée — relisez-la avant d’enregistrer.', 'bon');
     });
   }
 
@@ -207,7 +207,7 @@ function pageCollection(id) {
     return P.appeler('verrou:prendre', 'collections', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 fiche réservée'; return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu un d autre');
+      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
       dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
     });
@@ -229,7 +229,7 @@ function pageCollection(id) {
   function enregistrer(){
     if (!Assist.toutValide()) return;
     bEnr.disabled = true;
-    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? 'Dépôt de l image et enregistrement…' : 'Enregistrement…');
+    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? 'Dépôt de l’image et enregistrement…' : 'Enregistrement…');
     P.appeler('collection:enregistrer', ID, {
       name: val('c-nom').trim(),
       description: val('c-desc'),

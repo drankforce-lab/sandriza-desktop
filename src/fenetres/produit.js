@@ -44,6 +44,17 @@ const CSS_PROPRE = `
   justify-content:center;color:#8fa1b8;font-size:.75rem;overflow:hidden;text-align:center}
 .photo .vign img{width:100%;height:100%;object-fit:cover}
 .photo .cmd{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.45rem}
+.vues{display:flex;flex-wrap:wrap;gap:.5rem;align-content:flex-start;overflow:hidden}
+.vue{position:relative;width:88px;flex:0 0 auto}
+.vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
+  background:#0f1826;color:#8fa1b8;font-size:.68rem;text-align:center;padding:.2rem}
+.vue .cadre.pleine{border-style:solid;border-color:rgba(255,255,255,.22)}
+.vue img{width:100%;height:100%;object-fit:cover}
+.vue .lgd{font-size:.68rem;color:#8fa1b8;text-align:center;margin-top:.18rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vue .x{position:absolute;top:2px;right:2px;width:18px;height:18px;padding:0;
+  border-radius:50%;font-size:.7rem;line-height:1;background:rgba(14,21,34,.85)}
 .paire{display:flex;gap:.4rem;align-items:center}
 .paire input{flex:1 1 auto}
 .paire select{flex:0 0 5rem}
@@ -77,15 +88,22 @@ function pageProduit(id) {
 (function(){
   'use strict';
   ${JS_SOCLE}
-  MOTIFS.prix_invalide  = 'Le prix doit etre superieur a zero.';
-  MOTIFS.cout_requis    = 'Le cout d acquisition est obligatoire.';
+  MOTIFS.prix_invalide  = 'Le prix doit être supérieur à zéro.';
+  MOTIFS.cout_requis    = 'Le coût d’acquisition est obligatoire.';
   MOTIFS.poids_requis   = 'Le poids unitaire est obligatoire.';
-  MOTIFS.non_enregistre = 'La fiche n a PAS ete enregistree. Voyez l avis dans la fenetre principale — le plus souvent, un collegue vient de modifier la meme fiche.';
+  MOTIFS.non_enregistre = 'La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.';
 
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
   var sous = document.getElementById('sous');
   var CTX = null, FICHE = null, IMAGE = '', STOCK = {}, LOCS = {}, PAGI = null;
+  // ⚠ CES DEUX-LA ETAIENT DEJA ENVOYES AU PONT MAIS JAMAIS REMPLIS : la fenetre
+  // expediait deux objets vides, et modifier une fiche depuis l application lui
+  // FAISAIT PERDRE ses photos par couleur. Un defaut qui ne se voit pas a
+  // l enregistrement — il se decouvre plus tard, sur la boutique.
+  var VUES = {};      // { 'vue-2': dataUrl | url, … }
+  var PARCOUL = {};   // { 'Noir': { principale: dataUrl | url }, … }
+  var VUES_NOMS = ['Dos', 'Détail', 'Porté', 'Autre'];
 
   function dire(t, genre){
     var m = document.getElementById('msg');
@@ -145,12 +163,10 @@ function pageProduit(id) {
       // La redaction par IA passe par le PONT : la fenetre envoie la photo et les
       // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
       // d ici, aucune cle ne voyage.
-      + '<div style="display:flex;gap:.4rem;align-items:center;margin-top:.35rem">'
-      + '<button type="button" id="p-ia">✨ Rédiger avec l’IA</button>'
-      + '<span class="aide" id="p-ia-note">demande une photo à l’étape « Photo »</span>'
+      + '<div style="margin-top:.35rem">'
+      + '<button type="button" id="p-ia">✨ Rédiger avec l’IA</button></div></div>'
       + '</div></div>'
-      + '</div></div>'
-      + '<div class="carte plein"><h2>Classement</h2><div class="grille">'
+      + '<div class="carte"><h2>Classement</h2><div class="grille">'
       + sel('p-genre', 'Genre', rien.concat(opt(CTX.genres, 'cle', 'libelle')))
       + sel('p-age', 'Groupe d’âge', rien.concat(opt(CTX.groupesAge, 'cle', 'libelle')))
       + sel('p-style', 'Style', rien.concat(opt(CTX.styles, 'cle', 'libelle')))
@@ -162,7 +178,7 @@ function pageProduit(id) {
 
     // 3 — Tailles et couleurs
     h.push('<div class="etape">'
-      + '<div class="carte plein"><h2>Tailles offertes</h2><div class="jetons" id="p-tailles">'
+      + '<div class="carte"><h2>Tailles offertes</h2><div class="jetons" id="p-tailles">'
       + (CTX.tailles.length
           ? CTX.tailles.map(function(t){ return '<span class="jeton" data-t="' + esc(t) + '">' + esc(t) + '</span>'; }).join('')
           : '<span class="aide">Aucune taille au référentiel.</span>')
@@ -193,7 +209,7 @@ function pageProduit(id) {
       + '<span class="aide" style="margin-right:.2rem">Rabais rapide :</span></div>'
       + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
       + '<div id="p-alerte" style="display:none;color:#f87171;font-size:.78rem;margin-top:.4rem"></div></div>'
-      + '<div class="carte plein"><h2>Poids unitaire</h2><div class="grille">'
+      + '<div class="carte"><h2>Poids unitaire</h2><div class="grille">'
       + '<div class="ch"><label for="p-poids">Poids <span class="req">*</span></label>'
       + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0">'
       + '<select id="p-unite"><option value="g">g</option><option value="kg">kg</option>'
@@ -201,16 +217,22 @@ function pageProduit(id) {
       + '<div class="aide" style="margin-top:.5rem">Le poids sert au calcul des frais d’expédition. '
       + 'Il est conservé en kilogrammes, quelle que soit l’unité choisie ici.</div></div></div>');
 
-    // 5 — Photo
-    h.push('<div class="etape"><div class="carte plein"><h2>Photo principale</h2><div class="photo">'
+    // 5 — Photos : principale, vues supplémentaires, et par couleur
+    h.push('<div class="etape">'
+      + '<div class="carte"><h2>Photo principale</h2><div class="photo">'
       + '<div class="vign" id="p-vign">aucune photo</div><div class="cmd">'
       + '<input type="file" id="p-fichier" accept="image/*">'
       + '<button type="button" id="p-vider">Retirer la photo</button>'
-      + '<div class="aide">Maximum 8 Mo. Déposée dans le stockage à l’enregistrement.<br><br>'
-      + 'Les vues supplémentaires, les photos par couleur, le détourage et la génération '
-      + 'par intelligence artificielle restent dans l’éditeur de la fenêtre principale : '
-      + 'ils s’appuient sur des services que seul le site sait joindre.</div>'
-      + '</div></div></div></div>');
+      + '<div class="aide">Maximum 8 Mo. Déposée dans le stockage à l’enregistrement.</div>'
+      + '</div></div></div>'
+      + '<div class="carte"><h2>Vues supplémentaires</h2>'
+      + '<div class="vues" id="p-vues"></div>'
+      + '<div class="aide" style="margin-top:.45rem">Dos, détail, porté. Elles apparaissent '
+      + 'sur la fiche, après la photo principale.</div></div>'
+      + '<div class="carte plein"><h2>Photo par couleur</h2>'
+      + '<div class="aide" style="margin-bottom:.5rem">La cliente voit la photo de la couleur '
+      + 'qu’elle choisit. Sans photo pour une couleur, c’est la photo principale qui s’affiche.</div>'
+      + '<div class="vues" id="p-parcoul"></div></div></div>');
 
     // 6 — Détails
     // ⚠ LE REGIME DE VENTE EST UN CHOIX A QUATRE ETATS, pas trois cases
@@ -228,7 +250,7 @@ function pageProduit(id) {
       + '</select></div>'
       + bascule('p-finalret', 'Vente finale, mais retour accepté malgré tout')
       + '</div></div>'
-      + '<div class="carte plein"><h2>Repères</h2><div class="grille">'
+      + '<div class="carte"><h2>Repères</h2><div class="grille">'
       + ch('p-emoji', 'Émoji', { placeholder: '👗' })
       + ch('p-hex', 'Couleur d’accent', { type: 'color' })
       + ch('p-seuil', 'Seuil d’alerte de stock', { type: 'number', min: 0, pas: '1' })
@@ -257,10 +279,10 @@ function pageProduit(id) {
       { t: 'Photo',                  obl: [] },
       { t: 'Mise en marché',         obl: [] },
       { t: 'Stock',                  obl: [] }
-    ], function(i){ if (i === 5) majStock(); });
+    ], function(i){ if (i === 3) dessinerVues(); if (i === 5) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
-    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d enregistrer.', 'att');
+    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d’enregistrer.', 'att');
   }
 
   function brancher(){
@@ -297,6 +319,20 @@ function pageProduit(id) {
     document.getElementById('p-vider').onclick = function(){
       IMAGE = ''; montrerImage(''); document.getElementById('p-fichier').value = ''; majIa();
     };
+    document.getElementById('corps').addEventListener('click', function(ev){
+      var c = ev.target.closest('[data-vue]');
+      if (c) { var k = c.getAttribute('data-vue'); choisirFichier(function(d){ VUES[k] = d; dessinerVues(); }); return; }
+      var x = ev.target.closest('[data-vuex]');
+      if (x) { delete VUES[x.getAttribute('data-vuex')]; dessinerVues(); return; }
+      var p = ev.target.closest('[data-coul]');
+      if (p) {
+        var n = p.getAttribute('data-coul');
+        choisirFichier(function(d){ PARCOUL[n] = PARCOUL[n] || {}; PARCOUL[n].principale = d; dessinerVues(); });
+        return;
+      }
+      var px = ev.target.closest('[data-coulx]');
+      if (px) { delete PARCOUL[px.getAttribute('data-coulx')]; dessinerVues(); }
+    });
     var ca = document.getElementById('p-coul-add');
     if (ca) ca.onclick = ajouterCouleur;
     var cl = document.getElementById('p-coul-libre');
@@ -328,16 +364,21 @@ function pageProduit(id) {
   // Le bouton de redaction n a de sens qu avec une photo : le service regarde
   // le vetement. On le DIT plutot que de laisser cliquer pour rien.
   function majIa(){
-    var b = document.getElementById('p-ia'), n = document.getElementById('p-ia-note');
+    var b = document.getElementById('p-ia');
     if (!b) return;
     var pret = !!IMAGE;
     b.disabled = !pret;
-    if (n) n.textContent = pret ? 'analyse la photo du produit' : 'demande une photo a l etape « Photo »';
+    // ⚠ L explication passe par l INFOBULLE, pas par une ligne sous le bouton.
+    // Une phrase d aide permanente occupe la place du formulaire pour dire une
+    // chose qu on n a besoin de lire qu une fois.
+    b.title = pret
+      ? 'Analyse la photo du produit et propose une description.'
+      : 'Ajoutez d’abord une photo à l’étape « Photo » : le service regarde le vêtement.';
   }
 
   function rediger(){
     var b = document.getElementById('p-ia');
-    b.disabled = true; dire('Redaction en cours…');
+    b.disabled = true; dire('Rédaction en cours…');
     var cat = (CTX.categories.find(function(c){ return c.cle === val('p-cat'); }) || {}).libelle || '';
     P.appeler('produit:decrire', {
       nom: val('p-nom'), categorie: cat, couleurs: couleurs(), imageDataUrl: IMAGE
@@ -345,7 +386,7 @@ function pageProduit(id) {
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
       poser('p-desc', r.texte);
-      dire('Description redigee — relisez-la avant d enregistrer.', 'bon');
+      dire('Description rédigée — relisez-la avant d’enregistrer.', 'bon');
     });
   }
 
@@ -355,7 +396,7 @@ function pageProduit(id) {
     if (!v) return;
     var z = document.getElementById('p-couleurs');
     var deja = z.querySelector('.jeton[data-c="' + v.replace(/"/g, '') + '"]');
-    if (deja) { deja.classList.add('on'); e.value = ''; dire('Couleur deja dans la liste — cochee.', ''); return; }
+    if (deja) { deja.classList.add('on'); e.value = ''; dire('Couleur déjà dans la liste — cochée.', ''); return; }
     var j = document.createElement('span');
     j.className = 'jeton on'; j.setAttribute('data-c', v);
     j.innerHTML = '<span class="pt" style="background:#888"></span>' + esc(v);
@@ -382,7 +423,7 @@ function pageProduit(id) {
         var actif = s > 0 && p > 0 && Math.round((1 - s / p) * 100) === pct;
         hs.push('<button type="button" data-pct="' + pct + '"'
           + (!p || sousCout ? ' disabled' : '')
-          + ' title="' + (sousCout ? 'sous le cout d acquisition' : (sp ? sp.toFixed(2) + ' $' : '')) + '"'
+          + ' title="' + (sousCout ? 'sous le coût d’acquisition' : (sp ? sp.toFixed(2) + ' $' : '')) + '"'
           + ' style="padding:.16rem .45rem;font-size:.74rem'
           + (actif ? ';background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600' : '') + '">'
           + '-' + pct + '%</button>');
@@ -409,7 +450,7 @@ function pageProduit(id) {
     var al = document.getElementById('p-alerte');
     if (al) {
       if (c > 0 && eff > 0 && eff < c) {
-        al.textContent = '⚠ Le prix de vente effectif (' + eff.toFixed(2) + ' $) est inférieur au coût d acquisition ('
+        al.textContent = '⚠ Le prix de vente effectif (' + eff.toFixed(2) + ' $) est inférieur au coût d’acquisition ('
           + c.toFixed(2) + ' $).';
         al.style.display = 'block';
       } else { al.style.display = 'none'; }
@@ -421,6 +462,55 @@ function pageProduit(id) {
     el.innerHTML = 'Marge : <strong>' + m.toFixed(2) + ' $</strong> (' + pct + ' %)'
       + (s > 0 && s < p ? ' — calculée sur le prix soldé' : '')
       + (m <= 0 ? ' <span style="color:#f87171">— vente à perte</span>' : '');
+  }
+
+  // Un cadre par vue : on clique, on choisit un fichier. Le « x » retire.
+  function dessinerVues(){
+    var z = document.getElementById('p-vues');
+    if (z) {
+      z.innerHTML = VUES_NOMS.map(function(nom, i){
+        var cle = 'vue-' + (i + 2);
+        var src = VUES[cle] || '';
+        return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '') + '" data-vue="' + cle + '">'
+          + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
+          + (src ? '<button type="button" class="x" data-vuex="' + cle + '" title="Retirer">×</button>' : '')
+          + '<div class="lgd">' + esc(nom) + '</div></div>';
+      }).join('');
+    }
+    var p = document.getElementById('p-parcoul');
+    if (!p) return;
+    var cs = couleurs();
+    if (!cs.length) {
+      p.innerHTML = '<div class="aide">Choisissez d’abord des couleurs à l’étape « Tailles et couleurs ».</div>';
+      return;
+    }
+    p.innerHTML = cs.map(function(c){
+      var src = (PARCOUL[c] && PARCOUL[c].principale) || '';
+      return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '') + '" data-coul="' + esc(c) + '">'
+        + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
+        + (src ? '<button type="button" class="x" data-coulx="' + esc(c) + '" title="Retirer">×</button>' : '')
+        + '<div class="lgd">' + esc(c) + '</div></div>';
+    }).join('');
+  }
+
+  // Un seul sélecteur de fichier, réutilisé : en créer un par cadre laisserait
+  // autant d’éléments invisibles dans la page, et le navigateur n’en garde pas
+  // la trace une fois le cadre redessiné.
+  function choisirFichier(surCharge){
+    var e = document.createElement('input');
+    e.type = 'file'; e.accept = 'image/*';
+    e.onchange = function(){
+      var f = e.files && e.files[0]; if (!f) return;
+      if (f.size > MAX_MO * 1024 * 1024) {
+        dire('Image trop lourde (' + Math.round(f.size / 1048576) + ' Mo). Maximum ' + MAX_MO + ' Mo.', 'err');
+        return;
+      }
+      var l = new FileReader();
+      l.onload = function(){ surCharge(String(l.result || '')); dire(''); };
+      l.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
+      l.readAsDataURL(f);
+    };
+    e.click();
   }
 
   function montrerImage(src){
@@ -533,6 +623,14 @@ function pageProduit(id) {
     STOCK = Object.assign({}, p.stock || {});
     LOCS = Object.assign({}, p.stockLoc || {});
     if (p.image) { IMAGE = p.image; montrerImage(IMAGE); }
+    VUES = Object.assign({}, p.additionalImages || {});
+    // ⚠ COPIE PROFONDE : chaque couleur porte son propre objet. Une copie de
+    // surface les partagerait avec la fiche d origine, et retirer une photo ici
+    // la retirerait aussi de la reference qui sert a detecter les conflits.
+    PARCOUL = {};
+    Object.keys(p.colorVariants || {}).forEach(function(c){
+      PARCOUL[c] = Object.assign({}, p.colorVariants[c] || {});
+    });
   }
 
   function enKg(v, u){
@@ -547,7 +645,7 @@ function pageProduit(id) {
     return P.appeler('verrou:prendre', 'products', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 fiche réservée'; return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu un d autre');
+      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
       dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
     });
@@ -579,7 +677,7 @@ function pageProduit(id) {
     Object.keys(LOCS).forEach(function(k){ if (valides[k] && LOCS[k]) locs[k] = LOCS[k]; });
 
     bEnr.disabled = true;
-    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? 'Depot de la photo et enregistrement…' : 'Enregistrement…');
+    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? 'Dépôt de la photo et enregistrement…' : 'Enregistrement…');
     P.appeler('produit:enregistrer', ID, {
       name: val('p-nom').trim(), category: val('p-cat'), sku: val('p-sku'),
       brand: val('p-marque'), description: val('p-desc'),
@@ -594,10 +692,20 @@ function pageProduit(id) {
       active: coché('p-actif'), regime: val('p-regime'),
       finalSaleReturnOk: coché('p-finalret'),
       sizes: tailles(), colors: couleurs(),
-      image: IMAGE, stock: stock, stockLoc: locs
+      image: IMAGE,
+      additionalImages: VUES,
+      // Les photos des couleurs RETIREES ne partent pas : le site les
+      // televerserait puis les garderait dans le stockage sans que rien ne les
+      // affiche jamais.
+      colorVariants: (function(){
+        var g = {}, cs = couleurs();
+        cs.forEach(function(c){ if (PARCOUL[c]) g[c] = PARCOUL[c]; });
+        return g;
+      })(),
+      stock: stock, stockLoc: locs
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
-      dire('Enregistre.', 'bon');
+      dire('Enregistré.', 'bon');
       setTimeout(function(){ P.fermer(); }, 700);
     });
   }
