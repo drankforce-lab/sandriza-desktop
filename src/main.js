@@ -551,16 +551,32 @@ const portePage = (titre, message, progression) => {
     +   'color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28)}'
     // ── Panneau de droite : la place de l'identifiant et du mot de passe ──────
     + '.panel{flex:1 1 54%;display:flex;flex-direction:column;justify-content:center;align-items:center;'
-    +   'background:#faf8f5;padding:2.75rem 2rem;overflow-y:auto}'
+    +   'padding:2.75rem 2rem;overflow-y:auto;position:relative;'
+    // Fond travaille plutot qu un aplat : deux halos tres doux dans les coins
+    // opposes, et une trame diagonale a 2 % d opacite. On la voit sans la
+    // regarder — c est exactement ce qu on demande a un fond.
+    +   'background:'
+    +     'radial-gradient(120% 85% at 100% 0%,rgba(196,154,108,.13),transparent 62%),'
+    +     'radial-gradient(95% 70% at 0% 100%,rgba(30,58,138,.06),transparent 58%),'
+    +     'repeating-linear-gradient(135deg,rgba(26,18,7,.022) 0 1px,transparent 1px 10px),'
+    +     '#faf8f5}'
     + '.wrap{width:100%;max-width:400px;animation:rise .6s cubic-bezier(.16,.84,.44,1) both}'
     + '.kicker{display:block;font-size:.69rem;font-weight:600;color:#9a7d62;margin-bottom:.4rem;'
     +   'text-transform:uppercase;letter-spacing:.08em}'
     + '.h1{font-size:1.5rem;font-weight:800;color:#1a1207;font-family:Georgia,serif;letter-spacing:.01em;line-height:1.2;margin:0}'
     + '.sub{font-size:.8rem;color:#7a6652;line-height:1.5;margin-top:.35rem}'
-    + '.pg{width:100%;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;margin-top:1.6rem}'
-    + '.pg-in{height:100%;background:linear-gradient(90deg,#C49A6C,#e0bd93);border-radius:99px;transition:width .25s ease}'
+    + '.pg{width:100%;height:8px;border-radius:99px;background:rgba(196,154,108,.15);overflow:hidden;margin-top:1.7rem;'
+    +   'box-shadow:inset 0 1px 2px rgba(26,18,7,.07)}'
+    // Le remplissage COULE : un degrade plus large que la barre, deplace en
+    // boucle. Sans ca, un pourcentage qui n avance pas pendant dix secondes
+    // (negociation reseau, verification de signature) donne l impression d un
+    // blocage, alors que le travail se poursuit.
+    + '.pg-in{height:100%;border-radius:99px;transition:width .3s ease;'
+    +   'background:linear-gradient(90deg,#b98a55,#e6c79c,#b98a55);background-size:220% 100%;'
+    +   'animation:coule 1.6s linear infinite}'
+    + '@keyframes coule{from{background-position:220% 0}to{background-position:0 0}}'
     + '.pulse{margin-top:1.6rem;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;position:relative}'
-    + '.pulse::after{content:"";position:absolute;top:0;bottom:0;width:38%;border-radius:99px;'
+    + '.pulse::after{content:"";position:absolute;top:0;bottom:0;width:34%;border-radius:99px;'
     +   'background:linear-gradient(90deg,transparent,#C49A6C,transparent);animation:slide 1.5s ease-in-out infinite}'
     + '.ver{margin-top:1.8rem;padding-top:1.1rem;border-top:1px solid rgba(196,154,108,.22);'
     +   'font-size:.72rem;color:#9a7d62;letter-spacing:.02em}'
@@ -583,7 +599,10 @@ const portePage = (titre, message, progression) => {
   // Sans pourcentage connu, une barre figée à 0 % ressemble à un blocage : on
   // montre une animation de balayage, qui dit « ça travaille » sans mentir sur
   // l'avancement.
-  const jauge = (progression === undefined) ? '<div class="pulse"></div>' : barre;
+  // ⚠ 0 % EST TRAITE COMME << INDETERMINE >>. Une barre vide et immobile se lit
+  // comme une panne ; le balayage, lui, dit que ca travaille sans mentir sur
+  // l avancement.
+  const jauge = (progression === undefined || progression <= 0) ? '<div class="pulse"></div>' : barre;
 
   const html = ''
     + '<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>' + b.nom + '</title>'
@@ -821,7 +840,7 @@ const getUpdater = () => {
       const pct = Math.round(p && p.percent ? p.percent : 0);
       const mo = (n) => (n / 1048576).toFixed(0);
       montrerPorte('Mise à jour en cours',
-        'Téléchargement de la nouvelle version — ' + pct + ' %'
+        'Téléchargement de la nouvelle version : ' + pct + ' %'
         + (p && p.total ? ' (' + mo(p.transferred) + ' / ' + mo(p.total) + ' Mo)' : '')
         + '<br><span style="opacity:.6;font-size:13px">L’administration s’ouvrira après le redémarrage.</span>',
         pct);
@@ -857,7 +876,7 @@ const getUpdater = () => {
       // travailler sur une version périmée.)
       if (_porteActive) {
         montrerPorte('Mise à jour prête',
-          'Version ' + version + ' — l’application redémarre toute seule.<br>'
+          'Version ' + version + ' prête. L’application redémarre toute seule.<br>'
           + '<span style="opacity:.6;font-size:13px">L’administration s’ouvrira ensuite.</span>',
           100);
         _porteActive = false;
@@ -1040,8 +1059,8 @@ const verifierAuLancement = async () => {
     // Windows : l'écran reste, le téléchargement est déjà parti (autoDownload).
     // `update-downloaded` prendra le relais et redémarrera l'application.
     montrerPorte('Mise à jour requise',
-      'Une version plus récente est disponible. Elle s’installe automatiquement — '
-      + 'l’administration ne s’ouvre pas sur une version périmée.', 0);
+      'Une version plus récente est disponible. Elle s’installe automatiquement.<br>'
+      + '<span style="opacity:.62">L’administration ne s’ouvre pas sur une version périmée.</span>');
   } catch (err) {
     if (tranche) return;
     tranche = true;
