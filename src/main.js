@@ -705,7 +705,7 @@ const pageApropos = () => {
     + '.bs{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:' + b.sous + ';margin-top:.45rem}'
     + '.bv{margin-top:1.1rem;font-size:.7rem;color:' + b.sous + ';opacity:.75}'
     + '.panel{flex:1 1 auto;background:#faf8f5;display:flex;flex-direction:column;min-width:0}'
-    + '.body{flex:1 1 auto;overflow-y:auto;padding:1.5rem 1.7rem}'
+    + '.body{flex:1 1 auto;overflow:hidden;padding:1.4rem 1.7rem}'
     + '.sect{margin-bottom:1.25rem}.sect:last-child{margin-bottom:0}'
     + '.st{font-size:.66rem;font-weight:700;color:#9a7d62;text-transform:uppercase;letter-spacing:.1em;'
     +   'padding-bottom:.4rem;margin-bottom:.55rem;border-bottom:1px solid rgba(196,154,108,.22)}'
@@ -737,13 +737,27 @@ const pageApropos = () => {
     +     '<button onclick="szPalette.action({app:\'about-copy\'})">Copier les détails</button>'
     +     '<button onclick="szPalette.action({app:\'update-check\'})">Vérifier les mises à jour</button>'
     +     '<button class="p" onclick="window.close()">Fermer</button>'
-    +   '</div></main></body></html>';
+    +   '</div></main>'
+    // ⚠ AUCUNE BARRE DE DÉFILEMENT, ET PAS PAR UNE HAUTEUR DEVINÉE.
+    // Une fenêtre à hauteur fixe se fait démentir par la première ligne
+    // ajoutée, par un chemin de fichier plus long, ou par un poste dont la
+    // mise à l'échelle de Windows n'est pas à 100 %. On mesure le contenu
+    // réel et on demande à la fenêtre de s'y ajuster.
+    + '<script>(function(){function m(){try{'
+    +   'var h=Math.max(document.body.scrollHeight,'
+    +   'document.querySelector(".panel").scrollHeight,'
+    +   'document.querySelector(".brand").scrollHeight);'
+    +   'if(window.szPalette&&window.szPalette.ajusterHauteur)window.szPalette.ajusterHauteur(h);'
+    + '}catch(e){}}'
+    + 'if(document.readyState==="complete")m();else window.addEventListener("load",m);'
+    + 'setTimeout(m,120);})();<\/script>'
+    + '</body></html>';
 };
 
 const ouvrirApropos = () => {
   if (aproposWin && !aproposWin.isDestroyed()) { aproposWin.focus(); return; }
   aproposWin = new BrowserWindow({
-    width: 760, height: 500, resizable: false, minimizable: false, maximizable: false,
+    width: 780, height: 560, show: false, resizable: false, minimizable: false, maximizable: false,
     title: 'À propos', parent: mainWindow || undefined, modal: false,
     autoHideMenuBar: true, backgroundColor: '#faf8f5',
     webPreferences: {
@@ -752,6 +766,10 @@ const ouvrirApropos = () => {
     },
   });
   aproposWin.on('closed', () => { aproposWin = null; });
+  // La fenêtre s'ouvre déjà à la bonne taille quand elle a mesuré son contenu.
+  // On la montre seulement à ce moment-là, sinon on verrait un redimensionnement
+  // à l'écran — ce qui a l'air d'un défaut, pas d'un ajustement.
+  aproposWin.once('ready-to-show', () => { if (aproposWin) aproposWin.show(); });
   aproposWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageApropos()));
 };
 
@@ -1133,6 +1151,21 @@ ipcMain.handle('menu:modele', (e, m) => {
     if (reglages.get('menuMode') === 'fenetre') majPalette();
   }
   return true;
+});
+
+// Ajuste une fenêtre à la hauteur reelle de son contenu (voir pageApropos).
+// ⚠ Bornée à l'écran : un contenu inattendu ne doit pas produire une fenêtre
+// plus haute que le moniteur, qu'on ne pourrait plus ni lire ni fermer.
+ipcMain.on('fenetre:hauteur', (e, h) => {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  if (!win || win.isDestroyed() || !h) return;
+  try {
+    const { screen } = require('electron');
+    const dispo = screen.getDisplayMatching(win.getBounds()).workAreaSize.height;
+    const [larg] = win.getContentSize();
+    win.setContentSize(larg, Math.min(Math.max(320, Math.round(h)), dispo - 60));
+    win.center();
+  } catch {}
 });
 
 ipcMain.on('palette:action', (e, it) => {

@@ -16,4 +16,11 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('szPalette', {
   action: (payload) => ipcRenderer.send('palette:action', payload || {}),
+
+  // La fenetre annonce la hauteur REELLE de son contenu, et le processus
+  // principal l ajuste. C est la seule facon fiable de n avoir jamais de barre
+  // de defilement : une hauteur fixe devinee a l avance se fait dementir par la
+  // moindre ligne ajoutee, par un chemin plus long, ou par un poste dont la
+  // mise a l echelle de Windows n est pas 100 %.
+  ajusterHauteur: (h) => ipcRenderer.send('fenetre:hauteur', Math.round(h) || 0),
 });
