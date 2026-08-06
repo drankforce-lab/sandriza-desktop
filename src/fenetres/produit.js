@@ -44,6 +44,17 @@ const CSS_PROPRE = `
   justify-content:center;color:#8fa1b8;font-size:.75rem;overflow:hidden;text-align:center}
 .photo .vign img{width:100%;height:100%;object-fit:cover}
 .photo .cmd{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.45rem}
+#p-coul-sug{position:absolute;top:100%;left:0;right:5.5rem;z-index:40;margin-top:2px;
+  background:#16202f;border:1px solid rgba(255,255,255,.14);border-radius:9px;
+  box-shadow:0 10px 28px rgba(0,0,0,.45);max-height:230px;overflow-y:auto;display:none}
+#p-coul-sug.on{display:block}
+#p-coul-sug .s{display:flex;align-items:center;gap:.5rem;padding:.3rem .55rem;cursor:pointer;font-size:.85rem}
+#p-coul-sug .s:hover,#p-coul-sug .s.vis{background:rgba(201,169,126,.16)}
+#p-coul-sug .s .pt{width:16px;height:16px;border-radius:50%;flex:0 0 auto;
+  border:1px solid rgba(255,255,255,.25)}
+#p-coul-sug .s .deja{margin-left:auto;font-size:.72rem;color:#8fa1b8;flex:0 0 auto}
+.jeton .x{margin-left:.15rem;opacity:.55}
+.jeton:hover .x{opacity:1}
 .vues{display:flex;flex-wrap:wrap;gap:.5rem;align-content:flex-start;overflow:hidden}
 .vue{position:relative;width:88px;flex:0 0 auto}
 .vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed rgba(255,255,255,.18);
@@ -184,20 +195,18 @@ function pageProduit(id) {
           : '<span class="aide">Aucune taille au référentiel.</span>')
       + '</div></div>'
       + '<div class="carte plein"><h2>Couleurs offertes</h2>'
-      // ⚠ UNE COULEUR HORS REFERENTIEL DOIT POUVOIR ETRE SAISIE. L editeur du site
-      // le permet ; ne proposer que les jetons du referentiel bloquait net des
-      // qu une nouveaute arrivait, sans autre issue que d aller la creer ailleurs.
-      + '<div class="rech" style="margin-bottom:.5rem">'
-      + '<input id="p-coul-libre" placeholder="Ajouter une couleur absente de la liste…">'
-      + '<button type="button" id="p-coul-add">Ajouter</button></div>'
-      + '<div class="jetons" id="p-couleurs">'
-      + (CTX.couleurs.length
-          ? CTX.couleurs.map(function(c){
-              return '<span class="jeton" data-c="' + esc(c.nom) + '">'
-                + '<span class="pt" style="background:' + esc(c.hex || '#888') + '"></span>' + esc(c.nom) + '</span>';
-            }).join('')
-          : '<span class="aide">Aucune couleur au référentiel.</span>')
-      + '</div></div></div>');
+      // ⚠ UNE RECHERCHE, PAS UN MUR DE JETONS. Le moteur de couleurs en propose
+      // des centaines : les afficher toutes etait impossible, et c est
+      // exactement pour cela que l editeur du site propose une recherche.
+      // Les jetons montrent les couleurs CHOISIES ; la recherche sert a en
+      // ajouter, du referentiel ou hors referentiel.
+      + '<div class="rech" style="margin-bottom:.4rem;position:relative">'
+      + '<input id="p-coul-libre" autocomplete="off" placeholder="Chercher une couleur, ou en saisir une nouvelle…">'
+      + '<button type="button" id="p-coul-add">Ajouter</button>'
+      + '<div id="p-coul-sug"></div></div>'
+      + '<div class="jetons" id="p-couleurs"></div>'
+      + '<div class="aide" id="p-coul-vide" style="margin-top:.3rem">Aucune couleur choisie.</div>'
+      + '</div></div>');
 
     // 4 — Prix et poids
     h.push('<div class="etape"><div class="carte"><h2>Prix</h2><div class="grille">'
@@ -273,6 +282,7 @@ function pageProduit(id) {
       // des l ouverture, sinon il n arrive qu au premier changement.
       if (val('p-cat')) majSku();
     }
+    dessinerJetons();
     majMarge();
 
     Assist.poser([
@@ -290,7 +300,11 @@ function pageProduit(id) {
 
   function brancher(){
     document.getElementById('corps').addEventListener('click', function(ev){
-      var j = ev.target.closest('.jeton');
+      var x = ev.target.closest('[data-coulretire]');
+      if (x) { retirerCouleur(x.getAttribute('data-coulretire')); return; }
+      // Les TAILLES restent des jetons a bascule ; les COULEURS sont une liste
+      // qu on alimente par la recherche, donc leurs jetons ne basculent plus.
+      var j = ev.target.closest('#p-tailles .jeton');
       if (j) j.classList.toggle('on');
     });
     ['p-prix', 'p-cout', 'p-solde'].forEach(function(i){
@@ -337,9 +351,28 @@ function pageProduit(id) {
       if (px) { delete PARCOUL[px.getAttribute('data-coulx')]; dessinerVues(); }
     });
     var ca = document.getElementById('p-coul-add');
-    if (ca) ca.onclick = ajouterCouleur;
+    if (ca) ca.onclick = function(){ ajouterCouleur(); };
     var cl = document.getElementById('p-coul-libre');
-    if (cl) cl.onkeydown = function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); ajouterCouleur(); } };
+    if (cl) {
+      cl.oninput = function(){ chercher(this.value); };
+      cl.onkeydown = function(ev){
+        if (ev.key === 'ArrowDown') { ev.preventDefault(); viser(1); return; }
+        if (ev.key === 'ArrowUp')   { ev.preventDefault(); viser(-1); return; }
+        if (ev.key === 'Escape')    { if (SUG.length) { ev.stopPropagation(); cacherSug(); } return; }
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          // Entree prend la suggestion visee si elle existe, la saisie sinon :
+          // c est ce qui permet d ajouter une couleur qui n est pas au catalogue.
+          ajouterCouleur(SUG.length && SUGi >= 0 ? SUG[SUGi].nom : null);
+        }
+      };
+      cl.onblur = function(){ setTimeout(cacherSug, 160); };
+    }
+    var zs = document.getElementById('p-coul-sug');
+    if (zs) zs.addEventListener('mousedown', function(ev){
+      var e = ev.target.closest('[data-sug]'); if (!e) return;
+      ev.preventDefault(); ajouterCouleur(e.getAttribute('data-sug'));
+    });
   }
 
   // ⚠ La marge se calcule sur le prix REELLEMENT paye : un solde actif remplace
@@ -407,18 +440,78 @@ function pageProduit(id) {
     });
   }
 
-  function ajouterCouleur(){
-    var e = document.getElementById('p-coul-libre');
-    var v = String(e.value || '').trim();
-    if (!v) return;
+  // Les couleurs CHOISIES vivent dans ce tableau, pas dans le DOM : les jetons
+  // sont redessines a chaque ajout.
+  var CHOIX = [];
+  function teinte(nom){
+    var c = CTX.couleurs.find(function(x){ return x.nom === nom; });
+    return (c && c.hex) || '#888';
+  }
+  function dessinerJetons(){
     var z = document.getElementById('p-couleurs');
-    var deja = z.querySelector('.jeton[data-c="' + v.replace(/"/g, '') + '"]');
-    if (deja) { deja.classList.add('on'); e.value = ''; dire('Couleur déjà dans la liste — cochée.', ''); return; }
-    var j = document.createElement('span');
-    j.className = 'jeton on'; j.setAttribute('data-c', v);
-    j.innerHTML = '<span class="pt" style="background:#888"></span>' + esc(v);
-    z.insertBefore(j, z.firstChild);
-    e.value = ''; dire('');
+    if (!z) return;
+    z.innerHTML = CHOIX.map(function(n){
+      return '<span class="jeton on" data-c="' + esc(n) + '">'
+        + '<span class="pt" style="background:' + esc(teinte(n)) + '"></span>'
+        + esc(n) + '<span class="x" data-coulretire="' + esc(n) + '">×</span></span>';
+    }).join('');
+    var v = document.getElementById('p-coul-vide');
+    if (v) v.style.display = CHOIX.length ? 'none' : '';
+    dessinerVues();
+  }
+  function ajouterCouleur(nom){
+    var e = document.getElementById('p-coul-libre');
+    var v = String(nom != null ? nom : (e ? e.value : '')).trim();
+    if (!v) return;
+    if (CHOIX.indexOf(v) >= 0) { dire('« ' + v +' » est déjà dans la liste.', 'att'); }
+    else { CHOIX.push(v); dire(''); }
+    if (e) e.value = '';
+    cacherSug();
+    dessinerJetons();
+  }
+  function retirerCouleur(nom){
+    var i = CHOIX.indexOf(nom);
+    if (i >= 0) CHOIX.splice(i, 1);
+    dessinerJetons();
+  }
+
+  // ── Suggestions, calquees sur l editeur du site ─────────────────────────
+  // Celles qui COMMENCENT par la saisie viennent d abord : c est ce qu on
+  // cherche quand on tape « no » pour « noir ».
+  var SUG = [], SUGi = -1;
+  function cacherSug(){
+    var z = document.getElementById('p-coul-sug');
+    if (z) { z.classList.remove('on'); z.innerHTML = ''; }
+    SUG = []; SUGi = -1;
+  }
+  function chercher(q){
+    q = String(q || '').trim().toLowerCase();
+    var z = document.getElementById('p-coul-sug');
+    if (!z) return;
+    if (!q) { cacherSug(); return; }
+    SUG = CTX.couleurs.filter(function(c){ return c.nom.toLowerCase().indexOf(q) >= 0; })
+      .sort(function(a, b){
+        return (a.nom.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.nom.toLowerCase().indexOf(q) === 0 ? 0 : 1);
+      }).slice(0, 40);
+    if (!SUG.length) { cacherSug(); return; }
+    SUGi = 0;
+    z.innerHTML = SUG.map(function(c, i){
+      var deja = CHOIX.indexOf(c.nom) >= 0;
+      return '<div class="s' + (i === 0 ? ' vis' : '') + '" data-sug="' + esc(c.nom) + '">'
+        + '<span class="pt" style="background:' + esc(c.hex || '#888') + '"></span>'
+        + '<span style="text-transform:capitalize">' + esc(c.nom) + '</span>'
+        + (deja ? '<span class="deja">déjà choisie</span>' : '') + '</div>';
+    }).join('');
+    z.classList.add('on');
+  }
+  function viser(d){
+    if (!SUG.length) return;
+    SUGi = Math.max(0, Math.min(SUG.length - 1, SUGi + d));
+    var z = document.getElementById('p-coul-sug');
+    Array.prototype.forEach.call(z.querySelectorAll('.s'), function(e, i){
+      e.classList.toggle('vis', i === SUGi);
+      if (i === SUGi) e.scrollIntoView({ block: 'nearest' });
+    });
   }
 
   var PCTS = [10, 15, 20, 25, 30, 40, 50];
@@ -551,10 +644,7 @@ function pageProduit(id) {
     return Array.prototype.filter.call(document.querySelectorAll('#p-tailles .jeton'), function(j){
       return j.classList.contains('on'); }).map(function(j){ return j.getAttribute('data-t'); });
   }
-  function couleurs(){
-    return Array.prototype.filter.call(document.querySelectorAll('#p-couleurs .jeton'), function(j){
-      return j.classList.contains('on'); }).map(function(j){ return j.getAttribute('data-c'); });
-  }
+  function couleurs(){ return CHOIX.slice(); }
 
   // ⚠ LA CLE DE STOCK EST « taille-couleur », exactement comme dans le site. Une
   // autre convention aurait produit un stock que l inventaire ne sait pas lire :
@@ -633,10 +723,8 @@ function pageProduit(id) {
       var j = document.querySelector('#p-tailles .jeton[data-t="' + String(t).replace(/"/g, '') + '"]');
       if (j) j.classList.add('on');
     });
-    (p.colors || []).forEach(function(c){
-      var j = document.querySelector('#p-couleurs .jeton[data-c="' + String(c).replace(/"/g, '') + '"]');
-      if (j) j.classList.add('on');
-    });
+    CHOIX = (p.colors || []).map(String);
+    dessinerJetons();
     STOCK = Object.assign({}, p.stock || {});
     LOCS = Object.assign({}, p.stockLoc || {});
     if (p.image) { IMAGE = p.image; montrerImage(IMAGE); }
