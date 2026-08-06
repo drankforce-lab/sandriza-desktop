@@ -66,6 +66,15 @@ const CSS_PROPRE = `
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x{position:absolute;top:2px;right:2px;width:18px;height:18px;padding:0;
   border-radius:50%;font-size:.7rem;line-height:1;background:rgba(14,21,34,.85)}
+.prixgrille{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem .9rem;align-items:start}
+.prixgrille .ch label{display:flex;align-items:center;gap:.4rem}
+.pastille{margin-left:auto;padding:.06rem .4rem;border-radius:99px;background:#c9a97e;
+  color:#17202c;font-size:.7rem;font-weight:700;display:none}
+.pastille.on{display:inline-block}
+.rabais{display:flex;gap:.28rem;flex-wrap:wrap;margin-top:.35rem}
+.rabais button{padding:.14rem .4rem;font-size:.72rem;border-radius:6px}
+.rabais button.on{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
+@media (max-width:700px){.prixgrille{grid-template-columns:1fr}}
 .paire{display:flex;gap:.4rem;align-items:center}
 .paire input{flex:1 1 auto}
 .paire select{flex:0 0 5rem}
@@ -169,6 +178,13 @@ function pageProduit(id) {
       + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
       + 'background:#0b1220;color:#c9a97e" placeholder="choisissez une catégorie"></div>'
       + ch('p-marque', 'Marque')
+      // Le poids appartient a l identite du vetement, pas au prix : c est une
+      // caracteristique de l article, et il tenait seul dans une carte entiere.
+      + '<div class="ch"><label for="p-poids">Poids unitaire <span class="req">*</span></label>'
+      + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0" placeholder="Ex : 350">'
+      + '<select id="p-unite"><option value="g">g</option><option value="kg">kg</option>'
+      + '<option value="lb">lb</option></select></div>'
+      + '<div class="aide" style="margin-top:.2rem">Sert au calcul des frais d’expédition.</div></div>'
       + '<div class="ch large"><label for="p-desc">Description'
       + '<span id="p-desc-etat" style="float:right;color:#8fa1b8;font-size:.72rem"></span></label>'
       + '<textarea id="p-desc" rows="3"></textarea>'
@@ -210,22 +226,22 @@ function pageProduit(id) {
       + '</div></div>');
 
     // 4 — Prix et poids
-    h.push('<div class="etape"><div class="carte"><h2>Prix</h2><div class="grille">'
+    // ⚠ TROIS COLONNES FIXES, pas une grille qui se replie. Les rabais rapides
+    // doivent tomber SOUS la colonne du prix soldé, celle qu ils modifient : avec
+    // une grille automatique, ils auraient glissé ailleurs au moindre
+    // redimensionnement, et le lien entre les deux se serait perdu.
+    h.push('<div class="etape"><div class="carte"><h2>Prix</h2>'
+      + '<div class="prixgrille">'
       + ch('p-prix', 'Prix de vente ($)', { requis: true, argent: true })
-      + ch('p-solde', 'Prix soldé ($)', { argent: true, placeholder: 'aucun' })
+      + '<div class="ch"><label for="p-solde">Prix soldé ($)'
+      + '<span id="p-pastille" class="pastille"></span></label>'
+      + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="aucun">'
+      + '<div id="p-rabais" class="rabais"></div></div>'
       + ch('p-cout', 'Coût d’acquisition ($)', { requis: true, argent: true })
       + '</div>'
-      + '<div id="p-rabais" style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;margin-top:.55rem">'
-      + '<span class="aide" style="margin-right:.2rem">Rabais rapide :</span></div>'
       + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
       + '<div id="p-alerte" style="display:none;color:#f87171;font-size:.78rem;margin-top:.4rem"></div></div>'
-      + '<div class="carte"><h2>Poids unitaire</h2><div class="grille">'
-      + '<div class="ch"><label for="p-poids">Poids <span class="req">*</span></label>'
-      + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0">'
-      + '<select id="p-unite"><option value="g">g</option><option value="kg">kg</option>'
-      + '<option value="lb">lb</option></select></div></div></div>'
-      + '<div class="aide" style="margin-top:.5rem">Le poids sert au calcul des frais d’expédition. '
-      + 'Il est conservé en kilogrammes, quelle que soit l’unité choisie ici.</div></div></div>');
+      + '</div></div>');
 
     // 5 — Photos : principale, vues supplémentaires, et par couleur
     h.push('<div class="etape">'
@@ -287,9 +303,9 @@ function pageProduit(id) {
     majMarge();
 
     Assist.poser([
-      { t: 'Identité et classement', obl: ['p-nom', 'p-cat'] },
+      { t: 'Identité et classement', obl: ['p-nom', 'p-cat', 'p-poids'] },
       { t: 'Tailles et couleurs',    obl: [] },
-      { t: 'Prix et poids',          obl: ['p-prix', 'p-cout', 'p-poids'] },
+      { t: 'Prix',                   obl: ['p-prix', 'p-cout'] },
       { t: 'Photo',                  obl: [] },
       { t: 'Mise en marché',         obl: [] },
       { t: 'Stock',                  obl: [] }
@@ -333,6 +349,10 @@ function pageProduit(id) {
       var b = ev.target.closest('[data-pct]'); if (!b || b.disabled) return;
       var pr = argentNombre(val('p-prix')) || 0;
       if (!pr) return;
+      // ⚠ RECLIQUER SUR LE RABAIS ACTIF LE RETIRE. Sans cela, il fallait vider le
+      // champ a la main pour revenir au plein prix — et l on garde un solde qu on
+      // ne voulait plus, sans s en apercevoir.
+      if (b.classList.contains('on')) { poser('p-solde', ''); majMarge(); return; }
       poser('p-solde', (pr * (1 - parseInt(b.getAttribute('data-pct'), 10) / 100)).toFixed(2) + ' $');
       majMarge();
     });
@@ -547,26 +567,28 @@ function pageProduit(id) {
     // Rabais rapides — un bouton par pourcentage, DESACTIVE si le prix obtenu
     // passe sous le cout. Proposer un rabais qui fait vendre a perte, c est
     // proposer une erreur.
+    // Sans etiquette : les boutons sont sous le champ qu ils modifient, et
+    // « -10% » se comprend seul.
     var z = document.getElementById('p-rabais');
     if (z) {
-      var hs = ['<span class="aide" style="margin-right:.2rem">Rabais rapide :</span>'];
-      PCTS.forEach(function(pct){
+      z.innerHTML = PCTS.map(function(pct){
         var sp = p ? +(p * (1 - pct / 100)).toFixed(2) : 0;
         var sousCout = c > 0 && sp > 0 && sp < c;
         var actif = s > 0 && p > 0 && Math.round((1 - s / p) * 100) === pct;
-        hs.push('<button type="button" data-pct="' + pct + '"'
+        return '<button type="button" data-pct="' + pct + '"' + (actif ? ' class="on"' : '')
           + (!p || sousCout ? ' disabled' : '')
-          + ' title="' + (sousCout ? 'sous le coût d’acquisition' : (sp ? sp.toFixed(2) + ' $' : '')) + '"'
-          + ' style="padding:.16rem .45rem;font-size:.74rem'
-          + (actif ? ';background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600' : '') + '">'
-          + '-' + pct + '%</button>');
-      });
-      if (s > 0 && p > 0 && s < p) {
-        hs.push('<span style="margin-left:.3rem;padding:.14rem .45rem;border-radius:99px;'
-          + 'background:#c9a97e;color:#17202c;font-size:.74rem;font-weight:700">-'
-          + Math.round((1 - s / p) * 100) + '%</span>');
-      }
-      z.innerHTML = hs.join('');
+          + ' title="' + (sousCout ? 'sous le coût d’acquisition'
+              : (actif ? 'recliquez pour retirer le rabais' : (sp ? sp.toFixed(2) + ' $' : ''))) + '">'
+          + '-' + pct + '%</button>';
+      }).join('');
+    }
+    // La pastille se pose DANS l etiquette du prix solde, a droite : c est la
+    // qu on regarde pour savoir de combien on rabat.
+    var pa = document.getElementById('p-pastille');
+    if (pa) {
+      var remise = (s > 0 && p > 0 && s < p) ? Math.round((1 - s / p) * 100) : 0;
+      pa.textContent = remise ? '-' + remise + '%' : '';
+      pa.classList.toggle('on', !!remise);
     }
 
     // ⚠ ETIQUETTE « SOLDE » AUTOMATIQUE, comme dans l editeur du site — mais
