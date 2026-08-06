@@ -13,13 +13,12 @@
  de NE PAS GARDER toutes les versions.
 
  CE QU'IL GARDE
-   - LA DERNIERE VERSION, et rien d'autre (-Garder 1 par defaut, sur demande
-     explicite de l'utilisateur le 2026-08-06 : << ne garde jamais les anciennes
-     versions >>).
-     ⚠ Consequence a assumer : plus de paquet de retour arriere dans R2. Si une
-     version se revele mauvaise, on rebatit la precedente depuis git — la source
-     est la, c'est deux minutes. Ce qu'on ne peut PAS faire, c'est la
-     retelecharger.
+   - LES DEUX DERNIERES VERSIONS (-Garder 2, choix de l'utilisateur le
+     2026-08-06). La courante, plus une de RETOUR ARRIERE : si une version se
+     revele mauvaise, la precedente est encore telechargeable telle qu'elle a
+     ete publiee, sans rien rebatir.
+     Deux versions pesent environ 460 Mo sur les 10 Go du bucket — le probleme
+     n'a jamais ete de garder une version de trop, mais d'en garder huit.
    - TOUJOURS les fiches Windows `latest*.yml` et `latest.json` : les effacer
      couperait la mise a jour de tous les postes.
 
@@ -41,7 +40,7 @@
 #>
 [CmdletBinding()]
 param(
-  [int]$Garder = 1,
+  [int]$Garder = 2,
   [switch]$Appliquer,
   # Les paquets macOS ne sont plus construits (aucun Mac en service, et la mise
   # a jour automatique y est impossible sans signature Apple) : ils ne servent
