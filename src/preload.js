@@ -14,7 +14,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('sandrizaDesktop', {
   isDesktop: true,
-  version: '1.1.0',
+  version: '1.2.0',
 
   // Menu intégré : le bouton cliqué dans la barre dessinée demande au processus
   // principal d'exécuter une action de l'APPLICATION (quitter, zoom, ancrage du
@@ -37,6 +37,13 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // Le site pousse son modèle de menu : la coquille en tire ses RACCOURCIS
   // CLAVIER et la fenêtre détachée. Une seule source, jamais deux listes.
   menuModele: (m) => ipcRenderer.invoke('menu:modele', m || {}),
+
+  // Ouvre une VRAIE fenêtre du système sur l'administration, deplaçable sur un
+  // autre écran, et y exécute `run` une fois la page prête.
+  //   { cle, titre, run }  — `cle` identifie le TYPE de fenêtre : rouvrir le
+  //   même type ramène celle qui existe au lieu d'en empiler une deuxième, et
+  //   c'est aussi sous cette clé que sa position est retenue.
+  ouvrirFenetre: (o) => ipcRenderer.invoke('fenetre:ouvrir', o || {}),
   // Prévenu quand un réglage change côté application (ex. « ancrer en haut »
   // cliqué depuis la fenêtre détachée) : sans ça, le site ne le verrait qu'au
   // prochain rechargement.

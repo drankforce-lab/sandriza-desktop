@@ -32,6 +32,10 @@ const DEFAUTS = {
   // correspondant, et la ramène sur l'écran principal si celui-ci a disparu).
   menuFenetre: { width: 260, height: 620, x: null, y: null },
   menuToujoursDevant: true,
+  // Position et taille des FENÊTRES DE TRAVAIL (éditeur de produit, de
+  // collection, de fournisseur), retenues par TYPE. Elles reprennent ainsi leur
+  // place d'une fois à l'autre, y compris sur un second écran.
+  fenetres: {},
 };
 
 let _cache = null;

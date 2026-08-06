@@ -1146,6 +1146,115 @@ const poserReglage = (cle, valeur) => {
 };
 
 ipcMain.handle('menu:action', (e, nom) => { actionApp(String(nom || '')); return true; });
+
+// ══ FENÊTRES DE TRAVAIL ═══════════════════════════════════════════════════════
+// « Nouveau produit », « Nouvelle collection », « Nouveau fournisseur » ouvrent
+// une VRAIE fenêtre du système, déplaçable sur un second écran, et non plus un
+// écran de plus dans la fenêtre principale.
+//
+// ⚠ MÊME SESSION, PAS UNE SECONDE CONNEXION. La fenêtre utilise la session
+// Electron par défaut, donc le même témoin `elg_adm` : le serveur y voit la
+// session déjà ouverte. C'est indispensable — la politique « une seule session
+// par compte » révoquerait la première si celle-ci ouvrait la sienne.
+// Et `armAppHeader()` posant l'en-tête sur cette même session, la nouvelle
+// fenêtre passe le verrou d'application sans rien de plus.
+//
+// ⚠ SANS `parent:` — c'est ce qui la rend libre d'aller sur un autre écran.
+// Avec un parent, Windows la garde au-dessus de la fenêtre principale et la
+// ramène avec elle.
+//
+// ⚠ LE MARQUEUR `?szwin=1` : la barre de menu (appbar.js) s'y reconnaît et NE
+// SE DESSINE PAS. Une fenêtre d'édition n'a pas besoin d'une seconde barre de
+// navigation ; et deux barres pilotant la même application se contrediraient.
+//
+// ⚠ LES VERROUS D'ENREGISTREMENT RESTENT CEUX DU SITE. Ouvrir la même fiche
+// ici et dans la fenêtre principale déclenchera le conflit prévu (409) — ce
+// n'est pas un défaut, c'est le garde-fou qui fait son travail.
+const fenetresTravail = new Map();
+
+ipcMain.handle('fenetre:ouvrir', (e, opts = {}) => {
+  const cle = String(opts.cle || 'travail');
+  const titre = String(opts.titre || 'Administration Sandriza');
+  const run = String(opts.run || '');
+
+  // Déjà ouverte : on la ramène plutôt que d'en empiler une deuxième.
+  const dejaLa = fenetresTravail.get(cle);
+  if (dejaLa && !dejaLa.isDestroyed()) {
+    if (dejaLa.isMinimized()) dejaLa.restore();
+    dejaLa.focus();
+    return true;
+  }
+
+  const bornes = (reglages.get('fenetres') || {})[cle] || {};
+  const win = new BrowserWindow({
+    width: bornes.width || 1180,
+    height: bornes.height || 860,
+    ...(Number.isFinite(bornes.x) && Number.isFinite(bornes.y) ? { x: bornes.x, y: bornes.y } : {}),
+    minWidth: 900,
+    minHeight: 600,
+    title: titre,
+    backgroundColor: '#111827',
+    autoHideMenuBar: true,
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+      spellcheck: true,
+    },
+  });
+  fenetresTravail.set(cle, win);
+
+  // Le titre suit celui qu'on a demandé, pas celui de la page.
+  win.on('page-title-updated', (ev) => { ev.preventDefault(); });
+  win.setTitle(titre);
+  win.once('ready-to-show', () => win.show());
+
+  // Position et taille retenues PAR TYPE de fenêtre : l'éditeur de produit
+  // reprend sa place, même sur un second écran.
+  let minuterie = null;
+  const retenir = () => {
+    clearTimeout(minuterie);
+    minuterie = setTimeout(() => {
+      if (win.isDestroyed()) return;
+      const tout = reglages.get('fenetres') || {};
+      tout[cle] = win.getBounds();
+      reglages.set('fenetres', tout);
+    }, 400);
+  };
+  win.on('moved', retenir);
+  win.on('resized', retenir);
+  win.on('closed', () => { fenetresTravail.delete(cle); });
+
+  // Mêmes règles de navigation que la fenêtre principale : rien d'externe
+  // n'entre dans l'application.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (!isAllowed(url)) { shell.openExternal(url); return { action: 'deny' }; }
+    return { action: 'allow' };
+  });
+  win.webContents.on('will-navigate', (ev, url) => {
+    if (!isAllowed(url)) { ev.preventDefault(); shell.openExternal(url); }
+  });
+
+  // ⚠ `once` et non `on` : sans ça, chaque rechargement de la page rouvrirait
+  // le formulaire par-dessus le travail en cours.
+  if (run) {
+    win.webContents.once('did-finish-load', () => {
+      // Un court délai laisse l'administration finir son premier rendu ; sans
+      // lui, `Admin` peut ne pas encore exister au moment de l'appel.
+      setTimeout(() => {
+        win.webContents.executeJavaScript(
+          '(function(){try{' + run + '}catch(e){' +
+          "if(typeof Toast!=='undefined')Toast.show('Ouverture impossible','error');}})()", true
+        ).catch(() => {});
+      }, 600);
+    });
+  }
+
+  win.loadURL(APP_URL + '?szwin=1#admin');
+  return true;
+});
 ipcMain.handle('menu:reglages', () => reglages.lire());
 ipcMain.handle('menu:set', (e, cle, valeur) => {
   if (cle === 'menuMode' || cle === 'menuTaille') { poserReglage(cle, valeur); }
