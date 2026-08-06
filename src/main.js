@@ -780,6 +780,82 @@ const ouvrirApropos = () => {
   aproposWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageApropos()));
 };
 
+// ═══ PONT DES FENÊTRES NATIVES ═══════════════════════════════════════════════
+// Une fenêtre native n'a ni session ni accès au site : elle envoie un NOM
+// d'opération, et c'est la fenêtre PRINCIPALE — déjà connectée — qui l'exécute.
+//
+// ⚠ DEUX LISTES FERMÉES, PAS UNE. Le site en a une (`SzPont`), la coquille garde
+// la sienne ici. Ce n'est pas une redondance : sans celle-ci, la coquille
+// transmettrait n'importe quel nom reçu d'une fenêtre, et toute faiblesse future
+// du site deviendrait atteignable depuis un document local.
+const OPS_PONT = new Set([
+  'identite',
+  'imprimantes:etat', 'imprimantes:choisir', 'imprimantes:tester',
+  'verrou:prendre', 'verrou:rendre',
+]);
+
+// ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que
+// `JSON.stringify` les laisse tels quels. Une valeur qui en contient couperait
+// l'expression en deux et casserait l'appel — ou pire, ferait exécuter la suite
+// hors du contexte prévu.
+const litteralJs = (v) => JSON.stringify(v === undefined ? null : v)
+  .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+
+ipcMain.handle('pont:appeler', async (e, op, args) => {
+  const nom = String(op || '');
+  if (!OPS_PONT.has(nom)) return { ok: false, motif: 'operation_inconnue' };
+  const wc = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
+  if (!wc) return { ok: false, motif: 'pont_indisponible' };
+  const code = '(function(){try{'
+    + 'if(!window.SzPont)return{ok:false,motif:"indisponible"};'
+    + 'return SzPont.executer.apply(null,[' + litteralJs(nom) + '].concat('
+    + litteralJs(Array.isArray(args) ? args : []) + '));'
+    + '}catch(e){return{ok:false,motif:"erreur"};}})()';
+  try {
+    const r = await wc.executeJavaScript(code, true);
+    return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
+  } catch { return { ok: false, motif: 'pont_indisponible' }; }
+});
+
+ipcMain.on('pont:fermer', (e) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (w && !w.isDestroyed()) w.close();
+});
+
+// ── Fenêtre « Imprimantes », entièrement native ──────────────────────────────
+let imprimantesWin = null;
+const ouvrirImprimantes = () => {
+  if (imprimantesWin && !imprimantesWin.isDestroyed()) { imprimantesWin.focus(); return; }
+  const b = (reglages.get('fenetres') || {})['imprimantes'] || {};
+  imprimantesWin = new BrowserWindow({
+    width: b.width || 720, height: b.height || 600,
+    ...(Number.isFinite(b.x) && Number.isFinite(b.y) ? { x: b.x, y: b.y } : {}),
+    minWidth: 520, minHeight: 420, show: false,
+    title: 'Imprimantes', autoHideMenuBar: true, backgroundColor: '#0e1522',
+    webPreferences: {
+      preload: path.join(__dirname, 'pont-preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true,
+    },
+  });
+  // La place est retenue par type de fenêtre, comme les fenêtres de travail :
+  // un second écran reste un second écran d'une fois à l'autre.
+  let minuterie = null;
+  const retenir = () => {
+    clearTimeout(minuterie);
+    minuterie = setTimeout(() => {
+      if (!imprimantesWin || imprimantesWin.isDestroyed()) return;
+      const tout = reglages.get('fenetres') || {};
+      tout['imprimantes'] = imprimantesWin.getBounds();
+      reglages.set('fenetres', tout);
+    }, 400);
+  };
+  imprimantesWin.on('moved', retenir);
+  imprimantesWin.on('resized', retenir);
+  imprimantesWin.on('closed', () => { imprimantesWin = null; });
+  imprimantesWin.once('ready-to-show', () => { if (imprimantesWin) imprimantesWin.show(); });
+  imprimantesWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageImprimantes()));
+};
+
 const montrerPorte = (titre, message, progression) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   mainWindow.loadURL(portePage(titre, message, progression)).catch(() => {});
@@ -1080,6 +1156,7 @@ const verifierAuLancement = async () => {
 // ne décide jamais de ce qui s'affiche, elle en dérive ses raccourcis.
 
 const { pageDetachee } = require('./menubar');
+const { pageImprimantes } = require('./fenetres/imprimantes');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
@@ -1102,6 +1179,7 @@ const actionApp = (nom) => {
     case 'exports':     shell.openPath(EXPORT_DIR()); break;
     case 'update-check': checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
+    case 'imprimantes': ouvrirImprimantes(); break;
     case 'about-copy':
       try { require('electron').clipboard.writeText(texteApropos()); } catch {}
       break;
