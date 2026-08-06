@@ -14,7 +14,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('sandrizaDesktop', {
   isDesktop: true,
-  version: '1.8.0',
+  version: '1.9.0',
 
   // Menu intégré : le bouton cliqué dans la barre dessinée demande au processus
   // principal d'exécuter une action de l'APPLICATION (quitter, zoom, ancrage du
@@ -70,6 +70,10 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   close: () => ipcRenderer.send('win:close'),
 
   // ── Phase 3 : notifications + pastille ──────────────────────────────────────
+  // Ouvre la preparation d une commande PRECISE dans une fenetre native.
+  // Le site sait laquelle est selectionnee ; la coquille ne fait que porter
+  // la fenetre.
+  ouvrirCommande: (id) => ipcRenderer.invoke('fenetre:commande', String(id || '')),
   notify: (opts) => ipcRenderer.invoke('notify', opts || {}),
   // Pastille sur l'icône : on DESSINE le compteur ici (le monde isolé partage le
   // DOM, donc canvas dispo) et on envoie l'image au processus principal.

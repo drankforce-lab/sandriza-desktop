@@ -556,11 +556,11 @@ const portePage = (titre, message, progression) => {
     // déjà riche, la moindre texture ici devient du bruit. Ne pas y revenir.
     + '.panel{flex:1 1 54%;display:flex;flex-direction:column;justify-content:center;align-items:center;'
     +   'background:#faf8f5;padding:2.75rem 2rem;overflow-y:auto}'
-    + '.wrap{width:100%;max-width:400px;animation:rise .6s cubic-bezier(.16,.84,.44,1) both}'
+    + '.wrap{width:100%;max-width:460px;animation:rise .6s cubic-bezier(.16,.84,.44,1) both}'
     + '.kicker{display:block;font-size:.69rem;font-weight:600;color:#9a7d62;margin-bottom:.7rem;'
     +   'text-transform:uppercase;letter-spacing:.08em}'
     + '.h1{font-size:1.55rem;font-weight:800;color:#1a1207;font-family:Georgia,serif;letter-spacing:.01em;line-height:1.25;margin:0}'
-    + '.sub{font-size:.84rem;color:#7a6652;line-height:1.75;margin-top:.85rem;max-width:34ch}'
+    + '.sub{font-size:.84rem;color:#7a6652;line-height:1.75;margin-top:.85rem;max-width:46ch}'
     + '.pg{width:100%;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;margin-top:2.1rem}'
     + '.pg-in{height:100%;background:linear-gradient(90deg,#C49A6C,#e0bd93);border-radius:99px;transition:width .25s ease}'
     + '.pulse{margin-top:2.1rem;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;position:relative}'
@@ -800,6 +800,8 @@ const OPS_PONT = new Set([
   'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
   'collection:contexte', 'collection:lire', 'collection:enregistrer',
   'produit:contexte', 'produit:lire', 'produit:enregistrer',
+  'commande:contexte', 'commande:lire', 'commande:bon',
+  'commande:etiquette', 'commande:prete', 'commande:expedier',
   'verrou:prendre', 'verrou:rendre',
 ]);
 
@@ -809,6 +811,15 @@ const OPS_PONT = new Set([
 // hors du contexte prévu.
 const litteralJs = (v) => JSON.stringify(v === undefined ? null : v)
   .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+
+// Ouverture d une preparation depuis le site : c est lui qui sait quelle
+// commande est selectionnee, la coquille ne fait que porter la fenetre.
+ipcMain.handle('fenetre:commande', (e, id) => {
+  const cle = 'commande-' + String(id || '').replace(/[^\w-]/g, '');
+  ouvrirNative(cle, 'Préparation de commande', pageCommande(String(id || '')),
+    { width: 880, height: 700, minHeight: 520 });
+  return true;
+});
 
 ipcMain.handle('pont:appeler', async (e, op, args) => {
   const nom = String(op || '');
@@ -1210,6 +1221,7 @@ const { pageImprimantes } = require('./fenetres/imprimantes');
 const { pageFournisseur } = require('./fenetres/fournisseur');
 const { pageCollection } = require('./fenetres/collection');
 const { pageProduit } = require('./fenetres/produit');
+const { pageCommande } = require('./fenetres/commande');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
