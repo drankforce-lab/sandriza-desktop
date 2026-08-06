@@ -132,7 +132,8 @@ function pageProduit(id) {
     return '<div class="ch' + (o.large ? ' large' : '') + '">'
       + '<label for="' + id + '">' + esc(lbl) + (o.requis ? ' <span class="req">*</span>' : '') + '</label>'
       + (o.multi ? '<textarea id="' + id + '" rows="' + (o.rows || 4) + '"></textarea>'
-                 : '<input id="' + id + '" type="' + (o.type || 'text') + '"'
+                 : '<input id="' + id + '" type="' + (o.argent ? 'text' : (o.type || 'text')) + '"'
+                   + (o.argent ? ' inputmode="decimal" class="argent"' : '')
                    + (o.pas ? ' step="' + o.pas + '"' : '') + (o.min !== undefined ? ' min="' + o.min + '"' : '')
                    + (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '') + '>')
       + '</div>';
@@ -210,9 +211,9 @@ function pageProduit(id) {
 
     // 4 — Prix et poids
     h.push('<div class="etape"><div class="carte"><h2>Prix</h2><div class="grille">'
-      + ch('p-prix', 'Prix de vente ($)', { requis: true, type: 'number', pas: '0.01', min: 0 })
-      + ch('p-solde', 'Prix soldé ($)', { type: 'number', pas: '0.01', min: 0, placeholder: 'aucun' })
-      + ch('p-cout', 'Coût d’acquisition ($)', { requis: true, type: 'number', pas: '0.01', min: 0 })
+      + ch('p-prix', 'Prix de vente ($)', { requis: true, argent: true })
+      + ch('p-solde', 'Prix soldé ($)', { argent: true, placeholder: 'aucun' })
+      + ch('p-cout', 'Coût d’acquisition ($)', { requis: true, argent: true })
       + '</div>'
       + '<div id="p-rabais" style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;margin-top:.55rem">'
       + '<span class="aide" style="margin-right:.2rem">Rabais rapide :</span></div>'
@@ -308,7 +309,10 @@ function pageProduit(id) {
       if (j) j.classList.toggle('on');
     });
     ['p-prix', 'p-cout', 'p-solde'].forEach(function(i){
-      var e = document.getElementById(i); if (e) e.oninput = majMarge;
+      var e = document.getElementById(i); if (!e) return;
+      e.onfocus = function(){ argentFocus(this); };
+      e.onblur  = function(){ argentBlur(this); this.classList.remove('manque'); };
+      e.oninput = majMarge;
     });
     ['p-nom', 'p-cat', 'p-poids'].forEach(function(i){
       var e = document.getElementById(i);
@@ -327,9 +331,9 @@ function pageProduit(id) {
     var rab = document.getElementById('p-rabais');
     if (rab) rab.addEventListener('click', function(ev){
       var b = ev.target.closest('[data-pct]'); if (!b || b.disabled) return;
-      var pr = parseFloat(val('p-prix')) || 0;
+      var pr = argentNombre(val('p-prix')) || 0;
       if (!pr) return;
-      poser('p-solde', (pr * (1 - parseInt(b.getAttribute('data-pct'), 10) / 100)).toFixed(2));
+      poser('p-solde', (pr * (1 - parseInt(b.getAttribute('data-pct'), 10) / 100)).toFixed(2) + ' $');
       majMarge();
     });
     document.getElementById('p-fichier').onchange = lireFichier;
@@ -514,11 +518,30 @@ function pageProduit(id) {
     });
   }
 
+  // ── Champs d argent, calques sur l editeur du site ──────────────────────
+  // ⚠ LA VIRGULE EST ACCEPTEE. C est le separateur decimal d ici : quelqu un qui
+  // tape « 125,50 » a raison, et un champ qui lui rend zero a tort.
+  // A la prise de focus on montre le nombre NU — on ne corrige pas « 125.00 $ »
+  // en se battant contre le curseur. Au depart du champ, on met en forme.
+  function argentNombre(v){
+    var n = parseFloat(String(v || '').replace(/[^0-9.,-]/g, '').replace(',', '.'));
+    return isNaN(n) ? null : n;
+  }
+  function argentFocus(e){ var n = argentNombre(e.value); e.value = (n === null) ? '' : String(n); }
+  function argentBlur(e){
+    var n = argentNombre(e.value);
+    e.value = (n === null) ? '' : n.toFixed(2) + ' $';
+    majMarge(); Assist.fil();
+  }
+
   var PCTS = [10, 15, 20, 25, 30, 40, 50];
   function majMarge(){
-    var p = parseFloat(val('p-prix')) || 0;
-    var s = parseFloat(val('p-solde')) || 0;
-    var c = parseFloat(val('p-cout')) || 0;
+    // ⚠ On lit par "argentNombre" : le champ contient « 125.00 $ » une fois mis
+    // en forme, et "parseFloat" s arreterait au premier caractere non numerique
+    // — ce qui marche par hasard ici, mais pas avec une virgule decimale.
+    var p = argentNombre(val('p-prix')) || 0;
+    var s = argentNombre(val('p-solde')) || 0;
+    var c = argentNombre(val('p-cout')) || 0;
     var eff = (s > 0 && s < p) ? s : p;
 
     // Rabais rapides — un bouton par pourcentage, DESACTIVE si le prix obtenu
@@ -707,9 +730,9 @@ function pageProduit(id) {
     poser('p-genre', p.genre || ''); poser('p-age', p.ageGroup || '');
     poser('p-style', p.style || ''); poser('p-guide', p.sizeGuideId || '');
     poser('p-etiq', p.tag || ''); poser('p-fourn', p.supplierId || '');
-    poser('p-prix', p.price != null ? p.price : '');
-    poser('p-solde', p.salePrice != null ? p.salePrice : '');
-    poser('p-cout', p.acquisitionCost != null ? p.acquisitionCost : '');
+    poser('p-prix', p.price != null ? p.price.toFixed(2) + ' $' : '');
+    poser('p-solde', p.salePrice != null ? p.salePrice.toFixed(2) + ' $' : '');
+    poser('p-cout', p.acquisitionCost != null ? p.acquisitionCost.toFixed(2) + ' $' : '');
     // Le poids est conserve en KILOGRAMMES : on l affiche en grammes, l unite la
     // plus lisible pour un vetement.
     poser('p-poids', p.weight ? String(Math.round(p.weight * 1000 * 10) / 10) : '');
@@ -788,9 +811,9 @@ function pageProduit(id) {
       brand: val('p-marque'), description: val('p-desc'),
       genre: val('p-genre'), ageGroup: val('p-age'), style: val('p-style'),
       sizeGuideId: val('p-guide'), tag: val('p-etiq'), supplierId: val('p-fourn'),
-      price: parseFloat(val('p-prix')),
-      salePrice: parseFloat(val('p-solde')) || null,
-      acquisitionCost: parseFloat(val('p-cout')),
+      price: argentNombre(val('p-prix')),
+      salePrice: argentNombre(val('p-solde')),
+      acquisitionCost: argentNombre(val('p-cout')),
       weight: enKg(val('p-poids'), val('p-unite')),
       emoji: val('p-emoji'), colorHex: val('p-hex'),
       lowStock: parseInt(val('p-seuil'), 10),
