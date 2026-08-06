@@ -123,7 +123,21 @@ function pageProduit(id) {
   // l enregistrement — il se decouvre plus tard, sur la boutique.
   var VUES = {};      // { 'vue-2': dataUrl | url, … }
   var PARCOUL = {};   // { 'Noir': { principale: dataUrl | url }, … }
-  var VUES_NOMS = ['Dos', 'Détail', 'Porté', 'Autre'];
+  // ⚠ LES VUES SUIVENT LA CATEGORIE, comme dans l editeur du site. Une categorie
+  // en mode « standard » demande une serie de vues sans couleur ; les autres
+  // demandent des vues par ANGLE plus une photo par couleur. Ce reglage vit dans
+  // Inventaire → Categories : si la fenetre en decidait autrement, deux ecrans du
+  // meme produit ne demanderaient pas les memes photos.
+  var ANGLES = { devant: 'Devant', derriere: 'Derrière', coteG: 'Côté gauche', coteD: 'Côté droit', autres: 'Autre' };
+  function modeStandard(){
+    var c = val('p-cat');
+    return !!(c && CTX.modesPhoto && CTX.modesPhoto[c] === 'standard');
+  }
+  function clesVues(){
+    if (modeStandard()) return ['v1', 'v2', 'v3', 'v4', 'v5'];
+    return (CTX.vuesAngles || ['devant', 'derriere', 'coteG', 'coteD', 'autres']);
+  }
+  function nomVue(k){ return ANGLES[k] || ('Vue ' + String(k).replace(/^v/, '')); }
 
   function dire(t, genre){
     var m = document.getElementById('msg');
@@ -343,7 +357,7 @@ function pageProduit(id) {
     // Le SKU suit la categorie — sauf sur une fiche existante, dont le code est
     // deja attribue : le recalculer lui en donnerait un autre a chaque ouverture.
     var cat = document.getElementById('p-cat');
-    if (cat) cat.addEventListener('change', function(){ if (!ID) majSku(); });
+    if (cat) cat.addEventListener('change', function(){ if (!ID) majSku(); dessinerVues(); });
     var rab = document.getElementById('p-rabais');
     if (rab) rab.addEventListener('click', function(ev){
       var b = ev.target.closest('[data-pct]'); if (!b || b.disabled) return;
@@ -623,17 +637,21 @@ function pageProduit(id) {
   function dessinerVues(){
     var z = document.getElementById('p-vues');
     if (z) {
-      z.innerHTML = VUES_NOMS.map(function(nom, i){
-        var cle = 'vue-' + (i + 2);
+      z.innerHTML = clesVues().map(function(cle){
         var src = VUES[cle] || '';
-        return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '') + '" data-vue="' + cle + '">'
+        return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '') + '" data-vue="' + esc(cle) + '">'
           + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
-          + (src ? '<button type="button" class="x" data-vuex="' + cle + '" title="Retirer">×</button>' : '')
-          + '<div class="lgd">' + esc(nom) + '</div></div>';
+          + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="Retirer">×</button>' : '')
+          + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
       }).join('');
     }
     var p = document.getElementById('p-parcoul');
     if (!p) return;
+    if (modeStandard()) {
+      p.innerHTML = '<div class="aide">Cette catégorie est réglée en mode « standard » : '
+        + 'une série de vues, sans photo par couleur. Réglage dans Inventaire → Catégories.</div>';
+      return;
+    }
     var cs = couleurs();
     if (!cs.length) {
       p.innerHTML = '<div class="aide">Choisissez d’abord des couleurs à l’étape « Tailles et couleurs ».</div>';
