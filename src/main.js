@@ -556,11 +556,11 @@ const portePage = (titre, message, progression) => {
     // déjà riche, la moindre texture ici devient du bruit. Ne pas y revenir.
     + '.panel{flex:1 1 54%;display:flex;flex-direction:column;justify-content:center;align-items:center;'
     +   'background:#faf8f5;padding:2.75rem 2rem;overflow-y:auto}'
-    + '.wrap{width:100%;max-width:460px;animation:rise .6s cubic-bezier(.16,.84,.44,1) both}'
+    + '.wrap{width:100%;max-width:520px;animation:rise .6s cubic-bezier(.16,.84,.44,1) both}'
     + '.kicker{display:block;font-size:.69rem;font-weight:600;color:#9a7d62;margin-bottom:.7rem;'
     +   'text-transform:uppercase;letter-spacing:.08em}'
     + '.h1{font-size:1.55rem;font-weight:800;color:#1a1207;font-family:Georgia,serif;letter-spacing:.01em;line-height:1.25;margin:0}'
-    + '.sub{font-size:.84rem;color:#7a6652;line-height:1.75;margin-top:.85rem;max-width:46ch}'
+    + '.sub{font-size:.84rem;color:#7a6652;line-height:1.75;margin-top:.85rem}'
     + '.pg{width:100%;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;margin-top:2.1rem}'
     + '.pg-in{height:100%;background:linear-gradient(90deg,#C49A6C,#e0bd93);border-radius:99px;transition:width .25s ease}'
     + '.pulse{margin-top:2.1rem;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;position:relative}'
@@ -799,7 +799,7 @@ const OPS_PONT = new Set([
   'imprimantes:etat', 'imprimantes:choisir', 'imprimantes:tester',
   'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
   'collection:contexte', 'collection:lire', 'collection:enregistrer',
-  'produit:contexte', 'produit:lire', 'produit:enregistrer',
+  'produit:contexte', 'produit:sku', 'produit:lire', 'produit:enregistrer',
   'commande:contexte', 'commande:lire', 'commande:bon',
   'commande:etiquette', 'commande:prete', 'commande:expedier',
   'verrou:prendre', 'verrou:rendre',
@@ -1183,7 +1183,7 @@ const verifierAuLancement = async () => {
     // Windows : l'écran reste, le téléchargement est déjà parti (autoDownload).
     // `update-downloaded` prendra le relais et redémarrera l'application.
     montrerPorte('Nouvelle version disponible',
-      '<span style="opacity:.7">L’application redémarrera dès qu’elle sera prête.</span>');
+      '<span style="opacity:.7;white-space:nowrap">L’application redémarrera dès qu’elle sera prête.</span>');
   } catch (err) {
     if (tranche) return;
     tranche = true;

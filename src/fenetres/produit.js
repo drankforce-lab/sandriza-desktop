@@ -126,23 +126,28 @@ function pageProduit(id) {
   function dessiner(){
     var h = [];
 
-    // 1 — Identité
-    h.push('<div class="etape"><div class="carte plein"><h2>Identification</h2><div class="grille">'
+    // 1 — Identité ET classement (fusionnées : elles décrivent la même chose,
+    // et les séparer obligeait à un aller-retour pour une poignée de listes).
+    h.push('<div class="etape">'
+      + '<div class="carte"><h2>Identification</h2><div class="grille">'
       + ch('p-nom', 'Nom du produit', { requis: true, large: true, placeholder: 'Ex : Robe fleurie été' })
       + sel('p-cat', 'Catégorie', rien.concat(opt(CTX.categories, 'cle', 'libelle')), { requis: true })
-      + ch('p-sku', 'Code (SKU)', { placeholder: 'attribué automatiquement' })
+      // ⚠ LE SKU EST VISIBLE, en lecture seule. Un code attribué « quelque part
+      // plus tard » ne peut ni être lu, ni recopié sur une étiquette, ni
+      // vérifié. Il se calcule dès que la catégorie est choisie.
+      + '<div class="ch"><label for="p-sku">Code (SKU)</label>'
+      + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
+      + 'background:#0b1220;color:#c9a97e" placeholder="choisissez une catégorie"></div>'
       + ch('p-marque', 'Marque')
-      + ch('p-desc', 'Description', { multi: true, large: true, rows: 5 })
-      + '</div></div></div>');
-
-    // 2 — Classement
-    h.push('<div class="etape"><div class="carte plein"><h2>Classement</h2><div class="grille">'
+      + ch('p-desc', 'Description', { multi: true, large: true, rows: 3 })
+      + '</div></div>'
+      + '<div class="carte plein"><h2>Classement</h2><div class="grille">'
       + sel('p-genre', 'Genre', rien.concat(opt(CTX.genres, 'cle', 'libelle')))
       + sel('p-age', 'Groupe d’âge', rien.concat(opt(CTX.groupesAge, 'cle', 'libelle')))
       + sel('p-style', 'Style', rien.concat(opt(CTX.styles, 'cle', 'libelle')))
       + sel('p-guide', 'Guide des tailles', rien.concat(opt(CTX.guides, 'id', 'nom')))
-      + sel('p-etiq', 'Étiquette', [{ v: '', l: 'Aucune' }, { v: 'Populaire', l: 'Populaire' }]
-          .concat(opt(CTX.etiquettes, 'cle', 'libelle')))
+      + sel('p-etiq', 'Étiquette', [{ v: '', l: 'Aucune' }, { v: 'Populaire', l: 'Populaire' },
+            { v: 'Solde', l: 'Solde' }].concat(opt(CTX.etiquettes, 'cle', 'libelle')))
       + sel('p-fourn', 'Fournisseur', rien.concat(opt(CTX.fournisseurs, 'id', 'nom')))
       + '</div></div></div>');
 
@@ -167,7 +172,11 @@ function pageProduit(id) {
       + ch('p-prix', 'Prix de vente ($)', { requis: true, type: 'number', pas: '0.01', min: 0 })
       + ch('p-solde', 'Prix soldé ($)', { type: 'number', pas: '0.01', min: 0, placeholder: 'aucun' })
       + ch('p-cout', 'Coût d’acquisition ($)', { requis: true, type: 'number', pas: '0.01', min: 0 })
-      + '</div><div class="aide" id="p-marge" style="margin-top:.55rem"></div></div>'
+      + '</div>'
+      + '<div id="p-rabais" style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;margin-top:.55rem">'
+      + '<span class="aide" style="margin-right:.2rem">Rabais rapide :</span></div>'
+      + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
+      + '<div id="p-alerte" style="display:none;color:#f87171;font-size:.78rem;margin-top:.4rem"></div></div>'
       + '<div class="carte plein"><h2>Poids unitaire</h2><div class="grille">'
       + '<div class="ch"><label for="p-poids">Poids <span class="req">*</span></label>'
       + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0">'
@@ -188,11 +197,20 @@ function pageProduit(id) {
       + '</div></div></div></div>');
 
     // 6 — Détails
+    // ⚠ LE REGIME DE VENTE EST UN CHOIX A QUATRE ETATS, pas trois cases
+    // independantes. Mes cases permettaient « vente finale ET aucun retour ET
+    // liquidation » — une combinaison que l editeur du site ne peut pas produire
+    // et que la boutique ne sait pas afficher.
     h.push('<div class="etape"><div class="carte"><h2>Mise en marché</h2><div class="bascules">'
       + bascule('p-actif', 'Produit actif (visible en boutique)')
-      + bascule('p-liquid', 'En liquidation')
-      + bascule('p-final', 'Vente finale (aucun retour)')
-      + bascule('p-finalret', 'Vente finale, mais retour accepté')
+      + '<div class="ch" style="margin-top:.3rem"><label for="p-regime">Régime de vente</label>'
+      + '<select id="p-regime">'
+      + '<option value="0">✅ Retour accepté</option>'
+      + '<option value="4">🚫 Aucun retour</option>'
+      + '<option value="3">🟡 Liquidation</option>'
+      + '<option value="1">🔴 Vente finale</option>'
+      + '</select></div>'
+      + bascule('p-finalret', 'Vente finale, mais retour accepté malgré tout')
       + '</div></div>'
       + '<div class="carte plein"><h2>Repères</h2><div class="grille">'
       + ch('p-emoji', 'Émoji', { placeholder: '👗' })
@@ -212,18 +230,18 @@ function pageProduit(id) {
       document.getElementById('p-actif').checked = true;
       poser('p-seuil', String(CTX.seuilDefaut));
       poser('p-hex', '#c9a97e');
+      poser('p-regime', '0');
     }
     majMarge();
 
     Assist.poser([
-      { t: 'Identité',           obl: ['p-nom', 'p-cat'] },
-      { t: 'Classement',         obl: [] },
-      { t: 'Tailles et couleurs', obl: [] },
-      { t: 'Prix et poids',      obl: ['p-prix', 'p-cout', 'p-poids'] },
-      { t: 'Photo',              obl: [] },
-      { t: 'Détails',            obl: [] },
-      { t: 'Stock',              obl: [] }
-    ], function(i){ if (i === 6) majStock(); });
+      { t: 'Identité et classement', obl: ['p-nom', 'p-cat'] },
+      { t: 'Tailles et couleurs',    obl: [] },
+      { t: 'Prix et poids',          obl: ['p-prix', 'p-cout', 'p-poids'] },
+      { t: 'Photo',                  obl: [] },
+      { t: 'Mise en marché',         obl: [] },
+      { t: 'Stock',                  obl: [] }
+    ], function(i){ if (i === 5) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d enregistrer.', 'att');
@@ -241,6 +259,18 @@ function pageProduit(id) {
       var e = document.getElementById(i);
       if (e) e.oninput = e.onchange = function(){ this.classList.remove('manque'); Assist.fil(); };
     });
+    // Le SKU suit la categorie — sauf sur une fiche existante, dont le code est
+    // deja attribue : le recalculer lui en donnerait un autre a chaque ouverture.
+    var cat = document.getElementById('p-cat');
+    if (cat) cat.addEventListener('change', function(){ if (!ID) majSku(); });
+    var rab = document.getElementById('p-rabais');
+    if (rab) rab.addEventListener('click', function(ev){
+      var b = ev.target.closest('[data-pct]'); if (!b || b.disabled) return;
+      var pr = parseFloat(val('p-prix')) || 0;
+      if (!pr) return;
+      poser('p-solde', (pr * (1 - parseInt(b.getAttribute('data-pct'), 10) / 100)).toFixed(2));
+      majMarge();
+    });
     document.getElementById('p-fichier').onchange = lireFichier;
     document.getElementById('p-vider').onclick = function(){
       IMAGE = ''; montrerImage(''); document.getElementById('p-fichier').value = '';
@@ -250,10 +280,73 @@ function pageProduit(id) {
   // ⚠ La marge se calcule sur le prix REELLEMENT paye : un solde actif remplace
   // le prix de vente. L afficher sur le prix barre donnerait une marge que
   // personne n encaisse.
+  // Le prochain code libre pour la categorie choisie. "configure: false" veut
+  // dire qu aucun prefixe n est defini pour cette categorie : on le DIT, au lieu
+  // de laisser un champ vide qui ressemble a un chargement qui n arrive jamais.
+  function majSku(){
+    var c = val('p-cat');
+    if (!c) { poser('p-sku', ''); return; }
+    P.appeler('produit:sku', c).then(function(r){
+      if (!r || !r.ok) { poser('p-sku', ''); return; }
+      poser('p-sku', r.sku);
+      var e = document.getElementById('p-sku');
+      if (e) e.placeholder = r.configure ? '' : 'aucun code configuré pour cette catégorie';
+    });
+  }
+
+  var PCTS = [10, 15, 20, 25, 30, 40, 50];
   function majMarge(){
-    var el = document.getElementById('p-marge'); if (!el) return;
-    var p = parseFloat(val('p-prix')), s = parseFloat(val('p-solde')), c = parseFloat(val('p-cout'));
+    var p = parseFloat(val('p-prix')) || 0;
+    var s = parseFloat(val('p-solde')) || 0;
+    var c = parseFloat(val('p-cout')) || 0;
     var eff = (s > 0 && s < p) ? s : p;
+
+    // Rabais rapides — un bouton par pourcentage, DESACTIVE si le prix obtenu
+    // passe sous le cout. Proposer un rabais qui fait vendre a perte, c est
+    // proposer une erreur.
+    var z = document.getElementById('p-rabais');
+    if (z) {
+      var hs = ['<span class="aide" style="margin-right:.2rem">Rabais rapide :</span>'];
+      PCTS.forEach(function(pct){
+        var sp = p ? +(p * (1 - pct / 100)).toFixed(2) : 0;
+        var sousCout = c > 0 && sp > 0 && sp < c;
+        var actif = s > 0 && p > 0 && Math.round((1 - s / p) * 100) === pct;
+        hs.push('<button type="button" data-pct="' + pct + '"'
+          + (!p || sousCout ? ' disabled' : '')
+          + ' title="' + (sousCout ? 'sous le cout d acquisition' : (sp ? sp.toFixed(2) + ' $' : '')) + '"'
+          + ' style="padding:.16rem .45rem;font-size:.74rem'
+          + (actif ? ';background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600' : '') + '">'
+          + '-' + pct + '%</button>');
+      });
+      if (s > 0 && p > 0 && s < p) {
+        hs.push('<span style="margin-left:.3rem;padding:.14rem .45rem;border-radius:99px;'
+          + 'background:#c9a97e;color:#17202c;font-size:.74rem;font-weight:700">-'
+          + Math.round((1 - s / p) * 100) + '%</span>');
+      }
+      z.innerHTML = hs.join('');
+    }
+
+    // ⚠ ETIQUETTE « SOLDE » AUTOMATIQUE, comme dans l editeur du site — mais
+    // JAMAIS sur un produit deja en liquidation ou en vente finale : ces regimes
+    // ont leur propre etiquette, et en poser une seconde par-dessus donne deux
+    // messages contradictoires sur la meme fiche.
+    var etiq = document.getElementById('p-etiq');
+    var reg = val('p-regime');
+    if (etiq && reg !== '1' && reg !== '3') {
+      if (p && s && s < p) etiq.value = 'Solde';
+      else if (etiq.value === 'Solde') etiq.value = '';
+    }
+
+    var al = document.getElementById('p-alerte');
+    if (al) {
+      if (c > 0 && eff > 0 && eff < c) {
+        al.textContent = '⚠ Le prix de vente effectif (' + eff.toFixed(2) + ' $) est inférieur au coût d acquisition ('
+          + c.toFixed(2) + ' $).';
+        al.style.display = 'block';
+      } else { al.style.display = 'none'; }
+    }
+
+    var el = document.getElementById('p-marge'); if (!el) return;
     if (!(eff > 0) || !(c > 0)) { el.textContent = ''; return; }
     var m = eff - c, pct = Math.round((m / eff) * 100);
     el.innerHTML = 'Marge : <strong>' + m.toFixed(2) + ' $</strong> (' + pct + ' %)'
@@ -358,9 +451,8 @@ function pageProduit(id) {
     poser('p-emoji', p.emoji || ''); poser('p-hex', p.colorHex || '#c9a97e');
     poser('p-seuil', p.lowStock != null ? String(p.lowStock) : String(CTX.seuilDefaut));
     document.getElementById('p-actif').checked = p.active !== false;
-    document.getElementById('p-liquid').checked = !!p.liquidation;
-    document.getElementById('p-final').checked = !!p.finalSale;
     document.getElementById('p-finalret').checked = !!p.finalSaleReturnOk;
+    poser('p-regime', p.liquidation ? '3' : (p.finalSale ? '1' : (p.noReturn ? '4' : '0')));
     (p.sizes || []).forEach(function(t){
       var j = document.querySelector('#p-tailles .jeton[data-t="' + String(t).replace(/"/g, '') + '"]');
       if (j) j.classList.add('on');
@@ -430,8 +522,8 @@ function pageProduit(id) {
       weight: enKg(val('p-poids'), val('p-unite')),
       emoji: val('p-emoji'), colorHex: val('p-hex'),
       lowStock: parseInt(val('p-seuil'), 10),
-      active: coché('p-actif'), liquidation: coché('p-liquid'),
-      finalSale: coché('p-final'), finalSaleReturnOk: coché('p-finalret'),
+      active: coché('p-actif'), regime: val('p-regime'),
+      finalSaleReturnOk: coché('p-finalret'),
       sizes: tailles(), colors: couleurs(),
       image: IMAGE, stock: stock, stockLoc: locs
     }).then(function(r){
