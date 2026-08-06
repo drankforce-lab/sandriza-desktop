@@ -67,6 +67,18 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
     catch (e) { dire(false, f, 'la fabrique échoue — ' + e.message); continue; }
     const absentes = ANCRES.filter((a) => page.indexOf(a) < 0);
     if (absentes.length) { dire(false, f, 'ancres manquantes : ' + absentes.join(', ')); continue; }
+
+    // ⚠ LE TROU QUI A LAISSE PASSER UNE FENETRE MORTE (2026-08-06).
+    // Ce controle verifiait que le MODULE se charge — mais le script de la page
+    // vit dans un litteral de gabarit : pour Node c'est une CHAINE, et une ligne
+    // orpheline dedans passe inapercue. La fenetre s'ouvrait, restait sur
+    // « Chargement… », et rien n'expliquait pourquoi : le script n'avait jamais
+    // demarre. On compile donc le script PRODUIT, pas seulement le module.
+    const i2 = page.indexOf('<script>');
+    const j2 = page.indexOf('</script>');
+    if (i2 < 0 || j2 < i2) { dire(false, f, 'page sans script'); continue; }
+    try { new Function(page.slice(i2 + 8, j2)); }
+    catch (e) { dire(false, f, 'SCRIPT de la page invalide — ' + e.message); continue; }
   }
 
   dire(true, f, '');

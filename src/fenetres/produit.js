@@ -217,7 +217,7 @@ function pageProduit(id) {
             { v: 'Solde', l: 'Solde' }].concat(opt(CTX.etiquettes, 'cle', 'libelle')))
       + sel('p-fourn', 'Fournisseur', rien.concat(opt(CTX.fournisseurs, 'id', 'nom')))
       + '</div></div>'
-          + '<div class="carte"><h2>Prix</h2>'
+      + '<div class="carte"><h2>Prix</h2>'
       + '<div class="prixgrille">'
       + ch('p-prix', 'Prix de vente ($)', { requis: true, argent: true })
       + '<div class="ch"><label for="p-solde">Prix soldé ($)'
@@ -229,7 +229,6 @@ function pageProduit(id) {
       + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
       + '<div id="p-alerte" style="display:none;color:#f87171;font-size:.78rem;margin-top:.4rem"></div></div>'
       + '</div>');
-      + '</div></div>')
 
     // 3 — Tailles et couleurs
     h.push('<div class="etape">'
