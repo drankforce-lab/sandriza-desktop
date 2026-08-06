@@ -1,4 +1,4 @@
-# SANDRIZA Admin — coquille de bureau
+# Administration Sandriza — coquille de bureau
 
 Application Electron qui ouvre le portail d'administration **en ligne**
 (`adm.sandriza.com`) dans une fenêtre de bureau, avec l'impression native des

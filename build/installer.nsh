@@ -1,7 +1,7 @@
-; installer.nsh — personnalise l'installateur NSIS de SANDRIZA Admin.
+; installer.nsh — personnalise l installateur NSIS d Administration Sandriza.
 ;
 ; Force le dossier d'installation par DÉFAUT à « Sandriza » (et non
-; « SANDRIZA Admin ») sous le bon Program Files selon l'architecture :
+; « Administration Sandriza ») sous le bon Program Files selon l architecture :
 ;   64 bits -> C:\Program Files\Sandriza        ($PROGRAMFILES64)
 ;   32 bits -> C:\Program Files (x86)\Sandriza  ($PROGRAMFILES32)
 ;

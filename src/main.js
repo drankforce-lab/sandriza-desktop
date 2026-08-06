@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * SANDRIZA Admin — coquille de bureau (PROTOTYPE)
+ * Administration Sandriza — coquille de bureau
  * ================================================
  * Fenêtre mince qui ouvre le site d'administration EN LIGNE. Aucune copie du
  * site n'est embarquée : l'application est un miroir vivant de ce qui est
@@ -203,7 +203,7 @@ const ICON_PATH = path.join(__dirname, '..', 'build', 'icon.png');
 ipcMain.handle('notify', (e, opts = {}) => {
   try {
     const n = new Notification({
-      title: opts.title || 'SANDRIZA Admin',
+      title: opts.title || 'Administration Sandriza',
       body: opts.body || '',
       icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
       silent: !!opts.silent,
@@ -336,7 +336,7 @@ const startUsbWatch = () => {
           mainWindow.webContents.send('usb:photos', { drive: d, photos });
           try {
             new Notification({
-              title: 'SANDRIZA Admin',
+              title: 'Administration Sandriza',
               body: 'Clé ' + d + ' détectée — ' + photos.length + ' photo(s). Ouvrez la section Photos pour importer.',
               icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
             }).on('click', () => { if (mainWindow) { mainWindow.restore(); mainWindow.focus(); } }).show();
@@ -375,7 +375,7 @@ const createWindow = () => {
     minWidth: 1024,
     minHeight: 700,
     backgroundColor: '#111827',
-    title: 'SANDRIZA Admin',
+    title: 'Administration Sandriza',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,   // durcissement : la page n'a jamais accès direct à Node
@@ -405,7 +405,7 @@ const createWindow = () => {
   // Le titre de la fenêtre suivait celui de la PAGE (« SANDRIZA - Boutique de
   // vêtements… »), ce qui n'a aucun sens pour un outil d'administration.
   mainWindow.on('page-title-updated', (e) => { e.preventDefault(); });
-  mainWindow.setTitle('SANDRIZA Admin');
+  mainWindow.setTitle('Administration Sandriza');
 
   mainWindow.webContents.on('did-finish-load', () => {
     applySidebarPref(mainWindow.webContents);
@@ -602,7 +602,7 @@ const portePage = (titre, message, progression) => {
     +   '<div class="h1">' + titre + '</div>'
     +   '<div class="sub">' + message + '</div>'
     +   jauge
-    +   '<div class="ver">' + b.nom + ' Admin · version ' + app.getVersion() + '</div>'
+    +   '<div class="ver">Administration ' + b.nom + ' · version ' + app.getVersion() + '</div>'
     + '</div></main></div></body></html>';
 
   return 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
@@ -729,7 +729,10 @@ const pageApropos = () => {
   return '<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>À propos</title>'
     + '<style>' + css + '</style></head><body>'
     + '<aside class="brand"><span class="orb o1"></span><span class="orb o2"></span>'
-    +   '<div class="bi">' + logo + '<div class="bn">' + esc(b.nom) + '</div>'
+    // ⚠ Le nom n'est ecrit QUE si le logo ne le porte pas deja. Le logo de
+    // marque contient le mot SANDRIZA : l'afficher en dessous le repetait deux
+    // fois, l'un sous l'autre.
+    +   '<div class="bi">' + logo + (b.logo ? '' : '<div class="bn">' + esc(b.nom) + '</div>')
     +   '<div class="bs">Administration</div>'
     +   '<div class="bv">version ' + app.getVersion() + '</div></div></aside>'
     + '<main class="panel"><div class="body">' + sections + '</div>'
@@ -1026,7 +1029,7 @@ const verifierAuLancement = async () => {
         type: 'info',
         buttons: ['Continuer'],
         title: 'Mise à jour disponible',
-        message: 'Une version plus récente de SANDRIZA Admin est disponible.',
+        message: 'Une version plus récente d’Administration Sandriza est disponible.',
         detail: 'Sur macOS, téléchargez-la et réinstallez-la manuellement. L’installation automatique exige une application signée.',
       });
       _updBusy = false;
@@ -1252,7 +1255,7 @@ const majPalette = () => {
       width: b.width || 260,
       height: b.height || 620,
       ...(Number.isFinite(b.x) && Number.isFinite(b.y) ? { x: b.x, y: b.y } : {}),
-      title: 'Menu SANDRIZA',
+      title: 'Menu — Administration Sandriza',
       alwaysOnTop: !!cfg.menuToujoursDevant,
       minWidth: 200, minHeight: 260, autoHideMenuBar: true,
       backgroundColor: desc.sombre ? '#0e1522' : '#f6f7f9',

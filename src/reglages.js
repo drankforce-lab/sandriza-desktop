@@ -38,13 +38,36 @@ let _cache = null;
 
 const chemin = () => path.join(app.getPath('userData'), 'reglages.json');
 
+// ⚠ RENOMMER L'APPLICATION DÉPLACE SON DOSSIER DE DONNÉES.
+// `userData` est dérivé de `productName` : passer de « SANDRIZA Admin » à
+// « Administration Sandriza » (2026-08-06) fait pointer Electron vers un dossier
+// VIDE. Sans ce rattrapage, l'ancrage du menu, sa taille et la position de la
+// fenêtre détachée seraient silencieusement oubliés — et la personne
+// conclurait, à raison, que la mise à jour a perdu ses réglages.
+// Une seule reprise, au premier lancement : après quoi le fichier existe au
+// nouvel endroit et cette branche ne sert plus.
+const ANCIENS_NOMS = ['SANDRIZA Admin'];
+
+function repriseAncien() {
+  try {
+    const parent = path.dirname(app.getPath('userData'));
+    for (const nom of ANCIENS_NOMS) {
+      const vieux = path.join(parent, nom, 'reglages.json');
+      if (fs.existsSync(vieux)) return JSON.parse(fs.readFileSync(vieux, 'utf8')) || {};
+    }
+  } catch { /* rien à reprendre : on repart des défauts */ }
+  return null;
+}
+
 function lire() {
   if (_cache) return _cache;
   let brut = {};
   try {
     const txt = fs.readFileSync(chemin(), 'utf8');
     brut = JSON.parse(txt) || {};
-  } catch { brut = {}; }           // absent ou illisible : on repart des défauts
+  } catch {
+    brut = repriseAncien() || {};   // absent : on regarde l'ancien dossier
+  }
   _cache = { ...DEFAUTS, ...brut, menuFenetre: { ...DEFAUTS.menuFenetre, ...(brut.menuFenetre || {}) } };
   // Bornes : un fichier édité à la main ne doit pas pouvoir produire un menu
   // invisible (échelle 0) ou plus large que l'écran.

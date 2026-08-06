@@ -413,7 +413,7 @@ function scriptBarre(desc) {
 function pageDetachee(desc) {
   const taille = desc.taille || 1;
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Menu SANDRIZA</title>
+<title>Menu — Administration Sandriza</title>
 <style>
 html,body{margin:0;height:100%;overflow:hidden}
 body{background:var(--sz-bg,#fff)}
