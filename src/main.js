@@ -1360,6 +1360,11 @@ const majPalette = () => {
     version: app.getVersion(),
     taille: cfg.menuTaille,
     sombre: !!_modele.sombre,
+    // ⚠ La feuille de style vient DU SITE, avec le modèle. La coquille n'en
+    // tient plus de copie : celle qu'elle avait a dérivé (emojis absents,
+    // espacements différents), et deux menus censés être le même ne se
+    // ressemblaient plus.
+    cssRail: _modele.cssRail || '',
   };
   if (!desc.menus.length) return;   // rien à montrer tant que le site n'a rien dit
 
