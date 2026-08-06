@@ -269,6 +269,9 @@ function pageProduit(id) {
       poser('p-seuil', String(CTX.seuilDefaut));
       poser('p-hex', '#c9a97e');
       poser('p-regime', '0');
+      // Une categorie deja choisie n emet aucun evenement : on demande le code
+      // des l ouverture, sinon il n arrive qu au premier changement.
+      if (val('p-cat')) majSku();
     }
     majMarge();
 
@@ -348,11 +351,25 @@ function pageProduit(id) {
   function majSku(){
     var c = val('p-cat');
     if (!c) { poser('p-sku', ''); return; }
+    var e = document.getElementById('p-sku');
+    if (e) e.placeholder = 'calcul du code…';
     P.appeler('produit:sku', c).then(function(r){
-      if (!r || !r.ok) { poser('p-sku', ''); return; }
+      if (!e) return;
+      // ⚠ UN ECHEC NE DOIT PAS VIDER LE CHAMP EN SILENCE. C est ce que je faisais :
+      // le code n apparaissait pas et rien ne disait pourquoi — coquille trop
+      // ancienne pour connaitre l operation, droit refuse, ou simplement aucun
+      // prefixe configure. Trois causes, un seul symptome, aucun message.
+      if (!r || !r.ok) {
+        poser('p-sku', '');
+        e.placeholder = 'code indisponible';
+        dire('Code (SKU) : ' + expliquer(r), 'att');
+        return;
+      }
       poser('p-sku', r.sku);
-      var e = document.getElementById('p-sku');
-      if (e) e.placeholder = r.configure ? '' : 'aucun code configuré pour cette catégorie';
+      e.placeholder = r.configure ? '' : 'aucun code configuré pour cette catégorie';
+      if (!r.configure) {
+        dire('Aucun préfixe de code n’est configuré pour cette catégorie — voyez Inventaire → Catégories.', 'att');
+      } else { dire(''); }
     });
   }
 
