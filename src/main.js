@@ -788,9 +788,17 @@ const ouvrirApropos = () => {
 // la sienne ici. Ce n'est pas une redondance : sans celle-ci, la coquille
 // transmettrait n'importe quel nom reçu d'une fenêtre, et toute faiblesse future
 // du site deviendrait atteignable depuis un document local.
+// ⚠ CETTE LISTE DOIT SUIVRE `OPS` DE `assets/js/pont.js`. Elles sont deux
+// EXPRÈS — voir plus haut — mais c'est aussi le piège : ajouter une opération au
+// site sans l'ajouter ICI donne « Cette version de l'application ne connaît pas
+// cette opération », et la fenêtre est vide sans que rien n'indique laquelle des
+// deux listes manque. C'est arrivé le 2026-08-06 avec les assistants Fournisseur
+// et Collection. En ajouter une : LES DEUX FICHIERS, dans le même geste.
 const OPS_PONT = new Set([
   'identite',
   'imprimantes:etat', 'imprimantes:choisir', 'imprimantes:tester',
+  'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
+  'collection:contexte', 'collection:lire', 'collection:enregistrer',
   'verrou:prendre', 'verrou:rendre',
 ]);
 
@@ -1163,8 +1171,7 @@ const verifierAuLancement = async () => {
     // Windows : l'écran reste, le téléchargement est déjà parti (autoDownload).
     // `update-downloaded` prendra le relais et redémarrera l'application.
     montrerPorte('Nouvelle version disponible',
-      'Son installation se fait toute seule.<br>'
-      + '<span style="opacity:.7">L’application redémarrera dès qu’elle sera prête.</span>');
+      '<span style="opacity:.7">L’application redémarrera dès qu’elle sera prête.</span>');
   } catch (err) {
     if (tranche) return;
     tranche = true;
