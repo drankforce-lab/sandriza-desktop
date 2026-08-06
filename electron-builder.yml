@@ -1,5 +1,5 @@
 appId: com.sandriza.admin
-productName: SANDRIZA Admin
+productName: Administration Sandriza
 copyright: SANDRIZA
 
 directories:
@@ -39,7 +39,7 @@ win:
     - nsis
   # ⚠ ${arch} est OBLIGATOIRE : sans lui, les builds x64 / ia32 / arm64 écrivent tous
   # le MÊME fichier et s'écrasent l'un l'autre en silence.
-  artifactName: SANDRIZA-Admin-Setup-${version}-${arch}.${ext}
+  artifactName: Administration-Sandriza-Setup-${version}-${arch}.${ext}
   # Icône de l'application ET de l'installateur : logo de marque (« S » doré sur
   # marine). electron-builder génère le .ico multi-résolutions depuis ce PNG 512².
   icon: build/icon.png
@@ -71,7 +71,7 @@ mac:
   icon: build/icon.png
   category: public.app-category.business
   identity: null
-  artifactName: SANDRIZA-Admin-${version}-mac-${arch}.${ext}
+  artifactName: Administration-Sandriza-${version}-mac-${arch}.${ext}
   # ⚠ PAS DE CLÉ `arch:` ICI — VOLONTAIRE.
   # Une liste `arch: [x64, arm64]` ÉCRASE le drapeau `--arm64` / `--x64` de la
   # ligne de commande : chaque job macOS bâtissait alors LES DEUX architectures
@@ -95,4 +95,4 @@ nsis:
   include: build/installer.nsh
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: SANDRIZA Admin
+  shortcutName: Administration Sandriza
