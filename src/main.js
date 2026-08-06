@@ -557,16 +557,16 @@ const portePage = (titre, message, progression) => {
     + '.panel{flex:1 1 54%;display:flex;flex-direction:column;justify-content:center;align-items:center;'
     +   'background:#faf8f5;padding:2.75rem 2rem;overflow-y:auto}'
     + '.wrap{width:100%;max-width:400px;animation:rise .6s cubic-bezier(.16,.84,.44,1) both}'
-    + '.kicker{display:block;font-size:.69rem;font-weight:600;color:#9a7d62;margin-bottom:.4rem;'
+    + '.kicker{display:block;font-size:.69rem;font-weight:600;color:#9a7d62;margin-bottom:.7rem;'
     +   'text-transform:uppercase;letter-spacing:.08em}'
-    + '.h1{font-size:1.5rem;font-weight:800;color:#1a1207;font-family:Georgia,serif;letter-spacing:.01em;line-height:1.2;margin:0}'
-    + '.sub{font-size:.8rem;color:#7a6652;line-height:1.5;margin-top:.35rem}'
-    + '.pg{width:100%;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;margin-top:1.6rem}'
+    + '.h1{font-size:1.55rem;font-weight:800;color:#1a1207;font-family:Georgia,serif;letter-spacing:.01em;line-height:1.25;margin:0}'
+    + '.sub{font-size:.84rem;color:#7a6652;line-height:1.75;margin-top:.85rem;max-width:34ch}'
+    + '.pg{width:100%;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;margin-top:2.1rem}'
     + '.pg-in{height:100%;background:linear-gradient(90deg,#C49A6C,#e0bd93);border-radius:99px;transition:width .25s ease}'
-    + '.pulse{margin-top:1.6rem;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;position:relative}'
+    + '.pulse{margin-top:2.1rem;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;position:relative}'
     + '.pulse::after{content:"";position:absolute;top:0;bottom:0;width:38%;border-radius:99px;'
     +   'background:linear-gradient(90deg,transparent,#C49A6C,transparent);animation:slide 1.5s ease-in-out infinite}'
-    + '.ver{margin-top:1.8rem;padding-top:1.1rem;border-top:1px solid rgba(196,154,108,.22);'
+    + '.ver{margin-top:2.2rem;padding-top:1.2rem;border-top:1px solid rgba(196,154,108,.22);'
     +   'font-size:.72rem;color:#9a7d62;letter-spacing:.02em}'
     + '@keyframes f1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(36px,46px) scale(1.08)}}'
     + '@keyframes f2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-34px) scale(1.06)}}'
@@ -824,10 +824,10 @@ const getUpdater = () => {
       if (!_porteActive) return;
       const pct = Math.round(p && p.percent ? p.percent : 0);
       const mo = (n) => (n / 1048576).toFixed(0);
-      montrerPorte('Mise à jour en cours',
-        'Téléchargement de la nouvelle version : ' + pct + ' %'
-        + (p && p.total ? ' (' + mo(p.transferred) + ' / ' + mo(p.total) + ' Mo)' : '')
-        + '<br><span style="opacity:.6;font-size:13px">L’administration s’ouvrira après le redémarrage.</span>',
+      montrerPorte('Téléchargement en cours',
+        'Nouvelle version : ' + pct + ' %'
+        + (p && p.total ? '<br><span style="opacity:.7">' + mo(p.transferred) + ' Mo sur ' + mo(p.total) + '</span>' : '')
+        + '<br><span style="opacity:.7">L’application redémarrera à la fin.</span>',
         pct);
     });
 
@@ -860,9 +860,9 @@ const getUpdater = () => {
       // sens tout le mécanisme, puisqu'il suffirait de cliquer à côté pour
       // travailler sur une version périmée.)
       if (_porteActive) {
-        montrerPorte('Mise à jour prête',
-          'Version ' + version + ' prête. L’application redémarre toute seule.<br>'
-          + '<span style="opacity:.6;font-size:13px">L’administration s’ouvrira ensuite.</span>',
+        montrerPorte('Installation',
+          'La version ' + version + ' est prête.<br>'
+          + '<span style="opacity:.7">L’application redémarre, puis reprend où vous en étiez.</span>',
           100);
         _porteActive = false;
         setTimeout(() => installerEtRelancer(autoUpdater), 1600);
@@ -994,7 +994,7 @@ const PORTE_DELAI_MS = 20000; // au-delà, on considère la vérification imposs
 const verifierAuLancement = async () => {
   _porteActive = true;
   _majDispo = false;
-  montrerPorte('Vérification des mises à jour', 'Un instant…');
+  montrerPorte('Vérification des mises à jour', 'Quelques secondes, le temps d’interroger le serveur.');
 
   // En développement (npm start), il n'y a ni paquet ni flux : on ouvre.
   if (!app.isPackaged) { ouvrirAdmin(); return; }
@@ -1014,7 +1014,8 @@ const verifierAuLancement = async () => {
     tranche = true;
     _updBusy = false;
     montrerPorte('Vérification impossible',
-      'Le serveur de mise à jour n’a pas répondu. Ouverture de l’administration…');
+      'Le serveur de mise à jour n’a pas répondu.<br>'
+      + '<span style="opacity:.7">Ouverture de l’administration dans un instant.</span>');
     setTimeout(ouvrirAdmin, 1800);
   }, PORTE_DELAI_MS);
 
@@ -1043,9 +1044,9 @@ const verifierAuLancement = async () => {
 
     // Windows : l'écran reste, le téléchargement est déjà parti (autoDownload).
     // `update-downloaded` prendra le relais et redémarrera l'application.
-    montrerPorte('Mise à jour requise',
-      'Une version plus récente est disponible. Elle s’installe automatiquement.<br>'
-      + '<span style="opacity:.62">L’administration ne s’ouvre pas sur une version périmée.</span>');
+    montrerPorte('Nouvelle version disponible',
+      'Son installation se fait toute seule.<br>'
+      + '<span style="opacity:.7">L’application redémarrera dès qu’elle sera prête.</span>');
   } catch (err) {
     if (tranche) return;
     tranche = true;
