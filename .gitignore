@@ -1,0 +1,14 @@
+node_modules/
+dist/
+
+# ⚠ LA CLÉ DU VERROU — JAMAIS COMMITÉE, CE DÉPÔT EST PUBLIC.
+# Ce fichier est écrit au moment de la construction depuis le secret
+# ELG_APP_KEY (voir .github/workflows/build.yml). S'il apparaît un jour dans
+# un commit, il faut faire une ROTATION de la clé, pas seulement l'effacer :
+# l'historique git garde ce qu'on y a mis.
+src/cle.js
+
+# Certificats de signature : jamais dans un dépôt, public ou non.
+certs/*.pfx
+certs/*.cer
+certs/*.key

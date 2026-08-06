@@ -1,0 +1,159 @@
+# =============================================================================
+# CONSTRUCTION DE L'APPLICATION DE BUREAU — dépôt PUBLIC
+# -----------------------------------------------------------------------------
+# ⚠ CE WORKFLOW NE PUBLIE RIEN. Il construit, et dépose les paquets en
+# ARTÉFACTS de l'exécution. La publication dans Cloudflare R2 se fait depuis le
+# dépôt PRIVÉ (workflow « Publier l'application de bureau »), qui seul détient
+# les identifiants R2.
+#
+# ── POURQUOI CETTE SÉPARATION ────────────────────────────────────────────────
+# Les minutes GitHub Actions sont GRATUITES et illimitées sur un dépôt public,
+# alors qu'un dépôt privé les décompte — et les minutes macOS y comptent ×10.
+# Construire ici ne coûte rien.
+# Mais le bucket R2 ne contient pas que des installateurs : il porte aussi les
+# SAUVEGARDES, les PHOTOS PRODUIT et les EXPORTS COMPTABLES. Ses identifiants
+# n'ont donc rien à faire dans un dépôt public, quelles que soient les
+# protections de GitHub sur les secrets. Ils restent du côté privé.
+#
+# ── CE QUI EST PUBLIC ICI, ET CE QUI NE L'EST PAS ────────────────────────────
+# Public : le code de la COQUILLE — une fenêtre Electron qui ouvre
+#          adm.sandriza.com, imprime, et gère ses mises à jour. Aucune donnée
+#          d'affaires, aucun code de la boutique, aucun accès à la base.
+# Secret : `ELG_APP_KEY`, la clé du verrou d'application, écrite dans
+#          `src/cle.js` À LA CONSTRUCTION et jamais commitée.
+#
+# ⚠ LES SECRETS NE SONT PAS EXPOSÉS AUX FORKS. GitHub ne les fournit pas aux
+# exécutions déclenchées par une pull request venant d'un fork, et
+# `workflow_dispatch` exige un droit d'écriture sur le dépôt. C'est pour ça que
+# ce workflow n'a QUE ce déclencheur : pas de `push`, pas de `pull_request`.
+# =============================================================================
+name: Construire
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version à construire (doit correspondre à package.json)"
+        required: true
+      avec_mac:
+        description: "Construire aussi les paquets macOS ? (inutile tant qu'aucun Mac n'est en service — et la mise à jour automatique y est impossible sans signature Apple)"
+        type: boolean
+        required: true
+        default: false
+
+# Aucun droit n'est nécessaire : on ne touche ni au dépôt, ni aux releases.
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ia32, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # ── La clé du verrou, injectée ICI et nulle part ailleurs ──────────────
+      # ⚠ On ÉCHOUE si le secret est absent. Sans lui, l'application se
+      # construirait très bien — et serait refusée (403) par le serveur sur
+      # chaque poste. Mieux vaut ne rien livrer qu'un paquet mort-né.
+      - name: Injecter la clé d'application
+        shell: bash
+        env:
+          ELG_APP_KEY: ${{ secrets.ELG_APP_KEY }}
+        run: |
+          if [ -z "${ELG_APP_KEY:-}" ]; then
+            echo "::error::Le secret ELG_APP_KEY est absent. L'application construite serait refusée par le serveur."
+            exit 1
+          fi
+          printf "module.exports = { APP_KEY: '%s' };\n" "$ELG_APP_KEY" > src/cle.js
+
+      - name: Vérifier la version
+        shell: bash
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$PKG" != "${{ inputs.version }}" ]; then
+            echo "::error::package.json annonce $PKG, la demande porte sur ${{ inputs.version }}."
+            exit 1
+          fi
+
+      - name: Dépendances
+        run: npm ci || npm install
+
+      # Un simple contrôle de syntaxe : une faute de frappe ici coûte une
+      # construction complète et une réinstallation sur chaque poste.
+      - name: Contrôle de syntaxe
+        shell: bash
+        run: for f in src/*.js; do node --check "$f"; done
+
+      - name: Construire (${{ matrix.arch }})
+        run: npx electron-builder --win --${{ matrix.arch }} --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: win-${{ matrix.arch }}
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/latest*.yml
+
+  macos:
+    # ⚠ DÉSACTIVÉ PAR DÉFAUT, ET C'EST VOULU. Aucun Mac n'est en service, et la
+    # mise à jour automatique y est de toute façon impossible tant que
+    # l'application n'est pas signée par Apple (99 $US/an) : ces paquets ne
+    # serviraient à personne. Cochez la case le jour où un Mac arrive.
+    if: inputs.avec_mac
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Injecter la clé d'application
+        env:
+          ELG_APP_KEY: ${{ secrets.ELG_APP_KEY }}
+        run: |
+          if [ -z "${ELG_APP_KEY:-}" ]; then
+            echo "::error::Le secret ELG_APP_KEY est absent."
+            exit 1
+          fi
+          printf "module.exports = { APP_KEY: '%s' };\n" "$ELG_APP_KEY" > src/cle.js
+      - name: Dépendances
+        run: npm ci || npm install
+      - name: Construire (${{ matrix.arch }})
+        # Sans CSC_IDENTITY_AUTO_DISCOVERY=false, electron-builder cherche un
+        # certificat Apple sur l'exécuteur et échoue.
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder --mac --${{ matrix.arch }} --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-${{ matrix.arch }}
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.blockmap
+            dist/latest*.yml
+
+  recapitulatif:
+    needs: [windows, macos]
+    if: always() && !cancelled() && needs.windows.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Quoi faire ensuite
+        run: |
+          echo "## Construction ${{ inputs.version }} terminée" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Les paquets sont en artéfacts de **cette exécution** (\`${{ github.run_id }}\`)." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Pour les publier : dépôt privé **Sandriza** → Actions → " >> $GITHUB_STEP_SUMMARY
+          echo "**Publier l'application de bureau** → \`run_id = ${{ github.run_id }}\`, \`version = ${{ inputs.version }}\`." >> $GITHUB_STEP_SUMMARY

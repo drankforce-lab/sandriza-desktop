@@ -1,0 +1,98 @@
+appId: com.sandriza.admin
+productName: SANDRIZA Admin
+copyright: SANDRIZA
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - src/**/*
+  - package.json
+
+# ── PUBLICATION / MISES À JOUR ───────────────────────────────────────────────
+# Les installateurs vivent dans un bucket Cloudflare R2 PRIVÉ, et le site en est
+# la seule porte : adm-update.php (mises à jour) et adm-download.php (première
+# installation, sous mot de passe temporaire).
+#
+# ⚠ POURQUOI PAS GITHUB, NI PUBLIC NI PRIVÉ :
+#   - Dépôt PUBLIC : les installateurs seraient téléchargeables par n'importe qui.
+#     Or ils contiennent la clé du verrou application (adm-appgate.php) — le verrou
+#     serait donc public, et le téléchargement sous mot de passe, décoratif.
+#   - Dépôt PRIVÉ : electron-updater exigerait un jeton GitHub EMBARQUÉ dans
+#     l'application. L'app.asar n'étant pas chiffré, ce jeton serait lisible sur
+#     chaque poste et donnerait accès au code source complet.
+# R2 + un en-tête que l'application possède déjà supprime les deux problèmes.
+#
+# Ce bloc génère `app-update.yml` et `latest.yml` ; sans lui, electron-updater
+# reste inerte (c'était le cas jusqu'ici).
+publish:
+  provider: generic
+  url: https://adm.sandriza.com/update/${os}/${arch}/
+  # Le paquet ne se publie pas tout seul ici : GitHub Actions dépose les fichiers
+  # dans R2 (dossier desktop/<os>/<arch>/). Ce bloc sert à générer `app-update.yml`
+  # et `latest.yml` ; sans lui, electron-updater reste inerte.
+  publishAutoUpdate: true
+
+win:
+  target:
+    - nsis
+  # ⚠ ${arch} est OBLIGATOIRE : sans lui, les builds x64 / ia32 / arm64 écrivent tous
+  # le MÊME fichier et s'écrasent l'un l'autre en silence.
+  artifactName: SANDRIZA-Admin-Setup-${version}-${arch}.${ext}
+  # Icône de l'application ET de l'installateur : logo de marque (« S » doré sur
+  # marine). electron-builder génère le .ico multi-résolutions depuis ce PNG 512².
+  icon: build/icon.png
+  # ── SIGNATURE ────────────────────────────────────────────────────────────────
+  # PROTOTYPE = NON SIGNÉ : ne rien définir ci-dessous, lancer `npm run dist` tel quel.
+  #
+  # Pour signer avec le certificat AUTO-SIGNÉ (assistant 3 étapes), définir AVANT
+  # `npm run dist` (tools/build.ps1 -SelfSign le fait pour toi) :
+  #   $env:CSC_LINK        = "certs\sandriza-codesign.pfx"
+  #   $env:CSC_KEY_PASSWORD = "<mot de passe du .pfx>"
+  # electron-builder détecte ces variables et signe automatiquement.
+  #
+  # Plus tard, pour Azure Trusted Signing (le moins cher des certificats reconnus),
+  # remplacer par la config `azureSignOptions` — voir README.
+
+# ── macOS ────────────────────────────────────────────────────────────────────
+# ⚠ NE PEUT PAS ÊTRE BÂTI SUR WINDOWS : electron-builder exige macOS pour produire
+# un bundle .app (liens symboliques, permissions, hdiutil). C'est le workflow
+# GitHub Actions (.github/workflows/desktop-release.yml) qui s'en charge, sur un
+# exécuteur macOS.
+#
+# ⚠ NON SIGNÉ (identity: null) — deux conséquences à connaître :
+#   1. Gatekeeper refuse le premier lancement : clic DROIT sur l'app → « Ouvrir ».
+#   2. La MISE À JOUR AUTOMATIQUE NE FONCTIONNE PAS sur macOS sans signature —
+#      Squirrel.Mac refuse d'appliquer un paquet non signé. Sur Mac, la mise à
+#      jour reste donc MANUELLE (retélécharger le .dmg) tant qu'il n'y a pas de
+#      certificat Apple Developer (99 $US/an). Sur Windows, elle fonctionne.
+mac:
+  icon: build/icon.png
+  category: public.app-category.business
+  identity: null
+  artifactName: SANDRIZA-Admin-${version}-mac-${arch}.${ext}
+  # ⚠ PAS DE CLÉ `arch:` ICI — VOLONTAIRE.
+  # Une liste `arch: [x64, arm64]` ÉCRASE le drapeau `--arm64` / `--x64` de la
+  # ligne de commande : chaque job macOS bâtissait alors LES DEUX architectures
+  # (constaté le 2026-08-05), ce qui doublait les minutes macOS et déposait deux
+  # paquets dans chaque dossier. Sans cette clé, c'est le drapeau qui décide, une
+  # architecture par job — comme pour Windows, qui n'a jamais eu le problème
+  # précisément parce que ses cibles n'en ont pas.
+  target:
+    - dmg
+    # Le .zip n'est pas un doublon : c'est le format qu'electron-updater lit sur
+    # macOS. Sans lui, aucune mise à jour possible même une fois l'app signée.
+    - zip
+
+nsis:
+  oneClick: false
+  # perMachine + Program Files exige une élévation (UAC) à l'installation, ce qui
+  # est nécessaire pour écrire dans C:\Program Files\Sandriza.
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+  # Force le dossier « Sandriza » sous le bon Program Files selon l'architecture.
+  include: build/installer.nsh
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: SANDRIZA Admin

@@ -1,0 +1,21 @@
+{
+  "name": "sandriza-admin-desktop",
+  "productName": "SANDRIZA Admin",
+  "version": "0.7.0",
+  "description": "Coquille de bureau (prototype) pour l'administration SANDRIZA — ouvre le site en ligne, impression silencieuse directe (sans agent).",
+  "author": "SANDRIZA",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
