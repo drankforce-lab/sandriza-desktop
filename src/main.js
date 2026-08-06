@@ -696,7 +696,7 @@ const pageApropos = () => {
     + ':root{color-scheme:light}*{box-sizing:border-box}'
     + 'html,body{margin:0;height:100%;overflow:hidden}'
     + 'body{display:flex;font:14px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1a1207}'
-    + '.brand{flex:0 0 216px;background:' + bg + ';position:relative;overflow:hidden;'
+    + '.brand{flex:0 0 268px;background:' + bg + ';position:relative;overflow:hidden;'
     +   'display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.6rem 1.2rem;text-align:center}'
     + '.orb{position:absolute;border-radius:50%;filter:blur(52px);opacity:.5;pointer-events:none}'
     + '.o1{width:230px;height:230px;background:' + b.logoG + ';top:-70px;left:-60px;animation:f1 17s ease-in-out infinite}'
@@ -704,7 +704,7 @@ const pageApropos = () => {
     + '.bi{position:relative;z-index:2}'
     + '.bd{width:62px;height:62px;border-radius:17px;display:flex;align-items:center;justify-content:center;'
     +   'font:800 1.7rem/1 Georgia,serif;color:#fff;margin:0 auto .9rem;box-shadow:0 12px 30px rgba(0,0,0,.34)}'
-    + '.lg{display:block;max-width:150px;height:auto;margin:0 auto .9rem}'
+    + '.lg{display:block;width:100%;max-width:210px;height:auto;margin:0 auto 1.1rem}'
     + '.bn{font-family:Georgia,serif;font-size:1.15rem;font-weight:800;color:' + b.titre + ';margin:0}'
     + '.bs{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:' + b.sous + ';margin-top:.45rem}'
     + '.bv{margin-top:1.1rem;font-size:.7rem;color:' + b.sous + ';opacity:.75}'
@@ -764,7 +764,7 @@ const pageApropos = () => {
 const ouvrirApropos = () => {
   if (aproposWin && !aproposWin.isDestroyed()) { aproposWin.focus(); return; }
   aproposWin = new BrowserWindow({
-    width: 780, height: 560, show: false, resizable: false, minimizable: false, maximizable: false,
+    width: 830, height: 560, show: false, resizable: false, minimizable: false, maximizable: false,
     title: 'À propos', parent: mainWindow || undefined, modal: false,
     autoHideMenuBar: true, backgroundColor: '#faf8f5',
     webPreferences: {
