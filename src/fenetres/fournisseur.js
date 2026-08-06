@@ -1,21 +1,20 @@
 'use strict';
 
 /*
- * ASSISTANT « FOURNISSEUR » — NATIF
+ * ASSISTANT « FOURNISSEUR » — NATIF, PAR ÉTAPES
  * =============================================================================
  * Écrit ici, en entier. Aucune page du site n'est chargée, aucun appel web n'est
  * fait : la fenêtre demande son contexte au pont, affiche, et renvoie la saisie.
  * La validation et l'écriture restent dans le site, qui possède les règles.
  *
- * ⚠ LE VERROU EST PRIS PAR LE SITE, PAS PAR CETTE FENÊTRE.
- * En modification, `fournisseur:enregistrer` demande le verrou avant d'écrire et
- * refuse si quelqu'un d'autre le tient. C'était le point à ne pas rater : une
- * fenêtre native qui écrirait sans verrou serait un chemin d'écriture parallèle,
- * c'est-à-dire deux personnes sur la même fiche — exactement ce que le verrou
- * existe pour empêcher.
+ * ⚠ TROIS ÉTAPES, AUCUN DÉFILEMENT. La version d'avant tenait tout sur une page
+ * qu'il fallait faire défiler : on perdait de vue les boutons et la moitié des
+ * champs. Une étape tient dans la fenêtre — c'est la règle du socle.
  *
- * ⚠ ELLE NE DEVINE RIEN. Sans réponse du pont, elle affiche le motif traduit au
- * lieu d'un formulaire vide qui aurait l'air utilisable.
+ * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU, et à rien d'autre. Il y
+ * affichait « création » / « modification », ce que le titre disait déjà. Cet
+ * emplacement sert maintenant à la seule chose qu'on ne peut pas deviner :
+ * est-ce que quelqu'un d'autre tient cette fiche.
  */
 
 const { CSS_SOCLE, JS_SOCLE } = require('./socle');
@@ -28,9 +27,12 @@ function pageFournisseur(id) {
 <style>${CSS_SOCLE}</style></head><body>
 <div class="tete"><span class="ic">🏭</span><h1 id="titre">Fournisseur</h1>
   <span class="sous" id="sous"></span></div>
+<div class="pas" id="pas"></div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions">
+    <button id="btn-prec">Précédent</button>
+    <button id="btn-suiv">Suivant</button>
     <button id="btn-annuler">Annuler</button>
     <button id="btn-enr" class="prim" disabled>Enregistrer</button>
   </span></div>
@@ -39,30 +41,32 @@ function pageFournisseur(id) {
   'use strict';
   ${JS_SOCLE}
 
-  var ID    = ${ident};
-  var corps = document.getElementById('corps');
-  var msg   = document.getElementById('msg');
-  var sous  = document.getElementById('sous');
-  var bEnr  = document.getElementById('btn-enr');
-  var CTX   = null;
+  var ID   = ${ident};
+  var bEnr = document.getElementById('btn-enr');
+  var sous = document.getElementById('sous');
+  var CTX = null;
 
-  function dire(t, genre){ msg.textContent = t || ''; msg.className = 'msg' + (genre ? ' ' + genre : ''); }
+  function dire(t, genre){
+    var m = document.getElementById('msg');
+    m.textContent = t || ''; m.className = 'msg' + (genre ? ' ' + genre : '');
+  }
   function vide(titre, detail){
-    corps.innerHTML = '<div class="vide"><div class="gros">' + esc(titre) + '</div><div>' + esc(detail || '') + '</div></div>';
-    bEnr.disabled = true;
+    document.getElementById('corps').innerHTML =
+      '<div class="vide"><div class="gros">' + esc(titre) + '</div><div>' + esc(detail || '') + '</div></div>';
+    document.getElementById('pas').innerHTML = '';
+    ['btn-enr','btn-prec','btn-suiv'].forEach(function(b){ document.getElementById(b).disabled = true; });
   }
 
-  function champ(id, lbl, opts){
-    opts = opts || {};
-    return '<div class="ch' + (opts.large ? ' large' : '') + '">'
-      + '<label for="' + id + '">' + esc(lbl) + (opts.requis ? ' <span class="req">*</span>' : '') + '</label>'
-      + (opts.multi
-          ? '<textarea id="' + id + '" rows="3"></textarea>'
-          : '<input id="' + id + '" type="' + (opts.type || 'text') + '"'
-            + (opts.placeholder ? ' placeholder="' + esc(opts.placeholder) + '"' : '') + '>')
+  function ch(id, lbl, o){
+    o = o || {};
+    return '<div class="ch' + (o.large ? ' large' : '') + '">'
+      + '<label for="' + id + '">' + esc(lbl) + (o.requis ? ' <span class="req">*</span>' : '') + '</label>'
+      + (o.multi ? '<textarea id="' + id + '" rows="' + (o.rows || 4) + '"></textarea>'
+                 : '<input id="' + id + '" type="' + (o.type || 'text') + '"'
+                   + (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '') + '>')
       + '</div>';
   }
-  function liste(id, lbl, valeurs){
+  function sel(id, lbl, valeurs){
     return '<div class="ch"><label for="' + id + '">' + esc(lbl) + '</label><select id="' + id + '">'
       + valeurs.map(function(v){ return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('')
       + '</select></div>';
@@ -70,34 +74,34 @@ function pageFournisseur(id) {
 
   function dessiner(fiche){
     var h = [];
-    h.push('<div class="carte"><h2>Identification</h2><div class="grille">');
-    h.push(champ('f-nom', 'Nom du fournisseur', { requis: true, large: true }));
-    h.push(champ('f-contact', 'Personne-ressource'));
-    h.push(champ('f-courriel', 'Courriel', { type: 'email' }));
-    h.push(champ('f-tel', 'Téléphone', { type: 'tel' }));
-    h.push(champ('f-web', 'Site web', { placeholder: 'https://…' }));
-    h.push('</div></div>');
+    h.push('<div class="etape"><div class="carte plein"><h2>Identification</h2><div class="grille">'
+      + ch('f-nom', 'Nom du fournisseur', { requis: true, large: true })
+      + ch('f-contact', 'Personne-ressource')
+      + ch('f-courriel', 'Courriel', { type: 'email' })
+      + ch('f-tel', 'Téléphone', { type: 'tel' })
+      + ch('f-web', 'Site web', { placeholder: 'https://…' })
+      + '</div></div></div>');
 
-    h.push('<div class="carte"><h2>Adresse</h2><div class="grille">');
-    h.push(champ('f-rue', 'Rue', { large: true }));
-    h.push(champ('f-ville', 'Ville'));
-    h.push(liste('f-prov', 'Province', CTX.provinces));
-    h.push(champ('f-cp', 'Code postal', { placeholder: 'G1H 1T4' }));
-    h.push('</div></div>');
+    h.push('<div class="etape"><div class="carte plein"><h2>Adresse</h2><div class="grille">'
+      + ch('f-rue', 'Rue', { large: true })
+      + ch('f-ville', 'Ville')
+      + sel('f-prov', 'Province', CTX.provinces)
+      + ch('f-cp', 'Code postal', { placeholder: 'G1H 1T4' })
+      + '</div></div></div>');
 
-    h.push('<div class="carte"><h2>Approvisionnement</h2>');
-    h.push('<div class="ch large" style="margin-bottom:.75rem"><label>Catégories fournies</label><div class="cases">');
-    h.push(CTX.categories.map(function(c){
-      return '<label><input type="checkbox" class="f-cat" value="' + esc(c.cle) + '">' + esc(c.libelle) + '</label>';
-    }).join(''));
-    h.push('</div></div>');
-    h.push('<div class="grille">');
-    h.push(liste('f-delai', 'Délai de livraison moyen', CTX.delais));
-    h.push('<div class="ch"><label for="f-actif">Statut</label><select id="f-actif">'
-      + '<option value="1">Actif</option><option value="0">Inactif</option></select></div>');
-    h.push(champ('f-notes', 'Notes internes', { multi: true, large: true }));
-    h.push('</div></div>');
-    corps.innerHTML = h.join('');
+    h.push('<div class="etape"><div class="carte plein"><h2>Approvisionnement</h2>'
+      + '<div class="ch large" style="margin-bottom:.65rem"><label>Catégories fournies</label><div class="cases">'
+      + CTX.categories.map(function(c){
+          return '<label><input type="checkbox" class="f-cat" value="' + esc(c.cle) + '">' + esc(c.libelle) + '</label>';
+        }).join('')
+      + '</div></div><div class="grille">'
+      + sel('f-delai', 'Délai de livraison moyen', CTX.delais)
+      + '<div class="ch"><label for="f-actif">Statut</label><select id="f-actif">'
+      + '<option value="1">Actif</option><option value="0">Inactif</option></select></div>'
+      + ch('f-notes', 'Notes internes', { multi: true, large: true, rows: 3 })
+      + '</div></div></div>');
+
+    document.getElementById('corps').innerHTML = h.join('');
 
     if (fiche) {
       poser('f-nom', fiche.name); poser('f-contact', fiche.contactName);
@@ -113,11 +117,31 @@ function pageFournisseur(id) {
         c.checked = choisies.indexOf(c.value) >= 0;
       });
     }
-    // Le droit d'écrire décide de l'état du bouton — mais il ne remplace pas le
-    // contrôle du site, qui reste le seul qui compte.
+    var n = document.getElementById('f-nom');
+    if (n) n.oninput = function(){ this.classList.remove('manque'); Assist.fil(); };
+
+    Assist.poser([
+      { t: 'Identification', obl: ['f-nom'] },
+      { t: 'Adresse',        obl: [] },
+      { t: 'Approvisionnement', obl: [] }
+    ]);
+
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
-    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d’enregistrer.', 'att');
-    var n = document.getElementById('f-nom'); if (n) n.focus();
+    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d enregistrer.', 'att');
+  }
+
+  // ⚠ LE VERROU EST PRIS A L OUVERTURE, pas seulement a l enregistrement.
+  // Le decouvrir apres avoir tout saisi, c est perdre la saisie. On le demande
+  // des l ouverture et on le DIT dans l en-tete.
+  function verrou(){
+    if (!ID) return Promise.resolve();
+    return P.appeler('verrou:prendre', 'suppliers', ID).then(function(v){
+      if (!v || !v.ok) { sous.textContent = ''; return; }
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 fiche réservée'; return; }
+      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu un d autre');
+      bEnr.disabled = true;
+      dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
+    });
   }
 
   function charger(){
@@ -127,25 +151,18 @@ function pageFournisseur(id) {
       return P.appeler('fournisseur:lire', ID).then(function(r){
         if (!r || !r.ok) { vide('Fiche indisponible', expliquer(r)); return; }
         document.getElementById('titre').textContent = ID ? 'Modifier le fournisseur' : 'Nouveau fournisseur';
-        sous.textContent = ID ? 'modification' : 'création';
         dessiner(r.fiche);
+        return verrou();
       });
     });
   }
 
   function enregistrer(){
-    var nom = val('f-nom').trim();
-    var champNom = document.getElementById('f-nom');
-    if (!nom) {
-      if (champNom) { champNom.classList.add('manque'); champNom.focus(); }
-      dire(MOTIFS.nom_requis, 'err');
-      return;
-    }
-    if (champNom) champNom.classList.remove('manque');
+    if (!Assist.toutValide()) return;
     bEnr.disabled = true;
     dire('Enregistrement…');
     P.appeler('fournisseur:enregistrer', ID, {
-      name: nom,
+      name: val('f-nom').trim(),
       contactName: val('f-contact'), email: val('f-courriel'),
       phone: val('f-tel'), website: val('f-web'),
       address: { street: val('f-rue'), city: val('f-ville'), province: val('f-prov'), postalCode: val('f-cp') },
@@ -155,15 +172,12 @@ function pageFournisseur(id) {
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
       dire('Enregistré.', 'bon');
-      // On ferme APRES avoir montre le resultat : fermer aussitot laisse un doute
-      // sur ce qui s est passe, et c est la seule confirmation qu on recevra.
       setTimeout(function(){ P.fermer(); }, 550);
     });
   }
 
   bEnr.onclick = enregistrer;
   document.getElementById('btn-annuler').onclick = function(){ P.fermer(); };
-  // Ctrl+S : le geste attendu dans une fenetre de saisie.
   document.addEventListener('keydown', function(ev){
     if ((ev.ctrlKey || ev.metaKey) && (ev.key === 's' || ev.key === 'S')) {
       ev.preventDefault(); if (!bEnr.disabled) enregistrer();

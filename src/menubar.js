@@ -40,6 +40,9 @@ body{background:var(--sz-bg,#131b2a)}
 .sz-panneau{position:static!important;box-shadow:none!important;border:0!important;
   padding:2px 0 6px 10px!important;min-width:0!important;max-width:none!important;
   background:transparent!important;animation:none!important}
+#sz-menubar .sz-marque{background:none;border:0;font:inherit;color:inherit;
+  cursor:pointer;width:100%;text-align:left}
+#sz-menubar .sz-marque:hover{opacity:.82}
 .sz-corps{display:none}
 .sz-corps.sz-on{display:block}
 .sz-pied{display:flex;gap:4px;justify-content:space-between;padding:10px 8px 4px;
@@ -82,8 +85,14 @@ ${css}
     return pan;
   }
 
-  var marque=document.createElement('div'); marque.className='sz-marque';
+  // La marque ramene au tableau de bord, comme dans la barre ancree. Une meme
+  // chose au meme endroit doit faire la meme chose, sinon on apprend deux
+  // comportements pour un seul element.
+  var marque=document.createElement('button'); marque.type='button'; marque.className='sz-marque';
+  marque.title='Tableau de bord';
+  marque.setAttribute('aria-label','Revenir au tableau de bord');
   marque.innerHTML='<div class="sz-pastille">S</div><span class="sz-nom">Sandriza</span>';
+  marque.onclick=function(){ envoyer({section:'dashboard'}); };
   bar.appendChild(marque);
 
   D.menus.forEach(function(m){

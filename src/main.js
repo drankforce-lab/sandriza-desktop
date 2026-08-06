@@ -799,6 +799,7 @@ const OPS_PONT = new Set([
   'imprimantes:etat', 'imprimantes:choisir', 'imprimantes:tester',
   'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
   'collection:contexte', 'collection:lire', 'collection:enregistrer',
+  'produit:contexte', 'produit:lire', 'produit:enregistrer',
   'verrou:prendre', 'verrou:rendre',
 ]);
 
@@ -1208,6 +1209,7 @@ const { pageDetachee } = require('./menubar');
 const { pageImprimantes } = require('./fenetres/imprimantes');
 const { pageFournisseur } = require('./fenetres/fournisseur');
 const { pageCollection } = require('./fenetres/collection');
+const { pageProduit } = require('./fenetres/produit');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
@@ -1236,6 +1238,9 @@ const actionApp = (nom) => {
       break;
     case 'collection-nouvelle':
       ouvrirNative('collection', 'Nouvelle collection', pageCollection(''), { width: 860, height: 760 });
+      break;
+    case 'produit-nouveau':
+      ouvrirNative('produit', 'Nouveau produit', pageProduit(''), { width: 900, height: 720, minHeight: 520 });
       break;
     case 'about-copy':
       try { require('electron').clipboard.writeText(texteApropos()); } catch {}
