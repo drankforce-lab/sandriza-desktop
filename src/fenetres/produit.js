@@ -216,7 +216,20 @@ function pageProduit(id) {
       + sel('p-etiq', 'Étiquette', [{ v: '', l: 'Aucune' }, { v: 'Populaire', l: 'Populaire' },
             { v: 'Solde', l: 'Solde' }].concat(opt(CTX.etiquettes, 'cle', 'libelle')))
       + sel('p-fourn', 'Fournisseur', rien.concat(opt(CTX.fournisseurs, 'id', 'nom')))
-      + '</div></div></div>');
+      + '</div></div>'
+          + '<div class="carte"><h2>Prix</h2>'
+      + '<div class="prixgrille">'
+      + ch('p-prix', 'Prix de vente ($)', { requis: true, argent: true })
+      + '<div class="ch"><label for="p-solde">Prix soldé ($)'
+      + '<span id="p-pastille" class="pastille"></span></label>'
+      + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="aucun">'
+      + '<div id="p-rabais" class="rabais"></div></div>'
+      + ch('p-cout', 'Coût d’acquisition ($)', { requis: true, argent: true })
+      + '</div>'
+      + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
+      + '<div id="p-alerte" style="display:none;color:#f87171;font-size:.78rem;margin-top:.4rem"></div></div>'
+      + '</div>');
+      + '</div></div>')
 
     // 3 — Tailles et couleurs
     h.push('<div class="etape">'
@@ -237,24 +250,6 @@ function pageProduit(id) {
       + '<div id="p-coul-sug"></div></div>'
       + '<div class="jetons" id="p-couleurs"></div>'
       + '<div class="aide" id="p-coul-vide" style="margin-top:.3rem">Aucune couleur choisie.</div>'
-      + '</div></div>');
-
-    // 4 — Prix et poids
-    // ⚠ TROIS COLONNES FIXES, pas une grille qui se replie. Les rabais rapides
-    // doivent tomber SOUS la colonne du prix soldé, celle qu ils modifient : avec
-    // une grille automatique, ils auraient glissé ailleurs au moindre
-    // redimensionnement, et le lien entre les deux se serait perdu.
-    h.push('<div class="etape"><div class="carte"><h2>Prix</h2>'
-      + '<div class="prixgrille">'
-      + ch('p-prix', 'Prix de vente ($)', { requis: true, argent: true })
-      + '<div class="ch"><label for="p-solde">Prix soldé ($)'
-      + '<span id="p-pastille" class="pastille"></span></label>'
-      + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="aucun">'
-      + '<div id="p-rabais" class="rabais"></div></div>'
-      + ch('p-cout', 'Coût d’acquisition ($)', { requis: true, argent: true })
-      + '</div>'
-      + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
-      + '<div id="p-alerte" style="display:none;color:#f87171;font-size:.78rem;margin-top:.4rem"></div></div>'
       + '</div></div>');
 
     // 5 — Photos : principale, vues supplémentaires, et par couleur
@@ -317,13 +312,15 @@ function pageProduit(id) {
     majMarge();
 
     Assist.poser([
-      { t: 'Identité et classement', obl: ['p-nom', 'p-cat', 'p-poids'] },
-      { t: 'Tailles et couleurs',    obl: [] },
-      { t: 'Prix',                   obl: ['p-prix', 'p-cout'] },
-      { t: 'Photo',                  obl: [] },
-      { t: 'Mise en marché',         obl: [] },
-      { t: 'Stock',                  obl: [] }
-    ], function(i){ if (i === 3) dessinerVues(); if (i === 5) majStock(); });
+      // ⚠ Les obligations du prix rejoignent la PREMIERE etape avec ses champs :
+      // une etape ne peut pas exiger un champ qui vit ailleurs — le fil dirait
+      // « incomplet » sur une etape ou rien ne manque a l ecran.
+      { t: 'Identité, prix et poids', obl: ['p-nom', 'p-cat', 'p-poids', 'p-prix', 'p-cout'] },
+      { t: 'Tailles et couleurs',     obl: [] },
+      { t: 'Photo',                   obl: [] },
+      { t: 'Mise en marché',          obl: [] },
+      { t: 'Stock',                   obl: [] }
+    ], function(i){ if (i === 2) dessinerVues(); if (i === 4) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d’enregistrer.', 'att');
