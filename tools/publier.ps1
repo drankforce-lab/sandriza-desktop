@@ -41,7 +41,11 @@ param(
   # ensemble le fait ecraser deux fois, et deux flux sur trois annoncent alors le
   # mauvais paquet. On boucle, et on range la sortie apres chaque passe.
   [string[]]$Arch = @('x64', 'ia32', 'arm64'),
-  [switch]$SansTelever
+  [switch]$SansTelever,
+  # Reprend l envoi avec les paquets DEJA construits dans `paquets\`. Utile quand
+  # le televersement echoue : rebatir trois architectures pour reessayer un
+  # envoi, c est cinq minutes pour rien.
+  [switch]$SansConstruire
 )
 
 $ErrorActionPreference = 'Stop'
@@ -104,8 +108,14 @@ Bon "$((Get-ChildItem src\*.js).Count) fichiers"
 
 # ── 2. Construction, une architecture a la fois ─────────────────────────────
 $scene = Join-Path $racine 'paquets'
-if (Test-Path $scene) { Remove-Item -Recurse -Force $scene }
-New-Item -ItemType Directory -Force $scene | Out-Null
+if ($SansConstruire) {
+  if (-not (Test-Path $scene)) { Mauvais "aucun paquet a envoyer dans $scene" }
+  Bon "reprise : paquets deja construits ($((Get-ChildItem $scene -Directory).Count) architecture(s))"
+  $Arch = @()
+} else {
+  if (Test-Path $scene) { Remove-Item -Recurse -Force $scene }
+  New-Item -ItemType Directory -Force $scene | Out-Null
+}
 
 foreach ($a in $Arch) {
   Etape "Construction Windows $a"
@@ -171,11 +181,18 @@ function Envoyer-R2 {
   $kSigning = Hmac $kService 'aws4_request'
   $signature = Hex (Hmac $kSigning $aSigner)
 
-  $auth = "AWS4-HMAC-SHA256 Credential=$($env:R2_ACCESS_KEY_ID)/$portee," +
-          "SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=$signature"
+  $auth = "AWS4-HMAC-SHA256 Credential=$($env:R2_ACCESS_KEY_ID)/$portee, " +
+          "SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=$signature"
 
+  # ⚠ -SkipHeaderValidation EST INDISPENSABLE ICI.
+  # .NET traite `Authorization` comme un en-tete STRUCTURE (schema + parametres)
+  # et refuse la forme d AWS : « The format of value 'AWS4-HMAC-SHA256
+  # Credential=…' is invalid ». Ce n est pas R2 qui rejette la requete — elle ne
+  # part meme pas. Ce commutateur dit a PowerShell de transmettre l en-tete tel
+  # quel, ce qui est exactement ce qu il faut pour une signature calculee a la
+  # main. (Vecu le 2026-08-06 : trois constructions reussies, envoi impossible.)
   $r = Invoke-WebRequest -Method PUT -Uri ($endpoint + $uri) -InFile $Chemin `
-        -ContentType $TypeContenu -SkipHttpErrorCheck -TimeoutSec 900 -Headers @{
+        -ContentType $TypeContenu -SkipHttpErrorCheck -SkipHeaderValidation -TimeoutSec 900 -Headers @{
           'Authorization'        = $auth
           'x-amz-date'           = $amzDate
           'x-amz-content-sha256' = $empreinte

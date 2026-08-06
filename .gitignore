@@ -12,3 +12,7 @@ src/cle.js
 certs/*.pfx
 certs/*.cer
 certs/*.key
+
+# Paquets construits localement - JAMAIS dans le depot : un installateur
+# contient la cle du verrou, et ce depot est PUBLIC.
+paquets/
