@@ -1252,7 +1252,12 @@ ipcMain.handle('fenetre:ouvrir', (e, opts = {}) => {
     });
   }
 
-  win.loadURL(APP_URL + '?szwin=1#admin');
+  // ⚠ `url` est un SUFFIXE, jamais une adresse complète : une fenêtre de cette
+  // application ne doit pouvoir pointer que vers le portail. Accepter une URL
+  // entière ferait de cette porte un moyen d'ouvrir n'importe quoi dans une
+  // fenêtre qui porte, elle, l'en-tête d'application.
+  const suffixe = /^\?[\w=&%#.-]*$/.test(String(opts.url || '')) ? String(opts.url) : '?szwin=1#admin';
+  win.loadURL(APP_URL + suffixe);
   return true;
 });
 ipcMain.handle('menu:reglages', () => reglages.lire());
