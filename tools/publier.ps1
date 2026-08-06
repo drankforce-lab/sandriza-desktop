@@ -242,6 +242,14 @@ $tmp = Join-Path $env:TEMP 'latest.json'
 Envoyer-R2 -Chemin $tmp -Cle 'desktop/latest.json' -TypeContenu 'application/json'
 Bon 'manifeste desktop/latest.json'
 
+# ── 5. Menage automatique ───────────────────────────────────────────────────
+# ⚠ APRES la publication, jamais avant : on ne supprime l'ancienne que lorsque
+# la nouvelle est reellement en place. Purger d'abord laisserait, en cas d'echec
+# du televersement, un bucket sans AUCUNE version telechargeable.
+# Demande explicite (2026-08-06) : ne jamais garder les anciennes versions.
+Etape 'Menage des versions precedentes'
+& (Join-Path $PSScriptRoot 'menage.ps1') -Garder 1 -Appliquer
+
 Write-Host "`n=== Version $Version publiee ===" -ForegroundColor Green
 Write-Host "Les postes la recevront a leur prochain lancement." -ForegroundColor Green
 Write-Host "Verification : https://adm.sandriza.com/update/win/x64/latest.yml (en-tete X-Sandriza-App requis)" -ForegroundColor DarkGray
