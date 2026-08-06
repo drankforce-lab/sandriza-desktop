@@ -139,7 +139,16 @@ function pageProduit(id) {
       + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
       + 'background:#0b1220;color:#c9a97e" placeholder="choisissez une catégorie"></div>'
       + ch('p-marque', 'Marque')
-      + ch('p-desc', 'Description', { multi: true, large: true, rows: 3 })
+      + '<div class="ch large"><label for="p-desc">Description'
+      + '<span id="p-desc-etat" style="float:right;color:#8fa1b8;font-size:.72rem"></span></label>'
+      + '<textarea id="p-desc" rows="3"></textarea>'
+      // La redaction par IA passe par le PONT : la fenetre envoie la photo et les
+      // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
+      // d ici, aucune cle ne voyage.
+      + '<div style="display:flex;gap:.4rem;align-items:center;margin-top:.35rem">'
+      + '<button type="button" id="p-ia">✨ Rédiger avec l’IA</button>'
+      + '<span class="aide" id="p-ia-note">demande une photo à l’étape « Photo »</span>'
+      + '</div></div>'
       + '</div></div>'
       + '<div class="carte plein"><h2>Classement</h2><div class="grille">'
       + sel('p-genre', 'Genre', rien.concat(opt(CTX.genres, 'cle', 'libelle')))
@@ -158,7 +167,14 @@ function pageProduit(id) {
           ? CTX.tailles.map(function(t){ return '<span class="jeton" data-t="' + esc(t) + '">' + esc(t) + '</span>'; }).join('')
           : '<span class="aide">Aucune taille au référentiel.</span>')
       + '</div></div>'
-      + '<div class="carte plein"><h2>Couleurs offertes</h2><div class="jetons" id="p-couleurs">'
+      + '<div class="carte plein"><h2>Couleurs offertes</h2>'
+      // ⚠ UNE COULEUR HORS REFERENTIEL DOIT POUVOIR ETRE SAISIE. L editeur du site
+      // le permet ; ne proposer que les jetons du referentiel bloquait net des
+      // qu une nouveaute arrivait, sans autre issue que d aller la creer ailleurs.
+      + '<div class="rech" style="margin-bottom:.5rem">'
+      + '<input id="p-coul-libre" placeholder="Ajouter une couleur absente de la liste…">'
+      + '<button type="button" id="p-coul-add">Ajouter</button></div>'
+      + '<div class="jetons" id="p-couleurs">'
       + (CTX.couleurs.length
           ? CTX.couleurs.map(function(c){
               return '<span class="jeton" data-c="' + esc(c.nom) + '">'
@@ -257,8 +273,14 @@ function pageProduit(id) {
     });
     ['p-nom', 'p-cat', 'p-poids'].forEach(function(i){
       var e = document.getElementById(i);
-      if (e) e.oninput = e.onchange = function(){ this.classList.remove('manque'); Assist.fil(); };
+      if (e) e.oninput = e.onchange = function(){ this.classList.remove('manque'); Assist.fil(); majNom(); };
     });
+    var nm = document.getElementById('p-nom');
+    if (nm) nm.setAttribute('maxlength', '70');
+    majNom();
+    var bIa = document.getElementById('p-ia');
+    if (bIa) bIa.onclick = rediger;
+    majIa();
     // Le SKU suit la categorie — sauf sur une fiche existante, dont le code est
     // deja attribue : le recalculer lui en donnerait un autre a chaque ouverture.
     var cat = document.getElementById('p-cat');
@@ -273,8 +295,12 @@ function pageProduit(id) {
     });
     document.getElementById('p-fichier').onchange = lireFichier;
     document.getElementById('p-vider').onclick = function(){
-      IMAGE = ''; montrerImage(''); document.getElementById('p-fichier').value = '';
+      IMAGE = ''; montrerImage(''); document.getElementById('p-fichier').value = ''; majIa();
     };
+    var ca = document.getElementById('p-coul-add');
+    if (ca) ca.onclick = ajouterCouleur;
+    var cl = document.getElementById('p-coul-libre');
+    if (cl) cl.onkeydown = function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); ajouterCouleur(); } };
   }
 
   // ⚠ La marge se calcule sur le prix REELLEMENT paye : un solde actif remplace
@@ -292,6 +318,49 @@ function pageProduit(id) {
       var e = document.getElementById('p-sku');
       if (e) e.placeholder = r.configure ? '' : 'aucun code configuré pour cette catégorie';
     });
+  }
+
+  function majNom(){
+    var e = document.getElementById('p-nom'), z = document.getElementById('p-desc-etat');
+    if (e && z) z.textContent = (e.value || '').length + '/70';
+  }
+
+  // Le bouton de redaction n a de sens qu avec une photo : le service regarde
+  // le vetement. On le DIT plutot que de laisser cliquer pour rien.
+  function majIa(){
+    var b = document.getElementById('p-ia'), n = document.getElementById('p-ia-note');
+    if (!b) return;
+    var pret = !!IMAGE;
+    b.disabled = !pret;
+    if (n) n.textContent = pret ? 'analyse la photo du produit' : 'demande une photo a l etape « Photo »';
+  }
+
+  function rediger(){
+    var b = document.getElementById('p-ia');
+    b.disabled = true; dire('Redaction en cours…');
+    var cat = (CTX.categories.find(function(c){ return c.cle === val('p-cat'); }) || {}).libelle || '';
+    P.appeler('produit:decrire', {
+      nom: val('p-nom'), categorie: cat, couleurs: couleurs(), imageDataUrl: IMAGE
+    }).then(function(r){
+      b.disabled = false;
+      if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
+      poser('p-desc', r.texte);
+      dire('Description redigee — relisez-la avant d enregistrer.', 'bon');
+    });
+  }
+
+  function ajouterCouleur(){
+    var e = document.getElementById('p-coul-libre');
+    var v = String(e.value || '').trim();
+    if (!v) return;
+    var z = document.getElementById('p-couleurs');
+    var deja = z.querySelector('.jeton[data-c="' + v.replace(/"/g, '') + '"]');
+    if (deja) { deja.classList.add('on'); e.value = ''; dire('Couleur deja dans la liste — cochee.', ''); return; }
+    var j = document.createElement('span');
+    j.className = 'jeton on'; j.setAttribute('data-c', v);
+    j.innerHTML = '<span class="pt" style="background:#888"></span>' + esc(v);
+    z.insertBefore(j, z.firstChild);
+    e.value = ''; dire('');
   }
 
   var PCTS = [10, 15, 20, 25, 30, 40, 50];
@@ -366,7 +435,7 @@ function pageProduit(id) {
       this.value = ''; return;
     }
     var l = new FileReader();
-    l.onload = function(){ IMAGE = String(l.result || ''); montrerImage(IMAGE); dire(''); };
+    l.onload = function(){ IMAGE = String(l.result || ''); montrerImage(IMAGE); dire(''); majIa(); };
     l.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
     l.readAsDataURL(f);
   }

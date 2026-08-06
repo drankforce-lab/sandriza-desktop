@@ -76,7 +76,12 @@ function pageCollection(id) {
 
     h.push('<div class="etape"><div class="carte plein"><h2>La collection</h2><div class="grille">'
       + '<div class="ch large"><label for="c-nom">Nom <span class="req">*</span></label><input id="c-nom"></div>'
-      + '<div class="ch large"><label for="c-desc">Description</label><textarea id="c-desc" rows="4"></textarea></div>'
+      + '<div class="ch large"><label for="c-desc">Description</label>'
+      + '<textarea id="c-desc" rows="4"></textarea>'
+      + '<div style="display:flex;gap:.4rem;align-items:center;margin-top:.35rem">'
+      + '<button type="button" id="c-ia">✨ Rédiger avec l IA</button>'
+      + '<span class="aide" id="c-ia-note">demande une image a l etape « Image »</span>'
+      + '</div></div>'
       + '<div class="ch"><label for="c-saison">Saison</label><select id="c-saison">'
       + CTX.saisons.map(function(s){ return '<option value="' + esc(s) + '">' + (s ? esc(s) : '—') + '</option>'; }).join('')
       + '</select></div>'
@@ -115,8 +120,11 @@ function pageCollection(id) {
     var n = document.getElementById('c-nom');
     if (n) n.oninput = function(){ this.classList.remove('manque'); Assist.fil(); };
     document.getElementById('c-fichier').onchange = lireFichier;
+    var bIa = document.getElementById('c-ia');
+    if (bIa) bIa.onclick = rediger;
+    majIa();
     document.getElementById('c-vider').onclick = function(){
-      IMAGE = ''; montrerImage(''); document.getElementById('c-fichier').value = '';
+      IMAGE = ''; montrerImage(''); document.getElementById('c-fichier').value = ''; majIa();
     };
 
     // ── Liste paginée des produits ─────────────────────────────────────────
@@ -154,6 +162,25 @@ function pageCollection(id) {
     if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d enregistrer.', 'att');
   }
 
+  // Le bouton n a de sens qu avec une image : le service la regarde. On le DIT
+  // au lieu de laisser cliquer pour rien.
+  function majIa(){
+    var b = document.getElementById('c-ia'), n = document.getElementById('c-ia-note');
+    if (!b) return;
+    b.disabled = !IMAGE;
+    if (n) n.textContent = IMAGE ? 'analyse l image de couverture' : 'demande une image a l etape « Image »';
+  }
+  function rediger(){
+    var b = document.getElementById('c-ia');
+    b.disabled = true; dire('Redaction en cours…');
+    P.appeler('collection:decrire', { nom: val('c-nom'), imageDataUrl: IMAGE }).then(function(r){
+      b.disabled = false;
+      if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
+      poser('c-desc', r.texte);
+      dire('Description redigee — relisez-la avant d enregistrer.', 'bon');
+    });
+  }
+
   function montrerImage(src){
     var v = document.getElementById('c-vign'); if (!v) return;
     v.innerHTML = src ? '<img src="' + esc(src) + '" alt="">' : 'aucune image';
@@ -170,7 +197,7 @@ function pageCollection(id) {
       this.value = ''; return;
     }
     var l = new FileReader();
-    l.onload = function(){ IMAGE = String(l.result || ''); montrerImage(IMAGE); dire(''); };
+    l.onload = function(){ IMAGE = String(l.result || ''); montrerImage(IMAGE); dire(''); majIa(); };
     l.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
     l.readAsDataURL(f);
   }
