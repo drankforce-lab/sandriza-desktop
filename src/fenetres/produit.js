@@ -66,6 +66,14 @@ const CSS_PROPRE = `
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x{position:absolute;top:2px;right:2px;width:18px;height:18px;padding:0;
   border-radius:50%;font-size:.7rem;line-height:1;background:rgba(14,21,34,.85)}
+.theque{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;
+  max-height:46vh;overflow-y:auto;padding-right:.2rem}
+.theque .ph{cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.12);
+  background:#0f1826}
+.theque .ph:hover{border-color:#c9a97e}
+.theque .ph img{width:100%;height:88px;object-fit:cover;display:block}
+.theque .ph .lg{font-size:.66rem;color:#8fa1b8;padding:.16rem .25rem;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
 .avis{display:none;font-size:.74rem;line-height:1.4;color:#fbbf24;margin-top:.3rem}
 .avis.on{display:block}
 .voile{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
@@ -284,6 +292,7 @@ function pageProduit(id) {
       + '<div class="vign" id="p-vign">aucune photo</div><div class="cmd">'
       + '<input type="file" id="p-fichier" accept="image/*">'
       + '<button type="button" id="p-vider">Retirer la photo</button>'
+      + '<button type="button" id="p-theque">🖼 Choisir dans la photothèque…</button>'
       + '<div class="aide">Maximum 8 Mo. Déposée dans le stockage à l’enregistrement.</div>'
       + '</div></div></div>'
       + '<div class="carte"><h2 id="p-vues-titre">Vues supplémentaires</h2>'
@@ -462,6 +471,8 @@ function pageProduit(id) {
       var px = ev.target.closest('[data-coulx]');
       if (px) { delete PARCOUL[px.getAttribute('data-coulx')]; dessinerVues(); }
     });
+    var bt = document.getElementById('p-theque');
+    if (bt) bt.onclick = function(){ ouvrirTheque(function(src){ IMAGE = src; montrerImage(src); majIa(); }); };
     var ca = document.getElementById('p-coul-add');
     if (ca) ca.onclick = function(){ ajouterCouleur(); };
     var cl = document.getElementById('p-coul-libre');
@@ -783,6 +794,36 @@ function pageProduit(id) {
       });
     };
     e.click();
+  }
+
+  // ⚠ ELLE DIT CE QU ELLE EST. La photothèque se vide à chaque démarrage : sans
+  // cette phrase, un sélecteur vide ressemble à une panne alors que c est un plan
+  // de travail neuf. On renvoie aussi vers l endroit où l on importe.
+  function ouvrirTheque(surChoix){
+    P.appeler('photos:liste').then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      var v = document.createElement('div');
+      v.className = 'voile';
+      var corps = r.photos.length
+        ? '<div class="theque">' + r.photos.map(function(x){
+            return '<div class="ph" data-src="' + esc(x.src) + '" title="' + esc(x.nom) + '">'
+              + '<img src="' + esc(x.src) + '" alt="">'
+              + '<div class="lg">' + esc(x.code) + (x.rattacheA ? ' · ' + esc(x.rattacheA) : '') + '</div></div>';
+          }).join('') + '</div>'
+        : '<p style="font-size:.86rem;line-height:1.5;color:#8fa1b8">La photothèque est vide. '
+          + 'Elle se remplit par <strong>Catalogue → Photos</strong>, dans la fenêtre principale, '
+          + 'et repart à zéro à chaque démarrage de l’application.</p>';
+      v.innerHTML = '<div class="boite" style="max-width:620px"><h3 style="color:#e8dcc6">Photothèque</h3>'
+        + corps + '<div class="pied2"><button type="button" id="th-non">Fermer</button></div></div>';
+      document.body.appendChild(v);
+      document.getElementById('th-non').onclick = function(){ v.remove(); };
+      v.addEventListener('click', function(ev){
+        if (ev.target === v) { v.remove(); return; }
+        var p2 = ev.target.closest('.ph'); if (!p2) return;
+        surChoix(p2.getAttribute('data-src'));
+        v.remove(); dire('Photo reprise de la photothèque.', 'bon');
+      });
+    });
   }
 
   function montrerImage(src){
