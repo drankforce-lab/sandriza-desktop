@@ -139,7 +139,7 @@ function pageCommande(id) {
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.85rem;margin-top:.7rem;cursor:pointer">'
       + '<input type="checkbox" id="c-sans"> Expédier sans numéro de suivi</label>'
       + '<div class="aide" style="margin-top:.4rem">Remise en main propre, cueillette, transporteur local. '
-      + 'La cliente reçoit alors un courriel <strong>sans lien de suivi</strong> — c’est préférable à un numéro '
+      + 'Le client reçoit alors un courriel <strong>sans lien de suivi</strong> — c’est préférable à un numéro '
       + 'inventé qu’elle chercherait en vain.</div></div></div>');
 
     // 4 — Expédition
@@ -148,7 +148,7 @@ function pageCommande(id) {
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.86rem;margin-top:.8rem;cursor:pointer">'
       + '<input type="checkbox" id="c-pret"> Marquer « prête à l’expédition »</label>'
       + '<div class="aide" style="margin-top:.5rem">« Expédier » écrit le statut, envoie le courriel de suivi '
-      + 'à la cliente et referme cette fenêtre.</div></div></div>');
+      + 'au client et referme cette fenêtre.</div></div></div>');
 
     document.getElementById('corps').innerHTML = h.join('');
     document.getElementById('c-pret').checked = !!CMD.dejaPret;
@@ -234,7 +234,7 @@ function pageCommande(id) {
     var t = (CTX.transporteurs.find(function(x){ return x.cle === val('c-transp'); }) || {}).nom || val('c-transp');
     var complet = toutVerifie();
     z.innerHTML = lg('Commande', esc(CMD.numero))
-      + lg('Cliente', esc(CMD.client))
+      + lg('Client', esc(CMD.client))
       + lg('Vérification', complet ? 'colis complet' : (comptes() + ' sur ' + attendus() + ' — INCOMPLET'), !complet)
       + lg('Transporteur', esc(t))
       + lg('Numéro de suivi', val('c-suivi') ? esc(val('c-suivi'))

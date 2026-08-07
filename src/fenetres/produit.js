@@ -395,7 +395,7 @@ function pageProduit(id) {
       + '<div class="aide" style="margin-top:.45rem">Dos, détail, porté. Elles apparaissent '
       + 'sur la fiche, après la photo principale.</div></div>'
       + '<div class="carte plein"><h2>Photo par couleur</h2>'
-      + '<div class="aide" style="margin-bottom:.5rem">La cliente voit la photo de la couleur '
+      + '<div class="aide" style="margin-bottom:.5rem">Le client voit la photo de la couleur '
       + 'qu’elle choisit. Sans photo pour une couleur, c’est la photo principale qui s’affiche.</div>'
       + '<div class="vues" id="p-parcoul"></div></div></div>');
 
