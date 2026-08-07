@@ -155,11 +155,11 @@ const printDocument = async (payload = {}) => {
       ? { width: Math.round(widthIn * IN), height: Math.round(heightIn * IN) }
       : undefined;
 
-    return await new Promise((resolve) => {
+    const envoyer = (nom) => new Promise((resolve) => {
       win.webContents.print({
         silent: true,
         printBackground: true,
-        deviceName: deviceName || '',          // '' = imprimante par défaut du poste
+        deviceName: nom || '',                 // '' = imprimante par défaut du poste
         copies: Math.max(1, parseInt(copies, 10) || 1),
         landscape: !!landscape,
         margins: { marginType: 'none' },
@@ -168,6 +168,26 @@ const printDocument = async (payload = {}) => {
         resolve({ ok: !!success, error: success ? null : (failureReason || 'échec inconnu') });
       });
     });
+
+    const r = await envoyer(deviceName);
+    if (r.ok || !deviceName) return r;
+
+    /* ⚠ REPLI SUR L'IMPRIMANTE PAR DÉFAUT, DEMANDÉ PAR L'UTILISATEUR (2026-08-07) :
+       « si l'imprimante n'est pas disponible alors mettre une imprimante par défaut
+       simplement ». Une imprimante éteinte, débranchée ou renommée ne doit pas
+       arrêter une vente.
+       ⚠ APRÈS L'ÉCHEC, JAMAIS AVANT. On aurait pu vérifier d'avance que
+       l'imprimante existe — mais énumérer les imprimantes OUVRE LE PILOTE DE
+       CHACUNE, ce qui bloque quand une thermique Bluetooth est en train de recevoir.
+       Le contrôle préalable aurait donc causé la panne qu'il prétend éviter.
+       ⚠ ET LE REPLI SE DIT. Le retour porte `repli: true` et le nom réel : une
+       étiquette 4 × 6 sortie sur une imprimante à feuilles est acceptable dans
+       l'urgence, mais il faut le SAVOIR — sinon on cherche longtemps pourquoi le
+       rouleau n'a pas bougé. */
+    const r2 = await envoyer('');
+    return r2.ok
+      ? { ok: true, error: null, repli: true, demandee: deviceName }
+      : { ok: false, error: r.error + ' (repli sur l’imprimante par défaut : ' + r2.error + ')' };
   } catch (err) {
     return { ok: false, error: String((err && err.message) || err) };
   } finally {

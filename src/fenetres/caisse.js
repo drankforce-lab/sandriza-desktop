@@ -53,7 +53,7 @@ body{background:#0e1522;color:#e8edf5;
    droit de defiler — elle peut grandir, le reste non. */
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
   display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.85fr);gap:.85rem}
-.col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.7rem}
+.col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.55rem}
 
 /* ⚠⚠ L ARGENT ET LE BOUTON NE BOUGENT JAMAIS — LE RESTE DEFILE.
    Premiere version : la colonne de droite etait en overflow:hidden, au nom de la
@@ -68,7 +68,7 @@ body{background:#0e1522;color:#e8edf5;
    pas se permettre de chercher. */
 .col.droite{min-height:0}
 .defile{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;
-  flex-direction:column;gap:.7rem;padding-right:.2rem}
+  flex-direction:column;gap:.55rem;padding-right:.2rem}
 .defile::-webkit-scrollbar{width:8px}
 .defile::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .ancre{flex:0 0 auto}
@@ -81,24 +81,32 @@ body{background:#0e1522;color:#e8edf5;
   .defile{overflow:visible;min-height:auto}
 }
 
+/* ⚠ RESSERRE (2026-08-07) : meme en plein ecran une glissiere apparaissait dans la
+   colonne de droite. Chaque carte y perdait une dizaine de pixels en remplissage et
+   les textes d aide en prenaient deux ou trois lignes — cumule, cela depassait la
+   hauteur d un ecran. Compacte, mais rien n a ete retire. */
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
-  padding:.8rem .9rem;flex:0 0 auto;min-height:0}
+  padding:.6rem .75rem;flex:0 0 auto;min-height:0}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
-.carte h2{margin:0 0 .55rem;font-size:.72rem;text-transform:uppercase;
+.carte h2{margin:0 0 .4rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:#8fa1b8;font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:#6d7f96}
+/* << requis >> se voit : une vente anonyme est refusee par le site, autant le dire
+   AVANT d avoir tout saisi plutot qu au moment d encaisser. */
+.carte h2 .req{font-weight:700;text-transform:none;letter-spacing:0;color:#c9a97e}
+input.manque{border-color:#f87171}
 .carte h2 .lie{color:#4ade80;font-size:.68rem;margin-left:.4rem}
 
 input,select{font:inherit;color:#e8edf5;background:#0f1826;
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.38rem .55rem;
+  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input[type=checkbox]{width:auto}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem}
 /* Les champs du client : empiles, pleine largeur. Voir la note dans le gabarit. */
-.champs{display:flex;flex-direction:column;gap:.35rem}
+.champs{display:flex;flex-direction:column;gap:.28rem}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
-.sous-ch{font-size:.71rem;color:#6d7f96;margin-top:.22rem}
+.sous-ch{font-size:.7rem;color:#6d7f96;margin-top:.16rem}
 
 /* Le champ de scan : plus grand que les autres, c est la porte d entree. */
 #scan{font-size:1.02rem;padding:.5rem .65rem}
@@ -132,8 +140,8 @@ tbody .code{font-family:ui-monospace,monospace;font-size:.72rem;color:#6d7f96}
 tbody button{padding:.05rem .42rem;font-size:.9rem;line-height:1.3}
 
 /* Totaux : la ligne du total ne peut pas se confondre avec une taxe. */
-.tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.16rem 0;font-size:.87rem}
-.tot .l.grand{margin-top:.35rem;padding-top:.45rem;
+.tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.12rem 0;font-size:.86rem}
+.tot .l.grand{margin-top:.28rem;padding-top:.35rem;
   border-top:1px solid rgba(255,255,255,.14);font-size:1.12rem;font-weight:700}
 .tot .l.bon{color:#4ade80}
 
@@ -144,7 +152,7 @@ button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(25
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
-button.large{width:100%;padding:.6rem .8rem;font-size:1.02rem;margin-top:.5rem}
+button.large{width:100%;padding:.5rem .8rem;font-size:1rem;margin-top:.4rem}
 button.mini{padding:.16rem .45rem;font-size:.75rem}
 
 .cli{padding:.38rem .6rem;cursor:pointer;font-size:.84rem;
@@ -154,8 +162,8 @@ button.mini{padding:.16rem .45rem;font-size:.75rem}
 .cli .m{color:#8fa1b8;font-size:.77rem}
 .liste-cli{margin-top:.4rem;border:1px solid rgba(255,255,255,.1);border-radius:9px;overflow:hidden}
 
-.case{display:flex;align-items:flex-start;gap:.45rem;margin-top:.5rem;
-  font-size:.79rem;cursor:pointer}
+.case{display:flex;align-items:flex-start;gap:.45rem;margin-top:.4rem;
+  font-size:.78rem;cursor:pointer}
 .case .exp{display:block;color:#6d7f96;font-size:.72rem;line-height:1.45}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
@@ -166,7 +174,7 @@ button.mini{padding:.16rem .45rem;font-size:.75rem}
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
 .actions{flex:0 0 auto;display:flex;gap:.4rem}
 
-.aide{font-size:.72rem;color:#6d7f96;line-height:1.45;margin-top:.4rem}
+.aide{font-size:.71rem;color:#6d7f96;line-height:1.4;margin-top:.3rem}
 .vide{padding:1.6rem 1rem;text-align:center;color:#8fa1b8;font-size:.86rem}
 
 /* Le compte rendu de vente : un voile, pas une autre fenetre. Une boite de
@@ -208,7 +216,7 @@ function pageCaisse() {
   <div class="col droite">
    <div class="defile">
     <div class="carte">
-      <h2>Client <span class="note">— facultatif</span><span class="lie" id="lie"></span></h2>
+      <h2>Client <span class="req">— requis</span><span class="lie" id="lie"></span></h2>
       <!-- ⚠ TROIS CHAMPS EN COLONNE, ET NON SUR UNE LIGNE. Sur une ligne, dans une
            colonne de 380 px, chacun faisait 120 px : un nom complet et une adresse
            de courriel y etaient coupes, donc illisibles — on ne pouvait pas
@@ -223,8 +231,8 @@ function pageCaisse() {
       <div id="c-res"></div>
       <label class="case"><input type="checkbox" id="c-creer">
         <span>Ouvrir un compte et lui envoyer le lien pour le finaliser
-        <span class="exp">Courriel requis. Il garde l’historique de ses achats et peut demander
-        un retour. Aucune inscription à l’infolettre : il choisira lui-même.</span></span></label>
+        <span class="exp">Courriel requis. Historique et retours pour lui ; aucune
+        inscription à l’infolettre.</span></span></label>
       <h2 style="margin-top:.75rem">Vente</h2>
       <div class="r3">
         <select id="v-prov" title="Province — elle détermine les taxes"></select>
@@ -234,8 +242,7 @@ function pageCaisse() {
       <div class="sous-ch">Province · Livraison · Rabais</div>
       <h2 style="margin-top:.75rem">Facture</h2>
       <select id="v-remise" title="Ce qu’on fait de la facture après la vente"></select>
-      <div class="sous-ch">L’envoi par courriel exige une adresse. Elle reste
-        toujours consultable dans Facturation.</div>
+      <div class="sous-ch">L’envoi exige une adresse. Toujours consultable dans Facturation.</div>
     </div>
    </div>
     <div class="carte tot ancre" id="totaux"></div>
@@ -246,8 +253,7 @@ function pageCaisse() {
         <input id="v-note" placeholder="Note interne (facultatif)">
       </div>
       <button class="prim large" id="btn-vendre" disabled>Enregistrer la vente</button>
-      <div class="aide">Cet écran n’encaisse jamais la carte : saisir un numéro ici
-        sortirait la boutique de son régime de conformité.</div>
+      <div class="aide">Cet écran n’encaisse jamais la carte.</div>
     </div>
   </div>
 </div>
@@ -295,6 +301,7 @@ ${JS_ACTIVITE}
     introuvable:        'Cet article n’existe plus.',
     aucun_article:      'Aucun article dans la vente.',
     total_invalide:     'Total invalide — la vente n’a pas été enregistrée.',
+    client_requis:      'Le nom du client est obligatoire — aucune vente anonyme.',
     courriel_invalide:  'Un courriel valide est requis pour ouvrir un compte.',
     taxes_indisponibles:'Moteur de taxes indisponible — n’encaissez pas.',
     echec:              'L’opération a échoué.'
@@ -372,10 +379,17 @@ ${JS_ACTIVITE}
 
   function majBouton(){
     var b = document.getElementById('btn-vendre');
-    var pret = !!(TOT && TOT.total > 0 && LIGNES.length && CTX && CTX.peutVendre && !enVente);
+    // ⚠ LE NOM DU CLIENT FAIT PARTIE DES CONDITIONS. Le site refuse une vente
+    // anonyme (motif client_requis) : laisser le bouton actif ferait scanner,
+    // encaisser, presser — et decouvrir le refus a la fin, devant le client.
+    var nomOk = !!val('c-nom').trim();
+    var champ = document.getElementById('c-nom');
+    if (champ) champ.className = (!nomOk && LIGNES.length) ? 'manque' : '';
+    var pret = !!(TOT && TOT.total > 0 && LIGNES.length && nomOk && CTX && CTX.peutVendre && !enVente);
     b.disabled = !pret;
     b.textContent = enVente ? 'Enregistrement…'
-      : (pret ? 'Enregistrer la vente — ' + argent(TOT.total) : 'Enregistrer la vente');
+      : (pret ? 'Enregistrer la vente — ' + argent(TOT.total)
+              : (LIGNES.length && !nomOk ? 'Nom du client requis' : 'Enregistrer la vente'));
     document.getElementById('btn-vider').disabled = !LIGNES.length || enVente;
   }
 
@@ -690,7 +704,7 @@ ${JS_ACTIVITE}
     if (ev.key === 'Enter') { ev.preventDefault(); chercher(this.value, true); }
   };
   ['c-nom','c-mail'].forEach(function(id){
-    document.getElementById(id).oninput = function(){ chercherClient(this.value); };
+    document.getElementById(id).oninput = function(){ chercherClient(this.value); majBouton(); };
   });
   document.getElementById('c-tel').oninput = function(){
     masquerTel(this);

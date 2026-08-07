@@ -212,7 +212,13 @@ ${JS_ACTIVITE}
       h.push('</div>');
     }
 
-    h.push('<div class="carte"><h2>Association par service</h2>');
+    // ⚠ ON NOMME LE POSTE. La configuration est PAR POSTE (elle vit dans le profil,
+    // mais rangee par ordinateur) : sans cette mention, une imprimante differente
+    // d un poste a l autre passe pour une configuration perdue.
+    h.push('<div class="carte"><h2>Association par service — ce poste'
+      + (e.poste6 ? ' <span class="note" style="font-weight:400;text-transform:none;'
+          + 'letter-spacing:0;color:#6d7f96">(' + esc(e.poste6) + ')</span>' : '')
+      + '</h2>');
     if (!e.services || !e.services.length) {
       h.push('<div class="lg"><div class="v" style="color:#8fa1b8">Aucun service à associer.</div></div>');
     } else {

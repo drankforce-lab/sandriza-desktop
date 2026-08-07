@@ -70,7 +70,7 @@ module.exports = {
       // d'agent d'impression séparé, et la carte qui l'annonçait a été retirée le
       // 2026-08-07. Éprouver avec `natif: false` reviendrait à éprouver un chemin
       // que personne ne prend — l'erreur exacte qui a coûté quatre versions.
-      natif: true,
+      natif: true, poste6: 'a1b2c3',
       ok: true, disponible: true, poste: 'CAISSE-1',
       version: '1.4.0', versionDisponible: '1.4.0',
       aidePdf: true, aidePdfNom: 'SumatraPDF',
