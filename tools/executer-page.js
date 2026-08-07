@@ -204,9 +204,17 @@ function executerPage(script, reponses) {
   const contexte = vm.createContext(socle);
 
   try {
-    // 2 secondes : un script de fenêtre qui n'a pas fini de se poser au bout de
-    // deux secondes, faux document compris, a un problème en soi.
-    new vm.Script('(function(){' + script + '})()').runInContext(contexte, { timeout: 2000 });
+    // ⚠ 10 SECONDES, ET C'EST UNE CORRECTION, PAS UNE MOLLESSE. La première version
+    // plafonnait à 2 s : suffisant sur cette machine, DÉPASSÉ sur le coureur arm64
+    // de la construction, plus lent — la fenêtre Imprimantes y était déclarée
+    // « morte à l'exécution » alors qu'elle allait très bien, et la construction
+    // arm64 a échoué pour cette seule raison (2026-08-07).
+    // Un garde-fou qui accuse au hasard selon la machine finit par être désactivé,
+    // et l'on perd alors ce qu'il protégeait vraiment. Le plafond n'est pas là pour
+    // mesurer la vitesse : il est là pour qu'une boucle infinie ne fige pas la
+    // construction. 10 s laisse dix fois la marge d'un cas normal (≈ 0,2 s) et
+    // reste très en dessous de la patience d'un coureur.
+    new vm.Script('(function(){' + script + '})()').runInContext(contexte, { timeout: 10000 });
   } catch (e) {
     fautes.push(String((e && e.message) || e));
   }
