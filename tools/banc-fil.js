@@ -36,8 +36,15 @@ global.document = {
   getElementById: (id) => Object.assign({}, inerte, { value: champs[id] !== undefined ? champs[id] : '' }),
   querySelectorAll: () => [],
   querySelector: () => null,
+  // ⚠ AJOUTÉ LE 2026-08-07, ET LE MANQUE ÉTAIT INSTRUCTIF. Le socle porte désormais
+  // le signal « il y a quelqu'un », qui écoute les gestes sur le document ; sans ces
+  // deux fonctions, ce banc s'effondrait au chargement. Et je l'ai presque manqué :
+  // je ne cherchais que sa ligne de verdict dans la sortie — or un banc qui plante
+  // n'imprime pas de verdict. Chercher la RÉUSSITE au lieu de vérifier l'ABSENCE
+  // D'ÉCHEC est exactement l'erreur de méthode de la journée.
+  addEventListener() {}, removeEventListener() {},
 };
-global.window = { addEventListener() {} };
+global.window = { addEventListener() {}, szPont: { appeler: () => Promise.resolve({ ok: true }) } };
 global.dire = () => {};
 global.esc = (s) => String(s == null ? '' : s);
 
