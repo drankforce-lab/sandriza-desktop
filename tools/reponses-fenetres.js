@@ -780,6 +780,97 @@ module.exports = {
       },
     },
   ],
+
+  /* ── LES DEUX LISTES ───────────────────────────────────────────────────────
+     ⚠ LE MÊME FICHIER SERT LES DEUX VUES, et le contrôle doit donc les éprouver
+     TOUTES LES DEUX : la fabrique reçoit 'commandes' ou 'expeditions', et les
+     deux ne dessinent pas les mêmes colonnes (articles d'un côté, numéro de
+     suivi de l'autre), ni les mêmes jetons de statut, ni les mêmes boutons.
+     N'en éprouver qu'une laisserait la moitié du fichier dans l'ombre.
+     ⚠ `id` porte ici le MODE, pas un identifiant de fiche : c'est ce que la
+     fabrique `pageCommandes(mode)` attend. */
+  'commandes.js': [
+    {
+      nom: 'commandes en cours',
+      id: 'commandes',
+      reponses: {
+        'commandes:contexte': {
+          ok: true, peutEditer: true, peutExpedier: true,
+          statuts: [
+            { cle: 'pending', libelle: 'En attente' },
+            { cle: 'confirmed', libelle: 'Confirmée' },
+            { cle: 'preparing', libelle: 'En préparation' },
+            { cle: 'verification', libelle: 'Vérification' },
+            { cle: 'shipped', libelle: 'En livraison' },
+            { cle: 'delivered', libelle: 'Livrée' },
+            { cle: 'cancelled', libelle: 'Annulée' },
+          ],
+          annees: [2026, 2025],
+        },
+        'commandes:liste': {
+          ok: true, mode: 'commandes', total: 2, page: 0, pages: 1, parPage: 20,
+          lignes: [
+            { id: 'ord_0011', numero: 'SZ-100211', date: '2026-08-06T15:20:00.000Z',
+              client: 'Marie Tremblay', ville: 'Québec', total: 149.41, statut: 'preparing',
+              transporteur: '', suivi: '', articles: 3,
+              // ⚠ ÉTIQUETÉE MAIS PAS PARTIE : la ligne doit se teinter. C'est
+              // l'état qui se perd le plus facilement, entre l'impression et le
+              // dépôt au comptoir.
+              aUneEtiquette: true },
+            { id: 'ord_0012', numero: 'SZ-100212', date: '2026-08-07T09:02:00.000Z',
+              client: 'Luc Gagnon', ville: '', total: 67.5, statut: 'pending',
+              transporteur: '', suivi: '', articles: 1, aUneEtiquette: false },
+          ],
+        },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'expéditions',
+      id: 'expeditions',
+      reponses: {
+        'commandes:contexte': {
+          ok: true, peutEditer: true, peutExpedier: true,
+          statuts: [
+            { cle: 'shipped', libelle: 'En livraison' },
+            { cle: 'delivered', libelle: 'Livrée' },
+          ],
+          annees: [2026],
+        },
+        'commandes:liste': {
+          ok: true, mode: 'expeditions', total: 2, page: 0, pages: 1, parPage: 20,
+          lignes: [
+            { id: 'ord_0013', numero: 'SZ-100213', date: '2026-08-01T12:00:00.000Z',
+              client: 'Anne Roy', ville: 'Lévis', total: 220, statut: 'shipped',
+              transporteur: 'postes-canada', suivi: '1234567890123456', articles: 2,
+              aUneEtiquette: true },
+            // ⚠ EXPÉDIÉE SANS NUMÉRO : c'est un cas légitime (remise en main
+            // propre, cueillette) et la colonne doit le DIRE, pas rester vide.
+            { id: 'ord_0014', numero: 'SZ-100214', date: '2026-07-28T12:00:00.000Z',
+              client: 'Paul Côté', ville: 'Montréal', total: 89.95, statut: 'delivered',
+              transporteur: '', suivi: '', articles: 1, aUneEtiquette: false },
+          ],
+        },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'liste vide, lecture seule',
+      id: 'commandes',
+      reponses: {
+        'commandes:contexte': {
+          ok: true, peutEditer: false, peutExpedier: false,
+          statuts: [{ cle: 'pending', libelle: 'En attente' }], annees: [],
+        },
+        'commandes:liste': { ok: true, mode: 'commandes', total: 0, page: 0, pages: 1,
+          parPage: 20, lignes: [] },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+  ],
 };
 
 // ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque

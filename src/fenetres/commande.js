@@ -109,12 +109,12 @@ function pageCommande(id) {
 
     // 1 — Prélèvement
     h.push('<div class="etape"><div class="carte plein" id="c-zone">' + enTete
-      + '<h2>Articles à prélever — ' + CMD.nbColis + (CMD.nbColis > 1 ? ' unités' : ' unité') + '</h2>'
+      + '<h2>Articles à préparer — ' + CMD.nbColis + (CMD.nbColis > 1 ? ' unités' : ' unité') + '</h2>'
       + '<div class="rech"><input placeholder="Filtrer par nom, taille ou couleur…"><span class="cpt" id="c-cpt"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div>'
       + '<div style="margin-top:.6rem;display:flex;gap:.45rem;flex-wrap:wrap">'
-      + '<button type="button" id="c-bon">🖨 Bon de prélèvement</button>'
-      + '<button type="button" id="c-colis">🖨 Bon de colisage</button>'
+      + '<button type="button" id="c-bon">🖨 Bon de commande</button>'
+      + '<button type="button" id="c-colis">🧾 Bordereau</button>'
       + '</div></div></div>');
 
     // 2 — Vérification
@@ -127,12 +127,24 @@ function pageCommande(id) {
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
 
     // 3 — Étiquette
-    h.push('<div class="etape"><div class="carte"><h2>Étiquette d’expédition</h2><div class="duo">'
-      + '<div class="ch"><label for="c-transp">Transporteur</label><select id="c-transp">'
-      + CTX.transporteurs.map(function(t){ return '<option value="' + esc(t.cle) + '">' + esc(t.nom) + '</option>'; }).join('')
-      + '</select></div>'
-      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq">Générer l’étiquette</button></div>'
-      + '</div></div>'
+    /* ⚠⚠ L ETIQUETTE NE SE FABRIQUE PLUS ICI (revu le 2026-08-07).
+       Cette etape offrait un simple choix de transporteur et un bouton
+       << Generer l etiquette >>, qui appelait Admin.printLabel -- laquelle LIT LE
+       FORMULAIRE DU SITE pour connaitre le service et le poids. Depuis cette
+       fenetre, ou ces champs n existent pas, elle commandait donc une etiquette
+       FACTUREE au service par defaut et a 0,5 kg. Un colis de quatre kilos
+       etiquete pour cinq cents grammes, c est un refus au comptoir ou une facture
+       de rajustement, decouverte des semaines plus tard.
+       On renvoie a la fenetre EXPEDITION, qui fait ce travail correctement :
+       service et poids affiches et modifiables, confirmation avant de depenser,
+       garde contre la seconde etiquette. Une seule facon d etiqueter dans toute
+       l application, et c est la bonne. */
+    h.push('<div class="etape"><div class="carte"><h2>Étiquette d’expédition</h2>'
+      + '<div class="aide">L’étiquette se commande dans la fenêtre <strong>Expédition</strong>, '
+      + 'qui demande le service et le poids du colis — ce sont eux qui fixent le prix. '
+      + 'Le numéro de suivi revient ensuite tout seul dans le champ ci-dessous.</div>'
+      + '<button type="button" id="c-etiq" style="margin-top:.6rem">🚚 Ouvrir l’expédition</button>'
+      + '</div>'
       + '<div class="carte plein"><h2>Numéro de suivi</h2><div class="duo">'
       + '<div class="ch"><label for="c-suivi">Numéro</label><input id="c-suivi" placeholder="rempli par l’étiquette"></div>'
       + '</div>'
@@ -159,7 +171,7 @@ function pageCommande(id) {
     brancher();
 
     Assist.poser([
-      { t: 'Prélèvement',  obl: [] },
+      { t: 'Préparation',  obl: [] },
       { t: 'Vérification', obl: [] },
       { t: 'Étiquette',    obl: [] },
       { t: 'Expédition',   obl: [] }
@@ -257,17 +269,22 @@ function pageCommande(id) {
     });
   }
 
+  /* ⚠ ON N ETIQUETTE PLUS D ICI, ON OUVRE LA FENETRE QUI SAIT LE FAIRE.
+     L ancienne version appelait commande:etiquette -> Admin.printLabel, qui LIT LE
+     FORMULAIRE DU SITE pour le service et le poids. Absents ici, elle commandait
+     une etiquette FACTUREE au service par defaut et a 0,5 kg.
+     ⚠ RIEN N EST PERDU : le choix du transporteur, le service, le poids et la
+     confirmation avant de depenser existent tous dans la fenetre Expedition, en
+     mieux. Le numero de suivi revient par commande:lire au retour.
+     ⚠ L operation commande:etiquette RESTE en place (coquilles anterieures). */
   function etiquette(){
     var b = document.getElementById('c-etiq');
-    b.disabled = true; dire('Demande au transporteur…');
-    P.appeler('commande:etiquette', ID, val('c-transp')).then(function(r){
+    b.disabled = true; dire('Ouverture de l’expédition…');
+    P.appeler('commandes:expedier', ID).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      if (r.suivi) { poser('c-suivi', r.suivi); dire('Étiquette générée — suivi ' + r.suivi, 'bon'); }
-      // ⚠ Pas de numero = pas d etiquette, meme si l appel n a pas leve d erreur.
-      // Annoncer un succes ici ferait expedier une commande sans etiquette.
-      else dire('Aucun numéro reçu : l’étiquette n’a PAS été générée. Voyez l’avis dans la fenêtre principale.', 'err');
-    });
+      dire('Expédition ouverte dans sa fenêtre — le suivi reviendra ici.', 'bon');
+    }).catch(function(){ b.disabled = false; dire('Ouverture impossible.', 'err'); });
   }
 
   function verrou(){

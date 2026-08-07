@@ -986,6 +986,13 @@ const OPS_PONT = new Set([
   'expedition:contexte', 'expedition:lire', 'expedition:etiquette',
   'expedition:pdf', 'expedition:imprimer', 'expedition:bordereau',
   'expedition:confirmer',
+  // Les deux listes. ⚠ `commandes:liste` sert les DEUX vues (en cours / parties) :
+  // ce sont les memes lignes filtrees autrement, et deux operations jumelles
+  // finiraient par diverger. Le tri, le filtre et la pagination se font dans le
+  // site : envoyer trois mille commandes pour en afficher vingt ferait passer
+  // plusieurs megaoctets par ce pont a chaque frappe dans la recherche.
+  'commandes:contexte', 'commandes:liste',
+  'commandes:preparer', 'commandes:expedier',
 ]);
 
 // ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que
@@ -1537,6 +1544,7 @@ const { pageAffichage } = require('./fenetres/affichage');
 const { pageCaisse } = require('./fenetres/caisse');
 const { pageInventaire } = require('./fenetres/inventaire');
 const { pageExpedition } = require('./fenetres/expedition');
+const { pageCommandes } = require('./fenetres/commandes');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
@@ -1596,6 +1604,17 @@ const actionApp = (nom) => {
     case 'inventaire':
       ouvrirNative('inventaire', 'Ajustement de stock', pageInventaire(''),
         { width: 1040, height: 760, minWidth: 900, minHeight: 540 });
+      break;
+    /* Les deux listes. ⚠ DEUX CLES DISTINCTES : ce sont deux fenetres, qu on garde
+       ouvertes cote a cote — les commandes a preparer d un cote, les colis partis
+       de l autre. Une seule cle les ferait se remplacer l une l autre. */
+    case 'commandes':
+      ouvrirNative('commandes', 'Commandes', pageCommandes('commandes'),
+        { width: 1060, height: 720, minWidth: 860, minHeight: 500 });
+      break;
+    case 'expeditions':
+      ouvrirNative('expeditions', 'Expéditions', pageCommandes('expeditions'),
+        { width: 1060, height: 720, minWidth: 860, minHeight: 500 });
       break;
     case 'about-copy':
       try { require('electron').clipboard.writeText(texteApropos()); } catch {}
