@@ -980,6 +980,71 @@ module.exports = {
     ];
   })(),
 
+  /* ── REMBOURSEMENT ─────────────────────────────────────────────────────────
+     Formes relevées dans assets/js/pont.js (remboursementLire / Totaux).
+     ⚠ TROIS CAS : remboursable avec Square (frais + NIP configuré — le chemin
+     de l'argent complet), SANS Square (le moyen original doit être DÉSARMÉ,
+     crédit seul), et déjà remboursée (aucun bouton, le constat seulement). */
+  'remboursement.js': [
+    {
+      nom: 'remboursable, Square et NIP',
+      id: 'ord_0002',
+      reponses: {
+        'remboursement:lire': { ok: true, numero: 'CMD-0002-22010', statut: 'shipped',
+          complet: false, dejaRembourse: 44.98,
+          articles: [
+            { productId: 'p_0001', nom: 'Robe cintrée', taille: 'M', couleur: 'Noir', prix: 129.95, maxQty: 1 },
+            { productId: 'p_0002', nom: 'Chemisier de soie', taille: 'P', couleur: 'Ivoire', prix: 89.95, maxQty: 2 },
+          ],
+          livraison: { cout: 12.5, prioritaire: false, nonExpediee: false },
+          squareDisponible: true,
+          frais: { commande: 6.42, baseHT: 232.4 },
+          nipConfigure: true,
+          taxes: [{ nom: 'TPS', taux: 0.05 }, { nom: 'TVQ', taux: 0.09975 }] },
+        'remboursement:totaux': { ok: true, sousTotal: 129.95, livraison: 0,
+          taxes: [{ nom: 'TPS', taux: 0.05, montant: 6.5 }, { nom: 'TVQ', taux: 0.09975, montant: 12.96 }],
+          total: 149.41, frais: 3.59, net: 145.82, retenu: true, nbArticles: 1 },
+        'remboursement:nip': { ok: true, valide: true, libre: false },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+      },
+    },
+    {
+      nom: 'sans Square — crédit seulement',
+      id: 'ord_0005',
+      reponses: {
+        'remboursement:lire': { ok: true, numero: 'CMD-0005-31220', statut: 'confirmed',
+          complet: false, dejaRembourse: 0,
+          articles: [
+            { productId: 'p_0003', nom: 'Foulard de laine', taille: '', couleur: '', prix: 34.95, maxQty: 1 },
+          ],
+          livraison: { cout: 0, prioritaire: false, nonExpediee: true },
+          squareDisponible: false,
+          frais: { commande: 1.28, baseHT: 34.95 },
+          nipConfigure: false,
+          taxes: [{ nom: 'TPS', taux: 0.05 }, { nom: 'TVQ', taux: 0.09975 }] },
+        'remboursement:totaux': { ok: true, sousTotal: 34.95, livraison: 0,
+          taxes: [{ nom: 'TPS', taux: 0.05, montant: 1.75 }, { nom: 'TVQ', taux: 0.09975, montant: 3.49 }],
+          total: 40.19, frais: 0, net: 40.19, retenu: false, nbArticles: 1 },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+      },
+    },
+    {
+      nom: 'déjà entièrement remboursée',
+      id: 'ord_0006',
+      reponses: {
+        'remboursement:lire': { ok: true, numero: 'CMD-0006-31555', statut: 'delivered',
+          complet: true, dejaRembourse: 149.41, articles: [],
+          livraison: { cout: 12.5, prioritaire: false, nonExpediee: false },
+          squareDisponible: true,
+          frais: { commande: 4.48, baseHT: 142.45 }, nipConfigure: false, taxes: [] },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+      },
+    },
+  ],
+
 };
 
 // ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque
