@@ -209,38 +209,57 @@ function pageImprimantes() {
       // ⚠ LES IMPRIMANTES VIRTUELLES (PDF, fax, OneNote) SONT RANGEES A PART :
       // elles n impriment sur rien, et les proposer au meme rang qu une vraie
       // machine fait choisir << Microsoft Print to PDF >> pour des etiquettes.
-      var opts = '';
-      if (!IMPRS) {
-        opts = '<option value="">Liste non chargée…</option>';
-      } else {
-        var reelles = IMPRS.filter(function(p){ return !p.virtuelle; });
-        var virt    = IMPRS.filter(function(p){ return p.virtuelle; });
-        var ligne = function(p, choisie){
-          return '<option value="' + esc(p.nom) + '"' + (p.nom === choisie ? ' selected' : '') + '>'
-            + esc(p.nom) + (p.defaut ? ' (par défaut)' : '') + '</option>';
-        };
-        opts = '<option value="">— aucune —</option>';
-        // ⚠ Une imprimante ASSOCIEE mais ABSENTE de la liste doit rester visible,
-        // sinon on croirait qu elle a ete effacee alors qu elle est seulement
-        // eteinte ou debranchee — et l enregistrer a nouveau la remplacerait.
-        var connue = IMPRS.some(function(p){ return p.nom === s.imprimante; });
-        if (s.imprimante && !connue) {
-          opts += '<option value="' + esc(s.imprimante) + '" selected>' + esc(s.imprimante) + ' (hors ligne)</option>';
+      // ⚠⚠⚠ CETTE BOUCLE EST LA PANNE QUI A COUTE QUATRE VERSIONS (2026-08-07).
+      // En 1.6.0 le bloc etait enveloppe dans une boucle sur e.services, qui
+      // nommait chaque service « s ». En 1.19.3, en le reecrivant pour les listes
+      // deroulantes, j ai perdu l enveloppe : « s » est devenue une VARIABLE
+      // LIBRE — et le bloc en dessous la lit vingt fois. Lire une variable non
+      // definie leve une ReferenceError — donc le dessin s arretait avant sa
+      // derniere ligne, celle qui remplit le corps de la page. La fenetre restait
+      // sur << Lecture de l etat… >> POUR TOUJOURS, sans message.
+      //
+      // Pourquoi rien ne l a vue, et c est la vraie lecon :
+      //   — le garde-fou compile le script : une variable libre est licite a la
+      //     compilation, elle n echoue qu a l execution ;
+      //   — mon essai local n avait pas de pont, donc la reponse etait un REFUS et
+      //     le code du dessin n etait jamais atteint. J ai eprouve le chemin d a
+      //     cote et j en ai conclu que la page allait bien ;
+      //   — et l erreur etait AVALEE : voir la note du rattrapage, plus bas.
+      // J ai accuse le pont pendant quatre versions. Le pont n avait rien.
+      e.services.forEach(function(s){
+        var opts = '';
+        if (!IMPRS) {
+          opts = '<option value="">Liste non chargée…</option>';
+        } else {
+          var reelles = IMPRS.filter(function(p){ return !p.virtuelle; });
+          var virt    = IMPRS.filter(function(p){ return p.virtuelle; });
+          var ligne = function(p, choisie){
+            return '<option value="' + esc(p.nom) + '"' + (p.nom === choisie ? ' selected' : '') + '>'
+              + esc(p.nom) + (p.defaut ? ' (par défaut)' : '') + '</option>';
+          };
+          opts = '<option value="">— aucune —</option>';
+          // ⚠ Une imprimante ASSOCIEE mais ABSENTE de la liste doit rester visible,
+          // sinon on croirait qu elle a ete effacee alors qu elle est seulement
+          // eteinte ou debranchee — et l enregistrer a nouveau la remplacerait.
+          var connue = IMPRS.some(function(p){ return p.nom === s.imprimante; });
+          if (s.imprimante && !connue) {
+            opts += '<option value="' + esc(s.imprimante) + '" selected>' + esc(s.imprimante) + ' (hors ligne)</option>';
+          }
+          opts += reelles.map(function(p){ return ligne(p, s.imprimante); }).join('');
+          if (virt.length) {
+            opts += '<optgroup label="Sorties virtuelles (n’impriment sur rien)">'
+              + virt.map(function(p){ return ligne(p, s.imprimante); }).join('') + '</optgroup>';
+          }
         }
-        opts += reelles.map(function(p){ return ligne(p, s.imprimante); }).join('');
-        if (virt.length) {
-          opts += '<optgroup label="Sorties virtuelles (n’impriment sur rien)">'
-            + virt.map(function(p){ return ligne(p, s.imprimante); }).join('') + '</optgroup>';
-        }
-      }
-      h.push('<div class="svc"><div class="d">'
-        + '<div class="n">' + esc(s.titre) + '</div>'
-        + '<div class="m">' + esc(fmtFormat(s.largeurPo, s.hauteurPo))
-        + (s.imprimante ? '' : ' · <span class="att">aucune imprimante choisie</span>') + '</div>'
-        + '<select data-svc="' + esc(s.cle) + '"' + (dispo && IMPRS ? '' : ' disabled') + '>' + opts + '</select>'
-        + '</div><div class="a">'
-        + '<button data-tester="' + esc(s.cle) + '"' + (dispo && s.imprimante ? '' : ' disabled') + '>Test d’impression</button>'
-        + '</div></div>');
+        h.push('<div class="svc"><div class="d">'
+          + '<div class="n">' + esc(s.titre) + '</div>'
+          + '<div class="m">' + esc(fmtFormat(s.largeurPo, s.hauteurPo))
+          + (s.imprimante ? '' : ' · <span class="att">aucune imprimante choisie</span>') + '</div>'
+          + '<select data-svc="' + esc(s.cle) + '"' + (dispo && IMPRS ? '' : ' disabled') + '>' + opts + '</select>'
+          + '</div><div class="a">'
+          + '<button data-tester="' + esc(s.cle) + '"' + (dispo && s.imprimante ? '' : ' disabled') + '>Test d’impression</button>'
+          + '</div></div>');
+      });
     }
     h.push('</div>');
     corps.innerHTML = h.join('');
@@ -293,10 +312,16 @@ function pageImprimantes() {
       DERNIER = r;
       dessiner(r);
       dire(IMPRS ? '' : 'Liste des imprimantes : lecture en cours…');
-    }, function(e){
+    // ⚠⚠ UN RATTRAPAGE CHAINE, ET NON UN SECOND ARGUMENT — CETTE NUANCE A CACHE LA
+    // PANNE CI-DESSUS PENDANT QUATRE VERSIONS. Le second argument de then ne
+    // rattrape que le REJET de la promesse d avant ; ce que le PREMIER argument
+    // leve lui passe a cote et devient un rejet non traite — invisible dans une
+    // fenetre native, qui n a pas de console que l on regarde. Chaine, le
+    // rattrapage couvre les deux : le refus du pont ET un defaut de notre dessin.
+    }).catch(function(e){
       enCours = false;
-      noter('PROMESSE REJETEE : ' + (e && e.message));
-      montrerJournal('L’appel au pont a échoué');
+      noter('ECHEC : ' + ((e && e.message) || e));
+      montrerJournal('L’appel au pont, ou le dessin, a échoué');
     });
   }
 

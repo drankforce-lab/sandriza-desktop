@@ -24,6 +24,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const { executerPage } = require('./executer-page.js');
+const REPONSES = require('./reponses-fenetres.js');
 
 const DOSSIER = path.join(__dirname, '..', 'src', 'fenetres');
 // ⚠ `id="pas"` (le fil d'étapes) n'est PAS exigé : toutes les fenêtres ne sont
@@ -40,6 +42,12 @@ const dire = (etat, nom, texte) => {
   console.log('  ' + (etat ? 'OK  ' : 'NON ') + nom.padEnd(18) + (texte || ''));
   if (!etat) fautes++;
 };
+
+// ⚠ TOUT LE CONTRÔLE EST DEVENU ASYNCHRONE le 2026-08-07, et pour une raison
+// précise : la faute que l'on cherche désormais se produit dans la suite d'une
+// promesse. La constater exige donc de laisser les promesses se dérouler.
+const principal = async () => {
+const nonEprouvees = [];
 
 console.log('\n=== Fenêtres natives ===');
 for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
@@ -79,6 +87,23 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
     if (i2 < 0 || j2 < i2) { dire(false, f, 'page sans script'); continue; }
     try { new Function(page.slice(i2 + 8, j2)); }
     catch (e) { dire(false, f, 'SCRIPT de la page invalide — ' + e.message); continue; }
+
+    // ⚠⚠ LE SECOND TROU, ET IL A COÛTÉ QUATRE VERSIONS PUBLIÉES (2026-08-07).
+    // Compiler prouve que le texte est du JavaScript. Cela ne prouve pas qu'il
+    // fonctionne. La fenêtre Imprimantes est restée sur « Lecture de l'état… »
+    // pendant quatre versions à cause d'une VARIABLE LIBRE — un `forEach` retiré
+    // par mégarde en réécrivant un bloc — et une variable libre compile sans
+    // broncher : elle n'échoue qu'à la lecture. Le dessin s'arrêtait donc juste
+    // avant la ligne qui remplit l'écran, la faute partait dans un rejet non
+    // traité, et la fenêtre se taisait. Pendant ce temps j'accusais le pont.
+    // On EXÉCUTE donc le script, sur un faux document et un faux pont qui RÉPOND.
+    const rep = REPONSES[f];
+    if (!rep) { nonEprouvees.push(f); dire(true, f, 'compile — exécution NON éprouvée (aucun jeu de réponses)'); continue; }
+    let ex;
+    try { ex = await executerPage(page.slice(i2 + 8, j2), rep); }
+    catch (e) { dire(false, f, 'exécution impossible — ' + e.message); continue; }
+    if (ex.inconnus.length) { dire(false, f, 'variable(s) jamais définie(s) : ' + ex.inconnus.join(', ')); continue; }
+    if (ex.fautes.length) { dire(false, f, 'meurt à l’exécution — ' + ex.fautes.join(' | ')); continue; }
   }
 
   dire(true, f, '');
@@ -139,5 +164,20 @@ if (!chemin) {
   }
 }
 
+// ⚠ CE QUI N'A PAS ÉTÉ ÉPROUVÉ EST DIT À VOIX HAUTE, et ce n'est pas une faute :
+// c'est une couverture manquante. La taire donnerait « Tout est sain » pour des
+// fenêtres qu'on n'a jamais fait tourner — le mensonge exact qui a laissé passer
+// quatre versions. Pour en couvrir une : lui ajouter un jeu de réponses dans
+// tools/reponses-fenetres.js.
+if (nonEprouvees.length) {
+  console.log('\n  ⚠ exécution non éprouvée (jeu de réponses à écrire) : ' + nonEprouvees.join(', '));
+}
+
 console.log(fautes ? '\n>>> ' + fautes + ' point(s) à corriger\n' : '\n>>> Tout est sain\n');
-process.exit(fautes ? 1 : 0);
+return fautes ? 1 : 0;
+};
+
+principal().then((code) => process.exit(code), (e) => {
+  console.log('\n>>> le contrôle lui-même a échoué : ' + ((e && e.stack) || e) + '\n');
+  process.exit(1);
+});
