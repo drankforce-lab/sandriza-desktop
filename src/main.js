@@ -510,6 +510,31 @@ let _majCritique = false;
 // condition à la main : en oublier un morceau dans l'un d'eux (le plafond de
 // sécurité, par exemple) aurait donné trois gardes qui cèdent et un qui bloque.
 const fermetureBloquee = () => _majCritique && !_quitAutorise && !majFigee();
+
+// ⚠⚠ INTERCEPTER LE CLIC NE SUFFIT PAS : IL FAUT DÉSACTIVER LE BOUTON.
+// C'est ce qui manquait à la 1.19.2, et l'utilisateur l'a vu tout de suite : le X
+// de la barre de titre restait NORMAL, donc il paraissait fonctionner. On cliquait,
+// il ne se passait rien de visible, et l'on concluait que la protection était
+// inopérante — puis on insistait, ou l'on tuait le processus.
+// `setClosable(false)` fait GRISER le X par Windows lui-même : le bouton dit alors
+// tout seul qu'il n'est pas disponible, avant même qu'on le presse. L'interception
+// reste, comme filet — Alt+F4 et `app.quit()` ne passent pas par le bouton.
+// ⚠ ON NE TOUCHE PAS À « RÉDUIRE ». Réduire pendant une mise à jour est inoffensif,
+// et souvent ce qu'on veut faire pour continuer à travailler ailleurs.
+let _closableActuel = true;
+const majBoutonsFermeture = () => {
+  const bloque = fermetureBloquee();
+  const veut = !bloque;
+  if (veut === _closableActuel) return;      // rien à changer
+  _closableActuel = veut;
+  for (const w of BrowserWindow.getAllWindows()) {
+    // ⚠ TOUTES LES FENÊTRES, pas seulement la principale. Fermer la dernière
+    // fenêtre déclenche `window-all-closed` → `app.quit()`, donc fermer une fenêtre
+    // native pendant une mise à jour pouvait faire quitter l'application par la
+    // porte de derrière.
+    try { if (!w.isDestroyed()) w.setClosable(veut); } catch {}
+  }
+};
 // Seule la mise à jour elle-même a le droit de quitter. Sans ce laissez-passer, le
 // garde ci-dessous empêcherait le redémarrage qui INSTALLE la mise à jour — donc
 // la protection tuerait précisément ce qu'elle protège.
@@ -1080,6 +1105,7 @@ const installerEtRelancer = (autoUpdater) => {
   // quitter. Sans cette ligne, la mise à jour se téléchargerait indéfiniment sans
   // jamais pouvoir s'installer.
   _quitAutorise = true;
+  majBoutonsFermeture();
   try { autoUpdater.quitAndInstall(true, true); }
   catch { autoUpdater.quitAndInstall(); }   // repli : mieux vaut l'assistant que rien
 };
@@ -1093,7 +1119,7 @@ const getUpdater = () => {
 
     autoUpdater.on('update-available', () => { _majDispo = true; });
     // Rien à télécharger : aucune raison de retenir quoi que ce soit.
-    autoUpdater.on('update-not-available', () => { _majDispo = false; _majCritique = false; });
+    autoUpdater.on('update-not-available', () => { _majDispo = false; _majCritique = false; majBoutonsFermeture(); });
 
     // Une barre qui avance est la différence entre « ça travaille » et « c'est
     // planté ». Un téléchargement de 80 Mo sur une ligne lente prend des minutes.
@@ -1104,6 +1130,7 @@ const getUpdater = () => {
       // écran d'attente) doit être protégé tout autant — c'est même le cas où l'on
       // risque le plus de fermer sans savoir ce qui se passe.
       _majCritique = true;
+      majBoutonsFermeture();
       _majDernierOctet = Date.now();
       if (!_porteActive) return;
       const pct = Math.round(p && p.percent ? p.percent : 0);
@@ -1162,6 +1189,7 @@ const getUpdater = () => {
       // pour toujours l'installation qu'il est censé protéger — la protection
       // deviendrait le blocage.
       _majCritique = false;
+      majBoutonsFermeture();
 
       const { response } = await dialog.showMessageBox(mainWindow, {
         type: 'info',
@@ -1182,6 +1210,7 @@ const getUpdater = () => {
       // de mise à jour deviendrait un poste condamné, exactement ce que le reste
       // de cette fonction s'emploie à éviter.
       _majCritique = false;
+      majBoutonsFermeture();
       const detail = String((err && err.message) || err);
 
       // ⚠ UNE PANNE DE MISE À JOUR NE DOIT PAS CONDAMNER LE POSTE.
