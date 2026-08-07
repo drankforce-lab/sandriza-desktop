@@ -876,6 +876,110 @@ module.exports = {
       },
     },
   ],
+  /* ── RETOUR ────────────────────────────────────────────────────────────────
+     Formes relevées dans assets/js/pont.js (retourLire), pas inventées.
+     ⚠ QUATRE CAS, chacun pour un chemin distinct : la photo absente (dossier non
+     actionnable), l'approbation avec étiquette réelle déjà émise (avertissement
+     « facturé une seconde fois » + boutons d'aperçu), le dossier REÇU (les trois
+     étapes ouvertes, remboursement suggéré avec un 2 pour 1 réduit de moitié et
+     un envoi HORS fenêtre — crédit seulement), et le litige en lecture seule. */
+  'retour.js': (function(){
+    const etiquette = {
+      transporteurs: [
+        { cle: 'postes-canada', nom: 'Postes Canada' },
+        { cle: 'fedex', nom: 'FedEx' },
+      ],
+      cpPret: true,
+      services: [
+        { cle: 'DOM.EP', libelle: '⚡ Colis accéléré (DOM.EP)' },
+        { cle: 'DOM.RP', libelle: '📦 Colis régulier (DOM.RP)' },
+      ],
+      poidsCalcule: 0.62,
+    };
+    const modeles = [
+      'Remboursement émis avec succès. Merci de votre compréhension.',
+      'Crédit boutique émis conformément à notre politique de retour.',
+    ];
+    const articles = [
+      { productId: 'p_0001', nom: 'Robe cintrée', quantite: 1, prix: 129.95, taille: 'M', couleur: 'Noir' },
+      { productId: 'p_0002', nom: 'Chemisier de soie', quantite: 1, prix: 89.95, taille: 'P', couleur: 'Ivoire' },
+    ];
+    const demandeBase = {
+      id: 'ret_0001', commande: 'CMD-0002-22010', commandeId: 'ord_0002',
+      client: 'Marie Tremblay', courriel: 'marie@example.com',
+      creeLe: '2026-08-01T14:00:00.000Z', motif: 'Taille trop petite',
+      description: 'La robe taille petit, je préfère un remboursement.',
+      modeRemboursement: 'any', preference: 'credit', fraisPayesPar: 'customer',
+      fauteMarchande: false, notes: '', noteRefus: '', photo: IMAGE,
+      suivi: '', suiviTransporteur: '', aUneEtiquette: false, etiquetteReelle: false,
+      etiquetteTransporteur: '', etiquetteLe: '', litige: null, echange: null,
+    };
+    return [
+      {
+        nom: 'photo manquante',
+        id: 'ret_0001',
+        reponses: {
+          'retour:lire': { ok: true, archive: false, peutEcrire: true,
+            demande: Object.assign({}, demandeBase, { statut: 'awaiting_photo', photo: '' }),
+            articles, remboursement: null, etiquette, modeles },
+          'verrou:prendre': VERROU,
+          'session:activite': { ok: true },
+        },
+      },
+      {
+        nom: 'approuvée, étiquette réelle émise',
+        id: 'ret_0001',
+        reponses: {
+          'retour:lire': { ok: true, archive: false, peutEcrire: true,
+            demande: Object.assign({}, demandeBase, { statut: 'approved',
+              aUneEtiquette: true, etiquetteReelle: true, etiquetteTransporteur: 'postes-canada',
+              etiquetteLe: '2026-08-02T10:00:00.000Z', suivi: '1234567890123456',
+              suiviTransporteur: 'Postes Canada' }),
+            articles,
+            remboursement: { lignes: [
+                { nom: 'Robe cintrée', base: 129.95, montant: 129.95, moitie: false },
+                { nom: 'Chemisier de soie', base: 89.95, montant: 44.98, moitie: true } ],
+              livraisonBase: 12.5, prioritaireExclu: 0,
+              joursOuvrables: 6, joursFenetre: 15, dansFenetre: true, squareDisponible: true },
+            etiquette, modeles },
+          'verrou:prendre': VERROU,
+          'session:activite': { ok: true },
+        },
+      },
+      {
+        nom: 'reçue — hors fenêtre, crédit seulement',
+        id: 'ret_0002',
+        reponses: {
+          'retour:lire': { ok: true, archive: false, peutEcrire: true,
+            demande: Object.assign({}, demandeBase, { id: 'ret_0002', statut: 'received',
+              fauteMarchande: true }),
+            articles,
+            // ⚠ HORS fenêtre : le moyen original doit être DÉSARMÉ, crédit coché.
+            remboursement: { lignes: [
+                { nom: 'Robe cintrée', base: 129.95, montant: 129.95, moitie: false } ],
+              livraisonBase: 12.5, prioritaireExclu: 8,
+              joursOuvrables: 22, joursFenetre: 15, dansFenetre: false, squareDisponible: true },
+            etiquette, modeles },
+          'verrou:prendre': VERROU,
+          'session:activite': { ok: true },
+        },
+      },
+      {
+        nom: 'litige, lecture seule',
+        id: 'ret_0003',
+        reponses: {
+          'retour:lire': { ok: true, archive: false, peutEcrire: false,
+            demande: Object.assign({}, demandeBase, { id: 'ret_0003', statut: 'disputed',
+              litige: { message: 'Le colis a été déposé au comptoir le 12.',
+                preuve: IMAGE, recuLe: '2026-08-05T09:00:00.000Z' } }),
+            articles, remboursement: null, etiquette, modeles },
+          'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'Marc Dubé' },
+          'session:activite': { ok: true },
+        },
+      },
+    ];
+  })(),
+
 };
 
 // ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque

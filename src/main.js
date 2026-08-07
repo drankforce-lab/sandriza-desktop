@@ -997,6 +997,11 @@ const OPS_PONT = new Set([
   // plusieurs megaoctets par ce pont a chaque frappe dans la recherche.
   'commandes:contexte', 'commandes:liste',
   'commandes:preparer', 'commandes:expedier',
+  // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
+  // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
+  // dans le site, le pont ne porte que des valeurs.
+  'retour:lire', 'retour:enregistrer', 'retour:recu', 'retour:litige',
+  'retour:finaliser', 'retour:pdf', 'retour:renvoyer',
 ]);
 
 // ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que
@@ -1040,6 +1045,21 @@ ipcMain.handle('fenetre:expedition', (e, id) => {
   const cle = 'expedition-' + String(id || '').replace(/[^\w-]/g, '');
   ouvrirNative(cle, 'Expédier une commande', pageExpedition(String(id || '')),
     { width: 780, height: 720, minWidth: 620, minHeight: 520 });
+  return true;
+});
+
+/* Ouverture d un retour depuis le site. ⚠ UNE FENETRE PAR DOSSIER, et sur une
+   fenetre REUTILISEE on demande a la page de SE RELIRE (szRevenir) — la lecon de
+   la preparation : restore + focus laisse l ecran d avant, donnees comprises. */
+ipcMain.handle('fenetre:retour', (e, id) => {
+  const cle = 'retour-' + String(id || '').replace(/[^\w-]/g, '');
+  const _avant = fenetresNatives.get(cle);
+  const _reutilisee = !!(_avant && !_avant.isDestroyed());
+  const win = ouvrirNative(cle, 'Demande de retour', pageRetour(String(id || '')),
+    { width: 860, height: 760, minWidth: 680, minHeight: 540 });
+  if (_reutilisee && win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
   return true;
 });
 
@@ -1565,6 +1585,7 @@ const { pageCaisse } = require('./fenetres/caisse');
 const { pageInventaire } = require('./fenetres/inventaire');
 const { pageExpedition } = require('./fenetres/expedition');
 const { pageCommandes } = require('./fenetres/commandes');
+const { pageRetour } = require('./fenetres/retour');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
