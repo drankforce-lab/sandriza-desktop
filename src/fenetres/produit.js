@@ -66,6 +66,8 @@ const CSS_PROPRE = `
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x{position:absolute;top:2px;right:2px;width:18px;height:18px;padding:0;
   border-radius:50%;font-size:.7rem;line-height:1;background:rgba(14,21,34,.85)}
+.avis{display:none;font-size:.74rem;line-height:1.4;color:#fbbf24;margin-top:.3rem}
+.avis.on{display:block}
 .voile{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
   background:rgba(8,12,18,.6);padding:1.2rem}
 .voile .boite{width:100%;max-width:460px;background:#16202f;border:1px solid rgba(255,255,255,.1);
@@ -302,7 +304,10 @@ function pageProduit(id) {
       + '<option value="4">🚫 Aucun retour</option>'
       + '<option value="3">🟡 Liquidation</option>'
       + '<option value="1">🔴 Vente finale</option>'
-      + '</select></div>'
+      + '</select>'
+      + '<div id="p-fs-note" class="avis">L’étiquette de mise en marché est retirée : '
+      + 'ce régime porte déjà son propre badge en boutique, et en poser un second '
+      + 'donnerait deux messages contradictoires sur la même fiche.</div></div>'
       + bascule('p-finalret', 'Vente finale, mais retour accepté malgré tout')
       + '</div></div>'
       + '<div class="carte"><h2>Repères</h2><div class="grille">'
@@ -390,6 +395,20 @@ function pageProduit(id) {
         this.dataset.prec = this.value;
       };
     }
+    // ⚠ « VENTE FINALE » (1) ET « LIQUIDATION » (3) RETIRENT L ETIQUETTE, pas
+    // « aucun retour » (4) : ce dernier bloque les retours sans etre un mode de
+    // solde, et son etiquette marketing reste donc legitime. Confondre les trois
+    // aurait efface une etiquette voulue.
+    var reg = document.getElementById('p-regime');
+    function majRegime(){
+      var solde = reg && (reg.value === '1' || reg.value === '3');
+      var n = document.getElementById('p-fs-note');
+      if (n) n.classList.toggle('on', !!solde);
+      if (solde) { var t = document.getElementById('p-etiq'); if (t) t.value = ''; }
+      majMarge();
+    }
+    if (reg) reg.onchange = majRegime;
+    majRegime();
     var cat = document.getElementById('p-cat');
     if (cat) cat.addEventListener('change', function(){ if (!ID) majSku(); dessinerVues(); });
     var rab = document.getElementById('p-rabais');
