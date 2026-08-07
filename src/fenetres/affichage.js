@@ -32,6 +32,8 @@
  * (tools/verifier-fenetres.js) le vérifie avant chaque publication.
  */
 
+const { JS_ACTIVITE } = require('./socle.js');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -95,6 +97,7 @@ function pageAffichage() {
 (function(){
   'use strict';
   var P = window.szPont;
+${JS_ACTIVITE}
   var corps = document.getElementById('corps');
   var avis  = document.getElementById('msg');
   var MARQUE = { logo: '', nom: 'SANDRIZA' };

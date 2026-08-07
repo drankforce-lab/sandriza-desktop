@@ -20,6 +20,8 @@
  * on croirait l'imprimante prête alors que rien n'a été vérifié.
  */
 
+const { JS_ACTIVITE } = require('./socle.js');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -94,6 +96,7 @@ function pageImprimantes() {
 (function(){
   'use strict';
   var P = window.szPont;
+${JS_ACTIVITE}
   var corps = document.getElementById('corps');
   var msg   = document.getElementById('msg');
   var sous  = document.getElementById('sous');

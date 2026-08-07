@@ -128,9 +128,18 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
  * ⚠ Une fenetre qui ne sait pas doit le DIRE. Un ecran muet sur un refus de
  * droit ressemble a une panne, et on cherche au mauvais endroit.
  */
-const JS_SOCLE = `
-var P = window.szPont;
-
+/*
+ * ⚠ CE BLOC EST A PART, ET C EST VOULU : toutes les fenetres n incluent PAS le
+ * socle. << Imprimantes >>, << Affichage client >> et << Caisse >> sont des ecrans
+ * d etat ou d operation, pas des assistants a etapes : leur imposer le moteur
+ * d etapes aurait produit de faux assistants a une seule etape pour satisfaire une
+ * uniformite. Elles ont pourtant TOUTES besoin de dire << il y a quelqu un >> —
+ * la caisse plus que les autres, puisqu on y travaille des heures.
+ * Recopier ce bloc dans chaque fenetre l aurait fait diverger au premier
+ * ajustement, et une fenetre oubliee aurait continue de faire deconnecter son
+ * usager sans qu on comprenne pourquoi.
+ */
+const JS_ACTIVITE = `
 // ⚠⚠ << IL Y A QUELQU UN >> — CE BLOC EMPECHE DE DECONNECTER UNE PERSONNE AFFAIREE.
 // Le minuteur d inactivite du site n ecoute que les evenements de SA page. Une
 // fenetre native est un document separe : ses clics et ses frappes ne l atteignent
@@ -168,7 +177,11 @@ document.addEventListener('input', signalerActivite, true);
 // L ouverture de la fenetre EST un geste : on le dit tout de suite, sinon les
 // vingt premieres secondes ne compteraient pas.
 signalerActivite();
+`;
 
+const JS_SOCLE = `
+var P = window.szPont;
+` + JS_ACTIVITE + `
 var MOTIFS = {
   session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
   droit:              'Votre rôle ne donne pas accès à cette opération.',
@@ -357,4 +370,4 @@ Pagi.prototype.brancher = function(){
 };
 `;
 
-module.exports = { CSS_SOCLE, JS_SOCLE };
+module.exports = { CSS_SOCLE, JS_SOCLE, JS_ACTIVITE };

@@ -95,6 +95,83 @@ module.exports = {
     },
   },
 
+  // ── VENTE AU COMPTOIR ─────────────────────────────────────────────────────
+  // ⚠ LE SEUL ÉCRAN QUI ENCAISSE DE L'ARGENT : son jeu d'essai est donc le plus
+  // important du lot. Deux cas, parce qu'ils ne traversent pas le même code — un
+  // rôle qui peut vendre, et un rôle en lecture seule qui doit voir l'écran
+  // désarmé plutôt qu'un bouton qui ne répond pas.
+  'caisse.js': [
+    {
+      nom: 'caissier',
+      id: '',
+      reponses: {
+        'caisse:contexte': {
+          ok: true,
+          provinces: ['QC', 'ON', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'NT', 'NU', 'YT'],
+          paiements: [
+            { cle: 'terminal', libelle: 'Terminal Square (reçu)' },
+            { cle: 'comptant', libelle: 'Comptant (reçu)' },
+            { cle: 'lien', libelle: 'Lien de paiement (téléphone)' },
+          ],
+          remises: [
+            { cle: 'courriel', libelle: '✉ Envoyer par courriel' },
+            { cle: 'impression', libelle: '🖨 Imprimer seulement' },
+            { cle: 'aucun', libelle: 'Ne rien faire' },
+          ],
+          peutVendre: true,
+          par: 'Brigitte Brousseau',
+        },
+        'caisse:chercher': {
+          ok: true, sku: null,
+          articles: [
+            { id: 'p_0001', nom: 'Robe cintrée', code: 'ROB-0001', variantes: [
+              { cle: 'M-Noir', taille: 'M', couleur: 'Noir', quantite: 4 },
+              // Une variante ÉPUISÉE : le bouton doit être grisé, pas absent.
+              { cle: 'G-Noir', taille: 'G', couleur: 'Noir', quantite: 0 },
+            ] },
+            // Un article SANS variante : la fenêtre doit le dire au lieu de laisser un vide.
+            { id: 'p_0003', nom: 'Foulard de laine', code: 'ACC-0012', variantes: [] },
+          ],
+        },
+        'caisse:article': { ok: true, ligne: { productId: 'p_0001', name: 'Robe cintrée',
+          sku: 'ROB-0001-M-NOI', size: 'M', color: 'Noir', price: 129.95, quantity: 1 } },
+        'caisse:totaux': { ok: true, sousTotal: 129.95, rabais: 0, livraison: 0,
+          taxes: [{ nom: 'TPS', taux: 0.05, montant: 6.5 }, { nom: 'TVQ', taux: 0.09975, montant: 12.96 }],
+          total: 149.41 },
+        'caisse:client': { ok: true, exact: null, trouves: [
+          { id: 'u_0001', nom: 'Marie Tremblay', courriel: 'marie@example.com', tel: '418 555-0142',
+            province: 'QC', commandes: 3 },
+        ] },
+        'caisse:vendre': { ok: true, numero: 'SZ-100250', commandeId: 'ord_0003',
+          factureId: 'inv_0003', total: 149.41, stockOk: true, nuageOk: true,
+          compteNeuf: false, envoiCourriel: true, enAttente: false, lien: null, avis: [] },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'lecture seule',
+      id: '',
+      reponses: {
+        'caisse:contexte': {
+          ok: true,
+          provinces: ['QC', 'ON'],
+          paiements: [{ cle: 'comptant', libelle: 'Comptant (reçu)' }],
+          remises: [{ cle: 'aucun', libelle: 'Ne rien faire' }],
+          // ⚠ Le droit de VOIR sans le droit de VENDRE existe réellement : la
+          // fenêtre doit désarmer son bouton et le dire, pas laisser croire.
+          peutVendre: false,
+          par: 'Stagiaire',
+        },
+        'caisse:chercher': { ok: true, sku: null, articles: [] },
+        'caisse:totaux': { ok: true, sousTotal: 0, rabais: 0, livraison: 0, taxes: [], total: 0 },
+        'caisse:client': { ok: true, exact: null, trouves: [] },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── FOURNISSEUR ───────────────────────────────────────────────────────────
   // Forme de la fiche = celle qu'écrit `fournisseurEnregistrer`, donc celle que
   // `DB.getSupplierById` rend. L'adresse est un SOUS-OBJET : la mettre à plat

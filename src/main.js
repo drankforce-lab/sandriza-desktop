@@ -1485,6 +1485,7 @@ const { pageCollection } = require('./fenetres/collection');
 const { pageProduit } = require('./fenetres/produit');
 const { pageCommande } = require('./fenetres/commande');
 const { pageAffichage } = require('./fenetres/affichage');
+const { pageCaisse } = require('./fenetres/caisse');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
@@ -1522,6 +1523,17 @@ const actionApp = (nom) => {
     // ⚠ L AFFICHAGE CLIENT EST FAIT POUR ÊTRE POSÉ SUR UN SECOND ÉCRAN, face à la
     // cliente. D'où une fenêtre plus grande et une hauteur minimale généreuse : le
     // total doit rester lisible à un mètre, et c'est le bloc du bas qu'on lit.
+    /* ⚠ LA CAISSE EST LA PLUS GRANDE DES FENETRES, et c est justifie : deux
+       colonnes, une liste d articles qui grandit, et un ecran qui ne doit JAMAIS
+       defiler pour atteindre son bouton d encaissement. 1180 px de large est le
+       minimum ou les deux colonnes tiennent sans se serrer ; sous 1000 px la
+       fenetre repasse d elle-meme en une colonne (voir sa feuille de style).
+       ⚠ ELLE S OUVRE A COTE DE L ECRAN DU SITE, jamais a sa place : les deux
+       coexistent le temps qu elle soit eprouvee en boutique. */
+    case 'caisse':
+      ouvrirNative('caisse', 'Vente au comptoir', pageCaisse(),
+        { width: 1180, height: 780, minWidth: 720, minHeight: 520 });
+      break;
     case 'affichage-client':
       ouvrirNative('pos-client', 'Affichage client', pageAffichage(),
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
