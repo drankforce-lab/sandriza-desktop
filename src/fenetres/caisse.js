@@ -55,23 +55,33 @@ body{background:#0e1522;color:#e8edf5;
   display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.85fr);gap:.85rem}
 .col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.55rem}
 
-/* ⚠⚠ L ARGENT ET LE BOUTON NE BOUGENT JAMAIS — LE RESTE DEFILE.
-   Premiere version : la colonne de droite etait en overflow:hidden, au nom de la
-   regle << un ecran de travail ne defile pas >>. Resultat exactement inverse a
-   l intention : sur un ecran de 1350 px de haut, le bouton
-   << Enregistrer la vente >> etait COUPE et l avis en dessous invisible. La regle
-   existe pour que l action reste atteignable ; ici elle la cachait.
-   On applique donc son ESPRIT : la carte des totaux et celle de l encaissement
-   sont ancrees en bas et ne bougent pas, quoi qu il arrive ; seule la zone du
-   client, de la vente et de la facture defile quand la fenetre est trop courte.
-   Sur une caisse, le total et le bouton sont les deux seules choses qu on ne peut
-   pas se permettre de chercher. */
+/* ⚠⚠ TROIS ETATS SUCCESSIFS SUR CETTE COLONNE — ET LES DEUX PREMIERS ETAIENT
+   FAUX, CHACUN A SA MANIERE. A lire avant d y toucher une quatrieme fois.
+   1) overflow:hidden, au nom de la regle << un ecran de travail ne defile pas >>.
+      Resultat inverse de l intention : sur un ecran de 1350 px de haut, le bouton
+      << Enregistrer la vente >> etait COUPE, donc INATTEIGNABLE. La regle existe
+      pour que l action reste a portee ; la elle la cachait.
+   2) Totaux et encaissement ANCRES en bas, le reste defilant. Le bouton etait
+      atteignable, mais la zone defilante s etirait pour remplir la colonne : entre
+      la carte Facture et le sous-total s ouvrait un trou de cent soixante pixels.
+      Signale par l utilisateur le 2026-08-07, capture a l appui : sur une caisse,
+      un grand vide au milieu de l ecran de l argent ne se justifie par rien.
+   3) CE QUI EST EN PLACE : tout est empile a la suite, sans trou, et c est la
+      COLONNE ENTIERE qui defile quand elle deborde. On ne perd pas ce que
+      l etat 2 protegeait — le bouton reste atteignable, puisqu on peut toujours
+      l atteindre en defilant, alors que l etat 1 le coupait pour de bon.
+   ⚠ CONSEQUENCE ASSUMEE : sur une fenetre tres courte, le total peut sortir du
+   champ. Le bouton PORTE LE TOTAL (<< Enregistrer la vente — 77,61 $ >>) : le
+   chiffre reste donc sous les yeux au moment ou il compte, c est-a-dire au moment
+   de presser. */
 .col.droite{min-height:0}
 .defile{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;
-  flex-direction:column;gap:.55rem;padding-right:.2rem}
+  flex-direction:column;gap:.55rem;padding-right:.2rem;
+  /* Les cartes se suivent en haut : sans ceci, une colonne plus haute que son
+     contenu les etirerait et le trou reviendrait, ailleurs. */
+  justify-content:flex-start}
 .defile::-webkit-scrollbar{width:8px}
 .defile::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.ancre{flex:0 0 auto}
 
 /* Sous 1000 px on repasse en UNE colonne et on autorise le defilement general :
    ecraser un champ de montant est plus risque que faire defiler. */
@@ -244,9 +254,12 @@ function pageCaisse() {
       <select id="v-remise" title="Ce qu’on fait de la facture après la vente"></select>
       <div class="sous-ch">L’envoi exige une adresse. Toujours consultable dans Facturation.</div>
     </div>
-   </div>
-    <div class="carte tot ancre" id="totaux"></div>
-    <div class="carte ancre">
+    <!-- ⚠ LES TOTAUX ET L ENCAISSEMENT SONT DANS LE FLUX, a la suite de la carte
+         du client — plus ancres en bas. C est ce qui referme le trou de cent
+         soixante pixels signale le 2026-08-07 ; voir la note des trois etats dans
+         la feuille de style avant de les redescendre. -->
+    <div class="carte tot" id="totaux"></div>
+    <div class="carte">
       <h2>Encaissement</h2>
       <div class="r2">
         <select id="v-paie"></select>
@@ -255,6 +268,7 @@ function pageCaisse() {
       <button class="prim large" id="btn-vendre" disabled>Enregistrer la vente</button>
       <div class="aide">Cet écran n’encaisse jamais la carte.</div>
     </div>
+   </div>
   </div>
 </div>
 <div class="pied"><span class="msg" id="msg"></span>

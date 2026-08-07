@@ -973,6 +973,12 @@ const OPS_PONT = new Set([
   // `pos:diffuser` n accepte qu elle. Sans cela, une fenetre quelconque pourrait
   // afficher n importe quel montant devant le client au moment de payer.
   'caisse:diffuser', 'caisse:affichage',
+  // Ajustement de stock. ⚠ `stock:enregistrer` écrit un INVENTAIRE : toute la
+  // règle reste dans le site (`Admin._stockEcrire`, sans le moindre DOM), le pont
+  // ne porte que des valeurs. La version qui lisait le formulaire aurait enregistré
+  // une grille de zéros depuis cette fenêtre, sans un message.
+  'stock:contexte', 'stock:reappro', 'stock:chercher',
+  'stock:lire', 'stock:enregistrer', 'stock:etiquettes',
 ]);
 
 // ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que
@@ -1510,6 +1516,7 @@ const { pageProduit } = require('./fenetres/produit');
 const { pageCommande } = require('./fenetres/commande');
 const { pageAffichage } = require('./fenetres/affichage');
 const { pageCaisse } = require('./fenetres/caisse');
+const { pageInventaire } = require('./fenetres/inventaire');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
@@ -1561,6 +1568,14 @@ const actionApp = (nom) => {
     case 'affichage-client':
       ouvrirNative('pos-client', 'Affichage client', pageAffichage(),
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
+      break;
+    /* ⚠ LARGE PARCE QU ELLE PORTE UNE GRILLE A CINQ COLONNES : variante, code,
+       quantite, seuil, emplacement. Sous 900 px, le nom de la variante et le code
+       se coupent — et un code de variante coupe ne se verifie pas contre
+       l etiquette collee sur le vetement, ce qui est tout son usage. */
+    case 'inventaire':
+      ouvrirNative('inventaire', 'Ajustement de stock', pageInventaire(''),
+        { width: 1040, height: 760, minWidth: 900, minHeight: 540 });
       break;
     case 'about-copy':
       try { require('electron').clipboard.writeText(texteApropos()); } catch {}

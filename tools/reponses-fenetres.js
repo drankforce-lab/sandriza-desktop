@@ -581,6 +581,106 @@ module.exports = {
       },
     },
   ],
+
+  /* ── AJUSTEMENT DE STOCK ───────────────────────────────────────────────────
+     Formes relevées dans `assets/js/pont.js` (`stockContexte`, `stockReappro`,
+     `stockLire`), pas inventées ici.
+
+     ⚠ CE QUE CES CAS COUVRENT, ET POURQUOI CEUX-LÀ. La fenêtre s'ouvre SANS
+     identifiant : elle dessine donc d'abord la liste de réachat, puis — et
+     seulement si un produit est ouvert — la grille. Ouverte avec un identifiant,
+     elle traverse en plus `stock:lire`, la construction des variantes et le
+     verrou. Les deux chemins ne se ressemblent pas : n'éprouver que le premier
+     laisserait la grille, c'est-à-dire tout ce qui compte, dans l'ombre. */
+  'inventaire.js': [
+    {
+      nom: 'liste de réachat',
+      id: '',
+      reponses: {
+        'stock:contexte': {
+          ok: true, peutEcrire: true, seuilGeneral: 3, par: 'Brigitte Brousseau',
+          entrepots: [
+            { id: 'wh_0001', code: 'MTL-A', nom: 'Entrepôt principal' },
+            { id: 'wh_0002', code: 'QC-B', nom: 'Boutique' },
+          ],
+        },
+        // ⚠ Déjà TRIÉ par urgence quand il vient du pont : une rupture d'abord,
+        // puis le plus proche de la rupture en proportion de son seuil.
+        'stock:reappro': { ok: true, lignes: [
+          { produitId: 'p_0001', nom: 'Robe cintrée', cle: 'M-Noir', taille: 'M',
+            couleur: 'Noir', qte: 0, seuil: 4, rupture: true, sku: 'ROB-000001-M-01' },
+          { produitId: 'p_0002', nom: 'Chemisier de soie', cle: 'P-Ivoire', taille: 'P',
+            couleur: 'Ivoire', qte: 2, seuil: 6, rupture: false, sku: '' },
+        ] },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'grille ouverte',
+      id: 'p_0001',
+      reponses: {
+        'stock:contexte': {
+          ok: true, peutEcrire: true, seuilGeneral: 3, par: 'Brigitte Brousseau',
+          entrepots: [{ id: 'wh_0001', code: 'MTL-A', nom: 'Entrepôt principal' }],
+        },
+        'stock:reappro': { ok: true, lignes: [] },
+        'stock:lire': {
+          ok: true,
+          produit: { id: 'p_0001', nom: 'Robe cintrée', sku: 'ROB-000001', seuilHerite: 4 },
+          entrepots: [{ id: 'wh_0001', code: 'MTL-A', nom: 'Entrepôt principal' }],
+          variantes: [
+            // En stock, avec emplacement : la ligne doit se peindre en actif.
+            { cle: 'M-Noir', taille: 'M', couleur: 'Noir', sku: 'ROB-000001-M-01',
+              teinte: '#000000', qte: 6, seuil: '', entrepot: 'wh_0001' },
+            // ⚠ EN STOCK SANS EMPLACEMENT : c'est le cas qui doit se peindre en
+            // rouge et refuser l'enregistrement. Sans lui, le garde ne serait
+            // jamais traversé par le contrôle.
+            { cle: 'G-Noir', taille: 'G', couleur: 'Noir', sku: 'ROB-000001-G-01',
+              teinte: '#000000', qte: 3, seuil: '2', entrepot: '' },
+            // ⚠ UNE TEINTE EN DÉGRADÉ : `colorNameToHex` en rend pour les couleurs
+            // composées, et la pastille doit alors s'arrondir en carré au lieu de
+            // traiter la chaîne comme une couleur unie.
+            { cle: 'M-Bicolore', taille: 'M', couleur: 'Bicolore', sku: 'ROB-000001-M-00',
+              teinte: 'linear-gradient(90deg,#000 50%,#fff 50%)', qte: 0, seuil: '', entrepot: '' },
+            // Sans code de variante : la colonne doit afficher un tiret et NE PAS
+            // proposer le bouton d'étiquettes.
+            { cle: 'TP-Ivoire', taille: 'TP', couleur: 'Ivoire', sku: '',
+              teinte: '#f3ece1', qte: 0, seuil: '', entrepot: '' },
+          ],
+          base: { stock: { 'M-Noir': 6, 'G-Noir': 3 }, locs: { 'M-Noir': 'wh_0001' } },
+        },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'lecture seule, sans entrepôt',
+      id: 'p_0003',
+      reponses: {
+        // ⚠ Le droit de VOIR sans celui d'ÉCRIRE existe réellement : le bouton
+        // doit se désarmer et le dire. Et sans aucun entrepôt configuré,
+        // l'emplacement cesse d'être obligatoire — sinon plus rien ne
+        // s'enregistrerait sur une boutique qui n'en a pas créé.
+        'stock:contexte': { ok: true, peutEcrire: false, seuilGeneral: 3, par: 'Stagiaire', entrepots: [] },
+        'stock:reappro': { ok: true, lignes: [] },
+        'stock:lire': {
+          ok: true,
+          produit: { id: 'p_0003', nom: 'Foulard de laine', sku: '', seuilHerite: 3 },
+          entrepots: [],
+          variantes: [
+            { cle: 'U-Gris', taille: 'U', couleur: 'Gris', sku: '',
+              teinte: '#9aa3ad', qte: 1, seuil: '', entrepot: '' },
+          ],
+          base: { stock: { 'U-Gris': 1 }, locs: {} },
+        },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+  ],
 };
 
 // ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque
