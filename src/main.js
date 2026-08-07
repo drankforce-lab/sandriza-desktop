@@ -979,6 +979,13 @@ const OPS_PONT = new Set([
   // une grille de zéros depuis cette fenêtre, sans un message.
   'stock:contexte', 'stock:reappro', 'stock:chercher',
   'stock:lire', 'stock:enregistrer', 'stock:etiquettes',
+  // Expédition. ⚠ `expedition:etiquette` DÉPENSE DE L'ARGENT — une étiquette est
+  // facturée dès sa création. Toute la règle (garde anti-double-achat, secrets
+  // transporteurs, XML) reste dans le site ; le pont ne porte que le service et
+  // le poids, qui sont précisément ce que la fenêtre doit pouvoir choisir.
+  'expedition:contexte', 'expedition:lire', 'expedition:etiquette',
+  'expedition:pdf', 'expedition:imprimer', 'expedition:bordereau',
+  'expedition:confirmer',
 ]);
 
 // ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que
@@ -994,6 +1001,18 @@ ipcMain.handle('fenetre:commande', (e, id) => {
   const cle = 'commande-' + String(id || '').replace(/[^\w-]/g, '');
   ouvrirNative(cle, 'Préparation de commande', pageCommande(String(id || '')),
     { width: 880, height: 700, minHeight: 520 });
+  return true;
+});
+
+/* Ouverture d une expedition depuis le site : c est lui qui sait quelle commande
+   est selectionnee. Meme mecanique que la preparation de commande.
+   ⚠ UNE FENETRE PAR COMMANDE (la cle porte l identifiant) : deux expeditions
+   ouvertes en meme temps sur la meme commande, ce sont deux etiquettes facturees
+   et deux courriels au client. */
+ipcMain.handle('fenetre:expedition', (e, id) => {
+  const cle = 'expedition-' + String(id || '').replace(/[^\w-]/g, '');
+  ouvrirNative(cle, 'Expédier une commande', pageExpedition(String(id || '')),
+    { width: 780, height: 720, minWidth: 620, minHeight: 520 });
   return true;
 });
 
@@ -1517,6 +1536,7 @@ const { pageCommande } = require('./fenetres/commande');
 const { pageAffichage } = require('./fenetres/affichage');
 const { pageCaisse } = require('./fenetres/caisse');
 const { pageInventaire } = require('./fenetres/inventaire');
+const { pageExpedition } = require('./fenetres/expedition');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas

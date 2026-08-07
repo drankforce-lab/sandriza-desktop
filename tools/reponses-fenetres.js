@@ -681,6 +681,105 @@ module.exports = {
       },
     },
   ],
+
+  /* ── EXPÉDITION ────────────────────────────────────────────────────────────
+     Formes relevées dans `assets/js/pont.js` (`expeditionContexte`,
+     `expeditionLire`), pas inventées ici.
+
+     ⚠ TROIS CAS, ET CHACUN COUVRE UN CHEMIN QUE LES AUTRES NE PRENNENT PAS :
+     une commande prête à étiqueter (le chemin normal) ; une commande qui a DÉJÀ
+     son étiquette (l'avertissement « facturé une seconde fois » et les boutons
+     d'aperçu/impression actifs) ; et une commande dont le transporteur n'est pas
+     configuré, où le bouton qui dépense doit être DÉSARMÉ. C'est ce dernier cas
+     qui compte le plus : un bouton actif qui échoue toujours fait chercher la
+     panne chez le transporteur au lieu de la configuration. */
+  'expedition.js': [
+    {
+      nom: 'prête à étiqueter',
+      id: 'ord_0007',
+      reponses: {
+        'expedition:contexte': {
+          ok: true, peutExpedier: true, dernier: 'postes-canada',
+          transporteurs: [
+            { cle: 'postes-canada', nom: 'Postes Canada', pret: true, services: [
+              { cle: 'DOM.EP', libelle: '⚡ Colis accéléré (DOM.EP)' },
+              { cle: 'DOM.RP', libelle: '📦 Colis régulier (DOM.RP)' },
+            ] },
+            { cle: 'fedex', nom: 'FedEx', pret: true, services: [
+              { cle: 'FEDEX_GROUND', libelle: '📦 FedEx Ground' },
+            ] },
+            // Un transporteur NON configuré, sans service : la fenêtre doit le
+            // dire et désarmer, pas offrir une liste vide.
+            { cle: 'ups', nom: 'UPS', pret: false, services: [] },
+          ],
+        },
+        'expedition:lire': {
+          ok: true,
+          commande: { id: 'ord_0007', numero: 'SZ-100207', statut: 'preparing',
+            transporteur: '', suivi: '', etiquetteLe: '', aUneEtiquette: false, articles: 3 },
+          destinataire: { nom: 'Marie Tremblay', rue: '12 rue des Érables',
+            ville: 'Québec', province: 'QC', codePostal: 'G1R 2B5', pays: 'CA', tel: '418 555-0142' },
+          // ⚠ `estime: true` est le cas à éprouver : c'est le poids qui fixe le
+          // prix de l'étiquette, et une estimation doit se voir.
+          poids: { calcule: 1.24, estime: true, remboursements: 0 },
+        },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'étiquette déjà créée',
+      id: 'ord_0008',
+      reponses: {
+        'expedition:contexte': {
+          ok: true, peutExpedier: true, dernier: 'fedex',
+          transporteurs: [
+            { cle: 'postes-canada', nom: 'Postes Canada', pret: true, services: [
+              { cle: 'DOM.EP', libelle: '⚡ Colis accéléré (DOM.EP)' } ] },
+            { cle: 'fedex', nom: 'FedEx', pret: true, services: [
+              { cle: 'FEDEX_GROUND', libelle: '📦 FedEx Ground' } ] },
+          ],
+        },
+        'expedition:lire': {
+          ok: true,
+          commande: { id: 'ord_0008', numero: 'SZ-100208', statut: 'preparing',
+            transporteur: 'fedex', suivi: '794612345678',
+            etiquetteLe: '2026-08-07T14:02:00.000Z', aUneEtiquette: true, articles: 1 },
+          destinataire: { nom: 'Luc Gagnon', rue: '400 boul. René-Lévesque',
+            ville: 'Montréal', province: 'QC', codePostal: 'H2Z 1V1', pays: 'CA', tel: '' },
+          poids: { calcule: 0.42, estime: false, remboursements: 1 },
+        },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'lecture seule, adresse incomplète',
+      id: 'ord_0009',
+      reponses: {
+        // ⚠ Le droit de VOIR sans celui d'EXPÉDIER existe réellement.
+        'expedition:contexte': {
+          ok: true, peutExpedier: false, dernier: 'ups',
+          transporteurs: [{ cle: 'ups', nom: 'UPS', pret: false, services: [] }],
+        },
+        'expedition:lire': {
+          ok: true,
+          commande: { id: 'ord_0009', numero: 'SZ-100209', statut: 'paid',
+            transporteur: '', suivi: '', etiquetteLe: '', aUneEtiquette: false, articles: 2 },
+          // ⚠ SANS CODE POSTAL : aucun transporteur n'accepterait l'envoi, et la
+          // fenêtre doit le dire AVANT qu'on presse un bouton facturé.
+          destinataire: { nom: 'Client sans adresse', rue: '', ville: '',
+            province: '', codePostal: '', pays: 'CA', tel: '' },
+          poids: { calcule: 0, estime: true, remboursements: 0 },
+        },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+  ],
 };
 
 // ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque
