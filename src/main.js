@@ -1010,8 +1010,24 @@ const litteralJs = (v) => JSON.stringify(v === undefined ? null : v)
 // commande est selectionnee, la coquille ne fait que porter la fenetre.
 ipcMain.handle('fenetre:commande', (e, id) => {
   const cle = 'commande-' + String(id || '').replace(/[^\w-]/g, '');
-  ouvrirNative(cle, 'Préparation de commande', pageCommande(String(id || '')),
+  /* ⚠⚠ UNE FENÊTRE DÉJÀ OUVERTE NE CHANGE PAS TOUTE SEULE D'ÉTAPE.
+     `ouvrirNative` réutilise la fenêtre existante : restore + focus, rien de
+     plus. Les boutons du site (« Préparer », « Vérifier », « Étiquette »)
+     passent tous par ici avec la même clé — ils ne faisaient donc que la ramener
+     au premier plan, figée sur l'écran d'avant, question du bon comprise.
+     Signalé le 2026-08-07 : « je clique sur Vérifier et je n'arrive pas à la
+     vérification, l'assistant se recharge et me repose la même question ».
+     On demande donc à la page de SE REPLACER (`szRevenir` relit le statut et va
+     à l'étape qu'il commande). ⚠ Seulement sur une fenêtre RÉUTILISÉE : une
+     fenêtre neuve se place elle-même au chargement (`accueillir`), et lui
+     injecter du script avant `did-finish-load` ne trouverait rien. */
+  const _avant = fenetresNatives.get(cle);
+  const _reutilisee = !!(_avant && !_avant.isDestroyed());
+  const win = ouvrirNative(cle, 'Préparation de commande', pageCommande(String(id || '')),
     { width: 880, height: 700, minHeight: 520 });
+  if (_reutilisee && win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
   return true;
 });
 

@@ -342,7 +342,10 @@ module.exports = {
         'commande:lire': {
           ok: true,
           numero: 'SZ-100248',
-          statut: 'processing',
+          // ⚠ Statut REEL du site (ORDER_STATUS) — le jeu portait « processing »,
+          // qui n existe pas : un jeu qui ne ressemble pas a la vraie reponse
+          // eprouve une fenetre qui n existe pas.
+          statut: 'confirmed',
           dejaPret: false,
           suivi: '',
           transporteur: '',
@@ -376,7 +379,9 @@ module.exports = {
         'commande:lire': {
           ok: true,
           numero: 'SZ-100249',
-          statut: 'ready',
+          // ⚠ « verification » : la fenetre doit arriver DIRECTEMENT a l etape 2,
+          // SANS reposer la question du bon — la branche corrigee le 2026-08-07.
+          statut: 'verification',
           dejaPret: true,
           suivi: '1Z999AA10123456784',
           transporteur: 'postes-canada',

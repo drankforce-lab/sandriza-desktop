@@ -336,9 +336,12 @@ function pageCommande(id) {
      deux formulations pour un meme geste.
      ⚠ ET ELLE NE BLOQUE RIEN : << Non, continuer >> ferme et laisse travailler.
      Les deux boutons d impression restent dans l etape, pour reimprimer plus tard. */
-  function demanderBon(){
-    var deja = CMD && CMD.statut === 'preparing';
+  function demanderBon(deja){
     var v = document.createElement('div');
+    /* ⚠ Le voile porte un identifiant : szRevenir doit pouvoir le REFERMER quand
+       le bouton du site ramene une fenetre deja ouverte — le laisser trainer,
+       c est reposer la question a chaque focus, le defaut signale. */
+    v.id = 'bc-voile';
     v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
     v.innerHTML = '<div style="background:#16202f;border:1px solid rgba(255,255,255,.12);'
@@ -499,6 +502,44 @@ function pageCommande(id) {
     });
   }
 
+  /* ⚠⚠ L ETAPE D ARRIVEE SUIT LE STATUT — LA MEME REGLE QUE L ECRAN DU SITE.
+     _startFulfillmentFlow (admin.js) route deja ainsi : en verification, ecran
+     de verification SANS question ; en preparation sans suivi, question du bon en
+     re-entree ; sinon, debut du parcours. Cette fenetre ouvrait TOUJOURS a
+     l etape 1 avec la question — signale le 2026-08-07 : << je clique sur
+     Verifier et je n arrive pas a la verification >>. Reinventer un routage ici
+     plutot que reprendre celui du site, c est deux regles pour un meme geste. */
+  function accueillir(statut){
+    var enCours = statut === 'preparing' || statut === 'verification';
+    if (enCours) Assist.aller(1);
+    // La question du bon : au DEBUT du parcours, ou en re-entree d une
+    // preparation sans etiquette — jamais quand on vient verifier ou expedier.
+    if (statut === 'verification') return;
+    if (statut === 'preparing' && String(val('c-suivi') || '').trim()) return;
+    demanderBon(statut === 'preparing');
+  }
+
+  /* ⚠ APPELE PAR LA COQUILLE quand le bouton du site rouvre une fenetre DEJA
+     ouverte. ouvrirNative la ramene au premier plan SANS RIEN CHANGER : on
+     restait plante sur l ecran d avant, question du bon comprise — d ou
+     l impression que << l assistant se recharge et repose toujours la meme
+     question >>. On relit la commande (le statut a pu bouger entre-temps) et on
+     se place a l etape que ce statut commande. */
+  window.szRevenir = function(){
+    var v = document.getElementById('bc-voile');
+    if (v && v.parentNode) v.parentNode.removeChild(v);
+    P.appeler('commande:lire', ID).then(function(r){
+      if (!r || !r.ok || !CMD) return;
+      CMD.statut = r.statut;
+      // Le suivi peut etre arrive par la fenetre Expedition pendant qu on etait
+      // ailleurs : on le reprend, sans ecraser une saisie en cours.
+      if (r.suivi && !String(val('c-suivi') || '').trim()) poser('c-suivi', r.suivi);
+      var enCours = r.statut === 'preparing' || r.statut === 'verification';
+      Assist.aller(enCours ? 1 : 0);
+      majExpedier();
+    });
+  };
+
   function charger(){
     P.appeler('commande:contexte').then(function(c){
       if (!c || !c.ok) { vide('Préparation indisponible', expliquer(c)); return; }
@@ -506,9 +547,14 @@ function pageCommande(id) {
       return P.appeler('commande:lire', ID).then(function(r){
         if (!r || !r.ok) { vide('Commande indisponible', expliquer(r)); return; }
         CMD = r;
+        /* ⚠ Le statut D OUVERTURE est capture ICI : avancerStatut passe la
+           commande a << preparing >> des l arrivee sur l etape 1, et lire
+           CMD.statut apres coup aurait fait dire << deja en preparation >> a une
+           commande qu on vient tout juste de commencer. */
+        var statutOuverture = r.statut;
         document.getElementById('titre').textContent = 'Préparation — ' + r.numero;
         dessiner();
-        return verrou().then(function(){ chargerExpedition(); demanderBon(); });
+        return verrou().then(function(){ chargerExpedition(); accueillir(statutOuverture); });
       });
     });
   }
