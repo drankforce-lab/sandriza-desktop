@@ -88,6 +88,29 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
     try { new Function(page.slice(i2 + 8, j2)); }
     catch (e) { dire(false, f, 'SCRIPT de la page invalide — ' + e.message); continue; }
 
+    /* ⚠⚠ TROISIÈME TROU — LA FONCTION DÉCLARÉE DEUX FOIS (2026-08-07).
+       En modifiant `commande.js` par bouts, cinq fonctions se sont retrouvées
+       définies DEUX fois dans le même script : `bip`, `scanMsg`, `scanner`,
+       `imprimer`, `etiquette`. C'est du JavaScript parfaitement légal — la
+       DERNIÈRE déclaration gagne — donc rien n'a bronché : ni `new Function`, ni
+       l'exécution, ni les jeux de réponses. Résultat : la correction écrite dans
+       la première copie n'avait AUCUN effet, l'ancienne version tournait, et la
+       fenêtre a été PUBLIÉE ainsi. C'est l'utilisateur qui l'a vu.
+       On refuse donc un doublon de déclaration au premier niveau du script. */
+    const decls = {};
+    const rxDecl = /^  function ([A-Za-z_$][\w$]*)\s*\(/gm;
+    let md;
+    const corps = page.slice(i2 + 8, j2);
+    while ((md = rxDecl.exec(corps)) !== null) {
+      decls[md[1]] = (decls[md[1]] || 0) + 1;
+    }
+    const doubles = Object.keys(decls).filter((k) => decls[k] > 1);
+    if (doubles.length) {
+      dire(false, f, 'fonction(s) déclarée(s) DEUX fois — la dernière gagne, la correction est morte : '
+        + doubles.join(', '));
+      continue;
+    }
+
     // ⚠⚠ LE SECOND TROU, ET IL A COÛTÉ QUATRE VERSIONS PUBLIÉES (2026-08-07).
     // Compiler prouve que le texte est du JavaScript. Cela ne prouve pas qu'il
     // fonctionne. La fenêtre Imprimantes est restée sur « Lecture de l'état… »
