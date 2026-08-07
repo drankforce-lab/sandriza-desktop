@@ -1,9 +1,12 @@
 'use strict';
 
 /*
- * ASSISTANT « PRÉPARATION DE COMMANDE » — NATIF, QUATRE ÉTAPES
+ * ASSISTANT « PRÉPARATION DE COMMANDE » — NATIF, TROIS ÉTAPES
  * =============================================================================
- * Prélèvement, vérification, étiquette, expédition. Écrit ici, aucune page du
+ * Vérification, étiquette, expédition. (L'étape « Préparation » a été retirée le
+ * 2026-08-07 à la demande de l'utilisateur : sa liste d'articles faisait doublon
+ * avec celle de la vérification ; ses boutons d'impression y ont migré, et la
+ * question du bon de commande se pose toujours à l'ouverture.) Aucune page du
  * site chargée, aucun appel web : la fenêtre demande au pont, qui fait faire au
  * site ce que lui seul peut faire — imprimer, appeler le transporteur, écrire.
  *
@@ -78,7 +81,7 @@ function pageCommande(id) {
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
   var sous = document.getElementById('sous');
-  var CTX = null, CMD = null, COMPTES = {}, PAGI = null;
+  var CTX = null, CMD = null, COMPTES = {};
 
   function dire(t, genre){
     var m = document.getElementById('msg');
@@ -107,18 +110,15 @@ function pageCommande(id) {
       + '<span class="cli">' + esc(CMD.client) + '</span>'
       + '<span class="adr">' + esc(CMD.adresse) + '</span></div>';
 
-    // 1 — Prélèvement
-    h.push('<div class="etape"><div class="carte plein" id="c-zone">' + enTete
-      + '<h2>Articles à préparer — ' + CMD.nbColis + (CMD.nbColis > 1 ? ' unités' : ' unité') + '</h2>'
-      + '<div class="rech"><input placeholder="Filtrer par nom, taille ou couleur…"><span class="cpt" id="c-cpt"></span></div>'
-      + '<div class="liste"></div><div class="pagi"></div>'
-      + '<div style="margin-top:.6rem;display:flex;gap:.45rem;flex-wrap:wrap">'
-      + '<button type="button" id="c-bon">🖨 Bon de commande</button>'
-      + '<button type="button" id="c-colis">🧾 Bordereau</button>'
-      + '</div></div></div>');
-
-    // 2 — Vérification
-    h.push('<div class="etape"><div class="carte plein" id="c-zone2">'
+    /* 1 — Vérification.
+       ⚠ L ETAPE << PREPARATION >> A ETE RETIREE (demande le 2026-08-07 : << elle
+       ne sert a rien >>). Sa liste d articles faisait DOUBLON avec celle-ci, qui
+       montre les memes lignes AVEC les compteurs — strictement plus. Apres la
+       question du bon de commande, on arrive donc directement ici.
+       ⚠ RIEN N EST PERDU : l en-tete (numero, client, adresse) et les DEUX
+       boutons d impression (Bon de commande, Bordereau) ont migre dans cette
+       etape — ils n ont pas disparu avec elle. */
+    h.push('<div class="etape"><div class="carte plein" id="c-zone2">' + enTete
       + '<h2>Vérification du colis</h2>'
       + '<div class="etat"><span class="gros" id="c-prog">0</span>'
       + '<span style="color:#8fa1b8">sur ' + attendus() + ' unités confirmées</span></div>'
@@ -132,10 +132,13 @@ function pageCommande(id) {
       + '</div>'
       + '<div id="c-scan-msg" style="min-height:1.2em;font-size:.8rem;color:#8fa1b8;margin-bottom:.4rem"></div>'
       + '<div class="rech"><input placeholder="Filtrer…"><span class="cpt" id="c-cpt2"></span></div>'
-      + '<div class="liste"></div><div class="pagi"></div></div></div>');
+      + '<div class="liste"></div><div class="pagi"></div>'
+      + '<div style="margin-top:.6rem;display:flex;gap:.45rem;flex-wrap:wrap">'
+      + '<button type="button" id="c-bon">🖨 Bon de commande</button>'
+      + '<button type="button" id="c-colis">🧾 Bordereau</button>'
+      + '</div></div></div>');
 
-    // 3 — Étiquette
-    /* 3 — Étiquette. ⚠ ELLE SE FABRIQUE ICI, DANS L ASSISTANT (2026-08-07).
+    /* 2 — Étiquette. ⚠ ELLE SE FABRIQUE ICI, DANS L ASSISTANT (2026-08-07).
        Une premiere correction l avait renvoyee vers la fenetre Expedition parce
        que l ancien chemin (Admin.printLabel) LIT LE FORMULAIRE DU SITE et
        commandait donc une etiquette FACTUREE au service par defaut et a 0,5 kg.
@@ -165,7 +168,7 @@ function pageCommande(id) {
       + 'Le client reçoit alors un courriel <strong>sans lien de suivi</strong> — c’est préférable à un numéro '
       + 'inventé qu’elle chercherait en vain.</div></div></div>');
 
-    // 4 — Expédition
+    // 3 — Expédition
     h.push('<div class="etape"><div class="carte plein"><h2>Récapitulatif</h2>'
       + '<div id="c-recap"></div>'
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.86rem;margin-top:.8rem;cursor:pointer">'
@@ -194,7 +197,6 @@ function pageCommande(id) {
     brancher();
 
     Assist.poser([
-      { t: 'Préparation',  obl: [] },
       { t: 'Vérification', obl: [] },
       /* ⚠ L etape n est verte que si le SUIVI est rempli. Elle l etait des la
          premiere visite (obl vide = << complete des le depart >>, voir le socle) :
@@ -204,52 +206,41 @@ function pageCommande(id) {
       { t: 'Étiquette',    obl: ['c-suivi'] },
       { t: 'Expédition',   obl: [] }
     ], function(i){
-      if (i === 0 && PAGI) PAGI.dessiner();
-      if (i === 1 && PAGI2) { PAGI2.dessiner(); majProgres(); }
-      if (i === 3) recap();
-      /* ⚠ LE STATUT AVANCE AVEC LES ETAPES, comme l ecran du site le faisait.
-         Sans cela la commande restait << Confirmee >> jusqu a l expedition :
-         personne d autre ne voyait qu elle etait en cours de traitement, et deux
-         personnes pouvaient la preparer en meme temps.
-         ⚠ Le site REFUSE de reculer un statut (voir commande:statut) : revenir a
-         l etape 1 d une commande deja expediee ne la remet pas en preparation. */
-      avancerStatut(i);
+      if (i === 0 && PAGI2) { PAGI2.dessiner(); majProgres(); }
+      if (i === 2) recap();
     });
 
     majExpedier();
     if (!CTX.peutExpedier) dire('Votre rôle ne permet pas d’expédier.', 'att');
   }
 
-  /* Etape 1 -> << En preparation >>, etape 2 -> << Verification >>. Les etapes 3
-     et 4 ne changent rien : c est l EXPEDITION qui fait passer a << En livraison >>,
-     avec le courriel et le decompte de stock qui vont avec. */
-  function avancerStatut(i){
-    var voulu = (i === 0) ? 'preparing' : (i === 1 ? 'verification' : '');
+  /* ⚠ LE STATUT SUIT LES GESTES, PLUS LES INDEX D ETAPES (revu au retrait de
+     l etape Preparation — piloter par index aurait fait passer une commande en
+     << Verification >> a la simple OUVERTURE, puisque l etape 0 EST la
+     verification desormais). << En preparation >> se pose a l ouverture de
+     l assistant ; << Verification >> a la PREMIERE unite confirmee (scan ou
+     saisie) — c est le geste qui prouve qu on verifie, pas un ecran affiche.
+     L expedition, elle, passe par son propre chemin (courriel, stock).
+     ⚠ Le site REFUSE de reculer un statut (voir commande:statut) : rouvrir une
+     commande deja expediee ne la remet pas en preparation. */
+  function avancerStatut(voulu){
     if (!voulu || !CTX || !CTX.peutExpedier) return;
     P.appeler('commande:statut', ID, voulu).then(function(r){
       if (r && r.ok && r.statut && !r.inchange) { CMD.statut = r.statut; }
     }).catch(function(){ /* un statut qui ne monte pas ne doit pas bloquer la preparation */ });
   }
+  // La premiere unite confirmee fait passer en << Verification >> — une seule
+  // fois : le garde local evite un aller-retour de pont a chaque frappe.
+  function statutVerification(){
+    if (CMD && (CMD.statut === 'pending' || CMD.statut === 'confirmed' || CMD.statut === 'preparing')) {
+      avancerStatut('verification');
+    }
+  }
 
   var PAGI2 = null;
   function listes(){
-    // Etape 1 : la liste de prelevement, en lecture.
-    PAGI = new Pagi(document.getElementById('c-zone'), {
-      ligne: function(a){
-        return '<div class="art"><span class="pt"></span><div class="d">'
-          + '<div class="n">' + esc(a.nom) + '</div>'
-          + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || a.sku) + '</div></div>'
-          + '<span class="cpt">×' + a.quantite + '</span></div>';
-      },
-      surMaj: function(){
-        var c = document.getElementById('c-cpt');
-        if (c) c.textContent = CMD.articles.length + (CMD.articles.length > 1 ? ' lignes' : ' ligne');
-      }
-    });
-    PAGI.tout = CMD.articles;
-    PAGI.brancher();
-
-    // Etape 2 : la meme liste, avec un compteur par ligne.
+    // L unique liste : les articles AVEC leur compteur. Celle de l ancienne
+    // etape Preparation (les memes lignes, sans compteur) est partie avec elle.
     PAGI2 = new Pagi(document.getElementById('c-zone2'), {
       ligne: function(a){
         var v = COMPTES[a.cle] || 0;
@@ -272,6 +263,7 @@ function pageCommande(id) {
     document.getElementById('c-zone2').querySelector('.liste').addEventListener('input', function(ev){
       var q = ev.target.closest('.q'); if (!q) return;
       COMPTES[q.dataset.cle] = Math.max(0, parseInt(q.value, 10) || 0);
+      statutVerification();
       majExpedier();
       PAGI2.dessiner(); majProgres();
     });
@@ -415,6 +407,7 @@ function pageCommande(id) {
         return;
       }
       COMPTES[r.cle] = v + 1;
+      statutVerification();
       bip(true);
       scanMsg('✓ ' + r.sku + ' — ' + (v + 1) + '/' + att
         + ((v + 1) === att ? ' (ligne complète)' : ''), '#4ade80');
@@ -510,8 +503,10 @@ function pageCommande(id) {
      Verifier et je n arrive pas a la verification >>. Reinventer un routage ici
      plutot que reprendre celui du site, c est deux regles pour un meme geste. */
   function accueillir(statut){
-    var enCours = statut === 'preparing' || statut === 'verification';
-    if (enCours) Assist.aller(1);
+    // Plus de saut d etape : l etape 0 EST la verification, pour tout statut.
+    // Ouvrir l assistant, c est commencer la preparation : le statut le dit
+    // tout de suite, et la liste des commandes derriere le voit.
+    avancerStatut('preparing');
     // La question du bon : au DEBUT du parcours, ou en re-entree d une
     // preparation sans etiquette — jamais quand on vient verifier ou expedier.
     if (statut === 'verification') return;
@@ -534,8 +529,7 @@ function pageCommande(id) {
       // Le suivi peut etre arrive par la fenetre Expedition pendant qu on etait
       // ailleurs : on le reprend, sans ecraser une saisie en cours.
       if (r.suivi && !String(val('c-suivi') || '').trim()) poser('c-suivi', r.suivi);
-      var enCours = r.statut === 'preparing' || r.statut === 'verification';
-      Assist.aller(enCours ? 1 : 0);
+      Assist.aller(0);
       majExpedier();
     });
   };
@@ -547,10 +541,10 @@ function pageCommande(id) {
       return P.appeler('commande:lire', ID).then(function(r){
         if (!r || !r.ok) { vide('Commande indisponible', expliquer(r)); return; }
         CMD = r;
-        /* ⚠ Le statut D OUVERTURE est capture ICI : avancerStatut passe la
-           commande a << preparing >> des l arrivee sur l etape 1, et lire
-           CMD.statut apres coup aurait fait dire << deja en preparation >> a une
-           commande qu on vient tout juste de commencer. */
+        /* ⚠ Le statut D OUVERTURE est capture ICI : accueillir() passe la
+           commande a << preparing >> des l ouverture, et lire CMD.statut apres
+           coup aurait fait dire << deja en preparation >> a une commande qu on
+           vient tout juste de commencer. */
         var statutOuverture = r.statut;
         document.getElementById('titre').textContent = 'Préparation — ' + r.numero;
         dessiner();
@@ -584,7 +578,7 @@ function pageCommande(id) {
     var pourquoi = '';
     if (!CTX || !CTX.peutExpedier) pourquoi = 'Votre rôle ne permet pas d’expédier.';
     else if (!verifOk) pourquoi = 'Vérifiez le colis d’abord — ' + comptes() + ' sur ' + attendus() + ' unités confirmées.';
-    else if (!etiqOk) pourquoi = 'Générez l’étiquette (étape 3), ou cochez « Expédier sans numéro de suivi ».';
+    else if (!etiqOk) pourquoi = 'Générez l’étiquette (étape 2), ou cochez « Expédier sans numéro de suivi ».';
     bEnr.title = pourquoi || 'Marquer la commande expédiée et prévenir le client';
     return pourquoi;
   }
