@@ -945,8 +945,24 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
     + 'return SzPont.executer.apply(null,[' + litteralJs(nom) + '].concat('
     + litteralJs(Array.isArray(args) ? args : []) + '));'
     + '}catch(e){return{ok:false,motif:"erreur"};}})()';
+  // ⚠⚠ LE PLAFOND EST ICI AUSSI, ET C'EST CELUI QUI COMPTE VRAIMENT.
+  // `executeJavaScript` attend la promesse rendue par la page. Si celle-ci ne se
+  // règle JAMAIS — une opération du site qui interroge un périphérique muet, par
+  // exemple une imprimante Bluetooth éteinte — cet `await` ne rend jamais rien.
+  // Aucune exception, aucun journal : l'appel reste simplement en suspens, et la
+  // fenêtre native attend pour toujours.
+  // Vécu le 2026-08-07 : la fenêtre Imprimantes restait sur « Lecture de l'état… »
+  // indéfiniment. J'avais posé un plafond dans le préchargement, mais le vrai
+  // blocage est ici — et un garde placé du mauvais côté ne garde rien.
+  // 8 secondes : au-delà, plus aucune opération de ce pont n'a de raison d'être
+  // encore en cours, et mieux vaut un refus explicite qu'une attente muette.
   try {
-    const r = await wc.executeJavaScript(code, true);
+    let fini = false;
+    const travail = wc.executeJavaScript(code, true).then((r) => { fini = true; return r; });
+    const plafond = new Promise((resoudre) => {
+      setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, 8000);
+    });
+    const r = await Promise.race([travail, plafond]);
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
   } catch { return { ok: false, motif: 'pont_indisponible' }; }
 });
