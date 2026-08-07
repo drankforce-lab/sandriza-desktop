@@ -66,6 +66,14 @@ const CSS_PROPRE = `
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x{position:absolute;top:2px;right:2px;width:18px;height:18px;padding:0;
   border-radius:50%;font-size:.7rem;line-height:1;background:rgba(14,21,34,.85)}
+.lgstk{display:flex;align-items:center;gap:.5rem;padding:.2rem .3rem;border-radius:6px}
+.lgstk .c1{flex:0 0 5rem}
+.lgstk .c2{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lgstk .c3{flex:0 0 6rem}
+.lgstk .c4{flex:0 0 12rem}
+.lgstk.entete{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;
+  border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
+.lgstk:not(.entete):hover{background:rgba(255,255,255,.04)}
 .theque{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;
   max-height:46vh;overflow-y:auto;padding-right:.2rem}
 .theque .ph{cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.12);
@@ -291,8 +299,12 @@ function pageProduit(id) {
       + '<div class="carte"><h2>Photo principale</h2><div class="photo">'
       + '<div class="vign" id="p-vign">aucune photo</div><div class="cmd">'
       + '<input type="file" id="p-fichier" accept="image/*">'
-      + '<button type="button" id="p-vider">Retirer la photo</button>'
-      + '<button type="button" id="p-theque">🖼 Choisir dans la photothèque…</button>'
+      // Les boutons sur UNE ligne, a leur largeur : etires sur toute la carte,
+      // ils avaient le poids visuel d une action principale alors que ce sont
+      // deux gestes secondaires.
+      + '<div style="display:flex;gap:.4rem;flex-wrap:wrap">'
+      + '<button type="button" id="p-theque">🖼 Photothèque…</button>'
+      + '<button type="button" id="p-vider">Retirer</button></div>'
       + '<div class="aide">Maximum 8 Mo. Déposée dans le stockage à l’enregistrement.</div>'
       + '</div></div></div>'
       + '<div class="carte"><h2 id="p-vues-titre">Vues supplémentaires</h2>'
@@ -323,15 +335,19 @@ function pageProduit(id) {
       + 'donnerait deux messages contradictoires sur la même fiche.</div></div>'
       + bascule('p-finalret', 'Vente finale, mais retour accepté malgré tout')
       + '</div></div>'
-      + '<div class="carte"><h2>Repères</h2><div class="grille">'
-      + ch('p-emoji', 'Émoji', { placeholder: '👗' })
-      + ch('p-hex', 'Couleur d’accent', { type: 'color' })
-      + ch('p-seuil', 'Seuil d’alerte de stock', { type: 'number', min: 0, pas: '1' })
+      // ⚠ « Repères » retire a la demande. L emoji et la couleur d accent ne
+      // servent qu au rendu interne des listes ; les demander a la creation d un
+      // produit occupait une carte entiere pour deux reglages qu on ne touche
+      // jamais. Le SEUIL, lui, reste : il declenche les alertes de stock.
+      + '<div class="carte"><h2>Alerte de stock</h2><div class="grille">'
+      + ch('p-seuil', 'Seuil d’alerte', { type: 'number', min: 0, pas: '1' })
       + '</div></div></div>');
 
     // 7 — Stock
     h.push('<div class="etape"><div class="carte plein" id="p-zone"><h2>Stock par variante</h2>'
       + '<div class="rech"><input placeholder="Filtrer par taille ou couleur…"><span class="cpt" id="p-somme"></span></div>'
+      + '<div class="lgstk entete"><span class="c1">Taille</span><span class="c2">Couleur</span>'
+      + '<span class="c3">Quantité</span><span class="c4">Entrepôt</span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
 
     document.getElementById('corps').innerHTML = h.join('');
@@ -340,7 +356,6 @@ function pageProduit(id) {
     else {
       document.getElementById('p-actif').checked = true;
       poser('p-seuil', String(CTX.seuilDefaut));
-      poser('p-hex', '#c9a97e');
       poser('p-regime', '0');
       // Une categorie deja choisie n emet aucun evenement : on demande le code
       // des l ouverture, sinon il n arrive qu au premier changement.
@@ -864,16 +879,21 @@ function pageProduit(id) {
     var zone = document.getElementById('p-zone');
     if (!PAGI) {
       PAGI = new Pagi(zone, {
+        // ⚠ UN VRAI TABLEAU, avec ses en-tetes. Sans eux, on voyait quatre
+        // colonnes sans savoir laquelle se saisit et laquelle se choisit — et la
+        // quantite ressemblait a un identifiant.
         ligne: function(x){
           var q = STOCK[x.cle] || 0, lo = LOCS[x.cle] || '';
-          return '<div class="lg"><span style="flex:0 0 5rem">' + esc(x.taille) + '</span>'
-            + '<span style="flex:1 1 auto;min-width:0">' + esc(x.couleur) + '</span>'
-            + '<input class="q" type="number" min="0" step="1" data-cle="' + esc(x.cle) + '" value="' + esc(q) + '">'
+          return '<div class="lgstk">'
+            + '<span class="c1">' + esc(x.taille) + '</span>'
+            + '<span class="c2">' + esc(x.couleur) + '</span>'
+            + '<span class="c3"><input class="q" type="number" min="0" step="1" placeholder="0"'
+            + ' data-cle="' + esc(x.cle) + '" value="' + esc(q) + '"></span>'
             + (CTX.entrepots.length
-                ? '<select class="loc" data-cle="' + esc(x.cle) + '" style="flex:0 0 9rem"><option value="">—</option>'
+                ? '<span class="c4"><select class="loc" data-cle="' + esc(x.cle) + '"><option value="">— aucun —</option>'
                   + CTX.entrepots.map(function(w){
                       return '<option value="' + esc(w.id) + '"' + (lo === w.id ? ' selected' : '') + '>' + esc(w.nom) + '</option>';
-                    }).join('') + '</select>'
+                    }).join('') + '</select></span>'
                 : '')
             + '</div>';
         },
@@ -917,7 +937,6 @@ function pageProduit(id) {
     // plus lisible pour un vetement.
     poser('p-poids', p.weight ? String(Math.round(p.weight * 1000 * 10) / 10) : '');
     poser('p-unite', 'g');
-    poser('p-emoji', p.emoji || ''); poser('p-hex', p.colorHex || '#c9a97e');
     poser('p-seuil', p.lowStock != null ? String(p.lowStock) : String(CTX.seuilDefaut));
     document.getElementById('p-actif').checked = p.active !== false;
     document.getElementById('p-finalret').checked = !!p.finalSaleReturnOk;
@@ -1046,7 +1065,6 @@ function pageProduit(id) {
       salePrice: argentNombre(val('p-solde')),
       acquisitionCost: argentNombre(val('p-cout')),
       weight: enKg(val('p-poids'), val('p-unite')),
-      emoji: val('p-emoji'), colorHex: val('p-hex'),
       lowStock: parseInt(val('p-seuil'), 10),
       active: coché('p-actif'), regime: val('p-regime'),
       finalSaleReturnOk: coché('p-finalret'),
