@@ -54,7 +54,14 @@ body{background:#0e1522;color:#e8edf5;
 .svc .d{flex:1 1 auto;min-width:0}
 .svc .n{font-weight:600;font-size:.95rem}
 .svc .m{font-size:.78rem;color:#8fa1b8;margin-top:.12rem}
-.svc .a{flex:0 0 auto;display:flex;gap:.4rem}
+/* La liste deroulante EST le controle : elle prend la largeur, comme un champ de
+   formulaire, et non la taille d un bouton perdu au bout de la ligne. */
+.svc .d select{width:100%;max-width:34rem;margin-top:.35rem;font:inherit;
+  color:#e8edf5;background:#0f1826;border:1px solid rgba(255,255,255,.16);
+  border-radius:8px;padding:.4rem .55rem}
+.svc .d select:focus{outline:none;border-color:#c9a97e}
+.svc .d select:disabled{opacity:.5}
+.svc .a{flex:0 0 auto;display:flex;gap:.4rem;align-self:flex-end}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
   color:#e8edf5;transition:background .13s,border-color .13s}
@@ -146,33 +153,78 @@ function pageImprimantes() {
     if (!e.services || !e.services.length) {
       h.push('<div class="lg"><div class="v" style="color:#8fa1b8">Aucun service à associer.</div></div>');
     } else {
-      e.services.forEach(function(s){
-        h.push('<div class="svc"><div class="d">'
-          + '<div class="n">' + esc(s.titre) + '</div>'
-          + '<div class="m">' + (s.imprimante
-              ? esc(s.imprimante) + ' · ' + esc(fmtFormat(s.largeurPo, s.hauteurPo))
-              : '<span class="att">aucune imprimante choisie</span>') + '</div>'
-          + '</div><div class="a">'
-          + '<button data-choisir="' + esc(s.cle) + '"' + (dispo ? '' : ' disabled') + '>Choisir…</button>'
-          + '<button data-tester="' + esc(s.cle) + '"' + (dispo && s.imprimante ? '' : ' disabled') + '>Test</button>'
-          + '</div></div>');
-      });
+      // ⚠ UNE LISTE DEROULANTE, PLUS UN BOUTON QUI OUVRE UNE BOITE AILLEURS.
+      // << Choisir… >> deleguait la selection a la fenetre PRINCIPALE : on quittait
+      // cette fenetre pour choisir, et sur un second ecran la boite apparaissait
+      // sur l autre moniteur — on la cherchait. Le choix se fait ici, sur place.
+      // ⚠ LES IMPRIMANTES VIRTUELLES (PDF, fax, OneNote) SONT RANGEES A PART :
+      // elles n impriment sur rien, et les proposer au meme rang qu une vraie
+      // machine fait choisir << Microsoft Print to PDF >> pour des etiquettes.
+      var opts = '';
+      if (!IMPRS) {
+        opts = '<option value="">Liste non chargée…</option>';
+      } else {
+        var reelles = IMPRS.filter(function(p){ return !p.virtuelle; });
+        var virt    = IMPRS.filter(function(p){ return p.virtuelle; });
+        var ligne = function(p, choisie){
+          return '<option value="' + esc(p.nom) + '"' + (p.nom === choisie ? ' selected' : '') + '>'
+            + esc(p.nom) + (p.defaut ? ' (par défaut)' : '') + '</option>';
+        };
+        opts = '<option value="">— aucune —</option>';
+        // ⚠ Une imprimante ASSOCIEE mais ABSENTE de la liste doit rester visible,
+        // sinon on croirait qu elle a ete effacee alors qu elle est seulement
+        // eteinte ou debranchee — et l enregistrer a nouveau la remplacerait.
+        var connue = IMPRS.some(function(p){ return p.nom === s.imprimante; });
+        if (s.imprimante && !connue) {
+          opts += '<option value="' + esc(s.imprimante) + '" selected>' + esc(s.imprimante) + ' (hors ligne)</option>';
+        }
+        opts += reelles.map(function(p){ return ligne(p, s.imprimante); }).join('');
+        if (virt.length) {
+          opts += '<optgroup label="Sorties virtuelles (n’impriment sur rien)">'
+            + virt.map(function(p){ return ligne(p, s.imprimante); }).join('') + '</optgroup>';
+        }
+      }
+      h.push('<div class="svc"><div class="d">'
+        + '<div class="n">' + esc(s.titre) + '</div>'
+        + '<div class="m">' + esc(fmtFormat(s.largeurPo, s.hauteurPo))
+        + (s.imprimante ? '' : ' · <span class="att">aucune imprimante choisie</span>') + '</div>'
+        + '<select data-svc="' + esc(s.cle) + '"' + (dispo && IMPRS ? '' : ' disabled') + '>' + opts + '</select>'
+        + '</div><div class="a">'
+        + '<button data-tester="' + esc(s.cle) + '"' + (dispo && s.imprimante ? '' : ' disabled') + '>Test d’impression</button>'
+        + '</div></div>');
     }
     h.push('</div>');
     corps.innerHTML = h.join('');
     sous.textContent = dispo ? 'agent détecté' : 'agent absent';
   }
 
+  // ⚠ LA LISTE DES IMPRIMANTES EST LUE UNE FOIS, PAS A CHAQUE REDESSIN.
+  // Interroger l agent ouvre LE PILOTE DE CHAQUE IMPRIMANTE (c est ecrit dans
+  // printagent.js) : le refaire a chaque changement bloquerait une thermique
+  // Bluetooth en train de recevoir. null = pas encore lue, ce qui n est pas la
+  // meme chose qu une liste vide — et la fenetre le dit.
+  var IMPRS = null;
+
   var enCours = false;
-  function relire(){
+  function relire(rechargerListe){
     if (enCours) return;
     enCours = true;
     dire('Lecture…');
-    P.appeler('imprimantes:etat').then(function(r){
-      enCours = false;
-      if (!r || !r.ok) { sous.textContent = ''; vide('État indisponible', expliquer(r && r.motif)); dire(''); return; }
-      dessiner(r);
-      dire('');
+    var suite = function(){
+      P.appeler('imprimantes:etat').then(function(r){
+        enCours = false;
+        if (!r || !r.ok) { sous.textContent = ''; vide('État indisponible', expliquer(r && r.motif)); dire(''); return; }
+        dessiner(r);
+        dire('');
+      });
+    };
+    if (IMPRS && !rechargerListe) { suite(); return; }
+    P.appeler('imprimantes:liste').then(function(l){
+      // Un echec de liste n empeche PAS de lire l etat : on montre les
+      // associations existantes, avec la liste desactivee et le motif affiche.
+      IMPRS = (l && l.ok) ? (l.imprimantes || []) : null;
+      if (!IMPRS) dire('Liste des imprimantes indisponible : ' + expliquer(l && l.motif), 'att');
+      suite();
     });
   }
 
@@ -181,20 +233,7 @@ function pageImprimantes() {
   // perdus sans que rien ne le signale — les boutons cesseraient de repondre.
   corps.addEventListener('click', function(ev){
     var b = ev.target.closest('button'); if (!b || b.disabled) return;
-    var c = b.getAttribute('data-choisir');
     var t = b.getAttribute('data-tester');
-    if (c) {
-      dire('Sélection en cours dans la fenêtre principale…');
-      b.disabled = true;
-      P.appeler('imprimantes:choisir', c).then(function(r){
-        if (!r || !r.ok) { dire(expliquer(r && r.motif), 'err'); b.disabled = false; return; }
-        // On RELIT au lieu de croire la reponse : c est l agent qui fait foi,
-        // et l on veut voir le format associe, pas seulement le nom choisi.
-        relire();
-        dire(r.choisie ? 'Imprimante associée.' : 'Aucun changement.', r.choisie ? 'bon' : '');
-      });
-      return;
-    }
     if (t) {
       dire('Envoi du test…');
       b.disabled = true;
@@ -206,7 +245,28 @@ function pageImprimantes() {
     }
   });
 
-  document.getElementById('btn-relire').onclick = relire;
+  // ⚠ LE CHOIX S ENREGISTRE AU CHANGEMENT, et l on RELIT ensuite. C est l agent
+  // qui fait foi : croire la reponse afficherait un format que l agent n a peut-
+  // etre pas retenu. Le << change >> est delegue pour la meme raison que les
+  // boutons — le corps est redessine a chaque lecture.
+  corps.addEventListener('change', function(ev){
+    var s = ev.target.closest('select[data-svc]'); if (!s || s.disabled) return;
+    var cle = s.getAttribute('data-svc');
+    var nom = s.value;
+    s.disabled = true;
+    dire(nom ? 'Association…' : 'Retrait de l’association…');
+    P.appeler('imprimantes:definir', cle, nom).then(function(r){
+      s.disabled = false;
+      if (!r || !r.ok) { dire(expliquer(r && r.motif), 'err'); relire(); return; }
+      relire();
+      dire(nom ? 'Imprimante associée.' : 'Association retirée.', 'bon');
+    });
+  });
+
+  // « Relire » recharge AUSSI la liste des imprimantes : c est le geste qu on fait
+  // apres avoir branche une machine, et ne relire que l etat ne la ferait pas
+  // apparaitre.
+  document.getElementById('btn-relire').onclick = function(){ relire(true); };
   document.getElementById('btn-fermer').onclick = function(){ P.fermer(); };
   relire();
 })();

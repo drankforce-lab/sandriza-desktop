@@ -423,14 +423,14 @@ function pageProduit(id) {
       + '<select id="p-retours">'
       + '<option value="ok">✅ Acceptés</option>'
       + '<option value="aucun">🚫 Aucun retour</option>'
-      + '</select>'
-      + '<div class="aide" id="p-ret-note" style="display:none;margin-top:.2rem">'
-      + 'Imposé par le régime de vente choisi.</div></div>'
+      + '</select></div>'
       + '</div>'
-      + '<div class="ch">'
-      + '<div id="p-fs-note" class="avis">L’étiquette de mise en marché est retirée : '
-      + 'ce régime porte déjà son propre badge en boutique, et en poser un second '
-      + 'donnerait deux messages contradictoires sur la même fiche.</div></div>'
+      // ⚠ DEUX ENCARTS RETIRES le 2026-08-07, a la demande : ils EXPLIQUAIENT ce
+      // que l ecran montrait deja. Un champ grise et desactive dit tout seul qu il
+      // est impose ; lui ajouter << Impose par le regime de vente choisi >> ne
+      // renseigne personne et occupe la place utile. Meme chose pour le paragraphe
+      // sur l etiquette de mise en marche : le champ Etiquette se vide sous les
+      // yeux, ce qui est plus clair que trois lignes pour le dire.
       // ⚠ « VENTE FINALE, MAIS RETOUR ACCEPTE MALGRE TOUT » A ETE RETIRE, et il
       // n aurait jamais du reapparaitre ici. Le site a ABANDONNE ce reglage :
       // admin.js le dit explicitement (<< finalSaleReturnOk n a donc plus de
@@ -689,8 +689,6 @@ function pageProduit(id) {
     var reg = document.getElementById('p-regime');
     var ret = document.getElementById('p-retours');
     var impose = !!reg && reg.value !== 'normal';
-    var n = document.getElementById('p-fs-note');
-    if (n) n.classList.toggle('on', impose);
     if (impose) { var t = document.getElementById('p-etiq'); if (t) t.value = ''; }
     if (ret) {
       if (impose) {
@@ -708,8 +706,6 @@ function pageProduit(id) {
         ret.style.cursor = '';
       }
     }
-    var rn = document.getElementById('p-ret-note');
-    if (rn) rn.style.display = impose ? '' : 'none';
     majMarge();
   }
 

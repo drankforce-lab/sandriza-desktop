@@ -880,6 +880,7 @@ const ouvrirApropos = () => {
 const OPS_PONT = new Set([
   'identite',
   'imprimantes:etat', 'imprimantes:choisir', 'imprimantes:tester',
+  'imprimantes:liste', 'imprimantes:definir',
   'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
   'collection:contexte', 'collection:decrire', 'collection:lire', 'collection:enregistrer',
   'produit:contexte', 'produit:sku', 'produit:nip', 'produit:nipExige',
