@@ -111,6 +111,10 @@ function pageImprimantes() {
     agent_absent:   'L’agent d’impression n’est pas joignable sur ce poste.',
     indisponible:   'L’administration n’est pas encore chargée dans la fenêtre principale.',
     pont_indisponible: 'La fenêtre principale ne répond pas.',
+    // ⚠ Cette fenêtre a sa PROPRE table de motifs (elle n'utilise pas le socle) :
+    // un motif ajouté au socle doit aussi l'être ici, sinon il s'affiche comme
+    // « Erreur inattendue » — c'est-à-dire comme rien.
+    delai:          'La fenêtre principale n’a pas répondu à temps. « Actualiser » pour réessayer ; si cela persiste, rechargez la fenêtre principale (Ctrl+R).',
     operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
     echec:          'L’opération a échoué.'
   };

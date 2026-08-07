@@ -24,8 +24,32 @@ contextBridge.exposeInMainWorld('szPont', {
   // Rend toujours un objet : { ok:true, … } ou { ok:false, motif:'…' }.
   // ⚠ Jamais d'exception vers la page : une fenêtre qui plante sur un refus de
   // droit est plus difficile à comprendre qu'une fenêtre qui l'affiche.
-  appeler: (op, ...args) => ipcRenderer.invoke('pont:appeler', String(op || ''), args)
-    .catch(() => ({ ok: false, motif: 'pont_indisponible' })),
+  // ⚠⚠ UN DÉLAI MAXIMUM, ET C'EST LA CORRECTION LA PLUS IMPORTANTE DE CE FICHIER.
+  // Il n'y en avait AUCUN. Le `.catch` ne se déclenche que sur un REJET ; une
+  // opération qui ne se termine jamais ne rejette pas — elle reste en suspens. La
+  // promesse ne se règle donc jamais, et la fenêtre native attend indéfiniment,
+  // sans message et sans moyen de savoir pourquoi. Vécu le 2026-08-07 : la fenêtre
+  // Imprimantes restait sur « Lecture de l'état… » pour toujours, et j'ai d'abord
+  // cherché le défaut dans l'opération plutôt que dans l'absence de délai.
+  //
+  // ⚠ ET C'EST STRUCTUREL, pas propre à une fenêtre : chaque fenêtre devait sinon
+  // poser son propre garde, sur chaque appel. En oublier un — ce que j'ai fait —
+  // suffit à figer l'écran.
+  //
+  // 25 secondes, parce que certaines opérations sont LÉGITIMEMENT longues : une
+  // étiquette demandée à un transporteur, un test d'impression, une rédaction par
+  // le service d'IA. Trop court abandonnerait un travail en cours ; l'important
+  // n'est pas d'être rapide, c'est de finir par répondre.
+  appeler: (op, ...args) => {
+    let fini = false;
+    const attente = ipcRenderer.invoke('pont:appeler', String(op || ''), args)
+      .then((r) => { fini = true; return r; })
+      .catch(() => { fini = true; return { ok: false, motif: 'pont_indisponible' }; });
+    const plafond = new Promise((resoudre) => {
+      setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, 25000);
+    });
+    return Promise.race([attente, plafond]);
+  },
 
   // Fermer proprement — la fenêtre n'a pas de barre de menu à elle.
   fermer: () => ipcRenderer.send('pont:fermer'),

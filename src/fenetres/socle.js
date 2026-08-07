@@ -135,6 +135,7 @@ var MOTIFS = {
   droit:              'Votre rôle ne donne pas accès à cette opération.',
   indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
   pont_indisponible:  'La fenêtre principale ne répond pas.',
+  delai:              'La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).',
   operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
   introuvable:        'Cette fiche n’existe plus.',
   nom_requis:         'Le nom est obligatoire.',
