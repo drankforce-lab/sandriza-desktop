@@ -87,9 +87,20 @@ jobs:
 
       # Un simple contrôle de syntaxe : une faute de frappe ici coûte une
       # construction complète et une réinstallation sur chaque poste.
+      # ⚠ `src/*.js` NE COUVRAIT PAS `src/fenetres/`, où vit tout le contenu des
+      # fenêtres natives — c'est-à-dire l'essentiel de ce qui change d'une version
+      # à l'autre. Et `node --check` n'y aurait de toute façon pas suffi : le
+      # script de chaque fenêtre vit dans un littéral de gabarit, donc pour Node
+      # c'est une CHAÎNE, et une faute dedans passe inaperçue. La fenêtre s'ouvre,
+      # reste sur « Chargement… », et rien n'explique pourquoi.
+      # `verifier-fenetres.js` compile le script PRODUIT, refuse l'accent grave
+      # égaré dans un commentaire (arrivé quatre fois) et vérifie les ancres du
+      # socle. C'est le contrôle qui a de la valeur ici, pas le plus rapide.
       - name: Contrôle de syntaxe
         shell: bash
-        run: for f in src/*.js; do node --check "$f"; done
+        run: |
+          for f in src/*.js; do node --check "$f"; done
+          node tools/verifier-fenetres.js
 
       - name: Construire (${{ matrix.arch }})
         run: npx electron-builder --win --${{ matrix.arch }} --publish never
