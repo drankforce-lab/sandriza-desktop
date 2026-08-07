@@ -1012,6 +1012,28 @@ ipcMain.handle('fenetre:pleinecran', (e) => {
 // ⚠ UNE SEULE PAR CLÉ. Sans ce registre, cliquer deux fois sur « Nouveau
 // fournisseur » ouvrirait deux formulaires sur la même fiche : deux verrous
 // demandés, un seul obtenu, et la deuxième fenêtre travaillerait pour rien.
+// ⚠ LES OUTILS DE DEVELOPPEMENT DANS LES FENETRES NATIVES, ET POURQUOI CELA
+// COMPTE. Ctrl+Shift+I ne faisait RIEN : une fenêtre native n'a pas de menu, donc
+// aucun raccourci n'y est enregistré. Conséquence vécue le 2026-08-07 : la fenêtre
+// Imprimantes est restée bloquée à travers QUATRE versions, et l'erreur — s'il y en
+// avait une — n'était visible de personne. Ni de l'usager, ni de moi.
+// Une fenêtre qu'on ne peut pas inspecter est une fenêtre qu'on répare en
+// devinant. Le raccourci est posé sur chaque fenêtre native, une fois pour toutes.
+const brancherOutils = (win) => {
+  try {
+    win.webContents.on('before-input-event', (ev, entree) => {
+      if (entree.type !== 'keyDown') return;
+      const k = String(entree.key || '').toLowerCase();
+      if ((entree.control || entree.meta) && entree.shift && k === 'i') {
+        ev.preventDefault();
+        win.webContents.toggleDevTools();
+      }
+      // F12 aussi : c'est le réflexe de la moitié des gens.
+      if (k === 'f12') { ev.preventDefault(); win.webContents.toggleDevTools(); }
+    });
+  } catch {}
+};
+
 const fenetresNatives = new Map();
 const ouvrirNative = (cle, titre, html, opts = {}) => {
   const deja = fenetresNatives.get(cle);
@@ -1051,6 +1073,7 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
   win.on('moved', retenir);
   win.on('resized', retenir);
   win.on('closed', () => { fenetresNatives.delete(cle); });
+  brancherOutils(win);
   win.once('ready-to-show', () => win.show());
   win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
   return win;
@@ -1088,6 +1111,7 @@ const ouvrirImprimantes = () => {
   imprimantesWin.on('moved', retenir);
   imprimantesWin.on('resized', retenir);
   imprimantesWin.on('closed', () => { imprimantesWin = null; });
+  brancherOutils(imprimantesWin);
   imprimantesWin.once('ready-to-show', () => { if (imprimantesWin) imprimantesWin.show(); });
   imprimantesWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageImprimantes()));
 };

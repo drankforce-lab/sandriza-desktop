@@ -99,6 +99,45 @@ function pageImprimantes() {
   var sous  = document.getElementById('sous');
 
   function dire(t, genre){ msg.textContent = t || ''; msg.className = 'msg' + (genre ? ' ' + genre : ''); }
+
+  /* ══ DIAGNOSTIC AFFICHE DANS LA FENETRE ════════════════════════════════════
+     ⚠ POURQUOI IL EST LA. Cette fenetre est restee bloquee sur
+     << Lecture de l etat… >> a travers QUATRE versions. Les outils de
+     developpement ne s ouvrent pas dans une fenetre native, donc l erreur — s il
+     y en avait une — n etait visible de personne : ni de l usager, ni de moi. J ai
+     publie trois correctifs sur des hypotheses, dont deux fausses.
+     Une fenetre qui ne peut pas dire ce qui lui arrive est une fenetre qu on ne
+     peut pas reparer. Celle-ci le dit maintenant, a l ecran, sans outil.
+     Le journal reste DISCRET quand tout va bien : il n apparait que si l ecran
+     n a rien affiche au bout de trois secondes, ou si une erreur survient. */
+  var JOURNAL = [];
+  var rendu = false;
+  function noter(t){
+    JOURNAL.push(new Date().toLocaleTimeString('fr-CA') + ' — ' + t);
+    var z = document.getElementById('diag');
+    if (z) z.textContent = JOURNAL.join('\n');
+  }
+  function montrerJournal(titre){
+    corps.innerHTML = '<div class="vide"><div class="gros">' + esc(titre) + '</div>'
+      + '<div style="font-size:.82rem;margin-bottom:.6rem">Ce que la fenêtre a pu faire, étape par étape :</div>'
+      + '<pre id="diag" style="text-align:left;white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;'
+      + 'background:#0b1220;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem .8rem;'
+      + 'max-width:52rem;color:#cbd8e6">' + esc(JOURNAL.join('\n')) + '</pre></div>';
+  }
+  // ⚠ UNE ERREUR NON RATTRAPEE NE DOIT PLUS ETRE INVISIBLE. Sans ces deux
+  // ecouteurs, un defaut de script laissait la fenetre sur son message initial —
+  // exactement ce qu on a vu pendant quatre versions.
+  window.onerror = function(m, src, l, c){
+    noter('ERREUR : ' + m + ' (ligne ' + l + ')');
+    montrerJournal('Une erreur a interrompu la fenêtre');
+    return true;
+  };
+  window.addEventListener('unhandledrejection', function(ev){
+    noter('PROMESSE REJETEE : ' + ((ev.reason && ev.reason.message) || ev.reason));
+    montrerJournal('Une opération a échoué');
+  });
+  noter('page chargée');
+  noter('pont : ' + (P ? 'présent' : 'ABSENT') + (P && P.appeler ? ', appeler présent' : ', appeler ABSENT'));
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
 
@@ -219,17 +258,50 @@ function pageImprimantes() {
   // arriere-plan, et les menus se remplissent quand elle est la.
   var enCours = false;
   function relire(){
-    if (enCours) return;
+    if (enCours) { noter('relire ignoré : une lecture est déjà en cours'); return; }
     enCours = true;
     dire('Lecture…');
-    P.appeler('imprimantes:etat').then(function(r){
+    noter('appel de imprimantes:etat…');
+    // ⚠ ON JOURNALISE LES TROIS ISSUES : la reponse, le refus, et l exception
+    // synchrone. C est la troisieme qui nous a echappe pendant quatre versions —
+    // un « then » ne rattrape pas une erreur levee AVANT lui.
+    var p;
+    try { p = P.appeler('imprimantes:etat'); }
+    catch (e) {
       enCours = false;
+      noter('APPEL IMPOSSIBLE : ' + (e && e.message));
+      montrerJournal('Le pont a refusé l’appel');
+      return;
+    }
+    if (!p || typeof p.then !== 'function') {
+      enCours = false;
+      noter('le pont n’a pas rendu de promesse (type ' + typeof p + ')');
+      montrerJournal('Réponse inattendue du pont');
+      return;
+    }
+    p.then(function(r){
+      enCours = false;
+      noter('réponse reçue : ' + (r ? ('ok=' + r.ok + (r.motif ? ' motif=' + r.motif : '')) : 'vide'));
       if (!r || !r.ok) { sous.textContent = ''; vide('État indisponible', expliquer(r && r.motif)); dire(''); return; }
+      rendu = true;
       DERNIER = r;
       dessiner(r);
       dire(IMPRS ? '' : 'Liste des imprimantes : lecture en cours…');
+    }, function(e){
+      enCours = false;
+      noter('PROMESSE REJETEE : ' + (e && e.message));
+      montrerJournal('L’appel au pont a échoué');
     });
   }
+
+  // ⚠ LE GARDE QUI MANQUAIT A TOUS LES AUTRES. Si rien n est dessine au bout de
+  // trois secondes, la fenetre montre son journal AU LIEU de rester sur son
+  // message d attente. Trois secondes, parce que l usager a demande cinq au pire.
+  setTimeout(function(){
+    if (rendu) return;
+    noter('rien n’est arrivé après 3 s — le pont ne répond pas');
+    montrerJournal('La fenêtre n’a pas reçu de réponse');
+  }, 3000);
 
   // Le dernier etat lu, pour redessiner quand la liste arrive sans redemander
   // l etat a l agent.
