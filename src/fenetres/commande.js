@@ -260,6 +260,50 @@ function pageCommande(id) {
     document.getElementById('c-suivi').oninput = function(){ dire(''); };
   }
 
+  /* ⚠⚠ ON DEMANDE D IMPRIMER LE BON DE COMMANDE, COMME LE FAIT L ECRAN DU SITE.
+     Demande par l utilisateur le 2026-08-07 : la fenetre posait deux boutons
+     d impression et n en proposait aucun, alors que le site OUVRE le travail par
+     cette question (_confirmPrintPickingSlip). Preparer une commande commence par
+     sortir le bon : ne pas le proposer, c est obliger a y penser chaque fois, et
+     le bon finit par etre oublie.
+     ⚠ LES MEMES MOTS QUE LE SITE, y compris la nuance de la RE-ENTREE : revenir
+     dans une commande deja en preparation ne se dit pas comme la commencer, et
+     l ecran du site distingue deja les deux. Reinventer la phrase ici, c est
+     deux formulations pour un meme geste.
+     ⚠ ET ELLE NE BLOQUE RIEN : << Non, continuer >> ferme et laisse travailler.
+     Les deux boutons d impression restent dans l etape, pour reimprimer plus tard. */
+  function demanderBon(){
+    var deja = CMD && CMD.statut === 'preparing';
+    var v = document.createElement('div');
+    v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
+      + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
+    v.innerHTML = '<div style="background:#16202f;border:1px solid rgba(255,255,255,.12);'
+      + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%">'
+      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif">🚀 Préparation de la commande '
+      + esc(CMD.numero) + '</h3>'
+      + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
+          ? 'Cette commande est déjà en préparation.'
+          : 'Vous vous apprêtez à commencer la préparation de cette commande.') + '</p>'
+      + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
+          ? 'Désirez-vous (ré)imprimer un <strong>bon de commande</strong> avant de poursuivre ?'
+          : 'Pour débuter, désirez-vous imprimer un <strong>bon de commande</strong> ?') + '</p>'
+      + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
+      + '<button type="button" id="bc-non">Non, continuer sans imprimer</button>'
+      + '<button type="button" class="prim" id="bc-oui">🖨 Oui, imprimer le bon</button>'
+      + '</div></div>';
+    document.body.appendChild(v);
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
+    document.getElementById('bc-non').onclick = fermer;
+    document.getElementById('bc-oui').onclick = function(){
+      var b = this;
+      fermer();
+      // On reutilise le meme chemin que le bouton de l etape : une seule facon
+      // d imprimer un bon, donc un seul endroit ou la corriger.
+      var vrai = document.getElementById('c-bon');
+      imprimer('bon', vrai || b);
+    };
+  }
+
   function imprimer(genre, b){
     b.disabled = true; dire('Envoi à l’impression…');
     P.appeler('commande:bon', ID, genre).then(function(r){
@@ -306,7 +350,7 @@ function pageCommande(id) {
         CMD = r;
         document.getElementById('titre').textContent = 'Préparation — ' + r.numero;
         dessiner();
-        return verrou();
+        return verrou().then(function(){ demanderBon(); });
       });
     });
   }
