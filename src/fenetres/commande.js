@@ -197,13 +197,21 @@ function pageCommande(id) {
     brancher();
 
     Assist.poser([
-      { t: 'Vérification', obl: [] },
-      /* ⚠ L etape n est verte que si le SUIVI est rempli. Elle l etait des la
-         premiere visite (obl vide = << complete des le depart >>, voir le socle) :
-         le fil affichait donc un ✓ sur << Etiquette >> alors qu aucune etiquette
-         n avait ete generee. Un fil qui ment sur ce qui est fait est pire qu un
-         fil absent. */
-      { t: 'Étiquette',    obl: ['c-suivi'] },
+      /* ⚠ CHAQUE ETAPE PORTE SA REGLE (fait/refus, voir le socle), et elle sert
+         aux DEUX endroits : le vert du fil ET le refus d avancer — Suivant comme
+         un clic direct dans le fil. Signale le 2026-08-07 : << Suivant ne doit
+         pas etre disponible tant que la verification n est pas complete >>. */
+      { t: 'Vérification', obl: [],
+        fait: toutVerifie,
+        refus: function(){ return 'Vérifiez le colis d’abord — ' + comptes() + ' sur ' + attendus() + ' unités confirmées.'; } },
+      /* ⚠ << suivi rempli OU envoi sans numero assume >>. L ancienne forme
+         (obl: c-suivi) rendait l etape Expedition INATTEIGNABLE pour une remise
+         en main propre : la case cochee ne remplit aucun champ, et le fil comme
+         Suivant refusaient — alors que le bouton Expedier, lui, acceptait. Deux
+         regles pour le meme etat finissent toujours par se contredire. */
+      { t: 'Étiquette',    obl: [],
+        fait: function(){ return !!String(val('c-suivi') || '').trim() || coché('c-sans'); },
+        refus: 'Générez l’étiquette, ou cochez « Expédier sans numéro de suivi ».' },
       { t: 'Expédition',   obl: [] }
     ], function(i){
       if (i === 0 && PAGI2) { PAGI2.dessiner(); majProgres(); }
@@ -414,6 +422,10 @@ function pageCommande(id) {
       if (PAGI2) { PAGI2.dessiner(); }
       majProgres();
       majExpedier();
+      // Le fil se rafraichit sur les evenements input/change du corps — or un
+      // scan valide au lecteur ne produit que le keydown Entree : sans cet appel,
+      // la derniere unite confirmee laissait l etape << incomplete >> a l ecran.
+      Assist.fil();
     });
   }
 

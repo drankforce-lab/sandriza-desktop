@@ -228,7 +228,21 @@ var Assist = {
     var self = this;
     document.getElementById('pas').addEventListener('click', function(ev){
       var b = ev.target.closest('[data-etape]'); if (!b) return;
-      self.aller(parseInt(b.getAttribute('data-etape'), 10) || 0);
+      var cible = parseInt(b.getAttribute('data-etape'), 10) || 0;
+      /* ⚠ LE FIL NE SAUTE PAS PAR-DESSUS UNE ETAPE INACHEVEE (2026-08-07).
+         « Suivant » etait garde, mais cliquer directement une etape du fil
+         passait outre — la meme porte, sans le meme gardien. Pour avancer,
+         chaque etape traversee doit accepter qu on la quitte ; on s arrete sur
+         la PREMIERE qui refuse, la ou le travail reste. Reculer est libre. */
+      if (cible > self.i) {
+        for (var k = self.i; k < cible; k++) {
+          var m = self.manquant(k);
+          if (m) { self.aller(k); self.pointer(m, 'Remplissez ce champ pour continuer.'); return; }
+          var f = self.freine(k);
+          if (f) { self.aller(k); dire(f, 'att'); return; }
+        }
+      }
+      self.aller(cible);
     });
     document.getElementById('btn-prec').onclick = function(){ self.bouger(-1); };
     document.getElementById('btn-suiv').onclick = function(){ self.bouger(1); };
@@ -248,8 +262,25 @@ var Assist = {
     }
     this.aller(0);
   },
+  /* ⚠ UNE ETAPE PEUT PORTER SA PROPRE REGLE D ACHEVEMENT — fait: function() —
+     quand sa completude ne se lit pas dans des champs. Ajoute le 2026-08-07 pour
+     la verification d un colis : elle vit dans un COMPTEUR, pas dans un
+     formulaire, et « Suivant » laissait donc passer un colis a 0 sur 2. La regle
+     sert aux DEUX endroits qui doivent dire la meme chose : le vert du fil, et
+     le refus d avancer. refus (texte ou fonction) explique le blocage — un
+     bouton qui refuse sans dire pourquoi se lit comme une panne. */
+  freine: function(k){
+    var e = this.etapes[k];
+    if (e.fait && !e.fait()) {
+      return (typeof e.refus === 'function' ? e.refus() : e.refus)
+        || ('Terminez l’étape « ' + e.t + ' » pour continuer.');
+    }
+    return '';
+  },
   faite: function(k){
-    return this.etapes[k].obl.every(function(c){ return String(val(c) || '').trim() !== ''; });
+    var e = this.etapes[k];
+    if (e.fait && !e.fait()) return false;
+    return e.obl.every(function(c){ return String(val(c) || '').trim() !== ''; });
   },
   /* ⚠ VERT = VISITEE **ET** COMPLETE, et il faut les DEUX conditions.
      — Sans « complete » : on verdirait une etape dont il manque un champ.
@@ -295,6 +326,8 @@ var Assist = {
     if (d > 0) {
       var m = this.manquant(this.i);
       if (m) { this.pointer(m, 'Remplissez ce champ pour continuer.'); return; }
+      var f = this.freine(this.i);
+      if (f) { dire(f, 'att'); return; }
     }
     dire(''); this.aller(this.i + d);
   },
