@@ -140,6 +140,7 @@ var MOTIFS = {
   nom_requis:         'Le nom est obligatoire.',
   televersement:      'Le dépôt de l’image a échoué. Rien n’a été enregistré.',
   verrou:             'Fiche ouverte par quelqu’un d’autre.',
+  module_photos:      'La photothèque n’a pas pu être chargée dans la fenêtre principale. Rechargez-la (Ctrl+R) ; si le message revient, la session du personnel a peut-être expiré — reconnectez-vous.',
   echec:              'L’opération a échoué.'
 };
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -160,8 +161,17 @@ function coché(id){ var e = document.getElementById(id); return !!(e && e.check
    formulaire pret alors qu il ne l est pas. */
 var Assist = {
   etapes: [], i: 0, surEtape: null,
+  /* ⚠ LES ETAPES DEJA TRAVERSEES, et pourquoi il en faut la trace.
+     Une etape sans champ obligatoire est « complete » des le depart :
+     every sur une liste vide rend TRUE. Se fier a la seule completude
+     verdissait donc « Tailles et couleurs », « Photo », « Mise en marche » et
+     « Stock » AVANT qu on les ait ouvertes — un formulaire vierge s annoncait
+     pret aux quatre cinquiemes. Le critere est double : VISITEE et complete. */
+  vus: {},
+  etapes_: null,
   poser: function(etapes, surEtape){
     this.etapes = etapes; this.surEtape = surEtape || null; this.i = 0;
+    this.vus = {};
     var self = this;
     document.getElementById('pas').addEventListener('click', function(ev){
       var b = ev.target.closest('[data-etape]'); if (!b) return;
@@ -188,18 +198,20 @@ var Assist = {
   faite: function(k){
     return this.etapes[k].obl.every(function(c){ return String(val(c) || '').trim() !== ''; });
   },
-  /* ⚠ « FAITE » NE DEPEND PAS DE L ENDROIT OU L ON SE TROUVE.
-     La pastille ✓ et la COULEUR verte etaient pilotees par deux conditions
-     differentes : le crochet des que l etape etait complete, mais le vert
-     seulement si l etape etait DEJA DEPASSEE (k < i). Revenir a l etape 1
-     rendait donc gris des crochets qui restaient vrais — l ecran affirmait
-     deux choses contraires en meme temps, et la seule facon de « reverdir »
-     une etape valide etait de repasser devant. Une validite ne se perd pas
-     parce qu on a recule. */
+  /* ⚠ VERT = VISITEE **ET** COMPLETE, et il faut les DEUX conditions.
+     — Sans « complete » : on verdirait une etape dont il manque un champ.
+     — Sans « visitee » : une etape sans champ obligatoire est complete d office
+       (every sur une liste vide rend TRUE), donc verte avant d etre ouverte.
+     Et le vert NE DEPEND PAS de l endroit ou l on se trouve : c est tout le
+     point. Le code d origine exigeait k < i, si bien que revenir a l etape 1
+     eteignait des etapes reellement validees — une validite ne se perd pas parce
+     qu on a recule. La pastille ✓ et la couleur suivent desormais LE MEME
+     critere ; elles obeissaient a deux regles differentes, et l ecran affirmait
+     donc deux choses contraires en meme temps. */
   fil: function(){
     var self = this;
     document.getElementById('pas').innerHTML = this.etapes.map(function(e, k){
-      var faite = self.faite(k);
+      var faite = !!self.vus[k] && self.faite(k);
       var cl = k === self.i ? ' class="on"' : (faite ? ' class="fait"' : '');
       return '<button type="button" data-etape="' + k + '"' + cl + '><span class="n">'
         + (faite && k !== self.i ? '✓' : (k + 1)) + '</span> ' + esc(e.t) + '</button>';
@@ -207,6 +219,11 @@ var Assist = {
   },
   aller: function(k){
     this.i = Math.max(0, Math.min(this.etapes.length - 1, k));
+    /* On marque l etape A L ARRIVEE, pas au depart : « visitee » veut dire
+       « on l a eue sous les yeux ». Marquer au depart n aurait jamais marque la
+       derniere, et marquer toutes celles qu on survole en cliquant le fil aurait
+       verdi un chemin qu on n a pas parcouru. */
+    this.vus[this.i] = true;
     var self = this;
     Array.prototype.forEach.call(document.querySelectorAll('.etape'), function(el, n){
       el.classList.toggle('on', n === self.i);

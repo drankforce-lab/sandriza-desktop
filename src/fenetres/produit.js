@@ -87,9 +87,19 @@ const CSS_PROPRE = `
 /* ⚠ LA COULEUR NE PREND PLUS TOUTE LA LARGEUR RESTANTE, l ENTREPOT l absorbe.
    Un nom de couleur tient en un mot ; un entrepot porte son CODE et sa
    reference — c est lui qui manquait de place, et sa liste etait coupee. */
-.lgstk .c2{flex:0 1 11rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lgstk .c3{flex:0 0 6rem}
-.lgstk .c4{flex:1 1 14rem;min-width:0}
+/* ⚠ LES DEUX COLONNES SE PARTAGENT LE RESTE, a parts egales. Donner toute la
+   largeur restante a l entrepot le rendait demesurement large sur une grande
+   fenetre — un menu de quarante caracteres pour choisir un code de trois. Et la
+   lui refuser entierement coupait sa liste. Les deux grandissent donc ensemble,
+   et l entrepot est PLAFONNE : au-dela, le surplus retourne a la couleur. */
+.lgstk .c2{flex:1 1 9rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lgstk .c3{flex:0 0 7.4rem;display:flex;align-items:center;gap:.35rem}
+.lgstk .c3 .q{width:4.9rem;flex:0 0 auto}
+.lgstk .c4{flex:1 1 12rem;max-width:22rem;min-width:0}
+/* Sous le seuil : un AVERTISSEMENT, pas un refus. On peut tres bien enregistrer
+   une variante juste sous son seuil — mais on doit le savoir, et savoir combien
+   il en manque, sans avoir a faire la soustraction soi-meme. */
+.lgstk .al{flex:0 0 auto;font-size:.86rem;line-height:1;cursor:help;color:#fbbf24}
 .lgstk.entete{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;
   border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
 .lgstk:not(.entete):hover{background:rgba(255,255,255,.04)}
@@ -390,23 +400,45 @@ function pageProduit(id) {
       + '<div class="vues" id="p-parcoul"></div></div></div>');
 
     // 6 — Détails
-    // ⚠ LE REGIME DE VENTE EST UN CHOIX A QUATRE ETATS, pas trois cases
-    // independantes. Mes cases permettaient « vente finale ET aucun retour ET
-    // liquidation » — une combinaison que l editeur du site ne peut pas produire
-    // et que la boutique ne sait pas afficher.
+    // ⚠ LE REGIME DE VENTE N EST PAS UN JEU DE CASES INDEPENDANTES. Mes cases
+    // permettaient « vente finale ET aucun retour ET liquidation » — une
+    // combinaison que l editeur du site ne peut pas produire et que la boutique
+    // ne sait pas afficher. D ou deux menus dont les valeurs se contraignent.
     h.push('<div class="etape"><div class="carte"><h2>Mise en marché</h2><div class="bascules">'
       + bascule('p-actif', 'Produit actif (visible en boutique)')
-      + '<div class="ch" style="margin-top:.3rem"><label for="p-regime">Régime de vente</label>'
+      // ⚠ DEUX CONTROLES, LES MEMES QUATRE ETATS QU AVANT. Un menu unique
+      // melangeait deux questions sans rapport : comment l article est mis en
+      // marche, et si la cliente peut le retourner. Rien ne disait que
+      // << Vente finale >> excluait les retours — il fallait le savoir.
+      // Combinaisons : normal+retour, normal+aucun, liquidation, vente finale.
+      // Soit les quatre d origine, ni plus ni moins.
+      + '<div class="cote" style="margin-top:.3rem">'
+      + '<div class="ch"><label for="p-regime">Régime de vente</label>'
       + '<select id="p-regime">'
-      + '<option value="0">✅ Retour accepté</option>'
-      + '<option value="4">🚫 Aucun retour</option>'
-      + '<option value="3">🟡 Liquidation</option>'
-      + '<option value="1">🔴 Vente finale</option>'
+      + '<option value="normal">🛍 Normal</option>'
+      + '<option value="liq">🟡 Liquidation</option>'
+      + '<option value="final">🔴 Vente finale</option>'
+      + '</select></div>'
+      + '<div class="ch"><label for="p-retours">Retours</label>'
+      + '<select id="p-retours">'
+      + '<option value="ok">✅ Acceptés</option>'
+      + '<option value="aucun">🚫 Aucun retour</option>'
       + '</select>'
+      + '<div class="aide" id="p-ret-note" style="display:none;margin-top:.2rem">'
+      + 'Imposé par le régime de vente choisi.</div></div>'
+      + '</div>'
+      + '<div class="ch">'
       + '<div id="p-fs-note" class="avis">L’étiquette de mise en marché est retirée : '
       + 'ce régime porte déjà son propre badge en boutique, et en poser un second '
       + 'donnerait deux messages contradictoires sur la même fiche.</div></div>'
-      + bascule('p-finalret', 'Vente finale, mais retour accepté malgré tout')
+      // ⚠ « VENTE FINALE, MAIS RETOUR ACCEPTE MALGRE TOUT » A ETE RETIRE, et il
+      // n aurait jamais du reapparaitre ici. Le site a ABANDONNE ce reglage :
+      // admin.js le dit explicitement (<< finalSaleReturnOk n a donc plus de
+      // mode qui le mette a true, ancien mode liq_ok retire >>) et ses trois
+      // modes le forcent tous a false. Cette fenetre etait devenue le SEUL
+      // endroit du projet capable de le remettre a vrai — donc de produire une
+      // fiche que l editeur du site ne sait pas representer, et dont la boutique
+      // afficherait deux promesses contraires a la meme cliente.
       + '</div></div>'
       // ⚠ « Repères » retire a la demande. L emoji et la couleur d accent ne
       // servent qu au rendu interne des listes ; les demander a la creation d un
@@ -439,7 +471,8 @@ function pageProduit(id) {
     else {
       document.getElementById('p-actif').checked = true;
       poser('p-seuil', String(CTX.seuilDefaut));
-      poser('p-regime', '0');
+      poser('p-regime', 'normal');
+      poser('p-retours', 'ok');
       // Une categorie deja choisie n emet aucun evenement : on demande le code
       // des l ouverture, sinon il n arrive qu au premier changement.
       if (val('p-cat')) majSku();
@@ -510,15 +543,19 @@ function pageProduit(id) {
     // « aucun retour » (4) : ce dernier bloque les retours sans etre un mode de
     // solde, et son etiquette marketing reste donc legitime. Confondre les trois
     // aurait efface une etiquette voulue.
+    // ⚠ LE CHAMP « RETOURS » EST UN MIROIR DE LA CONSEQUENCE, PAS UN 2e REGLAGE.
+    // Sur liquidation ou vente finale, il affiche << Aucun retour >>, se grise et
+    // se desactive : ces regimes excluent deja les retours par finalSale et
+    // liquidation, que la boutique lit depuis toujours.
+    // ⚠ ET noReturn N EST PAS FORCE A VRAI POUR AUTANT. Il ne vaut vrai que
+    // dans le cas << normal + aucun retour >>, exactement comme avant : l ecrire
+    // aussi pour la liquidation reecrirait des donnees que personne n a demande
+    // de changer, et la colonne aucun_retour de l export CSV s en trouverait
+    // modifiee sur tout le catalogue. Ce qui change, c est ce qu on MONTRE.
     var reg = document.getElementById('p-regime');
-    function majRegime(){
-      var solde = reg && (reg.value === '1' || reg.value === '3');
-      var n = document.getElementById('p-fs-note');
-      if (n) n.classList.toggle('on', !!solde);
-      if (solde) { var t = document.getElementById('p-etiq'); if (t) t.value = ''; }
-      majMarge();
-    }
+    var ret = document.getElementById('p-retours');
     if (reg) reg.onchange = majRegime;
+    if (ret) ret.onchange = majRegime;
     majRegime();
     var cat = document.getElementById('p-cat');
     if (cat) cat.addEventListener('change', function(){ if (!ID) majSku(); dessinerVues(); });
@@ -635,6 +672,45 @@ function pageProduit(id) {
   function majNom(){
     var e = document.getElementById('p-nom'), z = document.getElementById('p-desc-etat');
     if (e && z) z.textContent = (e.value || '').length + '/70';
+  }
+
+  // ⚠ AU NIVEAU DU MODULE, PAS DANS brancher. Elle etait imbriquee dans
+  // brancher(), donc invisible depuis la reprise d un brouillon : l appeler de
+  // la aurait leve une erreur, et le champ des retours serait reste modifiable
+  // sur une fiche en vente finale.
+  // ⚠ LE CHAMP « RETOURS » EST UN MIROIR DE LA CONSEQUENCE, PAS UN 2e REGLAGE.
+  // Sur liquidation ou vente finale, il affiche << Aucun retour >>, se grise et
+  // se desactive : ces regimes excluent deja les retours par finalSale et
+  // liquidation, que la boutique lit depuis toujours.
+  // ⚠ ET noReturn N EST PAS FORCE A VRAI POUR AUTANT (voir pont.js) : il ne
+  // vaut vrai que dans le cas << normal + aucun retour >>, exactement comme
+  // avant. Ce qui change ici est ce qu on MONTRE, pas ce qu on ecrit.
+  function majRegime(){
+    var reg = document.getElementById('p-regime');
+    var ret = document.getElementById('p-retours');
+    var impose = !!reg && reg.value !== 'normal';
+    var n = document.getElementById('p-fs-note');
+    if (n) n.classList.toggle('on', impose);
+    if (impose) { var t = document.getElementById('p-etiq'); if (t) t.value = ''; }
+    if (ret) {
+      if (impose) {
+        // On garde le choix precedent : revenir a << Normal >> doit rendre ce qui
+        // avait ete pose, pas un defaut arbitraire.
+        if (!ret.disabled) ret.dataset.avant = ret.value;
+        ret.value = 'aucun';
+        ret.disabled = true;
+        ret.style.opacity = '.55';
+        ret.style.cursor = 'not-allowed';
+      } else {
+        if (ret.disabled && ret.dataset.avant) ret.value = ret.dataset.avant;
+        ret.disabled = false;
+        ret.style.opacity = '';
+        ret.style.cursor = '';
+      }
+    }
+    var rn = document.getElementById('p-ret-note');
+    if (rn) rn.style.display = impose ? '' : 'none';
+    majMarge();
   }
 
   // Le bouton de redaction n a de sens qu avec une photo : le service regarde
@@ -799,7 +875,7 @@ function pageProduit(id) {
     // messages contradictoires sur la meme fiche.
     var etiq = document.getElementById('p-etiq');
     var reg = val('p-regime');
-    if (etiq && reg !== '1' && reg !== '3') {
+    if (etiq && reg === 'normal') {
       if (p && s && s < p) etiq.value = 'Solde';
       else if (etiq.value === 'Solde') etiq.value = '';
     }
@@ -997,6 +1073,22 @@ function pageProduit(id) {
   // ⚠ LES QUANTITES VIVENT DANS "STOCK", PAS DANS LES CHAMPS. La liste est
   // paginee et redessinee : lire les champs a l enregistrement n aurait rendu
   // que la page affichee, et le reste aurait ete perdu sans un mot.
+  // ⚠ LE SEUIL A ZERO VEUT DIRE « NE JAMAIS ALERTER », c est la regle du projet
+  // (cascade variante -> produit -> general). Le traiter comme un seuil ordinaire
+  // aurait fait crier une alerte sur toutes les variantes vides d un produit dont
+  // on a justement decide qu il ne devait pas en declencher.
+  // ⚠ ET RIEN SUR UNE QUANTITE DE ZERO : une variante a zero sur une fiche neuve
+  // n est pas « sous le seuil », elle n est pas encore approvisionnee. Avertir
+  // partout a la creation, c est n avertir nulle part — on apprend a ne plus voir
+  // le symbole.
+  function alerteSeuil(q){
+    var s = parseInt(val('p-seuil'), 10);
+    if (!(s > 0) || !(q > 0) || q > s) return '';
+    var ilManque = s - q + 1;   // il faut DEPASSER le seuil, pas l egaler
+    return '<span class="al" title="Sous le seuil d’alerte (' + s + '). '
+      + 'Il en manque ' + ilManque + ' pour le dépasser.">⚠</span>';
+  }
+
   function majStock(){
     var t = tailles(), c = couleurs();
     var lignes = [];
@@ -1019,7 +1111,7 @@ function pageProduit(id) {
             + '<span class="c1">' + esc(x.taille) + '</span>'
             + '<span class="c2">' + esc(x.couleur) + '</span>'
             + '<span class="c3"><input class="q" type="number" min="0" step="1" placeholder="0"'
-            + ' data-cle="' + esc(x.cle) + '" value="' + esc(q) + '"></span>'
+            + ' data-cle="' + esc(x.cle) + '" value="' + esc(q) + '">' + alerteSeuil(q) + '</span>'
             + (CTX.entrepots.length
                 ? '<span class="c4"><select class="loc' + (manque ? ' manque' : '') + '" data-cle="' + esc(x.cle) + '">'
                   + '<option value="">Choisir l’emplacement</option>'
@@ -1047,6 +1139,16 @@ function pageProduit(id) {
         el.classList.toggle('enstock', q > 0);
         var s = el.querySelector('.loc');
         if (s) s.classList.toggle('manque', q > 0 && !s.value);
+        // L avertissement de seuil suit la frappe : on remplace le seul marqueur,
+        // jamais la cellule — reecrire la cellule emporterait le champ en cours
+        // de saisie et le curseur avec lui.
+        var c3 = el.querySelector('.c3');
+        if (c3) {
+          var vieux = c3.querySelector('.al');
+          if (vieux) vieux.remove();
+          var neuf = alerteSeuil(q);
+          if (neuf) c3.insertAdjacentHTML('beforeend', neuf);
+        }
       };
       zone.querySelector('.liste').addEventListener('input', function(ev){
         var q = ev.target.closest('.q');
@@ -1087,8 +1189,12 @@ function pageProduit(id) {
     poser('p-unite', 'g');
     poser('p-seuil', p.lowStock != null ? String(p.lowStock) : String(CTX.seuilDefaut));
     document.getElementById('p-actif').checked = p.active !== false;
-    document.getElementById('p-finalret').checked = !!p.finalSaleReturnOk;
-    poser('p-regime', p.liquidation ? '3' : (p.finalSale ? '1' : (p.noReturn ? '4' : '0')));
+    // ⚠ LES DEUX AXES SE LISENT SEPAREMENT, comme dans l editeur du site : la
+    // liquidation et la vente finale sont des REGIMES, noReturn est la politique
+    // de retour d un article par ailleurs normal. Les confondre ferait perdre
+    // l un des deux a chaque ouverture.
+    poser('p-regime', p.liquidation ? 'liq' : (p.finalSale ? 'final' : 'normal'));
+    poser('p-retours', p.noReturn ? 'aucun' : 'ok');
     (p.sizes || []).forEach(function(t){
       var j = document.querySelector('#p-tailles .jeton[data-t="' + String(t).replace(/"/g, '') + '"]');
       if (j) j.classList.add('on');
@@ -1386,7 +1492,7 @@ function pageProduit(id) {
         guide: val('p-guide'), etiq: val('p-etiq'), fourn: val('p-fourn'),
         prix: val('p-prix'), solde: val('p-solde'), cout: val('p-cout'),
         poids: val('p-poids'), unite: val('p-unite'), seuil: val('p-seuil'),
-        regime: val('p-regime'), actif: coché('p-actif'), finalret: coché('p-finalret')
+        regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif')
       },
       tailles: tailles(), couleurs: couleurs(),
       image: IMAGE || '', vues: VUES, parcoul: PARCOUL, stock: STOCK, locs: LOCS
@@ -1427,14 +1533,21 @@ function pageProduit(id) {
     poser('p-genre', f.genre); poser('p-age', f.age); poser('p-style', f.style);
     poser('p-guide', f.guide); poser('p-etiq', f.etiq); poser('p-fourn', f.fourn);
     poser('p-prix', f.prix); poser('p-solde', f.solde); poser('p-cout', f.cout);
-    poser('p-poids', f.poids); poser('p-seuil', f.seuil); poser('p-regime', f.regime || '0');
+    poser('p-poids', f.poids); poser('p-seuil', f.seuil);
+    // ⚠ UN BROUILLON ECRIT PAR LA VERSION PRECEDENTE ne porte que l ancien code
+    // ('0' | '1' | '3' | '4'). On le traduit : sans cela la reprise reposerait
+    // << Normal >> sur une fiche mise en vente finale, a l endroit precis ou l on
+    // croit tout retrouver.
+    poser('p-regime', f.regime === 'liq' || f.regime === '3' ? 'liq'
+      : (f.regime === 'final' || f.regime === '1' ? 'final' : 'normal'));
+    poser('p-retours', f.retours === 'aucun' || f.regime === '4' ? 'aucun' : 'ok');
+    majRegime();
     // ⚠ L UNITÉ ET SA MÉMOIRE VONT ENSEMBLE. dataset.prec sert à convertir le
     // poids au changement d'unité ; le laisser sur « g » après avoir restauré
     // « kg » ferait multiplier le poids par mille au premier changement.
     var uni = document.getElementById('p-unite');
     if (uni) { uni.value = f.unite || 'g'; uni.dataset.prec = uni.value; }
     var a = document.getElementById('p-actif'); if (a) a.checked = f.actif !== false;
-    var fr = document.getElementById('p-finalret'); if (fr) fr.checked = !!f.finalret;
     Array.prototype.forEach.call(document.querySelectorAll('#p-tailles .jeton'), function(j){
       j.classList.toggle('on', (d.tailles || []).indexOf(j.getAttribute('data-t')) >= 0);
     });
@@ -1606,8 +1719,7 @@ function pageProduit(id) {
       acquisitionCost: argentNombre(val('p-cout')),
       weight: enKg(val('p-poids'), val('p-unite')),
       lowStock: parseInt(val('p-seuil'), 10),
-      active: coché('p-actif'), regime: val('p-regime'),
-      finalSaleReturnOk: coché('p-finalret'),
+      active: coché('p-actif'), regime: val('p-regime'), retours: val('p-retours'),
       sizes: tailles(), colors: couleurs(),
       image: IMAGE,
       belowCost: !!SOUSCOUT,
