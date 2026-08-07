@@ -196,7 +196,12 @@ function pageCommande(id) {
     Assist.poser([
       { t: 'Préparation',  obl: [] },
       { t: 'Vérification', obl: [] },
-      { t: 'Étiquette',    obl: [] },
+      /* ⚠ L etape n est verte que si le SUIVI est rempli. Elle l etait des la
+         premiere visite (obl vide = << complete des le depart >>, voir le socle) :
+         le fil affichait donc un ✓ sur << Etiquette >> alors qu aucune etiquette
+         n avait ete generee. Un fil qui ment sur ce qui est fait est pire qu un
+         fil absent. */
+      { t: 'Étiquette',    obl: ['c-suivi'] },
       { t: 'Expédition',   obl: [] }
     ], function(i){
       if (i === 0 && PAGI) PAGI.dessiner();
@@ -211,7 +216,7 @@ function pageCommande(id) {
       avancerStatut(i);
     });
 
-    bEnr.disabled = !CTX.peutExpedier;
+    majExpedier();
     if (!CTX.peutExpedier) dire('Votre rôle ne permet pas d’expédier.', 'att');
   }
 
@@ -267,6 +272,7 @@ function pageCommande(id) {
     document.getElementById('c-zone2').querySelector('.liste').addEventListener('input', function(ev){
       var q = ev.target.closest('.q'); if (!q) return;
       COMPTES[q.dataset.cle] = Math.max(0, parseInt(q.value, 10) || 0);
+      majExpedier();
       PAGI2.dessiner(); majProgres();
     });
   }
@@ -309,6 +315,10 @@ function pageCommande(id) {
     document.getElementById('c-bon').onclick = function(){ imprimer('bon', this); };
     document.getElementById('c-colis').onclick = function(){ imprimer('colisage', this); };
     document.getElementById('c-etiq').onclick = etiquette;
+    var sn = document.getElementById('c-sans');
+    if (sn) sn.onchange = majExpedier;
+    var su = document.getElementById('c-suivi');
+    if (su) su.oninput = majExpedier;
     var tr = document.getElementById('c-transp');
     if (tr) tr.onchange = majServices;
     document.getElementById('c-suivi').oninput = function(){ dire(''); };
@@ -407,7 +417,7 @@ function pageCommande(id) {
         + ((v + 1) === att ? ' (ligne complète)' : ''), '#4ade80');
       if (PAGI2) { PAGI2.dessiner(); }
       majProgres();
-      majBoutons();
+      majExpedier();
     });
   }
 
@@ -472,7 +482,7 @@ function pageCommande(id) {
     P.appeler('expedition:etiquette', ID, val('c-transp'), val('c-service'), poids).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      if (r.suivi) { poser('c-suivi', r.suivi); dire('Étiquette générée — suivi ' + r.suivi, 'bon'); }
+      if (r.suivi) { poser('c-suivi', r.suivi); dire('Étiquette générée — suivi ' + r.suivi, 'bon'); majExpedier(); }
       // ⚠ Pas de numero = pas d etiquette, meme sans exception levee. Annoncer un
       // succes ici ferait expedier une commande sans etiquette.
       else dire('Aucun numéro reçu : l’étiquette n’a PAS été générée.', 'err');
@@ -503,22 +513,49 @@ function pageCommande(id) {
     });
   }
 
+  /* ⚠⚠ EXPEDIER RESTE DESARME TANT QUE LES DEUX CONDITIONS NE SONT PAS REMPLIES
+     — la verification COMPLETE et l etiquette GENEREE. C etait le comportement
+     d avant, et il a ete perdu en reecrivant : le bouton etait actif des
+     l ouverture, sur un colis dont rien n avait ete verifie (signale le
+     2026-08-07, capture a l appui).
+     Ce n est pas du zele : expedier, c est changer le statut, decompter le stock
+     et ENVOYER UN COURRIEL au client avec un lien de suivi. Fait avant d avoir
+     verifie le colis, on annonce un envoi qu on n a pas prepare ; fait sans
+     etiquette, on annonce un suivi qui n existe pas.
+     ⚠ L ENVOI SANS NUMERO RESTE POSSIBLE — remise en main propre, cueillette,
+     transporteur local — mais il faut cocher la case, donc l assumer. Sans cette
+     porte, on aurait ferme un cas legitime en croyant bien faire.
+     ⚠ ET LE BOUTON DIT POURQUOI il est desarme : un bouton gris sans explication
+     se lit comme une panne, et l on cherche ailleurs. */
+  function majExpedier(){
+    if (!bEnr) return;
+    var sansNum = coché('c-sans');
+    var aSuivi = !!String(val('c-suivi') || '').trim();
+    var verifOk = toutVerifie();
+    var etiqOk = aSuivi || sansNum;
+    var pret = !!(CTX && CTX.peutExpedier) && verifOk && etiqOk;
+    bEnr.disabled = !pret;
+    var pourquoi = '';
+    if (!CTX || !CTX.peutExpedier) pourquoi = 'Votre rôle ne permet pas d’expédier.';
+    else if (!verifOk) pourquoi = 'Vérifiez le colis d’abord — ' + comptes() + ' sur ' + attendus() + ' unités confirmées.';
+    else if (!etiqOk) pourquoi = 'Générez l’étiquette (étape 3), ou cochez « Expédier sans numéro de suivi ».';
+    bEnr.title = pourquoi || 'Marquer la commande expédiée et prévenir le client';
+    return pourquoi;
+  }
+
   function expedier(){
     // ⚠ UN COLIS INCOMPLET NE PART PAS SANS UN SECOND CLIC. La verification ne
     // sert a rien si on peut l ignorer d un geste distrait ; mais l interdire
     // bloquerait les cas legitimes (envoi partiel assume).
-    if (!toutVerifie() && window._szForcer !== true) {
-      window._szForcer = true;
-      dire('Colis INCOMPLET (' + comptes() + ' sur ' + attendus() + '). Recliquez « Expédier » pour assumer un envoi partiel.', 'att');
-      return;
-    }
+    var refus = majExpedier();
+    if (refus) { dire(refus, 'att'); return; }
     bEnr.disabled = true;
     dire('Expédition…');
     var pret = coché('c-pret');
     P.appeler('commande:prete', ID, pret).then(function(){
       return P.appeler('commande:expedier', ID, val('c-transp'), val('c-suivi'), coché('c-sans'));
     }).then(function(r){
-      if (!r || !r.ok) { bEnr.disabled = false; window._szForcer = false; dire(expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { majExpedier(); dire(expliquer(r), "err"); return; }
       dire(r.sansSuivi ? 'Expédiée sans numéro de suivi.' : 'Expédiée — courriel envoyé.', 'bon');
       setTimeout(function(){ P.fermer(); }, 900);
     });
