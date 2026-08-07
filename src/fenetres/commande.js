@@ -497,15 +497,29 @@ function pageCommande(id) {
     }).catch(function(){ b.disabled = false; dire('L’opération a échoué.', 'err'); });
   }
 
+  /* ⚠ LE VERROU SE REND A LA FERMETURE (2026-08-07). Il etait pris a l ouverture
+     mais JAMAIS rendu : fermer l assistant laissait la commande << En
+     traitement >> pour tout le monde jusqu a la peremption du verrou. Or c est
+     precisement ce verrou qui pilote le bouton des listes — demande de
+     l utilisateur : << si on sort de l assistant, tu ramenes le bouton >>. */
+  var VERROU_PRIS = false;
   function verrou(){
     return P.appeler('verrou:prendre', 'orders', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 commande réservée'; return; }
+      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 commande réservée'; return; }
       sous.textContent = '⚠ en traitement par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
       dire('Cette commande est déjà en traitement ailleurs.', 'err');
     });
   }
+  function rendreVerrou(){
+    if (!VERROU_PRIS) return;
+    VERROU_PRIS = false;
+    try { P.appeler('verrou:rendre'); } catch (e) {}
+  }
+  // Toutes les sorties passent par la : le X de la fenetre, Echap, Fermer, et la
+  // fermeture apres expedition.
+  window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 
   /* ⚠⚠ L ETAPE D ARRIVEE SUIT LE STATUT — LA MEME REGLE QUE L ECRAN DU SITE.
      _startFulfillmentFlow (admin.js) route deja ainsi : en verification, ecran

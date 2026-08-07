@@ -64,6 +64,11 @@ button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(25
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.mini{padding:.1rem .45rem;font-size:.75rem}
+/* En traitement : AMBRE et pleine opacite, comme le bouton verrouille du site —
+   griser par transparence le rendait presque invisible sur fond sombre alors
+   qu il porte une information importante. */
+button.traite{background:#78350f;color:#fde68a;border-color:#b45309;
+  cursor:not-allowed;opacity:1}
 
 .filtres{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;margin-top:.45rem}
 .filtres .lbl{font-size:.72rem;color:#8fa1b8}
@@ -263,11 +268,21 @@ ${JS_ACTIVITE}
           + '<td class="d">' + argent(o.total) + '</td>'
           + '<td class="c"><span class="et ' + couleurStatut(o.statut) + '">'
           + esc(libelleStatut(o.statut)) + '</span></td>'
+          /* ⚠ UN SEUL BOUTON, DEUX ETATS (demande le 2026-08-07 : << il y a trop
+             de boutons differents a ce niveau >>). Verrou tenu par QUICONQUE —
+             soi compris, sa propre fenetre de preparation ouverte est un
+             traitement en cours — la ligne dit 🔒 En traitement, et par qui.
+             Libre : 🚀 Preparer, qui ouvre l assistant (lequel se place tout
+             seul a la bonne etape depuis la 1.28.0, et fabrique l etiquette a
+             son etape 2 : plus besoin d un bouton Expedier separe ici).
+             Et AUCUN bouton sur une commande expediee ou livree — la vue
+             Expeditions n en porte donc pas. */
           + '<td class="c">'
-          + (CTX.peutEditer && !expedition
-              ? '<button class="mini" data-prep="' + esc(o.id) + '">Préparer</button> ' : '')
-          + (CTX.peutExpedier
-              ? '<button class="mini" data-exp="' + esc(o.id) + '">Expédier</button>' : '')
+          + (expedition || o.statut === 'shipped' || o.statut === 'delivered' ? ''
+             : (o.enTraitement
+                ? '<button class="mini traite" disabled>🔒 En traitement' + (o.par ? ' — ' + esc(o.par) : '') + '</button>'
+                : (CTX.peutEditer
+                   ? '<button class="mini" data-prep="' + esc(o.id) + '">🚀 Préparer</button>' : '')))
           + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -339,9 +354,13 @@ ${JS_ACTIVITE}
       }
       if (t.closest('[data-vider]')) { F.statuts = []; F.page = 0; charger(); return; }
       var pr = t.closest('[data-prep]');
-      if (pr) { ouvrir('commandes:preparer', pr.getAttribute('data-prep'), 'Préparation'); return; }
-      var ex = t.closest('[data-exp]');
-      if (ex) { ouvrir('commandes:expedier', ex.getAttribute('data-exp'), 'Expédition'); return; }
+      if (pr) {
+        ouvrir('commandes:preparer', pr.getAttribute('data-prep'), 'Préparation');
+        // La ligne passe << En traitement >> des que la fenetre a pris son
+        // verrou : on recharge sans attendre le prochain battement.
+        setTimeout(charger, 1200);
+        return;
+      }
     };
   }
 
@@ -386,6 +405,13 @@ ${JS_ACTIVITE}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
   });
+
+  setInterval(function(){
+    if (enCours) return;
+    var a = document.activeElement;
+    if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT')) return;
+    if (CTX && DONNEES) charger();
+  }, 5000);
 
   demarrer();
 })();
