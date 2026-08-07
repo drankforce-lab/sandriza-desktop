@@ -123,27 +123,38 @@ function pageCommande(id) {
       + '<div class="etat"><span class="gros" id="c-prog">0</span>'
       + '<span style="color:#8fa1b8">sur ' + attendus() + ' unités confirmées</span></div>'
       + '<div class="barre"><span id="c-barre"></span></div>'
+      /* ⚠ LE CHAMP DE SCAN, ET IL EST EN PREMIER. On verifie un colis un lecteur
+         a la main, sans regarder l ecran : le champ doit avoir le focus, avaler
+         le retour du lecteur, se vider et le reprendre aussitot. Un champ qu il
+         faut recliquer entre deux articles rend le lecteur inutile. */
+      + '<div class="rech" style="margin-bottom:.35rem">'
+      + '<input id="c-scan" placeholder="Scannez le code-barres de l’article…" autocomplete="off">'
+      + '</div>'
+      + '<div id="c-scan-msg" style="min-height:1.2em;font-size:.8rem;color:#8fa1b8;margin-bottom:.4rem"></div>'
       + '<div class="rech"><input placeholder="Filtrer…"><span class="cpt" id="c-cpt2"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
 
     // 3 — Étiquette
-    /* ⚠⚠ L ETIQUETTE NE SE FABRIQUE PLUS ICI (revu le 2026-08-07).
-       Cette etape offrait un simple choix de transporteur et un bouton
-       << Generer l etiquette >>, qui appelait Admin.printLabel -- laquelle LIT LE
-       FORMULAIRE DU SITE pour connaitre le service et le poids. Depuis cette
-       fenetre, ou ces champs n existent pas, elle commandait donc une etiquette
-       FACTUREE au service par defaut et a 0,5 kg. Un colis de quatre kilos
-       etiquete pour cinq cents grammes, c est un refus au comptoir ou une facture
-       de rajustement, decouverte des semaines plus tard.
-       On renvoie a la fenetre EXPEDITION, qui fait ce travail correctement :
-       service et poids affiches et modifiables, confirmation avant de depenser,
-       garde contre la seconde etiquette. Une seule facon d etiqueter dans toute
-       l application, et c est la bonne. */
-    h.push('<div class="etape"><div class="carte"><h2>Étiquette d’expédition</h2>'
-      + '<div class="aide">L’étiquette se commande dans la fenêtre <strong>Expédition</strong>, '
-      + 'qui demande le service et le poids du colis — ce sont eux qui fixent le prix. '
-      + 'Le numéro de suivi revient ensuite tout seul dans le champ ci-dessous.</div>'
-      + '<button type="button" id="c-etiq" style="margin-top:.6rem">🚚 Ouvrir l’expédition</button>'
+    /* 3 — Étiquette. ⚠ ELLE SE FABRIQUE ICI, DANS L ASSISTANT (2026-08-07).
+       Une premiere correction l avait renvoyee vers la fenetre Expedition parce
+       que l ancien chemin (Admin.printLabel) LIT LE FORMULAIRE DU SITE et
+       commandait donc une etiquette FACTUREE au service par defaut et a 0,5 kg.
+       Deplacer n etait pas reparer : on prepare un colis d un seul tenant, et
+       sortir de l assistant pour l etiqueter casse le geste.
+       On garde donc l etiquette ICI, et l on y ajoute ce qui manquait — le
+       SERVICE et le POIDS, qui fixent le prix — en passant par expedition:etiquette,
+       la seule operation qui les recoit explicitement. */
+    h.push('<div class="etape"><div class="carte"><h2>Étiquette d’expédition</h2><div class="duo">'
+      + '<div class="ch"><label for="c-transp">Transporteur</label><select id="c-transp">'
+      + CTX.transporteurs.map(function(t){ return '<option value="' + esc(t.cle) + '">' + esc(t.nom) + '</option>'; }).join('')
+      + '</select></div>'
+      + '<div class="ch"><label for="c-service">Service</label><select id="c-service"></select></div>'
+      + '</div><div class="duo" style="margin-top:.5rem">'
+      + '<div class="ch"><label for="c-poids">Poids du colis (kg)</label>'
+      + '<input id="c-poids" type="number" min="0.001" step="0.001" value="0.5"></div>'
+      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq">Générer l’étiquette</button></div>'
+      + '</div>'
+      + '<div class="aide" id="c-poids-note" style="margin-top:.4rem"></div>'
       + '</div>'
       + '<div class="carte plein"><h2>Numéro de suivi</h2><div class="duo">'
       + '<div class="ch"><label for="c-suivi">Numéro</label><input id="c-suivi" placeholder="rempli par l’étiquette"></div>'
@@ -164,6 +175,18 @@ function pageCommande(id) {
 
     document.getElementById('corps').innerHTML = h.join('');
     document.getElementById('c-pret').checked = !!CMD.dejaPret;
+    /* ⚠ LA CASE S ENREGISTRE AU CLIC, PAS A L EXPEDITION. Elle n etait poussee
+       qu au moment d expedier : cocher << prete >> puis fermer la fenetre perdait
+       l information, alors que c est justement l etat qu on pose pour SORTIR du
+       dossier et y revenir plus tard. L ecran du site l enregistre au clic
+       (toggleReadyToShip), on fait pareil. */
+    document.getElementById('c-pret').onchange = function(){
+      var v = this.checked;
+      P.appeler('commande:prete', ID, v).then(function(r){
+        if (r && r.ok) { CMD.dejaPret = v; dire(v ? 'Marquée prête à l’expédition.' : 'Marque « prête » retirée.', 'bon'); }
+        else dire(expliquer(r), 'err');
+      });
+    };
     poser('c-suivi', CMD.suivi || '');
     if (CMD.transporteur) poser('c-transp', CMD.transporteur);
 
@@ -179,10 +202,28 @@ function pageCommande(id) {
       if (i === 0 && PAGI) PAGI.dessiner();
       if (i === 1 && PAGI2) { PAGI2.dessiner(); majProgres(); }
       if (i === 3) recap();
+      /* ⚠ LE STATUT AVANCE AVEC LES ETAPES, comme l ecran du site le faisait.
+         Sans cela la commande restait << Confirmee >> jusqu a l expedition :
+         personne d autre ne voyait qu elle etait en cours de traitement, et deux
+         personnes pouvaient la preparer en meme temps.
+         ⚠ Le site REFUSE de reculer un statut (voir commande:statut) : revenir a
+         l etape 1 d une commande deja expediee ne la remet pas en preparation. */
+      avancerStatut(i);
     });
 
     bEnr.disabled = !CTX.peutExpedier;
     if (!CTX.peutExpedier) dire('Votre rôle ne permet pas d’expédier.', 'att');
+  }
+
+  /* Etape 1 -> << En preparation >>, etape 2 -> << Verification >>. Les etapes 3
+     et 4 ne changent rien : c est l EXPEDITION qui fait passer a << En livraison >>,
+     avec le courriel et le decompte de stock qui vont avec. */
+  function avancerStatut(i){
+    var voulu = (i === 0) ? 'preparing' : (i === 1 ? 'verification' : '');
+    if (!voulu || !CTX || !CTX.peutExpedier) return;
+    P.appeler('commande:statut', ID, voulu).then(function(r){
+      if (r && r.ok && r.statut && !r.inchange) { CMD.statut = r.statut; }
+    }).catch(function(){ /* un statut qui ne monte pas ne doit pas bloquer la preparation */ });
   }
 
   var PAGI2 = null;
@@ -254,9 +295,22 @@ function pageCommande(id) {
   }
 
   function brancher(){
+    var sc = document.getElementById('c-scan');
+    if (sc) {
+      sc.onkeydown = function(ev){
+        if (ev.key !== 'Enter') return;
+        ev.preventDefault();
+        var code = this.value;
+        this.value = '';
+        scanner(code);
+        try { this.focus(); } catch (e) {}
+      };
+    }
     document.getElementById('c-bon').onclick = function(){ imprimer('bon', this); };
     document.getElementById('c-colis').onclick = function(){ imprimer('colisage', this); };
     document.getElementById('c-etiq').onclick = etiquette;
+    var tr = document.getElementById('c-transp');
+    if (tr) tr.onchange = majServices;
     document.getElementById('c-suivi').oninput = function(){ dire(''); };
   }
 
@@ -302,6 +356,180 @@ function pageCommande(id) {
       var vrai = document.getElementById('c-bon');
       imprimer('bon', vrai || b);
     };
+  }
+
+  /* ══ LE SCAN ═══════════════════════════════════════════════════════════════
+     ⚠ LES MEMES REGLES QUE L ECRAN DU SITE, reprises une par une :
+       - code inconnu  -> refus, son grave, message rouge ;
+       - ligne DEJA complete -> refus, son grave, message ambre (sans quoi on
+         scanne deux fois le meme article et le compte ment) ;
+       - sinon +1, son aigu, message vert avec le compte et le mot
+         << ligne complete >> quand elle l est.
+     ⚠ LA CORRESPONDANCE DU CODE SE FAIT DANS LE SITE (commande:scan) : le
+     code-barres porte la forme COMPACTE du SKU, pas la forme affichee. */
+  function bip(ok){
+    try {
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return;
+      var a = new C(), o = a.createOscillator(), g = a.createGain();
+      o.frequency.value = ok ? 1180 : 320;
+      g.gain.value = 0.06;
+      o.connect(g); g.connect(a.destination);
+      o.start();
+      setTimeout(function(){ try { o.stop(); a.close(); } catch (e) {} }, ok ? 70 : 190);
+    } catch (e) { /* un poste sans son ne doit pas empecher de verifier */ }
+  }
+  function scanMsg(t, couleur){
+    var el = document.getElementById('c-scan-msg');
+    if (el) { el.textContent = t || ''; el.style.color = couleur || '#8fa1b8'; }
+  }
+  function scanner(code){
+    if (!String(code || '').trim()) return;
+    P.appeler('commande:scan', ID, code).then(function(r){
+      if (!r || !r.ok) {
+        bip(false);
+        scanMsg(r && r.motif === 'code_inconnu'
+          ? '⚠ Code inconnu : ' + (r.code || code)
+          : expliquer(r), '#f87171');
+        return;
+      }
+      var att = 0;
+      CMD.articles.forEach(function(a){ if (a.cle === r.cle) att = a.quantite; });
+      var v = COMPTES[r.cle] || 0;
+      if (v >= att) {
+        bip(false);
+        scanMsg('⚠ Déjà complet : ' + r.sku + ' (' + att + '/' + att + ')', '#fbbf24');
+        return;
+      }
+      COMPTES[r.cle] = v + 1;
+      bip(true);
+      scanMsg('✓ ' + r.sku + ' — ' + (v + 1) + '/' + att
+        + ((v + 1) === att ? ' (ligne complète)' : ''), '#4ade80');
+      if (PAGI2) { PAGI2.dessiner(); }
+      majProgres();
+      majBoutons();
+    });
+  }
+
+  function imprimer(genre, b){
+    b.disabled = true; dire('Envoi à l’impression…');
+    P.appeler('commande:bon', ID, genre).then(function(r){
+      b.disabled = false;
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('Envoyé à l’impression.', 'bon');
+    });
+  }
+
+  /* ⚠ SERVICES ET POIDS VIENNENT DU SITE (expedition:contexte / expedition:lire) :
+     ce sont les memes listes et le meme calcul que la fenetre Expedition, donc une
+     seule source. Le poids est le poids NET (articles moins remboursements), et
+     une estimation se DIT — c est lui qui fixe le prix. */
+  var EXP = null;   // { transporteurs: [{cle,nom,pret,services}] }
+  function chargerExpedition(){
+    return P.appeler('expedition:contexte').then(function(c){
+      if (c && c.ok) EXP = c;
+      return P.appeler('expedition:lire', ID);
+    }).then(function(r){
+      if (r && r.ok && r.poids) {
+        var p = document.getElementById('c-poids');
+        if (p && r.poids.calcule > 0) p.value = r.poids.calcule;
+        var n = document.getElementById('c-poids-note');
+        if (n) {
+          n.textContent = r.poids.estime
+            ? '⚠ Certains articles n’ont pas de poids configuré — estimation à 300 g par article. Vérifiez : le poids fixe le prix.'
+            : '✅ Poids calculé depuis les articles de la commande.';
+          n.style.color = r.poids.estime ? '#f0c987' : '#86e5a8';
+        }
+      }
+      majServices();
+    }).catch(function(){ majServices(); });
+  }
+
+  function majServices(){
+    var sel = document.getElementById('c-service');
+    var tr = val('c-transp');
+    if (!sel) return;
+    var liste = [];
+    ((EXP && EXP.transporteurs) || []).forEach(function(t){ if (t.cle === tr) liste = t.services || []; });
+    sel.innerHTML = liste.length
+      ? liste.map(function(x){ return '<option value="' + esc(x.cle) + '">' + esc(x.libelle) + '</option>'; }).join('')
+      : '<option value="">— transporteur non configuré —</option>';
+    sel.disabled = !liste.length;
+    var b = document.getElementById('c-etiq');
+    if (b) b.disabled = !liste.length;
+  }
+
+  /* ⚠ ON PASSE PAR expedition:etiquette, qui RECOIT le service et le poids.
+     L ancien chemin (commande:etiquette -> Admin.printLabel) les lisait dans le
+     formulaire du SITE : absents ici, il commandait une etiquette FACTUREE au
+     service par defaut et a 0,5 kg. L operation reste en place pour les coquilles
+     anterieures, mais cette fenetre ne l emprunte plus. */
+  function etiquette(){
+    var b = document.getElementById('c-etiq');
+    var poids = parseFloat(val('c-poids'));
+    if (!(poids > 0)) { dire('Le poids du colis doit être supérieur à zéro.', 'err'); return; }
+    b.disabled = true; dire('Demande au transporteur…', 'att');
+    P.appeler('expedition:etiquette', ID, val('c-transp'), val('c-service'), poids).then(function(r){
+      b.disabled = false;
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      if (r.suivi) { poser('c-suivi', r.suivi); dire('Étiquette générée — suivi ' + r.suivi, 'bon'); }
+      // ⚠ Pas de numero = pas d etiquette, meme sans exception levee. Annoncer un
+      // succes ici ferait expedier une commande sans etiquette.
+      else dire('Aucun numéro reçu : l’étiquette n’a PAS été générée.', 'err');
+    }).catch(function(){ b.disabled = false; dire('L’opération a échoué.', 'err'); });
+  }
+
+  /* ══ LE SCAN ═══════════════════════════════════════════════════════════════
+     ⚠ LES MEMES REGLES QUE L ECRAN DU SITE, reprises une par une :
+       - code inconnu  -> refus, son grave, message rouge ;
+       - ligne DEJA complete -> refus, son grave, message ambre (sans quoi on
+         scanne deux fois le meme article et le compte ment) ;
+       - sinon +1, son aigu, message vert avec le compte et le mot
+         << ligne complete >> quand elle l est.
+     ⚠ LA CORRESPONDANCE DU CODE SE FAIT DANS LE SITE (commande:scan) : le
+     code-barres porte la forme COMPACTE du SKU, pas la forme affichee. */
+  function bip(ok){
+    try {
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return;
+      var a = new C(), o = a.createOscillator(), g = a.createGain();
+      o.frequency.value = ok ? 1180 : 320;
+      g.gain.value = 0.06;
+      o.connect(g); g.connect(a.destination);
+      o.start();
+      setTimeout(function(){ try { o.stop(); a.close(); } catch (e) {} }, ok ? 70 : 190);
+    } catch (e) { /* un poste sans son ne doit pas empecher de verifier */ }
+  }
+  function scanMsg(t, couleur){
+    var el = document.getElementById('c-scan-msg');
+    if (el) { el.textContent = t || ''; el.style.color = couleur || '#8fa1b8'; }
+  }
+  function scanner(code){
+    if (!String(code || '').trim()) return;
+    P.appeler('commande:scan', ID, code).then(function(r){
+      if (!r || !r.ok) {
+        bip(false);
+        scanMsg(r && r.motif === 'code_inconnu'
+          ? '⚠ Code inconnu : ' + (r.code || code)
+          : expliquer(r), '#f87171');
+        return;
+      }
+      var att = 0;
+      CMD.articles.forEach(function(a){ if (a.cle === r.cle) att = a.quantite; });
+      var v = COMPTES[r.cle] || 0;
+      if (v >= att) {
+        bip(false);
+        scanMsg('⚠ Déjà complet : ' + r.sku + ' (' + att + '/' + att + ')', '#fbbf24');
+        return;
+      }
+      COMPTES[r.cle] = v + 1;
+      bip(true);
+      scanMsg('✓ ' + r.sku + ' — ' + (v + 1) + '/' + att
+        + ((v + 1) === att ? ' (ligne complète)' : ''), '#4ade80');
+      if (PAGI2) { PAGI2.dessiner(); }
+      majProgres();
+      majBoutons();
+    });
   }
 
   function imprimer(genre, b){
@@ -350,7 +578,7 @@ function pageCommande(id) {
         CMD = r;
         document.getElementById('titre').textContent = 'Préparation — ' + r.numero;
         dessiner();
-        return verrou().then(function(){ demanderBon(); });
+        return verrou().then(function(){ chargerExpedition(); demanderBon(); });
       });
     });
   }

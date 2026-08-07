@@ -960,6 +960,10 @@ const OPS_PONT = new Set([
   'caisse:etat',
   'commande:contexte', 'commande:lire', 'commande:bon',
   'commande:etiquette', 'commande:prete', 'commande:expedier',
+  // Le code scanne se resout DANS LE SITE (Barcode.payload) : la forme compacte
+  // du SKU n est pas la forme affichee, et la reecrire ici cesserait de marcher
+  // le jour ou l encodage change, sans que rien ne le signale.
+  'commande:scan', 'commande:statut',
   'verrou:prendre', 'verrou:rendre',
   // « Il y a quelqu'un » — sans ceci, travailler dans une fenêtre native passe
   // pour une absence et le minuteur d'inactivité déconnecte une personne affairée.
