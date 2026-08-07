@@ -888,6 +888,7 @@ const OPS_PONT = new Set([
   'produit:decrire', 'produit:lire', 'produit:enregistrer',
   'produit:brouillonLire', 'produit:brouillonEcrire', 'produit:brouillonJeter',
   'produit:changements', 'produit:historique',
+  'caisse:etat',
   'commande:contexte', 'commande:lire', 'commande:bon',
   'commande:etiquette', 'commande:prete', 'commande:expedier',
   'verrou:prendre', 'verrou:rendre',
@@ -923,6 +924,26 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
     const r = await wc.executeJavaScript(code, true);
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
   } catch { return { ok: false, motif: 'pont_indisponible' }; }
+});
+
+// ── RELAIS DE L'AFFICHAGE CLIENT ────────────────────────────────────────────
+// La caisse (fenêtre principale) pousse son état ; on le porte à la fenêtre
+// d'affichage. Aucun aller-retour réseau : l'afficheur suit le scan à l'instant.
+//
+// ⚠ CE RELAIS NE VA QUE DANS UN SENS, et c'est délibéré. L'afficheur est posé
+// devant une cliente : il ne doit pouvoir NI écrire, NI commander quoi que ce
+// soit. Il reçoit, il affiche. Rien ne remonte.
+//
+// ⚠ ET SEULE LA FENÊTRE PRINCIPALE PEUT ÉMETTRE. Sans ce contrôle, n'importe quel
+// document chargé dans n'importe quelle fenêtre pourrait afficher n'importe quel
+// montant devant la cliente — un total falsifié sur l'écran qu'elle regarde au
+// moment de payer.
+ipcMain.on('pos:diffuser', (e, etat) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (e.sender !== mainWindow.webContents) return;
+  const w = fenetresNatives.get('pos-client');
+  if (!w || w.isDestroyed()) return;          // afficheur fermé : rien à faire
+  try { w.webContents.send('pos:etat', etat || {}); } catch {}
 });
 
 ipcMain.on('pont:fermer', (e) => {
@@ -1362,6 +1383,7 @@ const { pageFournisseur } = require('./fenetres/fournisseur');
 const { pageCollection } = require('./fenetres/collection');
 const { pageProduit } = require('./fenetres/produit');
 const { pageCommande } = require('./fenetres/commande');
+const { pageAffichage } = require('./fenetres/affichage');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
@@ -1395,6 +1417,13 @@ const actionApp = (nom) => {
       break;
     case 'produit-nouveau':
       ouvrirNative('produit', 'Nouveau produit', pageProduit(''), { width: 900, height: 720, minHeight: 520 });
+      break;
+    // ⚠ L AFFICHAGE CLIENT EST FAIT POUR ÊTRE POSÉ SUR UN SECOND ÉCRAN, face à la
+    // cliente. D'où une fenêtre plus grande et une hauteur minimale généreuse : le
+    // total doit rester lisible à un mètre, et c'est le bloc du bas qu'on lit.
+    case 'affichage-client':
+      ouvrirNative('pos-client', 'Affichage client', pageAffichage(),
+        { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
       break;
     case 'about-copy':
       try { require('electron').clipboard.writeText(texteApropos()); } catch {}

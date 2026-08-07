@@ -39,6 +39,23 @@ contextBridge.exposeInMainWorld('szPont', {
   // Rend le nouvel état (true = plein écran) pour que le bouton dise la vérité.
   pleinEcran: () => ipcRenderer.invoke('fenetre:pleinecran').catch(() => null),
 
+  // ⚠ LE SEUL FLUX POUSSÉ VERS UNE FENÊTRE NATIVE, et il existe pour une raison
+  // précise. L'affichage client de la caisse doit suivre le scan à l'instant : le
+  // faire demander l'état en boucle serait un sondage permanent pour une
+  // information que la caisse connaît déjà. Elle la POUSSE donc.
+  // ⚠ Et c'est indispensable, pas un confort : la caisse et l'afficheur se
+  // parlaient par `BroadcastChannel` et l'événement `storage`, qui exigent tous
+  // deux une ORIGINE COMMUNE. Une fenêtre native est chargée en `data:`, son
+  // origine est `null` : aucun des deux ne peut l'atteindre.
+  // ⚠ ÉCOUTE SEULEMENT. Cette fenêtre ne peut RIEN émettre vers la caisse — elle
+  // affiche, elle ne décide de rien, et on doit pouvoir la poser devant une
+  // cliente sans y penser à deux fois.
+  surEtatCaisse: (cb) => {
+    const h = (e, etat) => { try { cb(etat); } catch {} };
+    ipcRenderer.on('pos:etat', h);
+    return () => ipcRenderer.removeListener('pos:etat', h);
+  },
+
   // La fenêtre annonce la hauteur réelle de son contenu ; le principal ajuste.
   // Même raison que la palette : une hauteur devinée d'avance se fait démentir
   // par la moindre ligne ajoutée ou par une mise à l'échelle Windows autre

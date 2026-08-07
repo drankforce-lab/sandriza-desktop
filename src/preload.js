@@ -77,6 +77,14 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // Impression de la page courante (test).
   printCurrent: (opts) => ipcRenderer.invoke('print:current', opts || {}),
 
+  // ── AFFICHAGE CLIENT DE LA CAISSE ─────────────────────────────────────────
+  // La caisse pousse son état ; le processus principal le relaie à la fenêtre
+  // d'affichage. ⚠ `BroadcastChannel` et `localStorage` ne peuvent PAS servir :
+  // la fenêtre d'affichage est native, donc d'origine `null`, et les deux exigent
+  // une origine commune. C'est pourquoi ce canal existe.
+  posAffichage: (etat) => ipcRenderer.send('pos:diffuser', etat || {}),
+  posOuvrir: () => ipcRenderer.invoke('menu:action', 'affichage-client'),
+
   // Contrôles de fenêtre RÉELS (window.minimize() n'existe pas côté navigateur).
   minimize: () => ipcRenderer.send('win:minimize'),
   close: () => ipcRenderer.send('win:close'),
