@@ -12,9 +12,21 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
+// ⚠ LA VERSION NE SE RECOPIE PLUS À LA MAIN. Elle était écrite en dur ici, et
+// elle y annonçait encore 1.18.0 alors que la coquille était en 1.19.1 : le
+// journal du personnel enregistrait la mauvaise version, et la fenêtre des notes
+// marquait « installée ici » sur la mauvaise ligne. Un numéro recopié dans un
+// second fichier finit toujours par mentir — celui-ci l'a fait pendant deux
+// versions sans que rien ne le signale.
+// Elle arrive maintenant de `package.json`, par `additionalArguments` du processus
+// principal : le bac à sable interdit `require` et l'accès à `app`, mais laisse
+// passer `process.argv`.
+const _arg = (process.argv || []).find((a) => String(a).indexOf('--sz-version=') === 0);
+const VERSION = _arg ? _arg.slice('--sz-version='.length) : '';
+
 contextBridge.exposeInMainWorld('sandrizaDesktop', {
   isDesktop: true,
-  version: '1.18.0',
+  version: VERSION,
 
   // Menu intégré : le bouton cliqué dans la barre dessinée demande au processus
   // principal d'exécuter une action de l'APPLICATION (quitter, zoom, ancrage du

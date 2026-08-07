@@ -196,7 +196,15 @@ ipcMain.handle('print:current', async (e, opts = {}) => {
 });
 
 ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
-ipcMain.on('win:close',    (e) => BrowserWindow.fromWebContents(e.sender)?.close());
+// ⚠ CINQUIÈME CHEMIN, TROUVÉ EN CHERCHANT. Le bouton de fermeture dessiné dans la
+// page passe par ici, pas par `menu:action` : garder les quatre autres et oublier
+// celui-là aurait laissé le bouton le plus évidemment cliquable casser
+// l'installation. Le garde de `close` en dessous rattraperait le coup, mais sans
+// rien expliquer — on préfère le message.
+ipcMain.on('win:close', (e) => {
+  if (fermetureBloquee()) { refuserFermeture(); return; }
+  BrowserWindow.fromWebContents(e.sender)?.close();
+});
 
 // ══ PHASE 3 — NOTIFICATIONS NATIVES + PASTILLE SUR L'ICÔNE ════════════════════
 const ICON_PATH = path.join(__dirname, '..', 'build', 'icon.png');
@@ -382,6 +390,16 @@ const createWindow = () => {
       nodeIntegration: false,
       sandbox: true,
       spellcheck: true,
+      // ⚠ LA VERSION VOYAGE PAR ICI, ET C'EST LA SEULE VOIE FIABLE. Elle était
+      // RECOPIÉE À LA MAIN dans `preload.js` — et elle y annonçait encore 1.18.0
+      // alors que la coquille était en 1.19.1. Conséquence : le journal du
+      // personnel enregistrait la mauvaise version, et la fenêtre des notes
+      // marquait « installée ici » sur la mauvaise ligne. Un numéro recopié
+      // finit toujours par mentir.
+      // Le préchargement tourne en bac à sable : ni `require('../package.json')`,
+      // ni `app` n'y sont accessibles. `additionalArguments` traverse le bac à
+      // sable et reste lisible dans `process.argv`.
+      additionalArguments: ['--sz-version=' + app.getVersion()],
     },
   });
 
@@ -426,6 +444,13 @@ const createWindow = () => {
     if (!isAllowed(url)) { e.preventDefault(); shell.openExternal(url); }
   });
 
+  // ⚠ QUATRE CHEMINS MÈNENT À LA FERMETURE, et il faut les quatre : le X du
+  // cadre natif, Alt+F4, l'entrée « Quitter » du menu, et le bouton de la barre
+  // dessinée dans la page (qui passe par `menu:action`). En couvrir trois laisse
+  // le quatrième casser l'installation.
+  mainWindow.on('close', (ev) => {
+    if (fermetureBloquee()) { ev.preventDefault(); refuserFermeture(); }
+  });
   mainWindow.on('closed', () => { mainWindow = null; });
 };
 
@@ -468,6 +493,64 @@ let _majDispo = false;
 // Vrai tant que l'écran d'attente au lancement est affiché : les événements de
 // progression n'écrivent dedans que dans ce cas.
 let _porteActive = false;
+
+// ══ PROTECTION DU PROCESSUS PENDANT UNE MISE À JOUR ═══════════════════════════
+// ⚠ UNE MISE À JOUR INTERROMPUE PEUT LAISSER UNE INSTALLATION CASSÉE. Le paquet
+// fait ~75 Mo : sur une ligne lente, le téléchargement dure des minutes, et rien
+// n'empêchait de fermer la fenêtre au milieu. Pire, l'installateur NSIS est déjà
+// lancé au moment de l'installation — le tuer là laisse des fichiers à moitié
+// remplacés, et l'application ne redémarre plus.
+//
+// ⚠ CE N'EST PAS `_updBusy`. Celui-là est vrai dès la simple VÉRIFICATION, qui
+// dure une seconde et qu'on peut interrompre sans conséquence : bloquer là-dessus
+// empêcherait de fermer l'application pendant un contrôle anodin, ce qui
+// ressemblerait à un blocage.
+let _majCritique = false;
+// ⚠ UN SEUL ENDROIT DÉCIDE. Les quatre chemins de fermeture posaient la même
+// condition à la main : en oublier un morceau dans l'un d'eux (le plafond de
+// sécurité, par exemple) aurait donné trois gardes qui cèdent et un qui bloque.
+const fermetureBloquee = () => _majCritique && !_quitAutorise && !majFigee();
+// Seule la mise à jour elle-même a le droit de quitter. Sans ce laissez-passer, le
+// garde ci-dessous empêcherait le redémarrage qui INSTALLE la mise à jour — donc
+// la protection tuerait précisément ce qu'elle protège.
+let _quitAutorise = false;
+
+const MSG_MAJ_T = 'Mise à jour en cours';
+const MSG_MAJ_D = 'L’application ne peut pas être fermée pendant l’installation d’une '
+  + 'mise à jour : le paquet est en cours d’écriture, et l’interrompre laisserait une '
+  + 'installation incomplète.\n\nElle redémarrera toute seule dès que ce sera terminé.';
+
+// ⚠ ON NE SE CONTENTE PAS D'IGNORER LE GESTE. Un bouton qui ne fait rien est un
+// défaut qu'on ne peut pas diagnostiquer : on clique plus fort, puis on tue le
+// processus par le gestionnaire des tâches — exactement ce qu'on voulait éviter.
+// Horodatage du dernier octet reçu. Il sert de PLAFOND DE SÉCURITÉ, voir ci-dessous.
+let _majDernierOctet = 0;
+const MAJ_SANS_PROGRES_MS = 3 * 60 * 1000;
+
+// ⚠ PLAFOND DE SÉCURITÉ, À NE PAS RETIRER. Le pire défaut possible de cette
+// protection serait de rester coincée : un téléchargement figé (serveur qui ne
+// répond plus sans jamais émettre d'erreur, veille de la machine, réseau qui
+// disparaît) laisserait une application qu'on ne peut plus fermer autrement qu'en
+// tuant le processus — ce qui est exactement ce qu'on cherchait à éviter, en pire.
+// On vérifie donc AU MOMENT DU GESTE : plus de trois minutes sans un seul octet,
+// et la fermeture est rendue. Pas de minuteur à entretenir, et le contrôle a lieu
+// précisément quand il compte.
+const majFigee = () => _majDernierOctet > 0 && (Date.now() - _majDernierOctet) > MAJ_SANS_PROGRES_MS;
+
+let _avisMajLe = 0;
+const refuserFermeture = () => {
+  // Un seul avis à la fois : trois clics d'affilée ne doivent pas empiler trois
+  // boîtes qu'il faudra fermer une par une.
+  const t = Date.now();
+  if (t - _avisMajLe < 2500) return;
+  _avisMajLe = t;
+  if (_porteActive) { montrerPorte(MSG_MAJ_T, MSG_MAJ_D.replace(/\n\n/g, '<br><br>')); return; }
+  try {
+    dialog.showMessageBox(mainWindow && !mainWindow.isDestroyed() ? mainWindow : null, {
+      type: 'warning', title: MSG_MAJ_T, message: MSG_MAJ_T, detail: MSG_MAJ_D, buttons: ['Compris'],
+    });
+  } catch {}
+};
 
 // ══ ÉCRAN DE LANCEMENT — MÊME HABILLAGE QUE LA CONNEXION ══════════════════════
 // L'application n'ouvre PAS l'administration avant d'avoir regardé s'il existe
@@ -970,6 +1053,11 @@ const ouvrirAdmin = () => {
 // ⚠ L'installateur est `perMachine` (C:\Program Files) : Windows demandera quand
 // même l'élévation (UAC). Silencieux ne veut pas dire sans autorisation.
 const installerEtRelancer = (autoUpdater) => {
+  // ⚠ LE LAISSEZ-PASSER, SANS QUOI LA PROTECTION SE MORD LA QUEUE. Le garde de
+  // fermeture bloque tout départ pendant une mise à jour ; or installer EXIGE de
+  // quitter. Sans cette ligne, la mise à jour se téléchargerait indéfiniment sans
+  // jamais pouvoir s'installer.
+  _quitAutorise = true;
   try { autoUpdater.quitAndInstall(true, true); }
   catch { autoUpdater.quitAndInstall(); }   // repli : mieux vaut l'assistant que rien
 };
@@ -982,11 +1070,19 @@ const getUpdater = () => {
     autoUpdater.autoInstallOnAppQuit = true;
 
     autoUpdater.on('update-available', () => { _majDispo = true; });
-    autoUpdater.on('update-not-available', () => { _majDispo = false; });
+    // Rien à télécharger : aucune raison de retenir quoi que ce soit.
+    autoUpdater.on('update-not-available', () => { _majDispo = false; _majCritique = false; });
 
     // Une barre qui avance est la différence entre « ça travaille » et « c'est
     // planté ». Un téléchargement de 80 Mo sur une ligne lente prend des minutes.
     autoUpdater.on('download-progress', (p) => {
+      // ⚠ C'EST ICI QUE LA ZONE CRITIQUE COMMENCE, pas à la vérification : des
+      // octets sont en train d'arriver, et l'interruption a désormais un coût.
+      // Posé AVANT le test de la porte : un téléchargement en tâche de fond (hors
+      // écran d'attente) doit être protégé tout autant — c'est même le cas où l'on
+      // risque le plus de fermer sans savoir ce qui se passe.
+      _majCritique = true;
+      _majDernierOctet = Date.now();
       if (!_porteActive) return;
       const pct = Math.round(p && p.percent ? p.percent : 0);
       const mo = (n) => (n / 1048576).toFixed(0);
@@ -1031,9 +1127,19 @@ const getUpdater = () => {
           + '<span style="opacity:.7">L’application redémarre, puis reprend où vous en étiez.</span>',
           100);
         _porteActive = false;
+        // On reste en zone critique : le redémarrage part dans 1,6 s et il ne doit
+        // pas être devancé par un Alt+F4 pendant qu'on lit le message.
         setTimeout(() => installerEtRelancer(autoUpdater), 1600);
         return;
       }
+
+      // ⚠ ICI LA ZONE CRITIQUE S'ARRÊTE, ET C'EST ESSENTIEL. Le paquet est
+      // COMPLET sur le disque ; si l'usager répond « Plus tard »,
+      // `autoInstallOnAppQuit` fait que FERMER L'APPLICATION est précisément ce
+      // qui installe la mise à jour. Laisser le garde en place empêcherait donc
+      // pour toujours l'installation qu'il est censé protéger — la protection
+      // deviendrait le blocage.
+      _majCritique = false;
 
       const { response } = await dialog.showMessageBox(mainWindow, {
         type: 'info',
@@ -1049,6 +1155,11 @@ const getUpdater = () => {
 
     autoUpdater.on('error', async (err) => {
       _updBusy = false;
+      // ⚠ ON LIBÈRE LE VERROU SUR ÉCHEC. Un téléchargement qui casse à 60 % laisse
+      // un poste qu'on ne peut plus fermer si l'on oublie cette ligne — la panne
+      // de mise à jour deviendrait un poste condamné, exactement ce que le reste
+      // de cette fonction s'emploie à éviter.
+      _majCritique = false;
       const detail = String((err && err.message) || err);
 
       // ⚠ UNE PANNE DE MISE À JOUR NE DOIT PAS CONDAMNER LE POSTE.
@@ -1260,7 +1371,9 @@ let _modele = { menus: [], taille: 1.15, mode: 'haut', sombre: false };
 const actionApp = (nom) => {
   const wc = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
   switch (nom) {
-    case 'quit':        app.quit(); break;
+    // Le bouton de la barre dessinée et l'entrée « Quitter » du menu passent tous
+    // deux par ici : un seul garde couvre les deux.
+    case 'quit':        if (fermetureBloquee()) { refuserFermeture(); break; } app.quit(); break;
     case 'minimize':    if (mainWindow) mainWindow.minimize(); break;
     case 'reload':      if (wc) wc.reload(); break;
     case 'reload-hard': if (wc) wc.reloadIgnoringCache(); break;
@@ -1615,7 +1728,11 @@ if (!app.requestSingleInstanceLock()) {
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   });
 
-  app.on('before-quit', () => {
+  app.on('before-quit', (ev) => {
+    // Dernier rempart : `app.quit()` ne passe pas forcément par le `close` d'une
+    // fenêtre (extinction de session, appel direct). Le laissez-passer
+    // `_quitAutorise` est posé par la mise à jour juste avant de redémarrer.
+    if (fermetureBloquee()) { ev.preventDefault(); refuserFermeture(); return; }
     if (_usbTimer) clearInterval(_usbTimer);
   });
 

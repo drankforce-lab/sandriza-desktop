@@ -1081,12 +1081,15 @@ function pageProduit(id) {
   // n est pas « sous le seuil », elle n est pas encore approvisionnee. Avertir
   // partout a la creation, c est n avertir nulle part — on apprend a ne plus voir
   // le symbole.
+  // ⚠ ATTEINDRE LE SEUIL SUFFIT — il n y a pas a le depasser. Le seuil est le
+  // plancher a partir duquel on reappprovisionne : y etre, c est etre au minimum
+  // voulu, pas en dessous. J exigeais une unite de plus, ce qui faisait persister
+  // l avertissement sur une variante pourtant conforme.
   function alerteSeuil(q){
     var s = parseInt(val('p-seuil'), 10);
-    if (!(s > 0) || !(q > 0) || q > s) return '';
-    var ilManque = s - q + 1;   // il faut DEPASSER le seuil, pas l egaler
+    if (!(s > 0) || !(q > 0) || q >= s) return '';
     return '<span class="al" title="Sous le seuil d’alerte (' + s + '). '
-      + 'Il en manque ' + ilManque + ' pour le dépasser.">⚠</span>';
+      + 'Il en manque ' + (s - q) + ' pour l’atteindre.">⚠</span>';
   }
 
   function majStock(){
