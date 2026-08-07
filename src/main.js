@@ -944,6 +944,11 @@ const OPS_PONT = new Set([
   // « Il y a quelqu'un » — sans ceci, travailler dans une fenêtre native passe
   // pour une absence et le minuteur d'inactivité déconnecte une personne affairée.
   'session:activite',
+  // Vente au comptoir. ⚠ `caisse:vendre` est la SEULE opération de ce pont qui
+  // encaisse de l'argent : toute la règle de vente reste dans le site
+  // (`Admin._posVente`), le pont ne porte que des valeurs.
+  'caisse:contexte', 'caisse:chercher', 'caisse:article',
+  'caisse:totaux', 'caisse:client', 'caisse:vendre',
 ]);
 
 // ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que
