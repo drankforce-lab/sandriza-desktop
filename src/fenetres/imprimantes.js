@@ -205,26 +205,57 @@ function pageImprimantes() {
   // meme chose qu une liste vide — et la fenetre le dit.
   var IMPRS = null;
 
+  // ⚠⚠ ON N ATTEND JAMAIS LA LISTE POUR AFFICHER L ECRAN. C etait ma regression :
+  // je demandais la liste des imprimantes AVANT de dessiner, et la fenetre restait
+  // sur << Lecture de l etat… >> indefiniment. Enumerer les imprimantes OUVRE LE
+  // PILOTE DE CHACUNE — c est ecrit dans printagent.js — et une thermique Bluetooth
+  // peut mettre tres longtemps a repondre, voire ne jamais repondre. L ancienne
+  // version ne la demandait jamais au chargement, et c etait la bonne intuition.
+  // L etat se lit donc SEUL et s affiche tout de suite ; la liste arrive apres, en
+  // arriere-plan, et les menus se remplissent quand elle est la.
   var enCours = false;
-  function relire(rechargerListe){
+  function relire(){
     if (enCours) return;
     enCours = true;
     dire('Lecture…');
-    var suite = function(){
-      P.appeler('imprimantes:etat').then(function(r){
-        enCours = false;
-        if (!r || !r.ok) { sous.textContent = ''; vide('État indisponible', expliquer(r && r.motif)); dire(''); return; }
-        dessiner(r);
-        dire('');
-      });
-    };
-    if (IMPRS && !rechargerListe) { suite(); return; }
+    P.appeler('imprimantes:etat').then(function(r){
+      enCours = false;
+      if (!r || !r.ok) { sous.textContent = ''; vide('État indisponible', expliquer(r && r.motif)); dire(''); return; }
+      DERNIER = r;
+      dessiner(r);
+      dire(IMPRS ? '' : 'Liste des imprimantes : lecture en cours…');
+    });
+  }
+
+  // Le dernier etat lu, pour redessiner quand la liste arrive sans redemander
+  // l etat a l agent.
+  var DERNIER = null;
+  var listeEnCours = false;
+
+  // ⚠ AVEC UN PLAFOND. Sans lui, une imprimante qui ne repond pas laisserait le
+  // message << lecture en cours >> pour toujours — le defaut qu on vient de
+  // corriger, deplace d un cran. Au-dela, on le DIT et on offre de reessayer.
+  function chargerListe(){
+    if (listeEnCours) return;
+    listeEnCours = true;
+    var fini = false;
+    var minuterie = setTimeout(function(){
+      if (fini) return;
+      fini = true; listeEnCours = false;
+      dire('Liste des imprimantes trop longue à lire — « Actualiser » pour réessayer.', 'att');
+    }, 12000);
     P.appeler('imprimantes:liste').then(function(l){
-      // Un echec de liste n empeche PAS de lire l etat : on montre les
-      // associations existantes, avec la liste desactivee et le motif affiche.
-      IMPRS = (l && l.ok) ? (l.imprimantes || []) : null;
-      if (!IMPRS) dire('Liste des imprimantes indisponible : ' + expliquer(l && l.motif), 'att');
-      suite();
+      if (fini) return;
+      fini = true; clearTimeout(minuterie); listeEnCours = false;
+      if (!l || !l.ok) {
+        // Un echec de liste n empeche PAS d utiliser l ecran : les associations
+        // existantes restent visibles, et le test reste possible.
+        dire('Liste des imprimantes indisponible : ' + expliquer(l && l.motif), 'att');
+        return;
+      }
+      IMPRS = l.imprimantes || [];
+      if (DERNIER) dessiner(DERNIER);
+      dire('');
     });
   }
 
@@ -266,9 +297,12 @@ function pageImprimantes() {
   // « Relire » recharge AUSSI la liste des imprimantes : c est le geste qu on fait
   // apres avoir branche une machine, et ne relire que l etat ne la ferait pas
   // apparaitre.
-  document.getElementById('btn-relire').onclick = function(){ relire(true); };
+  // « Actualiser » relit l état ET retente la liste : c est le geste qu on fait
+  // apres avoir branche une machine, ou quand la liste n a pas abouti.
+  document.getElementById('btn-relire').onclick = function(){ IMPRS = null; relire(); chargerListe(); };
   document.getElementById('btn-fermer').onclick = function(){ P.fermer(); };
   relire();
+  chargerListe();
 })();
 </script></body></html>`;
 }
