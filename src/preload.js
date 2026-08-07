@@ -14,7 +14,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('sandrizaDesktop', {
   isDesktop: true,
-  version: '1.14.1',
+  version: '1.15.0',
 
   // Menu intégré : le bouton cliqué dans la barre dessinée demande au processus
   // principal d'exécuter une action de l'APPLICATION (quitter, zoom, ancrage du

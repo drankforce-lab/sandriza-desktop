@@ -143,11 +143,21 @@ function pageProduit(id) {
     var c = val('p-cat');
     return !!(c && CTX.modesPhoto && CTX.modesPhoto[c] === 'standard');
   }
+  // ⚠ EN MODE MANUEL, LES PHOTOS N ONT PAS DE ROLE FIXE. La categorie dit
+  // « manuel » justement parce que ces articles ne se photographient pas selon
+  // des angles convenus : imposer cinq cases nommees aurait redonne la
+  // contrainte que le reglage sert a lever. On ajoute autant de photos qu il en
+  // faut, et l ordre est celui de l ajout.
   function clesVues(){
-    if (modeStandard()) return ['v1', 'v2', 'v3', 'v4', 'v5'];
+    if (modeStandard()) {
+      var n = Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0; }).length;
+      var l = [];
+      for (var i = 1; i <= n + 1; i++) l.push('libre' + i);   // toujours une case vide au bout
+      return l;
+    }
     return (CTX.vuesAngles || ['devant', 'derriere', 'coteG', 'coteD', 'autres']);
   }
-  function nomVue(k){ return ANGLES[k] || ('Vue ' + String(k).replace(/^v/, '')); }
+  function nomVue(k){ return ANGLES[k] || ('Photo ' + String(k).replace(/^libre/, '')); }
 
   function dire(t, genre){
     var m = document.getElementById('msg');
@@ -270,7 +280,7 @@ function pageProduit(id) {
       + '<button type="button" id="p-vider">Retirer la photo</button>'
       + '<div class="aide">Maximum 8 Mo. Déposée dans le stockage à l’enregistrement.</div>'
       + '</div></div></div>'
-      + '<div class="carte"><h2>Vues supplémentaires</h2>'
+      + '<div class="carte"><h2 id="p-vues-titre">Vues supplémentaires</h2>'
       + '<div class="vues" id="p-vues"></div>'
       + '<div class="aide" style="margin-top:.45rem">Dos, détail, porté. Elles apparaissent '
       + 'sur la fiche, après la photo principale.</div></div>'
@@ -659,6 +669,8 @@ function pageProduit(id) {
 
   // Un cadre par vue : on clique, on choisit un fichier. Le « x » retire.
   function dessinerVues(){
+    var t = document.getElementById('p-vues-titre');
+    if (t) t.textContent = modeStandard() ? 'Photos supplémentaires' : 'Vues supplémentaires';
     var z = document.getElementById('p-vues');
     if (z) {
       z.innerHTML = clesVues().map(function(cle){
@@ -671,11 +683,15 @@ function pageProduit(id) {
     }
     var p = document.getElementById('p-parcoul');
     if (!p) return;
+    // ⚠ ON MASQUE LA CARTE ENTIERE, on n y met pas un message d excuse. Une carte
+    // qui explique pourquoi elle est vide occupe la place d une carte utile, et
+    // laisse croire qu il manque quelque chose alors que le reglage est respecte.
+    var carte = p.closest('.carte');
     if (modeStandard()) {
-      p.innerHTML = '<div class="aide">Cette catégorie est réglée en mode « standard » : '
-        + 'une série de vues, sans photo par couleur. Réglage dans Inventaire → Catégories.</div>';
+      if (carte) carte.style.display = 'none';
       return;
     }
+    if (carte) carte.style.display = '';
     var cs = couleurs();
     if (!cs.length) {
       p.innerHTML = '<div class="aide">Choisissez d’abord des couleurs à l’étape « Tailles et couleurs ».</div>';
