@@ -96,10 +96,20 @@ jobs:
       # `verifier-fenetres.js` compile le script PRODUIT, refuse l'accent grave
       # égaré dans un commentaire (arrivé quatre fois) et vérifie les ancres du
       # socle. C'est le contrôle qui a de la valeur ici, pas le plus rapide.
+      # ⚠ ET COMPILER NE SUFFISAIT PAS NON PLUS. La fenêtre Imprimantes est restée
+      # morte QUATRE VERSIONS avec un script qui compilait parfaitement : la faute
+      # était une variable libre, licite à la compilation, fatale à l'exécution.
+      # `verifier-fenetres.js` EXÉCUTE donc maintenant chaque fenêtre sur des
+      # données d'essai. Et `banc-executer-page.js` éprouve L'OUTIL lui-même en y
+      # injectant des défauts connus — parce que ce même outil a été construit deux
+      # fois de travers, et qu'il annonçait alors « aucune faute » sur du code qui
+      # levait vraiment. Il passe d'abord : un contrôle aveugle vaut moins que rien,
+      # il rassure.
       - name: Contrôle de syntaxe
         shell: bash
         run: |
           for f in src/*.js; do node --check "$f"; done
+          node tools/banc-executer-page.js
           node tools/verifier-fenetres.js
 
       - name: Construire (${{ matrix.arch }})

@@ -97,13 +97,36 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
     // avant la ligne qui remplit l'écran, la faute partait dans un rejet non
     // traité, et la fenêtre se taisait. Pendant ce temps j'accusais le pont.
     // On EXÉCUTE donc le script, sur un faux document et un faux pont qui RÉPOND.
-    const rep = REPONSES[f];
-    if (!rep) { nonEprouvees.push(f); dire(true, f, 'compile — exécution NON éprouvée (aucun jeu de réponses)'); continue; }
-    let ex;
-    try { ex = await executerPage(page.slice(i2 + 8, j2), rep); }
-    catch (e) { dire(false, f, 'exécution impossible — ' + e.message); continue; }
-    if (ex.inconnus.length) { dire(false, f, 'variable(s) jamais définie(s) : ' + ex.inconnus.join(', ')); continue; }
-    if (ex.fautes.length) { dire(false, f, 'meurt à l’exécution — ' + ex.fautes.join(' | ')); continue; }
+    const jeu = REPONSES[f];
+    if (!jeu) { nonEprouvees.push(f); dire(true, f, 'compile — exécution NON éprouvée (aucun jeu de réponses)'); continue; }
+
+    // ⚠ PLUSIEURS CAS D'OUVERTURE PAR FENÊTRE, et ce n'est pas du zèle : ouvrir en
+    // CRÉATION et ouvrir en MODIFICATION ne traversent pas le même code. La
+    // création ne lit aucune fiche, ne prend aucun verrou et n'affiche aucun
+    // journal ; la modification fait les trois. N'éprouver que la première
+    // laisserait la moitié de chaque fenêtre dans l'ombre — et c'est précisément
+    // une moitié restée dans l'ombre qui a coûté quatre versions.
+    const cas = Array.isArray(jeu) ? jeu : [{ nom: 'défaut', id: '', reponses: jeu }];
+    let mort = false;
+    let ecrituresTotal = 0;
+    for (const c of cas) {
+      const pc = String(fabrique(c.id || ''));
+      const a = pc.indexOf('<script>'), b = pc.indexOf('</script>');
+      if (a < 0 || b < a) { dire(false, f, '[' + c.nom + '] page sans script'); mort = true; break; }
+      let ex;
+      try { ex = await executerPage(pc.slice(a + 8, b), c.reponses || {}); }
+      catch (e) { dire(false, f, '[' + c.nom + '] exécution impossible — ' + e.message); mort = true; break; }
+      if (ex.fautes.length) { dire(false, f, '[' + c.nom + '] meurt à l’exécution — ' + ex.fautes.join(' | ')); mort = true; break; }
+      ecrituresTotal += ex.ecritures || 0;
+    }
+    if (mort) continue;
+    // ⚠ AUCUNE ÉCRITURE D'ÉCRAN = LA FENÊTRE N'A RIEN DESSINÉ, et c'est une FAUTE,
+    // pas une information. « Elle n'est pas morte » sans « elle a dessiné » est
+    // exactement le verdict rassurant qui a coûté quatre versions : la fenêtre
+    // Imprimantes ne mourait pas non plus, elle se taisait.
+    if (!ecrituresTotal) { dire(false, f, 'ne dessine RIEN (aucune écriture d’écran) — le jeu de réponses ne mène pas au dessin'); continue; }
+    dire(true, f, cas.length + ' cas éprouvé' + (cas.length > 1 ? 's' : '') + ', ' + ecrituresTotal + ' écriture(s) d’écran');
+    continue;
   }
 
   dire(true, f, '');

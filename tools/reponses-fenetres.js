@@ -15,13 +15,49 @@
  * regardé » n'est pas « j'ai regardé et c'est bon », et c'est exactement la
  * confusion qui a laissé passer quatre versions.
  *
+ * ⚠⚠ ET UN JEU DE RÉPONSES DOIT ÊTRE ÉPROUVÉ, LUI AUSSI. Écrire un jeu qui ne
+ * conduit pas la fenêtre jusqu'à son DESSIN donne le même faux calme : « rien n'a
+ * cassé » parce que rien n'a été fait. Deux garde-fous s'en chargent : le compteur
+ * d'écritures d'écran (aucune écriture = faute), et la vérification à la main en
+ * injectant une variable libre dans la fonction de dessin de la fenêtre — si le
+ * contrôle ne l'accuse pas, le jeu ne mène pas là où l'on croit. Les quatre jeux
+ * ci-dessous ont passé cette épreuve le 2026-08-07.
+ *
  * Pour couvrir une fenêtre de plus : ajouter son fichier ici, avec les réponses
  * de ses opérations. Le contrôle s'y applique aussitôt.
+ *
+ * DEUX FORMES ACCEPTÉES :
+ *   — un objet { 'op:nom': réponse }        → un seul cas, ouvert sans identifiant ;
+ *   — un TABLEAU de { nom, id, reponses }   → plusieurs cas d'ouverture.
+ * La seconde existe parce qu'ouvrir en CRÉATION et ouvrir en MODIFICATION ne
+ * traversent pas le même code : la création ne lit aucune fiche, ne prend aucun
+ * verrou et n'affiche aucun journal ; la modification fait les trois.
+ *
+ * ⚠ LES FORMES DE RÉPONSE SONT CELLES DU SITE, relevées dans `assets/js/pont.js`
+ * — pas inventées ici. Un jeu d'essai qui ne ressemble pas à la vraie réponse
+ * éprouve une fenêtre qui n'existe pas. Si une opération change de forme là-bas,
+ * elle doit changer ici : c'est le prix de l'outil, et il est plus bas que celui
+ * d'une fenêtre morte en production.
  */
+
+// ── PIÈCES COMMUNES ─────────────────────────────────────────────────────────
+// Une image minuscule mais VALIDE : plusieurs fenêtres posent la source d'une
+// photo dans un attribut, et une chaîne quelconque y passerait pour une adresse.
+const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+// Verrou obtenu. ⚠ La forme est { obtenu, horsLigne, parQui } — PAS un booléen :
+// `_lockTake` du site rend un objet, et le pont le traduit ainsi.
+const VERROU = { ok: true, obtenu: true, horsLigne: false, parQui: '' };
+const IDENTITE = { ok: true, nom: 'Brigitte Brousseau', role: 'Administratrice' };
 
 module.exports = {
   'imprimantes.js': {
     'imprimantes:etat': {
+      // ⚠ `natif: true` EST LE CAS RÉEL, et le jeu d'essai doit être le cas réel.
+      // Une fenêtre native ne s'ouvre que dans l'application : il n'y a donc jamais
+      // d'agent d'impression séparé, et la carte qui l'annonçait a été retirée le
+      // 2026-08-07. Éprouver avec `natif: false` reviendrait à éprouver un chemin
+      // que personne ne prend — l'erreur exacte qui a coûté quatre versions.
+      natif: true,
       ok: true, disponible: true, poste: 'CAISSE-1',
       version: '1.4.0', versionDisponible: '1.4.0',
       aidePdf: true, aidePdfNom: 'SumatraPDF',
@@ -58,4 +94,438 @@ module.exports = {
       sousTotal: 179.9, tps: 9, tvq: 17.95, total: 206.85, remise: 0,
     },
   },
+
+  // ── FOURNISSEUR ───────────────────────────────────────────────────────────
+  // Forme de la fiche = celle qu'écrit `fournisseurEnregistrer`, donc celle que
+  // `DB.getSupplierById` rend. L'adresse est un SOUS-OBJET : la mettre à plat
+  // ferait lire `undefined.street` et la fenêtre mourrait — exactement le défaut
+  // que cet outil existe pour attraper.
+  'fournisseur.js': [
+    {
+      nom: 'création',
+      id: '',
+      reponses: {
+        'fournisseur:contexte': {
+          ok: true,
+          categories: [
+            { cle: 'robes', libelle: 'Robes' },
+            { cle: 'hauts', libelle: 'Hauts' },
+            { cle: 'chaussures', libelle: 'Chaussures' },
+          ],
+          delais: ['1-3 jours', '4-7 jours', '1-2 semaines', '2-4 semaines', '1-2 mois', '2 mois et plus'],
+          provinces: ['QC', 'ON', 'NB', 'NS', 'PE', 'NL', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU'],
+          peutAjouter: true, peutModifier: true,
+        },
+        // Aucun identifiant : le site rend une fiche NULLE, pas une erreur.
+        'fournisseur:lire': { ok: true, fiche: null },
+        'fournisseur:enregistrer': { ok: true, modifie: false },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'modification',
+      id: 'sup_0001',
+      reponses: {
+        'fournisseur:contexte': {
+          ok: true,
+          categories: [
+            { cle: 'robes', libelle: 'Robes' },
+            { cle: 'hauts', libelle: 'Hauts' },
+            { cle: 'chaussures', libelle: 'Chaussures' },
+          ],
+          delais: ['1-3 jours', '4-7 jours', '1-2 semaines', '2-4 semaines', '1-2 mois', '2 mois et plus'],
+          provinces: ['QC', 'ON', 'NB', 'NS', 'PE', 'NL', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU'],
+          peutAjouter: true, peutModifier: true,
+        },
+        'fournisseur:lire': {
+          ok: true,
+          fiche: {
+            id: 'sup_0001',
+            name: 'Atelier Rivière',
+            contactName: 'Louise Gagné',
+            email: 'louise@atelier-riviere.ca',
+            phone: '418 555-0142',
+            website: 'https://atelier-riviere.ca',
+            address: { street: '221 rue Saint-Joseph Est', city: 'Québec', province: 'QC', postalCode: 'G1K 3B1' },
+            categories: ['robes', 'hauts'],
+            leadTime: '1-2 semaines',
+            notes: 'Livre le mardi. Minimum de 6 pièces par modèle.',
+            active: true,
+          },
+        },
+        'fournisseur:enregistrer': { ok: true, modifie: true },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+  ],
+
+  // ── COLLECTION ────────────────────────────────────────────────────────────
+  'collection.js': [
+    {
+      nom: 'création',
+      id: '',
+      reponses: {
+        'collection:contexte': {
+          ok: true,
+          produits: [
+            { id: 'p_0001', nom: 'Robe cintrée', categorie: 'robes' },
+            { id: 'p_0002', nom: 'Chemisier de soie', categorie: 'hauts' },
+          ],
+          // ⚠ LA PREMIÈRE SAISON EST UNE CHAÎNE VIDE, et c'est voulu côté site
+          // (« aucune saison »). Un jeu d'essai qui l'omettrait ne dirait pas si
+          // la fenêtre sait dessiner ce choix-là.
+          saisons: ['', 'Printemps', 'Été', 'Automne', 'Hiver'],
+          annees: [2025, 2026, 2027, 2028],
+          anneeParDefaut: 2026,
+          peutAjouter: true, peutModifier: true,
+        },
+        'collection:lire': { ok: true, fiche: null },
+        'collection:decrire': { ok: true, texte: 'Une collection lumineuse, pensée pour les journées qui s’allongent.' },
+        'collection:enregistrer': { ok: true, modifie: false },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'modification',
+      id: 'col_0001',
+      reponses: {
+        'collection:contexte': {
+          ok: true,
+          produits: [
+            { id: 'p_0001', nom: 'Robe cintrée', categorie: 'robes' },
+            { id: 'p_0002', nom: 'Chemisier de soie', categorie: 'hauts' },
+          ],
+          saisons: ['', 'Printemps', 'Été', 'Automne', 'Hiver'],
+          annees: [2025, 2026, 2027, 2028],
+          anneeParDefaut: 2026,
+          peutAjouter: true, peutModifier: true,
+        },
+        'collection:lire': {
+          ok: true,
+          fiche: {
+            id: 'col_0001',
+            name: 'Printemps 2026',
+            description: 'Des coupes fluides et des teintes claires.',
+            season: 'Printemps',
+            year: 2026,
+            active: true,
+            coverImage: IMAGE,
+            productIds: ['p_0001'],
+          },
+        },
+        'collection:decrire': { ok: true, texte: 'Des coupes fluides et des teintes claires.' },
+        'collection:enregistrer': { ok: true, modifie: true },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+  ],
+
+  // ── COMMANDE (préparation d'un colis) ─────────────────────────────────────
+  // ⚠ CETTE FENÊTRE N'A PAS DE CAS << CRÉATION >> : on ne crée pas une commande
+  // depuis un écran d'entrepôt, on en prépare une qui existe. Le site répond
+  // « introuvable » sans identifiant — donc le cas sans identifiant est un cas de
+  // REFUS, qu'on éprouve aussi : c'est le chemin qu'on prend quand une commande a
+  // été supprimée entre la liste et l'ouverture de la fenêtre.
+  'commande.js': [
+    {
+      nom: 'à préparer',
+      id: 'ord_0001',
+      reponses: {
+        'commande:contexte': {
+          ok: true,
+          transporteurs: [
+            { cle: 'postes-canada', nom: 'Postes Canada' },
+            { cle: 'fedex', nom: 'FedEx' },
+          ],
+          peutPreparer: true, peutExpedier: true,
+        },
+        'commande:lire': {
+          ok: true,
+          numero: 'SZ-100248',
+          statut: 'processing',
+          dejaPret: false,
+          suivi: '',
+          transporteur: '',
+          client: 'Marie Tremblay',
+          adresse: '221 rue Saint-Joseph Est, Québec, QC, G1K 3B1',
+          articles: [
+            { rang: 0, cle: 'p_0001|M|Noir', nom: 'Robe cintrée', sku: 'ROB-0001', taille: 'M', couleur: 'Noir', quantite: 2 },
+            { rang: 1, cle: 'p_0002|P|Ivoire', nom: 'Chemisier de soie', sku: 'HAU-0007', taille: 'P', couleur: 'Ivoire', quantite: 1 },
+          ],
+          nbColis: 3,
+        },
+        'commande:bon': { ok: true },
+        'commande:etiquette': { ok: true, suivi: '1Z999AA10123456784', transporteur: 'postes-canada' },
+        'commande:prete': { ok: true },
+        'commande:expedier': { ok: true },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'déjà prête, avec suivi',
+      id: 'ord_0002',
+      reponses: {
+        'commande:contexte': {
+          ok: true,
+          transporteurs: [{ cle: 'postes-canada', nom: 'Postes Canada' }],
+          // Droit de préparer SANS droit d'expédier : la fenêtre doit dessiner
+          // l'un et refuser l'autre. Deux booléens toujours vrais n'éprouvent rien.
+          peutPreparer: true, peutExpedier: false,
+        },
+        'commande:lire': {
+          ok: true,
+          numero: 'SZ-100249',
+          statut: 'ready',
+          dejaPret: true,
+          suivi: '1Z999AA10123456784',
+          transporteur: 'postes-canada',
+          client: 'Josée Lafleur',
+          adresse: '9 avenue des Érables, Lévis, QC, G6V 2R1',
+          articles: [
+            { rang: 0, cle: 'p_0003||', nom: 'Foulard de laine', sku: 'ACC-0012', taille: '', couleur: '', quantite: 1 },
+          ],
+          nbColis: 1,
+        },
+        'commande:bon': { ok: true },
+        'commande:etiquette': { ok: true, suivi: '1Z999AA10123456784', transporteur: 'postes-canada' },
+        'commande:prete': { ok: true },
+        'commande:expedier': { ok: true },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'commande introuvable',
+      id: 'ord_disparue',
+      reponses: {
+        'commande:contexte': {
+          ok: true,
+          transporteurs: [{ cle: 'postes-canada', nom: 'Postes Canada' }],
+          peutPreparer: true, peutExpedier: true,
+        },
+        'commande:lire': { ok: false, motif: 'introuvable' },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+  ],
+
+  // ── PRODUIT (l'assistant, la plus grande des fenêtres) ────────────────────
+  'produit.js': [
+    {
+      nom: 'création',
+      id: '',
+      reponses: {
+        'produit:contexte': _produitContexte(),
+        'produit:lire': { ok: true, fiche: null },
+        'produit:sku': { ok: true, sku: 'ROB-0007', configure: true },
+        'produit:nipExige': { ok: true, exige: false },
+        'produit:nip': { ok: true, valide: true, exige: false },
+        'photos:liste': {
+          ok: true, session: true,
+          photos: [
+            { id: 'ph_0001', code: 'PH-0001', nom: 'Robe noire, devant', src: IMAGE,
+              rattacheA: 'Robe cintrée', codeProduit: 'ROB-0001', poids: 184320 },
+            // Une photo NON rattachée : la fiche de détail doit savoir le dire
+            // plutôt que d'afficher un vide.
+            { id: 'ph_0002', code: 'PH-0002', nom: 'Chemisier ivoire', src: IMAGE,
+              rattacheA: '', codeProduit: '', poids: 96000 },
+          ],
+        },
+        // Aucun brouillon à reprendre : c'est le cas ordinaire.
+        'produit:brouillonLire': { ok: true, brouillon: null },
+        'produit:brouillonEcrire': { ok: true },
+        'produit:brouillonJeter': { ok: true },
+        'produit:changements': { ok: true, entrees: [] },
+        'produit:historique': { ok: true, entrees: [] },
+        'produit:decrire': { ok: true, texte: 'Une robe cintrée à la coupe nette, taillée dans un lainage souple.' },
+        'produit:enregistrer': { ok: true, id: 'p_0009' },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'brouillon à reprendre',
+      id: '',
+      reponses: Object.assign({}, {
+        'produit:contexte': _produitContexte(),
+        'produit:lire': { ok: true, fiche: null },
+        'produit:sku': { ok: true, sku: 'ROB-0007', configure: true },
+        'produit:nipExige': { ok: true, exige: true },
+        'produit:nip': { ok: true, valide: true, exige: true },
+        'photos:liste': { ok: true, session: true, photos: [] },
+        // ⚠ LE VOILE DE REPRISE NE S'ÉPROUVE QUE S'IL Y A UN BROUILLON. Sans ce
+        // cas, tout le code de restauration ne serait jamais exécuté — et c'est
+        // du code qui touche à la saisie de quelqu'un.
+        'produit:brouillonLire': {
+          ok: true, ilYaMin: 4,
+          brouillon: {
+            ts: 1770000000000,
+            name: 'Robe cintrée (en cours)',
+            category: 'robes',
+            price: '129.95',
+            acquisitionCost: '48.00',
+            weight: '0.42',
+            regime: 'normal',
+            retours: 'accepte',
+            stock: [{ color: 'Noir', size: 'M', qty: 4, warehouseId: 'wh_0001', threshold: 3 }],
+          },
+        },
+        'produit:brouillonEcrire': { ok: true },
+        'produit:brouillonJeter': { ok: true },
+        'produit:changements': { ok: true, entrees: [] },
+        'produit:historique': { ok: true, entrees: [] },
+        'produit:decrire': { ok: true, texte: '' },
+        'produit:enregistrer': { ok: true, id: 'p_0009' },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      }),
+    },
+    {
+      nom: 'modification, avec journal',
+      id: 'p_0001',
+      reponses: {
+        'produit:contexte': _produitContexte(),
+        'produit:lire': {
+          ok: true,
+          fiche: {
+            id: 'p_0001',
+            sku: 'ROB-0001',
+            name: 'Robe cintrée',
+            description: 'Une coupe nette, un lainage souple.',
+            category: 'robes',
+            price: 129.95,
+            compareAtPrice: 159.95,
+            acquisitionCost: 48,
+            weight: 0.42,
+            active: true,
+            supplierId: 'sup_0001',
+            sizeGuideId: 'sg_0003',
+            genre: 'femme',
+            ageGroup: 'adulte',
+            style: 'chic',
+            finalSale: false,
+            liquidation: false,
+            noReturn: false,
+            images: [IMAGE],
+            variants: [
+              { color: 'Noir', size: 'M', stock: 4, warehouseId: 'wh_0001', lowStockThreshold: 3 },
+              // Une variante SOUS le seuil : c'est elle qui déclenche l'avertissement.
+              { color: 'Noir', size: 'G', stock: 1, warehouseId: 'wh_0001', lowStockThreshold: 3 },
+              // Une variante SANS entrepôt : la fenêtre doit la marquer en manque.
+              { color: 'Bleu marine', size: 'P', stock: 2, warehouseId: '', lowStockThreshold: 3 },
+            ],
+            labels: ['lbl:bio'],
+          },
+        },
+        'produit:sku': { ok: true, sku: 'ROB-0001', configure: true },
+        'produit:nipExige': { ok: true, exige: false },
+        'produit:nip': { ok: true, valide: true, exige: false },
+        'photos:liste': {
+          ok: true, session: true,
+          photos: [{ id: 'ph_0001', code: 'PH-0001', nom: 'Robe noire, devant', src: IMAGE,
+            rattacheA: 'Robe cintrée', codeProduit: 'ROB-0001', poids: 184320 }],
+        },
+        'produit:brouillonLire': { ok: true, brouillon: null },
+        'produit:brouillonEcrire': { ok: true },
+        'produit:brouillonJeter': { ok: true },
+        // ⚠ La forme du journal : { entrees:[{ ts, par, changements:[{libelle,avant,apres}] }] }.
+        // Les libellés BRUTS (`sg_0003`) sont volontaires : c'est ce que le site
+        // envoie réellement aujourd'hui, et un jeu d'essai qui les embellirait
+        // cacherait le défaut connu au lieu de l'exposer (tâche ouverte).
+        'produit:changements': {
+          ok: true,
+          entrees: [
+            { ts: 1770000000000, par: 'Brigitte Brousseau', changements: [
+              { libelle: 'price', avant: '119.95', apres: '129.95' },
+              { libelle: 'sizeGuideId', avant: '', apres: 'sg_0003' },
+            ] },
+          ],
+        },
+        'produit:historique': {
+          ok: true,
+          entrees: [
+            { ts: 1770000000000, par: 'Brigitte Brousseau', changements: [
+              { libelle: 'price', avant: '119.95', apres: '129.95' },
+            ] },
+            { ts: 1700000000000, par: 'Système', changements: [
+              { libelle: 'active', avant: 'false', apres: 'true' },
+            ] },
+          ],
+        },
+        'produit:decrire': { ok: true, texte: 'Une coupe nette, un lainage souple.' },
+        'produit:enregistrer': { ok: true, modifie: true },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'fiche tenue par un collègue',
+      id: 'p_0002',
+      reponses: {
+        'produit:contexte': _produitContexte(),
+        'produit:lire': { ok: true, fiche: { id: 'p_0002', sku: 'HAU-0007', name: 'Chemisier de soie',
+          category: 'hauts', price: 89.95, acquisitionCost: 31, weight: 0.2, active: true, variants: [], images: [] } },
+        'produit:sku': { ok: true, sku: 'HAU-0007', configure: true },
+        'produit:nipExige': { ok: true, exige: false },
+        'photos:liste': { ok: true, session: true, photos: [] },
+        'produit:brouillonLire': { ok: true, brouillon: null },
+        'produit:changements': { ok: true, entrees: [] },
+        'produit:historique': { ok: true, entrees: [] },
+        // ⚠ LE VERROU REFUSÉ EST UN CAS NORMAL, pas une panne : deux personnes
+        // ouvrent la même fiche tous les jours. La fenêtre doit le dire, nommer
+        // qui tient la fiche, et ne pas laisser enregistrer.
+        'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'Marc Dubé' },
+        identite: IDENTITE,
+      },
+    },
+  ],
 };
+
+// ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque
+// cas doit recevoir un objet NEUF. Une fenêtre qui trierait ou modifierait une de
+// ces listes sur place contaminerait les cas suivants, et l'on chercherait
+// longtemps pourquoi le troisième échoue alors que le premier passe.
+function _produitContexte() {
+  return {
+    ok: true,
+    categories: [
+      { cle: 'robes', libelle: 'Robes' },
+      { cle: 'hauts', libelle: 'Hauts' },
+      { cle: 'chaussures', libelle: 'Chaussures' },
+    ],
+    tailles: ['TP', 'P', 'M', 'G', 'TG'],
+    // ⚠ UNE COULEUR EN DÉGRADÉ : `colorNameToHex` rend parfois un
+    // `linear-gradient(...)` pour les teintes composées, et la fenêtre doit le
+    // poser tel quel en fond au lieu de le traiter comme une couleur unie.
+    couleurs: [
+      { nom: 'Noir', hex: '#000000', code: '01' },
+      { nom: 'Bleu marine', hex: '#1b2a4a', code: '02' },
+      { nom: 'Ivoire', hex: '#f3ece1', code: '' },
+      { nom: 'Bicolore', hex: 'linear-gradient(90deg,#000 50%,#fff 50%)', code: '' },
+    ],
+    guides: [{ id: 'sg_0003', nom: 'Robes — femmes' }],
+    // ⚠ UN ENTREPÔT PORTE SON CODE, jamais son identifiant interne : la liste
+    // proposait « wh_0001 », qui n'est affiché nulle part ailleurs.
+    entrepots: [
+      { id: 'wh_0001', nom: 'MTL — Entrepôt principal' },
+      { id: 'wh_0002', nom: 'QC — Boutique' },
+    ],
+    fournisseurs: [{ id: 'sup_0001', nom: 'Atelier Rivière' }],
+    etiquettes: [{ cle: 'lbl:bio', libelle: 'Coton biologique' }],
+    // Les deux modes de photo, parce que la catégorie en décide : « standard »
+    // = une série de vues sans couleur ; sinon des vues par angle.
+    modesPhoto: { robes: 'angles', hauts: 'standard', chaussures: 'angles' },
+    vuesAngles: ['devant', 'derriere', 'coteG', 'coteD', 'autres'],
+    genres: [{ cle: 'femme', libelle: 'Femme' }, { cle: 'unisexe', libelle: 'Unisexe' }],
+    groupesAge: [{ cle: 'adulte', libelle: 'Adulte' }],
+    styles: [{ cle: 'chic', libelle: 'Chic' }, { cle: 'decontracte', libelle: 'Décontracté' }],
+    seuilDefaut: 3,
+    peutAjouter: true, peutModifier: true,
+  };
+}

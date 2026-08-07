@@ -183,20 +183,31 @@ function pageImprimantes() {
     var aJour = !e.versionDisponible || e.version === e.versionDisponible;
     var h = [];
 
-    h.push('<div class="carte"><h2>Agent d’impression de ce poste</h2>');
-    h.push('<div class="lg"><div class="k">État</div><div class="v">' + etatPastille + '</div></div>');
-    if (dispo) {
-      h.push('<div class="lg"><div class="k">Ordinateur</div><div class="v">' + (esc(e.poste) || '—') + '</div></div>');
-      h.push('<div class="lg"><div class="k">Version installée</div><div class="v">' + (esc(e.version) || '—')
-        + (aJour ? ' <span class="pastille ok">à jour</span>'
-                 : ' <span class="pastille att">' + esc(e.versionDisponible) + ' disponible</span>') + '</div></div>');
-      h.push('<div class="lg"><div class="k">Aide PDF</div><div class="v">'
-        + (e.aidePdf
-            ? '<span class="pastille ok">' + (esc(e.aidePdfNom) || 'présente') + '</span>'
-            : '<span class="pastille att">absente</span> <span style="color:#8fa1b8;font-size:.8rem">— requise pour les étiquettes d’expédition, qui arrivent en PDF du transporteur.</span>')
-        + '</div></div>');
+    // ⚠⚠ AUCUNE CARTE << AGENT D IMPRESSION >> EN MODE APPLICATION, et ce n est pas
+    // une simplification d affichage : c etait un MENSONGE. En mode application il
+    // n y a pas de programme d impression separe — c est l application qui imprime.
+    // Le site interrogeait quand meme PrintAgent, qui rend alors une fiche
+    // SYNTHETIQUE (<< Ordinateur : Application de bureau >>, une version, une aide
+    // PDF << presente >>), et cette fenetre la dessinait comme un composant reel,
+    // avec son etat et sa mise a jour. On annoncait un logiciel inexistant.
+    // Releve par l utilisateur le 2026-08-07. Cette fenetre ne s ouvre QUE dans
+    // l application : la carte n a donc aucun cas ou elle serait vraie.
+    if (!e.natif) {
+      h.push('<div class="carte"><h2>Agent d’impression de ce poste</h2>');
+      h.push('<div class="lg"><div class="k">État</div><div class="v">' + etatPastille + '</div></div>');
+      if (dispo) {
+        h.push('<div class="lg"><div class="k">Ordinateur</div><div class="v">' + (esc(e.poste) || '—') + '</div></div>');
+        h.push('<div class="lg"><div class="k">Version installée</div><div class="v">' + (esc(e.version) || '—')
+          + (aJour ? ' <span class="pastille ok">à jour</span>'
+                   : ' <span class="pastille att">' + esc(e.versionDisponible) + ' disponible</span>') + '</div></div>');
+        h.push('<div class="lg"><div class="k">Aide PDF</div><div class="v">'
+          + (e.aidePdf
+              ? '<span class="pastille ok">' + (esc(e.aidePdfNom) || 'présente') + '</span>'
+              : '<span class="pastille att">absente</span> <span style="color:#8fa1b8;font-size:.8rem">— requise pour les étiquettes d’expédition, qui arrivent en PDF du transporteur.</span>')
+          + '</div></div>');
+      }
+      h.push('</div>');
     }
-    h.push('</div>');
 
     h.push('<div class="carte"><h2>Association par service</h2>');
     if (!e.services || !e.services.length) {
@@ -263,7 +274,10 @@ function pageImprimantes() {
     }
     h.push('</div>');
     corps.innerHTML = h.join('');
-    sous.textContent = dispo ? 'agent détecté' : 'agent absent';
+    // ⚠ MEME LA LIGNE D ETAT DISAIT << agent detecte >> EN MODE APPLICATION. Retirer
+    // la carte et laisser ce libelle-la aurait garde le mensonge, juste plus petit.
+    sous.textContent = e.natif ? 'impression par l’application'
+      : (dispo ? 'agent détecté' : 'agent absent');
   }
 
   // ⚠ LA LISTE DES IMPRIMANTES EST LUE UNE FOIS, PAS A CHAQUE REDESSIN.
