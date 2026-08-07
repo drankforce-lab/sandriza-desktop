@@ -110,19 +110,25 @@ function pageImprimantes() {
      peut pas reparer. Celle-ci le dit maintenant, a l ecran, sans outil.
      Le journal reste DISCRET quand tout va bien : il n apparait que si l ecran
      n a rien affiche au bout de trois secondes, ou si une erreur survient. */
+  // ⚠ LE SAUT DE LIGNE PASSE PAR UNE CONSTANTE, ET CE N EST PAS UN CAPRICE.
+  // Ecrire la sequence d echappement directement ici la ferait RESOUDRE a la
+  // lecture du module — un vrai saut de ligne se retrouverait au milieu d une
+  // chaine entre apostrophes, et le script de la page serait casse. Deja vecu deux
+  // fois aujourd hui. String.fromCharCode traverse le gabarit sans rien resoudre.
+  var SAUT = String.fromCharCode(10);
   var JOURNAL = [];
   var rendu = false;
   function noter(t){
     JOURNAL.push(new Date().toLocaleTimeString('fr-CA') + ' — ' + t);
     var z = document.getElementById('diag');
-    if (z) z.textContent = JOURNAL.join('\n');
+    if (z) z.textContent = JOURNAL.join(SAUT);
   }
   function montrerJournal(titre){
     corps.innerHTML = '<div class="vide"><div class="gros">' + esc(titre) + '</div>'
       + '<div style="font-size:.82rem;margin-bottom:.6rem">Ce que la fenêtre a pu faire, étape par étape :</div>'
       + '<pre id="diag" style="text-align:left;white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;'
       + 'background:#0b1220;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem .8rem;'
-      + 'max-width:52rem;color:#cbd8e6">' + esc(JOURNAL.join('\n')) + '</pre></div>';
+      + 'max-width:52rem;color:#cbd8e6">' + esc(JOURNAL.join(SAUT)) + '</pre></div>';
   }
   // ⚠ UNE ERREUR NON RATTRAPEE NE DOIT PLUS ETRE INVISIBLE. Sans ces deux
   // ecouteurs, un defaut de script laissait la fenetre sur son message initial —
