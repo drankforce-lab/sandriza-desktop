@@ -66,6 +66,13 @@ const CSS_PROPRE = `
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x{position:absolute;top:2px;right:2px;width:18px;height:18px;padding:0;
   border-radius:50%;font-size:.7rem;line-height:1;background:rgba(14,21,34,.85)}
+.voile{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+  background:rgba(8,12,18,.6);padding:1.2rem}
+.voile .boite{width:100%;max-width:460px;background:#16202f;border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:1rem 1.1rem;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.voile h3{margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:#fca5a5}
+.voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:#cbd8e6}
+.voile .pied2{display:flex;justify-content:flex-end;gap:.45rem;margin-top:.8rem}
 .prixgrille{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem .9rem;align-items:start}
 .prixgrille .ch label{display:flex;align-items:center;gap:.4rem}
 .pastille{margin-left:auto;padding:.06rem .4rem;border-radius:99px;background:#c9a97e;
@@ -352,6 +359,23 @@ function pageProduit(id) {
     majIa();
     // Le SKU suit la categorie — sauf sur une fiche existante, dont le code est
     // deja attribue : le recalculer lui en donnerait un autre a chaque ouverture.
+    // ⚠ CHANGER L UNITE NE CHANGE PAS LE POIDS. Passer de « 350 g » a « kg »
+    // doit donner « 0.35 », pas « 350 kg ». Sans cette conversion, on croit
+    // corriger une unite et l on multiplie le poids par mille — les frais
+    // d expedition suivent.
+    var uni = document.getElementById('p-unite');
+    if (uni) {
+      uni.dataset.prec = uni.value;
+      uni.onchange = function(){
+        var v = parseFloat(val('p-poids')) || 0;
+        if (v > 0) {
+          var kg = enKg(v, this.dataset.prec || 'g');
+          var n = (this.value === 'kg') ? kg : (this.value === 'lb') ? kg / 0.45359237 : kg * 1000;
+          poser('p-poids', String(Math.round(n * 1000) / 1000));
+        }
+        this.dataset.prec = this.value;
+      };
+    }
     var cat = document.getElementById('p-cat');
     if (cat) cat.addEventListener('change', function(){ if (!ID) majSku(); dessinerVues(); });
     var rab = document.getElementById('p-rabais');
@@ -829,8 +853,59 @@ function pageProduit(id) {
     });
   }
 
+  // ⚠ VENDRE SOUS LE COUT RESTE POSSIBLE — c est parfois voulu (ecoulement, fin
+  // de serie) — mais jamais SANS TRACE ni sans autorisation. La raison est
+  // ecrite dans la fiche, et un code est exige s il en existe un.
+  var SOUSCOUT = null;   // { raison, nip } une fois accorde
+  function demanderSousCout(eff, cout){
+    return P.appeler('produit:nipExige').then(function(x){
+      var exige = !!(x && x.exige);
+      return new Promise(function(resoudre){
+        var v = document.createElement('div');
+        v.className = 'voile';
+        v.innerHTML = '<div class="boite"><h3>⚠ Prix inférieur au coût d’acquisition</h3>'
+          + '<p>Le prix de vente effectif (<strong>' + eff.toFixed(2) + ' $</strong>) est inférieur '
+          + 'au coût d’acquisition (<strong>' + cout.toFixed(2) + ' $</strong>).</p>'
+          + '<div class="ch"><label for="bc-raison">Raison <span class="req">*</span></label>'
+          + '<textarea id="bc-raison" rows="3" placeholder="Écoulement de fin de série, article abîmé…"></textarea></div>'
+          + (exige ? '<div class="ch" style="margin-top:.5rem"><label for="bc-nip">Code d’autorisation <span class="req">*</span></label>'
+              + '<input id="bc-nip" type="password" autocomplete="off"></div>' : '')
+          + '<div class="msg err" id="bc-err" style="min-height:1.1em;margin-top:.4rem"></div>'
+          + '<div class="pied2"><button type="button" id="bc-non">Annuler</button>'
+          + '<button type="button" class="prim" id="bc-oui">Autoriser et enregistrer</button></div></div>';
+        document.body.appendChild(v);
+        var r = document.getElementById('bc-raison'); if (r) r.focus();
+        document.getElementById('bc-non').onclick = function(){ v.remove(); resoudre(null); };
+        document.getElementById('bc-oui').onclick = function(){
+          var raison = (document.getElementById('bc-raison').value || '').trim();
+          var err = document.getElementById('bc-err');
+          if (!raison) { err.textContent = 'La raison est obligatoire.'; return; }
+          var nip = exige ? (document.getElementById('bc-nip').value || '') : '';
+          P.appeler('produit:nip', nip).then(function(z){
+            if (!z || !z.ok) { err.textContent = expliquer(z); return; }
+            if (!z.valide) { err.textContent = 'Code incorrect — réessayez.'; return; }
+            v.remove(); resoudre({ raison: raison });
+          });
+        };
+      });
+    });
+  }
+
   function enregistrer(){
     if (!Assist.toutValide()) return;
+    // On regarde AVANT d envoyer : le refus doit arriver pendant qu on a encore
+    // le formulaire sous les yeux.
+    var pr = argentNombre(val('p-prix')) || 0;
+    var so = argentNombre(val('p-solde')) || 0;
+    var co = argentNombre(val('p-cout')) || 0;
+    var eff = (so > 0 && so < pr) ? so : pr;
+    if (co > 0 && eff > 0 && eff < co && !SOUSCOUT) {
+      demanderSousCout(eff, co).then(function(a){
+        if (!a) { dire('Enregistrement annulé.', 'att'); return; }
+        SOUSCOUT = a; enregistrer();
+      });
+      return;
+    }
     // Le stock est purge des variantes qui n existent plus : garder une quantite
     // sur une couleur retiree la ferait compter dans l inventaire sans qu aucun
     // ecran ne la montre.
@@ -857,6 +932,8 @@ function pageProduit(id) {
       finalSaleReturnOk: coché('p-finalret'),
       sizes: tailles(), colors: couleurs(),
       image: IMAGE,
+      belowCost: !!SOUSCOUT,
+      belowCostReason: SOUSCOUT ? SOUSCOUT.raison : '',
       additionalImages: VUES,
       // Les photos des couleurs RETIREES ne partent pas : le site les
       // televerserait puis les garderait dans le stockage sans que rien ne les
