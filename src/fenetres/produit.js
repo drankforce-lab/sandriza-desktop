@@ -154,7 +154,11 @@ function pageProduit(id) {
     if (modeStandard()) {
       var n = Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0; }).length;
       var l = [];
-      for (var i = 1; i <= n + 1; i++) l.push('libre' + i);   // toujours une case vide au bout
+      // Une case vide au bout TANT QU IL RESTE DE LA PLACE : en proposer une
+      // sixieme laisserait croire qu on peut depasser, et le refus arriverait
+      // apres avoir choisi le fichier.
+      var max = Math.min(n + 1, MAX_PHOTOS);
+      for (var i = 1; i <= max; i++) l.push('libre' + i);
       return l;
     }
     return (CTX.vuesAngles || ['devant', 'derriere', 'coteG', 'coteD', 'autres']);
@@ -429,13 +433,30 @@ function pageProduit(id) {
     };
     document.getElementById('corps').addEventListener('click', function(ev){
       var c = ev.target.closest('[data-vue]');
-      if (c) { var k = c.getAttribute('data-vue'); choisirFichier(function(d){ VUES[k] = d; dessinerVues(); }); return; }
+      if (c) {
+        var k = c.getAttribute('data-vue');
+        // Les cases NOMMEES (angles) prennent une photo chacune ; les cases
+        // LIBRES du mode manuel se remplissent en serie.
+        var libre = k.indexOf('libre') === 0;
+        choisirFichier(function(ds){
+          if (!libre) { VUES[k] = ds[0]; dessinerVues(); return; }
+          var deja = Object.keys(VUES).filter(function(x){ return x.indexOf('libre') === 0; }).length;
+          var place = Math.max(0, MAX_PHOTOS - deja);
+          if (ds.length > place) {
+            dire('Maximum ' + MAX_PHOTOS + ' photos supplémentaires — '
+              + (ds.length - place) + ' ignorée(s).', 'att');
+          }
+          ds.slice(0, place).forEach(function(d, i){ VUES['libre' + (deja + i + 1)] = d; });
+          dessinerVues();
+        }, libre);
+        return;
+      }
       var x = ev.target.closest('[data-vuex]');
       if (x) { delete VUES[x.getAttribute('data-vuex')]; dessinerVues(); return; }
       var p = ev.target.closest('[data-coul]');
       if (p) {
         var n = p.getAttribute('data-coul');
-        choisirFichier(function(d){ PARCOUL[n] = PARCOUL[n] || {}; PARCOUL[n].principale = d; dessinerVues(); });
+        choisirFichier(function(ds){ PARCOUL[n] = PARCOUL[n] || {}; PARCOUL[n].principale = ds[0]; dessinerVues(); });
         return;
       }
       var px = ev.target.closest('[data-coulx]');
@@ -728,19 +749,38 @@ function pageProduit(id) {
   // Un seul sélecteur de fichier, réutilisé : en créer un par cadre laisserait
   // autant d’éléments invisibles dans la page, et le navigateur n’en garde pas
   // la trace une fois le cadre redessiné.
-  function choisirFichier(surCharge){
+  // ⚠ PLUSIEURS PHOTOS D UN COUP. On en depose rarement une seule : obliger a
+  // rouvrir le selecteur cinq fois pour cinq vues d un meme vetement transforme
+  // une minute de travail en cinq. Le selecteur accepte donc une selection
+  // multiple, et les fichiers remplissent les cases libres dans l ordre.
+  var MAX_PHOTOS = 5;
+  function choisirFichier(surCharge, multiple){
     var e = document.createElement('input');
     e.type = 'file'; e.accept = 'image/*';
+    if (multiple) e.multiple = true;
     e.onchange = function(){
-      var f = e.files && e.files[0]; if (!f) return;
-      if (f.size > MAX_MO * 1024 * 1024) {
-        dire('Image trop lourde (' + Math.round(f.size / 1048576) + ' Mo). Maximum ' + MAX_MO + ' Mo.', 'err');
-        return;
+      var fs = Array.prototype.slice.call(e.files || []);
+      if (!fs.length) return;
+      var trop = fs.filter(function(f){ return f.size > MAX_MO * 1024 * 1024; });
+      fs = fs.filter(function(f){ return f.size <= MAX_MO * 1024 * 1024; });
+      if (trop.length) {
+        dire(trop.length + (trop.length > 1 ? ' photos ignorées : plus de ' : ' photo ignorée : plus de ')
+          + MAX_MO + ' Mo.', 'att');
       }
-      var l = new FileReader();
-      l.onload = function(){ surCharge(String(l.result || '')); dire(''); };
-      l.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
-      l.readAsDataURL(f);
+      if (!fs.length) return;
+      // ⚠ Les lectures sont ASYNCHRONES : sans ce compteur, les photos
+      // arriveraient dans le desordre et la derniere lue ecraserait l ordre
+      // choisi. On les repose a leur rang une fois toutes lues.
+      var lues = new Array(fs.length), reste = fs.length;
+      fs.forEach(function(f, i){
+        var l = new FileReader();
+        l.onload = function(){
+          lues[i] = String(l.result || '');
+          if (--reste === 0) { surCharge(lues.filter(Boolean)); if (!trop.length) dire(''); }
+        };
+        l.onerror = function(){ if (--reste === 0) { surCharge(lues.filter(Boolean)); } };
+        l.readAsDataURL(f);
+      });
     };
     e.click();
   }
