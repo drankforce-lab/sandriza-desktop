@@ -89,6 +89,17 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   minimize: () => ipcRenderer.send('win:minimize'),
   close: () => ipcRenderer.send('win:close'),
 
+  // ⚠ RAMENER CETTE FENETRE DEVANT — pour un avertissement, pas pour du confort.
+  // Le decompte avant deconnexion pour inactivite s ouvre dans CETTE fenetre. Or
+  // le travail se fait desormais dans des fenetres natives : la boite s ouvrait
+  // donc DERRIERE elles, ou sur l autre ecran, et l usager etait deconnecte sans
+  // avoir rien vu — il en concluait, a juste titre, que << la fenetre de
+  // deconnexion ne fonctionne pas >> (2026-08-07).
+  // ⚠ A N APPELER QUE POUR CE GENRE D AVERTISSEMENT. Une fenetre qui se met devant
+  // pendant qu on travaille ailleurs est une nuisance : ce qui la justifie ici,
+  // c est qu on est a 60 secondes de perdre sa session.
+  attirerAttention: () => ipcRenderer.send('win:attention'),
+
   // ── Phase 3 : notifications + pastille ──────────────────────────────────────
   // Ouvre la preparation d une commande PRECISE dans une fenetre native.
   // Le site sait laquelle est selectionnee ; la coquille ne fait que porter

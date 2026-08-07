@@ -130,6 +130,45 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
  */
 const JS_SOCLE = `
 var P = window.szPont;
+
+// ⚠⚠ << IL Y A QUELQU UN >> — CE BLOC EMPECHE DE DECONNECTER UNE PERSONNE AFFAIREE.
+// Le minuteur d inactivite du site n ecoute que les evenements de SA page. Une
+// fenetre native est un document separe : ses clics et ses frappes ne l atteignent
+// jamais. Quelqu un qui saisit une fiche pendant vingt minutes etait donc traite
+// comme absent depuis vingt minutes, et renvoye a l ecran de connexion — sans
+// meme voir le decompte, qui s ouvrait DERRIERE cette fenetre. Signale par
+// l utilisateur le 2026-08-07 : << je suis constamment deconnecte >>.
+//
+// ⚠ SUR DE VRAIS GESTES SEULEMENT, JAMAIS SUR UNE MINUTERIE. Un envoi periodique
+// — l enregistrement automatique du brouillon part toutes les 5 secondes —
+// maintiendrait la session ouverte toute la nuit, et le minuteur ne protegerait
+// plus rien du tout. On n ecoute donc que clic, frappe et saisie.
+//
+// ⚠ ETRANGLE A 20 SECONDES. Le site se protege deja (une ecriture par 5 s au
+// plus), mais chaque appel traverse le pont jusqu a la fenetre principale : le
+// faire a chaque touche encombrerait ce passage pour rien. Vingt secondes restent
+// tres en dessous des quinze minutes d inactivite tolerees.
+var _derniereActivite = 0;
+function signalerActivite(){
+  var t = Date.now();
+  if (t - _derniereActivite < 20000) return;
+  _derniereActivite = t;
+  // Sans rattrapage visible : si ce signal echoue, ce n est pas a l usager de le
+  // savoir — au pire l avertissement d inactivite paraitra, ce qui est le
+  // comportement d avant et non une panne nouvelle.
+  try { var p = P.appeler('session:activite'); if (p && p.then) p.then(function(){}, function(){}); }
+  catch (e) {}
+}
+// En phase de CAPTURE, pour que rien ne puisse l empecher d etre vu — un
+// gestionnaire qui arrete la propagation ne doit pas faire passer son usager pour
+// un absent.
+document.addEventListener('mousedown', signalerActivite, true);
+document.addEventListener('keydown', signalerActivite, true);
+document.addEventListener('input', signalerActivite, true);
+// L ouverture de la fenetre EST un geste : on le dit tout de suite, sinon les
+// vingt premieres secondes ne compteraient pas.
+signalerActivite();
+
 var MOTIFS = {
   session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
   droit:              'Votre rôle ne donne pas accès à cette opération.',

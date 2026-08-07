@@ -196,6 +196,30 @@ ipcMain.handle('print:current', async (e, opts = {}) => {
 });
 
 ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
+
+// ⚠ LE DECOMPTE AVANT DECONNEXION DOIT ETRE VU, sinon il n avertit personne.
+// Il s ouvre dans la fenetre principale, et le travail se fait maintenant dans des
+// fenetres natives : la boite s ouvrait donc derriere elles. L usager etait
+// deconnecte sans avoir rien vu (2026-08-07).
+// ⚠ TROIS GESTES, PARCE QU AUCUN NE SUFFIT SEUL :
+//   — `restore` : Windows refuse de mettre au premier plan une fenetre reduite ;
+//   — `show`+`focus` : la remonter au-dessus des fenetres natives ;
+//   — `flashFrame` : Windows peut REFUSER le premier plan a une application qui n a
+//     pas le focus (regle du systeme, pas un defaut). Le clignotement dans la barre
+//     des taches est alors le seul signal qui passe — et il reste visible si la
+//     personne regarde ailleurs.
+ipcMain.on('win:attention', () => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+    mainWindow.flashFrame(true);
+    // On arrete le clignotement des que la fenetre est reellement regardee : le
+    // laisser courir apres coup ferait clignoter une fenetre deja lue.
+    mainWindow.once('focus', () => { try { mainWindow.flashFrame(false); } catch {} });
+  } catch {}
+});
 // ⚠ CINQUIÈME CHEMIN, TROUVÉ EN CHERCHANT. Le bouton de fermeture dessiné dans la
 // page passe par ici, pas par `menu:action` : garder les quatre autres et oublier
 // celui-là aurait laissé le bouton le plus évidemment cliquable casser
@@ -917,6 +941,9 @@ const OPS_PONT = new Set([
   'commande:contexte', 'commande:lire', 'commande:bon',
   'commande:etiquette', 'commande:prete', 'commande:expedier',
   'verrou:prendre', 'verrou:rendre',
+  // « Il y a quelqu'un » — sans ceci, travailler dans une fenêtre native passe
+  // pour une absence et le minuteur d'inactivité déconnecte une personne affairée.
+  'session:activite',
 ]);
 
 // ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que
