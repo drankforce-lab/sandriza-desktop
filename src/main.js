@@ -802,6 +802,8 @@ const OPS_PONT = new Set([
   'produit:contexte', 'produit:sku', 'produit:nip', 'produit:nipExige',
   'photos:liste',
   'produit:decrire', 'produit:lire', 'produit:enregistrer',
+  'produit:brouillonLire', 'produit:brouillonEcrire', 'produit:brouillonJeter',
+  'produit:changements', 'produit:historique',
   'commande:contexte', 'commande:lire', 'commande:bon',
   'commande:etiquette', 'commande:prete', 'commande:expedier',
   'verrou:prendre', 'verrou:rendre',
@@ -844,6 +846,22 @@ ipcMain.on('pont:fermer', (e) => {
   if (w && !w.isDestroyed()) w.close();
 });
 
+// ⚠ UN VRAI PLEIN ÉCRAN, pas une classe CSS. L'éditeur du site n'a que la
+// seconde solution — il vit dans un onglet et ne peut qu'étirer un bloc dans la
+// page. Ici la fenêtre existe pour de bon, donc on demande au système.
+// ⚠ CETTE OPÉRATION NE PASSE PAS PAR `OPS_PONT` : cette liste-là garde l'accès
+// aux données et à la session du site. Piloter la fenêtre qui appelle n'y a rien
+// à faire, et l'y mêler brouillerait ce qu'elle protège.
+// Rend le nouvel état, pour que le bouton porte le bon libellé au lieu de
+// supposer que sa demande a abouti.
+ipcMain.handle('fenetre:pleinecran', (e) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w || w.isDestroyed()) return false;
+  const vers = !w.isFullScreen();
+  w.setFullScreen(vers);
+  return vers;
+});
+
 // ── Fabrique commune des fenêtres natives ───────────────────────────────────
 // ⚠ UNE SEULE PAR CLÉ. Sans ce registre, cliquer deux fois sur « Nouveau
 // fournisseur » ouvrirait deux formulaires sur la même fiche : deux verrous
@@ -868,11 +886,17 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
   win.on('page-title-updated', (ev) => { ev.preventDefault(); });
   win.setTitle(titre);
   // Place retenue PAR CLÉ : un second écran reste un second écran.
+  // ⚠ MAIS JAMAIS LES BORNES DU PLEIN ÉCRAN. Passer en plein écran émet
+  // « resized », et `getBounds()` rend alors la taille de l'ÉCRAN : on aurait
+  // retenu 2560×1440 comme taille normale de la fenêtre, et la fois suivante elle
+  // se serait ouverte en couvrant tout, sans être en plein écran — impossible à
+  // rattraper autrement qu'en la redimensionnant à la main. C'est le même genre de
+  // piège qui a fait abandonner la position mémorisée dans l'éditeur du site.
   let minuterie = null;
   const retenir = () => {
     clearTimeout(minuterie);
     minuterie = setTimeout(() => {
-      if (win.isDestroyed()) return;
+      if (win.isDestroyed() || win.isFullScreen()) return;
       const tout = reglages.get('fenetres') || {};
       tout[cle] = win.getBounds();
       reglages.set('fenetres', tout);
@@ -907,7 +931,9 @@ const ouvrirImprimantes = () => {
   const retenir = () => {
     clearTimeout(minuterie);
     minuterie = setTimeout(() => {
-      if (!imprimantesWin || imprimantesWin.isDestroyed()) return;
+      // Même garde que les fenêtres natives : les bornes du plein écran ne sont
+      // pas la taille de la fenêtre (voir ouvrirNative).
+      if (!imprimantesWin || imprimantesWin.isDestroyed() || imprimantesWin.isFullScreen()) return;
       const tout = reglages.get('fenetres') || {};
       tout['imprimantes'] = imprimantesWin.getBounds();
       reglages.set('fenetres', tout);
@@ -1371,7 +1397,9 @@ ipcMain.handle('fenetre:ouvrir', (e, opts = {}) => {
   const retenir = () => {
     clearTimeout(minuterie);
     minuterie = setTimeout(() => {
-      if (win.isDestroyed()) return;
+      // Même garde que les fenêtres natives (voir ouvrirNative) : en plein écran,
+      // `getBounds()` rend la taille de l'écran, pas celle de la fenêtre.
+      if (win.isDestroyed() || win.isFullScreen()) return;
       const tout = reglages.get('fenetres') || {};
       tout[cle] = win.getBounds();
       reglages.set('fenetres', tout);

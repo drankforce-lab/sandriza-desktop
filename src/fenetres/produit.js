@@ -39,9 +39,12 @@ const CSS_PROPRE = `
 .jeton.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:#f0e4d2}
 .jeton .pt{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.3);flex:0 0 auto}
 .photo{display:flex;gap:.85rem;align-items:flex-start}
-.photo .vign{flex:0 0 auto;width:140px;height:140px;border-radius:10px;
+.photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
   border:1px dashed rgba(255,255,255,.18);display:flex;align-items:center;
-  justify-content:center;color:#8fa1b8;font-size:.75rem;overflow:hidden;text-align:center}
+  justify-content:center;color:#8fa1b8;font-size:.75rem;overflow:hidden;text-align:center;
+  cursor:pointer;background:#0f1826}
+.photo .vign:hover{border-color:#c9a97e}
+.photo .vign.pleine{border-style:solid;border-color:rgba(255,255,255,.22)}
 .photo .vign img{width:100%;height:100%;object-fit:cover}
 .photo .cmd{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.45rem}
 #p-coul-sug{position:absolute;top:100%;left:0;right:5.5rem;z-index:40;margin-top:2px;
@@ -60,20 +63,48 @@ const CSS_PROPRE = `
 .vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed rgba(255,255,255,.18);
   display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
   background:#0f1826;color:#8fa1b8;font-size:.68rem;text-align:center;padding:.2rem}
+.vue .cadre:hover{border-color:#c9a97e}
 .vue .cadre.pleine{border-style:solid;border-color:rgba(255,255,255,.22)}
 .vue img{width:100%;height:100%;object-fit:cover}
 .vue .lgd{font-size:.68rem;color:#8fa1b8;text-align:center;margin-top:.18rem;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vue .x{position:absolute;top:2px;right:2px;width:18px;height:18px;padding:0;
-  border-radius:50%;font-size:.7rem;line-height:1;background:rgba(14,21,34,.85)}
+.vue .x,.vign .x{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;
+  border-radius:50%;font-size:.78rem;line-height:1;font-weight:700;
+  background:rgba(200,40,40,.94);border:1px solid rgba(255,255,255,.28);color:#fff}
+.vue .x:hover,.vign .x:hover{background:#e04141;border-color:rgba(255,255,255,.5)}
+/* ⚠ CINQ CADRES, UNE SEULE LIGNE, A TOUTE LARGEUR DE FENETRE. Une largeur fixe
+   ne peut pas tenir les deux promesses a la fois : assez grande sur une fenetre
+   large, elle passe a deux lignes des qu on la reduit — or le nombre de photos
+   ne depend pas de la taille de la fenetre. Les cadres se PARTAGENT donc la
+   largeur disponible ; « aspect-ratio » tient le carre, donc ils grandissent et
+   se resserrent sans jamais se deformer, et « nowrap » interdit le retour a la
+   ligne au lieu de compter sur la chance. */
+#p-vues{flex-wrap:nowrap}
+#p-vues .vue{flex:1 1 0;width:auto;min-width:62px;max-width:158px}
+#p-vues .vue .cadre{width:100%;height:auto;aspect-ratio:1/1;font-size:.72rem}
 .lgstk{display:flex;align-items:center;gap:.5rem;padding:.2rem .3rem;border-radius:6px}
-.lgstk .c1{flex:0 0 5rem}
-.lgstk .c2{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lgstk .c1{flex:0 0 4.5rem}
+/* ⚠ LA COULEUR NE PREND PLUS TOUTE LA LARGEUR RESTANTE, l ENTREPOT l absorbe.
+   Un nom de couleur tient en un mot ; un entrepot porte son CODE et sa
+   reference — c est lui qui manquait de place, et sa liste etait coupee. */
+.lgstk .c2{flex:0 1 11rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lgstk .c3{flex:0 0 6rem}
-.lgstk .c4{flex:0 0 12rem}
+.lgstk .c4{flex:1 1 14rem;min-width:0}
 .lgstk.entete{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;
   border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
 .lgstk:not(.entete):hover{background:rgba(255,255,255,.04)}
+/* ⚠ UNE LIGNE QUI PORTE DU STOCK SE VOIT, comme dans le tableau d inventaire du
+   site : on balaie la liste et l on sait ou il y a de la marchandise sans lire
+   les chiffres un par un. Le site teinte a 6 % sur un fond CLAIR ; sur ce fond
+   sombre la meme valeur est invisible — c est la teinte qui s adapte au fond,
+   pas l intention qui change. */
+.lgstk.enstock{background:rgba(34,197,94,.10)}
+.lgstk.enstock:hover{background:rgba(34,197,94,.15)}
+.lgstk.enstock .c1,.lgstk.enstock .c2{color:#86efac;font-weight:600}
+/* ⚠ EMPLACEMENT OBLIGATOIRE DES QUE LA QUANTITE DEPASSE ZERO — la regle de
+   l editeur du site, reprise telle quelle. Sans ce rappel on enregistre de la
+   marchandise que l inventaire ne sait pas ou aller chercher. */
+.lgstk select.manque{border-color:#f87171}
 .theque{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;
   max-height:46vh;overflow-y:auto;padding-right:.2rem}
 .theque .ph{cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.12);
@@ -82,6 +113,11 @@ const CSS_PROPRE = `
 .theque .ph img{width:100%;height:88px;object-fit:cover;display:block}
 .theque .ph .lg{font-size:.66rem;color:#8fa1b8;padding:.16rem .25rem;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
+/* Le code de l article qui se sert deja de la photo — en couleur d accent, pour
+   qu il se distingue du code de la photo elle-meme juste au-dessus. */
+.theque .ph .lg.sku{color:#c9a97e;font-weight:700;padding-top:0;
+  font-family:ui-monospace,Consolas,monospace}
+.theque .ph .lg.libre{color:#4ade80;padding-top:0}
 .avis{display:none;font-size:.74rem;line-height:1.4;color:#fbbf24;margin-top:.3rem}
 .avis.on{display:block}
 .voile{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
@@ -113,6 +149,38 @@ const CSS_PROPRE = `
 .stk input,.stk select{padding:.18rem .35rem;font-size:.83rem}
 .stk .q{width:5rem}
 .bascules{display:flex;flex-direction:column;gap:.45rem}
+/* ⚠ LES OUTILS SE POSENT APRES LE TITRE, JAMAIS AU COIN DROIT — celui-la est
+   reserve au verrou (.sous, qui garde son margin-left:auto). */
+.tete .outils{display:flex;align-items:center;gap:.3rem;flex:0 0 auto}
+.tete .outils button{padding:.14rem .45rem;font-size:.78rem;line-height:1.35}
+.tete .outils .n{font-variant-numeric:tabular-nums;font-weight:700}
+/* Journal des modifications — une boite qui SE LIT, donc elle peut defiler : la
+   regle « aucun defilement » vise les etapes du formulaire, pas la consultation
+   d une liste dont on ne connait pas la longueur (meme choix que .theque). */
+.jrn{max-height:52vh;overflow-y:auto;padding-right:.2rem;text-align:left}
+.jrn .sec{display:flex;align-items:center;gap:.4rem;margin:.5rem 0 .5rem}
+.jrn .sec .t{font-size:.66rem;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:#c9a97e;flex:0 0 auto}
+.jrn .sec .tr{flex:1 1 auto;height:1px;background:rgba(255,255,255,.12)}
+.jrn .bl{padding:.5rem .6rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  background:#0f1826;margin-bottom:.45rem}
+.jrn .bl.cliq{cursor:pointer;user-select:none}
+.jrn .bl.cliq:hover{border-color:rgba(201,169,126,.45)}
+.jrn .et{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  color:#8fa1b8;margin-bottom:.15rem}
+.jrn .dif{display:flex;align-items:center;gap:.4rem;font-size:.82rem;flex-wrap:wrap}
+.jrn .dif .av{color:#8fa1b8;text-decoration:line-through;opacity:.75;word-break:break-word}
+.jrn .dif .fl{color:#c9a97e;flex:0 0 auto}
+.jrn .dif .ap{color:#e8edf5;font-weight:600;word-break:break-word}
+.jrn .qd{display:flex;justify-content:space-between;align-items:center;gap:.4rem;
+  font-size:.68rem;color:#8fa1b8;margin-bottom:.35rem}
+.jrn .qui{margin-top:.45rem;padding-top:.4rem;border-top:1px dashed rgba(255,255,255,.14);
+  font-size:.72rem;color:#8fa1b8;line-height:1.5}
+.jrn .an{font-size:.72rem;font-weight:800;letter-spacing:.06em;color:#c9a97e;
+  text-transform:uppercase;margin:.2rem 0 .5rem;border-bottom:1px solid rgba(255,255,255,.12);
+  padding-bottom:.3rem}
+.jrn .fin{font-size:.7rem;color:#8fa1b8;text-align:center;line-height:1.45;margin-top:.5rem}
+.jrn .lien{color:#c9a97e;text-decoration:none;font-weight:600;cursor:pointer}
 `;
 
 /** Page complète de l'assistant. `id` vide = création. */
@@ -122,6 +190,10 @@ function pageProduit(id) {
 <title>Produit — Administration Sandriza</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}</style></head><body>
 <div class="tete"><span class="ic">🧵</span><h1 id="titre">Produit</h1>
+  <span class="outils">
+    <button type="button" id="btn-jrn" title="Modifications de cette fiche" style="display:none">🕘 <span class="n" id="jrn-n">0</span></button>
+    <button type="button" id="btn-fs" title="Plein écran">⛶</button>
+  </span>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>
@@ -296,16 +368,17 @@ function pageProduit(id) {
 
     // 5 — Photos : principale, vues supplémentaires, et par couleur
     h.push('<div class="etape">'
+      // ⚠ LA VIGNETTE EST LE CONTROLE, plus un bouton a cote d elle. Un bouton
+      // « Retirer » pose sous la carte n indique pas a quelle photo il
+      // s applique, et il occupait la place d une action principale pour un
+      // geste secondaire. On clique la photo pour la choisir, on clique la
+      // pastille rouge de son coin pour la retirer — la ou l oeil est deja.
       + '<div class="carte"><h2>Photo principale</h2><div class="photo">'
-      + '<div class="vign" id="p-vign">aucune photo</div><div class="cmd">'
-      + '<input type="file" id="p-fichier" accept="image/*">'
-      // Les boutons sur UNE ligne, a leur largeur : etires sur toute la carte,
-      // ils avaient le poids visuel d une action principale alors que ce sont
-      // deux gestes secondaires.
-      + '<div style="display:flex;gap:.4rem;flex-wrap:wrap">'
-      + '<button type="button" id="p-theque">🖼 Photothèque…</button>'
-      + '<button type="button" id="p-vider">Retirer</button></div>'
-      + '<div class="aide">Maximum 8 Mo. Déposée dans le stockage à l’enregistrement.</div>'
+      + '<div class="vign" id="p-vign" title="Choisir la photo principale">aucune photo</div>'
+      + '<div class="cmd">'
+      + '<div class="aide">Cliquez la vignette : la <strong>photothèque</strong> s’ouvre '
+      + 'd’abord, et l’import depuis l’ordinateur y reste offert. Maximum 8 Mo. '
+      + 'Déposée dans le stockage à l’enregistrement.</div>'
       + '</div></div></div>'
       + '<div class="carte"><h2 id="p-vues-titre">Vues supplémentaires</h2>'
       + '<div class="vues" id="p-vues"></div>'
@@ -345,6 +418,16 @@ function pageProduit(id) {
 
     // 7 — Stock
     h.push('<div class="etape"><div class="carte plein" id="p-zone"><h2>Stock par variante</h2>'
+      // ⚠ LA REGLE DE L EDITEUR DU SITE, DITE ICI AUSSI. Sans entrepot configure,
+      // la colonne disparaissait sans un mot : on saisissait des quantites en
+      // croyant l emplacement facultatif, alors qu il est obligatoire des que la
+      // quantite depasse zero.
+      + (CTX.entrepots.length
+          ? '<div class="aide" style="margin:-.2rem 0 .5rem">Un emplacement d’entrepôt est '
+            + 'obligatoire dès qu’une quantité dépasse zéro.</div>'
+          : '<div class="aide" style="margin:-.2rem 0 .5rem;color:#fbbf24">⚠ Aucun emplacement '
+            + 'configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux '
+            + 'variantes en stock.</div>')
       + '<div class="rech"><input placeholder="Filtrer par taille ou couleur…"><span class="cpt" id="p-somme"></span></div>'
       + '<div class="lgstk entete"><span class="c1">Taille</span><span class="c2">Couleur</span>'
       + '<span class="c3">Quantité</span><span class="c4">Entrepôt</span></div>'
@@ -451,18 +534,25 @@ function pageProduit(id) {
       poser('p-solde', (pr * (1 - parseInt(b.getAttribute('data-pct'), 10) / 100)).toFixed(2) + ' $');
       majMarge();
     });
-    document.getElementById('p-fichier').onchange = lireFichier;
-    document.getElementById('p-vider').onclick = function(){
-      IMAGE = ''; montrerImage(''); document.getElementById('p-fichier').value = ''; majIa();
-    };
     document.getElementById('corps').addEventListener('click', function(ev){
+      // ⚠ LA PASTILLE DE RETRAIT SE TESTE AVANT LE CADRE QUI LA PORTE. Elle est
+      // DANS la vignette : chercher le cadre d abord aurait rouvert le selecteur
+      // au moment ou l on voulait retirer la photo.
+      if (ev.target.closest('#p-vider')) {
+        IMAGE = ''; montrerImage(''); majIa(); dire('');
+        return;
+      }
+      if (ev.target.closest('#p-vign')) {
+        choisirPhoto(function(ds){ IMAGE = ds[0]; montrerImage(IMAGE); majIa(); });
+        return;
+      }
       var c = ev.target.closest('[data-vue]');
       if (c) {
         var k = c.getAttribute('data-vue');
         // Les cases NOMMEES (angles) prennent une photo chacune ; les cases
         // LIBRES du mode manuel se remplissent en serie.
         var libre = k.indexOf('libre') === 0;
-        choisirFichier(function(ds){
+        choisirPhoto(function(ds){
           if (!libre) { VUES[k] = ds[0]; dessinerVues(); return; }
           var deja = Object.keys(VUES).filter(function(x){ return x.indexOf('libre') === 0; }).length;
           var place = Math.max(0, MAX_PHOTOS - deja);
@@ -480,14 +570,12 @@ function pageProduit(id) {
       var p = ev.target.closest('[data-coul]');
       if (p) {
         var n = p.getAttribute('data-coul');
-        choisirFichier(function(ds){ PARCOUL[n] = PARCOUL[n] || {}; PARCOUL[n].principale = ds[0]; dessinerVues(); });
+        choisirPhoto(function(ds){ PARCOUL[n] = PARCOUL[n] || {}; PARCOUL[n].principale = ds[0]; dessinerVues(); });
         return;
       }
       var px = ev.target.closest('[data-coulx]');
       if (px) { delete PARCOUL[px.getAttribute('data-coulx')]; dessinerVues(); }
     });
-    var bt = document.getElementById('p-theque');
-    if (bt) bt.onclick = function(){ ouvrirTheque(function(src){ IMAGE = src; montrerImage(src); majIa(); }); };
     var ca = document.getElementById('p-coul-add');
     if (ca) ca.onclick = function(){ ajouterCouleur(); };
     var cl = document.getElementById('p-coul-libre');
@@ -811,52 +899,91 @@ function pageProduit(id) {
     e.click();
   }
 
+  // ⚠ LA PHOTOTHEQUE D ABORD, L ORDINATEUR ENSUITE — pour TOUS les emplacements
+  // photo, pas seulement la principale. Une photo deja importee dans la session a
+  // deja ete choisie et nommee : aller la rechercher dans un dossier refait un
+  // travail deja fait, et depose un second exemplaire du meme fichier dans le
+  // stockage. L import reste offert, dans la meme boite — il n est pas cache, il
+  // est second.
+  // La fonction de retour recoit TOUJOURS un TABLEAU, quelle que soit la porte
+  // empruntee : sans quoi chaque appelant devrait distinguer les deux cas, et
+  // l un d eux l aurait oublie.
+  function choisirPhoto(surChoix, multiple){
+    ouvrirTheque(surChoix, multiple);
+  }
+
   // ⚠ ELLE DIT CE QU ELLE EST. La photothèque se vide à chaque démarrage : sans
   // cette phrase, un sélecteur vide ressemble à une panne alors que c est un plan
   // de travail neuf. On renvoie aussi vers l endroit où l on importe.
-  function ouvrirTheque(surChoix){
+  function ouvrirTheque(surChoix, multiple){
     P.appeler('photos:liste').then(function(r){
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       var v = document.createElement('div');
       v.className = 'voile';
-      var corps = r.photos.length
-        ? '<div class="theque">' + r.photos.map(function(x){
-            return '<div class="ph" data-src="' + esc(x.src) + '" title="' + esc(x.nom) + '">'
+      var corps;
+      if (!r || !r.ok) {
+        // ⚠ « INDISPONIBLE » N EST PAS « VIDE ». Un refus du pont affiche ici son
+        // motif : sans lui, on croirait la photothèque vide et l on importerait
+        // a la main sans jamais savoir qu elle n avait pas repondu.
+        corps = '<p style="font-size:.86rem;line-height:1.5;color:#fbbf24">Photothèque '
+          + 'indisponible : ' + esc(expliquer(r)) + '</p>';
+      } else if (r.photos.length) {
+        // ⚠ ON MONTRE LE CODE DE L ARTICLE QUI SE SERT DEJA DE CETTE PHOTO.
+        // Deux articles peuvent porter des noms voisins ; le SKU, lui, ne trompe
+        // pas — et c est celui qu on relit sur l etiquette et sur le bon. Une
+        // photo deja employee ailleurs n est pas interdite, mais on doit le
+        // SAVOIR avant de la reprendre.
+        corps = '<div class="theque">' + r.photos.map(function(x){
+            var sku = x.codeProduit || '';
+            // ⚠ DOUBLE ANTISLASH VOULU. Ce script part dans un litteral de
+            // gabarit : un « \\n » simple serait resolu ICI, a la lecture du
+            // module, et la page recevrait un vrai saut de ligne au milieu d une
+            // chaine entre apostrophes — donc un script casse. Le garde-fou l a
+            // attrape, sinon la fenetre serait restee sur « Chargement… ».
+            var bulle = x.nom + (x.rattacheA ? '\\nDéjà utilisée par : ' + x.rattacheA
+              + (sku ? ' (' + sku + ')' : '') : '\\nJamais utilisée');
+            return '<div class="ph" data-src="' + esc(x.src) + '" title="' + esc(bulle) + '">'
               + '<img src="' + esc(x.src) + '" alt="">'
-              + '<div class="lg">' + esc(x.code) + (x.rattacheA ? ' · ' + esc(x.rattacheA) : '') + '</div></div>';
-          }).join('') + '</div>'
-        : '<p style="font-size:.86rem;line-height:1.5;color:#8fa1b8">La photothèque est vide. '
+              + '<div class="lg">' + esc(x.code) + '</div>'
+              + (x.rattacheA
+                  ? '<div class="lg sku" title="' + esc(x.rattacheA) + '">'
+                    + esc(sku || x.rattacheA) + '</div>'
+                  : '<div class="lg libre">libre</div>')
+              + '</div>';
+          }).join('') + '</div>';
+      } else {
+        corps = '<p style="font-size:.86rem;line-height:1.5;color:#8fa1b8">La photothèque est vide. '
           + 'Elle se remplit par <strong>Catalogue → Photos</strong>, dans la fenêtre principale, '
           + 'et repart à zéro à chaque démarrage de l’application.</p>';
+      }
       v.innerHTML = '<div class="boite" style="max-width:620px"><h3 style="color:#e8dcc6">Photothèque</h3>'
-        + corps + '<div class="pied2"><button type="button" id="th-non">Fermer</button></div></div>';
+        + corps
+        + '<div class="pied2" style="justify-content:space-between">'
+        + '<button type="button" id="th-fich">📂 Importer de l’ordinateur…</button>'
+        + '<button type="button" id="th-non">Annuler</button></div></div>';
       document.body.appendChild(v);
       document.getElementById('th-non').onclick = function(){ v.remove(); };
+      document.getElementById('th-fich').onclick = function(){
+        v.remove(); choisirFichier(surChoix, multiple);
+      };
       v.addEventListener('click', function(ev){
         if (ev.target === v) { v.remove(); return; }
         var p2 = ev.target.closest('.ph'); if (!p2) return;
-        surChoix(p2.getAttribute('data-src'));
-        v.remove(); dire('Photo reprise de la photothèque.', 'bon');
+        v.remove();
+        surChoix([p2.getAttribute('data-src')]);
+        dire('Photo reprise de la photothèque.', 'bon');
       });
     });
   }
 
   function montrerImage(src){
     var v = document.getElementById('p-vign'); if (!v) return;
-    v.innerHTML = src ? '<img src="' + esc(src) + '" alt="">' : 'aucune photo';
+    v.classList.toggle('pleine', !!src);
+    v.innerHTML = src
+      ? '<img src="' + esc(src) + '" alt="">'
+        + '<button type="button" class="x" id="p-vider" title="Retirer la photo">×</button>'
+      : 'choisir une photo';
   }
   var MAX_MO = 8;
-  function lireFichier(){
-    var f = this.files && this.files[0]; if (!f) return;
-    if (f.size > MAX_MO * 1024 * 1024) {
-      dire('Photo trop lourde (' + Math.round(f.size / 1048576) + ' Mo). Maximum ' + MAX_MO + ' Mo.', 'err');
-      this.value = ''; return;
-    }
-    var l = new FileReader();
-    l.onload = function(){ IMAGE = String(l.result || ''); montrerImage(IMAGE); dire(''); majIa(); };
-    l.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
-    l.readAsDataURL(f);
-  }
 
   function tailles(){
     return Array.prototype.filter.call(document.querySelectorAll('#p-tailles .jeton'), function(j){
@@ -884,13 +1011,18 @@ function pageProduit(id) {
         // quantite ressemblait a un identifiant.
         ligne: function(x){
           var q = STOCK[x.cle] || 0, lo = LOCS[x.cle] || '';
-          return '<div class="lgstk">'
+          // Une variante SANS emplacement alors qu elle porte du stock est
+          // signalee des le dessin, pas seulement quand on y touche : une liste
+          // paginee se rouvre a la page 2 et le rappel doit y etre deja.
+          var manque = (q > 0 && CTX.entrepots.length && !lo);
+          return '<div class="lgstk' + (q > 0 ? ' enstock' : '') + '">'
             + '<span class="c1">' + esc(x.taille) + '</span>'
             + '<span class="c2">' + esc(x.couleur) + '</span>'
             + '<span class="c3"><input class="q" type="number" min="0" step="1" placeholder="0"'
             + ' data-cle="' + esc(x.cle) + '" value="' + esc(q) + '"></span>'
             + (CTX.entrepots.length
-                ? '<span class="c4"><select class="loc" data-cle="' + esc(x.cle) + '"><option value="">— aucun —</option>'
+                ? '<span class="c4"><select class="loc' + (manque ? ' manque' : '') + '" data-cle="' + esc(x.cle) + '">'
+                  + '<option value="">Choisir l’emplacement</option>'
                   + CTX.entrepots.map(function(w){
                       return '<option value="' + esc(w.id) + '"' + (lo === w.id ? ' selected' : '') + '>' + esc(w.nom) + '</option>';
                     }).join('') + '</select></span>'
@@ -905,13 +1037,29 @@ function pageProduit(id) {
         }
       });
       PAGI.brancher();
+      // ⚠ ON REPEINT LA LIGNE, ON NE REDESSINE PAS LA LISTE. Un redessin
+      // remplacerait le champ pendant la frappe : le curseur repartirait au
+      // debut et l on perdrait le deuxieme chiffre d une quantite a deux
+      // chiffres. La ligne existe deja — on ne fait que changer son etat.
+      var peindre = function(el, cle){
+        if (!el) return;
+        var q = STOCK[cle] || 0;
+        el.classList.toggle('enstock', q > 0);
+        var s = el.querySelector('.loc');
+        if (s) s.classList.toggle('manque', q > 0 && !s.value);
+      };
       zone.querySelector('.liste').addEventListener('input', function(ev){
         var q = ev.target.closest('.q');
-        if (q) { STOCK[q.dataset.cle] = parseInt(q.value, 10) || 0; PAGI.surMaj(); return; }
+        if (q) {
+          STOCK[q.dataset.cle] = parseInt(q.value, 10) || 0;
+          peindre(q.closest('.lgstk'), q.dataset.cle);
+          PAGI.surMaj();
+          return;
+        }
       });
       zone.querySelector('.liste').addEventListener('change', function(ev){
         var l = ev.target.closest('.loc');
-        if (l) LOCS[l.dataset.cle] = l.value;
+        if (l) { LOCS[l.dataset.cle] = l.value; peindre(l.closest('.lgstk'), l.dataset.cle); }
       });
     }
     PAGI.tout = lignes;
@@ -967,6 +1115,377 @@ function pageProduit(id) {
     return n / 1000;
   }
 
+  // ══ PLEIN ÉCRAN ═══════════════════════════════════════════════════════════
+  // ⚠ LE SITE SE MET À JOUR SEUL, LA COQUILLE NON. Une coquille antérieure à
+  // 1.19.0 n'expose pas pleinEcran : le bouton se retire plutôt que de rester
+  // là sans rien faire. Un bouton mort est un défaut qu'on ne peut pas diagnostiquer.
+  function brancherPleinEcran(){
+    var b = document.getElementById('btn-fs');
+    if (!b) return;
+    if (!P || !P.pleinEcran) { b.style.display = 'none'; return; }
+    b.onclick = function(){
+      P.pleinEcran().then(function(plein){
+        if (plein === null) return;               // la coquille n'a pas répondu
+        b.textContent = plein ? '⊠' : '⛶';
+        b.title = plein ? 'Quitter le plein écran' : 'Plein écran';
+      });
+    };
+  }
+
+  // ══ JOURNAL DES MODIFICATIONS ═════════════════════════════════════════════
+  // Reprise du « Résumé des changements » de l'éditeur du site : les mêmes champs
+  // suivis, dans le même ordre, avec les mêmes mises en forme.
+  // ⚠ DEUX PARTIES DE NATURES DIFFÉRENTES, et il faut les garder distinctes :
+  //   — NON ENREGISTRÉES : écart entre l'état courant et celui pris à l'ouverture.
+  //     Purement local, aucune question au serveur.
+  //   — ENREGISTRÉES depuis moins de 24 h : c'est la BASE qui décide de la
+  //     fenêtre de 24 h (colonne summary_until), pas l'horloge de ce poste. Un
+  //     cache vidé ou une horloge décalée ne doivent pas changer ce qui est récent.
+  var BASE = null;      // instantané pris à l'ouverture (modification seulement)
+  var RECENT = null;    // { etat: 'attente'|'pret'|'erreur', entrees, motif }
+  var OUVERT = {};      // horodatages dont l'auteur est révélé
+  var JRN_T = null;
+
+  function libCat(c){
+    var x = (CTX.categories || []).find(function(y){ return y.cle === c; });
+    return (x && x.libelle) || c || '';
+  }
+  function libEtiq(t){
+    if (!t) return '';
+    var x = (CTX.etiquettes || []).find(function(y){ return y.cle === t; });
+    return (x && x.libelle) || String(t).replace(/^lbl:/, '');
+  }
+  function argentTxt(v){
+    var n = argentNombre(v);
+    return (n === null) ? '' : n.toFixed(2) + ' $';
+  }
+  // ⚠ LA MÊME LISTE QUE _PF_CHG_FIELDS DE L'ÉDITEUR DU SITE, VOLONTAIREMENT.
+  // Le site n'y résout PAS les libellés du genre, du groupe d'âge, du style ni du
+  // guide des tailles : il affiche la valeur brute. Je le reproduis tel quel — si
+  // cet écran montrait « Chic décontracté » là où l'éditeur web montre
+  // « chic_decontracte », les deux écrans ne diraient plus la même chose de la
+  // même modification. À corriger DES DEUX CÔTÉS, pas d'un seul.
+  var SUIVIS = [
+    { c: 'nom',      l: 'Nom' },
+    { c: 'cat',      l: 'Catégorie',            f: libCat },
+    { c: 'marque',   l: 'Marque' },
+    { c: 'etiq',     l: 'Étiquette',            f: libEtiq },
+    { c: 'actif',    l: 'Visible en boutique',  f: function(x){ return x === '1' ? 'Oui' : 'Non'; } },
+    { c: 'prix',     l: 'Prix régulier',        f: argentTxt },
+    { c: 'solde',    l: 'Prix soldé',           f: argentTxt },
+    { c: 'cout',     l: 'Coût d’acquisition',   f: argentTxt },
+    { c: 'genre',    l: 'Genre' },
+    { c: 'age',      l: 'Groupe d’âge' },
+    { c: 'style',    l: 'Style' },
+    { c: 'guide',    l: 'Guide des tailles' },
+    { c: 'desc',     l: 'Description' },
+    { c: 'tailles',  l: 'Tailles',   f: function(x){ return String(x).split(',').filter(Boolean).join(', '); } },
+    { c: 'couleurs', l: 'Couleurs',  f: function(x){ return String(x).split(',').filter(Boolean).join(', '); } }
+  ];
+  function instantane(){
+    return {
+      nom: val('p-nom').trim(), cat: val('p-cat'), marque: val('p-marque').trim(),
+      etiq: val('p-etiq'), actif: coché('p-actif') ? '1' : '0',
+      prix: val('p-prix'), solde: val('p-solde'), cout: val('p-cout'),
+      genre: val('p-genre'), age: val('p-age'), style: val('p-style'),
+      guide: val('p-guide'), desc: val('p-desc').trim(),
+      tailles: tailles().join(','), couleurs: couleurs().join(',')
+    };
+  }
+  function enAttente(){
+    if (!BASE) return [];
+    var m = instantane(), l = [];
+    SUIVIS.forEach(function(s){
+      var a = BASE[s.c] == null ? '' : BASE[s.c];
+      var b = m[s.c] == null ? '' : m[s.c];
+      if (String(a) === String(b)) return;
+      l.push({ l: s.l, av: (s.f ? s.f(a) : a) || '—', ap: (s.f ? s.f(b) : b) || '—' });
+    });
+    return l;
+  }
+  // Reprise de _pfAgo : « à l’instant », « il y a 12 min », « il y a 3 h 20 min ».
+  function ilYa(ts){
+    var m = Math.max(0, Math.round((Date.now() - ts) / 60000));
+    if (m < 1) return 'à l’instant';
+    if (m < 60) return 'il y a ' + m + ' min';
+    var h = Math.floor(m / 60);
+    return 'il y a ' + h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');
+  }
+  function dateLongue(ts){
+    try { return new Date(ts).toLocaleString('fr-CA', { dateStyle: 'long', timeStyle: 'short' }); }
+    catch (e) { return String(ts); }
+  }
+  function dateCourte(ts){
+    try { return new Date(ts).toLocaleString('fr-CA', { dateStyle: 'medium', timeStyle: 'short' }); }
+    catch (e) { return String(ts); }
+  }
+
+  function chargerRecent(){
+    if (!ID) return;
+    RECENT = { etat: 'attente', entrees: (RECENT && RECENT.entrees) || [], motif: '' };
+    P.appeler('produit:changements', ID).then(function(r){
+      if (!r || !r.ok) {
+        RECENT = { etat: 'erreur', entrees: [], motif: expliquer(r) };
+      } else {
+        RECENT = { etat: 'pret', entrees: r.entrees || [], motif: '' };
+      }
+      majPastille();
+      if (document.getElementById('jrn-corps')) dessinerJournal();
+    });
+  }
+  function majPastille(){
+    var b = document.getElementById('btn-jrn'), n = document.getElementById('jrn-n');
+    if (!b || !n) return;
+    if (!ID) { b.style.display = 'none'; return; }
+    b.style.display = '';
+    var enr = 0;
+    if (RECENT && RECENT.etat === 'pret') {
+      (RECENT.entrees || []).forEach(function(e){ enr += (e.changements || []).length; });
+    }
+    n.textContent = String(enAttente().length + enr);
+  }
+
+  function dif(av, ap){
+    return '<div class="dif"><span class="av">' + esc(av) + '</span>'
+      + '<span class="fl">→</span><span class="ap">' + esc(ap) + '</span></div>';
+  }
+  function sec(t){ return '<div class="sec"><span class="t">' + esc(t) + '</span><span class="tr"></span></div>'; }
+
+  function dessinerJournal(){
+    var z = document.getElementById('jrn-corps');
+    if (!z) return;
+    var att = enAttente();
+    var h = '';
+    if (att.length) {
+      h += sec('Non enregistrées')
+        + att.map(function(r){
+            return '<div class="bl"><div class="et">' + esc(r.l) + '</div>' + dif(r.av, r.ap) + '</div>';
+          }).join('');
+    }
+    if (RECENT && RECENT.etat === 'attente' && !(RECENT.entrees || []).length) {
+      h += '<div class="fin">Lecture des modifications enregistrées…</div>';
+    } else if (RECENT && RECENT.etat === 'erreur') {
+      // ⚠ « INDISPONIBLE » N EST PAS « AUCUNE MODIFICATION ». Afficher une fiche
+      // vierge sur une panne de réseau ferait croire qu’elle n’a jamais été
+      // touchée — exactement l’inverse de ce qu’un journal doit garantir.
+      h += '<div class="fin" style="color:#fbbf24">Modifications enregistrées indisponibles ('
+        + esc(RECENT.motif) + ') — <span class="lien" id="jrn-retry">réessayer</span>.</div>';
+    } else if (RECENT && (RECENT.entrees || []).length) {
+      h += sec('Enregistrées — dernières 24 h')
+        + RECENT.entrees.map(function(e){
+            var k = String(e.ts), vu = !!OUVERT[k];
+            return '<div class="bl cliq" data-qui="' + esc(k) + '" title="Cliquer pour voir qui a fait cette modification">'
+              + '<div class="qd"><span title="' + esc(dateCourte(e.ts)) + '">' + esc(ilYa(e.ts)) + '</span>'
+              + '<span style="opacity:.7">' + (vu ? '▴' : '▾') + '</span></div>'
+              + (e.changements || []).map(function(c){
+                  return '<div style="margin-bottom:.3rem"><div class="et">' + esc(c.libelle) + '</div>'
+                    + dif(c.avant || '—', c.apres || '—') + '</div>';
+                }).join('')
+              + (vu ? '<div class="qui">👤 <strong style="color:#e8edf5">'
+                  + esc(e.par || 'Auteur non enregistré') + '</strong><br>🕘 '
+                  + esc(dateLongue(e.ts)) + '</div>' : '')
+              + '</div>';
+          }).join('')
+        + '<div class="fin">Après 24 h, ces modifications ne s’affichent plus ici — elles restent '
+        + 'consultables dans <span class="lien" id="jrn-tout">🕘 tout l’historique</span>.</div>';
+    } else if (RECENT && RECENT.etat === 'pret' && !att.length) {
+      h += '<div class="fin">Aucune modification depuis l’ouverture, et aucune enregistrée '
+        + 'dans les dernières 24 h. <span class="lien" id="jrn-tout">🕘 Tout l’historique</span></div>';
+    }
+    if (!h) h = '<div class="fin">Aucune modification.</div>';
+    z.innerHTML = h;
+  }
+
+  function ouvrirJournal(){
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite" style="max-width:640px">'
+      + '<h3 style="color:#e8dcc6">🕘 Modifications de cette fiche</h3>'
+      + '<div class="jrn" id="jrn-corps"></div>'
+      + '<div class="pied2"><button type="button" id="jrn-non">Fermer</button></div></div>';
+    document.body.appendChild(v);
+    dessinerJournal();
+    document.getElementById('jrn-non').onclick = function(){ v.remove(); };
+    v.addEventListener('click', function(ev){
+      if (ev.target === v) { v.remove(); return; }
+      if (ev.target.closest('#jrn-retry')) { chargerRecent(); dessinerJournal(); return; }
+      if (ev.target.closest('#jrn-tout')) { v.remove(); ouvrirHistorique(); return; }
+      // L'auteur n'est PAS montré d'office : on le révèle au clic sur le bloc
+      // concerné, comme dans l'éditeur du site. L'état ouvert survit aux redessins.
+      var b = ev.target.closest('[data-qui]');
+      if (b) {
+        var k = b.getAttribute('data-qui');
+        OUVERT[k] = !OUVERT[k];
+        dessinerJournal();
+      }
+    });
+  }
+
+  // L'historique COMPLET, groupé par année — le pendant de _pfShowHistory.
+  function ouvrirHistorique(){
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite" style="max-width:640px">'
+      + '<h3 style="color:#e8dcc6">🕘 Historique complet</h3>'
+      + '<div class="jrn" id="hist-corps"><div class="fin">Lecture…</div></div>'
+      + '<div class="pied2"><button type="button" id="hist-non">Fermer</button></div></div>';
+    document.body.appendChild(v);
+    document.getElementById('hist-non').onclick = function(){ v.remove(); };
+    v.addEventListener('click', function(ev){ if (ev.target === v) v.remove(); });
+    P.appeler('produit:historique', ID).then(function(r){
+      var z = document.getElementById('hist-corps');
+      if (!z) return;
+      if (!r || !r.ok) {
+        z.innerHTML = '<div class="fin" style="color:#fbbf24">Historique indisponible : '
+          + esc(expliquer(r)) + '.<br>Rien n’est perdu — réessayez une fois reconnecté.</div>';
+        return;
+      }
+      var e2 = r.entrees || [];
+      if (!e2.length) { z.innerHTML = '<div class="fin">Aucune modification enregistrée pour cet article.</div>'; return; }
+      var parAn = {};
+      e2.forEach(function(e){
+        var a;
+        try { a = new Date(e.ts).getFullYear(); } catch (x) { a = '?'; }
+        (parAn[a] = parAn[a] || []).push(e);
+      });
+      var ans = Object.keys(parAn).sort(function(a, b){ return b - a; });
+      z.innerHTML = '<div class="fin" style="text-align:left;margin:0 0 .6rem">Modifications conservées '
+        + 'jusqu’au retrait de l’article, archivées par année, purgées au-delà de 5 ans.</div>'
+        + ans.map(function(a){
+            var l = parAn[a];
+            return '<div class="an">' + esc(a) + ' · ' + l.length + ' modification'
+              + (l.length > 1 ? 's' : '') + '</div>'
+              + l.map(function(e){
+                  return '<div class="bl"><div class="qd"><span>' + esc(dateCourte(e.ts)) + '</span>'
+                    + (e.par ? '<span>par ' + esc(e.par) + '</span>' : '') + '</div>'
+                    + (e.changements || []).map(function(c){
+                        return '<div style="margin-bottom:.3rem"><div class="et">' + esc(c.libelle) + '</div>'
+                          + dif(c.avant || '—', c.apres || '—') + '</div>';
+                      }).join('') + '</div>';
+                }).join('');
+          }).join('');
+    });
+  }
+
+  // ══ BROUILLON AUTOMATIQUE ═════════════════════════════════════════════════
+  // ⚠ IL NE PEUT PAS VIVRE ICI. Cette fenêtre est chargée en data:text/html :
+  // son origine est nulle et localStorage y lève SecurityError — mesuré, pas
+  // supposé. Le brouillon passe donc par le pont, dans le stockage du site, sous
+  // une sous-clé qui lui est propre (voir pont.js).
+  // ⚠ EN CRÉATION SEULEMENT, comme l'éditeur du site : sur une fiche existante, un
+  // brouillon ferait concurrence à la fiche enregistrée sans qu'on sache laquelle
+  // fait foi.
+  var BR_DERNIER = '', BR_T = null, BR_FINI = false;
+  function brCapturer(){
+    return {
+      ts: Date.now(),
+      etape: Assist.i,
+      f: {
+        nom: val('p-nom'), cat: val('p-cat'), sku: val('p-sku'), marque: val('p-marque'),
+        desc: val('p-desc'), genre: val('p-genre'), age: val('p-age'), style: val('p-style'),
+        guide: val('p-guide'), etiq: val('p-etiq'), fourn: val('p-fourn'),
+        prix: val('p-prix'), solde: val('p-solde'), cout: val('p-cout'),
+        poids: val('p-poids'), unite: val('p-unite'), seuil: val('p-seuil'),
+        regime: val('p-regime'), actif: coché('p-actif'), finalret: coché('p-finalret')
+      },
+      tailles: tailles(), couleurs: couleurs(),
+      image: IMAGE || '', vues: VUES, parcoul: PARCOUL, stock: STOCK, locs: LOCS
+    };
+  }
+  // « Utile » = la personne a réellement saisi quelque chose. On EXCLUT les
+  // tailles, comme le site : sur une fiche neuve elles peuvent être cochées par
+  // défaut, et l'on garderait un brouillon d'un formulaire vierge.
+  function brUtile(d){
+    return !!(d && d.f && (d.f.nom || d.f.prix || d.f.cout || d.image || d.f.desc
+      || d.f.marque || (d.couleurs && d.couleurs.length)));
+  }
+  function brEnregistrer(){
+    if (ID || BR_FINI) return;
+    var d = brCapturer();
+    if (!brUtile(d)) return;
+    var s = JSON.stringify(d);
+    // ⚠ ON N ENVOIE QUE SI QUELQUE CHOSE A CHANGÉ. Un brouillon porte des photos
+    // en base64 : le repousser toutes les cinq secondes sans raison ferait voyager
+    // plusieurs mégaoctets pour rien, à travers le pont, en continu.
+    if (s === BR_DERNIER) return;
+    BR_DERNIER = s;
+    P.appeler('produit:brouillonEcrire', d).then(function(r){
+      if (r && r.ok) return;
+      // ⚠ UN BROUILLON QUI N EST PAS GARDÉ DOIT LE DIRE. Le site avale l'échec de
+      // quota en silence ; ici on l'annonce, parce que se croire à l'abri est pire
+      // que de savoir qu'on ne l'est pas.
+      BR_DERNIER = '';
+      dire('⚠ Brouillon non conservé — ' + expliquer(r), 'att');
+    });
+  }
+  function brArreter(){ if (BR_T) { clearInterval(BR_T); BR_T = null; } }
+
+  function brReprendre(d){
+    var f = d.f || {};
+    poser('p-nom', f.nom); poser('p-cat', f.cat); poser('p-sku', f.sku);
+    poser('p-marque', f.marque); poser('p-desc', f.desc);
+    poser('p-genre', f.genre); poser('p-age', f.age); poser('p-style', f.style);
+    poser('p-guide', f.guide); poser('p-etiq', f.etiq); poser('p-fourn', f.fourn);
+    poser('p-prix', f.prix); poser('p-solde', f.solde); poser('p-cout', f.cout);
+    poser('p-poids', f.poids); poser('p-seuil', f.seuil); poser('p-regime', f.regime || '0');
+    // ⚠ L UNITÉ ET SA MÉMOIRE VONT ENSEMBLE. dataset.prec sert à convertir le
+    // poids au changement d'unité ; le laisser sur « g » après avoir restauré
+    // « kg » ferait multiplier le poids par mille au premier changement.
+    var uni = document.getElementById('p-unite');
+    if (uni) { uni.value = f.unite || 'g'; uni.dataset.prec = uni.value; }
+    var a = document.getElementById('p-actif'); if (a) a.checked = f.actif !== false;
+    var fr = document.getElementById('p-finalret'); if (fr) fr.checked = !!f.finalret;
+    Array.prototype.forEach.call(document.querySelectorAll('#p-tailles .jeton'), function(j){
+      j.classList.toggle('on', (d.tailles || []).indexOf(j.getAttribute('data-t')) >= 0);
+    });
+    CHOIX = (d.couleurs || []).map(String);
+    IMAGE = d.image || '';
+    VUES = Object.assign({}, d.vues || {});
+    PARCOUL = {};
+    Object.keys(d.parcoul || {}).forEach(function(c){ PARCOUL[c] = Object.assign({}, d.parcoul[c] || {}); });
+    STOCK = Object.assign({}, d.stock || {});
+    LOCS = Object.assign({}, d.locs || {});
+    montrerImage(IMAGE);
+    dessinerJetons(); majMarge(); majIa(); majNom();
+    // On repart de l'étape où la personne s'était arrêtée : la ramener à la
+    // première l'obligerait à retraverser ce qu'elle avait déjà rempli.
+    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(4, d.etape)));
+    else Assist.fil();
+    // Le brouillon restauré est déjà celui du stockage : sans cette ligne, le
+    // premier tic le réécrirait à l'identique.
+    BR_DERNIER = JSON.stringify(brCapturer());
+    dire('Brouillon repris.', 'bon');
+  }
+
+  // ⚠ UNE BOÎTE, PAS UN BANDEAU. L'éditeur du site pose un bandeau au-dessus du
+  // formulaire parce que sa page défile ; ici une étape doit tenir dans la
+  // fenêtre, et un bandeau permanent volerait la place d'une carte. La question
+  // se pose une fois, à l'ouverture, et disparaît.
+  function brProposer(){
+    if (ID) return Promise.resolve();
+    return P.appeler('produit:brouillonLire').then(function(r){
+      if (!r || !r.ok || !r.brouillon || !brUtile(r.brouillon)) return;
+      return new Promise(function(resoudre){
+        var v = document.createElement('div');
+        v.className = 'voile';
+        v.innerHTML = '<div class="boite"><h3 style="color:#e8dcc6">📝 Un brouillon non terminé</h3>'
+          + '<p>Une saisie a été laissée en cours <strong>' + esc(ilYa(r.brouillon.ts))
+          + '</strong>. La reprendre, ou repartir d’une fiche vierge ?</p>'
+          + '<p style="font-size:.78rem;color:#8fa1b8">Un brouillon est gardé 15 minutes, '
+          + 'puis il disparaît de lui-même.</p>'
+          + '<div class="pied2"><button type="button" id="br-non">Repartir à neuf</button>'
+          + '<button type="button" class="prim" id="br-oui">Reprendre</button></div></div>';
+        document.body.appendChild(v);
+        document.getElementById('br-oui').onclick = function(){
+          v.remove(); brReprendre(r.brouillon); resoudre();
+        };
+        document.getElementById('br-non').onclick = function(){
+          v.remove(); P.appeler('produit:brouillonJeter'); BR_DERNIER = ''; resoudre();
+        };
+      });
+    });
+  }
+
   function verrou(){
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'products', ID).then(function(v){
@@ -987,7 +1506,28 @@ function pageProduit(id) {
         FICHE = r.fiche;
         document.getElementById('titre').textContent = ID ? 'Modifier le produit' : 'Nouveau produit';
         dessiner();
-        return verrou();
+        brancherPleinEcran();
+        if (ID) {
+          // ⚠ L INSTANTANÉ SE PREND APRÈS remplir, jamais avant : pris trop tôt
+          // il serait vide, et la fiche entière passerait pour « modifiée » dès
+          // l'ouverture — un journal qui crie au loup ne se lit plus.
+          BASE = instantane();
+          chargerRecent();
+          // La fenêtre des 24 h expire côté serveur pendant qu'on travaille : on
+          // redemande chaque minute, comme l'éditeur du site, plutôt que de
+          // recalculer une échéance ici avec l'horloge de ce poste.
+          JRN_T = setInterval(chargerRecent, 60000);
+          var bj = document.getElementById('btn-jrn');
+          if (bj) bj.onclick = ouvrirJournal;
+          // La pastille suit la saisie : un écart apparaît dès qu'on touche un champ.
+          document.getElementById('corps').addEventListener('input', majPastille);
+          document.getElementById('corps').addEventListener('change', majPastille);
+          majPastille();
+        } else {
+          // Autosauvegarde toutes les 5 secondes, comme l'éditeur du site.
+          BR_T = setInterval(brEnregistrer, 5000);
+        }
+        return verrou().then(function(){ return brProposer(); });
       });
     });
   }
@@ -1084,18 +1624,44 @@ function pageProduit(id) {
       stock: stock, stockLoc: locs
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
+      // ⚠ LE BROUILLON SE JETTE SEULEMENT MAINTENANT, et l'autosauvegarde s'arrête
+      // AVANT : sans cela, un dernier tic le réécrirait juste après l'avoir jeté,
+      // et la prochaine ouverture proposerait de reprendre une fiche déjà créée.
+      BR_FINI = true; brArreter();
+      if (!ID) P.appeler('produit:brouillonJeter');
       dire('Enregistré.', 'bon');
       setTimeout(function(){ P.fermer(); }, 700);
     });
   }
 
+  // ⚠ ON NE FERME PAS SANS AVOIR GARDÉ LA SAISIE. Fermer par mégarde après dix
+  // minutes de travail est exactement le cas où un brouillon sert à quelque chose.
+  // On attend la réponse du pont avant de fermer : la fenêtre disparue, plus
+  // personne ne porte l'écriture.
+  function fermerProprement(){
+    brArreter();
+    if (ID || BR_FINI) { P.fermer(); return; }
+    var d = brCapturer();
+    if (!brUtile(d)) { P.fermer(); return; }
+    dire('Brouillon conservé…');
+    P.appeler('produit:brouillonEcrire', d).then(function(){ P.fermer(); });
+  }
+
   bEnr.onclick = enregistrer;
-  document.getElementById('btn-annuler').onclick = function(){ P.fermer(); };
+  document.getElementById('btn-annuler').onclick = fermerProprement;
   document.addEventListener('keydown', function(ev){
     if ((ev.ctrlKey || ev.metaKey) && (ev.key === 's' || ev.key === 'S')) {
       ev.preventDefault(); if (!bEnr.disabled) enregistrer();
     }
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
+    if (ev.key === 'Escape') {
+      ev.preventDefault();
+      // ⚠ ÉCHAP FERME D ABORD CE QUI EST PAR-DESSUS. Sans ce test, fermer une
+      // boîte de dialogue fermait LA FENÊTRE : on demandait à quitter un journal
+      // et l'on perdait la fiche en cours de saisie.
+      var voiles = document.querySelectorAll('.voile');
+      if (voiles.length) { voiles[voiles.length - 1].remove(); return; }
+      fermerProprement();
+    }
   });
   charger();
 })();

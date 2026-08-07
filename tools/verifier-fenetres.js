@@ -84,5 +84,60 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
   dire(true, f, '');
 }
 
-console.log(fautes ? '\n>>> ' + fautes + ' fenêtre(s) à corriger\n' : '\n>>> Toutes les fenêtres sont saines\n');
+// ── LES DEUX LISTES D'OPÉRATIONS DOIVENT ÊTRE D'ACCORD ──────────────────────
+// ⚠ C'EST LE PIÈGE N°1 DE CE PONT, et il était le seul à ne pas être vérifié.
+// `OPS` vit dans le site (assets/js/pont.js), `OPS_PONT` dans la coquille
+// (src/main.js). Elles sont deux EXPRÈS — la seconde empêche qu'un nom
+// quelconque venu d'un document local soit transmis au site. Mais en ajouter une
+// dans un seul fichier donne « Cette version de l'application ne connaît pas
+// cette opération », SANS dire laquelle manque : on cherche alors du côté du
+// site, où tout est correct. C'est arrivé le 2026-08-06 avec Fournisseur et
+// Collection. Une machine sait comparer deux listes ; nous, non.
+//
+// Le dépôt du site n'est pas là sur une machine de construction : on le CHERCHE,
+// et son absence n'est pas une faute — c'est un contrôle qu'on annonce comme non
+// effectué, ce qui est différent de réussi.
+const CANDIDATS = [
+  path.join(__dirname, '..', '..', 'Sandriza', 'assets', 'js', 'pont.js'),
+  path.join(__dirname, '..', '..', 'sandriza', 'assets', 'js', 'pont.js'),
+];
+// ⚠ LA BORNE DE FIN DIFFÈRE SELON LA LISTE, et je m'y suis fait prendre en
+// écrivant ce contrôle : `OPS` est un objet qui se ferme par « }; », `OPS_PONT`
+// un ensemble qui se ferme par « ]); ». Chercher la mauvaise borne fait lire tout
+// le reste du fichier, où d'autres chaînes « xxx:yyy » traînent (les canaux
+// `ipcMain.handle`) — et le contrôle accuse alors des opérations qui n'ont jamais
+// existé. Un garde-fou qui crie à tort se fait désactiver ; il doit donc être
+// juste avant d'être sévère.
+const noms = (src, marqueur, borne) => {
+  const i = src.indexOf(marqueur);
+  if (i < 0) return null;
+  const j = src.indexOf(borne, i);
+  const bloc = src.slice(i, j < 0 ? src.length : j);
+  const trouves = bloc.match(/'[a-z]+:[A-Za-z]+'|'identite'/g) || [];
+  return new Set(trouves.map((s) => s.replace(/'/g, '')));
+};
+
+console.log('=== Parité des opérations du pont ===');
+const chemin = CANDIDATS.find((c) => fs.existsSync(c));
+if (!chemin) {
+  console.log('  -   non vérifiée : le dépôt du site n’est pas à côté (assets/js/pont.js)');
+} else {
+  const siteSrc = fs.readFileSync(chemin, 'utf8');
+  const coqSrc = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8');
+  const site = noms(siteSrc, 'const OPS = {', '};');
+  const coq = noms(coqSrc, 'const OPS_PONT = new Set([', ']);');
+  if (!site || !coq) {
+    dire(false, 'listes', 'liste introuvable — la forme de OPS / OPS_PONT a changé');
+  } else {
+    const manqueCoquille = [...site].filter((n) => !coq.has(n));
+    const manqueSite = [...coq].filter((n) => !site.has(n));
+    if (manqueCoquille.length) dire(false, 'coquille', 'absentes de OPS_PONT (src/main.js) : ' + manqueCoquille.join(', '));
+    if (manqueSite.length) dire(false, 'site', 'absentes de OPS (assets/js/pont.js) : ' + manqueSite.join(', '));
+    if (!manqueCoquille.length && !manqueSite.length) {
+      dire(true, 'listes', site.size + ' opérations, les deux listes concordent');
+    }
+  }
+}
+
+console.log(fautes ? '\n>>> ' + fautes + ' point(s) à corriger\n' : '\n>>> Tout est sain\n');
 process.exit(fautes ? 1 : 0);

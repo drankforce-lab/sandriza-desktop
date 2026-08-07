@@ -30,6 +30,15 @@ contextBridge.exposeInMainWorld('szPont', {
   // Fermer proprement — la fenêtre n'a pas de barre de menu à elle.
   fermer: () => ipcRenderer.send('pont:fermer'),
 
+  // ⚠ LE PLEIN ÉCRAN EST UNE ACTION DE FENÊTRE, PAS UNE DONNÉE. Il ne passe donc
+  // pas par `appeler` : cette voie-là mène aux données du site et à sa session,
+  // et y mêler le pilotage de la fenêtre brouillerait ce qu'elle protège.
+  // ⚠ Et c'est un VRAI plein écran du système, pas une classe CSS qui étire un
+  // bloc dans une page — l'éditeur du site n'a que la seconde solution parce
+  // qu'il vit dans un onglet ; ici la fenêtre existe pour de bon.
+  // Rend le nouvel état (true = plein écran) pour que le bouton dise la vérité.
+  pleinEcran: () => ipcRenderer.invoke('fenetre:pleinecran').catch(() => null),
+
   // La fenêtre annonce la hauteur réelle de son contenu ; le principal ajuste.
   // Même raison que la palette : une hauteur devinée d'avance se fait démentir
   // par la moindre ligne ajoutée ou par une mise à l'échelle Windows autre

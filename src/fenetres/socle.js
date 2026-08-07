@@ -169,17 +169,40 @@ var Assist = {
     });
     document.getElementById('btn-prec').onclick = function(){ self.bouger(-1); };
     document.getElementById('btn-suiv').onclick = function(){ self.bouger(1); };
+    /* ⚠ UN SEUL ENDROIT QUI RAFRAICHIT LE FIL — delegue sur tout le corps.
+       Sans lui, une etape ne verdissait qu au prochain deplacement : le fil
+       affirmait « incomplet » alors que le dernier champ obligatoire venait
+       d etre rempli sous les yeux. Le brancher champ par champ revient a en
+       oublier un a chaque champ ajoute ; ici, ce qui arrive demain est couvert.
+       Le fil ne reecrit que la barre d etapes, jamais le formulaire : le rendre
+       a chaque frappe ne peut donc pas deplacer un curseur en cours de saisie. */
+    var corps = document.getElementById('corps');
+    if (corps && !corps._filBranche) {
+      corps._filBranche = true;
+      var rafraichir = function(){ self.fil(); };
+      corps.addEventListener('input', rafraichir);
+      corps.addEventListener('change', rafraichir);
+    }
     this.aller(0);
   },
   faite: function(k){
     return this.etapes[k].obl.every(function(c){ return String(val(c) || '').trim() !== ''; });
   },
+  /* ⚠ « FAITE » NE DEPEND PAS DE L ENDROIT OU L ON SE TROUVE.
+     La pastille ✓ et la COULEUR verte etaient pilotees par deux conditions
+     differentes : le crochet des que l etape etait complete, mais le vert
+     seulement si l etape etait DEJA DEPASSEE (k < i). Revenir a l etape 1
+     rendait donc gris des crochets qui restaient vrais — l ecran affirmait
+     deux choses contraires en meme temps, et la seule facon de « reverdir »
+     une etape valide etait de repasser devant. Une validite ne se perd pas
+     parce qu on a recule. */
   fil: function(){
     var self = this;
     document.getElementById('pas').innerHTML = this.etapes.map(function(e, k){
-      var cl = k === self.i ? ' class="on"' : (self.faite(k) && k < self.i ? ' class="fait"' : '');
+      var faite = self.faite(k);
+      var cl = k === self.i ? ' class="on"' : (faite ? ' class="fait"' : '');
       return '<button type="button" data-etape="' + k + '"' + cl + '><span class="n">'
-        + (self.faite(k) && k !== self.i ? '✓' : (k + 1)) + '</span> ' + esc(e.t) + '</button>';
+        + (faite && k !== self.i ? '✓' : (k + 1)) + '</span> ' + esc(e.t) + '</button>';
     }).join('');
   },
   aller: function(k){
