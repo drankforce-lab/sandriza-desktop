@@ -46,7 +46,7 @@ body{background:#0e1522;color:#e8edf5;
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .ic{font-size:1.05rem}
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
-.tete .sous{margin-left:auto;font-size:.73rem;color:#8fa1b8}
+.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:.6rem}
 
 /* ⚠ DEUX COLONNES, ET LE CORPS NE DEFILE PAS. La regle du projet : un ecran de
    travail qui defile cache son bouton d action. Seule la LISTE DES ARTICLES a le
@@ -54,11 +54,31 @@ body{background:#0e1522;color:#e8edf5;
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
   display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.85fr);gap:.85rem}
 .col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.7rem}
-/* Sous 1000 px on repasse en UNE colonne et on autorise le defilement : ecraser
-   un champ de montant est plus risque que faire defiler. */
+
+/* ⚠⚠ L ARGENT ET LE BOUTON NE BOUGENT JAMAIS — LE RESTE DEFILE.
+   Premiere version : la colonne de droite etait en overflow:hidden, au nom de la
+   regle << un ecran de travail ne defile pas >>. Resultat exactement inverse a
+   l intention : sur un ecran de 1350 px de haut, le bouton
+   << Enregistrer la vente >> etait COUPE et l avis en dessous invisible. La regle
+   existe pour que l action reste atteignable ; ici elle la cachait.
+   On applique donc son ESPRIT : la carte des totaux et celle de l encaissement
+   sont ancrees en bas et ne bougent pas, quoi qu il arrive ; seule la zone du
+   client, de la vente et de la facture defile quand la fenetre est trop courte.
+   Sur une caisse, le total et le bouton sont les deux seules choses qu on ne peut
+   pas se permettre de chercher. */
+.col.droite{min-height:0}
+.defile{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;
+  flex-direction:column;gap:.7rem;padding-right:.2rem}
+.defile::-webkit-scrollbar{width:8px}
+.defile::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.ancre{flex:0 0 auto}
+
+/* Sous 1000 px on repasse en UNE colonne et on autorise le defilement general :
+   ecraser un champ de montant est plus risque que faire defiler. */
 @media (max-width:1000px){
   .corps{grid-template-columns:1fr;overflow-y:auto}
   .col{min-height:auto}
+  .defile{overflow:visible;min-height:auto}
 }
 
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
@@ -75,6 +95,8 @@ input,select{font:inherit;color:#e8edf5;background:#0f1826;
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input[type=checkbox]{width:auto}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem}
+/* Les champs du client : empiles, pleine largeur. Voir la note dans le gabarit. */
+.champs{display:flex;flex-direction:column;gap:.35rem}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
 .sous-ch{font-size:.71rem;color:#6d7f96;margin-top:.22rem}
 
@@ -169,6 +191,8 @@ function pageCaisse() {
 <title>Vente au comptoir — Administration Sandriza</title>
 <style>${CSS}</style></head><body>
 <div class="tete"><span class="ic">🧾</span><h1>Vente au comptoir</h1>
+  <button id="btn-afficheur" class="mini" style="margin-left:auto"
+    title="Ouvrir l’écran tourné vers le client, à poser sur un second moniteur">🖥 Affichage client</button>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps">
   <div class="col">
@@ -181,13 +205,20 @@ function pageCaisse() {
       <div class="lignes" id="lignes"></div>
     </div>
   </div>
-  <div class="col">
+  <div class="col droite">
+   <div class="defile">
     <div class="carte">
       <h2>Client <span class="note">— facultatif</span><span class="lie" id="lie"></span></h2>
-      <div class="r3">
+      <!-- ⚠ TROIS CHAMPS EN COLONNE, ET NON SUR UNE LIGNE. Sur une ligne, dans une
+           colonne de 380 px, chacun faisait 120 px : un nom complet et une adresse
+           de courriel y etaient coupes, donc illisibles — on ne pouvait pas
+           verifier ce qu on venait de saisir. Signale a l usage le 2026-08-07.
+           La zone de droite defile maintenant, la hauteur est donc disponible ;
+           la lisibilite d une adresse de courriel, elle, ne se negocie pas. -->
+      <div class="champs">
         <input id="c-nom" autocomplete="off" placeholder="Nom">
-        <input id="c-mail" autocomplete="off" placeholder="Courriel">
-        <input id="c-tel" autocomplete="off" placeholder="Téléphone">
+        <input id="c-mail" autocomplete="off" inputmode="email" placeholder="Courriel">
+        <input id="c-tel" autocomplete="off" inputmode="tel" placeholder="Téléphone — 000 000-0000">
       </div>
       <div id="c-res"></div>
       <label class="case"><input type="checkbox" id="c-creer">
@@ -206,8 +237,9 @@ function pageCaisse() {
       <div class="sous-ch">L’envoi par courriel exige une adresse. Elle reste
         toujours consultable dans Facturation.</div>
     </div>
-    <div class="carte tot" id="totaux"></div>
-    <div class="carte">
+   </div>
+    <div class="carte tot ancre" id="totaux"></div>
+    <div class="carte ancre">
       <h2>Encaissement</h2>
       <div class="r2">
         <select id="v-paie"></select>
@@ -234,6 +266,12 @@ ${JS_ACTIVITE}
   var LIGNES = [];           // { productId, name, size, color, price, quantity }
   var CLI = null;            // identifiant du compte lie, s il y en a un
   var TOT = null;            // dernier compte rendu de totaux, venu du SITE
+  // ⚠ LES FICHES TROUVEES SONT RETENUES, ET C EST LA CORRECTION D UN VRAI
+  // DEFAUT (2026-08-07) : au clic, je reconstruisais une fiche a partir des
+  // champs de l ecran — qui sont VIDES pour le courriel et le telephone, puisque
+  // c est justement ce qu on attend de la recherche. Le nom se remplissait, le
+  // reste non, et la vente partait sans adresse : donc sans facture par courriel.
+  var TROUVES = [];
   var enVente = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -292,9 +330,22 @@ ${JS_ACTIVITE}
       appeler('caisse:totaux', [LIGNES, val('v-prov'), val('v-liv'), val('v-rab')]).then(function(r){
         if (!r.ok) { TOT = null; dire(expliquer(r.motif), 'err'); }
         else { TOT = r; dire(''); }
-        dessinerTotaux(); majBouton();
+        dessinerTotaux(); majBouton(); diffuser();
       });
     }, 150);
+  }
+
+  /* ⚠ L AFFICHEUR SUIT LE PANIER, ET LE MESSAGE PART DE LA FENETRE PRINCIPALE.
+     Le canal de l afficheur n accepte qu elle : cette fenetre ne peut donc pas lui
+     parler directement, elle demande au site de le faire (caisse:diffuser). Sans
+     cela, l afficheur montrerait au client le panier de l ECRAN DE LA PAGE — un
+     ecran vide pendant qu on scanne, ce qui est pire qu un afficheur eteint parce
+     qu on le croirait juste.
+     ⚠ ET IL EST VIDE QUAND LA VENTE EST VIDE, volontairement : le client suivant
+     ne doit pas voir le panier du precedent. */
+  function diffuser(){
+    appeler('caisse:diffuser', [LIGNES, val('v-prov'), val('v-liv'), val('v-rab')])
+      .then(function(){ /* l afficheur ne doit jamais faire tomber la caisse */ });
   }
 
   function dessinerTotaux(){
@@ -446,6 +497,7 @@ ${JS_ACTIVITE}
         if (!r.ok) { dire(expliquer(r.motif), 'err'); return; }
         if (r.exact) { remplirClient(r.exact); return; }
         var l = r.trouves || [];
+        TROUVES = l;
         document.getElementById('c-res').innerHTML = l.length
           ? '<div class="liste-cli">' + l.map(function(u){
               return '<div class="cli" data-uid="' + esc(u.id) + '">'
@@ -462,7 +514,9 @@ ${JS_ACTIVITE}
     CLI = u.id;
     document.getElementById('c-nom').value = u.nom || '';
     document.getElementById('c-mail').value = u.courriel || '';
-    document.getElementById('c-tel').value = u.tel || '';
+    var tel = document.getElementById('c-tel');
+    tel.value = u.tel || '';
+    masquerTel(tel);
     // ⚠ LA PROVINCE SUIT LE CLIENT : c est elle qui determine les taxes, et la
     // ressaisir a la main est l erreur la plus couteuse de cet ecran.
     if (u.province) {
@@ -478,6 +532,25 @@ ${JS_ACTIVITE}
   }
 
   function majLie(){ document.getElementById('lie').textContent = CLI ? '✓ compte lié' : ''; }
+
+  /* ⚠ MASQUE DU TELEPHONE — 000 000-0000, la forme deja utilisee dans les fiches.
+     Il ne gene PAS la recherche : celle-ci compare des chiffres, jamais la mise en
+     forme. Et il ne reformate que si le curseur est AU BOUT du champ : sinon,
+     corriger un chiffre au milieu renverrait le curseur a la fin a chaque frappe,
+     ce qui est plus penible que l absence de masque. */
+  function masquerTel(el){
+    var auBout = (el.selectionStart == null) || (el.selectionStart === el.value.length);
+    var d = String(el.value || '').replace(/[^0-9]/g, '');
+    // Un 1 de tete (indicatif pays) est retire : personne ne le note dans une fiche.
+    if (d.length === 11 && d.charAt(0) === '1') d = d.slice(1);
+    d = d.slice(0, 10);
+    var s = d;
+    if (d.length > 6) s = d.slice(0, 3) + ' ' + d.slice(3, 6) + '-' + d.slice(6);
+    else if (d.length > 3) s = d.slice(0, 3) + ' ' + d.slice(3);
+    if (s === el.value) return;
+    el.value = s;
+    if (auBout) { try { el.selectionStart = el.selectionEnd = s.length; } catch (e) {} }
+  }
 
   // ══ ENREGISTRER LA VENTE ══════════════════════════════════════════════════
   function vendre(){
@@ -503,6 +576,7 @@ ${JS_ACTIVITE}
       document.getElementById('v-liv').value = '0.00';
       document.getElementById('v-rab').value = '0.00';
       majLie(); dessinerLignes(); dessinerTotaux(); majBouton(); dire('');
+      diffuser();
       compteRendu(r);
     });
   }
@@ -615,19 +689,37 @@ ${JS_ACTIVITE}
   document.getElementById('scan').onkeydown = function(ev){
     if (ev.key === 'Enter') { ev.preventDefault(); chercher(this.value, true); }
   };
-  ['c-nom','c-mail','c-tel'].forEach(function(id){
+  ['c-nom','c-mail'].forEach(function(id){
     document.getElementById(id).oninput = function(){ chercherClient(this.value); };
   });
+  document.getElementById('c-tel').oninput = function(){
+    masquerTel(this);
+    chercherClient(this.value);
+  };
   ['v-prov','v-liv','v-rab'].forEach(function(id){
     document.getElementById(id).onchange = function(){ majTotaux(); };
   });
   document.getElementById('btn-vendre').onclick = vendre;
   document.getElementById('btn-vider').onclick = function(){
     LIGNES = []; TOT = null; videRecherche();
-    dessinerLignes(); dessinerTotaux(); majBouton(); dire('');
+    dessinerLignes(); dessinerTotaux(); majBouton(); dire(''); diffuser();
     var s = document.getElementById('scan'); if (s) s.focus();
   };
   document.getElementById('btn-fermer').onclick = function(){ P.fermer(); };
+  document.getElementById('btn-afficheur').onclick = function(){
+    var b = this;
+    b.disabled = true;
+    appeler('caisse:affichage').then(function(r){
+      b.disabled = false;
+      if (!r.ok) { dire(expliquer(r.motif), 'err'); return; }
+      // ⚠ ON DIFFUSE TOUT DE SUITE APRES L OUVERTURE. L afficheur demande bien
+      // l etat courant a son ouverture, mais il le demande a la CAISSE DU SITE :
+      // ouvert depuis cette fenetre, il afficherait un panier vide devant le
+      // client alors que la vente est en cours.
+      diffuser();
+      dire('Affichage client ouvert.', 'bon');
+    });
+  };
 
   // ⚠ ECOUTEURS DELEGUES. Les boutons de variante, de quantite et de retrait sont
   // redessines a chaque changement : un ecouteur pose sur chacun serait reperdu
@@ -659,12 +751,13 @@ ${JS_ACTIVITE}
     var c = t.closest('.cli');
     if (c) {
       var uid = c.getAttribute('data-uid');
-      appeler('caisse:client', [uid]).then(function(){ /* rien : on relit ci-dessous */ });
-      // On a deja la fiche dans la liste affichee : inutile de la redemander.
-      var nom = c.querySelector('strong');
-      remplirClient({ id: uid, nom: nom ? nom.textContent : '',
-        courriel: (document.getElementById('c-mail').value || ''),
-        tel: (document.getElementById('c-tel').value || ''), province: '' });
+      // La fiche COMPLETE est deja la, retenue au moment du dessin : courriel,
+      // telephone et province comprises. Aucun aller-retour, et surtout aucune
+      // reconstruction a partir de l ecran.
+      for (var k = 0; k < TROUVES.length; k++) {
+        if (TROUVES[k].id === uid) { remplirClient(TROUVES[k]); return; }
+      }
+      dire('Fiche introuvable — relancez la recherche.', 'err');
     }
   });
 

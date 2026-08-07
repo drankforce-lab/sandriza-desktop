@@ -949,6 +949,10 @@ const OPS_PONT = new Set([
   // (`Admin._posVente`), le pont ne porte que des valeurs.
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
   'caisse:totaux', 'caisse:client', 'caisse:vendre',
+  // ⚠ `caisse:diffuser` passe par la fenetre PRINCIPALE a dessein : le canal
+  // `pos:diffuser` n accepte qu elle. Sans cela, une fenetre quelconque pourrait
+  // afficher n importe quel montant devant le client au moment de payer.
+  'caisse:diffuser', 'caisse:affichage',
 ]);
 
 // ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que

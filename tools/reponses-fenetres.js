@@ -23,6 +23,19 @@
  * contrôle ne l'accuse pas, le jeu ne mène pas là où l'on croit. Les quatre jeux
  * ci-dessous ont passé cette épreuve le 2026-08-07.
  *
+ * ⚠⚠⚠ CE QUE CE CONTRÔLE NE COUVRE PAS, ET IL FAUT LE SAVOIR POUR NE PAS S'Y FIER
+ * PLUS QU'IL NE LE MÉRITE : il exécute le rendu au CHARGEMENT, pas les gestes de
+ * l'usager. Aucun clic, aucune frappe n'est simulée — le faux document rend un
+ * élément NEUF à chaque `getElementById`, il n'y a donc pas d'arbre où un événement
+ * pourrait remonter. Tout ce qui ne se déclenche que sur un clic ou une saisie
+ * (reprise d'une fiche client, boutons de quantité, masque de téléphone, envoi de
+ * la vente) reste hors de sa portée.
+ * Mesuré le 2026-08-07 : une variable libre injectée dans `remplirClient` de la
+ * caisse n'est PAS vue par le contrôle, alors que la même sonde dans la fonction de
+ * dessin l'est immédiatement. Ces chemins-là se vérifient à la main, dans
+ * l'application — et c'est précisément l'un d'eux qui portait le défaut de la
+ * reprise de fiche client.
+ *
  * Pour couvrir une fenêtre de plus : ajouter son fichier ici, avec les réponses
  * de ses opérations. Le contrôle s'y applique aussitôt.
  *
@@ -145,6 +158,9 @@ module.exports = {
         'caisse:vendre': { ok: true, numero: 'SZ-100250', commandeId: 'ord_0003',
           factureId: 'inv_0003', total: 149.41, stockOk: true, nuageOk: true,
           compteNeuf: false, envoiCourriel: true, enAttente: false, lien: null, avis: [] },
+        // L afficheur : la fenetre diffuse son panier a chaque changement.
+        'caisse:diffuser': { ok: true },
+        'caisse:affichage': { ok: true },
         'session:activite': { ok: true },
         identite: IDENTITE,
       },
@@ -166,6 +182,9 @@ module.exports = {
         'caisse:chercher': { ok: true, sku: null, articles: [] },
         'caisse:totaux': { ok: true, sousTotal: 0, rabais: 0, livraison: 0, taxes: [], total: 0 },
         'caisse:client': { ok: true, exact: null, trouves: [] },
+        // L afficheur : la fenetre diffuse son panier a chaque changement.
+        'caisse:diffuser': { ok: true },
+        'caisse:affichage': { ok: true },
         'session:activite': { ok: true },
         identite: IDENTITE,
       },
