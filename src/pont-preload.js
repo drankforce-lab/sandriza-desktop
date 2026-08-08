@@ -54,7 +54,7 @@ contextBridge.exposeInMainWorld('szPont', {
     // l'important n'est pas d'etre rapide, c'est de finir par repondre VRAI.
     // Liste JUMELLE de LIMITES_PONT (main.js) : ici +5 s, pour que le
     // principal reponde toujours en premier et que son verdict arrive entier.
-    const LONGUES = { 'produit:enregistrer': 90000,
+    const LONGUES = { 'produit:enregistrer': 90000, 'produit:photoIa': 120000,
       'commande:etiquette': 60000, 'expedition:etiquette': 60000,
       'remboursement:ecrire': 45000, 'commandes:supprimerEcrire': 45000,
       'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,

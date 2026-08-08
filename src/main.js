@@ -1009,7 +1009,7 @@ const OPS_PONT = new Set([
   'commandes:supprimerApercu', 'commandes:supprimerEcrire',
   'commandes:fraisApercu', 'commandes:fraisEcrire',
   'commandes:rembourser', 'commandes:facture', 'commandes:ouvrirDetail',
-  'facture:lire', 'facture:imprimer', 'produit:apercu', 'produit:fonds', 'produit:detourer',
+  'facture:lire', 'facture:imprimer', 'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -1167,6 +1167,7 @@ const LIMITES_PONT = {
   'remboursement:ecrire': 45000, 'commandes:supprimerEcrire': 45000,
   'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,
   // Detourage, impressions et rapports.
+  'produit:photoIa': 120000,
   'produit:detourer': 30000, 'stock:etiquettes': 30000,
   'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
 };

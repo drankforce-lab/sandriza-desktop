@@ -72,6 +72,14 @@ const CSS_PROPRE = `
   background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
 .fonds button.on{border-color:#c9a97e;background:rgba(201,169,126,.18);color:#f0e4d2}
 .fonds .past{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.3);flex:0 0 auto}
+.modeles{display:flex;gap:.45rem;flex-wrap:wrap;margin:.4rem 0}
+.modeles .md{width:64px;cursor:pointer;text-align:center}
+.modeles .md .cd{height:84px;border-radius:7px;overflow:hidden;
+  border:2px solid rgba(255,255,255,.16)}
+.modeles .md.on .cd{border-color:#c9a97e}
+.modeles .md img{width:100%;height:100%;object-fit:cover;display:block}
+.modeles .md .nm{font-size:.62rem;color:#8fa1b8;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;margin-top:.1rem}
 [draggable=true]{cursor:grab}
 .photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
   border:1px dashed rgba(255,255,255,.18);display:flex;align-items:center;
@@ -428,7 +436,9 @@ function pageProduit(id) {
       + '<div class="vign" id="p-vign" title="Photo principale — cliquer pour choisir, ou déposer une secondaire ici">choisir une photo</div>'
       + '<div class="lgd-principale">Photo principale</div>'
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
-      + 'title="Détourer la photo et poser un décor (studio, jardin, Paris…)">✂ Décor</button></div>'
+      + 'title="Détourer la photo et poser un décor (studio, jardin, Paris…)">✂ Décor</button>'
+      + '<button type="button" id="p-mannequin" class="mini-decor" disabled '
+      + 'title="Faire porter le vêtement par un modèle (IA Fal.ai — chaque génération consomme des crédits)">✨ Mannequin IA</button></div>'
       + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
       + '<div class="carte plein"><h2>Photo par couleur</h2>'
@@ -617,6 +627,7 @@ function pageProduit(id) {
         return;
       }
       if (ev.target.closest('#p-detourer')) { ouvrirDetourage(); return; }
+      if (ev.target.closest('#p-mannequin')) { ouvrirMannequin(); return; }
       if (ev.target.closest('#p-vign')) {
         choisirPhoto(function(ds){ IMAGE = ds[0]; montrerImage(IMAGE); majIa(); });
         return;
@@ -1094,6 +1105,8 @@ function pageProduit(id) {
     v.setAttribute('draggable', src ? 'true' : 'false');
     var bd = document.getElementById('p-detourer');
     if (bd) bd.disabled = !src;
+    var bm = document.getElementById('p-mannequin');
+    if (bm) bm.disabled = !src;
     v.innerHTML = src
       ? '<img src="' + esc(src) + '" alt="">'
         + '<button type="button" class="x" id="p-vider" title="Retirer la photo">×</button>'
@@ -1489,6 +1502,105 @@ function pageProduit(id) {
       montrerImage(IMAGE); majIa();
       v.remove();
       dire('Photo principale remplacée par la version détourée.', 'bon');
+    };
+  }
+
+  /* ── MANNEQUIN IA ── Essayage virtuel Fal.ai, EXECUTE PAR LE SITE
+     (produit:photoIa — la cle ne voyage jamais). ⚠ CHAQUE GENERATION COUTE des
+     credits : le geste explicite << Generer >> confirme, le bouton se desarme
+     pendant le travail (jusqu a 2 minutes), et le resultat ne remplace la
+     photo principale que sur << Utiliser cette photo >>. Les modeles de pose
+     viennent de la phototheque du site (Configuration). */
+  function ouvrirMannequin(){
+    if (!IMAGE) return;
+    var MODELE = '', RES = '';
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite" style="max-width:34rem">'
+      + '<h3>✨ Mannequin IA</h3>'
+      + '<div class="aide">Le vêtement de la photo principale sera porté par le modèle choisi. '
+      + 'Chaque génération consomme des crédits Fal.ai.</div>'
+      + '<div class="modeles" id="ia-modeles"><span class="aide">Chargement…</span></div>'
+      + '<div class="grille" style="grid-template-columns:1fr 1fr;margin:.3rem 0 .5rem">'
+      + '<div class="ch"><label for="ia-cat">Type de vêtement</label><select id="ia-cat">'
+      + '<option value="one-pieces">Robes / Combinaisons</option>'
+      + '<option value="upper_body">Hauts / Vestes / Manteaux</option>'
+      + '<option value="lower_body">Bas — Pantalons / Jupes</option></select></div>'
+      + '<div class="ch"><label for="ia-desc">Description courte</label>'
+      + '<input id="ia-desc" type="text" placeholder="Ex : robe fleurie été"></div></div>'
+      + '<div id="ia-zone" style="background:#0f1826;border-radius:10px;min-height:10rem;'
+      + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
+      + '<div class="pied2"><button type="button" id="ia-non">Fermer</button>'
+      + '<button type="button" id="ia-gen">✨ Générer</button>'
+      + '<button type="button" class="prim" id="ia-oui" disabled>✓ Utiliser cette photo</button></div></div>';
+    document.body.appendChild(v);
+    // La categorie part de celle du produit : robes -> one-pieces, bas -> lower_body.
+    var cat = val('p-cat');
+    var ic = document.getElementById('ia-cat');
+    if (ic) ic.value = (cat === 'pantalons' || cat === 'jupes') ? 'lower_body'
+      : (cat === 'hauts' || cat === 'manteaux') ? 'upper_body' : 'one-pieces';
+    var idn = document.getElementById('ia-desc');
+    if (idn) idn.value = val('p-nom').trim();
+    function zone(html){ var z = document.getElementById('ia-zone'); if (z) z.innerHTML = html; }
+    zone('<span class="aide">Choisissez un modèle, puis ✨ Générer.</span>');
+    P.appeler('produit:modeles').then(function(r){
+      var z = document.getElementById('ia-modeles');
+      if (!z) return;
+      if (!r || !r.ok) { z.innerHTML = '<span class="aide" style="color:#f87171">' + esc(expliquer(r)) + '</span>'; return; }
+      if (!r.cleConfiguree) {
+        z.innerHTML = '<span class="aide" style="color:#fbbf24">⚠ Clé Fal.ai non configurée — '
+          + 'Configuration de la fenêtre principale.</span>';
+        return;
+      }
+      if (!(r.modeles || []).length) {
+        z.innerHTML = '<span class="aide" style="color:#fbbf24">⚠ Aucun modèle de pose sauvegardé — '
+          + 'gérez la photothèque de modèles dans Configuration.</span>';
+        return;
+      }
+      z.innerHTML = r.modeles.map(function(m){
+        return '<div class="md" data-modele="' + esc(m.id) + '"><div class="cd">'
+          + '<img src="' + esc(m.image) + '" alt=""></div>'
+          + '<div class="nm">' + esc(m.nom) + '</div></div>'; }).join('');
+      z.onclick = function(ev){
+        var d = ev.target && ev.target.closest ? ev.target.closest('[data-modele]') : null;
+        if (!d) return;
+        MODELE = d.getAttribute('data-modele');
+        Array.prototype.forEach.call(z.querySelectorAll('.md'), function(x){
+          x.classList.toggle('on', x.getAttribute('data-modele') === MODELE);
+        });
+      };
+    });
+    document.getElementById('ia-non').onclick = function(){ v.remove(); };
+    document.getElementById('ia-gen').onclick = function(){
+      if (!MODELE) { zone('<span class="aide" style="color:#fbbf24">Choisissez d’abord un modèle.</span>'); return; }
+      var g = this;
+      g.disabled = true; // anti double-clic : chaque generation COUTE
+      var oui = document.getElementById('ia-oui');
+      if (oui) oui.disabled = true;
+      zone('<span class="aide">Génération en cours — jusqu’à 2 minutes…</span>');
+      P.appeler('produit:photoIa', IMAGE, MODELE,
+        (document.getElementById('ia-cat') || {}).value,
+        (document.getElementById('ia-desc') || {}).value).then(function(r){
+        g.disabled = false;
+        g.textContent = '↻ Régénérer';
+        if (!r || !r.ok) {
+          zone('<span class="aide" style="color:#f87171">'
+            + esc((r && r.detail) || (r && r.motif === 'cle_absente' ? 'Clé Fal.ai non configurée.'
+              : r && r.motif === 'modele_absent' ? 'Ce modèle n’existe plus — rechargez.' : expliquer(r))) + '</span>');
+          return;
+        }
+        RES = r.image || '';
+        zone('<img src="' + esc(RES) + '" style="max-width:100%;max-height:22rem;object-fit:contain" alt="">');
+        var oui2 = document.getElementById('ia-oui');
+        if (oui2) oui2.disabled = !RES;
+      });
+    };
+    document.getElementById('ia-oui').onclick = function(){
+      if (!RES) return;
+      IMAGE = RES;
+      montrerImage(IMAGE); majIa();
+      v.remove();
+      dire('Photo principale remplacée par la photo portée.', 'bon');
     };
   }
 
