@@ -513,6 +513,47 @@ module.exports = {
     },
   ],
 
+  // ── MESSAGERIE CLIENTS ─────────────────────────────────────────────────────
+  'messagerie.js': [
+    {
+      // ⚠ FORME REELLE de messagerie:liste (Admin._messagerieLigne) et :lire.
+      nom: 'demandes en attente',
+      id: '',
+      reponses: {
+        'messagerie:liste': {
+          ok: true, onglet: 'pending',
+          comptes: { attente: 2, repondues: 5, toutes: 7 },
+          lignes: [
+            { id: 'sup_1', commande: 'CMD-0002-22010', client: 'Josée Lafleur',
+              courriel: 'josee@exemple.ca', raison: 'Question sur ma commande',
+              statut: 'pending', date: '2026-08-08' },
+            { id: 'sup_2', commande: 'CMD-0002-21970', client: 'Marc Dubé',
+              courriel: 'marc@exemple.ca', raison: 'Article manquant',
+              statut: 'pending', date: '2026-08-07' },
+          ],
+        },
+        'messagerie:lire': {
+          ok: true, id: 'sup_1', commande: 'CMD-0002-22010', client: 'Josée Lafleur',
+          courriel: 'josee@exemple.ca', raison: 'Question sur ma commande',
+          statut: 'pending', date: '2026-08-08',
+          message: 'Bonjour, ma commande est-elle partie ? Merci.',
+          reponse: '', reponduLe: '',
+        },
+        'messagerie:repondre': { ok: true, courriel: true },
+        'messagerie:supprimer': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans messagerie',
+      id: '',
+      reponses: {
+        'messagerie:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── AVIS PRODUITS ──────────────────────────────────────────────────────────
   'avis.js': [
     {

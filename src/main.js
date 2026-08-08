@@ -1038,6 +1038,9 @@ const OPS_PONT = new Set([
   // et les quatre gestes — les coeurs vivent dans le site.
   'avis:liste', 'avis:lire', 'avis:approuver', 'avis:masquer',
   'avis:repondre', 'avis:supprimer',
+  // La messagerie clients (fenetre Messagerie) : liste (resynchronisee),
+  // lecture, reponse (envoyee par courriel) et suppression.
+  'messagerie:liste', 'messagerie:lire', 'messagerie:repondre', 'messagerie:supprimer',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1242,6 +1245,7 @@ const LIMITES_PONT = {
   // meme fraicheur que l ecran du site) : laisser le temps du nuage.
   'retours:liste': 20000,
   'ramassages:annuler': 30000,
+  'messagerie:liste': 20000, 'messagerie:repondre': 30000,
 };
 
 /* ⚠ LA FENETRE INVENTAIRE SE TIENT A JOUR TOUTE SEULE (demande du 2026-08-08 :
@@ -1380,6 +1384,7 @@ const PAGES_ANCRABLES = () => ({
   factures: ['Factures', () => pageFactures()],
   codesbarres: ['Impression de codes-barres', () => pageCodesbarres()],
   avis: ['Avis produits', () => pageAvis()],
+  messagerie: ['Messagerie clients', () => pageMessagerie()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2099,6 +2104,7 @@ const { pageClients } = require('./fenetres/clients');
 const { pageCodesbarres } = require('./fenetres/codesbarres');
 const { pageRamassages } = require('./fenetres/ramassages');
 const { pageAvis } = require('./fenetres/avis');
+const { pageMessagerie } = require('./fenetres/messagerie');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2173,7 +2179,7 @@ const actionApp = (nom) => {
        separee HERITEE d un ancien menu est ramenee plutot que doublee. */
     case 'tableau': case 'inventaire': case 'commandes': case 'produits':
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
-    case 'retours': case 'codesbarres': case 'avis': {
+    case 'retours': case 'codesbarres': case 'avis': case 'messagerie': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

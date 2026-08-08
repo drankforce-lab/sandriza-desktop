@@ -66,7 +66,8 @@ contextBridge.exposeInMainWorld('szPont', {
       'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,
       'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
       'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
-      'retours:liste': 20000, 'ramassages:annuler': 30000 };
+      'retours:liste': 20000, 'ramassages:annuler': 30000,
+      'messagerie:liste': 20000, 'messagerie:repondre': 30000 };
     const limite = (LONGUES[nom] || 20000) + 5000;
     const plafond = new Promise((resoudre) => {
       setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, limite);
