@@ -49,6 +49,9 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // Le site pousse son modèle de menu : la coquille en tire ses RACCOURCIS
   // CLAVIER et la fenêtre détachée. Une seule source, jamais deux listes.
   menuModele: (m) => ipcRenderer.invoke('menu:modele', m || {}),
+  // Le theme (jour/nuit) A L INSTANT de la bascule — sans attendre le
+  // battement du modele du menu (plusieurs secondes de retard sinon).
+  themeChange: (sombre) => ipcRenderer.send('theme:changer', !!sombre),
   // Le panneau d un menu en VRAI menu du systeme (1.55.1) : quand un ecran est
   // ancre, un panneau dessine dans la page passerait dessous — celui-ci
   // s affiche au-dessus de tout, sans voiler l ecran. (x, y) en px CSS.

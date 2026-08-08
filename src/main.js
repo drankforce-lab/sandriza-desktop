@@ -2116,7 +2116,7 @@ const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
 // encore chargé, ou version du site antérieure à appbar.js).
-let _modele = { menus: [], taille: 1.15, mode: 'haut', sombre: false };
+let _modele = { menus: [], taille: 1.15, mode: 'haut', sombre: !!reglages.get('sombre') };
 
 // ── ACTIONS DE L'APPLICATION ─────────────────────────────────────────────────
 const actionApp = (nom) => {
@@ -2478,6 +2478,21 @@ ipcMain.on('panneau:survol', (e, dedans) => {
   else fermerPanneauBientot();
 });
 
+/* LE THEME A L INSTANT (1.58.3) : la bascule jour/nuit du site arrivait par
+   le battement du modele du menu — le menu se repeignait tout de suite, les
+   fenetres natives 3 secondes plus tard (releve du 2026-08-09). Le site
+   pousse maintenant le theme DES la bascule ; il est aussi RETENU (reglages)
+   pour que les fenetres du prochain demarrage naissent du bon cote. */
+ipcMain.on('theme:changer', (e, sombre) => {
+  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  const v = !!sombre;
+  if (v === !!_modele.sombre) return;
+  _modele.sombre = v;
+  try { reglages.set('sombre', v); } catch {}
+  panneauSale = true;
+  appliquerThemePartout();
+});
+
 ipcMain.handle('menu:modele', (e, m) => {
   if (m && typeof m === 'object' && Array.isArray(m.menus)) {
     const sombreAvant = !!_modele.sombre;
@@ -2486,7 +2501,10 @@ ipcMain.handle('menu:modele', (e, m) => {
     buildMenu();
     if (reglages.get('menuMode') === 'fenetre') majPalette();
     // Le theme a bascule : toutes les fenetres et vues ancrees suivent.
-    if (sombreAvant !== !!_modele.sombre) appliquerThemePartout();
+    if (sombreAvant !== !!_modele.sombre) {
+      try { reglages.set('sombre', !!_modele.sombre); } catch {}
+      appliquerThemePartout();
+    }
   }
   return true;
 });
@@ -2683,6 +2701,28 @@ if (!app.requestSingleInstanceLock()) {
     buildMenu();       // repli minimal ; le vrai menu arrive du site
     createWindow();
     startUsbWatch();
+
+    /* PRECHAUFFAGE DU TABLEAU DE BORD (1.58.3) : la vue ancree n etait creee
+       qu apres le chargement complet du site — on voyait le menu, puis
+       l ecran arriver (releve du 2026-08-09 : << jamais instantane >>). La
+       vue nait ICI, cachee, avec le DERNIER THEME RETENU : quand le site
+       demande l ancrage, elle existe deja (szRevenir la fait relire) et se
+       pose a l instant. */
+    setTimeout(() => {
+      try {
+        if (ancrees.get('tableau')) return;
+        const view = new WebContentsView({ webPreferences: {
+          preload: path.join(__dirname, 'pont-preload.js'),
+          contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
+        } });
+        ancrees.set('tableau', { view, fenetre: null });
+        view.webContents.on('did-finish-load', () => {
+          view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
+          appliquerTheme(view.webContents);
+        });
+        view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageTableau()));
+      } catch {}
+    }, 250);
 
     // PORTE DE LANCEMENT : vérifie la version AVANT d'ouvrir l'administration.
     // C'est elle, et elle seule, qui charge APP_URL — voir verifierAuLancement().
