@@ -518,8 +518,16 @@ function pageProduit(id) {
       // servent qu au rendu interne des listes ; les demander a la creation d un
       // produit occupait une carte entiere pour deux reglages qu on ne touche
       // jamais. Le SEUIL, lui, reste : il declenche les alertes de stock.
-      + '<div class="carte"><h2>Alerte de stock</h2><div class="grille">'
+      + '<div class="carte"><h2>Alerte et limites</h2><div class="grille">'
       + ch('p-seuil', 'Seuil d’alerte', { type: 'number', min: 0, pas: '1' })
+      // ⚠ LIMITE PAR CLIENT (2026-08-08) : toutes commandes confondues, par
+      // adresse courriel — le cumul est tranché par le SERVEUR à la caisse
+      // (client_limit_check). Vide = aucune limite propre au produit.
+      + '<div class="ch"><label for="p-limclient">Limite par client</label>'
+      + '<input id="p-limclient" type="number" min="1" step="1" placeholder="aucune">'
+      + '<div class="aide" style="margin-top:.2rem">Unités de ce produit qu’un même client peut '
+      + 'acheter, toutes commandes confondues (par adresse courriel). Affichée sur la fiche '
+      + 'en boutique.</div></div>'
       + '</div></div></div>');
 
     // 7 — Stock
@@ -1414,6 +1422,7 @@ function pageProduit(id) {
     poser('p-poids', p.weight ? String(Math.round(p.weight * 1000 * 10) / 10) : '');
     poser('p-unite', 'g');
     poser('p-seuil', p.lowStock != null ? String(p.lowStock) : String(CTX.seuilDefaut));
+    poser('p-limclient', (Number(p.buyMaxClient) >= 1) ? String(Math.floor(Number(p.buyMaxClient))) : '');
     document.getElementById('p-actif').checked = p.active !== false;
     // ⚠ LES DEUX AXES SE LISENT SEPAREMENT, comme dans l editeur du site : la
     // liquidation et la vente finale sont des REGIMES, noReturn est la politique
@@ -2061,6 +2070,7 @@ function pageProduit(id) {
         guide: val('p-guide'), etiq: val('p-etiq'), fourn: val('p-fourn'),
         prix: val('p-prix'), solde: val('p-solde'), cout: val('p-cout'),
         poids: val('p-poids'), unite: val('p-unite'), seuil: val('p-seuil'),
+        limclient: val('p-limclient'),
         regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif')
       },
       tailles: tailles(), couleurs: couleurs(),
@@ -2103,6 +2113,7 @@ function pageProduit(id) {
     poser('p-guide', f.guide); poser('p-etiq', f.etiq); poser('p-fourn', f.fourn);
     poser('p-prix', f.prix); poser('p-solde', f.solde); poser('p-cout', f.cout);
     poser('p-poids', f.poids); poser('p-seuil', f.seuil);
+    poser('p-limclient', f.limclient || '');
     // ⚠ UN BROUILLON ECRIT PAR LA VERSION PRECEDENTE ne porte que l ancien code
     // ('0' | '1' | '3' | '4'). On le traduit : sans cela la reprise reposerait
     // << Normal >> sur une fiche mise en vente finale, a l endroit precis ou l on
@@ -2337,6 +2348,7 @@ function pageProduit(id) {
       acquisitionCost: argentNombre(val('p-cout')),
       weight: enKg(val('p-poids'), val('p-unite')),
       lowStock: parseInt(val('p-seuil'), 10),
+      buyMaxClient: (parseInt(val('p-limclient'), 10) >= 1) ? parseInt(val('p-limclient'), 10) : null,
       active: coché('p-actif'), regime: val('p-regime'), retours: val('p-retours'),
       sizes: tailles(), colors: couleurs(),
       image: IMAGE,
