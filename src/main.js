@@ -2382,6 +2382,29 @@ ipcMain.handle('menu:set', (e, cle, valeur) => {
   return reglages.lire();
 });
 // Le site pousse son modèle : on en tire les raccourcis et la fenêtre détachée.
+/* LE PANNEAU DU MENU EN NATIF (1.55.1). Quand un ecran est ANCRE, un panneau
+   dessine dans la page passe DESSOUS la vue native — le voile (cacher l ecran
+   le temps du menu) marchait mais faisait disparaitre tout l ecran pour un
+   panneau d un coin (releve du 2026-08-09). Ici, le site demande un VRAI menu
+   du systeme, pose aux coordonnees du bouton : il s affiche au-dessus de tout,
+   et l ecran ancre ne bouge plus. Les clics passent par les MEMES chemins que
+   le menu natif masque (versTemplateNatif -> actionApp / runAdmin). */
+ipcMain.on('menu:panneau', (e, label, x, y) => {
+  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  const m = (_modele.menus || []).find((mm) => mm && mm.label === String(label || ''));
+  if (!m) return;
+  const items = versTemplateNatif(m.items || []);
+  if (!items.length) return;
+  const f = mainWindow.webContents.getZoomFactor() || 1;
+  try {
+    Menu.buildFromTemplate(items).popup({
+      window: mainWindow,
+      x: Math.round((Number(x) || 0) * f),
+      y: Math.round((Number(y) || 0) * f),
+    });
+  } catch {}
+});
+
 ipcMain.handle('menu:modele', (e, m) => {
   if (m && typeof m === 'object' && Array.isArray(m.menus)) {
     _modele = m;
