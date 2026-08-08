@@ -1045,6 +1045,72 @@ module.exports = {
     },
   ],
 
+  /* ── CLIENT ────────────────────────────────────────────────────────────────
+     Formes relevées dans assets/js/pont.js (clientLire). Trois cas : actif
+     complet (commandes + retours + purge impossible... non — actif), SUPPRIMÉ
+     AVEC commandes (le bouton de purge ne doit PAS apparaître, la fiche doit
+     dire pourquoi), et lecture seule. */
+  'client.js': (function(){
+    const base = {
+      ok: true, peutEcrire: true, peutSupprimer: true,
+      client: { id: 'u_0001', prenom: 'Marie', nom: 'Tremblay',
+        courriel: 'marie@example.com', tel: '418 555-0142', langue: 'fr',
+        actif: true, supprime: false, inscritLe: '2026-05-02T10:00:00.000Z', supprimeLe: '',
+        adresse: { rue: '12 rue des Érables', ville: 'Québec', province: 'QC',
+          codePostal: 'G1R 2B5', pays: 'Canada' } },
+      stats: { commandes: 8, retours: 1, totalDepense: 1240.55 },
+      dernieres: [
+        { id: 'ord_0011', numero: 'SZ-100211', date: '2026-08-06T15:20:00.000Z', total: 149.41, statut: 'preparing' },
+        { id: 'ord_0009', numero: 'SZ-100209', date: '2026-07-28T09:00:00.000Z', total: 89.95, statut: 'delivered' },
+      ],
+      provinces: ['QC','ON','BC','AB','MB','SK','NS','NB','NL','PE','NT','NU','YT'],
+      purgeable: false,
+    };
+    return [
+      {
+        nom: 'client actif',
+        id: 'u_0001',
+        reponses: {
+          'client:lire': base,
+          'verrou:prendre': VERROU,
+          'session:activite': { ok: true },
+        },
+      },
+      {
+        nom: 'supprimé avec commandes — purge refusée',
+        id: 'u_0002',
+        reponses: {
+          'client:lire': Object.assign({}, base, {
+            client: Object.assign({}, base.client, { id: 'u_0002', prenom: 'Luc', nom: 'Gagnon',
+              courriel: 'luc@example.com', actif: false, supprime: true,
+              supprimeLe: '2026-08-01T12:00:00.000Z' }),
+            // ⚠ purgeable: false AVEC des commandes : le bouton de purge ne doit
+            // pas apparaître, et la fiche doit dire les 6 ans de conservation.
+            stats: { commandes: 3, retours: 0, totalDepense: 402.1 },
+            purgeable: false,
+          }),
+          'verrou:prendre': VERROU,
+          'session:activite': { ok: true },
+        },
+      },
+      {
+        nom: 'lecture seule',
+        id: 'u_0003',
+        reponses: {
+          'client:lire': Object.assign({}, base, {
+            peutEcrire: false, peutSupprimer: false,
+            client: Object.assign({}, base.client, { id: 'u_0003', prenom: 'Anne', nom: 'Roy',
+              courriel: 'anne@example.com' }),
+            stats: { commandes: 0, retours: 0, totalDepense: 0 },
+            dernieres: [],
+          }),
+          'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'Marc Dubé' },
+          'session:activite': { ok: true },
+        },
+      },
+    ];
+  })(),
+
 };
 
 // ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque

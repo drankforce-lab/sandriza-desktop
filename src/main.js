@@ -1005,6 +1005,11 @@ const OPS_PONT = new Set([
   // Remboursement. ⚠ remboursement:ecrire REMBOURSE (Square ou credit) : la
   // regle entiere vit dans le site, le pont ne porte que quantites et choix.
   'remboursement:lire', 'remboursement:totaux', 'remboursement:nip', 'remboursement:ecrire',
+  // Fiche client. La regle (unicite du courriel, mot de passe par canal separe
+  // et hache serveur, purge refusee des qu il existe une commande) vit dans le
+  // site ; le pont ne porte que des valeurs.
+  'client:lire', 'client:ecrire', 'client:etat', 'client:corbeille',
+  'client:restaurer', 'client:purger', 'client:etatCompte',
 ]);
 
 // ⚠ U+2028 et U+2029 sont des SAUTS DE LIGNE en JavaScript alors que
@@ -1075,6 +1080,20 @@ ipcMain.handle('fenetre:remboursement', (e, id) => {
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
   const win = ouvrirNative(cle, 'Remboursement', pageRemboursement(String(id || '')),
     { width: 760, height: 740, minWidth: 620, minHeight: 520 });
+  if (_reutilisee && win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
+  return true;
+});
+
+/* Ouverture d une fiche client depuis le site. Une fenetre PAR client ;
+   reutilisee, elle SE RELIT (szRevenir). */
+ipcMain.handle('fenetre:client', (e, id) => {
+  const cle = 'client-' + String(id || '').replace(/[^\w-]/g, '');
+  const _avant = fenetresNatives.get(cle);
+  const _reutilisee = !!(_avant && !_avant.isDestroyed());
+  const win = ouvrirNative(cle, 'Fiche client', pageClient(String(id || '')),
+    { width: 720, height: 720, minWidth: 600, minHeight: 500 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
   }
@@ -1605,6 +1624,7 @@ const { pageExpedition } = require('./fenetres/expedition');
 const { pageCommandes } = require('./fenetres/commandes');
 const { pageRetour } = require('./fenetres/retour');
 const { pageRemboursement } = require('./fenetres/remboursement');
+const { pageClient } = require('./fenetres/client');
 const reglages = require('./reglages');
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
