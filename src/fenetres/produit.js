@@ -153,11 +153,11 @@ const CSS_PROPRE = `
 .lgstk.enstock{background:rgba(34,197,94,.10)}
 .lgstk.enstock:hover{background:rgba(34,197,94,.15)}
 .lgstk.enstock .c1,.lgstk.enstock .c2{color:#86efac;font-weight:600}
-/* ⚠ EMPLACEMENT OBLIGATOIRE POUR CHAQUE VARIANTE, quantite ou pas — regle
-   DURCIE le 2026-08-08 (l ancienne << des que la quantite depasse zero >>
-   laissait creer une fiche entiere a zero sans aucun emplacement). Sans ce
-   rappel on enregistre de la marchandise que l inventaire ne sait pas ou
-   aller chercher. */
+/* ⚠ EMPLACEMENT OBLIGATOIRE DES QUE LA QUANTITE DEPASSE ZERO — et depuis le
+   2026-08-08, une CREATION exige au moins une variante avec une quantite
+   (une fiche entiere a zero se creait sans un mot). Sans ce rappel on
+   enregistre de la marchandise que l inventaire ne sait pas ou aller
+   chercher. */
 .lgstk select.manque{border-color:#f87171}
 .theque{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;
   max-height:46vh;overflow-y:auto;padding-right:.2rem}
@@ -273,6 +273,7 @@ function pageProduit(id) {
   MOTIFS.photo_requise = 'La photo principale est obligatoire.';
   MOTIFS.tailles_couleurs_requises = 'Choisissez au moins une taille ET une couleur.';
   MOTIFS.emplacement_requis = 'Un emplacement d’entrepôt manque pour des variantes en stock.';
+  MOTIFS.stock_requis = 'Saisissez une quantité pour au moins une variante.';
   MOTIFS.couleur_non_mappee = 'Cette couleur n’a pas de teinte unie attribuée.';
   MOTIFS.non_enregistre = 'La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.';
 
@@ -528,8 +529,9 @@ function pageProduit(id) {
       // croyant l emplacement facultatif, alors qu il est obligatoire des que la
       // quantite depasse zero.
       + (CTX.entrepots.length
-          ? '<div class="aide" style="margin:-.2rem 0 .5rem">Un emplacement d’entrepôt est '
-            + 'obligatoire pour chaque variante, même sans quantité.</div>'
+          ? '<div class="aide" style="margin:-.2rem 0 .5rem">Au moins une variante doit porter '
+            + 'une quantité, et un emplacement d’entrepôt est obligatoire dès qu’une quantité '
+            + 'dépasse zéro.</div>'
           : '<div class="aide" style="margin:-.2rem 0 .5rem;color:#fbbf24">⚠ Aucun emplacement '
             + 'configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux '
             + 'variantes en stock.</div>')
@@ -1327,11 +1329,10 @@ function pageProduit(id) {
         // quantite ressemblait a un identifiant.
         ligne: function(x){
           var q = STOCK[x.cle] || 0, lo = LOCS[x.cle] || '';
-          // Une variante SANS emplacement est signalee des le dessin, pas
-          // seulement quand on y touche : une liste paginee se rouvre a la
-          // page 2 et le rappel doit y etre deja. Quantite ou pas — la regle
-          // durcie du 2026-08-08.
-          var manque = (CTX.entrepots.length && !lo);
+          // Une variante SANS emplacement alors qu elle porte du stock est
+          // signalee des le dessin, pas seulement quand on y touche : une liste
+          // paginee se rouvre a la page 2 et le rappel doit y etre deja.
+          var manque = (q > 0 && CTX.entrepots.length && !lo);
           return '<div class="lgstk' + (q > 0 ? ' enstock' : '') + '">'
             + '<span class="c1">' + esc(x.taille) + '</span>'
             + '<span class="c2">' + esc(x.couleur) + '</span>'
@@ -1363,7 +1364,7 @@ function pageProduit(id) {
         var q = STOCK[cle] || 0;
         el.classList.toggle('enstock', q > 0);
         var s = el.querySelector('.loc');
-        if (s) s.classList.toggle('manque', !s.value);
+        if (s) s.classList.toggle('manque', q > 0 && !s.value);
         // L avertissement de seuil suit la frappe : on remplace le seul marqueur,
         // jamais la cellule — reecrire la cellule emporterait le champ en cours
         // de saisie et le curseur avec lui.
@@ -2264,17 +2265,25 @@ function pageProduit(id) {
       dire('La photo principale est obligatoire.', 'err');
       return;
     }
+    // ⚠ REGLE ARRETEE le 2026-08-08 (2e passe, a sa demande) : l emplacement
+    // suit la QUANTITE — une variante a zero n en exige pas — mais une
+    // CREATION doit porter du stock : au moins une variante avec une
+    // quantite. La fiche << tout a zero >> se creait sans un mot. En
+    // MODIFICATION, pas d exigence : un produit vendu a zero reste modifiable.
+    var enStock = [];
+    tailles().forEach(function(t){ couleurs().forEach(function(c){
+      if ((STOCK[t + '-' + c] || 0) > 0) enStock.push(t + '-' + c);
+    }); });
+    if (!ID && !enStock.length) {
+      Assist.aller(4);
+      dire('Saisissez une quantité pour au moins une variante avant d’enregistrer.', 'err');
+      return;
+    }
     if (CTX && (CTX.entrepots || []).length) {
-      // ⚠ REGLE DURCIE le 2026-08-08 : CHAQUE variante doit avoir son
-      // emplacement, quantite ou pas — << des qu une quantite depasse zero >>
-      // laissait creer une fiche entiere a zero sans aucun emplacement.
-      var sansLieu = [];
-      tailles().forEach(function(t){ couleurs().forEach(function(c){
-        if (!LOCS[t + '-' + c]) sansLieu.push(t + '-' + c);
-      }); });
+      var sansLieu = enStock.filter(function(k){ return !LOCS[k]; });
       if (sansLieu.length) {
         Assist.aller(4);
-        dire('Sélectionnez un emplacement d’entrepôt pour chaque variante — il manque : '
+        dire('Sélectionnez un emplacement d’entrepôt pour : '
           + sansLieu.slice(0, 3).join(', ')
           + (sansLieu.length > 3 ? '… (' + sansLieu.length + ' variantes)' : '') + '.', 'err');
         return;
@@ -2361,6 +2370,7 @@ function pageProduit(id) {
         // yeux oblige à chercher ce qui manque.
         if (r && r.motif === 'tailles_couleurs_requises') Assist.aller(1);
         if (r && r.motif === 'photo_requise') Assist.aller(2);
+        if (r && r.motif === 'stock_requis') Assist.aller(4);
         if (r && r.motif === 'emplacement_requis') {
           Assist.aller(4);
           dire('Sélectionnez un emplacement d’entrepôt pour : '
