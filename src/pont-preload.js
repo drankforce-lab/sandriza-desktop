@@ -42,11 +42,27 @@ contextBridge.exposeInMainWorld('szPont', {
   // n'est pas d'être rapide, c'est de finir par répondre.
   appeler: (op, ...args) => {
     let fini = false;
-    const attente = ipcRenderer.invoke('pont:appeler', String(op || ''), args)
+    const nom = String(op || '');
+    const attente = ipcRenderer.invoke('pont:appeler', nom, args)
       .then((r) => { fini = true; return r; })
       .catch(() => { fini = true; return { ok: false, motif: 'pont_indisponible' }; });
+    // ⚠ L'ENREGISTREMENT D'UN PRODUIT DEPOSE SES PHOTOS DANS LE STOCKAGE : sur
+    // une connexion de boutique, 25 s ne suffisent pas toujours. Le plafond
+    // sonnait, la fenetre affichait << n'a pas repondu a temps >>... et la fiche
+    // s'enregistrait quand meme derriere — une invitation au doublon
+    // (2026-08-08). 90 s pour cette operation-la, 25 s pour tout le reste :
+    // l'important n'est pas d'etre rapide, c'est de finir par repondre VRAI.
+    // Liste JUMELLE de LIMITES_PONT (main.js) : ici +5 s, pour que le
+    // principal reponde toujours en premier et que son verdict arrive entier.
+    const LONGUES = { 'produit:enregistrer': 90000,
+      'commande:etiquette': 60000, 'expedition:etiquette': 60000,
+      'remboursement:ecrire': 45000, 'commandes:supprimerEcrire': 45000,
+      'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,
+      'produit:detourer': 30000, 'stock:etiquettes': 30000,
+      'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000 };
+    const limite = (LONGUES[nom] || 20000) + 5000;
     const plafond = new Promise((resoudre) => {
-      setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, 25000);
+      setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, limite);
     });
     return Promise.race([attente, plafond]);
   },

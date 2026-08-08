@@ -1955,6 +1955,29 @@ function pageProduit(id) {
 
   function enregistrer(){
     if (!Assist.toutValide()) return;
+    if (!tailles().length || !couleurs().length) {
+      Assist.aller(1);
+      dire('Choisissez au moins une taille ET une couleur avant d’enregistrer.', 'err');
+      return;
+    }
+    if (!IMAGE) {
+      Assist.aller(2);
+      dire('La photo principale est obligatoire.', 'err');
+      return;
+    }
+    if (CTX && (CTX.entrepots || []).length) {
+      var sansLieu = [];
+      Object.keys(STOCK).forEach(function(k){
+        if ((STOCK[k] || 0) > 0 && !LOCS[k]) sansLieu.push(k);
+      });
+      if (sansLieu.length) {
+        Assist.aller(4);
+        dire('Sélectionnez un emplacement d’entrepôt pour : '
+          + sansLieu.slice(0, 3).join(', ')
+          + (sansLieu.length > 3 ? '… (' + sansLieu.length + ' variantes)' : '') + '.', 'err');
+        return;
+      }
+    }
     // On regarde AVANT d envoyer : le refus doit arriver pendant qu on a encore
     // le formulaire sous les yeux.
     var pr = argentNombre(val('p-prix')) || 0;
@@ -2005,7 +2028,19 @@ function pageProduit(id) {
       })(),
       stock: stock, stockLoc: locs
     }).then(function(r){
-      if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
+      if (!r || !r.ok) {
+        bEnr.disabled = false;
+        if (r && r.motif === 'delai') {
+          // ⚠ Le plafond du pont a sonne mais le SITE continue le depot de la
+          // photo : la fiche est souvent enregistree quand meme. Recommencer
+          // tout de suite fabriquerait un DOUBLON.
+          dire('L’enregistrement prend du temps (dépôt de la photo) et se poursuit '
+            + 'peut-être — vérifiez la liste des produits avant de recommencer.', 'att');
+          return;
+        }
+        dire(expliquer(r), 'err');
+        return;
+      }
       // ⚠ LE BROUILLON SE JETTE SEULEMENT MAINTENANT, et l'autosauvegarde s'arrête
       // AVANT : sans cela, un dernier tic le réécrirait juste après l'avoir jeté,
       // et la prochaine ouverture proposerait de reprendre une fiche déjà créée.

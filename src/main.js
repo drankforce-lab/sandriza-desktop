@@ -1157,6 +1157,20 @@ ipcMain.handle('fenetre:client', (e, id) => {
   return true;
 });
 
+const LIMITES_PONT = {
+  // Depot des photos dans le stockage : le plus long de tous.
+  'produit:enregistrer': 90000,
+  // Etiquettes demandees a un transporteur (Postes Canada, FedEx).
+  'commande:etiquette': 60000, 'expedition:etiquette': 60000,
+  // De l'argent chez Square : un remboursement lent n'est pas un remboursement
+  // rate — le couper a 8 s en ferait un << echec >> qui a pourtant paye.
+  'remboursement:ecrire': 45000, 'commandes:supprimerEcrire': 45000,
+  'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,
+  // Detourage, impressions et rapports.
+  'produit:detourer': 30000, 'stock:etiquettes': 30000,
+  'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
+};
+
 ipcMain.handle('pont:appeler', async (e, op, args) => {
   const nom = String(op || '');
   if (!OPS_PONT.has(nom)) return { ok: false, motif: 'operation_inconnue' };
@@ -1176,13 +1190,19 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
   // Vécu le 2026-08-07 : la fenêtre Imprimantes restait sur « Lecture de l'état… »
   // indéfiniment. J'avais posé un plafond dans le préchargement, mais le vrai
   // blocage est ici — et un garde placé du mauvais côté ne garde rien.
-  // 8 secondes : au-delà, plus aucune opération de ce pont n'a de raison d'être
-  // encore en cours, et mieux vaut un refus explicite qu'une attente muette.
+  // ⚠ LE PLAFOND EST PAR OPERATION (2026-08-08). Le << 8 s : au-dela, plus
+  // aucune operation n'a de raison d'etre en cours >> etait devenu FAUX :
+  // l'enregistrement d'un produit depose ses photos dans le stockage, une
+  // etiquette attend le transporteur, un remboursement attend Square. Le
+  // plafond sonnait << delai >> pendant que l'operation REUSSISSAIT derriere —
+  // et la personne recommencait, fabriquant un doublon. 8 s reste le defaut ;
+  // les operations legitimement longues ont leur limite (liste jumelle dans
+  // pont-preload.js, qui laisse 5 s de plus a celui-ci pour repondre).
   try {
     let fini = false;
     const travail = wc.executeJavaScript(code, true).then((r) => { fini = true; return r; });
     const plafond = new Promise((resoudre) => {
-      setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, 8000);
+      setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, LIMITES_PONT[nom] || 8000);
     });
     const r = await Promise.race([travail, plafond]);
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
