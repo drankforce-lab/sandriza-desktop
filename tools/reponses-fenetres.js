@@ -513,6 +513,48 @@ module.exports = {
     },
   ],
 
+  // ── AVIS PRODUITS ──────────────────────────────────────────────────────────
+  'avis.js': [
+    {
+      // ⚠ FORME REELLE d avis:liste (Admin._avisLigne) et avis:lire.
+      nom: 'file de moderation',
+      id: '',
+      reponses: {
+        'avis:liste': {
+          ok: true, onglet: 'pending',
+          comptes: { attente: 2, traites: 5, masques: 1, publies: 4, moyenne: 4.25 },
+          lignes: [
+            { id: 'rev_1', statut: 'pending', note: 5, produit: 'Robe Élégance mi-longue',
+              client: 'Josée Lafleur', verifie: true, date: '2026-08-08' },
+            { id: 'rev_2', statut: 'pending', note: 2, produit: 'Manteau d’hiver Aurore',
+              client: 'Marc Dubé', verifie: false, date: '2026-08-07' },
+          ],
+          total: 2, pages: 1, page: 0,
+        },
+        'avis:lire': {
+          ok: true, id: 'rev_1', statut: 'pending', note: 5, produit: 'Robe Élégance mi-longue',
+          client: 'Josée Lafleur', verifie: true, date: '2026-08-08',
+          titre: 'Superbe qualité', texte: 'La robe tombe parfaitement, la couleur est fidèle aux photos.',
+          reponse: '', reponduLe: '', approuveLe: '', commande: 'CMD-0002-22010',
+          taille: 'M', langue: 'Français', photos: 1,
+        },
+        'avis:approuver': { ok: true, statut: 'published' },
+        'avis:masquer': { ok: true, statut: 'hidden' },
+        'avis:repondre': { ok: true },
+        'avis:supprimer': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans avis',
+      id: '',
+      reponses: {
+        'avis:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── RAMASSAGES ET RAPPORT ──────────────────────────────────────────────────
   'ramassages.js': [
     {
