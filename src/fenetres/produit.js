@@ -202,6 +202,7 @@ function pageProduit(id) {
 <div class="tete"><span class="ic">🧵</span><h1 id="titre">Produit</h1>
   <span class="outils">
     <button type="button" id="btn-jrn" title="Modifications de cette fiche" style="display:none">🕘 <span class="n" id="jrn-n">0</span></button>
+    <button type="button" id="btn-apercu" title="Aperçu boutique — dessiné par le site, avec ses vraies fonctions">👁 Aperçu</button>
     <button type="button" id="btn-fs" title="Plein écran">⛶</button>
   </span>
   <span class="sous" id="sous"></span></div>
@@ -1225,8 +1226,62 @@ function pageProduit(id) {
   // ══ PLEIN ÉCRAN ═══════════════════════════════════════════════════════════
   // ⚠ LE SITE SE MET À JOUR SEUL, LA COQUILLE NON. Une coquille antérieure à
   // 1.19.0 n'expose pas pleinEcran : le bouton se retire plutôt que de rester
+  /* ── APERCU BOUTIQUE ── Le SITE dessine (produit:apercu → Shop.renderProductCard
+     et la vue page produit de _pfApercuHtml, avec ses regles vivantes) ; ici on
+     ne fait que poser le document sur fond clair. Deux onglets, comme l editeur
+     du site. La saisie part TELLE QUELLE : l apercu montre ce qu on est en
+     train d ecrire, pas la fiche enregistree. */
+  var APERCU_ONGLET = 'card';
+  function saisieApercu(){
+    return {
+      name: val('p-nom').trim(), category: val('p-cat'),
+      price: argentNombre(val('p-prix')) || 0, salePrice: argentNombre(val('p-solde')) || null,
+      description: val('p-desc'), brand: val('p-marque'), tag: val('p-etiq'),
+      active: coché('p-actif'), image: IMAGE || null,
+      sizes: tailles(), colors: couleurs()
+    };
+  }
+  function ouvrirApercu(){
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite" style="max-width:36rem">'
+      + '<h3>👁 Aperçu boutique</h3>'
+      + '<div style="display:flex;gap:.4rem;margin:.45rem 0 .6rem">'
+      + '<button type="button" id="ap-card">Grille boutique</button>'
+      + '<button type="button" id="ap-detail">Page produit</button></div>'
+      + '<div id="ap-zone" style="background:#f6f4ef;border-radius:10px;padding:.85rem;'
+      + 'color:#1a1a1a;max-height:62vh;overflow-y:auto"></div>'
+      + '<div class="pied2"><button type="button" id="ap-non">Fermer</button></div></div>';
+    document.body.appendChild(v);
+    function peindre(){
+      var c = document.getElementById('ap-card'), d = document.getElementById('ap-detail');
+      if (c) c.className = APERCU_ONGLET === 'card' ? 'prim' : '';
+      if (d) d.className = APERCU_ONGLET === 'detail' ? 'prim' : '';
+    }
+    function chargerApercu(){
+      var z = document.getElementById('ap-zone');
+      if (z) z.innerHTML = '<div style="padding:2rem;text-align:center;color:#6b7280">Chargement…</div>';
+      P.appeler('produit:apercu', saisieApercu(), APERCU_ONGLET).then(function(r){
+        var z2 = document.getElementById('ap-zone');
+        if (!z2) return;
+        if (!r || !r.ok) {
+          z2.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#b91c1c">' + esc(expliquer(r)) + '</div>';
+          return;
+        }
+        z2.innerHTML = '<style>' + (r.css || '') + '</style>' + (r.html || '');
+      });
+    }
+    document.getElementById('ap-card').onclick = function(){ APERCU_ONGLET = 'card'; peindre(); chargerApercu(); };
+    document.getElementById('ap-detail').onclick = function(){ APERCU_ONGLET = 'detail'; peindre(); chargerApercu(); };
+    document.getElementById('ap-non').onclick = function(){ v.remove(); };
+    peindre();
+    chargerApercu();
+  }
+
   // là sans rien faire. Un bouton mort est un défaut qu'on ne peut pas diagnostiquer.
   function brancherPleinEcran(){
+    var ba = document.getElementById('btn-apercu');
+    if (ba) ba.onclick = ouvrirApercu;
     var b = document.getElementById('btn-fs');
     if (!b) return;
     if (!P || !P.pleinEcran) { b.style.display = 'none'; return; }

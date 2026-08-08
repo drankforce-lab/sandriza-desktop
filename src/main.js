@@ -1009,7 +1009,7 @@ const OPS_PONT = new Set([
   'commandes:supprimerApercu', 'commandes:supprimerEcrire',
   'commandes:fraisApercu', 'commandes:fraisEcrire',
   'commandes:rembourser', 'commandes:facture', 'commandes:ouvrirDetail',
-  'facture:lire', 'facture:imprimer',
+  'facture:lire', 'facture:imprimer', 'produit:apercu',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
