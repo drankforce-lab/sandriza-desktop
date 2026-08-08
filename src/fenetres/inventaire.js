@@ -196,6 +196,15 @@ td.e select{min-width:8rem}
 .tuile.att{border-color:rgba(245,158,11,.5)}
 .tuile.err{border-color:rgba(239,68,68,.5)}
 .val.att{color:#fbbf24}.val.err{color:#f87171}.val.bon{color:#4ade80}
+/* Une tuile qui FILTRE se reconnait au survol — et au clavier de la souris
+   seulement : pas de :hover-only pour l information, juste pour l affordance. */
+.tuile.cliq{cursor:pointer;user-select:none}
+.tuile.cliq:hover{border-color:#c9a97e}
+/* La ligne entiere ouvre la fiche (demande le 2026-08-08) : la selection de
+   texte avalerait le clic (le bug connu des controles cliquables), donc
+   user-select:none sur la ligne — les codes se copient depuis la fiche. */
+tbody tr[data-ligne]{cursor:pointer;user-select:none}
+tbody tr[data-ligne]:hover td{background:rgba(255,255,255,.045)}
 
 /* Pastilles d etat, badges et puce de categorie */
 .pill{display:inline-block;font-size:.65rem;padding:.05rem .5rem;
@@ -744,8 +753,13 @@ ${JS_ACTIVITE}
   }
 
   // ══ ONGLET PRODUITS ═══════════════════════════════════════════════════════
-  function tuile(libelle, valeur, sousTitre, ton){
-    return '<div class="tuile' + (ton ? ' ' + ton : '') + '">'
+  // « geste » : la tuile devient cliquable et pose ce filtre (ou ouvre cet
+  // onglet). Les compteurs qui invitent a agir doivent mener a la liste qu ils
+  // comptent — lire << 3 en rupture >> et devoir chercher ou les voir est le
+  // genre de detour qu on ne fait qu une fois.
+  function tuile(libelle, valeur, sousTitre, ton, geste){
+    return '<div class="tuile' + (ton ? ' ' + ton : '') + (geste ? ' cliq" data-tuile="' + geste : '')
+      + '"' + (geste ? ' title="Cliquer pour voir la liste"' : '') + '>'
       + '<div class="lbl">' + libelle + '</div>'
       + '<div class="val' + (ton ? ' ' + ton : '') + '">' + valeur + '</div>'
       + '<div class="sub">' + sousTitre + '</div></div>';
@@ -772,10 +786,12 @@ ${JS_ACTIVITE}
       + tuile('Sans code SKU', st.sansSku,
           st.sansSku > 0 ? 'non disponibles à l’achat' : 'tous assignés ✓',
           st.sansSku > 0 ? 'att' : 'bon')
-      + tuile('En rupture', st.rupture, 'inventaire = 0', st.rupture > 0 ? 'err' : 'bon')
+      + tuile('En rupture', st.rupture, 'inventaire = 0', st.rupture > 0 ? 'err' : 'bon',
+          st.rupture > 0 ? 'rupture' : '')
       + tuile('À réapprovisionner', st.aCommander,
           st.aCommander ? 'voir l’onglet Réapprovisionnement' : 'tout est au-dessus du seuil ✓',
-          st.aCommander ? 'att' : 'bon')
+          st.aCommander ? 'att' : 'bon',
+          st.aCommander > 0 ? 'reappro' : '')
       + tuile('Unités en inventaire', st.unites, 'toutes variantes', '')
       + '</div>';
 
@@ -813,6 +829,7 @@ ${JS_ACTIVITE}
       + '<input type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom produit…" value="' + esc(FP.q) + '">'
       + '<select id="fp-etat">'
       + '<option value="">📦 Tout l’inventaire</option>'
+      + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '>🔴 En rupture</option>'
       + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '>⚠ À commander</option>'
       + '<option value="ok"' + (FP.etat === 'ok' ? ' selected' : '') + '>✓ Seuil non atteint</option>'
       + '</select>'
@@ -831,7 +848,10 @@ ${JS_ACTIVITE}
         + '<th>Inventaire</th><th class="c">Actions</th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
-        h += '<tr>'
+        // La ligne entiere est cliquable : elle ouvre la fiche (ou coche, en
+        // mode lot). Les boutons de la colonne Actions restent prioritaires.
+        h += '<tr data-ligne="' + esc(l.id) + '" title="'
+          + (LOT ? 'Cliquer pour sélectionner' : 'Cliquer pour modifier la fiche produit') + '">'
           + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(l.id) + '"'
               + (COCHES[l.id] ? ' checked' : '') + '></td>' : '')
           + '<td>' + (l.sku ? '<span class="code">' + esc(l.sku) + '</span>'
@@ -975,6 +995,18 @@ ${JS_ACTIVITE}
       if (!t || !t.closest) return;
       if (t.closest('[data-menu-cats]')) { FP.menu = !FP.menu; dessiner(); return; }
       if (t.closest('[data-vider-cats]')) { FP.cats = []; FP.page = 0; FP.menu = false; chargerOnglet(); return; }
+      // Les tuiles-compteurs menent a leur liste : « En rupture » pose le
+      // filtre, « À réapprovisionner » ouvre son onglet (demande 2026-08-08).
+      var tu = t.closest('[data-tuile]');
+      if (tu) {
+        var geste = tu.getAttribute('data-tuile');
+        if (geste === 'rupture') { FP.etat = 'rupture'; FP.page = 0; chargerOnglet(); return; }
+        if (geste === 'reappro') {
+          LOT = false; COCHES = {}; ONGLET = 'reappro'; VUE = 'reappro';
+          dire(''); dessiner(); chargerOnglet();
+        }
+        return;
+      }
       var cat = t.getAttribute && t.getAttribute('data-cat');
       if (cat) {
         var k = FP.cats.indexOf(cat);
@@ -983,7 +1015,28 @@ ${JS_ACTIVITE}
         return;
       }
       var b = t.closest('button');
-      if (!b) return;
+      if (!b) {
+        // ⚠ Le clic sur la LIGNE, en dernier : apres les boutons et jamais sur
+        // un champ — la case a cocher a deja bascule par onchange, la rejouer
+        // ici l annulerait aussitot.
+        if (t.closest('input') || t.closest('select') || t.closest('label')) return;
+        var tr = t.closest('tr[data-ligne]');
+        if (!tr) return;
+        var lid = tr.getAttribute('data-ligne');
+        if (LOT) {
+          if (COCHES[lid]) delete COCHES[lid]; else COCHES[lid] = true;
+          var cc = tr.querySelector('[data-coche]');
+          if (cc) cc.checked = !!COCHES[lid];
+          var lot = corps.querySelector('.lot span:nth-child(2)');
+          var nc = Object.keys(COCHES).length;
+          if (lot) lot.textContent = nc + ' produit' + (nc > 1 ? 's' : '') + ' sélectionné' + (nc > 1 ? 's' : '');
+          return;
+        }
+        // Le geste principal de la ligne : MODIFIER la fiche. En lecture seule
+        // on ouvre la grille d inventaire, qui sait se mettre en consultation.
+        if (PRODS && PRODS.peutEcrire) modifier(lid); else ouvrirProduit(lid);
+        return;
+      }
       if (b.id === 'fp-prec') { FP.page--; chargerOnglet(); return; }
       if (b.id === 'fp-suiv') { FP.page++; chargerOnglet(); return; }
       if (b.id === 'btn-lot') { LOT = true; COCHES = {}; dessiner(); return; }
