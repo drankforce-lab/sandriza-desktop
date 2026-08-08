@@ -1678,7 +1678,21 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
   };
   win.on('moved', retenir);
   win.on('resized', retenir);
-  win.on('closed', () => { fenetresNatives.delete(cle); });
+  win.on('closed', () => {
+    fenetresNatives.delete(cle);
+    /* ⚠ QUIRK WINDOWS (releve du 2026-08-09, fenetre A propos) : fermer une
+       fenetre pendant qu un ENFANT INVISIBLE de la principale existe (le
+       panneau du menu) peut REDUIRE la principale dans la barre des taches.
+       Si cette fermeture vient de la reduire, on la releve — jamais de vol
+       de focus sinon. */
+    setTimeout(() => {
+      try {
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isMinimized()) {
+          mainWindow.restore(); mainWindow.focus();
+        }
+      } catch {}
+    }, 80);
+  });
   brancherOutils(win);
   win.once('ready-to-show', () => win.show());
   win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
