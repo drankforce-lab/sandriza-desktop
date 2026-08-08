@@ -513,6 +513,36 @@ module.exports = {
     },
   ],
 
+  // ── NOTES DES MISES À JOUR ─────────────────────────────────────────────────
+  'notes.js': [
+    {
+      // ⚠ FORME REELLE de notes:lire (les entrees NOTES de pont.js, brutes).
+      nom: 'notes garnies',
+      id: '',
+      reponses: {
+        'notes:lire': {
+          ok: true, installee: '1.59.2', recentes: 12,
+          entrees: [
+            { v: '1.59.2', d: '2026-08-09', t: 'Les notes en fenêtre native',
+              r: 'La boîte du site était la dernière surface web de l’application.',
+              s: [{ h: 'Comment ça marche', p: ['Deux onglets, une entrée par version, dépliable.'] }] },
+            { v: '1.59.1', d: '2026-08-09', t: 'Planifier un ramassage dans la fenêtre',
+              r: 'Le formulaire s’ouvre dans la fenêtre native.', s: [] },
+          ],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'sans session',
+      id: '',
+      reponses: {
+        'notes:lire': { ok: false, motif: 'session' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── MESSAGERIE CLIENTS ─────────────────────────────────────────────────────
   'messagerie.js': [
     {

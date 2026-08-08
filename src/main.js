@@ -1041,6 +1041,8 @@ const OPS_PONT = new Set([
   // La messagerie clients (fenetre Messagerie) : liste (resynchronisee),
   // lecture, reponse (envoyee par courriel) et suppression.
   'messagerie:liste', 'messagerie:lire', 'messagerie:repondre', 'messagerie:supprimer',
+  // Les notes de version (fenetre Notes) : les entrees brutes du site.
+  'notes:lire',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -2106,6 +2108,7 @@ const { pageCodesbarres } = require('./fenetres/codesbarres');
 const { pageRamassages } = require('./fenetres/ramassages');
 const { pageAvis } = require('./fenetres/avis');
 const { pageMessagerie } = require('./fenetres/messagerie');
+const { pageNotes } = require('./fenetres/notes');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2191,6 +2194,16 @@ const actionApp = (nom) => {
         mainWindow.show(); mainWindow.focus();
         try { mainWindow.webContents.send('dock:naviguer', nom); } catch {}
         break;
+      }
+      break;
+    }
+    case 'notes': {
+      const _avN = fenetresNatives.get('notes');
+      const _reuN = !!(_avN && !_avN.isDestroyed());
+      const winN = ouvrirNative('notes', 'Notes des mises à jour', pageNotes(),
+        { width: 760, height: 680, minWidth: 560, minHeight: 460 });
+      if (_reuN && winN && !winN.isDestroyed()) {
+        winN.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
       }
       break;
     }
