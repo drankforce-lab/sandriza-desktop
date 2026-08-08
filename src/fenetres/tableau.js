@@ -5,9 +5,10 @@
  * =============================================================================
  * Le premier écran de la journée, en fenêtre de consultation : les tuiles
  * chiffrées (masquables par personne, comme l'écran du site), l'avis de taux
- * de change s'il y a lieu, et les commandes et factures récentes, trois par
- * page. AUCUNE écriture ici, sauf le réglage des tuiles (préférence par
- * personne, tableau:tuiles).
+ * de change s'il y a lieu, et les 10 dernières commandes et factures (la suite
+ * vit dans « Tout voir », qui ouvre la fenêtre native dans son état retenu).
+ * AUCUNE écriture ici, sauf le réglage des tuiles (préférence par personne,
+ * tableau:tuiles).
  *
  * ⚠ LE CALCUL VIT DANS LE SITE (Admin._tableauDonnees, sans DOM) : l'écran du
  * site et cette fenêtre consomment le MÊME cœur — dupliquer les sommes ici,
@@ -118,8 +119,7 @@ ${JS_ACTIVITE}
   var D = null;            // les donnees du site (tableau:lire)
   var ANNEE = 'all';
   var PANNEAU = false;     // le panneau << Tuiles >> est ouvert
-  var PAGE_CMD = 0, PAGE_FAC = 0;
-  var PAR_PAGE = 3;        // meme cadence que l ecran du site
+  var PAR_PAGE = 10;       // les 10 dernieres, d un bloc (demande du 2026-08-08)
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -184,10 +184,10 @@ ${JS_ACTIVITE}
     return '<span class="pill ' + ton + '">' + esc(libelle || statut) + '</span>';
   }
 
-  function tableRecent(titre, cibleTout, lignes, page, idPagi){
-    var pages = Math.max(1, Math.ceil(lignes.length / PAR_PAGE));
-    var p = Math.min(Math.max(0, page), pages - 1);
-    var vue = lignes.slice(p * PAR_PAGE, p * PAR_PAGE + PAR_PAGE);
+  function tableRecent(titre, cibleTout, lignes){
+    // Les 10 dernieres, d un bloc — la suite vit dans la fenetre native de la
+    // chose, ouverte par << Tout voir >> dans son etat retenu (ancre/detache).
+    var vue = lignes.slice(0, PAR_PAGE);
     var h = '<div class="carte"><h2>' + esc(titre)
       + '<button class="mini tout" data-ouvre="' + cibleTout + '">Tout voir →</button></h2>';
     if (!vue.length) {
@@ -202,13 +202,6 @@ ${JS_ACTIVITE}
               + '<td>' + pilule(r.statut, r.statutLibelle) + '</td></tr>';
           }).join('')
         + '</tbody></table>';
-      if (pages > 1) {
-        h += '<div class="pagi">'
-          + '<button class="mini" data-pagi="' + idPagi + '" data-dir="-1"' + (p <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>Page ' + (p + 1) + ' / ' + pages + '</span>'
-          + '<button class="mini" data-pagi="' + idPagi + '" data-dir="1"' + (p >= pages - 1 ? ' disabled' : '') + '>▶</button>'
-          + '</div>';
-      }
     }
     return h + '</div>';
   }
@@ -283,8 +276,8 @@ ${JS_ACTIVITE}
       + '</div>';
 
     h += '<div class="deux">'
-      + tableRecent('Commandes récentes', 'orders', D.recentesCommandes || [], PAGE_CMD, 'cmd')
-      + tableRecent('Factures récentes', 'billing', D.recentesFactures || [], PAGE_FAC, 'fac')
+      + tableRecent('Commandes récentes', 'orders', D.recentesCommandes || [])
+      + tableRecent('Factures récentes', 'billing', D.recentesFactures || [])
       + '</div>';
 
     corps.innerHTML = h;
@@ -294,14 +287,6 @@ ${JS_ACTIVITE}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
-    var pg = t.closest('[data-pagi]');
-    if (pg && !pg.disabled) {
-      var dir = parseInt(pg.getAttribute('data-dir'), 10) || 0;
-      if (pg.getAttribute('data-pagi') === 'cmd') PAGE_CMD = Math.max(0, PAGE_CMD + dir);
-      else PAGE_FAC = Math.max(0, PAGE_FAC + dir);
-      dessiner();
-      return;
-    }
     var ou = t.closest('[data-ouvre]');
     if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
     if (t.closest('#tb-tuiles')) { PANNEAU = !PANNEAU; dessiner(); return; }
@@ -316,7 +301,7 @@ ${JS_ACTIVITE}
   corps.onchange = function(ev){
     var t = ev.target;
     if (!t) return;
-    if (t.id === 'tb-annee') { ANNEE = t.value; PAGE_CMD = 0; PAGE_FAC = 0; charger(); return; }
+    if (t.id === 'tb-annee') { ANNEE = t.value; charger(); return; }
     var k = t.getAttribute && t.getAttribute('data-cfg');
     if (k) {
       var cfg = (D && D.cfgTuiles) || {};
@@ -364,18 +349,26 @@ ${JS_ACTIVITE}
     var t = document.querySelector('.tete');
     if (!t) return;
     var b = document.getElementById('sz-detacher');
-    if (!actif) { if (b) b.remove(); return; }
-    if (b) return;
-    b = document.createElement('button');
-    b.id = 'sz-detacher';
-    b.type = 'button';
-    b.textContent = '\u29c9 D\u00e9tacher';
-    b.title = 'Ouvrir cet \u00e9cran dans sa propre fen\u00eatre';
-    b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-      + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-      + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
-    b.onclick = function(){ if (P && P.detacher) P.detacher(); };
-    t.appendChild(b);
+    if (!b) {
+      b = document.createElement('button');
+      b.id = 'sz-detacher';
+      b.type = 'button';
+      b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
+        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+      t.appendChild(b);
+    }
+    // Le meme bouton dit l inverse selon le mode : detacher la vue ancree,
+    // ou RAMENER la vue detachee dans la fenetre principale (etat retenu).
+    if (actif) {
+      b.textContent = '\u29c9 D\u00e9tacher';
+      b.title = 'Ouvrir cet \u00e9cran dans sa propre fen\u00eatre';
+      b.onclick = function(){ if (P && P.detacher) P.detacher(); };
+    } else {
+      b.textContent = '\u2693 Ancrer';
+      b.title = 'Ramener cet \u00e9cran dans la fen\u00eatre principale';
+      b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
+    }
   };
 
 

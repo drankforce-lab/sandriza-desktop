@@ -1012,7 +1012,11 @@ const OPS_PONT = new Set([
   'commandes:supprimerApercu', 'commandes:supprimerEcrire',
   'commandes:fraisApercu', 'commandes:fraisEcrire',
   'commandes:rembourser', 'commandes:facture', 'commandes:ouvrirDetail',
-  'facture:lire', 'facture:imprimer', 'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
+  'facture:lire', 'facture:imprimer',
+  // La LISTE des factures (fenetre Factures) et l ouverture d une facture
+  // depuis cette liste (fenetre Facture existante, une par facture).
+  'factures:liste', 'factures:ouvrir',
+  'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
   'tableau:lire', 'tableau:tuiles', 'tableau:ouvrir',
@@ -1138,6 +1142,19 @@ ipcMain.handle('fenetre:facture', (e, id) => {
   return true;
 });
 
+// La LISTE des factures — ouverte par << Tout voir >> du tableau de bord ou
+// par le menu. Reutilisee, elle RELIT (szRevenir) : une facture a pu se payer.
+ipcMain.handle('fenetre:factures', () => {
+  const _avant = fenetresNatives.get('factures');
+  const _reutilisee = !!(_avant && !_avant.isDestroyed());
+  const win = ouvrirNative('factures', 'Factures', pageFactures(''),
+    { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
+  if (_reutilisee && win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
+  return true;
+});
+
 ipcMain.handle('fenetre:commandeDetail', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
@@ -1257,8 +1274,10 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
     const r = await Promise.race([travail, plafond]);
     if (r && r.ok) {
       const fenetres = [];
-      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau');
-      else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau');
+      // La fenetre Factures suit les memes ecritures que le tableau : une
+      // vente, un remboursement ou un statut de commande la font bouger aussi.
+      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures');
+      else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau', 'factures');
       if (fenetres.length) actualiserFenetres(fenetres, e.sender);
     }
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
@@ -1300,7 +1319,46 @@ let zoneAncrage = null;      // { x, y, largeur, hauteur } en px CSS de la page
 const PAGES_ANCRABLES = () => ({
   tableau: ['Tableau de bord', () => pageTableau()],
   inventaire: ['Inventaire', () => pageInventaire('')],
+  commandes: ['Commandes', () => pageCommandes('commandes')],
 });
+// L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
+// << tu charges la fenetre native appropriee dans son etat enregistre, soit
+// ancre ou detache >>). Par POSTE (reglages.json), comme la place du menu :
+// l ecran du comptoir n est pas celui du bureau.
+const etatAncrage = (cle) => ((reglages.get('ancrage') || {})[cle] === 'detache' ? 'detache' : 'ancre');
+const etatAncragePoser = (cle, etat) => {
+  const tout = { ...(reglages.get('ancrage') || {}) };
+  if (tout[cle] === etat) return;
+  tout[cle] = etat;
+  reglages.set('ancrage', tout);
+};
+// Emporte la vue dans sa propre BaseWindow (detachement, ou reouverture d un
+// ecran laisse detache). La vue VOYAGE — jamais rechargee, l etat suit.
+const poserEnFenetre = (c, a) => {
+  const defs = PAGES_ANCRABLES();
+  const win = new BaseWindow({
+    width: 1080, height: 780, minWidth: 760, minHeight: 520,
+    title: (defs[c] || [''])[0], autoHideMenuBar: true, backgroundColor: '#0e1522',
+  });
+  win.contentView.addChildView(a.view);
+  const poser = () => {
+    try { const [w, h] = win.getContentSize(); a.view.setBounds({ x: 0, y: 0, width: w, height: h }); } catch {}
+  };
+  win.on('resize', poser);
+  poser();
+  try { a.view.setVisible(true); } catch {}
+  a.fenetre = win;
+  win.on('closed', () => {
+    // Vue REPRISE par << Ancrer >> juste avant la fermeture : elle vit toujours.
+    if (a.reancre) { a.reancre = false; return; }
+    // Fenetre detachee fermee : la vue meurt avec elle — la barre laterale
+    // en recree une fraiche au prochain clic.
+    try { a.view.webContents.close(); } catch {}
+    ancrees.delete(c);
+  });
+  a.view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(false);', true).catch(() => {});
+  return win;
+};
 const boundsAncrage = () => {
   if (!zoneAncrage || !mainWindow || mainWindow.isDestroyed()) return null;
   const f = mainWindow.webContents.getZoomFactor() || 1;
@@ -1352,11 +1410,21 @@ ipcMain.handle('dock:ouvrir', (e, cle) => {
     ancrees.set(c, a);
     view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(defs[c][1]()));
     view.webContents.on('did-finish-load', () => {
-      view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
+      // `a.fenetre` est lu AU MOMENT du chargement : la vue a pu etre ouverte
+      // directement detachee (etat enregistre) — le bouton doit dire Ancrer.
+      view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(' + (a.fenetre ? 'false' : 'true') + ');', true).catch(() => {});
     });
   } else {
     // Vue conservee cachee : elle RELIT ses donnees en revenant.
     a.view.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
+  if (etatAncrage(c) === 'detache') {
+    // L ecran a ete LAISSE detache : on le rouvre tel quel. Le site montre
+    // l ecriteau << detache >> dans la zone (dock:detachee).
+    poserEnFenetre(c, a);
+    a.fenetre.show(); a.fenetre.focus();
+    try { mainWindow.webContents.send('dock:detachee', c); } catch {}
+    return { ok: true, detachee: true };
   }
   try { mainWindow.contentView.addChildView(a.view); } catch {}
   try { a.view.setVisible(true); } catch {}
@@ -1376,27 +1444,36 @@ ipcMain.handle('dock:detacher', (e) => {
   for (const [c, a] of ancrees) {
     if (!a.view || a.view.webContents !== e.sender || a.fenetre) continue;
     try { mainWindow.contentView.removeChildView(a.view); } catch {}
-    const defs = PAGES_ANCRABLES();
-    const win = new BaseWindow({
-      width: 1080, height: 780, minWidth: 760, minHeight: 520,
-      title: (defs[c] || [''])[0], autoHideMenuBar: true, backgroundColor: '#0e1522',
-    });
-    win.contentView.addChildView(a.view);
-    const poser = () => {
-      try { const [w, h] = win.getContentSize(); a.view.setBounds({ x: 0, y: 0, width: w, height: h }); } catch {}
-    };
-    win.on('resize', poser);
-    poser();
-    try { a.view.setVisible(true); } catch {}
-    a.fenetre = win;
-    win.on('closed', () => {
-      // Fenetre detachee fermee : la vue meurt avec elle — la barre laterale
-      // en recree une fraiche au prochain clic.
-      try { a.view.webContents.close(); } catch {}
-      ancrees.delete(c);
-    });
-    a.view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(false);', true).catch(() => {});
+    poserEnFenetre(c, a);
+    etatAncragePoser(c, 'detache');   // l ecran rouvrira DETACHE desormais
     try { mainWindow.webContents.send('dock:detachee', c); } catch {}
+    return true;
+  }
+  return false;
+});
+// << Ancrer >> — demande par la VUE detachee : elle REVIENT dans la fenetre
+// principale (jamais rechargee, l etat voyage), et l etat retenu redevient
+// << ancre >>. Le site est prevenu (dock:ancree) pour naviguer vers la section
+// hote — la zone d ancrage n existe que la.
+ipcMain.handle('dock:ancrer', (e) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return false;
+  for (const [c, a] of ancrees) {
+    if (!a.view || a.view.webContents !== e.sender || !a.fenetre) continue;
+    const win = a.fenetre;
+    a.reancre = true;   // la fermeture de la fenetre ne doit PAS detruire la vue
+    try { win.contentView.removeChildView(a.view); } catch {}
+    a.fenetre = null;
+    try { win.close(); } catch {}
+    etatAncragePoser(c, 'ancre');
+    // Une seule vue ancree visible a la fois — comme dock:ouvrir.
+    ancrees.forEach((x, k) => { if (k !== c && !x.fenetre && x.view) { try { x.view.setVisible(false); } catch {} } });
+    try { mainWindow.contentView.addChildView(a.view); } catch {}
+    try { a.view.setVisible(true); } catch {}
+    const b = boundsAncrage();
+    if (b) { try { a.view.setBounds(b); } catch {} }
+    a.view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
+    mainWindow.show(); mainWindow.focus();
+    try { mainWindow.webContents.send('dock:ancree', c); } catch {}
     return true;
   }
   return false;
@@ -1877,6 +1954,7 @@ const { pageFournisseur } = require('./fenetres/fournisseur');
 const { pageCollection } = require('./fenetres/collection');
 const { pageProduit } = require('./fenetres/produit');
 const { pageFacture } = require('./fenetres/facture');
+const { pageFactures } = require('./fenetres/factures');
 const { pageCommande } = require('./fenetres/commande');
 const { pageAffichage } = require('./fenetres/affichage');
 const { pageCaisse } = require('./fenetres/caisse');
@@ -1972,10 +2050,26 @@ const actionApp = (nom) => {
     /* Les deux listes. ⚠ DEUX CLES DISTINCTES : ce sont deux fenetres, qu on garde
        ouvertes cote a cote — les commandes a preparer d un cote, les colis partis
        de l autre. Une seule cle les ferait se remplacer l une l autre. */
-    case 'commandes':
+    case 'commandes': {
+      // L ecran peut deja vivre ANCRE ou DETACHE (barre laterale) : on le
+      // ramene plutot que d empiler une deuxieme liste — meme garde que tableau.
+      const _aC = ancrees.get('commandes');
+      if (_aC && _aC.fenetre && !_aC.fenetre.isDestroyed()) { _aC.fenetre.show(); _aC.fenetre.focus(); break; }
+      if (_aC && _aC.view && !_aC.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
       ouvrirNative('commandes', 'Commandes', pageCommandes('commandes'),
         { width: 1060, height: 720, minWidth: 860, minHeight: 500 });
       break;
+    }
+    case 'factures': {
+      const _avF = fenetresNatives.get('factures');
+      const _reuF = !!(_avF && !_avF.isDestroyed());
+      const winF = ouvrirNative('factures', 'Factures', pageFactures(''),
+        { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
+      if (_reuF && winF && !winF.isDestroyed()) {
+        winF.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
     case 'expeditions':
       ouvrirNative('expeditions', 'Expéditions', pageCommandes('expeditions'),
         { width: 1060, height: 720, minWidth: 860, minHeight: 500 });

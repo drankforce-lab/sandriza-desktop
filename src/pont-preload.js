@@ -24,6 +24,9 @@ contextBridge.exposeInMainWorld('szPont', {
   // ANCRAGE : la page demande a etre emportee dans sa propre fenetre. Inerte
   // quand la page vit deja dans une fenetre (le principal l ignore alors).
   detacher: () => ipcRenderer.invoke('dock:detacher').catch(() => false),
+  // ANCRAGE : la vue detachee demande a REVENIR dans la fenetre principale.
+  // Inerte pour une page qui vit ancree ou dans une fenetre ordinaire.
+  ancrer: () => ipcRenderer.invoke('dock:ancrer').catch(() => false),
   // Rend toujours un objet : { ok:true, … } ou { ok:false, motif:'…' }.
   // ⚠ Jamais d'exception vers la page : une fenêtre qui plante sur un refus de
   // droit est plus difficile à comprendre qu'une fenêtre qui l'affiche.

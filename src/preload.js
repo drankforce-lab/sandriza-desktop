@@ -68,6 +68,9 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // juste dans sa zone de contenu.
   onDockFermee: (cb) => { ipcRenderer.on('dock:fermee', (e, cle) => { try { cb(cle); } catch {} }); },
   onDockDetachee: (cb) => { ipcRenderer.on('dock:detachee', (e, cle) => { try { cb(cle); } catch {} }); },
+  // La vue detachee a demande << Ancrer >> : le site navigue vers la section
+  // hote pour que la zone d ancrage existe sous la vue revenue.
+  onDockAncree: (cb) => { ipcRenderer.on('dock:ancree', (e, cle) => { try { cb(cle); } catch {} }); },
   // Prévenu quand un réglage change côté application (ex. « ancrer en haut »
   // cliqué depuis la fenêtre détachée) : sans ça, le site ne le verrait qu'au
   // prochain rechargement.
@@ -127,6 +130,7 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   ouvrirCommandeDetail: (id) => ipcRenderer.invoke('fenetre:commandeDetail', String(id || '')),
   // La facture dans sa propre fenetre (une par facture).
   ouvrirFacture: (id) => ipcRenderer.invoke('fenetre:facture', String(id || '')),
+  ouvrirFactures: () => ipcRenderer.invoke('fenetre:factures'),
   notify: (opts) => ipcRenderer.invoke('notify', opts || {}),
   // Pastille sur l'icône : on DESSINE le compteur ici (le monde isolé partage le
   // DOM, donc canvas dispo) et on envoie l'image au processus principal.

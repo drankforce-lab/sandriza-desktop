@@ -36,6 +36,9 @@ const DEFAUTS = {
   // collection, de fournisseur), retenues par TYPE. Elles reprennent ainsi leur
   // place d'une fois à l'autre, y compris sur un second écran.
   fenetres: {},
+  // Écrans ancrables : état retenu par écran, 'ancre' (défaut) ou 'detache' —
+  // « Tout voir » et la barre latérale rouvrent l'écran comme on l'a laissé.
+  ancrage: {},
 };
 
 let _cache = null;

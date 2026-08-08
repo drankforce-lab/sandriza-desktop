@@ -663,6 +663,34 @@ ${JS_ACTIVITE}
     if (VUE === 'detail' && DET_ID) rechargerDetail();
   };
 
+  /* ── MODE ANCRE ── La coquille appelle szModeAncre(true) quand cette page
+     vit DANS la fenetre principale (section Commandes de la barre laterale).
+     Le meme bouton dit l inverse selon le mode : detacher la vue ancree, ou
+     RAMENER la vue detachee dans la fenetre principale (etat retenu). */
+  window.szModeAncre = function(actif){
+    var t = document.querySelector('.tete');
+    if (!t) return;
+    var b = document.getElementById('sz-detacher');
+    if (!b) {
+      b = document.createElement('button');
+      b.id = 'sz-detacher';
+      b.type = 'button';
+      b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
+        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+      t.appendChild(b);
+    }
+    if (actif) {
+      b.textContent = '⧉ Détacher';
+      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.onclick = function(){ if (P && P.detacher) P.detacher(); };
+    } else {
+      b.textContent = '⚓ Ancrer';
+      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
+    }
+  };
+
   // ══ CHANGEMENT DE STATUT (selecteur du detail ET clic droit de la liste) ══
   // L apercu vient du site (implications, case courriels) ; << En livraison >>
   // n ecrit rien ici : il ouvre le flux d expedition, comme la fiche du site.
