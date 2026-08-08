@@ -991,8 +991,11 @@ module.exports = {
         },
         'commandes:liste': {
           ok: true, mode: 'commandes', total: 2, page: 0, pages: 1, parPage: 20,
+          // ⚠ Une ligne PRIORITAIRE et un compte non nul : sans eux, l'éclair et
+          // le compte du bouton « Prioritaires » ne seraient jamais dessinés.
+          prioritairesNonTraitees: 1,
           lignes: [
-            { id: 'ord_0011', numero: 'SZ-100211', date: '2026-08-06T15:20:00.000Z',
+            { id: 'ord_0011', numero: 'SZ-100211', prioritaire: true, date: '2026-08-06T15:20:00.000Z',
               client: 'Marie Tremblay', ville: 'Québec', total: 149.41, statut: 'preparing',
               transporteur: '', suivi: '', articles: 3,
               // ⚠ ÉTIQUETÉE MAIS PAS PARTIE : la ligne doit se teinter. C'est

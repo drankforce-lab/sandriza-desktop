@@ -82,6 +82,10 @@ button.traite{background:#78350f;color:#fde68a;border-color:#b45309;
 .jetons{display:flex;gap:.28rem;flex-wrap:wrap}
 .jetons button{font-size:.74rem;padding:.1rem .5rem;border-radius:99px}
 .jetons button.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:#e8dcc6}
+/* Prioritaires : l ambre du site, et un compte qui dit le RESTE-A-FAIRE. */
+.jetons button.prio{border-color:rgba(245,158,11,.55);color:#f0c987}
+.jetons button.prio.on{background:#f59e0b;border-color:#f59e0b;color:#1a1a2e;font-weight:700}
+.eclair{color:#f59e0b;margin-right:.2rem}
 
 /* La liste : la seule zone qui defile. */
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
@@ -218,9 +222,13 @@ ${JS_ACTIVITE}
   // ⚠ L ETAT DU FILTRE VIT ICI, HORS DE LA LISTE : elle est redessinee a chaque
   // frappe, et lire les champs au moment de paginer ne rendrait que l affichage.
   // Auto par defaut : autant de lignes que la hauteur reelle, jamais de glissiere.
-  var F = { q: '', statuts: [], annee: 'all', page: 0, parPage: 20, auto: true };
+  var F = { q: '', statuts: [], annee: 'all', prioritaires: false, page: 0, parPage: 20, auto: true };
   var enCours = false;
   var VUE = 'liste';        // 'liste' | 'detail'
+  // Ouverte par << mode@identifiant >>, la fenetre EST un detail : pas de
+  // << Liste >>, et fermer le detail ferme la fenetre (demande le 2026-08-07 :
+  // le detail s ouvre dans une fenetre native separee).
+  var SEUL = !!DET_DEPART;
   var DET = null, DET_ID = '';
   var VERROU_PRIS = false;  // le detail tient le verrou 'orders'
   var VERROU_PAR = '';      // tenu par quelqu un d autre -> lecture seule
@@ -318,7 +326,12 @@ ${JS_ACTIVITE}
           return '<button class="mini' + (F.statuts.indexOf(s.cle) >= 0 ? ' on' : '')
             + '" data-st="' + esc(s.cle) + '">' + esc(s.libelle) + '</button>'; }).join('')
       + (F.statuts.length ? '<button class="mini" data-vider="1">Tout afficher</button>' : '')
-      + '</span>';
+      + '</span>'
+      + '<button class="mini prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
+      + 'title="N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées">'
+      + '⚡ Prioritaires' + (d && d.prioritairesNonTraitees
+          ? ' · ' + d.prioritairesNonTraitees + ' non traitée' + (d.prioritairesNonTraitees > 1 ? 's' : '')
+          : '') + '</button>';
     if (expedition && CTX && (CTX.annees || []).length) {
       h += '<span class="lbl" style="margin-left:.4rem">Année :</span><select id="f-annee">'
         + '<option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>Toutes</option>'
@@ -331,7 +344,7 @@ ${JS_ACTIVITE}
 
     h += '<div class="carte plein">';
     if (!d || !d.lignes.length) {
-      h += '<div class="vide">' + (F.q || F.statuts.length || F.annee !== 'all'
+      h += '<div class="vide">' + (F.q || F.statuts.length || F.annee !== 'all' || F.prioritaires
         ? 'Aucune commande ne correspond à ces filtres.'
         : (expedition ? 'Aucune commande expédiée.' : 'Aucune commande en cours.')) + '</div>';
     } else {
@@ -346,7 +359,8 @@ ${JS_ACTIVITE}
         var attente = o.aUneEtiquette && o.statut !== 'shipped' && o.statut !== 'delivered';
         h += '<tr class="' + (attente ? 'attente' : '') + '" data-id="' + esc(o.id)
           + '" style="cursor:pointer" title="Clic : détails · clic droit : changer le statut">'
-          + '<td><span class="num">' + esc(o.numero) + '</span>'
+          + '<td>' + (o.prioritaire ? '<span class="eclair" title="Traitement prioritaire">⚡</span>' : '')
+          + '<span class="num">' + esc(o.numero) + '</span>'
           + (attente ? '<div class="det">étiquette prête</div>' : '') + '</td>'
           + '<td>' + esc(o.client) + (o.ville ? '<div class="det">' + esc(o.ville) + '</div>' : '') + '</td>'
           + '<td class="c det">' + esc(dateCourte(o.date)) + '</td>'
@@ -424,7 +438,7 @@ ${JS_ACTIVITE}
     var d = DET;
     if (!d) {
       corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
-      actions.innerHTML = '<button id="btn-retour">← Liste</button>';
+      actions.innerHTML = SEUL ? '' : '<button id="btn-retour">← Liste</button>';
       brancherDetail();
       return;
     }
@@ -527,7 +541,7 @@ ${JS_ACTIVITE}
     h += '</div></div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = '<button id="btn-retour">← Liste</button>'
+    actions.innerHTML = (SEUL ? '' : '<button id="btn-retour">← Liste</button>')
       + (d.droits.bon && !ro ? '<button id="det-bon">🖨 Bon de commande</button>' : '')
       + (c.aFacture ? '<button id="det-fact">🧾 Facture</button>' : '')
       + (d.droits.frais && !ro ? '<button id="det-frais">💰 Frais retenus (' + argent(rb.fraisRestants) + ')</button>' : '')
@@ -588,6 +602,10 @@ ${JS_ACTIVITE}
     appeler('commandes:detail', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); retourListe(); return; }
       DET = r;
+      if (SEUL) {
+        document.getElementById('titre').textContent = 'Commande ' + (r.commande.numero || '');
+        document.title = 'Commande ' + (r.commande.numero || '') + ' — Administration Sandriza';
+      }
       dessiner();
       prendreVerrou(id);
     });
@@ -625,11 +643,17 @@ ${JS_ACTIVITE}
   }
   function retourListe(){
     rendreVerrou();
+    if (SEUL) { P.fermer(); return; }
     VERROU_PAR = ''; DET = null; DET_ID = '';
     VUE = 'liste';
     sous.textContent = (CTX && CTX.peutEditer) ? '' : '👁 Lecture seule';
     charger(true);
   }
+
+  // Rouvrir la meme commande ramene cette fenetre : elle RELIT la fiche.
+  window.szRevenir = function(){
+    if (VUE === 'detail' && DET_ID) rechargerDetail();
+  };
 
   // ══ CHANGEMENT DE STATUT (selecteur du detail ET clic droit de la liste) ══
   // L apercu vient du site (implications, case courriels) ; << En livraison >>
@@ -849,6 +873,7 @@ ${JS_ACTIVITE}
         return;
       }
       if (t.closest('[data-vider]')) { F.statuts = []; F.page = 0; charger(); return; }
+      if (t.closest('[data-prio]')) { F.prioritaires = !F.prioritaires; F.page = 0; charger(); return; }
       var pr = t.closest('[data-prep]');
       if (pr) {
         ouvrir('commandes:preparer', pr.getAttribute('data-prep'), 'Préparation');
@@ -857,9 +882,13 @@ ${JS_ACTIVITE}
         setTimeout(function(){ charger(); }, 1200);
         return;
       }
-      // Le reste de la ligne ouvre le DETAIL.
+      // Le reste de la ligne ouvre le DETAIL — dans SA fenetre native.
       var tr = t.closest('tr[data-id]');
-      if (tr) ouvrirDetail(tr.getAttribute('data-id'));
+      if (tr) {
+        ouvrir('commandes:ouvrirDetail', tr.getAttribute('data-id'), 'Détail');
+        // Le detail prend le verrou : la ligne passe << En traitement >>.
+        setTimeout(function(){ charger(); }, 1200);
+      }
     };
     // Clic droit sur une ligne : changer le statut (jamais quand elle est tenue).
     corps.oncontextmenu = function(ev){

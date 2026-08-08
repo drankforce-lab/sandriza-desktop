@@ -1008,7 +1008,7 @@ const OPS_PONT = new Set([
   'commandes:detail', 'commandes:statutApercu', 'commandes:statutEcrire',
   'commandes:supprimerApercu', 'commandes:supprimerEcrire',
   'commandes:fraisApercu', 'commandes:fraisEcrire',
-  'commandes:rembourser', 'commandes:facture',
+  'commandes:rembourser', 'commandes:facture', 'commandes:ouvrirDetail',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -1110,6 +1110,22 @@ ipcMain.handle('fenetre:produit', (e, id) => {
     { width: 980, height: 860, minHeight: 520 });
   // Pas de szRevenir ici : l'assistant Produit ne sait pas encore se replacer.
   // Reutilisee, la fenetre revient simplement au premier plan.
+  return true;
+});
+
+ipcMain.handle('fenetre:commandeDetail', (e, id) => {
+  const brut = String(id || '');
+  if (!brut) return false;
+  // Une fenetre PAR commande : on compare deux details cote a cote, et rouvrir
+  // la meme ramene celle qui existe (szRevenir la fait relire).
+  const cle = 'cmd-detail-' + brut.replace(/[^\w-]/g, '');
+  const _avant = fenetresNatives.get(cle);
+  const _reutilisee = !!(_avant && !_avant.isDestroyed());
+  const win = ouvrirNative(cle, 'Détail de commande', pageCommandes('commandes@' + brut),
+    { width: 940, height: 780, minWidth: 720, minHeight: 540 });
+  if (_reutilisee && win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
   return true;
 });
 
