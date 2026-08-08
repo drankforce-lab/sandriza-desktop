@@ -219,10 +219,14 @@ ${css}
     sous.style.display='block';
     /* PARALLELE A SON PARENT (releve du 2026-08-09 : le sous-menu s ouvrait
        en haut de la colonne). Mesure ABSOLUE — rect du parent moins rect de
-       la rangee — plutot qu offsetTop, dont l origine depend de l arbre. */
+       la rangee — plutot qu offsetTop, dont l origine depend de l arbre.
+       ⚠ setProperty(..., 'important') : la neutralisation ci-dessus pose
+       margin:0!important sur .sz-panneau, et un !important de FEUILLE bat un
+       style inline ordinaire — la marge calculee ne prenait jamais. */
     var rp = parent.getBoundingClientRect();
     var rr = rangee.getBoundingClientRect();
-    sous.style.marginTop = Math.max(0, Math.round(rp.top - rr.top) - 3) + 'px';
+    sous.style.setProperty('margin-top', Math.max(0, Math.round(rp.top - rr.top) - 3) + 'px', 'important');
+    sous.style.setProperty('margin-left', '7px', 'important');
     mesurer();
   }
 
