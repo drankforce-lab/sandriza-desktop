@@ -41,11 +41,13 @@ body{background:#0e1522;color:#e8edf5;
 .corps::-webkit-scrollbar{width:9px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
 
-/* ⚠ LE PAPIER EST CLAIR, comme la facture reelle : le document du site est
-   concu pour un fond blanc (bandeaux d etat, tableau a en-tete noir). Le texte
-   sans style de classe retombe sur ce noir-ci, pas sur le texte de la fenetre. */
-.papier{max-width:860px;margin:0 auto;background:#fff;color:#1a1a1a;
-  border-radius:10px;box-shadow:0 16px 40px rgba(0,0,0,.5);padding:1rem}
+/* ⚠ LE PAPIER, C EST .invoice-doc DU SITE (fond blanc, bordure, marges) :
+   le doubler d un second cadre blanc donnait une << bande blanche >> vide
+   au-dessus de la facture (2026-08-08). Ici on ne fait que centrer, poser
+   l ombre et donner la couleur d encre de secours pour tout texte sans
+   classe — noir d imprimerie, pas le texte clair de la fenetre. */
+.papier{max-width:880px;margin:0 auto;color:#1a1a1a}
+.papier .invoice-doc{box-shadow:0 16px 40px rgba(0,0,0,.5);margin:0 auto}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
