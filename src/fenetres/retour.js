@@ -26,7 +26,7 @@
  * menu entière.
  */
 
-const { JS_ACTIVITE } = require('./socle.js');
+const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -132,7 +132,7 @@ function pageRetour(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Demande de retour — Administration Sandriza</title>
-<style>${CSS}</style></head><body>
+<style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">↩️</span><h1 id="titre">Demande de retour</h1>
   <span class="pill" id="pill" style="display:none"></span>
   <span class="sous" id="sous"></span></div>

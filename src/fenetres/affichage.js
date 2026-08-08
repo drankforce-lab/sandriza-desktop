@@ -32,7 +32,7 @@
  * (tools/verifier-fenetres.js) le vérifie avant chaque publication.
  */
 
-const { JS_ACTIVITE } = require('./socle.js');
+const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -88,7 +88,7 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 function pageAffichage() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Affichage client</title>
-<style>${CSS}</style></head><body>
+<style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete" id="tete"><div class="nom">SANDRIZA</div>
   <div class="sous">Votre commande</div></div>
 <div class="corps" id="corps"></div>

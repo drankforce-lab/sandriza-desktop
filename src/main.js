@@ -1486,6 +1486,7 @@ ipcMain.handle('dock:ouvrir', (e, cle, etat) => {
       // `a.fenetre` est lu AU MOMENT du chargement : la vue a pu etre ouverte
       // directement detachee (etat enregistre) — le bouton doit dire Ancrer.
       view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(' + (a.fenetre ? 'false' : 'true') + ');', true).catch(() => {});
+      appliquerTheme(view.webContents);
     });
   } else {
     // Vue conservee cachee : elle RELIT ses donnees en revenant.
@@ -1651,6 +1652,28 @@ const brancherOutils = (win) => {
   } catch {}
 };
 
+/* ── LE MODE JOUR/NUIT SUIT LE SITE (1.58.1) ────────────────────────────────
+   Les fenetres natives sont dessinees nuit d abord ; quand l administration
+   est en mode jour, la classe `jour` est posee sur leur <html> (la feuille
+   CSS_JOUR du socle fait le reste). Le drapeau vient du site avec le modele
+   du menu (_modele.sombre, lu du theme de l administration) — pousse au
+   chargement de chaque fenetre, et a chaque bascule du theme.
+   ⚠ REGLE POUR TOUTE NOUVELLE FENETRE : construire sur le vocabulaire commun
+   (tete/carte/pill/pied...) et appendre CSS_JOUR — le theme suit alors tout
+   seul, rien d autre a brancher. */
+const jsTheme = () => {
+  const jour = !_modele.sombre;
+  return 'document.documentElement.classList.toggle("jour",' + jour + ');'
+    + 'document.documentElement.style.colorScheme=' + JSON.stringify(jour ? 'light' : 'dark') + ';';
+};
+const appliquerTheme = (wc) => {
+  try { if (wc && !wc.isDestroyed()) wc.executeJavaScript(jsTheme(), true).catch(() => {}); } catch {}
+};
+const appliquerThemePartout = () => {
+  fenetresNatives.forEach((w) => { if (w && !w.isDestroyed()) appliquerTheme(w.webContents); });
+  ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) appliquerTheme(a.view.webContents); });
+};
+
 const fenetresNatives = new Map();
 const ouvrirNative = (cle, titre, html, opts = {}) => {
   const deja = fenetresNatives.get(cle);
@@ -1660,7 +1683,7 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
     width: b.width || opts.width || 760, height: b.height || opts.height || 640,
     ...(Number.isFinite(b.x) && Number.isFinite(b.y) ? { x: b.x, y: b.y } : {}),
     minWidth: opts.minWidth || 520, minHeight: opts.minHeight || 420, show: false,
-    title: titre, autoHideMenuBar: true, backgroundColor: '#0e1522',
+    title: titre, autoHideMenuBar: true, backgroundColor: _modele.sombre ? '#0e1522' : '#f4f2ec',
     webPreferences: {
       preload: path.join(__dirname, 'pont-preload.js'),
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
@@ -1691,6 +1714,7 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
   win.on('resized', retenir);
   win.on('closed', () => { fenetresNatives.delete(cle); });
   brancherOutils(win);
+  win.webContents.on('did-finish-load', () => appliquerTheme(win.webContents));
   win.once('ready-to-show', () => win.show());
   win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
   return win;
@@ -2456,10 +2480,13 @@ ipcMain.on('panneau:survol', (e, dedans) => {
 
 ipcMain.handle('menu:modele', (e, m) => {
   if (m && typeof m === 'object' && Array.isArray(m.menus)) {
+    const sombreAvant = !!_modele.sombre;
     _modele = m;
     panneauSale = true;   // le panneau flottant se reconstruira a sa prochaine ouverture
     buildMenu();
     if (reglages.get('menuMode') === 'fenetre') majPalette();
+    // Le theme a bascule : toutes les fenetres et vues ancrees suivent.
+    if (sombreAvant !== !!_modele.sombre) appliquerThemePartout();
   }
   return true;
 });

@@ -31,7 +31,7 @@
  * menu entière.
  */
 
-const { JS_ACTIVITE } = require('./socle.js');
+const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -205,7 +205,7 @@ function pageCommandes(mode) {
   const icone = (m === 'expeditions') ? '🚚' : '🛒';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>${titre} — Administration Sandriza</title>
-<style>${CSS}</style></head><body>
+<style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">${icone}</span><h1 id="titre">${titre}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"></div>

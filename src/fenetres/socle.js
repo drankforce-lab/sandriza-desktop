@@ -403,4 +403,64 @@ Pagi.prototype.brancher = function(){
 };
 `;
 
-module.exports = { CSS_SOCLE, JS_SOCLE, JS_ACTIVITE };
+
+/* ── LE MODE JOUR DES FENÊTRES NATIVES (1.58.1) ─────────────────────────────
+   Les fenêtres sont dessinées NUIT d'abord ; quand l'administration est en
+   mode jour (le thème du site), la coquille pose la classe `jour` sur <html>
+   et cette feuille remappe le VOCABULAIRE COMMUN des fenêtres. UNE SEULE
+   SOURCE pour toutes : une couleur oubliée se corrige ici, pas fenêtre par
+   fenêtre. */
+const CSS_JOUR = `
+html.jour body{background:#f4f2ec;color:#1d2433}
+html.jour .tete{background:linear-gradient(180deg,#ffffff,#f4f2ec);border-bottom-color:rgba(15,23,42,.12)}
+html.jour .tete .sous{color:#5b6779}
+html.jour .corps::-webkit-scrollbar-thumb{background:rgba(15,23,42,.22)}
+html.jour .barreoutils .droite{color:#5b6779}
+html.jour input,html.jour select,html.jour button,html.jour textarea{
+  color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
+html.jour button:hover:not(:disabled){background:#efece4}
+html.jour button.actif{border-color:#8a6a3e;background:rgba(138,106,62,.12)}
+html.jour button.prim{background:#C49A6C;border-color:#C49A6C;color:#241703}
+html.jour button.prim:hover:not(:disabled){background:#d4ad80}
+html.jour button.danger{border-color:rgba(185,28,28,.45);color:#b91c1c}
+html.jour button .n{background:rgba(15,23,42,.08);color:#1d2433}
+html.jour button .n.hi{background:rgba(180,120,10,.18);color:#92610c}
+html.jour .carte,html.jour .ligne,html.jour .tuile,html.jour .panneau{
+  background:#ffffff;border-color:rgba(15,23,42,.12)}
+html.jour .tuile:hover,html.jour .ligne:hover{border-color:#8a6a3e}
+html.jour .carte h2{color:#5b6779}
+html.jour thead th{color:#5b6779;border-bottom-color:rgba(15,23,42,.14)}
+html.jour tbody td{border-top-color:rgba(15,23,42,.08)}
+html.jour tbody tr:hover td{background:rgba(15,23,42,.045)}
+html.jour tfoot td{border-top-color:rgba(15,23,42,.25)}
+html.jour .dt,html.jour .sub,html.jour .pagi,html.jour .vide,html.jour .msg{color:#5b6779}
+html.jour .msg.err{color:#b91c1c}
+html.jour .msg.bon{color:#15803d}
+html.jour .num{color:#1d2433}
+html.jour .sku,html.jour .etoile{color:#8a6a3e}
+html.jour .prixbarre{color:#5b6779}
+html.jour .pill.bon{background:rgba(21,128,61,.12);color:#15803d}
+html.jour .pill.att{background:rgba(180,120,10,.14);color:#92610c}
+html.jour .pill.err{background:rgba(185,28,28,.1);color:#b91c1c}
+html.jour .pill.info{background:rgba(30,64,175,.1);color:#1e40af}
+html.jour .pill.neutre{background:rgba(91,103,121,.12);color:#5b6779}
+html.jour .pied{background:#efece4;border-top-color:rgba(15,23,42,.12)}
+html.jour .voile{background:rgba(29,36,51,.35)}
+html.jour .boite{background:#ffffff;border-color:rgba(15,23,42,.16);color:#1d2433}
+html.jour .boite .grille{border-color:rgba(15,23,42,.1)}
+html.jour .boite .grille .l{color:#5b6779}
+html.jour .boite .texte{background:rgba(15,23,42,.03);border-color:rgba(15,23,42,.1)}
+html.jour .boite .reponse{background:rgba(138,106,62,.08);border-left-color:#8a6a3e}
+html.jour .boite .rang{border-top-color:rgba(15,23,42,.08)}
+html.jour .stats .s{background:rgba(15,23,42,.05)}
+html.jour .stats .s .n{color:#8a6a3e}
+html.jour .stats .s .l{color:#5b6779}
+html.jour .avis{background:rgba(180,120,10,.1);border-color:rgba(180,120,10,.4);color:#7a5410}
+html.jour .fileligne{border-top-color:rgba(15,23,42,.08)}
+html.jour .tuile .lbl,html.jour .tuile .sub{color:#5b6779}
+html.jour .tuile .val{color:#1d2433}
+html.jour .tuile .val.att{color:#92610c}
+html.jour .tuile .val.err{color:#b91c1c}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR, CSS_JOUR, JS_SOCLE, JS_ACTIVITE };

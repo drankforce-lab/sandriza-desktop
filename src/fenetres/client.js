@@ -17,7 +17,7 @@
  * COMPRIS — onzième rappel du projet.
  */
 
-const { JS_ACTIVITE } = require('./socle.js');
+const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -103,7 +103,7 @@ function pageClient(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Fiche client — Administration Sandriza</title>
-<style>${CSS}</style></head><body>
+<style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="av" id="t-av">?</span>
   <div><h1 id="titre">Fiche client</h1><div class="mail" id="t-mail"></div></div>
   <span class="pill gris" id="pill" style="display:none"></span>

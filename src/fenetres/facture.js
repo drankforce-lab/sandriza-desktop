@@ -18,7 +18,7 @@
  * referme la chaîne et casse toute la fenêtre.
  */
 
-const { JS_ACTIVITE } = require('./socle.js');
+const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -77,7 +77,7 @@ function pageFacture(invId) {
   const depart = JSON.stringify(String(invId || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Facture — Administration Sandriza</title>
-<style>${CSS}</style></head><body>
+<style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">🧾</span><h1 id="titre">Facture</h1>
   <span class="sous" id="sous"></span>
   <span class="actions" id="actions"></span></div>

@@ -18,7 +18,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE } = require('./socle.js');
+const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -76,7 +76,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:#fbbf24}
 function pageRetours() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Nos Retours — Administration Sandriza</title>
-<style>${CSS}</style></head><body>
+<style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">↩</span><h1>Nos Retours</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="vide">Chargement… (les demandes se resynchronisent)</div></div>

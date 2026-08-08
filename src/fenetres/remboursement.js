@@ -21,7 +21,7 @@
  * COMPRIS — dixième rappel du projet.
  */
 
-const { JS_ACTIVITE } = require('./socle.js');
+const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -101,7 +101,7 @@ function pageRemboursement(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Remboursement — Administration Sandriza</title>
-<style>${CSS}</style></head><body>
+<style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">↩</span><h1 id="titre">Remboursement</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>
