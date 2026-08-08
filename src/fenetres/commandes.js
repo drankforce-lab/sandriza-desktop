@@ -254,7 +254,7 @@ ${JS_ACTIVITE}
     if (!iso) return '—';
     var d = new Date(iso);
     if (isNaN(d)) return '—';
-    return d.toLocaleDateString('fr-CA', { day: '2-digit', month: 'short', year: '2-digit' });
+    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
   var MOTIFS = {
@@ -362,7 +362,7 @@ ${JS_ACTIVITE}
           + '<td>' + (o.prioritaire ? '<span class="eclair" title="Traitement prioritaire">⚡</span>' : '')
           + '<span class="num">' + esc(o.numero) + '</span>'
           + (attente ? '<div class="det">étiquette prête</div>' : '') + '</td>'
-          + '<td>' + esc(o.client) + (o.ville ? '<div class="det">' + esc(o.ville) + '</div>' : '') + '</td>'
+          + '<td>' + esc(o.client) + '</td>'
           + '<td class="c det">' + esc(dateCourte(o.date)) + '</td>'
           + (expedition
               ? '<td>' + (o.suivi ? '<span class="num">' + esc(o.suivi) + '</span>'
@@ -869,11 +869,11 @@ ${JS_ACTIVITE}
         var cle = st.getAttribute('data-st');
         var i = F.statuts.indexOf(cle);
         if (i >= 0) F.statuts.splice(i, 1); else F.statuts.push(cle);
-        F.page = 0; charger();
+        F.page = 0; dessiner(); charger();
         return;
       }
-      if (t.closest('[data-vider]')) { F.statuts = []; F.page = 0; charger(); return; }
-      if (t.closest('[data-prio]')) { F.prioritaires = !F.prioritaires; F.page = 0; charger(); return; }
+      if (t.closest('[data-vider]')) { F.statuts = []; F.page = 0; dessiner(); charger(); return; }
+      if (t.closest('[data-prio]')) { F.prioritaires = !F.prioritaires; F.page = 0; dessiner(); charger(); return; }
       var pr = t.closest('[data-prep]');
       if (pr) {
         ouvrir('commandes:preparer', pr.getAttribute('data-prep'), 'Préparation');
@@ -910,11 +910,18 @@ ${JS_ACTIVITE}
   }
 
   // ══ CHARGEMENT ════════════════════════════════════════════════════════════
+  var RELANCE = false;
   function charger(forcer){
-    if (enCours) return;
+    /* ⚠ NE JAMAIS AVALER UN CLIC. Avant, un appel deja en vol (le battement
+       des 5 s, ou la frappe precedente) faisait simplement RETURN : le filtre
+       clique n agissait qu au battement suivant — vecu comme << plusieurs
+       secondes de delai >> (2026-08-07). On note la demande, et la reponse
+       perimee (celle de l ANCIEN filtre) n est pas dessinee. */
+    if (enCours) { RELANCE = true; return; }
     enCours = true;
     appeler('commandes:liste', [MODE, F]).then(function(r){
       enCours = false;
+      if (RELANCE) { RELANCE = false; charger(forcer); return; }
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       DONNEES = r;
       // La reponse arrivee APRES l ouverture d un detail ne doit pas l ecraser.
