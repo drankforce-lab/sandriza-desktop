@@ -65,7 +65,9 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // La barre laterale pose la version NATIVE par-dessus la zone de contenu
   // (dock:ouvrir), dit ou est la zone (dock:zone, px CSS — le principal
   // applique le zoom), et cache les vues en naviguant ailleurs (dock:cacher).
-  dockOuvrir: (cle) => ipcRenderer.invoke('dock:ouvrir', String(cle || '')),
+  // `etat` (1.56.0+) : l etat voulu par la PERSONNE ('ancre' | 'detache'),
+  // lu par le site dans son profil — omis par les sites plus vieux.
+  dockOuvrir: (cle, etat) => ipcRenderer.invoke('dock:ouvrir', String(cle || ''), etat ? String(etat) : undefined),
   dockCacher: () => ipcRenderer.send('dock:cacher'),
   dockZone: (rect) => ipcRenderer.send('dock:zone', rect || {}),
   // La vue ancree s est fermee (Echap) ou detachee : le site remet le mot
@@ -75,6 +77,10 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // La vue detachee a demande << Ancrer >> : le site navigue vers la section
   // hote pour que la zone d ancrage existe sous la vue revenue.
   onDockAncree: (cb) => { ipcRenderer.on('dock:ancree', (e, cle) => { try { cb(cle); } catch {} }); },
+  // Le MENU demande un ecran ancrable (1.56.0) : le site navigue vers sa
+  // section — SANS changer l etat retenu de la personne (contrairement a
+  // << Ancrer >>) ; le flux d ancrage rouvre ancre ou detache selon l etat.
+  onDockNaviguer: (cb) => { ipcRenderer.on('dock:naviguer', (e, cle) => { try { cb(cle); } catch {} }); },
   // Le voile du menu : masquer (false) puis remontrer (true) la vue ancree
   // sans la recharger — le site le prefere a dockCacher+dockOuvrir.
   dockVoiler: (visible) => ipcRenderer.send('dock:voiler', !!visible),

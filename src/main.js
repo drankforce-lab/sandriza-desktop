@@ -1435,11 +1435,16 @@ ipcMain.on('dock:zone', (e, rect) => {
     largeur: Number(rect.largeur) || 0, hauteur: Number(rect.hauteur) || 0 };
   reposerAncrees();
 });
-ipcMain.handle('dock:ouvrir', (e, cle) => {
+ipcMain.handle('dock:ouvrir', (e, cle, etat) => {
   if (!mainWindow || e.sender !== mainWindow.webContents) return false;
   const defs = PAGES_ANCRABLES();
   const c = String(cle || '');
   if (!defs[c]) return false;
+  /* L ETAT VOULU VIENT DU SITE depuis 1.56.0 (profil de la PERSONNE, Turso) :
+     le reglages.json du poste n est plus que le repli des sites plus vieux
+     qui n envoient pas le 2e argument. */
+  const etatVoulu = NON_DETACHABLES.has(c) ? 'ancre'
+    : (etat === 'detache' || etat === 'ancre') ? etat : etatAncrage(c);
   // Une fenetre SEPAREE du meme ecran existe (ouverte par le menu) : on la
   // ramene plutot que d empiler une deuxieme instance — deux inventaires,
   // c est deux etats de scan qui se contredisent.
@@ -1475,7 +1480,7 @@ ipcMain.handle('dock:ouvrir', (e, cle) => {
     // Vue conservee cachee : elle RELIT ses donnees en revenant.
     a.view.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
   }
-  if (etatAncrage(c) === 'detache') {
+  if (etatVoulu === 'detache') {
     // L ecran a ete LAISSE detache : on le rouvre tel quel. Le site montre
     // l ecriteau << detache >> dans la zone (dock:detachee).
     poserEnFenetre(c, a);
@@ -2122,93 +2127,24 @@ const actionApp = (nom) => {
       ouvrirNative('pos-client', 'Affichage client', pageAffichage(),
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
       break;
-    /* ⚠ LARGE PARCE QU ELLE PORTE UNE GRILLE A CINQ COLONNES : variante, code,
-       quantite, seuil, emplacement. Sous 900 px, le nom de la variante et le code
-       se coupent — et un code de variante coupe ne se verifie pas contre
-       l etiquette collee sur le vetement, ce qui est tout son usage. */
-    case 'tableau': {
-      const _aT = ancrees.get('tableau');
-      if (_aT && _aT.fenetre && !_aT.fenetre.isDestroyed()) { _aT.fenetre.show(); _aT.fenetre.focus(); break; }
-      if (_aT && _aT.view && !_aT.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
-      // L ecran d ouverture de la journee : reutilisee, la fenetre RELIT ses
-      // chiffres (szRevenir) — l etat d avant pourrait dater d hier.
-      const _avT = fenetresNatives.get('tableau');
-      const _reuT = !!(_avT && !_avT.isDestroyed());
-      const winT = ouvrirNative('tableau', 'Tableau de bord', pageTableau(),
-        { width: 1060, height: 780, minWidth: 760, minHeight: 520 });
-      if (_reuT && winT && !winT.isDestroyed()) {
-        winT.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
-      }
-      break;
-    }
-    case 'inventaire': {
-      const _aI = ancrees.get('inventaire');
-      if (_aI && _aI.fenetre && !_aI.fenetre.isDestroyed()) { _aI.fenetre.show(); _aI.fenetre.focus(); break; }
-      if (_aI && _aI.view && !_aI.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
-      // Depuis 1.35.0 c est l ecran d inventaire ENTIER (quatre onglets), plus
-      // seulement l ajustement — d ou le titre << Inventaire >>. Un peu plus
-      // large : le tableau des produits porte huit colonnes.
-      ouvrirNative('inventaire', 'Inventaire', pageInventaire(''),
-        { width: 1120, height: 760, minWidth: 900, minHeight: 540 });
-      break;
-    }
-    /* Les deux listes. ⚠ DEUX CLES DISTINCTES : ce sont deux fenetres, qu on garde
-       ouvertes cote a cote — les commandes a preparer d un cote, les colis partis
-       de l autre. Une seule cle les ferait se remplacer l une l autre. */
-    case 'commandes': {
-      // L ecran peut deja vivre ANCRE ou DETACHE (barre laterale) : on le
-      // ramene plutot que d empiler une deuxieme liste — meme garde que tableau.
-      const _aC = ancrees.get('commandes');
-      if (_aC && _aC.fenetre && !_aC.fenetre.isDestroyed()) { _aC.fenetre.show(); _aC.fenetre.focus(); break; }
-      if (_aC && _aC.view && !_aC.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
-      ouvrirNative('commandes', 'Commandes', pageCommandes('commandes'),
-        { width: 1060, height: 720, minWidth: 860, minHeight: 500 });
-      break;
-    }
-    case 'produits': {
-      // Meme garde que tableau/commandes : l ecran peut deja vivre ancre ou
-      // detache — on le ramene au lieu d empiler une deuxieme liste.
-      const _aP = ancrees.get('produits');
-      if (_aP && _aP.fenetre && !_aP.fenetre.isDestroyed()) { _aP.fenetre.show(); _aP.fenetre.focus(); break; }
-      if (_aP && _aP.view && !_aP.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
-      const _avP = fenetresNatives.get('produits');
-      const _reuP = !!(_avP && !_avP.isDestroyed());
-      const winP = ouvrirNative('produits', 'Produits en vente', pageProduits(),
-        { width: 1120, height: 740, minWidth: 900, minHeight: 520 });
-      if (_reuP && winP && !winP.isDestroyed()) {
-        winP.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
-      }
-      break;
-    }
-    case 'factures': {
-      /* Factures est ANCRABLE depuis 1.55.0 (demande du 2026-08-09) : le menu
-         passe par le flux d ancrage — le site navigue vers la section hote et
-         la vue se pose (ou se rouvre detachee, selon l etat retenu). */
-      const _aF = ancrees.get('factures');
-      if (_aF && _aF.fenetre && !_aF.fenetre.isDestroyed()) { _aF.fenetre.show(); _aF.fenetre.focus(); break; }
-      const _avF = fenetresNatives.get('factures');
-      if (_avF && !_avF.isDestroyed()) { _avF.show(); _avF.focus(); break; }
+    /* ⚠ TOUS LES ECRANS ANCRABLES DU MENU PASSENT PAR LE FLUX D ANCRAGE
+       (demande du 2026-08-09 : << si je passe par le menu, ca doit etre ancre,
+       sauf si je l ai detache — l etat persiste par profil >>). On ne pose plus
+       de fenetre separee ici : le site navigue vers la section hote
+       (dock:naviguer) et rouvre ancre OU detache selon l etat de la PERSONNE,
+       sans le changer. Deja detachee : on ramene sa fenetre. Une fenetre
+       separee HERITEE d un ancien menu est ramenee plutot que doublee. */
+    case 'tableau': case 'inventaire': case 'commandes': case 'produits':
+    case 'factures': case 'clients': case 'collections': case 'fournisseurs':
+    case 'retours': case 'codesbarres': {
+      const _aA = ancrees.get(action);
+      if (_aA && _aA.fenetre && !_aA.fenetre.isDestroyed()) { _aA.fenetre.show(); _aA.fenetre.focus(); break; }
+      const _avA = fenetresNatives.get(action);
+      if (_avA && !_avA.isDestroyed()) { _avA.show(); _avA.focus(); break; }
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.show(); mainWindow.focus();
-        try { mainWindow.webContents.send('dock:ancree', 'factures'); break; } catch {}
-      }
-      ouvrirNative('factures', 'Factures', pageFactures(),
-        { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
-      break;
-    }
-    /* Les quatre listes du palier 2 : meme garde d ancrage que tableau et
-       commandes — deja ancree ou detachee, on la ramene ; sinon fenetre. */
-    case 'clients': case 'collections': case 'fournisseurs': case 'retours': case 'codesbarres': {
-      const _aL = ancrees.get(action);
-      if (_aL && _aL.fenetre && !_aL.fenetre.isDestroyed()) { _aL.fenetre.show(); _aL.fenetre.focus(); break; }
-      if (_aL && _aL.view && !_aL.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
-      const _defsL = PAGES_ANCRABLES();
-      const _avL = fenetresNatives.get(action);
-      const _reuL = !!(_avL && !_avL.isDestroyed());
-      const winL = ouvrirNative(action, _defsL[action][0], _defsL[action][1](),
-        { width: 1040, height: 720, minWidth: 820, minHeight: 500 });
-      if (_reuL && winL && !winL.isDestroyed()) {
-        winL.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+        try { mainWindow.webContents.send('dock:naviguer', action); } catch {}
+        break;
       }
       break;
     }
