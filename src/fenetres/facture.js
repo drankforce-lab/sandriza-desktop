@@ -55,6 +55,11 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
+/* ⚠ SANS cette regle, le survol GENERIQUE (voile blanc translucide) delavait
+   le bouton principal : texte sombre sur beige lave, illisible en sombre
+   (capture du 2026-08-08). La meme teinte de survol que toutes les autres
+   fenetres (socle, inventaire, produit) : le bouton reste fidele partout. */
+button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
@@ -74,10 +79,10 @@ function pageFacture(invId) {
 <title>Facture — Administration Sandriza</title>
 <style>${CSS}</style></head><body>
 <div class="tete"><span class="ic">🧾</span><h1 id="titre">Facture</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"></div>
-<div class="pied"><span class="msg" id="msg"></span>
+  <span class="sous" id="sous"></span>
   <span class="actions" id="actions"></span></div>
+<div class="corps" id="corps"></div>
+<div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
   'use strict';
