@@ -1424,7 +1424,13 @@ function pageProduit(id) {
     CHOIX = (p.colors || []).map(String);
     dessinerJetons();
     STOCK = Object.assign({}, p.stock || {});
-    LOCS = Object.assign({}, p.stockLoc || {});
+    // ⚠ LE CHAMP DU PRODUIT EST warehouseLocations. Cette fenêtre lisait
+    // « stockLoc », un nom qu'elle avait inventé : les emplacements existants
+    // ne s'affichaient JAMAIS (tout restait à « Choisir l'emplacement »), et
+    // ceux qu'on choisissait n'étaient jamais écrits — le pont traduit
+    // désormais l'envoi (la fenêtre continue d'expédier « stockLoc » sur le
+    // fil, c'est le contrat des coquilles déjà installées).
+    LOCS = Object.assign({}, p.warehouseLocations || p.stockLoc || {});
     if (p.image) { IMAGE = p.image; montrerImage(IMAGE); }
     VUES = vuesDepuisFiche(p.additionalImages);
     // ⚠ COPIE PROFONDE : chaque couleur porte son propre objet. Une copie de

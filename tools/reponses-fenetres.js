@@ -522,7 +522,11 @@ module.exports = {
             sizes: ['M', 'G'],
             colors: ['Noir', 'Bleu marine'],
             stock: { 'M-Noir': 4 },
-            stockLoc: { 'M-Noir': 'wh_0001' },
+            // ⚠ Le VRAI nom du champ — « stockLoc » n'existe pas dans le
+            // modèle produit, et un jeu d'essai qui l'emploierait cacherait
+            // le défaut au lieu de l'exposer (vécu : les emplacements ne
+            // s'affichaient jamais dans la fenêtre).
+            warehouseLocations: { 'M-Noir': 'wh_0001' },
             additionalImages: { devant: IMAGE },
             // Une variante déjà générée : la case « Bleu marine » doit la
             // montrer (mode AUTO pour « robes »).
