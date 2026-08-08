@@ -86,10 +86,13 @@ button.traite{background:#78350f;color:#fde68a;border-color:#b45309;
    ⚠ Regles AUTONOMES : le bouton vit HORS du groupe .jetons, une regle
    prefixee .jetons ne l atteignait jamais - le bouton ne s allumait pas
    (signale le 2026-08-07). */
-button.prio{border-color:rgba(245,158,11,.55);color:#f0c987;border-radius:99px;
+button.prio{border-color:rgba(245,158,11,.4);color:#cbd8e6;border-radius:99px;
   font-size:.74rem;padding:.1rem .5rem;margin-left:.4rem}
-button.prio.on{background:#f59e0b;border-color:#f59e0b;color:#1a1a2e;font-weight:700}
-button.prio.on:hover{background:#fbbf24;border-color:#fbbf24}
+/* ⚠ Actif = teinte ambree sur fond sombre, texte clair. Le plein orange avec
+   texte marine noyait l eclair et se lisait mal en theme sombre (2026-08-08). */
+button.prio.on{background:rgba(245,158,11,.24);border-color:#f59e0b;color:#fde68a;
+  font-weight:700;box-shadow:0 0 0 1px rgba(245,158,11,.35) inset}
+button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
 .eclair{color:#f59e0b;margin-right:.2rem}
 
 /* La liste : la seule zone qui defile. */
