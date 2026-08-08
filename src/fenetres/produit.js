@@ -523,11 +523,12 @@ function pageProduit(id) {
       // ⚠ LIMITE PAR CLIENT (2026-08-08) : toutes commandes confondues, par
       // adresse courriel — le cumul est tranché par le SERVEUR à la caisse
       // (client_limit_check). Vide = aucune limite propre au produit.
+      // ⚠ SANS texte d aide (retire a la demande, 2026-08-08) : l explication
+      // vit dans l INFOBULLE, comme le veut la regle des encarts qui expliquent
+      // ce que l ecran montre deja.
       + '<div class="ch"><label for="p-limclient">Limite par client</label>'
-      + '<input id="p-limclient" type="number" min="1" step="1" placeholder="aucune">'
-      + '<div class="aide" style="margin-top:.2rem">Unités de ce produit qu’un même client peut '
-      + 'acheter, toutes commandes confondues (par adresse courriel). Affichée sur la fiche '
-      + 'en boutique.</div></div>'
+      + '<input id="p-limclient" type="number" min="1" step="1" placeholder="aucune" '
+      + 'title="Unités de ce produit qu’un même client peut acheter, toutes commandes confondues (par adresse courriel)."></div>'
       + '</div></div></div>');
 
     // 7 — Stock
