@@ -138,26 +138,35 @@ ${css}
  * Les clics passent par palette:action — les mêmes chemins que la palette.
  */
 function pagePanneau(desc) {
-  const items = desc.items || [];
+  const menus = desc.menus || [];
   const css = desc.cssRail || '';
   const sombre = !!desc.sombre;
-  const taille = Number(desc.taille) || 1;
 
+  /* ⚠ TOUS LES MENUS SONT CONSTRUITS D'AVANCE, UNE FOIS. La première version
+     rechargeait la page a CHAQUE survol d'un bouton de la barre — c'était le
+     « lag » relevé le 2026-08-09. Ici, `montrer(label)` ne fait que basculer
+     l'affichage : instantané.
+     ⚠ AUCUNE ÉCHELLE APPLIQUÉE ICI : la feuille du site (cssRail) porte DÉJÀ
+     la taille du menu (d.police inclut menuTaille) — le zoom ajouté par-dessus
+     doublait l'échelle (« c'est beaucoup trop gros »). Le facteur de zoom de
+     la fenêtre principale est posé par la coquille (setZoomFactor), pour que
+     panneau et barre paraissent à la même taille. */
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <style>
 html,body{margin:0;overflow:hidden}
 body{background:var(--sz-bg,${sombre ? '#131b2a' : '#ffffff'})}
-/* Le panneau occupe toute la fenêtre : on neutralise le positionnement volant
-   que la feuille du site lui donne quand il vit dans une page. */
-.sz-panneau{position:static!important;display:block!important;margin:0!important;
+/* Le panneau vit seul dans sa fenêtre : on neutralise le positionnement volant
+   que la feuille du site lui donne quand il vit dans une page — et il garde sa
+   LARGEUR NATURELLE, que la fenêtre épouse (panneau:taille). */
+.sz-panneau{position:static!important;margin:0!important;
   box-shadow:none!important;border:0!important;border-radius:0!important;
-  min-width:0!important;max-width:none!important;width:100%!important;
+  max-width:none!important;width:max-content!important;
   max-height:none!important;animation:none!important;overflow:visible!important}
 ${css}
 </style></head><body>
 <script>
 (function(){
-  var D = ${JSON.stringify({ items, taille })};
+  var D = ${JSON.stringify({ menus })};
   function envoyer(it){ try{ window.szPalette && window.szPalette.action(it); }catch(e){} }
 
   function entree(it){
@@ -171,29 +180,40 @@ ${css}
     return b;
   }
 
-  var pan=document.createElement('div');
-  pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
-  D.items.forEach(function(it){
-    if(it.sub){
-      // Sous-groupe aplati d'un cran, avec son libelle en intertitre — comme
-      // la palette : un panneau volant DANS un panneau volant serait coupe.
-      var t=document.createElement('div'); t.className='sz-titre'; t.textContent=it.label;
-      pan.appendChild(t);
-      it.sub.forEach(function(si){ pan.appendChild(entree(si)); });
-      return;
-    }
-    pan.appendChild(entree(it));
+  var panneaux = {};
+  D.menus.forEach(function(m){
+    var pan=document.createElement('div');
+    pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
+    pan.style.display='none';
+    (m.items||[]).forEach(function(it){
+      if(it.sub){
+        // Sous-groupe aplati d'un cran, avec son libelle en intertitre — comme
+        // la palette : un panneau volant DANS un panneau volant serait coupe.
+        var t=document.createElement('div'); t.className='sz-titre'; t.textContent=it.label;
+        pan.appendChild(t);
+        it.sub.forEach(function(si){ pan.appendChild(entree(si)); });
+        return;
+      }
+      pan.appendChild(entree(it));
+    });
+    document.body.appendChild(pan);
+    panneaux[m.label]=pan;
   });
-  document.body.appendChild(pan);
-  if (D.taille && D.taille !== 1) document.body.style.zoom = D.taille;
 
-  // La fenetre s'ajuste au contenu REEL (jamais de barre de defilement), et le
-  // survol tient le panneau ouvert — le quitter le referme, en differe court.
-  try {
-    var w = Math.ceil(pan.scrollWidth * (D.taille || 1)) + 2;
-    var h = Math.ceil(pan.scrollHeight * (D.taille || 1)) + 2;
-    if (window.szPalette && window.szPalette.taille) window.szPalette.taille(w, h);
-  } catch(e){}
+  // Bascule instantanee d'un menu a l'autre, et la fenetre epouse le contenu
+  // REEL (jamais de barre de defilement).
+  window.montrer = function(label){
+    Object.keys(panneaux).forEach(function(k){
+      panneaux[k].style.display = (k === label) ? 'block' : 'none';
+    });
+    var pan = panneaux[label];
+    if (!pan) return;
+    try {
+      window.szPalette.taille(Math.ceil(pan.offsetWidth) + 2, Math.ceil(pan.offsetHeight) + 2);
+    } catch(e){}
+  };
+
+  // Le survol tient le panneau ouvert — le quitter le referme, en differe court.
   document.addEventListener('mouseenter', function(){ try{ window.szPalette.survol(true); }catch(e){} });
   document.addEventListener('mouseleave', function(){ try{ window.szPalette.survol(false); }catch(e){} });
 })();

@@ -2331,6 +2331,8 @@ ipcMain.handle('menu:set', (e, cle, valeur) => {
 let panneauWin = null;
 let panneauSurvole = false;
 let panneauFermeT = null;
+let panneauPret = false;    // la page (TOUS les menus) est chargee
+let panneauSale = true;     // le modele a change depuis le dernier chargement
 const fermerPanneauMenu = () => {
   clearTimeout(panneauFermeT); panneauFermeT = null; panneauSurvole = false;
   if (panneauWin && !panneauWin.isDestroyed()) { try { panneauWin.hide(); } catch {} }
@@ -2355,23 +2357,40 @@ ipcMain.on('menu:panneau', (e, label, x, y) => {
         contextIsolation: true, nodeIntegration: false, sandbox: true,
       },
     });
-    panneauWin.on('closed', () => { panneauWin = null; });
+    panneauWin.on('closed', () => { panneauWin = null; panneauPret = false; panneauSale = true; });
+    panneauSale = true;
   }
-  const cfg = reglages.lire();
   const f = mainWindow.webContents.getZoomFactor() || 1;
   const cb = mainWindow.getContentBounds();
-  panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
-    items: m.items || [], cssRail: _modele.cssRail || '',
-    sombre: !!_modele.sombre, taille: cfg.menuTaille,
-  })));
   try {
     panneauWin.setBounds({
       x: Math.round(cb.x + (Number(x) || 0) * f),
       y: Math.round(cb.y + (Number(y) || 0) * f),
-      width: 300, height: 200,
+      width: panneauWin.getBounds().width, height: panneauWin.getBounds().height,
     });
   } catch {}
-  panneauWin.showInactive();
+  // MEME TAILLE APPARENTE QUE LA BARRE : le panneau suit le zoom de la
+  // fenetre principale (la feuille du site porte deja l echelle du menu —
+  // aucun zoom ajoute dans la page, voir pagePanneau).
+  const montrer = () => {
+    try { panneauWin.webContents.setZoomFactor(f); } catch {}
+    panneauWin.webContents.executeJavaScript(
+      'window.montrer && window.montrer(' + JSON.stringify(String(label || '')) + ');', true).catch(() => {});
+    try { panneauWin.showInactive(); } catch {}
+  };
+  /* ⚠ LA PAGE (tous les menus) N EST CHARGEE QU UNE FOIS — la recharger a
+     chaque survol etait le << lag >> releve le 2026-08-09. `montrer` ne fait
+     ensuite que basculer l affichage. Rechargee seulement si le modele a
+     change (menu:modele pose panneauSale). */
+  if (panneauSale || !panneauPret) {
+    panneauSale = false; panneauPret = false;
+    panneauWin.webContents.once('did-finish-load', () => { panneauPret = true; montrer(); });
+    panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
+      menus: _modele.menus || [], cssRail: _modele.cssRail || '', sombre: !!_modele.sombre,
+    })));
+  } else {
+    montrer();
+  }
 });
 // Le site annonce que la souris a quitte la barre (ou qu on a clique ailleurs).
 ipcMain.on('menu:panneau:fermer', (e) => {
@@ -2383,11 +2402,14 @@ ipcMain.on('menu:panneau:fermer', (e) => {
 ipcMain.on('panneau:taille', (e, w, h) => {
   if (!panneauWin || panneauWin.isDestroyed() || e.sender !== panneauWin.webContents) return;
   try {
+    // La page mesure en px CSS ; la fenetre, elle, vit en px physiques — le
+    // facteur de zoom pose sur le panneau s applique donc ici aussi.
+    const f = (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.getZoomFactor()) || 1;
     const b = panneauWin.getBounds();
     const { screen } = require('electron');
     const wa = screen.getDisplayMatching(b).workArea;
-    const W = Math.min(Math.max(190, Math.round(w) || 260), 480);
-    const H = Math.min(Math.max(48, Math.round(h) || 120), wa.y + wa.height - b.y - 8);
+    const W = Math.min(Math.max(170, Math.round((w || 260) * f)), 520);
+    const H = Math.min(Math.max(40, Math.round((h || 120) * f)), wa.y + wa.height - b.y - 8);
     panneauWin.setBounds({ x: Math.min(b.x, wa.x + wa.width - W - 4), y: b.y, width: W, height: H });
   } catch {}
 });
@@ -2401,6 +2423,7 @@ ipcMain.on('panneau:survol', (e, dedans) => {
 ipcMain.handle('menu:modele', (e, m) => {
   if (m && typeof m === 'object' && Array.isArray(m.menus)) {
     _modele = m;
+    panneauSale = true;   // le panneau flottant se reconstruira a sa prochaine ouverture
     buildMenu();
     if (reglages.get('menuMode') === 'fenetre') majPalette();
   }
