@@ -1684,21 +1684,7 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
   };
   win.on('moved', retenir);
   win.on('resized', retenir);
-  win.on('closed', () => {
-    fenetresNatives.delete(cle);
-    /* ⚠ QUIRK WINDOWS (releve du 2026-08-09, fenetre A propos) : fermer une
-       fenetre pendant qu un ENFANT INVISIBLE de la principale existe (le
-       panneau du menu) peut REDUIRE la principale dans la barre des taches.
-       Si cette fermeture vient de la reduire, on la releve — jamais de vol
-       de focus sinon. */
-    setTimeout(() => {
-      try {
-        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isMinimized()) {
-          mainWindow.restore(); mainWindow.focus();
-        }
-      } catch {}
-    }, 80);
-  });
+  win.on('closed', () => { fenetresNatives.delete(cle); });
   brancherOutils(win);
   win.once('ready-to-show', () => win.show());
   win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
@@ -2635,6 +2621,25 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('second-instance', () => {
     if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); }
+  });
+
+  /* ⚠ QUIRK WINDOWS (releve DEUX FOIS le 2026-08-09, fenetre A propos —
+     qui n est PAS une fenetre ouvrirNative, d ou le premier correctif rate) :
+     fermer une fenetre pendant qu un ENFANT INVISIBLE de la principale
+     existe (le panneau du menu) peut REDUIRE la principale dans la barre des
+     taches. Garde GLOBAL : a la fermeture de N IMPORTE QUELLE fenetre, si la
+     principale vient d etre reduite, elle est relevee. Une seule place —
+     patcher fenetre par fenetre, c est en oublier une. */
+  app.on('browser-window-created', (ev, win) => {
+    win.on('closed', () => {
+      setTimeout(() => {
+        try {
+          if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isMinimized()) {
+            mainWindow.restore(); mainWindow.focus();
+          }
+        } catch {}
+      }, 80);
+    });
   });
 
   app.whenReady().then(() => {
