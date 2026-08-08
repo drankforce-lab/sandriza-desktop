@@ -513,6 +513,145 @@ module.exports = {
     },
   ],
 
+  // ── CLIENTS (la liste) ─────────────────────────────────────────────────────
+  'clients.js': [
+    {
+      // ⚠ FORME REELLE de clients:liste (pont.js -> Admin._clientLigne).
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'clients:liste': {
+          ok: true,
+          lignes: [
+            { id: 'usr_1', nom: 'Josée Lafleur', courriel: 'josee@exemple.ca', commandes: 12,
+              achats: 1450.25, actif: true, supprime: false, cree: '2025-11-02T10:00:00Z' },
+            { id: 'usr_2', nom: 'Marc Dubé', courriel: 'marc@exemple.ca', commandes: 1,
+              achats: 89.95, actif: false, supprime: false, cree: '2026-03-14T09:00:00Z' },
+            { id: 'usr_3', nom: 'Anne Roy', courriel: 'anne@exemple.ca', commandes: 0,
+              achats: 0, actif: false, supprime: true, cree: '2026-01-20T15:00:00Z' },
+          ],
+          total: 3, pages: 1, page: 0, onglet: 'active',
+          comptes: { actifs: 42, inactifs: 5, supprimes: 2 },
+        },
+        'clients:ouvrir': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans clients',
+      id: '',
+      reponses: {
+        'clients:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
+  // ── NOS COLLECTIONS (la liste) ─────────────────────────────────────────────
+  'collections.js': [
+    {
+      // ⚠ FORME REELLE de collections:liste (pont.js).
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'collections:liste': {
+          ok: true,
+          lignes: [
+            { id: 'col_1', nom: 'Élégance d’automne', saison: 'Automne 2026', articles: 14,
+              active: true, description: 'Les pièces chaudes de la saison.', cree: '2026-08-01T10:00:00Z' },
+            { id: 'col_2', nom: 'Soirées d’été', saison: 'Été 2026', articles: 8,
+              active: false, description: '', cree: '2026-05-10T10:00:00Z' },
+          ],
+        },
+        'collections:ouvrir': { ok: true },
+        'collections:nouvelle': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans collections',
+      id: '',
+      reponses: {
+        'collections:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
+  // ── FOURNISSEURS (la liste) ────────────────────────────────────────────────
+  'fournisseurs.js': [
+    {
+      // ⚠ FORME REELLE de fournisseurs:liste (pont.js -> Admin._fournisseurLigne).
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'fournisseurs:liste': {
+          ok: true,
+          total: 2,
+          lignes: [
+            { id: 'sup_1', nom: 'Frank Lyman Design', contact: 'Julie Caron',
+              courriel: 'wholesale@franklyman.com', telephone: '514-384-3000',
+              site: 'franklyman.com', categories: ['Robes', 'Hauts'], actif: true },
+            { id: 'sup_2', nom: 'Emballages Préstige', contact: '',
+              courriel: 'ventes@emballages-prestige.ca', telephone: '',
+              site: '', categories: [], actif: false },
+          ],
+        },
+        'fournisseurs:ouvrir': { ok: true },
+        'fournisseurs:nouveau': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans fournisseurs',
+      id: '',
+      reponses: {
+        'fournisseurs:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
+  // ── NOS RETOURS (la liste) ─────────────────────────────────────────────────
+  'retours.js': [
+    {
+      // ⚠ FORME REELLE de retours:liste (pont.js -> Admin._retourLigne) :
+      // une expiration imminente, une etiquette reelle, un suivi.
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'retours:liste': {
+          ok: true,
+          onglet: 'pending',
+          comptes: { pending: 2, approved: 1, in_transit: 1, expiring_soon: 1,
+            received: 0, disputed: 0, rejected: 1, completed: 3, all: 8 },
+          lignes: [
+            { id: 'ret_1', commande: 'CMD-0002-22010', client: 'Josée Lafleur',
+              courriel: 'josee@exemple.ca', motif: 'Taille trop petite', statut: 'pending',
+              statutLibelle: 'En attente', date: '2026-08-07T14:00:00Z',
+              expireBientot: true, expireLe: '2026-08-12', expireAuto: false,
+              suivi: '', etiquette: '', fraisBoutique: false },
+            { id: 'ret_2', commande: 'CMD-0002-21988', client: 'Marc Dubé',
+              courriel: 'marc@exemple.ca', motif: 'Couleur différente des photos', statut: 'pending',
+              statutLibelle: 'En attente', date: '2026-08-06T09:00:00Z',
+              expireBientot: false, expireLe: '', expireAuto: false,
+              suivi: '1Z999AA10123456784', etiquette: 'reelle', fraisBoutique: true },
+          ],
+        },
+        'retours:ouvrir': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans retours',
+      id: '',
+      reponses: {
+        'retours:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── FACTURES (la liste) ────────────────────────────────────────────────────
   'factures.js': [
     {

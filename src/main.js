@@ -1019,6 +1019,12 @@ const OPS_PONT = new Set([
   // La LISTE des produits en vente (fenetre Produits) : la page filtree par le
   // site, l ouverture de l assistant sur une fiche, et l assistant vierge.
   'produits:liste', 'produits:ouvrir', 'produits:nouveau',
+  // Les quatre listes restantes du palier 2 (1.54.0) : meme patron — la page
+  // filtree par le site, le clic ouvre la fenetre native de la chose.
+  'clients:liste', 'clients:ouvrir',
+  'collections:liste', 'collections:ouvrir', 'collections:nouvelle',
+  'fournisseurs:liste', 'fournisseurs:ouvrir', 'fournisseurs:nouveau',
+  'retours:liste', 'retours:ouvrir',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1145,6 +1151,26 @@ ipcMain.handle('fenetre:facture', (e, id) => {
   return true;
 });
 
+/* Assistants collection et fournisseur PAR FICHE (listes natives 1.54.0).
+   Id vide = assistant vierge, MEME CLE que l entree de menu (pas deux
+   assistants vierges concurrents) ; une fiche = une fenetre a elle. Pas de
+   szRevenir : comme l assistant Produit, ils ne savent pas se replacer —
+   reutilisee, la fenetre revient simplement au premier plan. */
+ipcMain.handle('fenetre:collection', (e, id) => {
+  const brut = String(id || '');
+  const cle = brut ? 'collection-' + brut.replace(/[^\w-]/g, '') : 'collection';
+  ouvrirNative(cle, brut ? 'Collection' : 'Nouvelle collection', pageCollection(brut),
+    { width: 860, height: 760 });
+  return true;
+});
+ipcMain.handle('fenetre:fournisseur', (e, id) => {
+  const brut = String(id || '');
+  const cle = brut ? 'fournisseur-' + brut.replace(/[^\w-]/g, '') : 'fournisseur';
+  ouvrirNative(cle, brut ? 'Fournisseur' : 'Nouveau fournisseur', pageFournisseur(brut),
+    { width: 820, height: 760 });
+  return true;
+});
+
 // La LISTE des factures — ouverte par << Tout voir >> du tableau de bord ou
 // par le menu. Reutilisee, elle RELIT (szRevenir) : une facture a pu se payer.
 ipcMain.handle('fenetre:factures', () => {
@@ -1199,6 +1225,9 @@ const LIMITES_PONT = {
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
   'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
+  // La liste des retours RESYNCHRONISE les demandes avant de repondre (la
+  // meme fraicheur que l ecran du site) : laisser le temps du nuage.
+  'retours:liste': 20000,
 };
 
 /* ⚠ LA FENETRE INVENTAIRE SE TIENT A JOUR TOUTE SEULE (demande du 2026-08-08 :
@@ -1279,9 +1308,14 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
       const fenetres = [];
       // La fenetre Factures suit les memes ecritures que le tableau : une
       // vente, un remboursement ou un statut de commande la font bouger aussi.
-      // La liste Produits en vente suit celles de l inventaire (fiches, stock).
-      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures', 'produits');
-      else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau', 'factures');
+      // La liste Produits en vente suit celles de l inventaire (fiches, stock) ;
+      // Clients suit les deux (une vente change ses totaux, client:ecrire sa
+      // fiche) ; Retours suit les operations de retour des deux ensembles.
+      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures', 'produits', 'clients', 'retours');
+      else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau', 'factures', 'clients', 'retours');
+      // Les assistants collection et fournisseur previennent leur liste.
+      if (nom === 'collection:enregistrer') fenetres.push('collections');
+      if (nom === 'fournisseur:enregistrer') fenetres.push('fournisseurs');
       if (fenetres.length) actualiserFenetres(fenetres, e.sender);
     }
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
@@ -1325,6 +1359,10 @@ const PAGES_ANCRABLES = () => ({
   inventaire: ['Inventaire', () => pageInventaire('')],
   commandes: ['Commandes', () => pageCommandes('commandes')],
   produits: ['Produits en vente', () => pageProduits()],
+  clients: ['Clients', () => pageClients()],
+  collections: ['Nos Collections', () => pageCollections()],
+  fournisseurs: ['Fournisseurs', () => pageFournisseurs()],
+  retours: ['Nos Retours', () => pageRetours()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -1988,6 +2026,10 @@ const { pageProduit } = require('./fenetres/produit');
 const { pageFacture } = require('./fenetres/facture');
 const { pageFactures } = require('./fenetres/factures');
 const { pageProduits } = require('./fenetres/produits');
+const { pageClients } = require('./fenetres/clients');
+const { pageCollections } = require('./fenetres/collections');
+const { pageFournisseurs } = require('./fenetres/fournisseurs');
+const { pageRetours } = require('./fenetres/retours');
 const { pageCommande } = require('./fenetres/commande');
 const { pageAffichage } = require('./fenetres/affichage');
 const { pageCaisse } = require('./fenetres/caisse');
@@ -2115,6 +2157,22 @@ const actionApp = (nom) => {
         { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
       if (_reuF && winF && !winF.isDestroyed()) {
         winF.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
+    /* Les quatre listes du palier 2 : meme garde d ancrage que tableau et
+       commandes — deja ancree ou detachee, on la ramene ; sinon fenetre. */
+    case 'clients': case 'collections': case 'fournisseurs': case 'retours': {
+      const _aL = ancrees.get(action);
+      if (_aL && _aL.fenetre && !_aL.fenetre.isDestroyed()) { _aL.fenetre.show(); _aL.fenetre.focus(); break; }
+      if (_aL && _aL.view && !_aL.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
+      const _defsL = PAGES_ANCRABLES();
+      const _avL = fenetresNatives.get(action);
+      const _reuL = !!(_avL && !_avL.isDestroyed());
+      const winL = ouvrirNative(action, _defsL[action][0], _defsL[action][1](),
+        { width: 1040, height: 720, minWidth: 820, minHeight: 500 });
+      if (_reuL && winL && !winL.isDestroyed()) {
+        winL.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
       }
       break;
     }
