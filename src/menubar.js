@@ -217,7 +217,12 @@ ${css}
     sous.innerHTML='';
     (it.sub||[]).forEach(function(si){ sous.appendChild(entree(si, true)); });
     sous.style.display='block';
-    sous.style.marginTop=Math.max(0, parent.offsetTop - 4) + 'px';
+    /* PARALLELE A SON PARENT (releve du 2026-08-09 : le sous-menu s ouvrait
+       en haut de la colonne). Mesure ABSOLUE — rect du parent moins rect de
+       la rangee — plutot qu offsetTop, dont l origine depend de l arbre. */
+    var rp = parent.getBoundingClientRect();
+    var rr = rangee.getBoundingClientRect();
+    sous.style.marginTop = Math.max(0, Math.round(rp.top - rr.top) - 3) + 'px';
     mesurer();
   }
 
