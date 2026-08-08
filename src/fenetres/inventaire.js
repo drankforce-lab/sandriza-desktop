@@ -1713,6 +1713,18 @@ ${JS_ACTIVITE}
   });
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 
+  /* ⚠ ACTUALISATION POUSSEE PAR LA COQUILLE (2026-08-08) : un produit modifie
+     AILLEURS (assistant Produit, caisse, retour, remboursement) fait relire
+     cette fenetre sans geste. JAMAIS pendant un travail en cours : la grille
+     d un produit, un voile ouvert ou une ligne d entrepot en edition se
+     laissent finir — leurs chemins de sortie rechargent deja tout. */
+  window.szActualiser = function(){
+    if (VUE === 'produit') return;
+    if (WH_EDIT) return;
+    if (document.querySelector('.voile')) return;
+    chargerOnglet(true);
+  };
+
   var DEPART = ${depart};
   // << onglet:… >> ouvre la fenetre sur un onglet precis ; tout autre identifiant
   // est un produit dont on ouvre la grille directement.

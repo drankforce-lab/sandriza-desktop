@@ -1178,6 +1178,29 @@ const LIMITES_PONT = {
   'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
 };
 
+/* ⚠ LA FENETRE INVENTAIRE SE TIENT A JOUR TOUTE SEULE (demande du 2026-08-08 :
+   << si on met a jour un produit, l inventaire natif doit prendre ses
+   modifications sans rafraichissement >>). Quand une operation qui CHANGE les
+   produits ou le stock REUSSIT, on demande a la fenetre Inventaire de se
+   relire — JAMAIS a celle qui vient d agir (ses propres ecrans rechargent
+   deja), et c est la PAGE qui choisit le bon moment : elle refuse pendant une
+   saisie ou sous un voile (la regle << ne jamais redessiner pendant une
+   saisie >>). Meme mecanique que szRevenir : un crochet execute, inerte si la
+   page ne le porte pas. */
+const OPS_QUI_CHANGENT_L_INVENTAIRE = new Set([
+  'produit:enregistrer',
+  'stock:enregistrer', 'stock:supprimer', 'stock:skuUn', 'stock:skuTous',
+  'stock:skuPad6', 'stock:venteFinale', 'stock:vendre',
+  'stock:entrepotEcrire', 'stock:entrepotSupprimer',
+  'caisse:vendre', 'retour:finaliser', 'remboursement:ecrire',
+]);
+const actualiserInventaire = (sender) => {
+  const win = fenetresNatives.get('inventaire');
+  if (!win || win.isDestroyed()) return;
+  if (sender && win.webContents === sender) return;
+  win.webContents.executeJavaScript('window.szActualiser && window.szActualiser()', true).catch(() => {});
+};
+
 ipcMain.handle('pont:appeler', async (e, op, args) => {
   const nom = String(op || '');
   if (!OPS_PONT.has(nom)) return { ok: false, motif: 'operation_inconnue' };
@@ -1212,6 +1235,7 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
       setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, LIMITES_PONT[nom] || 8000);
     });
     const r = await Promise.race([travail, plafond]);
+    if (r && r.ok && OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) actualiserInventaire(e.sender);
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
   } catch { return { ok: false, motif: 'pont_indisponible' }; }
 });
