@@ -988,7 +988,7 @@ const OPS_PONT = new Set([
   'stock:produits', 'stock:skuUn', 'stock:skuTous', 'stock:skuPad6',
   'stock:venteFinale', 'stock:vendre', 'stock:endommages',
   'stock:endommagesRapport', 'stock:entrepots', 'stock:entrepotEcrire',
-  'stock:entrepotSupprimer', 'stock:modifier',
+  'stock:entrepotSupprimer', 'stock:modifier', 'stock:supprimer',
   // Expédition. ⚠ `expedition:etiquette` DÉPENSE DE L'ARGENT — une étiquette est
   // facturée dès sa création. Toute la règle (garde anti-double-achat, secrets
   // transporteurs, XML) reste dans le site ; le pont ne porte que le service et
@@ -1100,7 +1100,7 @@ ipcMain.handle('fenetre:produit', (e, id) => {
   // pour ne pas ouvrir deux assistants vierges concurrents.
   const cle = brut ? 'produit-' + brut.replace(/[^\w-]/g, '') : 'produit';
   ouvrirNative(cle, brut ? 'Produit' : 'Nouveau produit', pageProduit(brut),
-    { width: 900, height: 720, minHeight: 520 });
+    { width: 980, height: 860, minHeight: 520 });
   // Pas de szRevenir ici : l'assistant Produit ne sait pas encore se replacer.
   // Reutilisee, la fenetre revient simplement au premier plan.
   return true;
@@ -1675,7 +1675,7 @@ const actionApp = (nom) => {
       ouvrirNative('collection', 'Nouvelle collection', pageCollection(''), { width: 860, height: 760 });
       break;
     case 'produit-nouveau':
-      ouvrirNative('produit', 'Nouveau produit', pageProduit(''), { width: 900, height: 720, minHeight: 520 });
+      ouvrirNative('produit', 'Nouveau produit', pageProduit(''), { width: 980, height: 860, minHeight: 520 });
       break;
     // ⚠ L AFFICHAGE CLIENT EST FAIT POUR ÊTRE POSÉ SUR UN SECOND ÉCRAN, face à la
     // cliente. D'où une fenêtre plus grande et une hauteur minimale généreuse : le
@@ -1895,15 +1895,26 @@ ipcMain.handle('menu:modele', (e, m) => {
 // Ajuste une fenêtre à la hauteur reelle de son contenu (voir pageApropos).
 // ⚠ Bornée à l'écran : un contenu inattendu ne doit pas produire une fenêtre
 // plus haute que le moniteur, qu'on ne pourrait plus ni lire ni fermer.
-ipcMain.on('fenetre:hauteur', (e, h) => {
+ipcMain.on('fenetre:hauteur', (e, h, garder) => {
   const win = BrowserWindow.fromWebContents(e.sender);
   if (!win || win.isDestroyed() || !h) return;
   try {
     const { screen } = require('electron');
-    const dispo = screen.getDisplayMatching(win.getBounds()).workAreaSize.height;
+    const ecran = screen.getDisplayMatching(win.getBounds());
+    const dispo = ecran.workAreaSize.height;
     const [larg] = win.getContentSize();
     win.setContentSize(larg, Math.min(Math.max(320, Math.round(h)), dispo - 60));
-    win.center();
+    // ⚠ `garder` : la fenetre reste OU ELLE EST (l assistant Produit se recale a
+    // chaque etape — la recentrer arracherait la fenetre des mains de la
+    // personne qui l a placee). On la ramene seulement si le bas sort de
+    // l ecran. Sans `garder`, comportement historique : centree (palette,
+    // reglages, qui s ouvrent pres du menu).
+    if (!garder) { win.center(); return; }
+    const b = win.getBounds();
+    const wa = ecran.workArea;
+    const x = Math.max(wa.x, Math.min(b.x, wa.x + wa.width - b.width));
+    const y = Math.max(wa.y, Math.min(b.y, wa.y + wa.height - b.height));
+    if (x !== b.x || y !== b.y) win.setPosition(x, y);
   } catch {}
 });
 

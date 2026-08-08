@@ -1758,6 +1758,52 @@ function pageProduit(id) {
     P.appeler('produit:brouillonEcrire', d).then(function(){ P.fermer(); });
   }
 
+  /* ⚠⚠ AUCUNE GLISSIERE, A AUCUNE ETAPE — ET QUE CA LE RESTE MALGRE LES AJOUTS.
+     Le corps ne defile pas (regle du socle) : quand une etape est plus haute que
+     la fenetre, elle etait COUPEE en bas (vu sur << Identite, prix et poids >>,
+     2026-08-07). La fenetre se met donc A LA TAILLE DE SON CONTENU :
+     - a chaque etape et a CHAQUE changement du contenu (MutationObserver — un
+       jeton de couleur ajoute, une ligne de stock de plus, tout est vu, y
+       compris ce qu on ajoutera plus tard), la hauteur necessaire est mesuree
+       et demandee au processus principal ;
+     - << garder >> : la fenetre reste ou la personne l a posee (juste ramenee dans
+       l ecran si le bas sort), au lieu d etre recentree a chaque etape ;
+     - le principal PLAFONNE a la hauteur de l ecran ; si malgre tout ca ne
+       tient pas (petit ecran), on REDUIT LE RENDU (zoom) plutot que de couper
+       ou de faire apparaitre une glissiere. */
+  var calT = null, calDern = 0;
+  function caler(){
+    if (!P || !P.ajusterHauteur) return;
+    var corps = document.getElementById('corps');
+    if (!corps || !corps.style) return;
+    corps.style.zoom = '';
+    var besoin = document.body.scrollHeight - corps.clientHeight + corps.scrollHeight;
+    if (!(besoin > 0)) return;
+    // On ne redemande pas la meme hauteur en boucle : l observateur voit aussi
+    // nos propres retouches de style.
+    if (Math.abs(besoin - calDern) < 3) { secours(); return; }
+    calDern = besoin;
+    P.ajusterHauteur(besoin + 2, true);
+  }
+  function secours(){
+    var corps = document.getElementById('corps');
+    if (!corps || !corps.style) return;
+    corps.style.zoom = '';
+    var deb = corps.scrollHeight, vu = corps.clientHeight;
+    if (deb > 0 && vu > 0 && deb > vu + 4) corps.style.zoom = String(Math.max(0.7, vu / deb));
+  }
+  function calerBientot(){ clearTimeout(calT); calT = setTimeout(caler, 120); }
+  window.addEventListener('resize', function(){ clearTimeout(calT); calT = setTimeout(secours, 150); });
+  if (typeof MutationObserver !== 'undefined') {
+    // childList + subtree SEULEMENT : observer les attributs verrait nos propres
+    // changements de style (zoom) et tournerait en rond.
+    new MutationObserver(calerBientot).observe(document.getElementById('corps'), { childList: true, subtree: true });
+  }
+  document.getElementById('pas').addEventListener('click', calerBientot);
+  document.getElementById('btn-prec').addEventListener('click', calerBientot);
+  document.getElementById('btn-suiv').addEventListener('click', calerBientot);
+  calerBientot();
+
   bEnr.onclick = enregistrer;
   document.getElementById('btn-annuler').onclick = fermerProprement;
   document.addEventListener('keydown', function(ev){

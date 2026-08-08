@@ -622,7 +622,7 @@ module.exports = {
             { cle: 'robes', nom: 'Robes', couleur: '#c084fc' },
             { cle: 'hauts', nom: 'Hauts', couleur: '#60a5fa' },
           ],
-          peutEcrire: true, peutAjouter: true,
+          peutEcrire: true, peutAjouter: true, peutSupprimer: true,
           total: 4, page: 0, pages: 1, parPage: 25,
           lignes: [
             { id: 'p_0001', sku: 'ROB-0001', nom: 'Robe cintrée', categorie: 'robes',
@@ -727,7 +727,7 @@ module.exports = {
         'stock:produits': {
           ok: true,
           stats: { total: 1, inventories: 1, sansSku: 0, rupture: 0, aCommander: 0, unites: 6 },
-          pad6: { n: 0 }, cats: [], peutEcrire: true, peutAjouter: true,
+          pad6: { n: 0 }, cats: [], peutEcrire: true, peutAjouter: true, peutSupprimer: false,
           total: 0, page: 0, pages: 1, parPage: 25, lignes: [],
         },
         'stock:lire': {
@@ -772,7 +772,7 @@ module.exports = {
         'stock:produits': {
           ok: true,
           stats: { total: 1, inventories: 0, sansSku: 1, rupture: 0, aCommander: 0, unites: 1 },
-          pad6: { n: 0 }, cats: [], peutEcrire: false, peutAjouter: false,
+          pad6: { n: 0 }, cats: [], peutEcrire: false, peutAjouter: false, peutSupprimer: false,
           total: 0, page: 0, pages: 1, parPage: 25, lignes: [],
         },
         'stock:lire': {

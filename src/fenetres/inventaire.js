@@ -9,8 +9,10 @@
  * Réapprovisionnement, Produits endommagés (avec le rapport imprimable,
  * reconstruit des DONNÉES — celui du site lisait le tableau affiché) et
  * Entrepôt (ajout/édition en ligne, suppression refusée si utilisé).
- * ⚠ LA SUPPRESSION D'UN PRODUIT N'EST PAS ICI, à dessein : elle reste à
- * l'écran Inventaire de la page. « Modifier » ouvre l'assistant Produit natif.
+ * La SUPPRESSION d'un produit se fait ici aussi (demandé le 2026-08-07) : même
+ * cœur que la modale du site (`Admin._produitSupprimerEcrire` — nettoyage R2,
+ * purge de l'historique), confirmation dans la fenêtre, droits au pont.
+ * « Modifier » ouvre l'assistant Produit natif.
  * Elle ne charge aucune page du site et ne fait aucun appel web — tout passe
  * par le pont, qui interroge la fenêtre principale, seule porteuse de la
  * session.
@@ -272,7 +274,7 @@ ${JS_ACTIVITE}
   // ── Onglet Produits ── La liste est paginee et filtree PAR LE SITE
   // (stock:produits) : la fenetre n envoie que le filtre, jamais un catalogue.
   var PRODS = null;    // derniere reponse de stock:produits
-  var FP = { q: '', etat: '', cats: [], page: 0, parPage: 25, menu: false };
+  var FP = { q: '', etat: '', cats: [], page: 0, parPage: 25, menu: false, auto: true };
   // ⚠ Mode << vente finale en lot >> : les coches vivent ICI, pas dans les cases
   // affichees — l ecran du site ne lisait que la PAGE VISIBLE de ses cases, une
   // selection posee puis paginee etait perdue sans un mot.
@@ -288,7 +290,20 @@ ${JS_ACTIVITE}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ msg.className = 'msg' + (cl ? ' ' + cl : ''); msg.textContent = t || ''; }
+  // ⚠ Une BONNE nouvelle s efface d elle-meme : << Fiche produit ouverte dans sa
+  // fenetre >> qui reste affiche des heures finit par mentir. Les ERREURS et les
+  // avertissements, eux, restent — on doit pouvoir les lire en revenant.
+  var direT = null;
+  function dire(t, cl){
+    clearTimeout(direT);
+    msg.className = 'msg' + (cl ? ' ' + cl : '');
+    msg.textContent = t || '';
+    if (cl === 'bon' && t) {
+      direT = setTimeout(function(){
+        if (msg.textContent === t) { msg.textContent = ''; msg.className = 'msg'; }
+      }, 6000);
+    }
+  }
 
   // ⚠ CHAQUE REFUS A SA PHRASE. Un ecran muet sur un refus de droit ressemble a
   // une panne, et l on cherche partout sauf dans les permissions.
@@ -341,7 +356,7 @@ ${JS_ACTIVITE}
   function vide(titre, detail){
     corps.innerHTML = '<div class="carte plein"><div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div></div>';
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '';
     brancherFermer();
   }
 
@@ -445,8 +460,7 @@ ${JS_ACTIVITE}
     h += '</div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = (enRecherche ? '<button id="btn-retour">← Réapprovisionnement</button>' : '')
-      + '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = enRecherche ? '<button id="btn-retour">← Réapprovisionnement</button>' : '';
     brancherListe();
   }
 
@@ -552,8 +566,7 @@ ${JS_ACTIVITE}
 
     actions.innerHTML = '<button id="btn-retour">← Liste</button>'
       + (PROD.sku ? '<button id="btn-tout">🖨 Tous les codes-barres</button>' : '')
-      + '<button class="prim" id="btn-enr">Enregistrer l’inventaire</button>'
-      + '<button id="btn-fermer">Fermer</button>';
+      + '<button class="prim" id="btn-enr">Enregistrer l’inventaire</button>';
     brancherProduit();
     majBouton();
   }
@@ -604,10 +617,11 @@ ${JS_ACTIVITE}
   }
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
-  function brancherFermer(){
-    var f = document.getElementById('btn-fermer');
-    if (f) f.onclick = function(){ quitter(); };
-  }
+  // ⚠ PLUS DE BOUTON << Fermer >> AU PIED (retire sur demande, 2026-08-07) : la
+  // barre de titre et Echap ferment, et les deux passent par quitter() — le
+  // verrou est donc toujours rendu. La fonction reste comme point d ancrage des
+  // dessins, vide.
+  function brancherFermer(){}
 
   var rechT = null;
   function brancherListe(){
@@ -727,7 +741,7 @@ ${JS_ACTIVITE}
     var d = PRODS;
     if (!d) {
       corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
-      actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+      actions.innerHTML = '';
       brancherFermer();
       return;
     }
@@ -814,7 +828,8 @@ ${JS_ACTIVITE}
           +   '<button class="mini" data-inv="' + esc(l.id) + '" title="Gérer l’inventaire">📦 Inventaire</button> '
           +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="Assigner un SKU">🏷 SKU</button> ' : '')
           +   (d.peutEcrire ? '<button class="mini" data-mod="' + esc(l.id) + '" title="Modifier la fiche produit">✎ Modifier</button> ' : '')
-          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="Mettre en vente">🛒 Vendre</button>' : '')
+          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="Mettre en vente">🛒 Vendre</button> ' : '')
+          +   (d.peutSupprimer ? '<button class="mini" data-suppr="' + esc(l.id) + '" data-nom="' + esc(l.nom) + '" title="Supprimer de l’inventaire" style="border-color:rgba(239,68,68,.45)">🗑</button>' : '')
           + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -823,8 +838,9 @@ ${JS_ACTIVITE}
       var fin = Math.min((d.page + 1) * d.parPage, d.total);
       h += '<div class="pagi">'
         + '<span>Afficher</span><select id="fp-taille">'
+        + '<option value="auto"' + (FP.auto ? ' selected' : '') + '>Auto</option>'
         + [10, 25, 50, 100].map(function(n){
-            return '<option value="' + n + '"' + (FP.parPage === n ? ' selected' : '') + '>' + n + '</option>'; }).join('')
+            return '<option value="' + n + '"' + (!FP.auto && FP.parPage === n ? ' selected' : '') + '>' + n + '</option>'; }).join('')
         + '</select><span>par page</span>'
         + '<span class="pos">' + debut + '–' + fin + ' sur ' + d.total + ' '
         + (d.pages > 1
@@ -834,15 +850,40 @@ ${JS_ACTIVITE}
             : '')
         + '</span></div>';
     }
-    // ⚠ Dit une fois, la ou on la chercherait : la suppression n est PAS ici.
-    h += '<div class="aide" style="margin-top:.4rem">La <b>suppression</b> d’un produit se fait '
-      + 'à l’écran Inventaire de la page — pas dans cette fenêtre.</div>';
     h += '</div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '';
     brancherProduits();
+    pageAutoAjuste();
   }
+
+  /* ⚠ PAGINATION << AUTO >> : autant de lignes que la hauteur REELLE le permet
+     — quand ca arriverait a la glissiere, ca change de page a la place. Mesure,
+     jamais devine (meme choix que les listes paginees du socle) : une valeur
+     fixe deborde sur un petit ecran et laisse du vide sur un grand.
+     Stable par construction : on ne recharge que si le compte mesure differe de
+     la cadence courante, et la mesure ne depend pas du nombre de lignes recues
+     (la grille est en flex, sa hauteur est celle de la place disponible). */
+  var autoT = null;
+  function pageAutoAjuste(){
+    if (!FP.auto || ONGLET !== 'produits' || VUE === 'produit' || !PRODS) return;
+    var g = corps.querySelector('.grille');
+    if (!g) return;
+    var th = g.querySelector('thead');
+    var tr = g.querySelector('tbody tr');
+    var hL = tr ? tr.offsetHeight : 0;
+    if (!(hL > 0)) hL = 34;
+    var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
+    // Un faux document (le banc) mesure NaN : on ne touche a rien dans ce cas.
+    if (!(dispo > 0)) return;
+    var n = Math.max(5, Math.floor(dispo / hL));
+    if (isFinite(n) && n !== FP.parPage) { FP.parPage = n; FP.page = 0; chargerOnglet(); }
+  }
+  window.addEventListener('resize', function(){
+    clearTimeout(autoT);
+    autoT = setTimeout(pageAutoAjuste, 180);
+  });
 
   function menuCats(cats){
     if (!cats.length) return '';
@@ -882,7 +923,11 @@ ${JS_ACTIVITE}
       var t = ev.target;
       if (!t) return;
       if (t.id === 'fp-etat') { FP.etat = t.value; FP.page = 0; chargerOnglet(); return; }
-      if (t.id === 'fp-taille') { FP.parPage = parseInt(t.value, 10) || 25; FP.page = 0; chargerOnglet(); return; }
+      if (t.id === 'fp-taille') {
+        if (t.value === 'auto') { FP.auto = true; FP.page = 0; dessiner(); pageAutoAjuste(); }
+        else { FP.auto = false; FP.parPage = parseInt(t.value, 10) || 25; FP.page = 0; chargerOnglet(); }
+        return;
+      }
       if (t.id === 'lot-page') {
         // Coche ou decoche LA PAGE AFFICHEE — la selection des autres pages
         // reste ce qu elle etait, et elle est comptee sous les yeux.
@@ -931,6 +976,8 @@ ${JS_ACTIVITE}
       if (pid) { modifier(pid); return; }
       pid = b.getAttribute('data-vendre');
       if (pid) { vendre(pid, b); return; }
+      pid = b.getAttribute('data-suppr');
+      if (pid) { supprimer(pid, b.getAttribute('data-nom') || ''); return; }
     };
   }
 
@@ -990,6 +1037,25 @@ ${JS_ACTIVITE}
       else b.disabled = false;
     });
   }
+  function supprimer(pid, nom){
+    voile('<h3>Supprimer de l’inventaire</h3>'
+      + '<p>Supprimer définitivement <strong>' + esc(nom) + '</strong> de l’inventaire ? '
+      + 'Cette action est <strong>irréversible</strong>.</p>'
+      + '<div class="fin2"><button id="v-non">Annuler</button>'
+      + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:#fff">Supprimer</button></div>',
+      function(fermer){
+        document.getElementById('v-non').onclick = fermer;
+        document.getElementById('v-oui').onclick = function(){
+          this.disabled = true;
+          appeler('stock:supprimer', [pid]).then(function(r){
+            fermer();
+            dire(r.ok ? 'Produit supprimé.' : expliquer(r), r.ok ? 'bon' : 'err');
+            if (r.ok) chargerOnglet();
+          });
+        };
+      });
+  }
+
   function venteFinaleLot(activer){
     var ids = Object.keys(COCHES);
     if (!ids.length) { dire(MOTIFS.aucun_produit, 'att'); return; }
@@ -1006,7 +1072,7 @@ ${JS_ACTIVITE}
     var d = DMG;
     if (!d) {
       corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
-      actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+      actions.innerHTML = '';
       brancherFermer();
       return;
     }
@@ -1050,7 +1116,7 @@ ${JS_ACTIVITE}
     }
     h += '</div>';
     corps.innerHTML = h;
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '';
     brancherEndommages();
   }
 
@@ -1083,7 +1149,7 @@ ${JS_ACTIVITE}
     var d = WHS;
     if (!d) {
       corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
-      actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+      actions.innerHTML = '';
       brancherFermer();
       return;
     }
@@ -1125,7 +1191,7 @@ ${JS_ACTIVITE}
     });
     h += '</tbody></table></div></div>';
     corps.innerHTML = h;
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '';
     brancherEntrepots();
     var champ = document.getElementById('wh-code');
     if (champ) { champ.focus(); try { champ.setSelectionRange(champ.value.length, champ.value.length); } catch (e) {} }

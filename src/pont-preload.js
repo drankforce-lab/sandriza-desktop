@@ -84,5 +84,8 @@ contextBridge.exposeInMainWorld('szPont', {
   // Même raison que la palette : une hauteur devinée d'avance se fait démentir
   // par la moindre ligne ajoutée ou par une mise à l'échelle Windows autre
   // que 100 %.
-  ajusterHauteur: (h) => ipcRenderer.send('fenetre:hauteur', Math.round(h) || 0),
+  // `garder` = true : la fenêtre reste où elle est (juste ramenée dans l'écran
+  // si le bas déborde) au lieu d'être recentrée — pour l'assistant Produit, qui
+  // se recale à CHAQUE étape.
+  ajusterHauteur: (h, garder) => ipcRenderer.send('fenetre:hauteur', Math.round(h) || 0, !!garder),
 });
