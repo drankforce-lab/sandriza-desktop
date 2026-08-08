@@ -82,9 +82,14 @@ button.traite{background:#78350f;color:#fde68a;border-color:#b45309;
 .jetons{display:flex;gap:.28rem;flex-wrap:wrap}
 .jetons button{font-size:.74rem;padding:.1rem .5rem;border-radius:99px}
 .jetons button.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:#e8dcc6}
-/* Prioritaires : l ambre du site, et un compte qui dit le RESTE-A-FAIRE. */
-.jetons button.prio{border-color:rgba(245,158,11,.55);color:#f0c987}
-.jetons button.prio.on{background:#f59e0b;border-color:#f59e0b;color:#1a1a2e;font-weight:700}
+/* Prioritaires : l ambre du site, et un compte qui dit le RESTE-A-FAIRE.
+   ⚠ Regles AUTONOMES : le bouton vit HORS du groupe .jetons, une regle
+   prefixee .jetons ne l atteignait jamais - le bouton ne s allumait pas
+   (signale le 2026-08-07). */
+button.prio{border-color:rgba(245,158,11,.55);color:#f0c987;border-radius:99px;
+  font-size:.74rem;padding:.1rem .5rem;margin-left:.4rem}
+button.prio.on{background:#f59e0b;border-color:#f59e0b;color:#1a1a2e;font-weight:700}
+button.prio.on:hover{background:#fbbf24;border-color:#fbbf24}
 .eclair{color:#f59e0b;margin-right:.2rem}
 
 /* La liste : la seule zone qui defile. */
