@@ -2415,9 +2415,13 @@ ipcMain.on('panneau:taille', (e, w, h) => {
     const b = panneauWin.getBounds();
     const { screen } = require('electron');
     const wa = screen.getDisplayMatching(b).workArea;
-    const W = Math.min(Math.max(170, Math.round((w || 260) * f)), 520);
+    /* ⚠ BORNE = L ESPACE D ECRAN, jamais un chiffre en dur : le plafond de
+       520 px tranchait le sous-menu ouvert (bord droit sans coins ronds,
+       releve du 2026-08-09). Au pire, la fenetre glisse vers la gauche pour
+       que tout tienne. */
+    const W = Math.min(Math.max(170, Math.round((w || 260) * f)), wa.width - 16);
     const H = Math.min(Math.max(40, Math.round((h || 120) * f)), wa.y + wa.height - b.y - 8);
-    panneauWin.setBounds({ x: Math.min(b.x, wa.x + wa.width - W - 4), y: b.y, width: W, height: H });
+    panneauWin.setBounds({ x: Math.max(wa.x + 4, Math.min(b.x, wa.x + wa.width - W - 4)), y: b.y, width: W, height: H });
   } catch {}
 });
 ipcMain.on('panneau:survol', (e, dedans) => {
