@@ -1043,6 +1043,8 @@ const OPS_PONT = new Set([
   'messagerie:liste', 'messagerie:lire', 'messagerie:repondre', 'messagerie:supprimer',
   // Les notes de version (fenetre Notes) : les entrees brutes du site.
   'notes:lire',
+  // Les archives (fenetre Archives, 1.60.0) : quatre piles + reactivation.
+  'archives:liste', 'archives:reactiver', 'archives:ouvrir',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1289,6 +1291,7 @@ const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
   'commandes:statutEcrire', 'commandes:supprimerEcrire', 'commandes:fraisEcrire',
   'expedition:confirmer', 'retour:enregistrer', 'retour:recu', 'retour:litige',
   'client:ecrire', 'client:purger', 'client:restaurer',
+  'archives:reactiver',
 ]);
 
 ipcMain.handle('pont:appeler', async (e, op, args) => {
@@ -1332,8 +1335,8 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
       // La liste Produits en vente suit celles de l inventaire (fiches, stock) ;
       // Clients suit les deux (une vente change ses totaux, client:ecrire sa
       // fiche) ; Retours suit les operations de retour des deux ensembles.
-      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures', 'produits', 'clients', 'retours', 'codesbarres');
-      else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau', 'factures', 'clients', 'retours');
+      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures', 'produits', 'clients', 'retours', 'codesbarres', 'archives');
+      else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau', 'factures', 'clients', 'retours', 'archives');
       // Les assistants collection et fournisseur previennent leur liste.
       if (nom === 'collection:enregistrer') fenetres.push('collections');
       if (nom === 'fournisseur:enregistrer') fenetres.push('fournisseurs');
@@ -1388,6 +1391,7 @@ const PAGES_ANCRABLES = () => ({
   codesbarres: ['Impression de codes-barres', () => pageCodesbarres()],
   avis: ['Avis produits', () => pageAvis()],
   messagerie: ['Messagerie clients', () => pageMessagerie()],
+  archives: ['Archives', () => pageArchives()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2109,6 +2113,7 @@ const { pageRamassages } = require('./fenetres/ramassages');
 const { pageAvis } = require('./fenetres/avis');
 const { pageMessagerie } = require('./fenetres/messagerie');
 const { pageNotes } = require('./fenetres/notes');
+const { pageArchives } = require('./fenetres/archives');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2183,7 +2188,8 @@ const actionApp = (nom) => {
        separee HERITEE d un ancien menu est ramenee plutot que doublee. */
     case 'tableau': case 'inventaire': case 'commandes': case 'produits':
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
-    case 'retours': case 'codesbarres': case 'avis': case 'messagerie': {
+    case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
+    case 'archives': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

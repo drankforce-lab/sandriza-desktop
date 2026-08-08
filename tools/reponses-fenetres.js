@@ -513,6 +513,63 @@ module.exports = {
     },
   ],
 
+  // ── ARCHIVES ───────────────────────────────────────────────────────────────
+  'archives.js': [
+    {
+      // ⚠ FORME REELLE de archives:liste (lignes du coeur Admin._archivesDonnees).
+      nom: 'archives garnies',
+      id: '',
+      reponses: {
+        'archives:liste': {
+          ok: true, peutRembourser: true, peutReactiver: true,
+          commandes: [
+            { id: 'o1', num: 'CMD-2026-0412', date: '12 mai 2026', client: 'Marie Tremblay',
+              courriel: 'marie@example.com', total: '154,26 $', statut: 'Livrée',
+              rembourse: false, archivee: '27 juin 2026' },
+            { id: 'o2', num: 'CMD-2026-0398', date: '2 mai 2026', client: 'Julie Gagnon',
+              courriel: 'julie@example.com', total: '89,12 $', statut: 'Livrée',
+              rembourse: true, archivee: '17 juin 2026' },
+          ],
+          retours: [
+            { id: 'r1', num: 'CMD-2026-0355', date: '20 avr. 2026', client: 'Anne Roy',
+              courriel: 'anne@example.com', statut: 'Complétée', motif: 'Taille trop petite',
+              archivee: '10 juin 2026' },
+          ],
+          factures: [
+            { id: 'f1', num: 'FAC-2026-0412', commande: 'CMD-2026-0412', date: '12 mai 2026',
+              client: 'Marie Tremblay', courriel: 'marie@example.com', manuel: false,
+              total: '154,26 $', statut: 'paid', archivee: '27 juin 2026' },
+          ],
+          remboursements: [
+            { id: 'rb1', num: 'RMB-000031', date: '2026-06-01', commande: 'CMD-2026-0398',
+              commandeId: 'o2', client: 'Julie Gagnon', type: 'Original',
+              total: '89,12 $', archivee: '17 juin 2026' },
+          ],
+        },
+        'archives:ouvrir': { ok: true },
+        'archives:reactiver': { ok: true, num: 'CMD-2026-0412' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'archives vides',
+      id: '',
+      reponses: {
+        'archives:liste': { ok: true, peutRembourser: false, peutReactiver: false,
+          commandes: [], retours: [], factures: [], remboursements: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'archives:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── NOTES DES MISES À JOUR ─────────────────────────────────────────────────
   'notes.js': [
     {
