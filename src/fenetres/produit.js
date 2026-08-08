@@ -44,13 +44,21 @@ const CSS_PROPRE = `
    contour PLEIN or et a son libelle, les secondaires restent en POINTILLE
    meme remplies. Tout se glisse : une secondaire deposee sur la principale
    prend sa place (l ancienne descend dans la ligne). */
-.ligne-photos{display:flex;gap:.65rem;align-items:flex-start;flex-wrap:wrap}
-.vue-principale{flex:0 0 auto;width:120px}
-.ligne-photos .vign{width:120px;height:120px;border-radius:10px}
-.ligne-photos .vign,.ligne-photos .vign.pleine{border:2px solid #c9a97e}
-.lgd-principale{font-size:.68rem;color:#c9a97e;text-align:center;margin-top:.18rem;
+.ligne-photos{display:flex;gap:.7rem;align-items:flex-start;flex-wrap:wrap}
+.vue-principale{flex:0 0 auto;width:160px}
+/* ⚠ STYLE COMPLET, pas un simple habillage : la vignette vivait dans .photo
+   et ses regles (centrage flex, couleurs, curseur) etaient prefixees .photo —
+   sortie du conteneur a la fusion, elle avait tout perdu et << aucune photo >>
+   collait au coin (2026-08-08). */
+.ligne-photos .vign{position:relative;width:160px;height:160px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;color:#8fa1b8;
+  font-size:.75rem;overflow:hidden;text-align:center;cursor:pointer;
+  background:#0f1826;border:2px solid #c9a97e}
+.ligne-photos .vign:hover{border-color:#d8bd97}
+.ligne-photos .vign img{width:100%;height:100%;object-fit:cover}
+.lgd-principale{font-size:.68rem;color:#c9a97e;text-align:center;margin-top:.22rem;
   font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-#p-vues .vue .cadre{width:100%;height:120px}
+#p-vues .vue .cadre{width:100%;height:160px}
 #p-vues .cadre.pleine{border-style:dashed;border-color:rgba(255,255,255,.4)}
 .cadre.survol,.vign.survol{outline:3px solid #4ade80;outline-offset:2px}
 .mini-decor{display:block;width:100%;margin-top:.3rem;font-size:.72rem;
@@ -106,7 +114,7 @@ const CSS_PROPRE = `
    se resserrent sans jamais se deformer, et « nowrap » interdit le retour a la
    ligne au lieu de compter sur la chance. */
 #p-vues{flex-wrap:nowrap}
-#p-vues .vue{flex:0 0 auto;width:120px;max-width:120px}
+#p-vues .vue{flex:0 0 auto;width:160px;max-width:160px}
 #p-vues .vue .cadre{width:100%;height:auto;aspect-ratio:1/1;font-size:.72rem}
 .lgstk{display:flex;align-items:center;gap:.5rem;padding:.2rem .3rem;border-radius:6px}
 .lgstk .c1{flex:0 0 4.5rem}
@@ -417,7 +425,7 @@ function pageProduit(id) {
       + '<div class="carte"><h2 id="p-vues-titre">Photos</h2>'
       + '<div class="ligne-photos">'
       + '<div class="vue-principale">'
-      + '<div class="vign" id="p-vign" title="Photo principale — cliquer pour choisir, ou déposer une secondaire ici">aucune photo</div>'
+      + '<div class="vign" id="p-vign" title="Photo principale — cliquer pour choisir, ou déposer une secondaire ici">choisir une photo</div>'
       + '<div class="lgd-principale">Photo principale</div>'
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
       + 'title="Détourer la photo et poser un décor (studio, jardin, Paris…)">✂ Décor</button></div>'
