@@ -165,30 +165,68 @@ body{background:var(--sz-bg,${sombre ? '#131b2a' : '#ffffff'})}
 ${css}
 /* ⚠ COMPACT, ET APRES la feuille du site pour la battre : le panneau herite
    de l echelle du MENU (d.police x menuTaille), pensee pour une barre — en
-   panneau vertical c etait << beaucoup trop gros >> (2026-08-09, deux fois).
-   Police et espacements FIXES, environ moitie de l empreinte d avant. Ces
-   reglages ne vivent QUE dans cette fenetre : la barre et les panneaux des
-   ecrans web gardent les leurs. */
-.sz-panneau{font-size:12px!important;line-height:1.3!important;padding:.3rem .25rem!important}
-.sz-panneau .sz-item{padding:.26em .85em!important;line-height:1.3!important;min-height:0!important;gap:.5em!important}
-.sz-panneau .sz-lbl{font-size:12px!important}
-.sz-panneau .sz-acc{font-size:10px!important}
-.sz-panneau .sz-titre{font-size:10px!important;padding:.5em .85em .15em!important;margin:0!important}
-.sz-panneau .sz-sep{margin:.28em .5em!important}
+   panneau vertical c etait trop gros ; 12 px etait trop petit (2026-08-09).
+   13,5 px et retraits serres. Ces reglages ne vivent QUE dans cette fenetre :
+   la barre et les panneaux des ecrans web gardent les leurs. */
+.sz-panneau{font-size:13.5px!important;line-height:1.35!important;padding:.32rem .28rem!important}
+.sz-panneau .sz-item{padding:.3em .9em!important;line-height:1.35!important;min-height:0!important;gap:.55em!important}
+.sz-panneau .sz-lbl{font-size:13.5px!important}
+.sz-panneau .sz-acc{font-size:11px!important}
+.sz-panneau .sz-titre{font-size:11px!important;padding:.55em .9em .2em!important;margin:0!important}
+.sz-panneau .sz-sep{margin:.3em .5em!important}
+/* Les SOUS-MENUS volants : la colonne principale et le sous-panneau vivent
+   cote a cote dans la meme fenetre, qui s elargit quand un sous-menu s ouvre. */
+#rangee{display:flex;align-items:flex-start}
+#sous{display:none}
+.sz-item .sz-fleche{margin-left:auto;opacity:.6;font-size:.8em}
 </style></head><body>
 <script>
 (function(){
   var D = ${JSON.stringify({ menus })};
   function envoyer(it){ try{ window.szPalette && window.szPalette.action(it); }catch(e){} }
 
-  function entree(it){
+  var rangee=document.createElement('div'); rangee.id='rangee';
+  var sous=document.createElement('div'); sous.id='sous';
+  sous.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
+
+  function mesurer(){
+    try {
+      window.szPalette.taille(Math.ceil(rangee.scrollWidth) + 2, Math.ceil(rangee.scrollHeight) + 2);
+    } catch(e){}
+  }
+  function cacherSous(){
+    if (sous.style.display !== 'block') return;
+    sous.style.display='none'; sous.innerHTML='';
+    mesurer();
+  }
+  /* LES SOUS-MENUS VOLANTS (« je n'ai plus mes sous-menus », 2026-08-09) :
+     survoler un parent ouvre son panneau A DROITE, aligne sur lui — la
+     fenetre s elargit d autant, et se resserre quand il se referme. */
+  function montrerSous(it, parent){
+    sous.innerHTML='';
+    (it.sub||[]).forEach(function(si){ sous.appendChild(entree(si, true)); });
+    sous.style.display='block';
+    sous.style.marginTop=Math.max(0, parent.offsetTop - 4) + 'px';
+    mesurer();
+  }
+
+  function entree(it, dansSous){
     if(it.sep){ var h=document.createElement('div'); h.className='sz-sep'; return h; }
     var b=document.createElement('button'); b.type='button'; b.className='sz-item';
     if(it.coche!==undefined){ var c=document.createElement('span'); c.className='sz-coche';
       c.textContent=it.coche?'\\u2713':''; b.appendChild(c); }
     var l=document.createElement('span'); l.className='sz-lbl'; l.textContent=it.label; b.appendChild(l);
     if(it.accel){ var a=document.createElement('span'); a.className='sz-acc'; a.textContent=it.accel; b.appendChild(a); }
-    b.onclick=function(){ envoyer(it); };
+    if(it.sub){
+      var f=document.createElement('span'); f.className='sz-fleche'; f.textContent='\\u25B8'; b.appendChild(f);
+      b.onmouseenter=function(){ montrerSous(it, b); };
+      b.onclick=function(){ montrerSous(it, b); };
+    } else {
+      b.onclick=function(){ envoyer(it); };
+      // Passer sur un element SANS sous-menu referme le sous-panneau — sauf
+      // dans le sous-panneau lui-meme, evidemment.
+      if(!dansSous) b.onmouseenter=cacherSous;
+    }
     return b;
   }
 
@@ -197,32 +235,21 @@ ${css}
     var pan=document.createElement('div');
     pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
     pan.style.display='none';
-    (m.items||[]).forEach(function(it){
-      if(it.sub){
-        // Sous-groupe aplati d'un cran, avec son libelle en intertitre — comme
-        // la palette : un panneau volant DANS un panneau volant serait coupe.
-        var t=document.createElement('div'); t.className='sz-titre'; t.textContent=it.label;
-        pan.appendChild(t);
-        it.sub.forEach(function(si){ pan.appendChild(entree(si)); });
-        return;
-      }
-      pan.appendChild(entree(it));
-    });
-    document.body.appendChild(pan);
+    (m.items||[]).forEach(function(it){ pan.appendChild(entree(it, false)); });
+    rangee.appendChild(pan);
     panneaux[m.label]=pan;
   });
+  rangee.appendChild(sous);
+  document.body.appendChild(rangee);
 
   // Bascule instantanee d'un menu a l'autre, et la fenetre epouse le contenu
   // REEL (jamais de barre de defilement).
   window.montrer = function(label){
+    sous.style.display='none'; sous.innerHTML='';
     Object.keys(panneaux).forEach(function(k){
       panneaux[k].style.display = (k === label) ? 'block' : 'none';
     });
-    var pan = panneaux[label];
-    if (!pan) return;
-    try {
-      window.szPalette.taille(Math.ceil(pan.offsetWidth) + 2, Math.ceil(pan.offsetHeight) + 2);
-    } catch(e){}
+    if (panneaux[label]) mesurer();
   };
 
   // Le survol tient le panneau ouvert — le quitter le referme, en differe court.

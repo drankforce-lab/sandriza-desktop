@@ -2137,13 +2137,15 @@ const actionApp = (nom) => {
     case 'tableau': case 'inventaire': case 'commandes': case 'produits':
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
     case 'retours': case 'codesbarres': {
-      const _aA = ancrees.get(action);
+      /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
+         (ReferenceError au premier clic de menu, 2026-08-09). */
+      const _aA = ancrees.get(nom);
       if (_aA && _aA.fenetre && !_aA.fenetre.isDestroyed()) { _aA.fenetre.show(); _aA.fenetre.focus(); break; }
-      const _avA = fenetresNatives.get(action);
+      const _avA = fenetresNatives.get(nom);
       if (_avA && !_avA.isDestroyed()) { _avA.show(); _avA.focus(); break; }
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.show(); mainWindow.focus();
-        try { mainWindow.webContents.send('dock:naviguer', action); } catch {}
+        try { mainWindow.webContents.send('dock:naviguer', nom); } catch {}
         break;
       }
       break;
