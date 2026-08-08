@@ -899,6 +899,32 @@ module.exports = {
      N'en éprouver qu'une laisserait la moitié du fichier dans l'ombre.
      ⚠ `id` porte ici le MODE, pas un identifiant de fiche : c'est ce que la
      fabrique `pageCommandes(mode)` attend. */
+  /* ── FACTURE ────────────────────────────────────────────────────────────────
+     Le document arrive PRÊT du site (facture:lire) : la fenêtre n'a qu'à le
+     poser sur son papier. Le jeu porte un document minimal mais REEL dans sa
+     forme (classes .invoice-*), et un style non vide. */
+  'facture.js': [
+    {
+      nom: 'facture payée',
+      id: 'inv_0001',
+      reponses: {
+        'facture:lire': {
+          ok: true, numero: 'FAC-2026-0117',
+          css: '.invoice-doc{background:#fff;padding:2rem}.invoice-status-banner.paid{background:#dcfce7;color:#166534}',
+          html: '<div class="invoice-doc"><div class="invoice-status-banner paid">✓ PAYÉE</div>'
+            + '<div class="invoice-header"><div class="invoice-logo">SANDRIZA</div>'
+            + '<div class="invoice-meta"><div class="invoice-num">FAC-2026-0117</div></div></div>'
+            + '<table class="invoice-table"><tbody><tr><td>Robe cintrée</td><td>M</td>'
+            + '<td>Noir</td><td>2</td><td>89,99 $</td><td>179,98 $</td></tr></tbody></table>'
+            + '<div class="invoice-totals"><div class="invoice-total-row grand">'
+            + '<span>TOTAL</span><span>206,93 $</span></div></div></div>',
+        },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   'commandes.js': [
     /* ⚠ LE DÉTAIL S'ÉPROUVE PAR « mode@identifiant » : le banc ne clique pas,
        et sans ce cas la vue détail (statut, remboursements, frais retenus,

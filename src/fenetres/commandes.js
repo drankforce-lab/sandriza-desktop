@@ -578,7 +578,7 @@ ${JS_ACTIVITE}
     var f = document.getElementById('det-fact');
     if (f) f.onclick = function(){
       appeler('commandes:facture', [DET_ID]).then(function(z){
-        dire(z.ok ? 'Facture ouverte dans la fenêtre principale.' : expliquer(z), z.ok ? 'bon' : 'err');
+        dire(z.ok ? (z.web ? 'Facture ouverte dans la fenêtre principale.' : 'Facture ouverte dans sa fenêtre.') : expliquer(z), z.ok ? 'bon' : 'err');
       });
     };
     var fr = document.getElementById('det-frais');

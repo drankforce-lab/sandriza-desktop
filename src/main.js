@@ -1009,6 +1009,7 @@ const OPS_PONT = new Set([
   'commandes:supprimerApercu', 'commandes:supprimerEcrire',
   'commandes:fraisApercu', 'commandes:fraisEcrire',
   'commandes:rembourser', 'commandes:facture', 'commandes:ouvrirDetail',
+  'facture:lire', 'facture:imprimer',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -1110,6 +1111,21 @@ ipcMain.handle('fenetre:produit', (e, id) => {
     { width: 980, height: 860, minHeight: 520 });
   // Pas de szRevenir ici : l'assistant Produit ne sait pas encore se replacer.
   // Reutilisee, la fenetre revient simplement au premier plan.
+  return true;
+});
+
+ipcMain.handle('fenetre:facture', (e, id) => {
+  const brut = String(id || '');
+  if (!brut) return false;
+  // Une fenetre PAR facture ; rouvrir la meme la ramene (szRevenir relit).
+  const cle = 'facture-' + brut.replace(/[^0-9A-Za-z_-]/g, '');
+  const _avant = fenetresNatives.get(cle);
+  const _reutilisee = !!(_avant && !_avant.isDestroyed());
+  const win = ouvrirNative(cle, 'Facture', pageFacture(brut),
+    { width: 920, height: 820, minWidth: 680, minHeight: 520 });
+  if (_reutilisee && win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
   return true;
 });
 
@@ -1657,6 +1673,7 @@ const { pageImprimantes } = require('./fenetres/imprimantes');
 const { pageFournisseur } = require('./fenetres/fournisseur');
 const { pageCollection } = require('./fenetres/collection');
 const { pageProduit } = require('./fenetres/produit');
+const { pageFacture } = require('./fenetres/facture');
 const { pageCommande } = require('./fenetres/commande');
 const { pageAffichage } = require('./fenetres/affichage');
 const { pageCaisse } = require('./fenetres/caisse');
