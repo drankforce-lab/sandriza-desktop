@@ -83,9 +83,21 @@ function pageCommande(id) {
   var sous = document.getElementById('sous');
   var CTX = null, CMD = null, COMPTES = {};
 
+  // ⚠ Les messages passagers (bonnes nouvelles, rappels comme << Verifiez le
+  // colis d abord >>) s effacent SEULS apres 10 s (demande le 2026-08-07) : un
+  // rappel qui reste des heures finit par ne plus etre lu. Les ERREURS restent
+  // — on doit pouvoir les lire en revenant a la fenetre.
+  var direT = null;
   function dire(t, genre){
+    clearTimeout(direT);
     var m = document.getElementById('msg');
     m.textContent = t || ''; m.className = 'msg' + (genre ? ' ' + genre : '');
+    if (t && (genre === 'bon' || genre === 'att')) {
+      direT = setTimeout(function(){
+        var m2 = document.getElementById('msg');
+        if (m2 && m2.textContent === t) { m2.textContent = ''; m2.className = 'msg'; }
+      }, 10000);
+    }
   }
   function vide(titre, detail){
     document.getElementById('corps').innerHTML =
