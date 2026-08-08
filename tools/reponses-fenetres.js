@@ -639,7 +639,7 @@ module.exports = {
         // ⚠ LE VERROU REFUSÉ EST UN CAS NORMAL, pas une panne : deux personnes
         // ouvrent la même fiche tous les jours. La fenêtre doit le dire, nommer
         // qui tient la fiche, et ne pas laisser enregistrer.
-        'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'Marc Dubé' },
+        'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'mdube' },
         identite: IDENTITE,
       },
     },
@@ -1237,7 +1237,7 @@ module.exports = {
               litige: { message: 'Le colis a été déposé au comptoir le 12.',
                 preuve: IMAGE, recuLe: '2026-08-05T09:00:00.000Z' } }),
             articles, remboursement: null, etiquette, modeles },
-          'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'Marc Dubé' },
+          'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'mdube' },
           'session:activite': { ok: true },
         },
       },
@@ -1368,7 +1368,7 @@ module.exports = {
             stats: { commandes: 0, retours: 0, totalDepense: 0 },
             dernieres: [],
           }),
-          'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'Marc Dubé' },
+          'verrou:prendre': { ok: true, obtenu: false, horsLigne: false, parQui: 'mdube' },
           'session:activite': { ok: true },
         },
       },
