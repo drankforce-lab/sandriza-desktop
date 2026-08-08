@@ -673,7 +673,7 @@ ${JS_ACTIVITE}
     appeler('verrou:prendre', ['return_reqs', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 dossier réservé'; return; }
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
       sous.textContent = '⚠ ouvert par ' + (v.parQui || 'quelqu’un d’autre');
       dire('Ce dossier est déjà ouvert ailleurs — lecture seule conseillée.', 'att');
     });

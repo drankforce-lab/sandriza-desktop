@@ -441,7 +441,7 @@ ${JS_ACTIVITE}
     appeler('verrou:prendre', ['orders', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = (sous.textContent ? sous.textContent + ' · ' : '') + '🔒 réservée'; return; }
+      if (v.obtenu) { sous.textContent = (sous.textContent ? sous.textContent + ' · ' : '') + '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
       sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       var b = document.getElementById('btn-rembourser');
       if (b) b.disabled = true;

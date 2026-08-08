@@ -509,7 +509,7 @@ ${JS_ACTIVITE}
     appeler('verrou:prendre', ['orders', cid]).then(function(v){
       if (!v || !v.ok) { return; }
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 commande réservée'; return; }
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
       sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       ['btn-etiquette', 'btn-expedier'].forEach(function(k){
         var b = document.getElementById(k); if (b) b.disabled = true;

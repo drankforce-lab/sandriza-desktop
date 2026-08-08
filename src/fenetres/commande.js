@@ -506,7 +506,7 @@ function pageCommande(id) {
   function verrou(){
     return P.appeler('verrou:prendre', 'orders', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 commande réservée'; return; }
+      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
       sous.textContent = '⚠ en traitement par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
       dire('Cette commande est déjà en traitement ailleurs.', 'err');
