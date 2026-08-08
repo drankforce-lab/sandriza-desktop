@@ -35,7 +35,7 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .ic{font-size:1.05rem}
+.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
@@ -60,6 +60,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
   transition:border-color .13s}
 .tuile:hover{border-color:#c9a97e}
 .tuile .lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:#8fa1b8;
+  filter:grayscale(1) brightness(1.45);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile .val{font:700 1.5rem/1.3 Georgia,serif}
 .tuile .val.att{color:#fbbf24}.tuile .val.err{color:#f87171}
