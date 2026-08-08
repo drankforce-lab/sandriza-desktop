@@ -2052,7 +2052,7 @@ const verifierAuLancement = async () => {
 // Le site envoie son modèle par `menu:modele` : UNE SEULE SOURCE. La coquille
 // ne décide jamais de ce qui s'affiche, elle en dérive ses raccourcis.
 
-const { pageDetachee } = require('./menubar');
+const { pageDetachee, pagePanneau } = require('./menubar');
 const { pageImprimantes } = require('./fenetres/imprimantes');
 const { pageFournisseur } = require('./fenetres/fournisseur');
 const { pageCollection } = require('./fenetres/collection');
@@ -2318,27 +2318,84 @@ ipcMain.handle('menu:set', (e, cle, valeur) => {
   return reglages.lire();
 });
 // Le site pousse son modèle : on en tire les raccourcis et la fenêtre détachée.
-/* LE PANNEAU DU MENU EN NATIF (1.55.1). Quand un ecran est ANCRE, un panneau
-   dessine dans la page passe DESSOUS la vue native — le voile (cacher l ecran
-   le temps du menu) marchait mais faisait disparaitre tout l ecran pour un
-   panneau d un coin (releve du 2026-08-09). Ici, le site demande un VRAI menu
-   du systeme, pose aux coordonnees du bouton : il s affiche au-dessus de tout,
-   et l ecran ancre ne bouge plus. Les clics passent par les MEMES chemins que
-   le menu natif masque (versTemplateNatif -> actionApp / runAdmin). */
+/* LE PANNEAU FLOTTANT DU MENU (1.56.1). Quand un ecran est ANCRE, un panneau
+   dessine dans la page passe DESSOUS la vue native. Le menu du SYSTEME
+   (1.55.1) reglait la superposition mais imposait le theme de Windows et ne
+   s ouvrait qu au clic (releve du 2026-08-09 : << je perds mon theme et je
+   dois cliquer >>). Ici : une petite fenetre SANS CADRE de l application —
+   le THEME DU SITE (cssRail), l ouverture au survol (montree SANS voler le
+   focus, pour que le survol de la barre continue de fonctionner), au-dessus
+   de tout puisque c est une fenetre. Clics par palette:action, comme la
+   palette. Le survol tient le panneau ouvert ; le quitter (barre ET panneau)
+   le referme en differe court. */
+let panneauWin = null;
+let panneauSurvole = false;
+let panneauFermeT = null;
+const fermerPanneauMenu = () => {
+  clearTimeout(panneauFermeT); panneauFermeT = null; panneauSurvole = false;
+  if (panneauWin && !panneauWin.isDestroyed()) { try { panneauWin.hide(); } catch {} }
+};
+const fermerPanneauBientot = () => {
+  clearTimeout(panneauFermeT);
+  panneauFermeT = setTimeout(() => { if (!panneauSurvole) fermerPanneauMenu(); }, 320);
+};
 ipcMain.on('menu:panneau', (e, label, x, y) => {
   if (!mainWindow || e.sender !== mainWindow.webContents) return;
   const m = (_modele.menus || []).find((mm) => mm && mm.label === String(label || ''));
-  if (!m) return;
-  const items = versTemplateNatif(m.items || []);
-  if (!items.length) return;
+  if (!m || !(m.items || []).length) return;
+  clearTimeout(panneauFermeT); panneauFermeT = null; panneauSurvole = false;
+  if (!panneauWin || panneauWin.isDestroyed()) {
+    panneauWin = new BrowserWindow({
+      parent: mainWindow, frame: false, show: false, resizable: false, movable: false,
+      skipTaskbar: true, hasShadow: true, minimizable: false, maximizable: false,
+      width: 300, height: 200,
+      backgroundColor: _modele.sombre ? '#131b2a' : '#ffffff',
+      webPreferences: {
+        preload: path.join(__dirname, 'palette-preload.js'),
+        contextIsolation: true, nodeIntegration: false, sandbox: true,
+      },
+    });
+    panneauWin.on('closed', () => { panneauWin = null; });
+  }
+  const cfg = reglages.lire();
   const f = mainWindow.webContents.getZoomFactor() || 1;
+  const cb = mainWindow.getContentBounds();
+  panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
+    items: m.items || [], cssRail: _modele.cssRail || '',
+    sombre: !!_modele.sombre, taille: cfg.menuTaille,
+  })));
   try {
-    Menu.buildFromTemplate(items).popup({
-      window: mainWindow,
-      x: Math.round((Number(x) || 0) * f),
-      y: Math.round((Number(y) || 0) * f),
+    panneauWin.setBounds({
+      x: Math.round(cb.x + (Number(x) || 0) * f),
+      y: Math.round(cb.y + (Number(y) || 0) * f),
+      width: 300, height: 200,
     });
   } catch {}
+  panneauWin.showInactive();
+});
+// Le site annonce que la souris a quitte la barre (ou qu on a clique ailleurs).
+ipcMain.on('menu:panneau:fermer', (e) => {
+  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  fermerPanneauBientot();
+});
+// Le panneau annonce sa taille reelle : la fenetre s ajuste, position gardee
+// (bornee a l ecran — un panneau coupe par le bord ne se lit pas).
+ipcMain.on('panneau:taille', (e, w, h) => {
+  if (!panneauWin || panneauWin.isDestroyed() || e.sender !== panneauWin.webContents) return;
+  try {
+    const b = panneauWin.getBounds();
+    const { screen } = require('electron');
+    const wa = screen.getDisplayMatching(b).workArea;
+    const W = Math.min(Math.max(190, Math.round(w) || 260), 480);
+    const H = Math.min(Math.max(48, Math.round(h) || 120), wa.y + wa.height - b.y - 8);
+    panneauWin.setBounds({ x: Math.min(b.x, wa.x + wa.width - W - 4), y: b.y, width: W, height: H });
+  } catch {}
+});
+ipcMain.on('panneau:survol', (e, dedans) => {
+  if (!panneauWin || panneauWin.isDestroyed() || e.sender !== panneauWin.webContents) return;
+  panneauSurvole = !!dedans;
+  if (dedans) { clearTimeout(panneauFermeT); panneauFermeT = null; }
+  else fermerPanneauBientot();
 });
 
 ipcMain.handle('menu:modele', (e, m) => {
@@ -2378,6 +2435,18 @@ ipcMain.on('fenetre:hauteur', (e, h, garder) => {
 
 ipcMain.on('palette:action', (e, it) => {
   if (!it || typeof it !== 'object') return;
+  // Un clic dans le PANNEAU FLOTTANT du menu : il a fait son travail, il se
+  // range — et la barre du site deballe son bouton (AppBar.fermer, expose
+  // pour ca ; jamais un Echap simule, qui fermerait aussi une modale du site).
+  if (panneauWin && !panneauWin.isDestroyed() && e.sender === panneauWin.webContents) {
+    fermerPanneauMenu();
+    try {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.executeJavaScript(
+          'window.AppBar && AppBar.fermer && AppBar.fermer();', true).catch(() => {});
+      }
+    } catch {}
+  }
   if (it.app) { actionApp(String(it.app)); return; }
   if (it.section) { runAdmin(`Admin.renderSection('${String(it.section).replace(/'/g, '')}')`); if (mainWindow) mainWindow.focus(); return; }
   if (it.tab) {

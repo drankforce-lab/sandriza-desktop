@@ -23,4 +23,9 @@ contextBridge.exposeInMainWorld('szPalette', {
   // moindre ligne ajoutee, par un chemin plus long, ou par un poste dont la
   // mise a l echelle de Windows n est pas 100 %.
   ajusterHauteur: (h) => ipcRenderer.send('fenetre:hauteur', Math.round(h) || 0),
+
+  // PANNEAU FLOTTANT D UN MENU (1.56.1) — il annonce sa taille reelle (la
+  // fenetre s ajuste, position gardee) et son survol (le quitter le referme).
+  taille: (w, h) => ipcRenderer.send('panneau:taille', Math.round(w) || 0, Math.round(h) || 0),
+  survol: (dedans) => ipcRenderer.send('panneau:survol', !!dedans),
 });

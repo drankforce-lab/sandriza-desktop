@@ -126,4 +126,78 @@ ${css}
 </script></body></html>`;
 }
 
-module.exports = { pageDetachee };
+/*
+ * PANNEAU FLOTTANT D'UN MENU (1.56.1)
+ * =============================================================================
+ * Quand un écran est ANCRÉ, un panneau dessiné dans la page passe DESSOUS la
+ * vue native ; et le menu du SYSTÈME (1.55.1) imposait le thème de Windows et
+ * ne s'ouvrait qu'au clic. Ce panneau-ci est une petite fenêtre SANS CADRE de
+ * l'application : le THÈME DU SITE (cssRail voyage avec le modèle, comme la
+ * palette), l'ouverture au survol (montrée sans voler le focus), et il passe
+ * au-dessus de tout puisque c'est une fenêtre.
+ * Les clics passent par palette:action — les mêmes chemins que la palette.
+ */
+function pagePanneau(desc) {
+  const items = desc.items || [];
+  const css = desc.cssRail || '';
+  const sombre = !!desc.sombre;
+  const taille = Number(desc.taille) || 1;
+
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<style>
+html,body{margin:0;overflow:hidden}
+body{background:var(--sz-bg,${sombre ? '#131b2a' : '#ffffff'})}
+/* Le panneau occupe toute la fenêtre : on neutralise le positionnement volant
+   que la feuille du site lui donne quand il vit dans une page. */
+.sz-panneau{position:static!important;display:block!important;margin:0!important;
+  box-shadow:none!important;border:0!important;border-radius:0!important;
+  min-width:0!important;max-width:none!important;width:100%!important;
+  max-height:none!important;animation:none!important;overflow:visible!important}
+${css}
+</style></head><body>
+<script>
+(function(){
+  var D = ${JSON.stringify({ items, taille })};
+  function envoyer(it){ try{ window.szPalette && window.szPalette.action(it); }catch(e){} }
+
+  function entree(it){
+    if(it.sep){ var h=document.createElement('div'); h.className='sz-sep'; return h; }
+    var b=document.createElement('button'); b.type='button'; b.className='sz-item';
+    if(it.coche!==undefined){ var c=document.createElement('span'); c.className='sz-coche';
+      c.textContent=it.coche?'\\u2713':''; b.appendChild(c); }
+    var l=document.createElement('span'); l.className='sz-lbl'; l.textContent=it.label; b.appendChild(l);
+    if(it.accel){ var a=document.createElement('span'); a.className='sz-acc'; a.textContent=it.accel; b.appendChild(a); }
+    b.onclick=function(){ envoyer(it); };
+    return b;
+  }
+
+  var pan=document.createElement('div');
+  pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
+  D.items.forEach(function(it){
+    if(it.sub){
+      // Sous-groupe aplati d'un cran, avec son libelle en intertitre — comme
+      // la palette : un panneau volant DANS un panneau volant serait coupe.
+      var t=document.createElement('div'); t.className='sz-titre'; t.textContent=it.label;
+      pan.appendChild(t);
+      it.sub.forEach(function(si){ pan.appendChild(entree(si)); });
+      return;
+    }
+    pan.appendChild(entree(it));
+  });
+  document.body.appendChild(pan);
+  if (D.taille && D.taille !== 1) document.body.style.zoom = D.taille;
+
+  // La fenetre s'ajuste au contenu REEL (jamais de barre de defilement), et le
+  // survol tient le panneau ouvert — le quitter le referme, en differe court.
+  try {
+    var w = Math.ceil(pan.scrollWidth * (D.taille || 1)) + 2;
+    var h = Math.ceil(pan.scrollHeight * (D.taille || 1)) + 2;
+    if (window.szPalette && window.szPalette.taille) window.szPalette.taille(w, h);
+  } catch(e){}
+  document.addEventListener('mouseenter', function(){ try{ window.szPalette.survol(true); }catch(e){} });
+  document.addEventListener('mouseleave', function(){ try{ window.szPalette.survol(false); }catch(e){} });
+})();
+</script></body></html>`;
+}
+
+module.exports = { pageDetachee, pagePanneau };

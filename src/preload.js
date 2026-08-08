@@ -53,6 +53,9 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // ancre, un panneau dessine dans la page passerait dessous — celui-ci
   // s affiche au-dessus de tout, sans voiler l ecran. (x, y) en px CSS.
   menuPanneau: (label, x, y) => ipcRenderer.send('menu:panneau', String(label || ''), Number(x) || 0, Number(y) || 0),
+  // La souris a quitte la barre (ou clic ailleurs) : le panneau flottant se
+  // referme — en differe court, la souris est peut-etre en route vers lui.
+  menuPanneauFermer: () => ipcRenderer.send('menu:panneau:fermer'),
 
   // Ouvre une VRAIE fenêtre du système sur l'administration, deplaçable sur un
   // autre écran, et y exécute `run` une fois la page prête.
