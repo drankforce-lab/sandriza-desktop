@@ -1029,6 +1029,11 @@ const OPS_PONT = new Set([
   // variantes d un produit (le choix se fait dans la fenetre, l impression
   // passe par stock:etiquettes — la meme voie que l Inventaire).
   'codesbarres:liste', 'codesbarres:produit',
+  // Ramassages et rapport transporteurs (fenetre Ramassages) : la liste,
+  // l annulation aupres du transporteur (le coeur vit dans le site), le
+  // renvoi vers l assistant de planification du site, et le rapport.
+  'ramassages:liste', 'ramassages:annuler', 'ramassages:planifier',
+  'expeditions:rapport',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1232,6 +1237,7 @@ const LIMITES_PONT = {
   // La liste des retours RESYNCHRONISE les demandes avant de repondre (la
   // meme fraicheur que l ecran du site) : laisser le temps du nuage.
   'retours:liste': 20000,
+  'ramassages:annuler': 30000,
 };
 
 /* ⚠ LA FENETRE INVENTAIRE SE TIENT A JOUR TOUTE SEULE (demande du 2026-08-08 :
@@ -2076,6 +2082,7 @@ const { pageFactures } = require('./fenetres/factures');
 const { pageProduits } = require('./fenetres/produits');
 const { pageClients } = require('./fenetres/clients');
 const { pageCodesbarres } = require('./fenetres/codesbarres');
+const { pageRamassages } = require('./fenetres/ramassages');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2161,6 +2168,16 @@ const actionApp = (nom) => {
         mainWindow.show(); mainWindow.focus();
         try { mainWindow.webContents.send('dock:naviguer', nom); } catch {}
         break;
+      }
+      break;
+    }
+    case 'ramassages': {
+      const _avR = fenetresNatives.get('ramassages');
+      const _reuR = !!(_avR && !_avR.isDestroyed());
+      const winR = ouvrirNative('ramassages', 'Ramassages et rapport', pageRamassages(),
+        { width: 980, height: 700, minWidth: 780, minHeight: 500 });
+      if (_reuR && winR && !winR.isDestroyed()) {
+        winR.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
       }
       break;
     }

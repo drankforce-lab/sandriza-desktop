@@ -513,6 +513,54 @@ module.exports = {
     },
   ],
 
+  // ── RAMASSAGES ET RAPPORT ──────────────────────────────────────────────────
+  'ramassages.js': [
+    {
+      // ⚠ FORME REELLE de ramassages:liste (Admin._ramassagesDonnees) : un
+      // planifie et un annule (les deux etats de la pastille).
+      nom: 'ramassages garnis',
+      id: '',
+      reponses: {
+        'ramassages:liste': {
+          ok: true,
+          lignes: [
+            { id: 'pk_1', transporteur: 'Postes Canada', logo: '📮', date: '2026-08-11',
+              colis: 3, annule: false, confirmation: '0087512345', par: 'Bobby Brousseau',
+              annulePar: '', commandes: ['CMD-0002-22010', 'CMD-0002-21988'] },
+            { id: 'pk_2', transporteur: 'FedEx', logo: '📦', date: '2026-08-08',
+              colis: 1, annule: true, confirmation: 'PU77821', par: 'Bobby Brousseau',
+              annulePar: 'Bobby Brousseau', commandes: ['CMD-0002-21970'] },
+          ],
+        },
+        'ramassages:annuler': { ok: true },
+        'ramassages:planifier': { ok: true, web: true },
+        // FORME REELLE d expeditions:rapport (Admin._rapportTransporteursDonnees).
+        'expeditions:rapport': {
+          ok: true, total: 4, totalFrais: 61.8,
+          transporteurs: [
+            { cle: 'postes-canada', nom: 'Postes Canada', logo: '📮', colis: 3, frais: 45.3, moyen: 15.1 },
+            { cle: 'fedex', nom: 'FedEx', logo: '📦', colis: 1, frais: 16.5, moyen: 16.5 },
+          ],
+          expeditions: [
+            { numero: 'CMD-0002-22010', date: '2026-08-07T14:00:00Z', transporteur: 'Postes Canada',
+              logo: '📮', suivi: '7023210987654321', frais: 15.1, livree: false, ramasse: true },
+            { numero: 'CMD-0002-21988', date: '2026-08-06T10:00:00Z', transporteur: 'FedEx',
+              logo: '📦', suivi: '1Z999AA10123456784', frais: 16.5, livree: true, ramasse: false },
+          ],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans expéditions',
+      id: '',
+      reponses: {
+        'ramassages:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── IMPRESSION DE CODES-BARRES ─────────────────────────────────────────────
   'codesbarres.js': [
     {
