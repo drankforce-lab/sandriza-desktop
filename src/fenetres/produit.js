@@ -264,6 +264,14 @@ function pageProduit(id) {
   MOTIFS.prix_invalide  = 'Le prix doit être supérieur à zéro.';
   MOTIFS.cout_requis    = 'Le coût d’acquisition est obligatoire.';
   MOTIFS.poids_requis   = 'Le poids unitaire est obligatoire.';
+  // Les motifs du DOUBLE FILET du pont (produit:enregistrer). Les gardes
+  // locales les attrapent avant lui en temps normal : s’ils arrivent ici,
+  // c’est qu’une garde a été contournée — ils doivent avoir une phrase,
+  // sinon le socle dirait « Erreur inattendue » sur un refus légitime.
+  MOTIFS.photo_requise = 'La photo principale est obligatoire.';
+  MOTIFS.tailles_couleurs_requises = 'Choisissez au moins une taille ET une couleur.';
+  MOTIFS.emplacement_requis = 'Un emplacement d’entrepôt manque pour des variantes en stock.';
+  MOTIFS.couleur_non_mappee = 'Cette couleur n’a pas de teinte unie attribuée.';
   MOTIFS.non_enregistre = 'La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.';
 
   var ID   = ${ident};
@@ -285,6 +293,14 @@ function pageProduit(id) {
   function modeStandard(){
     var c = val('p-cat');
     return !!(c && CTX.modesPhoto && CTX.modesPhoto[c] === 'standard');
+  }
+  // ⚠ ABSENTE = ACTIVÉE, la règle de l’éditeur du site (_catHasAiColorGen) :
+  // une catégorie qui n’a jamais réglé aiColorGen est en mode auto. Un site
+  // antérieur à couleursAuto ne l’envoie pas — même défaut, même résultat.
+  function modeAutoCouleur(){
+    var c = val('p-cat');
+    if (!c || !CTX.couleursAuto) return true;
+    return CTX.couleursAuto[c] !== false;
   }
   // ⚠ EN MODE MANUEL, LES PHOTOS N ONT PAS DE ROLE FIXE. La categorie dit
   // « manuel » justement parce que ces articles ne se photographient pas selon
@@ -441,10 +457,18 @@ function pageProduit(id) {
       + 'title="Faire porter le vêtement par un modèle (IA Fal.ai — chaque génération consomme des crédits)">✨ Mannequin IA</button></div>'
       + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
-      + '<div class="carte plein"><h2>Photo par couleur</h2>'
-      + '<div class="aide" style="margin-bottom:.5rem">Le client voit la photo de la couleur '
-      + 'qu’elle choisit. Sans photo pour une couleur, c’est la photo principale qui s’affiche.</div>'
-      + '<div class="vues" id="p-parcoul"></div></div></div>');
+      /* ⚠ DEUX MODES, DÉCIDÉS PAR LA CATÉGORIE, comme l’éditeur du site :
+         AUTO (aiColorGen) = les variantes se GÉNÈRENT en teintant les photos
+         du produit au canevas — par le site, via le pont — et se régénèrent à
+         l’enregistrement ; MANUEL = on dépose une photo par couleur. La
+         1ʳᵉ couleur n’a jamais de variante : ses photos SONT celles du
+         produit (la boutique ne lit une variante que pour les autres). */
+      + '<div class="carte plein"><h2 id="p-parcoul-titre">Photo par couleur</h2>'
+      + '<div class="aide" id="p-parcoul-aide" style="margin-bottom:.5rem"></div>'
+      + '<div class="vues" id="p-parcoul"></div>'
+      + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
+      + 'title="Teinter les photos du produit pour chaque couleur — local, sans crédit ni service">'
+      + '⚡ Tout générer</button></div></div></div>');
 
     // 6 — Détails
     // ⚠ LE REGIME DE VENTE N EST PAS UN JEU DE CASES INDEPENDANTES. Mes cases
@@ -628,6 +652,7 @@ function pageProduit(id) {
       }
       if (ev.target.closest('#p-detourer')) { ouvrirDetourage(); return; }
       if (ev.target.closest('#p-mannequin')) { ouvrirMannequin(); return; }
+      if (ev.target.closest('#p-cv-gen')) { genererVariantes(); return; }
       if (ev.target.closest('#p-vign')) {
         choisirPhoto(function(ds){ IMAGE = ds[0]; montrerImage(IMAGE); majIa(); });
         return;
@@ -656,7 +681,17 @@ function pageProduit(id) {
       var p = ev.target.closest('[data-coul]');
       if (p) {
         var n = p.getAttribute('data-coul');
-        choisirPhoto(function(ds){ PARCOUL[n] = PARCOUL[n] || {}; PARCOUL[n].principale = ds[0]; dessinerVues(); });
+        // ⚠ « main », JAMAIS « principale » : la boutique lit main (et les clés
+        // d’angle) dans colorVariants. La fenêtre a déposé sous « principale »
+        // de 1.40.1 à 1.43.0 — des photos enregistrées que la boutique
+        // n’affichait jamais. Le pont traduit encore l’ancienne clé, mais plus
+        // personne ne doit l’écrire.
+        choisirPhoto(function(ds){
+          PARCOUL[n] = PARCOUL[n] || {};
+          PARCOUL[n].main = ds[0];
+          delete PARCOUL[n].principale;
+          dessinerVues();
+        });
         return;
       }
       var px = ev.target.closest('[data-coulx]');
@@ -970,16 +1005,40 @@ function pageProduit(id) {
       return;
     }
     if (carte) carte.style.display = '';
+    var auto = modeAutoCouleur();
+    var titre = document.getElementById('p-parcoul-titre');
+    if (titre) titre.textContent = auto ? '⚡ Variantes de couleur (Auto)' : 'Photo par couleur (Manuel)';
+    var aide = document.getElementById('p-parcoul-aide');
+    if (aide) aide.textContent = auto
+      ? 'Générées en teintant les photos du produit — et régénérées automatiquement '
+        + 'à l’enregistrement. Le client voit la photo de la couleur qu’il choisit.'
+      : 'Ajoutez une photo par couleur. Le client voit la photo de la couleur qu’il '
+        + 'choisit ; sans photo, c’est la photo principale qui s’affiche.';
     var cs = couleurs();
+    var bg = document.getElementById('p-cv-gen');
+    // ⚠ LA 1ʳᵉ COULEUR N’A PAS DE CASE : ses photos sont celles du produit, et
+    // la boutique ne lit jamais de variante pour elle. Lui offrir une case
+    // faisait déposer une photo qui ne s’affichait nulle part.
+    var variantes = cs.slice(1);
+    if (bg) bg.style.display = (auto && variantes.length && IMAGE) ? '' : 'none';
     if (!cs.length) {
       p.innerHTML = '<div class="aide">Choisissez d’abord des couleurs à l’étape « Tailles et couleurs ».</div>';
       return;
     }
-    p.innerHTML = cs.map(function(c){
-      var src = (PARCOUL[c] && PARCOUL[c].principale) || '';
-      return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '') + '" data-coul="' + esc(c) + '">'
-        + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
-        + (src ? '<button type="button" class="x" data-coulx="' + esc(c) + '" title="Retirer">×</button>' : '')
+    if (!variantes.length) {
+      p.innerHTML = '<div class="aide">Ajoutez au moins une couleur de plus — « ' + esc(cs[0])
+        + ' » est la couleur principale, ses photos sont celles du produit.</div>';
+      return;
+    }
+    p.innerHTML = variantes.map(function(c){
+      var src = (PARCOUL[c] && (PARCOUL[c].main || PARCOUL[c].principale)) || '';
+      // En mode AUTO la case ne se clique pas : un dépôt manuel serait écrasé
+      // par la régénération de l’enregistrement, sans un mot.
+      return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '')
+        + (auto ? '" style="cursor:default" title="Générée par « Tout générer » et à l’enregistrement"'
+                : '" data-coul="' + esc(c) + '"')
+        + '>' + (src ? '<img src="' + esc(src) + '" alt="">' : (auto ? 'à générer' : 'ajouter')) + '</div>'
+        + (src && !auto ? '<button type="button" class="x" data-coulx="' + esc(c) + '" title="Retirer">×</button>' : '')
         + '<div class="lgd">' + esc(c) + '</div></div>';
     }).join('');
   }
@@ -1367,14 +1426,63 @@ function pageProduit(id) {
     STOCK = Object.assign({}, p.stock || {});
     LOCS = Object.assign({}, p.stockLoc || {});
     if (p.image) { IMAGE = p.image; montrerImage(IMAGE); }
-    VUES = Object.assign({}, p.additionalImages || {});
+    VUES = vuesDepuisFiche(p.additionalImages);
     // ⚠ COPIE PROFONDE : chaque couleur porte son propre objet. Une copie de
     // surface les partagerait avec la fiche d origine, et retirer une photo ici
     // la retirerait aussi de la reference qui sert a detecter les conflits.
-    PARCOUL = {};
-    Object.keys(p.colorVariants || {}).forEach(function(c){
-      PARCOUL[c] = Object.assign({}, p.colorVariants[c] || {});
+    PARCOUL = parcoulDepuisFiche(p.colorVariants);
+  }
+
+  // ⚠ LA FICHE PEUT PORTER TROIS FORMES de photos supplémentaires : un TABLEAU
+  // (la forme que le pont écrit depuis le 2026-08-08), des clés d’ANGLE
+  // (l’éditeur du site), ou des clés libre1..5 (cette fenêtre, 1.15.0 à
+  // 1.43.0). On traduit vers ce que le MODE de la catégorie attend — sans ça,
+  // les photos existaient dans la fiche mais les cases restaient vides ici.
+  // La catégorie est déjà posée quand remplir nous appelle.
+  function vuesDepuisFiche(brut){
+    var angles = ['devant', 'derriere', 'coteG', 'coteD', 'autres'];
+    var liste = [];
+    if (Array.isArray(brut)) {
+      liste = brut.filter(Boolean);
+    } else if (brut && typeof brut === 'object') {
+      if (!modeStandard()) {
+        // Mode angles : les clés d’angle se gardent telles quelles ; des clés
+        // libres héritées s’ajoutent à la suite, dans les angles encore vides.
+        var v = {};
+        angles.forEach(function(k){ if (brut[k]) v[k] = brut[k]; });
+        Object.keys(brut).filter(function(k){ return k.indexOf('libre') === 0 && brut[k]; })
+          .sort(function(a, b){ return (parseInt(a.slice(5), 10) || 0) - (parseInt(b.slice(5), 10) || 0); })
+          .forEach(function(k){
+            for (var i = 0; i < angles.length; i++) {
+              if (!v[angles[i]]) { v[angles[i]] = brut[k]; return; }
+            }
+          });
+        return v;
+      }
+      // Mode standard : angles puis libres, dans l’ordre, vers libre1..N.
+      liste = angles.map(function(k){ return brut[k]; }).filter(Boolean)
+        .concat(Object.keys(brut).filter(function(k){ return k.indexOf('libre') === 0 && brut[k]; })
+          .sort(function(a, b){ return (parseInt(a.slice(5), 10) || 0) - (parseInt(b.slice(5), 10) || 0); })
+          .map(function(k){ return brut[k]; }));
+    } else { return {}; }
+    var res = {};
+    if (modeStandard()) {
+      liste.slice(0, MAX_PHOTOS).forEach(function(src, i){ res['libre' + (i + 1)] = src; });
+    } else {
+      liste.slice(0, angles.length).forEach(function(src, i){ res[angles[i]] = src; });
+    }
+    return res;
+  }
+  // « principale » était la clé de cette fenêtre ; la boutique lit « main ».
+  function parcoulDepuisFiche(brut){
+    var g = {};
+    Object.keys(brut || {}).forEach(function(c){
+      var v = Object.assign({}, brut[c] || {});
+      if (v.principale && !v.main) v.main = v.principale;
+      delete v.principale;
+      g[c] = v;
     });
+    return g;
   }
 
   function enKg(v, u){
@@ -1602,6 +1710,75 @@ function pageProduit(id) {
       v.remove();
       dire('Photo principale remplacée par la photo portée.', 'bon');
     };
+  }
+
+  /* ── VARIANTES PAR COULEUR ── ⚠ PAS FAL.AI : le site TEINTE au canevas, en
+     local, sans clé ni crédit (produit:teinter — la même mécanique que « Tout
+     générer » de l’éditeur du site). La boucle vit ICI : une image et une
+     couleur par appel, le canal du pont porte les images une à la fois. La
+     1ʳᵉ couleur est sautée (ses photos SONT celles du produit), une couleur
+     sans teinte attribuée est sautée EN LE DISANT. Et comme l’éditeur du
+     site, tout se REGÉNÈRE à l’enregistrement en mode auto. */
+  var GEN_ENCOURS = false;
+  function slotsSources(){
+    var l = [];
+    if (IMAGE) l.push({ cle: 'main', src: IMAGE });
+    if (!modeStandard()) {
+      (CTX.vuesAngles || []).forEach(function(k){ if (VUES[k]) l.push({ cle: k, src: VUES[k] }); });
+    }
+    return l;
+  }
+  function genererVariantes(fini){
+    if (GEN_ENCOURS) { if (fini) fini(); return; }
+    var cibles = couleurs().slice(1);
+    var slots = slotsSources();
+    if (!cibles.length || !slots.length) { if (fini) fini(); return; }
+    GEN_ENCOURS = true;
+    var b = document.getElementById('p-cv-gen');
+    if (b) { b.disabled = true; b.textContent = '⏳ Génération…'; }
+    var total = cibles.length * slots.length, fait = 0;
+    var sautees = [], iC = 0, iS = 0, arret = '';
+    function conclure(){
+      GEN_ENCOURS = false;
+      if (b) { b.disabled = false; b.textContent = '⚡ Tout générer'; }
+      dessinerVues();
+      if (arret) { dire('Variantes de couleur : ' + arret, 'err'); }
+      else {
+        dire('Variantes de couleur générées'
+          + (sautees.length ? ' — sans teinte attribuée pour : ' + sautees.join(', ')
+            + ' (Inventaire → Références)' : '') + '.', sautees.length ? 'att' : 'bon');
+      }
+      if (fini) fini(arret || null);
+    }
+    function suivant(){
+      if (iC >= cibles.length) { conclure(); return; }
+      if (iS >= slots.length) { iC++; iS = 0; suivant(); return; }
+      var coul = cibles[iC], slot = slots[iS];
+      fait++;
+      dire('Variantes de couleur : ' + coul + ' (' + fait + '/' + total + ')…');
+      P.appeler('produit:teinter', slot.src, coul).then(function(r){
+        if (!r || !r.ok) {
+          if (r && r.motif === 'couleur_non_mappee') {
+            // Inutile d’essayer les autres vues de cette couleur.
+            if (sautees.indexOf(coul) < 0) sautees.push(coul);
+            iC++; iS = 0; suivant(); return;
+          }
+          if (r && (r.motif === 'operation_inconnue' || r.motif === 'session' || r.motif === 'droit')) {
+            // Un refus qui frappera CHAQUE appel : on s’arrête au premier au
+            // lieu de le collectionner N fois.
+            arret = expliquer(r); conclure(); return;
+          }
+          // Échec d’une seule image : on continue, la photo principale de la
+          // couleur peut réussir même si une vue échoue.
+          iS++; suivant(); return;
+        }
+        PARCOUL[coul] = PARCOUL[coul] || {};
+        PARCOUL[coul][slot.cle] = r.image;
+        delete PARCOUL[coul].principale;
+        iS++; suivant();
+      });
+    }
+    suivant();
   }
 
   // là sans rien faire. Un bouton mort est un défaut qu'on ne peut pas diagnostiquer.
@@ -1936,8 +2113,8 @@ function pageProduit(id) {
     CHOIX = (d.couleurs || []).map(String);
     IMAGE = d.image || '';
     VUES = Object.assign({}, d.vues || {});
-    PARCOUL = {};
-    Object.keys(d.parcoul || {}).forEach(function(c){ PARCOUL[c] = Object.assign({}, d.parcoul[c] || {}); });
+    // Un brouillon d’une version antérieure porte encore la clé « principale ».
+    PARCOUL = parcoulDepuisFiche(d.parcoul);
     STOCK = Object.assign({}, d.stock || {});
     LOCS = Object.assign({}, d.locs || {});
     montrerImage(IMAGE);
@@ -2031,6 +2208,7 @@ function pageProduit(id) {
   // de serie) — mais jamais SANS TRACE ni sans autorisation. La raison est
   // ecrite dans la fiche, et un code est exige s il en existe un.
   var SOUSCOUT = null;   // { raison, nip } une fois accorde
+  var VAR_FAITES = false; // variantes de couleur regenerees pour CET envoi
   function demanderSousCout(eff, cout){
     return P.appeler('produit:nipExige').then(function(x){
       var exige = !!(x && x.exige);
@@ -2103,6 +2281,20 @@ function pageProduit(id) {
       });
       return;
     }
+    // ⚠ COMME L’ÉDITEUR DU SITE : en mode auto, les variantes de couleur se
+    // RÉGÉNÈRENT à l’enregistrement (le bouton de l’éditeur affiche le même
+    // « ⏳ Génération… » avant d’écrire). Après la question du sous-coût, pour
+    // ne pas faire attendre la personne avant de l’interroger. Un échec de
+    // teinte n’empêche PAS d’enregistrer : générer est un plus, pas une porte.
+    if (!VAR_FAITES && modeAutoCouleur() && IMAGE && couleurs().length > 1) {
+      bEnr.disabled = true;
+      genererVariantes(function(){
+        bEnr.disabled = false;
+        VAR_FAITES = true;
+        enregistrer();
+      });
+      return;
+    }
     // Le stock est purge des variantes qui n existent plus : garder une quantite
     // sur une couleur retiree la ferait compter dans l inventaire sans qu aucun
     // ecran ne la montre.
@@ -2140,6 +2332,8 @@ function pageProduit(id) {
       })(),
       stock: stock, stockLoc: locs
     }).then(function(r){
+      // Le prochain envoi repart de zéro : les photos ont pu changer entre-temps.
+      VAR_FAITES = false;
       if (!r || !r.ok) {
         bEnr.disabled = false;
         if (r && r.motif === 'delai') {
@@ -2148,6 +2342,17 @@ function pageProduit(id) {
           // tout de suite fabriquerait un DOUBLON.
           dire('L’enregistrement prend du temps (dépôt de la photo) et se poursuit '
             + 'peut-être — vérifiez la liste des produits avant de recommencer.', 'att');
+          return;
+        }
+        // Le DOUBLE FILET du pont : on RAMÈNE à l’étape fautive, exactement
+        // comme les gardes locales — un refus sans l’écran concerné sous les
+        // yeux oblige à chercher ce qui manque.
+        if (r && r.motif === 'tailles_couleurs_requises') Assist.aller(1);
+        if (r && r.motif === 'photo_requise') Assist.aller(2);
+        if (r && r.motif === 'emplacement_requis') {
+          Assist.aller(4);
+          dire('Sélectionnez un emplacement d’entrepôt pour : '
+            + (r.manquants || []).join(', ') + '.', 'err');
           return;
         }
         dire(expliquer(r), 'err');

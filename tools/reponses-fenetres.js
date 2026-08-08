@@ -514,6 +514,19 @@ module.exports = {
             liquidation: false,
             noReturn: false,
             images: [IMAGE],
+            // ⚠ CES CHAMPS-LÀ SONT CEUX QUE LA FENÊTRE LIT (remplir) : sans
+            // eux, ni la photo, ni les jetons, ni la carte des variantes de
+            // couleur ne se dessinaient au chargement — le jeu n'atteignait
+            // pas le dessin qu'il prétendait éprouver.
+            image: IMAGE,
+            sizes: ['M', 'G'],
+            colors: ['Noir', 'Bleu marine'],
+            stock: { 'M-Noir': 4 },
+            stockLoc: { 'M-Noir': 'wh_0001' },
+            additionalImages: { devant: IMAGE },
+            // Une variante déjà générée : la case « Bleu marine » doit la
+            // montrer (mode AUTO pour « robes »).
+            colorVariants: { 'Bleu marine': { main: IMAGE } },
             variants: [
               { color: 'Noir', size: 'M', stock: 4, warehouseId: 'wh_0001', lowStockThreshold: 3 },
               // Une variante SOUS le seuil : c'est elle qui déclenche l'avertissement.
@@ -560,6 +573,47 @@ module.exports = {
           ],
         },
         'produit:decrire': { ok: true, texte: 'Une coupe nette, un lainage souple.' },
+        'produit:teinter': { ok: true, image: IMAGE, hex: '#1b2a4a' },
+        'produit:enregistrer': { ok: true, modifie: true },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ LA BRANCHE MANUELLE ET LES FORMES HÉRITÉES : « chaussures » est en
+      // couleursAuto:false (cases cliquables, pas de « Tout générer »), la
+      // fiche porte une photo par couleur sous l'ANCIENNE clé « principale »
+      // (1.40.1→1.43.0) et une vue sous une clé « libre » en mode angles —
+      // les deux traductions de la reprise doivent tourner au chargement.
+      nom: 'couleurs manuelles, formes héritées',
+      id: 'p_0003',
+      reponses: {
+        'produit:contexte': _produitContexte(),
+        'produit:lire': {
+          ok: true,
+          fiche: {
+            id: 'p_0003', sku: 'CHA-0002', name: 'Escarpins de cuir',
+            category: 'chaussures', price: 149.95, acquisitionCost: 61,
+            weight: 0.6, active: true,
+            image: IMAGE,
+            sizes: ['36', '37'],
+            colors: ['Noir', 'Ivoire'],
+            additionalImages: { libre1: IMAGE },
+            colorVariants: { 'Ivoire': { principale: IMAGE } },
+          },
+        },
+        'produit:sku': { ok: true, sku: 'CHA-0002', configure: true },
+        'produit:nipExige': { ok: true, exige: false },
+        'produit:nip': { ok: true, valide: true, exige: false },
+        'photos:liste': { ok: true, session: true, photos: [] },
+        'produit:brouillonLire': { ok: true, brouillon: null },
+        'produit:brouillonEcrire': { ok: true },
+        'produit:brouillonJeter': { ok: true },
+        'produit:changements': { ok: true, entrees: [] },
+        'produit:historique': { ok: true, entrees: [] },
+        'produit:decrire': { ok: true, texte: '' },
+        'produit:teinter': { ok: false, motif: 'couleur_non_mappee',
+          detail: '« Ivoire » n’a pas de teinte unie attribuée.' },
         'produit:enregistrer': { ok: true, modifie: true },
         'verrou:prendre': VERROU,
         identite: IDENTITE,
@@ -1353,6 +1407,9 @@ function _produitContexte() {
     // Les deux modes de photo, parce que la catégorie en décide : « standard »
     // = une série de vues sans couleur ; sinon des vues par angle.
     modesPhoto: { robes: 'angles', hauts: 'standard', chaussures: 'angles' },
+    // ⚠ « hauts » ABSENT à dessein : une catégorie hors de cette carte est en
+    // mode AUTO (absente = activée, la règle de l'éditeur du site).
+    couleursAuto: { robes: true, chaussures: false },
     vuesAngles: ['devant', 'derriere', 'coteG', 'coteD', 'autres'],
     genres: [{ cle: 'femme', libelle: 'Femme' }, { cle: 'unisexe', libelle: 'Unisexe' }],
     groupesAge: [{ cle: 'adulte', libelle: 'Adulte' }],
