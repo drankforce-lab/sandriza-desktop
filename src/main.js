@@ -989,6 +989,9 @@ const OPS_PONT = new Set([
   'stock:venteFinale', 'stock:vendre', 'stock:endommages',
   'stock:endommagesRapport', 'stock:entrepots', 'stock:entrepotEcrire',
   'stock:entrepotSupprimer', 'stock:modifier', 'stock:supprimer',
+  // L'apercu de la suppression : le nom et les photos de la mediatheque que la
+  // fiche emploie — pour la question << les retirer aussi ? >> (volontaire).
+  'stock:supprimerApercu',
   // Expédition. ⚠ `expedition:etiquette` DÉPENSE DE L'ARGENT — une étiquette est
   // facturée dès sa création. Toute la règle (garde anti-double-achat, secrets
   // transporteurs, XML) reste dans le site ; le pont ne porte que le service et

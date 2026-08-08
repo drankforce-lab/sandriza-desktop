@@ -1114,22 +1114,41 @@ ${JS_ACTIVITE}
     });
   }
   function supprimer(pid, nom){
-    voile('<h3>Supprimer de l’inventaire</h3>'
-      + '<p>Supprimer définitivement <strong>' + esc(nom) + '</strong> de l’inventaire ? '
-      + 'Cette action est <strong>irréversible</strong>.</p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:#fff">Supprimer</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          this.disabled = true;
-          appeler('stock:supprimer', [pid]).then(function(r){
-            fermer();
-            dire(r.ok ? 'Produit supprimé.' : expliquer(r), r.ok ? 'bon' : 'err');
-            if (r.ok) chargerOnglet();
-          });
-        };
-      });
+    // L apercu d abord : si la fiche emploie des photos de la MEDIATHEQUE, la
+    // question de les retirer aussi se pose ICI — et elle reste VOLONTAIRE, la
+    // case part decochee (regle du 2026-08-08). Un apercu qui echoue n empeche
+    // pas la suppression : on pose la question sans la partie phototheque.
+    appeler('stock:supprimerApercu', [pid]).then(function(a){
+      var photos = (a && a.ok && a.phototheque) || [];
+      var q = photos.length
+        ? '<label style="display:flex;align-items:flex-start;gap:.5rem;margin-top:.6rem;'
+          + 'font-size:.83rem;cursor:pointer;text-align:left">'
+          + '<input type="checkbox" id="v-ph" style="width:auto;margin-top:.2rem">'
+          + '<span>Retirer aussi ' + (photos.length > 1 ? 'ses ' + photos.length + ' photos' : 'sa photo')
+          + ' de la photothèque (' + photos.map(function(x){ return esc(x.code); }).join(', ') + '). '
+          + 'Sans cette case, ' + (photos.length > 1 ? 'elles y restent' : 'elle y reste')
+          + ' pour servir à d’autres fiches.</span></label>'
+        : '';
+      voile('<h3>Supprimer de l’inventaire</h3>'
+        + '<p>Supprimer définitivement <strong>' + esc(nom) + '</strong> de l’inventaire ? '
+        + 'Cette action est <strong>irréversible</strong>.</p>' + q
+        + '<div class="fin2"><button id="v-non">Annuler</button>'
+        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:#fff">Supprimer</button></div>',
+        function(fermer){
+          document.getElementById('v-non').onclick = fermer;
+          document.getElementById('v-oui').onclick = function(){
+            this.disabled = true;
+            var coche = document.getElementById('v-ph');
+            appeler('stock:supprimer', [pid, !!(coche && coche.checked)]).then(function(r){
+              fermer();
+              dire(r.ok ? ('Produit supprimé' + (r.photosRetirees
+                  ? ' — ' + r.photosRetirees + ' photo(s) retirée(s) de la photothèque' : '') + '.')
+                : expliquer(r), r.ok ? 'bon' : 'err');
+              if (r.ok) chargerOnglet();
+            });
+          };
+        });
+    });
   }
 
   function venteFinaleLot(activer){
