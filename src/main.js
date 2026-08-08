@@ -1016,6 +1016,9 @@ const OPS_PONT = new Set([
   // La LISTE des factures (fenetre Factures) et l ouverture d une facture
   // depuis cette liste (fenetre Facture existante, une par facture).
   'factures:liste', 'factures:ouvrir',
+  // La LISTE des produits en vente (fenetre Produits) : la page filtree par le
+  // site, l ouverture de l assistant sur une fiche, et l assistant vierge.
+  'produits:liste', 'produits:ouvrir', 'produits:nouveau',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1276,7 +1279,8 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
       const fenetres = [];
       // La fenetre Factures suit les memes ecritures que le tableau : une
       // vente, un remboursement ou un statut de commande la font bouger aussi.
-      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures');
+      // La liste Produits en vente suit celles de l inventaire (fiches, stock).
+      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures', 'produits');
       else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau', 'factures');
       if (fenetres.length) actualiserFenetres(fenetres, e.sender);
     }
@@ -1320,6 +1324,7 @@ const PAGES_ANCRABLES = () => ({
   tableau: ['Tableau de bord', () => pageTableau()],
   inventaire: ['Inventaire', () => pageInventaire('')],
   commandes: ['Commandes', () => pageCommandes('commandes')],
+  produits: ['Produits en vente', () => pageProduits()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -1437,6 +1442,33 @@ ipcMain.handle('dock:ouvrir', (e, cle) => {
 ipcMain.on('dock:cacher', (e) => {
   if (!mainWindow || e.sender !== mainWindow.webContents) return;
   ancrees.forEach((a) => { if (!a.fenetre && a.view) { try { a.view.setVisible(false); } catch {} } });
+});
+// LE VOILE DU MENU DE L APPLICATION : masquer puis remontrer la vue ancree
+// SANS la recharger. Les panneaux du menu vivent dans la PAGE, donc sous la
+// vue native (releve du 2026-08-09 : << le menu est en dessous du tableau de
+// bord >>) — le site voile pendant qu un panneau est deploye. Le repli 1.52
+// (dockCacher + dockOuvrir) relisait les donnees a chaque fermeture de menu ;
+// ici on ne touche qu a la visibilite, et on ne remontre que ce qu on a cache.
+let vueVoilee = null;
+ipcMain.on('dock:voiler', (e, visible) => {
+  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  if (visible) {
+    const a = vueVoilee && ancrees.get(vueVoilee);
+    vueVoilee = null;
+    if (a && !a.fenetre && a.view) {
+      try { a.view.setVisible(true); } catch {}
+      const b = boundsAncrage();
+      if (b) { try { a.view.setBounds(b); } catch {} }
+    }
+    return;
+  }
+  vueVoilee = null;
+  ancrees.forEach((a, c) => {
+    if (!a.fenetre && a.view && a.view.getVisible && a.view.getVisible()) {
+      vueVoilee = c;
+      try { a.view.setVisible(false); } catch {}
+    }
+  });
 });
 // << Detacher >> — demande par la VUE elle-meme : on DEPLACE la vue dans une
 // BaseWindow, sans recharger : l etat (filtres, saisies, page) voyage avec.
@@ -1955,6 +1987,7 @@ const { pageCollection } = require('./fenetres/collection');
 const { pageProduit } = require('./fenetres/produit');
 const { pageFacture } = require('./fenetres/facture');
 const { pageFactures } = require('./fenetres/factures');
+const { pageProduits } = require('./fenetres/produits');
 const { pageCommande } = require('./fenetres/commande');
 const { pageAffichage } = require('./fenetres/affichage');
 const { pageCaisse } = require('./fenetres/caisse');
@@ -2058,6 +2091,21 @@ const actionApp = (nom) => {
       if (_aC && _aC.view && !_aC.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
       ouvrirNative('commandes', 'Commandes', pageCommandes('commandes'),
         { width: 1060, height: 720, minWidth: 860, minHeight: 500 });
+      break;
+    }
+    case 'produits': {
+      // Meme garde que tableau/commandes : l ecran peut deja vivre ancre ou
+      // detache — on le ramene au lieu d empiler une deuxieme liste.
+      const _aP = ancrees.get('produits');
+      if (_aP && _aP.fenetre && !_aP.fenetre.isDestroyed()) { _aP.fenetre.show(); _aP.fenetre.focus(); break; }
+      if (_aP && _aP.view && !_aP.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
+      const _avP = fenetresNatives.get('produits');
+      const _reuP = !!(_avP && !_avP.isDestroyed());
+      const winP = ouvrirNative('produits', 'Produits en vente', pageProduits(),
+        { width: 1120, height: 740, minWidth: 900, minHeight: 520 });
+      if (_reuP && winP && !winP.isDestroyed()) {
+        winP.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
       break;
     }
     case 'factures': {

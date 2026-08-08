@@ -469,6 +469,50 @@ module.exports = {
     },
   ],
 
+  // ── PRODUITS EN VENTE (la liste) ───────────────────────────────────────────
+  'produits.js': [
+    {
+      // ⚠ FORME REELLE de produits:liste (pont.js -> Admin._produitLigne) :
+      // les trois etats de la pastille d inventaire (rupture, a commander,
+      // seuil non atteint), un solde, une vente finale et une liquidation.
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'produits:liste': {
+          ok: true,
+          lignes: [
+            { id: 'prod_1', nom: 'Robe Élégance mi-longue', categorie: 'Robes', tag: 'Nouveauté',
+              finalSale: false, liquidation: false, prix: 129.99, solde: 89.99,
+              stockTotal: 24, variantesBas: 0, bassesDetail: '', panier: 3, cree: '2026-08-05T10:00:00Z' },
+            { id: 'prod_2', nom: 'Manteau d’hiver Aurore', categorie: 'Manteaux', tag: '',
+              finalSale: true, liquidation: false, prix: 249.0, solde: 0,
+              stockTotal: 0, variantesBas: 2, bassesDetail: 'S-Noir : 0/2, M-Noir : 0/2', panier: 0, cree: '2026-07-28T09:00:00Z' },
+            { id: 'prod_3', nom: 'Jupe plissée Camélia', categorie: 'Jupes', tag: 'Solde',
+              finalSale: false, liquidation: true, prix: 59.5, solde: 0,
+              stockTotal: 7, variantesBas: 1, bassesDetail: 'M-Rouge : 1/3', panier: 1, cree: '2026-07-15T14:00:00Z' },
+          ],
+          total: 3, pages: 1, page: 0,
+          cats: [{ cle: 'robes', nom: 'Robes' }, { cle: 'manteaux', nom: 'Manteaux' }, { cle: 'jupes', nom: 'Jupes' }],
+          etiquettes: ['Nouveauté', 'Solde'],
+          aFinal: true, aLiq: true,
+          stats: { actifs: 3, ruptures: 1, venteFinale: 1, categories: 3 },
+        },
+        'produits:ouvrir': { ok: true },
+        'produits:nouveau': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Le refus de droit : la fenetre doit le dire, pas rester sur Chargement.
+      nom: 'rôle sans produits',
+      id: '',
+      reponses: {
+        'produits:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── FACTURES (la liste) ────────────────────────────────────────────────────
   'factures.js': [
     {

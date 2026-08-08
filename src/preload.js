@@ -71,6 +71,9 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // La vue detachee a demande << Ancrer >> : le site navigue vers la section
   // hote pour que la zone d ancrage existe sous la vue revenue.
   onDockAncree: (cb) => { ipcRenderer.on('dock:ancree', (e, cle) => { try { cb(cle); } catch {} }); },
+  // Le voile du menu : masquer (false) puis remontrer (true) la vue ancree
+  // sans la recharger — le site le prefere a dockCacher+dockOuvrir.
+  dockVoiler: (visible) => ipcRenderer.send('dock:voiler', !!visible),
   // Prévenu quand un réglage change côté application (ex. « ancrer en haut »
   // cliqué depuis la fenêtre détachée) : sans ça, le site ne le verrait qu'au
   // prochain rechargement.
