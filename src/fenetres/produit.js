@@ -153,9 +153,11 @@ const CSS_PROPRE = `
 .lgstk.enstock{background:rgba(34,197,94,.10)}
 .lgstk.enstock:hover{background:rgba(34,197,94,.15)}
 .lgstk.enstock .c1,.lgstk.enstock .c2{color:#86efac;font-weight:600}
-/* ⚠ EMPLACEMENT OBLIGATOIRE DES QUE LA QUANTITE DEPASSE ZERO — la regle de
-   l editeur du site, reprise telle quelle. Sans ce rappel on enregistre de la
-   marchandise que l inventaire ne sait pas ou aller chercher. */
+/* ⚠ EMPLACEMENT OBLIGATOIRE POUR CHAQUE VARIANTE, quantite ou pas — regle
+   DURCIE le 2026-08-08 (l ancienne << des que la quantite depasse zero >>
+   laissait creer une fiche entiere a zero sans aucun emplacement). Sans ce
+   rappel on enregistre de la marchandise que l inventaire ne sait pas ou
+   aller chercher. */
 .lgstk select.manque{border-color:#f87171}
 .theque{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;
   max-height:46vh;overflow-y:auto;padding-right:.2rem}
@@ -527,7 +529,7 @@ function pageProduit(id) {
       // quantite depasse zero.
       + (CTX.entrepots.length
           ? '<div class="aide" style="margin:-.2rem 0 .5rem">Un emplacement d’entrepôt est '
-            + 'obligatoire dès qu’une quantité dépasse zéro.</div>'
+            + 'obligatoire pour chaque variante, même sans quantité.</div>'
           : '<div class="aide" style="margin:-.2rem 0 .5rem;color:#fbbf24">⚠ Aucun emplacement '
             + 'configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux '
             + 'variantes en stock.</div>')
@@ -1325,10 +1327,11 @@ function pageProduit(id) {
         // quantite ressemblait a un identifiant.
         ligne: function(x){
           var q = STOCK[x.cle] || 0, lo = LOCS[x.cle] || '';
-          // Une variante SANS emplacement alors qu elle porte du stock est
-          // signalee des le dessin, pas seulement quand on y touche : une liste
-          // paginee se rouvre a la page 2 et le rappel doit y etre deja.
-          var manque = (q > 0 && CTX.entrepots.length && !lo);
+          // Une variante SANS emplacement est signalee des le dessin, pas
+          // seulement quand on y touche : une liste paginee se rouvre a la
+          // page 2 et le rappel doit y etre deja. Quantite ou pas — la regle
+          // durcie du 2026-08-08.
+          var manque = (CTX.entrepots.length && !lo);
           return '<div class="lgstk' + (q > 0 ? ' enstock' : '') + '">'
             + '<span class="c1">' + esc(x.taille) + '</span>'
             + '<span class="c2">' + esc(x.couleur) + '</span>'
@@ -1360,7 +1363,7 @@ function pageProduit(id) {
         var q = STOCK[cle] || 0;
         el.classList.toggle('enstock', q > 0);
         var s = el.querySelector('.loc');
-        if (s) s.classList.toggle('manque', q > 0 && !s.value);
+        if (s) s.classList.toggle('manque', !s.value);
         // L avertissement de seuil suit la frappe : on remplace le seul marqueur,
         // jamais la cellule — reecrire la cellule emporterait le champ en cours
         // de saisie et le curseur avec lui.
@@ -2262,13 +2265,16 @@ function pageProduit(id) {
       return;
     }
     if (CTX && (CTX.entrepots || []).length) {
+      // ⚠ REGLE DURCIE le 2026-08-08 : CHAQUE variante doit avoir son
+      // emplacement, quantite ou pas — << des qu une quantite depasse zero >>
+      // laissait creer une fiche entiere a zero sans aucun emplacement.
       var sansLieu = [];
-      Object.keys(STOCK).forEach(function(k){
-        if ((STOCK[k] || 0) > 0 && !LOCS[k]) sansLieu.push(k);
-      });
+      tailles().forEach(function(t){ couleurs().forEach(function(c){
+        if (!LOCS[t + '-' + c]) sansLieu.push(t + '-' + c);
+      }); });
       if (sansLieu.length) {
         Assist.aller(4);
-        dire('Sélectionnez un emplacement d’entrepôt pour : '
+        dire('Sélectionnez un emplacement d’entrepôt pour chaque variante — il manque : '
           + sansLieu.slice(0, 3).join(', ')
           + (sansLieu.length > 3 ? '… (' + sansLieu.length + ' variantes)' : '') + '.', 'err');
         return;
