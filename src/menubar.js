@@ -163,6 +163,18 @@ body{background:var(--sz-bg,${sombre ? '#131b2a' : '#ffffff'})}
   max-width:none!important;width:max-content!important;
   max-height:none!important;animation:none!important;overflow:visible!important}
 ${css}
+/* ⚠ COMPACT, ET APRES la feuille du site pour la battre : le panneau herite
+   de l echelle du MENU (d.police x menuTaille), pensee pour une barre — en
+   panneau vertical c etait << beaucoup trop gros >> (2026-08-09, deux fois).
+   Police et espacements FIXES, environ moitie de l empreinte d avant. Ces
+   reglages ne vivent QUE dans cette fenetre : la barre et les panneaux des
+   ecrans web gardent les leurs. */
+.sz-panneau{font-size:12px!important;line-height:1.3!important;padding:.3rem .25rem!important}
+.sz-panneau .sz-item{padding:.26em .85em!important;line-height:1.3!important;min-height:0!important;gap:.5em!important}
+.sz-panneau .sz-lbl{font-size:12px!important}
+.sz-panneau .sz-acc{font-size:10px!important}
+.sz-panneau .sz-titre{font-size:10px!important;padding:.5em .85em .15em!important;margin:0!important}
+.sz-panneau .sz-sep{margin:.28em .5em!important}
 </style></head><body>
 <script>
 (function(){
