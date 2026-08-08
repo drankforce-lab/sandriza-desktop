@@ -1013,6 +1013,9 @@ const OPS_PONT = new Set([
   'commandes:fraisApercu', 'commandes:fraisEcrire',
   'commandes:rembourser', 'commandes:facture', 'commandes:ouvrirDetail',
   'facture:lire', 'facture:imprimer', 'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
+  // Tableau de bord : lecture des chiffres, preference des tuiles, et le
+  // clic d une tuile qui ouvre sa cible.
+  'tableau:lire', 'tableau:tuiles', 'tableau:ouvrir',
   // Variantes par couleur : teinte au CANEVAS par le site (une image, une
   // couleur par appel — la fenetre boucle), aucun service externe.
   'produit:teinter',
@@ -1194,12 +1197,23 @@ const OPS_QUI_CHANGENT_L_INVENTAIRE = new Set([
   'stock:entrepotEcrire', 'stock:entrepotSupprimer',
   'caisse:vendre', 'retour:finaliser', 'remboursement:ecrire',
 ]);
-const actualiserInventaire = (sender) => {
-  const win = fenetresNatives.get('inventaire');
-  if (!win || win.isDestroyed()) return;
-  if (sender && win.webContents === sender) return;
-  win.webContents.executeJavaScript('window.szActualiser && window.szActualiser()', true).catch(() => {});
+const actualiserFenetres = (cles, sender) => {
+  (cles || []).forEach((cle) => {
+    const win = fenetresNatives.get(cle);
+    if (!win || win.isDestroyed()) return;
+    if (sender && win.webContents === sender) return;
+    win.webContents.executeJavaScript('window.szActualiser && window.szActualiser()', true).catch(() => {});
+  });
 };
+// Le tableau de bord suit davantage d ecritures que l inventaire : toute
+// operation qui change une commande, un retour ou un remboursement le fait
+// bouger aussi.
+const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
+  'commande:statut', 'commande:prete', 'commande:expedier',
+  'commandes:statutEcrire', 'commandes:supprimerEcrire', 'commandes:fraisEcrire',
+  'expedition:confirmer', 'retour:enregistrer', 'retour:recu', 'retour:litige',
+  'client:ecrire', 'client:purger', 'client:restaurer',
+]);
 
 ipcMain.handle('pont:appeler', async (e, op, args) => {
   const nom = String(op || '');
@@ -1235,7 +1249,12 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
       setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, LIMITES_PONT[nom] || 8000);
     });
     const r = await Promise.race([travail, plafond]);
-    if (r && r.ok && OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) actualiserInventaire(e.sender);
+    if (r && r.ok) {
+      const fenetres = [];
+      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau');
+      else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau');
+      if (fenetres.length) actualiserFenetres(fenetres, e.sender);
+    }
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
   } catch { return { ok: false, motif: 'pont_indisponible' }; }
 });
@@ -1730,6 +1749,7 @@ const { pageAffichage } = require('./fenetres/affichage');
 const { pageCaisse } = require('./fenetres/caisse');
 const { pageInventaire } = require('./fenetres/inventaire');
 const { pageExpedition } = require('./fenetres/expedition');
+const { pageTableau } = require('./fenetres/tableau');
 const { pageCommandes } = require('./fenetres/commandes');
 const { pageRetour } = require('./fenetres/retour');
 const { pageRemboursement } = require('./fenetres/remboursement');
@@ -1790,6 +1810,18 @@ const actionApp = (nom) => {
        quantite, seuil, emplacement. Sous 900 px, le nom de la variante et le code
        se coupent — et un code de variante coupe ne se verifie pas contre
        l etiquette collee sur le vetement, ce qui est tout son usage. */
+    case 'tableau': {
+      // L ecran d ouverture de la journee : reutilisee, la fenetre RELIT ses
+      // chiffres (szRevenir) — l etat d avant pourrait dater d hier.
+      const _avT = fenetresNatives.get('tableau');
+      const _reuT = !!(_avT && !_avT.isDestroyed());
+      const winT = ouvrirNative('tableau', 'Tableau de bord', pageTableau(),
+        { width: 1060, height: 780, minWidth: 760, minHeight: 520 });
+      if (_reuT && winT && !winT.isDestroyed()) {
+        winT.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
     case 'inventaire':
       // Depuis 1.35.0 c est l ecran d inventaire ENTIER (quatre onglets), plus
       // seulement l ajustement — d ou le titre << Inventaire >>. Un peu plus

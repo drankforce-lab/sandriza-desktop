@@ -421,6 +421,54 @@ module.exports = {
     },
   ],
 
+  // ── TABLEAU DE BORD ────────────────────────────────────────────────────────
+  'tableau.js': [
+    {
+      // Donnees pleines : chaque tuile a de quoi dessiner, l'avis de taux est
+      // present, et les deux listes recentes ont plus d'une page.
+      nom: 'journée chargée, taux de secours',
+      id: '',
+      reponses: {
+        'tableau:lire': {
+          ok: true,
+          annee: 'all',
+          annees: [2026, 2025],
+          cfgTuiles: { revenue: false },
+          tuiles: {
+            produits: { actifs: 42, variantesReappro: 12, produitsBas: 4 },
+            commandes: { total: 128, enAttente: 3 },
+            clients: { actifs: 87, inactifs: 5 },
+            revenus: { brut: 15230.5, rembourse: 320, net: 14910.5, factures: 96 },
+            messagerie: 2, retoursNouveaux: 1, retoursExpirent: 1,
+          },
+          recentesCommandes: [
+            { numero: 'SZ-100251', date: '2026-08-08T14:00:00Z', client: 'Josée Lafleur', total: 302.96, statut: 'pending', statutLibelle: 'En attente' },
+            { numero: 'SZ-100249', date: '2026-08-08T11:00:00Z', client: 'Marc Dubé', total: 89.95, statut: 'shipped', statutLibelle: 'Expédiée' },
+            { numero: 'SZ-100242', date: '2026-08-07T16:00:00Z', client: 'Anne Roy', total: 145.0, statut: 'delivered', statutLibelle: 'Livrée' },
+            { numero: 'SZ-100238', date: '2026-08-07T09:00:00Z', client: 'Luc Simard', total: 45.0, statut: 'cancelled', statutLibelle: 'Annulée' },
+          ],
+          recentesFactures: [
+            { numero: 'FAC-0002-47028', date: '2026-08-08T14:00:00Z', client: 'Josée Lafleur', total: 302.96, statut: 'paid', statutLibelle: 'Payée' },
+            { numero: 'FAC-0002-46981', date: '2026-08-07T10:00:00Z', client: 'Marc Dubé', total: 89.95, statut: 'overdue', statutLibelle: 'En retard' },
+          ],
+          taux: { genre: 'secours', rate: 1.3567 },
+        },
+        'tableau:tuiles': { ok: true },
+        'tableau:ouvrir': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Le refus de droit : la fenetre doit le dire, pas rester sur Chargement.
+      nom: 'rôle sans tableau de bord',
+      id: '',
+      reponses: {
+        'tableau:lire': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── PRODUIT (l'assistant, la plus grande des fenêtres) ────────────────────
   'produit.js': [
     {
