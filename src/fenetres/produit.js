@@ -383,17 +383,17 @@ function pageProduit(id) {
       // s applique, et il occupait la place d une action principale pour un
       // geste secondaire. On clique la photo pour la choisir, on clique la
       // pastille rouge de son coin pour la retirer — la ou l oeil est deja.
+      /* ⚠ COTE A COTE, SANS TEXTE D AIDE (demande le 2026-08-07) : la vignette
+         principale laissait toute sa moitie droite vide, et les deux phrases
+         d explication n apprenaient rien apres la premiere utilisation. Le
+         MAXIMUM, seul renseignement qui compte, vit dans le TITRE. */
+      + '<div class="cote">'
       + '<div class="carte"><h2>Photo principale</h2><div class="photo">'
       + '<div class="vign" id="p-vign" title="Choisir la photo principale">aucune photo</div>'
-      + '<div class="cmd">'
-      + '<div class="aide">Cliquez la vignette : la <strong>photothèque</strong> s’ouvre '
-      + 'd’abord, et l’import depuis l’ordinateur y reste offert. Maximum 8 Mo. '
-      + 'Déposée dans le stockage à l’enregistrement.</div>'
-      + '</div></div></div>'
-      + '<div class="carte"><h2 id="p-vues-titre">Vues supplémentaires</h2>'
-      + '<div class="vues" id="p-vues"></div>'
-      + '<div class="aide" style="margin-top:.45rem">Dos, détail, porté. Elles apparaissent '
-      + 'sur la fiche, après la photo principale.</div></div>'
+      + '</div></div>'
+      + '<div class="carte"><h2 id="p-vues-titre">Photos supplémentaires (5 photos maximum)</h2>'
+      + '<div class="vues" id="p-vues"></div></div>'
+      + '</div>'
       + '<div class="carte plein"><h2>Photo par couleur</h2>'
       + '<div class="aide" style="margin-bottom:.5rem">Le client voit la photo de la couleur '
       + 'qu’elle choisit. Sans photo pour une couleur, c’est la photo principale qui s’affiche.</div>'
@@ -896,7 +896,9 @@ function pageProduit(id) {
   // Un cadre par vue : on clique, on choisit un fichier. Le « x » retire.
   function dessinerVues(){
     var t = document.getElementById('p-vues-titre');
-    if (t) t.textContent = modeStandard() ? 'Photos supplémentaires' : 'Vues supplémentaires';
+    if (t) t.textContent = modeStandard()
+      ? 'Photos supplémentaires (' + MAX_PHOTOS + ' photos maximum)'
+      : 'Vues supplémentaires';
     var z = document.getElementById('p-vues');
     if (z) {
       z.innerHTML = clesVues().map(function(cle){
@@ -1602,7 +1604,7 @@ function pageProduit(id) {
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'products', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 fiche réservée'; return; }
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
       sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
       dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');

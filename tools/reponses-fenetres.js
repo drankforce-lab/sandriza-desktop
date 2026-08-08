@@ -900,6 +900,78 @@ module.exports = {
      ⚠ `id` porte ici le MODE, pas un identifiant de fiche : c'est ce que la
      fabrique `pageCommandes(mode)` attend. */
   'commandes.js': [
+    /* ⚠ LE DÉTAIL S'ÉPROUVE PAR « mode@identifiant » : le banc ne clique pas,
+       et sans ce cas la vue détail (statut, remboursements, frais retenus,
+       actions) ne serait JAMAIS traversée. Le jeu porte : des quantités
+       remboursées (la mention « remb. »), deux taxes aux taux figés, des frais
+       retenus PARTIELLEMENT remboursés (le badge « Partiel — … reste … »),
+       et tous les droits pour que chaque bouton du pied se dessine. */
+    {
+      nom: 'détail d’une commande',
+      id: 'commandes@ord_0007',
+      reponses: {
+        'commandes:contexte': {
+          ok: true, peutEditer: true, peutExpedier: true,
+          statuts: [
+            { cle: 'pending', libelle: 'En attente' },
+            { cle: 'confirmed', libelle: 'Confirmée' },
+            { cle: 'preparing', libelle: 'En préparation' },
+            { cle: 'verification', libelle: 'Vérification' },
+            { cle: 'shipped', libelle: 'En livraison' },
+            { cle: 'delivered', libelle: 'Livrée' },
+            { cle: 'cancelled', libelle: 'Annulée' },
+          ],
+          annees: [2026],
+        },
+        'commandes:detail': {
+          ok: true,
+          commande: {
+            id: 'ord_0007', numero: 'SZ-100207', statut: 'preparing',
+            creeLe: '2026-08-05T14:00:00Z', livreLe: '', prioritaire: true,
+            notes: 'Emballage cadeau demandé.',
+            paiementSquare: 'PAY_abc123', afterpay: false, membre: true, aFacture: true,
+            suivi: '', suiviStatut: '', suiviVerifieLe: '',
+            client: { nom: 'Marie Tremblay', entreprise: '', courriel: 'marie@example.com', tel: '418 555-0142' },
+            adresse: { rue: '12 rue des Érables', ville: 'Québec', province: 'QC', cp: 'G1R 2B5' },
+          },
+          articles: [
+            { nom: 'Robe cintrée', taille: 'M', couleur: 'Noir', qte: 2, montant: 179.98, rembourseQte: 1 },
+            { nom: 'Foulard de laine', taille: 'U', couleur: 'Gris', qte: 1, montant: 39.99, rembourseQte: 0 },
+          ],
+          totaux: {
+            sousTotal: 219.97,
+            taxes: [
+              { nom: 'TPS', taux: 0.05, montant: 11.0 },
+              { nom: 'TVQ', taux: 0.09975, montant: 21.94 },
+            ],
+            livraison: 12.99, prioritaire: 5.0, coupon: 10.0, total: 260.9,
+          },
+          remboursements: {
+            lignes: [
+              { numero: 'RMB-0001', date: '2026-08-06T10:00:00Z', type: 'Moyen original',
+                montant: 89.99, fraisRetenus: 2.75 },
+              { numero: 'RMB-0002', date: '2026-08-06T15:00:00Z', type: 'Frais de service',
+                montant: 1.0, fraisRetenus: 0 },
+            ],
+            total: 90.99, complet: false,
+            fraisRetenus: 2.75, fraisRembourses: 1.0, fraisRestants: 1.75,
+          },
+          statuts: [
+            { cle: 'pending', libelle: 'En attente' },
+            { cle: 'confirmed', libelle: 'Confirmée' },
+            { cle: 'preparing', libelle: 'En préparation' },
+            { cle: 'verification', libelle: 'Vérification' },
+            { cle: 'shipped', libelle: 'En livraison' },
+            { cle: 'delivered', libelle: 'Livrée' },
+            { cle: 'cancelled', libelle: 'Annulée' },
+          ],
+          droits: { statut: true, supprimer: true, rembourser: true, frais: true, bon: true },
+        },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
     {
       nom: 'commandes en cours',
       id: 'commandes',

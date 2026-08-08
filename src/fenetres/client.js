@@ -423,7 +423,7 @@ ${JS_ACTIVITE}
     appeler('verrou:prendre', ['users', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 fiche réservée'; return; }
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
       sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       dire('Cette fiche est ouverte ailleurs — modifications bloquées.', 'att');
       R.peutEcrire = false;

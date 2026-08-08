@@ -268,7 +268,7 @@ ${JS_ACTIVITE}
   var BASE = null;     // instantane pris a l OUVERTURE — reference du conflit
   var ENTREPOTS = [];
   var FILTRE = { couleur: [], taille: [], menu: null };
-  var PAGE = 0, TAILLE_PAGE = 25;
+  var PAGE = 0, TAILLE_PAGE = 25, GRILLE_AUTO = true;
   var enCours = false;
 
   // ── Onglet Produits ── La liste est paginee et filtree PAR LE SITE
@@ -542,8 +542,9 @@ ${JS_ACTIVITE}
 
       h += '<div class="pagi">'
         + '<span>Afficher</span><select id="pg-taille">'
+        + '<option value="auto"' + (GRILLE_AUTO ? ' selected' : '') + '>Auto</option>'
         + [5, 10, 25, 50, 9999].map(function(n){
-            return '<option value="' + n + '"' + (TAILLE_PAGE === n ? ' selected' : '') + '>'
+            return '<option value="' + n + '"' + (!GRILLE_AUTO && TAILLE_PAGE === n ? ' selected' : '') + '>'
               + (n === 9999 ? 'Tout' : n) + '</option>'; }).join('')
         + '</select><span>par page</span>'
         + '<span class="pos">'
@@ -569,6 +570,23 @@ ${JS_ACTIVITE}
       + '<button class="prim" id="btn-enr">Enregistrer l’inventaire</button>';
     brancherProduit();
     majBouton();
+    grilleAutoAjuste();
+  }
+
+  // La grille des variantes suit la meme regle Auto que l onglet Produits :
+  // autant de lignes que la hauteur reelle le permet, jamais de glissiere.
+  function grilleAutoAjuste(){
+    if (!GRILLE_AUTO || VUE !== 'produit') return;
+    var g = corps.querySelector('.grille');
+    if (!g) return;
+    var th = g.querySelector('thead');
+    var tr = g.querySelector('tbody tr');
+    var hL = tr ? tr.offsetHeight : 0;
+    if (!(hL > 0)) hL = 34;
+    var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
+    if (!(dispo > 0)) return; // le banc mesure NaN : on ne touche a rien
+    var n = Math.max(3, Math.floor(dispo / hL));
+    if (isFinite(n) && n !== TAILLE_PAGE) { TAILLE_PAGE = n; PAGE = 0; dessiner(); }
   }
 
   function dessinerFiltres(){
@@ -659,7 +677,10 @@ ${JS_ACTIVITE}
     var tt = document.getElementById('btn-tout');
     if (tt) tt.onclick = toutesLesEtiquettes;
     var pt = document.getElementById('pg-taille');
-    if (pt) pt.onchange = function(){ TAILLE_PAGE = parseInt(this.value, 10) || 25; PAGE = 0; dessiner(); };
+    if (pt) pt.onchange = function(){
+      if (this.value === 'auto') { GRILLE_AUTO = true; PAGE = 0; dessiner(); }
+      else { GRILLE_AUTO = false; TAILLE_PAGE = parseInt(this.value, 10) || 25; PAGE = 0; dessiner(); }
+    };
     var pp = document.getElementById('pg-prec');
     if (pp) pp.onclick = function(){ PAGE--; dessiner(); };
     var ps = document.getElementById('pg-suiv');
@@ -882,7 +903,9 @@ ${JS_ACTIVITE}
   }
   window.addEventListener('resize', function(){
     clearTimeout(autoT);
-    autoT = setTimeout(pageAutoAjuste, 180);
+    autoT = setTimeout(function(){
+      if (VUE === 'produit') grilleAutoAjuste(); else pageAutoAjuste();
+    }, 180);
   });
 
   function menuCats(cats){
@@ -1332,7 +1355,7 @@ ${JS_ACTIVITE}
     appeler('verrou:prendre', ['products', pid]).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 fiche réservée'; return; }
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
       sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       var b = document.getElementById('btn-enr');
       if (b) { b.disabled = true; b.textContent = 'Ouverte ailleurs'; }

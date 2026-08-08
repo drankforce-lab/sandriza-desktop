@@ -1002,6 +1002,13 @@ const OPS_PONT = new Set([
   // site : envoyer trois mille commandes pour en afficher vingt ferait passer
   // plusieurs megaoctets par ce pont a chaque frappe dans la recherche.
   'commandes:contexte', 'commandes:liste',
+  // Le DETAIL d une commande dans la fenetre Commandes : lecture complete,
+  // statut (apercu/ecriture, case courriels), suppression (cascade, Square),
+  // frais retenus, renvoi vers Remboursement, facture dans la fenetre principale.
+  'commandes:detail', 'commandes:statutApercu', 'commandes:statutEcrire',
+  'commandes:supprimerApercu', 'commandes:supprimerEcrire',
+  'commandes:fraisApercu', 'commandes:fraisEcrire',
+  'commandes:rembourser', 'commandes:facture',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
