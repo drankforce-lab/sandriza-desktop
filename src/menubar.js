@@ -168,17 +168,21 @@ ${css}
    panneau vertical c etait trop gros ; 12 px etait trop petit (2026-08-09).
    13,5 px et retraits serres. Ces reglages ne vivent QUE dans cette fenetre :
    la barre et les panneaux des ecrans web gardent les leurs. */
-.sz-panneau{font-size:13.5px!important;line-height:1.35!important;padding:.32rem .28rem!important}
-.sz-panneau .sz-item{padding:.3em .9em!important;line-height:1.35!important;min-height:0!important;gap:.55em!important}
+.sz-panneau{font-size:13.5px!important;line-height:1.3!important;padding:.28rem .24rem!important}
+.sz-panneau .sz-item{padding:.26em .8em!important;line-height:1.3!important;min-height:0!important;gap:.5em!important;width:100%!important}
 .sz-panneau .sz-lbl{font-size:13.5px!important}
 .sz-panneau .sz-acc{font-size:11px!important}
-.sz-panneau .sz-titre{font-size:11px!important;padding:.55em .9em .2em!important;margin:0!important}
-.sz-panneau .sz-sep{margin:.3em .5em!important}
+.sz-panneau .sz-titre{font-size:11px!important;padding:.5em .8em .18em!important;margin:0!important}
+.sz-panneau .sz-sep{margin:.28em .5em!important}
 /* Les SOUS-MENUS volants : la colonne principale et le sous-panneau vivent
-   cote a cote dans la meme fenetre, qui s elargit quand un sous-menu s ouvre. */
-#rangee{display:flex;align-items:flex-start}
+   cote a cote dans la meme fenetre, qui s elargit quand un sous-menu s ouvre.
+   ⚠ INLINE-flex, et c est LA correction : un bloc remplit la fenetre, sa
+   mesure renvoyait donc la largeur de la FENETRE — elle ne se resserrait
+   jamais (grand fond vide a droite, releve du 2026-08-09). En inline-flex,
+   la rangee a la largeur de son CONTENU, et la fenetre l epouse. */
+#rangee{display:inline-flex;align-items:flex-start;vertical-align:top}
 #sous{display:none}
-.sz-item .sz-fleche{margin-left:auto;opacity:.6;font-size:.8em}
+.sz-item .sz-fleche{margin-left:auto;opacity:.6;font-size:.8em;padding-left:1.2em}
 </style></head><body>
 <script>
 (function(){
