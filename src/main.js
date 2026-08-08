@@ -1033,7 +1033,7 @@ const OPS_PONT = new Set([
   // l annulation aupres du transporteur (le coeur vit dans le site), le
   // renvoi vers l assistant de planification du site, et le rapport.
   'ramassages:liste', 'ramassages:annuler', 'ramassages:planifier',
-  'expeditions:rapport',
+  'ramassages:preparer', 'expeditions:rapport',
   // La moderation des avis (fenetre Avis produits) : liste, lecture entiere,
   // et les quatre gestes — les coeurs vivent dans le site.
   'avis:liste', 'avis:lire', 'avis:approuver', 'avis:masquer',
@@ -1245,6 +1245,7 @@ const LIMITES_PONT = {
   // meme fraicheur que l ecran du site) : laisser le temps du nuage.
   'retours:liste': 20000,
   'ramassages:annuler': 30000,
+  'ramassages:planifier': 45000,
   'messagerie:liste': 20000, 'messagerie:repondre': 30000,
 };
 

@@ -46,8 +46,8 @@ button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:700}
+button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:#f87171}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem}
@@ -73,6 +73,18 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
 .ligne.annule{opacity:.55}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
 .ligne .dt{font-size:.72rem;color:#8fa1b8;margin-top:.2rem}
+input[type=number],input[type=text]{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem;width:100%}
+input:focus{outline:none;border-color:#c9a97e}
+.voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
+  align-items:center;justify-content:center;z-index:50;padding:1rem}
+.boite{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
+  max-width:34rem;width:100%;max-height:84vh;overflow:auto;padding:.9rem 1rem}
+.boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif}
+.boite .grp{border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.5rem .6rem;margin:.4rem 0}
+.boite .champs{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.6rem}
+.boite .champs .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;margin-bottom:.2rem}
+.boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
 .vide{padding:1.2rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
@@ -103,6 +115,7 @@ ${JS_ACTIVITE}
   var RAM = null;              // lignes de ramassages:liste
   var RAP = null;              // donnees d expeditions:rapport
   var ANNULER_ARME = '';       // id du ramassage dont Annuler attend confirmation
+  var PLAN = null;             // le formulaire de planification (ramassages:preparer)
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -193,7 +206,41 @@ ${JS_ACTIVITE}
           + '</div>';
       }).join('');
     }
+    if (PLAN) h += boitePlan();
     corps.innerHTML = h;
+  }
+
+  function boitePlan(){
+    var p = PLAN;
+    var h = '<div class="voile" id="rm-voile"><div class="boite">'
+      + '<h3>📦 Planifier les ramassages — ' + (p.total || 0) + ' colis</h3>';
+    if (!p.total) {
+      h += '<div class="vide">Aucun colis à ramasser pour l’instant.<br>'
+        + 'Une commande doit être marquée Expédiée et avoir un numéro de suivi.</div>'
+        + '<div class="pied-boite"><button id="rm-p-annuler">Fermer</button></div></div></div>';
+      return h;
+    }
+    h += '<div class="dt">📅 Prévu le <strong>' + esc(p.date) + '</strong>, entre 09 h et 17 h'
+      + (p.adresse ? ' · ' + esc(p.adresse) : '') + '</div>';
+    h += (p.groupes || []).map(function(g){
+      return '<div class="grp"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
+        + '<span>' + g.logo + '</span><span class="num">' + esc(g.nom) + '</span>'
+        + '<span class="pill neutre">' + g.colis + ' colis</span>'
+        + (g.api ? '<span class="pill bon">API — demande automatique</span>'
+                 : '<span class="pill att">à contacter manuellement</span>')
+        + '</div><div class="dt">' + (g.commandes || []).map(function(n){
+            return '<span class="pill neutre mono">' + esc(n) + '</span>'; }).join(' ') + '</div></div>';
+    }).join('');
+    h += '<div class="champs">'
+      + '<div><div class="l">Poids estimé par colis (kg)</div>'
+      + '<input type="number" id="rm-p-poids" value="0.5" min="0.05" step="0.05"></div>'
+      + '<div><div class="l">Endroit du ramassage</div>'
+      + '<input type="text" id="rm-p-endroit" value="Porte principale"></div>'
+      + '</div>'
+      + '<div class="pied-boite"><button id="rm-p-annuler">Annuler</button>'
+      + '<button class="prim" id="rm-p-envoyer">📨 Envoyer les demandes</button></div>'
+      + '</div></div>';
+    return h;
   }
 
   function dessinerRapport(){
@@ -243,12 +290,40 @@ ${JS_ACTIVITE}
     if (og) { ONGLET = og.getAttribute('data-onglet'); ANNULER_ARME = ''; charger(); return; }
     var pl = t.closest('#rm-planifier');
     if (pl) {
-      dire('Assistant de planification ouvert dans la fenêtre principale.', 'bon');
-      appeler('ramassages:planifier', []).then(function(r){
-        if (!r.ok) dire(expliquer(r), 'err');
+      /* NATIF (1.59.1) : le formulaire s ouvre ICI — le renvoi a l assistant
+         web contredisait la regle << plus rien au format web >> (releve du
+         2026-08-09). */
+      dire('Lecture des colis prêts…');
+      appeler('ramassages:preparer', []).then(function(r){
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        dire('');
+        PLAN = r;
+        dessiner();
       });
       return;
     }
+    if (t.closest('#rm-p-annuler')) { PLAN = null; dessiner(); return; }
+    var env = t.closest('#rm-p-envoyer');
+    if (env) {
+      var poids = parseFloat((document.getElementById('rm-p-poids') || {}).value) || 0.5;
+      var endroit = ((document.getElementById('rm-p-endroit') || {}).value || '').trim();
+      env.disabled = true;
+      dire('Demandes envoyées aux transporteurs…');
+      appeler('ramassages:planifier', [{ poids: poids, endroit: endroit }]).then(function(r){
+        if (!r.ok) {
+          dire(r.motif === 'aucun_colis' ? 'Aucun colis à ramasser.' : expliquer(r), 'err');
+          env.disabled = false;
+          return;
+        }
+        dire((r.echec ? '⚠ ' : '') + 'Ramassage ' + r.date + ' — ' + r.total + ' colis'
+          + ((r.parties || []).length ? ' · ' + r.parties.join(' · ') : ''), r.echec ? 'err' : 'bon');
+        PLAN = null;
+        charger();
+      });
+      return;
+    }
+    if (t.closest('.boite')) return;
+    if (t.closest('#rm-voile')) { PLAN = null; dessiner(); return; }
     var an = t.closest('[data-annuler]');
     if (an) {
       var id = an.getAttribute('data-annuler');
@@ -288,7 +363,7 @@ ${JS_ACTIVITE}
 
   /* ⚠ ACTUALISATION POUSSEE PAR LA COQUILLE : une expedition confirmee ou un
      statut qui change font relire l onglet courant. */
-  window.szActualiser = function(){ if (!ANNULER_ARME) charger(); };
+  window.szActualiser = function(){ if (!ANNULER_ARME && !PLAN) charger(); };
   window.szRevenir = function(){ ANNULER_ARME = ''; charger(); };
 
   /* ── MODE ANCRE ── Le meme bouton que les autres ecrans. */
@@ -317,7 +392,11 @@ ${JS_ACTIVITE}
   };
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
+    if (ev.key === 'Escape') {
+      ev.preventDefault();
+      if (PLAN) { PLAN = null; dessiner(); return; }
+      P.fermer();
+    }
   });
 
   var sous = document.getElementById('sous');

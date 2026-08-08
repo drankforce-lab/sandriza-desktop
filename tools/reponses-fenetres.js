@@ -616,7 +616,17 @@ module.exports = {
           ],
         },
         'ramassages:annuler': { ok: true },
-        'ramassages:planifier': { ok: true, web: true },
+        'ramassages:planifier': { ok: true, date: '2026-08-11', total: 4,
+          parties: ['Postes Canada ✓ (réf 0087512399)', 'FedEx ✓ (conf. PU77900)'], echec: false },
+        'ramassages:preparer': {
+          ok: true, date: '2026-08-11', adresse: '6845 rue Eugène-Achard, Québec QC', total: 4,
+          groupes: [
+            { cle: 'postes-canada', nom: 'Postes Canada', logo: '📮', colis: 3,
+              commandes: ['CMD-0002-22010', 'CMD-0002-21988', 'CMD-0002-21970'], api: true },
+            { cle: 'purolator', nom: 'Purolator', logo: '📦', colis: 1,
+              commandes: ['CMD-0002-21944'], api: false },
+          ],
+        },
         // FORME REELLE d expeditions:rapport (Admin._rapportTransporteursDonnees).
         'expeditions:rapport': {
           ok: true, total: 4, totalFrais: 61.8,
