@@ -154,12 +154,11 @@ function pagePanneau(desc) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <style>
 html,body{margin:0;overflow:hidden}
-body{background:var(--sz-bg,${sombre ? '#131b2a' : '#ffffff'})}
-/* Le panneau vit seul dans sa fenêtre : on neutralise le positionnement volant
-   que la feuille du site lui donne quand il vit dans une page — et il garde sa
-   LARGEUR NATURELLE, que la fenêtre épouse (panneau:taille). */
+/* ⚠ FENETRE TRANSPARENTE : chaque panneau porte SON fond, sa bordure et son
+   ombre — le sous-menu est une vraie boite a la hauteur de ses elements, et
+   le fond ne << se poursuit >> plus derriere (releve du 2026-08-09). */
+body{background:transparent;padding:7px}
 .sz-panneau{position:static!important;margin:0!important;
-  box-shadow:none!important;border:0!important;border-radius:0!important;
   max-width:none!important;width:max-content!important;
   max-height:none!important;animation:none!important;overflow:visible!important}
 ${css}
@@ -174,14 +173,21 @@ ${css}
 .sz-panneau .sz-acc{font-size:11px!important}
 .sz-panneau .sz-titre{font-size:11px!important;padding:.5em .8em .18em!important;margin:0!important}
 .sz-panneau .sz-sep{margin:.28em .5em!important}
+/* Chaque panneau est une BOITE a lui : fond, bordure, coins ronds, ombre —
+   apres la feuille du site pour la battre. */
+.sz-panneau{background:var(--sz-bg,${sombre ? '#131b2a' : '#ffffff'})!important;
+  border:1px solid var(--sz-bord,rgba(255,255,255,.09))!important;
+  border-radius:10px!important;
+  box-shadow:0 10px 26px rgba(0,0,0,${sombre ? '.5' : '.18'})!important}
 /* Les SOUS-MENUS volants : la colonne principale et le sous-panneau vivent
    cote a cote dans la meme fenetre, qui s elargit quand un sous-menu s ouvre.
    ⚠ INLINE-flex, et c est LA correction : un bloc remplit la fenetre, sa
    mesure renvoyait donc la largeur de la FENETRE — elle ne se resserrait
    jamais (grand fond vide a droite, releve du 2026-08-09). En inline-flex,
-   la rangee a la largeur de son CONTENU, et la fenetre l epouse. */
+   la rangee a la largeur de son CONTENU, et la fenetre l epouse. Le
+   sous-panneau, ALIGNE EN HAUT DE SON PARENT, a la hauteur de ses elements. */
 #rangee{display:inline-flex;align-items:flex-start;vertical-align:top}
-#sous{display:none}
+#sous{display:none;margin-left:7px}
 .sz-item .sz-fleche{margin-left:auto;opacity:.6;font-size:.8em;padding-left:1.2em}
 </style></head><body>
 <script>
@@ -194,8 +200,9 @@ ${css}
   sous.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
 
   function mesurer(){
+    // + les 7 px de marge transparente de chaque cote (l ombre y respire).
     try {
-      window.szPalette.taille(Math.ceil(rangee.scrollWidth) + 2, Math.ceil(rangee.scrollHeight) + 2);
+      window.szPalette.taille(Math.ceil(rangee.scrollWidth) + 16, Math.ceil(rangee.scrollHeight) + 16);
     } catch(e){}
   }
   function cacherSous(){

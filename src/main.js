@@ -2349,11 +2349,16 @@ ipcMain.on('menu:panneau', (e, label, x, y) => {
   if (!m || !(m.items || []).length) return;
   clearTimeout(panneauFermeT); panneauFermeT = null; panneauSurvole = false;
   if (!panneauWin || panneauWin.isDestroyed()) {
+    /* ⚠ TRANSPARENTE : chaque panneau (colonne et sous-menu) peint SON fond
+       dans la page — la fenetre elle-meme n en a pas, sinon le fond
+       << se poursuit >> derriere le sous-menu plus court que la colonne
+       (releve du 2026-08-09). L ombre aussi vient de la page (hasShadow
+       suivrait le rectangle de la fenetre, pas les boites). */
     panneauWin = new BrowserWindow({
       parent: mainWindow, frame: false, show: false, resizable: false, movable: false,
-      skipTaskbar: true, hasShadow: true, minimizable: false, maximizable: false,
+      skipTaskbar: true, hasShadow: false, minimizable: false, maximizable: false,
+      transparent: true,
       width: 300, height: 200,
-      backgroundColor: _modele.sombre ? '#131b2a' : '#ffffff',
       webPreferences: {
         preload: path.join(__dirname, 'palette-preload.js'),
         contextIsolation: true, nodeIntegration: false, sandbox: true,
