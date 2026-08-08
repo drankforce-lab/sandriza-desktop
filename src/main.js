@@ -1025,6 +1025,10 @@ const OPS_PONT = new Set([
   'collections:liste', 'collections:ouvrir', 'collections:nouvelle',
   'fournisseurs:liste', 'fournisseurs:ouvrir', 'fournisseurs:nouveau',
   'retours:liste', 'retours:ouvrir',
+  // La fenetre Codes-barres : la page filtree par le site, et la grille des
+  // variantes d un produit (le choix se fait dans la fenetre, l impression
+  // passe par stock:etiquettes — la meme voie que l Inventaire).
+  'codesbarres:liste', 'codesbarres:produit',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1311,7 +1315,7 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
       // La liste Produits en vente suit celles de l inventaire (fiches, stock) ;
       // Clients suit les deux (une vente change ses totaux, client:ecrire sa
       // fiche) ; Retours suit les operations de retour des deux ensembles.
-      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures', 'produits', 'clients', 'retours');
+      if (OPS_QUI_CHANGENT_L_INVENTAIRE.has(nom)) fenetres.push('inventaire', 'tableau', 'factures', 'produits', 'clients', 'retours', 'codesbarres');
       else if (OPS_QUI_CHANGENT_LE_TABLEAU.has(nom)) fenetres.push('tableau', 'factures', 'clients', 'retours');
       // Les assistants collection et fournisseur previennent leur liste.
       if (nom === 'collection:enregistrer') fenetres.push('collections');
@@ -1363,12 +1367,22 @@ const PAGES_ANCRABLES = () => ({
   collections: ['Nos Collections', () => pageCollections()],
   fournisseurs: ['Fournisseurs', () => pageFournisseurs()],
   retours: ['Nos Retours', () => pageRetours()],
+  factures: ['Factures', () => pageFactures()],
+  codesbarres: ['Impression de codes-barres', () => pageCodesbarres()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
 // ancre ou detache >>). Par POSTE (reglages.json), comme la place du menu :
 // l ecran du comptoir n est pas celui du bureau.
-const etatAncrage = (cle) => ((reglages.get('ancrage') || {})[cle] === 'detache' ? 'detache' : 'ancre');
+// LE TABLEAU DE BORD NE SE DETACHE PAS (demande du 2026-08-09) : c est l ecran
+// d ouverture de session — detache, la fenetre principale n aurait qu un fond
+// vide. Il est ancre en permanence ; un etat << detache >> retenu d avant
+// cette regle est ignore.
+const NON_DETACHABLES = new Set(['tableau']);
+const etatAncrage = (cle) => {
+  if (NON_DETACHABLES.has(cle)) return 'ancre';
+  return (reglages.get('ancrage') || {})[cle] === 'detache' ? 'detache' : 'ancre';
+};
 const etatAncragePoser = (cle, etat) => {
   const tout = { ...(reglages.get('ancrage') || {}) };
   if (tout[cle] === etat) return;
@@ -1466,6 +1480,8 @@ ipcMain.handle('dock:ouvrir', (e, cle) => {
     // l ecriteau << detache >> dans la zone (dock:detachee).
     poserEnFenetre(c, a);
     a.fenetre.show(); a.fenetre.focus();
+    if (ancreeVisible !== c) { /* la vue posee, s il y en avait une, a ete cachee ci-dessus */ }
+    ancreeVisible = null; vueVoilee = null;
     try { mainWindow.webContents.send('dock:detachee', c); } catch {}
     return { ok: true, detachee: true };
   }
@@ -1473,6 +1489,7 @@ ipcMain.handle('dock:ouvrir', (e, cle) => {
   try { a.view.setVisible(true); } catch {}
   const b = boundsAncrage();
   if (b) { try { a.view.setBounds(b); } catch {} }
+  ancreeVisible = c; vueVoilee = null;
   return { ok: true };
 });
 // Le site navigue vers une section ordinaire : les vues ancrees se cachent
@@ -1480,6 +1497,7 @@ ipcMain.handle('dock:ouvrir', (e, cle) => {
 ipcMain.on('dock:cacher', (e) => {
   if (!mainWindow || e.sender !== mainWindow.webContents) return;
   ancrees.forEach((a) => { if (!a.fenetre && a.view) { try { a.view.setVisible(false); } catch {} } });
+  ancreeVisible = null; vueVoilee = null;
 });
 // LE VOILE DU MENU DE L APPLICATION : masquer puis remontrer la vue ancree
 // SANS la recharger. Les panneaux du menu vivent dans la PAGE, donc sous la
@@ -1487,6 +1505,12 @@ ipcMain.on('dock:cacher', (e) => {
 // bord >>) — le site voile pendant qu un panneau est deploye. Le repli 1.52
 // (dockCacher + dockOuvrir) relisait les donnees a chaque fermeture de menu ;
 // ici on ne touche qu a la visibilite, et on ne remontre que ce qu on a cache.
+// ⚠⚠ ELECTRON 31 N A PAS view.getVisible() — la 1.54.0 s y fiait pour savoir
+// quoi cacher et ne cachait donc JAMAIS rien (le menu repassait dessous,
+// deux fois vecu le meme soir). La visibilite est desormais SUIVIE ICI :
+// `ancreeVisible` porte la cle de LA vue posee sur la zone (il n y en a
+// jamais qu une), et chaque geste qui la change la met a jour.
+let ancreeVisible = null;
 let vueVoilee = null;
 ipcMain.on('dock:voiler', (e, visible) => {
   if (!mainWindow || e.sender !== mainWindow.webContents) return;
@@ -1501,21 +1525,23 @@ ipcMain.on('dock:voiler', (e, visible) => {
     return;
   }
   vueVoilee = null;
-  ancrees.forEach((a, c) => {
-    if (!a.fenetre && a.view && a.view.getVisible && a.view.getVisible()) {
-      vueVoilee = c;
-      try { a.view.setVisible(false); } catch {}
-    }
-  });
+  const a = ancreeVisible && ancrees.get(ancreeVisible);
+  if (a && !a.fenetre && a.view) {
+    vueVoilee = ancreeVisible;
+    try { a.view.setVisible(false); } catch {}
+  }
 });
 // << Detacher >> — demande par la VUE elle-meme : on DEPLACE la vue dans une
 // BaseWindow, sans recharger : l etat (filtres, saisies, page) voyage avec.
 ipcMain.handle('dock:detacher', (e) => {
   for (const [c, a] of ancrees) {
     if (!a.view || a.view.webContents !== e.sender || a.fenetre) continue;
+    if (NON_DETACHABLES.has(c)) return false;   // le tableau de bord reste ancre
     try { mainWindow.contentView.removeChildView(a.view); } catch {}
     poserEnFenetre(c, a);
     etatAncragePoser(c, 'detache');   // l ecran rouvrira DETACHE desormais
+    if (ancreeVisible === c) ancreeVisible = null;
+    vueVoilee = null;
     try { mainWindow.webContents.send('dock:detachee', c); } catch {}
     return true;
   }
@@ -1542,6 +1568,7 @@ ipcMain.handle('dock:ancrer', (e) => {
     const b = boundsAncrage();
     if (b) { try { a.view.setBounds(b); } catch {} }
     a.view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
+    ancreeVisible = c; vueVoilee = null;
     mainWindow.show(); mainWindow.focus();
     try { mainWindow.webContents.send('dock:ancree', c); } catch {}
     return true;
@@ -1556,6 +1583,8 @@ ipcMain.on('pont:fermer', (e) => {
     if (a.view && a.view.webContents === e.sender) {
       if (a.fenetre && !a.fenetre.isDestroyed()) { a.fenetre.close(); return; }
       try { a.view.setVisible(false); } catch {}
+      if (ancreeVisible === c) ancreeVisible = null;
+      vueVoilee = null;
       try { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('dock:fermee', c); } catch {}
       return;
     }
@@ -2027,6 +2056,7 @@ const { pageFacture } = require('./fenetres/facture');
 const { pageFactures } = require('./fenetres/factures');
 const { pageProduits } = require('./fenetres/produits');
 const { pageClients } = require('./fenetres/clients');
+const { pageCodesbarres } = require('./fenetres/codesbarres');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2151,18 +2181,24 @@ const actionApp = (nom) => {
       break;
     }
     case 'factures': {
+      /* Factures est ANCRABLE depuis 1.55.0 (demande du 2026-08-09) : le menu
+         passe par le flux d ancrage — le site navigue vers la section hote et
+         la vue se pose (ou se rouvre detachee, selon l etat retenu). */
+      const _aF = ancrees.get('factures');
+      if (_aF && _aF.fenetre && !_aF.fenetre.isDestroyed()) { _aF.fenetre.show(); _aF.fenetre.focus(); break; }
       const _avF = fenetresNatives.get('factures');
-      const _reuF = !!(_avF && !_avF.isDestroyed());
-      const winF = ouvrirNative('factures', 'Factures', pageFactures(''),
-        { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
-      if (_reuF && winF && !winF.isDestroyed()) {
-        winF.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      if (_avF && !_avF.isDestroyed()) { _avF.show(); _avF.focus(); break; }
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.show(); mainWindow.focus();
+        try { mainWindow.webContents.send('dock:ancree', 'factures'); break; } catch {}
       }
+      ouvrirNative('factures', 'Factures', pageFactures(),
+        { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
       break;
     }
     /* Les quatre listes du palier 2 : meme garde d ancrage que tableau et
        commandes — deja ancree ou detachee, on la ramene ; sinon fenetre. */
-    case 'clients': case 'collections': case 'fournisseurs': case 'retours': {
+    case 'clients': case 'collections': case 'fournisseurs': case 'retours': case 'codesbarres': {
       const _aL = ancrees.get(action);
       if (_aL && _aL.fenetre && !_aL.fenetre.isDestroyed()) { _aL.fenetre.show(); _aL.fenetre.focus(); break; }
       if (_aL && _aL.view && !_aL.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }

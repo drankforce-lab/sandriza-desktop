@@ -259,6 +259,32 @@ ${JS_ACTIVITE}
   // Ramenee au premier plan par le menu ou << Tout voir >> : la liste se relit.
   window.szRevenir = function(){ charger(); };
 
+  /* ── MODE ANCRE (1.55.0) ── Le meme bouton que les autres ecrans : detacher
+     la vue ancree, ou RAMENER la vue detachee dans la fenetre principale. */
+  window.szModeAncre = function(actif){
+    var t = document.querySelector('.tete');
+    if (!t) return;
+    var b = document.getElementById('sz-detacher');
+    if (!b) {
+      b = document.createElement('button');
+      b.id = 'sz-detacher';
+      b.type = 'button';
+      b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
+        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+      t.appendChild(b);
+    }
+    if (actif) {
+      b.textContent = '⧉ Détacher';
+      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.onclick = function(){ if (P && P.detacher) P.detacher(); };
+    } else {
+      b.textContent = '⚓ Ancrer';
+      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
+    }
+  };
+
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
   });

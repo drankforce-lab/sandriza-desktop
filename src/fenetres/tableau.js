@@ -345,30 +345,13 @@ ${JS_ACTIVITE}
   /* ── MODE ANCRE ── La coquille appelle szModeAncre(true) quand cette page
      vit DANS la fenetre principale : on offre alors << Detacher >>, qui
      emporte la vue — et tout son etat — dans une vraie fenetre. */
-  window.szModeAncre = function(actif){
-    var t = document.querySelector('.tete');
-    if (!t) return;
+  /* \u26a0 LE TABLEAU DE BORD NE SE DETACHE PAS (demande du 2026-08-09) : c est
+     l ecran d ouverture de session \u2014 detache, la fenetre principale n aurait
+     qu un fond vide. Pas de bouton ; la coquille refuse aussi (dock:detacher,
+     NON_DETACHABLES), pour que la regle tienne meme sans ce dessin. */
+  window.szModeAncre = function(){
     var b = document.getElementById('sz-detacher');
-    if (!b) {
-      b = document.createElement('button');
-      b.id = 'sz-detacher';
-      b.type = 'button';
-      b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
-      t.appendChild(b);
-    }
-    // Le meme bouton dit l inverse selon le mode : detacher la vue ancree,
-    // ou RAMENER la vue detachee dans la fenetre principale (etat retenu).
-    if (actif) {
-      b.textContent = '\u29c9 D\u00e9tacher';
-      b.title = 'Ouvrir cet \u00e9cran dans sa propre fen\u00eatre';
-      b.onclick = function(){ if (P && P.detacher) P.detacher(); };
-    } else {
-      b.textContent = '\u2693 Ancrer';
-      b.title = 'Ramener cet \u00e9cran dans la fen\u00eatre principale';
-      b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
-    }
+    if (b) b.remove();
   };
 
 

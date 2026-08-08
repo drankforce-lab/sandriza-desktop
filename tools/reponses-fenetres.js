@@ -513,6 +513,46 @@ module.exports = {
     },
   ],
 
+  // ── IMPRESSION DE CODES-BARRES ─────────────────────────────────────────────
+  'codesbarres.js': [
+    {
+      // ⚠ FORME REELLE de codesbarres:liste / codesbarres:produit (pont.js) :
+      // un produit avec SKU (stock bas), un en rupture, un SANS SKU.
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'codesbarres:liste': {
+          ok: true,
+          lignes: [
+            { id: 'prod_1', sku: 'ROB-0001', nom: 'Robe Élégance mi-longue', categorie: 'Robes', stock: 24, bas: false },
+            { id: 'prod_2', sku: 'MAN-0002', nom: 'Manteau d’hiver Aurore', categorie: 'Manteaux', stock: 0, bas: true },
+            { id: 'prod_3', sku: '', nom: 'Jupe plissée Camélia', categorie: 'Jupes', stock: 7, bas: false },
+          ],
+          total: 3, pages: 1, page: 0,
+          cats: [{ cle: 'robes', nom: 'Robes' }, { cle: 'manteaux', nom: 'Manteaux' }, { cle: 'jupes', nom: 'Jupes' }],
+        },
+        'codesbarres:produit': {
+          ok: true, id: 'prod_1', nom: 'Robe Élégance mi-longue',
+          variantes: [
+            { taille: 'S', couleur: 'Noir', sku: 'ROB-0001-S-NOI', stock: 8 },
+            { taille: 'M', couleur: 'Noir', sku: 'ROB-0001-M-NOI', stock: 0 },
+            { taille: 'M', couleur: 'Rouge', sku: 'ROB-0001-M-ROU', stock: 16 },
+          ],
+        },
+        'stock:etiquettes': { ok: true, envoyees: 24, imprimante: 'Zebra ZD410' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans inventaire',
+      id: '',
+      reponses: {
+        'codesbarres:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── CLIENTS (la liste) ─────────────────────────────────────────────────────
   'clients.js': [
     {
