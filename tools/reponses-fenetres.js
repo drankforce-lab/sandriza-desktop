@@ -923,23 +923,52 @@ module.exports = {
   // ── FACTURES (la liste) ────────────────────────────────────────────────────
   'factures.js': [
     {
-      // ⚠ FORME REELLE de factures:liste (pont.js) : id, numero, commande,
-      // client, date, echeance, total, statut, statutLibelle. Les statuts
-      // couvrent les quatre pilules (payee, non payee, en retard, annulee).
-      nom: 'liste garnie',
+      // FORME REELLE de factures:liste depuis 1.61.0 : lignes + tuiles +
+      // droits + clients (etat de compte). Les gestes paraissent.
+      nom: 'facturation complete',
       id: '',
       reponses: {
         'factures:liste': {
           ok: true,
           lignes: [
-            { id: 'inv_1051', numero: 'FAC-0002-47028', commande: 'SZ-100251', client: 'Josée Lafleur',
-              date: '2026-08-08T14:00:00Z', echeance: '2026-09-07T14:00:00Z', total: 302.96, statut: 'paid', statutLibelle: 'Payée' },
-            { id: 'inv_1050', numero: 'FAC-0002-46981', commande: 'SZ-100249', client: 'Marc Dubé',
-              date: '2026-08-07T10:00:00Z', echeance: '2026-08-01T10:00:00Z', total: 89.95, statut: 'overdue', statutLibelle: 'En retard' },
-            { id: 'inv_1049', numero: 'FAC-0002-46914', commande: 'SZ-100242', client: 'Anne Roy',
-              date: '2026-08-06T16:00:00Z', echeance: '2026-09-05T16:00:00Z', total: 145.0, statut: 'unpaid', statutLibelle: 'Non payée' },
-            { id: 'inv_1048', numero: 'FAC-0002-46870', commande: 'SZ-100238', client: 'Luc Simard',
-              date: '2026-08-05T09:00:00Z', echeance: '2026-09-04T09:00:00Z', total: 45.0, statut: 'cancelled', statutLibelle: 'Annulée' },
+            { id: 'i1', numero: 'FAC-2026-0512', commande: 'CMD-2026-0512',
+              client: 'Marie Tremblay', courriel: 'marie@example.com',
+              date: '2026-08-01T10:00:00Z', echeance: '2026-08-31T10:00:00Z',
+              total: 154.26, statut: 'unpaid', statutLibelle: 'Non payée' },
+            { id: 'i2', numero: 'FAC-2026-0498', commande: 'CMD-2026-0498',
+              client: 'Julie Gagnon', courriel: 'julie@example.com',
+              date: '2026-07-15T10:00:00Z', echeance: '2026-08-14T10:00:00Z',
+              total: 89.12, statut: 'paid', statutLibelle: 'Payée' },
+          ],
+          tuiles: { total: 243.38, encaisse: 89.12, aRecevoir: 154.26,
+            rembourse: 25.00, nbRemboursements: 1, depenses: 1200.50,
+            annee: 2026, nb: 2 },
+          peutEncaisser: true, peutSupprimer: true,
+          clients: [
+            { id: 'u1', nom: 'Marie Tremblay', courriel: 'marie@example.com' },
+            { id: 'u2', nom: 'Julie Gagnon', courriel: 'julie@example.com' },
+          ],
+        },
+        'factures:ouvrir': { ok: true },
+        'factures:payer': { ok: true, num: 'FAC-2026-0512' },
+        'factures:supprimer': { ok: true, num: 'FAC-2026-0512' },
+        'factures:etat': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // VIEUX SITE : factures:liste sans tuiles ni droits ni clients — la
+      // fenetre cache tuiles et gestes et reste une liste de consultation.
+      nom: 'vieux site (liste seule)',
+      id: '',
+      reponses: {
+        'factures:liste': {
+          ok: true,
+          lignes: [
+            { id: 'i1', numero: 'FAC-2026-0512', commande: 'CMD-2026-0512',
+              client: 'Marie Tremblay',
+              date: '2026-08-01T10:00:00Z', echeance: '2026-08-31T10:00:00Z',
+              total: 154.26, statut: 'unpaid', statutLibelle: 'Non payée' },
           ],
         },
         'factures:ouvrir': { ok: true },
@@ -947,8 +976,15 @@ module.exports = {
       },
     },
     {
-      // Le refus de droit : la fenetre doit le dire, pas rester sur Chargement.
-      nom: 'rôle sans facturation',
+      nom: 'liste vide',
+      id: '',
+      reponses: {
+        'factures:liste': { ok: true, lignes: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
       id: '',
       reponses: {
         'factures:liste': { ok: false, motif: 'droit' },
@@ -957,7 +993,6 @@ module.exports = {
     },
   ],
 
-  // ── PRODUIT (l'assistant, la plus grande des fenêtres) ────────────────────
   'produit.js': [
     {
       nom: 'création',

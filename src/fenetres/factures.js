@@ -6,8 +6,12 @@
  * La LISTE des factures, en fenêtre de consultation : recherche, filtre par
  * statut, pagination locale. Cliquer une ligne ouvre la facture dans SA
  * fenêtre native (une par facture, celle qui existe déjà — factures:ouvrir).
- * AUCUNE écriture ici : encaisser, annuler ou renvoyer une facture reste le
- * travail de l'écran Facturation.
+ * Depuis 1.61.0, c'est l'écran FACTURATION AU COMPLET : les six tuiles,
+ * encaisser/annuler un paiement (factures:payer), supprimer (confirmée en
+ * deux clics, factures:supprimer) et l'état de compte client (factures:etat).
+ * Les règles vivent au site (Billing._facture*Coeur) — la fenêtre ne décide
+ * de rien. Sur un VIEUX site, tuiles et gestes sont absents de la réponse :
+ * la fenêtre les cache et reste la liste de consultation qu'elle était.
  *
  * ⚠ LA LISTE SE CHARGE UNE FOIS (factures:liste, lignes allégées — jamais les
  * articles) puis se filtre ICI, à chaque frappe, sans repasser par le pont.
@@ -48,6 +52,24 @@ input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
+button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
+button.bon{border-color:rgba(34,197,94,.5);color:#4ade80}
+button.danger{border-color:rgba(239,68,68,.5);color:#f87171}
+.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:.5rem}
+.tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.5rem .65rem}
+.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+.tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
+.tuile .val.bon{color:#4ade80}.tuile .val.att{color:#fbbf24}.tuile .val.err{color:#f87171}
+.tuile .sub{font-size:.66rem;color:#8fa1b8}
+tbody .fin{white-space:nowrap;text-align:right}
+.voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
+  align-items:center;justify-content:center;z-index:50;padding:1rem}
+.boite{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
+  max-width:26rem;width:100%;padding:.9rem 1rem}
+.boite h3{margin:0 0 .6rem;font:700 .95rem/1.3 Georgia,serif}
+.boite select{width:100%;font:inherit;color:#e8edf5;background:#0f1826;
+  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.38rem .55rem}
+.boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
@@ -70,7 +92,7 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
 .msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}
+.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -96,6 +118,11 @@ ${JS_ACTIVITE}
   var STATUT = '';         // '' = tous
   var PAGE = 0;
   var PAR_PAGE = 25;
+  var TUILES = null;                     // absentes sur un vieux site
+  var PEUT_ENC = false, PEUT_SUP = false;
+  var CLIENTS = [];                      // pour l'etat de compte
+  var SUPPR_ARME = '';                   // id de la facture a confirmer
+  var ETAT_OUVERT = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -157,7 +184,8 @@ ${JS_ACTIVITE}
     return (LIGNES || []).filter(function(r){
       if (STATUT && r.statut !== STATUT) return false;
       if (!q) return true;
-      return (String(r.numero) + ' ' + String(r.commande) + ' ' + String(r.client))
+      return (String(r.numero) + ' ' + String(r.commande) + ' ' + String(r.client)
+        + ' ' + String(r.courriel || ''))
         .toLowerCase().indexOf(q) !== -1;
     });
   }
@@ -170,7 +198,24 @@ ${JS_ACTIVITE}
     PAGE = p;
     var vue = rows.slice(p * PAR_PAGE, p * PAR_PAGE + PAR_PAGE);
 
-    var h = '<div class="barreoutils">'
+    var h = '';
+    if (TUILES) {
+      var tuile = function(lbl, val, ton, sub){
+        return '<div class="tuile"><div class="lbl">' + lbl + '</div>'
+          + '<div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
+          + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+      };
+      var nbR = TUILES.nbRemboursements || 0;
+      h += '<div class="tuiles">'
+        + tuile('Total facturé', fmt(TUILES.total), '')
+        + tuile('Encaissé', fmt(TUILES.encaisse), 'bon')
+        + tuile('À recevoir', fmt(TUILES.aRecevoir), 'att')
+        + tuile('Remboursé', fmt(TUILES.rembourse), 'att', nbR + ' remboursement' + (nbR > 1 ? 's' : ''))
+        + tuile('Dépenses ' + (TUILES.annee || ''), fmt(TUILES.depenses), 'err')
+        + tuile('Nb factures', String(TUILES.nb || 0), '')
+        + '</div>';
+    }
+    h += '<div class="barreoutils">'
       + '<input type="search" id="f-q" placeholder="Numéro, commande ou client…" value="' + esc(Q) + '">'
       + '<select id="f-statut">'
       + '<option value=""' + (STATUT === '' ? ' selected' : '') + '>Tous les statuts</option>'
@@ -179,16 +224,25 @@ ${JS_ACTIVITE}
       + '<option value="overdue"' + (STATUT === 'overdue' ? ' selected' : '') + '>En retard</option>'
       + '<option value="cancelled"' + (STATUT === 'cancelled' ? ' selected' : '') + '>Annulée</option>'
       + '</select>'
-      + '<span class="droite">' + rows.length + ' facture' + (rows.length > 1 ? 's' : '') + '</span>'
+      + '<span class="droite">'
+      + (CLIENTS.length ? '<button class="mini" id="f-etat">État de compte client</button>' : '')
+      + rows.length + ' facture' + (rows.length > 1 ? 's' : '') + '</span>'
       + '</div>';
 
     h += '<div class="carte">';
     if (!vue.length) {
       h += '<div class="vide">Aucune facture ne correspond.</div>';
     } else {
+      var avecGestes = PEUT_ENC || PEUT_SUP;
       h += '<table><thead><tr><th>Numéro</th><th>Commande</th><th>Client</th>'
-        + '<th>Échéance</th><th>Total</th><th>Statut</th></tr></thead><tbody>'
+        + '<th>Échéance</th><th>Total</th><th>Statut</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
+            var gestes = '';
+            if (PEUT_ENC) {
+              if (r.statut === 'unpaid' || r.statut === 'overdue') gestes += '<button class="mini geste bon" data-payer="' + esc(r.id) + '" title="Marquer la facture comme payée">Payée</button> ';
+              else if (r.statut === 'paid') gestes += '<button class="mini geste" data-depayer="' + esc(r.id) + '" title="Annuler le statut de paiement">Annuler</button> ';
+            }
+            if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + (SUPPR_ARME === r.id ? 'Confirmer ?' : 'Supprimer') + '</button>';
             return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la facture">'
               + '<td><span class="num">' + esc(r.numero) + '</span>'
               + '<div class="dt">' + esc(fmtDate(r.date)) + '</div></td>'
@@ -196,7 +250,8 @@ ${JS_ACTIVITE}
               + '<td>' + esc(r.client || '—') + '</td>'
               + '<td>' + esc(fmtDate(r.echeance)) + '</td>'
               + '<td>' + esc(fmt(r.total)) + '</td>'
-              + '<td>' + pilule(r.statut, r.statutLibelle) + '</td></tr>';
+              + '<td>' + pilule(r.statut, r.statutLibelle) + '</td>'
+              + (avecGestes ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
         + '</tbody></table>';
       if (pages > 1) {
@@ -208,7 +263,38 @@ ${JS_ACTIVITE}
       }
     }
     h += '</div>';
+
+    if (ETAT_OUVERT) {
+      h += '<div class="voile" id="f-voile"><div class="boite">'
+        + '<h3>État de compte client</h3>'
+        + '<select id="f-client"><option value="">— Choisir un client —</option>'
+        + CLIENTS.map(function(c){
+            return '<option value="' + esc(c.id) + '">' + esc(c.nom) + ' (' + esc(c.courriel) + ')</option>';
+          }).join('')
+        + '</select>'
+        + '<div class="pied-boite"><button class="mini" id="f-etat-annuler">Annuler</button>'
+        + '<button class="mini geste bon" id="f-etat-generer">Générer l’état</button></div>'
+        + '</div></div>';
+    }
     corps.innerHTML = h;
+
+    var be = document.getElementById('f-etat');
+    if (be) be.onclick = function(){ ETAT_OUVERT = true; dessiner(); };
+    var bea = document.getElementById('f-etat-annuler');
+    if (bea) bea.onclick = function(){ ETAT_OUVERT = false; dessiner(); };
+    var beg = document.getElementById('f-etat-generer');
+    if (beg) beg.onclick = function(){
+      var sel = document.getElementById('f-client');
+      var v = sel ? sel.value : '';
+      if (!v) { dire('Choisissez un client.', 'err'); return; }
+      beg.disabled = true;
+      appeler('factures:etat', [v]).then(function(r){
+        ETAT_OUVERT = false; dessiner();
+        dire(r.ok ? 'État de compte envoyé à l’impression (fenêtre principale).' : expliquer(r), r.ok ? 'bon' : 'err');
+      });
+    };
+    var vo = document.getElementById('f-voile');
+    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { ETAT_OUVERT = false; dessiner(); } };
 
     var q = document.getElementById('f-q');
     if (q) {
@@ -240,6 +326,49 @@ ${JS_ACTIVITE}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    var bpay = t.closest('[data-payer]');
+    if (bpay) {
+      SUPPR_ARME = '';
+      bpay.disabled = true;
+      appeler('factures:payer', [bpay.getAttribute('data-payer'), true]).then(function(r){
+        if (!r.ok) { bpay.disabled = false; dire(expliquer(r), 'err'); return; }
+        dire('Facture ' + (r.num || '') + ' marquée comme payée.', 'bon');
+        charger();
+      });
+      return;
+    }
+    var bdep = t.closest('[data-depayer]');
+    if (bdep) {
+      SUPPR_ARME = '';
+      bdep.disabled = true;
+      appeler('factures:payer', [bdep.getAttribute('data-depayer'), false]).then(function(r){
+        if (!r.ok) { bdep.disabled = false; dire(expliquer(r), 'err'); return; }
+        dire('Statut de paiement annulé pour ' + (r.num || 'la facture') + '.', 'bon');
+        charger();
+      });
+      return;
+    }
+    var bsup = t.closest('[data-suppr]');
+    if (bsup) {
+      var idS = bsup.getAttribute('data-suppr');
+      /* Suppression ARMEE en deux clics : pas de boite, mais jamais un seul
+         clic pour un geste irreversible (la facture est retiree de partout,
+         y compris du compte client et du nuage). */
+      if (SUPPR_ARME !== idS) {
+        SUPPR_ARME = idS;
+        dessiner();
+        dire('Cliquez « Confirmer ? » pour supprimer définitivement — la facture sera retirée de partout, y compris du compte client.', 'att');
+        return;
+      }
+      SUPPR_ARME = '';
+      appeler('factures:supprimer', [idS]).then(function(r){
+        if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
+        dire('Facture ' + (r.num || '') + ' supprimée.', 'bon');
+        charger();
+      });
+      return;
+    }
+    if (SUPPR_ARME) { SUPPR_ARME = ''; dessiner(); }
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
@@ -253,6 +382,10 @@ ${JS_ACTIVITE}
     appeler('factures:liste', []).then(function(r){
       if (!r || !r.ok) { vide('Factures indisponibles', expliquer(r)); return; }
       LIGNES = r.lignes || [];
+      TUILES = r.tuiles || null;
+      PEUT_ENC = !!r.peutEncaisser;
+      PEUT_SUP = !!r.peutSupprimer;
+      CLIENTS = r.clients || [];
       dire('');
       dessiner();
     });

@@ -1045,6 +1045,9 @@ const OPS_PONT = new Set([
   'notes:lire',
   // Les archives (fenetre Archives, 1.60.0) : quatre piles + reactivation.
   'archives:liste', 'archives:reactiver', 'archives:ouvrir',
+  // Le solde Facturation (fenetre Factures, 1.61.0) : encaisser, supprimer,
+  // etat de compte.
+  'factures:payer', 'factures:supprimer', 'factures:etat',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1291,7 +1294,7 @@ const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
   'commandes:statutEcrire', 'commandes:supprimerEcrire', 'commandes:fraisEcrire',
   'expedition:confirmer', 'retour:enregistrer', 'retour:recu', 'retour:litige',
   'client:ecrire', 'client:purger', 'client:restaurer',
-  'archives:reactiver',
+  'archives:reactiver', 'factures:payer', 'factures:supprimer',
 ]);
 
 ipcMain.handle('pont:appeler', async (e, op, args) => {
