@@ -93,6 +93,27 @@ const isAllowed = (urlStr) => {
   catch { return false; }
 };
 
+/* ⚠⚠ UNE PAGE VIERGE N'EST PAS UN LIEN EXTERNE (corrige le 2026-08-09).
+   `window.open('', '_blank')` est LA maniere dont le site ouvre ses documents a
+   imprimer — etat de compte, facture, bon de commande. L'URL vaut alors
+   `about:blank`, que `isAllowed` refusait : le gestionnaire la passait donc a
+   `shell.openExternal`, et Windows affichait << Obtenir une application pour
+   ouvrir ce lien 'about' >>. Pire, `window.open` rendait `null` : la ligne
+   suivante du site (`w.document.write`) levait << Cannot read properties of
+   null >>, que la fenetre native affichait telle quelle.
+   On laisse donc passer la page vierge — la fenetre d'impression s'ouvre — et
+   on ne remet JAMAIS au systeme autre chose que du http(s) : lui tendre un
+   `about:`, un `blob:` ou un `data:` ne peut produire qu'une bevue de ce genre. */
+const estPageVierge = (urlStr) => {
+  const u = String(urlStr || '').trim().toLowerCase();
+  return u === '' || u === 'about:blank' || u === 'about:blank#blocked';
+};
+const versLExterieur = (urlStr) => {
+  const u = String(urlStr || '').trim().toLowerCase();
+  if (!/^https?:\/\//.test(u)) return;
+  try { shell.openExternal(urlStr); } catch {}
+};
+
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ══ IMPRESSION SILENCIEUSE D'UN DOCUMENT ARBITRAIRE ═══════════════════════════
@@ -479,13 +500,16 @@ const createWindow = () => {
 
   // Liens externes → navigateur par défaut ; jamais dans l'application.
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (!isAllowed(url)) { shell.openExternal(url); return { action: 'deny' }; }
+    // La page vierge sert aux documents a imprimer : on la laisse s ouvrir.
+    if (estPageVierge(url)) return { action: 'allow' };
+    if (!isAllowed(url)) { versLExterieur(url); return { action: 'deny' }; }
     return { action: 'allow' };
   });
 
   // Navigation hors des hôtes autorisés bloquée (défense en profondeur).
   mainWindow.webContents.on('will-navigate', (e, url) => {
-    if (!isAllowed(url)) { e.preventDefault(); shell.openExternal(url); }
+    if (estPageVierge(url)) return;
+    if (!isAllowed(url)) { e.preventDefault(); versLExterieur(url); }
   });
 
   // ⚠ QUATRE CHEMINS MÈNENT À LA FERMETURE, et il faut les quatre : le X du
@@ -2360,11 +2384,14 @@ ipcMain.handle('fenetre:ouvrir', (e, opts = {}) => {
   // Mêmes règles de navigation que la fenêtre principale : rien d'externe
   // n'entre dans l'application.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (!isAllowed(url)) { shell.openExternal(url); return { action: 'deny' }; }
+    // La page vierge sert aux documents a imprimer : on la laisse s ouvrir.
+    if (estPageVierge(url)) return { action: 'allow' };
+    if (!isAllowed(url)) { versLExterieur(url); return { action: 'deny' }; }
     return { action: 'allow' };
   });
   win.webContents.on('will-navigate', (ev, url) => {
-    if (!isAllowed(url)) { ev.preventDefault(); shell.openExternal(url); }
+    if (estPageVierge(url)) return;
+    if (!isAllowed(url)) { ev.preventDefault(); versLExterieur(url); }
   });
 
   // ⚠ `once` et non `on` : sans ça, chaque rechargement de la page rouvrirait

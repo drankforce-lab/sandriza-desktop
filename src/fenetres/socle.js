@@ -411,6 +411,22 @@ Pagi.prototype.brancher = function(){
    SOURCE pour toutes : une couleur oubliée se corrige ici, pas fenêtre par
    fenêtre. */
 const CSS_JOUR = `
+/* ⚠⚠ LA LISTE DEROULEE D UN <select> EST DESSINEE PAR LE SYSTEME, PAS PAR NOUS.
+   Elle ne prend NI le fond ni la couleur de la fenetre : les fenetres ecrivent
+   << select{color:#e8edf5;background:rgba(255,255,255,.05)} >>, et un fond
+   TRANSPARENT pose sur du blanc redonne du blanc. On obtenait donc, en mode
+   nuit, une liste blanche a texte gris tres pale — illisible (releve le
+   2026-08-09 sur le filtre de statut des Factures).
+   Remede : les <option> portent un fond OPAQUE et leur propre couleur. Ces deux
+   regles-ci ne sont PAS sous html.jour — elles valent en mode nuit, qui est le
+   defaut ; la bascule jour les reprend plus bas. Comme cette feuille est ajoutee
+   a TOUTES les fenetres, une liste deroulante ecrite demain est couverte
+   d office. */
+select{color-scheme:dark}
+select option,select optgroup{background:#16202f;color:#e8edf5}
+html.jour select{color-scheme:light}
+html.jour select option,html.jour select optgroup{background:#ffffff;color:#1d2433}
+
 html.jour body{background:#f4f2ec;color:#1d2433}
 html.jour .tete{background:linear-gradient(180deg,#ffffff,#f4f2ec);border-bottom-color:rgba(15,23,42,.12)}
 html.jour .tete .sous{color:#414e66}
