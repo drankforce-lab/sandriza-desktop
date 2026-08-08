@@ -39,6 +39,21 @@ const CSS_PROPRE = `
 .jeton.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:#f0e4d2}
 .jeton .pt{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.3);flex:0 0 auto}
 .photo{display:flex;gap:.85rem;align-items:flex-start}
+/* ── LA LIGNE UNIQUE DES PHOTOS (fusion demandee le 2026-08-08) ──
+   Principale et secondaires cote a cote ; la principale se reconnait a son
+   contour PLEIN or et a son libelle, les secondaires restent en POINTILLE
+   meme remplies. Tout se glisse : une secondaire deposee sur la principale
+   prend sa place (l ancienne descend dans la ligne). */
+.ligne-photos{display:flex;gap:.65rem;align-items:flex-start;flex-wrap:wrap}
+.vue-principale{flex:0 0 auto;width:120px}
+.ligne-photos .vign{width:120px;height:120px;border-radius:10px}
+.ligne-photos .vign,.ligne-photos .vign.pleine{border:2px solid #c9a97e}
+.lgd-principale{font-size:.68rem;color:#c9a97e;text-align:center;margin-top:.18rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+#p-vues .vue .cadre{width:100%;height:120px}
+#p-vues .cadre.pleine{border-style:dashed;border-color:rgba(255,255,255,.4)}
+.cadre.survol,.vign.survol{outline:3px solid #4ade80;outline-offset:2px}
+[draggable=true]{cursor:grab}
 .photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
   border:1px dashed rgba(255,255,255,.18);display:flex;align-items:center;
   justify-content:center;color:#8fa1b8;font-size:.75rem;overflow:hidden;text-align:center;
@@ -80,7 +95,7 @@ const CSS_PROPRE = `
    se resserrent sans jamais se deformer, et « nowrap » interdit le retour a la
    ligne au lieu de compter sur la chance. */
 #p-vues{flex-wrap:nowrap}
-#p-vues .vue{flex:1 1 0;width:auto;min-width:62px;max-width:158px}
+#p-vues .vue{flex:0 0 auto;width:120px;max-width:120px}
 #p-vues .vue .cadre{width:100%;height:auto;aspect-ratio:1/1;font-size:.72rem}
 .lgstk{display:flex;align-items:center;gap:.5rem;padding:.2rem .3rem;border-radius:6px}
 .lgstk .c1{flex:0 0 4.5rem}
@@ -388,13 +403,13 @@ function pageProduit(id) {
          principale laissait toute sa moitie droite vide, et les deux phrases
          d explication n apprenaient rien apres la premiere utilisation. Le
          MAXIMUM, seul renseignement qui compte, vit dans le TITRE. */
-      + '<div class="cote">'
-      + '<div class="carte"><h2>Photo principale</h2><div class="photo">'
-      + '<div class="vign" id="p-vign" title="Choisir la photo principale">aucune photo</div>'
+      + '<div class="carte"><h2 id="p-vues-titre">Photos</h2>'
+      + '<div class="ligne-photos">'
+      + '<div class="vue-principale">'
+      + '<div class="vign" id="p-vign" title="Photo principale — cliquer pour choisir, ou déposer une secondaire ici">aucune photo</div>'
+      + '<div class="lgd-principale">Photo principale</div></div>'
+      + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
-      + '<div class="carte"><h2 id="p-vues-titre">Photos supplémentaires (5 photos maximum)</h2>'
-      + '<div class="vues" id="p-vues"></div></div>'
-      + '</div>'
       + '<div class="carte plein"><h2>Photo par couleur</h2>'
       + '<div class="aide" style="margin-bottom:.5rem">Le client voit la photo de la couleur '
       + 'qu’elle choisit. Sans photo pour une couleur, c’est la photo principale qui s’affiche.</div>'
@@ -898,13 +913,14 @@ function pageProduit(id) {
   function dessinerVues(){
     var t = document.getElementById('p-vues-titre');
     if (t) t.textContent = modeStandard()
-      ? 'Photos supplémentaires (' + MAX_PHOTOS + ' photos maximum)'
-      : 'Vues supplémentaires';
+      ? 'Photos — 1 principale + ' + MAX_PHOTOS + ' supplémentaires maximum'
+      : 'Photos — principale + vues';
     var z = document.getElementById('p-vues');
     if (z) {
       z.innerHTML = clesVues().map(function(cle){
         var src = VUES[cle] || '';
-        return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '') + '" data-vue="' + esc(cle) + '">'
+        return '<div class="vue"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '"'
+          + (src ? ' title="Glisser pour réordonner, ou déposer sur la principale"' : '') + '>'
           + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="Retirer">×</button>' : '')
           + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
@@ -1053,11 +1069,119 @@ function pageProduit(id) {
   function montrerImage(src){
     var v = document.getElementById('p-vign'); if (!v) return;
     v.classList.toggle('pleine', !!src);
+    v.setAttribute('draggable', src ? 'true' : 'false');
     v.innerHTML = src
       ? '<img src="' + esc(src) + '" alt="">'
         + '<button type="button" class="x" id="p-vider" title="Retirer la photo">×</button>'
       : 'choisir une photo';
   }
+
+  /* ── GLISSER-DEPOSER DES PHOTOS (demande le 2026-08-08) ──
+     Une secondaire deposee sur la principale PREND SA PLACE, et l ancienne
+     principale descend dans la ligne : rien ne se perd. Les cases libres se
+     reordonnent en glissant sur la ligne ; les vues NOMMEES (devant,
+     derriere...) gardent leur sens, elles ne font que s echanger. Tout vit
+     dans IMAGE et VUES, jamais dans l ecran : le redessin repart de l etat. */
+  function libresOrdonnees(){
+    return Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0; })
+      .sort(function(a, b){ return parseInt(a.slice(5), 10) - parseInt(b.slice(5), 10); })
+      .map(function(k){ return VUES[k]; });
+  }
+  function poserLibres(arr){
+    Object.keys(VUES).forEach(function(k){ if (k.indexOf('libre') === 0) delete VUES[k]; });
+    arr.forEach(function(src, i){ VUES['libre' + (i + 1)] = src; });
+  }
+  var GLISSE = null; // 'principale' | cle de la vue tiree
+  function nettoyerSurvol(){
+    Array.prototype.forEach.call(document.querySelectorAll('.survol'), function(el){
+      el.classList.remove('survol');
+    });
+  }
+  document.getElementById('corps').addEventListener('dragstart', function(ev){
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    if (t.closest('#p-vign')) {
+      if (!IMAGE) return;
+      GLISSE = 'principale';
+      try { ev.dataTransfer.setData('text/plain', 'principale'); } catch (e) {}
+      return;
+    }
+    var c = t.closest('[data-vue]');
+    if (c && c.classList.contains('pleine')) {
+      GLISSE = c.getAttribute('data-vue');
+      try { ev.dataTransfer.setData('text/plain', GLISSE); } catch (e) {}
+    }
+  });
+  document.getElementById('corps').addEventListener('dragover', function(ev){
+    if (!GLISSE) return;
+    var t = ev.target && ev.target.closest ? (ev.target.closest('#p-vign') || ev.target.closest('[data-vue]')) : null;
+    if (!t) return;
+    ev.preventDefault();
+    nettoyerSurvol();
+    t.classList.add('survol');
+  });
+  document.getElementById('corps').addEventListener('dragend', function(){
+    GLISSE = null;
+    nettoyerSurvol();
+  });
+  document.getElementById('corps').addEventListener('drop', function(ev){
+    if (!GLISSE) return;
+    var src = GLISSE;
+    GLISSE = null;
+    nettoyerSurvol();
+    var surVign = ev.target.closest ? ev.target.closest('#p-vign') : null;
+    var surVue = ev.target.closest ? ev.target.closest('[data-vue]') : null;
+    if (!surVign && !surVue) return;
+    ev.preventDefault();
+    if (surVign) {
+      if (src === 'principale') return;
+      var neuve = VUES[src];
+      if (!neuve) return;
+      var ancienne = IMAGE;
+      IMAGE = neuve;
+      if (src.indexOf('libre') === 0) {
+        var arr = libresOrdonnees();
+        var i = arr.indexOf(neuve);
+        if (i >= 0) { if (ancienne) arr[i] = ancienne; else arr.splice(i, 1); }
+        poserLibres(arr);
+      } else {
+        if (ancienne) VUES[src] = ancienne; else delete VUES[src];
+      }
+      montrerImage(IMAGE); dessinerVues(); majIa();
+      dire('Photo principale remplacée — l’ancienne est restée dans la ligne.', 'bon');
+      return;
+    }
+    var cible = surVue.getAttribute('data-vue');
+    if (src === 'principale') {
+      if (!IMAGE) return;
+      var valC = VUES[cible];
+      if (valC) { VUES[cible] = IMAGE; IMAGE = valC; }
+      else if (cible.indexOf('libre') === 0) {
+        var a0 = libresOrdonnees();
+        if (a0.length >= MAX_PHOTOS) { dire('Maximum ' + MAX_PHOTOS + ' photos supplémentaires.', 'att'); return; }
+        a0.push(IMAGE); poserLibres(a0); IMAGE = '';
+      } else { VUES[cible] = IMAGE; IMAGE = ''; }
+      montrerImage(IMAGE); dessinerVues(); majIa();
+      return;
+    }
+    if (src === cible) return;
+    if (src.indexOf('libre') === 0 && cible.indexOf('libre') === 0) {
+      var a = libresOrdonnees();
+      var de = a.indexOf(VUES[src]);
+      if (de < 0) return;
+      var val = a.splice(de, 1)[0];
+      var vers = VUES[cible] ? a.indexOf(VUES[cible]) : a.length;
+      if (vers < 0) vers = a.length;
+      a.splice(vers, 0, val);
+      poserLibres(a);
+      dessinerVues();
+      return;
+    }
+    var tmp = VUES[src];
+    if (VUES[cible]) { VUES[src] = VUES[cible]; } else { delete VUES[src]; }
+    VUES[cible] = tmp;
+    dessinerVues();
+  });
   var MAX_MO = 8;
 
   function tailles(){
