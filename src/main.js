@@ -26,7 +26,7 @@
  * normal ne voit ce drapeau — la boutique et l'admin au navigateur sont intactes.
  */
 
-const { app, BrowserWindow, ipcMain, shell, Menu, Notification, nativeImage, powerSaveBlocker, session, dialog } = require('electron');
+const { app, BrowserWindow, BaseWindow, WebContentsView, ipcMain, shell, Menu, Notification, nativeImage, powerSaveBlocker, session, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -1200,9 +1200,15 @@ const OPS_QUI_CHANGENT_L_INVENTAIRE = new Set([
 const actualiserFenetres = (cles, sender) => {
   (cles || []).forEach((cle) => {
     const win = fenetresNatives.get(cle);
-    if (!win || win.isDestroyed()) return;
-    if (sender && win.webContents === sender) return;
-    win.webContents.executeJavaScript('window.szActualiser && window.szActualiser()', true).catch(() => {});
+    if (win && !win.isDestroyed() && (!sender || win.webContents !== sender)) {
+      win.webContents.executeJavaScript('window.szActualiser && window.szActualiser()', true).catch(() => {});
+    }
+    // Le meme ecran peut vivre ANCRE dans la fenetre principale : il se tient
+    // a jour de la meme facon.
+    const a = ancrees.get(cle);
+    if (a && a.view && !a.view.webContents.isDestroyed() && (!sender || a.view.webContents !== sender)) {
+      a.view.webContents.executeJavaScript('window.szActualiser && window.szActualiser()', true).catch(() => {});
+    }
   });
 };
 // Le tableau de bord suit davantage d ecritures que l inventaire : toute
@@ -1279,7 +1285,134 @@ ipcMain.on('pos:diffuser', (e, etat) => {
   try { w.webContents.send('pos:etat', etat || {}); } catch {}
 });
 
+/* ══ ÉCRANS NATIFS ANCRÉS DANS LA FENÊTRE PRINCIPALE (2026-08-08) ═══════════
+   << c est toujours la portion web qui s ouvre >> : la barre laterale du site
+   naviguait vers les ecrans web, seules les entrees de MENU ouvraient les
+   fenetres. Une WebContentsView — la MEME page, le MEME pont-preload que la
+   fenetre — se pose par-dessus la zone de contenu de la fenetre principale ;
+   << Detacher >> DEPLACE la vue (donc son etat, saisies comprises) dans une
+   BaseWindow. Le site dit OU se trouve la zone (dock:zone, en px CSS) ; on la
+   convertit ici avec le facteur de zoom courant.
+   ⚠ Echap ou << fermer >> dans une vue ancree ne doit JAMAIS fermer la fenetre
+   principale : pont:fermer distingue les deux (voir plus bas). */
+const ancrees = new Map();   // cle -> { view, fenetre: BaseWindow|null }
+let zoneAncrage = null;      // { x, y, largeur, hauteur } en px CSS de la page
+const PAGES_ANCRABLES = () => ({
+  tableau: ['Tableau de bord', () => pageTableau()],
+  inventaire: ['Inventaire', () => pageInventaire('')],
+});
+const boundsAncrage = () => {
+  if (!zoneAncrage || !mainWindow || mainWindow.isDestroyed()) return null;
+  const f = mainWindow.webContents.getZoomFactor() || 1;
+  return { x: Math.round(zoneAncrage.x * f), y: Math.round(zoneAncrage.y * f),
+           width: Math.max(0, Math.round(zoneAncrage.largeur * f)),
+           height: Math.max(0, Math.round(zoneAncrage.hauteur * f)) };
+};
+const reposerAncrees = () => {
+  const b = boundsAncrage();
+  if (!b) return;
+  ancrees.forEach((a) => { if (!a.fenetre && a.view) { try { a.view.setBounds(b); } catch {} } });
+};
+ipcMain.on('dock:zone', (e, rect) => {
+  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  if (!rect || typeof rect !== 'object') return;
+  zoneAncrage = { x: Number(rect.x) || 0, y: Number(rect.y) || 0,
+    largeur: Number(rect.largeur) || 0, hauteur: Number(rect.hauteur) || 0 };
+  reposerAncrees();
+});
+ipcMain.handle('dock:ouvrir', (e, cle) => {
+  if (!mainWindow || e.sender !== mainWindow.webContents) return false;
+  const defs = PAGES_ANCRABLES();
+  const c = String(cle || '');
+  if (!defs[c]) return false;
+  // Une fenetre SEPAREE du meme ecran existe (ouverte par le menu) : on la
+  // ramene plutot que d empiler une deuxieme instance — deux inventaires,
+  // c est deux etats de scan qui se contredisent.
+  const exist = fenetresNatives.get(c);
+  if (exist && !exist.isDestroyed()) {
+    if (exist.isMinimized()) exist.restore();
+    exist.show(); exist.focus();
+    return { ok: true, deja: 'fenetre' };
+  }
+  // Une seule vue ancree visible a la fois : la zone est la meme pour toutes.
+  ancrees.forEach((a, k) => { if (k !== c && !a.fenetre && a.view) { try { a.view.setVisible(false); } catch {} } });
+  let a = ancrees.get(c);
+  if (a && a.fenetre && !a.fenetre.isDestroyed()) {
+    // Deja detachee : le reclic la ramene au premier plan.
+    if (a.fenetre.isMinimized()) a.fenetre.restore();
+    a.fenetre.show(); a.fenetre.focus();
+    return { ok: true, deja: 'detachee' };
+  }
+  if (!a || !a.view || a.view.webContents.isDestroyed()) {
+    const view = new WebContentsView({ webPreferences: {
+      preload: path.join(__dirname, 'pont-preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
+    } });
+    a = { view, fenetre: null };
+    ancrees.set(c, a);
+    view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(defs[c][1]()));
+    view.webContents.on('did-finish-load', () => {
+      view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
+    });
+  } else {
+    // Vue conservee cachee : elle RELIT ses donnees en revenant.
+    a.view.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
+  try { mainWindow.contentView.addChildView(a.view); } catch {}
+  try { a.view.setVisible(true); } catch {}
+  const b = boundsAncrage();
+  if (b) { try { a.view.setBounds(b); } catch {} }
+  return { ok: true };
+});
+// Le site navigue vers une section ordinaire : les vues ancrees se cachent
+// (JAMAIS detruites — revenir est instantane et l etat survit).
+ipcMain.on('dock:cacher', (e) => {
+  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  ancrees.forEach((a) => { if (!a.fenetre && a.view) { try { a.view.setVisible(false); } catch {} } });
+});
+// << Detacher >> — demande par la VUE elle-meme : on DEPLACE la vue dans une
+// BaseWindow, sans recharger : l etat (filtres, saisies, page) voyage avec.
+ipcMain.handle('dock:detacher', (e) => {
+  for (const [c, a] of ancrees) {
+    if (!a.view || a.view.webContents !== e.sender || a.fenetre) continue;
+    try { mainWindow.contentView.removeChildView(a.view); } catch {}
+    const defs = PAGES_ANCRABLES();
+    const win = new BaseWindow({
+      width: 1080, height: 780, minWidth: 760, minHeight: 520,
+      title: (defs[c] || [''])[0], autoHideMenuBar: true, backgroundColor: '#0e1522',
+    });
+    win.contentView.addChildView(a.view);
+    const poser = () => {
+      try { const [w, h] = win.getContentSize(); a.view.setBounds({ x: 0, y: 0, width: w, height: h }); } catch {}
+    };
+    win.on('resize', poser);
+    poser();
+    try { a.view.setVisible(true); } catch {}
+    a.fenetre = win;
+    win.on('closed', () => {
+      // Fenetre detachee fermee : la vue meurt avec elle — la barre laterale
+      // en recree une fraiche au prochain clic.
+      try { a.view.webContents.close(); } catch {}
+      ancrees.delete(c);
+    });
+    a.view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(false);', true).catch(() => {});
+    try { mainWindow.webContents.send('dock:detachee', c); } catch {}
+    return true;
+  }
+  return false;
+});
+
 ipcMain.on('pont:fermer', (e) => {
+  // Une vue ANCREE qui << ferme >> (Echap) se cache — fermer la fenetre
+  // principale a sa place serait la pire des surprises.
+  for (const [c, a] of ancrees) {
+    if (a.view && a.view.webContents === e.sender) {
+      if (a.fenetre && !a.fenetre.isDestroyed()) { a.fenetre.close(); return; }
+      try { a.view.setVisible(false); } catch {}
+      try { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('dock:fermee', c); } catch {}
+      return;
+    }
+  }
   const w = BrowserWindow.fromWebContents(e.sender);
   if (w && !w.isDestroyed()) w.close();
 });
@@ -1772,9 +1905,9 @@ const actionApp = (nom) => {
     case 'reload-hard': if (wc) wc.reloadIgnoringCache(); break;
     case 'devtools':    if (wc) wc.toggleDevTools(); break;
     case 'fullscreen':  if (mainWindow) mainWindow.setFullScreen(!mainWindow.isFullScreen()); break;
-    case 'zoom-in':     if (wc) wc.setZoomLevel(wc.getZoomLevel() + 0.5); break;
-    case 'zoom-out':    if (wc) wc.setZoomLevel(wc.getZoomLevel() - 0.5); break;
-    case 'zoom-reset':  if (wc) wc.setZoomLevel(0); break;
+    case 'zoom-in':     if (wc) { wc.setZoomLevel(wc.getZoomLevel() + 0.5); setTimeout(reposerAncrees, 60); } break;
+    case 'zoom-out':    if (wc) { wc.setZoomLevel(wc.getZoomLevel() - 0.5); setTimeout(reposerAncrees, 60); } break;
+    case 'zoom-reset':  if (wc) { wc.setZoomLevel(0); setTimeout(reposerAncrees, 60); } break;
     case 'exports':     shell.openPath(EXPORT_DIR()); break;
     case 'update-check': checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
@@ -1811,6 +1944,9 @@ const actionApp = (nom) => {
        se coupent — et un code de variante coupe ne se verifie pas contre
        l etiquette collee sur le vetement, ce qui est tout son usage. */
     case 'tableau': {
+      const _aT = ancrees.get('tableau');
+      if (_aT && _aT.fenetre && !_aT.fenetre.isDestroyed()) { _aT.fenetre.show(); _aT.fenetre.focus(); break; }
+      if (_aT && _aT.view && !_aT.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
       // L ecran d ouverture de la journee : reutilisee, la fenetre RELIT ses
       // chiffres (szRevenir) — l etat d avant pourrait dater d hier.
       const _avT = fenetresNatives.get('tableau');
@@ -1822,13 +1958,17 @@ const actionApp = (nom) => {
       }
       break;
     }
-    case 'inventaire':
+    case 'inventaire': {
+      const _aI = ancrees.get('inventaire');
+      if (_aI && _aI.fenetre && !_aI.fenetre.isDestroyed()) { _aI.fenetre.show(); _aI.fenetre.focus(); break; }
+      if (_aI && _aI.view && !_aI.fenetre) { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } break; }
       // Depuis 1.35.0 c est l ecran d inventaire ENTIER (quatre onglets), plus
       // seulement l ajustement — d ou le titre << Inventaire >>. Un peu plus
       // large : le tableau des produits porte huit colonnes.
       ouvrirNative('inventaire', 'Inventaire', pageInventaire(''),
         { width: 1120, height: 760, minWidth: 900, minHeight: 540 });
       break;
+    }
     /* Les deux listes. ⚠ DEUX CLES DISTINCTES : ce sont deux fenetres, qu on garde
        ouvertes cote a cote — les commandes a preparer d un cote, les colis partis
        de l autre. Une seule cle les ferait se remplacer l une l autre. */

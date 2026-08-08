@@ -56,6 +56,18 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   //   même type ramène celle qui existe au lieu d'en empiler une deuxième, et
   //   c'est aussi sous cette clé que sa position est retenue.
   ouvrirFenetre: (o) => ipcRenderer.invoke('fenetre:ouvrir', o || {}),
+
+  // ── ÉCRANS NATIFS ANCRÉS ──────────────────────────────────────────────────
+  // La barre laterale pose la version NATIVE par-dessus la zone de contenu
+  // (dock:ouvrir), dit ou est la zone (dock:zone, px CSS — le principal
+  // applique le zoom), et cache les vues en naviguant ailleurs (dock:cacher).
+  dockOuvrir: (cle) => ipcRenderer.invoke('dock:ouvrir', String(cle || '')),
+  dockCacher: () => ipcRenderer.send('dock:cacher'),
+  dockZone: (rect) => ipcRenderer.send('dock:zone', rect || {}),
+  // La vue ancree s est fermee (Echap) ou detachee : le site remet le mot
+  // juste dans sa zone de contenu.
+  onDockFermee: (cb) => { ipcRenderer.on('dock:fermee', (e, cle) => { try { cb(cle); } catch {} }); },
+  onDockDetachee: (cb) => { ipcRenderer.on('dock:detachee', (e, cle) => { try { cb(cle); } catch {} }); },
   // Prévenu quand un réglage change côté application (ex. « ancrer en haut »
   // cliqué depuis la fenêtre détachée) : sans ça, le site ne le verrait qu'au
   // prochain rechargement.

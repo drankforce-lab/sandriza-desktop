@@ -357,6 +357,28 @@ ${JS_ACTIVITE}
   // Ramenee au premier plan par le menu : les chiffres se relisent.
   window.szRevenir = function(){ charger(); };
 
+  /* ── MODE ANCRE ── La coquille appelle szModeAncre(true) quand cette page
+     vit DANS la fenetre principale : on offre alors << Detacher >>, qui
+     emporte la vue — et tout son etat — dans une vraie fenetre. */
+  window.szModeAncre = function(actif){
+    var t = document.querySelector('.tete');
+    if (!t) return;
+    var b = document.getElementById('sz-detacher');
+    if (!actif) { if (b) b.remove(); return; }
+    if (b) return;
+    b = document.createElement('button');
+    b.id = 'sz-detacher';
+    b.type = 'button';
+    b.textContent = '\u29c9 D\u00e9tacher';
+    b.title = 'Ouvrir cet \u00e9cran dans sa propre fen\u00eatre';
+    b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
+      + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+      + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+    b.onclick = function(){ if (P && P.detacher) P.detacher(); };
+    t.appendChild(b);
+  };
+
+
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
   });
