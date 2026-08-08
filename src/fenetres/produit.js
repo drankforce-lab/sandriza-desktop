@@ -53,6 +53,17 @@ const CSS_PROPRE = `
 #p-vues .vue .cadre{width:100%;height:120px}
 #p-vues .cadre.pleine{border-style:dashed;border-color:rgba(255,255,255,.4)}
 .cadre.survol,.vign.survol{outline:3px solid #4ade80;outline-offset:2px}
+.mini-decor{display:block;width:100%;margin-top:.3rem;font-size:.72rem;
+  padding:.14rem .3rem;border-radius:7px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
+.mini-decor:hover:not(:disabled){border-color:#c9a97e}
+.mini-decor:disabled{opacity:.35;cursor:default}
+.fonds{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+.fonds button{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;
+  padding:.2rem .5rem;border-radius:99px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
+.fonds button.on{border-color:#c9a97e;background:rgba(201,169,126,.18);color:#f0e4d2}
+.fonds .past{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.3);flex:0 0 auto}
 [draggable=true]{cursor:grab}
 .photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
   border:1px dashed rgba(255,255,255,.18);display:flex;align-items:center;
@@ -407,7 +418,9 @@ function pageProduit(id) {
       + '<div class="ligne-photos">'
       + '<div class="vue-principale">'
       + '<div class="vign" id="p-vign" title="Photo principale — cliquer pour choisir, ou déposer une secondaire ici">aucune photo</div>'
-      + '<div class="lgd-principale">Photo principale</div></div>'
+      + '<div class="lgd-principale">Photo principale</div>'
+      + '<button type="button" id="p-detourer" class="mini-decor" disabled '
+      + 'title="Détourer la photo et poser un décor (studio, jardin, Paris…)">✂ Décor</button></div>'
       + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
       + '<div class="carte plein"><h2>Photo par couleur</h2>'
@@ -595,6 +608,7 @@ function pageProduit(id) {
         IMAGE = ''; montrerImage(''); majIa(); dire('');
         return;
       }
+      if (ev.target.closest('#p-detourer')) { ouvrirDetourage(); return; }
       if (ev.target.closest('#p-vign')) {
         choisirPhoto(function(ds){ IMAGE = ds[0]; montrerImage(IMAGE); majIa(); });
         return;
@@ -1070,6 +1084,8 @@ function pageProduit(id) {
     var v = document.getElementById('p-vign'); if (!v) return;
     v.classList.toggle('pleine', !!src);
     v.setAttribute('draggable', src ? 'true' : 'false');
+    var bd = document.getElementById('p-detourer');
+    if (bd) bd.disabled = !src;
     v.innerHTML = src
       ? '<img src="' + esc(src) + '" alt="">'
         + '<button type="button" class="x" id="p-vider" title="Retirer la photo">×</button>'
@@ -1400,6 +1416,72 @@ function pageProduit(id) {
     document.getElementById('ap-non').onclick = function(){ v.remove(); };
     peindre();
     chargerApercu();
+  }
+
+  /* ── DETOURAGE ── Le SITE fait le travail (produit:detourer : retrait local
+     du fond au canevas + decor compose), et il CACHE la transparente : changer
+     de decor est instantane. Le resultat ne REMPLACE la photo principale que
+     sur << Utiliser cette photo >> — jamais a l aveugle. */
+  var FOND_CHOISI = 'studio';
+  function ouvrirDetourage(){
+    if (!IMAGE) return;
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite" style="max-width:32rem">'
+      + '<h3>✂ Détourer et changer le décor</h3>'
+      + '<div class="fonds" id="dt-fonds"></div>'
+      + '<div id="dt-zone" style="background:#0f1826;border-radius:10px;min-height:14rem;'
+      + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
+      + '<div class="pied2"><button type="button" id="dt-non">Annuler</button>'
+      + '<button type="button" class="prim" id="dt-oui" disabled>✓ Utiliser cette photo</button></div></div>';
+    document.body.appendChild(v);
+    var RESULTAT = '';
+    function zone(html){ var z = document.getElementById('dt-zone'); if (z) z.innerHTML = html; }
+    function lancer(){
+      zone('<div style="padding:2rem;text-align:center;color:#8fa1b8">Détourage…</div>');
+      var oui = document.getElementById('dt-oui');
+      if (oui) oui.disabled = true;
+      P.appeler('produit:detourer', IMAGE, FOND_CHOISI).then(function(r){
+        if (!r || !r.ok) {
+          zone('<div style="padding:1.5rem;text-align:center;color:#f87171">'
+            + esc((r && r.detail) || expliquer(r)) + '</div>');
+          return;
+        }
+        RESULTAT = r.image || '';
+        zone('<img src="' + esc(RESULTAT) + '" style="max-width:100%;max-height:20rem;object-fit:contain" alt="">');
+        var oui2 = document.getElementById('dt-oui');
+        if (oui2) oui2.disabled = !RESULTAT;
+      });
+    }
+    function peindreFonds(fonds){
+      var z = document.getElementById('dt-fonds');
+      if (!z) return;
+      z.innerHTML = fonds.map(function(f){
+        return '<button type="button" data-fond="' + esc(f.cle) + '"'
+          + (f.cle === FOND_CHOISI ? ' class="on"' : '') + '>'
+          + '<span class="past" style="background:' + esc(f.couleur) + '"></span>'
+          + esc(f.libelle) + '</button>'; }).join('');
+      z.onclick = function(ev){
+        var b = ev.target && ev.target.closest ? ev.target.closest('[data-fond]') : null;
+        if (!b) return;
+        FOND_CHOISI = b.getAttribute('data-fond');
+        peindreFonds(fonds);
+        lancer();
+      };
+    }
+    P.appeler('produit:fonds').then(function(r){
+      if (!r || !r.ok) { zone('<div style="padding:1.5rem;text-align:center;color:#f87171">' + esc(expliquer(r)) + '</div>'); return; }
+      peindreFonds(r.fonds || []);
+      lancer();
+    });
+    document.getElementById('dt-non').onclick = function(){ v.remove(); };
+    document.getElementById('dt-oui').onclick = function(){
+      if (!RESULTAT) return;
+      IMAGE = RESULTAT;
+      montrerImage(IMAGE); majIa();
+      v.remove();
+      dire('Photo principale remplacée par la version détourée.', 'bon');
+    };
   }
 
   // là sans rien faire. Un bouton mort est un défaut qu'on ne peut pas diagnostiquer.
