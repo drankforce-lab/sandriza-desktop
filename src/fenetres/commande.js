@@ -77,11 +77,30 @@ function pageCommande(id) {
   'use strict';
   ${JS_SOCLE}
   MOTIFS.suivi_requis = 'Entrez un numéro de suivi, ou cochez « expédier sans numéro ».';
+  // Les motifs de l etiquette et de l impression — le dictionnaire de la
+  // fenetre Expedition, repris : les codes AA de Postes Canada et les motifs
+  // du transporteur n arrivaient jamais jusqu ici (releve du 2026-08-08).
+  MOTIFS.poids_invalide = 'Le poids du colis doit être supérieur à zéro.';
+  MOTIFS.deja_etiquetee = 'Une étiquette existe déjà pour cette commande — rien n’a été commandé.';
+  MOTIFS.secrets = 'Identifiants du transporteur indisponibles. Reconnectez-vous, puis réessayez.';
+  MOTIFS.config = 'Configuration du transporteur incomplète.';
+  MOTIFS.origine = 'Adresse d’expédition incomplète — Configuration puis Transporteurs.';
+  MOTIFS.destination = 'Adresse du destinataire incomplète dans la commande.';
+  MOTIFS.refus_transporteur = 'Le transporteur a refusé la demande.';
+  MOTIFS.etiquette_absente = 'Aucune étiquette enregistrée pour cette commande.';
+  MOTIFS.impression = 'L’impression a échoué.';
+  MOTIFS.reseau = 'Le réseau a échoué — rien n’a été commandé.';
+  // Le DETAIL du transporteur est conserve tel quel (les codes AA de Postes
+  // Canada designent toujours les identifiants) — l expliquer du socle le
+  // jetait, et l on cherchait la panne du mauvais cote.
+  function expliquerD(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
 
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
   var sous = document.getElementById('sous');
   var CTX = null, CMD = null, COMPTES = {};
+  var PDF = null;        // etiquette en base64, gardee pour imprimer sans repasser par le nuage
+  var LECTURE = false;   // verrou refuse : cette fenetre ne fait que regarder
 
   // ⚠ Les messages passagers (bonnes nouvelles, rappels comme << Verifiez le
   // colis d abord >>) s effacent SEULS apres 10 s (demande le 2026-08-07) : un
@@ -119,8 +138,12 @@ function pageCommande(id) {
   function dessiner(){
     var h = [];
     var enTete = '<div class="entete"><span class="num">' + esc(CMD.numero) + '</span>'
+      + (CMD.prioritaire ? '<span style="font-size:.76rem;background:#7c2d12;color:#fdba74;'
+          + 'border-radius:99px;padding:.12rem .55rem;font-weight:700">⚡ Prioritaire</span>' : '')
       + '<span class="cli">' + esc(CMD.client) + '</span>'
-      + '<span class="adr">' + esc(CMD.adresse) + '</span></div>';
+      + '<span class="adr">' + esc(CMD.adresse) + '</span>'
+      + (CMD.notes ? '<span class="adr" style="color:#f0c987">📝 ' + esc(CMD.notes) + '</span>' : '')
+      + '</div>';
 
     /* 1 — Vérification.
        ⚠ L ETAPE << PREPARATION >> A ETE RETIREE (demande le 2026-08-07 : << elle
@@ -168,6 +191,7 @@ function pageCommande(id) {
       + '<div class="ch"><label for="c-poids">Poids du colis (kg)</label>'
       + '<input id="c-poids" type="number" min="0.001" step="0.001" value="0.5"></div>'
       + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq">Générer l’étiquette</button></div>'
+      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq-imp" style="display:none">🖨 Imprimer l’étiquette</button></div>'
       + '</div>'
       + '<div class="aide" id="c-poids-note" style="margin-top:.4rem"></div>'
       + '</div>'
@@ -196,6 +220,7 @@ function pageCommande(id) {
        dossier et y revenir plus tard. L ecran du site l enregistre au clic
        (toggleReadyToShip), on fait pareil. */
     document.getElementById('c-pret').onchange = function(){
+      if (LECTURE) { this.checked = !this.checked; dire('Commande en traitement ailleurs — lecture seule.', 'err'); return; }
       var v = this.checked;
       P.appeler('commande:prete', ID, v).then(function(r){
         if (r && r.ok) { CMD.dejaPret = v; dire(v ? 'Marquée prête à l’expédition.' : 'Marque « prête » retirée.', 'bon'); }
@@ -244,6 +269,7 @@ function pageCommande(id) {
      ⚠ Le site REFUSE de reculer un statut (voir commande:statut) : rouvrir une
      commande deja expediee ne la remet pas en preparation. */
   function avancerStatut(voulu){
+    if (LECTURE) return;
     if (!voulu || !CTX || !CTX.peutExpedier) return;
     P.appeler('commande:statut', ID, voulu).then(function(r){
       if (r && r.ok && r.statut && !r.inchange) { CMD.statut = r.statut; }
@@ -268,7 +294,8 @@ function pageCommande(id) {
         return '<div class="art' + cl + '" data-cle="' + esc(a.cle) + '">'
           + '<span class="pt">' + (v === a.quantite ? '✓' : (v > a.quantite ? '!' : '')) + '</span>'
           + '<div class="d"><div class="n">' + esc(a.nom) + '</div>'
-          + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || a.sku) + '</div></div>'
+          + '<div class="v">' + esc([[a.taille, a.couleur].filter(Boolean).join(' · '), a.sku]
+              .filter(Boolean).join(' · ')) + '</div></div>'
           + '<span class="cpt">' + v + '/' + a.quantite + '</span>'
           + '<input class="q" type="number" min="0" step="1" data-cle="' + esc(a.cle) + '" value="' + v + '">'
           + '</div>';
@@ -329,11 +356,16 @@ function pageCommande(id) {
     document.getElementById('c-etiq').onclick = etiquette;
     var sn = document.getElementById('c-sans');
     if (sn) sn.onchange = majExpedier;
+    /* ⚠ UN SEUL oninput. Il y en avait DEUX poses l un apres l autre : le
+       second (dire('')) ECRASAIT le premier (majExpedier) — coller un numero
+       de suivi a la main ne rearmait pas Expedier. */
     var su = document.getElementById('c-suivi');
-    if (su) su.oninput = majExpedier;
+    if (su) su.oninput = function(){ dire(''); majExpedier(); majBoutonImpression(); };
     var tr = document.getElementById('c-transp');
     if (tr) tr.onchange = majServices;
-    document.getElementById('c-suivi').oninput = function(){ dire(''); };
+    var ei = document.getElementById('c-etiq-imp');
+    if (ei) ei.onclick = imprimerEtiquette;
+    majBoutonImpression();
   }
 
   /* ⚠⚠ ON DEMANDE D IMPRIMER LE BON DE COMMANDE, COMME LE FAIT L ECRAN DU SITE.
@@ -410,6 +442,7 @@ function pageCommande(id) {
   }
   function scanner(code){
     if (!String(code || '').trim()) return;
+    if (LECTURE) { bip(false); scanMsg('Commande en traitement ailleurs — lecture seule.', '#f87171'); return; }
     P.appeler('commande:scan', ID, code).then(function(r){
       if (!r || !r.ok) {
         bip(false);
@@ -442,10 +475,13 @@ function pageCommande(id) {
   }
 
   function imprimer(genre, b){
+    if (LECTURE) { dire('Commande en traitement ailleurs — lecture seule.', 'err'); return; }
     b.disabled = true; dire('Envoi à l’impression…');
     P.appeler('commande:bon', ID, genre).then(function(r){
       b.disabled = false;
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      // ⚠ Le pont rend maintenant un VERDICT (releve du 2026-08-08) : avant,
+      // << Envoye a l impression >> s affichait meme quand rien ne sortait.
+      if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
       dire('Envoyé à l’impression.', 'bon');
     });
   }
@@ -495,18 +531,80 @@ function pageCommande(id) {
      service par defaut et a 0,5 kg. L operation reste en place pour les coquilles
      anterieures, mais cette fenetre ne l emprunte plus. */
   function etiquette(){
-    var b = document.getElementById('c-etiq');
+    if (LECTURE) { dire('Commande en traitement ailleurs — lecture seule.', 'err'); return; }
     var poids = parseFloat(val('c-poids'));
     if (!(poids > 0)) { dire('Le poids du colis doit être supérieur à zéro.', 'err'); return; }
+    /* ⚠ UNE ETIQUETTE EXISTE DEJA ? La question se pose ICI, dans la fenetre —
+       plus dans des modales du site invisibles depuis l entrepot (releve du
+       2026-08-08 : double achat possible, modale du site detournee, appel
+       natif qui expirait a 60 s). L aveu part au pont (forcer) : sans lui, le
+       garde du site refuse. */
+    if (CMD.aUneEtiquette || String(val('c-suivi') || '').trim()) {
+      voileEtiq('⚠ Une étiquette existe déjà',
+        '<p style="margin:.35rem 0;font-size:.9rem">Une étiquette a déjà été facturée pour cette commande'
+        + (CMD.suivi ? ' (suivi <strong>' + esc(CMD.suivi) + '</strong>)' : '') + '.</p>'
+        + '<p style="margin:.35rem 0;font-size:.9rem">En commander une seconde sera <strong>facturé une '
+        + 'seconde fois</strong>. Pour réimprimer celle qui existe, « 🖨 Imprimer l’étiquette » suffit.</p>',
+        'Commander quand même', function(){ acheterEtiquette(poids, true); });
+      return;
+    }
+    acheterEtiquette(poids, false);
+  }
+  function acheterEtiquette(poids, forcer){
+    var b = document.getElementById('c-etiq');
     b.disabled = true; dire('Demande au transporteur…', 'att');
-    P.appeler('expedition:etiquette', ID, val('c-transp'), val('c-service'), poids).then(function(r){
+    P.appeler('expedition:etiquette', ID, val('c-transp'), val('c-service'), poids, forcer).then(function(r){
       b.disabled = false;
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      if (r.suivi) { poser('c-suivi', r.suivi); dire('Étiquette générée — suivi ' + r.suivi, 'bon'); majExpedier(); }
+      if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
       // ⚠ Pas de numero = pas d etiquette, meme sans exception levee. Annoncer un
       // succes ici ferait expedier une commande sans etiquette.
-      else dire('Aucun numéro reçu : l’étiquette n’a PAS été générée.', 'err');
+      if (!r.suivi) { dire('Aucun numéro reçu : l’étiquette n’a PAS été générée.', 'err'); return; }
+      poser('c-suivi', r.suivi);
+      /* ⚠ LE PDF EST GARDE ET S IMPRIME — il etait JETE (releve du 2026-08-08) :
+         la fenetre achetait l etiquette et ne l imprimait jamais, ni le
+         bordereau qui la suit. Meme patron que la fenetre Expedition. */
+      PDF = r.pdf || null;
+      CMD.aUneEtiquette = true;
+      CMD.suivi = r.suivi;
+      majExpedier();
+      majBoutonImpression();
+      voileEtiq('✅ Étiquette créée',
+        '<p style="margin:.35rem 0;font-size:.9rem">Suivi : <strong>' + esc(r.suivi) + '</strong></p>'
+        + '<p style="margin:.35rem 0;font-size:.9rem">Imprimer l’étiquette et le bordereau maintenant ?</p>',
+        '🖨 Imprimer maintenant', imprimerEtiquette);
     }).catch(function(){ b.disabled = false; dire('L’opération a échoué.', 'err'); });
+  }
+  // Un voile a deux boutons, pour la question du rachat et la proposition
+  // d impression — meme peau que la question du bon de commande.
+  function voileEtiq(titre, corps, libelle, surOui){
+    var v = document.createElement('div');
+    v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
+      + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
+    v.innerHTML = '<div style="background:#16202f;border:1px solid rgba(255,255,255,.12);'
+      + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:30rem;width:100%">'
+      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif">' + titre + '</h3>'
+      + corps
+      + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
+      + '<button type="button" id="ve-non">Annuler</button>'
+      + '<button type="button" class="prim" id="ve-oui">' + libelle + '</button></div></div>';
+    document.body.appendChild(v);
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
+    document.getElementById('ve-non').onclick = fermer;
+    document.getElementById('ve-oui').onclick = function(){ fermer(); surOui(); };
+  }
+  function imprimerEtiquette(){
+    if (LECTURE) { dire('Commande en traitement ailleurs — lecture seule.', 'err'); return; }
+    dire('Impression de l’étiquette et du bordereau…');
+    P.appeler('expedition:imprimer', ID, PDF).then(function(r){
+      dire(r && r.ok ? 'Étiquette et bordereau envoyés à l’impression.' : expliquerD(r),
+        r && r.ok ? 'bon' : 'err');
+    });
+  }
+  // Le bouton de reimpression n apparait que s il y a une etiquette a imprimer.
+  function majBoutonImpression(){
+    var b = document.getElementById('c-etiq-imp');
+    if (!b) return;
+    b.style.display = (CMD && CMD.aUneEtiquette) || String(val('c-suivi') || '').trim() ? '' : 'none';
   }
 
   /* ⚠ LE VERROU SE REND A LA FERMETURE (2026-08-07). Il etait pris a l ouverture
@@ -520,8 +618,14 @@ function pageCommande(id) {
       if (!v || !v.ok) { sous.textContent = ''; return; }
       if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
       sous.textContent = '⚠ en traitement par ' + (v.parQui || 'quelqu’un d’autre');
+      /* ⚠ EN LECTURE POUR DE BON (releve du 2026-08-08) : on ne desarmait que
+         le bouton Expedier, que majExpedier REARMAIT au premier input — et le
+         scan, le statut, l impression et meme l ACHAT D UNE ETIQUETTE
+         restaient permis. Deux personnes sur le meme colis, c est deux
+         etiquettes facturees et deux courriels au client. */
+      LECTURE = true;
       bEnr.disabled = true;
-      dire('Cette commande est déjà en traitement ailleurs.', 'err');
+      dire('Cette commande est déjà en traitement ailleurs — lecture seule.', 'err');
     });
   }
   function rendreVerrou(){
@@ -611,10 +715,11 @@ function pageCommande(id) {
     var aSuivi = !!String(val('c-suivi') || '').trim();
     var verifOk = toutVerifie();
     var etiqOk = aSuivi || sansNum;
-    var pret = !!(CTX && CTX.peutExpedier) && verifOk && etiqOk;
+    var pret = !LECTURE && !!(CTX && CTX.peutExpedier) && verifOk && etiqOk;
     bEnr.disabled = !pret;
     var pourquoi = '';
-    if (!CTX || !CTX.peutExpedier) pourquoi = 'Votre rôle ne permet pas d’expédier.';
+    if (LECTURE) pourquoi = 'Commande en traitement ailleurs — lecture seule.';
+    else if (!CTX || !CTX.peutExpedier) pourquoi = 'Votre rôle ne permet pas d’expédier.';
     else if (!verifOk) pourquoi = 'Vérifiez le colis d’abord — ' + comptes() + ' sur ' + attendus() + ' unités confirmées.';
     else if (!etiqOk) pourquoi = 'Générez l’étiquette (étape 2), ou cochez « Expédier sans numéro de suivi ».';
     bEnr.title = pourquoi || 'Marquer la commande expédiée et prévenir le client';

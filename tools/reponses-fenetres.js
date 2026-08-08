@@ -385,6 +385,11 @@ module.exports = {
           dejaPret: true,
           suivi: '1Z999AA10123456784',
           transporteur: 'postes-canada',
+          // La vraie forme depuis le 2026-08-08 : etiquette deja facturee,
+          // priorite et notes — l'entete doit les dessiner au chargement.
+          aUneEtiquette: true,
+          prioritaire: true,
+          notes: 'Fragile : verre souffle.',
           client: 'Josée Lafleur',
           adresse: '9 avenue des Érables, Lévis, QC, G6V 2R1',
           articles: [
