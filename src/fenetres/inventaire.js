@@ -1,12 +1,19 @@
 'use strict';
 
 /*
- * FENÊTRE « AJUSTEMENT DE STOCK » — NATIVE
+ * FENÊTRE « INVENTAIRE » — NATIVE, LES QUATRE ONGLETS DE L'ÉCRAN DU SITE
  * =============================================================================
- * On y fait le geste le plus banal et le plus lourd de conséquences de la
- * boutique : entrer les quantités réelles de l'étagère. Elle ne charge aucune
- * page du site et ne fait aucun appel web — tout passe par le pont, qui
- * interroge la fenêtre principale, seule porteuse de la session.
+ * D'abord bâtie comme « Ajustement de stock » (la liste de réachat, le scan et
+ * la grille des variantes), elle porte depuis 1.35.0 l'écran d'inventaire
+ * ENTIER : Produits (tuiles, recherche, filtres, SKU, vente finale en lot),
+ * Réapprovisionnement, Produits endommagés (avec le rapport imprimable,
+ * reconstruit des DONNÉES — celui du site lisait le tableau affiché) et
+ * Entrepôt (ajout/édition en ligne, suppression refusée si utilisé).
+ * ⚠ LA SUPPRESSION D'UN PRODUIT N'EST PAS ICI, à dessein : elle reste à
+ * l'écran Inventaire de la page. « Modifier » ouvre l'assistant Produit natif.
+ * Elle ne charge aucune page du site et ne fait aucun appel web — tout passe
+ * par le pont, qui interroge la fenêtre principale, seule porteuse de la
+ * session.
  *
  * ⚠⚠ CE QU'IL A FALLU FAIRE AVANT D'ÉCRIRE UNE SEULE LIGNE D'ICI.
  * `Admin.saveStock` LISAIT LE DOM : elle allait chercher, pour chaque taille ×
@@ -165,17 +172,74 @@ td.e select{min-width:8rem}
 .voile textarea{width:100%;font:inherit;font-size:.78rem;color:#e8edf5;
   background:#0f1826;border:1px solid rgba(255,255,255,.14);border-radius:8px;
   padding:.4rem .5rem;resize:none}
+/* ── Les quatre onglets ───────────────────────────────────────────────────── */
+.onglets{flex:0 0 auto;display:flex;gap:.25rem;padding:.5rem 1.05rem 0;
+  border-bottom:1px solid rgba(255,255,255,.08);background:#0e1522}
+.onglets button{border:1px solid transparent;border-bottom:none;
+  border-radius:9px 9px 0 0;background:transparent;color:#8fa1b8;
+  padding:.42rem .85rem;font-size:.82rem}
+.onglets button.actif{background:#16202f;border-color:rgba(255,255,255,.09);
+  color:#e8edf5;font-weight:600}
+.onglets button:hover:not(.actif){background:rgba(255,255,255,.05)}
+
+/* ── Tuiles de statistiques (onglet Produits) ─────────────────────────────── */
+.tuiles{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;flex:0 0 auto}
+.tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;padding:.45rem .65rem;min-width:0}
+.tuile .lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;
+  color:#8fa1b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile .val{font-size:1.22rem;font-weight:700;line-height:1.25}
+.tuile .sub{font-size:.67rem;color:#6d7f96;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.tuile.att{border-color:rgba(245,158,11,.5)}
+.tuile.err{border-color:rgba(239,68,68,.5)}
+.val.att{color:#fbbf24}.val.err{color:#f87171}.val.bon{color:#4ade80}
+
+/* Pastilles d etat, badges et puce de categorie */
+.pill{display:inline-block;font-size:.65rem;padding:.05rem .5rem;
+  border-radius:99px;white-space:nowrap}
+.pill.rup{background:rgba(239,68,68,.16);color:#f87171}
+.pill.bas{background:rgba(245,158,11,.16);color:#fbbf24}
+.pill.ok{background:rgba(34,197,94,.14);color:#4ade80}
+.pill.neutre{background:rgba(148,163,184,.16);color:#8fa1b8}
+.badge{display:inline-block;font-size:.6rem;padding:0 .4rem;border-radius:99px;
+  margin-left:.35rem;vertical-align:1px}
+.badge.vente{background:#c9a97e;color:#17202c}
+.badge.finale{background:#dc2626;color:#fff}
+.puce{width:10px;height:10px;border-radius:50%;display:inline-block;
+  vertical-align:middle}
+
+/* Barre du mode << vente finale en lot >> */
+.lot{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+  background:#241a08;border:1px solid rgba(245,158,11,.4);border-radius:9px;
+  padding:.45rem .7rem;font-size:.8rem}
+.lot label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
+.lot input{width:auto}
+button.rouge{background:#dc2626;border-color:#dc2626;color:#fff;font-weight:600}
+button.rouge:hover:not(:disabled){background:#ef4444;border-color:#ef4444}
+button.vert{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:600}
+button.vert:hover:not(:disabled){background:#22c55e;border-color:#22c55e}
+
+.toolbar{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
+  margin-bottom:.45rem}
+.toolbar input[type=text]{width:15rem}
+.toolbar select{width:auto}
+.toolbar .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/** Page complète de la fenêtre native « Ajustement de stock ». */
+/** Page complète de la fenêtre native « Inventaire » (les quatre onglets).
+ *  `id` : vide = onglet Produits ; « onglet:reappro » (ou endommages,
+ *  entrepots) = ouvrir sur cet onglet ; tout autre = ouvrir la grille de ce
+ *  produit directement. */
 function pageInventaire(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Ajustement de stock — Administration Sandriza</title>
+<title>Inventaire — Administration Sandriza</title>
 <style>${CSS}</style></head><body>
-<div class="tete"><span class="ic">📦</span><h1 id="titre">Ajustement de stock</h1>
+<div class="tete"><span class="ic">📦</span><h1 id="titre">Inventaire</h1>
   <span class="sous" id="sous"></span></div>
+<div class="onglets" id="onglets"></div>
 <div class="corps" id="corps"></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions" id="actions"></span></div>
@@ -189,8 +253,12 @@ ${JS_ACTIVITE}
   var actions = document.getElementById('actions');
   var sous = document.getElementById('sous');
 
+  var onglets = document.getElementById('onglets');
+
   var CTX = null;      // contexte : entrepots, droit d ecriture, seuil general
-  var VUE = 'reappro'; // 'reappro' | 'recherche' | 'produit'
+  // L onglet courant, et — a l interieur de Reapprovisionnement — la sous-vue.
+  var ONGLET = 'produits'; // 'produits' | 'reappro' | 'endommages' | 'entrepots'
+  var VUE = 'reappro'; // 'reappro' | 'recherche' | 'produit' (la grille)
   var REAPPRO = [];    // lignes de la liste de reachat
   var TROUVES = [];    // resultats de la recherche par nom
   var PROD = null;     // { id, nom, sku, seuilHerite }
@@ -200,6 +268,23 @@ ${JS_ACTIVITE}
   var FILTRE = { couleur: [], taille: [], menu: null };
   var PAGE = 0, TAILLE_PAGE = 25;
   var enCours = false;
+
+  // ── Onglet Produits ── La liste est paginee et filtree PAR LE SITE
+  // (stock:produits) : la fenetre n envoie que le filtre, jamais un catalogue.
+  var PRODS = null;    // derniere reponse de stock:produits
+  var FP = { q: '', etat: '', cats: [], page: 0, parPage: 25, menu: false };
+  // ⚠ Mode << vente finale en lot >> : les coches vivent ICI, pas dans les cases
+  // affichees — l ecran du site ne lisait que la PAGE VISIBLE de ses cases, une
+  // selection posee puis paginee etait perdue sans un mot.
+  var LOT = false, COCHES = {};
+  var NB_REAPPRO = null; // compte pour le libelle de l onglet (des qu on le sait)
+
+  // ── Onglet Produits endommages ──
+  var DMG = null, DMG_AN = 'all';
+
+  // ── Onglet Entrepot ──
+  var WHS = null;
+  var WH_EDIT = null;  // null | { id:'' (ajout) | id (edition) }
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -222,12 +307,20 @@ ${JS_ACTIVITE}
     aucune_etiquette:   'Aucune étiquette à imprimer (quantité 0).',
     imprimante:         'Aucune imprimante de codes-barres prête — voir Configuration puis Imprimantes.',
     impression:         'L’impression a échoué.',
+    categorie_sans_code: 'Aucun code de catégorie configuré.',
+    aucun_produit:      'Aucun produit sélectionné.',
+    code_requis:        'Donnez un nom à l’emplacement.',
+    version_coquille:   'Cette version de l’application ne sait pas ouvrir cette fenêtre — quittez et relancez pour la mettre à jour.',
     echec:              'L’opération a échoué.'
   };
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
     if ((m === 'imprimante' || m === 'impression') && r.detail) return MOTIFS[m] + ' ' + esc(r.detail);
+    // Les refus RACONTES du nouvel onglet Produits / Entrepot.
+    if (m === 'collision') return 'Impossible : ' + esc(r.avant) + ' deviendrait ' + esc(r.apres) + ', déjà utilisé.';
+    if (m === 'emplacement_utilise') return 'Suppression impossible — ' + (r.n || '?')
+      + ' variante(s) utilisent l’emplacement ' + esc(r.code || '') + '. Réassignez-les d’abord.';
     return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
   }
 
@@ -256,9 +349,51 @@ ${JS_ACTIVITE}
   // ⚠ TOUT LE DESSIN PASSE PAR ICI, et rien d autre n ecrit dans le corps : c est
   // ce qui rend la fenetre eprouvable au chargement (voir le garde-fou).
   function dessiner(){
-    if (VUE === 'produit') { dessinerProduit(); return; }
+    // La grille d un produit prend la fenetre entiere : les onglets s effacent,
+    // le << Retour >> ramene a l onglet d ou l on vient.
+    if (VUE === 'produit') { onglets.style.display = 'none'; dessinerProduit(); return; }
+    onglets.style.display = '';
+    dessinerOnglets();
+    if (ONGLET === 'produits') { dessinerProduits(); return; }
+    if (ONGLET === 'endommages') { dessinerEndommages(); return; }
+    if (ONGLET === 'entrepots') { dessinerEntrepots(); return; }
     dessinerListe();
   }
+
+  function dessinerOnglets(){
+    var reappro = (NB_REAPPRO === null) ? '' : (NB_REAPPRO ? ' (' + NB_REAPPRO + ')' : '');
+    var defs = [
+      ['produits', '📦 Produits'],
+      ['reappro', '⚠ Réapprovisionnement' + reappro],
+      ['endommages', '🔧 Produits endommagés'],
+      ['entrepots', '🏬 Entrepôt']
+    ];
+    onglets.innerHTML = defs.map(function(d){
+      return '<button data-onglet="' + d[0] + '"' + (ONGLET === d[0] ? ' class="actif"' : '')
+        + '>' + d[1] + '</button>';
+    }).join('');
+  }
+
+  // Pose UNE fois : le conteneur des onglets n est jamais remplace, seulement
+  // son contenu — l ecouteur delegue survit donc a tous les redessins.
+  onglets.onclick = function(ev){
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-onglet]') : null;
+    if (!b) return;
+    var cible = b.getAttribute('data-onglet');
+    if (cible === ONGLET) return;
+    // Quitter l Entrepot referme toute ligne d ajout/edition en cours — comme
+    // l ecran du site. Quitter Produits sort du mode lot : une selection
+    // invisible qui s appliquerait plus tard serait un piege.
+    if (cible !== 'entrepots') WH_EDIT = null;
+    if (cible !== 'produits') { LOT = false; COCHES = {}; }
+    ONGLET = cible;
+    VUE = 'reappro';
+    dire('');
+    // Redessine tout de suite (cache ou << Chargement… >>) : un onglet qui ne
+    // reagit qu a l arrivee de la reponse semble mort.
+    dessiner();
+    chargerOnglet();
+  };
 
   function dessinerListe(){
     var enRecherche = VUE === 'recherche';
@@ -573,6 +708,505 @@ ${JS_ACTIVITE}
     };
   }
 
+  // ══ ONGLET PRODUITS ═══════════════════════════════════════════════════════
+  function tuile(libelle, valeur, sousTitre, ton){
+    return '<div class="tuile' + (ton ? ' ' + ton : '') + '">'
+      + '<div class="lbl">' + libelle + '</div>'
+      + '<div class="val' + (ton ? ' ' + ton : '') + '">' + valeur + '</div>'
+      + '<div class="sub">' + sousTitre + '</div></div>';
+  }
+
+  function pilule(l){
+    if (!l.sku) return '<span class="pill neutre">Non inventorié (sans SKU)</span>';
+    if (l.unites === 0) return '<span class="pill rup">Rupture</span>';
+    if (l.basses > 0) return '<span class="pill bas">' + l.basses + ' à commander</span>';
+    return '<span class="pill ok">Seuil non atteint</span>';
+  }
+
+  function dessinerProduits(){
+    var d = PRODS;
+    if (!d) {
+      corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
+      actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+      brancherFermer();
+      return;
+    }
+    var st = d.stats;
+    var h = '<div class="tuiles">'
+      + tuile('Produits inventoriés', st.inventories, st.total + ' produits au total', '')
+      + tuile('Sans code SKU', st.sansSku,
+          st.sansSku > 0 ? 'non disponibles à l’achat' : 'tous assignés ✓',
+          st.sansSku > 0 ? 'att' : 'bon')
+      + tuile('En rupture', st.rupture, 'inventaire = 0', st.rupture > 0 ? 'err' : 'bon')
+      + tuile('À réapprovisionner', st.aCommander,
+          st.aCommander ? 'voir l’onglet Réapprovisionnement' : 'tout est au-dessus du seuil ✓',
+          st.aCommander ? 'att' : 'bon')
+      + tuile('Unités en inventaire', st.unites, 'toutes variantes', '')
+      + '</div>';
+
+    // ⚠ LES DEUX BANDEAUX DE L ECRAN DU SITE, repris au mot — et comme lui, ils
+    // disparaissent d eux-memes une fois la reprise faite.
+    if (st.sansSku > 0 && d.peutEcrire) {
+      h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
+        + '<span style="flex:1 1 auto">⚠ <b>' + st.sansSku + ' produit(s)</b> sans code SKU '
+        + '— ils sont bloqués à l’achat en boutique.</span>'
+        + '<button class="mini" id="btn-skus-tous">Assigner automatiquement</button></div>';
+    }
+    if (d.pad6 && d.pad6.n > 0 && d.peutEcrire) {
+      h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
+        + '<span style="flex:1 1 auto">🏷 <b>' + d.pad6.n + ' produit(s)</b> portent encore un '
+        + 'numéro à quatre chiffres (' + esc(d.pad6.avant || '') + '). Les nouveaux en comptent six '
+        + '— ' + esc(d.pad6.apres || '') + '. <em>Renuméroter oblige à réimprimer les étiquettes '
+        + 'déjà collées.</em></span>'
+        + '<button class="mini" id="btn-pad6">Passer à six chiffres</button></div>';
+    }
+
+    if (LOT) {
+      var nCoches = Object.keys(COCHES).length;
+      h += '<div class="lot">'
+        + '<label><input type="checkbox" id="lot-page"> Toute la page</label>'
+        + '<span>' + nCoches + ' produit' + (nCoches > 1 ? 's' : '') + ' sélectionné'
+        + (nCoches > 1 ? 's' : '') + '</span>'
+        + '<span style="flex:1 1 auto"></span>'
+        + '<button class="mini rouge" id="lot-app">🔴 Appliquer vente finale</button>'
+        + '<button class="mini vert" id="lot-ret">✅ Retirer vente finale</button>'
+        + '<button class="mini" id="lot-annuler">Annuler</button></div>';
+    }
+
+    h += '<div class="carte plein">';
+    h += '<div class="toolbar">'
+      + '<input type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom produit…" value="' + esc(FP.q) + '">'
+      + '<select id="fp-etat">'
+      + '<option value="">📦 Tout l’inventaire</option>'
+      + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '>⚠ À commander</option>'
+      + '<option value="ok"' + (FP.etat === 'ok' ? ' selected' : '') + '>✓ Seuil non atteint</option>'
+      + '</select>'
+      + menuCats(d.cats || [])
+      + '<span class="droite">'
+      + (d.peutEcrire && !LOT ? '<button class="mini" id="btn-lot" title="Appliquer ou retirer la vente finale sur plusieurs produits à la fois">Vente finale en lot</button>' : '')
+      + '</span></div>';
+
+    if (!d.lignes.length) {
+      h += '<div class="vide">Aucun produit trouvé.</div>';
+    } else {
+      h += '<div class="grille"><table><thead><tr>'
+        + (LOT ? '<th class="c" style="width:2rem"></th>' : '')
+        + '<th>SKU</th><th>Produit</th><th class="c" title="Catégorie">Cat.</th>'
+        + '<th class="c">Tailles</th><th class="c">Couleurs</th>'
+        + '<th>Inventaire</th><th class="c">Actions</th>'
+        + '</tr></thead><tbody>';
+      d.lignes.forEach(function(l){
+        h += '<tr>'
+          + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(l.id) + '"'
+              + (COCHES[l.id] ? ' checked' : '') + '></td>' : '')
+          + '<td>' + (l.sku ? '<span class="code">' + esc(l.sku) + '</span>'
+                            : '<span class="rien">sans SKU</span>') + '</td>'
+          + '<td><span class="nom">' + esc(l.nom) + '</span>'
+          +   (l.enVente ? '<span class="badge vente">En vente</span>' : '')
+          +   (l.venteFinale ? '<span class="badge finale">Vente finale</span>' : '') + '</td>'
+          + '<td class="c" title="' + esc(l.categorieNom) + '"><span class="puce" style="background:'
+          +   esc(l.couleurCat || '#6d7f96') + '"></span></td>'
+          + '<td class="c">' + l.tailles + '</td>'
+          + '<td class="c">' + l.couleurs + '</td>'
+          + '<td><b' + (l.unites === 0 ? ' style="color:#f87171"' : '') + '>' + l.unites + '</b> '
+          +   'unité' + (l.unites > 1 ? 's' : '') + ' ' + pilule(l) + '</td>'
+          + '<td class="c" style="white-space:nowrap">'
+          +   '<button class="mini" data-inv="' + esc(l.id) + '" title="Gérer l’inventaire">📦 Inventaire</button> '
+          +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="Assigner un SKU">🏷 SKU</button> ' : '')
+          +   (d.peutEcrire ? '<button class="mini" data-mod="' + esc(l.id) + '" title="Modifier la fiche produit">✎ Modifier</button> ' : '')
+          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="Mettre en vente">🛒 Vendre</button>' : '')
+          + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+
+      var debut = d.page * d.parPage + 1;
+      var fin = Math.min((d.page + 1) * d.parPage, d.total);
+      h += '<div class="pagi">'
+        + '<span>Afficher</span><select id="fp-taille">'
+        + [10, 25, 50, 100].map(function(n){
+            return '<option value="' + n + '"' + (FP.parPage === n ? ' selected' : '') + '>' + n + '</option>'; }).join('')
+        + '</select><span>par page</span>'
+        + '<span class="pos">' + debut + '–' + fin + ' sur ' + d.total + ' '
+        + (d.pages > 1
+            ? '<button class="mini" id="fp-prec"' + (d.page <= 0 ? ' disabled' : '') + '>← Préc.</button>'
+              + ' Page <strong>' + (d.page + 1) + '</strong> / ' + d.pages + ' '
+              + '<button class="mini" id="fp-suiv"' + (d.page >= d.pages - 1 ? ' disabled' : '') + '>Suiv. →</button>'
+            : '')
+        + '</span></div>';
+    }
+    // ⚠ Dit une fois, la ou on la chercherait : la suppression n est PAS ici.
+    h += '<div class="aide" style="margin-top:.4rem">La <b>suppression</b> d’un produit se fait '
+      + 'à l’écran Inventaire de la page — pas dans cette fenêtre.</div>';
+    h += '</div>';
+    corps.innerHTML = h;
+
+    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+    brancherProduits();
+  }
+
+  function menuCats(cats){
+    if (!cats.length) return '';
+    var n = FP.cats.length;
+    var h = '<div class="menu">';
+    if (FP.menu) h += '<div class="voile2" data-menu-cats="1"></div>';
+    h += '<button class="mini' + (n ? ' prim' : '') + '" data-menu-cats="1"'
+      + ' style="position:relative;z-index:41">Catégorie à afficher'
+      + (n ? ' (' + n + ')' : '') + (FP.menu ? ' ▴' : ' ▾') + '</button>';
+    if (FP.menu) {
+      h += '<div class="liste">';
+      if (n) h += '<button class="mini" data-vider-cats="1" style="width:100%;margin-bottom:.2rem">Réinitialiser</button>';
+      cats.forEach(function(c){
+        h += '<label><input type="checkbox" data-cat="' + esc(c.cle) + '"'
+          + (FP.cats.indexOf(c.cle) >= 0 ? ' checked' : '') + '>'
+          + '<span class="puce" style="background:' + esc(c.couleur || '#6d7f96') + '"></span>'
+          + '<span>' + esc(c.nom) + '</span></label>';
+      });
+      h += '</div>';
+    }
+    return h + '</div>';
+  }
+
+  var fpT = null;
+  function brancherProduits(){
+    brancherFermer();
+    corps.onkeydown = null;
+    corps.oninput = function(ev){
+      var t = ev.target;
+      if (t && t.id === 'fp-q') {
+        var q = t.value;
+        clearTimeout(fpT);
+        fpT = setTimeout(function(){ FP.q = q; FP.page = 0; chargerOnglet(true); }, 280);
+      }
+    };
+    corps.onchange = function(ev){
+      var t = ev.target;
+      if (!t) return;
+      if (t.id === 'fp-etat') { FP.etat = t.value; FP.page = 0; chargerOnglet(); return; }
+      if (t.id === 'fp-taille') { FP.parPage = parseInt(t.value, 10) || 25; FP.page = 0; chargerOnglet(); return; }
+      if (t.id === 'lot-page') {
+        // Coche ou decoche LA PAGE AFFICHEE — la selection des autres pages
+        // reste ce qu elle etait, et elle est comptee sous les yeux.
+        (PRODS.lignes || []).forEach(function(l){
+          if (t.checked) COCHES[l.id] = true; else delete COCHES[l.id];
+        });
+        dessiner();
+        return;
+      }
+      var id = t.getAttribute && t.getAttribute('data-coche');
+      if (id) {
+        if (t.checked) COCHES[id] = true; else delete COCHES[id];
+        // On ne redessine pas : seule la barre compte, et la mettre a jour
+        // suffit — redessiner ferait perdre la position de defilement.
+        var lot = corps.querySelector('.lot span:nth-child(2)');
+        var nc = Object.keys(COCHES).length;
+        if (lot) lot.textContent = nc + ' produit' + (nc > 1 ? 's' : '') + ' sélectionné' + (nc > 1 ? 's' : '');
+      }
+    };
+    corps.onclick = function(ev){
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      if (t.closest('[data-menu-cats]')) { FP.menu = !FP.menu; dessiner(); return; }
+      if (t.closest('[data-vider-cats]')) { FP.cats = []; FP.page = 0; FP.menu = false; chargerOnglet(); return; }
+      var cat = t.getAttribute && t.getAttribute('data-cat');
+      if (cat) {
+        var k = FP.cats.indexOf(cat);
+        if (k >= 0) FP.cats.splice(k, 1); else FP.cats.push(cat);
+        FP.page = 0; chargerOnglet();
+        return;
+      }
+      var b = t.closest('button');
+      if (!b) return;
+      if (b.id === 'fp-prec') { FP.page--; chargerOnglet(); return; }
+      if (b.id === 'fp-suiv') { FP.page++; chargerOnglet(); return; }
+      if (b.id === 'btn-lot') { LOT = true; COCHES = {}; dessiner(); return; }
+      if (b.id === 'lot-annuler') { LOT = false; COCHES = {}; dessiner(); return; }
+      if (b.id === 'lot-app' || b.id === 'lot-ret') { venteFinaleLot(b.id === 'lot-app'); return; }
+      if (b.id === 'btn-skus-tous') { skusTous(b); return; }
+      if (b.id === 'btn-pad6') { pad6(); return; }
+      var pid = b.getAttribute('data-inv');
+      if (pid) { ouvrirProduit(pid); return; }
+      pid = b.getAttribute('data-sku');
+      if (pid) { skuUn(pid, b); return; }
+      pid = b.getAttribute('data-mod');
+      if (pid) { modifier(pid); return; }
+      pid = b.getAttribute('data-vendre');
+      if (pid) { vendre(pid, b); return; }
+    };
+  }
+
+  // ── Les gestes de l onglet Produits ── Comme l ecran du site : l assignation
+  // de SKU et la mise en vente agissent DIRECTEMENT (avec leur message) ; seule
+  // la renumerotation 4 → 6 exige une confirmation, parce qu elle perime des
+  // etiquettes deja collees.
+  function skuUn(pid, b){
+    b.disabled = true;
+    appeler('stock:skuUn', [pid]).then(function(r){
+      dire(r.ok ? 'SKU assigné : ' + r.sku : expliquer(r), r.ok ? 'bon' : 'err');
+      if (r.ok) chargerOnglet();
+      else b.disabled = false;
+    });
+  }
+  function skusTous(b){
+    b.disabled = true;
+    appeler('stock:skuTous').then(function(r){
+      dire(r.ok ? r.n + ' SKU assigné(s) automatiquement.' : expliquer(r), r.ok ? 'bon' : 'err');
+      if (r.ok) chargerOnglet();
+      else b.disabled = false;
+    });
+  }
+  function pad6(){
+    var d = PRODS && PRODS.pad6;
+    if (!d || !d.n) return;
+    voile('<h3>Passer les SKU à six chiffres</h3>'
+      + '<p>' + d.n + ' produit(s) seront renumérotés (ex. ' + esc(d.avant || '') + ' → '
+      + esc(d.apres || '') + '). Les étiquettes <strong>déjà imprimées</strong> ne correspondront '
+      + 'plus au nouveau code — il faudra les réimprimer pour la marchandise concernée. '
+      + '<strong>Irréversible.</strong></p>'
+      + '<div class="fin2"><button id="v-non">Annuler</button>'
+      + '<button class="prim" id="v-oui">Renuméroter</button></div>',
+      function(fermer){
+        document.getElementById('v-non').onclick = fermer;
+        document.getElementById('v-oui').onclick = function(){
+          this.disabled = true;
+          appeler('stock:skuPad6').then(function(r){
+            fermer();
+            dire(r.ok ? r.n + ' SKU normalisé(s).' : expliquer(r), r.ok ? 'bon' : 'err');
+            if (r.ok) chargerOnglet();
+          });
+        };
+      });
+  }
+  function modifier(pid){
+    dire('Ouverture…');
+    appeler('stock:modifier', [pid]).then(function(r){
+      dire(r.ok ? 'Fiche produit ouverte dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+    });
+  }
+  function vendre(pid, b){
+    b.disabled = true;
+    appeler('stock:vendre', [pid]).then(function(r){
+      dire(r.ok ? (r.nom || 'Le produit') + ' est maintenant en vente.' : expliquer(r), r.ok ? 'bon' : 'err');
+      if (r.ok) chargerOnglet();
+      else b.disabled = false;
+    });
+  }
+  function venteFinaleLot(activer){
+    var ids = Object.keys(COCHES);
+    if (!ids.length) { dire(MOTIFS.aucun_produit, 'att'); return; }
+    appeler('stock:venteFinale', [ids, activer]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('Vente finale ' + (activer ? 'activée' : 'retirée') + ' pour ' + r.n + ' produit(s).', 'bon');
+      LOT = false; COCHES = {};
+      chargerOnglet();
+    });
+  }
+
+  // ══ ONGLET PRODUITS ENDOMMAGES ════════════════════════════════════════════
+  function dessinerEndommages(){
+    var d = DMG;
+    if (!d) {
+      corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
+      actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+      brancherFermer();
+      return;
+    }
+    var h = '<div class="carte plein">'
+      + '<h2>Produits endommagés <span class="note">— articles de retours non remis en inventaire</span></h2>'
+      + '<div class="toolbar">'
+      + '<select id="dmg-an"><option value="all">Tout cumulé</option>'
+      + (d.annees || []).map(function(a){
+          return '<option value="' + a + '"' + (String(DMG_AN) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
+      + '</select>'
+      + '<button class="mini" id="dmg-imp">🖨 Imprimer le rapport</button>'
+      + '<span class="droite aide">🔧 <b>' + d.totalQte + '</b> article' + (d.totalQte > 1 ? 's' : '')
+      + ' endommagé' + (d.totalQte > 1 ? 's' : '') + ' · 💸 <b>' + d.totalValeur.toFixed(2)
+      + ' $</b> valeur perdue (avant taxes)</span>'
+      + '</div>';
+
+    if (!d.lignes.length) {
+      h += '<div class="vide">Aucun article endommagé'
+        + (DMG_AN === 'all' ? '' : ' pour ' + esc(String(DMG_AN))) + '.</div>';
+    } else {
+      h += '<div class="grille"><table><thead><tr>'
+        + '<th>Date</th><th>Commande</th><th>Article</th><th class="c">Qté</th>'
+        + '<th style="text-align:right">Prix</th><th style="text-align:right">Valeur</th><th>Raison</th>'
+        + '</tr></thead><tbody>';
+      d.lignes.forEach(function(l){
+        h += '<tr>'
+          + '<td>' + new Date(l.date).toLocaleDateString('fr-CA') + '</td>'
+          + '<td><span class="code">' + esc(l.commande) + '</span></td>'
+          + '<td>' + esc(l.nom) + '</td>'
+          + '<td class="c">' + l.qte + '</td>'
+          + '<td style="text-align:right">' + l.prix.toFixed(2) + ' $</td>'
+          + '<td style="text-align:right;font-weight:600">' + (l.qte * l.prix).toFixed(2) + ' $</td>'
+          + '<td>' + esc(l.raison) + '</td></tr>';
+      });
+      h += '</tbody><tfoot><tr style="font-weight:700">'
+        + '<td colspan="3" style="padding:.34rem .5rem;border-top:1px solid rgba(255,255,255,.14)">Total</td>'
+        + '<td class="c" style="border-top:1px solid rgba(255,255,255,.14)">' + d.totalQte + '</td>'
+        + '<td style="border-top:1px solid rgba(255,255,255,.14)"></td>'
+        + '<td style="text-align:right;border-top:1px solid rgba(255,255,255,.14)">' + d.totalValeur.toFixed(2) + ' $</td>'
+        + '<td style="border-top:1px solid rgba(255,255,255,.14)"></td></tr></tfoot></table></div>';
+    }
+    h += '</div>';
+    corps.innerHTML = h;
+    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+    brancherEndommages();
+  }
+
+  function brancherEndommages(){
+    brancherFermer();
+    corps.onkeydown = null;
+    corps.oninput = null;
+    corps.onchange = function(ev){
+      if (ev.target && ev.target.id === 'dmg-an') {
+        DMG_AN = ev.target.value;
+        chargerOnglet();
+      }
+    };
+    corps.onclick = function(ev){
+      var b = ev.target && ev.target.closest ? ev.target.closest('button') : null;
+      if (!b || b.id !== 'dmg-imp') return;
+      b.disabled = true;
+      dire('Impression…');
+      // Le rapport se reconstruit des DONNEES cote site et s imprime par
+      // l application — jamais en relisant le tableau affiche ici.
+      appeler('stock:endommagesRapport', [DMG_AN]).then(function(r){
+        b.disabled = false;
+        dire(r.ok ? 'Rapport envoyé à l’impression.' : expliquer(r), r.ok ? 'bon' : 'err');
+      });
+    };
+  }
+
+  // ══ ONGLET ENTREPOT ═══════════════════════════════════════════════════════
+  function dessinerEntrepots(){
+    var d = WHS;
+    if (!d) {
+      corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
+      actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+      brancherFermer();
+      return;
+    }
+    function ligneEdition(w){
+      return '<tr style="background:rgba(201,169,126,.08)">'
+        + '<td><input type="text" id="wh-code" value="' + esc(w ? w.code : '') + '" placeholder="Ex : Casier 1, Section A"></td>'
+        + '<td><input type="text" id="wh-ref" value="' + esc(w ? w.reference : '') + '" placeholder="Référence (optionnel)"></td>'
+        + '<td class="c"><span class="rien">' + (w ? w.usage : '—') + '</span></td>'
+        + '<td class="c" style="white-space:nowrap">'
+        + '<button class="mini prim" id="wh-enr" title="Enregistrer (Entrée)">✓</button> '
+        + '<button class="mini" id="wh-annuler" title="Annuler (Échap)">✕</button></td></tr>';
+    }
+    var h = '<div class="carte plein">'
+      + '<h2>Entrepôt <span class="note">— les emplacements où ranger les variantes</span></h2>';
+    if (d.peutAjouter) {
+      h += '<div class="toolbar"><span class="droite">'
+        + '<button class="mini" id="wh-ajouter"' + (WH_EDIT && WH_EDIT.id === '' ? ' disabled' : '')
+        + '>+ Ajouter un emplacement</button></span></div>';
+    }
+    h += '<div class="grille"><table><thead><tr>'
+      + '<th>Emplacement</th><th>Référence</th><th class="c">Variantes assignées</th><th class="c">Actions</th>'
+      + '</tr></thead><tbody>';
+    if (WH_EDIT && WH_EDIT.id === '') h += ligneEdition(null);
+    if (!d.lignes.length && !(WH_EDIT && WH_EDIT.id === '')) {
+      h += '<tr><td colspan="4"><div class="vide">Aucun emplacement — cliquez sur '
+        + '<b>+ Ajouter un emplacement</b> pour en créer un.</div></td></tr>';
+    }
+    d.lignes.forEach(function(w){
+      if (WH_EDIT && WH_EDIT.id === w.id) { h += ligneEdition(w); return; }
+      h += '<tr>'
+        + '<td style="font-weight:600">' + esc(w.code) + '</td>'
+        + '<td>' + (w.reference ? esc(w.reference) : '<span class="rien">—</span>') + '</td>'
+        + '<td class="c">' + w.usage + '</td>'
+        + '<td class="c" style="white-space:nowrap">'
+        + (d.peutEcrire ? '<button class="mini" data-wh-mod="' + esc(w.id) + '" title="Modifier">✎</button> ' : '')
+        + (d.peutSupprimer ? '<button class="mini" data-wh-del="' + esc(w.id) + '" title="'
+            + (w.usage > 0 ? w.usage + ' variante(s) utilisent cet emplacement' : 'Supprimer') + '">🗑</button>' : '')
+        + '</td></tr>';
+    });
+    h += '</tbody></table></div></div>';
+    corps.innerHTML = h;
+    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+    brancherEntrepots();
+    var champ = document.getElementById('wh-code');
+    if (champ) { champ.focus(); try { champ.setSelectionRange(champ.value.length, champ.value.length); } catch (e) {} }
+  }
+
+  function brancherEntrepots(){
+    brancherFermer();
+    corps.oninput = null;
+    corps.onchange = null;
+    corps.onclick = function(ev){
+      var b = ev.target && ev.target.closest ? ev.target.closest('button') : null;
+      if (!b) return;
+      if (b.id === 'wh-ajouter') { WH_EDIT = { id: '' }; dessiner(); return; }
+      if (b.id === 'wh-annuler') { WH_EDIT = null; dessiner(); return; }
+      if (b.id === 'wh-enr') { entrepotEnregistrer(); return; }
+      var id = b.getAttribute('data-wh-mod');
+      if (id) { WH_EDIT = { id: id }; dessiner(); return; }
+      id = b.getAttribute('data-wh-del');
+      if (id) { entrepotSupprimer(id); return; }
+    };
+    // Entree enregistre, Echap referme la ligne (sans fermer la fenetre : le
+    // gestionnaire global d Echap ne joue que s il n y a pas de voile, mais la
+    // ligne d edition n en est pas un — on arrete donc la propagation ici).
+    corps.onkeydown = function(ev){
+      var t = ev.target;
+      if (!t || (t.id !== 'wh-code' && t.id !== 'wh-ref')) return;
+      if (ev.key === 'Enter') { ev.preventDefault(); entrepotEnregistrer(); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); WH_EDIT = null; dessiner(); }
+    };
+  }
+
+  function entrepotEnregistrer(){
+    if (!WH_EDIT) return;
+    var code = (document.getElementById('wh-code') || {}).value || '';
+    var ref = (document.getElementById('wh-ref') || {}).value || '';
+    if (!String(code).trim()) {
+      dire(MOTIFS.code_requis, 'err');
+      var c = document.getElementById('wh-code');
+      if (c) { c.className = 'manque'; c.focus(); }
+      return;
+    }
+    appeler('stock:entrepotEcrire', [WH_EDIT.id || '', code, ref]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire(WH_EDIT.id ? 'Emplacement modifié.' : 'Emplacement créé.', 'bon');
+      WH_EDIT = null;
+      chargerOnglet();
+    });
+  }
+
+  function entrepotSupprimer(id){
+    var w = (WHS && WHS.lignes || []).filter(function(x){ return x.id === id; })[0];
+    if (!w) return;
+    // ⚠ MEME REGLE QUE L ECRAN DU SITE : utilise = pas supprimable, on
+    // reassigne d abord. Le pont refuse aussi — ceci n est que le recit.
+    if (w.usage > 0) {
+      voile('<h3>Suppression impossible</h3>'
+        + '<p>L’emplacement <strong>' + esc(w.code) + '</strong> est utilisé par <strong>'
+        + w.usage + ' variante(s)</strong> de produit.</p>'
+        + '<p style="color:#8fa1b8;font-size:.8rem">Réassignez ces variantes à un autre '
+        + 'emplacement avant de supprimer celui-ci.</p>'
+        + '<div class="fin2"><button class="prim" id="v-ok">Compris</button></div>',
+        function(fermer){ document.getElementById('v-ok').onclick = fermer; });
+      return;
+    }
+    voile('<h3>Supprimer l’emplacement</h3>'
+      + '<p>Supprimer <strong>' + esc(w.code) + '</strong> ? Aucune variante ne l’utilise.</p>'
+      + '<div class="fin2"><button id="v-non">Annuler</button>'
+      + '<button class="prim" id="v-oui">Supprimer</button></div>',
+      function(fermer){
+        document.getElementById('v-non').onclick = fermer;
+        document.getElementById('v-oui').onclick = function(){
+          this.disabled = true;
+          appeler('stock:entrepotSupprimer', [id]).then(function(r){
+            fermer();
+            dire(r.ok ? 'Emplacement « ' + (r.code || '') + ' » supprimé.' : expliquer(r), r.ok ? 'bon' : 'err');
+            chargerOnglet();
+          });
+        };
+      });
+  }
+
   // ══ CHARGEMENT ════════════════════════════════════════════════════════════
   function chercher(texte){
     var q = String(texte || '').trim();
@@ -646,16 +1280,59 @@ ${JS_ACTIVITE}
     appeler('verrou:rendre');
   }
 
+  // Recharge les donnees de L ONGLET COURANT, et lui seul : la fenetre ne
+  // demande jamais les quatre a la fois.
+  function chargerOnglet(garderFocus){
+    dessinerOnglets();
+    if (ONGLET === 'produits') {
+      appeler('stock:produits', [FP]).then(function(r){
+        if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
+        PRODS = r;
+        // Le site borne page et cadence : on reprend SES valeurs, pas les notres.
+        FP.page = r.page; FP.parPage = r.parPage;
+        NB_REAPPRO = r.stats.aCommander;
+        // ⚠ On redessine SANS voler le focus : la personne est en train de taper.
+        var av = document.getElementById('fp-q');
+        var focus = garderFocus && av && document.activeElement === av;
+        var pos = focus ? av.selectionStart : null;
+        dessiner();
+        if (focus) {
+          var neuf = document.getElementById('fp-q');
+          if (neuf) { neuf.focus(); try { neuf.setSelectionRange(pos, pos); } catch (e) {} }
+        }
+      });
+      return;
+    }
+    if (ONGLET === 'reappro') {
+      appeler('stock:reappro').then(function(r){
+        if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
+        REAPPRO = r.lignes || [];
+        NB_REAPPRO = REAPPRO.length;
+        dessiner();
+      });
+      return;
+    }
+    if (ONGLET === 'endommages') {
+      appeler('stock:endommages', [DMG_AN]).then(function(r){
+        if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
+        DMG = r;
+        dessiner();
+      });
+      return;
+    }
+    appeler('stock:entrepots').then(function(r){
+      if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
+      WHS = r;
+      dessiner();
+    });
+  }
+
   function charger(){
     appeler('stock:contexte').then(function(c){
       if (!c || !c.ok) { vide('Inventaire indisponible', expliquer(c)); return; }
       CTX = c;
       sous.textContent = c.peutEcrire ? '' : '👁 Lecture seule';
-      return appeler('stock:reappro').then(function(r){
-        if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
-        REAPPRO = r.lignes || [];
-        dessiner();
-      });
+      chargerOnglet();
     });
   }
 
@@ -876,6 +1553,14 @@ ${JS_ACTIVITE}
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 
   var DEPART = ${depart};
+  // << onglet:… >> ouvre la fenetre sur un onglet precis ; tout autre identifiant
+  // est un produit dont on ouvre la grille directement.
+  if (DEPART.indexOf('onglet:') === 0) {
+    var ong = DEPART.slice(7);
+    if (['produits', 'reappro', 'endommages', 'entrepots'].indexOf(ong) >= 0) ONGLET = ong;
+    DEPART = '';
+  }
+  dessiner();
   charger();
   if (DEPART) ouvrirProduit(DEPART);
 })();

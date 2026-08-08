@@ -587,20 +587,65 @@ module.exports = {
     },
   ],
 
-  /* ── AJUSTEMENT DE STOCK ───────────────────────────────────────────────────
-     Formes relevées dans `assets/js/pont.js` (`stockContexte`, `stockReappro`,
-     `stockLire`), pas inventées ici.
+  /* ── INVENTAIRE (les quatre onglets) ───────────────────────────────────────
+     Formes relevées dans `assets/js/pont.js` (`stockContexte`, `stockProduits`,
+     `stockReappro`, `stockLire`, `stockEndommages`, `stockEntrepots`), pas
+     inventées ici.
 
-     ⚠ CE QUE CES CAS COUVRENT, ET POURQUOI CEUX-LÀ. La fenêtre s'ouvre SANS
-     identifiant : elle dessine donc d'abord la liste de réachat, puis — et
-     seulement si un produit est ouvert — la grille. Ouverte avec un identifiant,
-     elle traverse en plus `stock:lire`, la construction des variantes et le
-     verrou. Les deux chemins ne se ressemblent pas : n'éprouver que le premier
-     laisserait la grille, c'est-à-dire tout ce qui compte, dans l'ombre. */
+     ⚠ CE QUE CES CAS COUVRENT, ET POURQUOI CEUX-LÀ. La fenêtre s'ouvre sur
+     l'onglet PRODUITS ; « onglet:… » l'ouvre sur un autre onglet, et un
+     identifiant de produit ouvre la grille directement. Chaque onglet a donc
+     son cas — sans quoi son dessin ne serait JAMAIS traversé au banc — et la
+     grille garde ses deux cas d'origine (écriture, et lecture seule sans
+     entrepôt). Les gestes (clics d'onglet, mode lot, édition d'entrepôt)
+     restent hors de portée du banc : à éprouver à la main. */
   'inventaire.js': [
     {
-      nom: 'liste de réachat',
+      nom: 'liste des produits',
       id: '',
+      reponses: {
+        'stock:contexte': {
+          ok: true, peutEcrire: true, seuilGeneral: 3, par: 'Brigitte Brousseau',
+          entrepots: [
+            { id: 'wh_0001', code: 'MTL-A', nom: 'Entrepôt principal' },
+            { id: 'wh_0002', code: 'QC-B', nom: 'Boutique' },
+          ],
+        },
+        // ⚠ Les deux BANDEAUX (sans SKU, quatre chiffres) et chaque PASTILLE
+        // d'état ont leur ligne : rupture, à commander, sans SKU, vente finale,
+        // pas en vente. En retirer une laisserait ce dessin-là dans l'ombre.
+        'stock:produits': {
+          ok: true,
+          stats: { total: 4, inventories: 3, sansSku: 1, rupture: 1, aCommander: 2, unites: 27 },
+          pad6: { n: 2, avant: 'ROB-0001', apres: 'ROB-000001' },
+          cats: [
+            { cle: 'robes', nom: 'Robes', couleur: '#c084fc' },
+            { cle: 'hauts', nom: 'Hauts', couleur: '#60a5fa' },
+          ],
+          peutEcrire: true, peutAjouter: true,
+          total: 4, page: 0, pages: 1, parPage: 25,
+          lignes: [
+            { id: 'p_0001', sku: 'ROB-0001', nom: 'Robe cintrée', categorie: 'robes',
+              categorieNom: 'Robes', couleurCat: '#c084fc', tailles: 4, couleurs: 2,
+              unites: 14, basses: 2, enVente: true, venteFinale: false },
+            { id: 'p_0002', sku: 'HAU-000012', nom: 'Chemisier de soie', categorie: 'hauts',
+              categorieNom: 'Hauts', couleurCat: '#60a5fa', tailles: 3, couleurs: 1,
+              unites: 0, basses: 0, enVente: false, venteFinale: false },
+            { id: 'p_0003', sku: 'HAU-000013', nom: 'Cardigan côtelé', categorie: 'hauts',
+              categorieNom: 'Hauts', couleurCat: '#60a5fa', tailles: 3, couleurs: 2,
+              unites: 9, basses: 0, enVente: true, venteFinale: true },
+            { id: 'p_0004', sku: '', nom: 'Foulard de laine', categorie: 'accessoires',
+              categorieNom: 'Accessoires', couleurCat: '', tailles: 1, couleurs: 1,
+              unites: 4, basses: 0, enVente: false, venteFinale: false },
+          ],
+        },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'liste de réachat',
+      id: 'onglet:reappro',
       reponses: {
         'stock:contexte': {
           ok: true, peutEcrire: true, seuilGeneral: 3, par: 'Brigitte Brousseau',
@@ -622,6 +667,54 @@ module.exports = {
       },
     },
     {
+      nom: 'produits endommagés',
+      id: 'onglet:endommages',
+      reponses: {
+        'stock:contexte': {
+          ok: true, peutEcrire: true, seuilGeneral: 3, par: 'Brigitte Brousseau',
+          entrepots: [
+            { id: 'wh_0001', code: 'MTL-A', nom: 'Entrepôt principal' },
+            { id: 'wh_0002', code: 'QC-B', nom: 'Boutique' },
+          ],
+        },
+        'stock:endommages': {
+          ok: true, annees: [2026, 2025], totalQte: 3, totalValeur: 187.5,
+          lignes: [
+            { date: '2026-07-12T14:05:00Z', commande: 'SZ-100184', nom: 'Robe cintrée',
+              qte: 2, prix: 62.5, raison: 'Couture déchirée au retour' },
+            { date: '2026-03-02T10:00:00Z', commande: 'SZ-100122', nom: 'Cardigan côtelé',
+              qte: 1, prix: 62.5, raison: 'Taché — non revendable' },
+          ],
+        },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'entrepôts',
+      id: 'onglet:entrepots',
+      reponses: {
+        'stock:contexte': {
+          ok: true, peutEcrire: true, seuilGeneral: 3, par: 'Brigitte Brousseau',
+          entrepots: [
+            { id: 'wh_0001', code: 'MTL-A', nom: 'Entrepôt principal' },
+            { id: 'wh_0002', code: 'QC-B', nom: 'Boutique' },
+          ],
+        },
+        // ⚠ Un emplacement UTILISÉ et un LIBRE : la corbeille du premier doit
+        // porter l'avertissement, celle du second l'infobulle « Supprimer ».
+        'stock:entrepots': {
+          ok: true, peutAjouter: true, peutEcrire: true, peutSupprimer: true,
+          lignes: [
+            { id: 'wh_0001', code: 'MTL-A', reference: 'Rangée du fond', usage: 12 },
+            { id: 'wh_0002', code: 'QC-B', reference: '', usage: 0 },
+          ],
+        },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
       nom: 'grille ouverte',
       id: 'p_0001',
       reponses: {
@@ -629,7 +722,14 @@ module.exports = {
           ok: true, peutEcrire: true, seuilGeneral: 3, par: 'Brigitte Brousseau',
           entrepots: [{ id: 'wh_0001', code: 'MTL-A', nom: 'Entrepôt principal' }],
         },
-        'stock:reappro': { ok: true, lignes: [] },
+        // La grille s'ouvre par-dessus : l'onglet Produits charge derrière, et
+        // cette réponse minimale suffit — c'est la GRILLE qu'on éprouve ici.
+        'stock:produits': {
+          ok: true,
+          stats: { total: 1, inventories: 1, sansSku: 0, rupture: 0, aCommander: 0, unites: 6 },
+          pad6: { n: 0 }, cats: [], peutEcrire: true, peutAjouter: true,
+          total: 0, page: 0, pages: 1, parPage: 25, lignes: [],
+        },
         'stock:lire': {
           ok: true,
           produit: { id: 'p_0001', nom: 'Robe cintrée', sku: 'ROB-000001', seuilHerite: 4 },
@@ -669,7 +769,12 @@ module.exports = {
         // l'emplacement cesse d'être obligatoire — sinon plus rien ne
         // s'enregistrerait sur une boutique qui n'en a pas créé.
         'stock:contexte': { ok: true, peutEcrire: false, seuilGeneral: 3, par: 'Stagiaire', entrepots: [] },
-        'stock:reappro': { ok: true, lignes: [] },
+        'stock:produits': {
+          ok: true,
+          stats: { total: 1, inventories: 0, sansSku: 1, rupture: 0, aCommander: 0, unites: 1 },
+          pad6: { n: 0 }, cats: [], peutEcrire: false, peutAjouter: false,
+          total: 0, page: 0, pages: 1, parPage: 25, lignes: [],
+        },
         'stock:lire': {
           ok: true,
           produit: { id: 'p_0003', nom: 'Foulard de laine', sku: '', seuilHerite: 3 },

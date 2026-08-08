@@ -109,6 +109,8 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   ouvrirRetour: (id) => ipcRenderer.invoke('fenetre:retour', String(id || '')),
   ouvrirRemboursement: (id) => ipcRenderer.invoke('fenetre:remboursement', String(id || '')),
   ouvrirClient: (id) => ipcRenderer.invoke('fenetre:client', String(id || '')),
+  // L'assistant Produit sur une fiche PRECISE (le << Modifier >> de l'inventaire).
+  ouvrirProduitFiche: (id) => ipcRenderer.invoke('fenetre:produit', String(id || '')),
   notify: (opts) => ipcRenderer.invoke('notify', opts || {}),
   // Pastille sur l'icône : on DESSINE le compteur ici (le monde isolé partage le
   // DOM, donc canvas dispo) et on envoie l'image au processus principal.

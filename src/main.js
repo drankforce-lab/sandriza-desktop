@@ -983,6 +983,12 @@ const OPS_PONT = new Set([
   // une grille de zéros depuis cette fenêtre, sans un message.
   'stock:contexte', 'stock:reappro', 'stock:chercher',
   'stock:lire', 'stock:enregistrer', 'stock:etiquettes',
+  // Inventaire COMPLET (les 4 onglets). La pagination et les filtres vivent
+  // dans le site ; les lots recoivent des IDENTIFIANTS, jamais des cases.
+  'stock:produits', 'stock:skuUn', 'stock:skuTous', 'stock:skuPad6',
+  'stock:venteFinale', 'stock:vendre', 'stock:endommages',
+  'stock:endommagesRapport', 'stock:entrepots', 'stock:entrepotEcrire',
+  'stock:entrepotSupprimer', 'stock:modifier',
   // Expédition. ⚠ `expedition:etiquette` DÉPENSE DE L'ARGENT — une étiquette est
   // facturée dès sa création. Toute la règle (garde anti-double-achat, secrets
   // transporteurs, XML) reste dans le site ; le pont ne porte que le service et
@@ -1088,6 +1094,18 @@ ipcMain.handle('fenetre:remboursement', (e, id) => {
 
 /* Ouverture d une fiche client depuis le site. Une fenetre PAR client ;
    reutilisee, elle SE RELIT (szRevenir). */
+ipcMain.handle('fenetre:produit', (e, id) => {
+  const brut = String(id || '');
+  // Sans identifiant, c'est le << Nouveau produit >> du menu : meme cle que lui,
+  // pour ne pas ouvrir deux assistants vierges concurrents.
+  const cle = brut ? 'produit-' + brut.replace(/[^\w-]/g, '') : 'produit';
+  ouvrirNative(cle, brut ? 'Produit' : 'Nouveau produit', pageProduit(brut),
+    { width: 900, height: 720, minHeight: 520 });
+  // Pas de szRevenir ici : l'assistant Produit ne sait pas encore se replacer.
+  // Reutilisee, la fenetre revient simplement au premier plan.
+  return true;
+});
+
 ipcMain.handle('fenetre:client', (e, id) => {
   const cle = 'client-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
@@ -1682,8 +1700,11 @@ const actionApp = (nom) => {
        se coupent — et un code de variante coupe ne se verifie pas contre
        l etiquette collee sur le vetement, ce qui est tout son usage. */
     case 'inventaire':
-      ouvrirNative('inventaire', 'Ajustement de stock', pageInventaire(''),
-        { width: 1040, height: 760, minWidth: 900, minHeight: 540 });
+      // Depuis 1.35.0 c est l ecran d inventaire ENTIER (quatre onglets), plus
+      // seulement l ajustement — d ou le titre << Inventaire >>. Un peu plus
+      // large : le tableau des produits porte huit colonnes.
+      ouvrirNative('inventaire', 'Inventaire', pageInventaire(''),
+        { width: 1120, height: 760, minWidth: 900, minHeight: 540 });
       break;
     /* Les deux listes. ⚠ DEUX CLES DISTINCTES : ce sont deux fenetres, qu on garde
        ouvertes cote a cote — les commandes a preparer d un cote, les colis partis
