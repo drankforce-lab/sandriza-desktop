@@ -175,9 +175,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     telecharge: 'Téléchargement', revoque: 'Révoqué', expire: 'Expiré automatiquement',
     refuse: 'Refusé', comptable_ouvert: 'Portail comptable ouvert',
     comptable_refuse: 'Portail comptable — mot de passe refusé',
-    comptable_classeur: 'Classeur comptable téléchargé'
+    comptable_classeur: 'Classeur comptable téléchargé',
+    relais_refuse: 'Envoi de courriel refusé'
   };
-  var CANAUX = { telechargement: 'Installation', comptable: 'Comptable' };
+  var CANAUX = { telechargement: 'Installation', comptable: 'Comptable',
+                 courriel: 'Courriel' };
 
   function quand(iso){
     if (!iso) return '—';
@@ -451,6 +453,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<option value="">Tous</option>'
       + '<option value="telechargement"' + (filtre === 'telechargement' ? ' selected' : '') + '>Installation</option>'
       + '<option value="comptable"' + (filtre === 'comptable' ? ' selected' : '') + '>Comptable</option>'
+      + '<option value="courriel"' + (filtre === 'courriel' ? ' selected' : '') + '>Courriel</option>'
       + '</select>'
       + (lien ? '<span class="pill g">Lien ' + esc(lien.slice(0, 8)) + '…</span>'
                 + '<button class="mini" id="j-tout">Tout le journal</button>' : '')
