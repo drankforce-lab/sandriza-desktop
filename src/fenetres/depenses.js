@@ -489,14 +489,23 @@ ${JS_ACTIVITE}${JS_DIRE}
           /* ⚠ ON DIT SI LA LECTURE A ÉTÉ RECOUPÉE AVEC LE DOCUMENT. Sur une photo
              ou un PDF numérisé il n y a aucun texte a comparer : la personne est
              alors la seule verification, et elle doit le savoir. */
+          /* ⚠ ON DIT D'OÙ VIENT CHAQUE CHOSE. « Lu dans le document » et
+             « proposé par la lecture automatique » n'engagent pas la même
+             confiance, et la personne doit pouvoir régler son attention en
+             conséquence : ce qui vient du document ne se vérifie qu'au coup
+             d'oeil, ce qui vient du modèle se relit. */
           FORM.lectureErr = !r.verifie;
+          var dd = (r.depuisDocument || []);
           FORM.lecture = (r.verifie
-              ? '✓ Facture lue et recoupée avec le document.'
-              : '⚠ Facture lue à partir d’une image : impossible de la recouper. Vérifiez CHAQUE champ.')
-            + (r.preuve ? ' Lu dans le document : « ' + r.preuve + ' »' : '')
+              ? ('✓ Lu directement dans le document : ' + esc(dd.join(', ') || 'les montants') + '.')
+              : '⚠ Aucun texte à lire dans ce document (photo ou numérisation) : tout vient de la lecture automatique. Vérifiez CHAQUE champ.')
+            + (r.modeleEcarte
+                ? ' La lecture automatique a été écartée (elle ne correspondait pas au document) — complétez la description et la catégorie.'
+                : '')
+            + (r.preuve && !r.verifie ? ' Lu : « ' + esc(r.preuve) + ' »' : '')
             + (r.devise === 'USD' && r.fxTaux
-                ? ' Montants convertis depuis le dollar US au taux ' + r.fxTaux
-                  + (r.fxDate ? ' du ' + r.fxDate : '') + (r.fxApprox ? ' (approximatif)' : '') + '.'
+                ? ' Montants convertis depuis le dollar US au taux ' + esc(r.fxTaux)
+                  + (r.fxDate ? ' du ' + esc(r.fxDate) : '') + (r.fxApprox ? ' (approximatif)' : '') + '.'
                 : '');
           dire(complet
             ? 'Facture lue — vérifiez les informations, puis enregistrez.'
@@ -508,9 +517,10 @@ ${JS_ACTIVITE}${JS_DIRE}
              declaration de revenus, alors qu un champ vide se remarque. */
           FORM.lectureErr = true;
           FORM.lecture = (r.motifLecture === 'non_fiable')
-            ? ('⛔ Lecture REFUSÉE : ce qui a été lu ne correspond pas au document ('
+            ? ('⛔ Lecture REFUSÉE : ce qui a été proposé ne correspond pas au document ('
                + esc((r.ecarts || []).join(' ; ') || 'écart détecté')
-               + '). Rien n’a été rempli — saisissez à la main. Le reçu, lui, est joint.')
+               + '), et le document lui-même n’a pas pu être lu (photo ou numérisation). '
+               + 'Rien n’a été rempli — saisissez à la main. Le reçu, lui, est joint.')
             : (LECTURE[r.motifLecture] || 'Reçu joint — saisie manuelle.');
           dire(r.motifLecture === 'non_fiable'
             ? 'Lecture refusée — elle ne correspondait pas au document.'
