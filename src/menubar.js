@@ -250,11 +250,39 @@ ${css}
     return b;
   }
 
+  /* ⚠ L EN-TETE DU COMPTE (1.66.0). Le panneau du compte se dessinait dans la
+     PAGE : sur un ecran ancre il fallait voiler la vue native, et l ecran
+     disparaissait sous les yeux. Il emprunte desormais ce panneau flottant —
+     encore faut-il savoir dessiner son bloc de tete. Les classes .sz-cpt* sont
+     deja portees par la feuille du rail, qui voyage avec le modele. */
+  function enteteCompte(e){
+    var bloc=document.createElement('div'); bloc.className='sz-cpt';
+    var av=document.createElement('div'); av.className='sz-cpt-av';
+    av.style.background='linear-gradient(135deg,'+(e.couleur||'#C49A6C')+','+(e.couleur||'#C49A6C')+'b0)';
+    av.textContent=e.initiales||'?';
+    bloc.appendChild(av);
+    var txt=document.createElement('div'); txt.className='sz-cpt-txt';
+    var l1=document.createElement('div'); l1.className='sz-cpt-nom'; l1.textContent=e.nom||''; txt.appendChild(l1);
+    if(e.role){
+      var l2=document.createElement('div'); l2.className='sz-cpt-role';
+      var pt=document.createElement('span'); pt.className='sz-cpt-pt'; pt.style.background=e.couleur||'#C49A6C';
+      l2.appendChild(pt);
+      var lb=document.createElement('span'); lb.textContent=e.role; l2.appendChild(lb);
+      txt.appendChild(l2);
+    }
+    if(e.courriel){
+      var l3=document.createElement('div'); l3.className='sz-cpt-mail'; l3.textContent=e.courriel; txt.appendChild(l3);
+    }
+    bloc.appendChild(txt);
+    return bloc;
+  }
+
   var panneaux = {};
   D.menus.forEach(function(m){
     var pan=document.createElement('div');
     pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
     pan.style.display='none';
+    if (m.entete) pan.appendChild(enteteCompte(m.entete));
     (m.items||[]).forEach(function(it){ pan.appendChild(entree(it, false)); });
     rangee.appendChild(pan);
     panneaux[m.label]=pan;

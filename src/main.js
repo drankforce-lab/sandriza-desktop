@@ -2699,8 +2699,10 @@ const versTemplateNatif = (items) => items.map((it) => {
   return { label: it.label, accelerator: it.accel, click: () => runAdmin(String(it.run || '')) };
 });
 
+const _sansPseudo = (menus) => (menus || []).filter((m) => m && !String(m.label || '').startsWith('__'));
+
 const buildMenu = () => {
-  const template = (_modele.menus || [])
+  const template = _sansPseudo(_modele.menus)
     .map((m) => ({ label: m.label, submenu: versTemplateNatif(m.items || []) }))
     .filter((m) => m.submenu.length);
   // Tant que le site n'a rien envoyé, un minimum : sans menu du tout, plus aucun
@@ -2746,7 +2748,7 @@ const fermerPalette = () => {
 const majPalette = () => {
   const cfg = reglages.lire();
   const desc = {
-    menus: _modele.menus || [],
+    menus: _sansPseudo(_modele.menus),
     version: app.getVersion(),
     taille: cfg.menuTaille,
     sombre: !!_modele.sombre,
