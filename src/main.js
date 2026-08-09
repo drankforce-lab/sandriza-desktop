@@ -1152,6 +1152,9 @@ const OPS_PONT = new Set([
   // echues de toutes les chaines. Les deux sont armes en deux clics.
   'campagnes:liste', 'campagnes:envoyer', 'campagnes:supprimer',
   'chaines:liste', 'chaines:basculer', 'chaines:supprimer', 'chaines:traiter',
+  // Statistiques distantes (fenetre Statistiques, 2.2.0). ⚠ Elles ne lisent PAS
+  // la base : la fenetre principale interroge Google et Twilio par le reseau.
+  'stats:ga', 'stats:telephonie',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1386,6 +1389,10 @@ const LIMITES_PONT = {
   'campagnes:envoyer': 180000,
   // Le traitement des chaines envoie une etape par inscription echue.
   'chaines:traiter': 180000,
+  // Google assemble plusieurs rapports pour une seule reponse, et Twilio
+  // parcourt jusqu a 1000 appels : les deux sont lents avant d etre longs.
+  'stats:ga': 60000,
+  'stats:telephonie': 45000,
   // Un appel par reseau, et la file peut en compter plusieurs.
   'sociaux:publier': 60000,
   'sociaux:publierTout': 180000,
@@ -1545,6 +1552,7 @@ const PAGES_ANCRABLES = () => ({
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
   journal: ['Journal d’envoi', () => pageJournal()],
   campagnes: ['Campagnes et chaînes', () => pageCampagnes()],
+  statistiques: ['Statistiques', () => pageStatistiques()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2280,6 +2288,7 @@ const { pageRecherches } = require('./fenetres/recherches');
 const { pageAbonnes } = require('./fenetres/abonnes');
 const { pageJournal } = require('./fenetres/journal');
 const { pageCampagnes } = require('./fenetres/campagnes');
+const { pageStatistiques } = require('./fenetres/statistiques');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2358,7 +2367,7 @@ const actionApp = (nom) => {
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
-    case 'campagnes': {
+    case 'campagnes': case 'statistiques': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

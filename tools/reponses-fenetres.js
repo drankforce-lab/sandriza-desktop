@@ -667,6 +667,72 @@ module.exports = {
     },
   ],
 
+  // ── STATISTIQUES (GOOGLE ANALYTICS + TÉLÉPHONIE) ───────────────────────────
+  // ⚠ DEUX CAS D'OUVERTURE : l'onglet Google Analytics et l'onglet Téléphonie
+  // dessinent des choses complètement différentes. Le second s'ouvre par
+  // l'argument de page (id = 'tel').
+  'statistiques.js': [
+    {
+      // ⚠ FORME REELLE de stats:ga (coeur Admin._statsGaCoeur).
+      nom: 'analytics garni',
+      id: '',
+      reponses: {
+        'stats:ga': {
+          ok: true, plage: '7d', plageLibelle: '7 jours',
+          totaux: { visiteurs: 1284, sessions: 1791, pagesVues: 5320 },
+          engagement: { dureeMoyenne: '2m14', rebond: '38,4 %', pagesParSession: '3,0',
+            engagement: '61,6 %' },
+          serie: [
+            { date: '2026-08-03', vues: 640, visiteurs: 180 },
+            { date: '2026-08-04', vues: 810, visiteurs: 202 },
+            { date: '2026-08-05', vues: 0, visiteurs: 0 },
+          ],
+          pages: [
+            { titre: 'Robes d’été', chemin: '/produit/robe-lin', vues: 940 },
+            { titre: 'Accueil', chemin: '/', vues: 720 },
+          ],
+          pays: [{ nom: 'Canada', visiteurs: 1100 }, { nom: 'États-Unis', visiteurs: 140 }],
+          villes: [{ nom: 'Québec', visiteurs: 410 }, { nom: 'Montréal', visiteurs: 380 }],
+          appareils: [{ nom: 'Mobile', visiteurs: 790 }, { nom: 'Ordinateur', visiteurs: 470 }],
+          sources: [{ nom: 'google', sessions: 900 }, { nom: 'instagram', sessions: 410 }],
+          nouveauxConnus: [{ nom: 'Nouveaux visiteurs', visiteurs: 860 },
+            { nom: 'Visiteurs connus', visiteurs: 424 }],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ FORME REELLE de stats:telephonie (coeur Admin._statsTelephonieCoeur).
+      nom: 'telephonie garnie',
+      id: 'tel',
+      reponses: {
+        'stats:telephonie': {
+          ok: true, jours: 30,
+          totaux: { appels: 62, entrants: 48, repondus: 51, manques: 11, minutes: 137,
+            dureeMoyenne: '2m41', cout: '4,18 $US' },
+          solde: '18,42 $US',
+          serie: [{ date: '2026-08-06', appels: 4 }, { date: '2026-08-07', appels: 9 }],
+          appels: [
+            { de: '+14185550199', sens: 'entrant', statut: 'terminé', duree: 184,
+              cout: '0,0170 $US', date: '2026-08-07 14:22:03' },
+            { de: '+15145550142', sens: 'entrant', statut: 'sans réponse', duree: 0,
+              cout: '', date: '2026-08-07 09:01:44' },
+          ],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Le refus BLOQUANT : la fenetre doit le dire, pas rester vide en silence.
+      nom: 'analytics non configure',
+      id: '',
+      reponses: {
+        'stats:ga': { ok: false, motif: 'ga_sans_cle' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── RECHERCHES SANS RÉSULTAT ───────────────────────────────────────────────
   'recherches.js': [
     {

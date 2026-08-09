@@ -70,6 +70,7 @@ contextBridge.exposeInMainWorld('szPont', {
       'paiements:charger': 65000,
       'etat:courriel': 50000, 'cartescadeaux:liste': 25000, 'chat:liste': 25000, 'fidelisation:liste': 25000, 'abonnes:liste': 25000, 'abonnes:importer': 65000,
       'campagnes:envoyer': 185000, 'chaines:traiter': 185000,
+      'stats:ga': 65000, 'stats:telephonie': 50000,
       'sociaux:publier': 65000, 'sociaux:publierTout': 185000,
       'messagerie:liste': 20000, 'messagerie:repondre': 30000 };
     const limite = (LONGUES[nom] || 20000) + 5000;
