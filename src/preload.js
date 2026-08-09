@@ -195,6 +195,9 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
 
   // ── Phase 5 : import de photos depuis une clé USB ───────────────────────────
   scanUsb: () => ipcRenderer.invoke('usb:scan'),
+  // ⚠ Une VIGNETTE pour l ecran de choix : montrer 200 photos d une carte en
+  // taille reelle ferait passer un gigaoctet par le pont pour rien.
+  vignetteUsb: (chemin, cote) => ipcRenderer.invoke('usb:vignette', String(chemin || ''), cote || 220),
   readImage: (filePath) => ipcRenderer.invoke('usb:read', filePath),
   // Prévenu quand une clé de photos est branchée : callback({ drive, photos }).
   onUsbPhotos: (cb) => {

@@ -477,7 +477,13 @@ const scanDrivePhotos = (drive) => {
       if (out.length >= 500) return;
       const full = path.join(dir, en.name);
       if (en.isFile() && IMG_RE.test(en.name)) {
-        try { const st = fs.statSync(full); out.push({ path: full, name: en.name, size: st.size }); } catch {}
+        /* ⚠ LA DATE DE MODIFICATION EST RENDUE, et c est ce qui permet de trier
+           une carte d appareil photo par prise recente. Sans elle, l ordre est
+           celui du systeme de fichiers — c est-a-dire aucun ordre utile. */
+        try {
+          const st = fs.statSync(full);
+          out.push({ path: full, name: en.name, size: st.size, mtime: st.mtimeMs });
+        } catch {}
       }
     }
   };
@@ -492,6 +498,26 @@ const scanDrivePhotos = (drive) => {
   }
   return out;
 };
+/* ⚠⚠ UNE VIGNETTE, PAS L IMAGE ENTIERE. Montrer 200 photos d une carte pour en
+   choisir vingt, c est 200 fichiers de 5 Mo — un gigaoctet a faire passer par le
+   pont pour un ecran de choix. On renvoie donc une image REDUITE, et l original
+   n est lu qu au moment ou l on importe vraiment.
+   ⚠ Le redimensionnement se fait ici avec `nativeImage`, sans canevas : le
+   processus principal n a pas de DOM, et il n en a pas besoin pour cela. */
+ipcMain.handle('usb:vignette', (e, filePath, cote) => {
+  try {
+    const c = Math.max(64, Math.min(512, parseInt(cote, 10) || 220));
+    const img = nativeImage.createFromPath(String(filePath || ''));
+    if (img.isEmpty()) return null;
+    const t = img.getSize();
+    const ech = Math.min(1, c / Math.max(t.width || 1, t.height || 1));
+    const petite = (ech < 1)
+      ? img.resize({ width: Math.max(1, Math.round((t.width || 1) * ech)), quality: 'good' })
+      : img;
+    return petite.toDataURL();
+  } catch { return null; }
+});
+
 // Renvoie les données d'une image du poste en data URL (pour l'aperçu / le traitement).
 ipcMain.handle('usb:read', (e, filePath) => {
   try {
@@ -1280,6 +1306,9 @@ const OPS_PONT = new Set([
   // Traitements nommes (detourage, mannequin retire, porte par un mannequin)
   // et le meme geste sur un LOT.
   'photos:traiter', 'photos:lot', 'photos:renommer',
+  // L assistant de traitement en lot : lire une source SANS importer, montrer,
+  // importer ce qui est choisi, puis traiter — chaine imposee par le coeur.
+  'lot:sources', 'lot:vignette', 'lot:importer', 'lot:traiter',
   // Le suivi de consommation Fal.ai (lecture seule).
   'fal:suivi', 'fal:ouvrir',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :

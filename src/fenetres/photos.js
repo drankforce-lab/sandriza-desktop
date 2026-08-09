@@ -234,6 +234,49 @@ tr:hover .act .ic{opacity:1}
 .act .ic:hover{background:rgba(255,255,255,.14);opacity:1}
 .act .ic.sup:hover{background:rgba(248,113,113,.2);border-color:rgba(248,113,113,.5)}
 .act .ic.sup.arme{opacity:1;background:rgba(248,113,113,.25);border-color:#f87171;color:#fff}
+/* ── L ASSISTANT ───────────────────────────────────────────────────────── */
+.asst{position:fixed;inset:0;background:rgba(6,10,18,.78);z-index:70;display:flex;
+  align-items:center;justify-content:center;padding:1rem}
+.asst .bo{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
+  width:min(62rem,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.asst .tt{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.asst .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
+.asst .tt .pas{margin-left:auto;display:flex;gap:.3rem;align-items:center;font-size:.72rem;color:#8fa1b8}
+.asst .tt .pas b{display:inline-flex;width:1.35rem;height:1.35rem;border-radius:50%;
+  align-items:center;justify-content:center;background:rgba(255,255,255,.08);font-size:.7rem}
+.asst .tt .pas b.on{background:#c9a97e;color:#1a1208}
+.asst .co{flex:1 1 auto;min-height:0;overflow-y:auto;padding:.85rem .9rem}
+.asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
+  padding:.6rem .9rem;border-top:1px solid rgba(255,255,255,.08);background:#0f1725}
+.asst .pi .dr{margin-left:auto;display:flex;gap:.5rem}
+/* La planche de vignettes : c est l ecran ou l on CHOISIT, il doit montrer. */
+.pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.5rem}
+.pl .v{position:relative;border:2px solid rgba(255,255,255,.1);border-radius:9px;
+  overflow:hidden;cursor:pointer;background:#0b1220}
+.pl .v.on{border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.2)}
+.pl .v img{display:block;width:100%;height:8rem;object-fit:contain;background:#0b1220}
+.pl .v .att{display:flex;align-items:center;justify-content:center;height:8rem;
+  color:#8fa1b8;font-size:.72rem}
+.pl .v .lg{padding:.25rem .4rem;font-size:.68rem;color:#c3cede;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl .v .dt2{padding:0 .4rem .3rem;font-size:.63rem;color:#8fa1b8}
+.pl .v .ck{position:absolute;top:.3rem;left:.3rem;width:1.1rem;height:1.1rem;
+  border-radius:4px;background:rgba(11,18,32,.85);border:1px solid rgba(255,255,255,.3);
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#c9a97e}
+.pl .v.on .ck{background:#c9a97e;color:#1a1208;border-color:#c9a97e}
+.src{display:flex;flex-direction:column;gap:.4rem}
+.src .l{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;cursor:pointer;
+  border:1px solid rgba(255,255,255,.12);border-radius:9px}
+.src .l:hover{background:rgba(255,255,255,.04)}
+.src .l.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
+.src .l b{font-size:.9rem}
+.but{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
+.but label{display:flex;gap:.55rem;align-items:flex-start;padding:.5rem .65rem;
+  border:1px solid rgba(255,255,255,.12);border-radius:9px;cursor:pointer;margin:0;color:#e8edf5;font-size:.84rem}
+.but label.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
+.but label input{width:auto;margin-top:.15rem}
+.but label .d{display:block;font-size:.72rem;color:#8fa1b8;margin-top:.1rem}
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -272,6 +315,16 @@ ${JS_ACTIVITE}${JS_DIRE}
      toutes, et l on s en apercevrait apres avoir lance le traitement. */
   var CHOIX = {};
   var LOT_NOM = '';         // le nom donne au prochain lot importe
+  /* ══════════════════════════════════════════════════════════════════════════
+     L ASSISTANT DE TRAITEMENT EN LOT — trois etapes
+       1. LA SOURCE : une cle branchee, ou les photos deja importees.
+       2. LE CHOIX : ce que la source contient, avec vignettes, tri par date, et
+          uniquement les formats que l on sait lire.
+       3. LE TRAITEMENT : nommer le lot et choisir ce qu on veut en faire.
+     ⚠ LIRE N EST PAS IMPORTER : rien n entre dans la photothèque avant l etape 3.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var ASSIST = null;        // { etape, sources, lecteur, fichiers, choix, tri, nom, but }
+  var VIGNETTES = {};       // chemin -> data URL, chargees a la demande
   var RENOMME = '';         // la photo dont le nom est en cours de modification
   var SUPPR_ARME = '';      // la photo dont la suppression est armee
 
@@ -397,10 +450,13 @@ ${JS_ACTIVITE}${JS_DIRE}
        glisser-deposer, lui, marche partout dans la fenetre. */
     h += '<div class="cmd">'
       + '<button class="prim" id="p-choisir"' + (ro ? ' disabled' : '') + '>＋ Importer</button>'
-      + (D.bureau ? '<button id="p-usb"' + (ro ? ' disabled' : '') + ' title="Chercher des photos sur une clé branchée">🔌 Clé USB</button>' : '')
-      + (ro ? '' : '<input id="p-lot-nom" type="text" placeholder="Nom du lot…"'
-          + ' value="' + esc(LOT_NOM) + '" title="Les photos importées seront nommées « Nom 01 », « Nom 02 »…"'
-          + ' style="width:9.5rem">')
+      /* ⚠ LE CHAMP << NOM DU LOT >> A QUITTE CETTE BARRE. Il n y servait a rien
+         tant qu on n avait pas choisi de photos, et il encombrait la seule
+         ligne qu on regarde tout le temps. Il vit maintenant a l etape ou il
+         a un sens : quand le lot existe. */
+      + (ro ? '' : '<button id="p-assistant"'
+          + ' title="Choisir une source, sélectionner les photos, puis les traiter">'
+          + '⚙ Traitement en lot</button>')
       + '<span class="sep"></span>'
       + '<input type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
       + '<select id="p-tri">'
@@ -459,12 +515,342 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (DETAIL) h += boiteDetail();
     // ⚠ La classe se pose sur BODY et non sur le corps : c est elle qui decale
     // a la fois le tableau et le panneau de suivi, qui vit hors du corps.
-    document.body.classList.toggle('insp', !!DETAIL);
+    if (ASSIST) h += assistHtml();
+    document.body.classList.toggle('insp', !!DETAIL && !ASSIST);
     corps.innerHTML = h;
     brancher();
   }
 
   function nbChoisies(){ return Object.keys(CHOIX).length; }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     L ASSISTANT — dessin et conduite
+     ══════════════════════════════════════════════════════════════════════════ */
+  var BUTS = [
+    ['detourage', '✂ Retirer le fond', 'Isole le vêtement de son arrière-plan.'],
+    ['fantome', '👻 Retirer le mannequin', 'Retire le fond PUIS le mannequin. Le col et les manches sont reconstruits.'],
+    ['humain', '🧍 Mannequin humain', 'Retire le fond, retire le mannequin, PUIS engendre une personne qui porte le vêtement.'],
+  ];
+
+  function assistOuvrir(){
+    ASSIST = { etape: 1, sources: null, lecteur: '', fichiers: [], choix: {},
+               tri: 'date', nom: '', but: 'detourage' };
+    dessiner();
+    dire('Lecture des sources…');
+    appeler('lot:sources', []).then(function(r){
+      ASSIST.sources = (r && r.ok) ? (r.lecteurs || []) : [];
+      ASSIST.erreurSource = (r && r.ok) ? '' : expliquer(r);
+      dire('');
+      dessiner();
+    });
+  }
+  function assistFermer(){ ASSIST = null; VIGNETTES = {}; dessiner(); }
+
+  function dateFr(ms){
+    if (!ms) return '—';
+    var d = new Date(ms);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function assistHtml(){
+    var A = ASSIST;
+    var pas = function(n){ return '<b' + (A.etape === n ? ' class="on"' : '') + '>' + n + '</b>'; };
+    var h = '<div class="asst"><div class="bo">'
+      + '<div class="tt"><h3>Traitement en lot</h3>'
+      + '<span class="pas">' + pas(1) + '<span>source</span>' + pas(2) + '<span>choix</span>'
+      + pas(3) + '<span>traitement</span></span></div><div class="co">';
+
+    if (A.etape === 1) {
+      h += '<p class="aide" style="margin:0 0 .5rem">D’où viennent les photos&nbsp;?</p><div class="src">';
+      /* ⚠ LES PHOTOS DEJA IMPORTEES SONT UNE SOURCE COMME UNE AUTRE : le meme
+         traitement doit s appliquer a ce qui est deja dans la photothèque, sans
+         avoir a le reimporter. */
+      h += '<div class="l' + (A.lecteur === '@lib' ? ' on' : '') + '" data-src="@lib">'
+        + '<b>Photos déjà importées</b><span class="aide">'
+        + (D.total || 0) + ' dans la photothèque</span></div>';
+      if (!A.sources) h += '<div class="vide">Lecture des clés branchées…</div>';
+      else if (!A.sources.length) {
+        h += '<div class="vide">' + (A.erreurSource
+          ? esc(A.erreurSource)
+          : 'Aucune clé ou carte mémoire branchée avec des photos.') + '</div>';
+      } else {
+        A.sources.forEach(function(x){
+          h += '<div class="l' + (A.lecteur === x.lecteur ? ' on' : '') + '" data-src="' + esc(x.lecteur) + '">'
+            + '<b>Clé ' + esc(x.lecteur) + '</b>'
+            + '<span class="aide">' + x.photos.length + ' photo' + (x.photos.length > 1 ? 's' : '')
+            + ' lisible' + (x.photos.length > 1 ? 's' : '') + '</span></div>';
+        });
+      }
+      h += '</div>';
+      h += '<p class="aide">Rien n’est importé à cette étape : on lit seulement les noms, '
+        + 'les tailles et les dates. Seuls les formats que nous savons lire (JPG, PNG, WebP) '
+        + 'sont proposés.</p>';
+
+    } else if (A.etape === 2) {
+      var n = Object.keys(A.choix).length;
+      h += '<div class="barreoutils" style="margin-bottom:.5rem">'
+        + '<select id="a-tri" style="width:auto">'
+        + '<option value="date"' + (A.tri === 'date' ? ' selected' : '') + '>Plus récentes d’abord</option>'
+        + '<option value="date-vieux"' + (A.tri === 'date-vieux' ? ' selected' : '') + '>Plus anciennes d’abord</option>'
+        + '<option value="nom"' + (A.tri === 'nom' ? ' selected' : '') + '>Par nom</option>'
+        + '<option value="poids"' + (A.tri === 'poids' ? ' selected' : '') + '>Plus lourdes d’abord</option>'
+        + '</select>'
+        + '<button class="mini" id="a-tous">Tout choisir</button>'
+        + '<button class="mini" id="a-rien">Tout décocher</button>'
+        + '<span class="droite"><b>' + n + '</b> sur ' + A.fichiers.length + ' choisie'
+        + (n > 1 ? 's' : '') + '</span></div>';
+      if (!A.fichiers.length) h += '<div class="vide">Cette source ne contient aucune photo lisible.</div>';
+      else {
+        h += '<div class="pl">';
+        assistTriees().forEach(function(f){
+          var v = VIGNETTES[f.cle];
+          h += '<div class="v' + (A.choix[f.cle] ? ' on' : '') + '" data-f="' + esc(f.cle) + '">'
+            + '<span class="ck">' + (A.choix[f.cle] ? '✓' : '') + '</span>'
+            + (v ? '<img src="' + esc(v) + '" alt="">'
+                 : '<div class="att" data-charge="' + esc(f.cle) + '">…</div>')
+            + '<div class="lg" title="' + esc(f.nom) + '">' + esc(f.nom) + '</div>'
+            + '<div class="dt2">' + dateFr(f.modifie) + ' · ' + poids(f.octets) + '</div>'
+            + '</div>';
+        });
+        h += '</div>';
+      }
+
+    } else {
+      var m = Object.keys(A.choix).length;
+      h += '<label for="a-nom">Nom du lot</label>'
+        + '<input id="a-nom" type="text" value="' + esc(A.nom) + '" maxlength="80"'
+        + ' placeholder="ex. Collection printemps">'
+        + '<p class="aide">Les photos importées seront nommées « Nom 01 », « Nom 02 »… '
+        + 'Laissé vide, on garde le nom d’origine.</p>'
+        + '<label style="margin-top:.7rem">Que faut-il en faire&nbsp;?</label><div class="but">';
+      BUTS.forEach(function(b){
+        h += '<label class="' + (A.but === b[0] ? 'on' : '') + '">'
+          + '<input type="radio" name="a-but" value="' + b[0] + '"' + (A.but === b[0] ? ' checked' : '') + '>'
+          + '<span><strong>' + b[1] + '</strong><span class="d">' + b[2] + '</span></span></label>';
+      });
+      h += '</div>'
+        + '<div class="franc" style="margin-top:.6rem"><b>L’ordre est imposé, et c’est voulu.</b> '
+        + 'Demander un mannequin humain sur une photo brute donne un modèle qui porte le décor '
+        + 'autant que le vêtement. Le fond part d’abord, puis le mannequin, et seulement ensuite '
+        + 'la personne est engendrée.<br>'
+        + '<b>Ce qui est déjà fait n’est pas refait</b> : une étape déjà présente est sautée, '
+        + 'et la raison est inscrite au suivi et au journal.</div>'
+        + '<p class="aide"><b>' + m + '</b> photo' + (m > 1 ? 's' : '') + ' à traiter.</p>';
+    }
+
+    h += '</div><div class="pi">'
+      + '<button id="a-annuler">Annuler</button>'
+      + '<span class="dr">'
+      + (ASSIST.etape > 1 ? '<button id="a-prec">← Retour</button>' : '')
+      + '<button class="prim" id="a-suiv">'
+      + (ASSIST.etape === 3 ? 'Lancer le traitement' : 'Continuer →') + '</button>'
+      + '</span></div></div></div>';
+    return h;
+  }
+
+  function assistTriees(){
+    var A = ASSIST;
+    var l = A.fichiers.slice();
+    if (A.tri === 'date') l.sort(function(a, b){ return (b.modifie || 0) - (a.modifie || 0); });
+    else if (A.tri === 'date-vieux') l.sort(function(a, b){ return (a.modifie || 0) - (b.modifie || 0); });
+    else if (A.tri === 'poids') l.sort(function(a, b){ return (b.octets || 0) - (a.octets || 0); });
+    else l.sort(function(a, b){ return String(a.nom).localeCompare(String(b.nom), 'fr'); });
+    return l;
+  }
+
+  function assistBrancher(){
+    var A = ASSIST;
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-src]'), function(b){
+      b.onclick = function(){ A.lecteur = b.getAttribute('data-src'); dessiner(); };
+    });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-f]'), function(b){
+      b.onclick = function(){
+        var c = b.getAttribute('data-f');
+        if (A.choix[c]) delete A.choix[c]; else A.choix[c] = true;
+        dessiner();
+      };
+    });
+    var tri = document.getElementById('a-tri');
+    if (tri) tri.onchange = function(){ A.tri = tri.value; dessiner(); };
+    var tous = document.getElementById('a-tous');
+    if (tous) tous.onclick = function(){
+      A.fichiers.forEach(function(f){ A.choix[f.cle] = true; }); dessiner();
+    };
+    var rien = document.getElementById('a-rien');
+    if (rien) rien.onclick = function(){ A.choix = {}; dessiner(); };
+    var nom = document.getElementById('a-nom');
+    if (nom) nom.oninput = function(){ A.nom = nom.value; };
+    Array.prototype.forEach.call(corps.querySelectorAll('input[name="a-but"]'), function(r){
+      r.onchange = function(){ A.but = r.value; dessiner(); };
+    });
+    var an = document.getElementById('a-annuler');
+    if (an) an.onclick = assistFermer;
+    var pr = document.getElementById('a-prec');
+    if (pr) pr.onclick = function(){ A.etape = Math.max(1, A.etape - 1); dessiner(); };
+    var sv = document.getElementById('a-suiv');
+    if (sv) sv.onclick = assistSuivant;
+
+    /* ⚠ LES VIGNETTES SE CHARGENT A LA DEMANDE, une a la fois. Les demander
+       toutes d un coup ferait deux cents allers-retours simultanes par le pont,
+       et la fenetre paraitrait figee au moment precis ou l on veut choisir. */
+    var att = corps.querySelector('[data-charge]');
+    if (att && ASSIST && ASSIST.etape === 2) {
+      var cle = att.getAttribute('data-charge');
+      var f = null;
+      A.fichiers.forEach(function(x){ if (x.cle === cle) f = x; });
+      if (f && f.chemin) {
+        appeler('lot:vignette', [f.chemin]).then(function(r){
+          VIGNETTES[cle] = (r && r.ok) ? r.image : '';
+          if (ASSIST && ASSIST.etape === 2) dessiner();
+        });
+      } else { VIGNETTES[cle] = ''; }
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     L EXECUTION — import puis chaine de traitement, photo par photo
+     ⚠ ON IMPORTE PUIS ON TRAITE, DANS LA MEME BOUCLE. Tout importer d abord
+     laisserait, en cas d arret, une phototheque pleine de photos brutes qu on
+     croit traitees. Chaque photo va au bout de son chemin avant qu on passe a la
+     suivante.
+     ══════════════════════════════════════════════════════════════════════════ */
+  function assistLancer(){
+    var A = ASSIST;
+    var cles = Object.keys(A.choix);
+    if (!cles.length) { dire('Choisissez au moins une photo.', 'att'); return; }
+    if (occupeDeja('Traitement en lot')) return;
+
+    var fichiers = assistTriees().filter(function(f){ return A.choix[f.cle]; });
+    var nomLot = A.nom.trim();
+    var but = A.but;
+    var libelle = { detourage: 'Retrait du fond', fantome: 'Retrait du mannequin',
+                    humain: 'Mannequin humain' }[but] || 'Traitement';
+    var titres = fichiers.map(function(f, i){
+      return nomLot ? (nomLot + ' ' + (i + 1 < 10 ? '0' : '') + (i + 1)) : f.nom;
+    });
+
+    ASSIST = null;
+    VIGNETTES = {};
+    occuper(libelle + ' · ' + fichiers.length + ' photo(s)…');
+    suiviOuvrir(titres, libelle + ' · ' + fichiers.length + ' photo(s)');
+    dessiner();
+
+    var faites = 0, sautees = 0, echecs = 0, abandon = 0;
+
+    var suite = function(k){
+      suiviCompte(k, fichiers.length);
+      if (ANNULE && k < fichiers.length) {
+        abandon = fichiers.length - k;
+        for (var z = k; z < fichiers.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+        k = fichiers.length;
+      }
+      if (k >= fichiers.length) {
+        liberer();
+        var t = faites + ' traitée' + (faites > 1 ? 's' : '');
+        if (sautees) t += ' · ' + sautees + ' déjà à jour';
+        if (echecs) t += ' · ' + echecs + ' en échec';
+        if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
+        suiviFin(t + '.', abandon ? (libelle + ' interrompu') : (libelle + ' terminé'));
+        if (!echecs && !abandon) setTimeout(suiviFermer, 3000);
+        dire(t + '.', echecs ? 'att' : 'bon');
+        charger();
+        return;
+      }
+
+      var f = fichiers[k];
+      var nom = titres[k];
+      suiviLigne(k, 'cours', 'en cours');
+
+      var apresImport = function(id){
+        suiviEtapes(k, [{ nom: 'import', ok: true },
+                        { nom: libelle.toLowerCase(), etat: 'encours' }]);
+        occuper(libelle + ' ' + (k + 1) + ' / ' + fichiers.length + '…');
+        appeler('lot:traiter', [id, but, {}]).then(function(r){
+          var eps = [{ nom: 'import', ok: true }];
+          (r && r.etapes || []).forEach(function(e){
+            eps.push({ nom: e.etape + (e.saute ? ' (sautée)' : ''), ok: e.ok,
+                       chiffre: e.saute ? 'déjà fait'
+                              : (e.ms ? (Math.round(e.ms / 100) / 10) + ' s' : (e.raison || '')) });
+          });
+          suiviEtapes(k, eps);
+          if (r && r.ok) {
+            var toutSaute = (r.etapes || []).every(function(e){ return e.saute; });
+            if (toutSaute) { sautees++; suiviLigne(k, 'double', 'déjà à jour'); }
+            else { faites++; suiviLigne(k, 'faite', 'traitée'); }
+          } else {
+            echecs++;
+            suiviLigne(k, 'echec', 'échec' + (r && r.arretA ? ' · ' + r.arretA : ''));
+          }
+          suite(k + 1);
+        });
+      };
+
+      if (f.id) {
+        // Déjà dans la photothèque : rien à importer.
+        suiviEtapes(k, [{ nom: 'déjà importée', ok: true }]);
+        apresImport(f.id);
+        return;
+      }
+      suiviEtapes(k, [{ nom: 'import', etat: 'encours' }]);
+      occuper('Import ' + (k + 1) + ' / ' + fichiers.length + '…');
+      appeler('lot:importer', [f.chemin, nom]).then(function(r){
+        if (!r.ok) {
+          echecs++;
+          suiviLigne(k, 'echec', 'import refusé');
+          suiviEtapes(k, [{ nom: 'import', ok: false, chiffre: (r.detail || r.motif || '') }]);
+          suite(k + 1);
+          return;
+        }
+        if (r.doublon) {
+          /* ⚠ LE DOUBLON N EST PAS UN ECHEC : la photo est deja la, et on la
+             TRAITE quand meme si son traitement manque. C est exactement le cas
+             ou l on reimporte une carte pour rattraper ce qui n avait pas ete
+             fait la premiere fois. */
+          suiviEtapes(k, [{ nom: 'reconnue au contenu', ok: true, chiffre: r.code || '' }]);
+          apresImport((r.photo && r.photo.id) || '');
+          return;
+        }
+        apresImport((r.photo && r.photo.id) || '');
+      });
+    };
+    suite(0);
+  }
+
+  function assistSuivant(){
+    var A = ASSIST;
+    if (A.etape === 1) {
+      if (!A.lecteur) { dire('Choisissez une source.', 'att'); return; }
+      if (A.lecteur === '@lib') {
+        // Les photos deja importees : la source, ce sont les lignes affichees.
+        A.fichiers = (D.lignes || []).map(function(x){
+          return { cle: x.id, id: x.id, nom: x.nom, octets: x.poids || 0,
+                   modifie: 0, chemin: '', apercu: x.apercu || '' };
+        });
+        A.fichiers.forEach(function(f){ if (f.apercu) VIGNETTES[f.cle] = f.apercu; });
+      } else {
+        var src = null;
+        (A.sources || []).forEach(function(x){ if (x.lecteur === A.lecteur) src = x; });
+        A.fichiers = (src ? src.photos : []).map(function(f){
+          return { cle: f.chemin, id: '', nom: f.nom, octets: f.octets,
+                   modifie: f.modifie, chemin: f.chemin };
+        });
+      }
+      A.choix = {};
+      A.etape = 2;
+      dessiner();
+      return;
+    }
+    if (A.etape === 2) {
+      if (!Object.keys(A.choix).length) { dire('Choisissez au moins une photo.', 'att'); return; }
+      A.etape = 3;
+      dessiner();
+      return;
+    }
+    assistLancer();
+  }
+
+
 
   /* ══════════════════════════════════════════════════════════════════════════
      LE TRAITEMENT EN LOT
@@ -992,6 +1378,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   /* ── BRANCHEMENTS ──────────────────────────────────────────────────────── */
   function brancher(){
+    if (ASSIST) { assistBrancher(); return; }
     var q = document.getElementById('p-q');
     if (q) q.oninput = function(){
       Q = q.value; PAGE = 0;
@@ -1140,6 +1527,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         rouvrir(r.photo);
       });
     };
+
+    var asst = document.getElementById('p-assistant');
+    if (asst) asst.onclick = assistOuvrir;
 
     var usb = document.getElementById('p-usb');
     if (usb) usb.onclick = function(){

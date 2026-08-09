@@ -1510,6 +1510,25 @@ module.exports = {
         identite: IDENTITE,
       },
     },
+    {
+      // ⚠ L ASSISTANT DE TRAITEMENT EN LOT : ses trois etapes ne s atteignent
+      // qu au clic. Sans ce jeu, elles seraient dessinees pour la premiere fois
+      // en production — c est exactement le trou qu on a paye sur l annuaire.
+      nom: 'assistant · sources',
+      reponses: {
+        'photos:donnees': { ok: true, charge: true, peutModifier: true, bureau: true,
+          total: 0, trouvees: 0, liees: 0, isolees: 0, poidsTotal: 0,
+          page: 0, pages: 1, taille: 24, lignes: [], fonds: [] },
+        'lot:sources': { ok: true, lecteurs: [
+          { lecteur: 'D:', photos: [
+            { chemin: 'D:\DCIM\IMG_0064.JPG', nom: 'IMG_0064.JPG', octets: 5368709, modifie: 1786000000000 },
+            { chemin: 'D:\DCIM\IMG_0065.JPG', nom: 'IMG_0065.JPG', octets: 4194304, modifie: 1785900000000 },
+          ] },
+        ] },
+        'lot:vignette': { ok: true, image: 'data:image/png;base64,iVBORw0KGgo=' },
+        identite: IDENTITE,
+      },
+    },
   ],
 
   // ── RECHERCHES SANS RÉSULTAT ───────────────────────────────────────────────
