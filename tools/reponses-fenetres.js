@@ -880,6 +880,61 @@ module.exports = {
     ];
   })(),
 
+  // ── CONSOMMATION FAL.AI ────────────────────────────────────────────────────
+  // ⚠ FORME RÉELLE de fal:suivi (fal-proxy.php, actions resume et journal).
+  // TROIS cas : la consommation, l'historique — une VUE ENTIÈRE que rien d'autre
+  // n'atteint — et le registre VIDE, qui est le premier écran tant qu'aucun
+  // traitement n'a tourné. Sans ce dernier, l'écran d'accueil de la fonction
+  // serait dessiné pour la première fois en production.
+  'fal.js': (function(){
+    var PAR_MODELE = [
+      { modele: 'fal-ai/flux-pro/kontext', geste: 'humain', appels: 12, cout: 0.48,
+        reussis: 11, coutsReels: 12 },
+      { modele: 'fal-ai/flux-pro/kontext', geste: 'fantome', appels: 31, cout: 1.24,
+        reussis: 31, coutsReels: 0 },
+      { modele: 'fal-ai/birefnet', geste: 'detourage', appels: 84, cout: 0.168,
+        reussis: 82, coutsReels: 40 },
+    ];
+    var PAR_JOUR = [
+      { jour: '2026-08-09', appels: 44, cout: 0.92 },
+      { jour: '2026-08-08', appels: 61, cout: 0.71 },
+      { jour: '2026-08-07', appels: 22, cout: 0.30 },
+    ];
+    var BASE = { ok: true, parModele: PAR_MODELE, parJour: PAR_JOUR,
+                 total: 1.888, appels: 127, coutsReels: 52,
+                 tableauDeBord: 'https://fal.ai/dashboard/billing', evenements: [] };
+    return [
+      { nom: 'consommation', reponses: { 'fal:suivi': BASE, identite: IDENTITE } },
+      {
+        nom: 'historique',
+        id: 'historique',
+        reponses: {
+          'fal:suivi': Object.assign({}, BASE, { evenements: [
+            { au: '2026-08-09T15:02:11Z', modele: 'fal-ai/birefnet', geste: 'detourage',
+              qui: 'bbrousseau', ms: 4120, ok: true, erreur: '', cout: 0.002, coutReel: true },
+            { au: '2026-08-09T15:00:02Z', modele: 'fal-ai/flux-pro/kontext', geste: 'fantome',
+              qui: 'bbrousseau', ms: 18400, ok: true, erreur: '', cout: 0.04, coutReel: false },
+            // ⚠ UN ECHEC AVEC SON MESSAGE : c'est la ligne qu'on vient chercher,
+            // et elle a son propre dessin (une seconde rangee sous la premiere).
+            { au: '2026-08-09T14:58:40Z', modele: 'fal-ai/flux-pro/kontext', geste: 'humain',
+              qui: 'bbrousseau', ms: 900, ok: false,
+              erreur: 'Exhausted balance. Please top up your account.', cout: 0, coutReel: false },
+          ] }),
+          identite: IDENTITE,
+        },
+      },
+      {
+        nom: 'aucun appel',
+        reponses: {
+          'fal:suivi': { ok: true, parModele: [], parJour: [], total: 0, appels: 0,
+                         coutsReels: 0, evenements: [],
+                         tableauDeBord: 'https://fal.ai/dashboard/billing' },
+          identite: IDENTITE,
+        },
+      },
+    ];
+  })(),
+
   // ── LIENS D'INSTALLATION ───────────────────────────────────────────────────
   // ⚠ FORME RÉELLE de liens:liste / liens:journal (adm-invite.php).
   // QUATRE cas, et chacun dessine autre chose :

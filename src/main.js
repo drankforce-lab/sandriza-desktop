@@ -1280,6 +1280,8 @@ const OPS_PONT = new Set([
   // Traitements nommes (detourage, mannequin retire, porte par un mannequin)
   // et le meme geste sur un LOT.
   'photos:traiter', 'photos:lot',
+  // Le suivi de consommation Fal.ai (lecture seule).
+  'fal:suivi',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1757,6 +1759,7 @@ const PAGES_ANCRABLES = () => ({
   impot: ['Fiscalité et impôt', () => pageImpot()],
   liens: ['Liens d’installation', () => pageLiens('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
+  'fal-suivi': ['Traitements d’image', () => pageFal('')],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2501,6 +2504,7 @@ const { pageImpot } = require('./fenetres/impot');
 const { pageLiens } = require('./fenetres/liens');
 const { pageInactivite } = require('./fenetres/inactivite');
 const { pageBanque } = require('./fenetres/banque');
+const { pageFal } = require('./fenetres/fal');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2581,7 +2585,7 @@ const actionApp = (nom) => {
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':
-    case 'bankrec': {
+    case 'bankrec': case 'fal-suivi': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
