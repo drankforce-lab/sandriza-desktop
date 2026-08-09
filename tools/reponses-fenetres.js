@@ -513,6 +513,67 @@ module.exports = {
     },
   ],
 
+  // ── COUPONS ────────────────────────────────────────────────────────────────
+  'coupons.js': [
+    {
+      // ⚠ FORME REELLE de coupons:liste (coeur Promo._couponsDonnees).
+      nom: 'coupons garnis',
+      id: '',
+      reponses: {
+        'coupons:liste': {
+          ok: true, peutModifier: true,
+          coupons: [
+            { id: 'c1', code: 'PRINTEMPS20', nom: 'Promo printemps', type: 'percent',
+              valeur: 20, reduction: '20 %', minimum: 75, cumulSolde: false,
+              parClient: true, utilise: 12, maximum: 100,
+              debut: '2026-03-01', fin: '2026-06-30', actif: true, enCours: true },
+            { id: 'c2', code: 'LIVRAISON', nom: '', type: 'freeshipping',
+              valeur: 0, reduction: 'Livraison gratuite', minimum: 0, cumulSolde: true,
+              parClient: false, utilise: 3, maximum: 0,
+              debut: '', fin: '', actif: false, enCours: false },
+          ],
+        },
+        'coupons:enregistrer': { ok: true, id: 'c1', code: 'PRINTEMPS20', creation: false },
+        'coupons:basculer': { ok: true, actif: false, code: 'PRINTEMPS20' },
+        'coupons:supprimer': { ok: true, code: 'PRINTEMPS20' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucun coupon',
+      id: '',
+      reponses: {
+        'coupons:liste': { ok: true, peutModifier: true, coupons: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Lecture seule : aucun bouton de geste ne doit paraitre.
+      nom: 'consultation seulement',
+      id: '',
+      reponses: {
+        'coupons:liste': {
+          ok: true, peutModifier: false,
+          coupons: [
+            { id: 'c1', code: 'PRINTEMPS20', nom: 'Promo printemps', type: 'percent',
+              valeur: 20, reduction: '20 %', minimum: 75, cumulSolde: false,
+              parClient: true, utilise: 12, maximum: 100,
+              debut: '2026-03-01', fin: '2026-06-30', actif: true, enCours: true },
+          ],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'coupons:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── CARTES-CADEAUX ─────────────────────────────────────────────────────────
   'cartescadeaux.js': [
     {

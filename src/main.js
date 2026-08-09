@@ -1081,6 +1081,8 @@ const OPS_PONT = new Set([
   // resynchronisation : ce sont des soldes d argent.
   'cartescadeaux:liste', 'cartescadeaux:lire', 'cartescadeaux:creer',
   'cartescadeaux:activer', 'cartescadeaux:recompense',
+  // Coupons (fenetre Coupons, 1.64.0) : ils touchent la CAISSE.
+  'coupons:liste', 'coupons:enregistrer', 'coupons:basculer', 'coupons:supprimer',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1450,6 +1452,7 @@ const PAGES_ANCRABLES = () => ({
   archives: ['Archives', () => pageArchives()],
   paiements: ['Paiements Square', () => pagePaiements()],
   cartescadeaux: ['Cartes-cadeaux', () => pageCartesCadeaux()],
+  coupons: ['Coupons', () => pageCoupons()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2175,6 +2178,7 @@ const { pageArchives } = require('./fenetres/archives');
 const { pagePaiements } = require('./fenetres/paiements');
 const { pageEtatCompte } = require('./fenetres/etatcompte');
 const { pageCartesCadeaux } = require('./fenetres/cartescadeaux');
+const { pageCoupons } = require('./fenetres/coupons');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2250,7 +2254,7 @@ const actionApp = (nom) => {
     case 'tableau': case 'inventaire': case 'commandes': case 'produits':
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
-    case 'archives': case 'paiements': case 'cartescadeaux': {
+    case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
