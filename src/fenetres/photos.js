@@ -282,6 +282,17 @@ tr:hover .act .ic{opacity:1}
   border-radius:4px;background:rgba(11,18,32,.85);border:1px solid rgba(255,255,255,.3);
   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#c9a97e}
 .pl .v.on .ck{background:#c9a97e;color:#1a1208;border-color:#c9a97e}
+/* Le chargement, au centre, avant la planche. */
+.chargement{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.6rem;min-height:16rem;text-align:center}
+.chargement .gros{font:700 1rem/1.3 Georgia,serif}
+.chargement .cpt{font-variant-numeric:tabular-nums;font-size:1.3rem;color:#c9a97e;font-weight:800}
+.chargement .aide{max-width:26rem}
+.chargement .tourne{width:2.2rem;height:2.2rem;border-radius:50%;
+  border:3px solid rgba(201,169,126,.25);border-top-color:#c9a97e;
+  animation:vire 900ms linear infinite}
+@keyframes vire{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.chargement .tourne{animation:none}}
 .src{display:flex;flex-direction:column;gap:.4rem}
 .src .l{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;cursor:pointer;
   border:1px solid rgba(255,255,255,.12);border-radius:9px}
@@ -590,19 +601,26 @@ ${JS_ACTIVITE}${JS_DIRE}
          Quand le site est perime, le coeur rend des lots SANS leurs compteurs, et
          l ecran affichait << undefined >> partout — ce qui ressemble a un bogue
          alors que c est un decalage. On le NOMME, avec le geste qui repare. */
-      var perime = LOTS.length && (LOTS[0].nombre === undefined);
-      if (perime) {
-        LOTS = [];
-        dire('Les modules du site sont périmés dans cette session : rechargez avec '
-          + '« Affichage ▸ Recharger (vider le cache) » dans la fenêtre principale.', 'err');
-        dessiner();
-        return;
+      /* ⚠⚠ QUAND LES COMPTEURS MANQUENT, ON DIT CE QU ON A RECU. Afficher
+         << undefined >> laisse deviner ; nommer les champs REELLEMENT rendus par
+         le coeur permet de trancher en un coup d oeil entre << module du site
+         perime >> et << autre chose >>. Un diagnostic vaut mieux qu une
+         supposition, et celui-ci tient sur une ligne. */
+      if (LOTS.length && typeof LOTS[0].nombre !== 'number') {
+        var champs = [];
+        try { champs = Object.keys(LOTS[0]); } catch (e) { champs = []; }
+        dire('Les lots arrivent sans leurs compteurs (champs reçus : '
+          + esc(champs.join(', ') || 'aucun') + '). Rechargez avec '
+          + '« Affichage ▸ Recharger (vider le cache) » ; si cela persiste, '
+          + 'transmettez-moi cette ligne.', 'err');
       }
       dire('');
       dessiner();
     });
   }
   function lotsFermer(){ LOTS = null; LOT_ARME = ''; dessiner(); }
+
+  function nb(v){ return (typeof v === 'number' && isFinite(v)) ? v : '—'; }
 
   function lotsHtml(){
     var h = '<div class="asst"><div class="bo">'
@@ -620,9 +638,13 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td><b>' + esc(l.nom || 'Sans nom') + '</b>'
           + (l.source ? '<div class="dt">' + esc(l.source) + '</div>' : '') + '</td>'
           + '<td class="dt">' + (l.ts ? dateFr(l.ts) : '—') + '</td>'
-          + '<td class="num">' + l.nombre + '</td>'
-          + '<td class="num">' + l.traitees + '</td>'
-          + '<td class="num">' + l.liees + '</td>'
+          /* ⚠ UN NOMBRE MANQUANT S ECRIT << — >>, JAMAIS << undefined >>. Le mot
+             << undefined >> ne veut rien dire pour qui lit l ecran : il donne
+             l impression d un produit casse la ou il n y a qu une donnee
+             absente. */
+          + '<td class="num">' + nb(l.nombre) + '</td>'
+          + '<td class="num">' + nb(l.traitees) + '</td>'
+          + '<td class="num">' + nb(l.liees) + '</td>'
           + '<td class="num">' + poids(l.poids) + '</td>'
           + '<td style="white-space:nowrap">'
           + '<button class="mini" data-lotsel="' + esc(l.id) + '">Tout cocher</button> '
@@ -633,7 +655,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '</td></tr>'
           + (arme
               ? '<tr><td colspan="7" class="dt" style="color:#facc15">'
-                + 'Les ' + (l.nombre - l.liees) + ' photo(s) non attachées seront retirées. '
+                + 'Les ' + Math.max(0, (l.nombre || 0) - (l.liees || 0)) + ' photo(s) non attachées seront retirées. '
                 + (l.liees ? ('Les ' + l.liees + ' attachées à un article sont GARDÉES : '
                               + 'retirer la photothèque ne doit jamais dépouiller une fiche produit.')
                            : '')
@@ -752,6 +774,20 @@ ${JS_ACTIVITE}${JS_DIRE}
         + 'les tailles et les dates. Seuls les formats que nous savons lire (JPG, PNG, WebP) '
         + 'sont proposés.</p>';
 
+    } else if (A.etape === 2 && A.chargement) {
+      /* ⚠⚠ ON CHARGE AVANT DE MONTRER (demande du 2026-08-09). Afficher
+         soixante-six cases vides qui se remplissent une a une pendant qu on
+         essaie de choisir, c est offrir un ecran qui bouge sous les doigts. Un
+         seul message au centre, un compte qui avance, et la planche parait
+         d un coup — prete a servir. */
+      h += '<div class="chargement">'
+        + '<div class="tourne"></div>'
+        + '<div class="gros">Chargement des aperçus…</div>'
+        + '<div class="cpt"><b id="a-fait">' + A.fait + '</b> / ' + A.fichiers.length + '</div>'
+        + '<div class="aide">Les photos sont seulement LUES : rien n’est importé '
+        + 'tant que vous n’avez pas choisi.</div>'
+        + '</div>';
+
     } else if (A.etape === 2) {
       var n = Object.keys(A.choix).length;
       h += '<div class="barreoutils" style="margin-bottom:.5rem">'
@@ -770,9 +806,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!A.fichiers.length) h += '<div class="vide">Cette source ne contient aucune photo lisible.</div>';
       else {
         h += '<div class="pl">';
-        assistTriees().forEach(function(f){
+        assistTriees().forEach(function(f, i){
           var v = VIGNETTES[f.cle];
-          h += '<div class="v' + (A.choix[f.cle] ? ' on' : '') + '" data-f="' + esc(f.cle) + '">'
+          /* ⚠⚠ LE RANG, PAS LE CHEMIN. La case portait son chemin de fichier en
+             attribut, et l on retrouvait la case par un selecteur CSS. Or un
+             chemin Windows contient des ANTISLASHS : le selecteur ne trouvait
+             jamais rien, et aucune vignette ne se posait — le compteur avancait
+             pendant que l ecran restait vide. Un identifiant d affichage ne doit
+             rien devoir aux donnees. */
+          h += '<div class="v' + (A.choix[f.cle] ? ' on' : '') + '" data-i="' + i + '">'
             + '<span class="ck">' + (A.choix[f.cle] ? '✓' : '') + '</span>'
             + '<div class="im">'
             + (v ? '<img class="o' + (ORIENT[f.cle] || 1) + '" src="' + esc(v) + '" alt="">'
@@ -838,9 +880,12 @@ ${JS_ACTIVITE}${JS_DIRE}
        soixante-six vignettes il fallait redescendre a chaque fois. Un geste qui
        oblige a refaire le chemin qu on vient de parcourir n est pas un geste,
        c est une punition. On ne touche donc que la case cliquee et le compteur. */
-    Array.prototype.forEach.call(corps.querySelectorAll('[data-f]'), function(b){
+    var vues = assistTriees();
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-i]'), function(b){
       b.onclick = function(){
-        var c = b.getAttribute('data-f');
+        var f = vues[parseInt(b.getAttribute('data-i'), 10)];
+        if (!f) return;
+        var c = f.cle;
         if (A.choix[c]) { delete A.choix[c]; b.classList.remove('on'); }
         else { A.choix[c] = true; b.classList.add('on'); }
         var ck = b.querySelector('.ck');
@@ -852,9 +897,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     var tri = document.getElementById('a-tri');
     if (tri) tri.onchange = function(){ A.tri = tri.value; dessiner(); };
     var majCases = function(){
-      Array.prototype.forEach.call(corps.querySelectorAll('[data-f]'), function(b){
-        var c = b.getAttribute('data-f');
-        var on = !!A.choix[c];
+      Array.prototype.forEach.call(corps.querySelectorAll('[data-i]'), function(b){
+        var f = vues[parseInt(b.getAttribute('data-i'), 10)];
+        if (!f) return;
+        var on = !!A.choix[f.cle];
         b.classList.toggle('on', on);
         var ck = b.querySelector('.ck');
         if (ck) ck.textContent = on ? '✓' : '';
@@ -907,7 +953,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        d allers-retours simultanes par le pont, qui sert aussi au reste de
        l application ; une a la fois serait inutilement lent.
        ══════════════════════════════════════════════════════════════════════ */
-    if (ASSIST && ASSIST.etape === 2) chargerApercus();
+    if (ASSIST && ASSIST.etape === 2 && ASSIST.chargement) chargerApercus();
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
@@ -1032,36 +1078,38 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   var APERCUS_EN_COURS = 0;
 
-  function majCompteurApercus(){
-    var z = document.getElementById('a-apercus');
-    if (!z || !ASSIST) return;
-    var faits = 0;
-    ASSIST.fichiers.forEach(function(f){ if (VIGNETTES[f.cle] !== undefined) faits++; });
-    var total = ASSIST.fichiers.length;
-    z.textContent = (faits >= total) ? '' : ('Aperçus ' + faits + ' / ' + total + '… ');
-  }
-
-  function poserApercu(cle){
-    var b = corps.querySelector('[data-f="' + cle.replace(/"/g, '\\"') + '"]');
-    if (!b) return;
-    var im = b.querySelector('.im');
-    if (!im) return;
-    var v = VIGNETTES[cle];
-    im.innerHTML = v
-      ? '<img class="o' + (ORIENT[cle] || 1) + '" src="' + esc(v) + '" alt="">'
-      : '<div class="att">illisible</div>';
-  }
-
+  /* ══════════════════════════════════════════════════════════════════════════
+     LE PRE-CHARGEMENT DES APERCUS
+     ⚠ TOUT EST LU AVANT QUE LA PLANCHE PARAISSE. Des cases qui se remplissent
+     une a une pendant qu on choisit, c est un ecran qui bouge sous les doigts —
+     et, avec le defilement, une planche qu on n arrive pas a parcourir.
+     ⚠ QUATRE A LA FOIS : soixante-six d un coup feraient autant d allers-retours
+     simultanes par le pont, qui sert aussi au reste de l application ; un a la
+     fois serait inutilement lent.
+     ⚠ ET LA LECTURE N IMPORTE RIEN : le message central le redit, parce que
+     c est exactement le moment ou l on se demande ce qui est en train de se
+     passer avec ses fichiers.
+     ══════════════════════════════════════════════════════════════════════════ */
   function chargerApercus(){
-    if (!ASSIST || ASSIST.etape !== 2) return;
-    var reste = ASSIST.fichiers.filter(function(f){
+    if (!ASSIST || ASSIST.etape !== 2 || !ASSIST.chargement) return;
+    var A = ASSIST;
+    var reste = A.fichiers.filter(function(f){
       return VIGNETTES[f.cle] === undefined && !f.enCours;
     });
-    majCompteurApercus();
-    if (!reste.length) return;
-    while (APERCUS_EN_COURS < 3 && reste.length) {
+    if (!reste.length && !APERCUS_EN_COURS) {
+      A.chargement = false;
+      dessiner();
+      return;
+    }
+    var maj = document.getElementById('a-fait');
+    if (maj) maj.textContent = A.fait;
+    while (APERCUS_EN_COURS < 4 && reste.length) {
       var f = reste.shift();
-      if (!f.chemin) { VIGNETTES[f.cle] = ''; poserApercu(f.cle); continue; }
+      if (!f.chemin) {
+        VIGNETTES[f.cle] = f.apercu || '';
+        A.fait++;
+        continue;
+      }
       f.enCours = true;
       APERCUS_EN_COURS++;
       (function(fic){
@@ -1070,11 +1118,14 @@ ${JS_ACTIVITE}${JS_DIRE}
           fic.enCours = false;
           VIGNETTES[fic.cle] = (r && r.ok) ? r.image : '';
           ORIENT[fic.cle] = (r && r.ok) ? (r.orientation || 1) : 1;
-          // ⚠ On INJECTE : la planche ne bouge pas, le defilement non plus.
-          if (ASSIST && ASSIST.etape === 2) { poserApercu(fic.cle); chargerApercus(); }
+          if (ASSIST) ASSIST.fait++;
+          chargerApercus();
         });
       })(f);
     }
+    // ⚠ Le cas ou TOUT etait deja en memoire : sans ceci, la planche ne
+    // paraitrait jamais faute d une reponse a attendre.
+    if (!APERCUS_EN_COURS && !reste.length) { A.chargement = false; dessiner(); }
   }
 
   function assistSuivant(){
@@ -1098,6 +1149,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       A.choix = {};
       A.etape = 2;
+      A.chargement = true;
+      A.fait = 0;
       dessiner();
       return;
     }
