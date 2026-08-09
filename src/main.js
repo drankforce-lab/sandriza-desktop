@@ -1190,6 +1190,11 @@ const OPS_PONT = new Set([
   // CONSULTATION : rembourser engage de l argent et se fait depuis la COMMANDE,
   // dans la fenetre Remboursement qui porte deja toutes les gardes.
   'remboursements:liste', 'remboursements:ouvrir',
+  // Fiscalite et impot (fenetre Impot, 2.8.0). ⚠ PATRON << FENETRE PILOTE >> :
+  // les documents fiscaux sont des IMPRIMES composes par le site — les
+  // redessiner ici voudrait dire les ecrire deux fois, et deux formulaires
+  // fiscaux qui divergent, c est une declaration fausse.
+  'impot:donnees', 'impot:document',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1629,6 +1634,7 @@ const PAGES_ANCRABLES = () => ({
   promo: ['Centre d’impression', () => pagePromo()],
   depenses: ['Dépenses d’entreprise', () => pageDepenses()],
   remboursements: ['Remboursements et crédits', () => pageRemboursements()],
+  impot: ['Fiscalité et impôt', () => pageImpot()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2369,6 +2375,7 @@ const { pagePhotos } = require('./fenetres/photos');
 const { pagePromo } = require('./fenetres/promo');
 const { pageDepenses } = require('./fenetres/depenses');
 const { pageRemboursements } = require('./fenetres/remboursements');
+const { pageImpot } = require('./fenetres/impot');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2448,7 +2455,7 @@ const actionApp = (nom) => {
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
-    case 'depenses': case 'remboursements': {
+    case 'depenses': case 'remboursements': case 'impot': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

@@ -54,6 +54,53 @@
  */
 
 // ── PIÈCES COMMUNES ─────────────────────────────────────────────────────────
+// Les chiffres fiscaux d'une annee garnie, partages par les cas de impot.js.
+const DONNEES_IMPOT = {
+          ok: true, annee: 2026, annees: [2026, 2025], onglet: 'taxes', peutModifier: true,
+          profil: { complet: true, nom: 'Sandriza', neq: '1234567890',
+            tps: '123456789 RT0001', tvq: '1234567890 TQ0001' },
+          taxes: {
+            ventesNettes: '42 180,00 $', nbCommandes: 137,
+            tps: '2 109,00 $', tvq: '4 207,46 $', total: '6 316,46 $',
+            rembourse: '412,55 $', nbRemb: 3, rembSousTotal: '360,00 $',
+            rembTps: '18,00 $', rembTvq: '35,91 $',
+            cti: '210,93 $', rti: '420,80 $', ctiTotal: '631,73 $',
+            tpsRemettre: '1 898,07 $', tvqRemettre: '3 786,66 $',
+            totalRemettre: '5 684,73 $', enFaveur: false, aucunCredit: false,
+            souSeuil: false, seuil: '30 000,00 $',
+            // ⚠ La PST : elle ne se declare PAS sur les memes formulaires.
+            pst: [{ province: 'BC', montant: '84,20 $' }, { province: 'SK', montant: '31,05 $' }],
+            trimestres: [
+              { libelle: 'T1 — jan · fév · mar', indice: 0, n: 30, net: '9 100,00 $', tps: '455,00 $', tvq: '907,73 $', total: '1 362,73 $' },
+              { libelle: 'T2 — avr · mai · juin', indice: 1, n: 41, net: '12 400,00 $', tps: '620,00 $', tvq: '1 236,90 $', total: '1 856,90 $' },
+              { libelle: 'T3 — juil · août · sep', indice: 2, n: 39, net: '11 980,00 $', tps: '599,00 $', tvq: '1 194,90 $', total: '1 793,90 $' },
+              { libelle: 'T4 — oct · nov · déc', indice: 3, n: 27, net: '8 700,00 $', tps: '435,00 $', tvq: '867,83 $', total: '1 302,83 $' },
+            ],
+            mensuel: [
+              { mois: 'Janvier', n: 9, net: '2 800,00 $', tps: '140,00 $', tvq: '279,30 $' },
+              { mois: 'Février', n: 10, net: '3 100,00 $', tps: '155,00 $', tvq: '309,23 $' },
+              { mois: 'Mars', n: 11, net: '3 200,00 $', tps: '160,00 $', tvq: '319,20 $' },
+            ],
+          },
+          revenus: {
+            brut: '43 900,00 $', remises: '1 360,00 $', rembourse: '360,00 $', nbRemb: 3,
+            livraison: '1 240,00 $', totalRevenus: '43 420,00 $',
+            depenses: '9 870,00 $', benefice: '33 550,00 $', perte: false,
+            categories: [
+              { libelle: 'Site web, logiciels (SaaS)', ligne: '9270', montant: '1 240,00 $' },
+              { libelle: 'Publicité', ligne: '8521', montant: '5 400,00 $' },
+              { libelle: 'Livraison, transport, messagerie', ligne: '9275', montant: '3 230,00 $' },
+            ],
+            mensuel: [
+              { mois: 'Jan', net: '2 800,00 $', brutN: 2800 },
+              { mois: 'Fév', net: '3 100,00 $', brutN: 3100 },
+              { mois: 'Mar', net: '3 200,00 $', brutN: 3200 },
+            ],
+            maxMois: 3200,
+          },
+          square: { brut: '48 200,00 $', frais: '1 410,00 $', net: '46 790,00 $', n: 131 },
+        };
+
 // Une image minuscule mais VALIDE : plusieurs fenêtres posent la source d'une
 // photo dans un attribut, et une chaîne quelconque y passerait pour une adresse.
 const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
@@ -728,6 +775,31 @@ module.exports = {
       id: '',
       reponses: {
         'stats:ga': { ok: false, motif: 'ga_sans_cle' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
+  // ── FISCALITÉ ET IMPÔT ─────────────────────────────────────────────────────
+  // ⚠ FORME RÉELLE de impot:donnees (cœur Admin._impotDonnees). TROIS cas
+  // d'ouverture : les trois onglets ne partagent aucun dessin, et « Documents »
+  // est celui qui déclenche des IMPRIMÉS fiscaux — il ne peut pas rester non
+  // éprouvé. Plus un profil incomplet, qui doit se signaler en haut.
+  'impot.js': [
+    { nom: 'TPS / TVQ', id: '', reponses: { 'impot:donnees': DONNEES_IMPOT, identite: IDENTITE } },
+    { nom: 'revenus', id: 'revenus',
+      reponses: { 'impot:donnees': Object.assign({}, DONNEES_IMPOT, { onglet: 'revenus' }), identite: IDENTITE } },
+    { nom: 'documents', id: 'documents',
+      reponses: { 'impot:donnees': Object.assign({}, DONNEES_IMPOT, { onglet: 'documents' }),
+        'impot:document': { ok: true, annee: 2026, trimestre: 0 }, identite: IDENTITE } },
+    {
+      // ⚠ PROFIL INCOMPLET : un document imprimé sans numéro de taxe n'est pas
+      // recevable, et l'on ne s'en aperçoit qu'après l'avoir envoyé.
+      nom: 'profil incomplet',
+      id: 'documents',
+      reponses: {
+        'impot:donnees': Object.assign({}, DONNEES_IMPOT, { onglet: 'documents',
+          profil: { complet: false, nom: '', neq: '', tps: '', tvq: '' } }),
         identite: IDENTITE,
       },
     },
