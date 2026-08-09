@@ -575,6 +575,12 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (refuses) t += ' · ' + refuses + ' trop lourde' + (refuses > 1 ? 's' : '');
         if (echoues) t += ' · ' + echoues + ' en échec';
         suiviFin(t + '.');
+        /* ⚠ IL SE FERME TOUT SEUL QUAND TOUT EST PASSE (demande du 2026-08-09) :
+           il n y a rien a y lire, et un panneau qui reste apres coup encombre.
+           ⚠ MAIS IL RESTE DES QU IL Y A QUELQUE CHOSE A VOIR — un echec, une
+           trop lourde, un doublon. C est precisement le cas ou l on veut savoir
+           LAQUELLE, et le faire disparaitre effacerait la seule reponse. */
+        if (!echoues && !refuses && !doubles) setTimeout(suiviFermer, 2500);
         dire(t + '.', (echoues || refuses) ? 'att' : 'bon');
         charger();
         return;
@@ -656,7 +662,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('photos:isoler', [DETAIL.id]).then(function(r){
       liberer();
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(r.deja ? 'Cette photo était déjà isolée.' : 'Vêtement isolé — choisissez un fond.', 'bon');
+      /* ⚠ ON DIT PAR QUOI. Le detourage local devine l arriere-plan a partir des
+         pixels de bordure : sur une photo reelle il mange le vetement ou garde
+         le mur. Laisser croire que le modele a travaille, c est mettre en ligne
+         une photo qu on croit traitee correctement. */
+      dire(r.deja ? 'Cette photo était déjà isolée.'
+        : (r.par === 'canevas'
+            ? ('Vêtement isolé LOCALEMENT — le modèle n’a pas répondu'
+               + (r.repli ? ' (' + esc(r.repli) + ')' : '') + '. Le résultat est moins net.')
+            : 'Vêtement isolé par le modèle. Choisissez un fond.'),
+        r.par === 'canevas' ? 'att' : 'bon');
       rouvrir(r.photo);
     });
   }

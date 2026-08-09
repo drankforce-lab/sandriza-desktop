@@ -366,20 +366,38 @@ ipcMain.on('win:close', (e) => {
 
 // ══ PHASE 3 — NOTIFICATIONS NATIVES + PASTILLE SUR L'ICÔNE ════════════════════
 const ICON_PATH = path.join(__dirname, '..', 'build', 'icon.png');
-ipcMain.handle('notify', (e, opts = {}) => {
+/**
+ * UNE SEULE FABRIQUE DE NOTIFICATION.
+ *
+ * ⚠ LE TITRE EST LE SUJET, PAS LE NOM DE L'APPLICATION. Windows écrit déjà le
+ * nom de l'application en en-tête ; le répéter en titre donnait trois lignes
+ * dont deux disaient la même chose, et la seule qui portait l'information
+ * arrivait en dernier. On lit une notification en diagonale : le premier mot
+ * doit être ce qui vient d'arriver.
+ *
+ * ⚠ UN CLIC RAMÈNE LA FENÊTRE. Une notification qu'on ne peut pas suivre oblige
+ * à retrouver l'application à la main, et l'on a déjà oublié pourquoi.
+ */
+const notifier = (titre, corps, options = {}) => {
   try {
     const n = new Notification({
-      title: opts.title || 'Administration Sandriza',
-      body: opts.body || '',
+      title: String(titre || 'Administration Sandriza'),
+      body: String(corps || ''),
       icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
-      silent: !!opts.silent,
+      silent: !!options.silent,
     });
-    // Un clic ramène et focalise la fenêtre (ex. « nouvelle commande » → l'ouvrir).
-    n.on('click', () => { if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); } });
+    n.on('click', () => {
+      if (!mainWindow || mainWindow.isDestroyed()) return;
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+      if (options.aller) { try { mainWindow.webContents.send('dock:naviguer', options.aller); } catch {} }
+    });
     n.show();
     return true;
   } catch { return false; }
-});
+};
+ipcMain.handle('notify', (e, opts = {}) => notifier(opts.title, opts.body, { silent: opts.silent }));
 
 // Pastille (overlay) sur l'icône de la barre des tâches. Windows n'a pas de
 // compteur natif → on affiche une IMAGE dessinée par la page (canvas → dataURL),
@@ -502,13 +520,14 @@ const startUsbWatch = () => {
         const photos = scanDrivePhotos(d);
         if (photos.length && mainWindow) {
           mainWindow.webContents.send('usb:photos', { drive: d, photos });
-          try {
-            new Notification({
-              title: 'Administration Sandriza',
-              body: 'Clé ' + d + ' détectée — ' + photos.length + ' photo(s). Ouvrez la section Photos pour importer.',
-              icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
-            }).on('click', () => { if (mainWindow) { mainWindow.restore(); mainWindow.focus(); } }).show();
-          } catch {}
+          /* ⚠ LE SUJET EN TITRE, LE DETAIL EN CORPS, et le clic MENE a la
+             photothèque. L ancienne version repetait le nom de l application en
+             titre et laissait l information en troisieme ligne, avec un tiret
+             de decoration au milieu. */
+          notifier(
+            photos.length + ' photo' + (photos.length > 1 ? 's' : '') + ' sur la clé ' + d,
+            'Ouvrez la photothèque pour les importer. Rien n’est importé sans votre accord.',
+            { aller: 'photos' });
         }
       }
     }
@@ -3108,6 +3127,17 @@ if (!app.requestSingleInstanceLock()) {
   });
 
   app.whenReady().then(() => {
+    /* ⚠⚠ L'IDENTITÉ DE L'APPLICATION, ET C'EST CE QUI ÉCRIVAIT
+       « electron.app.Administration Sandriza » EN TÊTE DE CHAQUE NOTIFICATION.
+       Sans AppUserModelID, Windows en fabrique un à partir du binaire — d'où ce
+       préfixe « electron.app. » que tout le monde voit et que personne ne
+       comprend. La valeur doit être EXACTEMENT l'appId de l'installateur
+       (electron-builder.yml) : c'est par lui que Windows relie la notification
+       au raccourci du menu Démarrer, donc au nom et à l'icône.
+       ⚠ Et cela doit se faire AVANT la première notification, pas au moment de
+       l'émettre : Windows retient l'identité de la première. */
+    try { app.setAppUserModelId('com.sandriza.admin'); } catch {}
+
     // ⚠ AVANT createWindow() : le tout premier chargement de adm.sandriza.com doit
     // déjà porter l'en-tête, sinon le serveur nous prend pour un navigateur et
     // sert la page « Utilisez l'application » à notre propre fenêtre.
