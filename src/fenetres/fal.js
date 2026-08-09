@@ -149,8 +149,13 @@ ${JS_ACTIVITE}${JS_DIRE}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
+  /* ⚠ LE RETRAIT DE MANNEQUIN COMPTE TROIS LIGNES, PAS UNE : reperage du
+     mannequin, reconstruction sous le masque, puis detourage. Les nommer
+     separement est ce qui permet de voir OU l argent passe — et, le jour ou le
+     resultat decoit, laquelle des trois etapes a mal travaille. */
   var GESTES = {
-    detourage: 'Détourage', fantome: 'Mannequin retiré',
+    detourage: 'Détourage', masque: 'Repérage du mannequin',
+    fantome: 'Reconstruction sans mannequin',
     humain: 'Porté par un mannequin', essayage: 'Essayage virtuel'
   };
   function sous_(v){
