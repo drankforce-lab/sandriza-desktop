@@ -167,6 +167,15 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
 .suivi .pd{padding:.45rem .8rem;border-top:1px solid rgba(255,255,255,.08);
   display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:#8fa1b8}
 .suivi .pd button{margin-left:auto}
+/* La barre de LOT : elle ne parait que s il y a un choix, et elle dit ce que
+   les traitements engendrent — une image inventee n a pas la meme valeur qu une
+   photo, et cela doit se lire avant de cliquer. */
+.lot{position:sticky;bottom:0;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  margin-top:.6rem;padding:.5rem .7rem;background:#16202f;
+  border:1px solid rgba(201,169,126,.45);border-radius:11px}
+.lot .cnt{font-weight:700;font-size:.8rem}
+.lot .av{flex:1 0 100%;font-size:.7rem;color:#8fa1b8}
+input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -200,6 +209,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   var VIDER_ARME = false;
   var OCCUPE = false;       // un travail long est en cours : on desarme les gestes
   var VEILLE = null;        // le chien de garde de ce travail
+  /* Le CHOIX vit hors du dessin : il survit a un changement de page et de tri.
+     ⚠ Sans cela, cocher douze photos puis trier par poids les decocherait
+     toutes, et l on s en apercevrait apres avoir lance le traitement. */
+  var CHOIX = {};
 
   /* ⚠⚠ UN DRAPEAU QUI NE SE LEVE PAS BLOQUE LA FENETRE POUR TOUJOURS.
      Signale le 2026-08-09 : << Recherche de cles USB... >> restait a l ecran, et
@@ -351,7 +364,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         : (D.total ? 'Aucune photo ne correspond à cette recherche.'
                    : 'Aucune photo. Déposez-en ci-dessus.')) + '</div>';
     } else {
-      h += '<table><thead><tr><th>Aperçu</th><th>Code</th><th>Nom du fichier</th>'
+      h += '<table><thead><tr>'
+        + '<th style="width:26px"><input type="checkbox" id="p-tout" title="Tout choisir sur cette page"></th>'
+        + '<th>Aperçu</th><th>Code</th><th>Nom du fichier</th>'
         + '<th>Article lié</th><th>Poids</th><th>État</th></tr></thead><tbody>'
         + rows.map(ligne).join('') + '</tbody></table>';
       if ((D.pages || 1) > 1) {
@@ -364,9 +379,89 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '</div>';
 
+    h += barreLot();
     if (DETAIL) h += boiteDetail();
     corps.innerHTML = h;
     brancher();
+  }
+
+  function nbChoisies(){ return Object.keys(CHOIX).length; }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     LE TRAITEMENT EN LOT
+     ⚠ LA FENETRE MENE LA SUITE, ELLE N ENVOIE PAS UN LOT EN BLOC. L operation
+     photos:lot existe (c est la definition, et l ecran du site s en sert), mais
+     l appeler d ici rendrait la main seulement a la fin : sur trente photos et
+     deux echecs, on veut savoir LESQUELLES pendant que ca tourne. On boucle donc
+     photo par photo et l on rend compte a chaque pas.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var LOTS = [
+    ['detourage', '✂ Détourer', 'Isole le vêtement de son fond.'],
+    ['fantome', '👻 Retirer le mannequin', 'Ne garde que le vêtement, col et manches reconstruits.'],
+    ['humain', '🧍 Mettre sur un mannequin', 'Fait porter le vêtement par une personne engendrée.'],
+  ];
+
+  function barreLot(){
+    var n = nbChoisies();
+    if (!n || !D.peutModifier) return '';
+    return '<div class="lot"><span class="cnt">' + n + ' photo' + (n > 1 ? 's' : '')
+      + ' choisie' + (n > 1 ? 's' : '') + '</span>'
+      + LOTS.map(function(l){
+          return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
+        }).join('')
+      + '<button class="mini" id="p-rien">Tout décocher</button>'
+      + '<span class="av">Les deux derniers traitements <strong>engendrent</strong> une image&nbsp;: '
+      + 'l’original est conservé à côté.</span></div>';
+  }
+
+  function lancerLot(quoi){
+    var ids = Object.keys(CHOIX);
+    if (!ids.length) return;
+    if (occupeDeja('Traitement en lot')) return;
+    var nom = {};
+    (D.photos || []).forEach(function(r){ nom[r.id] = r.code + ' · ' + r.nom; });
+    var titres = ids.map(function(i){ return nom[i] || i; });
+    occuper('Traitement de ' + ids.length + ' photo' + (ids.length > 1 ? 's' : '') + '…');
+    suiviOuvrir(titres);
+    var faites = 0, echecs = 0, replis = 0;
+    var suite = function(k){
+      suiviCompte(k, ids.length);
+      if (k >= ids.length) {
+        liberer();
+        var t = faites + ' traitée' + (faites > 1 ? 's' : '');
+        if (replis) t += ' · ' + replis + ' en repli local';
+        if (echecs) t += ' · ' + echecs + ' en échec';
+        suiviFin(t + '.');
+        if (!echecs && !replis) setTimeout(suiviFermer, 2500);
+        dire(t + '.', echecs ? 'att' : 'bon');
+        CHOIX = {};
+        charger();
+        return;
+      }
+      suiviLigne(k, 'cours', 'en cours');
+      suiviEtapes(k, [{ nom: 'envoi au modèle', etat: 'encours' }]);
+      occuper('Traitement ' + (k + 1) + ' / ' + ids.length + '…');
+      appeler('photos:traiter', [ids[k], quoi, {}]).then(function(r){
+        if (r && r.ok) {
+          faites++;
+          if (r.par === 'canevas') replis++;
+          suiviLigne(k, r.par === 'canevas' ? 'double' : 'faite',
+            r.par === 'canevas' ? 'repli local' : 'traitée');
+          suiviEtapes(k, [
+            { nom: (r.par === 'canevas' ? 'détourage local' : 'modèle'), ok: true,
+              chiffre: r.ms ? (Math.round(r.ms / 100) / 10) + ' s' : '' },
+            { nom: 'dépôt', ok: true },
+          ]);
+        } else {
+          echecs++;
+          suiviLigne(k, 'echec', 'refusée');
+          suiviEtapes(k, [{ nom: 'modèle', ok: false,
+                            chiffre: (r && (r.detail || r.motif)) || '' }]);
+        }
+        suite(k + 1);
+      });
+    };
+    suite(0);
   }
 
   function opt(v, l){
@@ -397,6 +492,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function ligne(r){
     return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la photo">'
+      + '<td style="width:26px"><input type="checkbox" class="chx" data-chx="' + esc(r.id) + '"'
+      + (CHOIX[r.id] ? ' checked' : '') + '></td>'
       + '<td style="width:52px">' + vignette(r) + '</td>'
       + '<td><span class="num">' + esc(r.code) + '</span></td>'
       + '<td><div class="dt" style="max-width:16rem;overflow:hidden;text-overflow:ellipsis;'
@@ -727,6 +824,29 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ch) ch.onclick = choisirFichiers;
     var dp = document.getElementById('p-depot');
     if (dp) dp.onclick = choisirFichiers;
+
+    /* ⚠ LA CASE NE DOIT PAS OUVRIR LA PHOTO : la ligne entiere est cliquable,
+       et sans ce garde, cocher ouvrirait le panneau de detail par-dessus. */
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-chx]'), function(c){
+      c.onclick = function(ev){ ev.stopPropagation(); };
+      c.onchange = function(){
+        var id = c.getAttribute('data-chx');
+        if (c.checked) CHOIX[id] = true; else delete CHOIX[id];
+        dessiner();
+      };
+    });
+    var tt = document.getElementById('p-tout');
+    if (tt) tt.onchange = function(){
+      (D.photos || []).forEach(function(r){
+        if (tt.checked) CHOIX[r.id] = true; else delete CHOIX[r.id];
+      });
+      dessiner();
+    };
+    var rien = document.getElementById('p-rien');
+    if (rien) rien.onclick = function(){ CHOIX = {}; dessiner(); };
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-lot]'), function(b){
+      b.onclick = function(){ lancerLot(b.getAttribute('data-lot')); };
+    });
 
     var usb = document.getElementById('p-usb');
     if (usb) usb.onclick = function(){

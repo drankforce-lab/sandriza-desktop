@@ -512,9 +512,18 @@ ipcMain.handle('usb:scan', async () => {
 let _knownDrives = new Set();
 let _usbTimer = null;
 const startUsbWatch = () => {
+  /* ⚠⚠ LE PREMIER TOUR NE NOTIFIE RIEN (demande du 2026-08-09 : << pas besoin de
+     me faire le toast a chaque ouverture >>). `_knownDrives` partait vide, donc
+     TOUT ce qui etait deja branche au lancement passait pour une nouveaute : on
+     recevait la meme notification a chaque ouverture de l application, pour une
+     cle qui n avait pas bouge depuis des semaines.
+     << Une cle est APPARUE >> ne veut rien dire tant qu on ne sait pas ce qui
+     etait la avant. Le premier tour ne fait donc que RECENSER. */
+  let premierTour = true;
   const tick = async () => {
     const drives = await listRemovableDrives();
     const now = new Set(drives);
+    if (premierTour) { premierTour = false; _knownDrives = now; return; }
     for (const d of drives) {
       if (!_knownDrives.has(d)) {
         const photos = scanDrivePhotos(d);
@@ -1268,6 +1277,9 @@ const OPS_PONT = new Set([
   'photos:donnees', 'photos:importer', 'photos:isoler', 'photos:fond',
   'photos:attacher', 'photos:produits', 'photos:supprimer', 'photos:vider',
   'photos:usb', 'photos:enregistrer',
+  // Traitements nommes (detourage, mannequin retire, porte par un mannequin)
+  // et le meme geste sur un LOT.
+  'photos:traiter', 'photos:lot',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
