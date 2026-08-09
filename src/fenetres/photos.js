@@ -255,18 +255,25 @@ tr:hover .act .ic{opacity:1}
 .pl .v{position:relative;border:2px solid rgba(255,255,255,.1);border-radius:9px;
   overflow:hidden;cursor:pointer;background:#0b1220}
 .pl .v.on{border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.2)}
-.pl .v img{display:block;width:100%;height:8rem;object-fit:contain;background:#0b1220}
+/* ⚠⚠ UNE ROTATION CSS NE CHANGE PAS LA BOITE. L image tournait bien, mais son
+   encombrement restait celui d avant : elle debordait sur le titre de la case
+   d a cote. La boite d apercu est donc CARREE (aspect-ratio:1) et l image y est
+   centree en position absolue : dans un carre, une image qui tient avant la
+   rotation tient encore apres, quel que soit le quart de tour. */
+.pl .v .im{position:relative;aspect-ratio:1;overflow:hidden;background:#0b1220}
+.pl .v .im img{position:absolute;top:50%;left:50%;max-width:100%;max-height:100%;
+  display:block;transform:translate(-50%,-50%)}
 /* ⚠ LA VIGNETTE SE REDRESSE A L AFFICHAGE. Les pixels ne sont pas pivotes : on
    applique l etiquette EXIF en CSS, ce qui est gratuit et exact. L import, lui,
    pivote pour de vrai — ici on ne fait que REGARDER. */
-.pl .v img.o2{transform:scaleX(-1)}
-.pl .v img.o3{transform:rotate(180deg)}
-.pl .v img.o4{transform:scaleY(-1)}
-.pl .v img.o5{transform:rotate(90deg) scaleX(-1)}
-.pl .v img.o6{transform:rotate(90deg)}
-.pl .v img.o7{transform:rotate(270deg) scaleX(-1)}
-.pl .v img.o8{transform:rotate(270deg)}
-.pl .v .att{display:flex;align-items:center;justify-content:center;height:8rem;
+.pl .v .im img.o2{transform:translate(-50%,-50%) scaleX(-1)}
+.pl .v .im img.o3{transform:translate(-50%,-50%) rotate(180deg)}
+.pl .v .im img.o4{transform:translate(-50%,-50%) scaleY(-1)}
+.pl .v .im img.o5{transform:translate(-50%,-50%) rotate(90deg) scaleX(-1)}
+.pl .v .im img.o6{transform:translate(-50%,-50%) rotate(90deg)}
+.pl .v .im img.o7{transform:translate(-50%,-50%) rotate(270deg) scaleX(-1)}
+.pl .v .im img.o8{transform:translate(-50%,-50%) rotate(270deg)}
+.pl .v .att{display:flex;align-items:center;justify-content:center;height:100%;
   color:#8fa1b8;font-size:.72rem}
 .pl .v .lg{padding:.25rem .4rem;font-size:.68rem;color:#c3cede;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -760,8 +767,10 @@ ${JS_ACTIVITE}${JS_DIRE}
           var v = VIGNETTES[f.cle];
           h += '<div class="v' + (A.choix[f.cle] ? ' on' : '') + '" data-f="' + esc(f.cle) + '">'
             + '<span class="ck">' + (A.choix[f.cle] ? '✓' : '') + '</span>'
+            + '<div class="im">'
             + (v ? '<img class="o' + (ORIENT[f.cle] || 1) + '" src="' + esc(v) + '" alt="">'
                  : '<div class="att" data-charge="' + esc(f.cle) + '">…</div>')
+            + '</div>'
             + '<div class="lg" title="' + esc(f.nom) + '">' + esc(f.nom) + '</div>'
             + '<div class="dt2">' + dateFr(f.modifie) + ' · ' + poids(f.octets) + '</div>'
             + '</div>';
