@@ -203,7 +203,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     cle_absente: 'Reçu joint. Lecture automatique indisponible : aucune clé du service d’IA n’est enregistrée (écran Configuration → Clés API).',
     pdf:         'Reçu joint. Le PDF n’a pas pu être converti pour la lecture — saisie manuelle.',
     illisible:   'Reçu joint. La réponse du service n’était pas exploitable — saisie manuelle.',
-    service:     'Reçu joint. Le service de lecture n’a pas répondu — saisie manuelle.'
+    service:     'Reçu joint. Le service de lecture n’a pas répondu — saisie manuelle.',
+    non_fiable:  'Reçu joint. La lecture a été refusée : elle ne correspondait pas au document.'
   };
   function expliquer(r){
     var m = r && r.motif;
@@ -376,13 +377,22 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '<div class="voile" id="d-voile"><div class="boite">'
       + '<h3>' + (neuf ? '➕ Nouvelle dépense' : '✎ Modifier la dépense') + '</h3>';
 
-    if (neuf) {
+    /* ⚠ LA ZONE DE DEPOT S EFFACE UNE FOIS LA FACTURE PRISE (demande du
+       2026-08-09 : << quand on glisse une facture, plus besoin de montrer ca >>).
+       Elle occupait le haut du formulaire pour proposer un geste deja fait, et
+       repoussait les champs a verifier — qui sont, eux, ce qui reste a faire.
+       Une ligne discrete la remplace : le fichier reste remplacable. */
+    if (neuf && !f.recu) {
       h += '<div class="depot" id="d-depot-form" style="margin-bottom:.6rem">'
         + '<div class="gros">📄 Importer une facture</div>'
         + '<div class="pt">' + (D.lectureAuto
             ? 'Photo, image ou PDF — les champs sont pré-remplis, vous vérifiez avant d’enregistrer.'
             : 'Elle sera jointe comme reçu (lecture automatique indisponible sans clé).') + '</div>'
         + '</div>';
+    }
+    if (f.lecture) {
+      h += '<div class="' + (f.lectureErr ? 'avis' : 'carte') + '" style="margin-bottom:.6rem;font-size:.79rem;line-height:1.5">'
+        + esc(f.lecture) + '</div>';
     }
 
     h += '<div class="form">'
@@ -476,12 +486,35 @@ ${JS_ACTIVITE}${JS_DIRE}
           if (c.tvq != null) FORM.tvq = c.tvq.toFixed(2);
           var complet = (parseFloat(FORM.montant) || 0) > 0 && FORM.date
             && (FORM.description || FORM.fournisseur);
+          /* ⚠ ON DIT SI LA LECTURE A ÉTÉ RECOUPÉE AVEC LE DOCUMENT. Sur une photo
+             ou un PDF numérisé il n y a aucun texte a comparer : la personne est
+             alors la seule verification, et elle doit le savoir. */
+          FORM.lectureErr = !r.verifie;
+          FORM.lecture = (r.verifie
+              ? '✓ Facture lue et recoupée avec le document.'
+              : '⚠ Facture lue à partir d’une image : impossible de la recouper. Vérifiez CHAQUE champ.')
+            + (r.preuve ? ' Lu dans le document : « ' + r.preuve + ' »' : '')
+            + (r.devise === 'USD' && r.fxTaux
+                ? ' Montants convertis depuis le dollar US au taux ' + r.fxTaux
+                  + (r.fxDate ? ' du ' + r.fxDate : '') + (r.fxApprox ? ' (approximatif)' : '') + '.'
+                : '');
           dire(complet
             ? 'Facture lue — vérifiez les informations, puis enregistrez.'
             : 'Facture lue — complétez ce qui manque, puis enregistrez.',
             complet ? 'bon' : 'att');
         } else {
-          dire(LECTURE[r.motifLecture] || 'Reçu joint — saisie manuelle.', 'att');
+          /* ⚠ REFUS DE LECTURE : les champs restent VIDES, et l on dit pourquoi.
+             Un champ faux est pire qu un champ vide — il finit dans une
+             declaration de revenus, alors qu un champ vide se remarque. */
+          FORM.lectureErr = true;
+          FORM.lecture = (r.motifLecture === 'non_fiable')
+            ? ('⛔ Lecture REFUSÉE : ce qui a été lu ne correspond pas au document ('
+               + esc((r.ecarts || []).join(' ; ') || 'écart détecté')
+               + '). Rien n’a été rempli — saisissez à la main. Le reçu, lui, est joint.')
+            : (LECTURE[r.motifLecture] || 'Reçu joint — saisie manuelle.');
+          dire(r.motifLecture === 'non_fiable'
+            ? 'Lecture refusée — elle ne correspondait pas au document.'
+            : 'Reçu joint — saisie manuelle.', 'att');
         }
         dessiner();
       });
@@ -493,7 +526,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var cat = ((D.categories || [])[0] || {}).cle || 'autre';
     var pay = ((D.paiements || [])[0] || {}).cle || 'card';
     return { id: '__new__', date: auj, categorie: cat, paiement: pay,
-      description: '', fournisseur: '', montant: '', tps: '', tvq: '', recu: false };
+      description: '', fournisseur: '', montant: '', tps: '', tvq: '', recu: false,
+      lecture: '', lectureErr: false };
   }
 
   function enregistrer(){
