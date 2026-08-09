@@ -66,6 +66,50 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
     dire(false, f, 'aucune portion <script> : la page ne fera rien'); continue;
   }
 
+  /* ══════════════════════════════════════════════════════════════════════════
+     UN NOM, UNE DÉCLARATION
+     --------------------------------------------------------------------------
+     ⚠⚠ CE CONTRÔLE EXISTE À CAUSE D'UNE PANNE DE DEUX VERSIONS. Dans photos.js,
+     « var LOTS » était déclaré DEUX FOIS : une fois pour l'historique des
+     imports, une fois pour les trois traitements du menu. En JavaScript c'est
+     légal — « var » est hissé, les deux noms désignent UNE SEULE variable, et la
+     seconde déclaration écrase la première au chargement. L'écran des lots
+     affichait donc les traitements : « 3 lots », trois lignes « Sans nom », des
+     compteurs vides. Le diagnostic annonçait « champs reçus : 0, 1, 2 » — les
+     index d'un tableau de trois chaînes. Le contrôle de syntaxe était vert, la
+     fenêtre se dessinait, et le défaut a été cherché dans la sérialisation du
+     pont pendant deux publications.
+
+     ⚠ ON NE REGARDE QUE LE PREMIER NIVEAU (deux espaces d'indentation, celui de
+     la fermeture qui enveloppe chaque fenêtre). Deux « var i » dans deux
+     fonctions différentes sont légitimes et courants : les signaler noierait le
+     vrai défaut sous des dizaines de faux. L'heuristique tient parce que toutes
+     les fenêtres partagent cette mise en forme — si elle change, ce contrôle
+     devient muet, et il vaut mieux le savoir que le croire vigilant.
+     ══════════════════════════════════════════════════════════════════════════ */
+  /* ⚠ LE SOCLE EST HORS DE PORTÉE DE CETTE HEURISTIQUE : ses fonctions sont au
+     premier niveau du fichier, donc leurs variables locales s'indentent elles
+     aussi de deux espaces. « var t » dans deux fonctions distinctes y est
+     parfaitement sain, et le signaler noierait le vrai défaut sous les faux. */
+  if (f !== SOCLE) {
+    const vus = new Map();
+    const re = /^ {2}(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*[=;]/gm;
+    let m;
+    while ((m = re.exec(src))) {
+      const nom = m[1];
+      const ligne = src.slice(0, m.index).split('\n').length;
+      if (!vus.has(nom)) vus.set(nom, []);
+      vus.get(nom).push(ligne);
+    }
+    const doubles = [...vus.entries()].filter(([, l]) => l.length > 1);
+    if (doubles.length) {
+      dire(false, f, 'déclaré deux fois au premier niveau : '
+        + doubles.map(([n, l]) => n + ' (lignes ' + l.join(', ') + ')').join(' · ')
+        + ' — une seule variable existe, la seconde écrase la première');
+      continue;
+    }
+  }
+
   if (f !== SOCLE) {
     const mod = require(p);
     const fabrique = Object.values(mod).find((v) => typeof v === 'function');

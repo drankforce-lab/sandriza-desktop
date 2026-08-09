@@ -334,7 +334,16 @@ ${JS_ACTIVITE}${JS_DIRE}
   var ATTACHE = false;      // le selecteur d article est deploye
   var PRODUITS = null;      // sa derniere reponse
   var PQ = '';
-  var SUPPR_ARME = false;
+  /* ⚠⚠ L'INSPECTEUR ET LA LIGNE DU TABLEAU ARMAIENT LA MÊME VARIABLE, et pas
+     avec la même chose : la ligne y mettait l'IDENTIFIANT de la photo, le
+     panneau un simple oui/non. Comme les deux « var » portaient le même nom, il
+     n'y avait qu'UNE variable — armer la suppression d'une ligne du tableau
+     armait donc AUSSI, en silence, le bouton « Retirer de la médiathèque » du
+     panneau ouvert à côté. Le clic suivant y supprimait la photo sans jamais
+     avoir demandé confirmation POUR ELLE.
+     ⚠ UN AVERTISSEMENT QUI N'A PAS ÉTÉ MONTRÉ NE PROTÈGE PERSONNE — et c'est
+     exactement ce qui se passait. Deux gestes, deux variables. */
+  var SUPPR_ARME_INSP = false;   // le panneau : oui/non
   var VIDER_ARME = false;
   var OCCUPE = false;       // un travail long est en cours : on desarme les gestes
   var VEILLE = null;        // le chien de garde de ce travail
@@ -1235,7 +1244,20 @@ ${JS_ACTIVITE}${JS_DIRE}
      deux echecs, on veut savoir LESQUELLES pendant que ca tourne. On boucle donc
      photo par photo et l on rend compte a chaque pas.
      ══════════════════════════════════════════════════════════════════════════ */
-  var LOTS = [
+  /* ⚠⚠ CETTE LISTE S'APPELAIT « LOTS », COMME L'HISTORIQUE DES IMPORTS.
+     Deux déclarations « var » du MÊME NOM dans un même fichier ne font qu'UNE
+     variable : « var » est hissé, et la seconde écrase la première au
+     chargement.
+     L'écran des lots affichait donc CES TROIS TRAITEMENTS : « 3 lots », trois
+     lignes « Sans nom », des compteurs vides, et un diagnostic qui annonçait
+     « champs reçus : 0, 1, 2 » — les INDEX d'un tableau de trois chaînes, pas
+     des noms de champs.
+     ⚠ ET RIEN NE PROTESTAIT : c'est du JavaScript parfaitement légal. Le
+     contrôle de syntaxe était vert, le garde-fou des fenêtres disait « tout est
+     sain », et le défaut a été cherché dans la sérialisation du pont pendant
+     deux versions. Le contrôle qui manquait est maintenant posé
+     (tools/verifier-fenetres.js, § « un nom, une déclaration »). */
+  var TRAITEMENTS_LOT = [
     ['detourage', 'Détourer', 'Isole le vêtement de son fond.'],
     ['fantome', 'Retirer le mannequin', 'Ne garde que le vêtement, col et manches reconstruits.'],
     ['humain', 'Mettre sur un mannequin', 'Fait porter le vêtement par une personne engendrée.'],
@@ -1246,7 +1268,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!n || !D.peutModifier) return '';
     return '<div class="lot"><span class="cnt">' + n + ' photo' + (n > 1 ? 's' : '')
       + ' choisie' + (n > 1 ? 's' : '') + '</span>'
-      + LOTS.map(function(l){
+      + TRAITEMENTS_LOT.map(function(l){
           return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
         }).join('')
       + '<button class="mini" data-lot="pivot" title="Pivoter d’un quart de tour vers la droite">⟳ Pivoter</button>'
@@ -1502,7 +1524,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="pied-boite">'
       + (ro ? '' : '<button class="danger" id="p-suppr">'
-          + (SUPPR_ARME ? 'Confirmer le retrait ?' : '✕ Retirer de la médiathèque') + '</button>')
+          + (SUPPR_ARME_INSP ? 'Confirmer le retrait ?' : '✕ Retirer de la médiathèque') + '</button>')
       + (D.bureau ? '<button id="p-enreg">⤓ Enregistrer le fichier</button>' : '')
       + (ro || r.isole ? '' : '<button class="prim" id="p-isoler">✂ Isoler le vêtement</button>')
       + (ro ? '' : '<button class="' + (r.isole ? 'prim' : '') + '" id="p-attacher">'
@@ -1510,7 +1532,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button id="p-fermer">Fermer</button>'
       + '</div>';
 
-    if (SUPPR_ARME) {
+    if (SUPPR_ARME_INSP) {
       h += '<div class="aide" style="margin-top:.5rem">'
         + (r.lieId
             ? 'Cette photo est attachée à <strong>' + esc(r.lieNom) + '</strong>. La fiche de l’article '
@@ -2238,12 +2260,12 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var su = document.getElementById('p-suppr');
     if (su) su.onclick = function(){
-      if (!SUPPR_ARME) {
-        SUPPR_ARME = true; dessiner();
-        setTimeout(function(){ if (SUPPR_ARME) { SUPPR_ARME = false; if (DETAIL) dessiner(); } }, 5000);
+      if (!SUPPR_ARME_INSP) {
+        SUPPR_ARME_INSP = true; dessiner();
+        setTimeout(function(){ if (SUPPR_ARME_INSP) { SUPPR_ARME_INSP = false; if (DETAIL) dessiner(); } }, 5000);
         return;
       }
-      SUPPR_ARME = false;
+      SUPPR_ARME_INSP = false;
       dire('Retrait…');
       appeler('photos:supprimer', [DETAIL.id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -2256,7 +2278,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function fermerDetail(){
-    DETAIL = null; ATTACHE = false; PRODUITS = null; PQ = ''; SUPPR_ARME = '';
+    DETAIL = null; ATTACHE = false; PRODUITS = null; PQ = '';
+    SUPPR_ARME = ''; SUPPR_ARME_INSP = false;
     dessiner();
   }
 
@@ -2280,7 +2303,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (tr) {
       var id = tr.getAttribute('data-id');
       var r = (D.lignes || []).filter(function(x){ return x.id === id; })[0];
-      if (r) { DETAIL = r; SUPPR_ARME = ''; ATTACHE = false; dessiner(); }
+      if (r) { DETAIL = r; SUPPR_ARME = ''; SUPPR_ARME_INSP = false; ATTACHE = false; dessiner(); }
     }
   };
 
