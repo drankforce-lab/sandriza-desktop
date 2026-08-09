@@ -1077,6 +1077,10 @@ const OPS_PONT = new Set([
   'paiements:lire', 'paiements:charger', 'paiements:masquer', 'paiements:reafficher',
   // L etat de compte, dans sa fenetre : le voir, l imprimer, l envoyer.
   'etat:lire', 'etat:imprimer', 'etat:courriel',
+  // Cartes-cadeaux (fenetre Cartes-cadeaux, 1.63.0). La LISTE attend la
+  // resynchronisation : ce sont des soldes d argent.
+  'cartescadeaux:liste', 'cartescadeaux:lire', 'cartescadeaux:creer',
+  'cartescadeaux:activer', 'cartescadeaux:recompense',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1299,6 +1303,7 @@ const LIMITES_PONT = {
   // remboursements, paginee, depasse largement le delai ordinaire.
   'paiements:charger': 60000,
   'etat:courriel': 30000,
+  'cartescadeaux:liste': 20000,
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
   'messagerie:liste': 20000, 'messagerie:repondre': 30000,
@@ -1444,6 +1449,7 @@ const PAGES_ANCRABLES = () => ({
   messagerie: ['Messagerie clients', () => pageMessagerie()],
   archives: ['Archives', () => pageArchives()],
   paiements: ['Paiements Square', () => pagePaiements()],
+  cartescadeaux: ['Cartes-cadeaux', () => pageCartesCadeaux()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2168,6 +2174,7 @@ const { pageNotes } = require('./fenetres/notes');
 const { pageArchives } = require('./fenetres/archives');
 const { pagePaiements } = require('./fenetres/paiements');
 const { pageEtatCompte } = require('./fenetres/etatcompte');
+const { pageCartesCadeaux } = require('./fenetres/cartescadeaux');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2243,7 +2250,7 @@ const actionApp = (nom) => {
     case 'tableau': case 'inventaire': case 'commandes': case 'produits':
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
-    case 'archives': case 'paiements': {
+    case 'archives': case 'paiements': case 'cartescadeaux': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

@@ -68,7 +68,7 @@ contextBridge.exposeInMainWorld('szPont', {
       'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
       'retours:liste': 20000, 'ramassages:annuler': 30000, 'ramassages:planifier': 45000,
       'paiements:charger': 65000,
-      'etat:courriel': 35000,
+      'etat:courriel': 35000, 'cartescadeaux:liste': 25000,
       'messagerie:liste': 20000, 'messagerie:repondre': 30000 };
     const limite = (LONGUES[nom] || 20000) + 5000;
     const plafond = new Promise((resoudre) => {

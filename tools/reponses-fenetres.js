@@ -513,6 +513,71 @@ module.exports = {
     },
   ],
 
+  // ── CARTES-CADEAUX ─────────────────────────────────────────────────────────
+  'cartescadeaux.js': [
+    {
+      // ⚠ FORME REELLE de cartescadeaux:liste (coeur Promo._gcDonnees).
+      nom: 'cartes garnies',
+      id: '',
+      reponses: {
+        'cartescadeaux:liste': {
+          ok: true, peutModifier: true,
+          recompense: { enabled: true, type: 'percent', value: 10, expiryDays: 30 },
+          tuiles: { actives: 2, total: 3, enCirculation: 125.50, emis: 250.00, utilisees: 1 },
+          cartes: [
+            { id: 'g1', code: 'SZ-A1B2-C3D4', destinataire: 'Marie Tremblay',
+              courriel: 'marie@example.com', initial: 100, solde: 75.50,
+              expediteur: 'SANDRIZA', date: '2026-07-12', statut: 'active',
+              statutLibelle: 'Active', courrielEnvoye: true },
+            { id: 'g2', code: 'SZ-E5F6-G7H8', destinataire: 'Julie Gagnon',
+              courriel: 'julie@example.com', initial: 50, solde: 50,
+              expediteur: 'Anne Roy', date: '2026-08-01', statut: 'pending',
+              statutLibelle: 'Activation requise', courrielEnvoye: false },
+            { id: 'g3', code: 'SZ-I9J0-K1L2', destinataire: 'Anne Roy',
+              courriel: 'anne@example.com', initial: 100, solde: 0,
+              expediteur: 'SANDRIZA', date: '2026-05-20', statut: 'used',
+              statutLibelle: 'Utilisée', courrielEnvoye: true },
+          ],
+        },
+        'cartescadeaux:lire': {
+          ok: true,
+          carte: { id: 'g1', code: 'SZ-A1B2-C3D4', destinataire: 'Marie Tremblay',
+            courriel: 'marie@example.com', expediteur: 'SANDRIZA',
+            courrielExpediteur: '', message: 'Bonne fête !', note: '',
+            initial: 100, solde: 75.50, statut: 'active', date: '2026-07-12',
+            transactions: [
+              { date: '2026-08-01', commande: 'CMD-2026-0498', montant: 24.50, soldeApres: 75.50 },
+            ] },
+        },
+        'cartescadeaux:creer': { ok: true, code: 'SZ-M3N4-O5P6', id: 'g4' },
+        'cartescadeaux:activer': { ok: true, code: 'SZ-E5F6-G7H8' },
+        'cartescadeaux:recompense': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucune carte',
+      id: '',
+      reponses: {
+        'cartescadeaux:liste': {
+          ok: true, peutModifier: false,
+          recompense: { enabled: false, type: 'percent', value: 10, expiryDays: 30 },
+          tuiles: { actives: 0, total: 0, enCirculation: 0, emis: 0, utilisees: 0 },
+          cartes: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'cartescadeaux:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── ÉTAT DE COMPTE ─────────────────────────────────────────────────────────
   'etatcompte.js': [
     {
