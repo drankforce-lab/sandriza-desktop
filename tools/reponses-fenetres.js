@@ -513,6 +513,49 @@ module.exports = {
     },
   ],
 
+  // ── ABONNÉS DE L'INFOLETTRE ────────────────────────────────────────────────
+  'abonnes.js': [
+    {
+      // ⚠ FORME REELLE de abonnes:liste (coeur Newsletter._abonnesDonnees).
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'abonnes:liste': {
+          ok: true, peutModifier: true, actifs: 2, desabonnes: 1,
+          abonnes: [
+            { id: 'a1', courriel: 'marie@example.com', prenom: 'Marie', source: 'footer',
+              sourceLibelle: 'Pied de page', date: '2026-07-12', actif: true, retireLe: '' },
+            { id: 'a2', courriel: 'julie@example.com', prenom: '', source: 'checkout',
+              sourceLibelle: 'Commande', date: '2026-06-30', actif: true, retireLe: '' },
+            { id: 'a3', courriel: 'anne@example.com', prenom: 'Anne', source: 'import',
+              sourceLibelle: 'Import', date: '2026-05-02', actif: false, retireLe: '2026-07-01' },
+          ],
+        },
+        'abonnes:ajouter': { ok: true, courriel: 'nouvelle@example.com', reactive: false },
+        'abonnes:basculer': { ok: true, courriel: 'marie@example.com', actif: false },
+        'abonnes:supprimer': { ok: true, courriel: 'anne@example.com' },
+        'abonnes:importer': { ok: true, lues: 5, ajoutes: 3, deja: 1, refuses: 1 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucun abonne',
+      id: '',
+      reponses: {
+        'abonnes:liste': { ok: true, peutModifier: true, actifs: 0, desabonnes: 0, abonnes: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'abonnes:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── RECHERCHES SANS RÉSULTAT ───────────────────────────────────────────────
   'recherches.js': [
     {
