@@ -1183,6 +1183,9 @@ const OPS_PONT = new Set([
   // que soit la maniere dont la fenetre se ferme (meme patron que l assistant
   // Produit). Le recu voyage avec.
   'depenses:brouillonLire', 'depenses:brouillonEcrire', 'depenses:brouillonJeter',
+  // L ANNUAIRE des fournisseurs : visible, modifiable, et VERROUILLE pendant
+  // qu on le corrige (portee expense_vendors, meme mecanisme que les fiches).
+  'depenses:annuaire', 'depenses:annuaireEcrire', 'depenses:annuaireRetirer',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.

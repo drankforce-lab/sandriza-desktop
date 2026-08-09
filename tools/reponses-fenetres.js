@@ -859,6 +859,51 @@ module.exports = {
       },
     },
     {
+      // ⚠ L'ANNUAIRE : un écran entier qui ne s'atteint qu'au clic. Sans état
+      // d'ouverture, aucun jeu ne le dessinerait — troisième fois de la journée.
+      nom: 'annuaire des fournisseurs',
+      id: 'annuaire',
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
+          annees: ['2026'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'web', libelle: 'Site web, logiciels (SaaS)', ligne: '9270' },
+            { cle: 'pub', libelle: 'Publicité', ligne: '8521' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: true,
+          total: '0.00 $', totalTps: '0.00 $', totalTvq: '0.00 $',
+          nombre: 0, page: 0, pages: 1, taille: 25, lignes: [],
+        },
+        'depenses:annuaire': {
+          ok: true, total: 3, integres: 2, appris: 2, trouves: 3,
+          page: 0, pages: 1, taille: 30, peutModifier: true,
+          categories: [{ cle: 'web', libelle: 'Site web, logiciels (SaaS)', ligne: '9270' },
+            { cle: 'pub', libelle: 'Publicité', ligne: '8521' }],
+          lignes: [
+            // Livré tel quel.
+            { id: 'render', nom: '', categorie: 'web', categorieLbl: 'Site web, logiciels (SaaS)',
+              ligne: '9270', flou: false, origine: 'integre', categorieBaseLbl: '' },
+            // ⚠ CORRIGÉ : la correction RECOUVRE le classement livré, elle ne
+            // l'efface pas — l'écran doit montrer les deux.
+            { id: 'amazon', nom: 'Amazon.ca', categorie: 'web',
+              categorieLbl: 'Site web, logiciels (SaaS)', ligne: '9270', flou: false,
+              origine: 'corrige', categorieBaseLbl: 'Fournitures et frais de bureau' },
+            // Ajouté à la main : aucun classement livré derrière.
+            { id: 'atelierriviere', nom: 'Atelier Rivière', categorie: 'pub',
+              categorieLbl: 'Publicité', ligne: '8521', flou: false,
+              origine: 'appris', categorieBaseLbl: '' },
+          ],
+        },
+        'depenses:annuaireEcrire': { ok: true, id: 'render', categorie: 'Site web, logiciels (SaaS)' },
+        'depenses:annuaireRetirer': { ok: true, id: 'amazon', integre: true,
+          categorie: 'Fournitures et frais de bureau' },
+        // ⚠ FORME RÉELLE de verrou:prendre — un OBJET, jamais un booléen.
+        'verrou:prendre': { ok: true, obtenu: true, horsLigne: false, parQui: '', par: 'bbrousseau' },
+        'verrou:rendre': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
       nom: 'lecture seule',
       id: '',
       reponses: {

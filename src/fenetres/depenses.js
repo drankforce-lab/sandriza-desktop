@@ -152,7 +152,7 @@ function pageDepenses(ouverture) {
      autrement qu'après deux clics. Un panneau jamais dessiné par un jeu d'essai
      est un panneau qui peut mourir en silence — la leçon a déjà coûté quatre
      versions publiées sur ce projet. */
-  const ok = ['nouvelle', 'fermeture'];
+  const ok = ['nouvelle', 'fermeture', 'annuaire'];
   const depart = (ok.indexOf(String(ouverture || '')) >= 0) ? String(ouverture) : 'liste';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Dépenses d’entreprise — Administration Sandriza</title>
@@ -178,6 +178,12 @@ ${JS_ACTIVITE}${JS_DIRE}
   var BR_MINUTE = null;      // minuterie d enregistrement du brouillon
   var BR_REPRIS = 0;         // age du brouillon repris, en minutes
   var FERMER_DEMANDE = false; // on demande quoi faire du brouillon avant de fermer
+  var VUE = '${depart === 'annuaire' ? 'annuaire' : 'depenses'}';   // depenses | annuaire
+  var ANN = null;            // reponse de depenses:annuaire
+  var ANN_Q = '', ANN_PAGE = 0;
+  var ANN_FORM = null;       // { id, nom, categorie, neuf }
+  var ANN_RETIRE = '';       // id arme pour retrait
+  var VERROU = null;         // { obtenu, parQui } — l annuaire est partage
   var OUVERTURE = '${depart}';
 
   /* ⚠ MÊME PLAFOND QUE L'ÉCRAN WEB : 8 Mo. Au-delà, le fichier traverse le pont
@@ -242,6 +248,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!D.peutModifier && !D.peutAjouter) {
       h += '<div class="avis">👁 Lecture seule — votre rôle permet de consulter les dépenses, pas de les saisir.</div>';
     }
+
+    h += '<div class="barreoutils">'
+      + '<button class="mini' + (VUE === 'depenses' ? ' actif' : '') + '" data-vue="depenses">Dépenses</button>'
+      + '<button class="mini' + (VUE === 'annuaire' ? ' actif' : '') + '" data-vue="annuaire">Fournisseurs</button>'
+      + '</div>';
+
+    if (VUE === 'annuaire') { h += vueAnnuaire(); corps.innerHTML = h; brancher(); return; }
 
     h += '<div class="barreoutils">'
       + '<select id="d-annee">' + (D.annees || []).map(function(a){
@@ -324,6 +337,105 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     corps.innerHTML = h;
     brancher();
+  }
+
+  /* ══ L ANNUAIRE DES FOURNISSEURS ══════════════════════════════════════════
+     Demande le 2026-08-09 : << l annuaire doit etre visible, et me permettre
+     d ajouter et de modifier >>, << avec le systeme de verrou bien evidemment >>.
+     ⚠ DEUX ORIGINES, DISTINGUEES A L ECRAN : ce qui est LIVRE avec
+     l application et ce qui a ete APPRIS ou corrige ici. Modifier une entree
+     livree ne l ecrase pas — cela cree une correction qui la RECOUVRE, et
+     << Retirer la correction >> rend son classement d origine. Les confondre
+     ferait croire qu on a detruit un fournisseur alors qu on l a seulement
+     ramene a son reglage d usine. */
+  function vueAnnuaire(){
+    if (!ANN) return '<div class="carte"><div class="vide">Lecture de l’annuaire…</div></div>';
+    var ro = !ANN.peutModifier;
+    var h = '';
+
+    if (VERROU && !VERROU.obtenu) {
+      h += '<div class="avis">🔒 Annuaire ouvert en modification par <strong>'
+        + esc(VERROU.parQui || 'un collègue') + '</strong> — vous pouvez le consulter, '
+        + 'pas le corriger. Deux corrections en même temps, c’est la dernière qui gagne '
+        + 'sans que la première le sache.</div>';
+    }
+
+    h += '<div class="stats">'
+      + '<div class="s"><div class="n">' + ANN.total + '</div><div class="l">fournisseurs</div>'
+      + '<div class="sub">reconnus d’emblée</div></div>'
+      + '<div class="s"><div class="n">' + ANN.integres + '</div><div class="l">livrés</div>'
+      + '<div class="sub">avec l’application</div></div>'
+      + '<div class="s"><div class="n">' + ANN.appris + '</div><div class="l">vos corrections</div>'
+      + '<div class="sub">elles priment</div></div>'
+      + '</div>';
+
+    h += '<div class="barreoutils">'
+      + '<input type="search" id="a-q" placeholder="Domaine, nom ou catégorie…" value="' + esc(ANN_Q) + '">'
+      + ((ro || (VERROU && !VERROU.obtenu)) ? ''
+          : '<button class="prim" id="a-nouveau">＋ Ajouter un fournisseur</button>')
+      + '<span class="droite">' + ANN.trouves + ' affiché' + (ANN.trouves > 1 ? 's' : '') + '</span>'
+      + '</div>';
+
+    if (ANN_FORM) {
+      h += '<div class="carte"><h2>' + (ANN_FORM.neuf ? 'Ajouter un fournisseur' : 'Corriger le classement') + '</h2>'
+        + '<div class="form">'
+        + '<div class="champ"><label>Domaine ou nom</label>'
+        + '<input type="text" id="a-id" value="' + esc(ANN_FORM.id) + '"'
+        + (ANN_FORM.neuf ? ' placeholder="ex. render.com"' : ' disabled') + '></div>'
+        + '<div class="champ"><label>Nom affiché (facultatif)</label>'
+        + '<input type="text" id="a-nom" value="' + esc(ANN_FORM.nom) + '" placeholder="ex. Render Services"></div>'
+        + '<div class="champ large"><label>Catégorie (ligne fiscale)</label><select id="a-cat">'
+        + (ANN.categories || []).map(function(c){
+            return '<option value="' + esc(c.cle) + '"' + (ANN_FORM.categorie === c.cle ? ' selected' : '') + '>'
+              + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
+        + '</select></div></div>'
+        + '<div class="aide" style="margin:.3rem 0 .5rem">Un domaine complet est accepté et réduit '
+        + 'automatiquement : « render.com », « support@render.com » et « Render » désignent le même fournisseur.</div>'
+        + '<div class="pied-boite"><button id="a-annuler">Annuler</button>'
+        + '<button class="prim" id="a-ok">✓ Enregistrer</button></div></div>';
+    }
+
+    h += '<div class="carte">';
+    var rows = ANN.lignes || [];
+    if (!rows.length) {
+      h += '<div class="vide">Aucun fournisseur ne correspond.</div>';
+    } else {
+      h += '<table><thead><tr><th>Fournisseur</th><th>Catégorie</th>'
+        + '<th>Origine</th><th style="text-align:right">Actions</th></tr></thead><tbody>'
+        + rows.map(function(r){
+            return '<tr data-ann="' + esc(r.id) + '">'
+              + '<td><span class="num">' + esc(r.id) + '</span>'
+              + (r.nom ? '<div class="dt">' + esc(r.nom) + '</div>' : '') + '</td>'
+              + '<td>' + esc(r.categorieLbl)
+              + (r.ligne ? ' <span class="dt">· L.' + esc(r.ligne) + '</span>' : '')
+              + (r.flou ? ' <span class="pill att">polyvalent</span>' : '') + '</td>'
+              + '<td>' + (r.origine === 'integre' ? '<span class="pill neutre">livré</span>'
+                  : (r.origine === 'corrige'
+                      ? '<span class="pill bon">corrigé</span> <span class="dt">au lieu de '
+                        + esc(r.categorieBaseLbl) + '</span>'
+                      : '<span class="pill bon">ajouté</span>')) + '</td>'
+              + '<td style="text-align:right;white-space:nowrap">'
+              + ((ro || (VERROU && !VERROU.obtenu)) ? '<span class="dt">—</span>'
+                  : '<button class="mini" data-annmod="' + esc(r.id) + '">Modifier</button>'
+                    + (r.origine === 'integre' ? ''
+                        : ' <button class="mini danger" data-annret="' + esc(r.id) + '">'
+                          + (ANN_RETIRE === r.id ? 'Confirmer ?' : '✕') + '</button>'))
+              + '</td></tr>';
+          }).join('')
+        + '</tbody></table>';
+      if ((ANN.pages || 1) > 1) {
+        h += '<div class="pagi">'
+          + '<button class="mini" id="a-prec"' + (ANN.page <= 0 ? ' disabled' : '') + '>◀</button>'
+          + '<span>Page ' + (ANN.page + 1) + ' / ' + ANN.pages + '</span>'
+          + '<button class="mini" id="a-suiv"' + (ANN.page >= ANN.pages - 1 ? ' disabled' : '') + '>▶</button>'
+          + '</div>';
+      }
+    }
+    h += '</div>';
+    h += '<div class="aide" style="padding:.1rem">L’annuaire sert à classer une facture dès '
+      + 'son import. <strong>Vos corrections priment</strong> sur ce qui est livré, et une '
+      + 'catégorie choisie à la main lors d’une saisie y entre toute seule.</div>';
+    return h;
   }
 
   function boiteDetail(){
@@ -817,6 +929,45 @@ ${JS_ACTIVITE}${JS_DIRE}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    var vv = t.closest('[data-vue]');
+    if (vv) {
+      var v = vv.getAttribute('data-vue');
+      if (v === VUE) return;
+      VUE = v; ANN_FORM = null; ANN_RETIRE = '';
+      dessiner();
+      if (v === 'annuaire') { chargerAnnuaire(); prendreVerrou(); }
+      else rendreVerrou();
+      return;
+    }
+    var am = t.closest('[data-annmod]');
+    if (am) {
+      var idm = am.getAttribute('data-annmod');
+      var lg = ((ANN && ANN.lignes) || []).filter(function(x){ return x.id === idm; })[0];
+      if (lg) { ANN_FORM = { id: lg.id, nom: lg.nom, categorie: lg.categorie, neuf: false }; dessiner(); }
+      return;
+    }
+    var ar = t.closest('[data-annret]');
+    if (ar) {
+      var idr = ar.getAttribute('data-annret');
+      /* ⚠ ARME EN DEUX CLICS, et le second dit ce qui se passe VRAIMENT : sur un
+         fournisseur LIVRE, retirer la correction ne le supprime pas — il retrouve
+         son classement d origine. Confondre les deux ferait croire qu on a
+         detruit un fournisseur alors qu on l a ramene a son reglage d usine. */
+      if (ANN_RETIRE !== idr) {
+        ANN_RETIRE = idr; dessiner();
+        setTimeout(function(){ if (ANN_RETIRE === idr) { ANN_RETIRE = ''; dessiner(); } }, 5000);
+        return;
+      }
+      ANN_RETIRE = '';
+      appeler('depenses:annuaireRetirer', [idr]).then(function(r){
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        dire(r.integre
+          ? ('« ' + r.id + ' » retrouve son classement livré : ' + r.categorie + '.')
+          : ('« ' + r.id + ' » retiré de l’annuaire.'), 'bon');
+        chargerAnnuaire();
+      });
+      return;
+    }
     if (t.closest('.boite')) return;
     /* ⚠⚠ UN CLIC A COTE NE JETTE PLUS LA SAISIE. Il fermait le formulaire et tout
        ce qui y avait ete mis — recu importe compris — sans un mot. Signale le
@@ -871,6 +1022,44 @@ ${JS_ACTIVITE}${JS_DIRE}
   });
 
   /* ── CHARGEMENT ────────────────────────────────────────────────────────── */
+  function chargerAnnuaire(garderSaisie){
+    return appeler('depenses:annuaire', [{ q: ANN_Q, page: ANN_PAGE, taille: 30 }]).then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      ANN = r;
+      if (garderSaisie) {
+        var q = document.getElementById('a-q');
+        var d1 = q ? q.selectionStart : null, f1 = q ? q.selectionEnd : null;
+        dessiner();
+        var q2 = document.getElementById('a-q');
+        if (q2) { q2.focus({ preventScroll: true });
+          try { if (d1 != null) q2.setSelectionRange(d1, f1); } catch (e) {} }
+      } else dessiner();
+    });
+  }
+
+  /* ⚠ L ANNUAIRE EST PARTAGE, DONC IL SE VERROUILLE (demande du 2026-08-09 :
+     << avec le systeme de verrou bien evidemment >>). Deux personnes qui
+     corrigent le classement d un meme fournisseur en meme temps, c est la
+     derniere qui gagne sans que la premiere le sache — et une facture se
+     retrouve dans la mauvaise ligne fiscale sans que personne ne comprenne.
+     Le verrou est pris A L OUVERTURE de la vue et rendu quand on la quitte ou
+     qu on ferme : c est la regle deja posee pour les fiches. */
+  function prendreVerrou(){
+    appeler('verrou:prendre', ['expense_vendors', 'annuaire']).then(function(r){
+      /* ⚠ verrou:prendre rend un OBJET, pas un booleen — piege deja paye. */
+      VERROU = r && r.ok ? { obtenu: !!r.obtenu, parQui: r.parQui || '' } : { obtenu: true, parQui: '' };
+      if (VUE === 'annuaire') dessiner();
+      if (VERROU && !VERROU.obtenu) {
+        dire('Annuaire ouvert par ' + (VERROU.parQui || 'un collègue') + ' — consultation seulement.', 'att');
+      }
+    });
+  }
+  function rendreVerrou(){
+    if (!VERROU) return;
+    VERROU = null;
+    appeler('verrou:rendre', ['expense_vendors', 'annuaire']).then(function(){});
+  }
+
   var enCours = false, RELANCE = false;
   function charger(){
     if (enCours) { RELANCE = true; return Promise.resolve(); }
@@ -887,6 +1076,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       /* ⚠ L OUVERTURE DIRECTE PASSE PAR LE MEME CHEMIN QUE LE BOUTON : elle relit
          donc le brouillon. Poser un formulaire vierge ici aurait ecrase en
          silence ce qui avait ete commence. */
+      if (OUVERTURE === 'annuaire') { OUVERTURE = 'liste'; dessiner(); chargerAnnuaire(); prendreVerrou(); return; }
       var ouvrirApres = ((OUVERTURE === 'nouvelle' || OUVERTURE === 'fermeture')
         && D.peutAjouter && !FORM);
       var poserQuestion = (OUVERTURE === 'fermeture');
@@ -924,6 +1114,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
+
+  // ⚠ LE VERROU SE REND QUAND LA FENETRE PART. Sans cela, l annuaire resterait
+  // tenu jusqu a l expiration et le collegue suivant ne pourrait rien corriger.
+  window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
