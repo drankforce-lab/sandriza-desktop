@@ -1279,7 +1279,7 @@ const OPS_PONT = new Set([
   'photos:usb', 'photos:enregistrer',
   // Traitements nommes (detourage, mannequin retire, porte par un mannequin)
   // et le meme geste sur un LOT.
-  'photos:traiter', 'photos:lot',
+  'photos:traiter', 'photos:lot', 'photos:renommer',
   // Le suivi de consommation Fal.ai (lecture seule).
   'fal:suivi',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
@@ -1528,6 +1528,18 @@ const LIMITES_PONT = {
   // rate — le couper a 8 s en ferait un << echec >> qui a pourtant paye.
   'remboursement:ecrire': 45000, 'commandes:supprimerEcrire': 45000,
   'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,
+  /* ⚠⚠ LES TRAITEMENTS D IMAGE PAR MODELE, ET C EST LA CAUSE DE << modele
+     delai >> (signale le 2026-08-09 sur un retrait de mannequin). Ces
+     operations n etaient PAS dans cette table : elles heritaient du plafond
+     ordinaire de 8 SECONDES, alors qu un appel Kontext prend 20 a 60 s. La
+     fenetre annoncait un echec pendant que le modele travaillait — et surtout
+     pendant qu il FACTURAIT. Un plafond trop court ne rate pas seulement le
+     resultat : il le fait payer deux fois.
+     ⚠ 180 s ICI, 120 s AU RELAIS : le plafond le plus court doit etre le plus
+     INTERIEUR, sinon c est la couche du dessus qui abandonne la premiere et
+     l on perd le vrai message d erreur. */
+  'photos:traiter': 180000, 'photos:lot': 180000, 'photos:isoler': 180000,
+  'photos:importer': 60000, 'photos:usb': 120000, 'fal:suivi': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,

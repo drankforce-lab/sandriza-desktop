@@ -221,6 +221,7 @@ ${JS_ACTIVITE}${JS_DIRE}
      ⚠ Sans cela, cocher douze photos puis trier par poids les decocherait
      toutes, et l on s en apercevrait apres avoir lance le traitement. */
   var CHOIX = {};
+  var LOT_NOM = '';         // le nom donne au prochain lot importe
 
   /* ⚠⚠ UN DRAPEAU QUI NE SE LEVE PAS BLOQUE LA FENETRE POUR TOUJOURS.
      Signale le 2026-08-09 : << Recherche de cles USB... >> restait a l ecran, et
@@ -335,6 +336,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="barreoutils">'
       + '<button class="prim" id="p-choisir"' + (ro ? ' disabled' : '') + '>＋ Importer des photos</button>'
       + (D.bureau ? '<button id="p-usb"' + (ro ? ' disabled' : '') + '>🔌 Détecter une clé USB</button>' : '')
+      /* ⚠ LE NOM DU LOT SE POSE AVANT L IMPORT, pas apres : renommer trente
+         photos une a une apres coup, personne ne le fait. Vide, on garde le nom
+         du fichier — c est le repli le moins surprenant. */
+      + (ro ? '' : '<input id="p-lot-nom" type="text" placeholder="Nom du lot (facultatif)"'
+          + ' value="' + esc(LOT_NOM) + '" title="Les photos importées seront nommées « Nom 01 », « Nom 02 »…"'
+          + ' style="width:auto;min-width:11rem">')
       + '<input type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
       + '<select id="p-tri">'
       + opt('recent', 'Plus récentes') + opt('code', 'Par code') + opt('name', 'Par nom')
@@ -528,8 +535,16 @@ ${JS_ACTIVITE}${JS_DIRE}
   function boiteDetail(){
     var r = DETAIL;
     var ro = !D.peutModifier;
+    /* ⚠ LE CODE RESTE, LE NOM SE CHANGE. << PH-000001 >> est ce qu on retrouve
+       sur une fiche produit, dans un journal et sur une etiquette imprimee : le
+       laisser bouger casserait la seule chose qui relie tout cela. */
     var h = '<div class="voile" id="p-voile"><div class="boite">'
-      + '<h3><span class="num">' + esc(r.code) + '</span> ' + esc(r.nom) + ' ' + etat(r) + '</h3>'
+      + '<h3><span class="num">' + esc(r.code) + '</span> '
+      + (ro ? esc(r.nom)
+            : '<input id="p-nom" type="text" value="' + esc(r.nom) + '" maxlength="120"'
+              + ' style="width:auto;min-width:14rem;font:inherit" title="Renommer cette photo">'
+              + ' <button class="mini" id="p-nom-ok">Renommer</button>')
+      + ' ' + etat(r) + '</h3>'
       + '<div class="apercu">'
       + (r.apercu ? '<img src="' + esc(r.apercu) + '" alt="">'
                   : '<span class="aide" style="padding:1rem;text-align:center">Cette photo n’a pas atteint le stockage.<br>'
@@ -716,8 +731,20 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     if (!liste.length) { dire('Aucune image dans ce dépôt (JPG, PNG ou WebP).', 'att'); return; }
     if (occupeDeja('Import')) return;
+    var champLot = document.getElementById('p-lot-nom');
+    if (champLot) LOT_NOM = champLot.value.trim();
+    /* Le nom donne a chaque fichier : << Robe ete 01 >>, << Robe ete 02 >>…
+       ⚠ LE SUFFIXE EST SUR DEUX CHIFFRES ET SUIT L ORDRE DU DEPOT : c est ce qui
+       fait qu un tri alphabetique rend le meme ordre que celui qu on a choisi en
+       glissant les fichiers. Sans zero devant, << 10 >> passerait avant << 2 >>. */
+    var nommer = function(f, i){
+      if (!LOT_NOM) return f.name;
+      var n = String(i + 1);
+      return LOT_NOM + ' ' + (n.length < 2 ? '0' + n : n);
+    };
     occuper('Préparation de l’import…');
-    suiviOuvrir(liste.map(function(f){ return f.name; }), 'Import de ' + liste.length + ' photo(s)');
+    suiviOuvrir(liste.map(function(f, i){ return nommer(f, i); }),
+      (LOT_NOM ? ('Import · ' + LOT_NOM) : 'Import') + ' · ' + liste.length + ' photo(s)');
     var faites = 0, doubles = 0, refuses = 0, echoues = 0;
     var abandonnees = 0;
     var suite = function(k){
@@ -767,7 +794,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         }
         suiviEtapes(k, [{ nom: 'lecture', ok: true, chiffre: poids(f.size) },
                         { nom: 'compression', etat: 'encours' }]);
-        appeler('photos:importer', [f.name, data, f.size]).then(function(r){
+        appeler('photos:importer', [nommer(f, k), data, f.size]).then(function(r){
           /* ⚠ LES ETAPES VIENNENT DU COEUR, pas d une supposition d ici : c est
              lui qui compresse et qui depose, et lui seul sait ce que ca a donne. */
           if (r && r.etapes) {
@@ -912,6 +939,18 @@ ${JS_ACTIVITE}${JS_DIRE}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-lot]'), function(b){
       b.onclick = function(){ lancerLot(b.getAttribute('data-lot')); };
     });
+
+    var nomOk = document.getElementById('p-nom-ok');
+    if (nomOk) nomOk.onclick = function(){
+      var c = document.getElementById('p-nom');
+      if (!c || !c.value.trim()) { dire('Le nom ne peut pas être vide.', 'err'); return; }
+      dire('Renommage…');
+      appeler('photos:renommer', [DETAIL.id, c.value.trim()]).then(function(r){
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        dire('Photo renommée.', 'bon');
+        rouvrir(r.photo);
+      });
+    };
 
     var usb = document.getElementById('p-usb');
     if (usb) usb.onclick = function(){
