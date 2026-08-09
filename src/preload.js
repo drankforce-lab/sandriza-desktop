@@ -138,6 +138,11 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // c est qu on est a 60 secondes de perdre sa session.
   attirerAttention: () => ipcRenderer.send('win:attention'),
 
+  /* Le décompte d'inactivité, dans SA fenêtre — toujours au-dessus.
+     ⚠ Un nombre de secondes l'ouvre, 0 (ou rien) le ferme. Le site reste seul
+     maître de l'horloge : cette fenêtre ne fait que se montrer. */
+  decompte: (secondes) => ipcRenderer.send('session:decompte', parseInt(secondes, 10) || 0),
+
   // ── Phase 3 : notifications + pastille ──────────────────────────────────────
   // Ouvre la preparation d une commande PRECISE dans une fenetre native.
   // Le site sait laquelle est selectionnee ; la coquille ne fait que porter

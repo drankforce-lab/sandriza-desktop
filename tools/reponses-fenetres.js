@@ -806,45 +806,102 @@ module.exports = {
   ],
 
   // ── LIENS D'INSTALLATION ───────────────────────────────────────────────────
-  // ⚠ FORME RÉELLE de install:paquets (adm-invite.php, action=versions).
-  // TROIS cas, et chacun dessine autre chose :
-  //   « Windows seul » est la réalité du jour — les constructions se lancent avec
-  //     `avec_mac=false`, donc l'avis « aucun paquet macOS » DOIT s'afficher.
-  //   « les cinq » prouve que les déclinaisons Mac se dessinent quand elles
-  //     existent, et que l'avis, lui, disparaît.
-  //   « dépôt vide » est le cas où rien n'a jamais été publié : sans jeu d'essai,
-  //     cet écran-là ne serait dessiné pour la première fois qu'en production.
-  'liensinstall.js': [
+  // ⚠ FORME RÉELLE de liens:liste / liens:journal (adm-invite.php).
+  // QUATRE cas, et chacun dessine autre chose :
+  //   « registre garni » couvre les quatre états d'un lien — un seul état dessiné
+  //     laisserait les trois autres pastilles non éprouvées ;
+  //   « lien fraîchement fabriqué » est la carte qui montre le mot de passe UNE
+  //     fois : elle n'apparaît qu'après un geste, donc sans état d'ouverture
+  //     aucun jeu ne la dessinerait jamais ;
+  //   « journal » est une VUE ENTIÈRE que rien d'autre n'atteint ;
+  //   « registre vide » est le premier écran d'une installation neuve.
+  'liens.js': [
     {
-      nom: 'Windows seul',
+      nom: 'registre garni',
       reponses: {
-        'install:paquets': { ok: true, version: '2.9.0', paquets: [
-          { cle: 'win-x64',   nom: 'Windows 64 bits', note: 'La plupart des PC Windows.',   taille: 78900087 },
-          { cle: 'win-arm64', nom: 'Windows ARM',     note: 'Surface Pro X, PC Snapdragon.', taille: 82864100 },
-          { cle: 'win-ia32',  nom: 'Windows 32 bits', note: 'Anciens PC en 32 bits.',        taille: 73806341 },
+        'liens:liste': { ok: true, liens: [
+          { id: 'a1b2c3d4e5f6a1b2c3', etat: 'actif', genre: 'manuel',
+            etiquette: 'Poste de la boutique', destinataire: 'boutique@exemple.ca',
+            staffId: '', maxUsages: 1, usages: 0,
+            expireLe: '2026-08-10T14:00:00Z', creeLe: '2026-08-09T14:00:00Z', creePar: 'bbrousseau',
+            revoqueLe: '', revoquePar: '', motif: '',
+            url: 'https://adm.sandriza.com/adm-invite.php?l=a1b2c3d4e5f6a1b2c3&s=x' },
+          { id: 'b2c3d4e5f6a1b2c3d4', etat: 'revoque', genre: 'inscription',
+            etiquette: 'Invitation — Marie Tremblay', destinataire: 'marie@exemple.ca',
+            staffId: 'stf_0002', maxUsages: 3, usages: 1,
+            expireLe: '2026-08-10T09:00:00Z', creeLe: '2026-08-09T09:00:00Z', creePar: 'bbrousseau',
+            revoqueLe: '2026-08-09T11:30:00Z', revoquePar: 'bbrousseau', motif: 'Courriel envoyé à la mauvaise adresse',
+            url: 'https://adm.sandriza.com/adm-invite.php?l=b2c3d4e5f6a1b2c3d4&s=x' },
+          { id: 'c3d4e5f6a1b2c3d4e5', etat: 'expire', genre: 'manuel',
+            etiquette: 'Comptable externe', destinataire: '', staffId: '',
+            maxUsages: 0, usages: 4,
+            expireLe: '2026-08-08T12:00:00Z', creeLe: '2026-08-01T12:00:00Z', creePar: 'bbrousseau',
+            revoqueLe: '', revoquePar: '', motif: '',
+            url: 'https://adm.sandriza.com/adm-invite.php?l=c3d4e5f6a1b2c3d4e5&s=x' },
+          { id: 'd4e5f6a1b2c3d4e5f6', etat: 'epuise', genre: 'manuel',
+            etiquette: 'Portable de rechange', destinataire: '', staffId: 'stf_0001',
+            maxUsages: 2, usages: 2,
+            expireLe: '2026-08-12T12:00:00Z', creeLe: '2026-08-09T12:00:00Z', creePar: 'bbrousseau',
+            revoqueLe: '', revoquePar: '', motif: '',
+            url: 'https://adm.sandriza.com/adm-invite.php?l=d4e5f6a1b2c3d4e5f6&s=x' },
         ] },
-        'install:lien': { ok: true, url: 'https://adm.sandriza.com/adm-invite.php?a=win-x64&v=2.9.0&e=1786000000&n=a1b2c3d4e5f6&s=' + '0'.repeat(40),
-          version: '2.9.0', expire: 1786000000, nom: 'Windows 64 bits', protege: false },
+        'liens:comptes': { ok: true, comptes: [
+          { id: 'stf_0001', nom: 'Bruno Brousseau', courriel: 'bbrousseau@exemple.ca' },
+          { id: 'stf_0002', nom: 'Marie Tremblay', courriel: 'marie@exemple.ca' },
+        ] },
+        'liens:paquets': { ok: true, version: '2.10.0', paquets: [
+          { cle: 'win-x64', nom: 'Windows 64 bits', note: 'La plupart des PC Windows.', taille: 78900087 },
+        ] },
         identite: IDENTITE,
       },
     },
     {
-      nom: 'les cinq',
+      // Le formulaire ouvert : la liste des comptes à rattacher s'y dessine.
+      nom: 'nouveau lien',
+      id: 'nouveau',
       reponses: {
-        'install:paquets': { ok: true, version: '2.9.0', paquets: [
-          { cle: 'win-x64',   nom: 'Windows 64 bits',     note: 'La plupart des PC Windows.',   taille: 78900087 },
-          { cle: 'win-ia32',  nom: 'Windows 32 bits',     note: 'Anciens PC en 32 bits.',        taille: 73806341 },
-          { cle: 'win-arm64', nom: 'Windows ARM',         note: 'Surface Pro X, PC Snapdragon.', taille: 82864100 },
-          { cle: 'mac-arm64', nom: 'macOS Apple Silicon', note: 'Mac M1, M2, M3, M4.',           taille: 96000000 },
-          { cle: 'mac-x64',   nom: 'macOS Intel',         note: 'Mac Intel (avant 2020).',       taille: 99000000 },
+        'liens:liste': { ok: true, liens: [] },
+        'liens:comptes': { ok: true, comptes: [
+          { id: 'stf_0002', nom: 'Marie Tremblay', courriel: 'marie@exemple.ca' },
+        ] },
+        'liens:paquets': { ok: true, version: '2.10.0', paquets: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'journal',
+      id: 'journal',
+      reponses: {
+        'liens:journal': { ok: true, conservation: 365, evenements: [
+          { au: '2026-08-09T15:02:11Z', canal: 'telechargement', lienId: 'a1b2c3d4e5f6a1b2c3',
+            genre: 'telecharge', ip: '24.201.44.7', agent: 'Mozilla/5.0', qui: 'boutique@exemple.ca',
+            detail: 'declinaison=win-x64 restant=0' },
+          { au: '2026-08-09T15:01:40Z', canal: 'telechargement', lienId: 'a1b2c3d4e5f6a1b2c3',
+            genre: 'mdp_refuse', ip: '24.201.44.7', agent: 'Mozilla/5.0', qui: '', detail: 'essai 1' },
+          { au: '2026-08-09T14:00:02Z', canal: 'comptable', lienId: 'part_2026_t2',
+            genre: 'comptable_ouvert', ip: '198.51.100.20', agent: 'Mozilla/5.0', qui: '', detail: '' },
         ] },
         identite: IDENTITE,
       },
     },
     {
-      nom: 'dépôt vide',
-      reponses: { 'install:paquets': { ok: true, version: '', paquets: [] }, identite: IDENTITE },
+      nom: 'registre vide',
+      reponses: {
+        'liens:liste': { ok: true, liens: [] },
+        'liens:comptes': { ok: true, comptes: [] },
+        'liens:paquets': { ok: true, version: '', paquets: [] },
+        identite: IDENTITE,
+      },
     },
+  ],
+
+  // ── DÉCOMPTE D'INACTIVITÉ ──────────────────────────────────────────────────
+  // ⚠ Cette fenêtre n'INTERROGE rien : elle reçoit sa durée par son paramètre
+  // d'ouverture et n'appelle le pont qu'au CLIC. Le jeu d'essai ne prouve donc
+  // que le dessin — c'est-à-dire exactement ce que ce garde-fou sait prouver,
+  // et il vaut mieux le dire que de laisser croire à davantage.
+  'inactivite.js': [
+    { nom: 'soixante secondes', id: '60', reponses: { identite: IDENTITE } },
   ],
 
   // ── REMBOURSEMENTS ET CRÉDITS ──────────────────────────────────────────────

@@ -281,6 +281,67 @@ ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minim
 //     pas le focus (regle du systeme, pas un defaut). Le clignotement dans la barre
 //     des taches est alors le seul signal qui passe — et il reste visible si la
 //     personne regarde ailleurs.
+/* ═══════════════════════════════════════════════════════════════════════════
+   LE DÉCOMPTE D'INACTIVITÉ, EN FENÊTRE À PART
+   ---------------------------------------------------------------------------
+   ⚠⚠ SIGNALÉ DEUX FOIS (2026-08-07, puis 2026-08-09 : « je ne vois plus encore
+   le décompte, la session se ferme toute seule »). L'avertissement vivait dans
+   la fenêtre PRINCIPALE — celle qu'on ne regarde justement pas, puisque le
+   travail se fait dans les fenêtres natives. Deux rustines ont été essayées :
+   ramener la principale devant, puis voiler la vue ancrée. Ni l'une ni l'autre
+   ne couvre un second écran, une fenêtre détachée par-dessus, ou un système qui
+   refuse le premier plan.
+   Un avertissement dont la visibilité DÉPEND de l'endroit où se trouve une autre
+   fenêtre n'est pas un avertissement. Celui-ci est TOUJOURS AU-DESSUS, petit,
+   non redimensionnable, et il ne retient aucune position : il paraît au centre
+   de l'écran de la fenêtre principale, là où l'œil est.
+   ⚠ Il ne décide RIEN : le minuteur, le seuil et la déconnexion restent au site.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let decompteWin = null;
+const fermerDecompte = () => {
+  if (decompteWin && !decompteWin.isDestroyed()) { try { decompteWin.destroy(); } catch {} }
+  decompteWin = null;
+};
+const ouvrirDecompte = (secondes) => {
+  if (decompteWin && !decompteWin.isDestroyed()) { try { decompteWin.show(); } catch {} return; }
+  let x, y;
+  try {
+    const b = (mainWindow && !mainWindow.isDestroyed()) ? mainWindow.getBounds() : null;
+    if (b) { x = Math.round(b.x + (b.width - 460) / 2); y = Math.round(b.y + (b.height - 250) / 3); }
+  } catch {}
+  decompteWin = new BrowserWindow({
+    width: 460, height: 250,
+    ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}),
+    resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
+    alwaysOnTop: true, skipTaskbar: false, show: false,
+    title: 'Déconnexion imminente', autoHideMenuBar: true, backgroundColor: '#0e1522',
+    webPreferences: {
+      preload: path.join(__dirname, 'pont-preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true,
+    },
+  });
+  // « screen-saver » passe AU-DESSUS du plein écran d'une autre fenêtre : c'est
+  // exactement le cas qu'on rate autrement, quelqu'un qui travaille en plein
+  // écran dans une fenêtre native.
+  try { decompteWin.setAlwaysOnTop(true, 'screen-saver'); } catch {}
+  try { decompteWin.setVisibleOnAllWorkspaces(true); } catch {}
+  decompteWin.on('page-title-updated', (ev) => { ev.preventDefault(); });
+  decompteWin.setTitle('Déconnexion imminente');
+  /* ⚠ FERMER CETTE FENÊTRE NE PROLONGE RIEN ET NE DÉCONNECTE RIEN. Le site tient
+     l'horloge ; si l'on pouvait s'en débarrasser d'un clic sur la croix, on aurait
+     un décompte invisible qui court toujours — précisément le défaut qu'on corrige. */
+  decompteWin.on('closed', () => { decompteWin = null; });
+  decompteWin.once('ready-to-show', () => {
+    try { decompteWin.show(); decompteWin.focus(); decompteWin.flashFrame(true); } catch {}
+  });
+  decompteWin.loadURL('data:text/html;charset=utf-8,'
+    + encodeURIComponent(pageInactivite(secondes)));
+};
+ipcMain.on('session:decompte', (_e, secondes) => {
+  const n = parseInt(secondes, 10);
+  if (Number.isFinite(n) && n > 0) ouvrirDecompte(n); else fermerDecompte();
+});
+
 ipcMain.on('win:attention', () => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   try {
@@ -1026,6 +1087,8 @@ const OPS_PONT = new Set([
   // « Il y a quelqu'un » — sans ceci, travailler dans une fenêtre native passe
   // pour une absence et le minuteur d'inactivité déconnecte une personne affairée.
   'session:activite',
+  // Les deux gestes du decompte d inactivite, rendus depuis SA fenetre.
+  'session:rester', 'session:fermer',
   // Vente au comptoir. ⚠ `caisse:vendre` est la SEULE opération de ce pont qui
   // encaisse de l'argent : toute la règle de vente reste dans le site
   // (`Admin._posVente`), le pont ne porte que des valeurs.
@@ -1083,10 +1146,13 @@ const OPS_PONT = new Set([
   'collections:liste', 'collections:ouvrir', 'collections:nouvelle',
   'fournisseurs:liste', 'fournisseurs:ouvrir', 'fournisseurs:nouveau',
   'retours:liste', 'retours:ouvrir',
-  // Liens d installation (2.9.0) : le manifeste reel des paquets publies, et la
-  // fabrication d une adresse signee. La SIGNATURE se fait au serveur — le secret
-  // ne descend jamais dans l app.asar, qui n est pas chiffre.
-  'install:paquets', 'install:lien',
+  // Liens d installation (2.9.0, refondus en 2.10.0) : le registre des liens
+  // remis au dehors, leur fabrication, leur revocation et le journal des acces.
+  // ⚠ TOUT L ETAT VIT AU SERVEUR : c est ce qui rend la revocation immediate et
+  // le compte d usages honnete. La SIGNATURE aussi — le secret ne descend jamais
+  // dans l app.asar, qui n est pas chiffre.
+  'liens:paquets', 'liens:liste', 'liens:creer', 'liens:revoquer',
+  'liens:journal', 'liens:comptes', 'liens:courriel',
   // La fenetre Codes-barres : la page filtree par le site, et la grille des
   // variantes d un produit (le choix se fait dans la fenetre, l impression
   // passe par stock:etiquettes — la meme voie que l Inventaire).
@@ -1642,6 +1708,7 @@ const PAGES_ANCRABLES = () => ({
   depenses: ['Dépenses d’entreprise', () => pageDepenses()],
   remboursements: ['Remboursements et crédits', () => pageRemboursements()],
   impot: ['Fiscalité et impôt', () => pageImpot()],
+  liens: ['Liens d’installation', () => pageLiens('')],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2383,7 +2450,8 @@ const { pagePromo } = require('./fenetres/promo');
 const { pageDepenses } = require('./fenetres/depenses');
 const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
-const { pageLiensInstall } = require('./fenetres/liensinstall');
+const { pageLiens } = require('./fenetres/liens');
+const { pageInactivite } = require('./fenetres/inactivite');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2422,14 +2490,6 @@ const actionApp = (nom) => {
     case 'update-check': checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
     case 'imprimantes': ouvrirImprimantes(); break;
-    /* ⚠ FENETRE NON ANCRABLE, ET C EST VOULU. On y fabrique une adresse qu on
-       va COLLER ailleurs — dans un courriel, un message. Une surface ancree dans
-       la fenetre principale disparait des qu on navigue, en emportant le lien
-       qu on n avait pas encore copie. */
-    case 'liensinstall':
-      ouvrirNative('liensinstall', 'Liens d’installation', pageLiensInstall(),
-        { width: 700, height: 720, minWidth: 560, minHeight: 480 });
-      break;
     case 'fournisseur-nouveau':
       ouvrirNative('fournisseur', 'Nouveau fournisseur', pageFournisseur(''), { width: 800, height: 700 });
       break;
@@ -2471,7 +2531,7 @@ const actionApp = (nom) => {
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
-    case 'depenses': case 'remboursements': case 'impot': {
+    case 'depenses': case 'remboursements': case 'impot': case 'liens': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
