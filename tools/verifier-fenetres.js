@@ -232,6 +232,39 @@ const noms = (src, marqueur, borne) => {
   return new Set(trouves.map((s) => s.replace(/'/g, '')));
 };
 
+/* ══════════════════════════════════════════════════════════════════════════
+   UN SEUL JEU DE PLAFONDS
+   ⚠⚠ IL Y EN AVAIT DEUX, TENUS A LA MAIN : `LIMITES_PONT` dans main.js et une
+   jumelle `LONGUES` dans le prechargement. Celle-ci ignorait
+   << photos:traiter >> : le plafond REELLEMENT applique etait le defaut, 25
+   secondes, pendant que l autre annoncait 300. Le retrait de mannequin, qui
+   enchaine trois modeles, se faisait refuser a chaque essai — et le travail
+   continuait derriere jusqu a aboutir et se facturer, sur un ecran qui affichait
+   << modele delai >>.
+   ⚠ LA PARITE DES OPERATIONS NE SUFFISAIT PAS : elle verifie que les deux
+   listes citent les memes noms, jamais qu elles leur donnent le meme temps. Une
+   operation absente d une table n est pas manquante — elle est MUETTE, ce qui ne
+   se voit qu a l usage.
+   ══════════════════════════════════════════════════════════════════════════ */
+console.log('\n=== Plafonds du pont ===');
+{
+  const pre = fs.readFileSync(path.join(__dirname, '..', 'src', 'pont-preload.js'), 'utf8');
+  if (/const\s+LONGUES\s*=\s*\{/.test(pre)) {
+    dire(false, 'pont-preload', 'tient de nouveau sa PROPRE table de plafonds — '
+      + 'elle divergera de celle de main.js sans que rien ne proteste');
+  } else if (pre.indexOf("sendSync('pont:limites')") < 0) {
+    dire(false, 'pont-preload', 'ne demande plus les plafonds au processus principal');
+  } else {
+    const mn = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8');
+    if (mn.indexOf("ipcMain.on('pont:limites'") < 0) {
+      dire(false, 'main.js', 'ne rend plus la table des plafonds : le prechargement '
+        + 'appliquerait 20 s a TOUTES les operations');
+    } else {
+      dire(true, 'plafonds', 'une seule table, servie par le processus principal');
+    }
+  }
+}
+
 console.log('=== Parité des opérations du pont ===');
 const chemin = CANDIDATS.find((c) => fs.existsSync(c));
 if (!chemin) {

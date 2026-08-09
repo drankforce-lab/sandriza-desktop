@@ -20,6 +20,9 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
+// Rempli a la premiere operation, depuis le processus principal (voir plus bas).
+let LONGUES = null;
+
 contextBridge.exposeInMainWorld('szPont', {
   // ANCRAGE : la page demande a etre emportee dans sa propre fenetre. Inerte
   // quand la page vit deja dans une fenetre (le principal l ignore alors).
@@ -60,26 +63,30 @@ contextBridge.exposeInMainWorld('szPont', {
     // l'important n'est pas d'etre rapide, c'est de finir par repondre VRAI.
     // Liste JUMELLE de LIMITES_PONT (main.js) : ici +5 s, pour que le
     // principal reponde toujours en premier et que son verdict arrive entier.
-    const LONGUES = { 'produit:enregistrer': 90000, 'produit:photoIa': 120000,
-      'commande:etiquette': 60000, 'expedition:etiquette': 60000,
-      'remboursement:ecrire': 45000, 'commandes:supprimerEcrire': 45000,
-      'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,
-      'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
-      'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
-      'retours:liste': 20000, 'ramassages:annuler': 30000, 'ramassages:planifier': 45000,
-      'paiements:charger': 65000,
-      'etat:courriel': 50000, 'cartescadeaux:liste': 25000, 'chat:liste': 25000, 'fidelisation:liste': 25000, 'abonnes:liste': 25000, 'abonnes:importer': 65000,
-      'campagnes:envoyer': 185000, 'chaines:traiter': 185000,
-      'stats:ga': 65000, 'stats:telephonie': 50000,
-      'sociaux:publier': 65000, 'sociaux:publierTout': 185000,
-      'messagerie:liste': 20000, 'messagerie:repondre': 30000,
-      'photos:importer': 90000, 'photos:isoler': 60000, 'photos:fond': 45000,
-      'photos:attacher': 60000, 'photos:produits': 20000, 'photos:enregistrer': 30000,
-      'photos:vider': 120000, 'photos:usb': 300000,
-      'promo:donnees': 60000, 'promo:apercu': 45000, 'promo:lot': 90000,
-      'promo:planche': 60000, 'promo:imprimante': 20000,
-      'depenses:facture': 120000, 'depenses:recu': 45000,
-      'depenses:enregistrer': 90000, 'depenses:convertir': 20000 };
+    /* ══════════════════════════════════════════════════════════════════════
+       LES PLAFONDS VIENNENT DU PROCESSUS PRINCIPAL — ILS NE SONT PLUS RECOPIES
+       ⚠⚠ IL Y AVAIT DEUX TABLES JUMELLES, TENUES A LA MAIN. Celle-ci ignorait
+       << photos:traiter >> : le plafond applique etait donc le defaut, VINGT-CINQ
+       SECONDES, pendant que l autre table annoncait trois minutes. Le retrait de
+       mannequin, qui enchaine trois modeles, se faisait donc refuser a chaque
+       fois — et le travail CONTINUAIT derriere, jusqu a aboutir et se facturer,
+       sur un ecran qui affichait << modele delai >>. Deux jours a chercher
+       ailleurs.
+       ⚠ ET LE GARDE-FOU NE VOYAIT RIEN : il verifie que les deux listes
+       d OPERATIONS concordent, jamais leurs DELAIS. Une operation absente d une
+       table n est pas une operation manquante — c est une operation muette.
+       ⚠ POURQUOI PAS UN MODULE PARTAGE : ce prechargement tourne en BAC A SABLE,
+       ou << require >> ne sait pas lire un fichier voisin. On demande donc la
+       table au processus principal, une fois, a la premiere operation. Un
+       aller-retour synchrone, et plus jamais de recopie.
+       ══════════════════════════════════════════════════════════════════════ */
+    if (!LONGUES) {
+      try { LONGUES = ipcRenderer.sendSync('pont:limites') || {}; }
+      catch (e) { LONGUES = {}; }
+    }
+    /* ⚠ LE PLAFOND DU PRECHARGEMENT EST PLUS LARGE QUE CELUI DU PRINCIPAL : il est
+       le filet du filet. S il sonnait le premier, il masquerait le verdict
+       precis du principal par un << delai >> sans detail. */
     const limite = (LONGUES[nom] || 20000) + 5000;
     const plafond = new Promise((resoudre) => {
       setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, limite);

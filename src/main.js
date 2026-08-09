@@ -1601,6 +1601,9 @@ ipcMain.handle('fenetre:client', (e, id) => {
   return true;
 });
 
+/* ⚠ LA TABLE EST RENDUE AU PRECHARGEMENT, QUI NE LA RECOPIE PLUS. Il en tenait
+   une jumelle, a la main ; elle ignorait << photos:traiter >> et appliquait donc
+   vingt-cinq secondes la ou celle-ci en annonce trois cents. Une seule source. */
 const LIMITES_PONT = {
   // Depot des photos dans le stockage : le plus long de tous.
   'produit:enregistrer': 90000,
@@ -1706,6 +1709,12 @@ const LIMITES_PONT = {
   // Le recu est compresse ici, et depose dans le stockage a l enregistrement.
   'depenses:recu': 45000, 'depenses:enregistrer': 90000,
 };
+
+/* Le prechargement demande la table ICI, une fois, plutot que d en tenir une
+   copie. ⚠ SYNCHRONE ET C EST VOULU : c est un seul aller-retour, au tout
+   premier appel, et il doit etre resolu AVANT que le premier plafond ne se pose.
+   Une promesse ferait courir la premiere operation sans plafond du tout. */
+ipcMain.on('pont:limites', (e) => { e.returnValue = LIMITES_PONT; });
 
 /* ⚠ LA FENETRE INVENTAIRE SE TIENT A JOUR TOUTE SEULE (demande du 2026-08-08 :
    << si on met a jour un produit, l inventaire natif doit prendre ses
