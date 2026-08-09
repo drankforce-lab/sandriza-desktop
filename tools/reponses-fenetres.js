@@ -805,6 +805,81 @@ module.exports = {
     },
   ],
 
+  // ── CONCILIATION BANCAIRE ──────────────────────────────────────────────────
+  // ⚠ FORME RÉELLE de banque:donnees (cœur BankRec._banqueDonnees).
+  // SIX cas, et chacun dessine autre chose :
+  //   « liste » est l'écran d'entrée ;
+  //   les QUATRE onglets ne partagent aucun dessin, et trois d'entre eux ne
+  //     s'atteignent qu'au clic — sans état d'ouverture, aucun jeu ne les
+  //     dessinerait jamais, et ils seraient vus pour la première fois en
+  //     production (c'est exactement le trou qu'on a payé sur l'annuaire) ;
+  //   « verrouillée » est le cas où TOUS les boutons d'écriture disparaissent :
+  //     s'il n'était pas éprouvé, on ne saurait pas si l'écran se dessine
+  //     encore une fois la pièce close.
+  'banque.js': (function(){
+    var REC = {
+      id: 'rec_0001', label: 'Conciliation juillet 2026', status: 'in_progress',
+      notes: 'Le dépôt du 31 arrive le 2 août — reporté au mois suivant.',
+      createdAt: '2026-08-01T12:00:00Z', updatedAt: '2026-08-09T12:00:00Z', lockedAt: null,
+      bankEntries: [
+        { id: 'be_1', date: '2026-07-03', description: 'Dépôt Square', type: 'dépôt',
+          amount: 1840.25, status: 'matched', matchedPayoutId: 'sp_1', notes: '' },
+        { id: 'be_2', date: '2026-07-17', description: 'Dépôt Square', type: 'dépôt',
+          amount: 2210.00, status: 'unmatched', matchedPayoutId: null, notes: '' },
+        { id: 'be_3', date: '2026-07-22', description: 'Retrait — hébergement', type: 'retrait',
+          amount: -62.35, status: 'unmatched', matchedPayoutId: null, notes: 'Render' },
+      ],
+      squarePayouts: [
+        { id: 'sp_1', arrivalDate: '2026-07-03', periodFrom: '2026-07-01', periodTo: '2026-07-02',
+          amount: 1840.25, description: 'Dépôt Square — 2026-07 (58 tx)', status: 'matched',
+          matchedEntryId: 'be_1', txIds: [], notes: 'Brut: 1 902,10 $ | Frais: 61,85 $', source: 'square_cache' },
+        { id: 'sp_2', arrivalDate: '2026-07-22', periodFrom: '2026-07-22', periodTo: '2026-07-22',
+          amount: -62.35, description: 'Dépense — Site web · Render', status: 'unmatched',
+          matchedEntryId: null, txIds: [], notes: '', source: 'expense', expId: 'exp_9' },
+      ],
+      adjustments: [],
+    };
+    var RESUME = { bankTotal: 3987.90, squareTotal: 1777.90, adjTotal: 0,
+                   difference: 2210.00, isBalanced: false,
+                   matchedBank: 1, unmatchedBank: 2, unmatchedSquare: 1 };
+    var SQUARE = { nbTx: 58, brut: 1902.10, frais: 61.85, net: 1840.25 };
+    var LISTE = [
+      { id: 'rec_0001', label: 'Conciliation juillet 2026', status: 'in_progress',
+        createdAt: '2026-08-01T12:00:00Z', updatedAt: '2026-08-09T12:00:00Z', lockedAt: null,
+        nbBanque: 3, nbVersements: 2, resume: RESUME },
+      { id: 'rec_0002', label: 'Conciliation juin 2026', status: 'locked',
+        createdAt: '2026-07-02T12:00:00Z', updatedAt: '2026-07-05T12:00:00Z',
+        lockedAt: '2026-07-05T12:00:00Z', nbBanque: 5, nbVersements: 5,
+        resume: { bankTotal: 5120.00, squareTotal: 5120.00, adjTotal: 0, difference: 0,
+                  isBalanced: true, matchedBank: 5, unmatchedBank: 0, unmatchedSquare: 0 } },
+    ];
+    var BASE = { ok: true, annee: 2026, annees: [2026, 2025], liste: LISTE, peutEcrire: true };
+    var DETAIL = Object.assign({}, BASE, { rec: REC, resume: RESUME, square: SQUARE, verrouille: false });
+    var onglet = function(nom, id){ return { nom: nom, id: id,
+      reponses: { 'banque:donnees': DETAIL, identite: IDENTITE } }; };
+    return [
+      { nom: 'liste', reponses: { 'banque:donnees': BASE, identite: IDENTITE } },
+      onglet('relevé', 'releve'),
+      onglet('dépôts et sorties', 'depots'),
+      onglet('appariement', 'appariement'),
+      onglet('résumé', 'resume'),
+      {
+        // ⚠ VERROUILLÉE : plus un seul bouton d'écriture. Le cœur refuse déjà
+        // toute écriture ; ce cas-ci prouve que l'écran, lui, se dessine encore.
+        nom: 'verrouillée',
+        id: 'resume',
+        reponses: {
+          'banque:donnees': Object.assign({}, BASE, {
+            rec: Object.assign({}, REC, { status: 'locked', lockedAt: '2026-08-09T18:00:00Z' }),
+            resume: Object.assign({}, RESUME, { difference: 0, isBalanced: true }),
+            square: SQUARE, verrouille: true,
+          }),
+          identite: IDENTITE,
+        },
+      },
+    ];
+  })(),
+
   // ── LIENS D'INSTALLATION ───────────────────────────────────────────────────
   // ⚠ FORME RÉELLE de liens:liste / liens:journal (adm-invite.php).
   // QUATRE cas, et chacun dessine autre chose :

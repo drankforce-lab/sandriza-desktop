@@ -1152,7 +1152,18 @@ const OPS_PONT = new Set([
   // le compte d usages honnete. La SIGNATURE aussi — le secret ne descend jamais
   // dans l app.asar, qui n est pas chiffre.
   'liens:paquets', 'liens:liste', 'liens:creer', 'liens:revoquer',
-  'liens:journal', 'liens:comptes', 'liens:courriel',
+  'liens:journal', 'liens:comptes', 'liens:courriel', 'liens:motdepasse',
+  // Conciliation bancaire (2.11.0) : le rapprochement du releve avec les depots
+  // Square et les sorties.
+  // ⚠ LE VERROU ET LE DROIT SUPER-ADMINISTRATEUR VIVENT DANS LE COEUR, pas dans
+  // l ecran : ils n etaient que des boutons masques, donc contournables des qu on
+  // ajoute une seconde surface — et un document declare definitif qu une autre
+  // fenetre peut reecrire ne vaut rien comme piece comptable.
+  'banque:donnees', 'banque:creer', 'banque:supprimer',
+  'banque:entree', 'banque:entree-jeter',
+  'banque:versement', 'banque:versement-jeter',
+  'banque:apparier', 'banque:desapparier', 'banque:notes',
+  'banque:completer', 'banque:verrouiller', 'banque:importer', 'banque:document',
   // La fenetre Codes-barres : la page filtree par le site, et la grille des
   // variantes d un produit (le choix se fait dans la fenetre, l impression
   // passe par stock:etiquettes — la meme voie que l Inventaire).
@@ -1709,6 +1720,7 @@ const PAGES_ANCRABLES = () => ({
   remboursements: ['Remboursements et crédits', () => pageRemboursements()],
   impot: ['Fiscalité et impôt', () => pageImpot()],
   liens: ['Liens d’installation', () => pageLiens('')],
+  bankrec: ['Conciliation bancaire', () => pageBanque('')],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2452,6 +2464,7 @@ const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
 const { pageLiens } = require('./fenetres/liens');
 const { pageInactivite } = require('./fenetres/inactivite');
+const { pageBanque } = require('./fenetres/banque');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2531,7 +2544,8 @@ const actionApp = (nom) => {
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
-    case 'depenses': case 'remboursements': case 'impot': case 'liens': {
+    case 'depenses': case 'remboursements': case 'impot': case 'liens':
+    case 'bankrec': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

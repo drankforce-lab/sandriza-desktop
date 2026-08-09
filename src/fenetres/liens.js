@@ -243,11 +243,13 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-copier="' + esc(l.url) + '">📋</button> '
             + (l.etat === 'actif'
-                ? '<button class="mini dgr" data-revoquer="' + esc(l.id) + '">'
+                ? '<button class="mini" data-renvoyer="' + esc(l.id) + '">✉ Renvoyer</button> '
+                  + '<button class="mini dgr" data-revoquer="' + esc(l.id) + '">'
                   + (ARME === l.id ? 'Confirmer ?' : 'Révoquer') + '</button> '
                 : '')
             + '<button class="mini" data-journal="' + esc(l.id) + '">Journal</button>'
           + '</td></tr>');
+        if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
         if (l.revoqueLe) {
           h.push('<tr><td></td><td colspan="6" class="dt">Révoqué le ' + quand(l.revoqueLe)
             + ' par ' + esc(l.revoquePar || '?')
@@ -258,12 +260,77 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h.push('</div>');
 
-    h.push('<div class="franc"><b>Un lien ne copie aucun fichier.</b> Il ne contient qu’un '
-      + 'identifiant et ses règles&nbsp;; les installateurs restent l’unique exemplaire déposé '
-      + 'dans le dépôt. Cent liens n’occupent pas un octet de plus.</div>');
-
     corps.innerHTML = h.join('');
     brancherLiens();
+  }
+
+  /* Renvoyer un lien déjà émis.
+     ⚠⚠ « RENVOYER LE MOT DE PASSE » N'EXISTE PAS, et ce n'est pas une lacune :
+     la base n'en garde que l'empreinte, ce qui est précisément ce qui fait
+     qu'une fuite n'ouvre aucun lien. On peut renvoyer le LIEN, ou en POSER UN
+     NOUVEAU et l'envoyer — auquel cas l'ancien cesse aussitôt de fonctionner.
+     L'écran le dit AVANT le clic, pas après.
+     ⚠ Sans objet pour une inscription : ce lien emprunte le mot de passe du
+     compte, et lui en poser un le couperait de ce qui le tient à jour. */
+  var RENVOI = null;
+
+  function ligneRenvoi(l){
+    var inscription = (l.genre === 'inscription');
+    return '<tr><td></td><td colspan="6">'
+      + '<div class="carte" style="margin:.3rem 0">'
+      + '<h2>Renvoyer ce lien</h2>'
+      + '<label for="rv-a">Adresse</label>'
+      + '<input id="rv-a" type="email" value="' + esc(RENVOI.a || l.destinataire || '') + '" '
+      + 'placeholder="personne@exemple.com">'
+      + (inscription
+          ? '<p class="aide">Ce lien s’ouvre avec <strong>le mot de passe du compte</strong> de la '
+            + 'personne. Il n’y a donc pas de mot de passe à joindre&nbsp;: le courriel rappellera '
+            + 'd’utiliser celui de son accueil.</p>'
+          : '<label style="margin-top:.5rem">Ce que contient le courriel</label>'
+            + '<label style="margin:.2rem 0 0;font-size:.78rem;color:#e8edf5">'
+            + '<input type="radio" name="rv-quoi" value="lien" style="width:auto;margin-right:.4rem"'
+            + (RENVOI.quoi === 'lien' ? ' checked' : '') + '>Le lien seul</label>'
+            + '<label style="margin:.15rem 0 0;font-size:.78rem;color:#e8edf5">'
+            + '<input type="radio" name="rv-quoi" value="mdp" style="width:auto;margin-right:.4rem"'
+            + (RENVOI.quoi === 'lien' ? '' : ' checked') + '>Le lien <strong>et un nouveau mot de passe</strong></label>'
+            + '<p class="aide">L’ancien mot de passe ne peut pas être renvoyé&nbsp;: il n’existe nulle '
+            + 'part en clair, la base n’en garde que l’empreinte. En poser un nouveau le remplace, '
+            + 'et <strong>l’ancien cesse aussitôt de fonctionner</strong>.</p>')
+      + '<div class="barreoutils" style="margin-top:.5rem">'
+      + '<button class="prim" id="rv-envoyer">Envoyer</button>'
+      + '<span class="droite"><button id="rv-annuler">Annuler</button></span></div>'
+      + '</div></td></tr>';
+  }
+
+  function renvoyer(l){
+    var a = document.getElementById('rv-a');
+    var b = document.getElementById('rv-envoyer');
+    if (!a || !a.value.trim()) { dire('Indiquez une adresse de courriel.', 'err'); return; }
+    var adresse = a.value.trim();
+    var coche = corps.querySelector('input[name="rv-quoi"]:checked');
+    var avecMdp = !!(coche && coche.value === 'mdp');
+    b.disabled = true;
+
+    var neuf = avecMdp
+      ? appeler('liens:motdepasse', [l.id])
+      : Promise.resolve({ ok: true, mdp: '' });
+
+    dire(avecMdp ? 'Nouveau mot de passe…' : 'Envoi du courriel…');
+    neuf.then(function(r){
+      if (!r.ok) { b.disabled = false; dire(expliquer(r), 'err'); return; }
+      return appeler('liens:courriel', [{
+        destinataire: adresse, url: l.url, mdp: r.mdp || '',
+        inclureMdp: !!(r.mdp), echeance: jour(l.expireLe)
+      }]).then(function(e){
+        b.disabled = false;
+        if (!e.ok) { dire(expliquer(e), 'err'); return; }
+        RENVOI = null;
+        dire(avecMdp
+          ? ('Courriel envoyé à ' + adresse + ' avec un nouveau mot de passe — l’ancien ne fonctionne plus.')
+          : ('Courriel envoyé à ' + adresse + '.'), 'bon');
+        charger(false);
+      });
+    });
   }
 
   function carteNeuf(){
@@ -366,6 +433,27 @@ ${JS_ACTIVITE}${JS_DIRE}
         dire(fait ? 'Adresse copiée.' : 'Copie refusée par le système.', fait ? 'bon' : 'err');
       };
     });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-renvoyer]'), function(b){
+      b.onclick = function(){
+        var id = b.getAttribute('data-renvoyer');
+        // ⚠ LE MOT DE PASSE NEUF EST LE DEFAUT (demande du 2026-08-09) : on renvoie
+        // un lien parce que la personne n arrive pas a entrer, et le mot de passe
+        // est justement ce qu elle a le plus de chances d avoir perdu.
+        RENVOI = (RENVOI && RENVOI.id === id) ? null : { id: id, quoi: 'mdp', a: '' };
+        dessinerLiens();
+      };
+    });
+    var rvE = document.getElementById('rv-envoyer');
+    if (rvE && RENVOI) {
+      var cible = null;
+      for (var i = 0; i < ETAT.liens.length; i++) {
+        if (ETAT.liens[i].id === RENVOI.id) { cible = ETAT.liens[i]; break; }
+      }
+      if (cible) rvE.onclick = function(){ renvoyer(cible); };
+    }
+    var rvA = document.getElementById('rv-annuler');
+    if (rvA) rvA.onclick = function(){ RENVOI = null; dessinerLiens(); };
+
     Array.prototype.forEach.call(corps.querySelectorAll('[data-revoquer]'), function(b){
       b.onclick = function(){ revoquer(b.getAttribute('data-revoquer')); };
     });
