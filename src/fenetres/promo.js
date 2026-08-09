@@ -48,6 +48,36 @@ body{background:#0e1522;color:#e8edf5;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+/* ══════════════════════════════════════════════════════════════════════════
+   LE CONTROLE DE SUIVI — le meme que la phototheque, et pour les memes raisons
+   --------------------------------------------------------------------------
+   ⚠ UNE IMPRESSION DE 500 ETIQUETTES DURE DES MINUTES. Jusqu ici elle ne disait
+   son avancement que dans le bandeau du bas, en une ligne qui s efface :
+   personne ne sait ou en est le travail, et rien ne permet de l arreter sans
+   fermer la fenetre — ce qui n arrete rien du tout, l imprimante ayant deja
+   recu les lots partis.
+   ⚠ LA JAUGE AVANCE PAR LOT ENVOYE, jamais toute seule.
+   ⚠ << ARRETER >> N ANNULE PAS CE QUI EST DEJA CHEZ L IMPRIMANTE : le lot en
+   vol part, les suivants non. L ecran le dit — promettre le contraire ferait
+   chercher des etiquettes qui vont sortir quand meme.
+   ══════════════════════════════════════════════════════════════════════════ */
+.suivi{position:fixed;right:1rem;bottom:3rem;width:min(26rem,calc(100vw - 2rem));
+  display:flex;flex-direction:column;background:#16202f;
+  border:1px solid rgba(201,169,126,.45);border-radius:11px;
+  box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
+.suivi.arret{border-color:rgba(248,113,113,.5)}
+.suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
+  border-bottom:1px solid rgba(255,255,255,.08);font:700 .78rem/1.2 system-ui;
+  text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+.suivi .st .n{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:0;color:#e8edf5}
+.suivi .pd{padding:.55rem .8rem;display:flex;align-items:center;gap:.5rem;
+  flex-wrap:wrap;font-size:.74rem;color:#8fa1b8}
+.suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:rgba(255,255,255,.1);
+  overflow:hidden}
+.suivi .jauge i{display:block;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,#c9a97e,#e0c9a6);transition:width .25s ease}
+.suivi .pc{font-variant-numeric:tabular-nums;font-weight:700;color:#e8edf5}
+.suivi .bt{margin-left:auto;display:flex;gap:.4rem}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:#8fa1b8}
@@ -462,18 +492,89 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="rang"><span>' + esc(l) + '</span><strong>' + esc(v) + '</strong></div>';
   }
 
+  /* ── LE PANNEAU DE SUIVI ───────────────────────────────────────────────── */
+  var PANNEAU = null;
+
+  function suiviOuvrir(total, nom){
+    suiviFermer();
+    var d = document.createElement('div');
+    d.className = 'suivi';
+    d.innerHTML = '<div class="st"><span id="sv-t">Impression en cours</span>'
+      + '<span class="n" id="sv-n">0 / ' + total + '</span></div>'
+      + '<div class="pd"><div class="jauge"><i id="sv-j" style="width:0%"></i></div>'
+      + '<span class="pc" id="sv-pc">0 %</span>'
+      + '<span id="sv-r">' + esc(nom || '') + '</span>'
+      + '<span class="bt"><button class="mini dgr" id="sv-a">Arrêter</button>'
+      + '<button class="mini" id="sv-x">Fermer</button></span></div>';
+    document.body.appendChild(d);
+    PANNEAU = d;
+    var x = document.getElementById('sv-x');
+    if (x) x.onclick = suiviFermer;
+    var a = document.getElementById('sv-a');
+    if (a) a.onclick = function(){
+      if (JOB) JOB.arret = true;
+      a.disabled = true;
+      if (PANNEAU) PANNEAU.className = 'suivi arret';
+      var r = document.getElementById('sv-r');
+      if (r) r.textContent = 'Arrêt demandé — le lot déjà envoyé sortira quand même.';
+      dire('Arrêt demandé. Le lot déjà parti à l’imprimante sortira ; les suivants sont abandonnés.', 'att');
+    };
+  }
+  function suiviFermer(){
+    if (PANNEAU && PANNEAU.parentNode) PANNEAU.parentNode.removeChild(PANNEAU);
+    PANNEAU = null;
+  }
+  function suiviAvance(faites, total, mot){
+    var n = document.getElementById('sv-n');
+    if (n) n.textContent = faites + ' / ' + total;
+    var pct = total ? Math.round(faites * 100 / total) : 0;
+    var j = document.getElementById('sv-j');
+    if (j) j.style.width = pct + '%';
+    var p = document.getElementById('sv-pc');
+    if (p) p.textContent = pct + ' %';
+    var r = document.getElementById('sv-r');
+    if (r && mot) r.textContent = mot;
+  }
+  function suiviFin(titre, mot){
+    var t = document.getElementById('sv-t');
+    if (t) t.textContent = titre;
+    var r = document.getElementById('sv-r');
+    if (r) r.textContent = mot;
+    var a = document.getElementById('sv-a');
+    if (a) a.remove();
+  }
+
   /* ── L IMPRESSION, LOT PAR LOT ─────────────────────────────────────────── */
   function lancer(total){
     if (!CIBLE) { dire('Choisissez un modèle.', 'att'); return; }
-    if (EN_COURS) return;
+    /* ⚠ ON NE REFUSE PAS EN SILENCE : un bouton qui ne fait rien passe pour
+       casse, un bouton qui dit pourquoi passe pour occupe. */
+    if (EN_COURS) { dire('Une impression est déjà en cours — attendez-la ou arrêtez-la.', 'att'); return; }
     EN_COURS = true;
     JOB = { faites: 0, total: total, arret: false };
+    var nomModele = '';
+    (D && D.lignes || []).forEach(function(x){ if (x.id === CIBLE) nomModele = x.nom; });
+    suiviOuvrir(total, nomModele);
     dessiner();
+    /* ⚠ CHIEN DE GARDE. Le drapeau etait pose a la main et rendu a la main :
+       une reponse perdue laissait la fenetre bloquee jusqu a sa reouverture,
+       sans un mot. Meme defaut que la phototheque, meme remede. */
+    var veille = setTimeout(function(){
+      if (!EN_COURS) return;
+      EN_COURS = false; JOB = null;
+      dessiner();
+      suiviFin('Sans réponse', 'La fenêtre principale n’a pas répondu. Des étiquettes ont peut-être été imprimées — vérifiez l’imprimante.');
+      dire('Aucune réponse pour cette impression. Vérifiez l’imprimante avant de relancer.', 'err');
+    }, 240000);
+    var fini = function(){ clearTimeout(veille); EN_COURS = false; JOB = null; dessiner(); };
+
     var suite = function(){
       if (JOB.arret || JOB.faites >= JOB.total) {
         var faites = JOB.faites, arrete = JOB.arret;
-        JOB = null; EN_COURS = false;
-        dessiner();
+        fini();
+        suiviFin(arrete ? 'Impression arrêtée' : 'Impression terminée',
+          faites + ' / ' + total + ' étiquette' + (total > 1 ? 's' : '') + '.');
+        if (!arrete) setTimeout(suiviFermer, 2500);
         dire(arrete
           ? ('Impression arrêtée après ' + faites + ' / ' + total + ' étiquette' + (total > 1 ? 's' : '') + '.')
           : (faites + ' étiquette' + (faites > 1 ? 's' : '') + ' envoyée' + (faites > 1 ? 's' : '')
@@ -483,17 +584,20 @@ ${JS_ACTIVITE}${JS_DIRE}
         return;
       }
       var n = Math.min(25, JOB.total - JOB.faites);
+      suiviAvance(JOB.faites, JOB.total, 'Lot de ' + n + ' en cours d’envoi…');
       dire('Impression ' + (JOB.faites + n) + ' / ' + JOB.total + '…');
       appeler('promo:lot', [CIBLE, n]).then(function(r){
         if (!r.ok) {
           var faites = JOB.faites;
-          JOB = null; EN_COURS = false;
-          dessiner();
+          fini();
+          suiviFin('Impression interrompue',
+            expliquer(r) + (faites ? ' — ' + faites + ' déjà envoyée(s).' : ''));
           dire(expliquer(r) + (faites ? ' — ' + faites + ' étiquette(s) déjà envoyée(s).' : ''), 'err');
           lireImprimante();
           return;
         }
         JOB.faites += r.envoyees || n;
+        suiviAvance(JOB.faites, JOB.total, '');
         dessiner();
         suite();
       });
