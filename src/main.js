@@ -1124,6 +1124,10 @@ const OPS_PONT = new Set([
   // Chat en ligne (fenetre Chat, 1.69.0) : les OPERATIONS seulement — la
   // liste ATTEND la resynchronisation, quelqu un attend une reponse.
   'chat:liste', 'chat:lire', 'chat:repondre', 'chat:statut', 'chat:supprimer',
+  // Reseaux sociaux (fenetre Sociaux, 1.70.0) : la FILE seulement. Publier
+  // engage l exterieur et prend du temps — d ou les limites larges.
+  'sociaux:liste', 'sociaux:publier', 'sociaux:publierTout', 'sociaux:ignorer',
+  'sociaux:viderHistorique',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1348,6 +1352,9 @@ const LIMITES_PONT = {
   'etat:courriel': 45000,
   'cartescadeaux:liste': 20000,
   'chat:liste': 20000,
+  // Un appel par reseau, et la file peut en compter plusieurs.
+  'sociaux:publier': 60000,
+  'sociaux:publierTout': 180000,
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
   'messagerie:liste': 20000, 'messagerie:repondre': 30000,
@@ -1497,6 +1504,7 @@ const PAGES_ANCRABLES = () => ({
   coupons: ['Coupons', () => pageCoupons()],
   promotions: ['Offres et annonces', () => pagePromotions()],
   chat: ['Chat en ligne', () => pageChat()],
+  sociaux: ['Réseaux sociaux', () => pageSociaux()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2225,6 +2233,7 @@ const { pageCartesCadeaux } = require('./fenetres/cartescadeaux');
 const { pageCoupons } = require('./fenetres/coupons');
 const { pagePromotions } = require('./fenetres/promotions');
 const { pageChat } = require('./fenetres/chat');
+const { pageSociaux } = require('./fenetres/sociaux');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2301,7 +2310,7 @@ const actionApp = (nom) => {
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
-    case 'promotions': case 'chat': {
+    case 'promotions': case 'chat': case 'sociaux': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

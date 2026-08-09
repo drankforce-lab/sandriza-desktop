@@ -513,6 +513,68 @@ module.exports = {
     },
   ],
 
+  // ── RÉSEAUX SOCIAUX ────────────────────────────────────────────────────────
+  'sociaux.js': [
+    {
+      // ⚠ FORME REELLE de sociaux:liste (coeur Social._sociauxDonnees).
+      nom: 'file et historique',
+      id: '',
+      reponses: {
+        'sociaux:liste': {
+          ok: true, peutModifier: true,
+          reseauxActifs: [{ cle: 'facebook', nom: 'Facebook', icone: '📘' },
+                          { cle: 'instagram', nom: 'Instagram', icone: '📸' }],
+          tuiles: { enAttente: 1, publiees: 2, echouees: 1, ignorees: 0 },
+          file: [
+            { id: 'q1', patron: 'Nouvelle promotion', contenu: 'Jusqu’à 20 % sur les robes !',
+              image: true, reseaux: [{ cle: 'facebook', nom: 'Facebook', icone: '📘' }],
+              statut: 'pending', creee: '2026-08-08 10:00', partie: '', resultats: [] },
+          ],
+          historique: [
+            { id: 'q2', patron: 'Nouveau produit', contenu: 'Découvrez la blouse en soie.',
+              image: false,
+              reseaux: [{ cle: 'facebook', nom: 'Facebook', icone: '📘' },
+                        { cle: 'instagram', nom: 'Instagram', icone: '📸' }],
+              statut: 'partial', creee: '2026-08-05 09:00', partie: '2026-08-05 09:02',
+              resultats: [{ reseau: 'Facebook', ok: true, detail: '' },
+                          { reseau: 'Instagram', ok: false, detail: 'jeton expiré' }] },
+            { id: 'q3', patron: 'Nouvelle promotion', contenu: 'Livraison gratuite ce week-end.',
+              image: false, reseaux: [{ cle: 'facebook', nom: 'Facebook', icone: '📘' }],
+              statut: 'published', creee: '2026-08-01 08:00', partie: '2026-08-01 08:01',
+              resultats: [{ reseau: 'Facebook', ok: true, detail: '' }] },
+          ],
+        },
+        'sociaux:publier': { ok: true, statut: 'partial', complet: false, patron: 'Nouvelle promotion',
+          resultats: [{ reseau: 'Facebook', ok: true, detail: '' },
+                      { reseau: 'Instagram', ok: false, detail: 'jeton expiré' }] },
+        'sociaux:publierTout': { ok: true, tentees: 1, completes: 0, partielles: 1, echecs: 0 },
+        'sociaux:ignorer': { ok: true, patron: 'Nouvelle promotion' },
+        'sociaux:viderHistorique': { ok: true, efface: 2 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rien a publier',
+      id: '',
+      reponses: {
+        'sociaux:liste': {
+          ok: true, peutModifier: true, reseauxActifs: [],
+          tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
+          file: [], historique: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'sociaux:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── CHAT EN LIGNE ──────────────────────────────────────────────────────────
   'chat.js': [
     {
