@@ -79,7 +79,7 @@ contextBridge.exposeInMainWorld('szPont', {
       'promo:donnees': 60000, 'promo:apercu': 45000, 'promo:lot': 90000,
       'promo:planche': 60000, 'promo:imprimante': 20000,
       'depenses:facture': 120000, 'depenses:recu': 45000,
-      'depenses:enregistrer': 90000 };
+      'depenses:enregistrer': 90000, 'depenses:convertir': 20000 };
     const limite = (LONGUES[nom] || 20000) + 5000;
     const plafond = new Promise((resoudre) => {
       setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, limite);

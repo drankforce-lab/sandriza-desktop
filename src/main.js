@@ -1186,6 +1186,9 @@ const OPS_PONT = new Set([
   // L ANNUAIRE des fournisseurs : visible, modifiable, et VERROUILLE pendant
   // qu on le corrige (portee expense_vendors, meme mecanisme que les fiches).
   'depenses:annuaire', 'depenses:annuaireEcrire', 'depenses:annuaireRetirer',
+  // Convertir les montants SAISIS depuis le dollar US, au taux de la date de
+  // la depense : la conversion n avait lieu qu a la lecture d une facture.
+  'depenses:convertir',
   // Remboursements et credits (fenetre Remboursements, 2.7.0). ⚠ ECRAN DE
   // CONSULTATION : rembourser engage de l argent et se fait depuis la COMMANDE,
   // dans la fenetre Remboursement qui porte deja toutes les gardes.

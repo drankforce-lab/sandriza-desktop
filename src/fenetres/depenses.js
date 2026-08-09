@@ -254,7 +254,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="mini' + (VUE === 'annuaire' ? ' actif' : '') + '" data-vue="annuaire">Fournisseurs</button>'
       + '</div>';
 
-    if (VUE === 'annuaire') { h += vueAnnuaire(); corps.innerHTML = h; brancher(); return; }
+    if (VUE === 'annuaire') { h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); return; }
 
     h += '<div class="barreoutils">'
       + '<select id="d-annee">' + (D.annees || []).map(function(a){
@@ -549,8 +549,29 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="champ"><label>TVQ payée</label>'
       + '<input type="number" step="0.01" min="0" id="f-tvq" value="' + esc(f.tvq) + '" placeholder="0.00"></div>'
       + '<button id="f-taxes" title="Déduire TPS et TVQ d’un total payé saisi dans Montant">↧ Calc. taxes</button>'
-      + '</div><div class="aide" style="margin-top:.3rem">Saisissez le <strong>total payé</strong> dans '
-      + '« Montant » puis « Calc. taxes » pour en déduire la TPS et la TVQ.</div></div>'
+      + '</div>'
+      /* ⚠ LE MONTANT D ORIGINE RESTE SOUS LES YEUX pendant la saisie : c est la
+         seule facon de verifier une conversion, et c est aussi ce qu on relit
+         quand on corrige une taxe que la lecture a manquee. */
+      + (f.origine
+          ? '<div class="aide" style="margin-top:.35rem;color:#93c5fd">💵 Facture en '
+            + esc(f.origine.devise || 'USD') + ' — original : '
+            + [['montant', 'montant'], ['tps', 'TPS'], ['tvq', 'TVQ']].map(function(p){
+                var v = f.origine[p[0]];
+                return (v == null) ? '' : (p[1] + ' ' + v.toFixed(2) + ' $ US');
+              }).filter(Boolean).join(' · ')
+            + (f.origine.total != null ? ' · total ' + f.origine.total.toFixed(2) + ' $ US' : '')
+            + (f.fx ? ' — taux ' + esc(f.fx.taux)
+                + (f.fx.date ? ' du ' + esc(f.fx.date) : '')
+                + (f.fx.approx ? ' (taux du jour, faute de mieux)' : '') : '')
+            + '</div>'
+          : '')
+      + '<div class="aide" style="margin-top:.3rem">Saisissez le <strong>total payé</strong> dans '
+      + '« Montant » puis « Calc. taxes » pour en déduire la TPS et la TVQ. '
+      + 'Une facture en dollars US se convertit avec « ⇄ Convertir ».</div>'
+      + '<div class="barreoutils" style="margin-top:.4rem">'
+      + '<button id="f-convertir" title="Convertir les montants saisis depuis le dollar US, au taux de la date">'
+      + '⇄ Convertir depuis USD</button></div></div>'
       + '<div class="champ large"><label>Reçu (image ou PDF — facultatif)</label>'
       + '<button id="f-recu">' + (f.recu ? '✓ Reçu joint — remplacer' : '📎 Joindre un reçu') + '</button></div>'
       + '</div>';
@@ -692,6 +713,11 @@ ${JS_ACTIVITE}${JS_DIRE}
           if (c.montant != null) FORM.montant = c.montant.toFixed(2);
           if (c.tps != null) FORM.tps = c.tps.toFixed(2);
           if (c.tvq != null) FORM.tvq = c.tvq.toFixed(2);
+          /* ⚠ ON GARDE LES MONTANTS D ORIGINE : sans eux, on voit << 12,35 $ >>
+             sans pouvoir verifier si la facture disait 8,79 ou 8,97. */
+          FORM.origine = c.origine || null;
+          FORM.fx = (r.devise === 'USD' && r.fxTaux)
+            ? { taux: r.fxTaux, date: r.fxDate || '', approx: !!r.fxApprox, source: r.devise } : null;
           var complet = (parseFloat(FORM.montant) || 0) > 0 && FORM.date
             && (FORM.description || FORM.fournisseur);
           /* ⚠ ON DIT SI LA LECTURE A ÉTÉ RECOUPÉE AVEC LE DOCUMENT. Sur une photo
@@ -756,7 +782,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var pay = ((D.paiements || [])[0] || {}).cle || 'card';
     return { id: '__new__', date: auj, categorie: cat, paiement: pay,
       description: '', fournisseur: '', montant: '', tps: '', tvq: '', recu: false,
-      lecture: '', lectureErr: false };
+      lecture: '', lectureErr: false, origine: null, fx: null };
   }
 
   function enregistrer(){
@@ -786,6 +812,54 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   /* ── BRANCHEMENTS ──────────────────────────────────────────────────────── */
+  /* ⚠⚠ LA VUE FOURNISSEURS A SON PROPRE BRANCHEUR, et son absence a tout casse.
+     Elle appelait brancher() — celui des DEPENSES — qui cherche des champs
+     (d-annee, d-mois, d-prec…) absents de cet ecran : rien ne se branchait, donc
+     ni la recherche, ni la pagination, ni « Ajouter », ni « Enregistrer » ne
+     repondaient. Seuls marchaient les gestes passant par les attributs data-*
+     du gestionnaire general. Signale le 2026-08-09 (« changer de page dans les
+     fournisseurs, ca ne marche pas »).
+     ⚠ LE GARDE-FOU NE POUVAIT PAS LE VOIR : il execute le rendu, jamais les
+     gestes — c'est le trou nomme dans reponses-fenetres.js. Un ecran a
+     brancheur propre se verifie A LA MAIN. */
+  function brancherAnnuaire(){
+    var q = document.getElementById('a-q');
+    if (q) q.oninput = function(){
+      ANN_Q = q.value; ANN_PAGE = 0;
+      clearTimeout(window._aq);
+      window._aq = setTimeout(function(){ chargerAnnuaire(true); }, 300);
+    };
+    var bp = document.getElementById('a-prec');
+    if (bp) bp.onclick = function(){ ANN_PAGE = Math.max(0, (ANN.page || 0) - 1); chargerAnnuaire(); };
+    var bs = document.getElementById('a-suiv');
+    if (bs) bs.onclick = function(){ ANN_PAGE = (ANN.page || 0) + 1; chargerAnnuaire(); };
+    var nv = document.getElementById('a-nouveau');
+    if (nv) nv.onclick = function(){
+      ANN_FORM = { id: '', nom: '',
+        categorie: ((ANN.categories || [])[0] || {}).cle || 'autre', neuf: true };
+      dessiner();
+    };
+    var an = document.getElementById('a-annuler');
+    if (an) an.onclick = function(){ ANN_FORM = null; dessiner(); };
+    var ok = document.getElementById('a-ok');
+    if (ok) ok.onclick = function(){
+      var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+      var saisie = { id: ANN_FORM.neuf ? g('a-id') : ANN_FORM.id,
+        nom: g('a-nom'), categorie: g('a-cat') };
+      dire('Enregistrement…');
+      appeler('depenses:annuaireEcrire', [saisie]).then(function(r){
+        if (!r.ok) {
+          dire(r.motif === 'id_requis' ? 'Donnez un domaine ou un nom de fournisseur.'
+            : (r.motif === 'categorie' ? 'Choisissez une catégorie.' : expliquer(r)), 'err');
+          return;
+        }
+        dire('« ' + r.id + ' » classé en ' + r.categorie + '.', 'bon');
+        ANN_FORM = null;
+        chargerAnnuaire();
+      });
+    };
+  }
+
   function brancher(){
     /* ⚠ UN SEUL BRANCHEMENT POUR TOUT LE FORMULAIRE : brancher champ par champ,
        c est en oublier un a chaque champ ajoute. */
@@ -887,6 +961,35 @@ ${JS_ACTIVITE}${JS_DIRE}
         FORM.tvq = r.tvq.toFixed(2);
         dessiner();
         dire('Taxes déduites du total payé.', 'bon');
+      });
+    };
+    var cv = document.getElementById('f-convertir');
+    if (cv) cv.onclick = function(){
+      memoriserForm();
+      if (!(parseFloat(FORM.montant) || parseFloat(FORM.tps) || parseFloat(FORM.tvq))) {
+        dire('Saisissez d’abord les montants en dollars US.', 'att'); return;
+      }
+      dire('Lecture du taux de change…');
+      appeler('depenses:convertir', [{ montant: FORM.montant, tps: FORM.tps,
+        tvq: FORM.tvq, date: FORM.date }]).then(function(r){
+        if (!r.ok) {
+          dire(r.motif === 'rien_a_convertir' ? 'Rien à convertir.' : expliquer(r), 'att');
+          return;
+        }
+        /* ⚠ ON GARDE CE QU ON VIENT DE CONVERTIR : sans le montant d origine
+           affiche, personne ne peut verifier le resultat. */
+        FORM.origine = { devise: 'USD', montant: r.origine.montant,
+          tps: r.origine.tps, tvq: r.origine.tvq, total: null };
+        FORM.fx = { taux: r.taux, date: r.date, approx: r.approx, source: r.source };
+        if (r.montant != null) FORM.montant = r.montant.toFixed(2);
+        if (r.tps != null) FORM.tps = r.tps.toFixed(2);
+        if (r.tvq != null) FORM.tvq = r.tvq.toFixed(2);
+        dessiner();
+        brouillonMaintenant();
+        dire('Converti au taux ' + r.taux + (r.date ? ' du ' + r.date : '')
+          + (r.source ? ' (' + r.source + ')' : '')
+          + (r.approx ? ' — taux du jour, faute d’avoir trouvé celui de la date.' : '.'),
+          r.approx ? 'att' : 'bon');
       });
     };
     var rj = document.getElementById('f-recu');
