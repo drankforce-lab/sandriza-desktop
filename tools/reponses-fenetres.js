@@ -513,6 +513,47 @@ module.exports = {
     },
   ],
 
+  // ── RECHERCHES SANS RÉSULTAT ───────────────────────────────────────────────
+  'recherches.js': [
+    {
+      // ⚠ FORME REELLE de recherches:liste (coeur Admin._recherchesDonnees).
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'recherches:liste': {
+          ok: true, peutModifier: true, total: 27,
+          recentes: [
+            { q: 'robe de bal', fois: 12, derniere: '2026-08-08' },
+            { q: 'sandales dorees', fois: 9, derniere: '2026-08-06' },
+            { q: 'manteau long', fois: 6, derniere: '2026-08-02' },
+          ],
+          etendue: '2026-01 → 2026-08',
+          archive: [{ q: 'robe de bal', fois: 61 }, { q: 'manteau long', fois: 44 }],
+        },
+        'recherches:retirer': { ok: true, q: 'robe de bal', retiree: true },
+        'recherches:vider': { ok: true, efface: 3 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucune recherche',
+      id: '',
+      reponses: {
+        'recherches:liste': { ok: true, peutModifier: true, total: 0, recentes: [],
+          etendue: '', archive: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'recherches:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── RECOMMANDATIONS ────────────────────────────────────────────────────────
   'recommandations.js': [
     {
