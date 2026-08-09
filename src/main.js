@@ -1620,7 +1620,12 @@ const LIMITES_PONT = {
      ⚠ 180 s ICI, 120 s AU RELAIS : le plafond le plus court doit etre le plus
      INTERIEUR, sinon c est la couche du dessus qui abandonne la premiere et
      l on perd le vrai message d erreur. */
-  'photos:traiter': 180000, 'photos:lot': 180000, 'photos:isoler': 180000,
+  /* ⚠ LA CHAINE DU RETRAIT DE MANNEQUIN ENCHAINE TROIS MODELES : reperage,
+     reconstruction sous le masque, detourage. Trois minutes suffisaient quand
+     c etait un seul appel ; elles ne suffisent plus, et un plafond trop court ne
+     rate pas seulement un resultat — il MENT sur son sort, en affichant un echec
+     pendant que le travail continue et se facture derriere. */
+  'photos:traiter': 300000, 'photos:lot': 600000, 'photos:isoler': 180000,
   /* ⚠⚠ ET VOICI POURQUOI << TOUT VIDER >> LAISSAIT 32 PHOTOS (2026-08-09).
      `photos:vider` n etait pas dans cette table : elle heritait du plafond
      ordinaire de 8 SECONDES, alors qu elle supprime les photos UNE A UNE avec
