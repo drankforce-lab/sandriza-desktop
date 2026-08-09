@@ -473,8 +473,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       /* ⚠ L IMAGE S AFFICHE ICI, LE PDF S OUVRE DANS LA FENETRE PRINCIPALE : un
          PDF distant ne se rend pas dans un document local, et promettre un
          apercu qui reste blanc est pire que renvoyer ailleurs. */
+      /* ⚠ RIEN A DIRE QUAND IL N Y A RIEN A MONTRER. Une ligne annoncait << Recu
+         en PDF — il s ouvre dans la fenetre principale >> : le bouton
+         << Ouvrir le recu >> juste en dessous le dit deja, et mieux. Une phrase
+         qui repete un bouton n informe pas, elle encombre. */
       if (e.recu && !e.recuPdf) h += '<div class="recu"><img src="' + esc(e.recu) + '" alt=""></div>';
-      else h += '<div class="aide" style="margin-top:.6rem">Reçu en PDF — il s’ouvre dans la fenêtre principale.</div>';
     }
 
     h += '<div class="pied-boite">'
