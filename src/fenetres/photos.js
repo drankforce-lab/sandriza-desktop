@@ -98,10 +98,33 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
   padding-top:.4rem;font-size:.74rem;color:#8fa1b8}
 .vide{padding:1.2rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
 
-.voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
-  align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
-  max-width:44rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
+/* ══════════════════════════════════════════════════════════════════════════
+   L INSPECTEUR — a cote, plus par-dessus
+   --------------------------------------------------------------------------
+   ⚠⚠ UNE FENETRE MODALE CACHE CE QU ON COMPARE. On ouvre une photo pour la
+   regarder AVEC les autres : verifier qu on isole la bonne, que le nom suit la
+   serie, que le poids ressemble a ses voisines. Un voile noir sur toute la
+   surface repond exactement le contraire — il isole la photo de son contexte,
+   et il faut le fermer pour passer a la suivante.
+   Le panneau se pose donc a DROITE, le tableau reste lisible, et l on passe
+   d une ligne a l autre sans rien refermer.
+   ⚠ LE TABLEAU SE DECALE, il ne passe pas dessous : un inspecteur qui recouvre
+   la derniere colonne cache justement les boutons d action.
+   ══════════════════════════════════════════════════════════════════════════ */
+.voile{position:fixed;top:0;right:0;bottom:0;width:min(27rem,52vw);z-index:50;
+  display:flex;background:#0b1220;border-left:1px solid rgba(255,255,255,.12);
+  box-shadow:-16px 0 40px rgba(0,0,0,.45)}
+.boite{background:#0b1220;border:0;border-radius:0;width:100%;
+  overflow:auto;padding:.85rem .95rem}
+body.insp .corps{padding-right:calc(min(27rem,52vw) + .6rem)}
+body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
+@media (max-width:820px){
+  /* Sous 820 px il n y a plus de place pour deux colonnes : l inspecteur
+     reprend toute la largeur, et l on retombe sur le comportement d avant. */
+  .voile{width:100%}
+  body.insp .corps{padding-right:1.05rem}
+  body.insp .suivi{right:1rem}
+}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
 .boite .apercu{background:conic-gradient(#3a4354 25%,#2b3444 0 50%,#3a4354 0 75%,#2b3444 0) 0 0/14px 14px;
@@ -434,6 +457,9 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += barreLot();
     if (DETAIL) h += boiteDetail();
+    // ⚠ La classe se pose sur BODY et non sur le corps : c est elle qui decale
+    // a la fois le tableau et le panneau de suivi, qui vit hors du corps.
+    document.body.classList.toggle('insp', !!DETAIL);
     corps.innerHTML = h;
     brancher();
   }
@@ -603,6 +629,9 @@ ${JS_ACTIVITE}${JS_DIRE}
        sur une fiche produit, dans un journal et sur une etiquette imprimee : le
        laisser bouger casserait la seule chose qui relie tout cela. */
     var h = '<div class="voile" id="p-voile"><div class="boite">'
+      + '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem">'
+      + '<span class="dt" style="flex:1 1 auto">Inspecteur</span>'
+      + '<button class="mini" id="p-fermer-insp" title="Fermer le panneau">✕</button></div>'
       + '<h3><span class="num">' + esc(r.code) + '</span> '
       + (ro ? esc(r.nom)
             : '<input id="p-nom" type="text" value="' + esc(r.nom) + '" maxlength="120"'
@@ -1097,6 +1126,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.onclick = function(){ lancerLot(b.getAttribute('data-lot')); };
     });
 
+    var fx = document.getElementById('p-fermer-insp');
+    if (fx) fx.onclick = fermerDetail;
+
     var nomOk = document.getElementById('p-nom-ok');
     if (nomOk) nomOk.onclick = function(){
       var c = document.getElementById('p-nom');
@@ -1214,7 +1246,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function fermerDetail(){
-    DETAIL = null; ATTACHE = false; PRODUITS = null; PQ = ''; SUPPR_ARME = false;
+    DETAIL = null; ATTACHE = false; PRODUITS = null; PQ = ''; SUPPR_ARME = '';
     dessiner();
   }
 
@@ -1229,13 +1261,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     var pp = t.closest('[data-pid]');
     if (pp) { attacher(pp.getAttribute('data-pid')); return; }
     if (t.closest('.boite')) return;
-    if (t.closest('#p-voile')) { fermerDetail(); return; }
+    /* ⚠ ON NE FERME PLUS EN CLIQUANT A COTE. Le panneau ne recouvre plus rien :
+       cliquer ailleurs, c est vouloir travailler ailleurs — souvent sur une
+       AUTRE photo, qui prend simplement la place dans l inspecteur. Fermer se
+       fait par le bouton, qui est toujours la. */
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');
     if (tr) {
       var id = tr.getAttribute('data-id');
       var r = (D.lignes || []).filter(function(x){ return x.id === id; })[0];
-      if (r) { DETAIL = r; SUPPR_ARME = false; ATTACHE = false; dessiner(); }
+      if (r) { DETAIL = r; SUPPR_ARME = ''; ATTACHE = false; dessiner(); }
     }
   };
 
