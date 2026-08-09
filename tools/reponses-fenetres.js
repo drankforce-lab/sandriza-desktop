@@ -597,6 +597,76 @@ module.exports = {
     },
   ],
 
+  // ── CAMPAGNES ET CHAÎNES DE L'INFOLETTRE ───────────────────────────────────
+  // ⚠ DEUX CAS D'OUVERTURE, et ce n'est pas du zèle : l'onglet Campagnes et
+  // l'onglet Chaînes ne traversent pas le même dessin. Le second s'ouvre par
+  // l'argument de page (id = 'chaines'), comme le fait PAGES_ANCRABLES pour la
+  // vue par défaut.
+  'campagnes.js': [
+    {
+      // ⚠ FORME REELLE de campagnes:liste (coeur Newsletter._campagnesDonnees).
+      nom: 'campagnes garnies',
+      id: '',
+      reponses: {
+        'campagnes:liste': {
+          ok: true, peutModifier: true, resendPret: true, modeTest: false, courrielTest: '',
+          expediteur: 'SANDRIZA <infolettre@sandriza.com>',
+          abonnesActifs: 412, smsPret: true, smsDestinataires: 88,
+          envoyees: 3, brouillons: 2, courrielsEnvoyes: 1180, courrielsEchoues: 4,
+          campagnes: [
+            { id: 'camp_0007', nom: 'Rentrée — nouveautés', sujet: 'Les nouveautés de la rentrée',
+              segment: 'all', segmentLibelle: 'Tous les abonnés', canal: 'email',
+              canalLibelle: 'Courriel', etat: 'draft', etatLibelle: 'Brouillon',
+              envoyes: 0, echecs: 0, date: '', creeLe: '2026-08-07', destinataires: 412 },
+            { id: 'camp_0006', nom: 'Soldes d’été', sujet: 'Jusqu’à 40 % de réduction',
+              segment: 'clients', segmentLibelle: 'Clients avec commandes', canal: 'both',
+              canalLibelle: 'Courriel + SMS', etat: 'sent', etatLibelle: 'Envoyée',
+              envoyes: 388, echecs: 2, date: '2026-07-21', creeLe: '2026-07-20', destinataires: 296 },
+          ],
+        },
+        'campagnes:envoyer': { ok: true, nom: 'Rentrée — nouveautés', envoyes: 412, echecs: 0,
+          modeTest: false, courrielTest: '' },
+        'campagnes:supprimer': { ok: true, nom: 'Rentrée — nouveautés', etaitEnvoyee: false },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ FORME REELLE de chaines:liste (coeur Newsletter._chainesDonnees).
+      nom: 'chaines garnies',
+      id: 'chaines',
+      reponses: {
+        'chaines:liste': {
+          ok: true, peutModifier: true, envoisPermis: true, actives: 1, enAttente: 14, dues: 5,
+          chaines: [
+            { id: 'chain_0002', nom: 'Bienvenue', description: 'Trois messages après l’inscription',
+              declencheur: 'subscribe', declencheurLibelle: 'Nouvel abonné', active: true,
+              inscriptionsActives: 14, inscriptionsFinies: 121,
+              etapes: [
+                { no: 1, delai: 'Immédiat', sujet: 'Bienvenue chez Sandriza' },
+                { no: 2, delai: 'J+3', sujet: 'Nos coupes, expliquées' },
+                { no: 3, delai: 'J+7', sujet: 'Votre code de bienvenue expire bientôt' },
+              ] },
+            { id: 'chain_0001', nom: 'Panier abandonné', description: '',
+              declencheur: 'abandoned_cart', declencheurLibelle: 'Panier abandonné', active: false,
+              inscriptionsActives: 0, inscriptionsFinies: 42, etapes: [] },
+          ],
+        },
+        'chaines:basculer': { ok: true, nom: 'Bienvenue', active: false, nuage: true, enCours: 14 },
+        'chaines:supprimer': { ok: true, nom: 'Panier abandonné', perdues: 0, nuage: true },
+        'chaines:traiter': { ok: true, traitees: 5, envoyes: 5, echecs: 0 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'campagnes:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── RECHERCHES SANS RÉSULTAT ───────────────────────────────────────────────
   'recherches.js': [
     {

@@ -1147,6 +1147,11 @@ const OPS_PONT = new Set([
   // Journal d envoi (fenetre Journal, 1.75.0) : la seule piece qui reponde a
   // << je n ai jamais recu votre courriel >>.
   'journal:liste', 'journal:vider',
+  // Campagnes et chaines (fenetre Campagnes, 2.1.0). ⚠ DE VRAIS COURRIELS :
+  // << envoyer >> part vers toute la liste, << traiter >> envoie les etapes
+  // echues de toutes les chaines. Les deux sont armes en deux clics.
+  'campagnes:liste', 'campagnes:envoyer', 'campagnes:supprimer',
+  'chaines:liste', 'chaines:basculer', 'chaines:supprimer', 'chaines:traiter',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1375,6 +1380,12 @@ const LIMITES_PONT = {
   'abonnes:liste': 20000,
   // L import cree un abonne par ligne : une longue liste prend du temps.
   'abonnes:importer': 60000,
+  // Une campagne part par paquets de 100 vers TOUS les abonnes, et le canal
+  // SMS envoie un appel par numero : c est legitimement long. Abandonner en
+  // cours de route ne l arreterait pas — cela ne ferait que cacher le verdict.
+  'campagnes:envoyer': 180000,
+  // Le traitement des chaines envoie une etape par inscription echue.
+  'chaines:traiter': 180000,
   // Un appel par reseau, et la file peut en compter plusieurs.
   'sociaux:publier': 60000,
   'sociaux:publierTout': 180000,
@@ -1533,6 +1544,7 @@ const PAGES_ANCRABLES = () => ({
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
   journal: ['Journal d’envoi', () => pageJournal()],
+  campagnes: ['Campagnes et chaînes', () => pageCampagnes()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2267,6 +2279,7 @@ const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageAbonnes } = require('./fenetres/abonnes');
 const { pageJournal } = require('./fenetres/journal');
+const { pageCampagnes } = require('./fenetres/campagnes');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2344,7 +2357,8 @@ const actionApp = (nom) => {
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
-    case 'recommandations': case 'recherches': case 'abonnes': case 'journal': {
+    case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
+    case 'campagnes': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
