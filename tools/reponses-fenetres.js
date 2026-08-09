@@ -513,6 +513,81 @@ module.exports = {
     },
   ],
 
+  // ── OFFRES ET ANNONCES ─────────────────────────────────────────────────────
+  'promotions.js': [
+    {
+      // ⚠ FORME REELLE de offres:liste (coeur Promo._offresDonnees).
+      nom: 'offres garnies',
+      id: '',
+      reponses: {
+        'offres:liste': {
+          ok: true, peutModifier: true,
+          categories: [{ cle: 'robes', libelle: 'Robes' }, { cle: 'hauts', libelle: 'Hauts & Blouses' }],
+          catalogue: [
+            { id: 'p1', nom: 'Robe fleurie', sku: 'RB-0001', categorie: 'robes' },
+            { id: 'p2', nom: 'Blouse en soie', sku: 'HT-0002', categorie: 'hauts' },
+          ],
+          offres: [
+            { id: 'd1', nom: 'Solde du printemps', rabais: '20 %', portee: 'Robes',
+              genre: 'percent', valeur: 20, bogoAchat: 0, bogoGratuit: 0, paliers: [],
+              parClient: false, appliqueA: 'category', categoriesChoisies: ['robes'],
+              produitsChoisis: [], bandeau: 'Jusqu’à 20 % sur les robes', bandeauEN: '',
+              bandeauFond: '#1a1a2e', bandeauTexte: '#ffffff', bandeauCta: 'Voir',
+              bandeauCtaEN: '', bandeauUrl: '#shop', priorite: 5,
+              debut: '2026-03-01', fin: '2026-06-30', actif: true, enCours: true },
+            { id: 'd2', nom: '2 pour 1 accessoires', rabais: '3 pour 2', portee: 'Tous les produits',
+              genre: 'bogo', valeur: 0, bogoAchat: 3, bogoGratuit: 1, paliers: [],
+              parClient: true, appliqueA: 'all', categoriesChoisies: [], produitsChoisis: [],
+              bandeau: '', bandeauEN: '', bandeauFond: '#1a1a2e', bandeauTexte: '#ffffff',
+              bandeauCta: '', bandeauCtaEN: '', bandeauUrl: '#shop', priorite: 5,
+              debut: '', fin: '', actif: false, enCours: false },
+          ],
+        },
+        'offres:enregistrer': { ok: true, id: 'd1', nom: 'Solde du printemps', creation: false },
+        'promos:basculer': { ok: true, actif: false, nom: 'Solde du printemps' },
+        'promos:supprimer': { ok: true, nom: 'Solde du printemps' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ FORME REELLE de annonces:liste (coeur Promo._annoncesDonnees).
+      nom: 'annonces garnies',
+      id: '',
+      reponses: {
+        'annonces:liste': {
+          ok: true, peutModifier: true, intervalle: 6,
+          categories: [{ cle: 'robes', libelle: 'Robes' }],
+          catalogue: [{ id: 'p1', nom: 'Robe fleurie', sku: 'RB-0001', categorie: 'robes' }],
+          annonces: [
+            { id: 'a1', nom: 'Livraison gratuite', genre: 'announcement',
+              message: 'Livraison gratuite dès 100 $', messageEN: '', fond: '#1a1a2e',
+              texte: '#ffffff', cta: 'Magasiner', ctaEN: '', url: '#shop',
+              badge: '', badgeEN: '', badgeCouleur: 'accent', appliqueA: 'all',
+              categoriesChoisies: [], produitsChoisis: [], expireAuto: false, expireJours: 7,
+              priorite: 5, debut: '', fin: '', actif: true, enCours: true },
+            { id: 'a2', nom: 'Badge nouveauté', genre: 'badge',
+              message: '', messageEN: '', fond: '#1a1a2e', texte: '#ffffff',
+              cta: '', ctaEN: '', url: '#shop', badge: 'Nouveauté', badgeEN: 'New',
+              badgeCouleur: 'success', appliqueA: 'category', categoriesChoisies: ['robes'],
+              produitsChoisis: [], expireAuto: true, expireJours: 14,
+              priorite: 3, debut: '', fin: '', actif: true, enCours: true },
+          ],
+        },
+        'annonces:enregistrer': { ok: true, id: 'a1', nom: 'Livraison gratuite', creation: false },
+        'promos:bandeau': { ok: true, intervalle: 8 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'offres:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── COUPONS ────────────────────────────────────────────────────────────────
   'coupons.js': [
     {

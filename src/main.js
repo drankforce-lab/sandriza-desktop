@@ -1117,6 +1117,10 @@ const OPS_PONT = new Set([
   'cartescadeaux:activer', 'cartescadeaux:recompense',
   // Coupons (fenetre Coupons, 1.64.0) : ils touchent la CAISSE.
   'coupons:liste', 'coupons:enregistrer', 'coupons:basculer', 'coupons:supprimer',
+  // Offres et annonces (fenetre Promotions, 1.68.0). Offres, annonces et
+  // badges partagent une meme liste : bascule et suppression sont communes.
+  'offres:liste', 'offres:enregistrer', 'annonces:liste', 'annonces:enregistrer',
+  'promos:basculer', 'promos:supprimer', 'promos:bandeau',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1487,6 +1491,7 @@ const PAGES_ANCRABLES = () => ({
   paiements: ['Paiements Square', () => pagePaiements()],
   cartescadeaux: ['Cartes-cadeaux', () => pageCartesCadeaux()],
   coupons: ['Coupons', () => pageCoupons()],
+  promotions: ['Offres et annonces', () => pagePromotions()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2213,6 +2218,7 @@ const { pagePaiements } = require('./fenetres/paiements');
 const { pageEtatCompte } = require('./fenetres/etatcompte');
 const { pageCartesCadeaux } = require('./fenetres/cartescadeaux');
 const { pageCoupons } = require('./fenetres/coupons');
+const { pagePromotions } = require('./fenetres/promotions');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2288,7 +2294,8 @@ const actionApp = (nom) => {
     case 'tableau': case 'inventaire': case 'commandes': case 'produits':
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
-    case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons': {
+    case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
+    case 'promotions': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
