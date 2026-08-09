@@ -1361,7 +1361,7 @@ const OPS_PONT = new Set([
   'lot:sources', 'lot:vignette', 'lot:importer', 'lot:traiter',
   // L historique des lots : ce qui est entre, par quelle porte, et de quoi le
   // defaire d un geste.
-  'lot:liste', 'lot:jeter', 'lot:ouvrir', 'lot:clore', 'photos:toutes', 'photos:pivoter',
+  'lot:liste', 'lot:jeter', 'lot:ouvrir', 'lot:clore', 'photos:toutes', 'photos:pivoter', 'photos:ranger',
   // Le suivi de consommation Fal.ai (lecture seule).
   'fal:suivi', 'fal:ouvrir',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
@@ -1629,7 +1629,7 @@ const LIMITES_PONT = {
      une phototheque a moitie vide et un ecran qui pretendait avoir fini.
      Un plafond trop court ne rate pas une operation : il ment sur son sort. */
   'photos:vider': 600000, 'photos:supprimer': 45000, 'photos:toutes': 30000,
-  'photos:pivoter': 90000,
+  'photos:pivoter': 90000, 'photos:ranger': 180000,
   'lot:jeter': 600000, 'lot:sources': 90000, 'lot:vignette': 30000,
   'lot:importer': 90000, 'lot:traiter': 180000, 'lot:liste': 30000,
   'photos:importer': 60000, 'photos:usb': 120000, 'fal:suivi': 20000,

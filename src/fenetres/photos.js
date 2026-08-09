@@ -1386,11 +1386,20 @@ ${JS_ACTIVITE}${JS_DIRE}
        vide passerait pour une photo perdue. */
     return '<div class="vign"><span class="att">non<br>rangée</span></div>';
   }
+  /* ⚠ LE NOM DES TRAITEMENTS, TEL QU'ON L'A CLIQUÉ. La ligne annonçait
+     « isolée » quel que soit le traitement subi : on retirait un mannequin et
+     l'écran continuait de parler de détourage. Un verdict doit nommer ce qui a
+     eu lieu, sinon il ne vaut rien comme verdict. */
+  var NOM_TRAIT = { detourage: 'détourée', fantome: 'sans mannequin', humain: 'sur mannequin' };
+  function traits(r){ return (r.faits || []).map(function(f){ return NOM_TRAIT[f] || f; }); }
+
   function etat(r){
-    if (r.lieId) return '<span class="pill bon">attachée</span>';
     if (r.enAttente) return '<span class="pill err">non rangée</span>';
-    if (r.isole) return '<span class="pill att">isolée</span>';
-    return '<span class="pill neutre">' + esc(r.statut || 'importée') + '</span>';
+    var t = traits(r);
+    var h = t.map(function(x){ return '<span class="pill att">' + esc(x) + '</span>'; }).join(' ');
+    if (!h && r.isole) h = '<span class="pill att">détourée</span>';
+    if (r.lieId) h = '<span class="pill bon">attachée</span>' + (h ? ' ' + h : '');
+    return h || '<span class="pill neutre">' + esc(r.statut || 'importée') + '</span>';
   }
   function gain(r){
     var t = poids(r.poids);
@@ -1466,7 +1475,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="grille">'
       + '<div><div class="l">Poids rangé</div><div class="v">' + gain(r) + '</div></div>'
       + (r.poidsSrc ? '<div><div class="l">Avant compression</div><div class="v">' + poids(r.poidsSrc) + '</div></div>' : '')
-      + '<div><div class="l">Détourage</div><div class="v">' + (r.isole ? 'fait' : 'non fait') + '</div></div>'
+      + '<div><div class="l">Traitements</div><div class="v">'
+      + (traits(r).join(' · ') || (r.isole ? 'détourée' : 'aucun')) + '</div></div>'
       + (r.lieId ? '<div><div class="l">Article</div><div class="v">' + esc(r.lieNom)
           + (r.lieSku ? ' · ' + esc(r.lieSku) : '') + '</div></div>' : '')
       + '</div>';
@@ -2184,6 +2194,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var f = document.getElementById('p-fermer');
     if (f) f.onclick = fermerDetail;
+    rangerUneFois();
     var iso = document.getElementById('p-isoler');
     if (iso) iso.onclick = isoler;
 
@@ -2298,6 +2309,22 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   /* ── CHARGEMENT ────────────────────────────────────────────────────────── */
   var enCours = false, RELANCE = false;
+  /* ⚠ UNE SEULE FOIS PAR SÉANCE. Replier les anciennes photos sur le modèle à
+     une image efface des objets dans R2 : c'est un geste d'entretien, pas un
+     geste d'affichage, et le refaire à chaque rafraîchissement de la table
+     serait aussi inutile que bruyant. */
+  var RANGE = false;
+  function rangerUneFois(){
+    if (RANGE) return;
+    RANGE = true;
+    appeler('photos:ranger', []).then(function(r){
+      if (r && r.ok && r.repliees) {
+        dire(r.repliees + ' photo(s) rangée(s) : une seule image conservée par photo.', 'bon');
+        charger();
+      }
+    }).catch(function(){});
+  }
+
   function charger(garderSaisie){
     if (enCours) { RELANCE = true; return; }
     enCours = true;
