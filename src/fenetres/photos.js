@@ -132,6 +132,41 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
 .msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
+/* Le SUIVI d import : une ligne par fichier, son etat, et ce qui lui arrive.
+   ⚠ Un compteur << 3 / 12 >> dans le bandeau ne dit pas LESQUELLES ont echoue,
+   ni pourquoi. Sur douze photos dont deux sont refusees, c est precisement ce
+   qu on veut savoir. */
+.suivi{position:fixed;right:1rem;bottom:3rem;width:min(26rem,calc(100vw - 2rem));
+  max-height:60vh;display:flex;flex-direction:column;background:#16202f;
+  border:1px solid rgba(201,169,126,.45);border-radius:11px;
+  box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
+.suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
+  border-bottom:1px solid rgba(255,255,255,.08);font:700 .78rem/1.2 system-ui;
+  text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+.suivi .st .n{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:0}
+.suivi .lst{flex:1 1 auto;overflow-y:auto;padding:.3rem .5rem .5rem}
+.suivi .lg{display:flex;align-items:center;gap:.5rem;padding:.26rem .3rem;
+  border-top:1px solid rgba(255,255,255,.05);font-size:.76rem}
+.suivi .lg:first-child{border-top:0}
+.suivi .lg{flex-wrap:wrap}
+.suivi .lg .nm{flex:1 1 8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Les etapes, sous le nom : ce que l import a REELLEMENT fait, avec ses
+   chiffres. << 6,2 Mo vers 88 Ko >> se verifie ; << compression reussie >> non. */
+.suivi .lg .ep{flex:1 0 100%;font-size:.68rem;color:#8fa1b8;padding-left:.1rem;
+  display:flex;gap:.45rem;flex-wrap:wrap}
+.suivi .lg .ep i{font-style:normal}
+.suivi .lg .ep i.ok{color:#4ade80}
+.suivi .lg .ep i.non{color:#fca5a5}
+.suivi .lg .ep i.encours{color:#f0d6a0}
+.suivi .lg .et{flex:0 0 auto;font-size:.68rem;font-weight:700;padding:.03rem .4rem;border-radius:99px}
+.suivi .lg .et.attente{background:rgba(148,163,184,.16);color:#94a3b8}
+.suivi .lg .et.cours{background:rgba(201,169,126,.2);color:#f0d6a0}
+.suivi .lg .et.faite{background:rgba(34,197,94,.15);color:#4ade80}
+.suivi .lg .et.double{background:rgba(234,179,8,.15);color:#facc15}
+.suivi .lg .et.echec{background:rgba(248,113,113,.15);color:#fca5a5}
+.suivi .pd{padding:.45rem .8rem;border-top:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:#8fa1b8}
+.suivi .pd button{margin-left:auto}
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -164,6 +199,46 @@ ${JS_ACTIVITE}${JS_DIRE}
   var SUPPR_ARME = false;
   var VIDER_ARME = false;
   var OCCUPE = false;       // un travail long est en cours : on desarme les gestes
+  var VEILLE = null;        // le chien de garde de ce travail
+
+  /* ⚠⚠ UN DRAPEAU QUI NE SE LEVE PAS BLOQUE LA FENETRE POUR TOUJOURS.
+     Signale le 2026-08-09 : << Recherche de cles USB... >> restait a l ecran, et
+     tout import suivant repondait << un import est deja en cours >> alors que
+     rien ne tournait. La cause n est pas dans un appel precis : c est que
+     OCCUPE etait pose a la main et rendu a la main, sur le seul chemin de
+     succes. Une reponse perdue — quelle qu en soit la raison — laissait la
+     fenetre morte jusqu a sa reouverture, sans un mot.
+
+     Deux regles, ici, une fois pour toutes :
+       ① ON POSE ET ON REND AU MEME ENDROIT (occuper / liberer) ;
+       ② UN TRAVAIL QUI NE REPOND PAS FINIT PAR LE DIRE. Le chien de garde rend
+          le drapeau et NOMME le silence. Mieux vaut une fenetre qui avoue
+          n avoir pas eu de reponse qu une fenetre qui refuse tout sans raison. */
+  var VEILLE_MS = 60000;
+  function occuper(mot){
+    OCCUPE = true;
+    dire(mot);
+    clearTimeout(VEILLE);
+    VEILLE = setTimeout(function(){
+      if (!OCCUPE) return;
+      liberer();
+      dire('Aucune réponse de la fenêtre principale pour cette opération. '
+        + 'Elle a peut-être abouti quand même — rechargez la liste pour voir.', 'err');
+    }, VEILLE_MS);
+  }
+  function liberer(){
+    OCCUPE = false;
+    clearTimeout(VEILLE);
+    VEILLE = null;
+  }
+  /* ⚠ ON NE REFUSE JAMAIS EN SILENCE. Un bouton qui ne fait rien passe pour
+     casse ; un bouton qui dit pourquoi il attend passe pour occupe. */
+  function occupeDeja(quoi){
+    if (!OCCUPE) return false;
+    dire(quoi + ' — un travail est déjà en cours dans cette fenêtre. Patientez, '
+      + 'ou rechargez la liste s’il ne se termine pas.', 'att');
+    return true;
+  }
 
   /* ⚠ UN PLAFOND PAR FICHIER, ET IL EST DIT. L image traverse le pont en clair :
      une photo de 40 Mo bloquerait le canal plusieurs dizaines de secondes pour
@@ -418,6 +493,68 @@ ${JS_ACTIVITE}${JS_DIRE}
       r.readAsDataURL(f);
     });
   }
+  /* ══════════════════════════════════════════════════════════════════════════
+     LE SUIVI D IMPORT
+     ⚠ IL SURVIT A LA FIN DU TRAVAIL. Un suivi qui disparait au dernier fichier
+     ne sert qu a celui qui regardait l ecran ; celui qui revient deux minutes
+     plus tard n a aucun moyen de savoir laquelle des douze photos a ete refusee.
+     Il se ferme a la main.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var SUIVI = null;
+
+  function suiviOuvrir(noms){
+    suiviFermer();
+    var d = document.createElement('div');
+    d.className = 'suivi';
+    d.innerHTML = '<div class="st"><span>Import en cours</span><span class="n" id="sv-n">0 / '
+      + noms.length + '</span></div><div class="lst" id="sv-l">'
+      + noms.map(function(n, i){
+          return '<div class="lg" id="sv-' + i + '"><span class="nm">' + esc(n)
+            + '</span><span class="et attente">en attente</span>'
+            + '<span class="ep" id="sv-e-' + i + '"></span></div>';
+        }).join('')
+      + '</div><div class="pd" id="sv-p"><span id="sv-r">Préparation…</span>'
+      + '<button class="mini" id="sv-x">Fermer</button></div>';
+    document.body.appendChild(d);
+    SUIVI = d;
+    var x = document.getElementById('sv-x');
+    if (x) x.onclick = suiviFermer;
+  }
+  function suiviFermer(){
+    if (SUIVI && SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
+    SUIVI = null;
+  }
+  function suiviLigne(i, etat, mot){
+    if (!SUIVI) return;
+    var l = document.getElementById('sv-' + i);
+    if (!l) return;
+    var e = l.querySelector('.et');
+    if (e) { e.className = 'et ' + etat; e.textContent = mot; }
+    if (etat === 'cours') l.scrollIntoView({ block: 'nearest' });
+  }
+  /* Les etapes d une ligne. L etat << encours >> marque celle qui tourne ; les autres
+     portent leur verdict ET leur mesure. */
+  function suiviEtapes(i, etapes){
+    var z = document.getElementById('sv-e-' + i);
+    if (!z) return;
+    z.innerHTML = (etapes || []).map(function(e){
+      var c = (e.etat === 'encours') ? 'encours' : (e.ok ? 'ok' : 'non');
+      var m = (e.etat === 'encours') ? '…' : (e.ok ? '✓' : '✕');
+      return '<i class="' + c + '">' + m + ' ' + esc(e.nom)
+        + (e.chiffre ? ' ' + esc(e.chiffre) : '') + '</i>';
+    }).join('');
+  }
+  function suiviCompte(fait, total){
+    var n = document.getElementById('sv-n');
+    if (n) n.textContent = fait + ' / ' + total;
+  }
+  function suiviFin(mot){
+    var r = document.getElementById('sv-r');
+    if (r) r.textContent = mot;
+    var t = SUIVI && SUIVI.querySelector('.st span');
+    if (t) t.textContent = 'Import terminé';
+  }
+
   function importer(fichiers){
     if (!D || !D.peutModifier) { dire(MOTIFS.droit, 'err'); return; }
     var liste = [];
@@ -425,28 +562,72 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (/^image\\//.test(fichiers[i].type || '')) liste.push(fichiers[i]);
     }
     if (!liste.length) { dire('Aucune image dans ce dépôt (JPG, PNG ou WebP).', 'att'); return; }
-    if (OCCUPE) { dire('Un import est déjà en cours.', 'att'); return; }
-    OCCUPE = true;
-    var faites = 0, refuses = [], echoues = [];
+    if (occupeDeja('Import')) return;
+    occuper('Préparation de l’import…');
+    suiviOuvrir(liste.map(function(f){ return f.name; }));
+    var faites = 0, doubles = 0, refuses = 0, echoues = 0;
     var suite = function(k){
+      suiviCompte(k, liste.length);
       if (k >= liste.length) {
-        OCCUPE = false;
-        var t = faites + ' photo' + (faites > 1 ? 's' : '') + ' importée' + (faites > 1 ? 's' : '');
-        if (refuses.length) t += ' · ' + refuses.length + ' trop lourde' + (refuses.length > 1 ? 's' : '')
-          + ' (' + esc(refuses.slice(0, 2).join(', ')) + ')';
-        if (echoues.length) t += ' · ' + echoues.length + ' en échec';
-        dire(t + '.', (echoues.length || refuses.length) ? 'att' : 'bon');
+        liberer();
+        var t = faites + ' importée' + (faites > 1 ? 's' : '');
+        if (doubles) t += ' · ' + doubles + ' déjà présente' + (doubles > 1 ? 's' : '');
+        if (refuses) t += ' · ' + refuses + ' trop lourde' + (refuses > 1 ? 's' : '');
+        if (echoues) t += ' · ' + echoues + ' en échec';
+        suiviFin(t + '.');
+        dire(t + '.', (echoues || refuses) ? 'att' : 'bon');
         charger();
         return;
       }
       var f = liste[k];
-      if (f.size > MAX_OCTETS) { refuses.push(f.name); suite(k + 1); return; }
-      dire('Import ' + (k + 1) + ' / ' + liste.length + ' — ' + f.name + '…');
+      if (f.size > MAX_OCTETS) {
+        refuses++;
+        suiviLigne(k, 'echec', 'trop lourde');
+        suite(k + 1); return;
+      }
+      suiviLigne(k, 'cours', 'en cours');
+      suiviEtapes(k, [{ nom: 'lecture', etat: 'encours' }]);
+      // Chaque fichier relance le chien de garde : c est le TRAVAIL qui doit
+      // avancer, pas l ensemble qui doit tenir dans une minute.
+      occuper('Import ' + (k + 1) + ' / ' + liste.length + ' · ' + f.name + '…');
       lireFichier(f).then(function(data){
-        if (!data) { echoues.push(f.name); suite(k + 1); return; }
+        if (!data) {
+          echoues++;
+          suiviLigne(k, 'echec', 'illisible');
+          suiviEtapes(k, [{ nom: 'lecture', ok: false }]);
+          suite(k + 1); return;
+        }
+        suiviEtapes(k, [{ nom: 'lecture', ok: true, chiffre: poids(f.size) },
+                        { nom: 'compression', etat: 'encours' }]);
         appeler('photos:importer', [f.name, data, f.size]).then(function(r){
-          if (r && r.ok) { faites++; if (!r.rangee) echoues.push(f.name); }
-          else { echoues.push(f.name); dire(expliquer(r), 'err'); }
+          /* ⚠ LES ETAPES VIENNENT DU COEUR, pas d une supposition d ici : c est
+             lui qui compresse et qui depose, et lui seul sait ce que ca a donne. */
+          if (r && r.etapes) {
+            suiviEtapes(k, [{ nom: 'lecture', ok: true, chiffre: poids(f.size) }].concat(
+              r.etapes.map(function(e){
+                return { nom: e.nom, ok: e.ok,
+                  chiffre: (e.nom === 'compression' && e.avant)
+                    ? (poids(e.avant) + ' → ' + poids(e.apres))
+                    : (e.detail || '') };
+              })));
+          }
+          if (r && r.ok && r.doublon) {
+            suiviEtapes(k, [{ nom: 'lecture', ok: true, chiffre: poids(f.size) },
+                            { nom: 'reconnue au contenu', ok: true, chiffre: r.code || '' }]);
+            /* ⚠ RECONNUE A SON CONTENU, PAS A SON NOM — et l on donne le CODE de
+               celle qui existe deja : << deja presente >> tout court n aide
+               personne a la retrouver. */
+            doubles++;
+            suiviLigne(k, 'double', 'déjà là · ' + (r.code || ''));
+          } else if (r && r.ok) {
+            faites++;
+            suiviLigne(k, r.rangee ? 'faite' : 'echec', r.rangee ? 'importée' : 'non rangée');
+            if (!r.rangee) { echoues++; faites--; }
+          } else {
+            echoues++;
+            suiviLigne(k, 'echec', 'refusée');
+            dire(expliquer(r), 'err');
+          }
           suite(k + 1);
         });
       });
@@ -470,11 +651,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function isoler(){
-    if (OCCUPE) return;
-    OCCUPE = true;
-    dire('Isolation du vêtement… (quelques secondes)');
+    if (occupeDeja('Opération')) return;
+    occuper('Isolation du vêtement… (quelques secondes)');
     appeler('photos:isoler', [DETAIL.id]).then(function(r){
-      OCCUPE = false;
+      liberer();
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(r.deja ? 'Cette photo était déjà isolée.' : 'Vêtement isolé — choisissez un fond.', 'bon');
       rouvrir(r.photo);
@@ -482,11 +662,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function fond(cle, image){
-    if (OCCUPE) return;
-    OCCUPE = true;
-    dire('Application du fond…');
+    if (occupeDeja('Opération')) return;
+    occuper('Application du fond…');
     appeler('photos:fond', [DETAIL.id, cle, image || '']).then(function(r){
-      OCCUPE = false;
+      liberer();
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire('Fond appliqué.', 'bon');
       rouvrir(r.photo);
@@ -503,11 +682,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function attacher(pid){
-    if (OCCUPE) return;
-    OCCUPE = true;
-    dire('Attache et téléversement…');
+    if (occupeDeja('Opération')) return;
+    occuper('Attache et téléversement…');
     appeler('photos:attacher', [DETAIL.id, pid]).then(function(r){
-      OCCUPE = false;
+      liberer();
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire('Photo ' + r.code + ' attachée à ' + r.produit + '.', 'bon');
       ATTACHE = false; PRODUITS = null; PQ = '';
@@ -537,15 +715,17 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var usb = document.getElementById('p-usb');
     if (usb) usb.onclick = function(){
-      if (OCCUPE) return;
-      OCCUPE = true;
-      dire('Recherche de clés USB…');
+      if (occupeDeja('Détection de clé USB')) return;
+      occuper('Recherche de clés USB…');
       appeler('photos:usb', []).then(function(r){
-        OCCUPE = false;
+        liberer();
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         if (!r.trouvees) { dire('Aucune photo trouvée sur une clé USB.', 'att'); return; }
-        dire(r.importees + ' photo' + (r.importees > 1 ? 's' : '') + ' importée'
-          + (r.importees > 1 ? 's' : '') + ' depuis la clé ' + (r.lecteur || 'USB') + '.', 'bon');
+        var t = r.importees + ' photo' + (r.importees > 1 ? 's' : '') + ' importée'
+          + (r.importees > 1 ? 's' : '') + ' depuis la clé ' + (r.lecteur || 'USB');
+        if (r.doublons) t += ' · ' + r.doublons + ' déjà présente' + (r.doublons > 1 ? 's' : '');
+        if (r.echecs) t += ' · ' + r.echecs + ' en échec';
+        dire(t + '.', r.importees ? 'bon' : 'att');
         charger();
       });
     };
@@ -559,11 +739,10 @@ ${JS_ACTIVITE}${JS_DIRE}
         return;
       }
       VIDER_ARME = false;
-      if (OCCUPE) return;
-      OCCUPE = true;
-      dire('Retrait des entrées…');
+      if (occupeDeja('Vidage de la photothèque')) return;
+      occuper('Retrait des entrées…');
       appeler('photos:vider', []).then(function(r){
-        OCCUPE = false;
+        liberer();
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire(r.echecs
           ? (r.retirees + ' retirée(s), ' + r.echecs + ' refusée(s) par le nuage.')

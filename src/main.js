@@ -1159,6 +1159,11 @@ const OPS_PONT = new Set([
   // l ecran : ils n etaient que des boutons masques, donc contournables des qu on
   // ajoute une seconde surface — et un document declare definitif qu une autre
   // fenetre peut reecrire ne vaut rien comme piece comptable.
+  // Lien comptable (2.12.0) : le carnet des comptables et le lien de l exercice.
+  // ⚠ Le droit super-administrateur vit dans le COEUR, pas ici : ce lien ouvre
+  // l exercice entier a un tiers.
+  'comptable:donnees', 'comptable:creer', 'comptable:revoquer',
+  'comptable:contact', 'comptable:contact-retirer',
   'banque:donnees', 'banque:creer', 'banque:supprimer',
   'banque:entree', 'banque:entree-jeter',
   'banque:versement', 'banque:versement-jeter',
