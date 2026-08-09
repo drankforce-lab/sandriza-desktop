@@ -593,12 +593,40 @@ ${JS_ACTIVITE}${JS_DIRE}
   var LOTS_VERSION = '';
   var SUP_LOT_ARME = false;
 
+  /* ⚠⚠ LES LOTS SE COMPOSENT ICI, A PARTIR DE LA LISTE DES PHOTOS. L operation
+     dediee rendait des objets qui arrivaient VIDES a ce bout du pont — mesure :
+     la fenetre recevait des chaines de trois caracteres la ou elle attendait des
+     fiches, d ou les << undefined >> et le << lot inconnu >> a la suppression.
+     Le calcul cote site etait pourtant juste (banc d essai a l appui).
+     Plutot que de poursuivre une serialisation qui se comporte mal sur une forme
+     precise, on emprunte la MEME forme que le tableau des photos — un tableau
+     d objets plats, eprouve depuis des mois. Une forme qui marche partout
+     ailleurs vaut mieux qu une explication. */
   function lotsOuvrir(){
     dire('Lecture des lots…');
-    appeler('lot:liste', []).then(function(r){
+    appeler('photos:toutes', []).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      LOTS = r.lots || [];
-      LOTS_VERSION = r.moduleVersion || '';
+      var par = {};
+      (r.photos || []).forEach(function(x){
+        var id = x.lotId || '@avant';
+        if (!par[id]) {
+          par[id] = { id: id, nom: x.lotNom || '', source: x.lotSource || '',
+                      ts: x.lotTs || 0, nombre: 0, poids: 0, liees: 0, traitees: 0 };
+        }
+        var l = par[id];
+        l.nombre++;
+        l.poids += (x.poids || 0);
+        if (x.lie) l.liees++;
+        if (x.traite) l.traitees++;
+        if ((x.lotTs || 0) > l.ts) l.ts = x.lotTs;
+      });
+      if (par['@avant']) {
+        par['@avant'].nom = 'Avant le suivi des lots';
+        par['@avant'].source = 'origine inconnue';
+      }
+      LOTS = Object.keys(par).map(function(k){ return par[k]; })
+        .sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
+      LOTS_VERSION = '';
       LOT_ARME = '';
       /* ⚠⚠ LA FENETRE ET LE SITE PEUVENT NE PAS ETRE DE LA MEME VERSION. La
          fenetre vit dans l application (mise a jour par installation) ; les
