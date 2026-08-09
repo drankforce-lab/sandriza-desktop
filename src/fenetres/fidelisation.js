@@ -317,6 +317,8 @@ ${JS_ACTIVITE}
       + ((D.recompenses || []).length ? '<span class="n">' + D.recompenses.length + '</span>' : '') + '</button>'
       + '<button class="mini' + (ONGLET === 'invitations' ? ' actif' : '') + '" data-onglet="invitations">Invitations'
       + ((D.invitations || []).length ? '<span class="n">' + D.invitations.length + '</span>' : '') + '</button>'
+      + '<div class="droite"><span class="dt">Créer un sondage : écran Fidélisation, '
+      + 'fenêtre principale</span></div>'
       + '</div>';
 
     h += ONGLET === 'recompenses' ? vueRecompenses()

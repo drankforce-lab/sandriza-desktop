@@ -220,7 +220,8 @@ ${JS_ACTIVITE}
       + ((D.file || []).length ? '<span class="n hi">' + D.file.length + '</span>' : '') + '</button>'
       + '<button class="mini' + (ONGLET === 'historique' ? ' actif' : '') + '" data-onglet="historique">Historique'
       + ((D.historique || []).length ? '<span class="n">' + D.historique.length + '</span>' : '') + '</button>'
-      + '<div class="droite">';
+      + '<div class="droite"><span class="dt">Patrons et comptes des réseaux : '
+      + 'écran Réseaux sociaux, fenêtre principale</span>';
     if (ONGLET === 'file' && D.peutModifier && (D.file || []).length) {
       h += '<button class="mini prim" id="so-tout"' + (OCCUPE ? ' disabled' : '') + '>'
         + (OCCUPE ? 'Publication…' : (ARME === '__tout' ? 'Confirmer — tout publier ?' : 'Tout publier')) + '</button>';
