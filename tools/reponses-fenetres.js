@@ -805,6 +805,48 @@ module.exports = {
     },
   ],
 
+  // ── LIENS D'INSTALLATION ───────────────────────────────────────────────────
+  // ⚠ FORME RÉELLE de install:paquets (adm-invite.php, action=versions).
+  // TROIS cas, et chacun dessine autre chose :
+  //   « Windows seul » est la réalité du jour — les constructions se lancent avec
+  //     `avec_mac=false`, donc l'avis « aucun paquet macOS » DOIT s'afficher.
+  //   « les cinq » prouve que les déclinaisons Mac se dessinent quand elles
+  //     existent, et que l'avis, lui, disparaît.
+  //   « dépôt vide » est le cas où rien n'a jamais été publié : sans jeu d'essai,
+  //     cet écran-là ne serait dessiné pour la première fois qu'en production.
+  'liensinstall.js': [
+    {
+      nom: 'Windows seul',
+      reponses: {
+        'install:paquets': { ok: true, version: '2.9.0', paquets: [
+          { cle: 'win-x64',   nom: 'Windows 64 bits', note: 'La plupart des PC Windows.',   taille: 78900087 },
+          { cle: 'win-arm64', nom: 'Windows ARM',     note: 'Surface Pro X, PC Snapdragon.', taille: 82864100 },
+          { cle: 'win-ia32',  nom: 'Windows 32 bits', note: 'Anciens PC en 32 bits.',        taille: 73806341 },
+        ] },
+        'install:lien': { ok: true, url: 'https://adm.sandriza.com/adm-invite.php?a=win-x64&v=2.9.0&e=1786000000&n=a1b2c3d4e5f6&s=' + '0'.repeat(40),
+          version: '2.9.0', expire: 1786000000, nom: 'Windows 64 bits', protege: false },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'les cinq',
+      reponses: {
+        'install:paquets': { ok: true, version: '2.9.0', paquets: [
+          { cle: 'win-x64',   nom: 'Windows 64 bits',     note: 'La plupart des PC Windows.',   taille: 78900087 },
+          { cle: 'win-ia32',  nom: 'Windows 32 bits',     note: 'Anciens PC en 32 bits.',        taille: 73806341 },
+          { cle: 'win-arm64', nom: 'Windows ARM',         note: 'Surface Pro X, PC Snapdragon.', taille: 82864100 },
+          { cle: 'mac-arm64', nom: 'macOS Apple Silicon', note: 'Mac M1, M2, M3, M4.',           taille: 96000000 },
+          { cle: 'mac-x64',   nom: 'macOS Intel',         note: 'Mac Intel (avant 2020).',       taille: 99000000 },
+        ] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'dépôt vide',
+      reponses: { 'install:paquets': { ok: true, version: '', paquets: [] }, identite: IDENTITE },
+    },
+  ],
+
   // ── REMBOURSEMENTS ET CRÉDITS ──────────────────────────────────────────────
   // ⚠ FORME RÉELLE de remboursements:liste (cœur Admin._remboursementsDonnees).
   // DEUX cas d'ouverture, et il en faut deux : la table des crédits n'est pas

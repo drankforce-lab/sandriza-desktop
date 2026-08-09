@@ -1083,6 +1083,10 @@ const OPS_PONT = new Set([
   'collections:liste', 'collections:ouvrir', 'collections:nouvelle',
   'fournisseurs:liste', 'fournisseurs:ouvrir', 'fournisseurs:nouveau',
   'retours:liste', 'retours:ouvrir',
+  // Liens d installation (2.9.0) : le manifeste reel des paquets publies, et la
+  // fabrication d une adresse signee. La SIGNATURE se fait au serveur — le secret
+  // ne descend jamais dans l app.asar, qui n est pas chiffre.
+  'install:paquets', 'install:lien',
   // La fenetre Codes-barres : la page filtree par le site, et la grille des
   // variantes d un produit (le choix se fait dans la fenetre, l impression
   // passe par stock:etiquettes — la meme voie que l Inventaire).
@@ -2379,6 +2383,7 @@ const { pagePromo } = require('./fenetres/promo');
 const { pageDepenses } = require('./fenetres/depenses');
 const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
+const { pageLiensInstall } = require('./fenetres/liensinstall');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2417,6 +2422,14 @@ const actionApp = (nom) => {
     case 'update-check': checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
     case 'imprimantes': ouvrirImprimantes(); break;
+    /* ⚠ FENETRE NON ANCRABLE, ET C EST VOULU. On y fabrique une adresse qu on
+       va COLLER ailleurs — dans un courriel, un message. Une surface ancree dans
+       la fenetre principale disparait des qu on navigue, en emportant le lien
+       qu on n avait pas encore copie. */
+    case 'liensinstall':
+      ouvrirNative('liensinstall', 'Liens d’installation', pageLiensInstall(),
+        { width: 700, height: 720, minWidth: 560, minHeight: 480 });
+      break;
     case 'fournisseur-nouveau':
       ouvrirNative('fournisseur', 'Nouveau fournisseur', pageFournisseur(''), { width: 800, height: 700 });
       break;
