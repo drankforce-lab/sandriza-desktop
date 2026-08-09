@@ -513,6 +513,121 @@ module.exports = {
     },
   ],
 
+  // ── ÉTAT DE COMPTE ─────────────────────────────────────────────────────────
+  'etatcompte.js': [
+    {
+      // ⚠ FORME REELLE de etat:lire (coeur Billing._statementCorps) : `html`
+      // est le DOCUMENT deja construit par le site, pose tel quel.
+      nom: 'client avec solde',
+      id: 'u1',
+      reponses: {
+        'etat:lire': {
+          ok: true,
+          nom: 'Marie Tremblay', courriel: 'marie@example.com',
+          solde: 154.26, facture: 243.38, paye: 89.12,
+          html: '<div class="statement-doc"><h1>ÉTAT DE COMPTE</h1>'
+            + '<table><thead><tr><th>Facture</th><th>Statut</th></tr></thead>'
+            + '<tbody><tr><td>FAC-2026-0512</td><td>✓ Payée</td></tr></tbody></table></div>',
+        },
+        'etat:imprimer': { ok: true },
+        'etat:courriel': { ok: true, adresse: 'marie@example.com' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Sans adresse au dossier : le bouton d envoi reste eteint et le dit.
+      nom: 'sans adresse courriel',
+      id: 'u2',
+      reponses: {
+        'etat:lire': {
+          ok: true, nom: 'Client Comptoir', courriel: '',
+          solde: 0, facture: 45.00, paye: 45.00,
+          html: '<div class="statement-doc"><h1>ÉTAT DE COMPTE</h1></div>',
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'client introuvable',
+      id: 'zz',
+      reponses: {
+        'etat:lire': { ok: false, motif: 'introuvable' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
+  // ── PAIEMENTS SQUARE ───────────────────────────────────────────────────────
+  'paiements.js': [
+    {
+      // ⚠ FORME REELLE de paiements:lire (coeur Payments._paiementsDonnees).
+      nom: 'annee chargee (bac a sable)',
+      id: '',
+      reponses: {
+        'paiements:lire': {
+          ok: true, annee: 2026, annees: [2026, 2025],
+          connecte: true, mode: 'sandbox', bacASable: true, peutModifier: true,
+          masquees: 3, charge: true,
+          tuiles: { nb: 2, brut: 244.38, frais: 7.42, fraisRecuperes: 1.10,
+            fraisNets: 6.32, rembourse: 25.00, nbRemboursements: 1, net: 213.06 },
+          paiements: [
+            { ref: 'A1B2C3D4E5F6', date: '7 août 2026', moyen: 'VISA ···4242',
+              brut: 154.26, frais: 4.77, net: 149.49 },
+            { ref: 'F6E5D4C3B2A1', date: '2 août 2026', moyen: 'MASTERCARD ···5100',
+              brut: 90.12, frais: 2.65, net: 87.47 },
+          ],
+          remboursements: [
+            { ref: 'R9R8R7R6R5R4', paiement: 'F6E5D4C3B2A1', date: '5 août 2026',
+              motif: 'Article retourné', enAttente: false, montant: 25.00 },
+          ],
+          reconciliation: {
+            marque: 'SANDRIZA', nbCommandes: 2, nbSquare: 2, nbRemboursementsSquare: 1,
+            site: { brut: 244.38, rembourse: 25.00, fraisRetenus: 1.10, fraisRembourses: 0, net: 218.28 },
+            square: { brut: 244.38, rembourse: 25.00, frais: 7.42, net: 211.96 },
+            ecart: -6.32, equilibre: false,
+          },
+        },
+        'paiements:charger': { ok: true, nb: 2, nbRemboursements: 1 },
+        'paiements:masquer': { ok: true, nb: 3 },
+        'paiements:reafficher': { ok: true, nb: 3 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Connecte, mais RIEN en cache : la fenetre invite a charger.
+      nom: 'rien en memoire',
+      id: '',
+      reponses: {
+        'paiements:lire': {
+          ok: true, annee: 2026, annees: [2026], connecte: true, mode: 'production',
+          bacASable: false, peutModifier: true, masquees: 0, charge: false,
+          tuiles: null, paiements: [], remboursements: [], reconciliation: null,
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'square non configure',
+      id: '',
+      reponses: {
+        'paiements:lire': {
+          ok: true, annee: 2026, annees: [2026], connecte: false, mode: 'sandbox',
+          bacASable: true, peutModifier: false, masquees: 0, charge: false,
+          tuiles: null, paiements: [], remboursements: [], reconciliation: null,
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'paiements:lire': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── ARCHIVES ───────────────────────────────────────────────────────────────
   'archives.js': [
     {

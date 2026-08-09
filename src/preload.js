@@ -150,6 +150,8 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // La facture dans sa propre fenetre (une par facture).
   ouvrirFacture: (id) => ipcRenderer.invoke('fenetre:facture', String(id || '')),
   ouvrirFactures: () => ipcRenderer.invoke('fenetre:factures'),
+  // L etat de compte se VOIT avant de s imprimer, et peut partir au client.
+  ouvrirEtatCompte: (id) => ipcRenderer.invoke('fenetre:etatcompte', String(id || '')),
   // Assistants collection et fournisseur PAR FICHE (les listes natives 1.54.0
   // ouvrent une fiche existante ; id vide = assistant vierge, comme le menu).
   ouvrirCollection: (id) => ipcRenderer.invoke('fenetre:collection', String(id || '')),

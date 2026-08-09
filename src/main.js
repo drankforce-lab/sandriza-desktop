@@ -1072,6 +1072,11 @@ const OPS_PONT = new Set([
   // Le solde Facturation (fenetre Factures, 1.61.0) : encaisser, supprimer,
   // etat de compte.
   'factures:payer', 'factures:supprimer', 'factures:etat',
+  // Paiements Square (fenetre Paiements, 1.62.0). LIRE sert le cache ;
+  // CHARGER va chez Square — reseau, d ou sa limite large plus bas.
+  'paiements:lire', 'paiements:charger', 'paiements:masquer', 'paiements:reafficher',
+  // L etat de compte, dans sa fenetre : le voir, l imprimer, l envoyer.
+  'etat:lire', 'etat:imprimer', 'etat:courriel',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1183,6 +1188,21 @@ ipcMain.handle('fenetre:produit', (e, id) => {
   return true;
 });
 
+ipcMain.handle('fenetre:etatcompte', (e, id) => {
+  const brut = String(id || '');
+  if (!brut) return false;
+  // Une fenetre PAR client ; rouvrir la meme la ramene (szRevenir relit).
+  const cle = 'etatcompte-' + brut.replace(/[^0-9A-Za-z_-]/g, '');
+  const _avant = fenetresNatives.get(cle);
+  const _reutilisee = !!(_avant && !_avant.isDestroyed());
+  const win = ouvrirNative(cle, 'État de compte', pageEtatCompte(brut),
+    { width: 900, height: 840, minWidth: 640, minHeight: 520 });
+  if (_reutilisee && win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
+  return true;
+});
+
 ipcMain.handle('fenetre:facture', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
@@ -1275,6 +1295,10 @@ const LIMITES_PONT = {
   // La liste des retours RESYNCHRONISE les demandes avant de repondre (la
   // meme fraicheur que l ecran du site) : laisser le temps du nuage.
   'retours:liste': 20000,
+  // Square est un service DISTANT : une annee entiere de paiements et de
+  // remboursements, paginee, depasse largement le delai ordinaire.
+  'paiements:charger': 60000,
+  'etat:courriel': 30000,
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
   'messagerie:liste': 20000, 'messagerie:repondre': 30000,
@@ -1419,6 +1443,7 @@ const PAGES_ANCRABLES = () => ({
   avis: ['Avis produits', () => pageAvis()],
   messagerie: ['Messagerie clients', () => pageMessagerie()],
   archives: ['Archives', () => pageArchives()],
+  paiements: ['Paiements Square', () => pagePaiements()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2141,6 +2166,8 @@ const { pageAvis } = require('./fenetres/avis');
 const { pageMessagerie } = require('./fenetres/messagerie');
 const { pageNotes } = require('./fenetres/notes');
 const { pageArchives } = require('./fenetres/archives');
+const { pagePaiements } = require('./fenetres/paiements');
+const { pageEtatCompte } = require('./fenetres/etatcompte');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2216,7 +2243,7 @@ const actionApp = (nom) => {
     case 'tableau': case 'inventaire': case 'commandes': case 'produits':
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
-    case 'archives': {
+    case 'archives': case 'paiements': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
