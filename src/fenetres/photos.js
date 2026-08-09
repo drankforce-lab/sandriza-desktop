@@ -286,7 +286,7 @@ function pagePhotos() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Photos — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">🖼️</span><h1>Photos</h1>
+<div class="tete"><span class="ic">▣️</span><h1>Photos</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -436,7 +436,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     if (ro) {
       h += '<div class="carte" style="border-color:rgba(180,120,10,.4)">'
-        + '<span class="pill att">👁 Lecture seule</span> '
+        + '<span class="pill att">◉ Lecture seule</span> '
         + '<span class="aide">Votre rôle permet de consulter la photothèque, pas de la modifier.</span></div>';
     }
 
@@ -474,10 +474,14 @@ ${JS_ACTIVITE}${JS_DIRE}
         }).join('')
       + '</select>'
       + '<span class="droite">'
-      + '<button class="mini" id="p-lots" title="Historique des lots importés">📚 Lots</button>'
-      + '<button class="mini" id="p-fal" title="Consommation et journal des traitements Fal.ai">🧠 Traitements IA</button>'
+      + '<button class="mini" id="p-lots"' + (D.total ? '' : ' disabled')
+      + ' title="' + (D.total ? 'Historique des lots importés'
+                             : 'Aucune photo : il n’y a pas encore de lot') + '">Lots</button>'
+      + '<button class="mini" id="p-fal"' + (D.total ? '' : ' disabled')
+      + ' title="' + (D.total ? 'Consommation et journal des traitements'
+                             : 'Aucune photo : aucun traitement à suivre') + '">Traitements IA</button>'
       + (D.total && !ro
-          ? '<button class="mini danger" id="p-vider">' + (VIDER_ARME ? 'Confirmer — vider les ' + D.total + ' ?' : '🗑 Tout vider') + '</button>'
+          ? '<button class="mini danger" id="p-vider">' + (VIDER_ARME ? 'Confirmer — vider les ' + D.total + ' ?' : 'Tout vider') + '</button>'
           : '')
       + '</span></div>';
 
@@ -539,9 +543,9 @@ ${JS_ACTIVITE}${JS_DIRE}
      L ASSISTANT — dessin et conduite
      ══════════════════════════════════════════════════════════════════════════ */
   var BUTS = [
-    ['detourage', '✂ Retirer le fond', 'Isole le vêtement de son arrière-plan.'],
-    ['fantome', '👻 Retirer le mannequin', 'Retire le fond PUIS le mannequin. Le col et les manches sont reconstruits.'],
-    ['humain', '🧍 Mannequin humain', 'Retire le fond, retire le mannequin, PUIS engendre une personne qui porte le vêtement.'],
+    ['detourage', 'Retirer le fond', 'Isole le vêtement de son arrière-plan.'],
+    ['fantome', 'Retirer le mannequin', 'Retire le fond PUIS le mannequin. Le col et les manches sont reconstruits.'],
+    ['humain', 'Mannequin humain', 'Retire le fond, retire le mannequin, PUIS engendre une personne qui porte le vêtement.'],
   ];
 
   /* ══════════════════════════════════════════════════════════════════════════
@@ -996,9 +1000,9 @@ ${JS_ACTIVITE}${JS_DIRE}
      photo par photo et l on rend compte a chaque pas.
      ══════════════════════════════════════════════════════════════════════════ */
   var LOTS = [
-    ['detourage', '✂ Détourer', 'Isole le vêtement de son fond.'],
-    ['fantome', '👻 Retirer le mannequin', 'Ne garde que le vêtement, col et manches reconstruits.'],
-    ['humain', '🧍 Mettre sur un mannequin', 'Fait porter le vêtement par une personne engendrée.'],
+    ['detourage', 'Détourer', 'Isole le vêtement de son fond.'],
+    ['fantome', 'Retirer le mannequin', 'Ne garde que le vêtement, col et manches reconstruits.'],
+    ['humain', 'Mettre sur un mannequin', 'Fait porter le vêtement par une personne engendrée.'],
   ];
 
   function barreLot(){
@@ -1009,8 +1013,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + LOTS.map(function(l){
           return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
         }).join('')
+      + '<button class="mini" data-lot="pivot" title="Pivoter d’un quart de tour vers la droite">⟳ Pivoter</button>'
       + '<button class="mini dgr" id="p-lot-sup">'
-      + (SUP_LOT_ARME ? 'Confirmer — supprimer ' + n + ' ?' : '🗑 Supprimer') + '</button>'
+      + (SUP_LOT_ARME ? 'Confirmer — supprimer ' + n + ' ?' : 'Supprimer') + '</button>'
       + '<button class="mini" id="p-rien">Tout décocher</button>'
       + '<span class="av">Les deux derniers traitements <strong>engendrent</strong> une image&nbsp;: '
       + 'l’original est conservé à côté.</span></div>';
@@ -1019,6 +1024,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   function lancerLot(quoi){
     var ids = Object.keys(CHOIX);
     if (!ids.length) return;
+    /* ⚠ LA ROTATION N EST PAS UN TRAITEMENT PAR MODELE : elle est locale,
+       instantanee et gratuite. La faire passer par la meme porte donnerait des
+       lignes de journal Fal.ai pour un geste qui n a rien coute. */
+    if (quoi === 'pivot') { lancerPivot(ids); return; }
     if (occupeDeja('Traitement en lot')) return;
     /* ⚠ LES NOMS VIENNENT DU CHOIX, PAS DE LA PAGE : une photo cochee page 1 et
        traitee depuis la page 4 doit garder son nom dans le suivi. */
@@ -1080,6 +1089,54 @@ ${JS_ACTIVITE}${JS_DIRE}
     suite(0);
   }
 
+  function lancerPivot(ids){
+    if (occupeDeja('Rotation')) return;
+    var titres = ids.map(function(i){
+      var c = CHOIX[i];
+      return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
+    });
+    occuper('Rotation de ' + ids.length + ' photo(s)…');
+    suiviOuvrir(titres, 'Rotation · ' + ids.length + ' photo(s)');
+    var faits = 0, rates = 0, perdus = 0, abandon = 0;
+    var pas = function(k){
+      suiviCompte(k, ids.length);
+      if (ANNULE && k < ids.length) {
+        abandon = ids.length - k;
+        for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+        k = ids.length;
+      }
+      if (k >= ids.length) {
+        liberer();
+        var t = faits + ' pivotée' + (faits > 1 ? 's' : '');
+        if (perdus) t += ' · ' + perdus + ' traitement(s) à refaire';
+        if (rates) t += ' · ' + rates + ' en échec';
+        if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
+        suiviFin(t + '.', abandon ? 'Rotation interrompue' : 'Rotation terminée');
+        if (!rates && !abandon) setTimeout(suiviFermer, 2500);
+        dire(t + '.', rates ? 'att' : 'bon');
+        charger();
+        return;
+      }
+      suiviLigne(k, 'cours', 'en cours');
+      appeler('photos:pivoter', [ids[k], 90]).then(function(r){
+        if (r && r.ok) {
+          faits++;
+          perdus += (r.perdus || 0);
+          suiviLigne(k, 'faite', 'pivotée');
+          suiviEtapes(k, [{ nom: 'rotation', ok: true },
+            (r.perdus ? { nom: 'traitements écartés', ok: true, chiffre: r.perdus + ' à refaire' }
+                      : { nom: 'dépôt', ok: true })]);
+        } else {
+          rates++;
+          suiviLigne(k, 'echec', 'refusée');
+          suiviEtapes(k, [{ nom: 'rotation', ok: false, chiffre: (r && (r.detail || r.motif)) || '' }]);
+        }
+        pas(k + 1);
+      });
+    };
+    pas(0);
+  }
+
   function opt(v, l){
     return '<option value="' + v + '"' + (TRI === v ? ' selected' : '') + '>' + l + '</option>';
   }
@@ -1123,12 +1180,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     var act = ro ? '' : ('<span class="act">'
       + '<button class="ic" data-ren="' + esc(r.id) + '" title="Renommer">✎</button>'
       + '<button class="ic" data-t1="' + esc(r.id) + '" title="Détourer le vêtement">✂</button>'
-      + '<button class="ic" data-t2="' + esc(r.id) + '" title="Retirer le mannequin">👻</button>'
-      + '<button class="ic" data-t3="' + esc(r.id) + '" title="Mettre sur un mannequin">🧍</button>'
+      + '<button class="ic" data-t2="' + esc(r.id) + '" title="Retirer le mannequin">◍</button>'
+      + '<button class="ic" data-t3="' + esc(r.id) + '" title="Mettre sur un mannequin">☖</button>'
+      + '<button class="ic" data-piv="' + esc(r.id) + '" title="Pivoter d’un quart de tour">⟳</button>'
       + '<button class="ic" data-ouvre="' + esc(r.id) + '" title="Ouvrir la fiche (fond, article, export)">⋯</button>'
       + '<button class="ic sup' + (arme ? ' arme' : '') + '" data-sup="' + esc(r.id) + '"'
       + ' title="' + (arme ? 'Cliquez encore pour supprimer' : 'Supprimer') + '">'
-      + (arme ? '⚠' : '🗑') + '</button>'
+      + (arme ? '!' : '✕') + '</button>'
       + '</span>');
     return '<tr data-id="' + esc(r.id) + '"' + (CHOIX[r.id] ? ' class="on"' : '') + '>'
       + '<td><input type="checkbox" class="chx" data-chx="' + esc(r.id) + '"'
@@ -1198,11 +1256,11 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="pied-boite">'
       + (ro ? '' : '<button class="danger" id="p-suppr">'
-          + (SUPPR_ARME ? 'Confirmer le retrait ?' : '🗑 Retirer de la médiathèque') + '</button>')
+          + (SUPPR_ARME ? 'Confirmer le retrait ?' : '✕ Retirer de la médiathèque') + '</button>')
       + (D.bureau ? '<button id="p-enreg">⤓ Enregistrer le fichier</button>' : '')
       + (ro || r.isole ? '' : '<button class="prim" id="p-isoler">✂ Isoler le vêtement</button>')
       + (ro ? '' : '<button class="' + (r.isole ? 'prim' : '') + '" id="p-attacher">'
-          + (ATTACHE ? 'Annuler l’attache' : '🔗 Attacher à un article') + '</button>')
+          + (ATTACHE ? 'Annuler l’attache' : '⚭ Attacher à un article') + '</button>')
       + '<button id="p-fermer">Fermer</button>'
       + '</div>';
 
@@ -1609,6 +1667,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     /* ⚠ LA SUPPRESSION S ARME SUR LA LIGNE, et se desarme seule au bout de cinq
        secondes : une corbeille qui reste armee est une corbeille sur laquelle on
        reclique par reflexe. */
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-piv]'), function(b){
+      b.onclick = function(ev){
+        stop(ev);
+        var id = b.getAttribute('data-piv');
+        var l = null;
+        (D.lignes || []).forEach(function(y){ if (y.id === id) l = y; });
+        CHOIX = {};
+        CHOIX[id] = l ? { code: l.code, nom: l.nom } : { code: '', nom: id };
+        lancerPivot([id]);
+      };
+    });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-sup]'), function(b){
       b.onclick = function(ev){
         stop(ev);
