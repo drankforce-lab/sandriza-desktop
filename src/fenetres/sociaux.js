@@ -326,6 +326,13 @@ ${JS_ACTIVITE}
       return;
     }
 
+    /* ⚠⚠ UN CLIC SUR UN BOUTON NE DOIT PAS DÉSARMER CE QU'IL VIENT D'ARMER.
+       Les boutons branches par la fonction de branchement posent l armement,
+       puis le clic REMONTE jusqu ici : la ligne de desarmement ci-dessous
+       s executait dans la foulee, et le bouton revenait a son libelle
+       d origine : on voyait l avertissement sans jamais voir Confirmer ?
+       (2026-08-09). Un clic sur une commande est traite par SA commande. */
+    if (t.closest('button, input, select, label')) return;
     if (ARME) { ARME = ''; dessiner(); }
   });
 

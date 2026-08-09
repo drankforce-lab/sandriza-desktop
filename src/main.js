@@ -1132,6 +1132,10 @@ const OPS_PONT = new Set([
   // resynchronisation : un taux de reponse perime est un chiffre FAUX.
   'fidelisation:liste', 'fidelisation:sondage', 'fidelisation:supprimerSondage',
   'fidelisation:supprimerInvite', 'fidelisation:viderInvites', 'fidelisation:notification',
+  // Recommandations (fenetre Recommandations, 1.72.0) : l ORDRE des regles
+  // decide de ce que la cliente voit en premier sur une fiche.
+  'reco:liste', 'reco:stats', 'reco:basculer', 'reco:deplacer', 'reco:supprimer',
+  'reco:restaurer', 'reco:liaisons', 'reco:viderLiaisons',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1511,6 +1515,7 @@ const PAGES_ANCRABLES = () => ({
   chat: ['Chat en ligne', () => pageChat()],
   sociaux: ['Réseaux sociaux', () => pageSociaux()],
   fidelisation: ['Fidélisation et sondages', () => pageFidelisation()],
+  recommandations: ['Recommandations', () => pageRecommandations()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2241,6 +2246,7 @@ const { pagePromotions } = require('./fenetres/promotions');
 const { pageChat } = require('./fenetres/chat');
 const { pageSociaux } = require('./fenetres/sociaux');
 const { pageFidelisation } = require('./fenetres/fidelisation');
+const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2317,7 +2323,8 @@ const actionApp = (nom) => {
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
-    case 'promotions': case 'chat': case 'sociaux': case 'fidelisation': {
+    case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
+    case 'recommandations': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

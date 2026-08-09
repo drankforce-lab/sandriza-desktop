@@ -513,6 +513,69 @@ module.exports = {
     },
   ],
 
+  // ── RECOMMANDATIONS ────────────────────────────────────────────────────────
+  'recommandations.js': [
+    {
+      // ⚠ FORME REELLE de reco:liste (coeur Recommendations._recoDonnees).
+      nom: 'regles garnies',
+      id: '',
+      reponses: {
+        'reco:liste': {
+          ok: true, peutModifier: true,
+          regles: [
+            { id: 'r1', nom: 'Achetés ensemble', type: 'bought_together',
+              typeLibelle: 'Achetés ensemble', ou: ['Fiche produit', 'Panier'], max: 4,
+              active: true, pardefaut: true, premiere: true, derniere: false },
+            { id: 'r2', nom: 'Même catégorie', type: 'same_category',
+              typeLibelle: 'Même catégorie', ou: ['Fiche produit'], max: 6,
+              active: false, pardefaut: false, premiere: false, derniere: true },
+          ],
+          supprimees: [{ id: 'r9', nom: 'Les plus populaires', typeLibelle: 'Les plus populaires' }],
+          liaisons: [
+            { id: 'p1', nom: 'Robe fleurie',
+              lies: [{ id: 'p2', nom: 'Blouse en soie' }, { id: 'p3', nom: 'Ceinture cuir' }] },
+          ],
+          catalogue: [
+            { id: 'p1', nom: 'Robe fleurie', sku: 'RB-0001' },
+            { id: 'p2', nom: 'Blouse en soie', sku: 'HT-0002' },
+            { id: 'p3', nom: 'Ceinture cuir', sku: 'AC-0003' },
+          ],
+        },
+        'reco:stats': {
+          ok: true,
+          regles: [{ nom: 'Achetés ensemble', active: true, couverture: 12 },
+                   { nom: 'Même catégorie', active: false, couverture: 34 }],
+          populaires: [{ nom: 'Robe fleurie', score: 18 }, { nom: 'Blouse en soie', score: 11 }],
+        },
+        'reco:basculer': { ok: true, nom: 'Même catégorie', active: true },
+        'reco:deplacer': { ok: true, nom: 'Achetés ensemble' },
+        'reco:supprimer': { ok: true, nom: 'Même catégorie', restaurable: false },
+        'reco:restaurer': { ok: true, nom: 'Les plus populaires' },
+        'reco:liaisons': { ok: true, nom: 'Robe fleurie', nb: 2 },
+        'reco:viderLiaisons': { ok: true, efface: 1 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucune regle',
+      id: '',
+      reponses: {
+        'reco:liste': { ok: true, peutModifier: true, regles: [], supprimees: [],
+          liaisons: [], catalogue: [] },
+        'reco:stats': { ok: true, regles: [], populaires: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'reco:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── FIDÉLISATION ET SONDAGES ───────────────────────────────────────────────
   'fidelisation.js': [
     {
