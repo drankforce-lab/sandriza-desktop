@@ -719,7 +719,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '<div class="asst"><div class="bo">'
       + '<div class="tt"><h3>Traitement en lot</h3>'
       + '<span class="pas">' + pas(1) + '<span>source</span>' + pas(2) + '<span>choix</span>'
-      + pas(3) + '<span>traitement</span></span></div><div class="co">';
+      + pas(3) + '<span>traitement</span></span>'
+      /* ⚠ VRAI PLEIN ECRAN DU SYSTEME, pas une classe CSS qui etire un panneau :
+         on ouvre cet ecran pour VOIR les photos, et une planche de soixante-six
+         vignettes gagne plus a la place qu a n importe quel reglage. */
+      + '<button class="mini" id="a-plein" title="Plein écran">⛶</button>'
+      + '</div><div class="co">';
 
     if (A.etape === 1) {
       h += '<p class="aide" style="margin:0 0 .5rem">D’où viennent les photos&nbsp;?</p><div class="src">';
@@ -758,7 +763,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '</select>'
         + '<button class="mini" id="a-tous">Tout choisir</button>'
         + '<button class="mini" id="a-rien">Tout décocher</button>'
-        + '<span class="droite"><b>' + n + '</b> sur ' + A.fichiers.length + ' choisie'
+        + '<span class="droite">'
+        + '<span id="a-apercus" class="aide"></span>'
+        + '<b id="a-nb">' + n + '</b> sur ' + A.fichiers.length + ' choisie'
         + (n > 1 ? 's' : '') + '</span></div>';
       if (!A.fichiers.length) h += '<div class="vide">Cette source ne contient aucune photo lisible.</div>';
       else {
@@ -826,26 +833,58 @@ ${JS_ACTIVITE}${JS_DIRE}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-src]'), function(b){
       b.onclick = function(){ A.lecteur = b.getAttribute('data-src'); dessiner(); };
     });
+    /* ⚠⚠ COCHER NE REDESSINE PLUS LA PLANCHE. Un redessin reconstruit tout le
+       contenu : le defilement repartait EN HAUT a chaque photo cochee, et sur
+       soixante-six vignettes il fallait redescendre a chaque fois. Un geste qui
+       oblige a refaire le chemin qu on vient de parcourir n est pas un geste,
+       c est une punition. On ne touche donc que la case cliquee et le compteur. */
     Array.prototype.forEach.call(corps.querySelectorAll('[data-f]'), function(b){
       b.onclick = function(){
         var c = b.getAttribute('data-f');
-        if (A.choix[c]) delete A.choix[c]; else A.choix[c] = true;
-        dessiner();
+        if (A.choix[c]) { delete A.choix[c]; b.classList.remove('on'); }
+        else { A.choix[c] = true; b.classList.add('on'); }
+        var ck = b.querySelector('.ck');
+        if (ck) ck.textContent = A.choix[c] ? '✓' : '';
+        var nb = document.getElementById('a-nb');
+        if (nb) nb.textContent = Object.keys(A.choix).length;
       };
     });
     var tri = document.getElementById('a-tri');
     if (tri) tri.onchange = function(){ A.tri = tri.value; dessiner(); };
+    var majCases = function(){
+      Array.prototype.forEach.call(corps.querySelectorAll('[data-f]'), function(b){
+        var c = b.getAttribute('data-f');
+        var on = !!A.choix[c];
+        b.classList.toggle('on', on);
+        var ck = b.querySelector('.ck');
+        if (ck) ck.textContent = on ? '✓' : '';
+      });
+      var nb = document.getElementById('a-nb');
+      if (nb) nb.textContent = Object.keys(A.choix).length;
+    };
     var tous = document.getElementById('a-tous');
     if (tous) tous.onclick = function(){
-      A.fichiers.forEach(function(f){ A.choix[f.cle] = true; }); dessiner();
+      A.fichiers.forEach(function(f){ A.choix[f.cle] = true; }); majCases();
     };
     var rien = document.getElementById('a-rien');
-    if (rien) rien.onclick = function(){ A.choix = {}; dessiner(); };
+    if (rien) rien.onclick = function(){ A.choix = {}; majCases(); };
     var nom = document.getElementById('a-nom');
     if (nom) nom.oninput = function(){ A.nom = nom.value; };
     Array.prototype.forEach.call(corps.querySelectorAll('input[name="a-but"]'), function(r){
       r.onchange = function(){ A.but = r.value; dessiner(); };
     });
+    var pe = document.getElementById('a-plein');
+    if (pe) pe.onclick = function(){
+      if (!P || !P.pleinEcran) { dire('Le plein écran n’existe que dans l’application.', 'att'); return; }
+      P.pleinEcran().then(function(etat){
+        // ⚠ Le bouton dit l ETAT REEL rendu par la fenetre, pas celui qu on
+        // suppose : un plein ecran refuse par le systeme laisserait sinon un
+        // bouton qui ment.
+        pe.textContent = etat ? '⤡' : '⛶';
+        pe.title = etat ? 'Quitter le plein écran' : 'Plein écran';
+      });
+    };
+
     var an = document.getElementById('a-annuler');
     if (an) an.onclick = assistFermer;
     var pr = document.getElementById('a-prec');
@@ -853,22 +892,22 @@ ${JS_ACTIVITE}${JS_DIRE}
     var sv = document.getElementById('a-suiv');
     if (sv) sv.onclick = assistSuivant;
 
-    /* ⚠ LES VIGNETTES SE CHARGENT A LA DEMANDE, une a la fois. Les demander
-       toutes d un coup ferait deux cents allers-retours simultanes par le pont,
-       et la fenetre paraitrait figee au moment precis ou l on veut choisir. */
-    var att = corps.querySelector('[data-charge]');
-    if (att && ASSIST && ASSIST.etape === 2) {
-      var cle = att.getAttribute('data-charge');
-      var f = null;
-      A.fichiers.forEach(function(x){ if (x.cle === cle) f = x; });
-      if (f && f.chemin) {
-        appeler('lot:vignette', [f.chemin]).then(function(r){
-          VIGNETTES[cle] = (r && r.ok) ? r.image : '';
-          ORIENT[cle] = (r && r.ok) ? (r.orientation || 1) : 1;
-          if (ASSIST && ASSIST.etape === 2) dessiner();
-        });
-      } else { VIGNETTES[cle] = ''; }
-    }
+    /* ══════════════════════════════════════════════════════════════════════
+       LES APERÇUS SE CHARGENT EN FOND, ET SANS REDESSINER
+       ⚠⚠ LA VERSION PRECEDENTE REDESSINAIT TOUT A CHAQUE VIGNETTE RECUE.
+       Sur soixante-six photos, c est soixante-six reconstructions de la planche
+       pendant qu on essaie de la parcourir : le defilement repartait en haut
+       sans arret, et il devenait impossible d atteindre les dernieres. Une
+       interface qui se derobe pendant qu on s en sert est pire qu une interface
+       lente.
+       On INJECTE donc chaque vignette dans sa case, et rien d autre ne bouge.
+       ⚠ ET L ON DIT QUE CA CHARGE : << Aperçus 12 / 66 >>. Sans ce compte, les
+       cases vides passent pour des photos illisibles.
+       ⚠ TROIS A LA FOIS : en demander soixante-six d un coup ferait autant
+       d allers-retours simultanes par le pont, qui sert aussi au reste de
+       l application ; une a la fois serait inutilement lent.
+       ══════════════════════════════════════════════════════════════════════ */
+    if (ASSIST && ASSIST.etape === 2) chargerApercus();
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
@@ -989,6 +1028,53 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     /* Le lot est ouvert AVANT tout : la premiere photo doit deja le porter. */
     appeler('lot:ouvrir', [nomLot || (libelle + ' · ' + source), source]).then(lancerVraiment);
+  }
+
+  var APERCUS_EN_COURS = 0;
+
+  function majCompteurApercus(){
+    var z = document.getElementById('a-apercus');
+    if (!z || !ASSIST) return;
+    var faits = 0;
+    ASSIST.fichiers.forEach(function(f){ if (VIGNETTES[f.cle] !== undefined) faits++; });
+    var total = ASSIST.fichiers.length;
+    z.textContent = (faits >= total) ? '' : ('Aperçus ' + faits + ' / ' + total + '… ');
+  }
+
+  function poserApercu(cle){
+    var b = corps.querySelector('[data-f="' + cle.replace(/"/g, '\\"') + '"]');
+    if (!b) return;
+    var im = b.querySelector('.im');
+    if (!im) return;
+    var v = VIGNETTES[cle];
+    im.innerHTML = v
+      ? '<img class="o' + (ORIENT[cle] || 1) + '" src="' + esc(v) + '" alt="">'
+      : '<div class="att">illisible</div>';
+  }
+
+  function chargerApercus(){
+    if (!ASSIST || ASSIST.etape !== 2) return;
+    var reste = ASSIST.fichiers.filter(function(f){
+      return VIGNETTES[f.cle] === undefined && !f.enCours;
+    });
+    majCompteurApercus();
+    if (!reste.length) return;
+    while (APERCUS_EN_COURS < 3 && reste.length) {
+      var f = reste.shift();
+      if (!f.chemin) { VIGNETTES[f.cle] = ''; poserApercu(f.cle); continue; }
+      f.enCours = true;
+      APERCUS_EN_COURS++;
+      (function(fic){
+        appeler('lot:vignette', [fic.chemin]).then(function(r){
+          APERCUS_EN_COURS--;
+          fic.enCours = false;
+          VIGNETTES[fic.cle] = (r && r.ok) ? r.image : '';
+          ORIENT[fic.cle] = (r && r.ok) ? (r.orientation || 1) : 1;
+          // ⚠ On INJECTE : la planche ne bouge pas, le defilement non plus.
+          if (ASSIST && ASSIST.etape === 2) { poserApercu(fic.cle); chargerApercus(); }
+        });
+      })(f);
+    }
   }
 
   function assistSuivant(){
