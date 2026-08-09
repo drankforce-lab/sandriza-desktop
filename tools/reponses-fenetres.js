@@ -513,6 +513,65 @@ module.exports = {
     },
   ],
 
+  // ── CHAT EN LIGNE ──────────────────────────────────────────────────────────
+  'chat.js': [
+    {
+      // ⚠ FORME REELLE de chat:liste (coeur LiveChat._chatDonnees).
+      nom: 'file garnie',
+      id: '',
+      reponses: {
+        'chat:liste': {
+          ok: true, peutModifier: true, enAttente: 1, horsLigne: 1,
+          satisfaction: { total: 3, rated: 2, satisfied: 1, unsatisfied: 1, rate: 50,
+            comments: [{ name: 'Marie', score: false, comment: 'Réponse un peu lente.' }] },
+          conversations: [
+            { id: 's1', nom: 'Marie Tremblay', courriel: 'marie@example.com', telephone: '',
+              statut: 'pending', statutLibelle: 'En attente', horsLigne: false,
+              nbMessages: 3, date: '7 août 14:22' },
+            { id: 's2', nom: 'Visiteur', courriel: '', telephone: '(418) 555-0199',
+              statut: 'closed', statutLibelle: 'Fermée', horsLigne: true,
+              nbMessages: 5, date: '5 août 09:10' },
+          ],
+        },
+        'chat:lire': {
+          ok: true,
+          conversation: { id: 's1', nom: 'Marie Tremblay', courriel: 'marie@example.com',
+            telephone: '', contactVoulu: 'email', statut: 'pending', horsLigne: false,
+            ouverte: '2026-08-07 14:22',
+            messages: [
+              { texte: 'Bonjour, avez-vous la robe en taille M ?', qui: 'visitor', heure: '14:22' },
+              { texte: 'Un instant, je vérifie.', qui: 'agent', heure: '14:25' },
+              { texte: 'Merci !', qui: 'visitor', heure: '14:26' },
+            ] },
+        },
+        'chat:repondre': { ok: true, nom: 'Marie Tremblay' },
+        'chat:statut': { ok: true, statut: 'closed', nom: 'Marie Tremblay' },
+        'chat:supprimer': { ok: true, nom: 'Marie Tremblay' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucune conversation',
+      id: '',
+      reponses: {
+        'chat:liste': {
+          ok: true, peutModifier: true, enAttente: 0, horsLigne: 0,
+          satisfaction: { total: 0, rated: 0, satisfied: 0, unsatisfied: 0, rate: null, comments: [] },
+          conversations: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'chat:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── OFFRES ET ANNONCES ─────────────────────────────────────────────────────
   'promotions.js': [
     {
