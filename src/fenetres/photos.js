@@ -165,8 +165,16 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
 .suivi .lg .et.double{background:rgba(234,179,8,.15);color:#facc15}
 .suivi .lg .et.echec{background:rgba(248,113,113,.15);color:#fca5a5}
 .suivi .pd{padding:.45rem .8rem;border-top:1px solid rgba(255,255,255,.08);
-  display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:#8fa1b8}
-.suivi .pd button{margin-left:auto}
+  display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:#8fa1b8;flex-wrap:wrap}
+.suivi .pd .bt{margin-left:auto;display:flex;gap:.4rem}
+/* La barre de progression : elle avance par TACHE TERMINEE, jamais toute seule.
+   Une barre qui glisse pendant qu il ne se passe rien est un mensonge poli. */
+.suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:rgba(255,255,255,.1);
+  overflow:hidden;margin:0 0 .1rem}
+.suivi .jauge i{display:block;height:100%;background:linear-gradient(90deg,#c9a97e,#e0c9a6);
+  border-radius:99px;transition:width .25s ease}
+.suivi .pc{font-variant-numeric:tabular-nums;font-weight:700;color:#e8edf5}
+.suivi.annule{border-color:rgba(248,113,113,.5)}
 /* La barre de LOT : elle ne parait que s il y a un choix, et elle dit ce que
    les traitements engendrent — une image inventee n a pas la meme valeur qu une
    photo, et cela doit se lire avant de cliquer. */
@@ -421,18 +429,29 @@ ${JS_ACTIVITE}${JS_DIRE}
     var nom = {};
     (D.photos || []).forEach(function(r){ nom[r.id] = r.code + ' · ' + r.nom; });
     var titres = ids.map(function(i){ return nom[i] || i; });
-    occuper('Traitement de ' + ids.length + ' photo' + (ids.length > 1 ? 's' : '') + '…');
-    suiviOuvrir(titres);
-    var faites = 0, echecs = 0, replis = 0;
+    var nomLot = { detourage: 'Détourage', fantome: 'Retrait du mannequin',
+                   humain: 'Mise sur un mannequin' }[quoi] || 'Traitement';
+    occuper(nomLot + ' de ' + ids.length + ' photo' + (ids.length > 1 ? 's' : '') + '…');
+    suiviOuvrir(titres, nomLot + ' · ' + ids.length + ' photo(s)');
+    var faites = 0, echecs = 0, replis = 0, abandon = 0;
     var suite = function(k){
       suiviCompte(k, ids.length);
+      /* ⚠ ON S ARRETE ENTRE DEUX PHOTOS. L appel deja parti au modele va au
+         bout : il est deja facture, l interrompre ne rendrait pas l argent,
+         seulement le resultat. */
+      if (ANNULE && k < ids.length) {
+        abandon = ids.length - k;
+        for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+        k = ids.length;
+      }
       if (k >= ids.length) {
         liberer();
         var t = faites + ' traitée' + (faites > 1 ? 's' : '');
         if (replis) t += ' · ' + replis + ' en repli local';
         if (echecs) t += ' · ' + echecs + ' en échec';
-        suiviFin(t + '.');
-        if (!echecs && !replis) setTimeout(suiviFermer, 2500);
+        if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
+        suiviFin(t + '.', abandon ? (nomLot + ' interrompu') : (nomLot + ' terminé'));
+        if (!echecs && !replis && !abandon) setTimeout(suiviFermer, 2500);
         dire(t + '.', echecs ? 'att' : 'bon');
         CHOIX = {};
         charger();
@@ -599,23 +618,53 @@ ${JS_ACTIVITE}${JS_DIRE}
      ══════════════════════════════════════════════════════════════════════════ */
   var SUIVI = null;
 
-  function suiviOuvrir(noms){
+  /* ══════════════════════════════════════════════════════════════════════════
+     LE CONTROLE DE SUIVI — visible, chiffre, et ANNULABLE
+     --------------------------------------------------------------------------
+     ⚠ LA JAUGE AVANCE PAR TACHE TERMINEE, jamais toute seule. Une barre qui
+     glisse pendant qu il ne se passe rien est un mensonge poli : on la regarde,
+     on croit que ca avance, et l on decouvre l arret cinq minutes plus tard.
+
+     ⚠⚠ CE QUE << ANNULER >> FAIT VRAIMENT, ET QUE L ECRAN DIT : la tache EN
+     COURS va jusqu au bout — un appel deja parti au modele est deja facture, et
+     l interrompre ne rendrait pas l argent, seulement le resultat. Ce sont les
+     SUIVANTES qui sont abandonnees. Promettre un arret immediat serait plus
+     agreable et faux.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var ANNULE = false;
+
+  function suiviOuvrir(noms, titre){
     suiviFermer();
+    ANNULE = false;
     var d = document.createElement('div');
     d.className = 'suivi';
-    d.innerHTML = '<div class="st"><span>Import en cours</span><span class="n" id="sv-n">0 / '
-      + noms.length + '</span></div><div class="lst" id="sv-l">'
+    d.innerHTML = '<div class="st"><span id="sv-t">' + esc(titre || 'Import en cours')
+      + '</span><span class="n" id="sv-n">0 / ' + noms.length + '</span></div>'
+      + '<div class="lst" id="sv-l">'
       + noms.map(function(n, i){
           return '<div class="lg" id="sv-' + i + '"><span class="nm">' + esc(n)
             + '</span><span class="et attente">en attente</span>'
             + '<span class="ep" id="sv-e-' + i + '"></span></div>';
         }).join('')
-      + '</div><div class="pd" id="sv-p"><span id="sv-r">Préparation…</span>'
-      + '<button class="mini" id="sv-x">Fermer</button></div>';
+      + '</div><div class="pd" id="sv-p">'
+      + '<div class="jauge"><i id="sv-j" style="width:0%"></i></div>'
+      + '<span class="pc" id="sv-pc">0 %</span><span id="sv-r">Préparation…</span>'
+      + '<span class="bt">'
+      + '<button class="mini dgr" id="sv-a">Annuler</button>'
+      + '<button class="mini" id="sv-x">Fermer</button></span></div>';
     document.body.appendChild(d);
     SUIVI = d;
     var x = document.getElementById('sv-x');
     if (x) x.onclick = suiviFermer;
+    var a = document.getElementById('sv-a');
+    if (a) a.onclick = function(){
+      ANNULE = true;
+      a.disabled = true;
+      if (SUIVI) SUIVI.className = 'suivi annule';
+      var r = document.getElementById('sv-r');
+      if (r) r.textContent = 'Annulation… la tâche en cours se termine, les suivantes sont abandonnées.';
+      dire('Annulation demandée — la tâche en cours va au bout, les suivantes sont abandonnées.', 'att');
+    };
   }
   function suiviFermer(){
     if (SUIVI && SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
@@ -644,12 +693,19 @@ ${JS_ACTIVITE}${JS_DIRE}
   function suiviCompte(fait, total){
     var n = document.getElementById('sv-n');
     if (n) n.textContent = fait + ' / ' + total;
+    var pct = total ? Math.round(fait * 100 / total) : 0;
+    var j = document.getElementById('sv-j');
+    if (j) j.style.width = pct + '%';
+    var p = document.getElementById('sv-pc');
+    if (p) p.textContent = pct + ' %';
   }
-  function suiviFin(mot){
+  function suiviFin(mot, titre){
     var r = document.getElementById('sv-r');
     if (r) r.textContent = mot;
-    var t = SUIVI && SUIVI.querySelector('.st span');
-    if (t) t.textContent = 'Import terminé';
+    var t = document.getElementById('sv-t');
+    if (t) t.textContent = titre || 'Terminé';
+    var a = document.getElementById('sv-a');
+    if (a) a.remove();
   }
 
   function importer(fichiers){
@@ -661,23 +717,32 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!liste.length) { dire('Aucune image dans ce dépôt (JPG, PNG ou WebP).', 'att'); return; }
     if (occupeDeja('Import')) return;
     occuper('Préparation de l’import…');
-    suiviOuvrir(liste.map(function(f){ return f.name; }));
+    suiviOuvrir(liste.map(function(f){ return f.name; }), 'Import de ' + liste.length + ' photo(s)');
     var faites = 0, doubles = 0, refuses = 0, echoues = 0;
+    var abandonnees = 0;
     var suite = function(k){
       suiviCompte(k, liste.length);
+      /* ⚠ ON S ARRETE ENTRE DEUX FICHIERS, jamais au milieu d un : un fichier a
+         moitie envoye laisserait une entree sans image. */
+      if (ANNULE && k < liste.length) {
+        abandonnees = liste.length - k;
+        for (var z = k; z < liste.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+        k = liste.length;
+      }
       if (k >= liste.length) {
         liberer();
         var t = faites + ' importée' + (faites > 1 ? 's' : '');
         if (doubles) t += ' · ' + doubles + ' déjà présente' + (doubles > 1 ? 's' : '');
         if (refuses) t += ' · ' + refuses + ' trop lourde' + (refuses > 1 ? 's' : '');
         if (echoues) t += ' · ' + echoues + ' en échec';
-        suiviFin(t + '.');
+        if (abandonnees) t += ' · ' + abandonnees + ' abandonnée' + (abandonnees > 1 ? 's' : '');
+        suiviFin(t + '.', abandonnees ? 'Import interrompu' : 'Import terminé');
         /* ⚠ IL SE FERME TOUT SEUL QUAND TOUT EST PASSE (demande du 2026-08-09) :
            il n y a rien a y lire, et un panneau qui reste apres coup encombre.
            ⚠ MAIS IL RESTE DES QU IL Y A QUELQUE CHOSE A VOIR — un echec, une
            trop lourde, un doublon. C est precisement le cas ou l on veut savoir
            LAQUELLE, et le faire disparaitre effacerait la seule reponse. */
-        if (!echoues && !refuses && !doubles) setTimeout(suiviFermer, 2500);
+        if (!echoues && !refuses && !doubles && !abandonnees) setTimeout(suiviFermer, 2500);
         dire(t + '.', (echoues || refuses) ? 'att' : 'bon');
         charger();
         return;
