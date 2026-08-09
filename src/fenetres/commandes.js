@@ -31,7 +31,7 @@
  * menu entière.
  */
 
-const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -215,7 +215,7 @@ function pageCommandes(mode) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}
+${JS_ACTIVITE}${JS_DIRE}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');
@@ -243,17 +243,10 @@ ${JS_ACTIVITE}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  var direT = null;
-  function dire(t, cl){
-    clearTimeout(direT);
-    msg.className = 'msg' + (cl ? ' ' + cl : '');
-    msg.textContent = t || '';
-    if (cl === 'bon' && t) {
-      direT = setTimeout(function(){
-        if (msg.textContent === t) { msg.textContent = ''; msg.className = 'msg'; }
-      }, 6000);
-    }
-  }
+  /* Le bandeau de message : une seule regle, dans le socle (szDire) —
+     tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
+     par des points de suspension, qui annonce un travail en cours. */
+  function dire(t, cl){ szDire(t, cl); }
   function argent(n){
     var v = (Math.round((parseFloat(n) || 0) * 100) / 100).toFixed(2);
     return v.replace('.', ',') + ' $';

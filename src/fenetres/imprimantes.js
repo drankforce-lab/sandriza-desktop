@@ -20,7 +20,7 @@
  * on croirait l'imprimante prête alors que rien n'a été vérifié.
  */
 
-const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -96,12 +96,15 @@ function pageImprimantes() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}
+${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var msg   = document.getElementById('msg');
   var sous  = document.getElementById('sous');
 
-  function dire(t, genre){ msg.textContent = t || ''; msg.className = 'msg' + (genre ? ' ' + genre : ''); }
+  /* Le bandeau de message : une seule regle, dans le socle (szDire) —
+     tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
+     par des points de suspension, qui annonce un travail en cours. */
+  function dire(t, cl){ szDire(t, cl); }
 
   /* ══ DIAGNOSTIC AFFICHE DANS LA FENETRE ════════════════════════════════════
      ⚠ POURQUOI IL EST LA. Cette fenetre est restee bloquee sur

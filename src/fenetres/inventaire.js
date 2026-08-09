@@ -41,7 +41,7 @@
  * referme la chaîne et casse toute la fenêtre. C'est arrivé six fois ici.
  */
 
-const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -258,7 +258,7 @@ function pageInventaire(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}
+${JS_ACTIVITE}${JS_DIRE}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');
@@ -302,17 +302,10 @@ ${JS_ACTIVITE}
   // ⚠ Une BONNE nouvelle s efface d elle-meme : << Fiche produit ouverte dans sa
   // fenetre >> qui reste affiche des heures finit par mentir. Les ERREURS et les
   // avertissements, eux, restent — on doit pouvoir les lire en revenant.
-  var direT = null;
-  function dire(t, cl){
-    clearTimeout(direT);
-    msg.className = 'msg' + (cl ? ' ' + cl : '');
-    msg.textContent = t || '';
-    if (cl === 'bon' && t) {
-      direT = setTimeout(function(){
-        if (msg.textContent === t) { msg.textContent = ''; msg.className = 'msg'; }
-      }, 6000);
-    }
-  }
+  /* Le bandeau de message : une seule regle, dans le socle (szDire) —
+     tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
+     par des points de suspension, qui annonce un travail en cours. */
+  function dire(t, cl){ szDire(t, cl); }
 
   // ⚠ CHAQUE REFUS A SA PHRASE. Un ecran muet sur un refus de droit ressemble a
   // une panne, et l on cherche partout sauf dans les permissions.

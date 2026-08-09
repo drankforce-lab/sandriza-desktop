@@ -733,6 +733,103 @@ module.exports = {
     },
   ],
 
+  // ── CENTRE D'IMPRESSION (studio promo) ─────────────────────────────────────
+  // ⚠ FORME RÉELLE de promo:donnees (cœur PromoPrint._promoDonnees). Quatre cas :
+  // la liste garnie, le volet d'IMPRESSION (le seul qui atteigne l'aperçu, la
+  // calibration et l'état de l'imprimante), la lecture seule, et l'imprimante
+  // absente — qui doit se dire, pas se taire.
+  'promo.js': [
+    {
+      nom: 'volet impression garni',
+      id: 'impression',
+      reponses: {
+        'promo:donnees': {
+          ok: true, peutModifier: true, charge: true,
+          total: 2, trouves: 2, page: 0, pages: 1, taille: 12,
+          kpis: { modeles: 2, formats: 11, imprimees: 1840, logos: 3 },
+          lignes: [
+            { id: 'pp1', nom: 'Étiquette prix — collection été', type: 'Étiquette',
+              dim: '2 × 1 po', rond: false, w: 2, h: 1, elements: 4,
+              modifie: 1786200000000, planches: 1, vignette: IMAGE, rendable: true },
+            // ⚠ LE MODÈLE QU'ON NE PEUT PAS RENDRE : une de ses images a teinté le
+            // canevas. La fenêtre doit le DIRE — c'est ce qui empêchera de l'imprimer.
+            { id: 'pp2', nom: 'Autocollant rond 2 po', type: 'Autocollant',
+              dim: 'Ø 2 po', rond: true, w: 2, h: 2, elements: 2,
+              modifie: 1786100000000, planches: 1, vignette: '', rendable: false },
+          ],
+          formats: [
+            { cle: 'lbl2x1', id: '', nom: 'Étiquette prix', type: 'Étiquette',
+              dim: '2 × 1 po', rond: false, perso: false, planches: 0 },
+            { cle: 'c:fmt1', id: 'fmt1', nom: 'Étiquette bijou', type: 'Étiquette',
+              dim: '1,5 × 0,75 po', rond: false, perso: true, planches: 0 },
+          ],
+        },
+        'promo:apercu': { ok: true, image: IMAGE, rendable: true, detail: '',
+          planches: [{ id: 'av5160', nom: 'Avery 5160 — 2,625 × 1 po (30/feuille)', parFeuille: 30 }] },
+        'promo:imprimante': { ok: true, prete: true, imprimante: 'Zebra ZD410', dpi: 300,
+          motif: '', message: 'Prêt — impression sans fenêtre sur « Zebra ZD410 ».' },
+        'promo:calibration': { ok: true, echelle: 100, decX: 0, decY: 0, rendu: '600 × 300 px' },
+        'promo:calibrer': { ok: true, echelle: 101, decX: 0, decY: 0, rendu: '606 × 303 px' },
+        'promo:lot': { ok: true, envoyees: 25, imprimante: 'Zebra ZD410', dpi: 300 },
+        'promo:dupliquer': { ok: true, id: 'pp3', nom: 'Étiquette prix — collection été (copie)' },
+        'promo:supprimer': { ok: true, nom: 'Autocollant rond 2 po', dim: 'Ø 2 po' },
+        'promo:formatEcrire': { ok: true, nom: 'Étiquette bijou', dim: '1,5 × 0,75 po' },
+        'promo:formatSupprimer': { ok: true, nom: 'Étiquette bijou', dim: '1,5 × 0,75 po' },
+        'promo:nouveau': { ok: true, id: 'pp4', nom: 'Étiquette prix 2 × 1 po', dim: '2 × 1 po' },
+        'promo:editeur': { ok: true, nom: 'Étiquette prix — collection été' },
+        'promo:planche': { ok: true, planche: 'Avery 5160 — 2,625 × 1 po (30/feuille)', parFeuille: 30 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ L'IMPRIMANTE ABSENTE SE DIT. Un volet d'impression muet là-dessus
+      // laisserait appuyer sur « Lancer » pour rien.
+      // ⚠ `id: 'impression'` OUVRE DIRECTEMENT LE VOLET D'IMPRESSION. Sans lui,
+      // aucun de ces cas ne l'atteindrait : le garde-fou ne simule aucun clic, et
+      // la fenêtre s'ouvre sur l'onglet Modèles.
+      nom: 'imprimante absente (volet impression)',
+      id: 'impression',
+      reponses: {
+        'promo:donnees': {
+          ok: true, peutModifier: true, charge: true,
+          total: 1, trouves: 1, page: 0, pages: 1, taille: 12,
+          kpis: { modeles: 1, formats: 10, imprimees: 0, logos: 0 },
+          lignes: [{ id: 'pp1', nom: 'Carte d’affaires', type: "Carte d'affaires",
+            dim: '3,5 × 2 po', rond: false, w: 3.5, h: 2, elements: 6,
+            modifie: 1786200000000, planches: 1, vignette: IMAGE, rendable: true }],
+          formats: [],
+        },
+        'promo:apercu': { ok: true, image: IMAGE, rendable: true, planches: [] },
+        'promo:imprimante': { ok: true, prete: false, imprimante: '', dpi: 203,
+          motif: 'no_printer',
+          message: 'Aucune imprimante d’étiquettes choisie sur ce poste. Configuration → Imprimantes.' },
+        'promo:calibration': { ok: true, echelle: 100, decX: 0, decY: 0, rendu: '711 × 406 px' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'lecture seule',
+      id: '',
+      reponses: {
+        'promo:donnees': {
+          ok: true, peutModifier: false, charge: true,
+          total: 0, trouves: 0, page: 0, pages: 1, taille: 12,
+          kpis: { modeles: 0, formats: 10, imprimees: 0, logos: 0 },
+          lignes: [], formats: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'module absent',
+      id: '',
+      reponses: {
+        'promo:donnees': { ok: false, motif: 'module_promo' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── PHOTOS (médiathèque) ───────────────────────────────────────────────────
   // ⚠ FORME RÉELLE de photos:donnees (cœur Photos._photosDonnees). Trois cas,
   // parce qu'ils ne traversent pas le même dessin : garnie (tableau + tuiles +

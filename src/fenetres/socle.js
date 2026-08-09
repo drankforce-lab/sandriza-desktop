@@ -179,9 +179,52 @@ document.addEventListener('input', signalerActivite, true);
 signalerActivite();
 `;
 
+/*
+ * ⚠ LE BANDEAU DE MESSAGE S EFFACE SEUL — UNE SEULE SOURCE POUR TOUTES LES
+ * FENETRES.
+ *
+ * Le patron d origine n effacait que les SUCCES. Un avertissement comme
+ * << Aucune photo trouvee sur une cle USB. >> restait donc au bas de la fenetre
+ * POUR TOUJOURS, et l on finissait par le lire comme l etat courant de l ecran
+ * plutot que comme le verdict d un geste fait cinq minutes plus tot. Releve par
+ * l utilisateur le 2026-08-09, capture a l appui.
+ *
+ * ⚠ SAUF CE QUI EST EN COURS, et c est la seule exception. Un message qui se
+ * termine par des points de suspension annonce un TRAVAIL, pas un resultat :
+ * << Import 3 / 12 - robe.jpg... >>, << Isolation du vetement... >>. L effacer
+ * au bout de cinq secondes ferait passer une operation longue pour une fenetre
+ * inerte — exactement le contraire de ce qu on cherche.
+ *
+ * ⚠ ON N EFFACE QUE CE QU ON A ECRIT : si un autre message est arrive entre
+ * temps, le minuteur ne touche a rien. Sans ce controle, un verdict tout frais
+ * disparaitrait parce qu un message anterieur arrive a echeance.
+ *
+ * ⚠ POURQUOI ICI ET PAS DANS CHAQUE FENETRE : il y en a QUARANTE-DEUX, et la
+ * regle etait deja ecrite quarante-deux fois, avec quatre variantes (4 s, 10 s,
+ * aucune, et deux jeux de genres differents). En corriger une par une, c est en
+ * oublier une.
+ */
+const JS_DIRE = `
+var _szDireT = null;
+function szDire(texte, genre){
+  var m = document.getElementById('msg');
+  if (!m) return;
+  var t = texte == null ? '' : String(texte);
+  m.textContent = t;
+  m.className = 'msg' + (genre ? ' ' + genre : '');
+  clearTimeout(_szDireT);
+  if (!t) return;
+  if (t.charAt(t.length - 1) === '…' || t.slice(-3) === '...') return;
+  _szDireT = setTimeout(function(){
+    var m2 = document.getElementById('msg');
+    if (m2 && m2.textContent === t) { m2.textContent = ''; m2.className = 'msg'; }
+  }, 5000);
+}
+`;
+
 const JS_SOCLE = `
 var P = window.szPont;
-` + JS_ACTIVITE + `
+` + JS_ACTIVITE + JS_DIRE + `
 var MOTIFS = {
   session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
   droit:              'Votre rôle ne donne pas accès à cette opération.',
@@ -503,4 +546,4 @@ html.jour tbody tr.attente{background:rgba(124,92,255,.08)}
 html.jour input,html.jour select{background:#ffffff}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR, CSS_JOUR, JS_SOCLE, JS_ACTIVITE };
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR, CSS_JOUR, JS_SOCLE, JS_ACTIVITE, JS_DIRE };

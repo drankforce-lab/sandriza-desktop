@@ -32,7 +32,7 @@
  * (tools/verifier-fenetres.js) le vérifie avant chaque publication.
  */
 
-const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -97,7 +97,7 @@ function pageAffichage() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}
+${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var avis  = document.getElementById('msg');
   var MARQUE = { logo: '', nom: 'SANDRIZA' };

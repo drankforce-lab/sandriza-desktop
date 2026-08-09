@@ -21,7 +21,7 @@
  * COMPRIS — dixième rappel du projet.
  */
 
-const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -111,7 +111,7 @@ function pageRemboursement(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}
+${JS_ACTIVITE}${JS_DIRE}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');
@@ -127,17 +127,10 @@ ${JS_ACTIVITE}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  var _direT = null;
-  function dire(t, cl){
-    msg.className = 'msg' + (cl ? ' ' + cl : ''); msg.textContent = t || '';
-    clearTimeout(_direT);
-    /* Un message de SUCCES s'efface seul apres quelques secondes : il restait
-       sinon a l'ecran pour toujours (2026-08-09, << Facture ouverte dans sa
-       fenetre >>). Les ERREURS restent : on doit pouvoir les lire. */
-    if (t && cl === 'bon') _direT = setTimeout(function(){
-      if (msg.textContent === t) { msg.textContent = ''; msg.className = 'msg'; }
-    }, 4000);
-  }
+  /* Le bandeau de message : une seule regle, dans le socle (szDire) —
+     tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
+     par des points de suspension, qui annonce un travail en cours. */
+  function dire(t, cl){ szDire(t, cl); }
   function argent(n){
     var v = (Math.round((parseFloat(n) || 0) * 100) / 100).toFixed(2);
     return v.replace('.', ',') + ' $';

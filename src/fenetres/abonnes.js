@@ -19,7 +19,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -104,7 +104,7 @@ function pageAbonnes() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}
+${JS_ACTIVITE}${JS_DIRE}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -117,14 +117,10 @@ ${JS_ACTIVITE}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  var _direT = null;
-  function dire(t, cl){
-    msg.className = 'msg' + (cl ? ' ' + cl : ''); msg.textContent = t || '';
-    clearTimeout(_direT);
-    if (t && cl === 'bon') _direT = setTimeout(function(){
-      if (msg.textContent === t) { msg.textContent = ''; msg.className = 'msg'; }
-    }, 4000);
-  }
+  /* Le bandeau de message : une seule regle, dans le socle (szDire) —
+     tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
+     par des points de suspension, qui annonce un travail en cours. */
+  function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
     session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
