@@ -116,6 +116,38 @@ const versLExterieur = (urlStr) => {
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/* ══ UN DOCUMENT HTML CHANGE EN PDF ═══════════════════════════════════════════
+   Meme patron que l impression silencieuse : le document est charge dans une
+   fenetre CACHEE, puis rendu en PDF. Sert a JOINDRE un document a un courriel
+   plutot que de le recopier dans le corps du message — un etat de compte colle
+   dans un courriel se deforme d une messagerie a l autre, ne s imprime pas
+   proprement et ne se garde pas ; une piece jointe, si (demande du 2026-08-09).
+   Retour : { ok, base64, error } — le base64 est ce que Resend attend. */
+const documentEnPdf = async (html, opts = {}) => {
+  if (html == null || html === '') return { ok: false, error: 'aucun contenu' };
+  const win = new BrowserWindow({
+    show: false,
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
+  });
+  try {
+    await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+    // Les polices et les images (le logo) se posent APRES loadURL : sans ce
+    // court repos, le PDF sort parfois sans son en-tete.
+    await delay(350);
+    const buf = await win.webContents.printToPDF({
+      printBackground: true,
+      landscape: !!opts.paysage,
+      margins: { marginType: 'custom', top: 0.4, bottom: 0.4, left: 0.4, right: 0.4 },
+      pageSize: opts.format || 'Letter',
+    });
+    return { ok: true, base64: buf.toString('base64') };
+  } catch (e) {
+    return { ok: false, error: String((e && e.message) || e) };
+  } finally {
+    try { if (!win.isDestroyed()) win.destroy(); } catch {}
+  }
+};
+
 // ══ IMPRESSION SILENCIEUSE D'UN DOCUMENT ARBITRAIRE ═══════════════════════════
 // Le cœur du remplacement de l'agent. webContents.print() n'imprime que la page
 // COURANTE ; pour imprimer un document quelconque (bon de commande HTML, étiquette
@@ -302,6 +334,8 @@ ipcMain.handle('badge:set', (e, dataUrl, desc) => {
 });
 
 // ══ PHASE 4 — DÉMARRAGE AUTOMATIQUE ═══════════════════════════════════════════
+ipcMain.handle('doc:pdf', async (e, html, opts) => documentEnPdf(html, opts || {}));
+
 ipcMain.handle('autolaunch:get', () => {
   try { return !!app.getLoginItemSettings().openAtLogin; } catch { return false; }
 });
@@ -1304,7 +1338,7 @@ const LIMITES_PONT = {
   // Square est un service DISTANT : une annee entiere de paiements et de
   // remboursements, paginee, depasse largement le delai ordinaire.
   'paiements:charger': 60000,
-  'etat:courriel': 30000,
+  'etat:courriel': 45000,
   'cartescadeaux:liste': 20000,
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
