@@ -1155,6 +1155,14 @@ const OPS_PONT = new Set([
   // Statistiques distantes (fenetre Statistiques, 2.2.0). ⚠ Elles ne lisent PAS
   // la base : la fenetre principale interroge Google et Twilio par le reseau.
   'stats:ga', 'stats:telephonie',
+  // Photothèque (fenetre Photos, 2.3.0). ⚠ C EST UN ECRAN D IMPORT : ce qui
+  // entre par 'photos:importer' est compresse, depose dans le stockage et
+  // conserve par le SITE — la fenetre ne fait que lire un fichier. Et
+  // 'photos:attacher' ECRIT SUR UNE FICHE PRODUIT : c est ce que la boutique
+  // affichera, d ou un second droit exige cote site.
+  'photos:donnees', 'photos:importer', 'photos:isoler', 'photos:fond',
+  'photos:attacher', 'photos:produits', 'photos:supprimer', 'photos:vider',
+  'photos:usb', 'photos:enregistrer',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1399,6 +1407,25 @@ const LIMITES_PONT = {
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
   'messagerie:liste': 20000, 'messagerie:repondre': 30000,
+  // Photothèque. Une photo importee est contenue, reencodee PUIS deposee dans le
+  // stockage : c est le meme travail que l enregistrement d un produit, avec la
+  // meme dependance a la vitesse de televersement d une boutique.
+  'photos:importer': 90000,
+  // Le detourage est un calcul local sur un million de pixels, suivi de deux
+  // depots (la transparente et le rendu).
+  'photos:isoler': 60000, 'photos:fond': 45000,
+  // Attacher reencode, depose dans products/ ET ecrit la fiche.
+  'photos:attacher': 60000,
+  // Le catalogue complet peut etre relu avant la premiere recherche.
+  'photos:produits': 20000,
+  'photos:enregistrer': 30000,
+  // Vider retire les entrees UNE PAR UNE (fusion serveur) : une mediatheque
+  // fournie prend du temps, et abandonner en route ne l arreterait pas.
+  'photos:vider': 120000,
+  // ⚠ JUSQU A 200 PHOTOS D UNE CARTE D APPAREIL, chacune lue, compressee et
+  // deposee. C est legitimement long ; sonner << delai >> pendant que l import
+  // continue derriere ferait recommencer, et donc doubler la mediatheque.
+  'photos:usb': 300000,
 };
 
 /* ⚠ LA FENETRE INVENTAIRE SE TIENT A JOUR TOUTE SEULE (demande du 2026-08-08 :
@@ -1416,6 +1443,9 @@ const OPS_QUI_CHANGENT_L_INVENTAIRE = new Set([
   'stock:skuPad6', 'stock:venteFinale', 'stock:vendre',
   'stock:entrepotEcrire', 'stock:entrepotSupprimer',
   'caisse:vendre', 'retour:finaliser', 'remboursement:ecrire',
+  // Attacher une photo ECRIT sur la fiche : l Inventaire ouvert a cote doit la
+  // voir sans qu on le rafraichisse a la main.
+  'photos:attacher',
 ]);
 const actualiserFenetres = (cles, sender) => {
   (cles || []).forEach((cle) => {
@@ -1553,6 +1583,7 @@ const PAGES_ANCRABLES = () => ({
   journal: ['Journal d’envoi', () => pageJournal()],
   campagnes: ['Campagnes et chaînes', () => pageCampagnes()],
   statistiques: ['Statistiques', () => pageStatistiques()],
+  photos: ['Photos', () => pagePhotos()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2289,6 +2320,7 @@ const { pageAbonnes } = require('./fenetres/abonnes');
 const { pageJournal } = require('./fenetres/journal');
 const { pageCampagnes } = require('./fenetres/campagnes');
 const { pageStatistiques } = require('./fenetres/statistiques');
+const { pagePhotos } = require('./fenetres/photos');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2367,7 +2399,7 @@ const actionApp = (nom) => {
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
-    case 'campagnes': case 'statistiques': {
+    case 'campagnes': case 'statistiques': case 'photos': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

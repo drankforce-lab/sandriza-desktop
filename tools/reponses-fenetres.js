@@ -733,6 +733,108 @@ module.exports = {
     },
   ],
 
+  // ── PHOTOS (médiathèque) ───────────────────────────────────────────────────
+  // ⚠ FORME RÉELLE de photos:donnees (cœur Photos._photosDonnees). Trois cas,
+  // parce qu'ils ne traversent pas le même dessin : garnie (tableau + tuiles +
+  // zone de dépôt), lecture seule (bandeau, boutons désarmés, pas de dépôt) et
+  // médiathèque vide (le message « aucune photo », qui n'est PAS le message de
+  // chargement).
+  'photos.js': [
+    {
+      nom: 'mediatheque garnie',
+      id: '',
+      reponses: {
+        'photos:donnees': {
+          ok: true, charge: true, peutModifier: true, bureau: true,
+          total: 3, trouvees: 3, liees: 1, isolees: 2, poidsTotal: 271360,
+          page: 0, pages: 1, taille: 24,
+          lignes: [
+            // Rangée, isolée, attachée à un article : la ligne la plus complète.
+            { id: 'ph_a1', code: 'PH-000003', nom: 'robe-lin-devant.jpg',
+              apercu: 'https://exemple.invalid/phototheque/a1.webp', enAttente: false,
+              isole: true, fond: 'studio', lieId: 'p_0007', lieNom: 'Robe en lin',
+              lieSku: 'ROB-000123', poids: 90112, poidsSrc: 6291456, statut: 'liée' },
+            // Rangée, isolée, pas encore attachée.
+            { id: 'ph_a2', code: 'PH-000002', nom: 'chemisier.png',
+              apercu: 'https://exemple.invalid/phototheque/a2.webp', enAttente: false,
+              isole: true, fond: '', lieId: null, lieNom: '', lieSku: '',
+              poids: 88064, poidsSrc: 2400000, statut: 'isolé' },
+            // ⚠ LE CAS QUI N'A PAS D'IMAGE : le dépôt a échoué, l'entrée n'a donc
+            // aucune adresse. La fenêtre doit le DIRE, pas afficher un cadre vide.
+            { id: 'ph_a3', code: 'PH-000001', nom: 'jupe-plissee.heic',
+              apercu: '', enAttente: true, isole: false, fond: '', lieId: null,
+              lieNom: '', lieSku: '', poids: 93184, poidsSrc: 93184, statut: 'non rangée' },
+          ],
+          fonds: [{ cle: 'studio', libelle: '🤍 Studio' }, { cle: 'jardin', libelle: '🌿 Jardin fleuri' }],
+        },
+        'photos:produits': { ok: true, total: 2, produits: [
+          { id: 'p_0007', nom: 'Robe en lin', sku: 'ROB-000123',
+            image: 'https://exemple.invalid/products/p7.webp', enVente: true },
+          { id: 'p_0008', nom: 'Jupe plissée', sku: 'JUP-000045', image: '', enVente: false },
+        ] },
+        'photos:isoler': { ok: true, photo: { id: 'ph_a3', code: 'PH-000001', nom: 'jupe-plissee.heic',
+          apercu: 'https://exemple.invalid/phototheque/a3.webp', enAttente: false, isole: true,
+          fond: '', lieId: null, lieNom: '', lieSku: '', poids: 91000, poidsSrc: 93184, statut: 'isolé' } },
+        'photos:fond': { ok: true, photo: { id: 'ph_a2', code: 'PH-000002', nom: 'chemisier.png',
+          apercu: 'https://exemple.invalid/phototheque/a2b.webp', enAttente: false, isole: true,
+          fond: 'jardin', lieId: null, lieNom: '', lieSku: '', poids: 90000, poidsSrc: 2400000,
+          statut: 'isolé' } },
+        'photos:attacher': { ok: true, code: 'PH-000002', produit: 'Robe en lin', sku: 'ROB-000123',
+          photo: { id: 'ph_a2', code: 'PH-000002', nom: 'chemisier.png',
+            apercu: 'https://exemple.invalid/phototheque/a2.webp', enAttente: false, isole: true,
+            fond: '', lieId: 'p_0007', lieNom: 'Robe en lin', lieSku: 'ROB-000123',
+            poids: 88064, poidsSrc: 2400000, statut: 'liée' } },
+        'photos:importer': { ok: true, rangee: true, photo: { id: 'ph_a4', code: 'PH-000004',
+          nom: 'nouvelle.jpg', apercu: 'https://exemple.invalid/phototheque/a4.webp',
+          enAttente: false, isole: false, fond: '', lieId: null, lieNom: '', lieSku: '',
+          poids: 87000, poidsSrc: 5100000, statut: 'importée' } },
+        'photos:supprimer': { ok: true, code: 'PH-000001', lie: false },
+        'photos:vider': { ok: true, retirees: 3, echecs: 0 },
+        'photos:usb': { ok: true, trouvees: 12, importees: 12, lecteur: 'E:' },
+        'photos:enregistrer': { ok: true, code: 'PH-000003', fichier: 'PH-000003.png' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'lecture seule',
+      id: '',
+      reponses: {
+        'photos:donnees': {
+          ok: true, charge: true, peutModifier: false, bureau: false,
+          total: 1, trouvees: 1, liees: 0, isolees: 0, poidsTotal: 88064,
+          page: 0, pages: 1, taille: 24,
+          lignes: [{ id: 'ph_b1', code: 'PH-000001', nom: 'essai.jpg',
+            apercu: 'https://exemple.invalid/phototheque/b1.webp', enAttente: false,
+            isole: false, fond: '', lieId: null, lieNom: '', lieSku: '',
+            poids: 88064, poidsSrc: 0, statut: 'importée' }],
+          fonds: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ VIDE MAIS CHARGÉE — à ne pas confondre avec « pas encore lue ».
+      nom: 'mediatheque vide',
+      id: '',
+      reponses: {
+        'photos:donnees': {
+          ok: true, charge: true, peutModifier: true, bureau: true,
+          total: 0, trouvees: 0, liees: 0, isolees: 0, poidsTotal: 0,
+          page: 0, pages: 1, taille: 24, lignes: [], fonds: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'module absent',
+      id: '',
+      reponses: {
+        'photos:donnees': { ok: false, motif: 'module_photos' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── RECHERCHES SANS RÉSULTAT ───────────────────────────────────────────────
   'recherches.js': [
     {

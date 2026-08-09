@@ -72,7 +72,10 @@ contextBridge.exposeInMainWorld('szPont', {
       'campagnes:envoyer': 185000, 'chaines:traiter': 185000,
       'stats:ga': 65000, 'stats:telephonie': 50000,
       'sociaux:publier': 65000, 'sociaux:publierTout': 185000,
-      'messagerie:liste': 20000, 'messagerie:repondre': 30000 };
+      'messagerie:liste': 20000, 'messagerie:repondre': 30000,
+      'photos:importer': 90000, 'photos:isoler': 60000, 'photos:fond': 45000,
+      'photos:attacher': 60000, 'photos:produits': 20000, 'photos:enregistrer': 30000,
+      'photos:vider': 120000, 'photos:usb': 300000 };
     const limite = (LONGUES[nom] || 20000) + 5000;
     const plafond = new Promise((resoudre) => {
       setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, limite);
