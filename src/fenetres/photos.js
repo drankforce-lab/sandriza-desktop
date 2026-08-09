@@ -532,6 +532,17 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<span class="sp">·</span> <b>' + D.isolees + '</b> isolée' + (D.isolees > 1 ? 's' : '')
       + '<span class="sp">·</span> <b>' + D.liees + '</b> attachée' + (D.liees > 1 ? 's' : '')
       + '<span class="sp">·</span> ' + poids(D.poidsTotal) + ' rangés'
+      /* ⚠⚠ DEUX CHIFFRES DIFFERENTS, ET C EST VOULU. << rangés >> additionne le
+         poids inscrit sur chaque fiche ; << dans R2 >> est ce que le stockage
+         contient VRAIMENT, mesure en l interrogeant. Les confondre ferait passer
+         pour une mesure ce qui n est qu une somme : elle ignore les objets que
+         plus aucune fiche ne cite, et c est justement ceux-la qu on paie sans
+         les voir. L ecart entre les deux EST l information. */
+      + '<span class="sp">·</span> <span id="p-r2">'
+      + (ESPACE === null ? '<a href="#" id="p-mesurer">mesurer l’espace R2</a>'
+         : ESPACE.ok === false ? '<span class="err">espace R2 : ' + esc(ESPACE.detail || 'illisible') + '</span>'
+         : espaceTexte(ESPACE))
+      + '</span>'
       + '</div>';
 
     if (!ro && !D.total) {
@@ -660,6 +671,42 @@ ${JS_ACTIVITE}${JS_DIRE}
       dessiner();
     });
   }
+  /* ══════════════════════════════════════════════════════════════════════════
+     L ESPACE OCCUPE DANS R2
+     ⚠ IL SE DEMANDE, IL NE SE CHARGE PAS TOUT SEUL : mesurer, c est enumerer
+     tout le dossier du stockage, page par page. Le faire a chaque ouverture de
+     l ecran ferait payer une enumeration complete pour une ligne que l on ne
+     regarde pas toujours.
+     ⚠ ET IL DIT CE QU IL NE SAIT PAS : une enumeration interrompue rend
+     << au moins tant >>, jamais un total qui aurait l air complet.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var ESPACE = null;
+
+  function espaceTexte(e){
+    var t = 'R2 : <b>' + poids(e.octets) + '</b>';
+    if (!e.complet) t = 'R2 : <b>au moins ' + poids(e.octets) + '</b>';
+    t += ' <span class="pt">(' + e.objets + ' objet' + (e.objets > 1 ? 's' : '');
+    if (e.orphelins && e.orphelins.sur && e.orphelins.objets) {
+      t += ', dont <b class="att">' + e.orphelins.objets + ' orphelin'
+        + (e.orphelins.objets > 1 ? 's' : '') + ' — ' + poids(e.orphelins.octets) + '</b>';
+    }
+    t += ')</span>';
+    return t;
+  }
+
+  function mesurerEspace(){
+    var z = document.getElementById('p-r2');
+    if (z) z.innerHTML = 'mesure de l’espace R2…';
+    appeler('photos:espace', []).then(function(r){
+      ESPACE = r;
+      dessiner();
+      if (r && r.ok && r.orphelins && r.orphelins.sur && r.orphelins.objets) {
+        dire(r.orphelins.objets + ' objet(s) ne sont cités par aucune photo : '
+          + poids(r.orphelins.octets) + ' payés pour rien. Le passage de nuit les retire.', 'att');
+      }
+    });
+  }
+
   function lotsFermer(){ LOTS = null; LOT_ARME = ''; dessiner(); }
 
   function nb(v){ return (typeof v === 'number' && isFinite(v)) ? v : '—'; }
@@ -2217,6 +2264,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var f = document.getElementById('p-fermer');
     if (f) f.onclick = fermerDetail;
     rangerUneFois();
+    var me = document.getElementById('p-mesurer');
+    if (me) me.onclick = function(ev){ stop(ev); mesurerEspace(); };
     var iso = document.getElementById('p-isoler');
     if (iso) iso.onclick = isoler;
 
