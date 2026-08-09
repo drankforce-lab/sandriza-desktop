@@ -1309,6 +1309,9 @@ const OPS_PONT = new Set([
   // L assistant de traitement en lot : lire une source SANS importer, montrer,
   // importer ce qui est choisi, puis traiter — chaine imposee par le coeur.
   'lot:sources', 'lot:vignette', 'lot:importer', 'lot:traiter',
+  // L historique des lots : ce qui est entre, par quelle porte, et de quoi le
+  // defaire d un geste.
+  'lot:liste', 'lot:jeter', 'lot:ouvrir', 'lot:clore', 'photos:toutes',
   // Le suivi de consommation Fal.ai (lecture seule).
   'fal:suivi', 'fal:ouvrir',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
@@ -1568,6 +1571,16 @@ const LIMITES_PONT = {
      INTERIEUR, sinon c est la couche du dessus qui abandonne la premiere et
      l on perd le vrai message d erreur. */
   'photos:traiter': 180000, 'photos:lot': 180000, 'photos:isoler': 180000,
+  /* ⚠⚠ ET VOICI POURQUOI << TOUT VIDER >> LAISSAIT 32 PHOTOS (2026-08-09).
+     `photos:vider` n etait pas dans cette table : elle heritait du plafond
+     ordinaire de 8 SECONDES, alors qu elle supprime les photos UNE A UNE avec
+     un aller-retour reseau chacune. Au bout de 8 s la fenetre recevait
+     << delai >>, affichait un verdict, et le travail CONTINUAIT derriere — d ou
+     une phototheque a moitie vide et un ecran qui pretendait avoir fini.
+     Un plafond trop court ne rate pas une operation : il ment sur son sort. */
+  'photos:vider': 600000, 'photos:supprimer': 45000, 'photos:toutes': 30000,
+  'lot:jeter': 600000, 'lot:sources': 90000, 'lot:vignette': 30000,
+  'lot:importer': 90000, 'lot:traiter': 180000, 'lot:liste': 30000,
   'photos:importer': 60000, 'photos:usb': 120000, 'fal:suivi': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,

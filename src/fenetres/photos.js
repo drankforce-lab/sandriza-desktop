@@ -315,6 +315,8 @@ ${JS_ACTIVITE}${JS_DIRE}
      toutes, et l on s en apercevrait apres avoir lance le traitement. */
   var CHOIX = {};
   var LOT_NOM = '';         // le nom donne au prochain lot importe
+  var TAILLE = 24;          // photos par page
+  var LOTS = null;          // l historique, quand il est ouvert
   /* ══════════════════════════════════════════════════════════════════════════
      L ASSISTANT DE TRAITEMENT EN LOT — trois etapes
        1. LA SOURCE : une cle branchee, ou les photos deja importees.
@@ -463,7 +465,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       + opt('recent', 'Plus récentes') + opt('code', 'Par code') + opt('name', 'Par nom')
       + opt('linked', 'Liées d’abord') + opt('size', 'Plus lourdes')
       + '</select>'
+      /* ⚠ JUSQU A 500 PAR PAGE. Le plafond de 24 obligeait a paginer pour cocher
+         un lot de deux cents, et un choix qui se perd entre deux pages n en est
+         pas un. */
+      + '<select id="p-taille" title="Photos par page">'
+      + [24, 50, 100, 200, 500].map(function(n){
+          return '<option value="' + n + '"' + (TAILLE === n ? ' selected' : '') + '>' + n + ' / page</option>';
+        }).join('')
+      + '</select>'
       + '<span class="droite">'
+      + '<button class="mini" id="p-lots" title="Historique des lots importés">📚 Lots</button>'
       + '<button class="mini" id="p-fal" title="Consommation et journal des traitements Fal.ai">🧠 Traitements IA</button>'
       + (D.total && !ro
           ? '<button class="mini danger" id="p-vider">' + (VIDER_ARME ? 'Confirmer — vider les ' + D.total + ' ?' : '🗑 Tout vider') + '</button>'
@@ -516,6 +527,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // ⚠ La classe se pose sur BODY et non sur le corps : c est elle qui decale
     // a la fois le tableau et le panneau de suivi, qui vit hors du corps.
     if (ASSIST) h += assistHtml();
+    else if (LOTS) h += lotsHtml();
     document.body.classList.toggle('insp', !!DETAIL && !ASSIST);
     corps.innerHTML = h;
     brancher();
@@ -531,6 +543,118 @@ ${JS_ACTIVITE}${JS_DIRE}
     ['fantome', '👻 Retirer le mannequin', 'Retire le fond PUIS le mannequin. Le col et les manches sont reconstruits.'],
     ['humain', '🧍 Mannequin humain', 'Retire le fond, retire le mannequin, PUIS engendre une personne qui porte le vêtement.'],
   ];
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     L HISTORIQUE DES LOTS
+     ⚠⚠ IL EXISTE PARCE QU ON N A PAS PU DEFAIRE. Le 2026-08-09, l ancien import
+     automatique a verse 66 photos d une cle sans que personne n ait rien
+     demande, et rien ne permettait de les retrouver ENSEMBLE pour les retirer.
+     ⚠ ON COMPTE SUR LES PHOTOS, PAS SUR UN REGISTRE A PART : un registre
+     deriverait au premier retrait fait a la main — il dirait << 66 >> alors
+     qu il en reste douze.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var LOT_ARME = '';
+  var SUP_LOT_ARME = false;
+
+  function lotsOuvrir(){
+    dire('Lecture des lots…');
+    appeler('lot:liste', []).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      LOTS = r.lots || [];
+      LOT_ARME = '';
+      dire('');
+      dessiner();
+    });
+  }
+  function lotsFermer(){ LOTS = null; LOT_ARME = ''; dessiner(); }
+
+  function lotsHtml(){
+    var h = '<div class="asst"><div class="bo">'
+      + '<div class="tt"><h3>Lots importés</h3>'
+      + '<span class="pas">' + LOTS.length + ' lot' + (LOTS.length > 1 ? 's' : '') + '</span></div>'
+      + '<div class="co">';
+    if (!LOTS.length) h += '<div class="vide">Aucune photo dans la photothèque.</div>';
+    else {
+      h += '<table><thead><tr><th>Lot</th><th>Entré</th><th class="num">Photos</th>'
+        + '<th class="num">Traitées</th><th class="num">Attachées</th><th class="num">Poids</th>'
+        + '<th></th></tr></thead><tbody>';
+      LOTS.forEach(function(l){
+        var arme = (LOT_ARME === l.id);
+        h += '<tr>'
+          + '<td><b>' + esc(l.nom || 'Sans nom') + '</b>'
+          + (l.source ? '<div class="dt">' + esc(l.source) + '</div>' : '') + '</td>'
+          + '<td class="dt">' + (l.ts ? dateFr(l.ts) : '—') + '</td>'
+          + '<td class="num">' + l.nombre + '</td>'
+          + '<td class="num">' + l.traitees + '</td>'
+          + '<td class="num">' + l.liees + '</td>'
+          + '<td class="num">' + poids(l.poids) + '</td>'
+          + '<td style="white-space:nowrap">'
+          + '<button class="mini" data-lotsel="' + esc(l.id) + '">Tout cocher</button> '
+          + (D.peutModifier
+              ? '<button class="mini dgr" data-lotdel="' + esc(l.id) + '">'
+                + (arme ? 'Confirmer ?' : 'Supprimer le lot') + '</button>'
+              : '')
+          + '</td></tr>'
+          + (arme
+              ? '<tr><td colspan="7" class="dt" style="color:#facc15">'
+                + 'Les ' + (l.nombre - l.liees) + ' photo(s) non attachées seront retirées. '
+                + (l.liees ? ('Les ' + l.liees + ' attachées à un article sont GARDÉES : '
+                              + 'retirer la photothèque ne doit jamais dépouiller une fiche produit.')
+                           : '')
+                + '</td></tr>'
+              : '');
+      });
+      h += '</tbody></table>';
+    }
+    h += '</div><div class="pi"><span class="aide">Un lot est un import. '
+      + 'Le retirer défait cet import d’un geste.</span>'
+      + '<span class="dr"><button class="prim" id="l-fermer">Fermer</button></span>'
+      + '</div></div></div>';
+    return h;
+  }
+
+  function lotsBrancher(){
+    var f = document.getElementById('l-fermer');
+    if (f) f.onclick = lotsFermer;
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-lotsel]'), function(b){
+      b.onclick = function(){
+        /* ⚠ COCHER UN LOT NE COCHE QUE CE QUI EST AFFICHE : les cases vivent sur
+           les lignes, et une ligne d une autre page n existe pas encore. On le
+           DIT plutot que de laisser croire a une selection complete. */
+        var id = b.getAttribute('data-lotsel');
+        var n = 0;
+        (D.lignes || []).forEach(function(x){
+          if ((x.lotId || '@avant') === id) { CHOIX[x.id] = { code: x.code, nom: x.nom }; n++; }
+        });
+        var lot = LOTS.filter(function(x){ return x.id === id; })[0];
+        lotsFermer();
+        dire(n
+          ? (n + ' photo(s) cochée(s)'
+             + (lot && lot.nombre > n
+                 ? (' — le lot en compte ' + lot.nombre + ' ; augmentez « photos par page » pour toutes les voir.')
+                 : '.'))
+          : 'Aucune photo de ce lot sur cette page — augmentez « photos par page ».',
+          n ? 'bon' : 'att');
+      };
+    });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-lotdel]'), function(b){
+      b.onclick = function(){
+        var id = b.getAttribute('data-lotdel');
+        if (LOT_ARME !== id) { LOT_ARME = id; dessiner(); return; }
+        LOT_ARME = '';
+        dire('Suppression du lot…');
+        appeler('lot:jeter', [id]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          dire(r.retirees + ' photo(s) retirée(s)'
+            + (r.gardees ? ' · ' + r.gardees + ' gardée(s) car attachée(s) à un article' : '')
+            + (r.echecs ? ' · ' + r.echecs + ' en échec' : '') + '.',
+            r.echecs ? 'att' : 'bon');
+          LOTS = null;
+          charger();
+        });
+      };
+    });
+  }
 
   function assistOuvrir(){
     ASSIST = { etape: 1, sources: null, lecteur: '', fichiers: [], choix: {},
@@ -730,11 +854,18 @@ ${JS_ACTIVITE}${JS_DIRE}
       return nomLot ? (nomLot + ' ' + (i + 1 < 10 ? '0' : '') + (i + 1)) : f.nom;
     });
 
+    var source = (A.lecteur === '@lib') ? 'photothèque' : ('clé ' + A.lecteur);
     ASSIST = null;
     VIGNETTES = {};
     occuper(libelle + ' · ' + fichiers.length + ' photo(s)…');
     suiviOuvrir(titres, libelle + ' · ' + fichiers.length + ' photo(s)');
     dessiner();
+
+    /* ⚠⚠ LE LOT S OUVRE AVANT LA PREMIERE PHOTO ET SE CLOT APRES LA DERNIERE.
+       C est ce qui fait qu un import est UN lot et non vingt — et donc ce qui
+       permet de le DEFAIRE d un geste. Sans cette paire, chaque photo serait un
+       lot d une photo, et l historique ne servirait a rien. */
+    var lancerVraiment = function(){
 
     var faites = 0, sautees = 0, echecs = 0, abandon = 0;
 
@@ -746,6 +877,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         k = fichiers.length;
       }
       if (k >= fichiers.length) {
+        appeler('lot:clore', []);
         liberer();
         var t = faites + ' traitée' + (faites > 1 ? 's' : '');
         if (sautees) t += ' · ' + sautees + ' déjà à jour';
@@ -815,6 +947,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       });
     };
     suite(0);
+    };
+    /* Le lot est ouvert AVANT tout : la premiere photo doit deja le porter. */
+    appeler('lot:ouvrir', [nomLot || (libelle + ' · ' + source), source]).then(lancerVraiment);
   }
 
   function assistSuivant(){
@@ -874,6 +1009,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       + LOTS.map(function(l){
           return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
         }).join('')
+      + '<button class="mini dgr" id="p-lot-sup">'
+      + (SUP_LOT_ARME ? 'Confirmer — supprimer ' + n + ' ?' : '🗑 Supprimer') + '</button>'
       + '<button class="mini" id="p-rien">Tout décocher</button>'
       + '<span class="av">Les deux derniers traitements <strong>engendrent</strong> une image&nbsp;: '
       + 'l’original est conservé à côté.</span></div>';
@@ -883,9 +1020,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     var ids = Object.keys(CHOIX);
     if (!ids.length) return;
     if (occupeDeja('Traitement en lot')) return;
-    var nom = {};
-    (D.lignes || []).forEach(function(r){ nom[r.id] = r.code + ' · ' + r.nom; });
-    var titres = ids.map(function(i){ return nom[i] || i; });
+    /* ⚠ LES NOMS VIENNENT DU CHOIX, PAS DE LA PAGE : une photo cochee page 1 et
+       traitee depuis la page 4 doit garder son nom dans le suivi. */
+    var titres = ids.map(function(i){
+      var c = CHOIX[i];
+      return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
+    });
     var nomLot = { detourage: 'Détourage', fantome: 'Retrait du mannequin',
                    humain: 'Mise sur un mannequin' }[quoi] || 'Traitement';
     occuper(nomLot + ' de ' + ids.length + ' photo' + (ids.length > 1 ? 's' : '') + '…');
@@ -1222,6 +1362,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       return LOT_NOM + ' ' + (n.length < 2 ? '0' + n : n);
     };
     occuper('Préparation de l’import…');
+    /* ⚠ MEME UN GLISSER-DEPOSER EST UN LOT. Sans cela, l historique ne montrerait
+       que les imports passes par l assistant, et l on ne pourrait pas defaire un
+       depot fait a la main — c est-a-dire le plus courant. */
+    appeler('lot:ouvrir', [LOT_NOM || ('Import du ' + new Date().toLocaleDateString('fr-CA')), 'fichiers']);
     suiviOuvrir(liste.map(function(f, i){ return nommer(f, i); }),
       (LOT_NOM ? ('Import · ' + LOT_NOM) : 'Import') + ' · ' + liste.length + ' photo(s)');
     var faites = 0, doubles = 0, refuses = 0, echoues = 0;
@@ -1236,6 +1380,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         k = liste.length;
       }
       if (k >= liste.length) {
+        appeler('lot:clore', []);
         liberer();
         var t = faites + ' importée' + (faites > 1 ? 's' : '');
         if (doubles) t += ' · ' + doubles + ' déjà présente' + (doubles > 1 ? 's' : '');
@@ -1379,6 +1524,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ── BRANCHEMENTS ──────────────────────────────────────────────────────── */
   function brancher(){
     if (ASSIST) { assistBrancher(); return; }
+    if (LOTS) { lotsBrancher(); return; }
     var q = document.getElementById('p-q');
     if (q) q.oninput = function(){
       Q = q.value; PAGE = 0;
@@ -1441,7 +1587,10 @@ ${JS_ACTIVITE}${JS_DIRE}
         b.onclick = function(ev){
           stop(ev);
           var id = b.getAttribute(x[0]);
-          CHOIX = {}; CHOIX[id] = true;
+          var l = null;
+          (D.lignes || []).forEach(function(y){ if (y.id === id) l = y; });
+          CHOIX = {};
+          CHOIX[id] = l ? { code: l.code, nom: l.nom } : { code: '', nom: id };
           lancerLot(x[1]);
         };
       });
@@ -1496,19 +1645,84 @@ ${JS_ACTIVITE}${JS_DIRE}
       c.onclick = function(ev){ ev.stopPropagation(); };
       c.onchange = function(){
         var id = c.getAttribute('data-chx');
-        if (c.checked) CHOIX[id] = true; else delete CHOIX[id];
+        if (!c.checked) { delete CHOIX[id]; dessiner(); return; }
+        /* ⚠ ON RETIENT LE CODE ET LE NOM AU MOMENT DE COCHER. Une photo choisie
+           sur la page 1 doit pouvoir etre NOMMEE dans le suivi alors qu on est
+           rendu page 4 : sans cela, le panneau afficherait des identifiants
+           bruts pour tout ce qui n est plus a l ecran. */
+        var l = null;
+        (D.lignes || []).forEach(function(x){ if (x.id === id) l = x; });
+        CHOIX[id] = l ? { code: l.code, nom: l.nom } : { code: '', nom: id };
         dessiner();
       };
     });
     var tt = document.getElementById('p-tout');
     if (tt) tt.onchange = function(){
       (D.lignes || []).forEach(function(r){
-        if (tt.checked) CHOIX[r.id] = true; else delete CHOIX[r.id];
+        if (tt.checked) CHOIX[r.id] = { code: r.code, nom: r.nom };
+        else delete CHOIX[r.id];
       });
       dessiner();
     };
     var rien = document.getElementById('p-rien');
-    if (rien) rien.onclick = function(){ CHOIX = {}; dessiner(); };
+    if (rien) rien.onclick = function(){ CHOIX = {}; SUP_LOT_ARME = false; dessiner(); };
+
+    /* Supprimer les photos cochees.
+       ⚠ ON SUPPRIME UNE A UNE ET L ON REND COMPTE : sur trente photos dont deux
+       sont attachees a un article, un total muet ferait croire que tout est
+       parti. Le panneau de suivi nomme chaque ligne. */
+    var supLot = document.getElementById('p-lot-sup');
+    if (supLot) supLot.onclick = function(){
+      var ids = Object.keys(CHOIX);
+      if (!ids.length) return;
+      if (!SUP_LOT_ARME) {
+        SUP_LOT_ARME = true;
+        dessiner();
+        dire('Cliquez encore pour supprimer les ' + ids.length + ' photo(s) cochée(s). '
+          + 'Les articles liés gardent leur image.', 'att');
+        setTimeout(function(){ if (SUP_LOT_ARME) { SUP_LOT_ARME = false; dessiner(); } }, 6000);
+        return;
+      }
+      SUP_LOT_ARME = false;
+      if (occupeDeja('Suppression')) return;
+      var titres = ids.map(function(i){
+        var c = CHOIX[i];
+        return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
+      });
+      occuper('Suppression de ' + ids.length + ' photo(s)…');
+      suiviOuvrir(titres, 'Suppression · ' + ids.length + ' photo(s)');
+      var faits = 0, rates = 0, abandon = 0;
+      var pas = function(k){
+        suiviCompte(k, ids.length);
+        if (ANNULE && k < ids.length) {
+          abandon = ids.length - k;
+          for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+          k = ids.length;
+        }
+        if (k >= ids.length) {
+          liberer();
+          var t = faits + ' retirée' + (faits > 1 ? 's' : '');
+          if (rates) t += ' · ' + rates + ' refusée' + (rates > 1 ? 's' : '');
+          if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
+          suiviFin(t + '.', abandon ? 'Suppression interrompue' : 'Suppression terminée');
+          if (!rates && !abandon) setTimeout(suiviFermer, 2500);
+          dire(t + '.', rates ? 'att' : 'bon');
+          charger();
+          return;
+        }
+        suiviLigne(k, 'cours', 'en cours');
+        appeler('photos:supprimer', [ids[k]]).then(function(r){
+          if (r && r.ok) { faits++; delete CHOIX[ids[k]]; suiviLigne(k, 'faite', 'retirée'); }
+          else {
+            rates++;
+            suiviLigne(k, 'echec', 'refusée');
+            suiviEtapes(k, [{ nom: 'retrait', ok: false, chiffre: (r && (r.detail || r.motif)) || '' }]);
+          }
+          pas(k + 1);
+        });
+      };
+      pas(0);
+    };
     Array.prototype.forEach.call(corps.querySelectorAll('[data-lot]'), function(b){
       b.onclick = function(){ lancerLot(b.getAttribute('data-lot')); };
     });
@@ -1527,6 +1741,11 @@ ${JS_ACTIVITE}${JS_DIRE}
         rouvrir(r.photo);
       });
     };
+
+    var tl = document.getElementById('p-taille');
+    if (tl) tl.onchange = function(){ TAILLE = parseInt(tl.value, 10) || 24; PAGE = 0; charger(); };
+    var bl = document.getElementById('p-lots');
+    if (bl) bl.onclick = lotsOuvrir;
 
     var asst = document.getElementById('p-assistant');
     if (asst) asst.onclick = assistOuvrir;
@@ -1558,7 +1777,60 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       VIDER_ARME = false;
       if (occupeDeja('Vidage de la photothèque')) return;
-      occuper('Retrait des entrées…');
+      /* ⚠⚠ LE VIDAGE MENE SA SUITE, LIGNE PAR LIGNE. Il n affichait qu un
+         << Retrait des entrees... >> qui restait des minutes sans rien dire :
+         ni combien, ni lesquelles, ni ou l on en etait — et rien pour arreter.
+         Sur une phototheque de deux cents photos, c est un ecran mort.
+         ⚠ Et chaque retrait efface AUSSI les images dans le stockage : la fiche
+         seule partait, les objets restaient. << C est efface >> ne doit pas
+         vouloir dire << ce le sera peut-etre demain >>. */
+      occuper('Lecture de ce qu il y a à retirer…');
+      appeler('photos:toutes', []).then(function(t){
+        if (!t.ok) { liberer(); dire(expliquer(t), 'err'); return; }
+        var l = t.photos || [];
+        if (!l.length) { liberer(); dire('La photothèque est déjà vide.', 'att'); return; }
+        var titres = l.map(function(x){ return x.code + ' · ' + x.nom; });
+        suiviOuvrir(titres, 'Vidage · ' + l.length + ' photo(s)');
+        var faits = 0, rates = 0, abandon = 0;
+        var pas = function(k){
+          suiviCompte(k, l.length);
+          if (ANNULE && k < l.length) {
+            abandon = l.length - k;
+            for (var z = k; z < l.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+            k = l.length;
+          }
+          if (k >= l.length) {
+            liberer();
+            var m = faits + ' retirée' + (faits > 1 ? 's' : '');
+            if (rates) m += ' · ' + rates + ' refusée' + (rates > 1 ? 's' : '');
+            if (abandon) m += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
+            suiviFin(m + '.', abandon ? 'Vidage interrompu' : 'Vidage terminé');
+            if (!rates && !abandon) setTimeout(suiviFermer, 2500);
+            dire(m + '. Les fiches produits gardent leurs images.', rates ? 'att' : 'bon');
+            CHOIX = {};
+            charger();
+            return;
+          }
+          suiviLigne(k, 'cours', 'en cours');
+          suiviEtapes(k, [{ nom: 'fiche', etat: 'encours' }]);
+          occuper('Retrait ' + (k + 1) + ' / ' + l.length + '…');
+          appeler('photos:supprimer', [l[k].id]).then(function(r){
+            if (r && r.ok) {
+              faits++;
+              suiviLigne(k, 'faite', 'retirée');
+              suiviEtapes(k, [{ nom: 'fiche', ok: true }, { nom: 'images du stockage', ok: true }]);
+            } else {
+              rates++;
+              suiviLigne(k, 'echec', 'refusée');
+              suiviEtapes(k, [{ nom: 'fiche', ok: false, chiffre: (r && (r.detail || r.motif)) || '' }]);
+            }
+            pas(k + 1);
+          });
+        };
+        pas(0);
+      });
+      return;
+      /* eslint-disable no-unreachable */
       appeler('photos:vider', []).then(function(r){
         liberer();
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -1692,19 +1964,23 @@ ${JS_ACTIVITE}${JS_DIRE}
   function charger(garderSaisie){
     if (enCours) { RELANCE = true; return; }
     enCours = true;
-    appeler('photos:donnees', [{ q: Q, tri: TRI, page: PAGE, taille: 24 }]).then(function(r){
+    appeler('photos:donnees', [{ q: Q, tri: TRI, taille: TAILLE, page: PAGE, taille: 24 }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
       if (!r || !r.ok) { vide('Photothèque indisponible', expliquer(r)); return; }
       D = r;
-      /* ⚠⚠ LE CHOIX SE TAILLE SUR CE QUI EXISTE VRAIMENT. La barre annoncait
-         << 1 photo choisie >> devant une photothèque VIDE (capture du
-         2026-08-09) : les cases cochees survivaient a la suppression des photos
-         elles-memes. Un compteur qui parle d objets disparus fait douter de tout
-         le reste de l ecran. */
-      var vivantes = {};
-      (r.lignes || []).forEach(function(x){ vivantes[x.id] = true; });
-      Object.keys(CHOIX).forEach(function(id){ if (!vivantes[id]) delete CHOIX[id]; });
+      /* ⚠⚠ LE CHOIX SURVIT AU CHANGEMENT DE PAGE, ET C EST TOUT L INTERET.
+         La version precedente le taillait sur les lignes de la PAGE COURANTE :
+         cocher trente photos, tourner la page, et les trente
+         disparaissaient du choix. Une selection qui ne franchit pas une page ne
+         sert a rien des qu il y a plus d une page, donc precisement quand elle
+         servirait.
+         ⚠ ON NE VIDE QUE QUAND IL N Y A PLUS RIEN DU TOUT : c est le seul cas ou
+         l on est SUR que les photos cochees n existent plus. Ailleurs, elles sont
+         peut-etre simplement sur une autre page. (La barre annoncait
+         << 1 photo choisie >> devant une phototheque vide — c etait cela, le
+         defaut, et pas la persistance elle-meme.) */
+      if (!r.total) CHOIX = {};
       /* La photo ouverte est RELUE dans la nouvelle liste : sans cela, le
          panneau afficherait encore l etat d avant le geste. */
       if (DETAIL) {
