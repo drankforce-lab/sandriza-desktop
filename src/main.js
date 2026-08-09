@@ -1186,6 +1186,10 @@ const OPS_PONT = new Set([
   // L ANNUAIRE des fournisseurs : visible, modifiable, et VERROUILLE pendant
   // qu on le corrige (portee expense_vendors, meme mecanisme que les fiches).
   'depenses:annuaire', 'depenses:annuaireEcrire', 'depenses:annuaireRetirer',
+  // Remboursements et credits (fenetre Remboursements, 2.7.0). ⚠ ECRAN DE
+  // CONSULTATION : rembourser engage de l argent et se fait depuis la COMMANDE,
+  // dans la fenetre Remboursement qui porte deja toutes les gardes.
+  'remboursements:liste', 'remboursements:ouvrir',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1624,6 +1628,7 @@ const PAGES_ANCRABLES = () => ({
   photos: ['Photos', () => pagePhotos()],
   promo: ['Centre d’impression', () => pagePromo()],
   depenses: ['Dépenses d’entreprise', () => pageDepenses()],
+  remboursements: ['Remboursements et crédits', () => pageRemboursements()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2363,6 +2368,7 @@ const { pageStatistiques } = require('./fenetres/statistiques');
 const { pagePhotos } = require('./fenetres/photos');
 const { pagePromo } = require('./fenetres/promo');
 const { pageDepenses } = require('./fenetres/depenses');
+const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2442,7 +2448,7 @@ const actionApp = (nom) => {
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
-    case 'depenses': {
+    case 'depenses': case 'remboursements': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

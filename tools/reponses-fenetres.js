@@ -733,6 +733,82 @@ module.exports = {
     },
   ],
 
+  // ── REMBOURSEMENTS ET CRÉDITS ──────────────────────────────────────────────
+  // ⚠ FORME RÉELLE de remboursements:liste (cœur Admin._remboursementsDonnees).
+  // DEUX cas d'ouverture, et il en faut deux : la table des crédits n'est pas
+  // celle des remboursements, et elle porte le PASSIF — la moitié qui compte
+  // pour le comptable. Sans l'état d'ouverture, aucun jeu ne la dessinerait.
+  'remboursements.js': [
+    {
+      nom: 'remboursements',
+      id: '',
+      reponses: {
+        'remboursements:liste': {
+          ok: true, onglet: 'remboursements', page: 0, pages: 1, taille: 25,
+          comptes: { remboursements: 3, credits: 2 },
+          tuiles: { rembourse: '412,55 $', nbRemb: 3, emis: '180,00 $', nbCredits: 2,
+            utilise: '45,00 $', solde: '135,00 $', nbActifs: 1 },
+          lignes: [
+            { id: 'rf1', numero: 'RMB-0002-101', date: '7 août 2026', commandeId: 'o_1',
+              commande: 'CMD-0002-22010', client: 'Bobby Brousseau', type: 'original',
+              typeLbl: 'Moyen original', motif: 'Article non conforme',
+              sousTotal: '250,00 $', tps: '12,50 $', tvq: '24,94 $', total: '287,44 $', totalN: 287.44 },
+            { id: 'rf2', numero: 'RMB-0002-102', date: '5 août 2026', commandeId: 'o_2',
+              commande: 'CMD-0002-22008', client: 'Marie Tremblay', type: 'credit',
+              typeLbl: 'Crédit boutique', motif: 'Retour hors délai — crédit accordé',
+              sousTotal: '100,00 $', tps: '5,00 $', tvq: '9,98 $', total: '114,98 $', totalN: 114.98 },
+            // ⚠ Le remboursement de FRAIS : il n'a pas d'articles et se distingue.
+            { id: 'rf3', numero: 'RMB-0002-103', date: '2 août 2026', commandeId: '',
+              commande: 'CMD-0002-21990', client: 'Julie Gagnon', type: 'fees_refund',
+              typeLbl: 'Frais de service', motif: 'Frais retenus remboursés',
+              sousTotal: '10,13 $', tps: '0,00 $', tvq: '0,00 $', total: '10,13 $', totalN: 10.13 },
+          ],
+        },
+        'remboursements:ouvrir': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ LES CRÉDITS : le passif, avec le détail des utilisations et les trois
+      // statuts. Un crédit SANS date d'expiration n'est PAS expiré.
+      nom: 'credits boutique',
+      id: 'credits',
+      reponses: {
+        'remboursements:liste': {
+          ok: true, onglet: 'credits', page: 0, pages: 1, taille: 25,
+          comptes: { remboursements: 3, credits: 3 },
+          tuiles: { rembourse: '412,55 $', nbRemb: 3, emis: '280,00 $', nbCredits: 3,
+            utilise: '45,00 $', solde: '135,00 $', nbActifs: 1 },
+          lignes: [
+            { id: 'cr1', numero: 'CRD-0002-011', refund: 'RMB-0002-102',
+              client: 'Marie Tremblay', emisLe: '5 août 2026', commande: 'CMD-0002-22008',
+              expiration: 'N’expire jamais', montant: '180,00 $', utilise: '45,00 $',
+              solde: '135,00 $', soldeN: 135, statut: 'actif',
+              usages: [{ date: '7 août 2026', commande: 'CMD-0002-22011', montant: '45,00 $' }] },
+            { id: 'cr2', numero: 'CRD-0002-010', refund: '', client: 'Julie Gagnon',
+              emisLe: '12 mars 2026', commande: '', expiration: '12 mars 2026',
+              montant: '50,00 $', utilise: '0,00 $', solde: '50,00 $', soldeN: 50,
+              statut: 'expire', usages: [] },
+            { id: 'cr3', numero: 'CRD-0002-009', refund: '', client: 'Sophie Roy',
+              emisLe: '2 janvier 2026', commande: '', expiration: 'N’expire jamais',
+              montant: '50,00 $', utilise: '50,00 $', solde: '0,00 $', soldeN: 0,
+              statut: 'epuise',
+              usages: [{ date: '4 janvier 2026', commande: 'CMD-0002-21500', montant: '50,00 $' }] },
+          ],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'remboursements:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── DÉPENSES D'ENTREPRISE ──────────────────────────────────────────────────
   // ⚠ FORME RÉELLE de depenses:donnees (cœur Expenses._depensesDonnees). Quatre
   // cas : la liste garnie, la période vide, la lecture seule (ni saisie ni zone
