@@ -770,13 +770,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       OCCUPE = false;
       if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
       dire('Dépense enregistrée — ' + r.montant + ' · ' + r.categorie + '.', 'bon');
-      var etaitNeuve = (FORM.id === '__new__');
-      FORM = null; DETAIL = null;
-      /* Enchaîner : après un AJOUT on rouvre un formulaire vierge, comme
-         l'écran web le propose — on saisit rarement une seule facture. */
-      charger().then(function(){
-        if (etaitNeuve && D && D.peutAjouter) { BR_REPRIS = 0; FORM = formVierge(); dessiner(); }
-      });
+      /* ⚠ ON FERME, ON N ENCHAINE PAS. Je rouvrais ici un formulaire VIERGE pour
+         permettre de saisir la facture suivante — copie de la question que pose
+         l ecran web. Mais un formulaire qui se rouvre tout seul ne se lit pas
+         comme une invitation : il se lit comme une fenetre qui NE S EST PAS
+         FERMEE, et l on doute d avoir enregistre quoi que ce soit. Signale le
+         2026-08-09. Le bouton << Nouvelle depense >> est juste au-dessus de la
+         liste : enchainer reste a un clic, mais c est un clic VOULU. */
+      FORM = null; DETAIL = null; FERMER_DEMANDE = false; BR_REPRIS = 0;
+      charger();
     });
   }
 
