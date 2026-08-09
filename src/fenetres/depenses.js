@@ -169,6 +169,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   var FORM = null;           // { id, date, categorie, paiement, description, fournisseur, montant, tps, tvq, recu }
   var SUPPR_ARME = false;
   var OCCUPE = false;
+  var BR_MINUTE = null;      // minuterie d enregistrement du brouillon
+  var BR_REPRIS = 0;         // age du brouillon repris, en minutes
   var OUVERTURE = '${depart}';
 
   /* ⚠ MÊME PLAFOND QUE L'ÉCRAN WEB : 8 Mo. Au-delà, le fichier traverse le pont
@@ -390,6 +392,14 @@ ${JS_ACTIVITE}${JS_DIRE}
             : 'Elle sera jointe comme reçu (lecture automatique indisponible sans clé).') + '</div>'
         + '</div>';
     }
+    if (BR_REPRIS && neuf) {
+      h += '<div class="carte" style="margin-bottom:.6rem;font-size:.79rem;line-height:1.5;'
+        + 'display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">'
+        + '<span>↩ Brouillon repris — saisie commencée il y a '
+        + (BR_REPRIS < 60 ? (BR_REPRIS + ' min') : (Math.round(BR_REPRIS / 60) + ' h'))
+        + (f.recu ? ', reçu compris' : '') + '.</span>'
+        + '<button class="mini" id="f-neuf">Repartir à neuf</button></div>';
+    }
     if (f.lecture) {
       h += '<div class="' + (f.lectureErr ? 'avis' : 'carte') + '" style="margin-bottom:.6rem;font-size:.79rem;line-height:1.5">'
         + esc(f.lecture) + '</div>';
@@ -448,6 +458,29 @@ ${JS_ACTIVITE}${JS_DIRE}
     e.type = 'file'; e.accept = 'image/*,application/pdf';
     e.onchange = function(){ if (e.files && e.files[0]) cb(e.files[0]); };
     e.click();
+  }
+
+  /* ⚠ LE BROUILLON PART SUR UN GESTE, JAMAIS SUR UNE SIMPLE MINUTERIE. Un envoi
+     periodique traverserait le pont toute la nuit et tiendrait la session
+     ouverte — c est exactement le piege deja paye avec le signal d activite. On
+     enregistre donc apres une frappe, etrangle a 3 secondes. */
+  function brouillonPoser(){
+    if (!FORM || FORM.id !== '__new__') return;
+    clearTimeout(BR_MINUTE);
+    BR_MINUTE = setTimeout(function(){
+      if (!FORM || FORM.id !== '__new__') return;
+      memoriserForm();
+      appeler('depenses:brouillonEcrire', [{
+        date: FORM.date, categorie: FORM.categorie, paiement: FORM.paiement,
+        description: FORM.description, fournisseur: FORM.fournisseur,
+        montant: FORM.montant, tps: FORM.tps, tvq: FORM.tvq, recu: !!FORM.recu,
+      }]).then(function(r){
+        /* ⚠ UN ECHEC D ENREGISTREMENT SE DIT. Croire son travail a l abri alors
+           qu il ne l est pas est pire que de le savoir. */
+        if (!r.ok) dire('⚠ Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
+        else if (r.sansRecu) dire('Brouillon conservé, mais SANS le reçu (stockage plein) — rejoignez-le si vous fermez.', 'att');
+      });
+    }, 3000);
   }
 
   function memoriserForm(){
@@ -533,7 +566,14 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function formVierge(){
     var auj = new Date().toISOString().slice(0, 10);
-    var cat = ((D.categories || [])[0] || {}).cle || 'autre';
+    /* ⚠ PAS LA PREMIERE DE LA LISTE. Le formulaire ouvrait sur << Publicite >>
+       simplement parce qu elle vient en tete — une facture de serveurs s y est
+       retrouvee classee. << Autres depenses >> n affirme rien ; la vraie
+       categorie vient du document quand on peut la lire. */
+    var cat = 'autre';
+    if (!(D.categories || []).some(function(c){ return c.cle === 'autre'; })) {
+      cat = ((D.categories || [])[0] || {}).cle || 'autre';
+    }
     var pay = ((D.paiements || [])[0] || {}).cle || 'card';
     return { id: '__new__', date: auj, categorie: cat, paiement: pay,
       description: '', fournisseur: '', montant: '', tps: '', tvq: '', recu: false,
@@ -559,13 +599,20 @@ ${JS_ACTIVITE}${JS_DIRE}
       /* Enchaîner : après un AJOUT on rouvre un formulaire vierge, comme
          l'écran web le propose — on saisit rarement une seule facture. */
       charger().then(function(){
-        if (etaitNeuve && D && D.peutAjouter) { FORM = formVierge(); dessiner(); }
+        if (etaitNeuve && D && D.peutAjouter) { BR_REPRIS = 0; FORM = formVierge(); dessiner(); }
       });
     });
   }
 
   /* ── BRANCHEMENTS ──────────────────────────────────────────────────────── */
   function brancher(){
+    /* ⚠ UN SEUL BRANCHEMENT POUR TOUT LE FORMULAIRE : brancher champ par champ,
+       c est en oublier un a chaque champ ajoute. */
+    var boite = document.querySelector('.boite');
+    if (boite && FORM) {
+      boite.addEventListener('input', brouillonPoser);
+      boite.addEventListener('change', brouillonPoser);
+    }
     var lie = function(id, fn){ var e = document.getElementById(id); if (e) e.onchange = fn; };
     lie('d-annee', function(){ ANNEE = parseInt(this.value, 10) || 0; PAGE = 0; charger(); });
     lie('d-mois', function(){ MOIS = parseInt(this.value, 10) || 0; PAGE = 0; charger(); });
@@ -575,7 +622,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var bs = document.getElementById('d-suiv');
     if (bs) bs.onclick = function(){ PAGE = (D.page || 0) + 1; charger(); };
     var nv = document.getElementById('d-nouvelle');
-    if (nv) nv.onclick = function(){ DETAIL = null; FORM = formVierge(); dessiner(); };
+    if (nv) nv.onclick = ouvrirNouvelle;
 
     var dep = document.getElementById('d-depot');
     if (dep) dep.onclick = function(){ choisirFichier(importerFacture); };
@@ -620,7 +667,22 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     // ── Formulaire
     var an = document.getElementById('f-annuler');
-    if (an) an.onclick = function(){ FORM = null; dire(''); dessiner(); };
+    if (an) an.onclick = function(){
+      /* ⚠ << Annuler >> FERME, IL NE JETTE PAS. Le brouillon reste : c est la
+         seule facon qu une fermeture — voulue ou non — ne coute jamais rien.
+         Pour repartir a neuf, la banniere de reprise offre le geste explicite. */
+      memoriserForm(); brouillonPoser();
+      FORM = null;
+      dire('Fermé — votre saisie est conservée en brouillon. « Nouvelle dépense » la reprendra.', 'att');
+      dessiner();
+    };
+    var bj = document.getElementById('f-neuf');
+    if (bj) bj.onclick = function(){
+      appeler('depenses:brouillonJeter', []).then(function(){
+        BR_REPRIS = 0; FORM = formVierge(); dessiner();
+        dire('Brouillon jeté — formulaire vierge.', 'bon');
+      });
+    };
     var ok = document.getElementById('f-ok');
     if (ok) ok.onclick = enregistrer;
     var tx = document.getElementById('f-taxes');
@@ -656,13 +718,40 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function fermer(){ DETAIL = null; SUPPR_ARME = false; dessiner(); }
 
+  /* ⚠ ON REPREND TOUJOURS CE QUI A ETE COMMENCE. Ouvrir un formulaire vierge
+     par-dessus un brouillon effacerait en silence le travail de la derniere
+     fois — exactement ce qu on cherche a empecher. */
+  function ouvrirNouvelle(){
+    DETAIL = null;
+    FORM = formVierge();
+    BR_REPRIS = 0;
+    dessiner();
+    appeler('depenses:brouillonLire', []).then(function(r){
+      if (!r.ok || !r.brouillon || !FORM || FORM.id !== '__new__') return;
+      var b = r.brouillon;
+      Object.keys(b).forEach(function(k){ if (b[k] != null && b[k] !== '') FORM[k] = b[k]; });
+      FORM.recu = !!(b.recu || r.recu);
+      BR_REPRIS = r.ilYaMin || 1;
+      dessiner();
+      dire('Brouillon repris — rien n’avait été perdu.', 'bon');
+    });
+  }
+
   /* ⚠ La garde du gestionnaire général : un clic sur une commande est traité par
      SA commande, jamais ici — sinon le clic qui arme un bouton le désarme. */
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
     if (t.closest('.boite')) return;
-    if (t.closest('#d-voile')) { if (FORM) { FORM = null; dessiner(); } else fermer(); return; }
+    /* ⚠⚠ UN CLIC A COTE NE JETTE PLUS LA SAISIE. Il fermait le formulaire et tout
+       ce qui y avait ete mis — recu importe compris — sans un mot. Signale le
+       2026-08-09 : << la fenetre se ferme des que je clique a cote sans
+       sauvegarder >>. Le voile ne ferme desormais que la FICHE (qui ne contient
+       aucune saisie) ; sous un formulaire, il ne fait rien et on le DIT. */
+    if (t.closest('#d-voile')) {
+      if (FORM) { dire('Cliquez « Annuler » pour fermer — votre saisie est conservée en brouillon.', 'att'); return; }
+      fermer(); return;
+    }
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');
     if (tr) ouvrirDetail(tr.getAttribute('data-id'));
@@ -717,8 +806,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       ANNEE = D.annee; MOIS = D.mois; CAT = D.categorie;
       var s = document.getElementById('sous');
       if (s) s.textContent = D.periode + ' · ' + D.total;
-      if (OUVERTURE === 'nouvelle' && D.peutAjouter && !FORM) { OUVERTURE = 'liste'; FORM = formVierge(); }
+      /* ⚠ L OUVERTURE DIRECTE PASSE PAR LE MEME CHEMIN QUE LE BOUTON : elle relit
+         donc le brouillon. Poser un formulaire vierge ici aurait ecrase en
+         silence ce qui avait ete commence. */
+      var ouvrirApres = (OUVERTURE === 'nouvelle' && D.peutAjouter && !FORM);
+      if (ouvrirApres) OUVERTURE = 'liste';
       dessiner();
+      if (ouvrirApres) ouvrirNouvelle();
     });
   }
 
@@ -756,7 +850,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       ev.preventDefault();
       /* ⚠ On ne ferme pas la fenetre sous une saisie en cours : le formulaire
          se ferme d abord, et la personne voit ce qu elle perd. */
-      if (FORM) { FORM = null; dessiner(); return; }
+      if (FORM) {
+        memoriserForm(); brouillonPoser();
+        FORM = null; dessiner();
+        dire('Fermé — votre saisie est conservée en brouillon.', 'att');
+        return;
+      }
       if (DETAIL) { fermer(); return; }
       P.fermer();
     }

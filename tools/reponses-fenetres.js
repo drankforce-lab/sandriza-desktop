@@ -797,6 +797,13 @@ module.exports = {
         'depenses:supprimer': { ok: true, montant: '1 200.00 $', categorie: 'Publicité' },
         'depenses:recu': { ok: true, joint: true, pdf: false },
         'depenses:recuOuvrir': { ok: true },
+        // ⚠ LE BROUILLON REPRIS : le cas qui dessine la bannière de reprise.
+        'depenses:brouillonLire': { ok: true, ilYaMin: 7, recu: true,
+          brouillon: { date: '2026-08-05', categorie: 'web', paiement: 'card',
+            description: 'Render — facture', fournisseur: 'Render',
+            montant: '3.51', tps: '0.00', tvq: '0.00', recu: true } },
+        'depenses:brouillonEcrire': { ok: true, recu: true },
+        'depenses:brouillonJeter': { ok: true },
         'depenses:facture': { ok: true, recu: true, lu: true, modele: 'llama-3.3-70b-versatile',
           source: 'texte du PDF', devise: 'USD', fxTaux: 1.3712, fxDate: '2026-07-28',
           fxApprox: false,

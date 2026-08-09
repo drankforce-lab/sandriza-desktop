@@ -1179,6 +1179,10 @@ const OPS_PONT = new Set([
   // recoit des champs — rien n est enregistre sans confirmation.
   'depenses:donnees', 'depenses:lire', 'depenses:taxes', 'depenses:enregistrer',
   'depenses:supprimer', 'depenses:recu', 'depenses:recuOuvrir', 'depenses:facture',
+  // Le BROUILLON : rien de ce qui est saisi ne doit pouvoir disparaitre, quelle
+  // que soit la maniere dont la fenetre se ferme (meme patron que l assistant
+  // Produit). Le recu voyage avec.
+  'depenses:brouillonLire', 'depenses:brouillonEcrire', 'depenses:brouillonJeter',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
