@@ -55,7 +55,11 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // Le panneau d un menu en VRAI menu du systeme (1.55.1) : quand un ecran est
   // ancre, un panneau dessine dans la page passerait dessous — celui-ci
   // s affiche au-dessus de tout, sans voiler l ecran. (x, y) en px CSS.
-  menuPanneau: (label, x, y) => ipcRenderer.send('menu:panneau', String(label || ''), Number(x) || 0, Number(y) || 0),
+  // `ancrage` dit comment lire (x,y) : 'bas' = coin haut-gauche (barre du
+  // haut), 'droite' = a droite du rail, 'gauche' = le BORD DROIT du panneau
+  // est en x (rail a droite). Sans lui, un rail vertical se fait recouvrir.
+  menuPanneau: (label, x, y, ancrage) => ipcRenderer.send('menu:panneau', String(label || ''),
+    Number(x) || 0, Number(y) || 0, String(ancrage || 'bas')),
   // La souris a quitte la barre (ou clic ailleurs) : le panneau flottant se
   // referme — en differe court, la souris est peut-etre en route vers lui.
   menuPanneauFermer: () => ipcRenderer.send('menu:panneau:fermer'),

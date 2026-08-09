@@ -2518,7 +2518,15 @@ const fermerPanneauBientot = () => {
   clearTimeout(panneauFermeT);
   panneauFermeT = setTimeout(() => { if (!panneauSurvole) fermerPanneauMenu(); }, 320);
 };
-ipcMain.on('menu:panneau', (e, label, x, y) => {
+/* ⚠ OU POSER LE PANNEAU. Il s ouvrait TOUJOURS sous le bouton — juste pour la
+   barre du haut, faux partout ailleurs : en rail vertical il RECOUVRAIT le
+   rail, et la poignee d ancrage, tout en bas, ouvrait son panneau HORS DE
+   L ECRAN — on ne pouvait donc plus remettre le menu en haut (2026-08-09).
+   La pose est retenue ici et appliquee quand la page a MESURE son contenu :
+   avant, on ignore la largeur, donc on ne peut pas aligner un bord droit. */
+let panneauPose = { mode: 'bas', x: 0, y: 0 };
+
+ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
   if (!mainWindow || e.sender !== mainWindow.webContents) return;
   const m = (_modele.menus || []).find((mm) => mm && mm.label === String(label || ''));
   if (!m || !(m.items || []).length) return;
@@ -2544,11 +2552,18 @@ ipcMain.on('menu:panneau', (e, label, x, y) => {
   }
   const f = mainWindow.webContents.getZoomFactor() || 1;
   const cb = mainWindow.getContentBounds();
+  const _mode = ['bas', 'droite', 'gauche'].indexOf(String(ancrage || 'bas')) >= 0
+    ? String(ancrage || 'bas') : 'bas';
+  panneauPose = {
+    mode: _mode,
+    x: Math.round(cb.x + (Number(x) || 0) * f),
+    y: Math.round(cb.y + (Number(y) || 0) * f),
+  };
   try {
+    const _b = panneauWin.getBounds();
     panneauWin.setBounds({
-      x: Math.round(cb.x + (Number(x) || 0) * f),
-      y: Math.round(cb.y + (Number(y) || 0) * f),
-      width: panneauWin.getBounds().width, height: panneauWin.getBounds().height,
+      x: _mode === 'gauche' ? panneauPose.x - _b.width : panneauPose.x,
+      y: panneauPose.y, width: _b.width, height: _b.height,
     });
   } catch {}
   // MEME TAILLE APPARENTE QUE LA BARRE : le panneau suit le zoom de la
@@ -2595,8 +2610,15 @@ ipcMain.on('panneau:taille', (e, w, h) => {
        releve du 2026-08-09). Au pire, la fenetre glisse vers la gauche pour
        que tout tienne. */
     const W = Math.min(Math.max(170, Math.round((w || 260) * f)), wa.width - 16);
-    const H = Math.min(Math.max(40, Math.round((h || 120) * f)), wa.y + wa.height - b.y - 8);
-    panneauWin.setBounds({ x: Math.max(wa.x + 4, Math.min(b.x, wa.x + wa.width - W - 4)), y: b.y, width: W, height: H });
+    /* ⚠ LE PANNEAU SE DEPLACE, IL NE SE COUPE PAS. La hauteur etait bornee a
+       « ce qui tient SOUS le point d ouverture » : un menu ouvert en bas d un
+       rail se reduisait donc a quelques pixels, ou sortait de l ecran. On lui
+       laisse sa taille et on le remonte pour qu il tienne en entier. */
+    const H = Math.min(Math.max(40, Math.round((h || 120) * f)), wa.height - 8);
+    const xVoulu = panneauPose.mode === 'gauche' ? panneauPose.x - W : panneauPose.x;
+    const X = Math.max(wa.x + 4, Math.min(xVoulu, wa.x + wa.width - W - 4));
+    const Y = Math.max(wa.y + 4, Math.min(panneauPose.y, wa.y + wa.height - H - 4));
+    panneauWin.setBounds({ x: X, y: Y, width: W, height: H });
   } catch {}
 });
 ipcMain.on('panneau:survol', (e, dedans) => {
