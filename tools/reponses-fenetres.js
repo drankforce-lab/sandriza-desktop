@@ -814,6 +814,32 @@ module.exports = {
       },
     },
     {
+      // ⚠ LA QUESTION DE FERMETURE : elle ne s'atteint qu'après deux clics, donc
+      // aucun jeu ne la dessinerait sans cet état d'ouverture. C'est le panneau
+      // qui décide du sort d'une saisie — il ne peut pas rester non éprouvé.
+      nom: 'question de fermeture',
+      id: 'fermeture',
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
+          annees: ['2026'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'web', libelle: 'Site web, logiciels (SaaS)', ligne: '9270' },
+            { cle: 'autre', libelle: 'Autres dépenses', ligne: '9270' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: true,
+          total: '0.00 $', totalTps: '0.00 $', totalTvq: '0.00 $',
+          nombre: 0, page: 0, pages: 1, taille: 25, lignes: [],
+        },
+        'depenses:brouillonLire': { ok: true, ilYaMin: 3, recu: true,
+          brouillon: { date: '2026-08-05', categorie: 'web', paiement: 'card',
+            description: 'Render — facture', fournisseur: 'Render',
+            montant: '3.51', tps: '0.00', tvq: '0.00', recu: true } },
+        'depenses:brouillonEcrire': { ok: true, recu: true },
+        'depenses:brouillonJeter': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
       // ⚠ VIDE MAIS CHARGÉE — la période n'a rien, ce n'est pas une panne.
       nom: 'periode vide',
       id: '',

@@ -147,7 +147,13 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
  * liste.
  */
 function pageDepenses(ouverture) {
-  const depart = (String(ouverture || '') === 'nouvelle') ? 'nouvelle' : 'liste';
+  /* ⚠ 'fermeture' n'est employé par AUCUNE entrée de menu : il existe pour que
+     le garde-fou puisse dessiner la QUESTION de fermeture, qui ne s'atteint
+     autrement qu'après deux clics. Un panneau jamais dessiné par un jeu d'essai
+     est un panneau qui peut mourir en silence — la leçon a déjà coûté quatre
+     versions publiées sur ce projet. */
+  const ok = ['nouvelle', 'fermeture'];
+  const depart = (ok.indexOf(String(ouverture || '')) >= 0) ? String(ouverture) : 'liste';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Dépenses d’entreprise — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -171,6 +177,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var OCCUPE = false;
   var BR_MINUTE = null;      // minuterie d enregistrement du brouillon
   var BR_REPRIS = 0;         // age du brouillon repris, en minutes
+  var FERMER_DEMANDE = false; // on demande quoi faire du brouillon avant de fermer
   var OUVERTURE = '${depart}';
 
   /* ⚠ MÊME PLAFOND QUE L'ÉCRAN WEB : 8 Mo. Au-delà, le fichier traverse le pont
@@ -433,8 +440,21 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button id="f-recu">' + (f.recu ? '✓ Reçu joint — remplacer' : '📎 Joindre un reçu') + '</button></div>'
       + '</div>';
 
+    if (FERMER_DEMANDE) {
+      h += '<div class="avis" style="margin-top:.7rem">'
+        + '<strong>Fermer sans enregistrer la dépense ?</strong><br>'
+        + 'Votre saisie' + (f.recu ? ' et le reçu importé' : '') + ' peuvent être conservés '
+        + 'en brouillon : « Nouvelle dépense » les reprendra.'
+        + '</div>'
+        + '<div class="pied-boite">'
+        + '<button id="f-revenir">← Revenir au formulaire</button>'
+        + '<button class="danger" id="f-jeter">Jeter la saisie</button>'
+        + '<button class="prim" id="f-conserver">Conserver le brouillon</button>'
+        + '</div></div></div>';
+      return h;
+    }
     h += '<div class="pied-boite">'
-      + '<button id="f-annuler">Annuler</button>'
+      + '<button id="f-annuler">Fermer</button>'
       + '<button class="prim" id="f-ok"' + (OCCUPE ? ' disabled' : '') + '>'
       + (neuf ? '+ Ajouter la dépense' : '✓ Enregistrer') + '</button>'
       + '</div></div></div>';
@@ -460,27 +480,67 @@ ${JS_ACTIVITE}${JS_DIRE}
     e.click();
   }
 
-  /* ⚠ LE BROUILLON PART SUR UN GESTE, JAMAIS SUR UNE SIMPLE MINUTERIE. Un envoi
-     periodique traverserait le pont toute la nuit et tiendrait la session
-     ouverte — c est exactement le piege deja paye avec le signal d activite. On
-     enregistre donc apres une frappe, etrangle a 3 secondes. */
+  /* ══ LE BROUILLON ══════════════════════════════════════════════════════════
+     ⚠⚠ DEUX DEFAUTS CORRIGES ICI, signales le 2026-08-09 (<< il ne conserve que
+     la categorie, tout le reste est supprime >>).
+     ① L ENREGISTREMENT ETAIT DIFFERE DE 3 SECONDES, ET LA FERMETURE VIDAIT LE
+       FORMULAIRE AVANT QUE LA MINUTERIE NE PARTE : le garde << si FORM est nul,
+       on abandonne >> faisait le reste. Seul ce qui avait ete ecrit AVANT
+       survivait — c est-a-dire la categorie, un <select> dont le changement
+       avait declenche un enregistrement trois secondes plus tot. Tout ce que la
+       LECTURE D UNE FACTURE avait rempli ne partait jamais : elle remplit les
+       champs par programme, sans frappe, donc sans geste a etrangler.
+     ② Il n y avait AUCUNE PROPOSITION : la fenetre decidait seule de garder.
+     Remede : deux voies distinctes — differee sur geste (pour ne pas encombrer
+     le pont a chaque touche) et IMMEDIATE avant toute fermeture, avec les
+     valeurs saisies AVANT que le formulaire ne disparaisse. */
+  function brouillonValeurs(){
+    memoriserForm();
+    return { date: FORM.date, categorie: FORM.categorie, paiement: FORM.paiement,
+      description: FORM.description, fournisseur: FORM.fournisseur,
+      montant: FORM.montant, tps: FORM.tps, tvq: FORM.tvq, recu: !!FORM.recu };
+  }
+  function brouillonEcrire(v){
+    return appeler('depenses:brouillonEcrire', [v]).then(function(r){
+      /* ⚠ UN ECHEC D ENREGISTREMENT SE DIT. Croire son travail a l abri alors
+         qu il ne l est pas est pire que de le savoir. */
+      if (!r.ok) dire('⚠ Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
+      else if (r.sansRecu) dire('Brouillon conservé, mais SANS le reçu (stockage plein).', 'att');
+      return r;
+    });
+  }
+  /* Sur geste, etrangle a 3 s : un envoi a chaque touche encombrerait le pont,
+     et une minuterie SEULE tiendrait la session ouverte toute la nuit. */
   function brouillonPoser(){
     if (!FORM || FORM.id !== '__new__') return;
     clearTimeout(BR_MINUTE);
     BR_MINUTE = setTimeout(function(){
       if (!FORM || FORM.id !== '__new__') return;
-      memoriserForm();
-      appeler('depenses:brouillonEcrire', [{
-        date: FORM.date, categorie: FORM.categorie, paiement: FORM.paiement,
-        description: FORM.description, fournisseur: FORM.fournisseur,
-        montant: FORM.montant, tps: FORM.tps, tvq: FORM.tvq, recu: !!FORM.recu,
-      }]).then(function(r){
-        /* ⚠ UN ECHEC D ENREGISTREMENT SE DIT. Croire son travail a l abri alors
-           qu il ne l est pas est pire que de le savoir. */
-        if (!r.ok) dire('⚠ Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
-        else if (r.sansRecu) dire('Brouillon conservé, mais SANS le reçu (stockage plein) — rejoignez-le si vous fermez.', 'att');
-      });
+      brouillonEcrire(brouillonValeurs());
     }, 3000);
+  }
+  /* ⚠ IMMEDIAT, ET LES VALEURS SONT PRISES MAINTENANT : c est tout le correctif.
+     Rend une promesse, pour que la fermeture attende l ecriture. */
+  function brouillonMaintenant(){
+    if (!FORM || FORM.id !== '__new__') return Promise.resolve({ ok: true });
+    clearTimeout(BR_MINUTE);
+    return brouillonEcrire(brouillonValeurs());
+  }
+  /* Un formulaire VIDE ne merite aucune question : on ferme, c est tout. */
+  function formRempli(){
+    if (!FORM) return false;
+    memoriserForm();
+    return !!(FORM.recu || String(FORM.description || '').trim()
+      || String(FORM.fournisseur || '').trim() || (parseFloat(FORM.montant) || 0) > 0);
+  }
+  /* ⚠ ON DEMANDE, ON NE DECIDE PAS. Fermer en gardant en silence est aussi
+     surprenant que fermer en jetant : dans les deux cas la personne ne sait pas
+     ce qu il est advenu de son travail. */
+  function demanderFermeture(){
+    if (!FORM) return;
+    if (FORM.id !== '__new__' || !formRempli()) { FORM = null; FERMER_DEMANDE = false; dessiner(); return; }
+    FERMER_DEMANDE = true;
+    dessiner();
   }
 
   function memoriserForm(){
@@ -560,6 +620,10 @@ ${JS_ACTIVITE}${JS_DIRE}
             : 'Reçu joint — saisie manuelle.', 'att');
         }
         dessiner();
+        /* ⚠ ECRITURE IMMEDIATE : la lecture remplit les champs PAR PROGRAMME,
+           sans frappe — rien n aurait declenche l enregistrement differe, et
+           c est precisement ce qui se perdait a la fermeture. */
+        brouillonMaintenant();
       });
     });
   }
@@ -667,14 +731,25 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     // ── Formulaire
     var an = document.getElementById('f-annuler');
-    if (an) an.onclick = function(){
-      /* ⚠ << Annuler >> FERME, IL NE JETTE PAS. Le brouillon reste : c est la
-         seule facon qu une fermeture — voulue ou non — ne coute jamais rien.
-         Pour repartir a neuf, la banniere de reprise offre le geste explicite. */
-      memoriserForm(); brouillonPoser();
-      FORM = null;
-      dire('Fermé — votre saisie est conservée en brouillon. « Nouvelle dépense » la reprendra.', 'att');
-      dessiner();
+    if (an) an.onclick = demanderFermeture;
+    var rv = document.getElementById('f-revenir');
+    if (rv) rv.onclick = function(){ FERMER_DEMANDE = false; dessiner(); };
+    var cs = document.getElementById('f-conserver');
+    if (cs) cs.onclick = function(){
+      /* ⚠ ON ATTEND L ECRITURE AVANT DE FERMER. C est exactement le defaut
+         corrige : fermer d abord, ecrire ensuite, c est ne rien ecrire. */
+      brouillonMaintenant().then(function(){
+        FORM = null; FERMER_DEMANDE = false; dessiner();
+        dire('Brouillon conservé — « Nouvelle dépense » le reprendra.', 'bon');
+      });
+    };
+    var jt = document.getElementById('f-jeter');
+    if (jt) jt.onclick = function(){
+      clearTimeout(BR_MINUTE);
+      appeler('depenses:brouillonJeter', []).then(function(){
+        FORM = null; FERMER_DEMANDE = false; BR_REPRIS = 0; dessiner();
+        dire('Saisie jetée.', 'att');
+      });
     };
     var bj = document.getElementById('f-neuf');
     if (bj) bj.onclick = function(){
@@ -749,7 +824,10 @@ ${JS_ACTIVITE}${JS_DIRE}
        sauvegarder >>. Le voile ne ferme desormais que la FICHE (qui ne contient
        aucune saisie) ; sous un formulaire, il ne fait rien et on le DIT. */
     if (t.closest('#d-voile')) {
-      if (FORM) { dire('Cliquez « Annuler » pour fermer — votre saisie est conservée en brouillon.', 'att'); return; }
+      /* ⚠ LE VOILE NE JETTE PLUS RIEN : sous un formulaire il POSE LA QUESTION,
+         il ne decide pas. Il ne ferme directement que les fiches, qui ne
+         contiennent aucune saisie. */
+      if (FORM) { demanderFermeture(); return; }
       fermer(); return;
     }
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
@@ -809,10 +887,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       /* ⚠ L OUVERTURE DIRECTE PASSE PAR LE MEME CHEMIN QUE LE BOUTON : elle relit
          donc le brouillon. Poser un formulaire vierge ici aurait ecrase en
          silence ce qui avait ete commence. */
-      var ouvrirApres = (OUVERTURE === 'nouvelle' && D.peutAjouter && !FORM);
+      var ouvrirApres = ((OUVERTURE === 'nouvelle' || OUVERTURE === 'fermeture')
+        && D.peutAjouter && !FORM);
+      var poserQuestion = (OUVERTURE === 'fermeture');
       if (ouvrirApres) OUVERTURE = 'liste';
       dessiner();
-      if (ouvrirApres) ouvrirNouvelle();
+      if (ouvrirApres) { ouvrirNouvelle(); if (poserQuestion) { FERMER_DEMANDE = true; dessiner(); } }
     });
   }
 
@@ -850,12 +930,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       ev.preventDefault();
       /* ⚠ On ne ferme pas la fenetre sous une saisie en cours : le formulaire
          se ferme d abord, et la personne voit ce qu elle perd. */
-      if (FORM) {
-        memoriserForm(); brouillonPoser();
-        FORM = null; dessiner();
-        dire('Fermé — votre saisie est conservée en brouillon.', 'att');
-        return;
-      }
+      if (FERMER_DEMANDE) { FERMER_DEMANDE = false; dessiner(); return; }
+      if (FORM) { demanderFermeture(); return; }
       if (DETAIL) { fermer(); return; }
       P.fermer();
     }
