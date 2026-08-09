@@ -1281,7 +1281,7 @@ const OPS_PONT = new Set([
   // et le meme geste sur un LOT.
   'photos:traiter', 'photos:lot', 'photos:renommer',
   // Le suivi de consommation Fal.ai (lecture seule).
-  'fal:suivi',
+  'fal:suivi', 'fal:ouvrir',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et

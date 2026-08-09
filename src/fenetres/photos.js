@@ -184,6 +184,33 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
 .lot .cnt{font-weight:700;font-size:.8rem}
 .lot .av{flex:1 0 100%;font-size:.7rem;color:#8fa1b8}
 input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
+/* ── LE CENTRE DE COMMANDE ─────────────────────────────────────────────── */
+.cmd{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
+  padding:.5rem .6rem;background:#16202f;border:1px solid rgba(255,255,255,.07);
+  border-radius:11px}
+.cmd .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
+.cmd .sep{width:1px;height:1.3rem;background:rgba(255,255,255,.12);margin:0 .2rem}
+.cmd input[type=search]{min-width:12rem}
+.etat{font-size:.75rem;color:#8fa1b8;padding:0 .2rem}
+.etat b{color:#e8edf5;font-variant-numeric:tabular-nums}
+.etat .sp{opacity:.4;margin:0 .35rem}
+/* ── LA GRILLE ─────────────────────────────────────────────────────────── */
+table.grille tbody tr.on td{background:rgba(201,169,126,.1)}
+table.grille tbody td{vertical-align:middle}
+table.grille td.nom .txt{display:inline-block;max-width:18rem;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;cursor:text;border-bottom:1px dashed transparent}
+table.grille td.nom .txt:hover{border-bottom-color:rgba(201,169,126,.6)}
+table.grille input.ren{width:100%;min-width:10rem;font:inherit;padding:.15rem .35rem}
+table.grille td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Les actions : toujours visibles, jamais a chercher. Elles s eclairent au
+   survol de la ligne pour ne pas crier en permanence. */
+.act{display:flex;gap:.12rem;white-space:nowrap}
+.act .ic{width:1.7rem;height:1.7rem;padding:0;font-size:.85rem;line-height:1;
+  border-radius:6px;opacity:.55;transition:opacity .12s ease,background .12s ease}
+tr:hover .act .ic{opacity:1}
+.act .ic:hover{background:rgba(255,255,255,.14);opacity:1}
+.act .ic.sup:hover{background:rgba(248,113,113,.2);border-color:rgba(248,113,113,.5)}
+.act .ic.sup.arme{opacity:1;background:rgba(248,113,113,.25);border-color:#f87171;color:#fff}
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -222,6 +249,8 @@ ${JS_ACTIVITE}${JS_DIRE}
      toutes, et l on s en apercevrait apres avoir lance le traitement. */
   var CHOIX = {};
   var LOT_NOM = '';         // le nom donne au prochain lot importe
+  var RENOMME = '';         // la photo dont le nom est en cours de modification
+  var SUPPR_ARME = '';      // la photo dont la suppression est armee
 
   /* ⚠⚠ UN DRAPEAU QUI NE SE LEVE PAS BLOQUE LA FENETRE POUR TOUJOURS.
      Signale le 2026-08-09 : << Recherche de cles USB... >> restait a l ecran, et
@@ -333,40 +362,48 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<span class="aide">Votre rôle permet de consulter la photothèque, pas de la modifier.</span></div>';
     }
 
-    h += '<div class="barreoutils">'
-      + '<button class="prim" id="p-choisir"' + (ro ? ' disabled' : '') + '>＋ Importer des photos</button>'
-      + (D.bureau ? '<button id="p-usb"' + (ro ? ' disabled' : '') + '>🔌 Détecter une clé USB</button>' : '')
-      /* ⚠ LE NOM DU LOT SE POSE AVANT L IMPORT, pas apres : renommer trente
-         photos une a une apres coup, personne ne le fait. Vide, on garde le nom
-         du fichier — c est le repli le moins surprenant. */
-      + (ro ? '' : '<input id="p-lot-nom" type="text" placeholder="Nom du lot (facultatif)"'
+    /* ══════════════════════════════════════════════════════════════════════
+       LA BARRE DE COMMANDE
+       ⚠ TOUT SUR UNE LIGNE, ET LES COMPTEURS AVEC. Quatre grandes tuiles
+       occupaient un tiers de l ecran pour quatre nombres qu on lit en une
+       seconde : c est de la place prise a ce qu on vient VRAIMENT faire, le
+       tableau. Les compteurs deviennent une ligne d etat.
+       ⚠ LA ZONE DE DEPOT NE PARAIT QUE QUAND ELLE SERT — quand il n y a rien.
+       Un rectangle en pointille de 150 px au-dessus d une liste garnie est un
+       panneau publicitaire pour une action qu on peut faire d un bouton. Le
+       glisser-deposer, lui, marche partout dans la fenetre. */
+    h += '<div class="cmd">'
+      + '<button class="prim" id="p-choisir"' + (ro ? ' disabled' : '') + '>＋ Importer</button>'
+      + (D.bureau ? '<button id="p-usb"' + (ro ? ' disabled' : '') + ' title="Chercher des photos sur une clé branchée">🔌 Clé USB</button>' : '')
+      + (ro ? '' : '<input id="p-lot-nom" type="text" placeholder="Nom du lot…"'
           + ' value="' + esc(LOT_NOM) + '" title="Les photos importées seront nommées « Nom 01 », « Nom 02 »…"'
-          + ' style="width:auto;min-width:11rem">')
+          + ' style="width:9.5rem">')
+      + '<span class="sep"></span>'
       + '<input type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
       + '<select id="p-tri">'
       + opt('recent', 'Plus récentes') + opt('code', 'Par code') + opt('name', 'Par nom')
       + opt('linked', 'Liées d’abord') + opt('size', 'Plus lourdes')
       + '</select>'
+      + '<span class="droite">'
+      + '<button class="mini" id="p-fal" title="Consommation et journal des traitements Fal.ai">🧠 Traitements IA</button>'
       + (D.total && !ro
-          ? '<button class="danger" id="p-vider">' + (VIDER_ARME ? 'Confirmer — vider les ' + D.total + ' ?' : '🗑 Tout vider') + '</button>'
+          ? '<button class="mini danger" id="p-vider">' + (VIDER_ARME ? 'Confirmer — vider les ' + D.total + ' ?' : '🗑 Tout vider') + '</button>'
           : '')
-      + '<span class="droite">' + D.trouvees + ' sur ' + D.total + '</span>'
+      + '</span></div>';
+
+    h += '<div class="etat">'
+      + '<b>' + D.trouvees + '</b> affichée' + (D.trouvees > 1 ? 's' : '')
+      + ' sur <b>' + D.total + '</b>'
+      + '<span class="sp">·</span> <b>' + D.isolees + '</b> isolée' + (D.isolees > 1 ? 's' : '')
+      + '<span class="sp">·</span> <b>' + D.liees + '</b> attachée' + (D.liees > 1 ? 's' : '')
+      + '<span class="sp">·</span> ' + poids(D.poidsTotal) + ' rangés'
       + '</div>';
 
-    h += '<div class="stats">'
-      + tuile(D.total, 'photos')
-      + tuile(D.isolees, 'isolées')
-      + tuile(D.liees, 'attachées')
-      + '<div class="s"><div class="n">' + poids(D.poidsTotal) + '</div><div class="l">poids rangé</div></div>'
-      + '</div>';
-
-    if (!ro) {
+    if (!ro && !D.total) {
       h += '<div class="depot" id="p-depot">'
         + '<div class="gros">Glissez-déposez vos photos ici</div>'
         + '<div class="pt">ou cliquez pour choisir des fichiers'
-        + (D.bureau ? ' · ou « Détecter une clé USB »' : '') + '</div>'
-        + '<div class="pt">Elles sont contenues, réencodées et déposées dans le stockage par la fenêtre principale.</div>'
-        + '</div>';
+        + (D.bureau ? ' · ou « Clé USB »' : '') + '</div></div>';
     }
 
     h += '<div class="carte">';
@@ -379,10 +416,11 @@ ${JS_ACTIVITE}${JS_DIRE}
         : (D.total ? 'Aucune photo ne correspond à cette recherche.'
                    : 'Aucune photo. Déposez-en ci-dessus.')) + '</div>';
     } else {
-      h += '<table><thead><tr>'
+      h += '<table class="grille"><thead><tr>'
         + '<th style="width:26px"><input type="checkbox" id="p-tout" title="Tout choisir sur cette page"></th>'
-        + '<th>Aperçu</th><th>Code</th><th>Nom du fichier</th>'
-        + '<th>Article lié</th><th>Poids</th><th>État</th></tr></thead><tbody>'
+        + '<th style="width:46px"></th><th>Code</th><th>Nom</th>'
+        + '<th>Article lié</th><th class="num">Poids</th><th>État</th>'
+        + '<th style="width:1%">Actions</th></tr></thead><tbody>'
         + rows.map(ligne).join('') + '</tbody></table>';
       if ((D.pages || 1) > 1) {
         h += '<div class="pagi">'
@@ -434,7 +472,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!ids.length) return;
     if (occupeDeja('Traitement en lot')) return;
     var nom = {};
-    (D.photos || []).forEach(function(r){ nom[r.id] = r.code + ' · ' + r.nom; });
+    (D.lignes || []).forEach(function(r){ nom[r.id] = r.code + ' · ' + r.nom; });
     var titres = ids.map(function(i){ return nom[i] || i; });
     var nomLot = { detourage: 'Détourage', fantome: 'Retrait du mannequin',
                    humain: 'Mise sur un mannequin' }[quoi] || 'Traitement';
@@ -516,19 +554,45 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     return t;
   }
+  /* ══════════════════════════════════════════════════════════════════════════
+     UNE LIGNE = TOUTES LES ACTIONS DE CETTE PHOTO
+     ⚠⚠ AVANT, IL FALLAIT OUVRIR LE PANNEAU POUR TOUT. Renommer, supprimer,
+     detourer : trois clics chacun, et un panneau a refermer entre deux. Sur
+     trente photos, c est quatre-vingt-dix clics pour un travail qui en vaut
+     trente. Les gestes courants sont donc SUR la ligne.
+     ⚠ LE NOM SE MODIFIE SUR PLACE : un champ, entree pour valider, echap pour
+     renoncer. Ouvrir une fenetre pour changer un mot est disproportionne.
+     ⚠ LA SUPPRESSION S ARME sur la ligne meme — le second clic est a l endroit
+     ou l on vient de cliquer, pas dans une boite qui parait ailleurs.
+     ══════════════════════════════════════════════════════════════════════════ */
   function ligne(r){
-    return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la photo">'
-      + '<td style="width:26px"><input type="checkbox" class="chx" data-chx="' + esc(r.id) + '"'
+    var ro = !D.peutModifier;
+    var arme = (SUPPR_ARME === r.id);
+    var act = ro ? '' : ('<span class="act">'
+      + '<button class="ic" data-ren="' + esc(r.id) + '" title="Renommer">✎</button>'
+      + '<button class="ic" data-t1="' + esc(r.id) + '" title="Détourer le vêtement">✂</button>'
+      + '<button class="ic" data-t2="' + esc(r.id) + '" title="Retirer le mannequin">👻</button>'
+      + '<button class="ic" data-t3="' + esc(r.id) + '" title="Mettre sur un mannequin">🧍</button>'
+      + '<button class="ic" data-ouvre="' + esc(r.id) + '" title="Ouvrir la fiche (fond, article, export)">⋯</button>'
+      + '<button class="ic sup' + (arme ? ' arme' : '') + '" data-sup="' + esc(r.id) + '"'
+      + ' title="' + (arme ? 'Cliquez encore pour supprimer' : 'Supprimer') + '">'
+      + (arme ? '⚠' : '🗑') + '</button>'
+      + '</span>');
+    return '<tr data-id="' + esc(r.id) + '"' + (CHOIX[r.id] ? ' class="on"' : '') + '>'
+      + '<td><input type="checkbox" class="chx" data-chx="' + esc(r.id) + '"'
       + (CHOIX[r.id] ? ' checked' : '') + '></td>'
-      + '<td style="width:52px">' + vignette(r) + '</td>'
+      + '<td>' + vignette(r) + '</td>'
       + '<td><span class="num">' + esc(r.code) + '</span></td>'
-      + '<td><div class="dt" style="max-width:16rem;overflow:hidden;text-overflow:ellipsis;'
-      + 'white-space:nowrap;color:inherit;font-size:.84rem">' + esc(r.nom) + '</div></td>'
+      + '<td class="nom">' + (RENOMME === r.id
+          ? '<input class="ren" id="p-ren" type="text" value="' + esc(r.nom) + '" maxlength="120">'
+          : '<span class="txt" data-ren2="' + esc(r.id) + '" title="Cliquez pour renommer">' + esc(r.nom) + '</span>')
+      + '</td>'
       + '<td>' + (r.lieId
           ? esc(r.lieNom) + (r.lieSku ? ' <span class="dt">· ' + esc(r.lieSku) + '</span>' : '')
           : '<span class="dt">—</span>') + '</td>'
-      + '<td style="white-space:nowrap">' + gain(r) + '</td>'
-      + '<td>' + etat(r) + '</td></tr>';
+      + '<td class="num">' + gain(r) + '</td>'
+      + '<td>' + etat(r) + '</td>'
+      + '<td>' + act + '</td></tr>';
   }
 
   /* ── LE PANNEAU DE DETAIL ──────────────────────────────────────────────── */
@@ -917,6 +981,99 @@ ${JS_ACTIVITE}${JS_DIRE}
     var dp = document.getElementById('p-depot');
     if (dp) dp.onclick = choisirFichiers;
 
+    /* ── LES ACTIONS DE LIGNE ─────────────────────────────────────────────
+       ⚠ CHAQUE BOUTON ARRETE LA PROPAGATION : la ligne ouvre la fiche, et sans
+       ce garde, cliquer sur la corbeille ouvrirait la fiche par-dessus la
+       confirmation qu on vient d armer. */
+    var stop = function(ev){ ev.stopPropagation(); };
+
+    // Renommer sur place : le champ remplace le texte, entree valide, echap renonce.
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-ren],[data-ren2]'), function(b){
+      b.onclick = function(ev){
+        stop(ev);
+        RENOMME = b.getAttribute('data-ren') || b.getAttribute('data-ren2');
+        SUPPR_ARME = '';
+        dessiner();
+        var c = document.getElementById('p-ren');
+        if (c) { c.focus(); c.select(); }
+      };
+    });
+    var champRen = document.getElementById('p-ren');
+    if (champRen) {
+      champRen.onclick = stop;
+      champRen.onkeydown = function(ev){
+        if (ev.key === 'Escape') { RENOMME = ''; dessiner(); return; }
+        if (ev.key !== 'Enter') return;
+        var n = champRen.value.trim();
+        if (!n) { dire('Le nom ne peut pas être vide.', 'err'); return; }
+        var id = RENOMME;
+        RENOMME = '';
+        dire('Renommage…');
+        appeler('photos:renommer', [id, n]).then(function(r){
+          dire(r.ok ? 'Photo renommée.' : expliquer(r), r.ok ? 'bon' : 'err');
+          charger();
+        });
+      };
+      // ⚠ PERDRE LE FOYER RENONCE, ET N ENREGISTRE PAS. Enregistrer sur un clic
+      // ailleurs surprendrait : on ne sait jamais si l on a valide ou fui.
+      champRen.onblur = function(){ if (RENOMME) { RENOMME = ''; dessiner(); } };
+    }
+
+    // Les trois traitements, directement sur la ligne.
+    [['data-t1', 'detourage'], ['data-t2', 'fantome'], ['data-t3', 'humain']].forEach(function(x){
+      Array.prototype.forEach.call(corps.querySelectorAll('[' + x[0] + ']'), function(b){
+        b.onclick = function(ev){
+          stop(ev);
+          var id = b.getAttribute(x[0]);
+          CHOIX = {}; CHOIX[id] = true;
+          lancerLot(x[1]);
+        };
+      });
+    });
+
+    // La fiche complete (fond, article, export) reste derriere un bouton.
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-ouvre]'), function(b){
+      b.onclick = function(ev){
+        stop(ev);
+        var id = b.getAttribute('data-ouvre');
+        var t = (D.lignes || []).filter(function(x){ return x.id === id; })[0];
+        if (t) { DETAIL = t; dessiner(); }
+      };
+    });
+
+    /* ⚠ LA SUPPRESSION S ARME SUR LA LIGNE, et se desarme seule au bout de cinq
+       secondes : une corbeille qui reste armee est une corbeille sur laquelle on
+       reclique par reflexe. */
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-sup]'), function(b){
+      b.onclick = function(ev){
+        stop(ev);
+        var id = b.getAttribute('data-sup');
+        if (SUPPR_ARME !== id) {
+          SUPPR_ARME = id;
+          dessiner();
+          dire('Cliquez encore sur la corbeille pour supprimer — l’article lié, lui, garde son image.', 'att');
+          setTimeout(function(){ if (SUPPR_ARME === id) { SUPPR_ARME = ''; dessiner(); } }, 5000);
+          return;
+        }
+        SUPPR_ARME = '';
+        dire('Suppression…');
+        appeler('photos:supprimer', [id]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          delete CHOIX[id];
+          dire('Photo retirée de la photothèque.', 'bon');
+          charger();
+        });
+      };
+    });
+
+    var fal = document.getElementById('p-fal');
+    if (fal) fal.onclick = function(){
+      dire('Ouverture du suivi des traitements…');
+      appeler('fal:ouvrir', []).then(function(r){
+        dire(r && r.ok ? '' : expliquer(r), r && r.ok ? '' : 'err');
+      });
+    };
+
     /* ⚠ LA CASE NE DOIT PAS OUVRIR LA PHOTO : la ligne entiere est cliquable,
        et sans ce garde, cocher ouvrirait le panneau de detail par-dessus. */
     Array.prototype.forEach.call(corps.querySelectorAll('[data-chx]'), function(c){
@@ -929,7 +1086,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
     var tt = document.getElementById('p-tout');
     if (tt) tt.onchange = function(){
-      (D.photos || []).forEach(function(r){
+      (D.lignes || []).forEach(function(r){
         if (tt.checked) CHOIX[r.id] = true; else delete CHOIX[r.id];
       });
       dessiner();
@@ -1115,6 +1272,14 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
       if (!r || !r.ok) { vide('Photothèque indisponible', expliquer(r)); return; }
       D = r;
+      /* ⚠⚠ LE CHOIX SE TAILLE SUR CE QUI EXISTE VRAIMENT. La barre annoncait
+         << 1 photo choisie >> devant une photothèque VIDE (capture du
+         2026-08-09) : les cases cochees survivaient a la suppression des photos
+         elles-memes. Un compteur qui parle d objets disparus fait douter de tout
+         le reste de l ecran. */
+      var vivantes = {};
+      (r.lignes || []).forEach(function(x){ vivantes[x.id] = true; });
+      Object.keys(CHOIX).forEach(function(id){ if (!vivantes[id]) delete CHOIX[id]; });
       /* La photo ouverte est RELUE dans la nouvelle liste : sans cela, le
          panneau afficherait encore l etat d avant le geste. */
       if (DETAIL) {
