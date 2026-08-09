@@ -1144,6 +1144,9 @@ const OPS_PONT = new Set([
   // recoit rien ou qui recoit malgre son refus.
   'abonnes:liste', 'abonnes:ajouter', 'abonnes:basculer', 'abonnes:supprimer',
   'abonnes:importer',
+  // Journal d envoi (fenetre Journal, 1.75.0) : la seule piece qui reponde a
+  // << je n ai jamais recu votre courriel >>.
+  'journal:liste', 'journal:vider',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1529,6 +1532,7 @@ const PAGES_ANCRABLES = () => ({
   recommandations: ['Recommandations', () => pageRecommandations()],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
+  journal: ['Journal d’envoi', () => pageJournal()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2262,6 +2266,7 @@ const { pageFidelisation } = require('./fenetres/fidelisation');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageAbonnes } = require('./fenetres/abonnes');
+const { pageJournal } = require('./fenetres/journal');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2339,7 +2344,7 @@ const actionApp = (nom) => {
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
-    case 'recommandations': case 'recherches': case 'abonnes': {
+    case 'recommandations': case 'recherches': case 'abonnes': case 'journal': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

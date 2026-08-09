@@ -513,6 +513,47 @@ module.exports = {
     },
   ],
 
+  // ── JOURNAL D'ENVOI ────────────────────────────────────────────────────────
+  'journal.js': [
+    {
+      // ⚠ FORME REELLE de journal:liste (coeur Newsletter._journalDonnees).
+      nom: 'journal garni',
+      id: '',
+      reponses: {
+        'journal:liste': {
+          ok: true, peutModifier: true, total: 3, envoyes: 2, echecs: 1,
+          lignes: [
+            { date: '08-08-2026 10:12', genre: 'Campagne', reference: 'Soldes d’été',
+              courriel: 'marie@example.com', envoye: true, test: false, detail: 're_abc123' },
+            { date: '08-08-2026 10:12', genre: 'Campagne', reference: 'Soldes d’été',
+              courriel: 'julie@example.com', envoye: false, test: false,
+              detail: 'adresse rejetée par le serveur' },
+            { date: '05-08-2026 09:00', genre: 'Chaîne', reference: 'Bienvenue (étape 1)',
+              courriel: 'anne@example.com', envoye: true, test: true, detail: 're_def456' },
+          ],
+        },
+        'journal:vider': { ok: true, efface: 3 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'journal vide',
+      id: '',
+      reponses: {
+        'journal:liste': { ok: true, peutModifier: true, total: 0, envoyes: 0, echecs: 0, lignes: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'journal:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── ABONNÉS DE L'INFOLETTRE ────────────────────────────────────────────────
   'abonnes.js': [
     {
