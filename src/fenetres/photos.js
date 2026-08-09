@@ -503,6 +503,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         }).join('')
       + '</select>'
       + '<span class="droite">'
+      + (DERNIER_SUIVI && !SUIVI
+          ? '<button class="mini" id="p-suivi" title="Revoir le compte rendu du dernier traitement">Dernier suivi</button>'
+          : '')
       + '<button class="mini" id="p-lots"' + (D.total ? '' : ' disabled')
       + ' title="' + (D.total ? 'Historique des lots importés'
                              : 'Aucune photo : il n’y a pas encore de lot') + '">Lots</button>'
@@ -587,6 +590,7 @@ ${JS_ACTIVITE}${JS_DIRE}
      qu il en reste douze.
      ══════════════════════════════════════════════════════════════════════════ */
   var LOT_ARME = '';
+  var LOTS_VERSION = '';
   var SUP_LOT_ARME = false;
 
   function lotsOuvrir(){
@@ -594,6 +598,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('lot:liste', []).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       LOTS = r.lots || [];
+      LOTS_VERSION = r.moduleVersion || '';
       LOT_ARME = '';
       /* ⚠⚠ LA FENETRE ET LE SITE PEUVENT NE PAS ETRE DE LA MEME VERSION. La
          fenetre vit dans l application (mise a jour par installation) ; les
@@ -627,6 +632,22 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="tt"><h3>Lots importés</h3>'
       + '<span class="pas">' + LOTS.length + ' lot' + (LOTS.length > 1 ? 's' : '') + '</span></div>'
       + '<div class="co">';
+    /* ⚠⚠ LE DIAGNOSTIC EST DANS LE PANNEAU, PAS DANS LE BANDEAU DU BAS. Un
+       message qu on ne voit pas ne diagnostique rien — et le bandeau s efface au
+       bout de cinq secondes, souvent avant qu on ait fini de lire le tableau.
+       Il nomme les champs REELLEMENT recus et la version du module qui a
+       repondu : de quoi trancher entre << module perime >> et << autre chose >>
+       sans avoir a supposer. */
+    if (LOTS.length && typeof LOTS[0].nombre !== 'number') {
+      var champs = [];
+      try { champs = Object.keys(LOTS[0]); } catch (e) { champs = []; }
+      h += '<div class="franc" style="margin-bottom:.6rem">'
+        + '<b>Les lots arrivent sans leurs compteurs.</b><br>'
+        + 'Champs reçus : <code>' + esc(champs.join(', ') || '(aucun)') + '</code><br>'
+        + 'Module du site : <code>' + esc(LOTS_VERSION || '(non annoncée)') + '</code><br>'
+        + 'Rechargez avec « Affichage ▸ Recharger (vider le cache) ». Si cela '
+        + 'persiste, transmettez ces deux lignes.</div>';
+    }
     if (!LOTS.length) h += '<div class="vide">Aucune photo dans la photothèque.</div>';
     else {
       h += '<table><thead><tr><th>Lot</th><th>Entré</th><th class="num">Photos</th>'
@@ -1035,8 +1056,21 @@ ${JS_ACTIVITE}${JS_DIRE}
             if (toutSaute) { sautees++; suiviLigne(k, 'double', 'déjà à jour'); }
             else { faites++; suiviLigne(k, 'faite', 'traitée'); }
           } else {
+            /* ⚠⚠ UN ECHEC SANS RAISON N EST PAS UN COMPTE RENDU. La ligne disait
+               << echec >> et rien d autre quand la chaine s arretait AVANT sa
+               premiere etape (droit refuse, photo introuvable, pont muet, delai
+               depasse) : il ne restait qu a deviner. On rend donc TOUJOURS le
+               motif, et le detail quand il y en a un — celui de Fal.ai le cas
+               echeant, qui dit s il s agit d un credit epuise ou d une cle
+               invalide. */
             echecs++;
             suiviLigne(k, 'echec', 'échec' + (r && r.arretA ? ' · ' + r.arretA : ''));
+            if (!(r && r.etapes && r.etapes.length)) {
+              suiviEtapes(k, [{ nom: 'import', ok: true },
+                { nom: (r && r.motif) ? String(r.motif) : 'échec', ok: false,
+                  chiffre: (r && r.detail) ? String(r.detail).slice(0, 120) : '' }]);
+            }
+            dire(expliquer(r), 'err');
           }
           suite(k + 1);
         });
@@ -1500,7 +1534,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   var ANNULE = false;
 
   function suiviOuvrir(noms, titre){
-    suiviFermer();
+    if (SUIVI && SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
+    SUIVI = null;
+    DERNIER_SUIVI = '';
     ANNULE = false;
     var d = document.createElement('div');
     d.className = 'suivi';
@@ -1532,9 +1568,37 @@ ${JS_ACTIVITE}${JS_DIRE}
       dire('Annulation demandée — la tâche en cours va au bout, les suivantes sont abandonnées.', 'att');
     };
   }
+  /* ⚠⚠ FERMER NE DOIT PAS VOULOIR DIRE PERDRE. Le compte rendu disparaissait
+     pour de bon : on fermait le panneau, on voulait revoir LAQUELLE des trente
+     photos avait echoue, et il n y avait plus rien. Un rapport qu on ne peut
+     consulter qu une fois n est pas un rapport.
+     On garde donc son contenu, et un bouton le rouvre — en LECTURE : le travail,
+     lui, est fini. */
+  var DERNIER_SUIVI = '';
+
   function suiviFermer(){
-    if (SUIVI && SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
+    if (SUIVI) {
+      try { DERNIER_SUIVI = SUIVI.innerHTML; } catch (e) { DERNIER_SUIVI = ''; }
+      if (SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
+    }
     SUIVI = null;
+    dessiner();
+  }
+
+  function suiviRouvrir(){
+    if (!DERNIER_SUIVI) return;
+    if (SUIVI && SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
+    var d = document.createElement('div');
+    d.className = 'suivi';
+    d.innerHTML = DERNIER_SUIVI;
+    document.body.appendChild(d);
+    SUIVI = d;
+    // ⚠ Le bouton d annulation d un travail TERMINE n a plus de sens : on le
+    // retire plutot que de le laisser inerte.
+    var a = document.getElementById('sv-a');
+    if (a) a.remove();
+    var x = document.getElementById('sv-x');
+    if (x) x.onclick = suiviFermer;
   }
   function suiviLigne(i, etat, mot){
     if (!SUIVI) return;
@@ -1987,6 +2051,8 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var tl = document.getElementById('p-taille');
     if (tl) tl.onchange = function(){ TAILLE = parseInt(tl.value, 10) || 24; PAGE = 0; charger(); };
+    var bs = document.getElementById('p-suivi');
+    if (bs) bs.onclick = suiviRouvrir;
     var bl = document.getElementById('p-lots');
     if (bl) bl.onclick = lotsOuvrir;
 
