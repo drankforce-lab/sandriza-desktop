@@ -256,6 +256,16 @@ tr:hover .act .ic{opacity:1}
   overflow:hidden;cursor:pointer;background:#0b1220}
 .pl .v.on{border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.2)}
 .pl .v img{display:block;width:100%;height:8rem;object-fit:contain;background:#0b1220}
+/* ⚠ LA VIGNETTE SE REDRESSE A L AFFICHAGE. Les pixels ne sont pas pivotes : on
+   applique l etiquette EXIF en CSS, ce qui est gratuit et exact. L import, lui,
+   pivote pour de vrai — ici on ne fait que REGARDER. */
+.pl .v img.o2{transform:scaleX(-1)}
+.pl .v img.o3{transform:rotate(180deg)}
+.pl .v img.o4{transform:scaleY(-1)}
+.pl .v img.o5{transform:rotate(90deg) scaleX(-1)}
+.pl .v img.o6{transform:rotate(90deg)}
+.pl .v img.o7{transform:rotate(270deg) scaleX(-1)}
+.pl .v img.o8{transform:rotate(270deg)}
 .pl .v .att{display:flex;align-items:center;justify-content:center;height:8rem;
   color:#8fa1b8;font-size:.72rem}
 .pl .v .lg{padding:.25rem .4rem;font-size:.68rem;color:#c3cede;
@@ -327,6 +337,7 @@ ${JS_ACTIVITE}${JS_DIRE}
      ══════════════════════════════════════════════════════════════════════════ */
   var ASSIST = null;        // { etape, sources, lecteur, fichiers, choix, tri, nom, but }
   var VIGNETTES = {};       // chemin -> data URL, chargees a la demande
+  var ORIENT = {};          // chemin -> orientation EXIF (1 a 8)
   var RENOMME = '';         // la photo dont le nom est en cours de modification
   var SUPPR_ARME = '';      // la photo dont la suppression est armee
 
@@ -566,6 +577,20 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       LOTS = r.lots || [];
       LOT_ARME = '';
+      /* ⚠⚠ LA FENETRE ET LE SITE PEUVENT NE PAS ETRE DE LA MEME VERSION. La
+         fenetre vit dans l application (mise a jour par installation) ; les
+         coeurs vivent dans le site (mis a jour par le reseau, avec un cache).
+         Quand le site est perime, le coeur rend des lots SANS leurs compteurs, et
+         l ecran affichait << undefined >> partout — ce qui ressemble a un bogue
+         alors que c est un decalage. On le NOMME, avec le geste qui repare. */
+      var perime = LOTS.length && (LOTS[0].nombre === undefined);
+      if (perime) {
+        LOTS = [];
+        dire('Les modules du site sont périmés dans cette session : rechargez avec '
+          + '« Affichage ▸ Recharger (vider le cache) » dans la fenêtre principale.', 'err');
+        dessiner();
+        return;
+      }
       dire('');
       dessiner();
     });
@@ -672,7 +697,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       dessiner();
     });
   }
-  function assistFermer(){ ASSIST = null; VIGNETTES = {}; dessiner(); }
+  function assistFermer(){ ASSIST = null; VIGNETTES = {}; ORIENT = {}; dessiner(); }
 
   function dateFr(ms){
     if (!ms) return '—';
@@ -735,7 +760,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           var v = VIGNETTES[f.cle];
           h += '<div class="v' + (A.choix[f.cle] ? ' on' : '') + '" data-f="' + esc(f.cle) + '">'
             + '<span class="ck">' + (A.choix[f.cle] ? '✓' : '') + '</span>'
-            + (v ? '<img src="' + esc(v) + '" alt="">'
+            + (v ? '<img class="o' + (ORIENT[f.cle] || 1) + '" src="' + esc(v) + '" alt="">'
                  : '<div class="att" data-charge="' + esc(f.cle) + '">…</div>')
             + '<div class="lg" title="' + esc(f.nom) + '">' + esc(f.nom) + '</div>'
             + '<div class="dt2">' + dateFr(f.modifie) + ' · ' + poids(f.octets) + '</div>'
@@ -830,6 +855,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (f && f.chemin) {
         appeler('lot:vignette', [f.chemin]).then(function(r){
           VIGNETTES[cle] = (r && r.ok) ? r.image : '';
+          ORIENT[cle] = (r && r.ok) ? (r.orientation || 1) : 1;
           if (ASSIST && ASSIST.etape === 2) dessiner();
         });
       } else { VIGNETTES[cle] = ''; }

@@ -504,17 +504,67 @@ const scanDrivePhotos = (drive) => {
    n est lu qu au moment ou l on importe vraiment.
    ⚠ Le redimensionnement se fait ici avec `nativeImage`, sans canevas : le
    processus principal n a pas de DOM, et il n en a pas besoin pour cela. */
+/**
+ * L'orientation EXIF d'un JPEG, lue à même le fichier.
+ *
+ * ⚠⚠ `nativeImage` NE L'APPLIQUE PAS. C'est pourquoi la planche de choix montrait
+ * les photos couchées alors que l'import, lui, les redressait : deux chemins,
+ * deux comportements, et l'écran où l'on CHOISIT était le seul à mentir. On lit
+ * donc l'étiquette ici aussi, et on la rend avec la vignette.
+ * ⚠ On ne lit que le début du fichier : l'EXIF vit dans les premiers kilo-octets,
+ * et ouvrir 5 Mo pour deux octets, deux cents fois, se sentirait.
+ */
+const exifOrientation = (chemin) => {
+  try {
+    const fd = fs.openSync(chemin, 'r');
+    const buf = Buffer.alloc(131072);
+    const lus = fs.readSync(fd, buf, 0, buf.length, 0);
+    fs.closeSync(fd);
+    if (lus < 4 || buf.readUInt16BE(0) !== 0xFFD8) return 1;
+    let d = 2;
+    while (d < lus - 4) {
+      const marque = buf.readUInt16BE(d);
+      const taille = buf.readUInt16BE(d + 2);
+      if (marque === 0xFFE1) {
+        if (buf.readUInt32BE(d + 4) !== 0x45786966) return 1;   // « Exif »
+        const t = d + 10;
+        const petitBout = buf.readUInt16BE(t) === 0x4949;
+        const lireU16 = (o) => (petitBout ? buf.readUInt16LE(o) : buf.readUInt16BE(o));
+        const lireU32 = (o) => (petitBout ? buf.readUInt32LE(o) : buf.readUInt32BE(o));
+        const debut = t + lireU32(t + 4);
+        const nb = lireU16(debut);
+        for (let k = 0; k < nb; k++) {
+          const en = debut + 2 + k * 12;
+          if (lireU16(en) === 0x0112) {
+            const o = lireU16(en + 8);
+            return (o >= 1 && o <= 8) ? o : 1;
+          }
+        }
+        return 1;
+      }
+      if ((marque & 0xFF00) !== 0xFF00) break;
+      d += 2 + taille;
+    }
+    return 1;
+  } catch { return 1; }
+};
+
 ipcMain.handle('usb:vignette', (e, filePath, cote) => {
   try {
     const c = Math.max(64, Math.min(512, parseInt(cote, 10) || 220));
-    const img = nativeImage.createFromPath(String(filePath || ''));
+    const chemin = String(filePath || '');
+    const img = nativeImage.createFromPath(chemin);
     if (img.isEmpty()) return null;
     const t = img.getSize();
     const ech = Math.min(1, c / Math.max(t.width || 1, t.height || 1));
     const petite = (ech < 1)
       ? img.resize({ width: Math.max(1, Math.round((t.width || 1) * ech)), quality: 'good' })
       : img;
-    return petite.toDataURL();
+    /* ⚠ ON REND L ORIENTATION PLUTOT QUE DE PIVOTER ICI. Faire tourner les pixels
+       coûterait un décodage et un réencodage par vignette, deux cents fois, pour
+       une image qu'on ne fait que REGARDER. La fenêtre l'applique en CSS : c'est
+       gratuit et exact. L'import, lui, pivote pour de vrai. */
+    return { image: petite.toDataURL(), orientation: exifOrientation(chemin) };
   } catch { return null; }
 });
 
