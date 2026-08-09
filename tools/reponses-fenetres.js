@@ -513,6 +513,75 @@ module.exports = {
     },
   ],
 
+  // ── FIDÉLISATION ET SONDAGES ───────────────────────────────────────────────
+  'fidelisation.js': [
+    {
+      // ⚠ FORME REELLE de fidelisation:liste (coeur Loyalty._fidelisationDonnees).
+      nom: 'sondages garnis',
+      id: '',
+      reponses: {
+        'fidelisation:liste': {
+          ok: true, peutModifier: true, courrielNotification: 'sondages@example.com',
+          tuiles: { invitations: 40, reponses: 12, taux: 30, note: 4.3, nbNotes: 11,
+            codes: 12, codesUtilises: 5 },
+          sondages: [
+            { id: 's1', nom: 'Satisfaction après livraison', declencheur: 'Livraison (statut livré)',
+              nbQuestions: 3, invitations: 30, reponses: 10, taux: 33,
+              recompense: '10 % · 30 j', actif: true },
+            { id: 's2', nom: 'Accueil en boutique', declencheur: 'Confirmation commande',
+              nbQuestions: 2, invitations: 10, reponses: 2, taux: 20, recompense: '', actif: false },
+          ],
+          recompenses: [
+            { code: 'MERCI-A1B2', sondage: 'Satisfaction après livraison', commande: 'CMD-2026-0512',
+              date: '2026-08-07', utilise: true },
+          ],
+          invitations: [
+            { id: 'i1', sondage: 'Satisfaction après livraison', courriel: 'marie@example.com',
+              declencheur: 'Livraison (statut livré)', lien: 'https://…', date: '2026-08-06', repondu: true },
+            { id: 'i2', sondage: 'Accueil en boutique', courriel: 'julie@example.com',
+              declencheur: 'Confirmation commande', lien: 'https://…', date: '2026-08-05', repondu: false },
+          ],
+        },
+        'fidelisation:sondage': {
+          ok: true,
+          sondage: { id: 's1', nom: 'Satisfaction après livraison',
+            declencheur: 'Livraison (statut livré)', actif: true, nbReponses: 10,
+            questions: [
+              { texte: 'Comment jugez-vous la rapidité de livraison ?', genre: 'rating',
+                nbReponses: 10, moyenne: 4.4, textes: [] },
+              { texte: 'Un commentaire ?', genre: 'text', nbReponses: 3, moyenne: null,
+                textes: ['Très bel emballage.', 'Livraison rapide, merci !'] },
+            ] },
+        },
+        'fidelisation:supprimerSondage': { ok: true, nom: 'Accueil en boutique', reponsesPerdues: 2 },
+        'fidelisation:supprimerInvite': { ok: true, courriel: 'julie@example.com' },
+        'fidelisation:viderInvites': { ok: true, efface: 40 },
+        'fidelisation:notification': { ok: true, courriel: 'sondages@example.com' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucun sondage',
+      id: '',
+      reponses: {
+        'fidelisation:liste': {
+          ok: true, peutModifier: true, courrielNotification: '',
+          tuiles: { invitations: 0, reponses: 0, taux: 0, note: null, nbNotes: 0, codes: 0, codesUtilises: 0 },
+          sondages: [], recompenses: [], invitations: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'fidelisation:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── RÉSEAUX SOCIAUX ────────────────────────────────────────────────────────
   'sociaux.js': [
     {
