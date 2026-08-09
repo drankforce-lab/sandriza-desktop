@@ -1173,6 +1173,12 @@ const OPS_PONT = new Set([
   'promo:calibrer', 'promo:lot', 'promo:dupliquer', 'promo:supprimer',
   'promo:formatEcrire', 'promo:formatSupprimer', 'promo:nouveau',
   'promo:editeur', 'promo:planche',
+  // Depenses d entreprise (fenetre Depenses, 2.5.0) — premier ecran du palier 5.
+  // ⚠ 'depenses:facture' LIT une facture par le service d IA : la cle, pdf.js, le
+  // canevas et le taux de change restent au site. La fenetre envoie un fichier et
+  // recoit des champs — rien n est enregistre sans confirmation.
+  'depenses:donnees', 'depenses:lire', 'depenses:taxes', 'depenses:enregistrer',
+  'depenses:supprimer', 'depenses:recu', 'depenses:recuOuvrir', 'depenses:facture',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -1445,6 +1451,12 @@ const LIMITES_PONT = {
   // La planche compose une feuille entiere a 300 dpi.
   'promo:planche': 60000,
   'promo:imprimante': 20000,
+  // Une facture passe par la compression, l extraction du texte d un PDF (ou le
+  // rendu de ses pages), le service d IA et le taux de change : c est la plus
+  // longue chaine du module.
+  'depenses:facture': 120000,
+  // Le recu est compresse ici, et depose dans le stockage a l enregistrement.
+  'depenses:recu': 45000, 'depenses:enregistrer': 90000,
 };
 
 /* ⚠ LA FENETRE INVENTAIRE SE TIENT A JOUR TOUTE SEULE (demande du 2026-08-08 :
@@ -1604,6 +1616,7 @@ const PAGES_ANCRABLES = () => ({
   statistiques: ['Statistiques', () => pageStatistiques()],
   photos: ['Photos', () => pagePhotos()],
   promo: ['Centre d’impression', () => pagePromo()],
+  depenses: ['Dépenses d’entreprise', () => pageDepenses()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2342,6 +2355,7 @@ const { pageCampagnes } = require('./fenetres/campagnes');
 const { pageStatistiques } = require('./fenetres/statistiques');
 const { pagePhotos } = require('./fenetres/photos');
 const { pagePromo } = require('./fenetres/promo');
+const { pageDepenses } = require('./fenetres/depenses');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2420,7 +2434,8 @@ const actionApp = (nom) => {
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
-    case 'campagnes': case 'statistiques': case 'photos': case 'promo': {
+    case 'campagnes': case 'statistiques': case 'photos': case 'promo':
+    case 'depenses': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

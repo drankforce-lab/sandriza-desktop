@@ -733,6 +733,128 @@ module.exports = {
     },
   ],
 
+  // ── DÉPENSES D'ENTREPRISE ──────────────────────────────────────────────────
+  // ⚠ FORME RÉELLE de depenses:donnees (cœur Expenses._depensesDonnees). Quatre
+  // cas : la liste garnie, la période vide, la lecture seule (ni saisie ni zone
+  // de dépôt) et le module absent.
+  'depenses.js': [
+    {
+      // ⚠ `id: 'nouvelle'` OUVRE DIRECTEMENT LE FORMULAIRE : sans lui, aucun jeu
+      // ne l'atteindrait (le garde-fou ne simule aucun clic) et la moitié utile
+      // de la fenêtre resterait dans l'ombre. Mesuré avec une sonde.
+      nom: 'liste garnie + formulaire ouvert',
+      id: 'nouvelle',
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
+          annees: ['2026', '2025'],
+          moisNoms: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet',
+            'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+          categories: [
+            { cle: 'pub', libelle: 'Publicité', ligne: '8521' },
+            { cle: 'web', libelle: 'Site web, logiciels (SaaS)', ligne: '9270' },
+            { cle: 'bureau', libelle: 'Fournitures et frais de bureau', ligne: '8811' },
+          ],
+          paiements: [
+            { cle: 'card', libelle: 'Carte de crédit / débit' },
+            { cle: 'transfer', libelle: 'Virement / prélèvement' },
+          ],
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: true,
+          total: '4 218.55 $', totalTps: '210.93 $', totalTvq: '420.80 $',
+          nombre: 3, page: 0, pages: 1, taille: 25,
+          lignes: [
+            { id: 'exp1', date: '2026-08-04', dateFr: '2026-08-04', categorie: 'pub',
+              categorieLbl: 'Publicité', ligne: '8521', description: 'Publicité Meta juillet',
+              fournisseur: 'Meta Platforms', paiement: 'Carte de crédit / débit',
+              montant: '1 200.00 $', montantN: 1200, tps: '60.00 $', tvq: '119.70 $',
+              aTaxes: true, recu: true, usd: false },
+            // ⚠ LE CAS USD : montant converti, pastille distincte.
+            { id: 'exp2', date: '2026-07-28', dateFr: '2026-07-28', categorie: 'web',
+              categorieLbl: 'Site web, logiciels (SaaS)', ligne: '9270',
+              description: 'Namecheap — renouvellement nom de domaine', fournisseur: 'Namecheap',
+              paiement: 'Carte de crédit / débit', montant: '28.55 $', montantN: 28.55,
+              tps: '0.00 $', tvq: '0.00 $', aTaxes: false, recu: true, usd: true },
+            // Sans reçu ni taxes : la ligne la plus dépouillée.
+            { id: 'exp3', date: '2026-07-11', dateFr: '2026-07-11', categorie: 'bureau',
+              categorieLbl: 'Fournitures et frais de bureau', ligne: '8811',
+              description: 'Papeterie', fournisseur: '', paiement: 'Virement / prélèvement',
+              montant: '2 990.00 $', montantN: 2990, tps: '0.00 $', tvq: '0.00 $',
+              aTaxes: false, recu: false, usd: false },
+          ],
+        },
+        'depenses:lire': {
+          ok: true, id: 'exp1', date: '2026-08-04', dateFr: '2026-08-04',
+          categorie: 'pub', categorieLbl: 'Publicité', ligne: '8521',
+          paiement: 'card', paiementLbl: 'Carte de crédit / débit',
+          description: 'Publicité Meta juillet', fournisseur: 'Meta Platforms',
+          montantN: 1200, tpsN: 60, tvqN: 119.7,
+          montant: '1 200.00 $', tps: '60.00 $', tvq: '119.70 $', totalTTC: '1 379.70 $',
+          aTaxes: true, recu: 'https://exemple.invalid/receipts/r1.webp', recuPdf: false,
+          aRecu: true, usd: false, fxTaux: null, fxDate: '', fxApprox: false, origine: '',
+        },
+        'depenses:taxes': { ok: true, montant: 1000, tps: 50, tvq: 99.75 },
+        'depenses:enregistrer': { ok: true, neuf: true, montant: '1 200.00 $', categorie: 'Publicité' },
+        'depenses:supprimer': { ok: true, montant: '1 200.00 $', categorie: 'Publicité' },
+        'depenses:recu': { ok: true, joint: true, pdf: false },
+        'depenses:recuOuvrir': { ok: true },
+        'depenses:facture': { ok: true, recu: true, lu: true, modele: 'llama-3.3-70b-versatile',
+          source: 'texte du PDF', devise: 'USD', fxTaux: 1.3712, fxDate: '2026-07-28',
+          fxApprox: false,
+          champs: { date: '2026-07-28', fournisseur: 'Namecheap',
+            description: 'Namecheap — renouvellement nom de domaine', categorie: 'web',
+            montant: 28.55, tps: 0, tvq: 0 } },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ VIDE MAIS CHARGÉE — la période n'a rien, ce n'est pas une panne.
+      nom: 'periode vide',
+      id: '',
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 2, categorie: '', periode: 'Février 2026',
+          annees: ['2026'], moisNoms: ['Janvier', 'Février'],
+          categories: [{ cle: 'pub', libelle: 'Publicité', ligne: '8521' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          peutAjouter: true, peutModifier: true, peutSupprimer: true,
+          // ⚠ SANS CLÉ : la zone de dépôt doit le dire d'avance.
+          lectureAuto: false,
+          total: '0.00 $', totalTps: '0.00 $', totalTvq: '0.00 $',
+          nombre: 0, page: 0, pages: 1, taille: 25, lignes: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'lecture seule',
+      id: '',
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
+          annees: ['2026'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'pub', libelle: 'Publicité', ligne: '8521' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          peutAjouter: false, peutModifier: false, peutSupprimer: false, lectureAuto: false,
+          total: '120.00 $', totalTps: '6.00 $', totalTvq: '11.97 $',
+          nombre: 1, page: 0, pages: 1, taille: 25,
+          lignes: [{ id: 'exp9', date: '2026-01-05', dateFr: '2026-01-05', categorie: 'pub',
+            categorieLbl: 'Publicité', ligne: '8521', description: 'Annonce locale',
+            fournisseur: '', paiement: 'Carte de crédit / débit', montant: '120.00 $',
+            montantN: 120, tps: '6.00 $', tvq: '11.97 $', aTaxes: true, recu: false, usd: false }],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'module absent',
+      id: '',
+      reponses: {
+        'depenses:donnees': { ok: false, motif: 'module_depenses' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── CENTRE D'IMPRESSION (studio promo) ─────────────────────────────────────
   // ⚠ FORME RÉELLE de promo:donnees (cœur PromoPrint._promoDonnees). Quatre cas :
   // la liste garnie, le volet d'IMPRESSION (le seul qui atteigne l'aperçu, la

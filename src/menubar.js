@@ -165,14 +165,19 @@ ${css}
 /* ⚠ COMPACT, ET APRES la feuille du site pour la battre : le panneau herite
    de l echelle du MENU (d.police x menuTaille), pensee pour une barre — en
    panneau vertical c etait trop gros ; 12 px etait trop petit (2026-08-09).
-   13,5 px et retraits serres. Ces reglages ne vivent QUE dans cette fenetre :
-   la barre et les panneaux des ecrans web gardent les leurs. */
-.sz-panneau{font-size:13.5px!important;line-height:1.3!important;padding:.28rem .24rem!important}
-.sz-panneau .sz-item{padding:.26em .8em!important;line-height:1.3!important;min-height:0!important;gap:.5em!important;width:100%!important}
-.sz-panneau .sz-lbl{font-size:13.5px!important}
-.sz-panneau .sz-acc{font-size:11px!important}
-.sz-panneau .sz-titre{font-size:11px!important;padding:.5em .8em .18em!important;margin:0!important}
-.sz-panneau .sz-sep{margin:.28em .5em!important}
+   ⚠ REGLE INDEPENDAMMENT DE LA BARRE, et c est la demande du 2026-08-09 :
+   << grossir mon menu, pas la barre des menus mais les options en dessous >>.
+   Les deux tailles ne sont donc PAS liees : la barre garde la sienne (menuTaille,
+   reglable dans Affichage), le panneau a celle-ci. 13,5 -> 15 px, avec les
+   retraits et l interligne remontes d autant, sinon on grossit le texte dans une
+   boite restee etroite. Ces reglages ne vivent QUE dans cette fenetre : la barre
+   et les panneaux des ecrans web gardent les leurs. */
+.sz-panneau{font-size:15px!important;line-height:1.36!important;padding:.34rem .28rem!important}
+.sz-panneau .sz-item{padding:.32em .95em!important;line-height:1.36!important;min-height:0!important;gap:.55em!important;width:100%!important}
+.sz-panneau .sz-lbl{font-size:15px!important}
+.sz-panneau .sz-acc{font-size:12px!important}
+.sz-panneau .sz-titre{font-size:11.5px!important;padding:.55em .95em .2em!important;margin:0!important}
+.sz-panneau .sz-sep{margin:.32em .55em!important}
 /* Chaque panneau est une BOITE a lui : fond, bordure, coins ronds, ombre —
    apres la feuille du site pour la battre. */
 .sz-panneau{background:var(--sz-bg,${sombre ? '#131b2a' : '#ffffff'})!important;
