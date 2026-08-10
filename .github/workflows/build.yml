@@ -118,6 +118,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: win-${{ matrix.arch }}
+          # ⚠ 1 JOUR, PAS 90 (le défaut). Ces artéfacts ne sont qu'un RELAIS :
+          # le workflow « Publier » du dépôt privé les récupère dans la foulée
+          # et dépose tout dans R2. Or le stockage d'artéfacts GitHub n'est PAS
+          # gratuit — 0,5 Go inclus, à l'échelle du COMPTE, dépôt public ou non —
+          # et un seul build (~1,6 Go) le dépasse déjà. Sans rétention courte,
+          # 90 jours de builds s'accumulent et la facture de stockage tombe.
+          retention-days: 1
           path: |
             dist/*.exe
             dist/*.blockmap
@@ -159,6 +166,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: mac-${{ matrix.arch }}
+          # Même raison que le côté Windows : relais vers R2, rétention courte.
+          retention-days: 1
           path: |
             dist/*.dmg
             dist/*.zip

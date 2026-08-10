@@ -1,0 +1,72 @@
+# =============================================================================
+# MÉNAGE DES ARTÉFACTS — dépôt PUBLIC
+# -----------------------------------------------------------------------------
+# Le stockage d'artéfacts GitHub Actions n'est PAS gratuit : 0,5 Go inclus, à
+# l'échelle du COMPTE (dépôt public ou privé, peu importe). Un seul build de la
+# coquille (~1,6 Go) le dépasse. La rétention est passée à 1 jour dans
+# build.yml, mais ça ne vide pas le RETARD déjà accumulé (des dizaines
+# d'exécutions « Construire »). Ce workflow efface TOUS les artéfacts du dépôt,
+# à la demande.
+#
+# ⚠ SANS RISQUE. Les artéfacts ne sont qu'un relais vers Cloudflare R2 : les
+# vrais installateurs distribués vivent dans R2, jamais ici. Supprimer un
+# artéfact ne retire donc rien de ce qui est installé ou mis à jour sur les
+# postes.
+#
+# ⚠ PAS DE DÉCLENCHEUR AUTOMATIQUE (ni push, ni cron). Un cron pourrait effacer
+# les artéfacts d'un build tout juste terminé AVANT que le workflow « Publier »
+# du dépôt privé ne les récupère. On efface donc UNIQUEMENT à la main, quand on
+# sait qu'il n'y a rien en attente de publication.
+#
+# Tourne sur un dépôt PUBLIC : minutes gratuites et illimitées.
+# =============================================================================
+name: Ménage des artéfacts
+
+on:
+  workflow_dispatch:
+
+# Le jeton automatique du workflow suffit : supprimer un artéfact exige
+# « actions: write », et rien d'autre.
+permissions:
+  actions: write
+
+jobs:
+  menage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Supprimer tous les artéfacts du dépôt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          TOTAL=0
+          # On redemande la première page après chaque passe : les artéfacts
+          # supprimés disparaissent, la liste se vide peu à peu. La garde
+          # PROGRESS évite une boucle infinie si une suppression échoue en série.
+          while :; do
+            IDS=$(gh api "repos/$REPO/actions/artifacts?per_page=100" \
+                    --jq '.artifacts[].id')
+            [ -z "$IDS" ] && break
+
+            PROGRESS=0
+            for ID in $IDS; do
+              if gh api -X DELETE "repos/$REPO/actions/artifacts/$ID" >/dev/null; then
+                TOTAL=$((TOTAL + 1))
+                PROGRESS=1
+                echo "  • artéfact $ID supprimé"
+              else
+                echo "::warning::Échec de suppression de l'artéfact $ID"
+              fi
+            done
+
+            if [ "$PROGRESS" = "0" ]; then
+              echo "::error::Aucune suppression n'a abouti dans cette passe — arrêt pour ne pas boucler."
+              break
+            fi
+          done
+
+          echo "Terminé — $TOTAL artéfact(s) supprimé(s)."
+          echo "## Ménage des artéfacts" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Supprimés : **$TOTAL**" >> "$GITHUB_STEP_SUMMARY"
