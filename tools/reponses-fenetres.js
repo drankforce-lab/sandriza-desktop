@@ -1091,6 +1091,49 @@ module.exports = {
     } },
   ],
 
+  // Configuration — Logos et marque (palier 5, 4e onglet natif). Trois cas :
+  // un par onglet, pour que le garde-fou EXECUTE les trois dessins.
+  'marque.js': [
+    { nom: 'marque', reponses: {
+      identite: IDENTITE,
+      'config:marque:donnees': { ok: true, peutModifier: true,
+        marque: { name: 'SANDRIZA', sub: 'ÉLÉGANCE · RAFFINEMENT · STYLE',
+          slogan: 'RAFFINEMENT · STYLE', sloganEN: 'REFINEMENT · STYLE', letter: 'S',
+          gradient: { enabled: true, from: '#ec4899', to: '#3b82f6', dir: '135deg' } },
+        logos: { store: 'https://exemple.test/logo.png', store_en: '', admin: '',
+          login: 'https://exemple.test/login.png', transparent: '', transparent_en: '' },
+        clientLogin: { bgFrom: '#1a1a2e', bgTo: '#16213e', textColor: '#ffffff' },
+        loginTheme: { bgFrom: '#0f172a', bgMid: '#1e1b4b', logoGradFrom: '#4f46e5',
+          logoGradTo: '#7c3aed', btnGradFrom: '#4f46e5', btnGradTo: '#6366f1',
+          cardBg: '#1e293b', cardBorder: '#334155', titleColor: '#e2e8f0',
+          subtitleColor: '#64748b', subtitleText: 'Panneau d’administration' } },
+    } },
+    { nom: 'marque onglet logos', id: 'logos', reponses: {
+      identite: IDENTITE,
+      'config:marque:donnees': { ok: true, peutModifier: true,
+        marque: { name: 'SANDRIZA', sub: '', slogan: '', sloganEN: '', letter: 'S',
+          gradient: { enabled: false, from: '#ec4899', to: '#3b82f6', dir: '135deg' } },
+        logos: { store: '', store_en: '', admin: '', login: '', transparent: '', transparent_en: '' },
+        clientLogin: { bgFrom: '#1a1a2e', bgTo: '#16213e', textColor: '#ffffff' },
+        loginTheme: { bgFrom: '#0f172a', bgMid: '#1e1b4b', logoGradFrom: '#4f46e5',
+          logoGradTo: '#7c3aed', btnGradFrom: '#4f46e5', btnGradTo: '#6366f1',
+          cardBg: '#1e293b', cardBorder: '#334155', titleColor: '#e2e8f0',
+          subtitleColor: '#64748b', subtitleText: 'Panneau d’administration' } },
+    } },
+    { nom: 'marque onglet connexion, lecture seule', id: 'connexion', reponses: {
+      identite: IDENTITE,
+      'config:marque:donnees': { ok: true, peutModifier: false,
+        marque: { name: 'SANDRIZA', sub: 'Sous-titre', slogan: '', sloganEN: '', letter: 'S',
+          gradient: { enabled: false, from: '#ec4899', to: '#3b82f6', dir: '135deg' } },
+        logos: { store: '', store_en: '', admin: '', login: '', transparent: '', transparent_en: '' },
+        clientLogin: { bgFrom: '#1a1a2e', bgTo: '#16213e', textColor: '#ffffff' },
+        loginTheme: { bgFrom: '#0f172a', bgMid: '#1e1b4b', logoGradFrom: '#4f46e5',
+          logoGradTo: '#7c3aed', btnGradFrom: '#4f46e5', btnGradTo: '#6366f1',
+          cardBg: '#1e293b', cardBorder: '#334155', titleColor: '#e2e8f0',
+          subtitleColor: '#64748b', subtitleText: 'Panneau d’administration' } },
+    } },
+  ],
+
   'comptable.js': [
     {
       nom: 'exercices garnis',

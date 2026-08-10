@@ -228,7 +228,13 @@ const noms = (src, marqueur, borne) => {
   if (i < 0) return null;
   const j = src.indexOf(borne, i);
   const bloc = src.slice(i, j < 0 ? src.length : j);
-  const trouves = bloc.match(/'[a-z]+:[A-Za-z]+'|'identite'/g) || [];
+  /* ⚠ TROIS SEGMENTS AUSSI (corrigé le 2026-08-10). La forme d'origine
+     (`'[a-z]+:[A-Za-z]+'`) ne reconnaissait que `famille:geste` : TOUTES les
+     opérations `config:heures:*`, `config:footer:*`, `config:apparence:*` et
+     `config:marque:*` échappaient au contrôle depuis qu'elles existent — huit
+     opérations qu'on pouvait déclarer d'un seul côté sans que rien ne le dise,
+     alors que c'est précisément ce que ce contrôle existe pour attraper. */
+  const trouves = bloc.match(/'[a-z]+(?::[A-Za-z]+)+'|'identite'/g) || [];
   return new Set(trouves.map((s) => s.replace(/'/g, '')));
 };
 

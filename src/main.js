@@ -1369,6 +1369,7 @@ const OPS_PONT = new Set([
   'config:heures:donnees', 'config:heures:ecrire',
   'config:footer:donnees', 'config:footer:ecrire',
   'config:apparence:donnees', 'config:apparence:ecrire',
+  'config:marque:donnees', 'config:marque:ecrire', 'config:marque:reinit',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1656,6 +1657,10 @@ const LIMITES_PONT = {
   'config:heures:donnees': 15000, 'config:heures:ecrire': 20000,
   'config:footer:donnees': 15000, 'config:footer:ecrire': 20000,
   'config:apparence:donnees': 15000, 'config:apparence:ecrire': 20000,
+  // ⚠ L ecriture de la marque porte des IMAGES : le depot dans R2 se fait au
+  // coeur, six logos peuvent partir d un coup, et un plafond de 20 s ferait
+  // passer un depot lent pour une panne.
+  'config:marque:donnees': 15000, 'config:marque:ecrire': 120000, 'config:marque:reinit': 30000,
   'photoroom:compte': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
@@ -1901,6 +1906,13 @@ const PAGES_ANCRABLES = () => ({
   comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
   'fal-suivi': ['Traitements d’image', () => pageFal('')],
+  // Onglets de Configuration portes en fenetre native (palier 5). ⚠ ILS SONT
+  // ANCRABLES COMME LES AUTRES : sans cette declaration, dockOuvrir ne connait
+  // pas la cle et la fenetre naissait toujours detachee.
+  'config-heures': ['Heures d’ouverture', () => pageHeures()],
+  'config-footer': ['Pied de page', () => pageFooter()],
+  'config-apparence': ['Thème et apparence', () => pageApparence()],
+  'config-marque': ['Logos et marque', () => pageMarque()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2650,6 +2662,7 @@ const { pageFal } = require('./fenetres/fal');
 const { pageHeures } = require('./fenetres/heures');
 const { pageFooter } = require('./fenetres/footer');
 const { pageApparence } = require('./fenetres/apparence');
+const { pageMarque } = require('./fenetres/marque');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2688,18 +2701,10 @@ const actionApp = (nom) => {
     case 'update-check': checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
     case 'imprimantes': ouvrirImprimantes(); break;
-    case 'config-heures':
-      ouvrirNative('config-heures', 'Heures d’ouverture', pageHeures(),
-        { width: 760, height: 640, minWidth: 560, minHeight: 440 });
-      break;
-    case 'config-footer':
-      ouvrirNative('config-footer', 'Pied de page', pageFooter(),
-        { width: 720, height: 680, minWidth: 540, minHeight: 460 });
-      break;
-    case 'config-apparence':
-      ouvrirNative('config-apparence', 'Thème et apparence', pageApparence(),
-        { width: 760, height: 600, minWidth: 560, minHeight: 420 });
-      break;
+    /* ⚠ Les quatre onglets de Configuration natifs ne s'ouvrent PLUS ici :
+       ils sont passés au flux d'ancrage (voir la liste des ecrans ancrables
+       plus bas), a la demande du 2026-08-10 — « fais attention de creer les
+       fenetres en mode ancrable ». */
     case 'fournisseur-nouveau':
       ouvrirNative('fournisseur', 'Nouveau fournisseur', pageFournisseur(''), { width: 800, height: 700 });
       break;
@@ -2742,7 +2747,9 @@ const actionApp = (nom) => {
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':
-    case 'comptable': case 'bankrec': case 'fal-suivi': {
+    case 'comptable': case 'bankrec': case 'fal-suivi':
+    case 'config-heures': case 'config-footer': case 'config-apparence':
+    case 'config-marque': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
