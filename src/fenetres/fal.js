@@ -123,6 +123,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   var VUE = ${dep} === 'historique' ? 'hist' : 'conso';
   var D = null;
   var PR = null;
+  // Filtres de l'historique + horodatage de la dernière lecture (l'écran se
+  // rafraîchit seul, sans bouton).
+  var FILT_PROV = 'tous', FILT_Q = '', MAJ = '';
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -183,7 +186,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* La carte des CRÉDITS PHOTOROOM — le fournisseur principal du retrait et de
      l’ajout de mannequin. Le restant est RÉEL, lu de /v2/account ; le sandbox
      est notre compte estimé (Photoroom ne l’expose pas). */
-  function cartePhotoroom(){
+  function carteCredits(){
+    // Photoroom : credits reels (lus par API) + apercus sandbox (comptes par nous).
     var reel;
     if (PR && PR.compte && PR.compte.available != null) {
       var c = PR.compte;
@@ -199,48 +203,39 @@ ${JS_ACTIVITE}${JS_DIRE}
     var sand = '<div class="t"><div class="l">Aperçus sandbox</div><div class="n">'
       + (sb.utilise || 0) + ' <span class="s">/ ' + (sb.quotaMois || 1000) + '</span></div>'
       + '<div class="s">ce mois · estimé · filigrané</div></div>';
-    return '<div class="carte"><h2>Crédits Photoroom</h2><div class="tuiles">' + reel + sand + '</div></div>';
+    /* fal.ai : un SOLDE RESTANT, comme Photoroom, mais calculé — fal n'expose
+       aucun solde par API. Restant = montant saisi en Configuration MOINS la
+       consommation mesurée depuis la saisie ; il diminue donc à chaque traitement
+       fal. Un chiffre honnête et daté plutôt qu'un paragraphe. */
+    var solde = Number(D.soldeSaisi) || 0, conso = Number(D.consoDepuis) || 0;
+    var reste = solde - conso; if (reste < 0) { reste = 0; }
+    var fal;
+    if (solde > 0) {
+      fal = '<div class="t"><div class="l">Solde fal.ai (restant)</div><div class="n">' + sous_(reste)
+        + '</div><div class="s">' + (D.soldeDate ? 'saisi le ' + esc(jourCourt(D.soldeDate)) + ' · ' : '')
+        + 'diminue à chaque traitement</div></div>';
+    } else {
+      fal = '<div class="t"><div class="l">Solde fal.ai (restant)</div><div class="n">—</div>'
+        + '<div class="s">à saisir en Configuration</div></div>';
+    }
+    return '<div class="carte"><h2>Crédits &amp; solde</h2><div class="tuiles">'
+      + reel + sand + fal + '</div></div>';
   }
 
-  /* Le solde FAL.AI — SAISI À LA MAIN, faute d’API. On le dit, on le date, et on
-     montre la consommation mesurée depuis : un reste estimé, honnête et daté. */
-  function franchise(){
-    var reels = (D.coutsReels || 0), tot = (D.appels || 0);
-    var part = tot ? Math.round(reels * 100 / tot) : 0;
-    var solde = Number(D.soldeSaisi) || 0, conso = Number(D.consoDepuis) || 0;
-    var bloc;
-    if (solde > 0) {
-      var reste = solde - conso; if (reste < 0) { reste = 0; }
-      bloc = '<b>Solde fal.ai saisi à la main : ' + sous_(solde) + '</b>'
-        + (D.soldeDate ? ' (le ' + esc(jourCourt(D.soldeDate)) + ')' : '') + '. '
-        + 'Consommation mesurée depuis : ' + sous_(conso) + ' — <b>reste estimé '
-        + sous_(reste) + '</b>.<br>'
-        + '⚠ C’est un montant que <b>vous</b> avez inscrit : il ne suit pas les achats faits '
-        + 'ailleurs. Tenez-le à jour dans Configuration, et vérifiez le vrai solde sur '
-        + '<a href="' + esc(D.tableauDeBord || 'https://fal.ai/dashboard/billing') + '" target="_blank">'
-        + 'le tableau de bord de Fal.ai</a>.';
-    } else {
-      bloc = '<b>Aucun solde fal.ai saisi.</b> Fal.ai n’expose aucun solde par API. Inscrivez '
-        + 'le montant vu sur <a href="' + esc(D.tableauDeBord || 'https://fal.ai/dashboard/billing') + '" '
-        + 'target="_blank">le tableau de bord de Fal.ai</a> dans Configuration : l’écran affichera '
-        + 'alors le reste estimé et la consommation depuis.';
-    }
-    return '<div class="franc">' + bloc + '<br>'
-      + 'Ce qui est montré ici est <b>mesuré</b>&nbsp;: chaque appel passe par notre relais. '
-      + (tot
-          ? ('Sur ' + tot + ' appel' + (tot > 1 ? 's' : '') + ', <b>' + part + '&nbsp;%</b> '
-             + 'portent le prix rendu par Fal.ai&nbsp;; les autres sont une estimation par modèle.')
-          : '')
-      + '</div>';
+  /* La ligne « dernière actualisation » — l'écran se rafraîchit tout seul (plus de
+     bouton Recharger), donc on DIT quand les chiffres ont été relus pour la
+     dernière fois, sinon un écran figé passerait pour à jour. */
+  function ligneMaj(){
+    return '<div class="barreoutils"><span class="droite" style="font-size:.74rem;color:#8fa1b8">'
+      + '<span id="maj">' + (MAJ ? 'Dernière actualisation le ' + esc(MAJ) : 'Actualisation…') + '</span>'
+      + '</span></div>';
   }
 
   // ── CONSOMMATION ────────────────────────────────────────────────────────
   function vueConso(){
     var h = [];
-    h.push('<div class="barreoutils"><span class="droite">'
-      + '<button id="b-recharger">Recharger</button></span></div>');
-    h.push(cartePhotoroom());
-    h.push(franchise());
+    h.push(ligneMaj());
+    h.push(carteCredits());
 
     var reussis = 0;
     (D.parModele || []).forEach(function(m){ reussis += m.reussis; });
@@ -298,38 +293,61 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   // ── HISTORIQUE ──────────────────────────────────────────────────────────
+  /* L'opération d'un appel se lit dans son modèle : Photoroom loggue toujours
+     « photoroom/… », fal.ai loggue « fal-ai/… ». Un seul test suffit à ranger. */
+  function evtProv(e){ return (String(e.modele || '').indexOf('photoroom') === 0) ? 'photoroom' : 'fal'; }
+  function evtsFiltres(){
+    var q = (FILT_Q || '').trim().toLowerCase();
+    return (D.evenements || []).filter(function(e){
+      if (FILT_PROV !== 'tous' && evtProv(e) !== FILT_PROV) return false;
+      if (q) {
+        var hay = ((e.photoCode || '') + ' ' + (e.photoNom || '')).toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+  }
+  function lignesHist(){
+    var arr = evtsFiltres();
+    if (!arr.length) { return '<tr><td colspan="8" class="vide">Aucun appel pour ce filtre.</td></tr>'; }
+    var out = [];
+    arr.forEach(function(e){
+      var prov = evtProv(e);
+      var photo = e.photoCode
+        ? ('<span class="mono">' + esc(e.photoCode) + '</span>'
+           + (e.photoNom ? ' <span class="dt">' + esc(e.photoNom) + '</span>' : ''))
+        : (e.photoNom ? '<span class="dt">' + esc(e.photoNom) + '</span>' : '—');
+      out.push('<tr>'
+        + '<td class="dt" style="white-space:nowrap">' + quand(e.au) + '</td>'
+        + '<td><span class="pill g">' + (prov === 'photoroom' ? 'Photoroom' : 'Fal.ai') + '</span></td>'
+        + '<td>' + esc(GESTES[e.geste] || e.geste || '—') + '</td>'
+        + '<td>' + photo + '</td>'
+        + '<td class="dt">' + esc(e.qui || '—') + '</td>'
+        + '<td class="num">' + duree(e.ms) + '</td>'
+        + '<td class="num">' + sous_(e.cout) + (e.coutReel ? '' : ' <span class="dt">est.</span>') + '</td>'
+        + '<td>' + (e.ok ? '<span class="pill ok">réussi</span>' : '<span class="pill non">échec</span>') + '</td>'
+        + '</tr>'
+        // ⚠ LE MESSAGE D ERREUR EST RENDU TEL QUEL : << echec >> tout court n aide
+        // personne ; << credit epuise >> ou << cle invalide >> se reglent vite.
+        + (e.ok || !e.erreur ? ''
+            : '<tr><td></td><td colspan="7" class="dt" style="color:#fca5a5">' + esc(e.erreur) + '</td></tr>'));
+    });
+    return out.join('');
+  }
   function vueHist(){
+    var opt = function(v, t){ return '<option value="' + v + '"' + (FILT_PROV === v ? ' selected' : '') + '>' + t + '</option>'; };
     var h = [];
-    h.push('<div class="barreoutils"><span class="droite">'
-      + '<button id="b-recharger">Recharger</button></span></div>');
+    h.push('<div class="barreoutils">'
+      + '<select id="h-prov">' + opt('tous', 'Toutes les opérations') + opt('fal', 'Fal.ai') + opt('photoroom', 'Photoroom') + '</select>'
+      + '<input id="h-q" type="search" placeholder="Filtrer par photo (nom ou PH-000000)" value="' + esc(FILT_Q || '')
+      + '" style="flex:1;min-width:13rem;background:rgba(255,255,255,.05);color:#e8edf5;'
+      + 'border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.32rem .55rem;font:inherit">'
+      + '<span class="droite" style="font-size:.74rem;color:#8fa1b8"><span id="maj">'
+      + (MAJ ? 'Dernière actualisation le ' + esc(MAJ) : 'Actualisation…') + '</span></span></div>');
     h.push('<div class="carte"><h2>Cinq cents derniers appels</h2>');
-    if (!(D.evenements || []).length) {
-      h.push('<div class="vide">Aucun appel enregistré.</div>');
-    } else {
-      h.push('<table><thead><tr><th>Quand</th><th>Traitement</th><th>Modèle</th>'
-        + '<th>Par</th><th class="num">Durée</th><th class="num">Coût</th>'
-        + '<th>État</th></tr></thead><tbody>');
-      D.evenements.forEach(function(e){
-        h.push('<tr>'
-          + '<td class="dt" style="white-space:nowrap">' + quand(e.au) + '</td>'
-          + '<td>' + esc(GESTES[e.geste] || e.geste || '—') + '</td>'
-          + '<td class="mono">' + esc(e.modele) + '</td>'
-          + '<td class="dt">' + esc(e.qui || '—') + '</td>'
-          + '<td class="num">' + duree(e.ms) + '</td>'
-          + '<td class="num">' + sous_(e.cout) + (e.coutReel ? '' : ' <span class="dt">est.</span>') + '</td>'
-          + '<td>' + (e.ok
-              ? '<span class="pill ok">réussi</span>'
-              : '<span class="pill non">échec</span>') + '</td>'
-          + '</tr>'
-          // ⚠ LE MESSAGE D ERREUR EST RENDU TEL QUEL. << echec >> tout court
-          // n aide personne ; << credit epuise >> ou << cle invalide >> se
-          // reglent en une minute.
-          + (e.ok || !e.erreur ? ''
-              : '<tr><td></td><td colspan="6" class="dt" style="color:#fca5a5">'
-                + esc(e.erreur) + '</td></tr>'));
-      });
-      h.push('</tbody></table>');
-    }
+    h.push('<table><thead><tr><th>Quand</th><th>Opération</th><th>Traitement</th>'
+      + '<th>Photo</th><th>Par</th><th class="num">Durée</th><th class="num">Coût</th>'
+      + '<th>État</th></tr></thead><tbody id="h-body">' + lignesHist() + '</tbody></table>');
     h.push('</div>');
     return h.join('');
   }
@@ -338,8 +356,20 @@ ${JS_ACTIVITE}${JS_DIRE}
     document.getElementById('o-conso').classList.toggle('on', VUE === 'conso');
     document.getElementById('o-hist').classList.toggle('on', VUE === 'hist');
     corps.innerHTML = (VUE === 'hist') ? vueHist() : vueConso();
-    var b = document.getElementById('b-recharger');
-    if (b) b.onclick = function(){ charger(true); };
+    if (VUE === 'hist') { brancherHist(); }
+  }
+  /* Les filtres de l'historique se posent APRÈS le dessin. Ils ne redessinent que
+     le CORPS du tableau (h-body), pour ne pas voler le foyer du champ de
+     recherche pendant la frappe. */
+  function brancherHist(){
+    var sp = document.getElementById('h-prov');
+    if (sp) sp.onchange = function(){ FILT_PROV = sp.value; refiltrer(); };
+    var q = document.getElementById('h-q');
+    if (q) q.oninput = function(){ FILT_Q = q.value; refiltrer(); };
+  }
+  function refiltrer(){
+    var b = document.getElementById('h-body');
+    if (b) b.innerHTML = lignesHist();
   }
 
   document.getElementById('o-conso').onclick = function(){ VUE = 'conso'; charger(false); };
@@ -360,6 +390,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         return;
       }
       D = r;
+      MAJ = _horoNow();
       sous.textContent = (D.appels || 0) + ' appel' + ((D.appels || 0) > 1 ? 's' : '')
         + ' · ' + sous_(D.total);
       dessiner();
@@ -367,7 +398,51 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* ══════════════════════════════════════════════════════════════════════════
+     RAFRAÎCHISSEMENT AUTOMATIQUE — plus de bouton « Recharger »
+     ⚠ On SONDE léger (le résumé, sans les 500 événements) toutes les 5 s pour
+     DÉTECTER un changement du flux de la photothèque (un traitement de plus
+     bouge le nombre d'appels, le total, les crédits ou le solde). S'il a bougé,
+     on recharge complètement ; sinon on rafraîchit juste l'horodatage.
+     ⚠⚠ ON NE REDESSINE JAMAIS PENDANT UNE SAISIE : si le champ de filtre ou le
+     menu d'opération a le foyer, on saute ce tour — sinon la frappe serait
+     avalée. */
+  function _horoNow(){
+    try { return new Date().toLocaleString('fr-CA', { dateStyle: 'short', timeStyle: 'short' }); }
+    catch (e) { return ''; }
+  }
+  function signatureCourante(){
+    var pa = (PR && PR.compte && PR.compte.available != null) ? PR.compte.available : '-';
+    return [D ? D.appels : 0, D ? D.total : 0, pa, D ? D.soldeSaisi : 0, D ? D.consoDepuis : 0].join('|');
+  }
+  function saisieActive(){
+    var a = document.activeElement;
+    return !!(a && (a.id === 'h-q' || a.id === 'h-prov'));
+  }
+  function veille(){
+    setInterval(function(){
+      if (saisieActive()) return;
+      var avant = signatureCourante();
+      Promise.all([appeler('fal:suivi', ['resume']), appeler('photoroom:compte')]).then(function(rs){
+        var r = rs[0];
+        if (!r || !r.ok) return;   // une lecture ratée ne casse pas l'écran affiché
+        var prNew = (rs[1] && rs[1].ok) ? rs[1] : PR;
+        var pa = (prNew && prNew.compte && prNew.compte.available != null) ? prNew.compte.available : '-';
+        var apres = [r.appels, r.total, pa, r.soldeSaisi, r.consoDepuis].join('|');
+        MAJ = _horoNow();
+        if (apres !== avant) {
+          PR = prNew;
+          charger(false);   // rechargement complet et silencieux (journal si historique)
+        } else {
+          var el = document.getElementById('maj');
+          if (el) el.textContent = 'Dernière actualisation le ' + MAJ;
+        }
+      });
+    }, 5000);
+  }
+
   charger(true);
+  veille();
 })();
 </script></body></html>`;
 }

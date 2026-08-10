@@ -1531,7 +1531,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       return '<figure id="apr-c' + i + '" style="margin:0;background:#0e1522;'
         + 'border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden;'
         + 'display:flex;flex-direction:column">'
-        + '<div class="apr-img" style="aspect-ratio:1/1;display:flex;align-items:center;'
+        + '<div class="apr-img" style="aspect-ratio:3/4;display:flex;align-items:center;'
         + 'justify-content:center;background:' + APR_CHECKER + ';color:#8fa1b8;'
         + 'font-size:.78rem">…</div>'
         + '<figcaption style="padding:.35rem .5rem;font-size:.72rem;color:#cbd5e1;'
@@ -1548,9 +1548,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button id="apr-x" style="margin-left:auto;font:inherit;color:#e8edf5;'
       + 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);'
       + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">Fermer</button></div>'
+      // ⚠ auto-FIT + justify-content:center : une seule photo s'affiche GRANDE et
+      // CENTRÉE (auto-fill la collait en haut à gauche, minuscule) ; un lot reste
+      // une grille centrée de vignettes larges.
       + '<div style="flex:1 1 auto;min-height:0;overflow:auto;display:grid;'
-      + 'grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;'
-      + 'align-content:start">' + cells + '</div>'
+      + 'grid-template-columns:repeat(auto-fit,minmax(260px,360px));gap:.7rem;'
+      + 'justify-content:center;align-content:start">' + cells + '</div>'
       + '<div style="margin-top:.55rem;font-size:.74rem;color:#8fa1b8">Pour la version '
       + 'définitive sans filigrane, lancez le traitement : il consomme alors un crédit '
       + 'Photoroom.</div>';
