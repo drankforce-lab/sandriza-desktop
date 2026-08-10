@@ -80,6 +80,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .pill.ok{background:rgba(34,197,94,.15);color:#4ade80}
 .pill.non{background:rgba(248,113,113,.15);color:#fca5a5}
 .pill.g{background:rgba(148,163,184,.14);color:#94a3b8;font-weight:600}
+.pill.apr{background:rgba(201,169,126,.18);color:#d8bd97}
 /* La barre des jours : un dessin vaut mieux qu une colonne de nombres pour
    reperer une derive avant la facture. */
 .jours{display:flex;align-items:flex-end;gap:2px;height:4.5rem;padding-top:.3rem}
@@ -325,7 +326,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td class="dt">' + esc(e.qui || '—') + '</td>'
         + '<td class="num">' + duree(e.ms) + '</td>'
         + '<td class="num">' + sous_(e.cout) + (e.coutReel ? '' : ' <span class="dt">est.</span>') + '</td>'
-        + '<td>' + (e.ok ? '<span class="pill ok">réussi</span>' : '<span class="pill non">échec</span>') + '</td>'
+        + '<td>' + (e.ok
+            ? (e.apercu ? '<span class="pill apr">Aperçu gratuit</span>' : '<span class="pill ok">réussi</span>')
+            : '<span class="pill non">échec</span>') + '</td>'
         + '</tr>'
         // ⚠ LE MESSAGE D ERREUR EST RENDU TEL QUEL : << echec >> tout court n aide
         // personne ; << credit epuise >> ou << cle invalide >> se reglent vite.

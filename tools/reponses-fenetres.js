@@ -1041,6 +1041,25 @@ module.exports = {
   // premier écran d'un exercice neuf. La carte du lien fraîchement fabriqué (le
   // mot de passe montré une seule fois) n'apparaît qu'après un geste — aucun
   // état d'ouverture ne peut la dessiner, comme pour les liens d'installation.
+  // Configuration — Heures d'ouverture (palier 5, 1er onglet natif). Un seul cas :
+  // le formulaire des 7 jours doit se dessiner à partir de config:heures:donnees.
+  'heures.js': [
+    { nom: 'heures', reponses: {
+      identite: IDENTITE,
+      'config:heures:donnees': { ok: true, peutModifier: true, cfg: {
+        enabled: true, days: [
+          { day: 'Lundi',     open: '09:00', close: '18:00', closed: false },
+          { day: 'Mardi',     open: '09:00', close: '18:00', closed: false },
+          { day: 'Mercredi',  open: '09:00', close: '18:00', closed: false },
+          { day: 'Jeudi',     open: '09:00', close: '18:00', closed: false },
+          { day: 'Vendredi',  open: '09:00', close: '17:00', closed: false },
+          { day: 'Samedi',    open: '10:00', close: '17:00', closed: false },
+          { day: 'Dimanche',  open: '',      close: '',      closed: true  },
+        ] },
+      },
+    } },
+  ],
+
   'comptable.js': [
     {
       nom: 'exercices garnis',
