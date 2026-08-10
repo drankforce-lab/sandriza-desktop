@@ -599,6 +599,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // a la fois le tableau et le panneau de suivi, qui vit hors du corps.
     if (ASSIST) h += assistHtml();
     else if (SCENE_OUVERT) h += sceneHtml();
+    else if (RETRAIT_OUVERT) h += retraitHtml();
     else if (LOTS) h += lotsHtml();
     document.body.classList.toggle('insp', !!DETAIL && !ASSIST);
     corps.innerHTML = h;
@@ -1356,6 +1357,36 @@ ${JS_ACTIVITE}${JS_DIRE}
   function sceneFermer(){ SCENE_OUVERT = false; SCENE_IDS = null; dessiner(); }
   var SCENE_OUVERT = false;
 
+  /* ══════════════════════════════════════════════════════════════════════════
+     LE PANNEAU DE RETRAIT — un pas AVANT de dépenser
+     ⚠ Le retrait (fantome) n'a rien à régler, mais il COÛTE : un clic partait
+     droit vers un crédit par photo. Ce panneau minimal ajoute une respiration —
+     voir un aperçu gratuit d'abord, ou lancer — sans jamais rien configurer. Il
+     est le pendant, pour le retrait, du panneau de mise en scène du geste humain.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var RETRAIT_OUVERT = false, RETRAIT_IDS = null;
+  function retraitOuvrir(ids){ RETRAIT_IDS = ids; RETRAIT_OUVERT = true; dessiner(); }
+  function retraitFermer(){ RETRAIT_OUVERT = false; RETRAIT_IDS = null; dessiner(); }
+  function retraitHtml(){
+    var n = RETRAIT_IDS ? RETRAIT_IDS.length : 0;
+    return '<div class="asst"><div class="bo">'
+      + '<div class="tt"><h3>Retrait du mannequin</h3>'
+      + '<span class="pas">' + n + ' photo' + (n > 1 ? 's' : '') + '</span></div>'
+      + '<div class="co">'
+      + '<p class="aide">Le fond et le mannequin sont retirés ; le col et les manches '
+      + 'sont reconstruits. Rien n’est engendré : c’est le vêtement de la photo, pas '
+      + 'une personne inventée.</p>'
+      + '<div class="aide" style="margin-top:.5rem;color:#f0d6a0">Chaque photo coûte '
+      + '1 crédit Photoroom. L’aperçu est gratuit et filigrané : de quoi juger avant '
+      + 'de payer.</div>'
+      + '</div>'
+      + '<div class="pied"><button id="rt-non">Annuler</button>'
+      + '<button id="rt-apercu" title="Voir le rendu filigrané, gratuit">👁 Voir un aperçu</button>'
+      + '<button class="prim" id="rt-go">Lancer le retrait sur ' + n + ' photo'
+      + (n > 1 ? 's' : '') + '</button>'
+      + '</div></div></div>';
+  }
+
   /* ⚠ UNE SEULE LECTURE DES REGLAGES, partagee par << Lancer >> et
      << Voir un apercu >>. Deux copies divergeraient : l apercu montrerait autre
      chose que ce que le lancement produirait. On envoie le sourire en BOOLEEN et
@@ -1578,6 +1609,11 @@ ${JS_ACTIVITE}${JS_DIRE}
        traitements, eux, n ont rien a choisir : leur demander un panneau serait
        un clic de plus pour rien. */
     if (quoi === 'humain' && !scene) { sceneOuvrir(ids); return; }
+    /* ⚠ LE RETRAIT PASSE PAR SON PANNEAU, une seule fois. Le parametre scene sert
+       ici de sentinelle « déjà confirmé » (comme pour l'humain) : le bouton
+       « Lancer » du panneau rappelle lancerLot avec une valeur truthy, ce qui
+       saute cette porte et va droit a la garde des frais. */
+    if (quoi === 'fantome' && !scene) { retraitOuvrir(ids); return; }
     if (occupeDeja('Traitement en lot')) return;
     /* ⚠ LA GARDE DES FRAIS PHOTOROOM, EN PRE-VOL ET GROUPEE. On demande au coeur
        quelles photos de ce lot ont deja coute un credit Photoroom, et l on
@@ -2233,6 +2269,22 @@ ${JS_ACTIVITE}${JS_DIRE}
           ex.focus();
         };
       });
+      return;
+    }
+    if (RETRAIT_OUVERT) {
+      var rnon = document.getElementById('rt-non');
+      if (rnon) rnon.onclick = retraitFermer;
+      var rap = document.getElementById('rt-apercu');
+      if (rap) rap.onclick = function(){ apercuLot('fantome', null, (RETRAIT_IDS || []).slice()); };
+      var rgo = document.getElementById('rt-go');
+      if (rgo) rgo.onclick = function(){
+        RETRAIT_OUVERT = false; RETRAIT_IDS = null;
+        dessiner();
+        /* La sentinelle truthy saute la porte du panneau ; CHOIX porte toujours la
+           selection, donc lancerLot repart sur les memes photos et enchaine la
+           garde des frais puis le traitement. */
+        lancerLot('fantome', { _ok: 1 });
+      };
       return;
     }
     if (LOTS) { lotsBrancher(); return; }
