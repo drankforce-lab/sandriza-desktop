@@ -1356,6 +1356,7 @@ const OPS_PONT = new Set([
   // Traitements nommes (detourage, mannequin retire, porte par un mannequin)
   // et le meme geste sur un LOT.
   'photos:traiter', 'photos:lot', 'photos:renommer', 'photos:fraisEtat',
+  'photos:apercu',
   // L assistant de traitement en lot : lire une source SANS importer, montrer,
   // importer ce qui est choisi, puis traiter — chaine imposee par le coeur.
   'lot:sources', 'lot:vignette', 'lot:importer', 'lot:traiter',
@@ -1633,6 +1634,9 @@ const LIMITES_PONT = {
   // parallele) avant un lot : quelques secondes au plus, mais on laisse de la
   // marge pour un lot de soixante photos sur une liaison lente.
   'photos:fraisEtat': 60000,
+  // Un apercu sandbox = un appel Photoroom complet (comme un traitement) : meme
+  // ordre de grandeur, on lui laisse la meme marge qu'a photos:isoler.
+  'photos:apercu': 180000,
   /* ⚠⚠ ET VOICI POURQUOI << TOUT VIDER >> LAISSAIT 32 PHOTOS (2026-08-09).
      `photos:vider` n etait pas dans cette table : elle heritait du plafond
      ordinaire de 8 SECONDES, alors qu elle supprime les photos UNE A UNE avec

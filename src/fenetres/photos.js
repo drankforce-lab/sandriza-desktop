@@ -1370,6 +1370,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'l’état réel d’un article.</div>'
       + '</div>'
       + '<div class="pied"><button id="sc-non">Annuler</button>'
+      + '<button id="sc-apercu" title="Voir un aperçu filigrané et gratuit avec ces réglages">👁 Voir un aperçu</button>'
       + '<button class="prim" id="sc-go">Lancer sur ' + n + ' photo' + (n > 1 ? 's' : '') + '</button>'
       + '</div></div></div>';
   }
@@ -1383,6 +1384,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
         }).join('')
       + '<button class="mini" data-lot="pivot" title="Pivoter d’un quart de tour vers la droite">⟳ Pivoter</button>'
+      + '<button class="mini" data-apercu="fantome" title="Voir le retrait du mannequin, filigrané et gratuit, avant de payer">👁 Aperçu du retrait</button>'
       + '<button class="mini dgr" id="p-lot-sup">'
       + (SUP_LOT_ARME ? 'Confirmer — supprimer ' + n + ' ?' : 'Supprimer') + '</button>'
       + '<button class="mini" id="p-rien">Tout décocher</button>'
@@ -1438,6 +1440,92 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (oui) oui.onclick = function(){ fermer(); onOui(); };
     v.onclick = function(ev){ if (ev.target === v) fermer(); };
     if (oui) oui.focus();
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     L APERCU FILIGRANE — VOIR AVANT DE PAYER
+     ⚠ C EST GRATUIT ET SANS CONSEQUENCE : chaque apercu passe par la cle d essai
+     Photoroom (sandbox), qui rend une image barree << Photoroom >> sans entamer
+     le moindre credit reel. Rien n est enregistre : l image vit dans cette
+     planche et disparait avec elle. On dessine la planche d abord, puis on la
+     remplit photo par photo, pour qu un lot de dix ne fasse pas attendre le vide.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var APR_CHECKER = 'repeating-conic-gradient(#2a3444 0 25%, #222c3a 0 50%) 0 0/16px 16px';
+  function apercuFermer(){
+    var v = document.getElementById('apr-voile');
+    if (v && v.parentNode) v.parentNode.removeChild(v);
+  }
+  function apercuOuvrir(items, quoi){
+    apercuFermer();
+    var titre = (quoi === 'humain') ? 'Aperçu de la mise en scène'
+                                    : 'Aperçu du retrait de mannequin';
+    var cells = items.map(function(it, i){
+      return '<figure id="apr-c' + i + '" style="margin:0;background:#0e1522;'
+        + 'border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden;'
+        + 'display:flex;flex-direction:column">'
+        + '<div class="apr-img" style="aspect-ratio:1/1;display:flex;align-items:center;'
+        + 'justify-content:center;background:' + APR_CHECKER + ';color:#8fa1b8;'
+        + 'font-size:.78rem">…</div>'
+        + '<figcaption style="padding:.35rem .5rem;font-size:.72rem;color:#cbd5e1;'
+        + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
+        + esc((it.code || '') + (it.nom ? ' · ' + it.nom : '')) + '</figcaption></figure>';
+    }).join('');
+    var v = document.createElement('div');
+    v.id = 'apr-voile';
+    v.style.cssText = 'position:fixed;inset:0;z-index:130;background:rgba(6,10,18,.82);'
+      + 'display:flex;flex-direction:column;padding:1rem';
+    v.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">'
+      + '<h2 style="margin:0;font:700 1rem/1.2 Georgia,serif;color:#f0d6a0">' + esc(titre) + '</h2>'
+      + '<span style="font-size:.74rem;color:#8fa1b8">gratuit · filigrané · aucun crédit réel</span>'
+      + '<button id="apr-x" style="margin-left:auto;font:inherit;color:#e8edf5;'
+      + 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);'
+      + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">Fermer</button></div>'
+      + '<div style="flex:1 1 auto;min-height:0;overflow:auto;display:grid;'
+      + 'grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;'
+      + 'align-content:start">' + cells + '</div>'
+      + '<div style="margin-top:.55rem;font-size:.74rem;color:#8fa1b8">Pour la version '
+      + 'définitive sans filigrane, lancez le traitement : il consomme alors un crédit '
+      + 'Photoroom.</div>';
+    document.body.appendChild(v);
+    document.getElementById('apr-x').onclick = apercuFermer;
+    v.onclick = function(ev){ if (ev.target === v) apercuFermer(); };
+  }
+  function apercuRemplir(i, r){
+    var c = document.getElementById('apr-c' + i);
+    if (!c) return;
+    var box = c.querySelector('.apr-img');
+    if (!box) return;
+    if (r && r.ok && r.image){
+      box.innerHTML = '';
+      var img = document.createElement('img');
+      img.src = r.image;
+      img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain';
+      box.appendChild(img);
+    } else {
+      box.textContent = (r && r.motif === 'non_configure') ? 'Clé Photoroom absente'
+        : ((r && (r.detail || r.motif)) || 'échec');
+      box.style.color = '#fca5a5';
+    }
+  }
+  function apercuLot(quoi, scene, ids){
+    ids = ids || Object.keys(CHOIX);
+    if (!ids.length) return;
+    if (occupeDeja('Aperçu')) return;
+    var items = ids.map(function(i){
+      var c = CHOIX[i] || {};
+      return { id: i, code: c.code || '', nom: c.nom || '' };
+    });
+    apercuOuvrir(items, quoi);
+    occuper('Aperçu de ' + ids.length + '…');
+    var suite = function(k){
+      if (k >= ids.length){ liberer(); dire('Aperçu prêt.', 'bon'); return; }
+      occuper('Aperçu ' + (k + 1) + ' / ' + ids.length + '…');
+      appeler('photos:apercu', [ids[k], quoi, scene || {}]).then(function(r){
+        apercuRemplir(k, r);
+        suite(k + 1);
+      });
+    };
+    suite(0);
   }
 
   function lancerLot(quoi, scene){
@@ -2095,6 +2183,17 @@ ${JS_ACTIVITE}${JS_DIRE}
         dessiner();
         lancerLot('humain', scene);
       };
+      var apr = document.getElementById('sc-apercu');
+      if (apr) apr.onclick = function(){
+        var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+        var sourire = document.getElementById('sc-sourire');
+        var scene = { modele: v('sc-mod'), pose: v('sc-pose'), decor: v('sc-dec') };
+        if (!sourire || !sourire.checked) { scene.consigne = 'neutral expression'; }
+        /* ⚠ LE PANNEAU RESTE OUVERT : un apercu sert justement a juger puis
+           ajuster avant de lancer. La planche s ouvre par-dessus (z-index plus
+           haut), et SCENE_IDS n est pas efface. */
+        apercuLot('humain', scene, (SCENE_IDS || []).slice());
+      };
       return;
     }
     if (LOTS) { lotsBrancher(); return; }
@@ -2309,6 +2408,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     Array.prototype.forEach.call(corps.querySelectorAll('[data-lot]'), function(b){
       b.onclick = function(){ lancerLot(b.getAttribute('data-lot')); };
+    });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-apercu]'), function(b){
+      b.onclick = function(){ apercuLot(b.getAttribute('data-apercu'), null); };
     });
 
     var fx = document.getElementById('p-fermer-insp');
