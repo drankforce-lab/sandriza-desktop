@@ -1327,7 +1327,6 @@ ${JS_ACTIVITE}${JS_DIRE}
      vetement porte par une personne qui n a pas l air contente se vend moins
      bien. Ce n est pas un avis : les deux essais sont cote a cote.
      ══════════════════════════════════════════════════════════════════════════ */
-  var SCENE = null;
   var SCENE_IDS = null;
   var MODELES_SC = [['sophia','Sophia'],['emma','Emma'],['ava','Ava'],['zoe','Zoé'],
     ['maya','Maya'],['lena','Lena'],['julia','Julia'],['fiona','Fiona'],
@@ -1344,7 +1343,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     ['library','Bibliothèque'],['mountain','Montagne'],['pool','Piscine'],
     ['factory','Friche industrielle']];
 
-  function sceneOuvrir(ids){ SCENE_IDS = ids; SCENE = null; SCENE_OUVERT = true; dessiner(); }
+  function sceneOuvrir(ids){ SCENE_IDS = ids; SCENE_OUVERT = true; dessiner(); }
   function sceneFermer(){ SCENE_OUVERT = false; SCENE_IDS = null; dessiner(); }
   var SCENE_OUVERT = false;
 
@@ -1391,7 +1390,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'l’original est conservé à côté.</span></div>';
   }
 
-  function lancerLot(quoi){
+  function lancerLot(quoi, scene){
     var ids = Object.keys(CHOIX);
     if (!ids.length) return;
     /* ⚠ LA ROTATION N EST PAS UN TRAITEMENT PAR MODELE : elle est locale,
@@ -1403,7 +1402,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        payer deux fois pour decouvrir qu on voulait autre chose. Les autres
        traitements, eux, n ont rien a choisir : leur demander un panneau serait
        un clic de plus pour rien. */
-    if (quoi === 'humain' && !SCENE) { sceneOuvrir(ids); return; }
+    if (quoi === 'humain' && !scene) { sceneOuvrir(ids); return; }
     if (occupeDeja('Traitement en lot')) return;
     /* ⚠ LES NOMS VIENNENT DU CHOIX, PAS DE LA PAGE : une photo cochee page 1 et
        traitee depuis la page 4 doit garder son nom dans le suivi. */
@@ -1442,7 +1441,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       suiviLigne(k, 'cours', 'en cours');
       suiviEtapes(k, [{ nom: 'envoi au modèle', etat: 'encours' }]);
       occuper('Traitement ' + (k + 1) + ' / ' + ids.length + '…');
-      appeler('photos:traiter', [ids[k], quoi, (quoi === 'humain' && SCENE) ? SCENE : {}]).then(function(r){
+      appeler('photos:traiter', [ids[k], quoi, scene || {}]).then(function(r){
         if (r && r.ok) {
           faites++;
           if (r.par === 'canevas') replis++;
@@ -2005,20 +2004,26 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (go) go.onclick = function(){
         var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
         var sourire = document.getElementById('sc-sourire');
-        SCENE = { modele: v('sc-mod'), pose: v('sc-pose'), decor: v('sc-dec') };
+        var scene = { modele: v('sc-mod'), pose: v('sc-pose'), decor: v('sc-dec') };
         /* ⚠ DECOCHER LE SOURIRE DEMANDE EXPLICITEMENT UN VISAGE NEUTRE : laisser
            la consigne vide rendrait la consigne PAR DEFAUT du relais, qui, elle,
            fait sourire. Un reglage decoche qui ne change rien serait pire que
            pas de reglage du tout. */
-        if (!sourire || !sourire.checked) { SCENE.consigne = 'neutral expression'; }
-        var ids = SCENE_IDS || [];
+        if (!sourire || !sourire.checked) { scene.consigne = 'neutral expression'; }
+        /* ⚠⚠ LE PANNEAU SE FERME AVANT LE LANCEMENT. Il restait ouvert au-dessus
+           du suivi pendant toute la generation : on ne voyait plus l avancement,
+           et le meme bouton semblait relancable. Un panneau de reglages qui
+           survit au geste qu il declenche n est plus un reglage, c est un
+           obstacle.
+           ⚠ ET LA SCENE VOYAGE EN PARAMETRE, PLUS EN VARIABLE PARTAGEE. Elle
+           etait remise a zero par une minuterie de cent millisecondes : sur un
+           lot de vingt photos, les dix-neuf suivantes l auraient perdue en cours
+           de route et seraient parties avec les reglages par defaut — sans que
+           rien ne le signale, et en facturant chacune. */
         SCENE_OUVERT = false;
         SCENE_IDS = null;
-        lancerLot('humain');
-        // ⚠ On repose le choix APRES le lancement : lancerLot le lit, et le
-        // laisser trainer appliquerait la meme scene au prochain lot sans le dire.
-        setTimeout(function(){ SCENE = null; }, 100);
-        if (!ids.length) dessiner();
+        dessiner();
+        lancerLot('humain', scene);
       };
       return;
     }
