@@ -253,6 +253,15 @@ tr:hover .act .ic{opacity:1}
 .ch select{flex:1;background:#0f1724;color:#e8edf5;border:1px solid #2b3444;
   border-radius:.4rem;padding:.42rem .55rem;font:inherit}
 .ch input[type=checkbox]{accent-color:#c9a97e;margin-right:.35rem}
+.ch.col{display:block}
+.ch.col>label:first-child{display:block;min-width:0;margin-bottom:.35rem}
+.ch textarea{width:100%;box-sizing:border-box;background:#0f1724;color:#e8edf5;
+  border:1px solid #2b3444;border-radius:.4rem;padding:.42rem .55rem;font:inherit;
+  resize:vertical;min-height:2.6rem;line-height:1.4}
+.sugg{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+.sugg button{font-size:.72rem;padding:.2rem .55rem;background:rgba(201,169,126,.14);
+  border:1px solid rgba(201,169,126,.35);color:#e8dcc4;border-radius:999px;cursor:pointer}
+.sugg button:hover{background:rgba(201,169,126,.24)}
 .asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.6rem .9rem;border-top:1px solid rgba(255,255,255,.08);background:#0f1725}
 .asst .pi .dr{margin-left:auto;display:flex;gap:.5rem}
@@ -1347,6 +1356,20 @@ ${JS_ACTIVITE}${JS_DIRE}
   function sceneFermer(){ SCENE_OUVERT = false; SCENE_IDS = null; dessiner(); }
   var SCENE_OUVERT = false;
 
+  /* ⚠ UNE SEULE LECTURE DES REGLAGES, partagee par << Lancer >> et
+     << Voir un apercu >>. Deux copies divergeraient : l apercu montrerait autre
+     chose que ce que le lancement produirait. On envoie le sourire en BOOLEEN et
+     les precisions en TEXTE LIBRE (extra) ; c est le serveur qui compose le
+     prompt final (base + precisions), pour rester valable meme sur un lot. */
+  function sceneLire(){
+    var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var sourire = document.getElementById('sc-sourire');
+    var ex = document.getElementById('sc-extra');
+    return { modele: v('sc-mod'), pose: v('sc-pose'), decor: v('sc-dec'),
+             sourire: !!(sourire && sourire.checked),
+             extra: ex ? ex.value.trim().slice(0, 240) : '' };
+  }
+
   function liste_(id, options, choisi){
     return '<select id="' + id + '">' + options.map(function(o){
       return '<option value="' + esc(o[0]) + '"' + (o[0] === choisi ? ' selected' : '')
@@ -1365,6 +1388,20 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="ch"><label>Décor</label>' + liste_('sc-dec', DECORS_SC, 'studio') + '</div>'
       + '<div class="ch"><label><input type="checkbox" id="sc-sourire" checked> '
       + 'Sourire naturel, regard vers l’objectif</label></div>'
+      + '<div class="ch col"><label>Précisions (facultatif)</label>'
+      + '<textarea id="sc-extra" rows="2" maxlength="240" placeholder="ex. talons assortis, '
+      + 'bijoux dorés discrets, cheveux attachés, lumière chaude de fin de journée"></textarea>'
+      + '<div class="sugg">'
+      + '<button type="button" data-sugg="chaussures assorties au vêtement">+ Chaussures</button>'
+      + '<button type="button" data-sugg="bijoux fins et discrets">+ Bijoux</button>'
+      + '<button type="button" data-sugg="sac à main coordonné">+ Sac à main</button>'
+      + '<button type="button" data-sugg="coiffure soignée">+ Coiffure</button>'
+      + '<button type="button" data-sugg="lumière chaude de fin de journée">+ Lumière chaude</button>'
+      + '</div>'
+      + '<div class="aide" style="margin-top:.4rem">Ces précisions partent en texte au '
+      + 'générateur, qui en tient compte au mieux : Photoroom n’a pas de réglage dédié pour '
+      + 'les chaussures ou les bijoux. Un aperçu filigrané permet de vérifier avant de payer.</div>'
+      + '</div>'
       + '<div class="aide">Cette image est ENGENDRÉE : la personne, la pose et le décor '
       + 'n’ont jamais existé. À réserver à la mise en scène — jamais pour montrer '
       + 'l’état réel d’un article.</div>'
@@ -2160,14 +2197,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (non) non.onclick = sceneFermer;
       var go = document.getElementById('sc-go');
       if (go) go.onclick = function(){
-        var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-        var sourire = document.getElementById('sc-sourire');
-        var scene = { modele: v('sc-mod'), pose: v('sc-pose'), decor: v('sc-dec') };
-        /* ⚠ DECOCHER LE SOURIRE DEMANDE EXPLICITEMENT UN VISAGE NEUTRE : laisser
-           la consigne vide rendrait la consigne PAR DEFAUT du relais, qui, elle,
-           fait sourire. Un reglage decoche qui ne change rien serait pire que
-           pas de reglage du tout. */
-        if (!sourire || !sourire.checked) { scene.consigne = 'neutral expression'; }
+        var scene = sceneLire();
         /* ⚠⚠ LE PANNEAU SE FERME AVANT LE LANCEMENT. Il restait ouvert au-dessus
            du suivi pendant toute la generation : on ne voyait plus l avancement,
            et le meme bouton semblait relancable. Un panneau de reglages qui
@@ -2185,15 +2215,24 @@ ${JS_ACTIVITE}${JS_DIRE}
       };
       var apr = document.getElementById('sc-apercu');
       if (apr) apr.onclick = function(){
-        var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-        var sourire = document.getElementById('sc-sourire');
-        var scene = { modele: v('sc-mod'), pose: v('sc-pose'), decor: v('sc-dec') };
-        if (!sourire || !sourire.checked) { scene.consigne = 'neutral expression'; }
         /* ⚠ LE PANNEAU RESTE OUVERT : un apercu sert justement a juger puis
            ajuster avant de lancer. La planche s ouvre par-dessus (z-index plus
            haut), et SCENE_IDS n est pas efface. */
-        apercuLot('humain', scene, (SCENE_IDS || []).slice());
+        apercuLot('humain', sceneLire(), (SCENE_IDS || []).slice());
       };
+      // Les suggestions de precisions : un clic ajoute le texte au champ libre,
+      // sans doublon, en gardant ce que l usager a deja ecrit.
+      Array.prototype.forEach.call(document.querySelectorAll('[data-sugg]'), function(b){
+        b.onclick = function(){
+          var ex = document.getElementById('sc-extra');
+          if (!ex) return;
+          var t = b.getAttribute('data-sugg') || '';
+          var cur = ex.value.trim();
+          if (cur.toLowerCase().indexOf(t.toLowerCase()) >= 0) { ex.focus(); return; }
+          ex.value = cur ? (cur.replace(/[,\s]+$/, '') + ', ' + t) : t;
+          ex.focus();
+        };
+      });
       return;
     }
     if (LOTS) { lotsBrancher(); return; }
