@@ -533,9 +533,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="mini" id="p-lots"' + (D.total ? '' : ' disabled')
       + ' title="' + (D.total ? 'Historique des lots importés'
                              : 'Aucune photo : il n’y a pas encore de lot') + '">Lots</button>'
-      + '<button class="mini" id="p-fal"' + (D.total ? '' : ' disabled')
-      + ' title="' + (D.total ? 'Consommation et journal des traitements'
-                             : 'Aucune photo : aucun traitement à suivre') + '">Traitements IA</button>'
+      /* ⚠ PLUS DE BOUTON « Traitements IA » ICI (2026-08-10) : c'est un JOURNAL,
+         et les journaux ne s'ouvrent plus depuis d'autres fenêtres — ils vivront
+         dans la fenêtre Journaux unifiée (palier 5). L'écran reste accessible par
+         le menu Configuration en attendant. */
       + (D.total && !ro
           ? '<button class="mini danger" id="p-vider">' + (VIDER_ARME ? 'Confirmer — vider les ' + D.total + ' ?' : 'Tout vider') + '</button>'
           : '')
@@ -1130,7 +1131,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (echecs) t += ' · ' + echecs + ' en échec';
         if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
         suiviFin(t + '.', abandon ? (libelle + ' interrompu') : (libelle + ' terminé'));
-        if (!echecs && !abandon) setTimeout(suiviFermer, 3000);
+        if (!echecs && !abandon) suiviAutoFermer(3000);
         dire(t + '.', echecs ? 'att' : 'bon');
         charger();
         return;
@@ -1666,7 +1667,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (echecs) t += ' · ' + echecs + ' en échec';
         if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
         suiviFin(t + '.', abandon ? (nomLot + ' interrompu') : (nomLot + ' terminé'));
-        if (!echecs && !replis && !abandon) setTimeout(suiviFermer, 2500);
+        if (!echecs && !replis && !abandon) suiviAutoFermer(2500);
         dire(t + '.', echecs ? 'att' : 'bon');
         CHOIX = {};
         charger();
@@ -1721,7 +1722,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (rates) t += ' · ' + rates + ' en échec';
         if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
         suiviFin(t + '.', abandon ? 'Rotation interrompue' : 'Rotation terminée');
-        if (!rates && !abandon) setTimeout(suiviFermer, 2500);
+        if (!rates && !abandon) suiviAutoFermer(2500);
         dire(t + '.', rates ? 'att' : 'bon');
         charger();
         return;
@@ -1943,9 +1944,14 @@ ${JS_ACTIVITE}${JS_DIRE}
      agreable et faux.
      ══════════════════════════════════════════════════════════════════════════ */
   var ANNULE = false;
+  // ⚠ LA MINUTERIE D'AUTO-FERMETURE EST SUIVIE, sinon celle d'un lot TERMINÉ
+  // ferme le panneau d'un lot RELANCÉ juste après (vécu 2026-08-10 : un pivot
+  // reclique aussitôt voyait son suivi se fermer tout seul en pleine rotation).
+  var SUIVI_TIMER = null;
 
   function suiviOuvrir(noms, titre){
     if (SUIVI && SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
+    clearTimeout(SUIVI_TIMER); SUIVI_TIMER = null;
     SUIVI = null;
     DERNIER_SUIVI = '';
     ANNULE = false;
@@ -1988,12 +1994,19 @@ ${JS_ACTIVITE}${JS_DIRE}
   var DERNIER_SUIVI = '';
 
   function suiviFermer(){
-    if (SUIVI) {
-      try { DERNIER_SUIVI = SUIVI.innerHTML; } catch (e) { DERNIER_SUIVI = ''; }
-      if (SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
-    }
+    clearTimeout(SUIVI_TIMER); SUIVI_TIMER = null;
+    // ⚠ ON NE CAPTURE PLUS LE CONTENU ICI : « Dernier suivi » doit montrer le
+    // compte rendu TERMINÉ (posé par suiviFin), jamais un instantané pris en plein
+    // milieu (« 0 % · Préparation… · en cours ») si le panneau se ferme trop tôt.
+    if (SUIVI && SUIVI.parentNode) SUIVI.parentNode.removeChild(SUIVI);
     SUIVI = null;
     dessiner();
+  }
+  // Auto-fermeture SUIVIE : une seule minuterie à la fois, annulable par le
+  // prochain suiviOuvrir (sinon elle fermerait le panneau du lot suivant).
+  function suiviAutoFermer(ms){
+    clearTimeout(SUIVI_TIMER);
+    SUIVI_TIMER = setTimeout(suiviFermer, ms);
   }
 
   function suiviRouvrir(){
@@ -2047,6 +2060,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (t) t.textContent = titre || 'Terminé';
     var a = document.getElementById('sv-a');
     if (a) a.remove();
+    // ⚠ « DERNIER SUIVI » = LE COMPTE RENDU TERMINÉ, capturé ICI (pas à la
+    // fermeture) : ainsi il montre toujours l'état final, même si le panneau se
+    // ferme tout de suite après.
+    try { if (SUIVI) DERNIER_SUIVI = SUIVI.innerHTML; } catch (e) {}
   }
 
   function importer(fichiers){
@@ -2100,7 +2117,7 @@ ${JS_ACTIVITE}${JS_DIRE}
            ⚠ MAIS IL RESTE DES QU IL Y A QUELQUE CHOSE A VOIR — un echec, une
            trop lourde, un doublon. C est precisement le cas ou l on veut savoir
            LAQUELLE, et le faire disparaitre effacerait la seule reponse. */
-        if (!echoues && !refuses && !doubles && !abandonnees) setTimeout(suiviFermer, 2500);
+        if (!echoues && !refuses && !doubles && !abandonnees) suiviAutoFermer(2500);
         dire(t + '.', (echoues || refuses) ? 'att' : 'bon');
         charger();
         return;
@@ -2408,13 +2425,6 @@ ${JS_ACTIVITE}${JS_DIRE}
       };
     });
 
-    var fal = document.getElementById('p-fal');
-    if (fal) fal.onclick = function(){
-      dire('Ouverture du suivi des traitements…');
-      appeler('fal:ouvrir', []).then(function(r){
-        dire(r && r.ok ? '' : expliquer(r), r && r.ok ? '' : 'err');
-      });
-    };
 
     /* ⚠ LA CASE NE DOIT PAS OUVRIR LA PHOTO : la ligne entiere est cliquable,
        et sans ce garde, cocher ouvrirait le panneau de detail par-dessus. */
@@ -2482,7 +2492,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           if (rates) t += ' · ' + rates + ' refusée' + (rates > 1 ? 's' : '');
           if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
           suiviFin(t + '.', abandon ? 'Suppression interrompue' : 'Suppression terminée');
-          if (!rates && !abandon) setTimeout(suiviFermer, 2500);
+          if (!rates && !abandon) suiviAutoFermer(2500);
           dire(t + '.', rates ? 'att' : 'bon');
           charger();
           return;
@@ -2587,7 +2597,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             if (rates) m += ' · ' + rates + ' refusée' + (rates > 1 ? 's' : '');
             if (abandon) m += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
             suiviFin(m + '.', abandon ? 'Vidage interrompu' : 'Vidage terminé');
-            if (!rates && !abandon) setTimeout(suiviFermer, 2500);
+            if (!rates && !abandon) suiviAutoFermer(2500);
             dire(m + '. Les fiches produits gardent leurs images.', rates ? 'att' : 'bon');
             CHOIX = {};
             charger();
