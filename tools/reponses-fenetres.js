@@ -902,9 +902,13 @@ module.exports = {
     ];
     var BASE = { ok: true, parModele: PAR_MODELE, parJour: PAR_JOUR,
                  total: 1.888, appels: 127, coutsReels: 52,
-                 tableauDeBord: 'https://fal.ai/dashboard/billing', evenements: [] };
+                 tableauDeBord: 'https://fal.ai/dashboard/billing', evenements: [],
+                 soldeSaisi: 25.00, soldeDate: '2026-08-01T00:00:00Z', consoDepuis: 1.20 };
+    var PR_OK = { ok: true, compte: { available: 83, subscription: 100, plan: 'plus' },
+                  sandbox: { utilise: 42, quotaMois: 1000, quotaJour: 100, estime: true },
+                  prixEdit: 0.10 };
     return [
-      { nom: 'consommation', reponses: { 'fal:suivi': BASE, identite: IDENTITE } },
+      { nom: 'consommation', reponses: { 'fal:suivi': BASE, 'photoroom:compte': PR_OK, identite: IDENTITE } },
       {
         nom: 'historique',
         id: 'historique',
@@ -920,6 +924,7 @@ module.exports = {
               qui: 'bbrousseau', ms: 900, ok: false,
               erreur: 'Exhausted balance. Please top up your account.', cout: 0, coutReel: false },
           ] }),
+          'photoroom:compte': PR_OK,
           identite: IDENTITE,
         },
       },
@@ -929,6 +934,8 @@ module.exports = {
           'fal:suivi': { ok: true, parModele: [], parJour: [], total: 0, appels: 0,
                          coutsReels: 0, evenements: [],
                          tableauDeBord: 'https://fal.ai/dashboard/billing' },
+          'photoroom:compte': { ok: true, compte: null,
+                                sandbox: { utilise: 0, quotaMois: 1000, quotaJour: 100, estime: true } },
           identite: IDENTITE,
         },
       },

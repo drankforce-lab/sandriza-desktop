@@ -1363,7 +1363,7 @@ const OPS_PONT = new Set([
   // defaire d un geste.
   'lot:liste', 'lot:jeter', 'lot:ouvrir', 'lot:clore', 'photos:toutes', 'photos:pivoter', 'photos:ranger', 'photos:espace',
   // Le suivi de consommation Fal.ai (lecture seule).
-  'fal:suivi', 'fal:ouvrir',
+  'fal:suivi', 'fal:ouvrir', 'photoroom:compte',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1641,6 +1641,7 @@ const LIMITES_PONT = {
   'lot:jeter': 600000, 'lot:sources': 90000, 'lot:vignette': 30000,
   'lot:importer': 90000, 'lot:traiter': 180000, 'lot:liste': 30000,
   'photos:importer': 60000, 'photos:usb': 120000, 'fal:suivi': 20000,
+  'photoroom:compte': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,

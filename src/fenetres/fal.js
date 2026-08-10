@@ -103,7 +103,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 function pageFal(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Consommation Fal.ai — Administration Sandriza</title>
+<title>Traitements d’image — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">🧠</span><h1>Traitements d’image</h1>
   <span class="sous" id="sous"></span></div>
@@ -122,6 +122,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous  = document.getElementById('sous');
   var VUE = ${dep} === 'historique' ? 'hist' : 'conso';
   var D = null;
+  var PR = null;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -168,25 +169,63 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (isNaN(d.getTime())) return esc(iso);
     return d.toLocaleString('fr-CA', { dateStyle: 'medium', timeStyle: 'short' });
   }
+  function jourCourt(iso){
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return esc(iso);
+    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
   function duree(ms){
     var n = Number(ms) || 0;
     return n >= 1000 ? (Math.round(n / 100) / 10).toString().replace('.', ',') + ' s' : n + ' ms';
   }
 
-  /* ⚠ LE BLOC QUI DIT CE QU ON NE SAIT PAS. Il est en haut, pas en bas : la
-     premiere question qu on se pose devant cet ecran est << combien me
-     reste-t-il >>, et la reponse honnete est << pas ici >>. */
+  /* La carte des CRÉDITS PHOTOROOM — le fournisseur principal du retrait et de
+     l’ajout de mannequin. Le restant est RÉEL, lu de /v2/account ; le sandbox
+     est notre compte estimé (Photoroom ne l’expose pas). */
+  function cartePhotoroom(){
+    var reel;
+    if (PR && PR.compte && PR.compte.available != null) {
+      var c = PR.compte;
+      reel = '<div class="t"><div class="l">Crédits Photoroom (réels)</div><div class="n">'
+        + c.available + (c.subscription != null ? ' <span class="s">/ ' + c.subscription + '</span>' : '')
+        + '</div><div class="s">' + (c.plan ? 'offre ' + esc(c.plan) + ' · ' : '')
+        + 'lus en direct de Photoroom</div></div>';
+    } else {
+      reel = '<div class="t"><div class="l">Crédits Photoroom (réels)</div><div class="n">—</div>'
+        + '<div class="s">' + (PR ? 'indisponible (clé de production requise)' : 'non lu') + '</div></div>';
+    }
+    var sb = (PR && PR.sandbox) ? PR.sandbox : { utilise: 0, quotaMois: 1000 };
+    var sand = '<div class="t"><div class="l">Aperçus sandbox</div><div class="n">'
+      + (sb.utilise || 0) + ' <span class="s">/ ' + (sb.quotaMois || 1000) + '</span></div>'
+      + '<div class="s">ce mois · estimé · filigrané</div></div>';
+    return '<div class="carte"><h2>Crédits Photoroom</h2><div class="tuiles">' + reel + sand + '</div></div>';
+  }
+
+  /* Le solde FAL.AI — SAISI À LA MAIN, faute d’API. On le dit, on le date, et on
+     montre la consommation mesurée depuis : un reste estimé, honnête et daté. */
   function franchise(){
     var reels = (D.coutsReels || 0), tot = (D.appels || 0);
     var part = tot ? Math.round(reels * 100 / tot) : 0;
-    return '<div class="franc">'
-      + '<b>Le solde du compte n’est pas affiché ici, et ce n’est pas un oubli.</b> '
-      + 'Fal.ai n’expose aucune interface publique qui le donne. Le calculer en '
-      + 'soustrayant cette consommation d’un montant saisi à la main dériverait au '
-      + 'premier achat de crédit fait ailleurs, sans que personne pense à le '
-      + 'vérifier. Le solde se lit sur '
-      + '<a href="' + esc(D.tableauDeBord || 'https://fal.ai/dashboard/billing') + '" target="_blank">'
-      + 'le tableau de bord de Fal.ai</a>.<br>'
+    var solde = Number(D.soldeSaisi) || 0, conso = Number(D.consoDepuis) || 0;
+    var bloc;
+    if (solde > 0) {
+      var reste = solde - conso; if (reste < 0) { reste = 0; }
+      bloc = '<b>Solde fal.ai saisi à la main : ' + sous_(solde) + '</b>'
+        + (D.soldeDate ? ' (le ' + esc(jourCourt(D.soldeDate)) + ')' : '') + '. '
+        + 'Consommation mesurée depuis : ' + sous_(conso) + ' — <b>reste estimé '
+        + sous_(reste) + '</b>.<br>'
+        + '⚠ C’est un montant que <b>vous</b> avez inscrit : il ne suit pas les achats faits '
+        + 'ailleurs. Tenez-le à jour dans Configuration, et vérifiez le vrai solde sur '
+        + '<a href="' + esc(D.tableauDeBord || 'https://fal.ai/dashboard/billing') + '" target="_blank">'
+        + 'le tableau de bord de Fal.ai</a>.';
+    } else {
+      bloc = '<b>Aucun solde fal.ai saisi.</b> Fal.ai n’expose aucun solde par API. Inscrivez '
+        + 'le montant vu sur <a href="' + esc(D.tableauDeBord || 'https://fal.ai/dashboard/billing') + '" '
+        + 'target="_blank">le tableau de bord de Fal.ai</a> dans Configuration : l’écran affichera '
+        + 'alors le reste estimé et la consommation depuis.';
+    }
+    return '<div class="franc">' + bloc + '<br>'
       + 'Ce qui est montré ici est <b>mesuré</b>&nbsp;: chaque appel passe par notre relais. '
       + (tot
           ? ('Sur ' + tot + ' appel' + (tot > 1 ? 's' : '') + ', <b>' + part + '&nbsp;%</b> '
@@ -200,6 +239,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = [];
     h.push('<div class="barreoutils"><span class="droite">'
       + '<button id="b-recharger">Recharger</button></span></div>');
+    h.push(cartePhotoroom());
     h.push(franchise());
 
     var reussis = 0;
@@ -307,7 +347,13 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function charger(dit){
     if (dit) dire('Lecture…');
-    appeler('fal:suivi', [VUE === 'hist' ? 'journal' : 'resume']).then(function(r){
+    Promise.all([
+      appeler('fal:suivi', [VUE === 'hist' ? 'journal' : 'resume']),
+      appeler('photoroom:compte')
+    ]).then(function(rs){
+      var r = rs[0];
+      // Le compteur Photoroom ne bloque pas l’écran : s’il échoue, la carte le dit.
+      PR = (rs[1] && rs[1].ok) ? rs[1] : null;
       if (!r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
