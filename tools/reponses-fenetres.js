@@ -1074,6 +1074,23 @@ module.exports = {
     } },
   ],
 
+  // Configuration — Thème et apparence (palier 5, 3e onglet natif).
+  'apparence.js': [
+    { nom: 'apparence', reponses: {
+      identite: IDENTITE,
+      'config:apparence:donnees': { ok: true, peutModifier: true, adm: 'ocean', store: '',
+        admThemes: [
+          { id: '',         label: 'Défaut',   bg: '#0e1825', accent: '#C49A6C' },
+          { id: 'ocean',    label: 'Océan',    bg: '#04334d', accent: '#38BDF8' },
+          { id: 'graphite', label: 'Graphite', bg: '#141414', accent: '#FBBF24' },
+        ],
+        storeThemes: [
+          { id: '',      label: 'Défaut', bg: '#FDF8F5', accent: '#C49A6C' },
+          { id: 'rose',  label: 'Rose',   bg: '#FFE4E6', accent: '#E11D48' },
+        ] },
+    } },
+  ],
+
   'comptable.js': [
     {
       nom: 'exercices garnis',

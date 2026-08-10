@@ -1368,6 +1368,7 @@ const OPS_PONT = new Set([
   // Configuration en fenêtres natives (palier 5) — 1er onglet : Heures d'ouverture.
   'config:heures:donnees', 'config:heures:ecrire',
   'config:footer:donnees', 'config:footer:ecrire',
+  'config:apparence:donnees', 'config:apparence:ecrire',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1654,6 +1655,7 @@ const LIMITES_PONT = {
   'photos:importer': 60000, 'photos:usb': 120000, 'fal:suivi': 20000,
   'config:heures:donnees': 15000, 'config:heures:ecrire': 20000,
   'config:footer:donnees': 15000, 'config:footer:ecrire': 20000,
+  'config:apparence:donnees': 15000, 'config:apparence:ecrire': 20000,
   'photoroom:compte': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
@@ -2647,6 +2649,7 @@ const { pageBanque } = require('./fenetres/banque');
 const { pageFal } = require('./fenetres/fal');
 const { pageHeures } = require('./fenetres/heures');
 const { pageFooter } = require('./fenetres/footer');
+const { pageApparence } = require('./fenetres/apparence');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2692,6 +2695,10 @@ const actionApp = (nom) => {
     case 'config-footer':
       ouvrirNative('config-footer', 'Pied de page', pageFooter(),
         { width: 720, height: 680, minWidth: 540, minHeight: 460 });
+      break;
+    case 'config-apparence':
+      ouvrirNative('config-apparence', 'Thème et apparence', pageApparence(),
+        { width: 760, height: 600, minWidth: 560, minHeight: 420 });
       break;
     case 'fournisseur-nouveau':
       ouvrirNative('fournisseur', 'Nouveau fournisseur', pageFournisseur(''), { width: 800, height: 700 });
