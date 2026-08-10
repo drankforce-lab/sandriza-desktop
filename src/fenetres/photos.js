@@ -247,6 +247,12 @@ tr:hover .act .ic{opacity:1}
   align-items:center;justify-content:center;background:rgba(255,255,255,.08);font-size:.7rem}
 .asst .tt .pas b.on{background:#c9a97e;color:#1a1208}
 .asst .co{flex:1 1 auto;min-height:0;overflow-y:auto;padding:.85rem .9rem}
+/* Le choix de la mise en scene : des couples etiquette/valeur, alignes. */
+.ch{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
+.ch>label:first-child{min-width:7rem;color:#8fa1b8;font-size:.78rem}
+.ch select{flex:1;background:#0f1724;color:#e8edf5;border:1px solid #2b3444;
+  border-radius:.4rem;padding:.42rem .55rem;font:inherit}
+.ch input[type=checkbox]{accent-color:#c9a97e;margin-right:.35rem}
 .asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.6rem .9rem;border-top:1px solid rgba(255,255,255,.08);background:#0f1725}
 .asst .pi .dr{margin-left:auto;display:flex;gap:.5rem}
@@ -583,6 +589,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // ⚠ La classe se pose sur BODY et non sur le corps : c est elle qui decale
     // a la fois le tableau et le panneau de suivi, qui vit hors du corps.
     if (ASSIST) h += assistHtml();
+    else if (SCENE_OUVERT) h += sceneHtml();
     else if (LOTS) h += lotsHtml();
     document.body.classList.toggle('insp', !!DETAIL && !ASSIST);
     corps.innerHTML = h;
@@ -1310,6 +1317,64 @@ ${JS_ACTIVITE}${JS_DIRE}
     ['humain', 'Mettre sur un mannequin', 'Fait porter le vêtement par une personne engendrée.'],
   ];
 
+  /* ══════════════════════════════════════════════════════════════════════════
+     LE CHOIX DE LA MISE EN SCENE
+     ⚠ LES NOMS PARTENT EN ANGLAIS PARCE QUE LE SERVICE LES ATTEND AINSI ; c est
+     l ecran qui traduit, jamais la valeur envoyee. Traduire la valeur la ferait
+     refuser, et le refus parlerait d un champ que personne n aurait ecrit.
+     ⚠ ET LE SOURIRE EST COCHE PAR DEFAUT : sans consigne, le service rend un
+     visage neutre, presque ferme — quelqu un qui a l air de subir la seance. Un
+     vetement porte par une personne qui n a pas l air contente se vend moins
+     bien. Ce n est pas un avis : les deux essais sont cote a cote.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var SCENE = null;
+  var SCENE_IDS = null;
+  var MODELES_SC = [['sophia','Sophia'],['emma','Emma'],['ava','Ava'],['zoe','Zoé'],
+    ['maya','Maya'],['lena','Lena'],['julia','Julia'],['fiona','Fiona'],
+    ['avery','Avery'],['taylor','Taylor'],['kendall','Kendall'],['casey','Casey'],
+    ['jordan','Jordan'],['sam','Sam'],['reece','Reece'],['jackson','Jackson']];
+  var POSES_SC = [['34turn','Trois-quarts (met la coupe en valeur)'],
+    ['standing','Debout, de face'],['adjustingclothing','Ajuste son vêtement'],
+    ['handinpocket','Main dans la poche'],['crossedarms','Bras croisés'],
+    ['walkingforward','En marche'],['powerstance','Posture assurée'],
+    ['overtheshoulder','Regard par-dessus l’épaule'],['playfulspin','Tour sur soi'],
+    ['seated','Assise'],['back','De dos'],['random','Au hasard']];
+  var DECORS_SC = [['studio','Studio'],['street','Rue'],['beach','Bord de mer'],
+    ['sunset','Coucher de soleil'],['forest','Forêt'],['bedroom','Chambre'],
+    ['library','Bibliothèque'],['mountain','Montagne'],['pool','Piscine'],
+    ['factory','Friche industrielle']];
+
+  function sceneOuvrir(ids){ SCENE_IDS = ids; SCENE = null; SCENE_OUVERT = true; dessiner(); }
+  function sceneFermer(){ SCENE_OUVERT = false; SCENE_IDS = null; dessiner(); }
+  var SCENE_OUVERT = false;
+
+  function liste_(id, options, choisi){
+    return '<select id="' + id + '">' + options.map(function(o){
+      return '<option value="' + esc(o[0]) + '"' + (o[0] === choisi ? ' selected' : '')
+        + '>' + esc(o[1]) + '</option>';
+    }).join('') + '</select>';
+  }
+
+  function sceneHtml(){
+    var n = SCENE_IDS ? SCENE_IDS.length : 0;
+    return '<div class="asst"><div class="bo">'
+      + '<div class="tt"><h3>Mise en scène</h3>'
+      + '<span class="pas">' + n + ' photo' + (n > 1 ? 's' : '') + '</span></div>'
+      + '<div class="co">'
+      + '<div class="ch"><label>Mannequin</label>' + liste_('sc-mod', MODELES_SC, 'sophia') + '</div>'
+      + '<div class="ch"><label>Pose</label>' + liste_('sc-pose', POSES_SC, '34turn') + '</div>'
+      + '<div class="ch"><label>Décor</label>' + liste_('sc-dec', DECORS_SC, 'studio') + '</div>'
+      + '<div class="ch"><label><input type="checkbox" id="sc-sourire" checked> '
+      + 'Sourire naturel, regard vers l’objectif</label></div>'
+      + '<div class="aide">Cette image est ENGENDRÉE : la personne, la pose et le décor '
+      + 'n’ont jamais existé. À réserver à la mise en scène — jamais pour montrer '
+      + 'l’état réel d’un article.</div>'
+      + '</div>'
+      + '<div class="pied"><button id="sc-non">Annuler</button>'
+      + '<button class="prim" id="sc-go">Lancer sur ' + n + ' photo' + (n > 1 ? 's' : '') + '</button>'
+      + '</div></div></div>';
+  }
+
   function barreLot(){
     var n = nbChoisies();
     if (!n || !D.peutModifier) return '';
@@ -1333,6 +1398,12 @@ ${JS_ACTIVITE}${JS_DIRE}
        instantanee et gratuite. La faire passer par la meme porte donnerait des
        lignes de journal Fal.ai pour un geste qui n a rien coute. */
     if (quoi === 'pivot') { lancerPivot(ids); return; }
+    /* ⚠⚠ LA MISE EN SCENE SE CHOISIT AVANT, PAS APRES. Un mannequin humain fixe
+       une personne, une pose et un decor ; les subir puis recommencer, c est
+       payer deux fois pour decouvrir qu on voulait autre chose. Les autres
+       traitements, eux, n ont rien a choisir : leur demander un panneau serait
+       un clic de plus pour rien. */
+    if (quoi === 'humain' && !SCENE) { sceneOuvrir(ids); return; }
     if (occupeDeja('Traitement en lot')) return;
     /* ⚠ LES NOMS VIENNENT DU CHOIX, PAS DE LA PAGE : une photo cochee page 1 et
        traitee depuis la page 4 doit garder son nom dans le suivi. */
@@ -1371,7 +1442,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       suiviLigne(k, 'cours', 'en cours');
       suiviEtapes(k, [{ nom: 'envoi au modèle', etat: 'encours' }]);
       occuper('Traitement ' + (k + 1) + ' / ' + ids.length + '…');
-      appeler('photos:traiter', [ids[k], quoi, {}]).then(function(r){
+      appeler('photos:traiter', [ids[k], quoi, (quoi === 'humain' && SCENE) ? SCENE : {}]).then(function(r){
         if (r && r.ok) {
           faites++;
           if (r.par === 'canevas') replis++;
@@ -1927,6 +1998,30 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ── BRANCHEMENTS ──────────────────────────────────────────────────────── */
   function brancher(){
     if (ASSIST) { assistBrancher(); return; }
+    if (SCENE_OUVERT) {
+      var non = document.getElementById('sc-non');
+      if (non) non.onclick = sceneFermer;
+      var go = document.getElementById('sc-go');
+      if (go) go.onclick = function(){
+        var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+        var sourire = document.getElementById('sc-sourire');
+        SCENE = { modele: v('sc-mod'), pose: v('sc-pose'), decor: v('sc-dec') };
+        /* ⚠ DECOCHER LE SOURIRE DEMANDE EXPLICITEMENT UN VISAGE NEUTRE : laisser
+           la consigne vide rendrait la consigne PAR DEFAUT du relais, qui, elle,
+           fait sourire. Un reglage decoche qui ne change rien serait pire que
+           pas de reglage du tout. */
+        if (!sourire || !sourire.checked) { SCENE.consigne = 'neutral expression'; }
+        var ids = SCENE_IDS || [];
+        SCENE_OUVERT = false;
+        SCENE_IDS = null;
+        lancerLot('humain');
+        // ⚠ On repose le choix APRES le lancement : lancerLot le lit, et le
+        // laisser trainer appliquerait la meme scene au prochain lot sans le dire.
+        setTimeout(function(){ SCENE = null; }, 100);
+        if (!ids.length) dessiner();
+      };
+      return;
+    }
     if (LOTS) { lotsBrancher(); return; }
     var q = document.getElementById('p-q');
     if (q) q.oninput = function(){
