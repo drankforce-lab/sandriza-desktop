@@ -1060,6 +1060,20 @@ module.exports = {
     } },
   ],
 
+  // Configuration — Pied de page (palier 5, 2e onglet natif).
+  'footer.js': [
+    { nom: 'footer', reponses: {
+      identite: IDENTITE,
+      'config:footer:donnees': { ok: true, peutModifier: true, marque: 'SANDRIZA', annee: 2026, cfg: {
+        tagline: 'Mode féminine contemporaine · Québec',
+        address: '123 rue Principale, Québec, QC G1A 1A1',
+        addressEN: '123 Main Street, Quebec City, QC G1A 1A1',
+        email: 'contact@sandriza.com', phone: '(418) 000-0000',
+        tps: '123456789 RT0001', tvq: '9876543210 TQ0001',
+      } },
+    } },
+  ],
+
   'comptable.js': [
     {
       nom: 'exercices garnis',
