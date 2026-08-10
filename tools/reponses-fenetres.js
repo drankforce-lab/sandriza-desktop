@@ -1025,6 +1025,84 @@ module.exports = {
     },
   ],
 
+  // ── LIENS COMPTABLES ───────────────────────────────────────────────────────
+  // ⚠ FORME RÉELLE de comptable:donnees (cœur Backups._comptableDonnees).
+  // QUATRE cas : « exercices garnis » couvre les deux états d'un partage (actif
+  // et expiré) et un carnet peuplé ; « nouveau lien » ouvre le formulaire, qui
+  // dessine les destinataires du carnet en cases à cocher ; « carnet » est la
+  // seconde VUE ENTIÈRE, que rien d'autre n'atteint ; « aucun partage » est le
+  // premier écran d'un exercice neuf. La carte du lien fraîchement fabriqué (le
+  // mot de passe montré une seule fois) n'apparaît qu'après un geste — aucun
+  // état d'ouverture ne peut la dessiner, comme pour les liens d'installation.
+  'comptable.js': [
+    {
+      nom: 'exercices garnis',
+      id: '',
+      reponses: {
+        'comptable:donnees': {
+          ok: true, annee: 2026, annees: [2026, 2025, 2024, 2023, 2022, 2021],
+          peutEcrire: true,
+          contacts: [
+            { name: 'Julie Bergeron', firm: 'Bergeron CPA inc.',
+              email: 'julie@bergeroncpa.ca', phone: '514-555-0142', note: 'Dossier TPS/TVQ' },
+            { name: 'Marc Lavoie', firm: 'Groupe Fiscalité Québec',
+              email: 'marc.lavoie@gfq.ca', phone: '', note: '' },
+          ],
+          partages: [
+            { token: 'part_2026', url: 'https://adm.sandriza.com/accountant.php?t=part_2026',
+              label: 'Exercice 2026', periode: '2026', destinataire: 'julie@bergeroncpa.ca',
+              creeLe: '2026-08-09T14:00:00Z', expireLe: '2026-08-16T14:00:00Z', expire: false },
+            { token: 'part_2025', url: 'https://adm.sandriza.com/accountant.php?t=part_2025',
+              label: 'Exercice 2025', periode: '2025',
+              destinataire: 'julie@bergeroncpa.ca, marc.lavoie@gfq.ca',
+              creeLe: '2026-03-01T14:00:00Z', expireLe: '2026-03-08T14:00:00Z', expire: true },
+          ],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'nouveau lien',
+      id: 'nouveau',
+      reponses: {
+        'comptable:donnees': {
+          ok: true, annee: 2026, annees: [2026, 2025, 2024], peutEcrire: true,
+          contacts: [
+            { name: 'Julie Bergeron', firm: 'Bergeron CPA inc.',
+              email: 'julie@bergeroncpa.ca', phone: '514-555-0142', note: '' },
+          ],
+          partages: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'carnet',
+      id: 'carnet',
+      reponses: {
+        'comptable:donnees': {
+          ok: true, annee: 2026, annees: [2026, 2025, 2024], peutEcrire: true,
+          contacts: [
+            { name: 'Julie Bergeron', firm: 'Bergeron CPA inc.',
+              email: 'julie@bergeroncpa.ca', phone: '514-555-0142', note: 'Dossier TPS/TVQ' },
+            { name: 'Marc Lavoie', firm: '', email: 'marc.lavoie@gfq.ca', phone: '', note: '' },
+          ],
+          partages: [],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucun partage',
+      id: '',
+      reponses: {
+        'comptable:donnees': { ok: true, annee: 2026, annees: [2026], peutEcrire: true,
+          contacts: [], partages: [] },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── DÉCOMPTE D'INACTIVITÉ ──────────────────────────────────────────────────
   // ⚠ Cette fenêtre n'INTERROGE rien : elle reçoit sa durée par son paramètre
   // d'ouverture et n'appelle le pont qu'au CLIC. Le jeu d'essai ne prouve donc

@@ -1708,6 +1708,11 @@ const LIMITES_PONT = {
   'depenses:facture': 120000,
   // Le recu est compresse ici, et depose dans le stockage a l enregistrement.
   'depenses:recu': 45000, 'depenses:enregistrer': 90000,
+  // Le lien de l exercice CONSTRUIT le rapport comptable complet, cree le
+  // partage chiffre et envoie un courriel a chaque destinataire : bien au-dela
+  // du plafond ordinaire. L operation donnees fait un aller-retour au registre
+  // distant des partages.
+  'comptable:creer': 90000, 'comptable:donnees': 20000,
 };
 
 /* Le prechargement demande la table ICI, une fois, plutot que d en tenir une
@@ -1877,6 +1882,7 @@ const PAGES_ANCRABLES = () => ({
   remboursements: ['Remboursements et crédits', () => pageRemboursements()],
   impot: ['Fiscalité et impôt', () => pageImpot()],
   liens: ['Liens d’installation', () => pageLiens('')],
+  comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
   'fal-suivi': ['Traitements d’image', () => pageFal('')],
 });
@@ -2621,6 +2627,7 @@ const { pageDepenses } = require('./fenetres/depenses');
 const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
 const { pageLiens } = require('./fenetres/liens');
+const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
 const { pageBanque } = require('./fenetres/banque');
 const { pageFal } = require('./fenetres/fal');
@@ -2704,7 +2711,7 @@ const actionApp = (nom) => {
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':
-    case 'bankrec': case 'fal-suivi': {
+    case 'comptable': case 'bankrec': case 'fal-suivi': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
