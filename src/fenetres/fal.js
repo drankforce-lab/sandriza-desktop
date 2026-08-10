@@ -154,8 +154,8 @@ ${JS_ACTIVITE}${JS_DIRE}
      separement est ce qui permet de voir OU l argent passe — et, le jour ou le
      resultat decoit, laquelle des trois etapes a mal travaille. */
   var GESTES = {
-    detourage: 'Détourage', masque: 'Repérage du mannequin',
-    fantome: 'Reconstruction sans mannequin',
+    detourage: 'Détourage', masque: 'Repérage du vêtement',
+    fantome: 'Mannequin retiré',
     humain: 'Porté par un mannequin', essayage: 'Essayage virtuel'
   };
   function sous_(v){
