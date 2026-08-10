@@ -1390,6 +1390,56 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'l’original est conservé à côté.</span></div>';
   }
 
+  /* L AVERTISSEMENT DES FRAIS, GROUPE ET FRANC. Une decision qui coute de l argent
+     merite un arret net, pas une pastille qu on survole : on dit combien de photos
+     ont deja ete facturees, on les nomme, et l on demande de confirmer avant de
+     repayer. onOui n est appele que si l utilisateur choisit de continuer.
+     ⚠ CE N EST PAS UNE BOITE NATIVE (confirm()) : elle a ete refusee, et elle ne
+     suivrait pas le theme sombre de la fenetre. Tout au clic (souris ET tactile). */
+  function fraisConfirmer(deja, total, onOui){
+    var vieux = document.getElementById('frais-voile');
+    if (vieux && vieux.parentNode) vieux.parentNode.removeChild(vieux);
+    var n = deja.length;
+    var noms = deja.slice(0, 8).map(function(d){
+      return (d.code ? d.code : '') + (d.nom ? ' · ' + d.nom : '');
+    }).filter(Boolean);
+    var reste = n - noms.length;
+    var liste = noms.length
+      ? '<ul style="margin:.55rem 0 0;padding-left:1.1rem;color:#cbd5e1;font-size:.8rem;line-height:1.6">'
+        + noms.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join('')
+        + (reste > 0 ? '<li>et ' + reste + ' autre' + (reste > 1 ? 's' : '') + '…</li>' : '')
+        + '</ul>'
+      : '';
+    var v = document.createElement('div');
+    v.id = 'frais-voile';
+    v.style.cssText = 'position:fixed;inset:0;z-index:120;background:rgba(6,10,18,.72);'
+      + 'display:flex;align-items:center;justify-content:center;padding:1.2rem';
+    v.innerHTML = '<div style="max-width:30rem;background:#131c2b;'
+      + 'border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:1.1rem 1.2rem;'
+      + 'box-shadow:0 18px 50px rgba(0,0,0,.5)">'
+      + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:#f0d6a0">'
+      + 'Des photos ont déjà été facturées</h2>'
+      + '<p style="margin:0;color:#e8edf5;font-size:.86rem;line-height:1.6"><b>' + n
+      + '</b> photo' + (n > 1 ? 's' : '') + ' sur ' + total + ' '
+      + (n > 1 ? 'ont' : 'a') + ' déjà coûté un crédit Photoroom. Les relancer '
+      + 'entraînera de nouveaux frais.</p>' + liste
+      + '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">'
+      + '<button id="frais-non" style="font:inherit;color:#e8edf5;'
+      + 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);'
+      + 'border-radius:8px;padding:.42rem .85rem;cursor:pointer">Annuler</button>'
+      + '<button id="frais-oui" style="font:inherit;color:#0e1522;background:#f0d6a0;'
+      + 'border:1px solid #f0d6a0;border-radius:8px;padding:.42rem .85rem;cursor:pointer;'
+      + 'font-weight:700">Continuer et payer</button></div></div>';
+    document.body.appendChild(v);
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
+    var non = document.getElementById('frais-non');
+    var oui = document.getElementById('frais-oui');
+    if (non) non.onclick = function(){ fermer(); dire('Traitement annulé : rien n’a été refait ni facturé.', 'att'); };
+    if (oui) oui.onclick = function(){ fermer(); onOui(); };
+    v.onclick = function(ev){ if (ev.target === v) fermer(); };
+    if (oui) oui.focus();
+  }
+
   function lancerLot(quoi, scene){
     var ids = Object.keys(CHOIX);
     if (!ids.length) return;
@@ -1403,6 +1453,26 @@ ${JS_ACTIVITE}${JS_DIRE}
        traitements, eux, n ont rien a choisir : leur demander un panneau serait
        un clic de plus pour rien. */
     if (quoi === 'humain' && !scene) { sceneOuvrir(ids); return; }
+    if (occupeDeja('Traitement en lot')) return;
+    /* ⚠ LA GARDE DES FRAIS PHOTOROOM, EN PRE-VOL ET GROUPEE. On demande au coeur
+       quelles photos de ce lot ont deja coute un credit Photoroom, et l on
+       avertit UNE seule fois avant de relancer, plutot que photo par photo. Le
+       detourage ne passe pas par Photoroom : le coeur rend alors une liste vide
+       et rien n interrompt.
+       ⚠ LA FENETRE RESTE OCCUPEE PENDANT L INTERROGATION : sans cela, un second
+       clic repartirait une deuxieme verification par-dessus la premiere. */
+    occuper('Vérification des crédits…');
+    appeler('photos:fraisEtat', [ids, quoi]).then(function(g){
+      liberer();
+      var deja = (g && g.ok && g.dejaTraitees) ? g.dejaTraitees : [];
+      if (!deja.length) { demarrerLot(quoi, scene, ids); return; }
+      fraisConfirmer(deja, ids.length, function(){ demarrerLot(quoi, scene, ids); });
+    });
+  }
+
+  /* Le lancement proprement dit, une fois la garde des frais franchie. Separe de
+     lancerLot pour que la garde puisse s intercaler sans dupliquer le suivi. */
+  function demarrerLot(quoi, scene, ids){
     if (occupeDeja('Traitement en lot')) return;
     /* ⚠ LES NOMS VIENNENT DU CHOIX, PAS DE LA PAGE : une photo cochee page 1 et
        traitee depuis la page 4 doit garder son nom dans le suivi. */

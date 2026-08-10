@@ -1355,7 +1355,7 @@ const OPS_PONT = new Set([
   'photos:usb', 'photos:enregistrer',
   // Traitements nommes (detourage, mannequin retire, porte par un mannequin)
   // et le meme geste sur un LOT.
-  'photos:traiter', 'photos:lot', 'photos:renommer',
+  'photos:traiter', 'photos:lot', 'photos:renommer', 'photos:fraisEtat',
   // L assistant de traitement en lot : lire une source SANS importer, montrer,
   // importer ce qui est choisi, puis traiter — chaine imposee par le coeur.
   'lot:sources', 'lot:vignette', 'lot:importer', 'lot:traiter',
@@ -1629,6 +1629,10 @@ const LIMITES_PONT = {
      rate pas seulement un resultat — il MENT sur son sort, en affichant un echec
      pendant que le travail continue et se facture derriere. */
   'photos:traiter': 300000, 'photos:lot': 600000, 'photos:isoler': 180000,
+  // La garde des frais interroge le relais une fois par empreinte distincte (en
+  // parallele) avant un lot : quelques secondes au plus, mais on laisse de la
+  // marge pour un lot de soixante photos sur une liaison lente.
+  'photos:fraisEtat': 60000,
   /* ⚠⚠ ET VOICI POURQUOI << TOUT VIDER >> LAISSAIT 32 PHOTOS (2026-08-09).
      `photos:vider` n etait pas dans cette table : elle heritait du plafond
      ordinaire de 8 SECONDES, alors qu elle supprime les photos UNE A UNE avec
