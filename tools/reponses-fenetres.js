@@ -1212,6 +1212,35 @@ module.exports = {
     } },
   ],
 
+  // Configuration — Clés API (palier 5, dernier onglet de « Paiement & taxes »).
+  // ⚠ AUCUNE CLÉ n'apparaît dans un jeu d'essai : le cœur ne rend que l'existence
+  // et les 4 derniers caractères. Un jeu qui porterait une clé entière signalerait
+  // que la fenêtre en attend une. Le solde fal.ai, lui, n'est PAS un secret.
+  'cles.js': [
+    { nom: 'clés en place, solde saisi', reponses: {
+      identite: IDENTITE,
+      'config:cles:donnees': { ok: true, peutModifier: true,
+        fal:              { defini: true,  fin: '9a2c' },
+        photoroom:        { defini: true,  fin: '4b1f' },
+        photoroomSandbox: { defini: false, fin: '' },
+        groq:             { defini: true,  fin: 'k3xz' },
+        resend:           { defini: true,  fin: 'r7q0' },
+        hf:               { defini: false, fin: '' },
+        falSolde: '25.00', falSoldeMaj: '2026-08-05T14:12:00.000Z' },
+    } },
+    { nom: 'aucune clé, lecture seule', reponses: {
+      identite: IDENTITE,
+      'config:cles:donnees': { ok: true, peutModifier: false,
+        fal:              { defini: false, fin: '' },
+        photoroom:        { defini: false, fin: '' },
+        photoroomSandbox: { defini: false, fin: '' },
+        groq:             { defini: false, fin: '' },
+        resend:           { defini: false, fin: '' },
+        hf:               { defini: false, fin: '' },
+        falSolde: '', falSoldeMaj: '' },
+    } },
+  ],
+
   'comptable.js': [
     {
       nom: 'exercices garnis',

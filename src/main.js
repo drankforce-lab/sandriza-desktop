@@ -1376,6 +1376,10 @@ const OPS_PONT = new Set([
   'config:taxes:reference', 'config:taxes:revision', 'config:taxes:pays', 'config:taxes:paysoter',
   'config:paiements:donnees', 'config:paiements:ecrire', 'config:paiements:options',
   'config:paiements:mode', 'config:paiements:tester',
+  // Cles API (fenetre Cles, 2.34.0) — dernier onglet de << Paiement & taxes >>.
+  // ⚠ AUCUNE CLE NE TRAVERSE LE PONT : << donnees >> ne rend que l existence et
+  // les 4 derniers caracteres. << retirer >> est le geste explicite de retrait.
+  'config:cles:donnees', 'config:cles:ecrire', 'config:cles:retirer',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1678,6 +1682,8 @@ const LIMITES_PONT = {
   // Le test de connexion part chez Square : il depend d un tiers.
   'config:paiements:donnees': 15000, 'config:paiements:ecrire': 45000,
   'config:paiements:options': 30000, 'config:paiements:mode': 15000, 'config:paiements:tester': 45000,
+  // Cles API : chaque ecriture pousse plusieurs cles vers le nuage, awaitees.
+  'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000,
   'photoroom:compte': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
@@ -1933,6 +1939,7 @@ const PAGES_ANCRABLES = () => ({
   'config-icones': ['Icônes personnalisées', () => pageIcones()],
   'config-taxes': ['Gestion des taxes', () => pageTaxes()],
   'config-paiements': ['Configuration des paiements', () => pagePaiementsConfig()],
+  'config-cles': ['Clés API', () => pageClesConfig()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2686,6 +2693,7 @@ const { pageMarque } = require('./fenetres/marque');
 const { pageIcones } = require('./fenetres/icones');
 const { pageTaxes } = require('./fenetres/taxes');
 const { pagePaiementsConfig } = require('./fenetres/paiements-config');
+const { pageClesConfig } = require('./fenetres/cles');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2773,7 +2781,7 @@ const actionApp = (nom) => {
     case 'comptable': case 'bankrec': case 'fal-suivi':
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
-    case 'config-paiements': {
+    case 'config-paiements': case 'config-cles': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
