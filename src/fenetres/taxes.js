@@ -202,8 +202,6 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     // ── Canada ─────────────────────────────────────────────────────────────
     h.push('<div class="carte"><h2>Canada — par province de livraison</h2>');
-    h.push('<div class="avis">Les taux sont appliqués selon la province de <strong>livraison</strong> '
-      + 'de chaque commande. Confirmez-les avec votre comptable, ainsi que les inscriptions requises.</div>');
     h.push('<table><thead><tr><th>Province ou territoire</th><th>Composantes — nom, taux, organisme</th></tr></thead><tbody>');
     (d.provinces || []).forEach(function(p){
       h.push('<tr><td class="prov">' + esc(p.code) + '<div class="n">' + esc(p.nom) + '</div></td><td>');

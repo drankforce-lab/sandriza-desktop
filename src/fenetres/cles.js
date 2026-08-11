@@ -196,7 +196,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       sous: 'Isole le vêtement avant correction de couleur (exclut peau, visage, cheveux).',
       lien: ['huggingface.co', 'https://huggingface.co/settings/tokens'],
       champs: [{ k: 'hf', label: 'Token d’accès', place: 'hf_…',
-        aide: 'Gratuit — Settings, Access Tokens, New token (Read). Modèle segformer_b2_clothes.' }] }
+        aide: 'Gratuit — Settings, Access Tokens, New token (Read). Modèle segformer_b2_clothes.' }] },
+    { titre: 'Stripe Tax — Taxes internationales',
+      sous: 'Calcul auto de la TVA/TPS à l’international (le Canada garde la table manuelle). ⚠ Stripe ne perçoit que dans les pays où vous êtes inscrit ; ailleurs 0 (le client paie à la frontière). Ne couvre pas les droits de douane.',
+      lien: ['dashboard.stripe.com', 'https://dashboard.stripe.com/tax'],
+      champs: [{ k: 'stripeTax', label: 'Clé secrète Stripe', place: 'rk_… (clé restreinte Tax) ou sk_…',
+        aide: 'Recommandé : une clé RESTREINTE (rk_) limitée à la permission Tax. La clé reste au serveur.' }],
+      test: true }
   ];
 
   function champHtml(c){
@@ -240,6 +246,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       h.push('<p class="sous">' + esc(s.sous) + '</p>');
       s.champs.forEach(function(c){ h.push(champHtml(c)); });
       if (s.solde) h.push(soldeHtml()); // le solde fal.ai, sous sa cle, dans la meme carte
+      if (s.test) h.push('<div class="ch"><button id="b-teststripe"' + (RO ? ' disabled' : '')
+        + '>Tester la clé &amp; voir mes inscriptions</button>'
+        + '<div class="etat" id="stripe-res" style="margin-top:.4rem"></div></div>');
       h.push('</div>');
     });
     h.push('</div>');
@@ -258,6 +267,30 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
     corps.querySelectorAll('[data-conf]').forEach(function(b){
       b.onclick = function(){ retirer(b.getAttribute('data-conf')); };
+    });
+    var bt = document.getElementById('b-teststripe');
+    if (bt) bt.onclick = testerStripe;
+  }
+
+  // Test de la clé Stripe Tax : valide + montre les inscriptions. ⚠ Enregistrer
+  // la clé D'ABORD (le relais lit la clé enregistrée, pas le champ).
+  function testerStripe(){
+    if (OCCUPE) return;
+    var res = document.getElementById('stripe-res');
+    if (res) { res.className = 'etat'; res.innerHTML = '<span class="txt">Test en cours…</span>'; }
+    occuper(true);
+    appeler('config:cles:teststripe').then(function(r){
+      occuper(false);
+      if (!res) return;
+      if (r && r.ok) {
+        var insc = (r.inscriptions || []).map(function(i){ return i.pays; }).join(', ') || 'aucune';
+        res.className = 'etat';
+        res.innerHTML = '<span class="txt">✓ Clé valide (' + esc(r.mode) + '). Inscrit dans : <b>' + esc(insc) + '</b>.</span>';
+      } else {
+        res.className = 'etat non';
+        res.innerHTML = '<span class="txt">✗ ' + esc((r && (r.error || r.detail)) || 'Échec du test.')
+          + (r && r.motif === 'non_configure' ? ' (enregistrez la clé d’abord)' : '') + '</span>';
+      }
     });
   }
   function rafraichirEtat(k){

@@ -1379,7 +1379,7 @@ const OPS_PONT = new Set([
   // Cles API (fenetre Cles, 2.34.0) — dernier onglet de << Paiement & taxes >>.
   // ⚠ AUCUNE CLE NE TRAVERSE LE PONT : << donnees >> ne rend que l existence et
   // les 4 derniers caracteres. << retirer >> est le geste explicite de retrait.
-  'config:cles:donnees', 'config:cles:ecrire', 'config:cles:retirer',
+  'config:cles:donnees', 'config:cles:ecrire', 'config:cles:retirer', 'config:cles:teststripe',
   // Configuration de la livraison (fenetre Livraison, 2.37.0) — pas de secret.
   'config:livraison:donnees', 'config:livraison:ecrire',
   // Transporteurs (fenetre Transporteurs, 2.39.0) — ⚠ secrets + filet
@@ -1698,7 +1698,7 @@ const LIMITES_PONT = {
   'config:paiements:donnees': 15000, 'config:paiements:ecrire': 45000,
   'config:paiements:options': 30000, 'config:paiements:mode': 15000, 'config:paiements:tester': 45000,
   // Cles API : chaque ecriture pousse plusieurs cles vers le nuage, awaitees.
-  'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000,
+  'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000, 'config:cles:teststripe': 30000,
   'config:livraison:donnees': 15000, 'config:livraison:ecrire': 30000,
   'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000,
   'config:automations:donnees': 15000, 'config:automations:email': 20000, 'config:automations:stats': 20000,
