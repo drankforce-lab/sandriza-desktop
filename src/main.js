@@ -1370,6 +1370,8 @@ const OPS_PONT = new Set([
   'config:footer:donnees', 'config:footer:ecrire',
   'config:apparence:donnees', 'config:apparence:ecrire',
   'config:marque:donnees', 'config:marque:ecrire', 'config:marque:reinit',
+  'config:icones:donnees', 'config:icones:ajouter', 'config:icones:supprimer',
+  'config:icones:ico', 'config:icones:convertir',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1661,6 +1663,10 @@ const LIMITES_PONT = {
   // coeur, six logos peuvent partir d un coup, et un plafond de 20 s ferait
   // passer un depot lent pour une panne.
   'config:marque:donnees': 15000, 'config:marque:ecrire': 120000, 'config:marque:reinit': 30000,
+  // ⚠ L ajout d une icone depose dans R2 ; la conversion .ico redessine six
+  // tailles depuis l original. Ni l une ni l autre n est instantanee.
+  'config:icones:donnees': 15000, 'config:icones:ajouter': 90000,
+  'config:icones:supprimer': 30000, 'config:icones:ico': 60000, 'config:icones:convertir': 90000,
   'photoroom:compte': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
@@ -1913,6 +1919,7 @@ const PAGES_ANCRABLES = () => ({
   'config-footer': ['Pied de page', () => pageFooter()],
   'config-apparence': ['Thème et apparence', () => pageApparence()],
   'config-marque': ['Logos et marque', () => pageMarque()],
+  'config-icones': ['Icônes personnalisées', () => pageIcones()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2663,6 +2670,7 @@ const { pageHeures } = require('./fenetres/heures');
 const { pageFooter } = require('./fenetres/footer');
 const { pageApparence } = require('./fenetres/apparence');
 const { pageMarque } = require('./fenetres/marque');
+const { pageIcones } = require('./fenetres/icones');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2749,7 +2757,7 @@ const actionApp = (nom) => {
     case 'depenses': case 'remboursements': case 'impot': case 'liens':
     case 'comptable': case 'bankrec': case 'fal-suivi':
     case 'config-heures': case 'config-footer': case 'config-apparence':
-    case 'config-marque': {
+    case 'config-marque': case 'config-icones': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

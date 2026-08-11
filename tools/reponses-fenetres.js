@@ -1134,6 +1134,22 @@ module.exports = {
     } },
   ],
 
+  // Configuration — Icônes personnalisées (palier 5, 5e onglet natif).
+  'icones.js': [
+    { nom: 'icones garnies', reponses: {
+      identite: IDENTITE,
+      'config:icones:donnees': { ok: true, peutModifier: true, icones: [
+        { id: 'ico_1', tag: 'coeur', name: 'Cœur', url: 'https://exemple.test/coeur.png' },
+        { id: 'ico_2', tag: 'etoile', name: 'Étoile', url: 'https://exemple.test/etoile.png' },
+        { id: 'ico_3', tag: 'feu', name: 'Feu', url: '' },
+      ] },
+    } },
+    { nom: 'aucune icone, lecture seule', reponses: {
+      identite: IDENTITE,
+      'config:icones:donnees': { ok: true, peutModifier: false, icones: [] },
+    } },
+  ],
+
   'comptable.js': [
     {
       nom: 'exercices garnis',
