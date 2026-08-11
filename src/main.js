@@ -1384,6 +1384,9 @@ const OPS_PONT = new Set([
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
   'studio:presets', 'studio:compte', 'studio:traiter',
+  // Studio ↔ photothèque : lister pour choisir, ouvrir depuis la photothèque,
+  // enregistrer le résultat (import → dépôt R2).
+  'studio:phototheque', 'studio:ouvrir', 'studio:enregistrer',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1691,6 +1694,7 @@ const LIMITES_PONT = {
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
+  'studio:phototheque': 20000, 'studio:ouvrir': 8000, 'studio:enregistrer': 90000,
   'photoroom:compte': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,

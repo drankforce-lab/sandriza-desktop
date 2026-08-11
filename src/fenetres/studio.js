@@ -60,6 +60,18 @@ body{background:#0e1522;color:#e8edf5;
 .depot .gros{font-size:1.6rem;filter:grayscale(1) brightness(1.6)}
 .depot img{max-width:100%;max-height:14rem;border-radius:8px}
 .depot .refaire{font-size:.72rem;color:#8fa1b8;text-decoration:underline;margin-top:.3rem}
+/* Choix dans la photothèque */
+.phbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.phbarre .phinfo{font-size:.76rem;color:#8fa1b8}
+.phgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.5rem,1fr));gap:.5rem;
+  max-height:16rem;overflow-y:auto;padding-right:.2rem}
+.phvig{background:#0f1724;border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
+.phvig:hover{border-color:#c9a97e}
+.phvig img{width:100%;height:4.6rem;object-fit:contain;background:#0b1220}
+.phvig .attente{font-size:.68rem;color:#6d7f96;padding:1.6rem .3rem}
+.phvig .phnom{font-size:.64rem;color:#8fa1b8;padding:.15rem .25rem;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Voies + ambiances : tuiles cliquables */
 .tuiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
 .tuile{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:9px;
@@ -125,11 +137,16 @@ ${JS_ACTIVITE}${JS_DIRE}
   var bFinal = document.getElementById('b-final');
   var creditsEl = document.getElementById('credits');
   var RO = false, OCCUPE = false, ARME = false;
-  var PHOTO = null;      // data URL de la photo importee (reduite)
+  var PHOTO = null;      // data URL d une photo importee (fichier), reduite
+  var PHOTO_ID = '';     // id d une photo CHOISIE dans la phototheque (l image reste au site)
+  var PHOTO_URL = '';    // adresse de la vignette choisie (affichage seulement)
+  var PICKER = false;    // le choix dans la phototheque est-il ouvert ?
+  var PHOTHQ = [];       // [{id,nom,apercu,enAttente}]
   var VOIE = 'humain';   // humain | fantome | plat
   var PRESET = '';       // cle d ambiance
   var PRESETS = [];      // [{cle,label,emoji,desc}]
   var RESULT = null;     // { image, essai, decorErreur, upNote, largeur, hauteur }
+  var ENREG = false;     // le resultat a-t-il ete enregistre dans la phototheque ?
 
   var VOIES = [
     { cle: 'humain',  em: '👗', t: 'Mannequin virtuel', d: 'Porté par un modèle, décor intégré' },
@@ -152,6 +169,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     pont_indisponible:  'La fenêtre principale ne répond pas.',
     delai:              'La fenêtre principale n’a pas répondu à temps.',
     operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
+    module_photos:      'La photothèque n’a pas pu être chargée. Rechargez (Ctrl+R) ; si cela revient, reconnectez-vous.',
+    version_coquille:   'Cette version de l’application ne sait pas encore ouvrir cet écran.',
     echec:              'L’opération a échoué.'
   };
   function expliquer(r){
@@ -190,22 +209,49 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function majBoutons(){
-    var pret = !!PHOTO && !!PRESET && !RO && !OCCUPE;
+    var pret = aUnePhoto() && !!PRESET && !RO && !OCCUPE;
     bApercu.disabled = !pret;
     bFinal.disabled = !pret;
     if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = 'Générer en pleine qualité'; }
   }
 
+  function aUnePhoto(){ return !!PHOTO || !!PHOTO_ID; }
+
   function depotHtml(){
-    if (PHOTO) {
-      return '<div class="depot" id="depot"><img src="' + PHOTO + '" alt="photo">'
+    // Une photo est déjà choisie (fichier OU photothèque) : on la montre.
+    if (aUnePhoto()) {
+      var apercu = PHOTO || PHOTO_URL;
+      var vue = apercu
+        ? '<img src="' + apercu + '" alt="photo">'
+        : '<span class="gros">🖼️</span><span>Photo de la photothèque sélectionnée</span>';
+      return '<div class="depot" id="depot">' + vue
         + '<span class="refaire">Choisir une autre photo</span></div>'
         + '<input type="file" id="fichier" accept="image/*" hidden>';
     }
+    // Le choix dans la photothèque est ouvert : une grille de vignettes.
+    if (PICKER) {
+      var grille;
+      if (!PHOTHQ.length) {
+        grille = '<div class="vide">Aucune photo dans la photothèque.</div>';
+      } else {
+        grille = '<div class="phgrille">' + PHOTHQ.map(function(p){
+          var img = p.apercu
+            ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '">'
+            : '<span class="attente">en cours…</span>';
+          return '<div class="phvig" data-ph="' + esc(p.id) + '" title="' + esc(p.nom) + '">'
+            + img + '<span class="phnom">' + esc(p.nom) + '</span></div>';
+        }).join('') + '</div>';
+      }
+      return '<div class="phbarre"><button id="ph-retour">← Retour</button>'
+        + '<span class="phinfo">Choisissez une photo de la photothèque</span></div>' + grille;
+    }
+    // Rien de choisi : dépôt de fichier + accès à la photothèque.
     return '<div class="depot" id="depot"><span class="gros">📷</span>'
-      + '<span>Glissez une photo studio ici, ou cliquez pour choisir</span>'
+      + '<span>Glissez une photo studio ici, ou cliquez pour choisir un fichier</span>'
       + '<span style="font-size:.7rem;color:#6d7f96">Fond blanc, un vêtement — JPEG ou PNG</span></div>'
-      + '<input type="file" id="fichier" accept="image/*" hidden>';
+      + '<input type="file" id="fichier" accept="image/*" hidden>'
+      + '<div style="text-align:center;margin-top:.5rem">'
+      + '<button id="ph-ouvrir">📚 Depuis la photothèque</button></div>';
   }
 
   function voiesHtml(){
@@ -240,7 +286,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (RESULT.decorErreur) h += '<div class="filig">⚠ Le décor n’a pas pu être appliqué : ' + esc(RESULT.decorErreur) + '</div>';
     if (RESULT.upNote) h += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
-    h += '<div class="dl"><button id="b-dl">Télécharger l’image</button></div>';
+    h += '<div class="dl"><button id="b-dl">Télécharger l’image</button> '
+      + '<button id="b-save"' + (ENREG ? ' disabled' : '') + '>' + (ENREG ? '✓ Dans la photothèque' : '💾 Enregistrer dans la photothèque') + '</button></div>';
     return h;
   }
 
@@ -264,7 +311,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function brancher(){
     var depot = document.getElementById('depot');
     var fichier = document.getElementById('fichier');
-    if (depot && fichier && !RO) {
+    if (depot && fichier && !RO && !aUnePhoto()) {
       depot.onclick = function(){ fichier.click(); };
       depot.ondragover = function(e){ e.preventDefault(); depot.classList.add('survol'); };
       depot.ondragleave = function(){ depot.classList.remove('survol'); };
@@ -272,6 +319,13 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) lireFichier(e.dataTransfer.files[0]); };
       fichier.onchange = function(){ if (fichier.files && fichier.files[0]) lireFichier(fichier.files[0]); };
     }
+    // « Choisir une autre photo » : on repart de zéro.
+    if (depot && aUnePhoto() && !RO) { depot.onclick = function(){ reinitPhoto(); }; }
+    var phO = document.getElementById('ph-ouvrir'); if (phO) phO.onclick = ouvrirPicker;
+    var phR = document.getElementById('ph-retour'); if (phR) phR.onclick = function(){ PICKER = false; dessiner(); };
+    corps.querySelectorAll('[data-ph]').forEach(function(el){
+      el.onclick = function(){ if (OCCUPE) return; choisirPhoto(el.getAttribute('data-ph')); };
+    });
     corps.querySelectorAll('[data-voie]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); RESULT = null; dessiner();
         dire('Voie : ' + VOIE + '.', 'att'); };
@@ -281,6 +335,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
     var dl = document.getElementById('b-dl');
     if (dl && RESULT) dl.onclick = telecharger;
+    var sv = document.getElementById('b-save');
+    if (sv && RESULT) sv.onclick = enregistrerResultat;
+  }
+
+  function reinitPhoto(){
+    PHOTO = null; PHOTO_ID = ''; PHOTO_URL = ''; PICKER = false; RESULT = null; ENREG = false;
+    dessiner();
   }
 
   function lireFichier(f){
@@ -288,22 +349,43 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Lecture de la photo…');
     var fr = new FileReader();
     fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
-      PHOTO = petite; RESULT = null; dessiner(); dire('Photo prête.', 'bon'); }); };
+      PHOTO = petite; PHOTO_ID = ''; PHOTO_URL = ''; PICKER = false; RESULT = null; ENREG = false;
+      dessiner(); dire('Photo prête.', 'bon'); }); };
     fr.onerror = function(){ dire('Lecture impossible.', 'err'); };
     fr.readAsDataURL(f);
   }
 
+  function ouvrirPicker(){
+    if (RO || OCCUPE) return;
+    PICKER = true; dessiner(); dire('Chargement de la photothèque…');
+    appeler('studio:phototheque').then(function(r){
+      if (!r || !r.ok) { PICKER = false; dessiner(); dire(expliquer(r), 'err'); return; }
+      PHOTHQ = r.photos || [];
+      if (PICKER) { dessiner(); dire(PHOTHQ.length ? '' : 'Photothèque vide.', PHOTHQ.length ? '' : 'att'); }
+    });
+  }
+
+  function choisirPhoto(id){
+    var p = null;
+    for (var i = 0; i < PHOTHQ.length; i++) { if (PHOTHQ[i].id === id) { p = PHOTHQ[i]; break; } }
+    if (!p) return;
+    PHOTO = null; PHOTO_ID = id; PHOTO_URL = p.apercu || ''; PICKER = false; RESULT = null; ENREG = false;
+    dessiner(); dire('Photo choisie : ' + (p.nom || id) + '.', 'bon');
+  }
+
   function occuper(o){
     OCCUPE = o;
-    corps.querySelectorAll('button, [data-voie], [data-preset], .depot').forEach(function(b){
+    corps.querySelectorAll('button, [data-voie], [data-preset], [data-ph], .depot').forEach(function(b){
       if (b.tagName === 'BUTTON') b.disabled = o; });
     majBoutons();
-    bApercu.disabled = o || !PHOTO || !PRESET || RO;
-    bFinal.disabled = o || !PHOTO || !PRESET || RO;
+    var pret = aUnePhoto() && !!PRESET && !RO;
+    bApercu.disabled = o || !pret;
+    bFinal.disabled = o || !pret;
   }
 
   function saisie(apercu){
-    var s = { geste: VOIE, preset: PRESET, apercu: apercu, image: PHOTO };
+    var s = { geste: VOIE, preset: PRESET, apercu: apercu };
+    if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
       var sel = document.getElementById('modele');
       s.options = { modele: sel ? sel.value : 'sophia' };
@@ -311,19 +393,39 @@ ${JS_ACTIVITE}${JS_DIRE}
     return s;
   }
 
+  function enregistrerResultat(){
+    if (!RESULT || !RESULT.image || OCCUPE) return;
+    if (ENREG) { dire('Déjà enregistrée dans la photothèque.', 'att'); return; }
+    occuper(true); dire('Enregistrement dans la photothèque…');
+    appeler('studio:enregistrer', [{ image: RESULT.image, nom: 'studio-' + VOIE + '-' + PRESET }]).then(function(r){
+      occuper(false);
+      if (r && r.ok) {
+        ENREG = true;
+        var sv = document.getElementById('b-save');
+        if (sv) { sv.textContent = '✓ Dans la photothèque'; sv.disabled = true; }
+        dire('Enregistrée dans la photothèque — vous pouvez l’attacher à un article de là.', 'bon');
+      } else dire(expliquer(r), 'err');
+    });
+  }
+
   function lancer(apercu){
     if (RO || OCCUPE) return;
-    if (!PHOTO) { dire('Importez d’abord une photo.', 'err'); return; }
+    if (!aUnePhoto()) { dire('Importez d’abord une photo.', 'err'); return; }
     if (!PRESET) { dire('Choisissez une ambiance.', 'err'); return; }
     occuper(true);
     dire(apercu ? 'Aperçu gratuit en cours…' : 'Génération en pleine qualité…');
     appeler('studio:traiter', [saisie(apercu)]).then(function(r){
       occuper(false);
       if (r && r.ok) {
+        ENREG = false;
         RESULT = { image: r.image, essai: !!r.essai, decorErreur: r.decorErreur || '',
                    upNote: r.upNote || '', largeur: r.largeur || 0, hauteur: r.hauteur || 0 };
         var res = document.getElementById('res');
-        if (res) { res.innerHTML = resultatHtml(); var dl = document.getElementById('b-dl'); if (dl) dl.onclick = telecharger; }
+        if (res) {
+          res.innerHTML = resultatHtml();
+          var dl = document.getElementById('b-dl'); if (dl) dl.onclick = telecharger;
+          var sv = document.getElementById('b-save'); if (sv) sv.onclick = enregistrerResultat;
+        }
         dire(apercu ? 'Aperçu prêt (gratuit).' : 'Image générée.', 'bon');
         if (!apercu) chargerCredits();
       } else {

@@ -512,6 +512,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (ro ? '' : '<button id="p-assistant"'
           + ' title="Choisir une source, sélectionner les photos, puis les traiter">'
           + '⚙ Traitement en lot</button>')
+      // Studio virtuel : mise en scène guidée (Photoroom). On y choisit une photo
+      // de la photothèque directement, d'où l'entrée ici.
+      + '<button id="p-studio" title="Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat">🎨 Studio virtuel</button>'
       + '<span class="sep"></span>'
       + '<input type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
       + '<select id="p-tri">'
@@ -2541,6 +2544,15 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var asst = document.getElementById('p-assistant');
     if (asst) asst.onclick = assistOuvrir;
+
+    var stud = document.getElementById('p-studio');
+    if (stud) stud.onclick = function(){
+      appeler('studio:ouvrir', []).then(function(r){
+        if (!r || !r.ok) dire((r && r.motif === 'version_coquille')
+          ? 'Cette version ne sait pas encore ouvrir le Studio.'
+          : 'Ouverture du Studio impossible.', 'err');
+      });
+    };
 
     var usb = document.getElementById('p-usb');
     if (usb) usb.onclick = function(){
