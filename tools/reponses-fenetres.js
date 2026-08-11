@@ -1241,6 +1241,23 @@ module.exports = {
     } },
   ],
 
+  // Studio virtuel (palier 5, chantier #14). La fenêtre se dessine à partir des
+  // AMBIANCES (studio:presets), puis lit le compte de crédits. Aucune image ni
+  // clé dans le jeu d'essai : le traitement ne part qu'au clic (hors portée du
+  // contrôle, qui n'exécute que le rendu au chargement).
+  'studio.js': {
+    identite: IDENTITE,
+    'studio:presets': { ok: true, presets: [
+      { cle: 'studio-epure',  label: 'Studio épuré',  emoji: '🕊️', desc: 'Fond neutre, lumière douce.' },
+      { cle: 'plage-doree',   label: 'Plage dorée',   emoji: '🏖️', desc: 'Sable, mer, lumière dorée.' },
+      { cle: 'beton-chic',    label: 'Béton chic',    emoji: '🏙️', desc: 'Béton clair, urbain minimal.' },
+      { cle: 'verdure',       label: 'Verdure',       emoji: '🌿', desc: 'Végétation, lumière naturelle.' },
+      { cle: 'nuit-lumieres', label: 'Nuit lumières', emoji: '🌃', desc: 'Lumières de ville floutées.' },
+    ] },
+    'studio:compte': { ok: true, compte: { available: 842, subscription: 1000, plan: 'plus' },
+      sandbox: { utilise: 37, quotaMois: 1000, quotaJour: 100, estime: true }, prixEdit: 0.10 },
+  },
+
   'comptable.js': [
     {
       nom: 'exercices garnis',

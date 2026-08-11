@@ -1,0 +1,392 @@
+'use strict';
+
+/*
+ * FENÊTRE « STUDIO VIRTUEL » — NATIVE (Catalogue, palier 5, chantier #14)
+ * =============================================================================
+ * Mise en scène guidée d'une photo studio (fond blanc) par Photoroom. On importe
+ * une photo, on choisit UNE des trois voies, une AMBIANCE de marque, et l'on juge
+ * d'abord en APERÇU GRATUIT (sandbox, filigrané) avant de dépenser un crédit.
+ *
+ *   👗 Mannequin virtuel — le vêtement porté par un modèle réel, décor et lumière
+ *      intégrés (un seul appel). C'est la voie « pieds dans le sable ».
+ *   👻 Fantôme habillé — le mannequin disparaît, puis un décor pro est posé
+ *      (fond + ombre ancrée + relumière ; deux appels).
+ *   📦 Produit à plat — détourage + décor + ombre + relumière (un appel).
+ *
+ * ⚠ TOUT LE TRAVAIL EST AU RELAIS (photoroom-proxy.php) : cette fenêtre n'envoie
+ * qu'une image, une voie, une ambiance et le drapeau « aperçu ». Les clés ne la
+ * traversent jamais, les crédits se comptent là-bas, l'ambiance s'y résout.
+ *
+ * ⚠ L'APERÇU SANDBOX EST GRATUIT ET FILIGRANÉ : c'est le levier crédits. Le bouton
+ * payant s'arme en deux temps pour qu'aucun crédit ne parte par mégarde.
+ *
+ * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
+ * COMPRIS : le script vit dans un littéral de gabarit.
+ */
+
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+
+const CSS = `
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:#0e1522;color:#e8edf5;
+  font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex;flex-direction:column;overflow:hidden}
+.tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
+  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg,#131c2b,#0e1522)}
+.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
+.tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
+.tete .credits{margin-left:auto;font-size:.74rem;color:#8fa1b8}
+.tete .credits b{color:#c9a97e}
+.ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
+  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-content:start}
+.corps::-webkit-scrollbar{width:8px}
+.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+  padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
+.carte.large{grid-column:1/-1}
+.carte h2{margin:0 0 .1rem;font:700 .74rem/1.2 system-ui;text-transform:uppercase;
+  letter-spacing:.06em;color:#8fa1b8}
+.carte .sous{margin:0 0 .7rem;font-size:.75rem;color:#6d7f96}
+/* Dépôt de photo */
+.depot{border:1.5px dashed #2b3444;border-radius:10px;background:#0f1724;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;
+  min-height:9rem;text-align:center;color:#8fa1b8;font-size:.82rem;padding:1rem;-webkit-user-select:none;user-select:none}
+.depot:hover,.depot.survol{border-color:#c9a97e;color:#cbd8e6}
+.depot .gros{font-size:1.6rem;filter:grayscale(1) brightness(1.6)}
+.depot img{max-width:100%;max-height:14rem;border-radius:8px}
+.depot .refaire{font-size:.72rem;color:#8fa1b8;text-decoration:underline;margin-top:.3rem}
+/* Voies + ambiances : tuiles cliquables */
+.tuiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+.tuile{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:9px;
+  padding:.6rem .55rem;cursor:pointer;text-align:center;-webkit-user-select:none;user-select:none;
+  transition:border-color .12s,background .12s}
+.tuile:hover{border-color:rgba(201,169,126,.5)}
+.tuile.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+.tuile .em{font-size:1.4rem;display:block;line-height:1.3}
+.tuile .t{font-size:.8rem;font-weight:700;margin-top:.1rem}
+.tuile .d{font-size:.68rem;color:#6d7f96;margin-top:.15rem;line-height:1.3}
+.amb{grid-template-columns:1fr 1fr}
+.ch{margin:.7rem 0 0}
+.ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:#8fa1b8}
+select{width:100%;font:inherit;color:#e8edf5;background:#0f1724;border:1px solid #2b3444;
+  border-radius:8px;padding:.4rem .5rem}
+select:focus{outline:none;border-color:#c9a97e}
+.bascule{display:flex;align-items:flex-start;gap:.55rem;font-size:.82rem;cursor:pointer;
+  -webkit-user-select:none;user-select:none;margin:.2rem 0 0}
+.bascule input{width:1.05rem;height:1.05rem;accent-color:#c9a97e;cursor:pointer;margin-top:.12rem;flex:0 0 auto}
+.bascule .d{font-size:.72rem;color:#6d7f96;display:block;margin-top:.08rem}
+/* Résultat */
+.res{align-items:center;justify-content:center;min-height:12rem;text-align:center;color:#8fa1b8}
+.res img{max-width:100%;max-height:22rem;border-radius:9px;border:1px solid rgba(255,255,255,.1)}
+.res .filig{margin-top:.5rem;font-size:.74rem;color:#facc15}
+.res .avis{margin-top:.4rem;font-size:.74rem;color:#8fa1b8}
+.res .dims{font-size:.7rem;color:#6d7f96;margin-top:.2rem}
+.res .dl{margin-top:.6rem}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.55rem;
+  padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
+button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
+button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:disabled{opacity:.5;cursor:default}
+button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:#d8bd97}
+button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:700}
+.vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+@media (max-width:720px){.corps{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+`;
+
+function pageStudio() {
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<title>Studio virtuel — Administration Sandriza</title>
+<style>${CSS}${CSS_JOUR}</style></head><body>
+<div class="tete"><span class="ic">🎨</span><h1>Studio virtuel</h1>
+  <span class="credits" id="credits"></span></div>
+<div class="ro" id="ro" hidden>Lecture seule : votre rôle ne permet pas de lancer de traitement.</div>
+<div class="corps" id="corps"><div class="carte large"><div class="vide">Chargement…</div></div></div>
+<div class="pied"><span class="msg" id="msg"></span>
+  <button id="b-apercu" disabled>Aperçu gratuit</button>
+  <button class="prim" id="b-final" disabled>Générer en pleine qualité</button></div>
+<script>
+(function(){
+  'use strict';
+  var P = window.szPont;
+${JS_ACTIVITE}${JS_DIRE}
+  var corps = document.getElementById('corps');
+  var bApercu = document.getElementById('b-apercu');
+  var bFinal = document.getElementById('b-final');
+  var creditsEl = document.getElementById('credits');
+  var RO = false, OCCUPE = false, ARME = false;
+  var PHOTO = null;      // data URL de la photo importee (reduite)
+  var VOIE = 'humain';   // humain | fantome | plat
+  var PRESET = '';       // cle d ambiance
+  var PRESETS = [];      // [{cle,label,emoji,desc}]
+  var RESULT = null;     // { image, essai, decorErreur, upNote, largeur, hauteur }
+
+  var VOIES = [
+    { cle: 'humain',  em: '👗', t: 'Mannequin virtuel', d: 'Porté par un modèle, décor intégré' },
+    { cle: 'fantome', em: '👻', t: 'Fantôme habillé',   d: 'Sans mannequin, décor pro ajouté' },
+    { cle: 'plat',    em: '📦', t: 'Produit à plat',    d: 'Détourage + décor + ombre' }
+  ];
+  // Quelques modèles (mannequin virtuel). Le relais accepte tout nom connu.
+  var MODELES = ['sophia','avery','maya','taylor','emma','ava','zoe','julia','lena','jackson'];
+
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+  function dire(t, cl){ szDire(t, cl); }
+
+  var MOTIFS = {
+    session:            'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
+    droit:              'Votre rôle ne donne pas accès au traitement d’image.',
+    photo_absente:      'Importez d’abord une photo.',
+    non_configure:      'Aucune clé Photoroom configurée (Configuration ▸ Clés API).',
+    indisponible:       'Le service n’est pas prêt dans la fenêtre principale.',
+    pont_indisponible:  'La fenêtre principale ne répond pas.',
+    delai:              'La fenêtre principale n’a pas répondu à temps.',
+    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
+    echec:              'L’opération a échoué.'
+  };
+  function expliquer(r){
+    var m = r && r.motif;
+    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+      + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
+  }
+  function appeler(op, args){
+    var p;
+    try { p = P.appeler.apply(P, [op].concat(args || [])); }
+    catch (e) { return Promise.resolve({ ok: false, motif: 'pont_indisponible' }); }
+    if (!p || typeof p.then !== 'function') return Promise.resolve({ ok: false, motif: 'pont_indisponible' });
+    return p.then(function(r){ return r || { ok: false, motif: 'echec' }; })
+            .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
+  }
+
+  // Réduction locale avant l envoi : un cliché de téléphone pèserait plusieurs Mo
+  // sur le pont. 3000 px sur le grand côté suffit (Photoroom rend 1K a 4K), et le
+  // fond studio étant opaque, le JPEG ne coûte aucune transparence.
+  function reduire(dataUrl, cb){
+    try {
+      var im = new Image();
+      im.onload = function(){
+        try {
+          var max = 3000, w = im.naturalWidth, h = im.naturalHeight;
+          var ech = Math.min(1, max / Math.max(w, h));
+          var cw = Math.max(1, Math.round(w * ech)), chh = Math.max(1, Math.round(h * ech));
+          var c = document.createElement('canvas'); c.width = cw; c.height = chh;
+          c.getContext('2d').drawImage(im, 0, 0, cw, chh);
+          cb(c.toDataURL('image/jpeg', 0.92));
+        } catch (e) { cb(dataUrl); }
+      };
+      im.onerror = function(){ cb(dataUrl); };
+      im.src = dataUrl;
+    } catch (e) { cb(dataUrl); }
+  }
+
+  function majBoutons(){
+    var pret = !!PHOTO && !!PRESET && !RO && !OCCUPE;
+    bApercu.disabled = !pret;
+    bFinal.disabled = !pret;
+    if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = 'Générer en pleine qualité'; }
+  }
+
+  function depotHtml(){
+    if (PHOTO) {
+      return '<div class="depot" id="depot"><img src="' + PHOTO + '" alt="photo">'
+        + '<span class="refaire">Choisir une autre photo</span></div>'
+        + '<input type="file" id="fichier" accept="image/*" hidden>';
+    }
+    return '<div class="depot" id="depot"><span class="gros">📷</span>'
+      + '<span>Glissez une photo studio ici, ou cliquez pour choisir</span>'
+      + '<span style="font-size:.7rem;color:#6d7f96">Fond blanc, un vêtement — JPEG ou PNG</span></div>'
+      + '<input type="file" id="fichier" accept="image/*" hidden>';
+  }
+
+  function voiesHtml(){
+    return VOIES.map(function(v){
+      return '<div class="tuile' + (VOIE === v.cle ? ' on' : '') + '" data-voie="' + v.cle + '">'
+        + '<span class="em">' + v.em + '</span><span class="t">' + esc(v.t) + '</span>'
+        + '<span class="d">' + esc(v.d) + '</span></div>';
+    }).join('');
+  }
+
+  function modeleHtml(){
+    if (VOIE !== 'humain') return '';
+    return '<div class="ch"><label>Modèle</label><select id="modele">'
+      + MODELES.map(function(m, i){ return '<option value="' + m + '"' + (i === 0 ? ' selected' : '') + '>'
+          + m.charAt(0).toUpperCase() + m.slice(1) + '</option>'; }).join('')
+      + '</select></div>';
+  }
+
+  function ambiancesHtml(){
+    if (!PRESETS.length) return '<div class="vide">Aucune ambiance.</div>';
+    return '<div class="tuiles amb">' + PRESETS.map(function(p){
+      return '<div class="tuile' + (PRESET === p.cle ? ' on' : '') + '" data-preset="' + esc(p.cle) + '">'
+        + '<span class="em">' + (p.emoji || '🎨') + '</span><span class="t">' + esc(p.label) + '</span>'
+        + '<span class="d">' + esc(p.desc || '') + '</span></div>';
+    }).join('') + '</div>';
+  }
+
+  function resultatHtml(){
+    if (!RESULT) return '<div class="vide">L’image apparaîtra ici. Commencez par un <strong>aperçu gratuit</strong>.</div>';
+    var h = '<img src="' + RESULT.image + '" alt="résultat">';
+    if (RESULT.essai) h += '<div class="filig">⚠ Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.</div>';
+    if (RESULT.decorErreur) h += '<div class="filig">⚠ Le décor n’a pas pu être appliqué : ' + esc(RESULT.decorErreur) + '</div>';
+    if (RESULT.upNote) h += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
+    if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
+    h += '<div class="dl"><button id="b-dl">Télécharger l’image</button></div>';
+    return h;
+  }
+
+  function dessiner(){
+    var av = document.getElementById('ro'); if (av) av.hidden = !RO;
+    var h = [];
+    h.push('<div class="carte"><h2>1 · Photo</h2>'
+      + '<p class="sous">La photo de départ, prise en studio sur fond blanc.</p>' + depotHtml() + '</div>');
+    h.push('<div class="carte"><h2>2 · Voie</h2>'
+      + '<p class="sous">Comment mettre le vêtement en valeur.</p>'
+      + '<div class="tuiles">' + voiesHtml() + '</div>' + modeleHtml() + '</div>');
+    h.push('<div class="carte large"><h2>3 · Ambiance</h2>'
+      + '<p class="sous">Un clic règle décor, ombre ancrée et lumière. Réglable au besoin plus tard.</p>'
+      + ambiancesHtml() + '</div>');
+    h.push('<div class="carte large res" id="res">' + resultatHtml() + '</div>');
+    corps.innerHTML = h.join('');
+    brancher();
+    majBoutons();
+  }
+
+  function brancher(){
+    var depot = document.getElementById('depot');
+    var fichier = document.getElementById('fichier');
+    if (depot && fichier && !RO) {
+      depot.onclick = function(){ fichier.click(); };
+      depot.ondragover = function(e){ e.preventDefault(); depot.classList.add('survol'); };
+      depot.ondragleave = function(){ depot.classList.remove('survol'); };
+      depot.ondrop = function(e){ e.preventDefault(); depot.classList.remove('survol');
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) lireFichier(e.dataTransfer.files[0]); };
+      fichier.onchange = function(){ if (fichier.files && fichier.files[0]) lireFichier(fichier.files[0]); };
+    }
+    corps.querySelectorAll('[data-voie]').forEach(function(el){
+      el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); RESULT = null; dessiner();
+        dire('Voie : ' + VOIE + '.', 'att'); };
+    });
+    corps.querySelectorAll('[data-preset]').forEach(function(el){
+      el.onclick = function(){ if (RO || OCCUPE) return; PRESET = el.getAttribute('data-preset'); dessiner(); };
+    });
+    var dl = document.getElementById('b-dl');
+    if (dl && RESULT) dl.onclick = telecharger;
+  }
+
+  function lireFichier(f){
+    if (!f || String(f.type).indexOf('image/') !== 0) { dire('Ce n’est pas une image.', 'err'); return; }
+    dire('Lecture de la photo…');
+    var fr = new FileReader();
+    fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
+      PHOTO = petite; RESULT = null; dessiner(); dire('Photo prête.', 'bon'); }); };
+    fr.onerror = function(){ dire('Lecture impossible.', 'err'); };
+    fr.readAsDataURL(f);
+  }
+
+  function occuper(o){
+    OCCUPE = o;
+    corps.querySelectorAll('button, [data-voie], [data-preset], .depot').forEach(function(b){
+      if (b.tagName === 'BUTTON') b.disabled = o; });
+    majBoutons();
+    bApercu.disabled = o || !PHOTO || !PRESET || RO;
+    bFinal.disabled = o || !PHOTO || !PRESET || RO;
+  }
+
+  function saisie(apercu){
+    var s = { geste: VOIE, preset: PRESET, apercu: apercu, image: PHOTO };
+    if (VOIE === 'humain') {
+      var sel = document.getElementById('modele');
+      s.options = { modele: sel ? sel.value : 'sophia' };
+    }
+    return s;
+  }
+
+  function lancer(apercu){
+    if (RO || OCCUPE) return;
+    if (!PHOTO) { dire('Importez d’abord une photo.', 'err'); return; }
+    if (!PRESET) { dire('Choisissez une ambiance.', 'err'); return; }
+    occuper(true);
+    dire(apercu ? 'Aperçu gratuit en cours…' : 'Génération en pleine qualité…');
+    appeler('studio:traiter', [saisie(apercu)]).then(function(r){
+      occuper(false);
+      if (r && r.ok) {
+        RESULT = { image: r.image, essai: !!r.essai, decorErreur: r.decorErreur || '',
+                   upNote: r.upNote || '', largeur: r.largeur || 0, hauteur: r.hauteur || 0 };
+        var res = document.getElementById('res');
+        if (res) { res.innerHTML = resultatHtml(); var dl = document.getElementById('b-dl'); if (dl) dl.onclick = telecharger; }
+        dire(apercu ? 'Aperçu prêt (gratuit).' : 'Image générée.', 'bon');
+        if (!apercu) chargerCredits();
+      } else {
+        dire(expliquer(r), 'err');
+      }
+    });
+  }
+
+  // Aperçu : gratuit, part directement.
+  bApercu.onclick = function(){ lancer(true); };
+  // Pleine qualité : consomme des crédits → armement en deux temps.
+  bFinal.onclick = function(){
+    if (RO || OCCUPE) return;
+    if (!ARME) {
+      ARME = true; bFinal.className = 'prim conf'; bFinal.textContent = 'Confirmer (consomme des crédits)';
+      dire('Un clic de plus lance un vrai rendu payant.', 'att');
+      return;
+    }
+    ARME = false; bFinal.className = 'prim'; bFinal.textContent = 'Générer en pleine qualité';
+    lancer(false);
+  };
+
+  function telecharger(){
+    if (!RESULT || !RESULT.image) return;
+    try {
+      var a = document.createElement('a');
+      a.href = RESULT.image;
+      a.download = 'studio-' + VOIE + '-' + PRESET + '.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      dire('Téléchargement lancé.', 'bon');
+    } catch (e) { dire('Téléchargement impossible.', 'err'); }
+  }
+
+  function chargerCredits(){
+    appeler('studio:compte').then(function(r){
+      if (!r || !r.ok) { creditsEl.textContent = ''; return; }
+      var dispo = r.compte && r.compte.available != null ? r.compte.available : null;
+      var sb = r.sandbox || {};
+      var t = '';
+      if (dispo != null) t += 'Crédits : <b>' + dispo + '</b>';
+      if (sb.utilise != null) t += (t ? ' · ' : '') + 'Aperçus ce mois : ' + sb.utilise + (sb.quotaMois ? ' / ' + sb.quotaMois : '');
+      creditsEl.innerHTML = t;
+    });
+  }
+
+  function charger(){
+    dire('Chargement des ambiances…');
+    appeler('studio:presets').then(function(r){
+      if (!r || !r.ok) {
+        corps.innerHTML = '<div class="carte large"><div class="vide">' + expliquer(r) + '</div></div>';
+        dire(expliquer(r), 'err');
+        return;
+      }
+      PRESETS = r.presets || [];
+      dessiner();
+      dire('');
+      chargerCredits();
+    });
+  }
+
+  charger();
+})();
+</script></body></html>`;
+}
+
+module.exports = { pageStudio };
