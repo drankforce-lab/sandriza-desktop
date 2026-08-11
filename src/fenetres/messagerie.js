@@ -98,7 +98,13 @@ function pageMessagerie() {
 <div class="tete"><span class="ic">💬</span><h1>Messagerie clients</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="vide">Chargement… (les demandes se resynchronisent)</div></div>
-<div class="pied"><span class="msg" id="msg"></span></div>
+<div class="pied"><span class="msg" id="msg"></span>
+  <span id="ret" hidden style="margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:#8fa1b8">
+    <span title="Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.">Réponses conservées</span>
+    <input id="ret-mois" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:#e8edf5;background:#0f1724;border:1px solid #2b3444;border-radius:6px;padding:.2rem .35rem">
+    <span>mois</span>
+    <button id="ret-save" style="font:inherit;font-size:.74rem;color:#e8edf5;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);border-radius:6px;padding:.22rem .5rem;cursor:pointer">Enregistrer</button>
+  </span></div>
 <script>
 (function(){
   'use strict';
@@ -288,7 +294,33 @@ ${JS_ACTIVITE}${JS_DIRE}
       D = r;
       dire('');
       dessiner();
+      majRetention();
     });
+  }
+
+  /* Conservation des demandes répondues — ex-onglet Config « Messagerie clients »,
+     rapatrié ici (une seule maison pour la messagerie). En lecture seule sans le
+     droit de configuration. */
+  function majRetention(){
+    var box = document.getElementById('ret'); if (!box) return;
+    box.hidden = false;
+    var inp = document.getElementById('ret-mois');
+    var btn = document.getElementById('ret-save');
+    if (inp) inp.value = (D && D.retention) || 12;
+    var ro = !(D && D.peutModifier);
+    if (inp) inp.disabled = ro;
+    if (btn) { btn.disabled = ro;
+      btn.onclick = function(){
+        if (ro) return;
+        var v = inp ? inp.value : '';
+        btn.disabled = true; dire('Enregistrement…');
+        appeler('messagerie:retention', [v]).then(function(r){
+          btn.disabled = false;
+          if (r && r.ok) { if (D) D.retention = r.retention; dire('Conservation enregistrée.', 'bon'); }
+          else dire(r && r.motif === 'invalide' ? 'Valeur entre 1 et 120 mois.' : expliquer(r), 'err');
+        });
+      };
+    }
   }
 
   /* ⚠ ACTUALISATION POUSSEE PAR LA COQUILLE — jamais pendant qu une demande

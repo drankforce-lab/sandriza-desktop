@@ -1288,7 +1288,7 @@ const OPS_PONT = new Set([
   'avis:repondre', 'avis:supprimer',
   // La messagerie clients (fenetre Messagerie) : liste (resynchronisee),
   // lecture, reponse (envoyee par courriel) et suppression.
-  'messagerie:liste', 'messagerie:lire', 'messagerie:repondre', 'messagerie:supprimer',
+  'messagerie:liste', 'messagerie:lire', 'messagerie:repondre', 'messagerie:supprimer', 'messagerie:retention',
   // Les notes de version (fenetre Notes) : les entrees brutes du site.
   'notes:lire',
   // Les archives (fenetre Archives, 1.60.0) : quatre piles + reactivation.
@@ -1739,7 +1739,7 @@ const LIMITES_PONT = {
   'sociaux:publierTout': 180000,
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
-  'messagerie:liste': 20000, 'messagerie:repondre': 30000,
+  'messagerie:liste': 20000, 'messagerie:repondre': 30000, 'messagerie:retention': 20000,
   // Photothèque. Une photo importee est contenue, reencodee PUIS deposee dans le
   // stockage : c est le meme travail que l enregistrement d un produit, avec la
   // meme dependance a la vitesse de televersement d une boutique.

@@ -2605,6 +2605,7 @@ module.exports = {
               courriel: 'marc@exemple.ca', raison: 'Article manquant',
               statut: 'pending', date: '2026-08-07' },
           ],
+          retention: 12, peutModifier: true,
         },
         'messagerie:lire': {
           ok: true, id: 'sup_1', commande: 'CMD-0002-22010', client: 'Josée Lafleur',
