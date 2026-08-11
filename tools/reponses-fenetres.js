@@ -1252,6 +1252,41 @@ module.exports = {
       shippingCost: 14.99, freeThreshold: 75, priorityCost: 9.99 },
   },
 
+  // Transporteurs (palier 5, famille Livraison). ⚠ Aucun secret entier dans le
+  // jeu d'essai : le cœur ne rend que { defini, fin }. Deux cas : chargé, et le
+  // filet « identifiants non chargés » (charge:false → avertissement + Réessayer).
+  'transporteurs.js': [
+    { nom: 'chargé, identifiants en place', reponses: {
+      identite: IDENTITE,
+      'config:transporteurs:donnees': { ok: true, charge: true, raison: '', peutModifier: true,
+        mapbox: 'pk.abc123',
+        carriers: {
+          'postes-canada': { enabled: true, cle: { defini: true, fin: '7a2c' },
+            customerNumber: '2004381', contractId: '42708517', mode: 'production',
+            originName: 'SANDRIZA', originPhone: '5140000000', originAddress: '123 rue Sainte-Catherine',
+            originCity: 'Montréal', originProvince: 'QC', originPostal: 'H2X1K4' },
+          purolator: { enabled: false, apiUsername: 'boutique', motDePasse: { defini: true, fin: 'k9f1' }, accountNumber: '12345678' },
+          fedex: { enabled: true, clientId: 'l7xxABCD', clientSecret: { defini: true, fin: 'z0p2' }, accountNumber: '987654321', mode: 'production' },
+          ups: { enabled: false, clientId: '', clientSecret: { defini: false, fin: '' }, accountNumber: '' },
+          canpar: { enabled: false, apiUsername: '', motDePasse: { defini: false, fin: '' }, accountNumber: '' },
+        } },
+    } },
+    { nom: 'identifiants non chargés (filet)', reponses: {
+      identite: IDENTITE,
+      'config:transporteurs:donnees': { ok: true, charge: false,
+        raison: 'votre session du personnel a expiré — reconnectez-vous', peutModifier: true, mapbox: '',
+        carriers: {
+          'postes-canada': { enabled: true, cle: { defini: false, fin: '' }, customerNumber: '2004381',
+            contractId: '42708517', mode: 'production', originName: 'SANDRIZA', originPhone: '', originAddress: '',
+            originCity: 'Montréal', originProvince: 'QC', originPostal: '' },
+          purolator: { enabled: false, apiUsername: '', motDePasse: { defini: false, fin: '' }, accountNumber: '' },
+          fedex: { enabled: false, clientId: '', clientSecret: { defini: false, fin: '' }, accountNumber: '', mode: 'sandbox' },
+          ups: { enabled: false, clientId: '', clientSecret: { defini: false, fin: '' }, accountNumber: '' },
+          canpar: { enabled: false, apiUsername: '', motDePasse: { defini: false, fin: '' }, accountNumber: '' },
+        } },
+    } },
+  ],
+
   'studio.js': {
     identite: IDENTITE,
     'studio:presets': { ok: true, presets: [
