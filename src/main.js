@@ -1380,6 +1380,8 @@ const OPS_PONT = new Set([
   // ⚠ AUCUNE CLE NE TRAVERSE LE PONT : << donnees >> ne rend que l existence et
   // les 4 derniers caracteres. << retirer >> est le geste explicite de retrait.
   'config:cles:donnees', 'config:cles:ecrire', 'config:cles:retirer',
+  // Configuration de la livraison (fenetre Livraison, 2.37.0) — pas de secret.
+  'config:livraison:donnees', 'config:livraison:ecrire',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1691,6 +1693,7 @@ const LIMITES_PONT = {
   'config:paiements:options': 30000, 'config:paiements:mode': 15000, 'config:paiements:tester': 45000,
   // Cles API : chaque ecriture pousse plusieurs cles vers le nuage, awaitees.
   'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000,
+  'config:livraison:donnees': 15000, 'config:livraison:ecrire': 30000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
@@ -1951,6 +1954,7 @@ const PAGES_ANCRABLES = () => ({
   'config-taxes': ['Gestion des taxes', () => pageTaxes()],
   'config-paiements': ['Configuration des paiements', () => pagePaiementsConfig()],
   'config-cles': ['Clés API', () => pageClesConfig()],
+  'config-livraison': ['Configuration de la livraison', () => pageLivraison()],
   'studio': ['Studio virtuel', () => pageStudio()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
@@ -2707,6 +2711,7 @@ const { pageTaxes } = require('./fenetres/taxes');
 const { pagePaiementsConfig } = require('./fenetres/paiements-config');
 const { pageClesConfig } = require('./fenetres/cles');
 const { pageStudio } = require('./fenetres/studio');
+const { pageLivraison } = require('./fenetres/livraison');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2794,7 +2799,8 @@ const actionApp = (nom) => {
     case 'comptable': case 'bankrec': case 'fal-suivi':
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
-    case 'config-paiements': case 'config-cles': case 'studio': {
+    case 'config-paiements': case 'config-cles': case 'studio':
+    case 'config-livraison': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

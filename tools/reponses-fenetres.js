@@ -1245,6 +1245,13 @@ module.exports = {
   // AMBIANCES (studio:presets), puis lit le compte de crédits. Aucune image ni
   // clé dans le jeu d'essai : le traitement ne part qu'au clic (hors portée du
   // contrôle, qui n'exécute que le rendu au chargement).
+  // Configuration de la livraison (palier 5, famille Livraison). Pas de secret.
+  'livraison.js': {
+    identite: IDENTITE,
+    'config:livraison:donnees': { ok: true, peutModifier: true, international: true,
+      shippingCost: 14.99, freeThreshold: 75, priorityCost: 9.99 },
+  },
+
   'studio.js': {
     identite: IDENTITE,
     'studio:presets': { ok: true, presets: [
