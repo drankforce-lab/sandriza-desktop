@@ -28,11 +28,17 @@ body{background:#0e1522;color:#e8edf5;
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
+/* ⚠ LA ZONE EST PLEINE PAGE, ET LES CARTES DOIVENT LA REMPLIR (2026-08-10) :
+   plafonnees en largeur, elles laissaient la moitie de l ecran vide une fois la
+   fenetre ANCREE. On repartit en colonnes qui se replient seules. */
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));
+  gap:1rem;align-content:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
-  padding:1rem 1.1rem;max-width:42rem;margin:0 0 1rem}
+  padding:1rem 1.1rem;margin:0;min-width:0}
+.pleine{grid-column:1/-1}
 .carte h2{margin:0 0 .8rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:#8fa1b8}
 .ch{margin:0 0 .8rem}
@@ -58,8 +64,13 @@ button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
 .vide{padding:1.1rem .6rem;text-align:center;color:#8fa1b8;font-size:.82rem}
-.ro{margin:0 0 .8rem;border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.1);
-  color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+/* ⚠ LE BANDEAU DE LECTURE SEULE VIT HORS DE LA GRILLE. Place dedans avec
+   << grid-column:1/-1 >>, il OCCUPE la derniere piste : auto-fit ne la voit plus
+   vide, ne la replie plus, et les cartes cessent de remplir la largeur (releve
+   au rendu le 2026-08-10). */
+.ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
+  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;
+  padding:.5rem .7rem;font-size:.78rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -68,6 +79,7 @@ function pageFooter() {
 <title>Pied de page — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">🦶</span><h1>Pied de page</h1></div>
+<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter le pied de page, pas le modifier.</div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-save" disabled>Enregistrer</button></div>
@@ -118,7 +130,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessiner(){
     var c = D || {};
     var h = [];
-    if (RO) { h.push('<div class="ro">Lecture seule : vous pouvez consulter le pied de page, pas le modifier.</div>'); }
+    var av = document.getElementById('ro');
+    if (av) av.hidden = !RO;
     h.push('<div class="carte"><h2>Colonne marque</h2>');
     h.push(champ('fc-tagline', 'Tagline', c.tagline));
     h.push(champ('fc-address', 'Adresse complète (FR)', c.address));
@@ -168,7 +181,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Lecture…');
     appeler('config:footer:donnees').then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte pleine"><div class="vide">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

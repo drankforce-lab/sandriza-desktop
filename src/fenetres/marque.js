@@ -41,11 +41,18 @@ body{background:#0e1522;color:#e8edf5;
   -webkit-user-select:none;user-select:none}
 .onglets button:hover{color:#e8edf5}
 .onglets button[aria-selected="true"]{color:#c9a97e;border-bottom-color:#c9a97e;font-weight:700}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
+/* ⚠ LA ZONE EST PLEINE PAGE, ET LES CARTES DOIVENT LA REMPLIR. Plafonnees en
+   largeur, elles laissaient la moitie de l ecran vide une fois la fenetre
+   ANCREE (releve le 2026-08-10, capture a l appui). Une colonne unique etiree a
+   1900 px serait pire : on repartit donc en colonnes qui se replient seules. */
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(30rem,1fr));
+  gap:1rem;align-content:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
-  padding:1rem 1.1rem;max-width:48rem;margin:0 0 1rem}
+  padding:1rem 1.1rem;margin:0;min-width:0}
+.pleine{grid-column:1/-1}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:#8fa1b8}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:#6d7f96}
@@ -67,10 +74,11 @@ input[type=color]:disabled,input[type=text]:disabled,select:disabled{opacity:.55
 .bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
 .bascule input{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
-/* Un logo : sa vignette, son bouton de choix, son retrait. */
-.logo{display:grid;grid-template-columns:11rem 1fr;gap:.9rem;align-items:start;
-  padding:.7rem 0;border-top:1px solid rgba(255,255,255,.06)}
-.logo:first-of-type{border-top:none;padding-top:0}
+/* Un logo : sa vignette, son bouton de choix, son retrait. Les six se
+   repartissent en colonnes plutot qu en une pile etiree. */
+.logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(24rem,1fr));gap:.9rem}
+.logo{display:grid;grid-template-columns:9.5rem 1fr;gap:.9rem;align-items:start;min-width:0;
+  border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.7rem .8rem;background:#111a29}
 @media (max-width:620px){.logo{grid-template-columns:1fr}}
 .vig{height:5rem;border-radius:9px;display:flex;align-items:center;justify-content:center;
   padding:.5rem;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
@@ -94,8 +102,13 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 button.pt{font-size:.76rem;padding:.25rem .55rem}
 button.dgr{color:#f87171;border-color:rgba(248,113,113,.4)}
 .vide{padding:1.1rem .6rem;text-align:center;color:#8fa1b8;font-size:.82rem}
-.ro{margin:0 0 .8rem;border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.1);
-  color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+/* ⚠ LE BANDEAU DE LECTURE SEULE VIT HORS DE LA GRILLE. Place dedans avec
+   << grid-column:1/-1 >>, il OCCUPE la derniere piste : auto-fit ne la voit plus
+   vide, ne la replie plus, et les cartes cessent de remplir la largeur (releve
+   au rendu le 2026-08-10). */
+.ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
+  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;
+  padding:.5rem .7rem;font-size:.78rem}
 /* Apercus des deux pages de connexion. */
 .apc{border-radius:10px;padding:1.4rem 1rem;text-align:center;min-height:7rem;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem}
@@ -128,6 +141,7 @@ function pageMarque(onglet) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">🖼️</span><h1>Logos et marque</h1></div>
 <div class="onglets" id="onglets"></div>
+<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les logos, pas les modifier.</div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button id="b-reinit" disabled>Réinitialiser</button>
@@ -272,8 +286,9 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   /* ── ONGLET 2 : les logos ────────────────────────────────────────────── */
   function dessinerLogos(){
-    var h = ['<div class="carte"><h2>Les six logos</h2>'];
+    var h = ['<div class="carte pleine"><h2>Les six logos</h2>'];
     h.push('<p class="sous">Un logo choisi n’est déposé qu’à l’enregistrement. PNG ou SVG, fond transparent recommandé.</p>');
+    h.push('<div class="logos">');
     LOGOS.forEach(function(L){
       var src = logoActuel(L.t);
       var enAttente = !!ENATTENTE[L.t];
@@ -288,7 +303,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       else if (src) h.push('<button class="pt dgr" data-effacer="' + esc(L.t) + '"' + (RO ? ' disabled' : '') + '>✕ Supprimer</button>');
       h.push('</div></div></div>');
     });
-    h.push('</div>');
+    h.push('</div></div>');
     corps.innerHTML = h.join('');
     brancherLogos();
   }
@@ -436,6 +451,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
   }
   function dessiner(){
+    var av = document.getElementById('ro');
+    if (av) av.hidden = !RO;
     dessinerOnglets();
     if (ONGLET === 'marque') dessinerMarque();
     else if (ONGLET === 'logos') dessinerLogos();
@@ -494,20 +511,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('config:marque:donnees').then(function(r){
       if (!r || !r.ok) {
         ongl.innerHTML = '';
-        corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte pleine"><div class="vide">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }
       D = r;
       RO = !r.peutModifier;
-      if (RO) corps.innerHTML = '';
       dessiner();
-      if (RO) {
-        var av = document.createElement('div');
-        av.className = 'ro';
-        av.textContent = 'Lecture seule : vous pouvez consulter les logos, pas les modifier.';
-        corps.insertBefore(av, corps.firstChild);
-      }
       dire('');
     });
   }

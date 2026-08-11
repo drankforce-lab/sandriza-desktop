@@ -35,7 +35,7 @@ body{background:#0e1522;color:#e8edf5;
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
-  padding:1rem 1.1rem;max-width:44rem}
+  padding:1rem 1.1rem}
 .chef{display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
 .chef p{margin:.15rem 0 0;font-size:.8rem;color:#8fa1b8;max-width:32rem}
 .chef .bascule{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#8fa1b8}
