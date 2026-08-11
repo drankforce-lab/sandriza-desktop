@@ -62,9 +62,14 @@ body{background:#0e1522;color:#e8edf5;
 .depot .refaire{font-size:.72rem;color:#8fa1b8;text-decoration:underline;margin-top:.3rem}
 /* Choix dans la photothèque */
 .phbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
-.phbarre .phinfo{font-size:.76rem;color:#8fa1b8}
+.phbarre .phinfo{font-size:.74rem;color:#8fa1b8;margin-left:auto;white-space:nowrap}
+.phbarre #ph-q{flex:1 1 auto;min-width:6rem;max-width:22rem;font:inherit;color:#e8edf5;
+  background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.34rem .55rem}
+.phbarre #ph-q:focus{outline:none;border-color:#c9a97e}
 .phgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.5rem,1fr));gap:.5rem;
-  max-height:16rem;overflow-y:auto;padding-right:.2rem}
+  max-height:18rem;overflow-y:auto;padding-right:.2rem}
+.phgrille::-webkit-scrollbar{width:8px}
+.phgrille::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .phvig{background:#0f1724;border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
 .phvig:hover{border-color:#c9a97e}
@@ -184,7 +189,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PHOTO_ID = '';     // id d une photo CHOISIE dans la phototheque (l image reste au site)
   var PHOTO_URL = '';    // adresse de la vignette choisie (affichage seulement)
   var PICKER = false;    // le choix dans la phototheque est-il ouvert ?
-  var PHOTHQ = [];       // [{id,nom,apercu,enAttente}]
+  var PHOTHQ = [];       // [{id,nom,apercu,enAttente}] cumule (defilement infini)
+  var PH_Q = '';         // recherche courante (nom / code)
+  var PH_PAGE = 0;       // derniere page chargee
+  var PH_TAILLE = 60;    // photos par page
+  var PH_TOTAL = 0;      // total correspondant a la recherche
+  var PH_FIN = false;    // plus rien a charger
+  var PH_OCC = false;    // une page est-elle en cours de chargement ?
+  var PH_DEB = null;     // minuterie anti-rebond de la recherche
   var VOIE = 'humain';   // humain | fantome | plat
   var PRESET = '';       // cle d ambiance
   var PRESETS = [];      // [{cle,label,emoji,desc}]
@@ -204,7 +216,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     { cle: 'plat',    em: '📦', t: 'Produit à plat',    d: 'Détourage + décor + ombre' }
   ];
   // Quelques modèles (mannequin virtuel). Le relais accepte tout nom connu.
-  var MODELES = ['sophia','avery','maya','taylor','emma','ava','zoe','julia','lena','jackson'];
+  // Les 16 modeles REELS de Photoroom (virtualModel.model.preset.name, verifies
+  // dans la doc 2026-08-11). Sophia en tete = choix par defaut. Photoroom ne
+  // publie pas l apparence de chaque modele : le bouton << Comparer >> genere un
+  // apercu sandbox gratuit du VRAI vetement sur chacun pour choisir a l oeil.
+  var MODELES = ['sophia','emma','ava','zoe','maya','lena','julia','fiona',
+                 'avery','taylor','kendall','casey','sam','jordan','jackson','reece'];
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -278,22 +295,14 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<span class="refaire">Choisir une autre photo</span></div>'
         + '<input type="file" id="fichier" accept="image/*" hidden>';
     }
-    // Le choix dans la photothèque est ouvert : une grille de vignettes.
+    // Le choix dans la photothèque est ouvert : recherche + grille de vignettes,
+    // chargée par pages (défilement infini) pour tenir des milliers de photos.
     if (PICKER) {
-      var grille;
-      if (!PHOTHQ.length) {
-        grille = '<div class="vide">Aucune photo dans la photothèque.</div>';
-      } else {
-        grille = '<div class="phgrille">' + PHOTHQ.map(function(p){
-          var img = p.apercu
-            ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '">'
-            : '<span class="attente">en cours…</span>';
-          return '<div class="phvig" data-ph="' + esc(p.id) + '" title="' + esc(p.nom) + '">'
-            + img + '<span class="phnom">' + esc(p.nom) + '</span></div>';
-        }).join('') + '</div>';
-      }
+      var grille = '<div class="phgrille" id="ph-grille">' + phVignettesHtml() + '</div>';
       return '<div class="phbarre"><button id="ph-retour">← Retour</button>'
-        + '<span class="phinfo">Choisissez une photo de la photothèque</span></div>' + grille;
+        + '<input type="search" id="ph-q" placeholder="Rechercher (nom, code)…" value="' + esc(PH_Q) + '"'
+        + (RO ? ' disabled' : '') + '>'
+        + '<span class="phinfo" id="ph-info"></span></div>' + grille;
     }
     // Rien de choisi : dépôt de fichier + accès à la photothèque.
     return '<div class="depot" id="depot"><span class="gros">📷</span>'
@@ -403,10 +412,21 @@ ${JS_ACTIVITE}${JS_DIRE}
     // « Choisir une autre photo » : on repart de zéro.
     if (depot && aUnePhoto() && !RO) { depot.onclick = function(){ reinitPhoto(); }; }
     var phO = document.getElementById('ph-ouvrir'); if (phO) phO.onclick = ouvrirPicker;
-    var phR = document.getElementById('ph-retour'); if (phR) phR.onclick = function(){ PICKER = false; dessiner(); };
-    corps.querySelectorAll('[data-ph]').forEach(function(el){
-      el.onclick = function(){ if (OCCUPE) return; choisirPhoto(el.getAttribute('data-ph')); };
-    });
+    var phR = document.getElementById('ph-retour'); if (phR) phR.onclick = function(){ PICKER = false; PHOTHQ = []; PH_Q = ''; dessiner(); };
+    var phQ = document.getElementById('ph-q');
+    if (phQ) {
+      phQ.oninput = function(){ phRecherche(phQ.value); };
+      phQ.onsearch = function(){ if (PH_DEB) { clearTimeout(PH_DEB); PH_DEB = null; } PH_Q = String(phQ.value || '').trim(); PH_PAGE = 0; PH_FIN = false; phChargerPage(true); };
+    }
+    var phG = document.getElementById('ph-grille');
+    if (phG) {
+      phBrancherVignettes(phG);
+      phG.onscroll = function(){
+        if (PH_OCC || PH_FIN) return;
+        if (phG.scrollTop + phG.clientHeight >= phG.scrollHeight - 120) phChargerPage(false);
+      };
+      majPhInfo();
+    }
     corps.querySelectorAll('[data-voie]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); RESULT = null; dessiner();
         dire('Voie : ' + VOIE + '.', 'att'); };
@@ -486,14 +506,80 @@ ${JS_ACTIVITE}${JS_DIRE}
     fr.readAsDataURL(f);
   }
 
+  // Grille de vignettes (partagee : rendu initial + rafraichissements de page).
+  function phVignettesHtml(){
+    if (!PHOTHQ.length) {
+      return '<div class="vide" style="grid-column:1/-1">'
+        + (PH_Q ? 'Aucune photo ne correspond à « ' + esc(PH_Q) + ' ».' : 'Photothèque vide.') + '</div>';
+    }
+    return PHOTHQ.map(function(p){
+      var img = p.apercu
+        ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '" loading="lazy">'
+        : '<span class="attente">en cours…</span>';
+      return '<div class="phvig" data-ph="' + esc(p.id) + '" title="' + esc(p.nom) + '">'
+        + img + '<span class="phnom">' + esc(p.nom) + '</span></div>';
+    }).join('');
+  }
+  function majPhInfo(txt){
+    var el = document.getElementById('ph-info');
+    if (!el) return;
+    if (txt != null) { el.textContent = txt; return; }
+    if (PH_TOTAL <= 0) { el.textContent = PH_Q ? '0 résultat' : ''; return; }
+    el.textContent = PHOTHQ.length + ' sur ' + PH_TOTAL + (PH_FIN ? '' : ' — défilez pour en voir plus');
+  }
+  // Rafraichit UNIQUEMENT la grille + le compteur (garde le focus dans la recherche).
+  function phMajGrille(){
+    var g = document.getElementById('ph-grille');
+    if (g) { g.innerHTML = phVignettesHtml(); phBrancherVignettes(g); }
+    majPhInfo();
+  }
+  function phBrancherVignettes(g){
+    g.querySelectorAll('[data-ph]').forEach(function(el){
+      el.onclick = function(){ if (OCCUPE) return; choisirPhoto(el.getAttribute('data-ph')); };
+    });
+  }
+  // Charge une page. reset=true : nouvelle recherche (remplace) ; sinon : ajoute la suivante.
+  function phChargerPage(reset){
+    if (PH_OCC || RO) return;
+    if (!reset && PH_FIN) return;
+    PH_OCC = true;
+    var page = reset ? 0 : (PH_PAGE + 1);
+    majPhInfo(reset ? 'Recherche…' : 'Chargement…');
+    appeler('studio:phototheque', [{ q: PH_Q, page: page, taille: PH_TAILLE }]).then(function(r){
+      PH_OCC = false;
+      if (!PICKER) return;
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); majPhInfo(''); return; }
+      var lot = r.photos || [];
+      PHOTHQ = reset ? lot : PHOTHQ.concat(lot);
+      PH_PAGE = (r.page != null) ? r.page : page;
+      PH_TOTAL = (r.total != null) ? r.total : PHOTHQ.length;
+      PH_FIN = (PHOTHQ.length >= PH_TOTAL) || (lot.length === 0);
+      phMajGrille();
+      dire('');
+      // La page etait pleine mais la grille ne deborde pas encore : on tire la suivante.
+      if (!PH_FIN && reset) phPeutEtreEncore();
+    });
+  }
+  // Si la grille n'est pas encore assez remplie pour defiler, charge une page de plus.
+  function phPeutEtreEncore(){
+    var g = document.getElementById('ph-grille');
+    if (g && !PH_FIN && !PH_OCC && g.scrollHeight <= g.clientHeight + 4) phChargerPage(false);
+  }
   function ouvrirPicker(){
     if (RO || OCCUPE) return;
-    PICKER = true; dessiner(); dire('Chargement de la photothèque…');
-    appeler('studio:phototheque').then(function(r){
-      if (!r || !r.ok) { PICKER = false; dessiner(); dire(expliquer(r), 'err'); return; }
-      PHOTHQ = r.photos || [];
-      if (PICKER) { dessiner(); dire(PHOTHQ.length ? '' : 'Photothèque vide.', PHOTHQ.length ? '' : 'att'); }
-    });
+    PICKER = true; PHOTHQ = []; PH_Q = ''; PH_PAGE = 0; PH_TOTAL = 0; PH_FIN = false; PH_OCC = false;
+    dessiner(); dire('Chargement de la photothèque…');
+    phChargerPage(true);
+    var q = document.getElementById('ph-q'); if (q) { try { q.focus(); } catch (e) {} }
+  }
+  function phRecherche(v){
+    if (PH_DEB) clearTimeout(PH_DEB);
+    PH_DEB = setTimeout(function(){
+      PH_DEB = null;
+      PH_Q = String(v || '').trim();
+      PH_PAGE = 0; PH_FIN = false;
+      phChargerPage(true);
+    }, 250);
   }
 
   function choisirPhoto(id){
