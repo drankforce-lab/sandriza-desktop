@@ -73,15 +73,18 @@ body{background:#0e1522;color:#e8edf5;
 .phvig .phnom{font-size:.64rem;color:#8fa1b8;padding:.15rem .25rem;max-width:100%;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Voies + ambiances : tuiles cliquables */
-.tuiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+.tuiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem}
 .tuile{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:9px;
-  padding:.6rem .55rem;cursor:pointer;text-align:center;-webkit-user-select:none;user-select:none;
+  padding:.5rem .6rem;cursor:pointer;-webkit-user-select:none;user-select:none;
+  display:flex;align-items:center;gap:.5rem;text-align:left;
   transition:border-color .12s,background .12s}
 .tuile:hover{border-color:rgba(201,169,126,.5)}
 .tuile.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-.tuile .em{font-size:1.4rem;display:block;line-height:1.3}
-.tuile .t{font-size:.8rem;font-weight:700;margin-top:.1rem}
-.tuile .d{font-size:.68rem;color:#6d7f96;margin-top:.15rem;line-height:1.3}
+/* ⚠ Emoji en GRIS (comme le reste de l administration), jamais en couleur. */
+.tuile .em{font-size:1.15rem;line-height:1;flex:0 0 auto;filter:grayscale(1) brightness(1.45);opacity:.9}
+.tuile .txt{display:flex;flex-direction:column;min-width:0}
+.tuile .t{font-size:.8rem;font-weight:700;line-height:1.2}
+.tuile .d{font-size:.68rem;color:#6d7f96;line-height:1.22;margin-top:.06rem}
 .amb{grid-template-columns:1fr 1fr}
 .ch{margin:.7rem 0 0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:#8fa1b8}
@@ -131,6 +134,33 @@ function pageStudio() {
 (function(){
   'use strict';
   var P = window.szPont;
+
+  /* ── MODE ANCRE ── le meme bouton d'ancrage/detachement que les autres ecrans.
+     La coquille appelle szModeAncre(true) quand la vue est ANCREE, (false) quand
+     elle est DETACHEE ; on montre le bon libelle et on route vers le pont. */
+  window.szModeAncre = function(actif){
+    var t = document.querySelector('.tete');
+    if (!t) return;
+    var b = document.getElementById('sz-detacher');
+    if (!b) {
+      b = document.createElement('button');
+      b.id = 'sz-detacher';
+      b.type = 'button';
+      b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
+        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
+      t.appendChild(b);
+    }
+    if (actif) {
+      b.textContent = '⧉ Détacher';
+      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.onclick = function(){ if (P && P.detacher) P.detacher(); };
+    } else {
+      b.textContent = '⚓ Ancrer';
+      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
+    }
+  };
 ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var bApercu = document.getElementById('b-apercu');

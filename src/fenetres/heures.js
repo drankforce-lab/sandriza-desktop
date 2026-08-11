@@ -80,6 +80,33 @@ function pageHeures() {
 (function(){
   'use strict';
   var P = window.szPont;
+
+  /* ── MODE ANCRE ── le meme bouton d'ancrage/detachement que les autres ecrans.
+     La coquille appelle szModeAncre(true) quand la vue est ANCREE, (false) quand
+     elle est DETACHEE ; on montre le bon libelle et on route vers le pont. */
+  window.szModeAncre = function(actif){
+    var t = document.querySelector('.tete');
+    if (!t) return;
+    var b = document.getElementById('sz-detacher');
+    if (!b) {
+      b = document.createElement('button');
+      b.id = 'sz-detacher';
+      b.type = 'button';
+      b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
+        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
+      t.appendChild(b);
+    }
+    if (actif) {
+      b.textContent = '⧉ Détacher';
+      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.onclick = function(){ if (P && P.detacher) P.detacher(); };
+    } else {
+      b.textContent = '⚓ Ancrer';
+      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
+    }
+  };
 ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var bsave = document.getElementById('b-save');
