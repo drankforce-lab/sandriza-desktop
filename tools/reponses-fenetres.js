@@ -1260,6 +1260,20 @@ module.exports = {
       postal: 'H2X 1Y4', country: 'Canada', windowDays: 30, halfDays: 15, splitRefundEnabled: true },
   },
 
+  // Configuration de la navigation (palier 5, famille Configuration). Pas de secret.
+  'config-navigation.js': {
+    identite: IDENTITE,
+    'config:nav:donnees': { ok: true, peutModifier: true,
+      items: [
+        { id: 'home', label: 'Accueil', href: '#home', fixed: true, visible: true, children: [] },
+        { id: 'robes', label: 'Robes', href: '#shop?cat=robes', fixed: true, visible: true,
+          children: [ { id: 'ch1', label: 'Robes longues', href: '#shop?cat=robes&sub=longues', visible: true } ] },
+        { id: 'custom_1', label: 'Soldes', href: '#shop?sale=1', fixed: false, visible: true, children: [] },
+      ],
+      categories: [ { key: 'robes', label: 'Robes' }, { key: 'hauts', label: 'Hauts & Blouses' } ],
+      collections: [ { id: 'col1', name: 'Été 2026' } ] },
+  },
+
   // Automatisations (palier 5, famille Communications). Pas de secret.
   'automations.js': {
     identite: IDENTITE,

@@ -1383,6 +1383,7 @@ const OPS_PONT = new Set([
   // Configuration de la livraison (fenetre Livraison, 2.37.0) — pas de secret.
   'config:livraison:donnees', 'config:livraison:ecrire',
   'config:retours:donnees', 'config:retours:ecrire',
+  'config:nav:donnees', 'config:nav:ecrire', 'config:nav:reinit',
   // Transporteurs (fenetre Transporteurs, 2.39.0) — ⚠ secrets + filet
   // carriers_fetch_full : donnees/ecrire peuvent RECHARGER la config depuis le
   // nuage (reseau), d ou des plafonds larges.
@@ -1702,6 +1703,7 @@ const LIMITES_PONT = {
   'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000, 'config:cles:teststripe': 30000,
   'config:livraison:donnees': 15000, 'config:livraison:ecrire': 30000,
   'config:retours:donnees': 15000, 'config:retours:ecrire': 30000,
+  'config:nav:donnees': 15000, 'config:nav:ecrire': 30000, 'config:nav:reinit': 30000,
   'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000,
   'config:automations:donnees': 15000, 'config:automations:email': 20000, 'config:automations:stats': 20000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
@@ -1966,6 +1968,7 @@ const PAGES_ANCRABLES = () => ({
   'config-cles': ['Clés API', () => pageClesConfig()],
   'config-livraison': ['Configuration de la livraison', () => pageLivraison()],
   'config-retours': ['Configuration des retours', () => pageConfigRetours()],
+  'config-navigation': ['Configuration de la navigation', () => pageConfigNavigation()],
   'config-carriers': ['Transporteurs', () => pageTransporteurs()],
   'config-automations': ['Automatisations', () => pageAutomations()],
   'studio': ['Studio virtuel', () => pageStudio()],
@@ -2726,6 +2729,7 @@ const { pageClesConfig } = require('./fenetres/cles');
 const { pageStudio } = require('./fenetres/studio');
 const { pageLivraison } = require('./fenetres/livraison');
 const { pageConfigRetours } = require('./fenetres/config-retours');
+const { pageConfigNavigation } = require('./fenetres/config-navigation');
 const { pageTransporteurs } = require('./fenetres/transporteurs');
 const { pageAutomations } = require('./fenetres/automations');
 const { pageCollections } = require('./fenetres/collections');
@@ -2816,7 +2820,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-carriers': case 'config-automations': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

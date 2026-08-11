@@ -46,7 +46,7 @@ body{background:#0e1522;color:#e8edf5;
   border:1px solid rgba(248,113,113,.4);border-radius:7px;padding:.24rem .6rem;cursor:pointer}
 .avert button:hover:not(:disabled){background:rgba(248,113,113,.16)}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(30rem,1fr));gap:1rem;align-content:start}
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(30rem,1fr));gap:1rem;align-content:start;align-items:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
