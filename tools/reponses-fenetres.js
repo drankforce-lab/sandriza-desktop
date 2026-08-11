@@ -1324,18 +1324,50 @@ module.exports = {
     } },
   ],
 
-  'studio.js': {
-    identite: IDENTITE,
-    'studio:presets': { ok: true, presets: [
+  /* ⚠ DEUX CAS D'OUVERTURE, parce que la grille des mannequins a deux visages :
+     celui où les portraits existent déjà (on les relit de R2, aucun appel payant)
+     et celui où ils n'ont jamais été fabriqués (bouton « Afficher les
+     mannequins »). Un seul jeu n'aurait dessiné qu'une des deux branches. */
+  'studio.js': (() => {
+    const PRESETS = { ok: true, presets: [
       { cle: 'studio-epure',  label: 'Studio épuré',  emoji: '🕊️', desc: 'Fond neutre, lumière douce.' },
       { cle: 'plage-doree',   label: 'Plage dorée',   emoji: '🏖️', desc: 'Sable, mer, lumière dorée.' },
       { cle: 'beton-chic',    label: 'Béton chic',    emoji: '🏙️', desc: 'Béton clair, urbain minimal.' },
       { cle: 'verdure',       label: 'Verdure',       emoji: '🌿', desc: 'Végétation, lumière naturelle.' },
       { cle: 'nuit-lumieres', label: 'Nuit lumières', emoji: '🌃', desc: 'Lumières de ville floutées.' },
-    ] },
-    'studio:compte': { ok: true, compte: { available: 842, subscription: 1000, plan: 'plus' },
-      sandbox: { utilise: 37, quotaMois: 1000, quotaJour: 100, estime: true }, prixEdit: 0.10 },
-  },
+    ] };
+    const COMPTE = { ok: true, compte: { available: 842, subscription: 1000, plan: 'plus' },
+      sandbox: { utilise: 37, quotaMois: 1000, quotaJour: 100, estime: true }, prixEdit: 0.10 };
+    const NOMS = ['sophia', 'emma', 'ava', 'zoe', 'maya', 'lena', 'julia', 'fiona',
+      'avery', 'taylor', 'kendall', 'casey', 'sam', 'jordan', 'jackson', 'reece'];
+    const VIGNETTES = {};
+    NOMS.forEach((n) => { VIGNETTES[n] = 'https://img.sandriza.com/divers/mod-' + n + '.jpg'; });
+    return [
+      {
+        nom: 'portraits deja faits',
+        id: '',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
+        },
+      },
+      {
+        nom: 'aucun portrait',
+        id: 'vierge',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:modeles': { ok: true, vignettes: {}, ref: '', maj: '' },
+          'studio:modeleGenerer': { ok: true, modele: 'sophia',
+            vignette: 'https://img.sandriza.com/divers/mod-sophia.jpg', ref: 'ph_12' },
+          'studio:modelesVider': { ok: true, vignettes: {}, ref: '', maj: '' },
+        },
+      },
+    ];
+  })(),
 
   'comptable.js': [
     {
