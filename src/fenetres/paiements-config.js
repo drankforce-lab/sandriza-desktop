@@ -44,7 +44,11 @@ body{background:#0e1522;color:#e8edf5;
   display:flex;flex-direction:column;gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem;align-items:start}
+/* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10,
+   capture a l appui). Avec << align-items:start >>, chacune prenait sa hauteur
+   naturelle et la rangee finissait en escalier. On laisse donc l etirement par
+   defaut, et les contenus restent en haut de leur carte. */
+.rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:1rem 1.1rem;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;

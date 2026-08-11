@@ -45,7 +45,11 @@ body{background:#0e1522;color:#e8edf5;
    doivent se partager une ligne vivent dans une << rangee >>. */
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:1rem}
-.rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem;align-items:start}
+/* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10,
+   capture a l appui). Avec << align-items:start >>, chacune prenait sa hauteur
+   naturelle et la rangee finissait en escalier. On laisse donc l etirement par
+   defaut, et les contenus restent en haut de leur carte. */
+.rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
