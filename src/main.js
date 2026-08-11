@@ -1386,6 +1386,8 @@ const OPS_PONT = new Set([
   // carriers_fetch_full : donnees/ecrire peuvent RECHARGER la config depuis le
   // nuage (reseau), d ou des plafonds larges.
   'config:transporteurs:donnees', 'config:transporteurs:ecrire', 'config:transporteurs:reessayer',
+  // Automatisations (fenetre Automations, 2.40.0) — pas de secret.
+  'config:automations:donnees', 'config:automations:email', 'config:automations:stats',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1699,6 +1701,7 @@ const LIMITES_PONT = {
   'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000,
   'config:livraison:donnees': 15000, 'config:livraison:ecrire': 30000,
   'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000,
+  'config:automations:donnees': 15000, 'config:automations:email': 20000, 'config:automations:stats': 20000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
@@ -1961,6 +1964,7 @@ const PAGES_ANCRABLES = () => ({
   'config-cles': ['Clés API', () => pageClesConfig()],
   'config-livraison': ['Configuration de la livraison', () => pageLivraison()],
   'config-carriers': ['Transporteurs', () => pageTransporteurs()],
+  'config-automations': ['Automatisations', () => pageAutomations()],
   'studio': ['Studio virtuel', () => pageStudio()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
@@ -2719,6 +2723,7 @@ const { pageClesConfig } = require('./fenetres/cles');
 const { pageStudio } = require('./fenetres/studio');
 const { pageLivraison } = require('./fenetres/livraison');
 const { pageTransporteurs } = require('./fenetres/transporteurs');
+const { pageAutomations } = require('./fenetres/automations');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2807,7 +2812,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-carriers': {
+    case 'config-livraison': case 'config-carriers': case 'config-automations': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

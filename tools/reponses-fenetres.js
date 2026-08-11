@@ -1252,6 +1252,21 @@ module.exports = {
       shippingCost: 14.99, freeThreshold: 75, priorityCost: 9.99 },
   },
 
+  // Automatisations (palier 5, famille Communications). Pas de secret.
+  'automations.js': {
+    identite: IDENTITE,
+    'config:automations:donnees': { ok: true, peutModifier: true,
+      jobs: [
+        { key: 'stats', name: 'Statistiques quotidiennes', icon: '📊', schedule: 'Quotidien',
+          desc: 'Envoie le résumé de la veille.', recommendation: 'Une fois par jour, tôt le matin.',
+          recipient: 'single', url: 'https://www.sandriza.com/cron-daily-stats.php?token=abc123', email: 'admin@ex.com' },
+        { key: 'deliveries', name: 'Vérification des livraisons', icon: '📦', schedule: 'Toutes les heures',
+          desc: 'Suit les colis et avance les statuts.', recommendation: 'Toutes les heures.',
+          recipient: 'perCustomer', url: 'https://www.sandriza.com/cron-check-deliveries.php?token=def456', email: '' },
+      ],
+      statsMetrics: [ { key: 'ventes', label: 'Ventes', actif: true }, { key: 'visites', label: 'Visites', actif: false } ] },
+  },
+
   // Transporteurs (palier 5, famille Livraison). ⚠ Aucun secret entier dans le
   // jeu d'essai : le cœur ne rend que { defini, fin }. Deux cas : chargé, et le
   // filet « identifiants non chargés » (charge:false → avertissement + Réessayer).
