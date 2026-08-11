@@ -1191,6 +1191,27 @@ module.exports = {
     } },
   ],
 
+  // Configuration — Paiements Square (palier 5, 7e onglet natif).
+  // ⚠ Le jeton n'apparaît JAMAIS dans un jeu d'essai : le cœur n'en rend que
+  // l'existence et les 4 derniers caractères. Un jeu qui porterait un jeton
+  // entier signalerait que la fenêtre en attend un.
+  'paiements-config.js': [
+    { nom: 'production, jeton en place', reponses: {
+      identite: IDENTITE,
+      'config:paiements:donnees': { ok: true, peutModifier: true, mode: 'production',
+        sandbox:    { appId: 'sq0idb-abc', locId: 'LSANDBOX1', jeton: { defini: true, fin: '9f2c' } },
+        production: { appId: 'sq0idp-xyz', locId: 'LPROD1',    jeton: { defini: true, fin: 'a41d' } },
+        hebergee: true, afterpay: false, applepay: true, express: false },
+    } },
+    { nom: 'bac à sable sans jeton, lecture seule', reponses: {
+      identite: IDENTITE,
+      'config:paiements:donnees': { ok: true, peutModifier: false, mode: 'sandbox',
+        sandbox:    { appId: '', locId: '', jeton: { defini: false, fin: '' } },
+        production: { appId: '', locId: '', jeton: { defini: false, fin: '' } },
+        hebergee: false, afterpay: false, applepay: false, express: false },
+    } },
+  ],
+
   'comptable.js': [
     {
       nom: 'exercices garnis',
