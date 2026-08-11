@@ -86,6 +86,19 @@ body{background:#0e1522;color:#e8edf5;
 .tuile .t{font-size:.8rem;font-weight:700;line-height:1.2}
 .tuile .d{font-size:.68rem;color:#6d7f96;line-height:1.22;margin-top:.06rem}
 .amb{grid-template-columns:1fr 1fr}
+/* Galerie de modèles */
+.mgal{margin-top:.6rem;border-top:1px solid rgba(255,255,255,.08);padding-top:.6rem}
+.mgal-barre{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap}
+.mgal-info{font-size:.72rem;color:#8fa1b8;flex:1 1 12rem;min-width:0}
+.mgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(6rem,1fr));gap:.5rem;
+  max-height:20rem;overflow-y:auto;padding-right:.2rem}
+.mvig{background:#0f1724;border:1px solid #2b3444;border-radius:9px;overflow:hidden;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
+.mvig:hover{border-color:rgba(201,169,126,.6)}
+.mvig.on{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
+.mvig img{width:100%;height:7rem;object-fit:cover;object-position:top;background:#0b1220}
+.mvig .matt{height:7rem;display:flex;align-items:center;justify-content:center;color:#6d7f96;font-size:.72rem;width:100%}
+.mvig .mnom{font-size:.7rem;color:#cbd8e6;padding:.2rem .3rem}
 .ch{margin:.7rem 0 0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:#8fa1b8}
 select{width:100%;font:inherit;color:#e8edf5;background:#0f1724;border:1px solid #2b3444;
@@ -177,6 +190,13 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PRESETS = [];      // [{cle,label,emoji,desc}]
   var RESULT = null;     // { image, essai, decorErreur, upNote, largeur, hauteur }
   var ENREG = false;     // le resultat a-t-il ete enregistre dans la phototheque ?
+  // Galerie de modeles : apercus SANDBOX (gratuits) du vetement sur chaque modele,
+  // pour choisir AVANT de generer en pleine qualite.
+  var MODELE_SEL = 'sophia'; // modele choisi (persiste entre les rendus)
+  var COMPARE = false;       // la grille de comparaison est-elle ouverte ?
+  var APM = {};              // cache : modele -> data URL de l apercu
+  var APM_SIG = '';          // empreinte (photo+ambiance) pour invalider le cache
+  var COMPARE_STOP = false;  // demande d arret de la generation en cours
 
   var VOIES = [
     { cle: 'humain',  em: '👗', t: 'Mannequin virtuel', d: 'Porté par un modèle, décor intégré' },
@@ -292,12 +312,43 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('');
   }
 
+  function nomModele(m){ return m.charAt(0).toUpperCase() + m.slice(1); }
+  function sigActuelle(){
+    var p = PHOTO_ID || (PHOTO ? (PHOTO.length + ':' + PHOTO.slice(0, 40)) : '');
+    return p + '|' + PRESET;
+  }
   function modeleHtml(){
     if (VOIE !== 'humain') return '';
-    return '<div class="ch"><label>Modèle</label><select id="modele">'
-      + MODELES.map(function(m, i){ return '<option value="' + m + '"' + (i === 0 ? ' selected' : '') + '>'
-          + m.charAt(0).toUpperCase() + m.slice(1) + '</option>'; }).join('')
-      + '</select></div>';
+    var h = '<div class="ch"><label>Modèle</label><select id="modele"' + (RO ? ' disabled' : '') + '>'
+      + MODELES.map(function(m){ return '<option value="' + m + '"' + (MODELE_SEL === m ? ' selected' : '') + '>'
+          + nomModele(m) + '</option>'; }).join('') + '</select>';
+    if (aUnePhoto()) {
+      h += '<div style="margin-top:.4rem"><button id="b-compare">👥 '
+        + (COMPARE ? 'Masquer la comparaison' : 'Comparer les modèles (aperçu gratuit)') + '</button></div>';
+    } else {
+      h += '<div class="aide" style="margin-top:.3rem;font-size:.7rem;color:#6d7f96">Importez une photo pour comparer les modèles.</div>';
+    }
+    h += '</div>';
+    if (COMPARE && aUnePhoto()) h += comparerHtml();
+    return h;
+  }
+  function comparerHtml(){
+    if (APM_SIG !== sigActuelle()) { APM = {}; APM_SIG = sigActuelle(); } // photo/ambiance changée → cache vidé
+    var h = '<div class="mgal"><div class="mgal-barre">'
+      + '<span class="mgal-info">Aperçus gratuits (filigranés) de votre vêtement sur chaque modèle. Cliquez-en un pour le choisir.</span>'
+      + '<button id="b-mgen">Générer les aperçus</button></div><div class="mgrille">';
+    h += MODELES.map(function(m){
+      var im = APM[m];
+      var vis = im ? '<img src="' + im + '" alt="' + esc(m) + '">' : '<span class="matt">à générer</span>';
+      return '<div class="mvig' + (MODELE_SEL === m ? ' on' : '') + '" data-mod="' + esc(m) + '">' + vis
+        + '<span class="mnom">' + esc(nomModele(m)) + '</span></div>';
+    }).join('');
+    return h + '</div></div>';
+  }
+  function majVig(m){
+    var v = corps.querySelector('[data-mod="' + m + '"]');
+    if (v && APM[m]) v.innerHTML = '<img src="' + APM[m] + '" alt="' + esc(m) + '">'
+      + '<span class="mnom">' + esc(nomModele(m)) + '</span>';
   }
 
   function ambiancesHtml(){
@@ -363,10 +414,60 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.querySelectorAll('[data-preset]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; PRESET = el.getAttribute('data-preset'); dessiner(); };
     });
+    var mod = document.getElementById('modele');
+    if (mod) mod.onchange = function(){ MODELE_SEL = mod.value; };
+    var bc = document.getElementById('b-compare');
+    if (bc) bc.onclick = function(){ if (RO) return; COMPARE = !COMPARE; dessiner(); };
+    var bm = document.getElementById('b-mgen');
+    if (bm) bm.onclick = genererApercusModeles;
+    corps.querySelectorAll('[data-mod]').forEach(function(el){
+      el.onclick = function(){ choisirModele(el.getAttribute('data-mod')); };
+    });
     var dl = document.getElementById('b-dl');
     if (dl && RESULT) dl.onclick = telecharger;
     var sv = document.getElementById('b-save');
     if (sv && RESULT) sv.onclick = enregistrerResultat;
+  }
+
+  function choisirModele(m){
+    MODELE_SEL = m;
+    COMPARE_STOP = true;       // si une génération tourne, on l'arrête
+    COMPARE = false;
+    dessiner();
+    dire('Modèle : ' + nomModele(m) + '.', 'bon');
+  }
+
+  // Génère (ou arrête) les aperçus SANDBOX du vêtement sur chaque modèle. Séquentiel
+  // (le pont porte une image à la fois), avec progression et arrêt.
+  var COMPARE_OCC = false;
+  function genererApercusModeles(){
+    if (COMPARE_OCC) { COMPARE_STOP = true; return; }   // 2e clic = Arrêter
+    if (RO || OCCUPE || !aUnePhoto()) return;
+    if (APM_SIG !== sigActuelle()) { APM = {}; APM_SIG = sigActuelle(); }
+    var todo = MODELES.filter(function(m){ return !APM[m]; });
+    if (!todo.length) { dire('Tous les aperçus sont déjà générés — cliquez un modèle.', 'att'); return; }
+    COMPARE_OCC = true; COMPARE_STOP = false;
+    bApercu.disabled = true; bFinal.disabled = true;
+    var bm = document.getElementById('b-mgen'); if (bm) bm.textContent = 'Arrêter';
+    var i = 0;
+    function fini(msg, cl){
+      COMPARE_OCC = false; bApercu.disabled = RO; bFinal.disabled = RO;
+      var b = document.getElementById('b-mgen'); if (b) b.textContent = 'Générer les aperçus';
+      majBoutons(); dire(msg, cl);
+    }
+    function suite(){
+      if (COMPARE_STOP) { fini('Arrêté.', 'att'); return; }
+      if (i >= todo.length) { fini('Aperçus prêts — cliquez le modèle qui vous plaît.', 'bon'); return; }
+      var m = todo[i]; i++;
+      dire('Aperçu ' + i + '/' + todo.length + ' — ' + nomModele(m) + '…');
+      var s = { geste: 'humain', preset: PRESET, apercu: true, options: { modele: m } };
+      if (PHOTO_ID) s.photoId = PHOTO_ID; else s.image = PHOTO;
+      appeler('studio:traiter', [s]).then(function(r){
+        if (r && r.ok && r.image) { APM[m] = r.image; majVig(m); }
+        suite();
+      });
+    }
+    suite();
   }
 
   function reinitPhoto(){
@@ -418,7 +519,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
       var sel = document.getElementById('modele');
-      s.options = { modele: sel ? sel.value : 'sophia' };
+      if (sel) MODELE_SEL = sel.value;   // le menu déroulant reste la source si présent
+      s.options = { modele: MODELE_SEL || 'sophia' };
     }
     return s;
   }
