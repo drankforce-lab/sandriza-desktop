@@ -1252,6 +1252,14 @@ module.exports = {
       shippingCost: 14.99, freeThreshold: 75, priorityCost: 9.99 },
   },
 
+  // Configuration des retours (palier 5, famille Configuration). Pas de secret.
+  'config-retours.js': {
+    identite: IDENTITE,
+    'config:retours:donnees': { ok: true, peutModifier: true, configuree: true,
+      name: 'SANDRIZA', street: '123 rue Principale', city: 'Montréal', province: 'QC',
+      postal: 'H2X 1Y4', country: 'Canada', windowDays: 30, halfDays: 15, splitRefundEnabled: true },
+  },
+
   // Automatisations (palier 5, famille Communications). Pas de secret.
   'automations.js': {
     identite: IDENTITE,
