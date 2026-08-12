@@ -83,7 +83,20 @@ jobs:
           fi
 
       - name: Dépendances
-        run: npm ci || npm install
+        shell: bash
+        # ⚠ Le binaire Electron se télécharge (install.js) depuis la CDN des
+        # « releases » de GitHub, régulièrement en panne TRANSITOIRE : EOF, 503,
+        # socket hang up — TROIS échecs d'affilée le 2026-08-12, pur réseau, pas
+        # le code. On réessaie depuis LA MÊME source officielle (github.com/
+        # electron), aucun miroir tiers — le binaire reste celui d'Electron —,
+        # avec un délai croissant. `npm ci` repart d'un node_modules propre.
+        run: |
+          n=0
+          until [ $n -ge 5 ]; do
+            if npm ci || npm install; then echo "Dépendances OK (tentative $((n+1)))"; break; fi
+            n=$((n+1)); echo "::warning::Dépendances : échec réseau (tentative $n/5) — nouvelle tentative dans $((n*30))s"; sleep $((n*30));
+          done
+          if [ $n -ge 5 ]; then echo "::error::Dépendances : 5 tentatives échouées (CDN Electron indisponible ?)"; exit 1; fi
 
       # Un simple contrôle de syntaxe : une faute de frappe ici coûte une
       # construction complète et une réinstallation sur chaque poste.
@@ -113,7 +126,16 @@ jobs:
           node tools/verifier-fenetres.js
 
       - name: Construire (${{ matrix.arch }})
-        run: npx electron-builder --win --${{ matrix.arch }} --publish never
+        shell: bash
+        # Même parade que « Dépendances » : electron-builder retélécharge le zip
+        # d'Electron par arch depuis la même CDN GitHub, sujette aux 503/EOF.
+        run: |
+          n=0
+          until [ $n -ge 5 ]; do
+            if npx electron-builder --win --${{ matrix.arch }} --publish never; then echo "Build OK (tentative $((n+1)))"; break; fi
+            n=$((n+1)); echo "::warning::Build : échec (tentative $n/5) — nouvelle tentative dans $((n*30))s"; sleep $((n*30));
+          done
+          if [ $n -ge 5 ]; then echo "::error::Build : 5 tentatives échouées"; exit 1; fi
 
       - uses: actions/upload-artifact@v4
         with:
