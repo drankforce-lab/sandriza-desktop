@@ -190,6 +190,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var SUPPR_ARME = '';       // id du modele arme pour suppression
   var FMT_ARME = '';
   var NOUVEAU = false;       // le formulaire de format est deploye
+  var NOUVMOD = false;       // le choix de format pour un NOUVEAU MODELE est deploye (onglet Modeles)
   var EN_COURS = false;      // un travail long est en cours
   var JOB = null;            // { faites, total, arret }
 
@@ -304,7 +305,23 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<option value="updated"' + (TRI === 'updated' ? ' selected' : '') + '>Modifié récemment</option>'
       + '<option value="name"' + (TRI === 'name' ? ' selected' : '') + '>Nom</option>'
       + '<option value="size"' + (TRI === 'size' ? ' selected' : '') + '>Format</option>'
-      + '</select></div>';
+      + '</select>'
+      + (ro ? '' : '<button class="' + (NOUVMOD ? 'actif' : 'prim') + '" id="p-newmod-btn" style="margin-left:auto">'
+          + (NOUVMOD ? 'Annuler' : '＋ Nouveau modèle') + '</button>')
+      + '</div>';
+
+    // Un nouveau modèle part TOUJOURS d'un format (il calibre l'imprimante) : on
+    // choisit le format, puis on ouvre l'éditeur pour la mise en page.
+    if (!ro && NOUVMOD) {
+      var fmts = D.formats || [];
+      h += '<div class="carte" style="margin-bottom:.6rem"><div class="deux">'
+        + '<div class="champ"><label>Format du nouveau modèle</label><select id="p-newmod-fmt">'
+        + fmts.map(function(x){ return '<option value="' + esc(x.cle) + '">' + esc(x.nom) + ' — ' + esc(x.dim) + '</option>'; }).join('')
+        + '</select></div>'
+        + '<div class="champ" style="align-self:end"><button class="prim" id="p-newmod-ok">Créer et ouvrir l’éditeur</button></div>'
+        + '</div>'
+        + '<div class="aide">Besoin d’un autre gabarit ? Ajoutez un format dans l’onglet <strong>Formats</strong>.</div></div>';
+    }
 
     h += '<div class="carte">';
     var rows = D.lignes || [];
@@ -750,6 +767,21 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire('« ' + r.nom + ' » (' + r.dim + ') supprimé. Les impressions déjà faites ne sont pas touchées.', 'bon');
         if (CIBLE === idS) { CIBLE = ''; APERCU = null; }
+        charger();
+      });
+      return;
+    }
+    if (t.closest('#p-newmod-btn')) { NOUVMOD = !NOUVMOD; dessiner(); return; }
+    if (t.closest('#p-newmod-ok')) {
+      var selNm = document.getElementById('p-newmod-fmt');
+      var cleNm = selNm ? selNm.value : '';
+      if (!cleNm) { dire('Choisissez un format.', 'att'); return; }
+      dire('Création…');
+      appeler('promo:nouveau', [cleNm]).then(function(r){
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        NOUVMOD = false;
+        dire('« ' + r.nom + ' » créé — ouvrez l’éditeur pour le mettre en page.', 'bon');
+        ONGLET = 'modeles';
         charger();
       });
       return;
