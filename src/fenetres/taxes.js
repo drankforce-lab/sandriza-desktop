@@ -241,35 +241,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
 
     // ── International ──────────────────────────────────────────────────────
-    h.push('<div class="carte"><h2>International — par pays</h2>');
-    h.push('<div class="avis' + (d.intlLivraison ? '' : ' calme') + '">'
-      + (d.intlLivraison ? 'Livraison internationale activée. ' : 'Livraison internationale désactivée : cette section ne s’applique que si vous l’activez. ')
-      + 'Une commande hors Canada est <strong>détaxée</strong> par défaut. N’ajoutez un pays que si vous y êtes '
-      + 'inscrit pour percevoir une taxe.</div>');
-    h.push('<table><thead><tr><th style="width:9rem">Pays</th><th>Taxes — nom et taux</th>'
-      + '<th style="width:8rem"></th></tr></thead><tbody>');
-    if (AJOUT) {
-      h.push('<tr><td><input type="text" class="cc" id="a-cc" placeholder="US"></td>'
-        + '<td><input type="text" class="nom" id="a-nom" placeholder="TVA" style="width:9rem"> '
-        + '<input type="number" step="0.001" min="0" class="taux" id="a-pct" placeholder="20"> %</td>'
-        + '<td class="dr"><button class="pt prim" id="b-ajout-ok">Ajouter</button> '
-        + '<button class="pt" id="b-ajout-non">Annuler</button></td></tr>');
-    }
-    var intl = d.international || [];
-    if (!intl.length && !AJOUT) {
-      h.push('<tr><td colspan="3" class="vide">Aucun pays configuré.</td></tr>');
-    }
-    intl.forEach(function(p){
-      h.push('<tr><td style="font-weight:700">' + esc(p.cc) + '</td><td>');
-      p.composantes.forEach(function(c, i){
-        h.push('<span class="comp">' + champNom('in:' + p.cc, i, c.name) + champTaux('in:' + p.cc, i, c.pct) + '<span class="org">%</span></span>');
-      });
-      h.push('</td><td class="dr"><button class="pt dgr" data-oter="' + esc(p.cc) + '"'
-        + (RO ? ' disabled' : '') + '>Retirer</button></td></tr>');
-    });
-    h.push('</tbody></table>');
-    if (!AJOUT) h.push('<div class="gestes"><button id="b-ajout"' + (RO ? ' disabled' : '') + '>+ Ajouter un pays</button></div>');
-    h.push('</div>');
+    // ⚠ Table manuelle RETIRÉE (2026-08-12) : Stripe Tax calcule la taxe
+    // internationale à la caisse, selon la destination et les inscriptions réelles.
+    // Une table saisie à la main ferait double emploi (et pourrait diverger).
+    h.push('<div class="carte"><h2>International</h2>'
+      + '<div class="avis">Les taxes internationales sont <strong>gérées automatiquement par Stripe Tax</strong> : '
+      + 'le taux exact est calculé <strong>à la caisse</strong> selon la destination, à partir de vos inscriptions '
+      + 'fiscales réelles — plus rien à saisir ici.<br>'
+      + '• Les <strong>pays et États desservis</strong> se règlent dans <strong>Livraison ▸ Pays desservis</strong> '
+      + '(lus en direct chez Stripe).<br>'
+      + '• La <strong>clé Stripe Tax</strong> se règle dans <strong>Clés API</strong>.</div></div>');
 
     corps.innerHTML = h.join('');
     brancher();

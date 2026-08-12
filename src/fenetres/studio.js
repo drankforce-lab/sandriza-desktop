@@ -400,8 +400,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function modeleHtml(){
     if (VOIE !== 'humain') return '';
-    if (APM_SIG !== sigActuelle()) { APM = {}; APM_SIG = sigActuelle(); } // photo/ambiance changée → cache vidé
-    var faits = portraitsFaits(), reste = MODELES.length - faits;
+    // ⚠ Retour au MENU DÉROULANT (demande du 2026-08-12) : la galerie de vignettes
+    // est retirée. Les aperçus par mannequin sortaient identiques et n'aidaient pas
+    // au choix ; le nom suffit. Le modèle et la pose se choisissent dans deux listes.
     var h = '<div class="ch"><label>Pose</label>'
       + '<select id="pose"' + (RO ? ' disabled' : '') + '>'
       + POSES.map(function(p){ return '<option value="' + p.cle + '"'
@@ -409,23 +410,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</select>'
       + '<div class="aide" style="margin-top:.25rem;font-size:.7rem;color:#6d7f96">'
       + 'L’aperçu est gratuit : essayez-en plusieurs avant de générer.</div></div>';
-    h += '<div class="ch"><label>Modèle — <b id="modele-nom" style="color:#e7d3b3">'
-      + esc(nomModele(MODELE_SEL)) + '</b></label>';
-    h += grilleModelesHtml();
-    h += '<div class="mbarre">';
-    if (PORT_OCC) {
-      h += '<button id="b-port">Arrêter</button>';
-    } else if (reste > 0) {
-      h += '<button class="prim" id="b-port"' + (RO ? ' disabled' : '') + '>👥 Afficher les mannequins</button>'
-        + '<span class="mgal-info">Photoroom ne publie pas l’apparence de ses mannequins. Un clic les fabrique '
-        + 'une fois — gratuitement — à partir d’un vêtement de votre photothèque, puis ils restent ici.</span>';
-    } else {
-      h += '<button id="b-port-refaire"' + (RO ? ' disabled' : '') + '>↻ Refaire les portraits</button>';
-    }
-    if (aUnePhoto() && !PORT_OCC) {
-      h += '<button id="b-mgen">👗 Essayer VOTRE vêtement sur chacun</button>';
-    }
-    h += '</div></div>';
+    h += '<div class="ch"><label>Modèle</label>'
+      + '<select id="modele-sel"' + (RO ? ' disabled' : '') + '>'
+      + MODELES.map(function(m){ return '<option value="' + esc(m) + '"'
+          + (MODELE_SEL === m ? ' selected' : '') + '>' + esc(nomModele(m)) + '</option>'; }).join('')
+      + '</select></div>';
     return h;
   }
   // Redessine UNE vignette sans toucher au reste (on ne casse ni le défilement
@@ -528,6 +517,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       dessiner();
       dire('Pose : ' + (POSES.filter(function(p){ return p.cle === POSE_SEL; })[0] || {}).t + '.', 'att');
     };
+    var msel = document.getElementById('modele-sel');
+    if (msel) msel.onchange = function(){ choisirModele(msel.value); };
+    // Anciens boutons de galerie retirés (menu déroulant) ; gardes conservées au
+    // cas où un rendu partiel les ramènerait.
     var bm = document.getElementById('b-mgen');
     if (bm) bm.onclick = genererApercusModeles;
     var bp = document.getElementById('b-port');
@@ -548,13 +541,6 @@ ${JS_ACTIVITE}${JS_DIRE}
   function choisirModele(m){
     var av = MODELE_SEL;
     MODELE_SEL = m;
-    var g = document.getElementById('mgrille');
-    if (g) {
-      g.innerHTML = MODELES.map(vignetteHtml).join('');
-      brancherVignettes();
-      var lab = document.getElementById('modele-nom');
-      if (lab) lab.textContent = nomModele(m);
-    } else { dessiner(); }
     if (av !== m) dire('Modèle : ' + nomModele(m) + '.', 'bon');
   }
 
