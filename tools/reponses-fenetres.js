@@ -1396,6 +1396,26 @@ module.exports = {
     ];
   })(),
 
+  // Pages du site (palier 5, #5, étape 5a). Éditeurs structurés. Deux états :
+  // modifiable (avec données) et lecture seule.
+  'pages.js': (function(){
+    var donnees = {
+      ok: true, peutModifier: true, peutAjouter: true, peutSupprimer: true,
+      faq: { title: 'Foire aux questions', subtitle: 'Vos réponses', items: [ { id: 'f1', q: 'Livrez-vous au Québec ?', a: 'Oui, partout.' } ] },
+      contact: { title: 'Contactez-nous', subtitle: '', email: 'info@sandriza.com', phone: '(418) 555-1234', address: 'Québec', hours: 'Lun–Ven 9h–17h', intro: '' },
+      sizesPage: { title: 'Guide des Tailles', subtitle: '', intro: 'Mesures à plat.' },
+      sizeGuides: [ { id: 'g1', name: 'Robes', nameEN: 'Dresses', headers: ['Taille','Buste'], rows: [ ['S','86'], ['M','92'] ] } ],
+      vedette: [ { label: 'Meilleures ventes', href: '#shop?cat=robes' } ],
+      footer: { faq: true, contact: true, retours: true, tailles: false },
+      contactNouveaux: 2, contactTotal: 5,
+      customPages: [ { id: 'c1', slug: 'a-propos', title: 'À propos', footerVisible: true, protege: false }, { id: 'c2', slug: 'confidentialite', title: 'Confidentialité', footerVisible: true, protege: true } ]
+    };
+    return [
+      { nom: 'modifiable (données)', reponses: { identite: IDENTITE, 'pages:donnees': donnees } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'pages:donnees': Object.assign({}, donnees, { peutModifier: false, peutAjouter: false, peutSupprimer: false }) } }
+    ];
+  })(),
+
   // Mode lancement (palier 5, DERNIER — garde absolue). Pas de secret. Deux états :
   // pré-lancement (protégé, variable absente) et en ligne (piloté par ELG_LAUNCHED).
   'lancement.js': [
