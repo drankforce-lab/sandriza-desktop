@@ -1396,6 +1396,26 @@ module.exports = {
     ];
   })(),
 
+  // Page d'accueil (palier 5). Pas de secret ; images = URL. Trois états : liste,
+  // éditeur héro (le plus complexe), lecture seule.
+  'accueil.js': (() => {
+    const GRADS = [{ label: 'Nuit bleue', value: 'linear-gradient(135deg,#1a1a2e,#0f3460)' }, { label: 'Violet royal', value: 'linear-gradient(135deg,#2d1040,#7c3aed)' }];
+    const BLOCS = (peut) => ({ ok: true, peutModifier: peut, gradients: GRADS, blocs: [
+      { id: 'hero', label: 'Diaporama héro', order: 0, visible: true, icon: '🖼️', desc: 'Diaporama plein écran',
+        content: { sliderEffect: 'fade', sliderInterval: 6, sliderAutoplay: true, slides: [
+          { id: 's1', image: '', gradient: GRADS[0].value, overlay: 0.4, eyebrow: 'Nouvelle Collection', title: 'L’élégance au quotidien', subtitle: 'Découvrez notre sélection.', cta1Text: 'Découvrir', cta1Href: '#shop', cta2Text: '', cta2Href: '' },
+          { id: 's2', image: 'https://exemple.r2.dev/divers/h2.jpg', gradient: GRADS[1].value, overlay: 0.3, eyebrow: 'Soldes', title: 'Jusqu’à -50%', subtitle: '', cta1Text: 'Voir', cta1Href: '#shop?finalSale=1', cta2Text: '', cta2Href: '' },
+        ] } },
+      { id: 'categories', label: 'Catégories', order: 1, visible: true, icon: '🗂️', desc: 'Grille des catégories', content: { eyebrow: 'Explorer', title: 'Nos catégories' } },
+      { id: 'banner', label: 'Bannière', order: 2, visible: false, icon: '📢', desc: 'Bannière bas de page', content: { eyebrow: '', title: 'Infolettre', subtitle: 'Inscrivez-vous.', ctaText: 'S’abonner', ctaHref: '#shop' } },
+    ] });
+    return [
+      { nom: 'liste des blocs', reponses: { identite: IDENTITE, 'config:accueil:donnees': BLOCS(true) } },
+      { nom: 'éditeur héro', id: 'hero', reponses: { identite: IDENTITE, 'config:accueil:donnees': BLOCS(true) } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'config:accueil:donnees': BLOCS(false) } },
+    ];
+  })(),
+
   // Base de données (Turso/R2, palier 5). Pas de secret. Deux états : modifiable
   // (avec occupation) et lecture seule.
   'bd.js': [
