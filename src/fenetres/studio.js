@@ -245,6 +245,29 @@ ${JS_ACTIVITE}${JS_DIRE}
   var MODELES = ['sophia','emma','ava','zoe','maya','lena','julia','fiona',
                  'avery','taylor','kendall','casey','sam','jordan','jackson','reece'];
 
+  /* LES POSES — les douze valeurs officielles de Photoroom (verifiees dans la
+     documentation le 2026-08-11). ⚠ ELLE ETAIT FIXEE EN DUR au trois-quarts
+     cote serveur : le choix appartenait au code, pas a la personne qui regarde
+     le resultat — et il a ete refuse des le premier essai (<< je n aime pas
+     cette pose >>). Le trois-quarts reste le DEFAUT (il montre la coupe et le
+     tombe mieux qu une pose de face), mais il se change maintenant d un clic,
+     et l apercu est gratuit : on juge sur piece sans depenser un credit. */
+  var POSES = [
+    { cle: '34turn',           t: 'Trois-quarts (défaut)' },
+    { cle: 'standing',         t: 'Debout, de face' },
+    { cle: 'powerstance',      t: 'Posture affirmée' },
+    { cle: 'walkingforward',   t: 'En marche' },
+    { cle: 'handinpocket',     t: 'Main dans la poche' },
+    { cle: 'crossedarms',      t: 'Bras croisés' },
+    { cle: 'overtheshoulder',  t: 'Regard par-dessus l’épaule' },
+    { cle: 'back',             t: 'De dos' },
+    { cle: 'seated',           t: 'Assise' },
+    { cle: 'adjustingclothing',t: 'Ajuste son vêtement' },
+    { cle: 'playfulspin',      t: 'Tourne sur elle-même' },
+    { cle: 'random',           t: 'Au hasard' }
+  ];
+  var POSE_SEL = '34turn';
+
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -379,7 +402,14 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (VOIE !== 'humain') return '';
     if (APM_SIG !== sigActuelle()) { APM = {}; APM_SIG = sigActuelle(); } // photo/ambiance changée → cache vidé
     var faits = portraitsFaits(), reste = MODELES.length - faits;
-    var h = '<div class="ch"><label>Modèle — <b id="modele-nom" style="color:#e7d3b3">'
+    var h = '<div class="ch"><label>Pose</label>'
+      + '<select id="pose"' + (RO ? ' disabled' : '') + '>'
+      + POSES.map(function(p){ return '<option value="' + p.cle + '"'
+          + (POSE_SEL === p.cle ? ' selected' : '') + '>' + esc(p.t) + '</option>'; }).join('')
+      + '</select>'
+      + '<div class="aide" style="margin-top:.25rem;font-size:.7rem;color:#6d7f96">'
+      + 'L’aperçu est gratuit : essayez-en plusieurs avant de générer.</div></div>';
+    h += '<div class="ch"><label>Modèle — <b id="modele-nom" style="color:#e7d3b3">'
       + esc(nomModele(MODELE_SEL)) + '</b></label>';
     h += grilleModelesHtml();
     h += '<div class="mbarre">';
@@ -488,6 +518,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.querySelectorAll('[data-preset]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; PRESET = el.getAttribute('data-preset'); dessiner(); };
     });
+    var ps = document.getElementById('pose');
+    /* ⚠ La pose change ce que le rendu montre : le cache des apercus par modele
+       (APM) porte donc sur une pose donnee. On le vide, sinon la grille
+       garderait les silhouettes de l ancienne pose. */
+    if (ps) ps.onchange = function(){
+      POSE_SEL = ps.value;
+      APM = {}; APM_SIG = '';
+      dessiner();
+      dire('Pose : ' + (POSES.filter(function(p){ return p.cle === POSE_SEL; })[0] || {}).t + '.', 'att');
+    };
     var bm = document.getElementById('b-mgen');
     if (bm) bm.onclick = genererApercusModeles;
     var bp = document.getElementById('b-port');
@@ -600,7 +640,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (i >= todo.length) { fini('Aperçus prêts — cliquez le modèle qui vous plaît.', 'bon'); return; }
       var m = todo[i]; i++;
       dire('Aperçu ' + i + '/' + todo.length + ' — ' + nomModele(m) + '…');
-      var s = { geste: 'humain', preset: PRESET, apercu: true, options: { modele: m } };
+      var s = { geste: 'humain', preset: PRESET, apercu: true,
+                options: { modele: m, pose: POSE_SEL } };
       if (PHOTO_ID) s.photoId = PHOTO_ID; else s.image = PHOTO;
       appeler('studio:traiter', [s]).then(function(r){
         if (r && r.ok && r.image) { APM[m] = r.image; majVig(m); }
@@ -726,7 +767,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (VOIE === 'humain') {
       var sel = document.getElementById('modele');
       if (sel) MODELE_SEL = sel.value;   // le menu déroulant reste la source si présent
-      s.options = { modele: MODELE_SEL || 'sophia' };
+      s.options = { modele: MODELE_SEL || 'sophia', pose: POSE_SEL };
     }
     return s;
   }
