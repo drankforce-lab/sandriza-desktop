@@ -1396,6 +1396,17 @@ module.exports = {
     ];
   })(),
 
+  // Base de données (Turso/R2, palier 5). Pas de secret. Deux états : modifiable
+  // (avec occupation) et lecture seule.
+  'bd.js': [
+    { nom: 'modifiable + occupation', reponses: { identite: IDENTITE,
+      'config:bd:donnees': { ok: true, peutModifier: true, cles: ['ship_cfg', 'nav_cfg', 'tax_rules', 'phone_cfg', 'logo_library'] },
+      'config:bd:stockage': { ok: true, turso: { bytes: 89 * 1024, limit: 5 * 1024 * 1024 * 1024 }, r2: { bytes: 240 * 1024 * 1024, limit: 10 * 1024 * 1024 * 1024 } } } },
+    { nom: 'lecture seule', reponses: { identite: IDENTITE,
+      'config:bd:donnees': { ok: true, peutModifier: false, cles: ['ship_cfg', 'nav_cfg'] },
+      'config:bd:stockage': { ok: true, turso: { bytes: 89 * 1024, limit: 5 * 1024 * 1024 * 1024 }, r2: null } } },
+  ],
+
   // Statistiques GA4 (config, palier 5). ⚠ Secret : clé de compte de service en
   // booléen. Deux états : clé configurée (modifiable) et lecture seule.
   'analytics.js': [
