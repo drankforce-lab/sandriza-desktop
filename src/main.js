@@ -648,6 +648,13 @@ const createWindow = () => {
     minHeight: 700,
     backgroundColor: '#111827',
     title: 'Administration Sandriza',
+    // ⚠ BARRE DE TITRE PERSONNALISÉE (demande du 2026-08-12) : on retire le cadre
+    // gris de Windows et on peint une barre foncée assortie au thème ; les boutons
+    // OS (réduire/agrandir/fermer) sont teintés par `titleBarOverlay`. La page pose
+    // une bande de titre déplaçable en haut (#sz-titlebar, app.js/styles.css) et
+    // décale son contenu de 36 px sous elle. Réversible : retirer ces deux clés.
+    titleBarStyle: 'hidden',
+    titleBarOverlay: { color: '#0e1522', symbolColor: '#e8edf5', height: 36 },
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,   // durcissement : la page n'a jamais accès direct à Node
