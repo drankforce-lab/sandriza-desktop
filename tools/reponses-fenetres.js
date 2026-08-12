@@ -1396,6 +1396,25 @@ module.exports = {
     ];
   })(),
 
+  // Modèles par vue (palier 5, Configuration). Une photo par angle ; pas de secret.
+  // Deux états : garni + modifiable, et lecture seule.
+  'modeles.js': [
+    { nom: 'garni, modifiable', reponses: { identite: IDENTITE,
+      'config:modeles:donnees': { ok: true, peutModifier: true, vues: [
+        { key: 'devant',   label: 'Face',     src: 'https://exemple.r2.dev/divers/face.jpg' },
+        { key: 'derriere', label: 'Derrière', src: '' },
+        { key: 'coteG',    label: 'Gauche',   src: 'https://exemple.r2.dev/divers/gauche.jpg' },
+        { key: 'coteD',    label: 'Droit',    src: '' },
+      ] } } },
+    { nom: 'lecture seule', reponses: { identite: IDENTITE,
+      'config:modeles:donnees': { ok: true, peutModifier: false, vues: [
+        { key: 'devant',   label: 'Face',     src: 'https://exemple.r2.dev/divers/face.jpg' },
+        { key: 'derriere', label: 'Derrière', src: '' },
+        { key: 'coteG',    label: 'Gauche',   src: '' },
+        { key: 'coteD',    label: 'Droit',    src: '' },
+      ] } } },
+  ],
+
   /* ⚠ DEUX CAS D'OUVERTURE, parce que la grille des mannequins a deux visages :
      celui où les portraits existent déjà (on les relit de R2, aucun appel payant)
      et celui où ils n'ont jamais été fabriqués (bouton « Afficher les
