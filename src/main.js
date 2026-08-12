@@ -1382,6 +1382,8 @@ const OPS_PONT = new Set([
   'config:cles:donnees', 'config:cles:ecrire', 'config:cles:retirer', 'config:cles:teststripe',
   // Configuration de la livraison (fenetre Livraison, 2.37.0) — pas de secret.
   'config:livraison:donnees', 'config:livraison:ecrire',
+  // Les pays desservis, dans la meme fenetre que la livraison.
+  'config:pays:donnees', 'config:pays:relire', 'config:pays:exclure',
   'config:retours:donnees', 'config:retours:ecrire',
   'config:nav:donnees', 'config:nav:ecrire', 'config:nav:reinit',
   // Transporteurs (fenetre Transporteurs, 2.39.0) — ⚠ secrets + filet
@@ -1704,6 +1706,9 @@ const LIMITES_PONT = {
   // Cles API : chaque ecriture pousse plusieurs cles vers le nuage, awaitees.
   'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000, 'config:cles:teststripe': 30000,
   'config:livraison:donnees': 15000, 'config:livraison:ecrire': 30000,
+  // ⚠ 'relire' interroge Stripe en court-circuitant le cache : c est un appel
+  // reseau vers l exterieur, pas une lecture locale.
+  'config:pays:donnees': 15000, 'config:pays:relire': 45000, 'config:pays:exclure': 30000,
   'config:retours:donnees': 15000, 'config:retours:ecrire': 30000,
   'config:nav:donnees': 15000, 'config:nav:ecrire': 30000, 'config:nav:reinit': 30000,
   'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000,

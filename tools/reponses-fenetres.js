@@ -1246,11 +1246,42 @@ module.exports = {
   // clé dans le jeu d'essai : le traitement ne part qu'au clic (hors portée du
   // contrôle, qui n'exécute que le rendu au chargement).
   // Configuration de la livraison (palier 5, famille Livraison). Pas de secret.
-  'livraison.js': {
-    identite: IDENTITE,
-    'config:livraison:donnees': { ok: true, peutModifier: true, international: true,
-      shippingCost: 14.99, freeThreshold: 75, priorityCost: 9.99 },
-  },
+  /* ⚠ DEUX CAS : international ALLUMÉ (le tableau des pays se dessine) et ÉTEINT
+     (il ne doit rien y avoir). Un seul jeu n'aurait éprouvé qu'une des deux
+     branches — or c'est justement la disparition complète qui a été exigée. */
+  'livraison.js': (() => {
+    const PAYS = { ok: true, peutModifier: true, international: true,
+      maj: '2026-08-11T12:00:00Z', nbInscrits: 2,
+      pays: [
+        { code: 'US', nom: 'États-Unis', inscrit: true, etats: ['NY', 'AK'], livre: true },
+        { code: 'FR', nom: 'France', inscrit: true, etats: [], livre: false },
+        { code: 'DE', nom: 'Allemagne', inscrit: false, etats: [], livre: false },
+        { code: 'JP', nom: 'Japon', inscrit: false, etats: [], livre: false },
+      ] };
+    return [
+      {
+        nom: 'international allume',
+        id: '',
+        reponses: {
+          identite: IDENTITE,
+          'config:livraison:donnees': { ok: true, peutModifier: true, international: true,
+            shippingCost: 14.99, freeThreshold: 75, priorityCost: 9.99 },
+          'config:pays:donnees': PAYS,
+          'config:pays:relire': PAYS,
+          'config:pays:exclure': PAYS,
+        },
+      },
+      {
+        nom: 'international eteint',
+        id: 'canada',
+        reponses: {
+          identite: IDENTITE,
+          'config:livraison:donnees': { ok: true, peutModifier: true, international: false,
+            shippingCost: 14.99, freeThreshold: 150, priorityCost: 0 },
+        },
+      },
+    ];
+  })(),
 
   // Configuration des retours (palier 5, famille Configuration). Pas de secret.
   'config-retours.js': {
