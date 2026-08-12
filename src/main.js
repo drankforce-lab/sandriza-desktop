@@ -648,13 +648,15 @@ const createWindow = () => {
     minHeight: 700,
     backgroundColor: '#111827',
     title: 'Administration Sandriza',
-    // ⚠ BARRE DE TITRE PERSONNALISÉE (demande du 2026-08-12) : on retire le cadre
-    // gris de Windows et on peint une barre foncée assortie au thème ; les boutons
-    // OS (réduire/agrandir/fermer) sont teintés par `titleBarOverlay`. La page pose
-    // une bande de titre déplaçable en haut (#sz-titlebar, app.js/styles.css) et
-    // décale son contenu de 36 px sous elle. Réversible : retirer ces deux clés.
+    // ⚠ BARRE DE TITRE PERSONNALISÉE (2026-08-12) : cadre gris de Windows retiré,
+    // barre foncée assortie au thème ; les boutons OS (réduire/agrandir/fermer)
+    // sont teintés par `titleBarOverlay`. La barre de menu native
+    // (Fichier/Affichage/Aide) sert de bande de titre déplaçable — pas de bande
+    // maison. ⚠ PAS de `height` forcé : Windows déformait les boutons (2.60.0) ;
+    // on laisse la hauteur naturelle des boutons de légende. Réversible : retirer
+    // ces deux clés pour revenir au cadre natif.
     titleBarStyle: 'hidden',
-    titleBarOverlay: { color: '#0e1522', symbolColor: '#e8edf5', height: 36 },
+    titleBarOverlay: { color: '#0e1522', symbolColor: '#e8edf5' },
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,   // durcissement : la page n'a jamais accès direct à Node
@@ -1408,6 +1410,7 @@ const OPS_PONT = new Set([
   'config:analytics:donnees', 'config:analytics:ecrire',
   'config:bd:donnees', 'config:bd:tester', 'config:bd:pousser', 'config:bd:restaurer', 'config:bd:migrer', 'config:bd:stockage',
   'config:accueil:donnees', 'config:accueil:ecrire', 'config:accueil:reinit',
+  'config:lancement:donnees', 'config:lancement:basculer',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1738,6 +1741,7 @@ const LIMITES_PONT = {
   'config:analytics:donnees': 15000, 'config:analytics:ecrire': 30000,
   'config:bd:donnees': 15000, 'config:bd:tester': 30000, 'config:bd:pousser': 120000, 'config:bd:restaurer': 60000, 'config:bd:migrer': 300000, 'config:bd:stockage': 30000,
   'config:accueil:donnees': 15000, 'config:accueil:ecrire': 30000, 'config:accueil:reinit': 20000,
+  'config:lancement:donnees': 20000, 'config:lancement:basculer': 20000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
@@ -2013,6 +2017,7 @@ const PAGES_ANCRABLES = () => ({
   'config-analytics': ['Statistiques (Google Analytics)', () => pageAnalytics()],
   'config-turso': ['Base de données', () => pageBd()],
   'config-homepage': ['Page d’accueil', () => pageAccueil()],
+  'config-launch': ['Mode lancement', () => pageLancement()],
   'studio': ['Studio virtuel', () => pageStudio()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
@@ -2781,6 +2786,7 @@ const { pageLogotheque } = require('./fenetres/logotheque');
 const { pageAnalytics } = require('./fenetres/analytics');
 const { pageBd } = require('./fenetres/bd');
 const { pageAccueil } = require('./fenetres/accueil');
+const { pageLancement } = require('./fenetres/lancement');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2869,7 +2875,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

@@ -1396,6 +1396,15 @@ module.exports = {
     ];
   })(),
 
+  // Mode lancement (palier 5, DERNIER — garde absolue). Pas de secret. Deux états :
+  // pré-lancement (protégé, variable absente) et en ligne (piloté par ELG_LAUNCHED).
+  'lancement.js': [
+    { nom: 'pré-lancement (protégé)', reponses: { identite: IDENTITE,
+      'config:lancement:donnees': { ok: true, peutModifier: true, enLigne: false, envPresente: false, envValeur: '', coherent: true } } },
+    { nom: 'en ligne (variable Render)', reponses: { identite: IDENTITE,
+      'config:lancement:donnees': { ok: true, peutModifier: true, enLigne: true, envPresente: true, envValeur: '1', coherent: true } } },
+  ],
+
   // Page d'accueil (palier 5). Pas de secret ; images = URL. Trois états : liste,
   // éditeur héro (le plus complexe), lecture seule.
   'accueil.js': (() => {
