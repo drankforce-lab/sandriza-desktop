@@ -1253,7 +1253,7 @@ module.exports = {
     const PAYS = { ok: true, peutModifier: true, international: true,
       maj: '2026-08-11T12:00:00Z', nbInscrits: 2,
       pays: [
-        { code: 'US', nom: 'États-Unis', inscrit: true, etats: [{ code: 'NY', livre: true }, { code: 'AK', livre: false }], livre: true },
+        { code: 'US', nom: 'États-Unis', inscrit: true, etats: [{ code: 'NY', name: 'New York', livre: true }, { code: 'AK', name: 'Alaska', livre: false }], livre: true },
         { code: 'FR', nom: 'France', inscrit: true, etats: [], livre: false },
         { code: 'DE', nom: 'Allemagne', inscrit: false, etats: [], livre: false },
         { code: 'JP', nom: 'Japon', inscrit: false, etats: [], livre: false },
