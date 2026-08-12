@@ -36,8 +36,10 @@ body{background:#0e1522;color:#e8edf5;
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.zone{max-width:62rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;margin:0 0 1rem}
+/* ⚠ ANCRÉE = PLEINE PAGE : cartes en colonnes pour remplir la largeur. */
+.zone{columns:36rem;column-gap:1.1rem}
+.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;
+  margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .carte.edit{border-color:#c9a97e}
 .stitre{font-size:.9rem;font-weight:700;color:#cbd8e6;margin:0 0 .1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
 .sdesc{font-size:.76rem;color:#8fa1b8;margin:.1rem 0 .8rem}

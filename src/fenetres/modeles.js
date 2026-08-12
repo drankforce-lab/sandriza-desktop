@@ -36,7 +36,7 @@ body{background:#0e1522;color:#e8edf5;
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .intro{max-width:52rem;color:#8fa1b8;font-size:.8rem;line-height:1.55;margin:0 0 1rem}
-.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:1rem;max-width:60rem}
+.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:1rem}
 .slot{display:flex;flex-direction:column;gap:.35rem}
 .slot .lbl{font-size:.7rem;font-weight:700;color:#cbd8e6;text-transform:uppercase;letter-spacing:.05em;text-align:center}
 .cadre{aspect-ratio:3/4;border:1.5px dashed #2b3444;border-radius:9px;cursor:pointer;position:relative;

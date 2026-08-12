@@ -36,8 +36,10 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.zone{max-width:52rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;margin:0 0 1rem}
+/* ⚠ ANCRÉE = PLEINE PAGE : cartes en colonnes pour remplir la largeur. */
+.zone{columns:32rem;column-gap:1.1rem}
+.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;
+  margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
   border-radius:9px;padding:.7rem .85rem;font-size:.78rem;line-height:1.6;margin:0 0 1rem}
 .info b{color:#dbe7fb}

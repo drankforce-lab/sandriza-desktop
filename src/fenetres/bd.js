@@ -33,8 +33,11 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.zone{max-width:56rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;margin:0 0 1rem}
+/* ⚠ ANCRÉE = PLEINE PAGE : les cartes se répartissent en colonnes pour remplir la
+   largeur (pas de max-width qui laisse du vide à droite). Voir la règle mémoire. */
+.zone{columns:32rem;column-gap:1.1rem}
+.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;
+  margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .stitre{font-size:.86rem;font-weight:700;color:#cbd8e6;margin:0 0 .5rem}
 .info{color:#8fa1b8;font-size:.79rem;line-height:1.6;margin:0 0 .6rem}
 .info b{color:#cbd8e6}

@@ -32,7 +32,8 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.zone{max-width:64rem}
+/* ⚠ ANCRÉE = PLEINE PAGE : pas de cap de largeur ; la grille des logos remplit. */
+.zone{width:100%}
 .barre{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:0 0 1rem}
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.9rem}
 .lcard{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;overflow:hidden;display:flex;flex-direction:column}

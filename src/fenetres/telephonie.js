@@ -59,7 +59,8 @@ body{background:#0e1522;color:#e8edf5;
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.panneau{max-width:70rem}
+/* ⚠ ANCRÉE = PLEINE PAGE : pas de cap ; les champs (gr2) s'étendent sur la largeur. */
+.panneau{width:100%}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.9rem 1rem;margin:0 0 .9rem;min-width:0}
 .stitre{font-size:.86rem;font-weight:700;color:#cbd8e6;margin:0 0 .6rem}
