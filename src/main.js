@@ -1398,6 +1398,7 @@ const OPS_PONT = new Set([
   'config:gabarits:donnees', 'config:gabarits:ecrire', 'config:gabarits:copier',
   'config:gabarits:supprimer', 'config:gabarits:attributions', 'config:gabarits:gifApercu',
   'config:logotheque:donnees', 'config:logotheque:ajouter', 'config:logotheque:renommer', 'config:logotheque:retirer',
+  'config:analytics:donnees', 'config:analytics:ecrire',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1725,6 +1726,7 @@ const LIMITES_PONT = {
   'config:gabarits:donnees': 15000, 'config:gabarits:ecrire': 25000, 'config:gabarits:copier': 20000,
   'config:gabarits:supprimer': 20000, 'config:gabarits:attributions': 20000, 'config:gabarits:gifApercu': 25000,
   'config:logotheque:donnees': 15000, 'config:logotheque:ajouter': 60000, 'config:logotheque:renommer': 20000, 'config:logotheque:retirer': 20000,
+  'config:analytics:donnees': 15000, 'config:analytics:ecrire': 30000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
@@ -1997,6 +1999,7 @@ const PAGES_ANCRABLES = () => ({
   'config-models': ['Modèles par vue', () => pageModeles()],
   'config-gabarits': ['Gabarits courriel', () => pageGabarits()],
   'config-logotheque': ['Logothèque', () => pageLogotheque()],
+  'config-analytics': ['Statistiques (Google Analytics)', () => pageAnalytics()],
   'studio': ['Studio virtuel', () => pageStudio()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
@@ -2762,6 +2765,7 @@ const { pageTelephonie } = require('./fenetres/telephonie');
 const { pageModeles } = require('./fenetres/modeles');
 const { pageGabarits } = require('./fenetres/gabarits');
 const { pageLogotheque } = require('./fenetres/logotheque');
+const { pageAnalytics } = require('./fenetres/analytics');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2850,7 +2854,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

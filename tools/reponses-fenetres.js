@@ -1396,6 +1396,15 @@ module.exports = {
     ];
   })(),
 
+  // Statistiques GA4 (config, palier 5). ⚠ Secret : clé de compte de service en
+  // booléen. Deux états : clé configurée (modifiable) et lecture seule.
+  'analytics.js': [
+    { nom: 'configuré, modifiable', reponses: { identite: IDENTITE, 'config:analytics:donnees': {
+      ok: true, peutModifier: true, cfg: { enabled: true, measurementId: 'G-ABC123', propertyId: '456789012', hasServiceAccount: true } } } },
+    { nom: 'vierge, lecture seule', reponses: { identite: IDENTITE, 'config:analytics:donnees': {
+      ok: true, peutModifier: false, cfg: { enabled: false, measurementId: '', propertyId: '', hasServiceAccount: false } } } },
+  ],
+
   // Logothèque (palier 5, Configuration). Images R2 ; pas de secret. Deux états :
   // liste garnie (modifiable) et lecture seule. L'import/recadrage se déclenche au
   // choix d'un fichier (non simulable ici — le rendu de la liste suffit au banc).
