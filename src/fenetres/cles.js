@@ -283,9 +283,32 @@ ${JS_ACTIVITE}${JS_DIRE}
       occuper(false);
       if (!res) return;
       if (r && r.ok) {
-        var insc = (r.inscriptions || []).map(function(i){ return i.pays; }).join(', ') || 'aucune';
+        /* ⚠ ON AFFICHAIT le champ pays, D'OÙ LE FAMEUX << US, US >>. Deux
+           inscriptions dans le meme pays donnaient deux fois le meme mot, et l on
+           ne pouvait pas savoir DE QUEL ETAT il s agissait — or c est tout ce qui
+           compte : etre inscrit a New York n autorise pas le Texas. Le relais rend
+           deja le territoire (US-NY) et le statut ; on montre ca.
+           ⚠ ET ON NE REFAIT PAS LE TABLEAU ICI. Il vit dans Configuration ▸
+           Livraison, ou il sert a decider ou l on livre — le dupliquer ferait deux
+           ecrans a tenir d accord, et c est deja ce genre de doublon qui a coute
+           une journee. On renvoie donc vers lui. */
+        var lst = (r.inscriptions || []);
+        var actives = lst.filter(function(i){ return i.statut === 'active'; });
+        var noms = actives.map(function(i){ return i.territoire || i.pays; });
+        var enPlus = lst.length - actives.length;
+        var txt;
+        if (!lst.length) {
+          txt = '✓ Clé valide (' + esc(r.mode) + '). <b>Aucune inscription</b> — '
+              + 'aucune destination hors Canada ne peut être ouverte.';
+        } else {
+          txt = '✓ Clé valide (' + esc(r.mode) + '). Inscrit dans : <b>' + esc(noms.join(', ')) + '</b>'
+              + (enPlus > 0 ? ' <span style="opacity:.7">(+ ' + enPlus + ' non active'
+                              + (enPlus > 1 ? 's' : '') + ')</span>' : '')
+              + '. <span style="opacity:.75">Les pays desservis se règlent dans '
+              + '<b>Configuration ▸ Livraison</b>.</span>';
+        }
         res.className = 'etat';
-        res.innerHTML = '<span class="txt">✓ Clé valide (' + esc(r.mode) + '). Inscrit dans : <b>' + esc(insc) + '</b>.</span>';
+        res.innerHTML = '<span class="txt">' + txt + '</span>';
       } else {
         res.className = 'etat non';
         res.innerHTML = '<span class="txt">✗ ' + esc((r && (r.error || r.detail)) || 'Échec du test.')
