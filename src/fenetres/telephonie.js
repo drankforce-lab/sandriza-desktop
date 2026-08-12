@@ -201,6 +201,45 @@ ${JS_ACTIVITE}${JS_DIRE}
   function val(id){ var e = document.getElementById(id); return e ? String(e.value).trim() : ''; }
   function chk(id){ var e = document.getElementById(id); return !!(e && e.checked); }
 
+  // Taux de change indicatif USD -> CAD pour l'affichage du solde et des couts
+  // Twilio (facturés en USD). Approximatif (marqué « ≈ ») ; à ajuster au besoin.
+  var USD_CAD = 1.37;
+  function soldeCadUsd(usdStr){
+    var usd = Number(usdStr);
+    if (!isFinite(usd)) return String(usdStr || '');
+    var cad = (usd * USD_CAD).toFixed(2).replace('.', ',');
+    return '≈ ' + cad + ' $ CA (' + String(usdStr) + ' USD)';
+  }
+
+  // Masque de numéro NANP : chiffres seulement, affiché (418) 858-0455 ; stocké en
+  // E.164 (+1XXXXXXXXXX) pour que Twilio compose correctement.
+  function fmtTel(v){
+    var d = String(v == null ? '' : v).replace(/[^0-9]/g, '');
+    if (d.length === 11 && d.charAt(0) === '1') d = d.slice(1);
+    d = d.slice(0, 10);
+    if (!d) return '';
+    if (d.length <= 3) return '(' + d;
+    if (d.length <= 6) return '(' + d.slice(0, 3) + ') ' + d.slice(3);
+    return '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6);
+  }
+  function telE164(v){
+    var d = String(v == null ? '' : v).replace(/[^0-9]/g, '');
+    if (!d) return '';
+    if (d.length === 11 && d.charAt(0) === '1') return '+' + d;
+    if (d.length === 10) return '+1' + d;
+    return '+' + d;
+  }
+  function brancherTels(){
+    var sels = corps.querySelectorAll('[data-mf="number"], #t-number, #t-sms-to');
+    for (var i = 0; i < sels.length; i++) {
+      (function(el){
+        el.value = fmtTel(el.value);
+        el.setAttribute('inputmode', 'tel');
+        el.addEventListener('input', function(){ el.value = fmtTel(el.value); });
+      })(sels[i]);
+    }
+  }
+
   var MOTIFS = {
     session:            'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
     droit:              'Votre rôle ne donne pas accès à la configuration.',
@@ -266,9 +305,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   // ── PANNEAUX ────────────────────────────────────────────────────────────────
   function panGeneral(){
-    var h = '<div class="carte"><div class="info">📞 Dans la console Twilio (<b>Phone Numbers → votre numéro</b>) :<br>'
-      + '• <b>Voice</b> « A call comes in » (HTTP POST) → <code>' + esc(D.webhookVoice) + '</code><br>'
-      + '• <b>Messaging</b> « A message comes in » (HTTP POST) → <code>' + esc(D.webhookSms) + '</code></div>';
+    var h = '<div class="carte">';
     h += '<div class="gr2">'
       + texteHtml('t-number', 'Numéro Twilio', C.twilioNumber, '+1 514 555 0123', true)
       + selectHtml('t-langmode', 'Mode de langue', C.langMode || 'fr', [
@@ -327,8 +364,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="ch" style="margin:0"><label>Numéro (Rediriger / File)</label><input data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
       + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="Retirer">🗑</button>')
       + '</div><div class="l2">'
-      + '<div class="ch"><input data-mf="messageFr" value="' + esc(m.fr || '') + '" placeholder="Message vocal FR (si action = Message)"' + (RO ? ' disabled' : '') + '></div>'
-      + '<div class="ch"><input data-mf="messageEn" value="' + esc(m.en || '') + '" placeholder="Message vocal EN"' + (RO ? ' disabled' : '') + '></div>'
+      + '<div class="ch"><textarea data-mf="messageFr" rows="1" placeholder="Message vocal FR (si action = Message)"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
+      + '<div class="ch"><textarea data-mf="messageEn" rows="1" placeholder="Message vocal EN"' + (RO ? ' disabled' : '') + '>' + esc(m.en || '') + '</textarea></div>'
       + '</div></div>';
     return h;
   }
@@ -431,6 +468,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         var f = champs[j].getAttribute('data-mf'), v = String(champs[j].value).trim();
         if (f === 'messageFr') o.message.fr = v;
         else if (f === 'messageEn') o.message.en = v;
+        else if (f === 'number') o.number = telE164(v);   // stocké en E.164
         else o[f] = v;
       }
       out.push(o);
@@ -443,7 +481,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (RO) return;
     if (ONGLET === 'menu') { lireMenuDom(); return; }
     if (ONGLET === 'general') {
-      C.twilioNumber = val('t-number'); C.langMode = val('t-langmode');
+      C.twilioNumber = telE164(val('t-number')); C.langMode = val('t-langmode');
       C.voiceFr = val('t-voice-fr'); C.voiceEn = val('t-voice-en');
       C._sid = val('t-sid'); C._token = val('t-token');
     } else if (ONGLET === 'accueil') {
@@ -482,9 +520,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     var bs = ongletsEl.querySelectorAll('[data-ong]');
     for (var j = 0; j < bs.length; j++) bs[j].onclick = function(){ changerOnglet(this.getAttribute('data-ong')); };
   }
+  // Les zones de texte grandissent a la hauteur de leur contenu (voir tout d'un
+  // coup, sans barre de defilement interne). Rejoue a chaque saisie.
+  function autogrow(t){ t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight, 40) + 'px'; t.style.overflowY = 'hidden'; }
+  function autogrowTous(){ var ts = corps.querySelectorAll('textarea'); for (var i = 0; i < ts.length; i++) { (function(t){ autogrow(t); t.addEventListener('input', function(){ autogrow(t); }); })(ts[i]); } }
   function dessinerCorps(){
     corps.innerHTML = (PANNEAUX[ONGLET] || panGeneral)();
     brancherCorps();
+    autogrowTous();
+    brancherTels();
     if (ONGLET === 'messagerie') rendreVm();
     if (ONGLET === 'sms') rendreSms();
   }
@@ -573,7 +617,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!RESUME) { soldeEl.textContent = '…'; return; }
     if (RESUME.erreur) { soldeEl.innerHTML = '<span style="color:#f87171;font-size:.8rem">indisponible</span>'; qliveEl.innerHTML = ''; return; }
     var b = RESUME.balance;
-    soldeEl.textContent = (b && b.balance != null && b.balance !== '') ? (String(b.balance) + ' ' + String(b.currency || '')) : '—';
+    if (b && b.balance != null && b.balance !== '') {
+      var cur = String(b.currency || 'USD');
+      soldeEl.textContent = (cur === 'USD') ? soldeCadUsd(b.balance) : (String(b.balance) + ' ' + cur);
+    } else soldeEl.textContent = '—';
     var qw = (typeof RESUME.queueWaiting === 'number') ? RESUME.queueWaiting : 0;
     qliveEl.innerHTML = (qw > 0) ? '<span class="qlive">⏳ ' + qw + ' en attente</span>' : '';
   }
@@ -587,14 +634,24 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (ONGLET === 'sms') rendreSms();
     });
   }
+  // ⚠ On VÉRIFIE le résultat : sans ça, un échec (session, réseau, Twilio) était
+  // avalé en silence et le message restait — « la suppression ne marche pas ».
   function vmAction(op, id){
-    appeler('tel:' + op, [{ id: id }]).then(function(){ chargerResume(); });
+    dire('…');
+    appeler('tel:' + op, [{ id: id }]).then(function(r){
+      if (r && r.ok) { chargerResume(); dire(op === 'vm:suppr' ? 'Message supprimé.' : 'Marqué lu.', 'bon'); }
+      else dire('Échec : ' + expliquer(r), 'err');
+    });
   }
   function smsAction(op, id){
-    appeler('tel:' + op, [{ id: id }]).then(function(){ chargerResume(); });
+    dire('…');
+    appeler('tel:' + op, [{ id: id }]).then(function(r){
+      if (r && r.ok) { chargerResume(); dire(op === 'sms:suppr' ? 'SMS supprimé.' : 'Marqué lu.', 'bon'); }
+      else dire('Échec : ' + expliquer(r), 'err');
+    });
   }
   function smsEnvoyer(){
-    var to = val('t-sms-to'), body = val('t-sms-body');
+    var to = telE164(val('t-sms-to')), body = val('t-sms-body');
     if (!to || !body) { dire('Numéro et message requis.', 'err'); return; }
     dire('Envoi du SMS…');
     appeler('tel:sms:envoyer', [{ to: to, body: body }]).then(function(r){

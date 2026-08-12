@@ -1253,7 +1253,7 @@ module.exports = {
     const PAYS = { ok: true, peutModifier: true, international: true,
       maj: '2026-08-11T12:00:00Z', nbInscrits: 2,
       pays: [
-        { code: 'US', nom: 'États-Unis', inscrit: true, etats: ['NY', 'AK'], livre: true },
+        { code: 'US', nom: 'États-Unis', inscrit: true, etats: [{ code: 'NY', livre: true }, { code: 'AK', livre: false }], livre: true },
         { code: 'FR', nom: 'France', inscrit: true, etats: [], livre: false },
         { code: 'DE', nom: 'Allemagne', inscrit: false, etats: [], livre: false },
         { code: 'JP', nom: 'Japon', inscrit: false, etats: [], livre: false },
@@ -1395,6 +1395,19 @@ module.exports = {
         'config:telephonie:donnees': DONNEES(false), 'tel:resume': RESUME } },
     ];
   })(),
+
+  // Logothèque (palier 5, Configuration). Images R2 ; pas de secret. Deux états :
+  // liste garnie (modifiable) et lecture seule. L'import/recadrage se déclenche au
+  // choix d'un fichier (non simulable ici — le rendu de la liste suffit au banc).
+  'logotheque.js': [
+    { nom: 'liste garnie', reponses: { identite: IDENTITE, 'config:logotheque:donnees': { ok: true, peutModifier: true, logos: [
+      { id: 'lg1', name: 'Logo principal', url: 'https://exemple.r2.dev/logos/logo.png', w: 800, h: 240, alpha: true, printW: 2, printH: 0.6, dpi: 400, mode: 'keep' },
+      { id: 'lg2', name: 'Filigrane', url: 'https://exemple.r2.dev/logos/wm.png', w: 512, h: 512, alpha: true, printW: 0, printH: 0, dpi: 0, mode: 'crop' },
+    ] } } },
+    { nom: 'lecture seule', reponses: { identite: IDENTITE, 'config:logotheque:donnees': { ok: true, peutModifier: false, logos: [
+      { id: 'lg1', name: 'Logo principal', url: 'https://exemple.r2.dev/logos/logo.png', w: 800, h: 240, alpha: true, printW: 2, printH: 0.6, dpi: 400, mode: 'keep' },
+    ] } } },
+  ],
 
   // Gabarits courriel (palier 5, Communications). Style des courriels + attribution
   // par fonction ; pas de secret. TROIS états : liste, éditeur, lecture seule.

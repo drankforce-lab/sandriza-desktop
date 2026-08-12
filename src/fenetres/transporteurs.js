@@ -45,12 +45,16 @@ body{background:#0e1522;color:#e8edf5;
 .avert button{font:inherit;font-size:.78rem;color:#fca5a5;background:rgba(248,113,113,.08);
   border:1px solid rgba(248,113,113,.4);border-radius:7px;padding:.24rem .6rem;cursor:pointer}
 .avert button:hover:not(:disabled){background:rgba(248,113,113,.16)}
+/* Disposition en COLONNES (type maçonnerie) : les cartes courtes (Purolator, UPS…)
+   s'empilent sous la précédente au lieu de s'aligner par rangée sur la hauteur de
+   Postes Canada — plus d'espace mort sous une carte courte. */
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(30rem,1fr));gap:1rem;align-content:start;align-items:start}
+  columns:30rem;column-gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
-  padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
+  padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column;
+  break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:1rem}
 .carte .th{display:flex;align-items:center;gap:.5rem;margin:0 0 .3rem}
 /* ⚠ Emoji en GRIS, jamais en couleur (préférence 2026-08-11). */
 .carte .em{font-size:1rem;filter:grayscale(1) brightness(1.6);opacity:.9}

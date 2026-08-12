@@ -79,6 +79,8 @@ table.pays .code{color:#6d7f96;font:.72rem ui-monospace,Menlo,Consolas,monospace
 table.pays .oui{color:#4ade80;font-weight:600;font-size:.78rem}
 table.pays .non{color:#6d7f96;font-size:.78rem}
 table.pays .ets{font-size:.7rem;color:#8fa1b8;margin-top:1px}
+table.pays .etschk{display:flex;flex-wrap:wrap;gap:.2rem .6rem;justify-content:center}
+table.pays .etschk label{display:inline-flex;align-items:center;gap:.25rem;font-size:.76rem;cursor:pointer;color:#e8edf5;-webkit-user-select:none;user-select:none}
 table.pays .verrou{color:#6d7f96;font-size:.74rem}
 table.pays td.mid{text-align:center}
 table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
@@ -224,16 +226,24 @@ ${JS_ACTIVITE}${JS_DIRE}
     var autres = l.filter(function(p){ return !p.inscrit; });
     var dis = RO ? ' disabled' : '';
     var ligne = function(p){
+      // ⚠ p.etats = [{code, livre}] : chaque etat inscrit a SA case (on peut livrer
+      // a NY et pas au TX). Sans etats : une seule case pour le pays.
+      var ets = p.etats || [];
+      var etsCodes = ets.map(function(e){ return e.code; });
+      var cell;
+      if (!p.inscrit) cell = '<span class="verrou" title="Ajoutez l inscription fiscale dans Stripe pour ouvrir ce pays">verrouillé</span>';
+      else if (ets.length) cell = '<div class="etschk">' + ets.map(function(e){
+          return '<label><input type="checkbox" data-pays="' + esc(p.code) + '" data-etat="' + esc(e.code) + '"'
+            + (e.livre ? ' checked' : '') + dis + '>' + esc(e.code) + '</label>';
+        }).join('') + '</div>';
+      else cell = '<input type="checkbox" data-pays="' + esc(p.code) + '"' + (p.livre ? ' checked' : '') + dis + '>';
       return '<tr class="' + (p.inscrit ? '' : 'off') + '">'
         + '<td>' + esc(p.nom) + '<span class="code">' + esc(p.code) + '</span></td>'
         + '<td>' + (p.inscrit
             ? '<span class="oui">✓ inscrit</span>'
-              + (p.etats && p.etats.length ? '<div class="ets">' + esc(p.etats.join(', ')) + '</div>' : '')
+              + (etsCodes.length ? '<div class="ets">' + esc(etsCodes.join(', ')) + '</div>' : '')
             : '<span class="non">—</span>') + '</td>'
-        + '<td class="mid">' + (p.inscrit
-            ? '<input type="checkbox" data-pays="' + esc(p.code) + '"' + (p.livre ? ' checked' : '') + dis + '>'
-            : '<span class="verrou" title="Ajoutez l inscription fiscale dans Stripe pour ouvrir ce pays">verrouillé</span>')
-          + '</td></tr>';
+        + '<td class="mid">' + cell + '</td></tr>';
     };
     var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('fr-CA') : 'jamais';
     return '<div class="carte large"><h2>Pays desservis</h2>'
@@ -303,14 +313,17 @@ ${JS_ACTIVITE}${JS_DIRE}
      silences. */
   function exclurePays(el){
     if (RO) { el.checked = !el.checked; return; }
-    var code = el.getAttribute('data-pays');
+    var pays = el.getAttribute('data-pays');
+    var etat = el.getAttribute('data-etat');
+    var code = etat ? (pays + '-' + etat) : pays;   // exclusion par etat : « US-NY »
     var veut = el.checked;
     el.disabled = true;
     appeler('config:pays:exclure', [code, veut]).then(function(r){
       el.disabled = false;
       if (!r || !r.ok) { el.checked = !veut; dire(expliquer(r), 'err'); return; }
       PAYS = r;
-      dire(veut ? 'Pays desservi.' : 'Pays retiré.', 'bon');
+      var quoi = etat ? 'État' : 'Pays';
+      dire(veut ? (quoi + ' desservi.') : (quoi + ' retiré.'), 'bon');
     });
   }
 
@@ -338,7 +351,10 @@ ${JS_ACTIVITE}${JS_DIRE}
         return;
       }
       D = r; RO = !r.peutModifier; dessiner(); dire('');
-      if (r.international) chargerPays();
+      // ⚠ RELECTURE AUTOMATIQUE a l'ouverture : on lit les inscriptions chez Stripe
+      // tout de suite (et pas seulement le miroir local), pour un tableau a jour des
+      // l'entree — demande expresse. relirePays force le cache du relais.
+      if (r.international) relirePays();
     });
   }
 
