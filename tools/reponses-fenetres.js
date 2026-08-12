@@ -1396,6 +1396,30 @@ module.exports = {
     ];
   })(),
 
+  // Gabarits courriel (palier 5, Communications). Style des courriels + attribution
+  // par fonction ; pas de secret. TROIS états : liste, éditeur, lecture seule.
+  'gabarits.js': (() => {
+    const DONNEES = (peut) => ({ ok: true, peutModifier: peut, marque: 'SANDRIZA', tagline: 'ÉLÉGANCE · RAFFINEMENT · STYLE',
+      fonctions: [
+        { key: 'order_confirm', label: '🛒 Confirmation de commande', module: 'Panier' },
+        { key: 'shipping',      label: '🚚 Avis d’expédition',        module: 'Expédition' },
+        { key: 'newsletter',    label: '📧 Campagnes infolettre',      module: 'Newsletter' },
+      ],
+      gabarits: [
+        { id: 'default', name: 'Défaut', headerBgFrom: '#1a1a2e', headerBgTo: '#2d1b69', headerSubtitle: '',
+          footerBg: '#1a1a2e', footerTextColor: '#c4a882', animated: false, gifBanner: false, supprimable: false },
+        { id: 'tpl_promo', name: 'Promotionnel', headerBgFrom: '#7c2d12', headerBgTo: '#b45309', headerSubtitle: 'OFFRES',
+          footerBg: '#1a1a2e', footerTextColor: '#fbbf24', animated: true, gifBanner: true, supprimable: true },
+      ],
+      attributions: { order_confirm: 'default', shipping: 'default', newsletter: 'tpl_promo' } });
+    return [
+      { nom: 'liste + attributions', reponses: { identite: IDENTITE, 'config:gabarits:donnees': DONNEES(true) } },
+      { nom: 'éditeur (modification)', id: 'tpl_promo', reponses: { identite: IDENTITE, 'config:gabarits:donnees': DONNEES(true),
+        'config:gabarits:gifApercu': { ok: true, dataUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' } } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'config:gabarits:donnees': DONNEES(false) } },
+    ];
+  })(),
+
   // Modèles par vue (palier 5, Configuration). Une photo par angle ; pas de secret.
   // Deux états : garni + modifiable, et lecture seule.
   'modeles.js': [
