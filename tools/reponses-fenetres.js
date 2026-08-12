@@ -1355,6 +1355,47 @@ module.exports = {
     } },
   ],
 
+  // Téléphonie (palier 5, famille Communications). ⚠ Aucun secret entier : le
+  // cœur ne rend que les booléens hasAccountSid / hasAuthToken. Deux états : garni
+  // et modifiable (bandeau + boîtes relayés par tel:resume), et lecture seule.
+  'telephonie.js': (() => {
+    const CFG = {
+      enabled: true, twilioNumber: '+15145550123', langMode: 'select',
+      voiceFr: 'Polly.Gabrielle-Neural', voiceEn: 'Polly.Joanna-Neural',
+      hasAccountSid: true, hasAuthToken: true,
+      greeting: { fr: 'Bonjour et merci d’avoir appelé SANDRIZA.', en: 'Hello and thank you for calling SANDRIZA.' },
+      greetingPause: 5, menuTimeout: 10,
+      noInputMessage: { fr: 'Merci, au revoir !', en: 'Thank you, goodbye!' },
+      defaultAction: 'menu',
+      menu: [
+        { digit: '1', label: 'Ventes', labelEN: 'Sales', action: 'forward', number: '+15145550100', message: {} },
+        { digit: '2', label: 'Heures', labelEN: 'Hours', action: 'message',
+          number: '', message: { fr: 'Nous sommes ouverts du lundi au vendredi.', en: 'We are open Monday to Friday.' } },
+      ],
+      forward: { numbers: ['+15145550100', '+15145550101'], timeout: 20, strategy: 'simul', callerIdMode: 'business', noForwardAck: false },
+      hoursRouting: { useHours: true, closedMessage: { fr: 'Nos bureaux sont fermés.', en: 'Our offices are closed.' } },
+      voicemailEmail: 'standard@sandriza.com',
+      voicemailPrompt: { fr: 'Laissez votre message après le bip.', en: 'Leave your message after the tone.' },
+      voicemailPromptClosed: { fr: '', en: '' },
+      sms: { enabled: true, autoReply: { fr: 'Merci, nous répondrons bientôt.', en: 'Thanks, we will reply soon.' }, notifyEmail: 'sms@sandriza.com' },
+      queue: { enabled: true, maxWaitSec: 180, firstRingDelaySec: 30, dialTimeout: 15,
+        holdMusicUrl: '', announcePosition: true, vmDigit: '9',
+        waitMessage: { fr: 'Merci de patienter.', en: 'Please hold.' } },
+    };
+    const DONNEES = (peut) => ({ ok: true, peutModifier: peut, cfg: CFG,
+      webhookVoice: 'https://adm.sandriza.com/twilio-voice.php', webhookSms: 'https://adm.sandriza.com/twilio-sms.php' });
+    const RESUME = { ok: true, balance: { balance: '18.42', currency: 'USD' }, queueWaiting: 1,
+      calls: [{ from: '+14185550199', direction: 'inbound', status: 'completed', duration: '184', startTime: '2026-08-11T14:22:03Z' }],
+      voicemails: [{ id: 'vm1', from: '+14185550199', duration: '22', date: '2026-08-11T14:22:03Z', read: false, emailed: true }],
+      sms: [{ id: 's1', direction: 'inbound', from: '+15145550142', body: 'Bonjour, êtes-vous ouverts demain ?', date: '2026-08-11T09:01:44Z', read: false }] };
+    return [
+      { nom: 'garni, modifiable', reponses: { identite: IDENTITE,
+        'config:telephonie:donnees': DONNEES(true), 'tel:resume': RESUME } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE,
+        'config:telephonie:donnees': DONNEES(false), 'tel:resume': RESUME } },
+    ];
+  })(),
+
   /* ⚠ DEUX CAS D'OUVERTURE, parce que la grille des mannequins a deux visages :
      celui où les portraits existent déjà (on les relit de R2, aucun appel payant)
      et celui où ils n'ont jamais été fabriqués (bouton « Afficher les
