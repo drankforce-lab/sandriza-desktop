@@ -1408,11 +1408,42 @@ module.exports = {
       vedette: [ { label: 'Meilleures ventes', href: '#shop?cat=robes' } ],
       footer: { faq: true, contact: true, retours: true, tailles: false },
       contactNouveaux: 2, contactTotal: 5,
-      customPages: [ { id: 'c1', slug: 'a-propos', title: 'À propos', footerVisible: true, protege: false }, { id: 'c2', slug: 'confidentialite', title: 'Confidentialité', footerVisible: true, protege: true } ]
+      customPages: [ { id: 'c1', slug: 'a-propos', title: 'À propos', footerVisible: true, protege: false }, { id: 'c2', slug: 'confidentialite', title: 'Confidentialité', footerVisible: true, protege: true } ],
+      // ── Étape 5b : les trois politiques et les variables insérables ────────
+      // ⚠ Le contenu d'essai porte EXPRÈS un titre, une liste, un tableau et un
+      // jeton de variable : ce sont les quatre formes que l'éditeur doit savoir
+      // reprendre sans les abîmer. Un contenu réduit à un paragraphe ne prouve
+      // rien — c'est en relisant du HTML déjà riche qu'un éditeur se casse.
+      politiques: {
+        returns: { title: 'Politique de retour', subtitle: 'Votre satisfaction d’abord',
+          content: '<h3>Délai</h3><p>Vous avez <span class="re-var-token" contenteditable="false" data-var="{{JOURS_RETOUR}}">{{JOURS_RETOUR}}</span> jours.</p><ul><li>Non porté</li><li>Étiquettes en place</li></ul>' },
+        shipping: { title: 'Expédition & Livraison', subtitle: 'Ce qu’il faut savoir',
+          content: '<h3>Frais</h3><table style="width:100%;border-collapse:collapse"><thead><tr><th>Zone</th><th>Prix</th></tr></thead><tbody><tr><td>Québec</td><td>9,95 $</td></tr></tbody></table>' },
+        promocodes: { title: 'Conditions des codes promotionnels', subtitle: '',
+          content: '<p>Un seul code par commande chez <span class="re-var-token" contenteditable="false" data-var="{{MARQUE}}">{{MARQUE}}</span>.</p>' }
+      },
+      variables: [
+        { groupe: 'Liens — Pages', vars: [ { code: '{{BOUTIQUE}}', desc: 'Lien vers la boutique' }, { code: '{{CONTACT}}', desc: 'Page Contact' } ] },
+        { groupe: 'Infos boutique', vars: [ { code: '{{MARQUE}}', desc: 'Nom de la marque' }, { code: '{{JOURS_RETOUR}}', desc: 'Délai de retour' } ] }
+      ]
     };
+    // ⚠ UN CAS PAR ÉTAT D'OUVERTURE. Les deux premiers ouvrent sur la LISTE.
+    // L'onglet des politiques s'atteint par `id` — PAS par un clic simulé : le
+    // DOM du banc est factice, un clic n'y navigue nulle part, et l'éditeur
+    // riche ne serait jamais dessiné, donc jamais éprouvé.
+    var ro = { peutModifier: false, peutAjouter: false, peutSupprimer: false };
     return [
       { nom: 'modifiable (données)', reponses: { identite: IDENTITE, 'pages:donnees': donnees } },
-      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'pages:donnees': Object.assign({}, donnees, { peutModifier: false, peutAjouter: false, peutSupprimer: false }) } }
+      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'pages:donnees': Object.assign({}, donnees, ro) } },
+      { nom: 'politiques — éditeur riche', id: 'retours',
+        reponses: { identite: IDENTITE, 'pages:donnees': donnees,
+          'pages:politique:apercu': { ok: true, html: '<h3>Délai</h3><p>Vous avez 30 jours.</p>' },
+          'pages:politique:ecrire': { ok: true, section: 'returns', politique: { title: 'Politique de retour', subtitle: 'Votre satisfaction d’abord', content: '<p>Enregistré.</p>' } } } },
+      { nom: 'politiques — lecture seule', id: 'retours',
+        reponses: { identite: IDENTITE, 'pages:donnees': Object.assign({}, donnees, ro) } },
+      { nom: 'politiques — échec du dépôt des images', id: 'retours',
+        reponses: { identite: IDENTITE, 'pages:donnees': donnees,
+          'pages:politique:ecrire': { ok: false, motif: 'echec', detail: 'Dépôt des images impossible — rien n’a été enregistré.' } } }
     ];
   })(),
 
