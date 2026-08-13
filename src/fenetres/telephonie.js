@@ -420,7 +420,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + taHtml('t-sms-fr', 'Réponse automatique (FR)', ar.fr, 'Merci pour votre message, nous vous répondrons bientôt.')
       + taHtml('t-sms-en', 'Réponse automatique (EN)', ar.en, "Thanks for your message, we'll reply soon.") + '</div>';
     h += texteHtml('t-sms-email', 'Courriel de notification des SMS reçus', sms.notifyEmail, 'vous@exemple.com');
-    h += '</div><div class="carte"><div class="stitre">💬 Messages SMS <span id="t-sms-badge"></span></div>';
+    h += '</div><div class="carte"><div class="stitre">💬 Messages SMS <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="Voir les SMS dans le module Journaux" style="float:right;font-size:.76rem">🔎 Dans Journaux</button></div>';
     h += '<div class="smsbox">'
       + '<input class="to" id="t-sms-to" placeholder="+1…"' + (RO ? ' disabled' : '') + '>'
       + '<input class="body" id="t-sms-body" placeholder="Votre message…"' + (RO ? ' disabled' : '') + '>'
@@ -557,6 +557,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     if (ONGLET === 'sms') {
       var sb = document.getElementById('t-sms-send'); if (sb) sb.onclick = smsEnvoyer;
+      var sj = document.getElementById('t-sms-journaux'); if (sj) sj.onclick = function(){ if (P && P.ouvrirJournaux) P.ouvrirJournaux('sms'); };
     }
   }
 

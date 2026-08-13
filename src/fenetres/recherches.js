@@ -161,6 +161,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="barreoutils">'
       + '<input type="search" id="rs-q" placeholder="Chercher dans la liste…" value="' + esc(Q) + '">'
       + '<div class="droite">'
+      + '<button class="mini" id="rs-vers-journaux" title="Voir ce journal dans le module Journaux">🔎 Dans Journaux</button>'
       + (D.peutModifier && (D.recentes || []).length
           ? '<button class="mini danger" id="rs-vider">'
             + (ARME ? 'Confirmer ?' : 'Vider le détail') + '</button>' : '')
@@ -205,6 +206,9 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var q = document.getElementById('rs-q');
     if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
+
+    var rvj = document.getElementById('rs-vers-journaux');
+    if (rvj) rvj.onclick = function(){ if (P && P.ouvrirJournaux) P.ouvrirJournaux('recherches'); };
 
     var bv = document.getElementById('rs-vider');
     if (bv) bv.onclick = function(){

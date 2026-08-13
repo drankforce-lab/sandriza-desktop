@@ -91,6 +91,12 @@ function pageJournaux(onglet) {
     if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
+  // Aller directement à un onglet quand la fenêtre est DÉJÀ ouverte (lien de
+  // retour depuis une autre fenêtre — #7 7b-2c).
+  window.szAllerOnglet = function(t){
+    if (['recherche','acces','automatisations','impressions','sms','comptable','recherches','verrous'].indexOf(String(t||'')) < 0) return;
+    ONGLET = String(t); CONFV = ''; rendre();
+  };
 ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var ongletsEl = document.getElementById('onglets');

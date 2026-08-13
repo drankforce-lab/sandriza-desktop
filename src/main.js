@@ -2010,6 +2010,10 @@ ipcMain.on('pos:diffuser', (e, etat) => {
    ⚠ Echap ou << fermer >> dans une vue ancree ne doit JAMAIS fermer la fenetre
    principale : pont:fermer distingue les deux (voir plus bas). */
 const ancrees = new Map();   // cle -> { view, fenetre: BaseWindow|null }
+// Onglet demandé pour un OUVERTURE FRAÎCHE de Journaux via un lien de retour
+// (#7 7b-2c). Lu par la carte PAGES_ANCRABLES quand la fenêtre naît ; remis à
+// vide juste après, pour qu'une ouverture par le menu reparte sur l'onglet par défaut.
+let _journauxOnglet = '';
 let zoneAncrage = null;      // { x, y, largeur, hauteur } en px CSS de la page
 const PAGES_ANCRABLES = () => ({
   tableau: ['Tableau de bord', () => pageTableau()],
@@ -2073,7 +2077,7 @@ const PAGES_ANCRABLES = () => ({
   'config-launch': ['Mode lancement', () => pageLancement()],
   'pages': ['Pages du site', () => pagePages()],
   'securite': ['Accès Utilisateurs', () => pageSecurite()],
-  'journaux': ['Journaux', () => pageJournaux()],
+  'journaux': ['Journaux', () => pageJournaux(_journauxOnglet || '')],
   'studio': ['Studio virtuel', () => pageStudio()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
@@ -3016,6 +3020,27 @@ const poserReglage = (cle, valeur) => {
 };
 
 ipcMain.handle('menu:action', (e, nom) => { actionApp(String(nom || '')); return true; });
+
+// ── LIEN DE RETOUR VERS LES JOURNAUX (#7 7b-2c) ──────────────────────────────
+// Une fenêtre (Recherches, Téléphonie, Liens) demande d'ouvrir le module Journaux
+// sur un onglet. Ouverture FRAÎCHE : la carte lit `_journauxOnglet`. DÉJÀ ouverte
+// (dock ou détachée) : on lui envoie `szAllerOnglet`. Onglet réduit aux lettres —
+// aucune donnée n'entre dans le code exécuté.
+const _ONGLETS_JOURNAUX = ['recherche', 'acces', 'automatisations', 'impressions', 'sms', 'comptable', 'recherches', 'verrous'];
+ipcMain.handle('journaux:ouvrir', (e, onglet) => {
+  const t = _ONGLETS_JOURNAUX.indexOf(String(onglet || '').toLowerCase()) >= 0 ? String(onglet).toLowerCase() : '';
+  _journauxOnglet = t;
+  actionApp('journaux');
+  setTimeout(() => {
+    try {
+      const a = ancrees.get('journaux');
+      const wc = a ? (a.fenetre && !a.fenetre.isDestroyed() ? a.fenetre.webContents : (a.view && a.view.webContents)) : null;
+      if (wc && t) wc.executeJavaScript("window.szAllerOnglet && window.szAllerOnglet('" + t + "')", true).catch(() => {});
+    } catch (_) {}
+    _journauxOnglet = '';   // ne pas laisser fuiter vers une prochaine ouverture par le menu
+  }, 400);
+  return true;
+});
 
 // ══ FENÊTRES DE TRAVAIL ═══════════════════════════════════════════════════════
 // « Nouveau produit », « Nouvelle collection », « Nouveau fournisseur » ouvrent

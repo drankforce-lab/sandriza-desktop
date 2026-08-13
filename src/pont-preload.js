@@ -131,4 +131,9 @@ contextBridge.exposeInMainWorld('szPont', {
   // si le bas déborde) au lieu d'être recentrée — pour l'assistant Produit, qui
   // se recale à CHAQUE étape.
   ajusterHauteur: (h, garder) => ipcRenderer.send('fenetre:hauteur', Math.round(h) || 0, !!garder),
+
+  // Ouvre le module Journaux depuis une AUTRE fenêtre (lien de retour, #7 7b-2c) —
+  // sur l'onglet voulu si la fenêtre s'ouvre à neuf, sinon on lui dit d'y aller.
+  // Les fenêtres ancrées n'avaient aucun moyen d'ouvrir une autre section.
+  ouvrirJournaux: (onglet) => ipcRenderer.invoke('journaux:ouvrir', String(onglet || '')).catch(() => false),
 });

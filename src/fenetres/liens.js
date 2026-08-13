@@ -545,7 +545,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</select>'
       + (lien ? '<span class="pill g">Lien ' + esc(lien.slice(0, 8)) + '…</span>'
                 + '<button class="mini" id="j-tout">Tout le journal</button>' : '')
-      + '<span class="droite"><button id="j-recharger">Recharger</button></span></div>');
+      + '<span class="droite"><button id="j-vers-journaux" title="Voir ce journal dans le module Journaux">🔎 Dans Journaux</button>'
+      + '<button id="j-recharger">Recharger</button></span></div>');
 
     h.push('<div class="carte"><h2>Accès aux liens</h2>');
     if (!ETAT.journal.length) {
@@ -579,6 +580,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (jr) jr.onclick = function(){ chargerJournal(filtre, lien); };
     var jt = document.getElementById('j-tout');
     if (jt) jt.onclick = function(){ chargerJournal(filtre, ''); };
+    var jvj = document.getElementById('j-vers-journaux');
+    if (jvj) jvj.onclick = function(){ if (P && P.ouvrirJournaux) P.ouvrirJournaux('comptable'); };
   }
 
   function chargerJournal(canal, lien){
