@@ -1468,6 +1468,34 @@ module.exports = {
     ];
   })(),
 
+  // Accès Utilisateurs / Sécurité (palier 5, #6 Lot A). DEUX onglets, DEUX cas
+  // d'ouverture (le clic ne navigue pas sur le DOM factice du banc) : 'securite'
+  // (les 4 blocs de réglages) et 'users' (la liste en lecture). Un contenu d'essai
+  // riche : deux comptes, l'un superadmin/MFA, l'autre admin exempté.
+  'securite.js': (function(){
+    var donnees = {
+      ok: true, peutModifier: true,
+      pwPolicy: { expiryEnabled: true, expiryDays: 60, historyCount: 5, minLength: 8, requireUpper: true, requireNumber: true, requireSpecial: true, changeRateEnabled: true, changeRateCount: 3, changeRateHours: 24, changeLockHours: 24, changeLockNotifyEmail: '' },
+      inactivity: { staffEnabled: true, staffDays: 180, custEnabled: true, custDays: 730, idleWarnMin: 15, idleLogoutSec: 60, idleMaxMin: 60 },
+      geo: { enabled: false, allowedCountries: ['CA'], ipExceptions: ['203.0.113.7'], exemptStaffIds: ['s1'] },
+      stats: { total: 2, actifs: 2, mfa: 1 },
+      comptes: [
+        { id: 's1', nom: 'Bob Brousseau', username: 'brousseau', email: 'bob@sandriza.com', role: 'superadmin', roleLabel: 'Super-administrateur', roleColor: '#7c3aed', roleIcon: '👑', active: true, mfaEnabled: true, requireMfaSetup: false, mfaExempt: false, estSuper: true, estMoi: true, derniereConnexion: '2026-08-13T12:00:00Z', nbConnexions: 42 },
+        { id: 's2', nom: 'Marie Tremblay', username: 'marie', email: 'marie@sandriza.com', role: 'admin', roleLabel: 'Administratrice', roleColor: '#2563eb', roleIcon: '🛠', active: true, mfaEnabled: false, requireMfaSetup: false, mfaExempt: true, estSuper: false, estMoi: false, derniereConnexion: '', nbConnexions: 0 }
+      ]
+    };
+    var ro = { peutModifier: false };
+    return [
+      { nom: 'sécurité (réglages)', reponses: { identite: IDENTITE, 'securite:donnees': donnees,
+        'securite:pwpolicy:ecrire': { ok: true, pwPolicy: donnees.pwPolicy },
+        'securite:inactivite:ecrire': { ok: true, inactivity: donnees.inactivity },
+        'securite:geo:ecrire': { ok: true, geo: donnees.geo },
+        'securite:geo:malocalisation': { ok: true, ip: '203.0.113.7', cc: 'CA', pays: 'Canada', drapeau: '🇨🇦' } } },
+      { nom: 'utilisateurs (liste)', id: 'users', reponses: { identite: IDENTITE, 'securite:donnees': donnees } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'securite:donnees': Object.assign({}, donnees, ro) } }
+    ];
+  })(),
+
   // Mode lancement (palier 5, DERNIER — garde absolue). Pas de secret. Deux états :
   // pré-lancement (protégé, variable absente) et en ligne (piloté par ELG_LAUNCHED).
   'lancement.js': [

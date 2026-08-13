@@ -1418,6 +1418,11 @@ const OPS_PONT = new Set([
   'pages:politique:ecrire', 'pages:politique:apercu',
   // Pages personnalisees : contenu a l editeur riche (2.63.0, #5, etape 5c).
   'pages:custom:donnees', 'pages:custom:ecrire',
+  // Securite (fenetre Accès Utilisateurs, 2.65.0, #6 Lot A) — lecture des comptes
+  // + reglages (politique mdp, inactivite, verrouillage session, restriction geo).
+  'securite:donnees', 'securite:pwpolicy:ecrire', 'securite:inactivite:ecrire',
+  'securite:geo:ecrire', 'securite:geo:malocalisation',
+  'securite:verif:staff', 'securite:verif:client',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1761,6 +1766,12 @@ const LIMITES_PONT = {
   /* Contenu des pages personnalisees (5c) : la lecture est legere ; l ecriture
      depose les images dans R2 comme une politique — meme plafond de 180 s. */
   'pages:custom:donnees': 40000, 'pages:custom:ecrire': 180000,
+  /* Securite : lecture et reglages sont legers ; la localisation appelle un
+     service d IP externe (reseau) et les verifications d inactivite peuvent
+     ENVOYER des courriels a plusieurs comptes — plafonds plus larges. */
+  'securite:donnees': 40000, 'securite:pwpolicy:ecrire': 30000, 'securite:inactivite:ecrire': 30000,
+  'securite:geo:ecrire': 30000, 'securite:geo:malocalisation': 30000,
+  'securite:verif:staff': 120000, 'securite:verif:client': 120000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
@@ -2038,6 +2049,7 @@ const PAGES_ANCRABLES = () => ({
   'config-homepage': ['Page d’accueil', () => pageAccueil()],
   'config-launch': ['Mode lancement', () => pageLancement()],
   'pages': ['Pages du site', () => pagePages()],
+  'securite': ['Accès Utilisateurs', () => pageSecurite()],
   'studio': ['Studio virtuel', () => pageStudio()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
@@ -2808,6 +2820,7 @@ const { pageBd } = require('./fenetres/bd');
 const { pageAccueil } = require('./fenetres/accueil');
 const { pageLancement } = require('./fenetres/lancement');
 const { pagePages } = require('./fenetres/pages');
+const { pageSecurite } = require('./fenetres/securite');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
