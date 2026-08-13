@@ -1521,7 +1521,19 @@ module.exports = {
             compte: { id: 's2', firstName: 'Marie', lastName: 'Tremblay', username: 'marie', email: 'marie@sandriza.com', role: 'admin', active: true, requireMfaSetup: false, mfaExempt: true, mfaEnabled: false, estSuper: false, securityQ1: 'Ville de naissance ?', securityQ2: '', securityAnswersSet: true, effectivePerms: ['dashboard:view'] } },
           'securite:compte:ecrire': { ok: true, id: 's2', mode: 'edit' },
           'securite:compte:supprimer': { ok: true },
-          'securite:compte:invitation': { ok: true, email: 'marie@sandriza.com' } } }
+          'securite:compte:invitation': { ok: true, email: 'marie@sandriza.com' } } },
+      // Lot B2 : MFA. Deux modales selon l'état — activée (gérer/exempter/désactiver)
+      // ou à activer (QR + clé + code). Atteintes par l'id d'ouverture 'mfa-<id>'.
+      { nom: 'MFA — activé (gérer)', id: 'mfa-s1',
+        reponses: { identite: IDENTITE, 'securite:donnees': donnees,
+          'securite:mfa:etat': { ok: true, nom: 'Bob Brousseau', mfaEnabled: true, mfaExempt: false },
+          'securite:mfa:exempter': { ok: true, mfaExempt: true },
+          'securite:mfa:desactiver': { ok: true } } },
+      { nom: 'MFA — à activer (QR)', id: 'mfa-s2',
+        reponses: { identite: IDENTITE, 'securite:donnees': donnees,
+          'securite:mfa:etat': { ok: true, nom: 'Marie Tremblay', mfaEnabled: false, mfaExempt: true },
+          'securite:mfa:init': { ok: true, nom: 'Marie Tremblay', secret: 'ABCDEFGHIJKLMNOP', secretGroupe: 'ABCD EFGH IJKL MNOP', qrUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=x', qrFallback: 'https://quickchart.io/qr?text=x', mfaExempt: true },
+          'securite:mfa:confirmer': { ok: true } } }
     ];
   })(),
 

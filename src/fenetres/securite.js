@@ -116,8 +116,9 @@ function pageSecurite(onglet) {
   var brut = String(onglet || '');
   // Ouverture directe de l'éditeur de compte pour le BANC (le DOM factice ne
   // clique pas) : 'user-new' (création) ou 'user-<id>' (édition).
-  var UOUV0 = '';
+  var UOUV0 = '', MOUV0 = '';
   if (brut.indexOf('user-') === 0) { UOUV0 = brut.slice(5).replace(/[^A-Za-z0-9_-]/g, ''); brut = 'users'; }
+  else if (brut.indexOf('mfa-') === 0) { MOUV0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, ''); brut = 'users'; }
   const ONGLET0 = (['securite', 'users'].indexOf(brut) >= 0) ? brut : 'securite';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Accès Utilisateurs — Administration Sandriza</title>
@@ -145,6 +146,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var D = null, RO = false, OCCUPE = false;
   var ONGLET = '${ONGLET0}';
   var UOUV = '${UOUV0}';   // ouverture directe de l'éditeur de compte (banc) : 'new' ou '<id>'
+  var MOUV = '${MOUV0}';   // ouverture directe de la modale MFA (banc) : '<id>'
   var DELU = '';   // id du compte en attente de confirmation de suppression (2 clics)
 
   var ONGLETS = [ ['securite','🔒 Sécurité'], ['users','👥 Utilisateurs'] ];
@@ -365,6 +367,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var acts = '';
       if (D.peutModifier){
         acts = '<td class="acts"><button class="b" data-edit="'+esc(s.id)+'">✏ Modifier</button>'
+          + '<button class="b" data-mfa="'+esc(s.id)+'" title="Gérer l’authentification à deux facteurs">🔐 MFA</button>'
           + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="Renvoyer un mot de passe temporaire par courriel">📧 Renvoyer</button>' : '')
           + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'✓ Confirmer':'Supprimer')+'</button>' : '')
           + '</td>';
@@ -377,10 +380,10 @@ ${JS_ACTIVITE}${JS_DIRE}
         + acts + '</tr>';
     }
     h += '</tbody></table></div>';
-    h += '<div class="note">ℹ La gestion du <b>MFA</b> (activation par QR / code, exemption, désactivation) se fait pour l’instant dans l’<b>écran web</b> — elle arrive à la prochaine étape (Lot B2).</div>';
     corps.innerHTML = h;
     var nv=document.getElementById('u-nouveau'); if (nv) nv.onclick=function(){ ouvrirEditeurCompte(''); };
     var eds=corps.querySelectorAll('[data-edit]'); for (var e=0;e<eds.length;e++) eds[e].onclick=function(){ ouvrirEditeurCompte(this.getAttribute('data-edit')); };
+    var mfas=corps.querySelectorAll('[data-mfa]'); for (var mm=0;mm<mfas.length;mm++) mfas[mm].onclick=function(){ ouvrirMfa(this.getAttribute('data-mfa')); };
     var invs=corps.querySelectorAll('[data-invite]'); for (var v=0;v<invs.length;v++) invs[v].onclick=function(){ inviterCompte(this.getAttribute('data-invite')); };
     var dels=corps.querySelectorAll('[data-del]'); for (var d=0;d<dels.length;d++) dels[d].onclick=function(){ var id=this.getAttribute('data-del');
       if (DELU===id){ DELU=''; supprimerCompte(id); } else { DELU=id; vueUsers(); dire('Cliquez encore pour supprimer ce compte.', 'att'); } };
@@ -504,6 +507,78 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('securite:compte:invitation',[id]).then(function(r){ OCCUPE=false;
       if (r&&r.ok) dire('Invitation renvoyée à '+(r.email||'')+'.', 'bon'); else dire('Échec : '+expliquer(r), 'err'); });
   }
+
+  // ── MFA (Lot B2) — activation TOTP / exemption / désactivation ───
+  function ouvrirMfa(id){
+    if (OCCUPE) return; OCCUPE=true; dire('Lecture MFA…');
+    appeler('securite:mfa:etat',[id]).then(function(r){ OCCUPE=false;
+      if (!r||!r.ok){ dire('Échec : '+expliquer(r), 'err'); return; }
+      if (r.mfaEnabled){ dire(''); dessinerMfaGerer(id, r); }
+      else { OCCUPE=true; dire('Préparation de la liaison…');
+        appeler('securite:mfa:init',[id]).then(function(r2){ OCCUPE=false;
+          if (r2&&r2.ok){ dire(''); dessinerMfaSetup(id, r2); } else dire('Échec : '+expliquer(r2), 'err'); }); }
+    });
+  }
+  function fermerMfa(){ var s=document.getElementById('sur-mfa'); if (s) s.remove(); }
+  function dessinerMfaGerer(id, e){
+    var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
+    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3>🔐 MFA — '+esc(e.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
+      + '<div class="liste">'
+      + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:#6ee7a0">✅ Authentification à deux facteurs activée pour ce compte.</div>'
+      + '<label class="case" style="margin-top:.75rem"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><strong>Exempter ce compte</strong> — connexion autorisée sans code MFA</span></label>'
+      + '</div>'
+      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
+      + '<button class="b" id="m-annuler">Annuler</button><button class="b dgr" id="m-off">Désactiver MFA</button><button class="prim" id="m-save">Enregistrer</button></div></div>';
+    document.body.appendChild(sur);
+    document.getElementById('m-x').onclick=fermerMfa;
+    document.getElementById('m-annuler').onclick=fermerMfa;
+    document.getElementById('m-save').onclick=function(){ mfaExempter(id, chkv('m-exempt')); };
+    document.getElementById('m-off').onclick=function(){ mfaDesactiver(id); };
+  }
+  function dessinerMfaSetup(id, s){
+    var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
+    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3>🔐 Activer MFA — '+esc(s.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
+      + '<div class="liste">'
+      + '<div class="sub" style="color:#8fa1b8">Étape 1 — Scannez le QR avec Google Authenticator, Authy ou une app TOTP compatible, ou entrez la clé manuellement.</div>'
+      + '<div style="text-align:center;background:#0b1220;padding:1rem;border-radius:9px;margin:.6rem 0">'
+      + '<img id="m-qr" src="'+esc(s.qrUrl)+'" alt="QR MFA" style="width:190px;height:190px;border-radius:8px;background:#fff"></div>'
+      + '<div style="text-align:center;background:#0f1724;border:1px solid #2b3444;border-radius:9px;padding:.6rem">'
+      + '<div class="sub" style="color:#8fa1b8;text-transform:uppercase;letter-spacing:.05em">Clé secrète (saisie manuelle)</div>'
+      + '<code style="font-size:.9rem;letter-spacing:.12em;word-break:break-all;color:#e8edf5">'+esc(s.secretGroupe||s.secret||'')+'</code>'
+      + '<div class="sub" style="color:#6f8098">Base32 · SHA-1 · 6 chiffres · 30 s</div></div>'
+      + '<label class="champ" style="margin-top:.75rem"><span class="lbl">Étape 2 — Code à 6 chiffres</span>'
+      + '<input class="t" id="m-code" inputmode="numeric" maxlength="6" placeholder="000000" style="font-family:monospace;letter-spacing:.3em;text-align:center;font-size:1.2rem"></label>'
+      + '<div class="ferr" id="m-err"></div>'
+      + '<label class="case"><input type="checkbox" id="m-exempt" '+(s.mfaExempt?'checked':'')+'> Exempter ce compte (activer sans l’exiger à la connexion)</label>'
+      + '</div>'
+      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
+      + '<button class="b" id="m-annuler">Annuler</button><button class="prim" id="m-activer">✓ Activer MFA</button></div></div>';
+    document.body.appendChild(sur);
+    document.getElementById('m-x').onclick=fermerMfa;
+    document.getElementById('m-annuler').onclick=fermerMfa;
+    document.getElementById('m-activer').onclick=function(){ mfaConfirmer(id); };
+    var c=document.getElementById('m-code'); if (c) c.oninput=function(){ c.value=c.value.replace(/[^0-9]/g,''); };
+    // Repli du QR sans guillemets imbriqués dans l'attribut (câblé en JS).
+    var qi=document.getElementById('m-qr'); if (qi) qi.onerror=function(){ qi.onerror=null; if (s.qrFallback) qi.src=s.qrFallback; };
+  }
+  function mfaExempter(id, exempt){
+    if (OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
+    appeler('securite:mfa:exempter',[id, exempt]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ fermerMfa(); recharger(exempt?'Compte exempté de MFA.':'Exemption retirée.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+  }
+  function mfaDesactiver(id){
+    if (OCCUPE) return; OCCUPE=true; dire('Désactivation…');
+    appeler('securite:mfa:desactiver',[id]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ fermerMfa(); recharger('MFA désactivé.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+  }
+  function mfaConfirmer(id){
+    if (OCCUPE) return;
+    var code=txv('m-code'), exempt=chkv('m-exempt');
+    OCCUPE=true; dire('Vérification du code…');
+    appeler('securite:mfa:confirmer',[id, code, exempt]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ fermerMfa(); recharger('MFA activé.', 'bon'); }
+      else { var e=document.getElementById('m-err'); if (e){ e.textContent=expliquer(r); e.style.display='block'; } dire('Échec : '+expliquer(r), 'err'); } });
+  }
   function recharger(msg, cl){
     appeler('securite:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; RO=!r.peutModifier; DELU=''; if (ONGLET==='users') vueUsers(); if (msg) dire(msg, cl); } else if (msg) dire(msg, cl); });
   }
@@ -522,6 +597,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       // Ouverture directe de l'éditeur de compte (banc / lien profond), après le
       // dessin de la liste et une fois D disponible.
       if (UOUV){ ouvrirEditeurCompte(UOUV==='new' ? '' : UOUV); UOUV=''; }
+      else if (MOUV){ ouvrirMfa(MOUV); MOUV=''; }
     });
   }
 
