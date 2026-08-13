@@ -1578,7 +1578,9 @@ module.exports = {
           { cle: 'acces', label: '🔐 Accès', onglet: 'acces', total: 1, entrees: [ { ts: '2026-08-13T12:00:00Z', type: 'login_ok', nom: 'Bob Brousseau', email: 'bob@sandriza.com', ip: '203.0.113.7', cc: 'CA', pays: 'Canada', ville: 'Québec', action: 'Connexion' } ] },
           { cle: 'impressions', label: '🖨 Impressions', onglet: 'impressions', total: 1, entrees: [ { at: 1723545600000, kind: 'commande', kindLabel: 'Bon de commande', label: 'CMD-203', printer: 'Phomemo', who: 'Bob', qty: 1, ok: true } ] },
           { cle: 'recherches', label: '🔎 Recherches sans résultat', onglet: 'recherches', total: 1, entrees: [ { q: 'article 203', fois: 2, derniere: '2026-08-13' } ] }
-        ] } } }
+        ] },
+        'journal:sms': { ok: true, sms: [ { id: 's1', from: '+1203', to: '+14185550000', body: 'test 203', direction: 'inbound', date: '2026-08-13T12:00:00Z' } ] },
+        'liens:journal': { ok: true, journal: [ { au: '2026-08-13T09:00:00Z', canal: 'comptable', genre: 'ouvert', ip: '203.0.113.7', lienId: 'ab12cd34', detail: 'Portail', qui: 'cab@x.com' } ] } } }
     ];
   })(),
 

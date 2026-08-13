@@ -148,13 +148,34 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (q){ q.focus(); q.onkeydown=function(e){ if (e.key==='Enter'){ e.preventDefault(); lancerRecherche(); } }; }
     if (RQINIT && RRES===null){ RQ=RQINIT; RQINIT=''; if (q) q.value=RQ; lancerRecherche(); }
   }
+  function matchAny(ql, vals){ for (var i=0;i<vals.length;i++){ if (String(vals[i]==null?'':vals[i]).toLowerCase().indexOf(ql) >= 0) return true; } return false; }
   function lancerRecherche(){
     var q=document.getElementById('r-q'); RQ=q?String(q.value||''):RQ;
-    if (RQ.trim().length < 2){ RRES={ tropCourt:true, groupes:[], total:0 }; peindreResultats(); return; }
-    if (OCCUPE) return; OCCUPE=true; dire('Recherche…');
-    appeler('journal:recherche',[RQ]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ RRES=r; peindreResultats(); dire(r.total?(r.total+' résultat(s).'):'Aucun résultat.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+    var ql = RQ.trim().toLowerCase();
+    if (ql.length < 2){ RRES={ tropCourt:true, groupes:[], total:0 }; peindreResultats(); return; }
+    if (OCCUPE) return; OCCUPE=true; dire('Recherche dans tous les journaux…');
+    // Journaux LOCAUX (accès, automatisations, impressions, sans résultat) par le
+    // cœur ; journaux SERVEUR (SMS, comptable) récupérés puis filtrés ici — pour
+    // que « une IP » ressorte VRAIMENT de tous les journaux.
+    appeler('journal:recherche',[RQ]).then(function(r){
+      var groupes = (r && r.ok && r.groupes) ? r.groupes.slice() : [];
+      var total = (r && r.ok) ? (r.total||0) : 0;
+      return Promise.all([ appeler('journal:sms',[]), appeler('liens:journal',[{canal:''}]) ]).then(function(res){
+        var smsR=res[0], cpR=res[1];
+        if (smsR && smsR.ok){
+          var sm=(smsR.sms||[]).filter(function(s){ return matchAny(ql,[s.from,s.to,s.body,s.direction,s.date]); })
+            .map(function(s){ return { date:s.date, direction:s.direction, from:s.from, to:s.to, body:s.body }; });
+          if (sm.length){ groupes.push({ cle:'sms', label:'💬 SMS', onglet:'sms', total:sm.length, entrees:sm.slice(0,200) }); total+=sm.length; }
+        }
+        if (cpR && cpR.ok){
+          var cp=(cpR.journal||[]).filter(function(e){ return matchAny(ql,[e.canal,e.genre,e.ip,e.lienId,e.detail,e.qui,e.au]); })
+            .map(function(e){ return { au:e.au, canal:e.canal, genre:e.genre, ip:e.ip, lienId:e.lienId, detail:e.detail, qui:e.qui }; });
+          if (cp.length){ groupes.push({ cle:'comptable', label:'🧾 Accès comptables', onglet:'comptable', total:cp.length, entrees:cp.slice(0,200) }); total+=cp.length; }
+        }
+        OCCUPE=false; RRES={ ok:true, q:RQ, total:total, groupes:groupes }; peindreResultats();
+        dire(total?(total+' résultat(s) dans tous les journaux.'):'Aucun résultat.', 'bon');
+      });
+    }).catch(function(){ OCCUPE=false; dire('Échec de la recherche.', 'err'); });
   }
   function peindreResultats(){ var el=document.getElementById('r-res'); if (el) el.innerHTML=resultatsHtml(); brancherResultats(); }
   function resultatsHtml(){
@@ -177,6 +198,11 @@ ${JS_ACTIVITE}${JS_DIRE}
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(SECT[x.section]||x.section||'—')+'</span></td><td>'+esc(x.action||'')+'</td></tr>';
         } else if (grp.cle==='recherches'){
           h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+' fois</td><td class="mut">'+esc(x.derniere||'—')+'</td></tr>';
+        } else if (grp.cle==='sms'){
+          var ent=(x.direction==='inbound');
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.date))+'</td><td>'+(ent?'⬇ Reçu':'⬆ Envoyé')+'</td><td class="mono">'+esc(x.from||'')+'</td><td class="mono">'+esc(x.to||'')+'</td><td>'+esc(x.body||'')+'</td></tr>';
+        } else if (grp.cle==='comptable'){
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.au))+'</td><td>'+esc(CANAUX[x.canal]||x.canal||'')+'</td><td>'+esc(EVEN[x.genre]||x.genre||'')+'</td><td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.detail||'')+'</td></tr>';
         } else {
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:#fca5a5">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:#6ee7a0">Imprimé</span>')+'</td></tr>';
         }
