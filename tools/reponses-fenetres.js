@@ -1443,7 +1443,28 @@ module.exports = {
         reponses: { identite: IDENTITE, 'pages:donnees': Object.assign({}, donnees, ro) } },
       { nom: 'politiques — échec du dépôt des images', id: 'retours',
         reponses: { identite: IDENTITE, 'pages:donnees': donnees,
-          'pages:politique:ecrire': { ok: false, motif: 'echec', detail: 'Dépôt des images impossible — rien n’a été enregistré.' } } }
+          'pages:politique:ecrire': { ok: false, motif: 'echec', detail: 'Dépôt des images impossible — rien n’a été enregistré.' } } },
+      // ── Étape 5c : le contenu des pages personnalisées, MÊME éditeur riche ────
+      // ⚠ L'éditeur s'ouvre par un CLIC dans la liste. Le DOM du banc étant
+      // factice, on l'atteint par l'id d'ouverture — 'custom-nouvelle' (création)
+      // et 'custom-<id>' (modification, qui lit d'abord la page). Sans ces deux
+      // cas, l'éditeur des pages perso ne serait jamais dessiné, donc jamais
+      // éprouvé — exactement l'angle mort que ce banc existe pour éviter.
+      { nom: 'page perso — nouvelle', id: 'custom-nouvelle',
+        reponses: { identite: IDENTITE, 'pages:donnees': donnees,
+          'pages:custom:ecrire': { ok: true, id: 'cp_new', content: '<p>Bonjour</p>',
+            page: { id: 'cp_new', slug: 'ma-page', title: 'Ma page', subtitle: '', footerLabel: 'Ma page', footerVisible: false, content: '<p>Bonjour</p>', protege: false },
+            customPages: donnees.customPages.concat([{ id: 'cp_new', slug: 'ma-page', title: 'Ma page', footerVisible: false, protege: false }]) } } },
+      { nom: 'page perso — modifier', id: 'custom-c1',
+        reponses: { identite: IDENTITE, 'pages:donnees': donnees,
+          'pages:custom:donnees': { ok: true, page: { id: 'c1', slug: 'a-propos', title: 'À propos', subtitle: 'Notre histoire', footerLabel: 'À propos', footerVisible: true,
+            content: '<h3>Titre</h3><p>Un mot chez <span class="re-var-token" contenteditable="false" data-var="{{MARQUE}}">{{MARQUE}}</span>.</p><ul><li>Un</li><li>Deux</li></ul>', protege: false } },
+          'pages:custom:ecrire': { ok: true, id: 'c1', content: '<h3>Titre</h3><p>Enregistré.</p>',
+            page: { id: 'c1', slug: 'a-propos', title: 'À propos', subtitle: 'Notre histoire', footerLabel: 'À propos', footerVisible: true, content: '<h3>Titre</h3><p>Enregistré.</p>', protege: false },
+            customPages: donnees.customPages } } },
+      { nom: 'page perso — lecture seule', id: 'custom-c1',
+        reponses: { identite: IDENTITE, 'pages:donnees': Object.assign({}, donnees, ro),
+          'pages:custom:donnees': { ok: true, page: { id: 'c1', slug: 'a-propos', title: 'À propos', subtitle: '', footerLabel: 'À propos', footerVisible: true, content: '<p>Texte.</p>', protege: false } } } }
     ];
   })(),
 

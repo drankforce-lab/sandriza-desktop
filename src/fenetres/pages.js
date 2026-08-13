@@ -25,8 +25,16 @@
  *   politique parte en base avec une photo encastree dans son HTML, et cela
  *   règle la seule vraie inconnue de cette étape.
  *
- * ÉTAPE 5c (à venir) : le CONTENU des pages personnalisées, avec ce même
- *   éditeur. En attendant, « Modifier » y renvoie vers le repli web.
+ * ÉTAPE 5c (FAITE) : le CONTENU des pages personnalisées, avec ce même éditeur
+ *   riche. « Modifier » et « ＋ Nouvelle page » ouvrent l'éditeur EN SURCOUCHE
+ *   (titre, slug, sous-titre, libellé de pied de page, visibilité + contenu). Les
+ *   images suivent la même route que les politiques : elles entrent en `data:` et
+ *   le cœur (admin.js) les dépose dans R2 à l'enregistrement, puis renvoie le
+ *   contenu réécrit. On FERME après enregistrement : rouvrir relit un contenu déjà
+ *   pointé vers R2, donc pas de `data:` résiduel ni de second dépôt.
+ *   ⚠ Le banc ne peut pas CLIQUER : l'éditeur s'atteint aussi par un id
+ *   d'ouverture ('custom-nouvelle' / 'custom-<id>'), comme les politiques par
+ *   l'onglet 'retours'.
  *
  * Les clés elg_page_… , elg_size_guides, elg_custom_pages, elg_builtin_pages_footer
  * sont dans _CFG_MAP : côté cœur (admin.js), un simple localStorage.setItem est
@@ -204,8 +212,18 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
    — son DOM est factice, un clic simule ne navigue nulle part — et l editeur
    riche ne serait jamais dessine, donc jamais eprouve. */
 function pagePages(onglet) {
-  const ONGLET0 = (['list','faq','contact','retours','tailles','vedette'].indexOf(String(onglet||'')) >= 0)
-    ? String(onglet) : 'list';
+  var brut = String(onglet||'');
+  /* ⚠ OUVERTURE DIRECTE SUR L EDITEUR D UNE PAGE PERSO (etape 5c). L editeur
+     est une surcouche ouverte par un CLIC dans la liste — or le banc a un DOM
+     factice, un clic n y ouvre rien. On accepte donc un id d ouverture :
+     'custom-nouvelle' (creation) ou 'custom-<id>' (modification). C est ainsi
+     que verifier-fenetres.js atteint l editeur, comme il atteint deja les
+     politiques par l onglet 'retours'. En usage reel, l id reste vide et
+     l editeur s ouvre au clic. */
+  var CPOUV0 = '';
+  if (brut.indexOf('custom-') === 0) { CPOUV0 = brut.slice(7).replace(/[^A-Za-z0-9_-]/g,''); brut = 'list'; }
+  const ONGLET0 = (['list','faq','contact','retours','tailles','vedette'].indexOf(brut) >= 0)
+    ? brut : 'list';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Pages du site — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -231,6 +249,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   var ongletsEl = document.getElementById('onglets');
   var D = null, RO = false, OCCUPE = false;
   var ONGLET = '${ONGLET0}';
+  var CPOUV = '${CPOUV0}';  // ouverture directe de l editeur de page perso (banc)
+  var CPSEL = '';          // id de la page perso en cours d edition ('' = creation)
   var FAQ = null;          // copie de travail : { title, subtitle, items:[{id,q,a}] }
   var GUIDES = null;       // copie de travail des tableaux de tailles
   var DELP = '';           // id de page personnalisée en attente de confirmation
@@ -261,7 +281,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
     droit:'Votre rôle ne donne pas accès aux pages du site.',
     lecture_seule:'Votre rôle est en lecture seule.',
-    invalide:'Libellé et lien sont requis.',
+    invalide:'Titre et slug sont requis.',
+    slug_pris:'Ce slug est déjà utilisé par une autre page.',
     introuvable:'Élément introuvable.',
     protege:'Cette page est protégée et ne peut pas être supprimée.',
     pont_indisponible:'La fenêtre principale ne répond pas.',
@@ -295,7 +316,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       { k:'vedette', nom:'Menu Vêtements — En vedette', route:'(menu)', onglet:'vedette', foot:false }
     ];
     var cp=D.customPages||[];
-    var h='<div class="carte"><div class="entete"><h3>Toutes les pages <span style="font-size:.8rem;font-weight:400;color:#8fa1b8">'+(builtins.length+cp.length)+' page(s)</span></h3></div>';
+    var boutonNouv = (D.peutAjouter && !RO) ? '<button class="prim" id="cp-nouvelle">＋ Nouvelle page</button>' : '';
+    var h='<div class="carte"><div class="entete"><h3>Toutes les pages <span style="font-size:.8rem;font-weight:400;color:#8fa1b8">'+(builtins.length+cp.length)+' page(s)</span></h3>'+boutonNouv+'</div>';
     h+='<table class="tb"><thead><tr><th style="text-align:left">Page</th><th style="text-align:left">Route</th><th>Type</th><th>Pied de page</th><th></th></tr></thead><tbody>';
     for (var i=0;i<builtins.length;i++){ var b=builtins[i];
       var coche = f[b.k]!==false;
@@ -314,7 +336,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         +(D.peutSupprimer && !p.protege ? ' <button class="b dgr" data-cdel="'+esc(p.id)+'">'+(DELP===p.id?'✓ Confirmer':'Supprimer')+'</button>' : '')+'</td></tr>';
     }
     h+='</tbody></table></div>';
-    h+='<div class="note">ℹ <b>Nos politiques</b> se rédige ici, avec l’éditeur riche complet. Le <b>corps des pages personnalisées</b> l’attend encore : « Modifier » y renvoie vers l’écran web pour l’instant.</div>';
+    h+='<div class="note">ℹ <b>Nos politiques</b> et le <b>contenu des pages personnalisées</b> se rédigent ici, avec l’éditeur riche complet (titres, listes, liens, variables, images, tableaux, aperçu). Cliquez sur « Modifier » ou « ＋ Nouvelle page ».</div>';
     corps.innerHTML=h;
     brancherListe();
   }
@@ -325,8 +347,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     for (var j=0;j<cfs.length;j++) cfs[j].onchange=function(){ var id=this.getAttribute('data-cfoot'); enregistrer('pages:custom:footer',[id,this.checked],'Pied de page mis à jour.'); };
     var gos=corps.querySelectorAll('[data-go]');
     for (var g=0;g<gos.length;g++) gos[g].onclick=function(){ ONGLET=this.getAttribute('data-go'); FAQ=null; GUIDES=null; rendre(); };
+    var nv=document.getElementById('cp-nouvelle'); if (nv) nv.onclick=function(){ ouvrirEditeurPage(''); };
     var eds=corps.querySelectorAll('[data-cedit]');
-    for (var e=0;e<eds.length;e++) eds[e].onclick=function(){ dire('Le contenu des pages personnalisées se modifie dans l’écran web (éditeur riche) — étape 5b à venir.', 'att'); };
+    for (var e=0;e<eds.length;e++) eds[e].onclick=function(){ ouvrirEditeurPage(this.getAttribute('data-cedit')); };
     var dls=corps.querySelectorAll('[data-cdel]');
     for (var d=0;d<dls.length;d++) dls[d].onclick=function(){ var id=this.getAttribute('data-cdel');
       if (DELP===id){ DELP=''; supprimerPage(id); } else { DELP=id; vueListe(); dire('Cliquez encore pour supprimer cette page.', 'att'); } };
@@ -335,6 +358,81 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (RO||OCCUPE) return; OCCUPE=true; dire('Suppression…');
     appeler('pages:custom:supprimer',[id]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ recharger('Page supprimée.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+  }
+
+  // ── PAGES PERSONNALISÉES — ÉDITEUR RICHE DU CONTENU (5c) ─────────
+  // L editeur ouvre en SURCOUCHE (la liste reste derriere) ; son bouton plein
+  // ecran passe par-dessus tout. On FERME apres enregistrement : rouvrir relira
+  // le contenu deja reecrit (adresses R2), donc aucun data: residuel a l ecran et
+  // pas de second depot des memes images. Meme edHtml/edLier que les politiques.
+  function ouvrirEditeurPage(id){
+    if (OCCUPE) return;
+    if (!id){ dessinerEditeurPage(null); return; }
+    OCCUPE=true; dire('Ouverture de la page…');
+    appeler('pages:custom:donnees',[id]).then(function(r){ OCCUPE=false;
+      if (r && r.ok){ dire(''); dessinerEditeurPage(r.page); }
+      else dire('Échec : '+expliquer(r), 'err'); });
+  }
+  function fermerEditeurPage(){ var s=document.getElementById('sur-cp'); if (s) s.remove(); fermerFlot(); CPSEL=''; }
+  function dessinerEditeurPage(page){
+    fermerFlot();
+    var nouv=!page;
+    var p=page||{ id:'', slug:'', title:'', subtitle:'', footerLabel:'', footerVisible:false, content:'', protege:false };
+    CPSEL=p.id||'';
+    var dis=RO?' disabled':'';
+    var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-cp';
+    var h='<div class="boite" style="max-width:960px;max-height:92vh">'
+      +'<div class="tt"><h3>'+(nouv?'Nouvelle page':'Modifier — '+esc(p.title))+'</h3>'
+      +'<button class="mini" id="cp-x">Fermer</button></div>'
+      +'<div class="liste" id="cp-corps">'
+      +'<div class="grille2">'
+      +'<label class="champ"><span class="lbl">Titre <span style="color:#f87171">*</span></span><input class="t" id="cp-title" value="'+esc(p.title)+'"'+dis+'></label>'
+      +'<label class="champ"><span class="lbl">Slug (URL) <span style="color:#f87171">*</span></span><input class="t" id="cp-slug" value="'+esc(p.slug)+'" placeholder="ma-page"'+dis+(p.protege?' readonly title="Slug protégé (Loi 25)"':'')+'></label>'
+      +'<label class="champ"><span class="lbl">Sous-titre</span><input class="t" id="cp-sub" value="'+esc(p.subtitle)+'"'+dis+'></label>'
+      +'<label class="champ"><span class="lbl">Libellé pied de page</span><input class="t" id="cp-flabel" value="'+esc(p.footerLabel)+'"'+dis+'></label>'
+      +'</div>'
+      +'<label class="chk" style="margin:.2rem 0 .9rem"><input type="checkbox" id="cp-foot" '+(p.footerVisible?'checked':'')+dis+'> Afficher dans le pied de page</label>'
+      +'<label class="champ" style="margin:0"><span class="lbl">Contenu de la page</span></label>'
+      +edHtml('cp-ed', p.content)
+      +'</div>'
+      +'<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
+      +'<button class="b" id="cp-annuler">Annuler</button>'
+      +(RO?'':'<button class="prim" id="cp-enr">'+(nouv?'Créer la page':'Enregistrer')+'</button>')
+      +'</div></div>';
+    sur.innerHTML=h;
+    document.body.appendChild(sur);
+    edLier('cp-ed');
+    var bx=document.getElementById('cp-x'); if (bx) bx.onclick=fermerEditeurPage;
+    var ba=document.getElementById('cp-annuler'); if (ba) ba.onclick=fermerEditeurPage;
+    var be=document.getElementById('cp-enr'); if (be) be.onclick=function(){ enregistrerPage(nouv); };
+    // Slug : nettoye a la frappe ; se remplit depuis le titre tant qu on n y a pas
+    // touche (nouvelle page seulement). NFD par point de code pour eviter tout
+    // caractere accentue dans le script (les accents graves fermeraient le gabarit).
+    var sl=document.getElementById('cp-slug');
+    if (sl && !p.protege) sl.oninput=function(){ sl._touche=true; sl.value=sl.value.toLowerCase().replace(/[^a-z0-9-]/g,''); };
+    if (nouv){ var ti=document.getElementById('cp-title');
+      if (ti && sl) ti.oninput=function(){ if (sl._touche) return;
+        sl.value=String(ti.value||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }; }
+  }
+  function enregistrerPage(nouv){
+    if (RO||OCCUPE) return;
+    var title=val('cp-title');
+    var se=document.getElementById('cp-slug');
+    var slug=String((se&&se.value)||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'');
+    var subtitle=val('cp-sub');
+    var flabel=val('cp-flabel');
+    var fe=document.getElementById('cp-foot'); var foot=!!(fe&&fe.checked);
+    var ze=document.getElementById('cp-ed'); var content=(ze&&ze.innerHTML)||'';
+    if (!title || !slug){ dire('Titre et slug sont requis.', 'err'); return; }
+    OCCUPE=true; dire('Enregistrement… (dépôt des images dans le nuage si besoin)');
+    var d={ title:title, slug:slug, subtitle:subtitle, footerLabel:flabel, footerVisible:foot, content:content };
+    appeler('pages:custom:ecrire',[CPSEL||'', d]).then(function(r){ OCCUPE=false;
+      if (r && r.ok){
+        if (r.customPages) D.customPages=r.customPages;
+        fermerEditeurPage();
+        if (ONGLET==='list') vueListe();
+        dire(nouv?'Page créée.':'Page modifiée.', 'bon');
+      } else dire('Échec : '+expliquer(r), 'err'); });
   }
 
   // ── FAQ ──────────────────────────────────────────────────────────
@@ -956,6 +1054,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('pages:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');
+      // Ouverture directe de l editeur (banc, ou lien profond) : apres le dessin
+      // de la liste, une fois D disponible.
+      if (CPOUV){ if (CPOUV==='nouvelle') ouvrirEditeurPage(''); else ouvrirEditeurPage(CPOUV); CPOUV=''; }
     });
   }
 

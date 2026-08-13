@@ -1416,6 +1416,8 @@ const OPS_PONT = new Set([
   'pages:vedette:ajouter', 'pages:vedette:retirer', 'pages:footer', 'pages:custom:footer',
   'pages:custom:supprimer', 'pages:inbox', 'pages:inbox:supprimer', 'pages:inbox:vider',
   'pages:politique:ecrire', 'pages:politique:apercu',
+  // Pages personnalisees : contenu a l editeur riche (2.63.0, #5, etape 5c).
+  'pages:custom:donnees', 'pages:custom:ecrire',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1756,6 +1758,9 @@ const LIMITES_PONT = {
      photos. On l aligne sur les autres depots (produit:enregistrer, 90 s) avec
      de la marge. L apercu, lui, ne fait que resoudre des variables en memoire. */
   'pages:politique:ecrire': 180000, 'pages:politique:apercu': 20000,
+  /* Contenu des pages personnalisees (5c) : la lecture est legere ; l ecriture
+     depose les images dans R2 comme une politique — meme plafond de 180 s. */
+  'pages:custom:donnees': 40000, 'pages:custom:ecrire': 180000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
