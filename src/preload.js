@@ -52,6 +52,10 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // Le theme (jour/nuit) A L INSTANT de la bascule — sans attendre le
   // battement du modele du menu (plusieurs secondes de retard sinon).
   themeChange: (sombre) => ipcRenderer.send('theme:changer', !!sombre),
+  // Couleur de la bande des boutons de fenetre (reduire/agrandir/fermer), pour
+  // qu elle suive le fond REEL de la barre — theme clair comme ecran de connexion
+  // (correctif #24). Chaines CSS hexadecimales ; le processus principal valide.
+  bandeauTitre: (color, symbol) => ipcRenderer.send('chrome:titlebar', String(color || ''), String(symbol || '')),
   // Le panneau d un menu en VRAI menu du systeme (1.55.1) : quand un ecran est
   // ancre, un panneau dessine dans la page passerait dessous — celui-ci
   // s affiche au-dessus de tout, sans voiler l ecran. (x, y) en px CSS.

@@ -3251,6 +3251,30 @@ ipcMain.on('theme:changer', (e, sombre) => {
   appliquerThemePartout();
 });
 
+// ── BANDE DES BOUTONS DE FENÊTRE (réduire / agrandir / fermer) — correctif #24 ──
+// Depuis la 2.59.0, Windows dessine ces trois boutons dans un `titleBarOverlay`
+// dont on avait FIGÉ le fond en sombre (#0e1522). Juste en thème sombre, faux en
+// clair et surtout sur l'écran de CONNEXION, dont la barre a un autre fond : la
+// bande y jurait. C'est désormais la page (appbar.js) qui envoie la couleur RÉELLE
+// du bord droit de sa barre — là où sont les boutons — et celle de son texte.
+// ⚠ `setTitleBarOverlay` n'existe QUE sur une fenêtre créée avec `titleBarOverlay`
+// (la principale, Windows) : ailleurs c'est absent, d'où le garde. On n'accepte
+// qu'une couleur hexadécimale : une valeur inattendue jetterait sinon Electron.
+const _hexOuRien = (v) => {
+  const s = String(v || '').trim();
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(s) ? s : '';
+};
+ipcMain.on('chrome:titlebar', (e, color, symbol) => {
+  try {
+    if (!mainWindow || e.sender !== mainWindow.webContents) return;
+    if (typeof mainWindow.setTitleBarOverlay !== 'function') return;
+    mainWindow.setTitleBarOverlay({
+      color: _hexOuRien(color) || '#0e1522',
+      symbolColor: _hexOuRien(symbol) || '#e8edf5',
+    });
+  } catch (_) {}
+});
+
 ipcMain.handle('menu:modele', (e, m) => {
   if (m && typeof m === 'object' && Array.isArray(m.menus)) {
     const sombreAvant = !!_modele.sombre;
