@@ -1492,7 +1492,36 @@ module.exports = {
         'securite:geo:ecrire': { ok: true, geo: donnees.geo },
         'securite:geo:malocalisation': { ok: true, ip: '203.0.113.7', cc: 'CA', pays: 'Canada', drapeau: '🇨🇦' } } },
       { nom: 'utilisateurs (liste)', id: 'users', reponses: { identite: IDENTITE, 'securite:donnees': donnees } },
-      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'securite:donnees': Object.assign({}, donnees, ro) } }
+      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'securite:donnees': Object.assign({}, donnees, ro) } },
+      // Lot B1 : éditeur de compte. Atteint par l'id d'ouverture ('user-new' /
+      // 'user-<id>'), le clic ne navigue pas sur le DOM factice du banc.
+      (function(){
+        var form = {
+          ok: true, mode: 'create',
+          roles: [ { key: 'admin', label: 'Administratrice', icon: '🛠', permissions: ['dashboard:view','orders:view','orders:edit'] }, { key: 'superadmin', label: 'Super-administrateur', icon: '👑', permissions: [] } ],
+          permModel: [
+            { label: '🛍 Boutique', modules: [ { key: 'dashboard', label: 'Tableau de bord', actions: ['view'] }, { key: 'orders', label: 'Commandes', actions: ['view','add','edit','delete'] } ] },
+            { label: '⚙ Système', modules: [ { key: 'staff', label: 'Personnel & journaux', actions: ['view','add','edit','delete'] } ] }
+          ],
+          actions: ['view','add','edit','delete'], actionLabels: { view: 'Voir', add: 'Ajouter', edit: 'Modifier', delete: 'Supprimer' },
+          questions: ['Ville de naissance ?', 'Nom du premier animal ?'],
+          compte: { role: 'admin', active: true, effectivePerms: ['dashboard:view','orders:view'] }
+        };
+        return { nom: 'compte — nouveau', id: 'user-new',
+          reponses: { identite: IDENTITE, 'securite:donnees': donnees, 'securite:form': form,
+            'securite:compte:ecrire': { ok: true, id: 'nouv', mode: 'create', tempPassword: 'AB12-CD34-EF56', courriel: 'nouveau@sandriza.com', courrielEnvoye: true } } };
+      })(),
+      { nom: 'compte — modifier', id: 'user-s2',
+        reponses: { identite: IDENTITE, 'securite:donnees': donnees,
+          'securite:form': { ok: true, mode: 'edit',
+            roles: [ { key: 'admin', label: 'Administratrice', icon: '🛠', permissions: ['dashboard:view'] } ],
+            permModel: [ { label: '🛍 Boutique', modules: [ { key: 'dashboard', label: 'Tableau de bord', actions: ['view'] } ] } ],
+            actions: ['view','add','edit','delete'], actionLabels: { view: 'Voir', add: 'Ajouter', edit: 'Modifier', delete: 'Supprimer' },
+            questions: ['Ville de naissance ?', 'Nom du premier animal ?'],
+            compte: { id: 's2', firstName: 'Marie', lastName: 'Tremblay', username: 'marie', email: 'marie@sandriza.com', role: 'admin', active: true, requireMfaSetup: false, mfaExempt: true, mfaEnabled: false, estSuper: false, securityQ1: 'Ville de naissance ?', securityQ2: '', securityAnswersSet: true, effectivePerms: ['dashboard:view'] } },
+          'securite:compte:ecrire': { ok: true, id: 's2', mode: 'edit' },
+          'securite:compte:supprimer': { ok: true },
+          'securite:compte:invitation': { ok: true, email: 'marie@sandriza.com' } } }
     ];
   })(),
 

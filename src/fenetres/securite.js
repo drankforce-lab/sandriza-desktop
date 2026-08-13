@@ -84,6 +84,28 @@ table.tb td{padding:.6rem .7rem;border-bottom:1px solid rgba(255,255,255,.06);fo
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
 .vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
+.b.dgr{color:#f6a6a6;border-color:rgba(248,113,113,.35)}
+.b.dgr:hover{background:rgba(248,113,113,.16)}
+.acts{white-space:nowrap;text-align:right}
+.acts .b{margin-left:.3rem}
+/* ── Éditeur de compte (surcouche) ──────────────────────────────── */
+.sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:60;padding:1.4rem}
+.sur .boite{background:#131c2b;border:1px solid rgba(255,255,255,.12);border-radius:14px;max-width:820px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+.sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
+.sur .liste{padding:1rem 1.1rem;overflow-y:auto}
+select.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:#e8edf5;font:inherit;padding:.5rem .65rem}
+select.t:focus{outline:none;border-color:#c9a97e}
+details.bloc{border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.6rem .85rem;margin:.2rem 0 .8rem}
+details.bloc summary{font-size:.82rem;font-weight:600;cursor:pointer;color:#8fa1b8}
+.permtb{width:100%;border-collapse:collapse;margin-top:.6rem}
+.permtb th{font-size:.68rem;color:#8fa1b8;font-weight:600;padding:.25rem .5rem;text-align:center;white-space:nowrap}
+.permtb th.mod{text-align:left}
+.permtb td{padding:.2rem .5rem;text-align:center;font-size:.8rem}
+.permtb td.mod{text-align:left;white-space:nowrap}
+.permtb tr.grp td{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8fa1b8;background:rgba(255,255,255,.03);padding:.45rem .5rem .25rem;border-top:1px solid rgba(255,255,255,.1);text-align:left}
+.permtb input{accent-color:#c9a97e}
+.ferr{display:none;color:#fca5a5;font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:.3rem 0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -91,7 +113,12 @@ table.tb td{padding:.6rem .7rem;border-bottom:1px solid rgba(255,255,255,.06);fo
    puisse atteindre chaque onglet : son DOM est factice, un clic n'y navigue nulle
    part. 'securite' (réglages) par défaut, 'users' pour la liste des comptes. */
 function pageSecurite(onglet) {
-  const ONGLET0 = (['securite', 'users'].indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'securite';
+  var brut = String(onglet || '');
+  // Ouverture directe de l'éditeur de compte pour le BANC (le DOM factice ne
+  // clique pas) : 'user-new' (création) ou 'user-<id>' (édition).
+  var UOUV0 = '';
+  if (brut.indexOf('user-') === 0) { UOUV0 = brut.slice(5).replace(/[^A-Za-z0-9_-]/g, ''); brut = 'users'; }
+  const ONGLET0 = (['securite', 'users'].indexOf(brut) >= 0) ? brut : 'securite';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Accès Utilisateurs — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -117,6 +144,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   var ongletsEl = document.getElementById('onglets');
   var D = null, RO = false, OCCUPE = false;
   var ONGLET = '${ONGLET0}';
+  var UOUV = '${UOUV0}';   // ouverture directe de l'éditeur de compte (banc) : 'new' ou '<id>'
+  var DELU = '';   // id du compte en attente de confirmation de suppression (2 clics)
 
   var ONGLETS = [ ['securite','🔒 Sécurité'], ['users','👥 Utilisateurs'] ];
 
@@ -130,6 +159,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
     droit:'Votre rôle ne donne pas accès aux accès utilisateurs.',
     lecture_seule:'Votre rôle est en lecture seule.',
+    invalide:'Formulaire invalide.',
+    introuvable:'Compte introuvable.',
+    refus:'Action refusée par le serveur.',
     pont_indisponible:'La fenêtre principale ne répond pas.',
     delai:"La fenêtre principale n'a pas répondu à temps.",
     operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
@@ -314,26 +346,166 @@ ${JS_ACTIVITE}${JS_DIRE}
   function fmtTs(iso){ if (!iso) return 'Jamais'; try { return new Date(iso).toLocaleString('fr-CA'); } catch(e){ return '—'; } }
   function vueUsers(){
     var st = D.stats||{}, comptes = D.comptes||[];
-    var h = '<div class="stat-grid">'
+    var superActifs = 0; for (var k=0;k<comptes.length;k++) if (comptes[k].estSuper && comptes[k].active) superActifs++;
+    var h = '<div class="entete"><div></div>'
+      + (D.peutModifier ? '<button class="prim" id="u-nouveau">＋ Créer un accès</button>' : '') + '</div>';
+    h += '<div class="stat-grid">'
       + '<div class="stat"><div class="l">Comptes totaux</div><div class="v">'+(st.total||0)+'</div></div>'
       + '<div class="stat"><div class="l">Comptes actifs</div><div class="v" style="color:#6ee7a0">'+(st.actifs||0)+'</div></div>'
       + '<div class="stat"><div class="l">MFA activé</div><div class="v" style="color:#b6b9f7">'+(st.mfa||0)+'</div></div>'
       + '</div>';
-    h += '<div class="carte"><table class="tb"><thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Dernière connexion</th></tr></thead><tbody>';
-    if (!comptes.length) h += '<tr><td colspan="4" class="vide">Aucun utilisateur.</td></tr>';
+    var colspan = D.peutModifier ? 5 : 4;
+    h += '<div class="carte"><table class="tb"><thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Dernière connexion</th>'+(D.peutModifier?'<th></th>':'')+'</tr></thead><tbody>';
+    if (!comptes.length) h += '<tr><td colspan="'+colspan+'" class="vide">Aucun utilisateur.</td></tr>';
     for (var i=0;i<comptes.length;i++){ var s=comptes[i];
       var mfa = s.mfaEnabled ? '<span class="pill mfa">MFA ✓</span>'
         : (s.requireMfaSetup ? '<span class="pill warn">MFA à configurer</span>'
         : (s.mfaExempt ? '<span class="pill warn">Exempté</span>' : ''));
+      var peutSuppr = !s.estMoi && (!s.estSuper || superActifs > 1);
+      var acts = '';
+      if (D.peutModifier){
+        acts = '<td class="acts"><button class="b" data-edit="'+esc(s.id)+'">✏ Modifier</button>'
+          + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="Renvoyer un mot de passe temporaire par courriel">📧 Renvoyer</button>' : '')
+          + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'✓ Confirmer':'Supprimer')+'</button>' : '')
+          + '</td>';
+      }
       h += '<tr><td><strong>'+esc(s.nom||'—')+'</strong>'+(s.estMoi?'<span class="pill moi">vous</span>':'')
         + '<div style="font-size:.74rem;color:#6f8098">'+(s.username?'@'+esc(s.username)+' · ':'')+esc(s.email)+'</div></td>'
         + '<td><span style="font-weight:600;color:'+esc(s.roleColor||'#8fa1b8')+'">'+esc(s.roleIcon||'')+' '+esc(s.roleLabel||s.role)+'</span></td>'
         + '<td>'+(s.active?'<span class="pill on">Actif</span>':'<span class="pill off">Désactivé</span>')+mfa+'</td>'
-        + '<td style="font-size:.8rem;color:#8fa1b8">'+fmtTs(s.derniereConnexion)+'<div style="font-size:.7rem">'+(s.nbConnexions||0)+' connexion(s)</div></td></tr>';
+        + '<td style="font-size:.8rem;color:#8fa1b8">'+fmtTs(s.derniereConnexion)+'<div style="font-size:.7rem">'+(s.nbConnexions||0)+' connexion(s)</div></td>'
+        + acts + '</tr>';
     }
     h += '</tbody></table></div>';
-    h += '<div class="note">ℹ La <b>création et la modification</b> d’un compte (rôle, <b>permissions</b>, <b>MFA</b>, invitation, suppression) se font pour l’instant dans l’<b>écran web</b> — cette partie arrive dans la prochaine étape (Lot B).</div>';
+    h += '<div class="note">ℹ La gestion du <b>MFA</b> (activation par QR / code, exemption, désactivation) se fait pour l’instant dans l’<b>écran web</b> — elle arrive à la prochaine étape (Lot B2).</div>';
     corps.innerHTML = h;
+    var nv=document.getElementById('u-nouveau'); if (nv) nv.onclick=function(){ ouvrirEditeurCompte(''); };
+    var eds=corps.querySelectorAll('[data-edit]'); for (var e=0;e<eds.length;e++) eds[e].onclick=function(){ ouvrirEditeurCompte(this.getAttribute('data-edit')); };
+    var invs=corps.querySelectorAll('[data-invite]'); for (var v=0;v<invs.length;v++) invs[v].onclick=function(){ inviterCompte(this.getAttribute('data-invite')); };
+    var dels=corps.querySelectorAll('[data-del]'); for (var d=0;d<dels.length;d++) dels[d].onclick=function(){ var id=this.getAttribute('data-del');
+      if (DELU===id){ DELU=''; supprimerCompte(id); } else { DELU=id; vueUsers(); dire('Cliquez encore pour supprimer ce compte.', 'att'); } };
+  }
+
+  // ── Création / édition d'un compte (Lot B1) ──────────────────────
+  function ouvrirEditeurCompte(id){
+    if (OCCUPE) return; OCCUPE=true; dire('Ouverture…');
+    appeler('securite:form',[id||'']).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ dire(''); dessinerEditeurCompte(r); } else dire('Échec : '+expliquer(r), 'err'); });
+  }
+  function fermerEditeurCompte(){ var s=document.getElementById('sur-u'); if (s) s.remove(); }
+  function permMatrice(F){
+    var acts = F.actions||[], lbls = F.actionLabels||{}, model = F.permModel||[];
+    var eff = (F.compte&&F.compte.effectivePerms)||[];
+    var h = '<table class="permtb"><thead><tr><th class="mod">Module</th>';
+    for (var a=0;a<acts.length;a++) h += '<th>'+esc(lbls[acts[a]]||acts[a])+'</th>';
+    h += '</tr></thead><tbody>';
+    for (var g=0;g<model.length;g++){ var grp=model[g];
+      h += '<tr class="grp"><td colspan="'+(acts.length+1)+'">'+esc(grp.label)+'</td></tr>';
+      for (var m=0;m<grp.modules.length;m++){ var mod=grp.modules[m];
+        h += '<tr><td class="mod">'+esc(mod.label)+'</td>';
+        for (var a2=0;a2<acts.length;a2++){ var act=acts[a2];
+          if (mod.actions.indexOf(act)<0){ h += '<td style="color:#3a465a">—</td>'; continue; }
+          var key = mod.key+':'+act;
+          h += '<td><input type="checkbox" data-perm="'+esc(key)+'" '+(eff.indexOf(key)>=0?'checked':'')+'></td>';
+        }
+        h += '</tr>';
+      }
+    }
+    h += '</tbody></table>';
+    return h;
+  }
+  function dessinerEditeurCompte(F){
+    var nouv = (F.mode!=='edit');
+    var c = F.compte||{};
+    var roles = F.roles||[];
+    var roleOpts=''; for (var i=0;i<roles.length;i++) roleOpts += '<option value="'+esc(roles[i].key)+'"'+((c.role||'admin')===roles[i].key?' selected':'')+'>'+esc(roles[i].icon||'')+' '+esc(roles[i].label)+'</option>';
+    var qs = F.questions||[];
+    var qOpts=function(sel){ var o='<option value="">— Choisir —</option>'; for (var i=0;i<qs.length;i++) o+='<option value="'+esc(qs[i])+'"'+(sel===qs[i]?' selected':'')+'>'+esc(qs[i])+'</option>'; return o; };
+    var ansSet = !!c.securityAnswersSet;
+
+    var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-u';
+    var h='<div class="boite"><div class="tt"><h3>'+(nouv?'Créer un accès':'Modifier — '+esc((c.firstName||'')+' '+(c.lastName||'')))+'</h3>'
+      + '<button class="mini" id="u-x">Fermer</button></div>'
+      + '<div class="liste">'
+      + '<div class="ferr" id="u-err"></div>'
+      + '<div class="cols2">'
+      + '<label class="champ"><span class="lbl">Prénom</span><input class="t" id="u-first" value="'+esc(c.firstName||'')+'"></label>'
+      + '<label class="champ"><span class="lbl">Nom</span><input class="t" id="u-last" value="'+esc(c.lastName||'')+'"></label>'
+      + '<label class="champ"><span class="lbl">Nom d’utilisateur</span><input class="t" id="u-username" value="'+esc(c.username||'')+'" placeholder="ex : marie_b"></label>'
+      + '<label class="champ"><span class="lbl">Courriel'+(nouv?'':' (non modifiable)')+'</span><input class="t" type="email" id="u-email" value="'+esc(c.email||'')+'"'+(nouv?'':' readonly style="opacity:.7"')+'></label>'
+      + '</div>'
+      + '<label class="champ"><span class="lbl">'+(nouv?'Mot de passe (vide = généré automatiquement)':'Nouveau mot de passe (vide = inchangé)')+'</span><input class="t" type="password" id="u-pw" autocomplete="new-password"></label>'
+      + '<div class="cols2">'
+      + '<label class="champ" style="margin:0"><span class="lbl">Rôle</span><select class="t" id="u-role">'+roleOpts+'</select></label>'
+      + '<div style="display:flex;flex-direction:column;justify-content:flex-end;gap:.2rem">'
+      + '<label class="case"><input type="checkbox" id="u-active" '+(c.active!==false?'checked':'')+'> Compte actif</label>'
+      + '<label class="case"><input type="checkbox" id="u-reqmfa" '+(c.requireMfaSetup&&!c.mfaEnabled?'checked':'')+'> Exiger la configuration MFA à la 1ʳᵉ connexion</label>'
+      + '<label class="case"><input type="checkbox" id="u-exempt" '+(c.mfaExempt?'checked':'')+'> Exempté de MFA</label>'
+      + '</div></div>'
+      + '<details class="bloc"'+((!nouv && !(c.securityQ1&&c.securityQ2))?' open':'')+'><summary>🔐 Questions de sécurité'+(nouv?'':(ansSet?' — ✓ configurées':' — ⚠ non configurées'))+'</summary>'
+      + '<div class="cols2" style="margin-top:.6rem">'
+      + '<label class="champ" style="margin:0"><span class="lbl">Question 1</span><select class="t" id="u-q1">'+qOpts(c.securityQ1||'')+'</select></label>'
+      + '<label class="champ" style="margin:0"><span class="lbl">Réponse 1</span><input class="t" id="u-a1" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
+      + '<label class="champ" style="margin:0"><span class="lbl">Question 2</span><select class="t" id="u-q2">'+qOpts(c.securityQ2||'')+'</select></label>'
+      + '<label class="champ" style="margin:0"><span class="lbl">Réponse 2</span><input class="t" id="u-a2" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
+      + '</div><div class="sub" style="margin-top:.4rem;color:#6f8098">Les réponses sont chiffrées et ne se réaffichent plus. Vide = conserver.</div></details>'
+      + '<details class="bloc"><summary>⚙ Permissions personnalisées (modifient les droits du rôle)</summary><div id="u-perms">'+permMatrice(F)+'</div></details>'
+      + '</div>'
+      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
+      + '<button class="b" id="u-annuler">Annuler</button>'
+      + '<button class="prim" id="u-enr">'+(nouv?'Créer le compte':'Enregistrer')+'</button></div></div>';
+    sur.innerHTML=h;
+    document.body.appendChild(sur);
+    document.getElementById('u-x').onclick=fermerEditeurCompte;
+    document.getElementById('u-annuler').onclick=fermerEditeurCompte;
+    document.getElementById('u-enr').onclick=function(){ enregistrerCompte(nouv?'':(c.id||'')); };
+    // Slug du nom d'utilisateur : minuscules/chiffres/_/-
+    var un=document.getElementById('u-username'); if (un) un.oninput=function(){ un.value=un.value.toLowerCase().replace(/[^a-z0-9_-]/g,''); };
+    // Changer de rôle recoche la matrice selon les permissions du rôle.
+    var rs=document.getElementById('u-role'); if (rs) rs.onchange=function(){
+      var role=rs.value, def=null; for (var i=0;i<roles.length;i++) if (roles[i].key===role) def=roles[i];
+      var perms=(def&&def.permissions)||[];
+      var cbs=document.querySelectorAll('#u-perms [data-perm]');
+      for (var j=0;j<cbs.length;j++) cbs[j].checked = perms.indexOf(cbs[j].getAttribute('data-perm'))>=0;
+    };
+  }
+  function ferr(msg){ var e=document.getElementById('u-err'); if (e){ e.textContent=msg; e.style.display='block'; } }
+  function enregistrerCompte(id){
+    if (OCCUPE) return;
+    var perms=[]; var cbs=document.querySelectorAll('#u-perms [data-perm]');
+    for (var i=0;i<cbs.length;i++) if (cbs[i].checked) perms.push(cbs[i].getAttribute('data-perm'));
+    var d = {
+      firstName: txv('u-first').trim(), lastName: txv('u-last').trim(),
+      username: txv('u-username').trim(), email: txv('u-email').trim(),
+      password: txv('u-pw'), role: txv('u-role'),
+      active: chkv('u-active'), requireMfaSetup: chkv('u-reqmfa'), mfaExempt: chkv('u-exempt'),
+      perms: perms,
+      securityQ1: txv('u-q1').trim(), securityA1: txv('u-a1').trim(),
+      securityQ2: txv('u-q2').trim(), securityA2: txv('u-a2').trim()
+    };
+    OCCUPE=true; dire('Enregistrement…');
+    appeler('securite:compte:ecrire',[id||'', d]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){
+        fermerEditeurCompte();
+        var msg = (r.mode==='create')
+          ? ('Compte créé.' + (r.courrielEnvoye ? ' Courriel d’accueil envoyé à '+(r.courriel||'')+'.' : (r.tempPassword ? ' Mot de passe temporaire : '+r.tempPassword+' (courriel non envoyé).' : ' (courriel non envoyé).')))
+          : 'Compte modifié.';
+        recharger(msg, 'bon');
+      } else { ferr(expliquer(r)); dire('Échec : '+expliquer(r), 'err'); }
+    });
+  }
+  function supprimerCompte(id){
+    if (OCCUPE) return; OCCUPE=true; dire('Suppression…');
+    appeler('securite:compte:supprimer',[id]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok) recharger('Compte supprimé.', 'bon'); else dire('Échec : '+expliquer(r), 'err'); });
+  }
+  function inviterCompte(id){
+    if (OCCUPE) return; OCCUPE=true; dire('Envoi de l’invitation…');
+    appeler('securite:compte:invitation',[id]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok) dire('Invitation renvoyée à '+(r.email||'')+'.', 'bon'); else dire('Échec : '+expliquer(r), 'err'); });
+  }
+  function recharger(msg, cl){
+    appeler('securite:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; RO=!r.peutModifier; DELU=''; if (ONGLET==='users') vueUsers(); if (msg) dire(msg, cl); } else if (msg) dire(msg, cl); });
   }
 
   function rendre(){
@@ -347,6 +519,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('securite:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');
+      // Ouverture directe de l'éditeur de compte (banc / lien profond), après le
+      // dessin de la liste et une fois D disponible.
+      if (UOUV){ ouvrirEditeurCompte(UOUV==='new' ? '' : UOUV); UOUV=''; }
     });
   }
 

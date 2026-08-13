@@ -1423,6 +1423,9 @@ const OPS_PONT = new Set([
   'securite:donnees', 'securite:pwpolicy:ecrire', 'securite:inactivite:ecrire',
   'securite:geo:ecrire', 'securite:geo:malocalisation',
   'securite:verif:staff', 'securite:verif:client',
+  // Gestion des comptes (2.66.0, #6 Lot B1) — creation/edition + permissions +
+  // suppression + invitation. Le MFA reste au repli web jusqu au Lot B2.
+  'securite:form', 'securite:compte:ecrire', 'securite:compte:supprimer', 'securite:compte:invitation',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1772,6 +1775,9 @@ const LIMITES_PONT = {
   'securite:donnees': 40000, 'securite:pwpolicy:ecrire': 30000, 'securite:inactivite:ecrire': 30000,
   'securite:geo:ecrire': 30000, 'securite:geo:malocalisation': 30000,
   'securite:verif:staff': 120000, 'securite:verif:client': 120000,
+  /* Gestion des comptes : ecriture et invitation ENVOIENT un courriel (creation /
+     reenvoi) et fabriquent un lien d installation cote serveur -> plafonds larges. */
+  'securite:form': 40000, 'securite:compte:ecrire': 60000, 'securite:compte:supprimer': 30000, 'securite:compte:invitation': 60000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
