@@ -1552,8 +1552,9 @@ module.exports = {
         { at: 1723542000000, kind: 'etiquette', kindLabel: 'Étiquette', label: 'Colis', size: '', dpi: '', qty: 2, printer: 'Zebra', via: 'navigateur', who: 'Marie', poste: '', ok: false, note: 'Bourrage' }
       ],
       printKinds: [ { key: 'commande', label: 'Bon de commande' }, { key: 'etiquette', label: 'Étiquette' } ],
+      recherches: [ { q: 'robe rouge taille 12', fois: 8, derniere: '2026-08-13' }, { q: 'bottes hiver', fois: 3, derniere: '2026-08-12' } ],
       stats: { loginOk: 1, loginFail: 1, mfaFail: 0, geoBlocked: 0, ips: 2 },
-      accesTotal: 2, autoTotal: 1, printsTotal: 2
+      accesTotal: 2, autoTotal: 1, printsTotal: 2, recherchesTotal: 2
     };
     var verrous = { ok: true, locks: [
       { scope: 'orders', scopeLabel: 'Commandes', id: 'ord_1', label: 'CMD-1042', who: 'Marie Tremblay', age: '3 min', since: '2026-08-13T11:57:00Z', expired: false, sessionAlive: true, expiresIn: 45 },
@@ -1564,13 +1565,15 @@ module.exports = {
       { nom: 'automatisations', id: 'automatisations', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
       { nom: 'impressions', id: 'impressions', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:purger:prints': { ok: true, conserves: 2 }, 'journal:export:prints': { ok: true } } },
       { nom: 'verrous (super-admin)', id: 'verrous', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:verrous': verrous, 'journal:deverrouiller': { ok: true }, 'journal:deverrouiller:tout': { ok: true } } },
+      { nom: 'sans résultat', id: 'recherches', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
       { nom: 'accès (non super-admin)', reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { isSuper: false, peutModifier: false }) } },
       // Recherche inter-journaux (Lot 7c) : ouvre l'onglet et lance 'q-203' → le
       // faux pont renvoie des résultats groupés, ce qui éprouve le rendu des groupes.
       { nom: 'recherche (résultats groupés)', id: 'q-203', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'journal:recherche': { ok: true, q: '203', total: 2, groupes: [
           { cle: 'acces', label: '🔐 Accès', onglet: 'acces', total: 1, entrees: [ { ts: '2026-08-13T12:00:00Z', type: 'login_ok', nom: 'Bob Brousseau', email: 'bob@sandriza.com', ip: '203.0.113.7', cc: 'CA', pays: 'Canada', ville: 'Québec', action: 'Connexion' } ] },
-          { cle: 'impressions', label: '🖨 Impressions', onglet: 'impressions', total: 1, entrees: [ { at: 1723545600000, kind: 'commande', kindLabel: 'Bon de commande', label: 'CMD-203', printer: 'Phomemo', who: 'Bob', qty: 1, ok: true } ] }
+          { cle: 'impressions', label: '🖨 Impressions', onglet: 'impressions', total: 1, entrees: [ { at: 1723545600000, kind: 'commande', kindLabel: 'Bon de commande', label: 'CMD-203', printer: 'Phomemo', who: 'Bob', qty: 1, ok: true } ] },
+          { cle: 'recherches', label: '🔎 Recherches sans résultat', onglet: 'recherches', total: 1, entrees: [ { q: 'article 203', fois: 2, derniere: '2026-08-13' } ] }
         ] } } }
     ];
   })(),

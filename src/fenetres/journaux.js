@@ -71,7 +71,7 @@ function pageJournaux(onglet) {
   // 'q-<terme>' ouvre l'onglet Recherche et lance la recherche du terme.
   var RQINIT0 = '';
   if (brut.indexOf('q-') === 0) { RQINIT0 = brut.slice(2).replace(/[^A-Za-z0-9._@-]/g, ''); brut = 'recherche'; }
-  const ONGLET0 = (['recherche','acces','automatisations','impressions','verrous'].indexOf(brut) >= 0) ? brut : 'acces';
+  const ONGLET0 = (['recherche','acces','automatisations','impressions','recherches','verrous'].indexOf(brut) >= 0) ? brut : 'acces';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Journaux — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -102,7 +102,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['verrous','🔓 Verrous'] ];
+  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['recherches','❓ Sans résultat'], ['verrous','🔓 Verrous'] ];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -174,6 +174,8 @@ ${JS_ACTIVITE}${JS_DIRE}
             + '<td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.pays||'')+'</td><td>'+esc(x.action||'')+'</td></tr>';
         } else if (grp.cle==='automatisations'){
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(SECT[x.section]||x.section||'—')+'</span></td><td>'+esc(x.action||'')+'</td></tr>';
+        } else if (grp.cle==='recherches'){
+          h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+' fois</td><td class="mut">'+esc(x.derniere||'—')+'</td></tr>';
         } else {
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:#fca5a5">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:#6ee7a0">Imprimé</span>')+'</td></tr>';
         }
@@ -291,6 +293,20 @@ ${JS_ACTIVITE}${JS_DIRE}
     var pc=document.getElementById('p-csv'); if (pc) pc.onclick=function(){ exporter('journal:export:prints'); };
   }
 
+  // ── Recherches sans résultat (#7 Lot 7b) ─────────────────────────
+  function vueRecherchesRatees(){
+    var rows = D.recherches||[];
+    var h = '<div class="note">ℹ Ce que des visiteurs ont cherché sans rien trouver. Son tableau de bord complet (tendances, archive) reste dans <b>Marketing → Statistiques</b> ; il est rassemblé ici et couvert par la recherche inter-journaux.</div>'
+      + '<div class="carte"><div class="barre"><span class="sub">'+(D.recherchesTotal||rows.length)+' terme(s) distinct(s)</span></div>'
+      + '<table class="tb"><thead><tr><th>Terme cherché</th><th style="text-align:center">Fois</th><th>Dernière fois</th></tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="3" class="vide">Aucune recherche sans résultat.</td></tr>';
+    for (var i=0;i<rows.length;i++){ var x=rows[i];
+      h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+'</td><td class="mut">'+esc(x.derniere||'—')+'</td></tr>';
+    }
+    h += '</tbody></table></div>';
+    corps.innerHTML = h;
+  }
+
   // ── Verrous (super-admin) ────────────────────────────────────────
   function vueVerrous(){
     if (VERR===null){
@@ -365,6 +381,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ONGLET==='recherche') vueRecherche();
     else if (ONGLET==='automatisations') vueAuto();
     else if (ONGLET==='impressions') vuePrints();
+    else if (ONGLET==='recherches') vueRecherchesRatees();
     else if (ONGLET==='verrous') vueVerrous();
     else vueAcces();
   }
