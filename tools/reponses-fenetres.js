@@ -1537,6 +1537,37 @@ module.exports = {
     ];
   })(),
 
+  // Journaux (#7 Lot 7a). Quatre onglets ; verrous = super-admin (async). Chaque
+  // onglet a son cas d'ouverture (le clic ne navigue pas sur le DOM du banc).
+  'journaux.js': (function(){
+    var donnees = {
+      ok: true, isSuper: true, peutModifier: true, statsHidden: false,
+      acces: [
+        { ts: '2026-08-13T12:00:00Z', type: 'login_ok', nom: 'Bob Brousseau', email: 'bob@sandriza.com', ip: '203.0.113.7', cc: 'CA', pays: 'Canada', ville: 'Québec', action: 'Connexion réussie' },
+        { ts: '2026-08-13T11:00:00Z', type: 'login_fail', nom: '', email: 'x@y.com', ip: '198.51.100.9', cc: 'US', pays: 'États-Unis', ville: '', action: 'Mot de passe invalide' }
+      ],
+      automations: [ { ts: '2026-08-13T06:00:00Z', section: 'stats', action: 'Courriel de statistiques envoyé' } ],
+      prints: [
+        { at: 1723545600000, kind: 'commande', kindLabel: 'Bon de commande', label: 'CMD-1042', size: '4x6', dpi: 203, qty: 1, printer: 'Phomemo', via: 'agent', who: 'Bob', poste: 'A1', ok: true, note: '' },
+        { at: 1723542000000, kind: 'etiquette', kindLabel: 'Étiquette', label: 'Colis', size: '', dpi: '', qty: 2, printer: 'Zebra', via: 'navigateur', who: 'Marie', poste: '', ok: false, note: 'Bourrage' }
+      ],
+      printKinds: [ { key: 'commande', label: 'Bon de commande' }, { key: 'etiquette', label: 'Étiquette' } ],
+      stats: { loginOk: 1, loginFail: 1, mfaFail: 0, geoBlocked: 0, ips: 2 },
+      accesTotal: 2, autoTotal: 1, printsTotal: 2
+    };
+    var verrous = { ok: true, locks: [
+      { scope: 'orders', scopeLabel: 'Commandes', id: 'ord_1', label: 'CMD-1042', who: 'Marie Tremblay', age: '3 min', since: '2026-08-13T11:57:00Z', expired: false, sessionAlive: true, expiresIn: 45 },
+      { scope: 'products', scopeLabel: 'Produits', id: 'p_9', label: 'Robe', who: 'Bob', age: '2 h', since: '2026-08-13T10:00:00Z', expired: true, sessionAlive: false, expiresIn: 0 }
+    ] };
+    return [
+      { nom: 'accès', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:stats': { ok: true, statsHidden: true }, 'journal:purger:acces': { ok: true, conserves: 2 }, 'journal:export:acces': { ok: true } } },
+      { nom: 'automatisations', id: 'automatisations', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
+      { nom: 'impressions', id: 'impressions', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:purger:prints': { ok: true, conserves: 2 }, 'journal:export:prints': { ok: true } } },
+      { nom: 'verrous (super-admin)', id: 'verrous', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:verrous': verrous, 'journal:deverrouiller': { ok: true }, 'journal:deverrouiller:tout': { ok: true } } },
+      { nom: 'accès (non super-admin)', reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { isSuper: false, peutModifier: false }) } }
+    ];
+  })(),
+
   // Mode lancement (palier 5, DERNIER — garde absolue). Pas de secret. Deux états :
   // pré-lancement (protégé, variable absente) et en ligne (piloté par ELG_LAUNCHED).
   'lancement.js': [

@@ -1428,6 +1428,10 @@ const OPS_PONT = new Set([
   'securite:form', 'securite:compte:ecrire', 'securite:compte:supprimer', 'securite:compte:invitation',
   // MFA (2.67.0, #6 Lot B2) — activation TOTP, exemption, desactivation.
   'securite:mfa:etat', 'securite:mfa:init', 'securite:mfa:confirmer', 'securite:mfa:exempter', 'securite:mfa:desactiver',
+  // Journaux (2.68.0, #7 Lot 7a) — acces / automatisations / impressions / verrous.
+  'journal:donnees', 'journal:verrous', 'journal:purger:acces', 'journal:purger:prints',
+  'journal:stats', 'journal:deverrouiller', 'journal:deverrouiller:tout',
+  'journal:export:acces', 'journal:export:prints',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1781,6 +1785,11 @@ const LIMITES_PONT = {
      reenvoi) et fabriquent un lien d installation cote serveur -> plafonds larges. */
   'securite:form': 40000, 'securite:compte:ecrire': 60000, 'securite:compte:supprimer': 30000, 'securite:compte:invitation': 60000,
   'securite:mfa:etat': 20000, 'securite:mfa:init': 30000, 'securite:mfa:confirmer': 30000, 'securite:mfa:exempter': 20000, 'securite:mfa:desactiver': 20000,
+  /* Journaux : lecture locale rapide ; les verrous et le deverrouillage passent
+     par le serveur (lock_admin). */
+  'journal:donnees': 40000, 'journal:verrous': 30000, 'journal:purger:acces': 20000, 'journal:purger:prints': 20000,
+  'journal:stats': 20000, 'journal:deverrouiller': 30000, 'journal:deverrouiller:tout': 30000,
+  'journal:export:acces': 30000, 'journal:export:prints': 30000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
@@ -2059,6 +2068,7 @@ const PAGES_ANCRABLES = () => ({
   'config-launch': ['Mode lancement', () => pageLancement()],
   'pages': ['Pages du site', () => pagePages()],
   'securite': ['Accès Utilisateurs', () => pageSecurite()],
+  'journaux': ['Journaux', () => pageJournaux()],
   'studio': ['Studio virtuel', () => pageStudio()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
@@ -2830,6 +2840,7 @@ const { pageAccueil } = require('./fenetres/accueil');
 const { pageLancement } = require('./fenetres/lancement');
 const { pagePages } = require('./fenetres/pages');
 const { pageSecurite } = require('./fenetres/securite');
+const { pageJournaux } = require('./fenetres/journaux');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
