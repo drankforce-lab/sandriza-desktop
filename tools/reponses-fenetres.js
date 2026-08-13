@@ -1564,7 +1564,14 @@ module.exports = {
       { nom: 'automatisations', id: 'automatisations', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
       { nom: 'impressions', id: 'impressions', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:purger:prints': { ok: true, conserves: 2 }, 'journal:export:prints': { ok: true } } },
       { nom: 'verrous (super-admin)', id: 'verrous', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:verrous': verrous, 'journal:deverrouiller': { ok: true }, 'journal:deverrouiller:tout': { ok: true } } },
-      { nom: 'accès (non super-admin)', reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { isSuper: false, peutModifier: false }) } }
+      { nom: 'accès (non super-admin)', reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { isSuper: false, peutModifier: false }) } },
+      // Recherche inter-journaux (Lot 7c) : ouvre l'onglet et lance 'q-203' → le
+      // faux pont renvoie des résultats groupés, ce qui éprouve le rendu des groupes.
+      { nom: 'recherche (résultats groupés)', id: 'q-203', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
+        'journal:recherche': { ok: true, q: '203', total: 2, groupes: [
+          { cle: 'acces', label: '🔐 Accès', onglet: 'acces', total: 1, entrees: [ { ts: '2026-08-13T12:00:00Z', type: 'login_ok', nom: 'Bob Brousseau', email: 'bob@sandriza.com', ip: '203.0.113.7', cc: 'CA', pays: 'Canada', ville: 'Québec', action: 'Connexion' } ] },
+          { cle: 'impressions', label: '🖨 Impressions', onglet: 'impressions', total: 1, entrees: [ { at: 1723545600000, kind: 'commande', kindLabel: 'Bon de commande', label: 'CMD-203', printer: 'Phomemo', who: 'Bob', qty: 1, ok: true } ] }
+        ] } } }
     ];
   })(),
 

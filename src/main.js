@@ -1432,6 +1432,8 @@ const OPS_PONT = new Set([
   'journal:donnees', 'journal:verrous', 'journal:purger:acces', 'journal:purger:prints',
   'journal:stats', 'journal:deverrouiller', 'journal:deverrouiller:tout',
   'journal:export:acces', 'journal:export:prints',
+  // Recherche inter-journaux (2.69.0, #7 Lot 7c).
+  'journal:recherche',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1790,6 +1792,7 @@ const LIMITES_PONT = {
   'journal:donnees': 40000, 'journal:verrous': 30000, 'journal:purger:acces': 20000, 'journal:purger:prints': 20000,
   'journal:stats': 20000, 'journal:deverrouiller': 30000, 'journal:deverrouiller:tout': 30000,
   'journal:export:acces': 30000, 'journal:export:prints': 30000,
+  'journal:recherche': 30000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,

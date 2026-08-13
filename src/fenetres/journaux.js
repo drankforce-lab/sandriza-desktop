@@ -66,7 +66,12 @@ table.tb td{padding:.5rem .6rem;border-bottom:1px solid rgba(255,255,255,.06);fo
 `;
 
 function pageJournaux(onglet) {
-  const ONGLET0 = (['acces','automatisations','impressions','verrous'].indexOf(String(onglet||'')) >= 0) ? String(onglet) : 'acces';
+  var brut = String(onglet||'');
+  // Ouverture directe sur une RECHERCHE (pour le banc, qui ne clique pas) :
+  // 'q-<terme>' ouvre l'onglet Recherche et lance la recherche du terme.
+  var RQINIT0 = '';
+  if (brut.indexOf('q-') === 0) { RQINIT0 = brut.slice(2).replace(/[^A-Za-z0-9._@-]/g, ''); brut = 'recherche'; }
+  const ONGLET0 = (['recherche','acces','automatisations','impressions','verrous'].indexOf(brut) >= 0) ? brut : 'acces';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Journaux — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -94,8 +99,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   var VERR = null;      // verrous chargés (async) ; null = pas encore lus
   var CONFV = '';       // confirmation 2 clics : '' | 'tout' | scope+'\\u0001'+id
   var PF_TYPE = 'all', PF_VIA = 'all';   // filtres de l'onglet Impressions
+  var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
+  var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['verrous','🔓 Verrous'] ];
+  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['verrous','🔓 Verrous'] ];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -124,6 +131,60 @@ ${JS_ACTIVITE}${JS_DIRE}
     ongletsEl.innerHTML=h;
     var bs=ongletsEl.querySelectorAll('button');
     for (var j=0;j<bs.length;j++) bs[j].onclick=function(){ ONGLET=this.getAttribute('data-k'); CONFV=''; rendre(); };
+  }
+
+  // ── Recherche inter-journaux ─────────────────────────────────────
+  function vueRecherche(){
+    var h = '<div class="carte"><div class="barre">'
+      + '<input class="t" id="r-q" placeholder="Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)" value="'+esc(RQ)+'" style="flex:1;min-width:220px">'
+      + '<button class="b" id="r-go">🔎 Rechercher</button></div>'
+      + '<div class="sub">Le terme est cherché dans tous les champs de chaque journal (accès, automatisations, impressions). Minimum 2 caractères.</div>'
+      + '<div id="r-res">'+(RRES ? resultatsHtml() : '<div class="vide">Tapez un terme puis « Rechercher ».</div>')+'</div></div>';
+    corps.innerHTML = h;
+    var q=document.getElementById('r-q');
+    var go=document.getElementById('r-go');
+    if (go) go.onclick=lancerRecherche;
+    if (q){ q.focus(); q.onkeydown=function(e){ if (e.key==='Enter'){ e.preventDefault(); lancerRecherche(); } }; }
+    if (RQINIT && RRES===null){ RQ=RQINIT; RQINIT=''; if (q) q.value=RQ; lancerRecherche(); }
+  }
+  function lancerRecherche(){
+    var q=document.getElementById('r-q'); RQ=q?String(q.value||''):RQ;
+    if (RQ.trim().length < 2){ RRES={ tropCourt:true, groupes:[], total:0 }; peindreResultats(); return; }
+    if (OCCUPE) return; OCCUPE=true; dire('Recherche…');
+    appeler('journal:recherche',[RQ]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ RRES=r; peindreResultats(); dire(r.total?(r.total+' résultat(s).'):'Aucun résultat.', 'bon'); }
+      else dire('Échec : '+expliquer(r), 'err'); });
+  }
+  function peindreResultats(){ var el=document.getElementById('r-res'); if (el) el.innerHTML=resultatsHtml(); brancherResultats(); }
+  function resultatsHtml(){
+    if (RRES && RRES.tropCourt) return '<div class="vide">Entrez au moins 2 caractères.</div>';
+    var groupes = (RRES&&RRES.groupes)||[];
+    if (!groupes.length) return '<div class="vide">Aucun résultat pour « '+esc(RRES?RRES.q:'')+' ».</div>';
+    var h='';
+    for (var g=0;g<groupes.length;g++){ var grp=groupes[g], e=grp.entrees||[];
+      h += '<div class="barre" style="margin:.9rem 0 .3rem"><strong>'+esc(grp.label)+' <span class="mut">('+(grp.total||e.length)+')</span></strong>'
+        + '<span class="pousse"></span><button class="b" data-goto="'+esc(grp.onglet)+'">Ouvrir cet onglet</button></div>';
+      h += '<table class="tb"><tbody>';
+      for (var i=0;i<e.length;i++){ var x=e[i];
+        if (grp.cle==='acces'){
+          var t=TYPE[x.type]||{bg:'rgba(255,255,255,.06)',c:'#8fa1b8',l:x.type};
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td>'
+            + '<td><span class="pill" style="background:'+t.bg+';color:'+t.c+'">'+esc(t.l)+'</span></td>'
+            + '<td>'+esc(x.nom||'—')+'<div class="sub">'+esc(x.email)+'</div></td>'
+            + '<td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.pays||'')+'</td><td>'+esc(x.action||'')+'</td></tr>';
+        } else if (grp.cle==='automatisations'){
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(SECT[x.section]||x.section||'—')+'</span></td><td>'+esc(x.action||'')+'</td></tr>';
+        } else {
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:#fca5a5">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:#6ee7a0">Imprimé</span>')+'</td></tr>';
+        }
+      }
+      h += '</tbody></table>';
+    }
+    return h;
+  }
+  function brancherResultats(){
+    var gs=corps.querySelectorAll('[data-goto]');
+    for (var i=0;i<gs.length;i++) gs[i].onclick=function(){ ONGLET=this.getAttribute('data-goto'); CONFV=''; rendre(); };
   }
 
   // ── Accès ────────────────────────────────────────────────────────
@@ -301,7 +362,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   function rendre(){
     tabs();
     if (ONGLET==='verrous' && !(D&&D.isSuper)) ONGLET='acces';
-    if (ONGLET==='automatisations') vueAuto();
+    if (ONGLET==='recherche') vueRecherche();
+    else if (ONGLET==='automatisations') vueAuto();
     else if (ONGLET==='impressions') vuePrints();
     else if (ONGLET==='verrous') vueVerrous();
     else vueAcces();
