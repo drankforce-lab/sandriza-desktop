@@ -1434,6 +1434,8 @@ const OPS_PONT = new Set([
   'journal:export:acces', 'journal:export:prints',
   // Recherche inter-journaux (2.69.0, #7 Lot 7c).
   'journal:recherche',
+  // SMS dans les journaux (2.72.0, #7 Lot 7b-2). Comptable reutilise liens:journal.
+  'journal:sms',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1792,7 +1794,7 @@ const LIMITES_PONT = {
   'journal:donnees': 40000, 'journal:verrous': 30000, 'journal:purger:acces': 20000, 'journal:purger:prints': 20000,
   'journal:stats': 20000, 'journal:deverrouiller': 30000, 'journal:deverrouiller:tout': 30000,
   'journal:export:acces': 30000, 'journal:export:prints': 30000,
-  'journal:recherche': 30000,
+  'journal:recherche': 30000, 'journal:sms': 30000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,

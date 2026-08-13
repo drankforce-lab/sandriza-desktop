@@ -1566,6 +1566,10 @@ module.exports = {
       { nom: 'impressions', id: 'impressions', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:purger:prints': { ok: true, conserves: 2 }, 'journal:export:prints': { ok: true } } },
       { nom: 'verrous (super-admin)', id: 'verrous', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:verrous': verrous, 'journal:deverrouiller': { ok: true }, 'journal:deverrouiller:tout': { ok: true } } },
       { nom: 'sans résultat', id: 'recherches', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
+      { nom: 'SMS (serveur)', id: 'sms', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
+        'journal:sms': { ok: true, sms: [ { id: 's1', from: '+14185550142', to: '+14185550000', body: 'Bonjour, ma commande ?', direction: 'inbound', date: '2026-08-13T12:00:00Z', read: false } ] } } },
+      { nom: 'accès comptables (serveur)', id: 'comptable', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
+        'liens:journal': { ok: true, journal: [ { au: '2026-08-13T09:00:00Z', canal: 'comptable', genre: 'ouvert', ip: '203.0.113.7', lienId: 'ab12cd34ef', detail: 'Portail comptable', qui: 'cabinet@exemple.com' } ] } } },
       { nom: 'accès (non super-admin)', reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { isSuper: false, peutModifier: false }) } },
       // Recherche inter-journaux (Lot 7c) : ouvre l'onglet et lance 'q-203' → le
       // faux pont renvoie des résultats groupés, ce qui éprouve le rendu des groupes.

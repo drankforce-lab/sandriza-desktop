@@ -71,7 +71,7 @@ function pageJournaux(onglet) {
   // 'q-<terme>' ouvre l'onglet Recherche et lance la recherche du terme.
   var RQINIT0 = '';
   if (brut.indexOf('q-') === 0) { RQINIT0 = brut.slice(2).replace(/[^A-Za-z0-9._@-]/g, ''); brut = 'recherche'; }
-  const ONGLET0 = (['recherche','acces','automatisations','impressions','recherches','verrous'].indexOf(brut) >= 0) ? brut : 'acces';
+  const ONGLET0 = (['recherche','acces','automatisations','impressions','sms','comptable','recherches','verrous'].indexOf(brut) >= 0) ? brut : 'acces';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Journaux — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -102,7 +102,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['recherches','❓ Sans résultat'], ['verrous','🔓 Verrous'] ];
+  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🧾 Accès comptables'], ['recherches','❓ Sans résultat'], ['verrous','🔓 Verrous'] ];
+  var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -293,6 +294,58 @@ ${JS_ACTIVITE}${JS_DIRE}
     var pc=document.getElementById('p-csv'); if (pc) pc.onclick=function(){ exporter('journal:export:prints'); };
   }
 
+  // ── SMS (#7 Lot 7b-2 — lecture serveur) ──────────────────────────
+  function vueSms(){
+    if (SMS_D===null){
+      corps.innerHTML='<div class="vide">Lecture des SMS…</div>'; OCCUPE=true;
+      appeler('journal:sms',[]).then(function(r){ OCCUPE=false;
+        if (r&&r.ok){ SMS_D=r.sms||[]; if (ONGLET==='sms') vueSms(); }
+        else { SMS_D=[]; if (ONGLET==='sms') corps.innerHTML='<div class="carte"><div class="vide">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
+      return;
+    }
+    var rows = SMS_D;
+    var h = '<div class="note">ℹ Les SMS reçus et envoyés (Twilio). Leur gestion complète (répondre, marquer lu, supprimer) reste dans <b>Communications → Téléphonie</b>.</div>'
+      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' message(s)</span><span class="pousse"></span><button class="b" id="sms-reload">🔄 Actualiser</button></div>'
+      + '<table class="tb"><thead><tr><th>Date</th><th>Sens</th><th>De</th><th>À</th><th>Message</th></tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="5" class="vide">Aucun SMS.</td></tr>';
+    for (var i=0;i<rows.length;i++){ var s=rows[i]; var ent=(s.direction==='inbound');
+      h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(s.date))+'</td>'
+        + '<td><span class="pill" style="background:'+(ent?'rgba(14,165,233,.18)':'rgba(22,163,74,.2)')+';color:'+(ent?'#7dd3fc':'#6ee7a0')+'">'+(ent?'⬇ Reçu':'⬆ Envoyé')+'</span></td>'
+        + '<td class="mono">'+esc(s.from||'—')+'</td><td class="mono">'+esc(s.to||'—')+'</td>'
+        + '<td>'+esc(s.body||'')+'</td></tr>';
+    }
+    h += '</tbody></table></div>';
+    corps.innerHTML = h;
+    var rl=document.getElementById('sms-reload'); if (rl) rl.onclick=function(){ SMS_D=null; vueSms(); };
+  }
+
+  // ── Accès comptables (#7 Lot 7b-2 — reutilise liens:journal) ─────
+  var CANAUX = { telechargement:'Installation', comptable:'Comptable', courriel:'Courriel' };
+  var EVEN = { visite:'Visite', refuse:'Refusé', ouvert:'Ouvert', classeur:'Classeur ouvert', cree:'Créé', revoque:'Révoqué', telecharge:'Téléchargé', envoye:'Courriel envoyé' };
+  function vueComptable(){
+    if (COMPTA_D===null){
+      corps.innerHTML='<div class="vide">Lecture du journal des accès…</div>'; OCCUPE=true;
+      appeler('liens:journal',[{canal:''}]).then(function(r){ OCCUPE=false;
+        if (r&&r.ok){ COMPTA_D=r.journal||[]; if (ONGLET==='comptable') vueComptable(); }
+        else { COMPTA_D=[]; if (ONGLET==='comptable') corps.innerHTML='<div class="carte"><div class="vide">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
+      return;
+    }
+    var rows = COMPTA_D;
+    var h = '<div class="note">ℹ Accès aux liens d’installation et au portail comptable (visite, refus, ouverture, classeur). Sa gestion (créer/révoquer les liens) reste dans <b>Système → Liens d’installation</b>.</div>'
+      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' événement(s)</span><span class="pousse"></span><button class="b" id="cp-reload">🔄 Actualiser</button></div>'
+      + '<table class="tb"><thead><tr><th>Quand</th><th>Canal</th><th>Événement</th><th>IP</th><th>Lien</th><th>Détail</th></tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="6" class="vide">Aucun événement.</td></tr>';
+    for (var i=0;i<rows.length;i++){ var e=rows[i];
+      h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(e.au))+'</td>'
+        + '<td>'+esc(CANAUX[e.canal]||e.canal||'—')+'</td><td>'+esc(EVEN[e.genre]||e.genre||'—')+'</td>'
+        + '<td class="mono">'+esc(e.ip||'—')+'</td><td class="mono">'+esc((e.lienId||'').slice(0,8))+'</td>'
+        + '<td>'+esc(e.detail||'')+(e.qui?' · '+esc(e.qui):'')+'</td></tr>';
+    }
+    h += '</tbody></table></div>';
+    corps.innerHTML = h;
+    var rl=document.getElementById('cp-reload'); if (rl) rl.onclick=function(){ COMPTA_D=null; vueComptable(); };
+  }
+
   // ── Recherches sans résultat (#7 Lot 7b) ─────────────────────────
   function vueRecherchesRatees(){
     var rows = D.recherches||[];
@@ -381,6 +434,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ONGLET==='recherche') vueRecherche();
     else if (ONGLET==='automatisations') vueAuto();
     else if (ONGLET==='impressions') vuePrints();
+    else if (ONGLET==='sms') vueSms();
+    else if (ONGLET==='comptable') vueComptable();
     else if (ONGLET==='recherches') vueRecherchesRatees();
     else if (ONGLET==='verrous') vueVerrous();
     else vueAcces();
