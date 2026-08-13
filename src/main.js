@@ -2932,7 +2932,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'journaux': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
