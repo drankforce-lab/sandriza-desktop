@@ -1339,6 +1339,13 @@ const OPS_PONT = new Set([
   // change ce que la boutique annonce au client et sa politique de retour.
   'liquidation:donnees', 'liquidation:choix', 'liquidation:cats',
   'liquidation:retirer', 'liquidation:lot', 'liquidation:parCategorie',
+  // Import / Export de la boutique (fenetre catalogio, 3.13.0, #30). `products`
+  // pour voir/exporter/analyser ; `products:edit` pour ECRIRE et pour sortir les
+  // marges (cout). Le fichier se lit dans la fenetre ; les telechargements
+  // partent de la page principale (comme la sauvegarde).
+  'catalogio:etat', 'catalogio:exporter', 'catalogio:modele', 'catalogio:analyser',
+  'catalogio:lignes', 'catalogio:appliquer', 'catalogio:rapport', 'catalogio:avis',
+  'catalogio:reinit',
   // Reseaux sociaux (fenetre Sociaux, 1.70.0) : la FILE seulement. Publier
   // engage l exterieur et prend du temps — d ou les limites larges.
   // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
@@ -1902,6 +1909,13 @@ const LIMITES_PONT = {
   // ecriture qui aboutit — le pire des verdicts, puisqu on la refait.
   'liquidation:donnees': 20000, 'liquidation:choix': 20000, 'liquidation:cats': 20000,
   'liquidation:retirer': 30000, 'liquidation:lot': 120000, 'liquidation:parCategorie': 120000,
+  /* Import / Export : appliquer ECRIT des CENTAINES de fiches et peut reprendre
+     des dizaines de photos (chacune un transfert serveur) — c est de loin l op la
+     plus longue, d ou 10 min, comme la creation de sauvegarde. L export attend au
+     besoin la relecture des couts. */
+  'catalogio:etat': 20000, 'catalogio:exporter': 120000, 'catalogio:modele': 20000,
+  'catalogio:analyser': 60000, 'catalogio:lignes': 20000, 'catalogio:appliquer': 600000,
+  'catalogio:rapport': 30000, 'catalogio:avis': 120000, 'catalogio:reinit': 10000,
   /* Retirer une photo ecrit dans le nuage PUIS detruit l objet R2 : deux
      allers-retours reseau, pas une ecriture locale. */
   'fournisseurs:supprimer': 30000, 'avis:photoRetirer': 60000,
@@ -2120,6 +2134,7 @@ const PAGES_ANCRABLES = () => ({
   sociaux: ['Réseaux sociaux', () => pageSociaux('')],
   fidelisation: ['Fidélisation et sondages', () => pageFidelisation('')],
   liquidation: ['Liquidation / Vente finale', () => pageLiquidation('')],
+  catalogio: ['Import / Export Boutique', () => pageCatalogio('')],
   recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
@@ -2988,6 +3003,7 @@ const { pageChat } = require('./fenetres/chat');
 const { pageSociaux } = require('./fenetres/sociaux');
 const { pageFidelisation } = require('./fenetres/fidelisation');
 const { pageLiquidation } = require('./fenetres/liquidation');
+const { pageCatalogio } = require('./fenetres/catalogio');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageAbonnes } = require('./fenetres/abonnes');
@@ -3118,6 +3134,7 @@ const actionApp = (nom) => {
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'liquidation':
+    case 'catalogio':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':

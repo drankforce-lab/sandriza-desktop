@@ -2980,6 +2980,57 @@ module.exports = {
       reponses: { 'liquidation:donnees': { ok: false, motif: 'droit' } },
     },
   ],
+
+  // ── IMPORT / EXPORT DE LA BOUTIQUE (3.13.0, #30) ───────────────────────────
+  /* ⚠ LE BANC NE TELEVERSE PAS DE FICHIER. La fenetre restaure son ecran depuis
+     catalogio:etat (le champ `imp` pour un apercu en cours, `rapport` pour un
+     import termine). C est ce qui permet d atteindre l apercu, le RESUME de
+     confirmation et le rapport sans deposer de CSV — chacun par son identifiant
+     d ouverture. Sans ces cas, les ecrans qui ECRIVENT resteraient invisibles au
+     controle, l angle mort exact de #32. */
+  'catalogio.js': (function(){
+    var COLS = [
+      { lbl: 'SKU', key: true, info: false, req: false, priv: false, aide: 'Retrouve le produit.' },
+      { lbl: 'Nom', key: false, info: false, req: true, priv: false, aide: 'Nom affiché en boutique.' },
+      { lbl: 'Prix régulier', key: false, info: false, req: true, priv: false, aide: 'Supérieur à 0.' },
+      { lbl: 'Coût d’acquisition', key: false, info: false, req: true, priv: true, aide: 'Donnée de marge.' },
+      { lbl: 'Stock total', key: false, info: true, req: false, priv: false, aide: 'Somme des variantes.' },
+    ];
+    var IMP = { feuille: 'catalogue', fichier: 'fournisseur-automne.csv', sep: ';', total: 4,
+      ignorees: ['Notes internes'], nbPhotos: 2, compte: { creation: 1, maj: 2, inchange: 1, erreur: 0 } };
+    var LIGNES = { ok: true, page: 0, pages: 1, total: 4, feuille: 'catalogue', lignes: [
+      { n: 2, sku: 'ROB-0001', nom: 'Robe cintrée', etat: 'maj', err: '', taille: '', couleur: '',
+        diffs: [{ lbl: 'Prix régulier', de: '69,00 $', vers: '59,00 $' }] },
+      { n: 3, sku: '', nom: 'Blouse ivoire', etat: 'creation', err: '', taille: '', couleur: '',
+        diffs: [{ lbl: 'Nom', de: '—', vers: 'Blouse ivoire' }, { lbl: 'Prix régulier', de: '—', vers: '45,00 $' }] },
+      { n: 4, sku: 'HAU-0007', nom: 'Chemisier de soie', etat: 'inchange', err: '', taille: '', couleur: '', diffs: [] },
+      { n: 5, sku: 'MAN-0002', nom: 'Manteau', etat: 'erreur', err: 'Catégorie inconnue : « Vestes ».', taille: '', couleur: '', diffs: [] },
+    ] };
+    var RAP = { crees: 1, majs: 2, photos: 2, histEchecs: 0,
+      photosEchecs: [{ n: 3, sku: '', src: 'https://exemple.test/blouse.jpg', msg: 'introuvable (404)' }],
+      conflits: [{ n: 2, sku: 'ROB-0001', nom: 'Robe cintrée', champs: ['Prix régulier'], actuel: '55,00 $' }],
+      echecs: [{ n: 6, sku: 'PAN-0003', nom: 'Pantalon', msg: 'réseau' }],
+      notifs: [{ pid: 'p9', nom: 'Jupe plissée', count: 3 }] };
+    var etat = function(extra){
+      var base = { ok: true, peut: { vue: true, edit: true, ajout: true }, coutsCharges: true,
+        nbProduits: 128, nbVariantes: 512, colonnes: COLS, imp: null, rapport: null, busy: false };
+      for (var k in (extra || {})) base[k] = extra[k];
+      return base;
+    };
+    return [
+      { nom: 'onglet exporter (catalogue)', id: '', reponses: { identite: IDENTITE, 'catalogio:etat': etat({}) } },
+      { nom: 'choix du fichier a importer', id: 'import', reponses: { identite: IDENTITE, 'catalogio:etat': etat({}) } },
+      { nom: 'apercu d un import catalogue', id: 'apercu',
+        reponses: { identite: IDENTITE, 'catalogio:etat': etat({ imp: IMP }), 'catalogio:lignes': LIGNES } },
+      { nom: 'resume avant d appliquer', id: 'confirmer',
+        reponses: { identite: IDENTITE, 'catalogio:etat': etat({ imp: IMP }), 'catalogio:lignes': LIGNES } },
+      { nom: 'rapport d un import termine', id: 'rapport',
+        reponses: { identite: IDENTITE, 'catalogio:etat': etat({ rapport: RAP }),
+          'catalogio:avis': { ok: true, sent: 3, rapport: RAP } } },
+      { nom: 'refus de droit', id: '', reponses: { 'catalogio:etat': { ok: false, motif: 'droit' } } },
+    ];
+  })(),
+
   'fidelisation.js': [
     { nom: 'editeur de sondage', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
       'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
