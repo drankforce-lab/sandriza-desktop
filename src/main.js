@@ -1359,6 +1359,11 @@ const OPS_PONT = new Set([
   'newsletter:dash', 'newsletter:cfgDonnees', 'newsletter:cfgEcrire', 'newsletter:controls',
   'newsletter:testConn', 'newsletter:offerDonnees', 'newsletter:offerEcrire',
   'newsletter:offerImage', 'newsletter:offerReset', 'newsletter:processChains',
+  // Publicite ciblee & analytique (fenetre publicite, 3.16.0, #30) — le DERNIER.
+  // 5 onglets de lecture + Campagnes qui ecrit (analytics:edit revu au coeur).
+  'analytics:overview', 'analytics:segments', 'analytics:promos', 'analytics:social',
+  'analytics:satisfaction', 'analytics:campaigns', 'analytics:campForm', 'analytics:audience',
+  'analytics:campSave', 'analytics:campLaunch', 'analytics:campDelete', 'analytics:segExport',
   // Reseaux sociaux (fenetre Sociaux, 1.70.0) : la FILE seulement. Publier
   // engage l exterieur et prend du temps — d ou les limites larges.
   // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
@@ -1943,6 +1948,12 @@ const LIMITES_PONT = {
   'newsletter:controls': 20000, 'newsletter:testConn': 60000, 'newsletter:offerDonnees': 20000,
   'newsletter:offerEcrire': 30000, 'newsletter:offerImage': 120000, 'newsletter:offerReset': 15000,
   'newsletter:processChains': 300000,
+  /* Publicite ciblee : lecture (calcul sur toutes les ventes) ~30 s ; l'ecriture
+     de campagne peut declencher une publication sociale. */
+  'analytics:overview': 30000, 'analytics:segments': 30000, 'analytics:promos': 30000,
+  'analytics:social': 30000, 'analytics:satisfaction': 20000, 'analytics:campaigns': 20000,
+  'analytics:campForm': 20000, 'analytics:audience': 15000, 'analytics:campSave': 120000,
+  'analytics:campLaunch': 60000, 'analytics:campDelete': 15000, 'analytics:segExport': 30000,
   /* Retirer une photo ecrit dans le nuage PUIS detruit l objet R2 : deux
      allers-retours reseau, pas une ecriture locale. */
   'fournisseurs:supprimer': 30000, 'avis:photoRetirer': 60000,
@@ -2164,6 +2175,7 @@ const PAGES_ANCRABLES = () => ({
   catalogio: ['Import / Export Boutique', () => pageCatalogio('')],
   invmeta: ['Attributs produits', () => pageInvMeta('')],
   newsletter: ['Infolettre', () => pageNewsletter('')],
+  publicite: ['Publicité ciblée', () => pagePublicite('')],
   recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
@@ -3035,6 +3047,7 @@ const { pageLiquidation } = require('./fenetres/liquidation');
 const { pageCatalogio } = require('./fenetres/catalogio');
 const { pageInvMeta } = require('./fenetres/invmeta');
 const { pageNewsletter } = require('./fenetres/newsletter');
+const { pagePublicite } = require('./fenetres/publicite');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageAbonnes } = require('./fenetres/abonnes');
@@ -3168,6 +3181,7 @@ const actionApp = (nom) => {
     case 'catalogio':
     case 'invmeta':
     case 'newsletter':
+    case 'publicite':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':

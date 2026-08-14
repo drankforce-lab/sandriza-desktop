@@ -3102,6 +3102,57 @@ module.exports = {
     ];
   })(),
 
+  // ── PUBLICITÉ CIBLÉE & ANALYTIQUE (3.16.0, #30) — le DERNIER écran ──────────
+  /* ⚠ Chaque onglet appelle SON op au chargement. « camp-nouvelle » enchaîne
+     analytics:campaigns puis analytics:campForm (le formulaire ne clique pas). */
+  'publicite.js': (function(){
+    var PEUT = { vue: true, edit: true };
+    var overview = { ok: true, peut: PEUT, totalRev: 18420.5, orderCount: 96, promoRev: 6210.25, pctPromo: 34,
+      activeCustomers: 58, totalCustomers: 140, avgOrder: 191.88,
+      loy: { responseRate: 42, totalResponses: 21, totalInvites: 50, avgRating: 4.3 },
+      monthly: [{ label: 'mars', rev: 2100, promoRev: 600 }, { label: 'avr', rev: 3200, promoRev: 900 },
+        { label: 'mai', rev: 2800, promoRev: 1100 }, { label: 'juin', rev: 3600, promoRev: 1200 },
+        { label: 'juil', rev: 3100, promoRev: 800 }, { label: 'août', rev: 3620, promoRev: 1610 }],
+      topProds: [{ name: 'Robe cintrée', qty: 22, rev: 1319 }, { name: 'Chemisier de soie', qty: 14, rev: 595 }],
+      recent: [{ num: 'CMD-0002-22010', client: 'Bobby Brousseau', date: '2026-08-07', promo: 'Offre -30,00 $', total: 302.96, status: 'confirmed' },
+        { num: 'CMD-0002-22009', client: 'Marie Tremblay', date: '2026-08-06', promo: '', total: 129.99, status: 'shipped' }] };
+    var segMeta = [{ key: 'prospect', label: 'Prospect', desc: 'Inscrits sans achat' },
+      { key: 'nouveau', label: 'Nouveau', desc: '1 commande' }, { key: 'regulier', label: 'Régulier', desc: '2 à 4 commandes' },
+      { key: 'vip', label: 'VIP', desc: '5+ cmd ou 500 $+' }, { key: 'inactif', label: 'Inactif', desc: 'Aucun achat depuis 90j' }];
+    var segments = { ok: true, peut: PEUT, filtre: 'all', total: 140, promoCnt: 38,
+      segCounts: { prospect: 60, nouveau: 40, regulier: 22, vip: 10, inactif: 8 }, segMeta: segMeta,
+      filteredTotal: 140, avecCourriel: 120,
+      clients: [{ nom: 'Bobby Brousseau', email: 'bobby@example.com', segment: 'vip', segLabel: 'VIP', orderCount: 6, totalSpent: 812.4, lastO: '2026-08-07', daysSince: 7, isPromo: true },
+        { nom: 'Marie Tremblay', email: 'marie@example.com', segment: 'regulier', segLabel: 'Régulier', orderCount: 3, totalSpent: 289.5, lastO: '2026-08-06', daysSince: 8, isPromo: false }] };
+    var promos = { ok: true, peut: PEUT,
+      perfs: [{ id: 'p1', name: 'Soldes automne', type: 'discount', badge: '-20%', scope: 'Toute boutique', period: '2026-08-01 → 2026-09-15', orders: 30, revenue: 4200, savings: 840, active: true },
+        { id: 'c1', name: 'BIENVENUE10', type: 'coupon', badge: '10%', scope: 'Code: BIENVENUE10', period: '— → —', orders: 12, revenue: 1300, savings: 130, active: false }],
+      totaux: { count: 2, active: 1, promoOrders: 42, promoConvRate: 34, totalPromoRev: 5500, totalSavings: 970 } };
+    var social = { ok: true, peut: PEUT, base: 'https://www.sandriza.com/',
+      posts: [{ date: '2026-08-05', networks: 'facebook, instagram', content: 'Nouvelle collection automne 🍂', orders48h: 4, revenue48h: 512 }],
+      recs: [{ icon: '⚠️', txt: '8 clients inactifs depuis 90j+. Une offre de réactivation pourrait les relancer.', seg: 'inactif' },
+        { icon: '⭐', txt: '10 VIP — offre exclusive pour les fidéliser.', seg: 'vip' }] };
+    var campaigns = { ok: true, peut: PEUT,
+      camps: [{ id: 'camp_0001', name: 'Promo été VIP', promoLabel: 'Soldes automne (-20%)', segLabel: 'VIP', audienceCount: 10, channels: 'facebook, instagram', date: '2026-08-01', status: 'sent' },
+        { id: 'camp_0002', name: 'Relance inactifs', promoLabel: '', segLabel: 'Inactif', audienceCount: 8, channels: 'newsletter', date: '2026-08-10', status: 'draft' }] };
+    var campForm = { ok: true, peut: PEUT, seg0: 'all', audienceCount: 120,
+      promos: [{ id: 'p1', label: 'Soldes automne — -20%' }] };
+    var satisfaction = { ok: true, peut: PEUT, rated: 18, rate: 83, satisfied: 15, unsatisfied: 3, total: 26,
+      comments: [{ score: true, comment: 'Service rapide, merci !', name: 'Marie', date: '7 août' },
+        { score: false, comment: 'Attente un peu longue.', name: 'Paul', date: '5 août' }] };
+    return [
+      { nom: 'vue d ensemble', id: '', reponses: { identite: IDENTITE, 'analytics:overview': overview } },
+      { nom: 'segments clients', id: 'segments', reponses: { identite: IDENTITE, 'analytics:segments': segments } },
+      { nom: 'performance promotions', id: 'promos', reponses: { identite: IDENTITE, 'analytics:promos': promos } },
+      { nom: 'attribution sociale + UTM', id: 'social', reponses: { identite: IDENTITE, 'analytics:social': social } },
+      { nom: 'campagnes', id: 'campaigns', reponses: { identite: IDENTITE, 'analytics:campaigns': campaigns } },
+      { nom: 'nouvelle campagne (formulaire)', id: 'camp-nouvelle',
+        reponses: { identite: IDENTITE, 'analytics:campaigns': campaigns, 'analytics:campForm': campForm, 'analytics:audience': { ok: true, count: 120 } } },
+      { nom: 'satisfaction chat', id: 'satisfaction', reponses: { identite: IDENTITE, 'analytics:satisfaction': satisfaction } },
+      { nom: 'refus de droit', id: '', reponses: { 'analytics:overview': { ok: false, motif: 'droit' } } },
+    ];
+  })(),
+
   'fidelisation.js': [
     { nom: 'editeur de sondage', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
       'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
