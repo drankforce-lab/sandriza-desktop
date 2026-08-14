@@ -2397,8 +2397,28 @@ ipcMain.on('pont:fermer', (e) => {
 // à faire, et l'y mêler brouillerait ce qu'elle protège.
 // Rend le nouvel état, pour que le bouton porte le bon libellé au lieu de
 // supposer que sa demande a abouti.
+/* ⚠⚠ UNE VUE ANCRÉE N'EST PAS UNE FENÊTRE. `BrowserWindow.fromWebContents` rend
+   null pour une WebContentsView : elle appartient au cadre de la fenêtre
+   principale, elle n'en est pas une. Le handler rendait donc `false` sans rien
+   faire, et le bouton de plein écran d'une vue ancrée était MORT — silencieux,
+   donc indiagnosticable. Tant qu'il n'existait que dans produit.js et photos.js
+   le défaut passait inaperçu ; en le posant dans les 83 fenêtres, on l'aurait
+   multiplié par soixante-quatre (le nombre de sections ancrables).
+   C'est le même détour que `pont:fermer` fait déjà quelques lignes plus haut.
+   ⚠ ANCRÉE → C'EST LA FENÊTRE PRINCIPALE QU'ON AGRANDIT : la vue occupe son
+   cadre, donc c'est bien elle qui doit passer en plein écran. Détachée dans sa
+   propre fenêtre (`a.fenetre`), c'est celle-là. Et `_suivrePleinEcran` /
+   `_zoomPartout` s'occupent déjà de faire grossir les vues ancrées avec elle. */
+const _fenetreDeLAppelant = (sender) => {
+  for (const [, a] of ancrees) {
+    if (a.view && a.view.webContents === sender) {
+      return (a.fenetre && !a.fenetre.isDestroyed()) ? a.fenetre : mainWindow;
+    }
+  }
+  return BrowserWindow.fromWebContents(sender);
+};
 ipcMain.handle('fenetre:pleinecran', (e) => {
-  const w = BrowserWindow.fromWebContents(e.sender);
+  const w = _fenetreDeLAppelant(e.sender);
   if (!w || w.isDestroyed()) return false;
   const vers = !w.isFullScreen();
   w.setFullScreen(vers);

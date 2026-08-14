@@ -345,10 +345,69 @@ function szPleinAuto(){
 szPleinAuto();
 `;
 
+/* ── LE PLEIN ÉCRAN DE LA FENÊTRE ELLE-MÊME ──────────────────────────────────
+   ⚠⚠ CE N'EST PAS LE MÊME PLEIN ÉCRAN QUE CELUI DE #28, ET C'EST TOUT LE POINT.
+   L'installateur ci-dessus (JS_PLEIN_AUTO) équipe les SURCOUCHES : il fait
+   remplir la fenêtre par une boîte qui flottait au milieu. Il ne peut rien pour
+   une fenêtre dont l'assistant EST la page — « Préparation de commande » n'a
+   aucune surcouche à agrandir, donc aucun bouton n'y paraissait jamais. Le
+   défaut a été signalé là, mais il valait pour 82 fenêtres sur 84.
+
+   Le vrai plein écran de fenêtre existait déjà (szPont.pleinEcran →
+   `fenetre:pleinecran` → setFullScreen), et DEUX fenêtres seulement l'offraient :
+   produit.js et photos.js, chacune avec son bouton écrit à la main. On le pose
+   donc ici, une fois, pour toutes celles qui ont une barre de titre.
+
+   ⚠ LE LIBELLÉ SE SYNCHRONISE SUR LA CLASSE, PAS SUR NOS CLICS. La coquille pose
+   « sz-zoom-fen » sur <html> quand la fenêtre entre en plein écran, par quelque
+   chemin que ce soit (notre bouton, le menu, la touche du système). Un bouton qui
+   ne suivrait que ses propres clics mentirait dès que l'utilisateur sort du plein
+   écran autrement. On observe donc la classe.
+   ⚠ ET L'ÉTAT RENDU PAR LA COQUILLE PASSE EN PREMIER : la classe arrive par un
+   aller-retour, un instant plus tard. Sans cela le bouton clignoterait à l'envers.
+
+   ⚠ AUCUN BOUTON MORT : sans szPont.pleinEcran (coquille antérieure à 1.19.0,
+   ou page ouverte dans un navigateur), on ne pose rien du tout. Un bouton qui
+   reste là sans rien faire est un défaut qu'on ne peut pas diagnostiquer. */
+const JS_FENPLEIN = `
+function _szFenEtat(){ return document.documentElement.classList.contains('sz-zoom-fen'); }
+function _szFenLibelle(b, on){
+  if (on === undefined) on = _szFenEtat();
+  b.textContent = on ? '⤡' : '⛶';
+  b.title = on ? 'Quitter le plein écran' : 'Plein écran — toute la fenêtre';
+}
+function szFenPleinPoser(){
+  var t = document.querySelector('.tete');
+  if (!t) return;
+  // Déjà posé, ou la fenêtre a le sien (produit.js) : on ne double pas.
+  if (t.querySelector('[data-szfen]') || t.querySelector('#btn-fs')) return;
+  if (!window.szPont || !window.szPont.pleinEcran) return;
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'sz-btnfen';
+  b.setAttribute('data-szfen', '1');
+  _szFenLibelle(b);
+  b.onclick = function(){
+    window.szPont.pleinEcran().then(function(etat){
+      if (etat === null) return;          // la coquille n'a pas répondu
+      _szFenLibelle(b, etat);
+    });
+  };
+  t.appendChild(b);
+  try {
+    new MutationObserver(function(){ _szFenLibelle(b); })
+      .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  } catch(e){}
+}
+szFenPleinPoser();
+document.addEventListener('DOMContentLoaded', szFenPleinPoser);
+`;
+
 /* Ce que les fenêtres reçoivent réellement sous le nom `JS_DIRE` : le message,
-   le plein écran et son installateur. Elles n'ont RIEN à changer — c'est tout
-   l'intérêt de le brancher ici plutôt que dans chacune. */
-const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO;
+   le plein écran des surcouches et son installateur, et le plein écran de la
+   fenêtre. Elles n'ont RIEN à changer — c'est tout l'intérêt de le brancher ici
+   plutôt que dans chacune. */
+const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN;
 
 const JS_SOCLE = `
 var P = window.szPont;
@@ -713,6 +772,21 @@ html.jour .sz-btnplein:hover{background:#efece4}
    L'installateur réserve la place à droite du titre pour qu'il ne passe pas
    dessous. */
 .sz-btnplein.flottant{position:absolute;top:.55rem;right:.6rem;margin-right:0;z-index:3}
+/* Le bouton du plein écran DE LA FENÊTRE, posé dans la barre de titre de chaque
+   fenêtre par son installateur (voir JS_FENPLEIN).
+   ⚠ IL NE PEUT PAS EMPRUNTER la règle « .tete .outils button » : elle est locale
+   à produit.js, la seule fenêtre qui avait son bouton écrit à la main. Une règle
+   locale ne s'applique pas à un bouton posé dans les 82 autres.
+   ⚠ « user-select:none » comme tous les contrôles cliquables : la sélection du
+   texte avalait le clic de la souris (le clic sur le libellé ne faisait rien,
+   à côté du libellé fonctionnait). */
+.sz-btnfen{flex:0 0 auto;font:inherit;font-size:.78rem;line-height:1.35;padding:.14rem .45rem;
+  margin-left:.4rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;
+  background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;
+  -webkit-user-select:none;user-select:none}
+.sz-btnfen:hover{background:rgba(255,255,255,.09)}
+html.jour .sz-btnfen{color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
+html.jour .sz-btnfen:hover{background:#efece4}
 /* Message posé DANS la surcouche par szDire, quand la fenêtre n'a pas déjà sa
    propre zone (.msgsur). */
 .sz-msgauto{margin-top:.75rem;padding:.5rem .7rem;border-radius:8px;font-size:.8rem;

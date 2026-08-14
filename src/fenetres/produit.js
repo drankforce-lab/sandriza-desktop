@@ -247,7 +247,6 @@ function pageProduit(id) {
   <span class="outils">
     <button type="button" id="btn-jrn" title="Modifications de cette fiche" style="display:none">🕘 <span class="n" id="jrn-n">0</span></button>
     <button type="button" id="btn-apercu" title="Aperçu boutique — dessiné par le site, avec ses vraies fonctions">👁 Aperçu</button>
-    <button type="button" id="btn-fs" title="Plein écran">⛶</button>
   </span>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
@@ -1512,9 +1511,15 @@ function pageProduit(id) {
     return n / 1000;
   }
 
-  // ══ PLEIN ÉCRAN ═══════════════════════════════════════════════════════════
-  // ⚠ LE SITE SE MET À JOUR SEUL, LA COQUILLE NON. Une coquille antérieure à
-  // 1.19.0 n'expose pas pleinEcran : le bouton se retire plutôt que de rester
+  // ══ PLEIN ÉCRAN — RETIRÉ D'ICI (3.11.0) ═══════════════════════════════════
+  // ⚠ SON BOUTON ÉCRIT À LA MAIN A ÉTÉ SUPPRIMÉ, ET CE N'EST PAS UNE PERTE :
+  // l'installateur du socle (JS_FENPLEIN) le pose maintenant dans les 83
+  // fenêtres, celle-ci comprise. Garder les deux, c'était deux mécanismes pour
+  // un geste, et le nôtre était le moins bon : il ne se mettait à jour QUE sur
+  // ses propres clics, donc il annonçait encore « Plein écran » après une sortie
+  // par la touche du système. Mesuré : 9 verdicts sur 10, celui-là en échec.
+  // Celui du socle observe la classe « sz-zoom-fen » et ne peut pas mentir.
+  // ⚠ Il reste ici la seule chose qui soit propre à cette fenêtre : l'aperçu.
   /* ── APERCU BOUTIQUE ── Le SITE dessine (produit:apercu → Shop.renderProductCard
      et la vue page produit de _pfApercuHtml, avec ses regles vivantes) ; ici on
      ne fait que poser le document sur fond clair. Deux onglets, comme l editeur
@@ -1801,20 +1806,9 @@ function pageProduit(id) {
     suivant();
   }
 
-  // là sans rien faire. Un bouton mort est un défaut qu'on ne peut pas diagnostiquer.
-  function brancherPleinEcran(){
+  function brancherApercu(){
     var ba = document.getElementById('btn-apercu');
     if (ba) ba.onclick = ouvrirApercu;
-    var b = document.getElementById('btn-fs');
-    if (!b) return;
-    if (!P || !P.pleinEcran) { b.style.display = 'none'; return; }
-    b.onclick = function(){
-      P.pleinEcran().then(function(plein){
-        if (plein === null) return;               // la coquille n'a pas répondu
-        b.textContent = plein ? '⊠' : '⛶';
-        b.title = plein ? 'Quitter le plein écran' : 'Plein écran';
-      });
-    };
   }
 
   // ══ JOURNAL DES MODIFICATIONS ═════════════════════════════════════════════
@@ -2200,7 +2194,7 @@ function pageProduit(id) {
         FICHE = r.fiche;
         document.getElementById('titre').textContent = ID ? 'Modifier le produit' : 'Nouveau produit';
         dessiner();
-        brancherPleinEcran();
+        brancherApercu();
         if (ID) {
           // ⚠ L INSTANTANÉ SE PREND APRÈS remplir, jamais avant : pris trop tôt
           // il serait vide, et la fiche entière passerait pour « modifiée » dès
