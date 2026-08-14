@@ -2111,6 +2111,9 @@ module.exports = {
       nom: 'liste garnie + formulaire ouvert',
       id: 'nouvelle',
       reponses: {
+        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
+        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
+          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
           annees: ['2026', '2025'],
@@ -2189,6 +2192,9 @@ module.exports = {
       nom: 'question de fermeture',
       id: 'fermeture',
       reponses: {
+        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
+        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
+          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
           annees: ['2026'], moisNoms: ['Janvier'],
@@ -2213,6 +2219,9 @@ module.exports = {
       nom: 'periode vide',
       id: '',
       reponses: {
+        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
+        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
+          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 2, categorie: '', periode: 'Février 2026',
           annees: ['2026'], moisNoms: ['Janvier', 'Février'],
@@ -2233,6 +2242,9 @@ module.exports = {
       nom: 'annuaire des fournisseurs',
       id: 'annuaire',
       reponses: {
+        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
+        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
+          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
           annees: ['2026'], moisNoms: ['Janvier'],
@@ -2276,6 +2288,9 @@ module.exports = {
       nom: 'lecture seule',
       id: '',
       reponses: {
+        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
+        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
+          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
           annees: ['2026'], moisNoms: ['Janvier'],
@@ -2296,6 +2311,9 @@ module.exports = {
       nom: 'module absent',
       id: '',
       reponses: {
+        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
+        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
+          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': { ok: false, motif: 'module_depenses' },
         identite: IDENTITE,
       },

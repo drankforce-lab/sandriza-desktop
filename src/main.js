@@ -1471,7 +1471,9 @@ const OPS_PONT = new Set([
   // ⚠ 'depenses:facture' LIT une facture par le service d IA : la cle, pdf.js, le
   // canevas et le taux de change restent au site. La fenetre envoie un fichier et
   // recoit des champs — rien n est enregistre sans confirmation.
-  'depenses:donnees', 'depenses:lire', 'depenses:taxes', 'depenses:enregistrer',
+  'depenses:donnees', 'depenses:lire', 'depenses:taxes',
+  // Frais Stripe Tax en comptabilite (#22) — lecture seule.
+  'depenses:fraisStripe', 'depenses:enregistrer',
   'depenses:supprimer', 'depenses:recu', 'depenses:recuOuvrir', 'depenses:facture',
   // Le BROUILLON : rien de ce qui est saisi ne doit pouvoir disparaitre, quelle
   // que soit la maniere dont la fenetre se ferme (meme patron que l assistant
@@ -1820,6 +1822,10 @@ const LIMITES_PONT = {
      derriere, donc le meme aller-retour R2. On lui laisse la meme marge — et
      comme elle est lue APRES le premier dessin, elle ne retarde rien. */
   'tableau:sauvegarde': 60000,
+  /* Frais Stripe Tax (#22) : le relais interroge Turso puis agrege par mois.
+     C est un aller-retour RESEAU, pas une lecture locale — le plafond ordinaire
+     de 8 s le ferait passer pour un echec sur une liaison lente. */
+  'depenses:fraisStripe': 45000,
   'sauvegarde:donnees': 60000, 'sauvegarde:creer': 600000, 'sauvegarde:telecharger': 180000,
   'sauvegarde:restaurer': 600000, 'sauvegarde:supprimer': 45000, 'sauvegarde:purger': 120000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
