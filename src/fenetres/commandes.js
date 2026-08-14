@@ -385,7 +385,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td class="c">'
           + (expedition || o.statut === 'shipped' || o.statut === 'delivered' ? ''
              : (o.enTraitement
-                ? '<button class="mini traite" disabled>🔒 En traitement' + (o.par ? ' — ' + esc(o.par) : '') + '</button>'
+                ? '<button class="mini traite" disabled>🔒 En traitement' + (o.par ? ' par ' + esc(o.par) : '') + '</button>'
                 : (CTX.peutEditer
                    ? '<button class="mini" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)">📦</span> Préparer la commande</button>' : '')))
           + '</td></tr>';

@@ -1354,6 +1354,11 @@ const OPS_PONT = new Set([
   'invmeta:colorEdit', 'invmeta:colorRemove', 'invmeta:codeSave', 'invmeta:codesAssign',
   'invmeta:colorSearch', 'invmeta:colToggle', 'invmeta:colMove', 'invmeta:reachatSave',
   'invmeta:catSave', 'invmeta:catDelete',
+  // Infolettre — 3 onglets manquants (fenetre newsletter, 3.15.0, #30). Les 4
+  // autres onglets ont deja leur fenetre. Ecriture revue `newsletter:edit`.
+  'newsletter:dash', 'newsletter:cfgDonnees', 'newsletter:cfgEcrire', 'newsletter:controls',
+  'newsletter:testConn', 'newsletter:offerDonnees', 'newsletter:offerEcrire',
+  'newsletter:offerImage', 'newsletter:offerReset', 'newsletter:processChains',
   // Reseaux sociaux (fenetre Sociaux, 1.70.0) : la FILE seulement. Publier
   // engage l exterieur et prend du temps — d ou les limites larges.
   // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
@@ -1932,6 +1937,12 @@ const LIMITES_PONT = {
   'invmeta:colorRemove': 20000, 'invmeta:codeSave': 20000, 'invmeta:codesAssign': 30000,
   'invmeta:colorSearch': 15000, 'invmeta:colToggle': 15000, 'invmeta:colMove': 15000,
   'invmeta:reachatSave': 20000, 'invmeta:catSave': 20000, 'invmeta:catDelete': 20000,
+  /* Infolettre : testConn et processChains partent de VRAIS courriels (Resend) ;
+     offerImage televerse une image dans R2. */
+  'newsletter:dash': 20000, 'newsletter:cfgDonnees': 20000, 'newsletter:cfgEcrire': 30000,
+  'newsletter:controls': 20000, 'newsletter:testConn': 60000, 'newsletter:offerDonnees': 20000,
+  'newsletter:offerEcrire': 30000, 'newsletter:offerImage': 120000, 'newsletter:offerReset': 15000,
+  'newsletter:processChains': 300000,
   /* Retirer une photo ecrit dans le nuage PUIS detruit l objet R2 : deux
      allers-retours reseau, pas une ecriture locale. */
   'fournisseurs:supprimer': 30000, 'avis:photoRetirer': 60000,
@@ -2152,6 +2163,7 @@ const PAGES_ANCRABLES = () => ({
   liquidation: ['Liquidation / Vente finale', () => pageLiquidation('')],
   catalogio: ['Import / Export Boutique', () => pageCatalogio('')],
   invmeta: ['Attributs produits', () => pageInvMeta('')],
+  newsletter: ['Infolettre', () => pageNewsletter('')],
   recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
@@ -3022,6 +3034,7 @@ const { pageFidelisation } = require('./fenetres/fidelisation');
 const { pageLiquidation } = require('./fenetres/liquidation');
 const { pageCatalogio } = require('./fenetres/catalogio');
 const { pageInvMeta } = require('./fenetres/invmeta');
+const { pageNewsletter } = require('./fenetres/newsletter');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageAbonnes } = require('./fenetres/abonnes');
@@ -3154,6 +3167,7 @@ const actionApp = (nom) => {
     case 'liquidation':
     case 'catalogio':
     case 'invmeta':
+    case 'newsletter':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':

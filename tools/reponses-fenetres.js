@@ -3066,6 +3066,42 @@ module.exports = {
     ];
   })(),
 
+  // ── INFOLETTRE : Tableau de bord / Config / Offre (3.15.0, #30) ────────────
+  /* ⚠ La fenêtre n'appelle QUE l'op de l'onglet courant au chargement — chaque
+     cas fournit donc l'op correspondante. Les 4 autres onglets ont leur fenêtre. */
+  'newsletter.js': (function(){
+    var CTRLS = { orderConfirmation: true, shipping: true, delivery: false, welcomeOffer: true,
+      giftCard: true, chatOffline: true, passwordReset: true, chains: true, supportTicket: true };
+    var dash = { ok: true, peut: { vue: true, edit: true }, hasKey: true,
+      active: 128, unsub: 12, sentCamps: 6, draftCamps: 2, totalSent: 940, failedSent: 3,
+      activeChains: 2, pendingSteps: 4,
+      recents: [
+        { name: 'Nouvelle collection automne', sentAt: '2026-08-10', sent: 120, failed: 1, status: 'sent' },
+        { name: 'Soldes — brouillon', sentAt: '', sent: 0, failed: 0, status: 'draft' },
+      ],
+      sources: [{ label: 'Pied de page', count: 90, pct: 64 }, { label: 'Commande', count: 38, pct: 27 }, { label: 'Admin', count: 12, pct: 9 }] };
+    var cfg = { ok: true, peut: { vue: true, edit: true },
+      cfg: { apiKey: 're_test_abc123', hasKey: true, fromEmail: 'infolettre@sandriza.ca', fromName: 'SANDRIZA',
+        replyTo: 'service@sandriza.ca', companyName: 'SANDRIZA', companyAddress: '123 rue Principale, Québec',
+        websiteUrl: 'https://sandriza.ca', fromEmailTransactional: '', fromNameTransactional: '', testMode: false, testEmail: 'test@sandriza.ca' },
+      controls: CTRLS };
+    var offer = { ok: true, peut: { vue: true, edit: true },
+      cfg: { enabled: true, title: 'OBTENEZ\n10% DE RABAIS!', subtitle: 'Inscrivez-vous à notre infolettre et recevez votre rabais de bienvenue.',
+        cta: "JE M'INSCRIS", legal: 'En vous inscrivant, vous acceptez de recevoir nos communications.', imageUrl: '', discountValue: 10 },
+      done: false, stats: { total: 40, used: 12, active: 25 } };
+    return [
+      { nom: 'tableau de bord', id: '', reponses: { identite: IDENTITE, 'newsletter:dash': dash } },
+      { nom: 'tableau de bord sans clé', id: '', reponses: { identite: IDENTITE,
+        'newsletter:dash': Object.assign({}, dash, { hasKey: false }) } },
+      { nom: 'configuration Resend', id: 'config', reponses: { identite: IDENTITE, 'newsletter:cfgDonnees': cfg } },
+      { nom: 'configuration en lecture seule', id: 'config', reponses: { identite: IDENTITE,
+        'newsletter:cfgDonnees': Object.assign({}, cfg, { peut: { vue: true, edit: false }, cfg: Object.assign({}, cfg.cfg, { apiKey: '', hasKey: true }) }) } },
+      { nom: 'offre de bienvenue', id: 'offer', reponses: { identite: IDENTITE, 'newsletter:offerDonnees': offer } },
+      { nom: 'aperçu du popup d offre', id: 'apercu', reponses: { identite: IDENTITE, 'newsletter:offerDonnees': offer } },
+      { nom: 'refus de droit', id: '', reponses: { 'newsletter:dash': { ok: false, motif: 'droit' } } },
+    ];
+  })(),
+
   'fidelisation.js': [
     { nom: 'editeur de sondage', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
       'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
