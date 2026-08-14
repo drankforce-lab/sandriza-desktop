@@ -1346,6 +1346,14 @@ const OPS_PONT = new Set([
   'catalogio:etat', 'catalogio:exporter', 'catalogio:modele', 'catalogio:analyser',
   'catalogio:lignes', 'catalogio:appliquer', 'catalogio:rapport', 'catalogio:avis',
   'catalogio:reinit',
+  // Attributs produits (fenetre invmeta, 3.14.0, #30) — le plus gros ecran, huit
+  // onglets. Un seul droit au pont (inventory) ; chaque coeur d'ecriture reverifie
+  // le droit precis (inventory:edit/:add/:delete).
+  'invmeta:donnees', 'invmeta:sizeAdd', 'invmeta:sizeRemove', 'invmeta:attrAdd',
+  'invmeta:attrRemove', 'invmeta:labelAdd', 'invmeta:labelRemove', 'invmeta:colorAdd',
+  'invmeta:colorEdit', 'invmeta:colorRemove', 'invmeta:codeSave', 'invmeta:codesAssign',
+  'invmeta:colorSearch', 'invmeta:colToggle', 'invmeta:colMove', 'invmeta:reachatSave',
+  'invmeta:catSave', 'invmeta:catDelete',
   // Reseaux sociaux (fenetre Sociaux, 1.70.0) : la FILE seulement. Publier
   // engage l exterieur et prend du temps — d ou les limites larges.
   // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
@@ -1916,6 +1924,14 @@ const LIMITES_PONT = {
   'catalogio:etat': 20000, 'catalogio:exporter': 120000, 'catalogio:modele': 20000,
   'catalogio:analyser': 60000, 'catalogio:lignes': 20000, 'catalogio:appliquer': 600000,
   'catalogio:rapport': 30000, 'catalogio:avis': 120000, 'catalogio:reinit': 10000,
+  /* Attributs produits : chaque geste ecrit une config invMeta/invCats (rapide),
+     mais `donnees` recalcule l'usage de chaque valeur sur TOUS les produits. */
+  'invmeta:donnees': 30000, 'invmeta:sizeAdd': 20000, 'invmeta:sizeRemove': 20000,
+  'invmeta:attrAdd': 20000, 'invmeta:attrRemove': 20000, 'invmeta:labelAdd': 20000,
+  'invmeta:labelRemove': 20000, 'invmeta:colorAdd': 20000, 'invmeta:colorEdit': 20000,
+  'invmeta:colorRemove': 20000, 'invmeta:codeSave': 20000, 'invmeta:codesAssign': 30000,
+  'invmeta:colorSearch': 15000, 'invmeta:colToggle': 15000, 'invmeta:colMove': 15000,
+  'invmeta:reachatSave': 20000, 'invmeta:catSave': 20000, 'invmeta:catDelete': 20000,
   /* Retirer une photo ecrit dans le nuage PUIS detruit l objet R2 : deux
      allers-retours reseau, pas une ecriture locale. */
   'fournisseurs:supprimer': 30000, 'avis:photoRetirer': 60000,
@@ -2135,6 +2151,7 @@ const PAGES_ANCRABLES = () => ({
   fidelisation: ['Fidélisation et sondages', () => pageFidelisation('')],
   liquidation: ['Liquidation / Vente finale', () => pageLiquidation('')],
   catalogio: ['Import / Export Boutique', () => pageCatalogio('')],
+  invmeta: ['Attributs produits', () => pageInvMeta('')],
   recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
@@ -3004,6 +3021,7 @@ const { pageSociaux } = require('./fenetres/sociaux');
 const { pageFidelisation } = require('./fenetres/fidelisation');
 const { pageLiquidation } = require('./fenetres/liquidation');
 const { pageCatalogio } = require('./fenetres/catalogio');
+const { pageInvMeta } = require('./fenetres/invmeta');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageAbonnes } = require('./fenetres/abonnes');
@@ -3135,6 +3153,7 @@ const actionApp = (nom) => {
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'liquidation':
     case 'catalogio':
+    case 'invmeta':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':

@@ -104,6 +104,7 @@ thead th{position:sticky;top:0;background:#1b2635;text-align:left;
   padding:.34rem .5rem;font-size:.7rem;text-transform:uppercase;
   letter-spacing:.06em;color:#8fa1b8;font-weight:700}
 thead th.d{text-align:right}
+thead th.c{text-align:center}
 tbody td{padding:.3rem .5rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
@@ -376,7 +377,7 @@ ${JS_ACTIVITE}${JS_DIRE}
              de boutons differents a ce niveau >>). Verrou tenu par QUICONQUE —
              soi compris, sa propre fenetre de preparation ouverte est un
              traitement en cours — la ligne dit 🔒 En traitement, et par qui.
-             Libre : 🚀 Preparer, qui ouvre l assistant (lequel se place tout
+             Libre : 📦 Preparer la commande, qui ouvre l assistant (lequel se place tout
              seul a la bonne etape depuis la 1.28.0, et fabrique l etiquette a
              son etape 2 : plus besoin d un bouton Expedier separe ici).
              Et AUCUN bouton sur une commande expediee ou livree — la vue
@@ -386,7 +387,7 @@ ${JS_ACTIVITE}${JS_DIRE}
              : (o.enTraitement
                 ? '<button class="mini traite" disabled>🔒 En traitement' + (o.par ? ' — ' + esc(o.par) : '') + '</button>'
                 : (CTX.peutEditer
-                   ? '<button class="mini" data-prep="' + esc(o.id) + '">🚀 Préparer</button>' : '')))
+                   ? '<button class="mini" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)">📦</span> Préparer la commande</button>' : '')))
           + '</td></tr>';
       });
       h += '</tbody></table></div>';

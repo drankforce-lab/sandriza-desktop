@@ -3031,6 +3031,41 @@ module.exports = {
     ];
   })(),
 
+  // ── ATTRIBUTS PRODUITS (3.14.0, #30) — le plus gros écran ──────────────────
+  /* ⚠ La fenêtre rend chaque onglet depuis `invmeta:donnees`. Chaque onglet a
+     son id d'ouverture (colors, categories, reachat…) ; les lignes d'AJOUT aussi
+     (attr-nouveau, cat-nouvelle), car le banc ne clique pas. */
+  'invmeta.js': (function(){
+    var donnees = {
+      ok: true, peut: { vue: true, edit: true, ajout: true, supprime: true },
+      sizes: [{ nom: 'XS', used: 3 }, { nom: 'S', used: 5 }, { nom: 'M', used: 5 }, { nom: 'OS', used: 0 }],
+      genres: [{ key: 'femme', label: 'Femme', labelEN: 'Women', used: 8 }, { key: 'unisexe', label: 'Unisexe', labelEN: 'Unisex', used: 0 }],
+      ageGroups: [{ key: 'adulte', label: 'Adulte', labelEN: 'Adult', used: 8 }],
+      styles: [{ key: 'boheme', label: 'Bohème', labelEN: 'Boho', used: 2 }],
+      labels: [{ key: 'coup-de-coeur', label: 'Coup de cœur', labelEN: 'Favorite', color: '#c0392b', textColor: '#fff', used: 1 }],
+      custom: [{ nom: 'corail rosé', hex: '#ff8b7a', gradient: false, used: 2 }],
+      builtin: [{ nom: 'noir', hex: '#1a1a1a', used: 6 }, { nom: 'blanc', hex: '#ffffff', used: 4 }, { nom: 'rouge', hex: '#c0392b', used: 0 }],
+      codes: [{ nom: 'noir', hex: '#1a1a1a', code: 'NO', hasCode: true }, { nom: 'corail rosé', hex: '#ff8b7a', code: 'CR', hasCode: false }],
+      conflits: [{ code: 'BL', noms: ['bleu', 'blanc'] }],
+      suggestions: [{ nom: 'rouge', code: 'RO' }],
+      colOrder: ['add', 'codes', 'custom', 'builtin'], colCollapsed: {},
+      categories: [
+        { id: 'ic_robes', catKey: 'robes', name: 'Robes', nameEN: 'Dresses', code: 'ROB', color: '#C49A6C', aiOn: true, simpleOn: false, used: 7 },
+        { id: 'ic_hauts', catKey: 'hauts', name: 'Hauts & Blouses', nameEN: 'Tops', code: 'HAU', color: '#8FA1B8', aiOn: false, simpleOn: true, used: 3 },
+      ],
+      reachat: { lowStockDefault: 3, buyMax: 10, regles: 4, exceptions: 2 },
+    };
+    var mk = function(id){ return { nom: 'onglet ' + (id || 'tailles'), id: id, reponses: { identite: IDENTITE, 'invmeta:donnees': donnees } }; };
+    return [
+      mk(''), mk('genres'), mk('colors'), mk('labels'), mk('categories'), mk('reachat'),
+      { nom: 'ligne d ajout attribut', id: 'attr-nouveau', reponses: { identite: IDENTITE, 'invmeta:donnees': donnees } },
+      { nom: 'ligne d ajout categorie', id: 'cat-nouvelle', reponses: { identite: IDENTITE, 'invmeta:donnees': donnees } },
+      { nom: 'lecture seule', id: '', reponses: { identite: IDENTITE,
+        'invmeta:donnees': Object.assign({}, donnees, { peut: { vue: true, edit: false, ajout: false, supprime: false } }) } },
+      { nom: 'refus de droit', id: '', reponses: { 'invmeta:donnees': { ok: false, motif: 'droit' } } },
+    ];
+  })(),
+
   'fidelisation.js': [
     { nom: 'editeur de sondage', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
       'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
