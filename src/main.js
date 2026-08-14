@@ -1332,6 +1332,8 @@ const OPS_PONT = new Set([
   'chat:liste', 'chat:lire', 'chat:repondre', 'chat:statut', 'chat:supprimer',
   // Reseaux sociaux (fenetre Sociaux, 1.70.0) : la FILE seulement. Publier
   // engage l exterieur et prend du temps — d ou les limites larges.
+  // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
+  'sociaux:config:donnees', 'sociaux:config:ecrire', 'sociaux:config:tester',
   'sociaux:liste', 'sociaux:publier', 'sociaux:publierTout', 'sociaux:ignorer',
   'sociaux:viderHistorique',
   // Fidelisation (fenetre Fidelisation, 1.71.0). La LISTE attend la
@@ -1865,6 +1867,8 @@ const LIMITES_PONT = {
   'stats:telephonie': 45000,
   // Un appel par reseau, et la file peut en compter plusieurs.
   'sociaux:publier': 60000,
+  // Le test interroge Facebook/Instagram : un aller-retour hors de chez nous.
+  'sociaux:config:donnees': 20000, 'sociaux:config:ecrire': 30000, 'sociaux:config:tester': 45000,
   'sociaux:publierTout': 180000,
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
@@ -2111,6 +2115,7 @@ const PAGES_ANCRABLES = () => ({
   'pages': ['Pages du site', () => pagePages()],
   'securite': ['Accès Utilisateurs', () => pageSecurite()],
   'reglages-securite': ['Réglages de sécurité', () => pageReglagesSecurite()],
+  'sociaux-config': ['Configuration des réseaux sociaux', () => pageSociauxConfig()],
   'journaux': ['Journaux', () => pageJournaux(_journauxOnglet || '')],
   'incidents': ['Incidents de sécurité', () => pageIncidents('')],
   'sauvegarde': ['Sauvegarde & Restauration', () => pageSauvegarde('')],
@@ -2953,6 +2958,7 @@ const { pageLancement } = require('./fenetres/lancement');
 const { pagePages } = require('./fenetres/pages');
 const { pageSecurite } = require('./fenetres/securite');
 const { pageReglagesSecurite } = require('./fenetres/reglages-securite');
+const { pageSociauxConfig } = require('./fenetres/sociaux-config');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
@@ -3044,7 +3050,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'journaux': case 'incidents': case 'sauvegarde': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'journaux': case 'incidents': case 'sauvegarde': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

@@ -1748,6 +1748,37 @@ module.exports = {
     ];
   })(),
 
+  // Configuration des reseaux sociaux (#10) — le DERNIER ecran sans natif.
+  // ⚠ Le jeton ne traverse pas : le coeur ne rend qu'un booleen « pose ».
+  'sociaux-config.js': (function(){
+    var donnees = {
+      ok: true, peutEcrire: true, autoPublication: true,
+      reseaux: [
+        { cle: 'facebook', nom: 'Facebook', actif: true, jetonPose: true,
+          extraLabel: 'Identifiant de la Page', extraValeur: '1234567890',
+          aide: 'Jeton de longue duree (Page Access Token).', testable: true },
+        { cle: 'instagram', nom: 'Instagram', actif: true, jetonPose: false,
+          extraLabel: 'Identifiant du compte professionnel', extraValeur: '',
+          aide: 'Jeton Instagram Business.', testable: true },
+        { cle: 'pinterest', nom: 'Pinterest', actif: false, jetonPose: false,
+          extraLabel: 'Identifiant du tableau', extraValeur: '',
+          aide: 'Jeton Pinterest v5.', testable: false },
+        { cle: 'tiktok', nom: 'TikTok', actif: false, jetonPose: true,
+          extraLabel: 'Open ID', extraValeur: 'tt_9f3c', aide: 'Jeton TikTok for Business.', testable: false }
+      ]
+    };
+    return [
+      { nom: 'reseaux', reponses: { identite: IDENTITE,
+        'sociaux:config:donnees': donnees,
+        'sociaux:config:ecrire': donnees,
+        'sociaux:config:tester': { ok: true, quoi: 'Page : Sandriza' } } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE,
+        'sociaux:config:donnees': Object.assign({}, donnees, { peutEcrire: false }) } },
+      { nom: 'test refuse', reponses: { identite: IDENTITE, 'sociaux:config:donnees': donnees,
+        'sociaux:config:tester': { ok: false, motif: 'refus', detail: 'Jeton expire.' } } }
+    ];
+  })(),
+
   // Journaux (#7 Lot 7a). Quatre onglets ; verrous = super-admin (async). Chaque
   // onglet a son cas d'ouverture (le clic ne navigue pas sur le DOM du banc).
   'journaux.js': (function(){
