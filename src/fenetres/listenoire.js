@@ -43,6 +43,15 @@ label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-
 label.champ .sub{display:block;font-size:.72rem;color:#6f8098;margin:.25rem 0 0;line-height:1.5}
 input.t,select.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:#e8edf5;font:inherit;padding:.45rem .6rem}
 input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
+.sug{position:absolute;left:0;right:0;top:100%;z-index:20;margin-top:2px;background:#141d2c;
+  border:1px solid #2b3444;border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.5);
+  max-height:15rem;overflow:auto;display:none}
+.sug-it{padding:.45rem .6rem;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)}
+.sug-it:hover{background:rgba(201,169,126,.14)}
+.sug-it .r{font-weight:600;font-size:.84rem}
+.sug-it .v{font-size:.72rem;color:#8fa1b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug-vide{padding:.5rem .6rem;font-size:.8rem;color:#8fa1b8}
+.sug-src{padding:.25rem .6rem;font-size:.66rem;color:#8fa1b8;border-top:1px solid rgba(255,255,255,.06)}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
@@ -90,6 +99,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var AJOUT = '${AJOUT0}' === '1';
   var TYPE = 'email';
   var DELID = '';
+  var SUG_TIMER = null;   // #42 : anti-rebond des suggestions d'adresse
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -128,8 +138,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<option value="address"'+(TYPE==='address'?' selected':'')+'>Adresse de livraison</option>'
         + '</select></label>';
       if (TYPE === 'address') {
-        h += '<label class="champ"><span class="lbl">Rue</span><input class="t" id="l-valeur" placeholder="1234 rue Principale">'
-          + '<span class="sub">⚠ Pas de suggestions ici : l’assistance à la saisie vit dans la caisse. Recopiez l’adresse telle qu’elle apparaît sur la commande.</span></label>'
+        h += '<label class="champ" style="position:relative"><span class="lbl">Rue</span>'
+          + '<input class="t" id="l-valeur" placeholder="1234 rue Principale" autocomplete="off">'
+          + '<div class="sug" id="l-sug"></div></label>'
           + '<label class="champ"><span class="lbl">Ville</span><input class="t" id="l-ville" placeholder="Québec"></label>';
       } else {
         h += '<label class="champ"><span class="lbl">Valeur</span><input class="t" id="l-valeur" placeholder="'
@@ -178,6 +189,45 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (DELID===id){ DELID=''; retirer(id); }
       else { DELID=id; dessiner(); dire('Cliquez encore pour retirer — cette adresse pourra de nouveau commander.', 'att'); }
     };
+    brancherSuggestions();
+  }
+
+  /* ⚠ SUGGESTIONS D'ADRESSE (#42) — comme la caisse. Le moteur (Mapbox puis
+     repli Nominatim) vit dans la page (op adresse:suggerer) ; ici on affiche la
+     liste et on remplit rue + ville au clic. Anti-rebond 350 ms. Aucune taxe
+     (contrairement a la caisse) : c est juste un champ a saisir.
+     ⚠ AUCUN accent grave dans ce commentaire (litteral de gabarit). */
+  function brancherSuggestions(){
+    var inp = document.getElementById('l-valeur');
+    var sug = document.getElementById('l-sug');
+    if (!inp || !sug || TYPE !== 'address') return;
+    inp.oninput = function(){
+      var q = inp.value.trim();
+      clearTimeout(SUG_TIMER);
+      if (q.length < 3) { sug.innerHTML=''; sug.style.display='none'; return; }
+      SUG_TIMER = setTimeout(function(){
+        appeler('adresse:suggerer',[q]).then(function(r){
+          if (!r || !r.ok || !r.suggestions || !r.suggestions.length) {
+            sug.innerHTML = '<div class="sug-vide">Aucun résultat — vérifiez l’adresse</div>'; sug.style.display='block'; return;
+          }
+          sug.innerHTML = r.suggestions.map(function(s,idx){
+            return '<div class="sug-it" data-i="'+idx+'"><div class="r">'+esc(s.rue||s.ville||'—')
+              + '</div><div class="v">'+esc(s.label||'')+'</div></div>';
+          }).join('') + '<div class="sug-src">'+(r.source==='mapbox'?'🗺️ Mapbox':'🌍 OpenStreetMap')+'</div>';
+          sug.style.display='block';
+          var its = sug.querySelectorAll('.sug-it');
+          for (var k=0;k<its.length;k++) its[k].onmousedown=function(e){
+            e.preventDefault();
+            var s = r.suggestions[parseInt(this.getAttribute('data-i'),10)] || {};
+            if (inp) inp.value = s.rue || '';
+            var vl = document.getElementById('l-ville'); if (vl && s.ville) vl.value = s.ville;
+            sug.innerHTML=''; sug.style.display='none';
+          };
+        });
+      }, 350);
+    };
+    // Un clic hors de la liste la referme.
+    inp.onblur = function(){ setTimeout(function(){ if (sug) sug.style.display='none'; }, 180); };
   }
 
   function ajouter(){

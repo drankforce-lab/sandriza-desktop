@@ -1381,7 +1381,7 @@ const OPS_PONT = new Set([
   'reco:agencement', 'reco:agencement:publier',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
-  'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer',
+  'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer', 'adresse:suggerer',
   'profil:donnees', 'profil:motdepasse', 'profil:questions',
   'sociaux:liste', 'sociaux:publier', 'sociaux:publierTout', 'sociaux:ignorer',
   'sociaux:viderHistorique',
@@ -1967,6 +1967,7 @@ const LIMITES_PONT = {
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */
   'listenoire:donnees': 20000, 'listenoire:ajouter': 30000, 'listenoire:retirer': 30000,
+  'adresse:suggerer': 15000,
   'profil:donnees': 20000, 'profil:motdepasse': 60000, 'profil:questions': 60000,
   'sociaux:publierTout': 180000,
   'ramassages:annuler': 30000,
