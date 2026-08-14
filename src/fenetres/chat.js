@@ -8,9 +8,16 @@
  * sur place, le changement d'état, la suppression armée en deux clics.
  *
  * ⚠ NE COUVRE QUE LES OPÉRATIONS. La configuration du chat et celle de son
- * assistant IA sont des RÉGLAGES : elles restent à l'écran web et suivront avec
- * la Configuration, au palier 5. Les mêler ici aurait donné une fenêtre à
+ * assistant IA sont des RÉGLAGES : les mêler ici aurait donné une fenêtre à
  * moitié écran de travail, à moitié panneau d'options.
+ * ⚠⚠ CETTE PHRASE A COÛTÉ UN ÉCRAN. Elle disait « elles restent à l'écran web
+ * et suivront avec la Configuration, au palier 5 » — sauf qu'elles n'ont jamais
+ * suivi, et que cette fenêtre-ci prend TOUT l'écran `chat` depuis la 1.69.0.
+ * Les réglages sont donc restés joignables NULLE PART pendant des semaines,
+ * sans qu'aucun contrôle s'en aperçoive (il vérifiait que le natif existe, pas
+ * qu'il couvre le même terrain). Ils ont maintenant leur fenêtre :
+ * `chat-config.js`, section `config-chat` (3.9.0, #31).
+ * ➡ UN PORTAGE PARTIEL DOIT LE DIRE ICI **ET** LAISSER UNE PORTE OUVERTE.
  *
  * ⚠ LA LISTE ATTEND LA RESYNCHRONISATION (chat:liste est ASYNCHRONE) : une
  * conversation ouverte depuis un autre appareil doit paraître. Sur quelqu'un
@@ -295,8 +302,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'file' ? ' actif' : '') + '" data-onglet="file">Conversations</button>'
       + '<button class="mini' + (ONGLET === 'satisfaction' ? ' actif' : '') + '" data-onglet="satisfaction">Satisfaction</button>'
-      + '<div class="droite"><span class="dt">Réglages du chat et de l’IA : écran Chat en ligne, '
-      + 'fenêtre principale</span></div></div>';
+      + '<div class="droite"><span class="dt">Réglages du chat et de l’assistant : '
+      + 'Configuration → Communications → Chat en ligne</span></div></div>';
     h += ONGLET === 'satisfaction' ? vueSatisfaction() : vueFile();
     if (DETAIL) h += boiteDetail();
     corps.innerHTML = h;

@@ -1779,6 +1779,51 @@ module.exports = {
     ];
   })(),
 
+  /* Configuration du chat (#31) — l'ecran devenu INATTEIGNABLE parce que la
+     fenetre `chat` prend tout l'ecran `chat` sans porter ses reglages.
+     ⚠ L'onglet IA s'atteint par l'ID D'OUVERTURE : les deux onglets ne
+     traversent pas le meme code, et c'est justement l'onglet qu'on oublie qui
+     disparait. */
+  'chat-config.js': (function(){
+    var donnees = {
+      ok: true, peutEcrire: true,
+      actif: true, enLigne: true, rotation: true,
+      nomAgent: 'Support', nomAffiche: 'Camille',
+      photoAgent: 'https://img.sandriza.com/divers/agent.jpg',
+      courrielAvis: 'boutique@sandriza.com',
+      accueil: 'Bonjour ! Mon nom est {{AGENT}}, comment puis-je vous aider ?',
+      accueilEN: 'Hello! My name is {{AGENT}}, how can I help you today?',
+      horsLigne: 'Nous sommes presentement hors ligne.',
+      horsLigneEN: 'We are currently offline.',
+      agents: [
+        { nom: 'Sophie', photo: 'https://img.sandriza.com/divers/sophie.jpg', actif: true },
+        { nom: 'Camille', photo: '', actif: true },
+        { nom: 'Nicolas', photo: '', actif: false }
+      ],
+      ia: { active: true, produits: true, collections: true, faq: true, retours: true,
+            expedition: false, promotions: true,
+            regles: 'Ne jamais nommer un concurrent.',
+            transfert: 'Je transmets votre question a notre equipe.' },
+      groqPosee: true, groqModele: 'llama-3.3-70b-versatile'
+    };
+    var sansRotation = Object.assign({}, donnees, { rotation: false, nomAffiche: 'Support' });
+    return [
+      { nom: 'widget', reponses: { identite: IDENTITE,
+        'chat:cfg:donnees': donnees, 'chat:cfg:ecrire': donnees,
+        'chat:cfg:photo': { ok: true, url: 'https://img.sandriza.com/divers/neuf.jpg' } } },
+      { nom: 'nom fixe', reponses: { identite: IDENTITE, 'chat:cfg:donnees': sansRotation } },
+      { nom: 'assistant IA', id: 'ia', reponses: { identite: IDENTITE,
+        'chat:cfg:donnees': donnees, 'chat:cfg:ia': donnees } },
+      // Sans cle Groq, l'assistant ne repond pas : l'ecran doit le DIRE.
+      { nom: 'IA sans cle', id: 'ia', reponses: { identite: IDENTITE,
+        'chat:cfg:donnees': Object.assign({}, donnees, { groqPosee: false }) } },
+      { nom: 'aucun agent', reponses: { identite: IDENTITE,
+        'chat:cfg:donnees': Object.assign({}, donnees, { agents: [] }) } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE,
+        'chat:cfg:donnees': Object.assign({}, donnees, { peutEcrire: false }) } }
+    ];
+  })(),
+
   // Liste noire (#30) — un des six ecrans qui n'avaient aucun natif.
   'listenoire.js': (function(){
     var donnees = { ok: true, peutAjouter: true, peutRetirer: true, entrees: [

@@ -1330,6 +1330,10 @@ const OPS_PONT = new Set([
   // Chat en ligne (fenetre Chat, 1.69.0) : les OPERATIONS seulement — la
   // liste ATTEND la resynchronisation, quelqu un attend une reponse.
   'chat:liste', 'chat:lire', 'chat:repondre', 'chat:statut', 'chat:supprimer',
+  // Configuration du chat (fenetre chat-config, 3.9.0, #31) : la promesse
+  // faite en 1.69.0 (<< la configuration suivra >>) n avait jamais ete tenue,
+  // et l ecran est devenu INATTEIGNABLE des que le natif a gagne pour de bon.
+  'chat:cfg:donnees', 'chat:cfg:ecrire', 'chat:cfg:ia', 'chat:cfg:photo',
   // Reseaux sociaux (fenetre Sociaux, 1.70.0) : la FILE seulement. Publier
   // engage l exterieur et prend du temps — d ou les limites larges.
   // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
@@ -1872,6 +1876,9 @@ const LIMITES_PONT = {
   'sociaux:publier': 60000,
   // Le test interroge Facebook/Instagram : un aller-retour hors de chez nous.
   'sociaux:config:donnees': 20000, 'sociaux:config:ecrire': 30000, 'sociaux:config:tester': 45000,
+  /* La photo part en clair vers la PAGE, qui la range dans R2 : un televersement
+     reel, pas une ecriture locale — d ou une limite large. */
+  'chat:cfg:donnees': 20000, 'chat:cfg:ecrire': 30000, 'chat:cfg:ia': 30000, 'chat:cfg:photo': 90000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */
   'listenoire:donnees': 20000, 'listenoire:ajouter': 30000, 'listenoire:retirer': 30000,
@@ -2123,6 +2130,7 @@ const PAGES_ANCRABLES = () => ({
   'securite': ['Accès Utilisateurs', () => pageSecurite()],
   'reglages-securite': ['Réglages de sécurité', () => pageReglagesSecurite()],
   'sociaux-config': ['Configuration des réseaux sociaux', () => pageSociauxConfig()],
+  'chat-config': ['Configuration du chat en ligne', () => pageChatConfig('')],
   'listenoire': ['Liste noire', () => pageListeNoire('')],
   'profil': ['Mon profil', () => pageProfil()],
   'journaux': ['Journaux', () => pageJournaux(_journauxOnglet || '')],
@@ -2968,6 +2976,7 @@ const { pagePages } = require('./fenetres/pages');
 const { pageSecurite } = require('./fenetres/securite');
 const { pageReglagesSecurite } = require('./fenetres/reglages-securite');
 const { pageSociauxConfig } = require('./fenetres/sociaux-config');
+const { pageChatConfig } = require('./fenetres/chat-config');
 const { pageListeNoire } = require('./fenetres/listenoire');
 const { pageProfil } = require('./fenetres/profil');
 const { pageJournaux } = require('./fenetres/journaux');
@@ -3061,7 +3070,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
