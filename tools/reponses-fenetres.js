@@ -1537,6 +1537,70 @@ module.exports = {
     ];
   })(),
 
+  // Incidents de sécurité (#26). Registre Loi 25. Le formulaire est bâti à partir
+  // des `etapes` reçues du cœur : on en donne trois, couvrant les QUATRE types de
+  // champ (text, date, select, textarea), pour que chaque branche de champHtml
+  // soit dessinée au moins une fois. Les états d'ouverture ('inc-new', 'inc-<id>',
+  // 'vue-<id>') ont chacun leur cas — le DOM du banc est factice, un clic n'y
+  // navigue nulle part.
+  'incidents.js': (function(){
+    var etapes = [
+      { cle: 'ident', label: 'Identification', icone: '🧭', champs: [
+        { cle: 'ref', label: 'Référence interne', type: 'text', options: null, requis: false, indice: '', exemple: 'Ex. : INC-2026-001 (facultatif)', defaut: '' },
+        { cle: 'occurredAt', label: 'Date ou période de survenance', type: 'date', options: null, requis: false, indice: '', exemple: '', defaut: '' },
+        { cle: 'knownAt', label: 'Date de prise de connaissance', type: 'date', options: null, requis: true, indice: 'Obligatoire — c’est elle qui fait courir les délais légaux.', exemple: '', defaut: '' },
+        { cle: 'incidentType', label: 'Type d’incident', type: 'select', requis: false, indice: '', exemple: '', defaut: '',
+          options: [['','—'],['acces','Accès non autorisé'],['vol','Vol'],['hameconnage','Hameçonnage']] }
+      ] },
+      { cle: 'risk', label: 'Évaluation du risque', icone: '⚖️', champs: [
+        { cle: 'seriousRisk', label: 'Risque de préjudice sérieux ?', type: 'select', requis: false, indice: '', exemple: '', defaut: 'non',
+          options: [['non','Non'],['oui','Oui'],['evaluation','En cours d’évaluation']] },
+        { cle: 'riskReason', label: 'Motifs de cette conclusion', type: 'textarea', options: null, requis: false, indice: '', exemple: '', defaut: '' }
+      ] },
+      { cle: 'follow', label: 'Suivi & clôture', icone: '✅', champs: [
+        { cle: 'status', label: 'État du dossier', type: 'select', requis: false, indice: '', exemple: '', defaut: 'ouvert',
+          options: [['ouvert','Ouvert / en cours'],['surveille','Sous surveillance'],['clos','Clôturé']] },
+        { cle: 'responsable', label: 'Responsable du dossier', type: 'text', options: null, requis: false, indice: '', exemple: '', defaut: '' },
+        { cle: 'notes', label: 'Notes internes', type: 'textarea', options: null, requis: false, indice: '', exemple: '', defaut: '' }
+      ] }
+    ];
+    var incidents = [
+      { id: 'i1', ref: 'INC-2026-001', knownAt: '2026-08-10', occurredAt: '2026-08-08', incidentType: 'acces',
+        seriousRisk: 'oui', riskReason: 'Courriels et adresses postales de 42 clientes, utilisables pour de l’hameçonnage ciblé.',
+        status: 'ouvert', responsable: 'Bob Brousseau', notes: 'Corps policier avisé le 11.', caiNotified: 'prevu' },
+      { id: 'i2', ref: '', knownAt: '2026-05-02', occurredAt: '2026-05-02', incidentType: 'hameconnage',
+        seriousRisk: 'non', riskReason: 'Aucun renseignement n’a été transmis.', status: 'clos', responsable: 'Marie Tremblay', notes: '', caiNotified: 'nonrequis' }
+    ];
+    var lignes = [
+      { id: 'i1', knownAt: '2026-08-10', occurredAt: '2026-08-08', ref: 'INC-2026-001', type: 'Accès non autorisé', peopleCount: '42', seriousRisk: 'oui', status: 'ouvert', cai: 'À faire' },
+      { id: 'i2', knownAt: '2026-05-02', occurredAt: '2026-05-02', ref: '', type: 'Hameçonnage', peopleCount: '', seriousRisk: 'non', status: 'clos', cai: 'Non requis' }
+    ];
+    var donnees = { ok: true, peutModifier: true, peutSupprimer: true, etapes: etapes, lignes: lignes, incidents: incidents,
+      stats: { total: 2, ouverts: 1, serieux: 1, caiAFaire: 1 } };
+    var vide = { ok: true, peutModifier: true, peutSupprimer: true, etapes: etapes, lignes: [], incidents: [],
+      stats: { total: 0, ouverts: 0, serieux: 0, caiAFaire: 0 } };
+    var ro = { peutModifier: false, peutSupprimer: false };
+    return [
+      { nom: 'registre', reponses: { identite: IDENTITE, 'incidents:donnees': donnees,
+        'incidents:supprimer': Object.assign({}, vide) } },
+      // Le registre VIDE n'est pas un cas dégénéré : c'est l'état NORMAL d'une
+      // entreprise qui n'a pas eu d'incident, et l'écran doit quand même dire
+      // pourquoi il existe.
+      { nom: 'registre vide', reponses: { identite: IDENTITE, 'incidents:donnees': vide } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE, 'incidents:donnees': Object.assign({}, donnees, ro) } },
+      { nom: 'assistant — nouveau', id: 'inc-new',
+        reponses: { identite: IDENTITE, 'incidents:donnees': donnees,
+          'incidents:ecrire': Object.assign({ mode: 'create', id: 'i3' }, donnees) } },
+      { nom: 'assistant — modifier', id: 'inc-i1',
+        reponses: { identite: IDENTITE, 'incidents:donnees': donnees,
+          'incidents:ecrire': Object.assign({ mode: 'edit', id: 'i1' }, donnees) } },
+      { nom: 'assistant — date obligatoire refusée', id: 'inc-new',
+        reponses: { identite: IDENTITE, 'incidents:donnees': donnees,
+          'incidents:ecrire': { ok: false, motif: 'invalide', detail: 'La date de prise de connaissance est obligatoire.' } } },
+      { nom: 'fiche de consultation', id: 'vue-i1', reponses: { identite: IDENTITE, 'incidents:donnees': donnees } }
+    ];
+  })(),
+
   // Journaux (#7 Lot 7a). Quatre onglets ; verrous = super-admin (async). Chaque
   // onglet a son cas d'ouverture (le clic ne navigue pas sur le DOM du banc).
   'journaux.js': (function(){
