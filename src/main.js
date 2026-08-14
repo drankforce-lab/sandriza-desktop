@@ -698,8 +698,15 @@ const createWindow = () => {
   mainWindow.on('page-title-updated', (e) => { e.preventDefault(); });
   mainWindow.setTitle('Administration Sandriza');
 
+  // Le plein écran de la fenêtre principale agrandit son contenu ET celui des
+  // vues ancrées qu'elle porte (voir _zoomPartout).
+  _suivrePleinEcran(mainWindow);
+
   mainWindow.webContents.on('did-finish-load', () => {
     applySidebarPref(mainWindow.webContents);
+    // Un rechargement de la page perd la classe : on la repose si l'on est
+    // toujours en plein écran.
+    _zoomRattraper(mainWindow.webContents);
     capturerMarque();
     // La barre elle-même est dessinée par le SITE (appbar.js). Ici on remet
     // seulement le menu natif — qui porte les raccourcis — et la palette.
@@ -1489,6 +1496,8 @@ const OPS_PONT = new Set([
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
   'tableau:lire', 'tableau:tuiles', 'tableau:ouvrir',
+  // Derniere sauvegarde : lue A PART, car elle seule passe par le reseau (#25).
+  'tableau:sauvegarde',
   // Variantes par couleur : teinte au CANEVAS par le site (une image, une
   // couleur par appel — la fenetre boucle), aucun service externe.
   'produit:teinter',
@@ -1807,6 +1816,10 @@ const LIMITES_PONT = {
      RESTAURER la reecrit ligne a ligne. Ce sont les deux operations les plus
      longues du pont — leur donner un delai court les ferait passer pour un echec
      alors qu'elles se poursuivent cote serveur, ce qui est le pire des deux. */
+  /* La derniere sauvegarde au tableau de bord : c'est `sauvegarde:donnees`
+     derriere, donc le meme aller-retour R2. On lui laisse la meme marge — et
+     comme elle est lue APRES le premier dessin, elle ne retarde rien. */
+  'tableau:sauvegarde': 60000,
   'sauvegarde:donnees': 60000, 'sauvegarde:creer': 600000, 'sauvegarde:telecharger': 180000,
   'sauvegarde:restaurer': 600000, 'sauvegarde:supprimer': 45000, 'sauvegarde:purger': 120000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
@@ -2202,6 +2215,7 @@ ipcMain.handle('dock:ouvrir', (e, cle, etat) => {
       // directement detachee (etat enregistre) — le bouton doit dire Ancrer.
       view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(' + (a.fenetre ? 'false' : 'true') + ');', true).catch(() => {});
       appliquerTheme(view.webContents);
+      _zoomRattraper(view.webContents);
     });
   } else {
     // Vue conservee cachee : elle RELIT ses donnees en revenant.
@@ -2389,6 +2403,48 @@ const appliquerThemePartout = () => {
   ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) appliquerTheme(a.view.webContents); });
 };
 
+/* ── LE PLEIN ÉCRAN DOIT AUSSI AGRANDIR LE CONTENU ──────────────────────────
+   Signalé le 2026-08-14, sur la fenêtre « Nouveau produit » : passée en plein
+   écran, elle s'étirait sans que rien ne grossisse. On y gagnait de la surface,
+   pas de la LISIBILITÉ — or c'est la lisibilité qu'on vient chercher en passant
+   en plein écran.
+   La feuille commune des fenêtres (CSS_PLEIN, socle.js) porte déjà la règle
+   `html.sz-zoom-fen` ; il ne manquait que de poser la classe. On la pose ici, et
+   pas dans chaque fenêtre : l'état « plein écran » appartient à la COQUILLE, la
+   page ne le connaît pas.
+   ⚠ CLASSE DISTINCTE de `sz-zoom` (le plein écran d'une SURCOUCHE) : refermer un
+   assistant appelle szPleinReinit, qui retire `sz-zoom`. Avec une classe unique,
+   fermer l'assistant aurait rapetissé une fenêtre pourtant encore en plein
+   écran, sans rien pour l'expliquer. */
+const _zoomFenetre = (wc, on) => {
+  if (!wc || wc.isDestroyed()) return;
+  wc.executeJavaScript(
+    'document.documentElement.classList.toggle("sz-zoom-fen",' + (on ? 'true' : 'false') + ')'
+  ).catch(() => {});
+};
+/* La fenêtre PRINCIPALE emporte ses vues ANCRÉES : elles vivent dans son cadre
+   et passent donc en plein écran avec elle, sans qu'aucun événement ne les en
+   avertisse. Sans cette boucle, l'écran ancré serait le seul à ne pas suivre. */
+const _zoomPartout = (win, on) => {
+  if (!win || win.isDestroyed()) return;
+  _zoomFenetre(win.webContents, on);
+  if (win === mainWindow) {
+    ancrees.forEach((a) => { if (a.view) _zoomFenetre(a.view.webContents, on); });
+  }
+};
+const _suivrePleinEcran = (win) => {
+  if (!win) return;
+  win.on('enter-full-screen', () => _zoomPartout(win, true));
+  win.on('leave-full-screen', () => _zoomPartout(win, false));
+};
+/* Une vue ancrée POSÉE ALORS QUE la fenêtre est DÉJÀ en plein écran n'a reçu
+   aucun événement : elle naîtrait à la taille normale au milieu d'un écran
+   agrandi. On lui donne l'état courant à son premier chargement. */
+const _zoomRattraper = (wc) => {
+  try { if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isFullScreen()) _zoomFenetre(wc, true); }
+  catch (e) {}
+};
+
 const fenetresNatives = new Map();
 const ouvrirNative = (cle, titre, html, opts = {}) => {
   const deja = fenetresNatives.get(cle);
@@ -2405,6 +2461,7 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
     },
   });
   fenetresNatives.set(cle, win);
+  _suivrePleinEcran(win);
   // Le titre reste celui qu'on a demandé, pas celui que la page annonce.
   win.on('page-title-updated', (ev) => { ev.preventDefault(); });
   win.setTitle(titre);
@@ -3595,6 +3652,7 @@ if (!app.requestSingleInstanceLock()) {
         view.webContents.on('did-finish-load', () => {
           view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
           appliquerTheme(view.webContents);
+          _zoomRattraper(view.webContents);
         });
         view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageTableau()));
       } catch {}

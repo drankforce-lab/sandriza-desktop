@@ -488,6 +488,12 @@ module.exports = {
             revenus: { brut: 15230.5, rembourse: 320, net: 14910.5, factures: 96 },
             messagerie: 2, retoursNouveaux: 1, retoursExpirent: 1,
           },
+          // Ce qu'il reste a faire (#25) : la bande et les tuiles neuves.
+          aFaire: {
+            aTraiter: 7, enLivraison: 3, ruptures: 2, avis: 4,
+            facturesRetard: 2, facturesRetardMontant: 412.91,
+            incidentsOuverts: 1, incidentsCai: 1,
+          },
           recentesCommandes: [
             { numero: 'SZ-100251', date: '2026-08-08T14:00:00Z', client: 'Josée Lafleur', total: 302.96, statut: 'pending', statutLibelle: 'En attente' },
             { numero: 'SZ-100249', date: '2026-08-08T11:00:00Z', client: 'Marc Dubé', total: 89.95, statut: 'shipped', statutLibelle: 'Expédiée' },
@@ -502,6 +508,82 @@ module.exports = {
         },
         'tableau:tuiles': { ok: true },
         'tableau:ouvrir': { ok: true },
+        'tableau:sauvegarde': { ok: true, aucune: false, quand: '13 aout 2026, 00:12', jours: 1, taille: '17,4 Mo', total: 2 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* Journee CALME : rien a faire. La bande << A faire maintenant >> ne doit
+         PAS paraitre — une bande qui annonce << rien a faire >> finit par ne
+         plus etre lue. Et la sauvegarde date de 45 jours : la tuile doit
+         alarmer, pas se fondre dans le decor. */
+      nom: 'journée calme, sauvegarde vieille',
+      id: '',
+      reponses: {
+        'tableau:lire': {
+          ok: true, annee: 2026, annees: [2026],
+          cfgTuiles: {},
+          tuiles: {
+            produits: { actifs: 42, variantesReappro: 0, produitsBas: 0 },
+            commandes: { total: 12, enAttente: 0 },
+            clients: { actifs: 87, inactifs: 0 },
+            revenus: { brut: 1500, rembourse: 0, net: 1500, factures: 9 },
+            messagerie: 0, retoursNouveaux: 0, retoursExpirent: 0,
+          },
+          aFaire: { aTraiter: 0, enLivraison: 0, ruptures: 0, avis: 0,
+            facturesRetard: 0, facturesRetardMontant: 0,
+            incidentsOuverts: 0, incidentsCai: 0 },
+          recentesCommandes: [], recentesFactures: [], taux: null,
+        },
+        'tableau:sauvegarde': { ok: true, aucune: false, quand: '30 juin 2026, 03:00', jours: 45, taille: '16,3 Mo', total: 1 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* AUCUNE sauvegarde : c'est l'etat le plus grave que cette tuile puisse
+         dire, et il ne doit pas ressembler a une ligne d'information. */
+      nom: 'aucune sauvegarde',
+      id: '',
+      reponses: {
+        'tableau:lire': {
+          ok: true, annee: 'all', annees: [2026], cfgTuiles: {},
+          tuiles: {
+            produits: { actifs: 1, variantesReappro: 0, produitsBas: 0 },
+            commandes: { total: 0, enAttente: 0 },
+            clients: { actifs: 0, inactifs: 0 },
+            revenus: { brut: 0, rembourse: 0, net: 0, factures: 0 },
+            messagerie: 0, retoursNouveaux: 0, retoursExpirent: 0,
+          },
+          aFaire: { aTraiter: 0, enLivraison: 0, ruptures: 0, avis: 0,
+            facturesRetard: 0, facturesRetardMontant: 0,
+            incidentsOuverts: 0, incidentsCai: 0 },
+          recentesCommandes: [], recentesFactures: [], taux: null,
+        },
+        'tableau:sauvegarde': { ok: true, aucune: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* Pas le droit `backups` : la tuile disparait, elle ne dit pas << refuse >>.
+         Annoncer l'etat des sauvegardes a qui n'y a pas acces serait une fuite. */
+      nom: 'sauvegarde refusée (droit)',
+      id: '',
+      reponses: {
+        'tableau:lire': {
+          ok: true, annee: 'all', annees: [2026], cfgTuiles: {},
+          tuiles: {
+            produits: { actifs: 3, variantesReappro: 0, produitsBas: 0 },
+            commandes: { total: 1, enAttente: 0 },
+            clients: { actifs: 2, inactifs: 0 },
+            revenus: { brut: 10, rembourse: 0, net: 10, factures: 1 },
+            messagerie: 0, retoursNouveaux: 0, retoursExpirent: 0,
+          },
+          aFaire: { aTraiter: 0, enLivraison: 0, ruptures: 0, avis: 0,
+            facturesRetard: 0, facturesRetardMontant: 0,
+            incidentsOuverts: 0, incidentsCai: 0 },
+          recentesCommandes: [], recentesFactures: [], taux: null,
+        },
+        'tableau:sauvegarde': { ok: false, motif: 'droit' },
         identite: IDENTITE,
       },
     },

@@ -690,7 +690,12 @@ html.jour input,html.jour select{background:#ffffff}
    Cette feuille est jointe à TOUTES les fenêtres (via CSS_JOUR) : une surcouche
    écrite demain n'a qu'à appeler szPleinBasculer pour en hériter. */
 const CSS_PLEIN = `
-html.sz-zoom{font-size:112.5%}
+/* DEUX classes, et il en faut deux : « sz-zoom » est la surcouche mise en plein
+   écran par son bouton, « sz-zoom-fen » est la FENÊTRE passée en plein écran par
+   le système. Une seule classe partagée ferait que fermer une surcouche annule
+   le grossissement d'une fenêtre encore en plein écran — l'écran rapetisserait
+   sans que rien ne l'explique. Même valeur, donc elles ne se cumulent pas. */
+html.sz-zoom, html.sz-zoom-fen{font-size:112.5%}
 .sz-plein{
   position:fixed!important; inset:0!important;
   width:100%!important; max-width:none!important;

@@ -66,6 +66,23 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .tuile .val.att{color:#fbbf24}.tuile .val.err{color:#f87171}
 .tuile .sub{font-size:.7rem;color:#6d7f96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile .sub.att{color:#fbbf24}
+/* ── LA BANDE « À FAIRE MAINTENANT » ──────────────────────────────────────
+   ⚠ ELLE N'APPARAÎT QUE S'IL Y A QUELQUE CHOSE À FAIRE. Une bande permanente
+   qui annonce « rien à faire » finit par ne plus être lue — et le jour où elle
+   dit quelque chose, elle ne se distingue plus du décor. Rien à faire = pas de
+   bande, et l'écran commence directement par les chiffres. */
+.afaire{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;
+  background:rgba(201,169,126,.09);border:1px solid rgba(201,169,126,.32);
+  border-radius:11px;padding:.5rem .7rem}
+.afaire .titre{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
+  color:#c9a97e;font-weight:700;margin-right:.2rem}
+.afaire button{font-size:.79rem;padding:.22rem .6rem;border-radius:99px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14)}
+.afaire button:hover{background:rgba(255,255,255,.12)}
+.afaire button b{font-weight:800}
+.afaire button.urgent{border-color:rgba(248,113,113,.5);color:#fca5a5}
+html.jour .afaire{background:rgba(180,140,80,.12);border-color:rgba(150,110,50,.35)}
+html.jour .afaire .titre{color:#8a6a3e}
 .panneau{background:#16202f;border:1px solid rgba(255,255,255,.09);border-radius:11px;
   padding:.6rem .8rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:.82rem}
 .panneau label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
@@ -121,6 +138,12 @@ ${JS_ACTIVITE}${JS_DIRE}
   var ANNEE = 'all';
   var PANNEAU = false;     // le panneau << Tuiles >> est ouvert
   var PAR_PAGE = 10;       // les 10 dernieres, d un bloc (demande du 2026-08-08)
+  /* L etat de la tuile << Derniere sauvegarde >> (#25). null = pas encore lue.
+     ⚠ ELLE SE LIT A PART, APRES le premier dessin : c est le seul indicateur du
+     tableau de bord qui passe par le RESEAU (backup.php interroge R2). La mettre
+     dans tableau:lire ferait attendre tout l ecran d ouverture de session pour
+     une ligne d information. */
+  var SAUV = null;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -163,15 +186,27 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
-  // Les memes tuiles que l ecran du site, dans le meme ordre — meme dictionnaire.
+  /* Les tuiles. Les sept premieres sont celles de l ecran du site, dans le meme
+     ordre. Les suivantes sont propres au natif (#25) : elles disent ce qu il
+     RESTE A FAIRE, la ou les premieres disent des totaux.
+     ⚠ Chacune reste masquable par personne (panneau << Tuiles >>), et une tuile
+     inconnue de la preference est AFFICHEE par defaut — sans quoi personne ne
+     verrait jamais une tuile ajoutee apres coup. */
   var TUILES = [
+    ['a_traiter', '🎯', 'Commandes à traiter'],
     ['products', '👗', 'Produits actifs'],
     ['orders', '📦', 'Commandes'],
     ['customers', '👥', 'Clients actifs'],
     ['revenue', '💰', 'Revenus (payés)'],
     ['messagerie', '💬', 'Messagerie'],
     ['returns_new', '↩', 'Nouveaux retours'],
-    ['returns_expiring', '⏳', 'Retours sur le point d’expirer']
+    ['returns_expiring', '⏳', 'Retours sur le point d’expirer'],
+    ['en_livraison', '🚚', 'En livraison'],
+    ['ruptures', '🚫', 'Ruptures de stock'],
+    ['avis', '⭐', 'Avis à modérer'],
+    ['factures_retard', '⌛', 'Factures en retard'],
+    ['incidents', '🛡', 'Incidents ouverts'],
+    ['sauvegarde', '💾', 'Dernière sauvegarde']
   ];
 
   function tuile(cle, ic, lbl, valeur, ton, sousTitre, sousTon){
@@ -179,6 +214,40 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="lbl">' + ic + ' ' + esc(lbl) + '</div>'
       + '<div class="val' + (ton ? ' ' + ton : '') + '">' + valeur + '</div>'
       + '<div class="sub' + (sousTon ? ' ' + sousTon : '') + '">' + sousTitre + '</div></div>';
+  }
+
+  /* ⚠ UNE TUILE QU ON N A PAS LE DROIT DE VOIR NE S OFFRE MEME PAS AU REGLAGE.
+     Laisser << Derniere sauvegarde >> dans le panneau des tuiles a qui n a pas
+     la permission « backups », c est lui apprendre par la bande qu il existe des
+     sauvegardes et quand elles datent. Le pont refuse deja l operation ; ici on
+     retire aussi la case. */
+  function offerte(x){
+    if (x[0] !== 'sauvegarde') return true;
+    return !(SAUV && SAUV.interdite);
+  }
+
+  /* La tuile << Derniere sauvegarde >>. Ecrite a part parce qu elle a QUATRE
+     etats, et qu un empilement de ternaires y aurait tot ou tard affiche
+     << null j >> : pas encore lue, jamais faite, illisible, ou datee.
+     ⚠ LES SEUILS SONT DELIBERES : au-dela de 7 jours on avertit, au-dela de 30
+     on alarme, et << jamais >> alarme tout de suite. Une base non sauvegardee
+     ne doit pas se lire comme une ligne d information parmi d autres. */
+  function tuileSauvegarde(){
+    if (SAUV === null) {
+      return tuile('sauvegarde', '💾', 'Dernière sauvegarde', '…', '', 'lecture en cours…', '');
+    }
+    if (SAUV.erreur) {
+      return tuile('sauvegarde', '💾', 'Dernière sauvegarde', '—', '', esc(SAUV.erreur), 'att');
+    }
+    if (SAUV.aucune) {
+      return tuile('sauvegarde', '💾', 'Dernière sauvegarde', 'jamais', 'err',
+        'aucune sauvegarde — la base n’est pas protégée', 'att');
+    }
+    var j = SAUV.jours;
+    var val = (j === 0) ? 'aujourd’hui' : (j === 1 ? 'hier' : j + ' j');
+    var ton = (j > 30) ? 'err' : (j > 7 ? 'att' : '');
+    var sous = esc(SAUV.quand) + (SAUV.taille ? ' · ' + esc(SAUV.taille) : '');
+    return tuile('sauvegarde', '💾', 'Dernière sauvegarde', val, ton, sous, (j > 7 ? 'att' : ''));
   }
 
   function pilule(statut, libelle){
@@ -214,6 +283,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
     var cfg = D.cfgTuiles || {};
     var t = D.tuiles;
+    var f = D.aFaire || {};
     var h = '';
 
     h += '<div class="barreoutils">'
@@ -237,9 +307,34 @@ ${JS_ACTIVITE}${JS_DIRE}
           + 'Les prix en USD peuvent s’écarter du marché.') + '</div>';
     }
 
+    /* ── LA BANDE << A FAIRE MAINTENANT >> (#25) ────────────────────────
+       Le tableau de bord disait des TOTAUX ; il ne disait pas ce qui attend.
+       Cette bande reunit les files qui se VIDENT en travaillant — pas les
+       etats. Les ruptures de stock en sont donc absentes : elles ne se
+       traitent pas en un clic, elles se commandent, et elles tiendraient la
+       bande allumee en permanence. Meme raisonnement que la pastille de la
+       barre des taches, qui exclut le stock pour la meme raison. */
+    var files = [
+      ['orders', f.aTraiter, 'commande à traiter', 'commandes à traiter', false],
+      ['support-mgmt', t.messagerie, 'message sans réponse', 'messages sans réponse', false],
+      ['returns-pending', t.retoursNouveaux, 'retour à traiter', 'retours à traiter', false],
+      ['returns-expiring', t.retoursExpirent, 'retour sur le point d’expirer', 'retours sur le point d’expirer', true],
+      ['reviews', f.avis, 'avis à modérer', 'avis à modérer', false],
+      ['billing', f.facturesRetard, 'facture en retard', 'factures en retard', true],
+      ['security-incidents', f.incidentsCai, 'avis à la CAI à transmettre', 'avis à la CAI à transmettre', true]
+    ].filter(function(x){ return (x[1] || 0) > 0; });
+    if (files.length) {
+      h += '<div class="afaire"><span class="titre">À faire maintenant</span>'
+        + files.map(function(x){
+            return '<button data-ouvre="' + x[0] + '"' + (x[4] ? ' class="urgent"' : '') + '>'
+              + '<b>' + x[1] + '</b> ' + esc(x[1] > 1 ? x[3] : x[2]) + '</button>';
+          }).join('')
+        + '</div>';
+    }
+
     if (PANNEAU) {
       h += '<div class="panneau">'
-        + TUILES.map(function(x){
+        + TUILES.filter(offerte).map(function(x){
             return '<label><input type="checkbox" data-cfg="' + x[0] + '"'
               + (cfg[x[0]] !== false ? ' checked' : '') + '> ' + x[1] + ' ' + esc(x[2]) + '</label>';
           }).join('')
@@ -272,10 +367,36 @@ ${JS_ACTIVITE}${JS_DIRE}
           : 'aucune demande en attente', ''),
       returns_expiring: tuile('returns_expiring', '⏳', 'Retours sur le point d’expirer', t.retoursExpirent,
         t.retoursExpirent > 0 ? 'err' : '',
-        t.retoursExpirent > 0 ? 'colis pas encore reçu' : 'aucun retour à risque', '')
+        t.retoursExpirent > 0 ? 'colis pas encore reçu' : 'aucun retour à risque', ''),
+      // ── Ce qu il reste a faire (#25) ──────────────────────────────
+      a_traiter: tuile('a_traiter', '🎯', 'Commandes à traiter', f.aTraiter,
+        f.aTraiter > 0 ? 'att' : '',
+        f.aTraiter > 0 ? 'confirmées, en préparation ou en vérification' : 'rien en attente de préparation',
+        f.aTraiter > 0 ? 'att' : ''),
+      en_livraison: tuile('en_livraison', '🚚', 'En livraison', f.enLivraison, '',
+        f.enLivraison > 0 ? 'colis partis, pas encore livrés' : 'aucun colis en route', ''),
+      ruptures: tuile('ruptures', '🚫', 'Ruptures de stock', f.ruptures,
+        f.ruptures > 0 ? 'err' : '',
+        f.ruptures > 0 ? 'variantes à zéro — ventes perdues' : 'aucune variante à zéro',
+        f.ruptures > 0 ? 'att' : ''),
+      avis: tuile('avis', '⭐', 'Avis à modérer', f.avis, f.avis > 0 ? 'att' : '',
+        f.avis > 0 ? 'en attente d’approbation' : 'aucun avis en attente', ''),
+      factures_retard: tuile('factures_retard', '⌛', 'Factures en retard', f.facturesRetard,
+        f.facturesRetard > 0 ? 'err' : '',
+        f.facturesRetard > 0 ? esc(fmt(f.facturesRetardMontant)) + ' impayés' : 'aucune échéance dépassée',
+        f.facturesRetard > 0 ? 'att' : ''),
+      incidents: tuile('incidents', '🛡', 'Incidents ouverts', f.incidentsOuverts,
+        f.incidentsOuverts > 0 ? 'att' : '',
+        f.incidentsCai > 0
+          ? f.incidentsCai + ' avis à la CAI à transmettre'
+          : (f.incidentsOuverts > 0 ? 'dossiers non clôturés' : 'registre Loi 25 à jour'),
+        f.incidentsCai > 0 ? 'att' : ''),
+      // ⚠ Elle arrive APRES le premier dessin (reseau) : d ici la, elle dit
+      // qu elle cherche, plutot que d afficher un zero qui serait un mensonge.
+      sauvegarde: tuileSauvegarde()
     };
     h += '<div class="tuiles">'
-      + TUILES.filter(function(x){ return cfg[x[0]] !== false; })
+      + TUILES.filter(offerte).filter(function(x){ return cfg[x[0]] !== false; })
           .map(function(x){ return contenu[x[0]]; }).join('')
       + '</div>';
 
@@ -298,7 +419,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (tu) {
       var cibles = { products: 'products', orders: 'orders', customers: 'customers',
         revenue: 'billing', messagerie: 'support-mgmt',
-        returns_new: 'returns-pending', returns_expiring: 'returns-expiring' };
+        returns_new: 'returns-pending', returns_expiring: 'returns-expiring',
+        a_traiter: 'orders', en_livraison: 'orders', ruptures: 'inventory',
+        avis: 'reviews', factures_retard: 'billing',
+        incidents: 'security-incidents', sauvegarde: 'sauvegarde' };
       ouvrir(cibles[tu.getAttribute('data-tuile')] || '');
     }
   };
@@ -333,6 +457,22 @@ ${JS_ACTIVITE}${JS_DIRE}
       D = r;
       dire('');
       dessiner();
+      chargerSauvegarde();
+    });
+  }
+
+  /* ⚠ SON ECHEC NE DOIT RIEN CASSER. Le reste du tableau de bord est deja
+     dessine et ne depend pas d elle : un droit manquant ou un R2 injoignable
+     remplit la tuile d une explication, il ne vide pas l ecran. Un refus de
+     DROIT retire la tuile — annoncer l etat des sauvegardes a qui n y a pas
+     acces n est pas une information, c est une fuite. */
+  function chargerSauvegarde(){
+    if (SAUV !== null) { return; }
+    appeler('tableau:sauvegarde', []).then(function(r){
+      if (r && r.ok) SAUV = r;
+      else if (r && r.motif === 'droit') SAUV = { interdite: true };
+      else SAUV = { aucune: false, jours: null, quand: '', taille: '', erreur: expliquer(r) };
+      if (D) dessiner();
     });
   }
 
