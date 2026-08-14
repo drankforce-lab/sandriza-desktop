@@ -1700,14 +1700,14 @@ ipcMain.handle('fenetre:collection', (e, id) => {
   const brut = String(id || '');
   const cle = brut ? 'collection-' + brut.replace(/[^\w-]/g, '') : 'collection';
   ouvrirNative(cle, brut ? 'Collection' : 'Nouvelle collection', pageCollection(brut),
-    { width: 860, height: 760 });
+    { width: 860, height: 640, minHeight: 480 });
   return true;
 });
 ipcMain.handle('fenetre:fournisseur', (e, id) => {
   const brut = String(id || '');
   const cle = brut ? 'fournisseur-' + brut.replace(/[^\w-]/g, '') : 'fournisseur';
   ouvrirNative(cle, brut ? 'Fournisseur' : 'Nouveau fournisseur', pageFournisseur(brut),
-    { width: 820, height: 760 });
+    { width: 820, height: 620, minHeight: 460 });
   return true;
 });
 
@@ -2196,6 +2196,11 @@ const PAGES_ANCRABLES = () => ({
   comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
   'fal-suivi': ['Traitements d’image', () => pageFal('')],
+  // #37 : apps de terrain ANCRABLES par défaut + détachables, comme les autres
+  // (avant : fenêtres autonomes via ouvrirNative — « toujours pas ancré »).
+  expeditions: ['Expéditions', () => pageCommandes('expeditions')],
+  caisse: ['Vente au comptoir', () => pageCaisse()],
+  ramassages: ['Ramassages et rapport', () => pageRamassages()],
   // Onglets de Configuration portes en fenetre native (palier 5). ⚠ ILS SONT
   // ANCRABLES COMME LES AUTRES : sans cette declaration, dockOuvrir ne connait
   // pas la cle et la fenetre naissait toujours detachee.
@@ -3158,10 +3163,10 @@ const actionApp = (nom) => {
        plus bas), a la demande du 2026-08-10 — « fais attention de creer les
        fenetres en mode ancrable ». */
     case 'fournisseur-nouveau':
-      ouvrirNative('fournisseur', 'Nouveau fournisseur', pageFournisseur(''), { width: 800, height: 700 });
+      ouvrirNative('fournisseur', 'Nouveau fournisseur', pageFournisseur(''), { width: 820, height: 620, minHeight: 460 });
       break;
     case 'collection-nouvelle':
-      ouvrirNative('collection', 'Nouvelle collection', pageCollection(''), { width: 860, height: 760 });
+      ouvrirNative('collection', 'Nouvelle collection', pageCollection(''), { width: 860, height: 640, minHeight: 480 });
       break;
     case 'produit-nouveau':
       ouvrirNative('produit', 'Nouveau produit', pageProduit(''), { width: 980, height: 860, minHeight: 520 });
@@ -3176,10 +3181,8 @@ const actionApp = (nom) => {
        fenetre repasse d elle-meme en une colonne (voir sa feuille de style).
        ⚠ ELLE S OUVRE A COTE DE L ECRAN DU SITE, jamais a sa place : les deux
        coexistent le temps qu elle soit eprouvee en boutique. */
-    case 'caisse':
-      ouvrirNative('caisse', 'Vente au comptoir', pageCaisse(),
-        { width: 1180, height: 780, minWidth: 720, minHeight: 520 });
-      break;
+    // #37 : 'caisse' est désormais ANCRABLE — traité par le bloc d'ancrage
+    // plus bas (dock:naviguer vers la section 'pos'), plus de fenêtre autonome.
     case 'affichage-client':
       ouvrirNative('pos-client', 'Affichage client', pageAffichage(),
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
@@ -3191,6 +3194,7 @@ const actionApp = (nom) => {
        (dock:naviguer) et rouvre ancre OU detache selon l etat de la PERSONNE,
        sans le changer. Deja detachee : on ramene sa fenetre. Une fenetre
        separee HERITEE d un ancien menu est ramenee plutot que doublee. */
+    case 'expeditions': case 'caisse': case 'ramassages':   // #37 : désormais ancrables
     case 'tableau': case 'inventaire': case 'commandes': case 'produits':
     case 'factures': case 'clients': case 'collections': case 'fournisseurs':
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
@@ -3232,20 +3236,8 @@ const actionApp = (nom) => {
       }
       break;
     }
-    case 'ramassages': {
-      const _avR = fenetresNatives.get('ramassages');
-      const _reuR = !!(_avR && !_avR.isDestroyed());
-      const winR = ouvrirNative('ramassages', 'Ramassages et rapport', pageRamassages(),
-        { width: 980, height: 700, minWidth: 780, minHeight: 500 });
-      if (_reuR && winR && !winR.isDestroyed()) {
-        winR.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
-      }
-      break;
-    }
-    case 'expeditions':
-      ouvrirNative('expeditions', 'Expéditions', pageCommandes('expeditions'),
-        { width: 1060, height: 600, minWidth: 860, minHeight: 460 });
-      break;
+    // #37 : 'ramassages' et 'expeditions' sont désormais ANCRABLES — traités par
+    // le bloc d'ancrage plus haut (dock:naviguer vers 'ramassages' / 'shipping').
     case 'about-copy':
       try { require('electron').clipboard.writeText(texteApropos()); } catch {}
       break;
