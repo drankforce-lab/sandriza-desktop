@@ -1339,6 +1339,18 @@ const OPS_PONT = new Set([
   // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
   'sociaux:config:donnees', 'sociaux:config:ecrire', 'sociaux:config:tester',
   // Liste noire et Mon profil (fenetres listenoire / profil, 3.8.0, #30).
+  // #33 — deux gestes rouverts apres l audit de couverture (#32) : ils
+  // n existaient que dans des ecrans web qui ne s ouvrent plus.
+  'fournisseurs:supprimer', 'avis:photoRetirer',
+  // Profil d entreprise et aide-memoire fiscal : sans le profil, la fenetre
+  // refuse de composer les formulaires — et il n y avait plus ou le saisir.
+  'impot:profil', 'impot:profil:ecrire', 'impot:memo',
+  // Patrons de publication : promis << au palier 5 >>, jamais portes.
+  'patrons:liste', 'patrons:ecrire', 'patrons:basculer', 'patrons:supprimer', 'patrons:apercu',
+  // Generateur d agencement : la fenetre y renvoyait, l ecran n existait plus.
+  'reco:agencement', 'reco:agencement:publier',
+  // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
+  'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
   'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer',
   'profil:donnees', 'profil:motdepasse', 'profil:questions',
   'sociaux:liste', 'sociaux:publier', 'sociaux:publierTout', 'sociaux:ignorer',
@@ -1879,6 +1891,15 @@ const LIMITES_PONT = {
   /* La photo part en clair vers la PAGE, qui la range dans R2 : un televersement
      reel, pas une ecriture locale — d ou une limite large. */
   'chat:cfg:donnees': 20000, 'chat:cfg:ecrire': 30000, 'chat:cfg:ia': 30000, 'chat:cfg:photo': 90000,
+  /* Retirer une photo ecrit dans le nuage PUIS detruit l objet R2 : deux
+     allers-retours reseau, pas une ecriture locale. */
+  'fournisseurs:supprimer': 30000, 'avis:photoRetirer': 60000,
+  'impot:profil': 20000, 'impot:profil:ecrire': 30000, 'impot:memo': 20000,
+  'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
+  'patrons:supprimer': 30000, 'patrons:apercu': 20000,
+  /* Publier un agencement ecrit les liaisons de CHAQUE piece puis la regle. */
+  'reco:agencement': 20000, 'reco:agencement:publier': 45000,
+  'fidelisation:sondage:form': 20000, 'fidelisation:sondage:ecrire': 30000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */
   'listenoire:donnees': 20000, 'listenoire:ajouter': 30000, 'listenoire:retirer': 30000,
@@ -2077,7 +2098,7 @@ const PAGES_ANCRABLES = () => ({
   retours: ['Nos Retours', () => pageRetours()],
   factures: ['Factures', () => pageFactures()],
   codesbarres: ['Impression de codes-barres', () => pageCodesbarres()],
-  avis: ['Avis produits', () => pageAvis()],
+  avis: ['Avis produits', () => pageAvis('')],
   messagerie: ['Messagerie clients', () => pageMessagerie()],
   archives: ['Archives', () => pageArchives()],
   paiements: ['Paiements Square', () => pagePaiements()],
@@ -2085,9 +2106,9 @@ const PAGES_ANCRABLES = () => ({
   coupons: ['Coupons', () => pageCoupons()],
   promotions: ['Offres et annonces', () => pagePromotions()],
   chat: ['Chat en ligne', () => pageChat()],
-  sociaux: ['Réseaux sociaux', () => pageSociaux()],
-  fidelisation: ['Fidélisation et sondages', () => pageFidelisation()],
-  recommandations: ['Recommandations', () => pageRecommandations()],
+  sociaux: ['Réseaux sociaux', () => pageSociaux('')],
+  fidelisation: ['Fidélisation et sondages', () => pageFidelisation('')],
+  recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
   journal: ['Journal d’envoi', () => pageJournal()],

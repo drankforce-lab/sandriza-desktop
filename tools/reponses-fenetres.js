@@ -870,8 +870,35 @@ module.exports = {
   // d'ouverture : les trois onglets ne partagent aucun dessin, et « Documents »
   // est celui qui déclenche des IMPRIMÉS fiscaux — il ne peut pas rester non
   // éprouvé. Plus un profil incomplet, qui doit se signaler en haut.
+  /* ⚠ LES DEUX DERNIERS CAS SONT CEUX QUI MANQUAIENT (#33) : le profil
+     d entreprise et l aide-memoire n existaient nulle part, et la fenetre y
+     renvoyait quand meme. On les eprouve DANS LES DEUX ETATS du profil —
+     complet et incomplet — parce que l ecran change de discours. */
   'impot.js': [
     { nom: 'TPS / TVQ', id: '', reponses: { 'impot:donnees': DONNEES_IMPOT, identite: IDENTITE } },
+    { nom: 'mon entreprise', id: 'entreprise', reponses: { identite: IDENTITE,
+      'impot:donnees': DONNEES_IMPOT,
+      'impot:profil': { ok: true, peutEcrire: true, complet: true,
+        profil: { name: 'Sandriza inc.', neq: '1170000000', tpsNo: '123456789 RT0001',
+                  tvqNo: '1234567890 TQ0001', sinBn: '123456789', type: 'inc',
+                  address: '12 rue de la Mode', city: 'Montreal', postal: 'H2X 1Y4',
+                  phone: '514 555-0123', email: 'info@sandriza.com' },
+        types: [{ v: 'autonome', l: 'Travailleur(se) autonome' }, { v: 'inc', l: 'Societe par actions' }] },
+      'impot:profil:ecrire': { ok: true, peutEcrire: true, complet: true, profil: {}, types: [] } } },
+    { nom: 'profil incomplet', id: 'entreprise', reponses: { identite: IDENTITE,
+      'impot:donnees': DONNEES_IMPOT,
+      'impot:profil': { ok: true, peutEcrire: true, complet: false,
+        profil: { name: '', neq: '', tpsNo: '', tvqNo: '', sinBn: '', type: 'autonome',
+                  address: '', city: '', postal: '', phone: '', email: '' },
+        types: [{ v: 'autonome', l: 'Travailleur(se) autonome' }] } } },
+    { nom: 'aide-memoire', id: 'memo', reponses: { identite: IDENTITE,
+      'impot:donnees': DONNEES_IMPOT,
+      'impot:memo': { ok: true, annee: 2026, marque: 'SANDRIZA',
+        remises: [{ date: '15 janv. 2026', libelle: 'Remise TPS/TVQ — T4', note: 'Oct–Dec', passee: true }],
+        declarations: [{ date: '30 avr. 2026', libelle: 'Declaration T1', note: 'Particulier', passee: false }],
+        deductions: [{ libelle: 'Cout des marchandises vendues', detail: 'Factures fournisseurs' }],
+        formulaires: [{ code: 'T2125', quoi: 'Etat des resultats', lien: '' },
+                      { code: 'T1', quoi: 'Declaration federale', lien: 'https://exemple.ca/t1' }] } } },
     { nom: 'revenus', id: 'revenus',
       reponses: { 'impot:donnees': Object.assign({}, DONNEES_IMPOT, { onglet: 'revenus' }), identite: IDENTITE } },
     { nom: 'documents', id: 'documents',
@@ -2702,7 +2729,35 @@ module.exports = {
   ],
 
   // ── RECOMMANDATIONS ────────────────────────────────────────────────────────
+  /* ⚠ LE GENERATEUR EST L ONGLET QUI AVAIT DISPARU (#33). Le banc ne clique
+     pas : on l atteint par l id d ouverture, sinon il resterait invisible pour
+     lui exactement comme il l etait pour l utilisateur. */
   'recommandations.js': [
+    { nom: 'generateur', id: 'agencement', reponses: { identite: IDENTITE,
+      'reco:liste': { ok: true, peutModifier: true, regles: [], liaisons: [], retirees: [] },
+      'reco:agencement': { ok: true, peutEcrire: true, style: 'casual', nbActifs: 3,
+          styles: [{ v: 'casual', nom: 'Casual', icone: 'C', quoi: 'Decontracte',
+                     recette: 'Haut + Pantalon', categories: ['Hauts', 'Pantalons'] },
+                   { v: 'elegant', nom: 'Elegant', icone: 'E', quoi: 'Raffine',
+                     recette: 'Robe + Accessoires', categories: ['Robes'] }],
+          categories: [{ v: 'hauts', l: 'Hauts' }, { v: 'pantalons', l: 'Pantalons' }],
+          produits: [
+            { id: 'p1', nom: 'Chemisier Lin', categorie: 'hauts', categorieLibelle: 'Hauts', prix: 89.95, image: '' },
+            { id: 'p2', nom: 'Pantalon Droit', categorie: 'pantalons', categorieLibelle: 'Pantalons', prix: 119, image: '' }
+          ] },
+      'reco:agencement:publier': { ok: true, nom: 'Look d automne', pieces: 2, ou: 'les fiches produit' } } },
+    { nom: 'generateur sans style', id: 'agencement', reponses: { identite: IDENTITE,
+      'reco:liste': { ok: true, peutModifier: true, regles: [], liaisons: [], retirees: [] },
+      'reco:agencement': Object.assign({}, { ok: true, peutEcrire: true, style: 'casual', nbActifs: 3,
+          styles: [{ v: 'casual', nom: 'Casual', icone: 'C', quoi: 'Decontracte',
+                     recette: 'Haut + Pantalon', categories: ['Hauts', 'Pantalons'] },
+                   { v: 'elegant', nom: 'Elegant', icone: 'E', quoi: 'Raffine',
+                     recette: 'Robe + Accessoires', categories: ['Robes'] }],
+          categories: [{ v: 'hauts', l: 'Hauts' }, { v: 'pantalons', l: 'Pantalons' }],
+          produits: [
+            { id: 'p1', nom: 'Chemisier Lin', categorie: 'hauts', categorieLibelle: 'Hauts', prix: 89.95, image: '' },
+            { id: 'p2', nom: 'Pantalon Droit', categorie: 'pantalons', categorieLibelle: 'Pantalons', prix: 119, image: '' }
+          ] }, { style: null }) } },
     {
       // ⚠ FORME REELLE de reco:liste (coeur Recommendations._recoDonnees).
       nom: 'regles garnies',
@@ -2765,7 +2820,40 @@ module.exports = {
   ],
 
   // ── FIDÉLISATION ET SONDAGES ───────────────────────────────────────────────
+  /* ⚠ L EDITEUR DE SONDAGE EST CE QUI MANQUAIT (#33) : on ne pouvait CONSULTER
+     que des sondages, jamais en creer un. Il s ouvre par un clic — donc par un
+     id d ouverture ici. Le cas << question a choix >> est a part : c est le
+     seul type qui fait apparaitre une liste d options. */
   'fidelisation.js': [
+    { nom: 'editeur de sondage', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
+      'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
+        tuiles: { invitations: 0, reponses: 0, taux: 0, note: null, nbNotes: 0, codes: 0, codesUtilises: 0 },
+        sondages: [], recompenses: [], invitations: [] },
+      'fidelisation:sondage:form': { ok: true, peutEcrire: true,
+          declencheurs: [{ v: 'confirmed', l: 'Confirmation commande' }, { v: 'delivered', l: 'Livraison' }],
+          typesQuestion: [{ v: 'rating', l: 'Note sur 5' }, { v: 'text', l: 'Reponse libre' },
+                          { v: 'choice', l: 'Choix dans une liste' }],
+          typesRecompense: [{ v: 'percent', l: 'Pourcentage' }, { v: 'fixed', l: 'Montant fixe' }],
+          sondage: null },
+      'fidelisation:sondage:ecrire': { ok: true, id: 'surv1', nom: 'Satisfaction', nouveau: true, questions: 2 } } },
+    { nom: 'editeur d un sondage existant', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
+      'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
+        tuiles: { invitations: 0, reponses: 0, taux: 0, note: null, nbNotes: 0, codes: 0, codesUtilises: 0 },
+        sondages: [], recompenses: [], invitations: [] },
+      'fidelisation:sondage:form': Object.assign({}, { ok: true, peutEcrire: true,
+          declencheurs: [{ v: 'confirmed', l: 'Confirmation commande' }, { v: 'delivered', l: 'Livraison' }],
+          typesQuestion: [{ v: 'rating', l: 'Note sur 5' }, { v: 'text', l: 'Reponse libre' },
+                          { v: 'choice', l: 'Choix dans une liste' }],
+          typesRecompense: [{ v: 'percent', l: 'Pourcentage' }, { v: 'fixed', l: 'Montant fixe' }],
+          sondage: null }, {
+        sondage: { id: 'surv1', nom: 'Satisfaction apres livraison', declencheur: 'delivered',
+          intro: 'Merci pour votre achat !', actif: true,
+          questions: [
+            { id: 'q1', type: 'rating', libelle: 'Votre satisfaction ?', obligatoire: true, options: [] },
+            { id: 'q2', type: 'choice', libelle: 'Comment nous avez-vous connus ?', obligatoire: false,
+              options: ['Instagram', 'Bouche a oreille'] }
+          ],
+          recompense: { active: true, type: 'percent', valeur: 10, jours: 30, message: 'Merci !' } } }) } },
     {
       // ⚠ FORME REELLE de fidelisation:liste (coeur Loyalty._fidelisationDonnees).
       nom: 'sondages garnis',
@@ -2834,7 +2922,83 @@ module.exports = {
   ],
 
   // ── RÉSEAUX SOCIAUX ────────────────────────────────────────────────────────
+  /* ⚠ L ONGLET DES PATRONS EST CELUI QUI AVAIT DISPARU (#33) : on l atteint par
+     l ID D OUVERTURE, le banc ne cliquant pas. Deux cas — la liste, et
+     l editeur ouvert — parce qu ils ne traversent pas le meme code. */
   'sociaux.js': [
+    { nom: 'patrons', id: 'patrons', reponses: { identite: IDENTITE,
+      'sociaux:liste': { ok: true, peutModifier: true, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
+        reseauxActifs: [], file: [], historique: [] },
+      'patrons:liste': { ok: true, peutEcrire: true,
+          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajoute' }, { v: 'manual', l: 'Publication manuelle' }],
+          reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          patrons: [
+            { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
+              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajoute',
+              reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
+              actif: true, defaut: true },
+            { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
+              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
+          ] },
+      'patrons:basculer': { ok: true, peutEcrire: true,
+          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajoute' }, { v: 'manual', l: 'Publication manuelle' }],
+          reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          patrons: [
+            { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
+              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajoute',
+              reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
+              actif: true, defaut: true },
+            { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
+              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
+          ] },
+      'patrons:supprimer': { ok: true, peutEcrire: true,
+          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajoute' }, { v: 'manual', l: 'Publication manuelle' }],
+          reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          patrons: [
+            { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
+              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajoute',
+              reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
+              actif: true, defaut: true },
+            { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
+              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
+          ] },
+      'patrons:ecrire': { ok: true, peutEcrire: true,
+          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajoute' }, { v: 'manual', l: 'Publication manuelle' }],
+          reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          patrons: [
+            { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
+              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajoute',
+              reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
+              actif: true, defaut: true },
+            { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
+              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
+          ] },
+      'patrons:apercu': { ok: true, nom: 'Nouveau produit', texte: 'Nouveaute : Robe Aurore',
+        produit: 'Robe Aurore', reseaux: ['Facebook', 'Instagram'] } } },
+    { nom: 'patrons en lecture seule', id: 'patrons', reponses: { identite: IDENTITE,
+      'sociaux:liste': { ok: true, peutModifier: false, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
+        reseauxActifs: [], file: [], historique: [] },
+      'patrons:liste': Object.assign({}, { ok: true, peutEcrire: true,
+          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajoute' }, { v: 'manual', l: 'Publication manuelle' }],
+          reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          patrons: [
+            { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
+              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajoute',
+              reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
+              actif: true, defaut: true },
+            { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
+              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
+          ] }, { peutEcrire: false }) } },
     {
       // ⚠ FORME REELLE de sociaux:liste (coeur Social._sociauxDonnees).
       nom: 'file et historique',
@@ -3400,7 +3564,32 @@ module.exports = {
   ],
 
   // ── AVIS PRODUITS ──────────────────────────────────────────────────────────
+  /* ⚠ LE PANNEAU DE DETAIL S ATTEINT PAR L ID D OUVERTURE : c est lui qui porte
+     les VIGNETTES DE PHOTOS et leur retrait (#33), le geste qui manquait. Sans
+     ce cas, il resterait invisible pour le controle. */
   'avis.js': [
+    { nom: 'detail avec photos', id: 'rev_1', reponses: { identite: IDENTITE,
+      'avis:liste': { ok: true, onglet: 'pending',
+        comptes: { attente: 1, traites: 0, masques: 0, publies: 0, moyenne: 5 },
+        lignes: [{ id: 'rev_1', statut: 'pending', note: 5, produit: 'Robe Aurore',
+                   client: 'Josee Lafleur', verifie: true, date: '2026-08-08' }],
+        total: 1, pages: 1, page: 0 },
+      'avis:lire': { ok: true, id: 'rev_1', statut: 'pending', note: 5, produit: 'Robe Aurore',
+        client: 'Josee Lafleur', verifie: true, date: '2026-08-08', titre: 'Superbe',
+        texte: 'La robe tombe parfaitement.', reponse: '', reponduLe: '', approuveLe: '',
+        commande: 'CMD-0002', taille: 'M', langue: 'Francais', peutModifier: true,
+        photos: 2, photosUrl: ['https://img.exemple.ca/a.jpg', 'https://img.exemple.ca/b.jpg'] },
+      'avis:photoRetirer': { ok: true, restantes: 1 } } },
+    { nom: 'detail en lecture seule', id: 'rev_1', reponses: { identite: IDENTITE,
+      'avis:liste': { ok: true, onglet: 'pending',
+        comptes: { attente: 1, traites: 0, masques: 0, publies: 0, moyenne: 5 },
+        lignes: [{ id: 'rev_1', statut: 'pending', note: 5, produit: 'Robe Aurore',
+                   client: 'Josee Lafleur', verifie: true, date: '2026-08-08' }],
+        total: 1, pages: 1, page: 0 },
+      'avis:lire': { ok: true, id: 'rev_1', statut: 'pending', note: 5, produit: 'Robe Aurore',
+        client: 'Josee Lafleur', verifie: true, date: '2026-08-08', titre: '', texte: 'Bien.',
+        reponse: '', reponduLe: '', approuveLe: '', commande: '', taille: '', langue: 'Francais',
+        peutModifier: false, photos: 1, photosUrl: ['https://img.exemple.ca/a.jpg'] } } },
     {
       // ⚠ FORME REELLE d avis:liste (Admin._avisLigne) et avis:lire.
       nom: 'file de moderation',
@@ -3605,7 +3794,19 @@ module.exports = {
   ],
 
   // ── FOURNISSEURS (la liste) ────────────────────────────────────────────────
+  /* ⚠ LA SUPPRESSION MANQUAIT (#33) : la fenetre le disait dans son en-tete, et
+     l ecran web qui la portait ne s ouvre plus. Deux cas — avec et sans le
+     droit — parce que la colonne entiere disparait sans lui. */
   'fournisseurs.js': [
+    { nom: 'suppression permise', id: '', reponses: { identite: IDENTITE,
+      'fournisseurs:liste': { ok: true, total: 1, peutSupprimer: true,
+        lignes: [{ id: 'sup_1', nom: 'Textiles Nord', contact: 'Ana Roy', courriel: 'ana@nord.ca',
+                   telephone: '514 555-0100', site: 'nord.ca', categories: ['Robes'], actif: true }] },
+      'fournisseurs:supprimer': { ok: true, nom: 'Textiles Nord', rattaches: 3 } } },
+    { nom: 'suppression refusee au role', id: '', reponses: { identite: IDENTITE,
+      'fournisseurs:liste': { ok: true, total: 1, peutSupprimer: false,
+        lignes: [{ id: 'sup_1', nom: 'Textiles Nord', contact: '', courriel: '', telephone: '',
+                   site: '', categories: [], actif: false }] } } },
     {
       // ⚠ FORME REELLE de fournisseurs:liste (pont.js -> Admin._fournisseurLigne).
       nom: 'liste garnie',

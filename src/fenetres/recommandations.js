@@ -7,9 +7,13 @@
  * sur une fiche), LIAISONS MANUELLES (rapprocher deux produits à la main) et
  * STATISTIQUES (la couverture de chaque règle, les articles qui reviennent).
  *
- * ⚠ NE COUVRE PAS LE GÉNÉRATEUR D'AGENCEMENT : c'est un composeur visuel, où
- * l'on assemble une tenue à l'œil. Le porter en fenêtre demanderait de refaire
- * l'assemblage lui-même, pas seulement son cadre — il reste à l'écran web.
+ * ⚠⚠ LE GÉNÉRATEUR D'AGENCEMENT EST ICI DEPUIS #33. Cet en-tête disait qu'il
+ * « restait à l'écran web » — un écran que plus personne ne peut ouvrir depuis
+ * que la section est ancrable (1.72.0). La fenêtre y renvoyait quand même, en
+ * toutes lettres. Trouvé par l'audit de couverture (#32).
+ * ⚠ Le look reste DANS la fenêtre jusqu'à la publication : l'écran web
+ * réenregistrait à chaque clic sur un article, ce qui écrivait des liaisons à
+ * moitié faites. Un seul appel pose les liaisons ET la règle.
  *
  * ⚠ UNE RÈGLE PAR DÉFAUT SUPPRIMÉE N'EST PAS DÉTRUITE : elle est mise de côté
  * et se restaure. La fenêtre les montre, sans quoi on croirait les avoir
@@ -85,6 +89,26 @@ tbody tr:hover td{background:rgba(255,255,255,.04)}
 .choix label{display:flex;align-items:center;gap:.45rem;padding:.14rem 0;font-size:.83rem}
 .choix .sku{font-family:'Courier New',monospace;font-size:.72rem;color:#8fa1b8;margin-left:auto}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem;flex-wrap:wrap}
+/* ── Generateur d agencement (#33) ── */
+.styles{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+button.sty{font:inherit;font-size:.79rem;padding:.24rem .7rem;border-radius:99px;
+  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);color:#e8edf5;
+  cursor:pointer;white-space:nowrap;-webkit-user-select:none;user-select:none}
+button.sty:hover{background:rgba(255,255,255,.1)}
+button.sty.actif{border-color:#c9a97e;background:rgba(201,169,126,.16);font-weight:700}
+label.champ{display:block;margin:0 0 .6rem}
+label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+  color:#8fa1b8;margin:0 0 .22rem}
+input.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
+  color:#e8edf5;font:inherit;font-size:.85rem;padding:.4rem .55rem}
+input.t:focus{outline:none;border-color:#c9a97e}
+label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
+  border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:.22rem .55rem;
+  background:rgba(255,255,255,.03);-webkit-user-select:none;user-select:none}
+label.case input{width:15px;height:15px;accent-color:#c9a97e}
+.carte h2 .n{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;
+  font-size:.72rem;color:#8fa1b8}
+.carte h2 .n.hi{color:#fbbf24}
 .vide{padding:1.3rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
@@ -94,8 +118,15 @@ tbody tr:hover td{background:rgba(255,255,255,.04)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/** Page complète de la fenêtre native « Recommandations ». */
-function pageRecommandations() {
+/**
+ * Page complète de la fenêtre native « Recommandations ».
+ * `onglet` = 'liaisons', 'stats' ou 'agencement' pour ouvrir dessus.
+ * ⚠ Le garde-fou ne clique pas : sans ce paramètre, le générateur — celui qui
+ * avait disparu — resterait invisible pour lui.
+ */
+function pageRecommandations(onglet) {
+  const depart = (['liaisons', 'stats', 'agencement'].indexOf(String(onglet || '')) >= 0)
+    ? String(onglet) : 'regles';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Recommandations — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -114,7 +145,18 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   var D = null;
   var STATS = null;
-  var ONGLET = 'regles';     // regles | liaisons | stats
+  var ONGLET = '${depart}';  // regles | liaisons | stats | agencement
+  /* ── GENERATEUR D AGENCEMENT (#33) ──────────────────────────────────────────
+     ⚠ IL N ETAIT JOIGNABLE NULLE PART : cette fenetre affichait << Generateur
+     d agencement : ecran Recommandations, fenetre principale >> en designant un
+     ecran que la section ancrable a rendu inatteignable. Trouve par l audit #32.
+     ⚠ LE LOOK RESTE DANS LA FENETRE jusqu a la publication. L ecran web
+     reenregistrait a chaque clic sur un article, ce qui ecrivait des liaisons a
+     moitie faites ; ici un seul appel pose les liaisons ET la regle. */
+  var AGEN = null;           // reco:agencement — styles, categories, catalogue
+  var STYLE = null;          // style choisi (filtre le catalogue)
+  var LOOK = [];             // ids des articles retenus
+  var CATF = 'all';          // filtre de categorie
   var ARME = '';
   var LIAISON = null;        // { id, nom, choisis:[] } en cours d'édition
   var QPROD = '';
@@ -324,10 +366,14 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="mini' + (ONGLET === 'liaisons' ? ' actif' : '') + '" data-onglet="liaisons">Liaisons manuelles'
       + ((D.liaisons || []).length ? '<span class="n">' + D.liaisons.length + '</span>' : '') + '</button>'
       + '<button class="mini' + (ONGLET === 'stats' ? ' actif' : '') + '" data-onglet="stats">Statistiques</button>'
-      + '<div class="droite"><span class="dt">Générateur d’agencement : écran Recommandations, '
-      + 'fenêtre principale</span></div></div>';
+      + '<button class="mini' + (ONGLET === 'agencement' ? ' actif' : '') + '" data-onglet="agencement">Générateur d’agencement'
+      + (LOOK.length ? '<span class="n hi">' + LOOK.length + '</span>' : '') + '</button>'
+      + '</div>';
 
-    h += ONGLET === 'liaisons' ? vueLiaisons() : ONGLET === 'stats' ? vueStats() : vueRegles();
+    h += ONGLET === 'liaisons' ? vueLiaisons()
+       : ONGLET === 'stats' ? vueStats()
+       : ONGLET === 'agencement' ? vueAgencement()
+       : vueRegles();
     if (LIAISON) h += boiteLiaison();
     corps.innerHTML = h;
     brancher();
@@ -413,9 +459,32 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (og) {
       ONGLET = og.getAttribute('data-onglet'); ARME = '';
       if (ONGLET === 'stats' && !STATS) { chargerStats(); return; }
+      if (ONGLET === 'agencement' && !AGEN) { chargerAgencement(); dessiner(); return; }
       dessiner();
       return;
     }
+
+    var st = t.closest('[data-style]');
+    if (st) {
+      var v = st.getAttribute('data-style');
+      /* Recliquer le style actif le retire : c est le geste qu on cherche
+         quand on s est trompe, et il evite un bouton de plus. */
+      STYLE = (STYLE === v) ? null : v;
+      CATF = 'all'; AGEN = null; dessiner(); chargerAgencement();
+      return;
+    }
+    var cf = t.closest('[data-catf]');
+    if (cf) { CATF = cf.getAttribute('data-catf'); dessiner(); return; }
+    var lk = t.closest('[data-look]');
+    if (lk) {
+      var id = lk.getAttribute('data-look');
+      var k = LOOK.indexOf(id);
+      if (k >= 0) LOOK.splice(k, 1); else LOOK.push(id);
+      dessiner();
+      return;
+    }
+    if (t.closest('#ag-reinit')) { STYLE = null; LOOK = []; CATF = 'all'; AGEN = null; dessiner(); chargerAgencement(); return; }
+    if (t.closest('#ag-publier')) { publierAgencement(); return; }
 
     var bm = t.closest('[data-monter]');
     var bd = t.closest('[data-descendre]');
@@ -499,8 +568,105 @@ ${JS_ACTIVITE}${JS_DIRE}
       D = r;
       if (ONGLET === 'stats') { chargerStats(); return; }
       dessiner();
+      if (ONGLET === 'agencement' && !AGEN) chargerAgencement();
+      if (ONGLET === 'stats' && !STATS) chargerStats();
     });
   }
+  /* ── GENERATEUR D AGENCEMENT : LA VUE ─────────────────────────────────────
+     Trois temps, dans l ordre ou on travaille : choisir un STYLE (qui filtre le
+     catalogue), cocher les ARTICLES, nommer et publier. */
+  function vueAgencement(){
+    if (!AGEN) return '<div class="carte"><div class="vide">Lecture du catalogue…</div></div>';
+    var h = '<div class="carte"><h2>1 · Style</h2>'
+      + '<div class="styles">'
+      + (AGEN.styles || []).map(function(s){
+          return '<button class="sty' + (STYLE === s.v ? ' actif' : '') + '" data-style="' + esc(s.v) + '">'
+            + esc(s.icone) + ' ' + esc(s.nom) + '</button>';
+        }).join('')
+      + (STYLE ? '<button class="mini" id="ag-reinit">✕ Réinitialiser</button>' : '')
+      + '</div>';
+    var S = (AGEN.styles || []).find(function(x){ return x.v === STYLE; });
+    h += S
+      ? '<div class="dt" style="margin-top:.45rem"><strong>' + esc(S.quoi) + '</strong>'
+        + '<div>Recette : ' + esc(S.recette) + ' · Catégories : ' + esc(S.categories.join(', ')) + '</div></div>'
+      : '<div class="dt" style="margin-top:.45rem">Choisissez un style pour filtrer le catalogue. '
+        + 'Sans style, tous les articles actifs sont proposés.</div>';
+    h += '</div>';
+
+    h += '<div class="carte"><h2>2 · Articles<span class="n">' + LOOK.length + ' retenu'
+      + (LOOK.length > 1 ? 's' : '') + '</span></h2>'
+      + '<div class="styles" style="margin-bottom:.45rem">'
+      + '<button class="sty' + (CATF === 'all' ? ' actif' : '') + '" data-catf="all">Toutes</button>'
+      + (AGEN.categories || []).map(function(c){
+          return '<button class="sty' + (CATF === c.v ? ' actif' : '') + '" data-catf="' + esc(c.v) + '">'
+            + esc(c.l) + '</button>'; }).join('')
+      + '</div>';
+    var liste = (AGEN.produits || []).filter(function(p){ return CATF === 'all' || p.categorie === CATF; });
+    if (!liste.length) {
+      h += '<div class="vide">Aucun article actif dans cette catégorie.</div>';
+    } else {
+      h += '<div class="choix" style="max-height:22rem">' + liste.map(function(p){
+        return '<label><input type="checkbox" data-look="' + esc(p.id) + '"'
+          + (LOOK.indexOf(p.id) >= 0 ? ' checked' : '') + (AGEN.peutEcrire ? '' : ' disabled') + '> '
+          + esc(p.nom) + '<span class="sku">' + esc(p.categorieLibelle) + ' · '
+          + p.prix.toFixed(2) + ' $</span></label>';
+      }).join('') + '</div>';
+    }
+    h += '</div>';
+
+    var total = (AGEN.produits || []).filter(function(p){ return LOOK.indexOf(p.id) >= 0; })
+      .reduce(function(s, p){ return s + p.prix; }, 0);
+    h += '<div class="carte"><h2>3 · Publier<span class="n">' + total.toFixed(2) + ' $ au total</span></h2>';
+    if (!AGEN.peutEcrire) {
+      h += '<div class="vide">Consultation seulement.</div></div>';
+      return h;
+    }
+    h += '<label class="champ"><span class="lbl">Nom de la suggestion</span>'
+      + '<input class="t" id="ag-nom" placeholder="Look d’automne" value=""></label>'
+      + '<div class="styles">'
+      + '<label class="case"><input type="checkbox" id="ag-produit" checked> Sur les fiches produit</label>'
+      + '<label class="case"><input type="checkbox" id="ag-panier"> Dans le panier</label>'
+      + '</div>'
+      /* ⚠ ON DIT LE MINIMUM AVANT LE CLIC, pas apres : une suggestion d une
+         seule piece renverrait le client vers le produit qu il regarde deja. */
+      + '<div class="dt" style="margin-top:.4rem">Deux articles au minimum — chaque pièce du look sera '
+      + 'liée à toutes les autres.</div>'
+      + '<div class="pied-boite"><button class="mini prim" id="ag-publier"'
+      + (LOOK.length < 2 ? ' disabled' : '') + '>Publier la suggestion</button></div>'
+      + '</div>';
+    return h;
+  }
+
+  function chargerAgencement(){
+    appeler('reco:agencement', [STYLE || '']).then(function(r){
+      if (!r || !r.ok) { dire('Catalogue illisible : ' + expliquer(r), 'err'); return; }
+      AGEN = r;
+      if (ONGLET === 'agencement') dessiner();
+    });
+  }
+
+  function publierAgencement(){
+    var n = document.getElementById('ag-nom');
+    var ou = [];
+    var cp = document.getElementById('ag-produit');
+    var cc = document.getElementById('ag-panier');
+    if (cp && cp.checked) ou.push('product');
+    if (cc && cc.checked) ou.push('cart');
+    dire('Publication…');
+    appeler('reco:agencement:publier', [{
+      nom: n ? n.value : '', style: STYLE || '', articles: LOOK, afficher: ou
+    }]).then(function(r){
+      if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      LOOK = []; STYLE = null; CATF = 'all'; AGEN = null;
+      chargerAgencement();
+      /* On revient aux REGLES : la suggestion vient d y naitre, et c est la
+         qu on verifie qu elle est bien en place. */
+      ONGLET = 'regles';
+      charger();
+      dire('« ' + r.nom + ' » publiée — ' + r.pieces + ' pièces, visible sur ' + r.ou + '.', 'bon');
+    });
+  }
+
   function chargerStats(){
     appeler('reco:stats', []).then(function(r){
       STATS = r && r.ok ? r : { regles: [], populaires: [] };

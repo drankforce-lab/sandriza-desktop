@@ -45,6 +45,9 @@ input:focus,button:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
+button.mini{padding:.12rem .45rem;font-size:.74rem;-webkit-user-select:none;user-select:none}
+button.danger{border-color:rgba(239,68,68,.5);color:#f87171}
+button.danger:hover:not(:disabled){background:rgba(239,68,68,.12)}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
@@ -135,7 +138,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="vide">' + (D.total ? 'Aucun résultat.' : 'Aucun fournisseur — créez-en un pour commencer.') + '</div>';
     } else {
       h += '<table><thead><tr><th>Fournisseur</th><th>Contact</th><th>Courriel / Tél.</th>'
-        + '<th>Catégories</th><th>Statut</th></tr></thead><tbody>'
+        + '<th>Catégories</th><th>Statut</th>' + (D.peutSupprimer ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la fiche fournisseur">'
               + '<td><span class="num">' + esc(r.nom) + '</span>'
@@ -146,6 +149,14 @@ ${JS_ACTIVITE}${JS_DIRE}
               + '<td>' + ((r.categories || []).map(function(c){
                   return '<span class="pill neutre">' + esc(c) + '</span>'; }).join('') || '—') + '</td>'
               + '<td>' + (r.actif ? '<span class="pill bon">Actif</span>' : '<span class="pill neutre">Inactif</span>') + '</td>'
+              /* ⚠ ARME EN DEUX CLICS, comme partout ailleurs : une fiche
+                 supprimee ne se reconstitue pas, et la ligne entiere est deja
+                 cliquable pour OUVRIR — un bouton a un seul clic juste a cote
+                 serait un piege. */
+              + (D.peutSupprimer
+                  ? '<td style="text-align:right"><button class="mini danger" data-suppr="' + esc(r.id) + '">'
+                    + (SUPPR_ARME === r.id ? 'Confirmer ?' : 'Supprimer') + '</button></td>'
+                  : '')
               + '</tr>';
           }).join('')
         + '</tbody></table>';
@@ -173,6 +184,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    var su = t.closest('[data-suppr]');
+    if (su) { supprimer(su.getAttribute('data-suppr')); return; }
     if (t.closest('button') || t.closest('input')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
@@ -181,6 +194,32 @@ ${JS_ACTIVITE}${JS_DIRE}
       dire(r.ok ? 'Fiche fournisseur ouverte dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
+
+  /* ── SUPPRIMER UN FOURNISSEUR (#33) ────────────────────────────────────────
+     Ce geste manquait, et l en-tete de ce fichier l ecrivait : << la suppression
+     reste un geste de l ecran du site >>. Cet ecran ne s ouvre plus depuis que
+     la section est ancrable — le geste avait donc disparu pour tout le monde.
+     ⚠ ON DIT CE QUI ARRIVE AUX PRODUITS RATTACHES. Ils restent en place, sans
+     fournisseur : c est le seul effet de bord, et il est invisible d ici. */
+  var SUPPR_ARME = null;
+  function supprimer(id){
+    if (SUPPR_ARME !== id) {
+      SUPPR_ARME = id; dessiner();
+      dire('Recliquez pour confirmer — la fiche disparait, les produits rattaches restent sans fournisseur.', 'att');
+      return;
+    }
+    SUPPR_ARME = null;
+    dire('Suppression…');
+    appeler('fournisseurs:supprimer', [id]).then(function(r){
+      if (!r || !r.ok) { dessiner(); dire('Echec : ' + expliquer(r), 'err'); return; }
+      charger();
+      /* ⚠ PAS DE esc() DANS UN MESSAGE : szDire ecrit en textContent, donc un
+         nom echappe s afficherait avec ses entites en toutes lettres. */
+      dire('« ' + (r.nom || '') + ' » supprime.'
+        + (r.rattaches ? ' ' + r.rattaches + ' produit' + (r.rattaches > 1 ? 's' : '')
+            + ' restent sans fournisseur.' : ''), 'bon');
+    });
+  }
 
   var enCours = false, RELANCE = false;
   function charger(garderSaisie){

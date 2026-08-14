@@ -14,10 +14,14 @@
  * dire les écrire deux fois — et deux formulaires fiscaux qui divergent, c'est
  * une déclaration fausse. La fenêtre affiche les chiffres et commande.
  *
- * ⚠ CE QUI RESTE À L'ÉCRAN WEB : le PROFIL D'ENTREPRISE (des réglages —
- * numéros de TPS/TVQ, NEQ, adresse), l'onglet Inventaire et l'aide-mémoire des
- * dates. La fenêtre le dit et y renvoie quand le profil est incomplet, parce
- * qu'un document imprimé sans numéro de taxe ne vaut rien.
+ * ⚠⚠ LE PROFIL D'ENTREPRISE EST ICI DEPUIS #33, ET IL A MANQUÉ TROP LONGTEMPS.
+ * Cette fenêtre REFUSE de composer un document tant que le profil est
+ * incomplet — et elle renvoyait vers « l'onglet Mon entreprise, dans la fenêtre
+ * principale », un onglet devenu inatteignable dès que la section est passée
+ * ancrable (2.8.0). On pouvait donc rester bloqué net, sans aucune sortie.
+ * Trouvé par l'audit de couverture (#32). L'aide-mémoire l'a suivi.
+ * ⚠ L'onglet « Inventaire » de l'écran web n'a jamais manqué : c'est un des
+ * DOCUMENTS (inventaire de fin d'exercice).
  *
  * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit.
@@ -98,6 +102,47 @@ tbody tr.credit td{color:#4ade80}
 .mois{display:flex;gap:.25rem;margin-top:.2rem}
 .mois span{flex:1 1 0;text-align:center;font-size:.6rem;color:#6d7f96}
 .aide{font-size:.75rem;color:#8fa1b8;line-height:1.45}
+/* ── Onglets « Mon entreprise » et « Aide-mémoire » (#33) ── */
+.grillecfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(26rem,1fr));gap:.7rem;align-items:start}
+.carte.large{grid-column:1/-1}
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:0 .7rem}
+label.champ{display:block;margin:0 0 .7rem}
+label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+  color:#8fa1b8;margin:0 0 .22rem}
+label.champ .req{color:#fbbf24;text-transform:none;letter-spacing:0;font-size:.64rem}
+label.champ .sub{display:block;font-size:.68rem;color:#6d7f96;margin:.2rem 0 0;line-height:1.45}
+input.t,select.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
+  color:#e8edf5;font:inherit;font-size:.85rem;padding:.4rem .55rem}
+input.t.mono{font-family:Consolas,monospace;font-size:.8rem;text-transform:uppercase}
+input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
+input.t:disabled,select.t:disabled{opacity:.45}
+button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+  background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
+button .n.hi{background:rgba(245,158,11,.28);color:#fbbf24}
+.liens{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:.9rem;font-size:.76rem}
+.liens a{color:#c9a97e;text-decoration:none}
+.liens a:hover{text-decoration:underline}
+.sstitre{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:#6d7f96;
+  font-weight:700;margin:.6rem 0 .3rem}
+.ech{display:flex;gap:.6rem;align-items:flex-start;padding:.3rem .45rem;margin:0 0 .25rem;
+  border-radius:7px;border:1px solid rgba(201,169,126,.32);background:rgba(201,169,126,.06)}
+.ech.passe{border-color:transparent;background:transparent;color:#6d7f96}
+.ech .d{font-family:Consolas,monospace;font-size:.72rem;color:#c9a97e;white-space:nowrap;min-width:6.6rem}
+.ech.passe .d{color:#6d7f96}
+.ech strong{display:block;font-size:.8rem;font-weight:600}
+.ech.passe strong{font-weight:400}
+.ech .dt{display:block;font-size:.68rem;color:#6d7f96}
+.ded{padding:.28rem 0;border-bottom:1px solid rgba(255,255,255,.055)}
+.ded strong{display:block;font-size:.78rem}
+.ded .dt{display:block;font-size:.68rem;color:#6d7f96}
+.form{display:flex;align-items:center;gap:.5rem;padding:.28rem 0;
+  border-bottom:1px solid rgba(255,255,255,.055)}
+.form .code{font-family:Consolas,monospace;font-size:.74rem;font-weight:700;color:#c9a97e;
+  min-width:5.4rem;flex:0 0 auto}
+.form .dt{flex:1 1 auto;font-size:.73rem;color:#8fa1b8}
+.form a.mini{text-decoration:none;color:#e8edf5;border:1px solid rgba(255,255,255,.16);
+  border-radius:7px;padding:.12rem .42rem;font-size:.74rem;white-space:nowrap}
+.form a.mini:hover{background:rgba(255,255,255,.1)}
 .vide{padding:1.2rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
@@ -109,12 +154,12 @@ tbody tr.credit td{color:#4ade80}
 
 /**
  * Page complète de la fenêtre native « Fiscalité et impôt ».
- * `onglet` = 'revenus' ou 'documents' pour ouvrir directement dessus.
+ * `onglet` = 'revenus', 'documents', 'entreprise' ou 'memo' pour ouvrir dessus.
  * ⚠ Sans ce paramètre, le garde-fou ne dessinerait que l'onglet des taxes : il
  * ne simule aucun clic, et les deux autres resteraient dans l'ombre.
  */
 function pageImpot(onglet) {
-  const ok = ['revenus', 'documents'];
+  const ok = ['revenus', 'documents', 'entreprise', 'memo'];
   const depart = (ok.indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'taxes';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Fiscalité et impôt — Administration Sandriza</title>
@@ -135,6 +180,12 @@ ${JS_ACTIVITE}${JS_DIRE}
   var ANNEE = 0;
   var TRIM = 0;             // trimestre choisi pour les documents trimestriels
   var OCCUPE = false;
+  /* ⚠ LE PROFIL ET L AIDE-MEMOIRE SE LISENT A PART, ET SEULEMENT QUAND ON
+     OUVRE LEUR ONGLET. Les charger avec le reste ferait attendre l ecran
+     d ouverture pour deux panneaux qu on consulte quelques fois par annee. */
+  var PROFIL = null;        // impot:profil — le profil COMPLET, editable
+  var MEMO = null;          // impot:memo — echeances, deductions, formulaires
+  var RO = true;            // pas de droit d ecriture tant qu on ne l a pas lu
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -194,29 +245,153 @@ ${JS_ACTIVITE}${JS_DIRE}
     /* ⚠ LE PROFIL INCOMPLET SE DIT EN HAUT, TOUJOURS : un document imprime sans
        numero de TPS ni de TVQ ne vaut rien, et l on ne s en apercoit qu apres
        l avoir envoye. */
-    if (!D.profil.complet) {
+    /* ⚠ L AVIS OFFRE MAINTENANT LA SORTIE. Il renvoyait vers << l onglet Mon
+       entreprise, dans la fenetre principale >> — un onglet que plus personne ne
+       peut ouvrir depuis que cette section est ancrable. On pouvait donc rester
+       bloque net : la fenetre refuse les documents sans profil, et le seul
+       endroit ou saisir ce profil etait inatteignable. Rouvert par #33. */
+    if (!D.profil.complet && ONGLET !== 'entreprise') {
       h += '<div class="avis">⚠ <strong>Profil d’entreprise incomplet</strong> — il manque le nom, '
         + 'le NEQ ou vos numéros de TPS/TVQ. Les documents s’imprimeront sans eux, et ils ne '
-        + 'seront pas recevables. Complétez-le à l’écran <strong>Comptabilité → Fiscalité et '
-        + 'impôt</strong>, onglet « Mon entreprise », dans la fenêtre principale.</div>';
+        + 'seront pas recevables. <button class="mini" data-onglet="entreprise">Compléter maintenant</button></div>';
     }
 
     h += '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'taxes' ? ' actif' : '') + '" data-onglet="taxes">TPS / TVQ</button>'
       + '<button class="mini' + (ONGLET === 'revenus' ? ' actif' : '') + '" data-onglet="revenus">Revenus</button>'
       + '<button class="mini' + (ONGLET === 'documents' ? ' actif' : '') + '" data-onglet="documents">Documents</button>'
-      + '<select id="i-annee">' + (D.annees || []).map(function(a){
-          return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>'
-            + a + '</option>'; }).join('') + '</select>'
+      + '<button class="mini' + (ONGLET === 'entreprise' ? ' actif' : '') + '" data-onglet="entreprise">Mon entreprise'
+      + (D.profil.complet ? '' : '<span class="n hi">!</span>') + '</button>'
+      + '<button class="mini' + (ONGLET === 'memo' ? ' actif' : '') + '" data-onglet="memo">Aide-mémoire</button>'
+      /* Le choix d annee n a aucun sens sur le profil ni sur l aide-memoire :
+         l un decrit l entreprise, l autre le calendrier a venir. */
+      + ((ONGLET === 'entreprise' || ONGLET === 'memo') ? ''
+          : '<select id="i-annee">' + (D.annees || []).map(function(a){
+              return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>'
+                + a + '</option>'; }).join('') + '</select>')
       + '<span class="droite">' + esc(D.profil.nom || 'entreprise sans nom') + '</span>'
       + '</div>';
 
     if (ONGLET === 'revenus') h += vueRevenus();
     else if (ONGLET === 'documents') h += vueDocuments();
+    else if (ONGLET === 'entreprise') h += vueEntreprise();
+    else if (ONGLET === 'memo') h += vueMemo();
     else h += vueTaxes();
 
     corps.innerHTML = h;
     brancher();
+  }
+
+  /* ── MON ENTREPRISE (#33) ──────────────────────────────────────────────────
+     ⚠ CET ONGLET MANQUAIT, ET C ETAIT UNE IMPASSE : la fenetre refuse de
+     composer les formulaires tant que le profil est incomplet, et le seul
+     ecran ou le saisir etait l ancien onglet web, devenu inatteignable.
+     ⚠ ON N ENREGISTRE PAS AU FIL DE LA FRAPPE. Un numero de TVQ a moitie tape
+     serait pousse dans le nuage a chaque caractere, et un formulaire compose
+     entre-temps le porterait tel quel. Un seul bouton, un seul enregistrement.
+     ⚠ AUCUN FORMAT N EST REFUSE : un NEQ que le Registraire accepte et que nous
+     refuserions empecherait de travailler pour rien. On SIGNALE ce qui manque. */
+  var LIENS_OFFICIELS = [
+    ['https://www.registreentreprises.gouv.qc.ca', 'Registraire des entreprises (REQ)'],
+    ['https://www.canada.ca/fr/agence-revenu/services/services-electroniques/services-electroniques-entreprises/mon-dossier-entreprise.html', 'Mon dossier d’entreprise — ARC'],
+    ['https://rqen.revenuquebec.ca', 'Mon dossier — Revenu Québec']
+  ];
+
+  function champ(id, lbl, val, aide, mono, obligatoire){
+    return '<label class="champ"><span class="lbl">' + esc(lbl)
+      + (obligatoire ? ' <span class="req">obligatoire</span>' : '') + '</span>'
+      + '<input class="t' + (mono ? ' mono' : '') + '" id="' + id + '" value="' + esc(val || '') + '"'
+      + (RO ? ' disabled' : '') + '>'
+      + (aide ? '<span class="sub">' + esc(aide) + '</span>' : '') + '</label>';
+  }
+
+  function vueEntreprise(){
+    if (!PROFIL) return '<div class="vide">Lecture du profil…</div>';
+    var p = PROFIL.profil || {};
+    var h = '<div class="avis ' + (PROFIL.complet ? 'bon' : '') + '">'
+      + (PROFIL.complet
+          ? 'Profil complet — vos documents fiscaux se remplissent tout seuls.'
+          : 'Il manque le nom, le NEQ ou vos numéros de taxes. Les documents s’imprimeront sans eux, et ils ne seront pas recevables.')
+      + '</div>';
+
+    h += '<div class="grillecfg">';
+    h += '<div class="carte"><h2>Identification</h2>'
+      + champ('e-nom', 'Raison sociale', p.nom, '', false, true)
+      + champ('e-neq', 'NEQ — Numéro d’entreprise du Québec', p.neq, '10 chiffres · Registraire des entreprises du Québec', true, true)
+      + champ('e-ne', 'Numéro d’entreprise ARC (NE)', p.sinBn, '9 chiffres · Agence du revenu du Canada', true, false)
+      + '<label class="champ"><span class="lbl">Type d’entreprise</span>'
+      + '<select class="t" id="e-type"' + (RO ? ' disabled' : '') + '>'
+      + ((PROFIL && PROFIL.types) || []).map(function(t){
+          return '<option value="' + esc(t.v) + '"' + (p.type === t.v ? ' selected' : '') + '>'
+            + esc(t.l) + '</option>'; }).join('')
+      + '</select></label>'
+      + '</div>';
+
+    h += '<div class="carte"><h2>Numéros d’inscription aux taxes</h2>'
+      + champ('e-tps', 'TPS / TVH (GST/HST)', p.tpsNo, 'Format : 123456789 RT0001 · ARC', true, true)
+      + champ('e-tvq', 'TVQ', p.tvqNo, 'Format : 1234567890 TQ0001 · Revenu Québec', true, true)
+      + '</div>';
+
+    h += '<div class="carte large"><h2>Coordonnées</h2>'
+      + '<div class="deux">'
+      + champ('e-adresse', 'Adresse', p.address, '', false, false)
+      + champ('e-ville', 'Ville', p.city, '', false, false)
+      + champ('e-cp', 'Code postal', p.postal, '', true, false)
+      + champ('e-tel', 'Téléphone', p.phone, '', false, false)
+      + champ('e-courriel', 'Courriel professionnel', p.email, '', false, false)
+      + '</div></div>';
+    h += '</div>';
+
+    if (!RO) h += '<div style="margin-top:1rem"><button class="mini prim" id="e-enr">Enregistrer le profil</button></div>';
+
+    h += '<div class="liens">' + LIENS_OFFICIELS.map(function(l){
+      return '<a href="' + esc(l[0]) + '" target="_blank" rel="noopener">🔗 ' + esc(l[1]) + '</a>';
+    }).join('') + '</div>';
+    return h;
+  }
+
+  /* ── AIDE-MEMOIRE (#33) ────────────────────────────────────────────────────
+     ⚠ LE CONTENU EST SERIALISE PAR LE COEUR, jamais recopie ici : deux listes
+     d echeances a tenir d accord finiraient par diverger, et ce qui manquerait
+     est exactement ce qu on oublierait de remettre au fisc. */
+  function jourLigne(j){
+    return '<div class="ech' + (j.passee ? ' passe' : '') + '">'
+      + '<span class="d">' + esc(j.date) + '</span>'
+      + '<span><strong>' + esc(j.libelle) + (j.passee ? ' ✓' : '') + '</strong>'
+      + '<span class="dt">' + esc(j.note) + '</span></span></div>';
+  }
+
+  function vueMemo(){
+    if (!MEMO) return '<div class="vide">Lecture de l’aide-mémoire…</div>';
+    var h = '<div class="grillecfg">';
+    h += '<div class="carte"><h2>Dates limites — ' + esc(MEMO.annee) + ' / ' + esc(MEMO.annee + 1) + '</h2>'
+      + '<div class="sstitre">Remises TPS / TVQ (trimestriel)</div>'
+      + (MEMO.remises || []).map(jourLigne).join('')
+      + '<div class="sstitre">Déclarations de revenus</div>'
+      + (MEMO.declarations || []).map(jourLigne).join('')
+      + '</div>';
+
+    h += '<div class="carte"><h2>Déductions — boutique en ligne</h2>'
+      + (MEMO.deductions || []).map(function(d){
+          return '<div class="ded"><strong>☑ ' + esc(d.libelle) + '</strong>'
+            + '<span class="dt">' + esc(d.detail) + '</span></div>'; }).join('')
+      + '</div>';
+
+    h += '<div class="carte large"><h2>Formulaires de référence</h2>'
+      + (MEMO.formulaires || []).map(function(f){
+          return '<div class="form"><span class="code">' + esc(f.code) + '</span>'
+            + '<span class="dt">' + esc(f.quoi) + '</span>'
+            + (f.lien
+                ? '<a class="mini" href="' + esc(f.lien) + '" target="_blank" rel="noopener">Site officiel</a>'
+                : '<button class="mini" data-onglet="documents">Onglet Documents</button>')
+            + '</div>'; }).join('')
+      + '</div>';
+    h += '</div>';
+
+    h += '<div class="avis">💬 <strong>À titre indicatif seulement.</strong> Les lois fiscales changent '
+      + 'chaque année : faites confirmer votre situation par un comptable agréé. Les chiffres viennent '
+      + 'des ventes de ' + esc(MEMO.marque) + '.</div>';
+    return h;
   }
 
   function vueTaxes(){
@@ -379,13 +554,62 @@ ${JS_ACTIVITE}${JS_DIRE}
   function brancher(){
     var a = document.getElementById('i-annee');
     if (a) a.onchange = function(){ ANNEE = parseInt(a.value, 10) || 0; charger(); };
+    var e = document.getElementById('e-enr');
+    if (e) e.onclick = enregistrerProfil;
+  }
+
+  /* ⚠ UN SEUL ENREGISTREMENT, PAS UN PAR FRAPPE. Un numero de TVQ a moitie
+     tape serait pousse dans le nuage a chaque caractere, et un formulaire
+     compose entre-temps le porterait tel quel. */
+  function enregistrerProfil(){
+    if (RO || OCCUPE) return;
+    var v = function(id){ var el = document.getElementById(id); return el ? el.value : ''; };
+    OCCUPE = true;
+    dire('Enregistrement…');
+    appeler('impot:profil:ecrire', [{
+      name: v('e-nom'), neq: v('e-neq'), sinBn: v('e-ne'), type: v('e-type'),
+      tpsNo: v('e-tps'), tvqNo: v('e-tvq'),
+      address: v('e-adresse'), city: v('e-ville'), postal: v('e-cp'),
+      phone: v('e-tel'), email: v('e-courriel')
+    }]).then(function(r){
+      OCCUPE = false;
+      if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      PROFIL = r; RO = !r.peutEcrire;
+      /* On relit le reste : l en-tete et l avis << profil incomplet >> viennent
+         de l op impot:donnees, ils mentiraient sinon jusqu au prochain passage. */
+      charger();
+      dire(r.complet ? 'Profil enregistré — vos documents seront complets.'
+                     : 'Profil enregistré, mais il manque encore le nom, le NEQ ou un numéro de taxe.',
+        r.complet ? 'bon' : 'att');
+    });
+  }
+
+  /* ⚠ LU A LA DEMANDE. Le profil et l aide-memoire se consultent quelques fois
+     par annee : les charger avec le reste ferait attendre l ecran d ouverture
+     pour rien. On ne relit pas non plus ce qu on a deja. */
+  function chargerOnglet(){
+    if (ONGLET === 'entreprise' && !PROFIL) {
+      appeler('impot:profil', []).then(function(r){
+        if (!r || !r.ok) { dire('Profil illisible : ' + expliquer(r), 'err'); return; }
+        PROFIL = r; RO = !r.peutEcrire;
+        if (ONGLET === 'entreprise') dessiner();
+      });
+      return;
+    }
+    if (ONGLET === 'memo' && !MEMO) {
+      appeler('impot:memo', []).then(function(r){
+        if (!r || !r.ok) { dire('Aide-mémoire illisible : ' + expliquer(r), 'err'); return; }
+        MEMO = r;
+        if (ONGLET === 'memo') dessiner();
+      });
+    }
   }
 
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); dessiner(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); dessiner(); chargerOnglet(); return; }
     var tq = t.closest('[data-trim]');
     if (tq) { TRIM = parseInt(tq.getAttribute('data-trim'), 10) || 0; dessiner(); return; }
     var dc = t.closest('[data-doc]');
@@ -413,6 +637,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var s = document.getElementById('sous');
       if (s) s.textContent = D.annee + ' · ' + D.taxes.totalRemettre + ' à remettre';
       dessiner();
+      chargerOnglet();
     });
   }
 

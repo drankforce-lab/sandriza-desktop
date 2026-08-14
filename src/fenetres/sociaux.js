@@ -7,9 +7,15 @@
  * entrée avec son contenu et ses réseaux, publier une entrée ou toute la file,
  * ignorer, vider le journal.
  *
- * ⚠ NE COUVRE QUE LES OPÉRATIONS. Les patrons de publication et les clés des
- * réseaux sont des RÉGLAGES : ils restent à l'écran web et suivront avec la
- * Configuration, au palier 5 — même découpe que le chat (1.69.0).
+ * ⚠⚠ LES PATRONS DE PUBLICATION SONT ICI DEPUIS #33. Cet en-tête disait qu'ils
+ * « restaient à l'écran web et suivraient avec la Configuration, au palier 5 ».
+ * Les jetons ont suivi (3.7.0) ; les patrons, jamais — et l'écran web ne
+ * s'ouvre plus depuis que cette section est ancrable. Ils sont donc restés
+ * joignables NULLE PART, comme la configuration du chat. Trouvé par l'audit
+ * de couverture (#32).
+ * ⚠ Ils vivent dans la fenêtre des OPÉRATIONS, pas dans celle de la
+ * configuration : on ajuste un patron en regardant la file qu'il produit.
+ * Les COMPTES et JETONS, eux, restent dans Configuration → Communications.
  *
  * ⚠ PUBLIER ENGAGE L'EXTÉRIEUR. Le message part chez Facebook, Instagram ou X
  * et ne se rattrape pas : le bouton s'arme en deux clics, et le verdict est
@@ -80,6 +86,20 @@ button .n.hi{background:rgba(245,158,11,.25);color:#fbbf24}
 .pill.err{background:rgba(239,68,68,.16);color:#f87171}
 .pill.neutre{background:rgba(148,163,184,.16);color:#8fa1b8}
 .detail{margin-top:.35rem;display:flex;gap:.4rem;flex-wrap:wrap}
+/* ── Editeur de patron (#33) ── */
+label.champ{display:block;margin:0 0 .7rem}
+label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+  color:#8fa1b8;margin:0 0 .22rem}
+label.champ .sub{display:block;font-size:.68rem;color:#6d7f96;margin:.2rem 0 0;line-height:1.5}
+input.t,select.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
+  color:#e8edf5;font:inherit;font-size:.85rem;padding:.4rem .55rem}
+textarea.t{resize:vertical;line-height:1.5}
+input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
+.cases{display:flex;flex-wrap:wrap;gap:.5rem}
+label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
+  border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:.25rem .55rem;
+  background:rgba(255,255,255,.03);-webkit-user-select:none;user-select:none}
+label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .vide{padding:1.3rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
@@ -89,8 +109,15 @@ button .n.hi{background:rgba(245,158,11,.25);color:#fbbf24}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/** Page complète de la fenêtre native « Réseaux sociaux ». */
-function pageSociaux() {
+/**
+ * Page complète de la fenêtre native « Réseaux sociaux ».
+ * `onglet` = 'historique' ou 'patrons' pour ouvrir directement dessus.
+ * ⚠ Sans ce paramètre, le garde-fou ne verrait QUE la file : il ne simule aucun
+ * clic, et l'onglet des patrons — celui qui avait disparu — resterait dans
+ * l'ombre exactement comme avant.
+ */
+function pageSociaux(onglet) {
+  const depart = (['historique', 'patrons'].indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'file';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Réseaux sociaux — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -108,7 +135,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
 
   var D = null;
-  var ONGLET = 'file';       // file | historique
+  var ONGLET = '${depart}';  // file | historique | patrons
   var ARME = '';             // id arme pour publication, ou '__tout', ou '__vider'
   var OCCUPE = false;
 
@@ -193,6 +220,139 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h;
   }
 
+  /* ══ PATRONS DE PUBLICATION (#33) ═══════════════════════════════════════════
+     ⚠ ILS N ETAIENT JOIGNABLES NULLE PART. L en-tete de ce fichier promettait
+     qu ils << suivraient avec la Configuration, au palier 5 >> ; les jetons ont
+     suivi en 3.7.0, les patrons jamais — et l ecran web ne s ouvre plus depuis
+     que cette section est ancrable (1.70.0). Trouve par l audit #32.
+     ⚠ ILS VIVENT ICI ET NON DANS LA FENETRE DE CONFIGURATION : on ajuste un
+     patron en regardant la file qu il produit, pas en saisissant un jeton.
+     ⚠ UN PATRON FOURNI D ORIGINE NE SE SUPPRIME PAS, il se desactive : le
+     retirer le ferait reapparaitre au prochain chargement, puisque la liste
+     enregistree est FUSIONNEE avec les defauts. Le coeur refuse, on le dit. */
+  var PAT = null;        // patrons:liste
+  var EDIT = null;       // patron en cours d edition, ou 'nouveau'
+  var PAT_ARME = '';     // suppression armee
+
+  function vuePatrons(){
+    if (!PAT) return '<div class="carte"><div class="vide">Lecture des patrons…</div></div>';
+    if (EDIT) return vuePatronEditeur();
+    var l = PAT.patrons || [];
+    var h = '<div class="carte">';
+    if (PAT.peutEcrire) {
+      h += '<div style="text-align:right;margin-bottom:.4rem">'
+        + '<button class="mini prim" id="pa-nouveau">+ Nouveau patron</button></div>';
+    }
+    if (!l.length) { h += '<div class="vide">Aucun patron.</div></div>'; return h; }
+    h += l.map(function(p){
+      return '<div class="entree">'
+        + '<div class="haut"><strong>' + esc(p.nom) + '</strong>'
+        + '<span class="pill ' + (p.actif ? 'bon' : 'neutre') + '">' + (p.actif ? 'actif' : 'inactif') + '</span>'
+        + (p.defaut ? '<span class="pill neutre">fourni</span>' : '')
+        + '<span class="droite"><span class="dt">' + esc(p.declencheurLibelle) + '</span></span></div>'
+        + '<div class="dt" style="white-space:pre-wrap;overflow-wrap:anywhere">'
+        /* ⚠ DOUBLE ANTISLASH OBLIGATOIRE : ce script vit dans un litteral de
+           gabarit, ou un antislash-n simple devient un VRAI saut de ligne. La
+           regex se retrouvait coupee en deux — << Invalid regular expression >>,
+           attrape par le banc a l instant meme ou j ai ecrit cette ligne. */
+        + esc(String(p.gabarit).replace(/\\n/g, ' ').slice(0, 120))
+        + (String(p.gabarit).length > 120 ? '…' : '') + '</div>'
+        + '<div class="dt">' + (p.reseaux.length
+            ? p.reseaux.map(function(r){ return '<span class="pill neutre">' + esc(r) + '</span>'; }).join('')
+            : '<span class="pill neutre">aucun réseau</span>')
+          + (p.motsCles.length ? ' <span class="dt">#' + p.motsCles.map(esc).join(' #') + '</span>' : '')
+          + '</div>'
+        + '<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.3rem">'
+        + '<button class="mini" data-apercu="' + esc(p.id) + '">Aperçu</button>'
+        + (PAT.peutEcrire
+            ? '<button class="mini" data-modifier="' + esc(p.id) + '">Modifier</button>'
+              + '<button class="mini" data-bascule="' + esc(p.id) + '">' + (p.actif ? 'Désactiver' : 'Activer') + '</button>'
+              + (p.defaut ? ''
+                  : '<button class="mini danger" data-patsuppr="' + esc(p.id) + '">'
+                    + (PAT_ARME === p.id ? 'Confirmer ?' : 'Supprimer') + '</button>')
+            : '')
+        + '</div></div>';
+    }).join('');
+    h += '</div>';
+    return h;
+  }
+
+  function vuePatronEditeur(){
+    var p = (EDIT === 'nouveau')
+      ? { id: '', nom: '', gabarit: '', declencheur: 'manual', reseaux: [], motsCles: [], image: true, actif: true }
+      : (PAT.patrons || []).find(function(x){ return x.id === EDIT; });
+    if (!p) { EDIT = null; return vuePatrons(); }
+    var h = '<div class="carte">'
+      + '<div class="haut" style="margin-bottom:.5rem"><strong>'
+      + (EDIT === 'nouveau' ? 'Nouveau patron' : 'Modifier « ' + esc(p.nom) + ' »') + '</strong></div>'
+      + '<label class="champ"><span class="lbl">Nom du patron</span>'
+      + '<input class="t" id="pa-nom" value="' + esc(p.nom) + '" placeholder="Annonce d’un nouveau produit"></label>'
+      + '<label class="champ"><span class="lbl">Déclencheur</span><select class="t" id="pa-decl">'
+      + (PAT.declencheurs || []).map(function(d){
+          return '<option value="' + esc(d.v) + '"' + (p.declencheur === d.v ? ' selected' : '') + '>'
+            + esc(d.l) + '</option>'; }).join('')
+      + '</select></label>'
+      + '<label class="champ"><span class="lbl">Réseaux</span><span class="cases">'
+      + (PAT.reseaux || []).map(function(r){
+          return '<label class="case"><input type="checkbox" data-net="' + esc(r.v) + '"'
+            + (p.reseaux.indexOf(r.v) >= 0 ? ' checked' : '') + '> ' + esc(r.icone) + ' ' + esc(r.l) + '</label>';
+        }).join('')
+      + '</span></label>'
+      + '<label class="champ"><span class="lbl">Texte publié</span>'
+      + '<textarea class="t" id="pa-gab" rows="5">' + esc(p.gabarit) + '</textarea>'
+      + '<span class="sub">Variables : '
+      + (PAT.variables || []).map(function(v){ return esc(v.v) + ' (' + esc(v.l) + ')'; }).join(' · ')
+      + '</span></label>'
+      + '<label class="champ"><span class="lbl">Mots-clics</span>'
+      + '<input class="t" id="pa-tags" value="' + esc(p.motsCles.join(', ')) + '" placeholder="mode, quebec, nouveaute">'
+      + '<span class="sub">Séparés par des virgules, sans le croisillon.</span></label>'
+      + '<label class="case"><input type="checkbox" id="pa-img"' + (p.image ? ' checked' : '')
+      + '> Joindre l’image du produit</label>'
+      + '<div style="display:flex;gap:.4rem;margin-top:.7rem">'
+      + '<button class="mini prim" id="pa-enr">Enregistrer</button>'
+      + '<button class="mini" id="pa-annuler">Annuler</button></div>'
+      + '</div>';
+    return h;
+  }
+
+  function brancherPatrons(){
+    var n = document.getElementById('pa-nouveau');
+    if (n) n.onclick = function(){ EDIT = 'nouveau'; dessiner(); };
+    var a = document.getElementById('pa-annuler');
+    if (a) a.onclick = function(){ EDIT = null; dessiner(); dire(''); };
+    var e = document.getElementById('pa-enr');
+    if (e) e.onclick = enregistrerPatron;
+  }
+
+  function enregistrerPatron(){
+    var v = function(id){ var el = document.getElementById(id); return el ? el.value : ''; };
+    var nets = [];
+    var cs = document.querySelectorAll('[data-net]');
+    for (var i = 0; i < cs.length; i++) if (cs[i].checked) nets.push(cs[i].getAttribute('data-net'));
+    var img = document.getElementById('pa-img');
+    dire('Enregistrement…');
+    appeler('patrons:ecrire', [{
+      id: EDIT === 'nouveau' ? '' : EDIT,
+      nom: v('pa-nom'), gabarit: v('pa-gab'), declencheur: v('pa-decl'),
+      reseaux: nets, motsCles: v('pa-tags'), image: !!(img && img.checked)
+    }]).then(function(r){
+      if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      PAT = r; EDIT = null; dessiner();
+      dire('Patron enregistré.', 'bon');
+    });
+  }
+
+  /* ⚠ LU A LA DEMANDE, comme le profil fiscal : on ne fait pas attendre la file
+     des publications pour une liste qu on ouvre rarement. */
+  function chargerPatrons(){
+    if (PAT) return;
+    appeler('patrons:liste', []).then(function(r){
+      if (!r || !r.ok) { dire('Patrons illisibles : ' + expliquer(r), 'err'); return; }
+      PAT = r;
+      if (ONGLET === 'patrons') dessiner();
+    });
+  }
+
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
     var t = D.tuiles || {};
@@ -216,8 +376,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + ((D.file || []).length ? '<span class="n hi">' + D.file.length + '</span>' : '') + '</button>'
       + '<button class="mini' + (ONGLET === 'historique' ? ' actif' : '') + '" data-onglet="historique">Historique'
       + ((D.historique || []).length ? '<span class="n">' + D.historique.length + '</span>' : '') + '</button>'
-      + '<div class="droite"><span class="dt">Patrons et comptes des réseaux : '
-      + 'écran Réseaux sociaux, fenêtre principale</span>';
+      + '<button class="mini' + (ONGLET === 'patrons' ? ' actif' : '') + '" data-onglet="patrons">Patrons'
+      + (PAT && (PAT.patrons || []).length
+          ? '<span class="n">' + PAT.patrons.filter(function(p){ return p.actif; }).length + '</span>' : '')
+      + '</button>'
+      + '<div class="droite"><span class="dt">Comptes et jetons des réseaux : '
+      + 'Configuration → Communications → Réseaux sociaux</span>';
     if (ONGLET === 'file' && D.peutModifier && (D.file || []).length) {
       h += '<button class="mini prim" id="so-tout"' + (OCCUPE ? ' disabled' : '') + '>'
         + (OCCUPE ? 'Publication…' : (ARME === '__tout' ? 'Confirmer — tout publier ?' : 'Tout publier')) + '</button>';
@@ -228,17 +392,22 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '</div></div>';
 
-    var pile = ONGLET === 'file' ? (D.file || []) : (D.historique || []);
-    h += '<div class="carte">';
-    if (!pile.length) {
-      h += '<div class="vide">' + (ONGLET === 'file'
-        ? 'Aucune publication en attente.' : 'Rien au journal pour l’instant.') + '</div>';
+    if (ONGLET === 'patrons') {
+      h += vuePatrons();
     } else {
-      h += pile.map(function(e){ return entree(e, ONGLET === 'file'); }).join('');
+      var pile = ONGLET === 'file' ? (D.file || []) : (D.historique || []);
+      h += '<div class="carte">';
+      if (!pile.length) {
+        h += '<div class="vide">' + (ONGLET === 'file'
+          ? 'Aucune publication en attente.' : 'Rien au journal pour l’instant.') + '</div>';
+      } else {
+        h += pile.map(function(e){ return entree(e, ONGLET === 'file'); }).join('');
+      }
+      h += '</div>';
     }
-    h += '</div>';
 
     corps.innerHTML = h;
+    if (ONGLET === 'patrons') brancherPatrons();
 
     var bt = document.getElementById('so-tout');
     if (bt) bt.onclick = function(){
@@ -283,7 +452,63 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!t || !t.closest) return;
 
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; dessiner(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; PAT_ARME = ''; EDIT = null;
+      dessiner(); if (ONGLET === 'patrons') chargerPatrons(); return; }
+
+    var pm = t.closest('[data-modifier]');
+    if (pm) { EDIT = pm.getAttribute('data-modifier'); dessiner(); return; }
+    var pb = t.closest('[data-bascule]');
+    if (pb) {
+      var idB = pb.getAttribute('data-bascule');
+      var cur = (PAT.patrons || []).find(function(x){ return x.id === idB; });
+      dire('…');
+      appeler('patrons:basculer', [idB, !(cur && cur.actif)]).then(function(r){
+        if (!r || !r.ok) { dire('Echec : ' + expliquer(r), 'err'); return; }
+        PAT = r; dessiner(); dire(cur && cur.actif ? 'Patron desactive.' : 'Patron active.', 'bon');
+      });
+      return;
+    }
+    var ps = t.closest('[data-patsuppr]');
+    if (ps) {
+      var idS = ps.getAttribute('data-patsuppr');
+      if (PAT_ARME !== idS) {
+        PAT_ARME = idS; dessiner();
+        dire('Recliquez pour confirmer — le gabarit disparait. Les publications deja faites ne bougent pas.', 'att');
+        return;
+      }
+      PAT_ARME = '';
+      appeler('patrons:supprimer', [idS]).then(function(r){
+        if (!r || !r.ok) { dessiner(); dire('Echec : ' + expliquer(r), 'err'); return; }
+        PAT = r; dessiner(); dire('Patron supprime.', 'bon');
+      });
+      return;
+    }
+    var pa = t.closest('[data-apercu]');
+    if (pa) {
+      dire('Composition de l’aperçu…');
+      appeler('patrons:apercu', [pa.getAttribute('data-apercu')]).then(function(r){
+        if (!r || !r.ok) { dire('Echec : ' + expliquer(r), 'err'); return; }
+        /* ⚠ L APERCU SE LIT DANS L ECRAN, pas dans le bandeau : un texte de
+           publication tient sur plusieurs lignes, et le bandeau en montrerait
+           la premiere moitie avec des points de suspension. */
+        var z = document.createElement('div');
+        z.className = 'carte';
+        z.style.marginTop = '.5rem';
+        z.innerHTML = '<div class="haut"><strong>Aperçu — ' + esc(r.nom) + '</strong>'
+          + '<span class="droite"><span class="dt">'
+          + (r.produit ? 'exemple : ' + esc(r.produit) : 'aucun produit actif pour l’exemple')
+          + '</span></span></div>'
+          + '<div class="dt" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85rem;color:#e8edf5">'
+          + esc(r.texte) + '</div>'
+          + '<div class="dt" style="margin-top:.3rem">' + (r.reseaux.length
+              ? r.reseaux.map(function(x){ return '<span class="pill neutre">' + esc(x) + '</span>'; }).join('')
+              : '<span class="pill att">aucun réseau — ce patron ne publiera nulle part</span>') + '</div>';
+        var anc = pa.closest('.entree');
+        if (anc && anc.parentNode) anc.parentNode.insertBefore(z, anc.nextSibling);
+        dire('');
+      });
+      return;
+    }
 
     var bp = t.closest('[data-publier]');
     if (bp) {
@@ -338,6 +563,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!r || !r.ok) { vide('Réseaux sociaux indisponibles', expliquer(r)); return; }
       D = r;
       dessiner();
+      if (ONGLET === 'patrons') chargerPatrons();
     });
   }
 

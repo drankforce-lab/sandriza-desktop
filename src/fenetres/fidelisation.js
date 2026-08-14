@@ -7,9 +7,12 @@
  * question par question), RÉCOMPENSES (les codes émis et leur usage) et
  * INVITATIONS (celles qui sont parties, répondues ou non).
  *
- * ⚠ NE COUVRE PAS LA CRÉATION D'UN SONDAGE : son bâtisseur de questions est un
- * formulaire à part entière, qui mérite son propre passage. Une fenêtre qui
- * fait bien ce qu'elle annonce vaut mieux qu'une qui fait tout à moitié.
+ * ⚠⚠ LA CRÉATION D'UN SONDAGE EST ICI DEPUIS #33. Cet en-tête disait qu'elle
+ * « méritait son propre passage » — passage qui n'est jamais venu, tandis que
+ * cette fenêtre renvoyait vers « l'écran Fidélisation de la fenêtre
+ * principale », inatteignable depuis que la section est ancrable (1.71.0). On
+ * pouvait consulter des sondages sans jamais pouvoir en faire un. Trouvé par
+ * l'audit de couverture (#32).
  *
  * ⚠ SUPPRIMER UN SONDAGE DÉTRUIT SES RÉPONSES. Elles ne se reconstituent pas :
  * la confirmation annonce combien vont disparaître. Supprimer des invitations,
@@ -93,6 +96,27 @@ tbody tr[data-sondage]{cursor:pointer}
 .q .mot{font-size:.83rem;background:rgba(255,255,255,.04);border-radius:8px;
   padding:.25rem .5rem;white-space:pre-wrap;overflow-wrap:anywhere}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
+/* ── Editeur de sondage (#33) ── */
+label.champ{display:block;margin:0 0 .6rem}
+label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+  color:#8fa1b8;margin:0 0 .22rem}
+input.t,select.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
+  color:#e8edf5;font:inherit;font-size:.85rem;padding:.4rem .55rem}
+textarea.t{resize:vertical;line-height:1.5}
+input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
+label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
+  border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:.22rem .55rem;margin:0 0 .6rem;
+  background:rgba(255,255,255,.03);-webkit-user-select:none;user-select:none}
+label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0}
+.qs{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.5rem .6rem;margin:0 0 .7rem}
+.qstitre{display:flex;align-items:center;gap:.5rem;font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.06em;color:#8fa1b8;font-weight:700;margin:0 0 .45rem}
+.qstitre button{margin-left:auto}
+.qed{background:rgba(255,255,255,.03);border-radius:9px;padding:.45rem .55rem;margin:0 0 .45rem}
+.qedh{display:flex;align-items:center;gap:.5rem;margin:0 0 .3rem}
+.qedh button{margin-left:auto}
+.qedr{display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;margin-top:.4rem}
+.qedr .case{margin:0}
 .vide{padding:1.3rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
@@ -102,8 +126,17 @@ tbody tr[data-sondage]{cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/** Page complète de la fenêtre native « Fidélisation et sondages ». */
-function pageFidelisation() {
+/**
+ * Page complète de la fenêtre native « Fidélisation et sondages ».
+ * `ouverture` = 'recompenses' / 'invitations' pour un onglet, ou 'sondage-nouveau'
+ * pour ouvrir directement l'éditeur.
+ * ⚠ L'éditeur s'atteint par un CLIC : sans ce paramètre, le garde-fou ne le
+ * verrait jamais — et c'est précisément lui qui manquait.
+ */
+function pageFidelisation(ouverture) {
+  const ouv = String(ouverture || '');
+  const depart = (['recompenses', 'invitations'].indexOf(ouv) >= 0) ? ouv : 'sondages';
+  const editeur = (ouv === 'sondage-nouveau');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Fidélisation et sondages — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -121,7 +154,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
 
   var D = null;
-  var ONGLET = 'sondages';   // sondages | recompenses | invitations
+  var ONGLET = '${depart}';  // sondages | recompenses | invitations
   var DETAIL = null;
   var ARME = '';             // id de sondage armé, ou '__invites'
 
@@ -188,7 +221,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="carte"><h2>Sondages</h2>';
     if (!(D.sondages || []).length) {
       h += '<div class="vide">Aucun sondage configuré.'
-        + '<div style="margin-top:.35rem">La création se fait dans l’écran Fidélisation de la fenêtre principale.</div></div>';
+        + (D.peutModifier
+            ? '<div style="margin-top:.45rem"><button class="mini prim" id="fi-premier">Créer le premier</button></div>'
+            : '') + '</div>';
     } else {
       h += '<table><thead><tr><th>Nom</th><th>Déclencheur</th><th class="num">Questions</th>'
         + '<th class="num">Invitations</th><th class="num">Réponses</th><th class="num">Taux</th>'
@@ -206,7 +241,8 @@ ${JS_ACTIVITE}${JS_DIRE}
               + '<td><span class="pill ' + (s.actif ? 'bon' : 'neutre') + '">'
               + (s.actif ? 'Actif' : 'Inactif') + '</span></td>'
               + (D.peutModifier
-                  ? '<td class="fin"><button class="mini geste danger" data-suppr-sondage="' + esc(s.id) + '">'
+                  ? '<td class="fin"><button class="mini geste" data-modifier-sondage="' + esc(s.id) + '">Modifier</button> '
+                    + '<button class="mini geste danger" data-suppr-sondage="' + esc(s.id) + '">'
                     + (ARME === s.id ? 'Confirmer ?' : 'Supprimer') + '</button></td>'
                   : '')
               + '</tr>';
@@ -272,6 +308,139 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h;
   }
 
+  /* ══ CREER ET MODIFIER UN SONDAGE (#33) ════════════════════════════════════
+     ⚠ CE GESTE MANQUAIT, ET LA FENETRE Y RENVOYAIT : << Creer un sondage :
+     ecran Fidelisation, fenetre principale >>, plus << La creation se fait dans
+     l ecran Fidelisation >> quand la liste etait vide. Cet ecran ne s ouvre
+     plus depuis que la section est ancrable (1.71.0) : on pouvait consulter
+     des sondages sans jamais pouvoir en creer un. Trouve par l audit #32.
+     ⚠ LES QUESTIONS VIVENT EN MEMOIRE jusqu a l enregistrement : les ecrire
+     une par une ferait autant d ecritures que de frappes, et un sondage a
+     moitie ecrit partirait quand meme au prochain declenchement. */
+  var EDIT = null;      // { id, nom, declencheur, intro, actif, questions[], recompense{} }
+  var FORM = null;      // fidelisation:sondage:form — listes de choix
+
+  function boiteEditeur(){
+    var e = EDIT;
+    var h = '<div class="voile" id="fi-voile-ed"><div class="boite">'
+      + '<h3>' + (e.id ? 'Modifier le sondage' : 'Nouveau sondage') + '</h3>'
+      + '<label class="champ"><span class="lbl">Nom</span>'
+      + '<input class="t" id="sd-nom" value="' + esc(e.nom) + '" placeholder="Satisfaction après livraison"></label>'
+      + '<label class="champ"><span class="lbl">Envoyé quand</span><select class="t" id="sd-decl">'
+      + (FORM.declencheurs || []).map(function(d){
+          return '<option value="' + esc(d.v) + '"' + (e.declencheur === d.v ? ' selected' : '') + '>'
+            + esc(d.l) + '</option>'; }).join('')
+      + '</select></label>'
+      + '<label class="champ"><span class="lbl">Texte d’introduction du courriel</span>'
+      + '<textarea class="t" id="sd-intro" rows="2">' + esc(e.intro) + '</textarea></label>'
+      + '<label class="case"><input type="checkbox" id="sd-actif"' + (e.actif ? ' checked' : '')
+      + '> Sondage actif</label>';
+
+    h += '<div class="qs"><div class="qstitre">Questions<span class="dt">'
+      + e.questions.length + '</span>'
+      + '<button class="mini" id="sd-q-plus">+ Ajouter une question</button></div>';
+    if (!e.questions.length) {
+      h += '<div class="vide" style="padding:.8rem">Aucune question — un sondage vide partirait quand même par courriel.</div>';
+    }
+    h += e.questions.map(function(q, i){
+      return '<div class="qed">'
+        + '<div class="qedh"><span class="dt">Question ' + (i + 1) + '</span>'
+        + '<button class="mini danger" data-q-suppr="' + i + '">✕</button></div>'
+        + '<input class="t" data-q-lib="' + i + '" value="' + esc(q.libelle) + '" placeholder="Que pensez-vous de votre achat ?">'
+        + '<div class="qedr"><select class="t" data-q-type="' + i + '">'
+        + (FORM.typesQuestion || []).map(function(t){
+            return '<option value="' + esc(t.v) + '"' + (q.type === t.v ? ' selected' : '') + '>'
+              + esc(t.l) + '</option>'; }).join('')
+        + '</select>'
+        + '<label class="case"><input type="checkbox" data-q-obl="' + i + '"'
+        + (q.obligatoire ? ' checked' : '') + '> Obligatoire</label></div>'
+        + (q.type === 'choice'
+            ? '<textarea class="t" data-q-opt="' + i + '" rows="3" placeholder="Un choix par ligne">'
+              + esc((q.options || []).join('\\n')) + '</textarea>'
+            : '')
+        + '</div>';
+    }).join('');
+    h += '</div>';
+
+    var r = e.recompense;
+    h += '<label class="case"><input type="checkbox" id="sd-rec"' + (r.active ? ' checked' : '')
+      + '> Offrir une récompense pour la réponse</label>';
+    if (r.active) {
+      h += '<div class="qedr">'
+        + '<label class="champ" style="flex:1 1 10rem"><span class="lbl">Type</span>'
+        + '<select class="t" id="sd-rec-type">'
+        + (FORM.typesRecompense || []).map(function(t){
+            return '<option value="' + esc(t.v) + '"' + (r.type === t.v ? ' selected' : '') + '>'
+              + esc(t.l) + '</option>'; }).join('')
+        + '</select></label>'
+        + '<label class="champ" style="flex:0 0 7rem"><span class="lbl">Valeur</span>'
+        + '<input class="t" id="sd-rec-val" type="number" min="1" value="' + esc(r.valeur) + '"></label>'
+        + '<label class="champ" style="flex:0 0 8rem"><span class="lbl">Valide (jours)</span>'
+        + '<input class="t" id="sd-rec-j" type="number" min="1" value="' + esc(r.jours) + '"></label>'
+        + '</div>'
+        + '<label class="champ"><span class="lbl">Message accompagnant le code</span>'
+        + '<input class="t" id="sd-rec-msg" value="' + esc(r.message) + '" placeholder="Merci ! Voici un code pour votre prochaine commande."></label>';
+    }
+
+    h += '<div class="pied-boite">'
+      + '<button class="mini" id="sd-annuler">Annuler</button>'
+      + '<button class="mini prim" id="sd-enr">' + (e.id ? 'Enregistrer' : 'Créer le sondage') + '</button>'
+      + '</div></div></div>';
+    return h;
+  }
+
+  /* ⚠ ON RELIT LES CHAMPS AVANT CHAQUE REDESSIN. Cocher << recompense >> ou
+     changer un type de question redessine la boite : sans cette relecture, tout
+     ce qui a ete tape avant le clic serait perdu. */
+  function moissonner(){
+    if (!EDIT) return;
+    var v = function(id){ var el = document.getElementById(id); return el ? el.value : null; };
+    var c = function(id){ var el = document.getElementById(id); return el ? el.checked : null; };
+    if (v('sd-nom') !== null) EDIT.nom = v('sd-nom');
+    if (v('sd-decl') !== null) EDIT.declencheur = v('sd-decl');
+    if (v('sd-intro') !== null) EDIT.intro = v('sd-intro');
+    if (c('sd-actif') !== null) EDIT.actif = c('sd-actif');
+    if (c('sd-rec') !== null) EDIT.recompense.active = c('sd-rec');
+    if (v('sd-rec-type') !== null) EDIT.recompense.type = v('sd-rec-type');
+    if (v('sd-rec-val') !== null) EDIT.recompense.valeur = v('sd-rec-val');
+    if (v('sd-rec-j') !== null) EDIT.recompense.jours = v('sd-rec-j');
+    if (v('sd-rec-msg') !== null) EDIT.recompense.message = v('sd-rec-msg');
+    EDIT.questions.forEach(function(q, i){
+      var l = document.querySelector('[data-q-lib="' + i + '"]');
+      var t = document.querySelector('[data-q-type="' + i + '"]');
+      var o = document.querySelector('[data-q-obl="' + i + '"]');
+      var p = document.querySelector('[data-q-opt="' + i + '"]');
+      if (l) q.libelle = l.value;
+      if (t) q.type = t.value;
+      if (o) q.obligatoire = o.checked;
+      if (p) q.options = p.value.split('\\n').map(function(x){ return x.trim(); }).filter(Boolean);
+    });
+  }
+
+  function ouvrirEditeur(id){
+    var apres = function(){
+      EDIT = (FORM && FORM.sondage) || { id: '', nom: '', declencheur: 'delivered', intro: '',
+        actif: true, questions: [], recompense: { active: false, type: 'percent', valeur: 10, jours: 30, message: '' } };
+      DETAIL = null; dessiner();
+    };
+    appeler('fidelisation:sondage:form', [id || '']).then(function(r){
+      if (!r || !r.ok) { dire('Éditeur indisponible : ' + expliquer(r), 'err'); return; }
+      FORM = r; apres();
+    });
+  }
+
+  function enregistrerSondage(){
+    moissonner();
+    dire('Enregistrement…');
+    appeler('fidelisation:sondage:ecrire', [EDIT]).then(function(r){
+      if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      EDIT = null; FORM = null;
+      charger();
+      dire('« ' + r.nom + ' » ' + (r.nouveau ? 'créé' : 'enregistré') + ' — '
+        + r.questions + ' question' + (r.questions > 1 ? 's' : '') + '.', 'bon');
+    });
+  }
+
   function boiteDetail(){
     var s = DETAIL;
     if (!s) return '';
@@ -313,13 +482,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       + ((D.recompenses || []).length ? '<span class="n">' + D.recompenses.length + '</span>' : '') + '</button>'
       + '<button class="mini' + (ONGLET === 'invitations' ? ' actif' : '') + '" data-onglet="invitations">Invitations'
       + ((D.invitations || []).length ? '<span class="n">' + D.invitations.length + '</span>' : '') + '</button>'
-      + '<div class="droite"><span class="dt">Créer un sondage : écran Fidélisation, '
-      + 'fenêtre principale</span></div>'
+      + '<div class="droite">'
+      + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">+ Nouveau sondage</button>' : '')
+      + '</div>'
       + '</div>';
 
     h += ONGLET === 'recompenses' ? vueRecompenses()
        : ONGLET === 'invitations' ? vueInvitations() : vueSondages();
-    if (DETAIL) h += boiteDetail();
+    if (EDIT) h += boiteEditeur();
+    else if (DETAIL) h += boiteDetail();
     corps.innerHTML = h;
     brancher();
   }
@@ -400,6 +571,29 @@ ${JS_ACTIVITE}${JS_DIRE}
       return;
     }
 
+    /* ── Gestes de l editeur de sondage (#33) ── */
+    if (t.closest('#fi-nouveau') || t.closest('#fi-premier')) { ouvrirEditeur(''); return; }
+    var mo = t.closest('[data-modifier-sondage]');
+    if (mo) { ouvrirEditeur(mo.getAttribute('data-modifier-sondage')); return; }
+    if (EDIT) {
+      if (t.closest('#sd-annuler')) { EDIT = null; FORM = null; dessiner(); dire(''); return; }
+      if (t.closest('#sd-enr')) { enregistrerSondage(); return; }
+      if (t.closest('#sd-q-plus')) {
+        moissonner();
+        EDIT.questions.push({ id: '', type: 'rating', libelle: '', obligatoire: true, options: [] });
+        dessiner();
+        return;
+      }
+      var qs = t.closest('[data-q-suppr]');
+      if (qs) { moissonner(); EDIT.questions.splice(Number(qs.getAttribute('data-q-suppr')), 1); dessiner(); return; }
+      /* ⚠ LE VOILE NE FERME PAS L EDITEUR. Un clic a cote perdrait un sondage
+         qu on vient de composer ; le detail, lui, ne contient rien a perdre. */
+      if (t.closest('#fi-voile-ed') && !t.closest('.boite')) {
+        dire('Cliquez « Annuler » pour fermer — la saisie serait perdue.', 'att');
+        return;
+      }
+    }
+
     var tr = t.closest('tr[data-sondage]');
     if (tr) {
       appeler('fidelisation:sondage', [tr.getAttribute('data-sondage')]).then(function(r){
@@ -419,11 +613,27 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ARME) { ARME = ''; dessiner(); }
   });
 
+  /* ⚠ CHANGER LE TYPE D UNE QUESTION OU COCHER << recompense >> REDESSINE la
+     boite (un choix multiple fait apparaitre sa liste d options) : on moissonne
+     d abord, sinon tout ce qui est tape avant le changement disparait. */
+  corps.addEventListener('change', function(ev){
+    if (!EDIT) return;
+    var t = ev.target;
+    if (!t) return;
+    if (t.id === 'sd-rec' || (t.getAttribute && t.getAttribute('data-q-type') !== null)) {
+      moissonner(); dessiner();
+    }
+  });
+
   function charger(){
     appeler('fidelisation:liste', []).then(function(r){
       if (!r || !r.ok) { vide('Fidélisation indisponible', expliquer(r)); return; }
       D = r;
       dessiner();
+      /* ⚠ Ouverture directe sur l editeur (id d ouverture) : le banc
+         n a aucun moyen de cliquer, et c est justement l editeur qui
+         manquait. */
+      if (${JSON.stringify(editeur)} && !EDIT) ouvrirEditeur('');
     });
   }
 

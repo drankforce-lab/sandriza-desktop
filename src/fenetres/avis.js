@@ -10,8 +10,16 @@
  * (armé en deux clics). Les gestes sont les MÊMES cœurs que l'écran du site
  * (Admin._avisApprouverCoeur…), miroir local puis serveur, verdict honnête.
  *
- * Les PHOTOS d'un avis ne voyagent pas par le pont : leur nombre s'affiche,
- * et leur retrait photo par photo reste à l'écran web qui les montre.
+ * Les PHOTOS s'affichent en vignettes et se retirent une par une (#33).
+ * ⚠ CE GESTE A MANQUÉ LONGTEMPS, et cette fenêtre en portait le mensonge : elle
+ * annonçait « Photos : 3 — gérées à l'écran web » en désignant un écran que
+ * personne ne peut plus ouvrir, `reviews` étant ancrable depuis la 1.58.0.
+ * Trouvé par l'audit de couverture (#32).
+ * ⚠ LES VIGNETTES SONT DES <img>, JAMAIS UN fetch : une balise image n'a pas
+ * besoin de CORS, un `fetch` vers R2 échouerait sans un mot.
+ * ⚠ ON RETIRE UNE PHOTO, ON NE MASQUE PAS L'AVIS. Un visage de tiers ou un
+ * intérieur de domicile ne justifie pas de punir une cliente qui a bien fait
+ * son travail. L'objet R2 est détruit APRÈS l'écriture, jamais avant.
  *
  * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit.
@@ -85,6 +93,14 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
 .boite .grille .v{font-size:.84rem;font-weight:600}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
   background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.6rem .7rem}
+.boite .photos{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 .6rem}
+.boite .ph{position:relative;width:86px;height:86px;border-radius:9px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05)}
+.boite .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.boite .phx{position:absolute;top:3px;right:3px;width:22px;height:22px;padding:0;line-height:1;
+  border-radius:50%;background:rgba(6,10,18,.78);border:1px solid rgba(239,68,68,.6);
+  color:#f87171;font-size:.76rem;font-weight:700;cursor:pointer}
+.boite .phx:hover{background:rgba(239,68,68,.28)}
 .boite .reponse{margin-top:.6rem;border-left:3px solid #c9a97e;padding:.4rem .7rem;
   background:rgba(201,169,126,.07);border-radius:0 9px 9px 0;font-size:.85rem}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
@@ -96,8 +112,15 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/** Page complète de la fenêtre native « Avis produits ». */
-function pageAvis() {
+/**
+ * Page complète de la fenêtre native « Avis produits ».
+ * `ouverture` = un identifiant d'avis pour ouvrir directement son panneau.
+ * ⚠ Le panneau de détail s'atteint par un CLIC, que le garde-fou ne fait pas :
+ * sans ce paramètre, les VIGNETTES DE PHOTOS — le geste qui manquait — ne
+ * seraient jamais dessinées pendant le contrôle.
+ */
+function pageAvis(ouverture) {
+  const ouv = String(ouverture || '');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Avis produits — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -122,7 +145,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PAGE = 0;
   var TAILLE = 20;
   var DETAIL = null;         // l avis ouvert (avis:lire)
+  var OUVERTURE = ${JSON.stringify(ouv)};
   var SUPPR_ARME = false;    // Supprimer attend une confirmation
+  var PHOTO_ARMEE = -1;      // retrait d une photo : index arme, -1 = aucun
   var REPONDRE = false;      // le champ de reponse est ouvert
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -245,9 +270,23 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div><div class="l">Langue</div><div class="v">' + esc(r.langue) + '</div></div>'
       + '<div><div class="l">Déposé le</div><div class="v">' + esc(r.date) + '</div></div>'
       + (r.approuveLe ? '<div><div class="l">Approuvé le</div><div class="v">' + esc(r.approuveLe) + '</div></div>' : '')
-      + (r.photos ? '<div><div class="l">Photos</div><div class="v">' + r.photos
-        + ' — gérées à l’écran web</div></div>' : '')
+      + (r.photos ? '<div><div class="l">Photos</div><div class="v">' + r.photos + '</div></div>' : '')
       + '</div>'
+      /* ⚠ LES VIGNETTES SONT DES <img>, PAS UN fetch. Une balise image n a pas
+         besoin de CORS ; un fetch vers R2 echouerait sans un mot (voir
+         [[reference_r2_never_fetch_from_page]]). L adresse morte retombe sur un
+         cadre gris plutot que sur l icone d image brisee du navigateur. */
+      + ((r.photosUrl && r.photosUrl.length)
+          ? '<div class="photos">' + r.photosUrl.map(function(u, i){
+              return '<div class="ph">'
+                + '<img src="' + esc(u) + '" alt="Photo ' + (i + 1) + ' de l’avis">'
+                + (r.peutModifier
+                    ? '<button class="phx" data-photo="' + i + '" title="Retirer cette photo de l’avis et du stockage">'
+                      + (PHOTO_ARMEE === i ? '?' : '✕') + '</button>'
+                    : '')
+                + '</div>';
+            }).join('') + '</div>'
+          : '')
       + (r.titre ? '<div style="font-weight:700;margin-bottom:.35rem">' + esc(r.titre) + '</div>' : '')
       + '<div class="texte">' + esc(r.texte || '(aucun texte)') + '</div>'
       + (r.reponse
@@ -274,12 +313,40 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h;
   }
 
+  /* ── RETIRER UNE PHOTO (#33) ───────────────────────────────────────────────
+     ⚠ ARMEE EN DEUX CLICS et l avis reste ouvert : on retire souvent DEUX
+     photos d affilee, et refermer le panneau a chaque fois obligerait a
+     rouvrir l avis entre chaque geste.
+     ⚠ ON RELIT L AVIS APRES COUP plutot que de retirer la vignette a la main :
+     les index se decalent des qu une photo part, et un index perime ferait
+     retirer la mauvaise image au clic suivant. */
+  function retirerPhoto(i){
+    if (!DETAIL) return;
+    if (PHOTO_ARMEE !== i) {
+      PHOTO_ARMEE = i; dessiner();
+      dire('Recliquez pour confirmer — la photo quitte l’avis ET le stockage. Le texte reste intact.', 'att');
+      return;
+    }
+    PHOTO_ARMEE = -1;
+    var id = DETAIL.id;
+    dire('Retrait…');
+    appeler('avis:photoRetirer', [id, i]).then(function(r){
+      if (!r.ok) { dessiner(); dire('Échec : ' + expliquer(r), 'err'); return; }
+      appeler('avis:lire', [id]).then(function(d){
+        if (d && d.ok) { DETAIL = d; }
+        dessiner();
+        dire(r.restantes ? ('Photo retirée — ' + r.restantes + ' restante'
+              + (r.restantes > 1 ? 's' : '') + '.') : 'Photo retirée — il n’en reste aucune.', 'bon');
+      });
+    });
+  }
+
   function geste(op, apres){
     dire('…');
     appeler(op, [DETAIL.id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(apres, 'bon');
-      DETAIL = null; SUPPR_ARME = false; REPONDRE = false;
+      DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false;
       charger();
     });
   }
@@ -306,7 +373,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (bs) bs.onclick = function(){ PAGE = (D.page || 0) + 1; charger(); };
 
     var f = document.getElementById('a-fermer');
-    if (f) f.onclick = function(){ DETAIL = null; SUPPR_ARME = false; REPONDRE = false; dessiner(); };
+    if (f) f.onclick = function(){ DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; dessiner(); };
     var ap = document.getElementById('a-approuver');
     if (ap) ap.onclick = function(){ geste('avis:approuver', 'Avis approuvé — il est maintenant visible en boutique.'); };
     var ma = document.getElementById('a-masquer');
@@ -325,6 +392,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       SUPPR_ARME = false;
       geste('avis:supprimer', 'Avis supprimé définitivement.');
     };
+    var phs = document.querySelectorAll('[data-photo]');
+    for (var ip = 0; ip < phs.length; ip++) {
+      phs[ip].onclick = function(){ retirerPhoto(Number(this.getAttribute('data-photo'))); };
+    }
     var re = document.getElementById('a-repondre');
     if (re) re.onclick = function(){ REPONDRE = true; dessiner(); };
     var ra = document.getElementById('a-repannuler');
@@ -350,7 +421,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (og) { ONGLET = og.getAttribute('data-onglet'); ETAT = ''; PAGE = 0; charger(); return; }
     if (t.closest('.boite')) return;
     var vo = t.closest('#a-voile');
-    if (vo) { DETAIL = null; SUPPR_ARME = false; REPONDRE = false; dessiner(); return; }
+    if (vo) { DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; dessiner(); return; }
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');
     if (tr) ouvrirDetail(tr.getAttribute('data-id'));
@@ -379,6 +450,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
+      /* Ouverture directe sur un avis (id d ouverture) : une seule fois. */
+      if (OUVERTURE && !DETAIL) { var o = OUVERTURE; OUVERTURE = ''; ouvrirDetail(o); }
     });
   }
 
@@ -433,7 +506,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (DETAIL) { DETAIL = null; SUPPR_ARME = false; REPONDRE = false; dessiner(); return; }
+      if (DETAIL) { DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; dessiner(); return; }
       P.fermer();
     }
   });
