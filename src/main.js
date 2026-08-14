@@ -1334,6 +1334,9 @@ const OPS_PONT = new Set([
   // engage l exterieur et prend du temps — d ou les limites larges.
   // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
   'sociaux:config:donnees', 'sociaux:config:ecrire', 'sociaux:config:tester',
+  // Liste noire et Mon profil (fenetres listenoire / profil, 3.8.0, #30).
+  'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer',
+  'profil:donnees', 'profil:motdepasse', 'profil:questions',
   'sociaux:liste', 'sociaux:publier', 'sociaux:publierTout', 'sociaux:ignorer',
   'sociaux:viderHistorique',
   // Fidelisation (fenetre Fidelisation, 1.71.0). La LISTE attend la
@@ -1869,6 +1872,10 @@ const LIMITES_PONT = {
   'sociaux:publier': 60000,
   // Le test interroge Facebook/Instagram : un aller-retour hors de chez nous.
   'sociaux:config:donnees': 20000, 'sociaux:config:ecrire': 30000, 'sociaux:config:tester': 45000,
+  /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
+     hachage) : plus long qu'une ecriture locale. */
+  'listenoire:donnees': 20000, 'listenoire:ajouter': 30000, 'listenoire:retirer': 30000,
+  'profil:donnees': 20000, 'profil:motdepasse': 60000, 'profil:questions': 60000,
   'sociaux:publierTout': 180000,
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
@@ -2116,6 +2123,8 @@ const PAGES_ANCRABLES = () => ({
   'securite': ['Accès Utilisateurs', () => pageSecurite()],
   'reglages-securite': ['Réglages de sécurité', () => pageReglagesSecurite()],
   'sociaux-config': ['Configuration des réseaux sociaux', () => pageSociauxConfig()],
+  'listenoire': ['Liste noire', () => pageListeNoire('')],
+  'profil': ['Mon profil', () => pageProfil()],
   'journaux': ['Journaux', () => pageJournaux(_journauxOnglet || '')],
   'incidents': ['Incidents de sécurité', () => pageIncidents('')],
   'sauvegarde': ['Sauvegarde & Restauration', () => pageSauvegarde('')],
@@ -2959,6 +2968,8 @@ const { pagePages } = require('./fenetres/pages');
 const { pageSecurite } = require('./fenetres/securite');
 const { pageReglagesSecurite } = require('./fenetres/reglages-securite');
 const { pageSociauxConfig } = require('./fenetres/sociaux-config');
+const { pageListeNoire } = require('./fenetres/listenoire');
+const { pageProfil } = require('./fenetres/profil');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
@@ -3050,7 +3061,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'journaux': case 'incidents': case 'sauvegarde': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

@@ -1779,6 +1779,52 @@ module.exports = {
     ];
   })(),
 
+  // Liste noire (#30) — un des six ecrans qui n'avaient aucun natif.
+  'listenoire.js': (function(){
+    var donnees = { ok: true, peutAjouter: true, peutRetirer: true, entrees: [
+      { id: 'bl_1', type: 'email', typeLabel: 'Courriel', valeur: 'fraude@exemple.com',
+        note: 'Trois retours frauduleux', quand: '2026-08-02' },
+      { id: 'bl_2', type: 'address', typeLabel: 'Adresse', valeur: '12 rue Inconnue, Laval',
+        note: '', quand: '2026-07-14' }
+    ] };
+    return [
+      { nom: 'liste', reponses: { identite: IDENTITE, 'listenoire:donnees': donnees,
+        'listenoire:retirer': { ok: true, peutAjouter: true, peutRetirer: true, entrees: [] } } },
+      // ⚠ Le formulaire s'ouvre par un CLIC : on l'atteint par l'id d'ouverture.
+      { nom: 'ajout', id: 'ajout', reponses: { identite: IDENTITE, 'listenoire:donnees': donnees,
+        'listenoire:ajouter': Object.assign({}, donnees) } },
+      { nom: 'doublon refuse', id: 'ajout', reponses: { identite: IDENTITE, 'listenoire:donnees': donnees,
+        'listenoire:ajouter': { ok: false, motif: 'doublon' } } },
+      { nom: 'liste vide', reponses: { identite: IDENTITE,
+        'listenoire:donnees': { ok: true, peutAjouter: true, peutRetirer: true, entrees: [] } } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE,
+        'listenoire:donnees': Object.assign({}, donnees, { peutAjouter: false, peutRetirer: false }) } }
+    ];
+  })(),
+
+  // Mon profil (#30).
+  'profil.js': (function(){
+    var base = {
+      ok: true, nom: 'Bob Brousseau', role: 'Super-administrateur', roleIcone: '👑',
+      identifiant: 'brousseau', courriel: 'bob@sandriza.com',
+      derniereConnexion: '2026-08-13T12:00:00Z',
+      questions: ['Ville de naissance ?', 'Nom du premier animal ?', 'Nom de votre école primaire ?']
+    };
+    return [
+      { nom: 'questions configurées', reponses: { identite: IDENTITE,
+        'profil:donnees': Object.assign({ questionsPosees: true, q1: 'Ville de naissance ?', q2: 'Nom du premier animal ?' }, base),
+        'profil:motdepasse': { ok: true },
+        'profil:questions': Object.assign({ questionsPosees: true, q1: 'Ville de naissance ?', q2: 'Nom du premier animal ?' }, base) } },
+      // ⚠ L'etat le plus grave : aucune reponse enregistree, donc aucune
+      // recuperation possible par cette voie. L'ecran doit le DIRE.
+      { nom: 'aucune question', reponses: { identite: IDENTITE,
+        'profil:donnees': Object.assign({ questionsPosees: false, q1: '', q2: '' }, base) } },
+      { nom: 'mot de passe refuse', reponses: { identite: IDENTITE,
+        'profil:donnees': Object.assign({ questionsPosees: true, q1: 'Ville de naissance ?', q2: 'Nom du premier animal ?' }, base),
+        'profil:motdepasse': { ok: false, motif: 'refus', detail: 'Mot de passe actuel incorrect.' } } }
+    ];
+  })(),
+
   // Journaux (#7 Lot 7a). Quatre onglets ; verrous = super-admin (async). Chaque
   // onglet a son cas d'ouverture (le clic ne navigue pas sur le DOM du banc).
   'journaux.js': (function(){
