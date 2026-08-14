@@ -2824,6 +2824,162 @@ module.exports = {
      que des sondages, jamais en creer un. Il s ouvre par un clic — donc par un
      id d ouverture ici. Le cas << question a choix >> est a part : c est le
      seul type qui fait apparaitre une liste d options. */
+  /* ── LIQUIDATION / VENTE FINALE (3.12.0, #30) ─────────────────────────────
+     ⚠ LES DEUX SURCOUCHES ONT LEUR CAS, par identifiant d'ouverture : le banc
+     ne clique pas. Sans « lot » et « categories », l'ajout en lot et l'ajout par
+     catégorie ne seraient jamais dessinés ici — et c'est précisément le genre
+     d'angle mort qui a laissé passer les six trous de l'audit #32. */
+  'liquidation.js': [
+    {
+      nom: 'les deux regimes garnis',
+      id: '',
+      reponses: {
+        identite: IDENTITE,
+        'liquidation:donnees': {
+          ok: true, peut: { ajout: true, edition: true },
+          compteurs: { liquidation: 2, finale: 1 }, recherche: '', taille: 20,
+          liq: { total: 2, pages: 1, page: 0, lignes: [
+            { id: 'p1', nom: 'Robe cintrée', sku: 'ROB-0001', categorie: 'Robes',
+              couleur: '#C49A6C', prix: 59.99, stock: 4, regime: 'liq_no', du: '2026-08-01', au: '2026-09-15' },
+            { id: 'p2', nom: 'Chemisier de soie', sku: 'HAU-0007', categorie: 'Hauts',
+              couleur: '#8FA1B8', prix: 42.5, stock: 0, regime: 'liq_no', du: '', au: '' },
+          ] },
+          finale: { total: 1, pages: 1, page: 0, lignes: [
+            { id: 'p3', nom: 'Manteau de laine', sku: 'MAN-0002', categorie: 'Manteaux',
+              couleur: '#9B7BB8', prix: 149, stock: 2, regime: 'final', du: '', au: '' },
+          ] },
+        },
+        'liquidation:retirer': { ok: true, etait: 'liquidation', nom: 'Robe cintrée' },
+      },
+    },
+    {
+      nom: 'onglet vente finale',
+      id: 'final',
+      reponses: {
+        'liquidation:donnees': {
+          ok: true, peut: { ajout: true, edition: true },
+          compteurs: { liquidation: 0, finale: 1 }, recherche: '', taille: 20,
+          liq: { total: 0, pages: 1, page: 0, lignes: [] },
+          finale: { total: 1, pages: 1, page: 0, lignes: [
+            { id: 'p3', nom: 'Manteau de laine', sku: 'MAN-0002', categorie: 'Manteaux',
+              couleur: '#9B7BB8', prix: 149, stock: 2, regime: 'final', du: '', au: '' },
+          ] },
+        },
+      },
+    },
+    {
+      // L'etat NORMAL d'une boutique en debut de saison : aucun produit en regime.
+      nom: 'aucun produit en regime',
+      id: '',
+      reponses: {
+        'liquidation:donnees': {
+          ok: true, peut: { ajout: true, edition: true },
+          compteurs: { liquidation: 0, finale: 0 }, recherche: '', taille: 20,
+          liq: { total: 0, pages: 1, page: 0, lignes: [] },
+          finale: { total: 0, pages: 1, page: 0, lignes: [] },
+        },
+      },
+    },
+    {
+      nom: 'lecture seule (ni ajout ni retrait)',
+      id: '',
+      reponses: {
+        'liquidation:donnees': {
+          ok: true, peut: { ajout: false, edition: false },
+          compteurs: { liquidation: 1, finale: 0 }, recherche: '', taille: 20,
+          liq: { total: 1, pages: 1, page: 0, lignes: [
+            { id: 'p1', nom: 'Robe cintrée', sku: 'ROB-0001', categorie: 'Robes',
+              couleur: '#C49A6C', prix: 59.99, stock: 4, regime: 'liq_no', du: '', au: '' },
+          ] },
+          finale: { total: 0, pages: 1, page: 0, lignes: [] },
+        },
+      },
+    },
+    {
+      nom: 'surcouche ajout en lot',
+      id: 'lot',
+      reponses: {
+        'liquidation:donnees': {
+          ok: true, peut: { ajout: true, edition: true },
+          compteurs: { liquidation: 1, finale: 0 }, recherche: '', taille: 20,
+          liq: { total: 1, pages: 1, page: 0, lignes: [
+            { id: 'p1', nom: 'Robe cintrée', sku: 'ROB-0001', categorie: 'Robes',
+              couleur: '#C49A6C', prix: 59.99, stock: 4, regime: 'liq_no', du: '', au: '' },
+          ] },
+          finale: { total: 0, pages: 1, page: 0, lignes: [] },
+        },
+        'liquidation:choix': {
+          ok: true, total: 3, pages: 1, page: 0, ids: ['p1', 'p2', 'p3'],
+          categories: [
+            { cle: 'robes', nom: 'Robes', couleur: '#C49A6C' },
+            { cle: 'hauts', nom: 'Hauts', couleur: '#8FA1B8' },
+          ],
+          lignes: [
+            { id: 'p1', nom: 'Robe cintrée', sku: 'ROB-0001', categorie: 'Robes',
+              couleur: '#C49A6C', prix: 59.99, stock: 4, regime: 'liq_no', du: '', au: '' },
+            { id: 'p2', nom: 'Chemisier de soie', sku: 'HAU-0007', categorie: 'Hauts',
+              couleur: '#8FA1B8', prix: 42.5, stock: 6, regime: 'normal', du: '', au: '' },
+            { id: 'p3', nom: 'Manteau de laine', sku: 'MAN-0002', categorie: 'Manteaux',
+              couleur: '#9B7BB8', prix: 149, stock: 2, regime: 'final', du: '', au: '' },
+          ],
+        },
+        'liquidation:lot': { ok: true, n: 3, mode: 'liq_no' },
+      },
+    },
+    {
+      nom: 'surcouche par categorie',
+      id: 'categories',
+      reponses: {
+        'liquidation:donnees': {
+          ok: true, peut: { ajout: true, edition: true },
+          compteurs: { liquidation: 0, finale: 0 }, recherche: '', taille: 20,
+          liq: { total: 0, pages: 1, page: 0, lignes: [] },
+          finale: { total: 0, pages: 1, page: 0, lignes: [] },
+        },
+        'liquidation:cats': {
+          ok: true, categories: [
+            { cle: 'robes', nom: 'Robes', couleur: '#C49A6C', produits: 14, liq: 3, finale: 0 },
+            { cle: 'hauts', nom: 'Hauts', couleur: '#8FA1B8', produits: 9, liq: 0, finale: 2 },
+            { cle: 'manteaux', nom: 'Manteaux', couleur: '#9B7BB8', produits: 4, liq: 0, finale: 0 },
+          ],
+        },
+        'liquidation:parCategorie': { ok: true, n: 23, cats: 2, mode: 'liq_no' },
+      },
+    },
+    {
+      /* ⚠ LE RESUME EST LE DERNIER ECRAN AVANT UNE ECRITURE EN LOT : c est celui
+         qu il faut voir. Il ne s atteint qu au clic, d ou son identifiant
+         d ouverture << lot-resume >> (periode fixe, pour que la ligne de duree
+         soit dessinee elle aussi). */
+      nom: 'surcouche ajout en lot — le resume (etape 2)',
+      id: 'lot-resume',
+      reponses: {
+        'liquidation:donnees': {
+          ok: true, peut: { ajout: true, edition: true },
+          compteurs: { liquidation: 0, finale: 0 }, recherche: '', taille: 20,
+          liq: { total: 0, pages: 1, page: 0, lignes: [] },
+          finale: { total: 0, pages: 1, page: 0, lignes: [] },
+        },
+        'liquidation:choix': {
+          ok: true, total: 2, pages: 1, page: 0, ids: ['p1', 'p2'],
+          categories: [{ cle: 'robes', nom: 'Robes', couleur: '#C49A6C' }],
+          lignes: [
+            { id: 'p1', nom: 'Robe cintrée', sku: 'ROB-0001', categorie: 'Robes',
+              couleur: '#C49A6C', prix: 59.99, stock: 4, regime: 'normal', du: '', au: '' },
+            { id: 'p2', nom: 'Chemisier de soie', sku: 'HAU-0007', categorie: 'Hauts',
+              couleur: '#8FA1B8', prix: 42.5, stock: 6, regime: 'normal', du: '', au: '' },
+          ],
+        },
+        'liquidation:lot': { ok: true, n: 2, mode: 'liq_no' },
+      },
+    },
+    {
+      // Le refus : le pont dit non, la fenetre doit l EXPLIQUER, pas rester vide.
+      nom: 'droit refuse',
+      id: '',
+      reponses: { 'liquidation:donnees': { ok: false, motif: 'droit' } },
+    },
+  ],
   'fidelisation.js': [
     { nom: 'editeur de sondage', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
       'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',

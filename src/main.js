@@ -1334,6 +1334,11 @@ const OPS_PONT = new Set([
   // faite en 1.69.0 (<< la configuration suivra >>) n avait jamais ete tenue,
   // et l ecran est devenu INATTEIGNABLE des que le natif a gagne pour de bon.
   'chat:cfg:donnees', 'chat:cfg:ecrire', 'chat:cfg:ia', 'chat:cfg:photo',
+  // Liquidation / vente finale (fenetre liquidation, 3.12.0, #30). Trois droits
+  // distincts : voir, METTRE dans un regime (add), en RETIRER (edit) — ce qui
+  // change ce que la boutique annonce au client et sa politique de retour.
+  'liquidation:donnees', 'liquidation:choix', 'liquidation:cats',
+  'liquidation:retirer', 'liquidation:lot', 'liquidation:parCategorie',
   // Reseaux sociaux (fenetre Sociaux, 1.70.0) : la FILE seulement. Publier
   // engage l exterieur et prend du temps — d ou les limites larges.
   // Configuration des reseaux sociaux (fenetre sociaux-config, 3.7.0, #10).
@@ -1891,6 +1896,12 @@ const LIMITES_PONT = {
   /* La photo part en clair vers la PAGE, qui la range dans R2 : un televersement
      reel, pas une ecriture locale — d ou une limite large. */
   'chat:cfg:donnees': 20000, 'chat:cfg:ecrire': 30000, 'chat:cfg:ia': 30000, 'chat:cfg:photo': 90000,
+  // ⚠ Les DEUX ecritures en lot sont larges : elles touchent potentiellement TOUT
+  // le catalogue (un << tout cocher >>, ou plusieurs categories d un coup), et
+  // chaque produit part vers Turso. Un delai court ferait dire << echec >> a une
+  // ecriture qui aboutit — le pire des verdicts, puisqu on la refait.
+  'liquidation:donnees': 20000, 'liquidation:choix': 20000, 'liquidation:cats': 20000,
+  'liquidation:retirer': 30000, 'liquidation:lot': 120000, 'liquidation:parCategorie': 120000,
   /* Retirer une photo ecrit dans le nuage PUIS detruit l objet R2 : deux
      allers-retours reseau, pas une ecriture locale. */
   'fournisseurs:supprimer': 30000, 'avis:photoRetirer': 60000,
@@ -2108,6 +2119,7 @@ const PAGES_ANCRABLES = () => ({
   chat: ['Chat en ligne', () => pageChat()],
   sociaux: ['Réseaux sociaux', () => pageSociaux('')],
   fidelisation: ['Fidélisation et sondages', () => pageFidelisation('')],
+  liquidation: ['Liquidation / Vente finale', () => pageLiquidation('')],
   recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
@@ -2975,6 +2987,7 @@ const { pagePromotions } = require('./fenetres/promotions');
 const { pageChat } = require('./fenetres/chat');
 const { pageSociaux } = require('./fenetres/sociaux');
 const { pageFidelisation } = require('./fenetres/fidelisation');
+const { pageLiquidation } = require('./fenetres/liquidation');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageAbonnes } = require('./fenetres/abonnes');
@@ -3104,6 +3117,7 @@ const actionApp = (nom) => {
     case 'retours': case 'codesbarres': case 'avis': case 'messagerie':
     case 'archives': case 'paiements': case 'cartescadeaux': case 'coupons':
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
+    case 'liquidation':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':
