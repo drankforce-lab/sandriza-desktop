@@ -91,6 +91,18 @@ ${JS_ACTIVITE}${JS_DIRE}
   var ONGLET = 'recentes';   // recentes | archives
   var DEPLIE = {};           // v -> true
 
+  /* La mise en forme AUTORISEE dans le corps d une note. On ne rend pas le HTML
+     tel quel les yeux fermes : on garde les quelques balises d emphase qui y
+     servent et on neutralise tout le reste. Une note reste du texte enrichi,
+     pas une page — et si un jour ces textes venaient d ailleurs que du code,
+     ce filtre serait deja en place. */
+  var BALISES_OK = /^<\\/?(strong|b|em|i|code|br)\\s*\\/?>$/i;
+  function nettoyer(s){
+    return String(s == null ? '' : s).replace(/<[^>]*>|[&<>"]/g, function(m){
+      if (m.charAt(0) === '<') return BALISES_OK.test(m) ? m : '';
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m];
+    });
+  }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
@@ -149,10 +161,20 @@ ${JS_ACTIVITE}${JS_DIRE}
           ? ' <span class="pill bon">installée ici</span>' : '';
         var det = '';
         if (ouverte) {
-          det = '<div class="detail">' + esc(e.r || '');
+          /* ⚠ LE CORPS D UNE NOTE EST DU HTML, ET IL DOIT LE RESTER.
+             Il etait ECHAPPE : les <strong> ecrits dans NOTES (pont.js) se
+             lisaient en toutes lettres au milieu de la phrase, comme du code
+             oublie (signale le 2026-08-14, capture a l appui). Ces textes ne
+             viennent d aucun visiteur ni d aucune base : ils sont ecrits dans le
+             code du site, au meme titre que les libelles de cette fenetre. Les
+             echapper ne protegeait de rien et abimait chaque note.
+             ⚠ Le TITRE, la VERSION et la DATE restent echappes : eux ne sont pas
+             censes porter de mise en forme, et rien ne justifie d y ouvrir la
+             porte au HTML. */
+          det = '<div class="detail">' + nettoyer(e.r || '');
           (e.s || []).forEach(function(sec){
             det += (sec.h ? '<h4>' + esc(sec.h) + '</h4>' : '')
-              + '<ul>' + (sec.p || []).map(function(par){ return '<li>' + esc(par) + '</li>'; }).join('') + '</ul>';
+              + '<ul>' + (sec.p || []).map(function(par){ return '<li>' + nettoyer(par) + '</li>'; }).join('') + '</ul>';
           });
           det += '</div>';
         }
