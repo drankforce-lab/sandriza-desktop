@@ -2788,7 +2788,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function charger(garderSaisie){
     if (enCours) { RELANCE = true; return; }
     enCours = true;
-    appeler('photos:donnees', [{ q: Q, tri: TRI, taille: TAILLE, page: PAGE, taille: 24 }]).then(function(r){
+    appeler('photos:donnees', [{ q: Q, tri: TRI, taille: TAILLE, page: PAGE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
       if (!r || !r.ok) { vide('Photothèque indisponible', expliquer(r)); return; }

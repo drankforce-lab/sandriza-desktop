@@ -40,7 +40,7 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
 .h4{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8fa1b8;margin:0 0 .6rem}
 .prot{display:flex;flex-direction:column;gap:.5rem;margin:0 0 1.2rem}
 .prot .l{display:flex;align-items:center;gap:.7rem;font-size:.85rem}
-.prot .l .em{width:1.4em;text-align:center}
+.prot .l .em{width:1.4em;text-align:center;filter:grayscale(1) brightness(1.7);opacity:.9}
 .info{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;
   padding:.85rem 1rem;font-size:.8rem;color:#8fa1b8;line-height:1.6}
 .info b{color:#e8edf5}.info code{background:#0f1724;border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}

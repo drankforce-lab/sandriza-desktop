@@ -751,7 +751,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var s = { geste: VOIE, preset: PRESET, apercu: apercu };
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
-      var sel = document.getElementById('modele');
+      var sel = document.getElementById('modele-sel');
       if (sel) MODELE_SEL = sel.value;   // le menu déroulant reste la source si présent
       s.options = { modele: MODELE_SEL || 'sophia', pose: POSE_SEL };
     }

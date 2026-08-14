@@ -232,8 +232,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       desc: 'Revenus et dépenses ventilés par ligne fiscale, prêts à reporter dans votre déclaration.' },
     { cle: 'tp80', trim: false, titre: 'TP-80-V — État des résultats (Québec)',
       desc: 'L’équivalent québécois, aux mêmes chiffres.' },
-    { cle: 'grand-livre', trim: false, titre: 'Grand livre des dépenses',
-      desc: 'Chaque dépense de l’année, regroupée par catégorie — la pièce que demande un comptable.' },
+    { cle: 'grand-livre', trim: false, titre: 'Grand livre des ventes',
+      desc: 'Chaque vente de l’année, avec la TPS et la TVQ perçues — le registre que demande un comptable.' },
     { cle: 'inventaire', trim: false, titre: 'Inventaire de fin d’exercice',
       desc: 'La valeur du stock à la date de clôture, au coût — nécessaire au calcul du coût des marchandises vendues.' }
   ];

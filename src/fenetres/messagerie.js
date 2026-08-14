@@ -284,12 +284,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
-  var enCours = false;
+  var enCours = false, RELANCE = false;
   function charger(){
-    if (enCours) return;
+    // ⚠ Cliquer un onglet PENDANT un chargement ne doit pas laisser l'onglet
+    // actif ≠ contenu affiché : on note la demande et on redemande avec l'onglet
+    // courant à la fin, la réponse périmée n'est pas dessinée (patron commandes.js).
+    if (enCours) { RELANCE = true; return; }
     enCours = true;
     appeler('messagerie:liste', [{ onglet: ONGLET }]).then(function(r){
       enCours = false;
+      if (RELANCE) { RELANCE = false; charger(); return; }
       if (!r || !r.ok) { vide('Messagerie indisponible', expliquer(r)); return; }
       D = r;
       dire('');

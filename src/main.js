@@ -3244,7 +3244,7 @@ const actionApp = (nom) => {
     }
     case 'expeditions':
       ouvrirNative('expeditions', 'Expéditions', pageCommandes('expeditions'),
-        { width: 1060, height: 720, minWidth: 860, minHeight: 500 });
+        { width: 1060, height: 600, minWidth: 860, minHeight: 460 });
       break;
     case 'about-copy':
       try { require('electron').clipboard.writeText(texteApropos()); } catch {}
