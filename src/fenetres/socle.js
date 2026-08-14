@@ -204,12 +204,43 @@ signalerActivite();
  * aucune, et deux jeux de genres differents). En corriger une par une, c est en
  * oublier une.
  */
-const JS_DIRE = `
+/* Le compagnon JS du plein écran. ⚠ IL N'EST PLUS À INCLURE À LA MAIN : il est
+   joint à JS_DIRE, que les 78 fenêtres incluent (directement ou via JS_SOCLE).
+   L'inclure une seconde fois redéclarerait ses fonctions.
+   ⚠ szPleinReinit est appelé tout seul par l'observateur dès qu'il n'y a plus de
+   surcouche — la classe de zoom vit sur <html>, pas sur la boîte. */
+const JS_PLEIN = `
+var _szPleinOn = false;
+function szPleinEtat(){ return _szPleinOn; }
+function szPleinBasculer(boite, bouton){
+  _szPleinOn = !_szPleinOn;
+  if (boite) boite.classList.toggle('sz-plein', _szPleinOn);
+  document.documentElement.classList.toggle('sz-zoom', _szPleinOn);
+  if (bouton){
+    bouton.textContent = _szPleinOn ? '⤡ Réduire' : '⛶ Plein écran';
+    bouton.title = _szPleinOn ? 'Revenir à la taille normale' : 'Occuper toute la fenêtre';
+  }
+}
+function szPleinReinit(){
+  _szPleinOn = false;
+  document.documentElement.classList.remove('sz-zoom');
+}
+`;
+
+/* ⚠ LE MESSAGE PART D'ABORD DANS LA SURCOUCHE OUVERTE, ET SEULEMENT ENSUITE AU
+   PIED DE LA FENÊTRE. Le pied est DERRIÈRE le voile : un avertissement de saisie
+   s'y affichait tout en bas, hors du champ de vision, sous le panneau qu'on est
+   justement en train de remplir (signalé le 2026-08-13, capture à l'appui, sur
+   l'assistant des incidents — mais le défaut valait pour TOUTES les fenêtres).
+   ⚠ Le repli sur `#msg` est passé APRÈS : il sortait par `return` quand la
+   fenêtre n'a pas de pied, ce qui aurait sauté aussi le routage. */
+const JS_DIRE_BASE = `
 var _szDireT = null;
 function szDire(texte, genre){
+  var t = texte == null ? '' : String(texte);
+  szDireSurcouche(t, genre);
   var m = document.getElementById('msg');
   if (!m) return;
-  var t = texte == null ? '' : String(texte);
   m.textContent = t;
   m.className = 'msg' + (genre ? ' ' + genre : '');
   clearTimeout(_szDireT);
@@ -218,9 +249,106 @@ function szDire(texte, genre){
   _szDireT = setTimeout(function(){
     var m2 = document.getElementById('msg');
     if (m2 && m2.textContent === t) { m2.textContent = ''; m2.className = 'msg'; }
+    szDireSurcouche('', '');
   }, 5000);
 }
 `;
+
+/* ── LE PLEIN ÉCRAN S'INSTALLE TOUT SEUL, DANS TOUTES LES FENÊTRES ───────────
+   Il l'a demandé « pour tous les assistants ou fenêtres ». Il y a 78 fenêtres et
+   leurs surcouches n'ont PAS la même structure : `.voile > .boite` pour la
+   plupart, `.sur > .boite` pour les plus récentes, `.asst > .bo` pour la
+   photothèque, et l'en-tête est tantôt une barre `.tt`, tantôt un simple `h3`.
+   Poser un bouton à la main dans chacune, c'était 22 modifications à refaire à
+   chaque nouvelle surcouche — et une oubliée ne se voit pas.
+
+   On observe donc le document : dès qu'une surcouche paraît, elle reçoit son
+   bouton. Une surcouche écrite demain l'aura sans que personne y pense.
+
+   ⚠ ON RETIRE LE ZOOM DÈS QU'IL N'Y A PLUS DE SURCOUCHE. La classe vit sur
+   <html>, et la plupart des fenêtres retirent leur voile sans rien nous dire :
+   sans ce filet, la fenêtre entière resterait en gros caractères après la
+   fermeture, sans rien pour l'expliquer. */
+const JS_PLEIN_AUTO = `
+var SZ_VOILES = '.voile,.sur,.asst';
+function _szVoileVisible(){
+  var l = document.querySelectorAll(SZ_VOILES);
+  for (var i = 0; i < l.length; i++){
+    if (l[i].getClientRects().length) return l[i];
+  }
+  return null;
+}
+function _szBoite(v){
+  return v.querySelector('.boite') || v.querySelector('.bo') || v.firstElementChild;
+}
+/* Le message dans la surcouche. Si la fenêtre a DÉJÀ sa propre zone (.msgsur),
+   on n'y touche pas : elle sait mieux que nous où le poser. */
+function szDireSurcouche(t, genre){
+  var v = _szVoileVisible(); if (!v) return;
+  var b = _szBoite(v); if (!b) return;
+  if (b.querySelector('.msgsur')) return;
+  var z = b.querySelector('.sz-msgauto');
+  if (!z){
+    if (!t) return;
+    z = document.createElement('div');
+    b.appendChild(z);
+  }
+  z.textContent = t || '';
+  z.className = 'sz-msgauto' + (genre ? ' ' + genre : '');
+  z.style.display = t ? '' : 'none';
+}
+function _szPoserBouton(v){
+  if (v.getAttribute('data-szplein') === '1') return;
+  var b = _szBoite(v); if (!b) return;
+  v.setAttribute('data-szplein', '1');
+  // La fenêtre a posé le sien (incidents, sauvegarde) : on la laisse faire.
+  if (b.querySelector('.sz-btnplein')) return;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'sz-btnplein';
+  btn.textContent = '⛶ Plein écran';
+  btn.title = 'Occuper toute la fenêtre';
+  var tt = b.querySelector('.tt');
+  if (tt) { tt.appendChild(btn); }
+  else {
+    // Pas de barre d'en-tête : on le pose en surimpression au coin, et on
+    // RÉSERVE la place à droite du titre — sinon un titre long passe dessous.
+    btn.className = 'sz-btnplein flottant';
+    try { if (getComputedStyle(b).position === 'static') b.style.position = 'relative'; } catch(e){}
+    var h = b.querySelector('h1,h2,h3');
+    if (h) h.style.paddingRight = '8rem';
+    b.appendChild(btn);
+  }
+  btn.onclick = function(){ szPleinBasculer(b, btn); };
+}
+var _szAutoEnCours = false;
+function _szAutoPasse(){
+  _szAutoEnCours = false;
+  var l = document.querySelectorAll(SZ_VOILES);
+  for (var i = 0; i < l.length; i++) _szPoserBouton(l[i]);
+  if (!l.length && szPleinEtat()) szPleinReinit();
+}
+function szPleinAuto(){
+  if (window._szPleinAutoOn) return;
+  window._szPleinAutoOn = true;
+  _szAutoPasse();
+  // Différé : un écran qui se redessine produit des centaines de mutations, et
+  // il n'y a aucune raison de reparcourir le document pour chacune.
+  try {
+    new MutationObserver(function(){
+      if (_szAutoEnCours) return;
+      _szAutoEnCours = true;
+      setTimeout(_szAutoPasse, 0);
+    }).observe(document.body, { childList: true, subtree: true });
+  } catch(e){}
+}
+szPleinAuto();
+`;
+
+/* Ce que les fenêtres reçoivent réellement sous le nom `JS_DIRE` : le message,
+   le plein écran et son installateur. Elles n'ont RIEN à changer — c'est tout
+   l'intérêt de le brancher ici plutôt que dans chacune. */
+const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO;
 
 const JS_SOCLE = `
 var P = window.szPont;
@@ -576,28 +704,18 @@ html.sz-zoom{font-size:112.5%}
 .sz-btnplein:hover{background:rgba(255,255,255,.09)}
 html.jour .sz-btnplein{color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
 html.jour .sz-btnplein:hover{background:#efece4}
+/* Surcouches SANS barre d'en-tête : le bouton se pose en surimpression au coin.
+   L'installateur réserve la place à droite du titre pour qu'il ne passe pas
+   dessous. */
+.sz-btnplein.flottant{position:absolute;top:.55rem;right:.6rem;margin-right:0;z-index:3}
+/* Message posé DANS la surcouche par szDire, quand la fenêtre n'a pas déjà sa
+   propre zone (.msgsur). */
+.sz-msgauto{margin-top:.75rem;padding:.5rem .7rem;border-radius:8px;font-size:.8rem;
+  line-height:1.5;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#cbd8e6}
+.sz-msgauto.err{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.35);color:#fca5a5}
+.sz-msgauto.bon{background:rgba(22,163,74,.14);border-color:rgba(22,163,74,.32);color:#6ee7a0}
+.sz-msgauto.att{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.35);color:#f0d6a0}
+html.jour .sz-msgauto{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.14);color:#1d2433}
 `;
 
-/* Le compagnon JS. À inclure comme JS_DIRE dans les fenêtres qui offrent le
-   plein écran. ⚠ szPleinReinit DOIT être appelé à la fermeture de la surcouche :
-   sans lui, la classe de zoom reste sur <html> et la fenêtre entière garde un
-   texte plus gros, sans que rien ne l'explique. */
-const JS_PLEIN = `
-var _szPleinOn = false;
-function szPleinEtat(){ return _szPleinOn; }
-function szPleinBasculer(boite, bouton){
-  _szPleinOn = !_szPleinOn;
-  if (boite) boite.classList.toggle('sz-plein', _szPleinOn);
-  document.documentElement.classList.toggle('sz-zoom', _szPleinOn);
-  if (bouton){
-    bouton.textContent = _szPleinOn ? '⤡ Réduire' : '⛶ Plein écran';
-    bouton.title = _szPleinOn ? 'Revenir à la taille normale' : 'Occuper toute la fenêtre';
-  }
-}
-function szPleinReinit(){
-  _szPleinOn = false;
-  document.documentElement.classList.remove('sz-zoom');
-}
-`;
-
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN, CSS_JOUR: CSS_JOUR + CSS_PLEIN, JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_PLEIN };
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN, CSS_JOUR: CSS_JOUR + CSS_PLEIN, JS_SOCLE, JS_ACTIVITE, JS_DIRE };

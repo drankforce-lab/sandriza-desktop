@@ -24,7 +24,7 @@
  * ⚠ Aucun caractère accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_PLEIN, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -165,7 +165,7 @@ function pageIncidents(ouverture) {
     if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE}${JS_DIRE}${JS_PLEIN}
+${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var D = null, RO = false, OCCUPE = false;
   var NOUV = '${NOUV0}', EDIT = '${EDIT0}', VUE = '${VUE0}';
