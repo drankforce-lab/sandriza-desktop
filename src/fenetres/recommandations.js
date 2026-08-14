@@ -162,6 +162,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var CATF = 'all';          // filtre de categorie
   var ARME = '';
   var LIAISON = null;        // { id, nom, choisis:[] } en cours d'édition
+  var REG_FORM = null;       // { mode:'creer' } | { mode:'editer', r } — formulaire de règle
   var QPROD = '';
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -179,6 +180,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     delai:              'La fenêtre principale n’a pas répondu à temps.',
     operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
     introuvable:        'Cet élément n’existe plus.',
+    nom:                'Le nom interne est requis.',
+    titre:              'Le titre affiché est requis.',
     bord:               'Cette règle est déjà au bout de la liste.',
     echec:              'L’opération a échoué.'
   };
@@ -201,13 +204,73 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  /* Formulaire natif : créer / modifier une règle typée (op reco:creer /
+     reco:editer). En édition, le TYPE n'est pas modifiable (comme le web). */
+  function formulaireRegle(){
+    var f = REG_FORM, creer = f.mode === 'creer', r = f.r || {};
+    var sur = (r.surBrut && r.surBrut.length) ? r.surBrut : ['product'];
+    var typeSel = creer
+      ? '<label class="champ"><span class="lbl">Type de règle</span><select class="t" id="reg-type">'
+        + (D.types || []).map(function(ty){ return '<option value="' + esc(ty.v) + '">' + esc(ty.l) + '</option>'; }).join('')
+        + '</select></label>'
+      : '';
+    return '<div class="carte"><h2>' + (creer ? 'Nouvelle règle' : 'Modifier la règle') + '</h2>'
+      + '<label class="champ"><span class="lbl">Nom interne *</span><input class="t" id="reg-nom" placeholder="Ex : Accessoires tendance" value="' + esc(creer ? '' : (r.nom || '')) + '"></label>'
+      + typeSel
+      + '<label class="champ"><span class="lbl">Titre affiché *</span><input class="t" id="reg-titre" placeholder="Ex : Vous aimerez aussi" value="' + esc(creer ? '' : (r.titre || '')) + '"></label>'
+      + '<label class="champ"><span class="lbl">Sous-titre (optionnel)</span><input class="t" id="reg-sous" placeholder="Description courte" value="' + esc(creer ? '' : (r.soustitre || '')) + '"></label>'
+      + '<label class="champ"><span class="lbl">Articles max (1 à 16)</span><input class="t" type="number" id="reg-max" min="1" max="16" value="' + esc(creer ? '4' : String(r.max || 4)) + '" style="max-width:120px"></label>'
+      + '<div class="lbl" style="margin:.35rem 0 .2rem">Afficher sur</div>'
+      + '<div class="styles">'
+      + '<label class="case"><input type="checkbox" id="reg-on-product"' + (sur.indexOf('product') >= 0 ? ' checked' : '') + '> Fiche produit</label>'
+      + '<label class="case"><input type="checkbox" id="reg-on-cart"' + (sur.indexOf('cart') >= 0 ? ' checked' : '') + '> Panier</label>'
+      + '<label class="case"><input type="checkbox" id="reg-on-home"' + (sur.indexOf('home') >= 0 ? ' checked' : '') + '> Accueil</label>'
+      + '</div>'
+      + '<div class="pied-boite"><button class="mini" id="reg-annuler">Annuler</button> '
+      + '<button class="mini prim" id="reg-ok">' + (creer ? 'Créer la règle' : 'Enregistrer') + '</button></div>'
+      + '</div>';
+  }
+
+  function soumettreRegle(){
+    if (!REG_FORM) return;
+    var creer = REG_FORM.mode === 'creer';
+    var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var ck = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
+    if (!g('reg-nom').trim())   { dire('Le nom interne est requis.', 'err'); return; }
+    if (!g('reg-titre').trim()) { dire('Le titre affiché est requis.', 'err'); return; }
+    var on = [];
+    if (ck('reg-on-product')) on.push('product');
+    if (ck('reg-on-cart'))    on.push('cart');
+    if (ck('reg-on-home'))     on.push('home');
+    var payload = { name: g('reg-nom'), title: g('reg-titre'), subtitle: g('reg-sous'), max: g('reg-max'), on: on };
+    var btn = document.getElementById('reg-ok'); if (btn) btn.disabled = true;
+    dire(creer ? 'Création…' : 'Enregistrement…');
+    if (creer) {
+      payload.type = g('reg-type');
+      appeler('reco:creer', [payload]).then(function(r){
+        if (!r || !r.ok) { if (btn) btn.disabled = false; dire('Échec : ' + expliquer(r), 'err'); return; }
+        REG_FORM = null; charger(); dire('Règle « ' + (r.nom || '') + ' » créée.', 'bon');
+      });
+    } else {
+      appeler('reco:editer', [REG_FORM.r.id, payload]).then(function(r){
+        if (!r || !r.ok) { if (btn) btn.disabled = false; dire('Échec : ' + expliquer(r), 'err'); return; }
+        REG_FORM = null; charger(); dire('Règle mise à jour.', 'bon');
+      });
+    }
+  }
+
   function vueRegles(){
-    var h = '<div class="carte"><h2>Ordre d’affichage</h2>'
+    var h = '';
+    if (REG_FORM) h += formulaireRegle();
+    h += '<div class="carte"><h2>Ordre d’affichage</h2>'
       + '<div class="dt" style="margin-bottom:.45rem">Une règle plus haute passe avant : '
-      + 'c’est elle que la cliente voit en premier sur une fiche.</div>';
+      + 'c’est elle que la cliente voit en premier sur une fiche.</div>'
+      + (D.peutModifier && !REG_FORM
+          ? '<div style="margin:0 0 .7rem"><button class="mini prim" id="reg-nouvelle">+ Nouvelle règle</button></div>'
+          : '');
     if (!(D.regles || []).length) {
-      h += '<div class="vide">Aucune règle. La création se fait dans l’écran Recommandations '
-        + 'de la fenêtre principale.</div>';
+      h += '<div class="vide">Aucune règle pour l’instant'
+        + (D.peutModifier ? ' — utilisez « + Nouvelle règle » ci-dessus pour en créer une.' : '.') + '</div>';
     } else {
       h += '<table><thead><tr><th></th><th>Règle</th><th>Type</th><th>Affichée sur</th>'
         + '<th class="num">Max</th><th>État</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
@@ -220,6 +283,7 @@ ${JS_ACTIVITE}${JS_DIRE}
                 + (r.derniere ? ' disabled' : '') + ' title="Descendre">&#9660;</button> '
                 + '<button class="mini geste" data-basculer="' + esc(r.id) + '" data-actif="'
                 + (r.active ? '0' : '1') + '">' + (r.active ? 'Désactiver' : 'Activer') + '</button> '
+                + '<button class="mini geste" data-editer="' + esc(r.id) + '">Modifier</button> '
                 + '<button class="mini geste danger" data-suppr="' + esc(r.id) + '" data-defaut="'
                 + (r.pardefaut ? '1' : '0') + '">' + (ARME === r.id ? 'Confirmer ?' : 'Supprimer') + '</button>';
             }
@@ -489,6 +553,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (t.closest('#ag-reinit')) { STYLE = null; LOOK = []; CATF = 'all'; AGEN = null; dessiner(); chargerAgencement(); return; }
     if (t.closest('#ag-publier')) { publierAgencement(); return; }
 
+    if (t.closest('#reg-nouvelle')) { REG_FORM = { mode: 'creer' }; ARME = ''; dessiner(); return; }
+    var bed = t.closest('[data-editer]');
+    if (bed) {
+      var idE = bed.getAttribute('data-editer');
+      var rr = (D.regles || []).filter(function(x){ return x.id === idE; })[0];
+      if (rr) { REG_FORM = { mode: 'editer', r: rr }; ARME = ''; dessiner(); }
+      return;
+    }
+    if (t.closest('#reg-annuler')) { REG_FORM = null; dessiner(); return; }
+    if (t.closest('#reg-ok')) { soumettreRegle(); return; }
+
     var bm = t.closest('[data-monter]');
     var bd = t.closest('[data-descendre]');
     if (bm || bd) {
@@ -677,8 +752,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
-  window.szActualiser = function(){ if (!LIAISON && !ARME) charger(); };
-  window.szRevenir = function(){ if (!LIAISON) charger(); };
+  window.szActualiser = function(){ if (!LIAISON && !ARME && !REG_FORM) charger(); };
+  window.szRevenir = function(){ if (!LIAISON && !REG_FORM) charger(); };
 
   /* ── MODE ANCRE ── Le meme bouton que les autres ecrans. */
   window.szModeAncre = function(actif){

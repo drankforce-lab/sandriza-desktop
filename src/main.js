@@ -1381,7 +1381,7 @@ const OPS_PONT = new Set([
   // Patrons de publication : promis << au palier 5 >>, jamais portes.
   'patrons:liste', 'patrons:ecrire', 'patrons:basculer', 'patrons:supprimer', 'patrons:apercu',
   // Generateur d agencement : la fenetre y renvoyait, l ecran n existait plus.
-  'reco:agencement', 'reco:agencement:publier',
+  'reco:agencement', 'reco:agencement:publier', 'reco:creer', 'reco:editer',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
   'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer', 'adresse:suggerer',
@@ -1965,7 +1965,7 @@ const LIMITES_PONT = {
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
   'patrons:supprimer': 30000, 'patrons:apercu': 20000,
   /* Publier un agencement ecrit les liaisons de CHAQUE piece puis la regle. */
-  'reco:agencement': 20000, 'reco:agencement:publier': 45000,
+  'reco:agencement': 20000, 'reco:agencement:publier': 45000, 'reco:creer': 30000, 'reco:editer': 30000,
   'fidelisation:sondage:form': 20000, 'fidelisation:sondage:ecrire': 30000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */
