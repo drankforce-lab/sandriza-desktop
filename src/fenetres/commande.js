@@ -171,8 +171,15 @@ function pageCommande(id) {
        SERVICE et le POIDS, qui fixent le prix — en passant par expedition:etiquette,
        la seule operation qui les recoit explicitement. */
     h.push('<div class="etape"><div class="carte"><h2>Étiquette d’expédition</h2><div class="duo">'
+      /* ⚠ UN TRANSPORTEUR NON CONFIGURE SE DIT ICI, PAS AU MOMENT DE PAYER.
+         Le contexte rend maintenant « pret » (une seule source, la meme que les
+         services) : on le marque dans la liste. Avant, un transporteur sans
+         identifiants s offrait comme les autres, on preparait le colis, et l on
+         ne l apprenait qu a l achat de l etiquette. */
       + '<div class="ch"><label for="c-transp">Transporteur</label><select id="c-transp">'
-      + CTX.transporteurs.map(function(t){ return '<option value="' + esc(t.cle) + '">' + esc(t.nom) + '</option>'; }).join('')
+      + CTX.transporteurs.map(function(t){
+          return '<option value="' + esc(t.cle) + '">' + esc(t.nom)
+            + (t.pret === false ? ' — non configuré' : '') + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="ch"><label for="c-service">Service</label><select id="c-service"></select></div>'
       + '</div><div class="duo" style="margin-top:.5rem">'
@@ -505,12 +512,29 @@ function pageCommande(id) {
     if (!sel) return;
     var liste = [];
     ((EXP && EXP.transporteurs) || []).forEach(function(t){ if (t.cle === tr) liste = t.services || []; });
+    /* ⚠ AVOIR DES SERVICES N EST PAS ETRE PRET. CARRIERS_PONT liste les services
+       de Postes Canada et de FedEx en dur, mais « pret » dit s il y a des
+       identifiants. Sans cette seconde condition, le bouton restait actif pour
+       un transporteur sans identifiants et l on ne l apprenait qu au moment de
+       payer — apres avoir prepare le colis. */
+    var pret = true;
+    (CTX.transporteurs || []).forEach(function(t){ if (t.cle === tr && t.pret === false) pret = false; });
+    var utilisable = liste.length > 0 && pret;
     sel.innerHTML = liste.length
       ? liste.map(function(x){ return '<option value="' + esc(x.cle) + '">' + esc(x.libelle) + '</option>'; }).join('')
       : '<option value="">— transporteur non configuré —</option>';
-    sel.disabled = !liste.length;
+    sel.disabled = !utilisable;
     var b = document.getElementById('c-etiq');
-    if (b) b.disabled = !liste.length;
+    if (b) {
+      b.disabled = !utilisable;
+      b.title = utilisable ? ''
+        : 'Ce transporteur n’a pas d’identifiants : Configuration → Transporteurs.';
+    }
+    var n = document.getElementById('c-poids-note');
+    if (!pret && n) {
+      n.textContent = '⚠ Ce transporteur n’a pas d’identifiants — aucune étiquette ne peut être achetée. Configuration → Transporteurs.';
+      n.style.color = '#f0c987';
+    }
   }
 
   /* ⚠ ON PASSE PAR expedition:etiquette, qui RECOIT le service et le poids.

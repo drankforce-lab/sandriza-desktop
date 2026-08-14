@@ -381,8 +381,11 @@ module.exports = {
         'commande:contexte': {
           ok: true,
           transporteurs: [
-            { cle: 'postes-canada', nom: 'Postes Canada' },
-            { cle: 'fedex', nom: 'FedEx' },
+            { cle: 'postes-canada', nom: 'Postes Canada', pret: true },
+            // ⚠ NON PRET : la liste doit le dire, et l'achat rester DESARME.
+            // Avant, il s'offrait comme les autres et l'on ne l'apprenait qu'au
+            // moment de payer, le colis deja prepare.
+            { cle: 'fedex', nom: 'FedEx', pret: false },
           ],
           peutPreparer: true, peutExpedier: true,
         },
@@ -1568,12 +1571,12 @@ module.exports = {
     };
     var ro = { peutModifier: false };
     return [
-      { nom: 'sécurité (réglages)', reponses: { identite: IDENTITE, 'securite:donnees': donnees,
+      { nom: 'liste des comptes', reponses: { identite: IDENTITE, 'securite:donnees': donnees,
         'securite:pwpolicy:ecrire': { ok: true, pwPolicy: donnees.pwPolicy },
         'securite:inactivite:ecrire': { ok: true, inactivity: donnees.inactivity },
         'securite:geo:ecrire': { ok: true, geo: donnees.geo },
         'securite:geo:malocalisation': { ok: true, ip: '203.0.113.7', cc: 'CA', pays: 'Canada', drapeau: '🇨🇦' } } },
-      { nom: 'utilisateurs (liste)', id: 'users', reponses: { identite: IDENTITE, 'securite:donnees': donnees } },
+      { nom: 'recherche vide', id: '', reponses: { identite: IDENTITE, 'securite:donnees': donnees } },
       { nom: 'lecture seule', reponses: { identite: IDENTITE, 'securite:donnees': Object.assign({}, donnees, ro) } },
       // Lot B1 : éditeur de compte. Atteint par l'id d'ouverture ('user-new' /
       // 'user-<id>'), le clic ne navigue pas sur le DOM factice du banc.
@@ -1717,6 +1720,31 @@ module.exports = {
         reponses: { identite: IDENTITE, 'incidents:donnees': donnees,
           'incidents:ecrire': { ok: false, motif: 'invalide', detail: 'La date de prise de connaissance est obligatoire.' } } },
       { nom: 'fiche de consultation', id: 'vue-i1', reponses: { identite: IDENTITE, 'incidents:donnees': donnees } }
+    ];
+  })(),
+
+  // Réglages de sécurité (#29) — sortis d'Accès utilisateurs le 2026-08-14.
+  // MÊMES données et MÊMES opérations : la séparation est de présentation.
+  'reglages-securite.js': (function(){
+    var donnees = {
+      ok: true, peutModifier: true,
+      pwPolicy: { expiryEnabled: true, expiryDays: 60, historyCount: 5, minLength: 8, requireUpper: true, requireNumber: true, requireSpecial: true, changeRateEnabled: true, changeRateCount: 3, changeRateHours: 24, changeLockHours: 24, changeLockNotifyEmail: '' },
+      inactivity: { staffEnabled: true, staffDays: 180, custEnabled: true, custDays: 730, idleWarnMin: 15, idleLogoutSec: 60, idleMaxMin: 60 },
+      geo: { enabled: false, allowedCountries: ['CA'], ipExceptions: ['203.0.113.7'], exemptStaffIds: ['s1'] },
+      stats: { total: 2, actifs: 2, mfa: 1 },
+      comptes: [
+        { id: 's1', nom: 'Bob Brousseau', email: 'bob@sandriza.com' },
+        { id: 's2', nom: 'Marie Tremblay', email: 'marie@sandriza.com' }
+      ]
+    };
+    return [
+      { nom: 'réglages', reponses: { identite: IDENTITE, 'securite:donnees': donnees,
+        'securite:pwpolicy:ecrire': { ok: true, pwPolicy: donnees.pwPolicy },
+        'securite:inactivite:ecrire': { ok: true, inactivity: donnees.inactivity },
+        'securite:geo:ecrire': { ok: true, geo: donnees.geo },
+        'securite:geo:malocalisation': { ok: true, ip: '203.0.113.7', cc: 'CA', pays: 'Canada', drapeau: '🇨🇦' } } },
+      { nom: 'lecture seule', reponses: { identite: IDENTITE,
+        'securite:donnees': Object.assign({}, donnees, { peutModifier: false }) } }
     ];
   })(),
 

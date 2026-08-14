@@ -241,10 +241,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     if (SAUV.aucune) {
       return tuile('sauvegarde', '💾', 'Dernière sauvegarde', 'jamais', 'err',
-        'aucune sauvegarde — la base n’est pas protégée', 'att');
+        'la base n’est pas protégée', 'att');
     }
     var j = SAUV.jours;
-    var val = (j === 0) ? 'aujourd’hui' : (j === 1 ? 'hier' : j + ' j');
+    // « jours » en toutes lettres (sa demande) : un « j » collé au chiffre se
+    // lit mal dans une grande valeur, et rien n oblige a abreger ici.
+    var val = (j === 0) ? 'aujourd’hui' : (j === 1 ? 'hier' : j + ' jours');
     var ton = (j > 30) ? 'err' : (j > 7 ? 'att' : '');
     var sous = esc(SAUV.quand) + (SAUV.taille ? ' · ' + esc(SAUV.taille) : '');
     return tuile('sauvegarde', '💾', 'Dernière sauvegarde', val, ton, sous, (j > 7 ? 'att' : ''));
@@ -342,7 +344,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
 
     // Le meme contenu de tuiles que l ecran du site, valeur par valeur.
-    var an = (ANNEE === 'all') ? '' : ' — ' + ANNEE;
+    var an = (ANNEE === 'all') ? '' : ' ' + ANNEE;
     var contenu = {
       products: tuile('products', '👗', 'Produits actifs', t.produits.actifs, '',
         t.produits.produitsBas
@@ -369,16 +371,20 @@ ${JS_ACTIVITE}${JS_DIRE}
         t.retoursExpirent > 0 ? 'err' : '',
         t.retoursExpirent > 0 ? 'colis pas encore reçu' : 'aucun retour à risque', ''),
       // ── Ce qu il reste a faire (#25) ──────────────────────────────
+      /* ⚠ PAS DE SOUS-TITRE ICI (retire a sa demande, 2026-08-14). Il enumerait
+         les trois statuts comptes — un texte trop long pour la tuile, qui
+         sortait tronque (<< confirmees, en preparation ou en ver... >>) et
+         n apprenait rien de plus que le chiffre. Une ligne coupee au milieu
+         d un mot coute plus d attention qu elle n en rend. */
       a_traiter: tuile('a_traiter', '🎯', 'Commandes à traiter', f.aTraiter,
-        f.aTraiter > 0 ? 'att' : '',
-        f.aTraiter > 0 ? 'confirmées, en préparation ou en vérification' : 'rien en attente de préparation',
-        f.aTraiter > 0 ? 'att' : ''),
+        f.aTraiter > 0 ? 'att' : '', '&nbsp;', ''),
       en_livraison: tuile('en_livraison', '🚚', 'En livraison', f.enLivraison, '',
         f.enLivraison > 0 ? 'colis partis, pas encore livrés' : 'aucun colis en route', ''),
+      // ⚠ SANS SOUS-TITRE, comme << Commandes a traiter >> (retire a sa demande,
+      // 2026-08-14). Le chiffre et le titre suffisent ; la ligne du dessous
+      // n ajoutait qu un commentaire, coupe des que la tuile retrecit.
       ruptures: tuile('ruptures', '🚫', 'Ruptures de stock', f.ruptures,
-        f.ruptures > 0 ? 'err' : '',
-        f.ruptures > 0 ? 'variantes à zéro — ventes perdues' : 'aucune variante à zéro',
-        f.ruptures > 0 ? 'att' : ''),
+        f.ruptures > 0 ? 'err' : '', '&nbsp;', ''),
       avis: tuile('avis', '⭐', 'Avis à modérer', f.avis, f.avis > 0 ? 'att' : '',
         f.avis > 0 ? 'en attente d’approbation' : 'aucun avis en attente', ''),
       factures_retard: tuile('factures_retard', '⌛', 'Factures en retard', f.facturesRetard,

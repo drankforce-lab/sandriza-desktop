@@ -1,22 +1,27 @@
 'use strict';
 
 /*
- * FENÊTRE « ACCÈS UTILISATEURS » (SÉCURITÉ) — NATIVE (palier 5, #6)
+ * FENÊTRE « ACCÈS UTILISATEURS » — NATIVE
  * =============================================================================
- * LOT A : l'onglet « Sécurité » (politique de mots de passe, inactivité du
- * personnel et des clients, verrouillage de session à l'écran, restriction
- * géographique) et l'onglet « Utilisateurs » EN LECTURE (liste + statistiques).
+ * LA GESTION DES COMPTES DU PERSONNEL, ET RIEN D'AUTRE : liste, création,
+ * modification, permissions, questions de sécurité, MFA, invitation, suppression.
  *
- * ⚠ LOT B À VENIR : création/édition d'un compte, MATRICE DE PERMISSIONS, MFA,
- * invitations, suppression, réactivation. En attendant, ces actions restent dans
- * l'écran web (le bouton renvoie vers le repli). C'est écrit dans l'onglet.
+ * ⚠ LES RÉGLAGES DE SÉCURITÉ SONT PARTIS (2026-08-14, à sa demande) dans leur
+ * propre fenêtre — `reglages-securite.js`, entrée de menu séparée. Ils vivaient
+ * ici en onglet : d'un côté la GESTION (un geste quotidien, sur une personne
+ * précise), de l'autre des RÉGLAGES qui valent pour toute l'entreprise et qu'on
+ * touche deux fois par an. Les mêler faisait passer devant des réglages
+ * structurants à chaque création de compte.
  *
- * Les cœurs vivent dans staff.js (contexte origine-plein) : les clés pw_policy /
- * inactivity_cfg / geo_restrict_cfg sont dans _CFG_MAP, donc un enregistrement
- * pousse vers Turso comme le reste de la configuration. Rien n'est local seulement.
+ * ⚠ AUCUN CŒUR N'A BOUGÉ : mêmes opérations `securite:*`. La séparation est une
+ * affaire de présentation — sinon deux écrans finiraient par ne plus dire la
+ * même chose.
  *
- * ⚠ ANCRÉE = PLEINE PAGE (aucun max-width sur le conteneur des cartes).
- * ⚠ Aucun caractère accent grave dans la portion de script.
+ * ⚠ LE RÔLE N'EST PAS COLORÉ (sa demande) : une couleur y faisait croire à une
+ * alerte alors qu'un rôle est un simple fait. Seuls l'état du compte et le MFA
+ * gardent une couleur — eux appellent une décision.
+ *
+ * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun accent grave dans la portion de script.
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
@@ -33,99 +38,121 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
-.onglets{flex:0 0 auto;display:flex;gap:.1rem;flex-wrap:wrap;
-  padding:.35rem 1rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
-.onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;
-  color:#8fa1b8;padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.onglets button.on{color:#c9a97e;border-bottom-color:#c9a97e;font-weight:700}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.carte{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
-.carte h3{margin:0 0 .2rem;font:700 1rem/1.2 Georgia,serif}
-.entete{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
-.hint{font-size:.78rem;color:#8fa1b8;margin:0 0 .9rem;line-height:1.5}
-.grpH{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8fa1b8;margin:0 0 .55rem}
-.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}
-.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
-@media(max-width:760px){.cols3,.cols2{grid-template-columns:1fr}}
-label.champ{display:block;margin:0 0 .75rem}
-label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;margin:0 0 .25rem}
-label.champ .sub{display:block;font-size:.72rem;color:#6f8098;margin:.2rem 0 0}
-input.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:#e8edf5;font:inherit;padding:.5rem .65rem}
-input.n{width:120px}
-textarea.t{resize:vertical;min-height:3.4rem;line-height:1.5}
-input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
-label.case{display:flex;align-items:center;gap:.45rem;font-size:.84rem;cursor:pointer;margin:0 0 .45rem}
-label.case input{width:16px;height:16px;accent-color:#c9a97e}
+.entete{display:flex;justify-content:space-between;align-items:center;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
-.b:hover{background:rgba(255,255,255,.09)}
-.exempts{display:flex;flex-direction:column;gap:.35rem;max-height:240px;overflow-y:auto;
-  border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:.6rem .7rem}
+.b:hover:not(:disabled){background:rgba(255,255,255,.09)}
+.b:disabled{opacity:.45;cursor:default}
+.b.dgr{color:#f6a6a6;border-color:rgba(248,113,113,.35)}
+.b.dgr:hover:not(:disabled){background:rgba(248,113,113,.16)}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
+.recherche{flex:1 1 15rem;max-width:24rem;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
+  color:#e8edf5;font:inherit;padding:.45rem .7rem}
+.recherche:focus{outline:none;border-color:#c9a97e}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:0 0 1.2rem}
+@media(max-width:700px){.stat-grid{grid-template-columns:1fr}}
 .stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem 1.1rem}
 .stat .l{font-size:.74rem;color:#8fa1b8;text-transform:uppercase;letter-spacing:.05em}
 .stat .v{font:700 1.7rem/1.1 Georgia,serif;margin-top:.25rem}
-table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;padding:.5rem .7rem;border-bottom:1px solid rgba(255,255,255,.1)}
-table.tb td{padding:.6rem .7rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem;vertical-align:middle}
-.pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .pill.on{background:rgba(22,163,74,.2);color:#6ee7a0}
 .pill.off{background:rgba(220,38,38,.18);color:#fca5a5}
-.pill.mfa{background:rgba(99,102,241,.18);color:#b6b9f7;margin-left:4px}
-.pill.warn{background:rgba(234,179,8,.18);color:#e6c14a;margin-left:4px}
-.pill.moi{background:rgba(59,130,246,.18);color:#93c5fd;margin-left:5px}
-.note{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.85rem 1rem;font-size:.82rem;color:#8fa1b8;line-height:1.6}
-.note b{color:#e8edf5}
+.pill.mfa{background:rgba(99,102,241,.18);color:#b6b9f7}
+.pill.warn{background:rgba(234,179,8,.18);color:#e6c14a}
+.pill.moi{background:rgba(59,130,246,.18);color:#93c5fd}
+/* ⚠ LE RÔLE EN PASTILLE NEUTRE — jamais coloré. */
+.pill.role{background:rgba(148,163,184,.16);color:#c3cfdd;font-weight:600}
+/* ── LES COMPTES EN FICHES ────────────────────────────────────────────────
+   Le tableau dense convenait à des transactions ; ici chaque ligne est une
+   PERSONNE — un nom, un rôle, un état, des choses qu'on lit, pas qu'on compare
+   colonne par colonne. La fiche laisse respirer l'essentiel et met les actions
+   à portée sans les entasser au bout d'une rangée. */
+.fiches{display:grid;grid-template-columns:repeat(auto-fill,minmax(24rem,1fr));gap:.8rem}
+.fiche{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:13px;
+  padding:.9rem 1rem;display:flex;flex-direction:column;gap:.65rem;transition:border-color .13s}
+.fiche:hover{border-color:rgba(201,169,126,.45)}
+.fiche.inactif{opacity:.72}
+.fiche .haut{display:flex;align-items:center;gap:.75rem;min-width:0}
+.jeton{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font:700 .95rem/1 Georgia,serif;background:rgba(201,169,126,.16);
+  color:#e2c79b;border:1px solid rgba(201,169,126,.3);text-transform:uppercase}
+.fiche .qui{min-width:0;flex:1 1 auto}
+.fiche .nom{font-weight:700;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fiche .coord{font-size:.75rem;color:#8fa1b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fiche .etats{display:flex;gap:.32rem;flex-wrap:wrap;align-items:center}
+.fiche .quand{font-size:.74rem;color:#6f8098}
+.fiche .barre{display:flex;gap:.35rem;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.07);padding-top:.65rem;margin-top:auto}
+.fiche .barre .b{font-size:.76rem;padding:.3rem .62rem}
+.vide{padding:2.2rem 1rem;text-align:center;color:#8fa1b8;font-size:.84rem;line-height:1.7}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
 .msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
-.vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
-.b.dgr{color:#f6a6a6;border-color:rgba(248,113,113,.35)}
-.b.dgr:hover{background:rgba(248,113,113,.16)}
-.acts{white-space:nowrap;text-align:right}
-.acts .b{margin-left:.3rem}
-/* ── Éditeur de compte (surcouche) ──────────────────────────────── */
+/* ── Éditeur de compte (surcouche) ───────────────────────────────── */
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:60;padding:1.4rem}
-.sur .boite{background:#131c2b;border:1px solid rgba(255,255,255,.12);border-radius:14px;max-width:820px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+.sur .boite{background:#131c2b;border:1px solid rgba(255,255,255,.12);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
 .sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
-select.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:#e8edf5;font:inherit;padding:.5rem .65rem}
-select.t:focus{outline:none;border-color:#c9a97e}
-details.bloc{border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.6rem .85rem;margin:.2rem 0 .8rem}
-details.bloc summary{font-size:.82rem;font-weight:600;cursor:pointer;color:#8fa1b8}
-.permtb{width:100%;border-collapse:collapse;margin-top:.6rem}
-.permtb th{font-size:.68rem;color:#8fa1b8;font-weight:600;padding:.25rem .5rem;text-align:center;white-space:nowrap}
+.sur .liste::-webkit-scrollbar{width:8px}
+.sur .liste::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+/* ── LES ONGLETS DE L'ÉDITEUR (sa demande, 2026-08-14) ────────────────────
+   Créer un accès, ce sont QUATRE questions distinctes — qui est cette
+   personne, avec quel accès, quelles réponses de secours, quels droits — et
+   les empiler sur une même colonne obligeait à faire défiler un formulaire
+   pour trouver la case cherchée. Chacune a maintenant son onglet, et l'onglet
+   courant se voit d'un coup d'œil. */
+.ongEd{display:flex;gap:.15rem;flex-wrap:wrap;padding:0 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.ongEd button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;
+  color:#8fa1b8;padding:.55rem .9rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.ongEd button:hover{color:#e8edf5}
+.ongEd button.on{color:#c9a97e;border-bottom-color:#c9a97e;font-weight:700}
+.vol{display:none}
+.vol.on{display:block}
+.aideOng{font-size:.78rem;color:#8fa1b8;line-height:1.55;margin:0 0 1rem}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+@media(max-width:760px){.cols2{grid-template-columns:1fr}}
+label.champ{display:block;margin:0 0 .9rem}
+label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;margin:0 0 .25rem}
+label.champ .sub{display:block;font-size:.72rem;color:#6f8098;margin:.25rem 0 0;line-height:1.5}
+label.champ .req{color:#fca5a5}
+input.t,select.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:#e8edf5;font:inherit;padding:.5rem .65rem}
+input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
+label.case{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;cursor:pointer;margin:0 0 .55rem;line-height:1.45}
+label.case input{width:16px;height:16px;accent-color:#c9a97e;margin-top:.15rem;flex:0 0 auto}
+label.case .quoi{color:#8fa1b8;font-size:.75rem;display:block}
+.note{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.8rem .95rem;font-size:.81rem;color:#8fa1b8;line-height:1.6;margin:0 0 1rem}
+.note b{color:#e8edf5}
+.ferr{display:none;color:#fca5a5;font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:0 0 .8rem}
+.permtb{width:100%;border-collapse:collapse}
+.permtb th{font-size:.68rem;color:#8fa1b8;font-weight:600;padding:.3rem .5rem;text-align:center;white-space:nowrap}
 .permtb th.mod{text-align:left}
-.permtb td{padding:.2rem .5rem;text-align:center;font-size:.8rem}
+.permtb td{padding:.24rem .5rem;text-align:center;font-size:.8rem}
 .permtb td.mod{text-align:left;white-space:nowrap}
-.permtb tr.grp td{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8fa1b8;background:rgba(255,255,255,.03);padding:.45rem .5rem .25rem;border-top:1px solid rgba(255,255,255,.1);text-align:left}
+.permtb tr.grp td{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#c9a97e;background:rgba(255,255,255,.03);padding:.5rem .5rem .3rem;border-top:1px solid rgba(255,255,255,.1);text-align:left}
+.permtb tbody tr:not(.grp):hover{background:rgba(255,255,255,.03)}
 .permtb input{accent-color:#c9a97e}
-.ferr{display:none;color:#fca5a5;font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:.3rem 0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/* ⚠ La fenêtre accepte un ONGLET d'ouverture (comme Pages), pour que le banc
-   puisse atteindre chaque onglet : son DOM est factice, un clic n'y navigue nulle
-   part. 'securite' (réglages) par défaut, 'users' pour la liste des comptes. */
+/* ⚠ Identifiant d'ouverture pour le banc (son DOM est factice, un clic n'y
+   navigue nulle part) : 'user-new', 'user-<id>', 'mfa-<id>'.
+   ⚠ 'securite' est encore ACCEPTÉ et mène à la liste : une coquille récente
+   pourrait le passer par habitude, et tomber sur un écran vide serait pire que
+   d'arriver sur la gestion. */
 function pageSecurite(onglet) {
   var brut = String(onglet || '');
-  // Ouverture directe de l'éditeur de compte pour le BANC (le DOM factice ne
-  // clique pas) : 'user-new' (création) ou 'user-<id>' (édition).
   var UOUV0 = '', MOUV0 = '';
-  if (brut.indexOf('user-') === 0) { UOUV0 = brut.slice(5).replace(/[^A-Za-z0-9_-]/g, ''); brut = 'users'; }
-  else if (brut.indexOf('mfa-') === 0) { MOUV0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, ''); brut = 'users'; }
-  const ONGLET0 = (['securite', 'users'].indexOf(brut) >= 0) ? brut : 'securite';
+  if (brut.indexOf('user-') === 0) UOUV0 = brut.slice(5).replace(/[^A-Za-z0-9_-]/g, '');
+  else if (brut.indexOf('mfa-') === 0) MOUV0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, '');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Accès Utilisateurs — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">🛡</span><h1>Accès Utilisateurs</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="onglets" id="onglets"></div>
+<div class="tete"><span class="ic">👥</span><h1>Accès Utilisateurs</h1></div>
+<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les comptes, pas les modifier.</div>
 <div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
@@ -142,24 +169,21 @@ function pageSecurite(onglet) {
   };
 ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
-  var ongletsEl = document.getElementById('onglets');
   var D = null, RO = false, OCCUPE = false;
-  var ONGLET = '${ONGLET0}';
-  var UOUV = '${UOUV0}';   // ouverture directe de l'éditeur de compte (banc) : 'new' ou '<id>'
+  var UOUV = '${UOUV0}';   // ouverture directe de l editeur (banc) : 'new' ou '<id>'
   var MOUV = '${MOUV0}';   // ouverture directe de la modale MFA (banc) : '<id>'
-  var DELU = '';   // id du compte en attente de confirmation de suppression (2 clics)
-
-  var ONGLETS = [ ['securite','🔒 Sécurité'], ['users','👥 Utilisateurs'] ];
+  var DELU = '';           // compte en attente de confirmation de suppression (2 clics)
+  var FILTRE = '';         // recherche
+  var ONGED = 'identite';  // onglet courant de l editeur
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function numv(id, def){ var e=document.getElementById(id); var n=e?parseInt(e.value,10):NaN; return Number.isFinite(n)?n:def; }
   function chkv(id){ var e=document.getElementById(id); return !!(e&&e.checked); }
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
     session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès aux accès utilisateurs.',
+    droit:'Votre rôle ne donne pas accès aux comptes du personnel.',
     lecture_seule:'Votre rôle est en lecture seule.',
     invalide:'Formulaire invalide.',
     introuvable:'Compte introuvable.',
@@ -176,211 +200,77 @@ ${JS_ACTIVITE}${JS_DIRE}
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
-  function tabs(){
-    var h='';
-    for (var i=0;i<ONGLETS.length;i++){ var o=ONGLETS[i];
-      h+='<button data-k="'+o[0]+'" class="'+(ONGLET===o[0]?'on':'')+'">'+esc(o[1])+'</button>'; }
-    ongletsEl.innerHTML=h;
-    var bs=ongletsEl.querySelectorAll('button');
-    for (var j=0;j<bs.length;j++) bs[j].onclick=function(){ ONGLET=this.getAttribute('data-k'); rendre(); };
+  function fmtTs(iso){ if (!iso) return 'Jamais connecté'; try { return new Date(iso).toLocaleString('fr-CA'); } catch(e){ return '—'; } }
+  // Les initiales : deux lettres au plus, prises sur le nom, sinon le courriel.
+  function initiales(s){
+    var src = String(s.nom || s.email || '?').trim();
+    var m = src.split(/[\\s._-]+/).filter(Boolean);
+    if (m.length >= 2) return (m[0].charAt(0) + m[1].charAt(0));
+    return src.slice(0, 2);
   }
 
-  // ── Petits fabricants de champs ──────────────────────────────────
-  function champNum(id, lbl, val, sub){
-    return '<label class="champ"><span class="lbl">'+esc(lbl)+'</span>'
-      + '<input class="t n" type="number" id="'+id+'" value="'+esc(val)+'"'+(RO?' disabled':'')+'>'
-      + (sub?'<span class="sub">'+esc(sub)+'</span>':'')+'</label>';
-  }
-  function caseAC(id, lbl, coche){
-    return '<label class="case"><input type="checkbox" id="'+id+'" '+(coche?'checked':'')+(RO?' disabled':'')+'> '+esc(lbl)+'</label>';
-  }
-
-  // ── ONGLET SÉCURITÉ ──────────────────────────────────────────────
-  function vueSecurite(){
-    var p = D.pwPolicy||{}, c = D.inactivity||{}, g = D.geo||{};
-    var comptes = D.comptes||[];
-
-    var h = '';
-
-    // Politique de mots de passe
-    h += '<div class="carte"><div class="entete"><h3>🔑 Politique des mots de passe</h3>'
-      + (RO?'':'<button class="prim" id="s-pw">Enregistrer la politique</button>')+'</div>'
-      + '<div class="hint">Ne s’applique pas au super-administrateur.</div>'
-      + '<div class="cols3">'
-      + '<div><div class="grpH">Expiration</div>'
-      + caseAC('pw-exp-on', 'Activer l’expiration', p.expiryEnabled)
-      + champNum('pw-exp-days', 'Expiration après (jours)', p.expiryDays, 'Ex. : 60 = tous les 2 mois.')
-      + '</div>'
-      + '<div><div class="grpH">Complexité</div>'
-      + champNum('pw-min', 'Longueur minimale', p.minLength)
-      + caseAC('pw-up', 'Exiger une majuscule', p.requireUpper)
-      + caseAC('pw-nb', 'Exiger un chiffre', p.requireNumber)
-      + caseAC('pw-sp', 'Exiger un caractère spécial', p.requireSpecial)
-      + champNum('pw-hist', 'Historique (mdp interdits)', p.historyCount, '0 = aucun historique.')
-      + '</div>'
-      + '<div><div class="grpH">Fréquence & verrouillage</div>'
-      + caseAC('pw-rate-on', 'Activer la limite de fréquence', p.changeRateEnabled)
-      + champNum('pw-rate-n', 'Max. de changements…', p.changeRateCount)
-      + champNum('pw-rate-h', '… dans cette fenêtre (heures)', p.changeRateHours)
-      + champNum('pw-lock-h', 'Durée du verrouillage (heures)', p.changeLockHours)
-      + '<label class="champ"><span class="lbl">Notifier (courriel, optionnel)</span>'
-      + '<input class="t" type="email" id="pw-notify" value="'+esc(p.changeLockNotifyEmail||'')+'" placeholder="responsable@exemple.com"'+(RO?' disabled':'')+'></label>'
-      + '</div>'
-      + '</div></div>';
-
-    // Inactivité + verrouillage de session
-    h += '<div class="carte"><div class="entete"><h3>⏳ Inactivité & verrouillage de session</h3>'
-      + (RO?'':'<button class="prim" id="s-inact">Enregistrer</button>')+'</div>'
-      + '<div class="cols2">'
-      + '<div><div class="grpH">Portail administration — comptes dormants</div>'
-      + caseAC('in-staff-on', 'Désactiver les comptes inactifs (sauf superadmin)', c.staffEnabled)
-      + champNum('in-staff-d', 'Seuil (jours)', c.staffDays, 'Avertissement 14 jours avant.')
-      + (RO?'':'<button class="b" id="in-staff-run">▶ Vérifier maintenant</button>')
-      + '</div>'
-      + '<div><div class="grpH">Portail client — comptes dormants</div>'
-      + caseAC('in-cust-on', 'Désactiver les comptes clients inactifs', c.custEnabled)
-      + champNum('in-cust-d', 'Seuil (jours)', c.custDays, 'Avertissement 30 jours avant.')
-      + (RO?'':'<button class="b" id="in-cust-run">▶ Vérifier maintenant</button>')
-      + '</div>'
-      + '</div>'
-      + '<div class="grpH" style="margin-top:1rem">Verrouillage de session à l’écran</div>'
-      + '<div class="hint">Ferme la session d’administration après un temps sans clic ni changement de page — différent des comptes dormants ci-dessus (jours sans se connecter).</div>'
-      + '<div class="cols3">'
-      + champNum('idle-warn', 'Avertir après (minutes)', c.idleWarnMin||15, 'Défaut : 15.')
-      + champNum('idle-out', 'Décompte avant fermeture (secondes)', c.idleLogoutSec||60, 'Défaut : 60.')
-      + champNum('idle-max', 'Plafond absolu (minutes)', c.idleMaxMin||60, 'Même si un éditeur est ouvert. Défaut : 60.')
-      + '</div></div>';
-
-    // Restriction géographique
-    var exempts = '';
-    if (comptes.length) {
-      for (var i=0;i<comptes.length;i++){ var s=comptes[i];
-        var coche = (g.exemptStaffIds||[]).indexOf(s.id) >= 0;
-        exempts += '<label class="case"><input type="checkbox" data-geoex="'+esc(s.id)+'" '+(coche?'checked':'')+(RO?' disabled':'')+'> '
-          + esc(s.nom||s.email) + ' <span style="color:#6f8098">('+esc(s.email)+')</span></label>';
-      }
-    } else exempts = '<div class="vide">Aucun compte.</div>';
-
-    h += '<div class="carte"><div class="entete"><h3>🌍 Restriction géographique — administration</h3>'
-      + (RO?'':'<button class="prim" id="s-geo">Enregistrer la restriction</button>')+'</div>'
-      + '<div class="hint">N’autorise la connexion au portail d’administration que depuis les pays listés (géolocalisation de l’IP publique). La boutique cliente n’est jamais touchée.</div>'
-      + caseAC('geo-on', 'Activer la restriction géographique', g.enabled)
-      + '<div class="cols2" style="margin-top:.6rem">'
-      + '<div>'
-      + '<label class="champ"><span class="lbl">Pays autorisés (codes ISO, séparés par des virgules)</span>'
-      + '<input class="t" id="geo-pays" value="'+esc((g.allowedCountries||['CA']).join(', '))+'" placeholder="CA"'+(RO?' disabled':'')+'>'
-      + '<span class="sub">Ex. : CA ou CA, US.</span></label>'
-      + '<label class="champ"><span class="lbl">Adresses IP exclues (une par ligne)</span>'
-      + '<textarea class="t" id="geo-ip" rows="3"'+(RO?' disabled':'')+'>'+esc((g.ipExceptions||[]).join('\\n'))+'</textarea>'
-      + '<span class="sub">Ces IP restent autorisées peu importe le pays.</span></label>'
-      + (RO?'':'<button class="b" id="geo-loc">🔍 Détecter ma localisation actuelle</button>')
-      + '</div>'
-      + '<div><div class="grpH">Comptes exclus de cette restriction</div>'
-      + '<div class="exempts">'+exempts+'</div>'
-      + '<div class="sub" style="margin-top:.4rem;color:#6f8098">Ces comptes peuvent se connecter depuis n’importe quel pays.</div>'
-      + '</div>'
-      + '</div></div>';
-
-    corps.innerHTML = h;
-    lier();
-  }
-
-  function lier(){
-    var b;
-    b=document.getElementById('s-pw');    if (b) b.onclick=enrPw;
-    b=document.getElementById('s-inact'); if (b) b.onclick=enrInact;
-    b=document.getElementById('s-geo');   if (b) b.onclick=enrGeo;
-    b=document.getElementById('in-staff-run'); if (b) b.onclick=function(){ verif('securite:verif:staff','Vérification du personnel…'); };
-    b=document.getElementById('in-cust-run');  if (b) b.onclick=function(){ verif('securite:verif:client','Vérification des clients…'); };
-    b=document.getElementById('geo-loc'); if (b) b.onclick=localiser;
-  }
-
-  function enrPw(){
-    if (RO||OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
-    var d = {
-      expiryEnabled: chkv('pw-exp-on'), expiryDays: numv('pw-exp-days',60),
-      minLength: numv('pw-min',8), requireUpper: chkv('pw-up'), requireNumber: chkv('pw-nb'),
-      requireSpecial: chkv('pw-sp'), historyCount: numv('pw-hist',5),
-      changeRateEnabled: chkv('pw-rate-on'), changeRateCount: numv('pw-rate-n',3),
-      changeRateHours: numv('pw-rate-h',24), changeLockHours: numv('pw-lock-h',24),
-      changeLockNotifyEmail: txv('pw-notify').trim()
-    };
-    appeler('securite:pwpolicy:ecrire',[d]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.pwPolicy) D.pwPolicy=r.pwPolicy; dire('Politique enregistrée.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
-  }
-  function enrInact(){
-    if (RO||OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
-    var d = {
-      staffEnabled: chkv('in-staff-on'), staffDays: numv('in-staff-d',180),
-      custEnabled: chkv('in-cust-on'), custDays: numv('in-cust-d',730),
-      idleWarnMin: numv('idle-warn',15), idleLogoutSec: numv('idle-out',60), idleMaxMin: numv('idle-max',60)
-    };
-    appeler('securite:inactivite:ecrire',[d]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.inactivity) D.inactivity=r.inactivity; dire('Paramètres enregistrés.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
-  }
-  function enrGeo(){
-    if (RO||OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
-    var pays = txv('geo-pays').split(',').map(function(s){ return s.trim().toUpperCase(); }).filter(Boolean);
-    var ips = txv('geo-ip').split('\\n').map(function(s){ return s.trim(); }).filter(Boolean);
-    var ex = [];
-    var cbs = corps.querySelectorAll('[data-geoex]');
-    for (var i=0;i<cbs.length;i++) if (cbs[i].checked) ex.push(cbs[i].getAttribute('data-geoex'));
-    var d = { enabled: chkv('geo-on'), allowedCountries: pays, ipExceptions: ips, exemptStaffIds: ex };
-    appeler('securite:geo:ecrire',[d]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.geo) D.geo=r.geo; dire('Restriction enregistrée.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
-  }
-  function verif(op, msg){
-    if (RO||OCCUPE) return; OCCUPE=true; dire(msg);
-    appeler(op,[]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok) dire('Vérification effectuée.', 'bon'); else dire('Échec : '+expliquer(r), 'err'); });
-  }
-  function localiser(){
-    if (OCCUPE) return; OCCUPE=true; dire('Localisation…');
-    appeler('securite:geo:malocalisation',[]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok) dire('Votre IP : '+r.ip+' — '+(r.drapeau||'')+' '+(r.pays||'emplacement inconnu'), 'bon');
-      else dire('Échec : '+expliquer(r), 'err'); });
-  }
-
-  // ── ONGLET UTILISATEURS (lecture) ────────────────────────────────
-  function fmtTs(iso){ if (!iso) return 'Jamais'; try { return new Date(iso).toLocaleString('fr-CA'); } catch(e){ return '—'; } }
+  // ── LA LISTE ─────────────────────────────────────────────────────
   function vueUsers(){
     var st = D.stats||{}, comptes = D.comptes||[];
     var superActifs = 0; for (var k=0;k<comptes.length;k++) if (comptes[k].estSuper && comptes[k].active) superActifs++;
-    var h = '<div class="entete"><div></div>'
-      + (D.peutModifier ? '<button class="prim" id="u-nouveau">＋ Créer un accès</button>' : '') + '</div>';
+
+    var h = '<div class="entete">'
+      + '<input class="recherche" id="u-q" placeholder="Rechercher un nom, un courriel, un rôle…" value="'+esc(FILTRE)+'">'
+      + (D.peutModifier ? '<button class="prim" id="u-nouveau">＋ Créer un accès</button>' : '')
+      + '</div>';
+
     h += '<div class="stat-grid">'
-      + '<div class="stat"><div class="l">Comptes totaux</div><div class="v">'+(st.total||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Comptes actifs</div><div class="v" style="color:#6ee7a0">'+(st.actifs||0)+'</div></div>'
+      + '<div class="stat"><div class="l">Comptes</div><div class="v">'+(st.total||0)+'</div></div>'
+      + '<div class="stat"><div class="l">Actifs</div><div class="v" style="color:#6ee7a0">'+(st.actifs||0)+'</div></div>'
       + '<div class="stat"><div class="l">MFA activé</div><div class="v" style="color:#b6b9f7">'+(st.mfa||0)+'</div></div>'
       + '</div>';
-    var colspan = D.peutModifier ? 5 : 4;
-    h += '<div class="carte"><table class="tb"><thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Dernière connexion</th>'+(D.peutModifier?'<th></th>':'')+'</tr></thead><tbody>';
-    if (!comptes.length) h += '<tr><td colspan="'+colspan+'" class="vide">Aucun utilisateur.</td></tr>';
-    for (var i=0;i<comptes.length;i++){ var s=comptes[i];
-      var mfa = s.mfaEnabled ? '<span class="pill mfa">MFA ✓</span>'
-        : (s.requireMfaSetup ? '<span class="pill warn">MFA à configurer</span>'
-        : (s.mfaExempt ? '<span class="pill warn">Exempté</span>' : ''));
-      var peutSuppr = !s.estMoi && (!s.estSuper || superActifs > 1);
-      var acts = '';
-      if (D.peutModifier){
-        acts = '<td class="acts"><button class="b" data-edit="'+esc(s.id)+'">✏ Modifier</button>'
-          + '<button class="b" data-mfa="'+esc(s.id)+'" title="Gérer l’authentification à deux facteurs">🔐 MFA</button>'
-          + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="Renvoyer un mot de passe temporaire par courriel">📧 Renvoyer</button>' : '')
-          + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'✓ Confirmer':'Supprimer')+'</button>' : '')
-          + '</td>';
+
+    var q = FILTRE.trim().toLowerCase();
+    var vus = comptes.filter(function(s){
+      if (!q) return true;
+      return [s.nom, s.email, s.username, s.roleLabel, s.role].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+
+    if (!comptes.length) {
+      h += '<div class="vide">Aucun compte du personnel.</div>';
+    } else if (!vus.length) {
+      h += '<div class="vide">Aucun compte ne correspond à « '+esc(FILTRE)+' ».</div>';
+    } else {
+      h += '<div class="fiches">';
+      for (var i=0;i<vus.length;i++){ var s=vus[i];
+        var peutSuppr = !s.estMoi && (!s.estSuper || superActifs > 1);
+        var etats = '<span class="pill role">'+esc(s.roleLabel||s.role||'—')+'</span>'
+          + (s.active ? '<span class="pill on">Actif</span>' : '<span class="pill off">Désactivé</span>')
+          + (s.mfaEnabled ? '<span class="pill mfa">MFA ✓</span>'
+             : (s.requireMfaSetup ? '<span class="pill warn">MFA à configurer</span>'
+             : (s.mfaExempt ? '<span class="pill warn">MFA exempté</span>' : '')))
+          + (s.estMoi ? '<span class="pill moi">vous</span>' : '');
+        h += '<div class="fiche'+(s.active?'':' inactif')+'">'
+          + '<div class="haut"><div class="jeton">'+esc(initiales(s))+'</div>'
+          + '<div class="qui"><div class="nom">'+esc(s.nom||'—')+'</div>'
+          + '<div class="coord">'+(s.username?'@'+esc(s.username)+' · ':'')+esc(s.email||'')+'</div></div></div>'
+          + '<div class="etats">'+etats+'</div>'
+          + '<div class="quand">'+esc(fmtTs(s.derniereConnexion))+' · '+(s.nbConnexions||0)+' connexion'+((s.nbConnexions||0)>1?'s':'')+'</div>';
+        if (D.peutModifier){
+          h += '<div class="barre">'
+            + '<button class="b" data-edit="'+esc(s.id)+'">✏ Modifier</button>'
+            + '<button class="b" data-mfa="'+esc(s.id)+'" title="Gérer l’authentification à deux facteurs">🔐 MFA</button>'
+            + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="Renvoyer un mot de passe temporaire par courriel">📧 Renvoyer</button>' : '')
+            + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'✓ Confirmer':'Supprimer')+'</button>' : '')
+            + '</div>';
+        }
+        h += '</div>';
       }
-      h += '<tr><td><strong>'+esc(s.nom||'—')+'</strong>'+(s.estMoi?'<span class="pill moi">vous</span>':'')
-        + '<div style="font-size:.74rem;color:#6f8098">'+(s.username?'@'+esc(s.username)+' · ':'')+esc(s.email)+'</div></td>'
-        + '<td><span style="font-weight:600;color:'+esc(s.roleColor||'#8fa1b8')+'">'+esc(s.roleIcon||'')+' '+esc(s.roleLabel||s.role)+'</span></td>'
-        + '<td>'+(s.active?'<span class="pill on">Actif</span>':'<span class="pill off">Désactivé</span>')+mfa+'</td>'
-        + '<td style="font-size:.8rem;color:#8fa1b8">'+fmtTs(s.derniereConnexion)+'<div style="font-size:.7rem">'+(s.nbConnexions||0)+' connexion(s)</div></td>'
-        + acts + '</tr>';
+      h += '</div>';
     }
-    h += '</tbody></table></div>';
+
     corps.innerHTML = h;
+
+    var q2=document.getElementById('u-q');
+    if (q2) {
+      q2.oninput=function(){ FILTRE=this.value; var pos=this.selectionStart; vueUsers();
+        var n=document.getElementById('u-q'); if (n){ n.focus(); try { n.setSelectionRange(pos,pos); } catch(e){} } };
+    }
     var nv=document.getElementById('u-nouveau'); if (nv) nv.onclick=function(){ ouvrirEditeurCompte(''); };
     var eds=corps.querySelectorAll('[data-edit]'); for (var e=0;e<eds.length;e++) eds[e].onclick=function(){ ouvrirEditeurCompte(this.getAttribute('data-edit')); };
     var mfas=corps.querySelectorAll('[data-mfa]'); for (var mm=0;mm<mfas.length;mm++) mfas[mm].onclick=function(){ ouvrirMfa(this.getAttribute('data-mfa')); };
@@ -389,13 +279,14 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (DELU===id){ DELU=''; supprimerCompte(id); } else { DELU=id; vueUsers(); dire('Cliquez encore pour supprimer ce compte.', 'att'); } };
   }
 
-  // ── Création / édition d'un compte (Lot B1) ──────────────────────
+  // ── ÉDITEUR DE COMPTE (à onglets) ────────────────────────────────
   function ouvrirEditeurCompte(id){
     if (OCCUPE) return; OCCUPE=true; dire('Ouverture…');
     appeler('securite:form',[id||'']).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ dire(''); dessinerEditeurCompte(r); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ dire(''); ONGED='identite'; dessinerEditeurCompte(r); } else dire('Échec : '+expliquer(r), 'err'); });
   }
-  function fermerEditeurCompte(){ var s=document.getElementById('sur-u'); if (s) s.remove(); }
+  function fermerEditeurCompte(){ szPleinReinit(); var s=document.getElementById('sur-u'); if (s) s.remove(); }
+
   function permMatrice(F){
     var acts = F.actions||[], lbls = F.actionLabels||{}, model = F.permModel||[];
     var eff = (F.compte&&F.compte.effectivePerms)||[];
@@ -414,9 +305,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         h += '</tr>';
       }
     }
-    h += '</tbody></table>';
-    return h;
+    return h + '</tbody></table>';
   }
+
   function dessinerEditeurCompte(F){
     var nouv = (F.mode!=='edit');
     var c = F.compte||{};
@@ -426,53 +317,106 @@ ${JS_ACTIVITE}${JS_DIRE}
     var qOpts=function(sel){ var o='<option value="">— Choisir —</option>'; for (var i=0;i<qs.length;i++) o+='<option value="'+esc(qs[i])+'"'+(sel===qs[i]?' selected':'')+'>'+esc(qs[i])+'</option>'; return o; };
     var ansSet = !!c.securityAnswersSet;
 
-    var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-u';
-    var h='<div class="boite"><div class="tt"><h3>'+(nouv?'Créer un accès':'Modifier — '+esc((c.firstName||'')+' '+(c.lastName||'')))+'</h3>'
-      + '<button class="mini" id="u-x">Fermer</button></div>'
-      + '<div class="liste">'
-      + '<div class="ferr" id="u-err"></div>'
+    var ONG = [
+      ['identite', '👤 Identité'],
+      ['acces', '🔑 Accès'],
+      ['questions', '🔐 Questions' + (nouv ? '' : (ansSet ? ' ✓' : ' ⚠'))],
+      ['perms', '⚙ Permissions']
+    ];
+    var tabs = '';
+    for (var t=0;t<ONG.length;t++) tabs += '<button data-ong="'+ONG[t][0]+'" class="'+(ONGED===ONG[t][0]?'on':'')+'">'+esc(ONG[t][1])+'</button>';
+
+    var volIdentite = '<p class="aideOng">Qui est cette personne. Le <b>nom d’utilisateur</b> lui sert à se connecter ; le courriel reçoit l’invitation et les avis de sécurité.</p>'
       + '<div class="cols2">'
       + '<label class="champ"><span class="lbl">Prénom</span><input class="t" id="u-first" value="'+esc(c.firstName||'')+'"></label>'
       + '<label class="champ"><span class="lbl">Nom</span><input class="t" id="u-last" value="'+esc(c.lastName||'')+'"></label>'
-      + '<label class="champ"><span class="lbl">Nom d’utilisateur</span><input class="t" id="u-username" value="'+esc(c.username||'')+'" placeholder="ex : marie_b"></label>'
-      + '<label class="champ"><span class="lbl">Courriel'+(nouv?'':' (non modifiable)')+'</span><input class="t" type="email" id="u-email" value="'+esc(c.email||'')+'"'+(nouv?'':' readonly style="opacity:.7"')+'></label>'
-      + '</div>'
-      + '<label class="champ"><span class="lbl">'+(nouv?'Mot de passe (vide = généré automatiquement)':'Nouveau mot de passe (vide = inchangé)')+'</span><input class="t" type="password" id="u-pw" autocomplete="new-password"></label>'
+      + '<label class="champ"><span class="lbl">Nom d’utilisateur</span><input class="t" id="u-username" value="'+esc(c.username||'')+'" placeholder="ex : marie_b">'
+      + '<span class="sub">Minuscules, chiffres, tiret et soulignement.</span></label>'
+      + '<label class="champ"><span class="lbl">Courriel'+(nouv?' <span class="req">*</span>':' (non modifiable)')+'</span>'
+      + '<input class="t" type="email" id="u-email" value="'+esc(c.email||'')+'"'+(nouv?'':' readonly style="opacity:.7"')+'></label>'
+      + '</div>';
+
+    var volAcces = '<p class="aideOng">Ce que cette personne peut faire, et comment elle prouve son identité.</p>'
       + '<div class="cols2">'
-      + '<label class="champ" style="margin:0"><span class="lbl">Rôle</span><select class="t" id="u-role">'+roleOpts+'</select></label>'
-      + '<div style="display:flex;flex-direction:column;justify-content:flex-end;gap:.2rem">'
-      + '<label class="case"><input type="checkbox" id="u-active" '+(c.active!==false?'checked':'')+'> Compte actif</label>'
-      + '<label class="case"><input type="checkbox" id="u-reqmfa" '+(c.requireMfaSetup&&!c.mfaEnabled?'checked':'')+'> Exiger la configuration MFA à la 1ʳᵉ connexion</label>'
-      + '<label class="case"><input type="checkbox" id="u-exempt" '+(c.mfaExempt?'checked':'')+'> Exempté de MFA</label>'
-      + '</div></div>'
-      + '<details class="bloc"'+((!nouv && !(c.securityQ1&&c.securityQ2))?' open':'')+'><summary>🔐 Questions de sécurité'+(nouv?'':(ansSet?' — ✓ configurées':' — ⚠ non configurées'))+'</summary>'
-      + '<div class="cols2" style="margin-top:.6rem">'
-      + '<label class="champ" style="margin:0"><span class="lbl">Question 1</span><select class="t" id="u-q1">'+qOpts(c.securityQ1||'')+'</select></label>'
-      + '<label class="champ" style="margin:0"><span class="lbl">Réponse 1</span><input class="t" id="u-a1" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
-      + '<label class="champ" style="margin:0"><span class="lbl">Question 2</span><select class="t" id="u-q2">'+qOpts(c.securityQ2||'')+'</select></label>'
-      + '<label class="champ" style="margin:0"><span class="lbl">Réponse 2</span><input class="t" id="u-a2" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
-      + '</div><div class="sub" style="margin-top:.4rem;color:#6f8098">Les réponses sont chiffrées et ne se réaffichent plus. Vide = conserver.</div></details>'
-      + '<details class="bloc"><summary>⚙ Permissions personnalisées (modifient les droits du rôle)</summary><div id="u-perms">'+permMatrice(F)+'</div></details>'
+      + '<label class="champ"><span class="lbl">Rôle</span><select class="t" id="u-role">'+roleOpts+'</select>'
+      + '<span class="sub">Le rôle coche les permissions par défaut. L’onglet <b>Permissions</b> permet de s’en écarter.</span></label>'
+      + '<label class="champ"><span class="lbl">'+(nouv?'Mot de passe':'Nouveau mot de passe')+'</span>'
+      + '<input class="t" type="password" id="u-pw" autocomplete="new-password" placeholder="'+(nouv?'laisser vide = généré et envoyé par courriel':'laisser vide = inchangé')+'">'
+      + '<span class="sub">'+(nouv?'Vide : un mot de passe temporaire est créé et envoyé.':'Vide : le mot de passe actuel est conservé.')+'</span></label>'
+      + '</div>'
+      + '<label class="case"><input type="checkbox" id="u-active" '+(c.active!==false?'checked':'')+'>'
+      + '<span>Compte actif<span class="quoi">Décoché, la personne ne peut plus se connecter — sans que le compte ni son historique soient supprimés.</span></span></label>'
+      + '<label class="case"><input type="checkbox" id="u-reqmfa" '+(c.requireMfaSetup&&!c.mfaEnabled?'checked':'')+'>'
+      + '<span>Exiger la configuration MFA à la 1<sup>re</sup> connexion<span class="quoi">Elle devra lier une application d’authentification avant d’accéder à l’administration.</span></span></label>'
+      + '<label class="case"><input type="checkbox" id="u-exempt" '+(c.mfaExempt?'checked':'')+'>'
+      + '<span>Exempté de MFA<span class="quoi">À réserver aux cas où le second facteur est impossible : c’est un rempart en moins.</span></span></label>';
+
+    var volQuestions = '<p class="aideOng">Elles servent à retrouver un accès quand le mot de passe est perdu. Les réponses sont <b>chiffrées</b> et ne se réaffichent jamais — laisser vide conserve celles déjà enregistrées.</p>'
+      + (nouv ? '' : '<div class="note">'+(ansSet?'✓ Des réponses sont déjà enregistrées pour ce compte.':'⚠ Aucune réponse enregistrée : ce compte ne pourra pas être récupéré par cette voie.')+'</div>')
+      + '<div class="cols2">'
+      + '<label class="champ"><span class="lbl">Question 1</span><select class="t" id="u-q1">'+qOpts(c.securityQ1||'')+'</select></label>'
+      + '<label class="champ"><span class="lbl">Réponse 1</span><input class="t" id="u-a1" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
+      + '<label class="champ"><span class="lbl">Question 2</span><select class="t" id="u-q2">'+qOpts(c.securityQ2||'')+'</select></label>'
+      + '<label class="champ"><span class="lbl">Réponse 2</span><input class="t" id="u-a2" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
+      + '</div>';
+
+    var volPerms = '<p class="aideOng">Ces cases partent du rôle choisi. Les modifier crée des droits <b>personnalisés</b> pour cette personne ; changer de rôle les remet à ceux du rôle.</p>'
+      + '<div id="u-perms">'+permMatrice(F)+'</div>';
+
+    var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-u';
+    sur.innerHTML = '<div class="boite">'
+      + '<div class="tt"><h3>'+(nouv?'＋ Créer un accès':'✏ '+esc(((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email||'Compte'))+'</h3>'
+      + '<div><button class="sz-btnplein" id="u-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
+      + '<button class="mini" id="u-x">Fermer</button></div></div>'
+      + '<div class="ongEd" id="u-ong">'+tabs+'</div>'
+      + '<div class="liste">'
+      + '<div class="ferr" id="u-err"></div>'
+      + '<div class="vol'+(ONGED==='identite'?' on':'')+'" data-vol="identite">'+volIdentite+'</div>'
+      + '<div class="vol'+(ONGED==='acces'?' on':'')+'" data-vol="acces">'+volAcces+'</div>'
+      + '<div class="vol'+(ONGED==='questions'?' on':'')+'" data-vol="questions">'+volQuestions+'</div>'
+      + '<div class="vol'+(ONGED==='perms'?' on':'')+'" data-vol="perms">'+volPerms+'</div>'
       + '</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
       + '<button class="b" id="u-annuler">Annuler</button>'
       + '<button class="prim" id="u-enr">'+(nouv?'Créer le compte':'Enregistrer')+'</button></div></div>';
-    sur.innerHTML=h;
     document.body.appendChild(sur);
+
     document.getElementById('u-x').onclick=fermerEditeurCompte;
     document.getElementById('u-annuler').onclick=fermerEditeurCompte;
     document.getElementById('u-enr').onclick=function(){ enregistrerCompte(nouv?'':(c.id||'')); };
-    // Slug du nom d'utilisateur : minuscules/chiffres/_/-
+    var bp=document.getElementById('u-plein');
+    if (bp) bp.onclick=function(){ szPleinBasculer(sur.querySelector('.boite'), bp); };
+
+    /* ⚠ ON NE REDESSINE PAS L EDITEUR EN CHANGEANT D ONGLET : on montre et on
+       cache. Le redessiner perdrait tout ce qui est saisi et non encore
+       enregistre — quatre onglets, donc quatre occasions de tout perdre. */
+    var bs=sur.querySelectorAll('#u-ong button');
+    for (var b2=0;b2<bs.length;b2++) bs[b2].onclick=function(){
+      ONGED=this.getAttribute('data-ong');
+      var tous=sur.querySelectorAll('#u-ong button');
+      for (var i2=0;i2<tous.length;i2++) tous[i2].className = (tous[i2].getAttribute('data-ong')===ONGED)?'on':'';
+      var vols=sur.querySelectorAll('[data-vol]');
+      for (var j2=0;j2<vols.length;j2++) vols[j2].className = 'vol' + (vols[j2].getAttribute('data-vol')===ONGED?' on':'');
+    };
+
     var un=document.getElementById('u-username'); if (un) un.oninput=function(){ un.value=un.value.toLowerCase().replace(/[^a-z0-9_-]/g,''); };
-    // Changer de rôle recoche la matrice selon les permissions du rôle.
     var rs=document.getElementById('u-role'); if (rs) rs.onchange=function(){
-      var role=rs.value, def=null; for (var i=0;i<roles.length;i++) if (roles[i].key===role) def=roles[i];
+      var role=rs.value, def=null; for (var i3=0;i3<roles.length;i3++) if (roles[i3].key===role) def=roles[i3];
       var perms=(def&&def.permissions)||[];
       var cbs=document.querySelectorAll('#u-perms [data-perm]');
-      for (var j=0;j<cbs.length;j++) cbs[j].checked = perms.indexOf(cbs[j].getAttribute('data-perm'))>=0;
+      for (var j3=0;j3<cbs.length;j3++) cbs[j3].checked = perms.indexOf(cbs[j3].getAttribute('data-perm'))>=0;
+      dire('Permissions replacées sur celles du rôle.', 'att');
     };
   }
-  function ferr(msg){ var e=document.getElementById('u-err'); if (e){ e.textContent=msg; e.style.display='block'; } }
+
+  /* ⚠ L ERREUR RAMENE SUR L ONGLET CONCERNE. Afficher « courriel invalide »
+     pendant que l on regarde les permissions laisse chercher le champ fautif. */
+  function ferr(msg, ong){
+    var e=document.getElementById('u-err'); if (e){ e.textContent=msg; e.style.display='block'; }
+    if (!ong) return;
+    var b=document.querySelector('#u-ong button[data-ong="'+ong+'"]'); if (b) b.click();
+  }
+
   function enregistrerCompte(id){
     if (OCCUPE) return;
     var perms=[]; var cbs=document.querySelectorAll('#u-perms [data-perm]');
@@ -486,6 +430,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       securityQ1: txv('u-q1').trim(), securityA1: txv('u-a1').trim(),
       securityQ2: txv('u-q2').trim(), securityA2: txv('u-a2').trim()
     };
+    if (!d.email) { ferr('Le courriel est obligatoire.', 'identite'); return; }
     OCCUPE=true; dire('Enregistrement…');
     appeler('securite:compte:ecrire',[id||'', d]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){
@@ -494,7 +439,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           ? ('Compte créé.' + (r.courrielEnvoye ? ' Courriel d’accueil envoyé à '+(r.courriel||'')+'.' : (r.tempPassword ? ' Mot de passe temporaire : '+r.tempPassword+' (courriel non envoyé).' : ' (courriel non envoyé).')))
           : 'Compte modifié.';
         recharger(msg, 'bon');
-      } else { ferr(expliquer(r)); dire('Échec : '+expliquer(r), 'err'); }
+      } else { ferr(expliquer(r), 'identite'); dire('Échec : '+expliquer(r), 'err'); }
     });
   }
   function supprimerCompte(id){
@@ -508,7 +453,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (r&&r.ok) dire('Invitation renvoyée à '+(r.email||'')+'.', 'bon'); else dire('Échec : '+expliquer(r), 'err'); });
   }
 
-  // ── MFA (Lot B2) — activation TOTP / exemption / désactivation ───
+  // ── MFA — activation TOTP / exemption / désactivation ────────────
   function ouvrirMfa(id){
     if (OCCUPE) return; OCCUPE=true; dire('Lecture MFA…');
     appeler('securite:mfa:etat',[id]).then(function(r){ OCCUPE=false;
@@ -519,13 +464,13 @@ ${JS_ACTIVITE}${JS_DIRE}
           if (r2&&r2.ok){ dire(''); dessinerMfaSetup(id, r2); } else dire('Échec : '+expliquer(r2), 'err'); }); }
     });
   }
-  function fermerMfa(){ var s=document.getElementById('sur-mfa'); if (s) s.remove(); }
+  function fermerMfa(){ szPleinReinit(); var s=document.getElementById('sur-mfa'); if (s) s.remove(); }
   function dessinerMfaGerer(id, e){
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
     sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3>🔐 MFA — '+esc(e.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
       + '<div class="liste">'
       + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:#6ee7a0">✅ Authentification à deux facteurs activée pour ce compte.</div>'
-      + '<label class="case" style="margin-top:.75rem"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><strong>Exempter ce compte</strong> — connexion autorisée sans code MFA</span></label>'
+      + '<label class="case"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><b>Exempter ce compte</b><span class="quoi">Connexion autorisée sans code — un rempart en moins.</span></span></label>'
       + '</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
       + '<button class="b" id="m-annuler">Annuler</button><button class="b dgr" id="m-off">Désactiver MFA</button><button class="prim" id="m-save">Enregistrer</button></div></div>';
@@ -539,17 +484,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
     sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3>🔐 Activer MFA — '+esc(s.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
       + '<div class="liste">'
-      + '<div class="sub" style="color:#8fa1b8">Étape 1 — Scannez le QR avec Google Authenticator, Authy ou une app TOTP compatible, ou entrez la clé manuellement.</div>'
+      + '<p class="aideOng"><b>Étape 1</b> — Scannez le QR avec Google Authenticator, Authy ou une application TOTP compatible, ou entrez la clé manuellement.</p>'
       + '<div style="text-align:center;background:#0b1220;padding:1rem;border-radius:9px;margin:.6rem 0">'
       + '<img id="m-qr" src="'+esc(s.qrUrl)+'" alt="QR MFA" style="width:190px;height:190px;border-radius:8px;background:#fff"></div>'
       + '<div style="text-align:center;background:#0f1724;border:1px solid #2b3444;border-radius:9px;padding:.6rem">'
-      + '<div class="sub" style="color:#8fa1b8;text-transform:uppercase;letter-spacing:.05em">Clé secrète (saisie manuelle)</div>'
+      + '<div class="sub" style="color:#8fa1b8;text-transform:uppercase;letter-spacing:.05em;font-size:.72rem">Clé secrète (saisie manuelle)</div>'
       + '<code style="font-size:.9rem;letter-spacing:.12em;word-break:break-all;color:#e8edf5">'+esc(s.secretGroupe||s.secret||'')+'</code>'
-      + '<div class="sub" style="color:#6f8098">Base32 · SHA-1 · 6 chiffres · 30 s</div></div>'
-      + '<label class="champ" style="margin-top:.75rem"><span class="lbl">Étape 2 — Code à 6 chiffres</span>'
+      + '<div style="font-size:.72rem;color:#6f8098">Base32 · SHA-1 · 6 chiffres · 30 s</div></div>'
+      + '<label class="champ" style="margin-top:.9rem"><span class="lbl">Étape 2 — Code à 6 chiffres</span>'
       + '<input class="t" id="m-code" inputmode="numeric" maxlength="6" placeholder="000000" style="font-family:monospace;letter-spacing:.3em;text-align:center;font-size:1.2rem"></label>'
       + '<div class="ferr" id="m-err"></div>'
-      + '<label class="case"><input type="checkbox" id="m-exempt" '+(s.mfaExempt?'checked':'')+'> Exempter ce compte (activer sans l’exiger à la connexion)</label>'
+      + '<label class="case"><input type="checkbox" id="m-exempt" '+(s.mfaExempt?'checked':'')+'> <span>Exempter ce compte<span class="quoi">Activer sans l’exiger à la connexion.</span></span></label>'
       + '</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
       + '<button class="b" id="m-annuler">Annuler</button><button class="prim" id="m-activer">✓ Activer MFA</button></div></div>';
@@ -557,8 +502,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     document.getElementById('m-x').onclick=fermerMfa;
     document.getElementById('m-annuler').onclick=fermerMfa;
     document.getElementById('m-activer').onclick=function(){ mfaConfirmer(id); };
-    var c=document.getElementById('m-code'); if (c) c.oninput=function(){ c.value=c.value.replace(/[^0-9]/g,''); };
-    // Repli du QR sans guillemets imbriqués dans l'attribut (câblé en JS).
+    var cc=document.getElementById('m-code'); if (cc) cc.oninput=function(){ cc.value=cc.value.replace(/[^0-9]/g,''); };
+    // Repli du QR câblé en JS : un guillemet imbriqué dans un attribut serait
+    // avalé par le littéral de gabarit de cette fenêtre (piège vécu, Lot B2).
     var qi=document.getElementById('m-qr'); if (qi) qi.onerror=function(){ qi.onerror=null; if (s.qrFallback) qi.src=s.qrFallback; };
   }
   function mfaExempter(id, exempt){
@@ -579,14 +525,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (r&&r.ok){ fermerMfa(); recharger('MFA activé.', 'bon'); }
       else { var e=document.getElementById('m-err'); if (e){ e.textContent=expliquer(r); e.style.display='block'; } dire('Échec : '+expliquer(r), 'err'); } });
   }
+
   function recharger(msg, cl){
-    appeler('securite:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; RO=!r.peutModifier; DELU=''; if (ONGLET==='users') vueUsers(); if (msg) dire(msg, cl); } else if (msg) dire(msg, cl); });
+    appeler('securite:donnees',[]).then(function(r){
+      if (r&&r.ok){ D=r; RO=!r.peutModifier; DELU=''; rendre(); if (msg) dire(msg, cl); }
+      else if (msg) dire(msg, cl); });
   }
 
   function rendre(){
     var av=document.getElementById('ro'); if (av) av.hidden=!RO;
-    tabs();
-    if (ONGLET==='users') vueUsers(); else vueSecurite();
+    vueUsers();
   }
 
   function charger(){
@@ -594,10 +542,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('securite:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');
-      // Ouverture directe de l'éditeur de compte (banc / lien profond), après le
-      // dessin de la liste et une fois D disponible.
-      if (UOUV){ ouvrirEditeurCompte(UOUV==='new' ? '' : UOUV); UOUV=''; }
-      else if (MOUV){ ouvrirMfa(MOUV); MOUV=''; }
+      if (UOUV){ var u=UOUV; UOUV=''; ouvrirEditeurCompte(u==='new' ? '' : u); }
+      else if (MOUV){ var m=MOUV; MOUV=''; ouvrirMfa(m); }
     });
   }
 

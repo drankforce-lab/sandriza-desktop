@@ -2104,6 +2104,7 @@ const PAGES_ANCRABLES = () => ({
   'config-launch': ['Mode lancement', () => pageLancement()],
   'pages': ['Pages du site', () => pagePages()],
   'securite': ['Accès Utilisateurs', () => pageSecurite()],
+  'reglages-securite': ['Réglages de sécurité', () => pageReglagesSecurite()],
   'journaux': ['Journaux', () => pageJournaux(_journauxOnglet || '')],
   'incidents': ['Incidents de sécurité', () => pageIncidents('')],
   'sauvegarde': ['Sauvegarde & Restauration', () => pageSauvegarde('')],
@@ -2922,6 +2923,7 @@ const { pageAccueil } = require('./fenetres/accueil');
 const { pageLancement } = require('./fenetres/lancement');
 const { pagePages } = require('./fenetres/pages');
 const { pageSecurite } = require('./fenetres/securite');
+const { pageReglagesSecurite } = require('./fenetres/reglages-securite');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
@@ -3013,7 +3015,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'journaux': case 'incidents': case 'sauvegarde': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'journaux': case 'incidents': case 'sauvegarde': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
