@@ -4880,6 +4880,11 @@ module.exports = {
             paiementSquare: 'PAY_abc123', afterpay: false, membre: true, aFacture: true,
             suivi: '', suiviStatut: '', suiviVerifieLe: '',
             client: { nom: 'Marie Tremblay', entreprise: '', courriel: 'marie@example.com', tel: '418 555-0142' },
+            // ⚠ DEUX IDENTITÉS : `client` est le nom de LIVRAISON, `compte` le
+            // profil auquel la commande est rattachée. Le jeu les fait DIFFÉRER
+            // exprès — si le rendu confondait les deux, personne ne le verrait
+            // sur un cas où les deux portent le même nom.
+            compte: { id: 'u_0001', nom: 'Marie Tremblay', courriel: 'marie@example.com' },
             adresse: { rue: '12 rue des Érables', ville: 'Québec', province: 'QC', cp: 'G1R 2B5' },
           },
           articles: [
@@ -4913,7 +4918,58 @@ module.exports = {
             { cle: 'delivered', libelle: 'Livrée' },
             { cle: 'cancelled', libelle: 'Annulée' },
           ],
-          droits: { statut: true, supprimer: true, rembourser: true, frais: true, bon: true },
+          droits: { statut: true, supprimer: true, rembourser: true, frais: true, bon: true, lier: true },
+        },
+        'verrou:prendre': VERROU,
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    /* ⚠ ÉCRAN DE RATTACHEMENT — atteint par le TROISIÈME segment « @lier ».
+       Le banc ne clique pas : sans cet identifiant d'ouverture, la seule
+       surface de cette fenêtre qui ÉCRIVE resterait hors de tout contrôle.
+       Le jeu porte une commande liée à un compte (donc le bouton « Détacher »
+       se dessine) et deux résultats de recherche. */
+    {
+      nom: 'rattacher la commande à un client',
+      id: 'commandes@ord_0007@lier',
+      reponses: {
+        'commandes:contexte': {
+          ok: true, peutEditer: true, peutExpedier: true,
+          statuts: [{ cle: 'preparing', libelle: 'En préparation' }], annees: [2026],
+        },
+        'commandes:detail': {
+          ok: true,
+          commande: {
+            id: 'ord_0007', numero: 'SZ-100207', statut: 'preparing',
+            creeLe: '2026-08-05T14:00:00Z', livreLe: '', prioritaire: false, notes: '',
+            paiementSquare: 'PAY_abc123', afterpay: false, membre: true, aFacture: true,
+            suivi: '', suiviStatut: '', suiviVerifieLe: '',
+            client: { nom: 'Marie Tremblay', entreprise: '', courriel: 'marie@example.com', tel: '418 555-0142' },
+            compte: { id: 'u_0001', nom: 'Marie Tremblay', courriel: 'marie@example.com' },
+            adresse: { rue: '12 rue des Érables', ville: 'Québec', province: 'QC', cp: 'G1R 2B5' },
+          },
+          articles: [{ nom: 'Robe cintrée', taille: 'M', couleur: 'Noir', qte: 1, montant: 89.99, rembourseQte: 0 }],
+          totaux: { sousTotal: 89.99, taxes: [{ nom: 'TPS', taux: 0.05, montant: 4.5 }],
+            livraison: 0, prioritaire: 0, coupon: 0, total: 94.49 },
+          remboursements: { lignes: [], total: 0, complet: false,
+            fraisRetenus: 0, fraisRembourses: 0, fraisRestants: 0 },
+          statuts: [{ cle: 'preparing', libelle: 'En préparation' }],
+          droits: { statut: true, supprimer: false, rembourser: false, frais: false, bon: false, lier: true },
+        },
+        'commande:lierApercu': {
+          ok: true, numero: 'SZ-100207',
+          actuel: { id: 'u_0001', nom: 'Marie Tremblay', courriel: 'marie@example.com' },
+        },
+        'commande:lierChercher': {
+          ok: true, clients: [
+            { id: 'u_0002', nom: 'Bobby Brousseau', courriel: 'bbrousseau@example.com' },
+            { id: 'u_0003', nom: 'Sophie Lavoie', courriel: 'sophie@example.com' },
+          ],
+        },
+        'commande:lierEcrire': {
+          ok: true, numero: 'SZ-100207', invite: false, nom: 'Bobby Brousseau',
+          prenom: 'Bobby', courriel: 'bbrousseau@example.com', aFacture: true,
         },
         'verrou:prendre': VERROU,
         'session:activite': { ok: true },

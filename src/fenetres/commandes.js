@@ -181,6 +181,21 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
   border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:.5rem .65rem}
 .voile label.rc input{width:auto;margin-top:2px}
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
+/* Rattachement a un client : le champ de recherche et ses resultats. */
+.voile input.rech{width:100%;padding:.42rem .6rem;border-radius:8px;
+  border:1px solid rgba(255,255,255,.18);margin-top:.25rem}
+.voile .lres{max-height:250px;overflow-y:auto;display:flex;flex-direction:column;
+  gap:.35rem;margin-top:.55rem}
+.voile .lres .cli{display:flex;justify-content:space-between;align-items:center;
+  gap:.8rem;padding:.45rem .6rem;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);border-radius:7px;cursor:pointer}
+.voile .lres .cli:hover{border-color:#c9a97e;background:rgba(201,169,126,.12)}
+.voile .lres .cli .nm{font-weight:600;font-size:.85rem}
+.voile .lres .cli .em{font-size:.76rem;color:#8fa1b8}
+.voile .lres .cli .fl{font-size:.74rem;color:#c9a97e;white-space:nowrap}
+.voile .lres .rien{padding:.5rem .2rem;color:#8fa1b8;font-size:.83rem}
+.voile .detacher{margin-top:.8rem;padding-top:.6rem;
+  border-top:1px solid rgba(255,255,255,.1)}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
@@ -226,6 +241,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   // << mode@identifiant >> : la fenetre s ouvre directement sur ce detail.
   var DET_DEPART = '';
   if (MODE.indexOf('@') > 0) { DET_DEPART = MODE.slice(MODE.indexOf('@') + 1); MODE = MODE.slice(0, MODE.indexOf('@')); }
+  // ⚠ TROISIEME SEGMENT << @lier >> : ouvre d emblee l ecran de rattachement.
+  // Le banc ne CLIQUE pas — sans identifiant d ouverture, un ecran qui ECRIT
+  // reste invisible au controle. C est l angle mort de #32, pas une commodite.
+  var LIER_DEPART = false;
+  if (DET_DEPART.indexOf('@lier') > 0) {
+    LIER_DEPART = true;
+    DET_DEPART = DET_DEPART.slice(0, DET_DEPART.indexOf('@lier'));
+  }
   var CTX = null;
   var DONNEES = null;                       // derniere page recue
   // ⚠ L ETAT DU FILTRE VIT ICI, HORS DE LA LISTE : elle est redessinee a chaque
@@ -477,7 +500,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="det2">'
       + '<div class="bloc"><h3>Client</h3>'
       + '<div class="l"><strong>' + esc(c.client.nom || '—') + '</strong>'
-      + '<span class="badge2">' + (c.membre ? 'membre' : 'invité') + '</span></div>'
+      + '<span class="badge2">' + (c.membre ? 'membre' : 'invité') + '</span>'
+      // Rattacher la commande a un COMPTE : possible meme sur une commande
+      // invitee (c est justement le cas a corriger le plus souvent).
+      + (d.droits.lier && !ro
+          ? '<button class="mini" id="det-lier" title="Rattacher cette commande à un compte client">🔗 '
+            + (c.compte ? 'Changer' : 'Lier') + '</button>' : '')
+      + '</div>'
+      + (c.compte
+          ? '<div class="mut">Compte : <strong style="color:#cbd8e6">' + esc(c.compte.nom) + '</strong></div>'
+          : '')
       + (c.client.entreprise ? '<div class="l">' + esc(c.client.entreprise) + '</div>' : '')
       + '<div class="mut">' + esc(c.client.courriel) + (c.client.tel ? '<br>' + esc(c.client.tel) : '') + '</div>'
       + '<div class="mut" style="margin-top:.4rem">💳 '
@@ -578,6 +610,8 @@ ${JS_ACTIVITE}${JS_DIRE}
         dire(z.ok ? (z.web ? 'Facture ouverte dans la fenêtre principale.' : 'Facture ouverte dans sa fenêtre.') : expliquer(z), z.ok ? 'bon' : 'err');
       });
     };
+    var li = document.getElementById('det-lier');
+    if (li) li.onclick = flowLier;
     var fr = document.getElementById('det-frais');
     if (fr) fr.onclick = flowFrais;
     var rb = document.getElementById('det-remb');
@@ -610,6 +644,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       dessiner();
       prendreVerrou(id);
+      if (LIER_DEPART) { LIER_DEPART = false; flowLier(); }
     });
   }
 
@@ -776,6 +811,104 @@ ${JS_ACTIVITE}${JS_DIRE}
           };
         });
     });
+  }
+
+  // ══ RATTACHEMENT A UN COMPTE CLIENT ══════════════════════════════════════
+  // Corrige une commande passee sous le mauvais compte, ou identifie une
+  // invitee apres coup. Trois ops : apercu (etat courant), recherche, ecriture.
+  // ⚠ La recherche exige 3 caracteres — c est le coeur du site qui l impose,
+  // la fenetre ne fait que l annoncer pour que le champ vide ne paraisse pas mort.
+  function flowLier(){
+    appeler('commande:lierApercu', [DET_ID]).then(function(ap){
+      if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
+      var etat = ap.actuel
+        ? 'actuellement liée à <strong>' + esc(ap.actuel.nom) + '</strong> ('
+          + esc(ap.actuel.courriel) + ')'
+        : 'en mode <strong>invité</strong> (aucun compte)';
+      voile('<h3>🔗 Rattacher la commande à un client</h3>'
+        + '<p>Commande <strong>' + esc(ap.numero) + '</strong> — ' + etat + '.</p>'
+        + '<label style="font-size:.82rem;color:#cbd8e6">Rechercher un client (nom ou courriel)'
+        + '<input class="rech" id="v-rech" placeholder="ex : marie@example.com" autocomplete="off"></label>'
+        + '<div class="lres" id="v-lres"><div class="rien">Tapez au moins 3 caractères.</div></div>'
+        + (ap.actuel
+            ? '<div class="detacher"><button class="danger" id="v-det">🔓 Détacher (remettre en mode invité)</button></div>'
+            : '')
+        + '<div class="fin2"><button id="v-non">Fermer</button></div>',
+        function(fermer){
+          var champ = document.getElementById('v-rech');
+          var zone = document.getElementById('v-lres');
+          document.getElementById('v-non').onclick = fermer;
+          var det = document.getElementById('v-det');
+          if (det) det.onclick = function(){ confirmerLien(fermer, ap, null, 'invité (aucun compte)'); };
+
+          // Anti-rebond : on ne rappelle le pont qu une fois la frappe posee.
+          var t = null;
+          champ.oninput = function(){
+            var q = this.value;
+            if (t) clearTimeout(t);
+            t = setTimeout(function(){ chercher(q); }, 220);
+          };
+          champ.focus();
+
+          function chercher(q){
+            if (String(q || '').trim().length < 3) {
+              zone.innerHTML = '<div class="rien">Tapez au moins 3 caractères.</div>';
+              return;
+            }
+            appeler('commande:lierChercher', [q]).then(function(r){
+              if (!r.ok) { zone.innerHTML = '<div class="rien">' + esc(expliquer(r)) + '</div>'; return; }
+              // ⚠ La reponse peut arriver APRES une frappe plus recente : on ne
+              // dessine que si le champ contient toujours la meme chose.
+              if (champ.value !== q) return;
+              var cl = r.clients || [];
+              if (!cl.length) { zone.innerHTML = '<div class="rien">Aucun client trouvé.</div>'; return; }
+              zone.innerHTML = cl.map(function(u){
+                return '<div class="cli" data-cli="' + esc(u.id) + '" data-nom="' + esc(u.nom)
+                  + '" data-em="' + esc(u.courriel) + '">'
+                  + '<div><div class="nm">' + esc(u.nom) + '</div>'
+                  + '<div class="em">' + esc(u.courriel) + '</div></div>'
+                  + '<span class="fl">Lier →</span></div>'; }).join('');
+            });
+          }
+
+          zone.onclick = function(ev){
+            var b = ev.target && ev.target.closest ? ev.target.closest('[data-cli]') : null;
+            if (!b) return;
+            confirmerLien(fermer, ap, b.getAttribute('data-cli'),
+              b.getAttribute('data-nom') + ' (' + b.getAttribute('data-em') + ')');
+          };
+        });
+    });
+  }
+
+  // La confirmation est SEPAREE parce que le geste ne touche pas que la
+  // commande : la facture suit, et les statistiques d achat des DEUX comptes
+  // sont recalculees. On le dit avant, pas apres.
+  function confirmerLien(fermerListe, ap, clientId, libelle){
+    voile('<h3>Rattacher la commande</h3>'
+      + '<p>Lier <strong>' + esc(ap.numero) + '</strong> à <strong>' + esc(libelle) + '</strong> ?</p>'
+      + '<p style="color:#8fa1b8">La facture associée sera mise à jour et les statistiques '
+      + 'd’achat des comptes concernés recalculées.</p>'
+      + '<div class="fin2"><button id="v2-non">Annuler</button>'
+      + '<button class="prim" id="v2-oui">Lier</button></div>',
+      function(fermer2){
+        document.getElementById('v2-non').onclick = fermer2;
+        document.getElementById('v2-oui').onclick = function(){
+          this.disabled = true;
+          appeler('commande:lierEcrire', [DET_ID, clientId]).then(function(r){
+            fermer2();
+            if (!r.ok) {
+              dire(r.motif === 'inchange' ? 'Cette commande est déjà rattachée à ce compte.'
+                                          : expliquer(r), r.motif === 'inchange' ? 'att' : 'err');
+              return;
+            }
+            fermerListe();
+            dire(r.invite ? 'Commande détachée — remise en mode invité.'
+                          : 'Commande rattachée à ' + r.nom + '.', 'bon');
+            rechargerDetail();
+          });
+        };
+      });
   }
 
   // ══ SUPPRESSION — IRREVERSIBLE, cascade annoncee AVANT le bouton ════════

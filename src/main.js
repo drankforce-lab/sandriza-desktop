@@ -1254,6 +1254,9 @@ const OPS_PONT = new Set([
   // frais retenus, renvoi vers Remboursement, facture dans la fenetre principale.
   'commandes:detail', 'commandes:statutApercu', 'commandes:statutEcrire',
   'commandes:supprimerApercu', 'commandes:supprimerEcrire',
+  // Rattacher la commande a un compte client (ou la detacher) : la fenetre
+  // cherche AVANT d ecrire, d ou trois ops. L ecran web n avait pas de jumeau.
+  'commande:lierApercu', 'commande:lierChercher', 'commande:lierEcrire',
   'commandes:fraisApercu', 'commandes:fraisEcrire',
   'commandes:rembourser', 'commandes:facture', 'commandes:ouvrirDetail',
   'facture:lire', 'facture:imprimer',
@@ -1966,6 +1969,9 @@ const LIMITES_PONT = {
   'patrons:supprimer': 30000, 'patrons:apercu': 20000,
   /* Publier un agencement ecrit les liaisons de CHAQUE piece puis la regle. */
   'reco:agencement': 20000, 'reco:agencement:publier': 45000, 'reco:creer': 30000, 'reco:editer': 30000,
+  /* Rattacher une commande touche la commande, sa facture ET les statistiques
+     d achat des DEUX comptes concernes : plus qu une ecriture simple. */
+  'commande:lierApercu': 20000, 'commande:lierChercher': 20000, 'commande:lierEcrire': 30000,
   'fidelisation:sondage:form': 20000, 'fidelisation:sondage:ecrire': 30000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */
