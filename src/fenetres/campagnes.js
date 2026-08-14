@@ -101,6 +101,34 @@ tbody tr:hover td{background:rgba(255,255,255,.04)}
 .note{font-size:.73rem;color:#8fa1b8;line-height:1.6;border-top:1px solid rgba(255,255,255,.07);
   padding-top:.5rem;margin-top:.2rem}
 .vide{padding:1.4rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+/* ── Formulaires de creation / modification (campagne et chaine) ─────────── */
+.form .rang{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.form .champ{display:flex;flex-direction:column;gap:.18rem;margin-bottom:.55rem}
+.form .champ .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8}
+.form .champ .aide{font-size:.71rem;color:#8fa1b8;line-height:1.5}
+.form input,.form select,.form textarea{width:100%}
+.form textarea{resize:vertical;font-family:Consolas,"Courier New",monospace;font-size:.78rem;
+  line-height:1.55;min-height:9rem}
+.form textarea.sms{font-family:inherit;font-size:.83rem;min-height:4.5rem}
+.form .duo{display:flex;gap:.4rem;align-items:center}
+.form .duo input{width:5rem}
+.form .duo span{font-size:.76rem;color:#8fa1b8}
+.form .fin3{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.7rem;
+  border-top:1px solid rgba(255,255,255,.08);padding-top:.6rem}
+.form .fin3 .gauche{margin-right:auto}
+.apercu{border:1px solid rgba(255,255,255,.14);border-radius:9px;overflow:hidden;
+  margin-top:.4rem;background:#fff}
+.apercu .chrome{background:#0f1826;color:#8fa1b8;font-size:.7rem;padding:.24rem .55rem;
+  border-bottom:1px solid rgba(255,255,255,.12)}
+.apercu iframe{display:block;width:100%;height:20rem;border:none;background:#fff}
+.etapef{border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:.55rem .65rem;
+  margin-bottom:.5rem;background:rgba(255,255,255,.025)}
+.etapef .tete2{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
+.etapef .tete2 strong{font-size:.8rem}
+.etapef .tete2 .gestes{margin-left:auto;display:flex;gap:.3rem}
+.vars{font-size:.71rem;color:#8fa1b8;line-height:1.7;margin-top:.25rem}
+.vars code{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:4px;padding:.02rem .28rem;color:#dcc39b}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
 .msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
@@ -111,7 +139,13 @@ tbody tr:hover td{background:rgba(255,255,255,.04)}
 
 /** Page complète de la fenêtre native « Campagnes et chaînes ». */
 function pageCampagnes(ongletDepart) {
-  const dep = (ongletDepart === 'chaines') ? 'chaines' : 'campagnes';
+  /* ⚠ IDENTIFIANTS D OUVERTURE << campagnes:neuve >> et << chaines:neuve >> :
+     le banc ne clique pas. Sans eux, les DEUX ecrans qui ECRIVENT — les seuls
+     ajouts de ce lot — seraient invisibles au controle. Angle mort de #32. */
+  const brut = String(ongletDepart || '');
+  const neuf = brut.indexOf(':neuve') > 0;
+  const base = neuf ? brut.slice(0, brut.indexOf(':neuve')) : brut;
+  const dep = (base === 'chaines') ? 'chaines' : 'campagnes';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Campagnes et chaînes — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -129,11 +163,15 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
 
   var ONGLET = ${JSON.stringify(dep)};   // campagnes | chaines
+  var FORM_DEPART = ${neuf ? 'true' : 'false'};
   var DC = null;             // donnees des campagnes
   var DH = null;             // donnees des chaines
   var Q = '';
   var ARME = '';             // un seul geste arme a la fois
   var OCCUPE = false;        // un envoi est en cours : on ne redessine pas
+  // { type:'campagne'|'chaine', id:'' , d:{...} } — formulaire ouvert, ou null
+  var FORM = null;
+  var ETAPES = null;         // etapes en cours d edition (chaine seulement)
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -192,10 +230,280 @@ ${JS_ACTIVITE}${JS_DIRE}
      Regle nee de << ou sont mes configurations ? >> : une fenetre qui ne
      couvre qu une partie d un ecran doit dire ou trouver le reste. */
   function renvoi(){
-    return '<div class="note">La <strong>rédaction du contenu</strong> (éditeur visuel), '
-      + 'la <strong>configuration Resend</strong> et l’<strong>offre de bienvenue</strong> '
-      + 'restent à l’écran Infolettre, dans la fenêtre principale. '
-      + 'Le détail des envois se lit dans la fenêtre <strong>Journal d’envoi</strong>.</div>';
+    return '<div class="note">Créer et modifier se fait ici. Seul l’<strong>éditeur '
+      + 'visuel par blocs</strong> reste à l’écran Infolettre de la fenêtre principale : '
+      + 'ici le corps du courriel s’écrit en HTML, à partir des mêmes modèles et avec '
+      + 'le même aperçu. La <strong>configuration Resend</strong> et l’<strong>offre de '
+      + 'bienvenue</strong> restent également à l’écran Infolettre. Le détail des envois '
+      + 'se lit dans la fenêtre <strong>Journal d’envoi</strong>.</div>';
+  }
+
+  /* ══ FORMULAIRES — CREER / MODIFIER ═══════════════════════════════════════
+     Le trou #4 : cette fenetre savait tout faire SAUF en creer une.
+     ⚠ CHOIX DE PORTEE, dit a l ecran et declare dans la couverture : le corps
+     du courriel s edite en HTML, avec les MEMES modeles et le MEME apercu que
+     l ecran web. L editeur VISUEL par blocs reste a l ecran Infolettre. */
+
+  var VARS_CAMP = ['{{firstName}}', '{{shopUrl}}', '{{promoCode}}',
+    '{{discountPercent}}', '{{expiryDate}}', '{{collectionName}}'];
+  var VARS_CHAINE = ['{{firstName}}', '{{panier}}', '{{panierTotal}}', '{{panierNb}}',
+    '{{premierProduit}}', '{{lienPanier}}', '{{lienBoutique}}'];
+
+  function ligneVars(liste, note){
+    return '<div class="vars">Variables : '
+      + liste.map(function(v){ return '<code>' + esc(v) + '</code>'; }).join(' ')
+      + (note ? '<br>' + note : '') + '</div>';
+  }
+
+  function choixModeles(id, modeles){
+    return '<select id="' + id + '"><option value="">Charger un modèle…</option>'
+      + (modeles || []).map(function(m){
+          return '<option value="' + esc(m.cle) + '">' + esc(m.nom) + '</option>'; }).join('')
+      + '</select>';
+  }
+
+  function vueFormCampagne(){
+    var f = FORM, d = f.d, c = d.campagne || {};
+    var h = '<div class="carte form">'
+      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
+      + (f.id ? 'Modifier la campagne' : 'Nouvelle campagne') + '</h3>'
+      + '<div class="rang">'
+      + '<div class="champ"><span class="lbl">Nom interne</span>'
+      + '<input id="f-nom" value="' + esc(c.nom || '') + '" placeholder="Infolettre de septembre"></div>'
+      + '<div class="champ"><span class="lbl">Segment</span><select id="f-seg">'
+      + (d.segments || []).map(function(s){
+          return '<option value="' + esc(s.cle) + '"' + ((c.segment || 'all') === s.cle ? ' selected' : '')
+            + '>' + esc(s.nom) + (s.cle === 'all' ? ' (' + (d.abonnesActifs || 0) + ')' : '') + '</option>';
+        }).join('') + '</select></div></div>'
+      + '<div class="champ"><span class="lbl">Sujet du courriel</span>'
+      + '<input id="f-suj" value="' + esc(c.sujet || '') + '" placeholder="Nos nouveautés sont arrivées !"></div>'
+      + '<div class="rang">'
+      + '<div class="champ"><span class="lbl">Canal d’envoi</span><select id="f-canal">'
+      + (d.canaux || []).map(function(x){
+          return '<option value="' + esc(x.cle) + '"' + ((c.canal || 'email') === x.cle ? ' selected' : '')
+            + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></div>'
+      + '<div class="champ"><span class="lbl">Destinataires SMS</span>'
+      + '<div class="aide" style="padding-top:.35rem">' + (d.smsDestinataires || 0)
+      + ' client(s) ayant consenti, avec un téléphone.'
+      + (d.smsPret ? '' : '<br><span style="color:#f87171">⚠ Téléphonie non configurée : l’envoi SMS échouera.</span>')
+      + '</div></div></div>'
+      + '<div class="champ" id="f-sms-bloc"><span class="lbl">Message texte (SMS)</span>'
+      + '<textarea id="f-sms" class="sms" maxlength="480" placeholder="SANDRIZA : nos nouveautés sont arrivées !">'
+      + esc(c.sms || '') + '</textarea>'
+      + '<div class="aide"><span id="f-sms-n">0</span>/480 · Variable : <code>{{firstName}}</code>. '
+      + 'Twilio gère STOP et AIDE automatiquement.</div></div>'
+      + '<div class="champ"><span class="lbl">Corps du courriel (HTML)</span>'
+      + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('f-tpl', d.modeles)
+      + '<button class="mini" id="f-charger">Charger</button>'
+      + '<button class="mini" id="f-apercu">Aperçu</button></div>'
+      + '<textarea id="f-html" spellcheck="false">' + esc(c.html || '') + '</textarea>'
+      + ligneVars(VARS_CAMP) + '</div>'
+      + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
+      + '<div class="chrome">✉ Aperçu — marie@example.com</div>'
+      + '<iframe id="f-frame" sandbox=""></iframe></div>'
+      + '<div class="fin3"><span class="gauche aide">Enregistrée en <strong>brouillon</strong> : '
+      + 'rien ne part tant que vous n’appuyez pas sur « Envoyer ».</span>'
+      + '<button id="f-annuler">Annuler</button>'
+      + '<button class="prim" id="f-ok">Enregistrer</button></div></div>';
+    return h;
+  }
+
+  function vueFormChaine(){
+    var f = FORM, d = f.d, ch = d.chaine || {};
+    var h = '<div class="carte form">'
+      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
+      + (f.id ? 'Modifier la chaîne' : 'Nouvelle chaîne') + '</h3>'
+      + '<div class="rang">'
+      + '<div class="champ"><span class="lbl">Nom</span>'
+      + '<input id="f-nom" value="' + esc(ch.nom || '') + '" placeholder="Bienvenue en trois temps"></div>'
+      + '<div class="champ"><span class="lbl">Déclencheur</span><select id="f-decl">'
+      + (d.declencheurs || []).map(function(x){
+          return '<option value="' + esc(x.cle) + '"'
+            + ((ch.declencheur || 'subscribe') === x.cle ? ' selected' : '') + '>'
+            + esc(x.nom) + '</option>'; }).join('') + '</select></div></div>'
+      + '<div class="rang">'
+      + '<div class="champ"><span class="lbl">Description</span>'
+      + '<input id="f-desc" value="' + esc(ch.description || '') + '"></div>'
+      + '<div class="champ"><span class="lbl">Statut</span><select id="f-statut">'
+      + '<option value="active"' + (ch.statut !== 'paused' ? ' selected' : '') + '>Active</option>'
+      + '<option value="paused"' + (ch.statut === 'paused' ? ' selected' : '') + '>Suspendue</option>'
+      + '</select></div></div>'
+      + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
+      + '<strong style="font-size:.8rem">Étapes</strong>'
+      + '<button class="mini" id="f-etape-plus">+ Ajouter une étape</button></div>'
+      + '<div id="f-etapes">' + vueEtapes() + '</div>'
+      + ligneVars(VARS_CHAINE, '⚠ Les variables de panier ne se remplissent que dans une chaîne '
+          + 'dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.')
+      + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
+      + '<div class="chrome">✉ Aperçu — marie@example.com</div>'
+      + '<iframe id="f-frame" sandbox=""></iframe></div>'
+      + '<div class="fin3"><button id="f-annuler">Annuler</button>'
+      + '<button class="prim" id="f-ok">Enregistrer</button></div></div>';
+    return h;
+  }
+
+  function vueEtapes(){
+    var et = ETAPES || [];
+    if (!et.length) {
+      return '<div class="vide" style="padding:.9rem">Aucune étape : cette chaîne n’enverrait rien. '
+        + 'Cliquez « + Ajouter une étape ».</div>';
+    }
+    var mods = (FORM && FORM.d && FORM.d.modeles) || [];
+    return et.map(function(s, i){
+      return '<div class="etapef"><div class="tete2"><strong>Étape ' + (i + 1) + '</strong>'
+        + '<div class="gestes">'
+        + (i > 0 ? '<button class="mini" data-mont="' + i + '" title="Monter">↑</button>' : '')
+        + (i < et.length - 1 ? '<button class="mini" data-desc="' + i + '" title="Descendre">↓</button>' : '')
+        + '<button class="mini danger" data-etsup="' + i + '">Retirer</button></div></div>'
+        + '<div class="rang"><div class="champ"><span class="lbl">Délai depuis le déclenchement</span>'
+        + '<div class="duo"><input type="number" min="0" id="e-j-' + i + '" value="' + (s.jours || 0)
+        + '"><span>jours</span><input type="number" min="0" max="23" id="e-h-' + i + '" value="'
+        + (s.heures || 0) + '"><span>heures</span></div></div>'
+        + '<div class="champ"><span class="lbl">Sujet</span>'
+        + '<input id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'
+        + '<div class="champ"><span class="lbl">Corps du courriel (HTML)</span>'
+        + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('e-t-' + i, mods)
+        + '<button class="mini" data-etcharger="' + i + '">Charger</button>'
+        + '<button class="mini" data-etapercu="' + i + '">Aperçu</button></div>'
+        + '<textarea id="e-b-' + i + '" spellcheck="false">' + esc(s.html || '') + '</textarea></div>'
+        + '</div>';
+    }).join('');
+  }
+
+  /* ⚠ LA SAISIE VIT DANS ETAPES, PAS DANS LE DOM : ajouter ou retirer une
+     etape redessine la liste, et ce qui n aurait pas ete releve avant serait
+     perdu. On releve donc AVANT chaque redessin. */
+  function releverEtapes(){
+    (ETAPES || []).forEach(function(s, i){
+      var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+      s.sujet = g('e-s-' + i);
+      s.html = g('e-b-' + i);
+      s.jours = parseInt(g('e-j-' + i), 10) || 0;
+      s.heures = parseInt(g('e-h-' + i), 10) || 0;
+    });
+  }
+
+  function redessinerEtapes(){
+    releverEtapes();
+    var z = document.getElementById('f-etapes');
+    if (z) z.innerHTML = vueEtapes();
+  }
+
+  function ouvrirForm(type, id){
+    var op = (type === 'chaine') ? 'chaines:form' : 'campagnes:form';
+    appeler(op, [id || '']).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      if (!r.peutModifier) { dire('Vous êtes en consultation seulement.', 'err'); return; }
+      FORM = { type: type, id: id || '', d: r };
+      ETAPES = (type === 'chaine')
+        ? JSON.parse(JSON.stringify((r.chaine && r.chaine.etapes) || [])) : null;
+      ARME = '';
+      dessiner();
+    });
+  }
+
+  function fermerForm(){ FORM = null; ETAPES = null; charger(); }
+
+  function apercuDans(html){
+    var bloc = document.getElementById('f-apercu-bloc');
+    var cadre = document.getElementById('f-frame');
+    if (!bloc || !cadre) return;
+    dire('Construction de l’aperçu…');
+    appeler('nl:apercu', [html]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      bloc.style.display = '';
+      // ⚠ srcdoc avec un bac a sable VIDE : le courriel est du HTML etranger,
+      // il ne doit ni executer de script ni atteindre cette fenetre.
+      cadre.setAttribute('srcdoc', r.html);
+      dire('');
+      cadre.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function soumettreForm(){
+    var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var b = document.getElementById('f-ok');
+    if (FORM.type === 'campagne') {
+      var data = { nom: g('f-nom').trim(), sujet: g('f-suj').trim(), segment: g('f-seg'),
+        canal: g('f-canal'), sms: g('f-sms').trim(), html: g('f-html') };
+      if (!data.nom) { dire('Le nom interne est requis.', 'err'); return; }
+      if (!data.sujet) { dire('Le sujet est requis.', 'err'); return; }
+      if ((data.canal === 'sms' || data.canal === 'both') && !data.sms) {
+        dire('Le message texte est requis pour ce canal.', 'err'); return;
+      }
+      if (b) b.disabled = true;
+      dire('Enregistrement…');
+      appeler('campagnes:ecrire', [FORM.id, data]).then(function(r){
+        if (b) b.disabled = false;
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        dire(esc(r.nom) + (r.cree ? ' créée' : ' mise à jour') + ' — en brouillon.', 'bon');
+        fermerForm();
+      });
+      return;
+    }
+    releverEtapes();
+    var dch = { nom: g('f-nom').trim(), description: g('f-desc').trim(),
+      declencheur: g('f-decl'), statut: g('f-statut'), etapes: ETAPES || [] };
+    if (!dch.nom) { dire('Le nom est requis.', 'err'); return; }
+    if (!dch.etapes.length) { dire('Ajoutez au moins une étape.', 'err'); return; }
+    if (dch.etapes.some(function(s){ return !String(s.sujet || '').trim(); })) {
+      dire('Chaque étape doit avoir un sujet.', 'err'); return;
+    }
+    if (b) b.disabled = true;
+    dire('Enregistrement…');
+    appeler('chaines:ecrire', [FORM.id, dch]).then(function(r){
+      if (b) b.disabled = false;
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire(esc(r.nom) + (r.cree ? ' créée' : ' mise à jour') + ' — '
+        + pluriel(r.etapes, 'étape') + '.', 'bon');
+      fermerForm();
+    });
+  }
+
+  function brancherForm(){
+    var a = document.getElementById('f-annuler');
+    if (a) a.onclick = fermerForm;
+    var o = document.getElementById('f-ok');
+    if (o) o.onclick = soumettreForm;
+
+    if (FORM.type === 'campagne') {
+      var canal = document.getElementById('f-canal');
+      var bloc = document.getElementById('f-sms-bloc');
+      var majSms = function(){
+        var v = canal ? canal.value : 'email';
+        if (bloc) bloc.style.display = (v === 'sms' || v === 'both') ? '' : 'none';
+      };
+      if (canal) canal.onchange = majSms;
+      majSms();
+      var sms = document.getElementById('f-sms');
+      var cpt = document.getElementById('f-sms-n');
+      var majN = function(){ if (cpt && sms) cpt.textContent = String(sms.value.length); };
+      if (sms) sms.oninput = majN;
+      majN();
+      var ch = document.getElementById('f-charger');
+      if (ch) ch.onclick = function(){
+        var cle = document.getElementById('f-tpl').value;
+        if (!cle) { dire('Choisissez un modèle.', 'att'); return; }
+        appeler('nl:modele', [cle]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          document.getElementById('f-html').value = r.html;
+          var s = document.getElementById('f-suj');
+          if (s && !s.value.trim()) s.value = r.sujet;
+          dire('Modèle « ' + esc(r.nom) + ' » chargé.', 'bon');
+        });
+      };
+      var ap = document.getElementById('f-apercu');
+      if (ap) ap.onclick = function(){ apercuDans(document.getElementById('f-html').value); };
+      return;
+    }
+
+    var plus = document.getElementById('f-etape-plus');
+    if (plus) plus.onclick = function(){
+      releverEtapes();
+      ETAPES.push({ sujet: '', html: '', jours: ETAPES.length === 0 ? 0 : 3, heures: 0 });
+      var z = document.getElementById('f-etapes');
+      if (z) z.innerHTML = vueEtapes();
+    };
   }
 
   /* ══ ONGLET CAMPAGNES ═══════════════════════════════════════════════════ */
@@ -232,10 +540,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="dt">Expéditeur : ' + esc(D.expediteur) + '</div>';
     }
 
+    if (D.peutModifier) {
+      h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvelle">'
+        + '+ Nouvelle campagne</button></div>';
+    }
+
     h += '<div class="carte">';
     if (!rows.length) {
       h += '<div class="vide">' + (q ? 'Rien ne correspond.'
-        : 'Aucune campagne. Elles se rédigent à l’écran Infolettre, fenêtre principale.') + '</div>';
+        : 'Aucune campagne pour l’instant. Cliquez « + Nouvelle campagne ».') + '</div>';
     } else {
       h += '<table><thead><tr><th>Campagne</th><th>Envoyé à</th><th>Canal</th>'
         + '<th class="num">Destinataires</th><th>État</th><th class="num">Partis / échecs</th>'
@@ -243,6 +556,10 @@ ${JS_ACTIVITE}${JS_DIRE}
         + rows.map(function(c){
             var gestes = '';
             if (D.peutModifier) {
+              // ⚠ MEME REGLE QUE LE WEB : une campagne PARTIE ne se modifie plus.
+              if (c.etat !== 'sent') {
+                gestes += '<button class="mini geste" data-modif="' + esc(c.id) + '">Modifier</button> ';
+              }
               if (c.etat !== 'sent') {
                 var armeE = (ARME === 'env:' + c.id);
                 gestes += '<button class="mini geste' + (armeE ? ' arme' : ' prim') + '" data-envoyer="'
@@ -304,13 +621,19 @@ ${JS_ACTIVITE}${JS_DIRE}
             : 'Rien d’échu pour l’instant') + '</div></div>';
     }
 
+    if (D.peutModifier) {
+      h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvchaine">'
+        + '+ Nouvelle chaîne</button></div>';
+    }
+
     if (!(D.chaines || []).length) {
-      h += '<div class="carte"><div class="vide">Aucune chaîne. Elles se créent à l’écran Infolettre, '
-        + 'fenêtre principale.</div></div>';
+      h += '<div class="carte"><div class="vide">Aucune chaîne pour l’instant. '
+        + 'Cliquez « + Nouvelle chaîne ».</div></div>';
     } else {
       h += (D.chaines || []).map(function(ch){
         var gestes = '';
         if (D.peutModifier) {
+          gestes += '<button class="mini geste" data-chmodif="' + esc(ch.id) + '">Modifier</button>';
           var armeB = (ARME === 'bas:' + ch.id);
           gestes += '<button class="mini geste' + (armeB ? ' arme' : '') + '" data-basculer="' + esc(ch.id)
             + '" data-active="' + (ch.active ? '0' : '1') + '">'
@@ -345,6 +668,14 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function dessiner(){
     if (OCCUPE) return;
+    // ⚠ UN FORMULAIRE OUVERT PREND TOUTE LA VUE : pas d onglets, pas de liste.
+    // Redessiner la liste sous un formulaire ferait perdre la saisie en cours.
+    if (FORM) {
+      if (sous) sous.textContent = '';
+      corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine() : vueFormCampagne();
+      brancherForm();
+      return;
+    }
     if (sous) sous.textContent = (DC && !DC.peutModifier) || (DH && !DH.peutModifier)
       ? 'consultation seulement' : '';
     corps.innerHTML = onglets() + (ONGLET === 'chaines' ? vueChaines() : vueCampagnes());
@@ -354,6 +685,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   function brancher(){
     var q = document.getElementById('cp-q');
     if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
+    var bn = document.getElementById('cp-nouvelle');
+    if (bn) bn.onclick = function(){ ouvrirForm('campagne', ''); };
+    var bnc = document.getElementById('cp-nouvchaine');
+    if (bnc) bnc.onclick = function(){ ouvrirForm('chaine', ''); };
     var bt = document.getElementById('cp-traiter');
     if (bt) bt.onclick = function(){
       if (ARME !== 'traiter') {
@@ -395,6 +730,56 @@ ${JS_ACTIVITE}${JS_DIRE}
   corps.addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+
+    /* ── Gestes PROPRES AU FORMULAIRE (etapes d une chaine) ─────────────── */
+    if (FORM) {
+      var sup = t.closest('[data-etsup]');
+      if (sup) {
+        releverEtapes();
+        ETAPES.splice(parseInt(sup.getAttribute('data-etsup'), 10), 1);
+        var z1 = document.getElementById('f-etapes');
+        if (z1) z1.innerHTML = vueEtapes();
+        return;
+      }
+      var mnt = t.closest('[data-mont]');
+      var dsc = t.closest('[data-desc]');
+      if (mnt || dsc) {
+        releverEtapes();
+        var i0 = parseInt((mnt || dsc).getAttribute(mnt ? 'data-mont' : 'data-desc'), 10);
+        var j0 = mnt ? i0 - 1 : i0 + 1;
+        var tmp = ETAPES[i0]; ETAPES[i0] = ETAPES[j0]; ETAPES[j0] = tmp;
+        var z2 = document.getElementById('f-etapes');
+        if (z2) z2.innerHTML = vueEtapes();
+        return;
+      }
+      var etc = t.closest('[data-etcharger]');
+      if (etc) {
+        var ic = etc.getAttribute('data-etcharger');
+        var sel = document.getElementById('e-t-' + ic);
+        if (!sel || !sel.value) { dire('Choisissez un modèle.', 'att'); return; }
+        appeler('nl:modele', [sel.value]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          var b2 = document.getElementById('e-b-' + ic);
+          if (b2) b2.value = r.html;
+          var s2 = document.getElementById('e-s-' + ic);
+          if (s2 && !s2.value.trim()) s2.value = r.sujet;
+          dire('Modèle « ' + esc(r.nom) + ' » chargé dans l’étape ' + (parseInt(ic, 10) + 1) + '.', 'bon');
+        });
+        return;
+      }
+      var eta = t.closest('[data-etapercu]');
+      if (eta) {
+        var b3 = document.getElementById('e-b-' + eta.getAttribute('data-etapercu'));
+        apercuDans(b3 ? b3.value : '');
+        return;
+      }
+      return;   // rien d autre ne s ecoute tant qu un formulaire est ouvert
+    }
+
+    var bm = t.closest('[data-modif]');
+    if (bm) { ouvrirForm('campagne', bm.getAttribute('data-modif')); return; }
+    var bcm = t.closest('[data-chmodif]');
+    if (bcm) { ouvrirForm('chaine', bcm.getAttribute('data-chmodif')); return; }
 
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; charger(); return; }
@@ -524,13 +909,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* ⚠ NE JAMAIS REDESSINER PAR-DESSUS UNE SAISIE : un formulaire ouvert bloque
+     l actualisation, sinon la campagne en cours de redaction disparaitrait. */
   window.szActualiser = function(){
-    if (OCCUPE || ARME) return;
+    if (OCCUPE || ARME || FORM) return;
     var q = document.getElementById('cp-q');
     if (q && document.activeElement === q && q.value) return;
     charger();
   };
-  window.szRevenir = function(){ if (!OCCUPE) charger(); };
+  window.szRevenir = function(){ if (!OCCUPE && !FORM) charger(); };
 
   /* ── MODE ANCRE ── Le meme bouton que les autres ecrans. */
   window.szModeAncre = function(actif){
@@ -562,12 +949,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       ev.preventDefault();
       /* ⚠ Un envoi en cours ne se ferme pas d un coup d Echap. */
       if (OCCUPE) { dire('Un envoi est en cours : attendez le compte rendu.', 'att'); return; }
+      // ⚠ Echap ferme le FORMULAIRE avant la fenetre : sinon une frappe de trop
+      // ferait disparaitre tout ce qui vient d etre saisi.
+      if (FORM) { fermerForm(); return; }
       if (ARME) { ARME = ''; dessiner(); return; }
       P.fermer();
     }
   });
 
-  charger();
+  if (FORM_DEPART) ouvrirForm(ONGLET === 'chaines' ? 'chaine' : 'campagne', '');
+  else charger();
 })();
 </script>
 </body></html>`;

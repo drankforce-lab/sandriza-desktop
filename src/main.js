@@ -1385,6 +1385,11 @@ const OPS_PONT = new Set([
   'patrons:liste', 'patrons:ecrire', 'patrons:basculer', 'patrons:supprimer', 'patrons:apercu',
   // Generateur d agencement : la fenetre y renvoyait, l ecran n existait plus.
   'reco:agencement', 'reco:agencement:publier', 'reco:creer', 'reco:editer',
+  // Creer / modifier une campagne et une chaine : la fenetre savait tout faire
+  // SAUF en creer une. nl:modele charge un gabarit, nl:apercu batit le courriel
+  // COMPLET (en-tete, pied, desabonnement) que la fenetre ne saurait pas refaire.
+  'campagnes:form', 'campagnes:ecrire', 'chaines:form', 'chaines:ecrire',
+  'nl:modele', 'nl:apercu',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
   'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer', 'adresse:suggerer',
@@ -1972,6 +1977,12 @@ const LIMITES_PONT = {
   /* Rattacher une commande touche la commande, sa facture ET les statistiques
      d achat des DEUX comptes concernes : plus qu une ecriture simple. */
   'commande:lierApercu': 20000, 'commande:lierChercher': 20000, 'commande:lierEcrire': 30000,
+  /* Ecrire une campagne ou une chaine televerse d abord les images collees en
+     data URL vers R2 : c est le poste le plus long, et une chaine en a une par
+     etape. D ou 60 s a l ecriture, contre 20 s pour lire un formulaire. */
+  'campagnes:form': 20000, 'campagnes:ecrire': 60000,
+  'chaines:form': 20000, 'chaines:ecrire': 60000,
+  'nl:modele': 15000, 'nl:apercu': 20000,
   'fidelisation:sondage:form': 20000, 'fidelisation:sondage:ecrire': 30000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */

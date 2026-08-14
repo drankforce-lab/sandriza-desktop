@@ -735,6 +735,61 @@ module.exports = {
   // l'argument de page (id = 'chaines'), comme le fait PAGES_ANCRABLES pour la
   // vue par défaut.
   'campagnes.js': [
+    /* ⚠ LES DEUX ECRANS QUI ECRIVENT — atteints par « :neuve », l identifiant
+       d ouverture. Le banc ne clique pas : sans eux, les seuls ajouts de ce
+       lot resteraient hors de tout controle. C est l angle mort de #32. */
+    {
+      nom: 'formulaire — nouvelle campagne',
+      id: 'campagnes:neuve',
+      reponses: {
+        'campagnes:form': {
+          ok: true, peutModifier: true, campagne: null,
+          segments: [{ cle: 'all', nom: 'Tous les abonnés' },
+            { cle: 'clients', nom: 'Clients avec commandes' }],
+          canaux: [{ cle: 'email', nom: 'Courriel' }, { cle: 'both', nom: 'Courriel + SMS' },
+            { cle: 'sms', nom: 'SMS' }],
+          modeles: [{ cle: 'welcome', nom: '🌸 Bienvenue' }, { cle: 'promo', nom: '🎁 Promotion' }],
+          abonnesActifs: 412, smsDestinataires: 88, smsPret: true,
+        },
+        'nl:modele': { ok: true, nom: '🌸 Bienvenue', sujet: 'Bienvenue chez SANDRIZA !',
+          html: '<h1>Bienvenue, {{firstName}} !</h1>' },
+        'nl:apercu': { ok: true, html: '<html><body><h1>Bienvenue, Marie !</h1></body></html>' },
+        'campagnes:ecrire': { ok: true, id: 'camp_0009', nom: 'Rentrée', cree: true },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Le jeu rend une chaîne GARNIE bien que l'écran soit ouvert en création :
+      // c'est voulu, c'est le seul moyen de faire dessiner la liste d'étapes.
+      nom: 'formulaire de chaîne, étapes garnies',
+      id: 'chaines:neuve',
+      reponses: {
+        'chaines:form': {
+          ok: true, peutModifier: true,
+          // ⚠ Une chaine GARNIE : sans etapes, la liste d etapes (delais,
+          // sujets, corps, modeles) ne serait jamais dessinee.
+          chaine: { id: 'chain_0002', nom: 'Bienvenue en trois temps',
+            description: 'Trois courriels après l’inscription',
+            declencheur: 'subscribe', statut: 'active',
+            etapes: [
+              { sujet: 'Bienvenue !', html: '<p>Merci {{firstName}}</p>', jours: 0, heures: 0 },
+              { sujet: 'Nos essentiels', html: '<p>À découvrir</p>', jours: 3, heures: 0 },
+            ] },
+          declencheurs: [{ cle: 'subscribe', nom: 'Nouvel abonné' },
+            { cle: 'purchase', nom: 'Après achat' },
+            { cle: 'abandoned_cart', nom: 'Panier abandonné' },
+            { cle: 'new_collection', nom: 'Nouvelle collection' },
+            { cle: 'manual', nom: 'Manuel' }],
+          modeles: [{ cle: 'welcome', nom: '🌸 Bienvenue' }],
+        },
+        'nl:modele': { ok: true, nom: '🌸 Bienvenue', sujet: 'Bienvenue !', html: '<h1>Bienvenue</h1>' },
+        'nl:apercu': { ok: true, html: '<html><body><h1>Bienvenue</h1></body></html>' },
+        'chaines:ecrire': { ok: true, id: 'chain_0002', nom: 'Bienvenue', cree: false, etapes: 2 },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
     {
       // ⚠ FORME REELLE de campagnes:liste (coeur Newsletter._campagnesDonnees).
       nom: 'campagnes garnies',
