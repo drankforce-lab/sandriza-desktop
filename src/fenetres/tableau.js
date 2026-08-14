@@ -143,7 +143,7 @@ ${JS_ACTIVITE}${JS_DIRE}
      tableau de bord qui passe par le RESEAU (backup.php interroge R2). La mettre
      dans tableau:lire ferait attendre tout l ecran d ouverture de session pour
      une ligne d information. */
-  var SAUV = null;
+  var SAUV = null, SAUV_QUAND = 0, SAUV_EN_COURS = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -472,9 +472,19 @@ ${JS_ACTIVITE}${JS_DIRE}
      remplit la tuile d une explication, il ne vide pas l ecran. Un refus de
      DROIT retire la tuile — annoncer l etat des sauvegardes a qui n y a pas
      acces n est pas une information, c est une fuite. */
-  function chargerSauvegarde(){
-    if (SAUV !== null) { return; }
+  function chargerSauvegarde(forcer){
+    /* ⚠ ELLE SE RELIT. Le premier jet ne lisait qu UNE SEULE FOIS (garde
+       << SAUV !== null >>) : apres avoir cree une sauvegarde, la tuile
+       continuait d annoncer << 16 jours >> et aucun rafraichissement n y
+       changeait rien (signale le 2026-08-14). Le garde servait a ne pas
+       rappeler le reseau a chaque redessin — c est maintenant une FRAICHEUR
+       de quinze secondes qui s en charge, et un retour dans la fenetre force
+       la relecture. Un indicateur qui ne bouge jamais ne rassure pas : il ment. */
+    if (SAUV_EN_COURS) return;
+    if (!forcer && SAUV !== null && (Date.now() - SAUV_QUAND) < 15000) return;
+    SAUV_EN_COURS = true;
     appeler('tableau:sauvegarde', []).then(function(r){
+      SAUV_EN_COURS = false; SAUV_QUAND = Date.now();
       if (r && r.ok) SAUV = r;
       else if (r && r.motif === 'droit') SAUV = { interdite: true };
       else SAUV = { aucune: false, jours: null, quand: '', taille: '', erreur: expliquer(r) };
@@ -490,7 +500,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     charger();
   };
   // Ramenee au premier plan par le menu : les chiffres se relisent.
-  window.szRevenir = function(){ charger(); };
+  window.szRevenir = function(){ SAUV_QUAND = 0; charger(); };
 
   /* ── MODE ANCRE ── La coquille appelle szModeAncre(true) quand cette page
      vit DANS la fenetre principale : on offre alors << Detacher >>, qui

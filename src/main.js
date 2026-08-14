@@ -2536,8 +2536,31 @@ const ouvrirImprimantes = () => {
   imprimantesWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageImprimantes()));
 };
 
+/* ⚠ LA BANDE DES BOUTONS SUIT AUSSI LA PORTE (signalé le 2026-08-14, capture à
+   l'appui). `appbar.js` pilote la couleur des boutons réduire/agrandir/fermer —
+   mais il vit dans le SITE, et la porte de mise à jour n'est pas le site : c'est
+   une page servie par la coquille. Elle gardait donc la couleur de création de
+   la fenêtre (bleu nuit) au-dessus de son panneau crème, et les trois boutons
+   flottaient sur une bande sombre au coin d'un écran clair.
+   Les boutons sont posés sur le panneau de DROITE (#faf8f5) : c'est cette
+   couleur-là qu'il faut, avec des symboles foncés pour rester lisibles. */
+const PORTE_BANDE = { color: '#faf8f5', symbolColor: '#1d2433' };
+const _bandePorte = (dessus) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (typeof mainWindow.setTitleBarOverlay !== 'function') return;
+  try {
+    mainWindow.setTitleBarOverlay(dessus
+      ? PORTE_BANDE
+      // ⚠ On REMET le défaut sombre en quittant la porte : le site reprendra la
+      // main dès son premier rendu (chrome:titlebar), mais entre les deux il ne
+      // faut pas laisser une bande claire sur l'écran de connexion.
+      : { color: '#0e1522', symbolColor: '#e8edf5' });
+  } catch (_) {}
+};
+
 const montrerPorte = (titre, message, progression) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
+  _bandePorte(true);
   mainWindow.loadURL(portePage(titre, message, progression)).catch(() => {});
 };
 
