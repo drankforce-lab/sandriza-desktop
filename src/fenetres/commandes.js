@@ -641,7 +641,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function rendreVerrou(){
     if (!VERROU_PRIS) return;
     VERROU_PRIS = false;
-    appeler('verrou:rendre');
+    appeler('verrou:rendre', DET_ID ? ['orders', DET_ID] : []);
   }
   function retourListe(){
     rendreVerrou();
@@ -656,6 +656,20 @@ ${JS_ACTIVITE}${JS_DIRE}
   window.szRevenir = function(){
     if (VUE === 'detail' && DET_ID) rechargerDetail();
   };
+
+  /* ⚠ VERROU RELACHE A LA FERMETURE DE LA FENETRE (#40). Le detail tient le
+     verrou 'orders' ; il ne se rendait qu'au bouton Fermer/Liste (retourListe).
+     Fermer la fenetre par le bouton du SYSTEME, la detacher/rancrer, ou QUITTER
+     la section (la vue ancree se decharge) ne passait PAS par la, et le verrou
+     restait pris jusqu a son expiration (~90 s). On le rend donc aussi au
+     dechargement de la page : le message part par le pont vers la fenetre
+     principale, qui TIENT le verrou et le libere cote serveur meme une fois
+     cette fenetre morte. L evenement pagehide couvre la fermeture ET le
+     dechargement d une vue ancree ; le garde VERROU_PRIS rend l appel idempotent.
+     ⚠ AUCUN accent grave dans ce commentaire (litteral de gabarit). */
+  window.addEventListener('pagehide', function(){
+    if (VERROU_PRIS && DET_ID) { VERROU_PRIS = false; try { appeler('verrou:rendre', ['orders', DET_ID]); } catch(e){} }
+  });
 
   /* ── MODE ANCRE ── La coquille appelle szModeAncre(true) quand cette page
      vit DANS la fenetre principale (section Commandes de la barre laterale).
