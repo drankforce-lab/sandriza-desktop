@@ -126,7 +126,7 @@ code{font:.76rem/1.4 Consolas,monospace;color:#cbd8e6}
 .pager .gauche{margin-right:auto;display:flex;align-items:center;gap:.35rem}
 .pager select{padding:.1rem .3rem;font-size:.74rem}
 .vide{padding:1.4rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
-.centre{max-width:60rem}
+.centre{width:100%}
 .avancement{max-width:32rem;margin:2.5rem auto;text-align:center}
 .avancement .tourne{width:34px;height:34px;margin:1rem auto 0;border-radius:50%;
   border:3px solid rgba(255,255,255,.14);border-top-color:#c9a97e;animation:tr 1s linear infinite}

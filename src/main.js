@@ -1548,7 +1548,7 @@ const OPS_PONT = new Set([
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
-  'tableau:lire', 'tableau:tuiles', 'tableau:ouvrir',
+  'tableau:lire', 'tableau:tuiles', 'tableau:ouvrir', 'tableau:verrous',
   // Derniere sauvegarde : lue A PART, car elle seule passe par le reseau (#25).
   'tableau:sauvegarde',
   // Variantes par couleur : teinte au CANEVAS par le site (une image, une
@@ -1873,6 +1873,7 @@ const LIMITES_PONT = {
      derriere, donc le meme aller-retour R2. On lui laisse la meme marge — et
      comme elle est lue APRES le premier dessin, elle ne retarde rien. */
   'tableau:sauvegarde': 60000,
+  'tableau:verrous': 15000,
   /* Frais Stripe Tax (#22) : le relais interroge Turso puis agrege par mois.
      C est un aller-retour RESEAU, pas une lecture locale — le plafond ordinaire
      de 8 s le ferait passer pour un echec sur une liaison lente. */

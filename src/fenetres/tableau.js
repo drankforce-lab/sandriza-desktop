@@ -101,6 +101,9 @@ thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:up
 tbody td{padding:.3rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:#8fa1b8}
+.cadslot{display:inline}
+.cad{margin-left:.35rem;font-size:.8rem;color:#fbbf24;vertical-align:middle;cursor:default}
+.cad.mine{color:#c9a97e}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:#4ade80}
 .pill.att{background:rgba(245,158,11,.16);color:#fbbf24}
@@ -144,6 +147,8 @@ ${JS_ACTIVITE}${JS_DIRE}
      dans tableau:lire ferait attendre tout l ecran d ouverture de session pour
      une ligne d information. */
   var SAUV = null, SAUV_QUAND = 0, SAUV_EN_COURS = false;
+  var VERROUS = {};           // #38 : { <idCommande>: { par, mine } } — sonde toutes les ~3 s
+  var VERROU_TIMER = null;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -270,7 +275,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     } else {
       h += '<table><thead><tr><th>Numéro</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead><tbody>'
         + vue.map(function(r){
+            // ⚠ CADENAS DYNAMIQUE (#38) : la case data-cad est remplie/videe par
+            // le sondage des verrous, SANS redessiner le tableau. Une commande ET
+            // une facture pointent vers le meme ID de commande (r.oid).
             return '<tr><td><span class="num">' + esc(r.numero) + '</span>'
+              + '<span class="cadslot" data-cad="' + esc(r.oid || '') + '"></span>'
               + '<div class="dt">' + esc(fmtDate(r.date)) + '</div></td>'
               + '<td>' + esc(r.client || '—') + '</td>'
               + '<td>' + esc(fmt(r.total)) + '</td>'
@@ -412,6 +421,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
 
     corps.innerHTML = h;
+    appliquerVerrous();   // #38 : poser les cadenas connus sur le tableau frais
   }
 
   // Ecouteur delegue : tout est redessine, rien ne se perd.
@@ -492,6 +502,37 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* ══ CADENAS DYNAMIQUE (#38) ══════════════════════════════════════════════
+     Sondage leger des verrous 'orders' toutes les ~3 s : on pose/retire les
+     cadenas SANS redessiner le tableau (pas de clignotement ni de perte de
+     focus). Une commande ET sa facture pointent le meme ID de commande. */
+  function cadInner(oid){
+    if (!oid || !VERROUS[oid]) return '';
+    var v = VERROUS[oid];
+    var t = v.mine ? 'Vous tenez cette fiche en modification'
+      : ('En traitement par ' + (v.par || 'un collegue'));
+    return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="' + esc(t) + '">🔒</span>';
+  }
+  function appliquerVerrous(){
+    var slots = document.querySelectorAll('.cadslot');
+    for (var i = 0; i < slots.length; i++){
+      slots[i].innerHTML = cadInner(slots[i].getAttribute('data-cad'));
+    }
+  }
+  function chargerVerrous(){
+    appeler('tableau:verrous', []).then(function(r){
+      if (!r || !r.ok || !r.orders) return;
+      VERROUS = r.orders;
+      appliquerVerrous();
+    });
+  }
+  function demarrerVerrous(){
+    if (VERROU_TIMER) return;
+    chargerVerrous();
+    VERROU_TIMER = setInterval(chargerVerrous, 3000);
+  }
+  window.addEventListener('pagehide', function(){ if (VERROU_TIMER) { clearInterval(VERROU_TIMER); VERROU_TIMER = null; } });
+
   /* ⚠ ACTUALISATION POUSSEE PAR LA COQUILLE : une vente, un produit modifie ou
      un remboursement fait relire les chiffres sans geste — mais jamais pendant
      que le panneau des tuiles est ouvert (on redessinerait sous les doigts). */
@@ -522,6 +563,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
+  demarrerVerrous();   // #38 : cadenas en direct sur les commandes/factures verrouillees
 })();
 </script>
 </body></html>`;

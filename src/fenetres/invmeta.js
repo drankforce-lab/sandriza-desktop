@@ -73,7 +73,7 @@ tbody tr:hover td{background:rgba(255,255,255,.03)}
 tr.edit td{background:rgba(201,169,126,.09)}
 code{font:.77rem/1.4 Consolas,monospace;color:#cbd8e6}
 .mono{font-family:Consolas,monospace}
-.chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;max-width:720px;padding:.45rem .5rem;
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;width:100%;padding:.45rem .5rem;
   border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.03);min-height:44px}
 .chip{display:inline-flex;align-items:center;gap:.25rem;background:rgba(201,169,126,.14);
   border:1px solid rgba(255,255,255,.14);border-radius:7px;padding:.24rem .2rem .24rem .55rem;font-weight:600;font-size:.82rem}
