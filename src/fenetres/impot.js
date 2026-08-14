@@ -316,7 +316,11 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="grillecfg">';
     h += '<div class="carte"><h2>Identification</h2>'
-      + champ('e-nom', 'Raison sociale', p.nom, '', false, true)
+      /* ⚠ La propriete s appelle name, PAS nom : le coeur du profil rend la
+         forme BRUTE du stockage (name / tpsNo / sinBn), alors que la liste du
+         haut d ecran, elle, est francisee (D.profil.nom). Deux formes voisines
+         dans la meme fenetre : la raison sociale est arrivee VIDE au 1er rendu. */
+      + champ('e-nom', 'Raison sociale', p.name, '', false, true)
       + champ('e-neq', 'NEQ — Numéro d’entreprise du Québec', p.neq, '10 chiffres · Registraire des entreprises du Québec', true, true)
       + champ('e-ne', 'Numéro d’entreprise ARC (NE)', p.sinBn, '9 chiffres · Agence du revenu du Canada', true, false)
       + '<label class="champ"><span class="lbl">Type d’entreprise</span>'

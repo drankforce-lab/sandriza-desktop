@@ -101,6 +101,8 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
   border-radius:50%;background:rgba(6,10,18,.78);border:1px solid rgba(239,68,68,.6);
   color:#f87171;font-size:.76rem;font-weight:700;cursor:pointer}
 .boite .phx:hover{background:rgba(239,68,68,.28)}
+.boite .phmort{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#6d7f96;font-size:1.5rem}
 .boite .reponse{margin-top:.6rem;border-left:3px solid #c9a97e;padding:.4rem .7rem;
   background:rgba(201,169,126,.07);border-radius:0 9px 9px 0;font-size:.85rem}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
@@ -279,7 +281,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + ((r.photosUrl && r.photosUrl.length)
           ? '<div class="photos">' + r.photosUrl.map(function(u, i){
               return '<div class="ph">'
-                + '<img src="' + esc(u) + '" alt="Photo ' + (i + 1) + ' de l’avis">'
+                /* ⚠ alt VIDE : une adresse morte affichait le texte de
+                   remplacement en travers de la vignette, ce qui ressemble a un
+                   defaut de la fenetre plutot qu a une image introuvable. Le
+                   repli se pose en JS, jamais dans un onerror= en ligne (une
+                   apostrophe echappee y est avalee par le gabarit). */
+                + '<img src="' + esc(u) + '" alt="" title="Photo ' + (i + 1) + ' de l’avis">'
                 + (r.peutModifier
                     ? '<button class="phx" data-photo="' + i + '" title="Retirer cette photo de l’avis et du stockage">'
                       + (PHOTO_ARMEE === i ? '?' : '✕') + '</button>'
@@ -391,6 +398,18 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       SUPPR_ARME = false;
       geste('avis:supprimer', 'Avis supprimé définitivement.');
+    };
+    /* Une adresse morte devient un cadre neutre plutot qu une icone brisee. */
+    var vgs = document.querySelectorAll('.ph img');
+    for (var iv = 0; iv < vgs.length; iv++) vgs[iv].onerror = function(){
+      var c = this.parentNode; if (!c) return;
+      this.style.display = 'none';
+      if (!c.querySelector('.phmort')) {
+        var m = document.createElement('span');
+        m.className = 'phmort'; m.textContent = '⃠';
+        m.title = 'Image introuvable à cette adresse';
+        c.appendChild(m);
+      }
     };
     var phs = document.querySelectorAll('[data-photo]');
     for (var ip = 0; ip < phs.length; ip++) {
