@@ -64,7 +64,10 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
-  letter-spacing:.07em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.07em;color:#8fa1b8;font-weight:700;
+  /* ⚠ FLEX, sinon le compteur de droite se colle au titre : on lisait
+     << ARTICLES0 retenu >> en un seul mot (vu en capture). */
+  display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
