@@ -26,7 +26,7 @@
  * normal ne voit ce drapeau — la boutique et l'admin au navigateur sont intactes.
  */
 
-const { app, BrowserWindow, BaseWindow, WebContentsView, ipcMain, shell, Menu, Notification, nativeImage, powerSaveBlocker, session, dialog } = require('electron');
+const { app, BrowserWindow, BaseWindow, WebContentsView, ipcMain, shell, Menu, Notification, nativeImage, nativeTheme, powerSaveBlocker, session, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -641,6 +641,9 @@ const toggleSidebar = (hide) => {
 
 // ── Fenêtre principale ────────────────────────────────────────────────────────
 const createWindow = () => {
+  // #41 : la barre de titre OS des fenetres a cadre standard doit naitre du bon
+  // cote du theme des le demarrage (avant meme d en ouvrir une).
+  _majThemeOS();
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -2538,7 +2541,21 @@ const jsTheme = () => {
 const appliquerTheme = (wc) => {
   try { if (wc && !wc.isDestroyed()) wc.executeJavaScript(jsTheme(), true).catch(() => {}); } catch {}
 };
+/* ── LA BARRE DE TITRE OS SUIT LE THEME (#41) ───────────────────────────────
+   Les fenetres a CADRE STANDARD (ouvrirNative, fenetresTravail : « Detail de
+   commande », etc.) ne posent PAS de titleBarOverlay : Windows peint alors leur
+   barre de titre selon le theme du SYSTEME — donc BLANCHE quand l ordinateur est
+   en clair, meme si l administration est sombre (signale 2026-08-14, capture a
+   l appui). On force le theme OS a suivre celui de l administration : toutes ces
+   barres de titre deviennent sombres/claires d un coup, sans toucher a chacune
+   des ~84 fenetres. La fenetre PRINCIPALE garde son titleBarOverlay explicite
+   (couleur reelle envoyee par la page) : il gagne sur themeSource, rien ne
+   change pour elle. */
+const _majThemeOS = () => {
+  try { nativeTheme.themeSource = (_modele && _modele.sombre) ? 'dark' : 'light'; } catch (_) {}
+};
 const appliquerThemePartout = () => {
+  _majThemeOS();
   fenetresNatives.forEach((w) => { if (w && !w.isDestroyed()) appliquerTheme(w.webContents); });
   ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) appliquerTheme(a.view.webContents); });
 };
