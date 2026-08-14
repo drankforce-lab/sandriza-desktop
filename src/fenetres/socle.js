@@ -546,4 +546,58 @@ html.jour tbody tr.attente{background:rgba(124,92,255,.08)}
 html.jour input,html.jour select{background:#ffffff}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR, CSS_JOUR, JS_SOCLE, JS_ACTIVITE, JS_DIRE };
+/* ── PLEIN ÉCRAN DES ASSISTANTS ET DES PANNEAUX (demandé le 2026-08-13) ──────
+   DEUX effets, et le second compte autant que le premier : la boîte prend toute
+   la fenêtre, ET le texte grossit. Agrandir un panneau sans grossir ce qu'il
+   contient ne fait qu'étirer du vide — c'est la lisibilité qu'on vient chercher
+   en passant en plein écran, pas la surface.
+
+   ⚠ LE GROSSISSEMENT PASSE PAR LA RACINE, PAS PAR DES TAILLES RÉÉCRITES. Toutes
+   les fenêtres dimensionnent en `rem` ; changer la police de <html> les emmène
+   donc TOUTES d'un coup, sans qu'aucune ait à retoucher sa feuille — et revenir
+   à la taille normale se fait en retirant une classe, donc il n'y a rien à
+   défaire champ par champ. Écrire des tailles « en plein écran » aurait exigé de
+   les tenir à jour dans chaque fenêtre, à perpétuité.
+
+   Cette feuille est jointe à TOUTES les fenêtres (via CSS_JOUR) : une surcouche
+   écrite demain n'a qu'à appeler szPleinBasculer pour en hériter. */
+const CSS_PLEIN = `
+html.sz-zoom{font-size:112.5%}
+.sz-plein{
+  position:fixed!important; inset:0!important;
+  width:100%!important; max-width:none!important;
+  height:100%!important; max-height:none!important;
+  border-radius:0!important; border-width:0!important;
+}
+/* Le bouton de bascule : discret, à côté de « Fermer ». */
+.sz-btnplein{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-right:.35rem;
+  border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);
+  color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
+.sz-btnplein:hover{background:rgba(255,255,255,.09)}
+html.jour .sz-btnplein{color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
+html.jour .sz-btnplein:hover{background:#efece4}
+`;
+
+/* Le compagnon JS. À inclure comme JS_DIRE dans les fenêtres qui offrent le
+   plein écran. ⚠ szPleinReinit DOIT être appelé à la fermeture de la surcouche :
+   sans lui, la classe de zoom reste sur <html> et la fenêtre entière garde un
+   texte plus gros, sans que rien ne l'explique. */
+const JS_PLEIN = `
+var _szPleinOn = false;
+function szPleinEtat(){ return _szPleinOn; }
+function szPleinBasculer(boite, bouton){
+  _szPleinOn = !_szPleinOn;
+  if (boite) boite.classList.toggle('sz-plein', _szPleinOn);
+  document.documentElement.classList.toggle('sz-zoom', _szPleinOn);
+  if (bouton){
+    bouton.textContent = _szPleinOn ? '⤡ Réduire' : '⛶ Plein écran';
+    bouton.title = _szPleinOn ? 'Revenir à la taille normale' : 'Occuper toute la fenêtre';
+  }
+}
+function szPleinReinit(){
+  _szPleinOn = false;
+  document.documentElement.classList.remove('sz-zoom');
+}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN, CSS_JOUR: CSS_JOUR + CSS_PLEIN, JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_PLEIN };

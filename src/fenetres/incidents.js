@@ -24,7 +24,7 @@
  * ⚠ Aucun caractère accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_PLEIN, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -118,7 +118,16 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .pas{display:none}
 .pas.ici{display:block}
 .pas h4{margin:0 0 .9rem;font:700 .95rem/1.2 Georgia,serif}
-.nav{display:flex;justify-content:space-between;gap:.75rem;width:100%}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:.75rem;width:100%}
+/* ⚠ LE MESSAGE DE L'ASSISTANT VIT DANS L'ASSISTANT. Il partait au pied de la
+   FENÊTRE, c'est-à-dire DERRIÈRE le voile de la surcouche : l'avertissement
+   « la date de prise de connaissance est obligatoire » s'affichait tout en bas,
+   hors du champ de vision, sous le panneau qu'on est justement en train de
+   remplir (signalé le 2026-08-13, capture à l'appui). Il se pose maintenant
+   entre les deux boutons de navigation, là où le regard revient. */
+.msgsur{flex:1 1 auto;min-width:0;font-size:.79rem;color:#8fa1b8;text-align:center;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msgsur.err{color:#f87171}.msgsur.bon{color:#4ade80}.msgsur.att{color:#facc15}
 /* Fiche de consultation */
 .fiche .grp{margin:0 0 1.1rem}
 .fiche .grpT{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#c9a97e;margin:0 0 .3rem}
@@ -156,7 +165,7 @@ function pageIncidents(ouverture) {
     if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_PLEIN}
   var corps = document.getElementById('corps');
   var D = null, RO = false, OCCUPE = false;
   var NOUV = '${NOUV0}', EDIT = '${EDIT0}', VUE = '${VUE0}';
@@ -165,7 +174,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   var DELID = '';        // id en attente de confirmation de suppression (2 clics)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  // ⚠ SI UNE SURCOUCHE EST OUVERTE, LE MESSAGE VA DEDANS. Le pied de la fenêtre
+  // est derrière le voile : un avertissement de saisie s'y perdait hors du champ
+  // de vision. On garde le pied en second (il reste lisible une fois refermé).
+  function dire(t, cl){
+    var loc = document.getElementById('a-msg');
+    if (loc){ loc.textContent = (t==null?'':String(t)); loc.className = 'msgsur' + (cl?' '+cl:''); }
+    szDire(t, cl);
+  }
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
@@ -295,6 +311,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function navHtml(){
     var dernier = (D.etapes||[]).length - 1;
     return '<button class="b" id="a-prec"'+(ETAPE===0?' style="visibility:hidden"':'')+'>← Précédent</button>'
+      + '<span class="msgsur" id="a-msg"></span>'
       + (ETAPE<dernier
           ? '<button class="prim" id="a-suiv">Suivant →</button>'
           : (RO ? '<button class="b" id="a-fermer2">Fermer</button>'
@@ -350,7 +367,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inc';
     sur.innerHTML = '<div class="boite"><div class="tt"><h3>🛡 '+(id?'Modifier l’incident':'Consigner un incident')+'</h3>'
-      + '<button class="mini" id="a-x">Fermer</button></div>'
+      + '<div><button class="sz-btnplein" id="a-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
+      + '<button class="mini" id="a-x">Fermer</button></div></div>'
       + '<div class="liste">'
       + '<p class="loi" style="margin:0 0 1rem">Registre des incidents de sécurité (Loi 25) — parcourez les étapes ; seule la <b>date de prise de connaissance</b> est obligatoire.</p>'
       + '<div class="ferr" id="a-err"></div>'
@@ -360,10 +378,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="tt" style="border-bottom:0;border-top:1px solid rgba(255,255,255,.08)"><div class="nav" id="a-nav">'+navHtml()+'</div></div></div>';
     document.body.appendChild(sur);
     document.getElementById('a-x').onclick=fermerAssistant;
+    var bp=document.getElementById('a-plein');
+    if (bp) bp.onclick=function(){ szPleinBasculer(sur.querySelector('.boite'), bp); };
     lierFil(); lierNav();
     var k=document.getElementById('f-knownAt'); if (k) k.oninput=function(){ k.classList.remove('manque'); };
   }
-  function fermerAssistant(){ var s=document.getElementById('sur-inc'); if (s) s.remove(); DELID=''; }
+  // ⚠ szPleinReinit À LA FERMETURE, sans exception : la classe de zoom vit sur
+  // <html>, pas sur la surcouche. L'oublier laisserait toute la fenêtre en gros
+  // caractères après avoir fermé un assistant, sans rien pour l'expliquer.
+  function fermerAssistant(){ szPleinReinit(); var s=document.getElementById('sur-inc'); if (s) s.remove(); DELID=''; }
 
   function enregistrer(){
     if (RO||OCCUPE) return;
@@ -415,16 +438,19 @@ ${JS_ACTIVITE}${JS_DIRE}
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-vue';
     sur.innerHTML = '<div class="boite" style="max-width:720px"><div class="tt">'
       + '<h3>Incident — '+esc(inc.knownAt||'')+' '+pilRisque(inc.seriousRisk)+'</h3>'
-      + '<button class="mini" id="v-x">Fermer</button></div>'
+      + '<div><button class="sz-btnplein" id="v-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
+      + '<button class="mini" id="v-x">Fermer</button></div></div>'
       + '<div class="liste fiche">'+h+'</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
       + '<button class="b" id="v-fermer">Fermer</button>'
       + (D.peutModifier ? '<button class="prim" id="v-edit">✏ Modifier</button>' : '')
       + '</div></div>';
     document.body.appendChild(sur);
-    function fermer(){ var s=document.getElementById('sur-vue'); if (s) s.remove(); }
+    function fermer(){ szPleinReinit(); var s=document.getElementById('sur-vue'); if (s) s.remove(); }
     document.getElementById('v-x').onclick=fermer;
     document.getElementById('v-fermer').onclick=fermer;
+    var vp=document.getElementById('v-plein');
+    if (vp) vp.onclick=function(){ szPleinBasculer(sur.querySelector('.boite'), vp); };
     var ed=document.getElementById('v-edit'); if (ed) ed.onclick=function(){ fermer(); ouvrirAssistant(id); };
   }
 

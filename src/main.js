@@ -1438,6 +1438,9 @@ const OPS_PONT = new Set([
   'journal:sms',
   // Incidents de securite (fenetre Incidents, 2.75.0, #26) — registre Loi 25.
   'incidents:donnees', 'incidents:ecrire', 'incidents:supprimer',
+  // Sauvegarde & restauration (fenetre Sauvegarde, 2.76.0, #27) — backup.php.
+  'sauvegarde:donnees', 'sauvegarde:creer', 'sauvegarde:telecharger',
+  'sauvegarde:restaurer', 'sauvegarde:supprimer', 'sauvegarde:purger',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -1800,6 +1803,12 @@ const LIMITES_PONT = {
   /* Incidents : registre local pousse vers Turso a l ecriture (syncPrivateList),
      donc l ecriture attend le reseau — plus large que la lecture. */
   'incidents:donnees': 40000, 'incidents:ecrire': 60000, 'incidents:supprimer': 30000,
+  /* Sauvegarde : CREER dompe toute la base Turso puis chiffre et televerse ;
+     RESTAURER la reecrit ligne a ligne. Ce sont les deux operations les plus
+     longues du pont — leur donner un delai court les ferait passer pour un echec
+     alors qu'elles se poursuivent cote serveur, ce qui est le pire des deux. */
+  'sauvegarde:donnees': 60000, 'sauvegarde:creer': 600000, 'sauvegarde:telecharger': 180000,
+  'sauvegarde:restaurer': 600000, 'sauvegarde:supprimer': 45000, 'sauvegarde:purger': 120000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
@@ -2084,6 +2093,7 @@ const PAGES_ANCRABLES = () => ({
   'securite': ['Accès Utilisateurs', () => pageSecurite()],
   'journaux': ['Journaux', () => pageJournaux(_journauxOnglet || '')],
   'incidents': ['Incidents de sécurité', () => pageIncidents('')],
+  'sauvegarde': ['Sauvegarde & Restauration', () => pageSauvegarde('')],
   'studio': ['Studio virtuel', () => pageStudio()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
@@ -2857,6 +2867,7 @@ const { pagePages } = require('./fenetres/pages');
 const { pageSecurite } = require('./fenetres/securite');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageIncidents } = require('./fenetres/incidents');
+const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
 const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
@@ -2945,7 +2956,7 @@ const actionApp = (nom) => {
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'journaux': case 'incidents': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'journaux': case 'incidents': case 'sauvegarde': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);

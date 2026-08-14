@@ -1537,6 +1537,43 @@ module.exports = {
     ];
   })(),
 
+  // Sauvegarde & restauration (#27). Trois surcouches à confirmation écrite, plus
+  // le registre VIDE et le cas LECTURE SEULE (un compte du personnel qui n'est pas
+  // super-administrateur ne doit voir aucun bouton destructeur — même si c'est
+  // désormais le SERVEUR qui protège, pas l'écran).
+  'sauvegarde.js': (function(){
+    var liste = [
+      { id: 'bk_2026-08-13T00-12-00', encKey: 'backups/2026-08/bk_2026-08-13T00-12-00.enc',
+        createdAt: '2026-08-13T00:12:00Z', commit: '8194189abc', note: 'avant 2.75.0',
+        r2Objects: 4128, blobBytes: 18234567, taille: '17,4 Mo', quand: '13 août 2026, 00:12',
+        total: 9421, produits: 312, commandes: 1840, factures: 1802 },
+      { id: 'bk_2026-07-31T03-00-00', encKey: 'backups/2026-07/bk_2026-07-31T03-00-00.enc',
+        createdAt: '2026-07-31T03:00:00Z', commit: 'd7b73ac001', note: '',
+        r2Objects: 3990, blobBytes: 17110022, taille: '16,3 Mo', quand: '31 juillet 2026, 03:00',
+        total: 9012, produits: 305, commandes: 1701, factures: 1664 }
+    ];
+    var donnees = { ok: true, estSuper: true, peutEcrire: true, retentionMois: 12, sauvegardes: liste };
+    var vide = { ok: true, estSuper: true, peutEcrire: true, retentionMois: 12, sauvegardes: [] };
+    var ro = { estSuper: false, peutEcrire: false };
+    return [
+      { nom: 'liste', reponses: { identite: IDENTITE, 'sauvegarde:donnees': donnees,
+        'sauvegarde:telecharger': { ok: true, nom: 'bk_2026-08-13T00-12-00.enc' } } },
+      { nom: 'aucune sauvegarde', reponses: { identite: IDENTITE, 'sauvegarde:donnees': vide } },
+      { nom: 'lecture seule (pas super-admin)', reponses: { identite: IDENTITE,
+        'sauvegarde:donnees': Object.assign({}, donnees, ro) } },
+      { nom: 'créer', id: 'creer', reponses: { identite: IDENTITE, 'sauvegarde:donnees': donnees,
+        'sauvegarde:creer': Object.assign({ taille: '17,4 Mo' }, donnees) } },
+      { nom: 'créer — refus du serveur', id: 'creer', reponses: { identite: IDENTITE, 'sauvegarde:donnees': donnees,
+        'sauvegarde:creer': { ok: false, motif: 'echec', detail: 'Action réservée au super-administrateur.' } } },
+      { nom: 'restaurer', id: 'restaurer-backups/2026-08/bk_2026-08-13T00-12-00.enc',
+        reponses: { identite: IDENTITE, 'sauvegarde:donnees': donnees,
+          'sauvegarde:restaurer': { ok: true, total: 9421, rechargement: true } } },
+      { nom: 'supprimer', id: 'supprimer-backups/2026-08/bk_2026-08-13T00-12-00.enc',
+        reponses: { identite: IDENTITE, 'sauvegarde:donnees': donnees,
+          'sauvegarde:supprimer': Object.assign({}, vide) } }
+    ];
+  })(),
+
   // Incidents de sécurité (#26). Registre Loi 25. Le formulaire est bâti à partir
   // des `etapes` reçues du cœur : on en donne trois, couvrant les QUATRE types de
   // champ (text, date, select, textarea), pour que chaque branche de champHtml
