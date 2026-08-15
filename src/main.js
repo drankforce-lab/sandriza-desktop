@@ -2598,9 +2598,21 @@ const brancherOutils = (win) => {
    ⚠ REGLE POUR TOUTE NOUVELLE FENETRE : construire sur le vocabulaire commun
    (tete/carte/pill/pied...) et appendre CSS_JOUR — le theme suit alors tout
    seul, rien d autre a brancher. */
+/* ── LE JEU DE COULEURS, PAR POSTE (#26) ────────────────────────────────────
+   ⚠ PAR POSTE, PAS EN BASE, et c est deliberé : comme la place du menu, la
+   couleur suit l ECRAN devant lequel on est assis, pas le compte. Deux
+   personnes sur deux postes n ont aucune raison de se l imposer l une a
+   l autre. D ou reglages.json et non Turso.
+   La feuille CSS_THEMES du socle fait le reste : on ne pose qu un attribut. */
+const THEMES_CONNUS = ['defaut', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'];
+const _themeCouleur = () => {
+  const t = String(reglages.get('themeCouleur') || 'defaut');
+  return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'defaut';
+};
 const jsTheme = () => {
   const jour = !_modele.sombre;
   return 'document.documentElement.classList.toggle("jour",' + jour + ');'
+    + 'document.documentElement.setAttribute("data-sz-theme",' + JSON.stringify(_themeCouleur()) + ');'
     + 'document.documentElement.style.colorScheme=' + JSON.stringify(jour ? 'light' : 'dark') + ';';
 };
 const appliquerTheme = (wc) => {
@@ -3485,6 +3497,17 @@ ipcMain.handle('fenetre:ouvrir', (e, opts = {}) => {
 ipcMain.handle('menu:reglages', () => reglages.lire());
 ipcMain.handle('menu:set', (e, cle, valeur) => {
   if (cle === 'menuMode' || cle === 'menuTaille') { poserReglage(cle, valeur); }
+  /* ⚠ LE JEU DE COULEURS S APPLIQUE TOUT DE SUITE, PARTOUT (#26). Sans
+     `appliquerThemePartout`, il ne se verrait qu au prochain chargement de
+     chaque fenetre — donc jamais sur celles deja ouvertes, et l on croirait
+     que le reglage ne marche pas. C est exactement le defaut de l ancien. */
+  if (cle === 'themeCouleur') {
+    const t = String(valeur || 'defaut');
+    reglages.set('themeCouleur', THEMES_CONNUS.indexOf(t) >= 0 ? t : 'defaut');
+    appliquerThemePartout();
+    const wc0 = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
+    if (wc0) { appliquerTheme(wc0); wc0.send('menu:reglages', reglages.lire()); }
+  }
   return reglages.lire();
 });
 // Le site pousse son modèle : on en tire les raccourcis et la fenêtre détachée.

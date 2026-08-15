@@ -966,5 +966,104 @@ html.jour .sz-btnfen:hover{background:#efece4}
 html.jour .sz-msgauto{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.14);color:#1d2433}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS, JS_SOCLE, JS_ACTIVITE, JS_DIRE };
+/* ══ LES JEUX DE COULEURS (#26) ═══════════════════════════════════════════════
+   L ancien reglage << couleur de la barre laterale gauche >> ne s appliquait
+   plus a rien : il teintait la barre de l ecran WEB, disparue avec le lot 5.
+   Et il ne changeait qu une bande — les boutons restaient dores, le survol
+   blanc, les menus identiques. Sa demande : que le theme prenne AUSSI les
+   BOUTONS, le SURVOL et les MENUS.
+
+   ⚠⚠ LE VRAI TRAVAIL N EST PAS LA PALETTE, C EST L ACCROCHE. Chaque fenetre
+   ecrit ses couleurs EN DUR (#0e1522, #16202f, #c9a97e, rgba(255,255,255,.1)
+   au survol...). Un theme n a d effet que si ces valeurs passent par des
+   variables. On ne reecrit pas les quarante fenetres : on REDECLARE ici les
+   memes selecteurs avec des variables, et comme ce bloc est appende APRES le
+   CSS de chaque fenetre, il gagne par ordre de cascade. C est exactement le
+   mecanisme deja eprouve par CSS_JOUR.
+
+   ⚠ PORTEE ASSUMEE : les themes habillent le mode SOMBRE, celui de tous les
+   jours. En mode JOUR, les regles `html.jour` de CSS_JOUR sont plus
+   specifiques et gagnent : l application reste claire et lisible, sans
+   teinte. Habiller aussi le mode jour demanderait une seconde palette par
+   theme — a faire si le besoin vient, pas avant.
+
+   ⚠ AUCUN THEME NE TOUCHE AU ROUGE, A L AMBRE NI AU VERT des etats : une
+   erreur doit rester rouge dans tous les jeux de couleurs. Teinter un
+   avertissement en violet parce qu on a choisi << Violet >> le rendrait
+   invisible en tant qu avertissement.                                        */
+const CSS_THEMES = `
+:root{
+  --sz-fond:#0e1522; --sz-fond2:#131c2b; --sz-pied:#0b1220;
+  --sz-surface:#16202f; --sz-surface2:#141d2c;
+  --sz-bord:rgba(255,255,255,.09); --sz-bord-fort:rgba(255,255,255,.16);
+  --sz-texte:#e8edf5; --sz-attenue:#8fa1b8;
+  --sz-accent:#c9a97e; --sz-accent-fort:#a3824f; --sz-accent-txt:#17202c;
+  --sz-accent-doux:rgba(201,169,126,.16);
+  --sz-btn:rgba(255,255,255,.05); --sz-survol:rgba(255,255,255,.1);
+}
+html[data-sz-theme="ocean"]{
+  --sz-fond:#0a1620; --sz-fond2:#0f2030; --sz-pied:#081219;
+  --sz-surface:#122536; --sz-surface2:#102232;
+  --sz-accent:#38bdf8; --sz-accent-fort:#0ea5e9; --sz-accent-txt:#05202e;
+  --sz-accent-doux:rgba(56,189,248,.16);
+}
+html[data-sz-theme="violet"]{
+  --sz-fond:#140f22; --sz-fond2:#1d1533; --sz-pied:#100c1c;
+  --sz-surface:#1f1838; --sz-surface2:#1c1633;
+  --sz-accent:#a78bfa; --sz-accent-fort:#8b5cf6; --sz-accent-txt:#160f2b;
+  --sz-accent-doux:rgba(167,139,250,.18);
+}
+html[data-sz-theme="ardoise"]{
+  --sz-fond:#0f172a; --sz-fond2:#16213c; --sz-pied:#0b1120;
+  --sz-surface:#1b263f; --sz-surface2:#182238;
+  --sz-accent:#7dd3fc; --sz-accent-fort:#38bdf8; --sz-accent-txt:#0b2233;
+  --sz-accent-doux:rgba(125,211,252,.16);
+}
+html[data-sz-theme="graphite"]{
+  --sz-fond:#121212; --sz-fond2:#1c1c1c; --sz-pied:#0d0d0d;
+  --sz-surface:#1e1e1e; --sz-surface2:#1a1a1a;
+  --sz-bord:rgba(255,255,255,.1); --sz-bord-fort:rgba(255,255,255,.18);
+  --sz-accent:#fbbf24; --sz-accent-fort:#f59e0b; --sz-accent-txt:#211703;
+  --sz-accent-doux:rgba(251,191,36,.16);
+}
+html[data-sz-theme="emeraude"]{
+  --sz-fond:#08170f; --sz-fond2:#0d2318; --sz-pied:#06120b;
+  --sz-surface:#102a1c; --sz-surface2:#0e2519;
+  --sz-accent:#34d399; --sz-accent-fort:#10b981; --sz-accent-txt:#042315;
+  --sz-accent-doux:rgba(52,211,153,.16);
+}
+
+/* ── L ACCROCHE : les memes selecteurs, en variables ─────────────────────── */
+body{background:var(--sz-fond);color:var(--sz-texte)}
+.tete{background:linear-gradient(180deg,var(--sz-fond2),var(--sz-fond));
+  border-bottom-color:var(--sz-bord)}
+.pied{background:var(--sz-pied);border-top-color:var(--sz-bord)}
+.carte,.tuile,.boite,.ctx,.lotc,.repcarte,.phvig,.etapef{background:var(--sz-surface);
+  border-color:var(--sz-bord)}
+.voile .boite{background:var(--sz-surface2)}
+.dt,.mut,.note,.aide,.sous,.phinfo,.msg{color:var(--sz-attenue)}
+input,select,textarea,button{color:var(--sz-texte);background:var(--sz-btn);
+  border-color:var(--sz-bord-fort)}
+button:hover:not(:disabled),.ctx button:hover{background:var(--sz-survol);
+  border-color:var(--sz-accent)}
+input:focus,select:focus,textarea:focus,button:focus{border-color:var(--sz-accent);outline:none}
+button.prim,.jeton.prim,button.paie{background:var(--sz-accent);border-color:var(--sz-accent);
+  color:var(--sz-accent-txt);font-weight:600}
+button.prim:hover:not(:disabled),.jeton.prim:hover:not(:disabled){background:var(--sz-accent-fort);
+  border-color:var(--sz-accent-fort)}
+button.actif,.jeton.on,.mini.actif{border-color:var(--sz-accent);background:var(--sz-accent-doux);
+  color:var(--sz-texte)}
+.onglets button.on{color:var(--sz-accent);border-bottom-color:var(--sz-accent)}
+.pill.acc,.badge2.or{background:var(--sz-accent-doux);color:var(--sz-accent)}
+.cad.mine,.crochet code,.stats .s .n{color:var(--sz-accent)}
+.jauge i,.sz-lots .jauge i{background:var(--sz-accent)}
+.sz-lots{background:linear-gradient(180deg,var(--sz-fond2),var(--sz-surface));
+  border-top-color:var(--sz-accent);color:var(--sz-texte)}
+.phvig.pris{border-color:var(--sz-accent);box-shadow:0 0 0 1px var(--sz-accent) inset}
+.phvig:hover,.ligne:hover,.repcarte:hover{border-color:var(--sz-accent)}
+.portee{background:var(--sz-accent-doux);border-color:var(--sz-accent);color:var(--sz-texte)}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, CSS_THEMES };

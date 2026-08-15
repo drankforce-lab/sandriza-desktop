@@ -173,10 +173,19 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = [];
     var av = document.getElementById('ro');
     if (av) av.hidden = !RO;
+    /* ⚠ CE RÉGLAGE NE S APPLIQUE PLUS, ET ON LE DIT (#26). Il teintait la
+       BARRE LATÉRALE de l écran web — disparue avec le lot 5 de #10. Le laisser
+       cliquable laissait croire qu il faisait quelque chose : c est ce qui a
+       fait dire << ça ne s applique plus >>. Le jeu de couleurs de
+       l application vit maintenant dans le MENU, et il est PAR POSTE — donc il
+       n a pas sa place ici, où tout est partagé par toute l équipe. */
     h.push('<div class="carte"><h2>Panneau d’administration</h2>');
-    h.push('<p>Couleur de la barre latérale gauche. Appliquée immédiatement.</p>');
-    h.push('<div class="rang">' + (d.admThemes || []).map(function(t){
-      return pastille('adm', t, d.adm || ''); }).join('') + '</div></div>');
+    h.push('<p>Le jeu de couleurs de l’application a déménagé : <strong>menu '
+      + '« Affichage » → « Jeu de couleurs »</strong>. Il habille les fenêtres '
+      + 'entières — fonds, cartes, boutons, survol et menus — et il est réglé '
+      + '<strong>par poste</strong> : votre choix ne s’impose pas à vos collègues.</p>');
+    h.push('<p class="aide">L’ancien réglage ne teintait que la barre latérale '
+      + 'de l’écran web, qui n’existe plus.</p></div>');
     h.push('<div class="carte"><h2>Boutique</h2>');
     h.push('<p>Palette de couleurs vue par la clientèle. Visible immédiatement dans la boutique.</p>');
     h.push('<div class="rang">' + (d.storeThemes || []).map(function(t){
