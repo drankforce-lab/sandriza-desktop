@@ -779,7 +779,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="jeton" id="ph-inv"' + (dispo ? '' : ' disabled') + '>Inverser</button>'
       + '<button class="jeton" id="ph-rien"' + (n ? '' : ' disabled') + '>Vider</button>'
       + '<span class="droite">'
-      + (n === 1 ? '<button class="jeton prim" id="ph-ouvrir">Ouvrir cette photo →</button>' : '')
+      /* ⚠ ph-ouvrir-sel, PAS ph-ouvrir : ce dernier est le bouton
+         « Depuis la photothèque » de l'écran de départ. Le doublon d'identifiant
+         a fait que mon câblage écrasait le sien — et le bouton d'entrée ne
+         faisait plus rien. Un identifiant réutilisé ne casse rien de visible :
+         il détourne, en silence. */
+      + (n === 1 ? '<button class="jeton prim" id="ph-ouvrir-sel">Ouvrir cette photo →</button>' : '')
       + (n > 1 ? '<span class="aide">Le traitement par lot arrive — pour l’instant, choisissez-en une.</span>' : '')
       + '</span></div>';
   }
@@ -801,6 +806,10 @@ ${JS_ACTIVITE}${JS_DIRE}
      OUVRE la photo tout de suite (le geste courant, une photo a la fois).
      Confondre les deux forcerait a cocher puis valider pour un seul clic. */
   function brancherExplorateur(){
+    // ⚠ RIEN A BRANCHER SI LE SELECTEUR EST FERME. Sans cette garde, on allait
+    // chercher des identifiants qui n existent pas dans cet ecran — et l on
+    // risquait d en accrocher un qui appartient a un autre bouton.
+    if (!PICKER) return;
     corps.querySelectorAll('[data-filtre]').forEach(function(el){
       el.onclick = function(){
         var c = el.getAttribute('data-filtre');
@@ -834,7 +843,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     var rn = document.getElementById('ph-rien');
     if (rn) rn.onclick = function(){ SEL = {}; phMajSelection(); };
-    var ov = document.getElementById('ph-ouvrir');
+    var ov = document.getElementById('ph-ouvrir-sel');
     if (ov) ov.onclick = function(){
       var ids = Object.keys(SEL);
       if (ids.length === 1) choisirPhoto(ids[0]);
