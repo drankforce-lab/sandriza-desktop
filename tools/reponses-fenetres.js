@@ -4172,6 +4172,36 @@ module.exports = {
           ],
         },
         'stock:etiquettes': { ok: true, envoyees: 24, imprimante: 'Zebra ZD410' },
+        /* ⚠ LE VERDICT DE LISIBILITÉ, avec un code TROP LONG : sans un cas qui
+           refuse, la surcouche « ces codes ne se scanneront pas » ne serait
+           jamais dessinée — et c'est justement l'écran qui devait manquer. */
+        'etiquettes:lisibilite': {
+          ok: true, dpi: 203, largeurPo: 2, examines: 3,
+          problemes: [
+            { sku: 'ROB-0001-XXL-BOURGOGNE', nom: 'Robe Élégance mi-longue',
+              encode: 'ROB0001XXLBOURGOGNE', modules: 209, points: 1, largeurMiniPo: 2.1 },
+          ],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* Le GARDE-FOU : un SKU trop long pour l'étiquette. L'écran qui empêche
+         l'erreur doit être contrôlé comme les autres. */
+      nom: 'garde-fou du code illisible',
+      id: 'lisibilite',
+      reponses: {
+        'codesbarres:liste': {
+          ok: true, lignes: [], total: 0, pages: 1, page: 0, cats: [],
+        },
+        'etiquettes:lisibilite': {
+          ok: true, dpi: 203, largeurPo: 2, examines: 1,
+          problemes: [
+            { sku: 'ROB-0001-XXL-BOURGOGNE', nom: 'Robe Élégance mi-longue',
+              encode: 'ROB0001XXLBOURGOGNE', modules: 209, points: 1, largeurMiniPo: 2.1 },
+          ],
+        },
+        'stock:etiquettes': { ok: true, envoyees: 3, imprimante: 'Zebra ZD410' },
         identite: IDENTITE,
       },
     },

@@ -98,6 +98,10 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
   border-top:1px solid rgba(255,255,255,.055)}
 .boite .rang label{flex:1 1 auto;display:flex;align-items:center;gap:.5rem;cursor:pointer}
 .boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
+.boite p{margin:.35rem 0;font-size:.85rem;line-height:1.55}
+.boite ul{margin:.5rem 0 0;padding-left:0}
+.boite li.item{list-style:none;background:rgba(255,255,255,.05);border-radius:7px;
+  padding:.35rem .55rem;margin-bottom:.3rem;font-size:.82rem;line-height:1.45}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
 .msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
@@ -107,7 +111,12 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
 `;
 
 /** Page complète de la fenêtre native « Impression de codes-barres ». */
-function pageCodesbarres() {
+function pageCodesbarres(mode) {
+  /* ⚠ IDENTIFIANT D OUVERTURE << lisibilite >> : le banc ne clique pas, et la
+     surcouche du garde-fou n apparait qu au moment d imprimer. Sans lui,
+     l ECRAN QUI EMPECHE L ERREUR resterait hors de tout controle — c est
+     exactement le defaut qu on est en train de corriger. */
+  const essai = String(mode || '') === 'lisibilite';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Impression de codes-barres — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -131,6 +140,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ⚠ LA FILE : une liste en memoire — { pid, sku, name, size, color, qty }.
      Jamais relue du tableau affiche. */
   var FILE = [];
+  var ESSAI_LISIBILITE = ${essai ? 'true' : 'false'};
   var PICKER = null;       // { id, nom, variantes } — le choix des variantes
   var VIDER_ARME = false;  // le bouton Vider demande une confirmation
 
@@ -385,17 +395,87 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!ajouts) dire('Aucune variante cochée avec une quantité au-dessus de zéro.', 'err');
   }
 
+  /* Une surcouche jetable, posee dans le corps du document. La surcouche du
+     choix de variantes, elle, est dessinee par l etat PICKER : celle-ci est
+     ponctuelle et ne survit pas a un redessin, ce qui est exactement voulu. */
+  function voile(html, apres){
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite">' + html + '</div>';
+    document.body.appendChild(v);
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
+    if (apres) apres(fermer);
+    return fermer;
+  }
+
+  /* ══ LE GARDE-FOU DU CODE ILLISIBLE ══════════════════════════════════════
+     Le pire defaut du lot, vecu a l entrepot : l etiquette sort JOLIE et ne se
+     scanne pas. Le controle existait deja cote site, mais il criait dans une
+     bulle de la fenetre PRINCIPALE — invisible derriere celle-ci — et il
+     criait PENDANT que les etiquettes partaient. On demande donc le verdict
+     AVANT le premier envoi, et on laisse le choix. */
   function imprimer(){
     if (!FILE.length) return;
+    var imp = document.getElementById('cb-imprimer');
+    if (imp) imp.disabled = true;
+    dire('Vérification de la lisibilité…');
+    appeler('etiquettes:lisibilite', [FILE.slice()]).then(function(v){
+      // ⚠ Un controle qui ECHOUE ne doit pas bloquer l impression : ce serait
+      // remplacer un defaut rare par une panne totale. On le dit, et on passe.
+      if (!v || !v.ok) { dire('Lisibilité non vérifiable — impression lancée.', 'att'); lancer(); return; }
+      if (!(v.problemes || []).length) { lancer(); return; }
+      avertirLisibilite(v);
+    });
+  }
+
+  function avertirLisibilite(v){
+    var p = v.problemes;
+    var h = '<h3 style="color:#fbbf24">⚠ Ces codes ne se scanneront pas</h3>'
+      + '<p>Sur une étiquette de <strong>' + v.largeurPo + ' po</strong> à <strong>'
+      + v.dpi + ' ppp</strong>, ' + (p.length > 1 ? 'ces codes sont' : 'ce code est')
+      + ' trop long' + (p.length > 1 ? 's' : '') + ' : la barre la plus fine tomberait à '
+      + '<strong>1 point</strong>, sous le seuil de lecture des lecteurs. '
+      + 'L’étiquette s’imprimera correctement — mais elle ne se lira pas.</p>'
+      + '<ul style="padding-left:0">' + p.map(function(x){
+          return '<li class="item"><strong>' + esc(x.sku) + '</strong>'
+            + (x.nom ? ' — ' + esc(x.nom) : '')
+            + '<br><span style="color:#8fa1b8">' + x.modules + ' modules · il faudrait une '
+            + 'étiquette d’au moins ' + x.largeurMiniPo + ' po</span></li>'; }).join('')
+      + '</ul>'
+      + '<p style="color:#8fa1b8">Deux leviers : raccourcir le <strong>code couleur</strong> '
+      + '(Inventaire → Attributs → Couleurs) ou passer à une étiquette plus large. '
+      + 'Une imprimante 300 ppp règle aussi le cas.</p>'
+      + '<div class="pied-boite"><button id="v-non">Annuler</button>'
+      + '<button id="v-oui">Imprimer quand même</button></div>';
+    voile(h, function(fermer){
+      document.getElementById('v-non').onclick = function(){
+        fermer();
+        var b = document.getElementById('cb-imprimer');
+        if (b) b.disabled = false;
+        dire('Impression annulée.', 'att');
+      };
+      // ⚠ PAS la classe << prim >> sur ce bouton-la : imprimer quand meme est
+      // le choix par defaut de personne. Annuler doit rester le geste facile.
+      document.getElementById('v-oui').onclick = function(){ fermer(); lancer(); };
+    });
+  }
+
+  function lancer(){
     var total = FILE.reduce(function(n, it){ return n + (parseInt(it.qty, 10) || 0); }, 0);
     dire('Impression de ' + total + ' étiquette' + (total > 1 ? 's' : '') + '…');
     var imp = document.getElementById('cb-imprimer');
     if (imp) imp.disabled = true;
     appeler('stock:etiquettes', [FILE.slice()]).then(function(r){
       if (r && r.ok) {
-        dire((r.envoyees || total) + ' étiquette' + ((r.envoyees || total) > 1 ? 's' : '')
-          + ' envoyée' + ((r.envoyees || total) > 1 ? 's' : '')
-          + (r.imprimante ? ' à « ' + r.imprimante + ' »' : '') + '.', 'bon');
+        var n = (r.envoyees || total);
+        // ⚠ FILET : si l impression a quand meme rencontre un code illisible
+        // (controle contourne, ou un cas que le calcul n avait pas vu), on le
+        // DIT ici. Cet avertissement se perdait dans la fenetre principale.
+        var av = r.avertissements || [];
+        dire(n + ' étiquette' + (n > 1 ? 's' : '') + ' envoyée' + (n > 1 ? 's' : '')
+          + (r.imprimante ? ' à « ' + r.imprimante + ' »' : '') + '.'
+          + (av.length ? ' ⚠ ' + esc(av[0].sku) + ' ne se scannera pas ('
+             + av[0].points + ' point par barre).' : ''), av.length ? 'att' : 'bon');
         FILE = [];
         redessinerFile();
       } else {
@@ -480,6 +560,13 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
+  // Ouverture directe sur le garde-fou, avec une file d essai : la surcouche
+  // ne s atteint autrement qu apres avoir coche des variantes et clique.
+  if (ESSAI_LISIBILITE) {
+    FILE = [{ pid: 'prod_1', sku: 'ROB-0001-XXL-BOURGOGNE', name: 'Robe Élégance mi-longue',
+              size: 'XXL', color: 'Bourgogne', qty: 3 }];
+    imprimer();
+  }
 })();
 </script>
 </body></html>`;

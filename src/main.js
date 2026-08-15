@@ -1394,6 +1394,11 @@ const OPS_PONT = new Set([
   // deux entrees ECRITES EN DUR. segments:apercu compte SANS enregistrer, pour
   // voir la portee d une recette pendant qu on l ecrit.
   'segments:donnees', 'segments:apercu', 'segments:ecrire', 'segments:supprimer',
+  // Le verdict de lisibilite d un code-barres, AVANT d imprimer. Le garde-fou
+  // existait deja mais parlait par une bulle de la fenetre PRINCIPALE, donc
+  // invisible d ici : des etiquettes qui ne se scannent pas partaient sans
+  // que personne ne voie rien (vecu a l entrepot).
+  'etiquettes:lisibilite',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
   'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer', 'adresse:suggerer',
@@ -1991,6 +1996,9 @@ const LIMITES_PONT = {
      chaque abonnee : plus long qu une simple lecture de config. */
   'segments:donnees': 30000, 'segments:apercu': 30000,
   'segments:ecrire': 30000, 'segments:supprimer': 30000,
+  /* Interroge l imprimante pour connaitre sa VRAIE resolution (un 300 ppp rend
+     lisible ce qui ne l etait pas a 203) : un appel a l agent, d ou 20 s. */
+  'etiquettes:lisibilite': 20000,
   'fidelisation:sondage:form': 20000, 'fidelisation:sondage:ecrire': 30000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */
