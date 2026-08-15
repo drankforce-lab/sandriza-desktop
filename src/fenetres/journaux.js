@@ -5,12 +5,18 @@
  * =============================================================================
  * Réunit les 4 journaux existants en une fenêtre ancrable : Accès (connexions,
  * MFA, géo, actions), Automatisations (crons), Impressions (agent / navigateur /
- * Bluetooth), Verrous (super-administrateur seulement — forcer un déverrouillage).
- * ⚠ Les AUTRES journaux (accès comptables, SMS, recherches sans résultat,
- * révisions, impressions promo) vivent dans d'autres modules → Lot 7b.
+ * Bluetooth), SMS, Accès aux liens, Recherches sans résultat.
+ * ⚠ Les journaux de RÉVISIONS et d'impressions promo vivent encore dans leurs
+ * modules — ils sont attachés à une fiche, pas à l'entreprise.
  *
- * Lecture par `journal:donnees` (local, rapide) ; les verrous par `journal:verrous`
- * (serveur). Les EXPORTS CSV suivent le patron « fenêtre pilote » : c'est la PAGE
+ * ⚠ LES VERROUS NE SONT PLUS ICI (#35). Ils ont eu leur onglet jusqu'au
+ * 3.39.0 : c'était une erreur de rangement. Un journal est une ARCHIVE — on le
+ * consulte après coup ; un verrou est un ÉTAT VIVANT — qui travaille sur quoi
+ * MAINTENANT. Rangé parmi les archives, l'écran restait figé : un verrou libéré
+ * s'affichait encore comme s'il bloquait. Ils vivent désormais dans
+ * `verrous.js`, qui se rafraîchit tout seul — le bouton en tête y mène.
+ *
+ * Lecture par `journal:donnees` (local, rapide). Les EXPORTS CSV suivent le patron « fenêtre pilote » : c'est la PAGE
  * qui télécharge (createObjectURL + suivi des téléchargements), pas la fenêtre.
  *
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent grave dans la portion script.
@@ -77,7 +83,7 @@ function pageJournaux(onglet) {
   // 'q-<terme>' ouvre l'onglet Recherche et lance la recherche du terme.
   var RQINIT0 = '';
   if (brut.indexOf('q-') === 0) { RQINIT0 = brut.slice(2).replace(/[^A-Za-z0-9._@-]/g, ''); brut = 'recherche'; }
-  const ONGLET0 = (['recherche','acces','automatisations','impressions','sms','comptable','recherches','verrous'].indexOf(brut) >= 0) ? brut : 'acces';
+  const ONGLET0 = (['recherche','acces','automatisations','impressions','sms','comptable','recherches'].indexOf(brut) >= 0) ? brut : 'acces';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Journaux — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -100,21 +106,19 @@ function pageJournaux(onglet) {
   // Aller directement à un onglet quand la fenêtre est DÉJÀ ouverte (lien de
   // retour depuis une autre fenêtre — #7 7b-2c).
   window.szAllerOnglet = function(t){
-    if (['recherche','acces','automatisations','impressions','sms','comptable','recherches','verrous'].indexOf(String(t||'')) < 0) return;
-    ONGLET = String(t); CONFV = ''; rendre();
+    if (['recherche','acces','automatisations','impressions','sms','comptable','recherches'].indexOf(String(t||'')) < 0) return;
+    ONGLET = String(t); rendre();
   };
 ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var ongletsEl = document.getElementById('onglets');
   var D = null, OCCUPE = false;
   var ONGLET = '${ONGLET0}';
-  var VERR = null;      // verrous chargés (async) ; null = pas encore lus
-  var CONFV = '';       // confirmation 2 clics : '' | 'tout' | scope+'\\u0001'+id
   var PF_TYPE = 'all', PF_VIA = 'all';   // filtres de l'onglet Impressions
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🔗 Accès aux liens'], ['recherches','❓ Sans résultat'], ['verrous','🔓 Verrous'] ];
+  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🔗 Accès aux liens'], ['recherches','❓ Sans résultat'] ];
   var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -136,14 +140,32 @@ ${JS_ACTIVITE}${JS_DIRE}
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
+  /* ⚠ LE CHEMIN VERS LES VERROUS RESTE VISIBLE (#35). On a deplace un ecran,
+     pas supprime une fonction : sans ce bouton, un super-administrateur qui
+     connaissait l onglet le chercherait indefiniment. Il n apparait que pour
+     ceux qui y ont droit — le COEUR refuse les autres de toute facon. */
+  function boutonVerrous(){
+    var t = document.querySelector('.tete'); if (!t) return;
+    var b = document.getElementById('j-verrous');
+    if (!(D && D.isSuper)) { if (b && b.parentNode) b.parentNode.removeChild(b); return; }
+    if (b) return;
+    b = document.createElement('button');
+    b.id = 'j-verrous'; b.type = 'button'; b.className = 'mini';
+    b.style.marginLeft = '.6rem';
+    b.textContent = '🔓 Verrous';
+    b.title = 'Qui tient une fiche en ce moment (ecran a part, en direct)';
+    b.onclick = function(){ if (P && P.ouvrirModule) P.ouvrirModule('verrous'); };
+    var d = document.getElementById('sz-detacher');
+    if (d) t.insertBefore(b, d); else t.appendChild(b);
+  }
+
   function tabs(){
     var h='';
     for (var i=0;i<ONGLETS.length;i++){ var o=ONGLETS[i];
-      if (o[0]==='verrous' && !(D&&D.isSuper)) continue;   // verrous = super-admin
       h+='<button data-k="'+o[0]+'" class="'+(ONGLET===o[0]?'on':'')+'">'+esc(o[1])+'</button>'; }
     ongletsEl.innerHTML=h;
     var bs=ongletsEl.querySelectorAll('button');
-    for (var j=0;j<bs.length;j++) bs[j].onclick=function(){ ONGLET=this.getAttribute('data-k'); CONFV=''; rendre(); };
+    for (var j=0;j<bs.length;j++) bs[j].onclick=function(){ ONGLET=this.getAttribute('data-k'); rendre(); };
   }
 
   // ── Recherche inter-journaux ─────────────────────────────────────
@@ -225,7 +247,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function brancherResultats(){
     var gs=corps.querySelectorAll('[data-goto]');
-    for (var i=0;i<gs.length;i++) gs[i].onclick=function(){ ONGLET=this.getAttribute('data-goto'); CONFV=''; rendre(); };
+    for (var i=0;i<gs.length;i++) gs[i].onclick=function(){ ONGLET=this.getAttribute('data-goto'); rendre(); };
   }
 
   // ── Accès ────────────────────────────────────────────────────────
@@ -454,47 +476,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.innerHTML = h;
   }
 
-  // ── Verrous (super-admin) ────────────────────────────────────────
-  function vueVerrous(){
-    if (VERR===null){
-      corps.innerHTML = '<div class="vide">Lecture des verrous…</div>';
-      OCCUPE=true;
-      appeler('journal:verrous',[]).then(function(r){ OCCUPE=false;
-        if (r&&r.ok){ VERR=r.locks||[]; if (ONGLET==='verrous') vueVerrous(); }
-        else { VERR=[]; if (ONGLET==='verrous') { corps.innerHTML='<div class="carte"><div class="vide">'+expliquer(r)+'</div></div>'; } dire('Échec : '+expliquer(r), 'err'); }
-      });
-      return;
-    }
-    var actifs = VERR.filter(function(l){ return !l.expired && l.sessionAlive!==false; });
-    var morts = VERR.filter(function(l){ return l.expired || l.sessionAlive===false; });
-    function tbl(list, vide){
-      if (!list.length) return '<div class="vide">'+vide+'</div>';
-      var h='<table class="tb"><thead><tr><th>Section</th><th>Enregistrement</th><th>Détenu par</th><th>Depuis</th><th>État</th><th></th></tr></thead><tbody>';
-      for (var i=0;i<list.length;i++){ var l=list[i]; var mort=l.expired||l.sessionAlive===false; var motif=l.expired?'Périmé':(l.sessionAlive===false?'Session fermée':'');
-        var cle=l.scope+'\\u0001'+l.id;
-        h += '<tr><td><strong>'+esc(l.scopeLabel||l.scope)+'</strong><div class="sub mono">'+esc(l.scope)+'</div></td>'
-          + '<td>'+(l.label?'<strong>'+esc(l.label)+'</strong>':'<em class="mut">sans libellé</em>')+'<div class="sub mono">'+esc(l.id)+'</div></td>'
-          + '<td>'+esc(l.who||'—')+'</td>'
-          + '<td style="white-space:nowrap">'+esc(l.age)+'<div class="sub">'+esc(l.since?fdate(l.since):'')+'</div></td>'
-          + '<td>'+(mort?'<span class="pill" style="background:rgba(220,38,38,.18);color:#fca5a5">'+esc(motif)+'</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:#6ee7a0">actif · '+Math.max(0,l.expiresIn)+' s</span>')+'</td>'
-          + '<td style="text-align:right"><button class="b dgr" data-unl="'+esc(cle)+'">'+(CONFV===cle?'✓ Confirmer':'🔓 Déverrouiller')+'</button></td></tr>';
-      }
-      return h+'</tbody></table>';
-    }
-    var h = '<div class="note"><b>À quoi sert cette page.</b> Une fiche ouverte par quelqu’un est verrouillée pour éviter que deux personnes écrasent leur travail. Un verrou se libère seul (fermeture, 90 s sans activité, ou fin de session) — normalement rien à faire ici. Forcer un déverrouillage ne sert que si un poste est parti en laissant une fiche ouverte ; la personne pourra alors se faire refuser son enregistrement. Chaque déverrouillage forcé est inscrit au journal d’accès.</div>'
-      + '<div class="barre"><button class="b" id="v-reload">🔄 Actualiser</button>'
-      + (VERR.length && D.peutModifier ? '<button class="b dgr" id="v-all">'+(CONFV==='tout'?'✓ Confirmer — tout déverrouiller':'🔓 Tout déverrouiller ('+VERR.length+')')+'</button>' : '')+'</div>'
-      + '<div class="carte"><h3 style="margin:0 0 .5rem;font:700 .95rem Georgia,serif">Verrous actifs ('+actifs.length+')</h3>'+tbl(actifs,'Aucun verrou actif.')+'</div>'
-      + '<div class="carte"><h3 style="margin:0 0 .5rem;font:700 .95rem Georgia,serif">Verrous éteints ('+morts.length+')</h3><div class="sub" style="margin:0 0 .5rem">Ne bloquent personne — affichés pour information.</div>'+tbl(morts,'Aucun.')+'</div>';
-    corps.innerHTML = h;
-    var vr=document.getElementById('v-reload'); if (vr) vr.onclick=function(){ VERR=null; CONFV=''; vueVerrous(); };
-    var va=document.getElementById('v-all'); if (va) va.onclick=function(){ if (CONFV==='tout'){ CONFV=''; deverrouillerTout(); } else { CONFV='tout'; vueVerrous(); dire('Cliquez encore pour tout déverrouiller.', 'att'); } };
-    var us=corps.querySelectorAll('[data-unl]');
-    for (var u=0;u<us.length;u++) us[u].onclick=function(){ var cle=this.getAttribute('data-unl');
-      if (CONFV===cle){ CONFV=''; var parts=cle.split('\\u0001'); deverrouiller(parts[0], parts[1]); }
-      else { CONFV=cle; vueVerrous(); dire('Cliquez encore pour forcer ce déverrouillage.', 'att'); } };
-  }
-
   // ── Actions ──────────────────────────────────────────────────────
   function basculerStats(){
     if (OCCUPE) return; OCCUPE=true;
@@ -511,27 +492,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler(op,[]).then(function(r){ OCCUPE=false;
       dire(r&&r.ok ? 'Document téléchargé depuis la fenêtre principale.' : 'Échec : '+expliquer(r), r&&r.ok?'bon':'err'); });
   }
-  function deverrouiller(scope, id){
-    if (OCCUPE) return; OCCUPE=true; dire('Déverrouillage…');
-    appeler('journal:deverrouiller',[scope, id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ VERR=null; recharger('Verrou libéré.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
-  }
-  function deverrouillerTout(){
-    if (OCCUPE) return; OCCUPE=true; dire('Libération de tous les verrous…');
-    appeler('journal:deverrouiller:tout',[]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ VERR=null; recharger('Verrous libérés.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
-  }
-
   function rendre(){
     tabs();
-    if (ONGLET==='verrous' && !(D&&D.isSuper)) ONGLET='acces';
+    boutonVerrous();
     if (ONGLET==='recherche') vueRecherche();
     else if (ONGLET==='automatisations') vueAuto();
     else if (ONGLET==='impressions') vuePrints();
     else if (ONGLET==='sms') vueSms();
     else if (ONGLET==='comptable') vueComptable();
     else if (ONGLET==='recherches') vueRecherchesRatees();
-    else if (ONGLET==='verrous') vueVerrous();
     else vueAcces();
   }
   function recharger(msg, cl){

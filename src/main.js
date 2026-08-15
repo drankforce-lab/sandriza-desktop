@@ -2316,6 +2316,14 @@ const PAGES_ANCRABLES = () => ({
   'listenoire': ['Liste noire', () => pageListeNoire('')],
   'profil': ['Mon profil', () => pageProfil()],
   'journaux': ['Journaux', () => pageJournaux(_journauxOnglet || '')],
+  /* ⚠ ECRAN A PART, ET C EST TOUT L OBJET DU #35. Les verrous etaient un
+     onglet des Journaux — or un journal est une ARCHIVE (ce qui s est passe)
+     et un verrou est un ETAT VIVANT (qui travaille sur quoi maintenant).
+     Range parmi les archives, l ecran ne se rafraichissait pas : un verrou
+     libere restait affiche comme s il bloquait encore. Sorti, il se suit tout
+     seul toutes les 3 s. Le droit super-administrateur reste dans le COEUR
+     (journal:verrous refuse les autres) — la fenetre ne decide de rien. */
+  'verrous': ['Verrous', () => pageVerrous()],
   'incidents': ['Incidents de sécurité', () => pageIncidents('')],
   'sauvegarde': ['Sauvegarde & Restauration', () => pageSauvegarde('')],
   'studio': ['Studio virtuel', () => pageStudio()],
@@ -3228,6 +3236,7 @@ const { pageChatConfig } = require('./fenetres/chat-config');
 const { pageListeNoire } = require('./fenetres/listenoire');
 const { pageProfil } = require('./fenetres/profil');
 const { pageJournaux } = require('./fenetres/journaux');
+const { pageVerrous } = require('./fenetres/verrous');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -3336,6 +3345,23 @@ const actionApp = (nom) => {
       }
       break;
     }
+    /* ⚠ FENETRE A PART, PAS UN ECRAN DU DOCK (#35). Le chemin ancrable
+       demande au SITE de naviguer vers une section du meme nom — or << verrous >>
+       n existe pas cote site : c est un ecran ne natif, sans jumeau web. Passe
+       par la, le clic de menu n aurait rien ouvert du tout.
+       Il reste declare dans PAGES_ANCRABLES pour que le bouton << ancrer >>
+       fonctionne si on le veut dans la fenetre principale — meme montage que
+       l explorateur de photos. */
+    case 'verrous': {
+      const _avV = fenetresNatives.get('verrous');
+      const _reuV = !!(_avV && !_avV.isDestroyed());
+      const winV = ouvrirNative('verrous', 'Verrous', pageVerrous(),
+        { width: 900, height: 660, minWidth: 680, minHeight: 440 });
+      if (_reuV && winV && !winV.isDestroyed()) {
+        winV.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
     case 'notes': {
       const _avN = fenetresNatives.get('notes');
       const _reuN = !!(_avN && !_avN.isDestroyed());
@@ -3398,7 +3424,7 @@ ipcMain.handle('menu:action', (e, nom) => { actionApp(String(nom || '')); return
 // sur un onglet. Ouverture FRAÎCHE : la carte lit `_journauxOnglet`. DÉJÀ ouverte
 // (dock ou détachée) : on lui envoie `szAllerOnglet`. Onglet réduit aux lettres —
 // aucune donnée n'entre dans le code exécuté.
-const _ONGLETS_JOURNAUX = ['recherche', 'acces', 'automatisations', 'impressions', 'sms', 'comptable', 'recherches', 'verrous'];
+const _ONGLETS_JOURNAUX = ['recherche', 'acces', 'automatisations', 'impressions', 'sms', 'comptable', 'recherches'];
 ipcMain.handle('journaux:ouvrir', (e, onglet) => {
   const t = _ONGLETS_JOURNAUX.indexOf(String(onglet || '').toLowerCase()) >= 0 ? String(onglet).toLowerCase() : '';
   _journauxOnglet = t;
@@ -3411,6 +3437,20 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
     } catch (_) {}
     _journauxOnglet = '';   // ne pas laisser fuiter vers une prochaine ouverture par le menu
   }, 400);
+  return true;
+});
+
+/* ── OUVRIR UN AUTRE MODULE DEPUIS UNE FENETRE (#35) ──────────────────────────
+   Le bouton « Verrous » des Journaux mene a l ecran qui en est sorti. Une
+   fenetre ne choisit pas ce qu elle ouvre : elle nomme, et le principal
+   verifie ce nom contre une LISTE BLANCHE avant de le passer a actionApp.
+   Sans ce filtre, n importe quel nom traverserait le pont vers la commande
+   d ouverture d ecran. */
+const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents'];
+ipcMain.handle('module:ouvrir', (e, nom) => {
+  const n = String(nom || '').toLowerCase();
+  if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;
+  actionApp(n);
   return true;
 });
 

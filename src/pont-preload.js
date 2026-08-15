@@ -136,4 +136,10 @@ contextBridge.exposeInMainWorld('szPont', {
   // sur l'onglet voulu si la fenêtre s'ouvre à neuf, sinon on lui dit d'y aller.
   // Les fenêtres ancrées n'avaient aucun moyen d'ouvrir une autre section.
   ouvrirJournaux: (onglet) => ipcRenderer.invoke('journaux:ouvrir', String(onglet || '')).catch(() => false),
+
+  /* Ouvre un AUTRE module depuis une fenêtre (#35 : le bouton « Verrous » des
+     Journaux, qui pointe vers l'écran sorti de là). Le nom est filtré côté
+     principal contre une liste blanche — une fenêtre ne choisit pas ce qu'elle
+     ouvre dans l'application, elle le demande. */
+  ouvrirModule: (nom) => ipcRenderer.invoke('module:ouvrir', String(nom || '')).catch(() => false),
 });

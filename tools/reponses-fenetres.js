@@ -2025,8 +2025,26 @@ module.exports = {
     ];
   })(),
 
-  // Journaux (#7 Lot 7a). Quatre onglets ; verrous = super-admin (async). Chaque
-  // onglet a son cas d'ouverture (le clic ne navigue pas sur le DOM du banc).
+  // Journaux (#7 Lot 7a). Chaque onglet a son cas d'ouverture (le clic ne navigue
+  // pas sur le DOM du banc). ⚠ Les VERROUS ne sont plus un onglet depuis le
+  // 3.39.0 (#35) : ils ont leur fenêtre, et leur propre cas plus bas.
+  /* Verrous (#35) — ETAT VIVANT, sorti des Journaux. Trois cas :
+     - la liste normale (un verrou tenu, un verrou eteint) ;
+     - la liste VIDE, l'etat le plus frequent en vrai (personne ne tient rien) ;
+     - le REFUS de droit, qui doit se lire en clair et non en code. */
+  'verrous.js': (function(){
+    var verrous = { ok: true, peutModifier: true, locks: [
+      { scope: 'orders', scopeLabel: 'Commandes', id: 'ord_1', label: 'CMD-1042', who: 'Marie Tremblay', age: '3 min', since: '2026-08-13T11:57:00Z', expired: false, sessionAlive: true, expiresIn: 45, mine: false },
+      { scope: 'products', scopeLabel: 'Produits', id: 'p_9', label: 'Robe', who: 'Bob', age: '2 h', since: '2026-08-13T10:00:00Z', expired: true, sessionAlive: false, expiresIn: 0, mine: true }
+    ] };
+    return [
+      { nom: 'liste (un actif, un eteint)', reponses: { identite: IDENTITE, 'journal:verrous': verrous,
+        'journal:deverrouiller': { ok: true }, 'journal:deverrouiller:tout': { ok: true } } },
+      { nom: 'aucun verrou', reponses: { identite: IDENTITE, 'journal:verrous': { ok: true, peutModifier: true, locks: [] } } },
+      { nom: 'refuse (pas super-admin)', reponses: { identite: IDENTITE, 'journal:verrous': { ok: false, motif: 'droit' } } }
+    ];
+  })(),
+
   'journaux.js': (function(){
     var donnees = {
       ok: true, isSuper: true, peutModifier: true, statsHidden: false,
@@ -2044,15 +2062,10 @@ module.exports = {
       stats: { loginOk: 1, loginFail: 1, mfaFail: 0, geoBlocked: 0, ips: 2 },
       accesTotal: 2, autoTotal: 1, printsTotal: 2, recherchesTotal: 2
     };
-    var verrous = { ok: true, locks: [
-      { scope: 'orders', scopeLabel: 'Commandes', id: 'ord_1', label: 'CMD-1042', who: 'Marie Tremblay', age: '3 min', since: '2026-08-13T11:57:00Z', expired: false, sessionAlive: true, expiresIn: 45 },
-      { scope: 'products', scopeLabel: 'Produits', id: 'p_9', label: 'Robe', who: 'Bob', age: '2 h', since: '2026-08-13T10:00:00Z', expired: true, sessionAlive: false, expiresIn: 0 }
-    ] };
     return [
       { nom: 'accès', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:stats': { ok: true, statsHidden: true }, 'journal:purger:acces': { ok: true, conserves: 2 }, 'journal:export:acces': { ok: true } } },
       { nom: 'automatisations', id: 'automatisations', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
       { nom: 'impressions', id: 'impressions', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:purger:prints': { ok: true, conserves: 2 }, 'journal:export:prints': { ok: true } } },
-      { nom: 'verrous (super-admin)', id: 'verrous', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:verrous': verrous, 'journal:deverrouiller': { ok: true }, 'journal:deverrouiller:tout': { ok: true } } },
       { nom: 'sans résultat', id: 'recherches', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
       { nom: 'SMS (serveur)', id: 'sms', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'journal:sms': { ok: true, sms: [ { id: 's1', from: '+14185550142', to: '+14185550000', body: 'Bonjour, ma commande ?', direction: 'inbound', date: '2026-08-13T12:00:00Z', read: false } ] } } },

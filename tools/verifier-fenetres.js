@@ -271,6 +271,56 @@ console.log('\n=== Plafonds du pont ===');
   }
 }
 
+/* ══ LES AIDES APPELÉES EXISTENT-ELLES ? ══════════════════════════════════════
+   ⚠⚠ CE CONTRÔLE NAÎT D'UN DÉFAUT RÉEL ET COÛTEUX (#35, 2026-08-14). Le Studio
+   appelait `voile(...)` pour ouvrir la fenêtre de réglages d'un lot ; la
+   fonction `voile` n'a JAMAIS été écrite dans ce fichier — seuls les appels
+   avaient été recopiés depuis une autre fenêtre. Le clic sur « ⚙ Traiter ces N
+   en lot… » levait donc un ReferenceError et mourait là : aucune surcouche,
+   aucun message, aucune trace. Le bouton semblait simplement inerte, par ses
+   DEUX chemins d'accès, sur plusieurs versions publiées.
+
+   Le banc ne pouvait pas le voir : il DESSINE les écrans, il ne CLIQUE pas.
+   Un défaut qui ne se manifeste qu'au clic lui échappe par construction.
+   D'où ce contrôle statique, en complément : pour chaque fenêtre, toute aide
+   locale APPELÉE doit être DÉFINIE dans le même script (ou venir du socle, ou
+   être une globale connue). C'est grossier, et c'est exactement ce qu'il
+   fallait : ça n'aurait pas laissé passer celui-là.
+
+   ⚠ On ne vise que les aides du CRU MAISON — celles qu'on recopie d'une fenêtre
+   à l'autre, donc celles qu'on oublie de recopier en entier. */
+console.log('=== Aides locales appelées mais jamais définies ===');
+{
+  /* Les aides du CRU MAISON, celles qu'on recopie d'une fenêtre à l'autre —
+     donc celles qu'on oublie de recopier en entier.
+     ⚠ AUCUNE NE DOIT ÊTRE FOURNIE PAR LE SOCLE. `esc` et `expliquer` y ont
+     figuré une minute : le socle les injecte (socle.js), la moitié des
+     fenêtres les appellent donc sans les écrire, et le contrôle criait au
+     loup sur du code parfaitement sain. Un contrôle qui hurle à tort se fait
+     ignorer — c'est pire que pas de contrôle du tout.
+     Ajouter un nom ici ne coûte rien tant qu'on ne l'appelle pas sans l'écrire. */
+  const AIDES = ['voile', 'fdate'];
+  const dirF = path.join(__dirname, '..', 'src', 'fenetres');
+  let mauvais = 0, vus = 0;
+  for (const f of fs.readdirSync(dirF).filter((x) => x.endsWith('.js') && x !== 'socle.js')) {
+    const src = fs.readFileSync(path.join(dirF, f), 'utf8');
+    for (const a of AIDES) {
+      // Appelée ? On exclut la forme `objet.voile(` — ce n'est pas la même chose.
+      const appel = new RegExp('(^|[^\\w.$])' + a + '\\s*\\(', 'm');
+      if (!appel.test(src)) continue;
+      vus++;
+      const def = new RegExp('function\\s+' + a + '\\s*\\('
+        + '|(var|let|const)\\s+' + a + '\\s*=' + '|' + a + '\\s*[:=]\\s*function');
+      if (!def.test(src)) {
+        dire(false, f, 'appelle ' + a + '(...) sans jamais la définir — le clic mourra '
+          + 'sur un ReferenceError, en silence. C\'est le défaut du Studio (#35).');
+        mauvais++;
+      }
+    }
+  }
+  if (!mauvais) dire(true, 'aides locales', vus + ' appel(s), toutes définies dans leur fenêtre');
+}
+
 /* ⚠ MÊME RAISON QUE L'ACCENT GRAVE : une règle qu'on répète et qu'on oublie
    n'est pas une règle. Le cadenas manquant sur une LIGNE de liste ne casse
    rien — il laisse simplement deux personnes travailler sur la même fiche

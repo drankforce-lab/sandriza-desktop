@@ -205,6 +205,25 @@ button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:70
 button.prim:hover:not(:disabled){background:#d8bd97}
 button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:700}
 .vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+/* ⚠ LA SURCOUCHE DU LANCEMENT DE LOT. Elle manquait — habillage ET fonction :
+   ouvrirLotVoile() appelait un voile() qui n'existait nulle part, et le clic
+   mourait sur un ReferenceError. Le bouton « Traiter ces N en lot… » n'a donc
+   JAMAIS rien fait, par aucun des deux chemins (panier ou sélecteur). */
+.voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
+  align-items:center;justify-content:center;padding:1.1rem;z-index:60}
+.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+  border-radius:13px;padding:1rem 1.15rem;max-width:29rem;width:100%;
+  max-height:88vh;overflow-y:auto;box-shadow:0 18px 46px rgba(0,0,0,.5)}
+.voile h3{margin:0 0 .5rem;font:700 1.02rem/1.25 Georgia,serif}
+.voile p{margin:.6rem 0 0;font-size:.79rem;line-height:1.55}
+.voile input[type=text],.voile input:not([type]){width:100%;font:inherit;color:#e8edf5;
+  background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+.voile input:focus{outline:none;border-color:#c9a97e}
+.rc{display:flex;align-items:flex-start;gap:.55rem;font-size:.8rem;line-height:1.5;
+  cursor:pointer;-webkit-user-select:none;user-select:none;margin:.6rem 0 0}
+.rc input{width:1.05rem;height:1.05rem;accent-color:#c9a97e;cursor:pointer;
+  margin-top:.12rem;flex:0 0 auto}
+.fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 @media (max-width:720px){.corps{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -988,13 +1007,39 @@ ${JS_ACTIVITE}${JS_DIRE}
      facture : lancer 500 photos sans le dire serait la pire surprise possible.
      Le choix << refaire celles deja traitees >> est DECOCHE par defaut — le
      coeur les ecarte, et les recompter demande un geste volontaire. */
+  /* ⚠⚠ CETTE FONCTION MANQUAIT, ET C EST TOUT LE DEFAUT. ouvrirLotVoile
+     l appelait depuis le debut ; elle n existait ni ici ni globalement. Le
+     clic sur << Traiter ces N en lot... >> levait donc un ReferenceError et
+     mourait la : aucune surcouche, aucun message, rien. Les deux chemins
+     etaient touches (le panier venu de l explorateur ET la barre du
+     selecteur) — le lot n a jamais pu partir depuis l ecran.
+     ⚠ LECON : un helper copie d une fenetre a l autre se copie ENTIER, code
+     ET habillage. Ici seuls les appels avaient suivi. */
+  function voile(html, apres){
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite">' + html + '</div>';
+    document.body.appendChild(v);
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
+    // Clic hors de la boite = annuler (rien n est lance tant qu on n a pas
+    // clique << Lancer le lot >>).
+    v.onclick = function(ev){ if (ev.target === v) fermer(); };
+    if (apres) apres(fermer);
+    return fermer;
+  }
+
   function ouvrirLotVoile(){
     var ids = Object.keys(SEL);
-    if (ids.length < 2) return;
+    /* ⚠ UNE SEULE PHOTO EST UN LOT VALIDE. Le garde etait << moins de 2 >>,
+       alors que le panier propose << Traiter cette photo en lot... >> des UNE
+       photo : le bouton existait et ne faisait rien. Un lot d une photo garde
+       tout son sens — il part en arriere-plan et se suit comme les autres. */
+    if (!ids.length) return;
+    var nP = ids.length;
     var opts = (PH_META && PH_META.traitements) || [
       { cle: 'detourage', nom: 'Détourage' }, { cle: 'fantome', nom: 'Mannequin retiré' },
       { cle: 'humain', nom: 'Porté par un mannequin' }];
-    voile('<h3>⚙ Traiter ' + ids.length + ' photos en lot</h3>'
+    voile('<h3>⚙ Traiter ' + nP + ' photo' + (nP > 1 ? 's' : '') + ' en lot</h3>'
       + '<div class="ch"><label for="lot-quoi">Traitement à appliquer</label>'
       + '<select id="lot-quoi">' + opts.map(function(t){
           return '<option value="' + esc(t.cle) + '">' + esc(t.nom) + '</option>'; }).join('')
