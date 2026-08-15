@@ -106,6 +106,22 @@ body{background:#0e1522;color:#e8edf5;
 .phpast .pt{font-size:.6rem;line-height:1;padding:.12rem .22rem;border-radius:4px;
   background:rgba(8,12,20,.75);color:#8fa1b8}
 .phpast .pt.fait{color:#4ade80}
+/* ── Suivi des lots ──────────────────────────────────────────────────────── */
+.lots{display:flex;flex-direction:column;gap:.5rem;max-height:26rem;overflow-y:auto}
+.lotc{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:.5rem .65rem}
+.lotc.vif{border-color:#c9a97e}
+.lott{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.35rem}
+.lott strong{font-size:.85rem}
+.lott .dt{font-size:.72rem;color:#8fa1b8;margin-left:auto}
+.lotc .jauge{height:.42rem;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.lotc .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
+.lotd{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.35rem;
+  font-size:.76rem;color:#cbd8e6}
+.lotd .mal{color:#f87171}
+.lotd .droite{margin-left:auto;display:flex;gap:.3rem;flex-wrap:wrap}
+.lote{margin-top:.3rem;font-size:.71rem;color:#8fa1b8;line-height:1.5}
+.pill.acc{background:rgba(201,169,126,.18);color:#dcc39b}
+.pill.err{background:rgba(239,68,68,.16);color:#f87171}
 /* Voies + ambiances : tuiles cliquables */
 .tuiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem}
 .tuile{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:9px;
@@ -187,6 +203,7 @@ function pageStudio(mode) {
      selecteur de photos ne s atteint qu apres un clic. Sans lui, l ECRAN QUI
      CHOISIT CE QU ON VA PAYER resterait hors de tout controle. Angle mort #32. */
   const explo = String(mode || '') === 'explorateur';
+  const lotsDep = String(mode || '') === 'lots';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Studio virtuel — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -371,7 +388,107 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function aUnePhoto(){ return !!PHOTO || !!PHOTO_ID; }
 
+  /* ══ LE SUIVI DES LOTS ════════════════════════════════════════════════════
+     Sa demande : voir << lot xxxxx — photo 15 sur 500 >>, pouvoir arreter,
+     mettre en pause, reprendre LA OU C ETAIT RENDU, en placer plusieurs en
+     file, et donner une priorite.
+
+     ⚠ ARRETER N EFFACE RIEN : ce qui est fait reste fait, et le reste est
+     repris tel quel si l on change d avis. Seul << Retirer >> efface le lot de
+     la liste — et il refuse tant que le lot tourne. */
+  var LOTS = null, LOTS_VUE = false, LOTS_T = null;
+
+  var LOT_ETATS = { file: 'En file', encours: 'En cours', pause: 'En pause',
+    fini: 'Terminé', arrete: 'Arrêté' };
+
+  function lotsHtml(){
+    if (!LOTS) return '<div class="vide">Lecture des traitements…</div>';
+    var l = LOTS.lots || [];
+    if (!l.length) {
+      return '<div class="vide">Aucun traitement. Choisissez des photos depuis la '
+        + 'photothèque, puis « Traiter en lot ».</div>';
+    }
+    return l.map(function(x){
+      var fait = x.faits + x.echecs;
+      var pct = x.total ? Math.round((fait / x.total) * 100) : 0;
+      var g = '';
+      if (LOTS.peutModifier) {
+        if (x.etat === 'encours' || x.etat === 'file') {
+          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="pause">⏸ Pause</button>';
+          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="arreter">⏹ Arrêter</button>';
+        }
+        if ((x.etat === 'pause' || x.etat === 'arrete') && x.restants) {
+          g += '<button class="jeton prim" data-lot="' + esc(x.id) + '" data-geste="reprendre">▶ Reprendre</button>';
+        }
+        if (x.etat === 'encours' || x.etat === 'file' || x.etat === 'pause') {
+          g += '<button class="jeton' + (x.priorite ? ' on' : '') + '" data-lot="' + esc(x.id)
+            + '" data-geste="priorite" data-val="' + (x.priorite ? '0' : '1') + '">'
+            + (x.priorite ? '★ Prioritaire' : '☆ Prioriser') + '</button>';
+        }
+        if (x.etat !== 'encours') {
+          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="retirer">✕ Retirer</button>';
+        }
+      }
+      return '<div class="lotc' + (x.etat === 'encours' ? ' vif' : '') + '">'
+        + '<div class="lott"><strong>' + esc(x.nom) + '</strong>'
+        + '<span class="pill ' + (x.etat === 'fini' ? 'bon' : x.etat === 'encours' ? 'acc'
+            : x.etat === 'arrete' ? 'err' : 'neutre') + '">' + (LOT_ETATS[x.etat] || x.etat) + '</span>'
+        + (x.priorite ? '<span class="pill acc">★ Priorité</span>' : '')
+        + '<span class="dt">' + esc(x.quoiLibelle) + '</span></div>'
+        + '<div class="jauge"><i style="width:' + pct + '%"></i></div>'
+        + '<div class="lotd">'
+        // ⚠ << photo 15 sur 500 >>, et QUELLE photo : sans le nom, un lot bloque
+        // sur une image abimee ne se diagnostique pas.
+        + '<span>' + (x.etat === 'encours' && x.courant
+            ? ('Photo ' + (fait + 1) + ' sur ' + x.total + ' — ' + esc(x.courant.nom))
+            : (fait + ' sur ' + x.total)) + '</span>'
+        + (x.echecs ? '<span class="mal">' + x.echecs + ' échec' + (x.echecs > 1 ? 's' : '') + '</span>' : '')
+        + '<span class="droite">' + g + '</span></div>'
+        + (x.echecs && x.detailEchecs.length
+            ? '<div class="lote">' + x.detailEchecs.map(function(e){
+                return esc(e.nom) + ' : ' + esc(String(e.detail).slice(0, 80)); }).join(' · ') + '</div>'
+            : '')
+        + '</div>';
+    }).join('');
+  }
+
+  function chargerLots(){
+    appeler('lots:etat', []).then(function(r){
+      if (!r || !r.ok) return;
+      LOTS = r;
+      if (LOTS_VUE) dessiner();
+    });
+  }
+
+  function lotsSuivre(){
+    if (LOTS_T) return;
+    chargerLots();
+    LOTS_T = setInterval(function(){ if (LOTS_VUE && !document.hidden) chargerLots(); }, 2000);
+  }
+  window.addEventListener('pagehide', function(){ if (LOTS_T) { clearInterval(LOTS_T); LOTS_T = null; } });
+
+  function brancherLots(){
+    corps.querySelectorAll('[data-lot]').forEach(function(el){
+      el.onclick = function(){
+        el.disabled = true;
+        appeler('lots:agir', [el.getAttribute('data-lot'), el.getAttribute('data-geste'),
+          el.getAttribute('data-val')]).then(function(r){
+          if (!r.ok) { el.disabled = false; dire(expliquer(r), 'err'); return; }
+          chargerLots();
+        });
+      };
+    });
+    var f = document.getElementById('lots-fermer');
+    if (f) f.onclick = function(){ LOTS_VUE = false; dessiner(); };
+  }
+
   function depotHtml(){
+    // Le suivi des lots prend toute la colonne : c est un ecran, pas un encart.
+    if (LOTS_VUE) {
+      return '<div class="phbarre"><button id="lots-fermer">← Retour</button>'
+        + '<span class="phinfo">Traitements par lot</span></div>'
+        + '<div class="lots">' + lotsHtml() + '</div>';
+    }
     // Une photo est déjà choisie (fichier OU photothèque) : on la montre.
     if (aUnePhoto()) {
       var apercu = PHOTO || PHOTO_URL;
@@ -397,8 +514,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<span>Glissez une photo studio ici, ou cliquez pour choisir un fichier</span>'
       + '<span style="font-size:.7rem;color:#6d7f96">Fond blanc, un vêtement — JPEG ou PNG</span></div>'
       + '<input type="file" id="fichier" accept="image/*" hidden>'
-      + '<div style="text-align:center;margin-top:.5rem">'
-      + '<button id="ph-ouvrir">📚 Depuis la photothèque</button></div>';
+      + '<div style="text-align:center;margin-top:.5rem;display:flex;gap:.4rem;justify-content:center">'
+      + '<button id="ph-ouvrir">📚 Depuis la photothèque</button>'
+      // Le suivi reste joignable meme sans lot en cours : c est la qu on
+      // retrouve ce qui s est termine, et les echecs a comprendre.
+      + '<button id="lots-voir">⚙ Traitements'
+      + ((LOTS && LOTS.lots && LOTS.lots.length) ? ' (' + LOTS.lots.length + ')' : '')
+      + '</button></div>';
   }
 
   function voiesHtml(){
@@ -528,6 +650,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     // « Choisir une autre photo » : on repart de zéro.
     if (depot && aUnePhoto() && !RO) { depot.onclick = function(){ reinitPhoto(); }; }
     var phO = document.getElementById('ph-ouvrir'); if (phO) phO.onclick = ouvrirPicker;
+    var lv = document.getElementById('lots-voir');
+    if (lv) lv.onclick = function(){ LOTS_VUE = true; chargerLots(); dessiner(); };
+    brancherLots();
     var phR = document.getElementById('ph-retour'); if (phR) phR.onclick = function(){ PICKER = false; PHOTHQ = []; PH_Q = ''; dessiner(); };
     var phQ = document.getElementById('ph-q');
     if (phQ) {
@@ -785,8 +910,62 @@ ${JS_ACTIVITE}${JS_DIRE}
          faisait plus rien. Un identifiant réutilisé ne casse rien de visible :
          il détourne, en silence. */
       + (n === 1 ? '<button class="jeton prim" id="ph-ouvrir-sel">Ouvrir cette photo →</button>' : '')
-      + (n > 1 ? '<span class="aide">Le traitement par lot arrive — pour l’instant, choisissez-en une.</span>' : '')
+      + (n > 1 ? '<button class="jeton prim" id="ph-lot">⚙ Traiter ces ' + n + ' photos en lot…</button>' : '')
       + '</span></div>';
+  }
+
+  /* ══ LANCER UN LOT (#27) ══════════════════════════════════════════════════
+     ⚠ ON ANNONCE CE QUE CA COUTE AVANT, PAS APRES. Chaque photo est un appel
+     facture : lancer 500 photos sans le dire serait la pire surprise possible.
+     Le choix << refaire celles deja traitees >> est DECOCHE par defaut — le
+     coeur les ecarte, et les recompter demande un geste volontaire. */
+  function ouvrirLotVoile(){
+    var ids = Object.keys(SEL);
+    if (ids.length < 2) return;
+    var opts = (PH_META && PH_META.traitements) || [
+      { cle: 'detourage', nom: 'Détourage' }, { cle: 'fantome', nom: 'Mannequin retiré' },
+      { cle: 'humain', nom: 'Porté par un mannequin' }];
+    voile('<h3>⚙ Traiter ' + ids.length + ' photos en lot</h3>'
+      + '<div class="ch"><label for="lot-quoi">Traitement à appliquer</label>'
+      + '<select id="lot-quoi">' + opts.map(function(t){
+          return '<option value="' + esc(t.cle) + '">' + esc(t.nom) + '</option>'; }).join('')
+      + '</select></div>'
+      + '<div class="ch"><label for="lot-nom">Nom du lot (pour le retrouver dans le suivi)</label>'
+      + '<input id="lot-nom" placeholder="Collection automne — détourage"></div>'
+      + '<label class="rc"><input type="checkbox" id="lot-prio"> '
+      + '<span><strong>Priorité haute</strong> — ce lot passe devant ceux qui attendent.</span></label>'
+      + '<label class="rc"><input type="checkbox" id="lot-refaire"> '
+      + '<span><strong>Refaire celles déjà traitées.</strong> Par défaut elles sont écartées : '
+      + 'les repasser coûte un appel chacune pour un résultat identique.</span></label>'
+      + '<p style="color:#8fa1b8">Chaque photo est un appel facturé. Le lot part en arrière-plan : '
+      + 'vous pouvez fermer cette fenêtre, le traitement continue et se suit depuis n’importe quel écran.</p>'
+      + '<div class="fin2"><button id="v-non">Annuler</button>'
+      + '<button class="prim" id="v-oui">Lancer le lot</button></div>',
+      function(fermer){
+        document.getElementById('v-non').onclick = fermer;
+        document.getElementById('v-oui').onclick = function(){
+          this.disabled = true;
+          var g = function(i){ var e = document.getElementById(i); return e ? e.value : ''; };
+          var c = function(i){ var e = document.getElementById(i); return !!(e && e.checked); };
+          appeler('lots:creer', [{ ids: ids, quoi: g('lot-quoi'), nom: g('lot-nom'),
+            priorite: c('lot-prio') ? 1 : 0, refaire: c('lot-refaire'), options: {} }]).then(function(r){
+            fermer();
+            if (!r.ok) {
+              dire(r.motif === 'toutes_deja_faites'
+                ? ('Ces ' + (r.deja || ids.length) + ' photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.')
+                : expliquer(r), 'err');
+              return;
+            }
+            SEL = {};
+            dire(r.nom + ' — ' + r.total + ' photo' + (r.total > 1 ? 's' : '') + ' en traitement'
+              + (r.ignorees ? ' (' + r.ignorees + ' déjà faite' + (r.ignorees > 1 ? 's' : '') + ', écartée' + (r.ignorees > 1 ? 's' : '') + ')' : '')
+              + '. Suivez-le en bas de n’importe quel écran.', 'bon');
+            PICKER = false;
+            LOTS_VUE = true;
+            chargerLots();
+          });
+        };
+      });
   }
   function majPhInfo(txt){
     var el = document.getElementById('ph-info');
@@ -800,6 +979,28 @@ ${JS_ACTIVITE}${JS_DIRE}
     var g = document.getElementById('ph-grille');
     if (g) { g.innerHTML = phVignettesHtml(); phBrancherVignettes(g); }
     majPhInfo();
+  }
+
+  /* ⚠⚠ LES EN-TETES SE REPEIGNENT AUSSI, ET C EST TOUT LE DEFAUT CORRIGE ICI.
+     A l ouverture, la fenetre se dessine AVANT que la reponse arrive : les
+     filtres et le panier sont donc rendus avec PH_META encore vide — donc
+     aucun jeton, et << Tout selectionner (0) >> grise. Quand la reponse
+     arrivait, on ne repeignait que la GRILLE : les en-tetes restaient figes
+     sur l etat vide, pour toujours. L explorateur paraissait mort.
+     ⚠ On repeint les DEUX blocs sans redessiner la page, pour ne pas voler le
+     focus de la recherche pendant qu on tape. */
+  function phMajEntetes(){
+    var f = corps.querySelector('.phfiltres');
+    if (f) f.outerHTML = phFiltresHtml();
+    else {
+      // Premiere apparition : le bloc n existait pas encore, on l insere
+      // juste avant le panier.
+      var s0 = corps.querySelector('.phsel');
+      if (s0 && phFiltresHtml()) s0.insertAdjacentHTML('beforebegin', phFiltresHtml());
+    }
+    var s = corps.querySelector('.phsel');
+    if (s) s.outerHTML = phSelectionHtml();
+    brancherExplorateur();
   }
   /* ⚠ DEUX GESTES SUR UNE MEME VIGNETTE, ET IL FAUT LES DEUX : la COCHE
      ajoute au panier (on en prepare plusieurs), le reste de la vignette
@@ -848,12 +1049,19 @@ ${JS_ACTIVITE}${JS_DIRE}
       var ids = Object.keys(SEL);
       if (ids.length === 1) choisirPhoto(ids[0]);
     };
+    var lt = document.getElementById('ph-lot');
+    if (lt) lt.onclick = ouvrirLotVoile;
   }
 
+  /* ⚠ AUCUN REDESSIN COMPLET ICI : il volerait le focus
+     de la recherche pendant qu on tape. Les en-tetes sont repeints par
+     phMajEntetes quand la reponse arrive — ce qui suffit, et ne clignote
+     pas. On repeint tout de suite les jetons pour que le clic se voie. */
   function phRelancer(){
     PH_PAGE = 0; PH_FIN = false;
+    var f = corps.querySelector('.phfiltres');
+    if (f) { f.outerHTML = phFiltresHtml(); brancherExplorateur(); }
     phChargerPage(true);
-    dessiner();   // les jetons et le panier doivent refleter le nouvel etat
   }
 
   // Repeint le panier ET les coches, sans recharger la page de photos.
@@ -907,6 +1115,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       PH_TOTAL = (r.total != null) ? r.total : PHOTHQ.length;
       PH_FIN = (PHOTHQ.length >= PH_TOTAL) || (lot.length === 0);
       phMajGrille();
+      phMajEntetes();
       dire('');
       // La page etait pleine mais la grille ne deborde pas encore : on tire la suivante.
       if (!PH_FIN && reset) phPeutEtreEncore();
@@ -1070,7 +1279,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   charger();
+  lotsSuivre();
   if (${explo ? 'true' : 'false'}) ouvrirPicker();
+  if (${lotsDep ? 'true' : 'false'}) { LOTS_VUE = true; chargerLots(); }
 })();
 </script></body></html>`;
 }

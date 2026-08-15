@@ -1408,6 +1408,10 @@ const OPS_PONT = new Set([
   'repertoire:donnees', 'repertoire:ajouter',
   // L explorateur de photos du Studio (#28) : la meme phototheque, filtrable.
   'studio:explorer',
+  // Le moteur de LOTS (#27). ⚠ lots:etat est sondee par TOUTES les fenetres —
+  // c est elle qui alimente le bandeau qui suit la personne d un module a
+  // l autre. Elle doit rester legere : des compteurs, jamais des images.
+  'lots:etat', 'lots:creer', 'lots:agir',
   'retour:supprimerApercu', 'retour:supprimerEcrire',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
@@ -2016,6 +2020,9 @@ const LIMITES_PONT = {
   /* Parcourt toute la phototheque et rend AUSSI les identifiants du resultat
      complet (pour << tout selectionner >>) : plus lourd qu une page seule. */
   'studio:explorer': 30000,
+  /* lots:etat est sondee toutes les 2 s par chaque fenetre : elle doit rendre
+     vite ou pas du tout. Creer un lot ecrit la file ; agir la relit. */
+  'lots:etat': 10000, 'lots:creer': 30000, 'lots:agir': 20000,
   /* Supprimer un retour efface aussi sa preuve photo du stockage : plus long
      qu une ecriture locale. */
   'retour:supprimerApercu': 20000, 'retour:supprimerEcrire': 30000,

@@ -492,7 +492,91 @@ window.addEventListener('pagehide', function(){
 });
 `;
 
-const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS;
+/* ══ LE BANDEAU DE TRAITEMENT, DANS TOUTES LES FENETRES (#27) ═══════════════
+   Sa demande, mot pour mot : << le traitement doit pouvoir me suivre dans
+   differents modules dans l application, autrement dit quand ses un traitement
+   sa doit etre au premier plan >>.
+
+   Le moteur vit dans la page principale ; ce bandeau n est qu un temoin. Il
+   est pose ICI, dans le socle, pour qu AUCUNE fenetre n ait a y penser : un
+   ecran ajoute demain l aura sans rien faire.
+
+   ⚠ IL NE PARAIT QUE QUAND IL Y A QUELQUE CHOSE A DIRE. Une barre permanente
+   qui annonce << rien en cours >> n apprend rien et vole de la place a chaque
+   ecran. Pas de lot en marche : rien du tout.
+   ⚠ IL NE SONDE PAS TANT QUE LA FENETRE EST CACHEE (document.hidden) : vingt
+   fenetres ouvertes qui interrogent toutes les deux secondes, c est dix appels
+   par seconde pour un temoin que personne ne regarde.
+   ⚠ IL NE FAIT QUE MONTRER. Mettre en pause ou arreter se fait dans le Studio,
+   ou l on voit CE QU ON arrete. Un bouton d arret sur un bandeau minuscule,
+   au-dessus d un ecran sans rapport, est une facon de detruire un travail de
+   500 photos par megarde.                                                    */
+const CSS_LOTS = `
+.sz-lots{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;
+  gap:.6rem;padding:.3rem .8rem;font-size:.76rem;color:#e8dcc6;
+  background:linear-gradient(180deg,#1b2434,#141c29);
+  border-top:1px solid rgba(201,169,126,.45);box-shadow:0 -4px 14px rgba(0,0,0,.35)}
+.sz-lots .nom{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
+.sz-lots .jauge{flex:1 1 auto;min-width:4rem;height:.42rem;border-radius:99px;
+  background:rgba(255,255,255,.12);overflow:hidden}
+.sz-lots .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
+.sz-lots .cpt{white-space:nowrap;font-variant-numeric:tabular-nums}
+.sz-lots .file{white-space:nowrap;color:#8fa1b8}
+html.jour .sz-lots{background:linear-gradient(180deg,#fbf8f2,#f2ece1);color:#3a2f20;
+  border-top-color:rgba(143,111,66,.5)}
+html.jour .sz-lots .jauge{background:rgba(0,0,0,.1)}
+html.jour .sz-lots .file{color:#6b5c47}
+`;
+
+const JS_LOTS = `
+var _szLotsT = null, _szLotsEl = null;
+
+function _szLotsPeindre(r){
+  var actif = r && r.ok && r.resume;
+  if (!actif) {
+    if (_szLotsEl && _szLotsEl.parentNode) { _szLotsEl.parentNode.removeChild(_szLotsEl); _szLotsEl = null; }
+    return;
+  }
+  if (!_szLotsEl) {
+    _szLotsEl = document.createElement('div');
+    _szLotsEl.className = 'sz-lots';
+    document.body.appendChild(_szLotsEl);
+  }
+  var s = r.resume;
+  var pct = s.total ? Math.round((s.fait / s.total) * 100) : 0;
+  var enFile = s.enFile ? ('<span class="file">+ ' + s.enFile + ' en file</span>') : '';
+  _szLotsEl.innerHTML = '<span>⚙</span>'
+    + '<span class="nom">' + String(s.nom || 'Traitement').replace(/[&<>"]/g, '') + '</span>'
+    + '<span class="jauge"><i style="width:' + pct + '%"></i></span>'
+    + '<span class="cpt">' + s.fait + ' / ' + s.total + '</span>' + enFile;
+}
+
+function _szLotsLire(){
+  if (document.hidden) return;
+  if (!window.szPont || !window.szPont.appeler) return;
+  var p;
+  try { p = window.szPont.appeler('lots:etat'); } catch (e) { return; }
+  if (!p || typeof p.then !== 'function') return;
+  p.then(_szLotsPeindre).catch(function(){});
+}
+
+function szLotsSuivre(){
+  if (_szLotsT) return;
+  _szLotsLire();
+  _szLotsT = setInterval(_szLotsLire, 2000);
+}
+
+// Toute fenetre en herite : aucune n a a y penser.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', szLotsSuivre);
+} else { szLotsSuivre(); }
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) _szLotsLire(); });
+window.addEventListener('pagehide', function(){
+  if (_szLotsT) { clearInterval(_szLotsT); _szLotsT = null; }
+});
+`;
+
+const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS + JS_LOTS;
 
 const JS_SOCLE = `
 var P = window.szPont;
@@ -882,5 +966,5 @@ html.jour .sz-btnfen:hover{background:#efece4}
 html.jour .sz-msgauto{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.14);color:#1d2433}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS, JS_SOCLE, JS_ACTIVITE, JS_DIRE };
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS, JS_SOCLE, JS_ACTIVITE, JS_DIRE };
