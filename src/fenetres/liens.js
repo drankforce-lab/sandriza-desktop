@@ -481,6 +481,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-journal]'), function(b){
       b.onclick = function(){
+        /* Le journal D UN lien reste ICI : c est le seul endroit qui sache de
+           QUEL lien il s agit. Le journal COMPLET, lui, a demenage dans la
+           fenetre Journaux (#31) — l onglet du haut y renvoie. */
         VUE = 'journal';
         marquerOnglets();
         chargerJournal('', b.getAttribute('data-journal'));
@@ -677,7 +680,20 @@ ${JS_ACTIVITE}${JS_DIRE}
   document.getElementById('o-liens').onclick = function(){
     VUE = 'liens'; marquerOnglets(); dessinerLiens();
   };
+  /* ⚠ LE JOURNAL EST UNIFIE DANS LA FENETRE JOURNAUX (#31). Il vivait a DEUX
+     endroits : ici, et dans Journaux — deux ecrans pour la meme chose, qui
+     divergeaient au premier ajustement (celui de Journaux etait d ailleurs
+     casse depuis toujours et n affichait rien). Cet onglet renvoie donc a
+     l unique, au lieu d en tenir une copie.
+     ⚠ On garde la vue LOCALE en repli : sur une coquille plus ancienne,
+     P.ouvrirJournaux n existe pas, et il ne faut pas rendre le journal
+     injoignable. */
   document.getElementById('o-journal').onclick = function(){
+    if (P && P.ouvrirJournaux) {
+      P.ouvrirJournaux('comptable');
+      dire('Le journal des accès est dans la fenêtre Journaux.', 'bon');
+      return;
+    }
     VUE = 'journal'; marquerOnglets(); chargerJournal('', '');
   };
 

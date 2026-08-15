@@ -62,6 +62,12 @@ table.tb td{padding:.5rem .6rem;border-bottom:1px solid rgba(255,255,255,.06);fo
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
 .vide{padding:1.5rem;text-align:center;color:#8fa1b8;font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
+/* La zone mesurable de la pagination auto (#31) : une hauteur REELLE. */
+.liste{max-height:calc(100vh - 17rem);overflow-y:auto}
+.pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
+  padding-top:.45rem;font-size:.75rem;color:#8fa1b8}
+.barre select{font:inherit;font-size:.76rem;color:#e8edf5;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.16);border-radius:7px;padding:.12rem .4rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -108,7 +114,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🧾 Accès comptables'], ['recherches','❓ Sans résultat'], ['verrous','🔓 Verrous'] ];
+  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🔗 Accès aux liens'], ['recherches','❓ Sans résultat'], ['verrous','🔓 Verrous'] ];
   var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -247,9 +253,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="b" id="a-stats">'+(D.statsHidden?'Afficher les stats':'Masquer les stats')+'</button>'
       + (D.peutModifier?'<button class="b" id="a-purge">Purger anciens</button>':'')
       + '<button class="b" id="a-csv">Exporter CSV</button></div>'
-      + '<table class="tb"><thead><tr><th>Date</th><th>Type</th><th>Utilisateur</th><th>IP</th><th>Pays</th><th>Action</th></tr></thead><tbody>';
-    if (!rows.length) h += '<tr><td colspan="6" class="vide">Aucun journal.</td></tr>';
-    for (var i=0;i<rows.length;i++){ var l=rows[i]; var t=TYPE[l.type]||{bg:'rgba(255,255,255,.06)',c:'#8fa1b8',l:l.type};
+      + '<div class="liste"><table class="tb"><thead><tr><th>Date</th><th>Type</th><th>Utilisateur</th><th>IP</th><th>Pays</th><th>Action</th></tr></thead><tbody>';
+    /* ── PAGINATION AUTO (#31) ────────────────────────────────────────────
+       Le journal des accès déversait ses trente jours d'un coup. Le nombre de
+       lignes se MESURE maintenant sur la hauteur réelle de la fenêtre. */
+    var apages = Math.max(1, Math.ceil(rows.length / AC_PARPAGE));
+    if (AC_PAGE >= apages) AC_PAGE = apages - 1;
+    if (AC_PAGE < 0) AC_PAGE = 0;
+    var avue = rows.slice(AC_PAGE * AC_PARPAGE, AC_PAGE * AC_PARPAGE + AC_PARPAGE);
+    if (!avue.length) h += '<tr><td colspan="6" class="vide">Aucun journal.</td></tr>';
+    for (var i=0;i<avue.length;i++){ var l=avue[i]; var t=TYPE[l.type]||{bg:'rgba(255,255,255,.06)',c:'#8fa1b8',l:l.type};
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(l.ts))+'</td>'
         + '<td><span class="pill" style="background:'+t.bg+';color:'+t.c+'">'+esc(t.l)+'</span></td>'
         + '<td>'+esc(l.nom||'—')+'<div class="sub">'+esc(l.email)+'</div></td>'
@@ -258,10 +271,19 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td>'+esc(l.action||'—')+'</td></tr>';
     }
     h += '</tbody></table></div>';
+    if (apages > 1) {
+      h += '<div class="pagi"><button class="mini" id="ac-prec"'+(AC_PAGE<=0?' disabled':'')+'>‹ Précédent</button>'
+        + '<span>Page '+(AC_PAGE+1)+' sur '+apages+'</span>'
+        + '<button class="mini" id="ac-suiv"'+(AC_PAGE>=apages-1?' disabled':'')+'>Suivant ›</button></div>';
+    }
+    h += '</div>';
     corps.innerHTML = h;
     var bs=document.getElementById('a-stats'); if (bs) bs.onclick=basculerStats;
     var bp=document.getElementById('a-purge'); if (bp) bp.onclick=function(){ purger('journal:purger:acces'); };
     var bc=document.getElementById('a-csv'); if (bc) bc.onclick=function(){ exporter('journal:export:acces'); };
+    var ap=document.getElementById('ac-prec'); if (ap) ap.onclick=function(){ AC_PAGE=Math.max(0,AC_PAGE-1); vueAcces(); };
+    var as=document.getElementById('ac-suiv'); if (as) as.onclick=function(){ AC_PAGE=AC_PAGE+1; vueAcces(); };
+    szAutoPagination('.liste', function(n){ AC_PARPAGE=n; AC_PAGE=0; vueAcces(); });
   }
 
   // ── Automatisations ──────────────────────────────────────────────
@@ -354,28 +376,68 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── Accès comptables (#7 Lot 7b-2 — reutilise liens:journal) ─────
   var CANAUX = { telechargement:'Installation', comptable:'Comptable', courriel:'Courriel' };
   var EVEN = { visite:'Visite', refuse:'Refusé', ouvert:'Ouvert', classeur:'Classeur ouvert', cree:'Créé', revoque:'Révoqué', telecharge:'Téléchargé', envoye:'Courriel envoyé' };
+  /* ══ ACCÈS AUX LIENS — LE JOURNAL UNIFIÉ (#31) ═══════════════════════════
+     Sa demande : « les journaux des accès lien devraient aussi être unifiés
+     sur journal ». Ils l'étaient déjà à moitié — cet onglet lisait bien TOUS
+     les canaux — mais il portait le nom « Accès comptables », qui n'en
+     désigne qu'un tiers, et la fenêtre Liens gardait son propre onglet.
+
+     🔎 ET IL NE MONTRAIT RIEN. Le serveur répond « evenements » ; on lisait
+     « r.journal », une clé qui n'existe pas. Cet onglet affichait donc
+     « Aucun événement » DEPUIS TOUJOURS, sans la moindre erreur. Le même
+     genre de faute qu'au sélecteur de photothèque : un nom de clé, et l'écran
+     est mort en silence. */
+  var CP_CANAL = '', CP_PAGE = 0, CP_PARPAGE = 25;
+  var AC_PAGE = 0, AC_PARPAGE = 25;   // onglet Accès
+
   function vueComptable(){
     if (COMPTA_D===null){
       corps.innerHTML='<div class="vide">Lecture du journal des accès…</div>'; OCCUPE=true;
-      appeler('liens:journal',[{canal:''}]).then(function(r){ OCCUPE=false;
-        if (r&&r.ok){ COMPTA_D=r.journal||[]; if (ONGLET==='comptable') vueComptable(); }
+      appeler('liens:journal',[{canal:CP_CANAL}]).then(function(r){ OCCUPE=false;
+        if (r&&r.ok){ COMPTA_D=r.evenements||[]; if (ONGLET==='comptable') vueComptable(); }
         else { COMPTA_D=[]; if (ONGLET==='comptable') corps.innerHTML='<div class="carte"><div class="vide">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
       return;
     }
     var rows = COMPTA_D;
-    var h = '<div class="note">ℹ Accès aux liens d’installation et au portail comptable (visite, refus, ouverture, classeur). Sa gestion (créer/révoquer les liens) reste dans <b>Système → Liens d’installation</b>.</div>'
-      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' événement(s)</span><span class="pousse"></span><button class="b" id="cp-reload">🔄 Actualiser</button></div>'
-      + '<table class="tb"><thead><tr><th>Quand</th><th>Canal</th><th>Événement</th><th>IP</th><th>Lien</th><th>Détail</th></tr></thead><tbody>';
-    if (!rows.length) h += '<tr><td colspan="6" class="vide">Aucun événement.</td></tr>';
-    for (var i=0;i<rows.length;i++){ var e=rows[i];
+    var pages = Math.max(1, Math.ceil(rows.length / CP_PARPAGE));
+    if (CP_PAGE >= pages) CP_PAGE = pages - 1;
+    if (CP_PAGE < 0) CP_PAGE = 0;
+    var vue = rows.slice(CP_PAGE * CP_PARPAGE, CP_PAGE * CP_PARPAGE + CP_PARPAGE);
+    var h = '<div class="note">ℹ Tous les accès aux liens émis — installation de l’application, portail comptable et envois par courriel : visite, mot de passe refusé, téléchargement, révocation. La <b>gestion</b> des liens (créer, révoquer, supprimer) reste dans <b>Système → Liens d’installation</b>.</div>'
+      + '<div class="carte"><div class="barre">'
+      + '<select id="cp-canal"><option value="">Tous les canaux</option>'
+      + '<option value="installation"' + (CP_CANAL==='installation'?' selected':'') + '>Installation</option>'
+      + '<option value="comptable"' + (CP_CANAL==='comptable'?' selected':'') + '>Comptable</option>'
+      + '<option value="courriel"' + (CP_CANAL==='courriel'?' selected':'') + '>Courriel</option>'
+      + '</select>'
+      + '<span class="sub">'+rows.length+' événement(s)</span><span class="pousse"></span>'
+      + '<button class="b" id="cp-reload">🔄 Actualiser</button></div>'
+      + '<div class="liste"><table class="tb"><thead><tr><th>Quand</th><th>Canal</th><th>Événement</th><th>IP</th><th>Lien</th><th>Détail</th></tr></thead><tbody>';
+    if (!vue.length) h += '<tr><td colspan="6" class="vide">Aucun événement.</td></tr>';
+    for (var i=0;i<vue.length;i++){ var e=vue[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(e.au))+'</td>'
         + '<td>'+esc(CANAUX[e.canal]||e.canal||'—')+'</td><td>'+esc(EVEN[e.genre]||e.genre||'—')+'</td>'
         + '<td class="mono">'+esc(e.ip||'—')+'</td><td class="mono">'+esc((e.lienId||'').slice(0,8))+'</td>'
         + '<td>'+esc(e.detail||'')+(e.qui?' · '+esc(e.qui):'')+'</td></tr>';
     }
     h += '</tbody></table></div>';
+    if (pages > 1) {
+      h += '<div class="pagi"><button class="mini" id="cp-prec"'+(CP_PAGE<=0?' disabled':'')+'>‹ Précédent</button>'
+        + '<span>Page '+(CP_PAGE+1)+' sur '+pages+'</span>'
+        + '<button class="mini" id="cp-suiv"'+(CP_PAGE>=pages-1?' disabled':'')+'>Suivant ›</button></div>';
+    }
+    h += '</div>';
     corps.innerHTML = h;
     var rl=document.getElementById('cp-reload'); if (rl) rl.onclick=function(){ COMPTA_D=null; vueComptable(); };
+    var cc=document.getElementById('cp-canal');
+    if (cc) cc.onchange=function(){ CP_CANAL=cc.value; CP_PAGE=0; COMPTA_D=null; vueComptable(); };
+    var cpp=document.getElementById('cp-prec');
+    if (cpp) cpp.onclick=function(){ CP_PAGE=Math.max(0,CP_PAGE-1); vueComptable(); };
+    var cps=document.getElementById('cp-suiv');
+    if (cps) cps.onclick=function(){ CP_PAGE=CP_PAGE+1; vueComptable(); };
+    // ⚠ Mesure APRES le dessin : la hauteur reelle n existe qu une fois le
+    // tableau dans la page. Le socle ne rappelle que si le compte a change.
+    szAutoPagination('.liste', function(n){ CP_PARPAGE=n; CP_PAGE=0; vueComptable(); });
   }
 
   // ── Recherches sans résultat (#7 Lot 7b) ─────────────────────────

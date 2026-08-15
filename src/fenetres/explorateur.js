@@ -62,12 +62,18 @@ table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead th{position:sticky;top:0;z-index:1;text-align:left;padding:.26rem .4rem;
   font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;
   font-weight:700;background:#0e1522;border-bottom:1px solid rgba(255,255,255,.12)}
+/* ⚠ AUCUNE LIGNE DE TABLEAU, ET UN SURVOL DISCRET (demande du 2026-08-14 :
+   << l effet de survol est affreux, on ne devrait pas voir les lignes du
+   tableau >>). Le cadre dore posé cellule par cellule (box-shadow inset sur
+   chaque td) redessinait la grille entiere autour de la ligne active : c est
+   ce qui faisait sale. La ligne courante se marque maintenant par un LISERE a
+   gauche, et le survol par un fond a peine visible. */
 tbody tr{cursor:pointer}
-tbody td{padding:.22rem .4rem;border-top:1px solid rgba(255,255,255,.05);
+tbody td{padding:.26rem .4rem;border:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
-tbody tr:hover td{background:rgba(255,255,255,.045)}
-tbody tr.pris td{background:rgba(201,169,126,.16)}
-tbody tr.actif td{box-shadow:inset 0 0 0 1px #c9a97e}
+tbody tr:hover td{background:rgba(255,255,255,.03)}
+tbody tr.pris td{background:rgba(201,169,126,.1)}
+tbody tr.actif td:first-child{box-shadow:inset 2px 0 0 0 #c9a97e}
 /* La case a cocher : visible, cliquable, et distincte du clic sur la ligne. */
 th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center}
 .coche{display:inline-flex;align-items:center;justify-content:center;
@@ -84,6 +90,9 @@ th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center
   padding:.45rem .2rem 0;font-size:.75rem;color:#8fa1b8}
 td.vig{width:2.4rem;max-width:2.4rem;padding:.1rem .2rem}
 td.vig img{width:2rem;height:2rem;object-fit:contain;border-radius:4px;background:#0b1220;display:block}
+/* La vignette de liste ne porte NI cadre NI contour : c est une image, pas un
+   bouton — l encadrer ajoutait un rectangle de plus a une ligne deja chargee. */
+td.vig img{border:0;outline:0}
 /* Affichage GRILLE : quand on cherche a l oeil plutot qu au nom. */
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.5rem}
 .vig{background:#16202f;border:1px solid rgba(255,255,255,.1);border-radius:9px;
@@ -392,11 +401,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ev.shiftKey && ANCRE != null) {
       var a = Math.min(ANCRE, i), b = Math.max(ANCRE, i);
       for (var k = a; k <= b; k++) if (ph[k]) SEL[ph[k].id] = true;
-    } else if (ev.ctrlKey || ev.metaKey) {
+    } else {
+      /* ⚠ UN CLIC COCHE, UN AUTRE DECOCHE (demande du 2026-08-14 : << quand on
+         clique sur une photo ça devrait automatiquement la cocher et un autre
+         clic la décocher >>). Le comportement d origine — clic = ne garder que
+         celle-ci — venait de l explorateur Windows, mais ici on vient CHOISIR
+         un lot : perdre trente photos cochees en cliquant la trente-et-unieme
+         pour la regarder etait exactement le mauvais reflexe. */
       if (SEL[id]) delete SEL[id]; else SEL[id] = true;
       ANCRE = i;
-    } else {
-      SEL = {}; SEL[id] = true; ANCRE = i;
     }
     COURANT = id;
     dessiner();
