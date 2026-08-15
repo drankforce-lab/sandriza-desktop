@@ -212,6 +212,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PH_TOTAL = 0;      // total correspondant a la recherche
   var PH_FIN = false;    // plus rien a charger
   var PH_OCC = false;    // une page est-elle en cours de chargement ?
+  // ⚠ Trois etats : tant qu il est faux, on ne dit PAS << vide >>.
+  var PH_CHARGE = false;
   var PH_DEB = null;     // minuterie anti-rebond de la recherche
   var VOIE = 'humain';   // humain | fantome | plat
   var PRESET = '';       // cle d ambiance
@@ -656,8 +658,17 @@ ${JS_ACTIVITE}${JS_DIRE}
   // Grille de vignettes (partagee : rendu initial + rafraichissements de page).
   function phVignettesHtml(){
     if (!PHOTHQ.length) {
+      /* ⚠ TROIS ETATS, PAS DEUX. << Pas encore charge >> n est PAS << vide >> :
+         la synchronisation peut n avoir pas encore repondu, et annoncer
+         << Photothèque vide >> a ce moment-la fait croire que la mediatheque a
+         ete perdue — le message le plus inquietant possible sur des photos.
+         Le site fait deja voyager l etat charge ; cette fenetre l ignorait. */
+      if (!PH_CHARGE) {
+        return '<div class="vide" style="grid-column:1/-1">Lecture de la photothèque…</div>';
+      }
       return '<div class="vide" style="grid-column:1/-1">'
-        + (PH_Q ? 'Aucune photo ne correspond à « ' + esc(PH_Q) + ' ».' : 'Photothèque vide.') + '</div>';
+        + (PH_Q ? 'Aucune photo ne correspond à « ' + esc(PH_Q) + ' ».'
+                : 'Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.') + '</div>';
     }
     return PHOTHQ.map(function(p){
       var img = p.apercu
@@ -697,6 +708,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!PICKER) return;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); majPhInfo(''); return; }
       var lot = r.photos || [];
+      PH_CHARGE = (r.charge !== false);
       PHOTHQ = reset ? lot : PHOTHQ.concat(lot);
       PH_PAGE = (r.page != null) ? r.page : page;
       PH_TOTAL = (r.total != null) ? r.total : PHOTHQ.length;
