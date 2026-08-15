@@ -102,6 +102,13 @@ body{background:#0e1522;color:#e8edf5;
 .item .corpsmsg{font-size:.82rem;margin-top:.2rem}
 .item .actes{display:flex;gap:.3rem;flex-wrap:wrap}
 .sep{border:0;border-top:1px solid rgba(255,255,255,.08);margin:.8rem 0 .6rem}
+/* Adresse de rappel Twilio : selectionnable a la souris, copiable en un clic. */
+.crochet{display:flex;align-items:center;gap:.45rem}
+.crochet code{flex:1 1 auto;min-width:0;overflow-x:auto;white-space:nowrap;
+  font-family:Consolas,"Courier New",monospace;font-size:.78rem;color:#dcc39b;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);
+  border-radius:7px;padding:.28rem .5rem;user-select:text}
+.crochet button{flex:0 0 auto}
 .tbl{width:100%;border-collapse:collapse;font-size:.78rem}
 .tbl th{text-align:left;color:#8fa1b8;font-weight:600;padding:.35rem .5rem;border-bottom:1px solid rgba(255,255,255,.08)}
 .tbl td{padding:.35rem .5rem;border-bottom:1px solid rgba(255,255,255,.05)}
@@ -319,7 +326,32 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="gr2">'
       + secretHtml('t-sid', 'Account SID', !!C.hasAccountSid, 'ACxxxxxxxx')
       + secretHtml('t-token', 'Auth Token', !!C.hasAuthToken, 'votre Auth Token') + '</div>';
+
+    /* ⚠ LES DEUX URL DE RAPPEL — SANS ELLES, RIEN NE FONCTIONNE, ET LA
+       CONFIGURATION ETAIT IMPOSSIBLE DEPUIS L APPLICATION. Twilio ne devine
+       pas ou joindre le site : ces adresses se collent dans la fiche du
+       NUMERO, chez Twilio. Le coeur du site les fournissait deja (webhookVoice
+       / webhookSms) — cette fenetre ne les affichait simplement pas.
+       ⚠ Elles se collent sur le NUMERO, pas dans Monitor > Errors : c est
+       l erreur qui a fait perdre du temps la premiere fois. */
+    h += '<hr class="sep"><div class="stitre">Adresses de rappel (webhooks)</div>'
+      + '<div class="note">À coller dans <strong>Twilio → Phone Numbers → votre numéro</strong>. '
+      + 'Sans elles, Twilio ne sait pas où joindre le site : les appels et les SMS '
+      + 'n’arriveront jamais. <strong>Ce n’est pas dans Monitor → Errors.</strong></div>';
+    h += crochetHtml('A CALL COMES IN (Voice)', D.webhookVoice || '', 't-wh-voice');
+    h += crochetHtml('A MESSAGE COMES IN (Messaging)', D.webhookSms || '', 't-wh-sms');
     return h + '</div>';
+  }
+
+  // Une adresse de rappel : lisible, selectionnable, et copiable en un clic.
+  function crochetHtml(titre, url, id){
+    if (!url) {
+      return '<div class="ch"><label>' + esc(titre) + '</label>'
+        + '<div class="aide">Adresse indisponible — la fenêtre principale ne l’a pas fournie.</div></div>';
+    }
+    return '<div class="ch"><label>' + esc(titre) + '</label>'
+      + '<div class="crochet"><code id="' + id + '">' + esc(url) + '</code>'
+      + '<button type="button" class="mini" data-copier="' + id + '">Copier</button></div></div>';
   }
 
   function panAccueil(){
@@ -558,6 +590,26 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ONGLET === 'sms') {
       var sb = document.getElementById('t-sms-send'); if (sb) sb.onclick = smsEnvoyer;
       var sj = document.getElementById('t-sms-journaux'); if (sj) sj.onclick = function(){ if (P && P.ouvrirJournaux) P.ouvrirJournaux('sms'); };
+    }
+    // Copier une adresse de rappel. ⚠ On SELECTIONNE aussi le texte : si le
+    // presse-papiers est refuse, il reste le Ctrl+C, plutot qu un bouton mort.
+    var cps = corps.querySelectorAll('[data-copier]');
+    for (var k = 0; k < cps.length; k++) {
+      cps[k].onclick = function(){
+        var el = document.getElementById(this.getAttribute('data-copier'));
+        if (!el) return;
+        var txt = el.textContent || '';
+        try {
+          var s = window.getSelection(), r = document.createRange();
+          r.selectNodeContents(el); s.removeAllRanges(); s.addRange(r);
+        } catch (e) {}
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(function(){ dire('Adresse copiée.', 'bon'); },
+            function(){ dire('Copie refusée — l’adresse est sélectionnée, faites Ctrl+C.', 'att'); });
+        } else {
+          dire('L’adresse est sélectionnée, faites Ctrl+C.', 'att');
+        }
+      };
     }
   }
 

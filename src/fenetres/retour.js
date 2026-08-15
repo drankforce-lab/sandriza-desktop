@@ -356,6 +356,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (R.peutEcrire && d.statut === 'in_transit') boutons += '<button id="btn-recu">📬 Marquer reçu</button>';
     if (R.peutEcrire && !fige) boutons += '<button class="prim" id="btn-enr">Enregistrer + courriel</button>';
     else if (R.peutEcrire && !R.archive) boutons += '<button class="prim" id="btn-enr">Enregistrer les notes</button>';
+    /* ⚠ SUPPRIMER : uniquement sur un dossier TERMINE (#6). C etait impossible
+       depuis l application — un retour complete restait dans la liste pour
+       toujours. Effacer une demande EN COURS ferait disparaitre un dossier que
+       la cliente, elle, suit encore : le coeur du site le refuse aussi. */
+    if (['completed', 'refunded'].indexOf(d.statut) >= 0 && !R.archive) {
+      boutons += '<button class="danger" id="btn-suppr">🗑 Supprimer</button>';
+    }
     actions.innerHTML = boutons + '<button id="btn-fermer">Fermer</button>';
     brancherDemande(fige);
   }
@@ -459,6 +466,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     var enr = document.getElementById('btn-enr');
     if (enr) enr.onclick = function(){ enregistrer(fige); };
+    var sp = document.getElementById('btn-suppr');
+    if (sp) sp.onclick = flowSupprimer;
     var ap = document.getElementById('btn-apercu');
     if (ap) ap.onclick = apercu;
     var rv = document.getElementById('btn-renvoyer');
@@ -701,6 +710,44 @@ ${JS_ACTIVITE}${JS_DIRE}
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
     if (apres) apres(fermer);
     return fermer;
+  }
+
+  /* ══ SUPPRIMER LA DEMANDE — IRREVERSIBLE, ET LA PREUVE PART AVEC (#6) ══════
+     Ce geste n existait pas dans l application : un retour complete restait
+     dans la liste pour toujours. L apercu vient du site : c est LUI qui juge
+     si le dossier est supprimable, pas cette fenetre. */
+  function flowSupprimer(){
+    appeler('retour:supprimerApercu', [ID]).then(function(ap){
+      if (!ap.ok) {
+        dire(ap.motif === 'non_terminee'
+          ? 'Seule une demande terminée peut être supprimée.' : expliquer(ap), 'err');
+        return;
+      }
+      voile('<h3 style="color:#f87171">🗑 Supprimer la demande</h3>'
+        + '<p><strong>' + esc(ap.commande) + '</strong>'
+        + (ap.client ? ' — ' + esc(ap.client) : '') + '</p>'
+        + '<p>La demande disparaît de la liste'
+        + (ap.aPhoto ? ', <strong>et la photo envoyée par la cliente est effacée du stockage</strong>' : '')
+        + '.</p>'
+        + '<p style="color:#f87171;font-weight:600">⚠ Cette action est irréversible.</p>'
+        + '<div class="fin2"><button id="v-non">Annuler</button>'
+        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:#fff">'
+        + 'Supprimer définitivement</button></div>',
+        function(fermer){
+          document.getElementById('v-non').onclick = fermer;
+          document.getElementById('v-oui').onclick = function(){
+            this.disabled = true;
+            appeler('retour:supprimerEcrire', [ID]).then(function(r){
+              fermer();
+              if (!r.ok) { dire(expliquer(r), 'err'); return; }
+              dire('Demande supprimée.', 'bon');
+              // Le dossier n existe plus : rester dessus n aurait aucun sens.
+              rendreVerrou();
+              P.fermer();
+            });
+          };
+        });
+    });
   }
 
   document.addEventListener('keydown', function(ev){

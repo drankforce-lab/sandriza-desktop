@@ -1402,6 +1402,11 @@ const OPS_PONT = new Set([
   // Le cadenas SUR LA LIGNE d une liste (#22). Sonde toutes les ~3 s, pour
   // qu un collegue voie qu une fiche est prise SANS avoir a l ouvrir.
   'verrous:liste',
+  // Les quatre derniers trous fonctionnels de l audit (#6) : le REPERTOIRE de
+  // grossistes (ajout en un clic) et la SUPPRESSION d une demande de retour
+  // terminee, qui n existaient nulle part dans l application.
+  'repertoire:donnees', 'repertoire:ajouter',
+  'retour:supprimerApercu', 'retour:supprimerEcrire',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
   'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer', 'adresse:suggerer',
@@ -2005,6 +2010,10 @@ const LIMITES_PONT = {
   /* Sondage frequent et leger : une lecture de la table des verrous. Court
      expres — un sondage qui traine bloquerait le suivant. */
   'verrous:liste': 15000,
+  'repertoire:donnees': 20000, 'repertoire:ajouter': 30000,
+  /* Supprimer un retour efface aussi sa preuve photo du stockage : plus long
+     qu une ecriture locale. */
+  'retour:supprimerApercu': 20000, 'retour:supprimerEcrire': 30000,
   'fidelisation:sondage:form': 20000, 'fidelisation:sondage:ecrire': 30000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */

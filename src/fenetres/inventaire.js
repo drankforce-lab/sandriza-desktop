@@ -828,6 +828,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</select>'
       + menuCats(d.cats || [])
       + '<span class="droite">'
+      // ⚠ CE BOUTON MANQUAIT (#6) : depuis l inventaire, il fallait sortir vers
+      // l ecran Produits pour en creer un. L op existait deja cote pont, elle
+      // n etait simplement offerte nulle part ici.
+      + (d.peutAjouterProduit ? '<button class="mini prim" id="btn-nouveau-produit">+ Ajouter un produit</button>' : '')
       + (d.peutEcrire && !LOT ? '<button class="mini" id="btn-lot" title="Appliquer ou retirer la vente finale sur plusieurs produits à la fois">Vente finale en lot</button>' : '')
       + '</span></div>';
 
@@ -1032,6 +1036,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       if (b.id === 'fp-prec') { FP.page--; chargerOnglet(); return; }
       if (b.id === 'fp-suiv') { FP.page++; chargerOnglet(); return; }
+      if (b.id === 'btn-nouveau-produit') {
+        // L assistant Produit natif, en mode creation — le meme que celui de
+        // l ecran Produits. Rien n est duplique ici.
+        appeler('produits:nouveau', []).then(function(r){
+          dire(r && r.ok ? 'Nouveau produit ouvert dans sa fenêtre.' : expliquer(r),
+            (r && r.ok) ? 'bon' : 'err');
+        });
+        return;
+      }
       if (b.id === 'btn-lot') { LOT = true; COCHES = {}; dessiner(); return; }
       if (b.id === 'lot-annuler') { LOT = false; COCHES = {}; dessiner(); return; }
       if (b.id === 'lot-app' || b.id === 'lot-ret') { venteFinaleLot(b.id === 'lot-app'); return; }

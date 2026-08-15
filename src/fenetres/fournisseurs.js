@@ -63,6 +63,14 @@ tbody .dt{font-size:.72rem;color:#8fa1b8}
 .pill.bon{background:rgba(34,197,94,.14);color:#4ade80}
 .pill.neutre{background:rgba(148,163,184,.16);color:#8fa1b8}
 .vide{padding:1.2rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+/* Repertoire de grossistes : des cartes, comme sur l ecran du site. */
+.repgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:.6rem}
+.repcarte{background:#16202f;border:1px solid rgba(255,255,255,.08);border-radius:11px;
+  padding:.6rem .7rem;display:flex;flex-direction:column;gap:.25rem}
+.reptete{display:flex;align-items:flex-start;gap:.5rem;justify-content:space-between}
+.reptete strong{font-size:.88rem;line-height:1.3}
+.repquoi{font-size:.76rem;color:#cbd8e6;line-height:1.5;margin:.15rem 0}
+.repfin{margin-top:auto;padding-top:.4rem;display:flex;justify-content:flex-end}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
 .msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
@@ -125,12 +133,67 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  /* ══ LE REPERTOIRE DE GROSSISTES (#6) ═════════════════════════════════════
+     L ecran web offrait un carnet de grossistes connus, avec un ajout en un
+     clic. Cette fenetre ne l avait pas : il fallait ressaisir nom, courriel,
+     telephone et site a la main, pour un fournisseur deja repertorie. */
+  var REP = null;         // { entrees, cats, pays, peutAjouter } ou null
+  var REP_Q = '', REP_CAT = '', REP_PAYS = '';
+
+  function vueRepertoire(){
+    var d = REP;
+    var h = '<div class="barreoutils">'
+      + '<button class="mini" id="rep-retour">← Mes fournisseurs</button>'
+      + '<input type="search" id="rep-q" placeholder="Nom, description, ville…" value="' + esc(REP_Q) + '">'
+      + '<select id="rep-cat"><option value="">Toutes catégories</option>'
+      + (d.cats || []).map(function(c){
+          return '<option value="' + esc(c) + '"' + (REP_CAT === c ? ' selected' : '') + '>'
+            + esc(c) + '</option>'; }).join('') + '</select>'
+      + '<select id="rep-pays"><option value="">Tous les pays</option>'
+      + (d.pays || []).map(function(p){
+          return '<option value="' + esc(p.cle) + '"' + (REP_PAYS === p.cle ? ' selected' : '') + '>'
+            + esc(p.nom) + '</option>'; }).join('') + '</select>'
+      + '<span class="droite">' + (d.entrees || []).length + ' sur ' + (d.total || 0) + '</span></div>';
+
+    if (!(d.entrees || []).length) {
+      return h + '<div class="carte"><div class="vide">Aucun résultat pour cette recherche.</div></div>';
+    }
+    h += '<div class="repgrille">' + d.entrees.map(function(s){
+      return '<div class="repcarte">'
+        + '<div class="reptete"><strong>' + esc(s.nom) + '</strong>'
+        + '<span class="pill neutre">' + esc(s.cat) + '</span></div>'
+        + '<div class="dt">' + esc(s.paysLibelle) + ' · ' + esc(s.lieu) + '</div>'
+        + '<div class="repquoi">' + esc(s.quoi) + '</div>'
+        + '<div class="dt">' + (s.courriel ? esc(s.courriel) : '')
+        + (s.tel ? (s.courriel ? ' · ' : '') + esc(s.tel) : '') + '</div>'
+        + (s.site ? '<div class="dt">' + esc(s.site) + '</div>' : '')
+        + '<div class="repfin">'
+        // ⚠ Deja present : on le DIT au lieu d offrir un bouton qui refuse.
+        + (s.dejaAjoute
+            ? '<span class="pill bon">Déjà dans vos fournisseurs</span>'
+            : (d.peutAjouter
+                ? '<button class="mini prim" data-repadd="' + esc(s.nom) + '">+ Ajouter</button>'
+                : '<span class="dt">consultation seulement</span>'))
+        + '</div></div>'; }).join('') + '</div>';
+    return h;
+  }
+
+  function chargerRepertoire(){
+    dire('Lecture du répertoire…');
+    appeler('repertoire:donnees', [REP_Q, REP_CAT, REP_PAYS]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      REP = r; dire(''); dessiner();
+    });
+  }
+
   function dessiner(){
+    if (REP) { corps.innerHTML = vueRepertoire(); brancherRepertoire(); return; }
     if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
     var rows = D.lignes || [];
     var h = '<div class="barreoutils">'
       + '<input type="search" id="f-q" placeholder="Nom, contact ou courriel…" value="' + esc(Q) + '">'
       + '<span class="droite">' + (D.total || 0) + ' au total'
+      + '<button class="mini" id="f-repertoire" title="Un carnet de grossistes connus, à ajouter en un clic">🔎 Répertoire</button>'
       + '<button class="prim" id="f-nouveau">+ Nouveau fournisseur</button></span>'
       + '</div>';
     h += '<div class="carte">';
@@ -181,11 +244,48 @@ ${JS_ACTIVITE}${JS_DIRE}
         dire(r.ok ? 'Assistant fournisseur ouvert dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
+    var rp = document.getElementById('f-repertoire');
+    if (rp) rp.onclick = function(){ REP_Q = ''; REP_CAT = ''; REP_PAYS = ''; chargerRepertoire(); };
+  }
+
+  function brancherRepertoire(){
+    var r = document.getElementById('rep-retour');
+    // ⚠ Quitter le repertoire RECHARGE la liste : un grossiste ajoute doit y
+    // apparaitre tout de suite, sinon on croit que l ajout n a pas pris.
+    if (r) r.onclick = function(){ REP = null; charger(); };
+    var q = document.getElementById('rep-q');
+    if (q) q.oninput = function(){
+      REP_Q = q.value;
+      clearTimeout(window._rq);
+      window._rq = setTimeout(chargerRepertoire, 300);
+    };
+    var c = document.getElementById('rep-cat');
+    if (c) c.onchange = function(){ REP_CAT = c.value; chargerRepertoire(); };
+    var p = document.getElementById('rep-pays');
+    if (p) p.onchange = function(){ REP_PAYS = p.value; chargerRepertoire(); };
+    if (q) { try { q.focus({ preventScroll: true }); q.setSelectionRange(q.value.length, q.value.length); } catch (e) {} }
   }
 
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    var ra = t.closest('[data-repadd]');
+    if (ra) {
+      var nom = ra.getAttribute('data-repadd');
+      ra.disabled = true;
+      appeler('repertoire:ajouter', [nom]).then(function(r){
+        if (!r.ok) {
+          ra.disabled = false;
+          dire(r.motif === 'deja_present'
+            ? (esc(nom) + ' est déjà dans vos fournisseurs.') : expliquer(r), 'err');
+          return;
+        }
+        dire(esc(r.nom) + ' ajouté à vos fournisseurs.', 'bon');
+        chargerRepertoire();   // la carte passe a << Deja dans vos fournisseurs >>
+      });
+      return;
+    }
+    if (REP) return;   // rien d autre ne s ecoute dans le repertoire
     var su = t.closest('[data-suppr]');
     if (su) { supprimer(su.getAttribute('data-suppr')); return; }
     if (t.closest('button') || t.closest('input')) return;
@@ -252,11 +352,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   window.szActualiser = function(){
+    // ⚠ Ne jamais redessiner par-dessus le repertoire ouvert : on perdrait la
+    // recherche en cours et la place dans la liste.
+    if (REP) return;
     var q = document.getElementById('f-q');
     if (q && document.activeElement === q && q.value) return;
     charger();
   };
-  window.szRevenir = function(){ charger(); };
+  window.szRevenir = function(){ if (!REP) charger(); };
 
   /* ── MODE ANCRE ── Le meme bouton que les autres ecrans. */
   window.szModeAncre = function(actif){
