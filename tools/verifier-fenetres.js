@@ -282,6 +282,40 @@ try {
   dire(false, 'cadenas', 'le contrôle lui-même a échoué : ' + ((e && e.message) || e));
 }
 
+/* ══ LA NOTE DE VERSION EXISTE-T-ELLE ? ═══════════════════════════════════════
+   ⚠ OUBLIÉE DEUX FOIS DE SUITE, ET SIGNALÉE DEUX FOIS PAR L'UTILISATEUR :
+   3.24.0→3.28.0 puis 3.29.0→3.32.0 ont été publiées sans qu'une seule ligne
+   ne les décrive. La fenêtre « Notes des mises à jour » sautait donc des
+   versions, comme s'il ne s'était rien passé — sur une application qui se met
+   à jour toute seule, c'est la seule chose qui dise ce qui a changé.
+
+   Se le rappeler n'a pas marché. C'est donc une MACHINE qui le vérifie, et
+   elle refuse la publication tant que la note manque. Même raison que le
+   contrôle de l'accent grave et celui des cadenas.
+
+   ⚠ On lit la version dans package.json (la coquille) et les notes dans
+   pont.js (le site) : les deux dépôts doivent être côte à côte, comme pour la
+   parité des ops. Sans le site, on le DIT au lieu de laisser croire au vert. */
+console.log('=== Note de la version publiée ===');
+{
+  const cheminNotes = CANDIDATS.find((c) => fs.existsSync(c));
+  let version = '';
+  try { version = require(path.join(__dirname, '..', 'package.json')).version || ''; } catch (e) {}
+  if (!version) {
+    dire(false, 'version', 'package.json ne dit pas sa version');
+  } else if (!cheminNotes) {
+    console.log('  -   non vérifiée : le dépôt du site n’est pas à côté (assets/js/pont.js)');
+  } else {
+    const src = fs.readFileSync(cheminNotes, 'utf8');
+    // La forme des entrées : '3.32.0': { d: '…', t: '…', r: '…' }
+    const present = new RegExp("['\"]" + version.replace(/\./g, '\\.') + "['\"]\\s*:\\s*\\{").test(src);
+    if (present) dire(true, version, 'sa note est écrite');
+    else dire(false, version, 'AUCUNE note pour cette version — ajoutez une entrée dans NOTES '
+      + '(assets/js/pont.js) avant de publier. La fenêtre « Notes des mises à jour » '
+      + 'sauterait cette version.');
+  }
+}
+
 console.log('=== Parité des opérations du pont ===');
 const chemin = CANDIDATS.find((c) => fs.existsSync(c));
 if (!chemin) {
