@@ -4201,6 +4201,58 @@ module.exports = {
   ],
 
   // ── IMPRESSION DE CODES-BARRES ─────────────────────────────────────────────
+  /* L'EXPLORATEUR EN FENÊTRE (#32). Le jeu porte des photos VARIÉES — une déjà
+     traitée et liée, une vierge, une détourée, une en téléversement — sinon ni
+     les pastilles, ni les colonnes, ni le volet d'aperçu ne seraient dessinés
+     sur autre chose que du vide. */
+  'explorateur.js': [
+    {
+      nom: 'liste garnie',
+      id: '',
+      reponses: {
+        'studio:explorer': {
+          ok: true, charge: true, peutModifier: true,
+          total: 4, trouvees: 4, page: 0, taille: 500, pages: 1,
+          photos: [
+            { id: 'ph_1', code: 'PH-000101', nom: 'Robe noire — face',
+              apercu: 'https://img.sandriza.com/divers/p1.jpg', enAttente: false, isole: true,
+              fond: 'studio', lieId: 'prod_1', lieNom: 'Robe Élégance', lieSku: 'ROB-0001',
+              poids: 184320, statut: 'pret', lotId: 'lot_a', lotNom: 'Import du 12 août',
+              faits: ['detourage'] },
+            { id: 'ph_2', code: 'PH-000102', nom: 'Robe noire — dos',
+              apercu: 'https://img.sandriza.com/divers/p2.jpg', enAttente: false, isole: false,
+              fond: '', lieId: 'prod_1', lieNom: 'Robe Élégance', lieSku: 'ROB-0001',
+              poids: 2201400, statut: 'pret', lotId: 'lot_a', lotNom: 'Import du 12 août', faits: [] },
+            { id: 'ph_3', code: 'PH-000103', nom: 'Manteau beige',
+              apercu: 'https://img.sandriza.com/divers/p3.jpg', enAttente: false, isole: false,
+              fond: '', lieId: null, lieNom: '', lieSku: '', poids: 310000, statut: 'pret',
+              lotId: '', lotNom: '', faits: ['humain'] },
+            { id: 'ph_4', code: 'PH-000104', nom: 'Foulard gris', apercu: '', enAttente: true,
+              isole: false, fond: '', lieId: null, lieNom: '', lieSku: '', poids: 0,
+              statut: 'televersement', lotId: '', lotNom: '', faits: [] },
+          ],
+          tousLesIds: ['ph_1', 'ph_2', 'ph_3', 'ph_4'],
+          filtres: [
+            { cle: 'traitee', nom: 'A déjà reçu un traitement' },
+            { cle: 'nonTraitee', nom: 'Jamais traitée' },
+            { cle: 'isolee', nom: 'Détourée (fond transparent)' },
+            { cle: 'orpheline', nom: 'Aucun produit' },
+          ],
+          traitements: [
+            { cle: 'detourage', nom: 'Détourage' },
+            { cle: 'fantome', nom: 'Mannequin retiré' },
+            { cle: 'humain', nom: 'Porté par un mannequin' },
+          ],
+          fonds: ['studio'],
+          lots: [{ cle: 'lot_a', nom: 'Import du 12 août' }],
+        },
+        'lots:creer': { ok: true, id: 'lot_x', nom: 'Détourage — 4 photos', total: 4, ignorees: 0 },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   'codesbarres.js': [
     {
       // ⚠ FORME REELLE de codesbarres:liste / codesbarres:produit (pont.js) :

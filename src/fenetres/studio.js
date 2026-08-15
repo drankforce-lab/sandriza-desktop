@@ -516,6 +516,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<input type="file" id="fichier" accept="image/*" hidden>'
       + '<div style="text-align:center;margin-top:.5rem;display:flex;gap:.4rem;justify-content:center">'
       + '<button id="ph-ouvrir">📚 Depuis la photothèque</button>'
+      // ⚠ L EXPLORATEUR EST DANS SA PROPRE FENETRE (#32) : le selecteur
+      // ci-contre reste pour prendre UNE photo vite fait, l explorateur sert a
+      // en choisir des centaines — il lui faut de la place et un apercu.
+      + '<button id="ph-explorateur" title="Parcourir la photothèque en grand, avec aperçu">'
+      + '🗂️ Explorateur…</button>'
       // Le suivi reste joignable meme sans lot en cours : c est la qu on
       // retrouve ce qui s est termine, et les echecs a comprendre.
       + '<button id="lots-voir">⚙ Traitements'
@@ -650,6 +655,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     // « Choisir une autre photo » : on repart de zéro.
     if (depot && aUnePhoto() && !RO) { depot.onclick = function(){ reinitPhoto(); }; }
     var phO = document.getElementById('ph-ouvrir'); if (phO) phO.onclick = ouvrirPicker;
+    var px = document.getElementById('ph-explorateur');
+    if (px) px.onclick = function(){
+      appeler('explorateur:ouvrir', []).then(function(r){
+        dire(r && r.ok ? 'Explorateur ouvert dans sa fenêtre.' : expliquer(r),
+          (r && r.ok) ? 'bon' : 'err');
+      });
+    };
     var lv = document.getElementById('lots-voir');
     if (lv) lv.onclick = function(){ LOTS_VUE = true; chargerLots(); dessiner(); };
     brancherLots();

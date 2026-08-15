@@ -1407,7 +1407,7 @@ const OPS_PONT = new Set([
   // terminee, qui n existaient nulle part dans l application.
   'repertoire:donnees', 'repertoire:ajouter',
   // L explorateur de photos du Studio (#28) : la meme phototheque, filtrable.
-  'studio:explorer',
+  'studio:explorer', 'explorateur:ouvrir',
   // Le moteur de LOTS (#27). ⚠ lots:etat est sondee par TOUTES les fenetres —
   // c est elle qui alimente le bandeau qui suit la personne d un module a
   // l autre. Elle doit rester legere : des compteurs, jamais des images.
@@ -2019,7 +2019,7 @@ const LIMITES_PONT = {
   'repertoire:donnees': 20000, 'repertoire:ajouter': 30000,
   /* Parcourt toute la phototheque et rend AUSSI les identifiants du resultat
      complet (pour << tout selectionner >>) : plus lourd qu une page seule. */
-  'studio:explorer': 30000,
+  'studio:explorer': 30000, 'explorateur:ouvrir': 15000,
   /* lots:etat est sondee toutes les 2 s par chaque fenetre : elle doit rendre
      vite ou pas du tout. Creer un lot ecrit la file ; agir la relit. */
   'lots:etat': 10000, 'lots:creer': 30000, 'lots:agir': 20000,
@@ -2217,6 +2217,7 @@ let _journauxOnglet = '';
 let zoneAncrage = null;      // { x, y, largeur, hauteur } en px CSS de la page
 const PAGES_ANCRABLES = () => ({
   tableau: ['Tableau de bord', () => pageTableau()],
+  explorateur: ['Explorateur de photos', () => pageExplorateur()],
   inventaire: ['Inventaire', () => pageInventaire('')],
   commandes: ['Commandes', () => pageCommandes('commandes')],
   produits: ['Produits en vente', () => pageProduits()],
@@ -2296,6 +2297,11 @@ const PAGES_ANCRABLES = () => ({
   'incidents': ['Incidents de sécurité', () => pageIncidents('')],
   'sauvegarde': ['Sauvegarde & Restauration', () => pageSauvegarde('')],
   'studio': ['Studio virtuel', () => pageStudio()],
+  /* ⚠ FENETRE A PART, ET C EST TOUT L INTERET (#32). Le selecteur vivait dans
+     la colonne gauche du Studio : etroit, vignettes minuscules, aucune place
+     pour un apercu. Aucun reglage ne corrigeait ca — il fallait sortir l ecran
+     de la colonne. Large par defaut : c est un explorateur. */
+  'explorateur': ['Explorateur de photos', () => pageExplorateur()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -2306,9 +2312,18 @@ const PAGES_ANCRABLES = () => ({
 // vide. Il est ancre en permanence ; un etat << detache >> retenu d avant
 // cette regle est ignore.
 const NON_DETACHABLES = new Set(['tableau']);
+/* ⚠ DETACHE PAR DEFAUT (#32). L explorateur de photos n a aucun sens ancre :
+   c est justement parce qu il vivait dans la colonne du Studio — etroit,
+   vignettes minuscules, aucune place pour l apercu — qu il a fallu l en
+   sortir. Il s ouvre donc en fenetre, large, des la premiere fois. Rien
+   n empeche de l ancrer ensuite : le choix est retenu comme pour les autres. */
+const DETACHES_PAR_DEFAUT = new Set(['explorateur']);
 const etatAncrage = (cle) => {
   if (NON_DETACHABLES.has(cle)) return 'ancre';
-  return (reglages.get('ancrage') || {})[cle] === 'detache' ? 'detache' : 'ancre';
+  const retenu = (reglages.get('ancrage') || {})[cle];
+  if (retenu === 'detache') return 'detache';
+  if (retenu === 'ancre') return 'ancre';
+  return DETACHES_PAR_DEFAUT.has(cle) ? 'detache' : 'ancre';
 };
 const etatAncragePoser = (cle, etat) => {
   const tout = { ...(reglages.get('ancrage') || {}) };
@@ -3169,6 +3184,7 @@ const { pageTaxes } = require('./fenetres/taxes');
 const { pagePaiementsConfig } = require('./fenetres/paiements-config');
 const { pageClesConfig } = require('./fenetres/cles');
 const { pageStudio } = require('./fenetres/studio');
+const { pageExplorateur } = require('./fenetres/explorateur');
 const { pageLivraison } = require('./fenetres/livraison');
 const { pageConfigRetours } = require('./fenetres/config-retours');
 const { pageConfigNavigation } = require('./fenetres/config-navigation');
