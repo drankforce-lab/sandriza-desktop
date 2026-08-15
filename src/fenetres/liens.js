@@ -78,6 +78,10 @@ button.dgr{border-color:rgba(248,113,113,.5);color:#fca5a5}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
+/* La zone mesurable de la pagination auto : une hauteur REELLE a diviser. */
+.liste{max-height:52vh;overflow-y:auto}
+.pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
+  padding-top:.45rem;font-size:.75rem;color:#8fa1b8}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
   letter-spacing:.06em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody td{padding:.3rem .35rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:top}
@@ -171,6 +175,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   var VUE = (DEPART === 'journal') ? 'journal' : 'liens';
+  // Pagination auto du journal (#30) : le nombre de lignes est MESURE.
+  var JPAGE = 0, JPARPAGE = 20;
   var ETAT = { version: '', paquets: [], liens: [], comptes: [], journal: [],
                conservation: 365, neuf: null, formulaire: (DEPART === 'nouveau') };
 
@@ -253,7 +259,13 @@ ${JS_ACTIVITE}${JS_DIRE}
                 ? '<button class="mini" data-renvoyer="' + esc(l.id) + '">✉ Renvoyer</button> '
                   + '<button class="mini dgr" data-revoquer="' + esc(l.id) + '">'
                   + (ARME === l.id ? 'Confirmer ?' : 'Révoquer') + '</button> '
-                : '')
+                /* ⚠ SUPPRIMER N EST OFFERT QUE SUR UN LIEN PERIME (#30). Sur un
+                   lien ACTIF, le retirer le rendrait invisible ici tout en le
+                   laissant fonctionner pour qui a l adresse : une porte ouverte
+                   qu on ne voit plus. Il faut le revoquer d abord. */
+                : '<button class="mini dgr" data-supprimer="' + esc(l.id) + '" '
+                  + 'title="Retirer de la liste — le journal de ses accès est conservé">'
+                  + (ARME === 'sup:' + l.id ? 'Confirmer ?' : '🗑') + '</button> ')
             + '<button class="mini" data-journal="' + esc(l.id) + '">Journal</button>'
           + '</td></tr>');
         if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
@@ -464,6 +476,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-revoquer]'), function(b){
       b.onclick = function(){ revoquer(b.getAttribute('data-revoquer')); };
     });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-supprimer]'), function(b){
+      b.onclick = function(){ supprimer(b.getAttribute('data-supprimer')); };
+    });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-journal]'), function(b){
       b.onclick = function(){
         VUE = 'journal';
@@ -537,6 +552,28 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* Retirer de la liste un lien PERIME (#30).
+     ⚠ ON DIT CE QUI RESTE, PAS SEULEMENT CE QUI PART : le journal de ses acces
+     est conserve — qui a ouvert la page, qui a telecharge, quand. C est une
+     trace de securite, et l effacer avec le lien laisserait un trou dans
+     l historique la ou quelqu un voudrait regarder apres coup. */
+  function supprimer(id){
+    if (ARME !== 'sup:' + id) {
+      ARME = 'sup:' + id;
+      dessinerLiens();
+      dire('Cliquez « Confirmer ? » pour retirer ce lien de la liste. '
+        + 'Son journal d’accès est conservé.', 'att');
+      return;
+    }
+    ARME = '';
+    dire('Suppression…');
+    appeler('liens:supprimer', [id]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); dessinerLiens(); return; }
+      dire('Lien retiré de la liste — son journal d’accès reste consultable.', 'bon');
+      charger(false);
+    });
+  }
+
   // ════════════════════════════════════════════════════════════════════════
   // VUE « JOURNAL »
   // ════════════════════════════════════════════════════════════════════════
@@ -559,9 +596,18 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!ETAT.journal.length) {
       h.push('<div class="vide">Aucun événement pour ce filtre.</div>');
     } else {
-      h.push('<table><thead><tr><th>Quand</th><th>Canal</th><th>Événement</th>'
+      /* ── PAGINATION AUTO (#30) ────────────────────────────────────────────
+         Le journal deversait ses 500 evenements d un coup : on defilait pour
+         retrouver un acces, et la fenetre agrandie n en montrait pas plus.
+         Le nombre de lignes se MESURE maintenant sur la hauteur reelle
+         (szAutoPagination, socle) — jamais devine. */
+      var tot = ETAT.journal.length;
+      var pages = Math.max(1, Math.ceil(tot / JPARPAGE));
+      if (JPAGE >= pages) JPAGE = pages - 1;
+      var vue = ETAT.journal.slice(JPAGE * JPARPAGE, JPAGE * JPARPAGE + JPARPAGE);
+      h.push('<div class="liste"><table><thead><tr><th>Quand</th><th>Canal</th><th>Événement</th>'
         + '<th>Adresse IP</th><th>Lien</th><th>Détail</th></tr></thead><tbody>');
-      ETAT.journal.forEach(function(e){
+      vue.forEach(function(e){
         h.push('<tr>'
           + '<td class="dt" style="white-space:nowrap">' + quand(e.au) + '</td>'
           + '<td>' + esc(CANAUX[e.canal] || e.canal) + '</td>'
@@ -571,7 +617,14 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td class="dt">' + esc(e.detail || '') + (e.qui ? ' · ' + esc(e.qui) : '') + '</td>'
           + '</tr>');
       });
-      h.push('</tbody></table>');
+      h.push('</tbody></table></div>');
+      if (pages > 1) {
+        h.push('<div class="pagi"><button class="mini" id="j-prec"' + (JPAGE <= 0 ? ' disabled' : '')
+          + '>‹ Précédent</button><span>Page ' + (JPAGE + 1) + ' sur ' + pages
+          + ' — ' + tot + ' événement' + (tot > 1 ? 's' : '') + '</span>'
+          + '<button class="mini" id="j-suiv"' + (JPAGE >= pages - 1 ? ' disabled' : '')
+          + '>Suivant ›</button></div>');
+      }
     }
     h.push('</div>');
 
@@ -589,6 +642,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (jt) jt.onclick = function(){ chargerJournal(filtre, ''); };
     var jvj = document.getElementById('j-vers-journaux');
     if (jvj) jvj.onclick = function(){ if (P && P.ouvrirJournaux) P.ouvrirJournaux('comptable'); };
+    var jp = document.getElementById('j-prec');
+    if (jp) jp.onclick = function(){ JPAGE = Math.max(0, JPAGE - 1); dessinerJournal(filtre, lien); };
+    var js = document.getElementById('j-suiv');
+    if (js) js.onclick = function(){ JPAGE = JPAGE + 1; dessinerJournal(filtre, lien); };
+    /* ⚠ MESURE APRES LE DESSIN, jamais avant : la hauteur reelle n existe
+       qu une fois le tableau dans la page. Le socle ne rappelle que si le
+       compte a CHANGE, donc pas de boucle de redessin. */
+    szAutoPagination('.liste', function(n){
+      JPARPAGE = n; JPAGE = 0; dessinerJournal(filtre, lien);
+    });
   }
 
   function chargerJournal(canal, lien){

@@ -106,6 +106,17 @@ body{background:#0e1522;color:#e8edf5;
 .phpast .pt{font-size:.6rem;line-height:1;padding:.12rem .22rem;border-radius:4px;
   background:rgba(8,12,20,.75);color:#8fa1b8}
 .phpast .pt.fait{color:#4ade80}
+/* Le panier venu de l explorateur : ce qu on s apprete a traiter. */
+.panier{margin-top:.55rem;padding:.5rem .6rem;border-radius:10px;
+  background:rgba(201,169,126,.1);border:1px solid rgba(201,169,126,.35)}
+.panier .pt{display:flex;align-items:center;gap:.4rem;font-size:.8rem;margin-bottom:.4rem}
+.panier .pt .dt{color:#8fa1b8;font-size:.74rem}
+.panier .pt button{margin-left:auto}
+.panier .pv{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.panier .pv img{width:2.2rem;height:2.2rem;object-fit:contain;border-radius:5px;background:#0b1220}
+.panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:rgba(255,255,255,.06)}
+.panier .pv .pl{font-size:.72rem;color:#8fa1b8}
+.panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
 .lots{display:flex;flex-direction:column;gap:.5rem;max-height:26rem;overflow-y:auto}
 .lotc{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:.5rem .65rem}
@@ -482,6 +493,40 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (f) f.onclick = function(){ LOTS_VUE = false; dessiner(); };
   }
 
+  /* ══ LE PANIER VENU DE L EXPLORATEUR (#32) ═══════════════════════════════
+     Sa demande : << la selection doit etre ramenee au studio virtuel, et l on
+     execute le lot a cet endroit >>. L explorateur CHOISIT, le Studio DECIDE —
+     c est ici qu on voit la voie, l ambiance et le modele, donc ici que le
+     choix du traitement a du sens.
+     ⚠ ON SONDE, on ne recoit pas : deux fenetres natives ne peuvent pas se
+     parler. Le panier vit dans la page, les deux le lisent. */
+  var PANIER = [];
+  function panierHtml(){
+    if (!PANIER.length) return '';
+    var n = PANIER.length;
+    return '<div class="panier"><div class="pt">'
+      + '<strong>' + n + ' photo' + (n > 1 ? 's' : '') + '</strong> '
+      + '<span class="dt">venue' + (n > 1 ? 's' : '') + ' de l’explorateur</span>'
+      + '<button class="mini" id="pn-vider" title="Oublier cette sélection">✕</button></div>'
+      + '<div class="pv">' + PANIER.slice(0, 8).map(function(p){
+          return p.apercu ? '<img src="' + esc(p.apercu) + '" alt="" loading="lazy">'
+                          : '<span class="tr"></span>'; }).join('')
+      + (n > 8 ? '<span class="pl">+' + (n - 8) + '</span>' : '') + '</div>'
+      + '<button class="prim" id="pn-lot">⚙ Traiter ' + (n > 1 ? ('ces ' + n) : 'cette photo') + ' en lot…</button>'
+      + '</div>';
+  }
+
+  function chargerPanier(){
+    appeler('panier:lire', []).then(function(r){
+      if (!r || !r.ok) return;
+      var avant = PANIER.length;
+      PANIER = r.photos || [];
+      // On ne redessine que si ca a change : sinon on redessinerait toutes les
+      // deux secondes sous les doigts de quelqu un.
+      if (PANIER.length !== avant && !PICKER && !LOTS_VUE) dessiner();
+    });
+  }
+
   function depotHtml(){
     // Le suivi des lots prend toute la colonne : c est un ecran, pas un encart.
     if (LOTS_VUE) {
@@ -525,7 +570,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       // retrouve ce qui s est termine, et les echecs a comprendre.
       + '<button id="lots-voir">⚙ Traitements'
       + ((LOTS && LOTS.lots && LOTS.lots.length) ? ' (' + LOTS.lots.length + ')' : '')
-      + '</button></div>';
+      + '</button></div>'
+      + panierHtml();
   }
 
   function voiesHtml(){
@@ -664,6 +710,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     var lv = document.getElementById('lots-voir');
     if (lv) lv.onclick = function(){ LOTS_VUE = true; chargerLots(); dessiner(); };
+    var pnv = document.getElementById('pn-vider');
+    if (pnv) pnv.onclick = function(){
+      appeler('panier:vider', []).then(function(){ PANIER = []; dessiner(); });
+    };
+    var pnl = document.getElementById('pn-lot');
+    if (pnl) pnl.onclick = function(){
+      // Le meme voile que depuis le selecteur : une seule facon de lancer.
+      SEL = {};
+      PANIER.forEach(function(p){ SEL[p.id] = true; });
+      ouvrirLotVoile();
+    };
     brancherLots();
     var phR = document.getElementById('ph-retour'); if (phR) phR.onclick = function(){ PICKER = false; PHOTHQ = []; PH_Q = ''; dessiner(); };
     var phQ = document.getElementById('ph-q');
@@ -1292,6 +1349,8 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   charger();
   lotsSuivre();
+  chargerPanier();
+  setInterval(function(){ if (!document.hidden) chargerPanier(); }, 2000);
   if (${explo ? 'true' : 'false'}) ouvrirPicker();
   if (${lotsDep ? 'true' : 'false'}) { LOTS_VUE = true; chargerLots(); }
 })();

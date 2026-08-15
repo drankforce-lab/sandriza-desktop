@@ -68,6 +68,20 @@ tbody td{padding:.22rem .4rem;border-top:1px solid rgba(255,255,255,.05);
 tbody tr:hover td{background:rgba(255,255,255,.045)}
 tbody tr.pris td{background:rgba(201,169,126,.16)}
 tbody tr.actif td{box-shadow:inset 0 0 0 1px #c9a97e}
+/* La case a cocher : visible, cliquable, et distincte du clic sur la ligne. */
+th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center}
+.coche{display:inline-flex;align-items:center;justify-content:center;
+  width:1.05rem;height:1.05rem;border-radius:5px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.06);
+  font-size:.72rem;line-height:1;color:#17202c}
+.coche:hover{border-color:#c9a97e}
+.coche.on{background:#c9a97e;border-color:#c9a97e;font-weight:700}
+.coche.flot{position:absolute;top:.25rem;left:.25rem;z-index:2;
+  background:rgba(8,12,20,.72);color:#e8edf5}
+.coche.flot.on{background:#c9a97e;color:#17202c}
+.liste{max-height:calc(100vh - 15rem);overflow-y:auto}
+.pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
+  padding:.45rem .2rem 0;font-size:.75rem;color:#8fa1b8}
 td.vig{width:2.4rem;max-width:2.4rem;padding:.1rem .2rem}
 td.vig img{width:2rem;height:2rem;object-fit:contain;border-radius:4px;background:#0b1220;display:block}
 /* Affichage GRILLE : quand on cherche a l oeil plutot qu au nom. */
@@ -150,6 +164,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   var Q = '', FILTRES = [], SANS = '', LOT = '', TRI = 'recent';
   var SEL = {};            // { id: true }
   var ANCRE = null;        // index de depart pour la selection Maj-clic
+  // Pagination (#30) : le nombre de lignes est MESURE sur la hauteur reelle.
+  // ⚠ SEL est keye par IDENTIFIANT : changer de page n y touche pas.
+  var PAGE = 0, PARPAGE = 25;
   var COURANT = null;      // la photo affichee dans l apercu
   var OCC = false;
 
@@ -256,33 +273,75 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h ? '<span class="pastilles">' + h + '</span>' : '';
   }
 
-  function dessinerListe(){
+  /* ⚠ PAGINATION, MAIS LA SELECTION EST GARDEE (demande du 2026-08-14 :
+     << une retenue des cases en cas de changement de page >>). SEL est keye par
+     IDENTIFIANT, pas par position : changer de page, trier ou filtrer n y
+     touche pas. C est ce qui permet de cocher trente photos page 1, dix page 4,
+     et de lancer les quarante d un coup.
+     ⚠ LES INDICES SONT GLOBAUX, pas ceux de la page : le Maj-clic peut donc
+     prendre une plage qui TRAVERSE plusieurs pages. */
+  function pageCourante(){
     var ph = (D && D.photos) || [];
-    if (!ph.length) return vueVide();
-    return '<table><thead><tr><th></th><th>Nom</th><th>Code</th><th>Produit lié</th>'
+    var pages = Math.max(1, Math.ceil(ph.length / PARPAGE));
+    if (PAGE >= pages) PAGE = pages - 1;
+    if (PAGE < 0) PAGE = 0;
+    return { ph: ph, pages: pages, debut: PAGE * PARPAGE,
+      vue: ph.slice(PAGE * PARPAGE, PAGE * PARPAGE + PARPAGE) };
+  }
+
+  function pagerHtml(pc){
+    if (pc.pages <= 1) return '';
+    return '<div class="pagi"><button class="jeton" id="p-prec"' + (PAGE <= 0 ? ' disabled' : '')
+      + '>‹ Précédent</button><span>Page ' + (PAGE + 1) + ' sur ' + pc.pages
+      + ' — ' + pc.ph.length + ' photo' + (pc.ph.length > 1 ? 's' : '') + '</span>'
+      + '<button class="jeton" id="p-suiv"' + (PAGE >= pc.pages - 1 ? ' disabled' : '')
+      + '>Suivant ›</button></div>';
+  }
+
+  // Toutes les photos de la PAGE sont-elles cochees ? (pour la case d en-tete)
+  function pageToutePrise(pc){
+    return pc.vue.length > 0 && pc.vue.every(function(p){ return !!SEL[p.id]; });
+  }
+
+  function dessinerListe(){
+    var pc = pageCourante();
+    if (!pc.ph.length) return vueVide();
+    return '<div class="liste"><table><thead><tr>'
+      // ⚠ UNE CASE D EN-TETE : cocher toute la page d un geste. Sans elle, la
+      // case par ligne n aiderait pas beaucoup sur une page de trente.
+      + '<th class="ck"><span class="coche' + (pageToutePrise(pc) ? ' on' : '')
+      + '" id="ck-page" title="Cocher toute la page">' + (pageToutePrise(pc) ? '✓' : '') + '</span></th>'
+      + '<th></th><th>Nom</th><th>Code</th><th>Produit lié</th>'
       + '<th>État</th><th>Poids</th></tr></thead><tbody>'
-      + ph.map(function(p, i){
+      + pc.vue.map(function(p, k){
+          var i = pc.debut + k;
           return '<tr data-i="' + i + '" data-id="' + esc(p.id) + '"'
             + (SEL[p.id] ? ' class="pris' + (COURANT === p.id ? ' actif' : '') + '"'
                          : (COURANT === p.id ? ' class="actif"' : '')) + '>'
+            + '<td class="ck"><span class="coche' + (SEL[p.id] ? ' on' : '') + '" data-ck="'
+              + esc(p.id) + '">' + (SEL[p.id] ? '✓' : '') + '</span></td>'
             + '<td class="vig">' + (p.apercu ? '<img src="' + esc(p.apercu) + '" loading="lazy" alt="">' : '') + '</td>'
             + '<td>' + esc(p.nom) + '</td>'
             + '<td>' + esc(p.code || '') + '</td>'
             + '<td>' + esc(p.lieNom || '—') + '</td>'
             + '<td>' + pastilles(p) + '</td>'
             + '<td>' + poids(p.poids) + '</td></tr>'; }).join('')
-      + '</tbody></table>';
+      + '</tbody></table></div>' + pagerHtml(pc);
   }
 
   function dessinerGrille(){
-    var ph = (D && D.photos) || [];
-    if (!ph.length) return vueVide();
-    return '<div class="grille">' + ph.map(function(p, i){
+    var pc = pageCourante();
+    if (!pc.ph.length) return vueVide();
+    return '<div class="liste"><div class="grille">' + pc.vue.map(function(p, k){
+      var i = pc.debut + k;
       return '<div class="vig' + (SEL[p.id] ? ' pris' : '') + (COURANT === p.id ? ' actif' : '')
         + '" data-i="' + i + '" data-id="' + esc(p.id) + '" title="' + esc(p.nom) + '">'
+        + '<span class="coche flot' + (SEL[p.id] ? ' on' : '') + '" data-ck="' + esc(p.id) + '">'
+        + (SEL[p.id] ? '✓' : '') + '</span>'
         + (p.apercu ? '<img src="' + esc(p.apercu) + '" loading="lazy" alt="">'
                     : '<div style="height:6rem"></div>')
-        + '<div class="nm">' + esc(p.nom) + '</div></div>'; }).join('') + '</div>';
+        + '<div class="nm">' + esc(p.nom) + '</div></div>'; }).join('')
+      + '</div></div>' + pagerHtml(pc);
   }
 
   function vueVide(){
@@ -344,11 +403,34 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function brancherZone(){
+    /* ⚠ LA CASE A COCHER EST UN GESTE A PART, et elle doit arreter l evenement :
+       sans stopPropagation, le clic remonterait a la ligne, qui remet la
+       selection a UNE SEULE photo — donc cocher aurait decoche tout le reste. */
+    zone.querySelectorAll('[data-ck]').forEach(function(el){
+      el.onclick = function(ev){
+        ev.stopPropagation();
+        var id = el.getAttribute('data-ck');
+        if (SEL[id]) delete SEL[id]; else SEL[id] = true;
+        dessiner();
+      };
+    });
+    var ckp = document.getElementById('ck-page');
+    if (ckp) ckp.onclick = function(ev){
+      ev.stopPropagation();
+      var pc = pageCourante();
+      var tout = pageToutePrise(pc);
+      pc.vue.forEach(function(p){ if (tout) delete SEL[p.id]; else SEL[p.id] = true; });
+      dessiner();
+    };
     zone.querySelectorAll('[data-i]').forEach(function(el){
       el.onclick = function(ev){
         surClicLigne(parseInt(el.getAttribute('data-i'), 10), el.getAttribute('data-id'), ev);
       };
     });
+    var pp = document.getElementById('p-prec');
+    if (pp) pp.onclick = function(){ PAGE = Math.max(0, PAGE - 1); dessiner(); };
+    var ps = document.getElementById('p-suiv');
+    if (ps) ps.onclick = function(){ PAGE = PAGE + 1; dessiner(); };
   }
 
   function dessinerPied(){
@@ -360,8 +442,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       '<button class="jeton" id="a-tout"' + (dispo ? '' : ' disabled') + '>Tout (' + dispo + ')</button>'
       + '<button class="jeton" id="a-inv"' + (dispo ? '' : ' disabled') + '>Inverser</button>'
       + '<button class="jeton" id="a-rien"' + (n ? '' : ' disabled') + '>Vider</button>'
-      + '<button class="prim" id="a-lot"' + (n ? '' : ' disabled') + '>⚙ Traiter '
-      + (n ? ('ces ' + n) : '') + ' en lot…</button>';
+      /* ⚠ ON N EXECUTE PLUS LE LOT ICI (corrige le 2026-08-14, sa demande :
+         << la selection doit etre ramenee au studio virtuel et l on execute le
+         lot a cet endroit >>). L explorateur CHOISIT, le Studio DECIDE — c est
+         la ou l on voit la voie, l ambiance et le modele, donc la ou le choix
+         du traitement a du sens. */
+      + '<button class="prim" id="a-envoyer"' + (n ? '' : ' disabled') + '>'
+      + '→ Envoyer au Studio' + (n ? ' (' + n + ')' : '') + '</button>';
     var t = document.getElementById('a-tout');
     if (t) t.onclick = function(){
       ((D && D.tousLesIds) || []).forEach(function(id){ SEL[id] = true; }); dessiner(); };
@@ -371,8 +458,18 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (SEL[id]) delete SEL[id]; else SEL[id] = true; }); dessiner(); };
     var r = document.getElementById('a-rien');
     if (r) r.onclick = function(){ SEL = {}; dessiner(); };
-    var lo = document.getElementById('a-lot');
-    if (lo) lo.onclick = ouvrirLot;
+    var en = document.getElementById('a-envoyer');
+    if (en) en.onclick = function(){
+      var ids = Object.keys(SEL);
+      if (!ids.length) return;
+      en.disabled = true;
+      appeler('panier:poser', [ids]).then(function(r){
+        en.disabled = false;
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        dire(r.combien + ' photo' + (r.combien > 1 ? 's' : '') + ' envoyée'
+          + (r.combien > 1 ? 's' : '') + ' au Studio — le traitement se lance là-bas.', 'bon');
+      });
+    };
   }
 
   function dessiner(){
@@ -382,6 +479,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     dessinerPied();
     var s = document.getElementById('sous');
     if (s && D) s.textContent = (D.trouvees || 0) + ' sur ' + (D.total || 0);
+    /* ⚠ LA MESURE VIENT APRES LE DESSIN : la hauteur reelle n existe qu une
+       fois le tableau dans la page. Le socle ne rappelle que si le compte a
+       CHANGE — sinon on redessinerait en boucle. La grille n est pas mesuree
+       (ses tuiles n ont pas de hauteur de ligne) : elle garde son compte. */
+    if (VUE === 'liste') {
+      szAutoPagination('.liste', function(n){ PARPAGE = n; PAGE = 0; dessiner(); });
+    }
   }
 
   /* ══ LANCER UN LOT ══════════════════════════════════════════════════════

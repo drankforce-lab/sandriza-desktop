@@ -1408,6 +1408,12 @@ const OPS_PONT = new Set([
   'repertoire:donnees', 'repertoire:ajouter',
   // L explorateur de photos du Studio (#28) : la meme phototheque, filtrable.
   'studio:explorer', 'explorateur:ouvrir',
+  // Retirer de la liste un lien PERIME (#30). ⚠ Le journal de ses acces RESTE :
+  // on supprime la cle, pas la memoire de ce qu elle a fait.
+  'liens:supprimer',
+  // Le panier partage entre l explorateur et le Studio (#32) : l un CHOISIT,
+  // l autre DECIDE. Deux fenetres natives ne peuvent pas se parler.
+  'panier:poser', 'panier:lire', 'panier:vider',
   // Le moteur de LOTS (#27). ⚠ lots:etat est sondee par TOUTES les fenetres —
   // c est elle qui alimente le bandeau qui suit la personne d un module a
   // l autre. Elle doit rester legere : des compteurs, jamais des images.
@@ -1771,6 +1777,21 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
   return true;
 });
 
+/* ⚠ FENETRE A PART ENTIERE, PAS UN ECRAN ANCRABLE (#32, corrige le 2026-08-14).
+   Ouvert par dockOuvrir, l explorateur prenait la place du STUDIO dans la
+   fenetre principale : on ouvrait l explorateur et l on perdait le studio
+   derriere, remplace par << Ecran detache dans sa propre fenetre >>. Or les
+   deux servent ENSEMBLE — on choisit dans l un pour travailler dans l autre.
+   Il passe donc par ouvrirNative, qui ne touche pas au dock. */
+ipcMain.handle('fenetre:explorateur', () => {
+  const win = ouvrirNative('explorateur', 'Explorateur de photos', pageExplorateur(),
+    { width: 1180, height: 720, minWidth: 900, minHeight: 520 });
+  if (win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  }
+  return true;
+});
+
 ipcMain.handle('fenetre:client', (e, id) => {
   const cle = 'client-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
@@ -2020,6 +2041,8 @@ const LIMITES_PONT = {
   /* Parcourt toute la phototheque et rend AUSSI les identifiants du resultat
      complet (pour << tout selectionner >>) : plus lourd qu une page seule. */
   'studio:explorer': 30000, 'explorateur:ouvrir': 15000,
+  'liens:supprimer': 20000,
+  'panier:poser': 20000, 'panier:lire': 20000, 'panier:vider': 15000,
   /* lots:etat est sondee toutes les 2 s par chaque fenetre : elle doit rendre
      vite ou pas du tout. Creer un lot ecrit la file ; agir la relit. */
   'lots:etat': 10000, 'lots:creer': 30000, 'lots:agir': 20000,
@@ -2217,7 +2240,6 @@ let _journauxOnglet = '';
 let zoneAncrage = null;      // { x, y, largeur, hauteur } en px CSS de la page
 const PAGES_ANCRABLES = () => ({
   tableau: ['Tableau de bord', () => pageTableau()],
-  explorateur: ['Explorateur de photos', () => pageExplorateur()],
   inventaire: ['Inventaire', () => pageInventaire('')],
   commandes: ['Commandes', () => pageCommandes('commandes')],
   produits: ['Produits en vente', () => pageProduits()],

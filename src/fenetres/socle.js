@@ -576,7 +576,55 @@ window.addEventListener('pagehide', function(){
 });
 `;
 
-const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS + JS_LOTS;
+/* ══ PAGINATION AUTOMATIQUE (#30) ═══════════════════════════════════════════
+   Sa demande : << tous les journaux devraient avoir de la pagination auto >>,
+   et la meme chose dans les liens.
+
+   Le patron existait DEJA, dans commandes.js : autant de lignes que la hauteur
+   REELLE le permet — mesuree, jamais devinee — donc jamais de glissiere, et
+   une fenetre agrandie montre plus de lignes au lieu de laisser du vide. Il
+   est ici pour que les autres ecrans en heritent au lieu de le recopier : une
+   regle recopiee diverge au premier ajustement.
+
+   Usage :
+     szAutoPagination('.liste', function(n){ F.parPage = n; F.page = 0; charger(); });
+   Le rappel n est appele QUE si le compte a change — sinon on rechargerait la
+   liste a chaque redimensionnement d un pixel.
+
+   ⚠ ON NE TOUCHE A RIEN SI LA MESURE EST ABSURDE (hauteur nulle ou NaN) :
+   c est le cas au banc, ou rien n est reellement dispose. Un compte devine
+   dans ces conditions ferait recharger la liste avec une valeur inventee. */
+const JS_AUTOPAGE = `
+var _szAutoT = null, _szAutoDernier = 0;
+
+function szAutoPagination(selecteur, surChangement){
+  function mesurer(){
+    var g = document.querySelector(selecteur);
+    if (!g) return;
+    var th = g.querySelector('thead');
+    var tr = g.querySelector('tbody tr');
+    var hL = tr ? tr.offsetHeight : 0;
+    if (!(hL > 0)) hL = 36;
+    var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
+    if (!(dispo > 0)) return;
+    var n = Math.max(5, Math.floor(dispo / hL));
+    if (!isFinite(n) || n === _szAutoDernier) return;
+    _szAutoDernier = n;
+    try { surChangement(n); } catch (e) {}
+  }
+  mesurer();
+  if (!_szAutoT) {
+    window.addEventListener('resize', function(){
+      clearTimeout(_szAutoT);
+      _szAutoT = setTimeout(mesurer, 180);
+    });
+    _szAutoT = -1;   // l ecouteur n est pose qu une fois
+  }
+  return mesurer;
+}
+`;
+
+const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS + JS_LOTS + JS_AUTOPAGE;
 
 const JS_SOCLE = `
 var P = window.szPont;
