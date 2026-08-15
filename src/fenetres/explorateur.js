@@ -481,6 +481,16 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire(r.combien + ' photo' + (r.combien > 1 ? 's' : '') + ' envoyée'
           + (r.combien > 1 ? 's' : '') + ' au Studio — le traitement se lance là-bas.', 'bon');
+        /* ⚠ ON FERME, ET C EST LE GESTE JUSTE (demande du 2026-08-14 : << quand
+           on fait envoyer au studio ca devrait fermer l explorateur
+           automatiquement >>). L explorateur est un SELECTEUR : une fois la
+           selection remise au Studio, il n a plus rien a dire, et le laisser
+           ouvert masque justement la fenetre ou le travail continue. Le Studio
+           relit son panier tout seul — il n a pas besoin qu on le previenne.
+           ⚠ Un court delai, pour que le message de confirmation se lise avant
+           que la fenetre disparaisse : fermer dans la meme milliseconde donne
+           l impression que rien ne s est passe. */
+        setTimeout(function(){ if (P && P.fermer) P.fermer(); }, 700);
       });
     };
   }

@@ -602,6 +602,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function nomModele(m){ return m.charAt(0).toUpperCase() + m.slice(1); }
+  function nomPose(p){
+    var x = POSES.filter(function(o){ return o.cle === p; })[0];
+    return x ? x.t.replace(' (défaut)', '') : p;
+  }
   function sigActuelle(){
     var p = PHOTO_ID || (PHOTO ? (PHOTO.length + ':' + PHOTO.slice(0, 40)) : '');
     return p + '|' + PRESET;
@@ -1028,6 +1032,47 @@ ${JS_ACTIVITE}${JS_DIRE}
     return fermer;
   }
 
+  /* ══ LE LOT EMPORTE LA MISE EN SCÈNE (corrigé le 2026-08-14) ═══════════════
+     ⚠⚠ IL PARTAIT EN RÉGLAGES D USINE, ET PERSONNE NE POUVAIT LE VOIR. Les
+     deux lanceurs de lot envoyaient << options vide >> EN DUR : la voie, l ambiance,
+     le mannequin et la pose choisis a l ecran juste au-dessus etaient purement
+     et simplement jetes. 500 photos revenaient donc en Sophia / trois-quarts /
+     aucun decor — et les 500 etaient facturees. C est exactement le contraire
+     de ce qui avait ete demande : << je traite 500 photos avec des
+     configurations particulieres >>.
+     ⚠ LA CASE EST COCHEE PAR DEFAUT, mais elle EXISTE : un lot de simple
+     detourage n a que faire d une ambiance, et l on doit pouvoir la refuser
+     sans avoir a defaire ses reglages a l ecran. */
+  function reglagesActuels(){
+    var o = {};
+    if (PRESET) o.preset = PRESET;
+    if (VOIE === 'humain') {
+      o.modele = MODELE_SEL;
+      o.pose = POSE_SEL;
+    }
+    return o;
+  }
+  function resumeReglages(){
+    var b = [];
+    if (PRESET) {
+      var p = PRESETS.filter(function(x){ return x.cle === PRESET; })[0];
+      b.push('ambiance ' + ((p && p.label) || PRESET));
+    }
+    if (VOIE === 'humain') { b.push(nomModele(MODELE_SEL)); b.push(nomPose(POSE_SEL)); }
+    return b.join(' · ');
+  }
+  function reglagesLotHtml(){
+    var r = resumeReglages();
+    if (!r) {
+      return '<p style="color:#8fa1b8;margin:.6rem 0 0">Aucune ambiance ni mise en scène '
+        + 'choisie à l’écran : le lot partira avec les réglages par défaut.</p>';
+    }
+    return '<label class="rc"><input type="checkbox" id="lot-reglages" checked> '
+      + '<span><strong>Appliquer la mise en scène de l’écran</strong> — ' + esc(r) + '.<br>'
+      + '<span style="font-size:.74rem;color:#8fa1b8">Décochez pour un traitement brut, '
+      + 'sans ambiance ni pose imposée.</span></span></label>';
+  }
+
   function ouvrirLotVoile(){
     var ids = Object.keys(SEL);
     /* ⚠ UNE SEULE PHOTO EST UN LOT VALIDE. Le garde etait << moins de 2 >>,
@@ -1046,6 +1091,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</select></div>'
       + '<div class="ch"><label for="lot-nom">Nom du lot (pour le retrouver dans le suivi)</label>'
       + '<input id="lot-nom" placeholder="Collection automne — détourage"></div>'
+      + reglagesLotHtml()
       + '<label class="rc"><input type="checkbox" id="lot-prio"> '
       + '<span><strong>Priorité haute</strong> — ce lot passe devant ceux qui attendent.</span></label>'
       + '<label class="rc"><input type="checkbox" id="lot-refaire"> '
@@ -1062,7 +1108,8 @@ ${JS_ACTIVITE}${JS_DIRE}
           var g = function(i){ var e = document.getElementById(i); return e ? e.value : ''; };
           var c = function(i){ var e = document.getElementById(i); return !!(e && e.checked); };
           appeler('lots:creer', [{ ids: ids, quoi: g('lot-quoi'), nom: g('lot-nom'),
-            priorite: c('lot-prio') ? 1 : 0, refaire: c('lot-refaire'), options: {} }]).then(function(r){
+            priorite: c('lot-prio') ? 1 : 0, refaire: c('lot-refaire'),
+            options: c('lot-reglages') ? reglagesActuels() : {} }]).then(function(r){
             fermer();
             if (!r.ok) {
               dire(r.motif === 'toutes_deja_faites'
