@@ -1390,6 +1390,10 @@ const OPS_PONT = new Set([
   // COMPLET (en-tete, pied, desabonnement) que la fenetre ne saurait pas refaire.
   'campagnes:form', 'campagnes:ecrire', 'chaines:form', 'chaines:ecrire',
   'nl:modele', 'nl:apercu',
+  // Segments d envoi composables : le menu << Segment >> d une campagne lisait
+  // deux entrees ECRITES EN DUR. segments:apercu compte SANS enregistrer, pour
+  // voir la portee d une recette pendant qu on l ecrit.
+  'segments:donnees', 'segments:apercu', 'segments:ecrire', 'segments:supprimer',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
   'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer', 'adresse:suggerer',
@@ -1983,6 +1987,10 @@ const LIMITES_PONT = {
   'campagnes:form': 20000, 'campagnes:ecrire': 60000,
   'chaines:form': 20000, 'chaines:ecrire': 60000,
   'nl:modele': 15000, 'nl:apercu': 20000,
+  /* Compter un segment relit TOUTES les commandes pour batir le profil de
+     chaque abonnee : plus long qu une simple lecture de config. */
+  'segments:donnees': 30000, 'segments:apercu': 30000,
+  'segments:ecrire': 30000, 'segments:supprimer': 30000,
   'fidelisation:sondage:form': 20000, 'fidelisation:sondage:ecrire': 30000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */

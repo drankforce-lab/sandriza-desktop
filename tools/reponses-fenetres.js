@@ -109,6 +109,55 @@ const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAA
 const VERROU = { ok: true, obtenu: true, horsLigne: false, parQui: '' };
 const IDENTITE = { ok: true, nom: 'Brigitte Brousseau', role: 'Administratrice' };
 
+/* Jeu commun aux deux cas de SEGMENTS (liste et constructeur). Il porte les
+   CHAMPS avec leur `type` — c'est lui qui décide du contrôle de valeur dessiné
+   (nombre, catégorie, segment automatique, oui/non, texte) — et deux segments
+   dont l'un est DÉJÀ UTILISÉ par une campagne, l'autre de portée NULLE : sans
+   ces deux cas, ni le refus de suppression ni l'alerte « n'enverrait rien » ne
+   seraient jamais dessinés. */
+const SEGMENTS_JEU = {
+  ok: true, peutModifier: true, abonnesActifs: 412,
+  champs: [
+    { cle: 'totalDepense', nom: 'Total dépensé', type: 'nombre', unite: '$',
+      ops: [{ cle: 'gte', nom: 'au moins' }, { cle: 'lte', nom: 'au plus' }] },
+    { cle: 'nbCommandes', nom: 'Nombre de commandes', type: 'nombre', unite: '',
+      ops: [{ cle: 'gte', nom: 'au moins' }, { cle: 'lte', nom: 'au plus' }] },
+    { cle: 'joursDepuisAchat', nom: 'Dernier achat il y a', type: 'nombre', unite: 'jours',
+      ops: [{ cle: 'lte', nom: 'au plus' }, { cle: 'gte', nom: 'au moins' }] },
+    { cle: 'categorie', nom: 'A acheté dans la catégorie', type: 'categorie', unite: '',
+      ops: [{ cle: 'eq', nom: 'est' }, { cle: 'neq', nom: 'n’est pas' }] },
+    { cle: 'province', nom: 'Province', type: 'texte', unite: '',
+      ops: [{ cle: 'eq', nom: 'est' }, { cle: 'neq', nom: 'n’est pas' }] },
+    { cle: 'ville', nom: 'Ville', type: 'texte', unite: '',
+      ops: [{ cle: 'eq', nom: 'est' }, { cle: 'contient', nom: 'contient' }] },
+    { cle: 'segmentCalcule', nom: 'Segment automatique', type: 'segauto', unite: '',
+      ops: [{ cle: 'eq', nom: 'est' }, { cle: 'neq', nom: 'n’est pas' }] },
+    { cle: 'consentementSms', nom: 'Consentement SMS', type: 'booleen', unite: '',
+      ops: [{ cle: 'eq', nom: 'est' }] },
+  ],
+  segmentsAuto: [
+    { cle: 'prospect', nom: 'Prospect (aucun achat)' },
+    { cle: 'nouveau', nom: 'Nouveau (1 commande)' },
+    { cle: 'regulier', nom: 'Régulier (2 à 4 commandes)' },
+    { cle: 'vip', nom: 'VIP (5+ commandes ou 500 $+)' },
+    { cle: 'inactif', nom: 'Inactif (aucun achat depuis 90 j)' },
+  ],
+  categories: [{ cle: 'robes', nom: 'Robes' }, { cle: 'hauts', nom: 'Hauts' },
+    { cle: 'manteaux', nom: 'Manteaux' }],
+  segments: [
+    { id: 'seg_0001', nom: 'Clientes robes, 300 $+',
+      criteres: [{ champ: 'totalDepense', op: 'gte', valeur: 300 },
+        { champ: 'categorie', op: 'eq', valeur: 'robes' }],
+      phrase: 'Total dépensé au moins 300 $ · A acheté dans la catégorie est robes',
+      compte: 14, creeLe: '2026-08-14T10:00:00Z', utilisePar: 2 },
+    { id: 'seg_0002', nom: 'VIP inactives',
+      criteres: [{ champ: 'segmentCalcule', op: 'eq', valeur: 'inactif' },
+        { champ: 'nbCommandes', op: 'gte', valeur: 5 }],
+      phrase: 'Segment automatique est Inactif · Nombre de commandes au moins 5',
+      compte: 0, creeLe: '2026-08-14T11:00:00Z', utilisePar: 0 },
+  ],
+};
+
 module.exports = {
   'imprimantes.js': {
     'imprimantes:etat': {
@@ -786,6 +835,30 @@ module.exports = {
         'nl:modele': { ok: true, nom: '🌸 Bienvenue', sujet: 'Bienvenue !', html: '<h1>Bienvenue</h1>' },
         'nl:apercu': { ok: true, html: '<html><body><h1>Bienvenue</h1></body></html>' },
         'chaines:ecrire': { ok: true, id: 'chain_0002', nom: 'Bienvenue', cree: false, etapes: 2 },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    /* SEGMENTS COMPOSABLES — la liste et le constructeur. Le jeu porte un
+       segment UTILISÉ par une campagne (le refus de suppression se dessine)
+       et un segment à portée NULLE (l'avertissement « n'enverrait rien »). */
+    {
+      nom: 'segments composés',
+      id: 'segments',
+      reponses: {
+        'segments:donnees': SEGMENTS_JEU,
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'constructeur de segment',
+      id: 'segments:neuve',
+      reponses: {
+        'segments:donnees': SEGMENTS_JEU,
+        'segments:apercu': { ok: true, compte: 14, total: 412 },
+        'segments:ecrire': { ok: true, id: 'seg_0001', nom: 'Clientes robes, 300 $+',
+          cree: true, nuage: true, compte: 14 },
         'session:activite': { ok: true },
         identite: IDENTITE,
       },

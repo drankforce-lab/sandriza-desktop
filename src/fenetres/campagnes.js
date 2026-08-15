@@ -129,6 +129,18 @@ tbody tr:hover td{background:rgba(255,255,255,.04)}
 .vars{font-size:.71rem;color:#8fa1b8;line-height:1.7;margin-top:.25rem}
 .vars code{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
   border-radius:4px;padding:.02rem .28rem;color:#dcc39b}
+/* ── Criteres d un segment : une ligne = champ, operateur, valeur ────────── */
+.critere{display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap}
+.critere select,.critere input{width:auto;min-width:8rem}
+.critere select:first-child{min-width:14rem}
+.critere input[type=number]{min-width:6rem;width:6rem}
+.critere .u{font-size:.76rem;color:#8fa1b8}
+.critere button{margin-left:auto}
+.portee{margin-top:.6rem;padding:.45rem .65rem;border-radius:9px;font-size:.82rem;
+  background:rgba(201,169,126,.1);border:1px solid rgba(201,169,126,.3);color:#e8dcc6;
+  display:flex;align-items:center;gap:.5rem}
+.portee strong{font-size:.95rem;color:#f0e2c8}
+.portee button{margin-left:auto}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
 .msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
@@ -145,7 +157,8 @@ function pageCampagnes(ongletDepart) {
   const brut = String(ongletDepart || '');
   const neuf = brut.indexOf(':neuve') > 0;
   const base = neuf ? brut.slice(0, brut.indexOf(':neuve')) : brut;
-  const dep = (base === 'chaines') ? 'chaines' : 'campagnes';
+  const dep = (base === 'chaines') ? 'chaines'
+            : (base === 'segments') ? 'segments' : 'campagnes';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Campagnes et chaînes — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -166,6 +179,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   var FORM_DEPART = ${neuf ? 'true' : 'false'};
   var DC = null;             // donnees des campagnes
   var DH = null;             // donnees des chaines
+  var DS = null;             // donnees des segments
+  var CRITERES = null;       // criteres en cours d edition (segment seulement)
   var Q = '';
   var ARME = '';             // un seul geste arme a la fois
   var OCCUPE = false;        // un envoi est en cours : on ne redessine pas
@@ -221,6 +236,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'campagnes' ? ' actif' : '') + '" data-onglet="campagnes">Campagnes</button>'
       + '<button class="mini' + (ONGLET === 'chaines' ? ' actif' : '') + '" data-onglet="chaines">Chaînes automatisées</button>'
+      + '<button class="mini' + (ONGLET === 'segments' ? ' actif' : '') + '" data-onglet="segments">Segments</button>'
       + (ONGLET === 'campagnes'
           ? '<input type="search" id="cp-q" placeholder="Nom ou sujet…" value="' + esc(Q) + '">' : '')
       + '</div>';
@@ -270,11 +286,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">Nom interne</span>'
       + '<input id="f-nom" value="' + esc(c.nom || '') + '" placeholder="Infolettre de septembre"></div>'
+      // ⚠ CHAQUE SEGMENT MONTRE SA PORTEE : on choisit en voyant combien de
+      // personnes il atteint MAINTENANT, pas en devinant. Un segment a 0 se
+      // remarque avant l envoi, pas apres.
       + '<div class="champ"><span class="lbl">Segment</span><select id="f-seg">'
       + (d.segments || []).map(function(s){
           return '<option value="' + esc(s.cle) + '"' + ((c.segment || 'all') === s.cle ? ' selected' : '')
-            + '>' + esc(s.nom) + (s.cle === 'all' ? ' (' + (d.abonnesActifs || 0) + ')' : '') + '</option>';
-        }).join('') + '</select></div></div>'
+            + '>' + esc(s.nom) + ' (' + (s.compte || 0) + ')' + '</option>';
+        }).join('') + '</select>'
+      + '<span class="aide" id="f-seg-quoi"></span></div></div>'
       + '<div class="champ"><span class="lbl">Sujet du courriel</span>'
       + '<input id="f-suj" value="' + esc(c.sujet || '') + '" placeholder="Nos nouveautés sont arrivées !"></div>'
       + '<div class="rang">'
@@ -390,19 +410,29 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function ouvrirForm(type, id){
-    var op = (type === 'chaine') ? 'chaines:form' : 'campagnes:form';
+    // Le segment n a pas d op de formulaire dediee : ses champs, operateurs,
+    // categories et segments automatiques viennent tous de segments:donnees,
+    // qu on a deja pour dessiner la liste.
+    var op = (type === 'chaine') ? 'chaines:form'
+           : (type === 'segment') ? 'segments:donnees' : 'campagnes:form';
     appeler(op, [id || '']).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       if (!r.peutModifier) { dire('Vous êtes en consultation seulement.', 'err'); return; }
       FORM = { type: type, id: id || '', d: r };
       ETAPES = (type === 'chaine')
         ? JSON.parse(JSON.stringify((r.chaine && r.chaine.etapes) || [])) : null;
+      CRITERES = null;
+      if (type === 'segment') {
+        var s = (r.segments || []).filter(function(x){ return x.id === id; })[0];
+        FORM.nom = s ? s.nom : '';
+        CRITERES = s ? JSON.parse(JSON.stringify(s.criteres || [])) : [];
+      }
       ARME = '';
       dessiner();
     });
   }
 
-  function fermerForm(){ FORM = null; ETAPES = null; charger(); }
+  function fermerForm(){ FORM = null; ETAPES = null; CRITERES = null; charger(); }
 
   function apercuDans(html){
     var bloc = document.getElementById('f-apercu-bloc');
@@ -464,7 +494,21 @@ ${JS_ACTIVITE}${JS_DIRE}
     var a = document.getElementById('f-annuler');
     if (a) a.onclick = fermerForm;
     var o = document.getElementById('f-ok');
-    if (o) o.onclick = soumettreForm;
+    if (o) o.onclick = (FORM.type === 'segment') ? soumettreSegment : soumettreForm;
+
+    if (FORM.type === 'segment') {
+      var cp = document.getElementById('f-crit-plus');
+      if (cp) cp.onclick = function(){
+        releverCriteres();
+        // Premier critere par defaut : le plus parlant et le plus courant.
+        var d0 = (FORM.d.champs || [])[0] || { cle: 'totalDepense', ops: [{ cle: 'gte' }] };
+        CRITERES.push({ champ: d0.cle, op: (d0.ops[0] || {}).cle, valeur: '' });
+        redessinerCriteres();
+      };
+      var bc = document.getElementById('f-compter');
+      if (bc) bc.onclick = compterPortee;
+      return;
+    }
 
     if (FORM.type === 'campagne') {
       var canal = document.getElementById('f-canal');
@@ -475,6 +519,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       };
       if (canal) canal.onchange = majSms;
       majSms();
+      // La recette du segment choisi, sous le menu : on sait ce qu on cible.
+      var seg = document.getElementById('f-seg');
+      var quoi = document.getElementById('f-seg-quoi');
+      var majSeg = function(){
+        if (!seg || !quoi) return;
+        var s = (FORM.d.segments || []).filter(function(x){ return x.cle === seg.value; })[0];
+        quoi.textContent = (s && s.phrase) ? s.phrase : '';
+      };
+      if (seg) seg.onchange = majSeg;
+      majSeg();
       var sms = document.getElementById('f-sms');
       var cpt = document.getElementById('f-sms-n');
       var majN = function(){ if (cpt && sms) cpt.textContent = String(sms.value.length); };
@@ -504,6 +558,180 @@ ${JS_ACTIVITE}${JS_DIRE}
       var z = document.getElementById('f-etapes');
       if (z) z.innerHTML = vueEtapes();
     };
+  }
+
+  /* ══ ONGLET SEGMENTS ══════════════════════════════════════════════════════
+     Un segment est une RECETTE reevaluee a chaque envoi, pas une liste figee :
+     une cliente qui franchit le seuil entre la creation et l envoi y entre
+     d elle-meme. ⚠ Un segment ne fait que RETRECIR la liste des abonnees
+     actives — il n ajoute jamais personne (consentement, LCAP / Loi 25). */
+  function vueSegments(){
+    var D = DS;
+    if (!D) return '<div class="vide">Chargement…</div>';
+    var h = '<div class="tuiles">'
+      + '<div class="tuile"><div class="lbl">Abonnés actifs</div><div class="val bon">'
+      + (D.abonnesActifs || 0) + '</div><div class="dt">le point de départ</div></div>'
+      + '<div class="tuile"><div class="lbl">Segments composés</div><div class="val">'
+      + (D.segments || []).length + '</div></div></div>';
+
+    h += '<div class="avis att">Un segment ne fait que <strong>restreindre</strong> la liste '
+      + 'des abonnées actives : il ne peut jamais joindre quelqu’un qui n’a pas consenti '
+      + 'à recevoir l’infolettre.</div>';
+
+    if (D.peutModifier) {
+      h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvseg">'
+        + '+ Nouveau segment</button></div>';
+    }
+
+    if (!(D.segments || []).length) {
+      h += '<div class="carte"><div class="vide">Aucun segment composé. Les campagnes '
+        + 'disposent tout de même de « Tous les abonnés » et « Clients avec commandes ».</div></div>';
+      return h + renvoi();
+    }
+
+    h += '<div class="carte"><table><thead><tr><th>Segment</th><th>Critères</th>'
+      + '<th class="num">Portée</th><th class="num">Utilisé par</th>'
+      + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      + D.segments.map(function(s){
+          var gestes = '';
+          if (D.peutModifier) {
+            gestes += '<button class="mini geste" data-segmodif="' + esc(s.id) + '">Modifier</button> ';
+            var armeS = (ARME === 'segsup:' + s.id);
+            gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-segsup="'
+              + esc(s.id) + '">' + (armeS ? 'Confirmer ?' : 'Supprimer') + '</button>';
+          }
+          return '<tr><td><strong>' + esc(s.nom) + '</strong></td>'
+            + '<td class="dt">' + esc(s.phrase || '—') + '</td>'
+            + '<td class="num"><span class="pill ' + (s.compte ? 'bon' : 'neutre') + '">'
+            + s.compte + '</span></td>'
+            + '<td class="num dt">' + (s.utilisePar ? pluriel(s.utilisePar, 'campagne') : '—') + '</td>'
+            + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+    return h + renvoi();
+  }
+
+  function vueFormSegment(){
+    var f = FORM, d = f.d;
+    return '<div class="carte form">'
+      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
+      + (f.id ? 'Modifier le segment' : 'Nouveau segment') + '</h3>'
+      + '<div class="champ"><span class="lbl">Nom du segment</span>'
+      + '<input id="f-nom" value="' + esc(f.nom || '') + '" placeholder="Clientes robes, 300 $ et plus"></div>'
+      + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
+      + '<strong style="font-size:.8rem">Critères</strong>'
+      + '<span class="dt">toutes ces conditions doivent être remplies</span>'
+      + '<button class="mini" id="f-crit-plus">+ Ajouter un critère</button></div>'
+      + '<div id="f-criteres">' + vueCriteres() + '</div>'
+      + '<div class="portee" id="f-portee">Portée : <strong id="f-portee-n">—</strong> '
+      + 'sur ' + (d.abonnesActifs || 0) + ' abonnées actives '
+      + '<button class="mini" id="f-compter">Compter</button></div>'
+      + '<div class="fin3"><button id="f-annuler">Annuler</button>'
+      + '<button class="prim" id="f-ok">Enregistrer</button></div></div>';
+  }
+
+  function champDef(cle){
+    var l = (FORM && FORM.d && FORM.d.champs) || [];
+    for (var i = 0; i < l.length; i++) { if (l[i].cle === cle) return l[i]; }
+    return null;
+  }
+
+  // Le controle de VALEUR depend du type du champ : un nombre, une categorie,
+  // un segment automatique, un oui/non, ou du texte libre.
+  function champValeur(i, c){
+    var def = champDef(c.champ);
+    var d = FORM.d;
+    var id = 'c-v-' + i;
+    if (!def) return '<input id="' + id + '" value="' + esc(c.valeur) + '">';
+    if (def.type === 'nombre') {
+      return '<input type="number" min="0" step="any" id="' + id + '" value="'
+        + esc(c.valeur) + '">' + (def.unite ? '<span class="u">' + esc(def.unite) + '</span>' : '');
+    }
+    if (def.type === 'categorie' || def.type === 'segauto') {
+      var opts = (def.type === 'categorie' ? (d.categories || []) : (d.segmentsAuto || []));
+      return '<select id="' + id + '">' + opts.map(function(o){
+        return '<option value="' + esc(o.cle) + '"' + (String(c.valeur) === o.cle ? ' selected' : '')
+          + '>' + esc(o.nom) + '</option>'; }).join('') + '</select>';
+    }
+    if (def.type === 'booleen') {
+      var oui = (c.valeur === true || c.valeur === 'true');
+      return '<select id="' + id + '"><option value="true"' + (oui ? ' selected' : '') + '>Oui</option>'
+        + '<option value="false"' + (oui ? '' : ' selected') + '>Non</option></select>';
+    }
+    return '<input id="' + id + '" value="' + esc(c.valeur) + '">';
+  }
+
+  function vueCriteres(){
+    var cr = CRITERES || [];
+    if (!cr.length) {
+      return '<div class="vide" style="padding:.9rem">Aucun critère : ce segment vaudrait '
+        + '« tous les abonnés ». Ajoutez-en au moins un.</div>';
+    }
+    var champs = (FORM.d && FORM.d.champs) || [];
+    return cr.map(function(c, i){
+      var def = champDef(c.champ) || { ops: [] };
+      return '<div class="critere">'
+        + '<select id="c-c-' + i + '" data-critchamp="' + i + '">'
+        + champs.map(function(x){
+            return '<option value="' + esc(x.cle) + '"' + (x.cle === c.champ ? ' selected' : '')
+              + '>' + esc(x.nom) + '</option>'; }).join('') + '</select>'
+        + '<select id="c-o-' + i + '">'
+        + (def.ops || []).map(function(o){
+            return '<option value="' + esc(o.cle) + '"' + (o.cle === c.op ? ' selected' : '')
+              + '>' + esc(o.nom) + '</option>'; }).join('') + '</select>'
+        + champValeur(i, c)
+        + '<button class="mini danger" data-critsup="' + i + '">✕</button></div>';
+    }).join('');
+  }
+
+  /* ⚠ MEME PIEGE QUE LES ETAPES : la saisie vit dans CRITERES, pas dans le DOM.
+     Ajouter, retirer ou changer un champ redessine la liste — on releve donc
+     AVANT chaque redessin, sinon la frappe en cours disparait. */
+  function releverCriteres(){
+    (CRITERES || []).forEach(function(c, i){
+      var g = function(id){ var e = document.getElementById(id); return e ? e.value : null; };
+      var ch = g('c-c-' + i); if (ch != null) c.champ = ch;
+      var op = g('c-o-' + i); if (op != null) c.op = op;
+      var v = g('c-v-' + i); if (v != null) c.valeur = v;
+    });
+  }
+
+  function redessinerCriteres(){
+    var z = document.getElementById('f-criteres');
+    if (z) z.innerHTML = vueCriteres();
+    var p = document.getElementById('f-portee-n');
+    if (p) p.textContent = '—';   // la portee affichee ne vaut plus rien
+  }
+
+  function compterPortee(){
+    releverCriteres();
+    var p = document.getElementById('f-portee-n');
+    if (p) p.textContent = '…';
+    appeler('segments:apercu', [CRITERES || []]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); if (p) p.textContent = '—'; return; }
+      if (p) p.textContent = String(r.compte);
+      dire(r.compte === 0
+        ? 'Aucune abonnée ne correspond : ce segment n’enverrait rien.'
+        : pluriel(r.compte, 'abonnée') + ' sur ' + r.total + '.', r.compte === 0 ? 'att' : 'bon');
+    });
+  }
+
+  function soumettreSegment(){
+    releverCriteres();
+    var nom = (document.getElementById('f-nom').value || '').trim();
+    if (!nom) { dire('Le nom est requis.', 'err'); return; }
+    if (!(CRITERES || []).length) { dire('Ajoutez au moins un critère.', 'err'); return; }
+    var b = document.getElementById('f-ok');
+    if (b) b.disabled = true;
+    dire('Enregistrement…');
+    appeler('segments:ecrire', [FORM.id, { nom: nom, criteres: CRITERES }]).then(function(r){
+      if (b) b.disabled = false;
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire(esc(r.nom) + (r.cree ? ' créé' : ' mis à jour') + ' — ' + pluriel(r.compte, 'abonnée') + '.'
+        + (r.nuage ? '' : ' ⚠ Enregistré sur ce poste seulement — le nuage n’a pas confirmé.'),
+        r.nuage ? 'bon' : 'att');
+      fermerForm();
+    });
   }
 
   /* ══ ONGLET CAMPAGNES ═══════════════════════════════════════════════════ */
@@ -672,13 +900,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     // Redessiner la liste sous un formulaire ferait perdre la saisie en cours.
     if (FORM) {
       if (sous) sous.textContent = '';
-      corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine() : vueFormCampagne();
+      corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine()
+        : (FORM.type === 'segment') ? vueFormSegment() : vueFormCampagne();
       brancherForm();
       return;
     }
-    if (sous) sous.textContent = (DC && !DC.peutModifier) || (DH && !DH.peutModifier)
-      ? 'consultation seulement' : '';
-    corps.innerHTML = onglets() + (ONGLET === 'chaines' ? vueChaines() : vueCampagnes());
+    // La mention suit l ONGLET affiche : dire << consultation seulement >> en
+    // regardant les segments parce que les campagnes le sont serait faux.
+    var vu = (ONGLET === 'chaines') ? DH : (ONGLET === 'segments') ? DS : DC;
+    if (sous) sous.textContent = (vu && !vu.peutModifier) ? 'consultation seulement' : '';
+    corps.innerHTML = onglets() + (ONGLET === 'chaines' ? vueChaines()
+      : ONGLET === 'segments' ? vueSegments() : vueCampagnes());
     brancher();
   }
 
@@ -689,6 +921,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (bn) bn.onclick = function(){ ouvrirForm('campagne', ''); };
     var bnc = document.getElementById('cp-nouvchaine');
     if (bnc) bnc.onclick = function(){ ouvrirForm('chaine', ''); };
+    var bns = document.getElementById('cp-nouvseg');
+    if (bns) bns.onclick = function(){ ouvrirForm('segment', ''); };
     var bt = document.getElementById('cp-traiter');
     if (bt) bt.onclick = function(){
       if (ARME !== 'traiter') {
@@ -731,8 +965,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     var t = ev.target;
     if (!t || !t.closest) return;
 
-    /* ── Gestes PROPRES AU FORMULAIRE (etapes d une chaine) ─────────────── */
+    /* ── Gestes PROPRES AU FORMULAIRE (etapes d une chaine, criteres) ───── */
     if (FORM) {
+      var cs = t.closest('[data-critsup]');
+      if (cs) {
+        releverCriteres();
+        CRITERES.splice(parseInt(cs.getAttribute('data-critsup'), 10), 1);
+        redessinerCriteres();
+        return;
+      }
       var sup = t.closest('[data-etsup]');
       if (sup) {
         releverEtapes();
@@ -780,6 +1021,38 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (bm) { ouvrirForm('campagne', bm.getAttribute('data-modif')); return; }
     var bcm = t.closest('[data-chmodif]');
     if (bcm) { ouvrirForm('chaine', bcm.getAttribute('data-chmodif')); return; }
+    var bsm = t.closest('[data-segmodif]');
+    if (bsm) { ouvrirForm('segment', bsm.getAttribute('data-segmodif')); return; }
+
+    var bss = t.closest('[data-segsup]');
+    if (bss) {
+      var idSg = bss.getAttribute('data-segsup');
+      if (ARME !== 'segsup:' + idSg) {
+        ARME = 'segsup:' + idSg;
+        dessiner();
+        dire('Cliquez « Confirmer ? » — le segment disparaît. Les campagnes qui '
+          + 's’en servent doivent d’abord en choisir un autre.', 'att');
+        return;
+      }
+      ARME = '';
+      appeler('segments:supprimer', [idSg]).then(function(r){
+        if (!r.ok) {
+          // ⚠ Le refus le plus utile : on NOMME les campagnes qui bloquent,
+          // sinon il faudrait les chercher une par une.
+          dire(r.motif === 'utilise'
+            ? ('Impossible : ' + pluriel(r.combien, 'campagne') + ' s’en sert encore ('
+               + (r.campagnes || []).join(', ') + '). Changez leur segment d’abord.')
+            : expliquer(r), 'err');
+          dessiner();
+          return;
+        }
+        dire(esc(r.nom) + ' supprimé.'
+          + (r.nuage ? '' : ' ⚠ Retiré sur ce poste seulement — le nuage n’a pas confirmé.'),
+          r.nuage ? 'bon' : 'att');
+        charger();
+      });
+      return;
+    }
 
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; charger(); return; }
@@ -897,7 +1170,32 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ARME) { ARME = ''; dessiner(); }
   });
 
+  /* ⚠ CHANGER LE CHAMP D UN CRITERE CHANGE SES OPERATEURS ET SON CONTROLE DE
+     VALEUR : << Ville au moins 300 >> n existe pas. On redessine donc la ligne,
+     apres avoir releve la saisie, et on remet la valeur a vide — la garder
+     ferait un critere qui montre autre chose que ce qu il contient. */
+  corps.addEventListener('change', function(ev){
+    var t = ev.target;
+    if (!FORM || FORM.type !== 'segment' || !t || !t.getAttribute) return;
+    var i = t.getAttribute('data-critchamp');
+    if (i == null) return;
+    releverCriteres();
+    var c = CRITERES[parseInt(i, 10)];
+    var def = champDef(c.champ);
+    c.op = (def && def.ops[0]) ? def.ops[0].cle : 'eq';
+    c.valeur = '';
+    redessinerCriteres();
+  });
+
   function charger(){
+    if (ONGLET === 'segments') {
+      appeler('segments:donnees', []).then(function(r){
+        if (!r || !r.ok) { vide('Segments indisponibles', expliquer(r)); return; }
+        DS = r;
+        dessiner();
+      });
+      return;
+    }
     var op = (ONGLET === 'chaines') ? 'chaines:liste' : 'campagnes:liste';
     appeler(op, []).then(function(r){
       if (!r || !r.ok) {
@@ -957,8 +1255,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
   });
 
-  if (FORM_DEPART) ouvrirForm(ONGLET === 'chaines' ? 'chaine' : 'campagne', '');
-  else charger();
+  if (FORM_DEPART) {
+    ouvrirForm(ONGLET === 'chaines' ? 'chaine'
+             : ONGLET === 'segments' ? 'segment' : 'campagne', '');
+  } else charger();
 })();
 </script>
 </body></html>`;
