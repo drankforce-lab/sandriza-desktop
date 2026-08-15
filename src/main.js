@@ -1406,6 +1406,8 @@ const OPS_PONT = new Set([
   // grossistes (ajout en un clic) et la SUPPRESSION d une demande de retour
   // terminee, qui n existaient nulle part dans l application.
   'repertoire:donnees', 'repertoire:ajouter',
+  // L explorateur de photos du Studio (#28) : la meme phototheque, filtrable.
+  'studio:explorer',
   'retour:supprimerApercu', 'retour:supprimerEcrire',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
@@ -2011,6 +2013,9 @@ const LIMITES_PONT = {
      expres — un sondage qui traine bloquerait le suivant. */
   'verrous:liste': 15000,
   'repertoire:donnees': 20000, 'repertoire:ajouter': 30000,
+  /* Parcourt toute la phototheque et rend AUSSI les identifiants du resultat
+     complet (pour << tout selectionner >>) : plus lourd qu une page seule. */
+  'studio:explorer': 30000,
   /* Supprimer un retour efface aussi sa preuve photo du stockage : plus long
      qu une ecriture locale. */
   'retour:supprimerApercu': 20000, 'retour:supprimerEcrire': 30000,

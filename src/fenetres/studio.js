@@ -66,8 +66,10 @@ body{background:#0e1522;color:#e8edf5;
 .phbarre #ph-q{flex:1 1 auto;min-width:6rem;max-width:22rem;font:inherit;color:#e8edf5;
   background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.34rem .55rem}
 .phbarre #ph-q:focus{outline:none;border-color:#c9a97e}
-.phgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.5rem,1fr));gap:.5rem;
-  max-height:18rem;overflow-y:auto;padding-right:.2rem}
+/* ⚠ 7rem, pas 5,5 : la vignette porte desormais une coche et des pastilles.
+   A l ancienne largeur, le nom passait dessous et devenait illisible. */
+.phgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(7rem,1fr));gap:.5rem;
+  max-height:20rem;overflow-y:auto;padding-right:.2rem}
 .phgrille::-webkit-scrollbar{width:8px}
 .phgrille::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .phvig{background:#0f1724;border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
@@ -77,6 +79,33 @@ body{background:#0e1522;color:#e8edf5;
 .phvig .attente{font-size:.68rem;color:#6d7f96;padding:1.6rem .3rem}
 .phvig .phnom{font-size:.64rem;color:#8fa1b8;padding:.15rem .25rem;max-width:100%;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ── Explorateur : filtres, panier de selection, coches et pastilles ─────── */
+.phfiltres{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-bottom:.45rem}
+.jeton{font:inherit;font-size:.73rem;padding:.16rem .55rem;border-radius:99px;cursor:pointer;
+  color:#cbd8e6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15)}
+.jeton:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+.jeton:disabled{opacity:.4;cursor:default}
+.jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:#e8dcc6;font-weight:600}
+.jeton.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:600}
+.phfiltres select{font:inherit;font-size:.73rem;color:#cbd8e6;background:#0f1724;
+  border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.14rem .4rem}
+.phsel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;
+  padding:.35rem .5rem;border-radius:9px;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.08)}
+.phsel .cpt{font-size:.76rem;color:#8fa1b8}
+.phsel .cpt.on{color:#e8dcc6;font-weight:700}
+.phsel .droite{margin-left:auto;display:flex;align-items:center;gap:.4rem}
+.phsel .aide{font-size:.72rem;color:#8fa1b8}
+.phvig{position:relative}
+.phvig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
+.phcoche{position:absolute;top:.2rem;left:.2rem;width:1.05rem;height:1.05rem;z-index:2;
+  border-radius:5px;border:1px solid rgba(255,255,255,.35);background:rgba(8,12,20,.7);
+  display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#17202c}
+.phvig.pris .phcoche{background:#c9a97e;border-color:#c9a97e;font-weight:700}
+.phpast{position:absolute;top:.2rem;right:.2rem;z-index:2;display:flex;gap:.12rem}
+.phpast .pt{font-size:.6rem;line-height:1;padding:.12rem .22rem;border-radius:4px;
+  background:rgba(8,12,20,.75);color:#8fa1b8}
+.phpast .pt.fait{color:#4ade80}
 /* Voies + ambiances : tuiles cliquables */
 .tuiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem}
 .tuile{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:9px;
@@ -153,7 +182,11 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-function pageStudio() {
+function pageStudio(mode) {
+  /* ⚠ IDENTIFIANT D OUVERTURE << explorateur >> : le banc ne clique pas, et le
+     selecteur de photos ne s atteint qu apres un clic. Sans lui, l ECRAN QUI
+     CHOISIT CE QU ON VA PAYER resterait hors de tout controle. Angle mort #32. */
+  const explo = String(mode || '') === 'explorateur';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Studio virtuel — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -214,6 +247,13 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PH_OCC = false;    // une page est-elle en cours de chargement ?
   // ⚠ Trois etats : tant qu il est faux, on ne dit PAS << vide >>.
   var PH_CHARGE = false;
+  // ── EXPLORATEUR (#28) ──────────────────────────────────────────────────────
+  var PH_FILTRES = [];   // jetons actifs (traitee, isolee, orpheline...)
+  var PH_SANS = '';      // sans tel traitement precis
+  var PH_LOT = '';       // lot d import
+  var PH_TRI = 'recent';
+  var PH_META = null;    // filtres/traitements/lots disponibles + tousLesIds
+  var SEL = {};          // { <idPhoto>: true } — le panier de selection
   var PH_DEB = null;     // minuterie anti-rebond de la recherche
   var VOIE = 'humain';   // humain | fantome | plat
   var PRESET = '';       // cle d ambiance
@@ -347,9 +387,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (PICKER) {
       var grille = '<div class="phgrille" id="ph-grille">' + phVignettesHtml() + '</div>';
       return '<div class="phbarre"><button id="ph-retour">← Retour</button>'
-        + '<input type="search" id="ph-q" placeholder="Rechercher (nom, code)…" value="' + esc(PH_Q) + '"'
+        + '<input type="search" id="ph-q" placeholder="Rechercher (nom, code, produit, SKU)…" value="' + esc(PH_Q) + '"'
         + (RO ? ' disabled' : '') + '>'
-        + '<span class="phinfo" id="ph-info"></span></div>' + grille;
+        + '<span class="phinfo" id="ph-info"></span></div>'
+        + phFiltresHtml() + phSelectionHtml() + grille;
     }
     // Rien de choisi : dépôt de fichier + accès à la photothèque.
     return '<div class="depot" id="depot"><span class="gros">📷</span>'
@@ -502,6 +543,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       };
       majPhInfo();
     }
+    brancherExplorateur();
     corps.querySelectorAll('[data-voie]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); RESULT = null; dessiner();
         dire('Voie : ' + VOIE + '.', 'att'); };
@@ -674,9 +716,72 @@ ${JS_ACTIVITE}${JS_DIRE}
       var img = p.apercu
         ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '" loading="lazy">'
         : '<span class="attente">en cours…</span>';
-      return '<div class="phvig" data-ph="' + esc(p.id) + '" title="' + esc(p.nom) + '">'
+      var pris = !!SEL[p.id];
+      // Les pastilles disent ce qu on ne devine pas d une vignette : deja
+      // traitee (donc deja payee), detouree, rattachee a un produit.
+      var pastilles = '';
+      if ((p.faits || []).length) pastilles += '<span class="pt fait" title="Déjà traitée">✓</span>';
+      if (p.isole) pastilles += '<span class="pt" title="Détourée">◇</span>';
+      if (p.lieId) pastilles += '<span class="pt" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
+      return '<div class="phvig' + (pris ? ' pris' : '') + '" data-ph="' + esc(p.id) + '"'
+        + ' title="' + esc(p.nom) + (p.lieNom ? ' — ' + esc(p.lieNom) : '') + '">'
+        + '<span class="phcoche" data-sel="' + esc(p.id) + '">' + (pris ? '✓' : '') + '</span>'
+        + (pastilles ? '<span class="phpast">' + pastilles + '</span>' : '')
         + img + '<span class="phnom">' + esc(p.nom) + '</span></div>';
     }).join('');
+  }
+
+  /* ══ LES FILTRES (#28) ════════════════════════════════════════════════════
+     Le selecteur n offrait qu une recherche texte : pour choisir vingt photos
+     parmi quatre cents, il fallait les reconnaitre a l oeil. Le coeur du site
+     savait deja tout cela de chaque photo — ce n etait simplement pas offert. */
+  function phFiltresHtml(){
+    if (!PH_META) return '';
+    var jeton = function(cle, nom){
+      return '<button class="jeton' + (PH_FILTRES.indexOf(cle) >= 0 ? ' on' : '') + '"'
+        + ' data-filtre="' + esc(cle) + '">' + esc(nom) + '</button>';
+    };
+    var h = '<div class="phfiltres">'
+      + (PH_META.filtres || []).map(function(f){ return jeton(f.cle, f.nom); }).join('');
+    // Le filtre le plus utile : ce qui n a PAS encore recu tel traitement.
+    // Retraiter une photo deja faite coute un appel pour rien.
+    h += '<select id="ph-sans"><option value="">Traitement — tous</option>'
+      + (PH_META.traitements || []).map(function(t){
+          return '<option value="' + esc(t.cle) + '"' + (PH_SANS === t.cle ? ' selected' : '')
+            + '>Sans « ' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
+    if ((PH_META.lots || []).length) {
+      h += '<select id="ph-lot"><option value="">Tous les lots</option>'
+        + PH_META.lots.map(function(l){
+            return '<option value="' + esc(l.cle) + '"' + (PH_LOT === l.cle ? ' selected' : '')
+              + '>' + esc(l.nom) + '</option>'; }).join('') + '</select>';
+    }
+    h += '<select id="ph-tri">'
+      + [['recent', 'Plus récentes'], ['code', 'Code'], ['name', 'Nom'],
+         ['linked', 'Liées d’abord'], ['size', 'Plus lourdes']].map(function(t){
+          return '<option value="' + t[0] + '"' + (PH_TRI === t[0] ? ' selected' : '') + '>'
+            + t[1] + '</option>'; }).join('') + '</select>';
+    if (PH_FILTRES.length || PH_SANS || PH_LOT || PH_Q) {
+      h += '<button class="jeton" id="ph-vider">✕ Tout effacer</button>';
+    }
+    return h + '</div>';
+  }
+
+  /* Le panier de selection : ce qu on emporte, visible AVANT de lancer quoi
+     que ce soit. ⚠ << Tout selectionner >> porte sur TOUT LE RESULTAT du
+     filtre, pas sur la page affichee — sinon il faudrait defiler six pages
+     pour prendre 340 photos. Le coeur envoie exprès les identifiants. */
+  function phSelectionHtml(){
+    var n = Object.keys(SEL).length;
+    var dispo = (PH_META && PH_META.tousLesIds) ? PH_META.tousLesIds.length : 0;
+    return '<div class="phsel">'
+      + '<span class="cpt' + (n ? ' on' : '') + '">' + (n ? n + ' photo' + (n > 1 ? 's' : '') + ' choisie' + (n > 1 ? 's' : '') : 'Aucune sélection') + '</span>'
+      + '<button class="jeton" id="ph-tout"' + (dispo ? '' : ' disabled') + '>Tout sélectionner (' + dispo + ')</button>'
+      + '<button class="jeton" id="ph-inv"' + (dispo ? '' : ' disabled') + '>Inverser</button>'
+      + '<button class="jeton" id="ph-rien"' + (n ? '' : ' disabled') + '>Vider</button>'
+      + '<span class="droite">'
+      + (n === 1 ? '<button class="jeton prim" id="ph-ouvrir">Ouvrir cette photo →</button>' : '')
+      + (n > 1 ? '<span class="aide">Le traitement par lot arrive — pour l’instant, choisissez-en une.</span>' : '')
+      + '</span></div>';
   }
   function majPhInfo(txt){
     var el = document.getElementById('ph-info');
@@ -691,7 +796,75 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (g) { g.innerHTML = phVignettesHtml(); phBrancherVignettes(g); }
     majPhInfo();
   }
+  /* ⚠ DEUX GESTES SUR UNE MEME VIGNETTE, ET IL FAUT LES DEUX : la COCHE
+     ajoute au panier (on en prepare plusieurs), le reste de la vignette
+     OUVRE la photo tout de suite (le geste courant, une photo a la fois).
+     Confondre les deux forcerait a cocher puis valider pour un seul clic. */
+  function brancherExplorateur(){
+    corps.querySelectorAll('[data-filtre]').forEach(function(el){
+      el.onclick = function(){
+        var c = el.getAttribute('data-filtre');
+        var i = PH_FILTRES.indexOf(c);
+        if (i >= 0) PH_FILTRES.splice(i, 1); else PH_FILTRES.push(c);
+        phRelancer();
+      };
+    });
+    var s = document.getElementById('ph-sans');
+    if (s) s.onchange = function(){ PH_SANS = s.value; phRelancer(); };
+    var l = document.getElementById('ph-lot');
+    if (l) l.onchange = function(){ PH_LOT = l.value; phRelancer(); };
+    var t = document.getElementById('ph-tri');
+    if (t) t.onchange = function(){ PH_TRI = t.value; phRelancer(); };
+    var v = document.getElementById('ph-vider');
+    if (v) v.onclick = function(){
+      PH_FILTRES = []; PH_SANS = ''; PH_LOT = ''; PH_Q = '';
+      var q = document.getElementById('ph-q'); if (q) q.value = '';
+      phRelancer();
+    };
+    var tt = document.getElementById('ph-tout');
+    if (tt) tt.onclick = function(){
+      ((PH_META && PH_META.tousLesIds) || []).forEach(function(id){ SEL[id] = true; });
+      phMajSelection();
+    };
+    var iv = document.getElementById('ph-inv');
+    if (iv) iv.onclick = function(){
+      ((PH_META && PH_META.tousLesIds) || []).forEach(function(id){
+        if (SEL[id]) delete SEL[id]; else SEL[id] = true; });
+      phMajSelection();
+    };
+    var rn = document.getElementById('ph-rien');
+    if (rn) rn.onclick = function(){ SEL = {}; phMajSelection(); };
+    var ov = document.getElementById('ph-ouvrir');
+    if (ov) ov.onclick = function(){
+      var ids = Object.keys(SEL);
+      if (ids.length === 1) choisirPhoto(ids[0]);
+    };
+  }
+
+  function phRelancer(){
+    PH_PAGE = 0; PH_FIN = false;
+    phChargerPage(true);
+    dessiner();   // les jetons et le panier doivent refleter le nouvel etat
+  }
+
+  // Repeint le panier ET les coches, sans recharger la page de photos.
+  function phMajSelection(){
+    var z = corps.querySelector('.phsel');
+    if (z) { z.outerHTML = phSelectionHtml(); brancherExplorateur(); }
+    var g = document.getElementById('ph-grille');
+    if (g) { g.innerHTML = phVignettesHtml(); phBrancherVignettes(g); }
+  }
+
   function phBrancherVignettes(g){
+    g.querySelectorAll('[data-sel]').forEach(function(el){
+      el.onclick = function(ev){
+        ev.stopPropagation();
+        if (OCCUPE) return;
+        var id = el.getAttribute('data-sel');
+        if (SEL[id]) delete SEL[id]; else SEL[id] = true;
+        phMajSelection();
+      };
+    });
     g.querySelectorAll('[data-ph]').forEach(function(el){
       el.onclick = function(){ if (OCCUPE) return; choisirPhoto(el.getAttribute('data-ph')); };
     });
@@ -703,12 +876,23 @@ ${JS_ACTIVITE}${JS_DIRE}
     PH_OCC = true;
     var page = reset ? 0 : (PH_PAGE + 1);
     majPhInfo(reset ? 'Recherche…' : 'Chargement…');
-    appeler('studio:phototheque', [{ q: PH_Q, page: page, taille: PH_TAILLE }]).then(function(r){
+    /* ⚠ studio:explorer D ABORD, studio:phototheque EN REPLI : sur un site
+       plus ancien la nouvelle op n existe pas, et la fenetre doit continuer de
+       marcher — sans filtres, mais elle marche. */
+    var saisie = { q: PH_Q, page: page, taille: PH_TAILLE, tri: PH_TRI,
+      filtres: PH_FILTRES, sansTraitement: PH_SANS, lot: PH_LOT };
+    appeler('studio:explorer', [saisie]).then(function(r){
+      if (r && !r.ok && r.motif === 'operation_inconnue') {
+        return appeler('studio:phototheque', [{ q: PH_Q, page: page, taille: PH_TAILLE }]);
+      }
+      return r;
+    }).then(function(r){
       PH_OCC = false;
       if (!PICKER) return;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); majPhInfo(''); return; }
       var lot = r.photos || [];
       PH_CHARGE = (r.charge !== false);
+      if (r.filtres) PH_META = r;   // l explorateur repond ; sinon on garde l ancien
       PHOTHQ = reset ? lot : PHOTHQ.concat(lot);
       PH_PAGE = (r.page != null) ? r.page : page;
       PH_TOTAL = (r.total != null) ? r.total : PHOTHQ.length;
@@ -877,6 +1061,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   charger();
+  if (${explo ? 'true' : 'false'}) ouvrirPicker();
 })();
 </script></body></html>`;
 }

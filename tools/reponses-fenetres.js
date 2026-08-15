@@ -2195,7 +2195,62 @@ module.exports = {
       'avery', 'taylor', 'kendall', 'casey', 'sam', 'jordan', 'jackson', 'reece'];
     const VIGNETTES = {};
     NOMS.forEach((n) => { VIGNETTES[n] = 'https://img.sandriza.com/divers/mod-' + n + '.jpg'; });
+    /* L'EXPLORATEUR DE PHOTOS (#28). Le jeu porte des photos VARIÉES — une
+       déjà traitée, une détourée, une liée à un produit, une en attente de
+       téléversement — sans quoi ni les pastilles ni les filtres ne seraient
+       jamais dessinés sur autre chose que du vide. */
+    const EXPLO = {
+      ok: true, charge: true, peutModifier: true,
+      total: 5, trouvees: 5, page: 0, taille: 60, pages: 1,
+      photos: [
+        { id: 'ph_1', code: 'PH-000101', nom: 'Robe noire — face', apercu: 'https://img.sandriza.com/divers/p1.jpg',
+          enAttente: false, isole: true, fond: 'studio', lieId: 'prod_1', lieNom: 'Robe Élégance',
+          lieSku: 'ROB-0001', poids: 184320, statut: 'pret', lotId: 'lot_a', lotNom: 'Import du 12 août',
+          faits: ['detourage'] },
+        { id: 'ph_2', code: 'PH-000102', nom: 'Robe noire — dos', apercu: 'https://img.sandriza.com/divers/p2.jpg',
+          enAttente: false, isole: false, fond: '', lieId: 'prod_1', lieNom: 'Robe Élégance',
+          lieSku: 'ROB-0001', poids: 201400, statut: 'pret', lotId: 'lot_a', lotNom: 'Import du 12 août',
+          faits: [] },
+        { id: 'ph_3', code: 'PH-000103', nom: 'Manteau beige', apercu: 'https://img.sandriza.com/divers/p3.jpg',
+          enAttente: false, isole: false, fond: '', lieId: null, lieNom: '', lieSku: '',
+          poids: 310000, statut: 'pret', lotId: '', lotNom: '', faits: ['humain'] },
+        { id: 'ph_4', code: 'PH-000104', nom: 'Foulard gris', apercu: '',
+          enAttente: true, isole: false, fond: '', lieId: null, lieNom: '', lieSku: '',
+          poids: 0, statut: 'televersement', lotId: '', lotNom: '', faits: [] },
+        { id: 'ph_5', code: 'PH-000105', nom: 'Jupe plissée', apercu: 'https://img.sandriza.com/divers/p5.jpg',
+          enAttente: false, isole: true, fond: 'plage', lieId: null, lieNom: '', lieSku: '',
+          poids: 152000, statut: 'pret', lotId: 'lot_b', lotNom: 'Import du 14 août', faits: ['detourage', 'humain'] },
+      ],
+      tousLesIds: ['ph_1', 'ph_2', 'ph_3', 'ph_4', 'ph_5'],
+      filtres: [
+        { cle: 'traitee', nom: 'A déjà reçu un traitement' },
+        { cle: 'nonTraitee', nom: 'Jamais traitée' },
+        { cle: 'isolee', nom: 'Détourée (fond transparent)' },
+        { cle: 'nonIsolee', nom: 'Fond d’origine' },
+        { cle: 'liee', nom: 'Rattachée à un produit' },
+        { cle: 'orpheline', nom: 'Aucun produit' },
+        { cle: 'enAttente', nom: 'Téléversement en cours' },
+      ],
+      traitements: [
+        { cle: 'detourage', nom: 'Détourage' },
+        { cle: 'fantome', nom: 'Mannequin retiré' },
+        { cle: 'humain', nom: 'Porté par un mannequin' },
+      ],
+      fonds: ['studio', 'plage'],
+      lots: [{ cle: 'lot_a', nom: 'Import du 12 août' }, { cle: 'lot_b', nom: 'Import du 14 août' }],
+    };
     return [
+      {
+        nom: 'explorateur de photos',
+        id: 'explorateur',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:explorer': EXPLO,
+          'session:activite': { ok: true },
+        },
+      },
       {
         nom: 'portraits deja faits',
         id: '',
