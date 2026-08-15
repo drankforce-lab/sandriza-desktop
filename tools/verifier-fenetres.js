@@ -271,6 +271,17 @@ console.log('\n=== Plafonds du pont ===');
   }
 }
 
+/* ⚠ MÊME RAISON QUE L'ACCENT GRAVE : une règle qu'on répète et qu'on oublie
+   n'est pas une règle. Le cadenas manquant sur une LIGNE de liste ne casse
+   rien — il laisse simplement deux personnes travailler sur la même fiche
+   sans le savoir. C'est donc un contrôle, pas une consigne. */
+console.log('=== Cadenas sur les lignes des listes ===');
+try {
+  require('./verifier-cadenas.js').controlerCadenas(dire);
+} catch (e) {
+  dire(false, 'cadenas', 'le contrôle lui-même a échoué : ' + ((e && e.message) || e));
+}
+
 console.log('=== Parité des opérations du pont ===');
 const chemin = CANDIDATS.find((c) => fs.existsSync(c));
 if (!chemin) {

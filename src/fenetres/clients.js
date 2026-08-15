@@ -164,7 +164,11 @@ ${JS_ACTIVITE}${JS_DIRE}
             var st = r.supprime ? '<span class="pill neutre">Supprimé</span>'
               : (r.actif ? '<span class="pill bon">Actif</span>' : '<span class="pill neutre">Inactif</span>');
             return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la fiche client">'
-              + '<td><span class="num">' + esc(r.nom || '—') + '</span></td>'
+              // ⚠ LE CADENAS EST SUR LA LIGNE, pas seulement dans la fiche ouverte.
+        // Sans lui, un collegue devait CLIQUER pour decouvrir que la fiche
+        // etait prise — l information existait, mais pas la ou l on regarde.
+        + '<td><span class="num">' + esc(r.nom || '—') + '</span>'
+        + szVerrouCase('users', r.id) + '</td>'
               + '<td>' + esc(r.courriel) + '</td>'
               + '<td style="text-align:center;font-weight:600">' + r.commandes + '</td>'
               + '<td style="text-align:right;font-weight:600;white-space:nowrap">' + esc(fmt(r.achats)) + '</td>'
@@ -181,6 +185,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '</div>';
     corps.innerHTML = h;
+    // Reposer les cadenas deja connus sur le tableau frais : sans cela, ils
+    // disparaitraient a chaque redessin et ne reviendraient qu au sondage
+    // suivant — un clignotement toutes les trois secondes.
+    szVerrousPeindre();
 
     var q = document.getElementById('c-q');
     if (q) {
@@ -279,6 +287,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
+  szVerrousSuivre(['users']);
 })();
 </script>
 </body></html>`;

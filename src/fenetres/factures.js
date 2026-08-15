@@ -237,7 +237,10 @@ ${JS_ACTIVITE}${JS_DIRE}
             }
             if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + (SUPPR_ARME === r.id ? 'Confirmer ?' : 'Supprimer') + '</button>';
             return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la facture">'
+              // ⚠ Le cadenas d une facture est celui de SA COMMANDE : c est
+              // elle qui se verrouille (detail, expedition, remboursement).
               + '<td><span class="num">' + esc(r.numero) + '</span>'
+              + szVerrouCase('orders', r.commandeId || '')
               + '<div class="dt">' + esc(fmtDate(r.date)) + '</div></td>'
               + '<td>' + esc(r.commande || '—') + '</td>'
               + '<td>' + esc(r.client || '—') + '</td>'
@@ -270,6 +273,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '</div></div>';
     }
     corps.innerHTML = h;
+    szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
 
     var be = document.getElementById('f-etat');
     if (be) be.onclick = function(){ ETAT_OUVERT = true; dessiner(); };
@@ -428,6 +432,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
+  szVerrousSuivre(['orders']);
 })();
 </script>
 </body></html>`;

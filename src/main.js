@@ -1399,6 +1399,9 @@ const OPS_PONT = new Set([
   // invisible d ici : des etiquettes qui ne se scannent pas partaient sans
   // que personne ne voie rien (vecu a l entrepot).
   'etiquettes:lisibilite',
+  // Le cadenas SUR LA LIGNE d une liste (#22). Sonde toutes les ~3 s, pour
+  // qu un collegue voie qu une fiche est prise SANS avoir a l ouvrir.
+  'verrous:liste',
   // Creer et modifier un sondage : la fenetre y renvoyait, l ecran etait mort.
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
   'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer', 'adresse:suggerer',
@@ -1999,6 +2002,9 @@ const LIMITES_PONT = {
   /* Interroge l imprimante pour connaitre sa VRAIE resolution (un 300 ppp rend
      lisible ce qui ne l etait pas a 203) : un appel a l agent, d ou 20 s. */
   'etiquettes:lisibilite': 20000,
+  /* Sondage frequent et leger : une lecture de la table des verrous. Court
+     expres — un sondage qui traine bloquerait le suivant. */
+  'verrous:liste': 15000,
   'fidelisation:sondage:form': 20000, 'fidelisation:sondage:ecrire': 30000,
   /* Le mot de passe passe par le SERVEUR (verification puis ecriture, avec
      hachage) : plus long qu'une ecriture locale. */

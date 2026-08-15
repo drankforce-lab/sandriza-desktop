@@ -237,8 +237,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="mini' + (ONGLET === 'campagnes' ? ' actif' : '') + '" data-onglet="campagnes">Campagnes</button>'
       + '<button class="mini' + (ONGLET === 'chaines' ? ' actif' : '') + '" data-onglet="chaines">Chaînes automatisées</button>'
       + '<button class="mini' + (ONGLET === 'segments' ? ' actif' : '') + '" data-onglet="segments">Segments</button>'
-      + (ONGLET === 'campagnes'
-          ? '<input type="search" id="cp-q" placeholder="Nom ou sujet…" value="' + esc(Q) + '">' : '')
+      // ⚠ LA RECHERCHE N EST PLUS ICI (demande du 2026-08-14 : << pas beau a
+      // cote des onglets >>). Elle vit desormais dans la barre qui surplombe
+      // la liste, la ou porte son effet.
       + '</div>';
   }
 
@@ -768,10 +769,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="dt">Expéditeur : ' + esc(D.expediteur) + '</div>';
     }
 
-    if (D.peutModifier) {
-      h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvelle">'
-        + '+ Nouvelle campagne</button></div>';
-    }
+    // La barre qui surplombe la LISTE : creation a gauche, recherche a droite,
+    // juste au-dessus de ce sur quoi elles agissent.
+    h += '<div class="barreoutils">'
+      + (D.peutModifier ? '<button class="mini prim" id="cp-nouvelle">+ Nouvelle campagne</button>' : '')
+      + '<div class="droite"><input type="search" id="cp-q" placeholder="Nom ou sujet…" value="'
+      + esc(Q) + '"></div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {

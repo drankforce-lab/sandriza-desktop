@@ -142,6 +142,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la fiche fournisseur">'
               + '<td><span class="num">' + esc(r.nom) + '</span>'
+              + szVerrouCase('suppliers', r.id)
               + (r.site ? '<div class="dt">' + esc(r.site) + '</div>' : '') + '</td>'
               + '<td>' + esc(r.contact || '—') + '</td>'
               + '<td>' + esc(r.courriel || '—')
@@ -163,6 +164,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '</div>';
     corps.innerHTML = h;
+    szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
 
     var q = document.getElementById('f-q');
     if (q) {
@@ -288,6 +290,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
+  szVerrousSuivre(['suppliers']);
 })();
 </script>
 </body></html>`;

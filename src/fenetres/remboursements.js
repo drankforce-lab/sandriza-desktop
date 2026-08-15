@@ -203,6 +203,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<strong>Archives</strong>, et ne sont pas comptés ici.</div>';
 
     corps.innerHTML = h;
+    szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
     brancher();
   }
 
@@ -218,7 +219,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<th style="text-align:right">Total</th></tr></thead><tbody>'
       + rows.map(function(r){
           return '<tr data-cmd="' + esc(r.commandeId) + '" title="Ouvrir la commande">'
-            + '<td><span class="num">' + esc(r.numero) + '</span></td>'
+            // ⚠ LE VERROU EST CELUI DE LA COMMANDE, pas du remboursement : la
+            // fenetre de remboursement verrouille la COMMANDE (deux personnes
+            // qui remboursent la meme, c est un double remboursement). Un
+            // cadenas sur une portee << refunds >> ne pourrait jamais
+            // s allumer — il a d ailleurs ete retire du site pour cette raison.
+            + '<td><span class="num">' + esc(r.numero) + '</span>'
+            + szVerrouCase('orders', r.commandeId) + '</td>'
             + '<td class="dt">' + esc(r.date) + '</td>'
             + '<td>' + esc(r.commande) + '</td>'
             + '<td>' + esc(r.client) + '</td>'
@@ -358,6 +365,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   });
 
   charger();
+  szVerrousSuivre(['orders']);
 })();
 </script>
 </body></html>`;

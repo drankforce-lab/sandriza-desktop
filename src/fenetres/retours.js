@@ -164,7 +164,8 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (r.fraisBoutique) badges += ' <span class="pill info">Frais pris en charge</span>';
         return '<div class="ligne" data-id="' + esc(r.id) + '" title="Ouvrir la demande de retour">'
           + '<div class="gauche">'
-          + '<div class="haut"><span class="num">' + esc(r.commande) + '</span>' + badges + '</div>'
+          + '<div class="haut"><span class="num">' + esc(r.commande) + '</span>'
+          + szVerrouCase('return_reqs', r.id) + badges + '</div>'
           + '<div class="dt"><strong>' + esc(r.client) + '</strong>'
           + (r.courriel ? ' · ' + esc(r.courriel) : '') + '</div>'
           + '<div class="dt">Motif : ' + esc(r.motif || '–') + '</div>'
@@ -174,6 +175,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       }).join('');
     }
     corps.innerHTML = h;
+    szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
 
     var q = document.getElementById('r-q');
     if (q) {
@@ -268,6 +270,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
+  szVerrousSuivre(['return_reqs']);
 })();
 </script>
 </body></html>`;

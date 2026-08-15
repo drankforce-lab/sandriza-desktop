@@ -194,7 +194,8 @@ ${JS_ACTIVITE}${JS_DIRE}
                 + ' <span class="pill err">-' + Math.round((1 - r.solde / (r.prix || 1)) * 100) + '%</span>'
               : esc(fmt(r.prix));
             return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la fiche">'
-              + '<td><span class="num">' + esc(r.nom) + '</span>' + badges + '</td>'
+              + '<td><span class="num">' + esc(r.nom) + '</span>'
+              + szVerrouCase('products', r.id) + badges + '</td>'
               + '<td>' + esc(r.categorie || '—') + '</td>'
               + '<td>' + (r.tag ? '<span class="pill neutre">' + esc(r.tag) + '</span>'
                 : '<span class="dt">—</span>') + '</td>'
@@ -214,6 +215,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '</div>';
     corps.innerHTML = h;
+    szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
 
     var q = document.getElementById('p-q');
     if (q) {
@@ -334,6 +336,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
+  szVerrousSuivre(['products']);
 })();
 </script>
 </body></html>`;

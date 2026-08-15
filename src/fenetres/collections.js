@@ -134,6 +134,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la collection">'
               + '<td><span class="num">' + esc(r.nom) + '</span>'
+              + szVerrouCase('collections', r.id)
               + (r.description ? '<div class="dt">' + esc(r.description).slice(0, 120) + '</div>' : '') + '</td>'
               + '<td>' + esc(r.saison || '—') + '</td>'
               + '<td style="text-align:center;font-weight:600">' + r.articles + '</td>'
@@ -144,6 +145,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '</div>';
     corps.innerHTML = h;
+    szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
 
     var nv = document.getElementById('col-nouvelle');
     if (nv) nv.onclick = function(){
@@ -212,6 +214,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
+  szVerrousSuivre(['collections']);
 })();
 </script>
 </body></html>`;

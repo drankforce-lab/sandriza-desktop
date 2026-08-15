@@ -407,7 +407,92 @@ document.addEventListener('DOMContentLoaded', szFenPleinPoser);
    le plein écran des surcouches et son installateur, et le plein écran de la
    fenêtre. Elles n'ont RIEN à changer — c'est tout l'intérêt de le brancher ici
    plutôt que dans chacune. */
-const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN;
+/* ══ CADENAS SUR LES LIGNES D UNE LISTE (#22) ═══════════════════════════════
+   Signale avec capture : la fiche client OUVERTE disait bien << verrouillee
+   par broubob >>, mais la LIGNE dans la liste ne montrait rien — un collegue
+   devait cliquer pour decouvrir que la fiche etait prise. L information
+   existait ; elle n etait simplement pas la ou l on regarde.
+
+   #38 avait fait ce travail pour le seul tableau de bord. Il est ici pour que
+   TOUTE liste en herite, sans le reinventer — et pour qu il n y ait qu un
+   endroit a corriger.
+
+   Usage dans une fenetre de liste :
+     1. dans chaque ligne :  szVerrouCase('users', u.id)
+     2. une fois, au demarrage :  szVerrousSuivre(['users'])
+     3. apres chaque redessin :  szVerrousPeindre()
+
+   ⚠ ON NE REDESSINE JAMAIS LA LISTE POUR UN CADENAS. Le sondage repeint les
+   seules cases concernees : pas de clignotement, pas de perte de focus, pas de
+   selection perdue pendant qu on tape. C est la regle du temps reel du projet.
+   ⚠ Le minuteur s arrete a `pagehide` : une vue ancree dechargee laisserait
+   sinon un sondage vivant pour rien.                                        */
+const CSS_VERROUS = `
+.cadslot{display:inline}
+.cad{margin-left:.35rem;font-size:.8rem;color:#fbbf24;vertical-align:middle;cursor:default}
+.cad.mine{color:#c9a97e}
+`;
+
+const JS_VERROUS = `
+var _szVerrous = {};      // { 'portee|id': { par, mine, depuis } }
+var _szVerrousT = null;
+var _szVerrousP = [];
+
+function szVerrouCase(portee, id){
+  return '<span class="cadslot" data-cad="' + String(portee) + '|' + String(id == null ? '' : id) + '"></span>';
+}
+
+function _szVerrouInner(cle){
+  var v = _szVerrous[cle];
+  if (!v) return '';
+  var t = v.mine ? 'Vous tenez cette fiche en modification'
+    : ('En traitement par ' + (v.par || 'un collegue') + (v.depuis ? ' — ' + v.depuis : ''));
+  return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="'
+    + String(t).replace(/"/g, '&quot;') + '">🔒</span>';
+}
+
+function szVerrousPeindre(){
+  var s = document.querySelectorAll('.cadslot');
+  for (var i = 0; i < s.length; i++){
+    s[i].innerHTML = _szVerrouInner(s[i].getAttribute('data-cad'));
+  }
+}
+
+function szVerrousLire(){
+  if (!_szVerrousP.length) return;
+  if (!window.szPont || !window.szPont.appeler) return;
+  var p;
+  try { p = window.szPont.appeler('verrous:liste', _szVerrousP); }
+  catch (e) { return; }
+  if (!p || typeof p.then !== 'function') return;
+  p.then(function(r){
+    if (!r || !r.ok || !r.portees) return;
+    var n = {};
+    for (var portee in r.portees){
+      if (!Object.prototype.hasOwnProperty.call(r.portees, portee)) continue;
+      var ids = r.portees[portee];
+      for (var id in ids){
+        if (Object.prototype.hasOwnProperty.call(ids, id)) n[portee + '|' + id] = ids[id];
+      }
+    }
+    _szVerrous = n;
+    szVerrousPeindre();
+  }).catch(function(){});
+}
+
+function szVerrousSuivre(portees){
+  _szVerrousP = (portees || []).slice();
+  if (_szVerrousT) return;
+  szVerrousLire();
+  _szVerrousT = setInterval(szVerrousLire, 3000);
+}
+
+window.addEventListener('pagehide', function(){
+  if (_szVerrousT) { clearInterval(_szVerrousT); _szVerrousT = null; }
+});
+`;
+
+const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS;
 
 const JS_SOCLE = `
 var P = window.szPont;
@@ -797,4 +882,5 @@ html.jour .sz-btnfen:hover{background:#efece4}
 html.jour .sz-msgauto{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.14);color:#1d2433}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN, CSS_JOUR: CSS_JOUR + CSS_PLEIN, JS_SOCLE, JS_ACTIVITE, JS_DIRE };
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS, JS_SOCLE, JS_ACTIVITE, JS_DIRE };
