@@ -2287,6 +2287,33 @@ module.exports = {
           'studio:modelesVider': { ok: true, vignettes: {}, ref: '', maj: '' },
         },
       },
+      /* LES RÉGLAGES AVANCÉS (lot 1 du #29). ⚠ Le panneau est REPLIÉ par défaut :
+         sans ces deux cas, il ne serait jamais dessiné ici — le banc n'ouvre pas
+         un panneau au clic. Et les deux voies ne partagent presque rien. */
+      {
+        nom: 'reglages avances — mannequin virtuel',
+        id: 'avance',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
+        },
+      },
+      {
+        /* ⚠ L'ÉTAT LE PLUS GARNI, À DESSEIN : voie fantôme, ombre réglée à la main
+           et agrandissement actif. Les glissières d'ombre, le mode
+           d'agrandissement et le bloc de la photo d'intérieur ne sont dessinés
+           que là — replié ou ombre décochée, ce code ne serait pas éprouvé. */
+        nom: 'reglages avances — fantome, ombre et agrandissement',
+        id: 'avance-plein',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
+        },
+      },
     ];
   })(),
 

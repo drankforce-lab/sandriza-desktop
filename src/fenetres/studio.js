@@ -14,8 +14,21 @@
  *   📦 Produit à plat — détourage + décor + ombre + relumière (un appel).
  *
  * ⚠ TOUT LE TRAVAIL EST AU RELAIS (photoroom-proxy.php) : cette fenêtre n'envoie
- * qu'une image, une voie, une ambiance et le drapeau « aperçu ». Les clés ne la
- * traversent jamais, les crédits se comptent là-bas, l'ambiance s'y résout.
+ * qu'une image, une voie, une ambiance, ses réglages avancés et le drapeau
+ * « aperçu ». Les clés ne la traversent jamais, les crédits se comptent là-bas,
+ * l'ambiance s'y résout.
+ *
+ * ⚠⚠ LE PANNEAU « RÉGLAGES AVANCÉS » NE MONTRE QUE CE QUE LA VOIE ACCEPTE. Le
+ * relais ne pose `finition` (fond décrit au texte, ombre réglable, relumière)
+ * que sur le FANTÔME — en un second appel — et sur le PRODUIT À PLAT, en un
+ * appel unique. Le mannequin virtuel compose sa scène par `options` (décor,
+ * pose, modèle, expression, précisions libres) et la photo d'intérieur n'est lue
+ * que pour le fantôme. Dessiner une glissière d'ombre sous un mannequin virtuel
+ * serait un mensonge d'écran : le réglage partirait, serait ignoré en silence, et
+ * l'on chercherait la panne dans le résultat.
+ *
+ * ⚠ `preset` et `finition` voyagent À LA RACINE du corps, jamais dans `options` —
+ * enfouis là, ils sont reçus et jetés sans un mot (le défaut des lots, 3.40.0).
  *
  * ⚠ L'APERÇU SANDBOX EST GRATUIT ET FILIGRANÉ : c'est le levier crédits. Le bouton
  * payant s'arme en deux temps pour qu'aucun crédit ne parte par mégarde.
@@ -185,6 +198,40 @@ select:focus{outline:none;border-color:#c9a97e}
   -webkit-user-select:none;user-select:none;margin:.2rem 0 0}
 .bascule input{width:1.05rem;height:1.05rem;accent-color:#c9a97e;cursor:pointer;margin-top:.12rem;flex:0 0 auto}
 .bascule .d{font-size:.72rem;color:#6d7f96;display:block;margin-top:.08rem}
+/* ── RÉGLAGES AVANCÉS ─────────────────────────────────────────────────────
+   ⚠ CHAQUE VOIE N ACCEPTE PAS LES MEMES REGLAGES, et le panneau ne montre que
+   ce qui s applique : le relais ne pose la finition (fond decrit, ombre,
+   relumiere) que sur le FANTOME et le PRODUIT A PLAT — le mannequin virtuel
+   compose sa scene autrement. Une glissiere d ombre dessinee sous un mannequin
+   virtuel serait un mensonge d ecran : elle serait recue et ignoree en silence. */
+.avbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.avbar .avres{font-size:.74rem;color:#8fa1b8;min-width:0;flex:1 1 8rem;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.avgrille{display:grid;grid-template-columns:1fr 1fr;gap:.15rem 1.1rem;margin-top:.55rem}
+.avsec{grid-column:1/-1;margin:.75rem 0 .1rem;padding-top:.6rem;
+  border-top:1px solid rgba(255,255,255,.08);font:700 .72rem/1.2 system-ui;
+  text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+.avsec.prem{margin-top:.1rem;padding-top:0;border-top:0}
+.avun{grid-column:1/-1}
+.aidep{font-size:.71rem;color:#6d7f96;line-height:1.45;margin-top:.22rem}
+.aidep.att{color:#d8b57a}
+textarea{width:100%;font:inherit;font-size:.82rem;color:#e8edf5;background:#0f1724;
+  border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem;resize:vertical;min-height:3.2rem}
+textarea:focus{outline:none;border-color:#c9a97e}
+input[type=text]{width:100%;font:inherit;color:#e8edf5;background:#0f1724;
+  border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+input[type=text]:focus{outline:none;border-color:#c9a97e}
+input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointer}
+.avlab{display:flex;align-items:baseline;gap:.4rem}
+.avlab b{color:#c9a97e;font-size:.78rem;font-variant-numeric:tabular-nums}
+.avint{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
+.avint img{width:3.4rem;height:3.4rem;object-fit:contain;background:#0b1220;border-radius:7px;
+  border:1px solid rgba(255,255,255,.1)}
+/* ⚠ flex:0 1 auto, PAS 1 1 : en poussant, le nom occupait toute la largeur de la
+   carte et rejetait le bouton << Choisir un fichier >> a l autre bout de l ecran,
+   a plus de mille pixels de son libelle. */
+.avint .nm{font-size:.76rem;color:#cbd8e6;min-width:0;flex:0 1 22rem;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Résultat */
 .res{align-items:center;justify-content:center;min-height:12rem;text-align:center;color:#8fa1b8}
 .res img{max-width:100%;max-height:22rem;border-radius:9px;border:1px solid rgba(255,255,255,.1)}
@@ -234,6 +281,9 @@ function pageStudio(mode) {
      CHOISIT CE QU ON VA PAYER resterait hors de tout controle. Angle mort #32. */
   const explo = String(mode || '') === 'explorateur';
   const lotsDep = String(mode || '') === 'lots';
+  // Le panneau « Réglages avancés » : replié par défaut, donc invisible au banc.
+  const avOuvre = String(mode || '').indexOf('avance') === 0;
+  const avPlein = String(mode || '') === 'avance-plein';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Studio virtuel — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -356,6 +406,92 @@ ${JS_ACTIVITE}${JS_DIRE}
     { cle: 'random',           t: 'Au hasard' }
   ];
   var POSE_SEL = '34turn';
+
+  /* ══ LES RÉGLAGES AVANCÉS (lot 1 du #29) ═══════════════════════════════════
+     Le relais accepte HUIT capacités que cette fenêtre ne demandait jamais :
+     elles étaient écrites, testées, facturables — et injoignables. Le panneau
+     les expose enfin.
+
+     ⚠⚠ IL NE MONTRE QUE CE QUE LA VOIE ACCEPTE. Le relais ne pose « finition »
+     (fond décrit, ombre, relumière) que sur le FANTÔME — en un second appel —
+     et sur le PRODUIT À PLAT, en un appel unique. Le mannequin virtuel, lui,
+     compose sa scène par « options » (décor, pose, modèle, expression,
+     précisions). Un réglage montré dans la mauvaise voie serait transmis,
+     ignoré en silence, et l’on chercherait la panne dans le résultat.
+
+     ⚠ L AGRANDISSEMENT est la seule exception : le relais l’applique en dernier,
+     sur l’image sortie, quelle que soit la voie. */
+  var AV_OUV = false;
+  var AV = {
+    // Mannequin virtuel (options)
+    decor: '',            // vide = le décor de l ambiance
+    sourire: true,
+    extra: '',
+    // Fantôme et produit à plat (finition)
+    fondPrompt: '', fondNegatif: '', fondGraine: '',
+    ombreActive: false, ombreIntensite: 0.4, ombreDouceur: 0.7,
+    ombreEtendue: 'medium', ombreDirection: 'front', ombrePose: 'upright',
+    lumiere: '',
+    // Toutes les voies
+    upActive: false, upMode: 'ai.fast'
+  };
+  /* La SECONDE prise de vue — le vêtement retourné. ⚠ FANTÔME SEULEMENT : le
+     relais ne lit « interieur » que pour ce geste, et l ignore ailleurs. */
+  var INTERIEUR = null, INTERIEUR_NOM = '';
+
+  /* Les 23 décors réels du mannequin virtuel (virtualModel.scene.preset.name,
+     liste fermée côté Photoroom). ⚠ Un nom hors liste est refusé par le service :
+     on ne propose que ceux-là, jamais un champ libre. */
+  var DECORS = [
+    { cle: 'studio',           t: 'Studio' },
+    { cle: 'coloredstudio',    t: 'Studio coloré' },
+    { cle: 'concretestudio',   t: 'Studio béton' },
+    { cle: 'street',           t: 'Rue' },
+    { cle: 'businessdistrict', t: 'Quartier des affaires' },
+    { cle: 'latincity',        t: 'Ville latine' },
+    { cle: 'asiancity',        t: 'Ville asiatique' },
+    { cle: 'nightlights',      t: 'Lumières de nuit' },
+    { cle: 'cafe',             t: 'Café' },
+    { cle: 'library',          t: 'Bibliothèque' },
+    { cle: 'bedroom',          t: 'Chambre' },
+    { cle: 'factory',          t: 'Usine' },
+    { cle: 'beach',            t: 'Plage' },
+    { cle: 'pool',             t: 'Piscine' },
+    { cle: 'tropical',         t: 'Tropical' },
+    { cle: 'forest',           t: 'Forêt' },
+    { cle: 'flowers',          t: 'Fleurs' },
+    { cle: 'countryside',      t: 'Campagne' },
+    { cle: 'mountain',         t: 'Montagne' },
+    { cle: 'desert',           t: 'Désert' },
+    { cle: 'sunset',           t: 'Coucher de soleil' },
+    { cle: 'goldenlight',      t: 'Lumière dorée' },
+    { cle: 'random',           t: 'Au hasard' }
+  ];
+  /* Direction de la lumière (donc de l ombre). ⚠ Le relais attend ces mots
+     EXACTS (il les remet en camelCase lui-même) ou un angle. */
+  var OMBRE_DIRS = [
+    { cle: 'front',       t: 'De face' },
+    { cle: 'frontleft',   t: 'Devant, à gauche' },
+    { cle: 'frontright',  t: 'Devant, à droite' },
+    { cle: 'left',        t: 'À gauche' },
+    { cle: 'right',       t: 'À droite' },
+    { cle: 'behind',      t: 'Derrière le sujet' },
+    { cle: 'behindleft',  t: 'Derrière, à gauche' },
+    { cle: 'behindright', t: 'Derrière, à droite' }
+  ];
+  var OMBRE_ETENDUES = [
+    { cle: 'short',  t: 'Courte — collée au vêtement' },
+    { cle: 'medium', t: 'Moyenne' },
+    { cle: 'long',   t: 'Longue — lumière basse' }
+  ];
+  /* Les trois modes de relumière du service. ⚠ « Préserver la teinte » est le
+     seul vraiment sûr pour un vêtement : c est la couleur qu on vend. */
+  var LUMIERES = [
+    { cle: '', t: 'Celle de l’ambiance' },
+    { cle: 'ai.preserve-hue-and-saturation', t: 'Préserver la teinte (recommandé)' },
+    { cle: 'ai.auto', t: 'Automatique — peut déplacer les couleurs' },
+    { cle: 'ai.optimize-portrait', t: 'Optimiser un portrait — s’il y a un visage' }
+  ];
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -681,11 +817,324 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('') + '</div>';
   }
 
+  /* ══ CE QUE LA VOIE ACCEPTE VRAIMENT ══════════════════════════════════════
+     Trois destinations distinctes dans le corps de la requête, et elles ne
+     s ouvrent pas aux mêmes voies :
+       finitionPour  → « finition » (À LA RACINE du corps) : fantôme et à plat ;
+       optionsPour   → « options » : mannequin virtuel ;
+       l intérieur   → « interieur » : fantôme seul.
+     ⚠⚠ ELLES PRENNENT LA VOIE EN PARAMÈTRE, PAS L ÉTAT DE L ÉCRAN. Un lot
+     choisit son traitement dans son propre sélecteur : il peut demander un
+     fantôme alors que l écran montre un mannequin virtuel, et l on n emporte
+     alors que ce qui s applique là-bas. */
+  function estVoie(v){ return v === 'humain' || v === 'fantome' || v === 'plat'; }
+
+  function finitionPour(voie){
+    if (!estVoie(voie)) return null;
+    var f = {};
+    if (voie === 'fantome' || voie === 'plat') {
+      var p = String(AV.fondPrompt || '').trim();
+      if (p) {
+        f.fond = { prompt: p };
+        var n = String(AV.fondNegatif || '').trim();
+        if (n) f.fond.negatif = n;
+        var g = String(AV.fondGraine == null ? '' : AV.fondGraine).trim();
+        if (g !== '' && isFinite(Number(g))) f.fond.seed = Math.abs(Math.round(Number(g)));
+      }
+      /* ⚠ COCHÉE, ELLE PREND TOUT. Le relais ne pose l ombre de l ambiance que
+         si « ombre.active » est absente : dès qu on règle soi-même, ce sont ces
+         valeurs-ci qui s appliquent, pas un mélange des deux. Le panneau le dit. */
+      if (AV.ombreActive) {
+        f.ombre = { active: true, intensite: AV.ombreIntensite, douceur: AV.ombreDouceur,
+                    etendue: AV.ombreEtendue, direction: AV.ombreDirection,
+                    poseSujet: AV.ombrePose };
+      }
+      if (AV.lumiere) f.lumiere = { mode: AV.lumiere };
+    }
+    // ⚠ L AGRANDISSEMENT EST LA SEULE EXCEPTION : le relais l applique en
+    // dernier, sur l image déjà produite, quelle que soit la voie.
+    if (AV.upActive) f.upscale = { active: true, mode: AV.upMode };
+    return Object.keys(f).length ? f : null;
+  }
+
+  function optionsPour(voie){
+    var o = {};
+    if (voie !== 'humain') return o;
+    o.modele = MODELE_SEL || 'sophia';
+    o.pose = POSE_SEL;
+    var d = String(AV.decor || '').trim();
+    if (d) o.decor = d;
+    /* ⚠ ON L ENVOIE TOUJOURS, MÊME QUAND C EST LE DÉFAUT. Côté relais,
+       « sourire » ABSENT vaut sourire : ne le poser que pour le refuser
+       marcherait, mais l intention resterait implicite — et c est exactement ce
+       genre d implicite qui a laissé les lots partir en réglages d usine. */
+    o.sourire = AV.sourire ? 1 : 0;
+    var e = String(AV.extra || '').trim();
+    if (e) o.extra = e;
+    return o;
+  }
+
+  function nomDecor(c){
+    var x = DECORS.filter(function(o){ return o.cle === c; })[0];
+    return x ? x.t : c;
+  }
+  /* Résumé court des réglages avancés RÉELLEMENT emportés par une voie donnée. */
+  function resumeAvance(voie){
+    if (!estVoie(voie)) return '';
+    var b = [];
+    if (voie === 'humain') {
+      if (AV.decor) b.push('décor ' + nomDecor(AV.decor));
+      if (!AV.sourire) b.push('expression neutre');
+      if (String(AV.extra || '').trim()) b.push('précisions libres');
+    } else {
+      if (String(AV.fondPrompt || '').trim()) b.push('décor décrit');
+      if (AV.ombreActive) b.push('ombre réglée');
+      if (AV.lumiere) b.push('relumière');
+      if (voie === 'fantome' && INTERIEUR) b.push('photo d’intérieur');
+    }
+    if (AV.upActive) b.push('agrandissement ×4');
+    return b.join(' · ');
+  }
+
+  /* ══ LE PANNEAU ═══════════════════════════════════════════════════════════ */
+  function chSel(id, lab, liste, val, aide){
+    return '<div class="ch"><label for="' + id + '">' + lab + '</label>'
+      + '<select id="' + id + '"' + (RO ? ' disabled' : '') + '>'
+      + liste.map(function(o){ return '<option value="' + esc(o.cle) + '"'
+          + (String(val) === String(o.cle) ? ' selected' : '') + '>' + esc(o.t) + '</option>'; }).join('')
+      + '</select>' + (aide ? '<div class="aidep">' + aide + '</div>' : '') + '</div>';
+  }
+  function chRange(id, lab, val){
+    return '<div class="ch"><label class="avlab" for="' + id + '">' + lab
+      + ' <b id="' + id + '-v">' + Number(val).toFixed(2) + '</b></label>'
+      + '<input type="range" id="' + id + '" min="0" max="1" step="0.05" value="' + Number(val)
+      + '"' + (RO ? ' disabled' : '') + '></div>';
+  }
+
+  function avanceCorpsHtml(){
+    if (!AV_OUV) return '';
+    var h = [];
+    if (VOIE === 'humain') {
+      h.push('<div class="avsec prem">Mise en scène du mannequin</div>');
+      h.push(chSel('av-decor', 'Décor', [{ cle: '', t: 'Celui de l’ambiance choisie' }].concat(DECORS),
+        AV.decor, 'Choisi ici, il remplace celui de l’ambiance. Ce sont les 23 décors que le service '
+        + 'connaît : un nom hors liste serait refusé.'));
+      h.push(chSel('av-sourire', 'Expression',
+        [{ cle: '1', t: 'Sourire naturel (défaut)' }, { cle: '0', t: 'Neutre' }],
+        AV.sourire ? '1' : '0', 'Sans consigne, le service rend un visage presque fermé — mesuré sur '
+        + 'pièce. Le sourire se demande, il ne vient pas tout seul.'));
+      h.push('<div class="ch avun"><label for="av-extra">Précisions libres</label>'
+        + '<textarea id="av-extra" rows="2" maxlength="200"' + (RO ? ' disabled' : '')
+        + ' placeholder="black heels, hair tied back, delicate jewellery">' + esc(AV.extra) + '</textarea>'
+        + '<div class="aidep">Chaussures, bijoux, coiffure, ambiance… ⚠ Photoroom n’a <strong>aucun '
+        + 'réglage dédié</strong> pour ces éléments : c’est du texte libre ajouté à la consigne, au mieux '
+        + 'une suggestion, jamais une garantie. Le service comprend mieux l’anglais.</div></div>');
+      h.push('<div class="avun"><div class="aidep att">⚠ Le décor décrit au texte, l’ombre réglable et '
+        + 'la relumière ne figurent pas dans cette voie : le mannequin virtuel <strong>compose sa scène '
+        + 'lui-même</strong> et le service les ignorerait. Ils sont offerts sur « Fantôme habillé » et '
+        + '« Produit à plat ».</div></div>');
+    } else {
+      h.push('<div class="avsec prem">Décor décrit au texte</div>');
+      h.push('<div class="ch avun"><label for="av-fond">Décor voulu</label>'
+        + '<textarea id="av-fond" rows="2" maxlength="500"' + (RO ? ' disabled' : '')
+        + ' placeholder="clean marble surface, soft window light from the left">' + esc(AV.fondPrompt)
+        + '</textarea><div class="aidep">Laissez vide pour garder le décor de l’ambiance ; rempli, il la '
+        + 'remplace. Le sujet reste où il est. Le service comprend mieux l’anglais.</div></div>');
+      h.push('<div class="ch"><label for="av-neg">À éviter</label>'
+        + '<input type="text" id="av-neg" maxlength="300"' + (RO ? ' disabled' : '')
+        + ' value="' + esc(AV.fondNegatif) + '" placeholder="text, logo, hands, harsh reflections">'
+        + '<div class="aidep">Ce que le décor ne doit pas contenir.</div></div>');
+      h.push('<div class="ch"><label for="av-seed">Graine</label>'
+        + '<input type="text" id="av-seed" inputmode="numeric" maxlength="9"' + (RO ? ' disabled' : '')
+        + ' value="' + esc(AV.fondGraine) + '" placeholder="vide = au hasard">'
+        + '<div class="aidep">Un même nombre redonne le <strong>même décor</strong> : c’est ce qui garde '
+        + 'une collection cohérente d’une photo à l’autre. Vide, chaque photo repart au hasard.</div></div>');
+
+      h.push('<div class="avsec">Ombre portée</div>');
+      h.push('<label class="bascule avun"><input type="checkbox" id="av-ombre"'
+        + (AV.ombreActive ? ' checked' : '') + (RO ? ' disabled' : '')
+        + '> <span><strong>Régler l’ombre moi-même</strong><span class="d">Décochée, c’est l’ombre de '
+        + 'l’ambiance qui s’applique. Cochée, <strong>vos réglages remplacent entièrement les '
+        + 'siens</strong> — ce n’est pas un mélange des deux.</span></span></label>');
+      if (AV.ombreActive) {
+        h.push(chRange('av-oi', 'Intensité', AV.ombreIntensite));
+        h.push(chRange('av-od', 'Douceur', AV.ombreDouceur));
+        h.push(chSel('av-oe', 'Étendue', OMBRE_ETENDUES, AV.ombreEtendue, ''));
+        h.push(chSel('av-odir', 'Direction de la lumière', OMBRE_DIRS, AV.ombreDirection, ''));
+        h.push(chSel('av-op', 'Pose du sujet',
+          [{ cle: 'upright', t: 'Debout, posé au sol (défaut)' }, { cle: 'flatlay', t: 'À plat, vu de dessus' }],
+          AV.ombrePose, '« Debout » ancre le vêtement au sol pour qu’il ne flotte pas. Ne choisissez '
+          + '« à plat » que si la photo est prise à la verticale, au-dessus du vêtement.'));
+      }
+
+      h.push('<div class="avsec">Relumière</div>');
+      h.push(chSel('av-lum', 'Accorder la lumière du sujet au décor', LUMIERES, AV.lumiere,
+        '« Préserver la teinte » garde la <strong>vraie couleur du tissu</strong> : c’est le seul choix sûr '
+        + 'quand on vend l’article sur sa couleur. « Automatique » éclaire mieux mais peut la déplacer — '
+        + 'un bleu nuit qui ressort bleu roi fait un retour.'));
+
+      if (VOIE === 'fantome') {
+        h.push('<div class="avsec">Photo de l’intérieur du vêtement</div>');
+        h.push('<div class="avun"><div class="aidep">Le studio photographie le vêtement à l’endroit, puis '
+          + '<strong>retourné</strong> ; le service raccorde les deux. C’est le <strong>seul chemin vers un '
+          + 'col qui ne soit pas inventé</strong> — sans elle, l’intérieur de l’encolure est imaginé par le '
+          + 'modèle.</div>'
+          + '<input type="file" id="av-int-f" hidden accept="image/*">'
+          + '<div class="avint">'
+          + (INTERIEUR ? '<img src="' + INTERIEUR + '" alt="intérieur du vêtement">' : '')
+          + '<span class="nm">' + (INTERIEUR ? esc(INTERIEUR_NOM || 'photo choisie')
+              : 'Aucune photo d’intérieur.') + '</span>'
+          + '<button id="av-int-b"' + (RO ? ' disabled' : '') + '>'
+          + (INTERIEUR ? 'Remplacer' : 'Choisir un fichier') + '</button>'
+          + (INTERIEUR ? '<button id="av-int-x"' + (RO ? ' disabled' : '') + '>Retirer</button>' : '')
+          + '</div>'
+          + '<div class="aidep att">⚠ Photoroom ne documente pas ce paramètre pour le retrait de '
+          + 'mannequin, et l’on ne fait pas semblant du contraire : s’il est ignoré, le service le signale '
+          + 'et l’écran vous le rapporte.</div>'
+          + '<div class="aidep att">⚠ Elle ne voyage <strong>pas</strong> avec un lot : là, l’intérieur '
+          + 'utilisé est celui déjà attaché à chaque photo dans la photothèque.</div></div>');
+      }
+    }
+
+    h.push('<div class="avsec">Agrandissement</div>');
+    h.push('<label class="bascule avun"><input type="checkbox" id="av-up"'
+      + (AV.upActive ? ' checked' : '') + (RO ? ' disabled' : '')
+      + '> <span><strong>Agrandir ×4</strong><span class="d">Un appel de plus, facturé, après le '
+      + 'traitement.</span></span></label>');
+    if (AV.upActive) {
+      h.push(chSel('av-up-mode', 'Mode', [
+        { cle: 'ai.fast', t: 'Rapide — entrée jusqu’à 1000 px' },
+        { cle: 'ai.slow', t: 'Lent, plus fin — entrée jusqu’à 512 px' }], AV.upMode, ''));
+      h.push('<div class="avun"><div class="aidep att">⚠ L’entrée est plafonnée à <strong>'
+        + (AV.upMode === 'ai.slow' ? '512' : '1000') + ' px</strong> sur le grand côté. Au-delà, le '
+        + 'service refuse : l’écran vous le dira plutôt que de le facturer. Une photo de studio dépasse '
+        + 'largement cette limite — l’agrandissement sert surtout à récupérer une <strong>petite</strong> '
+        + 'image (vignette, photo de fournisseur).</div></div>');
+    }
+    return '<div class="avgrille">' + h.join('') + '</div>';
+  }
+
+  function avanceHtml(){
+    var r = resumeAvance(VOIE);
+    return '<div class="carte large"><h2>4 · Réglages avancés</h2>'
+      + '<p class="sous">Facultatif : l’ambiance suffit dans la plupart des cas. Le panneau ne montre que '
+      + 'ce que la voie choisie accepte vraiment.</p>'
+      + '<div class="avbar"><button id="av-bascule">' + (AV_OUV ? '▾ Masquer' : '▸ Afficher')
+      + ' les réglages avancés</button>'
+      + '<span class="avres" id="av-resume">' + (r ? esc(r) : 'Aucun réglage avancé.') + '</span></div>'
+      + '<div id="av-zone">' + avanceCorpsHtml() + '</div></div>';
+  }
+
+  // Ne repeint QUE le panneau : un redessin complet perdrait la grille de
+  // photos, son défilement et le focus de la saisie en cours.
+  function majAvance(){
+    var z = document.getElementById('av-zone');
+    if (!z) { dessiner(); return; }
+    z.innerHTML = avanceCorpsHtml();
+    brancherAvance();
+    majAvResume();
+  }
+  function majAvResume(){
+    var el = document.getElementById('av-resume');
+    if (!el) return;
+    var r = resumeAvance(VOIE);
+    el.textContent = r || 'Aucun réglage avancé.';
+  }
+
+  function brancherAvance(){
+    var b = document.getElementById('av-bascule');
+    if (b) b.onclick = function(){ AV_OUV = !AV_OUV; majAvance();
+      var z = document.getElementById('av-bascule');
+      if (z) z.textContent = (AV_OUV ? '▾ Masquer' : '▸ Afficher') + ' les réglages avancés'; };
+    // Un champ de texte ne redessine JAMAIS : on note la valeur et l on met à
+    // jour le seul résumé (sinon le curseur sauterait à chaque frappe).
+    var t = function(id, cle){
+      var e = document.getElementById(id);
+      if (e) e.oninput = function(){ AV[cle] = e.value; majAvResume(); };
+    };
+    t('av-extra', 'extra'); t('av-fond', 'fondPrompt');
+    t('av-neg', 'fondNegatif'); t('av-seed', 'fondGraine');
+    var s = function(id, cle, conv){
+      var e = document.getElementById(id);
+      if (e) e.onchange = function(){ AV[cle] = conv ? conv(e.value) : e.value; majAvResume(); };
+    };
+    s('av-decor', 'decor'); s('av-oe', 'ombreEtendue'); s('av-odir', 'ombreDirection');
+    s('av-op', 'ombrePose'); s('av-lum', 'lumiere');
+    s('av-sourire', 'sourire', function(v){ return v === '1'; });
+    // Les glissières : on écrit la valeur à côté du libellé, sans redessiner.
+    var g = function(id, cle){
+      var e = document.getElementById(id), v = document.getElementById(id + '-v');
+      if (!e) return;
+      e.oninput = function(){ AV[cle] = Number(e.value);
+        if (v) v.textContent = Number(e.value).toFixed(2); };
+    };
+    g('av-oi', 'ombreIntensite'); g('av-od', 'ombreDouceur');
+    // Ces deux-là font apparaître ou disparaître des contrôles : ils repeignent.
+    var o = document.getElementById('av-ombre');
+    if (o) o.onchange = function(){ AV.ombreActive = o.checked; majAvance(); };
+    var u = document.getElementById('av-up');
+    if (u) u.onchange = function(){ AV.upActive = u.checked; majAvance(); };
+    var um = document.getElementById('av-up-mode');
+    if (um) um.onchange = function(){ AV.upMode = um.value; majAvance(); };
+    // La photo de l intérieur (fantôme seulement).
+    var f = document.getElementById('av-int-f');
+    var ib = document.getElementById('av-int-b');
+    if (ib && f) ib.onclick = function(){ f.click(); };
+    if (f) f.onchange = function(){ if (f.files && f.files[0]) lireInterieur(f.files[0]); };
+    var ix = document.getElementById('av-int-x');
+    if (ix) ix.onclick = function(){ INTERIEUR = null; INTERIEUR_NOM = ''; majAvance();
+      dire('Photo d’intérieur retirée.', 'att'); };
+  }
+
+  function lireInterieur(fi){
+    if (!fi || String(fi.type).indexOf('image/') !== 0) { dire('Ce n’est pas une image.', 'err'); return; }
+    dire('Lecture de la photo d’intérieur…');
+    var fr = new FileReader();
+    fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
+      INTERIEUR = petite; INTERIEUR_NOM = String(fi.name || '');
+      majAvance(); dire('Photo d’intérieur prête.', 'bon'); }); };
+    fr.onerror = function(){ dire('Lecture impossible.', 'err'); };
+    fr.readAsDataURL(fi);
+  }
+
+  /* ══ CE QUE LE SERVICE A IGNORÉ, DIT À L ÉCRAN ═════════════════════════════
+     ⚠⚠ Photoroom renvoie l en-tête « pr-unsupported-attributes » quand il JETTE
+     un paramètre, et le relais le remonte depuis toujours sous la clé « ignores ».
+     Cette fenêtre ne l affichait NULLE PART. Un réglage avancé pouvait donc être
+     refusé sans que rien ne le dise — précisément le silence que ce panneau est
+     censé lever. Sans cet affichage, la mise en garde sur la photo d intérieur
+     (« s il est ignoré, l écran vous le rapporte ») serait une promesse fausse. */
+  var IGN_NOMS = {
+    'editWithAI.additionalImages.interior.imageFile': 'la photo de l’intérieur du vêtement',
+    'background.prompt': 'le décor décrit au texte',
+    'background.negativePrompt': 'l’anti-consigne du décor',
+    'background.seed': 'la graine du décor',
+    'lighting.mode': 'la relumière',
+    'upscale.mode': 'l’agrandissement',
+    'shadow.mode': 'l’ombre portée',
+    'shadow.intensityOverride': 'l’intensité de l’ombre',
+    'shadow.softnessOverride': 'la douceur de l’ombre',
+    'shadow.spreadOverride': 'l’étendue de l’ombre',
+    'shadow.directionOverride': 'la direction de l’ombre',
+    'shadow.subjectPoseOverride': 'la pose du sujet pour l’ombre',
+    'virtualModel.pose': 'la pose du mannequin',
+    'virtualModel.prompt': 'l’expression et les précisions libres',
+    'virtualModel.scene.preset.name': 'le décor du mannequin',
+    'virtualModel.model.preset.name': 'le mannequin choisi'
+  };
+  function ignoresLisible(s){
+    var l = String(s || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+    if (!l.length) return '';
+    return l.map(function(x){ return IGN_NOMS[x] || x; }).join(', ');
+  }
+
   function resultatHtml(){
     if (!RESULT) return '<div class="vide">L’image apparaîtra ici. Commencez par un <strong>aperçu gratuit</strong>.</div>';
     var h = '<img src="' + RESULT.image + '" alt="résultat">';
     if (RESULT.essai) h += '<div class="filig">⚠ Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.</div>';
     if (RESULT.decorErreur) h += '<div class="filig">⚠ Le décor n’a pas pu être appliqué : ' + esc(RESULT.decorErreur) + '</div>';
+    if (RESULT.ignores) h += '<div class="filig">⚠ Le service a <strong>ignoré</strong> : '
+      + esc(ignoresLisible(RESULT.ignores)) + '. Le reste du traitement a bien eu lieu.</div>';
     if (RESULT.upNote) h += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
     h += '<div class="dl"><button id="b-dl">Télécharger l’image</button> '
@@ -704,6 +1153,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h.push('<div class="carte large"><h2>3 · Ambiance</h2>'
       + '<p class="sous">Un clic règle décor, ombre ancrée et lumière. Réglable au besoin plus tard.</p>'
       + ambiancesHtml() + '</div>');
+    h.push(avanceHtml());
     h.push('<div class="carte large res" id="res">' + resultatHtml() + '</div>');
     corps.innerHTML = h.join('');
     brancher();
@@ -789,6 +1239,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var br = document.getElementById('b-port-refaire');
     if (br) br.onclick = refairePortraits;
     brancherVignettes();
+    brancherAvance();
     var dl = document.getElementById('b-dl');
     if (dl && RESULT) dl.onclick = telecharger;
     var sv = document.getElementById('b-save');
@@ -898,8 +1349,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     suite();
   }
 
+  /* ⚠ LA PHOTO D INTÉRIEUR PART AVEC LA PHOTO. Elle est celle de CE vêtement
+     retourné : gardée d un vêtement au suivant, elle ferait raccorder un col sur
+     une autre pièce — un défaut qu on ne verrait qu à l image, sans message. */
   function reinitPhoto(){
     PHOTO = null; PHOTO_ID = ''; PHOTO_URL = ''; PICKER = false; RESULT = null; ENREG = false;
+    INTERIEUR = null; INTERIEUR_NOM = '';
     dessiner();
   }
 
@@ -909,6 +1364,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var fr = new FileReader();
     fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
       PHOTO = petite; PHOTO_ID = ''; PHOTO_URL = ''; PICKER = false; RESULT = null; ENREG = false;
+      INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
       dessiner(); dire('Photo prête.', 'bon'); }); };
     fr.onerror = function(){ dire('Lecture impossible.', 'err'); };
     fr.readAsDataURL(f);
@@ -1043,34 +1499,59 @@ ${JS_ACTIVITE}${JS_DIRE}
      ⚠ LA CASE EST COCHEE PAR DEFAUT, mais elle EXISTE : un lot de simple
      detourage n a que faire d une ambiance, et l on doit pouvoir la refuser
      sans avoir a defaire ses reglages a l ecran. */
-  function reglagesActuels(){
-    var o = {};
+  /* ⚠⚠ LE TRAITEMENT D UN LOT N EST PAS LA VOIE DE L ÉCRAN. Le voile a son propre
+     sélecteur, et surtout le « détourage » en lot NE PASSE PAS par Photoroom :
+     il est fait par le détoureur, avec repli sur le canevas de la page. Ni
+     l ambiance, ni la mise en scène, ni la finition n y ont le moindre effet.
+     Annoncer « ambiance Plage dorée · Sophia » sur un lot de détourage, c est le
+     défaut qu on vient de corriger, en plus discret : un réglage promis à
+     l écran que rien n applique. Le voile dit donc la vérité du traitement
+     CHOISI, et il la redit quand on en change. */
+  function voiePourQuoi(q){
+    q = String(q || '');
+    return (q === 'humain' || q === 'fantome' || q === 'plat') ? q : '';
+  }
+  function reglagesPour(voie){
+    if (!estVoie(voie)) return {};
+    var o = optionsPour(voie);
     if (PRESET) o.preset = PRESET;
-    if (VOIE === 'humain') {
-      o.modele = MODELE_SEL;
-      o.pose = POSE_SEL;
-    }
+    var f = finitionPour(voie);
+    if (f) o.finition = f;
     return o;
   }
-  function resumeReglages(){
+  function resumeReglages(voie){
+    if (!estVoie(voie)) return '';
     var b = [];
     if (PRESET) {
       var p = PRESETS.filter(function(x){ return x.cle === PRESET; })[0];
       b.push('ambiance ' + ((p && p.label) || PRESET));
     }
-    if (VOIE === 'humain') { b.push(nomModele(MODELE_SEL)); b.push(nomPose(POSE_SEL)); }
+    if (voie === 'humain') { b.push(nomModele(MODELE_SEL)); b.push(nomPose(POSE_SEL)); }
+    var a = resumeAvance(voie);
+    if (a) b.push(a);
     return b.join(' · ');
   }
-  function reglagesLotHtml(){
-    var r = resumeReglages();
+  function reglagesLotHtml(voie, coche){
+    if (!estVoie(voie)) {
+      return '<p style="color:#d8b57a;margin:.6rem 0 0">⚠ Ce traitement ne passe pas par Photoroom : '
+        + 'ni l’ambiance, ni la mise en scène, ni les réglages avancés n’y changent quoi que ce soit. '
+        + 'Le détourage se fait au détoureur, et il n’a pas de décor à composer.</p>';
+    }
+    var r = resumeReglages(voie);
     if (!r) {
       return '<p style="color:#8fa1b8;margin:.6rem 0 0">Aucune ambiance ni mise en scène '
         + 'choisie à l’écran : le lot partira avec les réglages par défaut.</p>';
     }
-    return '<label class="rc"><input type="checkbox" id="lot-reglages" checked> '
+    // ⚠ La photo d intérieur est la SEULE chose du panneau avancé qui ne peut pas
+    // suivre un lot : elle est propre à UN vêtement, pas à cinq cents.
+    var sup = (voie === 'fantome' && INTERIEUR)
+      ? '<br><span style="font-size:.74rem;color:#d8b57a">⚠ La photo d’intérieur ne suit pas un lot : '
+        + 'chaque photo utilise celle qui lui est attachée dans la photothèque.</span>' : '';
+    return '<label class="rc"><input type="checkbox" id="lot-reglages"'
+      + (coche === false ? '' : ' checked') + '> '
       + '<span><strong>Appliquer la mise en scène de l’écran</strong> — ' + esc(r) + '.<br>'
       + '<span style="font-size:.74rem;color:#8fa1b8">Décochez pour un traitement brut, '
-      + 'sans ambiance ni pose imposée.</span></span></label>';
+      + 'sans ambiance ni pose imposée.</span>' + sup + '</span></label>';
   }
 
   function ouvrirLotVoile(){
@@ -1084,14 +1565,20 @@ ${JS_ACTIVITE}${JS_DIRE}
     var opts = (PH_META && PH_META.traitements) || [
       { cle: 'detourage', nom: 'Détourage' }, { cle: 'fantome', nom: 'Mannequin retiré' },
       { cle: 'humain', nom: 'Porté par un mannequin' }];
+    /* ⚠ ON PRÉSÉLECTIONNE LA VOIE DE L ÉCRAN quand le lot sait la faire : le
+       voile s ouvrait toujours sur le premier traitement de la liste, si bien
+       qu on venait de régler un fantôme et qu on lançait un détourage. */
+    var voieDef = opts.filter(function(t){ return t.cle === VOIE; }).length
+      ? VOIE : String((opts[0] || {}).cle || '');
     voile('<h3>⚙ Traiter ' + nP + ' photo' + (nP > 1 ? 's' : '') + ' en lot</h3>'
       + '<div class="ch"><label for="lot-quoi">Traitement à appliquer</label>'
       + '<select id="lot-quoi">' + opts.map(function(t){
-          return '<option value="' + esc(t.cle) + '">' + esc(t.nom) + '</option>'; }).join('')
+          return '<option value="' + esc(t.cle) + '"' + (t.cle === voieDef ? ' selected' : '')
+            + '>' + esc(t.nom) + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="ch"><label for="lot-nom">Nom du lot (pour le retrouver dans le suivi)</label>'
       + '<input id="lot-nom" placeholder="Collection automne — détourage"></div>'
-      + reglagesLotHtml()
+      + '<div id="lot-reg">' + reglagesLotHtml(voiePourQuoi(voieDef)) + '</div>'
       + '<label class="rc"><input type="checkbox" id="lot-prio"> '
       + '<span><strong>Priorité haute</strong> — ce lot passe devant ceux qui attendent.</span></label>'
       + '<label class="rc"><input type="checkbox" id="lot-refaire"> '
@@ -1103,13 +1590,22 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="prim" id="v-oui">Lancer le lot</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
+        var g = function(i){ var e = document.getElementById(i); return e ? e.value : ''; };
+        var c = function(i){ var e = document.getElementById(i); return !!(e && e.checked); };
+        /* Changer de traitement change ce qui s applique : on redit la vérité,
+           en gardant le choix déjà fait sur la case. */
+        var sq = document.getElementById('lot-quoi');
+        if (sq) sq.onchange = function(){
+          var z = document.getElementById('lot-reg');
+          if (!z) return;
+          var avait = document.getElementById('lot-reglages') ? c('lot-reglages') : true;
+          z.innerHTML = reglagesLotHtml(voiePourQuoi(sq.value), avait);
+        };
         document.getElementById('v-oui').onclick = function(){
           this.disabled = true;
-          var g = function(i){ var e = document.getElementById(i); return e ? e.value : ''; };
-          var c = function(i){ var e = document.getElementById(i); return !!(e && e.checked); };
           appeler('lots:creer', [{ ids: ids, quoi: g('lot-quoi'), nom: g('lot-nom'),
             priorite: c('lot-prio') ? 1 : 0, refaire: c('lot-refaire'),
-            options: c('lot-reglages') ? reglagesActuels() : {} }]).then(function(r){
+            options: c('lot-reglages') ? reglagesPour(voiePourQuoi(g('lot-quoi'))) : {} }]).then(function(r){
             fermer();
             if (!r.ok) {
               dire(r.motif === 'toutes_deja_faites'
@@ -1309,6 +1805,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     for (var i = 0; i < PHOTHQ.length; i++) { if (PHOTHQ[i].id === id) { p = PHOTHQ[i]; break; } }
     if (!p) return;
     PHOTO = null; PHOTO_ID = id; PHOTO_URL = p.apercu || ''; PICKER = false; RESULT = null; ENREG = false;
+    INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
     dessiner(); dire('Photo choisie : ' + (p.nom || id) + '.', 'bon');
   }
 
@@ -1328,8 +1825,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (VOIE === 'humain') {
       var sel = document.getElementById('modele-sel');
       if (sel) MODELE_SEL = sel.value;   // le menu déroulant reste la source si présent
-      s.options = { modele: MODELE_SEL || 'sophia', pose: POSE_SEL };
+      s.options = optionsPour('humain');
     }
+    /* ⚠ « finition » VA À LA RACINE DU CORPS, jamais dans « options » : le relais ne
+       la lit que là. Enfouie ailleurs, elle serait reçue et ignorée en silence —
+       c est la faute qui a fait partir les lots en réglages d usine. */
+    var f = finitionPour(VOIE);
+    if (f) s.finition = f;
+    // La seconde prise de vue : le relais ne la lit que pour le fantôme.
+    if (VOIE === 'fantome' && INTERIEUR) s.interieur = INTERIEUR;
     return s;
   }
 
@@ -1359,6 +1863,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (r && r.ok) {
         ENREG = false;
         RESULT = { image: r.image, essai: !!r.essai, decorErreur: r.decorErreur || '',
+                   ignores: r.ignores || '',
                    upNote: r.upNote || '', largeur: r.largeur || 0, hauteur: r.hauteur || 0 };
         var res = document.getElementById('res');
         if (res) {
@@ -1439,6 +1944,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* ⚠ IDENTIFIANTS D OUVERTURE DU PANNEAU AVANCÉ. Replié, il ne se déplie qu au
+     CLIC — et le banc dessine, il ne clique pas : tout le panneau serait resté
+     hors de tout contrôle, comme le lanceur de lot qui n a jamais pu partir
+     pendant deux versions. << avance-plein >> ouvre en plus la voie du fantôme
+     avec ombre et agrandissement actifs, parce que les glissières d ombre, le
+     mode d agrandissement et le bloc de la photo d intérieur ne sont dessinés
+     que dans cet état-là. C est l écran qui décide CE QU ON PAIE : il se
+     vérifie. */
+  if (${avOuvre ? 'true' : 'false'}) AV_OUV = true;
+  if (${avPlein ? 'true' : 'false'}) { VOIE = 'fantome'; AV.ombreActive = true; AV.upActive = true; }
   charger();
   lotsSuivre();
   chargerPanier();
