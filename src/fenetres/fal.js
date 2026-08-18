@@ -230,6 +230,55 @@ ${JS_ACTIVITE}${JS_DIRE}
       + reel + sand + fal + '</div></div>';
   }
 
+  /* ══ LE PLAFOND MENSUEL DE DÉPENSE (lot 2 du #29) ═════════════════════════
+     ⚠⚠ UN SEUL PLAFOND POUR LES DEUX FOURNISSEURS, et c est ce qui le rend utile.
+     Photoroom et fal.ai inscrivent leur coût dans la MÊME table : un plafond par
+     relais ne plafonnerait rien du tout, la dépense continuerait tranquillement
+     par l autre porte pendant que l écran afficherait deux limites respectées.
+
+     ⚠ ET IL NE SE CONFOND PAS AVEC LE SOLDE fal.ai juste au-dessus : le solde dit
+     ce qu il reste CHEZ LE FOURNISSEUR, le plafond ce que l entreprise s autorise
+     à dépenser CE MOIS-CI. Deux limites différentes ; c est la plus basse qui
+     mord la première, et il faut pouvoir les lire séparément.
+
+     ⚠ IL EST ICI, dans l écran de la dépense, et pas dans le Studio : le Studio
+     RENCONTRE le plafond, il ne le déplace pas (droit « config » contre
+     « photos »). */
+  function cartePlafond(){
+    var b = D.budget || { actif: false, mensuel: 0, depense: 0, restant: null, mois: '' };
+    var pct = (b.actif && b.mensuel > 0)
+      ? Math.min(100, Math.round((b.depense / b.mensuel) * 100)) : 0;
+    /* La jauge change de couleur AVANT d être pleine : découvrir le plafond au
+       moment où la file s arrête, c est le découvrir trop tard. */
+    var teinte = pct >= 100 ? '#e08a8a' : pct >= 80 ? '#d8b57a' : '#6ea8a1';
+    var h = '<div class="carte"><h2>Plafond mensuel de dépense</h2>';
+    h += '<p class="dt">Photoroom et fal.ai comptent ensemble : c est la dépense TOTALE '
+      + 'du mois en traitements d’image qui est plafonnée. Atteint, il arrête les lots '
+      + 'en cours au lieu de les laisser courir — les photos non traitées restent à faire, '
+      + 'elles ne sont pas marquées en échec. Les aperçus sandbox, gratuits, ne sont jamais bloqués.</p>';
+    h += '<label class="rc" style="display:flex;gap:.5rem;align-items:center;margin:.6rem 0">'
+      + '<input type="checkbox" id="pl-actif"' + (b.actif ? ' checked' : '') + '> '
+      + '<span><strong>Appliquer un plafond mensuel</strong></span></label>';
+    h += '<div class="ch" style="max-width:16rem"><label for="pl-montant">Montant autorisé par mois ($US)</label>'
+      + '<input id="pl-montant" type="number" min="0" step="1" value="'
+      + (Number(b.mensuel) || 0) + '"></div>';
+    if (b.actif && b.mensuel > 0) {
+      h += '<div style="margin:.8rem 0 .2rem;height:.5rem;border-radius:99px;background:#22303f;overflow:hidden">'
+        + '<i style="display:block;height:100%;width:' + pct + '%;background:' + teinte + '"></i></div>'
+        + '<p class="dt">' + sous_(b.depense) + ' dépensés sur ' + sous_(b.mensuel)
+        + ' pour ' + esc(b.mois || '') + ' — il reste <strong>' + sous_(b.restant) + '</strong>.</p>';
+    } else if (b.actif) {
+      h += '<p class="dt" style="color:#e08a8a">Plafond actif mais fixé à 0 : <strong>tout traitement '
+        + 'payant est refusé</strong>. Posez un montant, ou décochez.</p>';
+    } else {
+      h += '<p class="dt">' + sous_(b.depense) + ' dépensés ce mois-ci (' + esc(b.mois || '')
+        + '). Aucun plafond n’est appliqué : rien n’arrêtera un lot.</p>';
+    }
+    h += '<div class="fin2" style="margin-top:.6rem"><button class="prim" id="pl-poser">Enregistrer le plafond</button>'
+      + ' <span id="pl-dit" class="dt"></span></div>';
+    return h + '</div>';
+  }
+
   /* La ligne « dernière actualisation » — l'écran se rafraîchit tout seul (plus de
      bouton Recharger), donc on DIT quand les chiffres ont été relus pour la
      dernière fois, sinon un écran figé passerait pour à jour. */
@@ -244,6 +293,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = [];
     h.push(ligneMaj());
     h.push(carteCredits());
+    h.push(cartePlafond());
 
     var reussis = 0;
     (D.parModele || []).forEach(function(m){ reussis += m.reussis; });
@@ -366,7 +416,41 @@ ${JS_ACTIVITE}${JS_DIRE}
     document.getElementById('o-conso').classList.toggle('on', VUE === 'conso');
     document.getElementById('o-hist').classList.toggle('on', VUE === 'hist');
     corps.innerHTML = (VUE === 'hist') ? vueHist() : vueConso();
-    if (VUE === 'hist') { brancherHist(); }
+    if (VUE === 'hist') { brancherHist(); } else { brancherPlafond(); }
+  }
+  function brancherPlafond(){
+    var bt = document.getElementById('pl-poser');
+    if (!bt) return;
+    bt.onclick = function(){
+      var ac = document.getElementById('pl-actif');
+      var mo = document.getElementById('pl-montant');
+      var dt = document.getElementById('pl-dit');
+      var actif = !!(ac && ac.checked);
+      var mensuel = mo ? (parseFloat(mo.value) || 0) : 0;
+      /* ⚠ ON REFUSE AVANT D ÉCRIRE, ET ON DIT POURQUOI. Un plafond actif à 0
+         refuse absolument tout traitement payant : c est un réglage légitime, mais
+         il ne doit pas s obtenir par un champ laissé vide. */
+      if (actif && mensuel <= 0) {
+        if (dt) { dt.style.color = '#e08a8a';
+          dt.textContent = 'Un plafond actif à 0 $ refuse tout traitement. Posez un montant, ou décochez.'; }
+        return;
+      }
+      bt.disabled = true;
+      if (dt) { dt.style.color = ''; dt.textContent = 'Enregistrement…'; }
+      appeler('fal:plafondPoser', [{ actif: actif, mensuel: mensuel }]).then(function(r){
+        bt.disabled = false;
+        if (!r || !r.ok) {
+          if (dt) { dt.style.color = '#e08a8a'; dt.textContent = expliquer(r); }
+          dire(expliquer(r), 'err');
+          return;
+        }
+        dire('Plafond enregistré.', 'bon');
+        /* ⚠ ON RECHARGE : la jauge se calcule sur la dépense du mois, que seul le
+           relais connaît. La redessiner sur la valeur qu on vient de taper
+           afficherait un restant inventé. */
+        charger(false);
+      });
+    };
   }
   /* Les filtres de l'historique se posent APRÈS le dessin. Ils ne redessinent que
      le CORPS du tableau (h-body), pour ne pas voler le foyer du champ de
@@ -421,13 +505,25 @@ ${JS_ACTIVITE}${JS_DIRE}
     try { return new Date().toLocaleString('fr-CA', { dateStyle: 'short', timeStyle: 'short' }); }
     catch (e) { return ''; }
   }
+  /* La signature dit « quelque chose a-t-il bougé ». ⚠ LE PLAFOND EN FAIT PARTIE :
+     posé depuis un autre poste, il doit apparaître ici sans qu on ait à rouvrir
+     l écran — c est une limite qui gouverne la dépense, pas une préférence. */
+  function sigPlafond(b){
+    b = b || {};
+    return [b.actif ? 1 : 0, b.mensuel || 0, b.depense || 0].join(',');
+  }
   function signatureCourante(){
     var pa = (PR && PR.compte && PR.compte.available != null) ? PR.compte.available : '-';
-    return [D ? D.appels : 0, D ? D.total : 0, pa, D ? D.soldeSaisi : 0, D ? D.consoDepuis : 0].join('|');
+    return [D ? D.appels : 0, D ? D.total : 0, pa, D ? D.soldeSaisi : 0, D ? D.consoDepuis : 0,
+      sigPlafond(D && D.budget)].join('|');
   }
   function saisieActive(){
     var a = document.activeElement;
-    return !!(a && (a.id === 'h-q' || a.id === 'h-prov'));
+    /* ⚠⚠ LE MONTANT DU PLAFOND EN FAIT PARTIE. L écran se recharge tout seul
+       toutes les 5 s : sans ce garde, un montant à moitié tapé serait effacé sous
+       les doigts, et l on ne comprendrait pas pourquoi le champ « saute ». */
+    return !!(a && (a.id === 'h-q' || a.id === 'h-prov'
+      || a.id === 'pl-montant' || a.id === 'pl-actif'));
   }
   function veille(){
     setInterval(function(){
@@ -438,7 +534,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (!r || !r.ok) return;   // une lecture ratée ne casse pas l'écran affiché
         var prNew = (rs[1] && rs[1].ok) ? rs[1] : PR;
         var pa = (prNew && prNew.compte && prNew.compte.available != null) ? prNew.compte.available : '-';
-        var apres = [r.appels, r.total, pa, r.soldeSaisi, r.consoDepuis].join('|');
+        var apres = [r.appels, r.total, pa, r.soldeSaisi, r.consoDepuis, sigPlafond(r.budget)].join('|');
         MAJ = _horoNow();
         if (apres !== avant) {
           PR = prNew;

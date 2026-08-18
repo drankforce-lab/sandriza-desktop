@@ -1543,6 +1543,11 @@ const OPS_PONT = new Set([
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
   'studio:presets', 'studio:compte', 'studio:traiter',
+  // Plafond de depense (lot 2 du #29) : 'studio:estimer' chiffre un lot AVANT de
+  // le lancer, 'fal:plafondPoser' ecrit la limite mensuelle. ⚠ Les deux relais
+  // d image (Photoroom et fal.ai) partagent UN SEUL plafond : un plafond par
+  // relais ne plafonnerait rien, la depense passerait par l autre porte.
+  'studio:estimer', 'fal:plafondPoser',
   // Studio ↔ photothèque : lister pour choisir, ouvrir depuis la photothèque,
   // enregistrer le résultat (import → dépôt R2).
   'studio:phototheque', 'studio:ouvrir', 'studio:enregistrer',
@@ -1938,6 +1943,10 @@ const LIMITES_PONT = {
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
+  // L estimation est une addition apres UNE lecture de la table des couts ;
+  // poser le plafond est une ecriture de configuration. Ni l une ni l autre ne
+  // touche a une image, donc pas de plafond de temps genereux ici.
+  'studio:estimer': 20000, 'fal:plafondPoser': 20000,
   'studio:phototheque': 20000, 'studio:ouvrir': 8000, 'studio:enregistrer': 90000,
   // ⚠ 'studio:modeleGenerer' = un traitement Photoroom PUIS un depot dans R2 :
   // il tient du meme ordre de grandeur que 'studio:traiter', pas d une lecture.

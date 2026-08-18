@@ -614,6 +614,15 @@ ${JS_ACTIVITE}${JS_DIRE}
             ? '<div class="lote">' + x.detailEchecs.map(function(e){
                 return esc(e.nom) + ' : ' + esc(String(e.detail).slice(0, 80)); }).join(' · ') + '</div>'
             : '')
+        /* ⚠⚠ << EN PAUSE >> SANS RAISON SE LIT COMME UN ARRET QU ON AURAIT
+           DEMANDE. Quand c est le plafond de depense qui a arrete la file, il faut
+           le DIRE : la personne cherchera sinon une panne, et surtout elle
+           cliquera << Reprendre >> en boucle sur un mur qui ne bougera pas tant
+           que le plafond n aura pas ete releve. Les photos restantes n ont ete ni
+           traitees ni facturees — elles attendent, elles ne sont pas perdues. */
+        + (x.motifPause
+            ? '<div class="lote" style="color:#d8b57a">⏸ Mis en pause : ' + esc(x.motifPause) + '</div>'
+            : '')
         + '</div>';
     }).join('');
   }
@@ -1586,6 +1595,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'les repasser coûte un appel chacune pour un résultat identique.</span></label>'
       + '<p style="color:#8fa1b8">Chaque photo est un appel facturé. Le lot part en arrière-plan : '
       + 'vous pouvez fermer cette fenêtre, le traitement continue et se suit depuis n’importe quel écran.</p>'
+      /* ⚠ CE QUE ÇA VA COÛTER, AVANT DE CLIQUER. Le chiffre est demandé au relais
+         (« studio:estimer ») et jamais recalculé ici : lui seul sait qu un fantôme
+         avec décor est DEUX appels, et que le détourage part chez un autre
+         fournisseur, cinquante fois moins cher. */
+      + '<div id="lot-estim" style="margin:.6rem 0 0;padding:.5rem .6rem;border:1px solid #2a3a4e;'
+      + 'border-radius:6px;background:#16202c;font-size:.8rem;color:#8fa1b8">Estimation du coût…</div>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="prim" id="v-oui">Lancer le lot</button></div>',
       function(fermer){
@@ -1594,13 +1609,104 @@ ${JS_ACTIVITE}${JS_DIRE}
         var c = function(i){ var e = document.getElementById(i); return !!(e && e.checked); };
         /* Changer de traitement change ce qui s applique : on redit la vérité,
            en gardant le choix déjà fait sur la case. */
+        /* ── L ESTIMATION, ET LE FREIN QU ELLE COMMANDE ───────────────────
+           ⚠ L ÉCRAN PRÉVIENT, IL NE PROTÈGE PAS : le vrai mur est dans les relais
+           (image-budget.php), parce qu un lot peut aussi partir d ailleurs. Ici on
+           évite seulement de lancer pour rien.
+           ⚠⚠ ET SI L ESTIMATION ÉCHOUE, ON LAISSE PARTIR. Bloquer sur un relais
+           muet, ce serait interdire de travailler à cause du thermomètre : le
+           plafond, lui, sera appliqué au serveur de toute façon. On le dit. */
+        /* Un montant en français : « 12,50 », jamais « 12.50 ». ⚠ Sous la
+           demi-cenne on garde trois décimales — un détourage coûte 0,002 $, et
+           « 0,00 $ » pour cinq cents photos ferait croire à la gratuité. */
+        var sous = function(v){
+          var n = Number(v || 0);
+          return (n > 0 && n < 0.01 ? n.toFixed(3) : n.toFixed(2)).replace('.', ',');
+        };
+        var majEstimation = function(){
+          var z = document.getElementById('lot-estim');
+          var b = document.getElementById('v-oui');
+          if (!z) return;
+          var quoi = g('lot-quoi');
+          var voie = voiePourQuoi(quoi);
+          var reg = (document.getElementById('lot-reglages') ? c('lot-reglages') : true)
+            ? reglagesPour(voie) : {};
+          z.textContent = 'Estimation du coût…';
+          if (b) b.disabled = true;
+          appeler('studio:estimer', [{ geste: (voie || quoi), nb: nP,
+            preset: reg.preset || '', finition: reg.finition || {}, options: reg }]).then(function(r){
+            if (b) b.disabled = false;
+            var z2 = document.getElementById('lot-estim');
+            if (!z2) return;
+            if (!r || !r.ok) {
+              z2.innerHTML = '<span style="color:#d8b57a">⚠ Coût non estimé</span> — le relais n’a pas '
+                + 'répondu (' + esc(expliquer(r)) + '). Le lot peut partir : le plafond mensuel, lui, '
+                + 'est appliqué au serveur et arrêtera la file s’il est atteint.';
+              return;
+            }
+            var bu = r.budget || {};
+            /* Une fourchette quand elle existe : l agrandissement ×4 est ignoré
+               au-delà de 1000 px, donc il coûte « au plus » un appel de plus.
+               Annoncer un chiffre unique et faux serait pire que la fourchette. */
+            var mt = (r.coutMax > r.coutMin)
+              ? ('de ' + sous(r.coutMin) + ' à ' + sous(r.coutMax) + ' $')
+              : (sous(r.coutMax) + ' $');
+            var app = (r.appelsMax > r.appelsMin)
+              ? (r.appelsMin + ' à ' + r.appelsMax) : String(r.appelsMax);
+            var h = '<strong>' + nP + ' photo' + (nP > 1 ? 's' : '') + ' · ' + app
+              + ' appel' + (r.appelsMax > 1 ? 's' : '') + ' facturé' + (r.appelsMax > 1 ? 's' : '')
+              + ' ≈ ' + mt + '</strong>';
+            if (bu.actif) {
+              h += '<br>Plafond du mois : ' + sous(bu.depense) + ' $ dépensés sur '
+                + sous(bu.mensuel) + ' $ — il reste ' + sous(bu.restant) + ' $.';
+            } else {
+              h += '<br><span style="color:#8fa1b8">Aucun plafond mensuel n’est posé '
+                + '(fenêtre « Traitements d’image »).</span>';
+            }
+            if (r.depasse) {
+              /* ⚠⚠ ON NE RÉPOND PAS << non >>, ON RÉPOND << COMBIEN >>. Un refus
+                 sec laisse deviner ; le nombre de photos qui rentrent permet de
+                 découper le lot et de lancer tout de suite ce qui est possible. */
+              var n2 = (r.photosPossibles == null) ? 0 : r.photosPossibles;
+              h += '<br><span style="color:#e08a8a"><strong>Ce lot ne rentre pas dans le plafond.</strong> '
+                + (n2 > 0
+                    ? ('Il reste de quoi en traiter ' + n2 + ' — désélectionnez-en '
+                       + (nP - n2) + ', ou relevez le plafond.')
+                    : 'Relevez le plafond mensuel, ou attendez le mois prochain.')
+                + '</span>';
+              if (b) b.disabled = true;
+            }
+            z2.innerHTML = h;
+          });
+        };
+
         var sq = document.getElementById('lot-quoi');
         if (sq) sq.onchange = function(){
           var z = document.getElementById('lot-reg');
           if (!z) return;
           var avait = document.getElementById('lot-reglages') ? c('lot-reglages') : true;
           z.innerHTML = reglagesLotHtml(voiePourQuoi(sq.value), avait);
+          brancherCase();
+          /* ⚠ CHANGER DE TRAITEMENT CHANGE LE PRIX, et pas d un peu : un fantôme
+             avec décor coûte deux appels Photoroom, un détourage un appel chez un
+             fournisseur cinquante fois moins cher. Laisser l ancien chiffre à
+             l écran serait le mensonge que le voile vient tout juste d arrêter de
+             dire sur la mise en scène. */
+          majEstimation();
         };
+        /* La case « appliquer la mise en scène » change elle aussi le compte
+           d appels (l ambiance allume le décor du fantôme, donc un 2e appel).
+           ⚠ ELLE EST REDESSINÉE À CHAQUE CHANGEMENT DE TRAITEMENT : un écouteur
+           posé une seule fois mourrait avec le premier exemplaire de la case. On
+           la rebranche donc après chaque redessin.
+           ⚠ ET PAS SUR « corps » : la surcouche est ajoutée au BODY par voile(),
+           un écouteur posé sur le corps de la fenêtre n aurait jamais rien reçu. */
+        var brancherCase = function(){
+          var cc = document.getElementById('lot-reglages');
+          if (cc) cc.onchange = majEstimation;
+        };
+        brancherCase();
+        majEstimation();
         document.getElementById('v-oui').onclick = function(){
           this.disabled = true;
           appeler('lots:creer', [{ ids: ids, quoi: g('lot-quoi'), nom: g('lot-nom'),
