@@ -2375,6 +2375,24 @@ module.exports = {
          ignorés, note d'agrandissement), les dimensions et les deux boutons
          n'étaient dessinés dans AUCUN cas. Le mode « resultat » pose une photo
          et un résultat témoins, tous deux inertes (une image d'un pixel). */
+      /* LE FILIGRANE (lot 3c). Section repliee : sans identifiant d'ouverture, la
+         grille de logos, les neuf ancrages et les trois glissieres ne seraient
+         dessines nulle part. */
+      {
+        nom: 'filigrane, logos et ancrages',
+        id: 'filigrane',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
+          'studio:logos': { ok: true, logos: [
+            { id: 'lg1', nom: 'Sandriza noir', image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' },
+            { id: 'lg2', nom: 'Sandriza blanc', image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' },
+          ] },
+          'session:activite': { ok: true },
+        },
+      },
       {
         nom: 'volet du resultat, comparateur avant-apres',
         id: 'resultat',

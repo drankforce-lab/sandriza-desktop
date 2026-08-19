@@ -1553,6 +1553,8 @@ const OPS_PONT = new Set([
   'studio:phototheque', 'studio:ouvrir', 'studio:enregistrer',
   // Portraits persistants des mannequins (fabriques une fois, ranges dans R2).
   'studio:modeles', 'studio:modeleGenerer', 'studio:modelesVider',
+  // Le filigrane (lot 3c) : la liste des logos EN PIXELS, et le collage lui-même.
+  'studio:logos', 'studio:filigraner',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1951,6 +1953,10 @@ const LIMITES_PONT = {
   // ⚠ 'studio:modeleGenerer' = un traitement Photoroom PUIS un depot dans R2 :
   // il tient du meme ordre de grandeur que 'studio:traiter', pas d une lecture.
   'studio:modeles': 15000, 'studio:modeleGenerer': 300000, 'studio:modelesVider': 120000,
+  /* ⚠ 'studio:logos' est GÉNÉREUX : il rapatrie jusqu'à quarante logos depuis R2,
+     un par un. 'studio:filigraner' porte une photo de studio dans les deux sens —
+     le même ordre de grandeur que l'enregistrement. */
+  'studio:logos': 60000, 'studio:filigraner': 90000,
   'photoroom:compte': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,

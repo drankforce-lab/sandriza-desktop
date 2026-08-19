@@ -121,6 +121,27 @@ body{background:#0e1522;color:#e8edf5;
    ⚠ AUCUN APPEL, AUCUN CREDIT : couper et border une image que l on a deja ne
    demande rien a personne. Le faire redemander au service serait payer une
    seconde fois pour la meme photo. */
+/* ── FILIGRANE / LOGO DE MARQUE (lot 3c) ─────────────────────────────────── */
+.loggr{display:grid;grid-template-columns:repeat(auto-fill,minmax(6rem,1fr));gap:.45rem;
+  align-content:start;max-height:16rem;overflow-y:auto}
+.loggr::-webkit-scrollbar{width:8px}
+.loggr::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.logv{background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.3rem;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;
+  -webkit-user-select:none;user-select:none;transition:border-color .12s,background .12s}
+.logv:hover{border-color:rgba(201,169,126,.6)}
+.logv.on{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset;background:rgba(201,169,126,.1)}
+/* ⚠ Fond CLAIR sous le logo : la plupart sont noirs sur transparent, et sur le
+   fond sombre de cet ecran ils seraient invisibles — on choisirait a l aveugle. */
+.logv img{width:100%;height:3.4rem;object-fit:contain;background:#e8edf5;border-radius:5px;padding:.15rem}
+.logv .ln{font-size:.66rem;color:#8fa1b8;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Les neuf ancrages, disposes comme ils le seront sur l image. */
+.posgr{display:grid;grid-template-columns:repeat(3,2.3rem);gap:.25rem}
+.posc{padding:0;width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center}
+.posc span{display:block;width:.6rem;height:.6rem;border-radius:2px;background:rgba(255,255,255,.35)}
+.posc.on{border-color:#c9a97e;background:rgba(201,169,126,.16)}
+.posc.on span{background:#c9a97e}
 .fmt .fbar{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-top:.55rem}
 .fmt .fbar .grand{margin-left:auto}
 .fmtg{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.55rem;
@@ -441,6 +462,8 @@ function pageStudio(mode) {
   const avPlein = String(mode || '') === 'avance-plein';
   // Le volet de droite garni : voir le commentaire au pied du script.
   const resTemoin = String(mode || '') === 'resultat';
+  // Le filigrane : section repliee, donc invisible au banc sans cet identifiant.
+  const filTemoin = String(mode || '') === 'filigrane';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Studio virtuel — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -514,6 +537,22 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PRESET = '';       // cle d ambiance
   var PRESETS = [];      // [{cle,label,emoji,desc}]
   var RESULT = null;     // { image, essai, decorErreur, upNote, largeur, hauteur }
+  /* ══ LE FILIGRANE (lot 3c) ════════════════════════════════════════════════
+     ⚠⚠ LE COLLAGE N EST PAS FAIT ICI. La fenetre pourrait le faire dans son
+     propre canevas, plus vite d un aller-retour — mais la geometrie serait alors
+     ecrite DEUX fois, dans deux depots, et au premier ajustement de marge
+     l apercu de l ecran cesserait de correspondre au resultat du lot. On appelle
+     donc studio:filigraner, qui partage son code avec le moteur de lots. */
+  var FIL_OUV = false;
+  var LOGOS = [];        // [{id,nom,image}] — les logos EN PIXELS (studio:logos)
+  var FIL = { logoId: '', position: 'bd', taille: 20, opacite: 0.8, marge: 3 };
+  var POSITIONS = [
+    { cle: 'hg', t: 'En haut à gauche' },  { cle: 'hc', t: 'En haut, au centre' },
+    { cle: 'hd', t: 'En haut à droite' },  { cle: 'mg', t: 'Au milieu, à gauche' },
+    { cle: 'mc', t: 'Au centre' },         { cle: 'md', t: 'Au milieu, à droite' },
+    { cle: 'bg', t: 'En bas à gauche' },   { cle: 'bc', t: 'En bas, au centre' },
+    { cle: 'bd', t: 'En bas à droite' }
+  ];
   var FORM_MODE = 'recadrer'; // formats de sortie : recadrer (on coupe) ou marges
   var FORMATS = [];      // [{cle,label,largeur,hauteur,image,ext,enreg}] deja fabriques
   var FORM_OCC = false;  // fabrication en cours
@@ -1220,6 +1259,170 @@ ${JS_ACTIVITE}${JS_DIRE}
      que les trois autres — mais son numero ne devient jamais une coche : elle
      n a rien a valider, et une coche voudrait dire << il manque quelque chose >>
      tant qu on n y a pas touche. Ce qui est reglé se lit a sa droite. */
+  function logoChoisi(){
+    for (var i = 0; i < LOGOS.length; i++) { if (LOGOS[i].id === FIL.logoId) return LOGOS[i]; }
+    return null;
+  }
+  function nomPosition(c){
+    var x = POSITIONS.filter(function(o){ return o.cle === c; })[0];
+    return x ? x.t : c;
+  }
+  // Une glissiere a bornes libres — celle du panneau avance ne va que de 0 a 1.
+  function chRange2(id, lab, val, min, max, pas, unite){
+    return '<div class="ch"><label class="avlab" for="' + id + '">' + lab
+      + ' <b id="' + id + '-v">' + val + esc(unite || '') + '</b></label>'
+      + '<input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="' + pas
+      + '" value="' + val + '"' + (RO ? ' disabled' : '') + '></div>';
+  }
+
+  function filigraneCorpsHtml(){
+    if (!FIL_OUV) return '';
+    if (!LOGOS.length) {
+      return '<div class="avgrille"><div class="aidep att">Aucun logo dans la logothèque. '
+        + 'Ajoutez-en un dans <strong>Configuration ▸ Logothèque</strong>, puis rouvrez cet écran.'
+        + '</div></div>';
+    }
+    var lg = logoChoisi();
+    var h = '<div class="avgrille"><div class="avsec prem">Le logo</div>'
+      + '<div class="loggr">' + LOGOS.map(function(l){
+          return '<div class="logv' + (FIL.logoId === l.id ? ' on' : '') + '" data-logo="'
+            + esc(l.id) + '" title="' + esc(l.nom) + '">'
+            + '<img src="' + l.image + '" alt="' + esc(l.nom) + '">'
+            + '<span class="ln">' + esc(l.nom) + '</span></div>'; }).join('') + '</div>';
+    h += '<div class="avsec">Où le poser</div>'
+      + '<div class="posgr">' + POSITIONS.map(function(p){
+          return '<button class="posc' + (FIL.position === p.cle ? ' on' : '') + '" data-pos="'
+            + esc(p.cle) + '" title="' + esc(p.t) + '"><span></span></button>'; }).join('') + '</div>';
+    h += '<div class="avsec">Taille et discrétion</div>';
+    h += chRange2('fil-taille', 'Largeur du logo', FIL.taille, 5, 60, 1, ' % de l’image');
+    h += chRange2('fil-op', 'Opacité', Math.round(FIL.opacite * 100), 5, 100, 5, ' %');
+    h += chRange2('fil-marge', 'Marge', FIL.marge, 0, 15, 1, ' %');
+    h += '<div class="avun"><div class="fbar">'
+      + '<button class="prim" id="fil-go"' + ((RESULT && lg && !RO) ? '' : ' disabled') + '>'
+      + 'Appliquer au résultat</button>'
+      + ((RESULT && RESULT.filigrane) ? '<button id="fil-off">Retirer</button>' : '')
+      + '</div><div class="aidep">'
+      + (RESULT
+          ? (lg ? 'S’applique à l’image de droite. Les formats de sortie en seront tirés, donc marqués eux aussi.'
+                : 'Choisissez un logo ci-dessus.')
+          : 'Il n’y a pas encore d’image à marquer — commencez par un aperçu gratuit.')
+      + '</div>'
+      /* ⚠ CE QUE ÇA COÛTE, DIT UNE FOIS POUR TOUTES : rien. C est le seul
+         traitement de cet écran dont le prix ne dépend pas du nombre de photos. */
+      + '<div class="aidep">Le lot <strong>« Filigrane / logo »</strong> posera ce même réglage sur '
+      + 'chaque photo choisie — <strong>aucun appel, aucun crédit</strong>, qu’il y en ait cinq ou '
+      + 'cinq cents.</div></div>';
+    return h + '</div>';
+  }
+
+  function filigraneHtml(){
+    var lg = logoChoisi();
+    var etat = lg ? (lg.nom + ' · ' + nomPosition(FIL.position)) : 'Aucun';
+    return '<section class="etape">'
+      + '<div class="eth"><span class="num">5</span><h2>Filigrane</h2>'
+      + '<span class="etat' + (lg ? ' on' : '') + '" id="fil-etat">' + esc(etat) + '</span></div>'
+      + '<p class="sous">Le logo de la marque, posé sur l’image. Aucun appel, aucun crédit.</p>'
+      + '<div class="etc"><div class="avbar"><button id="fil-bascule">'
+      + (FIL_OUV ? '▾ Masquer' : '▸ Afficher') + ' le filigrane</button></div>'
+      + '<div id="fil-zone">' + filigraneCorpsHtml() + '</div></div></section>';
+  }
+
+  // Ne repeint QUE la section : un redessin complet perdrait le défilement du
+  // volet et le focus de la glissière qu on est en train de tirer.
+  function majFiligrane(){
+    var z = document.getElementById('fil-zone');
+    if (!z) { dessiner(); return; }
+    z.innerHTML = filigraneCorpsHtml();
+    var e = document.getElementById('fil-etat');
+    if (e) {
+      var lg = logoChoisi();
+      e.textContent = lg ? (lg.nom + ' · ' + nomPosition(FIL.position)) : 'Aucun';
+      e.className = 'etat' + (lg ? ' on' : '');
+    }
+    var b = document.getElementById('fil-bascule');
+    if (b) b.textContent = (FIL_OUV ? '▾ Masquer' : '▸ Afficher') + ' le filigrane';
+    brancherFiligrane();
+  }
+
+  function brancherFiligrane(){
+    var b = document.getElementById('fil-bascule');
+    if (b) b.onclick = function(){ FIL_OUV = !FIL_OUV; majFiligrane(); };
+    corps.querySelectorAll('[data-logo]').forEach(function(el){
+      el.onclick = function(){
+        var id = el.getAttribute('data-logo');
+        // Recliquer le logo choisi le retire : sinon on ne pourrait plus revenir
+        // en arrière sans fermer la fenêtre.
+        FIL.logoId = (FIL.logoId === id) ? '' : id;
+        majFiligrane();
+      };
+    });
+    corps.querySelectorAll('[data-pos]').forEach(function(el){
+      el.onclick = function(){ FIL.position = el.getAttribute('data-pos'); majFiligrane(); };
+    });
+    // ⚠ Les glissières ne redessinent JAMAIS : le curseur sauterait sous le doigt.
+    var g = function(id, poser){
+      var e = document.getElementById(id), v = document.getElementById(id + '-v');
+      if (!e) return;
+      e.oninput = function(){
+        poser(Number(e.value));
+        if (v) v.textContent = e.value + v.textContent.replace(/^[0-9.]+/, '');
+      };
+    };
+    g('fil-taille', function(n){ FIL.taille = n; });
+    g('fil-op', function(n){ FIL.opacite = n / 100; });
+    g('fil-marge', function(n){ FIL.marge = n; });
+    var go = document.getElementById('fil-go');
+    if (go) go.onclick = appliquerFiligrane;
+    var off = document.getElementById('fil-off');
+    if (off) off.onclick = retirerFiligrane;
+  }
+
+  function appliquerFiligrane(){
+    var lg = logoChoisi();
+    if (!RESULT || !lg || OCCUPE || RO) return;
+    /* ⚠⚠ ON REPART TOUJOURS DE L IMAGE NUE. Sans elle, changer de position
+       poserait un second logo SUR le premier : deux marques superposées, et
+       aucun retour possible sans repayer un rendu. */
+    var base = RESULT.brut || RESULT.image;
+    occuper(true);
+    dire('Pose du filigrane…');
+    appeler('studio:filigraner', [{ image: base, logo: lg.image, position: FIL.position,
+      taille: FIL.taille, opacite: FIL.opacite, marge: FIL.marge }]).then(function(r){
+      occuper(false);
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      if (!RESULT.brut) RESULT.brut = RESULT.image;
+      RESULT.image = r.image;
+      RESULT.filigrane = true;
+      /* Les formats avaient été tirés de l image NUE : les garder ferait
+         enregistrer quatre cadrages SANS la marque, sous le même nom. */
+      FORMATS = [];
+      ENREG = false;
+      peindreResultat();
+      majFiligrane();
+      dire('Filigrane posé — aucun crédit dépensé.', 'bon');
+    });
+  }
+
+  function retirerFiligrane(){
+    if (!RESULT || !RESULT.brut || OCCUPE) return;
+    RESULT.image = RESULT.brut;
+    RESULT.brut = '';
+    RESULT.filigrane = false;
+    FORMATS = [];
+    ENREG = false;
+    peindreResultat();
+    majFiligrane();
+    dire('Filigrane retiré.', 'att');
+  }
+
+  function chargerLogos(){
+    appeler('studio:logos', []).then(function(r){
+      if (!r || !r.ok) return;          // pas de logos : la section le dira
+      LOGOS = r.logos || [];
+      if (FIL_OUV) majFiligrane();
+    });
+  }
+
   function avanceHtml(){
     var r = resumeAvance(VOIE);
     return '<section class="etape">'
@@ -1607,6 +1810,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (a) {
       a.split(' · ').forEach(function(x){ j.push('<span class="jt">' + esc(x) + '</span>'); });
     }
+    if (RESULT && RESULT.filigrane) j.push('<span class="jt">filigrané</span>');
     return '<div class="bloc recap"><span class="rt">Ce qui sera généré</span>'
       + '<div class="rc2">' + j.join('') + '</div>'
       + '<div class="note">L’aperçu est <strong>gratuit</strong> et filigrané : jugez d’abord, '
@@ -1656,6 +1860,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           PRESET ? nomPreset(PRESET) : 'À choisir')
       + '<div class="etc">' + ambiancesHtml() + '</div></section>');
     r.push(avanceHtml());
+    r.push(filigraneHtml());
     corps.innerHTML = '<div class="rail">' + r.join('') + '</div>'
       + '<div class="scene">' + recapHtml()
       + '<div class="bloc res' + (RESULT ? ' garni' : '') + '" id="res">' + resultatHtml() + '</div>'
@@ -1748,6 +1953,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (br) br.onclick = refairePortraits;
     brancherVignettes();
     brancherAvance();
+    brancherFiligrane();
     brancherResultat();
   }
 
@@ -2139,7 +2345,41 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (a) b.push(a);
     return b.join(' · ');
   }
-  function reglagesLotHtml(voie, coche){
+  /* Ce que le lot emporte VRAIMENT, selon le traitement choisi dans le voile.
+     ⚠ Le filigrane n a rien a voir avec les reglages Photoroom : il emporte le
+     logo (en pixels), sa position, sa taille et son opacite — et rien d autre. */
+  function optionsLot(quoi, avecReglages){
+    if (!avecReglages) return {};
+    if (quoi === 'filigrane') {
+      var lg = logoChoisi();
+      return lg ? { logo: lg.image, position: FIL.position, taille: FIL.taille,
+                    opacite: FIL.opacite, marge: FIL.marge } : {};
+    }
+    return reglagesPour(voiePourQuoi(quoi));
+  }
+
+  function reglagesLotHtml(quoi, coche){
+    /* ⚠ LE FILIGRANE A SES PROPRES REGLAGES, et le dire << ne passe pas par
+       Photoroom >> serait vrai mais trompeur : ce lot-la EMPORTE bien quelque
+       chose de l ecran, et il faut savoir QUOI avant de lancer cinq cents
+       photos — un logo mal place se voit sur les cinq cents. */
+    if (quoi === 'filigrane') {
+      var lg = logoChoisi();
+      if (!lg) {
+        return '<p style="color:#e08a8a;margin:.6rem 0 0">⚠ <strong>Aucun logo choisi.</strong> '
+          + 'Ouvrez « Filigrane » dans la colonne de gauche et choisissez-en un : sans logo, '
+          + 'le lot échouerait photo après photo.</p>';
+      }
+      return '<label class="rc"><input type="checkbox" id="lot-reglages"'
+        + (coche === false ? '' : ' checked') + '> '
+        + '<span><strong>Poser le filigrane réglé à l’écran</strong> — ' + esc(lg.nom) + ' · '
+        + esc(nomPosition(FIL.position)) + ' · ' + FIL.taille + ' % · '
+        + Math.round(FIL.opacite * 100) + ' % d’opacité.<br>'
+        + '<span style="font-size:.74rem;color:#8fa1b8">Ce traitement ne passe par aucun service : '
+        + '<strong>aucun appel, aucun crédit</strong>, qu’il y ait cinq photos ou cinq cents.</span>'
+        + '</span></label>';
+    }
+    var voie = voiePourQuoi(quoi);
     if (!estVoie(voie)) {
       return '<p style="color:#d8b57a;margin:.6rem 0 0">⚠ Ce traitement ne passe pas par Photoroom : '
         + 'ni l’ambiance, ni la mise en scène, ni les réglages avancés n’y changent quoi que ce soit. '
@@ -2186,7 +2426,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</select></div>'
       + '<div class="ch"><label for="lot-nom">Nom du lot (pour le retrouver dans le suivi)</label>'
       + '<input id="lot-nom" placeholder="Collection automne — détourage"></div>'
-      + '<div id="lot-reg">' + reglagesLotHtml(voiePourQuoi(voieDef)) + '</div>'
+      + '<div id="lot-reg">' + reglagesLotHtml(voieDef) + '</div>'
       + '<label class="rc"><input type="checkbox" id="lot-prio"> '
       + '<span><strong>Priorité haute</strong> — ce lot passe devant ceux qui attendent.</span></label>'
       + '<label class="rc"><input type="checkbox" id="lot-refaire"> '
@@ -2230,6 +2470,17 @@ ${JS_ACTIVITE}${JS_DIRE}
           var voie = voiePourQuoi(quoi);
           var reg = (document.getElementById('lot-reglages') ? c('lot-reglages') : true)
             ? reglagesPour(voie) : {};
+          /* ⚠ LE FILIGRANE NE SE DEMANDE PAS AU RELAIS : il ne passe par aucun
+             service, donc il n a pas de prix a estimer. Poser la question ferait
+             afficher << coût non estimé >> sur un traitement qui est GRATUIT —
+             une inquiétude fabriquée de toutes pièces. */
+          if (quoi === 'filigrane') {
+            z.innerHTML = '<strong>' + nP + ' photo' + (nP > 1 ? 's' : '')
+              + ' · aucun appel facturé</strong><br>Le filigrane est posé dans l’application, '
+              + 'au canevas : il ne coûte rien et n’entame pas le plafond mensuel.';
+            if (b) b.disabled = false;
+            return;
+          }
           z.textContent = 'Estimation du coût…';
           if (b) b.disabled = true;
           appeler('studio:estimer', [{ geste: (voie || quoi), nb: nP,
@@ -2284,7 +2535,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           var z = document.getElementById('lot-reg');
           if (!z) return;
           var avait = document.getElementById('lot-reglages') ? c('lot-reglages') : true;
-          z.innerHTML = reglagesLotHtml(voiePourQuoi(sq.value), avait);
+          z.innerHTML = reglagesLotHtml(sq.value, avait);
           brancherCase();
           /* ⚠ CHANGER DE TRAITEMENT CHANGE LE PRIX, et pas d un peu : un fantôme
              avec décor coûte deux appels Photoroom, un détourage un appel chez un
@@ -2310,7 +2561,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           this.disabled = true;
           appeler('lots:creer', [{ ids: ids, quoi: g('lot-quoi'), nom: g('lot-nom'),
             priorite: c('lot-prio') ? 1 : 0, refaire: c('lot-refaire'),
-            options: c('lot-reglages') ? reglagesPour(voiePourQuoi(g('lot-quoi'))) : {} }]).then(function(r){
+            options: optionsLot(g('lot-quoi'), c('lot-reglages')) }]).then(function(r){
             fermer();
             if (!r.ok) {
               dire(r.motif === 'toutes_deja_faites'
@@ -2649,6 +2900,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       dire('');
       chargerCredits();
       chargerPortraits();
+      chargerLogos();
     });
   }
 
@@ -2671,6 +2923,13 @@ ${JS_ACTIVITE}${JS_DIRE}
        n existe pas dans le contexte de contrôle, donc les fabriquer pour de vrai
        est impossible. On pose donc la liste, seul état dont dépend le dessin —
        les deux états du bouton d enregistrement compris. */
+    /* Deux logos témoins, pour que la grille, l état << choisi >> et le bouton
+       << Appliquer >> soient dessinés au moins une fois. */
+    if (!LOGOS.length) {
+      LOGOS = [{ id: 'lg1', nom: 'Logo témoin', image: PIXEL },
+               { id: 'lg2', nom: 'Logo témoin 2', image: PIXEL }];
+      if (!FIL.logoId) FIL.logoId = 'lg1';
+    }
     FORMATS = [
       { cle: '3x4', label: '3:4', largeur: 1200, hauteur: 1600,
         image: PIXEL, ext: 'jpg', enreg: false },
@@ -2710,6 +2969,11 @@ ${JS_ACTIVITE}${JS_DIRE}
      pendant deux versions. Ce mode pose une photo temoin et un resultat temoin,
      tous deux inertes (une image de 1 pixel). La coquille ne l ouvre jamais. */
   if (${resTemoin ? 'true' : 'false'}) RES_TEMOIN = true;
+  /* ⚠ IDENTIFIANT D OUVERTURE << filigrane >>. La section est REPLIEE par defaut
+     et le banc ne clique pas : la grille de logos, les neuf ancrages, les trois
+     glissieres et les deux boutons ne seraient dessines nulle part. Il pose en
+     plus un resultat temoin, pour que le bouton << Appliquer >> existe. */
+  if (${filTemoin ? 'true' : 'false'}) { RES_TEMOIN = true; FIL_OUV = true; }
   charger();
   lotsSuivre();
   chargerPanier();
