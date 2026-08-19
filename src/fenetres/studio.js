@@ -49,6 +49,13 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
+/* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION. Sa demande, le
+   2026-08-19, capture a l appui : << les emojis ne sont pas encore en noir et
+   blanc, sa devrais toujours etre comme sa >>. La regle vit ICI, en un seul
+   endroit : tout ce qui pose un pictogramme le met dans <span class="ic">, et il
+   n y a plus rien a decider ailleurs. Un emoji en couleur dans une barre d outils
+   fait un jouet, pas un outil. */
+.ic{display:inline-block;filter:grayscale(1) brightness(1.6);opacity:.9;font-style:normal}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .credits{margin-left:auto;font-size:.74rem;color:#8fa1b8}
@@ -116,10 +123,12 @@ body{background:#0e1522;color:#e8edf5;
   background:transparent;color:#cbd8e6;cursor:pointer}
 .ong:hover:not(.on){background:rgba(255,255,255,.05)}
 .ong.on{background:#16202f;border-color:rgba(201,169,126,.45)}
-/* Les pastilles sont degrisees SUR L ONGLET OUVERT seulement : neuf emojis en
-   couleur cote a cote font une barre de jouet, pas un outil. */
+/* ⚠ MEME L ONGLET OUVERT RESTE EN GRIS. Il etait degrise pour se distinguer —
+   mais c est la seule couleur qui restait dans la bande, et la regle est
+   << toujours >>. L onglet ouvert se marque par son fond et son liseré dores,
+   pas par un emoji qui reprend des couleurs. */
 .ong .oi{flex:0 0 auto;font-size:.95rem;filter:grayscale(1) brightness(1.7);opacity:.85}
-.ong.on .oi{filter:none;opacity:1}
+.ong.on .oi{opacity:1}
 .ong .ot{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.2}
 .ong .ot b{font:600 .79rem/1.25 system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ong .oe{font-size:.68rem;color:#6d7f96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -209,11 +218,18 @@ body{background:#0e1522;color:#e8edf5;
 .guide .gp.suiv{color:#e8dcc6;font-weight:600}
 .guide .gp.suiv .n{border-color:#c9a97e;color:#c9a97e}
 /* Dépôt de photo */
+/* ⚠ ELLE ETAIT TROP GRANDE (sa demande du 2026-08-19, capture a l appui). Neuf
+   rem de haut, un pictogramme de 1,6 rem et un texte qui passait sur deux lignes :
+   la zone de depot occupait la moitie du panneau pour un geste qu on ne fait
+   qu UNE fois par photo — et repoussait les boutons qui, eux, servent tout le
+   temps. Elle reste evidemment reperable : c est un cadre en pointille, pas un
+   affichage. */
 .depot{border:1.5px dashed #2b3444;border-radius:10px;background:#0f1724;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;
-  min-height:9rem;text-align:center;color:#8fa1b8;font-size:.82rem;padding:1rem;-webkit-user-select:none;user-select:none}
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
+  min-height:5rem;text-align:center;color:#8fa1b8;font-size:.78rem;padding:.6rem .7rem;
+  -webkit-user-select:none;user-select:none}
 .depot:hover,.depot.survol{border-color:#c9a97e;color:#cbd8e6}
-.depot .gros{font-size:1.6rem;filter:grayscale(1) brightness(1.6)}
+.depot .gros{font-size:1.15rem;filter:grayscale(1) brightness(1.6)}
 .depot img{max-width:100%;max-height:14rem;border-radius:8px}
 .depot .refaire{font-size:.72rem;color:#8fa1b8;text-decoration:underline;margin-top:.3rem}
 /* Choix dans la photothèque */
@@ -972,17 +988,17 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<span class="refaire">Choisir une autre photo</span></div>';
     } else {
       h += '<div class="depot" id="depot"><span class="gros">📷</span>'
-        + '<span>Glissez une photo studio ici, ou cliquez pour choisir un fichier</span>'
-        + '<span class="pt2">Fond blanc, un vêtement — JPEG ou PNG</span></div>';
+        + '<span>Glissez une photo ici, ou cliquez pour en choisir une</span>'
+        + '<span class="pt2">Studio, fond blanc, un vêtement — JPEG ou PNG</span></div>';
     }
     h += '<input type="file" id="fichier" accept="image/*" hidden><div class="pbtn">';
     if (!aUnePhoto()) {
-      h += '<button id="ph-ouvrir">📚 Depuis la photothèque</button>'
+      h += '<button id="ph-ouvrir"><span class="ic">📚</span> Depuis la photothèque</button>'
         // ⚠ L EXPLORATEUR EST DANS SA PROPRE FENETRE (#32) : le selecteur
         // ci-contre reste pour prendre UNE photo vite fait, l explorateur sert a
         // en choisir des centaines — il lui faut de la place et un apercu.
         + '<button id="ph-explorateur" title="Parcourir la photothèque en grand, avec aperçu">'
-        + '🗂️ Explorateur…</button>';
+        + '<span class="ic">🗂️</span> Explorateur…</button>';
     }
     /* ⚠ LE SUIVI RESTE JOIGNABLE UNE FOIS LA PHOTO CHOISIE, et c est nouveau :
        avant, le bouton disparaissait avec le bloc de depart, si bien qu un lot
@@ -1570,8 +1586,17 @@ ${JS_ACTIVITE}${JS_DIRE}
      vetement precis : rangee dans une recette, elle raccorderait le col d une
      robe sur un manteau, cinq cents fois, et les cinq cents seraient facturees.
      Le pont refuse d ailleurs tout ce qui n est pas explicitement prevu. */
+  /* ⚠⚠ A L ECRAN CELA S APPELLE << PROFIL >>, dans le code << recette >>, et ce
+     n est pas un oubli. Il a demande le renommage le 2026-08-19, apres avoir vu
+     la barre ; l ecran suit sa langue. Mais les identifiants, eux, ne changent
+     PAS : l operation du pont (studio:recettes) et la cle de configuration
+     (studio_recettes) sont ecrites des DEUX cotes et deja posees dans Turso —
+     les renommer serait une migration de donnees pour un mot, avec le risque de
+     perdre ce qui est deja enregistre.
+     ⚠ NE PAS << CORRIGER >> CETTE DIVERGENCE en renommant les ops : elle est
+     voulue, et ceci est le seul endroit ou il faut le savoir. */
   var RECETTES = [];   // [{id,nom,maj,r}] — telles que le pont les rend
-  var RC_SEL = '';     // identifiant de la recette appliquee, '' = aucune
+  var RC_SEL = '';     // identifiant du profil applique, '' = aucun
   var RC_VOILE_DEP = false;  // identifiant d ouverture du banc — voir le pied du script
 
   function recetteChoisie(){
@@ -1581,17 +1606,18 @@ ${JS_ACTIVITE}${JS_DIRE}
   function recettesHtml(){
     var x = recetteChoisie();
     return '<div class="rcbar" id="rcbar">'
-      + '<label for="rc-sel">Recette</label>'
+      + '<label for="rc-sel">Profil</label>'
       + '<select id="rc-sel"' + (RO ? ' disabled' : '') + '>'
-      + '<option value="">— Aucune —</option>'
+      + '<option value="">— Aucun —</option>'
       + RECETTES.map(function(o){
           return '<option value="' + esc(o.id) + '"' + (RC_SEL === o.id ? ' selected' : '')
             + '>' + esc(o.nom) + '</option>'; }).join('')
       + '</select>'
       + '<button id="rc-enr"' + (RO ? ' disabled' : '')
-      + ' title="Enregistrer tous les réglages actuels sous un nom">💾 Enregistrer…</button>'
+      + ' title="Enregistrer tous les réglages actuels sous un nom">'
+      + '<span class="ic">💾</span> Enregistrer…</button>'
       + '<button class="x" id="rc-sup"' + ((RO || !x) ? ' disabled' : '')
-      + ' title="Retirer cette recette">✕</button></div>';
+      + ' title="Retirer ce profil">✕</button></div>';
   }
   function brancherRecettes(){
     var s = document.getElementById('rc-sel');
@@ -1630,7 +1656,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function appliquerRecette(id){
     RC_SEL = String(id || '');
     var x = recetteChoisie();
-    if (!x) { dessiner(); dire('Aucune recette appliquée — les réglages sont ceux de l’écran.', 'att'); return; }
+    if (!x) { dessiner(); dire('Aucun profil appliqué — les réglages sont ceux de l’écran.', 'att'); return; }
     var r = x.r || {};
     var perdus = [];
     if (r.voie && estVoie(r.voie)) VOIE = r.voie;
@@ -1652,9 +1678,9 @@ ${JS_ACTIVITE}${JS_DIRE}
        enregistrer une image que l ecran ne decrit plus. */
     RESULT = null; FORMATS = []; ENREG = false;
     dessiner();
-    var m = 'Recette « ' + x.nom +' » appliquée.';
+    var m = 'Profil « ' + x.nom +' » appliqué.';
     if (perdus.length) {
-      dire(m + ' ⚠ ' + perdus.join(' et ') + ' de cette recette '
+      dire(m + ' ⚠ ' + perdus.join(' et ') + ' de ce profil '
         + (perdus.length > 1 ? 'n’existent plus' : 'n’existe plus')
         + ' — ce réglage est resté au défaut.', 'att');
     } else {
@@ -1678,8 +1704,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   function ouvrirRecetteVoile(){
     if (RO) return;
     var x = recetteChoisie();
-    voile('<h3>💾 Enregistrer la recette</h3>'
-      + '<p>Elle retient <strong>tout</strong> : la mise en valeur, l’ambiance, le mannequin, la '
+    voile('<h3><span class="ic">💾</span> Enregistrer le profil</h3>'
+      + '<p>Il retient <strong>tout</strong> : la mise en valeur, l’ambiance, le mannequin, la '
       + 'pose, les réglages avancés (décor, ombres, lumière, agrandissement), le filigrane et le '
       + 'format de sortie.</p>'
       + '<p><strong>Pas la photo</strong>, ni la photo d’intérieur du fantôme : celle-là appartient '
@@ -1687,7 +1713,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<p><input type="text" id="rc-nom" maxlength="60" placeholder="Ex. : Collection automne — plage dorée" '
       + 'value="' + esc(x ? x.nom : '') + '"></p>'
       + '<p class="rcav" id="rc-av">' + (x
-          ? '⚠ Ce nom est celui de la recette choisie : elle sera <strong>remplacée</strong>.'
+          ? '⚠ Ce nom est celui du profil choisi : il sera <strong>remplacé</strong>.'
           : '') + '</p>'
       + '<div class="fin2"><button id="rc-non">Annuler</button>'
       + '<button class="prim" id="rc-oui">Enregistrer</button></div>',
@@ -1704,7 +1730,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           var v = String((n && n.value) || '').trim().toLowerCase();
           var d = RECETTES.filter(function(o){ return String(o.nom).trim().toLowerCase() === v; })[0];
           av.innerHTML = (v && d)
-            ? '⚠ Une recette porte déjà ce nom : elle sera <strong>remplacée</strong>.'
+            ? '⚠ Un profil porte déjà ce nom : il sera <strong>remplacé</strong>.'
             : '';
         };
         if (n) { n.oninput = majAv; majAv(); }
@@ -1721,7 +1747,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function enregistrerRecette(nom, fermer){
-    dire('Enregistrement de la recette…');
+    dire('Enregistrement du profil…');
     /* ⚠ ON N ENVOIE PAS L IDENTIFIANT COURANT AVEUGLEMENT. Si le nom tape n est
        plus celui de la recette choisie, c est une recette NEUVE qu on veut, pas
        un renommage de l ancienne — sinon << Enregistrer sous un autre nom >>
@@ -1735,15 +1761,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       RC_SEL = res.id || '';
       if (fermer) fermer();
       dessiner();
-      dire('Recette « ' + nom + ' » enregistrée.', 'bon');
+      dire('Profil « ' + nom + ' » enregistré.', 'bon');
     });
   }
 
   function retirerRecette(){
     var x = recetteChoisie();
     if (!x || RO) return;
-    voile('<h3>Retirer la recette ?</h3>'
-      + '<p>« <strong>' + esc(x.nom) + '</strong> » sera effacée. Les réglages restent à l’écran : '
+    voile('<h3>Retirer le profil ?</h3>'
+      + '<p>« <strong>' + esc(x.nom) + '</strong> » sera effacé. Les réglages restent à l’écran : '
       + 'c’est le raccourci qui disparaît, pas la mise en scène.</p>'
       + '<div class="fin2"><button id="rs-non">Annuler</button>'
       + '<button class="conf" id="rs-oui">Retirer</button></div>',
@@ -1759,7 +1785,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             RECETTES = res.recettes || [];
             RC_SEL = '';
             dessiner();
-            dire('Recette retirée.', 'att');
+            dire('Profil retiré.', 'att');
           });
         };
       });
@@ -2030,11 +2056,12 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<span class="fb">'
           + '<button data-fdl="' + esc(f.cle) + '" title="Télécharger ce format">⤓</button>'
           + '<button data-fsv="' + esc(f.cle) + '"' + (f.enreg ? ' disabled' : '')
-          + ' title="Enregistrer dans la photothèque">' + (f.enreg ? '✓' : '💾') + '</button>'
+          + ' title="Enregistrer dans la photothèque">'
+      + (f.enreg ? '✓' : '<span class="ic">💾</span>') + '</button>'
           + '</span></div>';
       }).join('') + '</div>'
         + '<div class="fbar"><button class="prim" id="fmt-save-all"'
-        + (RO ? ' disabled' : '') + '>💾 Enregistrer les ' + FORMATS.length
+        + (RO ? ' disabled' : '') + '><span class="ic">💾</span> Enregistrer les ' + FORMATS.length
         + ' dans la photothèque</button></div>';
     }
     return h;
@@ -2431,7 +2458,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var pastilles = '';
       if ((p.faits || []).length) pastilles += '<span class="pt fait" title="Déjà traitée">✓</span>';
       if (p.isole) pastilles += '<span class="pt" title="Détourée">◇</span>';
-      if (p.lieId) pastilles += '<span class="pt" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
+      if (p.lieId) pastilles += '<span class="pt ic" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
       return '<div class="phvig' + (pris ? ' pris' : '') + '" data-ph="' + esc(p.id) + '"'
         + ' title="' + esc(p.nom) + (p.lieNom ? ' — ' + esc(p.lieNom) : '') + '">'
         + '<span class="phcoche" data-sel="' + esc(p.id) + '">' + (pris ? '✓' : '') + '</span>'
@@ -2650,12 +2677,12 @@ ${JS_ACTIVITE}${JS_DIRE}
        laisser le menu du dessus sur l ancienne voie enverrait cinq cents photos
        dans une mise en scene que la recette ne decrit pas. */
     var rcListe = RECETTES.length
-      ? ('<div class="ch"><label for="lot-rc">Recette (facultatif)</label>'
+      ? ('<div class="ch"><label for="lot-rc">Profil (facultatif)</label>'
         + '<select id="lot-rc"><option value="">— Garder les réglages de l’écran —</option>'
         + RECETTES.map(function(o){
             return '<option value="' + esc(o.id) + '"' + (RC_SEL === o.id ? ' selected' : '')
               + '>' + esc(o.nom) + '</option>'; }).join('')
-        + '</select><div class="aidep">Elle pose d’un coup la voie, l’ambiance, le mannequin, la '
+        + '</select><div class="aidep">Il pose d’un coup la voie, l’ambiance, le mannequin, la '
         + 'pose, les réglages avancés et le filigrane de ce lot.</div></div>')
       : '';
     voile('<h3>⚙ Traiter ' + nP + ' photo' + (nP > 1 ? 's' : '') + ' en lot</h3>'
@@ -3143,7 +3170,8 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (n <= 1) { dire(''); suite(); return; }
         var causes = causesAppels();
         var bu = r.budget || {};
-        var h = '<h3>' + (apercu ? '👁 Aperçu — ' : '⚠ ') + n + ' appels pour <em>une seule</em> photo</h3>';
+        var h = '<h3>' + (apercu ? '<span class="ic">👁</span> Aperçu — ' : '⚠ ')
+      + n + ' appels pour <em>une seule</em> photo</h3>';
         if (apercu) {
           h += '<p>Cet aperçu demande <strong>' + n + ' appels</strong> au service au lieu d’un seul. '
             + 'Il reste <strong>gratuit</strong> : il part sur la clé d’essai, <strong>aucun crédit '

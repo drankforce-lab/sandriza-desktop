@@ -34,6 +34,10 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.05rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
+/* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION — sa demande du
+   2026-08-19 : << sa devrais toujours etre comme sa >>. Un seul endroit ou le
+   decider : tout ce qui pose un emoji le met dans <span class="ic">. */
+.ic{display:inline-block;filter:grayscale(1) brightness(1.6);opacity:.9;font-style:normal}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
@@ -307,7 +311,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + 'le dernier traitement">⚠ fiche</span>';
     }
     if (p.isole) h += '<span class="pt" title="Détourée">◇</span>';
-    if (p.lieId) h += '<span class="pt" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
+    if (p.lieId) h += '<span class="pt ic" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
     return h ? '<span class="pastilles">' + h + '</span>' : '';
   }
 
@@ -584,7 +588,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!ids.length) return;
     var k = nAppliquer();
     var r = nEnRetard();
-    voile('<h3>📦 Mettre à jour la fiche produit</h3>'
+    voile('<h3><span class="ic">📦</span> Mettre à jour la fiche produit</h3>'
       + '<p>L’image courante de ' + k + ' photo' + (k > 1 ? 's' : '')
       + ' sera portée dans la fiche de l’article auquel elle est rattachée.</p>'
       /* ⚠ ON DIT QUE C EST LA VITRINE. Un compte rendu qui parlerait de
@@ -657,7 +661,7 @@ ${JS_ACTIVITE}${JS_DIRE}
          libelle doit le dire avant le clic, pas le voile apres. */
       + '<button class="jeton" id="a-appliquer"' + (nAppliquer() ? '' : ' disabled')
       + ' title="Porter l’image courante dans la fiche de l’article — c’est ce que la boutique montrera">'
-      + '📦 Mettre à jour la fiche (' + nAppliquer() + ')</button>'
+      + '<span class="ic">📦</span> Mettre à jour la fiche (' + nAppliquer() + ')</button>'
       /* ⚠ ON N EXECUTE PLUS LE LOT ICI (corrige le 2026-08-14, sa demande :
          << la selection doit etre ramenee au studio virtuel et l on execute le
          lot a cet endroit >>). L explorateur CHOISIT, le Studio DECIDE — c est
