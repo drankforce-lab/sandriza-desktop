@@ -349,7 +349,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!RO) h += '<div style="margin-top:1rem"><button class="mini prim" id="e-enr">Enregistrer le profil</button></div>';
 
     h += '<div class="liens">' + LIENS_OFFICIELS.map(function(l){
-      return '<a href="' + esc(l[0]) + '" target="_blank" rel="noopener">🔗 ' + esc(l[1]) + '</a>';
+      return '<a href="' + esc(l[0]) + '" target="_blank" rel="noopener"><span class="ic">🔗</span> ' + esc(l[1]) + '</a>';
     }).join('') + '</div>';
     return h;
   }
@@ -392,7 +392,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
     h += '</div>';
 
-    h += '<div class="avis">💬 <strong>À titre indicatif seulement.</strong> Les lois fiscales changent '
+    h += '<div class="avis"><span class="ic">💬</span> <strong>À titre indicatif seulement.</strong> Les lois fiscales changent '
       + 'chaque année : faites confirmer votre situation par un comptable agréé. Les chiffres viennent '
       + 'des ventes de ' + esc(MEMO.marque) + '.</div>';
     return h;
@@ -428,7 +428,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       /* ⚠ LA PST NE SE DECLARE PAS SUR LES MEMES FORMULAIRES : elle se remet a
          CHAQUE province de destination. La taire ferait croire a une remise
          complete alors qu il en manque une par province. */
-      h += '<div class="avis info">🏛 <strong>Taxes provinciales perçues (PST / RST)</strong> — '
+      h += '<div class="avis info"><span class="ic">🏛</span> <strong>Taxes provinciales perçues (PST / RST)</strong> — '
         + 'à remettre à CHAQUE province séparément, elles ne sont ni dans les chiffres '
         + 'ci-dessus ni dans GST34 / FPZ-500-V :<br>'
         + t.pst.map(function(p){

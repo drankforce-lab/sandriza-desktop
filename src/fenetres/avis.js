@@ -309,10 +309,10 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<button class="prim" id="a-repenvoyer">Enregistrer la réponse</button></div></div>';
     }
     h += '<div class="pied-boite">'
-      + '<button class="danger" id="a-supprimer">' + (SUPPR_ARME ? 'Confirmer la suppression ?' : '🗑 Supprimer') + '</button>'
-      + (!REPONDRE ? '<button id="a-repondre">💬 Répondre</button>' : '')
+      + '<button class="danger" id="a-supprimer">' + (SUPPR_ARME ? 'Confirmer la suppression ?' : '<span class="ic">🗑</span> Supprimer') + '</button>'
+      + (!REPONDRE ? '<button id="a-repondre"><span class="ic">💬</span> Répondre</button>' : '')
       + (r.statut !== 'pending'
-          ? '<button id="a-masquer">' + (r.statut === 'hidden' ? '👁 Republier' : '🙈 Masquer') + '</button>'
+          ? '<button id="a-masquer">' + (r.statut === 'hidden' ? '<span class="ic">👁</span> Republier' : '<span class="ic">🙈</span> Masquer') + '</button>'
           : '')
       + (r.statut === 'pending' ? '<button class="prim" id="a-approuver">✓ Approuver</button>' : '')
       + '<button id="a-fermer">Fermer</button>'

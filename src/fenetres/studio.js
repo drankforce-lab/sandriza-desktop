@@ -49,13 +49,6 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-/* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION. Sa demande, le
-   2026-08-19, capture a l appui : << les emojis ne sont pas encore en noir et
-   blanc, sa devrais toujours etre comme sa >>. La regle vit ICI, en un seul
-   endroit : tout ce qui pose un pictogramme le met dans <span class="ic">, et il
-   n y a plus rien a decider ailleurs. Un emoji en couleur dans une barre d outils
-   fait un jouet, pas un outil. */
-.ic{display:inline-block;filter:grayscale(1) brightness(1.6);opacity:.9;font-style:normal}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .credits{margin-left:auto;font-size:.74rem;color:#8fa1b8}
@@ -2132,7 +2125,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (RESULT.upNote) h += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
     h += '<div class="dl"><button id="b-dl">Télécharger l’image</button> '
-      + '<button id="b-save"' + (ENREG ? ' disabled' : '') + '>' + (ENREG ? '✓ Dans la photothèque' : '💾 Enregistrer dans la photothèque') + '</button></div>';
+      + '<button id="b-save"' + (ENREG ? ' disabled' : '') + '>' + (ENREG ? '✓ Dans la photothèque' : '<span class="ic">💾</span> Enregistrer dans la photothèque') + '</button></div>';
     return h;
   }
 

@@ -168,7 +168,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="outils">'
       + (D.peutEcrire ? '<button class="prim" id="s-nouveau">＋ Créer une sauvegarde</button>' : '')
       + '<button class="b" id="s-refresh">↻ Actualiser</button>'
-      + (D.peutEcrire ? '<button class="b dgr" id="s-purger">🗑 Purger (&gt; '+(D.retentionMois||12)+' mois)</button>' : '')
+      + (D.peutEcrire ? '<button class="b dgr" id="s-purger"><span class="ic">🗑</span> Purger (&gt; '+(D.retentionMois||12)+' mois)</button>' : '')
       + '</div></div>';
 
     h += '<div class="stat-grid">'
@@ -197,7 +197,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td class="acts">'
         + '<button class="b" data-dl="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="Télécharger le fichier chiffré">⬇ Télécharger</button>'
         + (D.peutEcrire ? '<button class="b att" data-rest="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="Réécrire la base à partir de cette sauvegarde">↩ Restaurer</button>' : '')
-        + (D.peutEcrire ? '<button class="b dgr" data-del="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="Supprimer définitivement cette sauvegarde">🗑 Supprimer</button>' : '')
+        + (D.peutEcrire ? '<button class="b dgr" data-del="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="Supprimer définitivement cette sauvegarde"><span class="ic">🗑</span> Supprimer</button>' : '')
         + '</td></tr>';
     }
     h += '</tbody></table></div>';
@@ -253,7 +253,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<label class="champ"><span class="lbl">Note (facultatif)</span>'
       + '<input class="t" id="s-note" maxlength="200" placeholder="Ex. : avant mise à jour">'
       + '<span class="sub">200 caractères au plus.</span></label>',
-      '<button class="b" id="s-annuler">Annuler</button><button class="prim" id="s-go">💾 Créer la sauvegarde</button>');
+      '<button class="b" id="s-annuler">Annuler</button><button class="prim" id="s-go"><span class="ic">💾</span> Créer la sauvegarde</button>');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=creer;
     var n=document.getElementById('s-note'); if (n) try { n.focus(); } catch(e){}

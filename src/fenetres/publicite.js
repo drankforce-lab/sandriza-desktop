@@ -213,15 +213,15 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td><span class="badge ' + st[0] + '">' + esc(st[1]) + '</span></td></tr>';
     }).join('') : '<tr><td colspan="6" class="vide">Aucune commande.</td></tr>';
     return '<div class="tuiles">'
-      + '<div class="tuile"><div class="k">💰 Revenu total</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + D.orderCount + ' commande' + plur(D.orderCount) + '</div></div>'
-      + '<div class="tuile"><div class="k">🎯 Revenu promo</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '% des commandes</div></div>'
-      + '<div class="tuile"><div class="k">👥 Clients actifs</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' inscrits</div></div>'
-      + '<div class="tuile"><div class="k">🛒 Panier moyen</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">par commande</div></div>'
-      + (D.loy ? '<div class="tuile"><div class="k">💌 Réponse sondage</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + '★' : '') + '</div></div>' : '')
+      + '<div class="tuile"><div class="k"><span class="ic">💰</span> Revenu total</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + D.orderCount + ' commande' + plur(D.orderCount) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🎯</span> Revenu promo</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '% des commandes</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">👥</span> Clients actifs</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' inscrits</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🛒</span> Panier moyen</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">par commande</div></div>'
+      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> Réponse sondage</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + '★' : '') + '</div></div>' : '')
       + '</div>'
       + '<div class="deux">'
       +   '<div class="carte"><h2>Revenu mensuel — 6 mois<span class="legend"><span><i style="background:#c9a97e"></i>Total</span><span><i style="background:#dc2626;opacity:.7"></i>Promo</span></span></h2><div class="graph">' + graph + '</div></div>'
-      +   '<div class="carte"><h2>🏆 Top 5 produits</h2>' + tops + '</div>'
+      +   '<div class="carte"><h2><span class="ic">🏆</span> Top 5 produits</h2>' + tops + '</div>'
       + '</div>'
       + '<div class="carte"><h2>Commandes récentes</h2><table><thead><tr><th>Commande</th><th>Client</th><th>Date</th><th>Promo</th><th class="num">Total</th><th>Statut</th></tr></thead><tbody>' + recent + '</tbody></table></div>';
   }
@@ -244,7 +244,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="segc">' + cards + '</div>'
       + '<div class="carte"><h2>' + esc(titre) + ' — ' + D.filteredTotal + ' client' + plur(D.filteredTotal) + '<span style="display:flex;gap:.5rem">'
       +   '<button class="ghost mini" data-act="export">⬇ Exporter CSV</button>'
-      +   (D.avecCourriel > 0 && PEUT.edit ? '<button class="prim mini" data-act="cibler">📢 Cibler ce segment</button>' : '')
+      +   (D.avecCourriel > 0 && PEUT.edit ? '<button class="prim mini" data-act="cibler"><span class="ic">📢</span> Cibler ce segment</button>' : '')
       + '</span></h2>'
       + '<table><thead><tr><th>Client</th><th>Courriel</th><th>Segment</th><th class="ctr">Cmd</th><th class="num">Dépense</th><th>Dernière cmd</th><th class="ctr">Promo</th></tr></thead><tbody>' + rows + reste + '</tbody></table></div>';
   }
@@ -263,10 +263,10 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td><span class="badge ' + (p.active ? 'ok' : 'def') + '">' + (p.active ? 'Actif' : 'Inactif') + '</span></td></tr>';
     }).join('') : '<tr><td colspan="8" class="vide">Aucune promotion.</td></tr>';
     return '<div class="tuiles">'
-      + '<div class="tuile"><div class="k">📣 Promotions</div><div class="v">' + t.count + '</div><div class="z">' + t.active + ' active' + plur(t.active) + '</div></div>'
-      + '<div class="tuile"><div class="k">📦 Cmd sous promo</div><div class="v">' + t.promoOrders + '</div><div class="z">' + t.promoConvRate + '% des cmd</div></div>'
-      + '<div class="tuile"><div class="k">💰 Revenu (promo)</div><div class="v">' + argentK(t.totalPromoRev) + '</div></div>'
-      + '<div class="tuile"><div class="k">🎁 Économies accordées</div><div class="v">' + argentK(t.totalSavings) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">📣</span> Promotions</div><div class="v">' + t.count + '</div><div class="z">' + t.active + ' active' + plur(t.active) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">📦</span> Cmd sous promo</div><div class="v">' + t.promoOrders + '</div><div class="z">' + t.promoConvRate + '% des cmd</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">💰</span> Revenu (promo)</div><div class="v">' + argentK(t.totalPromoRev) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🎁</span> Économies accordées</div><div class="v">' + argentK(t.totalSavings) + '</div></div>'
       + '</div>'
       + '<div class="carte"><h2>Toutes les offres &amp; coupons</h2><table><thead><tr><th>Nom</th><th>Type</th><th>Rabais</th><th>Portée</th><th class="ctr">Cmd</th><th class="num">Revenu</th><th class="num">Économies</th><th>Statut</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
@@ -293,21 +293,21 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '<div style="font-size:.72rem;color:#8fa1b8;margin:-.3rem 0 .4rem">Commandes passées dans les 48 h suivant chaque publication</div>'
       +   '<table><thead><tr><th>Date</th><th>Réseaux</th><th>Contenu</th><th class="ctr">Cmd 48h</th><th class="num">Revenu 48h</th></tr></thead><tbody>' + posts + '</tbody></table></div>'
       + '<div style="display:flex;flex-direction:column;gap:.85rem">'
-      +   '<div class="carte"><h2>🔗 Liens UTM trackés</h2>'
+      +   '<div class="carte"><h2><span class="ic">🔗</span> Liens UTM trackés</h2>'
       +     '<div class="champ"><label>Source</label><select id="utm-source" data-utm="source">' + src + '</select></div>'
       +     '<div class="champ"><label>Campagne</label><input id="utm-campaign" data-utm="campaign" value="' + esc(UTM.campaign) + '"></div>'
       +     '<div class="champ"><label>Destination</label><select id="utm-dest" data-utm="dest">' + dst + '</select></div>'
       +     '<div class="champ" style="margin-bottom:0"><label>Lien généré</label><div style="display:flex;gap:.35rem">'
       +       '<input id="utm-result" readonly class="mono" style="font-size:.66rem" value="' + esc(lienUtm()) + '"><button class="ghost mini" data-act="copyutm">Copier</button></div></div>'
       +   '</div>'
-      +   '<div class="carte"><h2>💡 Recommandations</h2>' + recs + '</div>'
+      +   '<div class="carte"><h2><span class="ic">💡</span> Recommandations</h2>' + recs + '</div>'
       + '</div></div>';
   }
 
   /* ══ CAMPAGNES ═════════════════════════════════════════════════════════════ */
   function vueCampaigns(){
     var rows = D.camps.length ? D.camps.map(function(c){
-      return '<tr><td><strong>' + esc(c.name) + '</strong>' + (c.promoLabel ? '<div style="font-size:.68rem;color:#e8dcc6">🎯 ' + esc(c.promoLabel) + '</div>' : '') + '</td>'
+      return '<tr><td><strong>' + esc(c.name) + '</strong>' + (c.promoLabel ? '<div style="font-size:.68rem;color:#e8dcc6"><span class="ic">🎯</span> ' + esc(c.promoLabel) + '</div>' : '') + '</td>'
         + '<td>' + esc(c.segLabel) + '</td><td><strong>' + c.audienceCount + '</strong> contact' + plur(c.audienceCount) + '</td>'
         + '<td style="font-size:.74rem;color:#8fa1b8">' + esc(c.channels || '—') + '</td><td style="font-size:.74rem;color:#8fa1b8">' + esc(c.date) + '</td>'
         + '<td><span class="badge ' + (c.status === 'sent' ? 'ok' : 'warn') + '">' + (c.status === 'sent' ? 'Envoyée' : 'Brouillon') + '</span></td>'
@@ -331,10 +331,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="champ"><label>Promotion associée (optionnel)</label><select id="cf-promo">' + promos + '</select></div>'
       + '<div class="champ"><label>Message *</label><textarea id="cf-msg" rows="3" placeholder="Découvrez nos offres exclusives ! 🎉"></textarea></div>'
       + '<div class="champ"><label>Canaux de diffusion</label><div class="chans">'
-      +   '<label><input type="checkbox" id="cf-ch-facebook" checked> 📘 Facebook</label>'
-      +   '<label><input type="checkbox" id="cf-ch-instagram" checked> 📷 Instagram</label>'
-      +   '<label><input type="checkbox" id="cf-ch-newsletter"> 📧 Infolettre</label>'
-      +   '<label><input type="checkbox" id="cf-ch-pinterest"> 📌 Pinterest</label>'
+      +   '<label><input type="checkbox" id="cf-ch-facebook" checked> <span class="ic">📘</span> Facebook</label>'
+      +   '<label><input type="checkbox" id="cf-ch-instagram" checked> <span class="ic">📷</span> Instagram</label>'
+      +   '<label><input type="checkbox" id="cf-ch-newsletter"> <span class="ic">📧</span> Infolettre</label>'
+      +   '<label><input type="checkbox" id="cf-ch-pinterest"> <span class="ic">📌</span> Pinterest</label>'
       + '</div></div>'
       + '<div class="pied-boite"><button class="gauche" data-cf="annuler">Annuler</button>'
       +   '<button data-cf="brouillon">Sauvegarder brouillon</button>'
@@ -345,17 +345,17 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ══ SATISFACTION ══════════════════════════════════════════════════════════ */
   function vueSatisfaction(){
     if (D.indisponible) return '<div class="vide">Module chat non chargé.</div>';
-    if (!D.rated) return '<div class="carte"><div class="vide"><div style="font-size:2rem">💬</div>Aucune évaluation chat pour le moment.<br><span style="font-size:.8rem">Les données apparaissent après que des clients aient noté leur conversation.</span></div></div>';
+    if (!D.rated) return '<div class="carte"><div class="vide"><div style="font-size:2rem"><span class="ic">💬</span></div>Aucune évaluation chat pour le moment.<br><span style="font-size:.8rem">Les données apparaissent après que des clients aient noté leur conversation.</span></div></div>';
     var bar = function(v, tot, col){ var pct = tot ? Math.round(v / tot * 100) : 0; return '<div class="satbar"><div class="track"><div style="width:' + pct + '%;background:' + col + '"></div></div><span style="font-size:.78rem;color:#8fa1b8;width:66px;text-align:right">' + v + ' (' + pct + '%)</span></div>'; };
     var comments = D.comments.length ? '<div class="carte"><h2>Commentaires récents</h2>' + D.comments.map(function(c){
-      return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.055)"><span style="font-size:1.1rem">' + (c.score ? '👍' : '👎') + '</span>'
+      return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:#8fa1b8;margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
     }).join('') + '</div>' : '';
     return '<div class="tuiles">'
       + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? '#4ade80' : '#f87171') + ';font-size:2rem">' + D.rate + '%</div><div class="z">Taux de satisfaction</div></div>'
       + '<div class="carte" style="grid-column:span 2"><h2>Répartition des évaluations</h2>'
-      +   '<div style="font-size:.8rem;margin-bottom:.2rem">👍 Satisfaits</div>' + bar(D.satisfied, D.rated, '#4ade80')
-      +   '<div style="font-size:.8rem;margin-bottom:.2rem">👎 Insatisfaits</div>' + bar(D.unsatisfied, D.rated, '#f87171')
+      +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> Satisfaits</div>' + bar(D.satisfied, D.rated, '#4ade80')
+      +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> Insatisfaits</div>' + bar(D.unsatisfied, D.rated, '#f87171')
       +   '<div style="font-size:.74rem;color:#8fa1b8;margin-top:.4rem">' + D.rated + ' éval. sur ' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '% de couverture)</div></div>'
       + '</div>' + comments;
   }

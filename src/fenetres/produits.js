@@ -162,8 +162,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (D.etiquettes || []).map(function(t){
           return '<option value="' + esc(t) + '"' + (TAG === t ? ' selected' : '') + '>' + esc(t) + '</option>';
         }).join('')
-      + (D.aFinal ? '<option value="__final__"' + (TAG === '__final__' ? ' selected' : '') + '>🔴 Vente finale</option>' : '')
-      + (D.aLiq ? '<option value="__liq__"' + (TAG === '__liq__' ? ' selected' : '') + '>🟡 Liquidation</option>' : '')
+      + (D.aFinal ? '<option value="__final__"' + (TAG === '__final__' ? ' selected' : '') + '><span class="ic">🔴</span> Vente finale</option>' : '')
+      + (D.aLiq ? '<option value="__liq__"' + (TAG === '__liq__' ? ' selected' : '') + '><span class="ic">🟡</span> Liquidation</option>' : '')
       + '</select>'
       + '<select id="p-stock">'
       + '<option value=""' + (STOCK === '' ? ' selected' : '') + '>Tout l’inventaire</option>'
@@ -172,7 +172,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</select>'
       + '<button class="mini' + (TRI === 'cart' ? ' actif' : '') + '" id="p-tri" '
       + 'title="Mettre en premier les produits présents dans des paniers actifs">'
-      + (TRI === 'cart' ? '🛒 Tri panier ✓' : '🛒 Trier par panier') + '</button>'
+      + (TRI === 'cart' ? '<span class="ic">🛒</span> Tri panier ✓' : '<span class="ic">🛒</span> Trier par panier') + '</button>'
       + '<span class="droite">' + (D.total || 0) + ' produit' + (D.total > 1 ? 's' : '')
       + ' · ' + (D.stats && D.stats.ruptures || 0) + ' en rupture'
       + '<button class="prim" id="p-nouveau">+ Nouveau produit</button></span>'
@@ -201,7 +201,7 @@ ${JS_ACTIVITE}${JS_DIRE}
                 : '<span class="dt">—</span>') + '</td>'
               + '<td>' + prix + '</td>'
               + '<td>' + r.stockTotal + ' ' + pilStock(r) + '</td>'
-              + '<td style="text-align:center">' + (r.panier > 0 ? '🛒 ' + r.panier : '<span class="dt">—</span>') + '</td>'
+              + '<td style="text-align:center">' + (r.panier > 0 ? '<span class="ic">🛒</span> ' + r.panier : '<span class="dt">—</span>') + '</td>'
               + '</tr>';
           }).join('')
         + '</tbody></table>';

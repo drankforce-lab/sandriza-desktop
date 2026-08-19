@@ -158,9 +158,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         var badges = '<span class="pill ' + (TONS[r.statut] || 'neutre') + '">' + esc(r.statutLibelle) + '</span>';
         if (r.expireAuto) badges += ' <span class="pill err">Expirée automatiquement</span>';
         if (r.expireBientot) badges += ' <span class="pill err">⏳ Expire le ' + esc(r.expireLe) + '</span>';
-        if (r.suivi) badges += ' <span class="pill neutre">📦 ' + esc(r.suivi) + '</span>';
-        if (r.etiquette === 'reelle') badges += ' <span class="pill info">🏷️ Étiquette réelle</span>';
-        else if (r.etiquette === 'generee') badges += ' <span class="pill info">🏷️ Étiquette générée</span>';
+        if (r.suivi) badges += ' <span class="pill neutre"><span class="ic">📦</span> ' + esc(r.suivi) + '</span>';
+        if (r.etiquette === 'reelle') badges += ' <span class="pill info"><span class="ic">🏷️</span> Étiquette réelle</span>';
+        else if (r.etiquette === 'generee') badges += ' <span class="pill info"><span class="ic">🏷️</span> Étiquette générée</span>';
         if (r.fraisBoutique) badges += ' <span class="pill info">Frais pris en charge</span>';
         return '<div class="ligne" data-id="' + esc(r.id) + '" title="Ouvrir la demande de retour">'
           + '<div class="gauche">'

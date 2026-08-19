@@ -90,7 +90,7 @@ function pageConfigNavigation() {
 <div class="tete"><span class="ic">🧭</span><h1>Configuration de la navigation</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter le menu, pas le modifier.</div>
 <div class="barre">
-  <span class="aide">🔒 Les éléments fixes ne se suppriment pas — masquez-les ou ajoutez-leur des sous-menus. « + Ajouter » crée un élément personnalisé.</span>
+  <span class="aide"><span class="ic">🔒</span> Les éléments fixes ne se suppriment pas — masquez-les ou ajoutez-leur des sous-menus. « + Ajouter » crée un élément personnalisé.</span>
   <button class="mini danger" id="b-reset" disabled>Réinitialiser</button>
   <button class="mini prim" id="b-add" disabled>+ Ajouter un élément</button>
 </div>
@@ -181,7 +181,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var it = l[i];
       var masque = (it.visible === false);
       h.push('<div class="item' + (masque ? ' masque' : '') + '">');
-      h.push('<div class="lg"><span class="mk">' + (it.fixed ? '🔒' : '✎') + '</span><div class="co">');
+      h.push('<div class="lg"><span class="mk">' + (it.fixed ? '<span class="ic">🔒</span>' : '✎') + '</span><div class="co">');
       if (it.fixed) {
         h.push('<span class="lab">' + esc(it.label) + '</span><span class="href">' + esc(it.href) + '</span>');
       } else {
@@ -191,11 +191,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       h.push('</div><div class="gestes">');
       h.push('<button class="mini" data-act="up" data-id="' + esc(it.id) + '" title="Monter"' + (i===0||RO?' disabled':'') + '>↑</button>');
       h.push('<button class="mini" data-act="down" data-id="' + esc(it.id) + '" title="Descendre"' + (i===l.length-1||RO?' disabled':'') + '>↓</button>');
-      h.push('<button class="mini" data-act="toggle" data-id="' + esc(it.id) + '" title="' + (masque?'Afficher':'Masquer') + '"' + dis + '>' + (masque?'🙈':'👁') + '</button>');
+      h.push('<button class="mini" data-act="toggle" data-id="' + esc(it.id) + '" title="' + (masque?'Afficher':'Masquer') + '"' + dis + '>' + (masque?'<span class="ic">🙈</span>':'<span class="ic">👁</span>') + '</button>');
       h.push('<button class="mini" data-act="form" data-id="' + esc(it.id) + '"' + dis + '>+ Sous-menu</button>');
       if (!it.fixed) {
         var arme = (SUPPR === it.id);
-        h.push('<button class="mini danger' + (arme?' arme':'') + '" data-act="del" data-id="' + esc(it.id) + '"' + dis + '>' + (arme?'Confirmer ?':'🗑') + '</button>');
+        h.push('<button class="mini danger' + (arme?' arme':'') + '" data-act="del" data-id="' + esc(it.id) + '"' + dis + '>' + (arme?'Confirmer ?':'<span class="ic">🗑</span>') + '</button>');
       }
       h.push('</div></div>');
       // sous-menu existant

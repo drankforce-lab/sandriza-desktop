@@ -134,7 +134,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // resolues voyagent avec lui — c est ce qui garantit LA meme facture.
     corps.innerHTML = '<style>' + (d.css || '') + '</style>'
       + '<div class="papier">' + (d.html || '') + '</div>';
-    actions.innerHTML = '<button class="prim" id="btn-imp">🖨 Imprimer</button>';
+    actions.innerHTML = '<button class="prim" id="btn-imp"><span class="ic">🖨</span> Imprimer</button>';
     var b = document.getElementById('btn-imp');
     if (b) b.onclick = imprimer;
   }

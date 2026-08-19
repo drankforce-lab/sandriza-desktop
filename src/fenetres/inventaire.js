@@ -536,7 +536,7 @@ ${JS_ACTIVITE}${JS_DIRE}
                   + '>' + esc(w.code || w.nom || w.id) + '</option>'; }).join('')
           +   '</select></td>'
           + '<td class="c">' + (v.sku
-              ? '<button class="mini" data-etiq="' + i + '" title="Imprimer les étiquettes de cette variante">🖨</button>'
+              ? '<button class="mini" data-etiq="' + i + '" title="Imprimer les étiquettes de cette variante"><span class="ic">🖨</span></button>'
               : '') + '</td>'
           + '</tr>';
       });
@@ -568,7 +568,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.innerHTML = h;
 
     actions.innerHTML = '<button id="btn-retour">← Liste</button>'
-      + (PROD.sku ? '<button id="btn-tout">🖨 Tous les codes-barres</button>' : '')
+      + (PROD.sku ? '<button id="btn-tout"><span class="ic">🖨</span> Tous les codes-barres</button>' : '')
       + '<button class="prim" id="btn-enr">Enregistrer l’inventaire</button>';
     brancherProduit();
     majBouton();
@@ -798,7 +798,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     if (d.pad6 && d.pad6.n > 0 && d.peutEcrire) {
       h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
-        + '<span style="flex:1 1 auto">🏷 <b>' + d.pad6.n + ' produit(s)</b> portent encore un '
+        + '<span style="flex:1 1 auto"><span class="ic">🏷</span> <b>' + d.pad6.n + ' produit(s)</b> portent encore un '
         + 'numéro à quatre chiffres (' + esc(d.pad6.avant || '') + '). Les nouveaux en comptent six '
         + '— ' + esc(d.pad6.apres || '') + '. <em>Renuméroter oblige à réimprimer les étiquettes '
         + 'déjà collées.</em></span>'
@@ -812,7 +812,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<span>' + nCoches + ' produit' + (nCoches > 1 ? 's' : '') + ' sélectionné'
         + (nCoches > 1 ? 's' : '') + '</span>'
         + '<span style="flex:1 1 auto"></span>'
-        + '<button class="mini rouge" id="lot-app">🔴 Appliquer vente finale</button>'
+        + '<button class="mini rouge" id="lot-app"><span class="ic">🔴</span> Appliquer vente finale</button>'
         + '<button class="mini vert" id="lot-ret">✅ Retirer vente finale</button>'
         + '<button class="mini" id="lot-annuler">Annuler</button></div>';
     }
@@ -821,8 +821,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="toolbar">'
       + '<input type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom produit…" value="' + esc(FP.q) + '">'
       + '<select id="fp-etat">'
-      + '<option value="">📦 Tout l’inventaire</option>'
-      + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '>🔴 En rupture</option>'
+      + '<option value=""><span class="ic">📦</span> Tout l’inventaire</option>'
+      + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '><span class="ic">🔴</span> En rupture</option>'
       + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '>⚠ À commander</option>'
       + '<option value="ok"' + (FP.etat === 'ok' ? ' selected' : '') + '>✓ Seuil non atteint</option>'
       + '</select>'
@@ -863,11 +863,11 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td><b' + (l.unites === 0 ? ' style="color:#f87171"' : '') + '>' + l.unites + '</b> '
           +   'unité' + (l.unites > 1 ? 's' : '') + ' ' + pilule(l) + '</td>'
           + '<td class="c" style="white-space:nowrap">'
-          +   '<button class="mini" data-inv="' + esc(l.id) + '" title="Gérer l’inventaire">📦 Inventaire</button> '
-          +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="Assigner un SKU">🏷 SKU</button> ' : '')
+          +   '<button class="mini" data-inv="' + esc(l.id) + '" title="Gérer l’inventaire"><span class="ic">📦</span> Inventaire</button> '
+          +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="Assigner un SKU"><span class="ic">🏷</span> SKU</button> ' : '')
           +   (d.peutEcrire ? '<button class="mini" data-mod="' + esc(l.id) + '" title="Modifier la fiche produit">✎ Modifier</button> ' : '')
-          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="Mettre en vente">🛒 Vendre</button> ' : '')
-          +   (d.peutSupprimer ? '<button class="mini" data-suppr="' + esc(l.id) + '" data-nom="' + esc(l.nom) + '" title="Supprimer de l’inventaire" style="border-color:rgba(239,68,68,.45)">🗑</button>' : '')
+          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="Mettre en vente"><span class="ic">🛒</span> Vendre</button> ' : '')
+          +   (d.peutSupprimer ? '<button class="mini" data-suppr="' + esc(l.id) + '" data-nom="' + esc(l.nom) + '" title="Supprimer de l’inventaire" style="border-color:rgba(239,68,68,.45)"><span class="ic">🗑</span></button>' : '')
           + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -1184,9 +1184,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (d.annees || []).map(function(a){
           return '<option value="' + a + '"' + (String(DMG_AN) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
       + '</select>'
-      + '<button class="mini" id="dmg-imp">🖨 Imprimer le rapport</button>'
-      + '<span class="droite aide">🔧 <b>' + d.totalQte + '</b> article' + (d.totalQte > 1 ? 's' : '')
-      + ' endommagé' + (d.totalQte > 1 ? 's' : '') + ' · 💸 <b>' + d.totalValeur.toFixed(2)
+      + '<button class="mini" id="dmg-imp"><span class="ic">🖨</span> Imprimer le rapport</button>'
+      + '<span class="droite aide"><span class="ic">🔧</span> <b>' + d.totalQte + '</b> article' + (d.totalQte > 1 ? 's' : '')
+      + ' endommagé' + (d.totalQte > 1 ? 's' : '') + ' · <span class="ic">💸</span> <b>' + d.totalValeur.toFixed(2)
       + ' $</b> valeur perdue (avant taxes)</span>'
       + '</div>';
 
@@ -1287,7 +1287,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td class="c" style="white-space:nowrap">'
         + (d.peutEcrire ? '<button class="mini" data-wh-mod="' + esc(w.id) + '" title="Modifier">✎</button> ' : '')
         + (d.peutSupprimer ? '<button class="mini" data-wh-del="' + esc(w.id) + '" title="'
-            + (w.usage > 0 ? w.usage + ' variante(s) utilisent cet emplacement' : 'Supprimer') + '">🗑</button>' : '')
+            + (w.usage > 0 ? w.usage + ' variante(s) utilisent cet emplacement' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '')
         + '</td></tr>';
     });
     h += '</tbody></table></div></div>';
@@ -1614,7 +1614,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '<div class="fin2">'
       + (etiq.length ? '<button id="v-plus-tard">Plus tard</button>'
-                       + '<button class="prim" id="v-imprimer">🖨 Imprimer maintenant</button>'
+                       + '<button class="prim" id="v-imprimer"><span class="ic">🖨</span> Imprimer maintenant</button>'
                      : '<button class="prim" id="v-ok">Fermer</button>')
       + '</div>';
     voile(h, function(fermer){
@@ -1649,7 +1649,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var v = VARS[i];
     if (!v || !v.sku) return;
     var defaut = Math.max(1, parseInt(v.qte, 10) || 1);
-    voile('<h3>🏷 Imprimer des étiquettes</h3>'
+    voile('<h3><span class="ic">🏷</span> Imprimer des étiquettes</h3>'
       + '<p><span class="code">' + esc(v.sku) + '</span> — ' + esc(v.taille) + ' / ' + esc(v.couleur) + '</p>'
       + '<p><label>Nombre d’étiquettes<input type="number" min="1" id="v-qte" value="' + defaut + '"></label></p>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'
@@ -1678,7 +1678,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (v.sku && q > 0) { items.push({ sku: v.sku, name: PROD.nom, size: v.taille, color: v.couleur, qty: q }); total += q; }
     });
     if (!items.length) { dire('Aucune variante en stock à imprimer.', 'att'); return; }
-    voile('<h3>🏷 Imprimer les étiquettes</h3>'
+    voile('<h3><span class="ic">🏷</span> Imprimer les étiquettes</h3>'
       + '<p>Imprimer <strong>' + total + '</strong> étiquette' + (total > 1 ? 's' : '')
       + ' pour ' + items.length + ' variante' + (items.length > 1 ? 's' : '') + ' en stock ?</p>'
       + '<p style="color:#8fa1b8;font-size:.8rem">Quantités telles qu’elles sont saisies à l’écran, '

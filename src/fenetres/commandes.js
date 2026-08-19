@@ -408,9 +408,9 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td class="c">'
           + (expedition || o.statut === 'shipped' || o.statut === 'delivered' ? ''
              : (o.enTraitement
-                ? '<button class="mini traite" disabled>🔒 En traitement' + (o.par ? ' par ' + esc(o.par) : '') + '</button>'
+                ? '<button class="mini traite" disabled><span class="ic">🔒</span> En traitement' + (o.par ? ' par ' + esc(o.par) : '') + '</button>'
                 : (CTX.peutEditer
-                   ? '<button class="mini" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)">📦</span> Préparer la commande</button>' : '')))
+                   ? '<button class="mini" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)"><span class="ic">📦</span></span> Préparer la commande</button>' : '')))
           + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -471,7 +471,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var ro = !!VERROU_PAR; // tenue par quelqu un d autre -> LECTURE SEULE
     var h = '';
     if (ro) {
-      h += '<div class="banniere">🔒 En traitement par <strong>' + esc(VERROU_PAR)
+      h += '<div class="banniere"><span class="ic">🔒</span> En traitement par <strong>' + esc(VERROU_PAR)
         + '</strong> — changement de statut, remboursement et suppression désactivés '
         + 'le temps que cette personne termine.</div>';
     }
@@ -504,7 +504,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       // Rattacher la commande a un COMPTE : possible meme sur une commande
       // invitee (c est justement le cas a corriger le plus souvent).
       + (d.droits.lier && !ro
-          ? '<button class="mini" id="det-lier" title="Rattacher cette commande à un compte client">🔗 '
+          ? '<button class="mini" id="det-lier" title="Rattacher cette commande à un compte client"><span class="ic">🔗</span> '
             + (c.compte ? 'Changer' : 'Lier') + '</button>' : '')
       + '</div>'
       + (c.compte
@@ -512,7 +512,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           : '')
       + (c.client.entreprise ? '<div class="l">' + esc(c.client.entreprise) + '</div>' : '')
       + '<div class="mut">' + esc(c.client.courriel) + (c.client.tel ? '<br>' + esc(c.client.tel) : '') + '</div>'
-      + '<div class="mut" style="margin-top:.4rem">💳 '
+      + '<div class="mut" style="margin-top:.4rem"><span class="ic">💳</span> '
       + (c.paiementSquare ? '<span class="num">' + esc(c.paiementSquare) + '</span>'
                           : '<span style="color:#fbbf24">Commande démo — aucun paiement Square</span>')
       + (c.afterpay ? '<span class="badge2">AFTERPAY</span>' : '') + '</div></div>'
@@ -521,7 +521,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + esc(c.adresse.ville) + (c.adresse.province ? ', ' + esc(c.adresse.province) : '')
       + ' ' + esc(c.adresse.cp) + '</div>'
       + (c.livreLe ? '<div class="mut" style="margin-top:.3rem">✅ Livrée le ' + esc(dateCourte(c.livreLe)) + '</div>' : '')
-      + (c.suivi ? '<div class="mut" style="margin-top:.3rem">📡 <span class="num">' + esc(c.suivi) + '</span>'
+      + (c.suivi ? '<div class="mut" style="margin-top:.3rem"><span class="ic">📡</span> <span class="num">' + esc(c.suivi) + '</span>'
           + (c.suiviStatut ? ' — ' + esc(c.suiviStatut)
             + (c.suiviVerifieLe ? ' (vérifié le ' + esc(dateCourte(c.suiviVerifieLe)) + ')' : '') : '') + '</div>' : '')
       + '</div></div></div>';
@@ -576,11 +576,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.innerHTML = h;
 
     actions.innerHTML = (SEUL ? '' : '<button id="btn-retour">← Liste</button>')
-      + (d.droits.bon && !ro ? '<button id="det-bon">🖨 Bon de commande</button>' : '')
-      + (c.aFacture ? '<button id="det-fact">🧾 Facture</button>' : '')
-      + (d.droits.frais && !ro ? '<button id="det-frais">💰 Frais retenus (' + argent(rb.fraisRestants) + ')</button>' : '')
+      + (d.droits.bon && !ro ? '<button id="det-bon"><span class="ic">🖨</span> Bon de commande</button>' : '')
+      + (c.aFacture ? '<button id="det-fact"><span class="ic">🧾</span> Facture</button>' : '')
+      + (d.droits.frais && !ro ? '<button id="det-frais"><span class="ic">💰</span> Frais retenus (' + argent(rb.fraisRestants) + ')</button>' : '')
       + (d.droits.rembourser && !ro ? '<button id="det-remb">↩ Rembourser</button>' : '')
-      + (d.droits.supprimer && !ro ? '<button class="danger" id="det-suppr">🗑 Supprimer</button>' : '');
+      + (d.droits.supprimer && !ro ? '<button class="danger" id="det-suppr"><span class="ic">🗑</span> Supprimer</button>' : '');
     brancherDetail();
   }
 
@@ -749,7 +749,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + ((ap.implications || []).length
             ? '<ul>' + ap.implications.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '')
         + (ap.peutReinitCourriels
-            ? '<label class="rc"><input type="checkbox" id="v-reinit"><span>🧪 <strong>Tests</strong> — '
+            ? '<label class="rc"><input type="checkbox" id="v-reinit"><span><span class="ic">🧪</span> <strong>Tests</strong> — '
               + 'réautoriser l’envoi des courriels de cette commande (le client pourra les recevoir '
               + 'à nouveau). Sinon, la protection anti-doublon reste active.</span></label>' : '')
         + '<div class="fin2"><button id="v-non">Annuler</button>'
@@ -825,13 +825,13 @@ ${JS_ACTIVITE}${JS_DIRE}
         ? 'actuellement liée à <strong>' + esc(ap.actuel.nom) + '</strong> ('
           + esc(ap.actuel.courriel) + ')'
         : 'en mode <strong>invité</strong> (aucun compte)';
-      voile('<h3>🔗 Rattacher la commande à un client</h3>'
+      voile('<h3><span class="ic">🔗</span> Rattacher la commande à un client</h3>'
         + '<p>Commande <strong>' + esc(ap.numero) + '</strong> — ' + etat + '.</p>'
         + '<label style="font-size:.82rem;color:#cbd8e6">Rechercher un client (nom ou courriel)'
         + '<input class="rech" id="v-rech" placeholder="ex : marie@example.com" autocomplete="off"></label>'
         + '<div class="lres" id="v-lres"><div class="rien">Tapez au moins 3 caractères.</div></div>'
         + (ap.actuel
-            ? '<div class="detacher"><button class="danger" id="v-det">🔓 Détacher (remettre en mode invité)</button></div>'
+            ? '<div class="detacher"><button class="danger" id="v-det"><span class="ic">🔓</span> Détacher (remettre en mode invité)</button></div>'
             : '')
         + '<div class="fin2"><button id="v-non">Fermer</button></div>',
         function(fermer){
@@ -915,7 +915,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function flowSupprimer(){
     appeler('commandes:supprimerApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
-      voile('<h3 style="color:#f87171">🗑 Supprimer la commande</h3>'
+      voile('<h3 style="color:#f87171"><span class="ic">🗑</span> Supprimer la commande</h3>'
         + '<p><strong>' + esc(ap.numero) + '</strong> — ' + esc(ap.client) + '<br>'
         + '<span style="color:#8fa1b8">' + esc(dateCourte(ap.date)) + ' · ' + argent(ap.total)
         + ' · ' + esc(ap.statutLibelle) + '</span></p>'
@@ -963,7 +963,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     menuEl = document.createElement('div');
     menuEl.className = 'ctx';
     if (o.enTraitement) {
-      menuEl.innerHTML = '<div class="t">🔒 ' + esc(o.numero) + '</div>'
+      menuEl.innerHTML = '<div class="t"><span class="ic">🔒</span> ' + esc(o.numero) + '</div>'
         + '<div class="warn">En traitement par <strong>' + esc(o.par || 'quelqu’un d’autre')
         + '</strong>.<br>Changement de statut impossible pour l’instant.</div>';
     } else {

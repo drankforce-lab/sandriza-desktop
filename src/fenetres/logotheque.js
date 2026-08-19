@@ -163,8 +163,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (l.printW ? '<div class="pr" style="border-color:' + q.c + '55;color:' + q.c + '">' + fr(l.printW) + ' × ' + fr(l.printH) + ' po · ' + l.dpi + ' dpi</div>' : '')
       + (RO ? '' : '<div class="acts">'
         + '<button class="b" type="button" data-ren="' + esc(l.id) + '" title="Renommer">✎</button>'
-        + '<button class="b" type="button" data-cp="' + esc(l.id) + '" title="Copier l’adresse">🔗</button>'
-        + '<button class="b dgr" type="button" data-del="' + esc(l.id) + '" title="Retirer">' + (DELCONF === l.id ? '✓?' : '🗑') + '</button>'
+        + '<button class="b" type="button" data-cp="' + esc(l.id) + '" title="Copier l’adresse"><span class="ic">🔗</span></button>'
+        + '<button class="b dgr" type="button" data-del="' + esc(l.id) + '" title="Retirer">' + (DELCONF === l.id ? '✓?' : '<span class="ic">🗑</span>') + '</button>'
         + '</div>')
       + '</div></div>';
   }

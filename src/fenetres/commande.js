@@ -130,7 +130,7 @@ function pageCommande(id) {
           + 'border-radius:99px;padding:.12rem .55rem;font-weight:700">⚡ Prioritaire</span>' : '')
       + '<span class="cli">' + esc(CMD.client) + '</span>'
       + '<span class="adr">' + esc(CMD.adresse) + '</span>'
-      + (CMD.notes ? '<span class="adr" style="color:#f0c987">📝 ' + esc(CMD.notes) + '</span>' : '')
+      + (CMD.notes ? '<span class="adr" style="color:#f0c987"><span class="ic">📝</span> ' + esc(CMD.notes) + '</span>' : '')
       + '</div>';
 
     /* 1 — Vérification.
@@ -157,8 +157,8 @@ function pageCommande(id) {
       + '<div class="rech"><input placeholder="Filtrer…"><span class="cpt" id="c-cpt2"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div>'
       + '<div style="margin-top:.6rem;display:flex;gap:.45rem;flex-wrap:wrap">'
-      + '<button type="button" id="c-bon">🖨 Bon de commande</button>'
-      + '<button type="button" id="c-colis">🧾 Bordereau</button>'
+      + '<button type="button" id="c-bon"><span class="ic">🖨</span> Bon de commande</button>'
+      + '<button type="button" id="c-colis"><span class="ic">🧾</span> Bordereau</button>'
       + '</div></div></div>');
 
     /* 2 — Étiquette. ⚠ ELLE SE FABRIQUE ICI, DANS L ASSISTANT (2026-08-07).
@@ -186,7 +186,7 @@ function pageCommande(id) {
       + '<div class="ch"><label for="c-poids">Poids du colis (kg)</label>'
       + '<input id="c-poids" type="number" min="0.001" step="0.001" value="0.5"></div>'
       + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq">Générer l’étiquette</button></div>'
-      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq-imp" style="display:none">🖨 Imprimer l’étiquette</button></div>'
+      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq-imp" style="display:none"><span class="ic">🖨</span> Imprimer l’étiquette</button></div>'
       + '</div>'
       + '<div class="aide" id="c-poids-note" style="margin-top:.4rem"></div>'
       + '</div>'
@@ -385,7 +385,7 @@ function pageCommande(id) {
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
     v.innerHTML = '<div style="background:#16202f;border:1px solid rgba(255,255,255,.12);'
       + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%">'
-      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif">🚀 Préparation de la commande '
+      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif"><span class="ic">🚀</span> Préparation de la commande '
       + esc(CMD.numero) + '</h3>'
       + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
           ? 'Cette commande est déjà en préparation.'
@@ -395,7 +395,7 @@ function pageCommande(id) {
           : 'Pour débuter, désirez-vous imprimer un <strong>bon de commande</strong> ?') + '</p>'
       + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
       + '<button type="button" id="bc-non">Non, continuer sans imprimer</button>'
-      + '<button type="button" class="prim" id="bc-oui">🖨 Oui, imprimer le bon</button>'
+      + '<button type="button" class="prim" id="bc-oui"><span class="ic">🖨</span> Oui, imprimer le bon</button>'
       + '</div></div>';
     document.body.appendChild(v);
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
@@ -556,7 +556,7 @@ function pageCommande(id) {
         '<p style="margin:.35rem 0;font-size:.9rem">Une étiquette a déjà été facturée pour cette commande'
         + (CMD.suivi ? ' (suivi <strong>' + esc(CMD.suivi) + '</strong>)' : '') + '.</p>'
         + '<p style="margin:.35rem 0;font-size:.9rem">En commander une seconde sera <strong>facturé une '
-        + 'seconde fois</strong>. Pour réimprimer celle qui existe, « 🖨 Imprimer l’étiquette » suffit.</p>',
+        + 'seconde fois</strong>. Pour réimprimer celle qui existe, « <span class="ic">🖨</span> Imprimer l’étiquette » suffit.</p>',
         'Commander quand même', function(){ acheterEtiquette(poids, true); });
       return;
     }

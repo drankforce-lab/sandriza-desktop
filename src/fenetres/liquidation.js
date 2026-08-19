@@ -318,9 +318,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + ((c.liquidation + c.finale) === 1 ? '' : 's') + ' hors régime normal';
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile liq"><div class="lbl">🟡 En liquidation</div><div class="val">'
+      + '<div class="tuile liq"><div class="lbl"><span class="ic">🟡</span> En liquidation</div><div class="val">'
       +   c.liquidation + '</div><div class="sub">produit' + (c.liquidation === 1 ? '' : 's') + '</div></div>'
-      + '<div class="tuile vfin"><div class="lbl">🔴 En vente finale</div><div class="val">'
+      + '<div class="tuile vfin"><div class="lbl"><span class="ic">🔴</span> En vente finale</div><div class="val">'
       +   c.finale + '</div><div class="sub">produit' + (c.finale === 1 ? '' : 's') + '</div></div>'
       + '</div>';
 
@@ -348,9 +348,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         + carte('final', 'Vente finale', { texte:TEXTES.final.texte, vide:'Aucun résultat en vente finale.' }, D.finale);
     } else {
       h += '<div class="barreoutils">'
-        + '<button class="geste' + (ONGLET === 'liq' ? ' actif' : '') + '" data-onglet="liq">🟡 Liquidation'
+        + '<button class="geste' + (ONGLET === 'liq' ? ' actif' : '') + '" data-onglet="liq"><span class="ic">🟡</span> Liquidation'
         +   '<span class="n">' + c.liquidation + '</span></button>'
-        + '<button class="geste' + (ONGLET === 'final' ? ' actif' : '') + '" data-onglet="final">🔴 Vente finale'
+        + '<button class="geste' + (ONGLET === 'final' ? ' actif' : '') + '" data-onglet="final"><span class="ic">🔴</span> Vente finale'
         +   '<span class="n">' + c.finale + '</span></button>'
         + '</div>';
       h += (ONGLET === 'liq')
@@ -441,8 +441,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('');
     var lignes = d.lignes.length ? d.lignes.map(function(l){
       var pris = !!LOT.choix[l.id];
-      var deja = l.regime === 'liq_no' ? '<span class="pill liq">🟡 déjà</span>'
-        : l.regime === 'final' ? '<span class="pill vfin">🔴 déjà</span>' : '';
+      var deja = l.regime === 'liq_no' ? '<span class="pill liq"><span class="ic">🟡</span> déjà</span>'
+        : l.regime === 'final' ? '<span class="pill vfin"><span class="ic">🔴</span> déjà</span>' : '';
       return '<label class="case' + (pris ? ' pris' : '') + '">'
         + '<input type="checkbox" data-lotprod="' + esc(l.id) + '"' + (pris ? ' checked' : '') + '>'
         + '<span class="pastille" style="background:' + esc(l.couleur) + '"></span>'
@@ -531,7 +531,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="voile" id="lot-voile"><div class="boite etroite">'
       + '<h3>Résumé avant d’appliquer<span class="dt" style="margin-left:auto">étape 2 sur 2</span></h3>'
       + '<div class="resume ' + (estLiq ? 'liq' : 'vfin') + '">'
-      +   '<div class="quoi">' + (estLiq ? '🟡 Liquidation — aucun retour' : '🔴 Vente finale — aucun retour') + '</div>'
+      +   '<div class="quoi">' + (estLiq ? '<span class="ic">🟡</span> Liquidation — aucun retour' : '<span class="ic">🔴</span> Vente finale — aucun retour') + '</div>'
       +   '<div class="quand">⏳ ' + quand + '</div></div>'
       + '<div class="titre" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;font-weight:700;margin:0 0 .4rem">'
       +   LOT.ordre.length + ' produit' + (LOT.ordre.length === 1 ? '' : 's') + ' qui changent de régime</div>'
@@ -606,10 +606,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="dt" style="margin:-.35rem 0 .55rem">Choisissez le régime, puis les catégories à y placer. '
       +   'Les produits concernés sont ceux qui s’y trouvent <strong>maintenant</strong>.</div>'
       + '<div style="display:flex;gap:.5rem;margin-bottom:.6rem;flex-wrap:wrap">'
-      +   mode('liq_no', '🟡 Liquidation') + mode('final', '🔴 Vente finale') + '</div>'
+      +   mode('liq_no', '<span class="ic">🟡</span> Liquidation') + mode('final', '<span class="ic">🔴</span> Vente finale') + '</div>'
       + '<div class="barreoutils" style="margin-bottom:.5rem">'
       +   '<input class="rech" id="cat-rech" type="search" placeholder="Rechercher une catégorie…" value="' + esc(CAT.q) + '">'
-      +   fil('', 'Toutes') + fil('liq', '🟡 déjà') + fil('final', '🔴 déjà') + '</div>'
+      +   fil('', 'Toutes') + fil('liq', '<span class="ic">🟡</span> déjà') + fil('final', '<span class="ic">🔴</span> déjà') + '</div>'
       + '<div class="liste">' + lignes + '</div>'
       + '<div class="pied-boite">'
       +   '<button class="gauche" data-catfermer="1">Annuler</button>'

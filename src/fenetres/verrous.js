@@ -151,7 +151,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             ? '<span class="pill mort">' + esc(motif) + '</span>'
             : '<span class="pill vif">actif · ' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
         + (PEUT ? '<td style="text-align:right"><button class="mini dgr" data-unl="' + esc(cle) + '">'
-            + (CONF === cle ? '✓ Confirmer' : '🔓 Déverrouiller') + '</button></td>' : '')
+            + (CONF === cle ? '✓ Confirmer' : '<span class="ic">🔓</span> Déverrouiller') + '</button></td>' : '')
         + '</tr>';
     }
     return h + '</tbody></table>';
@@ -173,11 +173,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'que si un poste est parti en laissant une fiche ouverte : la personne se fera alors refuser '
       + 'son enregistrement. Chaque déverrouillage forcé est inscrit au journal d’accès.</div>';
 
-    h += '<div class="barre"><button class="mini" id="v-reload">🔄 Actualiser</button>'
+    h += '<div class="barre"><button class="mini" id="v-reload"><span class="ic">🔄</span> Actualiser</button>'
       + (VERR.length && PEUT
           ? '<button class="mini dgr" id="v-all">'
             + (CONF === 'tout' ? '✓ Confirmer — tout déverrouiller'
-                               : '🔓 Tout déverrouiller (' + VERR.length + ')') + '</button>'
+                               : '<span class="ic">🔓</span> Tout déverrouiller (' + VERR.length + ')') + '</button>'
           : '') + '</div>';
 
     h += '<div class="carte"><h3>Verrous actifs (' + actifs.length + ')</h3>'

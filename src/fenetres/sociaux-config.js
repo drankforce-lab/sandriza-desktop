@@ -142,7 +142,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<label class="champ"><span class="lbl">'+esc(r.extraLabel)+'</span>'
         + '<span class="rang"><input class="t" id="ext-'+esc(r.cle)+'" value="'+esc(r.extraValeur)+'" placeholder="identifiant numérique"'+(RO?' disabled':'')+'>'
         + (RO?'':'<button class="b" data-ext="'+esc(r.cle)+'">Enregistrer</button>')+'</span></label>'
-        + (r.testable && r.jetonPose ? '<button class="b" data-test="'+esc(r.cle)+'">🔗 Tester la connexion</button>' : '')
+        + (r.testable && r.jetonPose ? '<button class="b" data-test="'+esc(r.cle)+'"><span class="ic">🔗</span> Tester la connexion</button>' : '')
         + '</div>';
     }
     h += '</div>';

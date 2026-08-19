@@ -129,7 +129,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var comptes = D.comptes||[];
     var h = '';
 
-    h += '<div class="carte"><div class="entete"><h3>🔑 Politique des mots de passe</h3>'
+    h += '<div class="carte"><div class="entete"><h3><span class="ic">🔑</span> Politique des mots de passe</h3>'
       + (RO?'':'<button class="prim" id="s-pw">Enregistrer la politique</button>')+'</div>'
       + '<div class="hint">Ne s’applique pas au super-administrateur.</div>'
       + '<div class="cols3">'
@@ -185,7 +185,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
     } else exempts = '<div class="vide">Aucun compte.</div>';
 
-    h += '<div class="carte"><div class="entete"><h3>🌍 Restriction géographique — administration</h3>'
+    h += '<div class="carte"><div class="entete"><h3><span class="ic">🌍</span> Restriction géographique — administration</h3>'
       + (RO?'':'<button class="prim" id="s-geo">Enregistrer la restriction</button>')+'</div>'
       + '<div class="hint">N’autorise la connexion au portail d’administration que depuis les pays listés (géolocalisation de l’IP publique). La boutique cliente n’est jamais touchée.</div>'
       + caseAC('geo-on', 'Activer la restriction géographique', g.enabled)
@@ -197,7 +197,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<label class="champ"><span class="lbl">Adresses IP exclues (une par ligne)</span>'
       + '<textarea class="t" id="geo-ip" rows="3"'+(RO?' disabled':'')+'>'+esc((g.ipExceptions||[]).join('\\n'))+'</textarea>'
       + '<span class="sub">Ces IP restent autorisées peu importe le pays.</span></label>'
-      + (RO?'':'<button class="b" id="geo-loc">🔍 Détecter ma localisation actuelle</button>')
+      + (RO?'':'<button class="b" id="geo-loc"><span class="ic">🔍</span> Détecter ma localisation actuelle</button>')
       + '</div>'
       + '<div><div class="grpH">Comptes exclus de cette restriction</div>'
       + '<div class="exempts">'+exempts+'</div>'

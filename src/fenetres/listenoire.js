@@ -213,7 +213,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           sug.innerHTML = r.suggestions.map(function(s,idx){
             return '<div class="sug-it" data-i="'+idx+'"><div class="r">'+esc(s.rue||s.ville||'—')
               + '</div><div class="v">'+esc(s.label||'')+'</div></div>';
-          }).join('') + '<div class="sug-src">'+(r.source==='mapbox'?'🗺️ Mapbox':'🌍 OpenStreetMap')+'</div>';
+          }).join('') + '<div class="sug-src">'+(r.source==='mapbox'?'<span class="ic">🗺️</span> Mapbox':'<span class="ic">🌍</span> OpenStreetMap')+'</div>';
           sug.style.display='block';
           var its = sug.querySelectorAll('.sug-it');
           for (var k=0;k<its.length;k++) its[k].onmousedown=function(e){

@@ -259,7 +259,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + tuile('Pages / session', DGA.engagement.pagesParSession)
         + tuile('Taux d’engagement', DGA.engagement.engagement) + '</div>';
     }
-    h += '<div class="carte"><h3>📈 Pages vues par jour — ' + esc(DGA.plageLibelle) + '</h3>'
+    h += '<div class="carte"><h3><span class="ic">📈</span> Pages vues par jour — ' + esc(DGA.plageLibelle) + '</h3>'
       + graphique(DGA.serie, 'vues', 'pages vues') + '</div>';
 
     var pages = (DGA.pages || []).length
@@ -269,7 +269,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             + '</td><td class="num">' + nb(p.vues) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="2" class="dt" style="text-align:center">—</td></tr>';
-    h += '<div class="carte"><h3>🔝 Pages populaires</h3><table><thead><tr><th>Page</th>'
+    h += '<div class="carte"><h3><span class="ic">🔝</span> Pages populaires</h3><table><thead><tr><th>Page</th>'
       + '<th class="num">Vues</th></tr></thead><tbody>' + pages + '</tbody></table></div>';
 
     h += '<div class="grilles">'
@@ -294,9 +294,9 @@ ${JS_ACTIVITE}${JS_DIRE}
        Absent, on le DIT — un solde vide n est pas un solde nul. */
     h += '<div class="avis' + (DTEL.solde ? ' att' : ' mal') + '" style="display:flex;'
       + 'justify-content:space-between;gap:1rem;flex-wrap:wrap">'
-      + '<span>📞 Appels des <strong>' + DTEL.jours + ' derniers jours</strong>. '
+      + '<span><span class="ic">📞</span> Appels des <strong>' + DTEL.jours + ' derniers jours</strong>. '
       + 'Coûts en dollars US, la devise de facturation.</span>'
-      + '<span>' + (DTEL.solde ? '💰 Solde restant : <strong>' + esc(DTEL.solde) + '</strong>'
+      + '<span>' + (DTEL.solde ? '<span class="ic">💰</span> Solde restant : <strong>' + esc(DTEL.solde) + '</strong>'
                                : 'Solde indisponible') + '</span></div>';
     h += '<div class="tuiles">' + tuile('Appels', nb(t.appels), 'or')
       + tuile('Entrants', nb(t.entrants))
@@ -305,7 +305,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + tuile('Minutes', nb(t.minutes))
       + tuile('Durée moy.', t.dureeMoyenne)
       + tuile('Coût total', t.cout, 'att') + '</div>';
-    h += '<div class="carte"><h3>📈 Appels par jour</h3>'
+    h += '<div class="carte"><h3><span class="ic">📈</span> Appels par jour</h3>'
       + graphique(DTEL.serie, 'appels', 'appels') + '</div>';
 
     var rows = (DTEL.appels || []).length
@@ -316,7 +316,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             + '<td class="dt">' + esc(c.date) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="6" class="dt" style="text-align:center">Aucun appel.</td></tr>';
-    h += '<div class="carte"><h3>📋 Appels récents</h3><table><thead><tr><th>Appelant</th>'
+    h += '<div class="carte"><h3><span class="ic">📋</span> Appels récents</h3><table><thead><tr><th>Appelant</th>'
       + '<th>Sens</th><th>Statut</th><th class="num">Durée</th><th class="num">Coût</th>'
       + '<th>Date</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     return h;

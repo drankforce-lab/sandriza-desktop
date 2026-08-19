@@ -128,7 +128,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function occuper(o){ OCCUPE = o; bsave.disabled = o || RO; }
 
   function badge(has){
-    return has ? '<span class="etat">🔒 Clé <b>enregistrée</b>. Vide = conservée.</span>'
+    return has ? '<span class="etat"><span class="ic">🔒</span> Clé <b>enregistrée</b>. Vide = conservée.</span>'
                : '<span class="etat non">Aucune clé <b>enregistrée</b>.</span>';
   }
   function dessiner(){
@@ -136,7 +136,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     enabledEl.checked = !!C.enabled; enabledEl.disabled = RO;
     var dis = RO ? ' disabled' : '';
     var h = '<div class="carte"><div class="info">'
-      + '📊 Suit les <b>consultations</b> de la boutique via <b>Google Analytics 4</b>. Prérequis :<br>'
+      + '<span class="ic">📊</span> Suit les <b>consultations</b> de la boutique via <b>Google Analytics 4</b>. Prérequis :<br>'
       + '1. Créer une propriété <b>GA4</b> → noter l’<b>ID de mesure</b> (G-XXXX) et l’<b>ID de propriété</b> (numérique).<br>'
       + '2. Dans <b>Google Cloud</b> : créer un <b>compte de service</b>, activer l’API « Google Analytics Data », télécharger sa <b>clé JSON</b>.<br>'
       + '3. Dans GA4 → Admin → Accès à la propriété : ajouter l’e-mail du compte de service comme <b>Lecteur</b>.'
@@ -149,7 +149,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<textarea id="a-sa" rows="5" placeholder="' + (C.hasServiceAccount ? 'inchangée (laisser vide pour conserver la clé existante)' : 'Collez ici tout le contenu du fichier JSON téléchargé de Google Cloud') + '"' + dis + '></textarea>'
       + badge(!!C.hasServiceAccount)
       + '<div class="aide">La clé est stockée côté serveur et n’est jamais renvoyée à l’écran.</div></div>';
-    h += '</div><div class="carte"><div class="info" style="margin:0">📈 Le <b>tableau de bord</b> (visiteurs, pages vues, sources…) s’ouvre dans la fenêtre <b>Statistiques</b> (menu Marketing).</div></div>';
+    h += '</div><div class="carte"><div class="info" style="margin:0"><span class="ic">📈</span> Le <b>tableau de bord</b> (visiteurs, pages vues, sources…) s’ouvre dans la fenêtre <b>Statistiques</b> (menu Marketing).</div></div>';
     corps.innerHTML = h;
     bsave.disabled = RO || OCCUPE;
   }

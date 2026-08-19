@@ -226,7 +226,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="carte"><h2>Mode de remboursement</h2><div class="choix">'
       + '<label><input type="radio" name="m-type" value="credit" checked>'
-      + '<span><strong>💳 Crédit boutique</strong>'
+      + '<span><strong><span class="ic">💳</span> Crédit boutique</strong>'
       + '<span class="exp">Lié au compte du client, n’expire jamais, courriel envoyé automatiquement.</span></span></label>'
       + '<label style="' + (R.squareDisponible ? '' : 'opacity:.5;cursor:not-allowed') + '">'
       + '<input type="radio" name="m-type" value="original"' + (R.squareDisponible ? '' : ' disabled') + '>'
@@ -241,7 +241,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<div style="font-size:.83rem"><strong>Frais de service Square retenus</strong> — proportionnels ('
           + argent(R.frais.commande) + ' sur ' + argent(R.frais.baseHT) + ' HT). Square ne rembourse pas ses frais.</div>'
           + '<button class="mini" id="btn-nip" style="margin-top:.4rem;font-size:.75rem;padding:.14rem .5rem">'
-          + '🔐 Renoncer aux frais (rembourser au complet)</button>'
+          + '<span class="ic">🔐</span> Renoncer aux frais (rembourser au complet)</button>'
           + '<div id="z-nip-ok" style="display:none;font-size:.78rem;color:#4ade80;margin-top:.3rem">'
           + '✓ Exemption accordée — les frais ne seront pas retenus.</div>'
           + '</div>' : '')
@@ -351,7 +351,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       apresNip();
       return;
     }
-    voile('<h3>🔐 Code d’exemption</h3>'
+    voile('<h3><span class="ic">🔐</span> Code d’exemption</h3>'
       + '<p>Renoncer aux frais de service Square exige le code confidentiel.</p>'
       + '<input type="password" id="v-nip" autocomplete="off" '
       + 'style="letter-spacing:.14em;text-align:center;font-family:ui-monospace,monospace">'
@@ -397,7 +397,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var s = saisie();
     if (!String(s.motif || '').trim()) { dire(MOTIFS.motif_requis, 'err'); return; }
     var enCredit = s.methode !== 'original';
-    voile('<h3>💳 Confirmer le remboursement ?</h3>'
+    voile('<h3><span class="ic">💳</span> Confirmer le remboursement ?</h3>'
       + '<p>' + TOT.nbArticles + ' unité' + (TOT.nbArticles > 1 ? 's' : '')
       + (TOT.livraison > 0 ? ' + livraison' : '') + ' — total <strong>' + argent(TOT.total) + '</strong>'
       + (TOT.retenu ? ', net au client <strong>' + argent(TOT.net) + '</strong> (frais ' + argent(TOT.frais) + ' retenus)' : '')

@@ -172,7 +172,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueRecherche(){
     var h = '<div class="carte"><div class="barre">'
       + '<input class="t" id="r-q" placeholder="Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)" value="'+esc(RQ)+'" style="flex:1;min-width:220px">'
-      + '<button class="b" id="r-go">🔎 Rechercher</button></div>'
+      + '<button class="b" id="r-go"><span class="ic">🔎</span> Rechercher</button></div>'
       + '<div class="sub">Le terme est cherché dans tous les champs de chaque journal (accès, automatisations, impressions). Minimum 2 caractères.</div>'
       + '<div id="r-res">'+(RRES ? resultatsHtml() : '<div class="vide">Tapez un terme puis « Rechercher ».</div>')+'</div></div>';
     corps.innerHTML = h;
@@ -381,7 +381,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     var rows = SMS_D;
     var h = '<div class="note">ℹ Les SMS reçus et envoyés (Twilio). Leur gestion complète (répondre, marquer lu, supprimer) reste dans <b>Communications → Téléphonie</b>.</div>'
-      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' message(s)</span><span class="pousse"></span><button class="b" id="sms-reload">🔄 Actualiser</button></div>'
+      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' message(s)</span><span class="pousse"></span><button class="b" id="sms-reload"><span class="ic">🔄</span> Actualiser</button></div>'
       + '<table class="tb"><thead><tr><th>Date</th><th>Sens</th><th>De</th><th>À</th><th>Message</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="5" class="vide">Aucun SMS.</td></tr>';
     for (var i=0;i<rows.length;i++){ var s=rows[i]; var ent=(s.direction==='inbound');
@@ -433,7 +433,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<option value="courriel"' + (CP_CANAL==='courriel'?' selected':'') + '>Courriel</option>'
       + '</select>'
       + '<span class="sub">'+rows.length+' événement(s)</span><span class="pousse"></span>'
-      + '<button class="b" id="cp-reload">🔄 Actualiser</button></div>'
+      + '<button class="b" id="cp-reload"><span class="ic">🔄</span> Actualiser</button></div>'
       + '<div class="liste"><table class="tb"><thead><tr><th>Quand</th><th>Canal</th><th>Événement</th><th>IP</th><th>Lien</th><th>Détail</th></tr></thead><tbody>';
     if (!vue.length) h += '<tr><td colspan="6" class="vide">Aucun événement.</td></tr>';
     for (var i=0;i<vue.length;i++){ var e=vue[i];

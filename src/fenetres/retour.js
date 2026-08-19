@@ -264,7 +264,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + (d.modeRemboursement === 'creditOnly' ? '💳 Crédit boutique uniquement' : '💰 Moyen original ou crédit, au choix')
           + (d.preference ? ' · préférence : ' + (d.preference === 'credit' ? 'crédit boutique' : 'moyen original') : '') + '</div></div>' : '')
       + (d.fraisPayesPar ? '<div class="large"><div class="k">Frais de retour</div><div class="v">'
-          + (d.fraisPayesPar === 'store' ? '🛠 Pris en charge par la boutique (défaut / erreur)' : '📦 À la charge du client') + '</div></div>' : '')
+          + (d.fraisPayesPar === 'store' ? '<span class="ic">🛠</span> Pris en charge par la boutique (défaut / erreur)' : '<span class="ic">📦</span> À la charge du client') + '</div></div>' : '')
       + '</div></div>';
 
     // Articles
@@ -303,7 +303,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var fige = d.statut === 'awaiting_photo' || d.statut === 'completed' || d.statut === 'refunded' || R.archive;
     h += '<div class="carte"><h2>Décision</h2>';
     if (R.archive) {
-      h += '<div class="aide">🗄 Demande archivée — lecture seule.</div>';
+      h += '<div class="aide"><span class="ic">🗄</span> Demande archivée — lecture seule.</div>';
     } else if (fige) {
       h += '<div class="aide">' + (d.statut === 'awaiting_photo'
         ? 'Pas de changement de statut tant que la photo n’est pas fournie — seules les notes s’enregistrent.'
@@ -319,7 +319,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       // Etiquette de retour — visible quand on approuve.
       h += '<div id="z-etiq" style="' + (d.statut === 'approved' ? '' : 'display:none') + ';margin-top:.55rem;'
         + 'padding:.55rem .7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:9px">'
-        + '<div style="font-size:.72rem;color:#8fa1b8;font-weight:700;text-transform:uppercase;letter-spacing:.07em">📦 Étiquette de retour</div>'
+        + '<div style="font-size:.72rem;color:#8fa1b8;font-weight:700;text-transform:uppercase;letter-spacing:.07em"><span class="ic">📦</span> Étiquette de retour</div>'
         + (d.aUneEtiquette ? '<div class="avis jaune">⚠ Une étiquette existe déjà ('
             + (d.etiquetteReelle ? 'réelle Postes Canada — la régénérer sera FACTURÉ une seconde fois' : 'PDF interne')
             + (d.suivi ? ' · suivi ' + esc(d.suivi) : '') + ').</div>' : '')
@@ -338,7 +338,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;margin-top:.5rem;cursor:pointer">'
         + '<input type="checkbox" id="r-generer"' + (d.aUneEtiquette ? '' : ' checked') + '> '
         + (d.aUneEtiquette ? 'Régénérer et joindre au courriel' : 'Générer et joindre l’étiquette au courriel') + '</label>'
-        + (R.etiquette.cpPret ? '' : '<div class="aide" style="margin-top:.3rem">💡 Postes Canada non configuré : un PDF interne sera généré (sans suivi réel).</div>')
+        + (R.etiquette.cpPret ? '' : '<div class="aide" style="margin-top:.3rem"><span class="ic">💡</span> Postes Canada non configuré : un PDF interne sera généré (sans suivi réel).</div>')
         + '</div>';
     }
     if (!R.archive) {
@@ -350,10 +350,10 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var boutons = '';
     if (d.aUneEtiquette) {
-      boutons += '<button id="btn-apercu">👁 Étiquette</button>';
-      if (R.peutEcrire) boutons += '<button id="btn-renvoyer">🔁 Renvoyer au client</button>';
+      boutons += '<button id="btn-apercu"><span class="ic">👁</span> Étiquette</button>';
+      if (R.peutEcrire) boutons += '<button id="btn-renvoyer"><span class="ic">🔁</span> Renvoyer au client</button>';
     }
-    if (R.peutEcrire && d.statut === 'in_transit') boutons += '<button id="btn-recu">📬 Marquer reçu</button>';
+    if (R.peutEcrire && d.statut === 'in_transit') boutons += '<button id="btn-recu"><span class="ic">📬</span> Marquer reçu</button>';
     if (R.peutEcrire && !fige) boutons += '<button class="prim" id="btn-enr">Enregistrer + courriel</button>';
     else if (R.peutEcrire && !R.archive) boutons += '<button class="prim" id="btn-enr">Enregistrer les notes</button>';
     /* ⚠ SUPPRIMER : uniquement sur un dossier TERMINE (#6). C etait impossible
@@ -361,7 +361,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        toujours. Effacer une demande EN COURS ferait disparaitre un dossier que
        la cliente, elle, suit encore : le coeur du site le refuse aussi. */
     if (['completed', 'refunded'].indexOf(d.statut) >= 0 && !R.archive) {
-      boutons += '<button class="danger" id="btn-suppr">🗑 Supprimer</button>';
+      boutons += '<button class="danger" id="btn-suppr"><span class="ic">🗑</span> Supprimer</button>';
     }
     actions.innerHTML = boutons + '<button id="btn-fermer">Fermer</button>';
     brancherDemande(fige);
@@ -385,7 +385,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
     h += '<div class="carte"><h2>Réexpédition au client <span class="note">— échange ou renvoi</span></h2>'
       + '<div class="aide">La fenêtre Expédition fait ce travail — service, poids et confirmation avant de dépenser.</div>'
-      + '<button class="mini" id="btn-reexp" style="margin-top:.45rem">🚚 Ouvrir l’expédition de la commande</button>'
+      + '<button class="mini" id="btn-reexp" style="margin-top:.45rem"><span class="ic">🚚</span> Ouvrir l’expédition de la commande</button>'
       + '</div>';
     corps.innerHTML = h;
     actions.innerHTML = '<button class="prim" id="btn-vers-reglement">Vers le règlement →</button>'
@@ -400,7 +400,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="carte"><div class="vide">Suggestion de remboursement indisponible.</div></div>';
     } else {
       if (!MONTANTS) MONTANTS = rb.lignes.map(function(l){ return l.montant; });
-      h += '<div class="carte"><h2>💰 Règlement <span class="note">— si « Remboursée »</span></h2>'
+      h += '<div class="carte"><h2><span class="ic">💰</span> Règlement <span class="note">— si « Remboursée »</span></h2>'
         + '<div class="avis ' + (rb.dansFenetre ? 'vert' : 'jaune') + '">'
         + (rb.dansFenetre
             ? '✅ ' + rb.joursOuvrables + ' jours ouvrables — dans la fenêtre de ' + rb.joursFenetre + ' : moyen original ou crédit, au choix.'
@@ -426,7 +426,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<input type="radio" name="g-methode" value="credit"'
         + ((rb.dansFenetre && rb.squareDisponible && R.demande.preference !== 'credit') ? '' : ' checked') + '> Crédit boutique</label>'
         + '</div>'
-        + (R.demande.preference ? '<div class="avis bleu">👤 Préférence du client : '
+        + (R.demande.preference ? '<div class="avis bleu"><span class="ic">👤</span> Préférence du client : '
             + (R.demande.preference === 'credit' ? 'crédit boutique' : 'moyen original') + '</div>' : '')
         + '</div>';
     }
@@ -556,7 +556,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function marquerRecu(){
-    voile('<h3>📬 Réception du colis</h3><p>Confirmer la réception du colis de retour en entrepôt ?</p>'
+    voile('<h3><span class="ic">📬</span> Réception du colis</h3><p>Confirmer la réception du colis de retour en entrepôt ?</p>'
       + '<div class="fin2"><button id="v-non">Annuler</button><button class="prim" id="v-oui">Confirmer</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
@@ -583,7 +583,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function apercu(){
     appeler('retour:pdf', [ID]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      voile('<h3>👁 Étiquette de retour</h3>'
+      voile('<h3><span class="ic">👁</span> Étiquette de retour</h3>'
         + '<iframe src="data:application/pdf;base64,' + r.pdf + '" '
         + 'style="width:100%;height:52vh;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:#3c3c3c"></iframe>'
         + '<div class="fin2"><button id="v-non">Fermer</button></div>',
@@ -623,7 +623,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     /* ⚠ CONFIRMATION AVANT L ARGENT, montants sous les yeux — taxes en sus,
        recalculees par le site aux taux reels de la commande. */
-    voile('<h3>' + (statutFinal === 'refunded' ? '💳 Rembourser et clore ?' : '✅ Clore le dossier ?') + '</h3>'
+    voile('<h3>' + (statutFinal === 'refunded' ? '<span class="ic">💳</span> Rembourser et clore ?' : '✅ Clore le dossier ?') + '</h3>'
       + (statutFinal === 'refunded'
           ? '<p>Articles : <strong>' + argent(montants.reduce(function(s,v){ return s+(parseFloat(v)||0); }, 0)) + '</strong>'
             + (livraison && R.remboursement ? ' + livraison <strong>' + argent(R.remboursement.livraisonBase) + '</strong>' : '')
@@ -723,7 +723,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           ? 'Seule une demande terminée peut être supprimée.' : expliquer(ap), 'err');
         return;
       }
-      voile('<h3 style="color:#f87171">🗑 Supprimer la demande</h3>'
+      voile('<h3 style="color:#f87171"><span class="ic">🗑</span> Supprimer la demande</h3>'
         + '<p><strong>' + esc(ap.commande) + '</strong>'
         + (ap.client ? ' — ' + esc(ap.client) : '') + '</p>'
         + '<p>La demande disparaît de la liste'

@@ -115,7 +115,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var src;
     if (!D.coherent && D.envPresente) src = '<div class="src err">✗ Incohérence : la variable Render <code>ELG_LAUNCHED=' + esc(D.envValeur) + '</code> dit le contraire de l’état actuel. Le prochain déploiement suivra la variable.</div>';
-    else if (D.envPresente) src = '<div class="src ok">🔗 État piloté par la variable Render <code>ELG_LAUNCHED=' + esc(D.envValeur) + '</code> — il survit aux déploiements.</div>';
+    else if (D.envPresente) src = '<div class="src ok"><span class="ic">🔗</span> État piloté par la variable Render <code>ELG_LAUNCHED=' + esc(D.envValeur) + '</code> — il survit aux déploiements.</div>';
     else src = '<div class="src warn">⚠ Aucune variable <code>ELG_LAUNCHED</code> dans Render : l’état actuel est un simple fichier, effacé au prochain déploiement. Ajoutez-la dans Render pour le rendre durable.</div>';
 
     var h = '<div class="etat" style="border-color:' + coul + ';background:' + fond + '">'

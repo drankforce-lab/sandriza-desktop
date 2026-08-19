@@ -484,7 +484,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var d=D.contact||{};
     var badge = D.contactNouveaux>0 ? '<span class="badge">'+D.contactNouveaux+'</span>' : (' ('+(D.contactTotal||0)+')');
     var h='<div class="carte"><div class="entete"><h3>Page Contact</h3><div style="display:flex;gap:.4rem;align-items:center">'
-      +'<button class="b" id="ct-inbox">📬 Messages'+badge+'</button>'+boutonEnr('ctEnr')+'</div></div>'
+      +'<button class="b" id="ct-inbox"><span class="ic">📬</span> Messages'+badge+'</button>'+boutonEnr('ctEnr')+'</div></div>'
       +'<div class="grille2">'
       +champ('ct-title','Titre de la page',d.title||'')
       +champ('ct-sub','Sous-titre',d.subtitle||'')

@@ -388,7 +388,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       ? '<div class="avis" style="margin-bottom:.7rem">Colonne(s) non reconnue(s), donc <strong>ignorée(s)</strong> : '
         + esc(IMP.ignorees.slice(0,12).join(', ')) + (IMP.ignorees.length > 12 ? '…' : '') + '</div>' : '';
     var notePhoto = IMP.nbPhotos
-      ? '<div class="avis jaune" style="margin-bottom:.7rem">📷 <strong>' + IMP.nbPhotos + ' photo' + plur(IMP.nbPhotos)
+      ? '<div class="avis jaune" style="margin-bottom:.7rem"><span class="ic">📷</span> <strong>' + IMP.nbPhotos + ' photo' + plur(IMP.nbPhotos)
         + '</strong> seront téléchargées depuis les adresses du fichier et copiées dans votre stockage — la boutique '
         + 'ne pointera jamais sur le site du fournisseur. Une photo introuvable n’empêche pas le reste de sa ligne de passer.</div>' : '';
     return ''
@@ -442,7 +442,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       ? '<div class="avis" style="margin-top:.8rem">' + r.histEchecs + ' modification' + plur(r.histEchecs)
         + ' enregistrée' + plur(r.histEchecs) + ' mais absente' + plur(r.histEchecs) + ' de l’historique du produit.</div>' : '';
     var blocNotifs = r.notifs.length
-      ? '<div class="carte" style="margin-top:.8rem"><h2>🔔 Demandes « avisez-moi » satisfaites</h2>'
+      ? '<div class="carte" style="margin-top:.8rem"><h2><span class="ic">🔔</span> Demandes « avisez-moi » satisfaites</h2>'
         + '<div class="dt" style="margin-bottom:.4rem">Des clients attendaient le retour de ces articles. Les avis ne partent pas tout seuls.</div>'
         + r.notifs.map(function(g){ return '<div class="notif"><span>' + esc(g.nom) + ' <span class="dt">— ' + g.count + ' personne' + plur(g.count) + '</span></span>'
             + '<button class="mini" data-avis="' + esc(g.pid) + '">Envoyer les avis (' + g.count + ')</button></div>'; }).join('')

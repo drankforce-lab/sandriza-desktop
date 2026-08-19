@@ -256,7 +256,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '';
 
     if (ro) {
-      h += '<div class="avis">👁 Lecture seule — votre rôle permet de consulter, pas de modifier ni d’imprimer.</div>';
+      h += '<div class="avis"><span class="ic">👁</span> Lecture seule — votre rôle permet de consulter, pas de modifier ni d’imprimer.</div>';
     }
 
     h += '<div class="barreoutils">'

@@ -163,12 +163,12 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function barre(){
     return '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'ramassages' ? ' actif' : '') + '" data-onglet="ramassages">📅 Ramassages</button>'
-      + '<button class="mini' + (ONGLET === 'rapport' ? ' actif' : '') + '" data-onglet="rapport">📊 Rapport transporteurs</button>'
+      + '<button class="mini' + (ONGLET === 'ramassages' ? ' actif' : '') + '" data-onglet="ramassages"><span class="ic">📅</span> Ramassages</button>'
+      + '<button class="mini' + (ONGLET === 'rapport' ? ' actif' : '') + '" data-onglet="rapport"><span class="ic">📊</span> Rapport transporteurs</button>'
       + (ONGLET === 'ramassages'
           ? '<span class="droite"><button class="prim" id="rm-planifier" '
             + 'title="Le choix des colis, de la date et du poids se fait dans la fenêtre principale">'
-            + '📦 Planifier un ramassage</button></span>'
+            + '<span class="ic">📦</span> Planifier un ramassage</button></span>'
           : '')
       + '</div>';
   }
@@ -184,7 +184,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         return '<div class="ligne' + (r.annule ? ' annule' : '') + '">'
           + '<div class="haut">'
           + '<span>' + r.logo + '</span><span class="num">' + esc(r.transporteur) + '</span>'
-          + '<span class="dt">📅 ' + esc(r.date) + '</span>'
+          + '<span class="dt"><span class="ic">📅</span> ' + esc(r.date) + '</span>'
           + '<span class="pill neutre">' + r.colis + ' colis</span>'
           + etat
           + (!r.annule
@@ -209,14 +209,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   function boitePlan(){
     var p = PLAN;
     var h = '<div class="voile" id="rm-voile"><div class="boite">'
-      + '<h3>📦 Planifier les ramassages — ' + (p.total || 0) + ' colis</h3>';
+      + '<h3><span class="ic">📦</span> Planifier les ramassages — ' + (p.total || 0) + ' colis</h3>';
     if (!p.total) {
       h += '<div class="vide">Aucun colis à ramasser pour l’instant.<br>'
         + 'Une commande doit être marquée Expédiée et avoir un numéro de suivi.</div>'
         + '<div class="pied-boite"><button id="rm-p-annuler">Fermer</button></div></div></div>';
       return h;
     }
-    h += '<div class="dt">📅 Prévu le <strong>' + esc(p.date) + '</strong>, entre 09 h et 17 h'
+    h += '<div class="dt"><span class="ic">📅</span> Prévu le <strong>' + esc(p.date) + '</strong>, entre 09 h et 17 h'
       + (p.adresse ? ' · ' + esc(p.adresse) : '') + '</div>';
     h += (p.groupes || []).map(function(g){
       return '<div class="grp"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
@@ -234,7 +234,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<input type="text" id="rm-p-endroit" value="Porte principale"></div>'
       + '</div>'
       + '<div class="pied-boite"><button id="rm-p-annuler">Annuler</button>'
-      + '<button class="prim" id="rm-p-envoyer">📨 Envoyer les demandes</button></div>'
+      + '<button class="prim" id="rm-p-envoyer"><span class="ic">📨</span> Envoyer les demandes</button></div>'
       + '</div></div>';
     return h;
   }

@@ -232,16 +232,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     var b = '';
     if (c2.supprime) {
       if (R.peutEcrire) b += '<button class="prim" id="btn-restaurer">↩ Restaurer</button>';
-      b += '<button id="btn-releve">📄 État de compte</button>';
+      b += '<button id="btn-releve"><span class="ic">📄</span> État de compte</button>';
       /* ⚠ Le bouton de purge N APPARAIT PAS sur un dossier non purgeable : une
          commande impose 6 ans de conservation, et un bouton qui refuse toujours
          fait chercher la panne ailleurs. La fiche le DIT a la place. */
-      if (R.peutSupprimer && R.purgeable) b += '<button class="danger" id="btn-purger">🗑 Supprimer définitivement</button>';
+      if (R.peutSupprimer && R.purgeable) b += '<button class="danger" id="btn-purger"><span class="ic">🗑</span> Supprimer définitivement</button>';
     } else {
       if (R.peutEcrire) b += '<button class="prim" id="btn-modifier">✎ Modifier</button>';
-      b += '<button id="btn-releve">📄 État de compte</button>';
+      b += '<button id="btn-releve"><span class="ic">📄</span> État de compte</button>';
       if (R.peutEcrire) b += '<button id="btn-etat">' + (c2.actif ? '⏸ Désactiver' : '▶ Activer') + '</button>';
-      if (R.peutSupprimer) b += '<button class="danger" id="btn-corbeille">🗑 Supprimer</button>';
+      if (R.peutSupprimer) b += '<button class="danger" id="btn-corbeille"><span class="ic">🗑</span> Supprimer</button>';
     }
     actions.innerHTML = b + '<button id="btn-fermer">Fermer</button>';
     if (c2.supprime && !R.purgeable && R.peutSupprimer) {
@@ -267,16 +267,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="ch"><label for="e-postal">Code postal</label><input id="e-postal" value="' + esc(a.codePostal) + '"></div>'
       + '<div class="ch"><label for="e-pays">Pays</label><input id="e-pays" value="' + esc(a.pays) + '"></div>'
       + '<div class="ch large"><label for="e-langue">Langue des courriels</label><select id="e-langue">'
-      + '<option value="fr"' + (c.langue !== 'en' ? ' selected' : '') + '>🇫🇷 Français (par défaut)</option>'
-      + '<option value="en"' + (c.langue === 'en' ? ' selected' : '') + '>🇬🇧 English</option>'
+      + '<option value="fr"' + (c.langue !== 'en' ? ' selected' : '') + '><span class="ic">🇫🇷</span> Français (par défaut)</option>'
+      + '<option value="en"' + (c.langue === 'en' ? ' selected' : '') + '><span class="ic">🇬🇧</span> English</option>'
       + '</select></div>'
       + '</div></div>';
     h += '<div class="carte"><h2>Mot de passe</h2>'
       + '<div style="display:flex;gap:.45rem;align-items:flex-end">'
       + '<div class="ch" style="flex:1"><label for="e-mdp">Nouveau (laisser vide = inchangé)</label>'
       + '<input id="e-mdp" type="password" placeholder="Min. 6 caractères" autocomplete="new-password"></div>'
-      + '<button class="mini" id="btn-voir" title="Afficher / masquer">👁</button>'
-      + '<button class="mini" id="btn-gen">🎲 Générer</button>'
+      + '<button class="mini" id="btn-voir" title="Afficher / masquer"><span class="ic">👁</span></button>'
+      + '<button class="mini" id="btn-gen"><span class="ic">🎲</span> Générer</button>'
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:#8fa1b8;margin-top:.5rem;cursor:pointer">'
       + '<input type="checkbox" id="e-aviser" checked> Aviser le client par courriel de ce changement</label>'
@@ -317,9 +317,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     var cb = document.getElementById('btn-corbeille');
     if (cb) cb.onclick = function(){
-      voile('<h3>🗑 Supprimer le client ?</h3>'
+      voile('<h3><span class="ic">🗑</span> Supprimer le client ?</h3>'
         + '<p><strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + ')</p>'
-        + '<p class="aide">🛡 Le compte part dans la corbeille et reste restaurable à tout moment. '
+        + '<p class="aide"><span class="ic">🛡</span> Le compte part dans la corbeille et reste restaurable à tout moment. '
         + (R.stats.commandes ? 'L’historique de ' + R.stats.commandes + ' commande(s) est conservé intégralement.' : '') + '</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
         + '<button class="danger" id="v-oui">Supprimer</button></div>',
@@ -350,7 +350,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<p style="color:#f6a5a5">Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.</p>'
         + '<p class="aide">✅ Ce compte n’a aucune commande — rien de comptable n’est perdu.</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
-        + '<button class="danger" id="v-oui">🗑 Supprimer définitivement</button></div>',
+        + '<button class="danger" id="v-oui"><span class="ic">🗑</span> Supprimer définitivement</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){

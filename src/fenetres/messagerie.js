@@ -168,7 +168,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="mini' + (ONGLET === 'pending' ? ' actif' : '') + '" data-onglet="pending">'
       + 'En attente<span class="n' + (c.attente > 0 ? ' hi' : '') + '">' + (c.attente || 0) + '</span></button>'
       + '<button class="mini' + (ONGLET === 'answered' ? ' actif' : '') + '" data-onglet="answered">'
-      + '📁 Archive<span class="n">' + (c.repondues || 0) + '</span></button>'
+      + '<span class="ic">📁</span> Archive<span class="n">' + (c.repondues || 0) + '</span></button>'
       + '<button class="mini' + (ONGLET === 'all' ? ' actif' : '') + '" data-onglet="all">'
       + 'Toutes<span class="n">' + (c.toutes || 0) + '</span></button>'
       + '</div>';
@@ -217,9 +217,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (r.statut === 'answered' ? 'Modifier la réponse (renvoyée par courriel)' : 'Votre réponse (envoyée par courriel au client)') + '</div>'
       + '<textarea id="m-reptxt" placeholder="Rédigez votre réponse…">' + esc(r.reponse || '') + '</textarea></div>'
       + '<div class="pied-boite">'
-      + '<button class="danger" id="m-supprimer">' + (SUPPR_ARME ? 'Confirmer la suppression ?' : '🗑 Supprimer') + '</button>'
+      + '<button class="danger" id="m-supprimer">' + (SUPPR_ARME ? 'Confirmer la suppression ?' : '<span class="ic">🗑</span> Supprimer') + '</button>'
       + '<button id="m-fermer">Fermer</button>'
-      + '<button class="prim" id="m-envoyer">📨 Envoyer la réponse</button>'
+      + '<button class="prim" id="m-envoyer"><span class="ic">📨</span> Envoyer la réponse</button>'
       + '</div></div></div>';
   }
 

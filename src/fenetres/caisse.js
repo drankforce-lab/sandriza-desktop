@@ -210,7 +210,7 @@ function pageCaisse() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ic">🧾</span><h1>Vente au comptoir</h1>
   <button id="btn-afficheur" class="mini" style="margin-left:auto"
-    title="Ouvrir l’écran tourné vers le client, à poser sur un second moniteur">🖥 Affichage client</button>
+    title="Ouvrir l’écran tourné vers le client, à poser sur un second moniteur"><span class="ic">🖥</span> Affichage client</button>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps">
   <div class="col">
@@ -645,7 +645,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (r.enAttente) {
       lien = r.lien && r.lien.url
         ? '<div class="lien"><input id="lien-url" readonly value="' + esc(r.lien.url) + '">'
-          + '<button class="mini" id="btn-copier">📋 Copier</button></div>'
+          + '<button class="mini" id="btn-copier"><span class="ic">📋</span> Copier</button></div>'
           + '<div class="aide">Le stock sera décompté et la facture marquée payée quand Square '
           + 'confirmera — automatiquement au retour du client. Rien n’est encaissé par cet écran.</div>'
         : '<div class="aide" style="color:#f87171">La commande est enregistrée, mais Square a refusé '
@@ -660,7 +660,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var v = document.createElement('div');
     v.className = 'voile';
-    v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '🔗 Vente en attente de paiement'
+    v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '<span class="ic">🔗</span> Vente en attente de paiement'
       : '✅ Vente enregistrée') + '</h3>' + lignes + lien + avis
       + '<div class="fin"><button class="prim" id="btn-ok">Continuer</button></div></div>';
     document.body.appendChild(v);

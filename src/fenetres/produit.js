@@ -245,8 +245,8 @@ function pageProduit(id) {
 <style>${CSS_SOCLE}${CSS_PROPRE}</style></head><body>
 <div class="tete"><span class="ic">🧵</span><h1 id="titre">Produit</h1>
   <span class="outils">
-    <button type="button" id="btn-jrn" title="Modifications de cette fiche" style="display:none">🕘 <span class="n" id="jrn-n">0</span></button>
-    <button type="button" id="btn-apercu" title="Aperçu boutique — dessiné par le site, avec ses vraies fonctions">👁 Aperçu</button>
+    <button type="button" id="btn-jrn" title="Modifications de cette fiche" style="display:none"><span class="ic">🕘</span> <span class="n" id="jrn-n">0</span></button>
+    <button type="button" id="btn-apercu" title="Aperçu boutique — dessiné par le site, avec ses vraies fonctions"><span class="ic">👁</span> Aperçu</button>
   </span>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
@@ -488,14 +488,14 @@ function pageProduit(id) {
       + '<div class="cote" style="margin-top:.3rem">'
       + '<div class="ch"><label for="p-regime">Régime de vente</label>'
       + '<select id="p-regime">'
-      + '<option value="normal">🛍 Normal</option>'
-      + '<option value="liq">🟡 Liquidation</option>'
-      + '<option value="final">🔴 Vente finale</option>'
+      + '<option value="normal"><span class="ic">🛍</span> Normal</option>'
+      + '<option value="liq"><span class="ic">🟡</span> Liquidation</option>'
+      + '<option value="final"><span class="ic">🔴</span> Vente finale</option>'
       + '</select></div>'
       + '<div class="ch"><label for="p-retours">Retours</label>'
       + '<select id="p-retours">'
       + '<option value="ok">✅ Acceptés</option>'
-      + '<option value="aucun">🚫 Aucun retour</option>'
+      + '<option value="aucun"><span class="ic">🚫</span> Aucun retour</option>'
       + '</select></div>'
       + '</div>'
       // ⚠ DEUX ENCARTS RETIRES le 2026-08-07, a la demande : ils EXPLIQUAIENT ce
@@ -1153,7 +1153,7 @@ function pageProduit(id) {
       v.innerHTML = '<div class="boite" style="max-width:620px"><h3 style="color:#e8dcc6">Photothèque</h3>'
         + corps
         + '<div class="pied2" style="justify-content:space-between">'
-        + '<button type="button" id="th-fich">📂 Importer de l’ordinateur…</button>'
+        + '<button type="button" id="th-fich"><span class="ic">📂</span> Importer de l’ordinateur…</button>'
         + '<button type="button" id="th-non">Annuler</button></div></div>';
       document.body.appendChild(v);
       document.getElementById('th-non').onclick = function(){ v.remove(); };
@@ -1539,7 +1539,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:36rem">'
-      + '<h3>👁 Aperçu boutique</h3>'
+      + '<h3><span class="ic">👁</span> Aperçu boutique</h3>'
       + '<div style="display:flex;gap:.4rem;margin:.45rem 0 .6rem">'
       + '<button type="button" id="ap-card">Grille boutique</button>'
       + '<button type="button" id="ap-detail">Page produit</button></div>'
@@ -1960,16 +1960,16 @@ function pageProduit(id) {
                   return '<div style="margin-bottom:.3rem"><div class="et">' + esc(c.libelle) + '</div>'
                     + dif(c.avant || '—', c.apres || '—') + '</div>';
                 }).join('')
-              + (vu ? '<div class="qui">👤 <strong style="color:#e8edf5">'
-                  + esc(e.par || 'Auteur non enregistré') + '</strong><br>🕘 '
+              + (vu ? '<div class="qui"><span class="ic">👤</span> <strong style="color:#e8edf5">'
+                  + esc(e.par || 'Auteur non enregistré') + '</strong><br><span class="ic">🕘</span> '
                   + esc(dateLongue(e.ts)) + '</div>' : '')
               + '</div>';
           }).join('')
         + '<div class="fin">Après 24 h, ces modifications ne s’affichent plus ici — elles restent '
-        + 'consultables dans <span class="lien" id="jrn-tout">🕘 tout l’historique</span>.</div>';
+        + 'consultables dans <span class="lien" id="jrn-tout"><span class="ic">🕘</span> tout l’historique</span>.</div>';
     } else if (RECENT && RECENT.etat === 'pret' && !att.length) {
       h += '<div class="fin">Aucune modification depuis l’ouverture, et aucune enregistrée '
-        + 'dans les dernières 24 h. <span class="lien" id="jrn-tout">🕘 Tout l’historique</span></div>';
+        + 'dans les dernières 24 h. <span class="lien" id="jrn-tout"><span class="ic">🕘</span> Tout l’historique</span></div>';
     }
     if (!h) h = '<div class="fin">Aucune modification.</div>';
     z.innerHTML = h;
@@ -1979,7 +1979,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:640px">'
-      + '<h3 style="color:#e8dcc6">🕘 Modifications de cette fiche</h3>'
+      + '<h3 style="color:#e8dcc6"><span class="ic">🕘</span> Modifications de cette fiche</h3>'
       + '<div class="jrn" id="jrn-corps"></div>'
       + '<div class="pied2"><button type="button" id="jrn-non">Fermer</button></div></div>';
     document.body.appendChild(v);
@@ -2005,7 +2005,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:640px">'
-      + '<h3 style="color:#e8dcc6">🕘 Historique complet</h3>'
+      + '<h3 style="color:#e8dcc6"><span class="ic">🕘</span> Historique complet</h3>'
       + '<div class="jrn" id="hist-corps"><div class="fin">Lecture…</div></div>'
       + '<div class="pied2"><button type="button" id="hist-non">Fermer</button></div></div>';
     document.body.appendChild(v);
@@ -2156,7 +2156,7 @@ function pageProduit(id) {
       return new Promise(function(resoudre){
         var v = document.createElement('div');
         v.className = 'voile';
-        v.innerHTML = '<div class="boite"><h3 style="color:#e8dcc6">📝 Un brouillon non terminé</h3>'
+        v.innerHTML = '<div class="boite"><h3 style="color:#e8dcc6"><span class="ic">📝</span> Un brouillon non terminé</h3>'
           + '<p>Une saisie a été laissée en cours <strong>' + esc(ilYa(r.brouillon.ts))
           + '</strong>. La reprendre, ou repartir d’une fiche vierge ?</p>'
           + '<p style="font-size:.78rem;color:#8fa1b8">Un brouillon est gardé 15 minutes, '

@@ -138,7 +138,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '<div class="stock">';
     if (STOCK.turso && STOCK.turso.bytes != null) h += jauge('☁️', 'Turso (base de données)', 'Produits, commandes, clients, dépenses…', STOCK.turso.bytes, STOCK.turso.limit);
     if (STOCK.r2 && STOCK.r2.bytes != null) h += jauge('📦', 'Cloudflare R2 (fichiers)', 'Reçus, photos, logos, documents, sauvegardes…', STOCK.r2.bytes, STOCK.r2.limit);
-    else h += '<div class="jauge"><div class="sous">📦 Cloudflare R2 : en attente de connexion.</div></div>';
+    else h += '<div class="jauge"><div class="sous"><span class="ic">📦</span> Cloudflare R2 : en attente de connexion.</div></div>';
     return h + '</div>';
   }
 

@@ -115,7 +115,7 @@ function pageChatConfig(onglet) {
 <div class="tete"><span class="ic">💬</span><h1>Configuration du chat en ligne</h1></div>
 <div class="ong">
   <button type="button" id="o-widget" data-onglet="widget">⚙ Widget</button>
-  <button type="button" id="o-ia" data-onglet="ia">🤖 Assistant IA</button>
+  <button type="button" id="o-ia" data-onglet="ia"><span class="ic">🤖</span> Assistant IA</button>
 </div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter ces réglages, pas les modifier.</div>
 <div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
@@ -224,9 +224,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<span class="rang">'
       + (d.photoAgent
           ? '<img class="vign" src="'+esc(d.photoAgent)+'" alt="">'
-          : '<span class="sansph">👤</span>')
+          : '<span class="sansph"><span class="ic">👤</span></span>')
       + '<input class="t" id="c-photo" value="'+esc(d.photoAgent||'')+'" placeholder="https://…"'+dis+'>'
-      + (RO ? '' : '<button class="b" type="button" id="c-photo-imp">📁 Importer</button>')
+      + (RO ? '' : '<button class="b" type="button" id="c-photo-imp"><span class="ic">📁</span> Importer</button>')
       + '</span>'
       + '<span class="sub">Servie quand la rotation des noms est <b>désactivée</b>.</span></label>'
       + '<input type="file" id="c-photo-f" accept="image/*" hidden>'
@@ -264,8 +264,8 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<input type="checkbox" data-ag-actif="'+i+'"'+(a.actif?' checked':'')+dis+' style="width:15px;height:15px;accent-color:#c9a97e;flex:0 0 auto">'
         + '<input class="t nom" data-ag-nom="'+i+'" value="'+esc(a.nom)+'" placeholder="Nom"'+dis+'>'
         + '<input class="t ph" data-ag-photo="'+i+'" value="'+esc(a.photo)+'" placeholder="URL de la photo (vide = sans photo)"'+dis+'>'
-        + (RO ? '' : '<button class="mini" type="button" data-ag-imp="'+i+'" title="Importer une photo">📁</button>')
-        + (a.photo ? '<img class="vign" src="'+esc(a.photo)+'" alt="">' : '<span class="sansph">👤</span>')
+        + (RO ? '' : '<button class="mini" type="button" data-ag-imp="'+i+'" title="Importer une photo"><span class="ic">📁</span></button>')
+        + (a.photo ? '<img class="vign" src="'+esc(a.photo)+'" alt="">' : '<span class="sansph"><span class="ic">👤</span></span>')
         + (RO ? '' : '<button class="b danger" type="button" data-ag-suppr="'+i+'" title="Retirer cet agent">✕</button>')
         + '</div>';
     }

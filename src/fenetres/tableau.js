@@ -309,7 +309,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     // L avis de taux de change — seulement s il y a un probleme, comme le site.
     if (D.taux) {
-      h += '<div class="avis">💱 ' + (D.taux.genre === 'secours'
+      h += '<div class="avis"><span class="ic">💱</span> ' + (D.taux.genre === 'secours'
         ? '<strong>Taux de change indisponible.</strong> Les prix affichés en USD utilisent un taux '
           + 'de secours (1 USD = ' + Number(D.taux.rate).toFixed(4) + ' CAD), donc approximatif. '
           + 'Les commandes, elles, sont toujours facturées en dollars canadiens.'
@@ -511,7 +511,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var v = VERROUS[oid];
     var t = v.mine ? 'Vous tenez cette fiche en modification'
       : ('En traitement par ' + (v.par || 'un collegue'));
-    return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="' + esc(t) + '">🔒</span>';
+    return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="' + esc(t) + '"><span class="ic">🔒</span></span>';
   }
   function appliquerVerrous(){
     var slots = document.querySelectorAll('.cadslot');

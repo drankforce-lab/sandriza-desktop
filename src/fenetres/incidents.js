@@ -242,7 +242,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     for (var i=0;i<lg.length;i++){ var r=lg[i];
       var acts = '';
       if (D.peutModifier||D.peutSupprimer){
-        acts = '<td class="acts"><button class="b" data-vue="'+esc(r.id)+'" title="Voir le détail">👁 Détail</button>'
+        acts = '<td class="acts"><button class="b" data-vue="'+esc(r.id)+'" title="Voir le détail"><span class="ic">👁</span> Détail</button>'
           + (D.peutModifier ? '<button class="b" data-edit="'+esc(r.id)+'">✏ Modifier</button>' : '')
           + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+(DELID===r.id?'✓ Confirmer':'Retirer')+'</button>' : '')
           + '</td>';
@@ -366,7 +366,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       pasH += '<div class="pas'+(i===0?' ici':'')+'"><h4>'+esc(et[i].icone||'')+' '+esc(et[i].label)+'</h4>'+ch+'</div>';
     }
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inc';
-    sur.innerHTML = '<div class="boite"><div class="tt"><h3>🛡 '+(id?'Modifier l’incident':'Consigner un incident')+'</h3>'
+    sur.innerHTML = '<div class="boite"><div class="tt"><h3><span class="ic">🛡</span> '+(id?'Modifier l’incident':'Consigner un incident')+'</h3>'
       + '<div><button class="sz-btnplein" id="a-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
       + '<button class="mini" id="a-x">Fermer</button></div></div>'
       + '<div class="liste">'

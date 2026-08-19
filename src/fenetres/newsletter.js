@@ -183,10 +183,10 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="bar"><div style="width:' + s.pct + '%"></div></div></div>';
     }).join('') : '<p style="color:#8fa1b8;font-size:.85rem">Aucun abonné encore.</p>';
     return '<div class="tuiles">'
-      + '<div class="tuile"><div class="k">👥 Abonnés actifs</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + ' désabonné' + plur(D.unsub) + '</div></div>'
-      + '<div class="tuile"><div class="k">📣 Campagnes envoyées</div><div class="v">' + D.sentCamps + '</div><div class="z">' + D.draftCamps + ' en brouillon</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">👥</span> Abonnés actifs</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + ' désabonné' + plur(D.unsub) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">📣</span> Campagnes envoyées</div><div class="v">' + D.sentCamps + '</div><div class="z">' + D.draftCamps + ' en brouillon</div></div>'
       + '<div class="tuile"><div class="k">✉️ Courriels envoyés</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + ' échoué' + plur(D.failedSent) + '</div></div>'
-      + '<div class="tuile"><div class="k">🔗 Chaînes actives</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + ' étape' + plur(D.pendingSteps) + ' en attente</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🔗</span> Chaînes actives</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + ' étape' + plur(D.pendingSteps) + ' en attente</div></div>'
       + '</div>'
       + (PEUT.edit ? '<div><button class="ghost mini" data-act="chains">⚙ Traiter les chaînes (' + D.pendingSteps + ')</button></div>' : '')
       + '<div class="deux">'
@@ -222,7 +222,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       ? ligneChamp('Clé API Resend *', 'nl-key', c.apiKey, 'password', 'Créez votre clé sur <strong>resend.com/api-keys</strong>')
       : '<div class="champ"><label>Clé API Resend</label><input value="' + (c.hasKey ? '••••••••••••' : '') + '" readonly></div>';
     return '<div class="deux">'
-      + '<div class="carte"><h2>🔑 API Resend</h2>'
+      + '<div class="carte"><h2><span class="ic">🔑</span> API Resend</h2>'
       +   cleField
       +   ligneChamp('Courriel expéditeur *', 'nl-from-e', c.fromEmail, 'email', 'Le domaine doit être vérifié dans Resend')
       +   ligneChamp('Nom expéditeur', 'nl-from-n', c.fromName)
@@ -239,7 +239,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   ligneChamp('Courriel de test', 'nl-test-e', c.testEmail, 'email')
       +   (PEUT.edit ? '<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem"><button class="prim" data-act="cfgsave">Enregistrer</button><button class="ghost" data-act="testconn">Envoyer un courriel de test</button></div>' : '')
       + '</div>'
-      + '<div class="carte"><h2>🔕 Contrôle des envois par courriel</h2>'
+      + '<div class="carte"><h2><span class="ic">🔕</span> Contrôle des envois par courriel</h2>'
       +   '<p class="hint" style="margin:0 0 .6rem">Un service désactivé ne consomme pas de quota Resend.</p>'
       +   ctrls
       +   (PEUT.edit ? '<div style="margin-top:.7rem"><button class="prim" data-act="ctrlsave">Enregistrer les contrôles</button></div>' : '')
@@ -259,7 +259,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var ro = PEUT.edit ? '' : ' readonly';
     return '<div class="carte">'
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">'
-      +   '<div><h2 style="margin:0 0 .2rem">Widget Offre de bienvenue</h2><div class="hint" style="margin:0">Bouton 🎁 flottant + popup — suit le visiteur sur tout le site.</div></div>'
+      +   '<div><h2 style="margin:0 0 .2rem">Widget Offre de bienvenue</h2><div class="hint" style="margin:0">Bouton <span class="ic">🎁</span> flottant + popup — suit le visiteur sur tout le site.</div></div>'
       +   '<div style="display:flex;align-items:center;gap:.5rem"><span class="hint" style="margin:0">Actif</span>' + bascule('offer-enabled', c.enabled) + '</div>'
       + '</div>'
       + (D.done ? '<div class="hint" style="color:#86efac;margin:0 0 .8rem">✓ Un visiteur a déjà soumis ce widget. Utilisez « Réinitialiser » pour re-tester.</div>' : '')
@@ -267,7 +267,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="deux">'
       +   '<div class="champ"><label>Titre (saut de ligne = ↵)</label><textarea id="offer-title" rows="2"' + ro + '>' + esc(c.title) + '</textarea></div>'
       +   '<div class="champ"><label>Image côté gauche</label>' + img
-      +     (PEUT.edit ? '<label style="display:inline-block;margin-bottom:.4rem"><span class="ghost mini" style="display:inline-block;padding:.16rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:8px">📁 Choisir une photo</span><input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
+      +     (PEUT.edit ? '<label style="display:inline-block;margin-bottom:.4rem"><span class="ghost mini" style="display:inline-block;padding:.16rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:8px"><span class="ic">📁</span> Choisir une photo</span><input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
       +     '<input id="offer-img" value="' + esc(c.imageUrl) + '" placeholder="https://… ou coller une URL"' + ro + '>'
       +     '<div class="hint">700 × 900 px recommandé (portrait). Max 600 Ko.</div></div>'
       + '</div>'

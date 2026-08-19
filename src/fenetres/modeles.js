@@ -138,7 +138,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="cadre' + (RO ? ' ro' : '') + '" data-vue="' + esc(v.key) + '">'
         + (v.src
             ? '<img src="' + esc(v.src) + '" alt="' + esc(v.label) + '">'
-              + (RO ? '' : '<div class="surv">📸 Changer</div>')
+              + (RO ? '' : '<div class="surv"><span class="ic">📸</span> Changer</div>')
             : '<div class="vide"><span class="em">📸</span><span>' + (RO ? 'Non configuré' : 'Cliquer ou glisser') + '</span></div>')
         + '</div>'
         + '<div class="souspied">'

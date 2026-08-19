@@ -265,7 +265,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '';
 
     if (!D.peutModifier && !D.peutAjouter) {
-      h += '<div class="avis">👁 Lecture seule — votre rôle permet de consulter les dépenses, pas de les saisir.</div>';
+      h += '<div class="avis"><span class="ic">👁</span> Lecture seule — votre rôle permet de consulter les dépenses, pas de les saisir.</div>';
     }
 
     h += '<div class="barreoutils">'
@@ -313,7 +313,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        NOTRE decompte pour qu il soit CONFRONTE a la facture. */
     if (FRAIS !== null) {
       h += '<div class="frais">'
-        + '<div class="ft">💳 Frais Stripe Tax ' + esc(String(FRAIS.annee || ANNEE)) + '</div>';
+        + '<div class="ft"><span class="ic">💳</span> Frais Stripe Tax ' + esc(String(FRAIS.annee || ANNEE)) + '</div>';
       if (FRAIS.erreur) {
         h += '<div class="fx">' + esc(FRAIS.erreur) + '</div>';
       } else if (!FRAIS.transactions) {
@@ -363,7 +363,7 @@ ${JS_ACTIVITE}${JS_DIRE}
               + '<td class="num">' + esc(r.montant) + '</td>'
               + '<td class="dt" style="text-align:right;white-space:nowrap">'
               + (r.aTaxes ? esc(r.tps) + ' · ' + esc(r.tvq) : '—') + '</td>'
-              + '<td style="text-align:center">' + (r.recu ? '📎' : '<span class="dt">—</span>') + '</td>'
+              + '<td style="text-align:center">' + (r.recu ? '<span class="ic">📎</span>' : '<span class="dt">—</span>') + '</td>'
               + '</tr>';
           }).join('')
         + '</tbody></table>';
@@ -404,7 +404,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '';
 
     if (VERROU && !VERROU.obtenu) {
-      h += '<div class="avis">🔒 Annuaire ouvert en modification par <strong>'
+      h += '<div class="avis"><span class="ic">🔒</span> Annuaire ouvert en modification par <strong>'
         + esc(VERROU.parQui || 'un collègue') + '</strong> — vous pouvez le consulter, '
         + 'pas le corriger. Deux corrections en même temps, c’est la dernière qui gagne '
         + 'sans que la première le sache.</div>';
@@ -532,8 +532,8 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="pied-boite">'
       + (D.peutSupprimer ? '<button class="danger" id="d-suppr">'
-          + (SUPPR_ARME ? 'Confirmer la suppression ?' : '🗑 Supprimer') + '</button>' : '')
-      + (e.aRecu ? '<button id="d-recu">📎 Ouvrir le reçu</button>' : '')
+          + (SUPPR_ARME ? 'Confirmer la suppression ?' : '<span class="ic">🗑</span> Supprimer') + '</button>' : '')
+      + (e.aRecu ? '<button id="d-recu"><span class="ic">📎</span> Ouvrir le reçu</button>' : '')
       + (D.peutModifier ? '<button class="prim" id="d-modifier">✎ Modifier</button>' : '')
       + '<button id="d-fermer">Fermer</button>'
       + '</div>';
@@ -604,7 +604,7 @@ ${JS_ACTIVITE}${JS_DIRE}
          seule facon de verifier une conversion, et c est aussi ce qu on relit
          quand on corrige une taxe que la lecture a manquee. */
       + (f.origine
-          ? '<div class="aide" style="margin-top:.35rem;color:#93c5fd">💵 Facture en '
+          ? '<div class="aide" style="margin-top:.35rem;color:#93c5fd"><span class="ic">💵</span> Facture en '
             + esc(f.origine.devise || 'USD') + ' — original : '
             + [['montant', 'montant'], ['tps', 'TPS'], ['tvq', 'TVQ']].map(function(p){
                 var v = f.origine[p[0]];
@@ -623,7 +623,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button id="f-convertir" title="Convertir les montants saisis depuis le dollar US, au taux de la date">'
       + '⇄ Convertir depuis USD</button></div></div>'
       + '<div class="champ large"><label>Reçu (image ou PDF — facultatif)</label>'
-      + '<button id="f-recu">' + (f.recu ? '✓ Reçu joint — remplacer' : '📎 Joindre un reçu') + '</button></div>'
+      + '<button id="f-recu">' + (f.recu ? '✓ Reçu joint — remplacer' : '<span class="ic">📎</span> Joindre un reçu') + '</button></div>'
       + '</div>';
 
     if (FERMER_DEMANDE) {

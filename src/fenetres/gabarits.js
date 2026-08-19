@@ -189,7 +189,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<label class="bascule"><input type="checkbox" id="g-anim"' + (t.animated ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
       + '<span><span class="t">✨ Effet animé CSS (en-tête &amp; pied)</span><br><span class="d">Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.</span></span></label>';
     h += '<label class="bascule"><input type="checkbox" id="g-gif"' + (t.gifBanner ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
-      + '<span><span class="t">🖼️ Bannière animée GIF (compatible Gmail)</span><br><span class="d">Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.</span></span></label>';
+      + '<span><span class="t"><span class="ic">🖼️</span> Bannière animée GIF (compatible Gmail)</span><br><span class="d">Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.</span></span></label>';
     h += '<div class="gr2">' + coulChamp('g-fbg', 'Pied : couleur de fond', t.footerBg || '#1a1a2e')
       + coulChamp('g-fcol', 'Pied : couleur du texte', t.footerTextColor || '#c4a882') + '</div>';
     // Aperçu CSS
@@ -199,11 +199,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="foot" id="g-prev-foot"><div class="cp" id="g-prev-cp">© ' + esc(brand) + '.</div></div></div>';
     // Aperçu GIF (relayé)
     h += '<div class="gifwrap" id="g-gifwrap" style="display:' + (t.gifBanner ? 'block' : 'none') + '">'
-      + '<div class="lg">🖼️ Aperçu de la bannière GIF <button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
+      + '<div class="lg"><span class="ic">🖼️</span> Aperçu de la bannière GIF <button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
       + '<img id="g-gifimg" alt="Aperçu bannière"></div>';
     if (!RO) {
       h += '<div style="display:flex;gap:.6rem;margin-top:.3rem">'
-        + '<button class="prim" id="g-save">💾 Enregistrer</button>'
+        + '<button class="prim" id="g-save"><span class="ic">💾</span> Enregistrer</button>'
         + '<button class="b" id="g-cancel">Annuler</button></div>';
     } else {
       h += '<div style="margin-top:.3rem"><button class="b" id="g-cancel">← Retour</button></div>';
@@ -212,7 +212,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function listeHtml(){
     var g = (D && D.gabarits) || [];
-    var h = '<div class="carte"><div class="stitre">🎨 Gabarits disponibles</div><div class="sdesc">Le style (couleurs, sous-titre, bannière) partagé par les courriels.</div>';
+    var h = '<div class="carte"><div class="stitre"><span class="ic">🎨</span> Gabarits disponibles</div><div class="sdesc">Le style (couleurs, sous-titre, bannière) partagé par les courriels.</div>';
     for (var i = 0; i < g.length; i++) {
       var t = g[i];
       h += '<div class="ligne"><div class="nom">' + esc(t.name) + (t.id === 'default' ? '<span class="def">(défaut)</span>' : '')
@@ -220,15 +220,15 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<span class="lb">en-tête</span><div class="b2" style="background:' + esc(t.footerBg) + '"></div><span class="lb">pied</span></div></div>'
         + '<div style="display:flex;gap:.35rem">'
         + '<button class="b" type="button" data-edit="' + esc(t.id) + '">✏️ Modifier</button>'
-        + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '">📋 Copier</button>')
-        + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? 'Confirmer ?' : '🗑') + '</button>') : '')
+        + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span> Copier</button>')
+        + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? 'Confirmer ?' : '<span class="ic">🗑</span>') + '</button>') : '')
         + '</div></div>';
     }
     h += '</div>';
     // Attributions
     var fns = (D && D.fonctions) || [];
     var opts = g.map(function(t){ return { id: t.id, name: t.name }; });
-    h += '<div class="carte"><div class="stitre">📋 Attribution par module / fonction</div><div class="sdesc">Choisissez quel gabarit s’applique à chaque type de courriel.</div>';
+    h += '<div class="carte"><div class="stitre"><span class="ic">📋</span> Attribution par module / fonction</div><div class="sdesc">Choisissez quel gabarit s’applique à chaque type de courriel.</div>';
     h += '<table class="tbl"><thead><tr><th>Module</th><th>Fonction</th><th>Gabarit</th></tr></thead><tbody>';
     for (var j = 0; j < fns.length; j++) {
       var f = fns[j], cur = (D.attributions && D.attributions[f.key]) || 'default';
@@ -238,7 +238,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<tr><td class="mod">' + esc(f.module) + '</td><td>' + esc(f.label) + '</td><td>' + sel + '</td></tr>';
     }
     h += '</tbody></table>';
-    if (!RO) h += '<div style="margin-top:.8rem"><button class="prim" id="g-assign-save">💾 Enregistrer les attributions</button></div>';
+    if (!RO) h += '<div style="margin-top:.8rem"><button class="prim" id="g-assign-save"><span class="ic">💾</span> Enregistrer les attributions</button></div>';
     return h + '</div>';
   }
 

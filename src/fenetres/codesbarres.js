@@ -213,8 +213,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '<div style="display:flex;gap:.5rem;margin-top:.6rem">'
       + '<button class="danger" id="cb-vider"' + (FILE.length ? '' : ' disabled') + '>'
-      + (VIDER_ARME ? 'Confirmer ?' : '🗑 Vider') + '</button>'
-      + '<button class="prim" id="cb-imprimer" style="flex:1"' + (FILE.length ? '' : ' disabled') + '>🖨 Imprimer '
+      + (VIDER_ARME ? 'Confirmer ?' : '<span class="ic">🗑</span> Vider') + '</button>'
+      + '<button class="prim" id="cb-imprimer" style="flex:1"' + (FILE.length ? '' : ' disabled') + '><span class="ic">🖨</span> Imprimer '
       + (etiquettes ? etiquettes + ' étiquette' + (etiquettes > 1 ? 's' : '') : '') + '</button>'
       + '</div></div>';
     return h;
@@ -241,7 +241,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<th>Stock</th><th style="text-align:right">Ajouter</th></tr></thead><tbody>'
         + rows.map(function(r){
             var actions = r.sku
-              ? '<button class="mini" data-choisir="' + esc(r.id) + '">🏷️ Étiquettes</button>'
+              ? '<button class="mini" data-choisir="' + esc(r.id) + '"><span class="ic">🏷️</span> Étiquettes</button>'
                 + (r.stock > 0 ? ' <button class="mini" data-toutstock="' + esc(r.id) + '" title="Ajouter toutes les variantes en stock (quantité = stock)">+ Stock</button>' : '')
               : '<span class="dt">SKU requis</span>';
             return '<tr>'
@@ -266,7 +266,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     if (PICKER) {
       h += '<div class="voile" id="cb-voile"><div class="boite">'
-        + '<h3>🏷️ ' + esc(PICKER.nom) + ' — choisir les variantes</h3>'
+        + '<h3><span class="ic">🏷️</span> ' + esc(PICKER.nom) + ' — choisir les variantes</h3>'
         + '<div class="rangs">'
         + PICKER.variantes.map(function(v, i){
             var deja = null;

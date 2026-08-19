@@ -152,7 +152,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── LISTE DES BLOCS ───────────────────────────────────────────────────────
   function listeHtml(){
     var h = '<div class="carte"><div class="stitre">Ordre et visibilité</div>'
-      + '<div class="sdesc">↑ ↓ pour réorganiser · 👁 masque un bloc sans le supprimer · ✏️ modifie le contenu.</div>';
+      + '<div class="sdesc">↑ ↓ pour réorganiser · <span class="ic">👁</span> masque un bloc sans le supprimer · ✏️ modifie le contenu.</div>';
     BLOCS.forEach(function(b, i){
       h += '<div class="bloc' + (b.visible ? '' : ' off') + '">'
         + '<span class="em">' + esc(b.icon) + '</span>'
@@ -160,7 +160,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="d">' + esc(b.desc) + '</div></div>'
         + '<div class="actes">'
         + '<button class="b" type="button" data-ed="' + esc(b.id) + '" title="Modifier">✏️</button>'
-        + (RO ? '' : '<button class="b" type="button" data-vis="' + esc(b.id) + '" title="' + (b.visible ? 'Masquer' : 'Afficher') + '">' + (b.visible ? '👁' : '🚫') + '</button>'
+        + (RO ? '' : '<button class="b" type="button" data-vis="' + esc(b.id) + '" title="' + (b.visible ? 'Masquer' : 'Afficher') + '">' + (b.visible ? '<span class="ic">👁</span>' : '<span class="ic">🚫</span>') + '</button>'
           + '<button class="b" type="button" data-up="' + esc(b.id) + '"' + (i===0?' disabled':'') + '>↑</button>'
           + '<button class="b" type="button" data-down="' + esc(b.id) + '"' + (i===BLOCS.length-1?' disabled':'') + '>↓</button>')
         + '</div></div>';
@@ -179,7 +179,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<span class="nm">Diapo ' + (i+1) + '</span>'
       + (RO ? '' : '<button class="b" type="button" data-sup="' + i + '"' + (i===0?' disabled':'') + '>↑</button>'
         + '<button class="b" type="button" data-sdn="' + i + '"' + (i===SLIDES.length-1?' disabled':'') + '>↓</button>'
-        + '<button class="b dgr" type="button" data-sdel="' + i + '">🗑</button>')
+        + '<button class="b dgr" type="button" data-sdel="' + i + '"><span class="ic">🗑</span></button>')
       + '</div>'
       + '<div class="gr2">'
       + '<div class="ch"><label>Image URL (vide = dégradé)</label><input data-sf="image" data-si="' + i + '" value="' + esc(s.image||'') + '" placeholder="https://…"' + (RO?' disabled':'') + '></div>'

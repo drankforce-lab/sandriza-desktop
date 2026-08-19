@@ -254,8 +254,8 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (D.peutModifier){
           h += '<div class="barre">'
             + '<button class="b" data-edit="'+esc(s.id)+'">✏ Modifier</button>'
-            + '<button class="b" data-mfa="'+esc(s.id)+'" title="Gérer l’authentification à deux facteurs">🔐 MFA</button>'
-            + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="Renvoyer un mot de passe temporaire par courriel">📧 Renvoyer</button>' : '')
+            + '<button class="b" data-mfa="'+esc(s.id)+'" title="Gérer l’authentification à deux facteurs"><span class="ic">🔐</span> MFA</button>'
+            + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="Renvoyer un mot de passe temporaire par courriel"><span class="ic">📧</span> Renvoyer</button>' : '')
             + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'✓ Confirmer':'Supprimer')+'</button>' : '')
             + '</div>';
         }
@@ -467,7 +467,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function fermerMfa(){ szPleinReinit(); var s=document.getElementById('sur-mfa'); if (s) s.remove(); }
   function dessinerMfaGerer(id, e){
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
-    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3>🔐 MFA — '+esc(e.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
+    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> MFA — '+esc(e.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
       + '<div class="liste">'
       + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:#6ee7a0">✅ Authentification à deux facteurs activée pour ce compte.</div>'
       + '<label class="case"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><b>Exempter ce compte</b><span class="quoi">Connexion autorisée sans code — un rempart en moins.</span></span></label>'
@@ -482,7 +482,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function dessinerMfaSetup(id, s){
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
-    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3>🔐 Activer MFA — '+esc(s.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
+    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> Activer MFA — '+esc(s.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
       + '<div class="liste">'
       + '<p class="aideOng"><b>Étape 1</b> — Scannez le QR avec Google Authenticator, Authy ou une application TOTP compatible, ou entrez la clé manuellement.</p>'
       + '<div style="text-align:center;background:#0b1220;padding:1rem;border-radius:9px;margin:.6rem 0">'

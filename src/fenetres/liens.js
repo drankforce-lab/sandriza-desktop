@@ -254,7 +254,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td>' + jour(l.expireLe) + '</td>'
           + '<td>' + jour(l.creeLe) + '<div class="dt">' + esc(l.creePar || '') + '</div></td>'
           + '<td style="white-space:nowrap">'
-            + '<button class="mini" data-copier="' + esc(l.url) + '">📋</button> '
+            + '<button class="mini" data-copier="' + esc(l.url) + '"><span class="ic">📋</span></button> '
             + (l.etat === 'actif'
                 ? '<button class="mini" data-renvoyer="' + esc(l.id) + '">✉ Renvoyer</button> '
                   + '<button class="mini dgr" data-revoquer="' + esc(l.id) + '">'
@@ -265,7 +265,7 @@ ${JS_ACTIVITE}${JS_DIRE}
                    qu on ne voit plus. Il faut le revoquer d abord. */
                 : '<button class="mini dgr" data-supprimer="' + esc(l.id) + '" '
                   + 'title="Retirer de la liste — le journal de ses accès est conservé">'
-                  + (ARME === 'sup:' + l.id ? 'Confirmer ?' : '🗑') + '</button> ')
+                  + (ARME === 'sup:' + l.id ? 'Confirmer ?' : '<span class="ic">🗑</span>') + '</button> ')
             + '<button class="mini" data-journal="' + esc(l.id) + '">Journal</button>'
           + '</td></tr>');
         if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
@@ -357,7 +357,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="carte neuf"><h2>Lien fabriqué</h2>'
       + '<label for="n-url">Adresse à remettre</label>'
       + '<input id="n-url" type="text" readonly value="' + esc(n.url) + '">'
-      + '<div class="barreoutils" style="margin-top:.4rem"><button id="n-copier">📋 Copier</button>'
+      + '<div class="barreoutils" style="margin-top:.4rem"><button id="n-copier"><span class="ic">📋</span> Copier</button>'
       + '<span class="aide">' + (n.maxUsages > 0
             ? (n.maxUsages === 1 ? 'Utilisable une seule fois' : ('Utilisable ' + n.maxUsages + ' fois'))
             : 'Utilisations illimitées')
@@ -370,7 +370,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             + '<div class="gros" id="n-mdp-vue">' + esc(n.mdp) + '</div>'
             + '<input id="n-mdp" type="text" readonly value="' + esc(n.mdp) + '" style="position:absolute;left:-9999px">'
             + '<div class="barreoutils" style="margin-top:.4rem">'
-            + '<button id="n-copier-mdp">📋 Copier le mot de passe</button></div>'
+            + '<button id="n-copier-mdp"><span class="ic">📋</span> Copier le mot de passe</button></div>'
             + '<p class="aide"><strong>Il ne sera plus jamais affiché</strong> — la base n’en garde '
             + 'que l’empreinte. Notez-le ou envoyez-le maintenant, et de préférence par un autre '
             + 'canal que le lien.</p>')
@@ -592,7 +592,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</select>'
       + (lien ? '<span class="pill g">Lien ' + esc(lien.slice(0, 8)) + '…</span>'
                 + '<button class="mini" id="j-tout">Tout le journal</button>' : '')
-      + '<span class="droite"><button id="j-vers-journaux" title="Voir ce journal dans le module Journaux">🔎 Dans Journaux</button>'
+      + '<span class="droite"><button id="j-vers-journaux" title="Voir ce journal dans le module Journaux"><span class="ic">🔎</span> Dans Journaux</button>'
       + '<button id="j-recharger">Recharger</button></span></div>');
 
     h.push('<div class="carte"><h2>Accès aux liens</h2>');

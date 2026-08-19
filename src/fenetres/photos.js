@@ -514,7 +514,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '⚙ Traitement en lot</button>')
       // Studio virtuel : mise en scène guidée (Photoroom). On y choisit une photo
       // de la photothèque directement, d'où l'entrée ici.
-      + '<button id="p-studio" title="Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat">🎨 Studio virtuel</button>'
+      + '<button id="p-studio" title="Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat"><span class="ic">🎨</span> Studio virtuel</button>'
       + '<span class="sep"></span>'
       + '<input type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
       + '<select id="p-tri">'
@@ -1385,7 +1385,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'de payer.</div>'
       + '</div>'
       + '<div class="pied"><button id="rt-non">Annuler</button>'
-      + '<button id="rt-apercu" title="Voir le rendu filigrané, gratuit">👁 Voir un aperçu</button>'
+      + '<button id="rt-apercu" title="Voir le rendu filigrané, gratuit"><span class="ic">👁</span> Voir un aperçu</button>'
       + '<button class="prim" id="rt-go">Lancer le retrait sur ' + n + ' photo'
       + (n > 1 ? 's' : '') + '</button>'
       + '</div></div></div>';
@@ -1442,7 +1442,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'l’état réel d’un article.</div>'
       + '</div>'
       + '<div class="pied"><button id="sc-non">Annuler</button>'
-      + '<button id="sc-apercu" title="Voir un aperçu filigrané et gratuit avec ces réglages">👁 Voir un aperçu</button>'
+      + '<button id="sc-apercu" title="Voir un aperçu filigrané et gratuit avec ces réglages"><span class="ic">👁</span> Voir un aperçu</button>'
       + '<button class="prim" id="sc-go">Lancer sur ' + n + ' photo' + (n > 1 ? 's' : '') + '</button>'
       + '</div></div></div>';
   }
@@ -1456,7 +1456,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
         }).join('')
       + '<button class="mini" data-lot="pivot" title="Pivoter d’un quart de tour vers la droite">⟳ Pivoter</button>'
-      + '<button class="mini" data-apercu="fantome" title="Voir le retrait du mannequin, filigrané et gratuit, avant de payer">👁 Aperçu du retrait</button>'
+      + '<button class="mini" data-apercu="fantome" title="Voir le retrait du mannequin, filigrané et gratuit, avant de payer"><span class="ic">👁</span> Aperçu du retrait</button>'
       + '<button class="mini dgr" id="p-lot-sup">'
       + (SUP_LOT_ARME ? 'Confirmer — supprimer ' + n + ' ?' : 'Supprimer') + '</button>'
       + '<button class="mini" id="p-rien">Tout décocher</button>'

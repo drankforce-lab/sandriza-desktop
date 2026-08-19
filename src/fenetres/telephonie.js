@@ -395,7 +395,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<option value="message"' + (o.action === 'message' ? ' selected' : '') + '>Message vocal</option>'
         + '<option value="repeat"' + (o.action === 'repeat' ? ' selected' : '') + '>Répéter l’accueil</option></select></div>'
       + '<div class="ch" style="margin:0"><label>Numéro (Rediriger / File)</label><input data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
-      + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="Retirer">🗑</button>')
+      + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="Retirer"><span class="ic">🗑</span></button>')
       + '</div><div class="l2">'
       + '<div class="ch"><textarea data-mf="messageFr" rows="1" placeholder="Message vocal FR (si action = Message)"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
       + '<div class="ch"><textarea data-mf="messageEn" rows="1" placeholder="Message vocal EN"' + (RO ? ' disabled' : '') + '>' + esc(m.en || '') + '</textarea></div>'
@@ -403,7 +403,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h;
   }
   function panMenu(){
-    var h = '<div class="carte"><div class="stitre">🤖 Robot de réception (menu IVR)</div>';
+    var h = '<div class="carte"><div class="stitre"><span class="ic">🤖</span> Robot de réception (menu IVR)</div>';
     if (!MENU.length) h += '<div class="note">Aucune option — ajoutez-en pour activer le robot de réception.</div>';
     else { for (var i = 0; i < MENU.length; i++) h += menuRowHtml(MENU[i], i); }
     if (!RO) h += '<button class="b" type="button" id="t-menu-add">+ Ajouter une option de menu</button>';
@@ -429,16 +429,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     var vp = C.voicemailPrompt || {};
     var vpc = C.voicemailPromptClosed || {};
     var h = '<div class="carte"><div class="stitre">Messagerie vocale</div>'
-      + '<div class="note">🎧 Chaque message vocal est joint en MP3 au courriel ci-dessous, puis supprimé de Twilio. Un courriel valide est requis.</div>';
+      + '<div class="note"><span class="ic">🎧</span> Chaque message vocal est joint en MP3 au courriel ci-dessous, puis supprimé de Twilio. Un courriel valide est requis.</div>';
     h += texteHtml('t-vm-email', 'Courriel de notification (reçoit le MP3)', C.voicemailEmail, 'vous@exemple.com');
     h += '<div class="gr2">'
       + taHtml('t-vm-fr', 'Invite — heures ouverture (FR)', vp.fr, 'Laissez votre message après le bip…')
       + taHtml('t-vm-en', 'Invite — heures ouverture (EN)', vp.en, 'Leave your message after the tone…') + '</div>';
-    h += '<div class="note">🌙 Invite hors heures (laisser vide pour reprendre celle du dessus).</div>';
+    h += '<div class="note"><span class="ic">🌙</span> Invite hors heures (laisser vide pour reprendre celle du dessus).</div>';
     h += '<div class="gr2">'
       + taHtml('t-vm-closed-fr', 'Invite — hors heures (FR)', vpc.fr, 'Nos bureaux sont fermés. Laissez un message…')
       + taHtml('t-vm-closed-en', 'Invite — hors heures (EN)', vpc.en, "Our offices are closed. Leave a message…") + '</div>';
-    h += '</div><div class="carte"><div class="stitre">🎙️ Boîte de réception vocale <span id="t-vm-badge"></span></div>'
+    h += '</div><div class="carte"><div class="stitre"><span class="ic">🎙️</span> Boîte de réception vocale <span id="t-vm-badge"></span></div>'
       + '<div class="liste" id="t-vm-inbox"><div class="vide">Chargement…</div></div></div>';
     return h;
   }
@@ -452,7 +452,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + taHtml('t-sms-fr', 'Réponse automatique (FR)', ar.fr, 'Merci pour votre message, nous vous répondrons bientôt.')
       + taHtml('t-sms-en', 'Réponse automatique (EN)', ar.en, "Thanks for your message, we'll reply soon.") + '</div>';
     h += texteHtml('t-sms-email', 'Courriel de notification des SMS reçus', sms.notifyEmail, 'vous@exemple.com');
-    h += '</div><div class="carte"><div class="stitre">💬 Messages SMS <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="Voir les SMS dans le module Journaux" style="float:right;font-size:.76rem">🔎 Dans Journaux</button></div>';
+    h += '</div><div class="carte"><div class="stitre"><span class="ic">💬</span> Messages SMS <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="Voir les SMS dans le module Journaux" style="float:right;font-size:.76rem"><span class="ic">🔎</span> Dans Journaux</button></div>';
     h += '<div class="smsbox">'
       + '<input class="to" id="t-sms-to" placeholder="+1…"' + (RO ? ' disabled' : '') + '>'
       + '<input class="body" id="t-sms-body" placeholder="Votre message…"' + (RO ? ' disabled' : '') + '>'
@@ -627,13 +627,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     for (var i = 0; i < vms.length; i++) {
       var v = vms[i];
       h += '<div class="item' + (v.read ? '' : ' neuf') + '"><div class="haut">'
-        + '<div><span class="qui">' + (v.read ? '' : '🔵 ') + '<b>' + esc(v.from || 'Inconnu') + '</b></span>'
+        + '<div><span class="qui">' + (v.read ? '' : '<span class="ic">🔵</span> ') + '<b>' + esc(v.from || 'Inconnu') + '</b></span>'
         + ' <span class="meta">· ' + esc(v.duration || '?') + ' s · ' + esc(String(v.date || '').replace('T', ' ').replace('Z', '')) + '</span></div>'
         + '<div class="actes">'
         + (v.read || RO ? '' : '<button class="b" type="button" data-vmlu="' + esc(v.id) + '">✓ Marquer lu</button>')
-        + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '">🗑</button>')
+        + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '"><span class="ic">🗑</span></button>')
         + '</div></div>'
-        + '<div class="meta" style="margin-top:.25rem">' + (v.emailed === false ? '⚠ Échec de l’envoi courriel' : '🎧 Audio envoyé par courriel (MP3), non conservé') + '</div></div>';
+        + '<div class="meta" style="margin-top:.25rem">' + (v.emailed === false ? '⚠ Échec de l’envoi courriel' : '<span class="ic">🎧</span> Audio envoyé par courriel (MP3), non conservé') + '</div></div>';
     }
     box.innerHTML = h;
     var lus = box.querySelectorAll('[data-vmlu]'); for (var a = 0; a < lus.length; a++) lus[a].onclick = function(){ vmAction('vm:lu', this.getAttribute('data-vmlu')); };
@@ -653,12 +653,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       var m = sms[i], entrant = (m.direction === 'inbound');
       h += '<div class="item' + (entrant && !m.read ? ' neuf' : '') + '">'
         + '<div class="meta">' + (entrant ? '⬅ Reçu de ' : '➡ Envoyé à ') + '<b>' + esc(entrant ? m.from : m.to) + '</b> · '
-        + esc(String(m.date || '').replace('T', ' ').replace('Z', '')) + (entrant && !m.read ? ' · 🔵' : '') + '</div>'
+        + esc(String(m.date || '').replace('T', ' ').replace('Z', '')) + (entrant && !m.read ? ' · <span class="ic">🔵</span>' : '') + '</div>'
         + '<div class="corpsmsg">' + esc(m.body || '') + '</div>'
         + '<div class="actes" style="margin-top:.25rem">'
         + (entrant ? '<button class="b" type="button" data-smsrep="' + esc(m.from) + '">↩ Répondre</button>' : '')
         + (entrant && !m.read ? '<button class="b" type="button" data-smslu="' + esc(m.id) + '">✓</button>' : '')
-        + (RO ? '' : '<button class="b dgr" type="button" data-smsdel="' + esc(m.id) + '">🗑</button>')
+        + (RO ? '' : '<button class="b dgr" type="button" data-smsdel="' + esc(m.id) + '"><span class="ic">🗑</span></button>')
         + '</div></div>';
     }
     box.innerHTML = h;

@@ -228,7 +228,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ══ ONGLET TAILLES ════════════════════════════════════════════════════════ */
   function vueSizes(){
     var chips = D.sizes.map(function(s){
-      var lock = s.used > 0 ? '<span class="lock" title="Utilisée par ' + s.used + ' produit' + plur(s.used) + '">🔒</span>' : '';
+      var lock = s.used > 0 ? '<span class="lock" title="Utilisée par ' + s.used + ' produit' + plur(s.used) + '"><span class="ic">🔒</span></span>' : '';
       var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? 'Utilisée — suppression bloquée' : 'Retirer') + '">×</button>' : '';
       return '<span class="chip">' + esc(s.nom) + lock + x + '</span>';
     }).join('');
@@ -295,7 +295,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="champ"><label>Valeur hex</label><div style="display:flex;gap:.35rem;align-items:center">'
       +   '<input id="inv-color-hex" placeholder="#FF6B6B" class="mono" style="width:105px">'
       +   '<input type="color" id="inv-color-picker" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
-      + '<div class="champ"><label>Ou chercher par nom</label><button class="ghost mini" data-act="colorsearch">🔍 Chercher</button></div>'
+      + '<div class="champ"><label>Ou chercher par nom</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> Chercher</button></div>'
       + '</div>'
       + (CVARIANTS && CVARIANTS.length ? '<div style="margin-top:.6rem"><div class="aide" style="margin:0 0 .35rem">' + CVARIANTS.length + ' variante' + plur(CVARIANTS.length) + ' — cliquez pour choisir</div><div class="swatches">'
           + CVARIANTS.map(function(v){ return '<button class="sw" data-pick="' + esc(v.nom) + '|' + esc(v.hex) + '"><span class="pt" style="background:' + esc(v.hex) + '"></span><span class="nm">' + esc(v.nom) + '</span></button>'; }).join('')
@@ -311,7 +311,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var rows = D.codes.length ? D.codes.map(function(c){
       var autoTag = c.hasCode ? '' : ' <span class="pill auto">AUTO</span>';
       var ro = D.peut.edit ? '' : ' disabled';
-      var save = D.peut.edit ? '<button class="mini" data-codesave="' + esc(c.nom) + '" title="Enregistrer">💾</button>' : '';
+      var save = D.peut.edit ? '<button class="mini" data-codesave="' + esc(c.nom) + '" title="Enregistrer"><span class="ic">💾</span></button>' : '';
       return '<div class="cc"><span class="pt pastille" style="background:' + esc(c.hex) + ';width:22px;height:22px"></span>'
         + '<span class="nm">' + esc(c.nom) + autoTag + '</span>'
         + '<span class="mono" style="color:#8fa1b8;font-size:.72rem">…-<strong style="color:#e8dcc6">' + esc(c.code) + '</strong></span>'
@@ -388,7 +388,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
       var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '">✏️</button>' : '';
-      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' produit(s) — bloqué' : 'Supprimer') + '">🗑</button>' : '';
+      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' produit(s) — bloqué' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '';
       return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
         + '<td style="font-weight:600">' + esc(c.name) + '</td>'
         + '<td style="color:#8fa1b8">' + esc(c.nameEN || '—') + '</td>'

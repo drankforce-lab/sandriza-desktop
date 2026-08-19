@@ -275,7 +275,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       : '<div class="avis vert">✅ Poids calculé depuis les articles de la commande'
         + (pw.remboursements ? ' (remboursements déduits)' : '') + '.</div>';
     if (t && !t.pret) {
-      h += '<div class="avis jaune">💡 ' + esc(t.nom) + ' n’est pas configuré — aucune étiquette '
+      h += '<div class="avis jaune"><span class="ic">💡</span> ' + esc(t.nom) + ' n’est pas configuré — aucune étiquette '
         + 'réelle n’est possible. Configuration puis Transporteurs dans la fenêtre principale.</div>';
     }
     h += '</div>';
@@ -297,11 +297,11 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var pret = !!(t && t.pret) && !!CTX.peutExpedier && !expediee;
     actions.innerHTML =
-        '<button id="btn-apercu"' + (c.aUneEtiquette ? '' : ' disabled') + '>👁 Aperçu</button>'
-      + '<button id="btn-imprimer"' + (c.aUneEtiquette ? '' : ' disabled') + '>🖨 Étiquette + bordereau</button>'
-      + '<button id="btn-bordereau">🧾 Bordereau seul</button>'
+        '<button id="btn-apercu"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">👁</span> Aperçu</button>'
+      + '<button id="btn-imprimer"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">🖨</span> Étiquette + bordereau</button>'
+      + '<button id="btn-bordereau"><span class="ic">🧾</span> Bordereau seul</button>'
       + '<button class="paie" id="btn-etiquette"' + (pret ? '' : ' disabled') + '>'
-      + (c.aUneEtiquette ? '💳 Créer une AUTRE étiquette' : '💳 Créer l’étiquette') + '</button>'
+      + (c.aUneEtiquette ? '<span class="ic">💳</span> Créer une AUTRE étiquette' : '<span class="ic">💳</span> Créer l’étiquette') + '</button>'
       + '<button id="btn-fermer">Fermer</button>';
     brancher();
   }
@@ -360,7 +360,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        que l ancienne version allait chercher dans un formulaire absent. Les
        relire ici, en toutes lettres, est la derniere occasion de voir qu on
        s apprete a etiqueter quatre kilos pour cinq cents grammes. */
-    voile('<h3>💳 Commander l’étiquette ?</h3>'
+    voile('<h3><span class="ic">💳</span> Commander l’étiquette ?</h3>'
       + '<p>Une étiquette est <strong>facturée dès sa création</strong> et ne s’annule pas.</p>'
       + '<p>Transporteur : <strong>' + esc(t ? t.nom : TRANSPORTEUR) + '</strong><br>'
       + 'Service : <strong>' + esc(libelle || service || '—') + '</strong><br>'
@@ -402,7 +402,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<strong>La commande n’est pas encore marquée expédiée</strong> — fermer cette '
           + 'fenêtre est sans risque, vous pourrez y revenir.</p>'
           + '<div class="fin2"><button id="v-non">Plus tard</button>'
-          + '<button class="prim" id="v-oui">🖨 Imprimer maintenant</button></div>',
+          + '<button class="prim" id="v-oui"><span class="ic">🖨</span> Imprimer maintenant</button></div>',
           function(fermer){
             document.getElementById('v-non').onclick = fermer;
             document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(); };
@@ -432,12 +432,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       PDF = r.pdf;
       dire('');
-      voile('<h3>👁 Étiquette — ' + esc(CMD.commande.numero) + '</h3>'
+      voile('<h3><span class="ic">👁</span> Étiquette — ' + esc(CMD.commande.numero) + '</h3>'
         + '<p>Suivi : <strong>' + esc(CMD.commande.suivi || '—') + '</strong></p>'
         + '<iframe src="data:application/pdf;base64,' + r.pdf + '" '
         + 'style="width:100%;height:52vh;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:#3c3c3c"></iframe>'
         + '<div class="fin2"><button id="v-non">Fermer</button>'
-        + '<button class="prim" id="v-oui">🖨 Imprimer</button></div>',
+        + '<button class="prim" id="v-oui"><span class="ic">🖨</span> Imprimer</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(); };

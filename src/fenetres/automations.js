@@ -143,7 +143,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<span class="nom">' + esc(j.name) + '</span>'
       + '<span class="pill">' + esc(j.schedule) + '</span>' + badgeDest(j.recipient) + '</div>';
     h += '<p class="desc">' + esc(j.desc) + '</p>';
-    if (j.recommendation) h += '<div class="reco">💡 Fréquence recommandée : ' + esc(j.recommendation) + '</div>';
+    if (j.recommendation) h += '<div class="reco"><span class="ic">💡</span> Fréquence recommandée : ' + esc(j.recommendation) + '</div>';
     if (j.recipient === 'single') {
       h += '<div class="rangee"><div class="ch"><label>Courriel destinataire</label>'
         + '<input id="em-' + j.key + '" value="' + esc(j.email) + '" placeholder="Vide = courriel professionnel"'
@@ -151,7 +151,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<button class="prim" data-email="' + j.key + '"' + (RO ? ' disabled' : '') + '>Enregistrer</button></div>';
     }
     if (j.key === 'stats' && D.statsMetrics && D.statsMetrics.length) {
-      h += '<div class="metriques"><div class="t">📋 Métriques du courriel</div>'
+      h += '<div class="metriques"><div class="t"><span class="ic">📋</span> Métriques du courriel</div>'
         + '<div class="s">Cochez ce que vous voulez recevoir (données de la veille).</div><div class="mgrille">'
         + D.statsMetrics.map(function(m){ return '<label><input type="checkbox" id="mt-' + m.key + '"'
             + (m.actif ? ' checked' : '') + (RO ? ' disabled' : '') + '> ' + esc(m.label) + '</label>'; }).join('')
@@ -160,7 +160,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="rangee" style="margin:0"><div class="ch plein"><label>URL à configurer ('
       + esc(String(j.schedule).toLowerCase()) + ')</label>'
       + '<input class="mono" readonly value="' + esc(j.url) + '" data-url="1"></div>'
-      + '<button data-copier="' + esc(j.url) + '">📋 Copier</button></div>';
+      + '<button data-copier="' + esc(j.url) + '"><span class="ic">📋</span> Copier</button></div>';
     return h + '</div>';
   }
 

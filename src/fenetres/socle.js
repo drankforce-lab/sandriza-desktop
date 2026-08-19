@@ -448,7 +448,7 @@ function _szVerrouInner(cle){
   var t = v.mine ? 'Vous tenez cette fiche en modification'
     : ('En traitement par ' + (v.par || 'un collegue') + (v.depuis ? ' — ' + v.depuis : ''));
   return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="'
-    + String(t).replace(/"/g, '&quot;') + '">🔒</span>';
+    + String(t).replace(/"/g, '&quot;') + '"><span class="ic">🔒</span></span>';
 }
 
 function szVerrousPeindre(){
@@ -867,6 +867,30 @@ Pagi.prototype.brancher = function(){
    SOURCE pour toutes : une couleur oubliée se corrige ici, pas fenêtre par
    fenêtre. */
 const CSS_JOUR = `
+/* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION — ET LA REGLE EST ICI, UNE
+   SEULE FOIS. Sa regle, posee le 2026-08-19 devant une capture : << les emojis
+   sont pas encore en noir et blanc, sa devrais toujours etre comme sa >>.
+
+   ⚠ POURQUOI DANS LE SOCLE ET PAS DANS CHAQUE FENETRE. Premiere ecriture : je
+   l avais posee dans les 88 feuilles de style, une copie chacune. C est
+   exactement le defaut que ce depot traque — la meme decision ecrite quatre-vingt
+   -huit fois, dont quatre-vingt-sept qu on oubliera de corriger le jour ou le
+   gris ne convient plus. Les 91 fenetres importent CSS_JOUR ou CSS_SOCLE, et
+   CSS_JOUR entre dans les deux : une ligne ici les couvre toutes.
+
+   ⚠ MODE D EMPLOI, ET IL N Y EN A QU UN : tout ce qui affiche un emoji le met
+   dans <span class="ic">. Rien a declarer, rien a importer.
+
+   ⚠ CE QUE CETTE REGLE NE PEUT PAS FAIRE : un emoji pose par textContent n a pas
+   d element a lui, donc pas de filtre possible. Passer ces endroits en innerHTML
+   serait une INJECTION la ou un nom d usager est interpole — voir la liste qui
+   reste dans le carnet.
+
+   ⚠⚠ ET AUCUN ACCENT GRAVE DANS CE COMMENTAIRE : il vit dans un litteral de
+   gabarit, et un seul refermerait CSS_JOUR — donc les 91 fenetres d un coup.
+   Mordu trois fois le 2026-08-19, dont ici. */
+.ic{display:inline-block;filter:grayscale(1) brightness(1.6);opacity:.9;font-style:normal}
+
 /* ⚠⚠ LA LISTE DEROULEE D UN <select> EST DESSINEE PAR LE SYSTEME, PAS PAR NOUS.
    Elle ne prend NI le fond ni la couleur de la fenetre : les fenetres ecrivent
    << select{color:#e8edf5;background:rgba(255,255,255,.05)} >>, et un fond

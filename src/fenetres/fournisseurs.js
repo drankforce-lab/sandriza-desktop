@@ -193,7 +193,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '<div class="barreoutils">'
       + '<input type="search" id="f-q" placeholder="Nom, contact ou courriel…" value="' + esc(Q) + '">'
       + '<span class="droite">' + (D.total || 0) + ' au total'
-      + '<button class="mini" id="f-repertoire" title="Un carnet de grossistes connus, à ajouter en un clic">🔎 Répertoire</button>'
+      + '<button class="mini" id="f-repertoire" title="Un carnet de grossistes connus, à ajouter en un clic"><span class="ic">🔎</span> Répertoire</button>'
       + '<button class="prim" id="f-nouveau">+ Nouveau fournisseur</button></span>'
       + '</div>';
     h += '<div class="carte">';

@@ -127,7 +127,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '<div class="deux">';
 
     h += '<div class="carte"><h3>Informations</h3>'
-      + '<div class="moi"><div class="jeton">'+esc(D.roleIcone||'👤')+'</div>'
+      + '<div class="moi"><div class="jeton">'+esc(D.roleIcone||'<span class="ic">👤</span>')+'</div>'
       + '<div><div class="nom">'+esc(D.nom)+'</div><div class="role">'+esc(D.role)+'</div></div></div>'
       + '<div class="faits">'
       + '<span class="k">Identifiant</span><span>'+(D.identifiant?'@'+esc(D.identifiant):'—')+'</span>'
