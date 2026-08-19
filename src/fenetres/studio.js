@@ -109,12 +109,30 @@ body{background:#0e1522;color:#e8edf5;
    l image. */
 .bloc{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
   padding:.85rem 1rem;min-width:0}
-.recap .rt{font:700 .74rem/1.2 system-ui;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+.recap .rt,.fmt .rt{font:700 .74rem/1.2 system-ui;text-transform:uppercase;
+  letter-spacing:.06em;color:#8fa1b8}
 .recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:.5rem}
 .recap .jt{font-size:.75rem;padding:.16rem .55rem;border-radius:99px;
   background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:#e8dcc6}
 .recap .jt.gris{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);color:#8fa1b8}
-.recap .note{margin-top:.55rem;font-size:.73rem;color:#6d7f96;line-height:1.5}
+.recap .note,.fmt .note{margin-top:.55rem;font-size:.73rem;color:#6d7f96;line-height:1.5}
+/* ── FORMATS DE SORTIE (lot 3b) ────────────────────────────────────────────
+   La meme image en 3:4, 1:1, 4:5 et 9:16, fabriquee ICI, au canevas de la page.
+   ⚠ AUCUN APPEL, AUCUN CREDIT : couper et border une image que l on a deja ne
+   demande rien a personne. Le faire redemander au service serait payer une
+   seconde fois pour la meme photo. */
+.fmt .fbar{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-top:.55rem}
+.fmt .fbar .grand{margin-left:auto}
+.fmtg{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.55rem;
+  align-content:start;margin-top:.6rem}
+.fmtc{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:.45rem;
+  display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:0}
+.fmtc img{width:100%;height:7.5rem;object-fit:contain;background:#0b1220;border-radius:6px;
+  border:1px solid rgba(255,255,255,.07)}
+.fmtc .ft{font-size:.82rem;font-weight:700;line-height:1.1}
+.fmtc .fd{font-size:.68rem;color:#6d7f96;font-variant-numeric:tabular-nums}
+.fmtc .fb{display:flex;gap:.25rem;width:100%}
+.fmtc .fb button{flex:1 1 auto;padding:.24rem .3rem;font-size:.72rem}
 /* Le geste suivant, sans avoir a lire une aide : ce qui est fait porte une
    coche, ce qui vient est mis en avant. */
 .guide{display:flex;flex-direction:column;gap:.45rem;text-align:left;margin:.7rem auto 0;max-width:24rem}
@@ -142,14 +160,25 @@ body{background:#0e1522;color:#e8edf5;
 .phbarre #ph-q:focus{outline:none;border-color:#c9a97e}
 /* ⚠ 7rem, pas 5,5 : la vignette porte desormais une coche et des pastilles.
    A l ancienne largeur, le nom passait dessous et devenait illisible. */
-.phgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(7rem,1fr));gap:.5rem;
+/* ⚠⚠ align-content:start, ET C EST UN CORRECTIF, PAS UNE FINITION. Une grille
+   dont le conteneur est plus haut que son contenu ETIRE ses rangees pour combler
+   le vide : avec deux photos, les deux vignettes devenaient des boites de trois
+   cents pixels de haut, presque vides sous le nom. Le min-height pose avec le
+   passage en plein ecran a rendu le defaut visible tout de suite. Signale en
+   capture le 2026-08-19.
+   ⚠ La vignette passe a 7rem : l ecran est desormais plein, et c est ici qu on
+   choisit CE QU ON VA PAYER — a 4,6rem, une robe entiere tenait dans un timbre. */
+.phgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.5rem;
+  align-content:start;
   max-height:calc(100vh - 18rem);min-height:14rem;overflow-y:auto;padding-right:.2rem}
 .phgrille::-webkit-scrollbar{width:8px}
 .phgrille::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .phvig{background:#0f1724;border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
 .phvig:hover{border-color:#c9a97e}
-.phvig img{width:100%;height:4.6rem;object-fit:contain;background:#0b1220}
+/* object-fit:contain : une photo COUCHEE garde ses proportions et se centre dans
+   la boite, elle ne s etale pas pour la remplir. */
+.phvig img{width:100%;height:7rem;object-fit:contain;background:#0b1220}
 .phvig .attente{font-size:.68rem;color:#6d7f96;padding:1.6rem .3rem}
 .phvig .phnom{font-size:.64rem;color:#8fa1b8;padding:.15rem .25rem;max-width:100%;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -239,7 +268,7 @@ body{background:#0e1522;color:#e8edf5;
    ⚠ AUCUN ACCENT GRAVE ICI : cette feuille vit dans un littéral de gabarit. */
 .mgal-info{font-size:.72rem;color:#8fa1b8;flex:1 1 12rem;min-width:0}
 .mgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.8rem,1fr));gap:.55rem;
-  max-height:24rem;overflow-y:auto;padding-right:.2rem}
+  align-content:start;max-height:24rem;overflow-y:auto;padding-right:.2rem}
 .mgrille::-webkit-scrollbar{width:8px}
 .mgrille::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .mvig{background:#0f1724;border:1px solid #2b3444;border-radius:9px;overflow:hidden;cursor:pointer;
@@ -340,9 +369,16 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
   border-radius:5px;background:rgba(8,12,20,.72);color:#cbd8e6;pointer-events:none}
 .cmp .cet.g{left:.5rem}
 .cmp .cet.d{right:.5rem}
-/* Résultat — il occupe tout ce qui reste du volet de droite. */
+/* Résultat — VIDE, il occupe tout ce qui reste du volet de droite et centre son
+   guide dans le creux. GARNI, il reprend la taille de son contenu.
+   ⚠⚠ ET C EST UN CORRECTIF. Une boite centree (justify-content:center) dont le
+   contenu est plus haut qu elle deborde des DEUX cotes a la fois : les bascules
+   du rideau passaient par-dessus le recapitulatif, et les deux boutons du bas
+   etaient coupes net. Le volet de droite defile deja (.scene) — c est a lui de
+   defiler, pas au bloc de se comprimer. */
 .res{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:15rem;text-align:center;color:#8fa1b8}
+.res.garni{flex:0 0 auto;justify-content:flex-start;min-height:0}
 .res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
   border:1px solid rgba(255,255,255,.1)}
 .res .filig{margin-top:.5rem;font-size:.74rem;color:#facc15}
@@ -478,6 +514,18 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PRESET = '';       // cle d ambiance
   var PRESETS = [];      // [{cle,label,emoji,desc}]
   var RESULT = null;     // { image, essai, decorErreur, upNote, largeur, hauteur }
+  var FORM_MODE = 'recadrer'; // formats de sortie : recadrer (on coupe) ou marges
+  var FORMATS = [];      // [{cle,label,largeur,hauteur,image,ext,enreg}] deja fabriques
+  var FORM_OCC = false;  // fabrication en cours
+  /* Les quatre rapports demandes. ⚠ Ce sont des RAPPORTS, pas des tailles : on ne
+     redimensionne jamais vers le haut. Un 9:16 tire d une photo carree serait une
+     image inventee sur les cotes — on la borde, ou on coupe, jamais on n agrandit. */
+  var RATIOS = [
+    { cle: '3x4',  t: '3:4',  v: 3 / 4 },
+    { cle: '1x1',  t: '1:1',  v: 1 },
+    { cle: '4x5',  t: '4:5',  v: 4 / 5 },
+    { cle: '9x16', t: '9:16', v: 9 / 16 }
+  ];
   var CMP = true;        // volet de droite : rideau avant/apres, ou resultat seul
   var CMP_POS = 50;      // position du rideau, en pour-cent
   var RES_TEMOIN = false;// mode de controle : poser un resultat inerte (voir plus bas)
@@ -1310,6 +1358,192 @@ ${JS_ACTIVITE}${JS_DIRE}
           : '');
   }
 
+  /* ══ LES FORMATS DE SORTIE (lot 3b) ═══════════════════════════════════════
+     ⚠⚠ TOUT SE PASSE DANS LA PAGE. Couper et border une image qu on a deja ne
+     demande rien au service : la refaire produire en quatre cadrages coûterait
+     quatre appels facturés pour exactement les mêmes pixels. C est aussi pour ça
+     qu il n y a AUCUNE nouvelle opération de pont ici — seul l enregistrement en
+     passe une, et elle existait déjà (studio:enregistrer). */
+
+  /* ⚠ UNE IMAGE DÉTOURÉE EST TRANSPARENTE, et lui coller des marges blanches
+     détruirait précisément ce qu on a payé pour obtenir. On REGARDE donc l image
+     au lieu de demander à l écran ce qu il croit avoir demandé.
+     ⚠ DANS LE DOUTE, ON DIT TRANSPARENT. Si la lecture des pixels est refusée
+     (image d une autre origine), supposer « opaque » collerait du blanc sous un
+     détourage — irréversible. Supposer « transparent » donne au pire des marges
+     vides sur une photo : rien n est détruit, et le PNG garde tout. */
+  function estOpaque(im){
+    try {
+      var n = 64;
+      var w = Math.max(1, Math.min(n, im.naturalWidth || n));
+      var h = Math.max(1, Math.min(n, im.naturalHeight || n));
+      var c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      var x = c.getContext('2d');
+      x.drawImage(im, 0, 0, w, h);
+      var d = x.getImageData(0, 0, w, h).data;
+      for (var i = 3; i < d.length; i += 4) { if (d[i] < 250) return false; }
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* Une seule formule pour les deux gestes, et c est le signe des décalages qui
+     les sépare : en RECADRANT, le cadre est plus petit que l image, dx et dy sont
+     donc NÉGATIFS et l image déborde — c est la coupe. En BORDANT, le cadre est
+     plus grand, dx et dy sont positifs — c est la marge. Aucun agrandissement
+     dans un cas comme dans l autre. */
+  function fabriquerFormat(im, r, opaque){
+    var sw = im.naturalWidth, sh = im.naturalHeight;
+    if (!sw || !sh) return null;
+    var ow, oh;
+    if (FORM_MODE === 'marges') {
+      // Le plus petit cadre du rapport voulu qui CONTIENT toute l image.
+      if (sw / sh > r.v) { ow = sw; oh = Math.round(sw / r.v); }
+      else { oh = sh; ow = Math.round(sh * r.v); }
+    } else {
+      // Le plus grand cadre du rapport voulu qui TIENT dans l image.
+      if (sw / sh > r.v) { oh = sh; ow = Math.round(sh * r.v); }
+      else { ow = sw; oh = Math.round(sw / r.v); }
+    }
+    ow = Math.max(1, ow); oh = Math.max(1, oh);
+    var c = document.createElement('canvas');
+    c.width = ow; c.height = oh;
+    var x = c.getContext('2d');
+    if (opaque) { x.fillStyle = '#ffffff'; x.fillRect(0, 0, ow, oh); }
+    x.drawImage(im, Math.round((ow - sw) / 2), Math.round((oh - sh) / 2), sw, sh);
+    return { cle: r.cle, label: r.t, largeur: ow, hauteur: oh, enreg: false,
+             ext: opaque ? 'jpg' : 'png',
+             image: c.toDataURL(opaque ? 'image/jpeg' : 'image/png', 0.92) };
+  }
+
+  function preparerFormats(){
+    if (!RESULT || !RESULT.image || FORM_OCC || RO) return;
+    FORM_OCC = true; FORMATS = []; peindreResultat();
+    dire('Préparation des formats…');
+    var fini = function(msg, cl){ FORM_OCC = false; peindreResultat(); dire(msg, cl); };
+    /* ⚠ new Image() PEUT NE PAS EXISTER (banc de contrôle, contexte sans canevas).
+       On ne fait pas semblant que ça a marché : la liste reste vide et l écran le
+       dit. Une vignette manquante qu on prendrait pour un format prêt serait pire
+       qu un refus net. */
+    try {
+      var im = new Image();
+      im.onload = function(){
+        try {
+          var opaque = estOpaque(im);
+          var out = [];
+          for (var i = 0; i < RATIOS.length; i++) {
+            var f = fabriquerFormat(im, RATIOS[i], opaque);
+            if (f) out.push(f);
+          }
+          FORMATS = out;
+          fini(out.length
+            ? (out.length + ' formats prêts — aucun appel, aucun crédit.')
+            : 'Aucun format n’a pu être préparé.', out.length ? 'bon' : 'err');
+        } catch (e) {
+          FORMATS = [];
+          fini('Les formats n’ont pas pu être préparés (' + esc((e && e.message) || e) + ').', 'err');
+        }
+      };
+      im.onerror = function(){
+        FORMATS = [];
+        fini('L’image n’a pas pu être relue pour en tirer des formats.', 'err');
+      };
+      im.src = RESULT.image;
+    } catch (e) {
+      FORMATS = [];
+      fini('Les formats ne sont pas disponibles dans cette fenêtre.', 'err');
+    }
+  }
+
+  function nomFormat(f){ return 'studio-' + VOIE + '-' + PRESET + '-' + f.cle; }
+
+  function formatsHtml(){
+    if (!RESULT) return '';
+    var h = '<span class="rt">Formats de sortie</span>'
+      + '<div class="note">La même image en 3:4, 1:1, 4:5 et 9:16, préparés ici même — '
+      + '<strong>aucun appel, aucun crédit</strong>.</div>'
+      + '<div class="fbar">'
+      + '<button class="jeton' + (FORM_MODE === 'recadrer' ? ' on' : '') + '" data-fmode="recadrer">Recadrer</button>'
+      + '<button class="jeton' + (FORM_MODE === 'marges' ? ' on' : '') + '" data-fmode="marges">Marges</button>'
+      + '<button class="jeton prim grand" id="fmt-go"' + (FORM_OCC || RO ? ' disabled' : '') + '>'
+      + (FORM_OCC ? 'Préparation…' : (FORMATS.length ? '↻ Refaire les 4 formats' : '⚙ Préparer les 4 formats'))
+      + '</button></div>';
+    /* ⚠ CE QUE CHAQUE GESTE COÛTE VRAIMENT, DIT AVANT DE CLIQUER. Un recadrage
+       centré COUPE — sur une silhouette entière, le 1:1 emporte forcément le haut
+       et le bas. Le taire ferait découvrir la coupe une fois les quatre images
+       enregistrées dans la photothèque. */
+    h += '<div class="note">'
+      + (FORM_MODE === 'marges'
+          ? 'Rien n’est coupé : l’image entière est <strong>bordée</strong> jusqu’au format voulu. '
+            + 'Les marges sont <strong>blanches</strong> ; sur une image détourée (fond transparent) '
+            + 'elles restent transparentes, et le fichier sort en PNG.'
+          : 'Le recadrage est <strong>centré</strong> : sur une silhouette entière, le 1:1 et le 9:16 '
+            + 'emportent forcément du haut et du bas. Choisissez « Marges » pour ne rien perdre.')
+      + '</div>';
+    if (FORMATS.length) {
+      h += '<div class="fmtg">' + FORMATS.map(function(f){
+        return '<div class="fmtc"><img src="' + f.image + '" alt="' + esc(f.label) + '" loading="lazy">'
+          + '<span class="ft">' + esc(f.label) + '</span>'
+          + '<span class="fd">' + f.largeur + ' × ' + f.hauteur + '</span>'
+          + '<span class="fb">'
+          + '<button data-fdl="' + esc(f.cle) + '" title="Télécharger ce format">⤓</button>'
+          + '<button data-fsv="' + esc(f.cle) + '"' + (f.enreg ? ' disabled' : '')
+          + ' title="Enregistrer dans la photothèque">' + (f.enreg ? '✓' : '💾') + '</button>'
+          + '</span></div>';
+      }).join('') + '</div>'
+        + '<div class="fbar"><button class="prim" id="fmt-save-all"'
+        + (RO ? ' disabled' : '') + '>💾 Enregistrer les ' + FORMATS.length
+        + ' dans la photothèque</button></div>';
+    }
+    return h;
+  }
+
+  function formatParCle(c){
+    for (var i = 0; i < FORMATS.length; i++) { if (FORMATS[i].cle === c) return FORMATS[i]; }
+    return null;
+  }
+
+  /* Les quatre d un coup, EN SÉRIE : le pont porte une image à la fois, et quatre
+     envois simultanés d une photo de studio le feraient trébucher. */
+  function enregistrerTousFormats(){
+    if (!FORMATS.length || OCCUPE || RO) return;
+    occuper(true);
+    var i = 0, faits = 0, rate = 0;
+    var suite = function(){
+      if (i >= FORMATS.length) {
+        occuper(false);
+        peindreResultat();
+        dire(rate
+          ? (faits + ' format' + (faits > 1 ? 's' : '') + ' enregistré' + (faits > 1 ? 's' : '')
+             + ', ' + rate + ' en échec.')
+          : (faits + ' formats enregistrés dans la photothèque.'), rate ? 'att' : 'bon');
+        return;
+      }
+      var f = FORMATS[i]; i++;
+      if (f.enreg) { faits++; suite(); return; }
+      dire('Enregistrement ' + i + ' sur ' + FORMATS.length + ' — ' + f.label + '…');
+      appeler('studio:enregistrer', [{ image: f.image, nom: nomFormat(f) }]).then(function(r){
+        if (r && r.ok) { f.enreg = true; faits++; } else rate++;
+        suite();
+      });
+    };
+    suite();
+  }
+
+  function enregistrerUnFormat(f){
+    if (!f || f.enreg || OCCUPE || RO) return;
+    occuper(true);
+    dire('Enregistrement du format ' + f.label + '…');
+    appeler('studio:enregistrer', [{ image: f.image, nom: nomFormat(f) }]).then(function(r){
+      occuper(false);
+      if (r && r.ok) {
+        f.enreg = true;
+        peindreResultat();
+        dire('Format ' + f.label + ' enregistré dans la photothèque.', 'bon');
+      } else dire(expliquer(r), 'err');
+    });
+  }
+
   function resultatHtml(){
     if (!RESULT) {
       return '<div class="vide" style="padding:.2rem">L’image apparaîtra ici.</div>' + guideHtml();
@@ -1424,7 +1658,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     r.push(avanceHtml());
     corps.innerHTML = '<div class="rail">' + r.join('') + '</div>'
       + '<div class="scene">' + recapHtml()
-      + '<div class="bloc res" id="res">' + resultatHtml() + '</div></div>';
+      + '<div class="bloc res' + (RESULT ? ' garni' : '') + '" id="res">' + resultatHtml() + '</div>'
+      /* Le bloc est TOUJOURS posé, même vide et caché : sans lui, il n existerait
+         pas au moment où la première image arrive, et peindreResultat n aurait
+         rien à remplir — les formats ne paraîtraient qu au redessin suivant. */
+      + '<div class="bloc fmt" id="fmt"' + (RESULT ? '' : ' hidden') + '>'
+      + formatsHtml() + '</div></div>';
     brancher();
     majBoutons();
   }
@@ -1520,7 +1759,12 @@ ${JS_ACTIVITE}${JS_DIRE}
   function peindreResultat(){
     var res = document.getElementById('res');
     if (!res) { dessiner(); return; }
+    res.className = 'bloc res' + (RESULT ? ' garni' : '');
     res.innerHTML = resultatHtml();
+    // Le bloc des formats vit à côté du résultat, jamais dedans : le résultat est
+    // centré dans ce qui reste du volet, et une liste de vignettes s y battrait.
+    var fz = document.getElementById('fmt');
+    if (fz) { fz.hidden = !RESULT; fz.innerHTML = formatsHtml(); }
     brancherResultat();
   }
 
@@ -1534,6 +1778,36 @@ ${JS_ACTIVITE}${JS_DIRE}
     var c0 = document.getElementById('cmp-off');
     if (c0) c0.onclick = function(){ if (!CMP) return; CMP = false; peindreResultat(); };
     brancherComparateur();
+    brancherFormats();
+  }
+
+  function brancherFormats(){
+    corps.querySelectorAll('[data-fmode]').forEach(function(el){
+      el.onclick = function(){
+        var m = el.getAttribute('data-fmode');
+        if (m === FORM_MODE) return;
+        FORM_MODE = m;
+        /* ⚠ CHANGER DE GESTE INVALIDE CE QUI EST DÉJÀ FABRIQUÉ. Garder les
+           vignettes recadrées sous un bouton « Marges » allumé, ce serait montrer
+           quatre images qui ne correspondent plus au réglage affiché — et les
+           faire enregistrer telles quelles. On les refait, c est instantané. */
+        if (FORMATS.length) { preparerFormats(); return; }
+        peindreResultat();
+      };
+    });
+    var g = document.getElementById('fmt-go');
+    if (g) g.onclick = preparerFormats;
+    var sa = document.getElementById('fmt-save-all');
+    if (sa) sa.onclick = enregistrerTousFormats;
+    corps.querySelectorAll('[data-fdl]').forEach(function(el){
+      el.onclick = function(){
+        var f = formatParCle(el.getAttribute('data-fdl'));
+        if (f) telechargerImage(f.image, nomFormat(f) + '.' + f.ext);
+      };
+    });
+    corps.querySelectorAll('[data-fsv]').forEach(function(el){
+      el.onclick = function(){ enregistrerUnFormat(formatParCle(el.getAttribute('data-fsv'))); };
+    });
   }
 
   /* Le rideau. ⚠ POINTER EVENTS, jamais mousedown/mousemove : les deux entrees
@@ -2302,6 +2576,11 @@ ${JS_ACTIVITE}${JS_DIRE}
            photo en plein cadre : on croirait que le traitement n a rien fait —
            et l on relancerait, en payant une seconde fois. */
         CMP_POS = 50;
+        /* ⚠⚠ LES FORMATS DE L IMAGE PRÉCÉDENTE SONT JETÉS. Les garder afficherait
+           quatre vignettes de l ANCIENNE image sous la nouvelle, prêtes à être
+           enregistrées : on rangerait dans la photothèque un cadrage qui n a
+           jamais été demandé, sous le nom du bon. */
+        FORMATS = [];
         // peindreResultat redessine tout si le volet de droite n existe pas
         // (plein ecran) : sinon l image serait produite, facturee, et jamais vue.
         peindreResultat();
@@ -2327,15 +2606,20 @@ ${JS_ACTIVITE}${JS_DIRE}
     lancer(false);
   };
 
-  function telecharger(){
-    if (!RESULT || !RESULT.image) return;
+  function telechargerImage(source, nom){
+    if (!source) return;
     try {
       var a = document.createElement('a');
-      a.href = RESULT.image;
-      a.download = 'studio-' + VOIE + '-' + PRESET + '.png';
+      a.href = source;
+      a.download = nom;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       dire('Téléchargement lancé.', 'bon');
     } catch (e) { dire('Téléchargement impossible.', 'err'); }
+  }
+
+  function telecharger(){
+    if (!RESULT || !RESULT.image) return;
+    telechargerImage(RESULT.image, 'studio-' + VOIE + '-' + PRESET + '.png');
   }
 
   function chargerCredits(){
@@ -2382,6 +2666,17 @@ ${JS_ACTIVITE}${JS_DIRE}
                ignores: 'background.prompt,shadow.mode',
                upNote: 'Agrandissement ignoré : l’entrée dépasse 1000 px (témoin).',
                largeur: 1200, hauteur: 1600 };
+    /* ⚠ DEUX FORMATS TÉMOINS, DONT UN DÉJÀ ENREGISTRÉ. Les vignettes ne naissent
+       qu au CLIC sur « Préparer », et le banc ne clique pas ; et le canevas
+       n existe pas dans le contexte de contrôle, donc les fabriquer pour de vrai
+       est impossible. On pose donc la liste, seul état dont dépend le dessin —
+       les deux états du bouton d enregistrement compris. */
+    FORMATS = [
+      { cle: '3x4', label: '3:4', largeur: 1200, hauteur: 1600,
+        image: PIXEL, ext: 'jpg', enreg: false },
+      { cle: '1x1', label: '1:1', largeur: 1200, hauteur: 1200,
+        image: PIXEL, ext: 'png', enreg: true }
+    ];
     dessiner();
   }
 
