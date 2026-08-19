@@ -1557,8 +1557,17 @@ const OPS_PONT = new Set([
   // Studio ↔ photothèque : lister pour choisir, ouvrir depuis la photothèque,
   // enregistrer le résultat (import → dépôt R2).
   'studio:phototheque', 'studio:ouvrir', 'studio:enregistrer',
-  // Portraits persistants des mannequins (fabriques une fois, ranges dans R2).
-  'studio:modeles', 'studio:modeleGenerer', 'studio:modelesVider',
+  /* ⚠⚠ studio:modeles, studio:modeleGenerer et studio:modelesVider ONT ETE
+     RETIREES (3.50.0, a sa demande). ⚠ SANS GUILLEMETS DANS CE COMMENTAIRE, ET
+     C EST OBLIGATOIRE : le controle de parite extrait les chaines CITEES de ce
+     bloc, commentaires compris — les nommer entre apostrophes les ferait compter
+     comme encore declarees, et la parite echouerait sur un produit sain.
+     Elles servaient la galerie des seize
+     portraits de mannequins, disparue de l ecran le 2026-08-12 : la machinerie
+     etait restee injoignable derriere des boutons que plus rien ne dessinait.
+     Les seize images de R2 sont effacees par un menage unique (_purgerPortraits
+     dans pont.js) — il fallait le faire AVANT de jeter le code qui savait ou
+     elles etaient : personne ne balaie 'divers/'. */
   // Le filigrane (lot 3c) : la liste des logos EN PIXELS, et le collage lui-même.
   'studio:logos', 'studio:filigraner',
   // Les recettes de mise en scene (lot 3d) : une commande entiere rangee sous un
@@ -1969,9 +1978,6 @@ const LIMITES_PONT = {
   // touche a une image, donc pas de plafond de temps genereux ici.
   'studio:estimer': 20000, 'fal:plafondPoser': 20000,
   'studio:phototheque': 20000, 'studio:ouvrir': 8000, 'studio:enregistrer': 90000,
-  // ⚠ 'studio:modeleGenerer' = un traitement Photoroom PUIS un depot dans R2 :
-  // il tient du meme ordre de grandeur que 'studio:traiter', pas d une lecture.
-  'studio:modeles': 15000, 'studio:modeleGenerer': 300000, 'studio:modelesVider': 120000,
   /* ⚠ 'studio:logos' est GÉNÉREUX : il rapatrie jusqu'à quarante logos depuis R2,
      un par un. 'studio:filigraner' porte une photo de studio dans les deux sens —
      le même ordre de grandeur que l'enregistrement. */

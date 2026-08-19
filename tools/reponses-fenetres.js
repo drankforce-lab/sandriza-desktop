@@ -2204,10 +2204,6 @@ module.exports = {
     ] };
     const COMPTE = { ok: true, compte: { available: 842, subscription: 1000, plan: 'plus' },
       sandbox: { utilise: 37, quotaMois: 1000, quotaJour: 100, estime: true }, prixEdit: 0.10 };
-    const NOMS = ['sophia', 'emma', 'ava', 'zoe', 'maya', 'lena', 'julia', 'fiona',
-      'avery', 'taylor', 'kendall', 'casey', 'sam', 'jordan', 'jackson', 'reece'];
-    const VIGNETTES = {};
-    NOMS.forEach((n) => { VIGNETTES[n] = 'https://img.sandriza.com/divers/mod-' + n + '.jpg'; });
     /* L'EXPLORATEUR DE PHOTOS (#28). Le jeu porte des photos VARIÉES — une
        déjà traitée, une détourée, une liée à un produit, une en attente de
        téléversement — sans quoi ni les pastilles ni les filtres ne seraient
@@ -2286,26 +2282,12 @@ module.exports = {
         },
       },
       {
-        nom: 'portraits deja faits',
+        nom: 'ecran de depart',
         id: '',
         reponses: {
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
-          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
-        },
-      },
-      {
-        nom: 'aucun portrait',
-        id: 'vierge',
-        reponses: {
-          identite: IDENTITE,
-          'studio:presets': PRESETS,
-          'studio:compte': COMPTE,
-          'studio:modeles': { ok: true, vignettes: {}, ref: '', maj: '' },
-          'studio:modeleGenerer': { ok: true, modele: 'sophia',
-            vignette: 'https://img.sandriza.com/divers/mod-sophia.jpg', ref: 'ph_12' },
-          'studio:modelesVider': { ok: true, vignettes: {}, ref: '', maj: '' },
         },
       },
       /* LES RÉGLAGES AVANCÉS (lot 1 du #29). ⚠ Le panneau est REPLIÉ par défaut :
@@ -2318,7 +2300,6 @@ module.exports = {
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
-          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
         },
       },
       {
@@ -2332,7 +2313,6 @@ module.exports = {
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
-          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
         },
       },
       /* LE SUIVI DES LOTS. ⚠ Il ne s'atteint qu'au CLIC sur « Traitements », et
@@ -2348,7 +2328,6 @@ module.exports = {
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
-          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
           'lots:etat': {
             ok: true, peutModifier: true, actif: true,
             resume: { id: 'lot_1', nom: 'Collection automne', fait: 14, total: 500, enFile: 1 },
@@ -2406,7 +2385,6 @@ module.exports = {
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
-          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
           'studio:logos': { ok: true, logos: [
             { id: 'lg1', nom: 'Sandriza noir', image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' },
             { id: 'lg2', nom: 'Sandriza blanc', image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' },
@@ -2427,7 +2405,6 @@ module.exports = {
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
-          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
           'studio:recettes': RECETTES,
           'session:activite': { ok: true },
         },
@@ -2439,7 +2416,6 @@ module.exports = {
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
-          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
           'session:activite': { ok: true },
         },
       },

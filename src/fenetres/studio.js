@@ -324,35 +324,11 @@ body{background:#0e1522;color:#e8edf5;
    restent sur une seule quand il ne l est pas. C est auto-fill qui en decide,
    pas un nombre de colonnes ecrit en dur. */
 .amb{grid-template-columns:repeat(auto-fill,minmax(13rem,1fr))}
-/* Galerie de modèles — c'est la liste de CHOIX du mannequin, plus un menu texte.
-   ⚠ contain et non cover : on veut voir la SILHOUETTE ENTIÈRE (demande du
-   2026-08-11 : « je veux juste voir la forme du modèle et le corps aussi »).
-   cover avec object-position:top recadrait sur le visage — exactement ce
-   qu'il ne fallait pas montrer.
-   ⚠ AUCUN ACCENT GRAVE ICI : cette feuille vit dans un littéral de gabarit. */
-.mgal-info{font-size:.72rem;color:#8fa1b8;flex:1 1 12rem;min-width:0}
-.mgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.8rem,1fr));gap:.55rem;
-  align-content:start;max-height:24rem;overflow-y:auto;padding-right:.2rem}
-.mgrille::-webkit-scrollbar{width:8px}
-.mgrille::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.mvig{background:#0f1724;border:1px solid #2b3444;border-radius:9px;overflow:hidden;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;position:relative;
-  transition:border-color .12s,background .12s}
-.mvig:hover{border-color:rgba(201,169,126,.6);background:#121c2c}
-.mvig.on{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset;background:rgba(201,169,126,.1)}
-.mvig img{width:100%;height:9rem;object-fit:contain;background:#0b1220;padding:.15rem;display:block}
-.mvig .matt{height:9rem;display:flex;align-items:center;justify-content:center;
-  color:#5c6b80;font-size:.7rem;width:100%;background:#0b1220;text-align:center;padding:.3rem}
-.mvig .mnom{font-size:.72rem;font-weight:600;color:#cbd8e6;padding:.24rem .3rem;
-  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mvig.on .mnom{color:#e7d3b3}
-/* Pastille discrète : cette vignette montre VOTRE vêtement, pas le témoin. */
-.mvig .mtag{position:absolute;top:.25rem;right:.25rem;font-size:.6rem;line-height:1;
-  padding:.14rem .3rem;border-radius:5px;background:rgba(201,169,126,.9);color:#1a1208;font-weight:700}
-.mvig .mcoche{position:absolute;top:.25rem;left:.25rem;font-size:.7rem;line-height:1;
-  width:1.05rem;height:1.05rem;border-radius:50%;background:#c9a97e;color:#1a1208;
-  display:flex;align-items:center;justify-content:center;font-weight:700}
-.mbarre{display:flex;align-items:center;gap:.5rem;margin-top:.55rem;flex-wrap:wrap}
+/* ⚠ LA GALERIE DE MANNEQUINS ET SON HABILLAGE (.mgal-info, .mgrille, .mvig et
+   ses cinq enfants, .mbarre) ONT ETE RETIRES en 3.50.0, a sa demande. La galerie
+   avait quitte l ecran le 2026-08-12 — remplacee par un menu deroulant, parce
+   que les apercus par mannequin sortaient identiques et n aidaient pas au choix.
+   Le mannequin se choisit maintenant dans .duo / .ch, juste en dessous. */
 .ch{margin:.7rem 0 0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:#8fa1b8}
 select{width:100%;font:inherit;color:#e8edf5;background:#0f1724;border:1px solid #2b3444;
@@ -629,30 +605,23 @@ ${JS_ACTIVITE}${JS_DIRE}
   var CMP_POS = 50;      // position du rideau, en pour-cent
   var RES_TEMOIN = false;// mode de controle : poser un resultat inerte (voir plus bas)
   var ENREG = false;     // le resultat a-t-il ete enregistre dans la phototheque ?
-  // Galerie de modeles : apercus SANDBOX (gratuits) du vetement sur chaque modele,
-  // pour choisir AVANT de generer en pleine qualite.
   var MODELE_SEL = 'sophia'; // modele choisi (persiste entre les rendus)
-  var APM = {};              // cache : modele -> data URL de l apercu de VOTRE vetement
-  var APM_SIG = '';          // empreinte (photo+ambiance) pour invalider le cache
-  var COMPARE_STOP = false;  // demande d arret de la generation en cours
-  /* PORTRAITS PERSISTANTS : modele -> adresse R2. Fabriques UNE FOIS a partir d un
-     vetement temoin pris dans la phototheque, puis relus indefiniment.
-     ⚠ C EST TOUT L INTERET : << je ne veux pas payer un nouveau credit a chaque
-     fois que je consulte la liste >>. Rien ici ne rappelle Photoroom. */
-  var PORTRAITS = {};
-  var PORT_OCC = false;      // fabrication des portraits en cours
-  var PORT_STOP = false;     // demande d arret
-
+  /* ⚠ LES ETATS DE LA GALERIE DE MANNEQUINS (APM, APM_SIG, COMPARE_STOP,
+     PORTRAITS, PORT_OCC, PORT_STOP) ONT ETE RETIRES en 3.50.0, a sa demande. La
+     galerie avait disparu de l ecran le 2026-08-12 ; son moteur est parti avec.
+     Les seize images de R2 sont effacees par un menage unique cote site
+     (_purgerPortraits dans pont.js). */
   var VOIES = [
     { cle: 'humain',  em: '👗', t: 'Mannequin virtuel', d: 'Porté par un modèle, décor intégré' },
     { cle: 'fantome', em: '👻', t: 'Fantôme habillé',   d: 'Sans mannequin, décor pro ajouté' },
     { cle: 'plat',    em: '📦', t: 'Produit à plat',    d: 'Détourage + décor + ombre' }
   ];
-  // Quelques modèles (mannequin virtuel). Le relais accepte tout nom connu.
-  // Les 16 modeles REELS de Photoroom (virtualModel.model.preset.name, verifies
-  // dans la doc 2026-08-11). Sophia en tete = choix par defaut. Photoroom ne
-  // publie pas l apparence de chaque modele : le bouton << Comparer >> genere un
-  // apercu sandbox gratuit du VRAI vetement sur chacun pour choisir a l oeil.
+  /* Les 16 modeles REELS de Photoroom (virtualModel.model.preset.name, verifies
+     dans la doc 2026-08-11). Sophia en tete = choix par defaut.
+     ⚠ Photoroom ne publie l apparence d AUCUN de ses mannequins, et il n y a
+     plus de galerie pour la montrer : on avait fabrique seize portraits pour ca,
+     ils sortaient identiques et n aidaient pas au choix (retires le 2026-08-12).
+     Le nom suffit, et l apercu du vrai vetement est gratuit. */
   var MODELES = ['sophia','emma','ava','zoe','maya','lena','julia','fiona',
                  'avery','taylor','kendall','casey','sam','jordan','jackson','reece'];
 
@@ -1055,37 +1024,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     var x = POSES.filter(function(o){ return o.cle === p; })[0];
     return x ? x.t.replace(' (défaut)', '') : p;
   }
-  function sigActuelle(){
-    var p = PHOTO_ID || (PHOTO ? (PHOTO.length + ':' + PHOTO.slice(0, 40)) : '');
-    return p + '|' + PRESET;
-  }
-  function portraitsFaits(){
-    var n = 0;
-    for (var i = 0; i < MODELES.length; i++) { if (PORTRAITS[MODELES[i]]) n++; }
-    return n;
-  }
-  /* Ce qu on montre pour un mannequin, par ordre de preference :
-       1. l apercu de VOTRE vetement (le plus utile pour juger) ;
-       2. son portrait persistant (le temoin, relu de R2 — gratuit) ;
-       3. un carre d attente qui DIT ce qu il manque.
-     ⚠ Une seule grille pour les deux : deux listes cote a cote obligeaient a
-     choisir un mannequin dans l une en le regardant dans l autre. */
-  function vignetteHtml(m){
-    var mien = APM[m], port = PORTRAITS[m];
-    var vis;
-    if (mien)      vis = '<img src="' + mien + '" alt="' + esc(nomModele(m)) + '" loading="lazy">'
-                       + '<span class="mtag">votre photo</span>';
-    else if (port) vis = '<img src="' + esc(port) + '" alt="' + esc(nomModele(m)) + '" loading="lazy">';
-    else           vis = '<span class="matt">portrait<br>à venir</span>';
-    return '<div class="mvig' + (MODELE_SEL === m ? ' on' : '') + '" data-mod="' + esc(m) + '"'
-      + ' title="' + esc(nomModele(m)) + '">' + vis
-      + (MODELE_SEL === m ? '<span class="mcoche">✓</span>' : '')
-      + '<span class="mnom">' + esc(nomModele(m)) + '</span></div>';
-  }
-  function grilleModelesHtml(){
-    return '<div class="mgrille" id="mgrille">'
-      + MODELES.map(vignetteHtml).join('') + '</div>';
-  }
   function modeleHtml(){
     if (VOIE !== 'humain') return '';
     // ⚠ Retour au MENU DÉROULANT (demande du 2026-08-12) : la galerie de vignettes
@@ -1106,22 +1044,6 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'poses avant de dépenser un crédit.</div>';
     return h;
   }
-  // Redessine UNE vignette sans toucher au reste (on ne casse ni le défilement
-  // de la grille, ni le focus, pendant une fabrication qui dure).
-  function majVig(m){
-    var v = corps.querySelector('[data-mod="' + m + '"]');
-    if (!v) return;
-    var neuf = document.createElement('div');
-    neuf.innerHTML = vignetteHtml(m);
-    var rempl = neuf.firstChild;
-    if (rempl) { v.parentNode.replaceChild(rempl, v); brancherVignettes(); }
-  }
-  function brancherVignettes(){
-    corps.querySelectorAll('[data-mod]').forEach(function(el){
-      el.onclick = function(){ choisirModele(el.getAttribute('data-mod')); };
-    });
-  }
-
   function ambiancesHtml(){
     if (!PRESETS.length) return '<div class="vide">Aucune ambiance.</div>';
     return '<div class="tuiles amb">' + PRESETS.map(function(p){
@@ -2330,26 +2252,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       el.onclick = function(){ if (RO || OCCUPE) return; PRESET = el.getAttribute('data-preset'); dessiner(); };
     });
     var ps = document.getElementById('pose');
-    /* ⚠ La pose change ce que le rendu montre : le cache des apercus par modele
-       (APM) porte donc sur une pose donnee. On le vide, sinon la grille
-       garderait les silhouettes de l ancienne pose. */
     if (ps) ps.onchange = function(){
       POSE_SEL = ps.value;
-      APM = {}; APM_SIG = '';
       dessiner();
       dire('Pose : ' + (POSES.filter(function(p){ return p.cle === POSE_SEL; })[0] || {}).t + '.', 'att');
     };
     var msel = document.getElementById('modele-sel');
     if (msel) msel.onchange = function(){ choisirModele(msel.value); };
-    // Anciens boutons de galerie retirés (menu déroulant) ; gardes conservées au
-    // cas où un rendu partiel les ramènerait.
-    var bm = document.getElementById('b-mgen');
-    if (bm) bm.onclick = genererApercusModeles;
-    var bp = document.getElementById('b-port');
-    if (bp) bp.onclick = fabriquerPortraits;
-    var br = document.getElementById('b-port-refaire');
-    if (br) br.onclick = refairePortraits;
-    brancherVignettes();
     brancherAvance();
     brancherFiligrane();
     brancherResultat();
@@ -2466,98 +2375,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (av !== m) dire('Modèle : ' + nomModele(m) + '.', 'bon');
   }
 
-  /* ══ PORTRAITS PERSISTANTS ═════════════════════════════════════════════════
-     Un appel PAR mannequin (seize traitements d image dans un seul appel
-     depasseraient le delai du pont), et chaque portrait est depose dans R2 des
-     qu il est pret : si la fabrication est interrompue a mi-chemin, ce qui est
-     deja fait est deja garde. Rouvrir la fenetre ne refabrique QUE ce qui
-     manque — c est ce qui fait qu on ne repaye jamais pour regarder la liste. */
-  function fabriquerPortraits(){
-    if (PORT_OCC) { PORT_STOP = true; dire('Arrêt demandé…', 'att'); return; }
-    if (RO || OCCUPE) return;
-    var todo = MODELES.filter(function(m){ return !PORTRAITS[m]; });
-    if (!todo.length) { dire('Les portraits sont déjà là.', 'att'); return; }
-    PORT_OCC = true; PORT_STOP = false;
-    bApercu.disabled = true; bFinal.disabled = true;
-    dessiner();
-    var i = 0, echecs = 0;
-    function fini(msg, cl){
-      PORT_OCC = false; bApercu.disabled = RO; bFinal.disabled = RO;
-      dessiner(); majBoutons(); dire(msg, cl);
-    }
-    function suite(){
-      if (PORT_STOP) { fini('Arrêté — les portraits déjà faits sont gardés.', 'att'); return; }
-      if (i >= todo.length) {
-        fini(echecs ? ('Portraits prêts, sauf ' + echecs + '. Recliquez pour reprendre.')
-                    : 'Portraits prêts — cliquez celui qui vous plaît.',
-             echecs ? 'att' : 'bon');
-        return;
-      }
-      var m = todo[i]; i++;
-      dire('Portrait ' + i + '/' + todo.length + ' — ' + nomModele(m) + '…');
-      appeler('studio:modeleGenerer', [{ modele: m }]).then(function(r){
-        if (r && r.ok && r.vignette) { PORTRAITS[m] = r.vignette; majVig(m); }
-        else {
-          echecs++;
-          /* Un motif qui ne se corrigera pas tout seul arrête la série : enchaîner
-             quinze échecs identiques ne dit rien de plus que le premier. */
-          if (r && (r.motif === 'phototheque_vide' || r.motif === 'non_configure'
-                 || r.motif === 'droit' || r.motif === 'session')) {
-            fini(expliquer(r), 'err'); return;
-          }
-        }
-        suite();
-      });
-    }
-    suite();
-  }
-
-  function refairePortraits(){
-    if (PORT_OCC || RO || OCCUPE) return;
-    dire('Retrait des anciens portraits…');
-    appeler('studio:modelesVider').then(function(r){
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      PORTRAITS = {};
-      dessiner();
-      fabriquerPortraits();
-    });
-  }
-
-  // Génère (ou arrête) les aperçus SANDBOX du vêtement sur chaque modèle. Séquentiel
-  // (le pont porte une image à la fois), avec progression et arrêt.
-  var COMPARE_OCC = false;
-  function genererApercusModeles(){
-    if (COMPARE_OCC) { COMPARE_STOP = true; return; }   // 2e clic = Arrêter
-    if (RO || OCCUPE || !aUnePhoto()) return;
-    if (APM_SIG !== sigActuelle()) { APM = {}; APM_SIG = sigActuelle(); }
-    var todo = MODELES.filter(function(m){ return !APM[m]; });
-    if (!todo.length) { dire('Tous les aperçus sont déjà générés — cliquez un modèle.', 'att'); return; }
-    COMPARE_OCC = true; COMPARE_STOP = false;
-    bApercu.disabled = true; bFinal.disabled = true;
-    /* ⚠ LE LIBELLÉ NE VIT QU'À UN ENDROIT (modeleHtml). L'écrire aussi ici
-       remettait « Générer les aperçus » alors que le bouton s'appelle autrement
-       depuis la refonte — un bouton qui se contredit d'un clic à l'autre. */
-    var bm = document.getElementById('b-mgen'); if (bm) bm.textContent = 'Arrêter';
-    var i = 0;
-    function fini(msg, cl){
-      COMPARE_OCC = false; bApercu.disabled = RO; bFinal.disabled = RO;
-      dessiner(); majBoutons(); dire(msg, cl);
-    }
-    function suite(){
-      if (COMPARE_STOP) { fini('Arrêté.', 'att'); return; }
-      if (i >= todo.length) { fini('Aperçus prêts — cliquez le modèle qui vous plaît.', 'bon'); return; }
-      var m = todo[i]; i++;
-      dire('Aperçu ' + i + '/' + todo.length + ' — ' + nomModele(m) + '…');
-      var s = { geste: 'humain', preset: PRESET, apercu: true,
-                options: { modele: m, pose: POSE_SEL } };
-      if (PHOTO_ID) s.photoId = PHOTO_ID; else s.image = PHOTO;
-      appeler('studio:traiter', [s]).then(function(r){
-        if (r && r.ok && r.image) { APM[m] = r.image; majVig(m); }
-        suite();
-      });
-    }
-    suite();
-  }
+  /* ⚠ << fabriquerPortraits >>, << refairePortraits >> et
+     << genererApercusModeles >> ONT ETE RETIREES en 3.50.0, a sa demande. Elles
+     fabriquaient les seize portraits de mannequins et les apercus par modele,
+     pour une galerie disparue de l ecran le 2026-08-12 : leurs boutons
+     (b-port, b-port-refaire, b-mgen) n etaient plus dessines nulle part, donc ce
+     code parlait a Photoroom et deposait dans R2 sans que personne puisse le
+     declencher — ni l eprouver. */
 
   /* ⚠ LA PHOTO D INTÉRIEUR PART AVEC LA PHOTO. Elle est celle de CE vêtement
      retourné : gardée d un vêtement au suivant, elle ferait raccorder un col sur
@@ -3439,7 +3263,6 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (RES_TEMOIN) posterResultatTemoin();
       dire('');
       chargerCredits();
-      chargerPortraits();
       chargerLogos();
       chargerRecettes();
     });
@@ -3478,18 +3301,6 @@ ${JS_ACTIVITE}${JS_DIRE}
         image: PIXEL, ext: 'png', enreg: true }
     ];
     dessiner();
-  }
-
-  /* Les portraits déjà fabriqués : de simples ADRESSES relues de la base. Aucun
-     appel à Photoroom, aucun crédit — c'est exactement le but du rangement dans
-     R2. Si la lecture échoue, la grille reste utilisable (on peut toujours
-     choisir un mannequin par son nom) : on ne bloque pas l'écran pour ça. */
-  function chargerPortraits(){
-    appeler('studio:modeles').then(function(r){
-      if (!r || !r.ok) return;
-      PORTRAITS = r.vignettes || {};
-      if (VOIE === 'humain') dessiner();
-    });
   }
 
   /* ⚠ IDENTIFIANTS D OUVERTURE DES ONGLETS DE REGLAGES. Le panneau replie a
