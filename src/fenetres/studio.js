@@ -307,6 +307,39 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    a plus de mille pixels de son libelle. */
 .avint .nm{font-size:.76rem;color:#cbd8e6;min-width:0;flex:0 1 22rem;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ── COMPARATEUR AVANT / APRÈS (lot 3a) ────────────────────────────────────
+   Un rideau que l on tire sur l image : a gauche la photo de depart, a droite
+   ce que le service a rendu. C est la seule facon honnete de juger un
+   detourage, une relumiere ou une ombre — de tete, on ne se souvient pas de la
+   couleur d origine, et l on garde une retouche qui a deplace le bleu nuit.
+   ⚠ POINTER EVENTS et touch-action:none : son poste est une Surface, ecran
+   tactile ET souris. Un rideau qui ne repond qu a la souris ne s ouvre pas au
+   doigt (voir la regle des deux entrees). */
+.cmpb{display:flex;gap:.3rem;justify-content:center;margin-bottom:.55rem}
+.cmp{position:relative;display:inline-block;max-width:100%;line-height:0;
+  touch-action:none;-webkit-user-select:none;user-select:none;cursor:ew-resize}
+.cmp img{display:block;max-width:100%;max-height:min(56vh,31rem);border-radius:9px;
+  border:1px solid rgba(255,255,255,.1)}
+/* ⚠ La couche du DESSUS est l APRES, rognee par la GAUCHE : ce qui reste
+   visible a gauche est donc l avant, pose dessous. Un fond opaque, sinon un
+   detourage transparent laisserait voir la photo d origine au travers — et
+   l on croirait le detourage rate. */
+.cmp .cb{position:absolute;inset:0;overflow:hidden;background:#0b1220;border-radius:9px;
+  clip-path:inset(0 0 0 var(--x,50%))}
+.cmp .cb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+  max-height:none;border:0;border-radius:9px}
+.cmp .cpg{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;margin-left:-1px;
+  background:rgba(255,255,255,.9);box-shadow:0 0 6px rgba(0,0,0,.6)}
+.cmp .cpg:focus{outline:none}
+.cmp .cpg:focus-visible .cph{box-shadow:0 0 0 3px rgba(201,169,126,.75)}
+.cmp .cph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:1.9rem;height:1.9rem;border-radius:50%;background:#c9a97e;color:#1a1208;
+  display:flex;align-items:center;justify-content:center;font:700 .82rem/1 system-ui;
+  border:2px solid #fff}
+.cmp .cet{position:absolute;bottom:.5rem;font-size:.68rem;line-height:1;padding:.22rem .45rem;
+  border-radius:5px;background:rgba(8,12,20,.72);color:#cbd8e6;pointer-events:none}
+.cmp .cet.g{left:.5rem}
+.cmp .cet.d{right:.5rem}
 /* Résultat — il occupe tout ce qui reste du volet de droite. */
 .res{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:15rem;text-align:center;color:#8fa1b8}
@@ -370,6 +403,8 @@ function pageStudio(mode) {
   // Le panneau « Réglages avancés » : replié par défaut, donc invisible au banc.
   const avOuvre = String(mode || '').indexOf('avance') === 0;
   const avPlein = String(mode || '') === 'avance-plein';
+  // Le volet de droite garni : voir le commentaire au pied du script.
+  const resTemoin = String(mode || '') === 'resultat';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Studio virtuel — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -443,6 +478,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PRESET = '';       // cle d ambiance
   var PRESETS = [];      // [{cle,label,emoji,desc}]
   var RESULT = null;     // { image, essai, decorErreur, upNote, largeur, hauteur }
+  var CMP = true;        // volet de droite : rideau avant/apres, ou resultat seul
+  var CMP_POS = 50;      // position du rideau, en pour-cent
+  var RES_TEMOIN = false;// mode de controle : poser un resultat inerte (voir plus bas)
   var ENREG = false;     // le resultat a-t-il ete enregistre dans la phototheque ?
   // Galerie de modeles : apercus SANDBOX (gratuits) du vetement sur chaque modele,
   // pour choisir AVANT de generer en pleine qualite.
@@ -579,6 +617,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     { cle: 'ai.auto', t: 'Automatique — peut déplacer les couleurs' },
     { cle: 'ai.optimize-portrait', t: 'Optimiser un portrait — s’il y a un visage' }
   ];
+
+  // Une image d un pixel, transparente : le porteur du mode de contrôle.
+  var PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -1248,11 +1289,39 @@ ${JS_ACTIVITE}${JS_DIRE}
     return l.map(function(x){ return IGN_NOMS[x] || x; }).join(', ');
   }
 
+  /* La photo de DEPART, telle qu on peut la remontrer. ⚠ Venue de la
+     photothèque, on n a que sa VIGNETTE (PHOTO_URL = l apercu) : le rideau reste
+     un repere de cadrage et de couleur, pas un juge de nettete — et l ecran le
+     dit plutot que de laisser croire a une comparaison a definition egale. */
+  function photoAvant(){ return PHOTO || PHOTO_URL || ''; }
+
+  function comparateurHtml(av){
+    return '<div class="cmp" id="cmp" style="--x:' + CMP_POS.toFixed(2) + '%">'
+      + '<img src="' + esc(av) + '" alt="avant">'
+      + '<div class="cb"><img src="' + RESULT.image + '" alt="après"></div>'
+      + '<div class="cpg" id="cmp-p" role="slider" tabindex="0"'
+      + ' aria-label="Position du rideau entre l’avant et l’après"'
+      + ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(CMP_POS) + '">'
+      + '<span class="cph">⇔</span></div>'
+      + '<span class="cet g">Avant</span><span class="cet d">Après</span></div>'
+      + (!PHOTO && PHOTO_URL
+          ? '<div class="avis">L’« avant » est la vignette de la photothèque : un repère de '
+            + 'cadrage et de couleur, pas un juge de netteté.</div>'
+          : '');
+  }
+
   function resultatHtml(){
     if (!RESULT) {
       return '<div class="vide" style="padding:.2rem">L’image apparaîtra ici.</div>' + guideHtml();
     }
-    var h = '<img src="' + RESULT.image + '" alt="résultat">';
+    var av = photoAvant();
+    var h = '';
+    if (av) {
+      h += '<div class="cmpb">'
+        + '<button class="jeton' + (CMP ? ' on' : '') + '" id="cmp-on">⇔ Avant / après</button>'
+        + '<button class="jeton' + (CMP ? '' : ' on') + '" id="cmp-off">Résultat seul</button></div>';
+    }
+    h += (av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="résultat">');
     if (RESULT.essai) h += '<div class="filig">⚠ Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.</div>';
     if (RESULT.decorErreur) h += '<div class="filig">⚠ Le décor n’a pas pu être appliqué : ' + esc(RESULT.decorErreur) + '</div>';
     if (RESULT.ignores) h += '<div class="filig">⚠ Le service a <strong>ignoré</strong> : '
@@ -1440,10 +1509,73 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (br) br.onclick = refairePortraits;
     brancherVignettes();
     brancherAvance();
+    brancherResultat();
+  }
+
+  /* ⚠ UN SEUL ENDROIT QUI REPEINT LE RESULTAT, et un seul qui le rebranche. Le
+     volet se redessine par TROIS chemins (redessin complet, arrivee d une image,
+     bascule du rideau) : trois copies du cablage, c est la garantie qu un jour
+     l une d elles oubliera un bouton — le defaut exact qui avait laisse le
+     lanceur de lot mort pendant deux versions. */
+  function peindreResultat(){
+    var res = document.getElementById('res');
+    if (!res) { dessiner(); return; }
+    res.innerHTML = resultatHtml();
+    brancherResultat();
+  }
+
+  function brancherResultat(){
     var dl = document.getElementById('b-dl');
     if (dl && RESULT) dl.onclick = telecharger;
     var sv = document.getElementById('b-save');
     if (sv && RESULT) sv.onclick = enregistrerResultat;
+    var c1 = document.getElementById('cmp-on');
+    if (c1) c1.onclick = function(){ if (CMP) return; CMP = true; peindreResultat(); };
+    var c0 = document.getElementById('cmp-off');
+    if (c0) c0.onclick = function(){ if (!CMP) return; CMP = false; peindreResultat(); };
+    brancherComparateur();
+  }
+
+  /* Le rideau. ⚠ POINTER EVENTS, jamais mousedown/mousemove : les deux entrees
+     servent sur son poste. setPointerCapture garde le geste meme quand le doigt
+     sort de l image, et touch-action:none empeche le defilement de le voler. */
+  function brancherComparateur(){
+    var z = document.getElementById('cmp');
+    if (!z) return;
+    var pg = document.getElementById('cmp-p');
+    var tire = false;
+    var ecrire = function(){
+      z.style.setProperty('--x', CMP_POS.toFixed(2) + '%');
+      if (pg) pg.setAttribute('aria-valuenow', String(Math.round(CMP_POS)));
+    };
+    var poser = function(x){
+      var r = z.getBoundingClientRect();
+      if (!r.width) return;
+      CMP_POS = Math.max(0, Math.min(100, ((x - r.left) / r.width) * 100));
+      ecrire();
+    };
+    z.onpointerdown = function(e){
+      tire = true;
+      try { z.setPointerCapture(e.pointerId); } catch (x) {}
+      poser(e.clientX);
+      e.preventDefault();
+    };
+    z.onpointermove = function(e){ if (tire) poser(e.clientX); };
+    var fin = function(e){
+      tire = false;
+      try { z.releasePointerCapture(e.pointerId); } catch (x) {}
+    };
+    z.onpointerup = fin;
+    z.onpointercancel = fin;
+    // Au clavier : la poignee prend le focus, les fleches la deplacent.
+    if (pg) pg.onkeydown = function(e){
+      var d = (e.key === 'ArrowLeft' ? -4 : e.key === 'ArrowRight' ? 4
+             : e.key === 'Home' ? -100 : e.key === 'End' ? 100 : 0);
+      if (!d) return;
+      e.preventDefault();
+      CMP_POS = Math.max(0, Math.min(100, CMP_POS + d));
+      ecrire();
+    };
   }
 
   /* ⚠ ON NE REDESSINE PAS TOUT, et surtout on n arrete plus la fabrication en
@@ -2165,16 +2297,14 @@ ${JS_ACTIVITE}${JS_DIRE}
         RESULT = { image: r.image, essai: !!r.essai, decorErreur: r.decorErreur || '',
                    ignores: r.ignores || '',
                    upNote: r.upNote || '', largeur: r.largeur || 0, hauteur: r.hauteur || 0 };
-        var res = document.getElementById('res');
-        if (res) {
-          res.innerHTML = resultatHtml();
-          var dl = document.getElementById('b-dl'); if (dl) dl.onclick = telecharger;
-          var sv = document.getElementById('b-save'); if (sv) sv.onclick = enregistrerResultat;
-        } else {
-          // Le volet de droite n existait pas (plein ecran) : on redessine, sinon
-          // l image serait produite, facturee — et jamais montree.
-          dessiner();
-        }
+        /* ⚠ LE RIDEAU REVIENT AU MILIEU A CHAQUE NOUVELLE IMAGE. Laisse la ou
+           on l avait tire, un rideau pousse a fond a gauche montrerait l ANCIENNE
+           photo en plein cadre : on croirait que le traitement n a rien fait —
+           et l on relancerait, en payant une seconde fois. */
+        CMP_POS = 50;
+        // peindreResultat redessine tout si le volet de droite n existe pas
+        // (plein ecran) : sinon l image serait produite, facturee, et jamais vue.
+        peindreResultat();
         dire(apercu ? 'Aperçu prêt (gratuit).' : 'Image générée.', 'bon');
         if (!apercu) chargerCredits();
       } else {
@@ -2231,10 +2361,28 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       PRESETS = r.presets || [];
       dessiner();
+      if (RES_TEMOIN) posterResultatTemoin();
       dire('');
       chargerCredits();
       chargerPortraits();
     });
+  }
+
+  /* Le résultat témoin du mode de contrôle : une image d un pixel, aucun appel,
+     aucun crédit. Il allume EXPRÈS tous les avis (aperçu filigrané, décor
+     refusé, réglages ignorés, note d agrandissement) — sinon ces quatre lignes
+     ne seraient dessinées nulle part. */
+  function posterResultatTemoin(){
+    PHOTO = PIXEL;
+    PHOTO_NOM = 'photo témoin';
+    if (!PRESET) PRESET = (PRESETS[0] || {}).cle || '';
+    ENREG = false;
+    RESULT = { image: PIXEL, essai: true,
+               decorErreur: 'le décor n’a pas pu être appliqué (témoin)',
+               ignores: 'background.prompt,shadow.mode',
+               upNote: 'Agrandissement ignoré : l’entrée dépasse 1000 px (témoin).',
+               largeur: 1200, hauteur: 1600 };
+    dessiner();
   }
 
   /* Les portraits déjà fabriqués : de simples ADRESSES relues de la base. Aucun
@@ -2259,6 +2407,14 @@ ${JS_ACTIVITE}${JS_DIRE}
      vérifie. */
   if (${avOuvre ? 'true' : 'false'}) AV_OUV = true;
   if (${avPlein ? 'true' : 'false'}) { VOIE = 'fantome'; AV.ombreActive = true; AV.upActive = true; }
+  /* ⚠⚠ IDENTIFIANT D OUVERTURE << resultat >>. Tout le volet de droite garni — le
+     comparateur avant/apres, les avis du service, les dimensions, les deux
+     boutons — n existe qu APRES un vrai traitement, donc apres un CLIC et un
+     appel FACTURE. Le banc ne clique pas et ne paie pas : cette surface serait
+     restee hors de tout controle, exactement comme le lanceur de lot mort
+     pendant deux versions. Ce mode pose une photo temoin et un resultat temoin,
+     tous deux inertes (une image de 1 pixel). La coquille ne l ouvre jamais. */
+  if (${resTemoin ? 'true' : 'false'}) RES_TEMOIN = true;
   charger();
   lotsSuivre();
   chargerPanier();

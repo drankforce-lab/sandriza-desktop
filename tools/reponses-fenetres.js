@@ -2368,6 +2368,24 @@ module.exports = {
           'session:activite': { ok: true },
         },
       },
+      /* LE VOLET DU RÉSULTAT, GARNI (lot 3a). ⚠ Il n'existe qu'APRÈS un vrai
+         traitement — donc après un clic ET un appel facturé. Le banc ne clique
+         pas et ne paie pas : le comparateur avant/après, ses deux bascules, les
+         quatre avis du service (aperçu filigrané, décor refusé, réglages
+         ignorés, note d'agrandissement), les dimensions et les deux boutons
+         n'étaient dessinés dans AUCUN cas. Le mode « resultat » pose une photo
+         et un résultat témoins, tous deux inertes (une image d'un pixel). */
+      {
+        nom: 'volet du resultat, comparateur avant-apres',
+        id: 'resultat',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
+          'session:activite': { ok: true },
+        },
+      },
     ];
   })(),
 
