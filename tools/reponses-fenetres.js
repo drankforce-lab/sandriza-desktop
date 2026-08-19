@@ -2252,6 +2252,27 @@ module.exports = {
       fonds: ['studio', 'plage'],
       lots: [{ cle: 'lot_a', nom: 'Import du 12 août' }, { cle: 'lot_b', nom: 'Import du 14 août' }],
     };
+    /* ⚠ DEUX RECETTES, PAS UNE : avec une seule, on ne verrait pas que le menu
+       en liste plusieurs, et l avertissement d ecrasement ne se declenche que
+       sur un nom DEJA pris — il lui faut donc de quoi entrer en collision. */
+    const RECETTES = { ok: true, recettes: [
+      { id: 'rc_a', nom: 'Collection automne — plage dorée', maj: '2026-08-19T10:00:00Z',
+        r: { voie: 'fantome', preset: 'plage', modele: 'sophia', pose: '34turn',
+             formMode: 'recadrer',
+             av: { decor: '', sourire: true, extra: '', fondPrompt: 'warm sand, golden light',
+                   fondNegatif: '', fondGraine: '4242', ombreActive: true, ombreIntensite: 0.5,
+                   ombreDouceur: 0.6, ombreEtendue: 'medium', ombreDirection: 'frontleft',
+                   ombrePose: 'upright', lumiere: '', upActive: true, upMode: 'ai.fast' },
+             fil: { logoId: 'lg1', position: 'bd', taille: 18, opacite: 0.75, marge: 4 } } },
+      { id: 'rc_b', nom: 'Fiche produit — studio net', maj: '2026-08-18T09:00:00Z',
+        r: { voie: 'plat', preset: 'studio', modele: 'sophia', pose: '34turn',
+             formMode: 'marges',
+             av: { decor: '', sourire: true, extra: '', fondPrompt: '', fondNegatif: '',
+                   fondGraine: '', ombreActive: false, ombreIntensite: 0.4, ombreDouceur: 0.7,
+                   ombreEtendue: 'medium', ombreDirection: 'front', ombrePose: 'upright',
+                   lumiere: '', upActive: false, upMode: 'ai.fast' },
+             fil: { logoId: '', position: 'bd', taille: 20, opacite: 0.8, marge: 3 } } },
+    ] };
     return [
       {
         nom: 'explorateur de photos',
@@ -2390,6 +2411,24 @@ module.exports = {
             { id: 'lg1', nom: 'Sandriza noir', image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' },
             { id: 'lg2', nom: 'Sandriza blanc', image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' },
           ] },
+          'session:activite': { ok: true },
+        },
+      },
+      /* LES RECETTES (lot 3d). ⚠ La BARRE se voit dans tous les cas — elle n a
+         rien de replie —, mais le VOILE d enregistrement n existe qu apres un
+         clic sur « Enregistrer… », et le banc ne clique pas. C est pourtant la
+         que se decide un ECRASEMENT, donc une perte : le champ pre-rempli,
+         l avertissement « elle sera remplacee » et les deux boutons seraient
+         restes hors de tout controle. */
+      {
+        nom: 'recettes — barre garnie et voile d enregistrement',
+        id: 'recettes',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
+          'studio:recettes': RECETTES,
           'session:activite': { ok: true },
         },
       },

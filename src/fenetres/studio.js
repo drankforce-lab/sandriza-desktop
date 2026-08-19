@@ -68,17 +68,73 @@ body{background:#0e1522;color:#e8edf5;
    lots avec ses boutons. Les serrer dans le volet de gauche redonnerait
    exactement la compression qu on vient de retirer. */
 .corps.plein{display:block;overflow-y:auto}
-.rail{flex:0 0 clamp(21rem,40%,34rem);min-width:0;overflow-y:auto;padding-right:.35rem;
-  display:flex;flex-direction:column;gap:.8rem}
+.rail{flex:0 0 clamp(24rem,42%,36rem);min-width:0;min-height:0;
+  display:flex;flex-direction:column;gap:.7rem}
 .scene{flex:1 1 auto;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar,.rail::-webkit-scrollbar,.scene::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb,.rail::-webkit-scrollbar-thumb,
+.corps::-webkit-scrollbar,.scene::-webkit-scrollbar{width:8px}
+.corps::-webkit-scrollbar-thumb,
 .scene::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .74rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:#8fa1b8}
 .carte .sous{margin:0 0 .7rem;font-size:.75rem;color:#6d7f96}
+/* ── LA BARRE DES RECETTES (lot 3d du #29) ─────────────────────────────────
+   EN HAUT du volet de gauche, et volontairement FINE. Ce n est PAS une sixieme
+   etape : le volet en porte deja cinq, et une section de plus aurait pousse le
+   filigrane sous la ligne de flottaison — le defaut meme qu on vient de corriger
+   en separant les deux volets. Une recette n ajoute rien a la commande, elle
+   REMPLIT les cinq etapes d un coup : sa place est donc au-dessus d elles. */
+.rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;
+  background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  padding:.5rem .6rem}
+.rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:uppercase;
+  letter-spacing:.06em;color:#8fa1b8}
+.rcbar select{flex:1 1 auto;min-width:0;font-size:.78rem;padding:.3rem .45rem}
+.rcbar button{flex:0 0 auto;font:inherit;font-size:.73rem;padding:.3rem .55rem;
+  border-radius:8px;cursor:pointer;color:#cbd8e6;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.16)}
+.rcbar button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+.rcbar button:disabled{opacity:.4;cursor:default}
+.rcbar button.x{color:#e79a9a}
+/* L avertissement d ecrasement du voile d enregistrement. */
+.rcav{color:#d8b57a}
+/* ── LE VOLET DE GAUCHE EN ONGLETS (lot 3g du #29) ─────────────────────────
+   Sa demande : << au lieu d avoir une scroll bar, des onglets orientes vers la
+   gauche >>. Le volet ne defile donc plus DU TOUT : la bande d onglets tient a
+   l ecran, et seul le panneau du groupe ouvert peut deborder — un groupe a la
+   fois, c est justement ce qui l en empeche presque toujours.
+   ⚠ LES DEUX << min-height:0 >> NE SONT PAS DECORATIFS. Un enfant flex refuse par
+   defaut de retrecir sous la hauteur de son contenu : sans eux, le volet
+   repousse le pied de page hors de la fenetre et la barre de defilement qu on
+   vient de retirer revient par l autre bout. */
+.railc{flex:1 1 auto;min-height:0;display:flex;gap:.7rem}
+.onglets{flex:0 0 10.5rem;min-width:0;display:flex;flex-direction:column;gap:.25rem;
+  overflow-y:auto}
+.ong{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;
+  padding:.42rem .5rem;border-radius:9px;border:1px solid transparent;
+  background:transparent;color:#cbd8e6;cursor:pointer}
+.ong:hover:not(.on){background:rgba(255,255,255,.05)}
+.ong.on{background:#16202f;border-color:rgba(201,169,126,.45)}
+/* Les pastilles sont degrisees SUR L ONGLET OUVERT seulement : neuf emojis en
+   couleur cote a cote font une barre de jouet, pas un outil. */
+.ong .oi{flex:0 0 auto;font-size:.95rem;filter:grayscale(1) brightness(1.7);opacity:.85}
+.ong.on .oi{filter:none;opacity:1}
+.ong .ot{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.ong .ot b{font:600 .79rem/1.25 system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ong .oe{font-size:.68rem;color:#6d7f96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ong.on .oe{color:#8fa1b8}
+.ong .oc{flex:0 0 auto;color:#c9a97e;font-size:.8rem;font-weight:700}
+.panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
+  background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  padding:.85rem .95rem}
+.pnt{display:flex;align-items:center;gap:.55rem}
+.pnt .pi{font-size:1rem;filter:grayscale(1) brightness(1.7);opacity:.9}
+.pnt h2{margin:0;font:700 .95rem/1.2 Georgia,serif}
+.panneau .sous{margin:.28rem 0 .7rem;font-size:.74rem;color:#6d7f96;line-height:1.4}
+.onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
+.onglets::-webkit-scrollbar-thumb,.panneau::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.12);border-radius:8px}
 /* ── UNE ETAPE ─────────────────────────────────────────────────────────────
    Un numero qui devient une COCHE des que l etape est faite, un titre lisible,
    et a droite CE QUI A ETE CHOISI. On voit ou l on en est sans rien lire —
@@ -445,7 +501,14 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
 .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 @media (max-width:900px){
   .corps{flex-direction:column;overflow-y:auto}
-  .rail{flex:0 0 auto;overflow:visible;padding-right:0}
+  .rail{flex:0 0 auto;min-height:auto}
+  /* Trop etroit pour une bande verticale : les onglets passent au-dessus, en
+     bandeau qui se replie. Ils restent des onglets — un seul groupe s affiche. */
+  .railc{flex-direction:column;min-height:auto}
+  .onglets{flex:0 0 auto;flex-direction:row;flex-wrap:wrap;overflow:visible}
+  .onglets .ong{width:auto}
+  .onglets .oe{display:none}
+  .panneau{overflow:visible;min-height:auto}
   .scene{overflow:visible}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -462,8 +525,11 @@ function pageStudio(mode) {
   const avPlein = String(mode || '') === 'avance-plein';
   // Le volet de droite garni : voir le commentaire au pied du script.
   const resTemoin = String(mode || '') === 'resultat';
-  // Le filigrane : section repliee, donc invisible au banc sans cet identifiant.
+  // Le filigrane : un seul onglet est dessine a la fois, donc invisible au banc
+  // sans cet identifiant.
   const filTemoin = String(mode || '') === 'filigrane';
+  // Les recettes : la barre se voit toujours, le voile d enregistrement non.
+  const rcTemoin = String(mode || '') === 'recettes';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Studio virtuel — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -472,6 +538,7 @@ function pageStudio(mode) {
 <div class="ro" id="ro" hidden>Lecture seule : votre rôle ne permet pas de lancer de traitement.</div>
 <div class="corps plein" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
+  <button id="b-lot">⚙ Traiter en lot…</button>
   <button class="gratuit" id="b-apercu" disabled>Aperçu gratuit</button>
   <button class="prim" id="b-final" disabled>Générer en pleine qualité</button></div>
 <script>
@@ -509,6 +576,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var bApercu = document.getElementById('b-apercu');
   var bFinal = document.getElementById('b-final');
+  var bLot = document.getElementById('b-lot');
   var creditsEl = document.getElementById('credits');
   var RO = false, OCCUPE = false, ARME = false;
   var PHOTO = null;      // data URL d une photo importee (fichier), reduite
@@ -543,9 +611,14 @@ ${JS_ACTIVITE}${JS_DIRE}
      ecrite DEUX fois, dans deux depots, et au premier ajustement de marge
      l apercu de l ecran cesserait de correspondre au resultat du lot. On appelle
      donc studio:filigraner, qui partage son code avec le moteur de lots. */
-  var FIL_OUV = false;
   var LOGOS = [];        // [{id,nom,image}] — les logos EN PIXELS (studio:logos)
   var FIL = { logoId: '', position: 'bd', taille: 20, opacite: 0.8, marge: 3 };
+  /* Les valeurs de depart, mises de cote AVANT que quoi que ce soit y touche.
+     ⚠ Elles servent a APPLIQUER une recette : voir fusionner(). Une recette
+     ecrite avant l ajout d un reglage doit remettre ce reglage a son defaut, pas
+     le laisser a la valeur du rendu precedent — sinon la meme recette, appliquee
+     deux fois de suite, ne donne pas deux fois le meme resultat. */
+  var FIL_DEF = { logoId: '', position: 'bd', taille: 20, opacite: 0.8, marge: 3 };
   var POSITIONS = [
     { cle: 'hg', t: 'En haut à gauche' },  { cle: 'hc', t: 'En haut, au centre' },
     { cle: 'hd', t: 'En haut à droite' },  { cle: 'mg', t: 'Au milieu, à gauche' },
@@ -633,7 +706,6 @@ ${JS_ACTIVITE}${JS_DIRE}
 
      ⚠ L AGRANDISSEMENT est la seule exception : le relais l’applique en dernier,
      sur l’image sortie, quelle que soit la voie. */
-  var AV_OUV = false;
   var AV = {
     // Mannequin virtuel (options)
     decor: '',            // vide = le décor de l ambiance
@@ -645,6 +717,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     ombreEtendue: 'medium', ombreDirection: 'front', ombrePose: 'upright',
     lumiere: '',
     // Toutes les voies
+    upActive: false, upMode: 'ai.fast'
+  };
+  // Les valeurs de depart des reglages avances — meme role que FIL_DEF.
+  var AV_DEF = {
+    decor: '', sourire: true, extra: '',
+    fondPrompt: '', fondNegatif: '', fondGraine: '',
+    ombreActive: false, ombreIntensite: 0.4, ombreDouceur: 0.7,
+    ombreEtendue: 'medium', ombreDirection: 'front', ombrePose: 'upright',
+    lumiere: '',
     upActive: false, upMode: 'ai.fast'
   };
   /* La SECONDE prise de vue — le vêtement retourné. ⚠ FANTÔME SEULEMENT : le
@@ -772,6 +853,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     var pret = pretALancer() && !OCCUPE;
     bApercu.disabled = !pret;
     bFinal.disabled = !pret;
+    /* ⚠ LE LANCEUR DE LOT NE SUIT PAS LA MEME REGLE, et c est voulu : un lot ne
+       part pas de la photo ouverte a l ecran mais de photos choisies dans la
+       photothèque. L exiger prete a l ecran priverait du lot celui qui n a
+       justement pas ouvert de photo — le cas le plus courant. */
+    if (bLot) bLot.disabled = RO || OCCUPE;
     if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = 'Générer en pleine qualité'; }
   }
 
@@ -1152,8 +1238,26 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '"' + (RO ? ' disabled' : '') + '></div>';
   }
 
-  function avanceCorpsHtml(){
-    if (!AV_OUV) return '';
+  /* ══ LES GROUPES DE RÉGLAGES (lot 3g du #29) ═══════════════════════════════
+     Sa demande, mot pour mot : << au lieu d avoir une scroll bar, des onglets
+     orientes vers la gauche, professionnels, de style regroupement, et n
+     afficher que ces options >>.
+
+     ⚠⚠ LE PANNEAU << RÉGLAGES AVANCÉS >> N EXISTE PLUS COMME PANNEAU, et c est
+     un gain, pas une perte : replie par defaut, il cachait huit capacites
+     FACTURABLES derriere un clic que personne ne donnait. Ses reglages sont
+     maintenant des onglets a part entiere — Decor, Ombres, Lumiere, Interieur,
+     Agrandissement — donc visibles sans rien deplier, et eprouves par le banc
+     sans identifiant d ouverture special.
+
+     ⚠ LA REGLE DES VOIES NE CHANGE PAS, elle change seulement de support : un
+     groupe ne parait que si la voie l accepte. Le relais ne pose la finition
+     (fond decrit, ombre, relumiere) que sur le FANTOME et le PRODUIT A PLAT ; le
+     mannequin virtuel compose sa scene par << options >>. Un onglet << Ombres >>
+     sous un mannequin virtuel serait un mensonge d ecran : le reglage partirait,
+     serait ignore en silence, et l on chercherait la panne dans un resultat
+     qu on a paye.                                                            */
+  function avDecorHtml(){
     var h = [];
     if (VOIE === 'humain') {
       h.push('<div class="avsec prem">Mise en scène du mannequin</div>');
@@ -1190,9 +1294,14 @@ ${JS_ACTIVITE}${JS_DIRE}
         + ' value="' + esc(AV.fondGraine) + '" placeholder="vide = au hasard">'
         + '<div class="aidep">Un même nombre redonne le <strong>même décor</strong> : c’est ce qui garde '
         + 'une collection cohérente d’une photo à l’autre. Vide, chaque photo repart au hasard.</div></div>');
+    }
+    return '<div class="avgrille">' + h.join('') + '</div>';
+  }
 
-      h.push('<div class="avsec">Ombre portée</div>');
-      h.push('<label class="bascule avun"><input type="checkbox" id="av-ombre"'
+  function avOmbresHtml(){
+    var h = [];
+    h.push('<div class="avsec prem">Ombre portée</div>');
+    h.push('<label class="bascule avun"><input type="checkbox" id="av-ombre"'
         + (AV.ombreActive ? ' checked' : '') + (RO ? ' disabled' : '')
         + '> <span><strong>Régler l’ombre moi-même</strong><span class="d">Décochée, c’est l’ombre de '
         + 'l’ambiance qui s’applique. Cochée, <strong>vos réglages remplacent entièrement les '
@@ -1206,38 +1315,47 @@ ${JS_ACTIVITE}${JS_DIRE}
           [{ cle: 'upright', t: 'Debout, posé au sol (défaut)' }, { cle: 'flatlay', t: 'À plat, vu de dessus' }],
           AV.ombrePose, '« Debout » ancre le vêtement au sol pour qu’il ne flotte pas. Ne choisissez '
           + '« à plat » que si la photo est prise à la verticale, au-dessus du vêtement.'));
-      }
-
-      h.push('<div class="avsec">Relumière</div>');
-      h.push(chSel('av-lum', 'Accorder la lumière du sujet au décor', LUMIERES, AV.lumiere,
-        '« Préserver la teinte » garde la <strong>vraie couleur du tissu</strong> : c’est le seul choix sûr '
-        + 'quand on vend l’article sur sa couleur. « Automatique » éclaire mieux mais peut la déplacer — '
-        + 'un bleu nuit qui ressort bleu roi fait un retour.'));
-
-      if (VOIE === 'fantome') {
-        h.push('<div class="avsec">Photo de l’intérieur du vêtement</div>');
-        h.push('<div class="avun"><div class="aidep">Le studio photographie le vêtement à l’endroit, puis '
-          + '<strong>retourné</strong> ; le service raccorde les deux. C’est le <strong>seul chemin vers un '
-          + 'col qui ne soit pas inventé</strong> — sans elle, l’intérieur de l’encolure est imaginé par le '
-          + 'modèle.</div>'
-          + '<input type="file" id="av-int-f" hidden accept="image/*">'
-          + '<div class="avint">'
-          + (INTERIEUR ? '<img src="' + INTERIEUR + '" alt="intérieur du vêtement">' : '')
-          + '<span class="nm">' + (INTERIEUR ? esc(INTERIEUR_NOM || 'photo choisie')
-              : 'Aucune photo d’intérieur.') + '</span>'
-          + '<button id="av-int-b"' + (RO ? ' disabled' : '') + '>'
-          + (INTERIEUR ? 'Remplacer' : 'Choisir un fichier') + '</button>'
-          + (INTERIEUR ? '<button id="av-int-x"' + (RO ? ' disabled' : '') + '>Retirer</button>' : '')
-          + '</div>'
-          + '<div class="aidep att">⚠ Photoroom ne documente pas ce paramètre pour le retrait de '
-          + 'mannequin, et l’on ne fait pas semblant du contraire : s’il est ignoré, le service le signale '
-          + 'et l’écran vous le rapporte.</div>'
-          + '<div class="aidep att">⚠ Elle ne voyage <strong>pas</strong> avec un lot : là, l’intérieur '
-          + 'utilisé est celui déjà attaché à chaque photo dans la photothèque.</div></div>');
-      }
     }
+    return '<div class="avgrille">' + h.join('') + '</div>';
+  }
 
-    h.push('<div class="avsec">Agrandissement</div>');
+  function avLumiereHtml(){
+    var h = [];
+    h.push('<div class="avsec prem">Relumière</div>');
+    h.push(chSel('av-lum', 'Accorder la lumière du sujet au décor', LUMIERES, AV.lumiere,
+      '« Préserver la teinte » garde la <strong>vraie couleur du tissu</strong> : c’est le seul choix sûr '
+      + 'quand on vend l’article sur sa couleur. « Automatique » éclaire mieux mais peut la déplacer — '
+      + 'un bleu nuit qui ressort bleu roi fait un retour.'));
+    return '<div class="avgrille">' + h.join('') + '</div>';
+  }
+
+  function avInterieurHtml(){
+    var h = [];
+    h.push('<div class="avsec prem">Photo de l’intérieur du vêtement</div>');
+    h.push('<div class="avun"><div class="aidep">Le studio photographie le vêtement à l’endroit, puis '
+      + '<strong>retourné</strong> ; le service raccorde les deux. C’est le <strong>seul chemin vers un '
+      + 'col qui ne soit pas inventé</strong> — sans elle, l’intérieur de l’encolure est imaginé par le '
+      + 'modèle.</div>'
+      + '<input type="file" id="av-int-f" hidden accept="image/*">'
+      + '<div class="avint">'
+      + (INTERIEUR ? '<img src="' + INTERIEUR + '" alt="intérieur du vêtement">' : '')
+      + '<span class="nm">' + (INTERIEUR ? esc(INTERIEUR_NOM || 'photo choisie')
+      : 'Aucune photo d’intérieur.') + '</span>'
+      + '<button id="av-int-b"' + (RO ? ' disabled' : '') + '>'
+      + (INTERIEUR ? 'Remplacer' : 'Choisir un fichier') + '</button>'
+      + (INTERIEUR ? '<button id="av-int-x"' + (RO ? ' disabled' : '') + '>Retirer</button>' : '')
+      + '</div>'
+      + '<div class="aidep att">⚠ Photoroom ne documente pas ce paramètre pour le retrait de '
+      + 'mannequin, et l’on ne fait pas semblant du contraire : s’il est ignoré, le service le signale '
+      + 'et l’écran vous le rapporte.</div>'
+      + '<div class="aidep att">⚠ Elle ne voyage <strong>pas</strong> avec un lot : là, l’intérieur '
+      + 'utilisé est celui déjà attaché à chaque photo dans la photothèque.</div></div>');
+    return '<div class="avgrille">' + h.join('') + '</div>';
+  }
+
+  function avAgrandirHtml(){
+    var h = [];
+    h.push('<div class="avsec prem">Agrandissement</div>');
     h.push('<label class="bascule avun"><input type="checkbox" id="av-up"'
       + (AV.upActive ? ' checked' : '') + (RO ? ' disabled' : '')
       + '> <span><strong>Agrandir ×4</strong><span class="d">Un appel de plus, facturé, après le '
@@ -1276,7 +1394,6 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function filigraneCorpsHtml(){
-    if (!FIL_OUV) return '';
     if (!LOGOS.length) {
       return '<div class="avgrille"><div class="aidep att">Aucun logo dans la logothèque. '
         + 'Ajoutez-en un dans <strong>Configuration ▸ Logothèque</strong>, puis rouvrez cet écran.'
@@ -1315,38 +1432,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h + '</div>';
   }
 
-  function filigraneHtml(){
-    var lg = logoChoisi();
-    var etat = lg ? (lg.nom + ' · ' + nomPosition(FIL.position)) : 'Aucun';
-    return '<section class="etape">'
-      + '<div class="eth"><span class="num">5</span><h2>Filigrane</h2>'
-      + '<span class="etat' + (lg ? ' on' : '') + '" id="fil-etat">' + esc(etat) + '</span></div>'
-      + '<p class="sous">Le logo de la marque, posé sur l’image. Aucun appel, aucun crédit.</p>'
-      + '<div class="etc"><div class="avbar"><button id="fil-bascule">'
-      + (FIL_OUV ? '▾ Masquer' : '▸ Afficher') + ' le filigrane</button></div>'
-      + '<div id="fil-zone">' + filigraneCorpsHtml() + '</div></div></section>';
-  }
-
-  // Ne repeint QUE la section : un redessin complet perdrait le défilement du
-  // volet et le focus de la glissière qu on est en train de tirer.
-  function majFiligrane(){
-    var z = document.getElementById('fil-zone');
-    if (!z) { dessiner(); return; }
-    z.innerHTML = filigraneCorpsHtml();
-    var e = document.getElementById('fil-etat');
-    if (e) {
-      var lg = logoChoisi();
-      e.textContent = lg ? (lg.nom + ' · ' + nomPosition(FIL.position)) : 'Aucun';
-      e.className = 'etat' + (lg ? ' on' : '');
-    }
-    var b = document.getElementById('fil-bascule');
-    if (b) b.textContent = (FIL_OUV ? '▾ Masquer' : '▸ Afficher') + ' le filigrane';
-    brancherFiligrane();
-  }
+  // Le filigrane est devenu un ONGLET (lot 3g) : il n a plus de section repliée
+  // ni de zone à lui, il se repeint comme les huit autres.
+  function majFiligrane(){ majPanneau(); }
 
   function brancherFiligrane(){
-    var b = document.getElementById('fil-bascule');
-    if (b) b.onclick = function(){ FIL_OUV = !FIL_OUV; majFiligrane(); };
     corps.querySelectorAll('[data-logo]').forEach(function(el){
       el.onclick = function(){
         var id = el.getAttribute('data-logo');
@@ -1419,45 +1509,385 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('studio:logos', []).then(function(r){
       if (!r || !r.ok) return;          // pas de logos : la section le dira
       LOGOS = r.logos || [];
-      if (FIL_OUV) majFiligrane();
+      // La logotheque arrive apres coup : si l onglet du filigrane est ouvert,
+      // il montre encore << aucun logo >> — on le repeint.
+      if (ONGLET === 'filigrane') majPanneau(); else majAvResume();
     });
   }
 
-  function avanceHtml(){
-    var r = resumeAvance(VOIE);
-    return '<section class="etape">'
-      + '<div class="eth"><span class="num">4</span><h2>Réglages avancés</h2>'
-      + '<span class="etat' + (r ? ' on' : '') + '" id="av-resume">'
-      + (r ? esc(r) : 'Facultatif') + '</span></div>'
-      + '<p class="sous">L’ambiance suffit dans la plupart des cas. Le panneau ne montre que '
-      + 'ce que la voie choisie accepte vraiment.</p>'
-      + '<div class="etc"><div class="avbar"><button id="av-bascule">'
-      + (AV_OUV ? '▾ Masquer' : '▸ Afficher') + ' les réglages avancés</button></div>'
-      + '<div id="av-zone">' + avanceCorpsHtml() + '</div></div></section>';
+  /* ══ LA BANDE D ONGLETS DU VOLET DE GAUCHE (lot 3g du #29) ═════════════════
+     Neuf groupes au plus, un seul affiche a la fois, et RIEN a faire defiler :
+     c est la demande. Chaque onglet dit a sa droite ce qu il a recu — la coche
+     qui vivait sur le numero de l etape a demenage ici, sans quoi il faudrait
+     ouvrir les neuf pour savoir ou l on en est.
+
+     ⚠ << Formats >> n est PAS un onglet : il vit dans le volet de DROITE, avec
+     le resultat dont il est tire. Le mettre a gauche le separerait de l image
+     qu il decoupe. */
+  var ONGLET = 'photo';
+  var ONGLETS = [
+    { cle: 'photo',     em: '📷', t: 'Photo',          voies: '*' },
+    { cle: 'valeur',    em: '👗', t: 'Mise en valeur', voies: '*' },
+    { cle: 'ambiance',  em: '🎨', t: 'Ambiance',       voies: '*' },
+    { cle: 'decor',     em: '🖼', t: 'Décor',          voies: '*' },
+    { cle: 'ombres',    em: '🌑', t: 'Ombres',         voies: 'fantome,plat' },
+    { cle: 'lumiere',   em: '💡', t: 'Lumière',        voies: 'fantome,plat' },
+    { cle: 'interieur', em: '🧥', t: 'Intérieur',      voies: 'fantome' },
+    { cle: 'agrandir',  em: '🔍', t: 'Agrandissement', voies: '*' },
+    { cle: 'filigrane', em: '💧', t: 'Filigrane',      voies: '*' }
+  ];
+  function ongletsDispo(){
+    return ONGLETS.filter(function(o){
+      return o.voies === '*' || o.voies.split(',').indexOf(VOIE) >= 0;
+    });
+  }
+  /* ⚠ L ONGLET COURANT PEUT DISPARAITRE SOUS LE PIED. On regle l ombre, on
+     repasse au mannequin virtuel : << Ombres >> n existe plus dans cette voie.
+     Sans ce repli, le volet resterait VIDE et l on croirait l ecran casse. */
+  function ongletSur(){
+    var d = ongletsDispo();
+    for (var i = 0; i < d.length; i++) { if (d[i].cle === ONGLET) return d[i]; }
+    ONGLET = d[0].cle;
+    return d[0];
+  }
+  // Ce que l onglet a recu, dit SUR l onglet. Vide = rien de choisi.
+  function ongletEtat(cle){
+    if (cle === 'photo')     return aUnePhoto() ? (PHOTO_NOM || 'photo prête') : '';
+    if (cle === 'valeur')    return nomVoie(VOIE);
+    if (cle === 'ambiance')  return PRESET ? nomPreset(PRESET) : '';
+    if (cle === 'decor')     return (VOIE === 'humain')
+      ? (AV.decor ? nomDecor(AV.decor) : '')
+      : (String(AV.fondPrompt || '').trim() ? 'décrit au texte' : '');
+    if (cle === 'ombres')    return AV.ombreActive ? 'réglée à la main' : '';
+    if (cle === 'lumiere')   return AV.lumiere ? 'active' : '';
+    if (cle === 'interieur') return INTERIEUR ? (INTERIEUR_NOM || 'photo choisie') : '';
+    if (cle === 'agrandir')  return AV.upActive ? '×4' : '';
+    if (cle === 'filigrane') { var l = logoChoisi(); return l ? l.nom : ''; }
+    return '';
+  }
+  /* Les trois onglets qu il FAUT remplir pour lancer quoi que ce soit. Les six
+     autres sont facultatifs : leur coller une coche voudrait dire << il manque
+     quelque chose >> tant qu on n y a pas touche, ce qui est faux. */
+  function ongletRequis(cle){ return cle === 'photo' || cle === 'ambiance'; }
+  function ongletsHtml(){
+    var courant = ongletSur().cle;
+    return ongletsDispo().map(function(o){
+      var e = ongletEtat(o.cle);
+      var ok = ongletRequis(o.cle) ? !!e : false;
+      return '<button class="ong' + (o.cle === courant ? ' on' : '') + '" data-ong="' + o.cle
+        + '" role="tab" aria-selected="' + (o.cle === courant ? 'true' : 'false') + '">'
+        + '<span class="oi">' + o.em + '</span>'
+        + '<span class="ot"><b>' + esc(o.t) + '</b>'
+        + '<span class="oe">' + esc(e || (ongletRequis(o.cle) ? 'À choisir' : '—')) + '</span></span>'
+        + (ok ? '<span class="oc">✓</span>' : '') + '</button>';
+    }).join('');
+  }
+  // Le contenu du groupe affiché, et lui seul.
+  function panneauHtml(){
+    var o = ongletSur();
+    var corpsG = '';
+    if (o.cle === 'photo')     corpsG = photoHtml();
+    else if (o.cle === 'valeur') corpsG = '<div class="tuiles">' + voiesHtml() + '</div>' + modeleHtml();
+    else if (o.cle === 'ambiance')  corpsG = ambiancesHtml();
+    else if (o.cle === 'decor')     corpsG = avDecorHtml();
+    else if (o.cle === 'ombres')    corpsG = avOmbresHtml();
+    else if (o.cle === 'lumiere')   corpsG = avLumiereHtml();
+    else if (o.cle === 'interieur') corpsG = avInterieurHtml();
+    else if (o.cle === 'agrandir')  corpsG = avAgrandirHtml();
+    else if (o.cle === 'filigrane') corpsG = filigraneCorpsHtml();
+    return '<div class="pnt"><span class="pi">' + o.em + '</span><h2>' + esc(o.t) + '</h2></div>'
+      + '<p class="sous">' + panneauSousHtml(o.cle) + '</p>'
+      + '<div class="pnc">' + corpsG + '</div>';
+  }
+  function panneauSousHtml(cle){
+    if (cle === 'photo')     return 'Celle de départ, prise en studio sur fond blanc.';
+    if (cle === 'valeur')    return 'Comment le vêtement est présenté.';
+    if (cle === 'ambiance')  return 'Un clic règle décor, ombre ancrée et lumière.';
+    if (cle === 'decor')     return 'Ce qu’il y a derrière le vêtement. Facultatif : l’ambiance en pose déjà un.';
+    if (cle === 'ombres')    return 'Facultatif : sans réglage, c’est l’ombre de l’ambiance qui s’applique.';
+    if (cle === 'lumiere')   return 'Facultatif : accorder la lumière du sujet à celle du décor.';
+    if (cle === 'interieur') return 'La seconde prise de vue, vêtement retourné — le seul col qui ne soit pas inventé.';
+    if (cle === 'agrandir')  return 'Facultatif, et <strong>facturé un appel de plus</strong>.';
+    if (cle === 'filigrane') return 'Le logo de la marque, posé sur l’image. Aucun appel, aucun crédit.';
+    return '';
+  }
+  /* Repeindre le SEUL panneau, jamais toute la fenêtre : un redessin complet
+     perdrait la grille de photos, son défilement et le focus de la saisie ou de
+     la glissière en cours. La bande d onglets se repeint avec, parce que ce
+     qu on vient de régler s y affiche. */
+  function majPanneau(){
+    var z = document.getElementById('panneau');
+    if (!z) { dessiner(); return; }
+    z.innerHTML = panneauHtml();
+    var b = document.getElementById('onglets');
+    if (b) b.innerHTML = ongletsHtml();
+    brancher();
+    majBoutons();
+  }
+  function majAvance(){ majPanneau(); }
+  /* ⚠⚠ CELLE-CI NE TOUCHE PAS AU PANNEAU, ET C EST TOUT SON INTERET. Elle est
+     appelee A CHAQUE FRAPPE dans les champs de texte (decor decrit, precisions
+     libres, graine) : repeindre le panneau la remplacerait par un champ neuf, et
+     le curseur repartirait au debut a chaque lettre. Seule la bande d onglets se
+     redessine — elle ne detient aucun focus. */
+  function majAvResume(){
+    var b = document.getElementById('onglets');
+    if (b) b.innerHTML = ongletsHtml();
+    brancherOnglets();
+  }
+  function brancherOnglets(){
+    corps.querySelectorAll('[data-ong]').forEach(function(el){
+      el.onclick = function(){
+        if (OCCUPE) return;   // pendant un traitement, changer d onglet n a pas de sens
+        ONGLET = el.getAttribute('data-ong');
+        majPanneau();
+      };
+    });
   }
 
-  // Ne repeint QUE le panneau : un redessin complet perdrait la grille de
-  // photos, son défilement et le focus de la saisie en cours.
-  function majAvance(){
-    var z = document.getElementById('av-zone');
-    if (!z) { dessiner(); return; }
-    z.innerHTML = avanceCorpsHtml();
-    brancherAvance();
-    majAvResume();
+  /* ══ LES RECETTES DE MISE EN SCÈNE (lot 3d du #29) ═════════════════════════
+     Sa demande : << enregistrer des presets d option, les nommer, les reutiliser
+     [...] s assurer de prendre TOUTES les options dans les presets, incluant les
+     options avancees, je dis vraiment tout >>.
+
+     Une recette, c est donc la commande ENTIERE rangee sous un nom : la voie,
+     l ambiance, le mannequin, la pose, les huit reglages avances, le filigrane
+     et le format de sortie. La choisir remplit les neuf onglets d un coup —
+     c est ca, << accelerer le traitement >> : moins de gestes avant de lancer,
+     pas un appel plus rapide (le temps de rendu appartient au service).
+
+     ⚠⚠ UNE RECETTE NE CONTIENT AUCUNE IMAGE — ni la photo de depart, ni la photo
+     d INTERIEUR du fantome. Cette derniere est la seconde prise de vue d UN
+     vetement precis : rangee dans une recette, elle raccorderait le col d une
+     robe sur un manteau, cinq cents fois, et les cinq cents seraient facturees.
+     Le pont refuse d ailleurs tout ce qui n est pas explicitement prevu. */
+  var RECETTES = [];   // [{id,nom,maj,r}] — telles que le pont les rend
+  var RC_SEL = '';     // identifiant de la recette appliquee, '' = aucune
+  var RC_VOILE_DEP = false;  // identifiant d ouverture du banc — voir le pied du script
+
+  function recetteChoisie(){
+    for (var i = 0; i < RECETTES.length; i++) { if (RECETTES[i].id === RC_SEL) return RECETTES[i]; }
+    return null;
   }
-  function majAvResume(){
-    var el = document.getElementById('av-resume');
-    if (!el) return;
-    var r = resumeAvance(VOIE);
-    el.textContent = r || 'Facultatif';
-    el.className = 'etat' + (r ? ' on' : '');
+  function recettesHtml(){
+    var x = recetteChoisie();
+    return '<div class="rcbar" id="rcbar">'
+      + '<label for="rc-sel">Recette</label>'
+      + '<select id="rc-sel"' + (RO ? ' disabled' : '') + '>'
+      + '<option value="">— Aucune —</option>'
+      + RECETTES.map(function(o){
+          return '<option value="' + esc(o.id) + '"' + (RC_SEL === o.id ? ' selected' : '')
+            + '>' + esc(o.nom) + '</option>'; }).join('')
+      + '</select>'
+      + '<button id="rc-enr"' + (RO ? ' disabled' : '')
+      + ' title="Enregistrer tous les réglages actuels sous un nom">💾 Enregistrer…</button>'
+      + '<button class="x" id="rc-sup"' + ((RO || !x) ? ' disabled' : '')
+      + ' title="Retirer cette recette">✕</button></div>';
+  }
+  function brancherRecettes(){
+    var s = document.getElementById('rc-sel');
+    if (s) s.onchange = function(){ appliquerRecette(s.value); };
+    var e = document.getElementById('rc-enr');
+    if (e) e.onclick = ouvrirRecetteVoile;
+    var x = document.getElementById('rc-sup');
+    if (x) x.onclick = retirerRecette;
+  }
+
+  /* On repart des DEFAUTS, puis l on pose ce que la recette porte.
+     ⚠ SANS LE RETOUR AUX DEFAUTS, une recette ecrite avant l ajout d un reglage
+     laisserait ce reglage a la valeur du rendu PRECEDENT : la meme recette,
+     appliquee deux fois de suite, ne donnerait pas deux fois le meme resultat —
+     et l on paierait la difference sans comprendre d ou elle vient.
+     ⚠ Le controle de TYPE ecarte une valeur venue d une version qui ne compte
+     plus pareil (un nombre devenu texte) plutot que de la transmettre au relais,
+     qui la refuserait au milieu d un lot de cinq cents. */
+  function fusionner(defauts, sauve){
+    var o = {};
+    Object.keys(defauts).forEach(function(k){ o[k] = defauts[k]; });
+    if (sauve && typeof sauve === 'object') {
+      Object.keys(o).forEach(function(k){
+        if (sauve[k] !== undefined && typeof sauve[k] === typeof o[k]) o[k] = sauve[k];
+      });
+    }
+    return o;
+  }
+
+  /* ⚠⚠ UNE RECETTE QUI CITE CE QUI N EXISTE PLUS DOIT LE DIRE. Une ambiance
+     retiree de la liste, un logo sorti de la logotheque : appliquer les onze
+     autres reglages en silence donnerait un ecran qui a l air juste et un rendu
+     qui ne l est pas — et c est un rendu qu on PAIE, parfois cinq cents fois. On
+     applique donc tout le reste, on laisse le manquant a son defaut, et ON LE
+     NOMME. */
+  function appliquerRecette(id){
+    RC_SEL = String(id || '');
+    var x = recetteChoisie();
+    if (!x) { dessiner(); dire('Aucune recette appliquée — les réglages sont ceux de l’écran.', 'att'); return; }
+    var r = x.r || {};
+    var perdus = [];
+    if (r.voie && estVoie(r.voie)) VOIE = r.voie;
+    if (r.modele && MODELES.indexOf(r.modele) >= 0) MODELE_SEL = r.modele;
+    if (r.pose && POSES.filter(function(p){ return p.cle === r.pose; }).length) POSE_SEL = r.pose;
+    if (r.formMode === 'recadrer' || r.formMode === 'marges') FORM_MODE = r.formMode;
+    if (r.preset) {
+      if (PRESETS.filter(function(p){ return p.cle === r.preset; }).length) PRESET = r.preset;
+      else perdus.push('l’ambiance');
+    }
+    AV = fusionner(AV_DEF, r.av);
+    FIL = fusionner(FIL_DEF, r.fil);
+    if (FIL.logoId && !LOGOS.filter(function(l){ return l.id === FIL.logoId; }).length) {
+      FIL.logoId = '';
+      perdus.push('le logo');
+    }
+    /* Les reglages viennent de changer : le resultat affiche n est plus celui
+       qu ils produiraient, et ses formats non plus. Les garder ferait
+       enregistrer une image que l ecran ne decrit plus. */
+    RESULT = null; FORMATS = []; ENREG = false;
+    dessiner();
+    var m = 'Recette « ' + x.nom +' » appliquée.';
+    if (perdus.length) {
+      dire(m + ' ⚠ ' + perdus.join(' et ') + ' de cette recette '
+        + (perdus.length > 1 ? 'n’existent plus' : 'n’existe plus')
+        + ' — ce réglage est resté au défaut.', 'att');
+    } else {
+      dire(m + ' Tout est en place : il ne reste que la photo à choisir.', 'bon');
+    }
+  }
+
+  // Ce que la recette emporte. ⚠ La photo et l interieur n y sont pas — voir le
+  // gros avertissement en tete du bloc.
+  function recetteActuelle(){
+    return { voie: VOIE, preset: PRESET, modele: MODELE_SEL, pose: POSE_SEL,
+      formMode: FORM_MODE, av: fusionner(AV_DEF, AV), fil: fusionner(FIL_DEF, FIL) };
+  }
+
+  /* ⚠ LE NOM EST PRE-REMPLI AVEC CELUI DE LA RECETTE CHOISIE, et l ecran DIT
+     qu enregistrer va l ecraser. Le geste courant est << j ajuste et je remets a
+     jour >>, pas << je fabrique une quinzieme variante >> : ecraser est donc le
+     defaut. Mais un ecrasement qu on ne voit pas venir est une perte, et les
+     recettes ne se reconstituent pas — elles portent des reglages accordes a
+     l oeil sur des dizaines de rendus payes. */
+  function ouvrirRecetteVoile(){
+    if (RO) return;
+    var x = recetteChoisie();
+    voile('<h3>💾 Enregistrer la recette</h3>'
+      + '<p>Elle retient <strong>tout</strong> : la mise en valeur, l’ambiance, le mannequin, la '
+      + 'pose, les réglages avancés (décor, ombres, lumière, agrandissement), le filigrane et le '
+      + 'format de sortie.</p>'
+      + '<p><strong>Pas la photo</strong>, ni la photo d’intérieur du fantôme : celle-là appartient '
+      + 'à un vêtement précis, et se promènerait d’un article à l’autre.</p>'
+      + '<p><input type="text" id="rc-nom" maxlength="60" placeholder="Ex. : Collection automne — plage dorée" '
+      + 'value="' + esc(x ? x.nom : '') + '"></p>'
+      + '<p class="rcav" id="rc-av">' + (x
+          ? '⚠ Ce nom est celui de la recette choisie : elle sera <strong>remplacée</strong>.'
+          : '') + '</p>'
+      + '<div class="fin2"><button id="rc-non">Annuler</button>'
+      + '<button class="prim" id="rc-oui">Enregistrer</button></div>',
+      function(fermer){
+        var n = document.getElementById('rc-nom');
+        var av = document.getElementById('rc-av');
+        var oui = document.getElementById('rc-oui');
+        var non = document.getElementById('rc-non');
+        if (n) { try { n.focus(); n.select(); } catch (e) {} }
+        // L avertissement d ecrasement suit ce qui est TAPE, pas ce qui etait
+        // choisi : renommer en cours de route doit l eteindre.
+        var majAv = function(){
+          if (!av) return;
+          var v = String((n && n.value) || '').trim().toLowerCase();
+          var d = RECETTES.filter(function(o){ return String(o.nom).trim().toLowerCase() === v; })[0];
+          av.innerHTML = (v && d)
+            ? '⚠ Une recette porte déjà ce nom : elle sera <strong>remplacée</strong>.'
+            : '';
+        };
+        if (n) { n.oninput = majAv; majAv(); }
+        if (non) non.onclick = fermer;
+        var lancer = function(){
+          var nom = String((n && n.value) || '').trim();
+          if (!nom) { if (av) av.innerHTML = '⚠ Donnez-lui un nom.'; if (n) n.focus(); return; }
+          if (oui) oui.disabled = true;
+          enregistrerRecette(nom, fermer);
+        };
+        if (oui) oui.onclick = lancer;
+        if (n) n.onkeydown = function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); lancer(); } };
+      });
+  }
+
+  function enregistrerRecette(nom, fermer){
+    dire('Enregistrement de la recette…');
+    /* ⚠ ON N ENVOIE PAS L IDENTIFIANT COURANT AVEUGLEMENT. Si le nom tape n est
+       plus celui de la recette choisie, c est une recette NEUVE qu on veut, pas
+       un renommage de l ancienne — sinon << Enregistrer sous un autre nom >>
+       ferait disparaitre celle dont on partait. */
+    var x = recetteChoisie();
+    var meme = x && String(x.nom).trim().toLowerCase() === nom.toLowerCase();
+    appeler('studio:recetteEnregistrer',
+      [{ nom: nom, id: meme ? x.id : '', r: recetteActuelle() }]).then(function(res){
+      if (!res || !res.ok) { dire(expliquer(res), 'err'); if (fermer) fermer(); return; }
+      RECETTES = res.recettes || [];
+      RC_SEL = res.id || '';
+      if (fermer) fermer();
+      dessiner();
+      dire('Recette « ' + nom + ' » enregistrée.', 'bon');
+    });
+  }
+
+  function retirerRecette(){
+    var x = recetteChoisie();
+    if (!x || RO) return;
+    voile('<h3>Retirer la recette ?</h3>'
+      + '<p>« <strong>' + esc(x.nom) + '</strong> » sera effacée. Les réglages restent à l’écran : '
+      + 'c’est le raccourci qui disparaît, pas la mise en scène.</p>'
+      + '<div class="fin2"><button id="rs-non">Annuler</button>'
+      + '<button class="conf" id="rs-oui">Retirer</button></div>',
+      function(fermer){
+        var non = document.getElementById('rs-non');
+        var oui = document.getElementById('rs-oui');
+        if (non) non.onclick = fermer;
+        if (oui) oui.onclick = function(){
+          oui.disabled = true;
+          appeler('studio:recetteRetirer', [{ id: x.id }]).then(function(res){
+            if (fermer) fermer();
+            if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
+            RECETTES = res.recettes || [];
+            RC_SEL = '';
+            dessiner();
+            dire('Recette retirée.', 'att');
+          });
+        };
+      });
+  }
+
+  /* La liste au chargement. ⚠ Une lecture qui echoue ne bloque RIEN : la barre
+     reste utilisable (on peut toujours enregistrer), elle est simplement vide.
+     Un ecran de mise en scene qui refuserait de s ouvrir parce qu une liste de
+     raccourcis manque serait hors de proportion. */
+  function chargerRecettes(){
+    appeler('studio:recettes', []).then(function(r){
+      if (!r || !r.ok) return;
+      RECETTES = r.recettes || [];
+      // Seule la barre se repeint : le reste du volet peut deja etre en train
+      // d etre rempli, et un redessin complet le reprendrait a zero.
+      var b = document.getElementById('rcbar');
+      if (b) { b.outerHTML = recettesHtml(); brancherRecettes(); }
+      /* ⚠ LE VOILE DU BANC S OUVRE ICI, PAS AU DEMARRAGE. Ouvert avant que la
+         liste soit revenue, il montrerait un champ vide et aucun avertissement
+         d ecrasement — c est-a-dire tout sauf la surface qu on vient controler.
+         On pose aussi une recette choisie, sans quoi le champ pre-rempli et
+         l avertissement << elle sera remplacee >> ne seraient dessines nulle
+         part. */
+      if (RC_VOILE_DEP) {
+        RC_VOILE_DEP = false;
+        /* ⚠ ON APPLIQUE POUR DE VRAI, on ne se contente pas de cocher le menu.
+           Une barre qui annonce une recette pendant que les onglets montrent
+           autre chose est exactement le mensonge d ecran qu on traque — et le
+           chemin d application, celui qui doit dire ce qui a disparu, ne serait
+           eprouve nulle part. */
+        if (!RC_SEL) appliquerRecette(String((RECETTES[0] || {}).id || ''));
+        ouvrirRecetteVoile();
+      }
+    });
   }
 
   function brancherAvance(){
-    var b = document.getElementById('av-bascule');
-    if (b) b.onclick = function(){ AV_OUV = !AV_OUV; majAvance();
-      var z = document.getElementById('av-bascule');
-      if (z) z.textContent = (AV_OUV ? '▾ Masquer' : '▸ Afficher') + ' les réglages avancés'; };
     // Un champ de texte ne redessine JAMAIS : on note la valeur et l on met à
     // jour le seul résumé (sinon le curseur sauterait à chaque frappe).
     var t = function(id, cle){
@@ -1846,22 +2276,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       return;
     }
     corps.className = 'corps';
-    var r = [];
-    r.push('<section class="etape' + (aUnePhoto() ? '' : ' vif') + '">'
-      + enteteEtape(1, 'La photo', 'Celle de départ, prise en studio sur fond blanc.',
-          aUnePhoto() ? (PHOTO_NOM || 'photo prête') : 'Aucune photo')
-      + '<div class="etc">' + photoHtml() + '</div></section>');
-    r.push('<section class="etape">'
-      + enteteEtape(2, 'La mise en valeur', 'Comment le vêtement est présenté.', nomVoie(VOIE))
-      + '<div class="etc"><div class="tuiles">' + voiesHtml() + '</div>'
-      + modeleHtml() + '</div></section>');
-    r.push('<section class="etape' + (PRESET || !aUnePhoto() ? '' : ' vif') + '">'
-      + enteteEtape(3, 'L’ambiance', 'Un clic règle décor, ombre ancrée et lumière.',
-          PRESET ? nomPreset(PRESET) : 'À choisir')
-      + '<div class="etc">' + ambiancesHtml() + '</div></section>');
-    r.push(avanceHtml());
-    r.push(filigraneHtml());
-    corps.innerHTML = '<div class="rail">' + r.join('') + '</div>'
+    /* ⚠ LA BARRE DES RECETTES EST HORS DES ONGLETS, ET AU-DESSUS D EUX. Elle ne
+       regle rien elle-meme : elle remplit les neuf onglets d un coup. Rangee
+       DANS un onglet, il faudrait savoir lequel avant de pouvoir s en servir. */
+    corps.innerHTML = '<div class="rail">' + recettesHtml()
+      + '<div class="railc"><div class="onglets" id="onglets" role="tablist">' + ongletsHtml() + '</div>'
+      + '<section class="panneau" id="panneau">' + panneauHtml() + '</section></div></div>'
       + '<div class="scene">' + recapHtml()
       + '<div class="bloc res' + (RESULT ? ' garni' : '') + '" id="res">' + resultatHtml() + '</div>'
       /* Le bloc est TOUJOURS posé, même vide et caché : sans lui, il n existerait
@@ -1908,6 +2328,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       ouvrirLotVoile();
     };
     brancherLots();
+    brancherOnglets();
+    brancherRecettes();
     var phR = document.getElementById('ph-retour'); if (phR) phR.onclick = function(){ PICKER = false; PHOTHQ = []; PH_Q = ''; dessiner(); };
     var phQ = document.getElementById('ph-q');
     if (phQ) {
@@ -2418,7 +2840,26 @@ ${JS_ACTIVITE}${JS_DIRE}
        qu on venait de régler un fantôme et qu on lançait un détourage. */
     var voieDef = opts.filter(function(t){ return t.cle === VOIE; }).length
       ? VOIE : String((opts[0] || {}).cle || '');
+    /* ⚠ LA RECETTE EST PROPOSEE ICI, EN TETE, ET C EST LA DEMANDE : << pour
+       traiter une photo ou des lots complets on doit me proposer si je desire
+       utiliser un preset >>. La choisir remplit la mise en scene ENTIERE que le
+       lot va emporter — voie, ambiance, mannequin, pose, reglages avances,
+       filigrane — au lieu de la refaire reglage par reglage dans le volet de
+       gauche avant d ouvrir ce voile.
+       ⚠ Elle change AUSSI le traitement du lot, puisque la voie en fait partie :
+       laisser le menu du dessus sur l ancienne voie enverrait cinq cents photos
+       dans une mise en scene que la recette ne decrit pas. */
+    var rcListe = RECETTES.length
+      ? ('<div class="ch"><label for="lot-rc">Recette (facultatif)</label>'
+        + '<select id="lot-rc"><option value="">— Garder les réglages de l’écran —</option>'
+        + RECETTES.map(function(o){
+            return '<option value="' + esc(o.id) + '"' + (RC_SEL === o.id ? ' selected' : '')
+              + '>' + esc(o.nom) + '</option>'; }).join('')
+        + '</select><div class="aidep">Elle pose d’un coup la voie, l’ambiance, le mannequin, la '
+        + 'pose, les réglages avancés et le filigrane de ce lot.</div></div>')
+      : '';
     voile('<h3>⚙ Traiter ' + nP + ' photo' + (nP > 1 ? 's' : '') + ' en lot</h3>'
+      + rcListe
       + '<div class="ch"><label for="lot-quoi">Traitement à appliquer</label>'
       + '<select id="lot-quoi">' + opts.map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (t.cle === voieDef ? ' selected' : '')
@@ -2445,6 +2886,17 @@ ${JS_ACTIVITE}${JS_DIRE}
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         var g = function(i){ var e = document.getElementById(i); return e ? e.value : ''; };
+        /* Choisir une recette applique tout de suite les reglages a l ecran,
+           PUIS rouvre le voile : le menu du traitement, le bloc des reglages et
+           l estimation sont alors tous d accord entre eux, sans avoir a
+           reproduire ici la logique de chacun. */
+        var srcRc = document.getElementById('lot-rc');
+        if (srcRc) srcRc.onchange = function(){
+          var v = srcRc.value;
+          fermer();
+          appliquerRecette(v);
+          ouvrirLotVoile();
+        };
         var c = function(i){ var e = document.getElementById(i); return !!(e && e.checked); };
         /* Changer de traitement change ce qui s applique : on redit la vérité,
            en gardant le choix déjà fait sur la case. */
@@ -2774,6 +3226,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var pret = pretALancer();
     bApercu.disabled = o || !pret;
     bFinal.disabled = o || !pret;
+    if (bLot) bLot.disabled = o || RO;
   }
 
   function saisie(apercu){
@@ -2843,8 +3296,102 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
-  // Aperçu : gratuit, part directement.
-  bApercu.onclick = function(){ lancer(true); };
+  /* ══ LA CONFIRMATION DE DÉPENSE (lot 3h du #29) ════════════════════════════
+     Sa demande : << si plus de 1 credit est necessaire pour la generation par
+     image, mettre une confirmation avant le lancement, et ce meme pour
+     l apercu >>.
+
+     ⚠ LE SEUIL PORTE SUR LES APPELS PAR IMAGE, PAS SUR LE BOUTON. Un mannequin
+     virtuel, c est UN appel. Un fantome avec decor, c est DEUX. Avec
+     l agrandissement, TROIS. Rien a l ecran ne disait cet ecart avant le clic :
+     on croyait payer la meme chose selon la voie choisie trois onglets plus
+     haut. C est exactement ce que ce voile vient rendre visible.
+
+     ⚠⚠ ET L APERÇU NE COÛTE TOUJOURS RIEN. Il part sur la cle bac a sable :
+     zero credit, quel que soit le nombre d appels (relais, ligne 610). Le voile
+     s ouvre quand meme dans les memes cas — il les a demandes tous les deux —
+     mais il DIT zero. Annoncer un montant la ou il n y en a pas fabrique une
+     inquietude de toutes pieces, et l on finirait par ne plus croire l ecran le
+     jour ou le chiffre est vrai. Ce que l apercu consomme reellement, c est le
+     quota mensuel d apercus : c est donc CA qui est affiche.
+
+     ⚠ UNE ESTIMATION QUI ECHOUE NE BLOQUE PAS. On n interdit pas un rendu parce
+     qu on n a pas su le chiffrer : on passe, et le pied de page le dit. */
+  function argent(n){ return (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', ','); }
+
+  // Ce qui cause les appels supplementaires, dit dans les mots de l ecran.
+  function causesAppels(){
+    var c = [];
+    if (VOIE === 'fantome') {
+      c.push('le <strong>fantôme habillé</strong> demande deux gestes : retirer le mannequin, puis poser le décor');
+    }
+    if (AV.upActive) c.push('l’<strong>agrandissement ×4</strong> est un appel de plus, après le traitement');
+    return c;
+  }
+
+  function confirmerDepense(apercu, suite){
+    if (RO || OCCUPE) return;
+    var fin = finitionPour(VOIE) || {};
+    var opt = (VOIE === 'humain') ? optionsPour('humain') : {};
+    dire('Calcul du coût…');
+    appeler('studio:estimer', [{ geste: VOIE, preset: PRESET, nb: 1, finition: fin, options: opt }])
+      .then(function(r){
+        if (!r || !r.ok) { dire('Coût non estimé — le rendu part quand même.', 'att'); suite(); return; }
+        var n = r.appelsMax || 1;
+        // Un seul appel par image : rien a confirmer, on ne met pas un voile
+        // entre lui et le bouton pour le cas ordinaire.
+        if (n <= 1) { dire(''); suite(); return; }
+        var causes = causesAppels();
+        var bu = r.budget || {};
+        var h = '<h3>' + (apercu ? '👁 Aperçu — ' : '⚠ ') + n + ' appels pour <em>une seule</em> photo</h3>';
+        if (apercu) {
+          h += '<p>Cet aperçu demande <strong>' + n + ' appels</strong> au service au lieu d’un seul. '
+            + 'Il reste <strong>gratuit</strong> : il part sur la clé d’essai, <strong>aucun crédit '
+            + 'n’est consommé</strong> et le plafond mensuel n’est pas entamé.</p>'
+            + '<p>Ce qu’il consomme, ce sont vos <strong>aperçus du mois</strong> — ' + n
+            + ' d’un coup — et le résultat sera <strong>filigrané</strong>.</p>';
+        } else {
+          h += '<p><strong>' + n + ' appels facturés ≈ ' + argent(r.coutMax) + ' $</strong> pour cette '
+            + 'photo. Un mannequin virtuel n’en coûterait qu’un seul.</p>';
+          if (bu.actif) {
+            h += '<p>Plafond du mois : ' + argent(bu.depense) + ' $ dépensés sur ' + argent(bu.mensuel)
+              + ' $ — il reste ' + argent(bu.restant) + ' $.</p>';
+          }
+        }
+        /* ⚠ ON DIT COMMENT REDESCENDRE A UN APPEL, pas seulement combien ça
+           coûte : un avertissement sans porte de sortie ne fait que retarder le
+           même clic. Mais on ne le dit QUE si l on sait pourquoi — conseiller de
+           decocher un agrandissement qui est deja decoche envoie chercher un
+           reglage qui n existe pas, et l ecran perd sa credibilite pour la fois
+           suivante, celle ou le montant compte vraiment. */
+        if (causes.length) {
+          h += '<p>Pourquoi : ' + causes.join(' ; ') + '.</p>';
+          var sortie = [];
+          if (AV.upActive) sortie.push('décochez l’agrandissement');
+          if (VOIE === 'fantome') sortie.push('passez au « Mannequin virtuel »');
+          if (sortie.length) {
+            h += '<p class="rcav">Pour n’en payer qu’un : ' + sortie.join(', ou ') + '.</p>';
+          }
+        }
+        h += '<div class="fin2"><button id="cd-non">Annuler</button>'
+          + '<button class="' + (apercu ? 'prim' : 'conf') + '" id="cd-oui">'
+          + (apercu ? 'Lancer l’aperçu' : 'Lancer — ' + argent(r.coutMax) + ' $') + '</button></div>';
+        dire('');
+        voile(h, function(fermer){
+          var non = document.getElementById('cd-non');
+          var oui = document.getElementById('cd-oui');
+          if (non) non.onclick = fermer;
+          if (oui) oui.onclick = function(){ fermer(); suite(); };
+        });
+      });
+  }
+
+  // Aperçu : gratuit, mais il passe par la même confirmation dès qu il demande
+  // plus d un appel — c est la demande, et le voile dit franchement « 0 crédit ».
+  bApercu.onclick = function(){
+    if (RO || OCCUPE) return;
+    confirmerDepense(true, function(){ lancer(true); });
+  };
   // Pleine qualité : consomme des crédits → armement en deux temps.
   bFinal.onclick = function(){
     if (RO || OCCUPE) return;
@@ -2854,7 +3401,24 @@ ${JS_ACTIVITE}${JS_DIRE}
       return;
     }
     ARME = false; bFinal.className = 'prim'; bFinal.textContent = 'Générer en pleine qualité';
-    lancer(false);
+    confirmerDepense(false, function(){ lancer(false); });
+  };
+
+  /* ⚠ LE LANCEUR DE LOT EST AU PIED DE PAGE, ET C EST TOUT L INTERET : il ne
+     demande AUCUN defilement, quel que soit l onglet ouvert. Avant, il fallait
+     ouvrir le selecteur de photos et descendre pour le trouver.
+     Sans photo choisie, il ouvre le selecteur — repondre << rien a traiter >>
+     a quelqu un qui vient justement demander a traiter serait un mur. */
+  if (bLot) bLot.onclick = function(){
+    if (RO || OCCUPE) return;
+    if (PANIER && PANIER.length) {
+      SEL = {};
+      PANIER.forEach(function(p){ SEL[p.id] = true; });
+      ouvrirLotVoile();
+      return;
+    }
+    dire('Choisissez les photos du lot.', 'att');
+    ouvrirPicker();
   };
 
   function telechargerImage(source, nom){
@@ -2901,6 +3465,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       chargerCredits();
       chargerPortraits();
       chargerLogos();
+      chargerRecettes();
     });
   }
 
@@ -2951,16 +3516,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
-  /* ⚠ IDENTIFIANTS D OUVERTURE DU PANNEAU AVANCÉ. Replié, il ne se déplie qu au
-     CLIC — et le banc dessine, il ne clique pas : tout le panneau serait resté
-     hors de tout contrôle, comme le lanceur de lot qui n a jamais pu partir
-     pendant deux versions. << avance-plein >> ouvre en plus la voie du fantôme
-     avec ombre et agrandissement actifs, parce que les glissières d ombre, le
-     mode d agrandissement et le bloc de la photo d intérieur ne sont dessinés
-     que dans cet état-là. C est l écran qui décide CE QU ON PAIE : il se
-     vérifie. */
-  if (${avOuvre ? 'true' : 'false'}) AV_OUV = true;
-  if (${avPlein ? 'true' : 'false'}) { VOIE = 'fantome'; AV.ombreActive = true; AV.upActive = true; }
+  /* ⚠ IDENTIFIANTS D OUVERTURE DES ONGLETS DE REGLAGES. Le panneau replie a
+     disparu (lot 3g), mais le banc ne CLIQUE toujours pas : un seul groupe est
+     dessine a la fois, donc sans identifiant, huit des neuf resteraient hors de
+     tout controle. << avance >> ouvre le decor du mannequin virtuel ;
+     << avance-plein >> passe au fantome avec ombre reglee a la main et
+     agrandissement actif et ouvre les OMBRES — c est le seul etat ou les
+     glissieres d ombre et le mode d agrandissement existent. C est l ecran qui
+     decide CE QU ON PAIE : il se verifie. */
+  if (${avOuvre ? 'true' : 'false'}) ONGLET = 'decor';
+  if (${avPlein ? 'true' : 'false'}) { VOIE = 'fantome'; AV.ombreActive = true; AV.upActive = true;
+    ONGLET = 'ombres'; }
   /* ⚠⚠ IDENTIFIANT D OUVERTURE << resultat >>. Tout le volet de droite garni — le
      comparateur avant/apres, les avis du service, les dimensions, les deux
      boutons — n existe qu APRES un vrai traitement, donc apres un CLIC et un
@@ -2969,11 +3535,16 @@ ${JS_ACTIVITE}${JS_DIRE}
      pendant deux versions. Ce mode pose une photo temoin et un resultat temoin,
      tous deux inertes (une image de 1 pixel). La coquille ne l ouvre jamais. */
   if (${resTemoin ? 'true' : 'false'}) RES_TEMOIN = true;
-  /* ⚠ IDENTIFIANT D OUVERTURE << filigrane >>. La section est REPLIEE par defaut
-     et le banc ne clique pas : la grille de logos, les neuf ancrages, les trois
-     glissieres et les deux boutons ne seraient dessines nulle part. Il pose en
-     plus un resultat temoin, pour que le bouton << Appliquer >> existe. */
-  if (${filTemoin ? 'true' : 'false'}) { RES_TEMOIN = true; FIL_OUV = true; }
+  /* ⚠ IDENTIFIANT D OUVERTURE << filigrane >>. Un seul onglet est dessine a la
+     fois : sans lui, la grille de logos, les neuf ancrages, les trois glissieres
+     et les deux boutons ne paraitraient nulle part. Il pose en plus un resultat
+     temoin, pour que le bouton << Appliquer >> existe. */
+  if (${filTemoin ? 'true' : 'false'}) { RES_TEMOIN = true; ONGLET = 'filigrane'; }
+  /* ⚠ IDENTIFIANT D OUVERTURE << recettes >>. La BARRE des recettes est toujours
+     visible — elle n a rien de replie —, mais le VOILE d enregistrement, si :
+     il n existe qu apres un clic sur << Enregistrer... >>, et le banc ne clique
+     pas. C est pourtant la que se decide un ECRASEMENT, donc une perte. */
+  if (${rcTemoin ? 'true' : 'false'}) RC_VOILE_DEP = true;
   charger();
   lotsSuivre();
   chargerPanier();

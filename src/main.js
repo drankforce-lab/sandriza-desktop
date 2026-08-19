@@ -1555,6 +1555,10 @@ const OPS_PONT = new Set([
   'studio:modeles', 'studio:modeleGenerer', 'studio:modelesVider',
   // Le filigrane (lot 3c) : la liste des logos EN PIXELS, et le collage lui-même.
   'studio:logos', 'studio:filigraner',
+  // Les recettes de mise en scene (lot 3d) : une commande entiere rangee sous un
+  // nom. ⚠ Aucune image n y entre — ni la photo de depart, ni la photo
+  // d interieur du fantome, qui appartient a UN vetement.
+  'studio:recettes', 'studio:recetteEnregistrer', 'studio:recetteRetirer',
   // Centre d impression (fenetre Promo, 2.4.0). ⚠ PATRON << FENETRE PILOTE >> :
   // le rendu est un CANEVAS, il ne peut vivre que dans la fenetre principale
   // (seule a pouvoir relire une image du stockage sans teindre le canevas, et
@@ -1957,6 +1961,11 @@ const LIMITES_PONT = {
      un par un. 'studio:filigraner' porte une photo de studio dans les deux sens —
      le même ordre de grandeur que l'enregistrement. */
   'studio:logos': 60000, 'studio:filigraner': 90000,
+  /* Les recettes ne portent que du texte et des nombres — aucune image. La
+     lecture sort du cache local ; les deux ecritures attendent le verdict de la
+     base avant de repondre, d ou un delai d ecriture de configuration ordinaire. */
+  'studio:recettes': 8000, 'studio:recetteEnregistrer': 30000,
+  'studio:recetteRetirer': 30000,
   'photoroom:compte': 20000,
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
