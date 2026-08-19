@@ -346,6 +346,46 @@ try {
    ⚠ On lit la version dans package.json (la coquille) et les notes dans
    pont.js (le site) : les deux dépôts doivent être côte à côte, comme pour la
    parité des ops. Sans le site, on le DIT au lieu de laisser croire au vert. */
+console.log('=== Police des titres embarquée ===');
+/* ⚠⚠ CE CONTRÔLE EXISTE PARCE QUE LA PANNE SERAIT INVISIBLE. La police des
+   titres est inlinée en base64 dans `socle.js` — une chaîne de 50 000 caractères
+   sur une seule ligne. Si une coupe malheureuse la tronque, le `@font-face`
+   devient invalide et le titre retombe sur la chaîne de repli : ça reste LISIBLE,
+   donc personne ne remarque que la police achetée ne charge plus. Un défaut qui ne
+   dérange pas est un défaut qui dure.
+   ⚠ On vérifie aussi que le base64 DÉCODE en un vrai woff2 (signature wOF2) : un
+   .otf renommé passerait la syntaxe et ne chargerait jamais. */
+{
+  const pSocle = path.join(__dirname, '..', 'src', 'fenetres', 'socle.js');
+  let src = '';
+  try { src = fs.readFileSync(pSocle, 'utf8'); } catch (e) {}
+  if (!src) {
+    dire(false, 'socle.js', 'illisible');
+  } else {
+    const m = src.match(/src:url\(data:font\/woff2;base64,([A-Za-z0-9+/=]*)\)/);
+    if (!m) {
+      dire(false, 'police titres', 'aucun @font-face en base64 dans socle.js — les titres '
+        + 'retomberaient sur la police du système sans que rien ne le dise '
+        + '(reposer avec : node tools/police-en-base64.js)');
+    } else {
+      const b64 = m[1];
+      let buf = null;
+      try { buf = Buffer.from(b64, 'base64'); } catch (e) {}
+      const sig = buf ? buf.toString('latin1', 0, 4) : '';
+      if (b64.length < 4096) {
+        dire(false, 'police titres', 'le base64 ne fait que ' + b64.length + ' caractères — '
+          + 'tronqué. Le titre retomberait sur le repli, en silence.');
+      } else if (sig !== 'wOF2') {
+        dire(false, 'police titres', 'le base64 ne décode pas en woff2 (signature lue : '
+          + sig + ') — la police ne chargerait jamais, sans un mot.');
+      } else {
+        dire(true, 'police titres', Math.round(b64.length / 1024) + ' Ko de woff2 valide, '
+          + 'inliné une seule fois dans le socle');
+      }
+    }
+  }
+}
+
 console.log('=== Note de la version publiée ===');
 {
   const cheminNotes = CANDIDATS.find((c) => fs.existsSync(c));
