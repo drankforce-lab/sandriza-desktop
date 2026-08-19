@@ -135,24 +135,11 @@ body{background:#0e1522;color:#e8edf5;
 .onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
 .onglets::-webkit-scrollbar-thumb,.panneau::-webkit-scrollbar-thumb{
   background:rgba(255,255,255,.12);border-radius:8px}
-/* ── UNE ETAPE ─────────────────────────────────────────────────────────────
-   Un numero qui devient une COCHE des que l etape est faite, un titre lisible,
-   et a droite CE QUI A ETE CHOISI. On voit ou l on en est sans rien lire —
-   c est le critere qu il a nomme en dernier et souligne : intuitif. */
-.etape{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
-  padding:.85rem .95rem;min-width:0}
-.etape.vif{border-color:rgba(201,169,126,.45)}
-.eth{display:flex;align-items:center;gap:.55rem}
-.eth .num{flex:0 0 auto;width:1.5rem;height:1.5rem;border-radius:50%;
-  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);
-  display:flex;align-items:center;justify-content:center;font:700 .76rem/1 system-ui;color:#8fa1b8}
-.eth .num.ok{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
-.eth h2{margin:0;font:700 .88rem/1.2 system-ui;color:#e8edf5;text-transform:none;letter-spacing:0}
-.eth .etat{margin-left:auto;font-size:.73rem;color:#6d7f96;min-width:0;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.eth .etat.on{color:#c9a97e}
-.etape .sous{margin:.28rem 0 0 2.05rem;font-size:.74rem;color:#6d7f96;line-height:1.4}
-.etc{margin-top:.7rem}
+/* ⚠ LES CINQ << ETAPES >> NUMEROTEES ONT DISPARU avec le passage aux onglets
+   (3.47.0) : le numero qui devenait une coche vit maintenant SUR l onglet
+   (.ong .oc), et l en-tete du groupe est .pnt. Les regles .etape / .eth / .num /
+   .etc ne trouvaient plus aucun element a habiller — retirees a la cloture du
+   chantier #29 plutot que laissees a vieillir. */
 .pbtn{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
 .pbtn button{flex:1 1 auto}
 .pt2{font-size:.7rem;color:#6d7f96}
@@ -381,8 +368,8 @@ select:focus{outline:none;border-color:#c9a97e}
    relumiere) que sur le FANTOME et le PRODUIT A PLAT — le mannequin virtuel
    compose sa scene autrement. Une glissiere d ombre dessinee sous un mannequin
    virtuel serait un mensonge d ecran : elle serait recue et ignoree en silence. */
-.avbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-.avbar button{flex:1 1 auto}
+/* ⚠ .avbar portait le bouton << Afficher les reglages avances >>. Le panneau
+   replie a disparu (3.47.0) : ses reglages sont des onglets. */
 /* ⚠⚠ UNE SEULE COLONNE, ET C EST LE COEUR DE LA REFONTE DU PANNEAU. Il etait en
    DEUX colonnes serrees a l interieur d une carte deja large d une demi-page :
    des glissieres, des menus et leurs textes d aide a moins de dix caracteres de
@@ -2208,21 +2195,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     var x = PRESETS.filter(function(o){ return o.cle === c; })[0];
     return (x && x.label) || c;
   }
-  // Une etape est FAITE quand elle a recu son choix. La voie l est toujours :
-  // il y en a une par defaut, et l ecran ne peut pas ne pas en avoir.
-  function etapeFaite(n){
-    if (n === 1) return aUnePhoto();
-    if (n === 2) return true;
-    if (n === 3) return !!PRESET;
-    return false;
-  }
-  function enteteEtape(n, titre, sous, etat){
-    var ok = etapeFaite(n);
-    return '<div class="eth"><span class="num' + (ok ? ' ok' : '') + '">' + (ok ? '✓' : n)
-      + '</span><h2>' + titre + '</h2>'
-      + '<span class="etat' + (ok ? ' on' : '') + '">' + esc(etat || '') + '</span></div>'
-      + '<p class="sous">' + sous + '</p>';
-  }
+  /* ⚠ << etapeFaite >> et << enteteEtape >> ont ete RETIREES a la cloture du
+     chantier #29. Elles dessinaient l en-tete des cinq etapes numerotees,
+     remplacees par les onglets en 3.47.0 : la coche vit desormais sur l onglet
+     (ongletEtat + ongletRequis), et l en-tete du groupe est panneauHtml. */
 
   /* ══ CE QU ON VA GENERER, DIT AVANT DE PAYER ══════════════════════════════
      La voie, l ambiance, le mannequin, la pose et les reglages avances etaient

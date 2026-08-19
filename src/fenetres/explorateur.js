@@ -730,50 +730,19 @@ ${JS_ACTIVITE}${JS_DIRE}
     return fermer;
   }
 
-  function ouvrirLot(){
-    var ids = Object.keys(SEL);
-    if (!ids.length) return;
-    var opts = (D && D.traitements) || [];
-    voile('<h3>⚙ Traiter ' + ids.length + ' photo' + (ids.length > 1 ? 's' : '') + ' en lot</h3>'
-      + '<div class="ch"><label for="l-quoi">Traitement à appliquer</label>'
-      + '<select id="l-quoi">' + opts.map(function(t){
-          return '<option value="' + esc(t.cle) + '">' + esc(t.nom) + '</option>'; }).join('')
-      + '</select></div>'
-      + '<div class="ch"><label for="l-nom">Nom du lot (pour le retrouver dans le suivi)</label>'
-      + '<input id="l-nom" placeholder="Collection automne — détourage"></div>'
-      + '<label class="rc"><input type="checkbox" id="l-prio"> <span><strong>Priorité haute</strong> — '
-      + 'ce lot passe devant ceux qui attendent.</span></label>'
-      + '<label class="rc"><input type="checkbox" id="l-refaire"> <span><strong>Refaire celles déjà '
-      + 'traitées.</strong> Par défaut elles sont écartées : les repasser coûte un appel chacune '
-      + 'pour un résultat identique.</span></label>'
-      + '<p class="aide">Chaque photo est un appel facturé. Le lot part en arrière-plan : vous pouvez '
-      + 'fermer cette fenêtre, il continue et se suit depuis n’importe quel écran.</p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui">Lancer le lot</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          this.disabled = true;
-          var g = function(i){ var e = document.getElementById(i); return e ? e.value : ''; };
-          var c = function(i){ var e = document.getElementById(i); return !!(e && e.checked); };
-          appeler('lots:creer', [{ ids: ids, quoi: g('l-quoi'), nom: g('l-nom'),
-            priorite: c('l-prio') ? 1 : 0, refaire: c('l-refaire'), options: {} }]).then(function(r){
-            fermer();
-            if (!r.ok) {
-              dire(r.motif === 'toutes_deja_faites'
-                ? ('Ces ' + (r.deja || ids.length) + ' photos ont déjà ce traitement. Cochez « Refaire ».')
-                : expliquer(r), 'err');
-              return;
-            }
-            SEL = {};
-            dire(r.nom + ' — ' + r.total + ' photo' + (r.total > 1 ? 's' : '') + ' en traitement'
-              + (r.ignorees ? ' (' + r.ignorees + ' déjà faite' + (r.ignorees > 1 ? 's' : '') + ')' : '')
-              + '. Suivez-le en bas de n’importe quel écran.', 'bon');
-            charger();
-          });
-        };
-      });
-  }
+  /* ⚠⚠ << ouvrirLot >> A ETE RETIREE a la cloture du chantier #29 (3.49.0). Elle
+     lancait un lot DEPUIS ICI, avec son propre voile, son propre selecteur de
+     traitement et son propre appel a lots:creer. Elle etait morte depuis le
+     2026-08-14 : sa demande, ce jour-la, etait << la selection doit etre ramenee
+     au studio virtuel et l on execute le lot a cet endroit >>. Le bouton avait
+     ete remplace par << Envoyer au Studio >>, mais la fonction et son voile sont
+     restes en place, injoignables.
+     ⚠ POURQUOI LA SUPPRIMER PLUTOT QUE LA LAISSER DORMIR : c etait une SECONDE
+     facon de lancer un lot, avec ses propres libelles et ses propres reglages.
+     Laissee la, elle finit par etre rebranchee un jour << pour aller plus vite >>
+     — et l on reintroduit exactement ce qu il avait demande de retirer, en plus
+     d une geometrie de prix ecrite deux fois. L explorateur CHOISIT, le Studio
+     DECIDE. */
 
   /* ══ CHARGEMENT ════════════════════════════════════════════════════════ */
   function charger(){
