@@ -55,16 +55,77 @@ body{background:#0e1522;color:#e8edf5;
 .tete .credits b{color:#c9a97e}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
-  display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-content:start}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+/* ══ LA DISPOSITION EN DEUX VOLETS (refonte du 2026-08-18) ══════════════════
+   AVANT : cinq cartes dans une grille a deux colonnes fixes, tout l ecran
+   defilant d un seul bloc — et le RESULTAT, la seule chose qu on paie, tout en
+   bas, hors de vue pendant qu on reglait. Chaque fonction avait ete posee dans
+   la place qui restait ; personne n avait jamais redessine l ensemble.
+   MAINTENANT : a gauche les etapes, qui defilent seules ; a droite ce qu on va
+   obtenir, qui ne bouge plus. */
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;display:flex;gap:1rem;overflow:hidden}
+/* ⚠ LE SELECTEUR DE PHOTOS ET LE SUIVI DES LOTS PRENNENT TOUT L ECRAN. Ce sont
+   des ecrans a part entiere — une grille de centaines de vignettes, une file de
+   lots avec ses boutons. Les serrer dans le volet de gauche redonnerait
+   exactement la compression qu on vient de retirer. */
+.corps.plein{display:block;overflow-y:auto}
+.rail{flex:0 0 clamp(21rem,40%,34rem);min-width:0;overflow-y:auto;padding-right:.35rem;
+  display:flex;flex-direction:column;gap:.8rem}
+.scene{flex:1 1 auto;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:.7rem}
+.corps::-webkit-scrollbar,.rail::-webkit-scrollbar,.scene::-webkit-scrollbar{width:8px}
+.corps::-webkit-scrollbar-thumb,.rail::-webkit-scrollbar-thumb,
+.scene::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
-.carte.large{grid-column:1/-1}
 .carte h2{margin:0 0 .1rem;font:700 .74rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:#8fa1b8}
 .carte .sous{margin:0 0 .7rem;font-size:.75rem;color:#6d7f96}
+/* ── UNE ETAPE ─────────────────────────────────────────────────────────────
+   Un numero qui devient une COCHE des que l etape est faite, un titre lisible,
+   et a droite CE QUI A ETE CHOISI. On voit ou l on en est sans rien lire —
+   c est le critere qu il a nomme en dernier et souligne : intuitif. */
+.etape{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  padding:.85rem .95rem;min-width:0}
+.etape.vif{border-color:rgba(201,169,126,.45)}
+.eth{display:flex;align-items:center;gap:.55rem}
+.eth .num{flex:0 0 auto;width:1.5rem;height:1.5rem;border-radius:50%;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:center;font:700 .76rem/1 system-ui;color:#8fa1b8}
+.eth .num.ok{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
+.eth h2{margin:0;font:700 .88rem/1.2 system-ui;color:#e8edf5;text-transform:none;letter-spacing:0}
+.eth .etat{margin-left:auto;font-size:.73rem;color:#6d7f96;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eth .etat.on{color:#c9a97e}
+.etape .sous{margin:.28rem 0 0 2.05rem;font-size:.74rem;color:#6d7f96;line-height:1.4}
+.etc{margin-top:.7rem}
+.pbtn{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+.pbtn button{flex:1 1 auto}
+.pt2{font-size:.7rem;color:#6d7f96}
+/* Deux menus courts cote a cote quand la place le permet, l un sous l autre
+   sinon. auto-fit, donc jamais deux colonnes serrees dans un volet etroit. */
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem;margin-top:.7rem}
+.duo .ch{margin:0}
+/* ── LE VOLET DE DROITE ────────────────────────────────────────────────────
+   Ce qu on va obtenir, toujours visible : le recapitulatif de la commande, puis
+   l image. */
+.bloc{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  padding:.85rem 1rem;min-width:0}
+.recap .rt{font:700 .74rem/1.2 system-ui;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+.recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:.5rem}
+.recap .jt{font-size:.75rem;padding:.16rem .55rem;border-radius:99px;
+  background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:#e8dcc6}
+.recap .jt.gris{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);color:#8fa1b8}
+.recap .note{margin-top:.55rem;font-size:.73rem;color:#6d7f96;line-height:1.5}
+/* Le geste suivant, sans avoir a lire une aide : ce qui est fait porte une
+   coche, ce qui vient est mis en avant. */
+.guide{display:flex;flex-direction:column;gap:.45rem;text-align:left;margin:.7rem auto 0;max-width:24rem}
+.guide .gp{display:flex;align-items:center;gap:.55rem;font-size:.82rem;color:#6d7f96}
+.guide .gp .n{flex:0 0 auto;width:1.35rem;height:1.35rem;border-radius:50%;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:center;font:700 .72rem/1 system-ui;color:#8fa1b8}
+.guide .gp.ok{color:#cbd8e6}
+.guide .gp.ok .n{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
+.guide .gp.suiv{color:#e8dcc6;font-weight:600}
+.guide .gp.suiv .n{border-color:#c9a97e;color:#c9a97e}
 /* Dépôt de photo */
 .depot{border:1.5px dashed #2b3444;border-radius:10px;background:#0f1724;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;
@@ -82,7 +143,7 @@ body{background:#0e1522;color:#e8edf5;
 /* ⚠ 7rem, pas 5,5 : la vignette porte desormais une coche et des pastilles.
    A l ancienne largeur, le nom passait dessous et devenait illisible. */
 .phgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(7rem,1fr));gap:.5rem;
-  max-height:20rem;overflow-y:auto;padding-right:.2rem}
+  max-height:calc(100vh - 18rem);min-height:14rem;overflow-y:auto;padding-right:.2rem}
 .phgrille::-webkit-scrollbar{width:8px}
 .phgrille::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .phvig{background:#0f1724;border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
@@ -101,7 +162,8 @@ body{background:#0e1522;color:#e8edf5;
 .jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:#e8dcc6;font-weight:600}
 .jeton.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:600}
 .phfiltres select{font:inherit;font-size:.73rem;color:#cbd8e6;background:#0f1724;
-  border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.14rem .4rem}
+  border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.14rem .4rem;
+  width:auto;max-width:15rem;flex:0 1 auto}
 .phsel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;
   padding:.35rem .5rem;border-radius:9px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.08)}
@@ -131,7 +193,7 @@ body{background:#0e1522;color:#e8edf5;
 .panier .pv .pl{font-size:.72rem;color:#8fa1b8}
 .panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
-.lots{display:flex;flex-direction:column;gap:.5rem;max-height:26rem;overflow-y:auto}
+.lots{display:flex;flex-direction:column;gap:.5rem;max-height:calc(100vh - 14rem);overflow-y:auto}
 .lotc{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:.5rem .65rem}
 .lotc.vif{border-color:#c9a97e}
 .lott{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.35rem}
@@ -146,20 +208,29 @@ body{background:#0e1522;color:#e8edf5;
 .lote{margin-top:.3rem;font-size:.71rem;color:#8fa1b8;line-height:1.5}
 .pill.acc{background:rgba(201,169,126,.18);color:#dcc39b}
 .pill.err{background:rgba(239,68,68,.16);color:#f87171}
-/* Voies + ambiances : tuiles cliquables */
-.tuiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem}
-.tuile{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:9px;
-  padding:.5rem .6rem;cursor:pointer;-webkit-user-select:none;user-select:none;
-  display:flex;align-items:center;gap:.5rem;text-align:left;
-  transition:border-color .12s,background .12s}
+/* ── VOIES ET AMBIANCES ────────────────────────────────────────────────────
+   ⚠⚠ ELLES ETAIENT EN FLEX SUR UNE SEULE LIGNE : le titre et sa description se
+   disputaient la largeur d une tuile large d un tiers de demi-carte, et l on ne
+   lisait ni l un ni l autre. La regle .tuile .txt existait pour les empiler,
+   mais AUCUN des deux rendus ne posait ce conteneur — elle n a jamais servi.
+   La tuile est donc une grille : l emoji tient la colonne de gauche sur deux
+   rangs, le titre et la description se rangent l un SOUS l autre a droite. */
+.tuiles{display:grid;grid-template-columns:1fr;gap:.4rem}
+.tuile{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:10px;
+  padding:.58rem .7rem;cursor:pointer;-webkit-user-select:none;user-select:none;
+  display:grid;grid-template-columns:auto 1fr;column-gap:.65rem;row-gap:.08rem;
+  align-items:center;text-align:left;transition:border-color .12s,background .12s}
 .tuile:hover{border-color:rgba(201,169,126,.5)}
 .tuile.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 /* ⚠ Emoji en GRIS (comme le reste de l administration), jamais en couleur. */
-.tuile .em{font-size:1.15rem;line-height:1;flex:0 0 auto;filter:grayscale(1) brightness(1.45);opacity:.9}
-.tuile .txt{display:flex;flex-direction:column;min-width:0}
-.tuile .t{font-size:.8rem;font-weight:700;line-height:1.2}
-.tuile .d{font-size:.68rem;color:#6d7f96;line-height:1.22;margin-top:.06rem}
-.amb{grid-template-columns:1fr 1fr}
+.tuile .em{grid-row:1/3;align-self:center;font-size:1.35rem;line-height:1;
+  filter:grayscale(1) brightness(1.45);opacity:.9}
+.tuile .t{grid-column:2;font-size:.85rem;font-weight:700;line-height:1.25}
+.tuile .d{grid-column:2;font-size:.72rem;color:#6d7f96;line-height:1.32}
+/* Les ambiances passent a deux colonnes DES QUE le volet est assez large, et
+   restent sur une seule quand il ne l est pas. C est auto-fill qui en decide,
+   pas un nombre de colonnes ecrit en dur. */
+.amb{grid-template-columns:repeat(auto-fill,minmax(13rem,1fr))}
 /* Galerie de modèles — c'est la liste de CHOIX du mannequin, plus un menu texte.
    ⚠ contain et non cover : on veut voir la SILHOUETTE ENTIÈRE (demande du
    2026-08-11 : « je veux juste voir la forme du modèle et le corps aussi »).
@@ -205,14 +276,18 @@ select:focus{outline:none;border-color:#c9a97e}
    compose sa scene autrement. Une glissiere d ombre dessinee sous un mannequin
    virtuel serait un mensonge d ecran : elle serait recue et ignoree en silence. */
 .avbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-.avbar .avres{font-size:.74rem;color:#8fa1b8;min-width:0;flex:1 1 8rem;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.avgrille{display:grid;grid-template-columns:1fr 1fr;gap:.15rem 1.1rem;margin-top:.55rem}
-.avsec{grid-column:1/-1;margin:.75rem 0 .1rem;padding-top:.6rem;
+.avbar button{flex:1 1 auto}
+/* ⚠⚠ UNE SEULE COLONNE, ET C EST LE COEUR DE LA REFONTE DU PANNEAU. Il etait en
+   DEUX colonnes serrees a l interieur d une carte deja large d une demi-page :
+   des glissieres, des menus et leurs textes d aide a moins de dix caracteres de
+   large. Un reglage de plus qui rentre a l ecran n est pas gagne s il rend les
+   dix autres illisibles. */
+.avgrille{display:flex;flex-direction:column;gap:.7rem;margin-top:.75rem}
+.avgrille>*{margin:0}
+.avsec{margin:.4rem 0 -.15rem;padding-top:.65rem;
   border-top:1px solid rgba(255,255,255,.08);font:700 .72rem/1.2 system-ui;
   text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
-.avsec.prem{margin-top:.1rem;padding-top:0;border-top:0}
-.avun{grid-column:1/-1}
+.avsec.prem{margin-top:0;padding-top:0;border-top:0}
 .aidep{font-size:.71rem;color:#6d7f96;line-height:1.45;margin-top:.22rem}
 .aidep.att{color:#d8b57a}
 textarea{width:100%;font:inherit;font-size:.82rem;color:#e8edf5;background:#0f1724;
@@ -232,9 +307,11 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    a plus de mille pixels de son libelle. */
 .avint .nm{font-size:.76rem;color:#cbd8e6;min-width:0;flex:0 1 22rem;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Résultat */
-.res{align-items:center;justify-content:center;min-height:12rem;text-align:center;color:#8fa1b8}
-.res img{max-width:100%;max-height:22rem;border-radius:9px;border:1px solid rgba(255,255,255,.1)}
+/* Résultat — il occupe tout ce qui reste du volet de droite. */
+.res{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:15rem;text-align:center;color:#8fa1b8}
+.res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
+  border:1px solid rgba(255,255,255,.1)}
 .res .filig{margin-top:.5rem;font-size:.74rem;color:#facc15}
 .res .avis{margin-top:.4rem;font-size:.74rem;color:#8fa1b8}
 .res .dims{font-size:.7rem;color:#6d7f96;margin-top:.2rem}
@@ -250,6 +327,11 @@ button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
+/* ⚠ L APERCU EST GRATUIT, ET C EST LE LEVIER CREDITS : la seule facon de juger
+   sans depenser. Un bouton gris a cote d un bouton dore se lit comme le choix
+   secondaire — exactement l inverse de ce qu on veut. */
+button.gratuit{border-color:rgba(74,222,128,.42);color:#c9ead6}
+button.gratuit:hover:not(:disabled){background:rgba(74,222,128,.12)}
 button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:700}
 .vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
 /* ⚠ LA SURCOUCHE DU LANCEMENT DE LOT. Elle manquait — habillage ET fonction :
@@ -271,7 +353,11 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
 .rc input{width:1.05rem;height:1.05rem;accent-color:#c9a97e;cursor:pointer;
   margin-top:.12rem;flex:0 0 auto}
 .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
-@media (max-width:720px){.corps{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .corps{flex-direction:column;overflow-y:auto}
+  .rail{flex:0 0 auto;overflow:visible;padding-right:0}
+  .scene{overflow:visible}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -290,9 +376,9 @@ function pageStudio(mode) {
 <div class="tete"><span class="ic">🎨</span><h1>Studio virtuel</h1>
   <span class="credits" id="credits"></span></div>
 <div class="ro" id="ro" hidden>Lecture seule : votre rôle ne permet pas de lancer de traitement.</div>
-<div class="corps" id="corps"><div class="carte large"><div class="vide">Chargement…</div></div></div>
+<div class="corps plein" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button id="b-apercu" disabled>Aperçu gratuit</button>
+  <button class="gratuit" id="b-apercu" disabled>Aperçu gratuit</button>
   <button class="prim" id="b-final" disabled>Générer en pleine qualité</button></div>
 <script>
 (function(){
@@ -334,6 +420,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var PHOTO = null;      // data URL d une photo importee (fichier), reduite
   var PHOTO_ID = '';     // id d une photo CHOISIE dans la phototheque (l image reste au site)
   var PHOTO_URL = '';    // adresse de la vignette choisie (affichage seulement)
+  var PHOTO_NOM = '';    // son nom, dit en tete de l etape 1
   var PICKER = false;    // le choix dans la phototheque est-il ouvert ?
   var PHOTHQ = [];       // [{id,nom,apercu,enAttente}] cumule (defilement infini)
   var PH_Q = '';         // recherche courante (nom / code)
@@ -545,8 +632,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     } catch (e) { cb(dataUrl); }
   }
 
+  /* ⚠ UNE SEULE VERITE SUR L ETAT << pret a lancer >>, lue par le pied de page
+     ET par le guide du volet de droite. Elle inclut desormais le selecteur et le
+     suivi des lots : quand ils occupent tout l ecran, le volet du resultat
+     n existe plus, et une image generee la n aurait nulle part ou s afficher. */
+  function pretALancer(){
+    return aUnePhoto() && !!PRESET && !RO && !PICKER && !LOTS_VUE;
+  }
+
   function majBoutons(){
-    var pret = aUnePhoto() && !!PRESET && !RO && !OCCUPE;
+    var pret = pretALancer() && !OCCUPE;
     bApercu.disabled = !pret;
     bFinal.disabled = !pret;
     if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = 'Générer en pleine qualité'; }
@@ -691,51 +786,59 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
-  function depotHtml(){
-    // Le suivi des lots prend toute la colonne : c est un ecran, pas un encart.
+  /* ══ L ETAPE 1, DANS LE VOLET DE GAUCHE ═══════════════════════════════════
+     ⚠ ELLE NE CONTIENT PLUS NI LE SELECTEUR NI LE SUIVI DES LOTS. Ces deux-la
+     sont partis en plein ecran (pleinHtml) : une grille de plusieurs centaines
+     de vignettes et une file de lots n ont jamais eu leur place dans une carte
+     large d une demi-page — c est cet entassement qu on retire. */
+  function photoHtml(){
+    var h = '';
+    if (aUnePhoto()) {
+      // Une photo est déjà choisie (fichier OU photothèque) : on la montre.
+      var apercu = PHOTO || PHOTO_URL;
+      h += '<div class="depot" id="depot">'
+        + (apercu ? '<img src="' + apercu + '" alt="photo">'
+                  : '<span class="gros">🖼️</span><span>Photo de la photothèque sélectionnée</span>')
+        + '<span class="refaire">Choisir une autre photo</span></div>';
+    } else {
+      h += '<div class="depot" id="depot"><span class="gros">📷</span>'
+        + '<span>Glissez une photo studio ici, ou cliquez pour choisir un fichier</span>'
+        + '<span class="pt2">Fond blanc, un vêtement — JPEG ou PNG</span></div>';
+    }
+    h += '<input type="file" id="fichier" accept="image/*" hidden><div class="pbtn">';
+    if (!aUnePhoto()) {
+      h += '<button id="ph-ouvrir">📚 Depuis la photothèque</button>'
+        // ⚠ L EXPLORATEUR EST DANS SA PROPRE FENETRE (#32) : le selecteur
+        // ci-contre reste pour prendre UNE photo vite fait, l explorateur sert a
+        // en choisir des centaines — il lui faut de la place et un apercu.
+        + '<button id="ph-explorateur" title="Parcourir la photothèque en grand, avec aperçu">'
+        + '🗂️ Explorateur…</button>';
+    }
+    /* ⚠ LE SUIVI RESTE JOIGNABLE UNE FOIS LA PHOTO CHOISIE, et c est nouveau :
+       avant, le bouton disparaissait avec le bloc de depart, si bien qu un lot
+       lance puis une photo prise a l ecran rendait la file introuvable sans
+       tout reinitialiser. */
+    h += '<button id="lots-voir">⚙ Traitements'
+      + ((LOTS && LOTS.lots && LOTS.lots.length) ? ' (' + LOTS.lots.length + ')' : '')
+      + '</button></div>' + panierHtml();
+    return h;
+  }
+
+  /* ══ LES DEUX ECRANS PLEIN LARGEUR ════════════════════════════════════════
+     Le selecteur de photos (recherche, filtres, panier, grille chargee par
+     pages) et le suivi des lots. Ce sont des ecrans, pas des encarts. */
+  function pleinHtml(){
     if (LOTS_VUE) {
       return '<div class="phbarre"><button id="lots-fermer">← Retour</button>'
         + '<span class="phinfo">Traitements par lot</span></div>'
         + '<div class="lots">' + lotsHtml() + '</div>';
     }
-    // Une photo est déjà choisie (fichier OU photothèque) : on la montre.
-    if (aUnePhoto()) {
-      var apercu = PHOTO || PHOTO_URL;
-      var vue = apercu
-        ? '<img src="' + apercu + '" alt="photo">'
-        : '<span class="gros">🖼️</span><span>Photo de la photothèque sélectionnée</span>';
-      return '<div class="depot" id="depot">' + vue
-        + '<span class="refaire">Choisir une autre photo</span></div>'
-        + '<input type="file" id="fichier" accept="image/*" hidden>';
-    }
-    // Le choix dans la photothèque est ouvert : recherche + grille de vignettes,
-    // chargée par pages (défilement infini) pour tenir des milliers de photos.
-    if (PICKER) {
-      var grille = '<div class="phgrille" id="ph-grille">' + phVignettesHtml() + '</div>';
-      return '<div class="phbarre"><button id="ph-retour">← Retour</button>'
-        + '<input type="search" id="ph-q" placeholder="Rechercher (nom, code, produit, SKU)…" value="' + esc(PH_Q) + '"'
-        + (RO ? ' disabled' : '') + '>'
-        + '<span class="phinfo" id="ph-info"></span></div>'
-        + phFiltresHtml() + phSelectionHtml() + grille;
-    }
-    // Rien de choisi : dépôt de fichier + accès à la photothèque.
-    return '<div class="depot" id="depot"><span class="gros">📷</span>'
-      + '<span>Glissez une photo studio ici, ou cliquez pour choisir un fichier</span>'
-      + '<span style="font-size:.7rem;color:#6d7f96">Fond blanc, un vêtement — JPEG ou PNG</span></div>'
-      + '<input type="file" id="fichier" accept="image/*" hidden>'
-      + '<div style="text-align:center;margin-top:.5rem;display:flex;gap:.4rem;justify-content:center">'
-      + '<button id="ph-ouvrir">📚 Depuis la photothèque</button>'
-      // ⚠ L EXPLORATEUR EST DANS SA PROPRE FENETRE (#32) : le selecteur
-      // ci-contre reste pour prendre UNE photo vite fait, l explorateur sert a
-      // en choisir des centaines — il lui faut de la place et un apercu.
-      + '<button id="ph-explorateur" title="Parcourir la photothèque en grand, avec aperçu">'
-      + '🗂️ Explorateur…</button>'
-      // Le suivi reste joignable meme sans lot en cours : c est la qu on
-      // retrouve ce qui s est termine, et les echecs a comprendre.
-      + '<button id="lots-voir">⚙ Traitements'
-      + ((LOTS && LOTS.lots && LOTS.lots.length) ? ' (' + LOTS.lots.length + ')' : '')
-      + '</button></div>'
-      + panierHtml();
+    var grille = '<div class="phgrille" id="ph-grille">' + phVignettesHtml() + '</div>';
+    return '<div class="phbarre"><button id="ph-retour">← Retour</button>'
+      + '<input type="search" id="ph-q" placeholder="Rechercher (nom, code, produit, SKU)…" value="' + esc(PH_Q) + '"'
+      + (RO ? ' disabled' : '') + '>'
+      + '<span class="phinfo" id="ph-info"></span></div>'
+      + phFiltresHtml() + phSelectionHtml() + grille;
   }
 
   function voiesHtml(){
@@ -787,18 +890,19 @@ ${JS_ACTIVITE}${JS_DIRE}
     // ⚠ Retour au MENU DÉROULANT (demande du 2026-08-12) : la galerie de vignettes
     // est retirée. Les aperçus par mannequin sortaient identiques et n'aidaient pas
     // au choix ; le nom suffit. Le modèle et la pose se choisissent dans deux listes.
-    var h = '<div class="ch"><label>Pose</label>'
-      + '<select id="pose"' + (RO ? ' disabled' : '') + '>'
-      + POSES.map(function(p){ return '<option value="' + p.cle + '"'
-          + (POSE_SEL === p.cle ? ' selected' : '') + '>' + esc(p.t) + '</option>'; }).join('')
-      + '</select>'
-      + '<div class="aide" style="margin-top:.25rem;font-size:.7rem;color:#6d7f96">'
-      + 'L’aperçu est gratuit : essayez-en plusieurs avant de générer.</div></div>';
-    h += '<div class="ch"><label>Modèle</label>'
+    // Deux menus courts : cote a cote quand la place le permet, empiles sinon.
+    var h = '<div class="duo"><div class="ch"><label for="modele-sel">Modèle</label>'
       + '<select id="modele-sel"' + (RO ? ' disabled' : '') + '>'
       + MODELES.map(function(m){ return '<option value="' + esc(m) + '"'
           + (MODELE_SEL === m ? ' selected' : '') + '>' + esc(nomModele(m)) + '</option>'; }).join('')
-      + '</select></div>';
+      + '</select></div>'
+      + '<div class="ch"><label for="pose">Pose</label>'
+      + '<select id="pose"' + (RO ? ' disabled' : '') + '>'
+      + POSES.map(function(p){ return '<option value="' + p.cle + '"'
+          + (POSE_SEL === p.cle ? ' selected' : '') + '>' + esc(p.t) + '</option>'; }).join('')
+      + '</select></div></div>'
+      + '<div class="aidep">L’aperçu est gratuit : essayez plusieurs mannequins et plusieurs '
+      + 'poses avant de dépenser un crédit.</div>';
     return h;
   }
   // Redessine UNE vignette sans toucher au reste (on ne casse ni le défilement
@@ -1023,15 +1127,21 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
 
+  /* ⚠ FACULTATIF NE VEUT PAS DIRE MAL RANGE. L etape 4 garde le meme en-tete
+     que les trois autres — mais son numero ne devient jamais une coche : elle
+     n a rien a valider, et une coche voudrait dire << il manque quelque chose >>
+     tant qu on n y a pas touche. Ce qui est reglé se lit a sa droite. */
   function avanceHtml(){
     var r = resumeAvance(VOIE);
-    return '<div class="carte large"><h2>4 · Réglages avancés</h2>'
-      + '<p class="sous">Facultatif : l’ambiance suffit dans la plupart des cas. Le panneau ne montre que '
+    return '<section class="etape">'
+      + '<div class="eth"><span class="num">4</span><h2>Réglages avancés</h2>'
+      + '<span class="etat' + (r ? ' on' : '') + '" id="av-resume">'
+      + (r ? esc(r) : 'Facultatif') + '</span></div>'
+      + '<p class="sous">L’ambiance suffit dans la plupart des cas. Le panneau ne montre que '
       + 'ce que la voie choisie accepte vraiment.</p>'
-      + '<div class="avbar"><button id="av-bascule">' + (AV_OUV ? '▾ Masquer' : '▸ Afficher')
-      + ' les réglages avancés</button>'
-      + '<span class="avres" id="av-resume">' + (r ? esc(r) : 'Aucun réglage avancé.') + '</span></div>'
-      + '<div id="av-zone">' + avanceCorpsHtml() + '</div></div>';
+      + '<div class="etc"><div class="avbar"><button id="av-bascule">'
+      + (AV_OUV ? '▾ Masquer' : '▸ Afficher') + ' les réglages avancés</button></div>'
+      + '<div id="av-zone">' + avanceCorpsHtml() + '</div></div></section>';
   }
 
   // Ne repeint QUE le panneau : un redessin complet perdrait la grille de
@@ -1047,7 +1157,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var el = document.getElementById('av-resume');
     if (!el) return;
     var r = resumeAvance(VOIE);
-    el.textContent = r || 'Aucun réglage avancé.';
+    el.textContent = r || 'Facultatif';
+    el.className = 'etat' + (r ? ' on' : '');
   }
 
   function brancherAvance(){
@@ -1138,7 +1249,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function resultatHtml(){
-    if (!RESULT) return '<div class="vide">L’image apparaîtra ici. Commencez par un <strong>aperçu gratuit</strong>.</div>';
+    if (!RESULT) {
+      return '<div class="vide" style="padding:.2rem">L’image apparaîtra ici.</div>' + guideHtml();
+    }
     var h = '<img src="' + RESULT.image + '" alt="résultat">';
     if (RESULT.essai) h += '<div class="filig">⚠ Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.</div>';
     if (RESULT.decorErreur) h += '<div class="filig">⚠ Le décor n’a pas pu être appliqué : ' + esc(RESULT.decorErreur) + '</div>';
@@ -1151,20 +1264,98 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h;
   }
 
+  function nomVoie(v){
+    var x = VOIES.filter(function(o){ return o.cle === v; })[0];
+    return x ? x.t : v;
+  }
+  function nomPreset(c){
+    var x = PRESETS.filter(function(o){ return o.cle === c; })[0];
+    return (x && x.label) || c;
+  }
+  // Une etape est FAITE quand elle a recu son choix. La voie l est toujours :
+  // il y en a une par defaut, et l ecran ne peut pas ne pas en avoir.
+  function etapeFaite(n){
+    if (n === 1) return aUnePhoto();
+    if (n === 2) return true;
+    if (n === 3) return !!PRESET;
+    return false;
+  }
+  function enteteEtape(n, titre, sous, etat){
+    var ok = etapeFaite(n);
+    return '<div class="eth"><span class="num' + (ok ? ' ok' : '') + '">' + (ok ? '✓' : n)
+      + '</span><h2>' + titre + '</h2>'
+      + '<span class="etat' + (ok ? ' on' : '') + '">' + esc(etat || '') + '</span></div>'
+      + '<p class="sous">' + sous + '</p>';
+  }
+
+  /* ══ CE QU ON VA GENERER, DIT AVANT DE PAYER ══════════════════════════════
+     La voie, l ambiance, le mannequin, la pose et les reglages avances etaient
+     etales sur quatre cartes : rien ne les rassemblait, et l on cliquait
+     << Generer en pleine qualite >> sans pouvoir relire sa commande. */
+  function recapHtml(){
+    var j = ['<span class="jt">' + esc(nomVoie(VOIE)) + '</span>'];
+    j.push(PRESET ? '<span class="jt">' + esc(nomPreset(PRESET)) + '</span>'
+                  : '<span class="jt gris">ambiance à choisir</span>');
+    if (VOIE === 'humain') {
+      j.push('<span class="jt">' + esc(nomModele(MODELE_SEL)) + '</span>');
+      j.push('<span class="jt">' + esc(nomPose(POSE_SEL)) + '</span>');
+    }
+    var a = resumeAvance(VOIE);
+    if (a) {
+      a.split(' · ').forEach(function(x){ j.push('<span class="jt">' + esc(x) + '</span>'); });
+    }
+    return '<div class="bloc recap"><span class="rt">Ce qui sera généré</span>'
+      + '<div class="rc2">' + j.join('') + '</div>'
+      + '<div class="note">L’aperçu est <strong>gratuit</strong> et filigrané : jugez d’abord, '
+      + 'payez ensuite. Seul « Générer en pleine qualité » consomme un crédit, et il demande '
+      + 'deux clics.</div></div>';
+  }
+
+  /* ⚠ INTUITIF = LE GESTE SUIVANT EST EVIDENT SANS LIRE. Les deux boutons du
+     pied sont grises tant qu il manque une photo ou une ambiance, et rien ne
+     disait laquelle : on cliquait sur un bouton mort sans comprendre. */
+  function guideHtml(){
+    var e1 = aUnePhoto(), e2 = !!PRESET;
+    var l = function(ok, suiv, n, t){
+      return '<div class="gp' + (ok ? ' ok' : (suiv ? ' suiv' : '')) + '">'
+        + '<span class="n">' + (ok ? '✓' : n) + '</span><span>' + t + '</span></div>';
+    };
+    return '<div class="guide">'
+      + l(e1, !e1, '1', 'Choisissez une photo')
+      + l(e2, e1 && !e2, '2', 'Choisissez une ambiance')
+      + l(false, e1 && e2, '3', 'Cliquez « Aperçu gratuit », en bas de la fenêtre')
+      + '</div>';
+  }
+
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
-    var h = [];
-    h.push('<div class="carte"><h2>1 · Photo</h2>'
-      + '<p class="sous">La photo de départ, prise en studio sur fond blanc.</p>' + depotHtml() + '</div>');
-    h.push('<div class="carte"><h2>2 · Voie</h2>'
-      + '<p class="sous">Comment mettre le vêtement en valeur.</p>'
-      + '<div class="tuiles">' + voiesHtml() + '</div>' + modeleHtml() + '</div>');
-    h.push('<div class="carte large"><h2>3 · Ambiance</h2>'
-      + '<p class="sous">Un clic règle décor, ombre ancrée et lumière. Réglable au besoin plus tard.</p>'
-      + ambiancesHtml() + '</div>');
-    h.push(avanceHtml());
-    h.push('<div class="carte large res" id="res">' + resultatHtml() + '</div>');
-    corps.innerHTML = h.join('');
+    /* Le selecteur de photos et le suivi des lots prennent TOUT l ecran : ils
+       remplacent les deux volets au lieu de se serrer dans l un des deux. */
+    if (PICKER || LOTS_VUE) {
+      corps.className = 'corps plein';
+      corps.innerHTML = '<div class="carte">' + pleinHtml() + '</div>';
+      brancher();
+      majBoutons();
+      return;
+    }
+    corps.className = 'corps';
+    var r = [];
+    r.push('<section class="etape' + (aUnePhoto() ? '' : ' vif') + '">'
+      + enteteEtape(1, 'La photo', 'Celle de départ, prise en studio sur fond blanc.',
+          aUnePhoto() ? (PHOTO_NOM || 'photo prête') : 'Aucune photo')
+      + '<div class="etc">' + photoHtml() + '</div></section>');
+    r.push('<section class="etape">'
+      + enteteEtape(2, 'La mise en valeur', 'Comment le vêtement est présenté.', nomVoie(VOIE))
+      + '<div class="etc"><div class="tuiles">' + voiesHtml() + '</div>'
+      + modeleHtml() + '</div></section>');
+    r.push('<section class="etape' + (PRESET || !aUnePhoto() ? '' : ' vif') + '">'
+      + enteteEtape(3, 'L’ambiance', 'Un clic règle décor, ombre ancrée et lumière.',
+          PRESET ? nomPreset(PRESET) : 'À choisir')
+      + '<div class="etc">' + ambiancesHtml() + '</div></section>');
+    r.push(avanceHtml());
+    corps.innerHTML = '<div class="rail">' + r.join('') + '</div>'
+      + '<div class="scene">' + recapHtml()
+      + '<div class="bloc res" id="res">' + resultatHtml() + '</div></div>';
     brancher();
     majBoutons();
   }
@@ -1362,7 +1553,8 @@ ${JS_ACTIVITE}${JS_DIRE}
      retourné : gardée d un vêtement au suivant, elle ferait raccorder un col sur
      une autre pièce — un défaut qu on ne verrait qu à l image, sans message. */
   function reinitPhoto(){
-    PHOTO = null; PHOTO_ID = ''; PHOTO_URL = ''; PICKER = false; RESULT = null; ENREG = false;
+    PHOTO = null; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = '';
+    PICKER = false; RESULT = null; ENREG = false;
     INTERIEUR = null; INTERIEUR_NOM = '';
     dessiner();
   }
@@ -1372,7 +1564,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Lecture de la photo…');
     var fr = new FileReader();
     fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
-      PHOTO = petite; PHOTO_ID = ''; PHOTO_URL = ''; PICKER = false; RESULT = null; ENREG = false;
+      PHOTO = petite; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = String(f.name || '');
+      PICKER = false; RESULT = null; ENREG = false;
       INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
       dessiner(); dire('Photo prête.', 'bon'); }); };
     fr.onerror = function(){ dire('Lecture impossible.', 'err'); };
@@ -1910,7 +2103,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var p = null;
     for (var i = 0; i < PHOTHQ.length; i++) { if (PHOTHQ[i].id === id) { p = PHOTHQ[i]; break; } }
     if (!p) return;
-    PHOTO = null; PHOTO_ID = id; PHOTO_URL = p.apercu || ''; PICKER = false; RESULT = null; ENREG = false;
+    PHOTO = null; PHOTO_ID = id; PHOTO_URL = p.apercu || ''; PHOTO_NOM = p.nom || '';
+    PICKER = false; RESULT = null; ENREG = false;
     INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
     dessiner(); dire('Photo choisie : ' + (p.nom || id) + '.', 'bon');
   }
@@ -1920,7 +2114,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.querySelectorAll('button, [data-voie], [data-preset], [data-ph], .depot').forEach(function(b){
       if (b.tagName === 'BUTTON') b.disabled = o; });
     majBoutons();
-    var pret = aUnePhoto() && !!PRESET && !RO;
+    var pret = pretALancer();
     bApercu.disabled = o || !pret;
     bFinal.disabled = o || !pret;
   }
@@ -1976,6 +2170,10 @@ ${JS_ACTIVITE}${JS_DIRE}
           res.innerHTML = resultatHtml();
           var dl = document.getElementById('b-dl'); if (dl) dl.onclick = telecharger;
           var sv = document.getElementById('b-save'); if (sv) sv.onclick = enregistrerResultat;
+        } else {
+          // Le volet de droite n existait pas (plein ecran) : on redessine, sinon
+          // l image serait produite, facturee — et jamais montree.
+          dessiner();
         }
         dire(apercu ? 'Aperçu prêt (gratuit).' : 'Image générée.', 'bon');
         if (!apercu) chargerCredits();
@@ -2026,7 +2224,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Chargement des ambiances…');
     appeler('studio:presets').then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="carte large"><div class="vide">' + expliquer(r) + '</div></div>';
+        corps.className = 'corps plein';
+        corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

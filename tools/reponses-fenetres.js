@@ -2314,6 +2314,60 @@ module.exports = {
           'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
         },
       },
+      /* LE SUIVI DES LOTS. ⚠ Il ne s'atteint qu'au CLIC sur « Traitements », et
+         le banc ne clique pas : la file, ses jauges, ses boutons de pause et de
+         reprise, le détail des échecs et la ligne « mis en pause par le plafond »
+         n'étaient dessinés dans AUCUN cas — l'écran d'où l'on arrête cinq cents
+         photos en cours de facturation restait hors de tout contrôle.
+         Il passe en PLEIN ÉCRAN depuis la refonte : raison de plus de l'éprouver. */
+      {
+        nom: 'suivi des lots',
+        id: 'lots',
+        reponses: {
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+          'studio:modeles': { ok: true, vignettes: VIGNETTES, ref: 'ph_12', maj: '2026-08-11T12:00:00Z' },
+          'lots:etat': {
+            ok: true, peutModifier: true, actif: true,
+            resume: { id: 'lot_1', nom: 'Collection automne', fait: 14, total: 500, enFile: 1 },
+            lots: [
+              { id: 'lot_1', nom: 'Collection automne', quoi: 'humain',
+                quoiLibelle: 'Porté par un mannequin', etat: 'encours', priorite: 1,
+                total: 500, faits: 12, echecs: 2, restants: 486,
+                courant: { id: 'ph_15', code: 'PH-000115', nom: 'Robe noire — face' },
+                creeLe: '2026-08-18T13:00:00Z', finLe: '', motifPause: '',
+                detailEchecs: [
+                  { nom: 'Foulard gris', detail: 'image illisible (fichier tronqué)' },
+                  { nom: 'Jupe plissée', detail: 'le service a refusé : aucun vêtement détecté' },
+                ] },
+              /* ⚠ CELUI-CI PORTE « motifPause » : « en pause » sans raison se lit
+                 comme un arrêt qu'on aurait demandé, et l'on cliquerait
+                 « Reprendre » en boucle sur un plafond qui ne bougera pas. */
+              { id: 'lot_2', nom: 'Manteaux — détourage', quoi: 'detourage',
+                quoiLibelle: 'Détourage', etat: 'pause', priorite: 0,
+                total: 120, faits: 40, echecs: 0, restants: 80, courant: null,
+                creeLe: '2026-08-18T12:00:00Z', finLe: '',
+                motifPause: 'plafond mensuel de dépense atteint (250,00 $)',
+                detailEchecs: [] },
+              { id: 'lot_3', nom: 'Accessoires', quoi: 'fantome',
+                quoiLibelle: 'Mannequin retiré', etat: 'file', priorite: 0,
+                total: 30, faits: 0, echecs: 0, restants: 30, courant: null,
+                creeLe: '2026-08-18T13:30:00Z', finLe: '', motifPause: '', detailEchecs: [] },
+              { id: 'lot_4', nom: 'Import du 12 août', quoi: 'detourage',
+                quoiLibelle: 'Détourage', etat: 'fini', priorite: 0,
+                total: 60, faits: 60, echecs: 0, restants: 0, courant: null,
+                creeLe: '2026-08-17T09:00:00Z', finLe: '2026-08-17T09:40:00Z',
+                motifPause: '', detailEchecs: [] },
+              { id: 'lot_5', nom: 'Essai annulé', quoi: 'humain',
+                quoiLibelle: 'Porté par un mannequin', etat: 'arrete', priorite: 0,
+                total: 10, faits: 3, echecs: 0, restants: 7, courant: null,
+                creeLe: '2026-08-16T15:00:00Z', finLe: '', motifPause: '', detailEchecs: [] },
+            ],
+          },
+          'session:activite': { ok: true },
+        },
+      },
     ];
   })(),
 

@@ -522,6 +522,12 @@ const CSS_LOTS = `
 .sz-lots .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
 .sz-lots .cpt{white-space:nowrap;font-variant-numeric:tabular-nums}
 .sz-lots .file{white-space:nowrap;color:#8fa1b8}
+/* ⚠⚠ IL RECOUVRAIT LE BAS DE CHAQUE FENETRE. Le bandeau est en position FIXE :
+   il ne pousse rien, il passe par-dessus. Dans le Studio il masquait a moitie
+   << Generer en pleine qualite >> — le bouton qui depense — et ailleurs la
+   derniere ligne d une liste. On lui reserve donc sa hauteur, et seulement
+   quand il est la : la classe est posee a sa creation et retiree avec lui. */
+html.sz-lots-on body{padding-bottom:1.9rem}
 html.jour .sz-lots{background:linear-gradient(180deg,#fbf8f2,#f2ece1);color:#3a2f20;
   border-top-color:rgba(143,111,66,.5)}
 html.jour .sz-lots .jauge{background:rgba(0,0,0,.1)}
@@ -535,6 +541,7 @@ function _szLotsPeindre(r){
   var actif = r && r.ok && r.resume;
   if (!actif) {
     if (_szLotsEl && _szLotsEl.parentNode) { _szLotsEl.parentNode.removeChild(_szLotsEl); _szLotsEl = null; }
+    document.documentElement.classList.remove('sz-lots-on');
     return;
   }
   if (!_szLotsEl) {
@@ -542,6 +549,8 @@ function _szLotsPeindre(r){
     _szLotsEl.className = 'sz-lots';
     document.body.appendChild(_szLotsEl);
   }
+  // La place qu il occupe, reservee tant qu il est la (voir CSS_LOTS).
+  document.documentElement.classList.add('sz-lots-on');
   var s = r.resume;
   var pct = s.total ? Math.round((s.fait / s.total) * 100) : 0;
   var enFile = s.enFile ? ('<span class="file">+ ' + s.enFile + ' en file</span>') : '';
