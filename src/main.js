@@ -1466,6 +1466,9 @@ const OPS_PONT = new Set([
   // Retour en arriere (lot 3e du #29) : une photo, ou toute une selection.
   // ⚠ Aucun appel a un modele, aucun credit — on repointe des adresses R2.
   'photos:annuler', 'photos:annulerLot',
+  // Porter le resultat jusqu a la FICHE PRODUIT (lot 3f du #29).
+  // ⚠ Jamais automatique : c est une mise EN VITRINE.
+  'photos:appliquer', 'photos:appliquerLot',
   'photos:apercu',
   // L assistant de traitement en lot : lire une source SANS importer, montrer,
   // importer ce qui est choisi, puis traiter — chaine imposee par le coeur.
@@ -1851,6 +1854,10 @@ const LIMITES_PONT = {
      un delai ordinaire. Le LOT, lui, ecrit une fiche PAR photo : sur cinq cents,
      ce sont cinq cents ecritures, et il lui faut la meme largeur qu un vrai lot. */
   'photos:annuler': 30000, 'photos:annulerLot': 600000,
+  /* ⚠ APPLIQUER TELEVERSE VRAIMENT : une copie de l image part dans R2, puis la
+     fiche est ecrite. C est l ordre de grandeur d un enregistrement, pas d une
+     lecture — et le LOT le fait une fois PAR photo. */
+  'photos:appliquer': 90000, 'photos:appliquerLot': 900000,
   // La garde des frais interroge le relais une fois par empreinte distincte (en
   // parallele) avant un lot : quelques secondes au plus, mais on laisse de la
   // marge pour un lot de soixante photos sur une liaison lente.

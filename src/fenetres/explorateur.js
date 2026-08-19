@@ -108,6 +108,8 @@ td.vig img{border:0;outline:0}
 .pt.fait{color:#4ade80}
 /* Le retour en arriere possible — dore, comme tout ce qui se decide ici. */
 .pt.ret{color:#c9a97e}
+/* La fiche produit en retard : c est un avertissement, pas un etat neutre. */
+.pt.retard{color:#f0a05a;border:1px solid rgba(240,160,90,.4)}
 /* Le volet d APERCU : la raison d etre de cette fenetre. */
 .apercu{flex:0 0 19rem;border-left:1px solid rgba(255,255,255,.08);
   background:#111a29;display:flex;flex-direction:column;overflow-y:auto}
@@ -153,6 +155,9 @@ function pageExplorateur(mode) {
      muette du lanceur de lot, mort pendant deux versions sans que rien ne le
      signale. Ce mode coche tout, puis ouvre le voile. */
   const annulerTemoin = String(mode || '') === 'annuler';
+  /* ⚠ IDENTIFIANT D OUVERTURE << appliquer >>. Meme raison que ci-dessus, et
+     l enjeu est plus grand encore : ce voile-ci met a jour LA VITRINE. */
+  const appliquerTemoin = String(mode || '') === 'appliquer';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Explorateur de photos — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -292,6 +297,14 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (p.annulable) {
       h += '<span class="pt ret" title="' + esc((p.annulableRetabli ? 'Rétablir « ' : 'Annuler « ')
         + nomTraitement(p.annulableQuoi) + ' »') + '">↩</span>';
+    }
+    /* ⚠ LA FICHE PRODUIT EN RETARD (lot 3f). C est la pastille qui compte le
+       plus commercialement : elle dit que la BOUTIQUE affiche encore l image
+       d avant le dernier traitement — donc qu on a paye un rendu que personne ne
+       voit. Sans elle, rien a l ecran ne le laissait soupconner. */
+    if (p.produitEnRetard) {
+      h += '<span class="pt retard" title="La fiche produit montre encore l’image d’avant '
+        + 'le dernier traitement">⚠ fiche</span>';
     }
     if (p.isole) h += '<span class="pt" title="Détourée">◇</span>';
     if (p.lieId) h += '<span class="pt" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
@@ -549,6 +562,80 @@ ${JS_ACTIVITE}${JS_DIRE}
       });
   }
 
+  /* ══ PORTER LE RESULTAT DANS LA FICHE PRODUIT (lot 3f du #29) ══════════════
+     Une photo rattachee a un article puis RETRAITEE ne remontait jamais jusqu a
+     la fiche : la boutique continuait d afficher la copie faite au moment du
+     rattachement. On payait un traitement que personne ne voyait. */
+  function nAppliquer(){
+    var ph = (D && D.photos) || [];
+    var k = 0;
+    ph.forEach(function(p){ if (SEL[p.id] && p.lieId) k++; });
+    return k;
+  }
+  function nEnRetard(){
+    var ph = (D && D.photos) || [];
+    var k = 0;
+    ph.forEach(function(p){ if (SEL[p.id] && p.produitEnRetard) k++; });
+    return k;
+  }
+
+  function ouvrirAppliquerVoile(){
+    var ids = Object.keys(SEL);
+    if (!ids.length) return;
+    var k = nAppliquer();
+    var r = nEnRetard();
+    voile('<h3>📦 Mettre à jour la fiche produit</h3>'
+      + '<p>L’image courante de ' + k + ' photo' + (k > 1 ? 's' : '')
+      + ' sera portée dans la fiche de l’article auquel elle est rattachée.</p>'
+      /* ⚠ ON DIT QUE C EST LA VITRINE. Un compte rendu qui parlerait de
+         << fiches mises a jour >> laisserait croire a un rangement interne : ce
+         qui change ici, c est ce qu une cliente voit sur la boutique. */
+      + '<p><strong>C’est ce que la boutique affichera</strong> — la photo du produit change '
+      + 'pour de bon, en ligne.</p>'
+      + (r ? ('<p style="color:#d8b57a">' + r + ' fiche' + (r > 1 ? 's' : '') + ' montre'
+              + (r > 1 ? 'nt' : '') + ' encore l’image d’<strong>avant</strong> le dernier '
+              + 'traitement — c’est justement ce qu’on répare.</p>')
+           : '<p style="color:#8fa1b8">Aucune de ces fiches n’est en retard : elles montrent déjà '
+             + 'l’image courante. Rien ne changera visiblement.</p>')
+      /* ⚠ LE CAS AMBIGU EST ANNONCE AVANT, pas decouvert dans le compte rendu :
+         une fiche qui porte plusieurs images et dont on ignore laquelle vient de
+         cette photo est REFUSEE, jamais devinee. */
+      + '<p style="color:#8fa1b8">Une photo rattachée avant la version 3.49 dont la fiche porte '
+      + '<strong>plusieurs images</strong> sera laissée de côté : on ne peut pas savoir laquelle '
+      + 'lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre. '
+      + 'Rattachez-la de nouveau pour lever le doute.</p>'
+      + (k < ids.length
+          ? ('<p style="color:#d8b57a">⚠ ' + (ids.length - k) + ' photo'
+             + ((ids.length - k) > 1 ? 's ne sont' : ' n’est') + ' rattachée'
+             + ((ids.length - k) > 1 ? 's' : '') + ' à aucun article et ne bougera'
+             + ((ids.length - k) > 1 ? 'nt' : '') + ' pas.</p>')
+          : '')
+      + '<div class="fin2"><button id="ap-non">Annuler</button>'
+      + '<button class="prim" id="ap-oui">Mettre à jour la vitrine</button></div>',
+      function(fermer){
+        var non = document.getElementById('ap-non');
+        var oui = document.getElementById('ap-oui');
+        if (non) non.onclick = fermer;
+        if (oui) oui.onclick = function(){
+          oui.disabled = true;
+          dire('Mise à jour des fiches…');
+          appeler('photos:appliquerLot', [ids]).then(function(res){
+            fermer();
+            if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
+            var m = res.faites + ' fiche' + (res.faites > 1 ? 's' : '') + ' mise'
+              + (res.faites > 1 ? 's' : '') + ' à jour.';
+            if (res.nonLiees) m += ' ' + res.nonLiees + ' photo'
+              + (res.nonLiees > 1 ? 's non rattachées' : ' non rattachée') + '.';
+            if (res.incertaines) m += ' ⚠ ' + res.incertaines + ' laissée'
+              + (res.incertaines > 1 ? 's' : '') + ' de côté (plusieurs images, lien incertain).';
+            if (res.echecs && res.echecs.length) m += ' ⚠ ' + res.echecs.length + ' en échec.';
+            dire(m, ((res.echecs && res.echecs.length) || res.incertaines) ? 'att' : 'bon');
+            charger();
+          });
+        };
+      });
+  }
+
   function dessinerPied(){
     var n = Object.keys(SEL).length;
     var dispo = (D && D.tousLesIds) ? D.tousLesIds.length : 0;
@@ -565,6 +652,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="jeton" id="a-annuler"' + (nAnnulables() ? '' : ' disabled')
       + ' title="Revenir à l’état d’avant le dernier traitement">↩ Annuler ('
       + nAnnulables() + ')</button>'
+      /* ⚠ LE MOT << VITRINE >> EST SUR LE BOUTON, ET C EST VOULU : ce geste-ci
+         ne touche pas a la phototheque, il change ce que la CLIENTE voit. Le
+         libelle doit le dire avant le clic, pas le voile apres. */
+      + '<button class="jeton" id="a-appliquer"' + (nAppliquer() ? '' : ' disabled')
+      + ' title="Porter l’image courante dans la fiche de l’article — c’est ce que la boutique montrera">'
+      + '📦 Mettre à jour la fiche (' + nAppliquer() + ')</button>'
       /* ⚠ ON N EXECUTE PLUS LE LOT ICI (corrige le 2026-08-14, sa demande :
          << la selection doit etre ramenee au studio virtuel et l on execute le
          lot a cet endroit >>). L explorateur CHOISIT, le Studio DECIDE — c est
@@ -583,6 +676,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (r) r.onclick = function(){ SEL = {}; dessiner(); };
     var ann = document.getElementById('a-annuler');
     if (ann) ann.onclick = ouvrirAnnulerVoile;
+    var app = document.getElementById('a-appliquer');
+    if (app) app.onclick = ouvrirAppliquerVoile;
     var en = document.getElementById('a-envoyer');
     if (en) en.onclick = function(){
       var ids = Object.keys(SEL);
@@ -729,6 +824,14 @@ ${JS_ACTIVITE}${JS_DIRE}
       ((D && D.tousLesIds) || []).forEach(function(id){ SEL[id] = true; });
       dessiner();
       ouvrirAnnulerVoile();
+    };
+  }
+  if (${appliquerTemoin ? 'true' : 'false'}) {
+    window.szApresCharge = function(){
+      window.szApresCharge = null;
+      ((D && D.tousLesIds) || []).forEach(function(id){ SEL[id] = true; });
+      dessiner();
+      ouvrirAppliquerVoile();
     };
   }
 })();

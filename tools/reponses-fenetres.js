@@ -4393,6 +4393,67 @@ module.exports = {
                  confirmation, qui remplace cinq cents images d un coup, ne
                  serait dessine nulle part. */
               faits: ['detourage'], annulable: true, annulableQuoi: 'detourage',
+              annulableLe: 1755600000000, annulableRetabli: false,
+              /* ⚠ SA FICHE PRODUIT EST EN RETARD (lot 3f) : sans au moins une
+                 photo dans cet etat, la pastille << ⚠ fiche >> et le bouton
+                 << Mettre a jour la fiche >> ne seraient dessines nulle part. */
+              produitPoussee: true, produitLe: 1755500000000, produitEnRetard: true },
+            { id: 'ph_2', code: 'PH-000102', nom: 'Robe noire — dos',
+              apercu: 'https://img.sandriza.com/divers/p2.jpg', enAttente: false, isole: false,
+              fond: '', lieId: 'prod_1', lieNom: 'Robe Élégance', lieSku: 'ROB-0001',
+              poids: 2201400, statut: 'pret', lotId: 'lot_a', lotNom: 'Import du 12 août', faits: [] },
+            { id: 'ph_3', code: 'PH-000103', nom: 'Manteau beige',
+              apercu: 'https://img.sandriza.com/divers/p3.jpg', enAttente: false, isole: false,
+              fond: '', lieId: null, lieNom: '', lieSku: '', poids: 310000, statut: 'pret',
+              /* Celle-ci vient d un RETOUR : son bouton dit << Retablir >>, pas
+                 << Annuler >> — deux libelles, deux chemins a eprouver. */
+              lotId: '', lotNom: '', faits: ['humain'],
+              annulable: true, annulableQuoi: 'humain', annulableLe: 1755600000000,
+              annulableRetabli: true },
+            { id: 'ph_4', code: 'PH-000104', nom: 'Foulard gris', apercu: '', enAttente: true,
+              isole: false, fond: '', lieId: null, lieNom: '', lieSku: '', poids: 0,
+              statut: 'televersement', lotId: '', lotNom: '', faits: [] },
+          ],
+          tousLesIds: ['ph_1', 'ph_2', 'ph_3', 'ph_4'],
+          filtres: [
+            { cle: 'traitee', nom: 'A déjà reçu un traitement' },
+            { cle: 'nonTraitee', nom: 'Jamais traitée' },
+            { cle: 'isolee', nom: 'Détourée (fond transparent)' },
+            { cle: 'orpheline', nom: 'Aucun produit' },
+          ],
+          traitements: [
+            { cle: 'detourage', nom: 'Détourage' },
+            { cle: 'fantome', nom: 'Mannequin retiré' },
+            { cle: 'humain', nom: 'Porté par un mannequin' },
+          ],
+          fonds: ['studio'],
+          lots: [{ cle: 'lot_a', nom: 'Import du 12 août' }],
+        },
+        'lots:creer': { ok: true, id: 'lot_x', nom: 'Détourage — 4 photos', total: 4, ignorees: 0 },
+        'photos:annulerLot': { ok: true, total: 2, faites: 2, sansPrecedent: 0, echecs: [] },
+        'photos:appliquerLot': { ok: true, total: 4, faites: 2, nonLiees: 1, incertaines: 1, echecs: [] },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'voile du retour en arriere',
+      id: 'annuler',
+      reponses: {
+        'studio:explorer': {
+          ok: true, charge: true, peutModifier: true,
+          total: 4, trouvees: 4, page: 0, taille: 500, pages: 1,
+          photos: [
+            { id: 'ph_1', code: 'PH-000101', nom: 'Robe noire — face',
+              apercu: 'https://img.sandriza.com/divers/p1.jpg', enAttente: false, isole: true,
+              fond: 'studio', lieId: 'prod_1', lieNom: 'Robe Élégance', lieSku: 'ROB-0001',
+              poids: 184320, statut: 'pret', lotId: 'lot_a', lotNom: 'Import du 12 août',
+              /* ⚠ CELLE-CI EST ANNULABLE (lot 3e). Sans au moins une photo qui
+                 porte un etat precedent, la pastille << ↩ >> et le bouton du
+                 pied resteraient GRISES dans tous les cas : le voile de
+                 confirmation, qui remplace cinq cents images d un coup, ne
+                 serait dessine nulle part. */
+              faits: ['detourage'], annulable: true, annulableQuoi: 'detourage',
               annulableLe: 1755600000000, annulableRetabli: false },
             { id: 'ph_2', code: 'PH-000102', nom: 'Robe noire — dos',
               apercu: 'https://img.sandriza.com/divers/p2.jpg', enAttente: false, isole: false,
@@ -4432,8 +4493,8 @@ module.exports = {
       },
     },
     {
-      nom: 'voile du retour en arriere',
-      id: 'annuler',
+      nom: 'voile de mise a jour de la vitrine',
+      id: 'appliquer',
       reponses: {
         'studio:explorer': {
           ok: true, charge: true, peutModifier: true,
