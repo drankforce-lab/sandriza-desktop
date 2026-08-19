@@ -1217,6 +1217,12 @@ const OPS_PONT = new Set([
   // (`Admin._posVente`), le pont ne porte que des valeurs.
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
   'caisse:totaux', 'caisse:client', 'caisse:vendre',
+  /* Verifier a la main un paiement par LIEN. ⚠ Ce recours n existait que dans
+     l ecran web : la caisse native s appuie sur la confirmation automatique au
+     retour du client, mais quand elle n arrive pas, il faut pouvoir reconcilier
+     une vente DEJA PAYEE chez Square avec une facture restee impayee chez nous.
+     Porte AVANT de retirer l ecran, pour ne pas fermer cette porte. */
+  'caisse:verifierPaiement',
   // ⚠ `caisse:diffuser` passe par la fenetre PRINCIPALE a dessein : le canal
   // `pos:diffuser` n accepte qu elle. Sans cela, une fenetre quelconque pourrait
   // afficher n importe quel montant devant le client au moment de payer.
@@ -2172,6 +2178,9 @@ const OPS_QUI_CHANGENT_L_INVENTAIRE = new Set([
   'stock:skuPad6', 'stock:venteFinale', 'stock:vendre',
   'stock:entrepotEcrire', 'stock:entrepotSupprimer',
   'caisse:vendre', 'retour:finaliser', 'remboursement:ecrire',
+  /* ⚠ ELLE DECOMPTE LE STOCK quand Square confirme le paiement : l Inventaire
+     ouvert a cote doit le voir sans qu on le rafraichisse a la main. */
+  'caisse:verifierPaiement',
   // Attacher une photo ECRIT sur la fiche : l Inventaire ouvert a cote doit la
   // voir sans qu on le rafraichisse a la main.
   'photos:attacher',

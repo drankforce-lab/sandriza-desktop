@@ -203,7 +203,16 @@ button.mini{padding:.16rem .45rem;font-size:.75rem}
 `;
 
 /** Page complète de la fenêtre native « Vente au comptoir ». */
-function pageCaisse() {
+function pageCaisse(mode) {
+  /* ⚠⚠ IDENTIFIANT D OUVERTURE << attente >>. Le compte rendu de vente est un
+     VOILE : il n existe qu APRES un clic sur << Encaisser >>, et le banc ne
+     clique pas. Or c est l ecran ou l on lit le lien de paiement, ou l on
+     reconcilie une vente DEJA PAYEE chez Square, et ou vit desormais le bouton
+     << Verifier le paiement >> — de l argent, donc, et pas un affichage. Il
+     serait reste hors de tout controle, exactement comme le lanceur de lot mort
+     pendant deux versions. Ce mode pose un compte rendu temoin, inerte : aucun
+     appel, aucune vente. La coquille ne l ouvre jamais. */
+  const attenteTemoin = String(mode || '') === 'attente';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Vente au comptoir — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -644,9 +653,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (r.enAttente) {
       lien = r.lien && r.lien.url
         ? '<div class="lien"><input id="lien-url" readonly value="' + esc(r.lien.url) + '">'
-          + '<button class="mini" id="btn-copier"><span class="ic">📋</span> Copier</button></div>'
+          + '<button class="mini" id="btn-copier"><span class="ic">📋</span> Copier</button>'
+          /* ⚠ LE RECOURS QUAND LA CONFIRMATION AUTOMATIQUE N ARRIVE PAS. Le
+             client ferme son onglet, le retour rate : la vente est PAYEE chez
+             Square et la facture reste impayee chez nous. Sans ce bouton, il n y
+             avait aucun moyen de les reconcilier au comptoir — il n existait que
+             dans l ecran web, retire en 3.54.0. */
+          + '<button class="mini" id="btn-verif" data-hc="' + esc((r.lien && r.lien.hcId) || '')
+          + '" data-cmd="' + esc(r.commandeId || '') + '">↻ Vérifier le paiement</button></div>'
           + '<div class="aide">Le stock sera décompté et la facture marquée payée quand Square '
-          + 'confirmera — automatiquement au retour du client. Rien n’est encaissé par cet écran.</div>'
+          + 'confirmera — automatiquement au retour du client. Rien n’est encaissé par cet écran. '
+          + 'S’il a payé mais que rien ne bouge, pressez <strong>Vérifier le paiement</strong>.</div>'
         : '<div class="aide" style="color:#f87171">La commande est enregistrée, mais Square a refusé '
           + 'de créer le lien : ' + esc(r.lienMotif || 'raison inconnue') + '. Réessayez depuis la '
           + 'commande, ou encaissez autrement.</div>';
@@ -663,6 +680,37 @@ ${JS_ACTIVITE}${JS_DIRE}
       : '✅ Vente enregistrée') + '</h3>' + lignes + lien + avis
       + '<div class="fin"><button class="prim" id="btn-ok">Continuer</button></div></div>';
     document.body.appendChild(v);
+    /* ⚠ LE VERDICT EST DIT DANS LES MOTS DE CET ECRAN, pas herite du site : le
+       coeur rend un etat (paye / annule / insuffisant / attente), et c est ici
+       qu on choisit la phrase et le ton. Un << underpaid >> brut ne dirait rien
+       a quelqu un devant un client. */
+    var bvf = document.getElementById('btn-verif');
+    if (bvf) bvf.onclick = function(){
+      var hc = bvf.getAttribute('data-hc');
+      if (!hc) { dire('Aucun lien de paiement a verifier.', 'err'); return; }
+      bvf.disabled = true;
+      dire('Vérification auprès de Square…');
+      appeler('caisse:verifierPaiement', [hc, bvf.getAttribute('data-cmd')]).then(function(res){
+        bvf.disabled = false;
+        if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
+        if (res.etat === 'paye') {
+          dire('Paiement confirmé' + (res.numero ? ' — ' + res.numero : '')
+            + (res.stockOk ? ' · stock décompté.' : ' · ⚠ stock à vérifier.'),
+            res.stockOk ? 'bon' : 'att');
+          v.remove();
+          var sc = document.getElementById('scan');
+          if (sc) sc.focus();
+          return;
+        }
+        if (res.etat === 'annule') { dire('Paiement annulé par le client.', 'att'); return; }
+        if (res.etat === 'insuffisant') {
+          dire('⚠ Montant reçu INFÉRIEUR au total — à vérifier dans Square.', 'err');
+          return;
+        }
+        dire('Pas encore payé. Le lien reste valide — réessayez plus tard.', 'att');
+      });
+    };
+
     var ok = document.getElementById('btn-ok');
     ok.onclick = function(){
       v.remove();
@@ -804,6 +852,15 @@ ${JS_ACTIVITE}${JS_DIRE}
   });
 
   demarrer();
+  if (${attenteTemoin ? 'true' : 'false'}) {
+    /* Un compte rendu TEMOIN, avec un paiement en attente : c est le seul etat
+       qui dessine le lien, le bouton << Copier >> et celui de verification. */
+    compteRendu({ numero: 'SZ-100252', total: 149.95, enAttente: true,
+      commandeId: 'ord_temoin', paiement: 'lien',
+      lien: { url: 'https://square.link/u/TEMOIN', hcId: 'hc_temoin' },
+      envoiCourriel: true, compteNeuf: false,
+      avis: [{ ton: 'warning', texte: 'Temoin : aucune vente n a eu lieu.' }] });
+  }
 })();
 </script>
 </body></html>`;

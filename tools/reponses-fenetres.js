@@ -291,6 +291,44 @@ module.exports = {
         identite: IDENTITE,
       },
     },
+    /* ⚠⚠ LE COMPTE RENDU DE VENTE, PAIEMENT EN ATTENTE. Ce voile n existe qu APRES
+       un clic sur << Encaisser >>, et le banc ne clique pas. Or c est l ecran ou
+       l on lit le lien de paiement et ou vit le bouton << Verifier le paiement >>
+       (porte en 3.54.0, avant le retrait de l ecran web) : de l ARGENT deja
+       encaisse chez Square qu on vient reconcilier. Sans ce cas, il serait reste
+       hors de tout controle. Le mode << attente >> pose un compte rendu temoin
+       inerte : aucun appel, aucune vente. */
+    {
+      nom: 'compte rendu — paiement en attente',
+      id: 'attente',
+      reponses: {
+        /* ⚠ LE MEME contexte que le cas << caissier >> — la FORME REELLE. Un jeu
+           allege m avait paru suffisant : la fenetre est morte sur un .map, parce
+           que << paiements >> et << remises >> n y etaient pas. Le banc l a dit en
+           deux secondes. Un jeu d essai qui ne ressemble pas a la vraie reponse
+           n eprouve rien. */
+        'caisse:contexte': {
+          ok: true,
+          provinces: ['QC', 'ON', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'NT', 'NU', 'YT'],
+          paiements: [
+            { cle: 'terminal', libelle: 'Terminal Square (reçu)' },
+            { cle: 'comptant', libelle: 'Comptant (reçu)' },
+            { cle: 'lien', libelle: 'Lien de paiement (téléphone)' },
+          ],
+          remises: [
+            { cle: 'courriel', libelle: '✉ Envoyer par courriel' },
+            { cle: 'impression', libelle: '🖨 Imprimer seulement' },
+            { cle: 'aucun', libelle: 'Ne rien faire' },
+          ],
+          peutVendre: true,
+          par: 'Brigitte Brousseau',
+        },
+        'caisse:verifierPaiement': { ok: true, etat: 'attente' },
+        'caisse:diffuser': { ok: true },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
     {
       nom: 'lecture seule',
       id: '',
