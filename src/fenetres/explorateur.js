@@ -106,6 +106,8 @@ td.vig img{border:0;outline:0}
 .pt{font-size:.62rem;padding:.02rem .26rem;border-radius:4px;
   background:rgba(255,255,255,.08);color:#8fa1b8}
 .pt.fait{color:#4ade80}
+/* Le retour en arriere possible — dore, comme tout ce qui se decide ici. */
+.pt.ret{color:#c9a97e}
 /* Le volet d APERCU : la raison d etre de cette fenetre. */
 .apercu{flex:0 0 19rem;border-left:1px solid rgba(255,255,255,.08);
   background:#111a29;display:flex;flex-direction:column;overflow-y:auto}
@@ -143,7 +145,14 @@ td.vig img{border:0;outline:0}
 `;
 
 /** Page complète de la fenêtre native « Explorateur de photos ». */
-function pageExplorateur() {
+function pageExplorateur(mode) {
+  /* ⚠ IDENTIFIANT D OUVERTURE << annuler >>. Le voile qui confirme un retour en
+     arriere n existe qu apres avoir COCHE des photos puis CLIQUE — et le banc
+     dessine, il ne clique pas. Or c est l ecran qui remplace cinq cents images
+     d un coup : le laisser hors de tout controle serait exactement la panne
+     muette du lanceur de lot, mort pendant deux versions sans que rien ne le
+     signale. Ce mode coche tout, puis ouvre le voile. */
+  const annulerTemoin = String(mode || '') === 'annuler';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Explorateur de photos — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -277,6 +286,13 @@ ${JS_ACTIVITE}${JS_DIRE}
   function pastilles(p){
     var h = '';
     if ((p.faits || []).length) h += '<span class="pt fait" title="Déjà traitée">✓</span>';
+    /* ⚠ LA PASTILLE DIT CE QU ON DEFERAIT, pas seulement qu on peut defaire. Sur
+       une photo passee par trois gestes, << annulable >> tout seul laisse
+       exactement la question qu on se pose avant de cliquer. */
+    if (p.annulable) {
+      h += '<span class="pt ret" title="' + esc((p.annulableRetabli ? 'Rétablir « ' : 'Annuler « ')
+        + nomTraitement(p.annulableQuoi) + ' »') + '">↩</span>';
+    }
     if (p.isole) h += '<span class="pt" title="Détourée">◇</span>';
     if (p.lieId) h += '<span class="pt" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
     return h ? '<span class="pastilles">' + h + '</span>' : '';
@@ -289,6 +305,17 @@ ${JS_ACTIVITE}${JS_DIRE}
      et de lancer les quarante d un coup.
      ⚠ LES INDICES SONT GLOBAUX, pas ceux de la page : le Maj-clic peut donc
      prendre une plage qui TRAVERSE plusieurs pages. */
+  /* Les libelles viennent du serveur quand il les donne (D.traitements), sinon
+     de cette table de secours : une pastille qui dirait << fantome >> parlerait
+     le langage du code, pas celui de l ecran. */
+  var NOMS_TR = { detourage: 'Détourage', fantome: 'Mannequin retiré',
+    humain: 'Porté par un mannequin', filigrane: 'Filigrane / logo' };
+  function nomTraitement(cle){
+    var c = String(cle || '');
+    var l = ((D && D.traitements) || []).filter(function(t){ return t.cle === c; })[0];
+    return (l && l.nom) || NOMS_TR[c] || c || 'dernier traitement';
+  }
+
   function pageCourante(){
     var ph = (D && D.photos) || [];
     var pages = Math.max(1, Math.ceil(ph.length / PARPAGE));
@@ -446,6 +473,82 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ps) ps.onclick = function(){ PAGE = PAGE + 1; dessiner(); };
   }
 
+  /* Combien, parmi les photos choisies, ont vraiment quelque chose à défaire.
+     ⚠ ON NE COMPTE QUE CE QU ON CONNAIT. La selection survit au changement de
+     page (elle est keyee par identifiant), mais l ecran ne detient que les
+     photos chargees : une selection faite puis filtree peut contenir des
+     identifiants dont on ignore l etat. Le compte est donc un MINIMUM — et le
+     compte rendu du serveur, lui, dit la verite (voir << sansPrecedent >>). */
+  function nAnnulables(){
+    var ph = (D && D.photos) || [];
+    var k = 0;
+    ph.forEach(function(p){ if (SEL[p.id] && p.annulable) k++; });
+    return k;
+  }
+  // Ce qu on s apprete a defaire, dit par son nom quand il n y en a qu un seul.
+  function gesteAnnule(){
+    var ph = (D && D.photos) || [];
+    var vus = [];
+    ph.forEach(function(p){
+      if (SEL[p.id] && p.annulable && vus.indexOf(p.annulableQuoi) < 0) vus.push(p.annulableQuoi);
+    });
+    return vus;
+  }
+
+  /* ⚠⚠ UNE CONFIRMATION, ET PAS UN CLIC SEC. Annuler un lot de cinq cents
+     remplace cinq cents images par leur etat d avant : c est le geste le plus
+     lourd de cet ecran. ⚠ MAIS IL EST REVERSIBLE, et le voile le DIT — sans
+     cela on hesiterait devant le seul bouton qui repare, ce qui est exactement
+     l inverse du but. */
+  function ouvrirAnnulerVoile(){
+    var ids = Object.keys(SEL);
+    if (!ids.length) return;
+    var k = nAnnulables();
+    var gestes = gesteAnnule();
+    var quoi = (gestes.length === 1)
+      ? ('« <strong>' + esc(nomTraitement(gestes[0])) + '</strong> »')
+      : ('leur <strong>dernier traitement</strong>');
+    voile('<h3>↩ Revenir à l’état précédent</h3>'
+      + '<p>' + k + ' photo' + (k > 1 ? 's' : '') + ' sur ' + ids.length
+      + ' choisie' + (ids.length > 1 ? 's' : '') + ' ' + (k > 1 ? 'retrouveront' : 'retrouvera')
+      + ' l’état d’avant ' + quoi + '.</p>'
+      + '<p><strong>Aucun crédit n’est dépensé</strong> : l’image d’avant est déjà rangée, '
+      + 'on ne fait que la remettre en place.</p>'
+      + '<p>Le geste est <strong>réversible</strong> — le même bouton rétablira ce que vous '
+      + 'venez d’annuler.</p>'
+      /* ⚠ CE QU ON NE PEUT PAS DEFAIRE EST DIT AVANT, pas apres coup : une photo
+         traitee deux fois n a gardé qu UN état, celui d avant le dernier geste. */
+      + '<p style="color:#8fa1b8">Un seul pas en arrière est conservé par photo : une photo '
+      + 'passée par deux traitements ne remonte qu’au précédent, pas à l’originale.</p>'
+      + (k < ids.length
+          ? ('<p style="color:#d8b57a">⚠ ' + (ids.length - k) + ' photo'
+             + ((ids.length - k) > 1 ? 's n’ont' : ' n’a') + ' rien à annuler et ne bougera'
+             + ((ids.length - k) > 1 ? 'nt' : '') + ' pas.</p>')
+          : '')
+      + '<div class="fin2"><button id="an-non">Annuler</button>'
+      + '<button class="prim" id="an-oui">Revenir en arrière</button></div>',
+      function(fermer){
+        var non = document.getElementById('an-non');
+        var oui = document.getElementById('an-oui');
+        if (non) non.onclick = fermer;
+        if (oui) oui.onclick = function(){
+          oui.disabled = true;
+          dire('Retour en arrière…');
+          appeler('photos:annulerLot', [ids]).then(function(r){
+            fermer();
+            if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+            var m = r.faites + ' photo' + (r.faites > 1 ? 's' : '') + ' revenue'
+              + (r.faites > 1 ? 's' : '') + ' à l’état précédent.';
+            if (r.sansPrecedent) m += ' ' + r.sansPrecedent + ' n’avai'
+              + (r.sansPrecedent > 1 ? 'ent' : 't') + ' rien à annuler.';
+            if (r.echecs && r.echecs.length) m += ' ⚠ ' + r.echecs.length + ' en échec.';
+            dire(m, (r.echecs && r.echecs.length) ? 'att' : 'bon');
+            charger();   // les vignettes ont changé : on relit
+          });
+        };
+      });
+  }
+
   function dessinerPied(){
     var n = Object.keys(SEL).length;
     var dispo = (D && D.tousLesIds) ? D.tousLesIds.length : 0;
@@ -455,6 +558,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       '<button class="jeton" id="a-tout"' + (dispo ? '' : ' disabled') + '>Tout (' + dispo + ')</button>'
       + '<button class="jeton" id="a-inv"' + (dispo ? '' : ' disabled') + '>Inverser</button>'
       + '<button class="jeton" id="a-rien"' + (n ? '' : ' disabled') + '>Vider</button>'
+      /* ⚠ LE RETOUR EN ARRIERE EST ICI, ET PAS DANS LE STUDIO. Le Studio traite
+         UNE photo a la fois ; le cas qui a motive ce lot-ci, c est cinq cents
+         photos parties avec la mauvaise mise en scene. On repare la ou l on
+         choisit, sur la meme selection qui a servi a lancer le lot. */
+      + '<button class="jeton" id="a-annuler"' + (nAnnulables() ? '' : ' disabled')
+      + ' title="Revenir à l’état d’avant le dernier traitement">↩ Annuler ('
+      + nAnnulables() + ')</button>'
       /* ⚠ ON N EXECUTE PLUS LE LOT ICI (corrige le 2026-08-14, sa demande :
          << la selection doit etre ramenee au studio virtuel et l on execute le
          lot a cet endroit >>). L explorateur CHOISIT, le Studio DECIDE — c est
@@ -471,6 +581,8 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (SEL[id]) delete SEL[id]; else SEL[id] = true; }); dessiner(); };
     var r = document.getElementById('a-rien');
     if (r) r.onclick = function(){ SEL = {}; dessiner(); };
+    var ann = document.getElementById('a-annuler');
+    if (ann) ann.onclick = ouvrirAnnulerVoile;
     var en = document.getElementById('a-envoyer');
     if (en) en.onclick = function(){
       var ids = Object.keys(SEL);
@@ -583,6 +695,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       dessinerBarre();
       dessiner();
       dire('');
+      // Le crochet du banc (mode << annuler >>) : il n a rien a dire tant que la
+      // photothèque n est pas la, sinon il compterait zero photo concernee.
+      if (window.szApresCharge) { try { window.szApresCharge(); } catch (e) {} }
     });
   }
 
@@ -605,6 +720,17 @@ ${JS_ACTIVITE}${JS_DIRE}
   });
 
   charger();
+  if (${annulerTemoin ? 'true' : 'false'}) {
+    /* On attend que la photothèque soit là : ouvert avant, le voile ne saurait
+       ni combien de photos sont concernées ni quel geste il défait — c est-à-dire
+       tout ce qu on veut justement pouvoir relire avant de cliquer. */
+    window.szApresCharge = function(){
+      window.szApresCharge = null;
+      ((D && D.tousLesIds) || []).forEach(function(id){ SEL[id] = true; });
+      dessiner();
+      ouvrirAnnulerVoile();
+    };
+  }
 })();
 </script>
 </body></html>`;

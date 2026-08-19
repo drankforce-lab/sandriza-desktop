@@ -1463,6 +1463,9 @@ const OPS_PONT = new Set([
   // Traitements nommes (detourage, mannequin retire, porte par un mannequin)
   // et le meme geste sur un LOT.
   'photos:traiter', 'photos:lot', 'photos:renommer', 'photos:fraisEtat',
+  // Retour en arriere (lot 3e du #29) : une photo, ou toute une selection.
+  // ⚠ Aucun appel a un modele, aucun credit — on repointe des adresses R2.
+  'photos:annuler', 'photos:annulerLot',
   'photos:apercu',
   // L assistant de traitement en lot : lire une source SANS importer, montrer,
   // importer ce qui est choisi, puis traiter — chaine imposee par le coeur.
@@ -1843,6 +1846,11 @@ const LIMITES_PONT = {
      rate pas seulement un resultat — il MENT sur son sort, en affichant un echec
      pendant que le travail continue et se facture derriere. */
   'photos:traiter': 300000, 'photos:lot': 600000, 'photos:isoler': 180000,
+  /* ⚠ ANNULER NE TELEVERSE RIEN : on repointe des adresses deja dans R2, puis on
+     ecrit la fiche. C est une ecriture de base, pas un traitement d image — d ou
+     un delai ordinaire. Le LOT, lui, ecrit une fiche PAR photo : sur cinq cents,
+     ce sont cinq cents ecritures, et il lui faut la meme largeur qu un vrai lot. */
+  'photos:annuler': 30000, 'photos:annulerLot': 600000,
   // La garde des frais interroge le relais une fois par empreinte distincte (en
   // parallele) avant un lot : quelques secondes au plus, mais on laisse de la
   // marge pour un lot de soixante photos sur une liaison lente.
