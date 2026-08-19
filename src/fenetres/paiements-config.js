@@ -33,7 +33,6 @@ body{background:#0e1522;color:#e8edf5;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
-.tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .env{font-size:.72rem;margin-left:auto;border-radius:99px;padding:.12rem .6rem;font-weight:700}
 .tete .env.prod{background:rgba(248,113,113,.16);color:#fca5a5;border:1px solid rgba(248,113,113,.45)}
 .tete .env.bac{background:rgba(250,204,21,.14);color:#facc15;border:1px solid rgba(250,204,21,.4)}

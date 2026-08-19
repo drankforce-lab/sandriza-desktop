@@ -27,7 +27,6 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
-.tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .actif{margin-left:auto;display:inline-flex;align-items:center;gap:.45rem;cursor:pointer;
   font-weight:600;font-size:.82rem;-webkit-user-select:none;user-select:none}
 .tete .actif input{accent-color:#c9a97e;cursor:pointer}

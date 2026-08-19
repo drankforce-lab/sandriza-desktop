@@ -867,6 +867,33 @@ Pagi.prototype.brancher = function(){
    SOURCE pour toutes : une couleur oubliée se corrige ici, pas fenêtre par
    fenêtre. */
 const CSS_JOUR = `
+/* ══ LE TITRE DES FENETRES ══════════════════════════════════════════════════
+   Sa demande du 2026-08-19, capture a l appui : << l affichage des titres dans
+   l ensemble des fenetres natives, je veux que ce soit plus visible et
+   moderne >>, puis << prend une belle police >>.
+
+   AVANT : font:700 .98rem/1.2 Georgia,serif — un petit serif de 15,7 px, plus
+   discret que le contenu qu il annonce.
+
+   ⚠⚠ PAS DE POLICE TELECHARGEE, ET C EST UNE CONTRAINTE, PAS UN GOUT.
+   L application tourne HORS LIGNE : une police servie par un tiers ne serait pas
+   la au lancement suivant sans reseau, et le titre retomberait sur un repli
+   qu on n aurait jamais regarde. On prend donc la police d AFFICHAGE de Windows
+   11 — Segoe UI Variable Display —, dessinee exactement pour ca : des titres
+   nets, un dessin moderne, presente sur le poste. La chaine de repli descend
+   proprement jusqu a system-ui.
+
+   ⚠ CETTE REGLE VIT ICI, UNE SEULE FOIS. Les 86 declarations locales
+   << .tete h1 >> ont ete retirees : la meme decision ecrite 86 fois, c est 85
+   endroits qu on oubliera. CSS_JOUR est appende APRES le CSS de chaque fenetre,
+   donc il commande. */
+.tete h1{margin:0;
+  font-family:"Segoe UI Variable Display","Segoe UI Semibold","Segoe UI",
+    system-ui,-apple-system,Roboto,sans-serif;
+  font-size:1.18rem;font-weight:600;line-height:1.2;letter-spacing:-.015em;
+  color:#f4f7fb}
+html.jour .tete h1{color:#141c28}
+
 /* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION — ET LA REGLE EST ICI, UNE
    SEULE FOIS. Sa regle, posee le 2026-08-19 devant une capture : << les emojis
    sont pas encore en noir et blanc, sa devrais toujours etre comme sa >>.

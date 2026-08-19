@@ -32,7 +32,6 @@ body{background:#0e1522;color:#e8edf5;
 .tete .av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;
   display:flex;align-items:center;justify-content:center;font-weight:700;
   background:linear-gradient(135deg,#c9a97e,#8a6f4d);color:#17202c}
-.tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .mail{font-size:.72rem;color:#8fa1b8}
 .tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
 .tete .pill{font-size:.68rem;padding:.12rem .55rem;border-radius:99px;

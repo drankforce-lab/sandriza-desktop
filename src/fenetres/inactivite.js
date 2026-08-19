@@ -39,7 +39,9 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem .95rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#1b1216,#0e1522)}
-.tete h1{margin:0;font:700 .92rem/1.2 Georgia,serif;color:#fca5a5}
+/* ⚠ ON NE GARDE QUE LA COULEUR : elle est voulue — c est le decompte avant
+   fermeture, il doit alarmer. La police vient du socle, comme partout. */
+.tete h1{color:#fca5a5}
 .corps{flex:1 1 auto;min-height:0;display:flex;align-items:center;gap:1rem;
   padding:.9rem 1rem}
 .anneau{flex:0 0 auto;width:84px;height:84px;border-radius:50%;display:flex;

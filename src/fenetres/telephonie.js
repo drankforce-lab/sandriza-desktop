@@ -35,7 +35,6 @@ body{background:#0e1522;color:#e8edf5;
   padding:.55rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522);flex-wrap:wrap}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
-.tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .solde{display:flex;align-items:center;gap:.35rem;font-size:.8rem;color:#8fa1b8}
 .tete .solde b{color:#c9a97e;font-size:.95rem}
 .tete .qlive{font-size:.76rem;color:#facc15;background:rgba(250,204,21,.12);

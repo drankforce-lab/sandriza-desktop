@@ -1390,6 +1390,9 @@ const OPS_PONT = new Set([
   // COMPLET (en-tete, pied, desabonnement) que la fenetre ne saurait pas refaire.
   'campagnes:form', 'campagnes:ecrire', 'chaines:form', 'chaines:ecrire',
   'nl:modele', 'nl:apercu',
+  /* L editeur par blocs de la fenetre Campagnes (3.53.0). ⚠ La mise en page du
+     courriel reste cote site : la fenetre envoie des BLOCS et recoit du HTML. */
+  'nl:blocsCatalogue', 'nl:blocsHtml',
   // Segments d envoi composables : le menu << Segment >> d une campagne lisait
   // deux entrees ECRITES EN DUR. segments:apercu compte SANS enregistrer, pour
   // voir la portee d une recette pendant qu on l ecrit.
@@ -2072,6 +2075,9 @@ const LIMITES_PONT = {
   'campagnes:form': 20000, 'campagnes:ecrire': 60000,
   'chaines:form': 20000, 'chaines:ecrire': 60000,
   'nl:modele': 15000, 'nl:apercu': 20000,
+  /* Le catalogue des blocs est une lecture ; la conversion blocs -> HTML est un
+     assemblage de chaines, sans reseau ni image. Deux operations legeres. */
+  'nl:blocsCatalogue': 15000, 'nl:blocsHtml': 15000,
   /* Compter un segment relit TOUTES les commandes pour batir le profil de
      chaque abonnee : plus long qu une simple lecture de config. */
   'segments:donnees': 30000, 'segments:apercu': 30000,

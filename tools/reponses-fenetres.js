@@ -158,6 +158,36 @@ const SEGMENTS_JEU = {
   ],
 };
 
+/* Le catalogue que rend nl:blocsCatalogue — la FORME réelle : neuf types, avec
+   leur libellé, leur pictogramme et les valeurs de départ d un bloc neuf.
+   ⚠ Les défauts viennent du SITE en usage réel (BDEF, newsletter.js) : les
+   recopier ici ne crée pas une seconde vérité, c est un jeu d essai. */
+const BLOCS_CATALOGUE = { ok: true,
+  types: [
+    { cle: 'heading', label: 'Titre', icone: 'H\u2081',
+      defaut: { type: 'heading', text: 'Mon titre', size: 'h1', align: 'center', color: '#111111' } },
+    { cle: 'text', label: 'Texte', icone: '\u00b6',
+      defaut: { type: 'text', content: 'Mon texte...', align: 'left' } },
+    { cle: 'button', label: 'Bouton', icone: '\u25b6',
+      defaut: { type: 'button', text: 'Cliquer ici', url: '{{shopUrl}}', bgColor: '#C49A6C', textColor: '#ffffff', align: 'center' } },
+    { cle: 'divider', label: 'S\u00e9parateur', icone: '\u2014', defaut: { type: 'divider' } },
+    { cle: 'spacer', label: 'Espacement', icone: '\u2195', defaut: { type: 'spacer', height: 24 } },
+    { cle: 'codeBox', label: 'Encadr\u00e9 code', icone: '\ud83d\udd11',
+      defaut: { type: 'codeBox', label: 'Code promo', code: '{{promoCode}}', note: '' } },
+    { cle: 'discountHero', label: 'Banni\u00e8re r\u00e9duction', icone: '%',
+      defaut: { type: 'discountHero', subtitle: 'Offre limit\u00e9e', percent: '{{discountPercent}}', label2: 'de r\u00e9duction' } },
+    { cle: 'highlightBox', label: 'Encadr\u00e9 info', icone: '\ud83d\udce6',
+      defaut: { type: 'highlightBox', icon: '', title: 'Titre', desc: 'Description', code: '' } },
+    { cle: 'rawHtml', label: 'HTML libre', icone: '<>', defaut: { type: 'rawHtml', content: '' } },
+  ],
+  modeles: {
+    welcome: [
+      { type: 'heading', text: 'Bienvenue, {{firstName}} !', size: 'h1', align: 'center', color: '#111111' },
+      { type: 'text', content: 'Nous sommes ravies de vous accueillir.', align: 'left' },
+      { type: 'button', text: 'D\u00e9couvrir \u2192', url: '{{shopUrl}}', bgColor: '#C49A6C', textColor: '#ffffff', align: 'center' },
+    ],
+  } };
+
 module.exports = {
   'imprimantes.js': {
     'imprimantes:etat': {
@@ -804,6 +834,39 @@ module.exports = {
           html: '<h1>Bienvenue, {{firstName}} !</h1>' },
         'nl:apercu': { ok: true, html: '<html><body><h1>Bienvenue, Marie !</h1></body></html>' },
         'campagnes:ecrire': { ok: true, id: 'camp_0009', nom: 'Rentrée', cree: true },
+        /* ⚠⚠ LE CATALOGUE DES BLOCS (3.53.0). Sans lui, la palette des neuf
+           types est VIDE : les boutons d ajout, les cartes de bloc et leurs champs
+           ne seraient dessinés nulle part, et l éditeur qu on vient de porter
+           resterait hors de tout contrôle — exactement l angle mort qu on
+           reproche à l ancien lanceur de lot. */
+        'nl:blocsCatalogue': BLOCS_CATALOGUE,
+        'nl:blocsHtml': { ok: true, html: '<h1>Bienvenue, {{firstName}} !</h1>' },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    /* ⚠ LE MÊME ÉCRAN, MAIS AVEC DES BLOCS DÉJÀ EN PLACE. Le cas ci-dessus ouvre
+       une campagne NEUVE : ses blocs sont vides, donc on n y voit que le message
+       << aucun bloc >>. Celui-ci part d une campagne dont le corps existe, ce qui
+       fait dessiner une carte, ses champs et ses trois boutons (monter, descendre,
+       retirer). Deux cas, deux surfaces distinctes. */
+    {
+      nom: 'formulaire de campagne, corps d\u00e9j\u00e0 \u00e9crit',
+      id: 'campagnes:neuve',
+      reponses: {
+        'campagnes:form': {
+          ok: true, peutModifier: true,
+          campagne: { id: 'camp_0007', nom: 'Rentrée', sujet: 'Nos nouveautés',
+            segment: 'all', canal: 'email', sms: '',
+            html: '<h1 style="font-size:28px">Bienvenue, {{firstName}} !</h1>' },
+          segments: [{ cle: 'all', nom: 'Tous les abonnés' }],
+          canaux: [{ cle: 'email', nom: 'Courriel' }],
+          modeles: [{ cle: 'welcome', nom: 'Bienvenue' }],
+          abonnesActifs: 412, smsDestinataires: 0, smsPret: false,
+        },
+        'nl:blocsCatalogue': BLOCS_CATALOGUE,
+        'nl:blocsHtml': { ok: true, html: '<h1>Bienvenue, {{firstName}} !</h1>' },
+        'nl:apercu': { ok: true, html: '<html><body><h1>Bienvenue, Marie !</h1></body></html>' },
         'session:activite': { ok: true },
         identite: IDENTITE,
       },

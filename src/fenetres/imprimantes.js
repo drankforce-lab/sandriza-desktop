@@ -33,7 +33,6 @@ body{background:#0e1522;color:#e8edf5;
   padding:.75rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .ic{font-size:1.1rem}
-.tete h1{margin:0;font:700 1.02rem/1.2 Georgia,serif;letter-spacing:.01em}
 .tete .sous{margin-left:auto;font-size:.74rem;color:#8fa1b8}
 .corps{flex:1 1 auto;overflow-y:auto;padding:1.1rem}
 .corps::-webkit-scrollbar{width:9px}

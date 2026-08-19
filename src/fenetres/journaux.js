@@ -33,7 +33,6 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
-.tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .onglets{flex:0 0 auto;display:flex;gap:.1rem;flex-wrap:wrap;padding:.35rem 1rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
 .onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;color:#8fa1b8;padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .onglets button.on{color:#c9a97e;border-bottom-color:#c9a97e;font-weight:700}

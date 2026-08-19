@@ -40,7 +40,6 @@ body{background:#0e1522;color:#e8edf5;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
-.tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
@@ -116,6 +115,26 @@ tbody tr:hover td{background:rgba(255,255,255,.04)}
 .form .fin3{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.7rem;
   border-top:1px solid rgba(255,255,255,.08);padding-top:.6rem}
 .form .fin3 .gauche{margin-right:auto}
+/* ══ L EDITEUR PAR BLOCS (3.53.0) ══════════════════════════════════════════
+   Il etait le DERNIER trou declare PARTIEL dans la couverture, donc le dernier
+   obstacle au retrait du web. Une carte par bloc, dans l ordre du courriel : on
+   deplace, on retire, on ajoute — et l on ne voit jamais une balise. */
+.bqbar{display:flex;gap:.3rem;flex-wrap:wrap;margin:.35rem 0 .5rem}
+.bqbar button{font-size:.72rem;padding:.2rem .45rem;border-radius:7px}
+.bloc{border:1px solid rgba(255,255,255,.12);border-radius:9px;background:rgba(255,255,255,.03);
+  padding:.5rem .6rem;margin-bottom:.4rem}
+.bloc .bt{display:flex;align-items:center;gap:.4rem;margin-bottom:.35rem}
+.bloc .bt .bi{font-size:.82rem;opacity:.85;width:1.3rem;text-align:center}
+.bloc .bt b{font:700 .78rem/1.2 system-ui;flex:1 1 auto;min-width:0}
+.bloc .bt button{font-size:.7rem;padding:.1rem .35rem;border-radius:6px}
+.bloc .bg{display:grid;grid-template-columns:1fr;gap:.3rem}
+.bloc .bg .duo2{display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+.bloc label{font-size:.7rem;color:#8fa1b8;display:block;margin-bottom:.1rem}
+.bloc input,.bloc select,.bloc textarea{width:100%;font-size:.8rem;padding:.24rem .4rem}
+.bloc textarea{min-height:3.4rem;font-family:inherit}
+.bloc input[type=color]{padding:.1rem;height:1.7rem}
+.bvide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.8rem;
+  border:1.5px dashed rgba(255,255,255,.16);border-radius:9px}
 .apercu{border:1px solid rgba(255,255,255,.14);border-radius:9px;overflow:hidden;
   margin-top:.4rem;background:#fff}
 .apercu .chrome{background:#0f1826;color:#8fa1b8;font-size:.7rem;padding:.24rem .55rem;
@@ -186,6 +205,164 @@ ${JS_ACTIVITE}${JS_DIRE}
   var OCCUPE = false;        // un envoi est en cours : on ne redessine pas
   // { type:'campagne'|'chaine', id:'' , d:{...} } — formulaire ouvert, ou null
   var FORM = null;
+
+  /* ══ L EDITEUR PAR BLOCS (3.53.0) ══════════════════════════════════════════
+     Sa demande : << porte l editeur en natif >>. C etait le dernier trou declare
+     PARTIEL dans la couverture, donc le dernier obstacle au retrait du web.
+
+     ⚠⚠ LA MISE EN PAGE DU COURRIEL N EST PAS ICI, ET NE DOIT JAMAIS Y ETRE.
+     Cette fenetre edite des BLOCS — un titre, un texte, un bouton — et rien de
+     plus. C est _b2hOne (newsletter.js, cote site) qui decide qu un titre pese
+     28 px et qu un bouton a 14 px de fond. Recopier ces regles ici, ce serait
+     ecrire la mise en page du courriel DEUX fois, dans DEUX depots : au premier
+     ajustement de marge, l apercu cesserait de correspondre a ce que la cliente
+     recoit, et personne ne le verrait avant l envoi. On envoie donc les blocs et
+     l on recoit du HTML — la lecon du filigrane, appliquee.
+     ⚠ LE CATALOGUE VIENT AUSSI DU SITE (nl:blocsCatalogue) : les valeurs de
+     depart d un bloc neuf y sont deja ecrites. Les redeclarer ici ferait deux
+     verites de plus. */
+  var BMODE = 'visuel';   // visuel | html
+  var BLOCS = [];         // [{type, ...champs}]
+  var BTYPES = [];        // catalogue venu du site : [{cle,label,icone,defaut}]
+  var BMODELES = {};      // jeux de blocs de depart, par modele — venus du site aussi
+
+  function typeDe(cle){
+    for (var i = 0; i < BTYPES.length; i++) { if (BTYPES[i].cle === cle) return BTYPES[i]; }
+    return { cle: cle, label: cle, icone: '?', defaut: { type: cle } };
+  }
+
+  /* Les champs de chaque type. ⚠ ILS SONT DECRITS, PAS DESSINES UN PAR UN : une
+     liste de champs par type tient dans dix lignes, alors que neuf rendus
+     separes en feraient deux cents — et l on en oublierait un a chaque ajout. */
+  var BCHAMPS = {
+    heading:      [['text', 'Titre', 'texte'], ['size', 'Taille', 'choix:h1=Grand,h2=Moyen'],
+                   ['align', 'Alignement', 'choix:left=Gauche,center=Centre,right=Droite'],
+                   ['color', 'Couleur', 'couleur']],
+    text:         [['content', 'Texte', 'long'],
+                   ['align', 'Alignement', 'choix:left=Gauche,center=Centre,right=Droite']],
+    button:       [['text', 'Libellé', 'texte'], ['url', 'Lien', 'texte'],
+                   ['bgColor', 'Fond', 'couleur'], ['textColor', 'Texte', 'couleur'],
+                   ['align', 'Alignement', 'choix:left=Gauche,center=Centre,right=Droite']],
+    divider:      [],
+    spacer:       [['height', 'Hauteur (px)', 'nombre']],
+    codeBox:      [['label', 'Intitulé', 'texte'], ['code', 'Code', 'texte'],
+                   ['note', 'Note', 'texte']],
+    discountHero: [['subtitle', 'Sur-titre', 'texte'], ['percent', 'Pourcentage', 'texte'],
+                   ['label2', 'Sous-titre', 'texte']],
+    highlightBox: [['title', 'Titre', 'texte'], ['desc', 'Description', 'texte'],
+                   ['code', 'Code (facultatif)', 'texte'], ['icon', 'Pictogramme', 'texte']],
+    rawHtml:      [['content', 'HTML', 'long']]
+  };
+
+  function champBloc(i, cle, lib, genre, val){
+    var id = 'b-' + i + '-' + cle;
+    var v = (val === undefined || val === null) ? '' : String(val);
+    if (genre === 'long') {
+      return '<div><label for="' + id + '">' + esc(lib) + '</label>'
+        + '<textarea id="' + id + '" data-bi="' + i + '" data-bc="' + cle + '">' + esc(v) + '</textarea></div>';
+    }
+    if (genre === 'couleur') {
+      return '<div><label for="' + id + '">' + esc(lib) + '</label>'
+        + '<input type="color" id="' + id + '" data-bi="' + i + '" data-bc="' + cle + '" value="'
+        + esc(/^#[0-9a-f]{6}$/i.test(v) ? v : '#111111') + '"></div>';
+    }
+    if (genre === 'nombre') {
+      return '<div><label for="' + id + '">' + esc(lib) + '</label>'
+        + '<input type="number" min="4" max="200" id="' + id + '" data-bi="' + i + '" data-bc="' + cle
+        + '" value="' + esc(v || '24') + '"></div>';
+    }
+    if (genre.indexOf('choix:') === 0) {
+      var opts = genre.slice(6).split(',').map(function(o){
+        var q = o.split('='), sel = (v === q[0]) ? ' selected' : '';
+        return '<option value="' + esc(q[0]) + '"' + sel + '>' + esc(q[1]) + '</option>';
+      }).join('');
+      return '<div><label for="' + id + '">' + esc(lib) + '</label>'
+        + '<select id="' + id + '" data-bi="' + i + '" data-bc="' + cle + '">' + opts + '</select></div>';
+    }
+    return '<div><label for="' + id + '">' + esc(lib) + '</label>'
+      + '<input id="' + id + '" data-bi="' + i + '" data-bc="' + cle + '" value="' + esc(v) + '"></div>';
+  }
+
+  function blocsHtml(){
+    var pal = '<div class="bqbar">' + BTYPES.map(function(t){
+      return '<button class="mini" data-bajout="' + esc(t.cle) + '" title="Ajouter : '
+        + esc(t.label) + '"><span class="ic">' + esc(t.icone) + '</span> ' + esc(t.label) + '</button>';
+    }).join('') + '</div>';
+    if (!BLOCS.length) {
+      return pal + '<div class="bvide">Aucun bloc. Ajoutez-en un ci-dessus, ou chargez un modèle.</div>';
+    }
+    var cartes = BLOCS.map(function(b, i){
+      var t = typeDe(b.type);
+      var champs = (BCHAMPS[b.type] || []).map(function(c){
+        return champBloc(i, c[0], c[1], c[2], b[c[0]]);
+      }).join('');
+      return '<div class="bloc">'
+        + '<div class="bt"><span class="bi ic">' + esc(t.icone) + '</span><b>' + esc(t.label) + '</b>'
+        + '<button class="mini" data-bhaut="' + i + '"' + (i === 0 ? ' disabled' : '')
+        + ' title="Monter">\u2191</button>'
+        + '<button class="mini" data-bbas="' + i + '"' + (i === BLOCS.length - 1 ? ' disabled' : '')
+        + ' title="Descendre">\u2193</button>'
+        + '<button class="mini" data-bsupp="' + i + '" title="Retirer ce bloc">\u2715</button></div>'
+        + (champs ? '<div class="bg">' + champs + '</div>' : '')
+        + '</div>';
+    }).join('');
+    return pal + cartes;
+  }
+
+  // Ne repeint QUE la zone des blocs : un redessin du formulaire perdrait le
+  // sujet, le segment et le SMS deja saisis.
+  function majBlocs(){
+    var z = document.getElementById('f-blocs');
+    if (!z) return;
+    z.innerHTML = blocsHtml();
+    brancherBlocs();
+  }
+
+  /* ⚠ ON DEMANDE LE HTML AU SITE, on ne le fabrique pas. */
+  function blocsVersHtml(apres){
+    appeler('nl:blocsHtml', [BLOCS]).then(function(r){
+      apres((r && r.ok) ? (r.html || '') : '');
+    });
+  }
+
+  function brancherBlocs(){
+    var z = document.getElementById('f-blocs');
+    if (!z) return;
+    z.querySelectorAll('[data-bajout]').forEach(function(el){
+      el.onclick = function(){
+        var t = typeDe(el.getAttribute('data-bajout'));
+        BLOCS.push(JSON.parse(JSON.stringify(t.defaut || { type: t.cle })));
+        majBlocs();
+      };
+    });
+    z.querySelectorAll('[data-bsupp]').forEach(function(el){
+      el.onclick = function(){ BLOCS.splice(Number(el.getAttribute('data-bsupp')), 1); majBlocs(); };
+    });
+    var bouger = function(att, pas){
+      z.querySelectorAll('[' + att + ']').forEach(function(el){
+        el.onclick = function(){
+          var i = Number(el.getAttribute(att)), j = i + pas;
+          if (j < 0 || j >= BLOCS.length) return;
+          var t = BLOCS[i]; BLOCS[i] = BLOCS[j]; BLOCS[j] = t;
+          majBlocs();
+        };
+      });
+    };
+    bouger('data-bhaut', -1);
+    bouger('data-bbas', 1);
+    /* ⚠ UNE SAISIE NE REDESSINE JAMAIS : le curseur repartirait au debut a
+       chaque lettre. On note la valeur dans le bloc, et c est tout. */
+    z.querySelectorAll('[data-bi]').forEach(function(el){
+      var i = Number(el.getAttribute('data-bi')), c = el.getAttribute('data-bc');
+      var poser = function(){
+        if (!BLOCS[i]) return;
+        BLOCS[i][c] = (el.type === 'number') ? (Number(el.value) || 24) : el.value;
+      };
+      el.oninput = poser;
+      el.onchange = poser;
+    });
+  }
+
   var ETAPES = null;         // etapes en cours d edition (chaine seulement)
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -247,19 +424,21 @@ ${JS_ACTIVITE}${JS_DIRE}
      Regle nee de << ou sont mes configurations ? >> : une fenetre qui ne
      couvre qu une partie d un ecran doit dire ou trouver le reste. */
   function renvoi(){
-    return '<div class="note">Créer et modifier se fait ici. Seul l’<strong>éditeur '
-      + 'visuel par blocs</strong> reste à l’écran Infolettre de la fenêtre principale : '
-      + 'ici le corps du courriel s’écrit en HTML, à partir des mêmes modèles et avec '
-      + 'le même aperçu. La <strong>configuration Resend</strong> et l’<strong>offre de '
-      + 'bienvenue</strong> restent également à l’écran Infolettre. Le détail des envois '
-      + 'se lit dans la fenêtre <strong>Journal d’envoi</strong>.</div>';
+    /* ⚠ L EDITEUR PAR BLOCS EST ICI DEPUIS LA 3.53.0 : ce renvoi ne doit plus le
+       nommer comme un manque, sinon il envoie chercher a l ecran web quelque
+       chose qui est sous les yeux. */
+    return '<div class="note">Créer et modifier se fait ici, corps du courriel compris — '
+      + 'en <strong>blocs</strong> ou en <strong>HTML</strong>, au choix. La '
+      + '<strong>configuration Resend</strong> et l’<strong>offre de bienvenue</strong> '
+      + 'restent à l’écran Infolettre. Le détail des envois se lit dans la fenêtre '
+      + '<strong>Journal d’envoi</strong>.</div>';
   }
 
   /* ══ FORMULAIRES — CREER / MODIFIER ═══════════════════════════════════════
      Le trou #4 : cette fenetre savait tout faire SAUF en creer une.
-     ⚠ CHOIX DE PORTEE, dit a l ecran et declare dans la couverture : le corps
-     du courriel s edite en HTML, avec les MEMES modeles et le MEME apercu que
-     l ecran web. L editeur VISUEL par blocs reste a l ecran Infolettre. */
+     ⚠ LE CORPS S EDITE EN BLOCS **OU** EN HTML depuis la 3.53.0 : l editeur
+     visuel a ete porte ici, et la couverture est passee de PARTIEL a COMPLET.
+     C etait le dernier trou declare, donc le dernier obstacle au retrait du web. */
 
   var VARS_CAMP = ['{{firstName}}', '{{shopUrl}}', '{{promoCode}}',
     '{{discountPercent}}', '{{expiryDate}}', '{{collectionName}}'];
@@ -313,11 +492,22 @@ ${JS_ACTIVITE}${JS_DIRE}
       + esc(c.sms || '') + '</textarea>'
       + '<div class="aide"><span id="f-sms-n">0</span>/480 · Variable : <code>{{firstName}}</code>. '
       + 'Twilio gère STOP et AIDE automatiquement.</div></div>'
-      + '<div class="champ"><span class="lbl">Corps du courriel (HTML)</span>'
+      + '<div class="champ"><span class="lbl">Corps du courriel</span>'
       + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('f-tpl', d.modeles)
       + '<button class="mini" id="f-charger">Charger</button>'
       + '<button class="mini" id="f-apercu">Aperçu</button></div>'
-      + '<textarea id="f-html" spellcheck="false">' + esc(c.html || '') + '</textarea>'
+      /* ⚠ DEUX MODES, ET LE VISUEL EST LE DEFAUT. Le mode HTML reste : c est le
+         seul moyen de coller un gabarit venu d ailleurs, et de relire ce qui
+         part vraiment. Basculer vers HTML CONVERTIT les blocs ; revenir au
+         visuel remet le HTML dans un bloc << HTML libre >>, sans rien perdre. */
+      + '<div class="bqbar">'
+      + '<button class="mini' + (BMODE === 'visuel' ? ' on' : '') + '" id="f-m-vis">Visuel</button>'
+      + '<button class="mini' + (BMODE === 'html' ? ' on' : '') + '" id="f-m-htm">HTML</button>'
+      + '</div>'
+      + '<div id="f-blocs"' + (BMODE === 'visuel' ? '' : ' style="display:none"') + '>'
+      + blocsHtml() + '</div>'
+      + '<textarea id="f-html" spellcheck="false"'
+      + (BMODE === 'visuel' ? ' style="display:none"' : '') + '>' + esc(c.html || '') + '</textarea>'
       + ligneVars(VARS_CAMP) + '</div>'
       + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
       + '<div class="chrome">✉ Aperçu — marie@example.com</div>'
@@ -410,6 +600,24 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (z) z.innerHTML = vueEtapes();
   }
 
+  /* Le catalogue des blocs, demande UNE fois. ⚠ S il n arrive pas, la palette
+     reste vide et le mode HTML prend le relais : on ne bloque pas l ecran pour
+     une liste de types — mais on le DIT, sinon on chercherait pourquoi aucun
+     bouton n apparait. */
+  function chargerBlocsCatalogue(){
+    appeler('nl:blocsCatalogue', []).then(function(r){
+      if (!r || !r.ok) {
+        dire('Les types de blocs n’ont pas pu être lus — le mode HTML reste disponible.', 'att');
+        return;
+      }
+      BTYPES = r.types || [];
+      BMODELES = r.modeles || {};
+      // La palette n existe qu une fois le formulaire ouvert : on la repeint si
+      // elle est deja a l ecran.
+      if (document.getElementById('f-blocs')) majBlocs();
+    });
+  }
+
   function ouvrirForm(type, id){
     // Le segment n a pas d op de formulaire dediee : ses champs, operateurs,
     // categories et segments automatiques viennent tous de segments:donnees,
@@ -420,6 +628,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       if (!r.peutModifier) { dire('Vous êtes en consultation seulement.', 'err'); return; }
       FORM = { type: type, id: id || '', d: r };
+      /* ⚠ LES BLOCS PARTENT DU HTML EXISTANT, dans un bloc << HTML libre >>.
+         Une campagne deja ecrite n a pas de blocs : la deviner en la decoupant
+         serait inventer une structure qu on n a pas, et le premier
+         enregistrement REECRIRAIT son corps autrement. On la montre telle
+         quelle, et qui veut des blocs les ajoute. */
+      if (type === 'campagne') {
+        var htm0 = String((r.campagne && r.campagne.html) || '');
+        BLOCS = htm0 ? [{ type: 'rawHtml', content: htm0 }] : [];
+        BMODE = htm0 ? 'html' : 'visuel';
+      }
       ETAPES = (type === 'chaine')
         ? JSON.parse(JSON.stringify((r.chaine && r.chaine.etapes) || [])) : null;
       CRITERES = null;
@@ -455,6 +673,22 @@ ${JS_ACTIVITE}${JS_DIRE}
     var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     var b = document.getElementById('f-ok');
     if (FORM.type === 'campagne') {
+      /* ⚠⚠ EN MODE VISUEL, LE CHAMP HTML EST VIDE — il est masque et personne ne
+         l a rempli. Enregistrer g(f-html) tel quel ecrirait un corps VIDE sur
+         une campagne pleine de blocs, et l on ne s en apercevrait qu a l envoi.
+         On convertit donc d abord, puis on repasse par ici. */
+      if (BMODE === 'visuel') {
+        if (b) b.disabled = true;
+        dire('Assemblage du courriel…');
+        blocsVersHtml(function(htm){
+          var ta = document.getElementById('f-html');
+          if (ta) ta.value = htm;
+          BMODE = 'html';              // on ne reconvertira pas deux fois
+          if (b) b.disabled = false;
+          soumettreForm();
+        });
+        return;
+      }
       var data = { nom: g('f-nom').trim(), sujet: g('f-suj').trim(), segment: g('f-seg'),
         canal: g('f-canal'), sms: g('f-sms').trim(), html: g('f-html') };
       if (!data.nom) { dire('Le nom interne est requis.', 'err'); return; }
@@ -535,10 +769,56 @@ ${JS_ACTIVITE}${JS_DIRE}
       var majN = function(){ if (cpt && sms) cpt.textContent = String(sms.value.length); };
       if (sms) sms.oninput = majN;
       majN();
+      /* ══ LA BASCULE VISUEL / HTML ═══════════════════════════════════════
+         ⚠ ELLE NE PERD RIEN, DANS AUCUN SENS. Vers HTML : on demande au site de
+         convertir les blocs (il est le seul a savoir). Vers le visuel : le HTML
+         entre dans un bloc << HTML libre >> — on ne tente pas de le decouper en
+         blocs, ce serait inventer une structure et reecrire son corps au premier
+         enregistrement. */
+      var ta = document.getElementById('f-html');
+      var zb = document.getElementById('f-blocs');
+      var bv = document.getElementById('f-m-vis');
+      var bh = document.getElementById('f-m-htm');
+      var majMode = function(){
+        if (zb) zb.style.display = (BMODE === 'visuel') ? '' : 'none';
+        if (ta) ta.style.display = (BMODE === 'visuel') ? 'none' : '';
+        if (bv) bv.className = 'mini' + (BMODE === 'visuel' ? ' on' : '');
+        if (bh) bh.className = 'mini' + (BMODE === 'html' ? ' on' : '');
+      };
+      if (bv) bv.onclick = function(){
+        if (BMODE === 'visuel') return;
+        var htm = ta ? ta.value : '';
+        BLOCS = htm.trim() ? [{ type: 'rawHtml', content: htm }] : [];
+        BMODE = 'visuel';
+        majMode(); majBlocs();
+        dire('Mode visuel. Le HTML est rangé dans un bloc « HTML libre ».', 'att');
+      };
+      if (bh) bh.onclick = function(){
+        if (BMODE === 'html') return;
+        blocsVersHtml(function(htm){
+          if (ta) ta.value = htm;
+          BMODE = 'html';
+          majMode();
+          dire('Mode HTML — c’est exactement ce qui partira.', 'att');
+        });
+      };
+      majMode();
+      brancherBlocs();
+
       var ch = document.getElementById('f-charger');
       if (ch) ch.onclick = function(){
         var cle = document.getElementById('f-tpl').value;
         if (!cle) { dire('Choisissez un modèle.', 'att'); return; }
+        /* ⚠ EN MODE VISUEL, ON CHARGE LES BLOCS DU MODELE, pas son HTML. Charger
+           le HTML puis le ranger dans un bloc << HTML libre >> donnerait un
+           modele qu on ne peut plus modifier bloc par bloc — c est-a-dire tout
+           l inverse de ce que l editeur sert a faire. */
+        if (BMODE === 'visuel' && BMODELES[cle]) {
+          BLOCS = JSON.parse(JSON.stringify(BMODELES[cle]));
+          majBlocs();
+          dire('Modèle chargé en blocs — ajustez-les à votre guise.', 'bon');
+          return;
+        }
         appeler('nl:modele', [cle]).then(function(r){
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
           document.getElementById('f-html').value = r.html;
@@ -548,7 +828,13 @@ ${JS_ACTIVITE}${JS_DIRE}
         });
       };
       var ap = document.getElementById('f-apercu');
-      if (ap) ap.onclick = function(){ apercuDans(document.getElementById('f-html').value); };
+      if (ap) ap.onclick = function(){
+        // ⚠ L apercu montre TOUJOURS ce qui partira : en mode visuel, on convertit
+        // d abord. Montrer le contenu du champ HTML — vide en visuel — annoncerait
+        // un courriel vide sur une campagne pleine.
+        if (BMODE === 'visuel') { blocsVersHtml(function(h){ apercuDans(h); }); return; }
+        apercuDans(document.getElementById('f-html').value);
+      };
       return;
     }
 
@@ -1257,6 +1543,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       P.fermer();
     }
   });
+
+  /* Le catalogue des blocs, demande des l ouverture : la palette doit etre prete
+     quand le formulaire s ouvre, pas trois secondes apres. */
+  chargerBlocsCatalogue();
 
   if (FORM_DEPART) {
     ouvrirForm(ONGLET === 'chaines' ? 'chaine'
