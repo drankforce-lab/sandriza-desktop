@@ -2724,8 +2724,9 @@ const appliquerTheme = (wc) => {
   try { if (wc && !wc.isDestroyed()) wc.executeJavaScript(jsTheme(), true).catch(() => {}); } catch {}
 };
 /* ── LA BARRE DE TITRE OS SUIT LE THEME (#41) ───────────────────────────────
-   Les fenetres a CADRE STANDARD (ouvrirNative, fenetresTravail : « Detail de
-   commande », etc.) ne posent PAS de titleBarOverlay : Windows peint alors leur
+   Les fenetres a CADRE STANDARD (ouvrirNative : « Detail de commande », etc.
+   — les fenetres de TRAVAIL web sont parties le 2026-08-19) ne posent PAS de
+   titleBarOverlay : Windows peint alors leur
    barre de titre selon le theme du SYSTEME — donc BLANCHE quand l ordinateur est
    en clair, meme si l administration est sombre (signale 2026-08-14, capture a
    l appui). On force le theme OS a suivre celui de l administration : toutes ces
@@ -3514,124 +3515,34 @@ ipcMain.handle('module:ouvrir', (e, nom) => {
   return true;
 });
 
-// ══ FENÊTRES DE TRAVAIL ═══════════════════════════════════════════════════════
-// « Nouveau produit », « Nouvelle collection », « Nouveau fournisseur » ouvrent
-// une VRAIE fenêtre du système, déplaçable sur un second écran, et non plus un
-// écran de plus dans la fenêtre principale.
+// ══ FENÊTRES DE TRAVAIL — RETIRÉES LE 2026-08-19 (étape 3/4 du « tout natif ») ══
+// ⚠⚠ NE PAS LES REMETTRE. Ce bloc portait `ipcMain.handle('fenetre:ouvrir')` et
+// la carte `fenetresTravail` : une fenêtre qui chargeait `adm.sandriza.com` avec
+// le marqueur `?szwin=1`, et où la barre de menu du site se reconnaissait pour
+// masquer son décor. Autrement dit — une PAGE WEB DÉGUISÉE EN FENÊTRE.
 //
-// ⚠ MÊME SESSION, PAS UNE SECONDE CONNEXION. La fenêtre utilise la session
-// Electron par défaut, donc le même témoin `elg_adm` : le serveur y voit la
-// session déjà ouverte. C'est indispensable — la politique « une seule session
-// par compte » révoquerait la première si celle-ci ouvrait la sienne.
-// Et `armAppHeader()` posant l'en-tête sur cette même session, la nouvelle
-// fenêtre passe le verrou d'application sans rien de plus.
+// ⚠ POURQUOI C'ÉTAIT LE RETRAIT QUI TIENT LA PROMESSE. Tant que ce mécanisme
+// existait, une entrée de menu posée sans `app:` refabriquait cette page web
+// SANS QUE RIEN NE LE SIGNALE : à l'œil, une fenêtre ; en vérité, le site
+// entier téléchargé pour un formulaire. C'est exactement ce qui a coûté des
+// heures avec les DEUX entrées « Imprimantes » (2026-08-08) : les deux portaient
+// le même nom, l'une ouvrait la fenêtre native, l'autre cette coquille web — et
+// l'on croyait la fenêtre native cassée alors qu'elle n'était jamais ouverte.
 //
-// ⚠ SANS `parent:` — c'est ce qui la rend libre d'aller sur un autre écran.
-// Avec un parent, Windows la garde au-dessus de la fenêtre principale et la
-// ramène avec elle.
+// ⚠ CE QUI L'A REMPLACÉ, ET QUI EXISTAIT DÉJÀ : les quatre dernières entrées qui
+// s'en servaient — Nouveau produit, Nouvelle collection, Nouveau fournisseur,
+// Imprimantes — ont toutes leur `app:` et leur `case` dans `actionApp`
+// (`produit-nouveau`, `collection-nouvelle`, `fournisseur-nouveau`,
+// `imprimantes`), en `minApp` 1.6.0 à 1.8.0. On est à 3.55.0 : aucun poste en
+// service ne tombait encore sur le repli.
 //
-// ⚠ LE MARQUEUR `?szwin=1` : la barre de menu (appbar.js) s'y reconnaît et NE
-// SE DESSINE PAS. Une fenêtre d'édition n'a pas besoin d'une seconde barre de
-// navigation ; et deux barres pilotant la même application se contrediraient.
+// ⚠ `preload.js` n'expose plus `ouvrirFenetre`, et `verifier.ps1` (étape 1g)
+// REFUSE désormais toute réapparition de `szwin`, de `ouvrirFenetre` ou d'un
+// `fenetre:` dans le modèle de menu — la porte ne peut plus se réouvrir en
+// silence, ce qui était le seul vrai risque de ce mécanisme.
 //
-// ⚠ LES VERROUS D'ENREGISTREMENT RESTENT CEUX DU SITE. Ouvrir la même fiche
-// ici et dans la fenêtre principale déclenchera le conflit prévu (409) — ce
-// n'est pas un défaut, c'est le garde-fou qui fait son travail.
-const fenetresTravail = new Map();
-
-ipcMain.handle('fenetre:ouvrir', (e, opts = {}) => {
-  const cle = String(opts.cle || 'travail');
-  const titre = String(opts.titre || 'Administration Sandriza');
-  const run = String(opts.run || '');
-
-  // Déjà ouverte : on la ramène plutôt que d'en empiler une deuxième.
-  const dejaLa = fenetresTravail.get(cle);
-  if (dejaLa && !dejaLa.isDestroyed()) {
-    if (dejaLa.isMinimized()) dejaLa.restore();
-    dejaLa.focus();
-    return true;
-  }
-
-  const bornes = (reglages.get('fenetres') || {})[cle] || {};
-  const win = new BrowserWindow({
-    width: bornes.width || 1180,
-    height: bornes.height || 860,
-    ...(Number.isFinite(bornes.x) && Number.isFinite(bornes.y) ? { x: bornes.x, y: bornes.y } : {}),
-    minWidth: 900,
-    minHeight: 600,
-    title: titre,
-    backgroundColor: '#111827',
-    autoHideMenuBar: true,
-    show: false,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-      spellcheck: true,
-    },
-  });
-  fenetresTravail.set(cle, win);
-
-  // Le titre suit celui qu'on a demandé, pas celui de la page.
-  win.on('page-title-updated', (ev) => { ev.preventDefault(); });
-  win.setTitle(titre);
-  win.once('ready-to-show', () => win.show());
-
-  // Position et taille retenues PAR TYPE de fenêtre : l'éditeur de produit
-  // reprend sa place, même sur un second écran.
-  let minuterie = null;
-  const retenir = () => {
-    clearTimeout(minuterie);
-    minuterie = setTimeout(() => {
-      // Même garde que les fenêtres natives (voir ouvrirNative) : en plein écran,
-      // `getBounds()` rend la taille de l'écran, pas celle de la fenêtre.
-      if (win.isDestroyed() || win.isFullScreen()) return;
-      const tout = reglages.get('fenetres') || {};
-      tout[cle] = win.getBounds();
-      reglages.set('fenetres', tout);
-    }, 400);
-  };
-  win.on('moved', retenir);
-  win.on('resized', retenir);
-  win.on('closed', () => { fenetresTravail.delete(cle); });
-
-  // Mêmes règles de navigation que la fenêtre principale : rien d'externe
-  // n'entre dans l'application.
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    // La page vierge sert aux documents a imprimer : on la laisse s ouvrir.
-    if (estPageVierge(url)) return { action: 'allow' };
-    if (!isAllowed(url)) { versLExterieur(url); return { action: 'deny' }; }
-    return { action: 'allow' };
-  });
-  win.webContents.on('will-navigate', (ev, url) => {
-    if (estPageVierge(url)) return;
-    if (!isAllowed(url)) { ev.preventDefault(); versLExterieur(url); }
-  });
-
-  // ⚠ `once` et non `on` : sans ça, chaque rechargement de la page rouvrirait
-  // le formulaire par-dessus le travail en cours.
-  if (run) {
-    win.webContents.once('did-finish-load', () => {
-      // Un court délai laisse l'administration finir son premier rendu ; sans
-      // lui, `Admin` peut ne pas encore exister au moment de l'appel.
-      setTimeout(() => {
-        win.webContents.executeJavaScript(
-          '(function(){try{' + run + '}catch(e){' +
-          "if(typeof Toast!=='undefined')Toast.show('Ouverture impossible','error');}})()", true
-        ).catch(() => {});
-      }, 600);
-    });
-  }
-
-  // ⚠ `url` est un SUFFIXE, jamais une adresse complète : une fenêtre de cette
-  // application ne doit pouvoir pointer que vers le portail. Accepter une URL
-  // entière ferait de cette porte un moyen d'ouvrir n'importe quoi dans une
-  // fenêtre qui porte, elle, l'en-tête d'application.
-  const suffixe = /^\?[\w=&%#.-]*$/.test(String(opts.url || '')) ? String(opts.url) : '?szwin=1#admin';
-  win.loadURL(APP_URL + suffixe);
-  return true;
-});
+// Les VRAIES fenêtres, elles, passent par `ouvrirNative(...)` : du HTML écrit
+// ici, sans session de site ni module à télécharger.
 ipcMain.handle('menu:reglages', () => reglages.lire());
 ipcMain.handle('menu:set', (e, cle, valeur) => {
   if (cle === 'menuMode' || cle === 'menuTaille') { poserReglage(cle, valeur); }

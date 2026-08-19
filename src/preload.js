@@ -68,12 +68,13 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // referme — en differe court, la souris est peut-etre en route vers lui.
   menuPanneauFermer: () => ipcRenderer.send('menu:panneau:fermer'),
 
-  // Ouvre une VRAIE fenêtre du système sur l'administration, deplaçable sur un
-  // autre écran, et y exécute `run` une fois la page prête.
-  //   { cle, titre, run }  — `cle` identifie le TYPE de fenêtre : rouvrir le
-  //   même type ramène celle qui existe au lieu d'en empiler une deuxième, et
-  //   c'est aussi sous cette clé que sa position est retenue.
-  ouvrirFenetre: (o) => ipcRenderer.invoke('fenetre:ouvrir', o || {}),
+  // ⚠⚠ `ouvrirFenetre` A ÉTÉ RETIRÉ LE 2026-08-19, ET NE DOIT PAS REVENIR.
+  // Il ouvrait une fenêtre qui chargeait `adm.sandriza.com?szwin=1` — une PAGE
+  // WEB DÉGUISÉE EN FENÊTRE, où la barre de menu du site masquait son propre
+  // décor pour faire illusion. Le détail du retrait et la raison sont sur la
+  // pierre tombale de `main.js` (chercher « FENÊTRES DE TRAVAIL »).
+  // Une vraie fenêtre passe par `ouvrirNative(...)` côté coquille, atteinte
+  // depuis ici par `menuAction(...)` ou `dockOuvrir(...)`.
 
   // ── ÉCRANS NATIFS ANCRÉS ──────────────────────────────────────────────────
   // La barre laterale pose la version NATIVE par-dessus la zone de contenu
