@@ -26,7 +26,7 @@
  * menu entière.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -143,7 +143,7 @@ function pageRetour(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');
@@ -243,11 +243,21 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('');
   }
 
+  /* ⚠ LA PROPOSITION EST ICI, PAS DANS UN CHEMIN D'OUVERTURE. Cette fenetre n'a
+     pas de bouton << modifier >> : elle s'ouvre DEJA sur son formulaire, et se
+     redessine a chaque etape du fil. On propose donc apres le dessin de la
+     premiere etape, et une seule fois — sinon la question reviendrait a chaque
+     aller-retour dans le fil, ce qui est plus agacant que la perte qu'on evite. */
+  var BR_PROPOSE = false;
   function dessiner(){
     fil();
     if (ETAPE === 0) dessinerDemande();
     else if (ETAPE === 1) dessinerTraitement();
     else dessinerReglement();
+    if (!BR_PROPOSE && ETAPE === 0 && document.getElementById('r-notes')) {
+      BR_PROPOSE = true;
+      szBrouillonProposer();
+    }
   }
 
   function dessinerDemande(){
@@ -534,6 +544,38 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (f) f.onclick = finaliser;
   }
 
+  /* == LE BROUILLON D'UNE DEMANDE DE RETOUR =================================
+     On y decide un statut, une raison de refus ecrite a la main, un transporteur,
+     un service, un poids, et des notes internes. Ce n'est pas une heure de travail,
+     mais la raison de refus et les notes sont du texte redige — et il y a une
+     ETIQUETTE de transport au bout, donc de l'argent. Refaire la saisie parce
+     qu'une fenetre s'est fermee est le genre de contrariete qui fait cliquer trop
+     vite la fois suivante.
+     ⚠ UNE CLE PAR DEMANDE : les demandes de retour se ressemblent (memes statuts,
+     memes transporteurs). Sans la cle, la note d'une demande serait proposee sur la
+     suivante, et l'on refuserait la mauvaise.
+     ⚠ ET SEULEMENT CE QUI DIFFERE de ce qui est enregistre : on modifie une
+     demande EXISTANTE. */
+  var BR_CHAMPS = ['r-statut', 'r-refus', 'r-transp', 'r-service', 'r-poids', 'r-notes'];
+  szBrouillonBrancher({
+    portee: 'retour',
+    libelle: 'Une modification de cette demande',
+    ttlMin: 720,
+    cle: function(){ return 'r:' + ID; },
+    actif: function(){ return !!document.getElementById('r-notes'); },
+    valeurs: function(){ return szBrouillonDuDom(BR_CHAMPS, ['r-generer']); },
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, ['r-generer']); if (!v) return false;
+      var d = (R && R.demande) || {};
+      if (String(v['r-notes'] || '') !== String(d.notes || '')) return true;
+      if (String(v['r-refus'] || '') !== String(d.noteRefus || '')) return true;
+      if (String(v['r-statut'] || '') !== String(d.statut || '')) return true;
+      return false;
+    },
+    remplir: function(v){ szBrouillonAuDom(v); },
+  });
+  szBrouillonEcouter();
+
   // ══ GESTES ════════════════════════════════════════════════════════════════
   function enregistrer(fige){
     if (enCours) return;
@@ -549,6 +591,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       var t = 'Demande mise à jour.';
       if (r.etiquetteErreur) t += ' ⚠ Étiquette : ' + r.etiquetteErreur;
       if (r.courriel) t += r.courriel.envoye ? ' Courriel envoyé.' : (r.courriel.erreur ? ' Courriel NON envoyé : ' + r.courriel.erreur : '');
+      /* Le brouillon meurt a l'enregistrement REUSSI, pas avant. */
+      szBrouillonJeter();
       dire(t, r.etiquetteErreur || (r.courriel && !r.courriel.envoye && r.courriel.erreur) ? 'att' : 'bon');
       recharger();
     });

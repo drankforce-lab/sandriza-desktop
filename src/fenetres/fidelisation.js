@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -147,7 +147,7 @@ function pageFidelisation(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -421,6 +421,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       EDIT = (FORM && FORM.sondage) || { id: '', nom: '', declencheur: 'delivered', intro: '',
         actif: true, questions: [], recompense: { active: false, type: 'percent', valeur: 10, jours: 30, message: '' } };
       DETAIL = null; dessiner();
+      /* Apres le dessin : la boite de reprise remplit des champs qui n'existent
+         qu'une fois l'editeur pose. */
+      szBrouillonProposer();
     };
     appeler('fidelisation:sondage:form', [id || '']).then(function(r){
       if (!r || !r.ok) { dire('Éditeur indisponible : ' + expliquer(r), 'err'); return; }
@@ -428,11 +431,56 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* == LE BROUILLON D'UN SONDAGE ============================================
+     Un sondage se compose : nom, declencheur, texte d'introduction du courriel,
+     et une LISTE DE QUESTIONS redigees une par une, avec leurs options. C'est du
+     texte libre, ecrit pour etre lu par des clientes — on ne le refait pas de
+     memoire.
+     ⚠ TOUT VIT DANS L'OBJET << EDIT >>, pas dans le DOM, et il ne se synchronise qu'a
+     l'appel de << moissonner() >>. On l'appelle donc AVANT de garder : sans cela, la
+     derniere question tapee serait absente du brouillon alors qu'elle est a
+     l'ecran. C'est la meme mecanique que les etapes d'une chaine.
+     ⚠ ET ON GARDE L'OBJET ENTIER : c'est exactement ce que l'enregistrement
+     envoie, donc rien ne peut diverger entre ce qu'on garde et ce qu'on ecrirait. */
+  szBrouillonBrancher({
+    portee: 'sondage',
+    libelle: 'Un sondage',
+    ttlMin: 720,
+    cle: function(){ return EDIT ? ((EDIT.id || '__new__')) : ''; },
+    actif: function(){ return !!EDIT && !!document.getElementById('sd-nom'); },
+    valeurs: function(){
+      if (!EDIT) return null;
+      if (typeof moissonner === 'function') moissonner();
+      try { return { _edit: JSON.parse(JSON.stringify(EDIT)) }; } catch (e) { return null; }
+    },
+    rempli: function(){
+      if (!EDIT) return false;
+      if (typeof moissonner === 'function') moissonner();
+      if (String(EDIT.nom || '').trim() || String(EDIT.intro || '').trim()) return true;
+      /* Une question dont le libelle est ecrit compte : c'est du travail, meme
+         sans nom de sondage. */
+      return (EDIT.questions || []).some(function(q){ return String(q.libelle || '').trim(); });
+    },
+    remplir: function(v){
+      if (!v._edit) return;
+      /* On garde l'identifiant COURANT : reprendre un brouillon ne doit pas
+         changer la fiche qu'on modifie. */
+      var id = EDIT ? EDIT.id : '';
+      EDIT = v._edit;
+      EDIT.id = id;
+      /* L'editeur est DESSINE depuis EDIT : le reposer sans redessiner donnerait
+         un ecran qui ne montre pas ce qui sera enregistre. */
+      dessiner();
+    },
+  });
+  szBrouillonEcouter();
+
   function enregistrerSondage(){
     moissonner();
     dire('Enregistrement…');
     appeler('fidelisation:sondage:ecrire', [EDIT]).then(function(r){
       if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      szBrouillonJeter();
       EDIT = null; FORM = null;
       charger();
       dire('« ' + r.nom + ' » ' + (r.nouveau ? 'créé' : 'enregistré') + ' — '
@@ -575,7 +623,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     var mo = t.closest('[data-modifier-sondage]');
     if (mo) { ouvrirEditeur(mo.getAttribute('data-modifier-sondage')); return; }
     if (EDIT) {
-      if (t.closest('#sd-annuler')) { EDIT = null; FORM = null; dessiner(); dire(''); return; }
+      /* ⚠ << Annuler >> N'EFFACE PAS LE BROUILLON : on ferme un editeur, on ne
+         declare pas jeter son texte. L'ecriture est immediate, valeurs prises
+         maintenant. */
+      if (t.closest('#sd-annuler')) { szBrouillonMaintenant(); EDIT = null; FORM = null; dessiner(); dire(''); return; }
       if (t.closest('#sd-enr')) { enregistrerSondage(); return; }
       if (t.closest('#sd-q-plus')) {
         moissonner();

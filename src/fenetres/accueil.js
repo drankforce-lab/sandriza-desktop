@@ -16,7 +16,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -96,7 +96,7 @@ function pageAccueil(ouverture) {
     if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var corps = document.getElementById('corps');
   var breinit = document.getElementById('b-reinit');
   var D = null, RO = false, OCCUPE = false;
@@ -244,7 +244,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.querySelectorAll('[data-sup]').forEach(function(el){ el.onclick = function(){ bougerDiapo(parseInt(el.getAttribute('data-sup'),10), -1); }; });
     corps.querySelectorAll('[data-sdn]').forEach(function(el){ el.onclick = function(){ bougerDiapo(parseInt(el.getAttribute('data-sdn'),10), 1); }; });
     var sv = document.getElementById('a-save'); if (sv) sv.onclick = enregistrerBloc;
-    var cn = document.getElementById('a-cancel'); if (cn) cn.onclick = function(){ EDIT=null; SLIDES=[]; dessiner(); dire(''); };
+    /* ⚠ << Annuler >> N'EFFACE PAS LE BROUILLON : la personne quitte le bloc, elle
+       ne declare pas jeter son travail. Il lui sera propose a la reouverture, et la
+       boite de reprise a son bouton pour repartir a neuf. L'ecriture est IMMEDIATE,
+       avec les valeurs prises MAINTENANT : deux appels plus loin, les champs
+       n'existent plus. */
+    var cn = document.getElementById('a-cancel'); if (cn) cn.onclick = function(){ szBrouillonMaintenant(); EDIT=null; SLIDES=[]; dessiner(); dire(''); };
   }
 
   // ── Actions liste ──
@@ -267,6 +272,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         : [{ id:'s1', image:'', gradient:gradVal(0), overlay:0.15, eyebrow:'', title:'Nouvelle diapo', subtitle:'', cta1Text:'Découvrir', cta1Href:'#shop', cta2Text:'', cta2Href:'' }];
     }
     dessiner(); dire('');
+    /* Apres le dessin : la boite de reprise remplit des champs et la liste des
+       diapos, qui n'existent qu'une fois l'editeur pose. */
+    szBrouillonProposer();
   }
   function lireDiapos(){
     if (EDIT !== 'hero') return;
@@ -286,6 +294,95 @@ ${JS_ACTIVITE}${JS_DIRE}
   function ajouterDiapo(){ lireDiapos(); SLIDES.push({ id:'s'+SLIDES.length+'_'+SLIDES.length, image:'', gradient:gradVal(SLIDES.length % Math.max(1,GRADS.length)), overlay:0.15, eyebrow:'', title:'Nouvelle diapo', subtitle:'', cta1Text:'Découvrir', cta1Href:'#shop', cta2Text:'', cta2Href:'' }); rafraichirDiapos(); }
   function bougerDiapo(i, dir){ lireDiapos(); var ni=i+dir; if(ni<0||ni>=SLIDES.length)return; var t=SLIDES[i]; SLIDES[i]=SLIDES[ni]; SLIDES[ni]=t; rafraichirDiapos(); }
 
+  /* == LE BROUILLON DES BLOCS DE LA PAGE D'ACCUEIL ==========================
+     Sa consigne, le 2026-08-20 : << garde le texte sans les images >>.
+     ⚠⚠ ET IL N'Y A RIEN A RETIRER ICI, VERIFIE PLUTOT QUE SUPPOSE. Je lui avais
+     annonce des images a exclure ; c'est faux. Cette fenetre n'a AUCUN depot de
+     fichier (ni FileReader, ni readAsDataURL, ni champ de type file) : le champ
+     << Image URL >> d'une diapo est une ADRESSE tapee ou collee. Une adresse pese
+     quelques dizaines d'octets et c'est du texte — la garder, c'est exactement
+     appliquer sa consigne, pas la contourner.
+     La regle telle qu'elle vaut vraiment, et elle vaut ailleurs : ON GARDE LE
+     TRAVAIL, PAS LE FICHIER. Ce qui est exclu ailleurs l'est parce que c'est un
+     FICHIER encode en base64 — la couverture d'une collection (redeposable en un
+     clic) et les images inserees dans une page du site (d'ou le plafond par
+     brouillon). Rien de tel dans cette fenetre-ci.
+
+     ⚠ LES DIAPOS NE VIVENT PAS DANS LE DOM : SLIDES est une copie de travail, et
+     l'ecran n'en montre pas forcement toutes. On appelle donc lireDiapos() avant
+     de garder — sinon la derniere diapo modifiee serait absente du brouillon alors
+     qu'elle est sous les yeux — puis on garde la VARIABLE.
+     ⚠ UNE CLE PAR BLOC : le hero, la banniere et les titres de section n'ont pas
+     les memes champs. Sans elle, une saisie laissee sur l'un serait proposee sur
+     l'autre, avec des champs qui ne correspondent a rien. */
+  var BR_HERO = ['a-effect', 'a-interval'];
+  var BR_BANNIERE = ['a-eyebrow', 'a-title', 'a-subtitle', 'a-ctat', 'a-ctah'];
+  var BR_SECTION = ['a-eyebrow', 'a-title'];
+  function brChamps(){
+    if (EDIT === 'hero') return BR_HERO;
+    if (EDIT === 'banner') return BR_BANNIERE;
+    return BR_SECTION;
+  }
+  szBrouillonBrancher({
+    portee: 'accueil-bloc',
+    libelle: 'Une modification de ce bloc',
+    ttlMin: 720,
+    cle: function(){ return EDIT ? ('b:' + EDIT) : ''; },
+    actif: function(){ return !!EDIT && !RO && !!document.getElementById('a-save'); },
+    valeurs: function(){
+      if (!EDIT) return null;
+      var v = szBrouillonDuDom(brChamps(), EDIT === 'hero' ? ['a-autoplay'] : []);
+      if (!v) return null;
+      v._bloc = EDIT;
+      if (EDIT === 'hero') {
+        if (typeof lireDiapos === 'function') lireDiapos();
+        v._slides = SLIDES || [];
+      }
+      return v;
+    },
+    /* On modifie un bloc EXISTANT : ne proposer que ce qui DIFFERE de ce qui est
+       enregistre. Proposer de << reprendre >> un formulaire identique a la base
+       n'apprendrait rien et ferait douter. */
+    rempli: function(){
+      if (!EDIT) return false;
+      var b = BLOCS.filter(function(x){ return x.id === EDIT; })[0];
+      if (!b) return false;
+      var c = b.content || {};
+      var v = szBrouillonDuDom(brChamps(), EDIT === 'hero' ? ['a-autoplay'] : []);
+      if (!v) return false;
+      if (EDIT === 'hero') {
+        if (String(v['a-effect'] || '') !== String(c.sliderEffect || 'fade')) return true;
+        if (String(v['a-interval'] || '') !== String(c.sliderInterval || 6)) return true;
+        if (!!(v._c && v._c['a-autoplay']) !== (c.sliderAutoplay !== false)) return true;
+        if (typeof lireDiapos === 'function') lireDiapos();
+        try {
+          return JSON.stringify(SLIDES || []) !== JSON.stringify(c.slides || []);
+        } catch (e) { return true; }
+      }
+      if (String(v['a-eyebrow'] || '') !== String(c.eyebrow || '')) return true;
+      if (String(v['a-title'] || '') !== String(c.title || '')) return true;
+      if (EDIT === 'banner') {
+        if (String(v['a-subtitle'] || '') !== String(c.subtitle || '')) return true;
+        if (String(v['a-ctat'] || '') !== String(c.ctaText || '')) return true;
+        if (String(v['a-ctah'] || '') !== String(c.ctaHref || '#shop')) return true;
+      }
+      return false;
+    },
+    remplir: function(v){
+      /* Un brouillon d'un AUTRE bloc ne se repose pas : ses champs n'ont rien a
+         voir. La cle l'evite deja ; ceci est la ceinture. */
+      if (v._bloc && v._bloc !== EDIT) return;
+      szBrouillonAuDom(v);
+      if (EDIT === 'hero' && v._slides) {
+        SLIDES = v._slides;
+        /* Les diapos sont DESSINEES depuis SLIDES : les reposer sans redessiner
+           donnerait un ecran qui ne montre pas ce qui sera enregistre. */
+        if (typeof rafraichirDiapos === 'function') rafraichirDiapos();
+      }
+    },
+  });
+  szBrouillonEcouter();
+
   function enregistrerBloc(){
     if (RO) return;
     var b = BLOCS.filter(function(x){ return x.id===EDIT; })[0]; if(!b) return;
@@ -298,7 +395,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     } else {
       b.content = Object.assign({}, b.content||{}, { eyebrow:val('a-eyebrow'), title:val('a-title') });
     }
-    ecrire(function(){ EDIT=null; SLIDES=[]; });
+    /* ⚠ LE BROUILLON MEURT DANS LA SUITE D'ecrire(), donc SEULEMENT si l'ecriture
+       a abouti : le jeter avant perdrait la saisie en cas d'echec. */
+    ecrire(function(){ szBrouillonJeter(); EDIT=null; SLIDES=[]; });
   }
 
   breinit.onclick = function(){
