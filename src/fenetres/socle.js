@@ -714,6 +714,11 @@ var _BR_T = null;        // minuterie de l ecriture differee
 var _BR_DERNIER = '';    // derniere valeur ecrite : on n envoie rien d inutile
 var _BR_SALE = false;    // etat annonce a la coquille
 var _BR_ECOUTE = false;
+/* ⚠ LE TIROIR DE CETTE FENETRE. Appris a l ouverture, pendant que la session est
+   encore la, et repasse a chaque ecriture. C est ce qui fait qu une saisie
+   survit a une session tombee ET revient a la bonne personne — voir la note de
+   _brsProfil dans pont.js. */
+var _BR_PROFIL = '';
 
 function szBrouillonBrancher(cfg){ _BR = cfg || null; }
 
@@ -746,7 +751,7 @@ function _brEcrire(v){
   /* ON N ENVOIE QUE SI QUELQUE CHOSE A CHANGE : un brouillon peut porter une
      image en base64, et le pont n a pas a la reporter a chaque frappe. */
   if (txt && txt === _BR_DERNIER) return Promise.resolve({ ok: true });
-  return _brPont().appeler('brouillon:ecrire', _BR.portee, _brCle(), v, _BR.ttlMin || 0)
+  return _brPont().appeler('brouillon:ecrire', _BR.portee, _brCle(), v, _BR.ttlMin || 0, _BR_PROFIL)
     .then(function(r){
       if (r && r.ok) { _BR_DERNIER = txt; return r; }
       /* ⚠ UN ECHEC SE DIT, ET ON NOMME LA VRAIE RAISON : << trop gros >> et
@@ -788,7 +793,7 @@ function szBrouillonJeter(){
   clearTimeout(_BR_T); _BR_T = null;
   _BR_DERNIER = ''; _brSale(false);
   if (!_BR || !_brPont()) return Promise.resolve({ ok: true });
-  return _brPont().appeler('brouillon:jeter', _BR.portee, _brCle())
+  return _brPont().appeler('brouillon:jeter', _BR.portee, _brCle(), _BR_PROFIL)
     .then(function(r){ return r || { ok: true }; }, function(){ return { ok: true }; });
 }
 
@@ -920,6 +925,9 @@ function szBrouillonDemander(){
 function szBrouillonProposer(){
   if (!_brActif()) return Promise.resolve(false);
   return _brPont().appeler('brouillon:lire', _BR.portee, _brCle()).then(function(r){
+    /* On retient le tiroir DES MAINTENANT, meme s il n y a rien a reprendre : si
+       la session tombe plus tard, c est la seule chose qui dira ou ecrire. */
+    if (r && r.profil) _BR_PROFIL = String(r.profil);
     if (!r || !r.ok || !r.brouillon) return false;
     return new Promise(function(resoudre){
       var v = document.createElement('div');
