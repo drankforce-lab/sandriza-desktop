@@ -25,7 +25,7 @@
  * l'IIFE — concaténation par + comme dans liens.js.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -118,7 +118,7 @@ function pageComptable(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var DEPART = ${dep};
@@ -425,22 +425,52 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
   }
 
+  /* == LE BROUILLON DU CARNET DES COMPTABLES ================================
+     Nom, cabinet, courriel, telephone, note : cinq champs recopies depuis une
+     carte d'affaires ou un courriel. Le formulaire se replie au moindre clic sur
+     << Ajouter un comptable >> (c'est une bascule) et sur << Annuler >>.
+     ⚠ UNE CLE PAR FICHE : ETAT.edition porte l'identifiant en modification, vide
+     en creation. */
+  var BR_CHAMPS = ['ct-name', 'ct-firm', 'ct-email', 'ct-phone', 'ct-note'];
+  szBrouillonBrancher({
+    portee: 'comptable-carnet',
+    libelle: 'Une fiche de comptable',
+    ttlMin: 720,
+    cle: function(){ return (ETAT && ETAT.edition) ? ('c:' + ETAT.edition) : '__new__'; },
+    actif: function(){ return !!(ETAT && ETAT.contactForm) && !!document.getElementById('ct-name'); },
+    valeurs: function(){ return szBrouillonDuDom(BR_CHAMPS, []); },
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, []); if (!v) return false;
+      return szBrouillonQuelqueChose(v, BR_CHAMPS);
+    },
+    remplir: function(v){ szBrouillonAuDom(v); },
+  });
+  szBrouillonEcouter();
+
   function brancherCarnet(){
     var ba = document.getElementById('c-ajouter');
-    if (ba) ba.onclick = function(){ ETAT.edition = ''; ETAT.contactForm = !ETAT.contactForm; dessinerCarnet(); };
+    /* ⚠ C'EST UNE BASCULE : le meme bouton ouvre ET replie. On ecrit donc avant de
+       replier, et l'on propose apres avoir ouvert. */
+    if (ba) ba.onclick = function(){
+      if (ETAT.contactForm) szBrouillonMaintenant();
+      ETAT.edition = ''; ETAT.contactForm = !ETAT.contactForm;
+      dessinerCarnet();
+      if (ETAT.contactForm) szBrouillonProposer();
+    };
     var brc = document.getElementById('c-recharger');
     if (brc) brc.onclick = function(){ charger(true); };
 
     var ce = document.getElementById('ct-enregistrer');
     if (ce) ce.onclick = enregistrerContact;
     var ca = document.getElementById('ct-annuler');
-    if (ca) ca.onclick = function(){ ETAT.contactForm = false; ETAT.edition = ''; dessinerCarnet(); };
+    if (ca) ca.onclick = function(){ szBrouillonMaintenant(); ETAT.contactForm = false; ETAT.edition = ''; dessinerCarnet(); };
 
     Array.prototype.forEach.call(corps.querySelectorAll('[data-modifier]'), function(b){
       b.onclick = function(){
         ETAT.edition = b.getAttribute('data-modifier');
         ETAT.contactForm = true;
         dessinerCarnet();
+        szBrouillonProposer();
       };
     });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-retirer]'), function(b){
@@ -464,6 +494,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       if (r.contacts) ETAT.contacts = r.contacts;
+      /* Le brouillon meurt a l'enregistrement REUSSI, et seulement la : le garder
+         ferait concurrence a la fiche enregistree. */
+      szBrouillonJeter();
       ETAT.contactForm = false; ETAT.edition = '';
       dire('Comptable enregistré.', 'bon');
       majSous();

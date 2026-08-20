@@ -43,7 +43,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent-grave dans la portion script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -243,7 +243,7 @@ function pagePages(onglet) {
     if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var corps = document.getElementById('corps');
   var ongletsEl = document.getElementById('onglets');
   var D = null, RO = false, OCCUPE = false;
@@ -372,7 +372,69 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (r && r.ok){ dire(''); dessinerEditeurPage(r.page); }
       else dire('Échec : '+expliquer(r), 'err'); });
   }
-  function fermerEditeurPage(){ var s=document.getElementById('sur-cp'); if (s) s.remove(); fermerFlot(); CPSEL=''; }
+  /* == LE BROUILLON D UNE PAGE DU SITE ======================================
+     C'est le formulaire ou l'on perd le plus de temps : le CONTENU est un article
+     redige dans un editeur riche, avec ses titres, ses listes, ses tableaux et
+     ses images. Rien ne le gardait — fermer la surcouche l'effacait.
+
+     ⚠ LE CONTENU N'EST PAS UN CHAMP : c'est le innerHTML d'une zone editable.
+     L'aide generique lit des .value, elle ne le voit pas. On le prend donc a la
+     main, exactement comme l'enregistrement le fait.
+
+     ⚠ ET LES IMAGES SONT DEDANS, en base64, jusqu'a 600 Ko chacune. C'est pour
+     cette page-ci que le pont a recu un plafond par brouillon : sans lui, un
+     article illustre viderait tous les autres brouillons pour tenir. Au-dela, le
+     brouillon n'est pas garde et la fenetre le DIT, en nommant la raison —
+     << trop volumineuse >>, pas << stockage plein >> : on n'y repond pas de la
+     meme facon.
+
+     ⚠ LE SLUG PROTEGE (Loi 25) EST EN LECTURE SEULE : le reposer ne change rien,
+     puisqu'il n'aura pas bouge. On ne l'exclut donc pas — l'exclure ferait un cas
+     de plus a se rappeler pour aucun gain. */
+  var BR_CHAMPS = ['cp-title', 'cp-slug', 'cp-sub', 'cp-flabel'];
+  szBrouillonBrancher({
+    portee: 'page-site',
+    libelle: 'Une page',
+    ttlMin: 720,
+    cle: function(){ return CPSEL ? ('p:' + CPSEL) : '__new__'; },
+    actif: function(){ return !!document.getElementById('sur-cp'); },
+    valeurs: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, ['cp-foot']);
+      if (!v) return null;
+      var z = document.getElementById('cp-ed');
+      v._contenu = (z && z.innerHTML) || '';
+      return v;
+    },
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, ['cp-foot']); if (!v) return false;
+      if (szBrouillonQuelqueChose(v, BR_CHAMPS)) return true;
+      var z = document.getElementById('cp-ed');
+      /* Un editeur << vide >> contient souvent un paragraphe vide ou un saut de
+         ligne : on ne compte que ce qui reste apres avoir retire les balises. */
+      var t = z ? String(z.innerHTML || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim() : '';
+      return !!t;
+    },
+    remplir: function(v){
+      szBrouillonAuDom(v);
+      var z = document.getElementById('cp-ed');
+      if (z && v._contenu !== undefined) z.innerHTML = v._contenu;
+    },
+  });
+  szBrouillonEcouter();
+
+  /* == LA ZONE EDITABLE DEMANDE UNE ACCROCHE DE PLUS ========================
+     La frappe au clavier est couverte : l'aide du socle ecoute << input >> sur
+     document, en capture, et une zone contenteditable en emet.
+     ⚠ CE QU'ELLE NE COUVRE PAS, ce sont les modifications faites PAR PROGRAMME —
+     insertion d'une image, d'un tableau, d'un lien, application d'un format : aucun
+     << input >> n'en sort. On accroche donc aussi edGarder(), que edCmd() appelle
+     APRES chaque execCommand et que tous les boutons de la barre appellent. Sans
+     cela, une page mise en forme au bouton n'entrerait jamais dans le brouillon —
+     et l'on croirait le contraire, puisque taper au clavier fonctionne.
+     ⚠ edGarder est aussi appele sur un simple deplacement de la selection (keyup,
+     mouseup, blur). C'est sans consequence : l'ecriture est etranglee a 3 s, et une
+     valeur identique a la derniere ecrite n'est pas renvoyee. */
+  function fermerEditeurPage(){ szBrouillonMaintenant(); var s=document.getElementById('sur-cp'); if (s) s.remove(); fermerFlot(); CPSEL=''; }
   function dessinerEditeurPage(page){
     fermerFlot();
     var nouv=!page;
@@ -401,6 +463,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     sur.innerHTML=h;
     document.body.appendChild(sur);
     edLier('cp-ed');
+    /* Apres le dessin : la boite de reprise remplit des champs et la zone
+       editable, qui n existent qu une fois la surcouche posee. */
+    szBrouillonProposer();
     var bx=document.getElementById('cp-x'); if (bx) bx.onclick=fermerEditeurPage;
     var ba=document.getElementById('cp-annuler'); if (ba) ba.onclick=fermerEditeurPage;
     var be=document.getElementById('cp-enr'); if (be) be.onclick=function(){ enregistrerPage(nouv); };
@@ -428,6 +493,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('pages:custom:ecrire',[CPSEL||'', d]).then(function(r){ OCCUPE=false;
       if (r && r.ok){
         if (r.customPages) D.customPages=r.customPages;
+        /* Jeter AVANT de fermer : fermerEditeurPage ecrit le brouillon, et il le
+           reecrirait par-dessus celui qu on vient de jeter. */
+        szBrouillonJeter();
         fermerEditeurPage();
         if (ONGLET==='list') vueListe();
         dire(nouv?'Page créée.':'Page modifiée.', 'bon');
@@ -564,7 +632,13 @@ ${JS_ACTIVITE}${JS_DIRE}
   // une fenêtre (lien, image, variables) doit donc la mémoriser AVANT, et la
   // remettre en place après — sinon l insertion atterrit au début du document.
   var EDSEL = {};
+  /* ⚠ ON ACCROCHE LE BROUILLON ICI. edGarder est appele a chaque operation de
+     l editeur faite PAR PROGRAMME (image inseree, tableau, lien, format) : sans
+     cette ligne, une page mise en forme au bouton n entrerait jamais dans le
+     brouillon, et l on croirait le contraire puisque taper au clavier, lui,
+     fonctionne. */
   function edGarder(id){
+    if (typeof szBrouillonPoser === 'function') szBrouillonPoser();
     var s=window.getSelection();
     if (s && s.rangeCount) { var r=s.getRangeAt(0); var z=document.getElementById(id);
       if (z && z.contains(r.commonAncestorContainer)) EDSEL[id]=r.cloneRange(); }

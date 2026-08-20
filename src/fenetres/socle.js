@@ -749,10 +749,16 @@ function _brEcrire(v){
   return _brPont().appeler('brouillon:ecrire', _BR.portee, _brCle(), v, _BR.ttlMin || 0)
     .then(function(r){
       if (r && r.ok) { _BR_DERNIER = txt; return r; }
-      /* ⚠ UN ECHEC SE DIT. Le site avale l echec du stockage plein ; ici on le
+      /* ⚠ UN ECHEC SE DIT, ET ON NOMME LA VRAIE RAISON : << trop gros >> et
+         << stockage plein >> ne se corrigent pas de la meme facon (enregistrer
+         maintenant, ou fermer un autre formulaire). Les confondre ferait chercher
+         au mauvais endroit.
+         ⚠ UN ECHEC SE DIT. Le site avale l echec du stockage plein ; ici on le
          montre, sinon on croit son travail a l abri alors qu il ne l est pas. */
       if (typeof szDire === 'function') {
-        szDire('\u26a0 Le brouillon n\u2019a pas pu \u00eatre conserv\u00e9 (stockage du poste plein).', 'att');
+        szDire(r && r.motif === 'trop_gros'
+          ? '⚠ Cette saisie est trop volumineuse pour etre gardee en brouillon (images). Enregistrez pour ne rien perdre.'
+          : '⚠ Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
       }
       return r || { ok: false };
     }, function(){ return { ok: false }; });

@@ -19,7 +19,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -103,7 +103,7 @@ function pageAbonnes() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -252,11 +252,33 @@ ${JS_ACTIVITE}${JS_DIRE}
     var bn = document.getElementById('ab-nouveau');
     if (bn) bn.onclick = function(){ BOITE = 'ajout'; SUPPR_ARME = ''; dessiner(); };
     var bi = document.getElementById('ab-import');
-    if (bi) bi.onclick = function(){ BOITE = 'import'; SUPPR_ARME = ''; dessiner(); };
+    if (bi) bi.onclick = function(){ BOITE = 'import'; SUPPR_ARME = ''; dessiner(); szBrouillonProposer(); };
+    /* == LE BROUILLON DE L'IMPORT EN VRAC ===================================
+       ⚠ ON NE GARDE PAS LE FORMULAIRE << Ajouter >> : deux champs, dont un courriel
+       qu'on a sous les yeux au moment de le taper. Un brouillon y serait de la
+       machinerie pour rien.
+       C'est l'IMPORT qui est a risque : on y collE une LISTE — parfois deux cents
+       adresses sorties d'un tableur ou d'un autre service. La perdre, c'est
+       refaire l'export. */
+    szBrouillonBrancher({
+      portee: 'abonnes-import',
+      libelle: 'Une liste a importer',
+      ttlMin: 720,
+      cle: function(){ return '__new__'; },
+      actif: function(){ return BOITE === 'import' && !!document.getElementById('ab-vrac'); },
+      valeurs: function(){ return szBrouillonDuDom(['ab-vrac'], []); },
+      rempli: function(){
+        var v = szBrouillonDuDom(['ab-vrac'], []); if (!v) return false;
+        return szBrouillonQuelqueChose(v, ['ab-vrac']);
+      },
+      remplir: function(v){ szBrouillonAuDom(v); },
+    });
+    szBrouillonEcouter();
+
     var ba = document.getElementById('ab-annuler');
-    if (ba) ba.onclick = function(){ BOITE = null; dessiner(); };
+    if (ba) ba.onclick = function(){ szBrouillonMaintenant(); BOITE = null; dessiner(); };
     var vo = document.getElementById('ab-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { BOITE = null; dessiner(); } };
+    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { szBrouillonMaintenant(); BOITE = null; dessiner(); } };
 
     var bAjout = document.getElementById('ab-ajouter');
     if (bAjout) bAjout.onclick = function(){
@@ -278,7 +300,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       bim.disabled = true;
       appeler('abonnes:importer', [z ? z.value : '']).then(function(r){
         bim.disabled = false;
+        /* ⚠ EN CAS D'ECHEC, ON NE JETTE RIEN ET LA BOITE RESTE : la liste collee est
+           peut-etre longue, et la refaire est un vrai travail. */
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        szBrouillonJeter();
         BOITE = null;
         /* Le compte rendu distingue les trois cas : << 12 traitees >> ne
            dirait pas ce qui s est passe. */

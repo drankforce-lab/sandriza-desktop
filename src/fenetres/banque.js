@@ -29,7 +29,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -135,7 +135,7 @@ function pageBanque(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var barre = document.getElementById('onglets');
@@ -526,6 +526,59 @@ ${JS_ACTIVITE}${JS_DIRE}
     brancherDetail();
   }
 
+  /* == LE BROUILLON DES DEUX FORMULAIRES DE BANQUE ==========================
+     Le rapprochement bancaire se fait ligne par ligne, chacune avec sa date, sa
+     description, son type, son montant et sa note. On en saisit plusieurs de
+     suite, et c'est de l'ARGENT : recommencer une ligne veut dire retourner au
+     releve pour relire un chiffre.
+     ⚠ DEUX FORMULAIRES DISTINCTS — les lignes du releve (EDIT_E) et les depots ou
+     sorties (EDIT_V) — avec des champs differents. La cle porte donc lequel des
+     deux, et l'identifiant de la ligne modifiee : sans elle, une saisie laissee sur
+     une ligne serait proposee sur la suivante, dans un rapprochement ou toutes les
+     lignes se ressemblent. C'est le pire endroit pour confondre deux fiches. */
+  var BR_E = ['e-date', 'e-desc', 'e-type', 'e-mnt', 'e-notes'];
+  var BR_V = ['v-date', 'v-du', 'v-au', 'v-mnt', 'v-desc', 'v-notes'];
+  function brQuel(){
+    if (EDIT_E !== null && document.getElementById('e-desc')) return 'e';
+    if (EDIT_V !== null && document.getElementById('v-desc')) return 'v';
+    return '';
+  }
+  szBrouillonBrancher({
+    portee: 'banque',
+    libelle: 'Une ligne',
+    ttlMin: 720,
+    cle: function(){
+      var q = brQuel(); if (!q) return '';
+      var id = q === 'e' ? EDIT_E : EDIT_V;
+      return q + ':' + (id || '__new__');
+    },
+    actif: function(){ return !!brQuel(); },
+    valeurs: function(){
+      var q = brQuel(); if (!q) return null;
+      var v = szBrouillonDuDom(q === 'e' ? BR_E : BR_V, []);
+      if (v) v._quel = q;
+      return v;
+    },
+    rempli: function(){
+      var q = brQuel(); if (!q) return false;
+      var l = q === 'e' ? BR_E : BR_V;
+      var v = szBrouillonDuDom(l, []); if (!v) return false;
+      /* La date d'un champ << date >> peut etre prete d'avance : on ne compte que
+         la description, le montant et la note — ce qu'on tape vraiment. */
+      return szBrouillonQuelqueChose(v, q === 'e'
+        ? ['e-desc', 'e-type', 'e-mnt', 'e-notes']
+        : ['v-desc', 'v-mnt', 'v-notes']);
+    },
+    remplir: function(v){
+      /* Un brouillon de l'AUTRE formulaire ne se repose pas : ses champs n'ont
+         rien a voir, et remplir une ligne de releve avec un depot ferait un
+         formulaire incoherent. La cle l'evite deja ; ceci est la ceinture. */
+      if (v._quel && v._quel !== brQuel()) return;
+      szBrouillonAuDom(v);
+    },
+  });
+  szBrouillonEcouter();
+
   function brancherDetail(){
     var ret = document.getElementById('b-retour');
     if (ret) ret.onclick = function(){ REC = ''; ARME = ''; charger(); };
@@ -535,20 +588,22 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (pdf) pdf.onclick = function(){ document_('pdf'); };
 
     var ea = document.getElementById('e-ajouter');
-    if (ea) ea.onclick = function(){ EDIT_E = ''; dessiner(); };
+    if (ea) ea.onclick = function(){ EDIT_E = ''; dessiner(); szBrouillonProposer(); };
     var eo = document.getElementById('e-enregistrer');
     if (eo) eo.onclick = enregistrerEntree;
     var en = document.getElementById('e-annuler');
-    if (en) en.onclick = function(){ EDIT_E = null; dessiner(); };
+    /* ⚠ IMMEDIAT, valeurs prises MAINTENANT : le formulaire disparait a la ligne
+       suivante. */
+    if (en) en.onclick = function(){ szBrouillonMaintenant(); EDIT_E = null; dessiner(); };
     Array.prototype.forEach.call(corps.querySelectorAll('[data-e-mod]'), function(b){
-      b.onclick = function(){ EDIT_E = b.getAttribute('data-e-mod'); dessiner(); };
+      b.onclick = function(){ EDIT_E = b.getAttribute('data-e-mod'); dessiner(); szBrouillonProposer(); };
     });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-e-jeter]'), function(b){
       b.onclick = function(){ jeter('banque:entree-jeter', b.getAttribute('data-e-jeter'), 'cette ligne du relevé'); };
     });
 
     var va = document.getElementById('v-ajouter');
-    if (va) va.onclick = function(){ EDIT_V = ''; dessiner(); };
+    if (va) va.onclick = function(){ EDIT_V = ''; dessiner(); szBrouillonProposer(); };
     var vo = document.getElementById('v-enregistrer');
     if (vo) vo.onclick = enregistrerVersement;
     var vn = document.getElementById('v-annuler');
@@ -605,10 +660,16 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   // ── Gestes ──────────────────────────────────────────────────────────────
-  function agir(op, args, mot){
+  /* ⚠ UNE SUITE APPELEE SEULEMENT AU SUCCES, et elle repare un defaut plus ancien :
+     les deux formulaires se refermaient (EDIT_E = null) AVANT de savoir si
+     l'ecriture avait abouti. En cas d'echec, la saisie etait donc perdue et il ne
+     restait qu'un message d'erreur. Avec le brouillon elle survit — a condition de
+     ne le jeter QU'ICI. */
+  function agir(op, args, mot, apres){
     dire('…');
     appeler(op, args).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      if (typeof apres === 'function') apres();
       dire(mot, 'bon');
       charger();
     });
@@ -650,18 +711,23 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function enregistrerEntree(){
     var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    /* Le brouillon est mis a jour AVANT que le formulaire ne se referme : sans
+       cela, enregistrer moins de trois secondes apres la derniere frappe laisserait
+       un brouillon perime derriere, si l'ecriture echouait. */
+    szBrouillonMaintenant();
     agir('banque:entree', [ANNEE, REC, EDIT_E || '', {
       date: g('e-date'), description: g('e-desc'), type: g('e-type'),
       amount: g('e-mnt'), notes: g('e-notes')
-    }], 'Ligne enregistrée.');
+    }], 'Ligne enregistrée.', szBrouillonJeter);
     EDIT_E = null;
   }
   function enregistrerVersement(){
     var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    szBrouillonMaintenant();
     agir('banque:versement', [ANNEE, REC, EDIT_V || '', {
       arrivalDate: g('v-date'), periodFrom: g('v-du'), periodTo: g('v-au'),
       amount: g('v-mnt'), description: g('v-desc'), notes: g('v-notes')
-    }], 'Ligne enregistrée.');
+    }], 'Ligne enregistrée.', szBrouillonJeter);
     EDIT_V = null;
   }
   function importer(quoi){

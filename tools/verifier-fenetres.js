@@ -435,9 +435,14 @@ console.log('=== Le montage du brouillon est complet ===');
       manque.push('JS_BROUILLON absent de l import du socle');
     }
     if (t.indexOf('${JS_BROUILLON}') < 0) manque.push('${JS_BROUILLON} pas injecte dans le gabarit');
-    if (t.indexOf('szBrouillonEcouter(') < 0) manque.push('szBrouillonEcouter() jamais appele (rien ne s ecrirait pendant la frappe)');
-    if (t.indexOf('szBrouillonJeter(') < 0) manque.push('szBrouillonJeter() jamais appele (le brouillon survivrait a l enregistrement)');
-    if (t.indexOf('szBrouillonProposer(') < 0) manque.push('szBrouillonProposer() jamais appele (rien ne serait propose a la reouverture)');
+    /* ⚠ ON CHERCHE LE NOM, PAS L APPEL. `banque.js` passe szBrouillonJeter EN
+       REFERENCE a sa fonction `agir` (qui ne l appelle qu au succes) : chercher
+       << szBrouillonJeter( >> le declarait manquant alors qu il est bien la. Un
+       garde trop litteral accuse du code sain, et c est la meilleure facon de se
+       faire ignorer. */
+    if (t.indexOf('szBrouillonEcouter') < 0) manque.push('szBrouillonEcouter jamais utilise (rien ne s ecrirait pendant la frappe)');
+    if (t.indexOf('szBrouillonJeter') < 0) manque.push('szBrouillonJeter jamais utilise (le brouillon survivrait a l enregistrement)');
+    if (t.indexOf('szBrouillonProposer') < 0) manque.push('szBrouillonProposer jamais utilise (rien ne serait propose a la reouverture)');
     branchees.push({ f, manque });
   });
   if (!branchees.length) {

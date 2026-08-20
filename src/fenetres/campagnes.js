@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -189,7 +189,7 @@ function pageCampagnes(ongletDepart) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -648,10 +648,87 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       ARME = '';
       dessiner();
+      /* Apres le dessin : la boite de reprise remplit des champs qui n existent
+         qu une fois le formulaire pose. */
+      szBrouillonProposer();
     });
   }
 
-  function fermerForm(){ FORM = null; ETAPES = null; CRITERES = null; charger(); }
+  /* == LE BROUILLON DES CAMPAGNES, CHAINES ET SEGMENTS ======================
+     TROIS formulaires sous un seul etat, et pas les memes champs :
+       - une campagne : nom, sujet, segment, canal, le message texte et le corps
+         du courriel (plus les BLOCS de l editeur visuel) ;
+       - une chaine : nom, description, declencheur, statut, et ses ETAPES ;
+       - un segment : nom, et ses CRITERES.
+     La cle porte donc le TYPE. Sans lui, une chaine a moitie ecrite serait
+     proposee dans le formulaire d une campagne : des champs a moitie remplis dont
+     on ne comprendrait pas la provenance.
+
+     ⚠ ET LE PLUS IMPORTANT : ETAPES, CRITERES ET BLOCS NE VIVENT PAS DANS LE DOM.
+     Ce sont des copies de travail (JSON.parse(JSON.stringify(...))), justement
+     parce que l ecran ne montre pas tout. Les relire depuis l affichage ne rendrait
+     qu une partie — et une chaine de cinq etapes reviendrait avec deux. On garde
+     donc les VARIABLES, apres avoir appele les fonctions qui les mettent a jour
+     depuis les champs affiches (releverEtapes / releverCriteres) : sans cet appel,
+     la derniere etape modifiee serait absente du brouillon alors qu elle est a
+     l ecran. */
+  function brChampsForm(){
+    if (!FORM) return [];
+    if (FORM.type === 'chaine')  return ['f-nom', 'f-desc', 'f-decl', 'f-statut'];
+    if (FORM.type === 'segment') return ['f-nom'];
+    return ['f-nom', 'f-suj', 'f-seg', 'f-canal', 'f-sms', 'f-html'];
+  }
+  szBrouillonBrancher({
+    portee: 'campagne',
+    libelle: 'Une saisie',
+    ttlMin: 720,
+    cle: function(){ return FORM ? (FORM.type + ':' + (FORM.id || '__new__')) : ''; },
+    actif: function(){ return !!FORM && !!document.getElementById('f-nom'); },
+    valeurs: function(){
+      var v = szBrouillonDuDom(brChampsForm(), []);
+      if (!v) return null;
+      /* On remet les copies de travail a jour AVANT de les garder : elles ne se
+         synchronisent qu a l appel. */
+      if (FORM.type === 'chaine' && typeof releverEtapes === 'function') releverEtapes();
+      if (FORM.type === 'segment' && typeof releverCriteres === 'function') releverCriteres();
+      v._type = FORM.type;
+      if (FORM.type === 'chaine') v._etapes = ETAPES || [];
+      if (FORM.type === 'segment') v._criteres = CRITERES || [];
+      if (FORM.type === 'campagne') { v._blocs = BLOCS || []; v._bmode = BMODE; }
+      return v;
+    },
+    rempli: function(){
+      var v = szBrouillonDuDom(brChampsForm(), []); if (!v) return false;
+      if (szBrouillonQuelqueChose(v, brChampsForm())) return true;
+      if (FORM && FORM.type === 'chaine') return (ETAPES || []).length > 0;
+      if (FORM && FORM.type === 'segment') return (CRITERES || []).length > 0;
+      return (BLOCS || []).length > 0;
+    },
+    remplir: function(v){
+      /* ⚠ UN BROUILLON D UN AUTRE TYPE NE SE REPOSE PAS. La cle porte le type, donc
+         ca ne devrait pas arriver — mais un brouillon ecrit par une version
+         anterieure pourrait ne pas la porter, et remplir une chaine avec les etapes
+         d une campagne ferait un formulaire incoherent. On refuse plutot. */
+      if (v._type && FORM && v._type !== FORM.type) return;
+      szBrouillonAuDom(v);
+      if (FORM && FORM.type === 'chaine') ETAPES = v._etapes || [];
+      if (FORM && FORM.type === 'segment') CRITERES = v._criteres || [];
+      if (FORM && FORM.type === 'campagne') {
+        BLOCS = v._blocs || [];
+        if (v._bmode) BMODE = v._bmode;
+      }
+      /* Les etapes, les criteres et les blocs sont DESSINES a partir de ces
+         variables : les reposer sans redessiner donnerait un ecran qui ne montre
+         pas ce qui sera enregistre. */
+      dessiner();
+    },
+  });
+  szBrouillonEcouter();
+
+  /* ⚠ UN SEUL CHEMIN FERME CE FORMULAIRE (le bouton Annuler et l enregistrement
+     reussi passent tous deux par ici), donc une seule ligne suffit — et l ecriture
+     est IMMEDIATE, avant que charger() ne redessine tout. */
+  function fermerForm(){ szBrouillonMaintenant(); FORM = null; ETAPES = null; CRITERES = null; charger(); }
 
   function apercuDans(html){
     var bloc = document.getElementById('f-apercu-bloc');
@@ -701,6 +778,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       appeler('campagnes:ecrire', [FORM.id, data]).then(function(r){
         if (b) b.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        /* Jeter AVANT de fermer : fermerForm ecrit le brouillon, et il reecrirait
+           par-dessus celui qu on vient de jeter. */
+        szBrouillonJeter();
         dire(esc(r.nom) + (r.cree ? ' créée' : ' mise à jour') + ' — en brouillon.', 'bon');
         fermerForm();
       });
@@ -719,6 +799,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('chaines:ecrire', [FORM.id, dch]).then(function(r){
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      szBrouillonJeter();
       dire(esc(r.nom) + (r.cree ? ' créée' : ' mise à jour') + ' — '
         + pluriel(r.etapes, 'étape') + '.', 'bon');
       fermerForm();
@@ -1017,6 +1098,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       dire(esc(r.nom) + (r.cree ? ' créé' : ' mis à jour') + ' — ' + pluriel(r.compte, 'abonnée') + '.'
         + (r.nuage ? '' : ' ⚠ Enregistré sur ce poste seulement — le nuage n’a pas confirmé.'),
         r.nuage ? 'bon' : 'att');
+      szBrouillonJeter();
       fermerForm();
     });
   }
