@@ -1517,6 +1517,10 @@ const OPS_PONT = new Set([
   'config:telephonie:donnees', 'config:telephonie:ecrire',
   'tel:resume', 'tel:sms:envoyer', 'tel:sms:lu', 'tel:sms:suppr', 'tel:vm:lu', 'tel:vm:suppr',
   'config:modeles:donnees', 'config:modeles:ecrire', 'config:modeles:retirer',
+  // Bibliotheque de MANNEQUINS de l habillage IA (2026-08-20, meme fenetre que
+  // les modeles par vue). Portage AVANT retrait : produit:modeles la LISAIT
+  // deja, rien ne pouvait l alimenter hors de l ecran web de l editeur produit.
+  'config:mannequins:donnees', 'config:mannequins:ajouter', 'config:mannequins:retirer',
   'config:gabarits:donnees', 'config:gabarits:ecrire', 'config:gabarits:copier',
   'config:gabarits:supprimer', 'config:gabarits:attributions', 'config:gabarits:gifApercu',
   'config:logotheque:donnees', 'config:logotheque:ajouter', 'config:logotheque:renommer', 'config:logotheque:retirer',
@@ -1926,6 +1930,9 @@ const LIMITES_PONT = {
   'config:telephonie:donnees': 15000, 'config:telephonie:ecrire': 30000,
   'tel:resume': 20000, 'tel:sms:envoyer': 20000, 'tel:sms:lu': 15000, 'tel:sms:suppr': 15000, 'tel:vm:lu': 15000, 'tel:vm:suppr': 15000,
   'config:modeles:donnees': 15000, 'config:modeles:ecrire': 60000, 'config:modeles:retirer': 20000,
+  // Meme profil que les modeles par vue : l ajout televerse une photo dans R2
+  // (60 s), le retrait ecrit la liste puis efface l objet (20 s).
+  'config:mannequins:donnees': 15000, 'config:mannequins:ajouter': 60000, 'config:mannequins:retirer': 20000,
   'config:gabarits:donnees': 15000, 'config:gabarits:ecrire': 25000, 'config:gabarits:copier': 20000,
   'config:gabarits:supprimer': 20000, 'config:gabarits:attributions': 20000, 'config:gabarits:gifApercu': 25000,
   'config:logotheque:donnees': 15000, 'config:logotheque:ajouter': 60000, 'config:logotheque:renommer': 20000, 'config:logotheque:retirer': 20000,

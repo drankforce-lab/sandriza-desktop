@@ -2272,8 +2272,11 @@ module.exports = {
     ];
   })(),
 
-  // Modèles par vue (palier 5, Configuration). Une photo par angle ; pas de secret.
-  // Deux états : garni + modifiable, et lecture seule.
+  /* Modèles par vue (palier 5, Configuration). Une photo par angle ; pas de secret.
+     ⚠ DEUX BLOCS DEPUIS LE 2026-08-20, donc DEUX listes à servir : les quatre
+     angles fixes, et la bibliothèque OUVERTE de mannequins de l'habillage IA.
+     Un troisième cas éprouve la clé fal.ai ABSENTE : c'est le seul état où la
+     fenêtre dit quelque chose de plus, et il se voit sans clé sous la main. */
   'modeles.js': [
     { nom: 'garni, modifiable', reponses: { identite: IDENTITE,
       'config:modeles:donnees': { ok: true, peutModifier: true, vues: [
@@ -2281,6 +2284,10 @@ module.exports = {
         { key: 'derriere', label: 'Derrière', src: '' },
         { key: 'coteG',    label: 'Gauche',   src: 'https://exemple.r2.dev/divers/gauche.jpg' },
         { key: 'coteD',    label: 'Droit',    src: '' },
+      ] },
+      'config:mannequins:donnees': { ok: true, peutModifier: true, cleConfiguree: true, mannequins: [
+        { id: 'vm_a1', nom: 'Ana',  image: 'https://exemple.r2.dev/divers/ana.jpg' },
+        { id: 'vm_b2', nom: 'Lia',  image: 'https://exemple.r2.dev/divers/lia.jpg' },
       ] } } },
     { nom: 'lecture seule', reponses: { identite: IDENTITE,
       'config:modeles:donnees': { ok: true, peutModifier: false, vues: [
@@ -2288,7 +2295,18 @@ module.exports = {
         { key: 'derriere', label: 'Derrière', src: '' },
         { key: 'coteG',    label: 'Gauche',   src: '' },
         { key: 'coteD',    label: 'Droit',    src: '' },
+      ] },
+      'config:mannequins:donnees': { ok: true, peutModifier: false, cleConfiguree: true, mannequins: [
+        { id: 'vm_a1', nom: 'Ana', image: 'https://exemple.r2.dev/divers/ana.jpg' },
       ] } } },
+    { nom: 'aucun mannequin, clé fal.ai absente', reponses: { identite: IDENTITE,
+      'config:modeles:donnees': { ok: true, peutModifier: true, vues: [
+        { key: 'devant',   label: 'Face',     src: '' },
+        { key: 'derriere', label: 'Derrière', src: '' },
+        { key: 'coteG',    label: 'Gauche',   src: '' },
+        { key: 'coteD',    label: 'Droit',    src: '' },
+      ] },
+      'config:mannequins:donnees': { ok: true, peutModifier: true, cleConfiguree: false, mannequins: [] } } },
   ],
 
   /* ⚠ DEUX CAS D'OUVERTURE, parce que la grille des mannequins a deux visages :

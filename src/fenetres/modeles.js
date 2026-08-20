@@ -12,6 +12,17 @@
  * compression). Chaque dépôt ou retrait est enregistré tout de suite — pas de
  * bouton « Enregistrer ». Aucun secret.
  *
+ * ⚠ DEUX BLOCS, ET DEUX CHOSES DIFFÉRENTES (le second ajouté le 2026-08-20) :
+ *   1. MODÈLES PAR VUE — quatre angles fixes, une photo par angle.
+ *   2. MANNEQUINS (habillage IA) — une liste OUVERTE : c'est la photo humaine
+ *      que fal.ai habille (idm-vton). Elle vivait UNIQUEMENT dans la modale
+ *      « Générer une photo » de l'écran web de l'éditeur produit, et rien
+ *      d'autre ne pouvait l'alimenter. La fenêtre Produit renvoyait déjà ici
+ *      (« gérez la photothèque de modèles dans Configuration ») — ce renvoi
+ *      était FAUX jusqu'à aujourd'hui.
+ * ⚠ La génération de MANNEQUINS, elle, est passée à Photoroom (fenêtre Studio,
+ *   16 modèles préréglés) : fal.ai ne sert plus qu'à l'habillage.
+ *
  * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
@@ -56,6 +67,28 @@ body{background:#0e1522;color:#e8edf5;
 .msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
 .vide-page{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+/* ── Le SECOND bloc : les mannequins de l'habillage IA. Liste OUVERTE, donc une
+   grille de vignettes plus petites et une tuile d'ajout, au lieu de slots fixes. */
+.sect{display:flex;align-items:center;gap:.5rem;margin:1.6rem 0 .5rem}
+.sect:first-of-type{margin-top:0}
+.sect h2{font-size:.82rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:#c9a97e;margin:0;flex:0 0 auto}
+.sect .tr{flex:1 1 auto;height:1px;background:rgba(255,255,255,.12)}
+.mqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.85rem}
+.mq{display:flex;flex-direction:column;gap:.3rem}
+.mq .cd{aspect-ratio:3/4;border:1.5px solid #2b3444;border-radius:9px;overflow:hidden;
+  background:#0f1724;display:flex;align-items:center;justify-content:center}
+.mq .cd img{width:100%;height:100%;object-fit:cover;display:block}
+.mq .nm{font-size:.72rem;color:#cbd8e6;text-align:center;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.mq .sp{min-height:1.2rem;display:flex;justify-content:center;align-items:center}
+.ajout{aspect-ratio:3/4;border:1.5px dashed #2b3444;border-radius:9px;cursor:pointer;
+  background:#0f1724;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.3rem;color:#6d7f96;font-size:.72rem;text-align:center;padding:.4rem;transition:border-color .15s}
+.ajout:hover{border-color:#c9a97e}
+.ajout .em{font-size:1.4rem;filter:grayscale(1) brightness(1.6)}
+.nomq{width:100%;font:inherit;font-size:.74rem;padding:.2rem .35rem;margin-top:.3rem;
+  border:1px solid rgba(255,255,255,.16);border-radius:6px;background:#0b1220;color:#e8edf5}
 button.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;
   border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);
   color:#e8edf5;cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none}
@@ -70,10 +103,16 @@ function pageModeles() {
 <div class="tete"><span class="ic">🧍</span><h1>Modèles par vue</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
 <div class="corps">
+  <div class="sect"><h2>Modèles par vue</h2><span class="tr"></span></div>
   <p class="intro">Une photo de mannequin par angle de prise de vue. Elles sont chargées automatiquement lors de la génération IA dans l’éditeur produit. Choisissez des poses neutres sur fond clair. Chaque dépôt est enregistré immédiatement.</p>
   <div class="grille" id="corps"><div class="vide-page">Chargement…</div></div>
+
+  <div class="sect"><h2>Mannequins (habillage IA)</h2><span class="tr"></span></div>
+  <p class="intro">La photo de la personne que l’intelligence artificielle <strong>habille</strong> avec votre vêtement — c’est le choix offert par « ✨ Mannequin IA » dans l’assistant Produit. Une photo nette, de face, cadrée en pied donne le meilleur résultat. <span id="mq-cle"></span></p>
+  <div class="mqs" id="mqs"><div class="vide-page">Chargement…</div></div>
 </div>
 <input type="file" id="fichier" accept="image/*" style="display:none">
+<input type="file" id="fichier-mq" accept="image/*" style="display:none">
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -94,6 +133,11 @@ ${JS_ACTIVITE}${JS_DIRE}
   var grille = document.getElementById('corps');
   var fichier = document.getElementById('fichier');
   var D = null, RO = false, OCCUPE = false, CIBLE = '';
+  // Le SECOND bloc a son propre etat : les deux listes se chargent et s ecrivent
+  // separement, donc un echec sur l une ne doit pas effacer l autre a l ecran.
+  var grilleMq = document.getElementById('mqs');
+  var fichierMq = document.getElementById('fichier-mq');
+  var DM = null, ROM = false, OCCUPE_MQ = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -109,6 +153,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
     image_invalide:     'Le fichier choisi n’est pas une image.',
     vue_inconnue:       'Angle de vue inconnu.',
+    introuvable:        'Ce mannequin n’existe plus — rechargez la fenêtre.',
     nuage:              "Le téléversement a échoué. Réessayez.",
     echec:              "L'opération a échoué.",
   };
@@ -200,7 +245,104 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* ══ MANNEQUINS DE L HABILLAGE IA ══════════════════════════════════════════
+     Liste OUVERTE, contrairement aux quatre angles fixes du bloc du dessus. On
+     nomme AVANT de choisir la photo : le nom est le seul repere dans la liste que
+     l assistant Produit affiche, et il n y a pas d operation pour le changer
+     apres coup — le demander au moment du depot evite une entree << Mannequin >>
+     de plus a chaque fois.
+     ⚠ AUCUNE boite de dialogue du systeme (regle du projet) : le champ du nom vit
+     dans la tuile d ajout. */
+  function dessinerMq(){
+    var av = document.getElementById('mq-cle');
+    if (av) {
+      // On ne parle de la cle QUE si elle manque : sans elle, l habillage refusera,
+      // et le dire ici evite de chercher pourquoi le bouton ne rend rien.
+      av.innerHTML = (DM && DM.cleConfiguree === false)
+        ? '<strong style="color:#fbbf24">⚠ Aucune clé Fal.ai n’est enregistrée</strong> — l’habillage refusera tant qu’elle n’est pas posée dans Configuration → Clés API.'
+        : '';
+    }
+    var l = (DM && DM.mannequins) || [];
+    var h = '';
+    for (var i = 0; i < l.length; i++) {
+      var m = l[i];
+      h += '<div class="mq"><div class="cd"><img src="' + esc(m.image) + '" alt="' + esc(m.nom) + '"></div>'
+        + '<div class="nm" title="' + esc(m.nom) + '">' + esc(m.nom) + '</div>'
+        + '<div class="sp">'
+        + (ROM ? '' : '<button class="retirer" data-delmq="' + esc(m.id) + '">✕ Supprimer</button>')
+        + '</div></div>';
+    }
+    if (!ROM) {
+      h += '<div class="mq"><div class="ajout" id="mq-plus">'
+        + '<span class="em">📸</span><span>Ajouter un mannequin</span></div>'
+        + '<input class="nomq" id="mq-nom" type="text" maxlength="40" placeholder="Nom (ex : Ana)"></div>';
+    }
+    if (!l.length && ROM) h = '<div class="vide-page">Aucun mannequin enregistré.</div>';
+    grilleMq.innerHTML = h;
+    brancherMq();
+  }
+  function brancherMq(){
+    if (ROM) return;
+    var plus = document.getElementById('mq-plus');
+    if (plus) {
+      plus.onclick = function(){ if (OCCUPE_MQ) return; fichierMq.click(); };
+      plus.ondragover = function(e){ e.preventDefault(); plus.style.borderColor = '#c9a97e'; };
+      plus.ondragleave = function(){ plus.style.borderColor = ''; };
+      plus.ondrop = function(e){ e.preventDefault(); plus.style.borderColor = '';
+        if (OCCUPE_MQ) return;
+        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) deposerMq(f); };
+    }
+    var dels = grilleMq.querySelectorAll('[data-delmq]');
+    for (var j = 0; j < dels.length; j++) {
+      dels[j].onclick = function(e){ e.stopPropagation(); retirerMq(this.getAttribute('data-delmq')); };
+    }
+  }
+
+  fichierMq.onchange = function(){
+    var f = fichierMq.files && fichierMq.files[0];
+    fichierMq.value = '';
+    if (f) deposerMq(f);
+  };
+
+  function deposerMq(f){
+    if (ROM || OCCUPE_MQ) return;
+    if (String(f.type || '').indexOf('image/') !== 0) { dire('Le fichier choisi n’est pas une image.', 'err'); return; }
+    // Le nom est lu MAINTENANT : la tuile est redessinee apres l enregistrement,
+    // donc le champ n existera plus quand la reponse arrivera.
+    var champ = document.getElementById('mq-nom');
+    var nom = champ ? String(champ.value || '').trim() : '';
+    OCCUPE_MQ = true; dire('Lecture de l’image…');
+    var fr = new FileReader();
+    fr.onerror = function(){ OCCUPE_MQ = false; dire('Lecture du fichier impossible.', 'err'); };
+    fr.onload = function(){
+      dire('Téléversement…');
+      appeler('config:mannequins:ajouter', [{ nom: nom, dataUrl: String(fr.result || '') }]).then(function(r){
+        OCCUPE_MQ = false;
+        if (r && r.ok) { DM = r; ROM = !r.peutModifier; dessinerMq(); dire('Mannequin ajouté.', 'bon'); }
+        else dire(expliquer(r), 'err');
+      });
+    };
+    fr.readAsDataURL(f);
+  }
+  function retirerMq(id){
+    if (ROM || OCCUPE_MQ) return;
+    OCCUPE_MQ = true; dire('Suppression…');
+    appeler('config:mannequins:retirer', [id]).then(function(r){
+      OCCUPE_MQ = false;
+      if (r && r.ok) { DM = r; ROM = !r.peutModifier; dessinerMq(); dire('Mannequin retiré.', 'bon'); }
+      else dire(expliquer(r), 'err');
+    });
+  }
+  function chargerMq(){
+    appeler('config:mannequins:donnees').then(function(r){
+      if (!r || !r.ok) { grilleMq.innerHTML = '<div class="vide-page">' + expliquer(r) + '</div>'; return; }
+      DM = r; ROM = !r.peutModifier; dessinerMq();
+    });
+  }
+
   charger();
+  chargerMq();
 })();
 </script></body></html>`;
 }

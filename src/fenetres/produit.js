@@ -19,11 +19,14 @@
  * L'aperçu boutique de l'éditeur du site est la fiche RÉELLE, dessinée par les
  * feuilles de style de la boutique. Le reproduire ici en ferait une IMITATION —
  * et une imitation qui diverge est pire qu'aucun aperçu, parce qu'on y croit.
- * Même raison pour la génération d'images par intelligence artificielle et le
- * détourage : ils appellent des services que seul le site sait joindre, avec ses
- * clés. Une porte de plus vers eux depuis un document local n'apporterait qu'un
- * risque. Ces deux étapes du site deviennent ici une étape « Détails » et un
- * renvoi explicite vers l'éditeur de la fenêtre principale.
+ * ⚠⚠ CE PARAGRAPHE A ÉTÉ CORRIGÉ LE 2026-08-20 : il disait le contraire de la
+ * réalité depuis des semaines, et la déclaration de couverture le répétait.
+ * L'APERÇU BOUTIQUE EST ICI, et ce n'est pas une imitation : le SITE le dessine
+ * (`produit:apercu` → `Admin._pfApercuHtml` → `Shop.renderProductCard`), règles
+ * CSS vivantes comprises. La génération par IA, le détourage et la teinte sont
+ * ici aussi (`produit:photoIa` / `detourer` / `teinter`) : c'est toujours le site
+ * qui appelle les services, avec ses clés — aucune clé ne traverse le pont — mais
+ * le geste part d'ici. Il ne reste AUCUN renvoi vers l'éditeur du site.
  *
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU, et à rien d'autre.
  */
@@ -1686,8 +1689,14 @@ function pageProduit(id) {
         return;
       }
       if (!(r.modeles || []).length) {
-        z.innerHTML = '<span class="aide" style="color:#fbbf24">⚠ Aucun modèle de pose sauvegardé — '
-          + 'gérez la photothèque de modèles dans Configuration.</span>';
+        // ⚠ CE RENVOI ETAIT FAUX JUSQU AU 2026-08-20 : il envoyait vers
+        // << Configuration >>, ou RIEN ne gerait cette bibliotheque — elle ne
+        // vivait que dans la modale de l ecran web de l editeur produit. La
+        // fenetre << Modeles par vue >> la porte maintenant. On nomme le chemin
+        // exact : un renvoi vague fait chercher, et c est ce qui l avait cache.
+        z.innerHTML = '<span class="aide" style="color:#fbbf24">⚠ Aucun mannequin enregistré — '
+          + 'ajoutez-en dans <strong>Configuration → Apparence → Modèles par vue</strong>, '
+          + 'section « Mannequins ».</span>';
         return;
       }
       z.innerHTML = r.modeles.map(function(m){
