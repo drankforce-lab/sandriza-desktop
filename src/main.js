@@ -1701,6 +1701,12 @@ const OPS_PONT = new Set([
   // dans le site, le pont ne porte que des valeurs.
   'retour:lire', 'retour:enregistrer', 'retour:recu', 'retour:litige',
   'retour:finaliser', 'retour:pdf', 'retour:renvoyer',
+  /* ⚠ retour:reprendreEtiquette N EST PAS retour:pdf. Le second ne rend qu un
+     PDF DEJA STOCKE ; celui-ci va le RECHERCHER chez Postes Canada pour un envoi
+     qui existe deja (cpShipmentId), sans le recreer. C est le seul recours quand
+     le PDF local est perdu — et regenerer l etiquette commanderait un SECOND
+     envoi facture. */
+  'retour:reprendreEtiquette',
   // Remboursement. ⚠ remboursement:ecrire REMBOURSE (Square ou credit) : la
   // regle entiere vit dans le site, le pont ne porte que quantites et choix.
   'remboursement:lire', 'remboursement:totaux', 'remboursement:nip', 'remboursement:ecrire',
@@ -1919,6 +1925,11 @@ const LIMITES_PONT = {
   'produit:enregistrer': 90000,
   // Etiquettes demandees a un transporteur (Postes Canada, FedEx).
   'commande:etiquette': 60000, 'expedition:etiquette': 60000,
+  /* Reprendre une etiquette de retour va CHERCHER l imprime chez Postes Canada :
+     c est le meme aller-retour que d en creer une, donc le meme plafond. Au
+     plafond ordinaire de 8 s, le recours annoncerait un delai pendant que le PDF
+     arrive — et l on croirait l envoi perdu alors qu il est bien la. */
+  'retour:reprendreEtiquette': 60000,
   // De l'argent chez Square : un remboursement lent n'est pas un remboursement
   // rate — le couper a 8 s en ferait un << echec >> qui a pourtant paye.
   'remboursement:ecrire': 45000, 'commandes:supprimerEcrire': 45000,

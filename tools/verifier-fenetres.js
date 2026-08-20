@@ -184,6 +184,23 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
       try { ex = await executerPage(pc.slice(a + 8, b), c.reponses || {}); }
       catch (e) { dire(false, f, '[' + c.nom + '] exécution impossible — ' + e.message); mort = true; break; }
       if (ex.fautes.length) { dire(false, f, '[' + c.nom + '] meurt à l’exécution — ' + ex.fautes.join(' | ')); mort = true; break; }
+      /* ⚠⚠ `exige` — CE QUE LE CAS DOIT AVOIR DESSINÉ (2026-08-20).
+         Tout ce qui précède prouve que la fenêtre n'est pas MORTE. Rien ne
+         prouvait qu'elle avait dessiné ce que le cas prétend éprouver : un
+         bouton dont la condition d'affichage est fausse ne fait rien planter,
+         il manque, et le contrôle reste vert. Un cas d'épreuve qui ne distingue
+         pas la version saine de la version cassée ne prouve rien.
+         ⚠ C'est FACULTATIF, et ça doit le rester : l'exiger partout ferait
+         recopier du gabarit dans le jeu de réponses, où il se périmerait. On ne
+         le pose que là où la présence est justement l'objet du cas. */
+      if (Array.isArray(c.exige) && c.exige.length) {
+        const manquent = c.exige.filter((t) => String(ex.html || '').indexOf(t) < 0);
+        if (manquent.length) {
+          dire(false, f, '[' + c.nom + '] dessine, mais SANS ce que le cas exige : '
+            + manquent.join(' · '));
+          mort = true; break;
+        }
+      }
       ecrituresTotal += ex.ecritures || 0;
     }
     if (mort) continue;

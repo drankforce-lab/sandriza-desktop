@@ -5750,6 +5750,7 @@ module.exports = {
       modeRemboursement: 'any', preference: 'credit', fraisPayesPar: 'customer',
       fauteMarchande: false, notes: '', noteRefus: '', photo: IMAGE,
       suivi: '', suiviTransporteur: '', aUneEtiquette: false, etiquetteReelle: false,
+      aUnEnvoiCP: false,
       etiquetteTransporteur: '', etiquetteLe: '', litige: null, echange: null,
     };
     return [
@@ -5770,7 +5771,8 @@ module.exports = {
         reponses: {
           'retour:lire': { ok: true, archive: false, peutEcrire: true,
             demande: Object.assign({}, demandeBase, { statut: 'approved',
-              aUneEtiquette: true, etiquetteReelle: true, etiquetteTransporteur: 'postes-canada',
+              aUneEtiquette: true, etiquetteReelle: true, aUnEnvoiCP: true,
+              etiquetteTransporteur: 'postes-canada',
               etiquetteLe: '2026-08-02T10:00:00.000Z', suivi: '1234567890123456',
               suiviTransporteur: 'Postes Canada' }),
             articles,
@@ -5798,6 +5800,27 @@ module.exports = {
               livraisonBase: 12.5, prioritaireExclu: 8,
               joursOuvrables: 22, joursFenetre: 15, dansFenetre: false, squareDisponible: true },
             etiquette, modeles },
+          'verrou:prendre': VERROU,
+          'session:activite': { ok: true },
+        },
+      },
+      /* LE CAS DU RECOURS (2026-08-20) : le PDF local a DISPARU, mais l'envoi
+         vit toujours chez Postes Canada. C'est le seul moment ou le bouton
+         << Reprendre l'etiquette >> est le dernier chemin — et c'est justement
+         le moment ou il disparaitrait s'il etait range sous `aUneEtiquette`.
+         D'ou le `exige` : le cas echoue si le bouton n'est pas dessine. */
+      {
+        nom: 'PDF perdu, envoi vivant chez Postes Canada',
+        id: 'ret_0004',
+        exige: ['id="btn-reprendre"'],
+        reponses: {
+          'retour:lire': { ok: true, archive: false, peutEcrire: true,
+            demande: Object.assign({}, demandeBase, { id: 'ret_0004', statut: 'approved',
+              aUneEtiquette: false, etiquetteReelle: false, aUnEnvoiCP: true,
+              etiquetteTransporteur: 'postes-canada',
+              etiquetteLe: '2026-08-02T10:00:00.000Z', suivi: '1234567890123456',
+              suiviTransporteur: 'Postes Canada' }),
+            articles, remboursement: null, etiquette, modeles },
           'verrou:prendre': VERROU,
           'session:activite': { ok: true },
         },

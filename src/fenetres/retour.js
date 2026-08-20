@@ -194,14 +194,34 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     raison_requise:     'Une raison est requise pour chaque article non remis en inventaire.',
     montant_invalide:   'Montant du remboursement invalide.',
     etiquette_absente:  'Aucune étiquette générée pour cette demande.',
+    /* Les motifs du RECOURS (reprendre l’étiquette chez Postes Canada). Chacun
+       dit où aller : un « échec » sans direction fait rouvrir le dossier demain
+       avec la même question. */
+    envoi_absent:       'Aucun envoi Postes Canada n’est rattaché à cette demande — il n’y a rien à reprendre. Générez l’étiquette depuis l’étape Décision.',
+    identifiants:       'Identifiants Postes Canada indisponibles.',
+    config:             'Configuration Postes Canada incomplète — Configuration → Transporteurs.',
+    cp_refus:           'Postes Canada a refusé la demande.',
+    pdf_absent:         'Postes Canada n’a pas renvoyé de PDF pour cet envoi.',
+    reseau:             'Le réseau n’a pas répondu.',
     echec:              'L’opération a échoué.'
   };
+  /* Motifs dont le detail est un FRAGMENT a coller apres la phrase, pas une
+     phrase de remplacement (voir la fonction expliquer).
+     ⚠ AUCUN ACCENT GRAVE DANS CE FICHIER : tout ce script vit dans un gabarit,
+     et le premier accent grave le referme. Le module ne se charge plus. */
+  var COMPLEMENT = { identifiants: 1, config: 1, cp_refus: 1, reseau: 1 };
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
     if (m === 'echange_indisponible') return MOTIFS.echange_indisponible + ' Basculez sur '
       + (r.modeRepli === 'creditOnly' ? 'un crédit boutique.' : 'un remboursement complet.');
     if (m === 'raison_requise' && r.article) return 'Raison requise pour « ' + r.article + ' ».';
+    /* ⚠ POUR CEUX-CI, LE DETAIL COMPLETE LA PHRASE — IL NE LA REMPLACE PAS.
+       La regle generale plus bas rend r.detail SEUL des qu il existe : sur le
+       recours d etiquette, ca donnait « mot de passe API » tout court, sans dire
+       ni ce qui a echoue ni ou aller. Le detail y est un fragment (la liste des
+       champs manquants, le message brut de Postes Canada), pas une phrase. */
+    if (COMPLEMENT[m]) return MOTIFS[m] + (r.detail ? ' ' + r.detail : '');
     if (r && r.detail) return r.detail;
     return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
   }
@@ -362,6 +382,15 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       boutons += '<button id="btn-apercu"><span class="ic">👁</span> Étiquette</button>';
       if (R.peutEcrire) boutons += '<button id="btn-renvoyer"><span class="ic">🔁</span> Renvoyer au client</button>';
     }
+    /* ⚠ HORS DU BLOC CI-DESSUS, ET C EST TOUT L INTERET. Le recours sert quand
+       le PDF local a disparu — s il etait range sous aUneEtiquette, le bouton
+       s effacerait exactement dans le seul cas ou il est le dernier chemin.
+       L envoi, lui, existe toujours chez Postes Canada : on redemande l imprime,
+       on n en commande pas un second (ce qui serait FACTURE). */
+    if (d.aUnEnvoiCP && R.peutEcrire) {
+      boutons += '<button id="btn-reprendre" title="Redemande le PDF de l’envoi déjà créé chez Postes Canada. Aucun nouvel envoi n’est commandé, rien n’est facturé.">'
+        + '<span class="ic">📥</span> ' + (d.aUneEtiquette ? 'Reprendre chez Postes Canada' : 'Reprendre l’étiquette') + '</button>';
+    }
     if (R.peutEcrire && d.statut === 'in_transit') boutons += '<button id="btn-recu"><span class="ic">📬</span> Marquer reçu</button>';
     if (R.peutEcrire && !fige) boutons += '<button class="prim" id="btn-enr">Enregistrer + courriel</button>';
     else if (R.peutEcrire && !R.archive) boutons += '<button class="prim" id="btn-enr">Enregistrer les notes</button>';
@@ -481,6 +510,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (ap) ap.onclick = apercu;
     var rv = document.getElementById('btn-renvoyer');
     if (rv) rv.onclick = renvoyer;
+    var rp = document.getElementById('btn-reprendre');
+    if (rp) rp.onclick = reprendre;
     var rc = document.getElementById('btn-recu');
     if (rc) rc.onclick = marquerRecu;
     var ro = document.getElementById('btn-rouvrir');
@@ -623,14 +654,39 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     });
   }
 
+  function voilePdf(b64){
+    voile('<h3><span class="ic">👁</span> Étiquette de retour</h3>'
+      + '<iframe src="data:application/pdf;base64,' + b64 + '" '
+      + 'style="width:100%;height:52vh;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:#3c3c3c"></iframe>'
+      + '<div class="fin2"><button id="v-non">Fermer</button></div>',
+      function(fermer){ document.getElementById('v-non').onclick = fermer; });
+  }
+
   function apercu(){
     appeler('retour:pdf', [ID]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      voile('<h3><span class="ic">👁</span> Étiquette de retour</h3>'
-        + '<iframe src="data:application/pdf;base64,' + r.pdf + '" '
-        + 'style="width:100%;height:52vh;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:#3c3c3c"></iframe>'
-        + '<div class="fin2"><button id="v-non">Fermer</button></div>',
-        function(fermer){ document.getElementById('v-non').onclick = fermer; });
+      voilePdf(r.pdf);
+    });
+  }
+
+  /* LE RECOURS. ⚠ L etiquette est MONTREE tout de suite apres : sans cela, on ne
+     saurait pas si ce qui vient d arriver est bien l imprime attendu, et le seul
+     moyen de le verifier serait de recommencer. */
+  function reprendre(){
+    var b = document.getElementById('btn-reprendre');
+    if (b) b.disabled = true;
+    dire('Reprise de l’étiquette chez Postes Canada…', 'att');
+    appeler('retour:reprendreEtiquette', [ID]).then(function(r){
+      if (!r.ok) {
+        if (b) b.disabled = false;
+        dire(expliquer(r), 'err');
+        return;
+      }
+      dire('Étiquette reprise — aucun nouvel envoi n’a été créé, rien n’a été facturé.', 'bon');
+      // recharger redessine les boutons (« Étiquette » apparaît), le voile est
+      // posé sur le body et survit au redessin.
+      recharger();
+      voilePdf(r.pdf);
     });
   }
 

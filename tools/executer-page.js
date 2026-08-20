@@ -63,7 +63,17 @@ const _SEC = 'SecurityError (origine null) — le stockage est inaccessible à u
 // dirait « aucune faute », et l'on croirait avoir vérifié quelque chose.
 const faireElement = (compteur) => ({
   get innerHTML() { return this._html || ''; },
-  set innerHTML(v) { this._html = v; if (compteur && String(v).length > 40) compteur.ecritures++; },
+  set innerHTML(v) {
+    this._html = v;
+    if (compteur && String(v).length > 40) compteur.ecritures++;
+    /* ⚠ ON GARDE AUSSI LE TEXTE ÉCRIT, pas seulement le compte. Compter prouve
+       que la fenêtre a dessiné QUELQUE CHOSE ; il faut parfois prouver qu'elle a
+       dessiné CECI. Un cas d'épreuve qui ne distingue pas la version saine de la
+       version cassée ne prouve rien — et un bouton absent ne fait pas mourir la
+       page, il la laisse simplement incomplète, donc verte. Voir `exige` dans
+       verifier-fenetres.js. */
+    if (compteur && compteur.ecrit) compteur.ecrit.push(String(v));
+  },
   style: {}, dataset: {}, classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
   children: [], childNodes: [], attributes: {},
   // ⚠ PAS de `innerHTML` en propriété simple ici : dans un littéral d'objet la
@@ -87,11 +97,11 @@ const faireElement = (compteur) => ({
 /**
  * @param {string} script    le contenu de la portion <script> de la page
  * @param {object} reponses  { 'operation:nom': valeur } — ce que le faux pont rend
- * @returns {Promise<{fautes:string[], journal:string[], ecritures:number}>}
+ * @returns {Promise<{fautes:string[], journal:string[], ecritures:number, html:string}>}
  */
 function executerPage(script, reponses) {
   const fautes = [];
-  const compteur = { ecritures: 0 };
+  const compteur = { ecritures: 0, ecrit: [] };
   const journal = [];
   const rep = reponses || {};
 
@@ -236,7 +246,7 @@ function executerPage(script, reponses) {
     const tour = () => {
       if (--reste > 0) { setImmediate(tour); return; }
       process.removeListener('unhandledRejection', muet);
-      fin({ fautes, journal, ecritures: compteur.ecritures });
+      fin({ fautes, journal, ecritures: compteur.ecritures, html: compteur.ecrit.join('\n') });
     };
     setImmediate(tour);
   });
