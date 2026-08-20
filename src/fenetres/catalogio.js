@@ -197,6 +197,11 @@ ${JS_ACTIVITE}${JS_DIRE}
   var FILTRE = 'tous';
   var PAGE = 0, TAILLE = 50;
   var RAP = null;            // rapport d un import termine
+  /* Le détail des colonnes replié ou non. ⚠ CE N EST PAS UN ÉTAT DE FENÊTRE : il
+     est mémorisé dans le PROFIL, par l op ui:repli — cette fenêtre est chargée
+     en data:text/html, où localStorage lève SecurityError. Sans le pont, le repli
+     serait oublié à chaque ouverture, c est-à-dire inutile. */
+  var COL_REPLI = false;
   var BUSY = false;          // application en cours
   var CONFIRM = false;       // surcouche de confirmation ouverte
 
@@ -320,10 +325,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '<span class="compte">' + compte + '</span>'
       + '</div>'
       + '<div style="margin-top:1.4rem">'
-      +   '<div class="lbl">Colonnes de la feuille ' + esc(SHEET) + '</div>'
-      +   '<div class="avis" style="margin-bottom:.7rem">À l’import, <strong>seules les colonnes présentes dans votre fichier sont touchées</strong> : '
-      +     'un fichier « SKU ; Prix » ne change que le prix. Les colonnes <em>information</em> sont exportées pour vous repérer et ignorées à la relecture.</div>'
-      +   '<div class="carte"><table><thead><tr><th>Colonne</th><th>Rôle</th></tr></thead><tbody>' + lignesCol + '</tbody></table></div>'
+      +   '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
+      +     '<div class="lbl" style="margin:0">Colonnes de la feuille ' + esc(SHEET) + '</div>'
+      +     '<button class="ghost mini" data-act="colrepli">'
+      +       (COL_REPLI ? '▸ Afficher le détail des colonnes' : '▾ Masquer le détail des colonnes') + '</button>'
+      +   '</div>'
+      +   (COL_REPLI ? '' :
+            '<div class="avis" style="margin:.7rem 0">À l’import, <strong>seules les colonnes présentes dans votre fichier sont touchées</strong> : '
+          +   'un fichier « SKU ; Prix » ne change que le prix. Les colonnes <em>information</em> sont exportées pour vous repérer et ignorées à la relecture.</div>'
+          + '<div class="carte"><table><thead><tr><th>Colonne</th><th>Rôle</th></tr></thead><tbody>' + lignesCol + '</tbody></table></div>')
       + '</div>'
       + '</div>';
   }
@@ -337,8 +347,27 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '<strong>reconnus automatiquement</strong> d’après les en-têtes, qui acceptent les accents, les majuscules '
       +   'et les noms anglais courants (<em>price</em>, <em>sale price</em>, <em>qty</em>…).<br>'
       +   'Maximum 8 Mo et 5000 lignes. <strong>Rien n’est écrit avant l’aperçu et votre confirmation.</strong></div>'
-      + '<div class="avis" style="margin-top:.7rem">Pas de fichier sous la main ? Passez par l’onglet '
-      +   '<strong>Exporter</strong> : le fichier obtenu se remonte tel quel après modification.</div>'
+      /* ⚠ LE MODÈLE SE TÉLÉCHARGE D ICI, et pas seulement de l onglet Exporter.
+         C est ici qu on en a besoin : quelqu un qui veut importer en lot n a pas
+         de fichier, et l envoyer chercher dans l autre onglet suppose qu il
+         devine qu un « modèle vide » y dort. Les deux feuilles sont nommées,
+         parce que cet onglet n a pas de sélecteur de feuille. */
+      + '<div style="margin-top:1.1rem">'
+      +   '<div class="lbl">Partir d’un modèle</div>'
+      +   '<div class="avis" style="margin-bottom:.6rem">Un fichier CSV avec les <strong>bons en-têtes, dans le bon ordre</strong>, '
+      +     'et rien d’autre : remplissez une ligne par produit (ou par variante) et remontez-le ici. '
+      +     'Le séparateur suit ce que vous avez choisi dans <strong>Exporter</strong> (actuellement '
+      +     (SEP === ',' ? 'la virgule' : 'le point-virgule') + ').</div>'
+      +   '<div class="barre">'
+      +     '<button class="ghost" data-act="modele" data-feuille="catalogue">⬇ Modèle catalogue</button>'
+      +     '<button class="ghost" data-act="modele" data-feuille="inventaire">⬇ Modèle inventaire</button>'
+      +   '</div>'
+      +   '<div class="avis" style="margin-top:.6rem"><strong>Catalogue</strong> : une ligne par produit (prix, noms, catégorie, étiquettes). '
+      +     '<strong>Inventaire</strong> : une ligne par variante taille × couleur (quantité, entrepôt).</div>'
+      + '</div>'
+      + '<div class="avis" style="margin-top:.9rem">Vous avez déjà des fiches ? Passez plutôt par l’onglet '
+      +   '<strong>Exporter</strong> : le fichier obtenu se remonte tel quel après modification, '
+      +   'et il porte déjà vos données.</div>'
       + '</div>';
   }
 
@@ -529,10 +558,18 @@ ${JS_ACTIVITE}${JS_DIRE}
       else dire(expliquer(r), 'err');
     });
   }
-  function modele(){
-    dire('Préparation du modèle…');
-    appeler('catalogio:modele', optsExport()).then(function(r){
-      if (r && r.ok) dire('Modèle vide téléchargé dans la fenêtre principale.', 'bon');
+  /* Le modèle, avec une feuille EXPLICITE quand on le demande depuis l onglet
+     Importer. ⚠ Là-bas il n y a pas de sélecteur de feuille : prendre celui de
+     l onglet Exporter donnerait un modèle « inventaire » à qui croyait demander
+     un catalogue, sans que rien ne le dise. Deux boutons nommés valent mieux
+     qu un bouton qui dépend d un réglage invisible. */
+  function modele(feuille){
+    var o = optsExport();
+    if (feuille) o.sheet = feuille;
+    var quoi = (o.sheet === 'inventaire') ? 'inventaire' : 'catalogue';
+    dire('Préparation du modèle ' + quoi + '…');
+    appeler('catalogio:modele', o).then(function(r){
+      if (r && r.ok) dire('Modèle ' + quoi + ' (en-têtes seuls) téléchargé dans la fenêtre principale.', 'bon');
       else dire(expliquer(r), 'err');
     });
   }
@@ -613,7 +650,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (tab) { TAB = tab; dessiner(); return; }
     var act = b.getAttribute('data-act');
     if (act === 'exporter') { exporter(); return; }
-    if (act === 'modele') { modele(); return; }
+    if (act === 'modele') { modele(b.getAttribute('data-feuille') || ''); return; }
+    if (act === 'colrepli') { basculerColonnes(); return; }
     if (act === 'reinit') { reinit(); return; }
     if (act === 'rapport') { telechargerRapport(); return; }
     if (act === 'confirmer') { ouvrirConfirmer(); return; }
@@ -649,12 +687,33 @@ ${JS_ACTIVITE}${JS_DIRE}
     document.documentElement.classList.toggle('ancre', !!actif);
   };
 
+  /* Bascule le repli ET l enregistre. ⚠ On redessine TOUT DE SUITE, sans
+     attendre le pont : un bouton qui ne réagit qu après un aller-retour réseau
+     se lit comme un bouton mort, et on reclique. L écriture suit ; si elle
+     échoue, on le DIT plutôt que de laisser croire que c est retenu. */
+  function basculerColonnes(){
+    COL_REPLI = !COL_REPLI;
+    dessiner();
+    appeler('ui:repli', { nom: 'catalogio_colonnes', replie: COL_REPLI }).then(function(r){
+      if (!r || !r.ok) dire('Le repli n a pas pu être mémorisé : ' + expliquer(r), 'err');
+    });
+  }
+
   chargerEtat().then(function(ok){
     if (!ok) return;
-    ${ouvImport || ouvApercu || ouvConfirmer || ouvRapport ? "TAB = 'import';" : ''}
-    if (RAP) { dessiner(); return; }
-    if (IMP) { chargerLignes().then(function(){ ${ouvConfirmer ? 'ouvrirConfirmer();' : ''} }); return; }
-    dessiner();
+    /* ⚠ LE REPLI SE LIT AVANT LE PREMIER DESSIN, et c est pour ça qu il est dans
+       la chaîne et pas à côté. Lancé en parallèle, le tableau s affichait puis
+       disparaissait une demi-seconde plus tard : un clignotement qui fait douter
+       de ce qu on vient de régler. Une lecture manquée n empêche rien — on
+       dessine quand même, déplié. */
+    return appeler('ui:repli', { nom: 'catalogio_colonnes' }).then(function(r){
+      if (r && r.ok) COL_REPLI = !!r.replie;
+    }).then(function(){
+      ${ouvImport || ouvApercu || ouvConfirmer || ouvRapport ? "TAB = 'import';" : ''}
+      if (RAP) { dessiner(); return; }
+      if (IMP) { return chargerLignes().then(function(){ ${ouvConfirmer ? 'ouvrirConfirmer();' : ''} }); }
+      dessiner();
+    });
   });
 })();
 </script></body></html>`;

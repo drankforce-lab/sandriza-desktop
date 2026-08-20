@@ -1453,6 +1453,10 @@ const OPS_PONT = new Set([
   // SAUF en creer une. nl:modele charge un gabarit, nl:apercu batit le courriel
   // COMPLET (en-tete, pied, desabonnement) que la fenetre ne saurait pas refaire.
   'campagnes:form', 'campagnes:ecrire', 'chaines:form', 'chaines:ecrire',
+  /* Le repli d un panneau, memorise dans le PROFIL. Generique : une fenetre
+     chargee en data:text/html ne peut rien retenir elle-meme (localStorage y
+     leve SecurityError), donc chaque panneau repliable passe par ici. */
+  'ui:repli',
   'nl:modele', 'nl:apercu',
   /* L editeur par blocs de la fenetre Campagnes (3.53.0). ⚠ La mise en page du
      courriel reste cote site : la fenetre envoie des BLOCS et recoit du HTML. */
@@ -2139,6 +2143,8 @@ const LIMITES_PONT = {
      allers-retours reseau, pas une ecriture locale. */
   'fournisseurs:supprimer': 30000, 'avis:photoRetirer': 60000,
   'impot:profil': 20000, 'impot:profil:ecrire': 30000, 'impot:memo': 20000,
+  /* Un repli : une lecture ou une ecriture d un seul booleen dans le profil. */
+  'ui:repli': 15000,
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
   'patrons:supprimer': 30000, 'patrons:apercu': 20000,
   /* Publier un agencement ecrit les liaisons de CHAQUE piece puis la regle. */
