@@ -16,7 +16,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -77,7 +77,7 @@ function pageAnalytics() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Statistiques — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">📊</span><h1>Statistiques (Google Analytics)</h1>
+<div class="tete"><span class="ico">${ICO.analytics}</span><h1>Statistiques (Google Analytics)</h1>
   <label class="actif"><input type="checkbox" id="a-enabled"> Actif</label></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
 <div class="corps"><div class="zone" id="corps"><div class="vide">Chargement…</div></div></div>

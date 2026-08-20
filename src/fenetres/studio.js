@@ -37,7 +37,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -504,7 +504,7 @@ function pageStudio(mode) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Studio virtuel — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">🎨</span><h1>Studio virtuel</h1>
+<div class="tete"><span class="ico">${ICO.studio}</span><h1>Studio virtuel</h1>
   <span class="credits" id="credits"></span></div>
 <div class="ro" id="ro" hidden>Lecture seule : votre rôle ne permet pas de lancer de traitement.</div>
 <div class="corps plein" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>

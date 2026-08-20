@@ -23,7 +23,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -124,7 +124,7 @@ function pageTableau() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Tableau de bord — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">📊</span><h1>Tableau de bord</h1>
+<div class="tete"><span class="ico">${ICO.tableau}</span><h1>Tableau de bord</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>

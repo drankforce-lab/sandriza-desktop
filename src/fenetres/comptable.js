@@ -25,7 +25,7 @@
  * l'IIFE — concaténation par + comme dans liens.js.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -106,7 +106,7 @@ function pageComptable(ouverture) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Liens comptables — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">📊</span><h1>Liens comptables</h1>
+<div class="tete"><span class="ico">${ICO.acctlink}</span><h1>Liens comptables</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets">
   <button id="o-partages" class="on">Exercices partagés</button>

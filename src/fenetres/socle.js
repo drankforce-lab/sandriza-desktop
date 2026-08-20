@@ -989,6 +989,36 @@ html.jour .tete h1{color:#141c28}
    Mordu trois fois le 2026-08-19, dont ici. */
 .ic{display:inline-block;filter:grayscale(1) brightness(1.6);opacity:.9;font-style:normal}
 
+/* ⚠⚠ ET LA LIMITE DE LA REGLE AU-DESSUS, TROUVEE LE 2026-08-20 : GRISER UN
+   EMOJI NE LE REND PAS LISIBLE, CA PEUT L EFFACER. Sa capture montrait l en-tete
+   du Tableau de bord : un rectangle clair, presque vide, ou l on ne distinguait
+   plus rien. Le fautif etait le graphique a barres, dont le dessin est un fond
+   BLANC avec trois barres de couleur ; passe en niveaux de gris puis eclairci de
+   moitie, il ne reste que le fond. Le filtre n a rien casse — il a fait
+   exactement ce qu on lui demandait, sur un dessin qui ne pouvait pas y survivre.
+   D ou la regle du carnet, qui disait deja la bonne chose : ON RETIRE le
+   pictogramme, ON NE LE GRISE PAS.
+
+   Une icone d ici est un TRACE : pas de fond, une seule couleur, qui suit celle
+   du texte (<< currentColor >>). Elle est donc lisible de nuit comme de jour sans
+   qu on ait rien a declarer, et elle ne peut pas s effacer sous un filtre.
+
+   ⚠ LE MEME DESSIN QUE LE SITE, et ce n est pas de la coquetterie : la barre
+   laterale de l administration web porte sa propre table (la table << IC >> d admin.js).
+   Deux dessins pour la meme chose, c est ce qui fait qu on ne reconnait plus un
+   ecran d une fenetre a l autre — le meme travers que les deux menus qui avaient
+   deja derive et qui ont fait naitre ce socle.
+
+   ⚠ IL RESTE 86 EN-TETES A PASSER. Ils portent tous un emoji dans
+   <span class="ic">, et le probleme ne se voit que sur ceux dont le dessin est
+   clair (le graphique a barres, la page blanche, l enveloppe). Le reste tient
+   encore, donc on n a pas a tout faire d un coup — mais on a a le faire par ICI,
+   une entree a la fois, pas par une seconde table dans chaque fenetre. */
+.ico{display:inline-flex;align-items:center;justify-content:center;color:#cbd5e1}
+.ico svg{width:17px;height:17px;display:block}
+.tete .ico{opacity:.95}
+html.jour .ico{color:#414e66}
+
 /* ⚠⚠ LA LISTE DEROULEE D UN <select> EST DESSINEE PAR LE SYSTEME, PAS PAR NOUS.
    Elle ne prend NI le fond ni la couleur de la fenetre : les fenetres ecrivent
    << select{color:#e8edf5;background:rgba(255,255,255,.05)} >>, et un fond
@@ -1243,6 +1273,31 @@ button.actif,.jeton.on,.mini.actif{border-color:var(--sz-accent);background:var(
 .portee{background:var(--sz-accent-doux);border-color:var(--sz-accent);color:var(--sz-texte)}
 `;
 
+/* ⚠ LES ICONES TRACEES. Voir la regle de `.ico` dans CSS_JOUR : un trace, une
+   seule couleur, aucun fond. Le dessin est celui de la table `IC` d admin.js,
+   pour qu un ecran se reconnaisse du site a la fenetre.
+   ⚠ AUCUN ACCENT GRAVE ICI NON PLUS : ces chaines partent dans des gabarits. */
+const ICO = {
+  acctlink: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 13.5a3.5 3.5 0 005 0l2.5-2.5a3.54 3.54 0 00-5-5l-1 1"/><path d="M14.5 10.5a3.5 3.5 0 00-5 0L7 13a3.54 3.54 0 005 5l1-1"/><rect x="15.5" y="15.5" width="7" height="5.5" rx="1.2"/><path d="M17.4 15.5v-1.3a1.6 1.6 0 013.2 0v1.3"/></svg>',
+  analytics: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  apparence: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18z" fill="currentColor" stroke="none"/></svg>',
+  archives: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9"/><line x1="10" y1="13" x2="14" y2="13"/></svg>',
+  billing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
+  collections: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+  explorateur: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="9.5" cy="12" r="1.3"/><path d="M19 17l-4-4-3 3-1.5-1.5L7 18"/></svg>',
+  gabarit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>',
+  image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5-5 5-2-2-6 6"/></svg>',
+  imprimante: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V3h10v5"/><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 16h10v5H7z"/></svg>',
+  journaux: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H7a2 2 0 00-2 2v13a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2h-2"/><rect x="9" y="2.5" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>',
+  mktstats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>',
+  newsletter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+  pages: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>',
+  payments: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><line x1="7" y1="15" x2="11" y2="15"/><line x1="15" y1="15" x2="17" y2="15"/></svg>',
+  promoprint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z"/><line x1="14" y1="6" x2="14" y2="18" stroke-dasharray="2 2"/></svg>',
+  studio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l9-9"/><path d="M14 4l1.2 2.6L18 8l-2.8 1.4L14 12l-1.2-2.6L10 8l2.8-1.4z"/><path d="M19 15l.7 1.5L21 17l-1.3.6L19 19l-.7-1.4L17 17l1.3-.5z"/></svg>',
+  tableau: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>',
+};
+
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
   CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
-  JS_SOCLE, JS_ACTIVITE, JS_DIRE, CSS_THEMES };
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, CSS_THEMES, ICO };

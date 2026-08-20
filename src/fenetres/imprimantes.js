@@ -20,7 +20,7 @@
  * on croirait l'imprimante prête alors que rien n'a été vérifié.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -85,7 +85,7 @@ function pageImprimantes() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Imprimantes — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">🖨</span><h1>Imprimantes</h1>
+<div class="tete"><span class="ico">${ICO.imprimante}</span><h1>Imprimantes</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="vide">Lecture de l’état…</div></div>
 <div class="pied"><span class="msg" id="msg"></span>

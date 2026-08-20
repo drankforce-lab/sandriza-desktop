@@ -31,7 +31,7 @@
  * projet, dont deux fois dans un commentaire.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -216,7 +216,7 @@ function pageCaisse(mode) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Vente au comptoir — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">🧾</span><h1>Vente au comptoir</h1>
+<div class="tete"><span class="ico">${ICO.payments}</span><h1>Vente au comptoir</h1>
   <button id="btn-afficheur" class="mini" style="margin-left:auto"
     title="Ouvrir l’écran tourné vers le client, à poser sur un second moniteur"><span class="ic">🖥</span> Affichage client</button>
   <span class="sous" id="sous"></span></div>

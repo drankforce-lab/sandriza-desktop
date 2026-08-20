@@ -17,7 +17,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -108,7 +108,7 @@ function pageIcones() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Icônes personnalisées — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">🖼️</span><h1>Icônes personnalisées</h1>
+<div class="tete"><span class="ico">${ICO.image}</span><h1>Icônes personnalisées</h1>
   <span class="cpt" id="cpt"></span></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les icônes, pas les modifier.</div>
 <div class="corps" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>

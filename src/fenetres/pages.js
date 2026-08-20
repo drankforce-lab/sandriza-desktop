@@ -43,7 +43,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent-grave dans la portion script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -226,7 +226,7 @@ function pagePages(onglet) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Pages du site — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">📄</span><h1>Pages du site</h1></div>
+<div class="tete"><span class="ico">${ICO.pages}</span><h1>Pages du site</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
 <div class="onglets" id="onglets"></div>
 <div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
