@@ -2930,33 +2930,58 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
     if (win._szFermeOk || !fenSale.has(wcId)) return;
     if (fermetureBloquee()) return;
     ev.preventDefault();
-    let choix = 2;
-    try {
-      choix = dialog.showMessageBoxSync(win, {
-        type: 'question', noLink: true, cancelId: 2, defaultId: 0,
-        title: titre,
-        message: 'Vous avez une saisie en cours.',
-        detail: 'Conserv\u00e9e, elle vous sera propos\u00e9e \u00e0 la r\u00e9ouverture de cette '
-          + 'fen\u00eatre. Jet\u00e9e, elle est perdue.',
-        buttons: ['Conserver le brouillon', 'Jeter la saisie', 'Revenir au formulaire'],
-      });
-    } catch (e) { choix = 0; }   // pas de boîte possible : on garde, jamais on ne jette
-    if (choix === 2) return;
-    const js = choix === 1
-      ? 'window.szBrouillonJeter ? szBrouillonJeter() : null'
-      : 'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null';
-    /* ⚠ UN PLAFOND SUR L'ATTENTE. L'écriture passe par la fenêtre principale ; si
-       elle ne répond pas, la fenêtre resterait ouverte pour toujours et l'on ne
-       pourrait plus la fermer du tout — pire que la perte qu'on évite. */
-    let parti = false;
-    const partir = () => {
-      if (parti) return; parti = true;
-      fenSale.delete(wcId); win._szFermeOk = true;
-      if (!win.isDestroyed()) win.close();
+    /* ⚠ SORTIE DE SECOURS : un SECOND clic sur le X ferme, toujours. Si la page
+       n'affiche pas la question — elle est figée, son script a levé, peu importe —
+       la fenêtre resterait sinon incondamnable, ce qui est pire que la perte qu'on
+       évite. Le second clic tente une dernière écriture, puis part. */
+    if (win._szDemandeEnCours) {
+      win._szFermeOk = true; fenSale.delete(wcId);
+      try {
+        win.webContents.executeJavaScript(
+          'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null', true).catch(() => {});
+      } catch (e) {}
+      setTimeout(() => { if (!win.isDestroyed()) win.destroy(); }, 400);
+      return;
+    }
+    win._szDemandeEnCours = true;
+    /* La fenêtre passe devant : une question qu'on ne voit pas est une fenêtre qui
+       refuse de se fermer sans dire pourquoi. */
+    try { if (win.isMinimized()) win.restore(); win.focus(); } catch (e) {}
+    const partir = (js) => {
+      const finir = () => {
+        win._szFermeOk = true; fenSale.delete(wcId);
+        if (!win.isDestroyed()) win.close();
+      };
+      let fait = false;
+      const uneFois = () => { if (fait) return; fait = true; finir(); };
+      setTimeout(uneFois, 3000);
+      try { win.webContents.executeJavaScript(js, true).then(uneFois, uneFois); }
+      catch (e) { uneFois(); }
     };
-    setTimeout(partir, 3000);
-    try { win.webContents.executeJavaScript(js, true).then(partir, partir); }
-    catch (e) { partir(); }
+    /* ⚠ LA QUESTION EST DESSINÉE PAR LA PAGE, PAS PAR WINDOWS. Elle l'était par
+       `dialog.showMessageBoxSync` en 3.72.0 : fond clair, accent bleu et boutons du
+       système au milieu d'une application sombre. C'est mot pour mot la leçon du
+       menu système de la 1.55.1. La page est vivante pendant un `close` empêché et
+       elle a déjà son thème : on lui demande d'afficher et de rapporter le choix.
+       ⚠ ET SI ELLE NE PEUT PAS (fonction absente, script cassé), on CONSERVE et on
+       ferme. Jamais l'inverse : le défaut d'un mécanisme anti-perte ne peut pas
+       être de perdre. */
+    let demande = null;
+    try {
+      demande = win.webContents.executeJavaScript(
+        'window.szBrouillonDemander ? szBrouillonDemander() : -1', true);
+    } catch (e) { demande = null; }
+    if (!demande) { partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null'); return; }
+    demande.then((choix) => {
+      win._szDemandeEnCours = false;
+      if (choix === 2) return;                       // revenir au formulaire
+      partir(choix === 1
+        ? 'window.szBrouillonJeter ? szBrouillonJeter() : null'
+        : 'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
+    }, () => {
+      win._szDemandeEnCours = false;
+      partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
+    });
   });
   win.on('closed', () => { fenetresNatives.delete(cle); fenSale.delete(wcId); });
   brancherOutils(win);

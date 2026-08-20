@@ -26,7 +26,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -128,7 +128,7 @@ function pageSociaux(onglet) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -316,12 +316,54 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function brancherPatrons(){
     var n = document.getElementById('pa-nouveau');
-    if (n) n.onclick = function(){ EDIT = 'nouveau'; dessiner(); };
+    if (n) n.onclick = function(){ EDIT = 'nouveau'; dessiner(); szBrouillonProposer(); };
     var a = document.getElementById('pa-annuler');
-    if (a) a.onclick = function(){ EDIT = null; dessiner(); dire(''); };
+    /* ⚠ << Annuler >> N EFFACE PAS LE BROUILLON : la personne ferme son
+       formulaire, elle ne declare pas jeter son texte. Il lui sera propose a la
+       reouverture, et la boite de reprise a son bouton pour repartir a neuf. */
+    if (a) a.onclick = function(){ szBrouillonMaintenant(); EDIT = null; dessiner(); dire(''); };
     var e = document.getElementById('pa-enr');
     if (e) e.onclick = enregistrerPatron;
   }
+
+  /* ══ LE BROUILLON D UN PATRON DE PUBLICATION ═══════════════════
+     C est le formulaire ou l on perd le plus : le gabarit est du TEXTE LIBRE, une
+     annonce redigee mot a mot, avec ses mots-cles. Rien ne le gardait — le bouton
+     Annuler remettait EDIT a null et redessinait par-dessus.
+     ⚠ LA CLE DISTINGUE LE NOUVEAU PATRON DE CHAQUE PATRON EXISTANT. Sans elle,
+     un texte laisse sur un patron serait propose sur le suivant, et l on
+     publierait l annonce d un produit sous le nom d un autre.
+     ⚠ LES RESEAUX SONT DES CASES SANS IDENTIFIANT (attribut data-net) : elles ne
+     passent pas par l aide generique, d ou la liste explicite. */
+  var BR_CHAMPS = ['pa-nom', 'pa-decl', 'pa-gab', 'pa-tags'];
+  function brNets(){
+    var l = document.querySelectorAll('[data-net]'), r = [];
+    for (var i = 0; i < l.length; i++) if (l[i].checked) r.push(l[i].getAttribute('data-net'));
+    return r;
+  }
+  szBrouillonBrancher({
+    portee: 'patron-social',
+    libelle: 'Un patron de publication',
+    ttlMin: 720,
+    cle: function(){ return EDIT ? (EDIT === 'nouveau' ? '__new__' : ('p:' + EDIT)) : ''; },
+    actif: function(){ return !!EDIT && !!document.getElementById('pa-nom'); },
+    valeurs: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, ['pa-img']);
+      if (v) v._nets = brNets();
+      return v;
+    },
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, ['pa-img']); if (!v) return false;
+      return szBrouillonQuelqueChose(v, ['pa-nom', 'pa-gab', 'pa-tags']);
+    },
+    remplir: function(v){
+      szBrouillonAuDom(v);
+      var nets = v._nets || [];
+      var l = document.querySelectorAll('[data-net]');
+      for (var i = 0; i < l.length; i++) l[i].checked = nets.indexOf(l[i].getAttribute('data-net')) >= 0;
+    },
+  });
+  szBrouillonEcouter();
 
   function enregistrerPatron(){
     var v = function(id){ var el = document.getElementById(id); return el ? el.value : ''; };
@@ -336,7 +378,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       reseaux: nets, motsCles: v('pa-tags'), image: !!(img && img.checked)
     }]).then(function(r){
       if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
-      PAT = r; EDIT = null; dessiner();
+      szBrouillonJeter(); PAT = r; EDIT = null; dessiner();
       dire('Patron enregistré.', 'bon');
     });
   }
@@ -455,7 +497,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       dessiner(); if (ONGLET === 'patrons') chargerPatrons(); return; }
 
     var pm = t.closest('[data-modifier]');
-    if (pm) { EDIT = pm.getAttribute('data-modifier'); dessiner(); return; }
+    if (pm) { EDIT = pm.getAttribute('data-modifier'); dessiner(); szBrouillonProposer(); return; }
     var pb = t.closest('[data-bascule]');
     if (pb) {
       var idB = pb.getAttribute('data-bascule');

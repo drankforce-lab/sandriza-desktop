@@ -361,6 +361,65 @@ try {
        des deux fait foi, et c est ainsi qu on remplace du bon travail par du vieux.
    Aucun de ces quatre oublis ne casse la compilation, et l executeur de page ne
    les verrait pas non plus : la fenetre se dessine tres bien sans brouillon. */
+/* ══ CE QUE LA COQUILLE APPELLE DANS LA PAGE EXISTE VRAIMENT ═══════════
+   ⚠⚠ CE CONTROLE EXISTE A CAUSE D UNE PANNE PUBLIEE EN 3.72.0, ET ELLE ETAIT
+   TOTALEMENT MUETTE. Le processus principal appelait
+   `window.szBrouillonMaintenant` par executeJavaScript. Or JS_BROUILLON est
+   injecte DANS L IIFE de chaque fenetre : une declaration `function
+   szBrouillonMaintenant()` y est une liaison LEXICALE, pas une propriete du
+   global. Le principal trouvait donc `undefined`, retombait sur `null`, et
+   fermait la fenetre SANS ECRIRE. La question s affichait, on repondait
+   << Conserver le brouillon >>, et rien n etait conserve.
+   ⚠ RIEN NE POUVAIT LE VOIR : la page se dessine parfaitement, l executeur de
+   page ne leve rien (l appel vient du PRINCIPAL, pas de la page), et le montage
+   etait complet a la lettre. C est le meme piege que `const Newsletter = ...` et
+   `window.Admin`, deja note deux fois ici.
+   CE QU ON VERIFIE : on releve dans main.js chaque nom appele sous la forme
+   `window.szBrouillonXxx`, puis on EVALUE JS_BROUILLON dans une IIFE avec un faux
+   `window` — exactement comme une fenetre le fait — et l on exige que chaque nom
+   appele s y retrouve. Le contraire d une lecture de code : on fait tourner. */
+console.log('=== Ce que la coquille appelle dans la page existe ===');
+{
+  let ok = true;
+  let mainTxt = '';
+  try { mainTxt = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8'); }
+  catch (e) { dire(false, 'main.js', 'illisible'); ok = false; }
+  let socle = null;
+  try { socle = require(path.join(__dirname, '..', 'src', 'fenetres', 'socle.js')); }
+  catch (e) { dire(false, 'socle.js', 'illisible : ' + e.message); ok = false; }
+  if (ok && socle && typeof socle.JS_BROUILLON === 'string') {
+    const appeles = new Set();
+    const r = /window\.(szBrouillon[A-Za-z]+)/g;
+    let m;
+    while ((m = r.exec(mainTxt))) appeles.add(m[1]);
+    const faux = {};
+    let leve = '';
+    try {
+      // Exactement comme une fenetre : le bloc vit DANS une IIFE.
+      new Function('window', 'document', 'setTimeout', 'clearTimeout',
+        '(function(){' + socle.JS_BROUILLON + '})();')(
+        faux,
+        { addEventListener() {}, removeEventListener() {}, getElementById: () => null,
+          createElement: () => ({ style: {} }), body: { appendChild() {} } },
+        () => 0, () => {});
+    } catch (e) { leve = e.message; }
+    if (leve) {
+      dire(false, 'JS_BROUILLON', 'ne s evalue pas : ' + leve);
+    } else if (!appeles.size) {
+      dire(true, 'brouillon', 'la coquille n appelle aucune fonction de brouillon dans la page');
+    } else {
+      const absentes = [...appeles].filter((n) => typeof faux[n] !== 'function');
+      if (!absentes.length) {
+        dire(true, 'brouillon', 'les ' + appeles.size + ' fonction(s) appelees par la coquille sont exposees sur window');
+      } else {
+        absentes.forEach((n) => dire(false, 'JS_BROUILLON',
+          'main.js appelle window.' + n + ' mais le bloc ne l expose PAS sur window — '
+          + 'l appel rendrait undefined, en silence'));
+      }
+    }
+  }
+}
+
 console.log('=== Le montage du brouillon est complet ===');
 {
   const dossier = path.join(__dirname, '..', 'src', 'fenetres');

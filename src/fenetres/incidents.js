@@ -24,7 +24,7 @@
  * ⚠ Aucun caractère accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -164,7 +164,7 @@ function pageIncidents(ouverture) {
     if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var corps = document.getElementById('corps');
   var D = null, RO = false, OCCUPE = false;
   var NOUV = '${NOUV0}', EDIT = '${EDIT0}', VUE = '${VUE0}';
@@ -381,11 +381,46 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (bp) bp.onclick=function(){ szPleinBasculer(sur.querySelector('.boite'), bp); };
     lierFil(); lierNav();
     var k=document.getElementById('f-knownAt'); if (k) k.oninput=function(){ k.classList.remove('manque'); };
+    /* Apres le dessin : la boite de reprise remplit des champs qui n existent
+       qu une fois l assistant pose. */
+    szBrouillonProposer();
   }
   // ⚠ szPleinReinit À LA FERMETURE, sans exception : la classe de zoom vit sur
   // <html>, pas sur la surcouche. L'oublier laisserait toute la fenêtre en gros
   // caractères après avoir fermé un assistant, sans rien pour l'expliquer.
-  function fermerAssistant(){ szPleinReinit(); var s=document.getElementById('sur-inc'); if (s) s.remove(); DELID=''; }
+  /* ⚠ L ECRITURE EST IMMEDIATE ET AVANT LE remove() : une ligne plus bas la
+     surcouche n existe plus, donc ses champs non plus, et il n y aurait plus rien
+     a garder. C est exactement le defaut n°1 des Depenses. */
+  function fermerAssistant(){ szBrouillonMaintenant(); szPleinReinit(); var s=document.getElementById('sur-inc'); if (s) s.remove(); DELID=''; }
+
+  /* ══ LE BROUILLON DU REGISTRE DES INCIDENTS ════════════════════
+     Un incident se consigne en plusieurs etapes, avec des recits en texte libre —
+     et souvent dans l urgence, ce qui est exactement le moment ou l on ferme une
+     fenetre par erreur.
+     ⚠ LES CHAMPS SONT DYNAMIQUES : ils viennent de D.etapes, pas d une liste
+     ecrite ici. Recopier les identifiants serait les figer, et un champ ajoute au
+     formulaire demain sortirait silencieusement du brouillon — le genre de perte
+     qui ne se remarque qu apres. On lit donc la MEME source que l enregistrement. */
+  function brIds(){
+    var et = (D && D.etapes) || [], l = [];
+    for (var i = 0; i < et.length; i++)
+      for (var j = 0; j < et[i].champs.length; j++) l.push('f-' + et[i].champs[j].cle);
+    return l;
+  }
+  szBrouillonBrancher({
+    portee: 'incident',
+    libelle: 'Un incident',
+    ttlMin: 720,
+    cle: function(){ return EDITID ? ('i:' + EDITID) : '__new__'; },
+    actif: function(){ return !!document.getElementById('sur-inc'); },
+    valeurs: function(){ return szBrouillonDuDom(brIds(), []); },
+    rempli: function(){
+      var v = szBrouillonDuDom(brIds(), []); if (!v) return false;
+      return szBrouillonQuelqueChose(v, brIds());
+    },
+    remplir: function(v){ szBrouillonAuDom(v); },
+  });
+  szBrouillonEcouter();
 
   function enregistrer(){
     if (RO||OCCUPE) return;
@@ -397,6 +432,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     OCCUPE=true; dire('Enregistrement…');
     appeler('incidents:ecrire',[EDITID||'', d]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){
+        /* ⚠ JETER AVANT DE FERMER : fermerAssistant() ecrit le brouillon, et il le
+           reecrirait par-dessus celui qu on vient de jeter. */
+        szBrouillonJeter();
         fermerAssistant();
         D=r; RO=!r.peutModifier; DELID=''; vueRegistre();
         dire(r.mode==='create' ? 'Incident consigné au registre.' : 'Incident mis à jour.', 'bon');

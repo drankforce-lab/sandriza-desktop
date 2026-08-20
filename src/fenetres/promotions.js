@@ -21,7 +21,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -117,7 +117,7 @@ function pagePromotions() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -485,15 +485,100 @@ ${JS_ACTIVITE}${JS_DIRE}
     return [].map.call(document.querySelectorAll('.' + prefixe + '-cat:checked'), function(c){ return c.value; });
   }
 
+  /* == LE BROUILLON DES OFFRES ET DES ANNONCES ==============================
+     C'est le plus gros formulaire de l'application apres l'assistant Produit :
+     une trentaine de champs, deux langues, des couleurs, des dates, des paliers
+     de quantite, et une selection de produits ou de categories. Plusieurs minutes
+     de travail, dont rien n'existait ailleurs que dans la boite — qui se ferme au
+     moindre clic a cote.
+
+     ⚠ DEUX FORMULAIRES, UN SEUL ETAT. << FORM >> sert aux offres ET aux annonces,
+     et les deux n'ont pas les memes champs. La cle porte donc l'onglet : sans lui,
+     une annonce a moitie redigee serait proposee dans le formulaire d'une offre,
+     ou l'inverse — un formulaire aux champs a moitie remplis, dont on ne
+     comprendrait pas d'ou ils viennent.
+
+     ⚠ LES PALIERS ET LES PRODUITS CHOISIS NE VIVENT PAS DANS LE DOM mais dans
+     PALIERS et CHOISIS. Les lire depuis l'ecran ne rendrait que la page affichee
+     du catalogue — c'est le piege que le code note deja pour l'enregistrement.
+     On garde donc les deux VARIABLES, et on les repose telles quelles.
+
+     ⚠ ET LES CATEGORIES COCHEES SONT DES CASES SANS IDENTIFIANT (classe
+     <prefixe>-cat) : liste explicite, comme pour les reseaux des patrons. */
+  var BR_OF = ['of-nom', 'of-actif', 'of-genre', 'of-valeur', 'of-bogo-achat',
+    'of-bogo-gratuit', 'of-appli', 'of-bandeau', 'of-bandeau-en', 'of-fond',
+    'of-texte', 'of-cta', 'of-cta-en', 'of-url', 'of-priorite', 'of-debut', 'of-fin'];
+  var BR_OF_CASES = ['of-parclient'];
+  var BR_AN = ['an-nom', 'an-genre', 'an-actif', 'an-priorite', 'an-debut', 'an-fin',
+    'an-message', 'an-message-en', 'an-fond', 'an-texte', 'an-cta', 'an-cta-en',
+    'an-url', 'an-badge', 'an-badge-en', 'an-badge-couleur', 'an-appli', 'an-expire-jours'];
+  var BR_AN_CASES = ['an-expire'];
+  function brPrefixe(){ return ONGLET === 'annonces' ? 'an' : 'of'; }
+  function brListes(){
+    return ONGLET === 'annonces' ? [BR_AN, BR_AN_CASES] : [BR_OF, BR_OF_CASES];
+  }
+  function brCats(){
+    var pr = brPrefixe();
+    return [].map.call(document.querySelectorAll('.' + pr + '-cat:checked'), function(c){ return c.value; });
+  }
+  szBrouillonBrancher({
+    portee: 'promotion',
+    libelle: 'Une saisie',
+    ttlMin: 720,
+    cle: function(){
+      if (!FORM) return '';
+      return brPrefixe() + ':' + (FORM.id || '__new__');
+    },
+    actif: function(){ return !!FORM; },
+    valeurs: function(){
+      var l = brListes();
+      var v = szBrouillonDuDom(l[0], l[1]);
+      if (!v) return null;
+      v._cats = brCats();
+      v._paliers = PALIERS;
+      v._prods = CHOISIS;
+      return v;
+    },
+    /* Le nom suffit, comme partout ailleurs — mais un palier pose ou un produit
+       choisi compte AUSSI : c'est du travail, meme sans un mot tape. */
+    rempli: function(){
+      var l = brListes();
+      var v = szBrouillonDuDom(l[0], l[1]); if (!v) return false;
+      var texte = ONGLET === 'annonces'
+        ? ['an-nom', 'an-message', 'an-message-en', 'an-badge', 'an-cta', 'an-url']
+        : ['of-nom', 'of-valeur', 'of-bandeau', 'of-bandeau-en', 'of-cta', 'of-url'];
+      if (szBrouillonQuelqueChose(v, texte)) return true;
+      return (PALIERS && PALIERS.length > 0) || (CHOISIS && CHOISIS.length > 0);
+    },
+    remplir: function(v){
+      szBrouillonAuDom(v);
+      var pr = brPrefixe(), cats = v._cats || [];
+      [].forEach.call(document.querySelectorAll('.' + pr + '-cat'), function(c){
+        c.checked = cats.indexOf(c.value) >= 0;
+      });
+      PALIERS = v._paliers || [];
+      CHOISIS = v._prods || [];
+      /* Les blocs qui s'affichent selon le type de rabais, et la liste des
+         paliers, sont dessines a partir de ces valeurs : les reposer sans
+         redessiner donnerait un ecran qui ne montre pas ce qui sera enregistre. */
+      dessiner();
+    },
+  });
+  szBrouillonEcouter();
+
   function brancher(){
     var q = document.getElementById('pr-q');
     if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
     var bn = document.getElementById('pr-nouveau');
-    if (bn) bn.onclick = function(){ FORM = {}; PALIERS = []; CHOISIS = []; QPROD = ''; dessiner(); };
+    if (bn) bn.onclick = function(){ FORM = {}; PALIERS = []; CHOISIS = []; QPROD = ''; dessiner(); szBrouillonProposer(); };
     var ba = document.getElementById('pr-annuler');
-    if (ba) ba.onclick = function(){ FORM = null; dessiner(); };
+    /* ⚠ TROIS CHEMINS FERMENT CETTE BOITE (Annuler, le clic a cote, Echap) : les
+       trois ecrivent MAINTENANT, avec les valeurs prises avant qu'elle ne
+       disparaisse. Le clic a cote est celui qui arrive le plus par accident,
+       donc celui qui coute le plus cher. */
+    if (ba) ba.onclick = function(){ szBrouillonMaintenant(); FORM = null; dessiner(); };
     var vo = document.getElementById('pr-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { FORM = null; dessiner(); } };
+    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { szBrouillonMaintenant(); FORM = null; dessiner(); } };
 
     var bi = document.getElementById('pr-interv-enr');
     if (bi) bi.onclick = function(){
@@ -541,6 +626,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         }]).then(function(r){
           be.disabled = false;
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          szBrouillonJeter();
           FORM = null;
           dire('Offre « ' + r.nom + ' » ' + (r.creation ? 'créée.' : 'mise à jour.'), 'bon');
           charger();
@@ -571,6 +657,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         }]).then(function(r){
           ae.disabled = false;
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          szBrouillonJeter();
           FORM = null;
           dire('« ' + r.nom + ' » ' + (r.creation ? 'créée.' : 'mise à jour.'), 'bon');
           charger();
@@ -716,7 +803,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (FORM) { FORM = null; dessiner(); return; }
+      if (FORM) { szBrouillonMaintenant(); FORM = null; dessiner(); return; }
       P.fermer();
     }
   });

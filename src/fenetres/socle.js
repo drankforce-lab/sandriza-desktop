@@ -633,6 +633,31 @@ function szAutoPagination(selecteur, surChangement){
 }
 `;
 
+/* ⚠ LES ICONES TRACEES. Voir la regle de `.ico` dans CSS_JOUR : un trace, une
+   seule couleur, aucun fond. Le dessin est celui de la table `IC` d admin.js,
+   pour qu un ecran se reconnaisse du site a la fenetre.
+   ⚠ AUCUN ACCENT GRAVE ICI NON PLUS : ces chaines partent dans des gabarits. */
+const ICO = {
+  acctlink: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 13.5a3.5 3.5 0 005 0l2.5-2.5a3.54 3.54 0 00-5-5l-1 1"/><path d="M14.5 10.5a3.5 3.5 0 00-5 0L7 13a3.54 3.54 0 005 5l1-1"/><rect x="15.5" y="15.5" width="7" height="5.5" rx="1.2"/><path d="M17.4 15.5v-1.3a1.6 1.6 0 013.2 0v1.3"/></svg>',
+  analytics: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  apparence: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18z" fill="currentColor" stroke="none"/></svg>',
+  archives: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9"/><line x1="10" y1="13" x2="14" y2="13"/></svg>',
+  billing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
+  collections: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+  explorateur: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="9.5" cy="12" r="1.3"/><path d="M19 17l-4-4-3 3-1.5-1.5L7 18"/></svg>',
+  gabarit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>',
+  image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5-5 5-2-2-6 6"/></svg>',
+  imprimante: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V3h10v5"/><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 16h10v5H7z"/></svg>',
+  journaux: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H7a2 2 0 00-2 2v13a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2h-2"/><rect x="9" y="2.5" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>',
+  mktstats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>',
+  newsletter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+  pages: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>',
+  payments: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><line x1="7" y1="15" x2="11" y2="15"/><line x1="15" y1="15" x2="17" y2="15"/></svg>',
+  promoprint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z"/><line x1="14" y1="6" x2="14" y2="18" stroke-dasharray="2 2"/></svg>',
+  studio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l9-9"/><path d="M14 4l1.2 2.6L18 8l-2.8 1.4L14 12l-1.2-2.6L10 8l2.8-1.4z"/><path d="M19 15l.7 1.5L21 17l-1.3.6L19 19l-.7-1.4L17 17l1.3-.5z"/></svg>',
+  tableau: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>',
+};
+
 /* ══ LE BROUILLON D UNE FENETRE D EDITION ═══════════════════════
  * ⚠⚠ POURQUOI UNE AIDE PARTAGEE PLUTOT QU UN TROISIEME BLOC A LA MAIN.
  * L inventaire du 2026-08-20 a compte DEUX fenetres sur 88 protegees contre la
@@ -826,6 +851,62 @@ function _brIlYa(min){
   return 'il y a ' + h + ' heure' + (h > 1 ? 's' : '');
 }
 
+/* ══ LA QUESTION DE LA FERMETURE, DESSINEE ICI ════════════════════
+   ⚠⚠ ELLE ETAIT POSEE PAR WINDOWS, ET C ETAIT UNE FAUTE. La 3.72.0 utilisait
+   dialog.showMessageBoxSync : une boite du SYSTEME, donc fond clair, accent bleu
+   et boutons de Windows au milieu d une application sombre. Signale le 2026-08-20,
+   capture a l appui : << les fenetre doivent etre native ici et suivre notre
+   theme >>. C est mot pour mot la lecon du menu systeme de la 1.55.1 (<< je perds
+   mon theme et je dois cliquer >>), dont la reponse avait deja ete d abandonner le
+   composant du systeme.
+
+   ⚠ POURQUOI DANS LA PAGE PLUTOT QUE DANS UNE FENETRE A NOUS. Pendant un close
+   EMPECHE, la page est encore vivante : elle a deja sa feuille de style, son
+   theme jour/nuit, sa police. Une petite fenetre sans cadre marcherait aussi,
+   mais il faudrait la placer, la centrer, la fermer, lui faire suivre le theme et
+   lui parler par un canal de plus — pour obtenir exactement ce que la page a
+   deja. Le principal GARDE LA DECISION : il demande seulement a la page
+   d afficher et de rapporter le choix.
+
+   Rend 0 = conserver, 1 = jeter, 2 = revenir. Ne rend jamais rien d autre. */
+function szBrouillonDemander(){
+  return new Promise(function(resoudre){
+    var v = document.createElement('div');
+    v.className = 'szbr-voile';
+    v.innerHTML = '<div class="szbr-boite" role="dialog" aria-modal="true">'
+      /* ⚠ UN TRACE, PAS UN EMOJI GRISE — et je viens de refaire l erreur corrigee
+         le matin meme dans les 23 en-tetes : le crayon-sur-papier est un dessin
+         CLAIR, et le filtre monochrome ne lui laisse que son fond. On ne grise pas
+         un pictogramme, on le remplace. */
+      + '<h3><span class="ico">${ICO.gabarit}</span> Vous avez une saisie en cours</h3>'
+      + '<p>Conserv\u00e9e, elle vous sera propos\u00e9e \u00e0 la r\u00e9ouverture de cette fen\u00eatre. '
+      + 'Jet\u00e9e, elle est perdue.</p>'
+      + '<div class="szbr-pied">'
+      + '<button type="button" id="szbr-f-jeter">Jeter la saisie</button>'
+      + '<button type="button" id="szbr-f-revenir">Revenir au formulaire</button>'
+      + '<button type="button" class="prim" id="szbr-f-garder">Conserver le brouillon</button>'
+      + '</div></div>';
+    document.body.appendChild(v);
+    var fini = function(choix){
+      if (v.parentNode) v.parentNode.removeChild(v);
+      document.removeEventListener('keydown', clavier, true);
+      resoudre(choix);
+    };
+    /* ⚠ ECHAP REVIENT AU FORMULAIRE, il ne jette pas. Une touche qui ferait perdre
+       une saisie serait la pire des surprises — et Echap est justement la touche
+       qu on presse quand on ne sait pas ce qui se passe. */
+    var clavier = function(ev){
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fini(2); }
+    };
+    document.addEventListener('keydown', clavier, true);
+    document.getElementById('szbr-f-garder').onclick = function(){ fini(0); };
+    document.getElementById('szbr-f-jeter').onclick = function(){ fini(1); };
+    document.getElementById('szbr-f-revenir').onclick = function(){ fini(2); };
+    /* Le bouton par defaut prend le focus : la touche Entree conserve. */
+    try { document.getElementById('szbr-f-garder').focus(); } catch (e) {}
+  });
+}
+
 /* La question de la REOUVERTURE. Rend une promesse resolue a true si la saisie a
    ete reprise. ⚠ Rien n est restaure sans le demander : un formulaire qui se
    remplirait tout seul de la saisie d hier est aussi surprenant qu un formulaire
@@ -839,7 +920,7 @@ function szBrouillonProposer(){
       v.className = 'szbr-voile';
       var quoi = (_BR.libelle ? _BR.libelle : 'Une saisie');
       v.innerHTML = '<div class="szbr-boite" role="dialog" aria-modal="true">'
-        + '<h3><span class="ic">\u{1F4DD}</span> Une saisie non termin\u00e9e</h3>'
+        + '<h3><span class="ico">${ICO.gabarit}</span> Une saisie non termin\u00e9e</h3>'
         + '<p>' + quoi + ' a \u00e9t\u00e9 laiss\u00e9e en cours <strong>'
         + _brIlYa(r.ilYaMin) + '</strong>. La reprendre, ou repartir \u00e0 neuf ?</p>'
         + '<p class="szbr-note">Un brouillon dispara\u00eet de lui-m\u00eame apr\u00e8s '
@@ -862,6 +943,25 @@ function szBrouillonProposer(){
     });
   }, function(){ return false; });
 }
+
+/* == LES TROIS PORTES QUE LE PROCESSUS PRINCIPAL APPELLE ===================
+   ⚠⚠ SANS CES TROIS LIGNES, TOUT CE FICHIER EST INJOIGNABLE DEPUIS LA COQUILLE,
+   ET LE MECANISME NE FAIT RIEN. Ce bloc est injecte DANS L IIFE de chaque
+   fenetre : une declaration << function szBrouillonMaintenant() >> y est une
+   liaison LEXICALE, pas une propriete du global. Le principal, lui, appelle
+   << window.szBrouillonMaintenant >> par executeJavaScript — qui trouvait
+   undefined, retombait sur null, et fermait la fenetre SANS ECRIRE. La question
+   s affichait, on repondait << Conserver le brouillon >>, et rien n etait
+   conserve. Vecu en 3.72.0.
+   ⚠ C EST LE MEME PIEGE QUE << const Newsletter = ... >> ou << window.Admin >>,
+   deja note deux fois dans ce depot et dans les bancs : une liaison lexicale
+   n est PAS une propriete du global. Il se represente des qu on fait appeler du
+   code de page par la coquille.
+   ⚠ ON N EXPOSE QUE CES TROIS-LA, et pas tout le bloc : ce sont les seules que
+   le principal a besoin d appeler. Le reste appartient a la fenetre. */
+window.szBrouillonDemander = szBrouillonDemander;
+window.szBrouillonMaintenant = szBrouillonMaintenant;
+window.szBrouillonJeter = szBrouillonJeter;
 `;
 
 const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS + JS_LOTS + JS_AUTOPAGE;
@@ -1262,7 +1362,7 @@ html.jour .ico{color:#414e66}
    d une carte. La question se pose une fois, a l ouverture, et disparait. */
 .szbr-voile{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
   justify-content:center;padding:1.2rem;background:rgba(6,10,18,.62)}
-.szbr-boite{max-width:26rem;width:100%;background:#131c2b;color:#e8edf5;
+.szbr-boite{max-width:33rem;width:100%;background:#131c2b;color:#e8edf5;
   border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.1rem;
   box-shadow:0 18px 44px rgba(0,0,0,.45)}
 .szbr-boite h3{margin:0 0 .5rem;display:flex;align-items:center;gap:.45rem;
@@ -1272,7 +1372,11 @@ html.jour .ico{color:#414e66}
 .szbr-pied{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem}
 .szbr-pied button{font:inherit;font-size:.84rem;padding:.4rem .8rem;border-radius:6px;
   cursor:pointer;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);
-  color:#e8edf5}
+  color:#e8edf5;white-space:nowrap}
+/* ⚠ white-space:nowrap ET une boite plus large : a trois boutons, << Conserver le
+   brouillon >> se coupait en deux lignes et la question avait l air bricolee. Un
+   libelle qui se casse en deux se lit deux fois moins vite, et c est une question
+   qu on lit dans l urgence. */
 .szbr-pied button.prim{background:#C49A6C;border-color:#C49A6C;color:#1b1206;font-weight:700}
 html.jour .szbr-voile{background:rgba(29,36,51,.35)}
 html.jour .szbr-boite{background:#ffffff;color:#1d2433;border-color:rgba(15,23,42,.14)}
@@ -1534,31 +1638,6 @@ button.actif,.jeton.on,.mini.actif{border-color:var(--sz-accent);background:var(
 .phvig:hover,.ligne:hover,.repcarte:hover{border-color:var(--sz-accent)}
 .portee{background:var(--sz-accent-doux);border-color:var(--sz-accent);color:var(--sz-texte)}
 `;
-
-/* ⚠ LES ICONES TRACEES. Voir la regle de `.ico` dans CSS_JOUR : un trace, une
-   seule couleur, aucun fond. Le dessin est celui de la table `IC` d admin.js,
-   pour qu un ecran se reconnaisse du site a la fenetre.
-   ⚠ AUCUN ACCENT GRAVE ICI NON PLUS : ces chaines partent dans des gabarits. */
-const ICO = {
-  acctlink: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 13.5a3.5 3.5 0 005 0l2.5-2.5a3.54 3.54 0 00-5-5l-1 1"/><path d="M14.5 10.5a3.5 3.5 0 00-5 0L7 13a3.54 3.54 0 005 5l1-1"/><rect x="15.5" y="15.5" width="7" height="5.5" rx="1.2"/><path d="M17.4 15.5v-1.3a1.6 1.6 0 013.2 0v1.3"/></svg>',
-  analytics: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
-  apparence: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18z" fill="currentColor" stroke="none"/></svg>',
-  archives: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9"/><line x1="10" y1="13" x2="14" y2="13"/></svg>',
-  billing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
-  collections: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
-  explorateur: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="9.5" cy="12" r="1.3"/><path d="M19 17l-4-4-3 3-1.5-1.5L7 18"/></svg>',
-  gabarit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>',
-  image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5-5 5-2-2-6 6"/></svg>',
-  imprimante: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V3h10v5"/><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 16h10v5H7z"/></svg>',
-  journaux: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H7a2 2 0 00-2 2v13a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2h-2"/><rect x="9" y="2.5" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>',
-  mktstats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>',
-  newsletter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
-  pages: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>',
-  payments: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><line x1="7" y1="15" x2="11" y2="15"/><line x1="15" y1="15" x2="17" y2="15"/></svg>',
-  promoprint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z"/><line x1="14" y1="6" x2="14" y2="18" stroke-dasharray="2 2"/></svg>',
-  studio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l9-9"/><path d="M14 4l1.2 2.6L18 8l-2.8 1.4L14 12l-1.2-2.6L10 8l2.8-1.4z"/><path d="M19 15l.7 1.5L21 17l-1.3.6L19 19l-.7-1.4L17 17l1.3-.5z"/></svg>',
-  tableau: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>',
-};
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
   CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,

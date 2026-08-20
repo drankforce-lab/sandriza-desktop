@@ -33,7 +33,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -138,7 +138,7 @@ function pageLiens(ouverture) {
     if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var DEPART = ${dep};
@@ -419,16 +419,45 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
   }
 
+  /* ══ LE BROUILLON DU FORMULAIRE DE LIEN ═══════════════════════
+     Cinq champs, dont une etiquette et un courriel recopies d ailleurs. Le
+     formulaire se replie au moindre clic sur << Nouveau lien >> (c est une
+     bascule) et sur << Annuler >>. */
+  var BR_CHAMPS = ['f-etiquette', 'f-courriel', 'f-compte', 'f-duree', 'f-usages'];
+  szBrouillonBrancher({
+    portee: 'lien-installation',
+    libelle: 'Un lien',
+    ttlMin: 720,
+    cle: function(){ return '__new__'; },
+    actif: function(){ return !!(ETAT && ETAT.formulaire); },
+    valeurs: function(){ return szBrouillonDuDom(BR_CHAMPS, []); },
+    /* La duree et le nombre d usages ont un defaut : ils ne disent pas qu on a
+       commence a travailler. Le compte non plus — c est le premier de la liste. */
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, []); if (!v) return false;
+      return szBrouillonQuelqueChose(v, ['f-etiquette', 'f-courriel']);
+    },
+    remplir: function(v){ szBrouillonAuDom(v); },
+  });
+  szBrouillonEcouter();
+
   function brancherLiens(){
     var bn = document.getElementById('b-nouveau');
-    if (bn) bn.onclick = function(){ ETAT.formulaire = !ETAT.formulaire; dessinerLiens(); };
+    /* ⚠ C EST UNE BASCULE : le meme bouton ouvre ET replie. On ecrit donc
+       MAINTENANT avant de replier, et l on propose apres avoir ouvert. */
+    if (bn) bn.onclick = function(){
+      if (ETAT.formulaire) szBrouillonMaintenant();
+      ETAT.formulaire = !ETAT.formulaire;
+      dessinerLiens();
+      if (ETAT.formulaire) szBrouillonProposer();
+    };
     var br = document.getElementById('b-recharger');
     if (br) br.onclick = function(){ charger(true); };
 
     var fc = document.getElementById('f-creer');
     if (fc) fc.onclick = creer;
     var fa = document.getElementById('f-annuler');
-    if (fa) fa.onclick = function(){ ETAT.formulaire = false; dessinerLiens(); };
+    if (fa) fa.onclick = function(){ szBrouillonMaintenant(); ETAT.formulaire = false; dessinerLiens(); };
 
     var nc = document.getElementById('n-copier');
     if (nc) nc.onclick = function(){ copier(document.getElementById('n-url'), nc); };
@@ -510,6 +539,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       ETAT.neuf = { url: r.url, mdp: r.mdp, mdpCompte: !!r.mdpCompte, expire: r.expire,
                     maxUsages: r.maxUsages, destinataire: c ? c.value.trim() : '' };
+      szBrouillonJeter();
       ETAT.formulaire = false;
       dire('Lien fabriqué.', 'bon');
       charger(false);

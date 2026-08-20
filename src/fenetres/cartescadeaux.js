@@ -21,7 +21,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -114,7 +114,7 @@ function pageCartesCadeaux() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -339,7 +339,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var fs = document.getElementById('cc-f-statut');
     if (fs) fs.onchange = function(){ STATUT = fs.value; dessiner(); };
     var bn = document.getElementById('cc-nouvelle');
-    if (bn) bn.onclick = function(){ BOITE = 'creer'; dessiner(); };
+    if (bn) bn.onclick = function(){ BOITE = 'creer'; dessiner(); szBrouillonProposer(); };
     var br = document.getElementById('cc-recompense');
     if (br) br.onclick = function(){ BOITE = 'recompense'; dessiner(); };
     var ba = document.getElementById('cc-annuler');
@@ -360,6 +360,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       }]).then(function(r){
         bc.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        szBrouillonJeter();
         BOITE = null;
         dire('Carte créée — code ' + r.code + '.', 'bon');
         charger();
@@ -396,7 +397,39 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
   }
 
-  function fermerBoite(){ BOITE = null; DETAIL = null; dessiner(); }
+  /* ══ LE BROUILLON DE LA CARTE-CADEAU ════════════════════════
+     Six champs, dont le nom et le courriel d une destinataire — recopies depuis
+     une commande ou un courriel, donc penibles a retrouver. Ils ne vivent que
+     dans la boite, qui se ferme au moindre clic a cote.
+     ⚠ SEULE LA CREATION EST GARDEE. Les deux autres boites (la recompense de
+     fidelisation, le detail d une carte) montrent un reglage ou une fiche
+     existants : un brouillon y ferait concurrence a ce qui est deja enregistre
+     sans qu on sache lequel des deux fait foi. C est la meme regle que pour
+     l assistant Produit. */
+  var BR_CHAMPS = ['cc-montant', 'cc-statut', 'cc-dest', 'cc-mail', 'cc-exp', 'cc-note'];
+  szBrouillonBrancher({
+    portee: 'cartecadeau',
+    libelle: 'Une carte-cadeau',
+    ttlMin: 720,
+    cle: function(){ return '__new__'; },
+    actif: function(){ return BOITE === 'creer'; },
+    valeurs: function(){ return szBrouillonDuDom(BR_CHAMPS, []); },
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, []); if (!v) return false;
+      /* Le statut est une liste deroulante avec un defaut : il ne dit pas qu on a
+         commence a travailler. */
+      return szBrouillonQuelqueChose(v, ['cc-montant', 'cc-dest', 'cc-mail', 'cc-exp', 'cc-note']);
+    },
+    remplir: function(v){ szBrouillonAuDom(v); },
+  });
+  szBrouillonEcouter();
+
+  /* ⚠ TOUS LES CHEMINS DE FERMETURE DE LA BOITE PASSENT PAR ICI (le bouton
+     Annuler, le clic a cote, la touche Echap) : une seule ligne suffit donc, et
+     l ecriture est IMMEDIATE, avec les valeurs prises AVANT que la boite ne
+     disparaisse. C est le defaut n°1 des Depenses, qui ne gardait que la
+     categorie parce que l ecriture etait differee de trois secondes. */
+  function fermerBoite(){ szBrouillonMaintenant(); BOITE = null; DETAIL = null; dessiner(); }
 
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){
