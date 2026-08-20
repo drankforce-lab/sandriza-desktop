@@ -17,7 +17,7 @@
  * est-ce que quelqu'un d'autre tient cette fiche.
  */
 
-const { CSS_SOCLE, JS_SOCLE } = require('./socle');
+const { CSS_SOCLE, JS_SOCLE, JS_BROUILLON } = require('./socle');
 
 /** Page complète de l'assistant. `id` vide = création. */
 function pageFournisseur(id) {
@@ -40,6 +40,7 @@ function pageFournisseur(id) {
 (function(){
   'use strict';
   ${JS_SOCLE}
+  ${JS_BROUILLON}
 
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
@@ -152,10 +153,61 @@ function pageFournisseur(id) {
         if (!r || !r.ok) { vide('Fiche indisponible', expliquer(r)); return; }
         document.getElementById('titre').textContent = ID ? 'Modifier le fournisseur' : 'Nouveau fournisseur';
         dessiner(r.fiche);
+        /* La boite de reprise remplit des champs : ils n existent qu apres le dessin. */
+        szBrouillonProposer();
         return verrou();
       });
     });
   }
+
+  /* ══ LE BROUILLON DE L ASSISTANT FOURNISSEUR ════════════════════
+     Trois etapes, une douzaine de champs, des notes internes en texte libre : de
+     tout ce qu on saisit dans l application, c est parmi ce qu on a le moins envie
+     de refaire. Et rien n en gardait trace — les valeurs ne vivent que dans les
+     champs, et la fenetre se ferme par cinq chemins (Annuler, Echap, le X du
+     cadre, Ctrl+W, le menu).
+     ⚠ ON NE BRANCHE AUCUN DE CES CINQ CHEMINS ICI, ET C EST LE POINT DU MONTAGE.
+     Annuler et Echap appellent P.fermer(), qui va au meme endroit que le X du
+     cadre : le garde de fermeture de la coquille. C est LUI qui pose la question,
+     une seule fois, pour tous les chemins. Brancher Annuler ici ferait une
+     deuxieme question, et surtout laisserait le X sans la sienne — alors que le X
+     est le chemin le plus courant.
+     ⚠ LES CATEGORIES SONT DES CASES SANS IDENTIFIANT (classe .f-cat) : elles ne
+     passent pas par l aide generique, d ou la liste explicite ci-dessous. */
+  var BR_CHAMPS = ['f-nom', 'f-contact', 'f-courriel', 'f-tel', 'f-web',
+    'f-rue', 'f-ville', 'f-prov', 'f-cp', 'f-delai', 'f-actif', 'f-notes'];
+  function brCats(){
+    return Array.prototype.filter.call(document.querySelectorAll('.f-cat'), function(c){ return c.checked; })
+      .map(function(c){ return c.value; });
+  }
+  szBrouillonBrancher({
+    portee: 'fournisseur',
+    libelle: ID ? 'Une modification de cette fiche' : 'Une fiche de fournisseur',
+    ttlMin: 720,
+    cle: function(){ return ID ? ('f:' + ID) : '__new__'; },
+    actif: function(){ return !!document.getElementById('f-nom'); },
+    valeurs: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, []);
+      if (v) v._cats = brCats();
+      return v;
+    },
+    /* Le nom ou le contact suffit a rendre la saisie precieuse. On ne compte pas
+       les listes deroulantes : elles ont une valeur par defaut, donc elles ne
+       disent pas qu on a commence a travailler. */
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, []); if (!v) return false;
+      return szBrouillonQuelqueChose(v, ['f-nom', 'f-contact', 'f-courriel', 'f-tel',
+        'f-web', 'f-rue', 'f-ville', 'f-cp', 'f-notes']) || brCats().length > 0;
+    },
+    remplir: function(v){
+      szBrouillonAuDom(v);
+      var cats = v._cats || [];
+      Array.prototype.forEach.call(document.querySelectorAll('.f-cat'), function(c){
+        c.checked = cats.indexOf(c.value) >= 0;
+      });
+    },
+  });
+  szBrouillonEcouter();
 
   function enregistrer(){
     if (!Assist.toutValide()) return;
@@ -171,6 +223,10 @@ function pageFournisseur(id) {
       leadTime: val('f-delai'), notes: val('f-notes'), active: val('f-actif') === '1'
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
+      /* ⚠ LE BROUILLON MEURT ICI, ET AVANT LE P.fermer() DIFFERE : la fenetre part
+         dans 550 ms, et son garde de fermeture demanderait sinon quoi faire d une
+         saisie qui vient d etre enregistree. */
+      szBrouillonJeter();
       dire('Enregistré.', 'bon');
       setTimeout(function(){ P.fermer(); }, 550);
     });

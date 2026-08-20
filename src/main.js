@@ -1253,6 +1253,8 @@ const OPS_PONT = new Set([
   'produit:contexte', 'produit:sku', 'produit:nip', 'produit:nipExige',
   'photos:liste',
   'produit:decrire', 'produit:lire', 'produit:enregistrer',
+  // Le brouillon GENERIQUE de n importe quelle fenetre d edition (portee + cle).
+  'brouillon:lire', 'brouillon:ecrire', 'brouillon:jeter',
   'produit:brouillonLire', 'produit:brouillonEcrire', 'produit:brouillonJeter',
   'produit:changements', 'produit:historique',
   'caisse:etat',
@@ -1903,6 +1905,12 @@ ipcMain.handle('fenetre:client', (e, id) => {
    une jumelle, a la main ; elle ignorait << photos:traiter >> et appliquait donc
    vingt-cinq secondes la ou celle-ci en annonce trois cents. Une seule source. */
 const LIMITES_PONT = {
+  /* ⚠ LE BROUILLON A UN PLAFOND PLUS LARGE, et pas parce qu'il est lourd :
+     parce qu'il part au PIRE MOMENT. L'écriture immédiate se déclenche quand on
+     ferme la fenêtre, c'est-à-dire souvent pendant que la fenêtre principale
+     redessine un écran. Au plafond ordinaire de 8 s, on obtiendrait un << délai >>
+     sur la seule écriture qui n'a pas droit à l'échec. */
+  'brouillon:ecrire': 20000, 'brouillon:lire': 20000,
   // Depot des photos dans le stockage : le plus long de tous.
   'produit:enregistrer': 90000,
   // Etiquettes demandees a un transporteur (Postes Canada, FedEx).
@@ -2848,6 +2856,17 @@ const _zoomRattraper = (wc) => {
   catch (e) {}
 };
 
+/* Les fenêtres qui ont quelque chose à perdre. La page le déclare elle-même par
+   `szPont.brouillonSale(true/false)` ; voir le garde de `close` dans
+   `ouvrirNative`. Un `Set` d'identifiants de webContents, rien de plus — aucune
+   donnée de saisie ne traverse jamais ce canal. */
+const fenSale = new Set();
+ipcMain.on('pont:brouillonSale', (e, on) => {
+  const id = e.sender && e.sender.id;
+  if (typeof id !== 'number') return;
+  if (on) fenSale.add(id); else fenSale.delete(id);
+});
+
 const fenetresNatives = new Map();
 const ouvrirNative = (cle, titre, html, opts = {}) => {
   const deja = fenetresNatives.get(cle);
@@ -2864,6 +2883,9 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
     },
   });
   fenetresNatives.set(cle, win);
+  /* Retenu MAINTENANT : sur `closed`, `win.webContents` est déjà détruit et lire
+     son `id` lèverait — on ne pourrait donc plus retirer le drapeau. */
+  const wcId = win.webContents.id;
   _suivrePleinEcran(win);
   // Le titre reste celui qu'on a demandé, pas celui que la page annonce.
   win.on('page-title-updated', (ev) => { ev.preventDefault(); });
@@ -2887,7 +2909,56 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
   };
   win.on('moved', retenir);
   win.on('resized', retenir);
-  win.on('closed', () => { fenetresNatives.delete(cle); });
+  /* ══ FERMER UNE FENÊTRE QUI A UNE SAISIE EN COURS ════════════════════
+     ⚠⚠ LE BOUTON X DU CADRE NE TRAVERSE PAS LA PAGE. Une fenêtre peut avoir son
+     propre bouton << Fermer >> dessiné, qui passe par `pont:fermer` et laisse donc
+     la page demander avant de partir. Le X de Windows, lui, arrive ICI : sans ce
+     garde, la fenêtre disparaît et l'écriture différée du brouillon (3 s) n'a
+     jamais lieu. C'est le chemin le plus COURANT pour perdre une saisie, et
+     c'était le seul que rien ne couvrait.
+     ⚠ ON DEMANDE, ON NE DÉCIDE PAS. Fermer en gardant en silence est aussi
+     surprenant que fermer en jetant : dans les deux cas la personne ne sait pas
+     ce qu'il est advenu de son travail. Trois réponses, dont une pour revenir.
+     ⚠ LE COÛT EST NUL POUR LES 85 AUTRES FENÊTRES : sans drapeau levé, on sort
+     avant tout le reste. C'est pour cela que la page DÉCLARE qu'elle est sale au
+     lieu qu'on aille le lui demander — une question au moment du `close` serait
+     asynchrone, donc il faudrait empêcher CHAQUE fermeture le temps de la poser,
+     et une promesse qui ne revient pas rendrait la fenêtre incondamnable.
+     ⚠ ET LA MISE À JOUR PASSE AVANT : si `fermetureBloquee()`, on laisse le
+     chemin existant refuser — ce n'est pas le moment de poser une question. */
+  win.on('close', (ev) => {
+    if (win._szFermeOk || !fenSale.has(wcId)) return;
+    if (fermetureBloquee()) return;
+    ev.preventDefault();
+    let choix = 2;
+    try {
+      choix = dialog.showMessageBoxSync(win, {
+        type: 'question', noLink: true, cancelId: 2, defaultId: 0,
+        title: titre,
+        message: 'Vous avez une saisie en cours.',
+        detail: 'Conserv\u00e9e, elle vous sera propos\u00e9e \u00e0 la r\u00e9ouverture de cette '
+          + 'fen\u00eatre. Jet\u00e9e, elle est perdue.',
+        buttons: ['Conserver le brouillon', 'Jeter la saisie', 'Revenir au formulaire'],
+      });
+    } catch (e) { choix = 0; }   // pas de boîte possible : on garde, jamais on ne jette
+    if (choix === 2) return;
+    const js = choix === 1
+      ? 'window.szBrouillonJeter ? szBrouillonJeter() : null'
+      : 'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null';
+    /* ⚠ UN PLAFOND SUR L'ATTENTE. L'écriture passe par la fenêtre principale ; si
+       elle ne répond pas, la fenêtre resterait ouverte pour toujours et l'on ne
+       pourrait plus la fermer du tout — pire que la perte qu'on évite. */
+    let parti = false;
+    const partir = () => {
+      if (parti) return; parti = true;
+      fenSale.delete(wcId); win._szFermeOk = true;
+      if (!win.isDestroyed()) win.close();
+    };
+    setTimeout(partir, 3000);
+    try { win.webContents.executeJavaScript(js, true).then(partir, partir); }
+    catch (e) { partir(); }
+  });
+  win.on('closed', () => { fenetresNatives.delete(cle); fenSale.delete(wcId); });
   brancherOutils(win);
   win.webContents.on('did-finish-load', () => appliquerTheme(win.webContents));
   win.once('ready-to-show', () => win.show());

@@ -20,7 +20,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -108,7 +108,7 @@ function pageCoupons() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -270,11 +270,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     var q = document.getElementById('cp-q');
     if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
     var bn = document.getElementById('cp-nouveau');
-    if (bn) bn.onclick = function(){ FORM = {}; dessiner(); };
+    if (bn) bn.onclick = function(){ FORM = {}; dessiner(); szBrouillonProposer(); };
     var ba = document.getElementById('cp-annuler');
-    if (ba) ba.onclick = function(){ FORM = null; dessiner(); };
+    /* ⚠ TROIS CHEMINS FERMENT CETTE BOITE : le bouton Annuler, le clic a cote,
+       et la touche Echap. Les trois doivent ecrire le brouillon MAINTENANT, avec
+       les valeurs prises avant que la boite ne disparaisse. En oublier un, c est
+       exactement le defaut n°1 des Depenses — et le clic a cote est celui qui
+       arrive le plus souvent par accident, donc celui qui cout le plus cher. */
+    if (ba) ba.onclick = function(){ szBrouillonMaintenant(); FORM = null; dessiner(); };
     var vo = document.getElementById('cp-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { FORM = null; dessiner(); } };
+    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { szBrouillonMaintenant(); FORM = null; dessiner(); } };
 
     // « Livraison gratuite » : le champ de valeur se retire de lui-meme.
     var ty = document.getElementById('cp-type');
@@ -295,12 +300,46 @@ ${JS_ACTIVITE}${JS_DIRE}
       }]).then(function(r){
         be.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        /* Le brouillon meurt a l enregistrement reussi, pas avant. */
+        szBrouillonJeter();
         FORM = null;
         dire('Coupon ' + r.code + (r.creation ? ' créé.' : ' mis à jour.'), 'bon');
         charger();
       });
     };
   }
+
+  /* ══ LE BROUILLON DU COUPON ═══════════════════════════════
+     Un coupon se remplit en une dizaine de champs, dont deux dates. Ce n est pas
+     une heure de travail, mais c est assez pour ne pas vouloir le refaire — et
+     rien n en gardait trace : les valeurs ne vivent que dans les champs de la
+     boite, qui disparait au moindre clic a cote.
+     ⚠ UNE CLE PAR COUPON : une saisie laissee sur un coupon ne doit pas etre
+     proposee sur le suivant. */
+  var BR_CHAMPS = ['cp-code', 'cp-nom', 'cp-type', 'cp-val', 'cp-min', 'cp-max', 'cp-sd', 'cp-ed'];
+  var BR_CASES = ['cp-per', 'cp-onsale', 'cp-act'];
+  szBrouillonBrancher({
+    portee: 'coupon',
+    libelle: 'Un coupon',
+    ttlMin: 720,
+    cle: function(){ return FORM ? (FORM.id ? ('c:' + FORM.id) : '__new__') : ''; },
+    actif: function(){ return !!FORM; },
+    valeurs: function(){ return szBrouillonDuDom(BR_CHAMPS, BR_CASES); },
+    /* En creation, le code ou le nom suffit. En modification, on compare au
+       coupon d origine : un formulaire identique a ce qui est en base n a rien a
+       proposer. */
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, BR_CASES); if (!v) return false;
+      if (!FORM || !FORM.id) return szBrouillonQuelqueChose(v, ['cp-code', 'cp-nom', 'cp-val']);
+      var c = FORM;
+      return String(v['cp-code'] || '') !== String(c.code || '')
+        || String(v['cp-nom'] || '') !== String(c.nom || '')
+        || String(v['cp-type'] || '') !== String(c.type || 'percent')
+        || String(v['cp-val'] || '') !== String(c.valeur != null ? c.valeur : '');
+    },
+    remplir: function(v){ szBrouillonAuDom(v); },
+  });
+  szBrouillonEcouter();
 
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){
@@ -326,7 +365,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (bm) {
       var idM = bm.getAttribute('data-modifier');
       var c = (D.coupons || []).filter(function(x){ return x.id === idM; })[0];
-      if (c) { FORM = c; SUPPR_ARME = ''; dessiner(); }
+      if (c) { FORM = c; SUPPR_ARME = ''; dessiner(); szBrouillonProposer(); }
       return;
     }
 
@@ -411,7 +450,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (FORM) { FORM = null; dessiner(); return; }
+      if (FORM) { szBrouillonMaintenant(); FORM = null; dessiner(); return; }
       P.fermer();
     }
   });

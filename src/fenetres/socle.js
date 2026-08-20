@@ -633,6 +633,237 @@ function szAutoPagination(selecteur, surChangement){
 }
 `;
 
+/* ══ LE BROUILLON D UNE FENETRE D EDITION ═══════════════════════
+ * ⚠⚠ POURQUOI UNE AIDE PARTAGEE PLUTOT QU UN TROISIEME BLOC A LA MAIN.
+ * L inventaire du 2026-08-20 a compte DEUX fenetres sur 88 protegees contre la
+ * perte de saisie (l assistant Produit, les Depenses) et une vingtaine de
+ * formulaires longs qui ne le sont pas. Les deux blocs existants ont chacun paye
+ * ses erreurs ; les recopier vingt fois, c est vingt occasions d en oublier une.
+ * Les cinq regles qu ils ont apprises sont donc ICI, une fois :
+ *
+ *  ① ETRANGLE SUR GESTE, JAMAIS SUR MINUTERIE SEULE. Une ecriture periodique
+ *    passe pour de l activite et garde la session ouverte toute la nuit (vecu,
+ *    corrige en 1.20.8 : le minuteur d inactivite n ecoute que la page).
+ *  ② IMMEDIAT AVANT TOUTE FERMETURE, et LES VALEURS SONT PRISES MAINTENANT.
+ *    C etait le defaut n°1 des Depenses : l ecriture etait differee de 3 s et la
+ *    fermeture vidait le formulaire avant que la minuterie ne parte. Seul ce qui
+ *    avait ete ecrit AVANT survivait — la categorie, et rien d autre.
+ *  ③ UN FORMULAIRE VIDE NE MERITE AUCUNE QUESTION.
+ *  ④ ON DEMANDE, ON NE DECIDE PAS. Fermer en gardant en silence est aussi
+ *    surprenant que fermer en jetant : dans les deux cas la personne ne sait pas
+ *    ce qu il est advenu de son travail.
+ *  ⑤ UN ECHEC D ENREGISTREMENT SE DIT. Se croire a l abri est pire que de savoir
+ *    qu on ne l est pas.
+ *
+ * ⚠ LE BROUILLON NE VIT PAS ICI. Une fenetre native est chargee en
+ * data:text/html : son origine est null et localStorage y leve SecurityError
+ * (MESURE — banc-executer-page.js en fait un cas d epreuve). Il vit dans le
+ * stockage du SITE, par le pont, sous une entree par (portee, cle) et par profil.
+ *
+ * ⚠ LA QUESTION DE FERMETURE N EST PAS DESSINEE ICI, et c est le point le plus
+ * important du montage. Le bouton << Fermer >> dessine dans la page passe par
+ * szPont.fermer() → pont:fermer → win.close(), et le bouton X du cadre de Windows
+ * arrive au MEME endroit : le garde de close() dans ouvrirNative. Une question
+ * dessinee ici ferait DEUX habillages pour la meme question, dont un seul
+ * couvrirait le X — c est-a-dire le chemin le plus courant. La page se contente
+ * donc de LEVER UN DRAPEAU (szPont.brouillonSale) et de repondre a deux appels
+ * que le principal lui fait au moment de fermer.
+ *
+ * MODE D EMPLOI, dans la fenetre :
+ *   szBrouillonBrancher({
+ *     portee: 'client',                  // nomme le formulaire
+ *     cle:     function(){ return ID || '__new__'; },   // nomme CE QU ON EDITE
+ *     actif:   function(){ return !!FORM; },            // un formulaire est ouvert
+ *     rempli:  function(){ return ...; },               // y a-t-il quelque chose a perdre
+ *     valeurs: function(){ return {...}; },             // SYNCHRONE, appele MAINTENANT
+ *     remplir: function(v){ ... },                      // restaure
+ *     ttlMin:  720
+ *   });
+ *   szBrouillonEcouter();      // une fois : delegue sur document, survit aux redessins
+ *   szBrouillonProposer();     // a l ouverture du formulaire
+ *   szBrouillonJeter();        // apres un enregistrement REUSSI
+ */
+const JS_BROUILLON = `
+var _BR = null;          // la declaration de la fenetre
+var _BR_T = null;        // minuterie de l ecriture differee
+var _BR_DERNIER = '';    // derniere valeur ecrite : on n envoie rien d inutile
+var _BR_SALE = false;    // etat annonce a la coquille
+var _BR_ECOUTE = false;
+
+function szBrouillonBrancher(cfg){ _BR = cfg || null; }
+
+function _brPont(){ return (window.szPont && window.szPont.appeler) ? window.szPont : null; }
+function _brActif(){
+  if (!_BR || !_brPont()) return false;
+  try { return _BR.actif ? !!_BR.actif() : true; } catch (e) { return false; }
+}
+function _brRempli(){ try { return !!(_BR && _BR.rempli && _BR.rempli()); } catch (e) { return false; } }
+function _brCle(){
+  try { return String((_BR && _BR.cle ? _BR.cle() : '') || '') || '__new__'; }
+  catch (e) { return '__new__'; }
+}
+function _brValeurs(){ try { return (_BR && _BR.valeurs) ? _BR.valeurs() : null; } catch (e) { return null; } }
+
+/* Le drapeau vers la coquille. C est LUI qui fait poser la question au bouton X
+   du cadre : sans lui, le principal ferme la fenetre sans rien demander et
+   l ecriture differee n a jamais lieu. */
+function _brSale(on){
+  var v = !!on;
+  if (v === _BR_SALE) return;
+  _BR_SALE = v;
+  try { if (window.szPont && window.szPont.brouillonSale) window.szPont.brouillonSale(v); } catch (e) {}
+}
+function szBrouillonEtat(){ return _BR_SALE; }
+
+function _brEcrire(v){
+  var txt = '';
+  try { txt = JSON.stringify(v); } catch (e) { txt = ''; }
+  /* ON N ENVOIE QUE SI QUELQUE CHOSE A CHANGE : un brouillon peut porter une
+     image en base64, et le pont n a pas a la reporter a chaque frappe. */
+  if (txt && txt === _BR_DERNIER) return Promise.resolve({ ok: true });
+  return _brPont().appeler('brouillon:ecrire', _BR.portee, _brCle(), v, _BR.ttlMin || 0)
+    .then(function(r){
+      if (r && r.ok) { _BR_DERNIER = txt; return r; }
+      /* ⚠ UN ECHEC SE DIT. Le site avale l echec du stockage plein ; ici on le
+         montre, sinon on croit son travail a l abri alors qu il ne l est pas. */
+      if (typeof szDire === 'function') {
+        szDire('\u26a0 Le brouillon n\u2019a pas pu \u00eatre conserv\u00e9 (stockage du poste plein).', 'att');
+      }
+      return r || { ok: false };
+    }, function(){ return { ok: false }; });
+}
+
+/* Sur geste, etrangle a 3 s. ⚠ Le drapeau, lui, est leve TOUT DE SUITE : entre la
+   frappe et l ecriture il y a trois secondes pendant lesquelles le bouton X doit
+   deja poser la question. */
+function szBrouillonPoser(){
+  if (!_brActif()) { _brSale(false); return; }
+  _brSale(_brRempli());
+  clearTimeout(_BR_T);
+  _BR_T = setTimeout(function(){ _BR_T = null; szBrouillonMaintenant(); }, 3000);
+}
+
+/* Immediat, et les valeurs sont prises MAINTENANT. Rend une promesse : le
+   principal attend cette ecriture avant de laisser la fenetre partir. */
+function szBrouillonMaintenant(){
+  clearTimeout(_BR_T); _BR_T = null;
+  if (!_brActif() || !_brRempli()) return Promise.resolve({ ok: true });
+  var v = _brValeurs();
+  if (!v) return Promise.resolve({ ok: true });
+  return _brEcrire(v);
+}
+
+function szBrouillonJeter(){
+  clearTimeout(_BR_T); _BR_T = null;
+  _BR_DERNIER = ''; _brSale(false);
+  if (!_BR || !_brPont()) return Promise.resolve({ ok: true });
+  return _brPont().appeler('brouillon:jeter', _BR.portee, _brCle())
+    .then(function(r){ return r || { ok: true }; }, function(){ return { ok: true }; });
+}
+
+/* ⚠ DELEGUE SUR document, ET UNE SEULE FOIS. Les fenetres redessinent leur
+   formulaire entier a chaque etape : des ecouteurs poses sur les champs
+   dispararaitraient avec eux, et le brouillon cesserait de suivre la saisie sans
+   que rien ne le dise. */
+function szBrouillonEcouter(){
+  if (_BR_ECOUTE) return;
+  _BR_ECOUTE = true;
+  document.addEventListener('input', szBrouillonPoser, true);
+  document.addEventListener('change', szBrouillonPoser, true);
+}
+
+/* ══ LIRE ET REPOSER UN FORMULAIRE QUI NE VIT QUE DANS LE DOM ═══════════
+   ⚠ C EST LE CAS DE PRESQUE TOUTES LES FENETRES, et c est la raison de fond du
+   probleme : l etat du formulaire n est ni dans une variable ni dans le stockage.
+   Il est dans les champs. Un redessin, une fermeture, et il n existe plus.
+   Ces deux aides sont ici pour que chaque fenetre n ait qu a NOMMER ses champs :
+   recopier la boucle vingt fois, c est vingt occasions d en oublier un.
+   ⚠ ELLE REND null SI LE FORMULAIRE N EST PAS DESSINE. Sans ce garde, la
+   fermeture ecrirait un brouillon de champs vides PAR-DESSUS le vrai — la
+   << perte >> la plus vicieuse, puisqu elle passe par le mecanisme qui devait
+   proteger.
+   ⚠ ET ON NE MET JAMAIS UN MOT DE PASSE DEDANS. Le brouillon vit dans le
+   stockage du navigateur : y deposer un mot de passe en clair serait creer une
+   fuite pour eviter une contrariete. Les fenetres qui en portent un l excluent
+   de leur liste de champs, et le disent a cet endroit-la. */
+function szBrouillonDuDom(champs, cases){
+  var l = champs || [], c = cases || [];
+  if (!l.length || !document.getElementById(l[0])) return null;
+  var v = { _c: {} };
+  l.forEach(function(id){ var e = document.getElementById(id); if (e) v[id] = e.value; });
+  c.forEach(function(id){ var e = document.getElementById(id); if (e) v._c[id] = !!e.checked; });
+  return v;
+}
+function szBrouillonAuDom(v){
+  if (!v) return;
+  Object.keys(v).forEach(function(k){
+    if (k === '_c') return;
+    var e = document.getElementById(k); if (e) e.value = v[k];
+  });
+  Object.keys(v._c || {}).forEach(function(k){
+    var e = document.getElementById(k); if (e) e.checked = !!v._c[k];
+  });
+}
+/* Y a-t-il quelque chose a perdre ? Vrai des qu UN des champs nommes porte
+   quelque chose. ⚠ Pour un formulaire de MODIFICATION, une fenetre passe plutot
+   sa propre comparaison : un formulaire identique a la fiche enregistree n a rien
+   a proposer, et proposer de << reprendre >> l etat deja en base ne ferait
+   qu inquieter. */
+function szBrouillonQuelqueChose(v, champs){
+  if (!v) return false;
+  var l = champs && champs.length ? champs : Object.keys(v);
+  for (var i = 0; i < l.length; i++) {
+    if (l[i] === '_c') continue;
+    if (String(v[l[i]] == null ? '' : v[l[i]]).trim()) return true;
+  }
+  return false;
+}
+
+function _brIlYa(min){
+  var m = Math.max(1, Math.round(min || 1));
+  if (m < 60) return 'il y a ' + m + ' minute' + (m > 1 ? 's' : '');
+  var h = Math.round(m / 60);
+  return 'il y a ' + h + ' heure' + (h > 1 ? 's' : '');
+}
+
+/* La question de la REOUVERTURE. Rend une promesse resolue a true si la saisie a
+   ete reprise. ⚠ Rien n est restaure sans le demander : un formulaire qui se
+   remplirait tout seul de la saisie d hier est aussi surprenant qu un formulaire
+   vide apres une heure de travail. */
+function szBrouillonProposer(){
+  if (!_brActif()) return Promise.resolve(false);
+  return _brPont().appeler('brouillon:lire', _BR.portee, _brCle()).then(function(r){
+    if (!r || !r.ok || !r.brouillon) return false;
+    return new Promise(function(resoudre){
+      var v = document.createElement('div');
+      v.className = 'szbr-voile';
+      var quoi = (_BR.libelle ? _BR.libelle : 'Une saisie');
+      v.innerHTML = '<div class="szbr-boite" role="dialog" aria-modal="true">'
+        + '<h3><span class="ic">\u{1F4DD}</span> Une saisie non termin\u00e9e</h3>'
+        + '<p>' + quoi + ' a \u00e9t\u00e9 laiss\u00e9e en cours <strong>'
+        + _brIlYa(r.ilYaMin) + '</strong>. La reprendre, ou repartir \u00e0 neuf ?</p>'
+        + '<p class="szbr-note">Un brouillon dispara\u00eet de lui-m\u00eame apr\u00e8s '
+        + Math.round((_BR.ttlMin || 720) / 60) + ' heures, et il est jet\u00e9 d\u00e8s que la fiche est enregistr\u00e9e.</p>'
+        + '<div class="szbr-pied">'
+        + '<button type="button" id="szbr-non">Repartir \u00e0 neuf</button>'
+        + '<button type="button" class="prim" id="szbr-oui">Reprendre</button>'
+        + '</div></div>';
+      document.body.appendChild(v);
+      var fini = function(repris){ if (v.parentNode) v.parentNode.removeChild(v); resoudre(repris); };
+      document.getElementById('szbr-oui').onclick = function(){
+        try { if (_BR.remplir) _BR.remplir(r.brouillon); } catch (e) {}
+        /* La valeur restauree EST celle du stockage : sans cette ligne, le
+           premier geste reecrirait a l identique un brouillon deja la. */
+        try { _BR_DERNIER = JSON.stringify(r.brouillon); } catch (e) { _BR_DERNIER = ''; }
+        _brSale(true);
+        fini(true);
+      };
+      document.getElementById('szbr-non').onclick = function(){ szBrouillonJeter(); fini(false); };
+    });
+  }, function(){ return false; });
+}
+`;
+
 const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS + JS_LOTS + JS_AUTOPAGE;
 
 const JS_SOCLE = `
@@ -1019,6 +1250,37 @@ html.jour .tete h1{color:#141c28}
 .tete .ico{opacity:.95}
 html.jour .ico{color:#414e66}
 
+/* ══ LA BOITE DU BROUILLON ══════════════════════════════════
+   ⚠ SES PROPRES CLASSES, ET C EST VOULU. La boite de reprise de l assistant
+   Produit emprunte les classes .voile/.boite/.pied2 de SA feuille — elles
+   n existent pas dans les 87 autres fenetres. Une aide partagee qui s appuierait
+   dessus se dessinerait donc n importe comment ailleurs, ou pas du tout. Les
+   classes .szbr-* vivent ici, avec le reste du socle : une fenetre qui branche
+   un brouillon demain n a rien a declarer.
+   ⚠ UNE BOITE, PAS UN BANDEAU (meme raison que dans l assistant Produit) : une
+   etape doit tenir dans la fenetre, et un bandeau permanent volerait la place
+   d une carte. La question se pose une fois, a l ouverture, et disparait. */
+.szbr-voile{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
+  justify-content:center;padding:1.2rem;background:rgba(6,10,18,.62)}
+.szbr-boite{max-width:26rem;width:100%;background:#131c2b;color:#e8edf5;
+  border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.1rem;
+  box-shadow:0 18px 44px rgba(0,0,0,.45)}
+.szbr-boite h3{margin:0 0 .5rem;display:flex;align-items:center;gap:.45rem;
+  font:700 1rem/1.25 Georgia,serif;color:#e8dcc6}
+.szbr-boite p{margin:.35rem 0;font-size:.86rem;line-height:1.5}
+.szbr-note{font-size:.78rem;color:#8fa1b8}
+.szbr-pied{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem}
+.szbr-pied button{font:inherit;font-size:.84rem;padding:.4rem .8rem;border-radius:6px;
+  cursor:pointer;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);
+  color:#e8edf5}
+.szbr-pied button.prim{background:#C49A6C;border-color:#C49A6C;color:#1b1206;font-weight:700}
+html.jour .szbr-voile{background:rgba(29,36,51,.35)}
+html.jour .szbr-boite{background:#ffffff;color:#1d2433;border-color:rgba(15,23,42,.14)}
+html.jour .szbr-boite h3{color:#141c28}
+html.jour .szbr-note{color:#414e66}
+html.jour .szbr-pied button{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.18);color:#1d2433}
+html.jour .szbr-pied button.prim{background:#C49A6C;border-color:#C49A6C;color:#1b1206}
+
 /* ⚠⚠ LA LISTE DEROULEE D UN <select> EST DESSINEE PAR LE SYSTEME, PAS PAR NOUS.
    Elle ne prend NI le fond ni la couleur de la fenetre : les fenetres ecrivent
    << select{color:#e8edf5;background:rgba(255,255,255,.05)} >>, et un fond
@@ -1300,4 +1562,4 @@ const ICO = {
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
   CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
-  JS_SOCLE, JS_ACTIVITE, JS_DIRE, CSS_THEMES, ICO };
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_THEMES, ICO };

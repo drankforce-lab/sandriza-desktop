@@ -346,6 +346,55 @@ try {
    ⚠ On lit la version dans package.json (la coquille) et les notes dans
    pont.js (le site) : les deux dépôts doivent être côte à côte, comme pour la
    parité des ops. Sans le site, on le DIT au lieu de laisser croire au vert. */
+/* ══ LE MONTAGE DU BROUILLON EST COMPLET ════════════════════════
+   ⚠⚠ CE CONTROLE EXISTE PARCE QU UNE PIECE MANQUANTE NE SE VOIT PAS. Brancher un
+   brouillon demande quatre gestes dans le meme fichier, et en oublier un ne leve
+   RIEN :
+     ① sans l import de JS_BROUILLON, la page appelle une fonction absente — une
+       erreur avalee par la suite de promesse, et le dessin s arrete la ;
+     ② sans l injection ${JS_BROUILLON} dans le gabarit, meme chose ;
+     ③ sans szBrouillonEcouter(), le brouillon ne s ecrit JAMAIS pendant la frappe.
+       La fenetre a l air protegee, la boite de reprise existe, et il n y a jamais
+       rien a reprendre. C est le pire des quatre : tout paraît en place ;
+     ④ sans szBrouillonJeter() apres l enregistrement, le brouillon SURVIT a la
+       fiche enregistree et sera propose la fois suivante — on ne sait plus lequel
+       des deux fait foi, et c est ainsi qu on remplace du bon travail par du vieux.
+   Aucun de ces quatre oublis ne casse la compilation, et l executeur de page ne
+   les verrait pas non plus : la fenetre se dessine tres bien sans brouillon. */
+console.log('=== Le montage du brouillon est complet ===');
+{
+  const dossier = path.join(__dirname, '..', 'src', 'fenetres');
+  let fics = [];
+  try { fics = fs.readdirSync(dossier).filter((f) => f.endsWith('.js') && f !== 'socle.js'); } catch (e) {}
+  const branchees = [];
+  fics.forEach((f) => {
+    let t = '';
+    try { t = fs.readFileSync(path.join(dossier, f), 'utf8'); } catch (e) { return; }
+    if (t.indexOf('szBrouillonBrancher(') < 0) return;
+    const manque = [];
+    if (!/require\('\.\/socle(?:\.js)?'\)/.test(t) || !/\{[^}]*\bJS_BROUILLON\b[^}]*\}\s*=\s*require/.test(t)) {
+      manque.push('JS_BROUILLON absent de l import du socle');
+    }
+    if (t.indexOf('${JS_BROUILLON}') < 0) manque.push('${JS_BROUILLON} pas injecte dans le gabarit');
+    if (t.indexOf('szBrouillonEcouter(') < 0) manque.push('szBrouillonEcouter() jamais appele (rien ne s ecrirait pendant la frappe)');
+    if (t.indexOf('szBrouillonJeter(') < 0) manque.push('szBrouillonJeter() jamais appele (le brouillon survivrait a l enregistrement)');
+    if (t.indexOf('szBrouillonProposer(') < 0) manque.push('szBrouillonProposer() jamais appele (rien ne serait propose a la reouverture)');
+    branchees.push({ f, manque });
+  });
+  if (!branchees.length) {
+    dire(true, 'brouillons', 'aucune fenetre ne branche de brouillon');
+  } else {
+    const casses = branchees.filter((b) => b.manque.length);
+    if (!casses.length) {
+      dire(true, 'brouillons', branchees.length + ' fenetre(s) branchee(s), montage complet dans chacune');
+    } else {
+      casses.forEach((b) => {
+        b.manque.forEach((m) => dire(false, b.f, m));
+      });
+    }
+  }
+}
+
 console.log('=== Police des titres embarquée ===');
 /* ⚠⚠ CE CONTRÔLE EXISTE PARCE QUE LA PANNE SERAIT INVISIBLE. La police des
    titres est inlinée en base64 dans `socle.js` — une chaîne de 50 000 caractères

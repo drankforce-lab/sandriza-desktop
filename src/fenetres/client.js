@@ -17,7 +17,7 @@
  * COMPRIS — onzième rappel du projet.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -114,7 +114,7 @@ function pageClient(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');
@@ -297,7 +297,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   function brancherFiche(){
     brancherFermer();
     var m = document.getElementById('btn-modifier');
-    if (m) m.onclick = function(){ EDITION = true; dessiner(); };
+    /* Le dessin D ABORD : la boite de reprise remplit des champs qui n existent
+       qu apres lui. */
+    if (m) m.onclick = function(){ EDITION = true; dessiner(); szBrouillonProposer(); };
     var rl = document.getElementById('btn-releve');
     if (rl) rl.onclick = function(){
       dire('Impression de l’état de compte…');
@@ -365,8 +367,11 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function brancherEdition(){
     brancherFermer();
+    /* ⚠ IMMEDIAT, ET LES VALEURS SONT PRISES MAINTENANT : deux lignes plus bas le
+       formulaire n existe plus. C est le defaut n°1 des Depenses, qui ne gardait
+       que la categorie. */
     var an = document.getElementById('btn-annuler');
-    if (an) an.onclick = function(){ EDITION = false; dessiner(); };
+    if (an) an.onclick = function(){ szBrouillonMaintenant(); EDITION = false; dessiner(); };
     var bv = document.getElementById('btn-voir');
     if (bv) bv.onclick = function(){
       var i = document.getElementById('e-mdp');
@@ -390,6 +395,49 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (enr) enr.onclick = enregistrer;
   }
 
+  /* ══ LE BROUILLON DE LA FICHE CLIENT ══════════════════════════
+     ⚠⚠ LE MOT DE PASSE N EN FAIT PAS PARTIE, ET C EST LA DECISION LA PLUS
+     IMPORTANTE DE CE BLOC. Le brouillon vit dans le stockage du navigateur : y
+     deposer un mot de passe en clair serait creer une fuite pour eviter une
+     contrariete. << e-mdp >> et << e-aviser >> sont donc absents des listes ci-
+     dessous, exprès. Si l on reprend un brouillon, le champ du mot de passe est
+     vide — ce qui est aussi son comportement normal (vide = inchange).
+     ⚠ UNE CLE PAR FICHE. Sans elle, une saisie laissee sur la fiche de madame
+     Tremblay serait proposee sur celle de madame Gagnon : un formulaire qui a
+     l air simplement rempli, et l on enregistrerait les coordonnees de l une
+     chez l autre.
+     ⚠ ET SEULEMENT CE QUI DIFFERE. On modifie une fiche EXISTANTE : proposer de
+     << reprendre >> un formulaire identique a ce qui est en base n apprendrait
+     rien et ferait douter. */
+  var BR_CHAMPS = ['e-prenom', 'e-nom', 'e-courriel', 'e-tel', 'e-rue', 'e-ville',
+    'e-prov', 'e-postal', 'e-pays', 'e-langue'];
+  function brDeLaFiche(){
+    var c = (R && R.client) || {}, a = c.adresse || {};
+    return { 'e-prenom': c.prenom || '', 'e-nom': c.nom || '', 'e-courriel': c.courriel || '',
+      'e-tel': c.tel || '', 'e-rue': a.rue || '', 'e-ville': a.ville || '',
+      'e-prov': a.province || '', 'e-postal': a.codePostal || '', 'e-pays': a.pays || '',
+      'e-langue': c.langue === 'en' ? 'en' : 'fr' };
+  }
+  szBrouillonBrancher({
+    portee: 'client',
+    libelle: 'Une modification de cette fiche',
+    ttlMin: 720,
+    cle: function(){ return 'c:' + ID; },
+    actif: function(){ return !!(EDITION && R && R.client); },
+    valeurs: function(){ return szBrouillonDuDom(BR_CHAMPS, []); },
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, []); if (!v) return false;
+      var ref = brDeLaFiche();
+      for (var i = 0; i < BR_CHAMPS.length; i++) {
+        var k = BR_CHAMPS[i];
+        if (String(v[k] == null ? '' : v[k]) !== String(ref[k])) return true;
+      }
+      return false;
+    },
+    remplir: function(v){ szBrouillonAuDom(v); },
+  });
+  szBrouillonEcouter();
+
   function enregistrer(){
     if (enCours) return;
     enCours = true; dire('Enregistrement…', 'att');
@@ -405,6 +453,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       dire(r.mdpChange
         ? ('Fiche et mot de passe mis à jour.' + (r.avisEnvoye ? ' Client avisé par courriel.' : ''))
         : 'Fiche client mise à jour.', 'bon');
+      /* ⚠ LE BROUILLON MEURT ICI, et seulement ici : le garder ferait concurrence
+         a la fiche enregistree sans qu on sache laquelle fait foi. */
+      szBrouillonJeter();
       EDITION = false;
       recharger();
     });

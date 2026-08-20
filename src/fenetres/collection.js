@@ -20,7 +20,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU.
  */
 
-const { CSS_SOCLE, JS_SOCLE } = require('./socle');
+const { CSS_SOCLE, JS_SOCLE, JS_BROUILLON } = require('./socle');
 
 const CSS_PROPRE = `
 .photo{display:flex;gap:.85rem;align-items:flex-start}
@@ -52,6 +52,7 @@ function pageCollection(id) {
 (function(){
   'use strict';
   ${JS_SOCLE}
+  ${JS_BROUILLON}
 
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
@@ -221,10 +222,56 @@ function pageCollection(id) {
         if (!r || !r.ok) { vide('Fiche indisponible', expliquer(r)); return; }
         document.getElementById('titre').textContent = ID ? 'Modifier la collection' : 'Nouvelle collection';
         dessiner(r.fiche);
+        szBrouillonProposer();
         return verrou();
       });
     });
   }
+
+  /* ══ LE BROUILLON DE L ASSISTANT COLLECTION ═════════════════════
+     Le nom, une description en texte libre (souvent redigee par l IA, donc payee),
+     la saison, l annee, et LE CHOIX DES PRODUITS — qui peut representer plusieurs
+     minutes de selection dans un catalogue entier. Le tout ne vit que dans le DOM
+     et dans deux variables de la page.
+     ⚠ L IMAGE DE COUVERTURE N ENTRE PAS DANS LE BROUILLON. Une image deposee est
+     une chaine base64 de plusieurs centaines de kilo-octets : la mettre dans le
+     brouillon ferait tomber le quota du stockage a chaque frappe, et sacrifierait
+     les brouillons des autres formulaires pour garder une vignette qu on peut
+     redeposer en un clic. On garde le TRAVAIL, pas le fichier.
+     ⚠ Comme pour l assistant Fournisseur, on ne branche AUCUN chemin de
+     fermeture : Annuler, Echap et le X du cadre aboutissent tous au garde de la
+     coquille, qui pose la question une seule fois. */
+  var BR_CHAMPS = ['c-nom', 'c-desc', 'c-saison', 'c-annee', 'c-actif'];
+  szBrouillonBrancher({
+    portee: 'collection',
+    libelle: ID ? 'Une modification de cette collection' : 'Une collection',
+    ttlMin: 720,
+    cle: function(){ return ID ? ('col:' + ID) : '__new__'; },
+    actif: function(){ return !!document.getElementById('c-nom'); },
+    valeurs: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, []);
+      if (v) v._prods = Object.keys(CHOISIS).filter(function(k){ return CHOISIS[k]; });
+      return v;
+    },
+    rempli: function(){
+      var v = szBrouillonDuDom(BR_CHAMPS, []); if (!v) return false;
+      if (szBrouillonQuelqueChose(v, ['c-nom', 'c-desc'])) return true;
+      return Object.keys(CHOISIS).some(function(k){ return CHOISIS[k]; });
+    },
+    remplir: function(v){
+      szBrouillonAuDom(v);
+      /* On repose la selection dans la variable qui fait foi, puis on redessine la
+         liste : cocher les cases sans toucher CHOISIS donnerait un ecran qui montre
+         une selection que l enregistrement ignorerait. */
+      CHOISIS = {};
+      (v._prods || []).forEach(function(k){ CHOISIS[k] = true; });
+      /* ⚠ PAGI.dessiner(), PAS brancher() : brancher pose les ecouteurs, et le
+         rappeler les poserait une seconde fois — un clic compterait double. C est
+         dessiner qui repeint les lignes, donc les cases cochees. */
+      if (PAGI && PAGI.dessiner) PAGI.dessiner();
+    },
+  });
+  szBrouillonEcouter();
 
   function enregistrer(){
     if (!Assist.toutValide()) return;
@@ -240,6 +287,7 @@ function pageCollection(id) {
       productIds: Object.keys(CHOISIS).filter(function(k){ return CHOISIS[k]; })
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
+      szBrouillonJeter();
       dire('Enregistré.', 'bon');
       setTimeout(function(){ P.fermer(); }, 550);
     });

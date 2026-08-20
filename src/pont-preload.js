@@ -96,6 +96,16 @@ contextBridge.exposeInMainWorld('szPont', {
 
   // Fermer proprement — la fenêtre n'a pas de barre de menu à elle.
   fermer: () => ipcRenderer.send('pont:fermer'),
+  /* ⚠ << J'AI UNE SAISIE EN COURS >>. Le bouton de fermeture DESSINÉ dans la page
+     passe par `fermer` ci-dessus, donc la page peut demander avant de partir.
+     Mais le bouton X du CADRE DE WINDOWS, lui, ne traverse pas la page : le
+     principal ferme la fenêtre et personne n'a rien demandé. La page lève donc ce
+     drapeau dès qu'il y a quelque chose à perdre, et le principal s'en sert pour
+     poser la question à SA place, avant de laisser partir.
+     ⚠ Un canal ÉTROIT, un booléen : le préchargement n'expose toujours aucun
+     `ipcRenderer` brut (une page pourrait sinon émettre n'importe quel message
+     vers le principal, y compris ceux de la fenêtre principale). */
+  brouillonSale: (on) => ipcRenderer.send('pont:brouillonSale', !!on),
 
   // ⚠ LE PLEIN ÉCRAN EST UNE ACTION DE FENÊTRE, PAS UNE DONNÉE. Il ne passe donc
   // pas par `appeler` : cette voie-là mène aux données du site et à sa session,

@@ -23,7 +23,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -140,7 +140,7 @@ function pageRecommandations(onglet) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -248,12 +248,14 @@ ${JS_ACTIVITE}${JS_DIRE}
       payload.type = g('reg-type');
       appeler('reco:creer', [payload]).then(function(r){
         if (!r || !r.ok) { if (btn) btn.disabled = false; dire('Échec : ' + expliquer(r), 'err'); return; }
-        REG_FORM = null; charger(); dire('Règle « ' + (r.nom || '') + ' » créée.', 'bon');
+        /* ⚠ LE BROUILLON MEURT ICI, et seulement ici : le garder ferait
+           concurrence a la fiche enregistree sans qu on sache laquelle fait foi. */
+        szBrouillonJeter(); REG_FORM = null; charger(); dire('Règle « ' + (r.nom || '') + ' » créée.', 'bon');
       });
     } else {
       appeler('reco:editer', [REG_FORM.r.id, payload]).then(function(r){
         if (!r || !r.ok) { if (btn) btn.disabled = false; dire('Échec : ' + expliquer(r), 'err'); return; }
-        REG_FORM = null; charger(); dire('Règle mise à jour.', 'bon');
+        szBrouillonJeter(); REG_FORM = null; charger(); dire('Règle mise à jour.', 'bon');
       });
     }
   }
@@ -552,15 +554,24 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (t.closest('#ag-reinit')) { STYLE = null; LOOK = []; CATF = 'all'; AGEN = null; dessiner(); chargerAgencement(); return; }
     if (t.closest('#ag-publier')) { publierAgencement(); return; }
 
-    if (t.closest('#reg-nouvelle')) { REG_FORM = { mode: 'creer' }; ARME = ''; dessiner(); return; }
+    /* ⚠ << dessiner() >> D ABORD, << szBrouillonProposer() >> ENSUITE : la boite de reprise
+       remplit des champs, et ces champs n existent qu apres le dessin. */
+    if (t.closest('#reg-nouvelle')) { REG_FORM = { mode: 'creer' }; ARME = ''; dessiner(); szBrouillonProposer(); return; }
     var bed = t.closest('[data-editer]');
     if (bed) {
       var idE = bed.getAttribute('data-editer');
       var rr = (D.regles || []).filter(function(x){ return x.id === idE; })[0];
-      if (rr) { REG_FORM = { mode: 'editer', r: rr }; ARME = ''; dessiner(); }
+      if (rr) { REG_FORM = { mode: 'editer', r: rr }; ARME = ''; dessiner(); szBrouillonProposer(); }
       return;
     }
-    if (t.closest('#reg-annuler')) { REG_FORM = null; dessiner(); return; }
+    /* ⚠ << Annuler >> N EFFACE PAS LE BROUILLON, et c est voulu : la personne
+       ferme son formulaire, elle ne declare pas jeter son travail. Il lui sera
+       propose a la reouverture. Pour repartir a neuf, la boite de reprise a son
+       bouton — le geste est explicite.
+       ⚠ ET L ECRITURE EST IMMEDIATE, avec les valeurs prises MAINTENANT : trois
+       lignes plus bas le formulaire n existe plus. C est le defaut n°1 des
+       Depenses, qui ne gardait que la categorie. */
+    if (t.closest('#reg-annuler')) { szBrouillonMaintenant(); REG_FORM = null; dessiner(); return; }
     if (t.closest('#reg-ok')) { soumettreRegle(); return; }
 
     var bm = t.closest('[data-monter]');
@@ -750,6 +761,69 @@ ${JS_ACTIVITE}${JS_DIRE}
       dessiner();
     });
   }
+
+  /* ══ LE BROUILLON DU FORMULAIRE DE REGLE ═══════════════════════
+     ⚠ LES VALEURS NE VIVENT QUE DANS LE DOM. << REG_FORM >> ne porte que le MODE et
+     la fiche d origine ; ce qu on tape n existe nulle part ailleurs que dans les
+     champs. Un redessin, une fermeture, et c est perdu sans un mot.
+     ⚠ LA CLE DISTINGUE CREATION ET FICHE. Sans elle, une saisie laissee sur une
+     regle serait proposee pour la suivante — un formulaire qui a l air simplement
+     rempli, la perte la plus difficile a voir. */
+  var _brChamps = ['reg-nom', 'reg-type', 'reg-titre', 'reg-sous', 'reg-max'];
+  var _brCases = ['reg-on-product', 'reg-on-cart', 'reg-on-home'];
+  szBrouillonBrancher({
+    portee: 'reco-regle',
+    libelle: 'Une r\u00e8gle de recommandation',
+    ttlMin: 720,
+    cle: function(){
+      if (!REG_FORM) return '';
+      return REG_FORM.mode === 'creer' ? '__new__' : ('r:' + ((REG_FORM.r || {}).id || ''));
+    },
+    actif: function(){ return !!REG_FORM; },
+    /* Y a-t-il quelque chose a perdre ? En creation, le moindre mot tape. En
+       modification, seulement ce qui DIFFERE de la fiche enregistree — sinon on
+       proposerait de << reprendre >> un formulaire identique a ce qui est en base. */
+    rempli: function(){
+      if (!REG_FORM) return false;
+      var v = this.valeurs(); if (!v) return false;
+      if (REG_FORM.mode === 'creer') {
+        return !!(String(v.nom || '').trim() || String(v.titre || '').trim()
+          || String(v.sous || '').trim());
+      }
+      var r = REG_FORM.r || {};
+      return String(v.nom || '') !== String(r.nom || '')
+        || String(v.titre || '') !== String(r.titre || '')
+        || String(v.sous || '') !== String(r.soustitre || '')
+        || String(v.max || '') !== String(r.max || 4)
+        || v.on.join(',') !== ((r.surBrut && r.surBrut.length ? r.surBrut : ['product']).join(','));
+    },
+    /* ⚠ SYNCHRONE, et appele AU MOMENT OU l on ferme : les champs existent encore. */
+    valeurs: function(){
+      if (!document.getElementById('reg-nom')) return null;
+      var v = { on: [] };
+      _brChamps.forEach(function(id){
+        var e = document.getElementById(id);
+        v[id.slice(4)] = e ? e.value : '';
+      });
+      _brCases.forEach(function(id){
+        var e = document.getElementById(id);
+        if (e && e.checked) v.on.push(id.slice(7));
+      });
+      return v;
+    },
+    remplir: function(v){
+      _brChamps.forEach(function(id){
+        var e = document.getElementById(id);
+        if (e && v[id.slice(4)] !== undefined) e.value = v[id.slice(4)];
+      });
+      var on = v.on || [];
+      _brCases.forEach(function(id){
+        var e = document.getElementById(id);
+        if (e) e.checked = on.indexOf(id.slice(7)) >= 0;
+      });
+    },
+  });
+  szBrouillonEcouter();
 
   window.szActualiser = function(){ if (!LIAISON && !ARME && !REG_FORM) charger(); };
   window.szRevenir = function(){ if (!LIAISON && !REG_FORM) charger(); };
