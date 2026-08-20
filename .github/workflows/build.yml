@@ -73,6 +73,16 @@ jobs:
           fi
           printf "module.exports = { APP_KEY: '%s' };\n" "$ELG_APP_KEY" > src/cle.js
 
+      # ⚠⚠ ET LE PALIER : LA MINEURE NE DÉPASSE PAS 75. Règle posée le 2026-08-09
+      # — arrivé à `x.75.0`, la suivante est `(x+1).0.0`, jamais `x.76.0`. Sans
+      # palier, la mineure grossit indéfiniment et le numéro ne dit plus rien de
+      # l'ampleur du travail.
+      # Elle était notée, indexée, et elle a été enfreinte DEUX FOIS quand même :
+      # `2.76.0`, puis `3.76.0` (corrigée en 4.0.0). Une règle qu'on répète et
+      # qu'on oublie n'est pas une règle, c'est un vœu — donc c'est un contrôle,
+      # et il vit ICI parce que c'est la construction qui transforme un numéro en
+      # version installée chez quelqu'un. Le pendant côté site est l'étape 1k de
+      # `tools/check/verifier.ps1`, qui lit les clés de NOTES dans `pont.js`.
       - name: Vérifier la version
         shell: bash
         run: |
@@ -80,6 +90,16 @@ jobs:
           if [ "$PKG" != "${{ inputs.version }}" ]; then
             echo "::error::package.json annonce $PKG, la demande porte sur ${{ inputs.version }}."
             exit 1
+          fi
+          MAJ=${PKG%%.*}
+          RESTE=${PKG#*.}
+          MIN=${RESTE%%.*}
+          if [ "$MIN" -gt 75 ]; then
+            echo "::error::Palier de version enfreint : $PKG a une mineure de $MIN. Arrivé à $MAJ.75.0, la suivante est $((MAJ+1)).0.0 — jamais $MAJ.76.0."
+            exit 1
+          fi
+          if [ "$MIN" -eq 75 ]; then
+            echo "::warning::$PKG atteint le plafond : la PROCHAINE version doit être $((MAJ+1)).0.0."
           fi
 
       - name: Dépendances
