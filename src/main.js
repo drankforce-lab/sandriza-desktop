@@ -415,9 +415,65 @@ ipcMain.handle('badge:set', (e, dataUrl, desc) => {
 // ══ PHASE 4 — DÉMARRAGE AUTOMATIQUE ═══════════════════════════════════════════
 ipcMain.handle('doc:pdf', async (e, html, opts) => documentEnPdf(html, opts || {}));
 
-ipcMain.handle('autolaunch:get', () => {
-  try { return !!app.getLoginItemSettings().openAtLogin; } catch { return false; }
-});
+/* ══ « DÉMARRER AVEC WINDOWS » : IL N'ÉCRIVAIT RIEN, ET NE LE DISAIT PAS ═══
+   Signalé le 2026-08-20 : « a corriger, cela ne marche pas ». Vérifié dans le
+   registre du poste : AUCUNE entrée Sandriza sous
+   HKCU\...\CurrentVersion\Run, alors que d'autres applications y sont. La
+   chaîne de clics était pourtant entière (menu → menu:action → actionApp) :
+   c'est `app.setLoginItemSettings` qui ne posait rien.
+
+   ⚠⚠ ET C'EST LE `catch {}` VIDE QUI A COÛTÉ LE PLUS CHER. La bascule était
+   écrite `try { app.setLoginItemSettings(...) } catch {}` : qu'elle réussisse ou
+   qu'elle échoue, elle rendait la main sans un mot, et le menu se contentait de
+   relire un état qui n'avait pas bougé. Rien à chercher, rien à lire : une
+   commande morte, silencieuse. C'est le même défaut que le `catch {}` de
+   `session_activate`, qui avait fait accuser une « connexion ailleurs »
+   inexistante.
+
+   Ce qu'on fait maintenant, dans l'ordre : on demande à Electron, ON RELIT pour
+   savoir si ça a pris, et si non on écrit l'entrée NOUS-MÊMES avec `reg.exe`,
+   puis on relit encore. Et le résultat — succès OU échec — est dit à l'écran.
+   ⚠ LA LECTURE CONSULTE LES DEUX SOURCES : si le repli a écrit l'entrée,
+   `getLoginItemSettings` peut très bien continuer à répondre « non ». Ne lire
+   qu'Electron ferait une coche qui se relève toute seule au redémarrage. */
+const AUTOL_NOM = 'Administration Sandriza';
+const AUTOL_CLE = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run';
+const _reg = (args) => {
+  try {
+    return { ok: true, sortie: require('child_process')
+      .execFileSync('reg', args, { encoding: 'utf8', windowsHide: true }) };
+  } catch (e) {
+    return { ok: false, sortie: String((e && e.stdout) || (e && e.message) || '') };
+  }
+};
+const _autolDansRegistre = () => {
+  if (process.platform !== 'win32') return false;
+  const r = _reg(['query', AUTOL_CLE, '/v', AUTOL_NOM]);
+  return r.ok && r.sortie.indexOf(AUTOL_NOM) >= 0;
+};
+const autoLaunchEtat = () => {
+  let parElectron = false;
+  try { parElectron = !!app.getLoginItemSettings().openAtLogin; } catch (e) {}
+  return parElectron || _autolDansRegistre();
+};
+const autoLaunchPoser = (vouloir) => {
+  const on = !!vouloir;
+  try { app.setLoginItemSettings({ openAtLogin: on, path: process.execPath, args: [] }); }
+  catch (e) {}
+  if (autoLaunchEtat() === on) return { ok: true, actif: on, par: 'electron' };
+  if (process.platform !== 'win32') return { ok: false, actif: autoLaunchEtat(), detail: '' };
+  /* Le repli. On écrit le chemin de l'exécutable EN COURS, entre guillemets :
+     sans eux, un chemin à espaces (« Program Files », « Administration
+     Sandriza.exe ») ferait chercher à Windows un programme nommé « C:\Program ». */
+  const r = on
+    ? _reg(['add', AUTOL_CLE, '/v', AUTOL_NOM, '/t', 'REG_SZ', '/d', '"' + process.execPath + '"', '/f'])
+    : _reg(['delete', AUTOL_CLE, '/v', AUTOL_NOM, '/f']);
+  if (autoLaunchEtat() === on) return { ok: true, actif: on, par: 'registre' };
+  return { ok: false, actif: autoLaunchEtat(),
+    detail: String(r.sortie || '').trim().split('\n')[0] || '' };
+};
+
+ipcMain.handle('autolaunch:get', () => autoLaunchEtat());
 ipcMain.handle('autolaunch:set', (e, on) => {
   try { app.setLoginItemSettings({ openAtLogin: !!on }); return true; } catch { return false; }
 });
@@ -3456,9 +3512,24 @@ const actionApp = (nom) => {
       if (wc) wc.executeJavaScript("localStorage.getItem('elg_hide_admin_sidebar')==='1'", true)
         .then((masquee) => toggleSidebar(!masquee)).catch(() => {});
       break;
-    case 'autolaunch-toggle':
-      try { app.setLoginItemSettings({ openAtLogin: !app.getLoginItemSettings().openAtLogin }); } catch {}
+    /* ⚠ ON DIT CE QUI S'EST PASSÉ. Une bascule muette est exactement le défaut
+       qu'on vient de corriger : la coche du menu se relit déjà toute seule, mais
+       elle ne peut pas expliquer un ÉCHEC — elle se contenterait de rester au
+       même endroit, ce qui se lit comme « le clic n'a rien fait ». */
+    case 'autolaunch-toggle': {
+      const _al = autoLaunchPoser(!autoLaunchEtat());
+      const _alMsg = _al.ok
+        ? (_al.actif ? 'L\u2019application d\u00e9marrera avec Windows.'
+                     : 'L\u2019application ne d\u00e9marrera plus avec Windows.')
+        : ('Impossible de r\u00e9gler le d\u00e9marrage avec Windows'
+            + (_al.detail ? ' \u2014 ' + _al.detail : '.'));
+      if (wc) {
+        wc.executeJavaScript('window.Toast && Toast.show('
+          + JSON.stringify(_alMsg) + ',' + JSON.stringify(_al.ok ? 'success' : 'error')
+          + ',7000);', true).catch(() => {});
+      }
       break;
+    }
     default:
       if (nom.indexOf('dock:') === 0) {
         const mode = nom.slice(5);
