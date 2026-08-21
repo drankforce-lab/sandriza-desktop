@@ -152,4 +152,22 @@ contextBridge.exposeInMainWorld('szPont', {
      principal contre une liste blanche — une fenêtre ne choisit pas ce qu'elle
      ouvre dans l'application, elle le demande. */
   ouvrirModule: (nom) => ipcRenderer.invoke('module:ouvrir', String(nom || '')).catch(() => false),
+
+  /* ══ ÉCRIRE UN FICHIER D EXPORT — DEPUIS LA FENÊTRE QUI L A DEMANDÉ ════════
+     ⚠⚠ POURQUOI CE CANAL EXISTE (2026-08-20, signalé : « ça apparaît dans les
+     Import mais rien ne se télécharge »). Une fenêtre native qui demandait un
+     fichier faisait partir le téléchargement dans la fenêtre PRINCIPALE, la
+     seule qui porte la session. Là, le site le RETIENT volontairement et
+     l affiche dans un panneau de la barre latérale — un panneau qui se trouve
+     DERRIÈRE la fenêtre native. Message vert, et rien à voir nulle part.
+     ⚠ Ce n est PAS une porte vers le disque : le principal impose le dossier
+     (Documents\SANDRIZA\Exports, celui du menu « Exports ») et assainit le nom.
+     Une fenêtre ne choisit ni où elle écrit, ni comment le fichier s appelle
+     vraiment — elle demande, et on lui dit où c est allé.
+     ⚠ Le canal existait déjà pour la fenêtre principale (`export:save`) : on
+     l ouvre ici, on n en invente pas un second qui divergerait. */
+  enregistrerExport: (nom, contenu) => ipcRenderer
+    .invoke('export:save', String(nom || ''), String(contenu == null ? '' : contenu))
+    .catch((e) => ({ ok: false, error: String((e && e.message) || e) })),
+  ouvrirDossierExports: () => ipcRenderer.invoke('export:openFolder').catch(() => false),
 });

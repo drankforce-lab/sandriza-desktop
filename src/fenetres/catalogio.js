@@ -232,7 +232,21 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!P || !P.appeler) return Promise.resolve({ ok:false, motif:'indisponible' });
     return P.appeler(op, arg).catch(function(){ return { ok:false, motif:'echec' }; });
   }
-  function optsExport(){ return { sheet:SHEET, sep:SEP, inclHorsVente:INCL_HV, inclCout:INCL_COUT }; }
+  /* ⚠ natif:true — le coeur REND le fichier au lieu de le telecharger dans la
+     fenetre principale (voir ecrireExport). */
+  function optsExport(){ return { sheet:SHEET, sep:SEP, inclHorsVente:INCL_HV, inclCout:INCL_COUT, natif:true }; }
+  // Nom du dernier fichier ecrit : le bouton du dossier n a aucun sens tant que
+  // rien n est sorti, il n apparait donc qu apres.
+  var DERNIER_EXPORT = '';
+  /* ⚠ TOUJOURS VISIBLE, pas seulement apres une sortie. Le bouton repond a la
+     question << ou est parti mon fichier ? >>, et cette question se pose AVANT
+     de cliquer autant qu apres — la montrer seulement une fois le mal fait,
+     c est arriver en retard. */
+  function btnDossier(){
+    return '<button class="ghost mini" data-act="dossier" title="'
+      + (DERNIER_EXPORT ? 'Dernier fichier écrit : ' + esc(DERNIER_EXPORT) + '. ' : '')
+      + 'Ouvre le dossier Documents › SANDRIZA › Exports">📂 Dossier des exports</button>';
+  }
 
   function vide(titre, detail){
     ongletsEl.innerHTML = '';
@@ -322,6 +336,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="barre">'
       +   '<button class="prim" data-act="exporter">⬇ Sortir le CSV</button>'
       +   '<button class="ghost mini" data-act="modele">Modèle vide (en-têtes seuls)</button>'
+      +   btnDossier()
       +   '<span class="compte">' + compte + '</span>'
       + '</div>'
       + '<div style="margin-top:1.4rem">'
@@ -361,6 +376,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '<div class="barre">'
       +     '<button class="ghost" data-act="modele" data-feuille="catalogue">⬇ Modèle catalogue</button>'
       +     '<button class="ghost" data-act="modele" data-feuille="inventaire">⬇ Modèle inventaire</button>'
+      +     btnDossier()
       +   '</div>'
       +   '<div class="avis" style="margin-top:.6rem"><strong>Catalogue</strong> : une ligne par produit (prix, noms, catégorie, étiquettes). '
       +     '<strong>Inventaire</strong> : une ligne par variante taille × couleur (quantité, entrepôt).</div>'
@@ -551,10 +567,40 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   /* ══ ACTIONS ═════════════════════════════════════════════════════════════════ */
+
+  /* ⚠⚠ LE FICHIER S ECRIT ICI, PAS DANS LA FENETRE PRINCIPALE (2026-08-20).
+     Signale : << ca apparait dans les Import mais rien ne se telecharge >>.
+     Ces trois boutons faisaient partir le telechargement dans la fenetre
+     PRINCIPALE — la seule qui porte la session. Le site l y retient expres et
+     l affiche dans un panneau de la barre laterale, qui se trouve DERRIERE
+     cette fenetre-ci. On voyait un message vert, et rien d autre.
+     Le coeur rend maintenant le contenu (option natif), et on l ecrit dans le
+     dossier des exports, en DISANT ou il est alle. */
+  function ecrireExport(r, quoi){
+    if (!P || !P.enregistrerExport) {
+      dire('Cette version de l’application ne sait pas encore écrire le fichier ici. '
+        + 'Fermez et relancez l’application : elle se met à jour au démarrage.', 'err');
+      return;
+    }
+    if (!r.nom || r.contenu == null) {
+      dire('Le fichier n’a pas été reçu. Fermez et relancez l’application.', 'err');
+      return;
+    }
+    P.enregistrerExport(r.nom, r.contenu).then(function(res){
+      if (res && res.ok) {
+        DERNIER_EXPORT = r.nom;
+        dire(quoi + ' enregistré : ' + r.nom + ' — dossier Exports.', 'bon');
+        dessiner();
+      } else {
+        dire('Écriture impossible : ' + ((res && res.error) || 'motif inconnu'), 'err');
+      }
+    });
+  }
+
   function exporter(){
     dire('Préparation du fichier…');
     appeler('catalogio:exporter', optsExport()).then(function(r){
-      if (r && r.ok) dire('Fichier téléchargé dans la fenêtre principale.', 'bon');
+      if (r && r.ok) ecrireExport(r, 'Fichier');
       else dire(expliquer(r), 'err');
     });
   }
@@ -569,7 +615,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var quoi = (o.sheet === 'inventaire') ? 'inventaire' : 'catalogue';
     dire('Préparation du modèle ' + quoi + '…');
     appeler('catalogio:modele', o).then(function(r){
-      if (r && r.ok) dire('Modèle ' + quoi + ' (en-têtes seuls) téléchargé dans la fenêtre principale.', 'bon');
+      if (r && r.ok) ecrireExport(r, 'Modèle ' + quoi + ' (en-têtes seuls)');
       else dire(expliquer(r), 'err');
     });
   }
@@ -621,8 +667,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
   function telechargerRapport(){
-    appeler('catalogio:rapport', { sep:SEP }).then(function(r){
-      if (r && r.ok) dire('Rapport téléchargé dans la fenêtre principale.', 'bon');
+    appeler('catalogio:rapport', { sep:SEP, natif:true }).then(function(r){
+      if (r && r.ok) ecrireExport(r, 'Rapport');
       else dire(expliquer(r), 'err');
     });
   }
@@ -651,6 +697,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var act = b.getAttribute('data-act');
     if (act === 'exporter') { exporter(); return; }
     if (act === 'modele') { modele(b.getAttribute('data-feuille') || ''); return; }
+    if (act === 'dossier') { if (P && P.ouvrirDossierExports) P.ouvrirDossierExports(); return; }
     if (act === 'colrepli') { basculerColonnes(); return; }
     if (act === 'reinit') { reinit(); return; }
     if (act === 'rapport') { telechargerRapport(); return; }

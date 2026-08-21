@@ -3465,8 +3465,15 @@ module.exports = {
       return base;
     };
     return [
-      { nom: 'onglet exporter (catalogue)', id: '', reponses: { identite: IDENTITE, 'catalogio:etat': etat({}) } },
-      { nom: 'choix du fichier a importer', id: 'import', reponses: { identite: IDENTITE, 'catalogio:etat': etat({}) } },
+      /* ⚠ `exige` sur le bouton du DOSSIER (2026-08-20). Les trois sorties de
+         fichier de cette fenetre s ecrivent maintenant dans Documents\SANDRIZA         Exports, et non plus dans le panneau invisible de la fenetre principale.
+         Le bouton qui ouvre ce dossier est la seule chose qui repond a << ou est
+         parti mon fichier ? >> : s il disparait, plus rien ne casse, et la
+         fenetre redevient muette exactement comme avant. */
+      { nom: 'onglet exporter (catalogue)', id: '', exige: ['data-act="dossier"'],
+        reponses: { identite: IDENTITE, 'catalogio:etat': etat({}) } },
+      { nom: 'choix du fichier a importer', id: 'import', exige: ['data-act="dossier"'],
+        reponses: { identite: IDENTITE, 'catalogio:etat': etat({}) } },
       { nom: 'apercu d un import catalogue', id: 'apercu',
         reponses: { identite: IDENTITE, 'catalogio:etat': etat({ imp: IMP }), 'catalogio:lignes': LIGNES } },
       { nom: 'resume avant d appliquer', id: 'confirmer',
