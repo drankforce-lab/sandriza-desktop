@@ -14,10 +14,18 @@
  * affiché : c'était le piège de l'écran web (une file lue dans le DOM), et la
  * raison d'extraire le cœur AVANT de dessiner cette fenêtre.
  *
- * ⚠ PAS D'IMPRESSION BLUETOOTH ICI : Web Bluetooth exige un geste dans la
- * page qui l'appelle — impossible à travers le pont. En mode application,
- * l'impression passe par l'application ; le Bluetooth reste le chemin de la
- * tablette web.
+ * ⚠ PAS D'IMPRESSION BLUETOOTH, ET PLUS NULLE PART — le 2026-08-21, sur sa
+ * décision. Ce commentaire disait jusqu'ici « le Bluetooth reste le chemin de
+ * la tablette web » : c'était FAUX depuis le lot 4a, où l'écran web des
+ * codes-barres est devenu l'avis natif et a emporté le bouton avec lui. La
+ * moitié vraie tenait : Web Bluetooth exige un geste dans la page qui l'appelle,
+ * donc il ne peut PAS être rappelé d'ici, à travers le pont.
+ * Ce qui a tranché n'est pas le code mais l'APPAREIL : l'administration se fait
+ * depuis une Surface Windows depuis le 2026-07-27, où le Phomemo D245BT
+ * s'appaire comme imprimante du poste et rentre par stock:etiquettes, comme
+ * tout le reste. Web Bluetooth n'existait que parce qu'Android/Chrome ne voyait
+ * pas la thermique comme une imprimante. `btprint.js` et
+ * `Admin._bcPrintBluetooth` sont donc supprimés du site.
  *
  * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit.
