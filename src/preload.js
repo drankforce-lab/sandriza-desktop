@@ -23,10 +23,18 @@ const { contextBridge, ipcRenderer } = require('electron');
 // passer `process.argv`.
 const _arg = (process.argv || []).find((a) => String(a).indexOf('--sz-version=') === 0);
 const VERSION = _arg ? _arg.slice('--sz-version='.length) : '';
+// Le NOM DU POSTE, par le même chemin et pour la même raison : le bac à sable
+// interdit `require('os')`. Il remplit la colonne « poste » du journal des
+// impressions, qui restait vide dès que l'agent local n'était pas dans le coup —
+// or l'agent est installé sur plusieurs ordinateurs, et « qui a imprimé » ne
+// suffit pas pour retrouver une étiquette. Vide sur un navigateur ordinaire.
+const _argP = (process.argv || []).find((a) => String(a).indexOf('--sz-poste=') === 0);
+const POSTE = _argP ? _argP.slice('--sz-poste='.length) : '';
 
 contextBridge.exposeInMainWorld('sandrizaDesktop', {
   isDesktop: true,
   version: VERSION,
+  poste: POSTE,
 
   // Menu intégré : le bouton cliqué dans la barre dessinée demande au processus
   // principal d'exécuter une action de l'APPLICATION (quitter, zoom, ancrage du

@@ -478,12 +478,41 @@ ipcMain.handle('autolaunch:set', (e, on) => {
   try { app.setLoginItemSettings({ openAtLogin: !!on }); return true; } catch { return false; }
 });
 
-// ══ PHASE 4 — FICHIERS D'EXPORT (dossier fixe, ce que le navigateur ne peut pas) ═
-const EXPORT_DIR = () => {
-  const d = path.join(app.getPath('documents'), 'SANDRIZA', 'Exports');
-  try { fs.mkdirSync(d, { recursive: true }); } catch {}
-  return d;
+// ══ PHASE 4 — FICHIERS D'EXPORT (ce que le navigateur ne peut pas) ═══════════
+/* ⚠ LE DOSSIER EST MODIFIABLE DEPUIS LE 2026-08-21, et il ne l'était pas : tout
+   partait dans Documents › SANDRIZA › Exports, sans recours. Sa demande — un
+   comptable qui veut ses fichiers dans SON dossier, ou sur un lecteur réseau.
+
+   ⚠⚠ ET LE REPLI EST LE CŒUR DE CE CODE, pas un détail. Un dossier choisi peut
+   DISPARAÎTRE entre deux exports : clé USB retirée, lecteur réseau déconnecté,
+   dossier renommé. Sans repli, chaque export échouerait — et le message aurait
+   parlé d'écriture, pas de dossier absent : on aurait cherché la panne dans
+   l'export. On retombe donc sur le dossier standard, et `EXPORT_INFO()` DIT que
+   le repli a servi, pour que la fenêtre puisse l'expliquer.
+   ⚠ On ne remet PAS le réglage à `null` en passant : ce serait oublier son choix
+   parce que sa clé USB était débranchée une fois. Le choix reste, et redevient
+   effectif dès que le dossier réapparaît. */
+const EXPORT_DEFAUT = () => path.join(app.getPath('documents'), 'SANDRIZA', 'Exports');
+// Un dossier utilisable = il existe (ou peut être créé) ET on peut y écrire.
+// `mkdirSync` seul ne suffit pas : un dossier réseau en lecture seule se crée
+// sans erreur et refuse le premier fichier.
+const _dossierUtilisable = (d) => {
+  try {
+    fs.mkdirSync(d, { recursive: true });
+    fs.accessSync(d, fs.constants.W_OK);
+    return true;
+  } catch { return false; }
 };
+const EXPORT_INFO = () => {
+  const defaut = EXPORT_DEFAUT();
+  let choisi = '';
+  try { choisi = String(reglages.get('dossierExports') || ''); } catch {}
+  if (choisi && _dossierUtilisable(choisi)) return { dir: choisi, choisi, defaut, repli: false };
+  const repli = !!choisi;                       // il y avait un choix, il ne répond pas
+  _dossierUtilisable(defaut);
+  return { dir: defaut, choisi, defaut, repli };
+};
+const EXPORT_DIR = () => EXPORT_INFO().dir;
 const _safeName = (n) => String(n || 'export').replace(/[^A-Za-z0-9._-]+/g, '_').slice(0, 120) || 'export';
 ipcMain.handle('export:save', (e, name, dataUrlOrText) => {
   try {
@@ -731,7 +760,19 @@ const createWindow = () => {
       // Le préchargement tourne en bac à sable : ni `require('../package.json')`,
       // ni `app` n'y sont accessibles. `additionalArguments` traverse le bac à
       // sable et reste lisible dans `process.argv`.
-      additionalArguments: ['--sz-version=' + app.getVersion()],
+      // ⚠ LE NOM DU POSTE VOYAGE PAR LE MÊME CHEMIN, ET IL COMBLE UNE COLONNE
+      // VIDE. Le journal des impressions (Sécurité → Journaux → Impressions) a une
+      // colonne « poste » parce que l'agent d'impression est installé sur PLUSIEURS
+      // ordinateurs (sa remarque du 2026-07-28) et que « qui » ne suffit pas pour
+      // retrouver une étiquette. Or cette colonne se remplissait UNIQUEMENT depuis
+      // le `/ping` de l'agent : imprimer par le navigateur, ou par l'application,
+      // laissait la case vide. La coquille, elle, connaît le nom depuis toujours.
+      // ⚠ On le passe en ARGUMENT plutôt que par un canal : `printagent.js` écrit
+      // sa ligne de journal de façon synchrone, au moment de l'impression. Un appel
+      // au principal l'obligerait à attendre — et un journal ne doit jamais faire
+      // attendre une impression.
+      additionalArguments: ['--sz-version=' + app.getVersion(),
+                            '--sz-poste=' + String(os.hostname() || '').slice(0, 40)],
     },
   });
 

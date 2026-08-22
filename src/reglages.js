@@ -39,6 +39,16 @@ const DEFAUTS = {
   // Écrans ancrables : état retenu par écran, 'ancre' (défaut) ou 'detache' —
   // « Tout voir » et la barre latérale rouvrent l'écran comme on l'a laissé.
   ancrage: {},
+  // Dossier où l'application écrit les exports. `null` = le dossier standard
+  // (Documents › SANDRIZA › Exports), calculé au moment de s'en servir.
+  // ⚠ IL A SA PLACE ICI ET NON EN TURSO, pour la même raison que le menu : un
+  // chemin suit le POSTE. « D:\Comptabilite » n'existe pas sur l'autre
+  // ordinateur, et un réglage synchronisé y ferait échouer chaque export.
+  // ⚠ ON GARDE `null` PLUTÔT QUE LE CHEMIN CALCULÉ : écrire le dossier standard
+  // en dur le figerait, et un compte Windows renommé (ou un dossier Documents
+  // redirigé vers OneDrive, ce qui arrive tout seul) le laisserait pointer dans
+  // le vide. `null` veut dire « demande-le au système », pas « je ne sais pas ».
+  dossierExports: null,
 };
 
 let _cache = null;
