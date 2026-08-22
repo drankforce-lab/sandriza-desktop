@@ -56,7 +56,7 @@
  * Il n'est simplement plus AFFICHÉ ici.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -66,7 +66,6 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
@@ -169,7 +168,7 @@ function pageProfil() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Mon profil — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">🛡</span><h1>Mon profil</h1></div>
+<div class="tete"><span class="ico">${ICO.staffaccess}</span><h1>Mon profil</h1></div>
 <div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>

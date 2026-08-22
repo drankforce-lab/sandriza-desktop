@@ -30,7 +30,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -40,7 +40,6 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .ong{flex:0 0 auto;display:flex;gap:.4rem;padding:.5rem 1.05rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
 .ong button{font:inherit;font-size:.83rem;padding:.35rem .85rem;border:1px solid transparent;border-bottom:none;
   border-radius:9px 9px 0 0;background:transparent;color:#8fa1b8;cursor:pointer;margin-bottom:-1px;
@@ -111,7 +110,7 @@ function pageChatConfig(onglet) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Configuration du chat en ligne — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">💬</span><h1>Configuration du chat en ligne</h1></div>
+<div class="tete"><span class="ico">${ICO.chat}</span><h1>Configuration du chat en ligne</h1></div>
 <div class="ong">
   <button type="button" id="o-widget" data-onglet="widget">⚙ Widget</button>
   <button type="button" id="o-ia" data-onglet="ia"><span class="ic">🤖</span> Assistant IA</button>

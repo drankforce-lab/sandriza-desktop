@@ -20,7 +20,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU.
  */
 
-const { CSS_SOCLE, JS_SOCLE, JS_BROUILLON } = require('./socle');
+const { CSS_SOCLE, JS_SOCLE, JS_BROUILLON, ICO } = require('./socle');
 
 const CSS_PROPRE = `
 .photo{display:flex;gap:.85rem;align-items:flex-start}
@@ -37,7 +37,7 @@ function pageCollection(id) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Collection — Administration Sandriza</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}</style></head><body>
-<div class="tete"><span class="ic">🗂</span><h1 id="titre">Collection</h1>
+<div class="tete"><span class="ico">${ICO.collections}</span><h1 id="titre">Collection</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>

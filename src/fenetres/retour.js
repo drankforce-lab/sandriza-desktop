@@ -26,7 +26,7 @@
  * menu entière.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -39,7 +39,6 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
 .tete .pill{font-size:.7rem;padding:.14rem .6rem;border-radius:99px;
   border:1px solid rgba(255,255,255,.2);margin-left:.6rem}
@@ -132,7 +131,7 @@ function pageRetour(id) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Demande de retour — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">↩️</span><h1 id="titre">Demande de retour</h1>
+<div class="tete"><span class="ico">${ICO.returns}</span><h1 id="titre">Demande de retour</h1>
   <span class="pill" id="pill" style="display:none"></span>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>

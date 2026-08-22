@@ -34,7 +34,6 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.05rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
 .barre{flex:0 0 auto;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
   padding:.5rem 1.05rem;border-bottom:1px solid rgba(255,255,255,.06)}

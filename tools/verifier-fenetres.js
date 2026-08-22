@@ -476,6 +476,46 @@ console.log('=== Le montage du brouillon est complet ===');
   }
 }
 
+console.log('=== Pictogrammes des en-têtes (table ICO) ===');
+/* ⚠⚠ UNE CLÉ MAL ORTHOGRAPHIÉE NE LÈVE RIEN. `${ICO.homepge}` vaut `undefined`,
+   qui s'insère dans le gabarit comme le mot « undefined »… à l'intérieur d'un
+   <span> destiné à contenir un <svg>. Résultat : un en-tête où le pictogramme a
+   silencieusement disparu. Rien ne le dit — le module se charge, la page se
+   dessine, aucune erreur. C'est exactement le genre de défaut que la campagne
+   des 64 en-têtes (2026-08-22) pouvait semer soixante-quatre fois.
+   ⚠ On refuse AUSSI les entrées jamais citées : une icône dessinée pour un écran
+   puis oubliée fait grossir le socle sans que personne ne sache si elle sert.
+   Le socle part dans CHAQUE fenêtre — ce n'est pas un fichier où l'on entasse. */
+{
+  const dFen = path.join(__dirname, '..', 'src', 'fenetres');
+  let ICO = null;
+  try { ICO = require(path.join(dFen, 'socle.js')).ICO; } catch (e) {}
+  if (!ICO || typeof ICO !== 'object') {
+    dire(false, 'socle.js', 'la table ICO n est pas exportee — tous les en-tetes seraient vides');
+  } else {
+    const fics = fs.readdirSync(dFen).filter((f) => f.endsWith('.js'));
+    const absentes = [];
+    const citees = new Set();
+    fics.forEach((f) => {
+      const t = fs.readFileSync(path.join(dFen, f), 'utf8');
+      let m;
+      const re = /ICO\.([A-Za-z0-9_]+)/g;
+      while ((m = re.exec(t))) {
+        citees.add(m[1]);
+        if (!(m[1] in ICO)) absentes.push(f + ' cite ICO.' + m[1] + ', qui n existe pas');
+      }
+    });
+    const orphelines = Object.keys(ICO).filter((k) => !citees.has(k));
+    if (absentes.length) {
+      absentes.forEach((a) => dire(false, 'ICO', a));
+    } else if (orphelines.length) {
+      dire(false, 'ICO', orphelines.length + ' entree(s) jamais citee(s) : ' + orphelines.join(', '));
+    } else {
+      dire(true, 'ICO', Object.keys(ICO).length + ' pictogrammes, tous cites, aucun nom inconnu');
+    }
+  }
+}
+
 console.log('=== Police des titres embarquée ===');
 /* ⚠⚠ CE CONTRÔLE EXISTE PARCE QUE LA PANNE SERAIT INVISIBLE. La police des
    titres est inlinée en base64 dans `socle.js` — une chaîne de 50 000 caractères

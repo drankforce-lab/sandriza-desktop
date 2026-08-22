@@ -17,7 +17,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -29,7 +29,6 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .barre{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;justify-content:flex-end;
@@ -86,7 +85,7 @@ function pageConfigNavigation() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Configuration de la navigation — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">🧭</span><h1>Configuration de la navigation</h1></div>
+<div class="tete"><span class="ico">${ICO.navmenu}</span><h1>Configuration de la navigation</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter le menu, pas le modifier.</div>
 <div class="barre">
   <span class="aide"><span class="ic">🔒</span> Les éléments fixes ne se suppriment pas — masquez-les ou ajoutez-leur des sous-menus. « + Ajouter » crée un élément personnalisé.</span>

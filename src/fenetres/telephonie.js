@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -34,7 +34,6 @@ body{background:#0e1522;color:#e8edf5;
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.55rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522);flex-wrap:wrap}
-.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .tete .solde{display:flex;align-items:center;gap:.35rem;font-size:.8rem;color:#8fa1b8}
 .tete .solde b{color:#c9a97e;font-size:.95rem}
 .tete .qlive{font-size:.76rem;color:#facc15;background:rgba(250,204,21,.12);
@@ -132,7 +131,7 @@ function pageTelephonie() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Téléphonie — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">📞</span><h1>Téléphonie</h1>
+<div class="tete"><span class="ico">${ICO.telephone}</span><h1>Téléphonie</h1>
   <span class="solde">Solde&nbsp;: <b id="t-solde">…</b></span>
   <span id="t-qlive"></span>
   <a class="credit" href="https://console.twilio.com/us1/billing/manage-billing/billing-overview" target="_blank" rel="noopener">Crédits</a>

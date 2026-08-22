@@ -26,7 +26,7 @@
  * pages auraient compté pour zéro — un colis déclaré vérifié sans l'être.
  */
 
-const { CSS_SOCLE, JS_SOCLE } = require('./socle');
+const { CSS_SOCLE, JS_SOCLE, ICO } = require('./socle');
 
 const CSS_PROPRE = `
 .entete{display:flex;gap:1.1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.55rem}
@@ -61,7 +61,7 @@ function pageCommande(id) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Préparation — Administration Sandriza</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}</style></head><body>
-<div class="tete"><span class="ic">📦</span><h1 id="titre">Préparation</h1>
+<div class="tete"><span class="ico">${ICO.orders}</span><h1 id="titre">Préparation</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>

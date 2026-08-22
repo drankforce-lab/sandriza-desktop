@@ -19,7 +19,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -29,7 +29,6 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .ic{font-size:1.05rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
@@ -74,7 +73,7 @@ function pageSociauxConfig() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Configuration des réseaux sociaux — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ic">📱</span><h1>Configuration des réseaux sociaux</h1></div>
+<div class="tete"><span class="ico">${ICO.social}</span><h1>Configuration des réseaux sociaux</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter ces réglages, pas les modifier.</div>
 <div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>

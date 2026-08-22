@@ -31,7 +31,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU, et à rien d'autre.
  */
 
-const { CSS_SOCLE, JS_SOCLE } = require('./socle');
+const { CSS_SOCLE, JS_SOCLE, ICO } = require('./socle');
 
 const CSS_PROPRE = `
 .jetons{display:flex;flex-wrap:wrap;gap:.35rem;align-content:flex-start;
@@ -246,7 +246,7 @@ function pageProduit(id) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Produit — Administration Sandriza</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}</style></head><body>
-<div class="tete"><span class="ic">🧵</span><h1 id="titre">Produit</h1>
+<div class="tete"><span class="ico">${ICO.products}</span><h1 id="titre">Produit</h1>
   <span class="outils">
     <button type="button" id="btn-jrn" title="Modifications de cette fiche" style="display:none"><span class="ic">🕘</span> <span class="n" id="jrn-n">0</span></button>
     <button type="button" id="btn-apercu" title="Aperçu boutique — dessiné par le site, avec ses vraies fonctions"><span class="ic">👁</span> Aperçu</button>
