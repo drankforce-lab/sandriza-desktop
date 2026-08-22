@@ -1675,6 +1675,9 @@ const OPS_PONT = new Set([
      inscrite au journal. */
   'transfert:donnees', 'transfert:candidats',
   'transfert:partir', 'transfert:recevoir', 'transfert:annuler',
+  /* Erreurs JavaScript des clientes (onglet des Journaux, 4.12.0). La LECTURE
+     passe par journal:donnees ; ces deux-ci sont les gestes. */
+  'journal:jsErreursVues', 'journal:jsErreursPurger',
   // Abonnes de l infolettre (fenetre Abonnes, 1.74.0). La LISTE attend la
   // resynchronisation : une liste d envoi perimee, c est un client qui ne
   // recoit rien ou qui recoit malgre son refus.
@@ -3884,7 +3887,7 @@ ipcMain.handle('menu:action', (e, nom) => { actionApp(String(nom || '')); return
 // sur un onglet. Ouverture FRAÎCHE : la carte lit `_journauxOnglet`. DÉJÀ ouverte
 // (dock ou détachée) : on lui envoie `szAllerOnglet`. Onglet réduit aux lettres —
 // aucune donnée n'entre dans le code exécuté.
-const _ONGLETS_JOURNAUX = ['recherche', 'acces', 'automatisations', 'impressions', 'sms', 'comptable', 'recherches'];
+const _ONGLETS_JOURNAUX = ['recherche', 'acces', 'automatisations', 'impressions', 'sms', 'comptable', 'recherches', 'jserreurs'];
 ipcMain.handle('journaux:ouvrir', (e, onglet) => {
   const t = _ONGLETS_JOURNAUX.indexOf(String(onglet || '').toLowerCase()) >= 0 ? String(onglet).toLowerCase() : '';
   _journauxOnglet = t;

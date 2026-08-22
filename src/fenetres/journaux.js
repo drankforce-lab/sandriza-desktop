@@ -81,7 +81,7 @@ function pageJournaux(onglet) {
   // 'q-<terme>' ouvre l'onglet Recherche et lance la recherche du terme.
   var RQINIT0 = '';
   if (brut.indexOf('q-') === 0) { RQINIT0 = brut.slice(2).replace(/[^A-Za-z0-9._@-]/g, ''); brut = 'recherche'; }
-  const ONGLET0 = (['recherche','acces','automatisations','impressions','sms','comptable','recherches'].indexOf(brut) >= 0) ? brut : 'acces';
+  const ONGLET0 = (['recherche','acces','automatisations','impressions','sms','comptable','recherches','jserreurs'].indexOf(brut) >= 0) ? brut : 'acces';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Journaux — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -104,19 +104,22 @@ function pageJournaux(onglet) {
   // Aller directement à un onglet quand la fenêtre est DÉJÀ ouverte (lien de
   // retour depuis une autre fenêtre — #7 7b-2c).
   window.szAllerOnglet = function(t){
-    if (['recherche','acces','automatisations','impressions','sms','comptable','recherches'].indexOf(String(t||'')) < 0) return;
+    if (['recherche','acces','automatisations','impressions','sms','comptable','recherches','jserreurs'].indexOf(String(t||'')) < 0) return;
     ONGLET = String(t); rendre();
   };
 ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
   var ongletsEl = document.getElementById('onglets');
   var D = null, OCCUPE = false;
+  // Bouton « Vider » du journal des erreurs : arme au premier clic, agit au
+  // second. Desarme en changeant d onglet (voir la fonction rendre).
+  var JS_ARME = false;
   var ONGLET = '${ONGLET0}';
   var PF_TYPE = 'all', PF_VIA = 'all';   // filtres de l'onglet Impressions
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🔗 Accès aux liens'], ['recherches','❓ Sans résultat'] ];
+  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🔗 Accès aux liens'], ['recherches','❓ Sans résultat'], ['jserreurs','⚠ Erreurs des clientes'] ];
   var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -474,6 +477,105 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.innerHTML = h;
   }
 
+  /* ── ERREURS JAVASCRIPT DES CLIENTES ───────────────────────────────
+     Ses mots : « Quand une erreur JavaScript survient chez une cliente,
+     personne ne l apprend — vous le decouvrez si elle vous ecrit. »
+
+     ⚠ REGROUPEES, ET C EST LA CONDITION POUR QUE CA SERVE. Sa consigne :
+     « mille fois la meme erreur = une ligne + compteur, sinon on cesse de le
+     lire ». Un journal non regroupe se remplit en une apres-midi, devient
+     illisible, donc inutile — c est-a-dire PIRE qu absent, parce qu on croit
+     l avoir. Le regroupement se fait au serveur ; ici on affiche le compteur.
+
+     ⚠ LA VERSION DU FICHIER EST MONTREE (le ?v=). Sa demande explicite : sans
+     elle, on cherche un defaut dans du code qui n est plus servi. */
+  function vueJsErreurs(){
+    var rows = D.jsErreurs || [];
+    var neuves = D.jsErreursNeuves || 0;
+    var h = '<div class="note">ℹ Les erreurs JavaScript survenues chez des <b>visiteuses de la boutique</b>. '
+      + 'Elles sont <b>regroupées</b> : une ligne par défaut distinct, avec le nombre de fois. '
+      + 'Aucune donnée personnelle n’y entre — courriels, numéros et jetons sont remplacés avant l’envoi.</div>'
+      + '<div class="carte"><div class="barre">'
+      +   '<span class="sub">' + rows.length + ' défaut(s) distinct(s)'
+      +     (neuves ? ' · <b style="color:#fbbf24">' + neuves + ' non vu(s)</b>' : '') + '</span>'
+      +   (D.peutModifier && neuves ? '<button class="mini" id="js-vues">Tout marquer comme vu</button>' : '')
+      +   (D.peutModifier && rows.length
+            ? '<button class="mini" id="js-purge"' + (JS_ARME ? ' style="border-color:rgba(239,68,68,.6);color:#f87171"' : '') + '>'
+              + (JS_ARME ? 'Confirmer — vider définitivement' : 'Vider') + '</button>'
+            : '')
+      + '</div>'
+      + '<table class="tb"><thead><tr>'
+      +   '<th>Erreur</th><th>Fichier</th><th style="text-align:center">Fois</th>'
+      +   '<th>Où</th><th>Dernière fois</th>'
+      + '</tr></thead><tbody>';
+    if (!rows.length) {
+      h += '<tr><td colspan="5" class="vide">Aucune erreur rapportée. '
+        + 'C’est la bonne nouvelle — mais elle ne vaut que depuis la mise en place de ce journal.</td></tr>';
+    }
+    for (var i = 0; i < rows.length; i++) {
+      var x = rows[i];
+      var genre = x.genre === 'ressource' ? '📦 chargement'
+                : x.genre === 'promesse' ? '⏳ promesse' : '⚠ erreur';
+      h += '<tr' + (x.vu ? ' style="opacity:.62"' : '') + '>'
+        + '<td><strong>' + esc(x.message) + '</strong>'
+        +   '<div class="mut" style="font-size:.72rem">' + genre
+        +     (x.pile ? ' · <span title="' + esc(x.pile) + '">pile disponible (survolez)</span>' : '') + '</div></td>'
+        /* ⚠ LE FICHIER PORTE SON ?v= : c est la VERSION servie au moment du
+           plantage. Sans elle, on relit un fichier qui a change depuis. */
+        + '<td class="mut" style="font-size:.76rem;word-break:break-all">' + (x.fichier ? esc(x.fichier) : '—')
+        +   (x.ligne ? '<br>ligne ' + esc(x.ligne) + (x.colonne ? ':' + esc(x.colonne) : '') : '') + '</td>'
+        + '<td style="text-align:center"><b>' + esc(x.n || 1) + '</b></td>'
+        + '<td class="mut" style="font-size:.76rem">'
+        +   ((x.routes && x.routes.length) ? x.routes.map(esc).join('<br>') : '—') + '</td>'
+        + '<td class="mut" style="font-size:.76rem;white-space:nowrap">' + esc(String(x.dernier || '').slice(0, 16).replace('T', ' '))
+        +   (x.premier && x.premier !== x.dernier
+                ? '<br><span style="font-size:.7rem">depuis ' + esc(String(x.premier).slice(0, 10)) + '</span>' : '')
+        +   (x.agent ? '<br><span style="font-size:.7rem" title="' + esc(x.agent) + '">navigateur</span>' : '') + '</td>'
+        + '</tr>';
+    }
+    h += '</tbody></table></div>';
+    corps.innerHTML = h;
+    var bv = document.getElementById('js-vues');
+    if (bv) bv.onclick = function(){ jsVues(); };
+    var bp = document.getElementById('js-purge');
+    if (bp) bp.onclick = function(){ jsPurger(); };
+  }
+
+  function jsVues(){
+    if (OCCUPE) return; OCCUPE = true; dire('Marquage…');
+    appeler('journal:jsErreursVues', [null]).then(function(r){
+      OCCUPE = false;
+      if (r && r.ok) recharger((r.n || 0) + ' erreur(s) marquée(s) comme vue(s).', 'bon');
+      else dire('Échec : ' + expliquer(r), 'err');
+    });
+  }
+  /* ⚠⚠ VIDER EFFACE POUR TOUT LE MONDE, ET LES COMPTEURS AVEC — c est pour ca
+     que le bouton s ARME au lieu d agir tout de suite. Les autres purges de
+     cette fenetre partent au premier clic, et c est juste : elles ne font
+     qu appliquer une retention deja ecrite. Ici, le compteur d une erreur
+     ancienne est justement ce qui dit qu elle n a pas cesse, et il ne se
+     reconstitue pas. Un clic de trop coute une information qu on ne peut pas
+     retrouver.
+     ⚠ Le bouton arme se DESARME en changeant d onglet (JS_ARME est remis a faux
+     par la fonction rendre), sinon il resterait charge sans qu on s en
+     souvienne.
+     ⚠ AUCUN ACCENT GRAVE ICI : ce commentaire vit dans un gabarit. */
+  function jsPurger(){
+    if (OCCUPE) return;
+    if (!JS_ARME) {
+      JS_ARME = true;
+      vueJsErreurs();
+      dire('Cliquez de nouveau pour vider — les compteurs ne se reconstituent pas.', 'att');
+      return;
+    }
+    JS_ARME = false; OCCUPE = true; dire('Vidage…');
+    appeler('journal:jsErreursPurger', []).then(function(r){
+      OCCUPE = false;
+      if (r && r.ok) recharger('Journal vidé — ' + (r.efface || 0) + ' effacée(s).', 'bon');
+      else dire('Échec : ' + expliquer(r), 'err');
+    });
+  }
+
   // ── Actions ──────────────────────────────────────────────────────
   function basculerStats(){
     if (OCCUPE) return; OCCUPE=true;
@@ -499,7 +601,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     else if (ONGLET==='sms') vueSms();
     else if (ONGLET==='comptable') vueComptable();
     else if (ONGLET==='recherches') vueRecherchesRatees();
-    else vueAcces();
+    else if (ONGLET==='jserreurs') vueJsErreurs();
+    else { JS_ARME = false; vueAcces(); }
   }
   function recharger(msg, cl){
     appeler('journal:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; rendre(); } if (msg) dire(msg, cl); });

@@ -2160,6 +2160,27 @@ module.exports = {
       ],
       printKinds: [ { key: 'commande', label: 'Bon de commande' }, { key: 'etiquette', label: 'Étiquette' } ],
       recherches: [ { q: 'robe rouge taille 12', fois: 8, derniere: '2026-08-13' }, { q: 'bottes hiver', fois: 3, derniere: '2026-08-12' } ],
+      /* ⚠ TROIS FORMES, parce que l'onglet en dessine trois : une erreur NON VUE
+         avec sa pile et plusieurs routes, une VUE (ligne estompée), et un échec
+         de CHARGEMENT de ressource — qui n'a ni ligne ni pile. Un jeu qui n'en
+         porterait qu'une laisserait deux branches non éprouvées. */
+      jsErreurs: [
+        { id: 'jse_1', message: 'Cannot read properties of undefined (reading ‘prix’)',
+          fichier: 'shop.js?v=20260822a', ligne: 412, colonne: 18,
+          pile: 'at rendreFiche (shop.js:412)\nat App.render (app.js:88)',
+          genre: 'erreur', n: 37, routes: ['/#/produit/robe-aurore', '/#/boutique'],
+          agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5)', ecran: '390x844',
+          premier: '2026-08-20T09:12:00Z', dernier: '2026-08-22T17:40:00Z', vu: false },
+        { id: 'jse_2', message: 'Promesse rejetée : reseau coupe',
+          fichier: '', ligne: 0, colonne: 0, pile: '', genre: 'promesse', n: 4,
+          routes: ['/#/panier'], agent: '', ecran: '',
+          premier: '2026-08-21T14:00:00Z', dernier: '2026-08-21T14:20:00Z', vu: true },
+        { id: 'jse_3', message: 'Chargement impossible',
+          fichier: 'promo.js?v=20260819b', ligne: 0, colonne: 0, pile: '',
+          genre: 'ressource', n: 2, routes: [], agent: '', ecran: '',
+          premier: '2026-08-22T08:00:00Z', dernier: '2026-08-22T08:01:00Z', vu: false },
+      ],
+      jsErreursTotal: 3, jsErreursNeuves: 2,
       stats: { loginOk: 1, loginFail: 1, mfaFail: 0, geoBlocked: 0, ips: 2 },
       accesTotal: 2, autoTotal: 1, printsTotal: 2, recherchesTotal: 2
     };
@@ -2168,6 +2189,11 @@ module.exports = {
       { nom: 'automatisations', id: 'automatisations', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
       { nom: 'impressions', id: 'impressions', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:purger:prints': { ok: true, conserves: 2 }, 'journal:export:prints': { ok: true } } },
       { nom: 'sans résultat', id: 'recherches', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
+      // ⚠ `id: 'jserreurs'` OUVRE L'ONGLET. Le contrôle ne clique pas : sans
+      // cette porte, la vue des erreurs des clientes n'était jamais dessinée
+      // (vérifié par une variable libre injectée dedans, qui n'était PAS vue).
+      { nom: 'erreurs des clientes', id: 'jserreurs', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
+        'journal:jsErreursVues': { ok: true, n: 2 }, 'journal:jsErreursPurger': { ok: true, efface: 3 } } },
       { nom: 'SMS (serveur)', id: 'sms', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'journal:sms': { ok: true, sms: [ { id: 's1', from: '+14185550142', to: '+14185550000', body: 'Bonjour, ma commande ?', direction: 'inbound', date: '2026-08-13T12:00:00Z', read: false } ] } } },
       { nom: 'accès comptables (serveur)', id: 'comptable', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
