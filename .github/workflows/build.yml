@@ -158,6 +158,12 @@ jobs:
       # au mauvais endroit. La règle a été SORTIE de `main.js` pour ça : `main.js`
       # exige le processus principal d'Electron, donc un banc ne peut que le
       # recopier, et une copie ne garde rien.
+      # ⚠ `banc-brouillon-garde.js` (2026-08-22) garde le même genre de règle,
+      # et elle a DEUX façons de mal tourner dont la seconde est pire que la
+      # première : trop permissive, la fenêtre part avec la saisie ; trop
+      # stricte, l'application ne se ferme PLUS et l'on finit par la tuer depuis
+      # le gestionnaire des tâches — le geste le plus destructeur de tous. Elle
+      # est sortie de `main.js` pour la même raison que le dossier des exports.
       - name: Contrôle de syntaxe
         shell: bash
         run: |
@@ -166,6 +172,7 @@ jobs:
           node tools/verifier-fenetres.js
           node tools/verifier-mise-en-page.js
           node tools/banc-dossier-exports.js
+          node tools/banc-brouillon-garde.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

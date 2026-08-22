@@ -36,6 +36,9 @@ const { execFile } = require('child_process');
 // ce module doit exister AVANT la phase 4. Chargé tard, la constante vaudrait
 // `undefined` et le premier export planterait.
 const dossierExports = require('./dossier-exports');
+// La DÉCISION du garde des saisies en cours, sortie d'ici pour être éprouvable
+// (main.js exige Electron ; voir l'en-tête de ce module).
+const garde = require('./brouillon-garde');
 
 // ── CONFIG ───────────────────────────────────────────────────────────────────
 // L'application est un OUTIL D'ADMINISTRATION : elle ouvre UNIQUEMENT le portail
@@ -867,8 +870,88 @@ const createWindow = () => {
   // cadre natif, Alt+F4, l'entrée « Quitter » du menu, et le bouton de la barre
   // dessinée dans la page (qui passe par `menu:action`). En couvrir trois laisse
   // le quatrième casser l'installation.
+  /* ⚠⚠ ET LE SECOND TROU DES VUES ANCRÉES (2026-08-22). Une vue ANCRÉE n'a pas
+     de fenêtre à elle : elle vit DANS celle-ci. Fermer l'application emportait
+     donc sa saisie sans un mot — le garde du X ne pouvait rien voir, il n'y
+     avait pas de X à surveiller.
+     ⚠ CE N'EST PAS LE MÊME GARDE QUE POUR UNE FENÊTRE, et il ne pouvait pas
+     l'être : il peut y avoir PLUSIEURS vues ancrées sales à la fois. On traite
+     la première, puis on RELANCE la fermeture — elle attrape la suivante, et
+     ainsi de suite jusqu'à ce qu'il n'en reste aucune. Poser `_szFermeOk` après
+     la première, comme le fait le garde d'une fenêtre, aurait laissé partir
+     toutes les autres.
+     ⚠ ON REND LA VUE VISIBLE AVANT DE DEMANDER. Elle peut être cachée derrière
+     une autre : une question invisible donnerait une application qui refuse de
+     se fermer sans dire pourquoi — précisément ce que le garde des fenêtres
+     s'applique à éviter.
+     ⚠ SORTIE DE SECOURS, comme ailleurs : un second geste ferme toujours, en
+     tentant une dernière écriture dans TOUTES les vues. Une application
+     incondamnable est pire que la perte qu'on évite. */
   mainWindow.on('close', (ev) => {
-    if (fermetureBloquee()) { ev.preventDefault(); refuserFermeture(); }
+    const sale = garde.premiereAncreeSale(ancrees, (id) => fenSale.has(id));
+    const quoi = garde.decisionFermeture({
+      bloqueeParMaj:  fermetureBloquee(),
+      dejaAutorise:   !!mainWindow._szFermeOk,
+      aUneSaisie:     !!sale,
+      demandeEnCours: !!mainWindow._szDemandeEnCours,
+    });
+    if (quoi === 'refuser_maj') { ev.preventDefault(); refuserFermeture(); return; }
+    if (quoi === 'laisser') return;
+    const [cle, a] = sale;
+    ev.preventDefault();
+    if (quoi === 'secours') {
+      mainWindow._szFermeOk = true;
+      for (const [, x] of ancrees) {
+        if (!x.view || x.view.webContents.isDestroyed()) continue;
+        try {
+          x.view.webContents.executeJavaScript(
+            'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null', true).catch(() => {});
+        } catch (e) {}
+      }
+      setTimeout(() => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.destroy(); }, 400);
+      return;
+    }
+    mainWindow._szDemandeEnCours = true;
+    const wc = a.view.webContents;
+    // Amener la vue sous les yeux — même gestes que `dock:ancrer`.
+    try {
+      ancrees.forEach((x, k) => { if (k !== cle && !x.fenetre && x.view) { try { x.view.setVisible(false); } catch {} } });
+      mainWindow.show(); mainWindow.focus();
+      try { mainWindow.contentView.addChildView(a.view); } catch (e) {}
+      a.view.setVisible(true);
+      const b = boundsAncrage();
+      if (b) a.view.setBounds(b);
+      ancreeVisible = cle; vueVoilee = null;
+      mainWindow.webContents.send('dock:ancree', cle);
+    } catch (e) {}
+    const partir = (js) => {
+      let fait = false;
+      const uneFois = () => {
+        if (fait) return; fait = true;
+        mainWindow._szDemandeEnCours = false;
+        fenSale.delete(wc.id);
+        // ⚠ ON RELANCE : la vue suivante peut être sale elle aussi.
+        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();
+      };
+      setTimeout(uneFois, 3000);
+      try { wc.executeJavaScript(js, true).then(uneFois, uneFois); } catch (e) { uneFois(); }
+    };
+    let demande = null;
+    try { demande = wc.executeJavaScript('window.szBrouillonDemander ? szBrouillonDemander() : -1', true); }
+    catch (e) { demande = null; }
+    // La page ne sait pas répondre : on CONSERVE et on ferme. Le défaut d'un
+    // mécanisme anti-perte ne peut pas être de perdre.
+    if (!demande) { partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null'); return; }
+    demande.then((choix) => {
+      const geste = garde.gestePourChoix(choix);
+      // « Revenir au formulaire » : on reste, et le drapeau n'est PAS retiré.
+      if (geste === 'revenir') { mainWindow._szDemandeEnCours = false; return; }
+      partir(geste === 'jeter'
+        ? 'window.szBrouillonJeter ? szBrouillonJeter() : null'
+        : 'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
+    }, () => {
+      partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
+    });
   });
   mainWindow.on('closed', () => { mainWindow = null; });
 };
@@ -2602,6 +2685,14 @@ const poserEnFenetre = (c, a) => {
   poser();
   try { a.view.setVisible(true); } catch {}
   a.fenetre = win;
+  /* ⚠⚠ LE TROU QUI SE REFERME ICI (2026-08-22). Cette fenêtre n'est pas née de
+     `ouvrirNative` : son X n'avait donc AUCUN garde, et son `closed` détruit la
+     vue — la saisie partait sans un mot. Quatorze écrans ancrables déclarent un
+     brouillon, et se détacher est le geste normal pour travailler à deux écrans.
+     ⚠ LE `webContents` EST CELUI DE LA VUE, pas de la fenêtre : une `BaseWindow`
+     n'en a pas. C'est précisément ce qui rendait le garde d'origine
+     inapplicable tel quel, et pourquoi il a fallu l'extraire. */
+  brancherGardeBrouillon(win, a.view.webContents);
   win.on('closed', () => {
     // Vue REPRISE par << Ancrer >> juste avant la fermeture : elle vit toujours.
     if (a.reancre) { a.reancre = false; return; }
@@ -2961,6 +3052,101 @@ ipcMain.on('pont:brouillonSale', (e, on) => {
   if (on) fenSale.add(id); else fenSale.delete(id);
 });
 
+/* ══ LE GARDE DU BOUTON X, POUR N'IMPORTE QUELLE FENÊTRE ═════════════════════
+   ⚠⚠ EXTRAIT DE `ouvrirNative` LE 2026-08-22, ET C'EST TOUT L'OBJET DU
+   CORRECTIF. Il n'existait que là, si bien qu'il ne couvrait que les fenêtres
+   nées de `ouvrirNative`. Une vue ANCRABLE détachée vit dans une `BaseWindow`
+   fabriquée par `poserEnFenetre` : son X ne rencontrait AUCUN garde, et la vue
+   mourait avec sa saisie.
+   ⚠ LA NOTE DU CARNET DISAIT « sans effet aujourd'hui, aucun écran branché
+   n'est ancrable ». C'ÉTAIT VRAI, ET ÇA NE L'EST PLUS : il y a 77 écrans
+   ancrables, dont **14** dont la page déclare un brouillon (cartes-cadeaux,
+   coupons, offres, réseaux sociaux, fidélisation, recommandations, abonnés,
+   campagnes, liens, comptable, conciliation bancaire, page d'accueil, pages,
+   incidents). Relire l'outil avant de croire la note.
+
+   ⚠ POURQUOI UN `wc` À PART. Une `BrowserWindow` porte son `webContents` ; une
+   `BaseWindow` n'en a pas — c'est la VUE posée dedans qui l'a. Le garde parle
+   donc à un `webContents` qu'on lui donne, jamais à `win.webContents`.
+
+   ⚠ CE QUI N'EST PAS UN TROU, ET IL NE FAUT PAS LE « CORRIGER » : une vue
+   ANCRÉE qu'on ferme par Échap ou par son bouton Fermer ne meurt pas — elle est
+   seulement CACHÉE (`pont:fermer` fait `setVisible(false)`), et elle reprend sa
+   saisie au retour. Y poser une question serait demander à quelqu'un s'il veut
+   garder un travail que personne ne s'apprête à jeter. */
+const brancherGardeBrouillon = (win, wc) => {
+  const wcId = wc.id;
+  win.on('close', (ev) => {
+    /* ⚠ LA MÊME DÉCISION QUE LA FENÊTRE PRINCIPALE, prise au même endroit.
+       Les deux gardes divergeaient : celui-ci laissait passer quand une mise à
+       jour bloquait (`return` sans `preventDefault`), l'autre refusait. C'est
+       VOULU et ça le reste — ici le chemin existant refusera de lui-même — mais
+       l'ordre des questions, lui, doit être un seul. */
+    const quoi = garde.decisionFermeture({
+      bloqueeParMaj:  false,   // traité juste après : ce garde laisse faire
+      dejaAutorise:   !!win._szFermeOk,
+      aUneSaisie:     fenSale.has(wcId),
+      demandeEnCours: !!win._szDemandeEnCours,
+    });
+    if (quoi === 'laisser') return;
+    if (fermetureBloquee()) return;
+    ev.preventDefault();
+    /* ⚠ SORTIE DE SECOURS : un SECOND clic sur le X ferme, toujours. Si la page
+       n'affiche pas la question — elle est figée, son script a levé, peu importe —
+       la fenêtre resterait sinon incondamnable, ce qui est pire que la perte qu'on
+       évite. Le second clic tente une dernière écriture, puis part. */
+    if (quoi === 'secours') {
+      win._szFermeOk = true; fenSale.delete(wcId);
+      try {
+        wc.executeJavaScript(
+          'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null', true).catch(() => {});
+      } catch (e) {}
+      setTimeout(() => { if (!win.isDestroyed()) win.destroy(); }, 400);
+      return;
+    }
+    win._szDemandeEnCours = true;
+    /* La fenêtre passe devant : une question qu'on ne voit pas est une fenêtre qui
+       refuse de se fermer sans dire pourquoi. */
+    try { if (win.isMinimized()) win.restore(); win.focus(); } catch (e) {}
+    const partir = (js) => {
+      const finir = () => {
+        win._szFermeOk = true; fenSale.delete(wcId);
+        if (!win.isDestroyed()) win.close();
+      };
+      let fait = false;
+      const uneFois = () => { if (fait) return; fait = true; finir(); };
+      setTimeout(uneFois, 3000);
+      try { wc.executeJavaScript(js, true).then(uneFois, uneFois); }
+      catch (e) { uneFois(); }
+    };
+    /* ⚠ LA QUESTION EST DESSINÉE PAR LA PAGE, PAS PAR WINDOWS. Elle l'était par
+       `dialog.showMessageBoxSync` en 3.72.0 : fond clair, accent bleu et boutons du
+       système au milieu d'une application sombre. C'est mot pour mot la leçon du
+       menu système de la 1.55.1. La page est vivante pendant un `close` empêché et
+       elle a déjà son thème : on lui demande d'afficher et de rapporter le choix.
+       ⚠ ET SI ELLE NE PEUT PAS (fonction absente, script cassé), on CONSERVE et on
+       ferme. Jamais l'inverse : le défaut d'un mécanisme anti-perte ne peut pas
+       être de perdre. */
+    let demande = null;
+    try {
+      demande = wc.executeJavaScript(
+        'window.szBrouillonDemander ? szBrouillonDemander() : -1', true);
+    } catch (e) { demande = null; }
+    if (!demande) { partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null'); return; }
+    demande.then((choix) => {
+      win._szDemandeEnCours = false;
+      const geste = garde.gestePourChoix(choix);
+      if (geste === 'revenir') return;               // revenir au formulaire
+      partir(geste === 'jeter'
+        ? 'window.szBrouillonJeter ? szBrouillonJeter() : null'
+        : 'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
+    }, () => {
+      win._szDemandeEnCours = false;
+      partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
+    });
+  });
+};
+
 const fenetresNatives = new Map();
 const ouvrirNative = (cle, titre, html, opts = {}) => {
   const deja = fenetresNatives.get(cle);
@@ -3003,80 +3189,9 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
   };
   win.on('moved', retenir);
   win.on('resized', retenir);
-  /* ══ FERMER UNE FENÊTRE QUI A UNE SAISIE EN COURS ════════════════════
-     ⚠⚠ LE BOUTON X DU CADRE NE TRAVERSE PAS LA PAGE. Une fenêtre peut avoir son
-     propre bouton << Fermer >> dessiné, qui passe par `pont:fermer` et laisse donc
-     la page demander avant de partir. Le X de Windows, lui, arrive ICI : sans ce
-     garde, la fenêtre disparaît et l'écriture différée du brouillon (3 s) n'a
-     jamais lieu. C'est le chemin le plus COURANT pour perdre une saisie, et
-     c'était le seul que rien ne couvrait.
-     ⚠ ON DEMANDE, ON NE DÉCIDE PAS. Fermer en gardant en silence est aussi
-     surprenant que fermer en jetant : dans les deux cas la personne ne sait pas
-     ce qu'il est advenu de son travail. Trois réponses, dont une pour revenir.
-     ⚠ LE COÛT EST NUL POUR LES 85 AUTRES FENÊTRES : sans drapeau levé, on sort
-     avant tout le reste. C'est pour cela que la page DÉCLARE qu'elle est sale au
-     lieu qu'on aille le lui demander — une question au moment du `close` serait
-     asynchrone, donc il faudrait empêcher CHAQUE fermeture le temps de la poser,
-     et une promesse qui ne revient pas rendrait la fenêtre incondamnable.
-     ⚠ ET LA MISE À JOUR PASSE AVANT : si `fermetureBloquee()`, on laisse le
-     chemin existant refuser — ce n'est pas le moment de poser une question. */
-  win.on('close', (ev) => {
-    if (win._szFermeOk || !fenSale.has(wcId)) return;
-    if (fermetureBloquee()) return;
-    ev.preventDefault();
-    /* ⚠ SORTIE DE SECOURS : un SECOND clic sur le X ferme, toujours. Si la page
-       n'affiche pas la question — elle est figée, son script a levé, peu importe —
-       la fenêtre resterait sinon incondamnable, ce qui est pire que la perte qu'on
-       évite. Le second clic tente une dernière écriture, puis part. */
-    if (win._szDemandeEnCours) {
-      win._szFermeOk = true; fenSale.delete(wcId);
-      try {
-        win.webContents.executeJavaScript(
-          'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null', true).catch(() => {});
-      } catch (e) {}
-      setTimeout(() => { if (!win.isDestroyed()) win.destroy(); }, 400);
-      return;
-    }
-    win._szDemandeEnCours = true;
-    /* La fenêtre passe devant : une question qu'on ne voit pas est une fenêtre qui
-       refuse de se fermer sans dire pourquoi. */
-    try { if (win.isMinimized()) win.restore(); win.focus(); } catch (e) {}
-    const partir = (js) => {
-      const finir = () => {
-        win._szFermeOk = true; fenSale.delete(wcId);
-        if (!win.isDestroyed()) win.close();
-      };
-      let fait = false;
-      const uneFois = () => { if (fait) return; fait = true; finir(); };
-      setTimeout(uneFois, 3000);
-      try { win.webContents.executeJavaScript(js, true).then(uneFois, uneFois); }
-      catch (e) { uneFois(); }
-    };
-    /* ⚠ LA QUESTION EST DESSINÉE PAR LA PAGE, PAS PAR WINDOWS. Elle l'était par
-       `dialog.showMessageBoxSync` en 3.72.0 : fond clair, accent bleu et boutons du
-       système au milieu d'une application sombre. C'est mot pour mot la leçon du
-       menu système de la 1.55.1. La page est vivante pendant un `close` empêché et
-       elle a déjà son thème : on lui demande d'afficher et de rapporter le choix.
-       ⚠ ET SI ELLE NE PEUT PAS (fonction absente, script cassé), on CONSERVE et on
-       ferme. Jamais l'inverse : le défaut d'un mécanisme anti-perte ne peut pas
-       être de perdre. */
-    let demande = null;
-    try {
-      demande = win.webContents.executeJavaScript(
-        'window.szBrouillonDemander ? szBrouillonDemander() : -1', true);
-    } catch (e) { demande = null; }
-    if (!demande) { partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null'); return; }
-    demande.then((choix) => {
-      win._szDemandeEnCours = false;
-      if (choix === 2) return;                       // revenir au formulaire
-      partir(choix === 1
-        ? 'window.szBrouillonJeter ? szBrouillonJeter() : null'
-        : 'window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
-    }, () => {
-      win._szDemandeEnCours = false;
-      partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
-    });
-  });
+  // Le garde du bouton X — voir `brancherGardeBrouillon`, qui le porte pour
+  // toutes les fenêtres (natives ET vues ancrables détachées).
+  brancherGardeBrouillon(win, win.webContents);
   win.on('closed', () => { fenetresNatives.delete(cle); fenSale.delete(wcId); });
   brancherOutils(win);
   win.webContents.on('did-finish-load', () => appliquerTheme(win.webContents));
