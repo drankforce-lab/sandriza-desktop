@@ -3241,6 +3241,39 @@ module.exports = {
     },
   ],
 
+  /* ── IMAGES DES PRODUITS ───────────────────────────────────────────────────
+     ⚠ DEUX JEUX, ET LE SECOND N'EST PAS DÉCORATIF. Cette fenêtre a deux états
+     qui ne partagent AUCUN dessin : « il reste des fiches » (les compteurs, le
+     tableau, le bouton actif) et « rien à déplacer » (le pavé vert, le bouton
+     éteint). Le second est celui qu'on verra le plus souvent une fois la
+     migration faite — et c'est justement celui qu'un jeu unique laisserait non
+     éprouvé, en affichant « sain ». */
+  'images.js': [
+    {
+      nom: 'des fiches portent encore leur image collée',
+      id: '',
+      reponses: {
+        'images:etat': {
+          ok: true, produits: 148, champs: 402, base64: 7, octets: 5242880,
+          fiches: [
+            { id: 'p_aurore', nom: 'Robe Aurore', sku: 'RB-AUR-01', champs: 4, octets: 3145728 },
+            { id: 'p_lin', nom: 'Chemisier de lin', sku: 'HT-LIN-03', champs: 2, octets: 1572864 },
+            { id: 'p_ceint', nom: 'Ceinture tressée', sku: '', champs: 1, octets: 524288 },
+          ],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'plus rien à déplacer',
+      id: '',
+      reponses: {
+        'images:etat': { ok: true, produits: 148, champs: 402, base64: 0, octets: 0, fiches: [] },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   'recherches.js': [
     {
       // ⚠ FORME REELLE de recherches:liste (coeur Admin._recherchesDonnees).

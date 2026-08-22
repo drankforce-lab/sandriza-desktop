@@ -1675,6 +1675,11 @@ const OPS_PONT = new Set([
      inscrite au journal. */
   'transfert:donnees', 'transfert:candidats',
   'transfert:partir', 'transfert:recevoir', 'transfert:annuler',
+  /* Images des produits (fenetre Images, 4.13.0). `images:migrer` EFFACE une
+     donnee (l image collee dans la fiche) en la remplacant par une adresse :
+     products:edit cote pont, et le coeur ne remplace qu apres avoir RELU
+     l objet depose. */
+  'images:etat', 'images:migrer',
   /* Erreurs JavaScript des clientes (onglet des Journaux, 4.12.0). La LECTURE
      passe par journal:donnees ; ces deux-ci sont les gestes. */
   'journal:jsErreursVues', 'journal:jsErreursPurger',
@@ -2589,6 +2594,7 @@ const PAGES_ANCRABLES = () => ({
   recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   transferts: ['Transferts de stock', () => pageTransferts()],
+  images: ['Images des produits', () => pageImages()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
   journal: ['Journal d’envoi', () => pageJournal()],
   campagnes: ['Campagnes et chaînes', () => pageCampagnes()],
@@ -3636,6 +3642,7 @@ const { pagePublicite } = require('./fenetres/publicite');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageTransferts } = require('./fenetres/transferts');
+const { pageImages } = require('./fenetres/images');
 const { pageAbonnes } = require('./fenetres/abonnes');
 const { pageJournal } = require('./fenetres/journal');
 const { pageCampagnes } = require('./fenetres/campagnes');
@@ -3773,6 +3780,8 @@ const actionApp = (nom) => {
     // Ancrable depuis 4.11.0, sur sa demande. Sa section hote cote site
     // n existe que pour porter la zone (voir _DOCKABLES dans admin.js).
     case 'transferts':
+    // Images des produits (4.13.0) : meme cas, section hote seule cote site.
+    case 'images':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':
     case 'comptable': case 'bankrec': case 'fal-suivi':
