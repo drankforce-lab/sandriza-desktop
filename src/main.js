@@ -1667,6 +1667,12 @@ const OPS_PONT = new Set([
   // Recherches sans resultat (fenetre Recherches, 1.73.0) : chaque ligne est
   // une vente manquee.
   'recherches:liste', 'recherches:retirer', 'recherches:vider',
+  /* Transferts de stock entre entrepots (fenetre Transferts, 4.9.0). Un
+     transfert deplace de la marchandise REELLE : les trois ecritures exigent
+     inventory:edit cote pont, et un ecart parti/recu y devient une perte
+     inscrite au journal. */
+  'transfert:donnees', 'transfert:candidats',
+  'transfert:partir', 'transfert:recevoir', 'transfert:annuler',
   // Abonnes de l infolettre (fenetre Abonnes, 1.74.0). La LISTE attend la
   // resynchronisation : une liste d envoi perimee, c est un client qui ne
   // recoit rien ou qui recoit malgre son refus.
@@ -2574,6 +2580,7 @@ const PAGES_ANCRABLES = () => ({
   publicite: ['Publicité ciblée', () => pagePublicite('')],
   recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
+  transferts: ['Transferts de stock', () => pageTransferts()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
   journal: ['Journal d’envoi', () => pageJournal()],
   campagnes: ['Campagnes et chaînes', () => pageCampagnes()],
@@ -3620,6 +3627,7 @@ const { pageNewsletter } = require('./fenetres/newsletter');
 const { pagePublicite } = require('./fenetres/publicite');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
+const { pageTransferts } = require('./fenetres/transferts');
 const { pageAbonnes } = require('./fenetres/abonnes');
 const { pageJournal } = require('./fenetres/journal');
 const { pageCampagnes } = require('./fenetres/campagnes');
@@ -3781,6 +3789,24 @@ const actionApp = (nom) => {
        Il reste declare dans PAGES_ANCRABLES pour que le bouton << ancrer >>
        fonctionne si on le veut dans la fenetre principale — meme montage que
        l explorateur de photos. */
+    /* ⚠ AUTONOME, PAS ANCRABLE — MÊME RAISON QUE « Verrous », ET C'EST LE
+       CONTRÔLE 0b QUI ME L'A DIT AVANT LA MISE EN LIGNE. Le chemin ancrable
+       demande au SITE de naviguer vers une section du même nom pour y poser la
+       zone d'ancrage ; il n'existe aucune section « transferts » côté site,
+       l'écran étant né natif. Rangé du mauvais côté, le clic de menu n'aurait
+       RIEN ouvert. Sa clé va donc dans `APPS_AUTONOMES` (appbar.js), et il
+       s'ouvre ici par `ouvrirNative`. */
+    case 'transferts': {
+      const _avT = fenetresNatives.get('transferts');
+      const _reuT = !!(_avT && !_avT.isDestroyed());
+      const winT = ouvrirNative('transferts', 'Transferts de stock', pageTransferts(''),
+        { width: 1000, height: 700, minWidth: 720, minHeight: 480 });
+      // Rouverte : les transferts ont pu bouger depuis un autre poste.
+      if (_reuT && winT && !winT.isDestroyed()) {
+        winT.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
     case 'verrous': {
       const _avV = fenetresNatives.get('verrous');
       const _reuV = !!(_avV && !_avV.isDestroyed());

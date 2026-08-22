@@ -3135,6 +3135,86 @@ module.exports = {
   ],
 
   // ── RECHERCHES SANS RÉSULTAT ───────────────────────────────────────────────
+  /* ⚠ TROIS JEUX, PARCE QUE CETTE FENÊTRE A TROIS ÉTATS QUI NE SE RESSEMBLENT
+     PAS : rien en cours, un transfert en transit (le volet Recevoir), et un
+     historique portant un ÉCART. Le troisième est celui qui compte — c'est la
+     seule vue où le nombre manquant et son motif sont dessinés, et un jeu qui
+     ne l'atteindrait pas laisserait la partie la plus importante de l'écran
+     non éprouvée tout en affichant « sain ». */
+  'transferts.js': [
+    {
+      nom: 'un transfert en transit',
+      id: '',
+      reponses: {
+        'transfert:donnees': {
+          ok: true, peutEcrire: true,
+          motifs: [
+            { v: 'perte', l: 'Perte (jamais arrivé)' },
+            { v: 'casse', l: 'Casse / abîmé au transport' },
+            { v: 'comptage', l: 'Erreur de comptage au départ' },
+          ],
+          entrepots: [{ id: 'wh_A', code: 'A1', nom: 'Entrepôt A' }, { id: 'wh_B', code: 'B1', nom: 'Boutique' }],
+          transferts: [{
+            id: 'trf_1', etat: 'transit', productId: 'p1', cle: 'M-Rouge',
+            nom: 'Robe Aurore', sku: 'ROB-001-M-RGE',
+            de: 'wh_A', vers: 'wh_B', deNom: 'A1', versNom: 'B1',
+            quantite: 10, partiLe: '2026-08-22T14:05:00Z', partiPar: 'Banc Essai',
+            note: 'Réassort boutique', quantiteRecue: null, ecart: null,
+            motifEcart: null, motifLbl: '', noteEcart: '', recuLe: null, recuPar: '',
+          }],
+        },
+        'transfert:candidats': { ok: true, lignes: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ LE JEU QUI COMPTE : l'historique avec un écart NOMMÉ.
+      nom: 'historique avec écart',
+      // ⚠ `id: 'histo'` OUVRE DIRECTEMENT L'ONGLET. Le contrôle ne clique pas :
+      // sans cette porte, cette vue n'était jamais dessinée et le jeu ne
+      // prouvait rien (vérifié par une variable libre injectée dans vueHisto).
+      id: 'histo',
+      reponses: {
+        'transfert:donnees': {
+          ok: true, peutEcrire: true,
+          motifs: [{ v: 'casse', l: 'Casse / abîmé au transport' }],
+          entrepots: [{ id: 'wh_A', code: 'A1', nom: 'Entrepôt A' }, { id: 'wh_B', code: 'B1', nom: 'Boutique' }],
+          transferts: [
+            {
+              id: 'trf_2', etat: 'recu', productId: 'p1', cle: 'S-Rouge',
+              nom: 'Robe Aurore', sku: 'ROB-001-S-RGE',
+              de: 'wh_A', vers: 'wh_B', deNom: 'A1', versNom: 'B1',
+              quantite: 10, partiLe: '2026-08-20T09:00:00Z', partiPar: 'Banc Essai',
+              note: '', quantiteRecue: 7, ecart: 3, motifEcart: 'casse',
+              motifLbl: 'Casse / abîmé au transport', noteEcart: 'Boîte écrasée',
+              recuLe: '2026-08-21T11:30:00Z', recuPar: 'Banc Essai',
+            },
+            {
+              id: 'trf_3', etat: 'annule', productId: 'p2', cle: 'L-Noir',
+              nom: 'Manteau Long', sku: 'MAN-002-L-NOI',
+              de: 'wh_B', vers: 'wh_A', deNom: 'B1', versNom: 'A1',
+              quantite: 2, partiLe: '2026-08-19T08:00:00Z', partiPar: 'Banc Essai',
+              note: '', quantiteRecue: null, ecart: null, motifEcart: null,
+              motifLbl: '', noteEcart: 'Erreur de saisie',
+              recuLe: '2026-08-19T08:10:00Z', recuPar: 'Banc Essai',
+            },
+          ],
+        },
+        'transfert:candidats': { ok: true, lignes: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aucun entrepôt configuré',
+      id: '',
+      reponses: {
+        'transfert:donnees': { ok: true, peutEcrire: true, motifs: [], entrepots: [], transferts: [] },
+        'transfert:candidats': { ok: true, lignes: [] },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   'recherches.js': [
     {
       // ⚠ FORME REELLE de recherches:liste (coeur Admin._recherchesDonnees).
