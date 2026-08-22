@@ -72,9 +72,17 @@ button.danger{border-color:rgba(239,68,68,.5);color:#f87171}
 .ligne{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 .ligne .nom{font-weight:600}
 .ligne .sku{font:.76rem/1.3 Consolas,monospace;color:#8fa1b8}
-.trajet{display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem}
-.trajet .lieu{padding:.08rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:6px}
-.trajet .fleche{color:#c9a97e;font-weight:800}
+/* ⚠ LE TRAJET TENAIT SUR DEUX LIGNES ET MANGEAIT LA MOITIE DU TABLEAU (sa
+   capture du 2026-08-22). Un libelle complet fait « Maison - Casier 1 - Section
+   A » : encadre et laisse libre de revenir a la ligne, il pousse les colonnes
+   qui portent les CHIFFRES — parti, recu, ecart — a l extreme droite, la ou on
+   ne les lit plus ensemble. On empile donc le lieu (en gras) et le detail
+   casier/section (en petit, gris), sans cadre, sans retour a la ligne. */
+.trajet{display:inline-flex;align-items:center;gap:.55rem;font-size:.82rem;white-space:nowrap}
+.trajet .lieu{display:inline-block;line-height:1.25}
+.trajet .lieu b{font-weight:600}
+.trajet .lieu i{display:block;font-style:normal;font-size:.72rem;color:#8fa1b8}
+.trajet .fleche{color:#c9a97e;font-weight:800;font-size:1rem}
 .qte{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.05rem}
 .dt{font-size:.72rem;color:#8fa1b8}
 .avis{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.22);
@@ -86,6 +94,16 @@ thead th{text-align:left;padding:.24rem .4rem;font-size:.66rem;text-transform:up
 tbody td{padding:.32rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tbody tr:hover td{background:rgba(255,255,255,.04)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+/* ⚠ « Robe ZENXAS · S-rouge » se coupait au milieu de « S-rouge » (sa capture).
+   Un identifiant de variante coupe en deux ne se lit plus : on preserve les
+   mots, et le SKU — qui n a aucune raison de revenir a la ligne — reste d un
+   bloc. La colonne prend la largeur qu il faut, pas celle qui reste. */
+th.art,td.art{min-width:13rem}
+td.art .nom{font-weight:600;overflow-wrap:normal;word-break:keep-all}
+td.art .sku{white-space:nowrap}
+/* La date et son auteur : deux lignes voulues, pas trois subies. */
+td.quand{white-space:nowrap;font-size:.78rem;line-height:1.35}
+td.quand .qui{color:#8fa1b8;font-size:.72rem}
 /* ⚠ L ECART SE VOIT DE LOIN, ET C EST LE POINT DE TOUT L ECRAN. Un manque ecrit
    en gris se lit comme une colonne de plus ; en rouge, avec son motif a cote,
    il se lit comme un evenement. */
@@ -224,9 +242,23 @@ ${JS_ACTIVITE}${JS_DIRE}
     else corps.innerHTML = vueNeuf();
   }
 
+  /* Le lieu en gras, le casier et la section en dessous, en petit.
+     ⚠ ON DECOUPE LE LIBELLE plutot que d exiger des champs separes du coeur :
+     deNom et versNom portent le libelle compose (« Maison - Casier 1 - Section
+     A »), et un transfert ANCIEN garde le sien meme si l emplacement a ete
+     renomme depuis. Le decouper a l affichage n invente rien ; demander les
+     parties au coeur ferait mentir l historique.
+     ⚠ AUCUN ACCENT GRAVE ICI : ce commentaire vit dans un gabarit. */
+  function lieuHtml(libelle){
+    var s = String(libelle || '—');
+    var i = s.indexOf(' - ');
+    if (i < 0) return '<span class="lieu"><b>' + esc(s) + '</b></span>';
+    return '<span class="lieu"><b>' + esc(s.slice(0, i)) + '</b>'
+      + '<i>' + esc(s.slice(i + 3)) + '</i></span>';
+  }
   function trajet(t){
-    return '<span class="trajet"><span class="lieu">' + esc(t.deNom) + '</span>'
-      + '<span class="fleche">→</span><span class="lieu">' + esc(t.versNom) + '</span></span>';
+    return '<span class="trajet">' + lieuHtml(t.deNom)
+      + '<span class="fleche">→</span>' + lieuHtml(t.versNom) + '</span>';
   }
 
   function vueTransit(){
@@ -295,21 +327,29 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueHisto(){
     var l = clos();
     if (!l.length) return '<div class="vide">Aucun transfert terminé.</div>';
+    /* ⚠ L ORDRE DES COLONNES A CHANGE (sa capture du 2026-08-22) : l ETAT vient
+       juste apres le trajet, et les trois CHIFFRES sont cote a cote a la fin.
+       Parti / recu / ecart se lisent ENSEMBLE ou ne se lisent pas — separes par
+       un motif et un etat, l oeil doit sauter par-dessus pour comparer. */
     return '<div class="carte"><table><thead><tr>'
-      + '<th>Article</th><th>Trajet</th><th class="num">Parti</th><th class="num">Reçu</th>'
-      + '<th class="num">Écart</th><th>Motif</th><th>État</th><th>Le</th>'
+      + '<th class="art">Article</th><th>Trajet</th><th>État</th>'
+      + '<th class="num">Parti</th><th class="num">Reçu</th><th class="num">Écart</th>'
+      + '<th>Motif</th><th>Le</th>'
       + '</tr></thead><tbody>'
       + l.map(function(t){
           var ec = t.ecart || 0;
           return '<tr>'
-            + '<td><strong>' + esc(t.nom) + '</strong> · ' + esc(t.cle) + '<br><span class="sku">' + esc(t.sku) + '</span></td>'
+            + '<td class="art"><span class="nom">' + esc(t.nom) + '</span> · ' + esc(t.cle)
+            +   '<br><span class="sku">' + esc(t.sku) + '</span></td>'
             + '<td>' + trajet(t) + '</td>'
+            + '<td><span class="pill ' + esc(t.etat) + '">' + (t.etat === 'recu' ? 'reçu' : 'annulé') + '</span></td>'
             + '<td class="num">' + t.quantite + '</td>'
             + '<td class="num">' + (t.quantiteRecue === null ? '—' : t.quantiteRecue) + '</td>'
             + '<td class="num ' + (ec ? 'ecart' : 'ecart0') + '">' + (t.etat === 'annule' ? '—' : (ec ? '−' + ec : '0')) + '</td>'
-            + '<td>' + esc(t.motifLbl || '') + (t.noteEcart ? '<br><span class="dt">' + esc(t.noteEcart) + '</span>' : '') + '</td>'
-            + '<td><span class="pill ' + esc(t.etat) + '">' + (t.etat === 'recu' ? 'reçu' : 'annulé') + '</span></td>'
-            + '<td class="dt">' + esc(dateCourte(t.recuLe)) + (t.recuPar ? '<br>' + esc(t.recuPar) : '') + '</td>'
+            + '<td>' + (t.motifLbl ? esc(t.motifLbl) : '<span class="dt">—</span>')
+            +   (t.noteEcart ? '<br><span class="dt">' + esc(t.noteEcart) + '</span>' : '') + '</td>'
+            + '<td class="quand">' + esc(dateCourte(t.recuLe))
+            +   (t.recuPar ? '<br><span class="qui">' + esc(t.recuPar) + '</span>' : '') + '</td>'
             + '</tr>';
         }).join('')
       + '</tbody></table></div>';
