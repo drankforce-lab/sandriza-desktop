@@ -5366,11 +5366,30 @@ module.exports = {
         },
         // ⚠ Un emplacement UTILISÉ et un LIBRE : la corbeille du premier doit
         // porter l'avertissement, celle du second l'infobulle « Supprimer ».
+        /* ⚠ FORME DU 2026-08-22 : deux niveaux (lieux + emplacements), plus le
+           compte rendu de migration. Trois cas dans un seul jeu, et chacun
+           dessine une branche différente :
+           • `wh_0001` a un lieu AVEC adresse — la ligne montre les deux ;
+           • `wh_0002` a un lieu SANS adresse — « — adresse à remplir — » ;
+           • `wh_0003` n'a AUCUN lieu — « — sans lieu — », le cas d'un code que
+             la migration a refusé de deviner. Sans lui, cette branche ne serait
+             jamais dessinée et l'on ne saurait pas qu'elle tient. */
         'stock:entrepots': {
           ok: true, peutAjouter: true, peutEcrire: true, peutSupprimer: true,
+          migre: { crees: ['Entrepot'], repartis: 2 },
+          lieux: [
+            { id: 'lieu_0001', nom: 'Entrepot', adresse: '120 rue Principale, Québec' },
+            { id: 'lieu_0002', nom: 'Maison', adresse: '' },
+          ],
           lignes: [
-            { id: 'wh_0001', code: 'MTL-A', reference: 'Rangée du fond', usage: 12 },
-            { id: 'wh_0002', code: 'QC-B', reference: '', usage: 0 },
+            { id: 'wh_0001', code: 'Entrepot - Casier 1 - Section L', reference: 'Rangée du fond',
+              lieuId: 'lieu_0001', casier: 'Casier 1', section: 'Section L',
+              lieuNom: 'Entrepot', adresse: '120 rue Principale, Québec', usage: 12 },
+            { id: 'wh_0002', code: 'Maison - Casier 1 - Section A', reference: '',
+              lieuId: 'lieu_0002', casier: 'Casier 1', section: 'Section A',
+              lieuNom: 'Maison', adresse: '', usage: 0 },
+            { id: 'wh_0003', code: 'Réserve', reference: '',
+              lieuId: '', casier: 'Réserve', section: '', lieuNom: '', adresse: '', usage: 3 },
           ],
         },
         'session:activite': { ok: true },

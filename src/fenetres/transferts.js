@@ -141,6 +141,8 @@ function pageTransferts(ouverture) {
   var TAB = ${JSON.stringify(ouv)};   // transit | histo | neuf
   var CAND = null;           // candidats de l onglet Nouveau
   var RECH = '';
+  var F_LIEU = '';           // filtre par lieu (ou '_sans')
+  var F_SECTION = '';        // filtre par section
   var OUVERT = '';           // id du transfert dont le volet Recevoir est ouvert
   var BUSY = false;
 
@@ -322,10 +324,23 @@ ${JS_ACTIVITE}${JS_DIRE}
       return '<div class="vide">Un seul entrepôt est configuré.<br>'
         + '<span class="dt">Un transfert va d’un lieu à un autre : il en faut au moins deux.</span></div>';
     }
+    /* ⚠ CHERCHER PAR NOM SUPPOSE QU ON SAIT LEQUEL ON CHERCHE. Devant les
+       etageres, la question est plutot << qu est-ce qui est a la Maison ? >> ou
+       << tout ce qui est en Section L >>. D ou les deux filtres, demandes le
+       2026-08-22 — ils repondent a la question qu on se pose vraiment. */
     var haut = '<div class="carte"><h2>Choisir la variante à envoyer</h2>'
-      + '<div class="ligne"><input type="search" id="q" placeholder="Nom, SKU ou taille-couleur…" value="' + esc(RECH) + '">'
-      + '<button class="mini" data-act="chercher">Chercher</button>'
-      + '<span class="dt">Le transfert emporte <strong>toute</strong> la quantité de la variante.</span></div></div>';
+      + '<div class="ligne">'
+      +   '<select id="f-lieu"><option value="">Tous les lieux</option>'
+      +     (D.lieux || []).map(function(l){
+              return '<option value="' + esc(l.id) + '"' + (F_LIEU === l.id ? ' selected' : '') + '>'
+                + esc(l.nom) + '</option>'; }).join('')
+      +     '<option value="_sans"' + (F_LIEU === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
+      +   '</select>'
+      +   '<input type="search" id="f-section" placeholder="Section…" value="' + esc(F_SECTION) + '" style="min-width:9rem">'
+      +   '<input type="search" id="q" placeholder="Nom, SKU ou taille-couleur…" value="' + esc(RECH) + '">'
+      +   '<button class="mini" data-act="chercher">Chercher</button>'
+      + '</div>'
+      + '<div class="dt" style="margin-top:.4rem">Le transfert emporte <strong>toute</strong> la quantité de la variante.</div></div>';
     if (!CAND) return haut + '<div class="vide">Lancez une recherche pour voir ce qui peut partir.</div>';
     if (!CAND.length) return haut + '<div class="vide">Aucune variante avec du stock <em>et</em> un emplacement connu.</div>';
     return haut + '<div class="carte"><table><thead><tr>'
@@ -336,7 +351,13 @@ ${JS_ACTIVITE}${JS_DIRE}
           return '<tr>'
             + '<td><strong>' + esc(c.nom) + '</strong> · ' + esc(c.cle) + '<br><span class="sku">' + esc(c.sku) + '</span></td>'
             + '<td class="num qte">' + c.qte + '</td>'
-            + '<td><span class="lieu">' + esc(c.deNom) + '</span></td>'
+            /* ⚠ ON MONTRE CE SUR QUOI ON FILTRE. Filtrer par section sans
+               afficher la section, c est demander de faire confiance a un tri
+               qu on ne peut pas verifier. */
+            + '<td><span class="lieu">' + esc(c.deNom) + '</span>'
+            +   (c.lieuNom || c.section
+                  ? '<br><span class="dt">' + esc([c.lieuNom, c.section].filter(Boolean).join(' · ')) + '</span>'
+                  : '') + '</td>'
             + '<td><select data-vers="' + esc(id) + '"><option value="">— destination —</option>'
             +   (D.entrepots || []).filter(function(w){ return w.id !== c.de; })
                 .map(function(w){ return '<option value="' + esc(w.id) + '">' + esc(w.code || w.nom) + '</option>'; }).join('')
@@ -351,8 +372,12 @@ ${JS_ACTIVITE}${JS_DIRE}
   function chercher(){
     var el = document.getElementById('q');
     RECH = el ? el.value : '';
+    var fl = document.getElementById('f-lieu');
+    var fs = document.getElementById('f-section');
+    F_LIEU = fl ? fl.value : '';
+    F_SECTION = fs ? fs.value : '';
     dire('Recherche…');
-    appeler('transfert:candidats', [RECH]).then(function(r){
+    appeler('transfert:candidats', [{ q: RECH, lieuId: F_LIEU, section: F_SECTION }]).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       CAND = r.lignes || [];
       dessiner();

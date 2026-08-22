@@ -281,7 +281,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── Onglet Produits ── La liste est paginee et filtree PAR LE SITE
   // (stock:produits) : la fenetre n envoie que le filtre, jamais un catalogue.
   var PRODS = null;    // derniere reponse de stock:produits
-  var FP = { q: '', etat: '', cats: [], page: 0, parPage: 25, menu: false, auto: true };
+  // lieuId et section : sa demande du 2026-08-22 — « qu est-ce que j ai a la
+  // Maison ? », la question qu on se pose en preparant une commande.
+  // ⚠ AUCUN ACCENT GRAVE ICI : ce commentaire vit dans un gabarit.
+  var FP = { q: '', etat: '', cats: [], lieuId: '', section: '', page: 0, parPage: 25, menu: false, auto: true };
   // ⚠ Mode << vente finale en lot >> : les coches vivent ICI, pas dans les cases
   // affichees — l ecran du site ne lisait que la PAGE VISIBLE de ses cases, une
   // selection posee puis paginee etait perdue sans un mot.
@@ -294,6 +297,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── Onglet Entrepot ──
   var WHS = null;
   var WH_EDIT = null;  // null | { id:'' (ajout) | id (edition) }
+  var LX_EDIT = null;  // idem pour les LIEUX (batiment + adresse)
+  // Filtres de la liste des emplacements — sa demande du 2026-08-22.
+  var WH_FILTRE = { lieu: '', txt: '' };
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -324,7 +330,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     impression:         'L’impression a échoué.',
     categorie_sans_code: 'Aucun code de catégorie configuré.',
     aucun_produit:      'Aucun produit sélectionné.',
-    code_requis:        'Donnez un nom à l’emplacement.',
+    code_requis:        'Donnez au moins un lieu, un casier ou une section.',
+    // Les LIEUX (2026-08-22). ⚠ Sans ces phrases, ces refus tomberaient sur
+    // « Erreur inattendue » : le pont les nomme, la fenêtre doit les traduire.
+    nom_requis:         'Donnez un nom au lieu.',
+    lieu_introuvable:   'Ce lieu n’existe plus — rechargez l’écran.',
     version_coquille:   'Cette version de l’application ne sait pas ouvrir cette fenêtre — quittez et relancez pour la mettre à jour.',
     echec:              'L’opération a échoué.'
   };
@@ -336,6 +346,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (m === 'collision') return 'Impossible : ' + esc(r.avant) + ' deviendrait ' + esc(r.apres) + ', déjà utilisé.';
     if (m === 'emplacement_utilise') return 'Suppression impossible — ' + (r.n || '?')
       + ' variante(s) utilisent l’emplacement ' + esc(r.code || '') + '. Réassignez-les d’abord.';
+    if (m === 'lieu_utilise') return 'Suppression impossible — ' + (r.n || '?')
+      + ' emplacement(s) sont dans le lieu ' + esc(r.nom || '') + '. Déplacez-les d’abord.';
+    // ⚠ Deux lieux du même nom rendraient les libellés d'emplacement
+    // indiscernables — et c'est le libellé que l'import CSV retrouve.
+    if (m === 'nom_double') return 'Un lieu s’appelle déjà « ' + esc(r.nom || '') + ' ».';
     return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
   }
 
@@ -399,7 +414,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // Quitter l Entrepot referme toute ligne d ajout/edition en cours — comme
     // l ecran du site. Quitter Produits sort du mode lot : une selection
     // invisible qui s appliquerait plus tard serait un piege.
-    if (cible !== 'entrepots') WH_EDIT = null;
+    if (cible !== 'entrepots') { WH_EDIT = null; LX_EDIT = null; }
     if (cible !== 'produits') { LOT = false; COCHES = {}; }
     ONGLET = cible;
     VUE = 'reappro';
@@ -825,6 +840,17 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<option value="ok"' + (FP.etat === 'ok' ? ' selected' : '') + '>✓ Seuil non atteint</option>'
       + '</select>'
       + menuCats(d.cats || [])
+      /* ⚠ FILTRER PAR LIEU MONTRE UN PRODUIT DES QU UNE SEULE de ses variantes
+         s y trouve — pas seulement ceux qui y sont en entier. C est la regle
+         utile quand on prepare une commande : ce qu on a sous la main compte,
+         meme si le reste dort ailleurs. Le detail est dans stockProduits. */
+      + '<select id="fp-lieu"><option value="">Tous les lieux</option>'
+      +   (d.lieux || []).map(function(l){
+            return '<option value="' + esc(l.id) + '"' + (FP.lieuId === l.id ? ' selected' : '') + '>'
+              + esc(l.nom) + '</option>'; }).join('')
+      +   '<option value="_sans"' + (FP.lieuId === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
+      + '</select>'
+      + '<input type="text" id="fp-section" autocomplete="off" placeholder="Section…" value="' + esc(FP.section) + '" style="width:8rem">'
       + '<span class="droite">'
       // ⚠ CE BOUTON MANQUAIT (#6) : depuis l inventaire, il fallait sortir vers
       // l ecran Produits pour en creer un. L op existait deja cote pont, elle
@@ -956,11 +982,19 @@ ${JS_ACTIVITE}${JS_DIRE}
         clearTimeout(fpT);
         fpT = setTimeout(function(){ FP.q = q; FP.page = 0; chargerOnglet(true); }, 280);
       }
+      // Meme temporisation que la recherche : une frappe par requete ferait
+      // repartir la liste a chaque lettre.
+      if (t && t.id === 'fp-section') {
+        var s = t.value;
+        clearTimeout(fpT);
+        fpT = setTimeout(function(){ FP.section = s; FP.page = 0; chargerOnglet(true); }, 280);
+      }
     };
     corps.onchange = function(ev){
       var t = ev.target;
       if (!t) return;
       if (t.id === 'fp-etat') { FP.etat = t.value; FP.page = 0; chargerOnglet(); return; }
+      if (t.id === 'fp-lieu') { FP.lieuId = t.value; FP.page = 0; chargerOnglet(); return; }
       if (t.id === 'fp-taille') {
         if (t.value === 'auto') { FP.auto = true; FP.page = 0; dessiner(); pageAutoAjuste(); }
         else { FP.auto = false; FP.parPage = parseInt(t.value, 10) || 25; FP.page = 0; chargerOnglet(); }
@@ -1252,34 +1286,135 @@ ${JS_ACTIVITE}${JS_DIRE}
       brancherFermer();
       return;
     }
-    function ligneEdition(w){
+    /* ⚠ DEUX NIVEAUX depuis le 2026-08-22, sur sa demande. Le LIEU (bâtiment +
+       adresse) se déclare une fois ; l emplacement choisit son lieu puis precise
+       son casier et sa section. Sa raison : l adresse appartient au batiment, et
+       repetee sur dix casiers elle finit par diverger. */
+    var lieuxParId = {};
+    (d.lieux || []).forEach(function(l){ lieuxParId[l.id] = l; });
+
+    function ligneLieuEdition(l){
       return '<tr style="background:rgba(201,169,126,.08)">'
-        + '<td><input type="text" id="wh-code" value="' + esc(w ? w.code : '') + '" placeholder="Ex : Casier 1, Section A"></td>'
+        + '<td><input type="text" id="lx-nom" value="' + esc(l ? l.nom : '') + '" placeholder="Ex : Entrepot, Maison"></td>'
+        + '<td colspan="2"><input type="text" id="lx-adr" value="' + esc(l ? l.adresse : '') + '" placeholder="Adresse (optionnel)"></td>'
+        + '<td class="c" style="white-space:nowrap">'
+        + '<button class="mini prim" id="lx-enr" title="Enregistrer (Entrée)">✓</button> '
+        + '<button class="mini" id="lx-annuler" title="Annuler (Échap)">✕</button></td></tr>';
+    }
+
+    function ligneEdition(w){
+      var opts = '<option value="">— aucun —</option>'
+        + (d.lieux || []).map(function(l){
+            return '<option value="' + esc(l.id) + '"' + (w && w.lieuId === l.id ? ' selected' : '') + '>'
+              + esc(l.nom) + '</option>'; }).join('');
+      return '<tr style="background:rgba(201,169,126,.08)">'
+        + '<td><select id="wh-lieu">' + opts + '</select></td>'
+        + '<td><input type="text" id="wh-casier" value="' + esc(w ? w.casier : '') + '" placeholder="Ex : Casier 1"></td>'
+        + '<td><input type="text" id="wh-section" value="' + esc(w ? w.section : '') + '" placeholder="Ex : Section A"></td>'
         + '<td><input type="text" id="wh-ref" value="' + esc(w ? w.reference : '') + '" placeholder="Référence (optionnel)"></td>'
         + '<td class="c"><span class="rien">' + (w ? w.usage : '—') + '</span></td>'
         + '<td class="c" style="white-space:nowrap">'
         + '<button class="mini prim" id="wh-enr" title="Enregistrer (Entrée)">✓</button> '
         + '<button class="mini" id="wh-annuler" title="Annuler (Échap)">✕</button></td></tr>';
     }
-    var h = '<div class="carte plein">'
-      + '<h2>Entrepôt <span class="note">— les emplacements où ranger les variantes</span></h2>';
+
+    var h = '';
+
+    /* ⚠ LE COMPTE RENDU DE LA MIGRATION S AFFICHE, IL NE SE TAIT PAS. Ses
+       emplacements existants viennent d etre decoupes en lieu/casier/section :
+       reecrire ses donnees sans le lui montrer serait le laisser decouvrir seul
+       que ses lignes ont change de forme. */
+    if (d.migre && d.migre.repartis > 0) {
+      h += '<div class="carte plein" style="border-color:rgba(201,169,126,.4)">'
+        + '<div style="font-size:.84rem;line-height:1.6">'
+        + '<strong>' + d.migre.repartis + ' emplacement(s) répartis</strong> en lieu, casier et section'
+        + (d.migre.crees.length ? ' — lieu(x) créé(s) : <strong>' + d.migre.crees.map(esc).join(', ') + '</strong>' : '')
+        + '.<br><span class="note">Le libellé affiché n’a pas changé. Il ne manque que l’adresse de chaque lieu.</span>'
+        + '</div></div>';
+    }
+
+    // ── LES LIEUX ────────────────────────────────────────────────────────────
+    h += '<div class="carte plein">'
+      + '<h2>Lieux <span class="note">— les bâtiments, avec leur adresse</span></h2>';
     if (d.peutAjouter) {
       h += '<div class="toolbar"><span class="droite">'
-        + '<button class="mini" id="wh-ajouter"' + (WH_EDIT && WH_EDIT.id === '' ? ' disabled' : '')
-        + '>+ Ajouter un emplacement</button></span></div>';
+        + '<button class="mini" id="lx-ajouter"' + (LX_EDIT && LX_EDIT.id === '' ? ' disabled' : '')
+        + '>+ Ajouter un lieu</button></span></div>';
     }
     h += '<div class="grille"><table><thead><tr>'
-      + '<th>Emplacement</th><th>Référence</th><th class="c">Variantes assignées</th><th class="c">Actions</th>'
+      + '<th>Lieu</th><th colspan="2">Adresse</th><th class="c">Actions</th>'
+      + '</tr></thead><tbody>';
+    if (LX_EDIT && LX_EDIT.id === '') h += ligneLieuEdition(null);
+    if (!(d.lieux || []).length && !(LX_EDIT && LX_EDIT.id === '')) {
+      h += '<tr><td colspan="4"><div class="vide">Aucun lieu — cliquez sur '
+        + '<b>+ Ajouter un lieu</b> pour déclarer un bâtiment.</div></td></tr>';
+    }
+    (d.lieux || []).forEach(function(l){
+      if (LX_EDIT && LX_EDIT.id === l.id) { h += ligneLieuEdition(l); return; }
+      var n = (d.lignes || []).filter(function(w){ return w.lieuId === l.id; }).length;
+      h += '<tr>'
+        + '<td style="font-weight:600">' + esc(l.nom) + '</td>'
+        + '<td colspan="2">' + (l.adresse ? esc(l.adresse) : '<span class="rien">— adresse à remplir —</span>') + '</td>'
+        + '<td class="c" style="white-space:nowrap">'
+        + (d.peutEcrire ? '<button class="mini" data-lx-mod="' + esc(l.id) + '" title="Modifier">✎</button> ' : '')
+        + (d.peutSupprimer ? '<button class="mini" data-lx-del="' + esc(l.id) + '" title="'
+            + (n > 0 ? n + ' emplacement(s) dans ce lieu' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '')
+        + '</td></tr>';
+    });
+    h += '</tbody></table></div></div>';
+
+    // ── LES EMPLACEMENTS ─────────────────────────────────────────────────────
+    h += '<div class="carte plein">'
+      + '<h2>Emplacements <span class="note">— où ranger les variantes</span></h2>';
+    /* ⚠ LES FILTRES SONT LA MOITIE DE SA DEMANDE (<< la possibilite de filtre
+       par entrepot et par section, adresse etc. >>). Ils portent sur ce qui est
+       AFFICHE, pas sur ce qui est enregistre — une ligne en cours d edition
+       reste visible meme si elle ne correspond plus au filtre, sinon elle
+       disparaitrait sous les doigts. */
+    h += '<div class="toolbar">'
+      + '<select id="wh-f-lieu"><option value="">Tous les lieux</option>'
+      +   (d.lieux || []).map(function(l){
+            return '<option value="' + esc(l.id) + '"' + (WH_FILTRE.lieu === l.id ? ' selected' : '') + '>'
+              + esc(l.nom) + '</option>'; }).join('')
+      +   '<option value="_sans"' + (WH_FILTRE.lieu === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
+      + '</select>'
+      + '<input type="search" id="wh-f-txt" value="' + esc(WH_FILTRE.txt) + '" placeholder="Casier, section, adresse, référence…">'
+      + (WH_FILTRE.lieu || WH_FILTRE.txt ? '<button class="mini" id="wh-f-vider">Effacer</button>' : '')
+      + '<span class="droite">'
+      + (d.peutAjouter ? '<button class="mini" id="wh-ajouter"' + (WH_EDIT && WH_EDIT.id === '' ? ' disabled' : '')
+          + (!(d.lieux || []).length ? ' title="Déclarez d’abord un lieu"' : '')
+          + '>+ Ajouter un emplacement</button>' : '')
+      + '</span></div>';
+
+    var visibles = (d.lignes || []).filter(function(w){
+      if (WH_EDIT && WH_EDIT.id === w.id) return true;   // celle qu on modifie ne s evapore pas
+      if (WH_FILTRE.lieu === '_sans') { if (w.lieuId) return false; }
+      else if (WH_FILTRE.lieu && w.lieuId !== WH_FILTRE.lieu) return false;
+      var q = String(WH_FILTRE.txt || '').trim().toLowerCase();
+      if (!q) return true;
+      return [w.casier, w.section, w.adresse, w.reference, w.lieuNom, w.code]
+        .join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+
+    h += '<div class="grille"><table><thead><tr>'
+      + '<th>Lieu</th><th>Casier</th><th>Section</th><th>Référence</th>'
+      + '<th class="c">Variantes assignées</th><th class="c">Actions</th>'
       + '</tr></thead><tbody>';
     if (WH_EDIT && WH_EDIT.id === '') h += ligneEdition(null);
-    if (!d.lignes.length && !(WH_EDIT && WH_EDIT.id === '')) {
-      h += '<tr><td colspan="4"><div class="vide">Aucun emplacement — cliquez sur '
-        + '<b>+ Ajouter un emplacement</b> pour en créer un.</div></td></tr>';
+    if (!visibles.length && !(WH_EDIT && WH_EDIT.id === '')) {
+      h += '<tr><td colspan="6"><div class="vide">'
+        + ((d.lignes || []).length
+            ? 'Aucun emplacement ne correspond au filtre.'
+            : 'Aucun emplacement — cliquez sur <b>+ Ajouter un emplacement</b> pour en créer un.')
+        + '</div></td></tr>';
     }
-    d.lignes.forEach(function(w){
+    visibles.forEach(function(w){
       if (WH_EDIT && WH_EDIT.id === w.id) { h += ligneEdition(w); return; }
       h += '<tr>'
-        + '<td style="font-weight:600">' + esc(w.code) + '</td>'
+        + '<td style="font-weight:600">' + (w.lieuNom ? esc(w.lieuNom) : '<span class="rien">— sans lieu —</span>')
+        +   (w.adresse ? '<br><span class="note">' + esc(w.adresse) + '</span>' : '') + '</td>'
+        + '<td>' + (w.casier ? esc(w.casier) : '<span class="rien">—</span>') + '</td>'
+        + '<td>' + (w.section ? esc(w.section) : '<span class="rien">—</span>') + '</td>'
         + '<td>' + (w.reference ? esc(w.reference) : '<span class="rien">—</span>') + '</td>'
         + '<td class="c">' + w.usage + '</td>'
         + '<td class="c" style="white-space:nowrap">'
@@ -1303,36 +1438,126 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.onclick = function(ev){
       var b = ev.target && ev.target.closest ? ev.target.closest('button') : null;
       if (!b) return;
-      if (b.id === 'wh-ajouter') { WH_EDIT = { id: '' }; dessiner(); return; }
+      if (b.id === 'wh-ajouter') { WH_EDIT = { id: '' }; LX_EDIT = null; dessiner(); return; }
       if (b.id === 'wh-annuler') { WH_EDIT = null; dessiner(); return; }
       if (b.id === 'wh-enr') { entrepotEnregistrer(); return; }
+      if (b.id === 'lx-ajouter') { LX_EDIT = { id: '' }; WH_EDIT = null; dessiner(); return; }
+      if (b.id === 'lx-annuler') { LX_EDIT = null; dessiner(); return; }
+      if (b.id === 'lx-enr') { lieuEnregistrer(); return; }
+      if (b.id === 'wh-f-vider') { WH_FILTRE = { lieu: '', txt: '' }; dessiner(); return; }
       var id = b.getAttribute('data-wh-mod');
-      if (id) { WH_EDIT = { id: id }; dessiner(); return; }
+      if (id) { WH_EDIT = { id: id }; LX_EDIT = null; dessiner(); return; }
       id = b.getAttribute('data-wh-del');
       if (id) { entrepotSupprimer(id); return; }
+      id = b.getAttribute('data-lx-mod');
+      if (id) { LX_EDIT = { id: id }; WH_EDIT = null; dessiner(); return; }
+      id = b.getAttribute('data-lx-del');
+      if (id) { lieuSupprimer(id); return; }
+    };
+    /* ⚠ LE FILTRE SE REDESSINE SANS PERDRE LE CURSEUR. On redessine tout le
+       tableau a chaque frappe, donc le champ est recree : sans replacer le
+       curseur a la fin, on taperait a l envers des la deuxieme lettre. */
+    corps.oninput = function(ev){
+      var t = ev.target;
+      if (!t || t.id !== 'wh-f-txt') return;
+      WH_FILTRE.txt = t.value;
+      dessiner();
+      var n = document.getElementById('wh-f-txt');
+      if (n) { n.focus(); try { n.setSelectionRange(n.value.length, n.value.length); } catch (e) {} }
+    };
+    corps.onchange = function(ev){
+      var t = ev.target;
+      if (!t || t.id !== 'wh-f-lieu') return;
+      WH_FILTRE.lieu = t.value;
+      dessiner();
     };
     // Entree enregistre, Echap referme la ligne (sans fermer la fenetre : le
     // gestionnaire global d Echap ne joue que s il n y a pas de voile, mais la
     // ligne d edition n en est pas un — on arrete donc la propagation ici).
     corps.onkeydown = function(ev){
       var t = ev.target;
-      if (!t || (t.id !== 'wh-code' && t.id !== 'wh-ref')) return;
-      if (ev.key === 'Enter') { ev.preventDefault(); entrepotEnregistrer(); }
-      else if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); WH_EDIT = null; dessiner(); }
+      if (!t || !t.id) return;
+      var estEmpl = (t.id === 'wh-casier' || t.id === 'wh-section' || t.id === 'wh-ref' || t.id === 'wh-lieu');
+      var estLieu = (t.id === 'lx-nom' || t.id === 'lx-adr');
+      if (!estEmpl && !estLieu) return;
+      if (ev.key === 'Enter') { ev.preventDefault(); if (estLieu) lieuEnregistrer(); else entrepotEnregistrer(); }
+      else if (ev.key === 'Escape') {
+        ev.preventDefault(); ev.stopPropagation();
+        if (estLieu) LX_EDIT = null; else WH_EDIT = null;
+        dessiner();
+      }
     };
+  }
+
+  function lieuEnregistrer(){
+    if (!LX_EDIT) return;
+    var nom = (document.getElementById('lx-nom') || {}).value || '';
+    var adr = (document.getElementById('lx-adr') || {}).value || '';
+    if (!String(nom).trim()) {
+      dire('Le nom du lieu est requis.', 'err');
+      var c = document.getElementById('lx-nom');
+      if (c) { c.className = 'manque'; c.focus(); }
+      return;
+    }
+    appeler('stock:lieuEcrire', [LX_EDIT.id || '', nom, adr]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire(LX_EDIT.id ? 'Lieu modifié.' : 'Lieu créé.', 'bon');
+      LX_EDIT = null;
+      chargerOnglet();
+    });
+  }
+
+  function lieuSupprimer(id){
+    var l = ((WHS && WHS.lieux) || []).filter(function(x){ return x.id === id; })[0];
+    if (!l) return;
+    var n = ((WHS && WHS.lignes) || []).filter(function(w){ return w.lieuId === id; }).length;
+    /* ⚠ MEME REGLE QU UN EMPLACEMENT ENCORE ASSIGNE : on refuse, on ne casse
+       pas. Des casiers pointant vers un batiment disparu perdraient la premiere
+       moitie de leur libelle — et c est ce libelle que l import CSV retrouve. */
+    if (n > 0) {
+      voile('<h3>Suppression impossible</h3>'
+        + '<p>Le lieu <strong>' + esc(l.nom) + '</strong> contient <strong>'
+        + n + ' emplacement(s)</strong>.</p>'
+        + '<p style="color:#8fa1b8;font-size:.8rem">Déplacez ou supprimez ces emplacements '
+        + 'avant de supprimer le lieu.</p>'
+        + '<div class="fin2"><button class="prim" id="v-ok">Compris</button></div>',
+        function(fermer){ document.getElementById('v-ok').onclick = fermer; });
+      return;
+    }
+    voile('<h3>Supprimer le lieu</h3>'
+      + '<p>Supprimer <strong>' + esc(l.nom) + '</strong> ? Aucun emplacement ne s’y trouve.</p>'
+      + '<div class="fin2"><button id="v-non">Annuler</button>'
+      + '<button class="prim" id="v-oui">Supprimer</button></div>',
+      function(fermer){
+        document.getElementById('v-non').onclick = fermer;
+        document.getElementById('v-oui').onclick = function(){
+          this.disabled = true;
+          appeler('stock:lieuSupprimer', [id]).then(function(r){
+            fermer();
+            dire(r.ok ? 'Lieu « ' + (r.nom || '') + ' » supprimé.' : expliquer(r), r.ok ? 'bon' : 'err');
+            chargerOnglet();
+          });
+        };
+      });
   }
 
   function entrepotEnregistrer(){
     if (!WH_EDIT) return;
-    var code = (document.getElementById('wh-code') || {}).value || '';
+    var lieuId = (document.getElementById('wh-lieu') || {}).value || '';
+    var casier = (document.getElementById('wh-casier') || {}).value || '';
+    var section = (document.getElementById('wh-section') || {}).value || '';
     var ref = (document.getElementById('wh-ref') || {}).value || '';
-    if (!String(code).trim()) {
+    /* ⚠ IL FAUT AU MOINS UNE DES TROIS PARTIES : le libellé est composé d elles,
+       et un emplacement sans libellé ne se distingue pas d un autre dans la
+       liste déroulante de la fiche produit — ni ne se retrouve à l import CSV. */
+    if (!String(lieuId).trim() && !String(casier).trim() && !String(section).trim()) {
       dire(MOTIFS.code_requis, 'err');
-      var c = document.getElementById('wh-code');
+      var c = document.getElementById('wh-casier');
       if (c) { c.className = 'manque'; c.focus(); }
       return;
     }
-    appeler('stock:entrepotEcrire', [WH_EDIT.id || '', code, ref]).then(function(r){
+    appeler('stock:entrepotEcrire', [WH_EDIT.id || '',
+      { lieuId: lieuId, casier: casier, section: section, reference: ref }]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(WH_EDIT.id ? 'Emplacement modifié.' : 'Emplacement créé.', 'bon');
       WH_EDIT = null;

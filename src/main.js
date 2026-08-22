@@ -1456,6 +1456,8 @@ const OPS_PONT = new Set([
   'stock:produits', 'stock:skuUn', 'stock:skuTous', 'stock:skuPad6',
   'stock:venteFinale', 'stock:vendre', 'stock:endommages',
   'stock:endommagesRapport', 'stock:entrepots', 'stock:entrepotEcrire',
+  // Les LIEUX (batiment + adresse) au-dessus des emplacements — 2026-08-22.
+  'stock:lieuEcrire', 'stock:lieuSupprimer',
   'stock:entrepotSupprimer', 'stock:modifier', 'stock:supprimer',
   // L'apercu de la suppression : le nom et les photos de la mediatheque que la
   // fiche emploie — pour la question << les retirer aussi ? >> (volontaire).
@@ -2431,6 +2433,9 @@ const OPS_QUI_CHANGENT_L_INVENTAIRE = new Set([
   'stock:enregistrer', 'stock:supprimer', 'stock:skuUn', 'stock:skuTous',
   'stock:skuPad6', 'stock:venteFinale', 'stock:vendre',
   'stock:entrepotEcrire', 'stock:entrepotSupprimer',
+  /* ⚠ RENOMMER UN LIEU RECOMPOSE LE LIBELLE DE SES EMPLACEMENTS : l Inventaire
+     ouvert a cote afficherait encore l ancien nom du batiment. */
+  'stock:lieuEcrire', 'stock:lieuSupprimer',
   'caisse:vendre', 'retour:finaliser', 'remboursement:ecrire',
   /* ⚠ ELLE DECOMPTE LE STOCK quand Square confirme le paiement : l Inventaire
      ouvert a cote doit le voir sans qu on le rafraichisse a la main. */
