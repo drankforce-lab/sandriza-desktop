@@ -138,12 +138,25 @@ jobs:
       # fois de travers, et qu'il annonçait alors « aucune faute » sur du code qui
       # levait vraiment. Il passe d'abord : un contrôle aveugle vaut moins que rien,
       # il rassure.
+      # ⚠ ET AUCUN DE CES CONTRÔLES NE REGARDE CE QUE LA FENÊTRE DONNE À VOIR.
+      # `executer-page.js` le dit lui-même : « ce n'est pas un navigateur [...] ce
+      # contrôle ne dit donc pas la fenêtre est belle ». Il prouve qu'elle ne meurt
+      # pas en silence. `verifier-mise-en-page.js` (2026-08-21) ajoute les trois
+      # défauts de mise en page qui ne lèvent RIEN : une étiquette dont le for=
+      # pointe vers un identifiant inexistant (le clic ne fait rien, et le lecteur
+      # d'écran annonce un champ sans nom), une zone de texte où PERSONNE n'a choisi
+      # de hauteur (le navigateur en met deux lignes), et une fenêtre
+      # redimensionnable sans minHeight (ses boutons du bas sortent de l'écran).
+      # ⚠ Il ne MESURE rien — il lit le texte. Il attrape ce qui est décidable sans
+      # dessiner, et se TAIT dès qu'une valeur est calculée ou qu'un rows= est écrit
+      # à la main : un rows= explicite est une décision, pas un oubli.
       - name: Contrôle de syntaxe
         shell: bash
         run: |
           for f in src/*.js; do node --check "$f"; done
           node tools/banc-executer-page.js
           node tools/verifier-fenetres.js
+          node tools/verifier-mise-en-page.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

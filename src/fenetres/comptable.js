@@ -416,7 +416,12 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<div><label for="ct-email">Courriel</label><input id="ct-email" type="email" value="' + esc(c.email) + '"' + fige + '></div>'
       + '<div><label for="ct-phone">Téléphone</label><input id="ct-phone" type="tel" value="' + esc(c.phone) + '"></div>'
       + '</div>'
-      + '<label for="ct-note">Note</label><textarea id="ct-note">' + esc(c.note) + '</textarea>'
+      // rows="3" POSÉ LE 2026-08-21 : sans lui, cette zone tombait sur le
+      // plancher partagé de la feuille de style (textarea{min-height:2.6rem}),
+      // soit deux lignes — on écrivait une note de contact dans une fente. C'est
+      // la SEULE zone de texte des fenêtres où personne n'avait choisi : partout
+      // ailleurs le rows est explicite, donc voulu.
+      + '<label for="ct-note">Note</label><textarea id="ct-note" rows="3">' + esc(c.note) + '</textarea>'
       + (ETAT.edition ? '<p class="aide">Le courriel est la clé du contact : pour le changer, retirez '
           + 'ce contact et créez-en un nouveau.</p>' : '')
       + '<div class="barreoutils" style="margin-top:.5rem">'
