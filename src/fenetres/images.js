@@ -147,7 +147,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!E.base64) {
       h += '<div class="carte"><div class="info bien"><span class="ic">✅</span> '
         + '<b>Rien à déplacer.</b> Les ' + E.champs + ' image(s) du catalogue sont déjà dans le seau d’images : '
-        + 'le navigateur des clientes peut les garder en cache, et le catalogue ne les transporte plus à chaque visite.'
+        + 'le navigateur des clients peut les garder en cache, et le catalogue ne les transporte plus à chaque visite.'
         + '</div>';
       if (ECHECS.length) h += echecsHtml();
       h += '</div>';
