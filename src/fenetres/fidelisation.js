@@ -331,7 +331,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
             + esc(d.l) + '</option>'; }).join('')
       + '</select></label>'
       + '<label class="champ"><span class="lbl">Texte d’introduction du courriel</span>'
-      + '<textarea class="t" id="sd-intro" rows="2">' + esc(e.intro) + '</textarea></label>'
+      + '<textarea class="t" id="sd-intro" rows="3">' + esc(e.intro) + '</textarea></label>'
       + '<label class="case"><input type="checkbox" id="sd-actif"' + (e.actif ? ' checked' : '')
       + '> Sondage actif</label>';
 

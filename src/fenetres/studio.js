@@ -1186,7 +1186,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         AV.sourire ? '1' : '0', 'Sans consigne, le service rend un visage presque fermé — mesuré sur '
         + 'pièce. Le sourire se demande, il ne vient pas tout seul.'));
       h.push('<div class="ch avun"><label for="av-extra">Précisions libres</label>'
-        + '<textarea id="av-extra" rows="2" maxlength="200"' + (RO ? ' disabled' : '')
+        + '<textarea id="av-extra" rows="3" maxlength="200"' + (RO ? ' disabled' : '')
         + ' placeholder="black heels, hair tied back, delicate jewellery">' + esc(AV.extra) + '</textarea>'
         + '<div class="aidep">Chaussures, bijoux, coiffure, ambiance… ⚠ Photoroom n’a <strong>aucun '
         + 'réglage dédié</strong> pour ces éléments : c’est du texte libre ajouté à la consigne, au mieux '
@@ -1198,7 +1198,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     } else {
       h.push('<div class="avsec prem">Décor décrit au texte</div>');
       h.push('<div class="ch avun"><label for="av-fond">Décor voulu</label>'
-        + '<textarea id="av-fond" rows="2" maxlength="500"' + (RO ? ' disabled' : '')
+        // rows="3" comme les autres zones libres (2026-08-21). /!\ CELLE-CI ACCEPTE
+        // 500 CARACTERES, soit environ sept lignes : trois rangees restent en
+        // dessous de ce qu'on peut y mettre. C'est un choix a lui, pas un defaut —
+        // resize:vertical laisse tirer, et l'outil de mise en page se tait des
+        // qu'un rows est ecrit a la main.
+        + '<textarea id="av-fond" rows="3" maxlength="500"' + (RO ? ' disabled' : '')
         + ' placeholder="clean marble surface, soft window light from the left">' + esc(AV.fondPrompt)
         + '</textarea><div class="aidep">Laissez vide pour garder le décor de l’ambiance ; rempli, il la '
         + 'remplace. Le sujet reste où il est. Le service comprend mieux l’anglais.</div></div>');

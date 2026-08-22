@@ -1423,7 +1423,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="ch"><label><input type="checkbox" id="sc-sourire" checked> '
       + 'Sourire naturel, regard vers l’objectif</label></div>'
       + '<div class="ch col"><label>Précisions (facultatif)</label>'
-      + '<textarea id="sc-extra" rows="2" maxlength="240" placeholder="ex. talons assortis, '
+      + '<textarea id="sc-extra" rows="3" maxlength="240" placeholder="ex. talons assortis, '
       + 'bijoux dorés discrets, cheveux attachés, lumière chaude de fin de journée"></textarea>'
       + '<div class="sugg">'
       + '<button type="button" data-sugg="chaussures assorties au vêtement">+ Chaussures</button>'

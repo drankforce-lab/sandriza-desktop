@@ -372,7 +372,10 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     }
     if (!R.archive) {
       h += '<div class="ch" style="margin-top:.55rem"><label for="r-notes">Notes internes (jamais vues du client)</label>'
-        + '<textarea id="r-notes" rows="2">' + esc(d.notes) + '</textarea></div>';
+        // rows="3" (2026-08-21, sur sa demande) : on y ecrit une vraie phrase, et
+        // elle se relit des semaines plus tard. Bloc empile en une colonne, donc la
+        // ligne de plus ne deplace rien ; la fenetre a 760 px pour 540 de minimum.
+        + '<textarea id="r-notes" rows="3">' + esc(d.notes) + '</textarea></div>';
     }
     h += '</div>';
     corps.innerHTML = h;
@@ -474,7 +477,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<div class="jetons">' + (R.modeles || []).map(function(m, i){
           return '<button type="button" data-modele="' + i + '">' + esc(m) + '</button>'; }).join('') + '</div>'
       + '<div class="ch" style="margin-top:.45rem"><label for="g-note">Note pour le client (facultative)</label>'
-      + '<textarea id="g-note" rows="2">' + esc(R.demande.notes) + '</textarea></div>'
+      + '<textarea id="g-note" rows="3">' + esc(R.demande.notes) + '</textarea></div>'
       + '</div>';
     corps.innerHTML = h;
     actions.innerHTML = '<button class="paie" id="btn-finaliser"' + (R.peutEcrire ? '' : ' disabled') + '>✅ Finaliser le traitement</button>'

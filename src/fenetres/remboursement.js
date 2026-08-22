@@ -247,7 +247,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
 
     h += '<div class="carte"><h2>Motif <span class="note">— obligatoire</span></h2>'
-      + '<textarea id="m-motif" rows="2" placeholder="Ex : article défectueux, mauvaise taille reçue, retour volontaire…"></textarea>'
+      // rows="3" (2026-08-21) : motif OBLIGATOIRE d'un remboursement — de l'argent
+      // au bout, et c'est la piece qu'on relit si la cliente conteste.
+      + '<textarea id="m-motif" rows="3" placeholder="Ex : article défectueux, mauvaise taille reçue, retour volontaire…"></textarea>'
       + '</div>';
 
     h += '<div class="carte tot" id="z-totaux"><h2>Totaux <span class="note">— calculés par le site</span></h2>'
