@@ -31,6 +31,11 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { execFile } = require('child_process');
+// ⚠ EN HAUT, PAS AVEC LES AUTRES MODULES DE LA COQUILLE (qui sont chargés plus
+// bas) : `_dossierUtilisable` prend sa référence au chargement du fichier, donc
+// ce module doit exister AVANT la phase 4. Chargé tard, la constante vaudrait
+// `undefined` et le premier export planterait.
+const dossierExports = require('./dossier-exports');
 
 // ── CONFIG ───────────────────────────────────────────────────────────────────
 // L'application est un OUTIL D'ADMINISTRATION : elle ouvre UNIQUEMENT le portail
@@ -483,34 +488,18 @@ ipcMain.handle('autolaunch:set', (e, on) => {
    partait dans Documents › SANDRIZA › Exports, sans recours. Sa demande — un
    comptable qui veut ses fichiers dans SON dossier, ou sur un lecteur réseau.
 
-   ⚠⚠ ET LE REPLI EST LE CŒUR DE CE CODE, pas un détail. Un dossier choisi peut
-   DISPARAÎTRE entre deux exports : clé USB retirée, lecteur réseau déconnecté,
-   dossier renommé. Sans repli, chaque export échouerait — et le message aurait
-   parlé d'écriture, pas de dossier absent : on aurait cherché la panne dans
-   l'export. On retombe donc sur le dossier standard, et `EXPORT_INFO()` DIT que
-   le repli a servi, pour que la fenêtre puisse l'expliquer.
-   ⚠ On ne remet PAS le réglage à `null` en passant : ce serait oublier son choix
-   parce que sa clé USB était débranchée une fois. Le choix reste, et redevient
-   effectif dès que le dossier réapparaît. */
+   ⚠⚠ ET LE REPLI EST LE CŒUR DE CE CODE, pas un détail — mais la règle n'est
+   PLUS ÉCRITE ICI : elle est dans `src/dossier-exports.js`, parce que `main.js`
+   exige le processus principal d'Electron et ne peut donc pas être chargé par un
+   banc. Y laisser la décision revenait à la faire recopier par le banc, avec un
+   accord entre les deux que personne ne vérifie (voir l'avis de `banc-maj.js`).
+   Le pourquoi du repli est écrit là-bas, sur la règle elle-même. */
 const EXPORT_DEFAUT = () => path.join(app.getPath('documents'), 'SANDRIZA', 'Exports');
-// Un dossier utilisable = il existe (ou peut être créé) ET on peut y écrire.
-// `mkdirSync` seul ne suffit pas : un dossier réseau en lecture seule se crée
-// sans erreur et refuse le premier fichier.
-const _dossierUtilisable = (d) => {
-  try {
-    fs.mkdirSync(d, { recursive: true });
-    fs.accessSync(d, fs.constants.W_OK);
-    return true;
-  } catch { return false; }
-};
+const _dossierUtilisable = dossierExports.utilisable;
 const EXPORT_INFO = () => {
-  const defaut = EXPORT_DEFAUT();
   let choisi = '';
   try { choisi = String(reglages.get('dossierExports') || ''); } catch {}
-  if (choisi && _dossierUtilisable(choisi)) return { dir: choisi, choisi, defaut, repli: false };
-  const repli = !!choisi;                       // il y avait un choix, il ne répond pas
-  _dossierUtilisable(defaut);
-  return { dir: defaut, choisi, defaut, repli };
+  return dossierExports.info(EXPORT_DEFAUT(), choisi);
 };
 const EXPORT_DIR = () => EXPORT_INFO().dir;
 const _safeName = (n) => String(n || 'export').replace(/[^A-Za-z0-9._-]+/g, '_').slice(0, 120) || 'export';
@@ -536,6 +525,53 @@ ipcMain.handle('export:delete', (e, name) => {
   try { fs.unlinkSync(path.join(EXPORT_DIR(), _safeName(name))); return true; } catch { return false; }
 });
 ipcMain.handle('export:openFolder', () => { try { shell.openPath(EXPORT_DIR()); return true; } catch { return false; } });
+
+/* ══ CHOISIR LE DOSSIER DES EXPORTS ═══════════════════════════════════════════
+   Trois canaux, et un seul d'entre eux ouvre une boîte de dialogue. `dossier`
+   se contente de DIRE où l'on en est : la fenêtre a besoin de l'afficher avant
+   qu'on ait cliqué quoi que ce soit, et une lecture ne doit pas coûter un
+   sélecteur de fichiers.
+
+   ⚠⚠ ON ÉPROUVE L'ÉCRITURE AU MOMENT DU CHOIX, pas seulement à l'export. Un
+   dossier réseau en lecture seule s'affiche et se sélectionne comme les autres :
+   sans ce contrôle on l'enregistrerait, `EXPORT_INFO()` le refuserait
+   silencieusement au premier export, et la fenêtre annoncerait un repli pour un
+   dossier qu'elle venait d'accepter. Autant refuser TOUT DE SUITE, quand la
+   personne a encore le sélecteur en tête et peut en désigner un autre.
+   ⚠ `createDirectory` (macOS) et `dontAddToRecent` (Windows) : on peut fabriquer
+   un dossier depuis le sélecteur, et un chemin comptable ne va pas s'inscrire
+   dans les emplacements récents du poste. */
+ipcMain.handle('export:dossier', () => EXPORT_INFO());
+ipcMain.handle('export:dossierChoisir', async (e) => {
+  const info = EXPORT_INFO();
+  try {
+    const parent = _fenetreDeLAppelant(e.sender);
+    const opts = {
+      title: 'Dossier des exports',
+      defaultPath: info.dir,
+      buttonLabel: 'Utiliser ce dossier',
+      properties: ['openDirectory', 'createDirectory', 'dontAddToRecent'],
+    };
+    const r = (parent && !parent.isDestroyed())
+      ? await dialog.showOpenDialog(parent, opts)
+      : await dialog.showOpenDialog(opts);
+    if (r.canceled || !r.filePaths || !r.filePaths[0]) return { ok: false, motif: 'annule', info };
+    const choisi = r.filePaths[0];
+    // Refus AVANT d'enregistrer : voir le commentaire ci-dessus.
+    if (!_dossierUtilisable(choisi)) return { ok: false, motif: 'lecture_seule', chemin: choisi, info };
+    reglages.set('dossierExports', choisi);
+    return { ok: true, info: EXPORT_INFO() };
+  } catch (err) {
+    return { ok: false, motif: 'echec', detail: String((err && err.message) || err), info };
+  }
+});
+/* Revenir au dossier standard = OUBLIER le choix, donc `null` et non le chemin
+   standard écrit en dur (même raison que dans `reglages.js` : un Documents
+   redirigé vers OneDrive ferait pointer un chemin figé dans le vide). */
+ipcMain.handle('export:dossierDefaut', () => {
+  try { reglages.set('dossierExports', null); } catch { /* cache déjà à jour */ }
+  return { ok: true, info: EXPORT_INFO() };
+});
 
 // ══ PHASE 5 (NATIF) — DÉTECTION DE CLÉ USB DE PHOTOS ══════════════════════════
 const IMG_RE = /\.(jpe?g|png|webp|heic|heif|bmp|tiff?)$/i;

@@ -88,6 +88,20 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .barre{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;
   padding-top:.9rem;margin-top:.3rem;border-top:1px solid rgba(255,255,255,.08)}
 .barre .compte{font-size:.8rem;color:#8fa1b8}
+/* Le dossier des exports : une ligne qui se lit, deux boutons qui la changent. */
+.dossier{margin-top:.8rem;background:#16202f;border:1px solid rgba(255,255,255,.07);
+  border-radius:11px;padding:.55rem .7rem}
+.dossier.repli{border-color:rgba(217,119,6,.3)}
+.dossier .dl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.dossier .dk{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+/* ⚠ Le chemin ne coupe pas la fenetre : il s ellipse et le titre porte l entier.
+   Un « D:\\Comptabilite\\2026\\Exports SANDRIZA » sur un lecteur reseau depasse
+   largement la largeur utile, et un bloc qui s elargit pousse la barre dehors. */
+.dossier .chemin{background:none;border:0;padding:0;color:#e8dcc6;cursor:pointer;
+  font:600 .82rem/1.3 ui-monospace,Consolas,monospace;text-align:left;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dossier .chemin:hover{color:#c9a97e;text-decoration:underline}
+.dossier .dbtns{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.45rem}
 .avis{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.22);
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:#cbd8e6;line-height:1.55}
 .avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:#fcd9a6}
@@ -242,10 +256,44 @@ ${JS_ACTIVITE}${JS_DIRE}
      question << ou est parti mon fichier ? >>, et cette question se pose AVANT
      de cliquer autant qu apres — la montrer seulement une fois le mal fait,
      c est arriver en retard. */
-  function btnDossier(){
-    return '<button class="ghost mini" data-act="dossier" title="'
-      + (DERNIER_EXPORT ? 'Dernier fichier écrit : ' + esc(DERNIER_EXPORT) + '. ' : '')
-      + 'Ouvre le dossier Documents › SANDRIZA › Exports">📂 Dossier des exports</button>';
+  /* Où atterrissent les fichiers. Vide tant que la coquille n a pas répondu —
+     et une coquille trop ancienne pour ces canaux ne répondra jamais : dans ce
+     cas on redit la phrase d avant (le dossier standard), qui reste vraie. */
+  var DOSSIER = null;
+  /* ⚠ CE N EST PLUS UN BOUTON, C EST UNE LIGNE QUI RÉPOND À LA QUESTION.
+     Le bouton disait « Dossier des exports » et il fallait cliquer pour savoir
+     lequel. Depuis que le dossier est MODIFIABLE, « lequel ? » n est plus une
+     curiosité : le fichier peut partir sur un lecteur réseau qu on a réglé il y
+     a trois semaines. Le chemin se lit donc sans rien cliquer, et les deux
+     boutons qui le changent sont à côté de lui — pas dans un écran de réglages
+     ailleurs, où personne n irait les chercher en sortant un CSV.
+     ⚠ ET LE REPLI SE DIT. Sans cette phrase, une clé USB retirée donnerait des
+     fichiers parfaitement écrits… ailleurs que là où on les attend, et le seul
+     indice serait leur absence dans le dossier réglé. */
+  function blocDossier(){
+    var d = DOSSIER;
+    var chemin = (d && d.dir) ? d.dir : 'Documents › SANDRIZA › Exports';
+    var perso  = !!(d && d.choisi);
+    var repli  = !!(d && d.repli);
+    var titre  = (DERNIER_EXPORT ? 'Dernier fichier écrit : ' + esc(DERNIER_EXPORT) + '. ' : '')
+               + 'Ouvre ce dossier';
+    return '<div class="dossier' + (repli ? ' repli' : '') + '">'
+      +   '<div class="dl">'
+      +     '<span class="dk">Les fichiers sortent dans</span>'
+      +     '<button class="chemin" data-act="dossier" title="' + titre + '">📂 ' + esc(chemin) + '</button>'
+      +     (perso && !repli ? '<span class="pill inchange">dossier choisi</span>' : '')
+      +   '</div>'
+      +   (repli
+          ? '<div class="avis jaune" style="margin:.45rem 0 .1rem">Votre dossier <strong>'
+            + esc(d.choisi) + '</strong> ne répond pas — clé retirée, lecteur réseau déconnecté '
+            + 'ou dossier renommé. Les fichiers sortent dans le dossier standard <strong>en attendant</strong> : '
+            + 'votre choix est gardé et redeviendra effectif dès qu’il réapparaîtra.</div>'
+          : '')
+      +   '<div class="dbtns">'
+      +     '<button class="ghost mini" data-act="dosschoisir">Changer…</button>'
+      +     (perso ? '<button class="ghost mini" data-act="dossdefaut">Revenir au dossier standard</button>' : '')
+      +   '</div>'
+      + '</div>';
   }
 
   function vide(titre, detail){
@@ -336,9 +384,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="barre">'
       +   '<button class="prim" data-act="exporter">⬇ Sortir le CSV</button>'
       +   '<button class="ghost mini" data-act="modele">Modèle vide (en-têtes seuls)</button>'
-      +   btnDossier()
       +   '<span class="compte">' + compte + '</span>'
       + '</div>'
+      + blocDossier()
       + '<div style="margin-top:1.4rem">'
       +   '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
       +     '<div class="lbl" style="margin:0">Colonnes de la feuille ' + esc(SHEET) + '</div>'
@@ -376,8 +424,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '<div class="barre">'
       +     '<button class="ghost" data-act="modele" data-feuille="catalogue">⬇ Modèle catalogue</button>'
       +     '<button class="ghost" data-act="modele" data-feuille="inventaire">⬇ Modèle inventaire</button>'
-      +     btnDossier()
       +   '</div>'
+      +   blocDossier()
       +   '<div class="avis" style="margin-top:.6rem"><strong>Catalogue</strong> : une ligne par produit (prix, noms, catégorie, étiquettes). '
       +     '<strong>Inventaire</strong> : une ligne par variante taille × couleur (quantité, entrepôt).</div>'
       + '</div>'
@@ -587,13 +635,69 @@ ${JS_ACTIVITE}${JS_DIRE}
       return;
     }
     P.enregistrerExport(r.nom, r.contenu).then(function(res){
-      if (res && res.ok) {
-        DERNIER_EXPORT = r.nom;
-        dire(quoi + ' enregistré : ' + r.nom + ' — dossier Exports.', 'bon');
-        dessiner();
-      } else {
+      if (!res || !res.ok) {
         dire('Écriture impossible : ' + ((res && res.error) || 'motif inconnu'), 'err');
+        return;
       }
+      DERNIER_EXPORT = r.nom;
+      /* ⚠ ON RELIT LE DOSSIER APRÈS CHAQUE ÉCRITURE, et c est ici que ça compte
+         le plus : le repli se décide AU MOMENT d écrire. La clé peut avoir été
+         retirée depuis le dernier dessin — sans cette relecture, le bandeau
+         jaune n apparaîtrait qu au prochain passage dans l onglet, et entre les
+         deux on croirait le fichier parti sur la clé.
+         ⚠ Et le message nomme le dossier RÉEL, pas « dossier Exports » : c est
+         la phrase qui trompait dès qu un dossier personnel était réglé. */
+      relireDossier().then(function(){
+        var ou = (DOSSIER && DOSSIER.dir) ? DOSSIER.dir : 'le dossier des exports';
+        dire(quoi + ' enregistré : ' + r.nom + ' — dans ' + ou + '.'
+          + ((DOSSIER && DOSSIER.repli) ? ' ⚠ Votre dossier ne répondait pas.' : ''),
+          (DOSSIER && DOSSIER.repli) ? 'att' : 'bon');
+        dessiner();
+      });
+    });
+  }
+
+  /* ══ LE DOSSIER DES EXPORTS ══════════════════════════════════════════════════
+     ⚠ TROIS VERBES ET AUCUN CHEMIN NE MONTE D ICI. La fenêtre demande
+     l ouverture du sélecteur ; c est la coquille qui montre la boîte, éprouve
+     l écriture et enregistre. Elle nous rend l état complet, qu on réaffiche —
+     on ne DEVINE jamais le nouvel état à partir de ce qu on a demandé.
+     ⚠ UNE COQUILLE TROP ANCIENNE N A PAS CES CANAUX. On le DIT, avec le geste
+     qui répare (relancer l application, elle se met à jour au démarrage) —
+     sinon deux boutons restent muets et se lisent comme des boutons cassés. */
+  function pasCesCanaux(){
+    dire('Cette version de l’application ne sait pas encore changer le dossier des exports. '
+      + 'Fermez et relancez l’application : elle se met à jour au démarrage.', 'err');
+  }
+  function relireDossier(){
+    if (!P || !P.dossierExports) return Promise.resolve(false);
+    return P.dossierExports().then(function(info){
+      if (info && info.dir) { DOSSIER = info; return true; }
+      return false;
+    });
+  }
+  function choisirDossier(){
+    if (!P || !P.dossierExportsChoisir) { pasCesCanaux(); return; }
+    P.dossierExportsChoisir().then(function(r){
+      if (r && r.info) { DOSSIER = r.info; dessiner(); }
+      if (r && r.ok) { dire('Les fichiers sortiront maintenant dans ' + r.info.dir + '.', 'bon'); return; }
+      var m = r && r.motif;
+      if (m === 'annule') return;                       // il a fermé la boîte : rien à dire
+      if (m === 'lecture_seule') {
+        dire('Impossible d’écrire dans ' + ((r && r.chemin) || 'ce dossier')
+          + '. Le dossier n’a pas été changé — choisissez-en un autre, '
+          + 'ou demandez les droits d’écriture sur celui-là.', 'err');
+        return;
+      }
+      dire('Le dossier n’a pas pu être changé : ' + ((r && r.detail) || 'motif inconnu'), 'err');
+    });
+  }
+  function dossierStandard(){
+    if (!P || !P.dossierExportsDefaut) { pasCesCanaux(); return; }
+    P.dossierExportsDefaut().then(function(r){
+      if (r && r.info) { DOSSIER = r.info; dessiner(); }
+      if (r && r.ok) dire('Retour au dossier standard : ' + r.info.dir + '.', 'bon');
+      else dire('Le retour au dossier standard a échoué : ' + ((r && r.detail) || 'motif inconnu'), 'err');
     });
   }
 
@@ -698,6 +802,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (act === 'exporter') { exporter(); return; }
     if (act === 'modele') { modele(b.getAttribute('data-feuille') || ''); return; }
     if (act === 'dossier') { if (P && P.ouvrirDossierExports) P.ouvrirDossierExports(); return; }
+    if (act === 'dosschoisir') { choisirDossier(); return; }
+    if (act === 'dossdefaut') { dossierStandard(); return; }
     if (act === 'colrepli') { basculerColonnes(); return; }
     if (act === 'reinit') { reinit(); return; }
     if (act === 'rapport') { telechargerRapport(); return; }
@@ -755,7 +861,12 @@ ${JS_ACTIVITE}${JS_DIRE}
        dessine quand même, déplié. */
     return appeler('ui:repli', { nom: 'catalogio_colonnes' }).then(function(r){
       if (r && r.ok) COL_REPLI = !!r.replie;
-    }).then(function(){
+    /* ⚠ LE DOSSIER AUSSI SE LIT AVANT LE PREMIER DESSIN. Il ne vient pas du
+       pont mais de la coquille, donc il aurait pu partir en parallèle — sauf
+       que le bloc changerait sous les yeux (« Documents › SANDRIZA › Exports »
+       puis, une fraction de seconde plus tard, le vrai chemin réseau). Sur ce
+       bloc-là, le clignotement ferait douter du réglage qu on vient poser. */
+    }).then(relireDossier).then(function(){
       ${ouvImport || ouvApercu || ouvConfirmer || ouvRapport ? "TAB = 'import';" : ''}
       if (RAP) { dessiner(); return; }
       if (IMP) { return chargerLignes().then(function(){ ${ouvConfirmer ? 'ouvrirConfirmer();' : ''} }); }

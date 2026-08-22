@@ -170,4 +170,18 @@ contextBridge.exposeInMainWorld('szPont', {
     .invoke('export:save', String(nom || ''), String(contenu == null ? '' : contenu))
     .catch((e) => ({ ok: false, error: String((e && e.message) || e) })),
   ouvrirDossierExports: () => ipcRenderer.invoke('export:openFolder').catch(() => false),
+
+  /* ══ OU LES EXPORTS ATTERRISSENT — LE LIRE ET LE CHANGER ═══════════════════
+     ⚠ La fenetre ne choisit toujours PAS le chemin elle-meme : elle demande
+     l ouverture du selecteur, et c est le principal qui montre la boite,
+     eprouve l ecriture et enregistre. Le canal reste donc aussi etroit
+     qu avant — trois verbes, aucun chemin qui entre depuis la fenetre.
+     ⚠ En cas d echec on rend `info:null` plutot que rien : la fenetre doit
+     pouvoir dire << je ne sais pas ou c est >> au lieu d afficher un chemin
+     vide qui se lirait comme la racine du disque. */
+  dossierExports: () => ipcRenderer.invoke('export:dossier').catch(() => null),
+  dossierExportsChoisir: () => ipcRenderer.invoke('export:dossierChoisir')
+    .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e), info: null })),
+  dossierExportsDefaut: () => ipcRenderer.invoke('export:dossierDefaut')
+    .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e), info: null })),
 });

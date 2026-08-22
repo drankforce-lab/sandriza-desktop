@@ -150,6 +150,14 @@ jobs:
       # ⚠ Il ne MESURE rien — il lit le texte. Il attrape ce qui est décidable sans
       # dessiner, et se TAIT dès qu'une valeur est calculée ou qu'un rows= est écrit
       # à la main : un rows= explicite est une décision, pas un oubli.
+      # ⚠ `banc-dossier-exports.js` (2026-08-22) garde une règle qu'aucun des
+      # contrôles ci-dessus ne peut voir : quand le dossier des exports choisi ne
+      # répond plus (clé retirée, lecteur réseau tombé), l'export doit RÉUSSIR
+      # quand même, le repli doit être ANNONCÉ, et le choix doit être GARDÉ. Rien
+      # là-dedans ne lève d'erreur si c'est faux — l'export réussirait en silence
+      # au mauvais endroit. La règle a été SORTIE de `main.js` pour ça : `main.js`
+      # exige le processus principal d'Electron, donc un banc ne peut que le
+      # recopier, et une copie ne garde rien.
       - name: Contrôle de syntaxe
         shell: bash
         run: |
@@ -157,6 +165,7 @@ jobs:
           node tools/banc-executer-page.js
           node tools/verifier-fenetres.js
           node tools/verifier-mise-en-page.js
+          node tools/banc-dossier-exports.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

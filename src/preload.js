@@ -207,6 +207,12 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   listExports: () => ipcRenderer.invoke('export:list'),
   deleteExport: (name) => ipcRenderer.invoke('export:delete', name),
   openExportsFolder: () => ipcRenderer.invoke('export:openFolder'),
+  // Dossier des exports : le lire, le changer, revenir au standard.
+  // ⚠ MÊMES CANAUX que ceux du pont (pont-preload.js) : le réglage est UN, et
+  // deux voies vers le même réglage finiraient par diverger.
+  exportsDossier: () => ipcRenderer.invoke('export:dossier'),
+  exportsDossierChoisir: () => ipcRenderer.invoke('export:dossierChoisir'),
+  exportsDossierDefaut: () => ipcRenderer.invoke('export:dossierDefaut'),
 
   // ── Phase 5 : import de photos depuis une clé USB ───────────────────────────
   scanUsb: () => ipcRenderer.invoke('usb:scan'),
