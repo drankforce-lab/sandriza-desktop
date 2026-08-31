@@ -171,7 +171,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var dis = RO ? ' disabled' : '';
     var h = [];
     h.push('<div class="carte"><h2>Livraison internationale</h2>'
-      + '<p class="sous">Permet aux clientes de saisir une adresse hors Canada.</p>'
+      + '<p class="sous">Permet aux clients de saisir une adresse hors Canada.</p>'
       + '<label class="bascule"><input type="checkbox" id="f-intl"' + (d.international ? ' checked' : '') + dis + '>'
       + '<span><strong>Activer la livraison internationale</strong>'
       + '<span class="d">La recherche d’adresse s’adapte au monde entier et un champ Pays apparaît à la caisse.</span></span></label></div>');
@@ -184,7 +184,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="aide">Au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.</div></div>'
       + '<div class="ch"><label>Frais traitement prioritaire ⚡ (CA$)</label>'
       + '<input id="f-prio" type="number" min="0" step="0.01" value="' + esc(num(d.priorityCost)) + '"' + dis + '>'
-      + '<div class="aide">Supplément si la cliente choisit le traitement prioritaire. <strong>0</strong> masque l’option.</div></div></div>');
+      + '<div class="aide">Supplément si le client choisit le traitement prioritaire. <strong>0</strong> masque l’option.</div></div></div>');
     /* ⚠ LE TABLEAU N EXISTE QUE SI L INTERNATIONAL EST ALLUME. Demande expresse :
        decoche, on ne doit plus rien voir ni toucher de ce qui a trait a
        l international. On lit l etat REEL de la case a l ecran (pas seulement

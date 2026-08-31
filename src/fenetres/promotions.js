@@ -269,7 +269,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<input type="number" id="of-bogo-gratuit" min="1" step="1" value="' + esc(o.bogoGratuit || 1) + '">'
       + '<span class="aide">Doit rester inférieure à la quantité achetée.</span></div>'
       + '<div class="ch"><label>&nbsp;</label><label style="display:inline-flex;align-items:center;gap:.4rem">'
-      + '<input type="checkbox" id="of-parclient"' + (o.parClient ? ' checked' : '') + '> Une fois par cliente</label></div>'
+      + '<input type="checkbox" id="of-parclient"' + (o.parClient ? ' checked' : '') + '> Une fois par client</label></div>'
       + '</div></div>';
 
     h += '<div id="of-bloc-paliers"' + (genre === 'tiered' ? '' : ' style="display:none"') + '>'

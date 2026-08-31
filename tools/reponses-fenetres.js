@@ -145,7 +145,7 @@ const SEGMENTS_JEU = {
   categories: [{ cle: 'robes', nom: 'Robes' }, { cle: 'hauts', nom: 'Hauts' },
     { cle: 'manteaux', nom: 'Manteaux' }],
   segments: [
-    { id: 'seg_0001', nom: 'Clientes robes, 300 $+',
+    { id: 'seg_0001', nom: 'Clients robes, 300 $+',
       criteres: [{ champ: 'totalDepense', op: 'gte', valeur: 300 },
         { champ: 'categorie', op: 'eq', valeur: 'robes' }],
       phrase: 'Total dépensé au moins 300 $ · A acheté dans la catégorie est robes',
@@ -958,7 +958,7 @@ module.exports = {
       reponses: {
         'segments:donnees': SEGMENTS_JEU,
         'segments:apercu': { ok: true, compte: 14, total: 412 },
-        'segments:ecrire': { ok: true, id: 'seg_0001', nom: 'Clientes robes, 300 $+',
+        'segments:ecrire': { ok: true, id: 'seg_0001', nom: 'Clients robes, 300 $+',
           cree: true, nuage: true, compte: 14 },
         'session:activite': { ok: true },
         identite: IDENTITE,
@@ -1944,7 +1944,7 @@ module.exports = {
     ];
     var incidents = [
       { id: 'i1', ref: 'INC-2026-001', knownAt: '2026-08-10', occurredAt: '2026-08-08', incidentType: 'acces',
-        seriousRisk: 'oui', riskReason: 'Courriels et adresses postales de 42 clientes, utilisables pour de l’hameçonnage ciblé.',
+        seriousRisk: 'oui', riskReason: 'Courriels et adresses postales de 42 clients, utilisables pour de l’hameçonnage ciblé.',
         status: 'ouvert', responsable: 'Bob Brousseau', notes: 'Corps policier avisé le 11.', caiNotified: 'prevu' },
       { id: 'i2', ref: '', knownAt: '2026-05-02', occurredAt: '2026-05-02', incidentType: 'hameconnage',
         seriousRisk: 'non', riskReason: 'Aucun renseignement n’a été transmis.', status: 'clos', responsable: 'Marie Tremblay', notes: '', caiNotified: 'nonrequis' }
@@ -2192,7 +2192,7 @@ module.exports = {
       // ⚠ `id: 'jserreurs'` OUVRE L'ONGLET. Le contrôle ne clique pas : sans
       // cette porte, la vue des erreurs des clientes n'était jamais dessinée
       // (vérifié par une variable libre injectée dedans, qui n'était PAS vue).
-      { nom: 'erreurs des clientes', id: 'jserreurs', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
+      { nom: 'erreurs des clients', id: 'jserreurs', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'journal:jsErreursVues': { ok: true, n: 2 }, 'journal:jsErreursPurger': { ok: true, efface: 3 } } },
       { nom: 'SMS (serveur)', id: 'sms', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'journal:sms': { ok: true, sms: [ { id: 's1', from: '+14185550142', to: '+14185550000', body: 'Bonjour, ma commande ?', direction: 'inbound', date: '2026-08-13T12:00:00Z', read: false } ] } } },

@@ -237,12 +237,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     h.push('</div>');
 
     // ── Où la cliente saisit sa carte ──────────────────────────────────────
-    h.push('<div class="carte"><h2>Où la cliente saisit sa carte</h2>');
+    h.push('<div class="carte"><h2>Où le client saisit sa carte</h2>');
     h.push('<p class="sous">Par défaut, le champ de carte de Square s’affiche dans notre page de caisse. '
-      + 'S’il ne se charge pas, la cliente est bloquée au pire moment.</p>');
+      + 'S’il ne se charge pas, le client est bloqué au pire moment.</p>');
     h.push('<label class="bascule"><input type="checkbox" id="o-heb"' + (d.hebergee ? ' checked' : '')
       + (RO ? ' disabled' : '') + '><span><strong>Payer sur la page sécurisée de Square</strong>'
-      + '<span class="d">La cliente est dirigée vers Square, paie, puis revient sur un écran d’attente. '
+      + '<span class="d">Le client est dirigé vers Square, paie, puis revient sur un écran d’attente. '
       + 'Aucun numéro de carte ne passe par notre site.</span></span></label>');
     h.push('<div class="note">Apple Pay et Google Pay restent offerts sur la page de Square. Afterpay, lui, '
       + 'exige le champ intégré. Un bouton de secours vers la page de Square apparaît toujours si le champ '
@@ -261,7 +261,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<span class="d">Visible seulement dans Safari, sur un appareil compatible.</span></span></label>');
     h.push('<label class="bascule"><input type="checkbox" id="o-express"' + (d.express ? ' checked' : '')
       + (RO ? ' disabled' : '') + '><span><strong>Paiement express sur la fiche et le panier</strong>'
-      + '<span class="d">La cliente paie sans passer par le tunnel de commande. À éprouver en bac à sable '
+      + '<span class="d">Le client paie sans passer par le tunnel de commande. À éprouver en bac à sable '
       + 'avant de l’offrir.</span></span></label>');
     h.push('<div class="gestes"><button class="prim" id="b-options"' + (RO ? ' disabled' : '')
       + '>Enregistrer les modes de paiement</button></div>');

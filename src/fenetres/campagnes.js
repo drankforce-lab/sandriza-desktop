@@ -984,7 +984,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
       + (f.id ? 'Modifier le segment' : 'Nouveau segment') + '</h3>'
       + '<div class="champ"><span class="lbl">Nom du segment</span>'
-      + '<input id="f-nom" value="' + esc(f.nom || '') + '" placeholder="Clientes robes, 300 $ et plus"></div>'
+      + '<input id="f-nom" value="' + esc(f.nom || '') + '" placeholder="Clients robes, 300 $ et plus"></div>'
       + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
       + '<strong style="font-size:.8rem">Critères</strong>'
       + '<span class="dt">toutes ces conditions doivent être remplies</span>'

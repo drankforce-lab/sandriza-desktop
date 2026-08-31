@@ -222,7 +222,7 @@ ${JS_ACTIVITE}${JS_DIRE}
      ⚠ Le fond compte : un logo blanc sur fond blanc parait absent. Chacun est
      montre sur le fond ou il servira vraiment. */
   var LOGOS = [
-    { t:'store',          nom:'Boutique — FR',    aide:'Barre de navigation et connexion cliente.', fond:'#f5f2ec' },
+    { t:'store',          nom:'Boutique — FR',    aide:'Barre de navigation et connexion client.', fond:'#f5f2ec' },
     { t:'store_en',       nom:'Boutique — EN',    aide:'Utilise le logo français si vide.',         fond:'#f5f2ec' },
     { t:'admin',          nom:'Barre latérale',   aide:'Remplace l’icône lettre si défini.',        fond:'#1a2035' },
     { t:'login',          nom:'Connexion du personnel', aide:'Indépendant de la barre latérale.',   fond:'#0f172a' },
@@ -253,7 +253,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h.push(champ('m-name', 'Nom de marque', m.name));
     h.push('<div class="deux">' + champ('m-slogan', 'Slogan — FR', m.slogan, 'sous le nom, dans la barre')
       + champ('m-slogan-en', 'Slogan — EN', m.sloganEN) + '</div>');
-    h.push(champ('m-sub', 'Sous-titre de la connexion cliente', m.sub));
+    h.push(champ('m-sub', 'Sous-titre de la connexion client', m.sub));
     h.push(champ('m-letter', 'Lettre de l’icône', m.letter, '1 ou 2 caractères, si aucun logo'));
     h.push('</div>');
     h.push('<div class="carte"><h2>Dégradé sur le nom</h2>');

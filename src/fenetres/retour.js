@@ -828,7 +828,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<p><strong>' + esc(ap.commande) + '</strong>'
         + (ap.client ? ' — ' + esc(ap.client) : '') + '</p>'
         + '<p>La demande disparaît de la liste'
-        + (ap.aPhoto ? ', <strong>et la photo envoyée par la cliente est effacée du stockage</strong>' : '')
+        + (ap.aPhoto ? ', <strong>et la photo envoyée par le client est effacée du stockage</strong>' : '')
         + '.</p>'
         + '<p style="color:#f87171;font-weight:600">⚠ Cette action est irréversible.</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'

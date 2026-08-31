@@ -264,7 +264,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (REG_FORM) h += formulaireRegle();
     h += '<div class="carte"><h2>Ordre d’affichage</h2>'
       + '<div class="dt" style="margin-bottom:.45rem">Une règle plus haute passe avant : '
-      + 'c’est elle que la cliente voit en premier sur une fiche.</div>'
+      + 'c’est elle que le client voit en premier sur une fiche.</div>'
       + (D.peutModifier && !REG_FORM
           ? '<div style="margin:0 0 .7rem"><button class="mini prim" id="reg-nouvelle">+ Nouvelle règle</button></div>'
           : '');

@@ -272,8 +272,8 @@ ${JS_ACTIVITE}${JS_DIRE}
        est EPUISE sur la boutique : c est exact (il est dans un camion), mais
        quelqu un qui l ignore croira a un defaut. On le dit avant, pas apres. */
     return '<div class="avis jaune">Les unités en transit sont <strong>retirées du stock vendable</strong> : '
-      + 'l’article s’affiche épuisé sur la boutique le temps du trajet, et les clientes inscrites à l’alerte '
-      + '« de retour en stock » sont prévenues à la réception.</div>'
+      + 'l’article s’affiche épuisé sur la boutique le temps du trajet, et les clients inscrits à l’alerte '
+      + '« de retour en stock » sont prévenus à la réception.</div>'
       + l.map(carteTransit).join('');
   }
 

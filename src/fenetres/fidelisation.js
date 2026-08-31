@@ -209,7 +209,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
 
     if (D.peutModifier) {
       h += '<div class="carte"><h2>Notification des commentaires</h2>'
-        + '<div class="dt" style="margin-bottom:.4rem">Quand une cliente laisse un commentaire, '
+        + '<div class="dt" style="margin-bottom:.4rem">Quand un client laisse un commentaire, '
         + 'il vous est transféré à cette adresse. Laissez vide pour ne rien recevoir.</div>'
         + '<div style="display:flex;gap:.5rem;flex-wrap:wrap">'
         + '<input type="email" id="fi-mail" style="flex:1 1 16rem" value="' + esc(D.courrielNotification || '') + '" placeholder="sondages@exemple.com">'

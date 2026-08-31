@@ -119,7 +119,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🔗 Accès aux liens'], ['recherches','❓ Sans résultat'], ['jserreurs','⚠ Erreurs des clientes'] ];
+  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🔗 Accès aux liens'], ['recherches','❓ Sans résultat'], ['jserreurs','⚠ Erreurs des clients'] ];
   var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }

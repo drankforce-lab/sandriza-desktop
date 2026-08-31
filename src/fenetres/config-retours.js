@@ -161,7 +161,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     if (!d.configuree) {
       h.push('<div class="carte" style="grid-column:1/-1;border-color:rgba(240,180,80,.35);background:rgba(200,140,40,.08)">'
-        + '<div style="font-size:.82rem;color:#f0d6a0">⚠ Adresse de retour non configurée — renseignez-la pour pouvoir guider les clientes qui renvoient un colis.</div></div>');
+        + '<div style="font-size:.82rem;color:#f0d6a0">⚠ Adresse de retour non configurée — renseignez-la pour pouvoir guider les clients qui renvoient un colis.</div></div>');
     }
 
     h.push('<div class="carte"><h2>Fenêtre de retour</h2>'
@@ -171,10 +171,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="aide">La <strong>moitié</strong> (<span id="half">' + esc(half) + '</span> jours) permet le remboursement au moyen d’origine ; au-delà, crédit boutique.</div></div>'
       + '<div class="ch" style="margin-top:.85rem"><label class="bascule"><input type="checkbox" id="f-split"' + (d.splitRefundEnabled ? ' checked' : '') + dis + '>'
       + '<span><strong>Remboursement partiel en crédit boutique</strong>'
-      + '<span class="d">Durant la première moitié : remboursement au moyen d’origine OU crédit boutique, au choix de la cliente. Ensuite : crédit boutique uniquement. S’affiche dans la politique, les factures, le courriel et le portail client.</span></span></label></div></div>');
+      + '<span class="d">Durant la première moitié : remboursement au moyen d’origine OU crédit boutique, au choix du client. Ensuite : crédit boutique uniquement. S’affiche dans la politique, les factures, le courriel et le portail client.</span></span></label></div></div>');
 
     h.push('<div class="carte"><h2>Adresse de renvoi</h2>'
-      + '<p class="sous">L’adresse imprimée sur l’étiquette de retour et citée aux clientes.</p>'
+      + '<p class="sous">L’adresse imprimée sur l’étiquette de retour et citée aux clients.</p>'
       + '<div class="gr">'
       + '<div class="ch plein"><label>Nom de l’entreprise</label><input type="text" id="f-name" value="' + esc(d.name) + '"' + dis + '></div>'
       + '<div class="ch plein"><label>Rue</label><input type="text" id="f-street" value="' + esc(d.street) + '"' + dis + '></div>'
