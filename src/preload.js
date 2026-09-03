@@ -140,13 +140,15 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   minimize: () => ipcRenderer.send('win:minimize'),
   close: () => ipcRenderer.send('win:close'),
 
-  // Déplacement de la fenêtre par le pointeur (voir win:pos / win:move dans
-  // main.js). `-webkit-app-region:drag` n'est pas honoré par cette coquille :
-  // la barre du site lit la position au début du glissement, puis pousse la
-  // nouvelle position à chaque mouvement. Sans cadre ni barre de titre native,
-  // c'est la seule voie fiable pour déplacer la fenêtre.
-  fenetrePos: () => ipcRenderer.invoke('win:pos'),
-  fenetreDeplacer: (x, y) => ipcRenderer.send('win:move', x, y),
+  // Déplacement de la fenêtre par le pointeur (voir win:glisse:* dans main.js).
+  // `-webkit-app-region:drag` n'est pas honoré par cette coquille. ⚠ AUCUNE
+  // coordonnée ne traverse le pont : le principal lit lui-même la position du
+  // curseur (getCursorScreenPoint), sinon un écran à 125 % désaligne les pixels
+  // et le contenu « zoome » pendant le glissement. La barre dit seulement
+  // début / bouge / fin.
+  fenetreGlisserDebut: () => ipcRenderer.send('win:glisse:debut'),
+  fenetreGlisserBouge: () => ipcRenderer.send('win:glisse:bouge'),
+  fenetreGlisserFin: () => ipcRenderer.send('win:glisse:fin'),
   // Double-clic sur la bande de titre → agrandir/restaurer (voir win:togglemax).
   fenetreBasculerMax: () => ipcRenderer.send('win:togglemax'),
 

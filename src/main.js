@@ -278,7 +278,7 @@ ipcMain.handle('print:current', async (e, opts = {}) => {
 
 ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
 
-// ── DÉPLACEMENT DE LA FENÊTRE PAR LE POINTEUR (repli fiable) ─────────────────
+// ── DÉPLACEMENT DE LA FENÊTRE PAR LE POINTEUR (repli fiable, sûr en DPI) ──────
 // ⚠ POURQUOI ON DÉPLACE NOUS-MÊMES ET PAS PAR `-webkit-app-region:drag`.
 // La fenêtre est sans cadre (titleBarStyle:'hidden' + titleBarOverlay) et la
 // barre de menu native est masquée : il n'y a donc AUCUNE bande de titre native
@@ -286,23 +286,37 @@ ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minim
 // du site), mais Electron 31 ne l'honore PAS ici : la zone se calcule bien
 // « drag » côté page (vérifié : elementFromPoint → #sz-menubar, region=drag) et
 // pourtant la fenêtre ne bouge d'aucune zone, même flottante (constaté le
-// 2026-09-03, avec l'utilisateur). On déplace donc à la main : la page lit la
-// position au pointerdown (win:pos), puis pousse la nouvelle à chaque
-// pointermove (win:move). Aucune dépendance à app-region ni à la barre native.
-ipcMain.handle('win:pos', (e) => {
-  const w = BrowserWindow.fromWebContents(e.sender);
-  if (!w || w.isDestroyed()) return null;
-  const [x, y] = w.getPosition();
-  return { x, y, max: w.isMaximized() };
-});
-ipcMain.on('win:move', (e, x, y) => {
+// 2026-09-03).
+//
+// ⚠⚠ ET SURTOUT : NE PAS FAIRE TRAVERSER DE COORDONNÉES DE LA PAGE. Un premier
+// jet lisait `ev.screenX/Y` (pixels CSS du rendu) et appelait setPosition —
+// or sur un écran à 125 % ces pixels ne s'alignent pas avec l'espace d'Electron.
+// La fenêtre partait en oscillation, frôlait la frontière 125 %/100 %, et le
+// contenu « re-zoomait » à chaque changement de densité (signalé le 2026-09-03 :
+// « effet de zoom sur l'écran principal à 125 %, pas sur l'autre à 100 % »). La
+// PARADE : le principal lit LUI-MÊME la position du curseur avec
+// `screen.getCursorScreenPoint()` — même espace de coordonnées que setPosition,
+// donc insensible au facteur d'échelle. La page ne fait que dire « je commence /
+// je bouge / j'arrête » ; aucun nombre ne traverse le pont.
+// `screen` se requiert au besoin (comme ailleurs) : indisponible avant app.ready.
+let _glisseFenetre = null;   // { dx, dy } : décalage curseur → coin de la fenêtre
+ipcMain.on('win:glisse:debut', (e) => {
   const w = BrowserWindow.fromWebContents(e.sender);
   if (!w || w.isDestroyed() || !w.isMovable()) return;
-  // Une fenêtre maximisée est ignorée par setPosition : on la décroche d'abord.
-  if (w.isMaximized()) w.unmaximize();
-  const nx = Math.round(Number(x)), ny = Math.round(Number(y));
-  if (Number.isFinite(nx) && Number.isFinite(ny)) w.setPosition(nx, ny);
+  if (w.isMaximized()) w.unmaximize();   // sinon setPosition est ignoré
+  const { screen } = require('electron');
+  const c = screen.getCursorScreenPoint();
+  const [wx, wy] = w.getPosition();
+  _glisseFenetre = { dx: c.x - wx, dy: c.y - wy };
 });
+ipcMain.on('win:glisse:bouge', (e) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w || w.isDestroyed() || !w.isMovable() || !_glisseFenetre) return;
+  const { screen } = require('electron');
+  const c = screen.getCursorScreenPoint();
+  w.setPosition(c.x - _glisseFenetre.dx, c.y - _glisseFenetre.dy);
+});
+ipcMain.on('win:glisse:fin', () => { _glisseFenetre = null; });
 // Double-clic sur la bande de titre : bascule agrandir/restaurer, comme une vraie
 // barre de titre. `-webkit-app-region:drag` n'étant pas honoré ici (voir win:move),
 // ce geste natif est perdu aussi — la barre du site le rejoue par ce canal.
