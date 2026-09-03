@@ -278,6 +278,32 @@ ipcMain.handle('print:current', async (e, opts = {}) => {
 
 ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
 
+// ── DÉPLACEMENT DE LA FENÊTRE PAR LE POINTEUR (repli fiable) ─────────────────
+// ⚠ POURQUOI ON DÉPLACE NOUS-MÊMES ET PAS PAR `-webkit-app-region:drag`.
+// La fenêtre est sans cadre (titleBarStyle:'hidden' + titleBarOverlay) et la
+// barre de menu native est masquée : il n'y a donc AUCUNE bande de titre native
+// à saisir. On avait posé `-webkit-app-region:drag` sur #sz-menubar (appbar.js
+// du site), mais Electron 31 ne l'honore PAS ici : la zone se calcule bien
+// « drag » côté page (vérifié : elementFromPoint → #sz-menubar, region=drag) et
+// pourtant la fenêtre ne bouge d'aucune zone, même flottante (constaté le
+// 2026-09-03, avec l'utilisateur). On déplace donc à la main : la page lit la
+// position au pointerdown (win:pos), puis pousse la nouvelle à chaque
+// pointermove (win:move). Aucune dépendance à app-region ni à la barre native.
+ipcMain.handle('win:pos', (e) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w || w.isDestroyed()) return null;
+  const [x, y] = w.getPosition();
+  return { x, y, max: w.isMaximized() };
+});
+ipcMain.on('win:move', (e, x, y) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w || w.isDestroyed() || !w.isMovable()) return;
+  // Une fenêtre maximisée est ignorée par setPosition : on la décroche d'abord.
+  if (w.isMaximized()) w.unmaximize();
+  const nx = Math.round(Number(x)), ny = Math.round(Number(y));
+  if (Number.isFinite(nx) && Number.isFinite(ny)) w.setPosition(nx, ny);
+});
+
 // ⚠ LE DECOMPTE AVANT DECONNEXION DOIT ETRE VU, sinon il n avertit personne.
 // Il s ouvre dans la fenetre principale, et le travail se fait maintenant dans des
 // fenetres natives : la boite s ouvrait donc derriere elles. L usager etait

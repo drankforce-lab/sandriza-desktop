@@ -140,6 +140,14 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   minimize: () => ipcRenderer.send('win:minimize'),
   close: () => ipcRenderer.send('win:close'),
 
+  // Déplacement de la fenêtre par le pointeur (voir win:pos / win:move dans
+  // main.js). `-webkit-app-region:drag` n'est pas honoré par cette coquille :
+  // la barre du site lit la position au début du glissement, puis pousse la
+  // nouvelle position à chaque mouvement. Sans cadre ni barre de titre native,
+  // c'est la seule voie fiable pour déplacer la fenêtre.
+  fenetrePos: () => ipcRenderer.invoke('win:pos'),
+  fenetreDeplacer: (x, y) => ipcRenderer.send('win:move', x, y),
+
   // ⚠ RAMENER CETTE FENETRE DEVANT — pour un avertissement, pas pour du confort.
   // Le decompte avant deconnexion pour inactivite s ouvre dans CETTE fenetre. Or
   // le travail se fait desormais dans des fenetres natives : la boite s ouvrait
