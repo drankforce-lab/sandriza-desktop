@@ -299,22 +299,35 @@ ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minim
 // donc insensible au facteur d'échelle. La page ne fait que dire « je commence /
 // je bouge / j'arrête » ; aucun nombre ne traverse le pont.
 // `screen` se requiert au besoin (comme ailleurs) : indisponible avant app.ready.
-let _glisseFenetre = null;   // { dx, dy } : décalage curseur → coin de la fenêtre
+// ⚠⚠ ON FIGE LA TAILLE PENDANT LE GLISSEMENT (4.22.3). Sur un écran à 125 % à
+// côté d'un écran à 100 %, `setPosition` seul faisait GRANDIR la fenêtre : à
+// certaines positions Electron l'associe transitoirement à l'écran 100 %,
+// `devicePixelRatio` bascule 1.25→1.0 (diagnostic du 2026-09-03 : scale stable,
+// dpr qui saute), et la fenêtre est réinterprétée à l'autre densité — donc plus
+// grande. On repose donc à CHAQUE image la MÊME taille (celle du début), avec
+// `setBounds`, ce qui neutralise tout redimensionnement dû au changement de DPI.
+let _glisseFenetre = null;   // { dx, dy, width, height }
 ipcMain.on('win:glisse:debut', (e) => {
   const w = BrowserWindow.fromWebContents(e.sender);
   if (!w || w.isDestroyed() || !w.isMovable()) return;
-  if (w.isMaximized()) w.unmaximize();   // sinon setPosition est ignoré
+  if (w.isMaximized()) w.unmaximize();   // sinon le déplacement est ignoré
   const { screen } = require('electron');
   const c = screen.getCursorScreenPoint();
-  const [wx, wy] = w.getPosition();
-  _glisseFenetre = { dx: c.x - wx, dy: c.y - wy };
+  const b = w.getBounds();
+  _glisseFenetre = { dx: c.x - b.x, dy: c.y - b.y, width: b.width, height: b.height };
 });
 ipcMain.on('win:glisse:bouge', (e) => {
   const w = BrowserWindow.fromWebContents(e.sender);
   if (!w || w.isDestroyed() || !w.isMovable() || !_glisseFenetre) return;
   const { screen } = require('electron');
   const c = screen.getCursorScreenPoint();
-  w.setPosition(c.x - _glisseFenetre.dx, c.y - _glisseFenetre.dy);
+  // Position qui suit le curseur, TAILLE figée à celle du départ.
+  w.setBounds({
+    x: c.x - _glisseFenetre.dx,
+    y: c.y - _glisseFenetre.dy,
+    width: _glisseFenetre.width,
+    height: _glisseFenetre.height,
+  });
 });
 ipcMain.on('win:glisse:fin', () => { _glisseFenetre = null; });
 // Double-clic sur la bande de titre : bascule agrandir/restaurer, comme une vraie
