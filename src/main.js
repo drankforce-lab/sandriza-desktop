@@ -303,6 +303,14 @@ ipcMain.on('win:move', (e, x, y) => {
   const nx = Math.round(Number(x)), ny = Math.round(Number(y));
   if (Number.isFinite(nx) && Number.isFinite(ny)) w.setPosition(nx, ny);
 });
+// Double-clic sur la bande de titre : bascule agrandir/restaurer, comme une vraie
+// barre de titre. `-webkit-app-region:drag` n'étant pas honoré ici (voir win:move),
+// ce geste natif est perdu aussi — la barre du site le rejoue par ce canal.
+ipcMain.on('win:togglemax', (e) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w || w.isDestroyed() || !w.isMaximizable()) return;
+  if (w.isMaximized()) w.unmaximize(); else w.maximize();
+});
 
 // ⚠ LE DECOMPTE AVANT DECONNEXION DOIT ETRE VU, sinon il n avertit personne.
 // Il s ouvre dans la fenetre principale, et le travail se fait maintenant dans des

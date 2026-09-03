@@ -147,6 +147,8 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // c'est la seule voie fiable pour déplacer la fenêtre.
   fenetrePos: () => ipcRenderer.invoke('win:pos'),
   fenetreDeplacer: (x, y) => ipcRenderer.send('win:move', x, y),
+  // Double-clic sur la bande de titre → agrandir/restaurer (voir win:togglemax).
+  fenetreBasculerMax: () => ipcRenderer.send('win:togglemax'),
 
   // ⚠ RAMENER CETTE FENETRE DEVANT — pour un avertissement, pas pour du confort.
   // Le decompte avant deconnexion pour inactivite s ouvre dans CETTE fenetre. Or
