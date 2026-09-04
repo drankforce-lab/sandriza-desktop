@@ -233,7 +233,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="det">' + esc(d.rue) + '<br>' + esc(d.ville) + ', ' + esc(d.province)
       + ' ' + esc(d.codePostal) + (d.tel ? ' · ' + esc(d.tel) : '') + '</div></div>';
     if (!d.codePostal) {
-      h += '<div class="avis rouge">⚠ Aucun code postal sur cette commande — aucun transporteur '
+      h += '<div class="avis rouge"><span class="ic">⚠</span> Aucun code postal sur cette commande — aucun transporteur '
         + 'n’acceptera l’envoi. Corrigez l’adresse avant de commander une étiquette.</div>';
     }
     h += '</div>';
@@ -243,7 +243,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (c.aUneEtiquette) {
       // ⚠ ON LE DIT AVANT LE CLIC. Une etiquette est facturee : mieux vaut le
       // savoir en regardant l ecran qu apres avoir presse le bouton.
-      h += '<div class="avis jaune">⚠ Une étiquette a déjà été créée pour cette commande'
+      h += '<div class="avis jaune"><span class="ic">⚠</span> Une étiquette a déjà été créée pour cette commande'
         + (c.suivi ? ' (suivi <strong>' + esc(c.suivi) + '</strong>)' : '')
         + '. En commander une seconde serait <strong>facturé une seconde fois</strong>.</div>';
     }
@@ -267,9 +267,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   esc(pw.calcule > 0 ? pw.calcule : 0.5) + '"></div>'
       + '</div>';
     h += pw.estime
-      ? '<div class="avis jaune">⚠ Certains articles n’ont pas de poids configuré — estimation à '
+      ? '<div class="avis jaune"><span class="ic">⚠</span> Certains articles n’ont pas de poids configuré — estimation à '
         + '300 g par article. Vérifiez avant de commander : c’est le poids qui fixe le prix.</div>'
-      : '<div class="avis vert">✅ Poids calculé depuis les articles de la commande'
+      : '<div class="avis vert"><span class="ic">✅</span> Poids calculé depuis les articles de la commande'
         + (pw.remboursements ? ' (remboursements déduits)' : '') + '.</div>';
     if (t && !t.pret) {
       h += '<div class="avis jaune"><span class="ic">💡</span> ' + esc(t.nom) + ' n’est pas configuré — aucune étiquette '
@@ -356,7 +356,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'Service : <strong>' + esc(libelle || service || '—') + '</strong><br>'
       + 'Poids : <strong>' + esc(poids) + ' kg</strong></p>'
       + (CMD.commande.aUneEtiquette
-          ? '<p style="color:var(--tx-att)">⚠ Une étiquette existe déjà pour cette commande. '
+          ? '<p style="color:var(--tx-att)"><span class="ic">⚠</span> Une étiquette existe déjà pour cette commande. '
             + 'En commander une seconde sera facturé une seconde fois.</p>' : '')
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="paie" id="v-oui">Commander</button></div>',
@@ -386,7 +386,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       // ⚠ ON RELIT LA COMMANDE plutot que de rafistoler l etat en memoire : le
       // suivi, l historique et le drapeau d etiquette viennent du site.
       recharger().then(function(){
-        voile('<h3>✅ Étiquette créée</h3>'
+        voile('<h3><span class="ic">✅</span> Étiquette créée</h3>'
           + '<p>Suivi : <strong>' + esc(r.suivi || '—') + '</strong></p>'
           + '<p>Imprimez-la, puis revenez confirmer l’expédition. '
           + '<strong>La commande n’est pas encore marquée expédiée</strong> — fermer cette '

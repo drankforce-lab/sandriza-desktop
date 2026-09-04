@@ -80,7 +80,7 @@ function pageCollection(id) {
       + '<div class="ch large"><label for="c-desc">Description</label>'
       + '<textarea id="c-desc" rows="4"></textarea>'
       + '<div style="margin-top:.35rem">'
-      + '<button type="button" id="c-ia">✨ Rédiger avec l’IA</button></div></div>'
+      + '<button type="button" id="c-ia"><span class="ic">✨</span> Rédiger avec l’IA</button></div></div>'
       + '<div class="ch"><label for="c-saison">Saison</label><select id="c-saison">'
       + CTX.saisons.map(function(s){ return '<option value="' + esc(s) + '">' + (s ? esc(s) : '—') + '</option>'; }).join('')
       + '</select></div>'

@@ -165,7 +165,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</select>'
       + '<select id="p-stock">'
       + '<option value=""' + (STOCK === '' ? ' selected' : '') + '>Tout l’inventaire</option>'
-      + '<option value="low"' + (STOCK === 'low' ? ' selected' : '') + '>⚠ À commander</option>'
+      + '<option value="low"' + (STOCK === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> À commander</option>'
       + '<option value="ok"' + (STOCK === 'ok' ? ' selected' : '') + '>✓ Seuil non atteint</option>'
       + '</select>'
       + '<button class="mini' + (TRI === 'cart' ? ' actif' : '') + '" id="p-tri" '

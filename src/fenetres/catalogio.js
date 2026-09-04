@@ -279,7 +279,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="dossier' + (repli ? ' repli' : '') + '">'
       +   '<div class="dl">'
       +     '<span class="dk">Les fichiers sortent dans</span>'
-      +     '<button class="chemin" data-act="dossier" title="' + titre + '">📂 ' + esc(chemin) + '</button>'
+      +     '<button class="chemin" data-act="dossier" title="' + titre + '"><span class="ic">📂</span> ' + esc(chemin) + '</button>'
       +     (perso && !repli ? '<span class="pill inchange">dossier choisi</span>' : '')
       +   '</div>'
       +   (repli

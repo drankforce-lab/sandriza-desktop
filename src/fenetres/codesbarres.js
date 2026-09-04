@@ -436,7 +436,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function avertirLisibilite(v){
     var p = v.problemes;
-    var h = '<h3 style="color:var(--tx-att)">⚠ Ces codes ne se scanneront pas</h3>'
+    var h = '<h3 style="color:var(--tx-att)"><span class="ic">⚠</span> Ces codes ne se scanneront pas</h3>'
       + '<p>Sur une étiquette de <strong>' + v.largeurPo + ' po</strong> à <strong>'
       + v.dpi + ' ppp</strong>, ' + (p.length > 1 ? 'ces codes sont' : 'ce code est')
       + ' trop long' + (p.length > 1 ? 's' : '') + ' : la barre la plus fine tomberait à '

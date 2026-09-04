@@ -251,7 +251,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<div class="quand">'+esc(fmtTs(s.derniereConnexion))+' · '+(s.nbConnexions||0)+' connexion'+((s.nbConnexions||0)>1?'s':'')+'</div>';
         if (D.peutModifier){
           h += '<div class="barre">'
-            + '<button class="b" data-edit="'+esc(s.id)+'">✏ Modifier</button>'
+            + '<button class="b" data-edit="'+esc(s.id)+'"><span class="ic">✏</span> Modifier</button>'
             + '<button class="b" data-mfa="'+esc(s.id)+'" title="Gérer l’authentification à deux facteurs"><span class="ic">🔐</span> MFA</button>'
             + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="Renvoyer un mot de passe temporaire par courriel"><span class="ic">📧</span> Renvoyer</button>' : '')
             + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'✓ Confirmer':'Supprimer')+'</button>' : '')
@@ -467,7 +467,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
     sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> MFA — '+esc(e.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
       + '<div class="liste">'
-      + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:var(--tx-ok2)">✅ Authentification à deux facteurs activée pour ce compte.</div>'
+      + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:var(--tx-ok2)"><span class="ic">✅</span> Authentification à deux facteurs activée pour ce compte.</div>'
       + '<label class="case"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><b>Exempter ce compte</b><span class="quoi">Connexion autorisée sans code — un rempart en moins.</span></span></label>'
       + '</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'

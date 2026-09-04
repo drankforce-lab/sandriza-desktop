@@ -394,7 +394,7 @@ function pageProduit(id) {
       // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
       // d ici, aucune cle ne voyage.
       + '<div style="margin-top:.35rem">'
-      + '<button type="button" id="p-ia">✨ Rédiger avec l’IA</button></div></div>'
+      + '<button type="button" id="p-ia"><span class="ic">✨</span> Rédiger avec l’IA</button></div></div>'
       + '</div></div>'
       + '<div class="cote">'
       + '<div class="carte"><h2>Classement</h2><div class="grille">'
@@ -457,9 +457,9 @@ function pageProduit(id) {
       + '<div class="vign" id="p-vign" title="Photo principale — cliquer pour choisir, ou déposer une secondaire ici">choisir une photo</div>'
       + '<div class="lgd-principale">Photo principale</div>'
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
-      + 'title="Détourer la photo et poser un décor (studio, jardin, Paris…)">✂ Décor</button>'
+      + 'title="Détourer la photo et poser un décor (studio, jardin, Paris…)"><span class="ic">✂</span> Décor</button>'
       + '<button type="button" id="p-mannequin" class="mini-decor" disabled '
-      + 'title="Faire porter le vêtement par un modèle (IA Fal.ai — chaque génération consomme des crédits)">✨ Mannequin IA</button></div>'
+      + 'title="Faire porter le vêtement par un modèle (IA Fal.ai — chaque génération consomme des crédits)"><span class="ic">✨</span> Mannequin IA</button></div>'
       + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
       /* ⚠ DEUX MODES, DÉCIDÉS PAR LA CATÉGORIE, comme l’éditeur du site :
@@ -497,7 +497,7 @@ function pageProduit(id) {
       + '</select></div>'
       + '<div class="ch"><label for="p-retours">Retours</label>'
       + '<select id="p-retours">'
-      + '<option value="ok">✅ Acceptés</option>'
+      + '<option value="ok"><span class="ic">✅</span> Acceptés</option>'
       + '<option value="aucun"><span class="ic">🚫</span> Aucun retour</option>'
       + '</select></div>'
       + '</div>'
@@ -543,7 +543,7 @@ function pageProduit(id) {
           ? '<div class="aide" style="margin:-.2rem 0 .5rem">Au moins une variante doit porter '
             + 'une quantité, et un emplacement d’entrepôt est obligatoire dès qu’une quantité '
             + 'dépasse zéro.</div>'
-          : '<div class="aide" style="margin:-.2rem 0 .5rem;color:var(--tx-att)">⚠ Aucun emplacement '
+          : '<div class="aide" style="margin:-.2rem 0 .5rem;color:var(--tx-att)"><span class="ic">⚠</span> Aucun emplacement '
             + 'configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux '
             + 'variantes en stock.</div>')
       + '<div class="rech"><input placeholder="Filtrer par taille ou couleur…"><span class="cpt" id="p-somme"></span></div>'
@@ -1323,7 +1323,7 @@ function pageProduit(id) {
     var s = parseInt(val('p-seuil'), 10);
     if (!(s > 0) || !(q > 0) || q >= s) return '';
     return '<span class="al" title="Sous le seuil d’alerte (' + s + '). '
-      + 'Il en manque ' + (s - q) + ' pour l’atteindre.">⚠</span>';
+      + 'Il en manque ' + (s - q) + ' pour l’atteindre."><span class="ic">⚠</span></span>';
   }
 
   function majStock(){
@@ -1585,7 +1585,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:32rem">'
-      + '<h3>✂ Détourer et changer le décor</h3>'
+      + '<h3><span class="ic">✂</span> Détourer et changer le décor</h3>'
       + '<div class="fonds" id="dt-fonds"></div>'
       + '<div id="dt-zone" style="background:var(--f-champ);border-radius:10px;min-height:14rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
@@ -1653,7 +1653,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:34rem">'
-      + '<h3>✨ Mannequin IA</h3>'
+      + '<h3><span class="ic">✨</span> Mannequin IA</h3>'
       + '<div class="aide">Le vêtement de la photo principale sera porté par le modèle choisi. '
       + 'Chaque génération consomme des crédits Fal.ai.</div>'
       + '<div class="modeles" id="ia-modeles"><span class="aide">Chargement…</span></div>'
@@ -1667,7 +1667,7 @@ function pageProduit(id) {
       + '<div id="ia-zone" style="background:var(--f-champ);border-radius:10px;min-height:10rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
       + '<div class="pied2"><button type="button" id="ia-non">Fermer</button>'
-      + '<button type="button" id="ia-gen">✨ Générer</button>'
+      + '<button type="button" id="ia-gen"><span class="ic">✨</span> Générer</button>'
       + '<button type="button" class="prim" id="ia-oui" disabled>✓ Utiliser cette photo</button></div></div>';
     document.body.appendChild(v);
     // La categorie part de celle du produit : robes -> one-pieces, bas -> lower_body.
@@ -1684,7 +1684,7 @@ function pageProduit(id) {
       if (!z) return;
       if (!r || !r.ok) { z.innerHTML = '<span class="aide" style="color:var(--tx-err)">' + esc(expliquer(r)) + '</span>'; return; }
       if (!r.cleConfiguree) {
-        z.innerHTML = '<span class="aide" style="color:var(--tx-att)">⚠ Clé Fal.ai non configurée — '
+        z.innerHTML = '<span class="aide" style="color:var(--tx-att)"><span class="ic">⚠</span> Clé Fal.ai non configurée — '
           + 'Configuration de la fenêtre principale.</span>';
         return;
       }
@@ -1694,7 +1694,7 @@ function pageProduit(id) {
         // vivait que dans la modale de l ecran web de l editeur produit. La
         // fenetre << Modeles par vue >> la porte maintenant. On nomme le chemin
         // exact : un renvoi vague fait chercher, et c est ce qui l avait cache.
-        z.innerHTML = '<span class="aide" style="color:var(--tx-att)">⚠ Aucun mannequin enregistré — '
+        z.innerHTML = '<span class="aide" style="color:var(--tx-att)"><span class="ic">⚠</span> Aucun mannequin enregistré — '
           + 'ajoutez-en dans <strong>Configuration → Apparence → Modèles par vue</strong>, '
           + 'section « Mannequins ».</span>';
         return;
@@ -2240,7 +2240,7 @@ function pageProduit(id) {
       return new Promise(function(resoudre){
         var v = document.createElement('div');
         v.className = 'voile';
-        v.innerHTML = '<div class="boite"><h3>⚠ Prix inférieur au coût d’acquisition</h3>'
+        v.innerHTML = '<div class="boite"><h3><span class="ic">⚠</span> Prix inférieur au coût d’acquisition</h3>'
           + '<p>Le prix de vente effectif (<strong>' + eff.toFixed(2) + ' $</strong>) est inférieur '
           + 'au coût d’acquisition (<strong>' + cout.toFixed(2) + ' $</strong>).</p>'
           + '<div class="ch"><label for="bc-raison">Raison <span class="req">*</span></label>'

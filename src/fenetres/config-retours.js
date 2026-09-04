@@ -161,7 +161,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     if (!d.configuree) {
       h.push('<div class="carte" style="grid-column:1/-1;border-color:rgba(240,180,80,.35);background:rgba(200,140,40,.08)">'
-        + '<div style="font-size:.82rem;color:var(--tx-or2)">⚠ Adresse de retour non configurée — renseignez-la pour pouvoir guider les clients qui renvoient un colis.</div></div>');
+        + '<div style="font-size:.82rem;color:var(--tx-or2)"><span class="ic">⚠</span> Adresse de retour non configurée — renseignez-la pour pouvoir guider les clients qui renvoient un colis.</div></div>');
     }
 
     h.push('<div class="carte"><h2>Fenêtre de retour</h2>'

@@ -221,7 +221,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<option value="365"' + (PER === '365' ? ' selected' : '') + '>Cette année</option>'
       + '</select>'
       + '<span class="droite">'
-      + (c.moyenne != null ? 'moyenne ' + c.moyenne + ' <span class="etoile">★</span> · ' : '')
+      + (c.moyenne != null ? 'moyenne ' + c.moyenne + ' <span class="etoile"><span class="ic">★</span></span> · ' : '')
       + (c.publies || 0) + ' publié' + ((c.publies || 0) > 1 ? 's' : '') + '</span>'
       + '</div>';
 

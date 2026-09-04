@@ -383,7 +383,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         var attente = o.aUneEtiquette && o.statut !== 'shipped' && o.statut !== 'delivered';
         h += '<tr class="' + (attente ? 'attente' : '') + '" data-id="' + esc(o.id)
           + '" style="cursor:pointer" title="Clic : détails · clic droit : changer le statut">'
-          + '<td>' + (o.prioritaire ? '<span class="eclair" title="Traitement prioritaire">⚡</span>' : '')
+          + '<td>' + (o.prioritaire ? '<span class="eclair" title="Traitement prioritaire"><span class="ic">⚡</span></span>' : '')
           + '<span class="num">' + esc(o.numero) + '</span>'
           + (attente ? '<div class="det">étiquette prête</div>' : '') + '</td>'
           + '<td>' + esc(o.client) + '</td>'
@@ -489,8 +489,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     } else {
       h += '<span class="et ' + couleurStatut(c.statut) + '">' + esc(libelleStatut(c.statut)) + '</span>';
     }
-    h += (c.prioritaire ? '<span class="badge2 or">⚡ Prioritaire</span>' : '')
-      + (d.remboursements.complet ? '<span class="badge2 vertf">✅ Remboursée</span>'
+    h += (c.prioritaire ? '<span class="badge2 or"><span class="ic">⚡</span> Prioritaire</span>' : '')
+      + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> Remboursée</span>'
           : (d.remboursements.lignes.length
               ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' remb.</span>' : ''))
       + '<span style="margin-left:auto" class="mut">' + esc(dateCourte(c.creeLe)) + '</span>'
@@ -518,7 +518,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="mut">' + esc(c.adresse.rue) + '<br>'
       + esc(c.adresse.ville) + (c.adresse.province ? ', ' + esc(c.adresse.province) : '')
       + ' ' + esc(c.adresse.cp) + '</div>'
-      + (c.livreLe ? '<div class="mut" style="margin-top:.3rem">✅ Livrée le ' + esc(dateCourte(c.livreLe)) + '</div>' : '')
+      + (c.livreLe ? '<div class="mut" style="margin-top:.3rem"><span class="ic">✅</span> Livrée le ' + esc(dateCourte(c.livreLe)) + '</div>' : '')
       + (c.suivi ? '<div class="mut" style="margin-top:.3rem"><span class="ic">📡</span> <span class="num">' + esc(c.suivi) + '</span>'
           + (c.suiviStatut ? ' — ' + esc(c.suiviStatut)
             + (c.suiviVerifieLe ? ' (vérifié le ' + esc(dateCourte(c.suiviVerifieLe)) + ')' : '') : '') + '</div>' : '')
@@ -540,7 +540,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div>Sous-total</div>'
       + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + (Math.round(x.taux * 1000000) / 10000) + ' %)</div>'; }).join('')
       + (t.livraison > 0 ? '<div>Livraison</div>' : '')
-      + (t.prioritaire > 0 ? '<div>⚡ Traitement prioritaire</div>' : '')
+      + (t.prioritaire > 0 ? '<div><span class="ic">⚡</span> Traitement prioritaire</div>' : '')
       + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">Coupon</div>' : '')
       + '<div class="tt">Total</div></div>'
       + '<div class="d"><div>' + argent(t.sousTotal) + '</div>'
@@ -561,13 +561,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (rb.fraisRetenus > 0) {
         h += '<div class="fin3" style="color:#f0c987;font-weight:400">Frais de service retenus : <strong>'
           + argent(rb.fraisRetenus) + '</strong> '
-          + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf">✅ Remboursés au client</span>'
+          + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> Remboursés au client</span>'
              : rb.fraisRembourses > 0
-               ? '<span class="badge2 or">⚠ Partiel — remb. ' + argent(rb.fraisRembourses) + ' · reste ' + argent(rb.fraisRestants) + '</span>'
+               ? '<span class="badge2 or"><span class="ic">⚠</span> Partiel — remb. ' + argent(rb.fraisRembourses) + ' · reste ' + argent(rb.fraisRestants) + '</span>'
                : '<span class="badge2 or">⏳ Non remboursés</span>') + '</div>';
       }
       h += '<div class="fin3">Total remboursé : −' + argent(rb.total)
-        + (rb.complet ? ' <span class="badge2 vertf">✅ Entièrement remboursée</span>' : '') + '</div></div>';
+        + (rb.complet ? ' <span class="badge2 vertf"><span class="ic">✅</span> Entièrement remboursée</span>' : '') + '</div></div>';
     }
     if (c.notes) h += '<div class="mut" style="margin-top:.6rem"><strong>Notes :</strong> ' + esc(c.notes) + '</div>';
     h += '</div></div>';
@@ -920,7 +920,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<p style="font-weight:600;margin-top:.6rem">Éléments qui seront supprimés :</p>'
         + '<ul style="padding-left:0">' + (ap.elements || []).map(function(x){
             return '<li class="item">' + esc(x) + '</li>'; }).join('') + '</ul>'
-        + '<p style="color:var(--tx-err);font-weight:600">⚠ Cette action est irréversible.</p>'
+        + '<p style="color:var(--tx-err);font-weight:600"><span class="ic">⚠</span> Cette action est irréversible.</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
         + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">Supprimer définitivement</button></div>',
         function(fermer){

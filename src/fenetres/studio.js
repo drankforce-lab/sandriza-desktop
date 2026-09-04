@@ -871,7 +871,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="lott"><strong>' + esc(x.nom) + '</strong>'
         + '<span class="pill ' + (x.etat === 'fini' ? 'bon' : x.etat === 'encours' ? 'acc'
             : x.etat === 'arrete' ? 'err' : 'neutre') + '">' + (LOT_ETATS[x.etat] || x.etat) + '</span>'
-        + (x.priorite ? '<span class="pill acc">★ Priorité</span>' : '')
+        + (x.priorite ? '<span class="pill acc"><span class="ic">★</span> Priorité</span>' : '')
         + '<span class="dt">' + esc(x.quoiLibelle) + '</span></div>'
         + '<div class="jauge"><i style="width:' + pct + '%"></i></div>'
         + '<div class="lotd">'
@@ -975,10 +975,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       var apercu = PHOTO || PHOTO_URL;
       h += '<div class="depot" id="depot">'
         + (apercu ? '<img src="' + apercu + '" alt="photo">'
-                  : '<span class="gros">🖼️</span><span>Photo de la photothèque sélectionnée</span>')
+                  : '<span class="gros"><span class="ic">🖼</span>️</span><span>Photo de la photothèque sélectionnée</span>')
         + '<span class="refaire">Choisir une autre photo</span></div>';
     } else {
-      h += '<div class="depot" id="depot"><span class="gros">📷</span>'
+      h += '<div class="depot" id="depot"><span class="gros"><span class="ic">📷</span></span>'
         + '<span>Glissez une photo ici, ou cliquez pour en choisir une</span>'
         + '<span class="pt2">Studio, fond blanc, un vêtement — JPEG ou PNG</span></div>';
     }
@@ -1190,7 +1190,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="aidep">Chaussures, bijoux, coiffure, ambiance… ⚠ Photoroom n’a <strong>aucun '
         + 'réglage dédié</strong> pour ces éléments : c’est du texte libre ajouté à la consigne, au mieux '
         + 'une suggestion, jamais une garantie. Le service comprend mieux l’anglais.</div></div>');
-      h.push('<div class="avun"><div class="aidep att">⚠ Le décor décrit au texte, l’ombre réglable et '
+      h.push('<div class="avun"><div class="aidep att"><span class="ic">⚠</span> Le décor décrit au texte, l’ombre réglable et '
         + 'la relumière ne figurent pas dans cette voie : le mannequin virtuel <strong>compose sa scène '
         + 'lui-même</strong> et le service les ignorerait. Ils sont offerts sur « Fantôme habillé » et '
         + '« Produit à plat ».</div></div>');
@@ -1266,10 +1266,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (INTERIEUR ? 'Remplacer' : 'Choisir un fichier') + '</button>'
       + (INTERIEUR ? '<button id="av-int-x"' + (RO ? ' disabled' : '') + '>Retirer</button>' : '')
       + '</div>'
-      + '<div class="aidep att">⚠ Photoroom ne documente pas ce paramètre pour le retrait de '
+      + '<div class="aidep att"><span class="ic">⚠</span> Photoroom ne documente pas ce paramètre pour le retrait de '
       + 'mannequin, et l’on ne fait pas semblant du contraire : s’il est ignoré, le service le signale '
       + 'et l’écran vous le rapporte.</div>'
-      + '<div class="aidep att">⚠ Elle ne voyage <strong>pas</strong> avec un lot : là, l’intérieur '
+      + '<div class="aidep att"><span class="ic">⚠</span> Elle ne voyage <strong>pas</strong> avec un lot : là, l’intérieur '
       + 'utilisé est celui déjà attaché à chaque photo dans la photothèque.</div></div>');
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
@@ -1285,7 +1285,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h.push(chSel('av-up-mode', 'Mode', [
         { cle: 'ai.fast', t: 'Rapide — entrée jusqu’à 1000 px' },
         { cle: 'ai.slow', t: 'Lent, plus fin — entrée jusqu’à 512 px' }], AV.upMode, ''));
-      h.push('<div class="avun"><div class="aidep att">⚠ L’entrée est plafonnée à <strong>'
+      h.push('<div class="avun"><div class="aidep att"><span class="ic">⚠</span> L’entrée est plafonnée à <strong>'
         + (AV.upMode === 'ai.slow' ? '512' : '1000') + ' px</strong> sur le grand côté. Au-delà, le '
         + 'service refuse : l’écran vous le dira plutôt que de le facturer. Une photo de studio dépasse '
         + 'largement cette limite — l’agrandissement sert surtout à récupérer une <strong>petite</strong> '
@@ -2121,9 +2121,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<button class="jeton' + (CMP ? '' : ' on') + '" id="cmp-off">Résultat seul</button></div>';
     }
     h += (av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="résultat">');
-    if (RESULT.essai) h += '<div class="filig">⚠ Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.</div>';
-    if (RESULT.decorErreur) h += '<div class="filig">⚠ Le décor n’a pas pu être appliqué : ' + esc(RESULT.decorErreur) + '</div>';
-    if (RESULT.ignores) h += '<div class="filig">⚠ Le service a <strong>ignoré</strong> : '
+    if (RESULT.essai) h += '<div class="filig"><span class="ic">⚠</span> Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.</div>';
+    if (RESULT.decorErreur) h += '<div class="filig"><span class="ic">⚠</span> Le décor n’a pas pu être appliqué : ' + esc(RESULT.decorErreur) + '</div>';
+    if (RESULT.ignores) h += '<div class="filig"><span class="ic">⚠</span> Le service a <strong>ignoré</strong> : '
       + esc(ignoresLisible(RESULT.ignores)) + '. Le reste du traitement a bien eu lieu.</div>';
     if (RESULT.upNote) h += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
@@ -2454,7 +2454,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var pastilles = '';
       if ((p.faits || []).length) pastilles += '<span class="pt fait" title="Déjà traitée">✓</span>';
       if (p.isole) pastilles += '<span class="pt" title="Détourée">◇</span>';
-      if (p.lieId) pastilles += '<span class="pt ic" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
+      if (p.lieId) pastilles += '<span class="pt ic" title="' + esc(p.lieNom || 'Produit lié') + '"><span class="ic">🔗</span></span>';
       return '<div class="phvig' + (pris ? ' pris' : '') + '" data-ph="' + esc(p.id) + '"'
         + ' title="' + esc(p.nom) + (p.lieNom ? ' — ' + esc(p.lieNom) : '') + '">'
         + '<span class="phcoche" data-sel="' + esc(p.id) + '">' + (pris ? '✓' : '') + '</span>'
@@ -2611,7 +2611,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (quoi === 'filigrane') {
       var lg = logoChoisi();
       if (!lg) {
-        return '<p style="color:#e08a8a;margin:.6rem 0 0">⚠ <strong>Aucun logo choisi.</strong> '
+        return '<p style="color:#e08a8a;margin:.6rem 0 0"><span class="ic">⚠</span> <strong>Aucun logo choisi.</strong> '
           + 'Ouvrez « Filigrane » dans la colonne de gauche et choisissez-en un : sans logo, '
           + 'le lot échouerait photo après photo.</p>';
       }
@@ -2626,7 +2626,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     var voie = voiePourQuoi(quoi);
     if (!estVoie(voie)) {
-      return '<p style="color:#d8b57a;margin:.6rem 0 0">⚠ Ce traitement ne passe pas par Photoroom : '
+      return '<p style="color:#d8b57a;margin:.6rem 0 0"><span class="ic">⚠</span> Ce traitement ne passe pas par Photoroom : '
         + 'ni l’ambiance, ni la mise en scène, ni les réglages avancés n’y changent quoi que ce soit. '
         + 'Le détourage se fait au détoureur, et il n’a pas de décor à composer.</p>';
     }
@@ -2638,7 +2638,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // ⚠ La photo d intérieur est la SEULE chose du panneau avancé qui ne peut pas
     // suivre un lot : elle est propre à UN vêtement, pas à cinq cents.
     var sup = (voie === 'fantome' && INTERIEUR)
-      ? '<br><span style="font-size:.74rem;color:#d8b57a">⚠ La photo d’intérieur ne suit pas un lot : '
+      ? '<br><span style="font-size:.74rem;color:#d8b57a"><span class="ic">⚠</span> La photo d’intérieur ne suit pas un lot : '
         + 'chaque photo utilise celle qui lui est attachée dans la photothèque.</span>' : '';
     return '<label class="rc"><input type="checkbox" id="lot-reglages"'
       + (coche === false ? '' : ' checked') + '> '
@@ -2764,7 +2764,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             var z2 = document.getElementById('lot-estim');
             if (!z2) return;
             if (!r || !r.ok) {
-              z2.innerHTML = '<span style="color:#d8b57a">⚠ Coût non estimé</span> — le relais n’a pas '
+              z2.innerHTML = '<span style="color:#d8b57a"><span class="ic">⚠</span> Coût non estimé</span> — le relais n’a pas '
                 + 'répondu (' + esc(expliquer(r)) + '). Le lot peut partir : le plafond mensuel, lui, '
                 + 'est appliqué au serveur et arrêtera la file s’il est atteint.';
               return;

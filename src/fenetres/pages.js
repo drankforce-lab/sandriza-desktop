@@ -586,7 +586,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     var m=r.messages||[];
     var tete='<div class="entete" style="margin-bottom:.7rem"><span style="font-size:.82rem;color:var(--tx2)">'+m.length+' message(s)</span>'
       +(m.length&&!RO?'<button class="b dgr" id="ib-vider">'+(VIDECONF?'✓ Confirmer':'Tout supprimer')+'</button>':'')+'</div>';
-    if (r.etat==='reseau') tete+='<div class="note" style="margin-bottom:.7rem">⚠ Relecture depuis le nuage impossible (réseau) — rien n’est perdu. Rouvrez pour réessayer.</div>';
+    if (r.etat==='reseau') tete+='<div class="note" style="margin-bottom:.7rem"><span class="ic">⚠</span> Relecture depuis le nuage impossible (réseau) — rien n’est perdu. Rouvrez pour réessayer.</div>';
     var corpsl='';
     if (!m.length) corpsl='<div class="vide">Aucun message reçu.</div>';
     for (var i=m.length-1;i>=0;i--){ var s=m[i];
@@ -830,7 +830,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       '<button data-l="25">25 %</button><button data-l="50">50 %</button>'
       +'<button data-l="75">75 %</button><button data-l="100">100 %</button>'
       +'<span class="fil"></span>'
-      +'<button data-a="left">⯇</button><button data-a="center">⬍</button><button data-a="right">⯈</button>'
+      +'<button data-a="left"><span class="ic">⯇</span></button><button data-a="center"><span class="ic">⬍</span></button><button data-a="right"><span class="ic">⯈</span></button>'
       +'<span class="fil"></span><button class="dgr" data-sup>Supprimer</button>');
     IMGSEL=img; img.classList.add('imgsel');
     var ls=f.querySelectorAll('[data-l]');

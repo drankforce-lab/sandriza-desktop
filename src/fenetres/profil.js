@@ -258,7 +258,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function barreOnglets(){
     var etat = D.questionsPosees
       ? '<span class="pill bon">✓</span>'
-      : '<span class="pill att">⚠</span>';
+      : '<span class="pill att"><span class="ic">⚠</span></span>';
     return '<div class="onglets" role="tablist">'
       + '<button type="button" class="onglet' + (ONGLET === 'pw' ? ' on' : '') + '"'
         + ' data-ong="pw" role="tab" aria-selected="' + (ONGLET === 'pw') + '">Mot de passe</button>'

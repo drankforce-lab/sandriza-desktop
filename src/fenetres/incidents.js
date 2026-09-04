@@ -241,7 +241,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       var acts = '';
       if (D.peutModifier||D.peutSupprimer){
         acts = '<td class="acts"><button class="b" data-vue="'+esc(r.id)+'" title="Voir le détail"><span class="ic">👁</span> Détail</button>'
-          + (D.peutModifier ? '<button class="b" data-edit="'+esc(r.id)+'">✏ Modifier</button>' : '')
+          + (D.peutModifier ? '<button class="b" data-edit="'+esc(r.id)+'"><span class="ic">✏</span> Modifier</button>' : '')
           + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+(DELID===r.id?'✓ Confirmer':'Retirer')+'</button>' : '')
           + '</td>';
       }
@@ -479,7 +479,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<div class="liste fiche">'+h+'</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
       + '<button class="b" id="v-fermer">Fermer</button>'
-      + (D.peutModifier ? '<button class="prim" id="v-edit">✏ Modifier</button>' : '')
+      + (D.peutModifier ? '<button class="prim" id="v-edit"><span class="ic">✏</span> Modifier</button>' : '')
       + '</div></div>';
     document.body.appendChild(sur);
     function fermer(){ szPleinReinit(); var s=document.getElementById('sur-vue'); if (s) s.remove(); }

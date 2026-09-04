@@ -532,7 +532,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (D.peutSupprimer ? '<button class="danger" id="d-suppr">'
           + (SUPPR_ARME ? 'Confirmer la suppression ?' : '<span class="ic">🗑</span> Supprimer') + '</button>' : '')
       + (e.aRecu ? '<button id="d-recu"><span class="ic">📎</span> Ouvrir le reçu</button>' : '')
-      + (D.peutModifier ? '<button class="prim" id="d-modifier">✎ Modifier</button>' : '')
+      + (D.peutModifier ? '<button class="prim" id="d-modifier"><span class="ic">✎</span> Modifier</button>' : '')
       + '<button id="d-fermer">Fermer</button>'
       + '</div>';
     if (SUPPR_ARME) {
@@ -556,7 +556,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        Une ligne discrete la remplace : le fichier reste remplacable. */
     if (neuf && !f.recu) {
       h += '<div class="depot" id="d-depot-form" style="margin-bottom:.6rem">'
-        + '<div class="gros">📄 Importer une facture</div>'
+        + '<div class="gros"><span class="ic">📄</span> Importer une facture</div>'
         + '<div class="pt">' + (D.lectureAuto
             ? 'Photo, image ou PDF — les champs sont pré-remplis, vous vérifiez avant d’enregistrer.'
             : 'Elle sera jointe comme reçu (lecture automatique indisponible sans clé).') + '</div>'

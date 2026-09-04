@@ -167,7 +167,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ══ TABLEAU DE BORD ═══════════════════════════════════════════════════════ */
   function vueDash(){
     if (!D.hasKey) {
-      return '<div class="setup"><div class="em">📧</div><h2 style="margin:0 0 .5rem">Configurer Resend</h2>'
+      return '<div class="setup"><div class="em"><span class="ic">📧</span></div><h2 style="margin:0 0 .5rem">Configurer Resend</h2>'
         + '<p style="margin:0 0 1rem">Configurez votre clé API Resend pour commencer à envoyer des infolettres.</p>'
         + '<button class="prim" data-tab="config">Configurer maintenant →</button></div>';
     }
@@ -183,7 +183,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="tuiles">'
       + '<div class="tuile"><div class="k"><span class="ic">👥</span> Abonnés actifs</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + ' désabonné' + plur(D.unsub) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">📣</span> Campagnes envoyées</div><div class="v">' + D.sentCamps + '</div><div class="z">' + D.draftCamps + ' en brouillon</div></div>'
-      + '<div class="tuile"><div class="k">✉️ Courriels envoyés</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + ' échoué' + plur(D.failedSent) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">✉</span>️ Courriels envoyés</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + ' échoué' + plur(D.failedSent) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🔗</span> Chaînes actives</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + ' étape' + plur(D.pendingSteps) + ' en attente</div></div>'
       + '</div>'
       + (PEUT.edit ? '<div><button class="ghost mini" data-act="chains">⚙ Traiter les chaînes (' + D.pendingSteps + ')</button></div>' : '')

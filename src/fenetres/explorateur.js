@@ -302,10 +302,10 @@ ${JS_ACTIVITE}${JS_DIRE}
        voit. Sans elle, rien a l ecran ne le laissait soupconner. */
     if (p.produitEnRetard) {
       h += '<span class="pt retard" title="La fiche produit montre encore l’image d’avant '
-        + 'le dernier traitement">⚠ fiche</span>';
+        + 'le dernier traitement"><span class="ic">⚠</span> fiche</span>';
     }
     if (p.isole) h += '<span class="pt" title="Détourée">◇</span>';
-    if (p.lieId) h += '<span class="pt ic" title="' + esc(p.lieNom || 'Produit lié') + '">🔗</span>';
+    if (p.lieId) h += '<span class="pt ic" title="' + esc(p.lieNom || 'Produit lié') + '"><span class="ic">🔗</span></span>';
     return h ? '<span class="pastilles">' + h + '</span>' : '';
   }
 
@@ -532,7 +532,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<p style="color:var(--tx2)">Un seul pas en arrière est conservé par photo : une photo '
       + 'passée par deux traitements ne remonte qu’au précédent, pas à l’originale.</p>'
       + (k < ids.length
-          ? ('<p style="color:#d8b57a">⚠ ' + (ids.length - k) + ' photo'
+          ? ('<p style="color:#d8b57a"><span class="ic">⚠</span> ' + (ids.length - k) + ' photo'
              + ((ids.length - k) > 1 ? 's n’ont' : ' n’a') + ' rien à annuler et ne bougera'
              + ((ids.length - k) > 1 ? 'nt' : '') + ' pas.</p>')
           : '')
@@ -603,7 +603,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre. '
       + 'Rattachez-la de nouveau pour lever le doute.</p>'
       + (k < ids.length
-          ? ('<p style="color:#d8b57a">⚠ ' + (ids.length - k) + ' photo'
+          ? ('<p style="color:#d8b57a"><span class="ic">⚠</span> ' + (ids.length - k) + ' photo'
              + ((ids.length - k) > 1 ? 's ne sont' : ' n’est') + ' rattachée'
              + ((ids.length - k) > 1 ? 's' : '') + ' à aucun article et ne bougera'
              + ((ids.length - k) > 1 ? 'nt' : '') + ' pas.</p>')

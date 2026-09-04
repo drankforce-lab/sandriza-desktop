@@ -157,7 +157,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<div class="nom"><b>' + esc(b.label) + '</b>' + (b.visible ? '' : '<span class="masq">(masqué)</span>')
         + '<div class="d">' + esc(b.desc) + '</div></div>'
         + '<div class="actes">'
-        + '<button class="b" type="button" data-ed="' + esc(b.id) + '" title="Modifier">✏️</button>'
+        + '<button class="b" type="button" data-ed="' + esc(b.id) + '" title="Modifier"><span class="ic">✏</span>️</button>'
         + (RO ? '' : '<button class="b" type="button" data-vis="' + esc(b.id) + '" title="' + (b.visible ? 'Masquer' : 'Afficher') + '">' + (b.visible ? '<span class="ic">👁</span>' : '<span class="ic">🚫</span>') + '</button>'
           + '<button class="b" type="button" data-up="' + esc(b.id) + '"' + (i===0?' disabled':'') + '>↑</button>'
           + '<button class="b" type="button" data-down="' + esc(b.id) + '"' + (i===BLOCS.length-1?' disabled':'') + '>↓</button>')

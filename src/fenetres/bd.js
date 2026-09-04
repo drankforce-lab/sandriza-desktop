@@ -143,7 +143,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var dis = RO ? ' disabled' : '';
-    var h = '<div class="carte"><div class="stitre">☁️ Turso Cloud DB</div>'
+    var h = '<div class="carte"><div class="stitre"><span class="ic">☁</span>️ Turso Cloud DB</div>'
       + '<div class="info">Toute la configuration (thèmes, logos, clés API, navigation, profil…) est '
       + 'synchronisée vers Turso à <b>chaque sauvegarde</b>. Ces boutons servent à forcer une synchronisation, '
       + 'par exemple après avoir vidé le cache du navigateur.</div>'

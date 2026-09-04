@@ -182,7 +182,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + (v.src
             ? '<img src="' + esc(v.src) + '" alt="' + esc(v.label) + '">'
               + (RO ? '' : '<div class="surv"><span class="ic">📸</span> Changer</div>')
-            : '<div class="vide"><span class="em">📸</span><span>' + (RO ? 'Non configuré' : 'Cliquer ou glisser') + '</span></div>')
+            : '<div class="vide"><span class="em"><span class="ic">📸</span></span><span>' + (RO ? 'Non configuré' : 'Cliquer ou glisser') + '</span></div>')
         + '</div>'
         + '<div class="souspied">'
         + ((v.src && !RO) ? '<button class="retirer" data-del="' + esc(v.key) + '">✕ Supprimer</button>' : '')
@@ -258,7 +258,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       // On ne parle de la cle QUE si elle manque : sans elle, l habillage refusera,
       // et le dire ici evite de chercher pourquoi le bouton ne rend rien.
       av.innerHTML = (DM && DM.cleConfiguree === false)
-        ? '<strong style="color:var(--tx-att)">⚠ Aucune clé Fal.ai n’est enregistrée</strong> — l’habillage refusera tant qu’elle n’est pas posée dans Configuration → Clés API.'
+        ? '<strong style="color:var(--tx-att)"><span class="ic">⚠</span> Aucune clé Fal.ai n’est enregistrée</strong> — l’habillage refusera tant qu’elle n’est pas posée dans Configuration → Clés API.'
         : '';
     }
     var l = (DM && DM.mannequins) || [];
@@ -273,7 +273,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     if (!ROM) {
       h += '<div class="mq"><div class="ajout" id="mq-plus">'
-        + '<span class="em">📸</span><span>Ajouter un mannequin</span></div>'
+        + '<span class="em"><span class="ic">📸</span></span><span>Ajouter un mannequin</span></div>'
         + '<input class="nomq" id="mq-nom" type="text" maxlength="40" placeholder="Nom (ex : Ana)"></div>';
     }
     if (!l.length && ROM) h = '<div class="vide-page">Aucun mannequin enregistré.</div>';

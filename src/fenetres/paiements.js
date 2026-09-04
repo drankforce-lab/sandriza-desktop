@@ -293,7 +293,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         : '<span class="pill neutre">non configuré</span>';
     }
     if (!D.connecte) {
-      corps.innerHTML = '<div class="vide"><div class="gros">🔑</div>'
+      corps.innerHTML = '<div class="vide"><div class="gros"><span class="ic">🔑</span></div>'
         + 'Configurez d’abord la connexion Square dans <strong>Configuration → Paiement</strong>, '
         + 'dans la fenêtre principale.</div>';
       return;

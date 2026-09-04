@@ -347,7 +347,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       h += '<div id="z-etiq" style="' + (d.statut === 'approved' ? '' : 'display:none') + ';margin-top:.55rem;'
         + 'padding:.55rem .7rem;background:var(--v03);border:1px solid var(--v08);border-radius:9px">'
         + '<div style="font-size:.72rem;color:var(--tx2);font-weight:700;text-transform:uppercase;letter-spacing:.07em"><span class="ic">📦</span> Étiquette de retour</div>'
-        + (d.aUneEtiquette ? '<div class="avis jaune">⚠ Une étiquette existe déjà ('
+        + (d.aUneEtiquette ? '<div class="avis jaune"><span class="ic">⚠</span> Une étiquette existe déjà ('
             + (d.etiquetteReelle ? 'réelle Postes Canada — la régénérer sera FACTURÉ une seconde fois' : 'PDF interne')
             + (d.suivi ? ' · suivi ' + esc(d.suivi) : '') + ').</div>' : '')
         + '<div class="r3" style="margin-top:.45rem">'
@@ -414,8 +414,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
           return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
             + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—') + ' · × ' + a.quantite + '</div></div>'
             + '<select data-inv="' + i + '">'
-            + '<option value="1"' + (dec.backToStock ? ' selected' : '') + '>✅ Remettre en inventaire</option>'
-            + '<option value="0"' + (dec.backToStock ? '' : ' selected') + '>❌ Ne pas remettre</option>'
+            + '<option value="1"' + (dec.backToStock ? ' selected' : '') + '><span class="ic">✅</span> Remettre en inventaire</option>'
+            + '<option value="0"' + (dec.backToStock ? '' : ' selected') + '><span class="ic">❌</span> Ne pas remettre</option>'
             + '</select></div>'
             + '<div class="ch" data-raison-z="' + i + '" style="' + (dec.backToStock ? 'display:none;' : '') + 'margin:.25rem 0 .1rem">'
             + '<label>Raison (obligatoire)</label>'
@@ -477,7 +477,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<textarea id="g-note" rows="3">' + esc(R.demande.notes) + '</textarea></div>'
       + '</div>';
     corps.innerHTML = h;
-    actions.innerHTML = '<button class="paie" id="btn-finaliser"' + (R.peutEcrire ? '' : ' disabled') + '>✅ Finaliser le traitement</button>';
+    actions.innerHTML = '<button class="paie" id="btn-finaliser"' + (R.peutEcrire ? '' : ' disabled') + '><span class="ic">✅</span> Finaliser le traitement</button>';
     brancherReglement();
   }
 
@@ -819,7 +819,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<p>La demande disparaît de la liste'
         + (ap.aPhoto ? ', <strong>et la photo envoyée par le client est effacée du stockage</strong>' : '')
         + '.</p>'
-        + '<p style="color:var(--tx-err);font-weight:600">⚠ Cette action est irréversible.</p>'
+        + '<p style="color:var(--tx-err);font-weight:600"><span class="ic">⚠</span> Cette action est irréversible.</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
         + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">'
         + 'Supprimer définitivement</button></div>',

@@ -249,7 +249,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        bloque net : la fenetre refuse les documents sans profil, et le seul
        endroit ou saisir ce profil etait inatteignable. Rouvert par #33. */
     if (!D.profil.complet && ONGLET !== 'entreprise') {
-      h += '<div class="avis">⚠ <strong>Profil d’entreprise incomplet</strong> — il manque le nom, '
+      h += '<div class="avis"><span class="ic">⚠</span> <strong>Profil d’entreprise incomplet</strong> — il manque le nom, '
         + 'le NEQ ou vos numéros de TPS/TVQ. Les documents s’imprimeront sans eux, et ils ne '
         + 'seront pas recevables. <button class="mini" data-onglet="entreprise">Compléter maintenant</button></div>';
     }
@@ -375,7 +375,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="carte"><h2>Déductions — boutique en ligne</h2>'
       + (MEMO.deductions || []).map(function(d){
-          return '<div class="ded"><strong>☑ ' + esc(d.libelle) + '</strong>'
+          return '<div class="ded"><strong><span class="ic">☑</span> ' + esc(d.libelle) + '</strong>'
             + '<span class="dt">' + esc(d.detail) + '</span></div>'; }).join('')
       + '</div>';
 

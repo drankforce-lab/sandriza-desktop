@@ -278,7 +278,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function ouvrirRestaurer(encKey, id){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
     ouvrirSur('↩ Restaurer la base de données',
-      '<div class="garde jaune">⚠ Cette opération <b>réécrit</b> les données actuelles de Turso avec le contenu de la sauvegarde <b>'+esc(id)+'</b>. Les enregistrements portant le même identifiant seront écrasés. Elle ne supprime pas ce qui a été créé après la sauvegarde.</div>'
+      '<div class="garde jaune"><span class="ic">⚠</span> Cette opération <b>réécrit</b> les données actuelles de Turso avec le contenu de la sauvegarde <b>'+esc(id)+'</b>. Les enregistrements portant le même identifiant seront écrasés. Elle ne supprime pas ce qui a été créé après la sauvegarde.</div>'
       + '<label class="champ"><span class="lbl">Pour confirmer, tapez RESTAURER</span>'
       + '<input class="t" id="s-conf" autocomplete="off" placeholder="RESTAURER"></label>',
       '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go">Restaurer maintenant</button>');
@@ -304,7 +304,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         // pont ne répond pas. Laisser les boutons vivants inviterait à cliquer
         // dans le vide et à conclure que la restauration a échoué.
         FIGE = true;
-        corps.innerHTML = '<div class="carte"><div class="vide">✅ Restauration terminée — <b>'+(r.total||0)+'</b> enregistrements rétablis.<br><br>La fenêtre principale se recharge pour relire la base. Patientez quelques secondes, puis cliquez « ↻ Actualiser ».<br><br><button class="b" id="s-reprendre">↻ Actualiser</button></div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide"><span class="ic">✅</span> Restauration terminée — <b>'+(r.total||0)+'</b> enregistrements rétablis.<br><br>La fenêtre principale se recharge pour relire la base. Patientez quelques secondes, puis cliquez « ↻ Actualiser ».<br><br><button class="b" id="s-reprendre">↻ Actualiser</button></div></div>';
         var rb=document.getElementById('s-reprendre');
         if (rb) rb.onclick=function(){ FIGE=false; recharger('Liste actualisée.', 'bon'); };
         dire('Restauration terminée ('+(r.total||0)+' enregistrements).', 'bon');
@@ -319,7 +319,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function ouvrirSupprimer(encKey, id){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
     ouvrirSur('🗑 Supprimer la sauvegarde',
-      '<div class="garde rouge">⚠ Cette action supprime <b>définitivement</b> la sauvegarde <b>'+esc(id)+'</b> de Cloudflare R2. Elle sera <b>irrécupérable</b>.</div>'
+      '<div class="garde rouge"><span class="ic">⚠</span> Cette action supprime <b>définitivement</b> la sauvegarde <b>'+esc(id)+'</b> de Cloudflare R2. Elle sera <b>irrécupérable</b>.</div>'
       + '<label class="champ"><span class="lbl">Pour confirmer, tapez DÉTRUIRE</span>'
       + '<input class="t" id="s-conf" autocomplete="off" placeholder="DÉTRUIRE"></label>',
       '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go">Supprimer définitivement</button>');
@@ -349,7 +349,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function ouvrirPurge(){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
     ouvrirSur('🗑 Purger les vieilles sauvegardes',
-      '<div class="garde rouge">⚠ Toutes les sauvegardes de plus de <b>'+(D.retentionMois||12)+' mois</b> sont détruites de Cloudflare R2. <b>Irréversible.</b></div>'
+      '<div class="garde rouge"><span class="ic">⚠</span> Toutes les sauvegardes de plus de <b>'+(D.retentionMois||12)+' mois</b> sont détruites de Cloudflare R2. <b>Irréversible.</b></div>'
       + '<p class="quoi" style="margin:0">Les sauvegardes plus récentes ne sont pas touchées.</p>',
       '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go">Purger</button>', '520px');
     document.getElementById('s-annuler').onclick=fermerSur;

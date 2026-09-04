@@ -484,7 +484,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<div class="champ"><span class="lbl">Destinataires SMS</span>'
       + '<div class="aide" style="padding-top:.35rem">' + (d.smsDestinataires || 0)
       + ' client(s) ayant consenti, avec un téléphone.'
-      + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)">⚠ Téléphonie non configurée : l’envoi SMS échouera.</span>')
+      + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> Téléphonie non configurée : l’envoi SMS échouera.</span>')
       + '</div></div></div>'
       + '<div class="champ" id="f-sms-bloc"><span class="lbl">Message texte (SMS)</span>'
       + '<textarea id="f-sms" class="sms" maxlength="480" placeholder="SANDRIZA : nos nouveautés sont arrivées !">'
@@ -509,7 +509,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + (BMODE === 'visuel' ? ' style="display:none"' : '') + '>' + esc(c.html || '') + '</textarea>'
       + ligneVars(VARS_CAMP) + '</div>'
       + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
-      + '<div class="chrome">✉ Aperçu — marie@example.com</div>'
+      + '<div class="chrome"><span class="ic">✉</span> Aperçu — marie@example.com</div>'
       + '<iframe id="f-frame" sandbox=""></iframe></div>'
       + '<div class="fin3"><span class="gauche aide">Enregistrée en <strong>brouillon</strong> : '
       + 'rien ne part tant que vous n’appuyez pas sur « Envoyer ».</span>'
@@ -545,7 +545,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + ligneVars(VARS_CHAINE, '⚠ Les variables de panier ne se remplissent que dans une chaîne '
           + 'dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.')
       + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
-      + '<div class="chrome">✉ Aperçu — marie@example.com</div>'
+      + '<div class="chrome"><span class="ic">✉</span> Aperçu — marie@example.com</div>'
       + '<iframe id="f-frame" sandbox=""></iframe></div>'
       + '<div class="fin3"><button id="f-annuler">Annuler</button>'
       + '<button class="prim" id="f-ok">Enregistrer</button></div></div>';

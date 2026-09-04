@@ -236,7 +236,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
          fait chercher la panne ailleurs. La fiche le DIT a la place. */
       if (R.peutSupprimer && R.purgeable) b += '<button class="danger" id="btn-purger"><span class="ic">🗑</span> Supprimer définitivement</button>';
     } else {
-      if (R.peutEcrire) b += '<button class="prim" id="btn-modifier">✎ Modifier</button>';
+      if (R.peutEcrire) b += '<button class="prim" id="btn-modifier"><span class="ic">✎</span> Modifier</button>';
       b += '<button id="btn-releve"><span class="ic">📄</span> État de compte</button>';
       if (R.peutEcrire) b += '<button id="btn-etat">' + (c2.actif ? '⏸ Désactiver' : '▶ Activer') + '</button>';
       if (R.peutSupprimer) b += '<button class="danger" id="btn-corbeille"><span class="ic">🗑</span> Supprimer</button>';
@@ -339,10 +339,10 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     };
     var pg = document.getElementById('btn-purger');
     if (pg) pg.onclick = function(){
-      voile('<h3>⚠ Supprimer définitivement ?</h3>'
+      voile('<h3><span class="ic">⚠</span> Supprimer définitivement ?</h3>'
         + '<p>Effacer <strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + ') de la base ?</p>'
         + '<p style="color:var(--tx-err2)">Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.</p>'
-        + '<p class="aide">✅ Ce compte n’a aucune commande — rien de comptable n’est perdu.</p>'
+        + '<p class="aide"><span class="ic">✅</span> Ce compte n’a aucune commande — rien de comptable n’est perdu.</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
         + '<button class="danger" id="v-oui"><span class="ic">🗑</span> Supprimer définitivement</button></div>',
         function(fermer){

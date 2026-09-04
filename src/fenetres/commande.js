@@ -126,7 +126,7 @@ function pageCommande(id) {
     var h = [];
     var enTete = '<div class="entete"><span class="num">' + esc(CMD.numero) + '</span>'
       + (CMD.prioritaire ? '<span style="font-size:.76rem;background:#7c2d12;color:#fdba74;'
-          + 'border-radius:99px;padding:.12rem .55rem;font-weight:700">⚡ Prioritaire</span>' : '')
+          + 'border-radius:99px;padding:.12rem .55rem;font-weight:700"><span class="ic">⚡</span> Prioritaire</span>' : '')
       + '<span class="cli">' + esc(CMD.client) + '</span>'
       + '<span class="adr">' + esc(CMD.adresse) + '</span>'
       + (CMD.notes ? '<span class="adr" style="color:#f0c987"><span class="ic">📝</span> ' + esc(CMD.notes) + '</span>' : '')

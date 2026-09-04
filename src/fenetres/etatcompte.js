@@ -81,7 +81,7 @@ function pageEtatCompte(userId) {
 <div class="corps" id="corps"><div class="vide">Chargement…</div></div>
 <div class="pied">
   <span class="msg" id="msg"></span>
-  <button id="b-courriel" disabled>✉ Envoyer au client</button>
+  <button id="b-courriel" disabled><span class="ic">✉</span> Envoyer au client</button>
   <button id="b-imprimer" class="prim" disabled><span class="ic">🖨</span> Imprimer</button>
 </div>
 <script>

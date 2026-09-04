@@ -499,11 +499,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     // on ne peut pas assigner d emplacement, et sans SKU de base il n y a ni code
     // de variante ni etiquette.
     if (!ENTREPOTS.length) {
-      h += '<div class="avis">⚠ Aucun emplacement configuré — créez-en un dans '
+      h += '<div class="avis"><span class="ic">⚠</span> Aucun emplacement configuré — créez-en un dans '
         + 'Inventaire puis Entrepôt pour pouvoir en assigner un aux variantes en stock.</div>';
     }
     if (!PROD.sku) {
-      h += '<div class="avis">⚠ Ce produit n’a pas de SKU de base — assignez-lui un SKU '
+      h += '<div class="avis"><span class="ic">⚠</span> Ce produit n’a pas de SKU de base — assignez-lui un SKU '
         + 'dans la liste d’inventaire pour générer les codes de variante et les étiquettes.</div>';
     }
 
@@ -799,7 +799,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // disparaissent d eux-memes une fois la reprise faite.
     if (st.sansSku > 0 && d.peutEcrire) {
       h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
-        + '<span style="flex:1 1 auto">⚠ <b>' + st.sansSku + ' produit(s)</b> sans code SKU '
+        + '<span style="flex:1 1 auto"><span class="ic">⚠</span> <b>' + st.sansSku + ' produit(s)</b> sans code SKU '
         + '— ils sont bloqués à l’achat en boutique.</span>'
         + '<button class="mini" id="btn-skus-tous">Assigner automatiquement</button></div>';
     }
@@ -820,7 +820,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + (nCoches > 1 ? 's' : '') + '</span>'
         + '<span style="flex:1 1 auto"></span>'
         + '<button class="mini rouge" id="lot-app"><span class="ic">🔴</span> Appliquer vente finale</button>'
-        + '<button class="mini vert" id="lot-ret">✅ Retirer vente finale</button>'
+        + '<button class="mini vert" id="lot-ret"><span class="ic">✅</span> Retirer vente finale</button>'
         + '<button class="mini" id="lot-annuler">Annuler</button></div>';
     }
 
@@ -830,7 +830,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<select id="fp-etat">'
       + '<option value=""><span class="ic">📦</span> Tout l’inventaire</option>'
       + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '><span class="ic">🔴</span> En rupture</option>'
-      + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '>⚠ À commander</option>'
+      + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> À commander</option>'
       + '<option value="ok"' + (FP.etat === 'ok' ? ' selected' : '') + '>✓ Seuil non atteint</option>'
       + '</select>'
       + menuCats(d.cats || [])
@@ -883,7 +883,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td class="c" style="white-space:nowrap">'
           +   '<button class="mini" data-inv="' + esc(l.id) + '" title="Gérer l’inventaire"><span class="ic">📦</span> Inventaire</button> '
           +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="Assigner un SKU"><span class="ic">🏷</span> SKU</button> ' : '')
-          +   (d.peutEcrire ? '<button class="mini" data-mod="' + esc(l.id) + '" title="Modifier la fiche produit">✎ Modifier</button> ' : '')
+          +   (d.peutEcrire ? '<button class="mini" data-mod="' + esc(l.id) + '" title="Modifier la fiche produit"><span class="ic">✎</span> Modifier</button> ' : '')
           +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="Mettre en vente"><span class="ic">🛒</span> Vendre</button> ' : '')
           +   (d.peutSupprimer ? '<button class="mini" data-suppr="' + esc(l.id) + '" data-nom="' + esc(l.nom) + '" title="Supprimer de l’inventaire" style="border-color:rgba(239,68,68,.45)"><span class="ic">🗑</span></button>' : '')
           + '</td></tr>';
@@ -1346,7 +1346,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td style="font-weight:600">' + esc(l.nom) + '</td>'
         + '<td colspan="2">' + (l.adresse ? esc(l.adresse) : '<span class="rien">— adresse à remplir —</span>') + '</td>'
         + '<td class="c" style="white-space:nowrap">'
-        + (d.peutEcrire ? '<button class="mini" data-lx-mod="' + esc(l.id) + '" title="Modifier">✎</button> ' : '')
+        + (d.peutEcrire ? '<button class="mini" data-lx-mod="' + esc(l.id) + '" title="Modifier"><span class="ic">✎</span></button> ' : '')
         + (d.peutSupprimer ? '<button class="mini" data-lx-del="' + esc(l.id) + '" title="'
             + (n > 0 ? n + ' emplacement(s) dans ce lieu' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '')
         + '</td></tr>';
@@ -1408,7 +1408,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td>' + (w.reference ? esc(w.reference) : '<span class="rien">—</span>') + '</td>'
         + '<td class="c">' + w.usage + '</td>'
         + '<td class="c" style="white-space:nowrap">'
-        + (d.peutEcrire ? '<button class="mini" data-wh-mod="' + esc(w.id) + '" title="Modifier">✎</button> ' : '')
+        + (d.peutEcrire ? '<button class="mini" data-wh-mod="' + esc(w.id) + '" title="Modifier"><span class="ic">✎</span></button> ' : '')
         + (d.peutSupprimer ? '<button class="mini" data-wh-del="' + esc(w.id) + '" title="'
             + (w.usage > 0 ? w.usage + ' variante(s) utilisent cet emplacement' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '')
         + '</td></tr>';
@@ -1782,7 +1782,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var lignes = (r.conflits || []).map(function(c){
       return '<div class="rangee"><span>' + esc(nommer(c.cle)) + '</span><strong>' + c.actuel + '</strong></div>';
     }).join('');
-    voile('<h3>⚠ Inventaire non enregistré</h3>'
+    voile('<h3><span class="ic">⚠</span> Inventaire non enregistré</h3>'
       + '<p>Un collègue vient de modifier ' + ((r.conflits || []).length > 1 ? 'ces variantes' : 'cette variante')
       + '. <strong>Rien n’a été écrit.</strong></p>'
       + lignes
@@ -1800,18 +1800,18 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function apresSucces(r){
-    var h = '<h3>✅ Inventaire enregistré</h3><p>' + esc(r.nom || '') + '</p>';
+    var h = '<h3><span class="ic">✅</span> Inventaire enregistré</h3><p>' + esc(r.nom || '') + '</p>';
     var c = r.courriels;
     if (c && c.manuel) {
       // ⚠ ON NE PRETEND PAS QUE C EST PARTI. Resend n est pas configure : aucun
       // courriel n a ete envoye, et les demandes restent en attente en base.
-      h += '<p class="" style="color:var(--tx-att)">⚠ ' + c.adresses.length + ' client'
+      h += '<p class="" style="color:var(--tx-att)"><span class="ic">⚠</span> ' + c.adresses.length + ' client'
         + (c.adresses.length > 1 ? 's attendent' : ' attend') + ' cette variante, et '
         + '<strong>aucun courriel n’est parti</strong> — la clé d’envoi n’est pas configurée '
         + '(Configuration puis Infolettre). Les demandes restent en attente.</p>'
         + '<textarea rows="2" readonly>' + esc(c.adresses.join(', ')) + '</textarea>';
     } else if (c) {
-      h += '<p style="color:var(--tx-ok)">✉ ' + c.envoyes + ' courriel' + (c.envoyes > 1 ? 's' : '')
+      h += '<p style="color:var(--tx-ok)"><span class="ic">✉</span> ' + c.envoyes + ' courriel' + (c.envoyes > 1 ? 's' : '')
         + ' de retour en inventaire envoyé' + (c.envoyes > 1 ? 's' : '')
         + (c.echecs ? ', <span style="color:var(--tx-err)">' + c.echecs + ' échec'
             + (c.echecs > 1 ? 's' : '') + '</span>' : '') + '.</p>';

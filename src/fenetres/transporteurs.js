@@ -228,7 +228,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function cartePcHtml(){
     var pc = (D.carriers || {})['postes-canada'] || {};
     var m = pc.cle || { defini: false, fin: '' };
-    var h = '<div class="carte"><div class="th"><span class="em">📮</span>'
+    var h = '<div class="carte"><div class="th"><span class="em"><span class="ic">📮</span></span>'
       + '<h2>Postes Canada</h2>' + basculeHtml('cp-en', pc.enabled) + '</div>';
     h += '<div class="info">Identifiants sur <b>developer.canadapost-postescanada.ca</b>. La clé API est au '
       + 'format <b>utilisateur:motdepasse</b>. Valeurs de test : '
@@ -264,7 +264,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // Filet : identifiants non chargés → on avertit et on n'écrit pas.
     if (D && D.charge === false) {
       avertEl.hidden = false;
-      avertEl.innerHTML = '<b>⚠ Identifiants non chargés</b> — les identifiants API n’ont pas pu être '
+      avertEl.innerHTML = '<b><span class="ic">⚠</span> Identifiants non chargés</b> — les identifiants API n’ont pas pu être '
         + 'rechargés depuis le nuage cette session' + (D.raison ? ' (' + esc(D.raison) + ')' : '')
         + '. <strong>N’enregistrez pas</strong> sans avoir cliqué « Réessayer », sinon vous risqueriez '
         + 'd’effacer vos identifiants.<div class="g"><button id="b-retry">↻ Réessayer le chargement</button></div>';

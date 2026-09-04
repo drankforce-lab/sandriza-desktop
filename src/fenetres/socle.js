@@ -1473,6 +1473,21 @@ html.jour .tete h1{color:#141c28}
    ⚠⚠ ET AUCUN ACCENT GRAVE DANS CE COMMENTAIRE : il vit dans un litteral de
    gabarit, et un seul refermerait CSS_JOUR — donc les 91 fenetres d un coup.
    Mordu trois fois le 2026-08-19, dont ici. */
+/* == LE PICTOGRAMME EST MONOCHROME, ET IL DOIT SE VOIR DANS LES DEUX MODES ===
+   La regle du gris date du 2026-08-19 : << les emojis sont pas encore en noir et
+   blanc, sa devrais toujours etre comme sa >>. Elle vit ici, une seule fois, pour
+   les 91 fenetres.
+   ⚠⚠ MAIS brightness(1.6) ECLAIRCIT, et c est juste sur fond SOMBRE seulement.
+   En mode jour, un pictogramme grise puis eclairci devient BLANC SUR BLANC : sa
+   capture du 2026-09-04 montre un cadenas et une carte bancaire tout simplement
+   ABSENTS. 286 pictogrammes etaient dans ce cas.
+   Le multiplicateur doit donc s inverser avec le mode, comme le reste : on
+   eclaircit sur du sombre, on ASSOMBRIT sur du clair. Un multiplicateur (et non
+   brightness(0), qui ecraserait tout en silhouette noire) garde le relief interne
+   du glyphe.
+   ⚠ LE FILTRE RESTE DANS LA REGLE .ic, pas dans 88 feuilles : c est tout l interet
+   cette regle, et la premiere version de 2026-08-19 s etait justement fait
+   prendre a la recopier partout. */
 .ic{display:inline-block;filter:grayscale(1) brightness(1.6);opacity:.9;font-style:normal}
 
 /* ⚠⚠ ET LA LIMITE DE LA REGLE AU-DESSUS, TROUVEE LE 2026-08-20 : GRISER UN
@@ -1503,6 +1518,9 @@ html.jour .tete h1{color:#141c28}
 .ico{display:inline-flex;align-items:center;justify-content:center;color:var(--tx-gris2)}
 .ico svg{width:17px;height:17px;display:block}
 .tete .ico{opacity:.95}
+/* Le pictogramme en mode JOUR : on assombrit au lieu d eclaircir. Sans cette
+   ligne il est blanc sur blanc - c est le defaut qu il a signale. */
+html.jour .ic{filter:grayscale(1) brightness(.42);opacity:.78}
 html.jour .ico{color:#414e66}
 
 /* ══ LA BOITE DU BROUILLON ══════════════════════════════════

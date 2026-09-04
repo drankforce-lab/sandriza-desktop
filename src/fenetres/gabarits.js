@@ -185,7 +185,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="ch"><label>Sous-titre (vide = tagline du pied de page)</label>'
       + '<input type="text" id="g-sub" value="' + esc(t.headerSubtitle || '') + '" placeholder="ÉLÉGANCE · RAFFINEMENT · STYLE"' + (RO ? ' disabled' : '') + '></div>';
     h += '<label class="bascule"><input type="checkbox" id="g-anim"' + (t.animated ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
-      + '<span><span class="t">✨ Effet animé CSS (en-tête &amp; pied)</span><br><span class="d">Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.</span></span></label>';
+      + '<span><span class="t"><span class="ic">✨</span> Effet animé CSS (en-tête &amp; pied)</span><br><span class="d">Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.</span></span></label>';
     h += '<label class="bascule"><input type="checkbox" id="g-gif"' + (t.gifBanner ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
       + '<span><span class="t"><span class="ic">🖼️</span> Bannière animée GIF (compatible Gmail)</span><br><span class="d">Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.</span></span></label>';
     h += '<div class="gr2">' + coulChamp('g-fbg', 'Pied : couleur de fond', t.footerBg || '#1a1a2e')
@@ -217,7 +217,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="swatch"><div class="b1" style="background:linear-gradient(90deg,' + esc(t.headerBgFrom) + ',' + esc(t.headerBgTo) + ')"></div>'
         + '<span class="lb">en-tête</span><div class="b2" style="background:' + esc(t.footerBg) + '"></div><span class="lb">pied</span></div></div>'
         + '<div style="display:flex;gap:.35rem">'
-        + '<button class="b" type="button" data-edit="' + esc(t.id) + '">✏️ Modifier</button>'
+        + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✏</span>️ Modifier</button>'
         + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span> Copier</button>')
         + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? 'Confirmer ?' : '<span class="ic">🗑</span>') + '</button>') : '')
         + '</div></div>';

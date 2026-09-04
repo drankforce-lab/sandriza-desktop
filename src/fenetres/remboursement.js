@@ -191,7 +191,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessiner(){
     if (R.complet || !R.articles.length) {
       corps.innerHTML = '<div class="carte">' + (R.complet
-        ? '<div class="avis vert" style="margin:0">✅ Commande entièrement remboursée — total : '
+        ? '<div class="avis vert" style="margin:0"><span class="ic">✅</span> Commande entièrement remboursée — total : '
           + argent(R.dejaRembourse) + '.</div>'
         : '<div class="avis jaune" style="margin:0">Tous les articles de cette commande ont déjà été remboursés.</div>')
         + '</div>';

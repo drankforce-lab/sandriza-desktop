@@ -254,7 +254,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-copier="' + esc(l.url) + '"><span class="ic">📋</span></button> '
             + (l.etat === 'actif'
-                ? '<button class="mini" data-renvoyer="' + esc(l.id) + '">✉ Renvoyer</button> '
+                ? '<button class="mini" data-renvoyer="' + esc(l.id) + '"><span class="ic">✉</span> Renvoyer</button> '
                   + '<button class="mini dgr" data-revoquer="' + esc(l.id) + '">'
                   + (ARME === l.id ? 'Confirmer ?' : 'Révoquer') + '</button> '
                 /* ⚠ SUPPRIMER N EST OFFERT QUE SUR UN LIEN PERIME (#30). Sur un

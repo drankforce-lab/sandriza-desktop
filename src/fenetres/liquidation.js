@@ -534,12 +534,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="titre" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin:0 0 .4rem">'
       +   LOT.ordre.length + ' produit' + (LOT.ordre.length === 1 ? '' : 's') + ' qui changent de régime</div>'
       + '<div class="liste">' + liste + '</div>'
-      + '<div class="gare">⚠ Ces produits n’accepteront plus de retour, et la boutique l’annoncera sur '
+      + '<div class="gare"><span class="ic">⚠</span> Ces produits n’accepteront plus de retour, et la boutique l’annoncera sur '
       +   'leur fiche. Vous pourrez les retirer un par un depuis cet écran.</div>'
       + '<div class="pied-boite">'
       +   '<button class="gauche" data-lotretour="1">← Modifier la sélection</button>'
       +   '<button data-lotfermer="1">Annuler</button>'
-      +   '<button class="prim" data-lotappliquer="1">✅ Appliquer</button>'
+      +   '<button class="prim" data-lotappliquer="1"><span class="ic">✅</span> Appliquer</button>'
       + '</div>'
       + '</div></div>';
   }

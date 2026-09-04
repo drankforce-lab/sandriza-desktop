@@ -301,7 +301,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div style="margin-top:.7rem"><button class="prim" data-act="coloradd">+ Ajouter la couleur</button></div>';
   }
   function secCodes(){
-    var alerte = D.conflits.length ? '<div class="alerte">⚠ <strong>' + D.conflits.length + ' code' + plur(D.conflits.length) + ' porté' + plur(D.conflits.length) + ' par plusieurs couleurs</strong> — '
+    var alerte = D.conflits.length ? '<div class="alerte"><span class="ic">⚠</span> <strong>' + D.conflits.length + ' code' + plur(D.conflits.length) + ' porté' + plur(D.conflits.length) + ' par plusieurs couleurs</strong> — '
       + D.conflits.map(function(c){ return '<code>' + esc(c.code) + '</code> : ' + esc(c.noms.join(', ')); }).join(' · ')
       + '. Ces variantes partagent le même code-barres.</div>' : '';
     var bouton = D.suggestions.length ? '<div style="margin-bottom:.7rem"><button class="prim" data-act="codesassign">Attribuer des codes courts (' + D.suggestions.length + ')</button> '
@@ -323,7 +323,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!D.custom.length) return '<p class="aide" style="margin:0">Aucune couleur personnalisée. Ajoutez-en via « Ajouter une nouvelle couleur ».</p>';
     return D.custom.map(function(c){
       var use = c.used > 0 ? '<span class="pill used">' + c.used + ' produit' + plur(c.used) + '</span>' : '<span class="pill no">non utilisée</span>';
-      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '">✏️ Modifier</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? 'utilisée — bloqué' : 'Supprimer') + '">Supprimer</button>' : '';
+      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span>️ Modifier</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? 'utilisée — bloqué' : 'Supprimer') + '">Supprimer</button>' : '';
       return '<div class="cust"><span class="pastille" style="' + (c.gradient ? 'border-radius:4px;' : '') + 'background:' + esc(c.hex) + '"></span>'
         + '<span class="nm">' + esc(c.nom) + '</span>' + use
         + '<span class="mono" style="color:var(--tx2);font-size:.72rem">' + (c.gradient ? 'dégradé' : esc(c.hex)) + '</span>' + act + '</div>';
@@ -385,14 +385,14 @@ ${JS_ACTIVITE}${JS_DIRE}
     var cats = D.categories || [];
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
-      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '">✏️</button>' : '';
+      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✏</span>️</button>' : '';
       var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' produit(s) — bloqué' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '';
       return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
         + '<td style="font-weight:600">' + esc(c.name) + '</td>'
         + '<td style="color:var(--tx2)">' + esc(c.nameEN || '—') + '</td>'
         + '<td><code>' + esc(c.catKey) + '</code></td>'
         + '<td><span class="mono" style="font-weight:700;background:rgba(150,130,105,.18);padding:.1rem .45rem;border-radius:4px">' + esc(c.code) + '</span></td>'
-        + '<td style="text-align:center">' + (c.aiOn ? '<span style="color:var(--tx-or)" title="Canvas auto">⚡</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
+        + '<td style="text-align:center">' + (c.aiOn ? '<span style="color:var(--tx-or)" title="Canvas auto"><span class="ic">⚡</span></span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td style="text-align:center">' + (c.simpleOn ? '<span style="color:var(--tx-or)">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td style="text-align:center">' + c.used + '</td>'
         + '<td style="text-align:right">' + edit + del + '</td></tr>';
