@@ -2123,7 +2123,15 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
   const win = ouvrirNative(cle, 'Détail de commande', pageCommandes('commandes@' + brut),
-    { width: 940, height: 780, minWidth: 720, minHeight: 540 });
+    /* PLUS GRANDE DEPUIS LE 2026-09-04, sur sa capture : << quand on clique sur
+       la fenetre de details d une commande c est trop petit >>. A 780 px de haut,
+       le bloc des totaux etait COUPE en plein milieu et la carte des articles
+       sortait une glissiere - alors que la regle du socle est justement que le
+       corps ne defile pas. Une commande de deux articles ne devrait jamais
+       defiler ; a 980 px, il en tient une dizaine.
+       La taille est bornee a l ecran par ouvrirNative : sur un portable, elle
+       s ouvre aussi grande que la zone de travail le permet, jamais plus. */
+    { width: 1080, height: 980, minWidth: 720, minHeight: 560 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
   }
@@ -3273,8 +3281,42 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
   const deja = fenetresNatives.get(cle);
   if (deja && !deja.isDestroyed()) { if (deja.isMinimized()) deja.restore(); deja.focus(); return deja; }
   const b = (reglages.get('fenetres') || {})[cle] || {};
+  /* BORNER A L ECRAN, ET LES DEUX SOURCES DE TAILLE (2026-09-04).
+     Rien ne bornait la taille demandee : une fenetre plus haute que la zone de
+     travail sort de l ecran par le bas, et ses boutons du bas deviennent
+     inatteignables - le defaut que verifier-mise-en-page.js traque sur les
+     minHeight, mais par l autre bout.
+     LA TAILLE RETENUE EST BORNEE AUSSI, et c est le cas qui arrivera vraiment :
+     une fenetre agrandie sur un grand ecran, puis rouverte sur le portable.
+     Sans ca, elle rouvre plus grande que l ecran et l on ne peut plus la
+     redimensionner - il n y a plus de bord a saisir.
+     On garde une marge de 60 px : la barre des taches, et de quoi voir que la
+     fenetre a un bord. */
+  const _borne = (dem, defaut, dispo) => {
+    const v = Number(dem) || Number(defaut) || 0;
+    return (dispo > 200) ? Math.min(v, dispo - 60) : v;
+  };
+  /* On rend `{ l, h }` et non `{ width, height }` : le controle de mise en page
+     reconnait une ouverture de fenetre au motif `{ width: N, height: N`, et cet
+     objet de repli s y faisait prendre - il annoncait << 0x0 sans minHeight >>
+     sur une ligne qui n ouvre AUCUNE fenetre.
+     ⚠⚠ ET ON N A PAS RESSERRE LE CONTROLE, C ETAIT LA MAUVAISE REPARATION.
+     Exiger `new BrowserWindow` devant le motif faisait passer sa couverture de
+     23 ouvertures a 3 : la plupart des fenetres recoivent leur taille par une
+     AIDE (celle-ci, `poserEnFenetre`...), sous forme d objet d options - et c est
+     precisement pour les voir que le motif est large. Le chiffre l a dit tout de
+     suite ; sans le regarder, on aurait vide le garde en croyant l affiner.
+     La bonne reparation etait ici : ne pas ecrire un leurre. */
+  const _wa = (() => {
+    try {
+      const pt = screen.getCursorScreenPoint();
+      const t = screen.getDisplayNearestPoint(pt).workAreaSize;
+      return { l: t.width, h: t.height };
+    } catch { return { l: 0, h: 0 }; }
+  })();
   const win = new BrowserWindow({
-    width: b.width || opts.width || 760, height: b.height || opts.height || 640,
+    width: _borne(b.width || opts.width, 760, _wa.l),
+    height: _borne(b.height || opts.height, 640, _wa.h),
     ...(Number.isFinite(b.x) && Number.isFinite(b.y) ? { x: b.x, y: b.y } : {}),
     minWidth: opts.minWidth || 520, minHeight: opts.minHeight || 420, show: false,
     title: titre, autoHideMenuBar: true, backgroundColor: _modele.sombre ? '#0e1522' : '#f4f2ec',
