@@ -63,7 +63,7 @@ label.bascule input{width:16px;height:16px;accent-color:#c9a97e;flex:0 0 auto}
 label.champ{display:block;margin:0 0 .8rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
-input.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;
+input.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.45rem .6rem}
 textarea.t{min-height:4.2em;resize:vertical;line-height:1.5}
 input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}

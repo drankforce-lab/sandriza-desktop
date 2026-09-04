@@ -60,7 +60,7 @@ td.dr{text-align:right;white-space:nowrap}
 .comp{display:inline-flex;align-items:center;gap:.3rem;margin:.15rem .8rem .15rem 0}
 .comp .org{font-size:.7rem;color:var(--tx3)}
 input[type=text],input[type=number]{font:inherit;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:7px;padding:.25rem .4rem}
+  border:1px solid var(--v12);border-radius:7px;padding:.25rem .4rem}
 input[type=text]:focus,input[type=number]:focus{outline:none;border-color:#c9a97e}
 input:disabled{opacity:.55}
 .nom{width:5.5rem}

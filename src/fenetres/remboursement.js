@@ -56,6 +56,10 @@ button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.paie{background:#7859f7;border-color:#7859f7;color:var(--tx-sur-accent);font-weight:600}
+/* La reprise generique du mode jour repeint TOUT bouton en blanc
+   (html.jour button, specificite 0,1,2) et l'emporte sur button.paie
+   (0,1,1). Sans cette ligne, ce bouton perd sa couleur en plein jour. */
+html.jour button.paie{background:#7859f7;color:#fff;border-color:#7859f7}
 button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .art{display:flex;align-items:center;gap:.6rem;padding:.35rem .45rem;border-radius:8px;
   background:var(--v03);border:1px solid var(--v06);margin-top:.3rem}

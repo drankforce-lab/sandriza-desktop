@@ -39,7 +39,7 @@ body{background:var(--f-page);color:var(--tx);
 .chef .bascule{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--tx2)}
 label{cursor:pointer}
 input[type=checkbox]{accent-color:#c9a97e;width:1.1rem;height:1.1rem;cursor:pointer}
-input[type=time]{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
+input[type=time]{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.3rem .5rem;width:9rem}
 input[type=time]:disabled{opacity:.4}
 table{width:100%;border-collapse:collapse;font-size:.86rem}

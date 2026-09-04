@@ -46,7 +46,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .ch{margin:0 0 .8rem}.ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:var(--tx2)}
 .ch input,.ch textarea{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.42rem .5rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.42rem .5rem}
 .ch textarea{font-family:ui-monospace,Consolas,monospace;font-size:.76rem;resize:vertical;min-height:5rem}
 .ch input:focus,.ch textarea:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled,.ch textarea:disabled{opacity:.55}

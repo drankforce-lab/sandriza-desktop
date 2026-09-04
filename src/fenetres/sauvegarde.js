@@ -83,7 +83,7 @@ table.tb td{padding:.6rem .7rem;border-bottom:1px solid var(--v06);font-size:.85
 label.champ{display:block;margin:0 0 .9rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
-input.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
+input.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 input.t:focus{outline:none;border-color:#c9a97e}
 input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .garde{border-radius:9px;padding:.85rem 1rem;font-size:.83rem;line-height:1.6;margin:0 0 1rem}

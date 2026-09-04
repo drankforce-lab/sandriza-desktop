@@ -59,14 +59,14 @@ body{background:var(--f-page);color:var(--tx);
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
 .ch label .pt{color:var(--tx3);font-size:.72rem}
 .ch input[type=text]{width:100%;box-sizing:border-box;font:inherit;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.42rem .55rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input[type=text]:focus{outline:none;border-color:#c9a97e}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 .trois{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem}
 @media (max-width:620px){.deux,.trois{grid-template-columns:1fr}}
-select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
+select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.4rem .5rem;width:100%}
-input[type=color]{width:100%;height:2.1rem;padding:0;border:1px solid #2b3444;
+input[type=color]{width:100%;height:2.1rem;padding:0;border:1px solid var(--v12);
   border-radius:8px;background:var(--f-champ);cursor:pointer}
 input[type=color]:disabled,input[type=text]:disabled,select:disabled{opacity:.55;cursor:default}
 .bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
@@ -120,7 +120,7 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .lgn .tt{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .lgn .ss{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase}
 .lgn .cadre{border-radius:8px;padding:.6rem;width:100%;max-width:15rem;margin-top:.2rem}
-.lgn .champ{background:var(--f-0f172a);border:1px solid #334155;border-radius:4px;
+.lgn .champ{background:var(--f-0f172a);border:1px solid var(--v18);border-radius:4px;
   padding:.25rem .45rem;margin-bottom:.35rem;color:var(--tx-f1f5f9);font-size:.62rem;text-align:left}
 .lgn .bt{border-radius:4px;padding:.28rem;text-align:center;color:var(--tx-blanc);font-size:.62rem;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -427,7 +427,7 @@ ${JS_ACTIVITE}${JS_DIRE}
                + v('t-logo-to') + ')">' + esc(m.letter || 'É') + '</div>';
     h += '<div class="tt" style="color:' + esc(v('t-title')) + '">' + esc(m.name || 'SANDRIZA') + '</div>';
     h += '<div class="ss" style="color:' + esc(v('t-sub-col')) + '">' + esc(v('t-sub')) + '</div>';
-    h += '<div class="cadre" style="background:' + esc(v('t-card')) + ';border:1px solid #334155">'
+    h += '<div class="cadre" style="background:' + esc(v('t-card')) + ';border:1px solid var(--v18)">'
       + '<div class="champ">utilisateur</div><div class="champ">••••••••</div>'
       + '<div class="bt" style="background:linear-gradient(135deg,' + v('t-btn-from') + ',' + v('t-btn-to') + ')">Se connecter</div>'
       + '</div></div>';

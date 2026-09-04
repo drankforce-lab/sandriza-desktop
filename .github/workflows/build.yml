@@ -175,6 +175,12 @@ jobs:
       # ⚠ C'est un CLIQUET, pas une porte fermée : la queue restante est déclarée
       # avec son nombre dans `contraste-jour-declare.js`, et le banc refuse une
       # couleur neuve sous le seuil ou un plafond qui monte.
+      # ⚠ `banc-texte-sur-fond.js` (2026-09-04) mesure le texte contre le fond de
+      # SON PROPRE ELEMENT, pas contre celui de la page. C'est ce qui manquait :
+      # un vert clair sur une pastille vert pale donne 1.02 de ratio, invisible,
+      # alors que le meme vert sur le creme de la page passe le seuil. 40 regles
+      # etaient en defaut, dont 25 sous 1.5. La cause de fond : les jetons de la
+      # charte (--sz-accent et les six themes) n'avaient aucune valeur de jour.
       # ⚠ `banc-fonds-jour.js` (2026-09-04) est la moitié manquante du banc de
       # contraste, qui ne regarde QUE le texte et le dit dans son en-tête. Onze
       # vraies surfaces — fil des étapes des fiches, corps de facture, bande de
@@ -209,6 +215,7 @@ jobs:
           node tools/banc-pictogrammes.js
           node tools/banc-jetons.js
           node tools/banc-fonds-jour.js
+          node tools/banc-texte-sur-fond.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

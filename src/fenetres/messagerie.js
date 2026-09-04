@@ -99,7 +99,7 @@ function pageMessagerie() {
 <div class="pied"><span class="msg" id="msg"></span>
   <span id="ret" hidden style="margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--tx2)">
     <span title="Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.">Réponses conservées</span>
-    <input id="ret-mois" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;border-radius:6px;padding:.2rem .35rem">
+    <input id="ret-mois" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:6px;padding:.2rem .35rem">
     <span>mois</span>
     <button id="ret-save" style="font:inherit;font-size:.74rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:6px;padding:.22rem .5rem;cursor:pointer">Enregistrer</button>
   </span></div>

@@ -47,18 +47,18 @@ body{background:var(--f-page);color:var(--tx);
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}
 .ch input[type=text],.ch select{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .ch input:focus,.ch select:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled,.ch select:disabled{opacity:.55}
 .coul{display:flex;gap:.5rem;align-items:center}
-.coul input[type=color]{height:36px;width:48px;padding:0;border:1px solid #2b3444;border-radius:8px;background:var(--f-champ);cursor:pointer;flex:0 0 auto}
+.coul input[type=color]{height:36px;width:48px;padding:0;border:1px solid var(--v12);border-radius:8px;background:var(--f-champ);cursor:pointer;flex:0 0 auto}
 .coul input[type=text]{flex:1;font-family:ui-monospace,Consolas,monospace}
 .bascule{display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;padding:.55rem .7rem;background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:9px;margin:0 0 .7rem;-webkit-user-select:none;user-select:none}
+  border:1px solid var(--v12);border-radius:9px;margin:0 0 .7rem;-webkit-user-select:none;user-select:none}
 .bascule input{margin-top:.15rem;accent-color:#c9a97e;cursor:pointer;flex:0 0 auto}
 .bascule .t{font-size:.82rem;font-weight:600}
 .bascule .d{font-size:.72rem;color:var(--tx2);line-height:1.45}
-.apercu{border-radius:9px;overflow:hidden;font-size:12px;max-width:420px;margin:.2rem 0 .8rem;border:1px solid #2b3444}
+.apercu{border-radius:9px;overflow:hidden;font-size:12px;max-width:420px;margin:.2rem 0 .8rem;border:1px solid var(--v12)}
 .apercu .head{padding:16px 24px;text-align:center}
 .apercu .head .ti{font-family:Georgia,serif;font-size:16px;font-weight:700;letter-spacing:4px;color:var(--tx-blanc)}
 .apercu .head .su{font-size:8px;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
@@ -67,10 +67,10 @@ body{background:var(--f-page);color:var(--tx);
 .apercu .foot .cp{font-size:10px}
 .gifwrap{max-width:420px;margin:0 0 .8rem}
 .gifwrap .lg{font-size:.73rem;color:var(--tx2);margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem}
-.gifwrap img{display:block;width:100%;border-radius:8px;border:1px solid #2b3444;background:var(--f-champ);min-height:60px}
+.gifwrap img{display:block;width:100%;border-radius:8px;border:1px solid var(--v12);background:var(--f-champ);min-height:60px}
 @keyframes szshine{0%{background-position:0% 50%}100%{background-position:220% 50%}}
 .anim{animation:szshine 6s linear infinite}
-.ligne{display:flex;align-items:center;gap:1rem;padding:.6rem .8rem;background:var(--f-champ);border:1px solid #2b3444;border-radius:9px;margin:0 0 .55rem}
+.ligne{display:flex;align-items:center;gap:1rem;padding:.6rem .8rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;margin:0 0 .55rem}
 .ligne .nom{flex:1;font-size:.85rem;font-weight:600}
 .ligne .def{font-size:.7rem;color:var(--tx2);font-weight:400;margin-left:.4rem}
 .swatch{display:flex;gap:6px;align-items:center;margin-top:4px}
@@ -81,7 +81,7 @@ body{background:var(--f-page);color:var(--tx);
 .tbl th{text-align:left;color:var(--tx2);font-weight:600;padding:.45rem .6rem;border-bottom:1px solid var(--v10);font-size:.72rem;text-transform:uppercase}
 .tbl td{padding:.4rem .6rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 .tbl td .mod{color:var(--tx2)}
-.tbl select{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-page);border:1px solid #2b3444;border-radius:7px;padding:.3rem .4rem}
+.tbl select{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-page);border:1px solid var(--v12);border-radius:7px;padding:.3rem .4rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}

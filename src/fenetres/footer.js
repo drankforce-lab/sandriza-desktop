@@ -44,7 +44,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
 .ch label .pt{color:var(--tx3);font-size:.72rem}
 .ch input{width:100%;box-sizing:border-box;font:inherit;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.42rem .55rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 @media (max-width:560px){.deux{grid-template-columns:1fr}}

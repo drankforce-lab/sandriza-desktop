@@ -48,7 +48,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .b.dgr{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover:not(:disabled){background:rgba(248,113,113,.16)}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.recherche{flex:1 1 15rem;max-width:24rem;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;
+.recherche{flex:1 1 15rem;max-width:24rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;padding:.45rem .7rem}
 .recherche:focus{outline:none;border-color:#c9a97e}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:0 0 1.2rem}
@@ -117,7 +117,7 @@ label.champ{display:block;margin:0 0 .9rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
 label.champ .req{color:var(--tx-err2)}
-input.t,select.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
+input.t,select.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;cursor:pointer;margin:0 0 .55rem;line-height:1.45}
 label.case input{width:16px;height:16px;accent-color:#c9a97e;margin-top:.15rem;flex:0 0 auto}
@@ -296,7 +296,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       for (var m=0;m<grp.modules.length;m++){ var mod=grp.modules[m];
         h += '<tr><td class="mod">'+esc(mod.label)+'</td>';
         for (var a2=0;a2<acts.length;a2++){ var act=acts[a2];
-          if (mod.actions.indexOf(act)<0){ h += '<td style="color:#3a465a">—</td>'; continue; }
+          if (mod.actions.indexOf(act)<0){ h += '<td style="color:var(--tx3)">—</td>'; continue; }
           var key = mod.key+':'+act;
           h += '<td><input type="checkbox" data-perm="'+esc(key)+'" '+(eff.indexOf(key)>=0?'checked':'')+'></td>';
         }
@@ -485,7 +485,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<p class="aideOng"><b>Étape 1</b> — Scannez le QR avec Google Authenticator, Authy ou une application TOTP compatible, ou entrez la clé manuellement.</p>'
       + '<div style="text-align:center;background:var(--f-pied);padding:1rem;border-radius:9px;margin:.6rem 0">'
       + '<img id="m-qr" src="'+esc(s.qrUrl)+'" alt="QR MFA" style="width:190px;height:190px;border-radius:8px;background:#fff"></div>'
-      + '<div style="text-align:center;background:var(--f-champ);border:1px solid #2b3444;border-radius:9px;padding:.6rem">'
+      + '<div style="text-align:center;background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;padding:.6rem">'
       + '<div class="sub" style="color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;font-size:.72rem">Clé secrète (saisie manuelle)</div>'
       + '<code style="font-size:.9rem;letter-spacing:.12em;word-break:break-all;color:var(--tx)">'+esc(s.secretGroupe||s.secret||'')+'</code>'
       + '<div style="font-size:.72rem;color:var(--tx-gris)">Base32 · SHA-1 · 6 chiffres · 30 s</div></div>'

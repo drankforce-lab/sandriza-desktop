@@ -69,6 +69,10 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 /* ⚠ LE BOUTON QUI DEPENSE est d une AUTRE couleur que celui qui confirme : on ne
    doit jamais les confondre du coin de l oeil. */
 button.paie{background:#7859f7;border-color:#7859f7;color:var(--tx-sur-accent);font-weight:600}
+/* La reprise generique du mode jour repeint TOUT bouton en blanc
+   (html.jour button, specificite 0,1,2) et l'emporte sur button.paie
+   (0,1,1). Sans cette ligne, ce bouton perd sa couleur en plein jour. */
+html.jour button.paie{background:#7859f7;color:#fff;border-color:#7859f7}
 button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 button.mini{padding:.14rem .5rem;font-size:.76rem}
 

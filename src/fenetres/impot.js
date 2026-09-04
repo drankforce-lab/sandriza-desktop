@@ -109,7 +109,7 @@ label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-
   color:var(--tx2);margin:0 0 .22rem}
 label.champ .req{color:var(--tx-att);text-transform:none;letter-spacing:0;font-size:.64rem}
 label.champ .sub{display:block;font-size:.68rem;color:var(--tx3);margin:.2rem 0 0;line-height:1.45}
-input.t,select.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;
+input.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
 input.t.mono{font-family:Consolas,monospace;font-size:.8rem;text-transform:uppercase}
 input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}

@@ -42,7 +42,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .lcard .mt{font-size:.7rem;color:var(--tx2);display:flex;flex-wrap:wrap;gap:.35rem}
 .lcard .pr{font-size:.7rem;border:1px solid;border-radius:6px;padding:0 .35rem;align-self:flex-start}
 .lcard .acts{display:flex;gap:.3rem;margin-top:.2rem}
-.lcard .nmedit{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;border-radius:6px;padding:.25rem .4rem}
+.lcard .nmedit{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:6px;padding:.25rem .4rem}
 .vide{padding:2rem 1rem;text-align:center;color:var(--tx2);font-size:.85rem}
 /* Import / recadrage */
 .imp{display:grid;grid-template-columns:minmax(16rem,22rem) 1fr;gap:1.2rem;max-width:60rem}
@@ -51,11 +51,11 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .h{font-size:.74rem;font-weight:700;color:var(--tx-bleute);text-transform:uppercase;letter-spacing:.04em;margin:.2rem 0 .5rem}
 .det .row{display:flex;justify-content:space-between;gap:.6rem;font-size:.8rem;padding:.15rem 0}
 .det .row span{color:var(--tx2)}
-.prevbox{background:var(--f-champ) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22><rect width=%228%22 height=%228%22 fill=%22%23172233%22/><rect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22%23172233%22/></svg>');border:1px solid #2b3444;border-radius:9px;min-height:150px;display:flex;align-items:center;justify-content:center;padding:.5rem}
+.prevbox{background:var(--f-champ) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22><rect width=%228%22 height=%228%22 fill=%22%23172233%22/><rect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22%23172233%22/></svg>');border:1px solid var(--v12);border-radius:9px;min-height:150px;display:flex;align-items:center;justify-content:center;padding:.5rem}
 .prevbox canvas{max-width:100%;display:block}
 .ch{margin:0 0 .7rem}.ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}
-.ch input{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+.ch input{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .modes,.rrow{display:flex;gap:.4rem;flex-wrap:wrap;margin:0 0 .6rem}
 .modes button,.rrow button{font:inherit;font-size:.78rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.32rem .6rem;cursor:pointer}

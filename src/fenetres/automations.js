@@ -48,7 +48,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch.plein{flex:1 1 100%}
 .ch label{display:block;margin-bottom:.22rem;font-size:.73rem;color:var(--tx2)}
 .ch input{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .ch input.mono{font-family:ui-monospace,Consolas,monospace;font-size:.76rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled{opacity:.55}

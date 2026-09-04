@@ -67,7 +67,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}
 .ch input,.ch select{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .ch input.mono{font-family:ui-monospace,Consolas,monospace}
 .ch input:focus,.ch select:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled,.ch select:disabled{opacity:.55}

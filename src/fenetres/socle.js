@@ -1454,7 +1454,7 @@ const CSS_JOUR = `
    (element + classe) l emporte sur :root, et CSS_JOUR est appende APRES le CSS
    de chaque fenetre - donc ceci commande partout, sans une seule reprise locale. */
 ${JETONS_NUIT}
-html.jour{--f-entete:#e9e5da;--v15:rgba(15,23,42,0.195);--v18:rgba(15,23,42,0.234);--v20:rgba(15,23,42,0.26);--v25:rgba(15,23,42,0.325);--v28:rgba(15,23,42,0.364);--tx-sur-accent:#ffffff;--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#387652;--tx-err:#ab4e4e;--tx-err2:#905e5e;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#76694e;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b;--tx-f6a5a5:#8c5e5e;--tx-c3cede:#656b73;--tx-94a3b8:#626c79;--tx-f6a6a6:#8c5f5f;--tx-fcd9a6:#796850;--tx-e6cfa8:#756a56;--tx-f0e4d2:#716b63;--tx-f1ece4:#6c6a67;--tx-e6ded2:#6e6b65;--tx-f0e2c8:#716a5e;--tx-f0a0a0:#8e5e5e;--tx-fda4af:#905d64;--tx-f1f5f9:#6a6c6e;--tx-cdd7e5:#676c73;--tx-cfd8e4:#686c72;--tx-c0cad8:#666b72;--tx-e8dcc4:#6f6a5e;--tx-e7cfa8:#766a56;--tx-c3cfdd:#656c73;--f-page:#f4f2ec;--f-carte:#ffffff;--f-pied:#efece4;--f-champ:#ffffff;--f-carte2:#faf8f3;--f-pill:#eeebe3;--f-0f1826:#ffffff;--f-0f172a:#ffffff;--f-131c2b:#faf8f3;--f-16202c:#ffffff;--f-bande:#efece4;--v02:rgba(15,23,42,0.026);--v025:rgba(15,23,42,0.033);--v03:rgba(15,23,42,0.039);--v035:rgba(15,23,42,0.046);--v04:rgba(15,23,42,0.052);--v045:rgba(15,23,42,0.059);--v05:rgba(15,23,42,0.065);--v055:rgba(15,23,42,0.072);--v06:rgba(15,23,42,0.078);--v07:rgba(15,23,42,0.091);--v08:rgba(15,23,42,0.104);--v09:rgba(15,23,42,0.117);--v10:rgba(15,23,42,0.13);--v12:rgba(15,23,42,0.156);--v13:rgba(15,23,42,0.169);--v14:rgba(15,23,42,0.182);--v16:rgba(15,23,42,0.208);--v22:rgba(15,23,42,0.286);--v30:rgba(15,23,42,0.39);--v35:rgba(15,23,42,0.455);--v40:rgba(15,23,42,0.52);--v50:rgba(15,23,42,0.65);--v90:rgba(15,23,42,0.95)}
+html.jour{--f-entete:#e9e5da;--v15:rgba(15,23,42,0.195);--v18:rgba(15,23,42,0.234);--v20:rgba(15,23,42,0.26);--v25:rgba(15,23,42,0.325);--v28:rgba(15,23,42,0.364);--tx-sur-accent:#ffffff;--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#346e4c;--tx-err:#ab4e4e;--tx-err2:#895959;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#72664c;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b;--tx-f6a5a5:#8c5e5e;--tx-c3cede:#656b73;--tx-94a3b8:#626c79;--tx-f6a6a6:#8c5f5f;--tx-fcd9a6:#796850;--tx-e6cfa8:#756a56;--tx-f0e4d2:#716b63;--tx-f1ece4:#6c6a67;--tx-e6ded2:#6e6b65;--tx-f0e2c8:#716a5e;--tx-f0a0a0:#8e5e5e;--tx-fda4af:#905d64;--tx-f1f5f9:#6a6c6e;--tx-cdd7e5:#676c73;--tx-cfd8e4:#686c72;--tx-c0cad8:#666b72;--tx-e8dcc4:#6f6a5e;--tx-e7cfa8:#766a56;--tx-c3cfdd:#656c73;--f-page:#f4f2ec;--f-carte:#ffffff;--f-pied:#efece4;--f-champ:#ffffff;--f-carte2:#faf8f3;--f-pill:#eeebe3;--f-0f1826:#ffffff;--f-0f172a:#ffffff;--f-131c2b:#faf8f3;--f-16202c:#ffffff;--f-bande:#efece4;--v02:rgba(15,23,42,0.026);--v025:rgba(15,23,42,0.033);--v03:rgba(15,23,42,0.039);--v035:rgba(15,23,42,0.046);--v04:rgba(15,23,42,0.052);--v045:rgba(15,23,42,0.059);--v05:rgba(15,23,42,0.065);--v055:rgba(15,23,42,0.072);--v06:rgba(15,23,42,0.078);--v07:rgba(15,23,42,0.091);--v08:rgba(15,23,42,0.104);--v09:rgba(15,23,42,0.117);--v10:rgba(15,23,42,0.13);--v12:rgba(15,23,42,0.156);--v13:rgba(15,23,42,0.169);--v14:rgba(15,23,42,0.182);--v16:rgba(15,23,42,0.208);--v22:rgba(15,23,42,0.286);--v30:rgba(15,23,42,0.39);--v35:rgba(15,23,42,0.455);--v40:rgba(15,23,42,0.52);--v50:rgba(15,23,42,0.65);--v90:rgba(15,23,42,0.95)}
 html.jour .tete h1{color:#141c28}
 
 /* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION — ET LA REGLE EST ICI, UNE
@@ -1619,7 +1619,7 @@ html.jour button.prim{background:#C49A6C;border-color:#C49A6C;color:#241703}
 html.jour button.prim:hover:not(:disabled){background:#d4ad80}
 html.jour button.danger{border-color:rgba(185,28,28,.45);color:#b91c1c}
 html.jour button .n{background:rgba(15,23,42,.08);color:#1d2433}
-html.jour button .n.hi{background:rgba(180,120,10,.18);color:#92610c}
+html.jour button .n.hi{background:rgba(180,120,10,.18);color:#83570b}
 html.jour .carte,html.jour .ligne,html.jour .tuile,html.jour .panneau{
   background:#ffffff;border-color:rgba(15,23,42,.12)}
 html.jour .tuile:hover,html.jour .ligne:hover{border-color:#8a6a3e}
@@ -1634,8 +1634,8 @@ html.jour .msg.bon{color:#15803d}
 html.jour .num{color:#1d2433}
 html.jour .sku,html.jour .etoile{color:#8a6a3e}
 html.jour .prixbarre{color:#414e66}
-html.jour .pill.bon{background:rgba(21,128,61,.12);color:#15803d}
-html.jour .pill.att{background:rgba(180,120,10,.14);color:#92610c}
+html.jour .pill.bon{background:rgba(21,128,61,.12);color:#127136}
+html.jour .pill.att{background:rgba(180,120,10,.14);color:#885a0b}
 html.jour .pill.err{background:rgba(185,28,28,.1);color:#b91c1c}
 html.jour .pill.info{background:rgba(30,64,175,.1);color:#1e40af}
 html.jour .pill.neutre{background:rgba(91,103,121,.12);color:#414e66}
@@ -1742,6 +1742,16 @@ html.jour .sz-btnfen:hover{background:#efece4}
 .sz-msgauto.bon{background:rgba(22,163,74,.14);border-color:rgba(22,163,74,.32);color:var(--tx-ok2)}
 .sz-msgauto.att{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.35);color:var(--tx-or2)}
 html.jour .sz-msgauto{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.14);color:#1d2433}
+/* Les VARIANTES doivent survivre a la reprise generique ci-dessus : celle-ci a
+   la specificite (0,2,1) et bat .sz-msgauto.err (0,2,0), donc sans ces trois
+   lignes le message d'erreur, de succes et d'avertissement devenaient tous gris
+   en mode jour. Leur couleur EST leur sens. */
+html.jour .sz-msgauto.err{background:rgba(171,78,78,.10);border-color:rgba(171,78,78,.32);color:#8a4a4a}
+html.jour .sz-msgauto.bon{background:rgba(21,128,61,.10);border-color:rgba(21,128,61,.30);color:#146c37}
+html.jour .sz-msgauto.att{background:rgba(180,120,10,.12);border-color:rgba(180,120,10,.34);color:#855709}
+/* L'encart d'information est un bleu clair pense pour le fond sombre : sur son
+   propre fond bleute clair il tombe a 1.23 de ratio, illisible. */
+html.jour .info{background:rgba(30,64,175,.09);border-color:rgba(30,64,175,.28);color:#1e40af}
 `;
 
 /* ══ LES JEUX DE COULEURS (#26) ═══════════════════════════════════════════════
@@ -1811,6 +1821,72 @@ html[data-sz-theme="emeraude"]{
   --sz-accent-doux:rgba(52,211,153,.16);
 }
 
+/* ── LA MEME CHARTE, EN MODE JOUR ────────────────────────────────────────────
+   Signale le 2026-09-04, capture a l appui : << il y a encore des zones de texte
+   invisible en mode jour >>. L onglet actif d une fenetre s affichait en or
+   clair sur un fond or clair, illisible.
+
+   La cause : les jetons de la CHARTE ci-dessus (--sz-accent, --sz-texte, les
+   fonds) n avaient AUCUNE valeur de jour. Ils sont dessines pour un fond sombre
+   — un or clair, un texte presque blanc — et restaient tels quels quand la
+   fenetre passait en clair. Meme faille que les jetons --f/--tx repares plus
+   haut, un cran au-dessus.
+
+   ⚠ LA REGLE D ECRITURE, ET ELLE EST DELICATE. html.jour (0,1,1) et
+   html[data-sz-theme="ocean"] (0,1,1) ont LA MEME specificite : seul l ordre
+   du fichier les departage. C est pourquoi ce bloc vient APRES les themes de
+   nuit — sinon un theme de nuit ecraserait le mode jour. Et chaque theme a sa
+   propre reprise html.jour[data-sz-theme="x"] (0,2,1), qui l emporte sur les
+   deux : sans elle, le mode jour generique effacerait la couleur du theme.
+
+   ⚠ LES ACCENTS SONT CALCULES, PAS CHOISIS. Chacun est assombri jusqu a tenir
+   4.5 de ratio SUR BLANC *ET* SUR SON PROPRE FOND DOUX — c est ce second couple
+   (.pill.acc : fond doux + texte accent) qui etait illisible, et le seul
+   controle sur blanc l aurait laisse passer a 3.98. Le theme par defaut retombe
+   exactement sur la palette de jour du reste des fenetres (#f4f2ec).           */
+html.jour{
+  --sz-fond:#f4f2ec; --sz-fond2:#ece8de; --sz-pied:#efece4;
+  --sz-surface:#ffffff; --sz-surface2:#faf8f3;
+  --sz-texte:#1d2433; --sz-attenue:#5a6574;
+  --sz-accent:#77644a; --sz-accent-fort:#60513c; --sz-accent-txt:#ffffff;
+  --sz-accent-doux:rgba(201,169,126,0.18);
+}
+html.jour[data-sz-theme="ocean"]{
+  --sz-fond:#ddedf2; --sz-fond2:#d5e5e9; --sz-pied:#d8e8ed;
+  --sz-surface:#ffffff; --sz-surface2:#eef6f8;
+  --sz-texte:#1d2433; --sz-attenue:#5a6574;
+  --sz-accent:#1f6888; --sz-accent-fort:#195570; --sz-accent-txt:#ffffff;
+  --sz-accent-doux:rgba(56,189,248,0.18);
+}
+html.jour[data-sz-theme="violet"]{
+  --sz-fond:#eae7f2; --sz-fond2:#e2dfe9; --sz-pied:#e5e2ed;
+  --sz-surface:#ffffff; --sz-surface2:#f5f3f8;
+  --sz-texte:#1d2433; --sz-attenue:#5a6574;
+  --sz-accent:#665599; --sz-accent-fort:#52447b; --sz-accent-txt:#ffffff;
+  --sz-accent-doux:rgba(167,139,250,0.18);
+}
+html.jour[data-sz-theme="ardoise"]{
+  --sz-fond:#e5eff2; --sz-fond2:#dde7ea; --sz-pied:#e0ebed;
+  --sz-surface:#ffffff; --sz-surface2:#f3f8f8;
+  --sz-texte:#1d2433; --sz-attenue:#5a6574;
+  --sz-accent:#406c81; --sz-accent-fort:#35596a; --sz-accent-txt:#ffffff;
+  --sz-accent-doux:rgba(125,211,252,0.18);
+}
+html.jour[data-sz-theme="graphite"]{
+  --sz-fond:#f4edd8; --sz-fond2:#ece5d0; --sz-pied:#f0e8d3;
+  --sz-surface:#ffffff; --sz-surface2:#faf6eb;
+  --sz-texte:#1d2433; --sz-attenue:#5a6574;
+  --sz-accent:#806112; --sz-accent-fort:#69500f; --sz-accent-txt:#ffffff;
+  --sz-accent-doux:rgba(251,191,36,0.18);
+}
+html.jour[data-sz-theme="emeraude"]{
+  --sz-fond:#dcefe6; --sz-fond2:#d4e7de; --sz-pied:#d8ebe1;
+  --sz-surface:#ffffff; --sz-surface2:#eef8f2;
+  --sz-texte:#1d2433; --sz-attenue:#5a6574;
+  --sz-accent:#1c7051; --sz-accent-fort:#165b42; --sz-accent-txt:#ffffff;
+  --sz-accent-doux:rgba(52,211,153,0.18);
+}
+
 /* ── L ACCROCHE : les memes selecteurs, en variables ─────────────────────── */
 body{background:var(--sz-fond);color:var(--sz-texte)}
 .tete{background:linear-gradient(180deg,var(--sz-fond2),var(--sz-fond));
@@ -1842,6 +1918,122 @@ button.actif,.jeton.on,.mini.actif{border-color:var(--sz-accent);background:var(
 .portee{background:var(--sz-accent-doux);border-color:var(--sz-accent);color:var(--sz-texte)}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES,
+/* ── LES TEXTES QUI RESTAIENT ILLISIBLES EN MODE JOUR ────────────────────────
+   Signale le 2026-09-04, capture a l appui : << il y a encore des zones de texte
+   invisible en mode jour, corrige cela partout >>.
+
+   CE QUI MANQUAIT AU CONTROLE EXISTANT. Le banc de contraste mesure chaque
+   couleur de texte contre le fond de la PAGE. Or ces textes-la ne sont pas sur
+   la page : ils sont dans une pastille, un encart, un badge, qui ont leur PROPRE
+   fond teinte. Un vert clair sur un vert pale donne 1.02 de ratio et passait
+   inapercu, parce que le meme vert sur le fond creme de la page passait le
+   seuil. Il fallait mesurer le couple texte/fond de CHAQUE regle.
+
+   COMMENT CES VALEURS ONT ETE OBTENUES. Chaque couleur est la couleur d origine
+   ASSOMBRIE du minimum necessaire pour atteindre 4.6 de ratio sur son propre
+   fond de jour — la teinte est conservee, un vert reste vert. Quand un meme
+   selecteur existe dans plusieurs fenetres avec des fonds differents, la valeur
+   retenue tient le seuil sur TOUS. Rien n a ete choisi a la main.
+
+   ⚠ CE BLOC VIENT EN DERNIER, ET C EST OBLIGATOIRE. Ces reprises ont la meme
+   specificite que celles de CSS_JOUR et de CSS_THEMES : seul l ordre les
+   departage. Place avant, il ne servirait a rien.
+   ⚠ ON N ECLAIRCIT JAMAIS UN TEXTE ICI. Un fond reste sombre en mode jour est un
+   defaut de FOND — le blanchir figerait une boite noire dans une fenetre claire.
+   Ces cas-la relevent de banc-fonds-jour.js.                                  */
+const CSS_JOUR_TEXTES = `
+html.jour .alerte{color:#845555}
+html.jour .aud{color:#6c675c}
+html.jour .avis.att{color:#73693e}
+html.jour .avis.bleu{color:#586980}
+html.jour .avis.bon{color:#287644}
+html.jour .avis.calme{color:#5a6573}
+html.jour .avis.info{color:#4d6784}
+html.jour .avis.jaune{color:#72624b}
+html.jour .avis.mal{color:#885858}
+html.jour .avis.non{color:#746845}
+html.jour .avis.ok{color:#476e57}
+html.jour .avis.rouge{color:#885b5b}
+html.jour .avis.vert{color:#427052}
+html.jour .badge.err{color:#774d4d}
+html.jour .badge.info{color:#48607c}
+html.jour .badge.ok{color:#3a674a}
+html.jour .badge.warn{color:#6f5d22}
+html.jour .bien{color:#4f6c5d}
+html.jour .crochet code{color:#6e624e}
+html.jour .echec{color:#795d5d}
+html.jour .ed .zone .re-var-token{color:#70624d}
+html.jour .ed .zone blockquote{color:#666a70}
+html.jour .etat button{color:#8b5c5c}
+html.jour .flot button.dgr:hover{color:#815757}
+html.jour .fonds button.on{color:#6a655d}
+html.jour .garde.rouge{color:#855656}
+html.jour .gare{color:#885858}
+html.jour .jeton{color:#5e656b}
+html.jour .jeton.on{color:#686459}
+html.jour .note{color:#5a6573}
+html.jour .pas button.on{color:#6b665b}
+html.jour .pas span.on{color:#6c675c}
+html.jour .pastille.int{color:#71624d}
+html.jour .pastille.perso{color:#5b5c87}
+html.jour .permtb tr.grp td{color:#78654b}
+html.jour .pill.acc{color:#70634f}
+html.jour .pill.actif{color:#277342}
+html.jour .pill.annule{color:#5e6369}
+html.jour .pill.apr{color:#70624f}
+html.jour .pill.bas{color:#806112}
+html.jour .pill.clos{color:#326a49}
+html.jour .pill.completed{color:#346d56}
+html.jour .pill.creation{color:#48607c}
+html.jour .pill.epuise{color:#7c650b}
+html.jour .pill.erreur,html.jour .pill.conflit,html.jour .pill.echec{color:#774d4d}
+html.jour .pill.eval{color:#786426}
+html.jour .pill.expire{color:#5b6471}
+html.jour .pill.fait{color:#3a674a}
+html.jour .pill.g{color:#5d6773}
+html.jour .pill.grave{color:#7a4f4f}
+html.jour .pill.in_progress{color:#766324}
+html.jour .pill.liq{color:#7a5d11}
+html.jour .pill.maj{color:#6f5d22}
+html.jour .pill.mfa{color:#595b79}
+html.jour .pill.moi{color:#4a627e}
+html.jour .pill.mort{color:#7a4f4f}
+html.jour .pill.non{color:#865757}
+html.jour .pill.off{color:#7a4f4f}
+html.jour .pill.ok{color:#326a49}
+html.jour .pill.on{color:#326a49}
+html.jour .pill.open{color:#4b6380}
+html.jour .pill.ouvert{color:#786426}
+html.jour .pill.recu{color:#3f7051}
+html.jour .pill.revoque{color:#865757}
+html.jour .pill.role{color:#5f666c}
+html.jour .pill.rup{color:#984545}
+html.jour .pill.sain{color:#326a49}
+html.jour .pill.surveille{color:#595b79}
+html.jour .pill.transit{color:#796525}
+html.jour .pill.used{color:#585c70}
+html.jour .pill.vfin{color:#7a4f4f}
+html.jour .pill.vif{color:#326a49}
+html.jour .pill.warn{color:#786426}
+html.jour .portee{color:#6a655a}
+html.jour .pt{color:#56606e}
+html.jour .rcbar button{color:#5e656b}
+html.jour .recap .jt{color:#6c675c}
+html.jour .souso button.on{color:#6f6552}
+html.jour .sugg button{color:#6c675b}
+html.jour .suivi .lg .et.attente{color:#5c6672}
+html.jour .suivi .lg .et.cours{color:#6f634a}
+html.jour .suivi .lg .et.double{color:#7c650b}
+html.jour .suivi .lg .et.echec{color:#865757}
+html.jour .suivi .lg .et.faite{color:#277342}
+html.jour .tete .env.bac{color:#7f670b}
+html.jour .tete .env.prod{color:#865757}
+html.jour .tete .qlive{color:#7f670b}
+html.jour .vars code{color:#6a5e4a}
+html.jour button.arme{color:#72683e}
+html.jour code{color:#5e656e}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_THEMES, ICO };

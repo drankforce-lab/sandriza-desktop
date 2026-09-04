@@ -58,7 +58,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch{margin:0 0 .8rem}
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
 .ch input[type=text]{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.42rem .55rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input[type=text]:focus{outline:none;border-color:#c9a97e}
 .bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
   margin:0 0 .8rem;-webkit-user-select:none;user-select:none}
@@ -83,7 +83,7 @@ body{background:var(--f-page);color:var(--tx);
 .ico .nm{font-size:.84rem;font-weight:700;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ico .gestes{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.3rem}
 code{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;color:#cfe0f5;
-  background:var(--f-champ);border:1px solid #2b3444;border-radius:5px;padding:.1rem .35rem;
+  background:var(--f-champ);border:1px solid var(--v12);border-radius:5px;padding:.1rem .35rem;
   cursor:pointer;-webkit-user-select:none;user-select:none}
 code:hover{border-color:#c9a97e}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

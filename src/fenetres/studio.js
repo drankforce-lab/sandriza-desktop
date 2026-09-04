@@ -169,7 +169,7 @@ body{background:var(--f-page);color:var(--tx);
   align-content:start;max-height:16rem;overflow-y:auto}
 .loggr::-webkit-scrollbar{width:8px}
 .loggr::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.logv{background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.3rem;cursor:pointer;
+.logv{background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.3rem;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;
   -webkit-user-select:none;user-select:none;transition:border-color .12s,background .12s}
 .logv:hover{border-color:rgba(201,169,126,.6)}
@@ -215,7 +215,7 @@ body{background:var(--f-page);color:var(--tx);
    qu UNE fois par photo — et repoussait les boutons qui, eux, servent tout le
    temps. Elle reste evidemment reperable : c est un cadre en pointille, pas un
    affichage. */
-.depot{border:1.5px dashed #2b3444;border-radius:10px;background:var(--f-champ);cursor:pointer;
+.depot{border:1.5px dashed var(--v12);border-radius:10px;background:var(--f-champ);cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
   min-height:5rem;text-align:center;color:var(--tx2);font-size:.78rem;padding:.6rem .7rem;
   -webkit-user-select:none;user-select:none}
@@ -227,7 +227,7 @@ body{background:var(--f-page);color:var(--tx);
 .phbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
 .phbarre .phinfo{font-size:.74rem;color:var(--tx2);margin-left:auto;white-space:nowrap}
 .phbarre #ph-q{flex:1 1 auto;min-width:6rem;max-width:22rem;font:inherit;color:var(--tx);
-  background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.34rem .55rem}
+  background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.34rem .55rem}
 .phbarre #ph-q:focus{outline:none;border-color:#c9a97e}
 /* ⚠ 7rem, pas 5,5 : la vignette porte desormais une coche et des pastilles.
    A l ancienne largeur, le nom passait dessous et devenait illisible. */
@@ -244,7 +244,7 @@ body{background:var(--f-page);color:var(--tx);
   max-height:calc(100vh - 18rem);min-height:14rem;overflow-y:auto;padding-right:.2rem}
 .phgrille::-webkit-scrollbar{width:8px}
 .phgrille::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.phvig{background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
+.phvig{background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;overflow:hidden;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
 .phvig:hover{border-color:#c9a97e}
 /* object-fit:contain : une photo COUCHEE garde ses proportions et se centre dans
@@ -338,7 +338,7 @@ body{background:var(--f-page);color:var(--tx);
    Le mannequin se choisit maintenant dans .duo / .ch, juste en dessous. */
 .ch{margin:.7rem 0 0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:var(--tx2)}
-select{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
+select{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.4rem .5rem}
 select:focus{outline:none;border-color:#c9a97e}
 .bascule{display:flex;align-items:flex-start;gap:.55rem;font-size:.82rem;cursor:pointer;
@@ -367,10 +367,10 @@ select:focus{outline:none;border-color:#c9a97e}
 .aidep{font-size:.71rem;color:var(--tx3);line-height:1.45;margin-top:.22rem}
 .aidep.att{color:#d8b57a}
 textarea{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem;resize:vertical;min-height:3.2rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem;resize:vertical;min-height:3.2rem}
 textarea:focus{outline:none;border-color:#c9a97e}
 input[type=text]{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 input[type=text]:focus{outline:none;border-color:#c9a97e}
 input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointer}
 .avlab{display:flex;align-items:baseline;gap:.4rem}
@@ -462,7 +462,7 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
 .voile h3{margin:0 0 .5rem;font:700 1.02rem/1.25 Georgia,serif}
 .voile p{margin:.6rem 0 0;font-size:.79rem;line-height:1.55}
 .voile input[type=text],.voile input:not([type]){width:100%;font:inherit;color:var(--tx);
-  background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+  background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .voile input:focus{outline:none;border-color:#c9a97e}
 .rc{display:flex;align-items:flex-start;gap:.55rem;font-size:.8rem;line-height:1.5;
   cursor:pointer;-webkit-user-select:none;user-select:none;margin:.6rem 0 0}

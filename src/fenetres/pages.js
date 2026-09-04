@@ -68,7 +68,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .entete{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 label.champ{display:block;margin:0 0 .8rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
-input.t,textarea.t,select.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;color:var(--tx);
+input.t,textarea.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);
   font:inherit;padding:.5rem .65rem}
 textarea.t{resize:vertical;min-height:3.2rem;line-height:1.5}
 input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
@@ -124,15 +124,15 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .souso button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-e6cfa8);font-weight:700}
 .souso .pt{width:6px;height:6px;border-radius:50%;background:#facc15}
 
-.ed{border:1px solid #2b3444;border-radius:10px;overflow:hidden;background:var(--f-champ);display:flex;flex-direction:column}
+.ed{border:1px solid var(--v12);border-radius:10px;overflow:hidden;background:var(--f-champ);display:flex;flex-direction:column}
 .ed.plein{position:fixed;inset:0;z-index:70;border-radius:0;border:0}
 .ed .barre{display:flex;flex-wrap:wrap;align-items:center;gap:.15rem;padding:.35rem .45rem;
-  background:var(--f-131c2b);border-bottom:1px solid #2b3444;flex:0 0 auto}
+  background:var(--f-131c2b);border-bottom:1px solid var(--v12);flex:0 0 auto}
 .ed .barre button{font:inherit;font-size:.8rem;background:none;border:1px solid transparent;color:var(--tx-c3cede);
   border-radius:7px;padding:.28rem .42rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;line-height:1}
 .ed .barre button:hover{background:var(--v07);border-color:var(--v10)}
 .ed .barre button svg{width:15px;height:15px;display:block;fill:currentColor}
-.ed .barre select{font:inherit;font-size:.78rem;background:var(--f-champ);border:1px solid #2b3444;color:var(--tx-c3cede);
+.ed .barre select{font:inherit;font-size:.78rem;background:var(--f-champ);border:1px solid var(--v12);color:var(--tx-c3cede);
   border-radius:7px;padding:.25rem .35rem;cursor:pointer;max-width:120px}
 .ed .barre .fil{width:1px;align-self:stretch;background:var(--v14);margin:.1rem .3rem}
 .ed .barre .pousse{flex:1}
@@ -153,7 +153,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .ed .zone a{color:var(--tx-or)}
 .ed .zone img{max-width:100%;height:auto;border-radius:5px;display:block;margin:.6rem 0}
 .ed .zone table{border-collapse:collapse;width:100%;margin:.9rem 0}
-.ed .zone th,.ed .zone td{border:1px solid #3a465a;padding:.4rem .6rem;text-align:left}
+.ed .zone th,.ed .zone td{border:1px solid var(--v20);padding:.4rem .6rem;text-align:left}
 .ed .zone th{background:var(--v05);font-weight:700}
 /* Une variable est un BLOC INSECABLE, pas du texte : sans cela, une frappe au
    milieu de {{MARQUE}} produisait une variable a demi ecrite, qui ne se resout
@@ -170,7 +170,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .grtb{position:fixed;z-index:80;background:var(--f-131c2b);border:1px solid var(--v14);
   border-radius:10px;padding:.55rem;box-shadow:0 12px 34px rgba(0,0,0,.55)}
 .grtb .cases{display:grid;grid-template-columns:repeat(10,15px);gap:2px}
-.grtb .c{width:15px;height:15px;border:1px solid #3a465a;border-radius:2px;cursor:pointer}
+.grtb .c{width:15px;height:15px;border:1px solid var(--v20);border-radius:2px;cursor:pointer}
 .grtb .c.on{background:rgba(201,169,126,.55);border-color:#c9a97e}
 .grtb .lgd{margin-top:.4rem;font-size:.74rem;color:var(--tx2);text-align:center}
 

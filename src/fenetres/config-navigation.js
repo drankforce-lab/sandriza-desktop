@@ -46,7 +46,7 @@ body{background:var(--f-page);color:var(--tx);
 .item .co .href{font-size:.78rem;color:var(--tx3);font-family:ui-monospace,Menlo,Consolas,monospace}
 .item.masque .co .lab{opacity:.45}
 .item .gestes{display:flex;align-items:center;gap:.3rem;flex:0 0 auto}
-input,select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
+input,select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:7px;padding:.34rem .5rem}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input:disabled,select:disabled{opacity:.55}

@@ -100,7 +100,7 @@ button.sty.actif{border-color:#c9a97e;background:rgba(201,169,126,.16);font-weig
 label.champ{display:block;margin:0 0 .6rem}
 label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .22rem}
-input.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;
+input.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
 input.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;

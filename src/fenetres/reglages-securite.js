@@ -47,7 +47,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 label.champ{display:block;margin:0 0 .75rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.2rem 0 0}
-input.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
+input.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 input.n{width:120px}
 textarea.t{resize:vertical;min-height:3.4rem;line-height:1.5}
 input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}

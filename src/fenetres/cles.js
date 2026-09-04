@@ -57,7 +57,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
 .ch .aide{font-size:.72rem;color:var(--tx3);margin-top:.2rem}
 .ch input{width:100%;font:inherit;font-family:ui-monospace,Consolas,monospace;font-size:.84rem;
-  color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.42rem .55rem}
+  color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled{opacity:.55}
 .ch input.solde{font-family:inherit;max-width:12rem}

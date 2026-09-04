@@ -41,7 +41,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
 .ch .aide{font-size:.72rem;color:var(--tx3);margin-top:.2rem}
 .ch input[type=number]{width:12rem;max-width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
-  border:1px solid #2b3444;border-radius:8px;padding:.42rem .55rem}
+  border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled{opacity:.55}
 .bascule{display:flex;align-items:flex-start;gap:.6rem;font-size:.86rem;cursor:pointer;
@@ -82,7 +82,7 @@ table.pays td.etatnom{padding-left:1.9rem;font-size:.82rem}
 table.pays .verrou{color:var(--tx3);font-size:.74rem}
 table.pays td.mid{text-align:center}
 table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
-.pfiltre{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
+.pfiltre{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.32rem .5rem;width:12rem}
 .pfiltre:focus{outline:none;border-color:#c9a97e}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

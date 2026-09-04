@@ -128,6 +128,10 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .boite .apercu{background:conic-gradient(#3a4354 25%,#2b3444 0 50%,#3a4354 0 75%,#2b3444 0) 0 0/14px 14px;
   border-radius:10px;min-height:14rem;max-height:24rem;display:flex;align-items:center;
   justify-content:center;margin-bottom:.7rem;overflow:hidden}
+/* Le damier de transparence est bleu nuit : en mode jour il doit s'eclaircir,
+   sinon la vignette d'une image transparente s'ouvre sur un carre noir. */
+html.jour .vign{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6e1d6 0 75%,#f4f2ec 0) 0 0/12px 12px}
+html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6e1d6 0 75%,#f4f2ec 0) 0 0/14px 14px}
 .boite .apercu img{max-width:100%;max-height:24rem;object-fit:contain}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid var(--v08);
@@ -248,13 +252,13 @@ tr:hover .act .ic{opacity:1}
 /* Le choix de la mise en scene : des couples etiquette/valeur, alignes. */
 .ch{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
 .ch>label:first-child{min-width:7rem;color:var(--tx2);font-size:.78rem}
-.ch select{flex:1;background:var(--f-champ);color:var(--tx);border:1px solid #2b3444;
+.ch select{flex:1;background:var(--f-champ);color:var(--tx);border:1px solid var(--v12);
   border-radius:.4rem;padding:.42rem .55rem;font:inherit}
 .ch input[type=checkbox]{accent-color:#c9a97e;margin-right:.35rem}
 .ch.col{display:block}
 .ch.col>label:first-child{display:block;min-width:0;margin-bottom:.35rem}
 .ch textarea{width:100%;box-sizing:border-box;background:var(--f-champ);color:var(--tx);
-  border:1px solid #2b3444;border-radius:.4rem;padding:.42rem .55rem;font:inherit;
+  border:1px solid var(--v12);border-radius:.4rem;padding:.42rem .55rem;font:inherit;
   resize:vertical;min-height:2.6rem;line-height:1.4}
 .sugg{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
 .sugg button{font-size:.72rem;padding:.2rem .55rem;background:rgba(201,169,126,.14);

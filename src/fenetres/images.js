@@ -50,7 +50,7 @@ h1{font-size:1rem;margin:0;font-weight:650}
 .bien{background:rgba(60,160,110,.1);border-color:rgba(90,200,140,.3);color:#a9e6c6}
 .bien b{color:#d3f6e4}
 .chiffres{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:0 0 .9rem}
-.kpi{background:var(--f-champ);border:1px solid #2b3444;border-radius:9px;padding:.6rem .7rem;text-align:center}
+.kpi{background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;padding:.6rem .7rem;text-align:center}
 .kpi .n{font-size:1.35rem;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
 .kpi .l{font-size:.68rem;color:var(--tx2);margin-top:.15rem}
 .kpi.chaud .n{color:var(--tx-jaune)}
@@ -64,7 +64,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   border-radius:9px;padding:.6rem .8rem;font-size:.77rem;margin-top:.8rem}
 .echec b{color:#ffd9d9}
 .echec ul{margin:.4rem 0 0;padding-left:1.1rem}
-.jauge{height:7px;border-radius:99px;background:var(--f-champ);border:1px solid #2b3444;overflow:hidden;margin:.6rem 0 .3rem}
+.jauge{height:7px;border-radius:99px;background:var(--f-champ);border:1px solid var(--v12);overflow:hidden;margin:.6rem 0 .3rem}
 .jauge i{display:block;height:100%;background:#c9a97e;width:0;transition:width .25s}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;

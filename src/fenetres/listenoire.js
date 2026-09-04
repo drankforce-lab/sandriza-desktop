@@ -39,10 +39,10 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 label.champ{display:block;margin:0}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
-input.t,select.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.45rem .6rem}
+input.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.45rem .6rem}
 input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 .sug{position:absolute;left:0;right:0;top:100%;z-index:20;margin-top:2px;background:var(--f-carte2);
-  border:1px solid #2b3444;border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.5);
+  border:1px solid var(--v12);border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.5);
   max-height:15rem;overflow:auto;display:none}
 .sug-it{padding:.45rem .6rem;cursor:pointer;border-bottom:1px solid var(--v05)}
 .sug-it:hover{background:rgba(201,169,126,.14)}

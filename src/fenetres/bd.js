@@ -45,11 +45,11 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .jauge .lg{display:flex;align-items:baseline;gap:.4rem;font-size:.8rem;margin-bottom:.25rem}
 .jauge .lg .em{filter:grayscale(1) brightness(1.6)}
 .jauge .lg .v{margin-left:auto;color:var(--tx2);font-size:.74rem}
-.jauge .barre{height:.55rem;background:var(--f-champ);border:1px solid #2b3444;border-radius:99px;overflow:hidden}
+.jauge .barre{height:.55rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:99px;overflow:hidden}
 .jauge .barre i{display:block;height:100%;background:#c9a97e}
 .jauge .sous{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
 .cles{display:flex;flex-wrap:wrap;gap:.3rem}
-.cles code{font-size:.66rem;background:var(--f-champ);border:1px solid #2b3444;border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
+.cles code{font-size:.66rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;
   border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

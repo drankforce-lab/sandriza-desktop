@@ -227,6 +227,10 @@ html.jour .lot{background:#f6efe0}
 .lot label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
 .lot input{width:auto}
 button.rouge{background:#dc2626;border-color:#dc2626;color:var(--tx-sur-accent);font-weight:600}
+/* La reprise generique du mode jour repeint TOUT bouton en blanc
+   (html.jour button, specificite 0,1,2) et l'emporte sur button.rouge
+   (0,1,1). Sans cette ligne, ce bouton perd sa couleur en plein jour. */
+html.jour button.rouge{background:#dc2626;color:#fff;border-color:#dc2626}
 button.rouge:hover:not(:disabled){background:#ef4444;border-color:#ef4444}
 button.vert{background:#16a34a;border-color:#16a34a;color:var(--tx-blanc);font-weight:600}
 button.vert:hover:not(:disabled){background:#22c55e;border-color:#22c55e}
