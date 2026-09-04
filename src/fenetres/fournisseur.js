@@ -17,14 +17,14 @@
  * est-ce que quelqu'un d'autre tient cette fiche.
  */
 
-const { CSS_SOCLE, JS_SOCLE, JS_BROUILLON, ICO } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO } = require('./socle');
 
 /** Page complète de l'assistant. `id` vide = création. */
 function pageFournisseur(id) {
   const ident = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Fournisseur — Administration Sandriza</title>
-<style>${CSS_SOCLE}</style></head><body>
+<style>${CSS_SOCLE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.suppliers}</span><h1 id="titre">Fournisseur</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>

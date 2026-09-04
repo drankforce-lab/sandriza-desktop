@@ -175,6 +175,14 @@ jobs:
       # ⚠ C'est un CLIQUET, pas une porte fermée : la queue restante est déclarée
       # avec son nombre dans `contraste-jour-declare.js`, et le banc refuse une
       # couleur neuve sous le seuil ou un plafond qui monte.
+      # ⚠ `banc-jetons.js` (2026-09-04) garde les JETONS DE COULEUR. Il a fallu
+      # trois corrections ratées et un navigateur pour trouver la cause du
+      # bandeau d'en-tête invisible en mode sombre : le bloc `:root` des jetons
+      # de NUIT vivait dans `CSS_SOCLE`, que 4 fenêtres sur 92 incluent. Les 88
+      # autres n'avaient AUCUN jeton en sombre — chaque `var()` y était une
+      # valeur invalide. `color-scheme:dark` donnait quand même un fond sombre,
+      # ce qui a masqué le défaut pendant des jours. Ce banc FABRIQUE chaque
+      # fenêtre et exige que tout `var()` employé soit défini par sa page.
       # ⚠ `banc-pictogrammes.js` (2026-09-04) garde la norme du NOIR ET BLANC,
       # posée le 2026-08-19 et que rien ne vérifiait. Deux défauts en sont sortis,
       # tous deux signalés par l'utilisateur plutôt que par une machine : la règle
@@ -193,6 +201,7 @@ jobs:
           node tools/banc-brouillon-garde.js
           node tools/banc-contraste-jour.js
           node tools/banc-pictogrammes.js
+          node tools/banc-jetons.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash
