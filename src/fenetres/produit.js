@@ -39,7 +39,7 @@ const CSS_PROPRE = `
 .jeton{display:inline-flex;align-items:center;gap:.32rem;padding:.2rem .55rem;
   border:1px solid rgba(255,255,255,.16);border-radius:99px;font-size:.82rem;
   cursor:pointer;user-select:none;height:1.75rem}
-.jeton.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:#f0e4d2}
+.jeton.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:var(--tx-creme)}
 .jeton .pt{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.3);flex:0 0 auto}
 .photo{display:flex;gap:.85rem;align-items:flex-start}
 /* ── LA LIGNE UNIQUE DES PHOTOS (fusion demandee le 2026-08-08) ──
@@ -54,26 +54,26 @@ const CSS_PROPRE = `
    sortie du conteneur a la fusion, elle avait tout perdu et << aucune photo >>
    collait au coin (2026-08-08). */
 .ligne-photos .vign{position:relative;width:160px;height:160px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;color:#8fa1b8;
+  display:flex;align-items:center;justify-content:center;color:var(--tx2);
   font-size:.75rem;overflow:hidden;text-align:center;cursor:pointer;
   background:#0f1826;border:2px solid #c9a97e}
 .ligne-photos .vign:hover{border-color:#d8bd97}
 .ligne-photos .vign img{width:100%;height:100%;object-fit:cover}
-.lgd-principale{font-size:.68rem;color:#c9a97e;text-align:center;margin-top:.22rem;
+.lgd-principale{font-size:.68rem;color:var(--tx-or);text-align:center;margin-top:.22rem;
   font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 #p-vues .vue .cadre{width:100%;height:160px}
 #p-vues .cadre.pleine{border-style:dashed;border-color:rgba(255,255,255,.4)}
 .cadre.survol,.vign.survol{outline:3px solid #4ade80;outline-offset:2px}
 .mini-decor{display:block;width:100%;margin-top:.3rem;font-size:.72rem;
   padding:.14rem .3rem;border-radius:7px;border:1px solid rgba(255,255,255,.16);
-  background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
+  background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer}
 .mini-decor:hover:not(:disabled){border-color:#c9a97e}
 .mini-decor:disabled{opacity:.35;cursor:default}
 .fonds{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
 .fonds button{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;
   padding:.2rem .5rem;border-radius:99px;border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
-.fonds button.on{border-color:#c9a97e;background:rgba(201,169,126,.18);color:#f0e4d2}
+  background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer}
+.fonds button.on{border-color:#c9a97e;background:rgba(201,169,126,.18);color:var(--tx-creme)}
 .fonds .past{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.3);flex:0 0 auto}
 .modeles{display:flex;gap:.45rem;flex-wrap:wrap;margin:.4rem 0}
 .modeles .md{width:64px;cursor:pointer;text-align:center}
@@ -81,12 +81,12 @@ const CSS_PROPRE = `
   border:2px solid rgba(255,255,255,.16)}
 .modeles .md.on .cd{border-color:#c9a97e}
 .modeles .md img{width:100%;height:100%;object-fit:cover;display:block}
-.modeles .md .nm{font-size:.62rem;color:#8fa1b8;white-space:nowrap;
+.modeles .md .nm{font-size:.62rem;color:var(--tx2);white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;margin-top:.1rem}
 [draggable=true]{cursor:grab}
 .photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
   border:1px dashed rgba(255,255,255,.18);display:flex;align-items:center;
-  justify-content:center;color:#8fa1b8;font-size:.75rem;overflow:hidden;text-align:center;
+  justify-content:center;color:var(--tx2);font-size:.75rem;overflow:hidden;text-align:center;
   cursor:pointer;background:#0f1826}
 .photo .vign:hover{border-color:#c9a97e}
 .photo .vign.pleine{border-style:solid;border-color:rgba(255,255,255,.22)}
@@ -100,22 +100,22 @@ const CSS_PROPRE = `
 #p-coul-sug .s:hover,#p-coul-sug .s.vis{background:rgba(201,169,126,.16)}
 #p-coul-sug .s .pt{width:16px;height:16px;border-radius:50%;flex:0 0 auto;
   border:1px solid rgba(255,255,255,.25)}
-#p-coul-sug .s .deja{margin-left:auto;font-size:.72rem;color:#8fa1b8;flex:0 0 auto}
+#p-coul-sug .s .deja{margin-left:auto;font-size:.72rem;color:var(--tx2);flex:0 0 auto}
 .jeton .x{margin-left:.15rem;opacity:.55}
 .jeton:hover .x{opacity:1}
 .vues{display:flex;flex-wrap:wrap;gap:.5rem;align-content:flex-start;overflow:hidden}
 .vue{position:relative;width:88px;flex:0 0 auto}
 .vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed rgba(255,255,255,.18);
   display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
-  background:#0f1826;color:#8fa1b8;font-size:.68rem;text-align:center;padding:.2rem}
+  background:#0f1826;color:var(--tx2);font-size:.68rem;text-align:center;padding:.2rem}
 .vue .cadre:hover{border-color:#c9a97e}
 .vue .cadre.pleine{border-style:solid;border-color:rgba(255,255,255,.22)}
 .vue img{width:100%;height:100%;object-fit:cover}
-.vue .lgd{font-size:.68rem;color:#8fa1b8;text-align:center;margin-top:.18rem;
+.vue .lgd{font-size:.68rem;color:var(--tx2);text-align:center;margin-top:.18rem;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x,.vign .x{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;
   border-radius:50%;font-size:.78rem;line-height:1;font-weight:700;
-  background:rgba(200,40,40,.94);border:1px solid rgba(255,255,255,.28);color:#fff}
+  background:rgba(200,40,40,.94);border:1px solid rgba(255,255,255,.28);color:var(--tx-blanc)}
 .vue .x:hover,.vign .x:hover{background:#e04141;border-color:rgba(255,255,255,.5)}
 /* ⚠ CINQ CADRES, UNE SEULE LIGNE, A TOUTE LARGEUR DE FENETRE. Une largeur fixe
    ne peut pas tenir les deux promesses a la fois : assez grande sur une fenetre
@@ -144,8 +144,8 @@ const CSS_PROPRE = `
 /* Sous le seuil : un AVERTISSEMENT, pas un refus. On peut tres bien enregistrer
    une variante juste sous son seuil — mais on doit le savoir, et savoir combien
    il en manque, sans avoir a faire la soustraction soi-meme. */
-.lgstk .al{flex:0 0 auto;font-size:.86rem;line-height:1;cursor:help;color:#fbbf24}
-.lgstk.entete{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;
+.lgstk .al{flex:0 0 auto;font-size:.86rem;line-height:1;cursor:help;color:var(--tx-att)}
+.lgstk.entete{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
 .lgstk:not(.entete):hover{background:rgba(255,255,255,.04)}
 /* ⚠ UNE LIGNE QUI PORTE DU STOCK SE VOIT, comme dans le tableau d inventaire du
@@ -168,21 +168,21 @@ const CSS_PROPRE = `
   background:#0f1826}
 .theque .ph:hover{border-color:#c9a97e}
 .theque .ph img{width:100%;height:88px;object-fit:cover;display:block}
-.theque .ph .lg{font-size:.66rem;color:#8fa1b8;padding:.16rem .25rem;white-space:nowrap;
+.theque .ph .lg{font-size:.66rem;color:var(--tx2);padding:.16rem .25rem;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
 /* Le code de l article qui se sert deja de la photo — en couleur d accent, pour
    qu il se distingue du code de la photo elle-meme juste au-dessus. */
-.theque .ph .lg.sku{color:#c9a97e;font-weight:700;padding-top:0;
+.theque .ph .lg.sku{color:var(--tx-or);font-weight:700;padding-top:0;
   font-family:ui-monospace,Consolas,monospace}
-.theque .ph .lg.libre{color:#4ade80;padding-top:0}
-.avis{display:none;font-size:.74rem;line-height:1.4;color:#fbbf24;margin-top:.3rem}
+.theque .ph .lg.libre{color:var(--tx-ok);padding-top:0}
+.avis{display:none;font-size:.74rem;line-height:1.4;color:var(--tx-att);margin-top:.3rem}
 .avis.on{display:block}
 .voile{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
   background:rgba(8,12,18,.6);padding:1.2rem}
 .voile .boite{width:100%;max-width:460px;background:#16202f;border:1px solid rgba(255,255,255,.1);
   border-radius:12px;padding:1rem 1.1rem;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.voile h3{margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:#fca5a5}
-.voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:#cbd8e6}
+.voile h3{margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-err2)}
+.voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:var(--tx-bleute)}
 .voile .pied2{display:flex;justify-content:flex-end;gap:.45rem;margin-top:.8rem}
 .cote{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
 .cote .grille{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -200,7 +200,7 @@ const CSS_PROPRE = `
 .paire input{flex:1 1 auto}
 .paire select{flex:0 0 5rem}
 .stk{width:100%;border-collapse:collapse}
-.stk th{font-size:.69rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;
+.stk th{font-size:.69rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   text-align:left;padding:.22rem .35rem;border-bottom:1px solid rgba(255,255,255,.1)}
 .stk td{padding:.14rem .35rem;border-bottom:1px solid rgba(255,255,255,.05)}
 .stk input,.stk select{padding:.18rem .35rem;font-size:.83rem}
@@ -217,27 +217,27 @@ const CSS_PROPRE = `
 .jrn{max-height:52vh;overflow-y:auto;padding-right:.2rem;text-align:left}
 .jrn .sec{display:flex;align-items:center;gap:.4rem;margin:.5rem 0 .5rem}
 .jrn .sec .t{font-size:.66rem;font-weight:800;letter-spacing:.06em;
-  text-transform:uppercase;color:#c9a97e;flex:0 0 auto}
+  text-transform:uppercase;color:var(--tx-or);flex:0 0 auto}
 .jrn .sec .tr{flex:1 1 auto;height:1px;background:rgba(255,255,255,.12)}
 .jrn .bl{padding:.5rem .6rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;
   background:#0f1826;margin-bottom:.45rem}
 .jrn .bl.cliq{cursor:pointer;user-select:none}
 .jrn .bl.cliq:hover{border-color:rgba(201,169,126,.45)}
 .jrn .et{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
-  color:#8fa1b8;margin-bottom:.15rem}
+  color:var(--tx2);margin-bottom:.15rem}
 .jrn .dif{display:flex;align-items:center;gap:.4rem;font-size:.82rem;flex-wrap:wrap}
-.jrn .dif .av{color:#8fa1b8;text-decoration:line-through;opacity:.75;word-break:break-word}
-.jrn .dif .fl{color:#c9a97e;flex:0 0 auto}
-.jrn .dif .ap{color:#e8edf5;font-weight:600;word-break:break-word}
+.jrn .dif .av{color:var(--tx2);text-decoration:line-through;opacity:.75;word-break:break-word}
+.jrn .dif .fl{color:var(--tx-or);flex:0 0 auto}
+.jrn .dif .ap{color:var(--tx);font-weight:600;word-break:break-word}
 .jrn .qd{display:flex;justify-content:space-between;align-items:center;gap:.4rem;
-  font-size:.68rem;color:#8fa1b8;margin-bottom:.35rem}
+  font-size:.68rem;color:var(--tx2);margin-bottom:.35rem}
 .jrn .qui{margin-top:.45rem;padding-top:.4rem;border-top:1px dashed rgba(255,255,255,.14);
-  font-size:.72rem;color:#8fa1b8;line-height:1.5}
-.jrn .an{font-size:.72rem;font-weight:800;letter-spacing:.06em;color:#c9a97e;
+  font-size:.72rem;color:var(--tx2);line-height:1.5}
+.jrn .an{font-size:.72rem;font-weight:800;letter-spacing:.06em;color:var(--tx-or);
   text-transform:uppercase;margin:.2rem 0 .5rem;border-bottom:1px solid rgba(255,255,255,.12);
   padding-bottom:.3rem}
-.jrn .fin{font-size:.7rem;color:#8fa1b8;text-align:center;line-height:1.45;margin-top:.5rem}
-.jrn .lien{color:#c9a97e;text-decoration:none;font-weight:600;cursor:pointer}
+.jrn .fin{font-size:.7rem;color:var(--tx2);text-align:center;line-height:1.45;margin-top:.5rem}
+.jrn .lien{color:var(--tx-or);text-decoration:none;font-weight:600;cursor:pointer}
 `;
 
 /** Page complète de l'assistant. `id` vide = création. */
@@ -378,7 +378,7 @@ function pageProduit(id) {
       // vérifié. Il se calcule dès que la catégorie est choisie.
       + '<div class="ch"><label for="p-sku">Code (SKU)</label>'
       + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
-      + 'background:#0b1220;color:#c9a97e" placeholder="choisissez une catégorie"></div>'
+      + 'background:#0b1220;color:var(--tx-or)" placeholder="choisissez une catégorie"></div>'
       + ch('p-marque', 'Marque')
       // Le poids appartient a l identite du vetement, pas au prix : c est une
       // caracteristique de l article, et il tenait seul dans une carte entiere.
@@ -388,7 +388,7 @@ function pageProduit(id) {
       + '<option value="lb">lb</option></select></div>'
       + '<div class="aide" style="margin-top:.2rem">Sert au calcul des frais d’expédition.</div></div>'
       + '<div class="ch large"><label for="p-desc">Description'
-      + '<span id="p-desc-etat" style="float:right;color:#8fa1b8;font-size:.72rem"></span></label>'
+      + '<span id="p-desc-etat" style="float:right;color:var(--tx2);font-size:.72rem"></span></label>'
       + '<textarea id="p-desc" rows="3"></textarea>'
       // La redaction par IA passe par le PONT : la fenetre envoie la photo et les
       // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
@@ -416,7 +416,7 @@ function pageProduit(id) {
       + ch('p-cout', 'Coût d’acquisition ($)', { requis: true, argent: true })
       + '</div>'
       + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
-      + '<div id="p-alerte" style="display:none;color:#f87171;font-size:.78rem;margin-top:.4rem"></div></div>'
+      + '<div id="p-alerte" style="display:none;color:var(--tx-err);font-size:.78rem;margin-top:.4rem"></div></div>'
       + '</div></div>');
 
     // 3 — Tailles et couleurs
@@ -543,7 +543,7 @@ function pageProduit(id) {
           ? '<div class="aide" style="margin:-.2rem 0 .5rem">Au moins une variante doit porter '
             + 'une quantité, et un emplacement d’entrepôt est obligatoire dès qu’une quantité '
             + 'dépasse zéro.</div>'
-          : '<div class="aide" style="margin:-.2rem 0 .5rem;color:#fbbf24">⚠ Aucun emplacement '
+          : '<div class="aide" style="margin:-.2rem 0 .5rem;color:var(--tx-att)">⚠ Aucun emplacement '
             + 'configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux '
             + 'variantes en stock.</div>')
       + '<div class="rech"><input placeholder="Filtrer par taille ou couleur…"><span class="cpt" id="p-somme"></span></div>'
@@ -989,7 +989,7 @@ function pageProduit(id) {
     var m = eff - c, pct = Math.round((m / eff) * 100);
     el.innerHTML = 'Marge : <strong>' + m.toFixed(2) + ' $</strong> (' + pct + ' %)'
       + (s > 0 && s < p ? ' — calculée sur le prix soldé' : '')
-      + (m <= 0 ? ' <span style="color:#f87171">— vente à perte</span>' : '');
+      + (m <= 0 ? ' <span style="color:var(--tx-err)">— vente à perte</span>' : '');
   }
 
   // Un cadre par vue : on clique, on choisit un fichier. Le « x » retire.
@@ -1122,7 +1122,7 @@ function pageProduit(id) {
         // ⚠ « INDISPONIBLE » N EST PAS « VIDE ». Un refus du pont affiche ici son
         // motif : sans lui, on croirait la photothèque vide et l on importerait
         // a la main sans jamais savoir qu elle n avait pas repondu.
-        corps = '<p style="font-size:.86rem;line-height:1.5;color:#fbbf24">Photothèque '
+        corps = '<p style="font-size:.86rem;line-height:1.5;color:var(--tx-att)">Photothèque '
           + 'indisponible : ' + esc(expliquer(r)) + '</p>';
       } else if (r.photos.length) {
         // ⚠ ON MONTRE LE CODE DE L ARTICLE QUI SE SERT DEJA DE CETTE PHOTO.
@@ -1149,11 +1149,11 @@ function pageProduit(id) {
               + '</div>';
           }).join('') + '</div>';
       } else {
-        corps = '<p style="font-size:.86rem;line-height:1.5;color:#8fa1b8">La photothèque est vide. '
+        corps = '<p style="font-size:.86rem;line-height:1.5;color:var(--tx2)">La photothèque est vide. '
           + 'Elle se remplit par <strong>Catalogue → Photos</strong>, dans la fenêtre principale, '
           + 'et repart à zéro à chaque démarrage de l’application.</p>';
       }
-      v.innerHTML = '<div class="boite" style="max-width:620px"><h3 style="color:#e8dcc6">Photothèque</h3>'
+      v.innerHTML = '<div class="boite" style="max-width:620px"><h3 style="color:var(--tx-creme)">Photothèque</h3>'
         + corps
         + '<div class="pied2" style="justify-content:space-between">'
         + '<button type="button" id="th-fich"><span class="ic">📂</span> Importer de l’ordinateur…</button>'
@@ -1595,12 +1595,12 @@ function pageProduit(id) {
     var RESULTAT = '';
     function zone(html){ var z = document.getElementById('dt-zone'); if (z) z.innerHTML = html; }
     function lancer(){
-      zone('<div style="padding:2rem;text-align:center;color:#8fa1b8">Détourage…</div>');
+      zone('<div style="padding:2rem;text-align:center;color:var(--tx2)">Détourage…</div>');
       var oui = document.getElementById('dt-oui');
       if (oui) oui.disabled = true;
       P.appeler('produit:detourer', IMAGE, FOND_CHOISI).then(function(r){
         if (!r || !r.ok) {
-          zone('<div style="padding:1.5rem;text-align:center;color:#f87171">'
+          zone('<div style="padding:1.5rem;text-align:center;color:var(--tx-err)">'
             + esc((r && r.detail) || expliquer(r)) + '</div>');
           return;
         }
@@ -1627,7 +1627,7 @@ function pageProduit(id) {
       };
     }
     P.appeler('produit:fonds').then(function(r){
-      if (!r || !r.ok) { zone('<div style="padding:1.5rem;text-align:center;color:#f87171">' + esc(expliquer(r)) + '</div>'); return; }
+      if (!r || !r.ok) { zone('<div style="padding:1.5rem;text-align:center;color:var(--tx-err)">' + esc(expliquer(r)) + '</div>'); return; }
       peindreFonds(r.fonds || []);
       lancer();
     });
@@ -1682,9 +1682,9 @@ function pageProduit(id) {
     P.appeler('produit:modeles').then(function(r){
       var z = document.getElementById('ia-modeles');
       if (!z) return;
-      if (!r || !r.ok) { z.innerHTML = '<span class="aide" style="color:#f87171">' + esc(expliquer(r)) + '</span>'; return; }
+      if (!r || !r.ok) { z.innerHTML = '<span class="aide" style="color:var(--tx-err)">' + esc(expliquer(r)) + '</span>'; return; }
       if (!r.cleConfiguree) {
-        z.innerHTML = '<span class="aide" style="color:#fbbf24">⚠ Clé Fal.ai non configurée — '
+        z.innerHTML = '<span class="aide" style="color:var(--tx-att)">⚠ Clé Fal.ai non configurée — '
           + 'Configuration de la fenêtre principale.</span>';
         return;
       }
@@ -1694,7 +1694,7 @@ function pageProduit(id) {
         // vivait que dans la modale de l ecran web de l editeur produit. La
         // fenetre << Modeles par vue >> la porte maintenant. On nomme le chemin
         // exact : un renvoi vague fait chercher, et c est ce qui l avait cache.
-        z.innerHTML = '<span class="aide" style="color:#fbbf24">⚠ Aucun mannequin enregistré — '
+        z.innerHTML = '<span class="aide" style="color:var(--tx-att)">⚠ Aucun mannequin enregistré — '
           + 'ajoutez-en dans <strong>Configuration → Apparence → Modèles par vue</strong>, '
           + 'section « Mannequins ».</span>';
         return;
@@ -1714,7 +1714,7 @@ function pageProduit(id) {
     });
     document.getElementById('ia-non').onclick = function(){ v.remove(); };
     document.getElementById('ia-gen').onclick = function(){
-      if (!MODELE) { zone('<span class="aide" style="color:#fbbf24">Choisissez d’abord un modèle.</span>'); return; }
+      if (!MODELE) { zone('<span class="aide" style="color:var(--tx-att)">Choisissez d’abord un modèle.</span>'); return; }
       var g = this;
       g.disabled = true; // anti double-clic : chaque generation COUTE
       var oui = document.getElementById('ia-oui');
@@ -1726,7 +1726,7 @@ function pageProduit(id) {
         g.disabled = false;
         g.textContent = '↻ Régénérer';
         if (!r || !r.ok) {
-          zone('<span class="aide" style="color:#f87171">'
+          zone('<span class="aide" style="color:var(--tx-err)">'
             + esc((r && r.detail) || (r && r.motif === 'cle_absente' ? 'Clé Fal.ai non configurée.'
               : r && r.motif === 'modele_absent' ? 'Ce modèle n’existe plus — rechargez.' : expliquer(r))) + '</span>');
           return;
@@ -1956,7 +1956,7 @@ function pageProduit(id) {
       // ⚠ « INDISPONIBLE » N EST PAS « AUCUNE MODIFICATION ». Afficher une fiche
       // vierge sur une panne de réseau ferait croire qu’elle n’a jamais été
       // touchée — exactement l’inverse de ce qu’un journal doit garantir.
-      h += '<div class="fin" style="color:#fbbf24">Modifications enregistrées indisponibles ('
+      h += '<div class="fin" style="color:var(--tx-att)">Modifications enregistrées indisponibles ('
         + esc(RECENT.motif) + ') — <span class="lien" id="jrn-retry">réessayer</span>.</div>';
     } else if (RECENT && (RECENT.entrees || []).length) {
       h += sec('Enregistrées — dernières 24 h')
@@ -1969,7 +1969,7 @@ function pageProduit(id) {
                   return '<div style="margin-bottom:.3rem"><div class="et">' + esc(c.libelle) + '</div>'
                     + dif(c.avant || '—', c.apres || '—') + '</div>';
                 }).join('')
-              + (vu ? '<div class="qui"><span class="ic">👤</span> <strong style="color:#e8edf5">'
+              + (vu ? '<div class="qui"><span class="ic">👤</span> <strong style="color:var(--tx)">'
                   + esc(e.par || 'Auteur non enregistré') + '</strong><br><span class="ic">🕘</span> '
                   + esc(dateLongue(e.ts)) + '</div>' : '')
               + '</div>';
@@ -1988,7 +1988,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:640px">'
-      + '<h3 style="color:#e8dcc6"><span class="ic">🕘</span> Modifications de cette fiche</h3>'
+      + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> Modifications de cette fiche</h3>'
       + '<div class="jrn" id="jrn-corps"></div>'
       + '<div class="pied2"><button type="button" id="jrn-non">Fermer</button></div></div>';
     document.body.appendChild(v);
@@ -2014,7 +2014,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:640px">'
-      + '<h3 style="color:#e8dcc6"><span class="ic">🕘</span> Historique complet</h3>'
+      + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> Historique complet</h3>'
       + '<div class="jrn" id="hist-corps"><div class="fin">Lecture…</div></div>'
       + '<div class="pied2"><button type="button" id="hist-non">Fermer</button></div></div>';
     document.body.appendChild(v);
@@ -2024,7 +2024,7 @@ function pageProduit(id) {
       var z = document.getElementById('hist-corps');
       if (!z) return;
       if (!r || !r.ok) {
-        z.innerHTML = '<div class="fin" style="color:#fbbf24">Historique indisponible : '
+        z.innerHTML = '<div class="fin" style="color:var(--tx-att)">Historique indisponible : '
           + esc(expliquer(r)) + '.<br>Rien n’est perdu — réessayez une fois reconnecté.</div>';
         return;
       }
@@ -2165,10 +2165,10 @@ function pageProduit(id) {
       return new Promise(function(resoudre){
         var v = document.createElement('div');
         v.className = 'voile';
-        v.innerHTML = '<div class="boite"><h3 style="color:#e8dcc6"><span class="ic">📝</span> Un brouillon non terminé</h3>'
+        v.innerHTML = '<div class="boite"><h3 style="color:var(--tx-creme)"><span class="ic">📝</span> Un brouillon non terminé</h3>'
           + '<p>Une saisie a été laissée en cours <strong>' + esc(ilYa(r.brouillon.ts))
           + '</strong>. La reprendre, ou repartir d’une fiche vierge ?</p>'
-          + '<p style="font-size:.78rem;color:#8fa1b8">Un brouillon est gardé 15 minutes, '
+          + '<p style="font-size:.78rem;color:var(--tx2)">Un brouillon est gardé 15 minutes, '
           + 'puis il disparaît de lui-même.</p>'
           + '<div class="pied2"><button type="button" id="br-non">Repartir à neuf</button>'
           + '<button type="button" class="prim" id="br-oui">Reprendre</button></div></div>';

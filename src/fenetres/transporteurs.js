@@ -28,19 +28,19 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
-  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+  background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .avert{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(248,113,113,.4);
-  background:rgba(248,113,113,.1);color:#fca5a5;border-radius:9px;padding:.7rem .85rem;font-size:.8rem;line-height:1.5}
+  background:rgba(248,113,113,.1);color:var(--tx-err2);border-radius:9px;padding:.7rem .85rem;font-size:.8rem;line-height:1.5}
 .avert b{color:#fecaca}
 .avert .g{margin-top:.55rem}
-.avert button{font:inherit;font-size:.78rem;color:#fca5a5;background:rgba(248,113,113,.08);
+.avert button{font:inherit;font-size:.78rem;color:var(--tx-err2);background:rgba(248,113,113,.08);
   border:1px solid rgba(248,113,113,.4);border-radius:7px;padding:.24rem .6rem;cursor:pointer}
 .avert button:hover:not(:disabled){background:rgba(248,113,113,.16)}
 /* Disposition en COLONNES (type maçonnerie) : les cartes courtes (Purolator, UPS…)
@@ -65,29 +65,29 @@ body{background:#0e1522;color:#e8edf5;
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
 .ch{margin:0 0 .6rem}
 .ch:last-child{margin-bottom:0}
-.ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:#8fa1b8}
-.ch input,.ch select{width:100%;font:inherit;font-size:.83rem;color:#e8edf5;background:#0f1724;
+.ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}
+.ch input,.ch select{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:#0f1724;
   border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
 .ch input.mono{font-family:ui-monospace,Consolas,monospace}
 .ch input:focus,.ch select:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled,.ch select:disabled{opacity:.55}
-.ch .etat{font-size:.72rem;color:#8fa1b8;margin-top:.2rem}
-.ch .etat b{color:#4ade80}
-.ch .etat.non b{color:#facc15}
-.ch .aide{font-size:.7rem;color:#6d7f96;margin-top:.18rem}
+.ch .etat{font-size:.72rem;color:var(--tx2);margin-top:.2rem}
+.ch .etat b{color:var(--tx-ok)}
+.ch .etat.non b{color:var(--tx-jaune)}
+.ch .aide{font-size:.7rem;color:var(--tx3);margin-top:.18rem}
 .sep{border:0;border-top:1px solid rgba(255,255,255,.08);margin:.7rem 0 .5rem}
-.stitre{font-size:.78rem;font-weight:700;color:#cbd8e6;margin:0 0 .5rem}
+.stitre{font-size:.78rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .5rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
-button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
+button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
-.vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -116,7 +116,7 @@ function pageTransporteurs() {
       b.id = 'sz-detacher'; b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }
     if (actif) { b.textContent = '⧉ Détacher'; b.title = 'Ouvrir cet écran dans sa propre fenêtre';

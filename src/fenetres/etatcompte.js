@@ -31,13 +31,13 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem;overflow-y:auto;display:flex;
   flex-direction:column;align-items:center}
 .corps::-webkit-scrollbar{width:8px}
@@ -50,20 +50,20 @@ body{background:#0e1522;color:#e8edf5;
 .feuille img{max-width:100%}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .7rem;cursor:pointer}
 button:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:600}
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
-.pill.bon{background:rgba(34,197,94,.14);color:#4ade80}
-.pill.att{background:rgba(245,158,11,.16);color:#fbbf24}
-.vide{padding:1.4rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+.pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
+.pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

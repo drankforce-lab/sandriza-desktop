@@ -22,46 +22,46 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:1rem 1.1rem}
 .chef{display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
-.chef p{margin:.15rem 0 0;font-size:.8rem;color:#8fa1b8;max-width:32rem}
-.chef .bascule{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#8fa1b8}
+.chef p{margin:.15rem 0 0;font-size:.8rem;color:var(--tx2);max-width:32rem}
+.chef .bascule{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--tx2)}
 label{cursor:pointer}
 input[type=checkbox]{accent-color:#c9a97e;width:1.1rem;height:1.1rem;cursor:pointer}
-input[type=time]{font:inherit;color:#e8edf5;background:#0f1724;border:1px solid #2b3444;
+input[type=time]{font:inherit;color:var(--tx);background:#0f1724;border:1px solid #2b3444;
   border-radius:8px;padding:.3rem .5rem;width:9rem}
 input[type=time]:disabled{opacity:.4}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 th{text-align:left;padding:.4rem .5rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;border-bottom:1px solid rgba(255,255,255,.12)}
+  letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.12)}
 th.c,td.c{text-align:center}
 td{padding:.45rem .5rem;border-bottom:1px solid rgba(255,255,255,.06)}
 td.jour{font-weight:600}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
-button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
+button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
-.vide{padding:1.1rem .6rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .ro{margin:0 0 .8rem;border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.1);
-  color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+  color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -92,7 +92,7 @@ function pageHeures() {
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }
     if (actif) {

@@ -29,21 +29,21 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:#8fa1b8}
-input[type=search],select,button,textarea{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  font-size:.78rem;color:var(--tx2)}
+input[type=search],select,button,textarea{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem}
 input[type=search]{min-width:200px}
 select,button{cursor:pointer}
@@ -54,47 +54,47 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
-button.danger{border-color:rgba(239,68,68,.5);color:#f87171}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem}
 
 /* Zone de depot : elle doit se voir SANS chercher — c est la porte principale. */
 .depot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:.3rem;border:2px dashed rgba(255,255,255,.2);
-  border-radius:12px;padding:1.15rem 1rem;text-align:center;color:#8fa1b8;
+  border-radius:12px;padding:1.15rem 1rem;text-align:center;color:var(--tx2);
   cursor:pointer;transition:border-color .13s,background .13s}
 .depot:hover{border-color:#c9a97e}
 .depot.survol{border-color:#c9a97e;background:rgba(201,169,126,.08)}
-.depot .gros{font-size:.95rem;font-weight:600;color:#e8edf5}
+.depot .gros{font-size:.95rem;font-weight:600;color:var(--tx)}
 .depot .pt{font-size:.76rem}
 
 .stats{display:flex;gap:.5rem;flex-wrap:wrap}
 .stats .s{flex:1 1 7rem;background:rgba(255,255,255,.04);border-radius:9px;padding:.4rem .6rem}
-.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:#c9a97e}
-.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8}
+.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
+.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:rgba(255,255,255,.04)}
 tbody td{padding:.3rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tbody .num{font-weight:700;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
-tbody .dt{font-size:.72rem;color:#8fa1b8}
+tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vign{width:44px;height:44px;border-radius:7px;overflow:hidden;display:flex;
   align-items:center;justify-content:center;
   background:conic-gradient(#3a4354 25%,#2b3444 0 50%,#3a4354 0 75%,#2b3444 0) 0 0/12px 12px}
 .vign img{max-width:100%;max-height:100%;object-fit:contain}
-.vign .att{font-size:.6rem;color:#fbbf24;text-align:center;line-height:1.1}
-.gain{font-size:.68rem;color:#4ade80;font-weight:700}
+.vign .att{font-size:.6rem;color:var(--tx-att);text-align:center;line-height:1.1}
+.gain{font-size:.68rem;color:var(--tx-ok);font-weight:700}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
-.pill.bon{background:rgba(34,197,94,.14);color:#4ade80}
-.pill.att{background:rgba(245,158,11,.16);color:#fbbf24}
-.pill.err{background:rgba(239,68,68,.14);color:#f87171}
-.pill.neutre{background:rgba(148,163,184,.16);color:#8fa1b8}
+.pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
+.pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.pill.err{background:rgba(239,68,68,.14);color:var(--tx-err)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding-top:.4rem;font-size:.74rem;color:#8fa1b8}
-.vide{padding:1.2rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+  padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
+.vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 
 /* ══════════════════════════════════════════════════════════════════════════
    L INSPECTEUR — a cote, plus par-dessus
@@ -132,7 +132,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid rgba(255,255,255,.08);
   border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:.6rem}
-.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8}
+.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600;overflow-wrap:anywhere}
 .jetons{display:flex;flex-wrap:wrap;gap:.3rem;margin:.15rem 0 .6rem}
 .jetons button{font-size:.75rem;padding:.16rem .5rem}
@@ -147,11 +147,11 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .choix .p .creux{width:34px;height:34px;border-radius:6px;flex:0 0 auto;
   background:rgba(255,255,255,.06)}
 .choix .p .nm{font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.choix .p .sk{font-size:.7rem;color:#8fa1b8}
-.aide{font-size:.75rem;color:#8fa1b8;line-height:1.45}
+.choix .p .sk{font-size:.7rem;color:var(--tx2)}
+.aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 /* Le SUIVI d import : une ligne par fichier, son etat, et ce qui lui arrive.
    ⚠ Un compteur << 3 / 12 >> dans le bandeau ne dit pas LESQUELLES ont echoue,
@@ -163,7 +163,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
   box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
 .suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
   border-bottom:1px solid rgba(255,255,255,.08);font:700 .78rem/1.2 system-ui;
-  text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+  text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .suivi .st .n{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:0}
 .suivi .lst{flex:1 1 auto;overflow-y:auto;padding:.3rem .5rem .5rem}
 .suivi .lg{display:flex;align-items:center;gap:.5rem;padding:.26rem .3rem;
@@ -173,20 +173,20 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .suivi .lg .nm{flex:1 1 8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Les etapes, sous le nom : ce que l import a REELLEMENT fait, avec ses
    chiffres. << 6,2 Mo vers 88 Ko >> se verifie ; << compression reussie >> non. */
-.suivi .lg .ep{flex:1 0 100%;font-size:.68rem;color:#8fa1b8;padding-left:.1rem;
+.suivi .lg .ep{flex:1 0 100%;font-size:.68rem;color:var(--tx2);padding-left:.1rem;
   display:flex;gap:.45rem;flex-wrap:wrap}
 .suivi .lg .ep i{font-style:normal}
-.suivi .lg .ep i.ok{color:#4ade80}
-.suivi .lg .ep i.non{color:#fca5a5}
-.suivi .lg .ep i.encours{color:#f0d6a0}
+.suivi .lg .ep i.ok{color:var(--tx-ok)}
+.suivi .lg .ep i.non{color:var(--tx-err2)}
+.suivi .lg .ep i.encours{color:var(--tx-or2)}
 .suivi .lg .et{flex:0 0 auto;font-size:.68rem;font-weight:700;padding:.03rem .4rem;border-radius:99px}
-.suivi .lg .et.attente{background:rgba(148,163,184,.16);color:#94a3b8}
-.suivi .lg .et.cours{background:rgba(201,169,126,.2);color:#f0d6a0}
-.suivi .lg .et.faite{background:rgba(34,197,94,.15);color:#4ade80}
-.suivi .lg .et.double{background:rgba(234,179,8,.15);color:#facc15}
-.suivi .lg .et.echec{background:rgba(248,113,113,.15);color:#fca5a5}
+.suivi .lg .et.attente{background:rgba(148,163,184,.16);color:var(--tx2)}
+.suivi .lg .et.cours{background:rgba(201,169,126,.2);color:var(--tx-or2)}
+.suivi .lg .et.faite{background:rgba(34,197,94,.15);color:var(--tx-ok)}
+.suivi .lg .et.double{background:rgba(234,179,8,.15);color:var(--tx-jaune)}
+.suivi .lg .et.echec{background:rgba(248,113,113,.15);color:var(--tx-err2)}
 .suivi .pd{padding:.45rem .8rem;border-top:1px solid rgba(255,255,255,.08);
-  display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:#8fa1b8;flex-wrap:wrap}
+  display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:var(--tx2);flex-wrap:wrap}
 .suivi .pd .bt{margin-left:auto;display:flex;gap:.4rem}
 /* La barre de progression : elle avance par TACHE TERMINEE, jamais toute seule.
    Une barre qui glisse pendant qu il ne se passe rien est un mensonge poli. */
@@ -194,7 +194,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
   overflow:hidden;margin:0 0 .1rem}
 .suivi .jauge i{display:block;height:100%;background:linear-gradient(90deg,#c9a97e,#e0c9a6);
   border-radius:99px;transition:width .25s ease}
-.suivi .pc{font-variant-numeric:tabular-nums;font-weight:700;color:#e8edf5}
+.suivi .pc{font-variant-numeric:tabular-nums;font-weight:700;color:var(--tx)}
 .suivi.annule{border-color:rgba(248,113,113,.5)}
 /* La barre de LOT : elle ne parait que s il y a un choix, et elle dit ce que
    les traitements engendrent — une image inventee n a pas la meme valeur qu une
@@ -203,7 +203,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
   margin-top:.6rem;padding:.5rem .7rem;background:#16202f;
   border:1px solid rgba(201,169,126,.45);border-radius:11px}
 .lot .cnt{font-weight:700;font-size:.8rem}
-.lot .av{flex:1 0 100%;font-size:.7rem;color:#8fa1b8}
+.lot .av{flex:1 0 100%;font-size:.7rem;color:var(--tx2)}
 input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
 /* ── LE CENTRE DE COMMANDE ─────────────────────────────────────────────── */
 .cmd{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
@@ -212,8 +212,8 @@ input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
 .cmd .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 .cmd .sep{width:1px;height:1.3rem;background:rgba(255,255,255,.12);margin:0 .2rem}
 .cmd input[type=search]{min-width:12rem}
-.etat{font-size:.75rem;color:#8fa1b8;padding:0 .2rem}
-.etat b{color:#e8edf5;font-variant-numeric:tabular-nums}
+.etat{font-size:.75rem;color:var(--tx2);padding:0 .2rem}
+.etat b{color:var(--tx);font-variant-numeric:tabular-nums}
 .etat .sp{opacity:.4;margin:0 .35rem}
 /* ── LA GRILLE ─────────────────────────────────────────────────────────── */
 table.grille tbody tr.on td{background:rgba(201,169,126,.1)}
@@ -231,7 +231,7 @@ table.grille td.num{text-align:right;font-variant-numeric:tabular-nums;white-spa
 tr:hover .act .ic{opacity:1}
 .act .ic:hover{background:rgba(255,255,255,.14);opacity:1}
 .act .ic.sup:hover{background:rgba(248,113,113,.2);border-color:rgba(248,113,113,.5)}
-.act .ic.sup.arme{opacity:1;background:rgba(248,113,113,.25);border-color:#f87171;color:#fff}
+.act .ic.sup.arme{opacity:1;background:rgba(248,113,113,.25);border-color:#f87171;color:var(--tx-blanc)}
 /* ── L ASSISTANT ───────────────────────────────────────────────────────── */
 .asst{position:fixed;inset:0;background:rgba(6,10,18,.78);z-index:70;display:flex;
   align-items:center;justify-content:center;padding:1rem}
@@ -240,25 +240,25 @@ tr:hover .act .ic{opacity:1}
 .asst .tt{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;
   border-bottom:1px solid rgba(255,255,255,.08)}
 .asst .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
-.asst .tt .pas{margin-left:auto;display:flex;gap:.3rem;align-items:center;font-size:.72rem;color:#8fa1b8}
+.asst .tt .pas{margin-left:auto;display:flex;gap:.3rem;align-items:center;font-size:.72rem;color:var(--tx2)}
 .asst .tt .pas b{display:inline-flex;width:1.35rem;height:1.35rem;border-radius:50%;
   align-items:center;justify-content:center;background:rgba(255,255,255,.08);font-size:.7rem}
 .asst .tt .pas b.on{background:#c9a97e;color:#1a1208}
 .asst .co{flex:1 1 auto;min-height:0;overflow-y:auto;padding:.85rem .9rem}
 /* Le choix de la mise en scene : des couples etiquette/valeur, alignes. */
 .ch{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
-.ch>label:first-child{min-width:7rem;color:#8fa1b8;font-size:.78rem}
-.ch select{flex:1;background:#0f1724;color:#e8edf5;border:1px solid #2b3444;
+.ch>label:first-child{min-width:7rem;color:var(--tx2);font-size:.78rem}
+.ch select{flex:1;background:#0f1724;color:var(--tx);border:1px solid #2b3444;
   border-radius:.4rem;padding:.42rem .55rem;font:inherit}
 .ch input[type=checkbox]{accent-color:#c9a97e;margin-right:.35rem}
 .ch.col{display:block}
 .ch.col>label:first-child{display:block;min-width:0;margin-bottom:.35rem}
-.ch textarea{width:100%;box-sizing:border-box;background:#0f1724;color:#e8edf5;
+.ch textarea{width:100%;box-sizing:border-box;background:#0f1724;color:var(--tx);
   border:1px solid #2b3444;border-radius:.4rem;padding:.42rem .55rem;font:inherit;
   resize:vertical;min-height:2.6rem;line-height:1.4}
 .sugg{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
 .sugg button{font-size:.72rem;padding:.2rem .55rem;background:rgba(201,169,126,.14);
-  border:1px solid rgba(201,169,126,.35);color:#e8dcc4;border-radius:999px;cursor:pointer}
+  border:1px solid rgba(201,169,126,.35);color:var(--tx-creme);border-radius:999px;cursor:pointer}
 .sugg button:hover{background:rgba(201,169,126,.24)}
 .asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.6rem .9rem;border-top:1px solid rgba(255,255,255,.08);background:#0f1725}
@@ -287,19 +287,19 @@ tr:hover .act .ic{opacity:1}
 .pl .v .im img.o7{transform:translate(-50%,-50%) rotate(270deg) scaleX(-1)}
 .pl .v .im img.o8{transform:translate(-50%,-50%) rotate(270deg)}
 .pl .v .att{display:flex;align-items:center;justify-content:center;height:100%;
-  color:#8fa1b8;font-size:.72rem}
-.pl .v .lg{padding:.25rem .4rem;font-size:.68rem;color:#c3cede;
+  color:var(--tx2);font-size:.72rem}
+.pl .v .lg{padding:.25rem .4rem;font-size:.68rem;color:var(--tx-gris2);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pl .v .dt2{padding:0 .4rem .3rem;font-size:.63rem;color:#8fa1b8}
+.pl .v .dt2{padding:0 .4rem .3rem;font-size:.63rem;color:var(--tx2)}
 .pl .v .ck{position:absolute;top:.3rem;left:.3rem;width:1.1rem;height:1.1rem;
   border-radius:4px;background:rgba(11,18,32,.85);border:1px solid rgba(255,255,255,.3);
-  display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#c9a97e}
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--tx-or)}
 .pl .v.on .ck{background:#c9a97e;color:#1a1208;border-color:#c9a97e}
 /* Le chargement, au centre, avant la planche. */
 .chargement{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:.6rem;min-height:16rem;text-align:center}
 .chargement .gros{font:700 1rem/1.3 Georgia,serif}
-.chargement .cpt{font-variant-numeric:tabular-nums;font-size:1.3rem;color:#c9a97e;font-weight:800}
+.chargement .cpt{font-variant-numeric:tabular-nums;font-size:1.3rem;color:var(--tx-or);font-weight:800}
 .chargement .aide{max-width:26rem}
 .chargement .tourne{width:2.2rem;height:2.2rem;border-radius:50%;
   border:3px solid rgba(201,169,126,.25);border-top-color:#c9a97e;
@@ -314,11 +314,11 @@ tr:hover .act .ic{opacity:1}
 .src .l b{font-size:.9rem}
 .but{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
 .but label{display:flex;gap:.55rem;align-items:flex-start;padding:.5rem .65rem;
-  border:1px solid rgba(255,255,255,.12);border-radius:9px;cursor:pointer;margin:0;color:#e8edf5;font-size:.84rem}
+  border:1px solid rgba(255,255,255,.12);border-radius:9px;cursor:pointer;margin:0;color:var(--tx);font-size:.84rem}
 .but label.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 .but label input{width:auto;margin-top:.15rem}
-.but label .d{display:block;font-size:.72rem;color:#8fa1b8;margin-top:.1rem}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.but label .d{display:block;font-size:.72rem;color:var(--tx2);margin-top:.1rem}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -778,7 +778,7 @@ ${JS_ACTIVITE}${JS_DIRE}
               : '')
           + '</td></tr>'
           + (arme
-              ? '<tr><td colspan="7" class="dt" style="color:#facc15">'
+              ? '<tr><td colspan="7" class="dt" style="color:var(--tx-jaune)">'
                 + 'Les ' + Math.max(0, (l.nombre || 0) - (l.liees || 0)) + ' photo(s) non attachées seront retirées. '
                 + (l.liees ? ('Les ' + l.liees + ' attachées à un article sont GARDÉES : '
                               + 'retirer la photothèque ne doit jamais dépouiller une fiche produit.')
@@ -1378,7 +1378,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<p class="aide">Le fond et le mannequin sont retirés ; le col et les manches '
       + 'sont reconstruits. Rien n’est engendré : c’est le vêtement de la photo, pas '
       + 'une personne inventée.</p>'
-      + '<div class="aide" style="margin-top:.5rem;color:#f0d6a0">Chaque photo coûte '
+      + '<div class="aide" style="margin-top:.5rem;color:var(--tx-or2)">Chaque photo coûte '
       + '1 crédit Photoroom. L’aperçu est gratuit et filigrané : de quoi juger avant '
       + 'de payer.</div>'
       + '</div>'
@@ -1477,7 +1477,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).filter(Boolean);
     var reste = n - noms.length;
     var liste = noms.length
-      ? '<ul style="margin:.55rem 0 0;padding-left:1.1rem;color:#cbd5e1;font-size:.8rem;line-height:1.6">'
+      ? '<ul style="margin:.55rem 0 0;padding-left:1.1rem;color:var(--tx-gris2);font-size:.8rem;line-height:1.6">'
         + noms.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join('')
         + (reste > 0 ? '<li>et ' + reste + ' autre' + (reste > 1 ? 's' : '') + '…</li>' : '')
         + '</ul>'
@@ -1489,14 +1489,14 @@ ${JS_ACTIVITE}${JS_DIRE}
     v.innerHTML = '<div style="max-width:30rem;background:#131c2b;'
       + 'border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:1.1rem 1.2rem;'
       + 'box-shadow:0 18px 50px rgba(0,0,0,.5)">'
-      + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:#f0d6a0">'
+      + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-or2)">'
       + 'Des photos ont déjà été facturées</h2>'
-      + '<p style="margin:0;color:#e8edf5;font-size:.86rem;line-height:1.6"><b>' + n
+      + '<p style="margin:0;color:var(--tx);font-size:.86rem;line-height:1.6"><b>' + n
       + '</b> photo' + (n > 1 ? 's' : '') + ' sur ' + total + ' '
       + (n > 1 ? 'ont' : 'a') + ' déjà coûté un crédit Photoroom. Les relancer '
       + 'entraînera de nouveaux frais.</p>' + liste
       + '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">'
-      + '<button id="frais-non" style="font:inherit;color:#e8edf5;'
+      + '<button id="frais-non" style="font:inherit;color:var(--tx);'
       + 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);'
       + 'border-radius:8px;padding:.42rem .85rem;cursor:pointer">Annuler</button>'
       + '<button id="frais-oui" style="font:inherit;color:#0e1522;background:#f0d6a0;'
@@ -1534,9 +1534,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         + 'border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden;'
         + 'display:flex;flex-direction:column">'
         + '<div class="apr-img" style="aspect-ratio:3/4;display:flex;align-items:center;'
-        + 'justify-content:center;background:' + APR_CHECKER + ';color:#8fa1b8;'
+        + 'justify-content:center;background:' + APR_CHECKER + ';color:var(--tx2);'
         + 'font-size:.78rem">…</div>'
-        + '<figcaption style="padding:.35rem .5rem;font-size:.72rem;color:#cbd5e1;'
+        + '<figcaption style="padding:.35rem .5rem;font-size:.72rem;color:var(--tx-gris2);'
         + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
         + esc((it.code || '') + (it.nom ? ' · ' + it.nom : '')) + '</figcaption></figure>';
     }).join('');
@@ -1545,9 +1545,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     v.style.cssText = 'position:fixed;inset:0;z-index:130;background:rgba(6,10,18,.82);'
       + 'display:flex;flex-direction:column;padding:1rem';
     v.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">'
-      + '<h2 style="margin:0;font:700 1rem/1.2 Georgia,serif;color:#f0d6a0">' + esc(titre) + '</h2>'
-      + '<span style="font-size:.74rem;color:#8fa1b8">gratuit · filigrané · aucun crédit réel</span>'
-      + '<button id="apr-x" style="margin-left:auto;font:inherit;color:#e8edf5;'
+      + '<h2 style="margin:0;font:700 1rem/1.2 Georgia,serif;color:var(--tx-or2)">' + esc(titre) + '</h2>'
+      + '<span style="font-size:.74rem;color:var(--tx2)">gratuit · filigrané · aucun crédit réel</span>'
+      + '<button id="apr-x" style="margin-left:auto;font:inherit;color:var(--tx);'
       + 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);'
       + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">Fermer</button></div>'
       // ⚠ auto-FIT + justify-content:center : une seule photo s'affiche GRANDE et
@@ -1556,7 +1556,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div style="flex:1 1 auto;min-height:0;overflow:auto;display:grid;'
       + 'grid-template-columns:repeat(auto-fit,minmax(260px,360px));gap:.7rem;'
       + 'justify-content:center;align-content:start">' + cells + '</div>'
-      + '<div style="margin-top:.55rem;font-size:.74rem;color:#8fa1b8">Pour la version '
+      + '<div style="margin-top:.55rem;font-size:.74rem;color:var(--tx2)">Pour la version '
       + 'définitive sans filigrane, lancez le traitement : il consomme alors un crédit '
       + 'Photoroom.</div>';
     document.body.appendChild(v);
@@ -1857,7 +1857,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
 
     if (!ro && r.isole && (D.fonds || []).length) {
-      h += '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8">Fond</div>'
+      h += '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)">Fond</div>'
         + '<div class="jetons">'
         + '<button data-fond="__transp" class="' + (!r.fond || r.fond === '__transp' ? 'on' : '') + '">Transparent</button>'
         + D.fonds.map(function(f){
@@ -2850,7 +2850,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }
     if (actif) {

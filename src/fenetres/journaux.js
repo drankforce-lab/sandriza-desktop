@@ -28,13 +28,13 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .onglets{flex:0 0 auto;display:flex;gap:.1rem;flex-wrap:wrap;padding:.35rem 1rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
-.onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;color:#8fa1b8;padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.onglets button.on{color:#c9a97e;border-bottom-color:#c9a97e;font-weight:700}
+.onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;color:var(--tx2);padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.onglets button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem 1.1rem;margin:0 0 1.1rem}
@@ -43,34 +43,34 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
 .stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin:0 0 1rem}
 @media(max-width:820px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
 .stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:.7rem .85rem}
-.stat .l{font-size:.7rem;color:#8fa1b8;text-transform:uppercase;letter-spacing:.04em}
+.stat .l{font-size:.7rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
 .stat .v{font:700 1.4rem/1.1 Georgia,serif;margin-top:.2rem}
-select.t{background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:#e8edf5;font:inherit;font-size:.82rem;padding:.4rem .6rem}
-.b{font:inherit;font-size:.8rem;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;white-space:nowrap}
+select.t{background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;font-size:.82rem;padding:.4rem .6rem}
+.b{font:inherit;font-size:.8rem;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;white-space:nowrap}
 .b:hover{background:rgba(255,255,255,.09)}
-.b.dgr{color:#f6a6a6;border-color:rgba(248,113,113,.35)}
+.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover{background:rgba(248,113,113,.16)}
 table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;padding:.45rem .6rem;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap}
+table.tb th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .6rem;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap}
 table.tb td{padding:.5rem .6rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.82rem;vertical-align:top}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
-.mut{color:#8fa1b8}.sub{font-size:.72rem;color:#6f8098}
+.mut{color:var(--tx2)}.sub{font-size:.72rem;color:var(--tx-gris)}
 .kpis{display:flex;gap:.6rem;flex-wrap:wrap;margin:0 0 1rem}
 .kpi{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.55rem .8rem;min-width:110px}
-.kpi .v{font:700 1.2rem/1 Georgia,serif}.kpi .l{font-size:.7rem;color:#8fa1b8}
-.note{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.8rem 1rem;font-size:.82rem;color:#8fa1b8;line-height:1.55;margin:0 0 1rem}
-.note b{color:#e8edf5}
+.kpi .v{font:700 1.2rem/1 Georgia,serif}.kpi .l{font-size:.7rem;color:var(--tx2)}
+.note{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.8rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.55;margin:0 0 1rem}
+.note b{color:var(--tx)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
-.vide{padding:1.5rem;text-align:center;color:#8fa1b8;font-size:.82rem}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
+.vide{padding:1.5rem;text-align:center;color:var(--tx2);font-size:.82rem}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer}
 /* La zone mesurable de la pagination auto (#31) : une hauteur REELLE. */
 .liste{max-height:calc(100vh - 17rem);overflow-y:auto}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding-top:.45rem;font-size:.75rem;color:#8fa1b8}
-.barre select{font:inherit;font-size:.76rem;color:#e8edf5;background:rgba(255,255,255,.05);
+  padding-top:.45rem;font-size:.75rem;color:var(--tx2)}
+.barre select{font:inherit;font-size:.76rem;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:7px;padding:.12rem .4rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -230,7 +230,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             + '<td>'+esc(x.nom||'—')+'<div class="sub">'+esc(x.email)+'</div></td>'
             + '<td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.pays||'')+'</td><td>'+esc(x.action||'')+'</td></tr>';
         } else if (grp.cle==='automatisations'){
-          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(SECT[x.section]||x.section||'—')+'</span></td><td>'+esc(x.action||'')+'</td></tr>';
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:var(--tx-gris2)">'+esc(SECT[x.section]||x.section||'—')+'</span></td><td>'+esc(x.action||'')+'</td></tr>';
         } else if (grp.cle==='recherches'){
           h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+' fois</td><td class="mut">'+esc(x.derniere||'—')+'</td></tr>';
         } else if (grp.cle==='sms'){
@@ -239,7 +239,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         } else if (grp.cle==='comptable'){
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.au))+'</td><td>'+esc(CANAUX[x.canal]||x.canal||'')+'</td><td>'+esc(EVEN[x.genre]||x.genre||'')+'</td><td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.detail||'')+'</td></tr>';
         } else {
-          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:#fca5a5">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:#6ee7a0">Imprimé</span>')+'</td></tr>';
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:rgba(255,255,255,.06);color:var(--tx-gris2)">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:var(--tx-err2)">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:var(--tx-ok2)">Imprimé</span>')+'</td></tr>';
         }
       }
       h += '</tbody></table>';
@@ -266,10 +266,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     var st = D.stats||{}, rows = D.acces||[];
     var h = '';
     if (!D.statsHidden) h += '<div class="stat-grid">'
-      + '<div class="stat"><div class="l">Connexions auj.</div><div class="v" style="color:#6ee7a0">'+(st.loginOk||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Échecs auj.</div><div class="v" style="color:#fca5a5">'+(st.loginFail||0)+'</div></div>'
+      + '<div class="stat"><div class="l">Connexions auj.</div><div class="v" style="color:var(--tx-ok2)">'+(st.loginOk||0)+'</div></div>'
+      + '<div class="stat"><div class="l">Échecs auj.</div><div class="v" style="color:var(--tx-err2)">'+(st.loginFail||0)+'</div></div>'
       + '<div class="stat"><div class="l">Échecs MFA</div><div class="v" style="color:#e6c14a">'+(st.mfaFail||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Bloqués géo</div><div class="v" style="color:#fda4af">'+(st.geoBlocked||0)+'</div></div>'
+      + '<div class="stat"><div class="l">Bloqués géo</div><div class="v" style="color:var(--tx-err2)">'+(st.geoBlocked||0)+'</div></div>'
       + '<div class="stat"><div class="l">IPs uniques</div><div class="v">'+(st.ips||0)+'</div></div>'
       + '</div>';
     h += '<div class="carte"><div class="barre"><span class="sub">'+(D.accesTotal||rows.length)+' entrée(s) · conservation 30 jours</span><span class="pousse"></span>'
@@ -321,7 +321,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!rows.length) h += '<tr><td colspan="3" class="vide">Aucune action automatisée.</td></tr>';
     for (var i=0;i<rows.length;i++){ var l=rows[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(l.ts))+'</td>'
-        + '<td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(SECT[l.section]||l.section||'—')+'</span></td>'
+        + '<td><span class="pill" style="background:rgba(255,255,255,.06);color:var(--tx-gris2)">'+esc(SECT[l.section]||l.section||'—')+'</span></td>'
         + '<td>'+esc(l.action||'—')+'</td></tr>';
     }
     h += '</tbody></table></div>';
@@ -356,12 +356,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!rows.length) h += '<tr><td colspan="7" class="vide">'+(all.length?'Aucune impression ne correspond à ces filtres.':'Aucune impression depuis 30 jours.')+'</td></tr>';
     for (var i=0;i<rows.length;i++){ var r=rows[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(r.at))+'</td>'
-        + '<td><span class="pill" style="background:rgba(255,255,255,.06);color:#c3cede">'+esc(r.kindLabel||r.kind)+'</span></td>'
+        + '<td><span class="pill" style="background:rgba(255,255,255,.06);color:var(--tx-gris2)">'+esc(r.kindLabel||r.kind)+'</span></td>'
         + '<td>'+esc(r.label||'—')+(r.size?'<div class="sub">'+esc(r.size)+(r.dpi?' · '+esc(r.dpi)+' dpi':'')+'</div>':'')+'</td>'
         + '<td style="text-align:center"><strong>'+esc(r.qty||1)+'</strong></td>'
         + '<td>'+esc(r.printer||'—')+'<div class="sub">'+esc(VIA[r.via]||r.via||'')+'</div></td>'
         + '<td class="sub">'+esc(r.who||'—')+(r.poste?'<div class="sub">poste '+esc(r.poste)+'</div>':'')+'</td>'
-        + '<td>'+(r.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:#fca5a5" title="'+esc(r.note||'')+'">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:#6ee7a0">Imprimé</span>')+'</td></tr>';
+        + '<td>'+(r.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:var(--tx-err2)" title="'+esc(r.note||'')+'">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:var(--tx-ok2)">Imprimé</span>')+'</td></tr>';
     }
     h += '</tbody></table></div>';
     corps.innerHTML = h;
@@ -497,10 +497,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'Aucune donnée personnelle n’y entre — courriels, numéros et jetons sont remplacés avant l’envoi.</div>'
       + '<div class="carte"><div class="barre">'
       +   '<span class="sub">' + rows.length + ' défaut(s) distinct(s)'
-      +     (neuves ? ' · <b style="color:#fbbf24">' + neuves + ' non vu(s)</b>' : '') + '</span>'
+      +     (neuves ? ' · <b style="color:var(--tx-att)">' + neuves + ' non vu(s)</b>' : '') + '</span>'
       +   (D.peutModifier && neuves ? '<button class="mini" id="js-vues">Tout marquer comme vu</button>' : '')
       +   (D.peutModifier && rows.length
-            ? '<button class="mini" id="js-purge"' + (JS_ARME ? ' style="border-color:rgba(239,68,68,.6);color:#f87171"' : '') + '>'
+            ? '<button class="mini" id="js-purge"' + (JS_ARME ? ' style="border-color:rgba(239,68,68,.6);color:var(--tx-err)"' : '') + '>'
               + (JS_ARME ? 'Confirmer — vider définitivement' : 'Vider') + '</button>'
             : '')
       + '</div>'

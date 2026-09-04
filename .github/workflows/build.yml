@@ -164,6 +164,17 @@ jobs:
       # stricte, l'application ne se ferme PLUS et l'on finit par la tuer depuis
       # le gestionnaire des tâches — le geste le plus destructeur de tous. Elle
       # est sortie de `main.js` pour la même raison que le dossier des exports.
+      # ⚠ `banc-contraste-jour.js` (2026-09-04) garde la LISIBILITÉ DU MODE JOUR,
+      # et c'est le dernier angle mort de cette liste : aucun contrôle ci-dessus ne
+      # regarde une couleur. Le dépôt du site a bien un banc de contraste, mais il
+      # vit là-bas et ne voit pas les fenêtres natives. C'est ainsi qu'une dette de
+      # 2 300 déclarations s'est accumulée — des couleurs de mode SOMBRE posées sur
+      # le fond CLAIR du mode jour, #8fa1b8 sur 828 endroits à 2.36 de ratio, et pas
+      # un seul rouge pour le dire. Il a fallu deux captures d'écran de
+      # l'utilisateur : « en mode jour regarde ce n'est pas beau ».
+      # ⚠ C'est un CLIQUET, pas une porte fermée : la queue restante est déclarée
+      # avec son nombre dans `contraste-jour-declare.js`, et le banc refuse une
+      # couleur neuve sous le seuil ou un plafond qui monte.
       - name: Contrôle de syntaxe
         shell: bash
         run: |
@@ -173,6 +184,7 @@ jobs:
           node tools/verifier-mise-en-page.js
           node tools/banc-dossier-exports.js
           node tools/banc-brouillon-garde.js
+          node tools/banc-contraste-jour.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

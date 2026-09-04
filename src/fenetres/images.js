@@ -32,7 +32,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
@@ -43,7 +43,7 @@ h1{font-size:1rem;margin:0;font-weight:650}
 .zone{columns:34rem;column-gap:1.1rem}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
-.carte h2{font-size:.84rem;margin:0 0 .7rem;color:#c9a97e;letter-spacing:.03em;text-transform:uppercase}
+.carte h2{font-size:.84rem;margin:0 0 .7rem;color:var(--tx-or);letter-spacing:.03em;text-transform:uppercase}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
   border-radius:9px;padding:.7rem .85rem;font-size:.78rem;line-height:1.6;margin:0 0 1rem}
 .info b{color:#dbe7fb}
@@ -52,31 +52,31 @@ h1{font-size:1rem;margin:0;font-weight:650}
 .chiffres{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:0 0 .9rem}
 .kpi{background:#0f1724;border:1px solid #2b3444;border-radius:9px;padding:.6rem .7rem;text-align:center}
 .kpi .n{font-size:1.35rem;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
-.kpi .l{font-size:.68rem;color:#8fa1b8;margin-top:.15rem}
-.kpi.chaud .n{color:#facc15}
+.kpi .l{font-size:.68rem;color:var(--tx2);margin-top:.15rem}
+.kpi.chaud .n{color:var(--tx-jaune)}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
-thead th{text-align:left;font-weight:600;color:#8fa1b8;font-size:.71rem;letter-spacing:.04em;
+thead th{text-align:left;font-weight:600;color:var(--tx2);font-size:.71rem;letter-spacing:.04em;
   text-transform:uppercase;padding:.3rem .4rem;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody td{padding:.32rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.sku{font-size:.7rem;color:#6d7f96}
+.sku{font-size:.7rem;color:var(--tx3)}
 .echec{border:1px solid rgba(240,120,120,.35);background:rgba(200,60,60,.09);color:#f6bdbd;
   border-radius:9px;padding:.6rem .8rem;font-size:.77rem;margin-top:.8rem}
 .echec b{color:#ffd9d9}
 .echec ul{margin:.4rem 0 0;padding-left:1.1rem}
 .jauge{height:7px;border-radius:99px;background:#0f1724;border:1px solid #2b3444;overflow:hidden;margin:.6rem 0 .3rem}
 .jauge i{display:block;height:100%;background:#c9a97e;width:0;transition:width .25s}
-.vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;
   border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;
   border-radius:8px;padding:.42rem .9rem;cursor:pointer}
 button.prim:hover:not(:disabled){background:#d8bd97}
 button.prim:disabled{opacity:.5;cursor:default}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid rgba(255,255,255,.16);
-  border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
+  border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .mini:hover:not(:disabled){background:rgba(255,255,255,.1)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -172,7 +172,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (DEPART > 0) {
       var faits = Math.max(0, DEPART - E.fiches.length);
       h += '<div class="jauge"><i style="width:' + Math.round(faits * 100 / DEPART) + '%"></i></div>'
-        + '<div style="font-size:.72rem;color:#8fa1b8">' + faits + ' / ' + DEPART + ' fiche(s) traitée(s)</div>';
+        + '<div style="font-size:.72rem;color:var(--tx2)">' + faits + ' / ' + DEPART + ' fiche(s) traitée(s)</div>';
     }
 
     h += '<table><thead><tr><th>Fiche</th><th style="text-align:right">Images</th><th style="text-align:right">Poids</th></tr></thead><tbody>';
@@ -182,7 +182,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '</td><td class="n">' + f.champs + '</td><td class="n">' + poids(f.octets) + '</td></tr>';
     });
     h += '</tbody></table>';
-    if (E.fiches.length > 40) h += '<div style="font-size:.72rem;color:#8fa1b8;margin-top:.4rem">… et ' + (E.fiches.length - 40) + ' autre(s).</div>';
+    if (E.fiches.length > 40) h += '<div style="font-size:.72rem;color:var(--tx2);margin-top:.4rem">… et ' + (E.fiches.length - 40) + ' autre(s).</div>';
 
     if (ECHECS.length) h += echecsHtml();
     h += '</div>';

@@ -29,21 +29,21 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:#8fa1b8}
-input,select,button,textarea{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  font-size:.78rem;color:var(--tx2)}
+input,select,button,textarea{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem}
 select,button{cursor:pointer}
 input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
@@ -53,54 +53,54 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
-button.danger{border-color:rgba(239,68,68,.5);color:#f87171}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
-  color:#8fa1b8;font-weight:700}
+  color:var(--tx2);font-weight:700}
 .stats{display:flex;gap:.5rem;flex-wrap:wrap}
 .stats .s{flex:1 1 8rem;background:rgba(255,255,255,.04);border-radius:9px;padding:.4rem .6rem}
-.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:#c9a97e}
-.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8}
-.stats .s .sub{font-size:.66rem;color:#6d7f96}
+.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
+.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.stats .s .sub{font-size:.66rem;color:var(--tx3)}
 
 /* La zone de depot : c est la porte la plus rapide vers une depense saisie. */
 .depot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:.25rem;border:2px dashed rgba(255,255,255,.2);
-  border-radius:12px;padding:.85rem 1rem;text-align:center;color:#8fa1b8;
+  border-radius:12px;padding:.85rem 1rem;text-align:center;color:var(--tx2);
   cursor:pointer;transition:border-color .13s,background .13s}
 .depot:hover,.depot.survol{border-color:#c9a97e;background:rgba(201,169,126,.08)}
-.depot .gros{font-size:.9rem;font-weight:600;color:#e8edf5}
+.depot .gros{font-size:.9rem;font-weight:600;color:var(--tx)}
 .depot .pt{font-size:.74rem}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:rgba(255,255,255,.04)}
 tbody td{padding:.3rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tbody .num{font-weight:600;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-tbody .dt{font-size:.72rem;color:#8fa1b8}
+tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
-.pill.bon{background:rgba(34,197,94,.14);color:#4ade80}
-.pill.att{background:rgba(245,158,11,.16);color:#fbbf24}
-.pill.info{background:rgba(59,130,246,.18);color:#93c5fd}
-.pill.neutre{background:rgba(148,163,184,.16);color:#8fa1b8}
+.pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
+.pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.pill.info{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding-top:.4rem;font-size:.74rem;color:#8fa1b8}
-.vide{padding:1.2rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
-.aide{font-size:.75rem;color:#8fa1b8;line-height:1.45}
-.avis{background:rgba(180,120,10,.1);border:1px solid rgba(180,120,10,.4);color:#fbbf24;
+  padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
+.vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
+.aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
+.avis{background:rgba(180,120,10,.1);border:1px solid rgba(180,120,10,.4);color:var(--tx-att);
   border-radius:9px;padding:.45rem .65rem;font-size:.79rem;line-height:1.5}
 
 .frais{border:1px solid rgba(124,92,255,.32);background:rgba(124,92,255,.07);
   border-radius:11px;padding:.7rem .9rem;margin:0 0 .8rem}
 .frais .ft{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#b6a6f7}
 .frais .fv{font:700 1.35rem/1.2 Georgia,serif;margin:.15rem 0 .2rem}
-.frais .fx{font-size:.78rem;color:#8fa1b8;line-height:1.55}
-.frais .fx b{color:#e8edf5}
+.frais .fx{font-size:.78rem;color:var(--tx2);line-height:1.55}
+.frais .fx b{color:var(--tx)}
 .frais .fm{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}
-.frais .fm span{font-size:.74rem;color:#8fa1b8;background:rgba(255,255,255,.05);
+.frais .fm span{font-size:.74rem;color:var(--tx2);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:.12rem .55rem}
 html.jour .frais{background:rgba(90,60,190,.08);border-color:rgba(90,60,190,.28)}
 html.jour .frais .ft{color:#5b3fb0}
@@ -113,7 +113,7 @@ html.jour .frais .ft{color:#5b3fb0}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid rgba(255,255,255,.08);
   border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:.6rem}
-.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8}
+.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.86rem;font-weight:600;overflow-wrap:anywhere}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.5;
   background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;
@@ -132,7 +132,7 @@ html.jour .frais .ft{color:#5b3fb0}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem}
 .form .large{grid-column:1/-1}
 .champ{display:flex;flex-direction:column;gap:.2rem}
-.champ label{font-size:.7rem;color:#8fa1b8}
+.champ label{font-size:.7rem;color:var(--tx2)}
 .champ input,.champ select{width:100%}
 .bloc-montants{grid-column:1/-1;background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:.55rem .7rem}
@@ -140,9 +140,9 @@ html.jour .frais .ft{color:#5b3fb0}
 @media (max-width:620px){.form,.trois{grid-template-columns:1fr}}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -602,7 +602,7 @@ ${JS_ACTIVITE}${JS_DIRE}
          seule facon de verifier une conversion, et c est aussi ce qu on relit
          quand on corrige une taxe que la lecture a manquee. */
       + (f.origine
-          ? '<div class="aide" style="margin-top:.35rem;color:#93c5fd"><span class="ic">💵</span> Facture en '
+          ? '<div class="aide" style="margin-top:.35rem;color:var(--tx-bleu)"><span class="ic">💵</span> Facture en '
             + esc(f.origine.devise || 'USD') + ' — original : '
             + [['montant', 'montant'], ['tps', 'TPS'], ['tvq', 'TVQ']].map(function(p){
                 var v = f.origine[p[0]];
@@ -1272,7 +1272,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }
     if (actif) {

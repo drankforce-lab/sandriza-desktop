@@ -25,7 +25,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -43,8 +43,8 @@ body{background:#0e1522;color:#e8edf5;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .pleine{grid-column:1/-1}
 .carte h2{margin:0 0 .25rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8}
-.carte p{margin:0 0 .9rem;font-size:.79rem;color:#6d7f96}
+  letter-spacing:.06em;color:var(--tx2)}
+.carte p{margin:0 0 .9rem;font-size:.79rem;color:var(--tx3)}
 .rang{display:flex;flex-wrap:wrap;gap:1rem}
 .th{display:flex;flex-direction:column;align-items:center;gap:.4rem;
   background:none;border:none;padding:0;cursor:pointer;font:inherit;color:inherit;
@@ -56,22 +56,22 @@ body{background:#0e1522;color:#e8edf5;
 .th .barre{width:70%;height:6px;border-radius:4px;opacity:.9}
 .th .coche{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:8px;line-height:1}
-.th .nom{font-size:.72rem;color:#8fa1b8;white-space:nowrap}
-.th[aria-pressed="true"] .nom{color:#e8edf5;font-weight:700}
+.th .nom{font-size:.72rem;color:var(--tx2);white-space:nowrap}
+.th[aria-pressed="true"] .nom{color:var(--tx);font-weight:700}
 .th:hover:not(:disabled) .pastille{box-shadow:0 4px 14px rgba(0,0,0,.4)}
 .th:focus-visible .pastille{outline:2px solid #c9a97e;outline-offset:3px}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
-.vide{padding:1.1rem .6rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
+.vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* ⚠ LE BANDEAU DE LECTURE SEULE VIT HORS DE LA GRILLE. Place dedans avec
    << grid-column:1/-1 >>, il OCCUPE la derniere piste : auto-fit ne la voit plus
    vide, ne la replie plus, et les cartes cessent de remplir la largeur (releve
    au rendu le 2026-08-10). */
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
-  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;
+  background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;
   padding:.5rem .7rem;font-size:.78rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -102,7 +102,7 @@ function pageApparence() {
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }
     if (actif) {

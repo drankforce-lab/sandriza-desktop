@@ -33,64 +33,64 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
-  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+  background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.intro{max-width:52rem;color:#8fa1b8;font-size:.8rem;line-height:1.55;margin:0 0 1rem}
+.intro{max-width:52rem;color:var(--tx2);font-size:.8rem;line-height:1.55;margin:0 0 1rem}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:1rem}
 .slot{display:flex;flex-direction:column;gap:.35rem}
-.slot .lbl{font-size:.7rem;font-weight:700;color:#cbd8e6;text-transform:uppercase;letter-spacing:.05em;text-align:center}
+.slot .lbl{font-size:.7rem;font-weight:700;color:var(--tx-bleute);text-transform:uppercase;letter-spacing:.05em;text-align:center}
 .cadre{aspect-ratio:3/4;border:1.5px dashed #2b3444;border-radius:9px;cursor:pointer;position:relative;
   overflow:hidden;background:#0f1724;transition:border-color .15s;display:flex;align-items:center;justify-content:center}
 .cadre:hover{border-color:#c9a97e}
 .cadre.ro{cursor:default;opacity:.7}
 .cadre img{width:100%;height:100%;object-fit:cover;display:block}
-.cadre .vide{display:flex;flex-direction:column;align-items:center;gap:.3rem;color:#6d7f96;font-size:.72rem;text-align:center}
+.cadre .vide{display:flex;flex-direction:column;align-items:center;gap:.3rem;color:var(--tx3);font-size:.72rem;text-align:center}
 .cadre .vide .em{font-size:1.4rem;filter:grayscale(1) brightness(1.6)}
 .cadre .surv{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:.72rem;font-weight:600;opacity:0;transition:opacity .15s}
+  color:var(--tx-blanc);font-size:.72rem;font-weight:600;opacity:0;transition:opacity .15s}
 .cadre:hover .surv{opacity:1}
 .souspied{min-height:1.4rem;display:flex;justify-content:center;align-items:center}
-.retirer{background:none;border:0;padding:0;font-size:.7rem;color:#fca5a5;opacity:.7;cursor:pointer;font-family:inherit}
+.retirer{background:none;border:0;padding:0;font-size:.7rem;color:var(--tx-err2);opacity:.7;cursor:pointer;font-family:inherit}
 .retirer:hover{opacity:1}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
-.vide-page{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
+.vide-page{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* ── Le SECOND bloc : les mannequins de l'habillage IA. Liste OUVERTE, donc une
    grille de vignettes plus petites et une tuile d'ajout, au lieu de slots fixes. */
 .sect{display:flex;align-items:center;gap:.5rem;margin:1.6rem 0 .5rem}
 .sect:first-of-type{margin-top:0}
 .sect h2{font-size:.82rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
-  color:#c9a97e;margin:0;flex:0 0 auto}
+  color:var(--tx-or);margin:0;flex:0 0 auto}
 .sect .tr{flex:1 1 auto;height:1px;background:rgba(255,255,255,.12)}
 .mqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.85rem}
 .mq{display:flex;flex-direction:column;gap:.3rem}
 .mq .cd{aspect-ratio:3/4;border:1.5px solid #2b3444;border-radius:9px;overflow:hidden;
   background:#0f1724;display:flex;align-items:center;justify-content:center}
 .mq .cd img{width:100%;height:100%;object-fit:cover;display:block}
-.mq .nm{font-size:.72rem;color:#cbd8e6;text-align:center;overflow:hidden;
+.mq .nm{font-size:.72rem;color:var(--tx-bleute);text-align:center;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .mq .sp{min-height:1.2rem;display:flex;justify-content:center;align-items:center}
 .ajout{aspect-ratio:3/4;border:1.5px dashed #2b3444;border-radius:9px;cursor:pointer;
   background:#0f1724;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:.3rem;color:#6d7f96;font-size:.72rem;text-align:center;padding:.4rem;transition:border-color .15s}
+  gap:.3rem;color:var(--tx3);font-size:.72rem;text-align:center;padding:.4rem;transition:border-color .15s}
 .ajout:hover{border-color:#c9a97e}
 .ajout .em{font-size:1.4rem;filter:grayscale(1) brightness(1.6)}
 .nomq{width:100%;font:inherit;font-size:.74rem;padding:.2rem .35rem;margin-top:.3rem;
-  border:1px solid rgba(255,255,255,.16);border-radius:6px;background:#0b1220;color:#e8edf5}
+  border:1px solid rgba(255,255,255,.16);border-radius:6px;background:#0b1220;color:var(--tx)}
 button.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;
   border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);
-  color:#e8edf5;cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none}
+  color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none}
 button.mini:hover:not(:disabled){background:rgba(255,255,255,.1)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -258,7 +258,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       // On ne parle de la cle QUE si elle manque : sans elle, l habillage refusera,
       // et le dire ici evite de chercher pourquoi le bouton ne rend rien.
       av.innerHTML = (DM && DM.cleConfiguree === false)
-        ? '<strong style="color:#fbbf24">⚠ Aucune clé Fal.ai n’est enregistrée</strong> — l’habillage refusera tant qu’elle n’est pas posée dans Configuration → Clés API.'
+        ? '<strong style="color:var(--tx-att)">⚠ Aucune clé Fal.ai n’est enregistrée</strong> — l’habillage refusera tant qu’elle n’est pas posée dans Configuration → Clés API.'
         : '';
     }
     var l = (DM && DM.mannequins) || [];

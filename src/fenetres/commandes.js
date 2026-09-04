@@ -37,14 +37,14 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 
 /* ⚠ LE CORPS NE DEFILE PAS : seule la LISTE le fait, et elle est paginee pour
    que ce soit rare. La barre de recherche et les filtres restent en vue. */
@@ -55,7 +55,7 @@ body{background:#0e1522;color:#e8edf5;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 
-input,select{font:inherit;color:#e8edf5;background:#0f1826;
+input,select{font:inherit;color:var(--tx);background:#0f1826;
   border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -63,7 +63,7 @@ input:focus,select:focus{outline:none;border-color:#c9a97e}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
-  color:#e8edf5;transition:background .13s,border-color .13s}
+  color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
@@ -75,16 +75,16 @@ button.traite{background:#78350f;color:#fde68a;border-color:#b45309;
   cursor:not-allowed;opacity:1}
 
 .filtres{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;margin-top:.45rem}
-.filtres .lbl{font-size:.72rem;color:#8fa1b8}
+.filtres .lbl{font-size:.72rem;color:var(--tx2)}
 .filtres select{width:auto}
 .jetons{display:flex;gap:.28rem;flex-wrap:wrap}
 .jetons button{font-size:.74rem;padding:.1rem .5rem;border-radius:99px}
-.jetons button.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:#e8dcc6}
+.jetons button.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:var(--tx-creme)}
 /* Prioritaires : l ambre du site, et un compte qui dit le RESTE-A-FAIRE.
    ⚠ Regles AUTONOMES : le bouton vit HORS du groupe .jetons, une regle
    prefixee .jetons ne l atteignait jamais - le bouton ne s allumait pas
    (signale le 2026-08-07). */
-button.prio{border-color:rgba(245,158,11,.4);color:#cbd8e6;border-radius:99px;
+button.prio{border-color:rgba(245,158,11,.4);color:var(--tx-bleute);border-radius:99px;
   font-size:.74rem;padding:.1rem .5rem;margin-left:.4rem}
 /* ⚠ Actif = teinte ambree sur fond sombre, texte clair. Le plein orange avec
    texte marine noyait l eclair et se lisait mal en theme sombre (2026-08-08). */
@@ -100,39 +100,39 @@ button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 thead th{position:sticky;top:0;background:#1b2635;text-align:left;
   padding:.34rem .5rem;font-size:.7rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
 thead th.c{text-align:center}
 tbody td{padding:.3rem .5rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
 tbody tr:hover{background:rgba(255,255,255,.04)}
-tbody .num{font-family:ui-monospace,monospace;font-size:.78rem;color:#c9a97e}
-tbody .det{font-size:.75rem;color:#8fa1b8}
+tbody .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
+tbody .det{font-size:.75rem;color:var(--tx2)}
 /* Une commande ETIQUETEE mais pas encore expediee : c est exactement celle qu on
    cherche en reprenant le travail. Elle se repere sans lire. */
 tbody tr.attente{background:rgba(124,92,255,.09)}
 .et{font-size:.68rem;padding:.06rem .45rem;border-radius:99px;white-space:nowrap;
-  border:1px solid rgba(255,255,255,.16);color:#8fa1b8}
-.et.vert{border-color:rgba(74,222,128,.45);color:#4ade80}
-.et.bleu{border-color:rgba(96,165,250,.5);color:#93c5fd}
+  border:1px solid rgba(255,255,255,.16);color:var(--tx2)}
+.et.vert{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
+.et.bleu{border-color:rgba(96,165,250,.5);color:var(--tx-bleu)}
 .et.jaune{border-color:rgba(245,158,11,.5);color:#f0c987}
-.et.rouge{border-color:rgba(248,113,113,.5);color:#f6a5a5}
+.et.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.45rem;
   margin-top:.35rem;border-top:1px solid rgba(255,255,255,.07);
-  font-size:.78rem;color:#8fa1b8;flex-wrap:wrap}
+  font-size:.78rem;color:var(--tx2);flex-wrap:wrap}
 .pagi .pos{margin-left:auto}
 .pagi select{width:auto;padding:.14rem .35rem;font-size:.76rem}
 
 /* ── Le detail d une commande ── */
 .det2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.55rem}
 .bloc h3{margin:0 0 .25rem;font-size:.67rem;text-transform:uppercase;
-  letter-spacing:.08em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.08em;color:var(--tx2);font-weight:700}
 .bloc .l{font-size:.85rem}
-.bloc .mut{color:#8fa1b8;font-size:.8rem;line-height:1.5}
+.bloc .mut{color:var(--tx2);font-size:.8rem;line-height:1.5}
 .badge2{display:inline-block;font-size:.62rem;padding:.04rem .45rem;border-radius:99px;
-  margin-left:.4rem;vertical-align:1px;background:rgba(148,163,184,.18);color:#cbd8e6}
+  margin-left:.4rem;vertical-align:1px;background:rgba(148,163,184,.18);color:var(--tx-bleute)}
 .badge2.or{background:#f59e0b;color:#1a1a2e;font-weight:700}
 .badge2.vertf{background:#166534;color:#dcfce7;font-weight:700}
 select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
@@ -142,24 +142,24 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
 .totaux .tt{font-weight:700;margin-top:.2rem}
 .remb{margin-top:.7rem;border-top:2px dashed rgba(245,158,11,.5);padding-top:.45rem}
 .remb .t{font-size:.69rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.06em;color:#fbbf24;margin-bottom:.25rem}
+  letter-spacing:.06em;color:var(--tx-att);margin-bottom:.25rem}
 .remb .lg2{display:flex;justify-content:space-between;gap:1rem;font-size:.8rem;
   padding:.18rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.remb .fin3{text-align:right;font-size:.8rem;font-weight:700;color:#fbbf24;margin-top:.3rem}
-.banniere{flex:0 0 auto;background:#7f1d1d;color:#fff;border-radius:9px;
+.remb .fin3{text-align:right;font-size:.8rem;font-weight:700;color:var(--tx-att);margin-top:.3rem}
+.banniere{flex:0 0 auto;background:#7f1d1d;color:var(--tx-blanc);border-radius:9px;
   padding:.5rem .8rem;font-size:.82rem;line-height:1.5}
-button.danger{border-color:rgba(239,68,68,.55);color:#f6a5a5}
+button.danger{border-color:rgba(239,68,68,.55);color:var(--tx-err2)}
 button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#ef4444}
 
 /* ── Menu contextuel (clic droit sur une ligne) ── */
 .ctx{position:fixed;z-index:60;background:#16202f;border:1px solid rgba(255,255,255,.16);
   border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.5);padding:.3rem;min-width:210px}
 .ctx .t{font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;
-  color:#8fa1b8;padding:.28rem .5rem;font-weight:700}
+  color:var(--tx2);padding:.28rem .5rem;font-weight:700}
 .ctx button{display:block;width:100%;text-align:left;border:none;
   background:transparent;padding:.3rem .5rem;border-radius:6px;font-size:.83rem}
 .ctx button:hover{background:rgba(255,255,255,.08)}
-.ctx .warn{background:#7f1d1d;color:#fff;border-radius:6px;padding:.5rem .65rem;
+.ctx .warn{background:#7f1d1d;color:var(--tx-blanc);border-radius:6px;padding:.5rem .65rem;
   font-size:.79rem;line-height:1.5;max-width:290px;margin:.2rem}
 
 /* Confirmations : un voile, jamais une boite du systeme (elle s ouvrirait
@@ -171,7 +171,7 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
   max-height:84vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.86rem;line-height:1.5}
-.voile ul{font-size:.83rem;color:#cbd8e6;line-height:1.7;margin:.5rem 0 0;padding-left:1.1rem}
+.voile ul{font-size:.83rem;color:var(--tx-bleute);line-height:1.7;margin:.5rem 0 0;padding-left:1.1rem}
 .voile li.item{list-style:none;background:rgba(255,255,255,.05);border-radius:6px;
   padding:.3rem .6rem;margin:.25rem 0}
 .voile label.rc{display:flex;align-items:flex-start;gap:.5rem;margin-top:.9rem;
@@ -189,20 +189,20 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
   border:1px solid rgba(255,255,255,.12);border-radius:7px;cursor:pointer}
 .voile .lres .cli:hover{border-color:#c9a97e;background:rgba(201,169,126,.12)}
 .voile .lres .cli .nm{font-weight:600;font-size:.85rem}
-.voile .lres .cli .em{font-size:.76rem;color:#8fa1b8}
-.voile .lres .cli .fl{font-size:.74rem;color:#c9a97e;white-space:nowrap}
-.voile .lres .rien{padding:.5rem .2rem;color:#8fa1b8;font-size:.83rem}
+.voile .lres .cli .em{font-size:.76rem;color:var(--tx2)}
+.voile .lres .cli .fl{font-size:.74rem;color:var(--tx-or);white-space:nowrap}
+.voile .lres .rien{padding:.5rem .2rem;color:var(--tx2);font-size:.83rem}
 .voile .detacher{margin-top:.8rem;padding-top:.6rem;
   border-top:1px solid rgba(255,255,255,.1)}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
   background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .actions{flex:0 0 auto;display:flex;gap:.4rem}
-.vide{padding:1.6rem 1rem;text-align:center;color:#8fa1b8;font-size:.86rem}
+.vide{padding:1.6rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -506,13 +506,13 @@ ${JS_ACTIVITE}${JS_DIRE}
             + (c.compte ? 'Changer' : 'Lier') + '</button>' : '')
       + '</div>'
       + (c.compte
-          ? '<div class="mut">Compte : <strong style="color:#cbd8e6">' + esc(c.compte.nom) + '</strong></div>'
+          ? '<div class="mut">Compte : <strong style="color:var(--tx-bleute)">' + esc(c.compte.nom) + '</strong></div>'
           : '')
       + (c.client.entreprise ? '<div class="l">' + esc(c.client.entreprise) + '</div>' : '')
       + '<div class="mut">' + esc(c.client.courriel) + (c.client.tel ? '<br>' + esc(c.client.tel) : '') + '</div>'
       + '<div class="mut" style="margin-top:.4rem"><span class="ic">💳</span> '
       + (c.paiementSquare ? '<span class="num">' + esc(c.paiementSquare) + '</span>'
-                          : '<span style="color:#fbbf24">Commande démo — aucun paiement Square</span>')
+                          : '<span style="color:var(--tx-att)">Commande démo — aucun paiement Square</span>')
       + (c.afterpay ? '<span class="badge2">AFTERPAY</span>' : '') + '</div></div>'
       + '<div class="bloc"><h3>Livraison</h3>'
       + '<div class="mut">' + esc(c.adresse.rue) + '<br>'
@@ -529,7 +529,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<th class="c">Qté</th><th class="d">Prix</th></tr></thead><tbody>'
       + d.articles.map(function(a){
           return '<tr><td>' + esc(a.nom)
-            + (a.rembourseQte > 0 ? ' <span style="font-size:.7rem;color:#fbbf24">(' + a.rembourseQte + ' remb.)</span>' : '')
+            + (a.rembourseQte > 0 ? ' <span style="font-size:.7rem;color:var(--tx-att)">(' + a.rembourseQte + ' remb.)</span>' : '')
             + '</td><td class="c det">' + esc(a.taille) + ' / ' + esc(a.couleur) + '</td>'
             + '<td class="c">' + a.qte + '</td>'
             + '<td class="d">' + argent(a.montant) + '</td></tr>'; }).join('')
@@ -541,13 +541,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + (Math.round(x.taux * 1000000) / 10000) + ' %)</div>'; }).join('')
       + (t.livraison > 0 ? '<div>Livraison</div>' : '')
       + (t.prioritaire > 0 ? '<div>⚡ Traitement prioritaire</div>' : '')
-      + (t.coupon > 0 ? '<div style="color:#4ade80">Coupon</div>' : '')
+      + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">Coupon</div>' : '')
       + '<div class="tt">Total</div></div>'
       + '<div class="d"><div>' + argent(t.sousTotal) + '</div>'
       + t.taxes.map(function(x){ return '<div>' + argent(x.montant) + '</div>'; }).join('')
       + (t.livraison > 0 ? '<div>' + argent(t.livraison) + '</div>' : '')
       + (t.prioritaire > 0 ? '<div>' + argent(t.prioritaire) + '</div>' : '')
-      + (t.coupon > 0 ? '<div style="color:#4ade80">−' + argent(t.coupon) + '</div>' : '')
+      + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">−' + argent(t.coupon) + '</div>' : '')
       + '<div class="tt">' + argent(t.total) + '</div></div></div>';
 
     var rb = d.remboursements;
@@ -557,7 +557,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             return '<div class="lg2"><span><strong>' + esc(r.numero) + '</strong> · '
               + esc(dateCourte(r.date)) + ' · <em>' + esc(r.type) + '</em>'
               + (r.fraisRetenus > 0 ? ' <span style="color:#f59e0b;font-size:.72rem">(frais retenus : ' + argent(r.fraisRetenus) + ')</span>' : '')
-              + '</span><span style="font-weight:700;color:#fbbf24">−' + argent(r.montant) + '</span></div>'; }).join('');
+              + '</span><span style="font-weight:700;color:var(--tx-att)">−' + argent(r.montant) + '</span></div>'; }).join('');
       if (rb.fraisRetenus > 0) {
         h += '<div class="fin3" style="color:#f0c987;font-weight:400">Frais de service retenus : <strong>'
           + argent(rb.fraisRetenus) + '</strong> '
@@ -718,7 +718,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }
     if (actif) {
@@ -787,7 +787,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       voile('<h3>Rembourser les frais de service</h3>'
         + '<p>Rembourser <strong>' + argent(ap.montant) + '</strong> de frais de service retenus '
         + 'au client via Square ?'
-        + (ap.dejaRembourse > 0 ? '<br><span style="color:#8fa1b8">(' + argent(ap.dejaRembourse)
+        + (ap.dejaRembourse > 0 ? '<br><span style="color:var(--tx2)">(' + argent(ap.dejaRembourse)
             + ' déjà remboursés sur ' + argent(ap.totalRetenu) + ' retenus)</span>' : '')
         + ' <strong>Cette opération est irréversible.</strong></p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
@@ -825,7 +825,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         : 'en mode <strong>invité</strong> (aucun compte)';
       voile('<h3><span class="ic">🔗</span> Rattacher la commande à un client</h3>'
         + '<p>Commande <strong>' + esc(ap.numero) + '</strong> — ' + etat + '.</p>'
-        + '<label style="font-size:.82rem;color:#cbd8e6">Rechercher un client (nom ou courriel)'
+        + '<label style="font-size:.82rem;color:var(--tx-bleute)">Rechercher un client (nom ou courriel)'
         + '<input class="rech" id="v-rech" placeholder="ex : marie@example.com" autocomplete="off"></label>'
         + '<div class="lres" id="v-lres"><div class="rien">Tapez au moins 3 caractères.</div></div>'
         + (ap.actuel
@@ -885,7 +885,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function confirmerLien(fermerListe, ap, clientId, libelle){
     voile('<h3>Rattacher la commande</h3>'
       + '<p>Lier <strong>' + esc(ap.numero) + '</strong> à <strong>' + esc(libelle) + '</strong> ?</p>'
-      + '<p style="color:#8fa1b8">La facture associée sera mise à jour et les statistiques '
+      + '<p style="color:var(--tx2)">La facture associée sera mise à jour et les statistiques '
       + 'd’achat des comptes concernés recalculées.</p>'
       + '<div class="fin2"><button id="v2-non">Annuler</button>'
       + '<button class="prim" id="v2-oui">Lier</button></div>',
@@ -913,16 +913,16 @@ ${JS_ACTIVITE}${JS_DIRE}
   function flowSupprimer(){
     appeler('commandes:supprimerApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
-      voile('<h3 style="color:#f87171"><span class="ic">🗑</span> Supprimer la commande</h3>'
+      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> Supprimer la commande</h3>'
         + '<p><strong>' + esc(ap.numero) + '</strong> — ' + esc(ap.client) + '<br>'
-        + '<span style="color:#8fa1b8">' + esc(dateCourte(ap.date)) + ' · ' + argent(ap.total)
+        + '<span style="color:var(--tx2)">' + esc(dateCourte(ap.date)) + ' · ' + argent(ap.total)
         + ' · ' + esc(ap.statutLibelle) + '</span></p>'
         + '<p style="font-weight:600;margin-top:.6rem">Éléments qui seront supprimés :</p>'
         + '<ul style="padding-left:0">' + (ap.elements || []).map(function(x){
             return '<li class="item">' + esc(x) + '</li>'; }).join('') + '</ul>'
-        + '<p style="color:#f87171;font-weight:600">⚠ Cette action est irréversible.</p>'
+        + '<p style="color:var(--tx-err);font-weight:600">⚠ Cette action est irréversible.</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
-        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:#fff">Supprimer définitivement</button></div>',
+        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">Supprimer définitivement</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){

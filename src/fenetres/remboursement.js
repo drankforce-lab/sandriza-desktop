@@ -27,13 +27,13 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
@@ -41,9 +41,9 @@ body{background:#0e1522;color:#e8edf5;
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.09em;color:#8fa1b8;font-weight:700}
-.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:#6d7f96}
-input,select,textarea{font:inherit;color:#e8edf5;background:#0f1826;
+  letter-spacing:.09em;color:var(--tx2);font-weight:700}
+.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
+input,select,textarea{font:inherit;color:var(--tx);background:#0f1826;
   border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
@@ -51,39 +51,39 @@ textarea{resize:none}
 input[type=checkbox],input[type=radio]{width:auto}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
-  color:#e8edf5;transition:background .13s,border-color .13s}
+  color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
-button.paie{background:#7c5cff;border-color:#7c5cff;color:#fff;font-weight:600}
+button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-blanc);font-weight:600}
 button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .art{display:flex;align-items:center;gap:.6rem;padding:.35rem .45rem;border-radius:8px;
   background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-top:.3rem}
 .art .d{flex:1 1 auto;min-width:0}
 .art .n{font-size:.87rem;font-weight:600}
-.art .v{font-size:.74rem;color:#8fa1b8}
+.art .v{font-size:.74rem;color:var(--tx2)}
 .art input[type=number]{width:4.4rem;text-align:center}
-.art .max{font-size:.68rem;color:#6d7f96;white-space:nowrap}
+.art .max{font-size:.68rem;color:var(--tx3);white-space:nowrap}
 .tot .l{display:flex;justify-content:space-between;padding:.14rem 0;font-size:.85rem}
 .tot .l.grand{font-size:1.02rem;font-weight:700;border-top:1px solid rgba(255,255,255,.14);
   margin-top:.3rem;padding-top:.4rem}
-.tot .l.frais{color:#f6a5a5}
-.tot .l.net{color:#4ade80;font-weight:700}
+.tot .l.frais{color:var(--tx-err2)}
+.tot .l.net{color:var(--tx-ok);font-weight:700}
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
 .avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
-.aide{font-size:.73rem;color:#8fa1b8;line-height:1.45}
+.aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 .choix{display:flex;flex-direction:column;gap:.4rem;margin-top:.2rem}
 .choix label{display:flex;align-items:flex-start;gap:.5rem;font-size:.85rem;cursor:pointer}
-.choix .exp{display:block;font-size:.72rem;color:#8fa1b8}
+.choix .exp{display:block;font-size:.72rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
   background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .actions{flex:0 0 auto;display:flex;gap:.4rem}
-.vide{padding:1.6rem 1rem;text-align:center;color:#8fa1b8;font-size:.86rem}
+.vide{padding:1.6rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
 .voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
@@ -238,7 +238,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + argent(R.frais.commande) + ' sur ' + argent(R.frais.baseHT) + ' HT). Square ne rembourse pas ses frais.</div>'
           + '<button class="mini" id="btn-nip" style="margin-top:.4rem;font-size:.75rem;padding:.14rem .5rem">'
           + '<span class="ic">🔐</span> Renoncer aux frais (rembourser au complet)</button>'
-          + '<div id="z-nip-ok" style="display:none;font-size:.78rem;color:#4ade80;margin-top:.3rem">'
+          + '<div id="z-nip-ok" style="display:none;font-size:.78rem;color:var(--tx-ok);margin-top:.3rem">'
           + '✓ Exemption accordée — les frais ne seront pas retenus.</div>'
           + '</div>' : '')
       + '</div>';
@@ -347,7 +347,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<p>Renoncer aux frais de service Square exige le code confidentiel.</p>'
       + '<input type="password" id="v-nip" autocomplete="off" '
       + 'style="letter-spacing:.14em;text-align:center;font-family:ui-monospace,monospace">'
-      + '<div id="v-nip-err" style="display:none;font-size:.78rem;color:#f87171;margin-top:.35rem">Code incorrect — réessayez.</div>'
+      + '<div id="v-nip-err" style="display:none;font-size:.78rem;color:var(--tx-err);margin-top:.35rem">Code incorrect — réessayez.</div>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="prim" id="v-oui">Confirmer</button></div>',
       function(fermer){
@@ -394,7 +394,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (TOT.livraison > 0 ? ' + livraison' : '') + ' — total <strong>' + argent(TOT.total) + '</strong>'
       + (TOT.retenu ? ', net au client <strong>' + argent(TOT.net) + '</strong> (frais ' + argent(TOT.frais) + ' retenus)' : '')
       + '</p><p>Méthode : <strong>' + (enCredit ? 'crédit boutique (n’expire jamais)' : 'moyen de paiement original — Square') + '</strong></p>'
-      + '<p style="color:#fbbf24">Un remboursement ne s’annule pas d’un clic.</p>'
+      + '<p style="color:var(--tx-att)">Un remboursement ne s’annule pas d’un clic.</p>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="paie" id="v-oui">Rembourser ' + argent(TOT.retenu ? TOT.net : TOT.total) + '</button></div>',
       function(fermer){

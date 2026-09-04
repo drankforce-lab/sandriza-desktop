@@ -62,7 +62,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
@@ -80,17 +80,17 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
    couleur : il n y a plus d emoji du tout, donc rien a griser. */
 .mono{width:60px;height:60px;flex:0 0 auto;border-radius:50%;
   background:linear-gradient(145deg,rgba(201,169,126,.26),rgba(201,169,126,.1));
-  border:1px solid rgba(201,169,126,.42);color:#e7cfa8;
+  border:1px solid rgba(201,169,126,.42);color:var(--tx-or2);
   display:flex;align-items:center;justify-content:center;
   font:700 1.35rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.03em;
   -webkit-user-select:none;user-select:none}
 .qui{flex:1 1 14rem;min-width:0}
 .qui .nom{font-weight:700;font-size:1.22rem;line-height:1.25;letter-spacing:-.01em}
 .qui .sous2{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.3rem 0 0}
-.qui .id{font-size:.82rem;color:#8fa1b8}
+.qui .id{font-size:.82rem;color:var(--tx2)}
 .faits{display:grid;grid-template-columns:auto auto;gap:.3rem 1rem;font-size:.83rem;
   align-content:center;flex:0 0 auto}
-.faits .k{color:#8fa1b8;white-space:nowrap}
+.faits .k{color:var(--tx2);white-space:nowrap}
 .faits .v{white-space:nowrap}
 
 /* ── LES PASTILLES ───────────────────────────────────────────
@@ -98,7 +98,7 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
    redefinit donc que la base sombre, et le mode jour suit tout seul. */
 .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;
   letter-spacing:.02em;padding:.18rem .55rem;border-radius:99px;white-space:nowrap}
-.pill.bon{background:rgba(74,222,128,.14);color:#6ee7a0}
+.pill.bon{background:rgba(74,222,128,.14);color:var(--tx-ok2)}
 .pill.att{background:rgba(250,204,21,.14);color:#e6c14a}
 .pill.neutre{background:rgba(201,169,126,.14);color:#d9bd95}
 
@@ -107,39 +107,39 @@ body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Seg
    montre qu un formulaire a la fois — on ne change pas son mot de passe et ses
    questions dans le meme geste. */
 .onglets{display:flex;gap:.35rem;margin:0 0 -1px;padding:0 .2rem;position:relative;z-index:1}
-.onglet{font:inherit;font-size:.85rem;font-weight:600;color:#8fa1b8;cursor:pointer;
+.onglet{font:inherit;font-size:.85rem;font-weight:600;color:var(--tx2);cursor:pointer;
   display:inline-flex;align-items:center;gap:.45rem;
   background:transparent;border:1px solid transparent;border-bottom:0;
   border-radius:10px 10px 0 0;padding:.5rem .95rem}
-.onglet:hover{color:#e8edf5;background:rgba(255,255,255,.04)}
-.onglet.on{color:#e8edf5;background:rgba(255,255,255,.03);
+.onglet:hover{color:var(--tx);background:rgba(255,255,255,.04)}
+.onglet.on{color:var(--tx);background:rgba(255,255,255,.03);
   border-color:rgba(255,255,255,.08);border-bottom:0}
 .onglet:focus-visible{outline:2px solid #c9a97e;outline-offset:2px}
 .panneau{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
   border-radius:0 13px 13px 13px;padding:1.15rem 1.25rem}
 .panneau h3{margin:0 0 .25rem;font:700 1.02rem/1.25 system-ui,-apple-system,"Segoe UI",sans-serif}
-.panneau .intro{margin:0 0 1rem;font-size:.85rem;color:#8fa1b8;max-width:44rem;line-height:1.6}
-.panneau .intro b{color:#e8edf5}
+.panneau .intro{margin:0 0 1rem;font-size:.85rem;color:var(--tx2);max-width:44rem;line-height:1.6}
+.panneau .intro b{color:var(--tx)}
 
 /* ⚠ UNE COLONNE ETROITE POUR LES MOTS DE PASSE. Un champ de mot de passe large
    de 800 px est laid ET faux : il suggere une saisie longue. */
 .mince{max-width:23rem}
 label.champ{display:block;margin:0 0 .8rem}
-label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;margin:0 0 .25rem}
-label.champ .sub{display:block;font-size:.72rem;color:#6f8098;margin:.25rem 0 0;line-height:1.5}
-input.t,select.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:#e8edf5;font:inherit;padding:.5rem .65rem}
+label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
+label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
+input.t,select.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.55rem 1.05rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
-.ferr{display:none;color:#fca5a5;font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
+.ferr{display:none;color:var(--tx-err2);font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);
   border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:0 0 .8rem}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
 @media(max-width:640px){.cols2{grid-template-columns:1fr}}
-.vide{padding:2.2rem 1rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+.vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 
 /* ── MODE CLAIR ───────────────────────────────────────────
    Le socle habille body, input, select, button.prim, .pill.*, .sub,

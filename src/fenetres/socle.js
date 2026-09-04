@@ -24,10 +24,41 @@
  */
 
 const CSS_SOCLE = `
-:root{color-scheme:dark}
+/* == LES COULEURS DE TEXTE SONT DES JETONS, PAS DES LITTERAUX ===============
+   Signale le 2026-09-04, deux captures a l appui : << en mode jour regarde ce
+   n est pas beau >>. Il avait raison, et la mesure est accablante : 2 300
+   declarations de couleur de texte litterales dans les 91 fenetres, presque
+   toutes des couleurs de MODE SOMBRE posees sur le fond CLAIR du mode jour.
+     #8fa1b8 (texte faible) : 828 endroits, 91 fenetres, ratio 2.36 en jour
+     #e8edf5 (texte fort)   : 320 endroits, ratio 1.05 - invisible
+     #4ade80, #f87171, #fbbf24, #c9a97e... meme histoire.
+
+   POURQUOI UNE REPRISE html.jour NE POUVAIT PAS SUFFIRE. CSS ne sait pas
+   selectionner un element dont la couleur DECLAREE vaut #8fa1b8. Il aurait fallu
+   re-declarer chaque selecteur de chaque fenetre : 88 reprises existaient dans ce
+   socle, pour 4 fichiers sur 91 - les 87 autres n avaient RIEN. Une regle ecrite
+   91 fois, c est 90 endroits qu on oubliera, et c est ce qui s est produit.
+
+   LA VALEUR DE NUIT EST LE LITTERAL D ORIGINE, a l identique. Le mode sombre ne
+   change donc PAS d un pixel : c est ce qui rend ce remplacement sur 2 000
+   declarations sans danger. Seule la colonne jour est nouvelle.
+   LES VALEURS DE JOUR SONT CALCULEES, pas choisies a l oeil : meme teinte,
+   assombrie jusqu au ratio WCAG voulu sur le fond #f4f2ec - 5.2 pour le texte
+   courant (confort de lecture), 4.7 pour les accents colores (ils doivent rester
+   reconnaissables comme couleur). Aucune n est sous 4.69.
+   UN JETON PAR LITTERAL, meme quand deux se ressemblent (#8fa1b8 et #cbd8e6) :
+   les fusionner aurait change le mode sombre, un effet qu il n a pas demande.
+   CES JETONS SONT POUR LE TEXTE. Les fonds et les bordures gardent leurs
+   litteraux : la meme couleur n a pas le meme role, et un fond clair en jour
+   n est pas la version assombrie d un fond sombre.
+   ATTENTION, ET LE PIEGE A MORDU EN ECRIVANT CECI : aucun accent grave dans ce
+   commentaire. Le contenu part dans un litteral de gabarit, et un accent grave
+   egare le referme - la regle est en tete de ce fichier, elle a quand meme ete
+   oubliee une quatrieme fois. */
+:root{color-scheme:dark;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#6d7f96;--tx-gris:#6f8098;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
@@ -35,7 +66,7 @@ body{background:#0e1522;color:#e8edf5;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
-.tete .sous{margin-left:auto;font-size:.73rem;color:#8fa1b8}
+.tete .sous{margin-left:auto;font-size:.73rem;color:var(--tx2)}
 
 /* Fil des etapes : cliquable, et il dit ce qui est FAIT — pas ce qui est passe. */
 .pas{flex:0 0 auto;display:flex;gap:.2rem;padding:.45rem 1.1rem;
@@ -44,10 +75,10 @@ body{background:#0e1522;color:#e8edf5;
 .pas::-webkit-scrollbar{display:none}
 .pas button{flex:0 0 auto;font:inherit;font-size:.76rem;padding:.24rem .58rem;
   border-radius:7px;border:1px solid transparent;background:transparent;
-  color:#8fa1b8;cursor:pointer;white-space:nowrap}
-.pas button:hover{color:#cbd8e6}
-.pas button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:#e8dcc6}
-.pas button.fait{color:#4ade80}
+  color:var(--tx2);cursor:pointer;white-space:nowrap}
+.pas button:hover{color:var(--tx-bleute)}
+.pas button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-creme)}
+.pas button.fait{color:var(--tx-ok)}
 .pas .n{display:inline-block;min-width:1.05rem;text-align:center;font-variant-numeric:tabular-nums}
 
 /* ⚠ LE CORPS NE DEFILE PAS. Une etape doit tenir dans la fenetre ; si elle
@@ -65,14 +96,14 @@ body{background:#0e1522;color:#e8edf5;
 /* Une etape dont AUCUNE carte n est « plein » se tasse en haut au lieu de s etirer. */
 .etape{justify-content:flex-start}
 .carte h2{margin:0 0 .6rem;font-size:.72rem;text-transform:uppercase;
-  letter-spacing:.09em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.09em;color:var(--tx2);font-weight:700}
 
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.65rem .75rem}
 .ch{display:flex;flex-direction:column;gap:.24rem;min-width:0}
 .ch.large{grid-column:1/-1}
-.ch label{font-size:.73rem;color:#8fa1b8}
-.ch .req{color:#c9a97e}
-input,select,textarea{font:inherit;color:#e8edf5;background:#0f1826;
+.ch label{font-size:.73rem;color:var(--tx2)}
+.ch .req{color:var(--tx-or)}
+input,select,textarea{font:inherit;color:var(--tx);background:#0f1826;
   border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.38rem .55rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
@@ -81,11 +112,11 @@ input.manque{border-color:#f87171}
 input[type=checkbox]{width:auto}
 .cases{display:flex;flex-wrap:wrap;gap:.4rem .85rem}
 .cases label{display:inline-flex;align-items:center;gap:.35rem;font-size:.84rem;
-  color:#e8edf5;cursor:pointer}
+  color:var(--tx);cursor:pointer}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
-  color:#e8edf5;transition:background .13s,border-color .13s}
+  color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
@@ -94,9 +125,9 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.1rem;border-top:1px solid rgba(255,255,255,.08);
   background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;min-height:1.15em;flex:1 1 auto;min-width:0;
+.msg{font-size:.79rem;color:var(--tx2);min-height:1.15em;flex:1 1 auto;min-width:0;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .actions{flex:0 0 auto;display:flex;gap:.4rem}
 
 /* Listes PAGINEES : hauteur fixe, jamais de glissiere. Le nombre de lignes est
@@ -105,20 +136,20 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 .liste .lg{display:flex;align-items:center;gap:.5rem;padding:.26rem .3rem;
   border-radius:6px;font-size:.86rem;cursor:pointer}
 .liste .lg:hover{background:rgba(255,255,255,.04)}
-.liste .lg .fin{margin-left:auto;font-size:.72rem;color:#8fa1b8;flex:0 0 auto}
+.liste .lg .fin{margin-left:auto;font-size:.72rem;color:var(--tx2);flex:0 0 auto}
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.5rem;
-  margin-top:.35rem;border-top:1px solid rgba(255,255,255,.07);font-size:.78rem;color:#8fa1b8}
+  margin-top:.35rem;border-top:1px solid rgba(255,255,255,.07);font-size:.78rem;color:var(--tx2)}
 .pagi button{padding:.2rem .55rem;font-size:.78rem}
 .pagi .pos{margin-left:auto}
 
 .rech{display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;flex:0 0 auto}
 .rech input{flex:1 1 auto}
-.rech .cpt{flex:0 0 auto;font-size:.77rem;color:#8fa1b8;white-space:nowrap}
+.rech .cpt{flex:0 0 auto;font-size:.77rem;color:var(--tx2);white-space:nowrap}
 
-.aide{font-size:.75rem;color:#8fa1b8;line-height:1.45}
+.aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
 .vide{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;text-align:center;color:#8fa1b8;gap:.3rem}
-.vide .gros{font-size:1rem;color:#e8edf5}
+  justify-content:center;text-align:center;color:var(--tx2);gap:.3rem}
+.vide .gros{font-size:1rem;color:var(--tx)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -428,8 +459,8 @@ document.addEventListener('DOMContentLoaded', szFenPleinPoser);
    sinon un sondage vivant pour rien.                                        */
 const CSS_VERROUS = `
 .cadslot{display:inline}
-.cad{margin-left:.35rem;font-size:.8rem;color:#fbbf24;vertical-align:middle;cursor:default}
-.cad.mine{color:#c9a97e}
+.cad{margin-left:.35rem;font-size:.8rem;color:var(--tx-att);vertical-align:middle;cursor:default}
+.cad.mine{color:var(--tx-or)}
 `;
 
 const JS_VERROUS = `
@@ -512,7 +543,7 @@ window.addEventListener('pagehide', function(){
    500 photos par megarde.                                                    */
 const CSS_LOTS = `
 .sz-lots{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;
-  gap:.6rem;padding:.3rem .8rem;font-size:.76rem;color:#e8dcc6;
+  gap:.6rem;padding:.3rem .8rem;font-size:.76rem;color:var(--tx-creme);
   background:linear-gradient(180deg,#1b2434,#141c29);
   border-top:1px solid rgba(201,169,126,.45);box-shadow:0 -4px 14px rgba(0,0,0,.35)}
 .sz-lots .nom{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
@@ -520,7 +551,7 @@ const CSS_LOTS = `
   background:rgba(255,255,255,.12);overflow:hidden}
 .sz-lots .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
 .sz-lots .cpt{white-space:nowrap;font-variant-numeric:tabular-nums}
-.sz-lots .file{white-space:nowrap;color:#8fa1b8}
+.sz-lots .file{white-space:nowrap;color:var(--tx2)}
 /* ⚠⚠ IL RECOUVRAIT LE BAS DE CHAQUE FENETRE. Le bandeau est en position FIXE :
    il ne pousse rien, il passe par-dessus. Dans le Studio il masquait a moitie
    << Generer en pleine qualite >> — le bouton qui depense — et ailleurs la
@@ -1373,7 +1404,11 @@ const CSS_JOUR = `
   font-family:"SzTitre","Segoe UI Variable Display","Segoe UI",Georgia,serif;
   font-size:1.3rem;font-weight:400;line-height:1.3;
   letter-spacing:0;text-transform:none;
-  color:#f4f7fb}
+  color:var(--tx-blanc)}
+/* Les jetons de texte, version JOUR. Voir la fiche dans CSS_SOCLE. html.jour
+   (element + classe) l emporte sur :root, et CSS_JOUR est appende APRES le CSS
+   de chaque fenetre - donc ceci commande partout, sans une seule reprise locale. */
+html.jour{--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#387652;--tx-err:#ab4e4e;--tx-err2:#905e5e;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#76694e;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b}
 html.jour .tete h1{color:#141c28}
 
 /* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION — ET LA REGLE EST ICI, UNE
@@ -1425,7 +1460,7 @@ html.jour .tete h1{color:#141c28}
    clair (le graphique a barres, la page blanche, l enveloppe). Le reste tient
    encore, donc on n a pas a tout faire d un coup — mais on a a le faire par ICI,
    une entree a la fois, pas par une seconde table dans chaque fenetre. */
-.ico{display:inline-flex;align-items:center;justify-content:center;color:#cbd5e1}
+.ico{display:inline-flex;align-items:center;justify-content:center;color:var(--tx-gris2)}
 .ico svg{width:17px;height:17px;display:block}
 .tete .ico{opacity:.95}
 html.jour .ico{color:#414e66}
@@ -1442,17 +1477,17 @@ html.jour .ico{color:#414e66}
    d une carte. La question se pose une fois, a l ouverture, et disparait. */
 .szbr-voile{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
   justify-content:center;padding:1.2rem;background:rgba(6,10,18,.62)}
-.szbr-boite{max-width:33rem;width:100%;background:#131c2b;color:#e8edf5;
+.szbr-boite{max-width:33rem;width:100%;background:#131c2b;color:var(--tx);
   border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.1rem;
   box-shadow:0 18px 44px rgba(0,0,0,.45)}
 .szbr-boite h3{margin:0 0 .5rem;display:flex;align-items:center;gap:.45rem;
-  font:700 1rem/1.25 Georgia,serif;color:#e8dcc6}
+  font:700 1rem/1.25 Georgia,serif;color:var(--tx-creme)}
 .szbr-boite p{margin:.35rem 0;font-size:.86rem;line-height:1.5}
-.szbr-note{font-size:.78rem;color:#8fa1b8}
+.szbr-note{font-size:.78rem;color:var(--tx2)}
 .szbr-pied{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem}
 .szbr-pied button{font:inherit;font-size:.84rem;padding:.4rem .8rem;border-radius:6px;
   cursor:pointer;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);
-  color:#e8edf5;white-space:nowrap}
+  color:var(--tx);white-space:nowrap}
 /* ⚠ white-space:nowrap ET une boite plus large : a trois boutons, << Conserver le
    brouillon >> se coupait en deux lignes et la question avait l air bricolee. Un
    libelle qui se casse en deux se lit deux fois moins vite, et c est une question
@@ -1467,7 +1502,7 @@ html.jour .szbr-pied button.prim{background:#C49A6C;border-color:#C49A6C;color:#
 
 /* ⚠⚠ LA LISTE DEROULEE D UN <select> EST DESSINEE PAR LE SYSTEME, PAS PAR NOUS.
    Elle ne prend NI le fond ni la couleur de la fenetre : les fenetres ecrivent
-   << select{color:#e8edf5;background:rgba(255,255,255,.05)} >>, et un fond
+   << select{color:var(--tx);background:rgba(255,255,255,.05)} >>, et un fond
    TRANSPARENT pose sur du blanc redonne du blanc. On obtenait donc, en mode
    nuit, une liste blanche a texte gris tres pale — illisible (releve le
    2026-08-09 sur le filtre de statut des Factures).
@@ -1477,7 +1512,7 @@ html.jour .szbr-pied button.prim{background:#C49A6C;border-color:#C49A6C;color:#
    a TOUTES les fenetres, une liste deroulante ecrite demain est couverte
    d office. */
 select{color-scheme:dark}
-select option,select optgroup{background:#16202f;color:#e8edf5}
+select option,select optgroup{background:#16202f;color:var(--tx)}
 html.jour select{color-scheme:light}
 html.jour select option,html.jour select optgroup{background:#ffffff;color:#1d2433}
 
@@ -1587,7 +1622,7 @@ html.sz-zoom, html.sz-zoom-fen{font-size:112.5%}
 /* Le bouton de bascule : discret, à côté de « Fermer ». */
 .sz-btnplein{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-right:.35rem;
   border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);
-  color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
+  color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .sz-btnplein:hover{background:rgba(255,255,255,.09)}
 html.jour .sz-btnplein{color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
 html.jour .sz-btnplein:hover{background:#efece4}
@@ -1605,7 +1640,7 @@ html.jour .sz-btnplein:hover{background:#efece4}
    à côté du libellé fonctionnait). */
 .sz-btnfen{flex:0 0 auto;font:inherit;font-size:.78rem;line-height:1.35;padding:.14rem .45rem;
   margin-left:.4rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;
-  background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;
+  background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;
   -webkit-user-select:none;user-select:none}
 .sz-btnfen:hover{background:rgba(255,255,255,.09)}
 html.jour .sz-btnfen{color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
@@ -1613,10 +1648,10 @@ html.jour .sz-btnfen:hover{background:#efece4}
 /* Message posé DANS la surcouche par szDire, quand la fenêtre n'a pas déjà sa
    propre zone (.msgsur). */
 .sz-msgauto{margin-top:.75rem;padding:.5rem .7rem;border-radius:8px;font-size:.8rem;
-  line-height:1.5;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#cbd8e6}
-.sz-msgauto.err{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.35);color:#fca5a5}
-.sz-msgauto.bon{background:rgba(22,163,74,.14);border-color:rgba(22,163,74,.32);color:#6ee7a0}
-.sz-msgauto.att{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.35);color:#f0d6a0}
+  line-height:1.5;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--tx-bleute)}
+.sz-msgauto.err{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.35);color:var(--tx-err2)}
+.sz-msgauto.bon{background:rgba(22,163,74,.14);border-color:rgba(22,163,74,.32);color:var(--tx-ok2)}
+.sz-msgauto.att{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.35);color:var(--tx-or2)}
 html.jour .sz-msgauto{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.14);color:#1d2433}
 `;
 

@@ -26,45 +26,45 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.75rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{margin-left:auto;font-size:.74rem;color:#8fa1b8}
+.tete .sous{margin-left:auto;font-size:.74rem;color:var(--tx2)}
 .corps{flex:1 1 auto;overflow-y:auto;padding:1.1rem}
 .corps::-webkit-scrollbar{width:9px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.13);border-radius:9px}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.95rem 1.05rem;margin-bottom:.85rem}
 .carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;
-  letter-spacing:.09em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .lg{display:flex;gap:.9rem;align-items:baseline;padding:.34rem 0;
   border-top:1px solid rgba(255,255,255,.055)}
 .lg:first-of-type{border-top:0}
-.lg .k{flex:0 0 10.5rem;font-size:.75rem;color:#8fa1b8}
+.lg .k{flex:0 0 10.5rem;font-size:.75rem;color:var(--tx2)}
 .lg .v{flex:1 1 auto;min-width:0;word-break:break-word}
 .pastille{display:inline-block;padding:.04rem .5rem;border-radius:99px;
   font-size:.7rem;font-weight:600;border:1px solid currentColor}
-.ok{color:#4ade80}.att{color:#fbbf24}.non{color:#f87171}.gris{color:#8fa1b8}
+.ok{color:var(--tx-ok)}.att{color:var(--tx-att)}.non{color:var(--tx-err)}.gris{color:var(--tx2)}
 .svc{display:flex;align-items:center;gap:.9rem;padding:.7rem 0;
   border-top:1px solid rgba(255,255,255,.055)}
 .svc:first-of-type{border-top:0}
 .svc .d{flex:1 1 auto;min-width:0}
 .svc .n{font-weight:600;font-size:.95rem}
-.svc .m{font-size:.78rem;color:#8fa1b8;margin-top:.12rem}
+.svc .m{font-size:.78rem;color:var(--tx2);margin-top:.12rem}
 /* La liste deroulante EST le controle : elle prend la largeur, comme un champ de
    formulaire, et non la taille d un bouton perdu au bout de la ligne. */
 .svc .d select{width:100%;max-width:34rem;margin-top:.35rem;font:inherit;
-  color:#e8edf5;background:#0f1826;border:1px solid rgba(255,255,255,.16);
+  color:var(--tx);background:#0f1826;border:1px solid rgba(255,255,255,.16);
   border-radius:8px;padding:.4rem .55rem}
 .svc .d select:focus{outline:none;border-color:#c9a97e}
 .svc .d select:disabled{opacity:.5}
 .svc .a{flex:0 0 auto;display:flex;gap:.4rem;align-self:flex-end}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
-  color:#e8edf5;transition:background .13s,border-color .13s}
+  color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.45;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
@@ -72,10 +72,10 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.65rem 1.1rem;border-top:1px solid rgba(255,255,255,.08);
   background:#0b1220}
-.msg{font-size:.8rem;color:#8fa1b8;min-height:1.2em}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}
-.vide{padding:2.2rem 1rem;text-align:center;color:#8fa1b8}
-.vide .gros{font-size:1.02rem;color:#e8edf5;margin-bottom:.4rem}
+.msg{font-size:.8rem;color:var(--tx2);min-height:1.2em}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}
+.vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2)}
+.vide .gros{font-size:1.02rem;color:var(--tx);margin-bottom:.4rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -132,7 +132,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div style="font-size:.82rem;margin-bottom:.6rem">Ce que la fenêtre a pu faire, étape par étape :</div>'
       + '<pre id="diag" style="text-align:left;white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;'
       + 'background:#0b1220;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem .8rem;'
-      + 'max-width:52rem;color:#cbd8e6">' + esc(JOURNAL.join(SAUT)) + '</pre></div>';
+      + 'max-width:52rem;color:var(--tx-bleute)">' + esc(JOURNAL.join(SAUT)) + '</pre></div>';
   }
   // ⚠ UNE ERREUR NON RATTRAPEE NE DOIT PLUS ETRE INVISIBLE. Sans ces deux
   // ecouteurs, un defaut de script laissait la fenetre sur son message initial —
@@ -207,7 +207,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         h.push('<div class="lg"><div class="k">Aide PDF</div><div class="v">'
           + (e.aidePdf
               ? '<span class="pastille ok">' + (esc(e.aidePdfNom) || 'présente') + '</span>'
-              : '<span class="pastille att">absente</span> <span style="color:#8fa1b8;font-size:.8rem">— requise pour les étiquettes d’expédition, qui arrivent en PDF du transporteur.</span>')
+              : '<span class="pastille att">absente</span> <span style="color:var(--tx2);font-size:.8rem">— requise pour les étiquettes d’expédition, qui arrivent en PDF du transporteur.</span>')
           + '</div></div>');
       }
       h.push('</div>');
@@ -218,10 +218,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     // d un poste a l autre passe pour une configuration perdue.
     h.push('<div class="carte"><h2>Association par service — ce poste'
       + (e.poste6 ? ' <span class="note" style="font-weight:400;text-transform:none;'
-          + 'letter-spacing:0;color:#6d7f96">(' + esc(e.poste6) + ')</span>' : '')
+          + 'letter-spacing:0;color:var(--tx3)">(' + esc(e.poste6) + ')</span>' : '')
       + '</h2>');
     if (!e.services || !e.services.length) {
-      h.push('<div class="lg"><div class="v" style="color:#8fa1b8">Aucun service à associer.</div></div>');
+      h.push('<div class="lg"><div class="v" style="color:var(--tx2)">Aucun service à associer.</div></div>');
     } else {
       // ⚠ UNE LISTE DEROULANTE, PLUS UN BOUTON QUI OUVRE UNE BOITE AILLEURS.
       // << Choisir… >> deleguait la selection a la fenetre PRINCIPALE : on quittait

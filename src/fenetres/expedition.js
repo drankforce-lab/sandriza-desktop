@@ -34,14 +34,14 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.6rem}
@@ -51,48 +51,48 @@ body{background:#0e1522;color:#e8edf5;
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.65rem .8rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.09em;color:#8fa1b8;font-weight:700}
-.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:#6d7f96}
+  letter-spacing:.09em;color:var(--tx2);font-weight:700}
+.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
-input,select{font:inherit;color:#e8edf5;background:#0f1826;
+input,select{font:inherit;color:var(--tx);background:#0f1826;
   border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.34rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.34rem .75rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
-  color:#e8edf5;transition:background .13s,border-color .13s}
+  color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 /* ⚠ LE BOUTON QUI DEPENSE est d une AUTRE couleur que celui qui confirme : on ne
    doit jamais les confondre du coin de l oeil. */
-button.paie{background:#7c5cff;border-color:#7c5cff;color:#fff;font-weight:600}
+button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-blanc);font-weight:600}
 button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 button.mini{padding:.14rem .5rem;font-size:.76rem}
 
 .adresse{font-size:.86rem;line-height:1.5}
 .adresse .nom{font-weight:600}
-.adresse .det{color:#8fa1b8}
+.adresse .det{color:var(--tx2)}
 
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
 .ch{display:flex;flex-direction:column;gap:.2rem;min-width:0}
-.ch label{font-size:.72rem;color:#8fa1b8}
+.ch label{font-size:.72rem;color:var(--tx2)}
 
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
 .avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
-.avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:#f6a5a5}
-.aide{font-size:.73rem;color:#8fa1b8;line-height:1.45}
+.avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-err2)}
+.aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 
 /* Le pas-a-pas : cree, imprime, expedie. Il dit ce qui est FAIT. */
 .pas{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.5rem}
 .pas span{font-size:.72rem;padding:.16rem .5rem;border-radius:99px;
-  border:1px solid rgba(255,255,255,.14);color:#8fa1b8}
-.pas span.fait{border-color:rgba(74,222,128,.45);color:#4ade80}
-.pas span.on{border-color:#c9a97e;color:#e8dcc6;background:rgba(201,169,126,.14)}
+  border:1px solid rgba(255,255,255,.14);color:var(--tx2)}
+.pas span.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
+.pas span.on{border-color:#c9a97e;color:var(--tx-creme);background:rgba(201,169,126,.14)}
 
 .lignes{display:flex;flex-direction:column;gap:.28rem}
 .lg{display:flex;align-items:center;gap:.6rem;padding:.28rem .4rem;border-radius:7px;
@@ -100,16 +100,16 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .lg:first-child{border-top:0}
 .lg:hover{background:rgba(255,255,255,.055)}
 .lg .principal{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lg .fin{flex:0 0 auto;font-size:.78rem;color:#8fa1b8;white-space:nowrap}
+.lg .fin{flex:0 0 auto;font-size:.78rem;color:var(--tx2);white-space:nowrap}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
   background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .actions{flex:0 0 auto;display:flex;gap:.4rem}
-.vide{padding:1.5rem 1rem;text-align:center;color:#8fa1b8;font-size:.86rem}
+.vide{padding:1.5rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
@@ -356,7 +356,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'Service : <strong>' + esc(libelle || service || '—') + '</strong><br>'
       + 'Poids : <strong>' + esc(poids) + ' kg</strong></p>'
       + (CMD.commande.aUneEtiquette
-          ? '<p style="color:#fbbf24">⚠ Une étiquette existe déjà pour cette commande. '
+          ? '<p style="color:var(--tx-att)">⚠ Une étiquette existe déjà pour cette commande. '
             + 'En commander une seconde sera facturé une seconde fois.</p>' : '')
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="paie" id="v-oui">Commander</button></div>',

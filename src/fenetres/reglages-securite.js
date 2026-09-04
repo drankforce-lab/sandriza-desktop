@@ -27,27 +27,27 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
-  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
+  background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .carte{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
 .carte h3{margin:0 0 .2rem;font:700 1rem/1.2 Georgia,serif}
 .entete{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
-.hint{font-size:.78rem;color:#8fa1b8;margin:0 0 .9rem;line-height:1.5}
-.grpH{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8fa1b8;margin:0 0 .55rem}
+.hint{font-size:.78rem;color:var(--tx2);margin:0 0 .9rem;line-height:1.5}
+.grpH{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);margin:0 0 .55rem}
 .cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
 @media(max-width:760px){.cols3,.cols2{grid-template-columns:1fr}}
 label.champ{display:block;margin:0 0 .75rem}
-label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;margin:0 0 .25rem}
-label.champ .sub{display:block;font-size:.72rem;color:#6f8098;margin:.2rem 0 0}
-input.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:#e8edf5;font:inherit;padding:.5rem .65rem}
+label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
+label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.2rem 0 0}
+input.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 input.n{width:120px}
 textarea.t{resize:vertical;min-height:3.4rem;line-height:1.5}
 input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
@@ -55,15 +55,15 @@ label.case{display:flex;align-items:center;gap:.45rem;font-size:.84rem;cursor:po
 label.case input{width:16px;height:16px;accent-color:#c9a97e}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
-.b{font:inherit;font-size:.8rem;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer}
+.b{font:inherit;font-size:.8rem;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer}
 .b:hover{background:rgba(255,255,255,.09)}
 .exempts{display:flex;flex-direction:column;gap:.35rem;max-height:240px;overflow-y:auto;
   border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:.6rem .7rem}
-.vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
+.vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -179,7 +179,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       for (var i=0;i<comptes.length;i++){ var s=comptes[i];
         var coche = (g.exemptStaffIds||[]).indexOf(s.id) >= 0;
         exempts += '<label class="case"><input type="checkbox" data-geoex="'+esc(s.id)+'" '+(coche?'checked':'')+(RO?' disabled':'')+'> '
-          + esc(s.nom||s.email) + ' <span style="color:#6f8098">('+esc(s.email)+')</span></label>';
+          + esc(s.nom||s.email) + ' <span style="color:var(--tx-gris)">('+esc(s.email)+')</span></label>';
       }
     } else exempts = '<div class="vide">Aucun compte.</div>';
 
@@ -199,7 +199,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>'
       + '<div><div class="grpH">Comptes exclus de cette restriction</div>'
       + '<div class="exempts">'+exempts+'</div>'
-      + '<div class="sub" style="margin-top:.4rem;color:#6f8098">Ces comptes peuvent se connecter depuis n’importe quel pays.</div>'
+      + '<div class="sub" style="margin-top:.4rem;color:var(--tx-gris)">Ces comptes peuvent se connecter depuis n’importe quel pays.</div>'
       + '</div>'
       + '</div></div>';
 

@@ -23,55 +23,55 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:#8fa1b8}
-button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  font-size:.78rem;color:var(--tx2)}
+button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 button:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:700}
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:700}
 button.prim:hover:not(:disabled){background:#a3824f}
-button.danger{border-color:rgba(239,68,68,.5);color:#f87171}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.09em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.09em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody td{padding:.3rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tfoot td{padding:.34rem .4rem;border-top:2px solid rgba(255,255,255,.16);font-weight:800}
 tbody .num{font-weight:700}
-tbody .dt{font-size:.72rem;color:#8fa1b8}
+tbody .dt{font-size:.72rem;color:var(--tx2)}
 .mono{font-family:'Courier New',monospace;font-size:.78rem}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
   margin-right:.2rem}
-.pill.bon{background:rgba(34,197,94,.14);color:#4ade80}
-.pill.att{background:rgba(245,158,11,.16);color:#fbbf24}
-.pill.err{background:rgba(239,68,68,.16);color:#f87171}
-.pill.neutre{background:rgba(148,163,184,.16);color:#8fa1b8}
-.pill.info{background:rgba(59,130,246,.16);color:#93c5fd}
+.pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
+.pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.info{background:rgba(59,130,246,.16);color:var(--tx-bleu)}
 .ligne{padding:.55rem .7rem;background:#16202f;border:1px solid rgba(255,255,255,.07);
   border-radius:11px}
 .ligne.annule{opacity:.55}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
-.ligne .dt{font-size:.72rem;color:#8fa1b8;margin-top:.2rem}
-input[type=number],input[type=text]{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+.ligne .dt{font-size:.72rem;color:var(--tx2);margin-top:.2rem}
+input[type=number],input[type=text]{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem;width:100%}
 input:focus{outline:none;border-color:#c9a97e}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
@@ -81,14 +81,14 @@ input:focus{outline:none;border-color:#c9a97e}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif}
 .boite .grp{border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.5rem .6rem;margin:.4rem 0}
 .boite .champs{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.6rem}
-.boite .champs .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;margin-bottom:.2rem}
+.boite .champs .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:.2rem}
 .boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
-.vide{padding:1.2rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+.vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -371,7 +371,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }
     if (actif) {

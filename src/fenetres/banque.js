@@ -35,18 +35,18 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
   border-bottom:1px solid rgba(255,255,255,.08)}
-.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:#8fa1b8;
+.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:#e8edf5;border-bottom-color:#c9a97e}
+.onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.75rem}
 .corps::-webkit-scrollbar{width:8px}
@@ -54,12 +54,12 @@ body{background:#0e1522;color:#e8edf5;
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8}
-label{display:block;font-size:.73rem;color:#8fa1b8;margin:.5rem 0 .18rem}
-input,select,textarea{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  letter-spacing:.06em;color:var(--tx2)}
+label{display:block;font-size:.73rem;color:var(--tx2);margin:.5rem 0 .18rem}
+input,select,textarea{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.34rem .5rem;width:100%}
 textarea{resize:vertical;min-height:4rem}
-button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.34rem .6rem;cursor:pointer;width:auto}
 input:focus,select:focus,textarea:focus,button:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
@@ -67,37 +67,37 @@ button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.mini{font-size:.72rem;padding:.16rem .45rem}
-button.dgr{border-color:rgba(248,113,113,.5);color:#fca5a5}
+button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
 .duo>div{flex:1 1 9rem;min-width:0}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody td{padding:.3rem .35rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:top}
 tbody tr:hover td{background:rgba(255,255,255,.03)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.dt{font-size:.7rem;color:#8fa1b8}
+.dt{font-size:.7rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;
   white-space:nowrap;font-weight:700}
-.pill.open{background:rgba(59,130,246,.16);color:#93c5fd}
+.pill.open{background:rgba(59,130,246,.16);color:var(--tx-bleu)}
 .pill.in_progress{background:rgba(245,158,11,.16);color:#fcd34d}
 .pill.completed{background:rgba(16,185,129,.16);color:#6ee7b7}
-.pill.locked{background:rgba(148,163,184,.18);color:#cbd5e1}
-.pill.g{background:rgba(148,163,184,.14);color:#94a3b8;font-weight:600}
+.pill.locked{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
+.pill.g{background:rgba(148,163,184,.14);color:var(--tx2);font-weight:600}
 .lg{cursor:pointer}
-.vide{padding:1.1rem .6rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* L ecart : c est LA chose qu on vient regarder. Il se lit sans chercher. */
 .ecart{border-radius:11px;padding:.75rem .9rem;display:flex;align-items:center;
   justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .ecart.bon{border:2px solid rgba(16,185,129,.5);background:rgba(16,185,129,.08)}
 .ecart.mauvais{border:2px solid rgba(248,113,113,.5);background:rgba(248,113,113,.08)}
 .ecart .col{min-width:7rem}
-.ecart .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;font-weight:700}
+.ecart .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
 .ecart .v{font:700 1.05rem/1.2 system-ui;font-variant-numeric:tabular-nums}
 .ecart .verdict{font:700 1rem/1.2 system-ui}
-.ecart.bon .verdict{color:#6ee7b7}.ecart.mauvais .verdict{color:#fca5a5}
+.ecart.bon .verdict{color:#6ee7b7}.ecart.mauvais .verdict{color:var(--tx-err2)}
 .paire{border:1px solid rgba(16,185,129,.35);background:rgba(16,185,129,.07);
   border-radius:8px;padding:.35rem .5rem;margin-bottom:.3rem;display:flex;
   align-items:center;gap:.5rem}
@@ -106,13 +106,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem}
 .seule .d{flex:1 1 auto;min-width:0}
 .franc{border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.1);
-  color:#f0d6a0;border-radius:9px;padding:.45rem .65rem;font-size:.74rem}
-.aide{font-size:.71rem;color:#8fa1b8;margin:.3rem 0 0}
+  color:var(--tx-or2);border-radius:9px;padding:.45rem .65rem;font-size:.74rem}
+.aide{font-size:.71rem;color:var(--tx2);margin:.3rem 0 0}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -468,7 +468,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
           + '<div class="dt">' + esc(e.date || '—') + ' · relevé ' + sou(e.amount)
           + ' · dépôt ' + sou(p ? p.amount : 0) + ' · '
           + (ec !== null && Math.abs(ec) > 0.005
-              ? '<span style="color:#fca5a5">écart ' + sou(ec) + '</span>'
+              ? '<span style="color:var(--tx-err2)">écart ' + sou(ec) + '</span>'
               : '<span style="color:#6ee7b7">exact</span>') + '</div></div>'
           + (D.verrouille || !D.peutEcrire ? ''
               : '<button class="mini" data-desapp="' + esc(e.id) + '">Défaire</button>')

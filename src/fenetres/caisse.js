@@ -37,14 +37,14 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:.6rem}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:.6rem}
 
 /* ⚠ DEUX COLONNES, ET LE CORPS NE DEFILE PAS. La regle du projet : un ecran de
    travail qui defile cache son bouton d action. Seule la LISTE DES ARTICLES a le
@@ -97,15 +97,15 @@ body{background:#0e1522;color:#e8edf5;
   padding:.6rem .75rem;flex:0 0 auto;min-height:0}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 .carte h2{margin:0 0 .4rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.09em;color:#8fa1b8;font-weight:700}
-.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:#6d7f96}
+  letter-spacing:.09em;color:var(--tx2);font-weight:700}
+.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 /* << requis >> se voit : une vente anonyme est refusee par le site, autant le dire
    AVANT d avoir tout saisi plutot qu au moment d encaisser. */
-.carte h2 .req{font-weight:700;text-transform:none;letter-spacing:0;color:#c9a97e}
+.carte h2 .req{font-weight:700;text-transform:none;letter-spacing:0;color:var(--tx-or)}
 input.manque{border-color:#f87171}
-.carte h2 .lie{color:#4ade80;font-size:.68rem;margin-left:.4rem}
+.carte h2 .lie{color:var(--tx-ok);font-size:.68rem;margin-left:.4rem}
 
-input,select{font:inherit;color:#e8edf5;background:#0f1826;
+input,select{font:inherit;color:var(--tx);background:#0f1826;
   border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -114,7 +114,7 @@ input[type=checkbox]{width:auto}
 /* Les champs du client : empiles, pleine largeur. Voir la note dans le gabarit. */
 .champs{display:flex;flex-direction:column;gap:.28rem}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
-.sous-ch{font-size:.7rem;color:#6d7f96;margin-top:.16rem}
+.sous-ch{font-size:.7rem;color:var(--tx3);margin-top:.16rem}
 
 /* Le champ de scan : plus grand que les autres, c est la porte d entree. */
 #scan{font-size:1.02rem;padding:.5rem .65rem}
@@ -136,26 +136,26 @@ input[type=checkbox]{width:auto}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 thead th{position:sticky;top:0;background:#1b2635;text-align:left;
   padding:.35rem .5rem;font-size:.72rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
 tbody td{padding:.3rem .5rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
-tbody .det{font-size:.74rem;color:#8fa1b8}
+tbody .det{font-size:.74rem;color:var(--tx2)}
 /* Le code de variante : c est ce qu on lit sur l etiquette du vetement, donc
    la seule facon de verifier a l ecran qu on a scanne le bon article. */
-tbody .code{font-family:ui-monospace,monospace;font-size:.72rem;color:#6d7f96}
+tbody .code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(--tx3)}
 tbody button{padding:.05rem .42rem;font-size:.9rem;line-height:1.3}
 
 /* Totaux : la ligne du total ne peut pas se confondre avec une taxe. */
 .tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.12rem 0;font-size:.86rem}
 .tot .l.grand{margin-top:.28rem;padding-top:.35rem;
   border-top:1px solid rgba(255,255,255,.14);font-size:1.12rem;font-weight:700}
-.tot .l.bon{color:#4ade80}
+.tot .l.bon{color:var(--tx-ok)}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
-  color:#e8edf5;transition:background .13s,border-color .13s}
+  color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
@@ -167,23 +167,23 @@ button.mini{padding:.16rem .45rem;font-size:.75rem}
   border-top:1px solid rgba(255,255,255,.06)}
 .cli:first-child{border-top:0}
 .cli:hover{background:rgba(255,255,255,.05)}
-.cli .m{color:#8fa1b8;font-size:.77rem}
+.cli .m{color:var(--tx2);font-size:.77rem}
 .liste-cli{margin-top:.4rem;border:1px solid rgba(255,255,255,.1);border-radius:9px;overflow:hidden}
 
 .case{display:flex;align-items:flex-start;gap:.45rem;margin-top:.4rem;
   font-size:.78rem;cursor:pointer}
-.case .exp{display:block;color:#6d7f96;font-size:.72rem;line-height:1.45}
+.case .exp{display:block;color:var(--tx3);font-size:.72rem;line-height:1.45}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
   background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .actions{flex:0 0 auto;display:flex;gap:.4rem}
 
-.aide{font-size:.71rem;color:#6d7f96;line-height:1.4;margin-top:.3rem}
-.vide{padding:1.6rem 1rem;text-align:center;color:#8fa1b8;font-size:.86rem}
+.aide{font-size:.71rem;color:var(--tx3);line-height:1.4;margin-top:.3rem}
+.vide{padding:1.6rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 
 /* Le compte rendu de vente : un voile, pas une autre fenetre. Une boite de
    dialogue du systeme se serait ouverte derriere, comme le decompte d inactivite. */
@@ -636,15 +636,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     lignes += rangee('Commande', esc(r.numero || '—'));
     lignes += rangee('Total', argent(r.total));
     if (r.enAttente) {
-      lignes += rangee('Paiement', '<span style="color:#fbbf24">en attente — lien à envoyer</span>');
+      lignes += rangee('Paiement', '<span style="color:var(--tx-att)">en attente — lien à envoyer</span>');
     } else {
       lignes += rangee('Stock décompté', r.stockOk ? 'oui'
-        : '<strong style="color:#f87171">NON — à vérifier</strong>');
+        : '<strong style="color:var(--tx-err)">NON — à vérifier</strong>');
     }
     lignes += rangee('Enregistrement en base', r.nuageOk ? 'confirmé'
-      : '<strong style="color:#f87171">non confirmé</strong>');
+      : '<strong style="color:var(--tx-err)">non confirmé</strong>');
     if (r.envoiCourriel === true)  lignes += rangee('Facture', 'envoyée par courriel');
-    if (r.envoiCourriel === false) lignes += rangee('Facture', '<strong style="color:#f87171">NON envoyée</strong>');
+    if (r.envoiCourriel === false) lignes += rangee('Facture', '<strong style="color:var(--tx-err)">NON envoyée</strong>');
     if (r.compteNeuf) lignes += rangee('Compte client', 'ouvert · lien de finalisation envoyé');
 
     var lien = '';
@@ -662,7 +662,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<div class="aide">Le stock sera décompté et la facture marquée payée quand Square '
           + 'confirmera — automatiquement au retour du client. Rien n’est encaissé par cet écran. '
           + 'S’il a payé mais que rien ne bouge, pressez <strong>Vérifier le paiement</strong>.</div>'
-        : '<div class="aide" style="color:#f87171">La commande est enregistrée, mais Square a refusé '
+        : '<div class="aide" style="color:var(--tx-err)">La commande est enregistrée, mais Square a refusé '
           + 'de créer le lien : ' + esc(r.lienMotif || 'raison inconnue') + '. Réessayez depuis la '
           + 'commande, ou encaissez autrement.</div>';
     }
@@ -731,7 +731,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function rangee(k, v){
-    return '<div class="rangee"><span style="color:#8fa1b8">' + k + '</span><span>' + v + '</span></div>';
+    return '<div class="rangee"><span style="color:var(--tx2)">' + k + '</span><span>' + v + '</span></div>';
   }
 
   // ══ DEMARRAGE ═════════════════════════════════════════════════════════════
@@ -749,7 +749,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!r.ok) {
         // ⚠ ON DESARME L ECRAN AU LIEU DE LE LAISSER CROIRE QU IL PEUT VENDRE.
         document.getElementById('corps').innerHTML =
-          '<div class="vide" style="grid-column:1/-1"><div style="font-size:1rem;color:#e8edf5;margin-bottom:.4rem">'
+          '<div class="vide" style="grid-column:1/-1"><div style="font-size:1rem;color:var(--tx);margin-bottom:.4rem">'
           + 'Caisse indisponible</div>' + esc(expliquer(r.motif)) + '</div>';
         dire(expliquer(r.motif), 'err');
         return;

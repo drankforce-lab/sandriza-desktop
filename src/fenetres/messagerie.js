@@ -24,21 +24,21 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:#8fa1b8}
-button,textarea{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  font-size:.78rem;color:var(--tx2)}
+button,textarea{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem}
 button{cursor:pointer}
 textarea{width:100%;min-height:5em;resize:vertical}
@@ -49,22 +49,22 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
-button.danger{border-color:rgba(239,68,68,.5);color:#f87171}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
-button .n.hi{background:rgba(245,158,11,.25);color:#fbbf24}
+button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .ligne{padding:.55rem .7rem;background:#16202f;border:1px solid rgba(255,255,255,.07);
   border-radius:11px;cursor:pointer}
 .ligne:hover{border-color:#c9a97e}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
 .ligne .num{font-weight:700}
-.ligne .dt{font-size:.72rem;color:#8fa1b8;margin-top:.15rem}
-.ligne .droite{margin-left:auto;font-size:.74rem;color:#8fa1b8}
+.ligne .dt{font-size:.72rem;color:var(--tx2);margin-top:.15rem}
+.ligne .droite{margin-left:auto;font-size:.74rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
-.pill.bon{background:rgba(34,197,94,.14);color:#4ade80}
-.pill.att{background:rgba(245,158,11,.16);color:#fbbf24}
-.pill.neutre{background:rgba(148,163,184,.16);color:#8fa1b8}
-.vide{padding:1.2rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+.pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
+.pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
@@ -73,7 +73,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:#fbbf24}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);
   margin-bottom:.6rem}
-.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8}
+.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600;overflow-wrap:anywhere}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
   background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.6rem .7rem}
@@ -82,9 +82,9 @@ button .n.hi{background:rgba(245,158,11,.25);color:#fbbf24}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -97,11 +97,11 @@ function pageMessagerie() {
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="vide">Chargement… (les demandes se resynchronisent)</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <span id="ret" hidden style="margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:#8fa1b8">
+  <span id="ret" hidden style="margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--tx2)">
     <span title="Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.">Réponses conservées</span>
-    <input id="ret-mois" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:#e8edf5;background:#0f1724;border:1px solid #2b3444;border-radius:6px;padding:.2rem .35rem">
+    <input id="ret-mois" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:var(--tx);background:#0f1724;border:1px solid #2b3444;border-radius:6px;padding:.2rem .35rem">
     <span>mois</span>
-    <button id="ret-save" style="font:inherit;font-size:.74rem;color:#e8edf5;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);border-radius:6px;padding:.22rem .5rem;cursor:pointer">Enregistrer</button>
+    <button id="ret-save" style="font:inherit;font-size:.74rem;color:var(--tx);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);border-radius:6px;padding:.22rem .5rem;cursor:pointer">Enregistrer</button>
   </span></div>
 <script>
 (function(){
@@ -202,16 +202,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div><div class="l">Déposée le</div><div class="v">' + esc(r.date) + '</div></div>'
       + (r.reponduLe ? '<div><div class="l">Répondu le</div><div class="v">' + esc(r.reponduLe) + '</div></div>' : '')
       + '</div>'
-      + '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;'
+      + '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);'
       + 'margin-bottom:.25rem">Message du client</div>'
       + '<div class="texte">' + esc(r.message || '(aucun message)') + '</div>'
       + (r.reponse && r.statut === 'answered'
-          ? '<div class="reponse"><div style="font-size:.68rem;color:#8fa1b8;text-transform:uppercase;'
+          ? '<div class="reponse"><div style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
             + 'letter-spacing:.05em">Votre réponse' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
             + esc(r.reponse) + '</div>'
           : '')
       + '<div style="margin-top:.6rem"><div class="l" style="font-size:.62rem;text-transform:uppercase;'
-      + 'letter-spacing:.05em;color:#8fa1b8;margin-bottom:.25rem">'
+      + 'letter-spacing:.05em;color:var(--tx2);margin-bottom:.25rem">'
       + (r.statut === 'answered' ? 'Modifier la réponse (renvoyée par courriel)' : 'Votre réponse (envoyée par courriel au client)') + '</div>'
       + '<textarea id="m-reptxt" placeholder="Rédigez votre réponse…">' + esc(r.reponse || '') + '</textarea></div>'
       + '<div class="pied-boite">'
@@ -341,7 +341,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }
     if (actif) {

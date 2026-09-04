@@ -31,21 +31,21 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:#8fa1b8}
-input,button,select{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  font-size:.78rem;color:var(--tx2)}
+input,button,select{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem}
 button{cursor:pointer}
 input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -53,27 +53,27 @@ button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:600}
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:.5rem}
 .tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.5rem .65rem;text-align:center}
 .tuile .val{font-size:1.15rem;font-weight:800;line-height:1.2;white-space:nowrap}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;margin-top:.12rem}
-.tuile .val.or{color:#c9a97e}.tuile .val.bon{color:#4ade80}.tuile .val.mal{color:#f87171}
-.tuile .val.att{color:#fbbf24}
+.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin-top:.12rem}
+.tuile .val.or{color:var(--tx-or)}.tuile .val.bon{color:var(--tx-ok)}.tuile .val.mal{color:var(--tx-err)}
+.tuile .val.att{color:var(--tx-att)}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem}
-.carte h3{margin:0 0 .4rem;font:700 .82rem/1.3 Georgia,serif;color:#cbd5e1}
+.carte h3{margin:0 0 .4rem;font:700 .82rem/1.3 Georgia,serif;color:var(--tx-gris2)}
 .grilles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.55rem}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.22rem .4rem;font-size:.66rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody td{padding:.26rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:top}
 tbody tr:hover td{background:rgba(255,255,255,.04)}
 .num{text-align:right;white-space:nowrap}
-.dt{font-size:.72rem;color:#8fa1b8}
-.chemin{font-size:.68rem;color:#6d7f96;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dt{font-size:.72rem;color:var(--tx2)}
+.chemin{font-size:.68rem;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tronq{max-width:20rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Graphique : des barres qui montent, une graduation, rien de plus. */
 .graph{display:flex;align-items:flex-end;gap:2px;height:130px;
@@ -81,18 +81,18 @@ tbody tr:hover td{background:rgba(255,255,255,.04)}
   padding:0 .2rem}
 .col{flex:1 1 0;min-width:2px;background:#8f6f42;border-radius:2px 2px 0 0;position:relative}
 .col:hover{background:#c9a97e}
-.gmax{font-size:.66rem;color:#8fa1b8;margin-bottom:.15rem}
+.gmax{font-size:.66rem;color:var(--tx2);margin-bottom:.15rem}
 .avis{border-radius:9px;padding:.42rem .65rem;font-size:.78rem;line-height:1.55}
 .avis.att{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.32);color:#fde68a}
-.avis.mal{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.34);color:#fca5a5}
-.note{font-size:.73rem;color:#8fa1b8;line-height:1.6;border-top:1px solid rgba(255,255,255,.07);
+.avis.mal{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.34);color:var(--tx-err2)}
+.note{font-size:.73rem;color:var(--tx2);line-height:1.6;border-top:1px solid rgba(255,255,255,.07);
   padding-top:.5rem;margin-top:.2rem}
-.vide{padding:1.4rem .6rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+.vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -391,7 +391,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }
     if (actif) {

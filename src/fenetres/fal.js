@@ -30,18 +30,18 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
   border-bottom:1px solid rgba(255,255,255,.08)}
-.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:#8fa1b8;
+.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:#e8edf5;border-bottom-color:#c9a97e}
+.onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.75rem}
 .corps::-webkit-scrollbar{width:8px}
@@ -49,13 +49,13 @@ body{background:#0e1522;color:#e8edf5;
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8}
-button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+  letter-spacing:.06em;color:var(--tx2)}
+button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.34rem .6rem;cursor:pointer}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:focus{outline:none;border-color:#c9a97e}
 button.mini{font-size:.72rem;padding:.16rem .45rem}
-select{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+select{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .5rem}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
@@ -63,38 +63,38 @@ select{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
 .t{flex:1 1 8rem;background:#16202f;border:1px solid rgba(255,255,255,.07);
   border-radius:11px;padding:.6rem .75rem}
 .t .n{font:800 1.5rem/1.1 Georgia,serif;font-variant-numeric:tabular-nums}
-.t .l{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;font-weight:700}
-.t .s{font-size:.7rem;color:#8fa1b8;margin-top:.15rem}
+.t .l{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
+.t .s{font-size:.7rem;color:var(--tx2);margin-top:.15rem}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody td{padding:.3rem .35rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:top}
 tbody tr:hover td{background:rgba(255,255,255,.03)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.dt{font-size:.7rem;color:#8fa1b8}
+.dt{font-size:.7rem;color:var(--tx2)}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.74rem}
 .pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;
   white-space:nowrap;font-weight:700}
-.pill.ok{background:rgba(34,197,94,.15);color:#4ade80}
-.pill.non{background:rgba(248,113,113,.15);color:#fca5a5}
-.pill.g{background:rgba(148,163,184,.14);color:#94a3b8;font-weight:600}
+.pill.ok{background:rgba(34,197,94,.15);color:var(--tx-ok)}
+.pill.non{background:rgba(248,113,113,.15);color:var(--tx-err2)}
+.pill.g{background:rgba(148,163,184,.14);color:var(--tx2);font-weight:600}
 .pill.apr{background:rgba(201,169,126,.18);color:#d8bd97}
 /* La barre des jours : un dessin vaut mieux qu une colonne de nombres pour
    reperer une derive avant la facture. */
 .jours{display:flex;align-items:flex-end;gap:2px;height:4.5rem;padding-top:.3rem}
 .jours .b{flex:1 1 auto;min-width:3px;background:rgba(201,169,126,.55);border-radius:2px 2px 0 0}
 .jours .b:hover{background:#c9a97e}
-.vide{padding:1.1rem .6rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* L avertissement d honnetete : ni replie, ni en gris pale. Il doit se lire. */
 .franc{border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.1);
-  color:#f0d6a0;border-radius:9px;padding:.55rem .75rem;font-size:.76rem;line-height:1.5}
+  color:var(--tx-or2);border-radius:9px;padding:.55rem .75rem;font-size:.76rem;line-height:1.5}
 .franc b{color:#fbe3b0}
-.franc a{color:#f0d6a0}
+.franc a{color:var(--tx-or2)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -281,7 +281,7 @@ ${JS_ACTIVITE}${JS_DIRE}
      bouton Recharger), donc on DIT quand les chiffres ont été relus pour la
      dernière fois, sinon un écran figé passerait pour à jour. */
   function ligneMaj(){
-    return '<div class="barreoutils"><span class="droite" style="font-size:.74rem;color:#8fa1b8">'
+    return '<div class="barreoutils"><span class="droite" style="font-size:.74rem;color:var(--tx2)">'
       + '<span id="maj">' + (MAJ ? 'Dernière actualisation le ' + esc(MAJ) : 'Actualisation…') + '</span>'
       + '</span></div>';
   }
@@ -388,7 +388,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         // ⚠ LE MESSAGE D ERREUR EST RENDU TEL QUEL : << echec >> tout court n aide
         // personne ; << credit epuise >> ou << cle invalide >> se reglent vite.
         + (e.ok || !e.erreur ? ''
-            : '<tr><td></td><td colspan="7" class="dt" style="color:#fca5a5">' + esc(e.erreur) + '</td></tr>'));
+            : '<tr><td></td><td colspan="7" class="dt" style="color:var(--tx-err2)">' + esc(e.erreur) + '</td></tr>'));
     });
     return out.join('');
   }
@@ -398,9 +398,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     h.push('<div class="barreoutils">'
       + '<select id="h-prov">' + opt('tous', 'Toutes les opérations') + opt('fal', 'Fal.ai') + opt('photoroom', 'Photoroom') + '</select>'
       + '<input id="h-q" type="search" placeholder="Filtrer par photo (nom ou PH-000000)" value="' + esc(FILT_Q || '')
-      + '" style="flex:1;min-width:13rem;background:rgba(255,255,255,.05);color:#e8edf5;'
+      + '" style="flex:1;min-width:13rem;background:rgba(255,255,255,.05);color:var(--tx);'
       + 'border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.32rem .55rem;font:inherit">'
-      + '<span class="droite" style="font-size:.74rem;color:#8fa1b8"><span id="maj">'
+      + '<span class="droite" style="font-size:.74rem;color:var(--tx2)"><span id="maj">'
       + (MAJ ? 'Dernière actualisation le ' + esc(MAJ) : 'Actualisation…') + '</span></span></div>');
     h.push('<div class="carte"><h2>Cinq cents derniers appels</h2>');
     h.push('<table><thead><tr><th>Quand</th><th>Opération</th><th>Traitement</th>'

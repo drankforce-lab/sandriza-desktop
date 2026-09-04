@@ -23,7 +23,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -32,13 +32,13 @@ body{background:#0e1522;color:#e8edf5;
 .tete .av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;
   display:flex;align-items:center;justify-content:center;font-weight:700;
   background:linear-gradient(135deg,#c9a97e,#8a6f4d);color:#17202c}
-.tete .mail{font-size:.72rem;color:#8fa1b8}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .mail{font-size:.72rem;color:var(--tx2)}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .tete .pill{font-size:.68rem;padding:.12rem .55rem;border-radius:99px;
   border:1px solid rgba(255,255,255,.2);margin-left:.5rem}
-.pill.vert{border-color:rgba(74,222,128,.5);color:#4ade80}
-.pill.gris{color:#8fa1b8}
-.pill.rouge{border-color:rgba(248,113,113,.5);color:#f6a5a5}
+.pill.vert{border-color:rgba(74,222,128,.5);color:var(--tx-ok)}
+.pill.gris{color:var(--tx2)}
+.pill.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
@@ -46,47 +46,47 @@ body{background:#0e1522;color:#e8edf5;
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.09em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.5rem}
 .tuile{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
   border-radius:9px;padding:.5rem .65rem}
-.tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8}
-.tuile .v{font:700 1.15rem/1.3 Georgia,serif;color:#e8dcc6}
+.tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.tuile .v{font:700 1.15rem/1.3 Georgia,serif;color:var(--tx-creme)}
 .ligne{display:flex;justify-content:space-between;gap:1rem;padding:.32rem 0;
   border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem}
-.ligne .k{color:#8fa1b8}
+.ligne .k{color:var(--tx2)}
 .cmd{display:flex;align-items:center;gap:.6rem;padding:.32rem .4rem;border-radius:7px;
   border-top:1px solid rgba(255,255,255,.05);font-size:.85rem}
-.cmd .num{font-family:ui-monospace,monospace;font-size:.78rem;color:#c9a97e}
+.cmd .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
 .cmd .d{flex:1 1 auto;min-width:0}
-.cmd .fin{color:#8fa1b8;font-size:.78rem;white-space:nowrap}
-input,select{font:inherit;color:#e8edf5;background:#0f1826;
+.cmd .fin{color:var(--tx2);font-size:.78rem;white-space:nowrap}
+input,select{font:inherit;color:var(--tx);background:#0f1826;
   border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input[type=checkbox]{width:auto}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem}
 .ch{display:flex;flex-direction:column;gap:.18rem;min-width:0}
-.ch label{font-size:.7rem;color:#8fa1b8;text-transform:uppercase;letter-spacing:.04em}
+.ch label{font-size:.7rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
 .ch.large{grid-column:1/-1}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
-  color:#e8edf5;transition:background .13s,border-color .13s}
+  color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
-button.danger{border-color:rgba(248,113,113,.5);color:#f6a5a5}
+button.danger{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 button.danger:hover:not(:disabled){background:rgba(248,113,113,.12)}
 button.mini{padding:.14rem .5rem;font-size:.75rem}
-.aide{font-size:.73rem;color:#8fa1b8;line-height:1.45}
+.aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
   background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .actions{flex:0 0 auto;display:flex;gap:.4rem;flex-wrap:wrap}
-.vide{padding:1.6rem 1rem;text-align:center;color:#8fa1b8;font-size:.86rem}
+.vide{padding:1.6rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
 .voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
@@ -202,7 +202,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     var c = R.client, a = c.adresse;
     var h = '<div class="carte"><div class="tuiles">'
       + '<div class="tuile"><div class="k">Commandes</div><div class="v">' + R.stats.commandes + '</div></div>'
-      + '<div class="tuile"><div class="k">Retours</div><div class="v"' + (R.stats.retours ? ' style="color:#f6a5a5"' : '') + '>' + R.stats.retours + '</div></div>'
+      + '<div class="tuile"><div class="k">Retours</div><div class="v"' + (R.stats.retours ? ' style="color:var(--tx-err2)"' : '') + '>' + R.stats.retours + '</div></div>'
       + '<div class="tuile"><div class="k">Total dépensé</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
       + '<div class="tuile"><div class="k">Inscrit le</div><div class="v" style="font-size:.92rem">' + esc(dateFr(c.inscritLe)) + '</div></div>'
       + '</div></div>';
@@ -213,7 +213,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<div class="ligne"><span class="k">Langue des courriels</span><span>' + (c.langue === 'en' ? 'English' : 'Français') + '</span></div>'
       + (c.supprime && c.supprimeLe ? '<div class="ligne"><span class="k">Supprimé le</span><span>' + esc(dateFr(c.supprimeLe)) + '</span></div>' : '')
       + '</div>';
-    h += '<div class="carte"><h2>Commandes récentes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#6d7f96">— '
+    h += '<div class="carte"><h2>Commandes récentes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">— '
       + R.stats.commandes + ' au total</span></h2>'
       + (R.dernieres.length
         ? R.dernieres.map(function(o){
@@ -276,7 +276,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<button class="mini" id="btn-voir" title="Afficher / masquer"><span class="ic">👁</span></button>'
       + '<button class="mini" id="btn-gen"><span class="ic">🎲</span> Générer</button>'
       + '</div>'
-      + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:#8fa1b8;margin-top:.5rem;cursor:pointer">'
+      + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--tx2);margin-top:.5rem;cursor:pointer">'
       + '<input type="checkbox" id="e-aviser" checked> Aviser le client par courriel de ce changement</label>'
       + '<div class="aide" style="margin-top:.3rem">Le mot de passe part par un canal séparé et le serveur le hache — '
       + 'il n’est jamais gardé en clair, ni ici ni ailleurs.</div>'
@@ -341,7 +341,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (pg) pg.onclick = function(){
       voile('<h3>⚠ Supprimer définitivement ?</h3>'
         + '<p>Effacer <strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + ') de la base ?</p>'
-        + '<p style="color:#f6a5a5">Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.</p>'
+        + '<p style="color:var(--tx-err2)">Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.</p>'
         + '<p class="aide">✅ Ce compte n’a aucune commande — rien de comptable n’est perdu.</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
         + '<button class="danger" id="v-oui"><span class="ic">🗑</span> Supprimer définitivement</button></div>',

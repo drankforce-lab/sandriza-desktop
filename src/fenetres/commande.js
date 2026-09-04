@@ -30,9 +30,9 @@ const { CSS_SOCLE, JS_SOCLE, ICO } = require('./socle');
 
 const CSS_PROPRE = `
 .entete{display:flex;gap:1.1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.55rem}
-.entete .num{font:700 1.15rem/1 Georgia,serif;color:#e8dcc6}
+.entete .num{font:700 1.15rem/1 Georgia,serif;color:var(--tx-creme)}
 .entete .cli{font-size:.9rem}
-.entete .adr{font-size:.78rem;color:#8fa1b8;flex:1 1 100%}
+.entete .adr{font-size:.78rem;color:var(--tx2);flex:1 1 100%}
 .art{display:flex;align-items:center;gap:.6rem;padding:.3rem .35rem;border-radius:7px;
   border:1px solid transparent}
 .art:hover{background:rgba(255,255,255,.035)}
@@ -44,12 +44,12 @@ const CSS_PROPRE = `
 .art.trop .pt{background:#f87171;border-color:#f87171;color:#0e1522}
 .art .d{flex:1 1 auto;min-width:0}
 .art .n{font-size:.92rem;font-weight:600;line-height:1.25}
-.art .v{font-size:.76rem;color:#8fa1b8}
+.art .v{font-size:.76rem;color:var(--tx2)}
 .art .cpt{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:.88rem;min-width:3rem;text-align:right}
 .art .q{flex:0 0 4.4rem}
 .barre{flex:0 0 auto;height:6px;border-radius:6px;background:rgba(255,255,255,.09);overflow:hidden;margin:.5rem 0 .2rem}
 .barre span{display:block;height:100%;background:#4ade80;width:0;transition:width .18s}
-.gros{font:700 1.6rem/1 Georgia,serif;color:#e8dcc6}
+.gros{font:700 1.6rem/1 Georgia,serif;color:var(--tx-creme)}
 .duo{display:flex;gap:.7rem;flex-wrap:wrap}
 .duo>*{flex:1 1 220px}
 .etat{display:flex;align-items:center;gap:.5rem;font-size:.86rem;padding:.4rem 0}
@@ -143,7 +143,7 @@ function pageCommande(id) {
     h.push('<div class="etape"><div class="carte plein" id="c-zone2">' + enTete
       + '<h2>Vérification du colis</h2>'
       + '<div class="etat"><span class="gros" id="c-prog">0</span>'
-      + '<span style="color:#8fa1b8">sur ' + attendus() + ' unités confirmées</span></div>'
+      + '<span style="color:var(--tx2)">sur ' + attendus() + ' unités confirmées</span></div>'
       + '<div class="barre"><span id="c-barre"></span></div>'
       /* ⚠ LE CHAMP DE SCAN, ET IL EST EN PREMIER. On verifie un colis un lecteur
          a la main, sans regarder l ecran : le champ doit avoir le focus, avaler
@@ -152,7 +152,7 @@ function pageCommande(id) {
       + '<div class="rech" style="margin-bottom:.35rem">'
       + '<input id="c-scan" placeholder="Scannez le code-barres de l’article…" autocomplete="off">'
       + '</div>'
-      + '<div id="c-scan-msg" style="min-height:1.2em;font-size:.8rem;color:#8fa1b8;margin-bottom:.4rem"></div>'
+      + '<div id="c-scan-msg" style="min-height:1.2em;font-size:.8rem;color:var(--tx2);margin-bottom:.4rem"></div>'
       + '<div class="rech"><input placeholder="Filtrer…"><span class="cpt" id="c-cpt2"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div>'
       + '<div style="margin-top:.6rem;display:flex;gap:.45rem;flex-wrap:wrap">'
@@ -321,7 +321,7 @@ function pageCommande(id) {
     var z = document.getElementById('c-recap'); if (!z) return;
     function lg(k, v, alerte){
       return '<div class="art" style="border:0"><div class="d"><div class="v">' + esc(k) + '</div>'
-        + '<div class="n"' + (alerte ? ' style="color:#fbbf24"' : '') + '>' + (v || '—') + '</div></div></div>';
+        + '<div class="n"' + (alerte ? ' style="color:var(--tx-att)"' : '') + '>' + (v || '—') + '</div></div></div>';
     }
     var t = (CTX.transporteurs.find(function(x){ return x.cle === val('c-transp'); }) || {}).nom || val('c-transp');
     var complet = toutVerifie();

@@ -28,16 +28,16 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.05rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .barre{flex:0 0 auto;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
   padding:.5rem 1.05rem;border-bottom:1px solid rgba(255,255,255,.06)}
-input[type=search],select,button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+input[type=search],select,button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.28rem .5rem}
 input[type=search]{flex:1 1 14rem;min-width:9rem}
 button{cursor:pointer}
@@ -45,8 +45,8 @@ button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.4;cursor:default}
 input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
 .jeton{font-size:.73rem;padding:.14rem .5rem;border-radius:99px}
-.jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:#e8dcc6;font-weight:600}
-.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:600}
+.jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
+.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
 .vues{display:flex;gap:.15rem;margin-left:auto}
 .vues button.on{border-color:#c9a97e;background:rgba(201,169,126,.16)}
 /* Le corps : la liste a gauche, l apercu a droite — comme un explorateur. */
@@ -58,7 +58,7 @@ input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
    parcourir 500 photos sans defiler pendant une minute. */
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead th{position:sticky;top:0;z-index:1;text-align:left;padding:.26rem .4rem;
-  font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;
+  font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   font-weight:700;background:#0e1522;border-bottom:1px solid rgba(255,255,255,.12)}
 /* ⚠ AUCUNE LIGNE DE TABLEAU, ET UN SURVOL DISCRET (demande du 2026-08-14 :
    << l effet de survol est affreux, on ne devrait pas voir les lignes du
@@ -81,11 +81,11 @@ th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center
 .coche:hover{border-color:#c9a97e}
 .coche.on{background:#c9a97e;border-color:#c9a97e;font-weight:700}
 .coche.flot{position:absolute;top:.25rem;left:.25rem;z-index:2;
-  background:rgba(8,12,20,.72);color:#e8edf5}
+  background:rgba(8,12,20,.72);color:var(--tx)}
 .coche.flot.on{background:#c9a97e;color:#17202c}
 .liste{max-height:calc(100vh - 15rem);overflow-y:auto}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding:.45rem .2rem 0;font-size:.75rem;color:#8fa1b8}
+  padding:.45rem .2rem 0;font-size:.75rem;color:var(--tx2)}
 td.vig{width:2.4rem;max-width:2.4rem;padding:.1rem .2rem}
 td.vig img{width:2rem;height:2rem;object-fit:contain;border-radius:4px;background:#0b1220;display:block}
 /* La vignette de liste ne porte NI cadre NI contour : c est une image, pas un
@@ -98,14 +98,14 @@ td.vig img{border:0;outline:0}
 .vig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
 .vig.actif{outline:2px solid #c9a97e;outline-offset:-2px}
 .vig img{width:100%;height:6rem;object-fit:contain;background:#0b1220;display:block}
-.vig .nm{font-size:.68rem;color:#8fa1b8;padding:.18rem .3rem;white-space:nowrap;
+.vig .nm{font-size:.68rem;color:var(--tx2);padding:.18rem .3rem;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
 .pastilles{display:flex;gap:.15rem}
 .pt{font-size:.62rem;padding:.02rem .26rem;border-radius:4px;
-  background:rgba(255,255,255,.08);color:#8fa1b8}
-.pt.fait{color:#4ade80}
+  background:rgba(255,255,255,.08);color:var(--tx2)}
+.pt.fait{color:var(--tx-ok)}
 /* Le retour en arriere possible — dore, comme tout ce qui se decide ici. */
-.pt.ret{color:#c9a97e}
+.pt.ret{color:var(--tx-or)}
 /* La fiche produit en retard : c est un avertissement, pas un etat neutre. */
 .pt.retard{color:#f0a05a;border:1px solid rgba(240,160,90,.4)}
 /* Le volet d APERCU : la raison d etre de cette fenetre. */
@@ -113,21 +113,21 @@ td.vig img{border:0;outline:0}
   background:#111a29;display:flex;flex-direction:column;overflow-y:auto}
 .apercu .img{padding:.6rem;text-align:center;background:#0b1220}
 .apercu .img img{max-width:100%;max-height:15rem;border-radius:8px}
-.apercu .vide{padding:2rem .8rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.apercu .vide{padding:2rem .8rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .apercu .infos{padding:.55rem .7rem;font-size:.78rem;display:flex;flex-direction:column;gap:.3rem}
 .apercu .infos .l{display:flex;gap:.5rem;justify-content:space-between}
-.apercu .infos .k{color:#8fa1b8}
+.apercu .infos .k{color:var(--tx2)}
 .apercu .infos .v{text-align:right;word-break:break-word}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
   padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
 .pied .cpt{font-size:.8rem}
-.pied .cpt.on{color:#e8dcc6;font-weight:700}
+.pied .cpt.on{color:var(--tx-creme);font-weight:700}
 .pied .droite{margin-left:auto;display:flex;gap:.4rem}
-.msg{font-size:.78rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.78rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
-.vide{padding:2rem .8rem;text-align:center;color:#8fa1b8;font-size:.84rem}
-.aide{font-size:.72rem;color:#8fa1b8}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
+.vide{padding:2rem .8rem;text-align:center;color:var(--tx2);font-size:.84rem}
+.aide{font-size:.72rem;color:var(--tx2)}
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
@@ -135,7 +135,7 @@ td.vig img{border:0;outline:0}
 .voile h3{margin:0 0 .55rem;font:700 1.02rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.85rem;line-height:1.5}
 .voile .ch{margin:.5rem 0}
-.voile .ch label{display:block;font-size:.72rem;color:#8fa1b8;margin-bottom:.15rem}
+.voile .ch label{display:block;font-size:.72rem;color:var(--tx2);margin-bottom:.15rem}
 .voile .ch input,.voile .ch select{width:100%}
 .voile label.rc{display:flex;align-items:flex-start;gap:.5rem;margin-top:.6rem;
   font-size:.81rem;line-height:1.5;cursor:pointer}
@@ -529,7 +529,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'venez d’annuler.</p>'
       /* ⚠ CE QU ON NE PEUT PAS DEFAIRE EST DIT AVANT, pas apres coup : une photo
          traitee deux fois n a gardé qu UN état, celui d avant le dernier geste. */
-      + '<p style="color:#8fa1b8">Un seul pas en arrière est conservé par photo : une photo '
+      + '<p style="color:var(--tx2)">Un seul pas en arrière est conservé par photo : une photo '
       + 'passée par deux traitements ne remonte qu’au précédent, pas à l’originale.</p>'
       + (k < ids.length
           ? ('<p style="color:#d8b57a">⚠ ' + (ids.length - k) + ' photo'
@@ -593,12 +593,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (r ? ('<p style="color:#d8b57a">' + r + ' fiche' + (r > 1 ? 's' : '') + ' montre'
               + (r > 1 ? 'nt' : '') + ' encore l’image d’<strong>avant</strong> le dernier '
               + 'traitement — c’est justement ce qu’on répare.</p>')
-           : '<p style="color:#8fa1b8">Aucune de ces fiches n’est en retard : elles montrent déjà '
+           : '<p style="color:var(--tx2)">Aucune de ces fiches n’est en retard : elles montrent déjà '
              + 'l’image courante. Rien ne changera visiblement.</p>')
       /* ⚠ LE CAS AMBIGU EST ANNONCE AVANT, pas decouvert dans le compte rendu :
          une fiche qui porte plusieurs images et dont on ignore laquelle vient de
          cette photo est REFUSEE, jamais devinee. */
-      + '<p style="color:#8fa1b8">Une photo rattachée avant la version 3.49 dont la fiche porte '
+      + '<p style="color:var(--tx2)">Une photo rattachée avant la version 3.49 dont la fiche porte '
       + '<strong>plusieurs images</strong> sera laissée de côté : on ne peut pas savoir laquelle '
       + 'lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre. '
       + 'Rattachez-la de nouveau pour lever le doute.</p>'

@@ -39,7 +39,7 @@ const CSS = `
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
 body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
-  color:#f1ece4;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color:var(--tx-creme2);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column}
 .tete{display:flex;align-items:center;justify-content:space-between;gap:1rem;
   padding:1.1rem 1.8rem;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
@@ -53,7 +53,7 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
 .ln{display:flex;align-items:baseline;gap:1rem;padding:.72rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
-.ln .q{flex:0 0 auto;min-width:2.6rem;font-variant-numeric:tabular-nums;color:#c9a97e;font-weight:700;font-size:1.05rem}
+.ln .q{flex:0 0 auto;min-width:2.6rem;font-variant-numeric:tabular-nums;color:var(--tx-or);font-weight:700;font-size:1.05rem}
 .ln .d{flex:1 1 auto;min-width:0}
 .ln .n{font-size:1.12rem;font-weight:600;line-height:1.3}
 .ln .v{font-size:.82rem;color:#9fb0c4;margin-top:.15rem}
@@ -64,12 +64,12 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 @keyframes surligne{0%{background:rgba(201,169,126,.22)}100%{background:transparent}}
 .bas{flex:0 0 auto;border-top:1px solid rgba(255,255,255,.1);padding-top:.9rem;margin-top:.6rem}
 .sl{display:flex;justify-content:space-between;font-size:.95rem;color:#b9c6d6;padding:.2rem 0}
-.sl b{font-variant-numeric:tabular-nums;font-weight:600;color:#e6ded2}
+.sl b{font-variant-numeric:tabular-nums;font-weight:600;color:var(--tx-creme)}
 .tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:.7rem;
   padding-top:.8rem;border-top:2px solid rgba(201,169,126,.45)}
-.tot .lb{font-size:1.15rem;letter-spacing:.12em;text-transform:uppercase;color:#c9a97e;font-weight:700}
+.tot .lb{font-size:1.15rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-or);font-weight:700}
 .tot .vl{font-variant-numeric:tabular-nums;font-size:3.1rem;font-weight:800;line-height:1;
-  font-family:Georgia,serif;color:#fff}
+  font-family:Georgia,serif;color:var(--tx-blanc)}
 .vide{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;text-align:center}
 .vide img{max-width:min(340px,60vw);height:auto}
 .vide .msg{font-size:1.05rem;color:#9fb0c4}

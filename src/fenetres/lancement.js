@@ -18,37 +18,37 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
-  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+  background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .etat{border-radius:12px;padding:1.25rem 1.4rem;margin:0 0 1.2rem;border:2px solid}
 .etat .lg{font-size:1.05rem;font-weight:700;margin:0 0 .2rem}
-.etat .ds{font-size:.82rem;color:#8fa1b8}
+.etat .ds{font-size:.82rem;color:var(--tx2)}
 .etat .rangee{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
 .etat .rangee .g{flex:1;min-width:180px}
 .src{font-size:.8rem;margin:.7rem 0 0}
-.src.ok{color:#8fa1b8}.src.warn{color:#facc15}.src.err{color:#f87171}
+.src.ok{color:var(--tx2)}.src.warn{color:var(--tx-jaune)}.src.err{color:var(--tx-err)}
 .src code{background:#0f1724;border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}
-.h4{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8fa1b8;margin:0 0 .6rem}
+.h4{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin:0 0 .6rem}
 .prot{display:flex;flex-direction:column;gap:.5rem;margin:0 0 1.2rem}
 .prot .l{display:flex;align-items:center;gap:.7rem;font-size:.85rem}
 .prot .l .em{width:1.4em;text-align:center;filter:grayscale(1) brightness(1.7);opacity:.9}
 .info{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;
-  padding:.85rem 1rem;font-size:.8rem;color:#8fa1b8;line-height:1.6}
-.info b{color:#e8edf5}.info code{background:#0f1724;border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}
+  padding:.85rem 1rem;font-size:.8rem;color:var(--tx2);line-height:1.6}
+.info b{color:var(--tx)}.info code{background:#0f1724;border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
-button.bsc{font:inherit;border:none;border-radius:8px;padding:.65rem 1.25rem;font-size:.88rem;font-weight:700;cursor:pointer;color:#fff;white-space:nowrap}
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
+button.bsc{font:inherit;border:none;border-radius:8px;padding:.65rem 1.25rem;font-size:.88rem;font-weight:700;cursor:pointer;color:var(--tx-blanc);white-space:nowrap}
 button.bsc:disabled{opacity:.5;cursor:default}
-.vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:#e8edf5;cursor:pointer;-webkit-user-select:none;user-select:none}
+.vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

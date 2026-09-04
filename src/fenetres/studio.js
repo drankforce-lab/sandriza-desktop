@@ -43,16 +43,16 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .credits{margin-left:auto;font-size:.74rem;color:#8fa1b8}
-.tete .credits b{color:#c9a97e}
+.tete .credits{margin-left:auto;font-size:.74rem;color:var(--tx2)}
+.tete .credits b{color:var(--tx-or)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
-  background:rgba(200,140,40,.1);color:#f0d6a0;border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+  background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 /* ══ LA DISPOSITION EN DEUX VOLETS (refonte du 2026-08-18) ══════════════════
    AVANT : cinq cartes dans une grille a deux colonnes fixes, tout l ecran
    defilant d un seul bloc — et le RESULTAT, la seule chose qu on paie, tout en
@@ -75,8 +75,8 @@ body{background:#0e1522;color:#e8edf5;
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .74rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8}
-.carte .sous{margin:0 0 .7rem;font-size:.75rem;color:#6d7f96}
+  letter-spacing:.06em;color:var(--tx2)}
+.carte .sous{margin:0 0 .7rem;font-size:.75rem;color:var(--tx3)}
 /* ── LA BARRE DES RECETTES (lot 3d du #29) ─────────────────────────────────
    EN HAUT du volet de gauche, et volontairement FINE. Ce n est PAS une sixieme
    etape : le volet en porte deja cinq, et une section de plus aurait pousse le
@@ -87,10 +87,10 @@ body{background:#0e1522;color:#e8edf5;
   background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
   padding:.5rem .6rem}
 .rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8}
+  letter-spacing:.06em;color:var(--tx2)}
 .rcbar select{flex:1 1 auto;min-width:0;font-size:.78rem;padding:.3rem .45rem}
 .rcbar button{flex:0 0 auto;font:inherit;font-size:.73rem;padding:.3rem .55rem;
-  border-radius:8px;cursor:pointer;color:#cbd8e6;background:rgba(255,255,255,.05);
+  border-radius:8px;cursor:pointer;color:var(--tx-bleute);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16)}
 .rcbar button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 .rcbar button:disabled{opacity:.4;cursor:default}
@@ -111,7 +111,7 @@ body{background:#0e1522;color:#e8edf5;
   overflow-y:auto}
 .ong{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;
   padding:.42rem .5rem;border-radius:9px;border:1px solid transparent;
-  background:transparent;color:#cbd8e6;cursor:pointer}
+  background:transparent;color:var(--tx-bleute);cursor:pointer}
 .ong:hover:not(.on){background:rgba(255,255,255,.05)}
 .ong.on{background:#16202f;border-color:rgba(201,169,126,.45)}
 /* ⚠ MEME L ONGLET OUVERT RESTE EN GRIS. Il etait degrise pour se distinguer —
@@ -122,16 +122,16 @@ body{background:#0e1522;color:#e8edf5;
 .ong.on .oi{opacity:1}
 .ong .ot{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.2}
 .ong .ot b{font:600 .79rem/1.25 system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ong .oe{font-size:.68rem;color:#6d7f96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ong.on .oe{color:#8fa1b8}
-.ong .oc{flex:0 0 auto;color:#c9a97e;font-size:.8rem;font-weight:700}
+.ong .oe{font-size:.68rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ong.on .oe{color:var(--tx2)}
+.ong .oc{flex:0 0 auto;color:var(--tx-or);font-size:.8rem;font-weight:700}
 .panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
   background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
   padding:.85rem .95rem}
 .pnt{display:flex;align-items:center;gap:.55rem}
 .pnt .pi{font-size:1rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .pnt h2{margin:0;font:700 .95rem/1.2 Georgia,serif}
-.panneau .sous{margin:.28rem 0 .7rem;font-size:.74rem;color:#6d7f96;line-height:1.4}
+.panneau .sous{margin:.28rem 0 .7rem;font-size:.74rem;color:var(--tx3);line-height:1.4}
 .onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
 .onglets::-webkit-scrollbar-thumb,.panneau::-webkit-scrollbar-thumb{
   background:rgba(255,255,255,.12);border-radius:8px}
@@ -142,7 +142,7 @@ body{background:#0e1522;color:#e8edf5;
    chantier #29 plutot que laissees a vieillir. */
 .pbtn{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
 .pbtn button{flex:1 1 auto}
-.pt2{font-size:.7rem;color:#6d7f96}
+.pt2{font-size:.7rem;color:var(--tx3)}
 /* Deux menus courts cote a cote quand la place le permet, l un sous l autre
    sinon. auto-fit, donc jamais deux colonnes serrees dans un volet etroit. */
 .duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem;margin-top:.7rem}
@@ -153,12 +153,12 @@ body{background:#0e1522;color:#e8edf5;
 .bloc{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
   padding:.85rem 1rem;min-width:0}
 .recap .rt,.fmt .rt{font:700 .74rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8}
+  letter-spacing:.06em;color:var(--tx2)}
 .recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:.5rem}
 .recap .jt{font-size:.75rem;padding:.16rem .55rem;border-radius:99px;
-  background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:#e8dcc6}
-.recap .jt.gris{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);color:#8fa1b8}
-.recap .note,.fmt .note{margin-top:.55rem;font-size:.73rem;color:#6d7f96;line-height:1.5}
+  background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:var(--tx-creme)}
+.recap .jt.gris{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);color:var(--tx2)}
+.recap .note,.fmt .note{margin-top:.55rem;font-size:.73rem;color:var(--tx3);line-height:1.5}
 /* ── FORMATS DE SORTIE (lot 3b) ────────────────────────────────────────────
    La meme image en 3:4, 1:1, 4:5 et 9:16, fabriquee ICI, au canevas de la page.
    ⚠ AUCUN APPEL, AUCUN CREDIT : couper et border une image que l on a deja ne
@@ -177,7 +177,7 @@ body{background:#0e1522;color:#e8edf5;
 /* ⚠ Fond CLAIR sous le logo : la plupart sont noirs sur transparent, et sur le
    fond sombre de cet ecran ils seraient invisibles — on choisirait a l aveugle. */
 .logv img{width:100%;height:3.4rem;object-fit:contain;background:#e8edf5;border-radius:5px;padding:.15rem}
-.logv .ln{font-size:.66rem;color:#8fa1b8;max-width:100%;
+.logv .ln{font-size:.66rem;color:var(--tx2);max-width:100%;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Les neuf ancrages, disposes comme ils le seront sur l image. */
 .posgr{display:grid;grid-template-columns:repeat(3,2.3rem);gap:.25rem}
@@ -194,20 +194,20 @@ body{background:#0e1522;color:#e8edf5;
 .fmtc img{width:100%;height:7.5rem;object-fit:contain;background:#0b1220;border-radius:6px;
   border:1px solid rgba(255,255,255,.07)}
 .fmtc .ft{font-size:.82rem;font-weight:700;line-height:1.1}
-.fmtc .fd{font-size:.68rem;color:#6d7f96;font-variant-numeric:tabular-nums}
+.fmtc .fd{font-size:.68rem;color:var(--tx3);font-variant-numeric:tabular-nums}
 .fmtc .fb{display:flex;gap:.25rem;width:100%}
 .fmtc .fb button{flex:1 1 auto;padding:.24rem .3rem;font-size:.72rem}
 /* Le geste suivant, sans avoir a lire une aide : ce qui est fait porte une
    coche, ce qui vient est mis en avant. */
 .guide{display:flex;flex-direction:column;gap:.45rem;text-align:left;margin:.7rem auto 0;max-width:24rem}
-.guide .gp{display:flex;align-items:center;gap:.55rem;font-size:.82rem;color:#6d7f96}
+.guide .gp{display:flex;align-items:center;gap:.55rem;font-size:.82rem;color:var(--tx3)}
 .guide .gp .n{flex:0 0 auto;width:1.35rem;height:1.35rem;border-radius:50%;
   border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);
-  display:flex;align-items:center;justify-content:center;font:700 .72rem/1 system-ui;color:#8fa1b8}
-.guide .gp.ok{color:#cbd8e6}
+  display:flex;align-items:center;justify-content:center;font:700 .72rem/1 system-ui;color:var(--tx2)}
+.guide .gp.ok{color:var(--tx-bleute)}
 .guide .gp.ok .n{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
-.guide .gp.suiv{color:#e8dcc6;font-weight:600}
-.guide .gp.suiv .n{border-color:#c9a97e;color:#c9a97e}
+.guide .gp.suiv{color:var(--tx-creme);font-weight:600}
+.guide .gp.suiv .n{border-color:#c9a97e;color:var(--tx-or)}
 /* Dépôt de photo */
 /* ⚠ ELLE ETAIT TROP GRANDE (sa demande du 2026-08-19, capture a l appui). Neuf
    rem de haut, un pictogramme de 1,6 rem et un texte qui passait sur deux lignes :
@@ -217,16 +217,16 @@ body{background:#0e1522;color:#e8edf5;
    affichage. */
 .depot{border:1.5px dashed #2b3444;border-radius:10px;background:#0f1724;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
-  min-height:5rem;text-align:center;color:#8fa1b8;font-size:.78rem;padding:.6rem .7rem;
+  min-height:5rem;text-align:center;color:var(--tx2);font-size:.78rem;padding:.6rem .7rem;
   -webkit-user-select:none;user-select:none}
-.depot:hover,.depot.survol{border-color:#c9a97e;color:#cbd8e6}
+.depot:hover,.depot.survol{border-color:#c9a97e;color:var(--tx-bleute)}
 .depot .gros{font-size:1.15rem;filter:grayscale(1) brightness(1.6)}
 .depot img{max-width:100%;max-height:14rem;border-radius:8px}
-.depot .refaire{font-size:.72rem;color:#8fa1b8;text-decoration:underline;margin-top:.3rem}
+.depot .refaire{font-size:.72rem;color:var(--tx2);text-decoration:underline;margin-top:.3rem}
 /* Choix dans la photothèque */
 .phbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
-.phbarre .phinfo{font-size:.74rem;color:#8fa1b8;margin-left:auto;white-space:nowrap}
-.phbarre #ph-q{flex:1 1 auto;min-width:6rem;max-width:22rem;font:inherit;color:#e8edf5;
+.phbarre .phinfo{font-size:.74rem;color:var(--tx2);margin-left:auto;white-space:nowrap}
+.phbarre #ph-q{flex:1 1 auto;min-width:6rem;max-width:22rem;font:inherit;color:var(--tx);
   background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.34rem .55rem}
 .phbarre #ph-q:focus{outline:none;border-color:#c9a97e}
 /* ⚠ 7rem, pas 5,5 : la vignette porte desormais une coche et des pastilles.
@@ -250,27 +250,27 @@ body{background:#0e1522;color:#e8edf5;
 /* object-fit:contain : une photo COUCHEE garde ses proportions et se centre dans
    la boite, elle ne s etale pas pour la remplir. */
 .phvig img{width:100%;height:7rem;object-fit:contain;background:#0b1220}
-.phvig .attente{font-size:.68rem;color:#6d7f96;padding:1.6rem .3rem}
-.phvig .phnom{font-size:.64rem;color:#8fa1b8;padding:.15rem .25rem;max-width:100%;
+.phvig .attente{font-size:.68rem;color:var(--tx3);padding:1.6rem .3rem}
+.phvig .phnom{font-size:.64rem;color:var(--tx2);padding:.15rem .25rem;max-width:100%;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* ── Explorateur : filtres, panier de selection, coches et pastilles ─────── */
 .phfiltres{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-bottom:.45rem}
 .jeton{font:inherit;font-size:.73rem;padding:.16rem .55rem;border-radius:99px;cursor:pointer;
-  color:#cbd8e6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15)}
+  color:var(--tx-bleute);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15)}
 .jeton:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 .jeton:disabled{opacity:.4;cursor:default}
-.jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:#e8dcc6;font-weight:600}
-.jeton.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:600}
-.phfiltres select{font:inherit;font-size:.73rem;color:#cbd8e6;background:#0f1724;
+.jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
+.jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
+.phfiltres select{font:inherit;font-size:.73rem;color:var(--tx-bleute);background:#0f1724;
   border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.14rem .4rem;
   width:auto;max-width:15rem;flex:0 1 auto}
 .phsel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;
   padding:.35rem .5rem;border-radius:9px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.08)}
-.phsel .cpt{font-size:.76rem;color:#8fa1b8}
-.phsel .cpt.on{color:#e8dcc6;font-weight:700}
+.phsel .cpt{font-size:.76rem;color:var(--tx2)}
+.phsel .cpt.on{color:var(--tx-creme);font-weight:700}
 .phsel .droite{margin-left:auto;display:flex;align-items:center;gap:.4rem}
-.phsel .aide{font-size:.72rem;color:#8fa1b8}
+.phsel .aide{font-size:.72rem;color:var(--tx2)}
 .phvig{position:relative}
 .phvig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
 .phcoche{position:absolute;top:.2rem;left:.2rem;width:1.05rem;height:1.05rem;z-index:2;
@@ -279,18 +279,18 @@ body{background:#0e1522;color:#e8edf5;
 .phvig.pris .phcoche{background:#c9a97e;border-color:#c9a97e;font-weight:700}
 .phpast{position:absolute;top:.2rem;right:.2rem;z-index:2;display:flex;gap:.12rem}
 .phpast .pt{font-size:.6rem;line-height:1;padding:.12rem .22rem;border-radius:4px;
-  background:rgba(8,12,20,.75);color:#8fa1b8}
-.phpast .pt.fait{color:#4ade80}
+  background:rgba(8,12,20,.75);color:var(--tx2)}
+.phpast .pt.fait{color:var(--tx-ok)}
 /* Le panier venu de l explorateur : ce qu on s apprete a traiter. */
 .panier{margin-top:.55rem;padding:.5rem .6rem;border-radius:10px;
   background:rgba(201,169,126,.1);border:1px solid rgba(201,169,126,.35)}
 .panier .pt{display:flex;align-items:center;gap:.4rem;font-size:.8rem;margin-bottom:.4rem}
-.panier .pt .dt{color:#8fa1b8;font-size:.74rem}
+.panier .pt .dt{color:var(--tx2);font-size:.74rem}
 .panier .pt button{margin-left:auto}
 .panier .pv{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
 .panier .pv img{width:2.2rem;height:2.2rem;object-fit:contain;border-radius:5px;background:#0b1220}
 .panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:rgba(255,255,255,.06)}
-.panier .pv .pl{font-size:.72rem;color:#8fa1b8}
+.panier .pv .pl{font-size:.72rem;color:var(--tx2)}
 .panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
 .lots{display:flex;flex-direction:column;gap:.5rem;max-height:calc(100vh - 14rem);overflow-y:auto}
@@ -298,16 +298,16 @@ body{background:#0e1522;color:#e8edf5;
 .lotc.vif{border-color:#c9a97e}
 .lott{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.35rem}
 .lott strong{font-size:.85rem}
-.lott .dt{font-size:.72rem;color:#8fa1b8;margin-left:auto}
+.lott .dt{font-size:.72rem;color:var(--tx2);margin-left:auto}
 .lotc .jauge{height:.42rem;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
 .lotc .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
 .lotd{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.35rem;
-  font-size:.76rem;color:#cbd8e6}
-.lotd .mal{color:#f87171}
+  font-size:.76rem;color:var(--tx-bleute)}
+.lotd .mal{color:var(--tx-err)}
 .lotd .droite{margin-left:auto;display:flex;gap:.3rem;flex-wrap:wrap}
-.lote{margin-top:.3rem;font-size:.71rem;color:#8fa1b8;line-height:1.5}
+.lote{margin-top:.3rem;font-size:.71rem;color:var(--tx2);line-height:1.5}
 .pill.acc{background:rgba(201,169,126,.18);color:#dcc39b}
-.pill.err{background:rgba(239,68,68,.16);color:#f87171}
+.pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
 /* ── VOIES ET AMBIANCES ────────────────────────────────────────────────────
    ⚠⚠ ELLES ETAIENT EN FLEX SUR UNE SEULE LIGNE : le titre et sa description se
    disputaient la largeur d une tuile large d un tiers de demi-carte, et l on ne
@@ -326,7 +326,7 @@ body{background:#0e1522;color:#e8edf5;
 .tuile .em{grid-row:1/3;align-self:center;font-size:1.35rem;line-height:1;
   filter:grayscale(1) brightness(1.45);opacity:.9}
 .tuile .t{grid-column:2;font-size:.85rem;font-weight:700;line-height:1.25}
-.tuile .d{grid-column:2;font-size:.72rem;color:#6d7f96;line-height:1.32}
+.tuile .d{grid-column:2;font-size:.72rem;color:var(--tx3);line-height:1.32}
 /* Les ambiances passent a deux colonnes DES QUE le volet est assez large, et
    restent sur une seule quand il ne l est pas. C est auto-fill qui en decide,
    pas un nombre de colonnes ecrit en dur. */
@@ -337,14 +337,14 @@ body{background:#0e1522;color:#e8edf5;
    que les apercus par mannequin sortaient identiques et n aidaient pas au choix.
    Le mannequin se choisit maintenant dans .duo / .ch, juste en dessous. */
 .ch{margin:.7rem 0 0}
-.ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:#8fa1b8}
-select{width:100%;font:inherit;color:#e8edf5;background:#0f1724;border:1px solid #2b3444;
+.ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:var(--tx2)}
+select{width:100%;font:inherit;color:var(--tx);background:#0f1724;border:1px solid #2b3444;
   border-radius:8px;padding:.4rem .5rem}
 select:focus{outline:none;border-color:#c9a97e}
 .bascule{display:flex;align-items:flex-start;gap:.55rem;font-size:.82rem;cursor:pointer;
   -webkit-user-select:none;user-select:none;margin:.2rem 0 0}
 .bascule input{width:1.05rem;height:1.05rem;accent-color:#c9a97e;cursor:pointer;margin-top:.12rem;flex:0 0 auto}
-.bascule .d{font-size:.72rem;color:#6d7f96;display:block;margin-top:.08rem}
+.bascule .d{font-size:.72rem;color:var(--tx3);display:block;margin-top:.08rem}
 /* ── RÉGLAGES AVANCÉS ─────────────────────────────────────────────────────
    ⚠ CHAQUE VOIE N ACCEPTE PAS LES MEMES REGLAGES, et le panneau ne montre que
    ce qui s applique : le relais ne pose la finition (fond decrit, ombre,
@@ -362,26 +362,26 @@ select:focus{outline:none;border-color:#c9a97e}
 .avgrille>*{margin:0}
 .avsec{margin:.4rem 0 -.15rem;padding-top:.65rem;
   border-top:1px solid rgba(255,255,255,.08);font:700 .72rem/1.2 system-ui;
-  text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8}
+  text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .avsec.prem{margin-top:0;padding-top:0;border-top:0}
-.aidep{font-size:.71rem;color:#6d7f96;line-height:1.45;margin-top:.22rem}
+.aidep{font-size:.71rem;color:var(--tx3);line-height:1.45;margin-top:.22rem}
 .aidep.att{color:#d8b57a}
-textarea{width:100%;font:inherit;font-size:.82rem;color:#e8edf5;background:#0f1724;
+textarea{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:#0f1724;
   border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem;resize:vertical;min-height:3.2rem}
 textarea:focus{outline:none;border-color:#c9a97e}
-input[type=text]{width:100%;font:inherit;color:#e8edf5;background:#0f1724;
+input[type=text]{width:100%;font:inherit;color:var(--tx);background:#0f1724;
   border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
 input[type=text]:focus{outline:none;border-color:#c9a97e}
 input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointer}
 .avlab{display:flex;align-items:baseline;gap:.4rem}
-.avlab b{color:#c9a97e;font-size:.78rem;font-variant-numeric:tabular-nums}
+.avlab b{color:var(--tx-or);font-size:.78rem;font-variant-numeric:tabular-nums}
 .avint{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
 .avint img{width:3.4rem;height:3.4rem;object-fit:contain;background:#0b1220;border-radius:7px;
   border:1px solid rgba(255,255,255,.1)}
 /* ⚠ flex:0 1 auto, PAS 1 1 : en poussant, le nom occupait toute la largeur de la
    carte et rejetait le bouton << Choisir un fichier >> a l autre bout de l ecran,
    a plus de mille pixels de son libelle. */
-.avint .nm{font-size:.76rem;color:#cbd8e6;min-width:0;flex:0 1 22rem;
+.avint .nm{font-size:.76rem;color:var(--tx-bleute);min-width:0;flex:0 1 22rem;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* ── COMPARATEUR AVANT / APRÈS (lot 3a) ────────────────────────────────────
    Un rideau que l on tire sur l image : a gauche la photo de depart, a droite
@@ -413,7 +413,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
   display:flex;align-items:center;justify-content:center;font:700 .82rem/1 system-ui;
   border:2px solid #fff}
 .cmp .cet{position:absolute;bottom:.5rem;font-size:.68rem;line-height:1;padding:.22rem .45rem;
-  border-radius:5px;background:rgba(8,12,20,.72);color:#cbd8e6;pointer-events:none}
+  border-radius:5px;background:rgba(8,12,20,.72);color:var(--tx-bleute);pointer-events:none}
 .cmp .cet.g{left:.5rem}
 .cmp .cet.d{right:.5rem}
 /* Résultat — VIDE, il occupe tout ce qui reste du volet de droite et centre son
@@ -424,20 +424,20 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    etaient coupes net. Le volet de droite defile deja (.scene) — c est a lui de
    defiler, pas au bloc de se comprimer. */
 .res{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:15rem;text-align:center;color:#8fa1b8}
+  min-height:15rem;text-align:center;color:var(--tx2)}
 .res.garni{flex:0 0 auto;justify-content:flex-start;min-height:0}
 .res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
   border:1px solid rgba(255,255,255,.1)}
-.res .filig{margin-top:.5rem;font-size:.74rem;color:#facc15}
-.res .avis{margin-top:.4rem;font-size:.74rem;color:#8fa1b8}
-.res .dims{font-size:.7rem;color:#6d7f96;margin-top:.2rem}
+.res .filig{margin-top:.5rem;font-size:.74rem;color:var(--tx-jaune)}
+.res .avis{margin-top:.4rem;font-size:.74rem;color:var(--tx2)}
+.res .dims{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
 .res .dl{margin-top:.6rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.55rem;
   padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
-button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
+button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.5;cursor:default}
@@ -449,7 +449,7 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 button.gratuit{border-color:rgba(74,222,128,.42);color:#c9ead6}
 button.gratuit:hover:not(:disabled){background:rgba(74,222,128,.12)}
 button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:700}
-.vide{padding:1rem;text-align:center;color:#8fa1b8;font-size:.82rem}
+.vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* ⚠ LA SURCOUCHE DU LANCEMENT DE LOT. Elle manquait — habillage ET fonction :
    ouvrirLotVoile() appelait un voile() qui n'existait nulle part, et le clic
    mourait sur un ReferenceError. Le bouton « Traiter ces N en lot… » n'a donc
@@ -461,7 +461,7 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
   max-height:88vh;overflow-y:auto;box-shadow:0 18px 46px rgba(0,0,0,.5)}
 .voile h3{margin:0 0 .5rem;font:700 1.02rem/1.25 Georgia,serif}
 .voile p{margin:.6rem 0 0;font-size:.79rem;line-height:1.55}
-.voile input[type=text],.voile input:not([type]){width:100%;font:inherit;color:#e8edf5;
+.voile input[type=text],.voile input:not([type]){width:100%;font:inherit;color:var(--tx);
   background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
 .voile input:focus{outline:none;border-color:#c9a97e}
 .rc{display:flex;align-items:flex-start;gap:.55rem;font-size:.8rem;line-height:1.5;
@@ -529,7 +529,7 @@ function pageStudio(mode) {
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }
     if (actif) {
@@ -2620,7 +2620,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<span><strong>Poser le filigrane réglé à l’écran</strong> — ' + esc(lg.nom) + ' · '
         + esc(nomPosition(FIL.position)) + ' · ' + FIL.taille + ' % · '
         + Math.round(FIL.opacite * 100) + ' % d’opacité.<br>'
-        + '<span style="font-size:.74rem;color:#8fa1b8">Ce traitement ne passe par aucun service : '
+        + '<span style="font-size:.74rem;color:var(--tx2)">Ce traitement ne passe par aucun service : '
         + '<strong>aucun appel, aucun crédit</strong>, qu’il y ait cinq photos ou cinq cents.</span>'
         + '</span></label>';
     }
@@ -2632,7 +2632,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     var r = resumeReglages(voie);
     if (!r) {
-      return '<p style="color:#8fa1b8;margin:.6rem 0 0">Aucune ambiance ni mise en scène '
+      return '<p style="color:var(--tx2);margin:.6rem 0 0">Aucune ambiance ni mise en scène '
         + 'choisie à l’écran : le lot partira avec les réglages par défaut.</p>';
     }
     // ⚠ La photo d intérieur est la SEULE chose du panneau avancé qui ne peut pas
@@ -2643,7 +2643,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<label class="rc"><input type="checkbox" id="lot-reglages"'
       + (coche === false ? '' : ' checked') + '> '
       + '<span><strong>Appliquer la mise en scène de l’écran</strong> — ' + esc(r) + '.<br>'
-      + '<span style="font-size:.74rem;color:#8fa1b8">Décochez pour un traitement brut, '
+      + '<span style="font-size:.74rem;color:var(--tx2)">Décochez pour un traitement brut, '
       + 'sans ambiance ni pose imposée.</span>' + sup + '</span></label>';
   }
 
@@ -2696,14 +2696,14 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<label class="rc"><input type="checkbox" id="lot-refaire"> '
       + '<span><strong>Refaire celles déjà traitées.</strong> Par défaut elles sont écartées : '
       + 'les repasser coûte un appel chacune pour un résultat identique.</span></label>'
-      + '<p style="color:#8fa1b8">Chaque photo est un appel facturé. Le lot part en arrière-plan : '
+      + '<p style="color:var(--tx2)">Chaque photo est un appel facturé. Le lot part en arrière-plan : '
       + 'vous pouvez fermer cette fenêtre, le traitement continue et se suit depuis n’importe quel écran.</p>'
       /* ⚠ CE QUE ÇA VA COÛTER, AVANT DE CLIQUER. Le chiffre est demandé au relais
          (« studio:estimer ») et jamais recalculé ici : lui seul sait qu un fantôme
          avec décor est DEUX appels, et que le détourage part chez un autre
          fournisseur, cinquante fois moins cher. */
       + '<div id="lot-estim" style="margin:.6rem 0 0;padding:.5rem .6rem;border:1px solid #2a3a4e;'
-      + 'border-radius:6px;background:#16202c;font-size:.8rem;color:#8fa1b8">Estimation du coût…</div>'
+      + 'border-radius:6px;background:#16202c;font-size:.8rem;color:var(--tx2)">Estimation du coût…</div>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="prim" id="v-oui">Lancer le lot</button></div>',
       function(fermer){
@@ -2785,7 +2785,7 @@ ${JS_ACTIVITE}${JS_DIRE}
               h += '<br>Plafond du mois : ' + sous(bu.depense) + ' $ dépensés sur '
                 + sous(bu.mensuel) + ' $ — il reste ' + sous(bu.restant) + ' $.';
             } else {
-              h += '<br><span style="color:#8fa1b8">Aucun plafond mensuel n’est posé '
+              h += '<br><span style="color:var(--tx2)">Aucun plafond mensuel n’est posé '
                 + '(fenêtre « Traitements d’image »).</span>';
             }
             if (r.depasse) {

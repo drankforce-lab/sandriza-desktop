@@ -33,7 +33,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
@@ -41,27 +41,27 @@ body{background:#0e1522;color:#e8edf5;
   background:linear-gradient(180deg,#1b1216,#0e1522)}
 /* ⚠ ON NE GARDE QUE LA COULEUR : elle est voulue — c est le decompte avant
    fermeture, il doit alarmer. La police vient du socle, comme partout. */
-.tete h1{color:#fca5a5}
+.tete h1{color:var(--tx-err2)}
 .corps{flex:1 1 auto;min-height:0;display:flex;align-items:center;gap:1rem;
   padding:.9rem 1rem}
 .anneau{flex:0 0 auto;width:84px;height:84px;border-radius:50%;display:flex;
-  align-items:center;justify-content:center;font:800 1.7rem/1 system-ui;color:#fff;
+  align-items:center;justify-content:center;font:800 1.7rem/1 system-ui;color:var(--tx-blanc);
   background:conic-gradient(#ef4444 100%,rgba(255,255,255,.10) 0)}
 .txt{min-width:0}
 .txt p{margin:0 0 .25rem;font-size:.9rem}
-.txt .sec{font-size:.78rem;color:#8fa1b8;margin:0}
+.txt .sec{font-size:.78rem;color:var(--tx2);margin:0}
 .pied{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;
   padding:.55rem .95rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-button{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:focus{outline:none;border-color:#c9a97e}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700;margin-left:auto}
 button.prim:hover:not(:disabled){background:#d8bc95}
-button.dgr{border-color:rgba(248,113,113,.5);color:#fca5a5}
-.msg{font-size:.75rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
+.msg{font-size:.75rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#facc15}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

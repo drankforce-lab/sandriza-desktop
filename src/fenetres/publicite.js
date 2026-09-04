@@ -27,61 +27,61 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
   border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .onglets{flex:0 0 auto;display:flex;gap:.2rem;padding:.5rem 1.05rem 0;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08)}
-.onglets button{background:transparent;border:none;border-bottom:2px solid transparent;color:#8fa1b8;
+.onglets button{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--tx2);
   padding:.38rem .6rem;font-weight:600;font-size:.82rem;border-radius:6px 6px 0 0}
-.onglets button:hover{background:rgba(255,255,255,.05);color:#e8edf5}
-.onglets button.actif{color:#e8dcc6;border-bottom-color:#c9a97e}
+.onglets button:hover{background:rgba(255,255,255,.05);color:var(--tx)}
+.onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;display:flex;flex-direction:column;gap:.85rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-input,button,select,textarea{font:inherit;color:#e8edf5;background:rgba(255,255,255,.05);
+input,button,select,textarea{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.36rem .5rem}
 textarea{resize:vertical;min-height:60px;width:100%}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
 input:focus,button:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:rgba(255,255,255,.1)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#8f6f42;border-color:#a3824f;color:#f7efe2;font-weight:600;padding:.36rem .7rem}
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600;padding:.36rem .7rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
 button.mini{padding:.14rem .5rem;font-size:.75rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem}
 .tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.55rem .75rem}
-.tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8}
+.tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .tuile .v{font-size:1.35rem;font-weight:800;margin-top:.12rem}
-.tuile .z{font-size:.66rem;color:#8fa1b8;margin-top:.08rem}
+.tuile .z{font-size:.66rem;color:var(--tx2);margin-top:.08rem}
 .carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.7rem .8rem}
-.carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:#8fa1b8;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;display:flex;justify-content:space-between;align-items:center}
 .deux{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}
 .deuxb{display:grid;grid-template-columns:1fr 340px;gap:1rem;align-items:start}
 @media(max-width:760px){.deux,.deuxb{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead th{text-align:left;padding:.26rem .4rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:#8fa1b8;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+thead th{text-align:left;padding:.26rem .4rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
 tbody td{padding:.32rem .4rem;border-top:1px solid rgba(255,255,255,.055)}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ctr{text-align:center}
-code{font:.75rem/1.4 Consolas,monospace;color:#cbd8e6}
+code{font:.75rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .badge{display:inline-block;font-size:.66rem;font-weight:700;padding:.05rem .5rem;border-radius:99px}
 .badge.ok{background:rgba(22,163,74,.2);color:#86efac}
 .badge.warn{background:rgba(217,119,6,.2);color:#fcd34d}
-.badge.err{background:rgba(220,38,38,.2);color:#fca5a5}
-.badge.info{background:rgba(59,130,246,.2);color:#93c5fd}
-.badge.def{background:rgba(148,163,184,.18);color:#cbd5e1}
+.badge.err{background:rgba(220,38,38,.2);color:var(--tx-err2)}
+.badge.info{background:rgba(59,130,246,.2);color:var(--tx-bleu)}
+.badge.def{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .graph{display:flex;align-items:flex-end;gap:.4rem;height:150px}
 .graph .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
-.graph .val{font-size:.56rem;color:#8fa1b8;font-weight:600;margin-bottom:2px;white-space:nowrap}
+.graph .val{font-size:.56rem;color:var(--tx2);font-weight:600;margin-bottom:2px;white-space:nowrap}
 .graph .barz{width:100%;display:flex;gap:2px;align-items:flex-end;height:110px}
 .graph .b1{flex:1;background:#c9a97e;border-radius:3px 3px 0 0}
 .graph .b2{flex:1;background:#dc2626;opacity:.7;border-radius:3px 3px 0 0}
-.graph .lbl{font-size:.64rem;color:#8fa1b8;margin-top:.3rem}
-.legend{display:flex;gap:1rem;font-size:.68rem;color:#8fa1b8}
+.graph .lbl{font-size:.64rem;color:var(--tx2);margin-top:.3rem}
+.legend{display:flex;gap:1rem;font-size:.68rem;color:var(--tx2)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
 .rang{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.055)}
 .rang .pos{width:1.3rem;height:1.3rem;border-radius:50%;background:#c9a97e;color:#1a1a1a;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -91,12 +91,12 @@ code{font:.75rem/1.4 Consolas,monospace;color:#cbd8e6}
 .seg.pris{border-color:#c9a97e}
 .seg .n{font-size:1.5rem;font-weight:800}
 .seg .l{font-size:.78rem;font-weight:600}
-.seg .d{font-size:.66rem;color:#8fa1b8;margin-top:.1rem}
-.pill{display:inline-block;padding:.1rem .55rem;border-radius:99px;font-size:.7rem;font-weight:600;background:rgba(148,163,184,.18);color:#cbd5e1}
+.seg .d{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
+.pill{display:inline-block;padding:.1rem .55rem;border-radius:99px;font-size:.7rem;font-weight:600;background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .champ{margin-bottom:.65rem}
-.champ label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:#8fa1b8;margin:0 0 .22rem}
+.champ label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);margin:0 0 .22rem}
 .champ input,.champ select,.champ textarea{width:100%}
-.aud{background:rgba(201,169,126,.14);border-radius:8px;padding:.5rem;text-align:center;font-weight:800;font-size:1.05rem;color:#e8dcc6}
+.aud{background:rgba(201,169,126,.14);border-radius:8px;padding:.5rem;text-align:center;font-weight:800;font-size:1.05rem;color:var(--tx-creme)}
 .chans{display:flex;flex-wrap:wrap;gap:.7rem}
 .chans label{display:flex;align-items:center;gap:.35rem;font-size:.85rem;cursor:pointer}
 .rec{padding:.45rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.82rem;line-height:1.5}
@@ -108,10 +108,10 @@ code{font:.75rem/1.4 Consolas,monospace;color:#cbd8e6}
 .satbar{display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem}
 .satbar .track{flex:1;height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden}
 .satbar .track>div{height:100%;border-radius:5px}
-.vide{padding:1.5rem;text-align:center;color:#8fa1b8;font-size:.84rem}
+.vide{padding:1.5rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg{font-size:.79rem;color:var(--tx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -178,7 +178,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function vide(titre, detail){
     ongletsEl.innerHTML = '';
-    corps.innerHTML = '<div class="vide"><div style="font:700 1.3rem/1 Georgia,serif;color:#e8dcc6">' + esc(titre) + '</div><div style="margin-top:.35rem">' + esc(detail || '') + '</div></div>';
+    corps.innerHTML = '<div class="vide"><div style="font:700 1.3rem/1 Georgia,serif;color:var(--tx-creme)">' + esc(titre) + '</div><div style="margin-top:.35rem">' + esc(detail || '') + '</div></div>';
   }
   function relire(){ return charger().then(function(ok){ if (ok) dessiner(); return ok; }); }
 
@@ -199,14 +199,14 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('');
     var tops = D.topProds.length ? D.topProds.map(function(p, i){
       return '<div class="rang"><span class="pos">' + (i + 1) + '</span><div class="nm"><div>' + esc(p.name) + '</div>'
-        + '<div style="font-size:.66rem;color:#8fa1b8">' + p.qty + ' vendu' + plur(p.qty) + '</div></div>'
-        + '<div class="num" style="color:#e8dcc6;font-weight:700">' + argent(p.rev) + '</div></div>';
+        + '<div style="font-size:.66rem;color:var(--tx2)">' + p.qty + ' vendu' + plur(p.qty) + '</div></div>'
+        + '<div class="num" style="color:var(--tx-creme);font-weight:700">' + argent(p.rev) + '</div></div>';
     }).join('') : '<div class="vide">Aucune vente.</div>';
     var recent = D.recent.length ? D.recent.map(function(o){
       var st = STATUTS[o.status] || ['def', o.status];
       return '<tr><td><code>' + esc(o.num) + '</code></td><td>' + esc(o.client || '—') + '</td>'
-        + '<td style="color:#8fa1b8">' + esc(o.date) + '</td>'
-        + '<td>' + (o.promo ? '<span class="badge err">' + esc(o.promo) + '</span>' : '<span style="color:#8fa1b8">—</span>') + '</td>'
+        + '<td style="color:var(--tx2)">' + esc(o.date) + '</td>'
+        + '<td>' + (o.promo ? '<span class="badge err">' + esc(o.promo) + '</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td class="num" style="font-weight:700">' + argent(o.total) + '</td>'
         + '<td><span class="badge ' + st[0] + '">' + esc(st[1]) + '</span></td></tr>';
     }).join('') : '<tr><td colspan="6" class="vide">Aucune commande.</td></tr>';
@@ -228,15 +228,15 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueSegments(){
     var cards = D.segMeta.map(function(m){
       return '<div class="seg' + (SEGF === m.key ? ' pris' : '') + '" data-seg="' + m.key + '"><div class="n">' + (D.segCounts[m.key] || 0) + '</div><div class="l">' + esc(m.label) + '</div><div class="d">' + esc(m.desc) + '</div></div>';
-    }).join('') + '<div class="seg' + (SEGF === 'promo' ? ' pris' : '') + '" data-seg="promo"><div class="n" style="color:#fca5a5">' + D.promoCnt + '</div><div class="l">Acheteurs promo</div><div class="d">Ont utilisé une offre</div></div>';
+    }).join('') + '<div class="seg' + (SEGF === 'promo' ? ' pris' : '') + '" data-seg="promo"><div class="n" style="color:var(--tx-err2)">' + D.promoCnt + '</div><div class="l">Acheteurs promo</div><div class="d">Ont utilisé une offre</div></div>';
     var titre = SEGF === 'all' ? 'Tous les clients' : SEGF === 'promo' ? 'Acheteurs promo' : (function(){ var mm = D.segMeta.filter(function(x){ return x.key === SEGF; })[0]; return mm ? mm.label : SEGF; })();
     var rows = D.clients.length ? D.clients.map(function(c){
       var col = c.daysSince > 60 ? '#f87171' : c.daysSince > 30 ? '#fbbf24' : '#4ade80';
-      return '<tr><td><strong>' + esc(c.nom || '—') + '</strong></td><td style="color:#8fa1b8">' + esc(c.email || '—') + '</td>'
+      return '<tr><td><strong>' + esc(c.nom || '—') + '</strong></td><td style="color:var(--tx2)">' + esc(c.email || '—') + '</td>'
         + '<td><span class="pill">' + esc(c.segLabel) + '</span></td><td class="ctr" style="font-weight:700">' + c.orderCount + '</td>'
-        + '<td class="num" style="color:#e8dcc6;font-weight:600">' + argent(c.totalSpent) + '</td>'
-        + '<td style="color:#8fa1b8">' + esc(c.lastO || '—') + (c.daysSince !== null ? ' <span style="color:' + col + ';font-size:.7rem">(' + c.daysSince + 'j)</span>' : '') + '</td>'
-        + '<td class="ctr">' + (c.isPromo ? '<span style="color:#fca5a5;font-weight:700">✓</span>' : '<span style="color:#8fa1b8">—</span>') + '</td></tr>';
+        + '<td class="num" style="color:var(--tx-creme);font-weight:600">' + argent(c.totalSpent) + '</td>'
+        + '<td style="color:var(--tx2)">' + esc(c.lastO || '—') + (c.daysSince !== null ? ' <span style="color:' + col + ';font-size:.7rem">(' + c.daysSince + 'j)</span>' : '') + '</td>'
+        + '<td class="ctr">' + (c.isPromo ? '<span style="color:var(--tx-err2);font-weight:700">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td></tr>';
     }).join('') : '<tr><td colspan="7" class="vide">Aucun client dans ce segment.</td></tr>';
     var reste = (D.filteredTotal > 50) ? '<tr><td colspan="7" class="vide">+' + (D.filteredTotal - 50) + ' autres — exportez en CSV pour la liste complète</td></tr>' : '';
     return '<div class="segc">' + cards + '</div>'
@@ -251,13 +251,13 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vuePromos(){
     var t = D.totaux;
     var rows = D.perfs.length ? D.perfs.map(function(p){
-      return '<tr><td><strong>' + esc(p.name) + '</strong><div style="font-size:.66rem;color:#8fa1b8">' + esc(p.period) + '</div></td>'
+      return '<tr><td><strong>' + esc(p.name) + '</strong><div style="font-size:.66rem;color:var(--tx2)">' + esc(p.period) + '</div></td>'
         + '<td><span class="badge ' + (p.type === 'discount' ? 'err' : 'info') + '">' + (p.type === 'discount' ? 'Rabais auto' : 'Coupon') + '</span></td>'
-        + '<td><strong style="color:#fca5a5">' + esc(p.badge) + '</strong></td>'
+        + '<td><strong style="color:var(--tx-err2)">' + esc(p.badge) + '</strong></td>'
         + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem">' + esc(p.scope) + '</td>'
         + '<td class="ctr" style="font-weight:700">' + p.orders + '</td>'
         + '<td class="num">' + (p.orders > 0 ? argent(p.revenue) : '—') + '</td>'
-        + '<td class="num" style="color:#fca5a5">' + (p.savings > 0 ? '-' + argent(p.savings) : '—') + '</td>'
+        + '<td class="num" style="color:var(--tx-err2)">' + (p.savings > 0 ? '-' + argent(p.savings) : '—') + '</td>'
         + '<td><span class="badge ' + (p.active ? 'ok' : 'def') + '">' + (p.active ? 'Actif' : 'Inactif') + '</span></td></tr>';
     }).join('') : '<tr><td colspan="8" class="vide">Aucune promotion.</td></tr>';
     return '<div class="tuiles">'
@@ -283,12 +283,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('') : '<tr><td colspan="5" class="vide">Aucune publication dans l’historique.</td></tr>';
     var recs = D.recs.length ? D.recs.map(function(r){
       return '<div class="rec">' + r.icon + ' ' + esc(r.txt) + ' <button class="ghost mini" data-cibler="' + esc(r.seg) + '">Cibler →</button></div>';
-    }).join('') : '<div style="color:#8fa1b8;font-size:.82rem">Continuez à accumuler des données pour obtenir des recommandations.</div>';
+    }).join('') : '<div style="color:var(--tx2);font-size:.82rem">Continuez à accumuler des données pour obtenir des recommandations.</div>';
     var src = ['facebook','instagram','pinterest','tiktok','email'].map(function(s){ return '<option value="' + s + '"' + (UTM.source === s ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>'; }).join('');
     var dst = [['#shop','Boutique'],['#shop?cat=robes','Robes'],['#shop?cat=hauts','Hauts'],['#shop?cat=accessoires','Accessoires'],['#giftcard','Cartes-cadeaux']].map(function(d){ return '<option value="' + d[0] + '"' + (UTM.dest === d[0] ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('');
     return '<div class="deuxb">'
       + '<div class="carte"><h2>Publications sociales &amp; impact ventes</h2>'
-      +   '<div style="font-size:.72rem;color:#8fa1b8;margin:-.3rem 0 .4rem">Commandes passées dans les 48 h suivant chaque publication</div>'
+      +   '<div style="font-size:.72rem;color:var(--tx2);margin:-.3rem 0 .4rem">Commandes passées dans les 48 h suivant chaque publication</div>'
       +   '<table><thead><tr><th>Date</th><th>Réseaux</th><th>Contenu</th><th class="ctr">Cmd 48h</th><th class="num">Revenu 48h</th></tr></thead><tbody>' + posts + '</tbody></table></div>'
       + '<div style="display:flex;flex-direction:column;gap:.85rem">'
       +   '<div class="carte"><h2><span class="ic">🔗</span> Liens UTM trackés</h2>'
@@ -305,14 +305,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ══ CAMPAGNES ═════════════════════════════════════════════════════════════ */
   function vueCampaigns(){
     var rows = D.camps.length ? D.camps.map(function(c){
-      return '<tr><td><strong>' + esc(c.name) + '</strong>' + (c.promoLabel ? '<div style="font-size:.68rem;color:#e8dcc6"><span class="ic">🎯</span> ' + esc(c.promoLabel) + '</div>' : '') + '</td>'
+      return '<tr><td><strong>' + esc(c.name) + '</strong>' + (c.promoLabel ? '<div style="font-size:.68rem;color:var(--tx-creme)"><span class="ic">🎯</span> ' + esc(c.promoLabel) + '</div>' : '') + '</td>'
         + '<td>' + esc(c.segLabel) + '</td><td><strong>' + c.audienceCount + '</strong> contact' + plur(c.audienceCount) + '</td>'
-        + '<td style="font-size:.74rem;color:#8fa1b8">' + esc(c.channels || '—') + '</td><td style="font-size:.74rem;color:#8fa1b8">' + esc(c.date) + '</td>'
+        + '<td style="font-size:.74rem;color:var(--tx2)">' + esc(c.channels || '—') + '</td><td style="font-size:.74rem;color:var(--tx2)">' + esc(c.date) + '</td>'
         + '<td><span class="badge ' + (c.status === 'sent' ? 'ok' : 'warn') + '">' + (c.status === 'sent' ? 'Envoyée' : 'Brouillon') + '</span></td>'
-        + '<td class="num">' + (PEUT.edit ? ((c.status !== 'sent' ? '<button class="prim mini" data-launch="' + esc(c.id) + '">Lancer</button> ' : '') + '<button class="ghost mini" data-del="' + esc(c.id) + '" style="color:#f87171">✕</button>') : '') + '</td></tr>';
+        + '<td class="num">' + (PEUT.edit ? ((c.status !== 'sent' ? '<button class="prim mini" data-launch="' + esc(c.id) + '">Lancer</button> ' : '') + '<button class="ghost mini" data-del="' + esc(c.id) + '" style="color:var(--tx-err)">✕</button>') : '') + '</td></tr>';
     }).join('') : '<tr><td colspan="7" class="vide">Aucune campagne. Créez la première !</td></tr>';
     return '<div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">'
-      + '<div style="font-size:.82rem;color:#8fa1b8">Créez des campagnes ciblées combinant publication sociale et infolettre selon les segments.</div>'
+      + '<div style="font-size:.82rem;color:var(--tx2)">Créez des campagnes ciblées combinant publication sociale et infolettre selon les segments.</div>'
       + (PEUT.edit ? '<button class="prim" data-act="newcamp">+ Nouvelle campagne</button>' : '') + '</div>'
       + '<div class="carte"><table><thead><tr><th>Nom</th><th>Segment</th><th>Audience</th><th>Canaux</th><th>Date</th><th>Statut</th><th class="num">Actions</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
@@ -344,17 +344,17 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueSatisfaction(){
     if (D.indisponible) return '<div class="vide">Module chat non chargé.</div>';
     if (!D.rated) return '<div class="carte"><div class="vide"><div style="font-size:2rem"><span class="ic">💬</span></div>Aucune évaluation chat pour le moment.<br><span style="font-size:.8rem">Les données apparaissent après que des clients aient noté leur conversation.</span></div></div>';
-    var bar = function(v, tot, col){ var pct = tot ? Math.round(v / tot * 100) : 0; return '<div class="satbar"><div class="track"><div style="width:' + pct + '%;background:' + col + '"></div></div><span style="font-size:.78rem;color:#8fa1b8;width:66px;text-align:right">' + v + ' (' + pct + '%)</span></div>'; };
+    var bar = function(v, tot, col){ var pct = tot ? Math.round(v / tot * 100) : 0; return '<div class="satbar"><div class="track"><div style="width:' + pct + '%;background:' + col + '"></div></div><span style="font-size:.78rem;color:var(--tx2);width:66px;text-align:right">' + v + ' (' + pct + '%)</span></div>'; };
     var comments = D.comments.length ? '<div class="carte"><h2>Commentaires récents</h2>' + D.comments.map(function(c){
       return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
-        + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:#8fa1b8;margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
+        + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
     }).join('') + '</div>' : '';
     return '<div class="tuiles">'
       + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? '#4ade80' : '#f87171') + ';font-size:2rem">' + D.rate + '%</div><div class="z">Taux de satisfaction</div></div>'
       + '<div class="carte" style="grid-column:span 2"><h2>Répartition des évaluations</h2>'
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> Satisfaits</div>' + bar(D.satisfied, D.rated, '#4ade80')
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> Insatisfaits</div>' + bar(D.unsatisfied, D.rated, '#f87171')
-      +   '<div style="font-size:.74rem;color:#8fa1b8;margin-top:.4rem">' + D.rated + ' éval. sur ' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '% de couverture)</div></div>'
+      +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + ' éval. sur ' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '% de couverture)</div></div>'
       + '</div>' + comments;
   }
 

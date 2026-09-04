@@ -47,14 +47,14 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:#e8edf5;
+body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:#8fa1b8;margin-left:auto}
+.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 
 /* ⚠ LE CORPS NE DEFILE PAS. Seule la GRILLE des variantes peut defiler, et
    seulement quand une page ne tient pas — la pagination existe justement pour
@@ -66,10 +66,10 @@ body{background:#0e1522;color:#e8edf5;
   padding:.6rem .75rem;flex:0 0 auto;min-height:0}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.09em;color:#8fa1b8;font-weight:700}
-.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:#6d7f96}
+  letter-spacing:.09em;color:var(--tx2);font-weight:700}
+.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
-input,select{font:inherit;color:#e8edf5;background:#0f1826;
+input,select{font:inherit;color:var(--tx);background:#0f1826;
   border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.3rem .45rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -78,7 +78,7 @@ input.manque,select.manque{border-color:#f87171}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
-  color:#e8edf5;transition:background .13s,border-color .13s}
+  color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
@@ -88,12 +88,12 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 /* Encarts d avertissement : le meme jaune que l administration. */
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;
   background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
-.aide{font-size:.73rem;color:#8fa1b8;line-height:1.45}
-.aide b{color:#cbd8e6;font-weight:600}
+.aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
+.aide b{color:var(--tx-bleute);font-weight:600}
 
 /* ── Filtres couleur / taille ─────────────────────────────────────────────── */
 .filtres{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
-.filtres .lbl{font-size:.72rem;color:#8fa1b8}
+.filtres .lbl{font-size:.72rem;color:var(--tx2)}
 .menu{position:relative}
 .menu .voile2{position:fixed;inset:0;z-index:39}
 .menu .liste{position:absolute;top:calc(100% + 5px);left:0;z-index:40;min-width:170px;
@@ -111,7 +111,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 thead th{position:sticky;top:0;background:#1b2635;text-align:left;
   padding:.34rem .5rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.06em;color:#8fa1b8;font-weight:700}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.c{text-align:center}
 tbody td{padding:.24rem .5rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
 tbody td.c{text-align:center}
@@ -121,15 +121,15 @@ tbody .pastille{width:14px;height:14px;border-radius:50%;flex:0 0 auto;
   border:1px solid rgba(0,0,0,.3)}
 tbody .pastille.deg{border-radius:4px}
 tbody .nom{font-size:.85rem;font-weight:600}
-tbody tr.a .nom{color:#4ade80}
-tbody .code{font-family:ui-monospace,monospace;font-size:.72rem;color:#c9a97e}
-tbody .rien{color:#6d7f96}
+tbody tr.a .nom{color:var(--tx-ok)}
+tbody .code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(--tx-or)}
+tbody .rien{color:var(--tx3)}
 td.q input,td.s input{width:4.6rem;text-align:center}
 td.e select{min-width:8rem}
 
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.55rem;padding-top:.45rem;
   margin-top:.35rem;border-top:1px solid rgba(255,255,255,.07);
-  font-size:.78rem;color:#8fa1b8;flex-wrap:wrap}
+  font-size:.78rem;color:var(--tx2);flex-wrap:wrap}
 .pagi .pos{margin-left:auto}
 .pagi select{width:auto;padding:.16rem .35rem;font-size:.76rem}
 
@@ -142,20 +142,20 @@ td.e select{min-width:8rem}
 .lg:first-child{border-top:0}
 .lg:hover{background:rgba(255,255,255,.055)}
 .lg .principal{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lg .det{color:#8fa1b8;font-size:.78rem}
-.lg .fin{flex:0 0 auto;font-size:.78rem;color:#8fa1b8;white-space:nowrap}
+.lg .det{color:var(--tx2);font-size:.78rem}
+.lg .fin{flex:0 0 auto;font-size:.78rem;color:var(--tx2);white-space:nowrap}
 .lg .q{font-weight:700}
-.lg .q.rup{color:#f87171}
-.lg .q.bas{color:#fbbf24}
+.lg .q.rup{color:var(--tx-err)}
+.lg .q.bas{color:var(--tx-att)}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
   background:#0b1220}
-.msg{font-size:.79rem;color:#8fa1b8;flex:1 1 auto;min-width:0;overflow:hidden;
+.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.msg.err{color:#f87171}.msg.bon{color:#4ade80}.msg.att{color:#fbbf24}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .actions{flex:0 0 auto;display:flex;gap:.4rem}
-.vide{padding:1.5rem 1rem;text-align:center;color:#8fa1b8;font-size:.86rem}
+.vide{padding:1.5rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 
 /* Le compte rendu : un voile, pas une boite du systeme — celle-ci s ouvrirait
    DERRIERE la fenetre, comme le decompte d inactivite l a fait. */
@@ -169,17 +169,17 @@ td.e select{min-width:8rem}
 .voile .rangee{display:flex;justify-content:space-between;gap:1rem;padding:.22rem 0;
   font-size:.84rem;border-top:1px solid rgba(255,255,255,.06)}
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.85rem}
-.voile textarea{width:100%;font:inherit;font-size:.78rem;color:#e8edf5;
+.voile textarea{width:100%;font:inherit;font-size:.78rem;color:var(--tx);
   background:#0f1826;border:1px solid rgba(255,255,255,.14);border-radius:8px;
   padding:.4rem .5rem;resize:none}
 /* ── Les quatre onglets ───────────────────────────────────────────────────── */
 .onglets{flex:0 0 auto;display:flex;gap:.25rem;padding:.5rem 1.05rem 0;
   border-bottom:1px solid rgba(255,255,255,.08);background:#0e1522}
 .onglets button{border:1px solid transparent;border-bottom:none;
-  border-radius:9px 9px 0 0;background:transparent;color:#8fa1b8;
+  border-radius:9px 9px 0 0;background:transparent;color:var(--tx2);
   padding:.42rem .85rem;font-size:.82rem}
 .onglets button.actif{background:#16202f;border-color:rgba(255,255,255,.09);
-  color:#e8edf5;font-weight:600}
+  color:var(--tx);font-weight:600}
 .onglets button:hover:not(.actif){background:rgba(255,255,255,.05)}
 
 /* ── Tuiles de statistiques (onglet Produits) ─────────────────────────────── */
@@ -187,13 +187,13 @@ td.e select{min-width:8rem}
 .tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);
   border-radius:10px;padding:.45rem .65rem;min-width:0}
 .tuile .lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;
-  color:#8fa1b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile .val{font-size:1.22rem;font-weight:700;line-height:1.25}
-.tuile .sub{font-size:.67rem;color:#6d7f96;white-space:nowrap;overflow:hidden;
+.tuile .sub{font-size:.67rem;color:var(--tx3);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis}
 .tuile.att{border-color:rgba(245,158,11,.5)}
 .tuile.err{border-color:rgba(239,68,68,.5)}
-.val.att{color:#fbbf24}.val.err{color:#f87171}.val.bon{color:#4ade80}
+.val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}.val.bon{color:var(--tx-ok)}
 /* Une tuile qui FILTRE se reconnait au survol — et au clavier de la souris
    seulement : pas de :hover-only pour l information, juste pour l affordance. */
 .tuile.cliq{cursor:pointer;user-select:none}
@@ -207,14 +207,14 @@ tbody tr[data-ligne]:hover td{background:rgba(255,255,255,.045)}
 /* Pastilles d etat, badges et puce de categorie */
 .pill{display:inline-block;font-size:.65rem;padding:.05rem .5rem;
   border-radius:99px;white-space:nowrap}
-.pill.rup{background:rgba(239,68,68,.16);color:#f87171}
-.pill.bas{background:rgba(245,158,11,.16);color:#fbbf24}
-.pill.ok{background:rgba(34,197,94,.14);color:#4ade80}
-.pill.neutre{background:rgba(148,163,184,.16);color:#8fa1b8}
+.pill.rup{background:rgba(239,68,68,.16);color:var(--tx-err)}
+.pill.bas{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.pill.ok{background:rgba(34,197,94,.14);color:var(--tx-ok)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
 .badge{display:inline-block;font-size:.6rem;padding:0 .4rem;border-radius:99px;
   margin-left:.35rem;vertical-align:1px}
 .badge.vente{background:#c9a97e;color:#17202c}
-.badge.finale{background:#dc2626;color:#fff}
+.badge.finale{background:#dc2626;color:var(--tx-blanc)}
 .puce{width:10px;height:10px;border-radius:50%;display:inline-block;
   vertical-align:middle}
 
@@ -224,9 +224,9 @@ tbody tr[data-ligne]:hover td{background:rgba(255,255,255,.045)}
   padding:.45rem .7rem;font-size:.8rem}
 .lot label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
 .lot input{width:auto}
-button.rouge{background:#dc2626;border-color:#dc2626;color:#fff;font-weight:600}
+button.rouge{background:#dc2626;border-color:#dc2626;color:var(--tx-blanc);font-weight:600}
 button.rouge:hover:not(:disabled){background:#ef4444;border-color:#ef4444}
-button.vert{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:600}
+button.vert{background:#16a34a;border-color:#16a34a;color:var(--tx-blanc);font-weight:600}
 button.vert:hover:not(:disabled){background:#22c55e;border-color:#22c55e}
 
 .toolbar{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
@@ -878,7 +878,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           +   esc(l.couleurCat || '#6d7f96') + '"></span></td>'
           + '<td class="c">' + l.tailles + '</td>'
           + '<td class="c">' + l.couleurs + '</td>'
-          + '<td><b' + (l.unites === 0 ? ' style="color:#f87171"' : '') + '>' + l.unites + '</b> '
+          + '<td><b' + (l.unites === 0 ? ' style="color:var(--tx-err)"' : '') + '>' + l.unites + '</b> '
           +   'unité' + (l.unites > 1 ? 's' : '') + ' ' + pilule(l) + '</td>'
           + '<td class="c" style="white-space:nowrap">'
           +   '<button class="mini" data-inv="' + esc(l.id) + '" title="Gérer l’inventaire"><span class="ic">📦</span> Inventaire</button> '
@@ -1164,7 +1164,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<p>Supprimer définitivement <strong>' + esc(nom) + '</strong> de l’inventaire ? '
         + 'Cette action est <strong>irréversible</strong>.</p>' + q
         + '<div class="fin2"><button id="v-non">Annuler</button>'
-        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:#fff">Supprimer</button></div>',
+        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">Supprimer</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){
@@ -1507,7 +1507,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       voile('<h3>Suppression impossible</h3>'
         + '<p>Le lieu <strong>' + esc(l.nom) + '</strong> contient <strong>'
         + n + ' emplacement(s)</strong>.</p>'
-        + '<p style="color:#8fa1b8;font-size:.8rem">Déplacez ou supprimez ces emplacements '
+        + '<p style="color:var(--tx2);font-size:.8rem">Déplacez ou supprimez ces emplacements '
         + 'avant de supprimer le lieu.</p>'
         + '<div class="fin2"><button class="prim" id="v-ok">Compris</button></div>',
         function(fermer){ document.getElementById('v-ok').onclick = fermer; });
@@ -1563,7 +1563,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       voile('<h3>Suppression impossible</h3>'
         + '<p>L’emplacement <strong>' + esc(w.code) + '</strong> est utilisé par <strong>'
         + w.usage + ' variante(s)</strong> de produit.</p>'
-        + '<p style="color:#8fa1b8;font-size:.8rem">Réassignez ces variantes à un autre '
+        + '<p style="color:var(--tx2);font-size:.8rem">Réassignez ces variantes à un autre '
         + 'emplacement avant de supprimer celui-ci.</p>'
         + '<div class="fin2"><button class="prim" id="v-ok">Compris</button></div>',
         function(fermer){ document.getElementById('v-ok').onclick = fermer; });
@@ -1786,7 +1786,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<p>Un collègue vient de modifier ' + ((r.conflits || []).length > 1 ? 'ces variantes' : 'cette variante')
       + '. <strong>Rien n’a été écrit.</strong></p>'
       + lignes
-      + '<p style="color:#8fa1b8;font-size:.8rem">La grille est rechargée avec les quantités à jour : '
+      + '<p style="color:var(--tx2);font-size:.8rem">La grille est rechargée avec les quantités à jour : '
       + 'refaites votre saisie par-dessus.</p>'
       + '<div class="fin2"><button class="prim" id="v-ok">Recharger la grille</button></div>',
       function(fermer){
@@ -1805,15 +1805,15 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (c && c.manuel) {
       // ⚠ ON NE PRETEND PAS QUE C EST PARTI. Resend n est pas configure : aucun
       // courriel n a ete envoye, et les demandes restent en attente en base.
-      h += '<p class="" style="color:#fbbf24">⚠ ' + c.adresses.length + ' client'
+      h += '<p class="" style="color:var(--tx-att)">⚠ ' + c.adresses.length + ' client'
         + (c.adresses.length > 1 ? 's attendent' : ' attend') + ' cette variante, et '
         + '<strong>aucun courriel n’est parti</strong> — la clé d’envoi n’est pas configurée '
         + '(Configuration puis Infolettre). Les demandes restent en attente.</p>'
         + '<textarea rows="2" readonly>' + esc(c.adresses.join(', ')) + '</textarea>';
     } else if (c) {
-      h += '<p style="color:#4ade80">✉ ' + c.envoyes + ' courriel' + (c.envoyes > 1 ? 's' : '')
+      h += '<p style="color:var(--tx-ok)">✉ ' + c.envoyes + ' courriel' + (c.envoyes > 1 ? 's' : '')
         + ' de retour en inventaire envoyé' + (c.envoyes > 1 ? 's' : '')
-        + (c.echecs ? ', <span style="color:#f87171">' + c.echecs + ' échec'
+        + (c.echecs ? ', <span style="color:var(--tx-err)">' + c.echecs + ' échec'
             + (c.echecs > 1 ? 's' : '') + '</span>' : '') + '.</p>';
     }
     var etiq = r.etiquettes || [];
@@ -1893,7 +1893,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     voile('<h3><span class="ic">🏷</span> Imprimer les étiquettes</h3>'
       + '<p>Imprimer <strong>' + total + '</strong> étiquette' + (total > 1 ? 's' : '')
       + ' pour ' + items.length + ' variante' + (items.length > 1 ? 's' : '') + ' en stock ?</p>'
-      + '<p style="color:#8fa1b8;font-size:.8rem">Quantités telles qu’elles sont saisies à l’écran, '
+      + '<p style="color:var(--tx2);font-size:.8rem">Quantités telles qu’elles sont saisies à l’écran, '
       + 'même si l’inventaire n’est pas encore enregistré.</p>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="prim" id="v-oui">Imprimer</button></div>',
@@ -1957,7 +1957,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
         + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
-        + 'color:#e8edf5;cursor:pointer;flex:0 0 auto');
+        + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }
     // Le meme bouton dit l inverse selon le mode : detacher la vue ancree,
