@@ -379,7 +379,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       corps.innerHTML='<div class="vide charge">Lecture des SMS…</div>'; OCCUPE=true;
       appeler('journal:sms',[]).then(function(r){ OCCUPE=false;
         if (r&&r.ok){ SMS_D=r.sms||[]; if (ONGLET==='sms') vueSms(); }
-        else { SMS_D=[]; if (ONGLET==='sms') corps.innerHTML='<div class="carte"><div class="vide">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
+        else { SMS_D=[]; if (ONGLET==='sms') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
       return;
     }
     var rows = SMS_D;
@@ -420,7 +420,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       corps.innerHTML='<div class="vide charge">Lecture du journal des accès…</div>'; OCCUPE=true;
       appeler('liens:journal',[{canal:CP_CANAL}]).then(function(r){ OCCUPE=false;
         if (r&&r.ok){ COMPTA_D=r.evenements||[]; if (ONGLET==='comptable') vueComptable(); }
-        else { COMPTA_D=[]; if (ONGLET==='comptable') corps.innerHTML='<div class="carte"><div class="vide">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
+        else { COMPTA_D=[]; if (ONGLET==='comptable') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
       return;
     }
     var rows = COMPTA_D;
@@ -612,7 +612,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function charger(){
     dire('Chargement…');
     appeler('journal:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; rendre(); dire('');
     });
   }

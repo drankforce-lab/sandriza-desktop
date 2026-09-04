@@ -498,7 +498,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function charger(){
     dire('Chargement…');
     appeler('incidents:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');
       // Ouverture directe (banc / lien profond), une fois D disponible et le
       // registre dessiné — sinon l'assistant n'aurait ni etapes ni incident.

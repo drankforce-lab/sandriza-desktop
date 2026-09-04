@@ -477,7 +477,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       // Le compteur Photoroom ne bloque pas l’écran : s’il échoue, la carte le dit.
       PR = (rs[1] && rs[1].ok) ? rs[1] : null;
       if (!r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

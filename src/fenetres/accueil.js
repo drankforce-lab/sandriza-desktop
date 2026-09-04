@@ -412,7 +412,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function charger(){
     dire('Lecture…');
     appeler('config:accueil:donnees').then(function(r){
-      if (!r || !r.ok) { corps.innerHTML = '<div class="vide">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       adopter(r);
       if (OUVERTURE && BLOCS.some(function(b){ return b.id === OUVERTURE; })) { ouvrirEdit(OUVERTURE); }
       else { EDIT=null; dessiner(); dire(''); }

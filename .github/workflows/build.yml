@@ -220,6 +220,12 @@ jobs:
       # ⚠ C'est un CLIQUET, pas une porte fermée : la queue restante est déclarée
       # avec son nombre dans `contraste-jour-declare.js`, et le banc refuse une
       # couleur neuve sous le seuil ou un plafond qui monte.
+      # ⚠ `banc-accent-grave-socle.js` (2026-09-04) refuse un accent grave a
+      # l'interieur d'un gabarit de socle.js. Trois fois dans la meme journee, un
+      # nom de code entre accents graves dans un commentaire CSS a referme le
+      # gabarit et fait tomber les 92 fenetres. `node --check` repond OK dessus :
+      # un gabarit referme trop tot reste syntaxiquement valide. Ce banc nomme la
+      # ligne en deux dixiemes de seconde.
       # ⚠ `banc-texte-sur-fond.js` (2026-09-04) mesure le texte contre le fond de
       # SON PROPRE ELEMENT, pas contre celui de la page. C'est ce qui manquait :
       # un vert clair sur une pastille vert pale donne 1.02 de ratio, invisible,
@@ -261,6 +267,7 @@ jobs:
           node tools/banc-jetons.js
           node tools/banc-fonds-jour.js
           node tools/banc-texte-sur-fond.js
+          node tools/banc-accent-grave-socle.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

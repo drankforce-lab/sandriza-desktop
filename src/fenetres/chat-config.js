@@ -431,7 +431,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function charger(){
     dire('Chargement…');
     appeler('chat:cfg:donnees', []).then(function(r){
-      if (!r || !r.ok) { corps.innerHTML = '<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       poser(r); dessiner(); dire('');
     });
   }

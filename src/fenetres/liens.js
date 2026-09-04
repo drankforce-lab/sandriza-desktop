@@ -689,7 +689,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     dire('Lecture du journal…');
     appeler('liens:journal', [{ canal: canal || '', lien: lien || '' }]).then(function(r){
       if (!r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

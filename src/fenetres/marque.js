@@ -536,7 +536,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('config:marque:donnees').then(function(r){
       if (!r || !r.ok) {
         ongl.innerHTML = '';
-        corps.innerHTML = '<div class="carte pleine"><div class="vide">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte pleine"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

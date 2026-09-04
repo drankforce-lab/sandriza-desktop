@@ -244,7 +244,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function charger(){
     dire('Chargement…');
     appeler('listenoire:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutAjouter;
       var av=document.getElementById('ro'); if (av) av.hidden=!(!r.peutAjouter && !r.peutRetirer);
       dessiner(); dire('');

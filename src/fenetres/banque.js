@@ -754,7 +754,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function charger(){
     appeler('banque:donnees', [{ annee: ANNEE || undefined, id: REC || undefined }]).then(function(r){
       if (!r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

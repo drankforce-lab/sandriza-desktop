@@ -169,7 +169,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function charger(){
     dire('Lecture de l’état du serveur…');
     appeler('config:lancement:donnees').then(function(r){
-      if (!r || !r.ok) { corps.innerHTML = '<div class="vide">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; RO = !r.peutModifier; CONF = false; dessiner(); dire('');
     });
   }

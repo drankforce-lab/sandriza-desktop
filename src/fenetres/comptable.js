@@ -552,7 +552,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (dire_le) dire('Lecture…');
     appeler('comptable:donnees').then(function(r){
       if (!r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

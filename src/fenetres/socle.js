@@ -2123,6 +2123,32 @@ const CSS_ETATS = `
   animation:sz-trait .42s cubic-bezier(.2,.7,.3,1) both}
 @keyframes sz-trait{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:.45}}
 
+/* LE MEME BLOC GRIS NE PEUT PAS DIRE QUATRE CHOSES. Les 40 refus des fenetres
+   passent tous par le meme .vide : session fermee, droit refuse, fiche verrouillee,
+   operation echouee. Depuis le 2026-09-04 chacun porte son MOTIF en classe
+   (m-session, m-droit...) — pose directement dans le gabarit, sans fonction
+   nouvelle : expliquer est recopie dans 88 fenetres, en ajouter une seconde les
+   toucherait toutes. Le trait d accent suffit ensuite a les distinguer.
+
+   Le LIEN COUPE : la fenetre principale ne repond pas, ou la session est fermee.
+   Le trait se brise en deux et respire — il manque un maillon, ce n est pas une
+   donnee absente, et ca peut revenir tout seul. */
+.vide.m-session::before,.vide.m-indisponible::before,.vide.m-pont_indisponible::before,
+.vide.m-delai::before,.vide.m-module_photos::before{
+  width:58px;margin-left:-29px;
+  background:linear-gradient(90deg,var(--sz-accent) 0 38%,transparent 38% 62%,var(--sz-accent) 62% 100%);
+  animation:sz-trait .42s cubic-bezier(.2,.7,.3,1) both,
+            sz-souffle 2.4s ease-in-out .5s infinite}
+@keyframes sz-souffle{0%,100%{opacity:.45}50%{opacity:.16}}
+
+/* Le REFUS et le VERROU : une barriere, pas une panne. Trait court, epais,
+   IMMOBILE — rien ne va se debloquer tout seul en regardant l ecran. */
+.vide.m-droit::before,.vide.m-verrou::before{width:26px;margin-left:-13px;height:3px}
+
+/* L ECHEC : le rouge de la charte, la ou tout le reste garde l accent. */
+.vide.m-echec::before,.vide.m-televersement::before,.vide.m-operation_inconnue::before,
+.vide.m-introuvable::before,.vide.m-nom_requis::before{background:var(--tx-err)}
+
 /* Le chargement QUI DIT QUOI. Un squelette efface le message, or << Lecture des
    paiements chez Square pour 2026... >> vaut mieux qu un mot generique : on garde
    le texte et on lui pose une navette au-dessus. 33 emplacements. */

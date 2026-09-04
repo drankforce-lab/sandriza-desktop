@@ -380,7 +380,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function charger(){
     dire('Chargement…');
     appeler('sauvegarde:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutEcrire; rendre(); dire('');
       if (CREER){ CREER=''; ouvrirCreer(); }
       else if (REST){ var e=REST; REST=''; ouvrirRestaurer(e, e); }

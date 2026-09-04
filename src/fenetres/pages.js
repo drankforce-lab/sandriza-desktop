@@ -582,7 +582,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function fermerBoite(){ var s=document.getElementById('sur-inbox'); if (s) s.remove(); }
   function peindreBoite(r){
     var l=document.getElementById('ib-liste'); if (!l) return;
-    if (!r||!r.ok){ l.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; return; }
+    if (!r||!r.ok){ l.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; return; }
     var m=r.messages||[];
     var tete='<div class="entete" style="margin-bottom:.7rem"><span style="font-size:.82rem;color:var(--tx2)">'+m.length+' message(s)</span>'
       +(m.length&&!RO?'<button class="b dgr" id="ib-vider">'+(VIDECONF?'✓ Confirmer':'Tout supprimer')+'</button>':'')+'</div>';
@@ -922,7 +922,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     appeler('pages:politique:apercu',[brut]).then(function(r){
       var c=document.getElementById('a-corps'); if (!c) return;
       if (r && r.ok) c.innerHTML=r.html||'<div class="vide">Section vide.</div>';
-      else c.innerHTML='<div class="vide">'+expliquer(r)+'</div>';
+      else c.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>';
     });
   }
 
@@ -1124,7 +1124,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function charger(){
     dire('Chargement…');
     appeler('pages:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');
       // Ouverture directe de l editeur (banc, ou lien profond) : apres le dessin
       // de la liste, une fois D disponible.

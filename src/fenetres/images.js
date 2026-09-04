@@ -208,7 +208,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function charger(){
     dire('Lecture…');
     return appeler('images:etat').then(function(r){
-      if (!r || !r.ok) { corps.innerHTML = '<div class="vide">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); bmig.disabled = true; return false; }
+      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); bmig.disabled = true; return false; }
       E = r; dessiner(); dire(''); return true;
     });
   }

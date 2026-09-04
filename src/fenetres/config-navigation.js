@@ -382,7 +382,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Lecture…');
     appeler('config:nav:donnees').then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="vide">' + expliquer(r) + '</div>';
+        corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>';
         dire(expliquer(r), 'err');
         return;
       }
