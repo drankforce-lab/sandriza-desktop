@@ -37,13 +37,13 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
-input,select,textarea{font:inherit;color:var(--tx);background:var(--f-champ);
+input,select,textarea{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
@@ -52,7 +52,7 @@ input[type=checkbox],input[type=radio]{width:auto}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-sur-accent);font-weight:600}
@@ -67,7 +67,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .tot .l{display:flex;justify-content:space-between;padding:.14rem 0;font-size:.85rem}
 .tot .l.grand{font-size:1.02rem;font-weight:700;border-top:1px solid var(--v16);
   margin-top:.3rem;padding-top:.4rem}
-.tot .l.frais{color:var(--tx-err2)}
+.tot .l.frais{color:var(--tx-f6a5a5)}
 .tot .l.net{color:var(--tx-ok);font-weight:700}
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
 .avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}

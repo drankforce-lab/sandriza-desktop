@@ -68,7 +68,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 
 /* ── LA CARTE D IDENTITE ───────────────────────────────────────
    Elle est en PLEINE LARGEUR, et c est le point : la version d avant mettait
@@ -80,7 +80,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
    couleur : il n y a plus d emoji du tout, donc rien a griser. */
 .mono{width:60px;height:60px;flex:0 0 auto;border-radius:50%;
   background:linear-gradient(145deg,rgba(201,169,126,.26),rgba(201,169,126,.1));
-  border:1px solid rgba(201,169,126,.42);color:var(--tx-or2);
+  border:1px solid rgba(201,169,126,.42);color:var(--tx-e7cfa8);
   display:flex;align-items:center;justify-content:center;
   font:700 1.35rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.03em;
   -webkit-user-select:none;user-select:none}
@@ -111,7 +111,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   display:inline-flex;align-items:center;gap:.45rem;
   background:transparent;border:1px solid transparent;border-bottom:0;
   border-radius:10px 10px 0 0;padding:.5rem .95rem}
-.onglet:hover{color:var(--tx);background:var(--v03)}
+.onglet:hover{color:var(--tx);background:var(--v04)}
 .onglet.on{color:var(--tx);background:var(--v03);
   border-color:var(--v08);border-bottom:0}
 .onglet:focus-visible{outline:2px solid #c9a97e;outline-offset:2px}

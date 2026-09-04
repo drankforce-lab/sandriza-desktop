@@ -46,7 +46,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.6rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.65rem .8rem;flex:0 0 auto}
@@ -54,7 +54,7 @@ body{background:var(--f-page);color:var(--tx);
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
-input,select{font:inherit;color:var(--tx);background:var(--f-champ);
+input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -62,7 +62,7 @@ input:focus,select:focus{outline:none;border-color:#c9a97e}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.34rem .75rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
@@ -84,7 +84,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
 .avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
-.avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-err2)}
+.avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-f6a5a5)}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 
 /* Le pas-a-pas : cree, imprime, expedie. Il dit ce qui est FAIT. */
@@ -98,7 +98,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .lg{display:flex;align-items:center;gap:.6rem;padding:.28rem .4rem;border-radius:7px;
   cursor:pointer;font-size:.85rem;border-top:1px solid var(--v05)}
 .lg:first-child{border-top:0}
-.lg:hover{background:var(--v05)}
+.lg:hover{background:var(--v055)}
 .lg .principal{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lg .fin{flex:0 0 auto;font-size:.78rem;color:var(--tx2);white-space:nowrap}
 

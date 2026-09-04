@@ -41,11 +41,11 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barre{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap}
 button{font:inherit;color:var(--tx);background:var(--v05);cursor:pointer;
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .55rem}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button:focus{outline:none;border-color:#c9a97e}
 button.dgr{border-color:rgba(239,68,68,.5);color:var(--tx-err)}

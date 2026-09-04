@@ -43,7 +43,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -53,7 +53,7 @@ input[type=search]{min-width:190px}
 textarea{width:100%;min-height:4.5em;resize:vertical}
 select,button{cursor:pointer}
 input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
@@ -96,7 +96,7 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
   border:1px solid var(--v08)}
 .bulle{max-width:78%;padding:.4rem .65rem;border-radius:11px;font-size:.86rem;
   white-space:pre-wrap;overflow-wrap:anywhere}
-.bulle.visiteur{align-self:flex-start;background:var(--v08)}
+.bulle.visiteur{align-self:flex-start;background:var(--v07)}
 .bulle.agent{align-self:flex-end;background:rgba(201,169,126,.16);border:1px solid rgba(201,169,126,.3)}
 .bulle.bot{align-self:flex-start;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25)}
 .bulle .qd{display:block;font-size:.64rem;color:var(--tx2);margin-top:.15rem}

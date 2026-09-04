@@ -35,7 +35,7 @@ const CSS_PROPRE = `
 .entete .adr{font-size:.78rem;color:var(--tx2);flex:1 1 100%}
 .art{display:flex;align-items:center;gap:.6rem;padding:.3rem .35rem;border-radius:7px;
   border:1px solid transparent}
-.art:hover{background:var(--v03)}
+.art:hover{background:var(--v035)}
 .art.ok{border-color:rgba(74,222,128,.5);background:rgba(74,222,128,.08)}
 .art.trop{border-color:rgba(248,113,113,.6);background:rgba(248,113,113,.08)}
 .art .pt{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1px solid var(--v22);
@@ -47,7 +47,7 @@ const CSS_PROPRE = `
 .art .v{font-size:.76rem;color:var(--tx2)}
 .art .cpt{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:.88rem;min-width:3rem;text-align:right}
 .art .q{flex:0 0 4.4rem}
-.barre{flex:0 0 auto;height:6px;border-radius:6px;background:var(--v08);overflow:hidden;margin:.5rem 0 .2rem}
+.barre{flex:0 0 auto;height:6px;border-radius:6px;background:var(--v09);overflow:hidden;margin:.5rem 0 .2rem}
 .barre span{display:block;height:100%;background:#4ade80;width:0;transition:width .18s}
 .gros{font:700 1.6rem/1 Georgia,serif;color:var(--tx-creme)}
 .duo{display:flex;gap:.7rem;flex-wrap:wrap}

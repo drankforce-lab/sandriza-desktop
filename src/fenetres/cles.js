@@ -39,7 +39,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10) :
    pas d align-items:start, sinon la rangee finit en escalier. */
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
@@ -65,7 +65,7 @@ body{background:var(--f-page);color:var(--tx);
 .etat .txt{font-size:.76rem;color:var(--tx2)}
 .etat .txt b{color:var(--tx-ok)}
 .etat.non .txt b{color:var(--tx-jaune)}
-.etat button{font:inherit;font-size:.74rem;color:var(--tx-err2);background:rgba(248,113,113,.08);
+.etat button{font:inherit;font-size:.74rem;color:var(--tx-f0a0a0);background:rgba(248,113,113,.08);
   border:1px solid rgba(248,113,113,.3);border-radius:7px;padding:.16rem .55rem;cursor:pointer}
 .etat button:hover:not(:disabled){background:rgba(248,113,113,.16)}
 .etat button.conf{color:var(--tx-err2);border-color:rgba(248,113,113,.55);font-weight:700}
@@ -78,7 +78,7 @@ body{background:var(--f-page);color:var(--tx);
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}

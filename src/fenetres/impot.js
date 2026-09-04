@@ -43,13 +43,13 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;font-size:.78rem;color:var(--tx2)}
 select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 select:focus,button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
@@ -61,7 +61,7 @@ button.prim:hover:not(:disabled){background:#d8bc95}
   color:var(--tx2);font-weight:700;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
 .carte h2 .n{font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--tx3)}
 .stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 8rem;background:var(--v03);border-radius:9px;padding:.45rem .65rem}
+.stats .s{flex:1 1 8rem;background:var(--v04);border-radius:9px;padding:.45rem .65rem}
 .stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
 .stats .s .n.du{color:var(--tx-err)}
 .stats .s .n.ok{color:var(--tx-ok)}
@@ -87,7 +87,7 @@ tbody tr.credit td{color:var(--tx-ok)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
   background:rgba(148,163,184,.16);color:var(--tx2);margin:.1rem .25rem 0 0}
 .docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.5rem}
-.doc{background:var(--v03);border:1px solid var(--v08);
+.doc{background:var(--v04);border:1px solid var(--v08);
   border-radius:10px;padding:.55rem .7rem;display:flex;flex-direction:column;gap:.25rem}
 .doc .t{font-weight:600;font-size:.88rem}
 .doc .d{font-size:.72rem;color:var(--tx2);line-height:1.4;flex:1 1 auto}
@@ -140,7 +140,7 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 .form .dt{flex:1 1 auto;font-size:.73rem;color:var(--tx2)}
 .form a.mini{text-decoration:none;color:var(--tx);border:1px solid var(--v16);
   border-radius:7px;padding:.12rem .42rem;font-size:.74rem;white-space:nowrap}
-.form a.mini:hover{background:var(--v11)}
+.form a.mini:hover{background:var(--v10)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

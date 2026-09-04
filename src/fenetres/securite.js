@@ -38,14 +38,14 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .entete{display:flex;justify-content:space-between;align-items:center;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
-.b:hover:not(:disabled){background:var(--v08)}
+.b:hover:not(:disabled){background:var(--v09)}
 .b:disabled{opacity:.45;cursor:default}
-.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.35)}
+.b.dgr{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover:not(:disabled){background:rgba(248,113,113,.16)}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .recherche{flex:1 1 15rem;max-width:24rem;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;
@@ -63,7 +63,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .pill.warn{background:rgba(234,179,8,.18);color:#e6c14a}
 .pill.moi{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
 /* ⚠ LE RÔLE EN PASTILLE NEUTRE — jamais coloré. */
-.pill.role{background:rgba(148,163,184,.16);color:var(--tx-gris2);font-weight:600}
+.pill.role{background:rgba(148,163,184,.16);color:var(--tx-c3cfdd);font-weight:600}
 /* ── LES COMPTES EN FICHES ────────────────────────────────────────────────
    Le tableau dense convenait à des transactions ; ici chaque ligne est une
    PERSONNE — un nom, un rôle, un état, des choses qu'on lit, pas qu'on compare
@@ -91,12 +91,12 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 /* ── Éditeur de compte (surcouche) ───────────────────────────────── */
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:60;padding:1.4rem}
-.sur .boite{background:var(--f-carte2);border:1px solid var(--v11);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+.sur .boite{background:var(--f-131c2b);border:1px solid var(--v11);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
 .sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid var(--v08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
 .sur .liste::-webkit-scrollbar{width:8px}
-.sur .liste::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.sur .liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ── LES ONGLETS DE L'ÉDITEUR (sa demande, 2026-08-14) ────────────────────
    Créer un accès, ce sont QUATRE questions distinctes — qui est cette
    personne, avec quel accès, quelles réponses de secours, quels droits — et
@@ -122,7 +122,7 @@ input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;cursor:pointer;margin:0 0 .55rem;line-height:1.45}
 label.case input{width:16px;height:16px;accent-color:#c9a97e;margin-top:.15rem;flex:0 0 auto}
 label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
-.note{background:var(--v03);border:1px solid var(--v11);border-radius:9px;padding:.8rem .95rem;font-size:.81rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
+.note{background:var(--v04);border:1px solid var(--v11);border-radius:9px;padding:.8rem .95rem;font-size:.81rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
 .note b{color:var(--tx)}
 .ferr{display:none;color:var(--tx-err2);font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:0 0 .8rem}
 .permtb{width:100%;border-collapse:collapse}

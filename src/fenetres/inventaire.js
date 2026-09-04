@@ -69,7 +69,7 @@ body{background:var(--f-page);color:var(--tx);
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
-input,select{font:inherit;color:var(--tx);background:var(--f-champ);
+input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .45rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -79,7 +79,7 @@ input.manque,select.manque{border-color:#f87171}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
@@ -101,15 +101,15 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
   border-radius:9px;box-shadow:0 12px 30px rgba(0,0,0,.45);padding:.3rem}
 .menu .liste label{display:flex;align-items:center;gap:.5rem;padding:.3rem .45rem;
   cursor:pointer;font-size:.8rem;border-radius:5px}
-.menu .liste label:hover{background:var(--v05)}
+.menu .liste label:hover{background:var(--v06)}
 .menu .liste input{width:auto}
 
 /* ── La grille des variantes ──────────────────────────────────────────────── */
 .grille{flex:1 1 auto;min-height:0;overflow-y:auto}
 .grille::-webkit-scrollbar{width:8px}
-.grille::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.grille::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-thead th{position:sticky;top:0;background:var(--f-pill);text-align:left;
+thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
   padding:.34rem .5rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.c{text-align:center}
@@ -136,11 +136,11 @@ td.e select{min-width:8rem}
 /* ── Liste de reachat et resultats de recherche ───────────────────────────── */
 .lignes{flex:1 1 auto;min-height:0;overflow-y:auto}
 .lignes::-webkit-scrollbar{width:8px}
-.lignes::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.lignes::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .lg{display:flex;align-items:center;gap:.6rem;padding:.3rem .45rem;border-radius:7px;
   cursor:pointer;font-size:.85rem;border-top:1px solid var(--v05)}
 .lg:first-child{border-top:0}
-.lg:hover{background:var(--v05)}
+.lg:hover{background:var(--v055)}
 .lg .principal{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lg .det{color:var(--tx2);font-size:.78rem}
 .lg .fin{flex:0 0 auto;font-size:.78rem;color:var(--tx2);white-space:nowrap}
@@ -170,7 +170,7 @@ td.e select{min-width:8rem}
   font-size:.84rem;border-top:1px solid var(--v05)}
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.85rem}
 .voile textarea{width:100%;font:inherit;font-size:.78rem;color:var(--tx);
-  background:var(--f-champ);border:1px solid var(--v16);border-radius:8px;
+  background:var(--f-0f1826);border:1px solid var(--v16);border-radius:8px;
   padding:.4rem .5rem;resize:none}
 /* ── Les quatre onglets ───────────────────────────────────────────────────── */
 .onglets{flex:0 0 auto;display:flex;gap:.25rem;padding:.5rem 1.05rem 0;
@@ -178,7 +178,7 @@ td.e select{min-width:8rem}
 .onglets button{border:1px solid transparent;border-bottom:none;
   border-radius:9px 9px 0 0;background:transparent;color:var(--tx2);
   padding:.42rem .85rem;font-size:.82rem}
-.onglets button.actif{background:var(--f-carte);border-color:var(--v08);
+.onglets button.actif{background:var(--f-carte);border-color:var(--v09);
   color:var(--tx);font-weight:600}
 .onglets button:hover:not(.actif){background:var(--v05)}
 
@@ -202,7 +202,7 @@ td.e select{min-width:8rem}
    texte avalerait le clic (le bug connu des controles cliquables), donc
    user-select:none sur la ligne — les codes se copient depuis la fiche. */
 tbody tr[data-ligne]{cursor:pointer;user-select:none}
-tbody tr[data-ligne]:hover td{background:var(--v05)}
+tbody tr[data-ligne]:hover td{background:var(--v045)}
 
 /* Pastilles d etat, badges et puce de categorie */
 .pill{display:inline-block;font-size:.65rem;padding:.05rem .5rem;

@@ -39,7 +39,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -47,7 +47,7 @@ input,select,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 select,button{cursor:pointer}
 input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
@@ -59,7 +59,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700}
 .stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 8rem;background:var(--v03);border-radius:9px;padding:.4rem .6rem}
+.stats .s{flex:1 1 8rem;background:var(--v04);border-radius:9px;padding:.4rem .6rem}
 .stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
 .stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .stats .s .sub{font-size:.66rem;color:var(--tx3)}
@@ -77,7 +77,7 @@ table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody tr{cursor:pointer}
-tbody tr:hover td{background:var(--v03)}
+tbody tr:hover td{background:var(--v04)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
 tbody .num{font-weight:600;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
@@ -134,7 +134,7 @@ html.jour .frais .ft{color:#5b3fb0}
 .champ{display:flex;flex-direction:column;gap:.2rem}
 .champ label{font-size:.7rem;color:var(--tx2)}
 .champ input,.champ select{width:100%}
-.bloc-montants{grid-column:1/-1;background:var(--v03);
+.bloc-montants{grid-column:1/-1;background:var(--v04);
   border:1px solid var(--v08);border-radius:10px;padding:.55rem .7rem}
 .trois{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.5rem;align-items:end}
 @media (max-width:620px){.form,.trois{grid-template-columns:1fr}}

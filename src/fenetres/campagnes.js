@@ -43,7 +43,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -52,7 +52,7 @@ input,button,textarea,select{font:inherit;color:var(--tx);background:var(--v05);
 input[type=search]{min-width:200px}
 button{cursor:pointer}
 input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
@@ -76,7 +76,7 @@ button.arme{border-color:#fbbf24;background:rgba(251,191,36,.16);color:#fde68a}
 .chaine .desc{font-size:.76rem;color:var(--tx2);margin-top:.1rem}
 .chaine .compte{font-size:.74rem;color:var(--tx2);margin:.45rem 0 .35rem}
 .etapes{display:flex;flex-wrap:wrap;gap:.35rem}
-.etape{background:var(--v03);border:1px solid var(--v11);
+.etape{background:var(--v04);border:1px solid var(--v11);
   border-radius:8px;padding:.28rem .5rem;font-size:.72rem;max-width:15rem}
 .etape .no{color:var(--tx-or);font-weight:700}
 .etape .suj{color:var(--tx-gris2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -84,7 +84,7 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
-tbody tr:hover td{background:var(--v03)}
+tbody tr:hover td{background:var(--v04)}
 .fin{white-space:nowrap;text-align:right}
 .num{text-align:right;white-space:nowrap}
 .dt{font-size:.72rem;color:var(--tx2)}
@@ -136,16 +136,16 @@ tbody tr:hover td{background:var(--v03)}
   border:1.5px dashed var(--v16);border-radius:9px}
 .apercu{border:1px solid var(--v16);border-radius:9px;overflow:hidden;
   margin-top:.4rem;background:#fff}
-.apercu .chrome{background:var(--f-champ);color:var(--tx2);font-size:.7rem;padding:.24rem .55rem;
+.apercu .chrome{background:var(--f-0f1826);color:var(--tx2);font-size:.7rem;padding:.24rem .55rem;
   border-bottom:1px solid var(--v11)}
 .apercu iframe{display:block;width:100%;height:20rem;border:none;background:#fff}
 .etapef{border:1px solid var(--v11);border-radius:9px;padding:.55rem .65rem;
-  margin-bottom:.5rem;background:var(--v03)}
+  margin-bottom:.5rem;background:var(--v025)}
 .etapef .tete2{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
 .etapef .tete2 strong{font-size:.8rem}
 .etapef .tete2 .gestes{margin-left:auto;display:flex;gap:.3rem}
 .vars{font-size:.71rem;color:var(--tx2);line-height:1.7;margin-top:.25rem}
-.vars code{background:var(--v08);border:1px solid var(--v11);
+.vars code{background:var(--v07);border:1px solid var(--v11);
   border-radius:4px;padding:.02rem .28rem;color:#dcc39b}
 /* ── Criteres d un segment : une ligne = champ, operateur, valeur ────────── */
 .critere{display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap}
@@ -157,7 +157,7 @@ tbody tr:hover td{background:var(--v03)}
 .portee{margin-top:.6rem;padding:.45rem .65rem;border-radius:9px;font-size:.82rem;
   background:rgba(201,169,126,.1);border:1px solid rgba(201,169,126,.3);color:var(--tx-creme);
   display:flex;align-items:center;gap:.5rem}
-.portee strong{font-size:.95rem;color:var(--tx-creme)}
+.portee strong{font-size:.95rem;color:var(--tx-f0e2c8)}
 .portee button{margin-left:auto}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

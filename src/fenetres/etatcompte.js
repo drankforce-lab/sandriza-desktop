@@ -41,7 +41,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.9rem;overflow-y:auto;display:flex;
   flex-direction:column;align-items:center}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ LA FEUILLE. Blanche dans les deux modes : c'est un imprimé, pas un écran. */
 .feuille{background:#fff;color:#111;width:100%;max-width:52rem;border-radius:8px;
   padding:1.6rem 1.8rem;box-shadow:0 8px 30px rgba(0,0,0,.35);
@@ -53,7 +53,7 @@ body{background:var(--f-page);color:var(--tx);
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .7rem;cursor:pointer}
 button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}

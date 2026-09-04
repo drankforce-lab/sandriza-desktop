@@ -45,14 +45,14 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.75rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .6rem;cursor:pointer}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:focus{outline:none;border-color:#c9a97e}
 button.mini{font-size:.72rem;padding:.16rem .45rem}
 select{font:inherit;color:var(--tx);background:var(--v05);
@@ -77,7 +77,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   white-space:nowrap;font-weight:700}
 .pill.ok{background:rgba(34,197,94,.15);color:var(--tx-ok)}
 .pill.non{background:rgba(248,113,113,.15);color:var(--tx-err2)}
-.pill.g{background:rgba(148,163,184,.14);color:var(--tx2);font-weight:600}
+.pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .pill.apr{background:rgba(201,169,126,.18);color:#d8bd97}
 /* La barre des jours : un dessin vaut mieux qu une colonne de nombres pour
    reperer une derive avant la facture. */

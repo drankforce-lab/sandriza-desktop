@@ -38,11 +38,11 @@ body{background:var(--f-page);color:var(--tx);
   border:1px solid var(--v22);margin-left:.5rem}
 .pill.vert{border-color:rgba(74,222,128,.5);color:var(--tx-ok)}
 .pill.gris{color:var(--tx2)}
-.pill.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
+.pill.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-f6a5a5)}
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
@@ -60,7 +60,7 @@ body{background:var(--f-page);color:var(--tx);
 .cmd .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
 .cmd .d{flex:1 1 auto;min-width:0}
 .cmd .fin{color:var(--tx2);font-size:.78rem;white-space:nowrap}
-input,select{font:inherit;color:var(--tx);background:var(--f-champ);
+input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -72,10 +72,10 @@ input[type=checkbox]{width:auto}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
-button.danger{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
+button.danger{border-color:rgba(248,113,113,.5);color:var(--tx-f6a5a5)}
 button.danger:hover:not(:disabled){background:rgba(248,113,113,.12)}
 button.mini{padding:.14rem .5rem;font-size:.75rem}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
@@ -202,7 +202,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     var c = R.client, a = c.adresse;
     var h = '<div class="carte"><div class="tuiles">'
       + '<div class="tuile"><div class="k">Commandes</div><div class="v">' + R.stats.commandes + '</div></div>'
-      + '<div class="tuile"><div class="k">Retours</div><div class="v"' + (R.stats.retours ? ' style="color:var(--tx-err2)"' : '') + '>' + R.stats.retours + '</div></div>'
+      + '<div class="tuile"><div class="k">Retours</div><div class="v"' + (R.stats.retours ? ' style="color:var(--tx-f6a5a5)"' : '') + '>' + R.stats.retours + '</div></div>'
       + '<div class="tuile"><div class="k">Total dépensé</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
       + '<div class="tuile"><div class="k">Inscrit le</div><div class="v" style="font-size:.92rem">' + esc(dateFr(c.inscritLe)) + '</div></div>'
       + '</div></div>';
@@ -341,7 +341,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (pg) pg.onclick = function(){
       voile('<h3><span class="ic">⚠</span> Supprimer définitivement ?</h3>'
         + '<p>Effacer <strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + ') de la base ?</p>'
-        + '<p style="color:var(--tx-err2)">Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.</p>'
+        + '<p style="color:var(--tx-f6a5a5)">Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.</p>'
         + '<p class="aide"><span class="ic">✅</span> Ce compte n’a aucune commande — rien de comptable n’est perdu.</p>'
         + '<div class="fin2"><button id="v-non">Annuler</button>'
         + '<button class="danger" id="v-oui"><span class="ic">🗑</span> Supprimer définitivement</button></div>',

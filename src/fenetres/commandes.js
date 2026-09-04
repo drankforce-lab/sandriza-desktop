@@ -55,7 +55,7 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem .75rem;flex:0 0 auto}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 
-input,select{font:inherit;color:var(--tx);background:var(--f-champ);
+input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -64,7 +64,7 @@ input:focus,select:focus{outline:none;border-color:#c9a97e}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.mini{padding:.1rem .45rem;font-size:.75rem}
@@ -96,9 +96,9 @@ button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
 /* La liste : la seule zone qui defile. */
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
 .liste::-webkit-scrollbar{width:8px}
-.liste::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
-thead th{position:sticky;top:0;background:var(--f-pill);text-align:left;
+thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
   padding:.34rem .5rem;font-size:.7rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
@@ -106,7 +106,7 @@ thead th.c{text-align:center}
 tbody td{padding:.3rem .5rem;border-top:1px solid var(--v05);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
-tbody tr:hover{background:var(--v03)}
+tbody tr:hover{background:var(--v04)}
 tbody .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
 tbody .det{font-size:.75rem;color:var(--tx2)}
 /* Une commande ETIQUETEE mais pas encore expediee : c est exactement celle qu on
@@ -117,7 +117,7 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .et.vert{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .et.bleu{border-color:rgba(96,165,250,.5);color:var(--tx-bleu)}
 .et.jaune{border-color:rgba(245,158,11,.5);color:#f0c987}
-.et.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
+.et.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-f6a5a5)}
 
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.45rem;
   margin-top:.35rem;border-top:1px solid var(--v08);
@@ -148,7 +148,7 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
 .remb .fin3{text-align:right;font-size:.8rem;font-weight:700;color:var(--tx-att);margin-top:.3rem}
 .banniere{flex:0 0 auto;background:#7f1d1d;color:var(--tx-sur-accent);border-radius:9px;
   padding:.5rem .8rem;font-size:.82rem;line-height:1.5}
-button.danger{border-color:rgba(239,68,68,.55);color:var(--tx-err2)}
+button.danger{border-color:rgba(239,68,68,.55);color:var(--tx-f6a5a5)}
 button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#ef4444}
 
 /* ── Menu contextuel (clic droit sur une ligne) ── */

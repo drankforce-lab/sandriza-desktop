@@ -26,7 +26,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .etat{border-radius:12px;padding:1.25rem 1.4rem;margin:0 0 1.2rem;border:2px solid}
 .etat .lg{font-size:1.05rem;font-weight:700;margin:0 0 .2rem}
 .etat .ds{font-size:.82rem;color:var(--tx2)}
@@ -39,7 +39,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .prot{display:flex;flex-direction:column;gap:.5rem;margin:0 0 1.2rem}
 .prot .l{display:flex;align-items:center;gap:.7rem;font-size:.85rem}
 .prot .l .em{width:1.4em;text-align:center;filter:grayscale(1) brightness(1.7);opacity:.9}
-.info{background:var(--v03);border:1px solid var(--v08);border-radius:9px;
+.info{background:var(--v04);border:1px solid var(--v08);border-radius:9px;
   padding:.85rem 1rem;font-size:.8rem;color:var(--tx2);line-height:1.6}
 .info b{color:var(--tx)}.info code{background:var(--f-champ);border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

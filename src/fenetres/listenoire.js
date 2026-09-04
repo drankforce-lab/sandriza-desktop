@@ -29,7 +29,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .entete{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0;max-width:60rem}
 .quoi b{color:var(--tx)}
@@ -53,8 +53,8 @@ input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
-.b:hover:not(:disabled){background:var(--v08)}
-.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.35)}
+.b:hover:not(:disabled){background:var(--v09)}
+.b.dgr{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover{background:rgba(248,113,113,.16)}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied2{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.9rem}

@@ -31,7 +31,7 @@ body{background:var(--f-page);color:var(--tx);
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem}
 .chef{display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
@@ -55,7 +55,7 @@ td.jour{font-weight:600}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}

@@ -39,7 +39,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -48,7 +48,7 @@ input[type=search],select,button,textarea{font:inherit;color:var(--tx);backgroun
 input[type=search]{min-width:200px}
 select,button{cursor:pointer}
 input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
@@ -69,7 +69,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .depot .pt{font-size:.76rem}
 
 .stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 7rem;background:var(--v03);border-radius:9px;padding:.4rem .6rem}
+.stats .s{flex:1 1 7rem;background:var(--v04);border-radius:9px;padding:.4rem .6rem}
 .stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
 .stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 
@@ -77,7 +77,7 @@ table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody tr{cursor:pointer}
-tbody tr:hover td{background:var(--v03)}
+tbody tr:hover td{background:var(--v04)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
 tbody .num{font-weight:700;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
@@ -142,10 +142,10 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
   flex-direction:column;gap:.28rem}
 .choix .p{display:flex;align-items:center;gap:.55rem;padding:.3rem .4rem;
   border:1px solid var(--v08);border-radius:8px;cursor:pointer}
-.choix .p:hover{border-color:#c9a97e;background:var(--v03)}
+.choix .p:hover{border-color:#c9a97e;background:var(--v04)}
 .choix .p img{width:34px;height:34px;object-fit:cover;border-radius:6px;flex:0 0 auto}
 .choix .p .creux{width:34px;height:34px;border-radius:6px;flex:0 0 auto;
-  background:var(--v05)}
+  background:var(--v06)}
 .choix .p .nm{font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .choix .p .sk{font-size:.7rem;color:var(--tx2)}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
@@ -180,7 +180,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .suivi .lg .ep i.non{color:var(--tx-err2)}
 .suivi .lg .ep i.encours{color:var(--tx-or2)}
 .suivi .lg .et{flex:0 0 auto;font-size:.68rem;font-weight:700;padding:.03rem .4rem;border-radius:99px}
-.suivi .lg .et.attente{background:rgba(148,163,184,.16);color:var(--tx2)}
+.suivi .lg .et.attente{background:rgba(148,163,184,.16);color:var(--tx-94a3b8)}
 .suivi .lg .et.cours{background:rgba(201,169,126,.2);color:var(--tx-or2)}
 .suivi .lg .et.faite{background:rgba(34,197,94,.15);color:var(--tx-ok)}
 .suivi .lg .et.double{background:rgba(234,179,8,.15);color:var(--tx-jaune)}
@@ -190,7 +190,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .suivi .pd .bt{margin-left:auto;display:flex;gap:.4rem}
 /* La barre de progression : elle avance par TACHE TERMINEE, jamais toute seule.
    Une barre qui glisse pendant qu il ne se passe rien est un mensonge poli. */
-.suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:var(--v11);
+.suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:var(--v10);
   overflow:hidden;margin:0 0 .1rem}
 .suivi .jauge i{display:block;height:100%;background:linear-gradient(90deg,#c9a97e,#e0c9a6);
   border-radius:99px;transition:width .25s ease}
@@ -210,7 +210,7 @@ input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
   padding:.5rem .6rem;background:var(--f-carte);border:1px solid var(--v08);
   border-radius:11px}
 .cmd .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
-.cmd .sep{width:1px;height:1.3rem;background:var(--v11);margin:0 .2rem}
+.cmd .sep{width:1px;height:1.3rem;background:var(--v12);margin:0 .2rem}
 .cmd input[type=search]{min-width:12rem}
 .etat{font-size:.75rem;color:var(--tx2);padding:0 .2rem}
 .etat b{color:var(--tx);font-variant-numeric:tabular-nums}
@@ -229,7 +229,7 @@ table.grille td.num{text-align:right;font-variant-numeric:tabular-nums;white-spa
 .act .ic{width:1.7rem;height:1.7rem;padding:0;font-size:.85rem;line-height:1;
   border-radius:6px;opacity:.55;transition:opacity .12s ease,background .12s ease}
 tr:hover .act .ic{opacity:1}
-.act .ic:hover{background:var(--v16);opacity:1}
+.act .ic:hover{background:var(--v14);opacity:1}
 .act .ic.sup:hover{background:rgba(248,113,113,.2);border-color:rgba(248,113,113,.5)}
 .act .ic.sup.arme{opacity:1;background:rgba(248,113,113,.25);border-color:#f87171;color:var(--tx-blanc)}
 /* ── L ASSISTANT ───────────────────────────────────────────────────────── */
@@ -258,7 +258,7 @@ tr:hover .act .ic{opacity:1}
   resize:vertical;min-height:2.6rem;line-height:1.4}
 .sugg{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
 .sugg button{font-size:.72rem;padding:.2rem .55rem;background:rgba(201,169,126,.14);
-  border:1px solid rgba(201,169,126,.35);color:var(--tx-creme);border-radius:999px;cursor:pointer}
+  border:1px solid rgba(201,169,126,.35);color:var(--tx-e8dcc4);border-radius:999px;cursor:pointer}
 .sugg button:hover{background:rgba(201,169,126,.24)}
 .asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.6rem .9rem;border-top:1px solid var(--v08);background:#0f1725}
@@ -288,7 +288,7 @@ tr:hover .act .ic{opacity:1}
 .pl .v .im img.o8{transform:translate(-50%,-50%) rotate(270deg)}
 .pl .v .att{display:flex;align-items:center;justify-content:center;height:100%;
   color:var(--tx2);font-size:.72rem}
-.pl .v .lg{padding:.25rem .4rem;font-size:.68rem;color:var(--tx-gris2);
+.pl .v .lg{padding:.25rem .4rem;font-size:.68rem;color:var(--tx-c3cede);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pl .v .dt2{padding:0 .4rem .3rem;font-size:.63rem;color:var(--tx2)}
 .pl .v .ck{position:absolute;top:.3rem;left:.3rem;width:1.1rem;height:1.1rem;
@@ -309,7 +309,7 @@ tr:hover .act .ic{opacity:1}
 .src{display:flex;flex-direction:column;gap:.4rem}
 .src .l{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;cursor:pointer;
   border:1px solid var(--v11);border-radius:9px}
-.src .l:hover{background:var(--v03)}
+.src .l:hover{background:var(--v04)}
 .src .l.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 .src .l b{font-size:.9rem}
 .but{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
@@ -1486,7 +1486,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     v.id = 'frais-voile';
     v.style.cssText = 'position:fixed;inset:0;z-index:120;background:rgba(6,10,18,.72);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.2rem';
-    v.innerHTML = '<div style="max-width:30rem;background:var(--f-carte2);'
+    v.innerHTML = '<div style="max-width:30rem;background:var(--f-131c2b);'
       + 'border:1px solid var(--v11);border-radius:13px;padding:1.1rem 1.2rem;'
       + 'box-shadow:0 18px 50px rgba(0,0,0,.5)">'
       + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-or2)">'
@@ -1497,7 +1497,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'entraînera de nouveaux frais.</p>' + liste
       + '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">'
       + '<button id="frais-non" style="font:inherit;color:var(--tx);'
-      + 'background:var(--v05);border:1px solid var(--v16);'
+      + 'background:var(--v06);border:1px solid var(--v16);'
       + 'border-radius:8px;padding:.42rem .85rem;cursor:pointer">Annuler</button>'
       + '<button id="frais-oui" style="font:inherit;color:#0e1522;background:#f0d6a0;'
       + 'border:1px solid #f0d6a0;border-radius:8px;padding:.42rem .85rem;cursor:pointer;'
@@ -1548,7 +1548,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<h2 style="margin:0;font:700 1rem/1.2 Georgia,serif;color:var(--tx-or2)">' + esc(titre) + '</h2>'
       + '<span style="font-size:.74rem;color:var(--tx2)">gratuit · filigrané · aucun crédit réel</span>'
       + '<button id="apr-x" style="margin-left:auto;font:inherit;color:var(--tx);'
-      + 'background:var(--v05);border:1px solid var(--v16);'
+      + 'background:var(--v06);border:1px solid var(--v16);'
       + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">Fermer</button></div>'
       // ⚠ auto-FIT + justify-content:center : une seule photo s'affiche GRANDE et
       // CENTRÉE (auto-fill la collait en haut à gauche, minuscule) ; un lot reste

@@ -37,7 +37,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1rem 1.2rem;
   background:#1b2434}
 .corps::-webkit-scrollbar{width:9px}
-.corps::-webkit-scrollbar-thumb{background:var(--v16);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v14);border-radius:8px}
 
 /* ⚠ LE PAPIER, C EST .invoice-doc DU SITE (fond blanc, bordure, marges) :
    le doubler d un second cadre blanc donnait une << bande blanche >> vide
@@ -50,7 +50,7 @@ body{background:var(--f-page);color:var(--tx);
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 /* ⚠ SANS cette regle, le survol GENERIQUE (voile blanc translucide) delavait

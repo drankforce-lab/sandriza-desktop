@@ -39,7 +39,7 @@ const CSS = `
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
 body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
-  color:var(--tx-creme2);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color:var(--tx-f1ece4);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column}
 .tete{display:flex;align-items:center;justify-content:space-between;gap:1rem;
   padding:1.1rem 1.8rem;border-bottom:1px solid var(--v08);flex-shrink:0}
@@ -51,7 +51,7 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
    visible en permanence, c'est la seule chose que la cliente cherche. */
 .liste{flex:1 1 auto;overflow-y:auto;min-height:0}
 .liste::-webkit-scrollbar{width:8px}
-.liste::-webkit-scrollbar-thumb{background:var(--v16);border-radius:8px}
+.liste::-webkit-scrollbar-thumb{background:var(--v14);border-radius:8px}
 .ln{display:flex;align-items:baseline;gap:1rem;padding:.72rem 0;border-bottom:1px solid var(--v05)}
 .ln .q{flex:0 0 auto;min-width:2.6rem;font-variant-numeric:tabular-nums;color:var(--tx-or);font-weight:700;font-size:1.05rem}
 .ln .d{flex:1 1 auto;min-width:0}
@@ -64,7 +64,7 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 @keyframes surligne{0%{background:rgba(201,169,126,.22)}100%{background:transparent}}
 .bas{flex:0 0 auto;border-top:1px solid var(--v11);padding-top:.9rem;margin-top:.6rem}
 .sl{display:flex;justify-content:space-between;font-size:.95rem;color:#b9c6d6;padding:.2rem 0}
-.sl b{font-variant-numeric:tabular-nums;font-weight:600;color:var(--tx-creme)}
+.sl b{font-variant-numeric:tabular-nums;font-weight:600;color:var(--tx-e6ded2)}
 .tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:.7rem;
   padding-top:.8rem;border-top:2px solid rgba(201,169,126,.45)}
 .tot .lb{font-size:1.15rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-or);font-weight:700}

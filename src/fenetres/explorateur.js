@@ -41,7 +41,7 @@ input[type=search],select,button{font:inherit;color:var(--tx);background:var(--v
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .5rem}
 input[type=search]{flex:1 1 14rem;min-width:9rem}
 button{cursor:pointer}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
 .jeton{font-size:.73rem;padding:.14rem .5rem;border-radius:99px}
@@ -53,7 +53,7 @@ input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
 .corps{flex:1 1 auto;min-height:0;display:flex}
 .zone{flex:1 1 auto;min-width:0;overflow-y:auto;padding:.5rem .7rem}
 .zone::-webkit-scrollbar{width:9px}
-.zone::-webkit-scrollbar-thumb{background:var(--v16);border-radius:8px}
+.zone::-webkit-scrollbar-thumb{background:var(--v14);border-radius:8px}
 /* Affichage LISTE : dense, une ligne par photo — c est celui qui permet de
    parcourir 500 photos sans defiler pendant une minute. */
 table{width:100%;border-collapse:collapse;font-size:.82rem}
@@ -76,7 +76,7 @@ tbody tr.actif td:first-child{box-shadow:inset 2px 0 0 0 #c9a97e}
 th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center}
 .coche{display:inline-flex;align-items:center;justify-content:center;
   width:1.05rem;height:1.05rem;border-radius:5px;cursor:pointer;
-  border:1px solid var(--v45);background:var(--v05);
+  border:1px solid var(--v45);background:var(--v06);
   font-size:.72rem;line-height:1;color:#17202c}
 .coche:hover{border-color:#c9a97e}
 .coche.on{background:#c9a97e;border-color:#c9a97e;font-weight:700}

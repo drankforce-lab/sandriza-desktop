@@ -39,7 +39,7 @@ const CSS_PROPRE = `
 .jeton{display:inline-flex;align-items:center;gap:.32rem;padding:.2rem .55rem;
   border:1px solid var(--v16);border-radius:99px;font-size:.82rem;
   cursor:pointer;user-select:none;height:1.75rem}
-.jeton.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:var(--tx-creme)}
+.jeton.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:var(--tx-f0e4d2)}
 .jeton .pt{width:10px;height:10px;border-radius:50%;border:1px solid var(--v30);flex:0 0 auto}
 .photo{display:flex;gap:.85rem;align-items:flex-start}
 /* ── LA LIGNE UNIQUE DES PHOTOS (fusion demandee le 2026-08-08) ──
@@ -56,13 +56,13 @@ const CSS_PROPRE = `
 .ligne-photos .vign{position:relative;width:160px;height:160px;border-radius:10px;
   display:flex;align-items:center;justify-content:center;color:var(--tx2);
   font-size:.75rem;overflow:hidden;text-align:center;cursor:pointer;
-  background:var(--f-champ);border:2px solid #c9a97e}
+  background:var(--f-0f1826);border:2px solid #c9a97e}
 .ligne-photos .vign:hover{border-color:#d8bd97}
 .ligne-photos .vign img{width:100%;height:100%;object-fit:cover}
 .lgd-principale{font-size:.68rem;color:var(--tx-or);text-align:center;margin-top:.22rem;
   font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 #p-vues .vue .cadre{width:100%;height:160px}
-#p-vues .cadre.pleine{border-style:dashed;border-color:var(--v45)}
+#p-vues .cadre.pleine{border-style:dashed;border-color:var(--v40)}
 .cadre.survol,.vign.survol{outline:3px solid #4ade80;outline-offset:2px}
 .mini-decor{display:block;width:100%;margin-top:.3rem;font-size:.72rem;
   padding:.14rem .3rem;border-radius:7px;border:1px solid var(--v16);
@@ -73,7 +73,7 @@ const CSS_PROPRE = `
 .fonds button{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;
   padding:.2rem .5rem;border-radius:99px;border:1px solid var(--v16);
   background:var(--v05);color:var(--tx);cursor:pointer}
-.fonds button.on{border-color:#c9a97e;background:rgba(201,169,126,.18);color:var(--tx-creme)}
+.fonds button.on{border-color:#c9a97e;background:rgba(201,169,126,.18);color:var(--tx-f0e4d2)}
 .fonds .past{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.3);flex:0 0 auto}
 .modeles{display:flex;gap:.45rem;flex-wrap:wrap;margin:.4rem 0}
 .modeles .md{width:64px;cursor:pointer;text-align:center}
@@ -87,7 +87,7 @@ const CSS_PROPRE = `
 .photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
   border:1px dashed var(--v16);display:flex;align-items:center;
   justify-content:center;color:var(--tx2);font-size:.75rem;overflow:hidden;text-align:center;
-  cursor:pointer;background:var(--f-champ)}
+  cursor:pointer;background:var(--f-0f1826)}
 .photo .vign:hover{border-color:#c9a97e}
 .photo .vign.pleine{border-style:solid;border-color:var(--v22)}
 .photo .vign img{width:100%;height:100%;object-fit:cover}
@@ -107,7 +107,7 @@ const CSS_PROPRE = `
 .vue{position:relative;width:88px;flex:0 0 auto}
 .vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed var(--v16);
   display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
-  background:var(--f-champ);color:var(--tx2);font-size:.68rem;text-align:center;padding:.2rem}
+  background:var(--f-0f1826);color:var(--tx2);font-size:.68rem;text-align:center;padding:.2rem}
 .vue .cadre:hover{border-color:#c9a97e}
 .vue .cadre.pleine{border-style:solid;border-color:var(--v22)}
 .vue img{width:100%;height:100%;object-fit:cover}
@@ -116,7 +116,7 @@ const CSS_PROPRE = `
 .vue .x,.vign .x{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;
   border-radius:50%;font-size:.78rem;line-height:1;font-weight:700;
   background:rgba(200,40,40,.94);border:1px solid var(--v30);color:var(--tx-blanc)}
-.vue .x:hover,.vign .x:hover{background:#e04141;border-color:var(--v45)}
+.vue .x:hover,.vign .x:hover{background:#e04141;border-color:var(--v50)}
 /* ⚠ CINQ CADRES, UNE SEULE LIGNE, A TOUTE LARGEUR DE FENETRE. Une largeur fixe
    ne peut pas tenir les deux promesses a la fois : assez grande sur une fenetre
    large, elle passe a deux lignes des qu on la reduit — or le nombre de photos
@@ -147,7 +147,7 @@ const CSS_PROPRE = `
 .lgstk .al{flex:0 0 auto;font-size:.86rem;line-height:1;cursor:help;color:var(--tx-att)}
 .lgstk.entete{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   border-bottom:1px solid var(--v11);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
-.lgstk:not(.entete):hover{background:var(--v03)}
+.lgstk:not(.entete):hover{background:var(--v04)}
 /* ⚠ UNE LIGNE QUI PORTE DU STOCK SE VOIT, comme dans le tableau d inventaire du
    site : on balaie la liste et l on sait ou il y a de la marchandise sans lire
    les chiffres un par un. Le site teinte a 6 % sur un fond CLAIR ; sur ce fond
@@ -165,7 +165,7 @@ const CSS_PROPRE = `
 .theque{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;
   max-height:46vh;overflow-y:auto;padding-right:.2rem}
 .theque .ph{cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid var(--v11);
-  background:var(--f-champ)}
+  background:var(--f-0f1826)}
 .theque .ph:hover{border-color:#c9a97e}
 .theque .ph img{width:100%;height:88px;object-fit:cover;display:block}
 .theque .ph .lg{font-size:.66rem;color:var(--tx2);padding:.16rem .25rem;white-space:nowrap;
@@ -218,9 +218,9 @@ const CSS_PROPRE = `
 .jrn .sec{display:flex;align-items:center;gap:.4rem;margin:.5rem 0 .5rem}
 .jrn .sec .t{font-size:.66rem;font-weight:800;letter-spacing:.06em;
   text-transform:uppercase;color:var(--tx-or);flex:0 0 auto}
-.jrn .sec .tr{flex:1 1 auto;height:1px;background:var(--v11)}
+.jrn .sec .tr{flex:1 1 auto;height:1px;background:var(--v12)}
 .jrn .bl{padding:.5rem .6rem;border:1px solid var(--v11);border-radius:8px;
-  background:var(--f-champ);margin-bottom:.45rem}
+  background:var(--f-0f1826);margin-bottom:.45rem}
 .jrn .bl.cliq{cursor:pointer;user-select:none}
 .jrn .bl.cliq:hover{border-color:rgba(201,169,126,.45)}
 .jrn .et{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
@@ -1587,7 +1587,7 @@ function pageProduit(id) {
     v.innerHTML = '<div class="boite" style="max-width:32rem">'
       + '<h3><span class="ic">✂</span> Détourer et changer le décor</h3>'
       + '<div class="fonds" id="dt-fonds"></div>'
-      + '<div id="dt-zone" style="background:var(--f-champ);border-radius:10px;min-height:14rem;'
+      + '<div id="dt-zone" style="background:var(--f-0f1826);border-radius:10px;min-height:14rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
       + '<div class="pied2"><button type="button" id="dt-non">Annuler</button>'
       + '<button type="button" class="prim" id="dt-oui" disabled>✓ Utiliser cette photo</button></div></div>';
@@ -1664,7 +1664,7 @@ function pageProduit(id) {
       + '<option value="lower_body">Bas — Pantalons / Jupes</option></select></div>'
       + '<div class="ch"><label for="ia-desc">Description courte</label>'
       + '<input id="ia-desc" type="text" placeholder="Ex : robe fleurie été"></div></div>'
-      + '<div id="ia-zone" style="background:var(--f-champ);border-radius:10px;min-height:10rem;'
+      + '<div id="ia-zone" style="background:var(--f-0f1826);border-radius:10px;min-height:10rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
       + '<div class="pied2"><button type="button" id="ia-non">Fermer</button>'
       + '<button type="button" id="ia-gen"><span class="ic">✨</span> Générer</button>'

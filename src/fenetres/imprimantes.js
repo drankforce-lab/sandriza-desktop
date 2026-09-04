@@ -35,7 +35,7 @@ body{background:var(--f-page);color:var(--tx);
 .tete .sous{margin-left:auto;font-size:.74rem;color:var(--tx2)}
 .corps{flex:1 1 auto;overflow-y:auto;padding:1.1rem}
 .corps::-webkit-scrollbar{width:9px}
-.corps::-webkit-scrollbar-thumb{background:var(--v16);border-radius:9px}
+.corps::-webkit-scrollbar-thumb{background:var(--v13);border-radius:9px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.95rem 1.05rem;margin-bottom:.85rem}
 .carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;
@@ -57,7 +57,7 @@ body{background:var(--f-page);color:var(--tx);
 /* La liste deroulante EST le controle : elle prend la largeur, comme un champ de
    formulaire, et non la taille d un bouton perdu au bout de la ligne. */
 .svc .d select{width:100%;max-width:34rem;margin-top:.35rem;font:inherit;
-  color:var(--tx);background:var(--f-champ);border:1px solid var(--v16);
+  color:var(--tx);background:var(--f-0f1826);border:1px solid var(--v16);
   border-radius:8px;padding:.4rem .55rem}
 .svc .d select:focus{outline:none;border-color:#c9a97e}
 .svc .d select:disabled{opacity:.5}
@@ -65,7 +65,7 @@ body{background:var(--f-page);color:var(--tx);
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.45;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}

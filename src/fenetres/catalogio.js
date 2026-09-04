@@ -55,12 +55,12 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
 input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;
@@ -103,7 +103,7 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .dossier .dbtns{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.45rem}
 .avis{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.22);
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.55}
-.avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-or2)}
+.avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-fcd9a6)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.5rem .7rem}
@@ -119,7 +119,7 @@ table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.26rem .4rem;font-size:.66rem;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
-tbody tr:hover td{background:var(--v03)}
+tbody tr:hover td{background:var(--v04)}
 code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.05rem .5rem;border-radius:99px;font-weight:700}

@@ -39,14 +39,14 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 select:focus,button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;
@@ -75,8 +75,8 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .afaire .titre{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx-or);font-weight:700;margin-right:.2rem}
 .afaire button{font-size:.79rem;padding:.22rem .6rem;border-radius:99px;
-  background:var(--v05);border:1px solid var(--v16)}
-.afaire button:hover{background:var(--v11)}
+  background:var(--v06);border:1px solid var(--v16)}
+.afaire button:hover{background:var(--v12)}
 .afaire button b{font-weight:800}
 /* Le separateur : discret, non italique malgre le <i>, et il porte l espace de
    part et d autre — sans quoi le nombre reste colle au texte. */

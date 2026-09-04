@@ -33,7 +33,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem;max-width:62rem}
 .quoi b{color:var(--tx)}
 .auto{display:flex;align-items:center;gap:.5rem;font-size:.84rem;margin:0 0 1.2rem;
@@ -59,7 +59,7 @@ input.t{flex:1 1 auto;min-width:0;background:var(--f-champ);border:1px solid #2b
 input.t:focus{outline:none;border-color:#c9a97e}
 .b{font:inherit;font-size:.79rem;border:1px solid var(--v16);border-radius:8px;
   padding:.4rem .7rem;background:var(--v05);color:var(--tx);cursor:pointer;white-space:nowrap}
-.b:hover:not(:disabled){background:var(--v08)}
+.b:hover:not(:disabled){background:var(--v09)}
 .b:disabled{opacity:.45;cursor:default}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

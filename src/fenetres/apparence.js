@@ -38,7 +38,7 @@ body{background:var(--f-page);color:var(--tx);
   display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));
   gap:1rem;align-content:start}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .pleine{grid-column:1/-1}

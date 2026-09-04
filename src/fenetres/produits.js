@@ -34,7 +34,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -43,7 +43,7 @@ input[type=search],select,button{font:inherit;color:var(--tx);background:var(--v
 input[type=search]{min-width:210px}
 select,button{cursor:pointer}
 input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
@@ -55,7 +55,7 @@ table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody tr{cursor:pointer}
-tbody tr:hover td{background:var(--v03)}
+tbody tr:hover td{background:var(--v04)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}

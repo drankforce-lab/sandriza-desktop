@@ -52,13 +52,13 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem}
 input[type=search]{min-width:220px}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
 input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.36rem .8rem}
@@ -87,12 +87,12 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .dt{font-size:.72rem;color:var(--tx2)}
 .avis{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.22);
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.55}
-.avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-or2)}
+.avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-fcd9a6)}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.66rem;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
-tbody tr:hover td{background:var(--v03)}
+tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 /* ⚠ « Robe ZENXAS · S-rouge » se coupait au milieu de « S-rouge » (sa capture).
    Un identifiant de variante coupe en deux ne se lit plus : on preserve les

@@ -52,7 +52,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
@@ -65,7 +65,7 @@ body{background:var(--f-page);color:var(--tx);
 .info .v{font-weight:500}
 .info .large{grid-column:1/-1}
 
-input,select,textarea{font:inherit;color:var(--tx);background:var(--f-champ);
+input,select,textarea{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
@@ -78,7 +78,7 @@ textarea{resize:none}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-sur-accent);font-weight:600}
@@ -88,7 +88,7 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
 .avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
-.avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-err2)}
+.avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-f6a5a5)}
 .avis.bleu{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.38);color:#a9c9f7}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 

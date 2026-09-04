@@ -29,7 +29,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ ANCRÉE = PLEINE PAGE : pas de cap de largeur ; la grille des logos remplit. */
 .zone{width:100%}
 .barre{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:0 0 1rem}
@@ -67,7 +67,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.32rem .7rem;cursor:pointer;font-size:.78rem}
-button.b:hover:not(:disabled){background:var(--v11)}
+button.b:hover:not(:disabled){background:var(--v10)}
 button.b:disabled{opacity:.5;cursor:default}
 button.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.4)}
 button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;border-radius:8px;padding:.42rem .9rem;cursor:pointer;font-size:.82rem}
@@ -75,7 +75,7 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 button.prim:disabled{opacity:.5;cursor:default}
 label.upl{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.mini:hover:not(:disabled){background:var(--v11)}
+.mini:hover:not(:disabled){background:var(--v10)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

@@ -48,7 +48,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -56,7 +56,7 @@ input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
 input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
@@ -91,7 +91,7 @@ table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
-tbody tr:hover td{background:var(--v03)}
+tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .fin{white-space:nowrap;text-align:right}
 .pastille{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.4rem;
@@ -127,11 +127,11 @@ tbody tr:hover td{background:var(--v03)}
   color:var(--tx2);font-weight:700;margin:0 0 .4rem}
 .liste{max-height:15rem;overflow-y:auto;display:flex;flex-direction:column;gap:.25rem}
 .liste::-webkit-scrollbar{width:8px}
-.liste::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 label.case{display:flex;align-items:center;gap:.45rem;font-size:.82rem;cursor:pointer;
   border:1px solid var(--v11);border-radius:9px;padding:.28rem .5rem;
   background:var(--v03);-webkit-user-select:none;user-select:none}
-label.case:hover{background:var(--v08)}
+label.case:hover{background:var(--v07)}
 label.case.pris{border-color:#c9a97e;background:rgba(201,169,126,.13)}
 label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0;flex:0 0 auto}
 label.case .nom{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;
@@ -151,7 +151,7 @@ label.duree input{margin:0;accent-color:#c9a97e}
   color:var(--tx2);margin:0 0 .18rem}
 .dates input{width:11rem}
 .choisi{display:flex;align-items:center;gap:.4rem;padding:.24rem .45rem;border-radius:7px;
-  background:var(--v03);border:1px solid var(--v11);font-size:.79rem}
+  background:var(--v04);border:1px solid var(--v11);font-size:.79rem}
 .choisi .nom{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .resume{padding:.55rem .7rem;border-radius:9px;border-left:3px solid;margin:0 0 .6rem}
 .resume.liq{background:rgba(217,119,6,.12);border-left-color:#d97706}

@@ -54,7 +54,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.75rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -65,7 +65,7 @@ input,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .6rem;cursor:pointer;width:auto}
 input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
@@ -89,9 +89,9 @@ tbody tr:hover td{background:var(--v03)}
 .pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;white-space:nowrap;font-weight:700}
 .pill.actif{background:rgba(34,197,94,.15);color:var(--tx-ok)}
 .pill.revoque{background:rgba(248,113,113,.15);color:var(--tx-err2)}
-.pill.expire{background:rgba(148,163,184,.18);color:var(--tx2)}
+.pill.expire{background:rgba(148,163,184,.18);color:var(--tx-94a3b8)}
 .pill.epuise{background:rgba(234,179,8,.15);color:var(--tx-jaune)}
-.pill.g{background:rgba(148,163,184,.14);color:var(--tx2);font-weight:600}
+.pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* La carte du lien fraichement fabrique : le mot de passe ne reviendra pas. */
 .neuf{border:1px solid rgba(201,169,126,.5);background:rgba(201,169,126,.09)}

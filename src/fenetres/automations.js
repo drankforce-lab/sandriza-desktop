@@ -33,7 +33,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .9rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.85rem 1rem}
 .th{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:0 0 .3rem}
 .th .em{font-size:1.05rem;filter:grayscale(1) brightness(1.55);opacity:.9}
@@ -61,7 +61,7 @@ body{background:var(--f-page);color:var(--tx);
 .mgrille input{accent-color:#c9a97e;cursor:pointer}
 button{font:inherit;font-size:.8rem;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.36rem .7rem;cursor:pointer;white-space:nowrap}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}

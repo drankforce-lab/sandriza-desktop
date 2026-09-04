@@ -71,7 +71,7 @@ body{background:var(--f-page);color:var(--tx);
 .scene{flex:1 1 auto;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar,.scene::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb,
-.scene::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.scene::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .74rem/1.2 system-ui;text-transform:uppercase;
@@ -92,7 +92,7 @@ body{background:var(--f-page);color:var(--tx);
 .rcbar button{flex:0 0 auto;font:inherit;font-size:.73rem;padding:.3rem .55rem;
   border-radius:8px;cursor:pointer;color:var(--tx-bleute);background:var(--v05);
   border:1px solid var(--v16)}
-.rcbar button:hover:not(:disabled){background:var(--v11)}
+.rcbar button:hover:not(:disabled){background:var(--v10)}
 .rcbar button:disabled{opacity:.4;cursor:default}
 .rcbar button.x{color:#e79a9a}
 /* L avertissement d ecrasement du voile d enregistrement. */
@@ -134,7 +134,7 @@ body{background:var(--f-page);color:var(--tx);
 .panneau .sous{margin:.28rem 0 .7rem;font-size:.74rem;color:var(--tx3);line-height:1.4}
 .onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
 .onglets::-webkit-scrollbar-thumb,.panneau::-webkit-scrollbar-thumb{
-  background:var(--v11);border-radius:8px}
+  background:var(--v12);border-radius:8px}
 /* ⚠ LES CINQ << ETAPES >> NUMEROTEES ONT DISPARU avec le passage aux onglets
    (3.47.0) : le numero qui devenait une coche vit maintenant SUR l onglet
    (.ong .oc), et l en-tete du groupe est .pnt. Les regles .etape / .eth / .num /
@@ -157,7 +157,7 @@ body{background:var(--f-page);color:var(--tx);
 .recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:.5rem}
 .recap .jt{font-size:.75rem;padding:.16rem .55rem;border-radius:99px;
   background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:var(--tx-creme)}
-.recap .jt.gris{background:var(--v05);border-color:var(--v16);color:var(--tx2)}
+.recap .jt.gris{background:var(--v05);border-color:var(--v14);color:var(--tx2)}
 .recap .note,.fmt .note{margin-top:.55rem;font-size:.73rem;color:var(--tx3);line-height:1.5}
 /* ── FORMATS DE SORTIE (lot 3b) ────────────────────────────────────────────
    La meme image en 3:4, 1:1, 4:5 et 9:16, fabriquee ICI, au canevas de la page.
@@ -168,7 +168,7 @@ body{background:var(--f-page);color:var(--tx);
 .loggr{display:grid;grid-template-columns:repeat(auto-fill,minmax(6rem,1fr));gap:.45rem;
   align-content:start;max-height:16rem;overflow-y:auto}
 .loggr::-webkit-scrollbar{width:8px}
-.loggr::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.loggr::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .logv{background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.3rem;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;
   -webkit-user-select:none;user-select:none;transition:border-color .12s,background .12s}
@@ -182,7 +182,7 @@ body{background:var(--f-page);color:var(--tx);
 /* Les neuf ancrages, disposes comme ils le seront sur l image. */
 .posgr{display:grid;grid-template-columns:repeat(3,2.3rem);gap:.25rem}
 .posc{padding:0;width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center}
-.posc span{display:block;width:.6rem;height:.6rem;border-radius:2px;background:var(--v30)}
+.posc span{display:block;width:.6rem;height:.6rem;border-radius:2px;background:var(--v35)}
 .posc.on{border-color:#c9a97e;background:rgba(201,169,126,.16)}
 .posc.on span{background:#c9a97e}
 .fmt .fbar{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-top:.55rem}
@@ -243,7 +243,7 @@ body{background:var(--f-page);color:var(--tx);
   align-content:start;
   max-height:calc(100vh - 18rem);min-height:14rem;overflow-y:auto;padding-right:.2rem}
 .phgrille::-webkit-scrollbar{width:8px}
-.phgrille::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.phgrille::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .phvig{background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
 .phvig:hover{border-color:#c9a97e}
@@ -257,7 +257,7 @@ body{background:var(--f-page);color:var(--tx);
 .phfiltres{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-bottom:.45rem}
 .jeton{font:inherit;font-size:.73rem;padding:.16rem .55rem;border-radius:99px;cursor:pointer;
   color:var(--tx-bleute);background:var(--v05);border:1px solid var(--v16)}
-.jeton:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+.jeton:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 .jeton:disabled{opacity:.4;cursor:default}
 .jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
 .jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
@@ -265,7 +265,7 @@ body{background:var(--f-page);color:var(--tx);
   border:1px solid var(--v16);border-radius:8px;padding:.14rem .4rem;
   width:auto;max-width:15rem;flex:0 1 auto}
 .phsel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;
-  padding:.35rem .5rem;border-radius:9px;background:var(--v03);
+  padding:.35rem .5rem;border-radius:9px;background:var(--v035);
   border:1px solid var(--v08)}
 .phsel .cpt{font-size:.76rem;color:var(--tx2)}
 .phsel .cpt.on{color:var(--tx-creme);font-weight:700}
@@ -289,7 +289,7 @@ body{background:var(--f-page);color:var(--tx);
 .panier .pt button{margin-left:auto}
 .panier .pv{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
 .panier .pv img{width:2.2rem;height:2.2rem;object-fit:contain;border-radius:5px;background:var(--f-pied)}
-.panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:var(--v05)}
+.panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:var(--v06)}
 .panier .pv .pl{font-size:.72rem;color:var(--tx2)}
 .panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
@@ -299,7 +299,7 @@ body{background:var(--f-page);color:var(--tx);
 .lott{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.35rem}
 .lott strong{font-size:.85rem}
 .lott .dt{font-size:.72rem;color:var(--tx2);margin-left:auto}
-.lotc .jauge{height:.42rem;border-radius:99px;background:var(--v11);overflow:hidden}
+.lotc .jauge{height:.42rem;border-radius:99px;background:var(--v12);overflow:hidden}
 .lotc .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
 .lotd{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.35rem;
   font-size:.76rem;color:var(--tx-bleute)}
@@ -439,7 +439,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
@@ -2703,7 +2703,7 @@ ${JS_ACTIVITE}${JS_DIRE}
          avec décor est DEUX appels, et que le détourage part chez un autre
          fournisseur, cinquante fois moins cher. */
       + '<div id="lot-estim" style="margin:.6rem 0 0;padding:.5rem .6rem;border:1px solid #2a3a4e;'
-      + 'border-radius:6px;background:var(--f-carte);font-size:.8rem;color:var(--tx2)">Estimation du coût…</div>'
+      + 'border-radius:6px;background:var(--f-16202c);font-size:.8rem;color:var(--tx2)">Estimation du coût…</div>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="prim" id="v-oui">Lancer le lot</button></div>',
       function(fermer){

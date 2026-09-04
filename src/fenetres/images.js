@@ -39,7 +39,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 h1{font-size:1rem;margin:0;font-weight:650}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .zone{columns:34rem;column-gap:1.1rem}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
@@ -77,7 +77,7 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 button.prim:disabled{opacity:.5;cursor:default}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid var(--v16);
   border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.mini:hover:not(:disabled){background:var(--v11)}
+.mini:hover:not(:disabled){background:var(--v10)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

@@ -54,7 +54,7 @@ body{background:var(--f-page);color:var(--tx);
   padding:.55rem .95rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:var(--v11)}
+button:hover:not(:disabled){background:var(--v10)}
 button:focus{outline:none;border-color:#c9a97e}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700;margin-left:auto}
 button.prim:hover:not(:disabled){background:#d8bc95}

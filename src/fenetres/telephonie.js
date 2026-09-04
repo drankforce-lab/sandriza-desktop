@@ -44,7 +44,7 @@ body{background:var(--f-page);color:var(--tx);
 .tete button.mini{font:inherit;font-size:.74rem;padding:.16rem .55rem;
   border:1px solid var(--v16);border-radius:7px;background:var(--v05);
   color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none}
-.tete button.mini:hover:not(:disabled){background:var(--v11)}
+.tete button.mini:hover:not(:disabled){background:var(--v10)}
 .tete a.credit{font:inherit;font-size:.74rem;padding:.16rem .55rem;border-radius:7px;
   background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;text-decoration:none;flex:0 0 auto}
 .ro{flex:0 0 auto;margin:.6rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
@@ -56,7 +56,7 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ ANCRÉE = PLEINE PAGE : pas de cap ; les champs (gr2) s'étendent sur la largeur. */
 .panneau{width:100%}
 .carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
@@ -117,7 +117,7 @@ body{background:var(--f-page);color:var(--tx);
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button.b{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .7rem;cursor:pointer;font-size:.78rem}
-button.b:hover:not(:disabled){background:var(--v11)}
+button.b:hover:not(:disabled){background:var(--v10)}
 button.b:disabled{opacity:.5;cursor:default}
 button.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.4)}
 button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;

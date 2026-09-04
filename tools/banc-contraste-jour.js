@@ -63,12 +63,33 @@ const ratio = (a, b) => {
 
 // ⚠ LE PREFIXE EST CAPTURE ET REMIS : sans lui, on confondrait `color:` avec
 // `background-color:` ou `border-color:`, qui ne sont PAS du texte.
+/* ── LES DÉFINITIONS DE JETONS NE SONT PAS DES EMPLOIS ───────────────────────
+   ⚠⚠ CE FILTRE EXISTE PARCE QUE LA SUBSTITUTION EN MASSE A DÉTRUIT LES JETONS
+   EUX-MÊMES, le 2026-09-04. Le script qui remplaçait `rgba(255,255,255,x)` par
+   `var(--vNN)` a tourné sur TOUS les fichiers — `socle.js` compris — et il a
+   réécrit les DÉFINITIONS que je venais d'y poser :
+
+       --v05:rgba(255,255,255,.05)   devenu   --v05:var(--v05)
+
+   Un jeton défini par lui-même est cyclique, donc INVALIDE : la propriété
+   retombe à `unset`. Les 1 410 bordures et fonds de cartes des fenêtres sont
+   devenus INVISIBLES, en mode sombre comme en mode jour, pendant quatre
+   versions — et c'est lui qui l'a vu, capture à l'appui.
+
+   ⚠ LA LEÇON : une substitution mécanique doit EXCLURE le fichier où les jetons
+   sont définis. Ici, on exclut les deux blocs de définition avant toute mesure —
+   sans quoi le banc accuserait les littéraux qui DOIVENT y rester.
+   Et le contrôle d'auto-référence ci-dessous refuse le défaut lui-même. */
+const sansDefinitions = (src) => src
+  .replace(/:root\{color-scheme:dark;[^}]*\}/g, '')
+  .replace(/html\.jour\{[^}]*\}/g, '');
+
 const RX = /(^|[;{\s"'])color\s*:\s*(#[0-9a-fA-F]{3,6})/gm;
 
 const trouve = new Map();          // couleur -> { n, fichiers:Set }
 let lus = 0;
 for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
-  const src = fs.readFileSync(path.join(DOSSIER, f), 'utf8');
+  const src = sansDefinitions(fs.readFileSync(path.join(DOSSIER, f), 'utf8'));
   lus++;
   let m;
   RX.lastIndex = 0;
@@ -95,7 +116,7 @@ for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
 const RX_VOILE = /rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*[0-9.]+\s*\)/g;
 const voiles = new Map();
 for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
-  const src = fs.readFileSync(path.join(DOSSIER, f), 'utf8');
+  const src = sansDefinitions(fs.readFileSync(path.join(DOSSIER, f), 'utf8'));
   let m;
   RX_VOILE.lastIndex = 0;
   while ((m = RX_VOILE.exec(src))) {
@@ -107,6 +128,24 @@ for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
 
 const detail = process.argv.includes('--liste');
 let mal = 0, total = 0;
+
+/* Un jeton défini par lui-même : le défaut du 2026-09-04, refusé pour toujours.
+   Il ne lève AUCUNE erreur — la page s'affiche, seulement sans ses bordures. */
+{
+  const socleBrut = fs.readFileSync(path.join(DOSSIER, 'socle.js'), 'utf8');
+  const cycles = [];
+  for (const b of socleBrut.match(/(?::root\{color-scheme:dark;|html\.jour\{)[^}]*\}/g) || []) {
+    for (const m of b.matchAll(/(--[a-z0-9-]+)\s*:\s*var\(\s*(--[a-z0-9-]+)\s*\)/g))
+      if (m[1] === m[2]) cycles.push(m[1]);
+  }
+  if (cycles.length) {
+    mal += cycles.length;
+    for (const c of cycles)
+      console.log('  NON CYCLE   ' + c + ' est defini par lui-meme — le jeton est INVALIDE et tout ce qui l emploie devient invisible');
+  }
+}
+
+
 const lignes = [];
 for (const [c, e] of [...trouve.entries()].sort((a, b) => b[1].n - a[1].n)) {
   total += e.n;
@@ -181,7 +220,7 @@ for (const m of socleTxt.matchAll(/html\.jour\s+([^{,]+?)\s*\{([^}]*)\}/g)) {
 }
 const paires = new Map();
 for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
-  const src = fs.readFileSync(path.join(DOSSIER, f), 'utf8');
+  const src = sansDefinitions(fs.readFileSync(path.join(DOSSIER, f), 'utf8'));
   for (const m of src.matchAll(/([.#a-zA-Z][^{}\n;]{0,80}?)\s*\{([^{}]{0,400})\}/g)) {
     const sel = m[1].trim(), decl = m[2];
     const bg = decl.match(/background(?:-color)?\s*:\s*(#[0-9a-fA-F]{3,6})/);

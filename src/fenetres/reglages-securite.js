@@ -35,7 +35,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
 .carte h3{margin:0 0 .2rem;font:700 1rem/1.2 Georgia,serif}
 .entete{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
@@ -56,7 +56,7 @@ label.case input{width:16px;height:16px;accent-color:#c9a97e}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
-.b:hover{background:var(--v08)}
+.b:hover{background:var(--v09)}
 .exempts{display:flex;flex-direction:column;gap:.35rem;max-height:240px;overflow-y:auto;
   border:1px solid var(--v08);border-radius:9px;padding:.6rem .7rem}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}

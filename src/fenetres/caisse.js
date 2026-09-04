@@ -79,7 +79,7 @@ body{background:var(--f-page);color:var(--tx);
      contenu les etirerait et le trou reviendrait, ailleurs. */
   justify-content:flex-start}
 .defile::-webkit-scrollbar{width:8px}
-.defile::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.defile::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 
 /* Sous 1000 px on repasse en UNE colonne et on autorise le defilement general :
    ecraser un champ de montant est plus risque que faire defiler. */
@@ -105,7 +105,7 @@ body{background:var(--f-page);color:var(--tx);
 input.manque{border-color:#f87171}
 .carte h2 .lie{color:var(--tx-ok);font-size:.68rem;margin-left:.4rem}
 
-input,select{font:inherit;color:var(--tx);background:var(--f-champ);
+input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -134,7 +134,7 @@ input[type=checkbox]{width:auto}
 /* Liste des articles vendus : la seule zone qui defile. */
 .lignes{flex:1 1 auto;min-height:0;overflow-y:auto}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-thead th{position:sticky;top:0;background:var(--f-pill);text-align:left;
+thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
   padding:.35rem .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
@@ -156,7 +156,7 @@ tbody button{padding:.05rem .42rem;font-size:.9rem;line-height:1.3}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
