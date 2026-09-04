@@ -56,7 +56,7 @@ const CSS_PROPRE = `
 .ligne-photos .vign{position:relative;width:160px;height:160px;border-radius:10px;
   display:flex;align-items:center;justify-content:center;color:var(--tx2);
   font-size:.75rem;overflow:hidden;text-align:center;cursor:pointer;
-  background:#0f1826;border:2px solid #c9a97e}
+  background:var(--f-champ);border:2px solid #c9a97e}
 .ligne-photos .vign:hover{border-color:#d8bd97}
 .ligne-photos .vign img{width:100%;height:100%;object-fit:cover}
 .lgd-principale{font-size:.68rem;color:var(--tx-or);text-align:center;margin-top:.22rem;
@@ -87,13 +87,13 @@ const CSS_PROPRE = `
 .photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
   border:1px dashed var(--v16);display:flex;align-items:center;
   justify-content:center;color:var(--tx2);font-size:.75rem;overflow:hidden;text-align:center;
-  cursor:pointer;background:#0f1826}
+  cursor:pointer;background:var(--f-champ)}
 .photo .vign:hover{border-color:#c9a97e}
 .photo .vign.pleine{border-style:solid;border-color:var(--v22)}
 .photo .vign img{width:100%;height:100%;object-fit:cover}
 .photo .cmd{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.45rem}
 #p-coul-sug{position:absolute;top:100%;left:0;right:5.5rem;z-index:40;margin-top:2px;
-  background:#16202f;border:1px solid var(--v16);border-radius:9px;
+  background:var(--f-carte);border:1px solid var(--v16);border-radius:9px;
   box-shadow:0 10px 28px rgba(0,0,0,.45);max-height:230px;overflow-y:auto;display:none}
 #p-coul-sug.on{display:block}
 #p-coul-sug .s{display:flex;align-items:center;gap:.5rem;padding:.3rem .55rem;cursor:pointer;font-size:.85rem}
@@ -107,7 +107,7 @@ const CSS_PROPRE = `
 .vue{position:relative;width:88px;flex:0 0 auto}
 .vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed var(--v16);
   display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
-  background:#0f1826;color:var(--tx2);font-size:.68rem;text-align:center;padding:.2rem}
+  background:var(--f-champ);color:var(--tx2);font-size:.68rem;text-align:center;padding:.2rem}
 .vue .cadre:hover{border-color:#c9a97e}
 .vue .cadre.pleine{border-style:solid;border-color:var(--v22)}
 .vue img{width:100%;height:100%;object-fit:cover}
@@ -165,7 +165,7 @@ const CSS_PROPRE = `
 .theque{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;
   max-height:46vh;overflow-y:auto;padding-right:.2rem}
 .theque .ph{cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid var(--v11);
-  background:#0f1826}
+  background:var(--f-champ)}
 .theque .ph:hover{border-color:#c9a97e}
 .theque .ph img{width:100%;height:88px;object-fit:cover;display:block}
 .theque .ph .lg{font-size:.66rem;color:var(--tx2);padding:.16rem .25rem;white-space:nowrap;
@@ -179,7 +179,7 @@ const CSS_PROPRE = `
 .avis.on{display:block}
 .voile{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
   background:rgba(8,12,18,.6);padding:1.2rem}
-.voile .boite{width:100%;max-width:460px;background:#16202f;border:1px solid var(--v11);
+.voile .boite{width:100%;max-width:460px;background:var(--f-carte);border:1px solid var(--v11);
   border-radius:12px;padding:1rem 1.1rem;box-shadow:0 24px 64px rgba(0,0,0,.5)}
 .voile h3{margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-err2)}
 .voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:var(--tx-bleute)}
@@ -220,7 +220,7 @@ const CSS_PROPRE = `
   text-transform:uppercase;color:var(--tx-or);flex:0 0 auto}
 .jrn .sec .tr{flex:1 1 auto;height:1px;background:var(--v11)}
 .jrn .bl{padding:.5rem .6rem;border:1px solid var(--v11);border-radius:8px;
-  background:#0f1826;margin-bottom:.45rem}
+  background:var(--f-champ);margin-bottom:.45rem}
 .jrn .bl.cliq{cursor:pointer;user-select:none}
 .jrn .bl.cliq:hover{border-color:rgba(201,169,126,.45)}
 .jrn .et{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
@@ -378,7 +378,7 @@ function pageProduit(id) {
       // vérifié. Il se calcule dès que la catégorie est choisie.
       + '<div class="ch"><label for="p-sku">Code (SKU)</label>'
       + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
-      + 'background:#0b1220;color:var(--tx-or)" placeholder="choisissez une catégorie"></div>'
+      + 'background:var(--f-pied);color:var(--tx-or)" placeholder="choisissez une catégorie"></div>'
       + ch('p-marque', 'Marque')
       // Le poids appartient a l identite du vetement, pas au prix : c est une
       // caracteristique de l article, et il tenait seul dans une carte entiere.
@@ -1587,7 +1587,7 @@ function pageProduit(id) {
     v.innerHTML = '<div class="boite" style="max-width:32rem">'
       + '<h3>✂ Détourer et changer le décor</h3>'
       + '<div class="fonds" id="dt-fonds"></div>'
-      + '<div id="dt-zone" style="background:#0f1826;border-radius:10px;min-height:14rem;'
+      + '<div id="dt-zone" style="background:var(--f-champ);border-radius:10px;min-height:14rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
       + '<div class="pied2"><button type="button" id="dt-non">Annuler</button>'
       + '<button type="button" class="prim" id="dt-oui" disabled>✓ Utiliser cette photo</button></div></div>';
@@ -1664,7 +1664,7 @@ function pageProduit(id) {
       + '<option value="lower_body">Bas — Pantalons / Jupes</option></select></div>'
       + '<div class="ch"><label for="ia-desc">Description courte</label>'
       + '<input id="ia-desc" type="text" placeholder="Ex : robe fleurie été"></div></div>'
-      + '<div id="ia-zone" style="background:#0f1826;border-radius:10px;min-height:10rem;'
+      + '<div id="ia-zone" style="background:var(--f-champ);border-radius:10px;min-height:10rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
       + '<div class="pied2"><button type="button" id="ia-non">Fermer</button>'
       + '<button type="button" id="ia-gen">✨ Générer</button>'

@@ -31,7 +31,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -51,7 +51,7 @@ button:focus{outline:none;border-color:#c9a97e}
 button.dgr{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.dgr:hover:not(:disabled){background:rgba(239,68,68,.14)}
 button.mini{font-size:.74rem;padding:.14rem .45rem}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h3{margin:0 0 .5rem;font:700 .92rem/1.2 Georgia,serif}
 .note{font-size:.78rem;color:var(--tx2);line-height:1.6;background:var(--v03);
@@ -69,7 +69,7 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .pill.moi{background:rgba(201,169,126,.2);color:#dcc39b}
 .vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

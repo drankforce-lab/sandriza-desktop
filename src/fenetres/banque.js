@@ -35,7 +35,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -51,7 +51,7 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;gap:.75rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -109,7 +109,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   color:var(--tx-or2);border-radius:9px;padding:.45rem .65rem;font-size:.74rem}
 .aide{font-size:.71rem;color:var(--tx2);margin:.3rem 0 0}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}

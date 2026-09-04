@@ -25,7 +25,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -41,7 +41,7 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -59,7 +59,7 @@ td.prov .n{font-weight:400;color:var(--tx3);font-size:.75rem}
 td.dr{text-align:right;white-space:nowrap}
 .comp{display:inline-flex;align-items:center;gap:.3rem;margin:.15rem .8rem .15rem 0}
 .comp .org{font-size:.7rem;color:var(--tx3)}
-input[type=text],input[type=number]{font:inherit;color:var(--tx);background:#0f1724;
+input[type=text],input[type=number]{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid #2b3444;border-radius:7px;padding:.25rem .4rem}
 input[type=text]:focus,input[type=number]:focus{outline:none;border-color:#c9a97e}
 input:disabled{opacity:.55}
@@ -68,7 +68,7 @@ input:disabled{opacity:.55}
 .cc{width:5rem;text-transform:uppercase}
 .gestes{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}

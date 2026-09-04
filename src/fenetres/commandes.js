@@ -37,7 +37,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
@@ -51,11 +51,11 @@ body{background:#0e1522;color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.55rem}
 
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 
-input,select{font:inherit;color:var(--tx);background:#0f1826;
+input,select{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -98,7 +98,7 @@ button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
-thead th{position:sticky;top:0;background:#1b2635;text-align:left;
+thead th{position:sticky;top:0;background:var(--f-pill);text-align:left;
   padding:.34rem .5rem;font-size:.7rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
@@ -146,27 +146,27 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
 .remb .lg2{display:flex;justify-content:space-between;gap:1rem;font-size:.8rem;
   padding:.18rem 0;border-bottom:1px solid var(--v05)}
 .remb .fin3{text-align:right;font-size:.8rem;font-weight:700;color:var(--tx-att);margin-top:.3rem}
-.banniere{flex:0 0 auto;background:#7f1d1d;color:var(--tx-blanc);border-radius:9px;
+.banniere{flex:0 0 auto;background:#7f1d1d;color:var(--tx-sur-accent);border-radius:9px;
   padding:.5rem .8rem;font-size:.82rem;line-height:1.5}
 button.danger{border-color:rgba(239,68,68,.55);color:var(--tx-err2)}
 button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#ef4444}
 
 /* ── Menu contextuel (clic droit sur une ligne) ── */
-.ctx{position:fixed;z-index:60;background:#16202f;border:1px solid var(--v16);
+.ctx{position:fixed;z-index:60;background:var(--f-carte);border:1px solid var(--v16);
   border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.5);padding:.3rem;min-width:210px}
 .ctx .t{font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);padding:.28rem .5rem;font-weight:700}
 .ctx button{display:block;width:100%;text-align:left;border:none;
   background:transparent;padding:.3rem .5rem;border-radius:6px;font-size:.83rem}
 .ctx button:hover{background:var(--v08)}
-.ctx .warn{background:#7f1d1d;color:var(--tx-blanc);border-radius:6px;padding:.5rem .65rem;
+.ctx .warn{background:#7f1d1d;color:var(--tx-sur-accent);border-radius:6px;padding:.5rem .65rem;
   font-size:.79rem;line-height:1.5;max-width:290px;margin:.2rem}
 
 /* Confirmations : un voile, jamais une boite du systeme (elle s ouvrirait
    DERRIERE la fenetre, comme le decompte d inactivite l a fait). */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:36rem;width:100%;
   max-height:84vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
@@ -197,7 +197,7 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
-  background:#0b1220}
+  background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

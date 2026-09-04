@@ -29,7 +29,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -54,12 +54,12 @@ button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700;
@@ -82,7 +82,7 @@ tbody tr:hover td{background:var(--v03)}
 .jauge i{display:block;height:100%;background:#c9a97e}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
   max-width:36rem;width:100%;max-height:86vh;display:flex;flex-direction:column;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif}
 .choix{flex:1 1 auto;min-height:6rem;overflow:auto;border:1px solid var(--v11);
@@ -100,7 +100,7 @@ button.sty.actif{border-color:#c9a97e;background:rgba(201,169,126,.16);font-weig
 label.champ{display:block;margin:0 0 .6rem}
 label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .22rem}
-input.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
+input.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
 input.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
@@ -112,7 +112,7 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .carte h2 .n.hi{color:var(--tx-att)}
 .vide{padding:1.3rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

@@ -889,7 +889,13 @@ const createWindow = () => {
   // d'attente ; c'est `verifierAuLancement()` qui décide d'ouvrir APP_URL, une
   // fois la question de la mise à jour tranchée. Charger l'admin ici laisserait
   // une version périmée entrer pendant que la vérification tourne encore.
-  mainWindow.loadURL(portePage('Démarrage', 'Un instant…')).catch(() => {});
+  /* LA BARRE AVANCE SUR LES JALONS REELS DU LANCEMENT (A5, 2026-09-04) : 8 ici,
+     35 pendant l interrogation du serveur de mises a jour, 92 quand on ouvre
+     l administration. Trois etapes qui existent VRAIMENT - on ne fabrique pas
+     une animation qui pretend un avancement qu on ignore.
+     << Un instant... >> ne disait rien et n avait pas de barre : la charte le
+     relevait comme le defaut A5. */
+  mainWindow.loadURL(portePage('Démarrage', 'Préparation de l’application…', 8)).catch(() => {});
 
   // Réapplique la préférence de masquage de la barre latérale à chaque chargement,
   // et remet le menu en accord avec l'état de session de la page qui vient de
@@ -3431,9 +3437,42 @@ const montrerPorte = (titre, message, progression) => {
 // Ouvre (enfin) l'administration. Seul endroit qui charge APP_URL après le
 // lancement : si la porte ne l'appelle pas, l'admin ne s'ouvre pas.
 const ouvrirAdmin = () => {
-  _porteActive = false;
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  mainWindow.loadURL(APP_URL).catch(() => {});
+  /* UN DERNIER MOT AVANT DE CEDER LA PLACE, ET IL DIT LA VERITE (A5, 2026-09-04).
+     Le constat de la charte : << l application recharge tout le site a chaque
+     lancement ; l ecran d attente pourrait montrer la progression reelle plutot
+     qu un << un instant >> fixe >>.
+
+     ⚠⚠ ET LA PROGRESSION REELLE DU SITE EST HORS DE PORTEE, il faut le savoir
+     avant d essayer : la porte et le site partagent le MEME webContents. Charger
+     APP_URL remplace la porte - il n y a plus de page a mettre a jour. Ce qu on
+     voit pendant ces secondes-la, c est la DERNIERE IMAGE de la porte, que
+     Chromium retient jusqu a la premiere peinture du site.
+     Donc le seul progres possible, mais il est reel : que cette derniere image
+     dise ce qui se passe. Avant, elle restait sur << Verification des mises a
+     jour - quelques secondes, le temps d interroger le serveur >>, ce qui etait
+     FAUX a ce moment-la : la verification etait finie, c est le site qui charge.
+
+     ⚠ ON ATTEND QUE LA PORTE SOIT PEINTE avant de partir. Enchainer les deux
+     loadURL annulerait le premier, et l on n aurait rien change du tout.
+     ⚠ FILET DE 900 ms : si la porte ne rend jamais, on part quand meme. Sans lui,
+     l administration ne s ouvrirait PLUS - et ce fichier dit lui-meme que si la
+     porte n appelle pas ceci, l admin ne s ouvre pas. */
+  montrerPorte('Ouverture de l’administration', 'Chargement des écrans…', 92);
+  let parti = false;
+  const partir = () => {
+    if (parti) return;
+    parti = true;
+    _porteActive = false;
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    mainWindow.loadURL(APP_URL).catch(() => {});
+  };
+  try {
+    // Un souffle apres la peinture : sans lui, l image n a pas le temps d etre
+    // vue et l on remplace un message faux par un message invisible.
+    mainWindow.webContents.once('did-finish-load', () => setTimeout(partir, 120));
+  } catch { partir(); return; }
+  setTimeout(partir, 900);
 };
 
 // ⚠ LES DEUX ARGUMENTS SONT LE SUJET, PAS UN DÉTAIL.
@@ -3669,7 +3708,7 @@ const PORTE_DELAI_MS = 20000; // au-delà, on considère la vérification imposs
 const verifierAuLancement = async () => {
   _porteActive = true;
   _majDispo = false;
-  montrerPorte('Vérification des mises à jour', 'Quelques secondes, le temps d’interroger le serveur.');
+  montrerPorte('Vérification des mises à jour', 'Quelques secondes, le temps d’interroger le serveur.', 35);
 
   // En développement (npm start), il n'y a ni paquet ni flux : on ouvre.
   if (!app.isPackaged) { ouvrirAdmin(); return; }

@@ -29,7 +29,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -55,7 +55,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 
 /* Zone de depot : elle doit se voir SANS chercher — c est la porte principale. */
@@ -110,9 +110,9 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    la derniere colonne cache justement les boutons d action.
    ══════════════════════════════════════════════════════════════════════════ */
 .voile{position:fixed;top:0;right:0;bottom:0;width:min(27rem,52vw);z-index:50;
-  display:flex;background:#0b1220;border-left:1px solid var(--v11);
+  display:flex;background:var(--f-pied);border-left:1px solid var(--v11);
   box-shadow:-16px 0 40px rgba(0,0,0,.45)}
-.boite{background:#0b1220;border:0;border-radius:0;width:100%;
+.boite{background:var(--f-pied);border:0;border-radius:0;width:100%;
   overflow:auto;padding:.85rem .95rem}
 body.insp .corps{padding-right:calc(min(27rem,52vw) + .6rem)}
 body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
@@ -150,7 +150,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .choix .p .sk{font-size:.7rem;color:var(--tx2)}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 /* Le SUIVI d import : une ligne par fichier, son etat, et ce qui lui arrive.
@@ -158,7 +158,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
    ni pourquoi. Sur douze photos dont deux sont refusees, c est precisement ce
    qu on veut savoir. */
 .suivi{position:fixed;right:1rem;bottom:3rem;width:min(26rem,calc(100vw - 2rem));
-  max-height:60vh;display:flex;flex-direction:column;background:#16202f;
+  max-height:60vh;display:flex;flex-direction:column;background:var(--f-carte);
   border:1px solid rgba(201,169,126,.45);border-radius:11px;
   box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
 .suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
@@ -200,14 +200,14 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
    les traitements engendrent — une image inventee n a pas la meme valeur qu une
    photo, et cela doit se lire avant de cliquer. */
 .lot{position:sticky;bottom:0;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
-  margin-top:.6rem;padding:.5rem .7rem;background:#16202f;
+  margin-top:.6rem;padding:.5rem .7rem;background:var(--f-carte);
   border:1px solid rgba(201,169,126,.45);border-radius:11px}
 .lot .cnt{font-weight:700;font-size:.8rem}
 .lot .av{flex:1 0 100%;font-size:.7rem;color:var(--tx2)}
 input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
 /* ── LE CENTRE DE COMMANDE ─────────────────────────────────────────────── */
 .cmd{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
-  padding:.5rem .6rem;background:#16202f;border:1px solid var(--v08);
+  padding:.5rem .6rem;background:var(--f-carte);border:1px solid var(--v08);
   border-radius:11px}
 .cmd .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 .cmd .sep{width:1px;height:1.3rem;background:var(--v11);margin:0 .2rem}
@@ -235,7 +235,7 @@ tr:hover .act .ic{opacity:1}
 /* ── L ASSISTANT ───────────────────────────────────────────────────────── */
 .asst{position:fixed;inset:0;background:rgba(6,10,18,.78);z-index:70;display:flex;
   align-items:center;justify-content:center;padding:1rem}
-.asst .bo{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
+.asst .bo{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
   width:min(62rem,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
 .asst .tt{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;
   border-bottom:1px solid var(--v08)}
@@ -248,12 +248,12 @@ tr:hover .act .ic{opacity:1}
 /* Le choix de la mise en scene : des couples etiquette/valeur, alignes. */
 .ch{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
 .ch>label:first-child{min-width:7rem;color:var(--tx2);font-size:.78rem}
-.ch select{flex:1;background:#0f1724;color:var(--tx);border:1px solid #2b3444;
+.ch select{flex:1;background:var(--f-champ);color:var(--tx);border:1px solid #2b3444;
   border-radius:.4rem;padding:.42rem .55rem;font:inherit}
 .ch input[type=checkbox]{accent-color:#c9a97e;margin-right:.35rem}
 .ch.col{display:block}
 .ch.col>label:first-child{display:block;min-width:0;margin-bottom:.35rem}
-.ch textarea{width:100%;box-sizing:border-box;background:#0f1724;color:var(--tx);
+.ch textarea{width:100%;box-sizing:border-box;background:var(--f-champ);color:var(--tx);
   border:1px solid #2b3444;border-radius:.4rem;padding:.42rem .55rem;font:inherit;
   resize:vertical;min-height:2.6rem;line-height:1.4}
 .sugg{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
@@ -266,14 +266,14 @@ tr:hover .act .ic{opacity:1}
 /* La planche de vignettes : c est l ecran ou l on CHOISIT, il doit montrer. */
 .pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.5rem}
 .pl .v{position:relative;border:2px solid var(--v11);border-radius:9px;
-  overflow:hidden;cursor:pointer;background:#0b1220}
+  overflow:hidden;cursor:pointer;background:var(--f-pied)}
 .pl .v.on{border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.2)}
 /* ⚠⚠ UNE ROTATION CSS NE CHANGE PAS LA BOITE. L image tournait bien, mais son
    encombrement restait celui d avant : elle debordait sur le titre de la case
    d a cote. La boite d apercu est donc CARREE (aspect-ratio:1) et l image y est
    centree en position absolue : dans un carre, une image qui tient avant la
    rotation tient encore apres, quel que soit le quart de tour. */
-.pl .v .im{position:relative;aspect-ratio:1;overflow:hidden;background:#0b1220}
+.pl .v .im{position:relative;aspect-ratio:1;overflow:hidden;background:var(--f-pied)}
 .pl .v .im img{position:absolute;top:50%;left:50%;max-width:100%;max-height:100%;
   display:block;transform:translate(-50%,-50%)}
 /* ⚠ LA VIGNETTE SE REDRESSE A L AFFICHAGE. Les pixels ne sont pas pivotes : on
@@ -1486,7 +1486,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     v.id = 'frais-voile';
     v.style.cssText = 'position:fixed;inset:0;z-index:120;background:rgba(6,10,18,.72);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.2rem';
-    v.innerHTML = '<div style="max-width:30rem;background:#131c2b;'
+    v.innerHTML = '<div style="max-width:30rem;background:var(--f-carte2);'
       + 'border:1px solid var(--v11);border-radius:13px;padding:1.1rem 1.2rem;'
       + 'box-shadow:0 18px 50px rgba(0,0,0,.5)">'
       + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-or2)">'
@@ -1530,7 +1530,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var titre = (quoi === 'humain') ? 'Aperçu de la mise en scène'
                                     : 'Aperçu du retrait de mannequin';
     var cells = items.map(function(it, i){
-      return '<figure id="apr-c' + i + '" style="margin:0;background:#0e1522;'
+      return '<figure id="apr-c' + i + '" style="margin:0;background:var(--f-page);'
         + 'border:1px solid var(--v08);border-radius:10px;overflow:hidden;'
         + 'display:flex;flex-direction:column">'
         + '<div class="apr-img" style="aspect-ratio:3/4;display:flex;align-items:center;'

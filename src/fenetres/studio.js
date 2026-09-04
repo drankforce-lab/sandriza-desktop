@@ -43,7 +43,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -72,7 +72,7 @@ body{background:#0e1522;color:var(--tx);
 .corps::-webkit-scrollbar,.scene::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb,
 .scene::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .74rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -84,7 +84,7 @@ body{background:#0e1522;color:var(--tx);
    en separant les deux volets. Une recette n ajoute rien a la commande, elle
    REMPLIT les cinq etapes d un coup : sa place est donc au-dessus d elles. */
 .rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;
-  background:#16202f;border:1px solid var(--v08);border-radius:12px;
+  background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;
   padding:.5rem .6rem}
 .rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -113,7 +113,7 @@ body{background:#0e1522;color:var(--tx);
   padding:.42rem .5rem;border-radius:9px;border:1px solid transparent;
   background:transparent;color:var(--tx-bleute);cursor:pointer}
 .ong:hover:not(.on){background:var(--v05)}
-.ong.on{background:#16202f;border-color:rgba(201,169,126,.45)}
+.ong.on{background:var(--f-carte);border-color:rgba(201,169,126,.45)}
 /* ⚠ MEME L ONGLET OUVERT RESTE EN GRIS. Il etait degrise pour se distinguer —
    mais c est la seule couleur qui restait dans la bande, et la regle est
    << toujours >>. L onglet ouvert se marque par son fond et son liseré dores,
@@ -126,7 +126,7 @@ body{background:#0e1522;color:var(--tx);
 .ong.on .oe{color:var(--tx2)}
 .ong .oc{flex:0 0 auto;color:var(--tx-or);font-size:.8rem;font-weight:700}
 .panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
-  background:#16202f;border:1px solid var(--v08);border-radius:12px;
+  background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;
   padding:.85rem .95rem}
 .pnt{display:flex;align-items:center;gap:.55rem}
 .pnt .pi{font-size:1rem;filter:grayscale(1) brightness(1.7);opacity:.9}
@@ -150,7 +150,7 @@ body{background:#0e1522;color:var(--tx);
 /* ── LE VOLET DE DROITE ────────────────────────────────────────────────────
    Ce qu on va obtenir, toujours visible : le recapitulatif de la commande, puis
    l image. */
-.bloc{background:#16202f;border:1px solid var(--v08);border-radius:12px;
+.bloc{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;
   padding:.85rem 1rem;min-width:0}
 .recap .rt,.fmt .rt{font:700 .74rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -169,7 +169,7 @@ body{background:#0e1522;color:var(--tx);
   align-content:start;max-height:16rem;overflow-y:auto}
 .loggr::-webkit-scrollbar{width:8px}
 .loggr::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.logv{background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.3rem;cursor:pointer;
+.logv{background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.3rem;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;
   -webkit-user-select:none;user-select:none;transition:border-color .12s,background .12s}
 .logv:hover{border-color:rgba(201,169,126,.6)}
@@ -189,9 +189,9 @@ body{background:#0e1522;color:var(--tx);
 .fmt .fbar .grand{margin-left:auto}
 .fmtg{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.55rem;
   align-content:start;margin-top:.6rem}
-.fmtc{background:#111a29;border:1px solid var(--v08);border-radius:9px;padding:.45rem;
+.fmtc{background:var(--f-pill);border:1px solid var(--v08);border-radius:9px;padding:.45rem;
   display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:0}
-.fmtc img{width:100%;height:7.5rem;object-fit:contain;background:#0b1220;border-radius:6px;
+.fmtc img{width:100%;height:7.5rem;object-fit:contain;background:var(--f-pied);border-radius:6px;
   border:1px solid var(--v08)}
 .fmtc .ft{font-size:.82rem;font-weight:700;line-height:1.1}
 .fmtc .fd{font-size:.68rem;color:var(--tx3);font-variant-numeric:tabular-nums}
@@ -215,7 +215,7 @@ body{background:#0e1522;color:var(--tx);
    qu UNE fois par photo — et repoussait les boutons qui, eux, servent tout le
    temps. Elle reste evidemment reperable : c est un cadre en pointille, pas un
    affichage. */
-.depot{border:1.5px dashed #2b3444;border-radius:10px;background:#0f1724;cursor:pointer;
+.depot{border:1.5px dashed #2b3444;border-radius:10px;background:var(--f-champ);cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
   min-height:5rem;text-align:center;color:var(--tx2);font-size:.78rem;padding:.6rem .7rem;
   -webkit-user-select:none;user-select:none}
@@ -227,7 +227,7 @@ body{background:#0e1522;color:var(--tx);
 .phbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
 .phbarre .phinfo{font-size:.74rem;color:var(--tx2);margin-left:auto;white-space:nowrap}
 .phbarre #ph-q{flex:1 1 auto;min-width:6rem;max-width:22rem;font:inherit;color:var(--tx);
-  background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.34rem .55rem}
+  background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.34rem .55rem}
 .phbarre #ph-q:focus{outline:none;border-color:#c9a97e}
 /* ⚠ 7rem, pas 5,5 : la vignette porte desormais une coche et des pastilles.
    A l ancienne largeur, le nom passait dessous et devenait illisible. */
@@ -244,12 +244,12 @@ body{background:#0e1522;color:var(--tx);
   max-height:calc(100vh - 18rem);min-height:14rem;overflow-y:auto;padding-right:.2rem}
 .phgrille::-webkit-scrollbar{width:8px}
 .phgrille::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.phvig{background:#0f1724;border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
+.phvig{background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
 .phvig:hover{border-color:#c9a97e}
 /* object-fit:contain : une photo COUCHEE garde ses proportions et se centre dans
    la boite, elle ne s etale pas pour la remplir. */
-.phvig img{width:100%;height:7rem;object-fit:contain;background:#0b1220}
+.phvig img{width:100%;height:7rem;object-fit:contain;background:var(--f-pied)}
 .phvig .attente{font-size:.68rem;color:var(--tx3);padding:1.6rem .3rem}
 .phvig .phnom{font-size:.64rem;color:var(--tx2);padding:.15rem .25rem;max-width:100%;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -260,8 +260,8 @@ body{background:#0e1522;color:var(--tx);
 .jeton:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 .jeton:disabled{opacity:.4;cursor:default}
 .jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
-.jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
-.phfiltres select{font:inherit;font-size:.73rem;color:var(--tx-bleute);background:#0f1724;
+.jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
+.phfiltres select{font:inherit;font-size:.73rem;color:var(--tx-bleute);background:var(--f-champ);
   border:1px solid var(--v16);border-radius:8px;padding:.14rem .4rem;
   width:auto;max-width:15rem;flex:0 1 auto}
 .phsel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;
@@ -288,13 +288,13 @@ body{background:#0e1522;color:var(--tx);
 .panier .pt .dt{color:var(--tx2);font-size:.74rem}
 .panier .pt button{margin-left:auto}
 .panier .pv{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
-.panier .pv img{width:2.2rem;height:2.2rem;object-fit:contain;border-radius:5px;background:#0b1220}
+.panier .pv img{width:2.2rem;height:2.2rem;object-fit:contain;border-radius:5px;background:var(--f-pied)}
 .panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:var(--v05)}
 .panier .pv .pl{font-size:.72rem;color:var(--tx2)}
 .panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
 .lots{display:flex;flex-direction:column;gap:.5rem;max-height:calc(100vh - 14rem);overflow-y:auto}
-.lotc{background:#111a29;border:1px solid var(--v08);border-radius:10px;padding:.5rem .65rem}
+.lotc{background:var(--f-pill);border:1px solid var(--v08);border-radius:10px;padding:.5rem .65rem}
 .lotc.vif{border-color:#c9a97e}
 .lott{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.35rem}
 .lott strong{font-size:.85rem}
@@ -316,7 +316,7 @@ body{background:#0e1522;color:var(--tx);
    La tuile est donc une grille : l emoji tient la colonne de gauche sur deux
    rangs, le titre et la description se rangent l un SOUS l autre a droite. */
 .tuiles{display:grid;grid-template-columns:1fr;gap:.4rem}
-.tuile{background:#111a29;border:1px solid var(--v08);border-radius:10px;
+.tuile{background:var(--f-pill);border:1px solid var(--v08);border-radius:10px;
   padding:.58rem .7rem;cursor:pointer;-webkit-user-select:none;user-select:none;
   display:grid;grid-template-columns:auto 1fr;column-gap:.65rem;row-gap:.08rem;
   align-items:center;text-align:left;transition:border-color .12s,background .12s}
@@ -338,7 +338,7 @@ body{background:#0e1522;color:var(--tx);
    Le mannequin se choisit maintenant dans .duo / .ch, juste en dessous. */
 .ch{margin:.7rem 0 0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:var(--tx2)}
-select{width:100%;font:inherit;color:var(--tx);background:#0f1724;border:1px solid #2b3444;
+select{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
   border-radius:8px;padding:.4rem .5rem}
 select:focus{outline:none;border-color:#c9a97e}
 .bascule{display:flex;align-items:flex-start;gap:.55rem;font-size:.82rem;cursor:pointer;
@@ -366,17 +366,17 @@ select:focus{outline:none;border-color:#c9a97e}
 .avsec.prem{margin-top:0;padding-top:0;border-top:0}
 .aidep{font-size:.71rem;color:var(--tx3);line-height:1.45;margin-top:.22rem}
 .aidep.att{color:#d8b57a}
-textarea{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:#0f1724;
+textarea{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);
   border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem;resize:vertical;min-height:3.2rem}
 textarea:focus{outline:none;border-color:#c9a97e}
-input[type=text]{width:100%;font:inherit;color:var(--tx);background:#0f1724;
+input[type=text]{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
 input[type=text]:focus{outline:none;border-color:#c9a97e}
 input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointer}
 .avlab{display:flex;align-items:baseline;gap:.4rem}
 .avlab b{color:var(--tx-or);font-size:.78rem;font-variant-numeric:tabular-nums}
 .avint{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
-.avint img{width:3.4rem;height:3.4rem;object-fit:contain;background:#0b1220;border-radius:7px;
+.avint img{width:3.4rem;height:3.4rem;object-fit:contain;background:var(--f-pied);border-radius:7px;
   border:1px solid var(--v11)}
 /* ⚠ flex:0 1 auto, PAS 1 1 : en poussant, le nom occupait toute la largeur de la
    carte et rejetait le bouton << Choisir un fichier >> a l autre bout de l ecran,
@@ -400,7 +400,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    visible a gauche est donc l avant, pose dessous. Un fond opaque, sinon un
    detourage transparent laisserait voir la photo d origine au travers — et
    l on croirait le detourage rate. */
-.cmp .cb{position:absolute;inset:0;overflow:hidden;background:#0b1220;border-radius:9px;
+.cmp .cb{position:absolute;inset:0;overflow:hidden;background:var(--f-pied);border-radius:9px;
   clip-path:inset(0 0 0 var(--x,50%))}
 .cmp .cb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
   max-height:none;border:0;border-radius:9px}
@@ -433,7 +433,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
 .res .dims{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
 .res .dl{margin-top:.6rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.55rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
@@ -456,13 +456,13 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
    JAMAIS rien fait, par aucun des deux chemins (panier ou sélecteur). */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.1rem;z-index:60}
-.voile .boite{background:#16202f;border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
   border-radius:13px;padding:1rem 1.15rem;max-width:29rem;width:100%;
   max-height:88vh;overflow-y:auto;box-shadow:0 18px 46px rgba(0,0,0,.5)}
 .voile h3{margin:0 0 .5rem;font:700 1.02rem/1.25 Georgia,serif}
 .voile p{margin:.6rem 0 0;font-size:.79rem;line-height:1.55}
 .voile input[type=text],.voile input:not([type]){width:100%;font:inherit;color:var(--tx);
-  background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
+  background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
 .voile input:focus{outline:none;border-color:#c9a97e}
 .rc{display:flex;align-items:flex-start;gap:.55rem;font-size:.8rem;line-height:1.5;
   cursor:pointer;-webkit-user-select:none;user-select:none;margin:.6rem 0 0}
@@ -2703,7 +2703,7 @@ ${JS_ACTIVITE}${JS_DIRE}
          avec décor est DEUX appels, et que le détourage part chez un autre
          fournisseur, cinquante fois moins cher. */
       + '<div id="lot-estim" style="margin:.6rem 0 0;padding:.5rem .6rem;border:1px solid #2a3a4e;'
-      + 'border-radius:6px;background:#16202c;font-size:.8rem;color:var(--tx2)">Estimation du coût…</div>'
+      + 'border-radius:6px;background:var(--f-carte);font-size:.8rem;color:var(--tx2)">Estimation du coût…</div>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'
       + '<button class="prim" id="v-oui">Lancer le lot</button></div>',
       function(fermer){

@@ -28,7 +28,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -50,7 +50,7 @@ body{background:#0e1522;color:var(--tx);
   columns:30rem;column-gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column;
   break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:1rem}
 .carte .th{display:flex;align-items:center;gap:.5rem;margin:0 0 .3rem}
@@ -66,7 +66,7 @@ body{background:#0e1522;color:var(--tx);
 .ch{margin:0 0 .6rem}
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}
-.ch input,.ch select{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:#0f1724;
+.ch input,.ch select{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);
   border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
 .ch input.mono{font-family:ui-monospace,Consolas,monospace}
 .ch input:focus,.ch select:focus{outline:none;border-color:#c9a97e}
@@ -78,7 +78,7 @@ body{background:#0e1522;color:var(--tx);
 .sep{border:0;border-top:1px solid var(--v08);margin:.7rem 0 .5rem}
 .stitre{font-size:.78rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .5rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button{font:inherit;color:var(--tx);background:var(--v05);

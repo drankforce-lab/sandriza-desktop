@@ -22,7 +22,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
@@ -34,7 +34,7 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
 /* ⚠ ANCRÉE = PLEINE PAGE : les cartes se répartissent en colonnes pour remplir la
    largeur (pas de max-width qui laisse du vide à droite). Voir la règle mémoire. */
 .zone{columns:32rem;column-gap:1.1rem}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:1rem 1.1rem;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .stitre{font-size:.86rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .5rem}
 .info{color:var(--tx2);font-size:.79rem;line-height:1.6;margin:0 0 .6rem}
@@ -45,13 +45,13 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
 .jauge .lg{display:flex;align-items:baseline;gap:.4rem;font-size:.8rem;margin-bottom:.25rem}
 .jauge .lg .em{filter:grayscale(1) brightness(1.6)}
 .jauge .lg .v{margin-left:auto;color:var(--tx2);font-size:.74rem}
-.jauge .barre{height:.55rem;background:#0f1724;border:1px solid #2b3444;border-radius:99px;overflow:hidden}
+.jauge .barre{height:.55rem;background:var(--f-champ);border:1px solid #2b3444;border-radius:99px;overflow:hidden}
 .jauge .barre i{display:block;height:100%;background:#c9a97e}
 .jauge .sous{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
 .cles{display:flex;flex-wrap:wrap;gap:.3rem}
-.cles code{font-size:.66rem;background:#0f1724;border:1px solid #2b3444;border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
+.cles code{font-size:.66rem;background:var(--f-champ);border:1px solid #2b3444;border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;
-  border-top:1px solid var(--v08);background:#0b1220}
+  border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);

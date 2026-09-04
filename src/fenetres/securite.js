@@ -30,7 +30,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
@@ -48,7 +48,7 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
 .b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover:not(:disabled){background:rgba(248,113,113,.16)}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.recherche{flex:1 1 15rem;max-width:24rem;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
+.recherche{flex:1 1 15rem;max-width:24rem;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;
   color:var(--tx);font:inherit;padding:.45rem .7rem}
 .recherche:focus{outline:none;border-color:#c9a97e}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:0 0 1.2rem}
@@ -86,12 +86,12 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
 .fiche .barre{display:flex;gap:.35rem;flex-wrap:wrap;border-top:1px solid var(--v08);padding-top:.65rem;margin-top:auto}
 .fiche .barre .b{font-size:.76rem;padding:.3rem .62rem}
 .vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem;line-height:1.7}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 /* ── Éditeur de compte (surcouche) ───────────────────────────────── */
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:60;padding:1.4rem}
-.sur .boite{background:#131c2b;border:1px solid var(--v11);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+.sur .boite{background:var(--f-carte2);border:1px solid var(--v11);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
 .sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid var(--v08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
@@ -117,7 +117,7 @@ label.champ{display:block;margin:0 0 .9rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
 label.champ .req{color:var(--tx-err2)}
-input.t,select.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
+input.t,select.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;cursor:pointer;margin:0 0 .55rem;line-height:1.45}
 label.case input{width:16px;height:16px;accent-color:#c9a97e;margin-top:.15rem;flex:0 0 auto}
@@ -483,9 +483,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> Activer MFA — '+esc(s.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
       + '<div class="liste">'
       + '<p class="aideOng"><b>Étape 1</b> — Scannez le QR avec Google Authenticator, Authy ou une application TOTP compatible, ou entrez la clé manuellement.</p>'
-      + '<div style="text-align:center;background:#0b1220;padding:1rem;border-radius:9px;margin:.6rem 0">'
+      + '<div style="text-align:center;background:var(--f-pied);padding:1rem;border-radius:9px;margin:.6rem 0">'
       + '<img id="m-qr" src="'+esc(s.qrUrl)+'" alt="QR MFA" style="width:190px;height:190px;border-radius:8px;background:#fff"></div>'
-      + '<div style="text-align:center;background:#0f1724;border:1px solid #2b3444;border-radius:9px;padding:.6rem">'
+      + '<div style="text-align:center;background:var(--f-champ);border:1px solid #2b3444;border-radius:9px;padding:.6rem">'
       + '<div class="sub" style="color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;font-size:.72rem">Clé secrète (saisie manuelle)</div>'
       + '<code style="font-size:.9rem;letter-spacing:.12em;word-break:break-all;color:var(--tx)">'+esc(s.secretGroupe||s.secret||'')+'</code>'
       + '<div style="font-size:.72rem;color:var(--tx-gris)">Base32 · SHA-1 · 6 chiffres · 30 s</div></div>'

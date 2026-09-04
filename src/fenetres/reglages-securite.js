@@ -27,7 +27,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
@@ -47,7 +47,7 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
 label.champ{display:block;margin:0 0 .75rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.2rem 0 0}
-input.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
+input.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 input.n{width:120px}
 textarea.t{resize:vertical;min-height:3.4rem;line-height:1.5}
 input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
@@ -61,7 +61,7 @@ label.case input{width:16px;height:16px;accent-color:#c9a97e}
   border:1px solid var(--v08);border-radius:9px;padding:.6rem .7rem}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

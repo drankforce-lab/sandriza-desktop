@@ -21,7 +21,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -34,20 +34,20 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:.85rem 1rem}
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.85rem 1rem}
 .th{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:0 0 .3rem}
 .th .em{font-size:1.05rem;filter:grayscale(1) brightness(1.55);opacity:.9}
 .th .nom{font-weight:700;font-size:.9rem}
-.pill{font-size:.68rem;color:var(--tx2);background:#111a29;border:1px solid var(--v08);
+.pill{font-size:.68rem;color:var(--tx2);background:var(--f-pill);border:1px solid var(--v08);
   border-radius:99px;padding:.1rem .5rem}
 .desc{font-size:.8rem;color:var(--tx2);margin:0 0 .5rem}
-.reco{font-size:.76rem;color:var(--tx-bleute);background:#111a29;border-left:3px solid #c9a97e;
+.reco{font-size:.76rem;color:var(--tx-bleute);background:var(--f-pill);border-left:3px solid #c9a97e;
   border-radius:0 7px 7px 0;padding:.4rem .6rem;margin:0 0 .7rem}
 .rangee{display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;margin:0 0 .6rem}
 .ch{flex:1 1 16rem;min-width:0}
 .ch.plein{flex:1 1 100%}
 .ch label{display:block;margin-bottom:.22rem;font-size:.73rem;color:var(--tx2)}
-.ch input{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:#0f1724;
+.ch input{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);
   border:1px solid #2b3444;border-radius:8px;padding:.4rem .5rem}
 .ch input.mono{font-family:ui-monospace,Consolas,monospace;font-size:.76rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
@@ -66,7 +66,7 @@ button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
 .pied{flex:0 0 auto;display:flex;align-items:center;padding:.5rem 1.05rem;
-  border-top:1px solid var(--v08);background:#0b1220}
+  border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}

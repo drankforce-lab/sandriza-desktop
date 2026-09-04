@@ -33,7 +33,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -55,7 +55,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
@@ -109,7 +109,7 @@ label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-
   color:var(--tx2);margin:0 0 .22rem}
 label.champ .req{color:var(--tx-att);text-transform:none;letter-spacing:0;font-size:.64rem}
 label.champ .sub{display:block;font-size:.68rem;color:var(--tx3);margin:.2rem 0 0;line-height:1.45}
-input.t,select.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
+input.t,select.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
 input.t.mono{font-family:Consolas,monospace;font-size:.8rem;text-transform:uppercase}
 input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
@@ -143,7 +143,7 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 .form a.mini:hover{background:var(--v11)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

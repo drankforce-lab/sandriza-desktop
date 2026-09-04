@@ -23,7 +23,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -50,14 +50,14 @@ body{background:#0e1522;color:var(--tx);
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
 .ch{margin:0 0 .8rem}
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
-.ch input[type=text]{width:100%;font:inherit;color:var(--tx);background:#0f1724;
+.ch input[type=text]{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid #2b3444;border-radius:8px;padding:.42rem .55rem}
 .ch input[type=text]:focus{outline:none;border-color:#c9a97e}
 .bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
@@ -76,18 +76,18 @@ body{background:#0e1522;color:var(--tx);
 /* La liste des icones. */
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.7rem}
 .ico{display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem;align-items:center;min-width:0;
-  border:1px solid var(--v08);border-radius:10px;padding:.6rem .7rem;background:#111a29}
+  border:1px solid var(--v08);border-radius:10px;padding:.6rem .7rem;background:var(--f-pill)}
 .ico .im{width:3.4rem;height:3.4rem;border-radius:8px;background:#f5f2ec;display:flex;
   align-items:center;justify-content:center;padding:.3rem;overflow:hidden}
 .ico .im img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 .ico .nm{font-size:.84rem;font-weight:700;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ico .gestes{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.3rem}
 code{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;color:#cfe0f5;
-  background:#0f1724;border:1px solid #2b3444;border-radius:5px;padding:.1rem .35rem;
+  background:var(--f-champ);border:1px solid #2b3444;border-radius:5px;padding:.1rem .35rem;
   cursor:pointer;-webkit-user-select:none;user-select:none}
 code:hover{border-color:#c9a97e}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}

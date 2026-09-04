@@ -37,7 +37,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -67,7 +67,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .deux .principal{flex:1 1 auto;min-width:0}
 .deux .cote{flex:0 0 320px}
 @media (max-width:920px){.deux{flex-direction:column}.deux .cote{flex:1 1 auto;width:100%}}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
@@ -96,7 +96,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .fileligne .info .dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
   max-width:34rem;width:100%;max-height:82vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .95rem/1.3 Georgia,serif}
 .boite .rangs{display:flex;flex-direction:column}
@@ -109,7 +109,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .boite li.item{list-style:none;background:var(--v05);border-radius:7px;
   padding:.35rem .55rem;margin-bottom:.3rem;font-size:.82rem;line-height:1.45}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}

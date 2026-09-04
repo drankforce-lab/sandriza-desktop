@@ -382,7 +382,7 @@ function pageCommande(id) {
     v.id = 'bc-voile';
     v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
-    v.innerHTML = '<div style="background:#16202f;border:1px solid var(--v11);'
+    v.innerHTML = '<div style="background:var(--f-carte);border:1px solid var(--v11);'
       + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%">'
       + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif"><span class="ic">🚀</span> Préparation de la commande '
       + esc(CMD.numero) + '</h3>'
@@ -591,7 +591,7 @@ function pageCommande(id) {
     var v = document.createElement('div');
     v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
-    v.innerHTML = '<div style="background:#16202f;border:1px solid var(--v11);'
+    v.innerHTML = '<div style="background:var(--f-carte);border:1px solid var(--v11);'
       + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:30rem;width:100%">'
       + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif">' + titre + '</h3>'
       + corps

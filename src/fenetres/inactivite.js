@@ -33,7 +33,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
@@ -51,7 +51,7 @@ body{background:#0e1522;color:var(--tx);
 .txt p{margin:0 0 .25rem;font-size:.9rem}
 .txt .sec{font-size:.78rem;color:var(--tx2);margin:0}
 .pied{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;
-  padding:.55rem .95rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem .95rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v11)}

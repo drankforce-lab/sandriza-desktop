@@ -29,7 +29,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -53,7 +53,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
   background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
 /* ── Les tuiles ── */
 .tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.55rem}
-.tuile{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .8rem;min-width:0;cursor:pointer;user-select:none;
   transition:border-color .13s}
 .tuile:hover{border-color:#c9a97e}
@@ -84,14 +84,14 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .afaire button.urgent{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 html.jour .afaire{background:rgba(180,140,80,.12);border-color:rgba(150,110,50,.35)}
 html.jour .afaire .titre{color:#8a6a3e}
-.panneau{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.panneau{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .8rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:.82rem}
 .panneau label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
 .panneau input{width:auto}
 /* ── Les deux cartes récentes ── */
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
 @media (max-width:900px){.deux{grid-template-columns:1fr}}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
@@ -114,7 +114,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}

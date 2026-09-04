@@ -73,10 +73,32 @@ const CSS_SOCLE = `
    clair sur du bleu nuit ; a opacite egale, la bordure de jour serait plus
    faible que celle de nuit.
    Aucun accent grave ici : ce commentaire part dans un litteral de gabarit. */
-:root{color-scheme:dark;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#6d7f96;--tx-gris:#6f8098;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd;--v03:var(--v03);--v05:var(--v05);--v08:var(--v08);--v11:var(--v11);--v16:var(--v16);--v22:var(--v22);--v30:var(--v30);--v45:var(--v45);--v90:var(--v90)}
+/* == LES FONDS DE SURFACE AUSSI, ET C EST UNE REPARATION ====================
+   Troisieme famille du meme defaut, et celle-ci etait devenue URGENTE : en
+   convertissant les couleurs de TEXTE en jetons (meme jour), j ai casse les
+   CHAMPS DE SAISIE en mode jour. Un champ s ecrit
+       input{background:var(--f-champ);color:var(--tx)}
+   et en jour --tx vaut #1d2433 : texte fonce sur champ FONCE, ratio 1.16. On ne
+   pouvait plus lire ce qu on tape. Avant ma passe c etait laid mais lisible
+   (texte clair sur champ sombre) ; le jeton de texte seul a transforme un defaut
+   d aspect en defaut d USAGE.
+   LA LECON, ET ELLE VAUT POUR TOUTE CONVERSION EN JETONS : le texte et son FOND
+   forment une PAIRE. Convertir l un sans l autre ne deplace pas le probleme, il
+   l aggrave. On convertit donc les fonds neutres ici, et la paire redevient
+   coherente dans les deux modes.
+
+   ⚠ --tx-sur-accent NE S INVERSE PAS, et c est tout son role. Un texte pose sur
+   un fond d ACCENT fixe (rouge #7f1d1d, violet #7c5cff, dore #8f6f42) doit rester
+   CLAIR en jour comme en nuit : ce fond-la ne change pas, donc son texte ne doit
+   pas changer non plus. Employer --tx-blanc a cet endroit le faisait devenir
+   fonce en jour, donc illisible.
+   ⚠ NE PAS CONVERTIR LES FONDS D ACCENT en jetons de surface : un rouge d alerte
+   n a pas de version claire, il reste rouge.
+   Aucun accent grave ici : le tout part dans un litteral de gabarit. */
+:root{color-scheme:dark;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#6d7f96;--tx-gris:#6f8098;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd;--v03:var(--v03);--v05:var(--v05);--v08:var(--v08);--v11:var(--v11);--v16:var(--v16);--v22:var(--v22);--v30:var(--v30);--v45:var(--v45);--v90:var(--v90);--f-page:#0e1522;--f-carte:#16202f;--f-pied:#0b1220;--f-champ:#0f1724;--f-carte2:#141d2c;--f-pill:#111a29;--tx-sur-accent:#ffffff}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
@@ -105,7 +127,7 @@ body{background:#0e1522;color:var(--tx);
 .etape{display:none;flex:1 1 auto;min-height:0;flex-direction:column;gap:.7rem}
 .etape.on{display:flex}
 
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.85rem .95rem;min-height:0;flex:0 0 auto}
 /* « plein » : pour les cartes qui portent une LISTE, qui doit occuper la place
    disponible pour montrer le plus de lignes possible. Une carte ordinaire epouse
@@ -121,7 +143,7 @@ body{background:#0e1522;color:var(--tx);
 .ch.large{grid-column:1/-1}
 .ch label{font-size:.73rem;color:var(--tx2)}
 .ch .req{color:var(--tx-or)}
-input,select,textarea{font:inherit;color:var(--tx);background:#0f1826;
+input,select,textarea{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v16);border-radius:8px;padding:.38rem .55rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
@@ -142,7 +164,7 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.1rem;border-top:1px solid var(--v08);
-  background:#0b1220}
+  background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);min-height:1.15em;flex:1 1 auto;min-width:0;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
@@ -1426,7 +1448,7 @@ const CSS_JOUR = `
 /* Les jetons de texte, version JOUR. Voir la fiche dans CSS_SOCLE. html.jour
    (element + classe) l emporte sur :root, et CSS_JOUR est appende APRES le CSS
    de chaque fenetre - donc ceci commande partout, sans une seule reprise locale. */
-html.jour{--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#387652;--tx-err:#ab4e4e;--tx-err2:#905e5e;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#76694e;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b;--v03:rgba(15,23,42,.05);--v05:rgba(15,23,42,.07);--v08:rgba(15,23,42,.10);--v11:rgba(15,23,42,.14);--v16:rgba(15,23,42,.20);--v22:rgba(15,23,42,.26);--v30:rgba(15,23,42,.34);--v45:rgba(15,23,42,.48);--v90:rgba(15,23,42,.88)}
+html.jour{--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#387652;--tx-err:#ab4e4e;--tx-err2:#905e5e;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#76694e;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b;--v03:rgba(15,23,42,.05);--v05:rgba(15,23,42,.07);--v08:rgba(15,23,42,.10);--v11:rgba(15,23,42,.14);--v16:rgba(15,23,42,.20);--v22:rgba(15,23,42,.26);--v30:rgba(15,23,42,.34);--v45:rgba(15,23,42,.48);--v90:rgba(15,23,42,.88);--f-page:#f4f2ec;--f-carte:#ffffff;--f-pied:#efece4;--f-champ:#ffffff;--f-carte2:#faf8f3;--f-pill:#eeebe3;--tx-sur-accent:#ffffff}
 html.jour .tete h1{color:#141c28}
 
 /* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION — ET LA REGLE EST ICI, UNE
@@ -1495,7 +1517,7 @@ html.jour .ico{color:#414e66}
    d une carte. La question se pose une fois, a l ouverture, et disparait. */
 .szbr-voile{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
   justify-content:center;padding:1.2rem;background:rgba(6,10,18,.62)}
-.szbr-boite{max-width:33rem;width:100%;background:#131c2b;color:var(--tx);
+.szbr-boite{max-width:33rem;width:100%;background:var(--f-carte2);color:var(--tx);
   border:1px solid var(--v11);border-radius:10px;padding:1rem 1.1rem;
   box-shadow:0 18px 44px rgba(0,0,0,.45)}
 .szbr-boite h3{margin:0 0 .5rem;display:flex;align-items:center;gap:.45rem;
@@ -1530,7 +1552,7 @@ html.jour .szbr-pied button.prim{background:#C49A6C;border-color:#C49A6C;color:#
    a TOUTES les fenetres, une liste deroulante ecrite demain est couverte
    d office. */
 select{color-scheme:dark}
-select option,select optgroup{background:#16202f;color:var(--tx)}
+select option,select optgroup{background:var(--f-carte);color:var(--tx)}
 html.jour select{color-scheme:light}
 html.jour select option,html.jour select optgroup{background:#ffffff;color:#1d2433}
 

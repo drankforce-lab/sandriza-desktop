@@ -33,7 +33,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -57,17 +57,17 @@ button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.arme{border-color:#fbbf24;background:rgba(251,191,36,.16);color:#fde68a}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
-.tuile{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:.5rem .65rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.5rem .65rem}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.neutre{color:var(--tx2)}
 .tuile .val.att{color:var(--tx-att)}.tuile .val.mal{color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte + .carte{margin-top:.5rem}
 .chaine .entete{display:flex;align-items:flex-start;gap:.6rem;flex-wrap:wrap}
@@ -136,7 +136,7 @@ tbody tr:hover td{background:var(--v03)}
   border:1.5px dashed var(--v16);border-radius:9px}
 .apercu{border:1px solid var(--v16);border-radius:9px;overflow:hidden;
   margin-top:.4rem;background:#fff}
-.apercu .chrome{background:#0f1826;color:var(--tx2);font-size:.7rem;padding:.24rem .55rem;
+.apercu .chrome{background:var(--f-champ);color:var(--tx2);font-size:.7rem;padding:.24rem .55rem;
   border-bottom:1px solid var(--v11)}
 .apercu iframe{display:block;width:100%;height:20rem;border:none;background:#fff}
 .etapef{border:1px solid var(--v11);border-radius:9px;padding:.55rem .65rem;
@@ -160,7 +160,7 @@ tbody tr:hover td{background:var(--v03)}
 .portee strong{font-size:.95rem;color:var(--tx-creme)}
 .portee button{margin-left:auto}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

@@ -24,7 +24,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -48,7 +48,7 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .ligne{display:flex;align-items:center;gap:.8rem;padding:.6rem .75rem;cursor:pointer;
-  background:#16202f;border:1px solid var(--v08);border-radius:11px}
+  background:var(--f-carte);border:1px solid var(--v08);border-radius:11px}
 .ligne:hover{border-color:#c9a97e}
 .ligne .gauche{flex:1 1 auto;min-width:0}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
@@ -63,7 +63,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .pill.info{background:rgba(59,130,246,.16);color:var(--tx-bleu)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}

@@ -23,7 +23,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -38,7 +38,7 @@ body{background:#0e1522;color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 .item{border:1px solid var(--v08);border-radius:11px;margin-bottom:.55rem;
-  background:#16202f;overflow:hidden}
+  background:var(--f-carte);overflow:hidden}
 .item .lg{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem}
 .item .mk{font-size:.85rem;opacity:.5;flex:0 0 auto;width:1.1rem;text-align:center}
 .item .co{flex:1 1 auto;min-width:0;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
@@ -46,7 +46,7 @@ body{background:#0e1522;color:var(--tx);
 .item .co .href{font-size:.78rem;color:var(--tx3);font-family:ui-monospace,Menlo,Consolas,monospace}
 .item.masque .co .lab{opacity:.45}
 .item .gestes{display:flex;align-items:center;gap:.3rem;flex:0 0 auto}
-input,select{font:inherit;color:var(--tx);background:#0f1724;border:1px solid #2b3444;
+input,select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
   border-radius:7px;padding:.34rem .5rem}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input:disabled,select:disabled{opacity:.55}
@@ -60,10 +60,10 @@ button.mini{padding:.24rem .5rem;font-size:.8rem}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
 button.danger{color:#f4b4b4;border-color:rgba(240,120,120,.35)}
-button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-blanc)}
-.sous{background:#0f1724;border-top:1px solid var(--v08);padding:.4rem .8rem .55rem}
+button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-sur-accent)}
+.sous{background:var(--f-champ);border-top:1px solid var(--v08);padding:.4rem .8rem .55rem}
 .sous .tt{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:.3rem}
-.enf{display:flex;align-items:center;gap:.5rem;padding:.28rem .5rem;background:#16202f;
+.enf{display:flex;align-items:center;gap:.5rem;padding:.28rem .5rem;background:var(--f-carte);
   border:1px solid var(--v08);border-radius:6px;margin-bottom:.25rem}
 .enf .fl{color:var(--tx3);font-size:.8rem}
 .enf .el{font-size:.85rem;font-weight:500;flex:1 1 auto;min-width:0}
@@ -74,7 +74,7 @@ button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-blanc)
 .form .ch{display:flex;flex-direction:column;gap:.2rem}
 .form .ch label{font-size:.7rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .vide{padding:1.4rem;text-align:center;color:var(--tx2);font-size:.85rem}

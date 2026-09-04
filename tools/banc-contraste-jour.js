@@ -138,6 +138,74 @@ for (const [genre, c, n, fics, note] of lignes) {
     + ratio(c, FOND_JOUR).toFixed(2).padEnd(7) + note);
   if (detail && fics.size) console.log('         ' + [...fics].sort().join(', '));
 }
+/* ── LE TEXTE ET SON FOND SONT UNE PAIRE ─────────────────────────────────────
+   ⚠⚠ CE CONTRÔLE EXISTE PARCE QUE LE BANC PRÉCÉDENT A LAISSÉ PASSER UNE
+   RÉGRESSION QUE J'AI MOI-MÊME INTRODUITE, le 2026-09-04. En convertissant les
+   couleurs de TEXTE en jetons, les champs de saisie sont devenus illisibles en
+   mode jour :
+
+       input{background:#0f1724;color:var(--tx)}
+
+   En jour, `--tx` vaut #1d2433 : texte foncé sur champ FONCÉ, ratio 1.16. On ne
+   pouvait plus lire ce qu'on tape. Le banc ne voyait rien — il ne mesurait que
+   les couleurs LITTÉRALES, et celle-ci était devenue un `var()`.
+
+   ⚠ LA LEÇON, ET ELLE VAUT POUR TOUTE CONVERSION EN JETONS : convertir un texte
+   sans son FOND ne déplace pas le problème, il l'aggrave. Avant la conversion,
+   c'était laid mais LISIBLE.
+
+   Ce qu'on mesure : toute règle qui pose un fond EN DUR et une couleur de texte
+   par JETON. On calcule le ratio avec la valeur de JOUR du jeton, et l'on refuse
+   sous le seuil — SAUF si une reprise `html.jour` couvre le même sélecteur pour
+   le fond ET la couleur (alors c'est elle qui commande en jour, et elle décide
+   des deux).
+   ⚠ `--tx-sur-accent` est EXCLU par construction : il ne s'inverse pas (il vaut
+   #ffffff dans les deux modes), et c'est exactement ce qu'il faut sur un fond
+   d'accent fixe — un rouge d'alerte n'a pas de version claire. */
+const JOUR_JETON = {
+  '--tx': '#1d2433', '--tx-blanc': '#1d2433', '--tx2': '#5a6574', '--tx-bleute': '#5f666c',
+  '--tx-gris2': '#5f646a', '--tx3': '#576678', '--tx-gris': '#586578', '--tx-ok': '#297a46',
+  '--tx-ok2': '#387652', '--tx-err': '#ab4e4e', '--tx-err2': '#905e5e', '--tx-att': '#856513',
+  '--tx-jaune': '#80680b', '--tx-or': '#7d694e', '--tx-or2': '#76694e', '--tx-creme': '#6f6a5f',
+  '--tx-creme2': '#6d6963', '--tx-bleu': '#516c8b',
+};
+// Les reprises html.jour du socle, par sélecteur : posent-elles fond ET couleur ?
+const socleTxt = fs.readFileSync(path.join(DOSSIER, 'socle.js'), 'utf8');
+const reprises = new Map();
+for (const m of socleTxt.matchAll(/html\.jour\s+([^{,]+?)\s*\{([^}]*)\}/g)) {
+  const sel = m[1].trim(), decl = m[2];
+  const e = reprises.get(sel) || { bg: false, col: false };
+  if (/background/.test(decl)) e.bg = true;
+  if (/(^|[;\s])color\s*:/.test(decl)) e.col = true;
+  reprises.set(sel, e);
+}
+const paires = new Map();
+for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
+  const src = fs.readFileSync(path.join(DOSSIER, f), 'utf8');
+  for (const m of src.matchAll(/([.#a-zA-Z][^{}\n;]{0,80}?)\s*\{([^{}]{0,400})\}/g)) {
+    const sel = m[1].trim(), decl = m[2];
+    const bg = decl.match(/background(?:-color)?\s*:\s*(#[0-9a-fA-F]{3,6})/);
+    const col = decl.match(/color\s*:\s*var\((--tx[a-z0-9-]*)\)/);
+    if (!bg || !col) continue;
+    const j = JOUR_JETON[col[1]];
+    if (!j) continue;                       // --tx-sur-accent et inconnus : hors sujet
+    const r = ratio(j, bg[1].toLowerCase());
+    if (r >= SEUIL) continue;
+    const rep = reprises.get(sel);
+    if (rep && rep.bg && rep.col) continue; // la reprise de jour commande les deux
+    const cle = sel + ' {' + bg[1].toLowerCase() + ' + ' + col[1] + '}';
+    if (!paires.has(cle)) paires.set(cle, { n: 0, r, fics: new Set() });
+    const e = paires.get(cle); e.n++; e.fics.add(f);
+  }
+}
+if (paires.size) {
+  console.log('');
+  for (const [k, e] of [...paires.entries()].sort((a, b) => b[1].n - a[1].n))
+    console.log('  NON PAIRE   ' + k.padEnd(46) + 'ratio ' + e.r.toFixed(2) + '  x' + e.n
+      + '   texte par jeton sur un fond EN DUR — convertir le fond en --f-*, ou employer --tx-sur-accent');
+  mal += paires.size;
+}
+
 if (voiles.size) {
   console.log('');
   for (const [f, n] of [...voiles.entries()].sort((a, b) => b[1] - a[1]))

@@ -33,7 +33,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -49,7 +49,7 @@ body{background:#0e1522;color:var(--tx);
 .slot{display:flex;flex-direction:column;gap:.35rem}
 .slot .lbl{font-size:.7rem;font-weight:700;color:var(--tx-bleute);text-transform:uppercase;letter-spacing:.05em;text-align:center}
 .cadre{aspect-ratio:3/4;border:1.5px dashed #2b3444;border-radius:9px;cursor:pointer;position:relative;
-  overflow:hidden;background:#0f1724;transition:border-color .15s;display:flex;align-items:center;justify-content:center}
+  overflow:hidden;background:var(--f-champ);transition:border-color .15s;display:flex;align-items:center;justify-content:center}
 .cadre:hover{border-color:#c9a97e}
 .cadre.ro{cursor:default;opacity:.7}
 .cadre img{width:100%;height:100%;object-fit:cover;display:block}
@@ -62,7 +62,7 @@ body{background:#0e1522;color:var(--tx);
 .retirer{background:none;border:0;padding:0;font-size:.7rem;color:var(--tx-err2);opacity:.7;cursor:pointer;font-family:inherit}
 .retirer:hover{opacity:1}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .vide-page{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
@@ -76,18 +76,18 @@ body{background:#0e1522;color:var(--tx);
 .mqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.85rem}
 .mq{display:flex;flex-direction:column;gap:.3rem}
 .mq .cd{aspect-ratio:3/4;border:1.5px solid #2b3444;border-radius:9px;overflow:hidden;
-  background:#0f1724;display:flex;align-items:center;justify-content:center}
+  background:var(--f-champ);display:flex;align-items:center;justify-content:center}
 .mq .cd img{width:100%;height:100%;object-fit:cover;display:block}
 .mq .nm{font-size:.72rem;color:var(--tx-bleute);text-align:center;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .mq .sp{min-height:1.2rem;display:flex;justify-content:center;align-items:center}
 .ajout{aspect-ratio:3/4;border:1.5px dashed #2b3444;border-radius:9px;cursor:pointer;
-  background:#0f1724;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--f-champ);display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:.3rem;color:var(--tx3);font-size:.72rem;text-align:center;padding:.4rem;transition:border-color .15s}
 .ajout:hover{border-color:#c9a97e}
 .ajout .em{font-size:1.4rem;filter:grayscale(1) brightness(1.6)}
 .nomq{width:100%;font:inherit;font-size:.74rem;padding:.2rem .35rem;margin-top:.3rem;
-  border:1px solid var(--v16);border-radius:6px;background:#0b1220;color:var(--tx)}
+  border:1px solid var(--v16);border-radius:6px;background:var(--f-pied);color:var(--tx)}
 button.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;
   border:1px solid var(--v16);border-radius:7px;background:var(--v05);
   color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none}

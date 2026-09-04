@@ -34,7 +34,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
@@ -48,13 +48,13 @@ body{background:#0e1522;color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.65rem .8rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
-input,select{font:inherit;color:var(--tx);background:#0f1826;
+input,select{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -68,7 +68,7 @@ button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:60
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 /* ⚠ LE BOUTON QUI DEPENSE est d une AUTRE couleur que celui qui confirme : on ne
    doit jamais les confondre du coin de l oeil. */
-button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-blanc);font-weight:600}
+button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-sur-accent);font-weight:600}
 button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 button.mini{padding:.14rem .5rem;font-size:.76rem}
 
@@ -104,7 +104,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
-  background:#0b1220}
+  background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
@@ -113,7 +113,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:34rem;width:100%;
   max-height:80vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}

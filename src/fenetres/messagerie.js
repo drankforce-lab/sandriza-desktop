@@ -24,7 +24,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -53,7 +53,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
-.ligne{padding:.55rem .7rem;background:#16202f;border:1px solid var(--v08);
+.ligne{padding:.55rem .7rem;background:var(--f-carte);border:1px solid var(--v08);
   border-radius:11px;cursor:pointer}
 .ligne:hover{border-color:#c9a97e}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
@@ -67,7 +67,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
   max-width:40rem;width:100%;max-height:84vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;
@@ -81,7 +81,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
   background:rgba(201,169,126,.07);border-radius:0 9px 9px 0;font-size:.85rem;white-space:pre-wrap}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
@@ -99,7 +99,7 @@ function pageMessagerie() {
 <div class="pied"><span class="msg" id="msg"></span>
   <span id="ret" hidden style="margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--tx2)">
     <span title="Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.">Réponses conservées</span>
-    <input id="ret-mois" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:var(--tx);background:#0f1724;border:1px solid #2b3444;border-radius:6px;padding:.2rem .35rem">
+    <input id="ret-mois" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;border-radius:6px;padding:.2rem .35rem">
     <span>mois</span>
     <button id="ret-save" style="font:inherit;font-size:.74rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:6px;padding:.22rem .5rem;cursor:pointer">Enregistrer</button>
   </span></div>

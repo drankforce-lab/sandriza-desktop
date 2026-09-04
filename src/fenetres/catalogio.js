@@ -39,7 +39,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -63,7 +63,7 @@ input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
-button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600;
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;
   padding:.4rem .8rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
@@ -88,7 +88,7 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
   padding-top:.9rem;margin-top:.3rem;border-top:1px solid var(--v08)}
 .barre .compte{font-size:.8rem;color:var(--tx2)}
 /* Le dossier des exports : une ligne qui se lit, deux boutons qui la changent. */
-.dossier{margin-top:.8rem;background:#16202f;border:1px solid var(--v08);
+.dossier{margin-top:.8rem;background:var(--f-carte);border:1px solid var(--v08);
   border-radius:11px;padding:.55rem .7rem}
 .dossier.repli{border-color:rgba(217,119,6,.3)}
 .dossier .dl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
@@ -105,13 +105,13 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.55}
 .avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-or2)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem}
-.tuile{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.5rem .7rem}
 .tuile .k{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .v{font-size:1.1rem;font-weight:800;margin-top:.1rem}
 .tuile .z{font-size:.66rem;color:var(--tx2);margin-top:.05rem}
 .tuile.err .v{color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);font-weight:700}
@@ -147,7 +147,7 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
    le bouton de plein ecran s y pose tout seul). ─────────────────────────────── */
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
   max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif}
 .boite ul{margin:0 0 .7rem;padding-left:1.15rem;line-height:1.85;font-size:.86rem}
@@ -158,7 +158,7 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .notif{display:flex;justify-content:space-between;align-items:center;gap:1rem;
   padding:.4rem 0;border-top:1px solid var(--v08);font-size:.83rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

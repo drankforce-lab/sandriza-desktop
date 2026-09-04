@@ -27,7 +27,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
@@ -47,17 +47,17 @@ button{cursor:pointer;-webkit-user-select:none;user-select:none}
 input:focus,button:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600;padding:.36rem .7rem}
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.36rem .7rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
 button.mini{padding:.14rem .5rem;font-size:.75rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem}
-.tuile{background:#16202f;border:1px solid var(--v08);border-radius:12px;padding:.55rem .75rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.55rem .75rem}
 .tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .tuile .v{font-size:1.35rem;font-weight:800;margin-top:.12rem}
 .tuile .z{font-size:.66rem;color:var(--tx2);margin-top:.08rem}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:12px;padding:.7rem .8rem}
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.7rem .8rem}
 .carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;display:flex;justify-content:space-between;align-items:center}
 .deux{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}
 .deuxb{display:grid;grid-template-columns:1fr 340px;gap:1rem;align-items:start}
@@ -87,7 +87,7 @@ code{font:.75rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .rang .pos{width:1.3rem;height:1.3rem;border-radius:50%;background:#c9a97e;color:#1a1a1a;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rang .nm{flex:1;min-width:0;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .segc{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.55rem;margin-bottom:.9rem}
-.seg{background:#16202f;border:2px solid transparent;border-radius:11px;padding:.6rem .7rem;cursor:pointer}
+.seg{background:var(--f-carte);border:2px solid transparent;border-radius:11px;padding:.6rem .7rem;cursor:pointer}
 .seg.pris{border-color:#c9a97e}
 .seg .n{font-size:1.5rem;font-weight:800}
 .seg .l{font-size:.78rem;font-weight:600}
@@ -101,7 +101,7 @@ code{font:.75rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .chans label{display:flex;align-items:center;gap:.35rem;font-size:.85rem;cursor:pointer}
 .rec{padding:.45rem 0;border-bottom:1px solid var(--v05);font-size:.82rem;line-height:1.5}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.78);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
+.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .7rem;font:700 .98rem/1.3 Georgia,serif}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
 .pied-boite .gauche{margin-right:auto}
@@ -109,7 +109,7 @@ code{font:.75rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .satbar .track{flex:1;height:10px;background:var(--v11);border-radius:5px;overflow:hidden}
 .satbar .track>div{height:100%;border-radius:5px}
 .vide{padding:1.5rem;text-align:center;color:var(--tx2);font-size:.84rem}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}

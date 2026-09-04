@@ -26,14 +26,14 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .onglets{flex:0 0 auto;display:flex;gap:.2rem;padding:.35rem .9rem 0;
-  border-bottom:1px solid var(--v08);background:#111a29}
+  border-bottom:1px solid var(--v08);background:var(--f-pill)}
 .onglets button{font:inherit;font-size:.8rem;color:var(--tx2);background:none;border:none;
   border-bottom:2px solid transparent;padding:.45rem .8rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
@@ -48,7 +48,7 @@ body{background:#0e1522;color:var(--tx);
   gap:1rem;align-content:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .pleine{grid-column:1/-1}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -58,16 +58,16 @@ body{background:#0e1522;color:var(--tx);
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
 .ch label .pt{color:var(--tx3);font-size:.72rem}
-.ch input[type=text]{width:100%;box-sizing:border-box;font:inherit;color:var(--tx);background:#0f1724;
+.ch input[type=text]{width:100%;box-sizing:border-box;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid #2b3444;border-radius:8px;padding:.42rem .55rem}
 .ch input[type=text]:focus{outline:none;border-color:#c9a97e}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 .trois{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem}
 @media (max-width:620px){.deux,.trois{grid-template-columns:1fr}}
-select{font:inherit;color:var(--tx);background:#0f1724;border:1px solid #2b3444;
+select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
   border-radius:8px;padding:.4rem .5rem;width:100%}
 input[type=color]{width:100%;height:2.1rem;padding:0;border:1px solid #2b3444;
-  border-radius:8px;background:#0f1724;cursor:pointer}
+  border-radius:8px;background:var(--f-champ);cursor:pointer}
 input[type=color]:disabled,input[type=text]:disabled,select:disabled{opacity:.55;cursor:default}
 .bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
@@ -76,7 +76,7 @@ input[type=color]:disabled,input[type=text]:disabled,select:disabled{opacity:.55
    repartissent en colonnes plutot qu en une pile etiree. */
 .logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(24rem,1fr));gap:.9rem}
 .logo{display:grid;grid-template-columns:9.5rem 1fr;gap:.9rem;align-items:start;min-width:0;
-  border:1px solid var(--v08);border-radius:10px;padding:.7rem .8rem;background:#111a29}
+  border:1px solid var(--v08);border-radius:10px;padding:.7rem .8rem;background:var(--f-pill)}
 @media (max-width:620px){.logo{grid-template-columns:1fr}}
 .vig{height:5rem;border-radius:9px;display:flex;align-items:center;justify-content:center;
   padding:.5rem;overflow:hidden;border:1px solid var(--v08)}
@@ -87,7 +87,7 @@ input[type=color]:disabled,input[type=text]:disabled,select:disabled{opacity:.55
 .logo .gestes{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
 .att{font-size:.72rem;color:var(--tx-jaune)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
@@ -120,7 +120,7 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .lgn .tt{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .lgn .ss{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase}
 .lgn .cadre{border-radius:8px;padding:.6rem;width:100%;max-width:15rem;margin-top:.2rem}
-.lgn .champ{background:#0f172a;border:1px solid #334155;border-radius:4px;
+.lgn .champ{background:var(--f-champ);border:1px solid #334155;border-radius:4px;
   padding:.25rem .45rem;margin-bottom:.35rem;color:var(--tx);font-size:.62rem;text-align:left}
 .lgn .bt{border-radius:4px;padding:.28rem;text-align:center;color:var(--tx-blanc);font-size:.62rem;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

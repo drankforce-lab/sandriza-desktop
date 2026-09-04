@@ -35,7 +35,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -60,7 +60,7 @@ body{background:#0e1522;color:var(--tx);
    chercher des etiquettes qui vont sortir quand meme.
    ══════════════════════════════════════════════════════════════════════════ */
 .suivi{position:fixed;right:1rem;bottom:3rem;width:min(26rem,calc(100vw - 2rem));
-  display:flex;flex-direction:column;background:#16202f;
+  display:flex;flex-direction:column;background:var(--f-carte);
   border:1px solid rgba(201,169,126,.45);border-radius:11px;
   box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
 .suivi.arret{border-color:rgba(248,113,113,.5)}
@@ -92,7 +92,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700}
@@ -143,7 +143,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .barre i{display:block;height:100%;width:0;background:#c9a97e;transition:width .18s}
 .cal3{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

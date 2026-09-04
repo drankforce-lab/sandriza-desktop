@@ -37,7 +37,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
@@ -93,7 +93,7 @@ body{background:#0e1522;color:var(--tx);
    colonne de droite. Chaque carte y perdait une dizaine de pixels en remplissage et
    les textes d aide en prenaient deux ou trois lignes — cumule, cela depassait la
    hauteur d un ecran. Compacte, mais rien n a ete retire. */
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto;min-height:0}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 .carte h2{margin:0 0 .4rem;font-size:.71rem;text-transform:uppercase;
@@ -105,7 +105,7 @@ body{background:#0e1522;color:var(--tx);
 input.manque{border-color:#f87171}
 .carte h2 .lie{color:var(--tx-ok);font-size:.68rem;margin-left:.4rem}
 
-input,select{font:inherit;color:var(--tx);background:#0f1826;
+input,select{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
@@ -134,7 +134,7 @@ input[type=checkbox]{width:auto}
 /* Liste des articles vendus : la seule zone qui defile. */
 .lignes{flex:1 1 auto;min-height:0;overflow-y:auto}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-thead th{position:sticky;top:0;background:#1b2635;text-align:left;
+thead th{position:sticky;top:0;background:var(--f-pill);text-align:left;
   padding:.35rem .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
@@ -176,7 +176,7 @@ button.mini{padding:.16rem .45rem;font-size:.75rem}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
-  background:#0b1220}
+  background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
@@ -189,7 +189,7 @@ button.mini{padding:.16rem .45rem;font-size:.75rem}
    dialogue du systeme se serait ouverte derriere, comme le decompte d inactivite. */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
   border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%}
 .voile h3{margin:0 0 .6rem;font:700 1.06rem/1.25 Georgia,serif}
 .voile .rangee{display:flex;justify-content:space-between;gap:1rem;

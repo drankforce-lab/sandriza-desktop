@@ -28,7 +28,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -52,17 +52,17 @@ input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
-button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600;padding:.34rem .7rem}
+button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.34rem .7rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.ic{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;line-height:1}
-button.ic.plus{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2)}
+button.ic.plus{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent)}
 .aide{font-size:.79rem;color:var(--tx2);line-height:1.5;margin:0 0 .6rem}
 .avis{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.22);
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.5}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:.6rem .75rem}
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.28rem .45rem;font-size:.66rem;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
@@ -87,7 +87,7 @@ code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .pastille{width:20px;height:20px;border-radius:50%;display:inline-block;border:2px solid rgba(0,0,0,.2);vertical-align:middle}
 .tinp{width:100%;padding:.32rem .5rem;font-size:.84rem}
 .reco-sec{border:1px solid var(--v08);border-radius:11px;margin-bottom:.7rem;overflow:hidden}
-.reco-head{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;cursor:pointer;background:#16202f}
+.reco-head{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;cursor:pointer;background:var(--f-carte)}
 .reco-head:hover{background:#1b2739}
 .reco-head .caret{color:var(--tx2)}
 .reco-head .titre{font-weight:700;font-size:.86rem;flex:1}
@@ -109,12 +109,12 @@ code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .cust{display:flex;align-items:center;gap:.65rem;padding:.4rem .2rem;border-bottom:1px solid var(--v05)}
 .cust .nm{flex:1;font-weight:600;font-size:.86rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;max-width:26rem;width:100%;padding:.9rem 1rem}
+.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;max-width:26rem;width:100%;padding:.9rem 1rem}
 .boite h3{margin:0 0 .7rem;font:700 .98rem/1.3 Georgia,serif}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;
-  border-top:1px solid var(--v08);background:#0b1220}
+  border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

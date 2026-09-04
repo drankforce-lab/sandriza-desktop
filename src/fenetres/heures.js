@@ -22,7 +22,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -32,14 +32,14 @@ body{background:#0e1522;color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem}
 .chef{display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
 .chef p{margin:.15rem 0 0;font-size:.8rem;color:var(--tx2);max-width:32rem}
 .chef .bascule{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--tx2)}
 label{cursor:pointer}
 input[type=checkbox]{accent-color:#c9a97e;width:1.1rem;height:1.1rem;cursor:pointer}
-input[type=time]{font:inherit;color:var(--tx);background:#0f1724;border:1px solid #2b3444;
+input[type=time]{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
   border-radius:8px;padding:.3rem .5rem;width:9rem}
 input[type=time]:disabled{opacity:.4}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
@@ -49,7 +49,7 @@ th.c,td.c{text-align:center}
 td{padding:.45rem .5rem;border-bottom:1px solid var(--v05)}
 td.jour{font-weight:600}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}

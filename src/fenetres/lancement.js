@@ -18,7 +18,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
@@ -34,15 +34,15 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
 .etat .rangee .g{flex:1;min-width:180px}
 .src{font-size:.8rem;margin:.7rem 0 0}
 .src.ok{color:var(--tx2)}.src.warn{color:var(--tx-jaune)}.src.err{color:var(--tx-err)}
-.src code{background:#0f1724;border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}
+.src code{background:var(--f-champ);border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}
 .h4{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin:0 0 .6rem}
 .prot{display:flex;flex-direction:column;gap:.5rem;margin:0 0 1.2rem}
 .prot .l{display:flex;align-items:center;gap:.7rem;font-size:.85rem}
 .prot .l .em{width:1.4em;text-align:center;filter:grayscale(1) brightness(1.7);opacity:.9}
 .info{background:var(--v03);border:1px solid var(--v08);border-radius:9px;
   padding:.85rem 1rem;font-size:.8rem;color:var(--tx2);line-height:1.6}
-.info b{color:var(--tx)}.info code{background:#0f1724;border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+.info b{color:var(--tx)}.info code{background:var(--f-champ);border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.74rem}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button.bsc{font:inherit;border:none;border-radius:8px;padding:.65rem 1.25rem;font-size:.88rem;font-weight:700;cursor:pointer;color:var(--tx-blanc);white-space:nowrap}

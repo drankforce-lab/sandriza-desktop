@@ -20,7 +20,7 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:#0e1522;color:var(--tx);
+body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
@@ -32,7 +32,7 @@ body{background:#0e1522;color:var(--tx);
   display:grid;grid-template-columns:repeat(auto-fit,minmax(26rem,1fr));gap:1rem;align-content:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
-.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .8rem/1.2 system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--tx-bleute)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
@@ -40,7 +40,7 @@ body{background:#0e1522;color:var(--tx);
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
 .ch .aide{font-size:.72rem;color:var(--tx3);margin-top:.2rem}
-.ch input[type=number]{width:12rem;max-width:100%;font:inherit;color:var(--tx);background:#0f1724;
+.ch input[type=number]{width:12rem;max-width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid #2b3444;border-radius:8px;padding:.42rem .55rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled{opacity:.55}
@@ -49,7 +49,7 @@ body{background:#0e1522;color:var(--tx);
 .bascule input{width:1.1rem;height:1.1rem;accent-color:#c9a97e;cursor:pointer;margin-top:.15rem;flex:0 0 auto}
 .bascule .d{font-size:.74rem;color:var(--tx3);display:block;margin-top:.1rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button{font:inherit;color:var(--tx);background:var(--v05);
@@ -68,7 +68,7 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 .ptab::-webkit-scrollbar{width:8px}
 .ptab::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 table.pays{width:100%;border-collapse:collapse}
-table.pays th{position:sticky;top:0;background:#131c2b;text-align:left;font:700 .68rem/1.3 system-ui;
+table.pays th{position:sticky;top:0;background:var(--f-carte2);text-align:left;font:700 .68rem/1.3 system-ui;
   text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .7rem;
   border-bottom:1px solid var(--v11)}
 table.pays td{padding:.38rem .7rem;border-bottom:1px solid var(--v05);font-size:.84rem}
@@ -82,7 +82,7 @@ table.pays td.etatnom{padding-left:1.9rem;font-size:.82rem}
 table.pays .verrou{color:var(--tx3);font-size:.74rem}
 table.pays td.mid{text-align:center}
 table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
-.pfiltre{font:inherit;color:var(--tx);background:#0f1724;border:1px solid #2b3444;
+.pfiltre{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid #2b3444;
   border-radius:8px;padding:.32rem .5rem;width:12rem}
 .pfiltre:focus{outline:none;border-color:#c9a97e}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
