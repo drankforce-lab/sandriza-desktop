@@ -89,7 +89,7 @@ function pageImprimantes() {
 <div class="corps" id="corps"><div class="vide">Lecture de l’état…</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span><button id="btn-relire">Actualiser</button>
-  <button id="btn-fermer">Fermer</button></span></div>
+  </span></div>
 <script>
 (function(){
   'use strict';
@@ -431,7 +431,6 @@ ${JS_ACTIVITE}${JS_DIRE}
   // « Actualiser » relit l état ET retente la liste : c est le geste qu on fait
   // apres avoir branche une machine, ou quand la liste n a pas abouti.
   document.getElementById('btn-relire').onclick = function(){ IMPRS = null; relire(); chargerListe(); };
-  document.getElementById('btn-fermer').onclick = function(){ P.fermer(); };
   relire();
   chargerListe();
 })();

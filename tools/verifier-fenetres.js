@@ -181,7 +181,35 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js'))) {
       const a = pc.indexOf('<script>'), b = pc.indexOf('</script>');
       if (a < 0 || b < a) { dire(false, f, '[' + c.nom + '] page sans script'); mort = true; break; }
       let ex;
-      try { ex = await executerPage(pc.slice(a + 8, b), c.reponses || {}); }
+      /* ⚠ ON DONNE À L'EXÉCUTEUR LES IDENTIFIANTS QUE LA PAGE ÉCRIT VRAIMENT.
+         Sans cette liste, son faux document rend un élément pour n'importe quel
+         `getElementById` — donc un gestionnaire branché sur un bouton RETIRÉ ne
+         lève rien, et la fenêtre passe au vert alors qu'elle meurt à
+         l'initialisation dans un vrai navigateur (vécu le 2026-09-04 sur
+         `imprimantes.js`, en retirant le bouton « Fermer » du pied).
+         On relève sur la page ENTIÈRE, script compris : le balisage des fenêtres
+         est construit dans des chaînes. Un identifiant écrit quelque part dans le
+         fichier reste donc admis — c'est voulu, une étape non dessinée par ce cas
+         ne doit pas produire de fausse faute. */
+      const idsPage = [];
+      /* ⚠⚠ LA QUESTION EXACTE : cet identifiant est-il CITÉ AILLEURS que dans la
+         recherche qui l attend ? Et pas « figure-t-il dans un id= » — premier jet,
+         et il a inventé une faute sur `produit.js` : `p-actif` est bien produit,
+         mais par une AIDE (`bascule("p-actif", …)`), donc le balisage porte
+         id=" + variable + " et aucun relevé statique ne peut le voir.
+         On retire donc les `getElementById("…")` du texte, PUIS on relève toutes
+         les chaînes en forme d identifiant. Ce qui reste est cité par autre chose
+         — un balisage, une aide, un enregistrement. Un identifiant qui ne paraît
+         QUE dans sa propre recherche n est produit par personne : il est mort.
+         ⚠ AUCUN ANTISLASH ÉCRIT EN CLAIR ICI : l outillage en mange (vécu deux
+         fois le 2026-09-04, dont dans cette regex même, qui rendait zéro
+         identifiant et faisait donc inventer des fautes au lieu den trouver).
+         D où `String.fromCharCode(92)` pour aplatir les guillemets échappés. */
+      const platPc = pc.split(String.fromCharCode(92)).join("");
+      const sansRecherche = platPc.replace(/getElementById\(\s*["'][^"']*["']\s*\)/g, "getElementById(0)");
+      const rxLit = /["']([A-Za-z][A-Za-z0-9_:.-]{1,60})["']/g;
+      let mId; while ((mId = rxLit.exec(sansRecherche))) idsPage.push(mId[1]);
+      try { ex = await executerPage(pc.slice(a + 8, b), c.reponses || {}, { ids: idsPage }); }
       catch (e) { dire(false, f, '[' + c.nom + '] exécution impossible — ' + e.message); mort = true; break; }
       if (ex.fautes.length) { dire(false, f, '[' + c.nom + '] meurt à l’exécution — ' + ex.fautes.join(' | ')); mort = true; break; }
       /* ⚠⚠ `exige` — CE QUE LE CAS DOIT AVOIR DESSINÉ (2026-08-20).

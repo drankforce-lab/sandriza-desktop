@@ -179,8 +179,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function vide(titre, detail){
     corps.innerHTML = '<div class="carte"><div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div></div>';
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
-    brancherFermer();
+    actions.innerHTML = '';
   }
   function val(id2){ var e = document.getElementById(id2); return e ? e.value : ''; }
   function coche(id2){ var e = document.getElementById(id2); return !!(e && e.checked); }
@@ -242,7 +241,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       if (R.peutEcrire) b += '<button id="btn-etat">' + (c2.actif ? '⏸ Désactiver' : '▶ Activer') + '</button>';
       if (R.peutSupprimer) b += '<button class="danger" id="btn-corbeille"><span class="ic">🗑</span> Supprimer</button>';
     }
-    actions.innerHTML = b + '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = b;
     if (c2.supprime && !R.purgeable && R.peutSupprimer) {
       dire('Suppression définitive impossible : ' + R.stats.commandes + ' commande(s) — conservation fiscale de 6 ans.', 'att');
     }
@@ -284,18 +283,12 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '</div>';
     corps.innerHTML = h;
     actions.innerHTML = '<button id="btn-annuler">← Fiche</button>'
-      + '<button class="prim" id="btn-enr">Enregistrer</button>'
-      + '<button id="btn-fermer">Fermer</button>';
+      + '<button class="prim" id="btn-enr">Enregistrer</button>';
     brancherEdition();
   }
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
-  function brancherFermer(){
-    var f = document.getElementById('btn-fermer');
-    if (f) f.onclick = function(){ rendreVerrou(); P.fermer(); };
-  }
   function brancherFiche(){
-    brancherFermer();
     var m = document.getElementById('btn-modifier');
     /* Le dessin D ABORD : la boite de reprise remplit des champs qui n existent
        qu apres lui. */
@@ -366,7 +359,6 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     };
   }
   function brancherEdition(){
-    brancherFermer();
     /* ⚠ IMMEDIAT, ET LES VALEURS SONT PRISES MAINTENANT : deux lignes plus bas le
        formulaire n existe plus. C est le defaut n°1 des Depenses, qui ne gardait
        que la categorie. */

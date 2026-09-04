@@ -281,7 +281,6 @@ function pageCaisse(mode) {
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions">
     <button id="btn-vider">Vider la vente</button>
-    <button id="btn-fermer">Fermer</button>
   </span></div>
 <script>
 (function(){
@@ -789,7 +788,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     dessinerLignes(); dessinerTotaux(); majBouton(); dire(''); diffuser();
     var s = document.getElementById('scan'); if (s) s.focus();
   };
-  document.getElementById('btn-fermer').onclick = function(){ P.fermer(); };
   document.getElementById('btn-afficheur').onclick = function(){
     var b = this;
     b.disabled = true;

@@ -237,9 +237,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function vide(titre, detail){
     corps.innerHTML = '<div class="carte"><div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div></div>';
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '';
     document.getElementById('pas').innerHTML = '';
-    brancherFermer();
   }
 
   function val(id2){ var e = document.getElementById(id2); return e ? e.value : ''; }
@@ -403,7 +402,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (['completed', 'refunded'].indexOf(d.statut) >= 0 && !R.archive) {
       boutons += '<button class="danger" id="btn-suppr"><span class="ic">🗑</span> Supprimer</button>';
     }
-    actions.innerHTML = boutons + '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = boutons;
     brancherDemande(fige);
   }
 
@@ -428,8 +427,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<button class="mini" id="btn-reexp" style="margin-top:.45rem"><span class="ic">🚚</span> Ouvrir l’expédition de la commande</button>'
       + '</div>';
     corps.innerHTML = h;
-    actions.innerHTML = '<button class="prim" id="btn-vers-reglement">Vers le règlement →</button>'
-      + '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '<button class="prim" id="btn-vers-reglement">Vers le règlement →</button>';
     brancherTraitement();
   }
 
@@ -479,17 +477,11 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<textarea id="g-note" rows="3">' + esc(R.demande.notes) + '</textarea></div>'
       + '</div>';
     corps.innerHTML = h;
-    actions.innerHTML = '<button class="paie" id="btn-finaliser"' + (R.peutEcrire ? '' : ' disabled') + '>✅ Finaliser le traitement</button>'
-      + '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '<button class="paie" id="btn-finaliser"' + (R.peutEcrire ? '' : ' disabled') + '>✅ Finaliser le traitement</button>';
     brancherReglement();
   }
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
-  function brancherFermer(){
-    var f = document.getElementById('btn-fermer');
-    if (f) f.onclick = function(){ rendreVerrou(); P.fermer(); };
-  }
-
   document.getElementById('pas').addEventListener('click', function(ev){
     var b = ev.target.closest('[data-et]');
     if (!b || b.disabled) return;
@@ -498,7 +490,6 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   });
 
   function brancherDemande(fige){
-    brancherFermer();
     var st = document.getElementById('r-statut');
     if (st) st.onchange = function(){
       var z = document.getElementById('z-refus'); if (z) z.style.display = this.value === 'rejected' ? '' : 'none';
@@ -523,7 +514,6 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
 
   function brancherTraitement(){
-    brancherFermer();
     corps.onchange = function(ev){
       var t = ev.target;
       var iv = t.getAttribute && t.getAttribute('data-inv');
@@ -560,7 +550,6 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
 
   function brancherReglement(){
-    brancherFermer();
     corps.oninput = function(ev){
       var t = ev.target;
       var im = t.getAttribute && t.getAttribute('data-mnt');

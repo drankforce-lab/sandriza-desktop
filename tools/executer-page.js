@@ -42,7 +42,32 @@
  * était donc un refus, la fenêtre affichait poliment « indisponible », et le code
  * du dessin (le seul cassé) n'était jamais atteint.
  *
- * ⚠ CE N'EST PAS UN NAVIGATEUR. Le faux document est complaisant : il accepte tout
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ⚠⚠ TROISIÈME AVEUGLEMENT, TROUVÉ LE 2026-09-04 — ET IL A LAISSÉ PASSER UNE
+ * FENÊTRE RÉELLEMENT MORTE. En retirant le bouton « Fermer » du pied des
+ * fenêtres, le balisage d'`imprimantes.js` est parti mais son gestionnaire est
+ * resté :
+ *
+ *     document.getElementById('btn-fermer').onclick = function(){ … };
+ *
+ * Dans un vrai navigateur, `getElementById` d'un identifiant ABSENT rend `null`,
+ * et lire `.onclick` dessus lève — l'initialisation entière s'arrête, la fenêtre
+ * s'ouvre morte. Ici, le faux document rendait un élément complaisant : aucune
+ * erreur, et le garde annonçait « OK imprimantes.js ». Exactement l'aveuglement
+ * que ce fichier existe pour corriger, une troisième fois, sous une autre forme.
+ *
+ * ⚠ LE REMÈDE NE PEUT PAS ÊTRE « rendre null pour tout ce qui n'est pas encore
+ * dessiné » : un gestionnaire d'étape 3 se branche quand l'étape 3 paraît, et un
+ * cas d'épreuve n'en dessine qu'une. On rendrait des null partout, donc des
+ * fautes inventées. La question juste est plus étroite : **le fichier écrit-il ce
+ * `id="…"` QUELQUE PART ?** Un identifiant qu'aucun balisage ne produit est mort
+ * à coup sûr ; un identifiant produit ailleurs dans le fichier ne prouve rien
+ * contre le cas courant. D'où `opts.ids`, relevé sur la page ENTIÈRE par
+ * l'appelant.
+ * ⚠ Et c'est OPTIONNEL : sans `opts.ids`, l'ancien comportement complaisant
+ * reste — `banc-executer-page.js` continue de mesurer ce qu'il mesurait.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * * ⚠ CE N'EST PAS UN NAVIGATEUR. Le faux document est complaisant : il accepte tout
  * et ne dessine rien. Ce contrôle ne dit donc pas « la fenêtre est belle » ; il dit
  * « la fenêtre ne meurt pas en silence », ce qui est ce qui nous manquait.
  */
@@ -99,14 +124,20 @@ const faireElement = (compteur) => ({
  * @param {object} reponses  { 'operation:nom': valeur } — ce que le faux pont rend
  * @returns {Promise<{fautes:string[], journal:string[], ecritures:number, html:string}>}
  */
-function executerPage(script, reponses) {
+function executerPage(script, reponses, opts) {
   const fautes = [];
+  // Identifiants que le fichier écrit vraiment (`id="…"`), fournis par l'appelant.
+  // Absent → on garde le faux document complaisant d'avant.
+  const idsConnus = (opts && opts.ids) ? new Set(opts.ids) : null;
   const compteur = { ecritures: 0, ecrit: [] };
   const journal = [];
   const rep = reponses || {};
 
   const document = {
-    getElementById: () => faireElement(compteur),
+    /* ⚠ `null` COMME UN VRAI NAVIGATEUR, mais seulement pour un identifiant que
+       le fichier n'écrit NULLE PART. C'est ce qui distingue un gestionnaire
+       orphelin (défaut certain) d'un élément simplement pas encore dessiné. */
+    getElementById: (id) => (idsConnus && !idsConnus.has(String(id))) ? null : faireElement(compteur),
     querySelector: () => faireElement(compteur),
     querySelectorAll: () => [],
     createElement: () => faireElement(compteur),

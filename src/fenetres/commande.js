@@ -69,7 +69,6 @@ function pageCommande(id) {
   <span class="actions">
     <button id="btn-prec">Précédent</button>
     <button id="btn-suiv">Suivant</button>
-    <button id="btn-annuler">Fermer</button>
     <button id="btn-enr" class="prim" disabled>Expédier</button>
   </span></div>
 <script>
@@ -757,7 +756,6 @@ function pageCommande(id) {
   }
 
   bEnr.onclick = expedier;
-  document.getElementById('btn-annuler').onclick = function(){ P.fermer(); };
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
   });

@@ -83,7 +83,6 @@ function pageEtatCompte(userId) {
   <span class="msg" id="msg"></span>
   <button id="b-courriel" disabled>✉ Envoyer au client</button>
   <button id="b-imprimer" class="prim" disabled><span class="ic">🖨</span> Imprimer</button>
-  <button id="b-fermer">Fermer</button>
 </div>
 <script>
 (function(){
@@ -199,7 +198,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   };
 
-  document.getElementById('b-fermer').onclick = function(){ P.fermer(); };
 
   // Un clic ailleurs desarme l envoi : on ne laisse pas un bouton arme trainer.
   document.addEventListener('click', function(ev){

@@ -315,8 +315,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vide(titre, detail){
     corps.innerHTML = '<div class="carte plein"><div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div></div>';
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
-    brancherFermer();
+    actions.innerHTML = '';
   }
 
   function libelleStatut(cle){
@@ -431,8 +430,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '</div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = '<button id="btn-rafraichir">⟳ Rafraîchir</button>'
-      + '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '';
     brancher();
     listeAutoAjuste();
   }
@@ -1002,16 +1000,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
-  function brancherFermer(){
-    var f = document.getElementById('btn-fermer');
-    if (f) f.onclick = function(){ rendreVerrou(); P.fermer(); };
-  }
-
   var rechT = null;
   function brancher(){
-    brancherFermer();
-    var r = document.getElementById('btn-rafraichir');
-    if (r) r.onclick = function(){ charger(); };
 
     var champ = document.getElementById('rech');
     if (champ) {

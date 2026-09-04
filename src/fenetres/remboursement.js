@@ -170,8 +170,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vide(titre, detail){
     corps.innerHTML = '<div class="carte"><div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div></div>';
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
-    brancherFermer();
+    actions.innerHTML = '';
   }
   function val(id2){ var e = document.getElementById(id2); return e ? e.value : ''; }
   function coche(id2){ var e = document.getElementById(id2); return !!(e && e.checked); }
@@ -196,8 +195,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + argent(R.dejaRembourse) + '.</div>'
         : '<div class="avis jaune" style="margin:0">Tous les articles de cette commande ont déjà été remboursés.</div>')
         + '</div>';
-      actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
-      brancherFermer();
+      actions.innerHTML = '';
       return;
     }
     var h = '<div class="carte"><h2>Articles à rembourser <span class="note">— quantités plafonnées au pas-encore-remboursé</span></h2>'
@@ -255,8 +253,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="vide" style="padding:.6rem">Choisissez des articles…</div></div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = '<button class="paie" id="btn-rembourser" disabled>Confirmer le remboursement</button>'
-      + '<button id="btn-fermer">Fermer</button>';
+    actions.innerHTML = '<button class="paie" id="btn-rembourser" disabled>Confirmer le remboursement</button>';
     brancher();
   }
 
@@ -306,12 +303,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
-  function brancherFermer(){
-    var f = document.getElementById('btn-fermer');
-    if (f) f.onclick = function(){ rendreVerrou(); P.fermer(); };
-  }
   function brancher(){
-    brancherFermer();
     corps.oninput = function(ev){
       var t = ev.target;
       var iq = t.getAttribute && t.getAttribute('data-q');

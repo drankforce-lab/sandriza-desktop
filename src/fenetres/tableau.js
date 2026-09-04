@@ -78,6 +78,9 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14)}
 .afaire button:hover{background:rgba(255,255,255,.12)}
 .afaire button b{font-weight:800}
+/* Le separateur : discret, non italique malgre le <i>, et il porte l espace de
+   part et d autre — sans quoi le nombre reste colle au texte. */
+.afaire button i{font-style:normal;opacity:.45;margin:0 .38rem}
 .afaire button.urgent{border-color:rgba(248,113,113,.5);color:#fca5a5}
 html.jour .afaire{background:rgba(180,140,80,.12);border-color:rgba(150,110,50,.35)}
 html.jour .afaire .titre{color:#8a6a3e}
@@ -336,7 +339,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="afaire"><span class="titre">À faire maintenant</span>'
         + files.map(function(x){
             return '<button data-ouvre="' + x[0] + '"' + (x[4] ? ' class="urgent"' : '') + '>'
-              + '<b>' + x[1] + '</b> ' + esc(x[1] > 1 ? x[3] : x[2]) + '</button>';
+              // Point median entre le nombre et le libelle : c est le separateur
+              // du projet (<< Payer avec Afterpay · 45 $ >>). Colle, << 1commande a
+              // traiter >> se lisait comme un seul mot.
+              + '<b>' + x[1] + '</b><i>·</i>' + esc(x[1] > 1 ? x[3] : x[2]) + '</button>';
           }).join('')
         + '</div>';
     }

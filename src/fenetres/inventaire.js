@@ -372,7 +372,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.innerHTML = '<div class="carte plein"><div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div></div>';
     actions.innerHTML = '';
-    brancherFermer();
   }
 
   // ══ DESSIN ════════════════════════════════════════════════════════════════
@@ -654,11 +653,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   // barre de titre et Echap ferment, et les deux passent par quitter() — le
   // verrou est donc toujours rendu. La fonction reste comme point d ancrage des
   // dessins, vide.
-  function brancherFermer(){}
-
   var rechT = null;
   function brancherListe(){
-    brancherFermer();
     var r = document.getElementById('btn-retour');
     if (r) r.onclick = function(){ VUE = 'reappro'; dessiner(); };
     var champ = document.getElementById('rech');
@@ -684,7 +680,6 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function brancherProduit(){
-    brancherFermer();
     var r = document.getElementById('btn-retour');
     if (r) r.onclick = function(){ rendreVerrou(); VUE = 'reappro'; PROD = null; charger(); };
     var e = document.getElementById('btn-enr');
@@ -783,7 +778,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!d) {
       corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
       actions.innerHTML = '';
-      brancherFermer();
       return;
     }
     var st = d.stats;
@@ -973,7 +967,6 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   var fpT = null;
   function brancherProduits(){
-    brancherFermer();
     corps.onkeydown = null;
     corps.oninput = function(ev){
       var t = ev.target;
@@ -1206,7 +1199,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!d) {
       corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
       actions.innerHTML = '';
-      brancherFermer();
       return;
     }
     var h = '<div class="carte plein">'
@@ -1254,7 +1246,6 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function brancherEndommages(){
-    brancherFermer();
     corps.onkeydown = null;
     corps.oninput = null;
     corps.onchange = function(ev){
@@ -1283,7 +1274,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!d) {
       corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
       actions.innerHTML = '';
-      brancherFermer();
       return;
     }
     /* ⚠ DEUX NIVEAUX depuis le 2026-08-22, sur sa demande. Le LIEU (bâtiment +
@@ -1432,7 +1422,6 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function brancherEntrepots(){
-    brancherFermer();
     corps.oninput = null;
     corps.onchange = null;
     corps.onclick = function(ev){

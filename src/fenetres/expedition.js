@@ -202,8 +202,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vide(titre, detail){
     corps.innerHTML = '<div class="carte"><div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div></div>';
-    actions.innerHTML = '<button id="btn-fermer">Fermer</button>';
-    brancherFermer();
+    actions.innerHTML = '';
   }
 
   function transporteurCourant(){
@@ -299,19 +298,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button id="btn-imprimer"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">🖨</span> Étiquette + bordereau</button>'
       + '<button id="btn-bordereau"><span class="ic">🧾</span> Bordereau seul</button>'
       + '<button class="paie" id="btn-etiquette"' + (pret ? '' : ' disabled') + '>'
-      + (c.aUneEtiquette ? '<span class="ic">💳</span> Créer une AUTRE étiquette' : '<span class="ic">💳</span> Créer l’étiquette') + '</button>'
-      + '<button id="btn-fermer">Fermer</button>';
+      + (c.aUneEtiquette ? '<span class="ic">💳</span> Créer une AUTRE étiquette' : '<span class="ic">💳</span> Créer l’étiquette') + '</button>';
     brancher();
   }
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
-  function brancherFermer(){
-    var f = document.getElementById('btn-fermer');
-    if (f) f.onclick = function(){ quitter(); };
-  }
-
   function brancher(){
-    brancherFermer();
     var tr = document.getElementById('e-transporteur');
     if (tr) tr.onchange = function(){ TRANSPORTEUR = this.value; dessiner(); };
     var su = document.getElementById('e-suivi');
