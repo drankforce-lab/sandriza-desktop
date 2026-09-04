@@ -2068,13 +2068,13 @@ const CSS_ETATS = `
   padding:1.05rem .15rem 1.1rem;position:relative;overflow:hidden;
   animation:sz-parait .28s ease-out both}
 /* Le rail : le fond du trait, puis le segment qui le parcourt. */
-.sz-squel::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
-  border-radius:99px;background:var(--v05)}
-.sz-squel::after{content:"";position:absolute;top:0;height:2px;width:30%;
-  border-radius:99px;background:var(--sz-accent);opacity:.5;
+.sz-squel::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  border-radius:99px;background:var(--v10)}
+.sz-squel::after{content:"";position:absolute;top:0;height:3px;width:30%;
+  border-radius:99px;background:var(--sz-accent);opacity:.8;
   animation:sz-rail 1.5s cubic-bezier(.55,.05,.35,1) infinite}
 .sz-squel i{display:block;height:12px;border-radius:99px;
-  background:linear-gradient(90deg,var(--v05) 20%,var(--v14) 38%,var(--v05) 56%);
+  background:linear-gradient(90deg,var(--v08) 20%,var(--v22) 38%,var(--v08) 56%);
   background-size:340% 100%;
   animation:sz-lueur 1.45s ease-in-out infinite}
 /* Des largeurs inegales : un bloc de barres egales ressemble a un code-barres,
@@ -2086,8 +2086,8 @@ const CSS_ETATS = `
 .sz-squel i:nth-child(5){width:47%;animation-delay:.44s}
 
 /* Variante TUILES : la forme du tableau de bord, pas des lignes de texte. */
-.sz-squel.tuiles{display:grid;gap:.7rem;
-  grid-template-columns:repeat(auto-fill,minmax(148px,1fr))}
+.sz-squel.tuiles{display:grid;gap:.8rem;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 .sz-squel.tuiles i{height:76px;border-radius:12px;width:auto}
 /* Variante LIGNES : l interieur d un tableau. */
 .sz-squel.lignes i{height:14px;width:100%}
@@ -2103,7 +2103,7 @@ const CSS_ETATS = `
    entree en fondu qui evite que le texte claque d un coup. */
 .vide,.vide-page{position:relative;padding:1.35rem 1.1rem;text-align:center;color:var(--tx2);
   font-size:.84rem;line-height:1.6;max-width:52ch;
-  margin-left:auto;margin-right:auto;
+  margin:auto;
   animation:sz-parait .3s ease-out both}
 
 /* Un trait d accent qui se TRACE a l ouverture. Il remplace le pictogramme
