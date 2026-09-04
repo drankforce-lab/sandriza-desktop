@@ -56,20 +56,20 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:.5rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.5rem .65rem;text-align:center}
 .tuile .val{font-size:1.15rem;font-weight:800;line-height:1.2;white-space:nowrap}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin-top:.12rem}
 .tuile .val.or{color:var(--tx-or)}.tuile .val.bon{color:var(--tx-ok)}.tuile .val.mal{color:var(--tx-err)}
 .tuile .val.att{color:var(--tx-att)}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h3{margin:0 0 .4rem;font:700 .82rem/1.3 Georgia,serif;color:var(--tx-gris2)}
 .grilles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.55rem}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.22rem .4rem;font-size:.66rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.26rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.26rem .4rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap}
 .dt{font-size:.72rem;color:var(--tx2)}
@@ -77,7 +77,7 @@ tbody tr:hover td{background:var(--v04)}
 .tronq{max-width:20rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Graphique : des barres qui montent, une graduation, rien de plus. */
 .graph{display:flex;align-items:flex-end;gap:2px;height:130px;
-  border-left:1px solid var(--v11);border-bottom:1px solid var(--v11);
+  border-left:1px solid var(--v12);border-bottom:1px solid var(--v12);
   padding:0 .2rem}
 .col{flex:1 1 0;min-width:2px;background:#8f6f42;border-radius:2px 2px 0 0;position:relative}
 .col:hover{background:#c9a97e}
@@ -85,7 +85,7 @@ tbody tr:hover td{background:var(--v04)}
 .avis{border-radius:9px;padding:.42rem .65rem;font-size:.78rem;line-height:1.55}
 .avis.att{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.32);color:#fde68a}
 .avis.mal{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.34);color:var(--tx-err2)}
-.note{font-size:.73rem;color:var(--tx2);line-height:1.6;border-top:1px solid var(--v08);
+.note{font-size:.73rem;color:var(--tx2);line-height:1.6;border-top:1px solid var(--v07);
   padding-top:.5rem;margin-top:.2rem}
 .vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

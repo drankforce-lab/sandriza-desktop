@@ -53,7 +53,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
-.ligne{padding:.55rem .7rem;background:var(--f-carte);border:1px solid var(--v08);
+.ligne{padding:.55rem .7rem;background:var(--f-carte);border:1px solid var(--v07);
   border-radius:11px;cursor:pointer}
 .ligne:hover{border-color:#c9a97e}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
@@ -67,7 +67,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:40rem;width:100%;max-height:84vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;
@@ -76,7 +76,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600;overflow-wrap:anywhere}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
-  background:var(--v03);border:1px solid var(--v08);border-radius:9px;padding:.6rem .7rem}
+  background:var(--v03);border:1px solid var(--v07);border-radius:9px;padding:.6rem .7rem}
 .boite .reponse{margin-top:.6rem;border-left:3px solid #c9a97e;padding:.4rem .7rem;
   background:rgba(201,169,126,.07);border-radius:0 9px 9px 0;font-size:.85rem;white-space:pre-wrap}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}

@@ -59,13 +59,13 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ ANCRÉE = PLEINE PAGE : pas de cap ; les champs (gr2) s'étendent sur la largeur. */
 .panneau{width:100%}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.9rem 1rem;margin:0 0 .9rem;min-width:0}
 .stitre{font-size:.86rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .6rem}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
   border-radius:8px;padding:.55rem .7rem;font-size:.75rem;line-height:1.5;margin:0 0 .8rem}
 .info code{background:var(--f-champ);border:1px solid #2b3444;border-radius:5px;padding:1px 6px;font-size:.72rem}
-.note{background:var(--v03);border:1px solid var(--v08);color:var(--tx2);
+.note{background:var(--v03);border:1px solid var(--v07);color:var(--tx2);
   border-radius:8px;padding:.45rem .7rem;font-size:.73rem;line-height:1.5;margin:0 0 .7rem}
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
 @media (max-width:640px){.gr2{grid-template-columns:1fr}}
@@ -104,7 +104,7 @@ body{background:var(--f-page);color:var(--tx);
 .crochet{display:flex;align-items:center;gap:.45rem}
 .crochet code{flex:1 1 auto;min-width:0;overflow-x:auto;white-space:nowrap;
   font-family:Consolas,"Courier New",monospace;font-size:.78rem;color:#dcc39b;
-  background:var(--v05);border:1px solid var(--v16);
+  background:var(--v05);border:1px solid var(--v14);
   border-radius:7px;padding:.28rem .5rem;user-select:text}
 .crochet button{flex:0 0 auto}
 .tbl{width:100%;border-collapse:collapse;font-size:.78rem}

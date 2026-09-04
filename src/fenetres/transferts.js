@@ -64,7 +64,7 @@ button.mini{padding:.12rem .45rem;font-size:.74rem}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.36rem .8rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte.transit{border-left:3px solid #fbbf24}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
@@ -90,8 +90,8 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-fcd9a6)}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.66rem;text-transform:uppercase;
-  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 /* ⚠ « Robe ZENXAS · S-rouge » se coupait au milieu de « S-rouge » (sa capture).

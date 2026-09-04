@@ -35,7 +35,7 @@ body{background:var(--f-page);color:var(--tx);
 .tete .mail{font-size:.72rem;color:var(--tx2)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .tete .pill{font-size:.68rem;padding:.12rem .55rem;border-radius:99px;
-  border:1px solid var(--v22);margin-left:.5rem}
+  border:1px solid var(--v20);margin-left:.5rem}
 .pill.vert{border-color:rgba(74,222,128,.5);color:var(--tx-ok)}
 .pill.gris{color:var(--tx2)}
 .pill.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-f6a5a5)}
@@ -43,17 +43,17 @@ body{background:var(--f-page);color:var(--tx);
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.5rem}
-.tuile{background:var(--v03);border:1px solid var(--v08);
+.tuile{background:var(--v03);border:1px solid var(--v07);
   border-radius:9px;padding:.5rem .65rem}
 .tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .tuile .v{font:700 1.15rem/1.3 Georgia,serif;color:var(--tx-creme)}
 .ligne{display:flex;justify-content:space-between;gap:1rem;padding:.32rem 0;
-  border-bottom:1px solid var(--v05);font-size:.85rem}
+  border-bottom:1px solid var(--v06);font-size:.85rem}
 .ligne .k{color:var(--tx2)}
 .cmd{display:flex;align-items:center;gap:.6rem;padding:.32rem .4rem;border-radius:7px;
   border-top:1px solid var(--v05);font-size:.85rem}
@@ -61,7 +61,7 @@ body{background:var(--f-page);color:var(--tx);
 .cmd .d{flex:1 1 auto;min-width:0}
 .cmd .fin{color:var(--tx2);font-size:.78rem;white-space:nowrap}
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
-  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input[type=checkbox]{width:auto}
@@ -89,7 +89,7 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 .vide{padding:1.6rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:30rem;width:100%}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.86rem}

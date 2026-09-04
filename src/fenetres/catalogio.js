@@ -74,7 +74,7 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   font-weight:700;margin:0 0 .35rem}
 .radio{display:flex;gap:.5rem;align-items:flex-start;padding:.5rem .6rem;
-  border:1px solid var(--v16);border-radius:9px;cursor:pointer;
+  border:1px solid var(--v14);border-radius:9px;cursor:pointer;
   -webkit-user-select:none;user-select:none;margin-bottom:.4rem}
 .radio.pris{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 .radio input{margin-top:.2rem;accent-color:#c9a97e;flex:0 0 auto}
@@ -88,7 +88,7 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
   padding-top:.9rem;margin-top:.3rem;border-top:1px solid var(--v08)}
 .barre .compte{font-size:.8rem;color:var(--tx2)}
 /* Le dossier des exports : une ligne qui se lit, deux boutons qui la changent. */
-.dossier{margin-top:.8rem;background:var(--f-carte);border:1px solid var(--v08);
+.dossier{margin-top:.8rem;background:var(--f-carte);border:1px solid var(--v07);
   border-radius:11px;padding:.55rem .7rem}
 .dossier.repli{border-color:rgba(217,119,6,.3)}
 .dossier .dl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
@@ -105,20 +105,20 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.55}
 .avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-fcd9a6)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.5rem .7rem}
 .tuile .k{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .v{font-size:1.1rem;font-weight:800;margin-top:.1rem}
 .tuile .z{font-size:.66rem;color:var(--tx2);margin-top:.05rem}
 .tuile.err .v{color:var(--tx-err)}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.26rem .4rem;font-size:.66rem;text-transform:uppercase;
-  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
+  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v04)}
 code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .dt{font-size:.72rem;color:var(--tx2)}
@@ -129,7 +129,7 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .pill.erreur,.pill.conflit,.pill.echec{background:rgba(220,38,38,.2);color:var(--tx-err2)}
 .pill.fait{background:rgba(22,163,74,.2);color:#86efac}
 .chg{display:inline-block;margin:0 .3rem .22rem 0;padding:.08rem .42rem;border-radius:5px;
-  background:var(--v05);border:1px solid var(--v11);font-size:.74rem}
+  background:var(--v05);border:1px solid var(--v10);font-size:.74rem}
 .chg .de{color:var(--tx2);text-decoration:line-through}
 .rouge{color:var(--tx-err)}
 .filtres{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.6rem}
@@ -141,13 +141,13 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .centre{width:100%}
 .avancement{max-width:32rem;margin:2.5rem auto;text-align:center}
 .avancement .tourne{width:34px;height:34px;margin:1rem auto 0;border-radius:50%;
-  border:3px solid var(--v16);border-top-color:#c9a97e;animation:tr 1s linear infinite}
+  border:3px solid var(--v14);border-top-color:#c9a97e;animation:tr 1s linear infinite}
 @keyframes tr{to{transform:rotate(360deg)}}
 /* ── Surcouche de confirmation (structure .voile > .boite reconnue par le socle,
    le bouton de plein ecran s y pose tout seul). ─────────────────────────────── */
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif}
 .boite ul{margin:0 0 .7rem;padding-left:1.15rem;line-height:1.85;font-size:.86rem}
@@ -156,7 +156,7 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
 .pied-boite .gauche{margin-right:auto}
 .notif{display:flex;justify-content:space-between;align-items:center;gap:1rem;
-  padding:.4rem 0;border-top:1px solid var(--v08);font-size:.83rem}
+  padding:.4rem 0;border-top:1px solid var(--v07);font-size:.83rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;

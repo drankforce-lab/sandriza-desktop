@@ -54,7 +54,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
 .quoi b{color:var(--tx)}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:.9rem;align-items:start}
-.carte{background:var(--v03);border:1px solid var(--v11);border-radius:13px;padding:1rem 1.1rem}
+.carte{background:var(--v03);border:1px solid var(--v10);border-radius:13px;padding:1rem 1.1rem}
 .carte h2{margin:0 0 .8rem;font:700 .93rem/1.2 Georgia,serif}
 .carte.large{grid-column:1/-1}
 .bascules{display:flex;gap:1.4rem;flex-wrap:wrap;margin:0 0 .9rem}
@@ -72,13 +72,13 @@ input.t:disabled,textarea.t:disabled{opacity:.45}
 .rang input.t{flex:1 1 auto;min-width:0}
 .sources{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:.45rem;margin:0 0 .9rem}
 .sources label{display:flex;align-items:center;gap:.45rem;font-size:.82rem;cursor:pointer;
-  border:1px solid var(--v11);border-radius:9px;padding:.35rem .6rem;background:var(--v03)}
+  border:1px solid var(--v10);border-radius:9px;padding:.35rem .6rem;background:var(--v03)}
 .sources input{width:15px;height:15px;accent-color:#7c5fce}
 .agent{display:flex;align-items:center;gap:.45rem;padding:.45rem .55rem;margin:0 0 .5rem;
-  background:var(--v03);border:1px solid var(--v11);border-radius:10px}
+  background:var(--v03);border:1px solid var(--v10);border-radius:10px}
 .agent input.nom{flex:0 0 9rem}
 .agent input.ph{flex:1 1 auto;min-width:0;font-family:Consolas,monospace;font-size:.76rem}
-.agent .vign{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--v16);flex:0 0 auto}
+.agent .vign{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--v18);flex:0 0 auto}
 .agent .sansph{width:32px;height:32px;border-radius:50%;background:var(--v08);display:flex;
   align-items:center;justify-content:center;font-size:.95rem;flex:0 0 auto}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}

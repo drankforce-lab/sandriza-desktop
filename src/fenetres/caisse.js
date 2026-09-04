@@ -93,7 +93,7 @@ body{background:var(--f-page);color:var(--tx);
    colonne de droite. Chaque carte y perdait une dizaine de pixels en remplissage et
    les textes d aide en prenaient deux ou trois lignes — cumule, cela depassait la
    hauteur d un ecran. Compacte, mais rien n a ete retire. */
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto;min-height:0}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 .carte h2{margin:0 0 .4rem;font-size:.71rem;text-transform:uppercase;
@@ -106,7 +106,7 @@ input.manque{border-color:#f87171}
 .carte h2 .lie{color:var(--tx-ok);font-size:.68rem;margin-left:.4rem}
 
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
-  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input[type=checkbox]{width:auto}
@@ -121,9 +121,9 @@ input[type=checkbox]{width:auto}
 
 /* Resultats de recherche : hauteur bornee. Huit articles et leurs variantes
    repousseraient les totaux hors de l ecran. */
-.res{margin-top:.55rem;border:1px solid var(--v11);border-radius:9px;
+.res{margin-top:.55rem;border:1px solid var(--v10);border-radius:9px;
   max-height:32vh;overflow-y:auto}
-.res .art{padding:.5rem .65rem;border-top:1px solid var(--v05)}
+.res .art{padding:.5rem .65rem;border-top:1px solid var(--v06)}
 .res .art:first-child{border-top:0}
 .res .nom{font-weight:600;font-size:.87rem}
 .res .code{font-family:ui-monospace,monospace;font-size:.73rem;opacity:.55;margin-left:.35rem}
@@ -138,7 +138,7 @@ thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
   padding:.35rem .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
-tbody td{padding:.3rem .5rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody td{padding:.3rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
 tbody .det{font-size:.74rem;color:var(--tx2)}
@@ -150,7 +150,7 @@ tbody button{padding:.05rem .42rem;font-size:.9rem;line-height:1.3}
 /* Totaux : la ligne du total ne peut pas se confondre avec une taxe. */
 .tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.12rem 0;font-size:.86rem}
 .tot .l.grand{margin-top:.28rem;padding-top:.35rem;
-  border-top:1px solid var(--v16);font-size:1.12rem;font-weight:700}
+  border-top:1px solid var(--v14);font-size:1.12rem;font-weight:700}
 .tot .l.bon{color:var(--tx-ok)}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
@@ -164,11 +164,11 @@ button.large{width:100%;padding:.5rem .8rem;font-size:1rem;margin-top:.4rem}
 button.mini{padding:.16rem .45rem;font-size:.75rem}
 
 .cli{padding:.38rem .6rem;cursor:pointer;font-size:.84rem;
-  border-top:1px solid var(--v05)}
+  border-top:1px solid var(--v06)}
 .cli:first-child{border-top:0}
 .cli:hover{background:var(--v05)}
 .cli .m{color:var(--tx2);font-size:.77rem}
-.liste-cli{margin-top:.4rem;border:1px solid var(--v11);border-radius:9px;overflow:hidden}
+.liste-cli{margin-top:.4rem;border:1px solid var(--v10);border-radius:9px;overflow:hidden}
 
 .case{display:flex;align-items:flex-start;gap:.45rem;margin-top:.4rem;
   font-size:.78rem;cursor:pointer}
@@ -189,11 +189,11 @@ button.mini{padding:.16rem .45rem;font-size:.75rem}
    dialogue du systeme se serait ouverte derriere, comme le decompte d inactivite. */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%}
 .voile h3{margin:0 0 .6rem;font:700 1.06rem/1.25 Georgia,serif}
 .voile .rangee{display:flex;justify-content:space-between;gap:1rem;
-  padding:.26rem 0;font-size:.86rem;border-top:1px solid var(--v05)}
+  padding:.26rem 0;font-size:.86rem;border-top:1px solid var(--v06)}
 .voile .rangee:first-of-type{border-top:0}
 .voile .fin{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 .voile .lien{display:flex;gap:.4rem;margin-top:.55rem}

@@ -36,12 +36,12 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;overflow-y:auto;padding:1.1rem}
 .corps::-webkit-scrollbar{width:9px}
 .corps::-webkit-scrollbar-thumb{background:var(--v13);border-radius:9px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.95rem 1.05rem;margin-bottom:.85rem}
 .carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .lg{display:flex;gap:.9rem;align-items:baseline;padding:.34rem 0;
-  border-top:1px solid var(--v05)}
+  border-top:1px solid var(--v055)}
 .lg:first-of-type{border-top:0}
 .lg .k{flex:0 0 10.5rem;font-size:.75rem;color:var(--tx2)}
 .lg .v{flex:1 1 auto;min-width:0;word-break:break-word}
@@ -49,7 +49,7 @@ body{background:var(--f-page);color:var(--tx);
   font-size:.7rem;font-weight:600;border:1px solid currentColor}
 .ok{color:var(--tx-ok)}.att{color:var(--tx-att)}.non{color:var(--tx-err)}.gris{color:var(--tx2)}
 .svc{display:flex;align-items:center;gap:.9rem;padding:.7rem 0;
-  border-top:1px solid var(--v05)}
+  border-top:1px solid var(--v055)}
 .svc:first-of-type{border-top:0}
 .svc .d{flex:1 1 auto;min-width:0}
 .svc .n{font-weight:600;font-size:.95rem}
@@ -131,7 +131,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.innerHTML = '<div class="vide"><div class="gros">' + esc(titre) + '</div>'
       + '<div style="font-size:.82rem;margin-bottom:.6rem">Ce que la fenêtre a pu faire, étape par étape :</div>'
       + '<pre id="diag" style="text-align:left;white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;'
-      + 'background:var(--f-pied);border:1px solid var(--v11);border-radius:8px;padding:.7rem .8rem;'
+      + 'background:var(--f-pied);border:1px solid var(--v12);border-radius:8px;padding:.7rem .8rem;'
       + 'max-width:52rem;color:var(--tx-bleute)">' + esc(JOURNAL.join(SAUT)) + '</pre></div>';
   }
   // ⚠ UNE ERREUR NON RATTRAPEE NE DOIT PLUS ETRE INVISIBLE. Sans ces deux

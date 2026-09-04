@@ -92,7 +92,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700}
@@ -103,10 +103,10 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:600}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 /* Un damier CLAIR derriere les vignettes : un objet promotionnel est imprime sur
@@ -134,7 +134,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .champ label{font-size:.7rem;color:var(--tx2)}
 .rapide{display:flex;gap:.28rem;flex-wrap:wrap;margin-top:.3rem}
 .rang{display:flex;justify-content:space-between;gap:.6rem;font-size:.8rem;
-  padding:.16rem 0;border-bottom:1px solid var(--v05)}
+  padding:.16rem 0;border-bottom:1px solid var(--v055)}
 .rang strong{font-weight:600}
 .gapercu{background:#f2f2f2;border-radius:10px;min-height:9rem;display:flex;
   align-items:center;justify-content:center;padding:.5rem;overflow:hidden}

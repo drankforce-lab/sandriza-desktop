@@ -70,7 +70,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
    colonne par colonne. La fiche laisse respirer l'essentiel et met les actions
    à portée sans les entasser au bout d'une rangée. */
 .fiches{display:grid;grid-template-columns:repeat(auto-fill,minmax(24rem,1fr));gap:.8rem}
-.fiche{background:var(--v03);border:1px solid var(--v08);border-radius:13px;
+.fiche{background:var(--v03);border:1px solid var(--v09);border-radius:13px;
   padding:.9rem 1rem;display:flex;flex-direction:column;gap:.65rem;transition:border-color .13s}
 .fiche:hover{border-color:rgba(201,169,126,.45)}
 .fiche.inactif{opacity:.72}
@@ -83,7 +83,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .fiche .coord{font-size:.75rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fiche .etats{display:flex;gap:.32rem;flex-wrap:wrap;align-items:center}
 .fiche .quand{font-size:.74rem;color:var(--tx-gris)}
-.fiche .barre{display:flex;gap:.35rem;flex-wrap:wrap;border-top:1px solid var(--v08);padding-top:.65rem;margin-top:auto}
+.fiche .barre{display:flex;gap:.35rem;flex-wrap:wrap;border-top:1px solid var(--v07);padding-top:.65rem;margin-top:auto}
 .fiche .barre .b{font-size:.76rem;padding:.3rem .62rem}
 .vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem;line-height:1.7}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -91,7 +91,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 /* ── Éditeur de compte (surcouche) ───────────────────────────────── */
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:60;padding:1.4rem}
-.sur .boite{background:var(--f-131c2b);border:1px solid var(--v11);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+.sur .boite{background:var(--f-131c2b);border:1px solid var(--v12);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
 .sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid var(--v08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
@@ -122,7 +122,7 @@ input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;cursor:pointer;margin:0 0 .55rem;line-height:1.45}
 label.case input{width:16px;height:16px;accent-color:#c9a97e;margin-top:.15rem;flex:0 0 auto}
 label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
-.note{background:var(--v04);border:1px solid var(--v11);border-radius:9px;padding:.8rem .95rem;font-size:.81rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
+.note{background:var(--v04);border:1px solid var(--v10);border-radius:9px;padding:.8rem .95rem;font-size:.81rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
 .note b{color:var(--tx)}
 .ferr{display:none;color:var(--tx-err2);font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:0 0 .8rem}
 .permtb{width:100%;border-collapse:collapse}
@@ -130,7 +130,7 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
 .permtb th.mod{text-align:left}
 .permtb td{padding:.24rem .5rem;text-align:center;font-size:.8rem}
 .permtb td.mod{text-align:left;white-space:nowrap}
-.permtb tr.grp td{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);background:var(--v03);padding:.5rem .5rem .3rem;border-top:1px solid var(--v11);text-align:left}
+.permtb tr.grp td{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);background:var(--v03);padding:.5rem .5rem .3rem;border-top:1px solid var(--v10);text-align:left}
 .permtb tbody tr:not(.grp):hover{background:var(--v03)}
 .permtb input{accent-color:#c9a97e}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

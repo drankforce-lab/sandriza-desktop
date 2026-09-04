@@ -67,14 +67,14 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .deux .principal{flex:1 1 auto;min-width:0}
 .deux .cote{flex:0 0 320px}
 @media (max-width:920px){.deux{flex-direction:column}.deux .cote{flex:1 1 auto;width:100%}}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .sku{font-family:'Courier New',monospace;font-size:.74rem;font-weight:800;color:var(--tx-or)}
@@ -91,17 +91,17 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .stats .s .n{font:800 1.15rem/1.2 Georgia,serif;color:var(--tx-or)}
 .stats .s .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .fileligne{display:flex;align-items:center;gap:.45rem;padding:.3rem 0;
-  border-top:1px solid var(--v05);font-size:.8rem}
+  border-top:1px solid var(--v055);font-size:.8rem}
 .fileligne .info{flex:1 1 auto;min-width:0}
 .fileligne .info .dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:34rem;width:100%;max-height:82vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .95rem/1.3 Georgia,serif}
 .boite .rangs{display:flex;flex-direction:column}
 .boite .rang{display:flex;align-items:center;gap:.55rem;padding:.3rem 0;
-  border-top:1px solid var(--v05)}
+  border-top:1px solid var(--v055)}
 .boite .rang label{flex:1 1 auto;display:flex;align-items:center;gap:.5rem;cursor:pointer}
 .boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
 .boite p{margin:.35rem 0;font-size:.85rem;line-height:1.55}

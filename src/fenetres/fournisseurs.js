@@ -46,14 +46,14 @@ button.prim:hover:not(:disabled){background:#d8bc95}
 button.mini{padding:.12rem .45rem;font-size:.74rem;-webkit-user-select:none;user-select:none}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.danger:hover:not(:disabled){background:rgba(239,68,68,.12)}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
-tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;

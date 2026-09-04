@@ -37,11 +37,11 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem;max-width:62rem}
 .quoi b{color:var(--tx)}
 .auto{display:flex;align-items:center;gap:.5rem;font-size:.84rem;margin:0 0 1.2rem;
-  background:var(--v03);border:1px solid var(--v08);
+  background:var(--v03);border:1px solid var(--v09);
   border-radius:10px;padding:.6rem .8rem}
 .auto input{width:16px;height:16px;accent-color:#c9a97e}
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(27rem,1fr));gap:.9rem}
-.res{background:var(--v03);border:1px solid var(--v11);border-radius:13px;padding:1rem 1.1rem}
+.res{background:var(--v03);border:1px solid var(--v10);border-radius:13px;padding:1rem 1.1rem}
 .res.on{border-color:rgba(201,169,126,.42)}
 .res .haut{display:flex;align-items:center;gap:.7rem;margin:0 0 .8rem}
 .res .nom{font:700 1rem/1.2 Georgia,serif;flex:1 1 auto}

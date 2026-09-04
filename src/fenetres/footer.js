@@ -34,7 +34,7 @@ body{background:var(--f-page);color:var(--tx);
   gap:1rem;align-content:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .pleine{grid-column:1/-1}
 .carte h2{margin:0 0 .8rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -48,7 +48,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch input:focus{outline:none;border-color:#c9a97e}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 @media (max-width:560px){.deux{grid-template-columns:1fr}}
-.apercu{background:var(--f-champ);border:1px solid var(--v08);border-radius:9px;
+.apercu{background:var(--f-champ);border:1px solid var(--v07);border-radius:9px;
   padding:.6rem .75rem;font-size:.82rem;color:var(--tx2);line-height:1.5}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

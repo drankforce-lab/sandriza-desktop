@@ -54,7 +54,7 @@ button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
 button.bon{border-color:rgba(34,197,94,.5);color:var(--tx-ok)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:.5rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.5rem .65rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.att{color:var(--tx-att)}.tuile .val.err{color:var(--tx-err)}
@@ -62,20 +62,20 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 tbody .fin{white-space:nowrap;text-align:right}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:26rem;width:100%;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .95rem/1.3 Georgia,serif}
 .boite select{width:100%;font:inherit;color:var(--tx);background:var(--f-0f1826);
-  border:1px solid var(--v16);border-radius:8px;padding:.38rem .55rem}
+  border:1px solid var(--v14);border-radius:8px;padding:.38rem .55rem}
 .boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
-tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}

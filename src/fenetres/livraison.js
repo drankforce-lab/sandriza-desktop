@@ -32,7 +32,7 @@ body{background:var(--f-page);color:var(--tx);
   display:grid;grid-template-columns:repeat(auto-fit,minmax(26rem,1fr));gap:1rem;align-content:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .8rem/1.2 system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--tx-bleute)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
@@ -64,13 +64,13 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 .carte.large{grid-column:1/-1}
 .pbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap}
 .pbarre .info{font-size:.74rem;color:var(--tx2);flex:1 1 12rem;min-width:0}
-.ptab{max-height:22rem;overflow-y:auto;border:1px solid var(--v08);border-radius:9px}
+.ptab{max-height:22rem;overflow-y:auto;border:1px solid var(--v07);border-radius:9px}
 .ptab::-webkit-scrollbar{width:8px}
 .ptab::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table.pays{width:100%;border-collapse:collapse}
 table.pays th{position:sticky;top:0;background:var(--f-131c2b);text-align:left;font:700 .68rem/1.3 system-ui;
   text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .7rem;
-  border-bottom:1px solid var(--v11)}
+  border-bottom:1px solid var(--v10)}
 table.pays td{padding:.38rem .7rem;border-bottom:1px solid var(--v05);font-size:.84rem}
 table.pays tr.off td{opacity:.42}
 table.pays .code{color:var(--tx3);font:.72rem ui-monospace,Menlo,Consolas,monospace;margin-left:.35rem}

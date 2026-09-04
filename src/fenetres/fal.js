@@ -46,7 +46,7 @@ body{background:var(--f-page);color:var(--tx);
   display:flex;flex-direction:column;gap:.75rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -60,15 +60,15 @@ select{font:inherit;color:var(--tx);background:var(--v05);
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 .tuiles{display:flex;gap:.6rem;flex-wrap:wrap}
-.t{flex:1 1 8rem;background:var(--f-carte);border:1px solid var(--v08);
+.t{flex:1 1 8rem;background:var(--f-carte);border:1px solid var(--v07);
   border-radius:11px;padding:.6rem .75rem}
 .t .n{font:800 1.5rem/1.1 Georgia,serif;font-variant-numeric:tabular-nums}
 .t .l{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
 .t .s{font-size:.7rem;color:var(--tx2);margin-top:.15rem}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.3rem .35rem;border-top:1px solid var(--v05);vertical-align:top}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.3rem .35rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v03)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .dt{font-size:.7rem;color:var(--tx2)}

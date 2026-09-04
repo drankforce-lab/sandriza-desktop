@@ -55,12 +55,12 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 
 /* Zone de depot : elle doit se voir SANS chercher — c est la porte principale. */
 .depot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:.3rem;border:2px dashed var(--v22);
+  justify-content:center;gap:.3rem;border:2px dashed var(--v20);
   border-radius:12px;padding:1.15rem 1rem;text-align:center;color:var(--tx2);
   cursor:pointer;transition:border-color .13s,background .13s}
 .depot:hover{border-color:#c9a97e}
@@ -75,10 +75,10 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vign{width:44px;height:44px;border-radius:7px;overflow:hidden;display:flex;
@@ -110,7 +110,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    la derniere colonne cache justement les boutons d action.
    ══════════════════════════════════════════════════════════════════════════ */
 .voile{position:fixed;top:0;right:0;bottom:0;width:min(27rem,52vw);z-index:50;
-  display:flex;background:var(--f-pied);border-left:1px solid var(--v11);
+  display:flex;background:var(--f-pied);border-left:1px solid var(--v12);
   box-shadow:-16px 0 40px rgba(0,0,0,.45)}
 .boite{background:var(--f-pied);border:0;border-radius:0;width:100%;
   overflow:auto;padding:.85rem .95rem}
@@ -141,7 +141,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .choix{max-height:17rem;overflow:auto;margin-top:.5rem;display:flex;
   flex-direction:column;gap:.28rem}
 .choix .p{display:flex;align-items:center;gap:.55rem;padding:.3rem .4rem;
-  border:1px solid var(--v08);border-radius:8px;cursor:pointer}
+  border:1px solid var(--v09);border-radius:8px;cursor:pointer}
 .choix .p:hover{border-color:#c9a97e;background:var(--v04)}
 .choix .p img{width:34px;height:34px;object-fit:cover;border-radius:6px;flex:0 0 auto}
 .choix .p .creux{width:34px;height:34px;border-radius:6px;flex:0 0 auto;
@@ -207,7 +207,7 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
 /* ── LE CENTRE DE COMMANDE ─────────────────────────────────────────────── */
 .cmd{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
-  padding:.5rem .6rem;background:var(--f-carte);border:1px solid var(--v08);
+  padding:.5rem .6rem;background:var(--f-carte);border:1px solid var(--v07);
   border-radius:11px}
 .cmd .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 .cmd .sep{width:1px;height:1.3rem;background:var(--v12);margin:0 .2rem}
@@ -235,7 +235,7 @@ tr:hover .act .ic{opacity:1}
 /* ── L ASSISTANT ───────────────────────────────────────────────────────── */
 .asst{position:fixed;inset:0;background:rgba(6,10,18,.78);z-index:70;display:flex;
   align-items:center;justify-content:center;padding:1rem}
-.asst .bo{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.asst .bo{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   width:min(62rem,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
 .asst .tt{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;
   border-bottom:1px solid var(--v08)}
@@ -265,7 +265,7 @@ tr:hover .act .ic{opacity:1}
 .asst .pi .dr{margin-left:auto;display:flex;gap:.5rem}
 /* La planche de vignettes : c est l ecran ou l on CHOISIT, il doit montrer. */
 .pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.5rem}
-.pl .v{position:relative;border:2px solid var(--v11);border-radius:9px;
+.pl .v{position:relative;border:2px solid var(--v10);border-radius:9px;
   overflow:hidden;cursor:pointer;background:var(--f-pied)}
 .pl .v.on{border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.2)}
 /* ⚠⚠ UNE ROTATION CSS NE CHANGE PAS LA BOITE. L image tournait bien, mais son
@@ -308,13 +308,13 @@ tr:hover .act .ic{opacity:1}
 @media (prefers-reduced-motion:reduce){.chargement .tourne{animation:none}}
 .src{display:flex;flex-direction:column;gap:.4rem}
 .src .l{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;cursor:pointer;
-  border:1px solid var(--v11);border-radius:9px}
+  border:1px solid var(--v12);border-radius:9px}
 .src .l:hover{background:var(--v04)}
 .src .l.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 .src .l b{font-size:.9rem}
 .but{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
 .but label{display:flex;gap:.55rem;align-items:flex-start;padding:.5rem .65rem;
-  border:1px solid var(--v11);border-radius:9px;cursor:pointer;margin:0;color:var(--tx);font-size:.84rem}
+  border:1px solid var(--v12);border-radius:9px;cursor:pointer;margin:0;color:var(--tx);font-size:.84rem}
 .but label.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 .but label input{width:auto;margin-top:.15rem}
 .but label .d{display:block;font-size:.72rem;color:var(--tx2);margin-top:.1rem}
@@ -1487,7 +1487,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     v.style.cssText = 'position:fixed;inset:0;z-index:120;background:rgba(6,10,18,.72);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.2rem';
     v.innerHTML = '<div style="max-width:30rem;background:var(--f-131c2b);'
-      + 'border:1px solid var(--v11);border-radius:13px;padding:1.1rem 1.2rem;'
+      + 'border:1px solid var(--v12);border-radius:13px;padding:1.1rem 1.2rem;'
       + 'box-shadow:0 18px 50px rgba(0,0,0,.5)">'
       + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-or2)">'
       + 'Des photos ont déjà été facturées</h2>'
@@ -1497,7 +1497,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'entraînera de nouveaux frais.</p>' + liste
       + '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">'
       + '<button id="frais-non" style="font:inherit;color:var(--tx);'
-      + 'background:var(--v06);border:1px solid var(--v16);'
+      + 'background:var(--v06);border:1px solid var(--v18);'
       + 'border-radius:8px;padding:.42rem .85rem;cursor:pointer">Annuler</button>'
       + '<button id="frais-oui" style="font:inherit;color:#0e1522;background:#f0d6a0;'
       + 'border:1px solid #f0d6a0;border-radius:8px;padding:.42rem .85rem;cursor:pointer;'
@@ -1531,7 +1531,7 @@ ${JS_ACTIVITE}${JS_DIRE}
                                     : 'Aperçu du retrait de mannequin';
     var cells = items.map(function(it, i){
       return '<figure id="apr-c' + i + '" style="margin:0;background:var(--f-page);'
-        + 'border:1px solid var(--v08);border-radius:10px;overflow:hidden;'
+        + 'border:1px solid var(--v09);border-radius:10px;overflow:hidden;'
         + 'display:flex;flex-direction:column">'
         + '<div class="apr-img" style="aspect-ratio:3/4;display:flex;align-items:center;'
         + 'justify-content:center;background:' + APR_CHECKER + ';color:var(--tx2);'
@@ -1548,7 +1548,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<h2 style="margin:0;font:700 1rem/1.2 Georgia,serif;color:var(--tx-or2)">' + esc(titre) + '</h2>'
       + '<span style="font-size:.74rem;color:var(--tx2)">gratuit · filigrané · aucun crédit réel</span>'
       + '<button id="apr-x" style="margin-left:auto;font:inherit;color:var(--tx);'
-      + 'background:var(--v06);border:1px solid var(--v16);'
+      + 'background:var(--v06);border:1px solid var(--v18);'
       + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">Fermer</button></div>'
       // ⚠ auto-FIT + justify-content:center : une seule photo s'affiche GRANDE et
       // CENTRÉE (auto-fill la collait en haut à gauche, minuscule) ; un lot reste

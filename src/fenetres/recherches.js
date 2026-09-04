@@ -50,24 +50,24 @@ button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.5rem .65rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .fin{width:1%;white-space:nowrap;text-align:right}
 .dt{font-size:.72rem;color:var(--tx2)}
 .mot{display:inline-flex;align-items:center;gap:.35rem;padding:.16rem .6rem;
-  border:1px solid var(--v16);border-radius:99px;font-size:.82rem;margin:.15rem}
+  border:1px solid var(--v14);border-radius:99px;font-size:.82rem;margin:.15rem}
 .mot strong{font-variant-numeric:tabular-nums;color:var(--tx-or)}
 .vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

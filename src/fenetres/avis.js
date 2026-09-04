@@ -61,14 +61,14 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
-tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .etoile{color:var(--tx-or);font-weight:800}
@@ -81,7 +81,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:40rem;width:100%;max-height:84vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem;
@@ -90,10 +90,10 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
-  background:var(--v03);border:1px solid var(--v08);border-radius:9px;padding:.6rem .7rem}
+  background:var(--v03);border:1px solid var(--v07);border-radius:9px;padding:.6rem .7rem}
 .boite .photos{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 .6rem}
 .boite .ph{position:relative;width:86px;height:86px;border-radius:9px;overflow:hidden;
-  border:1px solid var(--v16);background:var(--v05)}
+  border:1px solid var(--v14);background:var(--v05)}
 .boite .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .boite .phx{position:absolute;top:3px;right:3px;width:22px;height:22px;padding:0;line-height:1;
   border-radius:50%;background:rgba(6,10,18,.78);border:1px solid rgba(239,68,68,.6);

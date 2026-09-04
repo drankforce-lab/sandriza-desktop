@@ -43,13 +43,13 @@ body{background:var(--f-page);color:var(--tx);
 /* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10) :
    pas d align-items:start, sinon la rangee finit en escalier. */
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;min-width:0;display:flex;flex-direction:column}
 .carte .tt{display:flex;align-items:center;gap:.5rem;margin:0 0 .2rem}
 .carte h2{margin:0;font:700 .82rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx-bleute)}
 .carte .lien{margin-left:auto;font-size:.72rem;color:var(--tx2);text-decoration:none;
-  border:1px solid var(--v16);border-radius:7px;padding:.14rem .5rem}
+  border:1px solid var(--v14);border-radius:7px;padding:.14rem .5rem}
 .carte .lien:hover{color:var(--tx);border-color:var(--v30)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
 .ch{margin:0 0 .8rem}

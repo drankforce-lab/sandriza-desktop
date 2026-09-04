@@ -49,8 +49,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .stat .l{font-size:.74rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em}
 .stat .v{font:700 1.7rem/1.1 Georgia,serif;margin-top:.25rem}
 table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.5rem .7rem;border-bottom:1px solid var(--v11);white-space:nowrap}
-table.tb td{padding:.6rem .7rem;border-bottom:1px solid var(--v05);font-size:.85rem;vertical-align:middle}
+table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.5rem .7rem;border-bottom:1px solid var(--v10);white-space:nowrap}
+table.tb td{padding:.6rem .7rem;border-bottom:1px solid var(--v06);font-size:.85rem;vertical-align:middle}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
 .pill.grave{background:rgba(220,38,38,.18);color:var(--tx-err2)}
 .pill.eval{background:rgba(234,179,8,.18);color:#e6c14a}
@@ -73,7 +73,7 @@ table.tb td{padding:.6rem .7rem;border-bottom:1px solid var(--v05);font-size:.85
 .vide{padding:2.4rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem;line-height:1.7}
 /* ── Assistant (surcouche) ───────────────────────────────────────── */
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:60;padding:1.4rem}
-.sur .boite{background:var(--f-131c2b);border:1px solid var(--v11);border-radius:14px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+.sur .boite{background:var(--f-131c2b);border:1px solid var(--v12);border-radius:14px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column}
 .sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid var(--v08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
@@ -105,7 +105,7 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .fil .tr.fait{background:#4ade80}
 .fil .tr.vide{background:transparent}
 .fil .rond{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:.75rem;font-weight:700;flex-shrink:0;border:2px solid var(--v16);
+  font-size:.75rem;font-weight:700;flex-shrink:0;border:2px solid var(--v18);
   background:transparent;color:var(--tx2);box-sizing:border-box}
 .fil .et.fait .rond{background:#4ade80;border-color:#4ade80;color:#08240f}
 .fil .et.ici .rond{background:#c9a97e;border-color:#c9a97e;color:#1a1408}
@@ -129,7 +129,7 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 /* Fiche de consultation */
 .fiche .grp{margin:0 0 1.1rem}
 .fiche .grpT{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx-or);margin:0 0 .3rem}
-.fiche .li{display:flex;gap:.9rem;padding:.38rem 0;border-bottom:1px solid var(--v08)}
+.fiche .li{display:flex;gap:.9rem;padding:.38rem 0;border-bottom:1px solid var(--v07)}
 .fiche .li .k{flex:0 0 42%;font-size:.78rem;color:var(--tx2)}
 .fiche .li .v{flex:1;font-size:.83rem;white-space:pre-wrap;word-break:break-word}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

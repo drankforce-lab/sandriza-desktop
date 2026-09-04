@@ -34,7 +34,7 @@ body{background:var(--f-page);color:var(--tx);
   display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.85rem 1rem}
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.85rem 1rem}
 .th{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:0 0 .3rem}
 .th .em{font-size:1.05rem;filter:grayscale(1) brightness(1.55);opacity:.9}
 .th .nom{font-weight:700;font-size:.9rem}

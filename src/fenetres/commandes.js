@@ -51,12 +51,12 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.55rem}
 
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
-  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 #rech{font-size:1rem;padding:.45rem .6rem}
@@ -103,7 +103,7 @@ thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
 thead th.c{text-align:center}
-tbody td{padding:.3rem .5rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody td{padding:.3rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
 tbody tr:hover{background:var(--v04)}
@@ -120,7 +120,7 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .et.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-f6a5a5)}
 
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.45rem;
-  margin-top:.35rem;border-top:1px solid var(--v08);
+  margin-top:.35rem;border-top:1px solid var(--v07);
   font-size:.78rem;color:var(--tx2);flex-wrap:wrap}
 .pagi .pos{margin-left:auto}
 .pagi select{width:auto;padding:.14rem .35rem;font-size:.76rem}
@@ -166,7 +166,7 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
    DERRIERE la fenetre, comme le decompte d inactivite l a fait). */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:36rem;width:100%;
   max-height:84vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
@@ -181,19 +181,19 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 /* Rattachement a un client : le champ de recherche et ses resultats. */
 .voile input.rech{width:100%;padding:.42rem .6rem;border-radius:8px;
-  border:1px solid var(--v16);margin-top:.25rem}
+  border:1px solid var(--v18);margin-top:.25rem}
 .voile .lres{max-height:250px;overflow-y:auto;display:flex;flex-direction:column;
   gap:.35rem;margin-top:.55rem}
 .voile .lres .cli{display:flex;justify-content:space-between;align-items:center;
   gap:.8rem;padding:.45rem .6rem;background:var(--v05);
-  border:1px solid var(--v11);border-radius:7px;cursor:pointer}
+  border:1px solid var(--v12);border-radius:7px;cursor:pointer}
 .voile .lres .cli:hover{border-color:#c9a97e;background:rgba(201,169,126,.12)}
 .voile .lres .cli .nm{font-weight:600;font-size:.85rem}
 .voile .lres .cli .em{font-size:.76rem;color:var(--tx2)}
 .voile .lres .cli .fl{font-size:.74rem;color:var(--tx-or);white-space:nowrap}
 .voile .lres .rien{padding:.5rem .2rem;color:var(--tx2);font-size:.83rem}
 .voile .detacher{margin-top:.8rem;padding-top:.6rem;
-  border-top:1px solid var(--v11)}
+  border-top:1px solid var(--v10)}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);

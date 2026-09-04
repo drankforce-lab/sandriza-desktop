@@ -41,10 +41,10 @@ body{background:var(--f-page);color:var(--tx);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .tete .pill{font-size:.7rem;padding:.14rem .6rem;border-radius:99px;
-  border:1px solid var(--v22);margin-left:.6rem}
+  border:1px solid var(--v20);margin-left:.6rem}
 
 .pas{flex:0 0 auto;display:flex;gap:.35rem;padding:.45rem 1.1rem;
-  border-bottom:1px solid var(--v08);background:#111a28}
+  border-bottom:1px solid var(--v07);background:#111a28}
 .pas button{font:inherit;font-size:.76rem;padding:.24rem .6rem;border-radius:7px;
   border:1px solid transparent;background:transparent;color:var(--tx2);cursor:pointer}
 .pas button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-creme)}
@@ -54,7 +54,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
@@ -66,7 +66,7 @@ body{background:var(--f-page);color:var(--tx);
 .info .large{grid-column:1/-1}
 
 input,select,textarea{font:inherit;color:var(--tx);background:var(--f-0f1826);
-  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
 textarea{resize:none}
@@ -93,15 +93,15 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 
 .art{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:8px;
-  background:var(--v03);border:1px solid var(--v05);margin-top:.35rem}
+  background:var(--v03);border:1px solid var(--v06);margin-top:.35rem}
 .art .d{flex:1 1 auto;min-width:0}
 .art .n{font-size:.88rem;font-weight:600}
 .art .v{font-size:.75rem;color:var(--tx2)}
 .art select{width:auto}
 .ligne{display:flex;align-items:center;justify-content:space-between;gap:.7rem;
-  padding:.3rem 0;border-bottom:1px solid var(--v05);font-size:.85rem}
+  padding:.3rem 0;border-bottom:1px solid var(--v06);font-size:.85rem}
 .ligne input{width:6.2rem;text-align:right}
-.photo{max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--v16)}
+.photo{max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--v14)}
 .jetons{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem}
 .jetons button{font-size:.72rem;padding:.14rem .5rem}
 
@@ -116,7 +116,7 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:34rem;width:100%;
   max-height:82vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
@@ -648,7 +648,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function voilePdf(b64){
     voile('<h3><span class="ic">👁</span> Étiquette de retour</h3>'
       + '<iframe src="data:application/pdf;base64,' + b64 + '" '
-      + 'style="width:100%;height:52vh;border:1px solid var(--v16);border-radius:8px;background:#3c3c3c"></iframe>'
+      + 'style="width:100%;height:52vh;border:1px solid var(--v14);border-radius:8px;background:#3c3c3c"></iframe>'
       + '<div class="fin2"><button id="v-non">Fermer</button></div>',
       function(fermer){ document.getElementById('v-non').onclick = fermer; });
   }

@@ -47,7 +47,7 @@ body{background:var(--f-page);color:var(--tx);
    naturelle et la rangee finissait en escalier. On laisse donc l etirement par
    defaut, et les contenus restent en haut de leur carte. */
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -74,7 +74,7 @@ body{background:var(--f-page);color:var(--tx);
 .jeton b{color:var(--tx-ok)}
 .jeton.non b{color:var(--tx-jaune)}
 .tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.6rem}
-.tarif{background:var(--f-pill);border:1px solid var(--v08);border-radius:9px;padding:.55rem .7rem}
+.tarif{background:var(--f-pill);border:1px solid var(--v07);border-radius:9px;padding:.55rem .7rem}
 .tarif .t{font-size:.76rem;font-weight:700}
 .tarif .r{font-size:.95rem;font-weight:700;color:var(--tx-or);margin:.1rem 0}
 .tarif .n{font-size:.7rem;color:var(--tx3)}

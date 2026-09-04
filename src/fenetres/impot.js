@@ -55,7 +55,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
@@ -69,15 +69,15 @@ button.prim:hover:not(:disabled){background:#d8bc95}
 .stats .s .sub{font-size:.66rem;color:var(--tx3)}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.28rem .4rem;border-top:1px solid var(--v05)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.28rem .4rem;border-top:1px solid var(--v055)}
 tbody .arg{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 tbody tr.total td{border-top:2px solid var(--v22);font-weight:700}
 tbody tr.credit td{color:var(--tx-ok)}
 .rang{display:flex;justify-content:space-between;gap:1rem;padding:.26rem 0;
-  border-bottom:1px solid var(--v05);font-size:.86rem}
+  border-bottom:1px solid var(--v06);font-size:.86rem}
 .rang .l .sub{font-size:.68rem;color:var(--tx3);margin-left:.4rem}
-.rang.fort{border-bottom:none;border-top:2px solid var(--v22);
+.rang.fort{border-bottom:none;border-top:2px solid var(--v20);
   margin-top:.2rem;font-weight:700;font-size:.95rem}
 .rang b{font-variant-numeric:tabular-nums}
 .avis{background:rgba(180,120,10,.1);border:1px solid rgba(180,120,10,.4);color:var(--tx-att);
@@ -87,7 +87,7 @@ tbody tr.credit td{color:var(--tx-ok)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
   background:rgba(148,163,184,.16);color:var(--tx2);margin:.1rem .25rem 0 0}
 .docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.5rem}
-.doc{background:var(--v04);border:1px solid var(--v08);
+.doc{background:var(--v04);border:1px solid var(--v09);
   border-radius:10px;padding:.55rem .7rem;display:flex;flex-direction:column;gap:.25rem}
 .doc .t{font-weight:600;font-size:.88rem}
 .doc .d{font-size:.72rem;color:var(--tx2);line-height:1.4;flex:1 1 auto}
@@ -130,11 +130,11 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 .ech strong{display:block;font-size:.8rem;font-weight:600}
 .ech.passe strong{font-weight:400}
 .ech .dt{display:block;font-size:.68rem;color:var(--tx3)}
-.ded{padding:.28rem 0;border-bottom:1px solid var(--v05)}
+.ded{padding:.28rem 0;border-bottom:1px solid var(--v055)}
 .ded strong{display:block;font-size:.78rem}
 .ded .dt{display:block;font-size:.68rem;color:var(--tx3)}
 .form{display:flex;align-items:center;gap:.5rem;padding:.28rem 0;
-  border-bottom:1px solid var(--v05)}
+  border-bottom:1px solid var(--v055)}
 .form .code{font-family:Consolas,monospace;font-size:.74rem;font-weight:700;color:var(--tx-or);
   min-width:5.4rem;flex:0 0 auto}
 .form .dt{flex:1 1 auto;font-size:.73rem;color:var(--tx2)}

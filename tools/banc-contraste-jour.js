@@ -129,6 +129,45 @@ for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
 const detail = process.argv.includes('--liste');
 let mal = 0, total = 0;
 
+/* ── UN JETON EMPLOYÉ DOIT ÊTRE DÉFINI ───────────────────────────────────────
+   ⚠⚠ LE CONTRÔLE QUI MANQUAIT, ET IL AURAIT ÉVITÉ DEUX VERSIONS DE RÉPARATION.
+   Le 2026-09-04, après avoir renommé les jetons de voile, `--v11` restait employé
+   dans **66 fenêtres** alors qu'il n'était plus défini nulle part. Un `var()` qui
+   ne résout rien rend la propriété INVALIDE : la bordure ou le fond n'est pas
+   dessiné. Les écrans s'affichent, simplement à plat — exactement ce qu'il a
+   photographié, deux fois.
+
+   ⚠ POURQUOI LE PREMIER RELEVÉ NE L'A PAS VU : il ne regardait que
+   `color:` / `background:` / `border-color:`, et ratait les RACCOURCIS —
+   `border:1px solid var(--v11)`. C'est par là que les 66 fenêtres sont passées.
+   Ici on relève TOUTE occurrence de `var(--…)`, quelle que soit la propriété.
+
+   ⚠ Les jetons du SITE (`--c-…`) et ceux des jeux de couleurs (`--sz-…`) sont
+   définis ailleurs que dans les deux blocs de mode : on lit donc toutes les
+   déclarations `--x:` du socle, pas seulement celles des blocs. */
+{
+  const socleBrut = fs.readFileSync(path.join(DOSSIER, 'socle.js'), 'utf8');
+  const definis = new Set();
+  for (const m of socleBrut.matchAll(/(--[a-z0-9-]+)\s*:\s*[^;}]+[;}]/g)) definis.add(m[1]);
+  const orphelins = new Map();
+  for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
+    const src = fs.readFileSync(path.join(DOSSIER, f), 'utf8');
+    for (const m of src.matchAll(/var\(\s*(--[a-z0-9-]+)\s*\)/g)) {
+      if (definis.has(m[1])) continue;
+      if (!orphelins.has(m[1])) orphelins.set(m[1], new Set());
+      orphelins.get(m[1]).add(f);
+    }
+  }
+  if (orphelins.size) {
+    console.log('');
+    for (const [j, fics] of [...orphelins.entries()].sort((a, b) => b[1].size - a[1].size))
+      console.log('  NON ORPHELIN ' + j.padEnd(16) + 'employe dans ' + fics.size
+        + ' fenetre(s) mais DEFINI NULLE PART — la propriete est invalide, donc rien ne se dessine ('
+        + [...fics].slice(0, 3).join(', ') + ')');
+    mal += orphelins.size;
+  }
+}
+
 /* Un jeton défini par lui-même : le défaut du 2026-09-04, refusé pour toujours.
    Il ne lève AUCUNE erreur — la page s'affiche, seulement sans ses bordures. */
 {

@@ -34,7 +34,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .zone{width:100%}
 .barre{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:0 0 1rem}
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.9rem}
-.lcard{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;overflow:hidden;display:flex;flex-direction:column}
+.lcard{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;overflow:hidden;display:flex;flex-direction:column}
 .lcard .th{height:110px;background:var(--f-champ) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22><rect width=%228%22 height=%228%22 fill=%22%23172233%22/><rect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22%23172233%22/></svg>');display:flex;align-items:center;justify-content:center}
 .lcard .th img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 .lcard .bd{padding:.5rem .6rem;display:flex;flex-direction:column;gap:.25rem}
@@ -47,7 +47,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 /* Import / recadrage */
 .imp{display:grid;grid-template-columns:minmax(16rem,22rem) 1fr;gap:1.2rem;max-width:60rem}
 @media (max-width:680px){.imp{grid-template-columns:1fr}}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:1rem 1.1rem}
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem}
 .h{font-size:.74rem;font-weight:700;color:var(--tx-bleute);text-transform:uppercase;letter-spacing:.04em;margin:.2rem 0 .5rem}
 .det .row{display:flex;justify-content:space-between;gap:.6rem;font-size:.8rem;padding:.15rem 0}
 .det .row span{color:var(--tx2)}

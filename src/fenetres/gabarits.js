@@ -36,7 +36,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ ANCRÉE = PLEINE PAGE : cartes en colonnes pour remplir la largeur. */
 .zone{columns:36rem;column-gap:1.1rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:1rem 1.1rem;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .carte.edit{border-color:#c9a97e}
 .stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
@@ -78,7 +78,7 @@ body{background:var(--f-page);color:var(--tx);
 .swatch .b2{width:11px;height:11px;border-radius:3px}
 .swatch .lb{font-size:.68rem;color:var(--tx2)}
 .tbl{width:100%;border-collapse:collapse;font-size:.8rem}
-.tbl th{text-align:left;color:var(--tx2);font-weight:600;padding:.45rem .6rem;border-bottom:1px solid var(--v11);font-size:.72rem;text-transform:uppercase}
+.tbl th{text-align:left;color:var(--tx2);font-weight:600;padding:.45rem .6rem;border-bottom:1px solid var(--v10);font-size:.72rem;text-transform:uppercase}
 .tbl td{padding:.4rem .6rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 .tbl td .mod{color:var(--tx2)}
 .tbl select{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-page);border:1px solid #2b3444;border-radius:7px;padding:.3rem .4rem}

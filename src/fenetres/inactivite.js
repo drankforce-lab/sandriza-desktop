@@ -46,7 +46,7 @@ body{background:var(--f-page);color:var(--tx);
   padding:.9rem 1rem}
 .anneau{flex:0 0 auto;width:84px;height:84px;border-radius:50%;display:flex;
   align-items:center;justify-content:center;font:800 1.7rem/1 system-ui;color:var(--tx-blanc);
-  background:conic-gradient(#ef4444 100%,var(--v11) 0)}
+  background:conic-gradient(#ef4444 100%,var(--v10) 0)}
 .txt{min-width:0}
 .txt p{margin:0 0 .25rem;font-size:.9rem}
 .txt .sec{font-size:.78rem;color:var(--tx2);margin:0}
@@ -112,7 +112,7 @@ ${JS_DIRE}
     var s = Math.ceil(reste / 1000);
     n.textContent = s;
     var pct = Math.max(0, Math.min(100, (reste / (TOTAL * 1000)) * 100));
-    anneau.style.background = 'conic-gradient(#ef4444 ' + pct + '%,var(--v11) 0)';
+    anneau.style.background = 'conic-gradient(#ef4444 ' + pct + '%,var(--v10) 0)';
     if (reste <= 0) clearInterval(tic);
   }, 250);
 

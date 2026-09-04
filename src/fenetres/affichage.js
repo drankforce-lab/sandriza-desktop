@@ -52,7 +52,7 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 .liste{flex:1 1 auto;overflow-y:auto;min-height:0}
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:var(--v14);border-radius:8px}
-.ln{display:flex;align-items:baseline;gap:1rem;padding:.72rem 0;border-bottom:1px solid var(--v05)}
+.ln{display:flex;align-items:baseline;gap:1rem;padding:.72rem 0;border-bottom:1px solid var(--v06)}
 .ln .q{flex:0 0 auto;min-width:2.6rem;font-variant-numeric:tabular-nums;color:var(--tx-or);font-weight:700;font-size:1.05rem}
 .ln .d{flex:1 1 auto;min-width:0}
 .ln .n{font-size:1.12rem;font-weight:600;line-height:1.3}
@@ -62,7 +62,7 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
    vient d'ajouter, sans avoir a comparer deux listes. */
 .ln.neuf{animation:surligne 1.4s ease-out}
 @keyframes surligne{0%{background:rgba(201,169,126,.22)}100%{background:transparent}}
-.bas{flex:0 0 auto;border-top:1px solid var(--v11);padding-top:.9rem;margin-top:.6rem}
+.bas{flex:0 0 auto;border-top:1px solid var(--v10);padding-top:.9rem;margin-top:.6rem}
 .sl{display:flex;justify-content:space-between;font-size:.95rem;color:#b9c6d6;padding:.2rem 0}
 .sl b{font-variant-numeric:tabular-nums;font-weight:600;color:var(--tx-e6ded2)}
 .tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:.7rem;

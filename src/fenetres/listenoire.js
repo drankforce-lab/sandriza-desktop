@@ -49,7 +49,7 @@ input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 .sug-it .r{font-weight:600;font-size:.84rem}
 .sug-it .v{font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sug-vide{padding:.5rem .6rem;font-size:.8rem;color:var(--tx2)}
-.sug-src{padding:.25rem .6rem;font-size:.66rem;color:var(--tx2);border-top:1px solid var(--v05)}
+.sug-src{padding:.25rem .6rem;font-size:.66rem;color:var(--tx2);border-top:1px solid var(--v06)}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
@@ -59,8 +59,8 @@ input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied2{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.9rem}
 table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.5rem .7rem;border-bottom:1px solid var(--v11);white-space:nowrap}
-table.tb td{padding:.55rem .7rem;border-bottom:1px solid var(--v05);font-size:.85rem;vertical-align:middle}
+table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.5rem .7rem;border-bottom:1px solid var(--v10);white-space:nowrap}
+table.tb td{padding:.55rem .7rem;border-bottom:1px solid var(--v06);font-size:.85rem;vertical-align:middle}
 code{font-family:Consolas,monospace;font-size:.82rem;background:var(--v05);padding:1px 6px;border-radius:5px}
 .acts{text-align:right;white-space:nowrap}
 .vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem;line-height:1.7}

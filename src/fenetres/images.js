@@ -41,7 +41,7 @@ h1{font-size:1rem;margin:0;font-weight:650}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .zone{columns:34rem;column-gap:1.1rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:1rem 1.1rem;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .carte h2{font-size:.84rem;margin:0 0 .7rem;color:var(--tx-or);letter-spacing:.03em;text-transform:uppercase}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
@@ -56,8 +56,8 @@ h1{font-size:1rem;margin:0;font-weight:650}
 .kpi.chaud .n{color:var(--tx-jaune)}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;font-weight:600;color:var(--tx2);font-size:.71rem;letter-spacing:.04em;
-  text-transform:uppercase;padding:.3rem .4rem;border-bottom:1px solid var(--v11)}
-tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+  text-transform:uppercase;padding:.3rem .4rem;border-bottom:1px solid var(--v10)}
+tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .sku{font-size:.7rem;color:var(--tx3)}
 .echec{border:1px solid rgba(240,120,120,.35);background:rgba(200,60,60,.09);color:#f6bdbd;

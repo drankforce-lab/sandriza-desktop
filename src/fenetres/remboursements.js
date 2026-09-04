@@ -48,7 +48,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .stats{display:flex;gap:.5rem;flex-wrap:wrap}
 .stats .s{flex:1 1 9rem;background:var(--v04);border-radius:9px;padding:.45rem .65rem}
@@ -59,10 +59,10 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 .stats .s .sub{font-size:.66rem;color:var(--tx3)}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody .num{font-weight:700;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
 tbody .arg{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 tbody .arg.sort{color:var(--tx-att);font-weight:700}

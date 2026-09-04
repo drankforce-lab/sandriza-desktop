@@ -51,15 +51,15 @@ select.t{background:var(--f-champ);border:1px solid #2b3444;border-radius:8px;co
 .b.dgr{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover{background:rgba(248,113,113,.16)}
 table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .6rem;border-bottom:1px solid var(--v11);white-space:nowrap}
-table.tb td{padding:.5rem .6rem;border-bottom:1px solid var(--v05);font-size:.82rem;vertical-align:top}
+table.tb th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .6rem;border-bottom:1px solid var(--v10);white-space:nowrap}
+table.tb td{padding:.5rem .6rem;border-bottom:1px solid var(--v06);font-size:.82rem;vertical-align:top}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
 .mut{color:var(--tx2)}.sub{font-size:.72rem;color:var(--tx-gris)}
 .kpis{display:flex;gap:.6rem;flex-wrap:wrap;margin:0 0 1rem}
 .kpi{background:var(--v03);border:1px solid var(--v08);border-radius:10px;padding:.55rem .8rem;min-width:110px}
 .kpi .v{font:700 1.2rem/1 Georgia,serif}.kpi .l{font-size:.7rem;color:var(--tx2)}
-.note{background:var(--v04);border:1px solid var(--v11);border-radius:9px;padding:.8rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.55;margin:0 0 1rem}
+.note{background:var(--v04);border:1px solid var(--v10);border-radius:9px;padding:.8rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.55;margin:0 0 1rem}
 .note b{color:var(--tx)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -226,7 +226,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<table class="tb"><tbody>';
       for (var i=0;i<e.length;i++){ var x=e[i];
         if (grp.cle==='acces'){
-          var t=TYPE[x.type]||{bg:'var(--v05)',c:'#8fa1b8',l:x.type};
+          var t=TYPE[x.type]||{bg:'var(--v06)',c:'#8fa1b8',l:x.type};
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td>'
             + '<td><span class="pill" style="background:'+t.bg+';color:'+t.c+'">'+esc(t.l)+'</span></td>'
             + '<td>'+esc(x.nom||'—')+'<div class="sub">'+esc(x.email)+'</div></td>'
@@ -287,7 +287,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (AC_PAGE < 0) AC_PAGE = 0;
     var avue = rows.slice(AC_PAGE * AC_PARPAGE, AC_PAGE * AC_PARPAGE + AC_PARPAGE);
     if (!avue.length) h += '<tr><td colspan="6" class="vide">Aucun journal.</td></tr>';
-    for (var i=0;i<avue.length;i++){ var l=avue[i]; var t=TYPE[l.type]||{bg:'var(--v05)',c:'#8fa1b8',l:l.type};
+    for (var i=0;i<avue.length;i++){ var l=avue[i]; var t=TYPE[l.type]||{bg:'var(--v06)',c:'#8fa1b8',l:l.type};
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(l.ts))+'</td>'
         + '<td><span class="pill" style="background:'+t.bg+';color:'+t.c+'">'+esc(t.l)+'</span></td>'
         + '<td>'+esc(l.nom||'—')+'<div class="sub">'+esc(l.email)+'</div></td>'

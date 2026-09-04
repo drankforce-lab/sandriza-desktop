@@ -81,18 +81,18 @@ button.b{font:inherit;font-size:.82rem;background:var(--v05);border:1px solid va
 button.b.dgr{border-color:rgba(248,113,113,.4);color:var(--tx-f6a6a6)}
 button.b:disabled{opacity:.4;cursor:default}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.qa{border:1px solid var(--v08);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:var(--v02)}
+.qa{border:1px solid var(--v09);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:var(--v02)}
 .qa .barre{display:flex;gap:.3rem;justify-content:flex-end;margin-top:.5rem}
-.lien{display:flex;align-items:center;gap:.75rem;padding:.55rem .8rem;border:1px solid var(--v08);border-radius:9px;margin:0 0 .5rem}
+.lien{display:flex;align-items:center;gap:.75rem;padding:.55rem .8rem;border:1px solid var(--v09);border-radius:9px;margin:0 0 .5rem}
 .lien .g{flex:1;min-width:0}
 .lien code{font-size:.76rem;color:var(--tx2);word-break:break-all}
 table.tb{width:100%;border-collapse:collapse;font-size:.83rem}
-table.tb th,table.tb td{border:1px solid var(--v11);padding:.25rem}
+table.tb th,table.tb td{border:1px solid var(--v12);padding:.25rem}
 table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .pastille{padding:.15rem .55rem;border-radius:20px;font-size:.7rem;font-weight:700}
 .pastille.int{background:rgba(201,169,126,.18);color:#d9bd94}
 .pastille.perso{background:rgba(99,102,241,.16);color:#a6a8f6}
-.note{background:var(--v04);border:1px solid var(--v11);border-radius:9px;padding:.85rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.6}
+.note{background:var(--v04);border:1px solid var(--v10);border-radius:9px;padding:.85rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.6}
 .note b{color:var(--tx)}
 .chk{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.82rem;color:var(--tx-cdd7e5)}
 .chk input{width:16px;height:16px;accent-color:#c9a97e}
@@ -102,11 +102,11 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1.5rem}
-.sur .boite{background:var(--f-131c2b);border:1px solid var(--v11);border-radius:14px;max-width:640px;width:100%;max-height:80vh;display:flex;flex-direction:column}
+.sur .boite{background:var(--f-131c2b);border:1px solid var(--v12);border-radius:14px;max-width:640px;width:100%;max-height:80vh;display:flex;flex-direction:column}
 .sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.1rem;border-bottom:1px solid var(--v08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
-.mailmsg{border:1px solid var(--v11);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:var(--v02)}
+.mailmsg{border:1px solid var(--v10);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:var(--v02)}
 .mailmsg .hh{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.35rem}
 .mailmsg a{color:var(--tx-or);text-decoration:none}
 
@@ -119,7 +119,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
      de la zone modifiable : un outil DANS le contenteditable finit toujours par
      se retrouver dans le HTML enregistré. */
 .souso{display:flex;gap:.2rem;margin:0 0 .9rem;flex-wrap:wrap}
-.souso button{font:inherit;font-size:.82rem;background:var(--v04);border:1px solid var(--v11);
+.souso button{font:inherit;font-size:.82rem;background:var(--v04);border:1px solid var(--v10);
   color:var(--tx2);padding:.4rem .8rem;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:.4rem}
 .souso button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-e6cfa8);font-weight:700}
 .souso .pt{width:6px;height:6px;border-radius:50%;background:#facc15}
@@ -167,7 +167,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .apr .re-var-token{background:rgba(196,154,108,.16);border-radius:4px;padding:0 .25rem}
 
 /* Grille de choix des dimensions du tableau. */
-.grtb{position:fixed;z-index:80;background:var(--f-131c2b);border:1px solid var(--v16);
+.grtb{position:fixed;z-index:80;background:var(--f-131c2b);border:1px solid var(--v14);
   border-radius:10px;padding:.55rem;box-shadow:0 12px 34px rgba(0,0,0,.55)}
 .grtb .cases{display:grid;grid-template-columns:repeat(10,15px);gap:2px}
 .grtb .c{width:15px;height:15px;border:1px solid #3a465a;border-radius:2px;cursor:pointer}
@@ -194,7 +194,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .apr img{max-width:100%;height:auto}
 .vgrp{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--tx2);margin:.9rem 0 .4rem}
 .vbtn{display:flex;justify-content:space-between;align-items:center;gap:1rem;width:100%;
-  padding:.5rem .75rem;background:var(--v04);border:1px solid var(--v11);
+  padding:.5rem .75rem;background:var(--v04);border:1px solid var(--v10);
   border-radius:8px;cursor:pointer;margin:0 0 .3rem;text-align:left;font:inherit;color:var(--tx)}
 .vbtn:hover{border-color:rgba(201,169,126,.45)}
 .vbtn code{font-size:.79rem;color:var(--tx-or);font-weight:600}

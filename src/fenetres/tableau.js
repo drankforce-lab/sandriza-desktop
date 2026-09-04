@@ -53,7 +53,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
   background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
 /* ── Les tuiles ── */
 .tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.55rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .8rem;min-width:0;cursor:pointer;user-select:none;
   transition:border-color .13s}
 .tuile:hover{border-color:#c9a97e}
@@ -75,7 +75,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .afaire .titre{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx-or);font-weight:700;margin-right:.2rem}
 .afaire button{font-size:.79rem;padding:.22rem .6rem;border-radius:99px;
-  background:var(--v06);border:1px solid var(--v16)}
+  background:var(--v06);border:1px solid var(--v14)}
 .afaire button:hover{background:var(--v12)}
 .afaire button b{font-weight:800}
 /* Le separateur : discret, non italique malgre le <i>, et il porte l espace de
@@ -84,22 +84,22 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .afaire button.urgent{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 html.jour .afaire{background:rgba(180,140,80,.12);border-color:rgba(150,110,50,.35)}
 html.jour .afaire .titre{color:#8a6a3e}
-.panneau{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.panneau{background:var(--f-carte);border:1px solid var(--v09);border-radius:11px;
   padding:.6rem .8rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:.82rem}
 .panneau label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
 .panneau input{width:auto}
 /* ── Les deux cartes récentes ── */
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
 @media (max-width:900px){.deux{grid-template-columns:1fr}}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
 .carte h2 .tout{margin-left:auto}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .cadslot{display:inline}

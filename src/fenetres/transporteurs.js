@@ -50,7 +50,7 @@ body{background:var(--f-page);color:var(--tx);
   columns:30rem;column-gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column;
   break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:1rem}
 .carte .th{display:flex;align-items:center;gap:.5rem;margin:0 0 .3rem}

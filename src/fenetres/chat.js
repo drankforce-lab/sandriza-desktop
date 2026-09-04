@@ -65,16 +65,16 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.5rem .65rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.err{color:var(--tx-err)}
 .tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
-.ligne{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.ligne{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.55rem .75rem;cursor:pointer}
 .ligne:hover{border-color:#c9a97e}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
@@ -87,13 +87,13 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:42rem;width:100%;max-height:88vh;display:flex;flex-direction:column;padding:.9rem 1rem}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
 .fil{flex:1 1 auto;min-height:6rem;overflow-y:auto;display:flex;flex-direction:column;
   gap:.4rem;padding:.5rem;background:var(--v03);border-radius:9px;
-  border:1px solid var(--v08)}
+  border:1px solid var(--v07)}
 .bulle{max-width:78%;padding:.4rem .65rem;border-radius:11px;font-size:.86rem;
   white-space:pre-wrap;overflow-wrap:anywhere}
 .bulle.visiteur{align-self:flex-start;background:var(--v07)}
@@ -234,7 +234,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="vide">Aucun commentaire pour l’instant.</div>';
     } else {
       h += cs.map(function(c){
-        return '<div style="padding:.35rem 0;border-top:1px solid var(--v05)">'
+        return '<div style="padding:.35rem 0;border-top:1px solid var(--v055)">'
           + '<span class="pill ' + (c.score === true ? 'bon' : 'err') + '">'
           + (c.score === true ? 'satisfait' : 'insatisfait') + '</span> '
           + '<strong>' + esc(c.name || 'Visiteur') + '</strong>'

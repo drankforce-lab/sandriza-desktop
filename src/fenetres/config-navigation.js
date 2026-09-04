@@ -64,7 +64,7 @@ button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-sur-ac
 .sous{background:var(--f-champ);border-top:1px solid var(--v08);padding:.4rem .8rem .55rem}
 .sous .tt{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:.3rem}
 .enf{display:flex;align-items:center;gap:.5rem;padding:.28rem .5rem;background:var(--f-carte);
-  border:1px solid var(--v08);border-radius:6px;margin-bottom:.25rem}
+  border:1px solid var(--v07);border-radius:6px;margin-bottom:.25rem}
 .enf .fl{color:var(--tx3);font-size:.8rem}
 .enf .el{font-size:.85rem;font-weight:500;flex:1 1 auto;min-width:0}
 .enf .eh{font-size:.76rem;color:var(--tx3);font-family:ui-monospace,Menlo,Consolas,monospace}

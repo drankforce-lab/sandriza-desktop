@@ -51,14 +51,14 @@ button:focus{outline:none;border-color:#c9a97e}
 button.dgr{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.dgr:hover:not(:disabled){background:rgba(239,68,68,.14)}
 button.mini{font-size:.74rem;padding:.14rem .45rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h3{margin:0 0 .5rem;font:700 .92rem/1.2 Georgia,serif}
 .note{font-size:.78rem;color:var(--tx2);line-height:1.6;background:var(--v03);
-  border:1px solid var(--v08);border-radius:10px;padding:.5rem .7rem}
+  border:1px solid var(--v07);border-radius:10px;padding:.5rem .7rem}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.67rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .sub{font-size:.71rem;color:var(--tx2)}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.72rem}

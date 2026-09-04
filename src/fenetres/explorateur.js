@@ -36,7 +36,7 @@ body{background:var(--f-page);color:var(--tx);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .barre{flex:0 0 auto;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
-  padding:.5rem 1.05rem;border-bottom:1px solid var(--v05)}
+  padding:.5rem 1.05rem;border-bottom:1px solid var(--v06)}
 input[type=search],select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .5rem}
 input[type=search]{flex:1 1 14rem;min-width:9rem}
@@ -59,7 +59,7 @@ input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead th{position:sticky;top:0;z-index:1;text-align:left;padding:.26rem .4rem;
   font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
-  font-weight:700;background:var(--f-page);border-bottom:1px solid var(--v11)}
+  font-weight:700;background:var(--f-page);border-bottom:1px solid var(--v12)}
 /* ⚠ AUCUNE LIGNE DE TABLEAU, ET UN SURVOL DISCRET (demande du 2026-08-14 :
    << l effet de survol est affreux, on ne devrait pas voir les lignes du
    tableau >>). Le cadre dore posé cellule par cellule (box-shadow inset sur
@@ -76,7 +76,7 @@ tbody tr.actif td:first-child{box-shadow:inset 2px 0 0 0 #c9a97e}
 th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center}
 .coche{display:inline-flex;align-items:center;justify-content:center;
   width:1.05rem;height:1.05rem;border-radius:5px;cursor:pointer;
-  border:1px solid var(--v45);background:var(--v06);
+  border:1px solid var(--v40);background:var(--v06);
   font-size:.72rem;line-height:1;color:#17202c}
 .coche:hover{border-color:#c9a97e}
 .coche.on{background:#c9a97e;border-color:#c9a97e;font-weight:700}
@@ -93,7 +93,7 @@ td.vig img{width:2rem;height:2rem;object-fit:contain;border-radius:4px;backgroun
 td.vig img{border:0;outline:0}
 /* Affichage GRILLE : quand on cherche a l oeil plutot qu au nom. */
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.5rem}
-.vig{background:var(--f-carte);border:1px solid var(--v11);border-radius:9px;
+.vig{background:var(--f-carte);border:1px solid var(--v10);border-radius:9px;
   overflow:hidden;cursor:pointer;position:relative}
 .vig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
 .vig.actif{outline:2px solid #c9a97e;outline-offset:-2px}
@@ -130,7 +130,7 @@ td.vig img{border:0;outline:0}
 .aide{font-size:.72rem;color:var(--tx2)}
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;max-width:30rem;width:100%;padding:.9rem 1rem}
 .voile h3{margin:0 0 .55rem;font:700 1.02rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.85rem;line-height:1.5}

@@ -48,14 +48,14 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.65rem .8rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
-  border:1px solid var(--v16);border-radius:8px;padding:.34rem .5rem;
+  border:1px solid var(--v14);border-radius:8px;padding:.34rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 
@@ -90,7 +90,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 /* Le pas-a-pas : cree, imprime, expedie. Il dit ce qui est FAIT. */
 .pas{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.5rem}
 .pas span{font-size:.72rem;padding:.16rem .5rem;border-radius:99px;
-  border:1px solid var(--v16);color:var(--tx2)}
+  border:1px solid var(--v14);color:var(--tx2)}
 .pas span.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .pas span.on{border-color:#c9a97e;color:var(--tx-creme);background:rgba(201,169,126,.14)}
 
@@ -113,7 +113,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:34rem;width:100%;
   max-height:80vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
@@ -425,7 +425,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       voile('<h3><span class="ic">👁</span> Étiquette — ' + esc(CMD.commande.numero) + '</h3>'
         + '<p>Suivi : <strong>' + esc(CMD.commande.suivi || '—') + '</strong></p>'
         + '<iframe src="data:application/pdf;base64,' + r.pdf + '" '
-        + 'style="width:100%;height:52vh;border:1px solid var(--v16);border-radius:8px;background:#3c3c3c"></iframe>'
+        + 'style="width:100%;height:52vh;border:1px solid var(--v14);border-radius:8px;background:#3c3c3c"></iframe>'
         + '<div class="fin2"><button id="v-non">Fermer</button>'
         + '<button class="prim" id="v-oui"><span class="ic">🖨</span> Imprimer</button></div>',
         function(fermer){

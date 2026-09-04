@@ -53,18 +53,18 @@ button.ghost{background:transparent}
 button.mini{padding:.14rem .5rem;font-size:.75rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.55rem .75rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.55rem .75rem}
 .tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .tuile .v{font-size:1.35rem;font-weight:800;margin-top:.12rem}
 .tuile .z{font-size:.66rem;color:var(--tx2);margin-top:.08rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.7rem .8rem}
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.7rem .8rem}
 .carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;display:flex;justify-content:space-between;align-items:center}
 .deux{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}
 .deuxb{display:grid;grid-template-columns:1fr 340px;gap:1rem;align-items:start}
 @media(max-width:760px){.deux,.deuxb{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead th{text-align:left;padding:.26rem .4rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05)}
+thead th{text-align:left;padding:.26rem .4rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055)}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ctr{text-align:center}
 code{font:.75rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
@@ -83,7 +83,7 @@ code{font:.75rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .graph .lbl{font-size:.64rem;color:var(--tx2);margin-top:.3rem}
 .legend{display:flex;gap:1rem;font-size:.68rem;color:var(--tx2)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
-.rang{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--v05)}
+.rang{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--v055)}
 .rang .pos{width:1.3rem;height:1.3rem;border-radius:50%;background:#c9a97e;color:#1a1a1a;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rang .nm{flex:1;min-width:0;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .segc{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.55rem;margin-bottom:.9rem}
@@ -99,9 +99,9 @@ code{font:.75rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .aud{background:rgba(201,169,126,.14);border-radius:8px;padding:.5rem;text-align:center;font-weight:800;font-size:1.05rem;color:var(--tx-creme)}
 .chans{display:flex;flex-wrap:wrap;gap:.7rem}
 .chans label{display:flex;align-items:center;gap:.35rem;font-size:.85rem;cursor:pointer}
-.rec{padding:.45rem 0;border-bottom:1px solid var(--v05);font-size:.82rem;line-height:1.5}
+.rec{padding:.45rem 0;border-bottom:1px solid var(--v06);font-size:.82rem;line-height:1.5}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.78);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .7rem;font:700 .98rem/1.3 Georgia,serif}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
 .pied-boite .gauche{margin-right:auto}
@@ -346,7 +346,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!D.rated) return '<div class="carte"><div class="vide"><div style="font-size:2rem"><span class="ic">💬</span></div>Aucune évaluation chat pour le moment.<br><span style="font-size:.8rem">Les données apparaissent après que des clients aient noté leur conversation.</span></div></div>';
     var bar = function(v, tot, col){ var pct = tot ? Math.round(v / tot * 100) : 0; return '<div class="satbar"><div class="track"><div style="width:' + pct + '%;background:' + col + '"></div></div><span style="font-size:.78rem;color:var(--tx2);width:66px;text-align:right">' + v + ' (' + pct + '%)</span></div>'; };
     var comments = D.comments.length ? '<div class="carte"><h2>Commentaires récents</h2>' + D.comments.map(function(c){
-      return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--v05)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
+      return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--v055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
     }).join('') + '</div>' : '';
     return '<div class="tuiles">'

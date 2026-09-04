@@ -48,7 +48,7 @@ body{background:var(--f-page);color:var(--tx);
   gap:1rem;align-content:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .pleine{grid-column:1/-1}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -76,7 +76,7 @@ input[type=color]:disabled,input[type=text]:disabled,select:disabled{opacity:.55
    repartissent en colonnes plutot qu en une pile etiree. */
 .logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(24rem,1fr));gap:.9rem}
 .logo{display:grid;grid-template-columns:9.5rem 1fr;gap:.9rem;align-items:start;min-width:0;
-  border:1px solid var(--v08);border-radius:10px;padding:.7rem .8rem;background:var(--f-pill)}
+  border:1px solid var(--v07);border-radius:10px;padding:.7rem .8rem;background:var(--f-pill)}
 @media (max-width:620px){.logo{grid-template-columns:1fr}}
 .vig{height:5rem;border-radius:9px;display:flex;align-items:center;justify-content:center;
   padding:.5rem;overflow:hidden;border:1px solid var(--v08)}

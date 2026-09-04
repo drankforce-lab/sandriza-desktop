@@ -32,7 +32,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem}
 .chef{display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
 .chef p{margin:.15rem 0 0;font-size:.8rem;color:var(--tx2);max-width:32rem}
@@ -44,9 +44,9 @@ input[type=time]{font:inherit;color:var(--tx);background:var(--f-champ);border:1
 input[type=time]:disabled{opacity:.4}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 th{text-align:left;padding:.4rem .5rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v11)}
+  letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
 th.c,td.c{text-align:center}
-td{padding:.45rem .5rem;border-bottom:1px solid var(--v05)}
+td{padding:.45rem .5rem;border-bottom:1px solid var(--v06)}
 td.jour{font-weight:600}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

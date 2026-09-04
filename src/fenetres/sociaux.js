@@ -61,15 +61,15 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.5rem .65rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.att{color:var(--tx-att)}.tuile .val.bon{color:var(--tx-ok)}.tuile .val.err{color:var(--tx-err)}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
-.entree{border-top:1px solid var(--v05);padding:.5rem .1rem}
+.entree{border-top:1px solid var(--v055);padding:.5rem .1rem}
 .entree:first-of-type{border-top:0}
 .entree .haut{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .entree .droite{margin-left:auto;display:flex;gap:.35rem;align-items:center}
@@ -95,7 +95,7 @@ textarea.t{resize:vertical;line-height:1.5}
 input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 .cases{display:flex;flex-wrap:wrap;gap:.5rem}
 label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
-  border:1px solid var(--v11);border-radius:9px;padding:.25rem .55rem;
+  border:1px solid var(--v12);border-radius:9px;padding:.25rem .55rem;
   background:var(--v03);-webkit-user-select:none;user-select:none}
 label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .vide{padding:1.3rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}

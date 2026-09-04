@@ -95,7 +95,7 @@ const CSS_SOCLE = `
    ⚠ NE PAS CONVERTIR LES FONDS D ACCENT en jetons de surface : un rouge d alerte
    n a pas de version claire, il reste rouge.
    Aucun accent grave ici : le tout part dans un litteral de gabarit. */
-:root{color-scheme:dark;--tx-sur-accent:#ffffff;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#6d7f96;--tx-gris:#6f8098;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd;--tx-f6a5a5:#f6a5a5;--tx-c3cede:#c3cede;--tx-94a3b8:#94a3b8;--tx-f6a6a6:#f6a6a6;--tx-fcd9a6:#fcd9a6;--tx-e6cfa8:#e6cfa8;--tx-f0e4d2:#f0e4d2;--tx-f1ece4:#f1ece4;--tx-e6ded2:#e6ded2;--tx-f0e2c8:#f0e2c8;--tx-f0a0a0:#f0a0a0;--tx-fda4af:#fda4af;--tx-f1f5f9:#f1f5f9;--tx-cdd7e5:#cdd7e5;--tx-cfd8e4:#cfd8e4;--tx-c0cad8:#c0cad8;--tx-e8dcc4:#e8dcc4;--tx-e7cfa8:#e7cfa8;--tx-c3cfdd:#c3cfdd;--f-page:#0e1522;--f-carte:#16202f;--f-pied:#0b1220;--f-champ:#0f1724;--f-carte2:#141d2c;--f-pill:#111a29;--f-0f1826:#0f1826;--f-0f172a:#0f172a;--f-131c2b:#131c2b;--f-16202c:#16202c;--f-bande:#1b2635;--v02:rgba(255,255,255,.02);--v025:rgba(255,255,255,.025);--v03:rgba(255,255,255,.03);--v035:rgba(255,255,255,.035);--v04:rgba(255,255,255,.04);--v045:rgba(255,255,255,.045);--v05:rgba(255,255,255,.05);--v055:rgba(255,255,255,.055);--v06:rgba(255,255,255,.06);--v07:rgba(255,255,255,.07);--v08:rgba(255,255,255,.08);--v09:rgba(255,255,255,.09);--v10:rgba(255,255,255,.1);--v12:rgba(255,255,255,.12);--v13:rgba(255,255,255,.13);--v14:rgba(255,255,255,.14);--v16:rgba(255,255,255,.16);--v22:rgba(255,255,255,.22);--v30:rgba(255,255,255,.3);--v35:rgba(255,255,255,.35);--v40:rgba(255,255,255,.4);--v50:rgba(255,255,255,.5);--v90:rgba(255,255,255,.9)}
+:root{color-scheme:dark;--v15:rgba(255,255,255,.15);--v18:rgba(255,255,255,.18);--v20:rgba(255,255,255,.2);--v25:rgba(255,255,255,.25);--v28:rgba(255,255,255,.28);--tx-sur-accent:#ffffff;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#6d7f96;--tx-gris:#6f8098;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd;--tx-f6a5a5:#f6a5a5;--tx-c3cede:#c3cede;--tx-94a3b8:#94a3b8;--tx-f6a6a6:#f6a6a6;--tx-fcd9a6:#fcd9a6;--tx-e6cfa8:#e6cfa8;--tx-f0e4d2:#f0e4d2;--tx-f1ece4:#f1ece4;--tx-e6ded2:#e6ded2;--tx-f0e2c8:#f0e2c8;--tx-f0a0a0:#f0a0a0;--tx-fda4af:#fda4af;--tx-f1f5f9:#f1f5f9;--tx-cdd7e5:#cdd7e5;--tx-cfd8e4:#cfd8e4;--tx-c0cad8:#c0cad8;--tx-e8dcc4:#e8dcc4;--tx-e7cfa8:#e7cfa8;--tx-c3cfdd:#c3cfdd;--f-page:#0e1522;--f-carte:#16202f;--f-pied:#0b1220;--f-champ:#0f1724;--f-carte2:#141d2c;--f-pill:#111a29;--f-0f1826:#0f1826;--f-0f172a:#0f172a;--f-131c2b:#131c2b;--f-16202c:#16202c;--f-bande:#1b2635;--v02:rgba(255,255,255,.02);--v025:rgba(255,255,255,.025);--v03:rgba(255,255,255,.03);--v035:rgba(255,255,255,.035);--v04:rgba(255,255,255,.04);--v045:rgba(255,255,255,.045);--v05:rgba(255,255,255,.05);--v055:rgba(255,255,255,.055);--v06:rgba(255,255,255,.06);--v07:rgba(255,255,255,.07);--v08:rgba(255,255,255,.08);--v09:rgba(255,255,255,.09);--v10:rgba(255,255,255,.1);--v12:rgba(255,255,255,.12);--v13:rgba(255,255,255,.13);--v14:rgba(255,255,255,.14);--v16:rgba(255,255,255,.16);--v22:rgba(255,255,255,.22);--v30:rgba(255,255,255,.3);--v35:rgba(255,255,255,.35);--v40:rgba(255,255,255,.4);--v50:rgba(255,255,255,.5);--v90:rgba(255,255,255,.9)}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{background:var(--f-page);color:var(--tx);
@@ -157,7 +157,7 @@ input[type=checkbox]{width:auto}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
@@ -588,7 +588,7 @@ const CSS_LOTS = `
   border-top:1px solid rgba(201,169,126,.45);box-shadow:0 -4px 14px rgba(0,0,0,.35)}
 .sz-lots .nom{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
 .sz-lots .jauge{flex:1 1 auto;min-width:4rem;height:.42rem;border-radius:99px;
-  background:var(--v11);overflow:hidden}
+  background:var(--v12);overflow:hidden}
 .sz-lots .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
 .sz-lots .cpt{white-space:nowrap;font-variant-numeric:tabular-nums}
 .sz-lots .file{white-space:nowrap;color:var(--tx2)}
@@ -1448,7 +1448,7 @@ const CSS_JOUR = `
 /* Les jetons de texte, version JOUR. Voir la fiche dans CSS_SOCLE. html.jour
    (element + classe) l emporte sur :root, et CSS_JOUR est appende APRES le CSS
    de chaque fenetre - donc ceci commande partout, sans une seule reprise locale. */
-html.jour{--tx-sur-accent:#ffffff;--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#387652;--tx-err:#ab4e4e;--tx-err2:#905e5e;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#76694e;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b;--tx-f6a5a5:#8c5e5e;--tx-c3cede:#656b73;--tx-94a3b8:#626c79;--tx-f6a6a6:#8c5f5f;--tx-fcd9a6:#796850;--tx-e6cfa8:#756a56;--tx-f0e4d2:#716b63;--tx-f1ece4:#6c6a67;--tx-e6ded2:#6e6b65;--tx-f0e2c8:#716a5e;--tx-f0a0a0:#8e5e5e;--tx-fda4af:#905d64;--tx-f1f5f9:#6a6c6e;--tx-cdd7e5:#676c73;--tx-cfd8e4:#686c72;--tx-c0cad8:#666b72;--tx-e8dcc4:#6f6a5e;--tx-e7cfa8:#766a56;--tx-c3cfdd:#656c73;--f-page:#f4f2ec;--f-carte:#ffffff;--f-pied:#efece4;--f-champ:#ffffff;--f-carte2:#faf8f3;--f-pill:#eeebe3;--f-0f1826:#ffffff;--f-0f172a:#ffffff;--f-131c2b:#faf8f3;--f-16202c:#ffffff;--f-bande:#efece4;--v02:rgba(15,23,42,0.026);--v025:rgba(15,23,42,0.033);--v03:rgba(15,23,42,0.039);--v035:rgba(15,23,42,0.046);--v04:rgba(15,23,42,0.052);--v045:rgba(15,23,42,0.059);--v05:rgba(15,23,42,0.065);--v055:rgba(15,23,42,0.072);--v06:rgba(15,23,42,0.078);--v07:rgba(15,23,42,0.091);--v08:rgba(15,23,42,0.104);--v09:rgba(15,23,42,0.117);--v10:rgba(15,23,42,0.13);--v12:rgba(15,23,42,0.156);--v13:rgba(15,23,42,0.169);--v14:rgba(15,23,42,0.182);--v16:rgba(15,23,42,0.208);--v22:rgba(15,23,42,0.286);--v30:rgba(15,23,42,0.39);--v35:rgba(15,23,42,0.455);--v40:rgba(15,23,42,0.52);--v50:rgba(15,23,42,0.65);--v90:rgba(15,23,42,0.95)}
+html.jour{--v15:rgba(15,23,42,0.195);--v18:rgba(15,23,42,0.234);--v20:rgba(15,23,42,0.26);--v25:rgba(15,23,42,0.325);--v28:rgba(15,23,42,0.364);--tx-sur-accent:#ffffff;--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#387652;--tx-err:#ab4e4e;--tx-err2:#905e5e;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#76694e;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b;--tx-f6a5a5:#8c5e5e;--tx-c3cede:#656b73;--tx-94a3b8:#626c79;--tx-f6a6a6:#8c5f5f;--tx-fcd9a6:#796850;--tx-e6cfa8:#756a56;--tx-f0e4d2:#716b63;--tx-f1ece4:#6c6a67;--tx-e6ded2:#6e6b65;--tx-f0e2c8:#716a5e;--tx-f0a0a0:#8e5e5e;--tx-fda4af:#905d64;--tx-f1f5f9:#6a6c6e;--tx-cdd7e5:#676c73;--tx-cfd8e4:#686c72;--tx-c0cad8:#666b72;--tx-e8dcc4:#6f6a5e;--tx-e7cfa8:#766a56;--tx-c3cfdd:#656c73;--f-page:#f4f2ec;--f-carte:#ffffff;--f-pied:#efece4;--f-champ:#ffffff;--f-carte2:#faf8f3;--f-pill:#eeebe3;--f-0f1826:#ffffff;--f-0f172a:#ffffff;--f-131c2b:#faf8f3;--f-16202c:#ffffff;--f-bande:#efece4;--v02:rgba(15,23,42,0.026);--v025:rgba(15,23,42,0.033);--v03:rgba(15,23,42,0.039);--v035:rgba(15,23,42,0.046);--v04:rgba(15,23,42,0.052);--v045:rgba(15,23,42,0.059);--v05:rgba(15,23,42,0.065);--v055:rgba(15,23,42,0.072);--v06:rgba(15,23,42,0.078);--v07:rgba(15,23,42,0.091);--v08:rgba(15,23,42,0.104);--v09:rgba(15,23,42,0.117);--v10:rgba(15,23,42,0.13);--v12:rgba(15,23,42,0.156);--v13:rgba(15,23,42,0.169);--v14:rgba(15,23,42,0.182);--v16:rgba(15,23,42,0.208);--v22:rgba(15,23,42,0.286);--v30:rgba(15,23,42,0.39);--v35:rgba(15,23,42,0.455);--v40:rgba(15,23,42,0.52);--v50:rgba(15,23,42,0.65);--v90:rgba(15,23,42,0.95)}
 html.jour .tete h1{color:#141c28}
 
 /* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION — ET LA REGLE EST ICI, UNE
@@ -1536,7 +1536,7 @@ html.jour .ico{color:#414e66}
 .szbr-voile{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
   justify-content:center;padding:1.2rem;background:rgba(6,10,18,.62)}
 .szbr-boite{max-width:33rem;width:100%;background:var(--f-carte2);color:var(--tx);
-  border:1px solid var(--v11);border-radius:10px;padding:1rem 1.1rem;
+  border:1px solid var(--v12);border-radius:10px;padding:1rem 1.1rem;
   box-shadow:0 18px 44px rgba(0,0,0,.45)}
 .szbr-boite h3{margin:0 0 .5rem;display:flex;align-items:center;gap:.45rem;
   font:700 1rem/1.25 Georgia,serif;color:var(--tx-creme)}
@@ -1706,7 +1706,7 @@ html.jour .sz-btnfen:hover{background:#efece4}
 /* Message posé DANS la surcouche par szDire, quand la fenêtre n'a pas déjà sa
    propre zone (.msgsur). */
 .sz-msgauto{margin-top:.75rem;padding:.5rem .7rem;border-radius:8px;font-size:.8rem;
-  line-height:1.5;background:var(--v05);border:1px solid var(--v11);color:var(--tx-bleute)}
+  line-height:1.5;background:var(--v05);border:1px solid var(--v12);color:var(--tx-bleute)}
 .sz-msgauto.err{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.35);color:var(--tx-err2)}
 .sz-msgauto.bon{background:rgba(22,163,74,.14);border-color:rgba(22,163,74,.32);color:var(--tx-ok2)}
 .sz-msgauto.att{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.35);color:var(--tx-or2)}
@@ -1721,7 +1721,7 @@ html.jour .sz-msgauto{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.
    BOUTONS, le SURVOL et les MENUS.
 
    ⚠⚠ LE VRAI TRAVAIL N EST PAS LA PALETTE, C EST L ACCROCHE. Chaque fenetre
-   ecrit ses couleurs EN DUR (#0e1522, #16202f, #c9a97e, var(--v11)
+   ecrit ses couleurs EN DUR (#0e1522, #16202f, #c9a97e, rgba blanc
    au survol...). Un theme n a d effet que si ces valeurs passent par des
    variables. On ne reecrit pas les quarante fenetres : on REDECLARE ici les
    memes selecteurs avec des variables, et comme ce bloc est appende APRES le
@@ -1746,7 +1746,7 @@ const CSS_THEMES = `
   --sz-texte:#e8edf5; --sz-attenue:#8fa1b8;
   --sz-accent:#c9a97e; --sz-accent-fort:#a3824f; --sz-accent-txt:#17202c;
   --sz-accent-doux:rgba(201,169,126,.16);
-  --sz-btn:var(--v05); --sz-survol:var(--v11);
+  --sz-btn:var(--v05); --sz-survol:var(--v10);
 }
 html[data-sz-theme="ocean"]{
   --sz-fond:#0a1620; --sz-fond2:#0f2030; --sz-pied:#081219;
@@ -1769,7 +1769,7 @@ html[data-sz-theme="ardoise"]{
 html[data-sz-theme="graphite"]{
   --sz-fond:#121212; --sz-fond2:#1c1c1c; --sz-pied:#0d0d0d;
   --sz-surface:#1e1e1e; --sz-surface2:#1a1a1a;
-  --sz-bord:var(--v11); --sz-bord-fort:var(--v16);
+  --sz-bord:var(--v10); --sz-bord-fort:var(--v16);
   --sz-accent:#fbbf24; --sz-accent-fort:#f59e0b; --sz-accent-txt:#211703;
   --sz-accent-doux:rgba(251,191,36,.16);
 }

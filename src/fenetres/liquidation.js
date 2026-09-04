@@ -68,7 +68,7 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .rech{flex:1 1 16rem;min-width:11rem}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.5rem .65rem;border-left-width:3px;border-left-style:solid}
 /* ⚠ « vfin », PAS « fin » : la classe « .fin » existe déjà plus bas pour aligner à
    droite la dernière cellule d'un tableau, et un modificateur qui porte le même
@@ -81,7 +81,7 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
@@ -89,8 +89,8 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 .carte h2 .cpt{margin-left:auto;font-weight:800;font-size:.8rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .fin{white-space:nowrap;text-align:right}
@@ -113,7 +113,7 @@ tbody tr:hover td{background:var(--v04)}
    donc le bouton de plein ecran s y pose tout seul. */
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:52rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
 .boite.etroite{max-width:34rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
@@ -122,14 +122,14 @@ tbody tr:hover td{background:var(--v04)}
 .pied-boite .gauche{margin-right:auto}
 .deux{display:flex;gap:.7rem;align-items:flex-start;flex-wrap:wrap}
 .deux>.col{flex:1 1 20rem;min-width:0}
-.bloc{border:1px solid var(--v11);border-radius:10px;padding:.5rem .6rem}
+.bloc{border:1px solid var(--v10);border-radius:10px;padding:.5rem .6rem}
 .bloc .titre{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;
   color:var(--tx2);font-weight:700;margin:0 0 .4rem}
 .liste{max-height:15rem;overflow-y:auto;display:flex;flex-direction:column;gap:.25rem}
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 label.case{display:flex;align-items:center;gap:.45rem;font-size:.82rem;cursor:pointer;
-  border:1px solid var(--v11);border-radius:9px;padding:.28rem .5rem;
+  border:1px solid var(--v12);border-radius:9px;padding:.28rem .5rem;
   background:var(--v03);-webkit-user-select:none;user-select:none}
 label.case:hover{background:var(--v07)}
 label.case.pris{border-color:#c9a97e;background:rgba(201,169,126,.13)}
@@ -138,7 +138,7 @@ label.case .nom{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis
   white-space:nowrap;font-weight:500}
 label.case .app{font-size:.71rem;color:var(--tx2);white-space:nowrap}
 label.mode{display:flex;align-items:center;gap:.5rem;font-size:.84rem;cursor:pointer;
-  border:2px solid var(--v11);border-radius:9px;padding:.4rem .55rem;
+  border:2px solid var(--v12);border-radius:9px;padding:.4rem .55rem;
   font-weight:600;-webkit-user-select:none;user-select:none}
 label.mode.pris{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 label.mode input{margin:0;accent-color:#c9a97e}
@@ -146,12 +146,12 @@ label.duree{display:flex;align-items:center;gap:.45rem;font-size:.82rem;cursor:p
   -webkit-user-select:none;user-select:none}
 label.duree input{margin:0;accent-color:#c9a97e}
 .dates{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.4rem;padding:.5rem .6rem;
-  background:var(--v03);border:1px solid var(--v11);border-radius:9px}
+  background:var(--v03);border:1px solid var(--v10);border-radius:9px}
 .dates label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .18rem}
 .dates input{width:11rem}
 .choisi{display:flex;align-items:center;gap:.4rem;padding:.24rem .45rem;border-radius:7px;
-  background:var(--v04);border:1px solid var(--v11);font-size:.79rem}
+  background:var(--v04);border:1px solid var(--v10);font-size:.79rem}
 .choisi .nom{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .resume{padding:.55rem .7rem;border-radius:9px;border-left:3px solid;margin:0 0 .6rem}
 .resume.liq{background:rgba(217,119,6,.12);border-left-color:#d97706}

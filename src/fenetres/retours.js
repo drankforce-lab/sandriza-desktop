@@ -48,7 +48,7 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .ligne{display:flex;align-items:center;gap:.8rem;padding:.6rem .75rem;cursor:pointer;
-  background:var(--f-carte);border:1px solid var(--v08);border-radius:11px}
+  background:var(--f-carte);border:1px solid var(--v07);border-radius:11px}
 .ligne:hover{border-color:#c9a97e}
 .ligne .gauche{flex:1 1 auto;min-width:0}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}

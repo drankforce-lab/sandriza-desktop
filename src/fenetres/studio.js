@@ -72,7 +72,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar,.scene::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb,
 .scene::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .74rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -84,7 +84,7 @@ body{background:var(--f-page);color:var(--tx);
    en separant les deux volets. Une recette n ajoute rien a la commande, elle
    REMPLIT les cinq etapes d un coup : sa place est donc au-dessus d elles. */
 .rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;
-  background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;
+  background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
   padding:.5rem .6rem}
 .rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -126,7 +126,7 @@ body{background:var(--f-page);color:var(--tx);
 .ong.on .oe{color:var(--tx2)}
 .ong .oc{flex:0 0 auto;color:var(--tx-or);font-size:.8rem;font-weight:700}
 .panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
-  background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;
+  background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
   padding:.85rem .95rem}
 .pnt{display:flex;align-items:center;gap:.55rem}
 .pnt .pi{font-size:1rem;filter:grayscale(1) brightness(1.7);opacity:.9}
@@ -150,7 +150,7 @@ body{background:var(--f-page);color:var(--tx);
 /* ── LE VOLET DE DROITE ────────────────────────────────────────────────────
    Ce qu on va obtenir, toujours visible : le recapitulatif de la commande, puis
    l image. */
-.bloc{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;
+.bloc{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
   padding:.85rem 1rem;min-width:0}
 .recap .rt,.fmt .rt{font:700 .74rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -189,10 +189,10 @@ body{background:var(--f-page);color:var(--tx);
 .fmt .fbar .grand{margin-left:auto}
 .fmtg{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.55rem;
   align-content:start;margin-top:.6rem}
-.fmtc{background:var(--f-pill);border:1px solid var(--v08);border-radius:9px;padding:.45rem;
+.fmtc{background:var(--f-pill);border:1px solid var(--v09);border-radius:9px;padding:.45rem;
   display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:0}
 .fmtc img{width:100%;height:7.5rem;object-fit:contain;background:var(--f-pied);border-radius:6px;
-  border:1px solid var(--v08)}
+  border:1px solid var(--v07)}
 .fmtc .ft{font-size:.82rem;font-weight:700;line-height:1.1}
 .fmtc .fd{font-size:.68rem;color:var(--tx3);font-variant-numeric:tabular-nums}
 .fmtc .fb{display:flex;gap:.25rem;width:100%}
@@ -202,7 +202,7 @@ body{background:var(--f-page);color:var(--tx);
 .guide{display:flex;flex-direction:column;gap:.45rem;text-align:left;margin:.7rem auto 0;max-width:24rem}
 .guide .gp{display:flex;align-items:center;gap:.55rem;font-size:.82rem;color:var(--tx3)}
 .guide .gp .n{flex:0 0 auto;width:1.35rem;height:1.35rem;border-radius:50%;
-  border:1px solid var(--v16);background:var(--v05);
+  border:1px solid var(--v18);background:var(--v05);
   display:flex;align-items:center;justify-content:center;font:700 .72rem/1 system-ui;color:var(--tx2)}
 .guide .gp.ok{color:var(--tx-bleute)}
 .guide .gp.ok .n{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
@@ -256,13 +256,13 @@ body{background:var(--f-page);color:var(--tx);
 /* ── Explorateur : filtres, panier de selection, coches et pastilles ─────── */
 .phfiltres{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-bottom:.45rem}
 .jeton{font:inherit;font-size:.73rem;padding:.16rem .55rem;border-radius:99px;cursor:pointer;
-  color:var(--tx-bleute);background:var(--v05);border:1px solid var(--v16)}
+  color:var(--tx-bleute);background:var(--v05);border:1px solid var(--v15)}
 .jeton:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 .jeton:disabled{opacity:.4;cursor:default}
 .jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
 .jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 .phfiltres select{font:inherit;font-size:.73rem;color:var(--tx-bleute);background:var(--f-champ);
-  border:1px solid var(--v16);border-radius:8px;padding:.14rem .4rem;
+  border:1px solid var(--v15);border-radius:8px;padding:.14rem .4rem;
   width:auto;max-width:15rem;flex:0 1 auto}
 .phsel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;
   padding:.35rem .5rem;border-radius:9px;background:var(--v035);
@@ -274,7 +274,7 @@ body{background:var(--f-page);color:var(--tx);
 .phvig{position:relative}
 .phvig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
 .phcoche{position:absolute;top:.2rem;left:.2rem;width:1.05rem;height:1.05rem;z-index:2;
-  border-radius:5px;border:1px solid var(--v30);background:rgba(8,12,20,.7);
+  border-radius:5px;border:1px solid var(--v35);background:rgba(8,12,20,.7);
   display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#17202c}
 .phvig.pris .phcoche{background:#c9a97e;border-color:#c9a97e;font-weight:700}
 .phpast{position:absolute;top:.2rem;right:.2rem;z-index:2;display:flex;gap:.12rem}
@@ -294,7 +294,7 @@ body{background:var(--f-page);color:var(--tx);
 .panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
 .lots{display:flex;flex-direction:column;gap:.5rem;max-height:calc(100vh - 14rem);overflow-y:auto}
-.lotc{background:var(--f-pill);border:1px solid var(--v08);border-radius:10px;padding:.5rem .65rem}
+.lotc{background:var(--f-pill);border:1px solid var(--v09);border-radius:10px;padding:.5rem .65rem}
 .lotc.vif{border-color:#c9a97e}
 .lott{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.35rem}
 .lott strong{font-size:.85rem}
@@ -316,7 +316,7 @@ body{background:var(--f-page);color:var(--tx);
    La tuile est donc une grille : l emoji tient la colonne de gauche sur deux
    rangs, le titre et la description se rangent l un SOUS l autre a droite. */
 .tuiles{display:grid;grid-template-columns:1fr;gap:.4rem}
-.tuile{background:var(--f-pill);border:1px solid var(--v08);border-radius:10px;
+.tuile{background:var(--f-pill);border:1px solid var(--v09);border-radius:10px;
   padding:.58rem .7rem;cursor:pointer;-webkit-user-select:none;user-select:none;
   display:grid;grid-template-columns:auto 1fr;column-gap:.65rem;row-gap:.08rem;
   align-items:center;text-align:left;transition:border-color .12s,background .12s}
@@ -377,7 +377,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
 .avlab b{color:var(--tx-or);font-size:.78rem;font-variant-numeric:tabular-nums}
 .avint{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
 .avint img{width:3.4rem;height:3.4rem;object-fit:contain;background:var(--f-pied);border-radius:7px;
-  border:1px solid var(--v11)}
+  border:1px solid var(--v10)}
 /* ⚠ flex:0 1 auto, PAS 1 1 : en poussant, le nom occupait toute la largeur de la
    carte et rejetait le bouton << Choisir un fichier >> a l autre bout de l ecran,
    a plus de mille pixels de son libelle. */
@@ -395,7 +395,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
 .cmp{position:relative;display:inline-block;max-width:100%;line-height:0;
   touch-action:none;-webkit-user-select:none;user-select:none;cursor:ew-resize}
 .cmp img{display:block;max-width:100%;max-height:min(56vh,31rem);border-radius:9px;
-  border:1px solid var(--v11)}
+  border:1px solid var(--v10)}
 /* ⚠ La couche du DESSUS est l APRES, rognee par la GAUCHE : ce qui reste
    visible a gauche est donc l avant, pose dessous. Un fond opaque, sinon un
    detourage transparent laisserait voir la photo d origine au travers — et
@@ -427,7 +427,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
   min-height:15rem;text-align:center;color:var(--tx2)}
 .res.garni{flex:0 0 auto;justify-content:flex-start;min-height:0}
 .res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
-  border:1px solid var(--v11)}
+  border:1px solid var(--v10)}
 .res .filig{margin-top:.5rem;font-size:.74rem;color:var(--tx-jaune)}
 .res .avis{margin-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .res .dims{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
@@ -456,7 +456,7 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
    JAMAIS rien fait, par aucun des deux chemins (panier ou sélecteur). */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.1rem;z-index:60}
-.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;padding:1rem 1.15rem;max-width:29rem;width:100%;
   max-height:88vh;overflow-y:auto;box-shadow:0 18px 46px rgba(0,0,0,.5)}
 .voile h3{margin:0 0 .5rem;font:700 1.02rem/1.25 Georgia,serif}

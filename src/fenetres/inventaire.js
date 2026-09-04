@@ -62,7 +62,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.6rem}
 
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto;min-height:0}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
@@ -70,7 +70,7 @@ body{background:var(--f-page);color:var(--tx);
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
-  border:1px solid var(--v16);border-radius:8px;padding:.3rem .45rem;
+  border:1px solid var(--v14);border-radius:8px;padding:.3rem .45rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input.manque,select.manque{border-color:#f87171}
@@ -97,7 +97,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .menu{position:relative}
 .menu .voile2{position:fixed;inset:0;z-index:39}
 .menu .liste{position:absolute;top:calc(100% + 5px);left:0;z-index:40;min-width:170px;
-  max-height:240px;overflow-y:auto;background:var(--f-carte);border:1px solid var(--v16);
+  max-height:240px;overflow-y:auto;background:var(--f-carte);border:1px solid var(--v14);
   border-radius:9px;box-shadow:0 12px 30px rgba(0,0,0,.45);padding:.3rem}
 .menu .liste label{display:flex;align-items:center;gap:.5rem;padding:.3rem .45rem;
   cursor:pointer;font-size:.8rem;border-radius:5px}
@@ -113,7 +113,7 @@ thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
   padding:.34rem .5rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.c{text-align:center}
-tbody td{padding:.24rem .5rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody td{padding:.24rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody td.c{text-align:center}
 tbody tr.a{background:rgba(34,197,94,.07)}
 tbody .var{display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap}
@@ -128,7 +128,7 @@ td.q input,td.s input{width:4.6rem;text-align:center}
 td.e select{min-width:8rem}
 
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.55rem;padding-top:.45rem;
-  margin-top:.35rem;border-top:1px solid var(--v08);
+  margin-top:.35rem;border-top:1px solid var(--v07);
   font-size:.78rem;color:var(--tx2);flex-wrap:wrap}
 .pagi .pos{margin-left:auto}
 .pagi select{width:auto;padding:.16rem .35rem;font-size:.76rem}
@@ -161,16 +161,16 @@ td.e select{min-width:8rem}
    DERRIERE la fenetre, comme le decompte d inactivite l a fait. */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:var(--f-carte);border:1px solid var(--v11);
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:34rem;width:100%;
   max-height:80vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.86rem}
 .voile .rangee{display:flex;justify-content:space-between;gap:1rem;padding:.22rem 0;
-  font-size:.84rem;border-top:1px solid var(--v05)}
+  font-size:.84rem;border-top:1px solid var(--v06)}
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.85rem}
 .voile textarea{width:100%;font:inherit;font-size:.78rem;color:var(--tx);
-  background:var(--f-0f1826);border:1px solid var(--v16);border-radius:8px;
+  background:var(--f-0f1826);border:1px solid var(--v14);border-radius:8px;
   padding:.4rem .5rem;resize:none}
 /* ── Les quatre onglets ───────────────────────────────────────────────────── */
 .onglets{flex:0 0 auto;display:flex;gap:.25rem;padding:.5rem 1.05rem 0;
@@ -184,7 +184,7 @@ td.e select{min-width:8rem}
 
 /* ── Tuiles de statistiques (onglet Produits) ─────────────────────────────── */
 .tuiles{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;flex:0 0 auto}
-.tuile{background:var(--f-carte);border:1px solid var(--v08);
+.tuile{background:var(--f-carte);border:1px solid var(--v07);
   border-radius:10px;padding:.45rem .65rem;min-width:0}
 .tuile .lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1233,11 +1233,11 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<td>' + esc(l.raison) + '</td></tr>';
       });
       h += '</tbody><tfoot><tr style="font-weight:700">'
-        + '<td colspan="3" style="padding:.34rem .5rem;border-top:1px solid var(--v16)">Total</td>'
-        + '<td class="c" style="border-top:1px solid var(--v16)">' + d.totalQte + '</td>'
-        + '<td style="border-top:1px solid var(--v16)"></td>'
-        + '<td style="text-align:right;border-top:1px solid var(--v16)">' + d.totalValeur.toFixed(2) + ' $</td>'
-        + '<td style="border-top:1px solid var(--v16)"></td></tr></tfoot></table></div>';
+        + '<td colspan="3" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">Total</td>'
+        + '<td class="c" style="border-top:1px solid var(--v14)">' + d.totalQte + '</td>'
+        + '<td style="border-top:1px solid var(--v14)"></td>'
+        + '<td style="text-align:right;border-top:1px solid var(--v14)">' + d.totalValeur.toFixed(2) + ' $</td>'
+        + '<td style="border-top:1px solid var(--v14)"></td></tr></tfoot></table></div>';
     }
     h += '</div>';
     corps.innerHTML = h;

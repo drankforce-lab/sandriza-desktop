@@ -50,7 +50,7 @@ body{background:var(--f-page);color:var(--tx);
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -68,7 +68,7 @@ body{background:var(--f-page);color:var(--tx);
 .pose{display:grid;grid-template-columns:7rem 1fr;gap:1rem;align-items:start}
 @media (max-width:620px){.pose{grid-template-columns:1fr}}
 .vig{height:7rem;border-radius:10px;background:#f5f2ec;display:flex;align-items:center;
-  justify-content:center;padding:.6rem;overflow:hidden;border:1px dashed var(--v16);
+  justify-content:center;padding:.6rem;overflow:hidden;border:1px dashed var(--v18);
   cursor:pointer;-webkit-user-select:none;user-select:none}
 .vig.fige{cursor:default}
 .vig img{max-width:100%;max-height:100%;object-fit:contain;display:block}
@@ -76,7 +76,7 @@ body{background:var(--f-page);color:var(--tx);
 /* La liste des icones. */
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.7rem}
 .ico{display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem;align-items:center;min-width:0;
-  border:1px solid var(--v08);border-radius:10px;padding:.6rem .7rem;background:var(--f-pill)}
+  border:1px solid var(--v07);border-radius:10px;padding:.6rem .7rem;background:var(--f-pill)}
 .ico .im{width:3.4rem;height:3.4rem;border-radius:8px;background:#f5f2ec;display:flex;
   align-items:center;justify-content:center;padding:.3rem;overflow:hidden}
 .ico .im img{max-width:100%;max-height:100%;object-fit:contain;display:block}

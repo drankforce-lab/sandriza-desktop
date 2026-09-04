@@ -59,7 +59,7 @@ button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700;
@@ -68,8 +68,8 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap}
 .fin{white-space:nowrap;text-align:right}
@@ -82,10 +82,10 @@ tbody tr:hover td{background:var(--v04)}
 .jauge i{display:block;height:100%;background:#c9a97e}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:36rem;width:100%;max-height:86vh;display:flex;flex-direction:column;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif}
-.choix{flex:1 1 auto;min-height:6rem;overflow:auto;border:1px solid var(--v11);
+.choix{flex:1 1 auto;min-height:6rem;overflow:auto;border:1px solid var(--v10);
   border-radius:9px;padding:.4rem .5rem}
 .choix label{display:flex;align-items:center;gap:.45rem;padding:.14rem 0;font-size:.83rem}
 .choix .sku{font-family:'Courier New',monospace;font-size:.72rem;color:var(--tx2);margin-left:auto}
@@ -104,7 +104,7 @@ input.t{width:100%;background:var(--f-champ);border:1px solid #2b3444;border-rad
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
 input.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
-  border:1px solid var(--v11);border-radius:9px;padding:.22rem .55rem;
+  border:1px solid var(--v12);border-radius:9px;padding:.22rem .55rem;
   background:var(--v03);-webkit-user-select:none;user-select:none}
 label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .carte h2 .n{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;
@@ -337,7 +337,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<div style="margin-top:.35rem">Les recommandations automatiques s’appliquent seules.</div></div>';
     } else {
       h += ls.map(function(l){
-        return '<div style="border-top:1px solid var(--v05);padding:.4rem 0">'
+        return '<div style="border-top:1px solid var(--v055);padding:.4rem 0">'
           + '<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
           + '<strong>' + esc(l.nom) + '</strong>'
           + '<span class="dt">' + l.lies.length + ' article' + (l.lies.length > 1 ? 's' : '') + '</span>'

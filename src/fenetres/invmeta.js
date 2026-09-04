@@ -62,11 +62,11 @@ button.ic.plus{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent
 .aide{font-size:.79rem;color:var(--tx2);line-height:1.5;margin:0 0 .6rem}
 .avis{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.22);
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.5}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;padding:.6rem .75rem}
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.28rem .45rem;font-size:.66rem;text-transform:uppercase;
-  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
-tbody td{padding:.32rem .45rem;border-top:1px solid var(--v05);vertical-align:middle}
+  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+tbody td{padding:.32rem .45rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v03)}
 tr.edit td{background:rgba(201,169,126,.09)}
 code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
@@ -74,7 +74,7 @@ code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;width:100%;padding:.45rem .5rem;
   border:1px solid var(--v16);border-radius:10px;background:var(--v03);min-height:44px}
 .chip{display:inline-flex;align-items:center;gap:.25rem;background:rgba(201,169,126,.14);
-  border:1px solid var(--v16);border-radius:7px;padding:.24rem .2rem .24rem .55rem;font-weight:600;font-size:.82rem}
+  border:1px solid var(--v14);border-radius:7px;padding:.24rem .2rem .24rem .55rem;font-weight:600;font-size:.82rem}
 .chip button{background:none;border:none;color:var(--tx2);font-size:1.05rem;line-height:1;padding:0 3px}
 .chip button:hover{color:var(--tx-err);background:none}
 .chip .lock{font-size:.7rem;opacity:.65}
@@ -86,30 +86,30 @@ code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .pill.auto{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .pastille{width:20px;height:20px;border-radius:50%;display:inline-block;border:2px solid rgba(0,0,0,.2);vertical-align:middle}
 .tinp{width:100%;padding:.32rem .5rem;font-size:.84rem}
-.reco-sec{border:1px solid var(--v08);border-radius:11px;margin-bottom:.7rem;overflow:hidden}
+.reco-sec{border:1px solid var(--v09);border-radius:11px;margin-bottom:.7rem;overflow:hidden}
 .reco-head{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;cursor:pointer;background:var(--f-carte)}
 .reco-head:hover{background:#1b2739}
 .reco-head .caret{color:var(--tx2)}
 .reco-head .titre{font-weight:700;font-size:.86rem;flex:1}
 .reco-head .outils{display:flex;gap:.3rem}
-.reco-body{padding:.75rem .8rem;border-top:1px solid var(--v05)}
+.reco-body{padding:.75rem .8rem;border-top:1px solid var(--v06)}
 .champ label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 .rangee{display:flex;gap:.7rem;flex-wrap:wrap;align-items:flex-end}
 .swatches{display:flex;flex-wrap:wrap;gap:.4rem}
-.sw{display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.4rem .3rem;border:1.5px solid var(--v11);
+.sw{display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.4rem .3rem;border:1.5px solid var(--v12);
   border-radius:8px;cursor:pointer;width:70px}
 .sw:hover{border-color:#c9a97e}
 .sw .pt{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
 .sw .nm{font-size:.6rem;text-align:center;line-height:1.15;word-break:break-word;max-height:2.3em;overflow:hidden}
-.cc{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem;border-bottom:1px solid var(--v05)}
+.cc{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem;border-bottom:1px solid var(--v06)}
 .cc .nm{flex:1;min-width:0;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cc input{width:84px;text-align:center;text-transform:uppercase;font-family:Consolas,monospace;font-weight:700}
 .alerte{background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);border-radius:9px;
   padding:.5rem .65rem;font-size:.8rem;color:var(--tx-err2);margin-bottom:.7rem;line-height:1.5}
-.cust{display:flex;align-items:center;gap:.65rem;padding:.4rem .2rem;border-bottom:1px solid var(--v05)}
+.cust{display:flex;align-items:center;gap:.65rem;padding:.4rem .2rem;border-bottom:1px solid var(--v06)}
 .cust .nm{flex:1;font-weight:600;font-size:.86rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v16);border-radius:13px;max-width:26rem;width:100%;padding:.9rem 1rem}
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;max-width:26rem;width:100%;padding:.9rem 1rem}
 .boite h3{margin:0 0 .7rem;font:700 .98rem/1.3 Georgia,serif}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
@@ -416,7 +416,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="avis" style="margin:.7rem 0">Le seuil se règle à trois niveaux, <strong>le plus précis l’emporte</strong> : exception sur la variante, sinon seuil du produit, sinon celui-ci.<br>'
       + 'Actuellement : <strong>' + r.regles + '</strong> produit' + (r.regles > 1 ? 's ont' : ' a') + ' son propre seuil, <strong>' + r.exceptions + '</strong> variante' + (r.exceptions > 1 ? 's font' : ' fait') + ' exception.</div>'
       + (D.peut.edit ? '<button class="prim" data-act="reachatlow">Enregistrer le seuil</button>' : '')
-      + '<hr style="border:none;border-top:1px solid var(--v11);margin:1.3rem 0">'
+      + '<hr style="border:none;border-top:1px solid var(--v10);margin:1.3rem 0">'
       + '<p class="aide">Nombre maximal d’unités d’une <strong>même variante</strong> qu’un client peut commander, même si le stock est plus grand. La boutique ne révèle ainsi jamais le stock exact.</p>'
       + '<div class="champ" style="max-width:220px"><label>Limite d’achat par commande</label>'
       + '<input type="number" min="1" step="1" id="rc-buymax" value="' + r.buyMax + '"' + ro + ' style="width:100%"></div>'

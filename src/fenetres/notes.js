@@ -42,7 +42,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
-.ligne{background:var(--f-carte);border:1px solid var(--v08);border-radius:11px;
+.ligne{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.55rem .75rem;cursor:pointer}
 .ligne:hover{border-color:#c9a97e}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
