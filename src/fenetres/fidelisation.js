@@ -251,9 +251,22 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     return h;
   }
 
+  /* Les listes de ce cœur sont PLAFONNEES a 100 (la reponse traverserait le pont
+     autrement). Afficher << 100 invitations >> quand il y en a 4 500 fait mentir
+     l ecran : la tuile du haut, elle, annonce le vrai compte, et les deux se
+     contredisent sous les yeux. On dit donc << 100 sur 4 500 >> des que le
+     plafond mord, et le compte simple sinon.
+     Aucun accent grave ici : le tout part dans un litteral de gabarit. */
+  function compte(n, tot, sing, plur){
+    if (!tot || tot <= n) return n + ' ' + (n > 1 ? plur : sing);
+    return n + ' sur ' + tot + ' ' + plur;
+  }
+
   function vueRecompenses(){
     var rs = D.recompenses || [];
-    var h = '<div class="carte"><h2>Codes de récompense</h2>';
+    var h = '<div class="barreoutils"><div class="droite"><span>'
+      + compte(rs.length, D.recompensesTotal, 'récompense', 'récompenses') + '</span></div></div>';
+    h += '<div class="carte"><h2>Codes de récompense</h2>';
     if (!rs.length) {
       h += '<div class="vide">Aucune récompense générée pour l’instant.</div>';
     } else {
@@ -279,7 +292,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + (D.peutModifier && iv.length
           ? '<button class="mini danger" id="fi-vider">'
             + (ARME === '__invites' ? 'Confirmer ?' : 'Tout supprimer') + '</button>' : '')
-      + '<span>' + iv.length + ' invitation' + (iv.length > 1 ? 's' : '') + '</span></div></div>';
+      + '<span>' + compte(iv.length, D.invitationsTotal, 'invitation', 'invitations') + '</span></div></div>';
     h += '<div class="carte">';
     if (!iv.length) {
       h += '<div class="vide">Aucune invitation.'
@@ -525,9 +538,9 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<button class="mini' + (ONGLET === 'sondages' ? ' actif' : '') + '" data-onglet="sondages">Sondages'
       + ((D.sondages || []).length ? '<span class="n">' + D.sondages.length + '</span>' : '') + '</button>'
       + '<button class="mini' + (ONGLET === 'recompenses' ? ' actif' : '') + '" data-onglet="recompenses">Récompenses'
-      + ((D.recompenses || []).length ? '<span class="n">' + D.recompenses.length + '</span>' : '') + '</button>'
+      + ((D.recompenses || []).length ? '<span class="n">' + (D.recompensesTotal || D.recompenses.length) + '</span>' : '') + '</button>'
       + '<button class="mini' + (ONGLET === 'invitations' ? ' actif' : '') + '" data-onglet="invitations">Invitations'
-      + ((D.invitations || []).length ? '<span class="n">' + D.invitations.length + '</span>' : '') + '</button>'
+      + ((D.invitations || []).length ? '<span class="n">' + (D.invitationsTotal || D.invitations.length) + '</span>' : '') + '</button>'
       + '<div class="droite">'
       + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">+ Nouveau sondage</button>' : '')
       + '</div>'

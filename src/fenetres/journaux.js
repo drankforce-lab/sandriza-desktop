@@ -109,6 +109,8 @@ function pageJournaux(onglet) {
   };
 ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
+  // << 300 sur 5 000 >> quand la lecture est plafonnee, le compte simple sinon.
+  function cpt(n, tot){ return (tot && tot > n) ? (n + ' sur ' + tot) : String(tot || n); }
   var ongletsEl = document.getElementById('onglets');
   var D = null, OCCUPE = false;
   // Bouton « Vider » du journal des erreurs : arme au premier clic, agit au
