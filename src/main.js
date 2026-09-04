@@ -606,10 +606,18 @@ ipcMain.handle('export:openFolder', () => { try { shell.openPath(EXPORT_DIR()); 
    un dossier depuis le sélecteur, et un chemin comptable ne va pas s'inscrire
    dans les emplacements récents du poste. */
 ipcMain.handle('export:dossier', () => EXPORT_INFO());
-ipcMain.handle('export:dossierChoisir', async (e) => {
+/* SORTI DU GESTIONNAIRE IPC LE 2026-09-04, et pour une raison de fond : le
+   selecteur de dossier n etait atteignable QUE depuis la fenetre Import / Export
+   du catalogue - un ecran ou l on ne pense pas a aller pour regler un chemin.
+   Sa demande : << je dois etre en mesure de pouvoir changer le chemin pour mon
+   dossier d export AUSSI dans les configurations >>. Le menu Configuration porte
+   maintenant l entree, et elle appelle CETTE fonction - pas une copie. Une regle
+   recopiee est une regle qui divergera (meme raison que dossier-exports.js). */
+const choisirDossierExports = async (parent) => {
   const info = EXPORT_INFO();
   try {
-    const parent = _fenetreDeLAppelant(e.sender);
+    // `parent` vient de l appelant : la fenetre pour l IPC, la principale pour le
+    // menu. Une boite de dialogue sans parent flotte hors de l application.
     const opts = {
       title: 'Dossier des exports',
       defaultPath: info.dir,
@@ -628,7 +636,8 @@ ipcMain.handle('export:dossierChoisir', async (e) => {
   } catch (err) {
     return { ok: false, motif: 'echec', detail: String((err && err.message) || err), info };
   }
-});
+};
+ipcMain.handle('export:dossierChoisir', (e) => choisirDossierExports(_fenetreDeLAppelant(e.sender)));
 /* Revenir au dossier standard = OUBLIER le choix, donc `null` et non le chemin
    standard écrit en dur (même raison que dans `reglages.js` : un Documents
    redirigé vers OneDrive ferait pointer un chemin figé dans le vide). */
@@ -2805,7 +2814,7 @@ ipcMain.on('dock:zone', (e, rect) => {
     largeur: Number(rect.largeur) || 0, hauteur: Number(rect.hauteur) || 0 };
   reposerAncrees();
 });
-ipcMain.handle('dock:ouvrir', (e, cle, etat) => {
+ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
   if (!mainWindow || e.sender !== mainWindow.webContents) return false;
   const defs = PAGES_ANCRABLES();
   const c = String(cle || '');
@@ -2840,13 +2849,43 @@ ipcMain.handle('dock:ouvrir', (e, cle, etat) => {
     } });
     a = { view, fenetre: null };
     ancrees.set(c, a);
+    /* UN FOND DES LA CREATION. Sans lui, la vue est BLANCHE avant sa premiere
+       peinture - un rectangle blanc sur un panneau bleu nuit. On lui donne tout
+       de suite le fond du theme courant : meme si elle parait un instant vide,
+       elle parait de la bonne couleur. */
+    try { view.setBackgroundColor((_modele && _modele.sombre) ? '#0e1522' : '#f4f2ec'); } catch {}
     view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(defs[c][1]()));
+    /* ON ATTEND LE CHARGEMENT AVANT DE LA MONTRER (2026-09-04). Sa remarque :
+       << rajoute des visuels de transition dans les changements de menu pour ne
+       pas avoir l impression d avoir des flashs >>. Le flash etait ici, et il
+       etait mecanique : la vue etait attachee et rendue VISIBLE tout de suite,
+       alors que loadURL est asynchrone - on voyait donc un cadre vide, puis le
+       contenu, puis le theme. Trois etats pour une ouverture.
+       En attendant ici, la promesse de dock:ouvrir ne se regle qu une fois
+       l ecran pret : le site garde son voile de chargement jusque-la (voir
+       _dockSuivre dans admin.js) et l on passe d un ecran a l autre sans blanc.
+       DELAI MAXIMAL OBLIGATOIRE. Une page qui ne finit jamais de charger
+       laisserait la vue invisible POUR TOUJOURS : l ecran ne s ouvrirait plus du
+       tout, et rien ne le dirait. Passe le delai, on montre ce qu on a - c est le
+       comportement d avant, donc jamais pire. */
+    /* ⚠⚠ CET ECOUTEUR EST ENREGISTRE AVANT L ATTENTE CI-DESSOUS, ET L ORDRE EST
+       TOUT. En le laissant apres, il etait pose une fois `did-finish-load` DEJA
+       PASSE : il ne se declenchait jamais, la vue s ouvrait sans son theme et
+       sans son bouton Detacher/Ancrer. Ecrit d abord dans ce sens-la, et attrape
+       en relisant - rien ne l aurait signale, la fenetre s affichait. */
     view.webContents.on('did-finish-load', () => {
       // `a.fenetre` est lu AU MOMENT du chargement : la vue a pu etre ouverte
       // directement detachee (etat enregistre) — le bouton doit dire Ancrer.
       view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(' + (a.fenetre ? 'false' : 'true') + ');', true).catch(() => {});
       appliquerTheme(view.webContents);
       _zoomRattraper(view.webContents);
+    });
+    await new Promise((resolve) => {
+      let fait = false;
+      const fini = () => { if (fait) return; fait = true; resolve(); };
+      view.webContents.once('did-finish-load', fini);
+      view.webContents.once('did-fail-load', fini);
+      setTimeout(fini, 1500);
     });
   } else {
     // Vue conservee cachee : elle RELIT ses donnees en revenant.
@@ -3787,6 +3826,39 @@ const actionApp = (nom) => {
     case 'zoom-out':    if (wc) { wc.setZoomLevel(wc.getZoomLevel() - 0.5); setTimeout(reposerAncrees, 60); } break;
     case 'zoom-reset':  if (wc) { wc.setZoomLevel(0); setTimeout(reposerAncrees, 60); } break;
     case 'exports':     shell.openPath(EXPORT_DIR()); break;
+    /* CHANGER LE DOSSIER DEPUIS LE MENU (2026-09-04). Le selecteur existait
+       depuis longtemps, mais uniquement dans la fenetre Import / Export du
+       catalogue : un ecran ou personne ne pense a aller pour regler un chemin.
+       Sa demande : << aussi dans les configurations >>.
+       ON PASSE PAR choisirDossierExports, la MEME fonction que l IPC - pas une
+       copie. Elle refuse deja un dossier en lecture seule AVANT d enregistrer (un
+       partage reseau se selectionne comme les autres et refuse le premier
+       fichier), et elle garde le choix quand le dossier ne repond plus.
+       ON DIT CE QUI S EST PASSE dans les trois cas. Un selecteur qui se ferme
+       sans un mot laisse croire que rien n a ete retenu - sauf a l annulation, ou
+       il n y a justement rien a dire. */
+    case 'exports-choisir': {
+      const parent = (mainWindow && !mainWindow.isDestroyed()) ? mainWindow : null;
+      choisirDossierExports(parent).then((r) => {
+        if (r && r.ok) {
+          dialog.showMessageBox(parent, { type: "info", title: "Dossier des exports",
+            message: "Les fichiers exportés sortiront maintenant ici :",
+            detail: r.info.dir, buttons: ["Parfait"], noLink: true });
+          return;
+        }
+        if (!r || r.motif === 'annule') return;          // il a ferme la boite
+        const detail = (r.motif === 'lecture_seule')
+          ? "Impossible d’écrire dans " + (r.chemin || "ce dossier") + "."
+            + String.fromCharCode(10) + String.fromCharCode(10)
+            + "Le dossier n’a PAS été changé — les exports continuent de sortir dans "
+            + r.info.dir + ". Choisissez-en un autre, ou demandez les droits d’écriture"
+            + " sur celui-là."
+          : "Le dossier n’a pas pu être changé : " + (r.detail || "motif inconnu");
+        dialog.showMessageBox(parent, { type: "warning", title: "Dossier des exports",
+          message: "Le dossier n’a pas été changé", detail, buttons: ["Fermer"], noLink: true });
+      });
+      break;
+    }
     case 'update-check': checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
     case 'imprimantes': ouvrirImprimantes(); break;
