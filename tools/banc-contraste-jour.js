@@ -83,6 +83,28 @@ for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
   }
 }
 
+/* ── LES VOILES DE SURFACE ───────────────────────────────────────────────────
+   Autre moitie du meme defaut, meme jour : 1 401 emplois de blanc translucide
+   (rgba(255,255,255,x)) dans 89 fenetres. Juste en mode sombre, invisible en
+   mode jour : la bordure disparait, la carte perd son contour, le bouton flotte
+   sans cadre. Convertis en jetons --v03..--v90 (voir la fiche du socle).
+   ⚠ On refuse tout NOUVEAU blanc translucide hors des reprises html.jour : il
+   n'y a aucune raison d'en ecrire un, le jeton existe. Zero tolere, donc pas de
+   plafond a declarer — c'est plus simple ET plus strict que pour les couleurs de
+   texte, ou une nuance unique peut se justifier. */
+const RX_VOILE = /rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*[0-9.]+\s*\)/g;
+const voiles = new Map();
+for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
+  const src = fs.readFileSync(path.join(DOSSIER, f), 'utf8');
+  let m;
+  RX_VOILE.lastIndex = 0;
+  while ((m = RX_VOILE.exec(src))) {
+    const amont = src.slice(Math.max(0, m.index - 500), m.index);
+    if (/html\.jour[^{}]*\{[^{}]*$/.test(amont)) continue;
+    voiles.set(f, (voiles.get(f) || 0) + 1);
+  }
+}
+
 const detail = process.argv.includes('--liste');
 let mal = 0, total = 0;
 const lignes = [];
@@ -115,6 +137,12 @@ for (const [genre, c, n, fics, note] of lignes) {
   console.log(marque + ' ' + genre.padEnd(7) + c.padEnd(10) + 'x' + String(n).padEnd(5)
     + ratio(c, FOND_JOUR).toFixed(2).padEnd(7) + note);
   if (detail && fics.size) console.log('         ' + [...fics].sort().join(', '));
+}
+if (voiles.size) {
+  console.log('');
+  for (const [f, n] of [...voiles.entries()].sort((a, b) => b[1] - a[1]))
+    console.log('  NON VOILE   ' + f.padEnd(24) + 'x' + n + '   blanc translucide en dur — employer un jeton --v03..--v90');
+  mal += voiles.size;
 }
 if (mal) {
   console.log('\n>>> ' + mal + ' couleur(s) NOUVELLE(S) ou EN HAUSSE — la lisibilite du mode jour recule');

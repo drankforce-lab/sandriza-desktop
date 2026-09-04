@@ -35,13 +35,13 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem;overflow-y:auto;display:flex;
   flex-direction:column;align-items:center}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 /* ⚠ LA FEUILLE. Blanche dans les deux modes : c'est un imprimé, pas un écran. */
 .feuille{background:#fff;color:#111;width:100%;max-width:52rem;border-radius:8px;
   padding:1.6rem 1.8rem;box-shadow:0 8px 30px rgba(0,0,0,.35);
@@ -49,11 +49,11 @@ body{background:#0e1522;color:var(--tx);
 .feuille table{width:100%;border-collapse:collapse}
 .feuille img{max-width:100%}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;
-  padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .7rem;cursor:pointer}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
+button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.3rem .7rem;cursor:pointer}
 button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}

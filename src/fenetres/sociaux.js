@@ -36,20 +36,20 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
-button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
+button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
@@ -61,15 +61,15 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
-.tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.5rem .65rem}
+.tuile{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:.5rem .65rem}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.att{color:var(--tx-att)}.tuile .val.bon{color:var(--tx-ok)}.tuile .val.err{color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
-.entree{border-top:1px solid rgba(255,255,255,.055);padding:.5rem .1rem}
+.entree{border-top:1px solid var(--v05);padding:.5rem .1rem}
 .entree:first-of-type{border-top:0}
 .entree .haut{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .entree .droite{margin-left:auto;display:flex;gap:.35rem;align-items:center}
@@ -95,12 +95,12 @@ textarea.t{resize:vertical;line-height:1.5}
 input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 .cases{display:flex;flex-wrap:wrap;gap:.5rem}
 label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
-  border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:.25rem .55rem;
-  background:rgba(255,255,255,.03);-webkit-user-select:none;user-select:none}
+  border:1px solid var(--v11);border-radius:9px;padding:.25rem .55rem;
+  background:var(--v03);-webkit-user-select:none;user-select:none}
 label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .vide{padding:1.3rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
@@ -620,7 +620,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }

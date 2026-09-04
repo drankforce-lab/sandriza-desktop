@@ -31,41 +31,41 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 input,select,textarea{font:inherit;color:var(--tx);background:#0f1826;
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
 textarea{resize:none}
 input[type=checkbox],input[type=radio]{width:auto}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-blanc);font-weight:600}
 button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .art{display:flex;align-items:center;gap:.6rem;padding:.35rem .45rem;border-radius:8px;
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-top:.3rem}
+  background:var(--v03);border:1px solid var(--v05);margin-top:.3rem}
 .art .d{flex:1 1 auto;min-width:0}
 .art .n{font-size:.87rem;font-weight:600}
 .art .v{font-size:.74rem;color:var(--tx2)}
 .art input[type=number]{width:4.4rem;text-align:center}
 .art .max{font-size:.68rem;color:var(--tx3);white-space:nowrap}
 .tot .l{display:flex;justify-content:space-between;padding:.14rem 0;font-size:.85rem}
-.tot .l.grand{font-size:1.02rem;font-weight:700;border-top:1px solid rgba(255,255,255,.14);
+.tot .l.grand{font-size:1.02rem;font-weight:700;border-top:1px solid var(--v16);
   margin-top:.3rem;padding-top:.4rem}
 .tot .l.frais{color:var(--tx-err2)}
 .tot .l.net{color:var(--tx-ok);font-weight:700}
@@ -77,7 +77,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .choix label{display:flex;align-items:flex-start;gap:.5rem;font-size:.85rem;cursor:pointer}
 .choix .exp{display:block;font-size:.72rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
@@ -86,7 +86,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .vide{padding:1.6rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+.voile .boite{background:#16202f;border:1px solid var(--v11);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:32rem;width:100%}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.86rem}

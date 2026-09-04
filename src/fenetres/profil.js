@@ -65,16 +65,16 @@ html,body{margin:0;height:100%}
 body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
-  border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
+  border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 
 /* ── LA CARTE D IDENTITE ───────────────────────────────────────
    Elle est en PLEINE LARGEUR, et c est le point : la version d avant mettait
    une carte courte a cote d une carte longue, ce qui laissait un trou beant. */
 .ident{display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  background:var(--v03);border:1px solid var(--v08);
   border-radius:14px;padding:1.15rem 1.3rem;margin:0 0 1.05rem}
 /* ⚠ UN MONOGRAMME, PAS UN PICTOGRAMME. C est ce qui regle la couronne en
    couleur : il n y a plus d emoji du tout, donc rien a griser. */
@@ -111,11 +111,11 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
   display:inline-flex;align-items:center;gap:.45rem;
   background:transparent;border:1px solid transparent;border-bottom:0;
   border-radius:10px 10px 0 0;padding:.5rem .95rem}
-.onglet:hover{color:var(--tx);background:rgba(255,255,255,.04)}
-.onglet.on{color:var(--tx);background:rgba(255,255,255,.03);
-  border-color:rgba(255,255,255,.08);border-bottom:0}
+.onglet:hover{color:var(--tx);background:var(--v03)}
+.onglet.on{color:var(--tx);background:var(--v03);
+  border-color:var(--v08);border-bottom:0}
 .onglet:focus-visible{outline:2px solid #c9a97e;outline-offset:2px}
-.panneau{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+.panneau{background:var(--v03);border:1px solid var(--v08);
   border-radius:0 13px 13px 13px;padding:1.15rem 1.25rem}
 .panneau h3{margin:0 0 .25rem;font:700 1.02rem/1.25 system-ui,-apple-system,"Segoe UI",sans-serif}
 .panneau .intro{margin:0 0 1rem;font-size:.85rem;color:var(--tx2);max-width:44rem;line-height:1.6}
@@ -131,13 +131,13 @@ input.t,select.t{width:100%;background:#0f1724;border:1px solid #2b3444;border-r
 input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.55rem 1.05rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .ferr{display:none;color:var(--tx-err2);font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);
   border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:0 0 .8rem}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
 @media(max-width:640px){.cols2{grid-template-columns:1fr}}
 .vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 

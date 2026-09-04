@@ -52,18 +52,18 @@ html,body{margin:0;height:100%}
 body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
-  border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
+  border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
 .onglets{flex:0 0 auto;display:flex;gap:.1rem;flex-wrap:wrap;overflow-x:auto;
-  padding:.35rem 1rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+  padding:.35rem 1rem 0;border-bottom:1px solid var(--v08)}
 .onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;
   color:var(--tx2);padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .onglets button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.carte{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
 .carte h3{margin:0 0 .2rem;font:700 1rem/1.2 Georgia,serif}
 .entete{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 label.champ{display:block;margin:0 0 .8rem}
@@ -76,37 +76,37 @@ input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 @media(max-width:640px){.grille2{grid-template-columns:1fr}}
 button.prim{font:inherit;font-weight:700;background:#c9a97e;color:#1a1408;border:none;border-radius:8px;padding:.5rem 1rem;cursor:pointer}
 button.prim:disabled{opacity:.5;cursor:default}
-button.b{font:inherit;font-size:.82rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);
+button.b{font:inherit;font-size:.82rem;background:var(--v05);border:1px solid var(--v16);
   color:var(--tx);border-radius:7px;padding:.35rem .7rem;cursor:pointer}
 button.b.dgr{border-color:rgba(248,113,113,.4);color:var(--tx-err2)}
 button.b:disabled{opacity:.4;cursor:default}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.qa{border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:rgba(255,255,255,.02)}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
+.qa{border:1px solid var(--v08);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:var(--v03)}
 .qa .barre{display:flex;gap:.3rem;justify-content:flex-end;margin-top:.5rem}
-.lien{display:flex;align-items:center;gap:.75rem;padding:.55rem .8rem;border:1px solid rgba(255,255,255,.09);border-radius:9px;margin:0 0 .5rem}
+.lien{display:flex;align-items:center;gap:.75rem;padding:.55rem .8rem;border:1px solid var(--v08);border-radius:9px;margin:0 0 .5rem}
 .lien .g{flex:1;min-width:0}
 .lien code{font-size:.76rem;color:var(--tx2);word-break:break-all}
 table.tb{width:100%;border-collapse:collapse;font-size:.83rem}
-table.tb th,table.tb td{border:1px solid rgba(255,255,255,.12);padding:.25rem}
+table.tb th,table.tb td{border:1px solid var(--v11);padding:.25rem}
 table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .pastille{padding:.15rem .55rem;border-radius:20px;font-size:.7rem;font-weight:700}
 .pastille.int{background:rgba(201,169,126,.18);color:#d9bd94}
 .pastille.perso{background:rgba(99,102,241,.16);color:#a6a8f6}
-.note{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.85rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.6}
+.note{background:var(--v03);border:1px solid var(--v11);border-radius:9px;padding:.85rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.6}
 .note b{color:var(--tx)}
 .chk{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.82rem;color:var(--tx-bleute)}
 .chk input{width:16px;height:16px;accent-color:#c9a97e}
 .badge{display:inline-block;min-width:1.2rem;text-align:center;background:#c9a97e;color:#1a1408;border-radius:20px;font-size:.7rem;font-weight:700;padding:0 .35rem;margin-left:.3rem}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1.5rem}
-.sur .boite{background:#131c2b;border:1px solid rgba(255,255,255,.12);border-radius:14px;max-width:640px;width:100%;max-height:80vh;display:flex;flex-direction:column}
-.sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.sur .boite{background:#131c2b;border:1px solid var(--v11);border-radius:14px;max-width:640px;width:100%;max-height:80vh;display:flex;flex-direction:column}
+.sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.1rem;border-bottom:1px solid var(--v08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
-.mailmsg{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:rgba(255,255,255,.02)}
+.mailmsg{border:1px solid var(--v11);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:var(--v03)}
 .mailmsg .hh{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.35rem}
 .mailmsg a{color:var(--tx-or);text-decoration:none}
 
@@ -119,7 +119,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
      de la zone modifiable : un outil DANS le contenteditable finit toujours par
      se retrouver dans le HTML enregistré. */
 .souso{display:flex;gap:.2rem;margin:0 0 .9rem;flex-wrap:wrap}
-.souso button{font:inherit;font-size:.82rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+.souso button{font:inherit;font-size:.82rem;background:var(--v03);border:1px solid var(--v11);
   color:var(--tx2);padding:.4rem .8rem;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:.4rem}
 .souso button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-or2);font-weight:700}
 .souso .pt{width:6px;height:6px;border-radius:50%;background:#facc15}
@@ -130,7 +130,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
   background:#131c2b;border-bottom:1px solid #2b3444;flex:0 0 auto}
 .ed .barre button{font:inherit;font-size:.8rem;background:none;border:1px solid transparent;color:var(--tx-gris2);
   border-radius:7px;padding:.28rem .42rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;line-height:1}
-.ed .barre button:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)}
+.ed .barre button:hover{background:var(--v08);border-color:var(--v11)}
 .ed .barre button svg{width:15px;height:15px;display:block;fill:currentColor}
 .ed .barre select{font:inherit;font-size:.78rem;background:#0f1724;border:1px solid #2b3444;color:var(--tx-gris2);
   border-radius:7px;padding:.25rem .35rem;cursor:pointer;max-width:120px}
@@ -140,7 +140,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
   color:var(--tx);line-height:1.65;font-size:.88rem;outline:none}
 .ed.plein .zone{max-height:none}
 .ed .zone::-webkit-scrollbar{width:9px}
-.ed .zone::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:9px}
+.ed .zone::-webkit-scrollbar-thumb{background:var(--v11);border-radius:9px}
 .ed .zone:empty:before{content:attr(data-vide);color:#5c6b80}
 .ed .zone h2{font:700 1.15rem/1.3 Georgia,serif;margin:1.1rem 0 .5rem}
 .ed .zone h3{font:700 1rem/1.3 Georgia,serif;margin:1rem 0 .4rem;color:var(--tx-or2)}
@@ -154,7 +154,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .ed .zone img{max-width:100%;height:auto;border-radius:5px;display:block;margin:.6rem 0}
 .ed .zone table{border-collapse:collapse;width:100%;margin:.9rem 0}
 .ed .zone th,.ed .zone td{border:1px solid #3a465a;padding:.4rem .6rem;text-align:left}
-.ed .zone th{background:rgba(255,255,255,.05);font-weight:700}
+.ed .zone th{background:var(--v05);font-weight:700}
 /* Une variable est un BLOC INSECABLE, pas du texte : sans cela, une frappe au
    milieu de {{MARQUE}} produisait une variable a demi ecrite, qui ne se resout
    plus et part telle quelle sur la boutique. */
@@ -167,7 +167,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .apr .re-var-token{background:rgba(196,154,108,.16);border-radius:4px;padding:0 .25rem}
 
 /* Grille de choix des dimensions du tableau. */
-.grtb{position:fixed;z-index:80;background:#131c2b;border:1px solid rgba(255,255,255,.14);
+.grtb{position:fixed;z-index:80;background:#131c2b;border:1px solid var(--v16);
   border-radius:10px;padding:.55rem;box-shadow:0 12px 34px rgba(0,0,0,.55)}
 .grtb .cases{display:grid;grid-template-columns:repeat(10,15px);gap:2px}
 .grtb .c{width:15px;height:15px;border:1px solid #3a465a;border-radius:2px;cursor:pointer}
@@ -176,13 +176,13 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 
 /* Barres flottantes : image selectionnee, cellule de tableau. */
 .flot{position:fixed;z-index:80;display:flex;gap:.15rem;background:#131c2b;
-  border:1px solid rgba(255,255,255,.16);border-radius:9px;padding:.25rem;
+  border:1px solid var(--v16);border-radius:9px;padding:.25rem;
   box-shadow:0 10px 28px rgba(0,0,0,.5)}
 .flot button{font:inherit;font-size:.74rem;background:none;border:0;color:var(--tx-gris2);border-radius:6px;
   padding:.24rem .45rem;cursor:pointer;white-space:nowrap}
-.flot button:hover{background:rgba(255,255,255,.09)}
+.flot button:hover{background:var(--v08)}
 .flot button.dgr:hover{background:rgba(248,113,113,.18);color:var(--tx-err2)}
-.flot .fil{width:1px;background:rgba(255,255,255,.14);margin:.1rem .2rem}
+.flot .fil{width:1px;background:var(--v16);margin:.1rem .2rem}
 .imgsel{outline:2px solid #c9a97e;outline-offset:2px}
 
 /* Aperçu et liste des variables : memes surfaces que la boite de reception. */
@@ -194,7 +194,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .apr img{max-width:100%;height:auto}
 .vgrp{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--tx2);margin:.9rem 0 .4rem}
 .vbtn{display:flex;justify-content:space-between;align-items:center;gap:1rem;width:100%;
-  padding:.5rem .75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  padding:.5rem .75rem;background:var(--v03);border:1px solid var(--v11);
   border-radius:8px;cursor:pointer;margin:0 0 .3rem;text-align:left;font:inherit;color:var(--tx)}
 .vbtn:hover{border-color:rgba(201,169,126,.45)}
 .vbtn code{font-size:.79rem;color:var(--tx-or);font-weight:600}
@@ -455,7 +455,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       +'<label class="champ" style="margin:0"><span class="lbl">Contenu de la page</span></label>'
       +edHtml('cp-ed', p.content)
       +'</div>'
-      +'<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
+      +'<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
       +'<button class="b" id="cp-annuler">Annuler</button>'
       +(RO?'':'<button class="prim" id="cp-enr">'+(nouv?'Créer la page':'Enregistrer')+'</button>')
       +'</div></div>';

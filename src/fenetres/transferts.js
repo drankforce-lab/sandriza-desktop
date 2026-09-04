@@ -38,33 +38,33 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .onglets{flex:0 0 auto;display:flex;gap:.4rem;padding:.5rem 1.05rem 0;
-  border-bottom:1px solid rgba(255,255,255,.08)}
+  border-bottom:1px solid var(--v08)}
 .onglets button{background:transparent;border:none;border-bottom:2px solid transparent;
   color:var(--tx2);padding:.4rem .7rem;font-weight:600;font-size:.86rem;border-radius:6px 6px 0 0}
-.onglets button:hover{background:rgba(255,255,255,.05);color:var(--tx)}
+.onglets button:hover{background:var(--v05);color:var(--tx)}
 .onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
 .onglets .pastille{display:inline-block;min-width:1.15rem;padding:0 .3rem;margin-left:.35rem;
   border-radius:99px;background:#c9a97e;color:#1a1207;font-size:.68rem;font-weight:800;text-align:center}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-input,button,select{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.32rem .55rem}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+input,button,select{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem}
 input[type=search]{min-width:220px}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
 input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600;padding:.36rem .8rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte.transit{border-left:3px solid #fbbf24}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
@@ -90,9 +90,9 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-or2)}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.66rem;text-transform:uppercase;
-  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
-tbody td{padding:.32rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
-tbody tr:hover td{background:rgba(255,255,255,.04)}
+  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody tr:hover td{background:var(--v03)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 /* ⚠ « Robe ZENXAS · S-rouge » se coupait au milieu de « S-rouge » (sa capture).
    Un identifiant de variante coupe en deux ne se lit plus : on preserve les
@@ -113,14 +113,14 @@ td.quand .qui{color:var(--tx2);font-size:.72rem}
 .pill.transit{background:rgba(251,191,36,.2);color:#fcd34d}
 .pill.recu{background:rgba(74,222,128,.18);color:#86efac}
 .pill.annule{background:rgba(148,163,184,.2);color:var(--tx-gris2)}
-.recevoir{margin-top:.6rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.08);
+.recevoir{margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--v08);
   display:flex;flex-direction:column;gap:.5rem}
 .recevoir .rangee{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
 .recevoir label{font-size:.74rem;color:var(--tx2)}
 .recevoir input[type=number]{width:6.5rem;text-align:right}
 .vide{padding:1.6rem .6rem;text-align:center;color:var(--tx2);font-size:.85rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

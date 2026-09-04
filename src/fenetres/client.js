@@ -27,7 +27,7 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;
   display:flex;align-items:center;justify-content:center;font-weight:700;
@@ -35,33 +35,33 @@ body{background:#0e1522;color:var(--tx);
 .tete .mail{font-size:.72rem;color:var(--tx2)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .tete .pill{font-size:.68rem;padding:.12rem .55rem;border-radius:99px;
-  border:1px solid rgba(255,255,255,.2);margin-left:.5rem}
+  border:1px solid var(--v22);margin-left:.5rem}
 .pill.vert{border-color:rgba(74,222,128,.5);color:var(--tx-ok)}
 .pill.gris{color:var(--tx2)}
 .pill.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.5rem}
-.tuile{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+.tuile{background:var(--v03);border:1px solid var(--v08);
   border-radius:9px;padding:.5rem .65rem}
 .tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .tuile .v{font:700 1.15rem/1.3 Georgia,serif;color:var(--tx-creme)}
 .ligne{display:flex;justify-content:space-between;gap:1rem;padding:.32rem 0;
-  border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem}
+  border-bottom:1px solid var(--v05);font-size:.85rem}
 .ligne .k{color:var(--tx2)}
 .cmd{display:flex;align-items:center;gap:.6rem;padding:.32rem .4rem;border-radius:7px;
-  border-top:1px solid rgba(255,255,255,.05);font-size:.85rem}
+  border-top:1px solid var(--v05);font-size:.85rem}
 .cmd .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
 .cmd .d{flex:1 1 auto;min-width:0}
 .cmd .fin{color:var(--tx2);font-size:.78rem;white-space:nowrap}
 input,select{font:inherit;color:var(--tx);background:#0f1826;
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input[type=checkbox]{width:auto}
@@ -70,9 +70,9 @@ input[type=checkbox]{width:auto}
 .ch label{font-size:.7rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
 .ch.large{grid-column:1/-1}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.danger{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
@@ -80,7 +80,7 @@ button.danger:hover:not(:disabled){background:rgba(248,113,113,.12)}
 button.mini{padding:.14rem .5rem;font-size:.75rem}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
@@ -89,7 +89,7 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 .vide{padding:1.6rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+.voile .boite{background:#16202f;border:1px solid var(--v11);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:30rem;width:100%}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.86rem}

@@ -37,14 +37,14 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .tete .pill{font-size:.7rem;padding:.14rem .6rem;border-radius:99px;
-  border:1px solid rgba(255,255,255,.2);margin-left:.6rem}
+  border:1px solid var(--v22);margin-left:.6rem}
 
 .pas{flex:0 0 auto;display:flex;gap:.35rem;padding:.45rem 1.1rem;
-  border-bottom:1px solid rgba(255,255,255,.07);background:#111a28}
+  border-bottom:1px solid var(--v08);background:#111a28}
 .pas button{font:inherit;font-size:.76rem;padding:.24rem .6rem;border-radius:7px;
   border:1px solid transparent;background:transparent;color:var(--tx2);cursor:pointer}
 .pas button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-creme)}
@@ -52,9 +52,9 @@ body{background:#0e1522;color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
@@ -66,7 +66,7 @@ body{background:#0e1522;color:var(--tx);
 .info .large{grid-column:1/-1}
 
 input,select,textarea{font:inherit;color:var(--tx);background:#0f1826;
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
 textarea{resize:none}
@@ -76,9 +76,9 @@ textarea{resize:none}
 .ch label{font-size:.72rem;color:var(--tx2)}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-blanc);font-weight:600}
@@ -93,20 +93,20 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 
 .art{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:8px;
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-top:.35rem}
+  background:var(--v03);border:1px solid var(--v05);margin-top:.35rem}
 .art .d{flex:1 1 auto;min-width:0}
 .art .n{font-size:.88rem;font-weight:600}
 .art .v{font-size:.75rem;color:var(--tx2)}
 .art select{width:auto}
 .ligne{display:flex;align-items:center;justify-content:space-between;gap:.7rem;
-  padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem}
+  padding:.3rem 0;border-bottom:1px solid var(--v05);font-size:.85rem}
 .ligne input{width:6.2rem;text-align:right}
-.photo{max-width:200px;max-height:200px;border-radius:8px;border:1px solid rgba(255,255,255,.14)}
+.photo{max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--v16)}
 .jetons{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem}
 .jetons button{font-size:.72rem;padding:.14rem .5rem}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
@@ -116,7 +116,7 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+.voile .boite{background:#16202f;border:1px solid var(--v11);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:34rem;width:100%;
   max-height:82vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
@@ -345,7 +345,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
 
       // Etiquette de retour — visible quand on approuve.
       h += '<div id="z-etiq" style="' + (d.statut === 'approved' ? '' : 'display:none') + ';margin-top:.55rem;'
-        + 'padding:.55rem .7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:9px">'
+        + 'padding:.55rem .7rem;background:var(--v03);border:1px solid var(--v08);border-radius:9px">'
         + '<div style="font-size:.72rem;color:var(--tx2);font-weight:700;text-transform:uppercase;letter-spacing:.07em"><span class="ic">📦</span> Étiquette de retour</div>'
         + (d.aUneEtiquette ? '<div class="avis jaune">⚠ Une étiquette existe déjà ('
             + (d.etiquetteReelle ? 'réelle Postes Canada — la régénérer sera FACTURÉ une seconde fois' : 'PDF interne')
@@ -648,7 +648,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function voilePdf(b64){
     voile('<h3><span class="ic">👁</span> Étiquette de retour</h3>'
       + '<iframe src="data:application/pdf;base64,' + b64 + '" '
-      + 'style="width:100%;height:52vh;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:#3c3c3c"></iframe>'
+      + 'style="width:100%;height:52vh;border:1px solid var(--v16);border-radius:8px;background:#3c3c3c"></iframe>'
       + '<div class="fin2"><button id="v-non">Fermer</button></div>',
       function(fermer){ document.getElementById('v-non').onclick = fermer; });
   }

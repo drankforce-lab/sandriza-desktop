@@ -32,16 +32,16 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.05rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.05rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .barre{flex:0 0 auto;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
-  padding:.5rem 1.05rem;border-bottom:1px solid rgba(255,255,255,.06)}
-input[type=search],select,button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.28rem .5rem}
+  padding:.5rem 1.05rem;border-bottom:1px solid var(--v05)}
+input[type=search],select,button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.28rem .5rem}
 input[type=search]{flex:1 1 14rem;min-width:9rem}
 button{cursor:pointer}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
 .jeton{font-size:.73rem;padding:.14rem .5rem;border-radius:99px}
@@ -53,13 +53,13 @@ input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
 .corps{flex:1 1 auto;min-height:0;display:flex}
 .zone{flex:1 1 auto;min-width:0;overflow-y:auto;padding:.5rem .7rem}
 .zone::-webkit-scrollbar{width:9px}
-.zone::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
+.zone::-webkit-scrollbar-thumb{background:var(--v16);border-radius:8px}
 /* Affichage LISTE : dense, une ligne par photo — c est celui qui permet de
    parcourir 500 photos sans defiler pendant une minute. */
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead th{position:sticky;top:0;z-index:1;text-align:left;padding:.26rem .4rem;
   font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
-  font-weight:700;background:#0e1522;border-bottom:1px solid rgba(255,255,255,.12)}
+  font-weight:700;background:#0e1522;border-bottom:1px solid var(--v11)}
 /* ⚠ AUCUNE LIGNE DE TABLEAU, ET UN SURVOL DISCRET (demande du 2026-08-14 :
    << l effet de survol est affreux, on ne devrait pas voir les lignes du
    tableau >>). Le cadre dore posé cellule par cellule (box-shadow inset sur
@@ -69,14 +69,14 @@ thead th{position:sticky;top:0;z-index:1;text-align:left;padding:.26rem .4rem;
 tbody tr{cursor:pointer}
 tbody td{padding:.26rem .4rem;border:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
-tbody tr:hover td{background:rgba(255,255,255,.03)}
+tbody tr:hover td{background:var(--v03)}
 tbody tr.pris td{background:rgba(201,169,126,.1)}
 tbody tr.actif td:first-child{box-shadow:inset 2px 0 0 0 #c9a97e}
 /* La case a cocher : visible, cliquable, et distincte du clic sur la ligne. */
 th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center}
 .coche{display:inline-flex;align-items:center;justify-content:center;
   width:1.05rem;height:1.05rem;border-radius:5px;cursor:pointer;
-  border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.06);
+  border:1px solid var(--v45);background:var(--v05);
   font-size:.72rem;line-height:1;color:#17202c}
 .coche:hover{border-color:#c9a97e}
 .coche.on{background:#c9a97e;border-color:#c9a97e;font-weight:700}
@@ -93,7 +93,7 @@ td.vig img{width:2rem;height:2rem;object-fit:contain;border-radius:4px;backgroun
 td.vig img{border:0;outline:0}
 /* Affichage GRILLE : quand on cherche a l oeil plutot qu au nom. */
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.5rem}
-.vig{background:#16202f;border:1px solid rgba(255,255,255,.1);border-radius:9px;
+.vig{background:#16202f;border:1px solid var(--v11);border-radius:9px;
   overflow:hidden;cursor:pointer;position:relative}
 .vig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
 .vig.actif{outline:2px solid #c9a97e;outline-offset:-2px}
@@ -102,14 +102,14 @@ td.vig img{border:0;outline:0}
   overflow:hidden;text-overflow:ellipsis}
 .pastilles{display:flex;gap:.15rem}
 .pt{font-size:.62rem;padding:.02rem .26rem;border-radius:4px;
-  background:rgba(255,255,255,.08);color:var(--tx2)}
+  background:var(--v08);color:var(--tx2)}
 .pt.fait{color:var(--tx-ok)}
 /* Le retour en arriere possible — dore, comme tout ce qui se decide ici. */
 .pt.ret{color:var(--tx-or)}
 /* La fiche produit en retard : c est un avertissement, pas un etat neutre. */
 .pt.retard{color:#f0a05a;border:1px solid rgba(240,160,90,.4)}
 /* Le volet d APERCU : la raison d etre de cette fenetre. */
-.apercu{flex:0 0 19rem;border-left:1px solid rgba(255,255,255,.08);
+.apercu{flex:0 0 19rem;border-left:1px solid var(--v08);
   background:#111a29;display:flex;flex-direction:column;overflow-y:auto}
 .apercu .img{padding:.6rem;text-align:center;background:#0b1220}
 .apercu .img img{max-width:100%;max-height:15rem;border-radius:8px}
@@ -119,7 +119,7 @@ td.vig img{border:0;outline:0}
 .apercu .infos .k{color:var(--tx2)}
 .apercu .infos .v{text-align:right;word-break:break-word}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
-  padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .pied .cpt{font-size:.8rem}
 .pied .cpt.on{color:var(--tx-creme);font-weight:700}
 .pied .droite{margin-left:auto;display:flex;gap:.4rem}
@@ -130,7 +130,7 @@ td.vig img{border:0;outline:0}
 .aide{font-size:.72rem;color:var(--tx2)}
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+.voile .boite{background:#16202f;border:1px solid var(--v11);
   border-radius:13px;max-width:30rem;width:100%;padding:.9rem 1rem}
 .voile h3{margin:0 0 .55rem;font:700 1.02rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.85rem;line-height:1.5}

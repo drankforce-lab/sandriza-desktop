@@ -32,21 +32,21 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
-input,button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem}
+input,button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 button{cursor:pointer}
 input:focus,button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
@@ -57,25 +57,25 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
-.tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.5rem .65rem}
+.tuile{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:.5rem .65rem}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}
 .tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
-tbody td{padding:.32rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
-tbody tr:hover td{background:rgba(255,255,255,.04)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+tbody td{padding:.32rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
+tbody tr:hover td{background:var(--v03)}
 tbody tr[data-sondage]{cursor:pointer}
 .num{text-align:right;white-space:nowrap}
 .fin{white-space:nowrap;text-align:right}
 .code{font-family:'Courier New',monospace;letter-spacing:1px;font-weight:700;
-  background:rgba(255,255,255,.06);border-radius:4px;padding:.06rem .4rem}
+  background:var(--v05);border-radius:4px;padding:.06rem .4rem}
 .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
@@ -83,15 +83,15 @@ tbody tr[data-sondage]{cursor:pointer}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
+.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
   max-width:42rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
-.q{border-top:1px solid rgba(255,255,255,.07);padding:.5rem 0}
+.q{border-top:1px solid var(--v08);padding:.5rem 0}
 .q:first-of-type{border-top:0}
 .q .txt{font-weight:600;font-size:.88rem}
 .q .mots{margin-top:.3rem;display:flex;flex-direction:column;gap:.25rem}
-.q .mot{font-size:.83rem;background:rgba(255,255,255,.04);border-radius:8px;
+.q .mot{font-size:.83rem;background:var(--v03);border-radius:8px;
   padding:.25rem .5rem;white-space:pre-wrap;overflow-wrap:anywhere}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
 /* ── Editeur de sondage (#33) ── */
@@ -103,21 +103,21 @@ input.t,select.t,textarea.t{width:100%;background:#0f1724;border:1px solid #2b34
 textarea.t{resize:vertical;line-height:1.5}
 input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
-  border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:.22rem .55rem;margin:0 0 .6rem;
-  background:rgba(255,255,255,.03);-webkit-user-select:none;user-select:none}
+  border:1px solid var(--v11);border-radius:9px;padding:.22rem .55rem;margin:0 0 .6rem;
+  background:var(--v03);-webkit-user-select:none;user-select:none}
 label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0}
-.qs{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.5rem .6rem;margin:0 0 .7rem}
+.qs{border:1px solid var(--v11);border-radius:10px;padding:.5rem .6rem;margin:0 0 .7rem}
 .qstitre{display:flex;align-items:center;gap:.5rem;font-size:.7rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;margin:0 0 .45rem}
 .qstitre button{margin-left:auto}
-.qed{background:rgba(255,255,255,.03);border-radius:9px;padding:.45rem .55rem;margin:0 0 .45rem}
+.qed{background:var(--v03);border-radius:9px;padding:.45rem .55rem;margin:0 0 .45rem}
 .qedh{display:flex;align-items:center;gap:.5rem;margin:0 0 .3rem}
 .qedh button{margin-left:auto}
 .qedr{display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;margin-top:.4rem}
 .qedr .case{margin:0}
 .vide{padding:1.3rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
@@ -704,7 +704,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }

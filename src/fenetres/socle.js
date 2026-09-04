@@ -55,7 +55,25 @@ const CSS_SOCLE = `
    commentaire. Le contenu part dans un litteral de gabarit, et un accent grave
    egare le referme - la regle est en tete de ce fichier, elle a quand meme ete
    oubliee une quatrieme fois. */
-:root{color-scheme:dark;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#6d7f96;--tx-gris:#6f8098;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd}
+/* == LES VOILES DE SURFACE SONT DES JETONS AUSSI =============================
+   Meme mesure, meme jour, autre moitie du defaut : 1 401 emplois de blanc
+   translucide (rgba(255,255,255,x)) dans 89 fenetres. En mode sombre c est le
+   bon geste - un voile clair pose sur du sombre donne une carte, une bordure,
+   un survol. En mode JOUR, c est du blanc sur du creme : la bordure disparait,
+   la carte n a plus de contour, et le bouton << Detacher >> flotte sans cadre
+   (sa capture du 2026-09-04).
+   AUCUN de ces 1 401 emplois n est du TEXTE : 520 fonds, 871 bordures. Un seul
+   jeu de jetons suffit donc, sans ambiguite de role - c est ce qui rend la
+   conversion mecanique sure.
+   LES OPACITES SONT REGROUPEES EN BANDES (29 valeurs distinctes pour un meme
+   geste : .05 et .055 ne se distinguent pas a l oeil). L ecart introduit en
+   nuit ne depasse 0,03 - imperceptible - et l on passe de 29 decisions a neuf.
+   EN JOUR, LE VOILE S INVERSE : rgba(15,23,42,x) un peu PLUS opaque que son
+   equivalent de nuit. Un voile sombre sur du creme porte moins loin qu un voile
+   clair sur du bleu nuit ; a opacite egale, la bordure de jour serait plus
+   faible que celle de nuit.
+   Aucun accent grave ici : ce commentaire part dans un litteral de gabarit. */
+:root{color-scheme:dark;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#6d7f96;--tx-gris:#6f8098;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd;--v03:var(--v03);--v05:var(--v05);--v08:var(--v08);--v11:var(--v11);--v16:var(--v16);--v22:var(--v22);--v30:var(--v30);--v45:var(--v45);--v90:var(--v90)}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{background:#0e1522;color:var(--tx);
@@ -63,14 +81,14 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete h1{margin:0;font:700 .98rem/1.2 Georgia,serif}
 .tete .sous{margin-left:auto;font-size:.73rem;color:var(--tx2)}
 
 /* Fil des etapes : cliquable, et il dit ce qui est FAIT — pas ce qui est passe. */
 .pas{flex:0 0 auto;display:flex;gap:.2rem;padding:.45rem 1.1rem;
-  border-bottom:1px solid rgba(255,255,255,.07);background:#111a28;
+  border-bottom:1px solid var(--v08);background:#111a28;
   overflow-x:auto;scrollbar-width:none}
 .pas::-webkit-scrollbar{display:none}
 .pas button{flex:0 0 auto;font:inherit;font-size:.76rem;padding:.24rem .58rem;
@@ -87,7 +105,7 @@ body{background:#0e1522;color:var(--tx);
 .etape{display:none;flex:1 1 auto;min-height:0;flex-direction:column;gap:.7rem}
 .etape.on{display:flex}
 
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.85rem .95rem;min-height:0;flex:0 0 auto}
 /* « plein » : pour les cartes qui portent une LISTE, qui doit occuper la place
    disponible pour montrer le plus de lignes possible. Une carte ordinaire epouse
@@ -104,7 +122,7 @@ body{background:#0e1522;color:var(--tx);
 .ch label{font-size:.73rem;color:var(--tx2)}
 .ch .req{color:var(--tx-or)}
 input,select,textarea{font:inherit;color:var(--tx);background:#0f1826;
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.38rem .55rem;
+  border:1px solid var(--v16);border-radius:8px;padding:.38rem .55rem;
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
 textarea{resize:none}
@@ -115,15 +133,15 @@ input[type=checkbox]{width:auto}
   color:var(--tx);cursor:pointer}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.1rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.55rem 1.1rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);min-height:1.15em;flex:1 1 auto;min-width:0;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -135,10 +153,10 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 .liste{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:.3rem;overflow:hidden}
 .liste .lg{display:flex;align-items:center;gap:.5rem;padding:.26rem .3rem;
   border-radius:6px;font-size:.86rem;cursor:pointer}
-.liste .lg:hover{background:rgba(255,255,255,.04)}
+.liste .lg:hover{background:var(--v03)}
 .liste .lg .fin{margin-left:auto;font-size:.72rem;color:var(--tx2);flex:0 0 auto}
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.5rem;
-  margin-top:.35rem;border-top:1px solid rgba(255,255,255,.07);font-size:.78rem;color:var(--tx2)}
+  margin-top:.35rem;border-top:1px solid var(--v08);font-size:.78rem;color:var(--tx2)}
 .pagi button{padding:.2rem .55rem;font-size:.78rem}
 .pagi .pos{margin-left:auto}
 
@@ -548,7 +566,7 @@ const CSS_LOTS = `
   border-top:1px solid rgba(201,169,126,.45);box-shadow:0 -4px 14px rgba(0,0,0,.35)}
 .sz-lots .nom{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
 .sz-lots .jauge{flex:1 1 auto;min-width:4rem;height:.42rem;border-radius:99px;
-  background:rgba(255,255,255,.12);overflow:hidden}
+  background:var(--v11);overflow:hidden}
 .sz-lots .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
 .sz-lots .cpt{white-space:nowrap;font-variant-numeric:tabular-nums}
 .sz-lots .file{white-space:nowrap;color:var(--tx2)}
@@ -1408,7 +1426,7 @@ const CSS_JOUR = `
 /* Les jetons de texte, version JOUR. Voir la fiche dans CSS_SOCLE. html.jour
    (element + classe) l emporte sur :root, et CSS_JOUR est appende APRES le CSS
    de chaque fenetre - donc ceci commande partout, sans une seule reprise locale. */
-html.jour{--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#387652;--tx-err:#ab4e4e;--tx-err2:#905e5e;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#76694e;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b}
+html.jour{--tx:#1d2433;--tx-blanc:#1d2433;--tx2:#5a6574;--tx-bleute:#5f666c;--tx-gris2:#5f646a;--tx3:#576678;--tx-gris:#586578;--tx-ok:#297a46;--tx-ok2:#387652;--tx-err:#ab4e4e;--tx-err2:#905e5e;--tx-att:#856513;--tx-jaune:#80680b;--tx-or:#7d694e;--tx-or2:#76694e;--tx-creme:#6f6a5f;--tx-creme2:#6d6963;--tx-bleu:#516c8b;--v03:rgba(15,23,42,.05);--v05:rgba(15,23,42,.07);--v08:rgba(15,23,42,.10);--v11:rgba(15,23,42,.14);--v16:rgba(15,23,42,.20);--v22:rgba(15,23,42,.26);--v30:rgba(15,23,42,.34);--v45:rgba(15,23,42,.48);--v90:rgba(15,23,42,.88)}
 html.jour .tete h1{color:#141c28}
 
 /* ⚠⚠ TOUT PICTOGRAMME EST MONOCHROME, SANS EXCEPTION — ET LA REGLE EST ICI, UNE
@@ -1478,7 +1496,7 @@ html.jour .ico{color:#414e66}
 .szbr-voile{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
   justify-content:center;padding:1.2rem;background:rgba(6,10,18,.62)}
 .szbr-boite{max-width:33rem;width:100%;background:#131c2b;color:var(--tx);
-  border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.1rem;
+  border:1px solid var(--v11);border-radius:10px;padding:1rem 1.1rem;
   box-shadow:0 18px 44px rgba(0,0,0,.45)}
 .szbr-boite h3{margin:0 0 .5rem;display:flex;align-items:center;gap:.45rem;
   font:700 1rem/1.25 Georgia,serif;color:var(--tx-creme)}
@@ -1486,7 +1504,7 @@ html.jour .ico{color:#414e66}
 .szbr-note{font-size:.78rem;color:var(--tx2)}
 .szbr-pied{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem}
 .szbr-pied button{font:inherit;font-size:.84rem;padding:.4rem .8rem;border-radius:6px;
-  cursor:pointer;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);
+  cursor:pointer;border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);white-space:nowrap}
 /* ⚠ white-space:nowrap ET une boite plus large : a trois boutons, << Conserver le
    brouillon >> se coupait en deux lignes et la question avait l air bricolee. Un
@@ -1502,7 +1520,7 @@ html.jour .szbr-pied button.prim{background:#C49A6C;border-color:#C49A6C;color:#
 
 /* ⚠⚠ LA LISTE DEROULEE D UN <select> EST DESSINEE PAR LE SYSTEME, PAS PAR NOUS.
    Elle ne prend NI le fond ni la couleur de la fenetre : les fenetres ecrivent
-   << select{color:var(--tx);background:rgba(255,255,255,.05)} >>, et un fond
+   << select{color:var(--tx);background:var(--v05)} >>, et un fond
    TRANSPARENT pose sur du blanc redonne du blanc. On obtenait donc, en mode
    nuit, une liste blanche a texte gris tres pale — illisible (releve le
    2026-08-09 sur le filtre de statut des Factures).
@@ -1621,9 +1639,9 @@ html.sz-zoom, html.sz-zoom-fen{font-size:112.5%}
 }
 /* Le bouton de bascule : discret, à côté de « Fermer ». */
 .sz-btnplein{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-right:.35rem;
-  border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);border-radius:7px;background:var(--v05);
   color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.sz-btnplein:hover{background:rgba(255,255,255,.09)}
+.sz-btnplein:hover{background:var(--v08)}
 html.jour .sz-btnplein{color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
 html.jour .sz-btnplein:hover{background:#efece4}
 /* Surcouches SANS barre d'en-tête : le bouton se pose en surimpression au coin.
@@ -1639,16 +1657,16 @@ html.jour .sz-btnplein:hover{background:#efece4}
    texte avalait le clic de la souris (le clic sur le libellé ne faisait rien,
    à côté du libellé fonctionnait). */
 .sz-btnfen{flex:0 0 auto;font:inherit;font-size:.78rem;line-height:1.35;padding:.14rem .45rem;
-  margin-left:.4rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;
-  background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;
+  margin-left:.4rem;border:1px solid var(--v16);border-radius:7px;
+  background:var(--v05);color:var(--tx);cursor:pointer;
   -webkit-user-select:none;user-select:none}
-.sz-btnfen:hover{background:rgba(255,255,255,.09)}
+.sz-btnfen:hover{background:var(--v08)}
 html.jour .sz-btnfen{color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
 html.jour .sz-btnfen:hover{background:#efece4}
 /* Message posé DANS la surcouche par szDire, quand la fenêtre n'a pas déjà sa
    propre zone (.msgsur). */
 .sz-msgauto{margin-top:.75rem;padding:.5rem .7rem;border-radius:8px;font-size:.8rem;
-  line-height:1.5;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--tx-bleute)}
+  line-height:1.5;background:var(--v05);border:1px solid var(--v11);color:var(--tx-bleute)}
 .sz-msgauto.err{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.35);color:var(--tx-err2)}
 .sz-msgauto.bon{background:rgba(22,163,74,.14);border-color:rgba(22,163,74,.32);color:var(--tx-ok2)}
 .sz-msgauto.att{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.35);color:var(--tx-or2)}
@@ -1663,7 +1681,7 @@ html.jour .sz-msgauto{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.
    BOUTONS, le SURVOL et les MENUS.
 
    ⚠⚠ LE VRAI TRAVAIL N EST PAS LA PALETTE, C EST L ACCROCHE. Chaque fenetre
-   ecrit ses couleurs EN DUR (#0e1522, #16202f, #c9a97e, rgba(255,255,255,.1)
+   ecrit ses couleurs EN DUR (#0e1522, #16202f, #c9a97e, var(--v11)
    au survol...). Un theme n a d effet que si ces valeurs passent par des
    variables. On ne reecrit pas les quarante fenetres : on REDECLARE ici les
    memes selecteurs avec des variables, et comme ce bloc est appende APRES le
@@ -1684,11 +1702,11 @@ const CSS_THEMES = `
 :root{
   --sz-fond:#0e1522; --sz-fond2:#131c2b; --sz-pied:#0b1220;
   --sz-surface:#16202f; --sz-surface2:#141d2c;
-  --sz-bord:rgba(255,255,255,.09); --sz-bord-fort:rgba(255,255,255,.16);
+  --sz-bord:var(--v08); --sz-bord-fort:var(--v16);
   --sz-texte:#e8edf5; --sz-attenue:#8fa1b8;
   --sz-accent:#c9a97e; --sz-accent-fort:#a3824f; --sz-accent-txt:#17202c;
   --sz-accent-doux:rgba(201,169,126,.16);
-  --sz-btn:rgba(255,255,255,.05); --sz-survol:rgba(255,255,255,.1);
+  --sz-btn:var(--v05); --sz-survol:var(--v11);
 }
 html[data-sz-theme="ocean"]{
   --sz-fond:#0a1620; --sz-fond2:#0f2030; --sz-pied:#081219;
@@ -1711,7 +1729,7 @@ html[data-sz-theme="ardoise"]{
 html[data-sz-theme="graphite"]{
   --sz-fond:#121212; --sz-fond2:#1c1c1c; --sz-pied:#0d0d0d;
   --sz-surface:#1e1e1e; --sz-surface2:#1a1a1a;
-  --sz-bord:rgba(255,255,255,.1); --sz-bord-fort:rgba(255,255,255,.18);
+  --sz-bord:var(--v11); --sz-bord-fort:var(--v16);
   --sz-accent:#fbbf24; --sz-accent-fort:#f59e0b; --sz-accent-txt:#211703;
   --sz-accent-doux:rgba(251,191,36,.16);
 }

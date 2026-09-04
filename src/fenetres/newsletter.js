@@ -26,53 +26,53 @@ html,body{margin:0;height:100%}
 body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
-  border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
+  border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;border-bottom:1px solid var(--v08)}
 .onglets button{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--tx2);
   padding:.4rem .7rem;font-weight:600;font-size:.85rem;border-radius:6px 6px 0 0}
-.onglets button:hover{background:rgba(255,255,255,.05);color:var(--tx)}
+.onglets button:hover{background:var(--v05);color:var(--tx)}
 .onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-input,button,select,textarea{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.4rem .55rem}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+input,button,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.4rem .55rem}
 textarea{resize:vertical;min-height:56px;width:100%}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
 input:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600;padding:.42rem .8rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
 button.mini{padding:.16rem .5rem;font-size:.76rem}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem}
-.tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.6rem .8rem}
+.tuile{background:#16202f;border:1px solid var(--v08);border-radius:12px;padding:.6rem .8rem}
 .tuile .k{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .tuile .v{font-size:1.5rem;font-weight:800;margin-top:.15rem}
 .tuile .z{font-size:.68rem;color:var(--tx2);margin-top:.1rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.75rem .85rem}
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:12px;padding:.75rem .85rem}
 .carte h2{margin:0 0 .6rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
 @media(max-width:720px){.deux{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
-thead th{text-align:left;padding:.28rem .4rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
-tbody td{padding:.34rem .4rem;border-top:1px solid rgba(255,255,255,.055)}
+thead th{text-align:left;padding:.28rem .4rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05)}
 .champ{margin-bottom:.7rem}
 .champ label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);margin:0 0 .25rem}
 .champ input,.champ textarea{width:100%}
 .hint{font-size:.72rem;color:var(--tx2);margin:.25rem 0 0;line-height:1.5}
-.sep{border:none;border-top:1px solid rgba(255,255,255,.09);margin:.9rem 0}
+.sep{border:none;border-top:1px solid var(--v08);margin:.9rem 0}
 .badge{display:inline-block;font-size:.66rem;font-weight:700;padding:.06rem .5rem;border-radius:99px}
 .badge.ok{background:rgba(22,163,74,.2);color:#86efac}
 .badge.draft{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .badge.warn{background:rgba(217,119,6,.2);color:#fcd34d}
 .src{margin-bottom:.6rem}
 .src .l{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.25rem}
-.src .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.src .bar{height:6px;border-radius:99px;background:var(--v11);overflow:hidden}
 .src .bar>div{height:100%;background:#c9a97e}
-.ctrl{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.ctrl{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid var(--v05)}
 .ctrl .t{font-weight:500;font-size:.86rem}
 .ctrl .d{font-size:.74rem;color:var(--tx2);margin-top:.1rem}
 .bascule{position:relative;width:42px;height:23px;flex:0 0 auto}
@@ -83,7 +83,7 @@ tbody td{padding:.34rem .4rem;border-top:1px solid rgba(255,255,255,.055)}
 .bascule input:checked ~ .pouce{left:21px}
 .setup{max-width:34rem;margin:2rem auto;text-align:center;color:var(--tx-bleute)}
 .setup .em{font-size:2.6rem;margin-bottom:.8rem}
-.apercu-img{max-height:80px;max-width:100%;border-radius:6px;border:1px solid rgba(255,255,255,.15);display:block;margin-bottom:.4rem}
+.apercu-img{max-height:80px;max-width:100%;border-radius:6px;border:1px solid var(--v16);display:block;margin-bottom:.4rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.78);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
 .pop{background:#fff;color:#222;border-radius:14px;max-width:40rem;width:100%;display:flex;overflow:hidden;min-height:16rem;position:relative}
 .pop .g{flex:1 1 45%;background:#e8dcc6 center/cover no-repeat;min-height:16rem}
@@ -93,7 +93,7 @@ tbody td{padding:.34rem .4rem;border-top:1px solid rgba(255,255,255,.055)}
 .pop .cta{background:#8f6f42;color:var(--tx-blanc);border:none;border-radius:8px;padding:.6rem;font-weight:700;margin-top:.4rem}
 .pop .lg{font-size:.66rem;color:#9a8f7d}
 .pop .x{position:absolute;top:.5rem;right:.7rem;background:rgba(0,0,0,.15);color:var(--tx-blanc);border:none;border-radius:50%;width:26px;height:26px}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .vide{padding:1.4rem;text-align:center;color:var(--tx2);font-size:.84rem}
@@ -265,7 +265,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="deux">'
       +   '<div class="champ"><label>Titre (saut de ligne = ↵)</label><textarea id="offer-title" rows="2"' + ro + '>' + esc(c.title) + '</textarea></div>'
       +   '<div class="champ"><label>Image côté gauche</label>' + img
-      +     (PEUT.edit ? '<label style="display:inline-block;margin-bottom:.4rem"><span class="ghost mini" style="display:inline-block;padding:.16rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:8px"><span class="ic">📁</span> Choisir une photo</span><input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
+      +     (PEUT.edit ? '<label style="display:inline-block;margin-bottom:.4rem"><span class="ghost mini" style="display:inline-block;padding:.16rem .5rem;border:1px solid var(--v16);border-radius:8px"><span class="ic">📁</span> Choisir une photo</span><input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
       +     '<input id="offer-img" value="' + esc(c.imageUrl) + '" placeholder="https://… ou coller une URL"' + ro + '>'
       +     '<div class="hint">700 × 900 px recommandé (portrait). Max 600 Ko.</div></div>'
       + '</div>'

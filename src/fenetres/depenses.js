@@ -33,40 +33,40 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
-input,select,button,textarea{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem}
+input,select,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 select,button{cursor:pointer}
 input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700}
 .stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 8rem;background:rgba(255,255,255,.04);border-radius:9px;padding:.4rem .6rem}
+.stats .s{flex:1 1 8rem;background:var(--v03);border-radius:9px;padding:.4rem .6rem}
 .stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
 .stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .stats .s .sub{font-size:.66rem;color:var(--tx3)}
 
 /* La zone de depot : c est la porte la plus rapide vers une depense saisie. */
 .depot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:.25rem;border:2px dashed rgba(255,255,255,.2);
+  justify-content:center;gap:.25rem;border:2px dashed var(--v22);
   border-radius:12px;padding:.85rem 1rem;text-align:center;color:var(--tx2);
   cursor:pointer;transition:border-color .13s,background .13s}
 .depot:hover,.depot.survol{border-color:#c9a97e;background:rgba(201,169,126,.08)}
@@ -75,10 +75,10 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody tr{cursor:pointer}
-tbody tr:hover td{background:rgba(255,255,255,.04)}
-tbody td{padding:.3rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
+tbody tr:hover td{background:var(--v03)}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
 tbody .num{font-weight:600;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
@@ -100,29 +100,29 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .frais .fx{font-size:.78rem;color:var(--tx2);line-height:1.55}
 .frais .fx b{color:var(--tx)}
 .frais .fm{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}
-.frais .fm span{font-size:.74rem;color:var(--tx2);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:.12rem .55rem}
+.frais .fm span{font-size:.74rem;color:var(--tx2);background:var(--v05);
+  border:1px solid var(--v11);border-radius:99px;padding:.12rem .55rem}
 html.jour .frais{background:rgba(90,60,190,.08);border-color:rgba(90,60,190,.28)}
 html.jour .frais .ft{color:#5b3fb0}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
+.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
   max-width:44rem;width:100%;max-height:90vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem;
-  padding:.55rem 0;border-top:1px solid rgba(255,255,255,.08);
-  border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:.6rem}
+  padding:.55rem 0;border-top:1px solid var(--v08);
+  border-bottom:1px solid var(--v08);margin-bottom:.6rem}
 .boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.86rem;font-weight:600;overflow-wrap:anywhere}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.5;
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;
+  background:var(--v03);border:1px solid var(--v08);border-radius:9px;
   padding:.5rem .7rem}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
 .gros-montant{font:800 1.7rem/1 Georgia,serif;text-align:center;padding:.3rem 0 .1rem}
 .rang{display:flex;justify-content:space-between;gap:1rem;padding:.28rem 0;
-  border-bottom:1px solid rgba(255,255,255,.06);font-size:.86rem}
-.rang.total{border-bottom:none;border-top:2px solid rgba(255,255,255,.18);
+  border-bottom:1px solid var(--v05);font-size:.86rem}
+.rang.total{border-bottom:none;border-top:2px solid var(--v16);
   margin-top:.2rem;font-weight:700}
 .recu{background:#f2f2f2;border-radius:10px;margin-top:.6rem;padding:.4rem;
   display:flex;align-items:center;justify-content:center;max-height:22rem;overflow:hidden}
@@ -134,12 +134,12 @@ html.jour .frais .ft{color:#5b3fb0}
 .champ{display:flex;flex-direction:column;gap:.2rem}
 .champ label{font-size:.7rem;color:var(--tx2)}
 .champ input,.champ select{width:100%}
-.bloc-montants{grid-column:1/-1;background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:.55rem .7rem}
+.bloc-montants{grid-column:1/-1;background:var(--v03);
+  border:1px solid var(--v08);border-radius:10px;padding:.55rem .7rem}
 .trois{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.5rem;align-items:end}
 @media (max-width:620px){.form,.trois{grid-template-columns:1fr}}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
@@ -1271,7 +1271,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }

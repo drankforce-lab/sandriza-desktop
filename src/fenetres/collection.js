@@ -25,7 +25,7 @@ const { CSS_SOCLE, JS_SOCLE, JS_BROUILLON, ICO } = require('./socle');
 const CSS_PROPRE = `
 .photo{display:flex;gap:.85rem;align-items:flex-start}
 .photo .vign{flex:0 0 auto;width:140px;height:140px;border-radius:10px;
-  border:1px dashed rgba(255,255,255,.18);display:flex;align-items:center;
+  border:1px dashed var(--v16);display:flex;align-items:center;
   justify-content:center;color:var(--tx2);font-size:.75rem;overflow:hidden;text-align:center}
 .photo .vign img{width:100%;height:100%;object-fit:cover}
 .photo .cmd{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.45rem}

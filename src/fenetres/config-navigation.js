@@ -27,7 +27,7 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
@@ -36,8 +36,8 @@ body{background:#0e1522;color:var(--tx);
 .barre .aide{margin-right:auto;font-size:.76rem;color:var(--tx3);max-width:44rem}
 .corps{flex:1 1 auto;min-height:0;padding:.5rem 1.05rem .9rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.item{border:1px solid rgba(255,255,255,.08);border-radius:11px;margin-bottom:.55rem;
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.item{border:1px solid var(--v08);border-radius:11px;margin-bottom:.55rem;
   background:#16202f;overflow:hidden}
 .item .lg{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem}
 .item .mk{font-size:.85rem;opacity:.5;flex:0 0 auto;width:1.1rem;text-align:center}
@@ -52,19 +52,19 @@ input:focus,select:focus{outline:none;border-color:#c9a97e}
 input:disabled,select:disabled{opacity:.55}
 input.lab{width:11rem}
 input.href{width:15rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem}
-button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:7px;padding:.32rem .6rem;cursor:pointer}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:7px;padding:.32rem .6rem;cursor:pointer}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.24rem .5rem;font-size:.8rem}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
 button.danger{color:#f4b4b4;border-color:rgba(240,120,120,.35)}
 button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-blanc)}
-.sous{background:#0f1724;border-top:1px solid rgba(255,255,255,.08);padding:.4rem .8rem .55rem}
+.sous{background:#0f1724;border-top:1px solid var(--v08);padding:.4rem .8rem .55rem}
 .sous .tt{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:.3rem}
 .enf{display:flex;align-items:center;gap:.5rem;padding:.28rem .5rem;background:#16202f;
-  border:1px solid rgba(255,255,255,.07);border-radius:6px;margin-bottom:.25rem}
+  border:1px solid var(--v08);border-radius:6px;margin-bottom:.25rem}
 .enf .fl{color:var(--tx3);font-size:.8rem}
 .enf .el{font-size:.85rem;font-weight:500;flex:1 1 auto;min-width:0}
 .enf .eh{font-size:.76rem;color:var(--tx3);font-family:ui-monospace,Menlo,Consolas,monospace}
@@ -74,7 +74,7 @@ button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-blanc)
 .form .ch{display:flex;flex-direction:column;gap:.2rem}
 .form .ch label{font-size:.7rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .vide{padding:1.4rem;text-align:center;color:var(--tx2);font-size:.85rem}
@@ -109,7 +109,7 @@ function pageConfigNavigation() {
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }

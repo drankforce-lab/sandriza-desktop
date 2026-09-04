@@ -47,7 +47,7 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .credits{margin-left:auto;font-size:.74rem;color:var(--tx2)}
 .tete .credits b{color:var(--tx-or)}
@@ -71,8 +71,8 @@ body{background:#0e1522;color:var(--tx);
 .scene{flex:1 1 auto;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar,.scene::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb,
-.scene::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.scene::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .74rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -84,15 +84,15 @@ body{background:#0e1522;color:var(--tx);
    en separant les deux volets. Une recette n ajoute rien a la commande, elle
    REMPLIT les cinq etapes d un coup : sa place est donc au-dessus d elles. */
 .rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;
-  background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  background:#16202f;border:1px solid var(--v08);border-radius:12px;
   padding:.5rem .6rem}
 .rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
 .rcbar select{flex:1 1 auto;min-width:0;font-size:.78rem;padding:.3rem .45rem}
 .rcbar button{flex:0 0 auto;font:inherit;font-size:.73rem;padding:.3rem .55rem;
-  border-radius:8px;cursor:pointer;color:var(--tx-bleute);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16)}
-.rcbar button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+  border-radius:8px;cursor:pointer;color:var(--tx-bleute);background:var(--v05);
+  border:1px solid var(--v16)}
+.rcbar button:hover:not(:disabled){background:var(--v11)}
 .rcbar button:disabled{opacity:.4;cursor:default}
 .rcbar button.x{color:#e79a9a}
 /* L avertissement d ecrasement du voile d enregistrement. */
@@ -112,7 +112,7 @@ body{background:#0e1522;color:var(--tx);
 .ong{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;
   padding:.42rem .5rem;border-radius:9px;border:1px solid transparent;
   background:transparent;color:var(--tx-bleute);cursor:pointer}
-.ong:hover:not(.on){background:rgba(255,255,255,.05)}
+.ong:hover:not(.on){background:var(--v05)}
 .ong.on{background:#16202f;border-color:rgba(201,169,126,.45)}
 /* ⚠ MEME L ONGLET OUVERT RESTE EN GRIS. Il etait degrise pour se distinguer —
    mais c est la seule couleur qui restait dans la bande, et la regle est
@@ -126,7 +126,7 @@ body{background:#0e1522;color:var(--tx);
 .ong.on .oe{color:var(--tx2)}
 .ong .oc{flex:0 0 auto;color:var(--tx-or);font-size:.8rem;font-weight:700}
 .panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
-  background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  background:#16202f;border:1px solid var(--v08);border-radius:12px;
   padding:.85rem .95rem}
 .pnt{display:flex;align-items:center;gap:.55rem}
 .pnt .pi{font-size:1rem;filter:grayscale(1) brightness(1.7);opacity:.9}
@@ -134,7 +134,7 @@ body{background:#0e1522;color:var(--tx);
 .panneau .sous{margin:.28rem 0 .7rem;font-size:.74rem;color:var(--tx3);line-height:1.4}
 .onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
 .onglets::-webkit-scrollbar-thumb,.panneau::-webkit-scrollbar-thumb{
-  background:rgba(255,255,255,.12);border-radius:8px}
+  background:var(--v11);border-radius:8px}
 /* ⚠ LES CINQ << ETAPES >> NUMEROTEES ONT DISPARU avec le passage aux onglets
    (3.47.0) : le numero qui devenait une coche vit maintenant SUR l onglet
    (.ong .oc), et l en-tete du groupe est .pnt. Les regles .etape / .eth / .num /
@@ -150,14 +150,14 @@ body{background:#0e1522;color:var(--tx);
 /* ── LE VOLET DE DROITE ────────────────────────────────────────────────────
    Ce qu on va obtenir, toujours visible : le recapitulatif de la commande, puis
    l image. */
-.bloc{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+.bloc{background:#16202f;border:1px solid var(--v08);border-radius:12px;
   padding:.85rem 1rem;min-width:0}
 .recap .rt,.fmt .rt{font:700 .74rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
 .recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:.5rem}
 .recap .jt{font-size:.75rem;padding:.16rem .55rem;border-radius:99px;
   background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:var(--tx-creme)}
-.recap .jt.gris{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);color:var(--tx2)}
+.recap .jt.gris{background:var(--v05);border-color:var(--v16);color:var(--tx2)}
 .recap .note,.fmt .note{margin-top:.55rem;font-size:.73rem;color:var(--tx3);line-height:1.5}
 /* ── FORMATS DE SORTIE (lot 3b) ────────────────────────────────────────────
    La meme image en 3:4, 1:1, 4:5 et 9:16, fabriquee ICI, au canevas de la page.
@@ -168,7 +168,7 @@ body{background:#0e1522;color:var(--tx);
 .loggr{display:grid;grid-template-columns:repeat(auto-fill,minmax(6rem,1fr));gap:.45rem;
   align-content:start;max-height:16rem;overflow-y:auto}
 .loggr::-webkit-scrollbar{width:8px}
-.loggr::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.loggr::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 .logv{background:#0f1724;border:1px solid #2b3444;border-radius:8px;padding:.3rem;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;
   -webkit-user-select:none;user-select:none;transition:border-color .12s,background .12s}
@@ -182,17 +182,17 @@ body{background:#0e1522;color:var(--tx);
 /* Les neuf ancrages, disposes comme ils le seront sur l image. */
 .posgr{display:grid;grid-template-columns:repeat(3,2.3rem);gap:.25rem}
 .posc{padding:0;width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center}
-.posc span{display:block;width:.6rem;height:.6rem;border-radius:2px;background:rgba(255,255,255,.35)}
+.posc span{display:block;width:.6rem;height:.6rem;border-radius:2px;background:var(--v30)}
 .posc.on{border-color:#c9a97e;background:rgba(201,169,126,.16)}
 .posc.on span{background:#c9a97e}
 .fmt .fbar{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-top:.55rem}
 .fmt .fbar .grand{margin-left:auto}
 .fmtg{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.55rem;
   align-content:start;margin-top:.6rem}
-.fmtc{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:.45rem;
+.fmtc{background:#111a29;border:1px solid var(--v08);border-radius:9px;padding:.45rem;
   display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:0}
 .fmtc img{width:100%;height:7.5rem;object-fit:contain;background:#0b1220;border-radius:6px;
-  border:1px solid rgba(255,255,255,.07)}
+  border:1px solid var(--v08)}
 .fmtc .ft{font-size:.82rem;font-weight:700;line-height:1.1}
 .fmtc .fd{font-size:.68rem;color:var(--tx3);font-variant-numeric:tabular-nums}
 .fmtc .fb{display:flex;gap:.25rem;width:100%}
@@ -202,7 +202,7 @@ body{background:#0e1522;color:var(--tx);
 .guide{display:flex;flex-direction:column;gap:.45rem;text-align:left;margin:.7rem auto 0;max-width:24rem}
 .guide .gp{display:flex;align-items:center;gap:.55rem;font-size:.82rem;color:var(--tx3)}
 .guide .gp .n{flex:0 0 auto;width:1.35rem;height:1.35rem;border-radius:50%;
-  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   display:flex;align-items:center;justify-content:center;font:700 .72rem/1 system-ui;color:var(--tx2)}
 .guide .gp.ok{color:var(--tx-bleute)}
 .guide .gp.ok .n{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
@@ -243,7 +243,7 @@ body{background:#0e1522;color:var(--tx);
   align-content:start;
   max-height:calc(100vh - 18rem);min-height:14rem;overflow-y:auto;padding-right:.2rem}
 .phgrille::-webkit-scrollbar{width:8px}
-.phgrille::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.phgrille::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 .phvig{background:#0f1724;border:1px solid #2b3444;border-radius:8px;overflow:hidden;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
 .phvig:hover{border-color:#c9a97e}
@@ -256,17 +256,17 @@ body{background:#0e1522;color:var(--tx);
 /* ── Explorateur : filtres, panier de selection, coches et pastilles ─────── */
 .phfiltres{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-bottom:.45rem}
 .jeton{font:inherit;font-size:.73rem;padding:.16rem .55rem;border-radius:99px;cursor:pointer;
-  color:var(--tx-bleute);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15)}
-.jeton:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+  color:var(--tx-bleute);background:var(--v05);border:1px solid var(--v16)}
+.jeton:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 .jeton:disabled{opacity:.4;cursor:default}
 .jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
 .jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600}
 .phfiltres select{font:inherit;font-size:.73rem;color:var(--tx-bleute);background:#0f1724;
-  border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.14rem .4rem;
+  border:1px solid var(--v16);border-radius:8px;padding:.14rem .4rem;
   width:auto;max-width:15rem;flex:0 1 auto}
 .phsel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;
-  padding:.35rem .5rem;border-radius:9px;background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.08)}
+  padding:.35rem .5rem;border-radius:9px;background:var(--v03);
+  border:1px solid var(--v08)}
 .phsel .cpt{font-size:.76rem;color:var(--tx2)}
 .phsel .cpt.on{color:var(--tx-creme);font-weight:700}
 .phsel .droite{margin-left:auto;display:flex;align-items:center;gap:.4rem}
@@ -274,7 +274,7 @@ body{background:#0e1522;color:var(--tx);
 .phvig{position:relative}
 .phvig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
 .phcoche{position:absolute;top:.2rem;left:.2rem;width:1.05rem;height:1.05rem;z-index:2;
-  border-radius:5px;border:1px solid rgba(255,255,255,.35);background:rgba(8,12,20,.7);
+  border-radius:5px;border:1px solid var(--v30);background:rgba(8,12,20,.7);
   display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#17202c}
 .phvig.pris .phcoche{background:#c9a97e;border-color:#c9a97e;font-weight:700}
 .phpast{position:absolute;top:.2rem;right:.2rem;z-index:2;display:flex;gap:.12rem}
@@ -289,17 +289,17 @@ body{background:#0e1522;color:var(--tx);
 .panier .pt button{margin-left:auto}
 .panier .pv{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
 .panier .pv img{width:2.2rem;height:2.2rem;object-fit:contain;border-radius:5px;background:#0b1220}
-.panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:rgba(255,255,255,.06)}
+.panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:var(--v05)}
 .panier .pv .pl{font-size:.72rem;color:var(--tx2)}
 .panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
 .lots{display:flex;flex-direction:column;gap:.5rem;max-height:calc(100vh - 14rem);overflow-y:auto}
-.lotc{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:.5rem .65rem}
+.lotc{background:#111a29;border:1px solid var(--v08);border-radius:10px;padding:.5rem .65rem}
 .lotc.vif{border-color:#c9a97e}
 .lott{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.35rem}
 .lott strong{font-size:.85rem}
 .lott .dt{font-size:.72rem;color:var(--tx2);margin-left:auto}
-.lotc .jauge{height:.42rem;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.lotc .jauge{height:.42rem;border-radius:99px;background:var(--v11);overflow:hidden}
 .lotc .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
 .lotd{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.35rem;
   font-size:.76rem;color:var(--tx-bleute)}
@@ -316,7 +316,7 @@ body{background:#0e1522;color:var(--tx);
    La tuile est donc une grille : l emoji tient la colonne de gauche sur deux
    rangs, le titre et la description se rangent l un SOUS l autre a droite. */
 .tuiles{display:grid;grid-template-columns:1fr;gap:.4rem}
-.tuile{background:#111a29;border:1px solid rgba(255,255,255,.09);border-radius:10px;
+.tuile{background:#111a29;border:1px solid var(--v08);border-radius:10px;
   padding:.58rem .7rem;cursor:pointer;-webkit-user-select:none;user-select:none;
   display:grid;grid-template-columns:auto 1fr;column-gap:.65rem;row-gap:.08rem;
   align-items:center;text-align:left;transition:border-color .12s,background .12s}
@@ -361,7 +361,7 @@ select:focus{outline:none;border-color:#c9a97e}
 .avgrille{display:flex;flex-direction:column;gap:.7rem;margin-top:.75rem}
 .avgrille>*{margin:0}
 .avsec{margin:.4rem 0 -.15rem;padding-top:.65rem;
-  border-top:1px solid rgba(255,255,255,.08);font:700 .72rem/1.2 system-ui;
+  border-top:1px solid var(--v08);font:700 .72rem/1.2 system-ui;
   text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .avsec.prem{margin-top:0;padding-top:0;border-top:0}
 .aidep{font-size:.71rem;color:var(--tx3);line-height:1.45;margin-top:.22rem}
@@ -377,7 +377,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
 .avlab b{color:var(--tx-or);font-size:.78rem;font-variant-numeric:tabular-nums}
 .avint{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
 .avint img{width:3.4rem;height:3.4rem;object-fit:contain;background:#0b1220;border-radius:7px;
-  border:1px solid rgba(255,255,255,.1)}
+  border:1px solid var(--v11)}
 /* ⚠ flex:0 1 auto, PAS 1 1 : en poussant, le nom occupait toute la largeur de la
    carte et rejetait le bouton << Choisir un fichier >> a l autre bout de l ecran,
    a plus de mille pixels de son libelle. */
@@ -395,7 +395,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
 .cmp{position:relative;display:inline-block;max-width:100%;line-height:0;
   touch-action:none;-webkit-user-select:none;user-select:none;cursor:ew-resize}
 .cmp img{display:block;max-width:100%;max-height:min(56vh,31rem);border-radius:9px;
-  border:1px solid rgba(255,255,255,.1)}
+  border:1px solid var(--v11)}
 /* ⚠ La couche du DESSUS est l APRES, rognee par la GAUCHE : ce qui reste
    visible a gauche est donc l avant, pose dessous. Un fond opaque, sinon un
    detourage transparent laisserait voir la photo d origine au travers — et
@@ -405,7 +405,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
 .cmp .cb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
   max-height:none;border:0;border-radius:9px}
 .cmp .cpg{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;margin-left:-1px;
-  background:rgba(255,255,255,.9);box-shadow:0 0 6px rgba(0,0,0,.6)}
+  background:var(--v90);box-shadow:0 0 6px rgba(0,0,0,.6)}
 .cmp .cpg:focus{outline:none}
 .cmp .cpg:focus-visible .cph{box-shadow:0 0 0 3px rgba(201,169,126,.75)}
 .cmp .cph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -427,19 +427,19 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
   min-height:15rem;text-align:center;color:var(--tx2)}
 .res.garni{flex:0 0 auto;justify-content:flex-start;min-height:0}
 .res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
-  border:1px solid rgba(255,255,255,.1)}
+  border:1px solid var(--v11)}
 .res .filig{margin-top:.5rem;font-size:.74rem;color:var(--tx-jaune)}
 .res .avis{margin-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .res .dims{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
 .res .dl{margin-top:.6rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.55rem;
-  padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
-button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
@@ -456,7 +456,7 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
    JAMAIS rien fait, par aucun des deux chemins (panier ou sélecteur). */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.1rem;z-index:60}
-.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+.voile .boite{background:#16202f;border:1px solid var(--v11);
   border-radius:13px;padding:1rem 1.15rem;max-width:29rem;width:100%;
   max-height:88vh;overflow-y:auto;box-shadow:0 18px 46px rgba(0,0,0,.5)}
 .voile h3{margin:0 0 .5rem;font:700 1.02rem/1.25 Georgia,serif}
@@ -528,7 +528,7 @@ function pageStudio(mode) {
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }

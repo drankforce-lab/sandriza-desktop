@@ -43,24 +43,24 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .onglets{flex:0 0 auto;display:flex;gap:.4rem;padding:.5rem 1.05rem 0;
-  border-bottom:1px solid rgba(255,255,255,.08)}
+  border-bottom:1px solid var(--v08)}
 .onglets button{background:transparent;border:none;border-bottom:2px solid transparent;
   color:var(--tx2);padding:.4rem .7rem;font-weight:600;font-size:.86rem;border-radius:6px 6px 0 0}
-.onglets button:hover{background:rgba(255,255,255,.05);color:var(--tx)}
+.onglets button:hover{background:var(--v05);color:var(--tx)}
 .onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-input,button,select{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.32rem .55rem}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+input,button,select{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
 input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-creme2);font-weight:600;
@@ -74,7 +74,7 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   font-weight:700;margin:0 0 .35rem}
 .radio{display:flex;gap:.5rem;align-items:flex-start;padding:.5rem .6rem;
-  border:1px solid rgba(255,255,255,.14);border-radius:9px;cursor:pointer;
+  border:1px solid var(--v16);border-radius:9px;cursor:pointer;
   -webkit-user-select:none;user-select:none;margin-bottom:.4rem}
 .radio.pris{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 .radio input{margin-top:.2rem;accent-color:#c9a97e;flex:0 0 auto}
@@ -85,10 +85,10 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .case input{margin-top:.15rem;accent-color:#c9a97e;flex:0 0 auto}
 .case .s{font-size:.72rem;color:var(--tx2)}
 .barre{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;
-  padding-top:.9rem;margin-top:.3rem;border-top:1px solid rgba(255,255,255,.08)}
+  padding-top:.9rem;margin-top:.3rem;border-top:1px solid var(--v08)}
 .barre .compte{font-size:.8rem;color:var(--tx2)}
 /* Le dossier des exports : une ligne qui se lit, deux boutons qui la changent. */
-.dossier{margin-top:.8rem;background:#16202f;border:1px solid rgba(255,255,255,.07);
+.dossier{margin-top:.8rem;background:#16202f;border:1px solid var(--v08);
   border-radius:11px;padding:.55rem .7rem}
 .dossier.repli{border-color:rgba(217,119,6,.3)}
 .dossier .dl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
@@ -105,21 +105,21 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.55}
 .avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-or2)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem}
-.tuile{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.tuile{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.5rem .7rem}
 .tuile .k{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .v{font-size:1.1rem;font-weight:800;margin-top:.1rem}
 .tuile .z{font-size:.66rem;color:var(--tx2);margin-top:.05rem}
 .tuile.err .v{color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.26rem .4rem;font-size:.66rem;text-transform:uppercase;
-  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
-tbody td{padding:.3rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:top}
-tbody tr:hover td{background:rgba(255,255,255,.04)}
+  letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
+tbody tr:hover td{background:var(--v03)}
 code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.05rem .5rem;border-radius:99px;font-weight:700}
@@ -129,7 +129,7 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .pill.erreur,.pill.conflit,.pill.echec{background:rgba(220,38,38,.2);color:var(--tx-err2)}
 .pill.fait{background:rgba(22,163,74,.2);color:#86efac}
 .chg{display:inline-block;margin:0 .3rem .22rem 0;padding:.08rem .42rem;border-radius:5px;
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);font-size:.74rem}
+  background:var(--v05);border:1px solid var(--v11);font-size:.74rem}
 .chg .de{color:var(--tx2);text-decoration:line-through}
 .rouge{color:var(--tx-err)}
 .filtres{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.6rem}
@@ -141,13 +141,13 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .centre{width:100%}
 .avancement{max-width:32rem;margin:2.5rem auto;text-align:center}
 .avancement .tourne{width:34px;height:34px;margin:1rem auto 0;border-radius:50%;
-  border:3px solid rgba(255,255,255,.14);border-top-color:#c9a97e;animation:tr 1s linear infinite}
+  border:3px solid var(--v16);border-top-color:#c9a97e;animation:tr 1s linear infinite}
 @keyframes tr{to{transform:rotate(360deg)}}
 /* ── Surcouche de confirmation (structure .voile > .boite reconnue par le socle,
    le bouton de plein ecran s y pose tout seul). ─────────────────────────────── */
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
+.boite{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
   max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif}
 .boite ul{margin:0 0 .7rem;padding-left:1.15rem;line-height:1.85;font-size:.86rem}
@@ -156,9 +156,9 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
 .pied-boite .gauche{margin-right:auto}
 .notif{display:flex;justify-content:space-between;align-items:center;gap:1rem;
-  padding:.4rem 0;border-top:1px solid rgba(255,255,255,.07);font-size:.83rem}
+  padding:.4rem 0;border-top:1px solid var(--v08);font-size:.83rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

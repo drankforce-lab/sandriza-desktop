@@ -33,34 +33,34 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
-input[type=search],select,button,textarea{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.3rem .55rem}
+input[type=search],select,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 input[type=search]{min-width:200px}
 select,button{cursor:pointer}
 input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem}
 
 /* Zone de depot : elle doit se voir SANS chercher — c est la porte principale. */
 .depot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:.3rem;border:2px dashed rgba(255,255,255,.2);
+  justify-content:center;gap:.3rem;border:2px dashed var(--v22);
   border-radius:12px;padding:1.15rem 1rem;text-align:center;color:var(--tx2);
   cursor:pointer;transition:border-color .13s,background .13s}
 .depot:hover{border-color:#c9a97e}
@@ -69,16 +69,16 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 .depot .pt{font-size:.76rem}
 
 .stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 7rem;background:rgba(255,255,255,.04);border-radius:9px;padding:.4rem .6rem}
+.stats .s{flex:1 1 7rem;background:var(--v03);border-radius:9px;padding:.4rem .6rem}
 .stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
 .stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}
+  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v11)}
 tbody tr{cursor:pointer}
-tbody tr:hover td{background:rgba(255,255,255,.04)}
-tbody td{padding:.3rem .4rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
+tbody tr:hover td{background:var(--v03)}
+tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:middle}
 tbody .num{font-weight:700;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vign{width:44px;height:44px;border-radius:7px;overflow:hidden;display:flex;
@@ -110,7 +110,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    la derniere colonne cache justement les boutons d action.
    ══════════════════════════════════════════════════════════════════════════ */
 .voile{position:fixed;top:0;right:0;bottom:0;width:min(27rem,52vw);z-index:50;
-  display:flex;background:#0b1220;border-left:1px solid rgba(255,255,255,.12);
+  display:flex;background:#0b1220;border-left:1px solid var(--v11);
   box-shadow:-16px 0 40px rgba(0,0,0,.45)}
 .boite{background:#0b1220;border:0;border-radius:0;width:100%;
   overflow:auto;padding:.85rem .95rem}
@@ -130,8 +130,8 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
   justify-content:center;margin-bottom:.7rem;overflow:hidden}
 .boite .apercu img{max-width:100%;max-height:24rem;object-fit:contain}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem;
-  padding:.55rem 0;border-top:1px solid rgba(255,255,255,.08);
-  border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:.6rem}
+  padding:.55rem 0;border-top:1px solid var(--v08);
+  border-bottom:1px solid var(--v08);margin-bottom:.6rem}
 .boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600;overflow-wrap:anywhere}
 .jetons{display:flex;flex-wrap:wrap;gap:.3rem;margin:.15rem 0 .6rem}
@@ -141,16 +141,16 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .choix{max-height:17rem;overflow:auto;margin-top:.5rem;display:flex;
   flex-direction:column;gap:.28rem}
 .choix .p{display:flex;align-items:center;gap:.55rem;padding:.3rem .4rem;
-  border:1px solid rgba(255,255,255,.09);border-radius:8px;cursor:pointer}
-.choix .p:hover{border-color:#c9a97e;background:rgba(255,255,255,.04)}
+  border:1px solid var(--v08);border-radius:8px;cursor:pointer}
+.choix .p:hover{border-color:#c9a97e;background:var(--v03)}
 .choix .p img{width:34px;height:34px;object-fit:cover;border-radius:6px;flex:0 0 auto}
 .choix .p .creux{width:34px;height:34px;border-radius:6px;flex:0 0 auto;
-  background:rgba(255,255,255,.06)}
+  background:var(--v05)}
 .choix .p .nm{font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .choix .p .sk{font-size:.7rem;color:var(--tx2)}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 /* Le SUIVI d import : une ligne par fichier, son etat, et ce qui lui arrive.
@@ -162,12 +162,12 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
   border:1px solid rgba(201,169,126,.45);border-radius:11px;
   box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
 .suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
-  border-bottom:1px solid rgba(255,255,255,.08);font:700 .78rem/1.2 system-ui;
+  border-bottom:1px solid var(--v08);font:700 .78rem/1.2 system-ui;
   text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .suivi .st .n{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:0}
 .suivi .lst{flex:1 1 auto;overflow-y:auto;padding:.3rem .5rem .5rem}
 .suivi .lg{display:flex;align-items:center;gap:.5rem;padding:.26rem .3rem;
-  border-top:1px solid rgba(255,255,255,.05);font-size:.76rem}
+  border-top:1px solid var(--v05);font-size:.76rem}
 .suivi .lg:first-child{border-top:0}
 .suivi .lg{flex-wrap:wrap}
 .suivi .lg .nm{flex:1 1 8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -185,12 +185,12 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 .suivi .lg .et.faite{background:rgba(34,197,94,.15);color:var(--tx-ok)}
 .suivi .lg .et.double{background:rgba(234,179,8,.15);color:var(--tx-jaune)}
 .suivi .lg .et.echec{background:rgba(248,113,113,.15);color:var(--tx-err2)}
-.suivi .pd{padding:.45rem .8rem;border-top:1px solid rgba(255,255,255,.08);
+.suivi .pd{padding:.45rem .8rem;border-top:1px solid var(--v08);
   display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:var(--tx2);flex-wrap:wrap}
 .suivi .pd .bt{margin-left:auto;display:flex;gap:.4rem}
 /* La barre de progression : elle avance par TACHE TERMINEE, jamais toute seule.
    Une barre qui glisse pendant qu il ne se passe rien est un mensonge poli. */
-.suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:rgba(255,255,255,.1);
+.suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:var(--v11);
   overflow:hidden;margin:0 0 .1rem}
 .suivi .jauge i{display:block;height:100%;background:linear-gradient(90deg,#c9a97e,#e0c9a6);
   border-radius:99px;transition:width .25s ease}
@@ -207,10 +207,10 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
 /* ── LE CENTRE DE COMMANDE ─────────────────────────────────────────────── */
 .cmd{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
-  padding:.5rem .6rem;background:#16202f;border:1px solid rgba(255,255,255,.07);
+  padding:.5rem .6rem;background:#16202f;border:1px solid var(--v08);
   border-radius:11px}
 .cmd .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
-.cmd .sep{width:1px;height:1.3rem;background:rgba(255,255,255,.12);margin:0 .2rem}
+.cmd .sep{width:1px;height:1.3rem;background:var(--v11);margin:0 .2rem}
 .cmd input[type=search]{min-width:12rem}
 .etat{font-size:.75rem;color:var(--tx2);padding:0 .2rem}
 .etat b{color:var(--tx);font-variant-numeric:tabular-nums}
@@ -229,20 +229,20 @@ table.grille td.num{text-align:right;font-variant-numeric:tabular-nums;white-spa
 .act .ic{width:1.7rem;height:1.7rem;padding:0;font-size:.85rem;line-height:1;
   border-radius:6px;opacity:.55;transition:opacity .12s ease,background .12s ease}
 tr:hover .act .ic{opacity:1}
-.act .ic:hover{background:rgba(255,255,255,.14);opacity:1}
+.act .ic:hover{background:var(--v16);opacity:1}
 .act .ic.sup:hover{background:rgba(248,113,113,.2);border-color:rgba(248,113,113,.5)}
 .act .ic.sup.arme{opacity:1;background:rgba(248,113,113,.25);border-color:#f87171;color:var(--tx-blanc)}
 /* ── L ASSISTANT ───────────────────────────────────────────────────────── */
 .asst{position:fixed;inset:0;background:rgba(6,10,18,.78);z-index:70;display:flex;
   align-items:center;justify-content:center;padding:1rem}
-.asst .bo{background:#141d2c;border:1px solid rgba(255,255,255,.14);border-radius:13px;
+.asst .bo{background:#141d2c;border:1px solid var(--v16);border-radius:13px;
   width:min(62rem,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
 .asst .tt{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;
-  border-bottom:1px solid rgba(255,255,255,.08)}
+  border-bottom:1px solid var(--v08)}
 .asst .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .asst .tt .pas{margin-left:auto;display:flex;gap:.3rem;align-items:center;font-size:.72rem;color:var(--tx2)}
 .asst .tt .pas b{display:inline-flex;width:1.35rem;height:1.35rem;border-radius:50%;
-  align-items:center;justify-content:center;background:rgba(255,255,255,.08);font-size:.7rem}
+  align-items:center;justify-content:center;background:var(--v08);font-size:.7rem}
 .asst .tt .pas b.on{background:#c9a97e;color:#1a1208}
 .asst .co{flex:1 1 auto;min-height:0;overflow-y:auto;padding:.85rem .9rem}
 /* Le choix de la mise en scene : des couples etiquette/valeur, alignes. */
@@ -261,11 +261,11 @@ tr:hover .act .ic{opacity:1}
   border:1px solid rgba(201,169,126,.35);color:var(--tx-creme);border-radius:999px;cursor:pointer}
 .sugg button:hover{background:rgba(201,169,126,.24)}
 .asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
-  padding:.6rem .9rem;border-top:1px solid rgba(255,255,255,.08);background:#0f1725}
+  padding:.6rem .9rem;border-top:1px solid var(--v08);background:#0f1725}
 .asst .pi .dr{margin-left:auto;display:flex;gap:.5rem}
 /* La planche de vignettes : c est l ecran ou l on CHOISIT, il doit montrer. */
 .pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.5rem}
-.pl .v{position:relative;border:2px solid rgba(255,255,255,.1);border-radius:9px;
+.pl .v{position:relative;border:2px solid var(--v11);border-radius:9px;
   overflow:hidden;cursor:pointer;background:#0b1220}
 .pl .v.on{border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.2)}
 /* ⚠⚠ UNE ROTATION CSS NE CHANGE PAS LA BOITE. L image tournait bien, mais son
@@ -292,7 +292,7 @@ tr:hover .act .ic{opacity:1}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pl .v .dt2{padding:0 .4rem .3rem;font-size:.63rem;color:var(--tx2)}
 .pl .v .ck{position:absolute;top:.3rem;left:.3rem;width:1.1rem;height:1.1rem;
-  border-radius:4px;background:rgba(11,18,32,.85);border:1px solid rgba(255,255,255,.3);
+  border-radius:4px;background:rgba(11,18,32,.85);border:1px solid var(--v30);
   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--tx-or)}
 .pl .v.on .ck{background:#c9a97e;color:#1a1208;border-color:#c9a97e}
 /* Le chargement, au centre, avant la planche. */
@@ -308,13 +308,13 @@ tr:hover .act .ic{opacity:1}
 @media (prefers-reduced-motion:reduce){.chargement .tourne{animation:none}}
 .src{display:flex;flex-direction:column;gap:.4rem}
 .src .l{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;cursor:pointer;
-  border:1px solid rgba(255,255,255,.12);border-radius:9px}
-.src .l:hover{background:rgba(255,255,255,.04)}
+  border:1px solid var(--v11);border-radius:9px}
+.src .l:hover{background:var(--v03)}
 .src .l.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 .src .l b{font-size:.9rem}
 .but{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
 .but label{display:flex;gap:.55rem;align-items:flex-start;padding:.5rem .65rem;
-  border:1px solid rgba(255,255,255,.12);border-radius:9px;cursor:pointer;margin:0;color:var(--tx);font-size:.84rem}
+  border:1px solid var(--v11);border-radius:9px;cursor:pointer;margin:0;color:var(--tx);font-size:.84rem}
 .but label.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
 .but label input{width:auto;margin-top:.15rem}
 .but label .d{display:block;font-size:.72rem;color:var(--tx2);margin-top:.1rem}
@@ -1487,7 +1487,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     v.style.cssText = 'position:fixed;inset:0;z-index:120;background:rgba(6,10,18,.72);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.2rem';
     v.innerHTML = '<div style="max-width:30rem;background:#131c2b;'
-      + 'border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:1.1rem 1.2rem;'
+      + 'border:1px solid var(--v11);border-radius:13px;padding:1.1rem 1.2rem;'
       + 'box-shadow:0 18px 50px rgba(0,0,0,.5)">'
       + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-or2)">'
       + 'Des photos ont déjà été facturées</h2>'
@@ -1497,7 +1497,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'entraînera de nouveaux frais.</p>' + liste
       + '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">'
       + '<button id="frais-non" style="font:inherit;color:var(--tx);'
-      + 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);'
+      + 'background:var(--v05);border:1px solid var(--v16);'
       + 'border-radius:8px;padding:.42rem .85rem;cursor:pointer">Annuler</button>'
       + '<button id="frais-oui" style="font:inherit;color:#0e1522;background:#f0d6a0;'
       + 'border:1px solid #f0d6a0;border-radius:8px;padding:.42rem .85rem;cursor:pointer;'
@@ -1531,7 +1531,7 @@ ${JS_ACTIVITE}${JS_DIRE}
                                     : 'Aperçu du retrait de mannequin';
     var cells = items.map(function(it, i){
       return '<figure id="apr-c' + i + '" style="margin:0;background:#0e1522;'
-        + 'border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden;'
+        + 'border:1px solid var(--v08);border-radius:10px;overflow:hidden;'
         + 'display:flex;flex-direction:column">'
         + '<div class="apr-img" style="aspect-ratio:3/4;display:flex;align-items:center;'
         + 'justify-content:center;background:' + APR_CHECKER + ';color:var(--tx2);'
@@ -1548,7 +1548,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<h2 style="margin:0;font:700 1rem/1.2 Georgia,serif;color:var(--tx-or2)">' + esc(titre) + '</h2>'
       + '<span style="font-size:.74rem;color:var(--tx2)">gratuit · filigrané · aucun crédit réel</span>'
       + '<button id="apr-x" style="margin-left:auto;font:inherit;color:var(--tx);'
-      + 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);'
+      + 'background:var(--v05);border:1px solid var(--v16);'
       + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">Fermer</button></div>'
       // ⚠ auto-FIT + justify-content:center : une seule photo s'affiche GRANDE et
       // CENTRÉE (auto-fill la collait en haut à gauche, minuscule) ; un lot reste
@@ -2849,7 +2849,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }

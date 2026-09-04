@@ -33,27 +33,27 @@ html,body{margin:0;height:100%}
 body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
-  border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
+  border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 .entete{display:flex;justify-content:space-between;align-items:center;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
-.b{font:inherit;font-size:.8rem;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.42rem .8rem;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer}
-.b:hover:not(:disabled){background:rgba(255,255,255,.09)}
+.b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
+.b:hover:not(:disabled){background:var(--v08)}
 .b:disabled{opacity:.45;cursor:default}
 .b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover:not(:disabled){background:rgba(248,113,113,.16)}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .recherche{flex:1 1 15rem;max-width:24rem;background:#0f1724;border:1px solid #2b3444;border-radius:8px;
   color:var(--tx);font:inherit;padding:.45rem .7rem}
 .recherche:focus{outline:none;border-color:#c9a97e}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:0 0 1.2rem}
 @media(max-width:700px){.stat-grid{grid-template-columns:1fr}}
-.stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem 1.1rem}
+.stat{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1rem 1.1rem}
 .stat .l{font-size:.74rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em}
 .stat .v{font:700 1.7rem/1.1 Georgia,serif;margin-top:.25rem}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
@@ -70,7 +70,7 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
    colonne par colonne. La fiche laisse respirer l'essentiel et met les actions
    à portée sans les entasser au bout d'une rangée. */
 .fiches{display:grid;grid-template-columns:repeat(auto-fill,minmax(24rem,1fr));gap:.8rem}
-.fiche{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:13px;
+.fiche{background:var(--v03);border:1px solid var(--v08);border-radius:13px;
   padding:.9rem 1rem;display:flex;flex-direction:column;gap:.65rem;transition:border-color .13s}
 .fiche:hover{border-color:rgba(201,169,126,.45)}
 .fiche.inactif{opacity:.72}
@@ -83,27 +83,27 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
 .fiche .coord{font-size:.75rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fiche .etats{display:flex;gap:.32rem;flex-wrap:wrap;align-items:center}
 .fiche .quand{font-size:.74rem;color:var(--tx-gris)}
-.fiche .barre{display:flex;gap:.35rem;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.07);padding-top:.65rem;margin-top:auto}
+.fiche .barre{display:flex;gap:.35rem;flex-wrap:wrap;border-top:1px solid var(--v08);padding-top:.65rem;margin-top:auto}
 .fiche .barre .b{font-size:.76rem;padding:.3rem .62rem}
 .vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem;line-height:1.7}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 /* ── Éditeur de compte (surcouche) ───────────────────────────────── */
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:60;padding:1.4rem}
-.sur .boite{background:#131c2b;border:1px solid rgba(255,255,255,.12);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
-.sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.sur .boite{background:#131c2b;border:1px solid var(--v11);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+.sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid var(--v08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
 .sur .liste::-webkit-scrollbar{width:8px}
-.sur .liste::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.sur .liste::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 /* ── LES ONGLETS DE L'ÉDITEUR (sa demande, 2026-08-14) ────────────────────
    Créer un accès, ce sont QUATRE questions distinctes — qui est cette
    personne, avec quel accès, quelles réponses de secours, quels droits — et
    les empiler sur une même colonne obligeait à faire défiler un formulaire
    pour trouver la case cherchée. Chacune a maintenant son onglet, et l'onglet
    courant se voit d'un coup d'œil. */
-.ongEd{display:flex;gap:.15rem;flex-wrap:wrap;padding:0 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.ongEd{display:flex;gap:.15rem;flex-wrap:wrap;padding:0 1.1rem;border-bottom:1px solid var(--v08)}
 .ongEd button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;
   color:var(--tx2);padding:.55rem .9rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .ongEd button:hover{color:var(--tx)}
@@ -122,7 +122,7 @@ input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;cursor:pointer;margin:0 0 .55rem;line-height:1.45}
 label.case input{width:16px;height:16px;accent-color:#c9a97e;margin-top:.15rem;flex:0 0 auto}
 label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
-.note{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.8rem .95rem;font-size:.81rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
+.note{background:var(--v03);border:1px solid var(--v11);border-radius:9px;padding:.8rem .95rem;font-size:.81rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
 .note b{color:var(--tx)}
 .ferr{display:none;color:var(--tx-err2);font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:0 0 .8rem}
 .permtb{width:100%;border-collapse:collapse}
@@ -130,8 +130,8 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
 .permtb th.mod{text-align:left}
 .permtb td{padding:.24rem .5rem;text-align:center;font-size:.8rem}
 .permtb td.mod{text-align:left;white-space:nowrap}
-.permtb tr.grp td{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);background:rgba(255,255,255,.03);padding:.5rem .5rem .3rem;border-top:1px solid rgba(255,255,255,.1);text-align:left}
-.permtb tbody tr:not(.grp):hover{background:rgba(255,255,255,.03)}
+.permtb tr.grp td{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);background:var(--v03);padding:.5rem .5rem .3rem;border-top:1px solid var(--v11);text-align:left}
+.permtb tbody tr:not(.grp):hover{background:var(--v03)}
 .permtb input{accent-color:#c9a97e}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -374,7 +374,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="vol'+(ONGED==='questions'?' on':'')+'" data-vol="questions">'+volQuestions+'</div>'
       + '<div class="vol'+(ONGED==='perms'?' on':'')+'" data-vol="perms">'+volPerms+'</div>'
       + '</div>'
-      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
+      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
       + '<button class="b" id="u-annuler">Annuler</button>'
       + '<button class="prim" id="u-enr">'+(nouv?'Créer le compte':'Enregistrer')+'</button></div></div>';
     document.body.appendChild(sur);
@@ -470,7 +470,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:var(--tx-ok2)">✅ Authentification à deux facteurs activée pour ce compte.</div>'
       + '<label class="case"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><b>Exempter ce compte</b><span class="quoi">Connexion autorisée sans code — un rempart en moins.</span></span></label>'
       + '</div>'
-      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
+      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
       + '<button class="b" id="m-annuler">Annuler</button><button class="b dgr" id="m-off">Désactiver MFA</button><button class="prim" id="m-save">Enregistrer</button></div></div>';
     document.body.appendChild(sur);
     document.getElementById('m-x').onclick=fermerMfa;
@@ -494,7 +494,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="ferr" id="m-err"></div>'
       + '<label class="case"><input type="checkbox" id="m-exempt" '+(s.mfaExempt?'checked':'')+'> <span>Exempter ce compte<span class="quoi">Activer sans l’exiger à la connexion.</span></span></label>'
       + '</div>'
-      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid rgba(255,255,255,.08)">'
+      + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
       + '<button class="b" id="m-annuler">Annuler</button><button class="prim" id="m-activer">✓ Activer MFA</button></div></div>';
     document.body.appendChild(sur);
     document.getElementById('m-x').onclick=fermerMfa;

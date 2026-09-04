@@ -27,7 +27,7 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .cpt{font-size:.73rem;color:var(--tx2);margin-left:auto}
 /* ⚠ LE BANDEAU DE LECTURE SEULE VIT HORS DE LA GRILLE (voir marque.js) :
@@ -49,8 +49,8 @@ body{background:#0e1522;color:var(--tx);
    defaut, et les contenus restent en haut de leur carte. */
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -68,7 +68,7 @@ body{background:#0e1522;color:var(--tx);
 .pose{display:grid;grid-template-columns:7rem 1fr;gap:1rem;align-items:start}
 @media (max-width:620px){.pose{grid-template-columns:1fr}}
 .vig{height:7rem;border-radius:10px;background:#f5f2ec;display:flex;align-items:center;
-  justify-content:center;padding:.6rem;overflow:hidden;border:1px dashed rgba(255,255,255,.18);
+  justify-content:center;padding:.6rem;overflow:hidden;border:1px dashed var(--v16);
   cursor:pointer;-webkit-user-select:none;user-select:none}
 .vig.fige{cursor:default}
 .vig img{max-width:100%;max-height:100%;object-fit:contain;display:block}
@@ -76,7 +76,7 @@ body{background:#0e1522;color:var(--tx);
 /* La liste des icones. */
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.7rem}
 .ico{display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem;align-items:center;min-width:0;
-  border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.6rem .7rem;background:#111a29}
+  border:1px solid var(--v08);border-radius:10px;padding:.6rem .7rem;background:#111a29}
 .ico .im{width:3.4rem;height:3.4rem;border-radius:8px;background:#f5f2ec;display:flex;
   align-items:center;justify-content:center;padding:.3rem;overflow:hidden}
 .ico .im img{max-width:100%;max-height:100%;object-fit:contain;display:block}
@@ -87,13 +87,13 @@ code{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;color:#cfe0f5;
   cursor:pointer;-webkit-user-select:none;user-select:none}
 code:hover{border-color:#c9a97e}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
-button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
@@ -129,7 +129,7 @@ function pageIcones() {
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }

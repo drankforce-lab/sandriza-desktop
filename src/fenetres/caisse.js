@@ -42,7 +42,7 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:.6rem}
 
@@ -79,7 +79,7 @@ body{background:#0e1522;color:var(--tx);
      contenu les etirerait et le trou reviendrait, ailleurs. */
   justify-content:flex-start}
 .defile::-webkit-scrollbar{width:8px}
-.defile::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.defile::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 
 /* Sous 1000 px on repasse en UNE colonne et on autorise le defilement general :
    ecraser un champ de montant est plus risque que faire defiler. */
@@ -93,7 +93,7 @@ body{background:#0e1522;color:var(--tx);
    colonne de droite. Chaque carte y perdait une dizaine de pixels en remplissage et
    les textes d aide en prenaient deux ou trois lignes — cumule, cela depassait la
    hauteur d un ecran. Compacte, mais rien n a ete retire. */
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto;min-height:0}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 .carte h2{margin:0 0 .4rem;font-size:.71rem;text-transform:uppercase;
@@ -106,7 +106,7 @@ input.manque{border-color:#f87171}
 .carte h2 .lie{color:var(--tx-ok);font-size:.68rem;margin-left:.4rem}
 
 input,select{font:inherit;color:var(--tx);background:#0f1826;
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input[type=checkbox]{width:auto}
@@ -121,9 +121,9 @@ input[type=checkbox]{width:auto}
 
 /* Resultats de recherche : hauteur bornee. Huit articles et leurs variantes
    repousseraient les totaux hors de l ecran. */
-.res{margin-top:.55rem;border:1px solid rgba(255,255,255,.1);border-radius:9px;
+.res{margin-top:.55rem;border:1px solid var(--v11);border-radius:9px;
   max-height:32vh;overflow-y:auto}
-.res .art{padding:.5rem .65rem;border-top:1px solid rgba(255,255,255,.06)}
+.res .art{padding:.5rem .65rem;border-top:1px solid var(--v05)}
 .res .art:first-child{border-top:0}
 .res .nom{font-weight:600;font-size:.87rem}
 .res .code{font-family:ui-monospace,monospace;font-size:.73rem;opacity:.55;margin-left:.35rem}
@@ -138,7 +138,7 @@ thead th{position:sticky;top:0;background:#1b2635;text-align:left;
   padding:.35rem .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
-tbody td{padding:.3rem .5rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
+tbody td{padding:.3rem .5rem;border-top:1px solid var(--v05);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
 tbody .det{font-size:.74rem;color:var(--tx2)}
@@ -150,13 +150,13 @@ tbody button{padding:.05rem .42rem;font-size:.9rem;line-height:1.3}
 /* Totaux : la ligne du total ne peut pas se confondre avec une taxe. */
 .tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.12rem 0;font-size:.86rem}
 .tot .l.grand{margin-top:.28rem;padding-top:.35rem;
-  border-top:1px solid rgba(255,255,255,.14);font-size:1.12rem;font-weight:700}
+  border-top:1px solid var(--v16);font-size:1.12rem;font-weight:700}
 .tot .l.bon{color:var(--tx-ok)}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
@@ -164,18 +164,18 @@ button.large{width:100%;padding:.5rem .8rem;font-size:1rem;margin-top:.4rem}
 button.mini{padding:.16rem .45rem;font-size:.75rem}
 
 .cli{padding:.38rem .6rem;cursor:pointer;font-size:.84rem;
-  border-top:1px solid rgba(255,255,255,.06)}
+  border-top:1px solid var(--v05)}
 .cli:first-child{border-top:0}
-.cli:hover{background:rgba(255,255,255,.05)}
+.cli:hover{background:var(--v05)}
 .cli .m{color:var(--tx2);font-size:.77rem}
-.liste-cli{margin-top:.4rem;border:1px solid rgba(255,255,255,.1);border-radius:9px;overflow:hidden}
+.liste-cli{margin-top:.4rem;border:1px solid var(--v11);border-radius:9px;overflow:hidden}
 
 .case{display:flex;align-items:flex-start;gap:.45rem;margin-top:.4rem;
   font-size:.78rem;cursor:pointer}
 .case .exp{display:block;color:var(--tx3);font-size:.72rem;line-height:1.45}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
@@ -189,11 +189,11 @@ button.mini{padding:.16rem .45rem;font-size:.75rem}
    dialogue du systeme se serait ouverte derriere, comme le decompte d inactivite. */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+.voile .boite{background:#16202f;border:1px solid var(--v11);
   border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%}
 .voile h3{margin:0 0 .6rem;font:700 1.06rem/1.25 Georgia,serif}
 .voile .rangee{display:flex;justify-content:space-between;gap:1rem;
-  padding:.26rem 0;font-size:.86rem;border-top:1px solid rgba(255,255,255,.06)}
+  padding:.26rem 0;font-size:.86rem;border-top:1px solid var(--v05)}
 .voile .rangee:first-of-type{border-top:0}
 .voile .fin{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 .voile .lien{display:flex;gap:.4rem;margin-top:.55rem}

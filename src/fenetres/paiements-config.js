@@ -30,7 +30,7 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .env{font-size:.72rem;margin-left:auto;border-radius:99px;padding:.12rem .6rem;font-weight:700}
 .tete .env.prod{background:rgba(248,113,113,.16);color:var(--tx-err2);border:1px solid rgba(248,113,113,.45)}
@@ -41,13 +41,13 @@ body{background:#0e1522;color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 /* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10,
    capture a l appui). Avec << align-items:start >>, chacune prenait sa hauteur
    naturelle et la rangee finissait en escalier. On laisse donc l etirement par
    defaut, et les contenus restent en haut de leur carte. */
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
@@ -74,7 +74,7 @@ body{background:#0e1522;color:var(--tx);
 .jeton b{color:var(--tx-ok)}
 .jeton.non b{color:var(--tx-jaune)}
 .tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.6rem}
-.tarif{background:#111a29;border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.55rem .7rem}
+.tarif{background:#111a29;border:1px solid var(--v08);border-radius:9px;padding:.55rem .7rem}
 .tarif .t{font-size:.76rem;font-weight:700}
 .tarif .r{font-size:.95rem;font-weight:700;color:var(--tx-or);margin:.1rem 0}
 .tarif .n{font-size:.7rem;color:var(--tx3)}
@@ -83,13 +83,13 @@ body{background:#0e1522;color:var(--tx);
 .res .id{font-family:ui-monospace,Consolas,monospace;font-size:.74rem;color:var(--tx2)}
 .gestes{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
-button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
@@ -125,7 +125,7 @@ function pagePaiementsConfig() {
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }

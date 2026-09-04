@@ -26,17 +26,17 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .droite{margin-left:auto}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 /* ⚠ ANCRÉE = PLEINE PAGE : cartes en colonnes pour remplir la largeur. */
 .zone{columns:36rem;column-gap:1.1rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .carte.edit{border-color:#c9a97e}
 .stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
@@ -78,25 +78,25 @@ body{background:#0e1522;color:var(--tx);
 .swatch .b2{width:11px;height:11px;border-radius:3px}
 .swatch .lb{font-size:.68rem;color:var(--tx2)}
 .tbl{width:100%;border-collapse:collapse;font-size:.8rem}
-.tbl th{text-align:left;color:var(--tx2);font-weight:600;padding:.45rem .6rem;border-bottom:1px solid rgba(255,255,255,.1);font-size:.72rem;text-transform:uppercase}
-.tbl td{padding:.4rem .6rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+.tbl th{text-align:left;color:var(--tx2);font-weight:600;padding:.45rem .6rem;border-bottom:1px solid var(--v11);font-size:.72rem;text-transform:uppercase}
+.tbl td{padding:.4rem .6rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 .tbl td .mod{color:var(--tx2)}
 .tbl select{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:#0e1522;border:1px solid #2b3444;border-radius:7px;padding:.3rem .4rem}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
-button.b{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);
+button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);
   border-radius:8px;padding:.34rem .7rem;cursor:pointer;font-size:.78rem}
-button.b:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button.b:hover:not(:disabled){background:var(--v11)}
 button.b:disabled{opacity:.5;cursor:default}
 button.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.4)}
 button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;border-radius:8px;padding:.42rem .9rem;cursor:pointer;font-size:.82rem}
 button.prim:hover:not(:disabled){background:#d8bd97}
 button.prim:disabled{opacity:.5;cursor:default}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid rgba(255,255,255,.16);
-  border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.mini:hover:not(:disabled){background:rgba(255,255,255,.1)}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid var(--v16);
+  border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
+.mini:hover:not(:disabled){background:var(--v11)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 `;
 

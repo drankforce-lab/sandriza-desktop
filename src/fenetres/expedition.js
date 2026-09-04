@@ -39,30 +39,30 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.6rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.65rem .8rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
 input,select{font:inherit;color:var(--tx);background:#0f1826;
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.34rem .5rem;
+  border:1px solid var(--v16);border-radius:8px;padding:.34rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.34rem .75rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
@@ -90,20 +90,20 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 /* Le pas-a-pas : cree, imprime, expedie. Il dit ce qui est FAIT. */
 .pas{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.5rem}
 .pas span{font-size:.72rem;padding:.16rem .5rem;border-radius:99px;
-  border:1px solid rgba(255,255,255,.14);color:var(--tx2)}
+  border:1px solid var(--v16);color:var(--tx2)}
 .pas span.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .pas span.on{border-color:#c9a97e;color:var(--tx-creme);background:rgba(201,169,126,.14)}
 
 .lignes{display:flex;flex-direction:column;gap:.28rem}
 .lg{display:flex;align-items:center;gap:.6rem;padding:.28rem .4rem;border-radius:7px;
-  cursor:pointer;font-size:.85rem;border-top:1px solid rgba(255,255,255,.05)}
+  cursor:pointer;font-size:.85rem;border-top:1px solid var(--v05)}
 .lg:first-child{border-top:0}
-.lg:hover{background:rgba(255,255,255,.055)}
+.lg:hover{background:var(--v05)}
 .lg .principal{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lg .fin{flex:0 0 auto;font-size:.78rem;color:var(--tx2);white-space:nowrap}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
@@ -113,7 +113,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+.voile .boite{background:#16202f;border:1px solid var(--v11);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:34rem;width:100%;
   max-height:80vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
@@ -425,7 +425,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       voile('<h3><span class="ic">👁</span> Étiquette — ' + esc(CMD.commande.numero) + '</h3>'
         + '<p>Suivi : <strong>' + esc(CMD.commande.suivi || '—') + '</strong></p>'
         + '<iframe src="data:application/pdf;base64,' + r.pdf + '" '
-        + 'style="width:100%;height:52vh;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:#3c3c3c"></iframe>'
+        + 'style="width:100%;height:52vh;border:1px solid var(--v16);border-radius:8px;background:#3c3c3c"></iframe>'
         + '<div class="fin2"><button id="v-non">Fermer</button>'
         + '<button class="prim" id="v-oui"><span class="ic">🖨</span> Imprimer</button></div>',
         function(fermer){

@@ -30,18 +30,18 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.75rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.75rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{margin-left:auto;font-size:.74rem;color:var(--tx2)}
 .corps{flex:1 1 auto;overflow-y:auto;padding:1.1rem}
 .corps::-webkit-scrollbar{width:9px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.13);border-radius:9px}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.corps::-webkit-scrollbar-thumb{background:var(--v16);border-radius:9px}
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.95rem 1.05rem;margin-bottom:.85rem}
 .carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .lg{display:flex;gap:.9rem;align-items:baseline;padding:.34rem 0;
-  border-top:1px solid rgba(255,255,255,.055)}
+  border-top:1px solid var(--v05)}
 .lg:first-of-type{border-top:0}
 .lg .k{flex:0 0 10.5rem;font-size:.75rem;color:var(--tx2)}
 .lg .v{flex:1 1 auto;min-width:0;word-break:break-word}
@@ -49,7 +49,7 @@ body{background:#0e1522;color:var(--tx);
   font-size:.7rem;font-weight:600;border:1px solid currentColor}
 .ok{color:var(--tx-ok)}.att{color:var(--tx-att)}.non{color:var(--tx-err)}.gris{color:var(--tx2)}
 .svc{display:flex;align-items:center;gap:.9rem;padding:.7rem 0;
-  border-top:1px solid rgba(255,255,255,.055)}
+  border-top:1px solid var(--v05)}
 .svc:first-of-type{border-top:0}
 .svc .d{flex:1 1 auto;min-width:0}
 .svc .n{font-weight:600;font-size:.95rem}
@@ -57,20 +57,20 @@ body{background:#0e1522;color:var(--tx);
 /* La liste deroulante EST le controle : elle prend la largeur, comme un champ de
    formulaire, et non la taille d un bouton perdu au bout de la ligne. */
 .svc .d select{width:100%;max-width:34rem;margin-top:.35rem;font:inherit;
-  color:var(--tx);background:#0f1826;border:1px solid rgba(255,255,255,.16);
+  color:var(--tx);background:#0f1826;border:1px solid var(--v16);
   border-radius:8px;padding:.4rem .55rem}
 .svc .d select:focus{outline:none;border-color:#c9a97e}
 .svc .d select:disabled{opacity:.5}
 .svc .a{flex:0 0 auto;display:flex;gap:.4rem;align-self:flex-end}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.45;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.65rem 1.1rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.65rem 1.1rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.8rem;color:var(--tx2);min-height:1.2em}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}
@@ -131,7 +131,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     corps.innerHTML = '<div class="vide"><div class="gros">' + esc(titre) + '</div>'
       + '<div style="font-size:.82rem;margin-bottom:.6rem">Ce que la fenêtre a pu faire, étape par étape :</div>'
       + '<pre id="diag" style="text-align:left;white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;'
-      + 'background:#0b1220;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem .8rem;'
+      + 'background:#0b1220;border:1px solid var(--v11);border-radius:8px;padding:.7rem .8rem;'
       + 'max-width:52rem;color:var(--tx-bleute)">' + esc(JOURNAL.join(SAUT)) + '</pre></div>';
   }
   // ⚠ UNE ERREUR NON RATTRAPEE NE DOIT PLUS ETRE INVISIBLE. Sans ces deux

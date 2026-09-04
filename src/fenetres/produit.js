@@ -37,10 +37,10 @@ const CSS_PROPRE = `
 .jetons{display:flex;flex-wrap:wrap;gap:.35rem;align-content:flex-start;
   flex:1 1 auto;min-height:0;overflow:hidden}
 .jeton{display:inline-flex;align-items:center;gap:.32rem;padding:.2rem .55rem;
-  border:1px solid rgba(255,255,255,.16);border-radius:99px;font-size:.82rem;
+  border:1px solid var(--v16);border-radius:99px;font-size:.82rem;
   cursor:pointer;user-select:none;height:1.75rem}
 .jeton.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:var(--tx-creme)}
-.jeton .pt{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.3);flex:0 0 auto}
+.jeton .pt{width:10px;height:10px;border-radius:50%;border:1px solid var(--v30);flex:0 0 auto}
 .photo{display:flex;gap:.85rem;align-items:flex-start}
 /* ── LA LIGNE UNIQUE DES PHOTOS (fusion demandee le 2026-08-08) ──
    Principale et secondaires cote a cote ; la principale se reconnait a son
@@ -62,61 +62,61 @@ const CSS_PROPRE = `
 .lgd-principale{font-size:.68rem;color:var(--tx-or);text-align:center;margin-top:.22rem;
   font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 #p-vues .vue .cadre{width:100%;height:160px}
-#p-vues .cadre.pleine{border-style:dashed;border-color:rgba(255,255,255,.4)}
+#p-vues .cadre.pleine{border-style:dashed;border-color:var(--v45)}
 .cadre.survol,.vign.survol{outline:3px solid #4ade80;outline-offset:2px}
 .mini-decor{display:block;width:100%;margin-top:.3rem;font-size:.72rem;
-  padding:.14rem .3rem;border-radius:7px;border:1px solid rgba(255,255,255,.16);
-  background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer}
+  padding:.14rem .3rem;border-radius:7px;border:1px solid var(--v16);
+  background:var(--v05);color:var(--tx);cursor:pointer}
 .mini-decor:hover:not(:disabled){border-color:#c9a97e}
 .mini-decor:disabled{opacity:.35;cursor:default}
 .fonds{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
 .fonds button{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;
-  padding:.2rem .5rem;border-radius:99px;border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer}
+  padding:.2rem .5rem;border-radius:99px;border:1px solid var(--v16);
+  background:var(--v05);color:var(--tx);cursor:pointer}
 .fonds button.on{border-color:#c9a97e;background:rgba(201,169,126,.18);color:var(--tx-creme)}
 .fonds .past{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.3);flex:0 0 auto}
 .modeles{display:flex;gap:.45rem;flex-wrap:wrap;margin:.4rem 0}
 .modeles .md{width:64px;cursor:pointer;text-align:center}
 .modeles .md .cd{height:84px;border-radius:7px;overflow:hidden;
-  border:2px solid rgba(255,255,255,.16)}
+  border:2px solid var(--v16)}
 .modeles .md.on .cd{border-color:#c9a97e}
 .modeles .md img{width:100%;height:100%;object-fit:cover;display:block}
 .modeles .md .nm{font-size:.62rem;color:var(--tx2);white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;margin-top:.1rem}
 [draggable=true]{cursor:grab}
 .photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
-  border:1px dashed rgba(255,255,255,.18);display:flex;align-items:center;
+  border:1px dashed var(--v16);display:flex;align-items:center;
   justify-content:center;color:var(--tx2);font-size:.75rem;overflow:hidden;text-align:center;
   cursor:pointer;background:#0f1826}
 .photo .vign:hover{border-color:#c9a97e}
-.photo .vign.pleine{border-style:solid;border-color:rgba(255,255,255,.22)}
+.photo .vign.pleine{border-style:solid;border-color:var(--v22)}
 .photo .vign img{width:100%;height:100%;object-fit:cover}
 .photo .cmd{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.45rem}
 #p-coul-sug{position:absolute;top:100%;left:0;right:5.5rem;z-index:40;margin-top:2px;
-  background:#16202f;border:1px solid rgba(255,255,255,.14);border-radius:9px;
+  background:#16202f;border:1px solid var(--v16);border-radius:9px;
   box-shadow:0 10px 28px rgba(0,0,0,.45);max-height:230px;overflow-y:auto;display:none}
 #p-coul-sug.on{display:block}
 #p-coul-sug .s{display:flex;align-items:center;gap:.5rem;padding:.3rem .55rem;cursor:pointer;font-size:.85rem}
 #p-coul-sug .s:hover,#p-coul-sug .s.vis{background:rgba(201,169,126,.16)}
 #p-coul-sug .s .pt{width:16px;height:16px;border-radius:50%;flex:0 0 auto;
-  border:1px solid rgba(255,255,255,.25)}
+  border:1px solid var(--v22)}
 #p-coul-sug .s .deja{margin-left:auto;font-size:.72rem;color:var(--tx2);flex:0 0 auto}
 .jeton .x{margin-left:.15rem;opacity:.55}
 .jeton:hover .x{opacity:1}
 .vues{display:flex;flex-wrap:wrap;gap:.5rem;align-content:flex-start;overflow:hidden}
 .vue{position:relative;width:88px;flex:0 0 auto}
-.vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed rgba(255,255,255,.18);
+.vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed var(--v16);
   display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
   background:#0f1826;color:var(--tx2);font-size:.68rem;text-align:center;padding:.2rem}
 .vue .cadre:hover{border-color:#c9a97e}
-.vue .cadre.pleine{border-style:solid;border-color:rgba(255,255,255,.22)}
+.vue .cadre.pleine{border-style:solid;border-color:var(--v22)}
 .vue img{width:100%;height:100%;object-fit:cover}
 .vue .lgd{font-size:.68rem;color:var(--tx2);text-align:center;margin-top:.18rem;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x,.vign .x{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;
   border-radius:50%;font-size:.78rem;line-height:1;font-weight:700;
-  background:rgba(200,40,40,.94);border:1px solid rgba(255,255,255,.28);color:var(--tx-blanc)}
-.vue .x:hover,.vign .x:hover{background:#e04141;border-color:rgba(255,255,255,.5)}
+  background:rgba(200,40,40,.94);border:1px solid var(--v30);color:var(--tx-blanc)}
+.vue .x:hover,.vign .x:hover{background:#e04141;border-color:var(--v45)}
 /* ⚠ CINQ CADRES, UNE SEULE LIGNE, A TOUTE LARGEUR DE FENETRE. Une largeur fixe
    ne peut pas tenir les deux promesses a la fois : assez grande sur une fenetre
    large, elle passe a deux lignes des qu on la reduit — or le nombre de photos
@@ -146,8 +146,8 @@ const CSS_PROPRE = `
    il en manque, sans avoir a faire la soustraction soi-meme. */
 .lgstk .al{flex:0 0 auto;font-size:.86rem;line-height:1;cursor:help;color:var(--tx-att)}
 .lgstk.entete{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
-  border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
-.lgstk:not(.entete):hover{background:rgba(255,255,255,.04)}
+  border-bottom:1px solid var(--v11);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
+.lgstk:not(.entete):hover{background:var(--v03)}
 /* ⚠ UNE LIGNE QUI PORTE DU STOCK SE VOIT, comme dans le tableau d inventaire du
    site : on balaie la liste et l on sait ou il y a de la marchandise sans lire
    les chiffres un par un. Le site teinte a 6 % sur un fond CLAIR ; sur ce fond
@@ -164,7 +164,7 @@ const CSS_PROPRE = `
 .lgstk select.manque{border-color:#f87171}
 .theque{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;
   max-height:46vh;overflow-y:auto;padding-right:.2rem}
-.theque .ph{cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.12);
+.theque .ph{cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid var(--v11);
   background:#0f1826}
 .theque .ph:hover{border-color:#c9a97e}
 .theque .ph img{width:100%;height:88px;object-fit:cover;display:block}
@@ -179,7 +179,7 @@ const CSS_PROPRE = `
 .avis.on{display:block}
 .voile{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
   background:rgba(8,12,18,.6);padding:1.2rem}
-.voile .boite{width:100%;max-width:460px;background:#16202f;border:1px solid rgba(255,255,255,.1);
+.voile .boite{width:100%;max-width:460px;background:#16202f;border:1px solid var(--v11);
   border-radius:12px;padding:1rem 1.1rem;box-shadow:0 24px 64px rgba(0,0,0,.5)}
 .voile h3{margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-err2)}
 .voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:var(--tx-bleute)}
@@ -201,8 +201,8 @@ const CSS_PROPRE = `
 .paire select{flex:0 0 5rem}
 .stk{width:100%;border-collapse:collapse}
 .stk th{font-size:.69rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
-  text-align:left;padding:.22rem .35rem;border-bottom:1px solid rgba(255,255,255,.1)}
-.stk td{padding:.14rem .35rem;border-bottom:1px solid rgba(255,255,255,.05)}
+  text-align:left;padding:.22rem .35rem;border-bottom:1px solid var(--v11)}
+.stk td{padding:.14rem .35rem;border-bottom:1px solid var(--v05)}
 .stk input,.stk select{padding:.18rem .35rem;font-size:.83rem}
 .stk .q{width:5rem}
 .bascules{display:flex;flex-direction:column;gap:.45rem}
@@ -218,8 +218,8 @@ const CSS_PROPRE = `
 .jrn .sec{display:flex;align-items:center;gap:.4rem;margin:.5rem 0 .5rem}
 .jrn .sec .t{font-size:.66rem;font-weight:800;letter-spacing:.06em;
   text-transform:uppercase;color:var(--tx-or);flex:0 0 auto}
-.jrn .sec .tr{flex:1 1 auto;height:1px;background:rgba(255,255,255,.12)}
-.jrn .bl{padding:.5rem .6rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;
+.jrn .sec .tr{flex:1 1 auto;height:1px;background:var(--v11)}
+.jrn .bl{padding:.5rem .6rem;border:1px solid var(--v11);border-radius:8px;
   background:#0f1826;margin-bottom:.45rem}
 .jrn .bl.cliq{cursor:pointer;user-select:none}
 .jrn .bl.cliq:hover{border-color:rgba(201,169,126,.45)}
@@ -231,10 +231,10 @@ const CSS_PROPRE = `
 .jrn .dif .ap{color:var(--tx);font-weight:600;word-break:break-word}
 .jrn .qd{display:flex;justify-content:space-between;align-items:center;gap:.4rem;
   font-size:.68rem;color:var(--tx2);margin-bottom:.35rem}
-.jrn .qui{margin-top:.45rem;padding-top:.4rem;border-top:1px dashed rgba(255,255,255,.14);
+.jrn .qui{margin-top:.45rem;padding-top:.4rem;border-top:1px dashed var(--v16);
   font-size:.72rem;color:var(--tx2);line-height:1.5}
 .jrn .an{font-size:.72rem;font-weight:800;letter-spacing:.06em;color:var(--tx-or);
-  text-transform:uppercase;margin:.2rem 0 .5rem;border-bottom:1px solid rgba(255,255,255,.12);
+  text-transform:uppercase;margin:.2rem 0 .5rem;border-bottom:1px solid var(--v11);
   padding-bottom:.3rem}
 .jrn .fin{font-size:.7rem;color:var(--tx2);text-align:center;line-height:1.45;margin-top:.5rem}
 .jrn .lien{color:var(--tx-or);text-decoration:none;font-weight:600;cursor:pointer}

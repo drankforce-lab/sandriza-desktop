@@ -25,16 +25,16 @@ html,body{margin:0;height:100%}
 body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;
-  border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#131c2b,#0e1522)}
+  border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 /* ⚠ ANCRÉE = PLEINE PAGE : les cartes se répartissent en colonnes pour remplir la
    largeur (pas de max-width qui laisse du vide à droite). Voir la règle mémoire. */
 .zone{columns:32rem;column-gap:1.1rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1rem 1.1rem;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .stitre{font-size:.86rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .5rem}
 .info{color:var(--tx2);font-size:.79rem;line-height:1.6;margin:0 0 .6rem}
@@ -51,12 +51,12 @@ body{background:#0e1522;color:var(--tx);font:14px/1.5 system-ui,-apple-system,"S
 .cles{display:flex;flex-wrap:wrap;gap:.3rem}
 .cles code{font-size:.66rem;background:#0f1724;border:1px solid #2b3444;border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;
-  border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
-button.b{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);
+button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);
   border-radius:8px;padding:.42rem .8rem;cursor:pointer;font-size:.8rem}
-button.b:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button.b:hover:not(:disabled){background:var(--v11)}
 button.b:disabled{opacity:.5;cursor:default}
 button.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.4)}
 button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;
@@ -64,9 +64,9 @@ button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a12
 button.prim:hover:not(:disabled){background:#d8bd97}
 button.prim:disabled{opacity:.5;cursor:default}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid rgba(255,255,255,.16);
-  border-radius:7px;background:rgba(255,255,255,.05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.mini:hover:not(:disabled){background:rgba(255,255,255,.1)}
+.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid var(--v16);
+  border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
+.mini:hover:not(:disabled){background:var(--v11)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

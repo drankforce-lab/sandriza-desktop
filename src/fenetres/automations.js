@@ -25,7 +25,7 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
@@ -33,12 +33,12 @@ body{background:#0e1522;color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .9rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.85rem 1rem}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;padding:.85rem 1rem}
 .th{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:0 0 .3rem}
 .th .em{font-size:1.05rem;filter:grayscale(1) brightness(1.55);opacity:.9}
 .th .nom{font-weight:700;font-size:.9rem}
-.pill{font-size:.68rem;color:var(--tx2);background:#111a29;border:1px solid rgba(255,255,255,.08);
+.pill{font-size:.68rem;color:var(--tx2);background:#111a29;border:1px solid var(--v08);
   border-radius:99px;padding:.1rem .5rem}
 .desc{font-size:.8rem;color:var(--tx2);margin:0 0 .5rem}
 .reco{font-size:.76rem;color:var(--tx-bleute);background:#111a29;border-left:3px solid #c9a97e;
@@ -52,21 +52,21 @@ body{background:#0e1522;color:var(--tx);
 .ch input.mono{font-family:ui-monospace,Consolas,monospace;font-size:.76rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled{opacity:.55}
-.metriques{border-top:1px solid rgba(255,255,255,.08);margin-top:.4rem;padding-top:.6rem}
+.metriques{border-top:1px solid var(--v08);margin-top:.4rem;padding-top:.6rem}
 .metriques .t{font-size:.78rem;font-weight:700;margin:0 0 .1rem}
 .metriques .s{font-size:.72rem;color:var(--tx3);margin:0 0 .5rem}
 .mgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:.25rem .8rem;margin:0 0 .6rem}
 .mgrille label{display:flex;align-items:center;gap:.45rem;font-size:.8rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
 .mgrille input{accent-color:#c9a97e;cursor:pointer}
-button{font:inherit;font-size:.8rem;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.36rem .7rem;cursor:pointer;white-space:nowrap}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button{font:inherit;font-size:.8rem;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.36rem .7rem;cursor:pointer;white-space:nowrap}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
 .pied{flex:0 0 auto;display:flex;align-items:center;padding:.5rem 1.05rem;
-  border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
@@ -93,7 +93,7 @@ function pageAutomations() {
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id = 'sz-detacher'; b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b); }
     if (actif) { b.textContent = '⧉ Détacher'; b.onclick = function(){ if (P && P.detacher) P.detacher(); }; }

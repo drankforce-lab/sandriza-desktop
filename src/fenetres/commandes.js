@@ -42,7 +42,7 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 
@@ -51,20 +51,20 @@ body{background:#0e1522;color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.55rem}
 
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:.6rem .75rem;flex:0 0 auto}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 
 input,select{font:inherit;color:var(--tx);background:#0f1826;
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.32rem .5rem;
+  border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 #rech{font-size:1rem;padding:.45rem .6rem}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 button.mini{padding:.1rem .45rem;font-size:.75rem}
@@ -96,31 +96,31 @@ button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
 /* La liste : la seule zone qui defile. */
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
 .liste::-webkit-scrollbar{width:8px}
-.liste::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.liste::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 thead th{position:sticky;top:0;background:#1b2635;text-align:left;
   padding:.34rem .5rem;font-size:.7rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
 thead th.d{text-align:right}
 thead th.c{text-align:center}
-tbody td{padding:.3rem .5rem;border-top:1px solid rgba(255,255,255,.055);vertical-align:middle}
+tbody td{padding:.3rem .5rem;border-top:1px solid var(--v05);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
-tbody tr:hover{background:rgba(255,255,255,.04)}
+tbody tr:hover{background:var(--v03)}
 tbody .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
 tbody .det{font-size:.75rem;color:var(--tx2)}
 /* Une commande ETIQUETEE mais pas encore expediee : c est exactement celle qu on
    cherche en reprenant le travail. Elle se repere sans lire. */
 tbody tr.attente{background:rgba(124,92,255,.09)}
 .et{font-size:.68rem;padding:.06rem .45rem;border-radius:99px;white-space:nowrap;
-  border:1px solid rgba(255,255,255,.16);color:var(--tx2)}
+  border:1px solid var(--v16);color:var(--tx2)}
 .et.vert{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .et.bleu{border-color:rgba(96,165,250,.5);color:var(--tx-bleu)}
 .et.jaune{border-color:rgba(245,158,11,.5);color:#f0c987}
 .et.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.45rem;
-  margin-top:.35rem;border-top:1px solid rgba(255,255,255,.07);
+  margin-top:.35rem;border-top:1px solid var(--v08);
   font-size:.78rem;color:var(--tx2);flex-wrap:wrap}
 .pagi .pos{margin-left:auto}
 .pagi select{width:auto;padding:.14rem .35rem;font-size:.76rem}
@@ -137,14 +137,14 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .badge2.vertf{background:#166534;color:#dcfce7;font-weight:700}
 select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
 .totaux{display:flex;justify-content:flex-end;gap:2.2rem;font-size:.84rem;
-  margin-top:.6rem;border-top:1px solid rgba(255,255,255,.08);padding-top:.55rem}
+  margin-top:.6rem;border-top:1px solid var(--v08);padding-top:.55rem}
 .totaux .d{text-align:right}
 .totaux .tt{font-weight:700;margin-top:.2rem}
 .remb{margin-top:.7rem;border-top:2px dashed rgba(245,158,11,.5);padding-top:.45rem}
 .remb .t{font-size:.69rem;font-weight:700;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx-att);margin-bottom:.25rem}
 .remb .lg2{display:flex;justify-content:space-between;gap:1rem;font-size:.8rem;
-  padding:.18rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  padding:.18rem 0;border-bottom:1px solid var(--v05)}
 .remb .fin3{text-align:right;font-size:.8rem;font-weight:700;color:var(--tx-att);margin-top:.3rem}
 .banniere{flex:0 0 auto;background:#7f1d1d;color:var(--tx-blanc);border-radius:9px;
   padding:.5rem .8rem;font-size:.82rem;line-height:1.5}
@@ -152,13 +152,13 @@ button.danger{border-color:rgba(239,68,68,.55);color:var(--tx-err2)}
 button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#ef4444}
 
 /* ── Menu contextuel (clic droit sur une ligne) ── */
-.ctx{position:fixed;z-index:60;background:#16202f;border:1px solid rgba(255,255,255,.16);
+.ctx{position:fixed;z-index:60;background:#16202f;border:1px solid var(--v16);
   border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.5);padding:.3rem;min-width:210px}
 .ctx .t{font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);padding:.28rem .5rem;font-weight:700}
 .ctx button{display:block;width:100%;text-align:left;border:none;
   background:transparent;padding:.3rem .5rem;border-radius:6px;font-size:.83rem}
-.ctx button:hover{background:rgba(255,255,255,.08)}
+.ctx button:hover{background:var(--v08)}
 .ctx .warn{background:#7f1d1d;color:var(--tx-blanc);border-radius:6px;padding:.5rem .65rem;
   font-size:.79rem;line-height:1.5;max-width:290px;margin:.2rem}
 
@@ -166,13 +166,13 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
    DERRIERE la fenetre, comme le decompte d inactivite l a fait). */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
-.voile .boite{background:#16202f;border:1px solid rgba(255,255,255,.12);
+.voile .boite{background:#16202f;border:1px solid var(--v11);
   border-radius:13px;padding:1.1rem 1.25rem;max-width:36rem;width:100%;
   max-height:84vh;overflow-y:auto}
 .voile h3{margin:0 0 .55rem;font:700 1.05rem/1.25 Georgia,serif}
 .voile p{margin:.35rem 0;font-size:.86rem;line-height:1.5}
 .voile ul{font-size:.83rem;color:var(--tx-bleute);line-height:1.7;margin:.5rem 0 0;padding-left:1.1rem}
-.voile li.item{list-style:none;background:rgba(255,255,255,.05);border-radius:6px;
+.voile li.item{list-style:none;background:var(--v05);border-radius:6px;
   padding:.3rem .6rem;margin:.25rem 0}
 .voile label.rc{display:flex;align-items:flex-start;gap:.5rem;margin-top:.9rem;
   font-size:.82rem;line-height:1.5;cursor:pointer;background:rgba(245,158,11,.1);
@@ -181,22 +181,22 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 /* Rattachement a un client : le champ de recherche et ses resultats. */
 .voile input.rech{width:100%;padding:.42rem .6rem;border-radius:8px;
-  border:1px solid rgba(255,255,255,.18);margin-top:.25rem}
+  border:1px solid var(--v16);margin-top:.25rem}
 .voile .lres{max-height:250px;overflow-y:auto;display:flex;flex-direction:column;
   gap:.35rem;margin-top:.55rem}
 .voile .lres .cli{display:flex;justify-content:space-between;align-items:center;
-  gap:.8rem;padding:.45rem .6rem;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.12);border-radius:7px;cursor:pointer}
+  gap:.8rem;padding:.45rem .6rem;background:var(--v05);
+  border:1px solid var(--v11);border-radius:7px;cursor:pointer}
 .voile .lres .cli:hover{border-color:#c9a97e;background:rgba(201,169,126,.12)}
 .voile .lres .cli .nm{font-weight:600;font-size:.85rem}
 .voile .lres .cli .em{font-size:.76rem;color:var(--tx2)}
 .voile .lres .cli .fl{font-size:.74rem;color:var(--tx-or);white-space:nowrap}
 .voile .lres .rien{padding:.5rem .2rem;color:var(--tx2);font-size:.83rem}
 .voile .detacher{margin-top:.8rem;padding-top:.6rem;
-  border-top:1px solid rgba(255,255,255,.1)}
+  border-top:1px solid var(--v11)}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
@@ -717,7 +717,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }

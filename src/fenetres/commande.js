@@ -35,10 +35,10 @@ const CSS_PROPRE = `
 .entete .adr{font-size:.78rem;color:var(--tx2);flex:1 1 100%}
 .art{display:flex;align-items:center;gap:.6rem;padding:.3rem .35rem;border-radius:7px;
   border:1px solid transparent}
-.art:hover{background:rgba(255,255,255,.035)}
+.art:hover{background:var(--v03)}
 .art.ok{border-color:rgba(74,222,128,.5);background:rgba(74,222,128,.08)}
 .art.trop{border-color:rgba(248,113,113,.6);background:rgba(248,113,113,.08)}
-.art .pt{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.22);
+.art .pt{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1px solid var(--v22);
   display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700}
 .art.ok .pt{background:#4ade80;border-color:#4ade80;color:#0e1522}
 .art.trop .pt{background:#f87171;border-color:#f87171;color:#0e1522}
@@ -47,7 +47,7 @@ const CSS_PROPRE = `
 .art .v{font-size:.76rem;color:var(--tx2)}
 .art .cpt{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:.88rem;min-width:3rem;text-align:right}
 .art .q{flex:0 0 4.4rem}
-.barre{flex:0 0 auto;height:6px;border-radius:6px;background:rgba(255,255,255,.09);overflow:hidden;margin:.5rem 0 .2rem}
+.barre{flex:0 0 auto;height:6px;border-radius:6px;background:var(--v08);overflow:hidden;margin:.5rem 0 .2rem}
 .barre span{display:block;height:100%;background:#4ade80;width:0;transition:width .18s}
 .gros{font:700 1.6rem/1 Georgia,serif;color:var(--tx-creme)}
 .duo{display:flex;gap:.7rem;flex-wrap:wrap}
@@ -382,7 +382,7 @@ function pageCommande(id) {
     v.id = 'bc-voile';
     v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
-    v.innerHTML = '<div style="background:#16202f;border:1px solid rgba(255,255,255,.12);'
+    v.innerHTML = '<div style="background:#16202f;border:1px solid var(--v11);'
       + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%">'
       + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif"><span class="ic">🚀</span> Préparation de la commande '
       + esc(CMD.numero) + '</h3>'
@@ -591,7 +591,7 @@ function pageCommande(id) {
     var v = document.createElement('div');
     v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
-    v.innerHTML = '<div style="background:#16202f;border:1px solid rgba(255,255,255,.12);'
+    v.innerHTML = '<div style="background:#16202f;border:1px solid var(--v11);'
       + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:30rem;width:100%">'
       + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif">' + titre + '</h3>'
       + corps

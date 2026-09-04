@@ -31,7 +31,7 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;
@@ -39,18 +39,18 @@ body{background:#0e1522;color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v11);border-radius:8px}
 /* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10) :
    pas d align-items:start, sinon la rangee finit en escalier. */
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
-.carte{background:#16202f;border:1px solid rgba(255,255,255,.07);border-radius:11px;
+.carte{background:#16202f;border:1px solid var(--v08);border-radius:11px;
   padding:1rem 1.1rem;min-width:0;display:flex;flex-direction:column}
 .carte .tt{display:flex;align-items:center;gap:.5rem;margin:0 0 .2rem}
 .carte h2{margin:0;font:700 .82rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx-bleute)}
 .carte .lien{margin-left:auto;font-size:.72rem;color:var(--tx2);text-decoration:none;
-  border:1px solid rgba(255,255,255,.14);border-radius:7px;padding:.14rem .5rem}
-.carte .lien:hover{color:var(--tx);border-color:rgba(255,255,255,.3)}
+  border:1px solid var(--v16);border-radius:7px;padding:.14rem .5rem}
+.carte .lien:hover{color:var(--tx);border-color:var(--v30)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
 .ch{margin:0 0 .8rem}
 .ch:last-child{margin-bottom:0}
@@ -69,16 +69,16 @@ body{background:#0e1522;color:var(--tx);
   border:1px solid rgba(248,113,113,.3);border-radius:7px;padding:.16rem .55rem;cursor:pointer}
 .etat button:hover:not(:disabled){background:rgba(248,113,113,.16)}
 .etat button.conf{color:var(--tx-err2);border-color:rgba(248,113,113,.55);font-weight:700}
-.etat button.annu{color:var(--tx2);background:transparent;border-color:rgba(255,255,255,.16)}
+.etat button.annu{color:var(--tx2);background:transparent;border-color:var(--v16)}
 .etat button:disabled{opacity:.5;cursor:default}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
+  padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
-button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
+button:hover:not(:disabled){background:var(--v11)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97}
@@ -112,7 +112,7 @@ function pageClesConfig() {
       b.id = 'sz-detacher';
       b.type = 'button';
       b.setAttribute('style', 'font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;'
-        + 'border:1px solid rgba(255,255,255,.16);border-radius:7px;background:rgba(255,255,255,.05);'
+        + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b);
     }

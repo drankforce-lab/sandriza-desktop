@@ -37,7 +37,7 @@ body{background:#0e1522;color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
-  padding:.55rem .95rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.55rem .95rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#1b1216,#0e1522)}
 /* ⚠ ON NE GARDE QUE LA COULEUR : elle est voulue — c est le decompte avant
    fermeture, il doit alarmer. La police vient du socle, comme partout. */
@@ -46,15 +46,15 @@ body{background:#0e1522;color:var(--tx);
   padding:.9rem 1rem}
 .anneau{flex:0 0 auto;width:84px;height:84px;border-radius:50%;display:flex;
   align-items:center;justify-content:center;font:800 1.7rem/1 system-ui;color:var(--tx-blanc);
-  background:conic-gradient(#ef4444 100%,rgba(255,255,255,.10) 0)}
+  background:conic-gradient(#ef4444 100%,var(--v11) 0)}
 .txt{min-width:0}
 .txt p{margin:0 0 .25rem;font-size:.9rem}
 .txt .sec{font-size:.78rem;color:var(--tx2);margin:0}
 .pied{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;
-  padding:.55rem .95rem;border-top:1px solid rgba(255,255,255,.08);background:#0b1220}
-button{font:inherit;color:var(--tx);background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+  padding:.55rem .95rem;border-top:1px solid var(--v08);background:#0b1220}
+button{font:inherit;color:var(--tx);background:var(--v05);
+  border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
+button:hover:not(:disabled){background:var(--v11)}
 button:focus{outline:none;border-color:#c9a97e}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700;margin-left:auto}
 button.prim:hover:not(:disabled){background:#d8bc95}
@@ -112,7 +112,7 @@ ${JS_DIRE}
     var s = Math.ceil(reste / 1000);
     n.textContent = s;
     var pct = Math.max(0, Math.min(100, (reste / (TOTAL * 1000)) * 100));
-    anneau.style.background = 'conic-gradient(#ef4444 ' + pct + '%,rgba(255,255,255,.10) 0)';
+    anneau.style.background = 'conic-gradient(#ef4444 ' + pct + '%,var(--v11) 0)';
     if (reste <= 0) clearInterval(tic);
   }, 250);
 

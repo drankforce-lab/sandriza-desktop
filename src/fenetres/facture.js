@@ -29,7 +29,7 @@ body{background:#0e1522;color:var(--tx);
   display:flex;flex-direction:column;overflow:hidden}
 
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 
@@ -37,7 +37,7 @@ body{background:#0e1522;color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1rem 1.2rem;
   background:#1b2434}
 .corps::-webkit-scrollbar{width:9px}
-.corps::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
+.corps::-webkit-scrollbar-thumb{background:var(--v16);border-radius:8px}
 
 /* ⚠ LE PAPIER, C EST .invoice-doc DU SITE (fond blanc, bordure, marges) :
    le doubler d un second cadre blanc donnait une << bande blanche >> vide
@@ -48,9 +48,9 @@ body{background:#0e1522;color:var(--tx);
 .papier .invoice-doc{box-shadow:0 16px 40px rgba(0,0,0,.5);margin:0 auto}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
-  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);
+  border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+button:hover:not(:disabled){background:var(--v11);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 /* ⚠ SANS cette regle, le survol GENERIQUE (voile blanc translucide) delavait
@@ -60,7 +60,7 @@ button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:60
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid rgba(255,255,255,.08);
+  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
   background:#0b1220}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
