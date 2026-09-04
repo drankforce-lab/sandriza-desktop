@@ -163,7 +163,7 @@ function pageExplorateur(mode) {
   <span class="sous" id="sous"></span></div>
 <div class="barre" id="barre"></div>
 <div class="corps" id="corps">
-  <div class="zone" id="liste"><div class="vide">Lecture de la photothèque…</div></div>
+  <div class="zone" id="liste"><div class="vide charge">Lecture de la photothèque…</div></div>
   <div class="apercu" id="apercu"><div class="vide">Cliquez une photo pour la voir ici.</div></div>
 </div>
 <div class="pied"><span class="msg" id="msg"></span>
@@ -392,7 +392,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function vueVide(){
-    if (D && D.charge === false) return '<div class="vide">Lecture de la photothèque…</div>';
+    if (D && D.charge === false) return '<div class="vide charge">Lecture de la photothèque…</div>';
     var filtre = Q || FILTRES.length || SANS || LOT;
     return '<div class="vide">' + (filtre
       ? 'Aucune photo ne correspond à ces critères.'
@@ -414,7 +414,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     apercuEl.innerHTML = '<div class="img">'
       + (p.apercu ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '">'
-                  : '<div class="vide">Téléversement en cours…</div>')
+                  : '<div class="vide charge">Téléversement en cours…</div>')
       + '</div><div class="infos">'
       + ligne('Nom', p.nom)
       + ligne('Code', p.code || '—')

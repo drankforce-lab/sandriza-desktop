@@ -95,7 +95,7 @@ function pageMessagerie() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.support}</span><h1>Messagerie clients</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement… (les demandes se resynchronisent)</div></div>
+<div class="corps" id="corps"><div class="vide charge">Chargement… (les demandes se resynchronisent)</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span id="ret" hidden style="margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--tx2)">
     <span title="Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.">Réponses conservées</span>
@@ -160,7 +160,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement… (les demandes se resynchronisent)</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="vide charge">Chargement… (les demandes se resynchronisent)</div>'; return; }
     var c = D.comptes || {};
     var h = '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'pending' ? ' actif' : '') + '" data-onglet="pending">'

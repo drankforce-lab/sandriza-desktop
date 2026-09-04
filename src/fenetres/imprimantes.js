@@ -86,7 +86,7 @@ function pageImprimantes() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.imprimante}</span><h1>Imprimantes</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Lecture de l’état…</div></div>
+<div class="corps" id="corps"><div class="vide charge">Lecture de l’état…</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span><button id="btn-relire">Actualiser</button>
   </span></div>

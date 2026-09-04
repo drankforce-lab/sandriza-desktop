@@ -104,11 +104,11 @@ function pageModeles() {
 <div class="corps">
   <div class="sect"><h2>Modèles par vue</h2><span class="tr"></span></div>
   <p class="intro">Une photo de mannequin par angle de prise de vue. Elles sont chargées automatiquement lors de la génération IA dans l’éditeur produit. Choisissez des poses neutres sur fond clair. Chaque dépôt est enregistré immédiatement.</p>
-  <div class="grille" id="corps"><div class="vide-page">Chargement…</div></div>
+  <div class="grille" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 
   <div class="sect"><h2>Mannequins (habillage IA)</h2><span class="tr"></span></div>
   <p class="intro">La photo de la personne que l’intelligence artificielle <strong>habille</strong> avec votre vêtement — c’est le choix offert par « ✨ Mannequin IA » dans l’assistant Produit. Une photo nette, de face, cadrée en pied donne le meilleur résultat. <span id="mq-cle"></span></p>
-  <div class="mqs" id="mqs"><div class="vide-page">Chargement…</div></div>
+  <div class="mqs" id="mqs"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 </div>
 <input type="file" id="fichier" accept="image/*" style="display:none">
 <input type="file" id="fichier-mq" accept="image/*" style="display:none">

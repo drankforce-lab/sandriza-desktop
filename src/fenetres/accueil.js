@@ -81,7 +81,7 @@ function pageAccueil(ouverture) {
 <div class="tete"><span class="ico">${ICO.homepage}</span><h1>Page d’accueil</h1>
   <span class="droite"><button class="mini" id="b-reinit" hidden>Réinitialiser</button></span></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div id="corps"><div class="sz-squel tuiles" role="status" aria-label="Chargement du tableau de bord"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){

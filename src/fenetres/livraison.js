@@ -94,7 +94,7 @@ function pageLivraison() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1>Configuration de la livraison</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les réglages, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-save" disabled>Enregistrer</button></div>
 <script>
@@ -213,7 +213,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function paysHtml(){
     if (!PAYS) {
       return '<div class="carte large"><h2>Pays desservis</h2>'
-        + '<div class="vide">Lecture des destinations…</div></div>';
+        + '<div class="vide charge">Lecture des destinations…</div></div>';
     }
     var q = FILTRE.toLowerCase();
     var l = PAYS.pays.filter(function(p){

@@ -96,7 +96,7 @@ function pagePaiements() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.payments}</span><h1>Paiements Square</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -286,7 +286,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     if (sous) {
       sous.innerHTML = D.connecte
         ? '<span class="pill bon">' + (D.mode === 'production' ? 'Production' : 'Bac à sable') + '</span>'
@@ -304,7 +304,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="vide">Aucune donnée pour ' + D.annee + '.'
         + '<div style="margin-top:.4rem">Cliquez « Charger les transactions » pour les lire chez Square.</div></div>';
     } else if (OCCUPE && !D.charge) {
-      h += '<div class="vide">Lecture des paiements et des remboursements chez Square pour ' + D.annee + '…</div>';
+      h += '<div class="vide charge">Lecture des paiements et des remboursements chez Square pour ' + D.annee + '…</div>';
     } else {
       h += ONGLET === 'reconciliation' ? vueReconciliation() : vueTransactions();
     }

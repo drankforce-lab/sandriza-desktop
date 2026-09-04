@@ -195,6 +195,7 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 .vide{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;
   justify-content:center;text-align:center;color:var(--tx2);gap:.3rem}
 .vide .gros{font-size:1rem;color:var(--tx)}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -2034,6 +2035,116 @@ html.jour button.arme{color:#72683e}
 html.jour code{color:#5e656e}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES,
+/* ── LES ETATS : CHARGEMENT, VIDE ────────────────────────────────────────────
+   Sa demande du 2026-09-04 : << peux-tu me faire des avis plus modernes et
+   dynamiques quand par exemple le tableau de bord est en chargement ou n est pas
+   disponible, que juste du texte ecrit en background ; je veux quelque chose de
+   vraiment 2026, tres dynamique >>.
+
+   L ETAT DES LIEUX AVANT. 129 fois le mot << Chargement... >> pose en petit texte
+   gris au milieu du vide, 393 etats vides du meme genre, et ZERO animation dans
+   tout le socle : pas une seule regle keyframes. Rien ne bougeait, jamais.
+
+   CE QUI REMPLACE. Un SQUELETTE : des barres arrondies a la forme du contenu qui
+   arrive, balayees par une lueur qui glisse, plus un rail fin ou file un segment.
+   L oeil comprend qu il attend quelque chose de precis, pas qu il est bloque.
+
+   ⚠ POURQUOI DU CSS SEUL, ET AUCUN JAVASCRIPT. Aucune brique de script n atteint
+   les 92 fenetres : JS_SOCLE n est dans que 4, JS_ACTIVITE dans 87. La feuille de
+   jour, elle, est dans les 92. Tout tient donc en CSS, et le marquage se fait par
+   une CLASSE posee sur les 112 emplacements de chargement.
+
+   ⚠ CE BLOC VIENT EN DERNIER dans la chaine : ses regles ont la meme specificite
+   que le .vide de chaque fenetre, seul l ordre les departage.
+
+   ⚠ IL RESPECTE prefers-reduced-motion. Une animation qui ne s arrete jamais est
+   une gene reelle pour certaines personnes, et la loi 25 n est pas la seule
+   raison de le faire : une barre qui scintille huit heures par jour fatigue tout
+   le monde.                                                                    */
+const CSS_ETATS = `
+/* Le squelette : la forme de ce qui arrive, pas un mot qui attend. */
+.sz-squel{
+  display:flex;flex-direction:column;gap:.55rem;width:100%;box-sizing:border-box;
+  padding:1.05rem .15rem 1.1rem;position:relative;overflow:hidden;
+  animation:sz-parait .28s ease-out both}
+/* Le rail : le fond du trait, puis le segment qui le parcourt. */
+.sz-squel::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  border-radius:99px;background:var(--v05)}
+.sz-squel::after{content:"";position:absolute;top:0;height:2px;width:30%;
+  border-radius:99px;background:var(--sz-accent);opacity:.5;
+  animation:sz-rail 1.5s cubic-bezier(.55,.05,.35,1) infinite}
+.sz-squel i{display:block;height:12px;border-radius:99px;
+  background:linear-gradient(90deg,var(--v05) 20%,var(--v14) 38%,var(--v05) 56%);
+  background-size:340% 100%;
+  animation:sz-lueur 1.45s ease-in-out infinite}
+/* Des largeurs inegales : un bloc de barres egales ressemble a un code-barres,
+   pas a du texte qui arrive. */
+.sz-squel i:nth-child(1){width:34%}
+.sz-squel i:nth-child(2){width:86%;animation-delay:.11s}
+.sz-squel i:nth-child(3){width:62%;animation-delay:.22s}
+.sz-squel i:nth-child(4){width:76%;animation-delay:.33s}
+.sz-squel i:nth-child(5){width:47%;animation-delay:.44s}
+
+/* Variante TUILES : la forme du tableau de bord, pas des lignes de texte. */
+.sz-squel.tuiles{display:grid;gap:.7rem;
+  grid-template-columns:repeat(auto-fill,minmax(148px,1fr))}
+.sz-squel.tuiles i{height:76px;border-radius:12px;width:auto}
+/* Variante LIGNES : l interieur d un tableau. */
+.sz-squel.lignes i{height:14px;width:100%}
+.sz-squel.lignes i:nth-child(odd){width:94%}
+
+@keyframes sz-lueur{0%{background-position:170% 0}100%{background-position:-70% 0}}
+@keyframes sz-rail{0%{left:-32%}100%{left:100%}}
+@keyframes sz-parait{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* L etat vide, l etat indisponible, le message d erreur : ils partagent la meme
+   classe et ne veulent PAS dire la meme chose. Pas de pictogramme, donc — il
+   serait juste pour un cas sur quatre. De l air, une largeur de lecture, et une
+   entree en fondu qui evite que le texte claque d un coup. */
+.vide,.vide-page{position:relative;padding:1.35rem 1.1rem;text-align:center;color:var(--tx2);
+  font-size:.84rem;line-height:1.6;max-width:52ch;
+  margin-left:auto;margin-right:auto;
+  animation:sz-parait .3s ease-out both}
+
+/* Un trait d accent qui se TRACE a l ouverture. Il remplace le pictogramme
+   auquel on a renonce : il ne veut rien dire de precis, donc il convient aussi
+   bien a << aucun produit >>, a une erreur et a une information — alors qu une
+   icone aurait ete juste pour un cas sur quatre. C est le mouvement qui fait le
+   travail, pas le symbole. */
+/* ⚠ POSITIONNE EN ABSOLU, ET C EST OBLIGATOIRE : dans quatre fenetres, .vide est
+   un conteneur flex. Un ::before en flux y deviendrait un ELEMENT FLEX, donc un
+   trait pose A COTE du texte au lieu d etre au-dessus. Hors flux, il se comporte
+   pareil que le conteneur soit en bloc ou en flex. */
+.vide:not(.charge){padding-top:1.85rem}
+.vide:not(.charge)::before{content:"";position:absolute;top:.75rem;left:50%;
+  margin-left:-22px;width:44px;height:2px;
+  border-radius:99px;background:var(--sz-accent);
+  transform-origin:center;
+  animation:sz-trait .42s cubic-bezier(.2,.7,.3,1) both}
+@keyframes sz-trait{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:.45}}
+
+/* Le chargement QUI DIT QUOI. Un squelette efface le message, or << Lecture des
+   paiements chez Square pour 2026... >> vaut mieux qu un mot generique : on garde
+   le texte et on lui pose une navette au-dessus. 33 emplacements. */
+.vide.charge{position:relative;padding-top:1.9rem;color:var(--tx2)}
+.vide.charge::before{content:"";position:absolute;top:.6rem;left:50%;
+  margin-left:-60px;width:120px;height:3px;border-radius:99px;background:var(--v08)}
+.vide.charge::after{content:"";position:absolute;top:.6rem;left:50%;
+  margin-left:-60px;width:42px;height:3px;border-radius:99px;
+  background:var(--sz-accent);opacity:.6;
+  animation:sz-navette 1.25s cubic-bezier(.45,.05,.55,.95) infinite alternate}
+@keyframes sz-navette{from{transform:translateX(0)}to{transform:translateX(78px)}}
+
+@media (prefers-reduced-motion:reduce){
+  .sz-squel,.sz-squel i,.sz-squel::after,.vide,.vide-page,
+  .vide.charge::after,.vide:not(.charge)::before{animation:none}
+  .vide:not(.charge)::before{opacity:.45}
+  .vide.charge::after{width:120px;opacity:.35}
+  .sz-squel i{background:var(--v08)}
+  .sz-squel::after{display:none}
+}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_THEMES, ICO };

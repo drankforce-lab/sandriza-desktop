@@ -121,7 +121,7 @@ function pageSociaux(onglet) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.social}</span><h1>Réseaux sociaux</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -233,7 +233,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   var PAT_ARME = '';     // suppression armee
 
   function vuePatrons(){
-    if (!PAT) return '<div class="carte"><div class="vide">Lecture des patrons…</div></div>';
+    if (!PAT) return '<div class="carte"><div class="vide charge">Lecture des patrons…</div></div>';
     if (EDIT) return vuePatronEditeur();
     var l = PAT.patrons || [];
     var h = '<div class="carte">';
@@ -394,7 +394,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var t = D.tuiles || {};
     if (sous) {
       sous.innerHTML = (D.reseauxActifs || []).length

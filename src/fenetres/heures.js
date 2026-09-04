@@ -71,7 +71,7 @@ function pageHeures() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.clock}</span><h1>Heures d’ouverture</h1>
   <span class="sous">Heure de l’Est — Montréal / Québec</span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-save" disabled>Enregistrer</button></div>
 <script>

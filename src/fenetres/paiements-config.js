@@ -104,7 +104,7 @@ function pagePaiementsConfig() {
 <div class="tete"><span class="ico">${ICO.payments}</span><h1>Configuration des paiements</h1>
   <span class="env" id="env" hidden></span></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les réglages, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button id="b-tester">Tester la connexion</button>
   <button class="prim" id="b-save" disabled>Enregistrer les identifiants</button></div>

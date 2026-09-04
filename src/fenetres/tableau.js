@@ -128,7 +128,7 @@ function pageTableau() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.tableau}</span><h1>Tableau de bord</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -292,7 +292,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var cfg = D.cfgTuiles || {};
     var t = D.tuiles;
     var f = D.aFaire || {};

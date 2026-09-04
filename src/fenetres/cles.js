@@ -92,7 +92,7 @@ function pageClesConfig() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.cles}</span><h1>Clés API</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les clés, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-save" disabled>Enregistrer les clés</button></div>
 <script>

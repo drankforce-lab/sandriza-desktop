@@ -76,7 +76,7 @@ function pageBd() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.nuage}</span><h1>Base de données</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div class="zone" id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -131,7 +131,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="sous">' + esc(sous) + '</div></div>';
   }
   function stockHtml(){
-    if (STOCK === null) return '<div class="vide">Lecture de l’occupation…</div>';
+    if (STOCK === null) return '<div class="vide charge">Lecture de l’occupation…</div>';
     if (STOCK.erreur) return '<div class="vide">' + esc(STOCK.erreur) + '</div>';
     var h = '<div class="stock">';
     if (STOCK.turso && STOCK.turso.bytes != null) h += jauge('☁️', 'Turso (base de données)', 'Produits, commandes, clients, dépenses…', STOCK.turso.bytes, STOCK.turso.limit);

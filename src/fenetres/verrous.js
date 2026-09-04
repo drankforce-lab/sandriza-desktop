@@ -83,7 +83,7 @@ function pageVerrous() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.verrou}</span><h1>Verrous</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Lecture des verrous…</div></div>
+<div class="corps" id="corps"><div class="vide charge">Lecture des verrous…</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -156,7 +156,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    if (VERR === null) { corps.innerHTML = '<div class="vide">Lecture des verrous…</div>'; return; }
+    if (VERR === null) { corps.innerHTML = '<div class="vide charge">Lecture des verrous…</div>'; return; }
     var actifs = VERR.filter(function(l){ return !l.expired && l.sessionAlive !== false; });
     var morts = VERR.filter(function(l){ return l.expired || l.sessionAlive === false; });
     sousEl.textContent = actifs.length

@@ -101,7 +101,7 @@ function pageTaxes(ouverture) {
 <div class="tete"><span class="ico">${ICO.argent}</span><h1>Gestion des taxes</h1>
   <span class="rev" id="rev"></span></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les taux, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button id="b-verifier">Comparer à la référence</button>
   <button class="prim" id="b-save" disabled>Enregistrer les taux</button></div>

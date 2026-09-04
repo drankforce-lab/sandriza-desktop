@@ -460,7 +460,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessinerDetail(){
     var d = DET;
     if (!d) {
-      corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>';
       actions.innerHTML = SEUL ? '' : '<button id="btn-retour">← Liste</button>';
       brancherDetail();
       return;

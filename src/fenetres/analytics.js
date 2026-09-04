@@ -79,7 +79,7 @@ function pageAnalytics() {
 <div class="tete"><span class="ico">${ICO.analytics}</span><h1>Statistiques (Google Analytics)</h1>
   <label class="actif"><input type="checkbox" id="a-enabled"> Actif</label></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div class="zone" id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-save" disabled>Enregistrer</button></div>
 <script>

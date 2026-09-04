@@ -77,7 +77,7 @@ function pageRetours() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.returns}</span><h1>Nos Retours</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement… (les demandes se resynchronisent)</div></div>
+<div class="corps" id="corps"><div class="vide charge">Chargement… (les demandes se resynchronisent)</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -137,7 +137,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement… (les demandes se resynchronisent)</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="vide charge">Chargement… (les demandes se resynchronisent)</div>'; return; }
     var c = D.comptes || {};
     var h = '<div class="barreoutils">'
       + ONGLETS.map(function(o){

@@ -44,9 +44,54 @@ on:
 # Aucun droit n'est nécessaire : on ne touche ni au dépôt, ni aux releases.
 permissions:
   contents: read
+  actions: write        # pour purger les artefacts des constructions precedentes
 
 jobs:
+  # ══ LE MENAGE PASSE AVANT, ET C'EST OBLIGATOIRE ══════════════════════════
+  # Signale le 2026-09-04 par une alerte GitHub : << You have used 100% of the
+  # Actions storage >>. Le quota est de 0,5 Go ; une construction depose trois
+  # installateurs Windows, soit ~240 Mo. DEUX constructions suffisent donc a le
+  # remplir, et il y en avait eu sept dans la journee — 1 582 Mo, trois fois le
+  # quota, facturable.
+  #
+  # ⚠ `retention-days: 1` NE SUFFIT PAS, et c'est le piege : il etait deja pose.
+  # La retention se compte en JOURS, alors que le depassement se produit en
+  # QUELQUES HEURES. Un delai n'a jamais borne un debit.
+  #
+  # ⚠ POURQUOI ICI ET PAS APRES LA PUBLICATION : le jeton du depot du site
+  # (`GH_DESKTOP_TOKEN`) est volontairement en LECTURE SEULE sur les Actions de
+  # ce depot-ci — il peut telecharger les paquets, pas les effacer. Le seul
+  # jeton qui a le droit de supprimer est celui de ce depot, donc le menage se
+  # fait ici, AVANT de deposer les nouveaux paquets. Le stockage ne peut alors
+  # plus depasser une construction.
+  #
+  # ⚠ CE QUE CELA IMPOSE : PUBLIER AVANT DE RECONSTRUIRE. Les paquets d'une
+  # construction non publiee disparaissent au lancement de la suivante. Ce n'est
+  # pas une perte — une version publiee vit dans R2, pas ici — mais l'ordre
+  # build -> publish -> build est desormais la seule marche a suivre.
+  menage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purger les artefacts des constructions precedentes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          total=0
+          n=0
+          for page in 1 2 3; do
+            ids=$(gh api "repos/${{ github.repository }}/actions/artifacts?per_page=100&page=$page"                     --jq '.artifacts[] | select(.expired==false) | "\(.id) \(.size_in_bytes)"' || true)
+            [ -z "$ids" ] && break
+            while read -r id taille; do
+              [ -z "$id" ] && continue
+              gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/$id" >/dev/null 2>&1 || continue
+              total=$((total + taille)); n=$((n + 1))
+            done <<< "$ids"
+          done
+          echo "::notice::$n artefact(s) purge(s), $((total / 1048576)) Mo liberes avant construction."
+
   windows:
+    needs: menage
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -245,6 +290,7 @@ jobs:
             dist/latest*.yml
 
   macos:
+    needs: menage
     # ⚠ DÉSACTIVÉ PAR DÉFAUT, ET C'EST VOULU. Aucun Mac n'est en service, et la
     # mise à jour automatique y est de toute façon impossible tant que
     # l'application n'est pas signée par Apple (99 $US/an) : ces paquets ne

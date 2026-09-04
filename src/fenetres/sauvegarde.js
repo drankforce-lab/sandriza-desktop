@@ -113,7 +113,7 @@ function pageSauvegarde(ouverture) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.sauvegarde}</span><h1>Sauvegarde &amp; Restauration</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : créer, restaurer, supprimer et purger sont réservés au super-administrateur.</div>
-<div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){

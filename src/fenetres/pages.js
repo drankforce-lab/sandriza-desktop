@@ -228,7 +228,7 @@ function pagePages(onglet) {
 <div class="tete"><span class="ico">${ICO.pages}</span><h1>Pages du site</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
 <div class="onglets" id="onglets"></div>
-<div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -572,7 +572,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
   function ouvrirBoite(){
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inbox';
-    sur.innerHTML='<div class="boite"><div class="tt"><h3>Messages reçus</h3><button class="mini" id="ib-x">Fermer</button></div><div class="liste" id="ib-liste"><div class="vide">⏳ Chargement…</div></div></div>';
+    sur.innerHTML='<div class="boite"><div class="tt"><h3>Messages reçus</h3><button class="mini" id="ib-x">Fermer</button></div><div class="liste" id="ib-liste"><div class="vide charge">Chargement…</div></div></div>';
     document.body.appendChild(sur);
     sur.addEventListener('click', function(e){ if (e.target===sur) fermerBoite(); });
     document.getElementById('ib-x').onclick=fermerBoite;
@@ -912,7 +912,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-apr';
     sur.innerHTML='<div class="boite" style="max-width:820px"><div class="tt"><h3>Aperçu du contenu</h3>'
       +'<button class="mini" id="a-x">Fermer</button></div>'
-      +'<div class="apr" id="a-corps"><div class="vide">⏳ Résolution des variables…</div></div></div>';
+      +'<div class="apr" id="a-corps"><div class="vide charge">Résolution des variables…</div></div></div>';
     document.body.appendChild(sur);
     sur.addEventListener('click', function(e){ if (e.target===sur) sur.remove(); });
     document.getElementById('a-x').onclick=function(){ sur.remove(); };

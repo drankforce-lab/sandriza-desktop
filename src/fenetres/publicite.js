@@ -129,7 +129,7 @@ function pagePublicite(ouverture) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.mktstats}</span><h1>Publicité ciblée &amp; analytique</h1><span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){

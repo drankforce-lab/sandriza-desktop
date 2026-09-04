@@ -110,7 +110,7 @@ function pageFal(ouverture) {
   <button id="o-conso" class="on">Consommation</button>
   <button id="o-hist">Historique</button>
 </div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){

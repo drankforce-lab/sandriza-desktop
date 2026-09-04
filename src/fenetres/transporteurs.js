@@ -98,7 +98,7 @@ function pageTransporteurs() {
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1>Transporteurs</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
 <div class="avert" id="avert" hidden></div>
-<div class="corps" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-save" disabled>Enregistrer</button></div>
 <script>

@@ -104,7 +104,7 @@ function pageStatistiques(ongletDepart) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.mktstats}</span><h1>Statistiques</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -245,7 +245,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '';
     if (AVGA) h += '<div class="avis att">' + AVGA + '</div>';
     if (!DGA) {
-      return h + (AVGA ? '' : '<div class="vide">Lecture des statistiques…</div>');
+      return h + (AVGA ? '' : '<div class="vide charge">Lecture des statistiques…</div>');
     }
     var t = DGA.totaux;
     h += '<div class="tuiles">' + tuile('Visiteurs', nb(t.visiteurs), 'or')
@@ -285,7 +285,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var h = '';
     if (AVTEL) h += '<div class="avis att">' + AVTEL + '</div>';
     if (!DTEL) {
-      return h + (AVTEL ? '' : '<div class="vide">Lecture des appels…</div>');
+      return h + (AVTEL ? '' : '<div class="vide charge">Lecture des appels…</div>');
     }
     var t = DTEL.totaux;
     /* ⚠ Le solde prepaye : quand il tombe a zero, la ligne cesse de repondre.

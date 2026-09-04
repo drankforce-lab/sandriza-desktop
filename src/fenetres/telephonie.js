@@ -140,7 +140,7 @@ function pageTelephonie() {
 </div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
 <div class="onglets" id="onglets"></div>
-<div class="corps"><div class="panneau" id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div class="panneau" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-save" disabled>Enregistrer</button></div>
 <script>
@@ -437,7 +437,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + taHtml('t-vm-closed-fr', 'Invite — hors heures (FR)', vpc.fr, 'Nos bureaux sont fermés. Laissez un message…')
       + taHtml('t-vm-closed-en', 'Invite — hors heures (EN)', vpc.en, "Our offices are closed. Leave a message…") + '</div>';
     h += '</div><div class="carte"><div class="stitre"><span class="ic">🎙️</span> Boîte de réception vocale <span id="t-vm-badge"></span></div>'
-      + '<div class="liste" id="t-vm-inbox"><div class="vide">Chargement…</div></div></div>';
+      + '<div class="liste" id="t-vm-inbox"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>';
     return h;
   }
 
@@ -455,7 +455,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<input class="to" id="t-sms-to" placeholder="+1…"' + (RO ? ' disabled' : '') + '>'
       + '<input class="body" id="t-sms-body" placeholder="Votre message…"' + (RO ? ' disabled' : '') + '>'
       + '<button class="b" type="button" id="t-sms-send"' + (RO ? ' disabled' : '') + '>Envoyer</button></div>';
-    h += '<div class="liste" id="t-sms-inbox"><div class="vide">Chargement…</div></div></div>';
+    h += '<div class="liste" id="t-sms-inbox"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>';
     return h;
   }
 
@@ -615,7 +615,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function rendreVm(){
     var box = document.getElementById('t-vm-inbox'); if (!box) return;
     var badge = document.getElementById('t-vm-badge');
-    if (!RESUME) { box.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!RESUME) { box.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     if (RESUME.erreur) { box.innerHTML = '<div class="vide">' + esc(RESUME.erreur) + '</div>'; return; }
     var vms = RESUME.voicemails || [];
     var nonlus = 0; for (var k = 0; k < vms.length; k++) if (!vms[k].read) nonlus++;
@@ -640,7 +640,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function rendreSms(){
     var box = document.getElementById('t-sms-inbox'); if (!box) return;
     var badge = document.getElementById('t-sms-badge');
-    if (!RESUME) { box.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!RESUME) { box.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     if (RESUME.erreur) { box.innerHTML = '<div class="vide">' + esc(RESUME.erreur) + '</div>'; return; }
     var sms = RESUME.sms || [];
     var nonlus = 0; for (var k = 0; k < sms.length; k++) if (sms[k].direction === 'inbound' && !sms[k].read) nonlus++;

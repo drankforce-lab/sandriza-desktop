@@ -145,7 +145,7 @@ function pageTransferts(ouverture) {
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1>Transferts de stock</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){

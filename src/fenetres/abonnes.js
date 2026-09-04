@@ -96,7 +96,7 @@ function pageAbonnes() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.newsletter}</span><h1>Abonnés de l’infolettre</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement… (la liste se resynchronise)</div></div>
+<div class="corps" id="corps"><div class="vide charge">Chargement… (la liste se resynchronise)</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -185,7 +185,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var rows = filtres();
     if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
 

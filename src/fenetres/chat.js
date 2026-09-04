@@ -117,7 +117,7 @@ function pageChat() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.chat}</span><h1>Chat en ligne</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement… (les conversations se resynchronisent)</div></div>
+<div class="corps" id="corps"><div class="vide charge">Chargement… (les conversations se resynchronisent)</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -291,7 +291,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     if (sous) {
       sous.innerHTML = D.enAttente
         ? '<span class="pill att">' + D.enAttente + ' en attente</span>'

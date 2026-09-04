@@ -335,7 +335,7 @@ function pagePhotos() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.image}</span><h1>Photos</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -487,7 +487,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   /* ── LE DESSIN ─────────────────────────────────────────────────────────── */
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var ro = !D.peutModifier;
     var h = '';
 
@@ -886,7 +886,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="l' + (A.lecteur === '@lib' ? ' on' : '') + '" data-src="@lib">'
         + '<b>Photos déjà importées</b><span class="aide">'
         + (D.total || 0) + ' dans la photothèque</span></div>';
-      if (!A.sources) h += '<div class="vide">Lecture des clés branchées…</div>';
+      if (!A.sources) h += '<div class="vide charge">Lecture des clés branchées…</div>';
       else if (!A.sources.length) {
         h += '<div class="vide">' + (A.erreurSource
           ? esc(A.erreurSource)

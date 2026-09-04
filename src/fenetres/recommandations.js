@@ -133,7 +133,7 @@ function pageRecommandations(onglet) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.reco}</span><h1>Recommandations</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -353,7 +353,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
 
   function vueStats(){
-    if (!STATS) return '<div class="vide">Chargement des statistiques…</div>';
+    if (!STATS) return '<div class="vide charge">Chargement des statistiques…</div>';
     var max = 0;
     (STATS.regles || []).forEach(function(r){ if (r.couverture > max) max = r.couverture; });
     var h = '<div class="carte"><h2>Couverture des règles</h2>';
@@ -424,7 +424,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
 
     var h = '<div class="barreoutils">'
@@ -663,7 +663,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
      Trois temps, dans l ordre ou on travaille : choisir un STYLE (qui filtre le
      catalogue), cocher les ARTICLES, nommer et publier. */
   function vueAgencement(){
-    if (!AGEN) return '<div class="carte"><div class="vide">Lecture du catalogue…</div></div>';
+    if (!AGEN) return '<div class="carte"><div class="vide charge">Lecture du catalogue…</div></div>';
     var h = '<div class="carte"><h2>1 · Style</h2>'
       + '<div class="styles">'
       + (AGEN.styles || []).map(function(s){

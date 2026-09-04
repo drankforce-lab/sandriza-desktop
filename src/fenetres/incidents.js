@@ -149,7 +149,7 @@ function pageIncidents(ouverture) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.secincident}</span><h1>Incidents de sécurité</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter le registre, pas le modifier.</div>
-<div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){

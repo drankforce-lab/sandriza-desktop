@@ -101,7 +101,7 @@ function pageFactures() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.billing}</span><h1>Factures</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -182,7 +182,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    if (!LIGNES) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!LIGNES) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
     var pages = Math.max(1, Math.ceil(rows.length / PAR_PAGE));
     var p = Math.min(Math.max(0, PAGE), pages - 1);

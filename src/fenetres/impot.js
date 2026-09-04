@@ -164,7 +164,7 @@ function pageImpot(onglet) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.impot}</span><h1>Fiscalité et impôt</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -237,7 +237,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   ];
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var h = '';
 
     /* ⚠ LE PROFIL INCOMPLET SE DIT EN HAUT, TOUJOURS : un document imprime sans
@@ -304,7 +304,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function vueEntreprise(){
-    if (!PROFIL) return '<div class="vide">Lecture du profil…</div>';
+    if (!PROFIL) return '<div class="vide charge">Lecture du profil…</div>';
     var p = PROFIL.profil || {};
     var h = '<div class="avis ' + (PROFIL.complet ? 'bon' : '') + '">'
       + (PROFIL.complet
@@ -364,7 +364,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function vueMemo(){
-    if (!MEMO) return '<div class="vide">Lecture de l’aide-mémoire…</div>';
+    if (!MEMO) return '<div class="vide charge">Lecture de l’aide-mémoire…</div>';
     var h = '<div class="grillecfg">';
     h += '<div class="carte"><h2>Dates limites — ' + esc(MEMO.annee) + ' / ' + esc(MEMO.annee + 1) + '</h2>'
       + '<div class="sstitre">Remises TPS / TVQ (trimestriel)</div>'

@@ -87,7 +87,7 @@ function pageJournaux(onglet) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.journaux}</span><h1>Journaux</h1></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -376,7 +376,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── SMS (#7 Lot 7b-2 — lecture serveur) ──────────────────────────
   function vueSms(){
     if (SMS_D===null){
-      corps.innerHTML='<div class="vide">Lecture des SMS…</div>'; OCCUPE=true;
+      corps.innerHTML='<div class="vide charge">Lecture des SMS…</div>'; OCCUPE=true;
       appeler('journal:sms',[]).then(function(r){ OCCUPE=false;
         if (r&&r.ok){ SMS_D=r.sms||[]; if (ONGLET==='sms') vueSms(); }
         else { SMS_D=[]; if (ONGLET==='sms') corps.innerHTML='<div class="carte"><div class="vide">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
@@ -417,7 +417,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function vueComptable(){
     if (COMPTA_D===null){
-      corps.innerHTML='<div class="vide">Lecture du journal des accès…</div>'; OCCUPE=true;
+      corps.innerHTML='<div class="vide charge">Lecture du journal des accès…</div>'; OCCUPE=true;
       appeler('liens:journal',[{canal:CP_CANAL}]).then(function(r){ OCCUPE=false;
         if (r&&r.ok){ COMPTA_D=r.evenements||[]; if (ONGLET==='comptable') vueComptable(); }
         else { COMPTA_D=[]; if (ONGLET==='comptable') corps.innerHTML='<div class="carte"><div class="vide">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });

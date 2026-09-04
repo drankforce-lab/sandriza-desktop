@@ -116,7 +116,7 @@ function pageChatConfig(onglet) {
   <button type="button" id="o-ia" data-onglet="ia"><span class="ic">🤖</span> Assistant IA</button>
 </div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter ces réglages, pas les modifier.</div>
-<div class="corps"><div id="corps"><div class="vide">Chargement…</div></div></div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -398,7 +398,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function dessiner(){
     majOnglets();
-    if (!D) { corps.innerHTML = '<div class="vide">Chargement…</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     corps.innerHTML = (ONGLET === 'ia') ? vueIa() : vueWidget();
     if (ONGLET === 'ia') {
       var bi = el('i-enr'); if (bi) bi.onclick = enregistrerIa;

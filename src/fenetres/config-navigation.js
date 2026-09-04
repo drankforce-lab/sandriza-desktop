@@ -92,7 +92,7 @@ function pageConfigNavigation() {
   <button class="mini danger" id="b-reset" disabled>Réinitialiser</button>
   <button class="mini prim" id="b-add" disabled>+ Ajouter un élément</button>
 </div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){

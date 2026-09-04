@@ -506,7 +506,7 @@ function pageStudio(mode) {
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>Studio virtuel</h1>
   <span class="credits" id="credits"></span></div>
 <div class="ro" id="ro" hidden>Lecture seule : votre rôle ne permet pas de lancer de traitement.</div>
-<div class="corps plein" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
+<div class="corps plein" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button id="b-lot">⚙ Traiter en lot…</button>
   <button class="gratuit" id="b-apercu" disabled>Aperçu gratuit</button>
@@ -840,7 +840,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     fini: 'Terminé', arrete: 'Arrêté' };
 
   function lotsHtml(){
-    if (!LOTS) return '<div class="vide">Lecture des traitements…</div>';
+    if (!LOTS) return '<div class="vide charge">Lecture des traitements…</div>';
     var l = LOTS.lots || [];
     if (!l.length) {
       return '<div class="vide">Aucun traitement. Choisissez des photos depuis la '

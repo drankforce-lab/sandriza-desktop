@@ -782,7 +782,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessinerProduits(){
     var d = PRODS;
     if (!d) {
-      corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>';
       actions.innerHTML = '';
       return;
     }
@@ -1203,7 +1203,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessinerEndommages(){
     var d = DMG;
     if (!d) {
-      corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>';
       actions.innerHTML = '';
       return;
     }
@@ -1278,7 +1278,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessinerEntrepots(){
     var d = WHS;
     if (!d) {
-      corps.innerHTML = '<div class="carte plein"><div class="vide">Chargement…</div></div>';
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>';
       actions.innerHTML = '';
       return;
     }

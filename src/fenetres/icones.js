@@ -110,7 +110,7 @@ function pageIcones() {
 <div class="tete"><span class="ico">${ICO.image}</span><h1>Icônes personnalisées</h1>
   <span class="cpt" id="cpt"></span></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les icônes, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="vide">Chargement…</div></div></div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){

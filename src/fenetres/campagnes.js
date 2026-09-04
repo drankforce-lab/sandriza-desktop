@@ -182,7 +182,7 @@ function pageCampagnes(ongletDepart) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.newsletter}</span><h1>Campagnes et chaînes</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -934,7 +934,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
      actives — il n ajoute jamais personne (consentement, LCAP / Loi 25). */
   function vueSegments(){
     var D = DS;
-    if (!D) return '<div class="vide">Chargement…</div>';
+    if (!D) return '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>';
     var h = '<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">Abonnés actifs</div><div class="val bon">'
       + (D.abonnesActifs || 0) + '</div><div class="dt">le point de départ</div></div>'
@@ -1105,7 +1105,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   /* ══ ONGLET CAMPAGNES ═══════════════════════════════════════════════════ */
   function vueCampagnes(){
     var D = DC;
-    if (!D) return '<div class="vide">Chargement…</div>';
+    if (!D) return '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>';
     var q = Q.trim().toLowerCase();
     var rows = (D.campagnes || []).filter(function(c){
       if (!q) return true;
@@ -1190,7 +1190,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   /* ══ ONGLET CHAINES ═════════════════════════════════════════════════════ */
   function vueChaines(){
     var D = DH;
-    if (!D) return '<div class="vide">Chargement…</div>';
+    if (!D) return '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>';
 
     var h = '<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">Chaînes actives</div><div class="val bon">'

@@ -86,7 +86,7 @@ function pageImages() {
 <title>Images des produits — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.image}</span><h1>Images des produits</h1></div>
-<div class="corps"><div class="zone" id="corps"><div class="vide">Lecture du catalogue…</div></div></div>
+<div class="corps"><div class="zone" id="corps"><div class="vide charge">Lecture du catalogue…</div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-migrer" disabled>Déplacer les images</button></div>
 <script>
@@ -141,7 +141,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    if (!E) { corps.innerHTML = '<div class="vide">Lecture du catalogue…</div>'; return; }
+    if (!E) { corps.innerHTML = '<div class="vide charge">Lecture du catalogue…</div>'; return; }
     var h = '';
 
     if (!E.base64) {

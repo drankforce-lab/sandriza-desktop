@@ -140,7 +140,7 @@ function pageMarque(onglet) {
 <div class="tete"><span class="ico">${ICO.image}</span><h1>Logos et marque</h1></div>
 <div class="onglets" id="onglets"></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les logos, pas les modifier.</div>
-<div class="corps" id="corps"><div class="vide">Chargement…</div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button id="b-reinit" disabled>Réinitialiser</button>
   <button class="prim" id="b-save" disabled>Enregistrer</button></div>
