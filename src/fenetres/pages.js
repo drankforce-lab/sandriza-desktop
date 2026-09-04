@@ -134,7 +134,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .ed .barre button svg{width:15px;height:15px;display:block;fill:currentColor}
 .ed .barre select{font:inherit;font-size:.78rem;background:var(--f-champ);border:1px solid #2b3444;color:var(--tx-c3cede);
   border-radius:7px;padding:.25rem .35rem;cursor:pointer;max-width:120px}
-.ed .barre .fil{width:1px;align-self:stretch;background:#2b3444;margin:.1rem .3rem}
+.ed .barre .fil{width:1px;align-self:stretch;background:var(--v14);margin:.1rem .3rem}
 .ed .barre .pousse{flex:1}
 .ed .zone{flex:1 1 auto;min-height:270px;max-height:46vh;overflow-y:auto;padding:1rem 1.15rem;
   color:var(--tx);line-height:1.65;font-size:.88rem;outline:none}

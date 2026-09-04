@@ -1603,6 +1603,9 @@ html.jour select{color-scheme:light}
 html.jour select option,html.jour select optgroup{background:#ffffff;color:#1d2433}
 
 html.jour body{background:#f4f2ec;color:#1d2433}
+/* Le fil des etapes est un bandeau navy en nuit (#111a28) : en jour il doit
+   suivre le bandeau de pied, sinon la fiche s'ouvre sur une barre sombre. */
+html.jour .pas{background:#efece4}
 html.jour .tete{background:linear-gradient(180deg,#ffffff,#f4f2ec);border-bottom-color:rgba(15,23,42,.12)}
 html.jour .tete .sous{color:#414e66}
 html.jour .tuile .lbl{filter:grayscale(1)}

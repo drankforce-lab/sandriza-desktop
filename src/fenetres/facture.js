@@ -36,6 +36,8 @@ body{background:var(--f-page);color:var(--tx);
 /* Le document defile ; la fenetre, elle, ne bouge pas. */
 .corps{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1rem 1.2rem;
   background:#1b2434}
+/* Le corps de la facture est une page de document : blanche en jour. */
+html.jour .corps{background:#fff}
 .corps::-webkit-scrollbar{width:9px}
 .corps::-webkit-scrollbar-thumb{background:var(--v14);border-radius:8px}
 

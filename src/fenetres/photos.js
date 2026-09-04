@@ -262,6 +262,8 @@ tr:hover .act .ic{opacity:1}
 .sugg button:hover{background:rgba(201,169,126,.24)}
 .asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.6rem .9rem;border-top:1px solid var(--v08);background:#0f1725}
+/* Le panneau de l'assistant est une surface, pas un accent. */
+html.jour .asst .pi{background:#faf8f3}
 .asst .pi .dr{margin-left:auto;display:flex;gap:.5rem}
 /* La planche de vignettes : c est l ecran ou l on CHOISIT, il doit montrer. */
 .pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.5rem}

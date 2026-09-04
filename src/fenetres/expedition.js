@@ -68,7 +68,7 @@ button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:60
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 /* ⚠ LE BOUTON QUI DEPENSE est d une AUTRE couleur que celui qui confirme : on ne
    doit jamais les confondre du coin de l oeil. */
-button.paie{background:#7c5cff;border-color:#7c5cff;color:var(--tx-sur-accent);font-weight:600}
+button.paie{background:#7859f7;border-color:#7859f7;color:var(--tx-sur-accent);font-weight:600}
 button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 button.mini{padding:.14rem .5rem;font-size:.76rem}
 

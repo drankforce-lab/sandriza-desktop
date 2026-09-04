@@ -175,6 +175,12 @@ jobs:
       # ⚠ C'est un CLIQUET, pas une porte fermée : la queue restante est déclarée
       # avec son nombre dans `contraste-jour-declare.js`, et le banc refuse une
       # couleur neuve sous le seuil ou un plafond qui monte.
+      # ⚠ `banc-fonds-jour.js` (2026-09-04) est la moitié manquante du banc de
+      # contraste, qui ne regarde QUE le texte et le dit dans son en-tête. Onze
+      # vraies surfaces — fil des étapes des fiches, corps de facture, bande de
+      # lot, panneau de l'assistant photos — restaient noires quand la fenêtre
+      # passait en clair. Un fond sombre doit avoir sa reprise `html.jour`, ou
+      # être déclaré comme accent plein dont la couleur porte un sens.
       # ⚠ `banc-jetons.js` (2026-09-04) garde les JETONS DE COULEUR. Il a fallu
       # trois corrections ratées et un navigateur pour trouver la cause du
       # bandeau d'en-tête invisible en mode sombre : le bloc `:root` des jetons
@@ -202,6 +208,7 @@ jobs:
           node tools/banc-contraste-jour.js
           node tools/banc-pictogrammes.js
           node tools/banc-jetons.js
+          node tools/banc-fonds-jour.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

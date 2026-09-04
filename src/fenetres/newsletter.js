@@ -78,6 +78,8 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055)}
 .bascule{position:relative;width:42px;height:23px;flex:0 0 auto}
 .bascule input{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;z-index:2;margin:0}
 .bascule .piste{position:absolute;inset:0;border-radius:12px;background:#4a5568;transition:background .2s}
+/* Piste de bascule eteinte : un gris ardoise disparait sur fond clair. */
+html.jour .bascule .piste{background:#cfcabd}
 .bascule .pouce{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:left .2s}
 .bascule input:checked ~ .piste{background:#c9a97e}
 .bascule input:checked ~ .pouce{left:21px}

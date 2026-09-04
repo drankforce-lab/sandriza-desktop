@@ -222,6 +222,8 @@ tbody tr[data-ligne]:hover td{background:var(--v045)}
 .lot{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
   background:#241a08;border:1px solid rgba(245,158,11,.4);border-radius:9px;
   padding:.45rem .7rem;font-size:.8rem}
+/* La bande du lot garde sa teinte chaude, version claire. */
+html.jour .lot{background:#f6efe0}
 .lot label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
 .lot input{width:auto}
 button.rouge{background:#dc2626;border-color:#dc2626;color:var(--tx-sur-accent);font-weight:600}
