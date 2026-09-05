@@ -65,7 +65,7 @@ tbody .fin{white-space:nowrap;text-align:right}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
   padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}

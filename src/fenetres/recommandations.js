@@ -56,7 +56,7 @@ button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
-button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
@@ -77,7 +77,7 @@ tbody tr:hover td{background:var(--v04)}
 .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;margin-right:.2rem}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .jauge{height:.4rem;border-radius:99px;background:var(--v08);overflow:hidden;min-width:5rem}
 .jauge i{display:block;height:100%;background:#c9a97e}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;

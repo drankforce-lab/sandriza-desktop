@@ -53,7 +53,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
-button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
@@ -85,7 +85,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.info{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
   padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}

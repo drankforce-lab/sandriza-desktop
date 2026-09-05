@@ -50,7 +50,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
-button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
 .tuile.bon{border-color:rgba(34,197,94,.4)}
@@ -75,7 +75,7 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:mid
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .avis{font-size:.78rem;line-height:1.5;border-radius:9px;padding:.55rem .7rem}
 .avis.bon{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35)}
 .avis.att{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4)}

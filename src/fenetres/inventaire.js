@@ -210,7 +210,7 @@ tbody tr[data-ligne]:hover td{background:var(--v045)}
 .pill.rup{background:rgba(239,68,68,.16);color:var(--tx-err)}
 .pill.bas{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.ok{background:rgba(34,197,94,.14);color:var(--tx-ok)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .badge{display:inline-block;font-size:.6rem;padding:0 .4rem;border-radius:99px;
   margin-left:.35rem;vertical-align:1px}
 .badge.vente{background:#c9a97e;color:#17202c}

@@ -63,7 +63,7 @@ button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.36rem .8rem}
 button.prim:hover:not(:disabled){background:#a3824f}
-button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte.transit{border-left:3px solid #fbbf24}

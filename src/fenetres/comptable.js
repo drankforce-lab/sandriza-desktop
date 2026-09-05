@@ -77,7 +77,7 @@ tbody tr:hover td{background:var(--v03)}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.74rem}
 .pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;white-space:nowrap;font-weight:700}
 .pill.actif{background:rgba(34,197,94,.15);color:var(--tx-ok)}
-.pill.expire{background:rgba(148,163,184,.18);color:var(--tx-94a3b8)}
+.pill.expire{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .neuf{border:1px solid rgba(201,169,126,.5);background:rgba(201,169,126,.09)}

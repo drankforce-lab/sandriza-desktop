@@ -563,7 +563,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + argent(rb.fraisRetenus) + '</strong> '
           + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> Remboursés au client</span>'
              : rb.fraisRembourses > 0
-               ? '<span class="badge2 or"><span class="ic">⚠</span> Partiel — remb. ' + argent(rb.fraisRembourses) + ' · reste ' + argent(rb.fraisRestants) + '</span>'
+               ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> Partiel — remb. ' + argent(rb.fraisRembourses) + ' · reste ' + argent(rb.fraisRestants) + '</span>'
                : '<span class="badge2 or">⏳ Non remboursés</span>') + '</div>';
       }
       h += '<div class="fin3">Total remboursé : −' + argent(rb.total)

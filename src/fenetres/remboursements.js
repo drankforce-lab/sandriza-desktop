@@ -72,7 +72,7 @@ tr.eteint td{opacity:.55}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.info{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .usages{margin-top:.2rem;display:flex;flex-direction:column;gap:1px}
 .usages span{font-size:.7rem;color:var(--tx2);white-space:nowrap}
 .usages b{color:var(--tx-err)}

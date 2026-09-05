@@ -44,7 +44,7 @@ button:hover:not(:disabled){background:var(--v10)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.mini{padding:.12rem .45rem;font-size:.74rem;-webkit-user-select:none;user-select:none}
-button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button.danger:hover:not(:disabled){background:rgba(239,68,68,.12)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
@@ -59,7 +59,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
   margin-right:.2rem}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 /* Repertoire de grossistes : des cartes, comme sur l ecran du site. */
 .repgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:.6rem}

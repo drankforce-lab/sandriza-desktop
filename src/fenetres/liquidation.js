@@ -63,7 +63,7 @@ button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
-button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .rech{flex:1 1 16rem;min-width:11rem}
@@ -100,7 +100,7 @@ tbody tr:hover td{background:var(--v04)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.liq{background:rgba(217,119,6,.18);color:var(--tx-att)}
 .pill.vfin{background:rgba(220,38,38,.18);color:var(--tx-err2)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .pager{display:flex;align-items:center;gap:.6rem;justify-content:flex-end;margin-top:.5rem;
   font-size:.75rem;color:var(--tx2);flex-wrap:wrap}
 .pager .gauche{margin-right:auto;display:flex;align-items:center;gap:.35rem}

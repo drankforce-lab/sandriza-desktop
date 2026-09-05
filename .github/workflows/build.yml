@@ -113,8 +113,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Contrastes des fenetres, mesures au rendu
-        run: node tools/banc-contraste-rendu.js
+      # ⚠ `--themes` DEPUIS LA 4.40.0, ET C'EST UN CHOIX QUI SE PAIE : 1 104
+      # affichages au lieu de 184, six minutes au lieu d'une. On le prend parce
+      # que le balayage des thèmes est enfin PROPRE — tant qu'il rendait cent
+      # dix-huit fautes, l'inclure aurait juste posé un rouge permanent, et un
+      # rouge permanent finit désactivé. Maintenant qu'il est vert, l'exclure
+      # reviendrait à laisser six jeux de couleurs sur sept sans garde.
+      # Le budget de temps du banc s'arrête bien avant le quota GitHub.
+      - name: Contrastes des fenetres, mesures au rendu (2 modes x 6 themes)
+        env:
+          SZ_CONTRASTE_BUDGET_MS: '900000'
+        run: node tools/banc-contraste-rendu.js --themes
 
   windows:
     needs: menage

@@ -56,7 +56,7 @@ button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);f
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
+button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button.ic{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;line-height:1}
 button.ic.plus{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent)}
 .aide{font-size:.79rem;color:var(--tx2);line-height:1.5;margin:0 0 .6rem}

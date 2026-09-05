@@ -94,7 +94,7 @@ input.t:disabled,textarea.t:disabled{opacity:.45}
 .b:disabled{opacity:.45;cursor:default}
 .b.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 .b.prim:hover:not(:disabled){background:#a3824f}
-.b.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err);padding:.2rem .45rem}
+.b.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2);padding:.2rem .45rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;
   background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;

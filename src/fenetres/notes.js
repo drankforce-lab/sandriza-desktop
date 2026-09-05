@@ -52,7 +52,7 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 .ligne .droite{margin-left:auto;font-size:.74rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}
+.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .detail{margin-top:.5rem;border-top:1px solid var(--v08);padding-top:.5rem;
   font-size:.86rem;line-height:1.55}
 .detail h4{margin:.55rem 0 .2rem;font-size:.72rem;text-transform:uppercase;

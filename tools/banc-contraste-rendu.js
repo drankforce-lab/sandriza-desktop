@@ -610,7 +610,13 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
      IMPORTANTE DU RAPPORT. Une page qui fait tomber le moteur ne dit rien ; sans
      ce compte, un banc qui n'aurait vu que la moitié des écrans se lirait comme
      un banc content. Un manquant est un PROBLÈME, pas une note. */
-  const rendusFaits = lignes.filter((l) => l.startsWith('COMPTES|')).length;
+  /* ⚠⚠ DES RENDUS DISTINCTS, PAS DES LIGNES DE RELEVÉ. Sur un petit lot le
+     rapport annonçait « 24 rendus mesurés sur 12 » — un compte de couverture qui
+     DÉPASSE son total. C'est absurde, et surtout c'est dangereux : la même
+     addition qui gonfle peut compenser un rendu manquant, et la ligne
+     « ⚠ N MANQUANT(S) » — la seule qui protège du « je n'ai pas regardé » —
+     s'éteindrait toute seule. On compte donc les CONTEXTES distincts. */
+  const rendusFaits = new Set(parRendu.map((r) => r.ctx)).size;
   const manquants = nbRendus - rendusFaits;
   console.log(`   ${rendusFaits} rendus mesurés sur ${nbRendus}${manquants > 0 ? `  ⚠ ${manquants} MANQUANT(S)` : ''}`);
   console.log(`   ${comptes.vus} couples texte/fond mesurés dans le navigateur`);

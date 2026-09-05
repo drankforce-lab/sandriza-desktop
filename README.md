@@ -187,3 +187,37 @@ rendu lisible, pas caché.
 sur les pastilles du thème **ardoise**, dont les fonds de carte sont les plus
 clairs des six. Ce sont des cheveux, pas des trous — mais ils sont nommés à
 chaque passage de `--themes`, pas cachés.
+
+### Et les 16 derniers (2026-09-05, 4.40.0) — une règle écrite 30 fois
+
+Il restait seize couples entre 4.0 et 4.4, sur les **pastilles** du thème
+*ardoise*. La cause n'était pas le thème : c'était **la même règle CSS recopiée
+trente fois, à l'octet près** —
+`.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx2)}` — dans trente
+fenêtres. Une pastille pose un voile clair sur la carte ; sur les thèmes dont la
+carte est déjà la plus claire, `--tx2` tombait juste sous le seuil.
+
+⚠ **On n'a pas touché aux jetons.** `--tx-gris2` et `--tx-err2` existaient déjà
+et passent largement (7.33 et 5.74 au pire) : il suffisait de prendre le bon
+jeton au bon endroit. Éclaircir `--tx2` aurait rejoué exactement le piège de
+`--tx3` sur la vignette des icônes.
+
+⚠ **Remplacement à l'IDENTIQUE, jamais par sélecteur.** Deux fenêtres ont une
+`.pill.neutre` volontairement différente (une variante dorée) : une règle
+d'écrasement posée dans le socle les aurait écrasées aussi. On remplace la chaîne
+exacte, les variantes restent intactes. 30 + 2 + 23 occurrences.
+
+⚠ **Une pastille sur un panneau teinté n'est pas une pastille sur une carte** :
+celle du panneau d'avis d'`impôt` est sur du bleu clair, où tous les gris de la
+charte tombent entre 3.8 et 4.2. Elle prend le texte principal.
+
+**Résultat : 16 → 0.** Le balayage des six thèmes est propre, donc il entre dans
+la construction (`--themes`, ~6 min, sans bloquer) : il n'y a plus de jeu de
+couleurs sans garde.
+
+🔴 **Et un défaut de comptage trouvé au passage** : sur un petit lot le rapport
+annonçait « **24 rendus mesurés sur 12** » — un compte de couverture qui dépasse
+son total. C'est absurde, et surtout dangereux : la même addition qui gonfle peut
+compenser un rendu manquant, et la ligne « ⚠ N MANQUANT(S) » — la seule qui
+protège du « je n'ai pas regardé » — s'éteindrait toute seule. On compte
+désormais des **contextes distincts**, pas des lignes de relevé.

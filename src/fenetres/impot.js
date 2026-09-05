@@ -85,7 +85,13 @@ tbody tr.credit td{color:var(--tx-ok)}
 .avis.bon{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);color:var(--tx-ok)}
 .avis.info{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.4);color:var(--tx-bleu)}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
-  background:rgba(148,163,184,.16);color:var(--tx2);margin:.1rem .25rem 0 0}
+  background:rgba(148,163,184,.16);color:var(--tx-gris2);margin:.1rem .25rem 0 0}
+/* La pastille du panneau d'AVIS (fond bleu clair en mode jour) : les gris de la
+   charte y tombent tous entre 3.8 et 4.2, parce que ce fond est plus clair
+   qu'une carte ordinaire. Le texte principal, lui, passe largement (10.9).
+   ⚠ Une pastille posée sur un panneau teinté ne peut pas prendre le gris des
+   pastilles posées sur une carte : ce n'est pas le même fond. */
+.avis .pill{color:var(--tx)}
 .docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.5rem}
 .doc{background:var(--v04);border:1px solid var(--v09);
   border-radius:10px;padding:.55rem .7rem;display:flex;flex-direction:column;gap:.25rem}
