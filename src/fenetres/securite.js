@@ -409,8 +409,14 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   /* ⚠ L ERREUR RAMENE SUR L ONGLET CONCERNE. Afficher « courriel invalide »
      pendant que l on regarde les permissions laisse chercher le champ fautif. */
+  /* ⚠ ET L ENCADRE EFFACE LA LIGNE DU PIED — voir profil.js, meme defaut :
+     le meme texte etait ecrit dans l encadre ET dans le pied, donc lu deux
+     fois. Ici il paraissait meme TROIS fois : l editeur est une surcouche, et
+     szDire y recopie aussi son message. */
   function ferr(msg, ong){
-    var e=document.getElementById('u-err'); if (e){ e.textContent=msg; e.style.display='block'; }
+    var e=document.getElementById('u-err');
+    if (e){ e.textContent=msg||''; e.style.display=msg?'block':'none'; }
+    if (msg) dire('');
     if (!ong) return;
     var b=document.querySelector('#u-ong button[data-ong="'+ong+'"]'); if (b) b.click();
   }
@@ -437,7 +443,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           ? ('Compte créé.' + (r.courrielEnvoye ? ' Courriel d’accueil envoyé à '+(r.courriel||'')+'.' : (r.tempPassword ? ' Mot de passe temporaire : '+r.tempPassword+' (courriel non envoyé).' : ' (courriel non envoyé).')))
           : 'Compte modifié.';
         recharger(msg, 'bon');
-      } else { ferr(expliquer(r), 'identite'); dire('Échec : '+expliquer(r), 'err'); }
+      } else ferr(expliquer(r), 'identite');
     });
   }
   function supprimerCompte(id){

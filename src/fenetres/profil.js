@@ -179,8 +179,18 @@ input.t:focus,select.t:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 
 .prim:focus-visible{outline:2px solid #c9a97e;outline-offset:3px}
 .mini{font:inherit;font-size:.76rem;padding:.2rem .6rem;border:1px solid var(--v16);border-radius:8px;
   background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
+/* ══ L ENCADRE D ERREUR — IL DIT, IL NE DEFORME PAS ══════════════════════
+   Sa remarque : << les messages d erreur apparaissent en double et surtout
+   deforment la fenetre >>. Deux defauts distincts, deux corrections.
+   ⚠ IL SE POSE JUSTE AU-DESSUS DU BOUTON, PAS EN TETE DE CARTE. Pose en tete,
+   il faisait descendre TOUT le formulaire d un cran a chaque echec : les champs
+   bougeaient sous le curseur. Juste au-dessus du bouton, rien de ce qu on vient
+   de saisir ne se deplace.
+   ⚠ ET IL EST BORNE. Un message de serveur long, ou sans espace, etirait la
+   colonne de gauche et decalait la carte de droite avec elle. */
 .ferr{display:none;color:var(--tx-err2);font-size:.85rem;padding:.65rem .85rem;background:rgba(248,113,113,.1);
-  border:1px solid rgba(248,113,113,.3);border-radius:11px;margin:0 0 1.05rem}
+  border:1px solid rgba(248,113,113,.3);border-radius:11px;margin:.35rem 0 0;
+  max-width:34rem;overflow-wrap:anywhere;line-height:1.5}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
 @media(max-width:760px){.cols2{grid-template-columns:1fr}}
 .vide{padding:2.4rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
@@ -380,7 +390,6 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="carte">'
       + '<h3>Changer le mot de passe</h3>'
       + '<p class="intro">Le mot de passe <b>actuel</b> est vérifié par le serveur, pas par cette fenêtre.</p>'
-      + '<div class="ferr" id="p-err"></div>'
       + '<div class="mince">'
       + champMdp('p-cur', 'Mot de passe actuel', 'current-password', '')
       + champMdp('p-new', 'Nouveau mot de passe', 'new-password',
@@ -391,6 +400,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="jauge" id="p-jauge"><i></i><i></i><i></i><i></i></div>'
       + '<div class="jmot" id="p-jmot">Indication de robustesse</div>'
       + champMdp('p-cnf', 'Confirmer', 'new-password', '')
+      + '<div class="ferr" id="p-err" role="alert"></div>'
       + '<div class="actions">'
         + '<button class="prim" id="p-go">Enregistrer le nouveau mot de passe</button>'
       + '</div>'
@@ -423,13 +433,13 @@ ${JS_ACTIVITE}${JS_DIRE}
           ? 'Vos réponses sont <b>enregistrées et chiffrées</b> : elles ne peuvent plus être réaffichées. Pour les changer, redonnez les <b>deux</b>.'
           : '<b>Aucune réponse enregistrée</b> : sans elles, votre compte ne pourra pas être récupéré par cette voie.')
       + '</p>'
-      + '<div class="ferr" id="q-err"></div>'
       + '<div class="cols2">'
       + '<label class="champ"><span class="lbl">Question 1</span><select class="t" id="q-q1">' + qOpts(D.q1, D.q2) + '</select></label>'
       + '<label class="champ"><span class="lbl">Réponse 1</span><input class="t" id="q-a1" autocomplete="off"></label>'
       + '<label class="champ"><span class="lbl">Question 2</span><select class="t" id="q-q2">' + qOpts(D.q2, D.q1) + '</select></label>'
       + '<label class="champ"><span class="lbl">Réponse 2</span><input class="t" id="q-a2" autocomplete="off"></label>'
       + '</div>'
+      + '<div class="ferr" id="q-err" role="alert"></div>'
       + '<button class="prim" id="q-go">Enregistrer les questions</button></div>';
   }
 
@@ -485,19 +495,30 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
     }
   }
-  function ferr(id, msg){ var e=document.getElementById(id); if (e){ e.textContent=msg; e.style.display=msg?'block':'none'; } }
+  /* ⚠ L ENCADRE EFFACE LA LIGNE DU PIED. Les deux disaient la meme phrase, et
+     on la lisait deux fois. L encadre gagne : il est a cote du bouton qu on
+     vient de presser, il porte role="alert" (donc il s annonce aussi a qui
+     n ecoute pas l ecran), et il RESTE tant qu on n a pas retente — la ligne du
+     pied, elle, s efface toute seule au bout de cinq secondes.
+     La regle est DANS la fonction, pas chez ses appelants : c est la seule
+     facon que le prochain echec ajoute ne revienne pas en double. */
+  function ferr(id, msg){
+    var e=document.getElementById(id);
+    if (e){ e.textContent=msg; e.style.display=msg?'block':'none'; }
+    if (msg) dire('');
+  }
 
   function motDePasse(){
     if (OCCUPE) return; OCCUPE=true; ferr('p-err',''); dire('Vérification…');
     appeler('profil:motdepasse',[txv('p-cur'), txv('p-new'), txv('p-cnf')]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ ONGLET='pw'; dire('Mot de passe modifié.', 'bon'); charger(); }
-      else { ferr('p-err', expliquer(r)); dire('Échec : '+expliquer(r), 'err'); } });
+      else ferr('p-err', expliquer(r)); });
   }
   function questions(){
     if (OCCUPE) return; OCCUPE=true; ferr('q-err',''); dire('Enregistrement…');
     appeler('profil:questions',[txv('q-q1'), txv('q-a1'), txv('q-q2'), txv('q-a2')]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ if (r.nom) D=r; ONGLET='q'; dessiner(); dire('Questions de sécurité enregistrées.', 'bon'); }
-      else { ferr('q-err', expliquer(r)); dire('Échec : '+expliquer(r), 'err'); } });
+      else ferr('q-err', expliquer(r)); });
   }
 
   function charger(){
