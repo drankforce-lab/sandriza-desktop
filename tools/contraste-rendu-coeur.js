@@ -221,7 +221,7 @@
 
   /* ── Le relevé ────────────────────────────────────────────────────────── */
   var trouve = {};                          // clé « fg sur bg @seuil » → dossier
-  var comptes = { vus: 0, invisibles: 0, voile: 0, image: 0, illisible: 0, inactifs: 0, souVoile: 0 };
+  var comptes = { vus: 0, invisibles: 0, voile: 0, image: 0, illisible: 0, inactifs: 0, souVoile: 0, decoratifs: 0 };
 
   /* ══ CE QUE LA NORME ELLE-MÊME N'EXIGE PAS — ET LA CAPTURE QUI L'A MONTRÉ ══
      Le premier balayage complet a rendu 138 couples sous le seuil, dont
@@ -290,6 +290,20 @@
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
       if (SANS_TEXTE[el.tagName]) continue;
+      /* ⚠⚠ CE QUI EST DÉCLARÉ DÉCORATIF NE SE JUGE PAS — ET C'EST LA BONNE
+         FAÇON DE LE DIRE. Les séparateurs « · » entre un nombre et son libellé
+         sortaient sous le seuil dans les six thèmes : douze clés de couleur pour
+         un point qui ne veut rien dire. Les déclarer une à une dans le fichier
+         d'exceptions aurait été long, illisible, et surtout FAUX — ce n'est pas
+         cette couleur-là qu'on absout, c'est ce point-là.
+         `aria-hidden="true"` dit exactement la bonne chose, au bon endroit : ce
+         texte n'est pas du contenu. Un lecteur d'écran l'ignore déjà ; la norme
+         exempte la décoration pure (WCAG 1.4.3) ; et le jour où quelqu'un met
+         de l'INFORMATION derrière cet attribut, c'est un défaut d'accessibilité
+         bien plus grave que son contraste — un autre garde l'attrapera.
+         ⚠ Compté et annoncé : un écran entier passé en `aria-hidden` se verrait
+         dans le rapport plutôt que de disparaître en silence. */
+      if (el.closest && el.closest('[aria-hidden="true"]')) { comptes.decoratifs++; continue; }
       if (estInactif(el)) { comptes.inactifs++; continue; }
       if (derriereUnVoile(el)) { comptes.souVoile++; continue; }
       var txt = '';

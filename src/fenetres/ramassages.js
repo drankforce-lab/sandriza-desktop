@@ -68,7 +68,13 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill.info{background:rgba(59,130,246,.16);color:var(--tx-bleu)}
 .ligne{padding:.55rem .7rem;background:var(--f-carte);border:1px solid var(--v07);
   border-radius:11px}
-.ligne.annule{opacity:.55}
+/* ⚠ UN RAMASSAGE ANNULÉ RESTE À LIRE. À .55, sa date, son nombre de colis et
+   sa pastille « Annulé » tombaient sous 2.9 de contraste : on voyait qu'il y
+   avait quelque chose, sans pouvoir lire QUOI. C'est l'inverse du besoin —
+   on ouvre cet écran pour savoir ce qui a été annulé, et quand.
+   ⚠ .95 : sa pastille rouge etait deja limite a pleine opacite, donc le peu
+   qu'on retire compte double. Valeur MESUREE au banc. */
+.ligne.annule{opacity:.95}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
 .ligne .dt{font-size:.72rem;color:var(--tx2);margin-top:.2rem}
 input[type=number],input[type=text]{font:inherit;color:var(--tx);background:var(--v05);
@@ -161,7 +167,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function barre(){
     return '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'ramassages' ? ' actif' : '') + '" data-onglet="ramassages"><span class="ic">📅</span> Ramassages</button>'
+      + '<button class="mini' + (ONGLET === 'ramassages' ? ' actif' : '') + '" data-onglet="ramassages"><span class="ic" aria-hidden="true">📅</span> Ramassages</button>'
       + '<button class="mini' + (ONGLET === 'rapport' ? ' actif' : '') + '" data-onglet="rapport"><span class="ic">📊</span> Rapport transporteurs</button>'
       + (ONGLET === 'ramassages'
           ? '<span class="droite"><button class="prim" id="rm-planifier" '
@@ -182,7 +188,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         return '<div class="ligne' + (r.annule ? ' annule' : '') + '">'
           + '<div class="haut">'
           + '<span>' + r.logo + '</span><span class="num">' + esc(r.transporteur) + '</span>'
-          + '<span class="dt"><span class="ic">📅</span> ' + esc(r.date) + '</span>'
+          + '<span class="dt"><span class="ic" aria-hidden="true">📅</span> ' + esc(r.date) + '</span>'
           + '<span class="pill neutre">' + r.colis + ' colis</span>'
           + etat
           + (!r.annule
@@ -214,7 +220,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="pied-boite"><button id="rm-p-annuler">Fermer</button></div></div></div>';
       return h;
     }
-    h += '<div class="dt"><span class="ic">📅</span> Prévu le <strong>' + esc(p.date) + '</strong>, entre 09 h et 17 h'
+    h += '<div class="dt"><span class="ic" aria-hidden="true">📅</span> Prévu le <strong>' + esc(p.date) + '</strong>, entre 09 h et 17 h'
       + (p.adresse ? ' · ' + esc(p.adresse) : '') + '</div>';
     h += (p.groupes || []).map(function(g){
       return '<div class="grp"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'

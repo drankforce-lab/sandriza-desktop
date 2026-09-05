@@ -154,3 +154,36 @@ demandée ; si la réponse diffère, c'est la décision du site et on s'y tient.
 La même récursion dormait dans la vue « fiche produit » (`dessiner()` →
 `grilleAutoAjuste()` → `dessiner()`), sans rien pour la borner : un verrou de
 ré-entrance l'en empêche désormais.
+
+### Ce que les six thèmes ont fait remonter (2026-09-05)
+
+118 couples sous le seuil, **et aucun n'était propre aux thèmes** : c'étaient
+**huit endroits** déjà en dette dans le thème par défaut, que les six thèmes
+multipliaient. Deux causes de fond, et une leçon :
+
+- **Deux JETONS trop pâles**, `--tx3` (#6d7f96 → **#8e9cad**) et `--tx-gris`
+  (#6f8098 → **#8b9cb4**). `--tx3` échouait **même à pleine opacité** (4.00 sur
+  la carte de nuit) : c'était la plus grosse entrée de dette, 125 endroits.
+- **Estomper n'est pas effacer.** Une ligne de pays non desservi à `.42`, un
+  ramassage annulé à `.55`, un bloc de bannière éteint à `.5` : le texte tombait
+  entre 1.7 et 2.9, c'est-à-dire illisible — alors qu'on ouvre ces écrans
+  **précisément pour lire ce qui est éteint**. Les opacités sont maintenant
+  MESURÉES (.9, .95, .9), pas choisies à l'œil.
+- 🔴 **En corrigeant `--tx3`, j'ai EMPIRÉ un endroit** : la vignette d'`icones`
+  garde un fond crème en dur dans les deux modes, et son texte prenait un jeton
+  qui, lui, suit le mode. → **un fond qui ne suit pas le thème ne peut pas porter
+  un texte qui le suit** ; les deux vont ensemble, ou aucun des deux.
+
+**La décoration se déclare, elle ne s'excuse pas.** Les séparateurs « · » et les
+pictogrammes accolés à leur libellé sortaient sous le seuil dans les douze
+combinaisons : douze clés de couleur pour un point qui ne veut rien dire. Ils
+portent désormais `aria-hidden="true"` — ce qui est vrai pour un lecteur d'écran
+aussi. Le banc les compte et les annonce (« déclarés décoratifs »).
+⚠ **Un pictogramme SEUL dans son élément n'est pas décoratif** : le maillon
+« produit lié » de l'explorateur porte son sens dans son `title`, donc il a été
+rendu lisible, pas caché.
+
+**Reste 16 couples**, tous entre **4.0 et 4.4** (le seuil est 4.5), concentrés
+sur les pastilles du thème **ardoise**, dont les fonds de carte sont les plus
+clairs des six. Ce sont des cheveux, pas des trous — mais ils sont nommés à
+chaque passage de `--themes`, pas cachés.

@@ -72,7 +72,15 @@ table.pays th{position:sticky;top:0;background:var(--f-131c2b);text-align:left;f
   text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .7rem;
   border-bottom:1px solid var(--v10)}
 table.pays td{padding:.38rem .7rem;border-bottom:1px solid var(--v05);font-size:.84rem}
-table.pays tr.off td{opacity:.42}
+/* ⚠ ESTOMPER N'EST PAS EFFACER. Une ligne de pays NON DESSERVI était à .42 :
+   son nom et son code sortaient à 1.7 de contraste, c'est-à-dire illisibles.
+   Or c'est justement là qu'il faut lire — on regarde cette liste POUR SAVOIR
+   quels pays sont fermés. Le gris dit « inactif » ; il ne doit pas dire « rien ».
+   ⚠ Ce n'est pas un contrôle inactif au sens de la norme (WCAG 1.4.3 exempte les
+   COMMANDES inactives, pas le texte d'un tableau) : ici, l'information reste
+   l'information. .9 se lit encore comme un retrait, et le texte se lit — c'est
+   la valeur MESUREE au banc, pas une estimation. */
+table.pays tr.off td{opacity:.9}
 table.pays .code{color:var(--tx3);font:.72rem ui-monospace,Menlo,Consolas,monospace;margin-left:.35rem}
 table.pays .oui{color:var(--tx-ok);font-weight:600;font-size:.78rem}
 table.pays .non{color:var(--tx3);font-size:.78rem}

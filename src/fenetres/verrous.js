@@ -149,7 +149,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             ? '<span class="pill mort">' + esc(motif) + '</span>'
             : '<span class="pill vif">actif · ' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
         + (PEUT ? '<td style="text-align:right"><button class="mini dgr" data-unl="' + esc(cle) + '">'
-            + (CONF === cle ? '✓ Confirmer' : '<span class="ic">🔓</span> Déverrouiller') + '</button></td>' : '')
+            + (CONF === cle ? '✓ Confirmer' : '<span class="ic" aria-hidden="true">🔓</span> Déverrouiller') + '</button></td>' : '')
         + '</tr>';
     }
     return h + '</tbody></table>';
@@ -175,7 +175,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (VERR.length && PEUT
           ? '<button class="mini dgr" id="v-all">'
             + (CONF === 'tout' ? '✓ Confirmer — tout déverrouiller'
-                               : '<span class="ic">🔓</span> Tout déverrouiller (' + VERR.length + ')') + '</button>'
+                               : '<span class="ic" aria-hidden="true">🔓</span> Tout déverrouiller (' + VERR.length + ')') + '</button>'
           : '') + '</div>';
 
     h += '<div class="carte"><h3>Verrous actifs (' + actifs.length + ')</h3>'

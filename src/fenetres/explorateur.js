@@ -101,8 +101,12 @@ td.vig img{border:0;outline:0}
 .vig .nm{font-size:.68rem;color:var(--tx2);padding:.18rem .3rem;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
 .pastilles{display:flex;gap:.15rem}
+/* ⚠ CETTE PASTILLE PORTE PARFOIS UN PICTOGRAMME SEUL (le maillon « produit
+   lié », dont le sens tient dans son attribut title). On ne peut donc pas la déclarer
+   décorative : elle doit se LIRE. --tx2 la laissait à 4.2 sur les fonds des
+   thèmes sombres ; --tx-bleute passe partout. */
 .pt{font-size:.62rem;padding:.02rem .26rem;border-radius:4px;
-  background:var(--v08);color:var(--tx2)}
+  background:var(--v08);color:var(--tx-bleute)}
 .pt.fait{color:var(--tx-ok)}
 /* Le retour en arriere possible — dore, comme tout ce qui se decide ici. */
 .pt.ret{color:var(--tx-or)}

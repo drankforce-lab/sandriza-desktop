@@ -549,7 +549,7 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
   const muettes = [];
   const manque = [];
   const comptes = { vus: 0, invisibles: 0, voile: 0, image: 0, illisible: 0,
-                    inactifs: 0, souVoile: 0 };
+                    inactifs: 0, souVoile: 0, decoratifs: 0 };
   const parRendu = [];
 
   for (const l of lignes) {
@@ -585,13 +585,14 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
       comptes.vus += p[0]; comptes.invisibles += p[1]; comptes.voile += p[2];
       comptes.image += p[3]; comptes.illisible += p[4];
       comptes.inactifs += p[5] || 0; comptes.souVoile += p[6] || 0;
+      comptes.decoratifs += p[7] || 0;
       /* ⚠⚠ UN RENDU QUI NE MESURE PRESQUE RIEN DOIT SE DÉNONCER LUI-MÊME.
          Exempter ce qui est derrière une modale a fait tomber `commande` de
          74 couples à une poignée : la fenêtre ouvre sa modale au démarrage,
          donc TOUT le reste est estompé, donc exempté. C'est correct, et c'est
          aussi une couverture proche de zéro qui, noyée dans un total, se lirait
          comme un écran propre. Le nom du rendu est donc gardé avec son compte. */
-      const ctx = l.split('|').slice(8).join('|');
+      const ctx = l.split('|').slice(9).join('|');
       if (ctx) parRendu.push({ ctx, vus: p[0] || 0, voile: p[6] || 0 });
     } else if (l.startsWith('MUETTE ')) {
       muettes.push(l.slice(7));
@@ -632,7 +633,8 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
      produit 138 « fautes » dont les deux plus graves — « Confirmer le
      remboursement » et « Expédier » — étaient des boutons grisés sous un voile. */
   console.log(`   exemptés : ${comptes.inactifs} contrôles inactifs · ` +
-              `${comptes.souVoile} derrière une modale ouverte`);
+              `${comptes.souVoile} derrière une modale ouverte · ` +
+              `${comptes.decoratifs} déclarés décoratifs (aria-hidden)`);
   /* ⚠ DEUX FAÇONS DE NE RIEN MESURER, ET LA SECONDE EST LA PLUS SOURNOISE :
      un rendu où l on a écarté DERRIÈRE UNE MODALE plus de textes qu on en a
      jugés a beau montrer un chiffre honnête, il a surtout mesuré le voile.

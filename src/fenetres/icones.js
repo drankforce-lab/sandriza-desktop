@@ -72,7 +72,13 @@ body{background:var(--f-page);color:var(--tx);
   cursor:pointer;-webkit-user-select:none;user-select:none}
 .vig.fige{cursor:default}
 .vig img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-.vig .rien{font-size:.72rem;color:var(--tx3);text-align:center;line-height:1.35}
+/* ⚠⚠ FOND EN DUR, DONC COULEUR EN DUR. Cette vignette garde son crème
+   (#f5f2ec) dans les DEUX modes ; le texte, lui, prenait --tx3, qui suit le
+   mode. En nuit, un jeton éclairci pour les fonds sombres tombait donc à 2.5
+   sur ce fond clair — j'ai empiré cet endroit en corrigeant les autres.
+   ⚠ La leçon : un fond qui ne suit pas le thème ne peut pas porter un texte qui
+   le suit. Les deux vont ensemble, ou aucun des deux. */
+.vig .rien{font-size:.72rem;color:#576678;text-align:center;line-height:1.35}
 /* La liste des icones. */
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.7rem}
 .ico{display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem;align-items:center;min-width:0;

@@ -489,7 +489,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     } else {
       h += '<span class="et ' + couleurStatut(c.statut) + '">' + esc(libelleStatut(c.statut)) + '</span>';
     }
-    h += (c.prioritaire ? '<span class="badge2 or"><span class="ic">⚡</span> Prioritaire</span>' : '')
+    h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> Prioritaire</span>' : '')
       + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> Remboursée</span>'
           : (d.remboursements.lignes.length
               ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' remb.</span>' : ''))

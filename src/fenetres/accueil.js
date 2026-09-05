@@ -41,8 +41,15 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .bloc .nom{flex:1;min-width:0}
 .bloc .nom b{font-size:.88rem}
 .bloc .nom .d{font-size:.73rem;color:var(--tx2)}
-.bloc .masq{font-size:.68rem;color:var(--tx-jaune);margin-left:.35rem}
-.bloc.off{opacity:.5}
+/* ⚠ « (masqué) » EST UNE INFORMATION, pas un ornement : c'est ce qui distingue
+   une bannière éteinte d'une bannière vivante. --tx-jaune sortait à 4.38 sur
+   blanc — juste sous le seuil, donc juste illisible pour qui lit mal. --tx-att
+   dit la même chose en un ton plus soutenu. */
+.bloc .masq{font-size:.68rem;color:var(--tx-att);margin-left:.35rem;font-weight:600}
+/* ⚠ UN BLOC ÉTEINT SE LIT ENCORE. À .5, le nom de la bannière et sa description
+   tombaient sous 2.6 de contraste : on ne pouvait plus savoir LAQUELLE est
+   éteinte, ce qui est pourtant la seule raison de regarder cette liste. */
+.bloc.off{opacity:.9}
 .bloc .actes{display:flex;gap:.3rem;flex-shrink:0}
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
 .gr4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.5rem}

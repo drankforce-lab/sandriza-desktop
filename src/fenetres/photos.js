@@ -553,16 +553,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="etat">'
       + '<b>' + D.trouvees + '</b> affichée' + (D.trouvees > 1 ? 's' : '')
       + ' sur <b>' + D.total + '</b>'
-      + '<span class="sp">·</span> <b>' + D.isolees + '</b> isolée' + (D.isolees > 1 ? 's' : '')
-      + '<span class="sp">·</span> <b>' + D.liees + '</b> attachée' + (D.liees > 1 ? 's' : '')
-      + '<span class="sp">·</span> ' + poids(D.poidsTotal) + ' rangés'
+      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.isolees + '</b> isolée' + (D.isolees > 1 ? 's' : '')
+      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.liees + '</b> attachée' + (D.liees > 1 ? 's' : '')
+      + '<span class="sp" aria-hidden="true">·</span> ' + poids(D.poidsTotal) + ' rangés'
       /* ⚠⚠ DEUX CHIFFRES DIFFERENTS, ET C EST VOULU. << rangés >> additionne le
          poids inscrit sur chaque fiche ; << dans R2 >> est ce que le stockage
          contient VRAIMENT, mesure en l interrogeant. Les confondre ferait passer
          pour une mesure ce qui n est qu une somme : elle ignore les objets que
          plus aucune fiche ne cite, et c est justement ceux-la qu on paie sans
          les voir. L ecart entre les deux EST l information. */
-      + '<span class="sp">·</span> <span id="p-r2">'
+      + '<span class="sp" aria-hidden="true">·</span> <span id="p-r2">'
       + (ESPACE === null ? '<a href="#" id="p-mesurer">mesurer l’espace R2</a>'
          : ESPACE.ok === false ? '<span class="err">espace R2 : ' + esc(ESPACE.detail || 'illisible') + '</span>'
          : espaceTexte(ESPACE))

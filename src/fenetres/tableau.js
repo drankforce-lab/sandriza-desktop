@@ -342,7 +342,7 @@ ${JS_ACTIVITE}${JS_DIRE}
               // Point median entre le nombre et le libelle : c est le separateur
               // du projet (<< Payer avec Afterpay · 45 $ >>). Colle, << 1commande a
               // traiter >> se lisait comme un seul mot.
-              + '<b>' + x[1] + '</b><i>·</i>' + esc(x[1] > 1 ? x[3] : x[2]) + '</button>';
+              + '<b>' + x[1] + '</b><i aria-hidden="true">·</i>' + esc(x[1] > 1 ? x[3] : x[2]) + '</button>';
           }).join('')
         + '</div>';
     }
