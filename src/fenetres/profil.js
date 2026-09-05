@@ -62,103 +62,158 @@ const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+body{background:var(--f-page);color:var(--tx);font:14px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
+.corps{flex:1 1 auto;min-height:0;padding:1.35rem 1.5rem 2rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 
-/* ── LA CARTE D IDENTITE ───────────────────────────────────────
-   Elle est en PLEINE LARGEUR, et c est le point : la version d avant mettait
-   une carte courte a cote d une carte longue, ce qui laissait un trou beant. */
+/* ══ LA GRILLE — C EST ELLE QUI REPARE L ECRAN ════════════════════════════
+   Sa remarque : le formulaire tenait dans 530 px et les deux tiers de la
+   fenetre restaient en friche. Un mot de passe ne doit PAS s etirer (un champ
+   large suggere une saisie longue) — mais la place libre doit servir a autre
+   chose, pas rester vide.
+   Deux colonnes : le geste a gauche, l etat du compte a droite. La droite ne
+   remplit pas, elle REPOND a une question qu on se pose sur cet ecran : ou en
+   est mon compte.
+   ⚠ ANCREE, LA ZONE EST PLEINE PAGE : minmax + auto, jamais de max-width sur la
+   grille elle-meme, sinon on recree le trou qu on vient de boucher. */
+.grille{display:grid;grid-template-columns:minmax(0,7fr) minmax(19rem,4fr);
+  gap:1.35rem;align-items:start}
+@media(max-width:1000px){.grille{grid-template-columns:minmax(0,1fr)}}
+
+/* ══ L EN-TETE D IDENTITE ═══════════════════════════════════════════════ */
 .ident{display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;
-  background:var(--v03);border:1px solid var(--v08);
-  border-radius:14px;padding:1.15rem 1.3rem;margin:0 0 1.05rem}
-/* ⚠ UN MONOGRAMME, PAS UN PICTOGRAMME. C est ce qui regle la couronne en
-   couleur : il n y a plus d emoji du tout, donc rien a griser. */
-.mono{width:60px;height:60px;flex:0 0 auto;border-radius:50%;
-  background:linear-gradient(145deg,rgba(201,169,126,.26),rgba(201,169,126,.1));
-  border:1px solid rgba(201,169,126,.42);color:var(--tx-e7cfa8);
+  background:linear-gradient(135deg,var(--v06),var(--v02));
+  border:1px solid var(--v08);border-radius:16px;padding:1.15rem 1.35rem;margin:0 0 1.35rem}
+.mono{width:56px;height:56px;flex:0 0 auto;border-radius:18px;
+  background:linear-gradient(145deg,rgba(201,169,126,.3),rgba(201,169,126,.12));
+  border:1px solid rgba(201,169,126,.45);color:var(--tx-e7cfa8);
   display:flex;align-items:center;justify-content:center;
-  font:700 1.35rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.03em;
+  font:700 1.3rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.02em;
   -webkit-user-select:none;user-select:none}
-.qui{flex:1 1 14rem;min-width:0}
-.qui .nom{font-weight:700;font-size:1.22rem;line-height:1.25;letter-spacing:-.01em}
-.qui .sous2{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.3rem 0 0}
-.qui .id{font-size:.82rem;color:var(--tx2)}
-.faits{display:grid;grid-template-columns:auto auto;gap:.3rem 1rem;font-size:.83rem;
-  align-content:center;flex:0 0 auto}
-.faits .k{color:var(--tx2);white-space:nowrap}
-.faits .v{white-space:nowrap}
+.qui{flex:1 1 16rem;min-width:0}
+.qui .nom{font:700 1.3rem/1.2 Georgia,"Times New Roman",serif;letter-spacing:-.01em}
+.qui .sous2{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:.42rem 0 0}
+.qui .id{font-size:.84rem;color:var(--tx2)}
+.qui .sep{color:var(--tx3)}
 
-/* ── LES PASTILLES ───────────────────────────────────────────
-   Le socle habille deja .pill.bon/.att/.neutre en mode CLAIR : on ne
-   redefinit donc que la base sombre, et le mode jour suit tout seul. */
-.pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;
-  letter-spacing:.02em;padding:.18rem .55rem;border-radius:99px;white-space:nowrap}
-.pill.bon{background:rgba(74,222,128,.14);color:var(--tx-ok2)}
-.pill.att{background:rgba(250,204,21,.14);color:var(--tx-att)}
-.pill.neutre{background:rgba(201,169,126,.14);color:#d9bd95}
-
-/* ── LES ONGLETS ───────────────────────────────────────────
-   DEUX, pas trois : un onglet << Informations >> aurait ete vide. Et on ne
-   montre qu un formulaire a la fois — on ne change pas son mot de passe et ses
-   questions dans le meme geste. */
-.onglets{display:flex;gap:.35rem;margin:0 0 -1px;padding:0 .2rem;position:relative;z-index:1}
-.onglet{font:inherit;font-size:.85rem;font-weight:600;color:var(--tx2);cursor:pointer;
+/* ══ LES ONGLETS — un segment, pas des chemises a onglets ════════════════
+   L ancienne barre imitait les chemises cartonnees de 2010 : coins releves,
+   trait qui se raccorde au panneau. On garde le meme geste (un seul formulaire
+   a la fois) avec la forme d aujourd hui : un segment pose sur le panneau. */
+.onglets{display:inline-flex;gap:.25rem;padding:.25rem;margin:0 0 1.1rem;
+  background:var(--v04);border:1px solid var(--v07);border-radius:12px}
+.onglet{font:inherit;font-size:.86rem;font-weight:600;color:var(--tx2);cursor:pointer;
   display:inline-flex;align-items:center;gap:.45rem;
-  background:transparent;border:1px solid transparent;border-bottom:0;
-  border-radius:10px 10px 0 0;padding:.5rem .95rem}
-.onglet:hover{color:var(--tx);background:var(--v04)}
-.onglet.on{color:var(--tx);background:var(--v03);
-  border-color:var(--v08);border-bottom:0}
+  background:transparent;border:0;border-radius:9px;padding:.5rem 1rem;
+  transition:background .12s ease,color .12s ease}
+.onglet:hover{color:var(--tx);background:var(--v05)}
+.onglet.on{color:var(--tx);background:var(--v10);box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .onglet:focus-visible{outline:2px solid #c9a97e;outline-offset:2px}
-.panneau{background:var(--v03);border:1px solid var(--v08);
-  border-radius:0 13px 13px 13px;padding:1.15rem 1.25rem}
-.panneau h3{margin:0 0 .25rem;font:700 1.02rem/1.25 system-ui,-apple-system,"Segoe UI",sans-serif}
-.panneau .intro{margin:0 0 1rem;font-size:.85rem;color:var(--tx2);max-width:44rem;line-height:1.6}
-.panneau .intro b{color:var(--tx)}
 
-/* ⚠ UNE COLONNE ETROITE POUR LES MOTS DE PASSE. Un champ de mot de passe large
-   de 800 px est laid ET faux : il suggere une saisie longue. */
-.mince{max-width:23rem}
-label.champ{display:block;margin:0 0 .8rem}
-label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
-label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
-input.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
-input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
-.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.55rem 1.05rem;background:#c9a97e;color:#1a1408;cursor:pointer}
+/* ══ LES CARTES ═════════════════════════════════════════════════════════ */
+.carte{background:var(--v03);border:1px solid var(--v08);border-radius:16px;padding:1.35rem 1.45rem}
+.carte h3{margin:0 0 .3rem;font:700 1.06rem/1.25 Georgia,"Times New Roman",serif}
+.carte .intro{margin:0 0 1.35rem;font-size:.86rem;color:var(--tx2);line-height:1.6;max-width:46rem}
+.carte .intro b{color:var(--tx)}
+.cote{display:flex;flex-direction:column;gap:1.1rem}
+.cote .carte{padding:1.1rem 1.2rem}
+.cote h4{margin:0 0 .85rem;font:700 .72rem/1.2 system-ui;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--tx2)}
+
+/* Les faits du compte : une ligne = une etiquette et sa valeur. */
+.faits{display:flex;flex-direction:column;gap:.7rem}
+.fait{display:flex;flex-direction:column;gap:.14rem;min-width:0}
+.fait .k{font-size:.75rem;color:var(--tx2)}
+.fait .v{font-size:.92rem;overflow-wrap:anywhere}
+
+/* La liste de protection : un etat par ligne, avec sa pastille. */
+.prot{display:flex;flex-direction:column;gap:.65rem}
+.prot .l{display:flex;align-items:flex-start;gap:.6rem}
+.prot .l .t{flex:1 1 auto;min-width:0}
+.prot .l .t b{display:block;font-size:.88rem;font-weight:600}
+.prot .l .t span{display:block;font-size:.78rem;color:var(--tx2);line-height:1.45}
+
+/* ══ LE FORMULAIRE ══════════════════════════════════════════════════════
+   ⚠ LES ETIQUETTES NE SONT PLUS EN PETITES CAPITALES ESPACEES. C etait la
+   signature de 2013, et c est ce qu il a vu en premier. Une etiquette de champ
+   est une phrase courte, pas un intertitre. */
+.mince{max-width:26rem}
+label.champ{display:block;margin:0 0 1.05rem}
+label.champ .lbl{display:block;font-size:.86rem;font-weight:600;color:var(--tx);margin:0 0 .35rem}
+label.champ .sub{display:block;font-size:.79rem;color:var(--tx2);margin:.4rem 0 0;line-height:1.5}
+.zsaisie{position:relative;display:block}
+input.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v14);border-radius:10px;
+  color:var(--tx);font:inherit;font-size:.95rem;padding:.7rem .8rem;transition:border-color .12s ease,box-shadow .12s ease}
+input.t{padding-right:2.9rem}
+select.t{padding-right:.8rem}
+input.t:hover,select.t:hover{border-color:var(--v20)}
+input.t:focus,select.t:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.22)}
+/* L oeil : il PORTE le sens (il n a pas de libelle a cote), donc il se lit et
+   ne se declare pas decoratif. */
+.oeil{position:absolute;top:50%;right:.45rem;transform:translateY(-50%);
+  width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;
+  background:transparent;border:0;border-radius:8px;color:var(--tx2);cursor:pointer;font-size:.95rem}
+.oeil:hover{background:var(--v08);color:var(--tx)}
+.oeil:focus-visible{outline:2px solid #c9a97e;outline-offset:1px}
+
+/* La jauge : quatre segments, remplis selon ce qui est saisi. Elle est
+   INDICATIVE et le dit — c est le serveur qui accepte ou refuse. */
+.jauge{display:flex;gap:.28rem;margin:.55rem 0 .3rem}
+.jauge i{flex:1 1 0;height:4px;border-radius:99px;background:var(--v12);transition:background .18s ease}
+.jauge.n1 i:nth-child(-n+1),.jauge.n2 i:nth-child(-n+2){background:var(--tx-err2)}
+.jauge.n3 i:nth-child(-n+3){background:var(--tx-att)}
+.jauge.n4 i{background:var(--tx-ok2)}
+.jmot{font-size:.79rem;color:var(--tx2)}
+
+.actions{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:1.3rem 0 0}
+.prim{font:inherit;font-size:.9rem;font-weight:700;border:0;border-radius:11px;
+  padding:.72rem 1.25rem;background:#c9a97e;color:#1a1408;cursor:pointer;
+  transition:background .12s ease,transform .06s ease}
+.prim:hover:not(:disabled){background:#d8bd97}
+.prim:active:not(:disabled){transform:translateY(1px)}
 .prim:disabled{opacity:.5;cursor:default}
-.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
-.ferr{display:none;color:var(--tx-err2);font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);
-  border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:0 0 .8rem}
-.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
-@media(max-width:640px){.cols2{grid-template-columns:1fr}}
-.vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
+.prim:focus-visible{outline:2px solid #c9a97e;outline-offset:3px}
+.mini{font:inherit;font-size:.76rem;padding:.2rem .6rem;border:1px solid var(--v16);border-radius:8px;
+  background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
+.ferr{display:none;color:var(--tx-err2);font-size:.85rem;padding:.65rem .85rem;background:rgba(248,113,113,.1);
+  border:1px solid rgba(248,113,113,.3);border-radius:11px;margin:0 0 1.05rem}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
+@media(max-width:760px){.cols2{grid-template-columns:1fr}}
+.vide{padding:2.4rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;
+  border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 
-/* ── MODE CLAIR ───────────────────────────────────────────
-   Le socle habille body, input, select, button.prim, .pill.*, .sub,
-   .vide, .msg et .pied — mais PAS les classes propres a cette fenetre.
-   Un fond clair avec une encre pensee pour le sombre est illisible : on les
-   ecrit donc explicitement, sinon la moitie de l ecran disparait en mode jour. */
-html.jour .ident{background:#fff;border-color:rgba(15,23,42,.1)}
+/* ══ MODE CLAIR ═════════════════════════════════════════════════════════
+   Le socle habille body, input, select, .pill.*, .vide, .msg et .pied — mais
+   PAS les classes propres a cette fenetre. Un fond clair avec une encre pensee
+   pour le sombre est illisible : chaque classe nouvelle a sa reprise ici, sinon
+   la moitie de l ecran disparait en mode jour. */
+html.jour .ident{background:linear-gradient(135deg,#fff,#f7f5f0);border-color:rgba(15,23,42,.1)}
 html.jour .mono{background:linear-gradient(145deg,#f0e2cc,#e6d3b6);
-  border-color:rgba(160,120,60,.35);color:#6b4d1f}
+  border-color:rgba(160,120,60,.4);color:#6b4d1f}
 html.jour .qui .id{color:#5b6779}
-html.jour .faits .k{color:#5b6779}
+html.jour .qui .sep{color:#5b6779}
+html.jour .onglets{background:rgba(15,23,42,.045);border-color:rgba(15,23,42,.09)}
 html.jour .onglet{color:#5b6779}
-html.jour .onglet:hover{color:#141c28;background:rgba(15,23,42,.04)}
-html.jour .onglet.on{color:#141c28;background:#fff;border-color:rgba(15,23,42,.1)}
-html.jour .panneau{background:#fff;border-color:rgba(15,23,42,.1)}
-html.jour .panneau .intro{color:#5b6779}
-html.jour .panneau .intro b{color:#141c28}
-html.jour label.champ .lbl{color:#5b6779}
-html.jour label.champ .sub{color:#6b7787}
+html.jour .onglet:hover{color:#141c28;background:rgba(15,23,42,.05)}
+html.jour .onglet.on{color:#141c28;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.12)}
+html.jour .carte{background:#fff;border-color:rgba(15,23,42,.1)}
+html.jour .carte .intro{color:#5b6779}
+html.jour .carte .intro b{color:#141c28}
+html.jour .cote h4{color:#5b6779}
+html.jour .fait .k{color:#5b6779}
+html.jour .prot .l .t span{color:#5b6779}
+html.jour label.champ .lbl{color:#141c28}
+html.jour label.champ .sub{color:#5b6779}
+html.jour .jmot{color:#5b6779}
+html.jour .oeil{color:#5b6779}
+html.jour .oeil:hover{background:rgba(15,23,42,.07);color:#141c28}
 html.jour .mini{background:#f1f3f7;border-color:rgba(15,23,42,.14);color:#141c28}
 html.jour .ferr{color:#9b1c1c;background:#fdecec;border-color:#f3b9b9}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -246,11 +301,50 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="sous2">'
           + '<span class="pill neutre">' + esc(D.role) + '</span>'
           + (D.identifiant ? '<span class="id">@' + esc(D.identifiant) + '</span>' : '')
+          + (D.identifiant && D.courriel ? '<span class="sep" aria-hidden="true">·</span>' : '')
+          + (D.courriel ? '<span class="id">' + esc(D.courriel) + '</span>' : '')
         + '</div>'
       + '</div>'
-      + '<div class="faits">'
-        + '<span class="k">Courriel</span><span class="v">' + esc(D.courriel || '\u2014') + '</span>'
-        + '<span class="k">Dernière connexion</span><span class="v">' + esc(fmtTs(D.derniereConnexion)) + '</span>'
+      + '</div>';
+  }
+
+  /* ══ LA COLONNE DE DROITE — ELLE REPOND, ELLE NE REMPLIT PAS ══════════════
+     Sa remarque : les deux tiers de la fenetre etaient vides. On ne les comble
+     pas avec du decor : on y met ce qu on vient chercher sur cet ecran quand on
+     n y vient pas pour changer son mot de passe — l etat de son compte.
+     ⚠ AUCUNE DONNEE INVENTEE. Tout ce qui est affiche ici vient de profil:donnees
+     et de rien d autre : le jour ou l on voudra montrer l etat du MFA ou la liste
+     des appareils, il faudra que le coeur les RENDE. Une carte qui affiche une
+     valeur plausible mais fabriquee est pire qu une carte absente. */
+  function coteDroit(){
+    var qOk = !!D.questionsPosees;
+    return '<div class="cote">'
+      + '<div class="carte">'
+        + '<h4>Votre compte</h4>'
+        + '<div class="faits">'
+          + (D.courriel ? '<div class="fait"><span class="k">Courriel</span>'
+              + '<span class="v">' + esc(D.courriel) + '</span></div>' : '')
+          + (D.identifiant ? '<div class="fait"><span class="k">Identifiant</span>'
+              + '<span class="v">@' + esc(D.identifiant) + '</span></div>' : '')
+          + '<div class="fait"><span class="k">Rôle</span>'
+            + '<span class="v">' + esc(D.role) + '</span></div>'
+          + '<div class="fait"><span class="k">Dernière connexion</span>'
+            + '<span class="v">' + esc(fmtTs(D.derniereConnexion)) + '</span></div>'
+        + '</div>'
+      + '</div>'
+      + '<div class="carte">'
+        + '<h4>Ce qui protège votre compte</h4>'
+        + '<div class="prot">'
+          + '<div class="l"><span class="pill bon">Actif</span><span class="t">'
+            + '<b>Mot de passe</b><span>Vérifié par le serveur à chaque connexion.</span>'
+            + '</span></div>'
+          + '<div class="l">'
+            + (qOk ? '<span class="pill bon">Prêtes</span>' : '<span class="pill att">Absentes</span>')
+            + '<span class="t"><b>Questions de sécurité</b><span>'
+            + (qOk ? 'Elles permettront de retrouver votre accès si vous perdez votre mot de passe.'
+                   : 'Sans elles, votre compte ne pourra pas être récupéré par cette voie.')
+            + '</span></span></div>'
+        + '</div>'
       + '</div>'
       + '</div>';
   }
@@ -258,7 +352,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function barreOnglets(){
     var etat = D.questionsPosees
       ? '<span class="pill bon">✓</span>'
-      : '<span class="pill att"><span class="ic">⚠</span></span>';
+      : '<span class="pill att">À faire</span>';
     return '<div class="onglets" role="tablist">'
       + '<button type="button" class="onglet' + (ONGLET === 'pw' ? ' on' : '') + '"'
         + ' data-ong="pw" role="tab" aria-selected="' + (ONGLET === 'pw') + '">Mot de passe</button>'
@@ -268,25 +362,61 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
   }
 
+  /* Un champ de mot de passe avec son oeil. L oeil PORTE le sens (il n a pas de
+     libelle a cote) : il a donc un nom accessible et il se lit, il n est pas
+     declare decoratif. */
+  function champMdp(id, lbl, autoc, aide){
+    return '<label class="champ"><span class="lbl">' + lbl + '</span>'
+      + '<span class="zsaisie">'
+        + '<input class="t" type="password" id="' + id + '" autocomplete="' + autoc + '">'
+        + '<button type="button" class="oeil" data-oeil="' + id + '"'
+          + ' title="Afficher le mot de passe" aria-label="Afficher le mot de passe">o</button>'
+      + '</span>'
+      + (aide ? '<span class="sub">' + aide + '</span>' : '')
+      + '</label>';
+  }
+
   function panneauMotDePasse(){
-    return '<div class="panneau">'
+    return '<div class="carte">'
       + '<h3>Changer le mot de passe</h3>'
       + '<p class="intro">Le mot de passe <b>actuel</b> est vérifié par le serveur, pas par cette fenêtre.</p>'
       + '<div class="ferr" id="p-err"></div>'
       + '<div class="mince">'
-      + '<label class="champ"><span class="lbl">Mot de passe actuel</span>'
-      + '<input class="t" type="password" id="p-cur" autocomplete="current-password"></label>'
-      + '<label class="champ"><span class="lbl">Nouveau mot de passe</span>'
-      + '<input class="t" type="password" id="p-new" autocomplete="new-password">'
-      + '<span class="sub">Huit caractères au moins. Un mot de passe déjà utilisé sera refusé.</span></label>'
-      + '<label class="champ"><span class="lbl">Confirmer</span>'
-      + '<input class="t" type="password" id="p-cnf" autocomplete="new-password"></label>'
-      + '<button class="prim" id="p-go">Enregistrer le nouveau mot de passe</button>'
+      + champMdp('p-cur', 'Mot de passe actuel', 'current-password', '')
+      + champMdp('p-new', 'Nouveau mot de passe', 'new-password',
+          'Huit caractères au moins. Un mot de passe déjà utilisé sera refusé.')
+      /* ⚠ LA JAUGE EST INDICATIVE, ET ELLE LE DIT. C est le serveur qui accepte
+         ou refuse ; une jauge qui aurait l air de decider ferait croire qu un
+         mot de passe << fort >> passera forcement. */
+      + '<div class="jauge" id="p-jauge"><i></i><i></i><i></i><i></i></div>'
+      + '<div class="jmot" id="p-jmot">Indication de robustesse</div>'
+      + champMdp('p-cnf', 'Confirmer', 'new-password', '')
+      + '<div class="actions">'
+        + '<button class="prim" id="p-go">Enregistrer le nouveau mot de passe</button>'
+      + '</div>'
       + '</div></div>';
   }
 
+  /* La robustesse, mesuree sur ce qui est saisi : longueur d abord (c est le
+     facteur qui compte vraiment), puis variete. Quatre crans, pas dix. */
+  function forceMdp(v){
+    if (!v) return 0;
+    var n = 0;
+    if (v.length >= 8) n++;
+    if (v.length >= 12) n++;
+    var varietes = 0;
+    if (/[a-z]/.test(v)) varietes++;
+    if (/[A-Z]/.test(v)) varietes++;
+    if (/[0-9]/.test(v)) varietes++;
+    if (/[^a-zA-Z0-9]/.test(v)) varietes++;
+    if (varietes >= 3) n++;
+    if (v.length >= 16 && varietes >= 3) n++;
+    return Math.max(1, Math.min(4, n));
+  }
+  var MOTS_FORCE = ['', 'Court', 'Correct', 'Bon', 'Excellent'];
+
   function panneauQuestions(){
-    return '<div class="panneau">'
+    return '<div class="carte">'
       + '<h3>Questions de sécurité</h3>'
       + '<p class="intro">Elles servent à retrouver votre accès si vous perdez votre mot de passe. '
       + (D.questionsPosees
@@ -304,8 +434,12 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function dessiner(){
-    corps.innerHTML = carteIdentite() + barreOnglets()
-      + (ONGLET === 'q' ? panneauQuestions() : panneauMotDePasse());
+    /* L en-tete d identite tient toute la largeur ; en dessous, deux colonnes :
+       le geste a gauche, l etat du compte a droite. */
+    corps.innerHTML = carteIdentite()
+      + '<div class="grille"><div>' + barreOnglets()
+      + (ONGLET === 'q' ? panneauQuestions() : panneauMotDePasse())
+      + '</div>' + coteDroit() + '</div>';
 
     var ongs = corps.querySelectorAll('.onglet');
     for (var i = 0; i < ongs.length; i++) {
@@ -325,6 +459,30 @@ ${JS_ACTIVITE}${JS_DIRE}
       s1.onchange = resync; s2.onchange = resync;
     } else {
       document.getElementById('p-go').onclick = motDePasse;
+      /* L oeil : il bascule le type du champ ET son propre libelle — un bouton
+         qui ne dit pas ce qu il fera au prochain clic se lit a l envers. */
+      var yeux = corps.querySelectorAll('[data-oeil]');
+      for (var y = 0; y < yeux.length; y++) {
+        yeux[y].onclick = function(){
+          var champ = document.getElementById(this.getAttribute('data-oeil'));
+          if (!champ) return;
+          var montre = champ.type === 'password';
+          champ.type = montre ? 'text' : 'password';
+          this.textContent = montre ? '-' : 'o';
+          var t = montre ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
+          this.title = t; this.setAttribute('aria-label', t);
+        };
+      }
+      var nouveau = document.getElementById('p-new');
+      var jauge = document.getElementById('p-jauge'), jmot = document.getElementById('p-jmot');
+      if (nouveau && jauge && jmot) {
+        nouveau.oninput = function(){
+          var n = forceMdp(this.value);
+          jauge.className = 'jauge' + (n ? ' n' + n : '');
+          jmot.textContent = n ? MOTS_FORCE[n] + ' — indication, le serveur décide'
+                               : 'Indication de robustesse';
+        };
+      }
     }
   }
   function ferr(id, msg){ var e=document.getElementById(id); if (e){ e.textContent=msg; e.style.display=msg?'block':'none'; } }
