@@ -90,6 +90,32 @@ jobs:
           done
           echo "::notice::$n artefact(s) purge(s), $((total / 1048576)) Mo liberes avant construction."
 
+  # ══ LES CONTRASTES, MESURES DANS UN VRAI NAVIGATEUR ══════════════════════
+  # ⚠ POURQUOI UN TRAVAIL A PART, ET PAS DANS << Controle de syntaxe >>.
+  # Ce dernier tourne sur la MATRICE des trois architectures Windows : y mettre
+  # un banc de deux a quatre minutes le ferait tourner TROIS FOIS, sur trois
+  # machines, pour un resultat identique — les couleurs d'une page ne dependent
+  # pas du processeur qui la construit. Une seule machine Linux suffit, et elle
+  # tourne EN MEME TEMPS que les constructions.
+  #
+  # ⚠ IL NE BLOQUE PAS LA CONSTRUCTION (`needs` ne le nomme pas). Une version
+  # doit pouvoir partir meme si un contraste a glisse : refuser de construire
+  # pour une couleur, c'est se retrouver a le desactiver le jour ou ca presse.
+  # Le travail est ROUGE et se voit dans le recapitulatif — c'est ce qu'on veut.
+  #
+  # ⚠ Chrome est deja installe sur `ubuntu-latest`. S'il venait a disparaitre,
+  # le banc REFUSE (il ne se tait pas) : << Chrome introuvable >>, et le travail
+  # est rouge. Un banc qui saute faute d'outil doit le dire.
+  contrastes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Contrastes des fenetres, mesures au rendu
+        run: node tools/banc-contraste-rendu.js
+
   windows:
     needs: menage
     runs-on: windows-latest

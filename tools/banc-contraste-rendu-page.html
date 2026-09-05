@@ -1,0 +1,126 @@
+<!-- ===========================================================================
+     LES DEUX MORCEAUX QU'ON COUD DANS LA PAGE D'UNE FENÊTRE
+     ---------------------------------------------------------------------------
+     ⚠ CE FICHIER N'EST PAS UNE PAGE : c'est un gabarit lu par
+     `banc-contraste-rendu.js`, découpé sur les deux marqueurs ci-dessous.
+
+     ⚠⚠ ET IL EST DANS UN FICHIER .html POUR UNE RAISON PRÉCISE. Ces morceaux
+     vivaient d'abord dans des gabarits `${'`'}…${'`'}` du pilote. Le premier accent grave
+     écrit dans un commentaire — on cite forcément `sz-parait`, `szPont`,
+     `opacity` — REFERME le gabarit, et tout ce qui suit devient du code du
+     pilote. `node --check` répond OK. C'est la CINQUIÈME fois que ce piège se
+     referme dans ce projet ; le seul remède qui tient est de ne pas mettre de
+     code de page dans une chaîne.
+
+     Les marques remplacées par le pilote : __REPONSES__, __COEUR__,
+     __CONTEXTE__, __NOM__.
+     =========================================================================== -->
+
+<!-- ==== PROLOGUE ==== -->
+<script>
+/* Il entre dans le <head>, donc AVANT le script de la fenêtre. Trois choses, et
+   l'ordre compte :
+     ① le mode et le thème sur <html>, AVANT le premier rendu — jamais après :
+        basculer un attribut sur un arbre déjà dessiné rend des couleurs
+        PÉRIMÉES (55 fausses fautes le 2026-09-05, côté site) ;
+     ② un faux pont qui RÉPOND, sinon la fenêtre affiche son écran de refus et
+        l'on mesure le mauvais écran (leçon du 2026-08-07) ;
+     ③ de quoi neutraliser ce qui n'a pas de sens hors de l'application. */
+(function () {
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('m') === 'jour') document.documentElement.classList.add('jour');
+    var t = q.get('t');
+    if (t) document.documentElement.setAttribute('data-sz-theme', t);
+  } catch (e) {}
+  var REP = __REPONSES__;
+  var MANQUE = {};
+  window.__szManque = MANQUE;
+  window.szPont = {
+    appeler: function (op) {
+      var nom = String(op || '');
+      if (!Object.prototype.hasOwnProperty.call(REP, nom)) {
+        // On NOTE ce qui manque au jeu de réponses. Une fenêtre qui demande une
+        // opération absente se dessine à moitié, et sans cette trace on lirait
+        // « peu de couples mesurés » comme « peu de texte à l'écran ».
+        MANQUE[nom] = true;
+        return Promise.resolve({ ok: false, motif: 'sans_jeu' });
+      }
+      return Promise.resolve(REP[nom]);
+    },
+    detacher: function () { return Promise.resolve(false); },
+    ancrer: function () { return Promise.resolve(false); },
+    fermer: function () {},
+    pleinEcran: function () { return Promise.resolve(false); },
+    brouillonSale: function () {},
+  };
+})();
+</script>
+
+<!-- ==== EPILOGUE ==== -->
+<script>
+__COEUR__
+
+/* ⚠⚠ ON ARRÊTE LES ANIMATIONS AVANT DE MESURER, ET SANS ÇA LE BANC EST AVEUGLE.
+   Le socle fait paraître les blocs par une animation d'entrée en
+   "animation:sz-parait .28s ease-out both". Le mot "both" est celui qui compte :
+   il fait tenir l'ÉTAT DE DÉPART tant que l'animation n'a pas commencé — donc
+   opacity 0. Sous temps virtuel, elle ne commence pas toujours : le cœur de
+   mesure voit un voile et refuse de juger, à raison. Premier relevé : 30 des 32
+   éléments d'accueil écartés "sous un voile", donc presque rien de mesuré — et
+   le banc se déclarait content.
+
+   On coupe donc les animations. Retirer l'animation rend à l'élément sa valeur
+   de BASE, c'est-à-dire l'état POSÉ : opacity 1. C'est exactement ce qu'on veut
+   juger — un contraste se lit sur l'écran une fois arrivé, pas à mi-fondu.
+   ⚠ On finit aussi celles qui tournent déjà (transitions incluses) : couper une
+   transition en cours laisserait la valeur intermédiaire.
+   ⚠ CE QUE ÇA COÛTE, et il faut le savoir : une couleur qui ne serait posée QUE
+   par une image-clé d'animation n'est pas mesurée ici. Le socle n'en a pas ;
+   si un jour il en a une, ce banc ne la verra pas. */
+function poserLesAnimations() {
+  try {
+    var as = document.getAnimations ? document.getAnimations() : [];
+    for (var i = 0; i < as.length; i++) { try { as[i].finish(); } catch (e) {} }
+  } catch (e) {}
+  try {
+    var st = document.createElement('style');
+    st.textContent = '*,*::before,*::after{animation-name:none!important;transition:none!important}';
+    document.head.appendChild(st);
+  } catch (e) {}
+}
+
+/* ⚠⚠ ON LAISSE LE TEMPS À LA FENÊTRE DE SE DESSINER. Elle pose son squelette,
+   appelle le pont, puis remplit. Mesurer tout de suite ne verrait que l'écran
+   d'attente — c'est arrivé côté site : 816 couples pour 152 rendus, rien que des
+   titres et des « Chargement… ». Le faux pont répond en une micro-tâche, mais le
+   dessin qui suit peut lui-même différer : on attend plusieurs tours. */
+var _tours = 0;
+function _fini() {
+  poserLesAnimations();
+  try { mesurer(document.body, __CONTEXTE__); }
+  catch (e) { dit('MESURE ' + __CONTEXTE__ + ' : ' + (e && e.message)); }
+  try {
+    var manque = Object.keys(window.__szManque || {});
+    if (manque.length) dit('MANQUE|' + __NOM__ + '|' + manque.slice(0, 6).join(' '));
+  } catch (e) {}
+  try {
+    Object.keys(trouve).forEach(function (cle) {
+      var d = trouve[cle];
+      // Une page = UN contexte : il est écrit ici, pas relu du dossier.
+      dit('PAIRE|' + cle + '|' + d.ratio.toFixed(2) + '|' + d.n + '|' + d.ex
+        + '|' + String(d.txt).replace(/\|/g, ' ') + '|' + __CONTEXTE__);
+    });
+  } catch (e) {}
+  dit('COMPTES|' + comptes.vus + '|' + comptes.invisibles + '|' + comptes.voile
+    + '|' + comptes.image + '|' + comptes.illisible
+    + '|' + comptes.inactifs + '|' + comptes.souVoile + '|' + __CONTEXTE__);
+  try { parent.postMessage('sz-fini', '*'); } catch (e) {}
+}
+function _tour() {
+  _tours++;
+  if (_tours < 6) { setTimeout(_tour, 40); return; }
+  _fini();
+}
+setTimeout(_tour, 40);
+</script>

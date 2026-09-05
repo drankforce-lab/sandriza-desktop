@@ -69,3 +69,57 @@ version périmée.
 npm install
 npm start          # ELG_APP_KEY dans l'environnement, sinon le portail répond 403
 ```
+
+## Les contrastes des fenêtres, mesurés dans un vrai navigateur
+
+```sh
+node tools/banc-contraste-rendu.js            les 2 modes, 92 fenêtres (~2 min)
+node tools/banc-contraste-rendu.js --themes   + les 6 thèmes (~30 min)
+node tools/banc-contraste-rendu.js accueil    une fenêtre en particulier
+node tools/banc-contraste-rendu.js --reste    le relevé, prêt à déclarer
+```
+
+`banc-texte-sur-fond.js` lit le CSS et apparie des couleurs **écrites** : il ne
+peut pas savoir ce que vaut `var(--tx2)` dans une fenêtre donnée, ni ce que
+donne un voile sur un dégradé. Celui-ci **ouvre les 92 fenêtres dans Chrome**,
+avec leur faux pont et leurs vraies données, et demande au navigateur la couleur
+qu'il a **peinte**. Il tourne dans la construction (travail `contrastes`), sur
+une seule machine et **sans bloquer** : refuser de construire pour une couleur,
+c'est se retrouver à désactiver le contrôle le jour où ça presse.
+
+**La dette vit dans `contraste-rendu-declare.js`** — 102 couples au premier
+relevé du 2026-09-05, chacun avec son nombre d'endroits. Ce nombre est un
+**plafond** : le banc refuse qu'une couleur gagne du terrain, et **dit** quand
+elle en perd pour qu'on resserre.
+
+### ⚠ Ce qu'il a coûté avant d'être utilisable — à ne pas refaire
+
+- 🔴🔴🔴 **Il a mis le poste à genoux.** Il lançait un Chrome par lot et n'en
+  fermait **aucun** : la seule sortie prévue était un `window.close()` de la page
+  pilote, qui ne part jamais quand le moteur de rendu est tombé — c'est-à-dire
+  précisément quand il faudrait ranger. Des centaines de processus, la mémoire
+  épuisée, et des fenêtres « chrome.exe — Application Error » sur le bureau.
+  → **Un outil qui démarre un processus doit le tuer lui-même, dans TOUS les cas.**
+  → **On ne tue que les siens** : le dossier temporaire de l'exécution sert de
+  signe distinctif, sinon on ferme le navigateur de la personne et ses onglets.
+- 🔴 **Le premier ménage ne marchait pas, en silence** : j'avais doublé les
+  antislashs du chemin « par prudence », or `-like` de PowerShell ne connaît pas
+  l'antislash comme échappement. Motif impossible, zéro processus trouvé, aucun
+  message. Le nom du dossier (sans antislash) est le repère qui ne se trompe pas.
+- 🔴🔴 **138 « fautes » dont les deux pires n'existaient pas.** « Confirmer le
+  remboursement » à 1.33, « Expédier » à 1.36 : une **capture d'écran** a montré
+  des boutons **désactivés**, **derrière une modale ouverte**. Les deux cas sont
+  exemptés **par la norme** (WCAG 1.4.3 : un contrôle inactif n'a aucune exigence
+  de contraste) et comptés à part. ⚠ L'opacité, elle, reste **composée** et jugée.
+- 🔴 **Le premier `</body>` était dans les DONNÉES.** L'épilogue s'insérait au
+  premier `</body>` du fichier — celui d'un **courriel d'essai** rangé dans une
+  chaîne JSON. La page mourait sur « Invalid or unexpected token » et deux écrans
+  n'étaient jamais mesurés. → chercher le **dernier**, pas le premier.
+- 🔴 **Une page qui tue le moteur emporte les 19 autres de son lot**, toutes
+  innocentes. Les perdus sont **rejoués un par un** : le coupable est isolé et
+  **nommé**. `inventaire` l'est — et il fait tomber Chrome **sans le banc**,
+  page brute en `--dump-dom` : 0 octet, aucune erreur. Déclaré dans
+  `INMESURABLES`, avec sa preuve, et rappelé à chaque passage.
+- 🔴 **Le verdict s'attribuait « les six thèmes compris »** alors qu'ils étaient
+  devenus optionnels. Une phrase de succès qui annonce une couverture qu'elle n'a
+  pas est pire qu'un banc absent : elle clôt la question.
