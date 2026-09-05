@@ -56,209 +56,295 @@ module.exports = {
 
   /* ── DETTE CONNUE, AVEC SON PLAFOND ─────────────────────────────────────── */
   RESTE: {
-    // 1.07 · div.info > b « consultations » · analytics/jour images/jour
-    '#DBE7FB sur #EBEEF8 @4.5': 15,
+    // 1.00 · div.info.bien > b « Rien à déplacer. » · images_c1/jour
+    '#D3F6E4 sur #EBEEF8 @4.5': 1,
+    // 1.07 · div.info > b « consultations » · analytics/jour analytics_c1/jour images/jour
+    '#DBE7FB sur #EBEEF8 @4.5': 26,
+    // 1.10 · div.apercu > span.t « L’élégance au quotidien » · accueil_c1/jour
+    '#1D2433 sur #1A1A2E @4.5': 1,
+    // 1.14 · b > span.ic « ⚠ » · transporteurs_c1/jour
+    '#FCD0CF sur #F4E5E0 @4.5': 1,
     // 1.17 · span.pt.ic > span.ic « 🔗 » · studio/jour
     '#606771 sur #6F7176 @4.5': 2,
-    // 1.23 · td > span.pill « ✓ Connexion » · journaux/jour
-    '#6EE7A0 sur #D0EDDB @4.5': 1,
-    // 1.27 · div.stat > div.v « 13 août 2026, 00:12 » · sauvegarde/jour
-    '#6EE7A0 sur #EBE9E4 @4.5': 1,
+    // 1.18 · div.pop > button.sz-btnplein.flottant « ⛶ Plein écran » · newsletter_c5/nuit
+    '#E8EDF5 sur #FFFFFF @4.5': 1,
+    // 1.18 · div#avert.avert > b « Identifiants non chargés » · transporteurs_c1/jour
+    '#FECACA sur #F4E5E0 @4.5': 1,
+    // 1.23 · td > span.pill « ✓ Connexion » · journaux/jour journaux_c13/jour journaux_c7/jour journaux_c8/jour
+    '#6EE7A0 sur #D0EDDB @4.5': 4,
+    // 1.27 · div.ecart.bon > div.verdict « ✓ Équilibrée » · banque_c5/jour
+    '#6EE7B7 sur #E2EDE3 @4.5': 1,
+    // 1.27 · div.stat > div.v « 13 août 2026, 00:12 » · sauvegarde/jour sauvegarde_c2/jour
+    '#6EE7A0 sur #EBE9E4 @4.5': 2,
+    // 1.36 · tr > td.num « 512.00 $ » · publicite_c3/jour
+    '#E8DCC6 sur #FFFFFF @4.5': 1,
+    // 1.39 · td > span.pill « ⬇ Reçu » · journaux_c5/jour
+    '#7DD3FC sur #D4EFFB @4.5': 1,
+    // 1.39 · div#cmp.cmp > span.cet.g « Avant » · studio_c5/jour studio_c7/jour
+    '#5F666C sur #4D5056 @4.5': 4,
+    // 1.41 · span.adr > span.ic « 📝 » · commande_c1/jour
+    '#F3D5A1 sur #FFFFFF @4.5': 1,
+    // 1.41 · div.pop > button.x « × » · newsletter_c5/nuit
+    '#FFFFFF sur #D9D9D9 @4.5': 1,
     // 1.42 · span.phpast > span.pt « ◇ » · studio/jour
     '#56606E sur #46494F @4.5': 2,
-    // 1.43 · div.stat > div.v « 1 » · incidents/jour journaux/jour
-    '#E6C14A sur #EBE9E4 @3': 2,
-    // 1.43 · td > span.pill « ✗ Échec » · journaux/jour
-    '#FCA5A5 sur #F9D8D8 @4.5': 1,
+    // 1.43 · div > span « → » · banque_c3/jour
+    '#6EE7B7 sur #EEFAF6 @4.5': 2,
+    // 1.43 · div.stat > div.v « 1 » · incidents/jour incidents_c1/jour incidents_c2/jour journaux/jour journaux_c7/jour journaux_c8/jour
+    '#E6C14A sur #EBE9E4 @3': 6,
+    // 1.43 · td > span.pill « ✗ Échec » · journaux/jour journaux_c7/jour journaux_c8/jour
+    '#FCA5A5 sur #F9D8D8 @4.5': 3,
+    // 1.43 · div.stat > div.v « aucune » · sauvegarde_c1/jour
+    '#E6C14A sur #EBE9E4 @4.5': 1,
+    // 1.48 · div.rangee > button#b-bascule.bsc « Repasser en pré-lancement » · lancement_c1/jour
+    '#8B5C5C sur #EF4444 @4.5': 1,
     // 1.49 · tr > th « Facture » · etatcompte/nuit
     '#111111 sur #26334A @4.5': 2,
     // 1.52 · tr.lg > td.num « 0,00 $ » · banque/jour
     '#6EE7B7 sur #FFFFFF @4.5': 1,
-    // 1.54 · div.stat > div.v « 1 » · securite/jour
-    '#B6B9F7 sur #EBE9E4 @3': 1,
-    // 1.57 · div.remb > div.fin3 « Frais de service retenus : » · commandes/jour
-    '#F0C987 sur #FFFFFF @4.5': 2,
+    // 1.54 · div.stat > div.v « 1 » · securite/jour securite_c1/jour securite_c2/jour
+    '#B6B9F7 sur #EBE9E4 @3': 3,
+    // 1.57 · div.entete > span.adr « Fragile : verre souffle. » · commande_c1/jour commandes/jour
+    '#F0C987 sur #FFFFFF @4.5': 3,
+    // 1.66 · p > span.ic « ⚠ » · explorateur_c1/jour explorateur_c2/jour studio_c2/jour
+    '#E1C597 sur #FFFFFF @4.5': 3,
+    // 1.66 · div#g-prev-head.head.anim > div.ti « SANDRIZA » · gabarits_c1/jour
+    '#1D2433 sur #7C2D12 @4.5': 1,
+    // 1.67 · div.boite > div.aide « Temoin : aucune vente n a eu lieu. » · caisse_c1/jour
+    '#FBBF24 sur #FFFFFF @4.5': 1,
     // 1.68 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/jour
     '#8B5C5C sur #16A34A @4.5': 1,
+    // 1.70 · span.eclair > span.ic « ⚡ » · commandes_c2/jour
+    '#F5B041 sur #F5F2FF @4.5': 1,
     // 1.71 · span.phpast > span.pt.fait « ✓ » · studio/jour
     '#297A46 sur #46494F @4.5': 3,
-    // 1.74 · tr > td.num « 75,50 $ » · cartescadeaux/jour logotheque/jour
-    '#4ADE80 sur #FFFFFF @4.5': 3,
-    // 1.75 · div.etat > span.sp « · » · photos/jour
-    '#B6BABC sur #F4F2EC @4.5': 4,
-    // 1.76 · td > span.code « DE » · livraison/nuit
-    '#3B485A sur #16202F @4.5': 6,
-    // 1.86 · td > span.code « DE » · livraison/jour
-    '#B8BFC6 sur #FFFFFF @4.5': 6,
+    // 1.74 · tr > td.num « 75,50 $ » · cartescadeaux/jour logotheque/jour logotheque_c1/jour publicite_c1/jour publicite_c3/jour
+    '#4ADE80 sur #FFFFFF @4.5': 7,
+    // 1.74 · div.tuile > div.v « 83% » · publicite_c6/jour
+    '#4ADE80 sur #FFFFFF @3': 1,
     // 1.90 · tr.lg > td.num « 2 210,00 $ » · banque/jour
     '#FCA5A5 sur #FFFFFF @4.5': 1,
-    // 1.96 · button.urgent > i « · » · tableau/jour
-    '#CAB4B4 sur #FFFFFF @4.5': 3,
+    // 1.91 · div > button.ghost.mini « ↺ Réinitialiser pour re-tester » · newsletter_c4/jour
+    '#E0B47A sur #FFFFFF @4.5': 1,
+    // 1.94 · div.boite > p « 2 photos n’ont rien à annuler et ne boug » · explorateur_c1/jour explorateur_c2/jour studio_c2/jour studio_c4/jour studio_c6/jour
+    '#D8B57A sur #FFFFFF @4.5': 7,
     // 2.06 · div.ph > button.phx « ✕ » · avis/jour
     '#AB4E4E sur #393C43 @4.5': 2,
-    // 2.08 · span.dt > span.ic « 📅 » · ramassages/jour
-    '#ABB0B8 sur #FAF9F6 @4.5': 1,
-    // 2.09 · div.nom > span.masq « (masqué) » · accueil/jour
-    '#C0B485 sur #FFFFFF @4.5': 1,
-    // 2.13 · div.nom > div.d « Bannière bas de page » · accueil/jour
+    // 2.13 · span#p-r2 > a#p-mesurer « mesurer l’espace R2 » · photos/jour photos_c1/jour photos_c2/jour photos_c4/jour
+    '#9E9EFF sur #F4F2EC @4.5': 4,
+    // 2.13 · span > span.exp « Aucun paiement Square enregistré sur cet » · remboursement_c1/jour
     '#ADB2BA sur #FFFFFF @4.5': 1,
-    // 2.13 · div.etat > span.sp « · » · photos/nuit
-    '#424D5E sur #0E1522 @4.5': 4,
-    // 2.13 · span#p-r2 > a#p-mesurer « mesurer l’espace R2 » · photos/jour
-    '#9E9EFF sur #F4F2EC @4.5': 1,
     // 2.15 · span > span « (frais retenus : 2,75 $) » · commandes/jour
     '#F59E0B sur #FFFFFF @4.5': 1,
     // 2.34 · span.mk > span.ic « 🔒 » · config-navigation/jour
     '#A7AAAF sur #FFFFFF @4.5': 2,
     // 2.37 · span.pt.ic > span.ic « 🔗 » · explorateur/jour
     '#8C9299 sur #E1E0DC @4.5': 2,
+    // 2.42 · td > span.num « CRD-0002-010 » · remboursements_c1/jour
+    '#B6A48C sur #FFFFFF @4.5': 1,
     // 2.43 · span.pastille > span.coche « ✓ » · apparence/jour apparence/nuit
-    '#FDF8F5 sur #C49A6C @4.5': 2,
-    // 2.53 · tr.off > td « Allemagne » · livraison/jour
-    '#A0A3A9 sur #FFFFFF @4.5': 2,
-    // 2.58 · div.haut > span.pill.neutre « 1 colis » · ramassages/jour
-    '#9097A3 sur #F0F0EE @4.5': 2,
-    // 2.59 · span.dt > span.ic « 📅 » · ramassages/nuit
-    '#505D70 sur #121B29 @4.5': 1,
-    // 2.61 · button.urgent > i « · » · tableau/nuit
-    '#8A6469 sur #2C3037 @4.5': 3,
-    // 2.62 · div.nom > div.d « Bannière bas de page » · accueil/nuit
-    '#515E71 sur #131C2A @4.5': 1,
+    '#FDF8F5 sur #C49A6C @4.5': 1,
+    // 2.47 · div.lgn > div.pastille « S » · marque_c2/jour
+    '#1D2433 sur #4F46E5 @4.5': 2,
+    // 2.50 · div.vig > span.rien « Aucun logo » · marque_c1/nuit
+    '#8E9CAD sur #F5F2EC @4.5': 2,
+    // 2.57 · div.vig > span.rien « Aucun logo » · marque_c1/nuit
+    '#8E9CAD sur #F9F5EE @4.5': 2,
+    // 2.58 · span > span.exp « Aucun paiement Square enregistré sur cet » · remboursement_c1/nuit
+    '#536174 sur #16202F @4.5': 1,
+    // 2.62 · td > span.pill.neutre « Expiré » · remboursements_c1/jour
+    '#9299A7 sur #F4F5F6 @4.5': 1,
     // 2.63 · div.g > div.lg « 🔒 Pré-lancement » · lancement/jour
     '#D97706 sur #F2E8DA @4.5': 1,
     // 2.64 · tr > td.num « 0,00 $ » · cartescadeaux/jour
     '#8FA1B8 sur #FFFFFF @4.5': 1,
-    // 2.65 · div.haut > span.pill.err « Annulé » · ramassages/jour
-    '#D57A79 sur #F6EDEA @4.5': 1,
-    // 2.66 · div.haut > span.dt « 2026-08-08 » · ramassages/jour
-    '#949BA7 sur #FAF9F6 @4.5': 3,
-    // 2.68 · div.haut > span.pill.err « Annulé » · ramassages/nuit
-    '#994C52 sur #261F2C @4.5': 1,
-    // 2.73 · div.haut > span.pill.neutre « 1 colis » · ramassages/nuit
-    '#5C6A7D sur #1E2736 @4.5': 2,
-    // 2.74 · button > i « · » · tableau/jour
-    '#999CA3 sur #FFFFFF @4.5': 4,
-    // 2.90 · div.haut > span.dt « 2026-08-08 » · ramassages/nuit
-    '#576578 sur #121B29 @4.5': 3,
-    // 2.98 · span.lock > span.ic « 🔒 » · invmeta/jour
-    '#808183 sur #E6E0D6 @4.5': 3,
+    // 2.65 · td > div.mut « ⏳ promesse » · journaux_c11/jour journaux_c4/jour
+    '#99A0A9 sur #FFFFFF @4.5': 10,
+    // 2.65 · span.em > span.ic « 📸 » · modeles_c1/jour
+    '#969DA9 sur #FCFBF9 @4.5': 3,
+    // 2.66 · th > button.ic.plus « ＋ » · invmeta_c1/jour invmeta_c3/jour invmeta_c4/jour
+    '#EBE5DD sur #A38963 @4.5': 3,
+    // 2.71 · div.g > div.lg « 🌐 En ligne » · lancement_c1/jour
+    '#16A34A sur #E2ECDF @4.5': 1,
+    // 2.71 · tr.eteint > td.dt « 12 mars 2026 » · remboursements_c1/jour
+    '#979EAB sur #FFFFFF @4.5': 2,
+    // 2.75 · div.vig > span.rien « Aucun logo » · marque_c1/jour
+    '#576678 sur #1A2035 @4.5': 1,
+    // 2.84 · tr.eteint > td.dt « 12 mars 2026 » · remboursements_c1/nuit
+    '#59677A sur #16202F @4.5': 2,
+    // 2.98 · span.lock > span.ic « 🔒 » · invmeta/jour invmeta_c8/jour
+    '#808183 sur #E6E0D6 @4.5': 6,
+    // 2.99 · span > span.ic « 📞 » · statistiques_c1/jour
+    '#8E845F sur #EEE6D5 @4.5': 2,
+    // 3.01 · span.etoile > span.ic « ★ » · avis_c2/jour
+    '#A18864 sur #F4F2EC @4.5': 1,
     // 3.03 · div.src.warn > span.ic « ⚠ » · lancement/jour
     '#998438 sur #F2E8DA @4.5': 1,
+    // 3.04 · div.vig > span.rien « Aucun logo » · marque_c1/jour
+    '#576678 sur #0F172A @4.5': 1,
     // 3.05 · div.avis.info > span.ic « 🏛 » · impot/jour
     '#6E829A sur #E1E2E7 @4.5': 1,
     // 3.08 · span.pt.retard > span.ic « ⚠ » · explorateur/jour
     '#737B85 sur #DCDBD7 @4.5': 1,
-    // 3.14 · div.bloc.off > span.em « 📢 » · accueil/jour config-navigation/jour
-    '#8E9299 sur #FFFFFF @4.5': 3,
-    // 3.19 · h2 > span.cpt « 2 » · liquidation/jour
-    '#D97706 sur #FFFFFF @4.5': 1,
+    // 3.09 · div.alerte > span.ic « ⚠ » · invmeta_c2/jour
+    '#9C7271 sur #F1DAD4 @4.5': 1,
+    // 3.11 · a > span.ic « 🔗 » · impot_c1/jour impot_c2/jour
+    '#978771 sur #F4F2EC @4.5': 6,
+    // 3.14 · div.avis.jaune > span.ic « 📷 » · catalogio_c2/jour
+    '#8D7F69 sur #EEE6D5 @4.5': 1,
+    // 3.14 · div.lg > span.mk « ✎ » · config-navigation/jour remboursement_c1/jour
+    '#8E9299 sur #FFFFFF @4.5': 2,
+    // 3.17 · span.pill.liq > span.ic « 🟡 » · liquidation_c4/jour
+    '#947A3A sur #F0DFCB @4.5': 1,
+    // 3.18 · div.d > div.lg « En vous inscrivant, vous acceptez de rec » · newsletter_c5/jour newsletter_c5/nuit
+    '#9A8F7D sur #FFFFFF @4.5': 1,
+    // 3.19 · h2 > span.cpt « 2 » · liquidation/jour liquidation_c2/jour liquidation_c3/jour
+    '#D97706 sur #FFFFFF @4.5': 3,
+    // 3.20 · div.src.ok > span.ic « 🔗 » · lancement_c1/jour
+    '#78838C sur #E2ECDF @4.5': 1,
+    // 3.20 · span.pill.vfin > span.ic « 🔴 » · liquidation_c4/jour
+    '#946B6C sur #F1D0D1 @4.5': 1,
     // 3.21 · div.reco > span.ic « 💡 » · automations/jour
     '#7E8386 sur #EEEBE3 @4.5': 2,
+    // 3.21 · div.avis.jaune > span.ic « ⚠ » · retour_c1/jour
+    '#8D806C sur #EFE9DF @4.5': 1,
+    // 3.24 · td > div.mut « ⏳ promesse » · journaux_c11/nuit journaux_c4/nuit
+    '#617084 sur #16202F @4.5': 10,
+    // 3.25 · div.info.bien > span.ic « ✅ » · images_c1/jour
+    '#71897F sur #EBEEF8 @4.5': 1,
     // 3.30 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/nuit
     '#FFFFFF sur #16A34A @4.5': 1,
+    // 3.31 · div.avis.rouge > span.ic « ⚠ » · expedition_c2/jour
+    '#A17C7A sur #F8F2E7 @4.5': 1,
+    // 3.31 · span.em > span.ic « 📸 » · modeles_c1/nuit
+    '#5F6B7A sur #0F1623 @4.5': 3,
+    // 3.32 · span.pill.acc > span.ic « ★ » · studio_c4/jour
+    '#8D8271 sur #F5F0E8 @4.5': 1,
+    // 3.33 · div.avis.vert > span.ic « ✅ » · expedition_c1/jour remboursement_c2/jour
+    '#6A8C73 sur #F8F2E7 @4.5': 2,
+    // 3.34 · div.gare > span.ic « ⚠ » · liquidation_c6/jour
+    '#A27979 sur #FDECEC @4.5': 1,
+    // 3.34 · div.garde.jaune > span.ic « ⚠ » · sauvegarde_c5/jour
+    '#90866D sur #FCF6E1 @4.5': 1,
+    // 3.35 · span.pill.att > span.ic « ⚠ » · profil_c1/jour
+    '#A07A39 sur #F5ECDD @4.5': 1,
     // 3.36 · span.aide > span.ic « 🔒 » · config-navigation/jour
     '#7A8592 sur #F4F2EC @4.5': 1,
-    // 3.37 · div.avis.jaune > span.ic « ⚠ » · expedition/jour
-    '#8F826D sur #F8F2E7 @4.5': 1,
-    // 3.41 · button.chemin > span.ic « 📂 » · catalogio/jour
-    '#8F8B82 sur #FFFFFF @4.5': 1,
-    // 3.42 · button#s-purger.b.dgr > span.ic « 🗑 » · sauvegarde/jour
-    '#A58282 sur #FFFFFF @4.5': 3,
-    // 3.44 · button#btn-etiquette.paie > span.ic « 💳 » · expedition/jour
-    '#E1DAFD sur #7859F7 @4.5': 1,
-    // 3.49 · div.tete > span#t-av.av « MT » · client/jour client/nuit
-    '#17202C sur #8A6F4D @4.5': 2,
-    // 3.51 · span > span.ic « ⚠ » · inventaire/jour tableau/jour
-    '#93743B sur #EEE6D5 @4.5': 3,
-    // 3.57 · div.haut > span « 📦 » · ramassages/jour
-    '#80848B sur #FAF9F6 @4.5': 2,
-    // 3.58 · tr.off > td « Allemagne » · livraison/nuit
-    '#6E7682 sur #16202F @4.5': 2,
-    // 3.58 · button > i « · » · tableau/nuit
-    '#81858D sur #2C3037 @4.5': 4,
-    // 3.60 · div.stitre > span.ic « ☁ » · bd/jour gabarits/jour
-    '#82888C sur #FFFFFF @4.5': 3,
-    // 3.61 · button.b.dgr > span.ic « 🗑 » · gabarits/jour logotheque/jour
-    '#A37E7E sur #FFFFFF @4.5': 3,
-    // 3.62 · span.em > span.ic « 📸 » · modeles/jour
-    '#7C8896 sur #FFFFFF @4.5': 1,
-    // 3.64 · div.sdesc > span.ic « 👁 » · accueil/jour analytics/jour newsletter/jour publicite/jour
-    '#7E8793 sur #FFFFFF @4.5': 11,
-    // 3.66 · h3 > span.ic « 📈 » · statistiques/jour
-    '#82868B sur #FFFFFF @4.5': 2,
-    // 3.67 · div.vig > span.rien « Choisirune image » · icones/nuit
-    '#6D7F96 sur #F5F2EC @4.5': 2,
-    // 3.69 · strong > span.code « US » · livraison/nuit remboursement/nuit
-    '#6D7F96 sur #1D2735 @4.5': 3,
-    // 3.71 · div.nom > span.masq « (masqué) » · accueil/nuit
-    '#86741F sur #131C2A @4.5': 1,
-    // 3.79 · span.em > span.ic « 📸 » · modeles/nuit
-    '#64758B sur #0F1724 @4.5': 3,
-    // 3.85 · span.aide > span.ic « 🔒 » · config-navigation/nuit
-    '#64748A sur #0E1522 @4.5': 1,
-    // 3.89 · button.b > span.ic « ✏ » · accueil/nuit
-    '#767D88 sur #18212F @4.5': 2,
+    // 3.36 · span > span.ic « ⚡ » · invmeta_c4/jour invmeta_c7/jour
+    '#9A8A75 sur #FFFFFF @4.5': 2,
+    // 3.36 · div.garde.rouge > span.ic « ⚠ » · sauvegarde_c6/jour
+    '#9F7676 sur #FDE9E9 @4.5': 1,
+    // 3.37 · div.avis.jaune > span.ic « ⚠ » · expedition/jour expedition_c1/jour expedition_c2/jour
+    '#8F826D sur #F8F2E7 @4.5': 4,
+    // 3.39 · h2 > span.cpt « 1 » · liquidation_c1/nuit
+    '#DC2626 sur #16202F @4.5': 1,
+    // 3.41 · button.chemin > span.ic « 📂 » · catalogio/jour catalogio_c1/jour publicite_c4/jour
+    '#8F8B82 sur #FFFFFF @4.5': 3,
+    // 3.41 · div.note > span.ic « ✅ » · securite_c5/jour
+    '#5B8B6F sur #E3F4E9 @4.5': 1,
+    // 3.42 · button#s-purger.b.dgr > span.ic « 🗑 » · sauvegarde/jour sauvegarde_c1/jour
+    '#A58282 sur #FFFFFF @4.5': 4,
+    // 3.44 · button#btn-etiquette.paie > span.ic « 💳 » · expedition/jour expedition_c1/jour
+    '#E1DAFD sur #7859F7 @4.5': 2,
+    // 3.45 · div > span.ic « 📦 » · retour_c1/jour retour_c3/jour
+    '#7C8591 sur #F5F6F6 @4.5': 2,
+    // 3.45 · div.filig > span.ic « ⚠ » · studio_c5/jour studio_c7/jour
+    '#9C8941 sur #FFFFFF @4.5': 6,
+    // 3.49 · div.tete > span#t-av.av « MT » · client/jour client/nuit client_c1/jour client_c1/nuit client_c2/jour client_c2/nuit
+    '#17202C sur #8A6F4D @4.5': 3,
+    // 3.51 · div.avis > span.ic « 👁 » · depenses_c4/jour impot_c3/jour impot_c6/jour inventaire/jour inventaire_c5/jour promo_c2/jour tableau/jour
+    '#93743B sur #EEE6D5 @4.5': 9,
+    // 3.52 · span > span.ic « ⚠ » · campagnes_c1/jour
+    '#BD7575 sur #FFFFFF @4.5': 1,
+    // 3.57 · button.sw > span.nm « rouge » · invmeta_c2/jour
+    '#80848B sur #FAF9F6 @4.5': 1,
+    // 3.60 · div.stitre > span.ic « ☁ » · bd/jour bd_c1/jour gabarits/jour gabarits_c2/jour
+    '#82888C sur #FFFFFF @4.5': 6,
+    // 3.61 · button.b.dgr > span.ic « 🗑 » · accueil_c1/jour gabarits/jour logotheque/jour
+    '#A37E7E sur #FFFFFF @4.5': 5,
+    // 3.62 · div.sous > span.ic « 📦 » · bd_c1/jour modeles/jour modeles_c2/jour
+    '#7C8896 sur #FFFFFF @4.5': 3,
+    // 3.62 · div > label.bascule « Retirer le fond de l’image » · icones_c1/jour remboursements_c1/jour
+    '#83878F sur #FFFFFF @4.5': 5,
+    // 3.64 · div.sdesc > span.ic « 👁 » · accueil/jour accueil_c2/jour analytics/jour gabarits_c1/jour inventaire_c2/jour newsletter/jour newsletter_c4/jour publicite/jour publicite_c2/jour publicite_c5/jour studio_c1/jour
+    '#7E8793 sur #FFFFFF @4.5': 26,
+    // 3.64 · button#rc-enr > span.ic « 💾 » · studio_c1/jour studio_c2/jour studio_c3/jour studio_c5/jour studio_c7/jour
+    '#81878C sur #FFFFFF @4.5': 5,
+    // 3.66 · h3 > span.ic « 📈 » · statistiques/jour statistiques_c1/jour
+    '#82868B sur #FFFFFF @4.5': 4,
+    // 3.75 · div.lgn > div.ss « Panneau d’administration » · marque_c2/jour marque_c2/nuit
+    '#64748B sur #0F172A @4.5': 1,
+    // 3.75 · div.vide > span « Non configuré » · modeles_c1/jour
+    '#798292 sur #FCFBF9 @4.5': 3,
+    // 3.76 · div.rangee > button#b-bascule.bsc « Repasser en pré-lancement » · lancement_c1/nuit
+    '#FFFFFF sur #EF4444 @4.5': 1,
+    // 3.80 · div.vide > span « Non configuré » · modeles_c1/nuit
+    '#687484 sur #0F1623 @4.5': 3,
+    // 3.81 · strong > span.ic « ⚠ » · modeles_c2/jour
+    '#8C793B sur #F4F2EC @4.5': 1,
+    // 3.82 · div.ft > span.ic « 💳 » · depenses_c2/jour depenses_c4/jour
+    '#7A63BC sur #E8E3E8 @4.5': 2,
     // 3.90 · span.mk > span.ic « 🔒 » · config-navigation/nuit
     '#757C88 sur #16202F @4.5': 2,
-    // 4.00 · div.ch > div.aide « La clé est stockée côté serveur et n’est » · analytics/nuit apparence/nuit automations/nuit bd/nuit caisse/nuit cles/nuit client/nuit config-navigation/nuit config-retours/nuit expedition/nuit footer/nuit icones/nuit images/nuit impot/nuit imprimantes/nuit inventaire/nuit livraison/nuit marque/nuit paiements-config/nuit remboursement/nuit retour/nuit statistiques/nuit studio/nuit tableau/nuit taxes/nuit transporteurs/nuit
-    '#6D7F96 sur #16202F @4.5': 105,
+    // 3.98 · td > span.pill.neutre « Expiré » · remboursements_c1/nuit
+    '#7F8996 sur #212C3B @4.5': 1,
     // 4.01 · div.afaire > span.titre « À faire maintenant » · tableau/jour
     '#8A6A3E sur #ECE6D9 @4.5': 1,
-    // 4.03 · div.s > div.n « 42 180,00 $ » · impot/jour promo/jour remboursements/jour
-    '#8A6A3E sur #E9E7E2 @4.5': 12,
-    // 4.06 · div.s > div.sub « 137 commandes » · impot/nuit remboursements/nuit
-    '#6D7F96 sur #181E2B @4.5': 8,
-    // 4.07 · label.champ > span.sub « La rotation est active : le nom change t » · chat-config/nuit incidents/nuit journaux/nuit reglages-securite/nuit sauvegarde/nuit
-    '#6F8098 sur #16202F @4.5': 28,
-    // 4.09 · button.mini.actif > span.n.hi « 2 » · messagerie/jour retours/jour
-    '#83570B sur #DECFB2 @4.5': 2,
-    // 4.12 · span.pill.neutre > span.ic « 📦 » · retours/nuit
-    '#8596AC sur #2A3545 @4.5': 1,
-    // 4.14 · div.avis.info > span.pill « BC : 84,20 $ » · impot/jour
-    '#5A6574 sur #D4D8DF @4.5': 2,
-    // 4.16 · div#onglets.onglets > button.actif « ⬇ Exporter » · catalogio/jour invmeta/jour newsletter/jour publicite/jour transferts/jour
-    '#6F6A5F sur #E7E2D7 @4.5': 5,
-    // 4.16 · div.vign > span.att « nonrangée » · photos/jour
-    '#856513 sur #E6E1D6 @4.5': 1,
+    // 4.03 · span > span.ic « ⚡ » · commande_c1/jour
+    '#E19B5E sur #7C2D12 @4.5': 1,
+    // 4.03 · div.s > div.n « 0.00 $ » · depenses_c2/jour depenses_c3/jour depenses_c4/jour impot/jour promo/jour promo_c1/jour promo_c2/jour remboursements/jour remboursements_c1/jour
+    '#8A6A3E sur #E9E7E2 @4.5': 35,
+    // 4.09 · button.mini.actif > span.n.hi « 2 » · avis_c2/jour messagerie/jour retours/jour sociaux_c2/jour
+    '#83570B sur #DECFB2 @4.5': 4,
+    // 4.11 · h3 > span.ic « ⚠ » · codesbarres_c1/jour
+    '#8F7C3F sur #FFFFFF @4.5': 1,
+    // 4.11 · div.fm > span « 2026-07 · 0,50 $ » · depenses_c2/jour depenses_c4/jour
+    '#5A6574 sur #D9D6DC @4.5': 4,
+    // 4.16 · div#onglets.onglets > button.actif « ⬇ Exporter » · catalogio/jour catalogio_c1/jour catalogio_c2/jour catalogio_c4/jour invmeta/jour invmeta_c1/jour invmeta_c2/jour invmeta_c3/jour invmeta_c4/jour invmeta_c5/jour invmeta_c6/jour invmeta_c7/jour invmeta_c8/jour newsletter/jour newsletter_c1/jour newsletter_c2/jour newsletter_c3/jour newsletter_c4/jour publicite/jour publicite_c1/jour publicite_c2/jour publicite_c3/jour publicite_c4/jour publicite_c6/jour transferts/jour transferts_c1/jour transferts_c2/jour
+    '#6F6A5F sur #E7E2D7 @4.5': 27,
     // 4.19 · span.pill.neutre > span.ic « 📦 » · retours/jour
     '#667184 sur #EBEDEF @4.5': 1,
-    // 4.24 · label.champ > span.sub « Huit caractères au moins. Un mot de pass » · profil/nuit sauvegarde/nuit securite/nuit sociaux-config/nuit
-    '#6F8098 sur #151C29 @4.5': 10,
-    // 4.25 · div.pied > span#msg.msg.bon « 2 pays inscrits. » · livraison/jour
-    '#15803D sur #EFECE4 @4.5': 1,
-    // 4.26 · div.tarif > div.n « Par transaction web » · paiements-config/nuit
-    '#6D7F96 sur #111A29 @4.5': 4,
-    // 4.30 · span.pt.ic > span.ic « 🔗 » · explorateur/nuit
-    '#7A8A9F sur #1F2632 @4.5': 2,
-    // 4.31 · div.etats > span.pill.on « Actif » · securite/jour sociaux-config/jour
-    '#326A49 sur #C0DBC5 @4.5': 4,
-    // 4.31 · div.etats > span.pill.moi « vous » · securite/jour
-    '#4A627E sur #CBD7E7 @4.5': 1,
-    // 4.32 · div.etats > span.pill.role « Super-administrateur » · securite/jour
-    '#5F666C sur #DDDEDD @4.5': 2,
-    // 4.35 · div.etats > span.pill.warn « MFA exempté » · securite/jour
-    '#786426 sur #EBDFBD @4.5': 1,
-    // 4.39 · div.sous > div.tt « Sous-menu » · config-navigation/nuit modeles/nuit
-    '#6D7F96 sur #0F1724 @4.5': 4,
-    // 4.39 · div.pas > span.on « 1 · Étiquette » · expedition/jour
-    '#6C675C sur #EAE3D6 @4.5': 1,
-    // 4.40 · div.tarif > div.r « 2,8 % + 0,30 $ » · paiements-config/jour
-    '#7D694E sur #EEEBE3 @4.5': 4,
-    // 4.40 · div.etats > span.pill.mfa « MFA ✓ » · securite/jour
-    '#595B79 sur #D2D2E7 @4.5': 1,
-    // 4.41 · div#pas.pas > button.on « La collection » · collection/jour fournisseur/jour produit/jour retour/jour
-    '#6B665B sur #E9E1D4 @4.5': 4,
-    // 4.43 · button.mini.dgr > span.ic « 🔓 » · verrous/nuit
-    '#E36A6B sur #222B39 @4.5': 2,
+    // 4.25 · div.pied > span#msg.msg.bon « 4 résultat(s) dans tous les journaux. » · journaux_c13/jour livraison/jour
+    '#15803D sur #EFECE4 @4.5': 2,
+    // 4.31 · div.etats > span.pill.on « Actif » · securite/jour securite_c1/jour securite_c2/jour sociaux-config/jour sociaux-config_c1/jour sociaux-config_c2/jour
+    '#326A49 sur #C0DBC5 @4.5': 12,
+    // 4.31 · div.etats > span.pill.moi « vous » · securite/jour securite_c1/jour securite_c2/jour
+    '#4A627E sur #CBD7E7 @4.5': 3,
+    // 4.32 · div.etats > span.pill.role « Super-administrateur » · securite/jour securite_c1/jour securite_c2/jour
+    '#5F666C sur #DDDEDD @4.5': 6,
+    // 4.33 · div.gros > span.ic « 🔑 » · paiements_c2/jour
+    '#687283 sur #F4F2EC @4.5': 1,
+    // 4.35 · td > span.pill « Échec » · journaux_c12/jour journaux_c2/jour
+    '#895959 sur #F9D8D8 @4.5': 2,
+    // 4.35 · div.etats > span.pill.warn « MFA exempté » · securite/jour securite_c1/jour securite_c2/jour
+    '#786426 sur #EBDFBD @4.5': 3,
+    // 4.39 · div.pas > span.on « 1 · Étiquette » · expedition/jour expedition_c1/jour expedition_c2/jour
+    '#6C675C sur #EAE3D6 @4.5': 3,
+    // 4.40 · div.alerte > code « BL » · invmeta_c2/jour
+    '#5E656E sur #F1DAD4 @4.5': 1,
+    // 4.40 · div.tarif > div.r « 2,8 % + 0,30 $ » · paiements-config/jour paiements-config_c1/jour
+    '#7D694E sur #EEEBE3 @4.5': 8,
+    // 4.40 · div.etats > span.pill.mfa « MFA ✓ » · securite/jour securite_c1/jour securite_c2/jour
+    '#595B79 sur #D2D2E7 @4.5': 3,
+    // 4.41 · div#pas.pas > button.on « La collection » · collection/jour collection_c1/jour commande_c1/jour fournisseur/jour fournisseur_c1/jour produit/jour produit_c1/jour produit_c2/jour produit_c3/jour produit_c4/jour retour/jour retour_c1/jour retour_c2/jour retour_c3/jour retour_c4/jour
+    '#6B665B sur #E9E1D4 @4.5': 15,
+    // 4.42 · div#corps.corps > div.avis.att « Un segment ne fait que la liste des abon » · campagnes_c3/jour statistiques_c1/jour statistiques_c2/jour
+    '#73693E sur #EEE6D5 @4.5': 7,
+    // 4.43 · div#corps > div.avis.non « Aucune clé Groq enregistrée : l’assistan » · chat-config_c3/jour
+    '#746845 sur #EEE6D5 @4.5': 2,
     // 4.44 · div.etat > div.src.warn « Aucune variable dans Render : l’état act » · lancement/jour
     '#80680B sur #F2E8DA @4.5': 1,
-    // 4.46 · div.barre > span.aide « Les éléments fixes ne se suppriment pas  » · config-navigation/nuit
-    '#6D7F96 sur #0E1522 @4.5': 1,
-    // 4.46 · div.haut > div.jeton « BB » · securite/jour
-    '#5E656B sur #E5DFD4 @4.5': 2,
-    // 4.47 · div.actes > button.b « ️ » · accueil/nuit
-    '#808792 sur #18212F @4.5': 2,
-    // 4.49 · div.lg > span.mk « ✎ » · config-navigation/nuit
-    '#7F8792 sur #16202F @4.5': 1,
+    // 4.46 · div.haut > div.jeton « BB » · securite/jour securite_c1/jour securite_c2/jour
+    '#5E656B sur #E5DFD4 @4.5': 6,
+    // 4.47 · div.cadre > div.bt « Se connecter » · marque_c2/nuit
+    '#FFFFFF sur #6366F1 @4.5': 1,
+    // 4.48 · div.pas > span.fait « 1 · Étiquette ✓ » · expedition_c1/jour
+    '#297A46 sur #EFECE4 @4.5': 1,
+    // 4.48 · div#corps.corps > div.avis.bon « Profil complet — vos documents fiscaux s » · impot_c1/jour
+    '#287644 sur #EEE6D5 @4.5': 1,
+    // 4.48 · td > strong « Promesse rejetée : reseau coupe » · journaux_c11/jour journaux_c4/jour
+    '#737781 sur #FFFFFF @4.5': 4,
+    // 4.49 · div.lg > span.mk « ✎ » · config-navigation/nuit remboursement_c1/nuit
+    '#7F8792 sur #16202F @4.5': 2,
   },
 };

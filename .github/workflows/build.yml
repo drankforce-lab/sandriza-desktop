@@ -113,17 +113,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      # ⚠ `--themes` DEPUIS LA 4.40.0, ET C'EST UN CHOIX QUI SE PAIE : 1 104
-      # affichages au lieu de 184, six minutes au lieu d'une. On le prend parce
-      # que le balayage des thèmes est enfin PROPRE — tant qu'il rendait cent
-      # dix-huit fautes, l'inclure aurait juste posé un rouge permanent, et un
-      # rouge permanent finit désactivé. Maintenant qu'il est vert, l'exclure
-      # reviendrait à laisser six jeux de couleurs sur sept sans garde.
-      # Le budget de temps du banc s'arrête bien avant le quota GitHub.
-      - name: Contrastes des fenetres, mesures au rendu (2 modes x 6 themes)
+      # ⚠⚠ TOUS LES SCENARIOS PLUTOT QUE TOUS LES THEMES — un budget, un choix.
+      # La 4.40.0 faisait tourner `--themes` (1 104 affichages, ~6 min). La
+      # 4.41.0 a decouvert bien pire : le banc ne mesurait que le PREMIER
+      # scenario de chaque fenetre, soit 92 des 339 declares. Les trois quarts
+      # des ecrans n'etaient jamais regardes.
+      # Croiser les deux ferait ~1 600 affichages et un quart d'heure. Entre les
+      # deux, le choix n'est pas serre : un THEME ne deplace que des fonds (les
+      # 118 << fautes de themes >> se ramenaient a 8 endroits), tandis qu'un
+      # SCENARIO montre un contenu different — une fiche produit, un onglet, une
+      # vue en lecture seule. On garde donc les 339 scenarios en 2 modes, et les
+      # six themes restent a la main (`--themes`).
+      # ⚠ Ce choix est ecrit ici parce qu'il se defend, pas parce qu'il va de soi.
+      - name: Contrastes des fenetres, mesures au rendu (339 scenarios x 2 modes)
         env:
           SZ_CONTRASTE_BUDGET_MS: '900000'
-        run: node tools/banc-contraste-rendu.js --themes
+        run: node tools/banc-contraste-rendu.js
 
   windows:
     needs: menage

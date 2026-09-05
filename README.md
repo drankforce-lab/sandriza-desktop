@@ -221,3 +221,32 @@ son total. C'est absurde, et surtout dangereux : la même addition qui gonfle pe
 compenser un rendu manquant, et la ligne « ⚠ N MANQUANT(S) » — la seule qui
 protège du « je n'ai pas regardé » — s'éteindrait toute seule. On compte
 désormais des **contextes distincts**, pas des lignes de relevé.
+
+### 🔴🔴🔴 Le banc ne mesurait qu'un écran par fenêtre (2026-09-05, 4.41.0)
+
+Il prenait `brut[0]` du jeu de réponses et s'arrêtait là. Or les 92 fenêtres
+déclarent **339 scénarios** : la liste des produits ET la fiche d'un produit,
+l'onglet Accès ET l'onglet Impressions, la vue normale ET la vue en lecture
+seule. **247 écrans — les trois quarts — n'étaient jamais mesurés, et le rapport
+n'en disait pas un mot** : il annonçait « 92 fenêtres » comme si une fenêtre
+n'avait qu'un visage.
+
+C'est aussi ce qui expliquait les « 72 rendus où presque rien n'a été jugé » : le
+premier scénario de `commande` ouvre une **modale** au démarrage, donc le seul
+écran mesuré de cette fenêtre était son voile — 8 textes jugés, 98 derrière la
+modale. Les cinq autres scénarios, eux, montrent l'écran.
+
+⚠ **« Fenêtre » et « scénario » ne sont pas la même chose**, et les confondre est
+exactement ce qui a caché ces 247 écrans. Le rapport dit maintenant les deux :
+« 339 scénario(s) de 92 fenêtre(s) ».
+
+**678 rendus, 19 324 couples mesurés** (contre 184 et 6 700). Cela a rendu
+visibles **118 fautes qui existaient depuis toujours** : elles sont figées dans
+`contraste-rendu-declare.js` avec leur nombre d'endroits — le cliquet les empêche
+d'empirer, et elles restent à corriger.
+
+⚠ **Un budget, un choix.** Croiser 339 scénarios × 6 thèmes ferait ~1 600
+affichages et un quart d'heure. Un **thème** ne déplace que des fonds (les 118
+« fautes de thèmes » se ramenaient à 8 endroits) ; un **scénario** montre un
+contenu différent. La construction garde donc les 339 scénarios en 2 modes, et
+`--themes` reste à la main sur le premier cas.

@@ -97,6 +97,11 @@ const MODES = ['nuit', 'jour'];
    couverture qui trouve l'essentiel (jour/nuit est là où la dette vit).
    Les six thèmes restent atteignables par `--themes`, en connaissance de cause. */
 const TOUS_THEMES = OPT('--themes');
+/* ⚠ TOUS LES SCÉNARIOS par défaut : c'est le contenu qui change d'un scénario à
+   l'autre, pas seulement une teinte. `--un-seul-cas` revient au premier de
+   chaque fenêtre, pour un passage rapide. Les THÈMES, eux, ne croisent que le
+   premier cas — voir la note dans `fenetres()`. */
+const TOUS_LES_CAS = !OPT('--un-seul-cas');
 const THEMES = TOUS_THEMES ? ['', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'] : [''];
 
 /* ══ 0. LE BANC RANGE DERRIÈRE LUI — LA LEÇON DU 2026-09-05 ═════════════════
@@ -228,11 +233,30 @@ function fenetres() {
        Le banc les déclarait « sans jeu, donc non éprouvées » — exact, mais pour
        la mauvaise raison, et cinq écrans passaient à la trappe. */
     const brut = REPONSES[f];
-    let jeu = null;
-    if (Array.isArray(brut) && brut.length) jeu = brut[0];
-    else if (brut && typeof brut === 'object') jeu = { id: '', reponses: brut };
-    if (!jeu) { sansJeu.push(nom); continue; }
-    out.push({ nom, fichier: f, fabrique, jeu });
+    let cas = null;
+    if (Array.isArray(brut) && brut.length) cas = brut;
+    else if (brut && typeof brut === 'object') cas = [{ id: '', reponses: brut }];
+    if (!cas) { sansJeu.push(nom); continue; }
+    /* ⚠⚠⚠ TOUS LES SCÉNARIOS, PLUS SEULEMENT LE PREMIER — 247 ÉCRANS ÉTAIENT
+       INVISIBLES. Le banc prenait `brut[0]` et s'arrêtait là. Or les 92 fenêtres
+       déclarent 339 scénarios : la liste des produits ET la fiche d'un produit,
+       l'onglet Accès ET l'onglet Impressions, la vue normale ET la vue en
+       lecture seule. **Les trois quarts des écrans n'étaient jamais mesurés, et
+       le rapport n'en disait pas un mot** — il annonçait « 92 fenêtres » comme
+       si une fenêtre n'avait qu'un visage.
+       C'est ce qui expliquait les « 72 rendus où presque rien n'a été jugé » :
+       le premier scénario de `commande` ouvre une MODALE au démarrage, donc le
+       seul écran mesuré de cette fenêtre était son voile — 8 textes jugés, 98
+       derrière la modale. Les cinq autres scénarios, eux, montrent l'écran.
+       ⚠ Les THÈMES restent sur le premier scénario : 339 × 12 feraient 4 068
+       affichages pour un gain nul. Les six thèmes ne déplacent que des fonds
+       (les 118 « fautes de thèmes » étaient 8 endroits), tandis qu'un scénario
+       montre un CONTENU différent. Ce partage est un choix, et il est dit dans
+       le rapport. */
+    cas.forEach((jeu, i) => {
+      if (i > 0 && !TOUS_LES_CAS) return;
+      out.push({ nom, fichier: f, fabrique, jeu, cas: i, casNom: (jeu && jeu.nom) || ('cas ' + i) });
+    });
   }
   return { liste: out, sansJeu };
 }
@@ -340,7 +364,10 @@ function main() {
     try { brut = String(f.fabrique(f.jeu.id || '')); }
     catch (e) { echecs++; console.error(`   ✗ ${f.nom} : la fabrique a levé — ${e.message}`); continue; }
     for (const mode of MODES) {
-      for (const theme of THEMES) {
+      /* Les thèmes ne croisent que le PREMIER scénario : un thème déplace des
+         fonds, un scénario montre un autre contenu. Croiser les deux ferait
+         4 068 affichages pour un gain nul. */
+      for (const theme of (f.cas ? [''] : THEMES)) {
         // Le prologue s'insère juste après <head>, donc avant tout script de la
         // fenêtre ; l'épilogue à la toute fin, quand tout existe.
         let page = brut.replace(/<head([^>]*)>/i, (m) => m + '\n' + prologue(f.jeu));
@@ -357,9 +384,9 @@ function main() {
            D'ESSAI PEUVENT CONTENIR DU BALISAGE. Un repère cherché « au premier
            venu » finit dans la donnée plutôt que dans la structure. */
         const fin = page.toLowerCase().lastIndexOf('</body>');
-        if (fin >= 0) page = page.slice(0, fin) + epilogue(f.nom, mode, theme) + page.slice(fin);
-        else page += epilogue(f.nom, mode, theme);
-        const nomF = `${f.nom}-${mode}${theme ? '-' + theme : ''}.html`;
+        if (fin >= 0) page = page.slice(0, fin) + epilogue(f.nom + (f.cas ? '_c' + f.cas : ''), mode, theme) + page.slice(fin);
+        else page += epilogue(f.nom + (f.cas ? '_c' + f.cas : ''), mode, theme);
+        const nomF = `${f.nom}${f.cas ? '_c' + f.cas : ''}-${mode}${theme ? '-' + theme : ''}.html`;
         fs.writeFileSync(path.join(tmp, nomF), page, 'utf8');
         adresses.push(nomF + '?m=' + mode + (theme ? '&t=' + theme : ''));
       }
@@ -526,7 +553,9 @@ function main() {
     console.log(`   ⚠⚠ PLAFOND DE TEMPS ATTEINT (${Math.round(BUDGET_MS / 60000)} min) — le parcours s'est arrêté en chemin.`);
     console.log("      Ce qui suit ne porte que sur ce qui a été mesuré ; le reste n'a PAS été regardé.");
   }
-  rapport(lignes, liste.length, adresses, sansJeu, echecs, lotsMorts, budgetDepasse);
+  const nbFenetres = new Set(liste.map((f) => f.nom)).size;
+  rapport(lignes, { scenarios: liste.length, fenetres: nbFenetres },
+    adresses, sansJeu, echecs, lotsMorts, budgetDepasse);
 }
 
 /* Le nom qu un rendu porte dans les relevés : « fenetre/mode » (ou « /theme »).
@@ -542,7 +571,7 @@ function nomDeRendu(adresse) {
 }
 
 /* ── 6. RAPPORT ───────────────────────────────────────────────────────────── */
-function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepasse) {
+function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepasse) {
   const nbRendus = adresses.length;
   const paires = new Map();
   const durs = [];
@@ -605,7 +634,12 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
 
   console.log('');
   console.log('══ CONTRASTES DES FENÊTRES, MESURÉS AU RENDU ══');
-  console.log(`   ${nbFen} fenêtre(s) × ${MODES.length} mode(s) × ${THEMES.length} thème(s) = ${nbRendus} rendus`);
+  /* ⚠ « FENÊTRES » ET « SCÉNARIOS » NE SONT PAS LA MÊME CHOSE, et les confondre
+     est exactement ce qui a caché 247 écrans : le rapport annonçait « 92
+     fenêtres » comme si une fenêtre n'avait qu'un visage. On dit les deux. */
+  console.log(`   ${quoi.scenarios} scénario(s) de ${quoi.fenetres} fenêtre(s)`
+    + ` × ${MODES.length} mode(s)` + (TOUS_THEMES ? ` (+ ${THEMES.length - 1} thèmes sur le 1er cas)` : '')
+    + ` = ${nbRendus} rendus`);
   /* ⚠ LE NOMBRE DE RENDUS RÉELLEMENT MESURÉS, ET C'EST LA LIGNE LA PLUS
      IMPORTANTE DU RAPPORT. Une page qui fait tomber le moteur ne dit rien ; sans
      ce compte, un banc qui n'aurait vu que la moitié des écrans se lirait comme
@@ -749,9 +783,9 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
        qu'un écran perdu ne se range pas dans le bruit. Et une déclaration ne
        l'efface pas du rapport : sa raison est réaffichée à chaque passage,
        pour qu'on se souvienne qu'il reste une zone d'ombre. */
-    const nonDeclares = perdus.filter((n) => !INMESURABLES[String(n).split('/')[0]]);
+    const nonDeclares = perdus.filter((n) => !INMESURABLES[String(n).split('/')[0].replace(/_c\d+$/, '')]);
     for (const [fen, raison] of Object.entries(INMESURABLES)) {
-      if (perdus.some((n) => String(n).split('/')[0] === fen)) {
+      if (perdus.some((n) => String(n).split('/')[0].replace(/_c\d+$/, '') === fen)) {
         console.log(`   • ${fen} — DÉCLARÉE non mesurable : ${raison}`);
       }
     }
@@ -802,7 +836,7 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
        s'attribue une couverture qu'elle n'a pas est pire qu'un banc absent :
        elle clôt la question. Le verdict énumère donc ce qu'il a mesuré, et
        nomme ce qu'il a laissé de côté. */
-    console.log(`✓ aucun texte sous le seuil dans ${nbFen} fenêtre(s), de jour comme de nuit`
+    console.log(`✓ aucun texte sous le seuil dans ${quoi.scenarios} scénario(s) de ${quoi.fenetres} fenêtre(s), de jour comme de nuit`
       + (TOUS_THEMES ? ', les six thèmes compris.' : '.'));
     if (!TOUS_THEMES) console.log('  ⚠ les six THÈMES n\'ont pas été mesurés — `--themes` pour les inclure.');
     const zones = Object.keys(INMESURABLES);
