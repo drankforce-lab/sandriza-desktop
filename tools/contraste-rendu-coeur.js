@@ -102,6 +102,68 @@
     return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
   }
 
+  /* ══ LES FILTRES CSS — SANS EUX ON MESURE UNE COULEUR QUI N'EST PAS PEINTE ══
+     ⚠⚠⚠ Trouvé le 2026-09-05, et c'était un TIERS de toute la dette : les
+     pictogrammes du projet passent par une seule règle du socle,
+     `.ic{filter:grayscale(1) brightness(1.6)}` (et `.42` en mode jour). Le banc
+     lisait `color` et jugeait dessus — or `color` n'est que la MATIÈRE PREMIÈRE :
+     le filtre la désature puis la multiplie avant de la peindre. 146 endroits
+     étaient jugés sur une couleur que personne ne voit.
+
+     ⚠ ET J'AI FAILLI CORRIGER ÇA À L'ENVERS. J'avais conclu que ces
+     pictogrammes étaient des emoji EN COULEUR, donc insensibles à `color`, et
+     j'allais écrire une règle qui les aurait tous EXCUSÉS. Une capture d'écran
+     a montré le contraire en une seconde : ⚠ 🔗 🗑 👁 ☁ deviennent rouges quand
+     on met `color:red` — seul 📝 reste peint par la police. Les fautes sont donc
+     RÉELLES ; c'est leur MESURE qui était fausse. Troisième fois de la journée
+     que regarder bat déduire.
+
+     On compose donc `grayscale()` et `brightness()` — les deux seuls filtres
+     employés ici, et les deux seuls qui se calculent exactement. Tout autre
+     filtre rend la couleur INDÉCIDABLE : on renonce et on le compte, plutôt que
+     de juger une couleur qu'on ne sait pas reproduire. */
+  function filtrer(c, chaineFiltres) {
+    var out = { r: c.r, g: c.g, b: c.b, a: c.a };
+    for (var i = 0; i < chaineFiltres.length; i++) {
+      var f = chaineFiltres[i];
+      if (f.nom === 'grayscale') {
+        // La matrice de luminance de CSS filter-effects, interpolée par `k`.
+        var y = 0.2126 * out.r + 0.7152 * out.g + 0.0722 * out.b;
+        var k = f.val;
+        out = { r: out.r + (y - out.r) * k, g: out.g + (y - out.g) * k,
+                b: out.b + (y - out.b) * k, a: out.a };
+      } else if (f.nom === 'brightness') {
+        out = { r: Math.min(255, out.r * f.val), g: Math.min(255, out.g * f.val),
+                b: Math.min(255, out.b * f.val), a: out.a };
+      } else if (f.nom === 'opacity') {
+        out = { r: out.r, g: out.g, b: out.b, a: out.a * f.val };
+      }
+    }
+    return out;
+  }
+
+  /* Lit la pile de filtres d'un élément ET de ses ancêtres. Rend `null` dès
+     qu'un filtre qu'on ne sait pas calculer apparaît. */
+  function filtresDe(el) {
+    var pile = [];
+    for (var n = el; n && n.nodeType === 1; n = n.parentElement) {
+      var f = getComputedStyle(n).filter;
+      if (!f || f === 'none') continue;
+      var rx = /([a-z-]+)\(([^)]*)\)/g, m2, vus = [];
+      while ((m2 = rx.exec(f))) {
+        var nom = m2[1], brut = String(m2[2]).trim();
+        if (nom !== 'grayscale' && nom !== 'brightness' && nom !== 'opacity') return null;
+        var v = /%$/.test(brut) ? parseFloat(brut) / 100 : parseFloat(brut);
+        if (isNaN(v)) return null;
+        vus.push({ nom: nom, val: v });
+      }
+      // Du plus proche vers la racine : les filtres s'appliquent de l'intérieur
+      // vers l'extérieur, donc dans cet ordre.
+      pile = pile.concat(vus);
+    }
+    return pile;
+  }
+
   /* ── LA CHAÎNE DES FONDS, AVEC LES OPACITÉS ───────────────────────────── */
   /* On remonte de l'élément vers la racine en notant, pour chaque niveau, son
      fond (une couleur, ou plusieurs quand c'est un dégradé) et son opacité. On
@@ -221,7 +283,7 @@
 
   /* ── Le relevé ────────────────────────────────────────────────────────── */
   var trouve = {};                          // clé « fg sur bg @seuil » → dossier
-  var comptes = { vus: 0, invisibles: 0, voile: 0, image: 0, illisible: 0, inactifs: 0, souVoile: 0, decoratifs: 0 };
+  var comptes = { vus: 0, invisibles: 0, voile: 0, image: 0, illisible: 0, inactifs: 0, souVoile: 0, decoratifs: 0, filtre: 0 };
 
   /* ══ CE QUE LA NORME ELLE-MÊME N'EXIGE PAS — ET LA CAPTURE QUI L'A MONTRÉ ══
      Le premier balayage complet a rendu 138 couples sous le seuil, dont
@@ -320,6 +382,12 @@
       if (f.indet) { comptes[f.indet === 'image' ? 'image' : 'illisible']++; continue; }
       var tc = lireCouleur(cs.color);
       if (tc === null) { comptes.illisible++; continue; }
+      /* ⚠ LA COULEUR PEINTE, PAS LA COULEUR ÉCRITE : on compose les filtres
+         avant tout jugement. Un filtre qu'on ne sait pas calculer rend la
+         couleur indécidable — on le compte plutôt que d'inventer. */
+      var fil = filtresDe(el);
+      if (fil === null) { comptes.filtre++; continue; }
+      if (fil.length) tc = filtrer(tc, fil);
       // L'opacité des ancêtres atténue le TEXTE comme elle atténue son fond.
       var aTexte = tc.a * f.multTexte;
       if (aTexte <= 0.02) { comptes.invisibles++; continue; }  // invisible pour de vrai

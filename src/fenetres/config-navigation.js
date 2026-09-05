@@ -40,7 +40,11 @@ body{background:var(--f-page);color:var(--tx);
 .item{border:1px solid var(--v08);border-radius:11px;margin-bottom:.55rem;
   background:var(--f-carte);overflow:hidden}
 .item .lg{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem}
-.item .mk{font-size:.85rem;opacity:.5;flex:0 0 auto;width:1.1rem;text-align:center}
+/* ⚠ CE CADENAS EST LA SEULE CHOSE QUI DIT QU UNE ENTREE EST VERROUILLEE — il
+   n a pas de libelle a cote. A .5 il sortait a 3.2 de contraste : on voyait un
+   gris, on ne lisait pas un cadenas. Estomper un signe qui est SEUL revient a
+   le retirer. */
+.item .mk{font-size:.85rem;opacity:.85;flex:0 0 auto;width:1.1rem;text-align:center}
 .item .co{flex:1 1 auto;min-width:0;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
 .item .co .lab{font-weight:600;font-size:.9rem}
 .item .co .href{font-size:.78rem;color:var(--tx3);font-family:ui-monospace,Menlo,Consolas,monospace}

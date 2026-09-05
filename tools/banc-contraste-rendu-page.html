@@ -114,7 +114,8 @@ function _fini() {
   } catch (e) {}
   dit('COMPTES|' + comptes.vus + '|' + comptes.invisibles + '|' + comptes.voile
     + '|' + comptes.image + '|' + comptes.illisible
-    + '|' + comptes.inactifs + '|' + comptes.souVoile + '|' + comptes.decoratifs + '|' + __CONTEXTE__);
+    + '|' + comptes.inactifs + '|' + comptes.souVoile + '|' + comptes.decoratifs
+    + '|' + comptes.filtre + '|' + __CONTEXTE__);
   try { parent.postMessage('sz-fini', '*'); } catch (e) {}
 }
 function _tour() {

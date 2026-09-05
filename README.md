@@ -250,3 +250,45 @@ affichages et un quart d'heure. Un **thème** ne déplace que des fonds (les 118
 « fautes de thèmes » se ramenaient à 8 endroits) ; un **scénario** montre un
 contenu différent. La construction garde donc les 339 scénarios en 2 modes, et
 `--themes` reste à la main sur le premier cas.
+
+### 🔴🔴🔴 Le banc jugeait la couleur ÉCRITE, pas la couleur PEINTE (4.42.0)
+
+Un **tiers de toute la dette** — 146 endroits sur 467 — venait d'une seule règle
+du socle : `.ic{filter:grayscale(1) brightness(1.6)}` (et `.42` en mode jour).
+Le banc lisait `color` et jugeait dessus. Or `color` n'est que la matière
+première : **le filtre la désature puis la multiplie avant de la peindre.** Cent
+quarante-six endroits étaient jugés sur une couleur que personne ne voit.
+
+⚠⚠ **ET J'AI FAILLI CORRIGER ÇA À L'ENVERS.** J'avais conclu que ces
+pictogrammes étaient des emoji **en couleur**, donc insensibles à `color`, et
+j'allais écrire une règle de banc qui les aurait tous **excusés** — 146 fautes
+réelles rendues muettes d'un trait. **Une capture d'écran a montré le contraire
+en une seconde** : ⚠ 🔗 🗑 👁 ☁ deviennent rouges quand on met `color:red` ; seul
+📝 reste peint par la police. Les fautes étaient réelles ; c'est leur **mesure**
+qui était fausse. Troisième fois de la journée que regarder bat déduire.
+
+Le banc compose maintenant `grayscale()`, `brightness()` et `opacity()` — les
+seuls filtres employés ici, et les seuls qui se calculent exactement. **Tout
+autre filtre rend la couleur indécidable** : il renonce, et il le compte.
+
+**Et les vraies fautes, une fois bien mesurées, tenaient en deux familles :**
+
+- **Le filtre EFFACE le pictogramme posé sur une surface d'accent.** Sur un
+  bouton doré, violet ou rouge, le glyphe hérite du blanc du bouton ; `grayscale`
+  le laisse blanc, puis `brightness(.42)` le ramène à un gris moyen — et un gris
+  moyen sur de l'or, c'est **1.44**. Le pictogramme d'un bouton **principal**
+  était donc là où il se voyait le moins. Ces surfaces gardent leur pictogramme
+  tel quel.
+  ⚠ **Un filtre se propage au sous-arbre** : quand la pastille porte elle-même la
+  classe (`class="pt ic"`), c'est ELLE qui reçoit le filtre, et un `filter:none`
+  posé sur le glyphe à l'intérieur n'annule pas celui du parent. **Il faut nommer
+  le porteur, pas seulement le porté.**
+  ⚠ Et la spécificité : `html.jour .ic` vaut (0,2,1), donc une règle en
+  `.prim .ic` (0,2,0) **ne gagnerait pas**. Les deux modes sont écrits.
+- **Estomper un signe qui est SEUL revient à le retirer.** Le cadenas des entrées
+  verrouillées (`config-navigation`) était à `.5` : on voyait un gris, on ne
+  lisait pas un cadenas — et il n'a aucun libellé à côté.
+
+**Dette : 145 → 89 entrées.** La table précédente avait été relevée sur les
+couleurs d'avant les filtres ; la moitié de ses clés désignaient des couleurs qui
+n'existent nulle part.

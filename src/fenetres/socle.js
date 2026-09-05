@@ -1576,8 +1576,31 @@ thead th{background:var(--f-entete)}
 .tete .ico{opacity:.95}
 /* Le pictogramme en mode JOUR : on assombrit au lieu d eclaircir. Sans cette
    ligne il est blanc sur blanc - c est le defaut qu il a signale. */
-html.jour .ic{filter:grayscale(1) brightness(.42);opacity:.78}
+html.jour .ic{filter:grayscale(1) brightness(.34);opacity:.92}
 html.jour .ico{color:#414e66}
+
+/* ══ LE FILTRE EFFACE LE PICTOGRAMME POSE SUR UNE SURFACE D ACCENT ═════════
+   ⚠⚠ Trouve le 2026-09-05, quand le banc a enfin su composer les filtres (il
+   jugeait jusque-la la couleur ECRITE, pas la couleur PEINTE). Sur un bouton
+   dore, violet ou rouge, le glyphe herite du blanc du bouton ; grayscale le
+   laisse blanc, puis brightness(.42) le ramene a un gris moyen — et un gris
+   moyen sur de l or, c est 1.44. Le pictogramme d un bouton PRINCIPAL etait
+   donc la ou il se voyait le moins.
+   ⚠ La regle du dessus existe pour les pictogrammes poses sur une SURFACE
+   NEUTRE, ou griser les rapproche du texte. Sur une surface d accent, la
+   couleur est deja choisie pour contraster : il n y a rien a corriger, et tout
+   a perdre. On rend donc ces pictogrammes tels quels.
+   ⚠ .pt ET .pt.ic : un FILTRE SE PROPAGE AU SOUS-ARBRE. Quand la pastille porte
+   elle-meme la classe (span class= pt ic ), c est ELLE qui recoit le filtre, et
+   un filter:none pose sur le glyphe a l interieur n annule pas celui du parent.
+   Il faut nommer le porteur, pas seulement le porte.
+   ⚠ La specificite compte : html.jour .ic vaut (0,2,1), donc une regle en
+   .prim .ic (0,2,0) NE GAGNERAIT PAS. Les deux modes sont ecrits. */
+.prim .ic,.paie .ic,.ong.on .oi,.badge2 .ic,.pt .ic,.pt.ic,button.ic.prim,button.ic.plus,
+html.jour .prim .ic,html.jour .paie .ic,html.jour .ong.on .oi,
+html.jour .badge2 .ic,html.jour .pt .ic,html.jour .pt.ic,
+html.jour button.ic.prim,html.jour button.ic.plus{
+  filter:none;opacity:1}
 
 /* ══ LA BOITE DU BROUILLON ══════════════════════════════════
    ⚠ SES PROPRES CLASSES, ET C EST VOULU. La boite de reprise de l assistant
