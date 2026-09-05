@@ -159,13 +159,28 @@ function tuerNosChrome() {
   if (!JETON) return 0;
   try {
     if (process.platform === 'win32') {
+      /* ⚠⚠ ON DEMANDE LES NUMÉROS, PUIS ON TUE CHAQUE **ARBRE** — et il a fallu
+         trois versions pour y arriver.
+         1. `Stop-Process` sur les processus qui portent le dossier temporaire :
+            ça n'attrape que le PÈRE, ses moteurs de rendu survivent (ils ne
+            portent pas `--user-data-dir` dans leur ligne de commande).
+         2. Tuer l'arbre du numéro rendu par `spawn` : sur Windows, Chrome SE
+            RELANCE dans un second processus et le premier meurt aussitôt. Le
+            numéro qu'on surveillait n'était donc plus celui du navigateur —
+            43 processus restaient après le balayage des six thèmes.
+         3. Celle-ci : on RETROUVE le vrai navigateur par son dossier temporaire,
+            et on tue SON arbre. Le père par la ligne de commande, les enfants
+            par le père. */
       const r = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command',
-        "$p = @(Get-CimInstance Win32_Process -Filter \"Name='chrome.exe'\" | " +
-        "Where-Object { $_.CommandLine -like '*" + JETON + "*' }); " +
-        '$p | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; ' +
-        'Write-Output $p.Count',
+        "@(Get-CimInstance Win32_Process -Filter \"Name='chrome.exe'\" | " +
+        "Where-Object { $_.CommandLine -like '*" + JETON + "*' }) | " +
+        'ForEach-Object { $_.ProcessId }',
       ], { encoding: 'utf8', timeout: 60000 });
-      return parseInt(String((r && r.stdout) || '0').trim(), 10) || 0;
+      const pids = String((r && r.stdout) || '').split(/\s+/).map(Number).filter(Boolean);
+      for (const pid of pids) {
+        spawnSync('taskkill', ['/F', '/T', '/PID', String(pid)], { stdio: 'ignore', timeout: 30000 });
+      }
+      return pids.length;
     }
     spawnSync('pkill', ['-f', JETON], { stdio: 'ignore', timeout: 30000 });
   } catch (e) {}
@@ -541,8 +556,27 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
     if (l.startsWith('PAIRE|')) {
       const p = l.split('|');
       const cle = p[1];
-      const d = paires.get(cle) || { cle, ratio: parseFloat(p[2]), n: 0, ex: p[4], txt: p[5], ou: new Set() };
-      d.n += parseInt(p[3], 10) || 0;
+      /* ⚠⚠⚠ ON COMPTE DES ENDROITS, PAS DES RENDUS — ET LE CLIQUET NE VALAIT
+         RIEN AVANT ÇA. Les plafonds avaient été relevés sur un balayage à UN
+         thème ; au premier balayage à SIX, la même couleur ressortait à 90
+         endroits contre un plafond de 15. Rien n'avait empiré : c'était 15 × 6.
+         Un plafond qui dépend de l'ÉTENDUE du balayage n'est pas un plafond, et
+         il aurait fait rougir le contrôle sur une dette parfaitement stable —
+         donc fini par le faire désactiver.
+         On additionne maintenant par ENDROIT : « quelle fenêtre, quel chemin
+         d'éléments ». Un même bouton vu en clair, en sombre et dans les six
+         thèmes compte pour UN. ⚠ Et ce n'est pas une perte de finesse : quand un
+         thème change vraiment la couleur, la CLÉ change (ce sont deux couleurs
+         différentes), donc le couple est déjà compté à part. */
+      const d = paires.get(cle) || {
+        cle, ratio: parseFloat(p[2]), ex: p[4], txt: p[5], ou: new Set(), lieux: new Map(),
+      };
+      const fenetre = String(p[6] || '').split('/')[0];
+      const lieu = fenetre + ' ' + p[4];
+      const combien = parseInt(p[3], 10) || 0;
+      // Le même endroit vu dans plusieurs thèmes : on garde le plus fourni,
+      // jamais la somme — c'est le même bouton, pas six boutons.
+      d.lieux.set(lieu, Math.max(d.lieux.get(lieu) || 0, combien));
       if (parseFloat(p[2]) < d.ratio) { d.ratio = parseFloat(p[2]); d.ex = p[4]; d.txt = p[5]; }
       d.ou.add(p[6]);
       paires.set(cle, d);
@@ -622,7 +656,12 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepa
   console.log('');
 
   const tous = [...paires.values()];
-  tous.forEach((p) => { p.seuil = parseFloat(p.cle.split('@')[1]); });
+  tous.forEach((p) => {
+    p.seuil = parseFloat(p.cle.split('@')[1]);
+    // Le compte qui sert de plafond : des ENDROITS, pas des rendus (voir plus haut).
+    p.n = 0;
+    for (const c of p.lieux.values()) p.n += c;
+  });
   const echoue = tous.filter((p) => p.ratio < p.seuil).sort((a, b) => a.ratio - b.ratio);
 
   const exceptions = DECLARE.EXCEPTIONS || {};
