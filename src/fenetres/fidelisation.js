@@ -257,10 +257,12 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
      contredisent sous les yeux. On dit donc << 100 sur 4 500 >> des que le
      plafond mord, et le compte simple sinon.
      Aucun accent grave ici : le tout part dans un litteral de gabarit. */
-  function compte(n, tot, sing, plur){
-    if (!tot || tot <= n) return n + ' ' + (n > 1 ? plur : sing);
-    return n + ' sur ' + tot + ' ' + plur;
-  }
+  /* ⚠ LA FORMULE A DÉMÉNAGÉ DANS JS_COMPTE (socle.js), sous le nom szCompte,
+     le 2026-09-05 : elle n'existait qu'ici alors que six autres listes en avaient
+     besoin, et une deuxième copie aurait suffi à faire diverger la phrase. On
+     garde compte comme simple renvoi — la fenêtre l'appelle à cinq endroits, et
+     renommer cinq appels pour le plaisir n'apporte rien. */
+  function compte(n, tot, sing, plur){ return szCompte(n, tot, sing, plur); }
 
   function vueRecompenses(){
     var rs = D.recompenses || [];

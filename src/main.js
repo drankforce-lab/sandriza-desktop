@@ -994,9 +994,10 @@ const createWindow = () => {
       ancrees.forEach((x, k) => { if (k !== cle && !x.fenetre && x.view) { try { x.view.setVisible(false); } catch {} } });
       mainWindow.show(); mainWindow.focus();
       try { mainWindow.contentView.addChildView(a.view); } catch (e) {}
-      a.view.setVisible(true);
+      // Dimensions AVANT visibilité — même raison qu'à `dock:ouvrir`.
       const b = boundsAncrage();
       if (b) a.view.setBounds(b);
+      a.view.setVisible(true);
       ancreeVisible = cle; vueVoilee = null;
       mainWindow.webContents.send('dock:ancree', cle);
     } catch (e) {}
@@ -2916,9 +2917,17 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
     return { ok: true, detachee: true };
   }
   try { mainWindow.contentView.addChildView(a.view); } catch {}
-  try { a.view.setVisible(true); } catch {}
+  /* ⚠⚠ LES DIMENSIONS AVANT LA VISIBILITÉ, ET C'EST UN FLASH DE MOINS.
+     L'ordre était `setVisible(true)` PUIS `setBounds(...)` : la vue paraît
+     d'abord à ses anciennes mesures — celles d'avant un redimensionnement, ou
+     celles d'une autre disposition — puis saute à sa place. Une vue native est
+     peinte par le système, au-dessus de la page : ni le voile de chargement du
+     site ni un fondu CSS ne peuvent couvrir ce saut. La seule façon de ne pas
+     le montrer est de ne jamais l'afficher de travers.
+     Signalé le 2026-09-05 : « ça flash et hop j'ai le tableau de bord ». */
   const b = boundsAncrage();
   if (b) { try { a.view.setBounds(b); } catch {} }
+  try { a.view.setVisible(true); } catch {}
   ancreeVisible = c; vueVoilee = null;
   return { ok: true };
 });
@@ -2994,6 +3003,8 @@ ipcMain.handle('dock:ancrer', (e) => {
     // Une seule vue ancree visible a la fois — comme dock:ouvrir.
     ancrees.forEach((x, k) => { if (k !== c && !x.fenetre && x.view) { try { x.view.setVisible(false); } catch {} } });
     try { mainWindow.contentView.addChildView(a.view); } catch {}
+    // Dimensions AVANT visibilité — même raison qu'à `dock:ouvrir`.
+    try { const b3 = boundsAncrage(); if (b3) a.view.setBounds(b3); } catch {}
     try { a.view.setVisible(true); } catch {}
     const b = boundsAncrage();
     if (b) { try { a.view.setBounds(b); } catch {} }

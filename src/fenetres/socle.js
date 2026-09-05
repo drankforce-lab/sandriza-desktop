@@ -1121,7 +1121,34 @@ window.szBrouillonMaintenant = szBrouillonMaintenant;
 window.szBrouillonJeter = szBrouillonJeter;
 `;
 
-const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS + JS_LOTS + JS_AUTOPAGE;
+/* ══ « 300 SUR 1 245 » — UNE LISTE PLAFONNÉE DOIT LE DIRE ═══════════════════
+   Les cœurs plafonnent leurs listes (accès 300, impressions 500, journal
+   d'infolettre 300, récompenses 100…) et font voyager leur vrai total à côté.
+   Restait à l'ÉCRIRE : `journaux.js` affichait « 1 245 entrée(s) » au-dessus
+   d'un tableau de trois cents lignes qui s'arrête net. Ce n'est pas seulement
+   muet, c'est CONTRADICTOIRE — le nombre annoncé et ce qu'on peut faire défiler
+   ne se rejoignent jamais, et rien n'explique l'écart.
+
+   ⚠ POURQUOI ICI PLUTÔT QUE DANS CHAQUE FENÊTRE. La formule existait déjà —
+   une fois, dans `fidelisation.js`, sous le nom `compte()`. C'est exactement
+   comme ça que naît une règle dupliquée : la deuxième copie dira « 300/1245 »,
+   la troisième « 300 (1245) », et plus personne ne saura laquelle est la bonne.
+   `JS_DIRE` est inclus par 78 fenêtres : une seule définition les atteint.
+
+   ⚠ SANS TOTAL, ON N'INVENTE RIEN. `tot` absent ou plus petit que ce qu'on
+   montre veut dire « la liste est complète » : on écrit le nombre, sans « sur ».
+   Affirmer « 300 sur 300 » là où le cœur n'a rien dit serait une affirmation
+   fabriquée par l'affichage. */
+const JS_COMPTE = `
+function szCompte(n, tot, sing, plur){
+  n = Number(n) || 0; tot = Number(tot) || 0;
+  var mot = (n > 1 ? plur : sing);
+  if (!tot || tot <= n) return n + ' ' + mot;
+  return n + ' sur ' + tot + ' ' + plur;
+}
+`;
+
+const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS + JS_LOTS + JS_AUTOPAGE + JS_COMPTE;
 
 const JS_SOCLE = `
 var P = window.szPont;

@@ -352,6 +352,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var DETAIL = null;        // la ligne ouverte
   var ATTACHE = false;      // le selecteur d article est deploye
   var PRODUITS = null;      // sa derniere reponse
+  var PRODUITS_TOTAL = 0;   // combien CORRESPONDENT (avant le plafond de 50)
   var PQ = '';
   /* ⚠⚠ L'INSPECTEUR ET LA LIGNE DU TABLEAU ARMAIENT LA MÊME VARIABLE, et pas
      avec la même chose : la ligne y mettait l'IDENTIFIANT de la photo, le
@@ -1907,7 +1908,15 @@ ${JS_ACTIVITE}${JS_DIRE}
   function listeProduits(){
     if (!PRODUITS) return '<div class="aide" style="padding:.4rem">Lecture du catalogue…</div>';
     if (!PRODUITS.length) return '<div class="aide" style="padding:.4rem">Aucun article ne correspond.</div>';
-    return PRODUITS.map(function(p){
+    /* ⚠ ON DIT QUAND LA RECHERCHE EST COUPEE. Le coeur rend au plus 50 articles ;
+       chercher un mot courant en trouvait cent vingt et l ecran en montrait
+       cinquante, sans un mot. On croit alors que l article cherche n existe pas
+       et l on va le creer une deuxieme fois. */
+    var coupe = (PRODUITS_TOTAL && PRODUITS_TOTAL > PRODUITS.length)
+      ? '<div class="aide" style="padding:.35rem">' + szCompte(PRODUITS.length, PRODUITS_TOTAL, 'article', 'articles')
+        + ' — precisez la recherche pour voir les autres.</div>'
+      : '';
+    return coupe + PRODUITS.map(function(p){
       return '<div class="p" data-pid="' + esc(p.id) + '">'
         + (p.image ? '<img src="' + esc(p.image) + '" alt="">' : '<span class="creux"></span>')
         + '<div style="min-width:0"><div class="nm">' + esc(p.nom) + '</div>'
@@ -2233,8 +2242,8 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function chercherProduits(){
     appeler('photos:produits', [PQ]).then(function(r){
-      if (!r.ok) { dire(expliquer(r), 'err'); PRODUITS = []; }
-      else PRODUITS = r.produits || [];
+      if (!r.ok) { dire(expliquer(r), 'err'); PRODUITS = []; PRODUITS_TOTAL = 0; }
+      else { PRODUITS = r.produits || []; PRODUITS_TOTAL = r.hitsTotal || 0; }
       var z = document.getElementById('p-choix');
       if (z) z.innerHTML = listeProduits();
     });

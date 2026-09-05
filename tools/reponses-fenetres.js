@@ -2199,6 +2199,28 @@ module.exports = {
       { nom: 'accès comptables (serveur)', id: 'comptable', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'liens:journal': { ok: true, journal: [ { au: '2026-08-13T09:00:00Z', canal: 'comptable', genre: 'ouvert', ip: '203.0.113.7', lienId: 'ab12cd34ef', detail: 'Portail comptable', qui: 'cabinet@exemple.com' } ] } } },
       { nom: 'accès (non super-admin)', reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { isSuper: false, peutModifier: false }) } },
+      /* ══ LES LISTES PLAFONNÉES DOIVENT LE DIRE (2026-09-05) ══════════════════
+         Tous les jeux ci-dessus portent un total ÉGAL au nombre de lignes
+         (`accesTotal: 2` pour deux lignes) : aucun n'éprouvait donc le seul cas
+         qui compte, celui où le cœur a coupé. Les fenêtres pouvaient rester
+         muettes — et elles l'étaient — sans qu'un seul contrôle rougisse.
+         ⚠ `exige` porte la PHRASE, pas le nombre : c'est « 2 sur 1245 » qui
+         apprend quelque chose ; « 1245 » tout seul, au-dessus de deux lignes,
+         était justement l'ancien affichage. */
+      { nom: 'accès — liste coupée, le dit', exige: ['2 sur 1245 entrées'],
+        reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { accesTotal: 1245 }) } },
+      { nom: 'automatisations — liste coupée, le dit', id: 'automatisations', exige: ['1 sur 812 entrées'],
+        reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { autoTotal: 812 }) } },
+      { nom: 'sans résultat — liste coupée, le dit', id: 'recherches', exige: ['2 sur 640 termes distincts'],
+        reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { recherchesTotal: 640 }) } },
+      { nom: 'erreurs des clients — liste coupée, le dit', id: 'jserreurs', exige: ['3 sur 977 défauts distincts'],
+        reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { jsErreursTotal: 977 }) } },
+      /* ⚠ Les impressions n'ont pas de phrase « sur » : leur nombre vit dans une
+         TUILE, et « 2 sur 1500 travaux » n'y tiendrait pas. C'est le total qui y
+         est affiché — il ne l'était pas du tout avant, la tuile comptant les
+         lignes reçues, c'est-à-dire le plafond. */
+      { nom: 'impressions — la tuile montre le vrai total', id: 'impressions', exige: ['>1500</div><div class="l">travaux'],
+        reponses: { identite: IDENTITE, 'journal:donnees': Object.assign({}, donnees, { printsTotal: 1500 }) } },
       // Recherche inter-journaux (Lot 7c) : ouvre l'onglet et lance 'q-203' → le
       // faux pont renvoie des résultats groupés, ce qui éprouve le rendu des groupes.
       { nom: 'recherche (résultats groupés)', id: 'q-203', reponses: { identite: IDENTITE, 'journal:donnees': donnees,

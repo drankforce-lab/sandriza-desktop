@@ -109,8 +109,17 @@ function pageJournaux(onglet) {
   };
 ${JS_ACTIVITE}${JS_DIRE}
   var corps = document.getElementById('corps');
-  // << 300 sur 5 000 >> quand la lecture est plafonnee, le compte simple sinon.
-  function cpt(n, tot){ return (tot && tot > n) ? (n + ' sur ' + tot) : String(tot || n); }
+  /* ⚠⚠ IL Y AVAIT ICI UN cpt(n, tot) QUI DISAIT EXACTEMENT << 300 sur 5 000 >>,
+     ET PERSONNE NE L APPELAIT. Ecrit avec la bonne intention, jamais branche :
+     les cinq listes de cette fenetre affichaient a cote un total NU, au-dessus
+     d un tableau coupe a 300. La regle etait donc ecrite TROIS fois dans le
+     depot — ici, dans fidelisation.js, et dans l en-tete d un coeur — et
+     appliquee UNE seule.
+     Elle vit maintenant dans JS_COMPTE (socle.js) sous le nom szCompte, joint a
+     JS_DIRE : une seule definition, 78 fenetres. Ce commentaire reste pour qu on
+     n en reecrive pas une quatrieme.
+     ⚠ Une fonction utilitaire sans appelant ne se voit pas a la relecture : elle
+     ressemble a du soin. C est le banc des plafonds, cote site, qui a mene ici. */
   var ongletsEl = document.getElementById('onglets');
   var D = null, OCCUPE = false;
   // Bouton « Vider » du journal des erreurs : arme au premier clic, agit au
@@ -274,7 +283,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="stat"><div class="l">Bloqués géo</div><div class="v" style="color:var(--tx-fda4af)">'+(st.geoBlocked||0)+'</div></div>'
       + '<div class="stat"><div class="l">IPs uniques</div><div class="v">'+(st.ips||0)+'</div></div>'
       + '</div>';
-    h += '<div class="carte"><div class="barre"><span class="sub">'+(D.accesTotal||rows.length)+' entrée(s) · conservation 30 jours</span><span class="pousse"></span>'
+    h += '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.accesTotal, 'entrée', 'entrées')+' · conservation 30 jours</span><span class="pousse"></span>'
       + '<button class="b" id="a-stats">'+(D.statsHidden?'Afficher les stats':'Masquer les stats')+'</button>'
       + (D.peutModifier?'<button class="b" id="a-purge">Purger anciens</button>':'')
       + '<button class="b" id="a-csv">Exporter CSV</button></div>'
@@ -316,7 +325,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     'returns-mgmt':'↩️ Retours', sociaux:'📱 Réseaux sociaux', newsletter:'🔗 Infolettre', systeme:'🧹 Entretien', app:'🖥 Application' };
   function vueAuto(){
     var rows = D.automations||[];
-    var h = '<div class="carte"><div class="barre"><span class="sub">'+(D.autoTotal||rows.length)+' entrée(s) · conservation 30 jours</span><span class="pousse"></span>'
+    var h = '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.autoTotal, 'entrée', 'entrées')+' · conservation 30 jours</span><span class="pousse"></span>'
       + (D.peutModifier?'<button class="b" id="au-purge">Purger anciens</button>':'')
       + '<button class="b" id="au-csv">Exporter CSV</button></div>'
       + '<table class="tb"><thead><tr><th>Date</th><th>Automatisation</th><th>Action / Détail</th></tr></thead><tbody>';
@@ -341,7 +350,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (PF_VIA!=='all') rows = rows.filter(function(r){ return (r.via||'agent')===PF_VIA; });
     var counts = {}, totalDocs = 0;
     for (var a=0;a<all.length;a++){ var k=all[a].kind||'autre'; counts[k]=(counts[k]||0)+(parseInt(all[a].qty,10)||1); if (all[a].ok!==false) totalDocs+=(parseInt(all[a].qty,10)||1); }
-    var kpis = '<div class="kpis"><div class="kpi"><div class="v">'+all.length+'</div><div class="l">travaux (30 j)</div></div>'
+    /* ⚠ printsTotal VOYAGEAIT DEPUIS TOUJOURS ET N'ÉTAIT AFFICHÉ NULLE PART.
+       La tuile disait « 512 travaux » en comptant les lignes reçues — c'est-à-dire
+       le plafond de 500 dès qu'il mord, jamais le vrai nombre des trente jours.
+       ⚠ Les DOCUMENTS, eux, restent comptés sur ce qui est là : on ne peut pas
+       additionner les copies d'un travail qu'on n'a pas reçu. Un nombre qu'on ne
+       peut pas connaître ne s'invente pas — il se laisse tel quel. */
+    var kpis = '<div class="kpis"><div class="kpi"><div class="v">'+(D.printsTotal||all.length)+'</div><div class="l">travaux (30 j)</div></div>'
       + '<div class="kpi"><div class="v">'+totalDocs+'</div><div class="l">documents imprimés</div></div></div>';
     var kLbl = {}; for (var z=0;z<kinds.length;z++) kLbl[kinds[z].key]=kinds[z].label;
     var typeOpts = '<option value="all"'+(PF_TYPE==='all'?' selected':'')+'>Tous les types</option>';
@@ -469,7 +484,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueRecherchesRatees(){
     var rows = D.recherches||[];
     var h = '<div class="note">ℹ Ce que des visiteurs ont cherché sans rien trouver. Son tableau de bord complet (tendances, archive) reste dans <b>Marketing → Statistiques</b> ; il est rassemblé ici et couvert par la recherche inter-journaux.</div>'
-      + '<div class="carte"><div class="barre"><span class="sub">'+(D.recherchesTotal||rows.length)+' terme(s) distinct(s)</span></div>'
+      + '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.recherchesTotal, 'terme distinct', 'termes distincts')+'</span></div>'
       + '<table class="tb"><thead><tr><th>Terme cherché</th><th style="text-align:center">Fois</th><th>Dernière fois</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="3" class="vide">Aucune recherche sans résultat.</td></tr>';
     for (var i=0;i<rows.length;i++){ var x=rows[i];
@@ -498,7 +513,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'Elles sont <b>regroupées</b> : une ligne par défaut distinct, avec le nombre de fois. '
       + 'Aucune donnée personnelle n’y entre — courriels, numéros et jetons sont remplacés avant l’envoi.</div>'
       + '<div class="carte"><div class="barre">'
-      +   '<span class="sub">' + rows.length + ' défaut(s) distinct(s)'
+      /* ⚠ jsErreursTotal N'ÉTAIT AFFICHÉ NULLE PART, et la liste est coupée à
+         300 : on lisait « 300 défauts distincts » sur un site qui en avait mille.
+         La pastille des non vus, elle, se compte désormais sur TOUT — sinon elle
+         cessait de monter au moment exact où la situation empirait. */
+      +   '<span class="sub">' + szCompte(rows.length, D.jsErreursTotal, 'défaut distinct', 'défauts distincts')
       +     (neuves ? ' · <b style="color:var(--tx-att)">' + neuves + ' non vu(s)</b>' : '') + '</span>'
       +   (D.peutModifier && neuves ? '<button class="mini" id="js-vues">Tout marquer comme vu</button>' : '')
       +   (D.peutModifier && rows.length
