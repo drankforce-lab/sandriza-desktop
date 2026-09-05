@@ -49,7 +49,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .res label.bascule input{width:16px;height:16px;accent-color:#c9a97e}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .pill.ok{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
-.pill.non{background:rgba(234,179,8,.18);color:#e6c14a}
+.pill.non{background:rgba(234,179,8,.18);color:var(--tx-att)}
 label.champ{display:block;margin:0 0 .8rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}

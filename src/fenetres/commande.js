@@ -129,7 +129,7 @@ function pageCommande(id) {
           + 'border-radius:99px;padding:.12rem .55rem;font-weight:700"><span class="ic" aria-hidden="true">⚡</span> Prioritaire</span>' : '')
       + '<span class="cli">' + esc(CMD.client) + '</span>'
       + '<span class="adr">' + esc(CMD.adresse) + '</span>'
-      + (CMD.notes ? '<span class="adr" style="color:#f0c987"><span class="ic">📝</span> ' + esc(CMD.notes) + '</span>' : '')
+      + (CMD.notes ? '<span class="adr" style="color:var(--tx-or2)"><span class="ic">📝</span> ' + esc(CMD.notes) + '</span>' : '')
       + '</div>';
 
     /* 1 — Vérification.

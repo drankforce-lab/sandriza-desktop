@@ -90,7 +90,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 button.mini{padding:.12rem .5rem;font-size:.75rem}
 
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
-.avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
+.avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
 .avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-f6a5a5)}
 .avis.bleu{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.38);color:#a9c9f7}
@@ -450,7 +450,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '</div>'
         + rb.lignes.map(function(l, i){
             return '<div class="ligne"><span>' + esc(l.nom)
-              + (l.moitie ? ' <span style="color:#f0c987;font-size:.74rem">(2 pour 1 — 50 % suggéré, plein : ' + argent(l.base) + ')</span>' : '')
+              + (l.moitie ? ' <span style="color:var(--tx-or2);font-size:.74rem">(2 pour 1 — 50 % suggéré, plein : ' + argent(l.base) + ')</span>' : '')
               + '</span><input type="number" step="0.01" min="0" data-mnt="' + i + '" value="' + (MONTANTS[i]).toFixed(2) + '"></div>'; }).join('')
         + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.84rem;margin-top:.5rem;cursor:pointer'
         + (R.demande.fauteMarchande ? '' : ';opacity:.55') + '">'

@@ -99,7 +99,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;
   letter-spacing:.02em;padding:.18rem .55rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(74,222,128,.14);color:var(--tx-ok2)}
-.pill.att{background:rgba(250,204,21,.14);color:#e6c14a}
+.pill.att{background:rgba(250,204,21,.14);color:var(--tx-att)}
 .pill.neutre{background:rgba(201,169,126,.14);color:#d9bd95}
 
 /* ── LES ONGLETS ───────────────────────────────────────────

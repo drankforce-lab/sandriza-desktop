@@ -74,7 +74,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .tot .l.frais{color:var(--tx-f6a5a5)}
 .tot .l.net{color:var(--tx-ok);font-weight:700}
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
-.avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
+.avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 .choix{display:flex;flex-direction:column;gap:.4rem;margin-top:.2rem}

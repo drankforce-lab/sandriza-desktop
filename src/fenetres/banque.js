@@ -83,7 +83,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   white-space:nowrap;font-weight:700}
 .pill.open{background:rgba(59,130,246,.16);color:var(--tx-bleu)}
 .pill.in_progress{background:rgba(245,158,11,.16);color:#fcd34d}
-.pill.completed{background:rgba(16,185,129,.16);color:#6ee7b7}
+.pill.completed{background:rgba(16,185,129,.16);color:var(--tx-ok2)}
 .pill.locked{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .lg{cursor:pointer}
@@ -97,7 +97,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .ecart .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
 .ecart .v{font:700 1.05rem/1.2 system-ui;font-variant-numeric:tabular-nums}
 .ecart .verdict{font:700 1rem/1.2 system-ui}
-.ecart.bon .verdict{color:#6ee7b7}.ecart.mauvais .verdict{color:var(--tx-err2)}
+.ecart.bon .verdict{color:var(--tx-ok2)}.ecart.mauvais .verdict{color:var(--tx-err2)}
 .paire{border:1px solid rgba(16,185,129,.35);background:rgba(16,185,129,.07);
   border-radius:8px;padding:.35rem .5rem;margin-bottom:.3rem;display:flex;
   align-items:center;gap:.5rem}
@@ -463,13 +463,13 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         }
         var ec = p ? (parseFloat(e.amount) - parseFloat(p.amount)) : null;
         h.push('<div class="paire"><div class="d">'
-          + '<div>' + esc(e.description || '—') + ' <span style="color:#6ee7b7">→</span> '
+          + '<div>' + esc(e.description || '—') + ' <span style="color:var(--tx-ok2)">→</span> '
           + esc((p && p.description) || '—') + '</div>'
           + '<div class="dt">' + esc(e.date || '—') + ' · relevé ' + sou(e.amount)
           + ' · dépôt ' + sou(p ? p.amount : 0) + ' · '
           + (ec !== null && Math.abs(ec) > 0.005
               ? '<span style="color:var(--tx-err2)">écart ' + sou(ec) + '</span>'
-              : '<span style="color:#6ee7b7">exact</span>') + '</div></div>'
+              : '<span style="color:var(--tx-ok2)">exact</span>') + '</div></div>'
           + (D.verrouille || !D.peutEcrire ? ''
               : '<button class="mini" data-desapp="' + esc(e.id) + '">Défaire</button>')
           + '</div>');

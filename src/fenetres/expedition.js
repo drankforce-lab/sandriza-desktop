@@ -86,7 +86,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .ch label{font-size:.72rem;color:var(--tx2)}
 
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
-.avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
+.avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
 .avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-f6a5a5)}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}

@@ -116,7 +116,7 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
   border:1px solid var(--v16);color:var(--tx2)}
 .et.vert{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .et.bleu{border-color:rgba(96,165,250,.5);color:var(--tx-bleu)}
-.et.jaune{border-color:rgba(245,158,11,.5);color:#f0c987}
+.et.jaune{border-color:rgba(245,158,11,.5);color:var(--tx-or2)}
 .et.rouge{border-color:rgba(248,113,113,.5);color:var(--tx-f6a5a5)}
 
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.45rem;
@@ -559,7 +559,7 @@ ${JS_ACTIVITE}${JS_DIRE}
               + (r.fraisRetenus > 0 ? ' <span style="color:#f59e0b;font-size:.72rem">(frais retenus : ' + argent(r.fraisRetenus) + ')</span>' : '')
               + '</span><span style="font-weight:700;color:var(--tx-att)">−' + argent(r.montant) + '</span></div>'; }).join('');
       if (rb.fraisRetenus > 0) {
-        h += '<div class="fin3" style="color:#f0c987;font-weight:400">Frais de service retenus : <strong>'
+        h += '<div class="fin3" style="color:var(--tx-or2);font-weight:400">Frais de service retenus : <strong>'
           + argent(rb.fraisRetenus) + '</strong> '
           + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> Remboursés au client</span>'
              : rb.fraisRembourses > 0

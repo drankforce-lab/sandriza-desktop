@@ -1685,6 +1685,19 @@ html.jour .msg.bon{color:#15803d}
 html.jour .num{color:#1d2433}
 html.jour .sku,html.jour .etoile{color:#8a6a3e}
 html.jour .prixbarre{color:#414e66}
+/* ⚠⚠ LES COULEURS DE PASTILLE EXISTENT AUSSI POUR LA NUIT, ICI ET PLUS EN
+   STYLE EN LIGNE. Plusieurs fenetres ecrivaient
+   un span class=pill avec un style= qui porte sa couleur :
+   un style EN LIGNE bat toute regle CSS, y compris les reprises de mode jour
+   juste en dessous. Ces pastilles-la ne pouvaient donc PAS suivre le theme —
+   et aucun banc qui lit le CSS ne pouvait les voir, puisqu'elles vivent dans
+   une chaine JavaScript. C'est ainsi que « ✗ Echec » sortait a 1.43 en mode
+   jour. On donne la couleur a la CLASSE, des deux cotes, et les fenetres
+   n ecrivent plus que class=pill err. */
+.pill.bon{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
+.pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.pill.err{background:rgba(220,38,38,.18);color:var(--tx-err2)}
+.pill.info{background:rgba(59,130,246,.16);color:var(--tx-bleu)}
 html.jour .pill.bon{background:rgba(21,128,61,.12);color:#127136}
 html.jour .pill.att{background:rgba(180,120,10,.14);color:#885a0b}
 html.jour .pill.err{background:rgba(185,28,28,.1);color:#b91c1c}

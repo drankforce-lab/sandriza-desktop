@@ -237,7 +237,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (grp.cle==='acces'){
           var t=TYPE[x.type]||{bg:'var(--v06)',c:'#8fa1b8',l:x.type};
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td>'
-            + '<td><span class="pill" style="background:'+t.bg+';color:'+t.c+'">'+esc(t.l)+'</span></td>'
+            + '<td><span class="pill '+(t.k||'')+'">'+esc(t.l)+'</span></td>'
             + '<td>'+esc(x.nom||'—')+'<div class="sub">'+esc(x.email)+'</div></td>'
             + '<td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.pays||'')+'</td><td>'+esc(x.action||'')+'</td></tr>';
         } else if (grp.cle==='automatisations'){
@@ -250,7 +250,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         } else if (grp.cle==='comptable'){
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.au))+'</td><td>'+esc(CANAUX[x.canal]||x.canal||'')+'</td><td>'+esc(EVEN[x.genre]||x.genre||'')+'</td><td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.detail||'')+'</td></tr>';
         } else {
-          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:var(--tx-err2)">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:var(--tx-ok2)">Imprimé</span>')+'</td></tr>';
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill err">Échec</span>':'<span class="pill bon">Imprimé</span>')+'</td></tr>';
         }
       }
       h += '</tbody></table>';
@@ -263,14 +263,22 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   // ── Accès ────────────────────────────────────────────────────────
+  /* ⚠⚠ UNE CLASSE, PLUS UNE COULEUR. Cette table portait bg et c, posés en
+     STYLE EN LIGNE — et un style en ligne bat toute regle CSS, y compris les
+     reprises de mode jour. Ces pastilles ne pouvaient donc pas suivre le theme :
+     « ✗ Echec » sortait a 1.43 de contraste en mode clair, c est-a-dire
+     illisible. Et aucun banc qui LIT le CSS ne pouvait le voir, puisque la
+     couleur vit dans une chaine JavaScript.
+     Les classes .pill.bon/.att/.err/.info sont definies dans le socle pour les
+     DEUX modes : la pastille n a plus qu a dire ce qu elle EST. */
   var TYPE = {
-    login_ok:{bg:'rgba(22,163,74,.2)',c:'#6ee7a0',l:'✓ Connexion'},
-    login_fail:{bg:'rgba(220,38,38,.18)',c:'#fca5a5',l:'✗ Échec'},
-    logout:{bg:'rgba(14,165,233,.18)',c:'#7dd3fc',l:'⏻ Déconnexion'},
-    mfa_fail:{bg:'rgba(234,179,8,.18)',c:'#e6c14a',l:'⚠ MFA échoué'},
-    mfa_timeout:{bg:'rgba(234,179,8,.18)',c:'#e6c14a',l:'⏱ MFA expiré'},
-    action:{bg:'rgba(147,51,234,.18)',c:'#c4a6f7',l:'⚙ Action'},
-    login_blocked_geo:{bg:'rgba(244,63,94,.18)',c:'#fda4af',l:'🌍 Bloqué (géo)'}
+    login_ok:{k:'bon',l:'✓ Connexion'},
+    login_fail:{k:'err',l:'✗ Échec'},
+    logout:{k:'info',l:'⏻ Déconnexion'},
+    mfa_fail:{k:'att',l:'⚠ MFA échoué'},
+    mfa_timeout:{k:'att',l:'⏱ MFA expiré'},
+    action:{k:'info',l:'⚙ Action'},
+    login_blocked_geo:{k:'err',l:'🌍 Bloqué (géo)'}
   };
   function drapeau(cc){ if (!cc||cc.length!==2) return ''; try { return String.fromCodePoint.apply(null,cc.toUpperCase().split('').map(function(x){return 127397+x.charCodeAt(0);})); } catch(e){ return ''; } }
   function vueAcces(){
@@ -279,7 +287,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!D.statsHidden) h += '<div class="stat-grid">'
       + '<div class="stat"><div class="l">Connexions auj.</div><div class="v" style="color:var(--tx-ok2)">'+(st.loginOk||0)+'</div></div>'
       + '<div class="stat"><div class="l">Échecs auj.</div><div class="v" style="color:var(--tx-err2)">'+(st.loginFail||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Échecs MFA</div><div class="v" style="color:#e6c14a">'+(st.mfaFail||0)+'</div></div>'
+      + '<div class="stat"><div class="l">Échecs MFA</div><div class="v" style="color:var(--tx-att)">'+(st.mfaFail||0)+'</div></div>'
       + '<div class="stat"><div class="l">Bloqués géo</div><div class="v" style="color:var(--tx-fda4af)">'+(st.geoBlocked||0)+'</div></div>'
       + '<div class="stat"><div class="l">IPs uniques</div><div class="v">'+(st.ips||0)+'</div></div>'
       + '</div>';
@@ -298,7 +306,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!avue.length) h += '<tr><td colspan="6" class="vide">Aucun journal.</td></tr>';
     for (var i=0;i<avue.length;i++){ var l=avue[i]; var t=TYPE[l.type]||{bg:'var(--v06)',c:'#8fa1b8',l:l.type};
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(l.ts))+'</td>'
-        + '<td><span class="pill" style="background:'+t.bg+';color:'+t.c+'">'+esc(t.l)+'</span></td>'
+        + '<td><span class="pill '+(t.k||'')+'">'+esc(t.l)+'</span></td>'
         + '<td>'+esc(l.nom||'—')+'<div class="sub">'+esc(l.email)+'</div></td>'
         + '<td class="mono">'+esc(l.ip||'—')+'</td>'
         + '<td style="white-space:nowrap">'+esc(drapeau(l.cc))+' '+esc(l.pays||'—')+(l.ville?'<div class="sub">'+esc(l.ville)+'</div>':'')+'</td>'
@@ -378,7 +386,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td style="text-align:center"><strong>'+esc(r.qty||1)+'</strong></td>'
         + '<td>'+esc(r.printer||'—')+'<div class="sub">'+esc(VIA[r.via]||r.via||'')+'</div></td>'
         + '<td class="sub">'+esc(r.who||'—')+(r.poste?'<div class="sub">poste '+esc(r.poste)+'</div>':'')+'</td>'
-        + '<td>'+(r.ok===false?'<span class="pill" style="background:rgba(220,38,38,.18);color:var(--tx-err2)" title="'+esc(r.note||'')+'">Échec</span>':'<span class="pill" style="background:rgba(22,163,74,.2);color:var(--tx-ok2)">Imprimé</span>')+'</td></tr>';
+        + '<td>'+(r.ok===false?'<span class="pill err" title="'+esc(r.note||'')+'">Échec</span>':'<span class="pill bon">Imprimé</span>')+'</td></tr>';
     }
     h += '</tbody></table></div>';
     corps.innerHTML = h;

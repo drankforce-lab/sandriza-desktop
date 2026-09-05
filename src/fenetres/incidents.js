@@ -53,10 +53,10 @@ table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spa
 table.tb td{padding:.6rem .7rem;border-bottom:1px solid var(--v06);font-size:.85rem;vertical-align:middle}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
 .pill.grave{background:rgba(220,38,38,.18);color:var(--tx-err2)}
-.pill.eval{background:rgba(234,179,8,.18);color:#e6c14a}
+.pill.eval{background:rgba(234,179,8,.18);color:var(--tx-att)}
 .pill.sain{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
-.pill.ouvert{background:rgba(234,179,8,.18);color:#e6c14a}
-.pill.surveille{background:rgba(99,102,241,.18);color:#b6b9f7}
+.pill.ouvert{background:rgba(234,179,8,.18);color:var(--tx-att)}
+.pill.surveille{background:rgba(99,102,241,.18);color:var(--tx-bleu)}
 .pill.clos{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
@@ -221,7 +221,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '</div>';
     h += '<div class="stat-grid">'
       + '<div class="stat"><div class="l">Au registre</div><div class="v">'+(st.total||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Dossiers ouverts</div><div class="v" style="color:#e6c14a">'+(st.ouverts||0)+'</div></div>'
+      + '<div class="stat"><div class="l">Dossiers ouverts</div><div class="v" style="color:var(--tx-att)">'+(st.ouverts||0)+'</div></div>'
       + '<div class="stat"><div class="l">Préjudice sérieux</div><div class="v" style="color:var(--tx-err2)">'+(st.serieux||0)+'</div></div>'
       + '<div class="stat"><div class="l">Avis CAI à faire</div><div class="v" style="color:var(--tx-err2)">'+(st.caiAFaire||0)+'</div></div>'
       + '</div>';

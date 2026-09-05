@@ -62,10 +62,6 @@ module.exports = {
     '#E8EDF5 sur #FFFFFF @4.5': 1,
     // 1.18 · div#avert.avert > b « Identifiants non chargés » · transporteurs_c1/jour
     '#FECACA sur #F4E5E0 @4.5': 1,
-    // 1.23 · td > span.pill « ✓ Connexion » · journaux/jour journaux_c13/jour journaux_c7/jour journaux_c8/jour
-    '#6EE7A0 sur #D0EDDB @4.5': 4,
-    // 1.27 · div.ecart.bon > div.verdict « ✓ Équilibrée » · banque_c5/jour
-    '#6EE7B7 sur #E2EDE3 @4.5': 1,
     // 1.27 · div.stat > div.v « 13 août 2026, 00:12 » · sauvegarde/jour sauvegarde_c2/jour
     '#6EE7A0 sur #EBE9E4 @4.5': 2,
     // 1.36 · tr > td.num « 512.00 $ » · publicite_c3/jour
@@ -78,12 +74,6 @@ module.exports = {
     '#FFFFFF sur #D9D9D9 @4.5': 1,
     // 1.42 · span.phpast > span.pt « ◇ » · studio/jour
     '#56606E sur #46494F @4.5': 4,
-    // 1.43 · div > span « → » · banque_c3/jour
-    '#6EE7B7 sur #EEFAF6 @4.5': 2,
-    // 1.43 · div.stat > div.v « 1 » · incidents/jour incidents_c1/jour incidents_c2/jour journaux/jour journaux_c7/jour journaux_c8/jour
-    '#E6C14A sur #EBE9E4 @3': 6,
-    // 1.43 · td > span.pill « ✗ Échec » · journaux/jour journaux_c7/jour journaux_c8/jour
-    '#FCA5A5 sur #F9D8D8 @4.5': 3,
     // 1.43 · div.stat > div.v « aucune » · sauvegarde_c1/jour
     '#E6C14A sur #EBE9E4 @4.5': 1,
     // 1.48 · div.rangee > button#b-bascule.bsc « Repasser en pré-lancement » · lancement_c1/jour
@@ -92,10 +82,6 @@ module.exports = {
     '#111111 sur #26334A @4.5': 2,
     // 1.52 · tr.lg > td.num « 0,00 $ » · banque/jour
     '#6EE7B7 sur #FFFFFF @4.5': 1,
-    // 1.54 · div.stat > div.v « 1 » · securite/jour securite_c1/jour securite_c2/jour
-    '#B6B9F7 sur #EBE9E4 @3': 3,
-    // 1.57 · div.entete > span.adr « Fragile : verre souffle. » · commande_c1/jour commandes/jour
-    '#F0C987 sur #FFFFFF @4.5': 3,
     // 1.66 · div#g-prev-head.head.anim > div.ti « SANDRIZA » · gabarits_c1/jour
     '#1D2433 sur #7C2D12 @4.5': 1,
     // 1.67 · div.boite > div.aide « Temoin : aucune vente n a eu lieu. » · caisse_c1/jour
@@ -198,8 +184,6 @@ module.exports = {
     '#4A627E sur #CBD7E7 @4.5': 3,
     // 4.32 · div.etats > span.pill.role « Super-administrateur » · securite/jour securite_c1/jour securite_c2/jour
     '#5F666C sur #DDDEDD @4.5': 6,
-    // 4.35 · td > span.pill « Échec » · journaux_c12/jour journaux_c2/jour
-    '#895959 sur #F9D8D8 @4.5': 2,
     // 4.35 · div.etats > span.pill.warn « MFA exempté » · securite/jour securite_c1/jour securite_c2/jour
     '#786426 sur #EBDFBD @4.5': 3,
     // 4.39 · div.pas > span.on « 1 · Étiquette » · expedition/jour expedition_c1/jour expedition_c2/jour

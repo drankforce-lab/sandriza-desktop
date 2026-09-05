@@ -59,8 +59,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .pill.on{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
 .pill.off{background:rgba(220,38,38,.18);color:var(--tx-err2)}
-.pill.mfa{background:rgba(99,102,241,.18);color:#b6b9f7}
-.pill.warn{background:rgba(234,179,8,.18);color:#e6c14a}
+.pill.mfa{background:rgba(99,102,241,.18);color:var(--tx-bleu)}
+.pill.warn{background:rgba(234,179,8,.18);color:var(--tx-att)}
 .pill.moi{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
 /* ⚠ LE RÔLE EN PASTILLE NEUTRE — jamais coloré. */
 .pill.role{background:rgba(148,163,184,.16);color:var(--tx-c3cfdd);font-weight:600}
@@ -220,7 +220,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="stat-grid">'
       + '<div class="stat"><div class="l">Comptes</div><div class="v">'+(st.total||0)+'</div></div>'
       + '<div class="stat"><div class="l">Actifs</div><div class="v" style="color:var(--tx-ok2)">'+(st.actifs||0)+'</div></div>'
-      + '<div class="stat"><div class="l">MFA activé</div><div class="v" style="color:#b6b9f7">'+(st.mfa||0)+'</div></div>'
+      + '<div class="stat"><div class="l">MFA activé</div><div class="v" style="color:var(--tx-bleu)">'+(st.mfa||0)+'</div></div>'
       + '</div>';
 
     var q = FILTRE.trim().toLowerCase();

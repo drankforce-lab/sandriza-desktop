@@ -83,7 +83,7 @@ input.t:disabled,textarea.t:disabled{opacity:.45}
   align-items:center;justify-content:center;font-size:.95rem;flex:0 0 auto}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .pill.ok{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
-.pill.non{background:rgba(234,179,8,.18);color:#e6c14a}
+.pill.non{background:rgba(234,179,8,.18);color:var(--tx-att)}
 .avis{border-radius:9px;padding:.5rem .75rem;font-size:.79rem;margin:0 0 .9rem;line-height:1.5}
 .avis.ok{background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);color:#93e6b5}
 .avis.non{background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#e8d08a}

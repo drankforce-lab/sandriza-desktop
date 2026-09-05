@@ -314,3 +314,27 @@ son panneau, sur son fond composé. Il a fallu que le banc au rendu mesure les
 **Ce qui reste : 47 clés sous 3.0, 102 endroits**, presque toutes du même
 travers — une couleur de la palette de nuit employée telle quelle sur un fond de
 jour. Elles sont relevées et plafonnées ; elles demandent un examen un par un.
+
+### 🔴🔴 Une couleur EN LIGNE échappe à tout (4.44.0)
+
+Les étiquettes des journaux — « ✗ Échec », « ✓ Connexion », « ⚠ MFA échoué » —
+sortaient jusqu'à **1.43 de contraste** en mode clair. Leur couleur ne venait pas
+de la feuille de style : elle était posée **en `style=` sur chaque étiquette**,
+depuis une table JavaScript.
+
+⚠⚠ **Un style en ligne bat TOUTE règle CSS**, y compris les reprises
+`html.jour` juste à côté. Ces pastilles **ne pouvaient pas** suivre le thème.
+⚠⚠ **Et aucun banc qui LIT le CSS ne pouvait les voir** — la couleur vit dans une
+chaîne JavaScript. `banc-texte-sur-fond` et `banc-contraste-jour` étaient verts.
+
+→ **La table porte désormais une CLASSE, pas une couleur** : la pastille dit ce
+qu'elle **est** (`bon`, `att`, `err`, `info`), et le socle choisit la couleur
+pour les deux modes. C'est aussi ce qui rend la correction définitive : la
+prochaine palette suivra toute seule.
+
+**45 couleurs échappent ainsi à la feuille de style, dans 20 fenêtres** (`style=`
+ou table JS). Les 29 qui faisaient défaut sont rattachées à un jeton de leur
+famille ; les autres sont recensées.
+
+**État : 678 affichages au vert.** Reste 40 clés sous 3.0 (80 endroits),
+plafonnées, à examiner une par une.

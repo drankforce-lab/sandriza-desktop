@@ -87,7 +87,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 
 /* Encarts d avertissement : le meme jaune que l administration. */
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;
-  background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
+  background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 .aide b{color:var(--tx-bleute);font-weight:600}
 

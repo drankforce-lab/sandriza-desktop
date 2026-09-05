@@ -50,7 +50,7 @@ button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;
-  background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:#f0c987}
+  background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
 /* ── Les tuiles ── */
 .tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.55rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
