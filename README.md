@@ -117,9 +117,40 @@ elle en perd pour qu'on resserre.
   n'étaient jamais mesurés. → chercher le **dernier**, pas le premier.
 - 🔴 **Une page qui tue le moteur emporte les 19 autres de son lot**, toutes
   innocentes. Les perdus sont **rejoués un par un** : le coupable est isolé et
-  **nommé**. `inventaire` l'est — et il fait tomber Chrome **sans le banc**,
-  page brute en `--dump-dom` : 0 octet, aucune erreur. Déclaré dans
-  `INMESURABLES`, avec sa preuve, et rappelé à chaque passage.
+  **nommé**. C'est ainsi qu'`inventaire` a été trouvé — et le banc, en refusant
+  de se taire dessus, a fait remonter **un vrai défaut de l'application** (voir
+  plus bas). Il se mesure depuis : **184 rendus sur 184**.
+- 🔴🔴 **ET LA PREUVE QUE J'AVAIS ÉCRITE POUR `inventaire` ÉTAIT FAUSSE.** J'avais
+  noté « vérifié sans le banc, page brute en `--dump-dom` : 0 octet » — or
+  **`--dump-dom` n'écrit rien en `--headless=new`** : un témoin trivial
+  (`<h1>bonjour</h1>`) sortait lui aussi à 0 octet. Puis, en relançant un Chrome
+  par variante, un profil **neuf** rend une capture vide (le premier lancement
+  passe son budget à s'installer) et un profil **partagé** est refusé (code 21).
+  Trois harnais, trois « muet », **une seule conclusion possible et fausse**.
+  → **UNE DÉCLARATION D'ANGLE MORT DOIT PORTER UNE PREUVE ÉPROUVÉE SUR UN
+  TÉMOIN.** Sans témoin, un outil cassé transforme un doute en fait acquis.
 - 🔴 **Le verdict s'attribuait « les six thèmes compris »** alors qu'ils étaient
   devenus optionnels. Une phrase de succès qui annonce une couverture qu'elle n'a
   pas est pire qu'un banc absent : elle clôt la question.
+
+### Le défaut que ce banc a fait remonter — Inventaire tournait sans fin
+
+La fenêtre **Inventaire** calculait combien de lignes tiennent dans sa hauteur,
+puis **redemandait la liste au site avec cette cadence**. Le site, lui, répond
+avec **sa propre cadence** (« Le site borne page et cadence : on reprend SES
+valeurs », dit le code). Si les deux ne tombent pas d'accord — parce que le site
+borne, ou renvoie une valeur fixe — la fenêtre recalcule, redemande, et **les
+deux nombres se renvoient la balle indéfiniment**, avec un aller-retour au pont
+à chaque tour.
+
+⚠ **Ce n'était pas un problème de banc.** Chez une cliente dont le catalogue
+ferait borner la cadence, l'onglet Produits martèlerait le pont sans jamais se
+poser. Le banc n'a fait que le rendre visible, en refusant de se taire sur la
+seule fenêtre qu'il ne pouvait pas mesurer.
+
+**Le remède n'est pas un compteur de tours, c'est la bonne question :** une
+cadence que le site a **déjà refusée** ne se redemande pas. On garde la dernière
+demandée ; si la réponse diffère, c'est la décision du site et on s'y tient.
+La même récursion dormait dans la vue « fiche produit » (`dessiner()` →
+`grilleAutoAjuste()` → `dessiner()`), sans rien pour la borner : un verrou de
+ré-entrance l'en empêche désormais.

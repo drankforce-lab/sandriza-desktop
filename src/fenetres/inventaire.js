@@ -595,6 +595,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   // La grille des variantes suit la meme regle Auto que l onglet Produits :
   // autant de lignes que la hauteur reelle le permet, jamais de glissiere.
+  var AUTO_EN_COURS = false;      // voir le verrou, plus bas
   function grilleAutoAjuste(){
     if (!GRILLE_AUTO || VUE !== 'produit') return;
     var g = corps.querySelector('.grille');
@@ -606,7 +607,28 @@ ${JS_ACTIVITE}${JS_DIRE}
     var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
     if (!(dispo > 0)) return; // le banc mesure NaN : on ne touche a rien
     var n = Math.max(3, Math.floor(dispo / hL));
-    if (isFinite(n) && n !== TAILLE_PAGE) { TAILLE_PAGE = n; PAGE = 0; dessiner(); }
+    /* ⚠⚠ UNE SEULE CORRECTION PAR DESSIN — SANS CE VERROU, LA FENÊTRE SE TUE.
+       Le chemin est court et il boucle sur lui-même : dessiner() ->
+       dessinerProduit() -> grilleAutoAjuste() -> dessiner(). Il ne s arrête que
+       si le nombre de lignes calcule est le MÊME qu au tour precedent. Or la
+       mesure peut osciller : avec trois lignes la grille est basse et l on en
+       calcule dix ; avec dix lignes une glissiere apparait, la hauteur utile
+       diminue et l on retombe a trois. Deux valeurs qui se renvoient la balle,
+       indefiniment, et de facon SYNCHRONE — aucune minuterie ne tourne entre
+       deux tours, donc rien ne peut s en apercevoir de l interieur.
+       C est ce qui faisait mourir le moteur de rendu : la fenetre Inventaire
+       etait la SEULE des 92 que le banc de contraste ne pouvait pas mesurer, et
+       elle emportait au passage les 19 autres pages de son lot (2026-09-05).
+       ⚠ Ce n est pas qu un probleme de banc : sur une hauteur de fenetre qui
+       tombe au mauvais endroit, ouvrir une fiche produit fige l application.
+       Le verrou laisse le redessin se faire, mais il empeche le redessin de
+       redemander un ajustement : on converge en un tour, ou l on garde ce qu on
+       a. Une ligne de trop ou de moins vaut mieux qu une fenetre morte. */
+    if (isFinite(n) && n !== TAILLE_PAGE && !AUTO_EN_COURS) {
+      TAILLE_PAGE = n; PAGE = 0;
+      AUTO_EN_COURS = true;
+      try { dessiner(); } finally { AUTO_EN_COURS = false; }
+    }
   }
 
   function dessinerFiltres(){
@@ -928,6 +950,7 @@ ${JS_ACTIVITE}${JS_DIRE}
      la cadence courante, et la mesure ne depend pas du nombre de lignes recues
      (la grille est en flex, sa hauteur est celle de la place disponible). */
   var autoT = null;
+  var AUTO_DEMANDE = 0;   // la derniere cadence DEMANDEE au site (voir plus bas)
   function pageAutoAjuste(){
     if (!FP.auto || ONGLET !== 'produits' || VUE === 'produit' || !PRODS) return;
     var g = corps.querySelector('.grille');
@@ -940,7 +963,29 @@ ${JS_ACTIVITE}${JS_DIRE}
     // Un faux document (le banc) mesure NaN : on ne touche a rien dans ce cas.
     if (!(dispo > 0)) return;
     var n = Math.max(5, Math.floor(dispo / hL));
-    if (isFinite(n) && n !== FP.parPage) { FP.parPage = n; FP.page = 0; chargerOnglet(); }
+    /* ⚠⚠⚠ ON NE REDEMANDE JAMAIS DEUX FOIS LA MÊME CADENCE — SANS CELA LA
+       FENÊTRE TOURNE À VIDE POUR TOUJOURS.
+       Le cycle : pageAutoAjuste calcule n, le pose dans FP.parPage et rappelle
+       chargerOnglet ; celui-ci interroge le site, et le site REPOND AVEC SA
+       PROPRE CADENCE (« Le site borne page et cadence : on reprend SES valeurs »,
+       quelques lignes plus bas). Si le site borne — parce qu il a un plafond,
+       ou parce qu il repond une valeur fixe — FP.parPage redevient SA valeur,
+       le dessin suivant recalcule n, le trouve encore different, et rappelle.
+       Deux nombres qui ne se rejoignent jamais, et un aller-retour au pont a
+       chaque tour, indefiniment.
+       C est ce qui rendait la fenetre Inventaire IMPOSSIBLE A MESURER : la
+       seule des 92, et elle emportait les 19 autres pages de son lot
+       (2026-09-05). ⚠ Et ce n est pas qu un probleme de banc : chez une
+       cliente dont le catalogue ferait borner la cadence, l onglet Produits
+       martelerait le pont sans jamais se poser.
+       Le remede n est pas un compteur de tours mais la bonne question : une
+       cadence que le site a DEJA refusee ne se redemande pas. On garde la
+       derniere demandee ; si la reponse differe, c est la decision du site, et
+       on s y tient. */
+    if (isFinite(n) && n !== FP.parPage && n !== AUTO_DEMANDE) {
+      AUTO_DEMANDE = n;
+      FP.parPage = n; FP.page = 0; chargerOnglet();
+    }
   }
   window.addEventListener('resize', function(){
     clearTimeout(autoT);

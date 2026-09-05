@@ -37,15 +37,17 @@ module.exports = {
      sans preuve n'en est pas une — on écrit ce qui a été essayé.
      ⚠ Cette table n'est pas un débarras : chaque entrée est une zone d'ombre
      qui reste à ouvrir, et le banc la rappelle À CHAQUE PASSAGE. */
+  /* ⚠ VIDE, ET C'EST UNE BONNE NOUVELLE. `inventaire` y a figuré une journée :
+     elle tuait le moteur de rendu et était la seule des 92 hors de portée. La
+     cause a été trouvée et corrigée le 2026-09-05 (une cadence de pagination que
+     la fenêtre et le site se renvoyaient sans fin) : elle se mesure maintenant.
+     ⚠⚠ ET LA PREUVE QUI ACCOMPAGNAIT SA DÉCLARATION ÉTAIT FAUSSE. J'avais écrit
+     « vérifié SANS le banc, en --dump-dom, 0 octet » — or `--dump-dom` N'ÉCRIT
+     RIEN en `--headless=new` : un témoin trivial (`<h1>bonjour</h1>`) sortait
+     lui aussi à 0 octet. La conclusion était juste, la preuve ne prouvait rien.
+     → UNE DÉCLARATION D'ANGLE MORT DOIT PORTER UNE PREUVE QUI A ÉTÉ ÉPROUVÉE
+     SUR UN TÉMOIN, sinon elle transforme un doute en fait acquis. */
   INMESURABLES: {
-    inventaire:
-      'fait tomber le moteur de rendu de Chrome sans-tête — vérifié SANS le banc : '
-      + 'la page brute de la fabrique, écrite telle quelle dans un fichier et ouverte '
-      + 'en --dump-dom, ne rend RIEN (0 octet) et n\'écrit aucune erreur de console. '
-      + 'Ce n\'est donc pas le harnais : c\'est la page. Elle emportait aussi les 19 '
-      + 'autres rendus de son lot — d\'où le rattrapage page par page, qui l\'a isolée. '
-      + '⚠ Une page qui tue un moteur de rendu n\'est pas un détail de banc : à '
-      + 'reprendre à part, c\'est le plus gros écran de l\'application.',
   },
 
   /* ── GARDÉ POUR TOUJOURS, AVEC LA RAISON ────────────────────────────────── */
@@ -166,8 +168,8 @@ module.exports = {
     '#E1DAFD sur #7859F7 @4.5': 1,
     // 3.49 · div.tete > span#t-av.av « MT » · client/jour client/nuit
     '#17202C sur #8A6F4D @4.5': 2,
-    // 3.51 · div.avis > span.ic « 💱 » · tableau/jour
-    '#93743B sur #EEE6D5 @4.5': 1,
+    // 3.51 · span > span.ic « ⚠ » · inventaire/jour tableau/jour
+    '#93743B sur #EEE6D5 @4.5': 3,
     // 3.57 · div.haut > span « 📦 » · ramassages/jour
     '#80848B sur #FAF9F6 @4.5': 2,
     // 3.58 · tr.off > td « Allemagne » · livraison/nuit
@@ -198,8 +200,8 @@ module.exports = {
     '#767D88 sur #18212F @4.5': 2,
     // 3.90 · span.mk > span.ic « 🔒 » · config-navigation/nuit
     '#757C88 sur #16202F @4.5': 2,
-    // 4.00 · div.ch > div.aide « La clé est stockée côté serveur et n’est » · analytics/nuit apparence/nuit automations/nuit bd/nuit caisse/nuit cles/nuit client/nuit config-navigation/nuit config-retours/nuit expedition/nuit footer/nuit icones/nuit images/nuit impot/nuit imprimantes/nuit livraison/nuit marque/nuit paiements-config/nuit remboursement/nuit retour/nuit statistiques/nuit studio/nuit tableau/nuit taxes/nuit transporteurs/nuit
-    '#6D7F96 sur #16202F @4.5': 99,
+    // 4.00 · div.ch > div.aide « La clé est stockée côté serveur et n’est » · analytics/nuit apparence/nuit automations/nuit bd/nuit caisse/nuit cles/nuit client/nuit config-navigation/nuit config-retours/nuit expedition/nuit footer/nuit icones/nuit images/nuit impot/nuit imprimantes/nuit inventaire/nuit livraison/nuit marque/nuit paiements-config/nuit remboursement/nuit retour/nuit statistiques/nuit studio/nuit tableau/nuit taxes/nuit transporteurs/nuit
+    '#6D7F96 sur #16202F @4.5': 105,
     // 4.01 · div.afaire > span.titre « À faire maintenant » · tableau/jour
     '#8A6A3E sur #ECE6D9 @4.5': 1,
     // 4.03 · div.s > div.n « 42 180,00 $ » · impot/jour promo/jour remboursements/jour
