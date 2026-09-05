@@ -56,10 +56,6 @@ module.exports = {
 
   /* ── DETTE CONNUE, AVEC SON PLAFOND ─────────────────────────────────────── */
   RESTE: {
-    // 1.00 · div.info.bien > b « Rien à déplacer. » · images_c1/jour
-    '#D3F6E4 sur #EBEEF8 @4.5': 1,
-    // 1.07 · div.info > b « consultations » · analytics/jour analytics_c1/jour images/jour
-    '#DBE7FB sur #EBEEF8 @4.5': 26,
     // 1.10 · div.apercu > span.t « L’élégance au quotidien » · accueil_c1/jour
     '#1D2433 sur #1A1A2E @4.5': 1,
     // 1.18 · div.pop > button.sz-btnplein.flottant « ⛶ Plein écran » · newsletter_c5/nuit

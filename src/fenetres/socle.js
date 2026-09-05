@@ -1993,6 +1993,19 @@ button.actif,.jeton.on,.mini.actif{border-color:var(--sz-accent);background:var(
    defaut de FOND — le blanchir figerait une boite noire dans une fenetre claire.
    Ces cas-la relevent de banc-fonds-jour.js.                                  */
 const CSS_JOUR_TEXTES = `
+/* ⚠⚠ LE GRAS D UN PANNEAU GARDAIT SA COULEUR DE NUIT — ET C ETAIT DU TEXTE
+   INVISIBLE. Les panneaux (.info, .bien, .avis) ont bien leur reprise de jour ;
+   mais le B a l interieur porte sa PROPRE couleur en dur (#dbe7fb, #d3f6e4 :
+   des pales concus pour un fond sombre) et il est PLUS SPECIFIQUE que le
+   panneau. En mode jour, le fond du panneau devient clair et ce gras sortait a
+   1.00 de contraste — la couleur EXACTE de son fond. « Rien a deplacer. »
+   n existait tout simplement pas a l ecran.
+   ⚠ On ne lui invente pas une couleur : on lui fait HERITER celle du panneau,
+   qui est deja juste dans les deux modes. Une reprise qui ne choisit rien ne
+   peut pas se tromper, et elle suivra les changements a venir. */
+html.jour .info b,html.jour .bien b,html.jour .avis b,
+html.jour .alerte b,html.jour .info strong,html.jour .bien strong,
+html.jour .avis strong,html.jour .alerte strong{color:inherit}
 html.jour .alerte{color:#845555}
 html.jour .aud{color:#6c675c}
 html.jour .avis.att{color:#73693e}

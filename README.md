@@ -292,3 +292,25 @@ autre filtre rend la couleur indécidable** : il renonce, et il le compte.
 **Dette : 145 → 89 entrées.** La table précédente avait été relevée sur les
 couleurs d'avant les filtres ; la moitié de ses clés désignaient des couleurs qui
 n'existent nulle part.
+
+### 🔴🔴🔴 Du texte à 1.00 de contraste — invisible (4.43.0)
+
+Un contraste de **1.00**, c'est du texte **exactement de la couleur de son fond**.
+« Rien à déplacer. » n'existait pas à l'écran. Les panneaux (`.info`, `.bien`,
+`.avis`) ont bien leur reprise de mode jour — mais le **gras à l'intérieur**
+porte sa PROPRE couleur en dur (`#dbe7fb`, `#d3f6e4` : des pâles conçus pour un
+fond sombre), et il est **plus spécifique que le panneau**. En mode jour, le fond
+devient clair et le gras restait pâle.
+
+⚠ **On ne lui invente pas une couleur : on lui fait HÉRITER celle du panneau**,
+qui est déjà juste dans les deux modes. Une reprise qui ne choisit rien ne peut
+pas se tromper, et elle suivra les changements à venir.
+
+⚠ Ce défaut avait survécu à `banc-contraste-jour.js` et à `banc-texte-sur-fond.js`
+— tous deux verts — parce qu'ils lisent le CSS et n'ont jamais vu ce `b` **dans**
+son panneau, sur son fond composé. Il a fallu que le banc au rendu mesure les
+339 scénarios pour qu'il apparaisse.
+
+**Ce qui reste : 47 clés sous 3.0, 102 endroits**, presque toutes du même
+travers — une couleur de la palette de nuit employée telle quelle sur un fond de
+jour. Elles sont relevées et plafonnées ; elles demandent un examen un par un.
