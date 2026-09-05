@@ -73,7 +73,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
 const RACINE = path.resolve(__dirname, '..');
 const DOS_FEN = path.join(RACINE, 'src', 'fenetres');
@@ -130,8 +130,32 @@ const THEMES = TOUS_THEMES ? ['', 'ocean', 'violet', 'ardoise', 'graphite', 'eme
    Le nom du dossier (`sz-cr-a1b2c3`) est unique à cette exécution ET sans
    antislash : rien à échapper, donc rien à se tromper. */
 let JETON = null;                      // nom du dossier temporaire de CETTE exécution
+const PIDS = new Set();                // les navigateurs que NOUS avons lancés
+
+/* ⚠⚠ ON TUE L'ARBRE, PAS LE PROCESSUS. Chrome éclate en une dizaine de
+   processus — moteur de rendu, GPU, utilitaires — et **eux ne portent pas le
+   `--user-data-dir` dans leur ligne de commande**. Le filtre par dossier
+   temporaire n'attrape donc que le processus PÈRE, et le reste survit.
+   Ça ne s'était pas vu tant qu'on attendait la sortie de Chrome (`spawnSync`) :
+   il était déjà parti de lui-même, et le ménage ne servait qu'au cas rare. En
+   passant au lancement asynchrone, 135 processus sont restés après un banc de
+   trois secondes. Le père connaît ses enfants : on le tue AVEC eux (`/T` sous
+   Windows, le groupe de processus ailleurs), et le balayage par dossier reste
+   en second rideau pour ce qui aurait échappé. */
+function tuerArbre(pid) {
+  if (!pid) return;
+  try {
+    if (process.platform === 'win32') {
+      spawnSync('taskkill', ['/F', '/T', '/PID', String(pid)], { stdio: 'ignore', timeout: 30000 });
+    } else {
+      try { process.kill(-pid, 'SIGKILL'); } catch (e) { try { process.kill(pid, 'SIGKILL'); } catch (e2) {} }
+    }
+  } catch (e) {}
+  PIDS.delete(pid);
+}
 
 function tuerNosChrome() {
+  for (const pid of Array.from(PIDS)) tuerArbre(pid);
   if (!JETON) return 0;
   try {
     if (process.platform === 'win32') {
@@ -340,8 +364,25 @@ function main() {
 
   /* Le parcours d'une liste d'adresses, par paquets de `parLot`. Extrait en
      fonction pour pouvoir être RAPPELÉ page par page sur ce qui a été perdu. */
+  /* ══ UN PLAFOND DE TEMPS, PARCE QUE 48 MINUTES SONT DÉJÀ PASSÉES ═══════════
+     À sa première exécution dans la construction, ce banc a tourné **48
+     minutes** au lieu de deux : chaque lot attendait son délai de 300 s entier
+     (voir la note sur `spawnSync`, plus bas). Personne ne l'a arrêté — RIEN
+     n'était prévu pour l'arrêter, et c'est l'utilisateur qui a demandé pourquoi
+     c'était si long.
+     ⚠ La cause est corrigée, mais la cause suivante ne l'est pas : un banc qui
+     ouvre des navigateurs peut TOUJOURS se retrouver à attendre quelque chose
+     qui ne viendra pas. Il lui faut donc une fin garantie, indépendante de la
+     panne du jour. Au-delà de ce plafond on s'arrête, on RAPPORTE ce qui a été
+     mesuré, et l'on refuse — un banc qui s'arrête en le disant vaut mieux qu'un
+     banc qui consomme une heure d'exécuteur en silence. */
+  const BUDGET_MS = Number(process.env.SZ_CONTRASTE_BUDGET_MS || 8 * 60 * 1000);
+  const DEBUT = Date.now();
+  let budgetDepasse = false;
+
   const parcourir = (adrs, parLot) => {
   for (let d = 0; d < adrs.length; d += parLot) {
+    if (Date.now() - DEBUT > BUDGET_MS) { budgetDepasse = true; break; }
     const lot = adrs.slice(d, d + parLot);
     lots++;
     /* ⚠⚠ UN LOT MUET EST REJOUÉ UNE FOIS, ET C'EST UNE CONSTATATION, PAS UNE
@@ -359,12 +400,22 @@ function main() {
       profil = path.join(tmp, `profil-${lots}-${essais}`);
       fs.writeFileSync(pilote, pagePilote(lot), 'utf8');
 
-    /* On lance et l'on n'attend PAS la sortie du processus : sur Windows, Chrome
-       se relance et le premier rend la main tout de suite. `spawnSync` revenait
-       au bout d'une seconde alors que le navigateur commençait à peine — c'est
-       ce qui bornait le parcours à 23 pages, toujours en 16 secondes, quel que
-       soit le nombre de fenêtres demandées. Le chiffre identique était l'indice. */
-      spawnSync(chrome, [
+    /* ⚠⚠⚠ `spawn`, PAS `spawnSync` — ET C'EST 48 MINUTES DE DIFFÉRENCE.
+       Ce banc a longtemps lancé le navigateur avec `spawnSync`, en s'appuyant
+       sur une PARTICULARITÉ DE WINDOWS : Chrome s'y relance dans un second
+       processus et le premier rend la main tout de suite, si bien que
+       `spawnSync` revenait aussitôt et que l'on attendait ensuite le témoin dans
+       le journal. Ça marchait — par accident.
+       Sur LINUX, Chrome ne se relance pas : `spawnSync` bloque jusqu'à ce qu'il
+       sorte, et `window.close()` ne suffit pas toujours à le faire sortir en
+       `--headless=new`. Chaque lot attendait donc son délai de 300 s ENTIER, une
+       fois son travail fini. Dix lots : **48 minutes** dans la construction, pour
+       deux minutes de mesure. Vu à la première exécution en ligne.
+       ⚠ La leçon : **une attente qui repose sur la façon dont un programme rend
+       la main n'est pas une attente, c'est une coïncidence de plateforme.** On
+       lance sans attendre, on attend LE TÉMOIN (ce qu'on faisait déjà), et l'on
+       ferme soi-même — ce que `tuerNosChrome()` fait déjà juste en dessous. */
+      const nav = spawn(chrome, [
         '--headless=new', '--disable-gpu', '--allow-file-access-from-files',
         '--no-first-run', '--no-default-browser-check', '--disable-extensions',
         '--window-size=1200,900',
@@ -373,10 +424,26 @@ function main() {
            SUR LE BUREAU, en plein travail, et il en tombe beaucoup quand on
            enfile mille pages. Un banc ne doit rien afficher à personne. */
         '--noerrdialogs', '--disable-crash-reporter', '--disable-breakpad',
+        /* ⚠ `--no-sandbox` UNIQUEMENT DANS UNE CONSTRUCTION. Le bac à sable de
+           Chrome refuse de démarrer sous l'utilisateur root des exécuteurs
+           GitHub, et le navigateur ne rend alors RIEN, sans un mot. On ne
+           l'ouvre jamais sur le poste de quelqu'un : `CI` est posée par GitHub
+           Actions et par personne d'autre. */
+        ...(process.env.CI ? ['--no-sandbox'] : []),
         '--enable-logging', '--v=1', `--log-file=${journal}`,
         `--user-data-dir=${profil}`,
         'file:///' + pilote.replace(/\\/g, '/'),
-      ], { stdio: 'ignore', timeout: 300000 });
+      ], { stdio: 'ignore', detached: process.platform !== 'win32' });
+      /* On garde le numéro du PÈRE : c'est par lui qu'on atteindra ses enfants,
+         qui ne portent pas le dossier temporaire dans leur ligne de commande.
+         ⚠ Et on l'oublie dès qu'il meurt de lui-même : tuer plus tard un numéro
+         recyclé par le système reviendrait à tuer le processus de quelqu'un. */
+      if (nav && nav.pid) PIDS.add(nav.pid);
+      try {
+        nav.on('exit', () => PIDS.delete(nav.pid));
+        nav.on('error', () => PIDS.delete(nav.pid));
+        nav.unref();
+      } catch (e) {}
 
     /* On attend le TÉMOIN DE FIN dans le journal, jamais une durée devinée — elle
        finit toujours par être trop courte le jour où l'on ajoute des écrans. Et un
@@ -440,7 +507,11 @@ function main() {
   if (GARDER) console.log("pages d'essai gardées : " + tmp);
   else { try { fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); } catch (e) {} }
 
-  rapport(lignes, liste.length, adresses, sansJeu, echecs, lotsMorts);
+  if (budgetDepasse) {
+    console.log(`   ⚠⚠ PLAFOND DE TEMPS ATTEINT (${Math.round(BUDGET_MS / 60000)} min) — le parcours s'est arrêté en chemin.`);
+    console.log("      Ce qui suit ne porte que sur ce qui a été mesuré ; le reste n'a PAS été regardé.");
+  }
+  rapport(lignes, liste.length, adresses, sansJeu, echecs, lotsMorts, budgetDepasse);
 }
 
 /* Le nom qu un rendu porte dans les relevés : « fenetre/mode » (ou « /theme »).
@@ -456,7 +527,7 @@ function nomDeRendu(adresse) {
 }
 
 /* ── 6. RAPPORT ───────────────────────────────────────────────────────────── */
-function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts) {
+function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts, budgetDepasse) {
   const nbRendus = adresses.length;
   const paires = new Map();
   const durs = [];
@@ -609,7 +680,9 @@ function rapport(lignes, nbFen, adresses, sansJeu, echecs, lotsMorts) {
      et n'ajoute que les seconds. Compter « 1 dès qu'il en manque un » rendait le
      banc rouge pour toujours à cause d'un seul écran connu — et un rouge
      permanent finit désactivé, ce qui coûterait les 91 autres. */
-  let mal = durs.length + vrais.length + monte.length + muettes.length;
+  /* ⚠ UN PARCOURS ÉCOURTÉ NE PEUT PAS ÊTRE VERT. Il n'a pas trouvé de faute
+     parce qu'il n'a pas fini de chercher — ce n'est pas la même chose. */
+  let mal = durs.length + vrais.length + monte.length + muettes.length + (budgetDepasse ? 1 : 0);
   if (manquants > 0) {
     console.log(`── ${manquants} RENDU(S) N'ONT PAS ÉTÉ MESURÉS ──`);
     /* ⚠⚠ ON NOMME CE QU'ON N'A PAS MESURÉ. Le rapport disait « 6 manquants » et
