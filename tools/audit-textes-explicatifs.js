@@ -93,7 +93,7 @@ for (const f of fichiers) {
       fichier: path.relative(RACINE, f).replace(/\\/g, '/'),
       ligne: lignesDe(m.index),
       mots: n,
-      texte: t.slice(0, 190),
+      texte: t.slice(0, 1200),
     });
   }
 }
@@ -138,6 +138,14 @@ for (const t of trouves) {
 }
 
 trouves.sort((a, b) => b.mots - a.mots);
+
+/* `--json` : la même mesure, pour la page de tri. Le texte y va ENTIER (pas la
+   coupe à 150 caractères de l'affichage) — on ne trie pas sur un extrait. */
+if (process.argv.includes('--json')) {
+  console.log(JSON.stringify(trouves, null, 1));
+  process.exit(0);
+}
+
 
 console.log('');
 console.log('AUDIT — textes qui EXPLIQUENT l’écran (≥ ' + SEUIL_MOTS + ' mots)');

@@ -163,11 +163,14 @@ ${JS_ACTIVITE}${JS_DIRE}
       ? (actifs.length + ' fiche' + (actifs.length > 1 ? 's' : '') + ' en cours de modification')
       : 'personne ne tient de fiche';
 
-    var h = '<div class="note"><b>Ce que vous regardez.</b> Une fiche ouverte par quelqu’un est '
-      + 'verrouillée le temps qu’il travaille, pour éviter que deux personnes écrasent leur travail. '
-      + 'Cette page se rafraîchit <b>toute seule</b> : elle montre l’état réel, en direct.<br>'
-      + 'Un verrou se libère seul — à la fermeture de la fiche, après 90 s sans activité, ou à la fin '
-      + 'de la session. <b>Normalement, il n’y a rien à faire ici.</b> Forcer un déverrouillage ne sert '
+    /* ⚠ L'EXPOSÉ EST PARTI (2026-09-06), L'AVERTISSEMENT RESTE. Le jumeau web
+       (staff.js) a subi le même retrait le même jour : « Ce que vous regardez »
+       racontait le verrouillage à quelqu'un qui a l'écran sous les yeux, et
+       finissait par « normalement, il n'y a rien à faire ici ».
+       Ce qui suit prévient d'une conséquence avant le geste qui la provoque —
+       ça, c'est utile au moment où on le lit. */
+    var h = '<div class="note">'
+      + 'Forcer un déverrouillage ne sert '
       + 'que si un poste est parti en laissant une fiche ouverte : la personne se fera alors refuser '
       + 'son enregistrement. Chaque déverrouillage forcé est inscrit au journal d’accès.</div>';
 
