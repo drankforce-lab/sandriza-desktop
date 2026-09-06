@@ -454,7 +454,17 @@ ipcMain.on('win:close', (e) => {
 });
 
 // ══ PHASE 3 — NOTIFICATIONS NATIVES + PASTILLE SUR L'ICÔNE ════════════════════
-const ICON_PATH = path.join(__dirname, '..', 'build', 'icon.png');
+/* ⚠ MÊME DÉFAUT QUE L'ICÔNE DU VEILLEUR, TROUVÉ PAR LE MÊME BANC (2026-09-06) :
+   `build` n'est pas empaqueté, donc ce chemin n'existe PAS dans l'application
+   installée. Ici la conséquence était moins visible — `fs.existsSync` rendait
+   faux, `icon` valait `undefined`, et Windows retombait sur l'icône de
+   l'application — mais l'intention (une notification à notre image) était
+   perdue en silence depuis toujours, et le code qui la porte était mort.
+   Le second chemin sert au développement, où l'on lance depuis le dépôt. */
+const ICON_PATH = [
+  path.join(__dirname, 'icone-veilleur.png'),
+  path.join(__dirname, '..', 'build', 'icon.png'),
+].find((p) => { try { return fs.existsSync(p); } catch (e) { return false; } }) || '';
 /**
  * UNE SEULE FABRIQUE DE NOTIFICATION.
  *

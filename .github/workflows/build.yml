@@ -308,6 +308,14 @@ jobs:
           node tools/banc-fonds-jour.js
           node tools/banc-texte-sur-fond.js
           node tools/banc-accent-grave-socle.js
+          node tools/banc-veilleur.js
+          node tools/banc-porte-progression.js
+          # ⚠ CELUI-CI GARDE UN DÉFAUT QUI NE SE VOIT QU'APRÈS INSTALLATION :
+          # une ressource citée par src/ mais rangée hors de src/ existe en
+          # développement et disparaît de l'archive. C'est ce qui a fait un carré
+          # noir dans la zone de notification (2026-09-06) — et personne ne
+          # pouvait le voir avant un build, une publication et une installation.
+          node tools/banc-ressources-empaquetees.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

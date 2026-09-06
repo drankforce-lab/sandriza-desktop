@@ -70,7 +70,26 @@ const CADENCE_MS = 60 * 1000;
 // reviendrait jamais tout seul.
 const CADENCE_ERREUR_MAX_MS = 10 * 60 * 1000;
 
-const ICON_PATH = path.join(__dirname, '..', 'build', 'icon.png');
+/* ⚠⚠ L'ICÔNE DOIT VIVRE SOUS `src/`, ET ELLE N'Y ÉTAIT PAS. Elle pointait sur
+   `build/icon.png` — or `electron-builder.yml` n'empaquette QUE le contenu de
+   `src` et `package.json`.
+   ⚠ Le motif d'empaquetage ne s'écrit PAS ici : il contient une étoile suivie
+   d'une barre oblique, qui referme ce commentaire. Même famille que l'accent
+   grave qui referme un gabarit — huit fois dans ce dépôt. `build/` est un dossier de RESSOURCES DE CONSTRUCTION : il
+   sert à fabriquer l'icône de l'application, il n'entre jamais dans l'archive.
+   En développement le fichier existe, donc tout allait bien ; dans
+   l'application installée, `createFromPath` rendait une image VIDE et la zone
+   de notification affichait un carré noir. Signalé le 2026-09-06, capture à
+   l'appui.
+   ⚠ La panne est MUETTE par nature : `createFromPath` ne lève pas sur un
+   fichier absent, il rend une image vide — et un `Tray` accepte une image vide
+   sans broncher. `tools/banc-ressources-empaquetees.js` refuse désormais toute
+   ressource citée par `src/` qui vivrait hors de `src/`.
+   Le second chemin reste pour le développement, où l'on lance depuis le dépôt. */
+const ICON_PATH = [
+  path.join(__dirname, 'icone-veilleur.png'),
+  path.join(__dirname, '..', 'build', 'icon.png'),
+].find((p) => { try { return fs.existsSync(p); } catch { return false; } }) || '';
 const SONS = {
   commande: path.join(__dirname, 'sons', 'commande.wav'),
   retour: path.join(__dirname, 'sons', 'retour.wav'),
@@ -268,7 +287,20 @@ async function unTour() {
   const res = await interroger();
   if (!res.ok) {
     dernierEchec = res.motif;
-    pasErreur++;
+    /* ⚠⚠ « PAS DE JETON » N'EST PAS UNE PANNE, C'EST UN ÉTAT — et les confondre
+       a produit le défaut qu'il a signalé le 2026-09-06 : « j'ai configuré le
+       jeton et il me dit que ce n'est pas configuré ». Les deux écrans disaient
+       vrai. Le veilleur avait démarré AVANT que le jeton n'existe, chaque tour
+       comptait un échec de plus, et le recul exponentiel avait porté la
+       prochaine lecture à DIX MINUTES. Il aurait fini par voir le jeton — dans
+       dix minutes, ce qui, pour quelqu'un qui vient de le coller, veut dire
+       jamais.
+       Espacer a un sens quand on martèle un serveur qui ne répond pas. Ça n'en a
+       aucun quand la réponse est ici, sur le disque, et qu'elle ne changera que
+       le jour où quelqu'un agira — d'où la surveillance du fichier plus bas, et
+       aucun recul pour ce motif-là. */
+    if (res.motif !== 'sans_jeton') pasErreur++;
+    else pasErreur = 0;
     majTray();
     return;
   }
@@ -348,7 +380,14 @@ function majTray() {
         if (!e.actif) { ordonnancer(); unTour().catch(() => {}); }
       },
     },
-    { label: 'Vérifier maintenant', enabled: e.actif, click: () => { unTour().catch(() => {}); } },
+    { label: 'Vérifier maintenant', enabled: e.actif, click: () => {
+      // ⚠ On efface le recul accumulé : demander explicitement une vérification,
+      // c'est dire « la situation a changé ». Sans ça, le clic vérifiait bien,
+      // mais le tour suivant restait à dix minutes.
+      pasErreur = 0;
+      unTour().catch(() => {});
+      ordonnancer();
+    } },
     {
       /* ⚠ CETTE ENTRÉE N'EST PAS UN GADGET DE MISE AU POINT, ET ELLE RESTE.
          Deux raisons. La première : c'est LUI qui doit juger si les deux sons se
@@ -409,6 +448,43 @@ function poserDemarrageAuto(on) {
   return r;
 }
 
+/* ══ LE JETON PEUT ARRIVER APRÈS NOUS — ET C'EST MÊME LE CAS NORMAL ═════════
+   Le veilleur démarre avec Windows ; le jeton se colle dans l'administration,
+   plus tard. Sans cette surveillance, il n'existe AUCUN canal entre les deux
+   processus (c'était voulu : pas de port ouvert, pas de canal à protéger), et
+   le veilleur ne pouvait apprendre la nouvelle qu'au tour suivant.
+   On surveille donc le DOSSIER, pas le fichier : `fs.watch` sur un fichier qui
+   n'existe pas encore échoue, et c'est précisément la situation de départ.
+   ⚠ Un `fs.watch` émet souvent DEUX événements pour une seule écriture (le
+   contenu, puis l'horodatage). On regroupe sur 300 ms, sinon on relancerait deux
+   interrogations coup sur coup pour rien.
+   ⚠ Et l'on ne relit que si l'état a VRAIMENT changé : sans ça, chaque écriture
+   du dossier (l'état du veilleur lui-même) déclencherait un tour. */
+let _surveille = null;
+let _avaitJeton = false;
+function surveillerJeton() {
+  const f = secret.chemin();
+  _avaitJeton = secret.existe();
+  try {
+    fs.mkdirSync(path.dirname(f), { recursive: true });
+    fs.watch(path.dirname(f), (ev, nom) => {
+      if (nom && String(nom) !== path.basename(f)) return;
+      if (_surveille) clearTimeout(_surveille);
+      _surveille = setTimeout(() => {
+        const a = secret.existe();
+        if (a === _avaitJeton) return;
+        _avaitJeton = a;
+        // Le jeton vient d'arriver (ou de partir) : on repart tout de suite, et
+        // on remet le compteur d'échecs à zéro — la situation a changé.
+        pasErreur = 0; dernierEchec = '';
+        majTray();
+        unTour().catch(() => {});
+        ordonnancer();
+      }, 300);
+    });
+  } catch { /* système sans surveillance de fichiers : le tour suivant fera foi */ }
+}
+
 // ══ DÉMARRAGE ═══════════════════════════════════════════════════════════════
 function demarrer() {
   // ⚠ AVANT `requestSingleInstanceLock` — voir l'en-tête. Le dossier du veilleur
@@ -440,6 +516,7 @@ function demarrer() {
 
     ordonnancer();
     unTour().catch(() => {});
+    surveillerJeton();
   });
 
   /* ⚠⚠ SANS CECI, LE VEILLEUR MOURRAIT DÈS SON PREMIER SON. Le comportement par
