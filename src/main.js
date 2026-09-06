@@ -1451,10 +1451,17 @@ const portePage = (titre, message, progression) => {
        à la même taille que le reste, donc invisible. On lit un écran d'attente
        du coin de l'œil, en faisant autre chose : le chiffre doit se voir sans
        qu'on s'approche.
+       ⚠⚠ MAIS PAS PLUS GROS QUE LE TITRE — première version à 3,4 rem contre
+       1,55 rem pour le titre, soit plus du DOUBLE, et il l'a dit tout de suite :
+       « c'est trop gros ». La hiérarchie s'inversait : on lisait « 50 % » avant
+       de savoir de quoi il s'agissait. Corriger un défaut de lisibilité en
+       écrasant ce qui l'entoure, c'est déplacer le problème.
+       1,5 rem, juste SOUS le titre : c'est la couleur d'accent qui porte la
+       mise en avant, pas la taille. Un seul signal suffit.
        ⚠ `tabular-nums` : sans lui, les chiffres n'ont pas la même largeur et le
        nombre TREMBLE à chaque rafraîchissement — sur un compteur qui change
        plusieurs fois par seconde, ça donne l'impression d'un écran instable. */
-    + '.dl-pct{font:800 3.4rem/1 Georgia,serif;color:#C49A6C;margin:.2rem 0 .5rem;'
+    + '.dl-pct{font:700 1.5rem/1.15 Georgia,serif;color:#C49A6C;margin:.15rem 0 .45rem;'
     +   'font-variant-numeric:tabular-nums;letter-spacing:-.02em}'
     + '.dl-mo{font-size:.95rem;color:#6b5340;font-variant-numeric:tabular-nums}'
     + '.dl-vit{font-size:.78rem;color:#9a7d62;margin-top:.25rem;font-variant-numeric:tabular-nums}'
