@@ -398,10 +398,10 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessinerOnglets(){
     var reappro = (NB_REAPPRO === null) ? '' : (NB_REAPPRO ? ' (' + NB_REAPPRO + ')' : '');
     var defs = [
-      ['produits', '📦 Produits'],
-      ['reappro', '⚠ Réapprovisionnement' + reappro],
-      ['endommages', '🔧 Produits endommagés'],
-      ['entrepots', '🏬 Entrepôt']
+      ['produits', 'Produits'],
+      ['reappro', 'Réapprovisionnement' + reappro],
+      ['endommages', 'Produits endommagés'],
+      ['entrepots', 'Entrepôt']
     ];
     onglets.innerHTML = defs.map(function(d){
       return '<button data-onglet="' + d[0] + '"' + (ONGLET === d[0] ? ' class="actif"' : '')
@@ -1696,8 +1696,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('verrou:prendre', ['products', pid]).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       var b = document.getElementById('btn-enr');
       if (b) { b.disabled = true; b.textContent = 'Ouverte ailleurs'; }
       dire('Enregistrement bloqué : ce produit est ouvert ailleurs.', 'err');
@@ -1761,7 +1761,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('stock:contexte').then(function(c){
       if (!c || !c.ok) { vide('Inventaire indisponible', expliquer(c)); return; }
       CTX = c;
-      sous.textContent = c.peutEcrire ? '' : '👁 Lecture seule';
+      sous.textContent = c.peutEcrire ? '' : 'Lecture seule';
       chargerOnglet();
     });
   }

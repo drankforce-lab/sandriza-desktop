@@ -77,10 +77,22 @@ for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
   // Les commentaires ne s affichent pas : un pictogramme dans une fiche ne
   // viole rien, et l y compter rendrait le banc rouge sur de la prose.
   const nu = src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
-                .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '));
+                .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '))
+                // ⚠ ET LES COMMENTAIRES HTML AUSSI (2026-09-05). Deux fiches de
+                // `caisse.js` vivent dans un littéral de gabarit, donc entre
+                // <!-- -->. Elles ne s’affichent pas plus qu’un commentaire JS.
+                // Les compter aurait cloué le relevé à 2 pour toujours — et un
+                // plafond qui ne peut pas atteindre zéro finit par se lire comme
+                // « c’est normal qu’il en reste ».
+                .replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, ' '));
   let m; RX.lastIndex = 0; let n = 0;
   while ((m = RX.exec(nu))) {
-    if (SIGNES.has(m[0])) continue;
+    /* ⚠⚠ UN SIGNE SUIVI DU SELECTEUR DE VARIANTE N EST PLUS UN SIGNE (2026-09-05).
+       `⚠️` demande explicitement la presentation EMOJI : le glyphe revient
+       en couleur, alors que la liste blanche l a laisse passer sur son seul
+       caractere de base. Deux cas dormaient dans le depot (`⚙️`, `↩️`).
+       La liste blanche ne vaut donc que pour le signe NU. */
+    if (SIGNES.has(m[0]) && nu[m.index + 1] !== '️') continue;
     const amont = nu.slice(Math.max(0, m.index - 90), m.index);
     if (/class="ic"[^<]*$/.test(amont)) continue;
     n++;

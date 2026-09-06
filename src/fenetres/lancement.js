@@ -98,17 +98,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
-  function protLigne(em, titre, txt){ return '<div class="l"><span class="em">' + em + '</span><div><strong>' + titre + '</strong> — ' + txt + '</div></div>'; }
+  function protLigne(titre, txt){ return '<div class="l"><div><strong>' + titre + '</strong> — ' + txt + '</div></div>'; }
 
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var enLigne = !!D.enLigne;
     var coul = enLigne ? '#16a34a' : '#d97706';
     var fond = enLigne ? 'rgba(22,163,74,.08)' : 'rgba(217,119,6,.08)';
-    var lbl = enLigne ? '🌐 En ligne' : '🔒 Pré-lancement';
+    var lbl = enLigne ? 'En ligne' : 'Pré-lancement';
     var ds = enLigne ? 'Le site est visible par les moteurs de recherche et les visiteurs.'
                      : 'Le site est protégé contre l’indexation. Seules les personnes ayant le lien direct peuvent le visiter.';
-    var btnTxt = enLigne ? 'Repasser en pré-lancement' : (CONF ? '⚠ Confirmer le lancement PUBLIC ?' : 'Lancer le site au public');
+    var btnTxt = enLigne ? 'Repasser en pré-lancement' : (CONF ? 'Confirmer le lancement PUBLIC ?' : 'Lancer le site au public');
     var btnCoul = enLigne ? '#ef4444' : (CONF ? '#b91c1c' : '#16a34a');
 
     var src;
@@ -122,11 +122,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>' + src + '</div>';
 
     h += '<div class="h4">Mesures de protection</div><div class="prot">'
-      + protLigne('☁', 'robots.txt', 'servi par Cloudflare, pas par ce site : ce bouton ne le change pas')
-      + protLigne(enLigne ? '✅' : '🔒', 'X-Robots-Tag HTTP', enLigne ? 'en-tête retiré' : 'noindex, nofollow sur toutes les pages')
-      + protLigne(enLigne ? '✅' : '🔒', 'Meta robots HTML', enLigne ? 'balise retirée' : 'noindex dans chaque page')
-      + protLigne('🛡', 'En-têtes de sécurité', 'X-Frame-Options, CSP, XSS-Protection (toujours actifs)')
-      + protLigne('🛡', 'Fichiers sensibles', '.env, Dockerfile, CLAUDE.md inaccessibles (toujours actif)')
+      + protLigne('robots.txt', 'servi par Cloudflare, pas par ce site : ce bouton ne le change pas')
+      + protLigne('X-Robots-Tag HTTP', enLigne ? 'en-tête retiré' : 'noindex, nofollow sur toutes les pages')
+      + protLigne('Meta robots HTML', enLigne ? 'balise retirée' : 'noindex dans chaque page')
+      + protLigne('En-têtes de sécurité', 'X-Frame-Options, CSP, XSS-Protection (toujours actifs)')
+      + protLigne('Fichiers sensibles', '.env, Dockerfile, CLAUDE.md inaccessibles (toujours actif)')
       + '</div>';
 
     h += '<div class="info"><b>ℹ Comment fonctionne le bouton.</b> Il crée ou supprime un fichier '
@@ -148,7 +148,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // PASSER EN LIGNE : garde absolue → confirmation en deux temps.
     if (!CONF) {
       CONF = true; dessiner();
-      dire('⚠ Cliquez encore pour rendre le site PUBLIC et indexable.', 'att');
+      dire('Cliquez encore pour rendre le site PUBLIC et indexable.', 'att');
       setTimeout(function(){ if (CONF) { CONF = false; dessiner(); } }, 6000);
       return;
     }
@@ -161,7 +161,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       OCCUPE = false;
       if (r && r.ok) {
         D = r; RO = !r.peutModifier; dessiner();
-        dire(r.enLigne ? '🌐 Site EN LIGNE au public.' : '🔒 Mode pré-lancement activé.', r.enLigne ? 'att' : 'bon');
+        dire(r.enLigne ? 'Site EN LIGNE au public.' : 'Mode pré-lancement activé.', r.enLigne ? 'att' : 'bon');
       } else dire('Échec : ' + expliquer(r), 'err');
     });
   }

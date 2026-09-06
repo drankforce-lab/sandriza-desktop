@@ -179,7 +179,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
 
   var STATUTS = {
-    awaiting_photo: '📷 Photo requise', pending: 'En attente', approved: 'Approuvée',
+    awaiting_photo: 'Photo requise', pending: 'En attente', approved: 'Approuvée',
     rejected: 'Rejetée', in_transit: 'En transit', received: 'Reçu — en traitement',
     refunded: 'Remboursée', completed: 'Complétée', disputed: 'En attente d’analyse'
   };
@@ -292,7 +292,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<div class="large"><div class="k">Motif</div><div class="v">' + esc(d.motif || '—') + '</div></div>'
       + (d.description ? '<div class="large"><div class="k">Description du client</div><div class="v" style="white-space:pre-wrap;font-weight:400">' + esc(d.description) + '</div></div>' : '')
       + (d.modeRemboursement ? '<div class="large"><div class="k">Mode communiqué au client</div><div class="v">'
-          + (d.modeRemboursement === 'creditOnly' ? '💳 Crédit boutique uniquement' : '💰 Moyen original ou crédit, au choix')
+          + (d.modeRemboursement === 'creditOnly' ? 'Crédit boutique uniquement' : 'Moyen original ou crédit, au choix')
           + (d.preference ? ' · préférence : ' + (d.preference === 'credit' ? 'crédit boutique' : 'moyen original') : '') + '</div></div>' : '')
       + (d.fraisPayesPar ? '<div class="large"><div class="k">Frais de retour</div><div class="v">'
           + (d.fraisPayesPar === 'store' ? '<span class="ic">🛠</span> Pris en charge par la boutique (défaut / erreur)' : '<span class="ic">📦</span> À la charge du client') + '</div></div>' : '')
@@ -338,7 +338,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     } else if (fige) {
       h += '<div class="aide">' + (d.statut === 'awaiting_photo'
         ? 'Pas de changement de statut tant que la photo n’est pas fournie — seules les notes s’enregistrent.'
-        : '✅ Dossier ' + (d.statut === 'refunded' ? 'remboursé' : 'complété') + ' — seules les notes s’enregistrent.') + '</div>';
+        : 'Dossier ' + (d.statut === 'refunded' ? 'remboursé' : 'complété') + ' — seules les notes s’enregistrent.') + '</div>';
     } else {
       h += '<div class="r2"><div class="ch"><label for="r-statut">Statut</label><select id="r-statut">'
         + ['pending','approved','rejected','in_transit','received','refunded','completed'].map(function(s){
@@ -445,8 +445,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       h += '<div class="carte"><h2><span class="ic">💰</span> Règlement <span class="note">— si « Remboursée »</span></h2>'
         + '<div class="avis ' + (rb.dansFenetre ? 'vert' : 'jaune') + '">'
         + (rb.dansFenetre
-            ? '✅ ' + rb.joursOuvrables + ' jours ouvrables — dans la fenêtre de ' + rb.joursFenetre + ' : moyen original ou crédit, au choix.'
-            : '⚠ ' + rb.joursOuvrables + ' jours ouvrables — hors fenêtre de ' + rb.joursFenetre + ' : crédit boutique uniquement.')
+            ? rb.joursOuvrables + ' jours ouvrables — dans la fenêtre de ' + rb.joursFenetre + ' : moyen original ou crédit, au choix.'
+            : rb.joursOuvrables + ' jours ouvrables — hors fenêtre de ' + rb.joursFenetre + ' : crédit boutique uniquement.')
         + '</div>'
         + rb.lignes.map(function(l, i){
             return '<div class="ligne"><span>' + esc(l.nom)
@@ -615,7 +615,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       enCours = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       var t = 'Demande mise à jour.';
-      if (r.etiquetteErreur) t += ' ⚠ Étiquette : ' + r.etiquetteErreur;
+      if (r.etiquetteErreur) t += ' Étiquette : ' + r.etiquetteErreur;
       if (r.courriel) t += r.courriel.envoye ? ' Courriel envoyé.' : (r.courriel.erreur ? ' Courriel NON envoyé : ' + r.courriel.erreur : '');
       /* Le brouillon meurt a l'enregistrement REUSSI, pas avant. */
       szBrouillonJeter();
@@ -717,7 +717,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
 
     /* ⚠ CONFIRMATION AVANT L ARGENT, montants sous les yeux — taxes en sus,
        recalculees par le site aux taux reels de la commande. */
-    voile('<h3>' + (statutFinal === 'refunded' ? '<span class="ic">💳</span> Rembourser et clore ?' : '✅ Clore le dossier ?') + '</h3>'
+    voile('<h3>' + (statutFinal === 'refunded' ? '<span class="ic">💳</span> Rembourser et clore ?' : 'Clore le dossier ?') + '</h3>'
       + (statutFinal === 'refunded'
           ? '<p>Articles : <strong>' + argent(montants.reduce(function(s,v){ return s+(parseFloat(v)||0); }, 0)) + '</strong>'
             + (livraison && R.remboursement ? ' + livraison <strong>' + argent(R.remboursement.livraisonBase) + '</strong>' : '')
@@ -741,8 +741,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
             if (!r.ok) { dire(expliquer(r), 'err'); return; }
             var t = 'Retour traité.';
             if (r.credit) t += ' Crédit ' + r.credit.numero + ' (' + argent(r.credit.montant) + ') émis.';
-            if (r.squareErreur) t += ' ⚠ Square a échoué : ' + r.squareErreur;
-            if (r.nonRestockes && r.nonRestockes.length) t += ' ⚠ Non remis en stock : ' + r.nonRestockes.join(' ; ');
+            if (r.squareErreur) t += ' Square a échoué : ' + r.squareErreur;
+            if (r.nonRestockes && r.nonRestockes.length) t += ' Non remis en stock : ' + r.nonRestockes.join(' ; ');
             if (r.courriel) t += r.courriel.envoye ? ' Courriel envoyé.' : '';
             dire(t, (r.squareErreur || (r.nonRestockes || []).length) ? 'att' : 'bon');
             ETAPE = 0;
@@ -769,7 +769,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       var pill = document.getElementById('pill');
       pill.style.display = '';
       pill.textContent = STATUTS[r.demande.statut] || r.demande.statut;
-      if (!r.peutEcrire) sous.textContent = r.archive ? '🗄 Archivée' : '👁 Lecture seule';
+      if (!r.peutEcrire) sous.textContent = r.archive ? 'Archivée' : 'Lecture seule';
       dessiner();
     });
   }
@@ -779,8 +779,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     appeler('verrou:prendre', ['return_reqs', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = '⚠ ouvert par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouvert par ' + (v.parQui || 'quelqu’un d’autre');
       dire('Ce dossier est déjà ouvert ailleurs — lecture seule conseillée.', 'att');
     });
   }

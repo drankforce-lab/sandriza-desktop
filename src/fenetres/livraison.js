@@ -190,7 +190,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="ch"><label>Seuil pour la livraison gratuite (CA$)</label>'
       + '<input id="f-thr" type="number" min="0" step="1" value="' + esc(num(d.freeThreshold)) + '"' + dis + '>'
       + '<div class="aide">Au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.</div></div>'
-      + '<div class="ch"><label>Frais traitement prioritaire ⚡ (CA$)</label>'
+      + '<div class="ch"><label>Frais traitement prioritaire (CA$)</label>'
       + '<input id="f-prio" type="number" min="0" step="0.01" value="' + esc(num(d.priorityCost)) + '"' + dis + '>'
       + '<div class="aide">Supplément si le client choisit le traitement prioritaire. <strong>0</strong> masque l’option.</div></div></div>');
     /* ⚠ LE TABLEAU N EXISTE QUE SI L INTERNATIONAL EST ALLUME. Demande expresse :

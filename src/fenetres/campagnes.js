@@ -542,7 +542,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<strong style="font-size:.8rem">Étapes</strong>'
       + '<button class="mini" id="f-etape-plus">+ Ajouter une étape</button></div>'
       + '<div id="f-etapes">' + vueEtapes() + '</div>'
-      + ligneVars(VARS_CHAINE, '⚠ Les variables de panier ne se remplissent que dans une chaîne '
+      + ligneVars(VARS_CHAINE, 'Les variables de panier ne se remplissent que dans une chaîne '
           + 'dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.')
       + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
       + '<div class="chrome"><span class="ic">✉</span> Aperçu — marie@example.com</div>'
@@ -1095,7 +1095,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(esc(r.nom) + (r.cree ? ' créé' : ' mis à jour') + ' — ' + pluriel(r.compte, 'abonnée') + '.'
-        + (r.nuage ? '' : ' ⚠ Enregistré sur ce poste seulement — le nuage n’a pas confirmé.'),
+        + (r.nuage ? '' : ' Enregistré sur ce poste seulement — le nuage n’a pas confirmé.'),
         r.nuage ? 'bon' : 'att');
       szBrouillonJeter();
       fermerForm();
@@ -1417,7 +1417,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
           return;
         }
         dire(esc(r.nom) + ' supprimé.'
-          + (r.nuage ? '' : ' ⚠ Retiré sur ce poste seulement — le nuage n’a pas confirmé.'),
+          + (r.nuage ? '' : ' Retiré sur ce poste seulement — le nuage n’a pas confirmé.'),
           r.nuage ? 'bon' : 'att');
         charger();
       });
@@ -1503,7 +1503,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       appeler('chaines:basculer', [idB, versActive]).then(function(r){
         if (!r.ok) { bb.disabled = false; dire(expliquer(r), 'err'); return; }
         dire(esc(r.nom) + (r.active ? ' est active.' : ' est suspendue.')
-          + (r.nuage ? '' : ' ⚠ Enregistré sur ce poste seulement — le nuage n’a pas confirmé.'),
+          + (r.nuage ? '' : ' Enregistré sur ce poste seulement — le nuage n’a pas confirmé.'),
           r.nuage ? 'bon' : 'att');
         charger();
       });
@@ -1527,7 +1527,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         dire(esc(r.nom) + ' supprimée'
           + (r.perdues ? ' — ' + pluriel(r.perdues, 'inscription') + ' abandonnée'
              + (r.perdues > 1 ? 's' : '') + '.' : '.')
-          + (r.nuage ? '' : ' ⚠ Retiré sur ce poste seulement — le nuage n’a pas confirmé.'),
+          + (r.nuage ? '' : ' Retiré sur ce poste seulement — le nuage n’a pas confirmé.'),
           r.nuage ? 'bon' : 'att');
         charger();
       });

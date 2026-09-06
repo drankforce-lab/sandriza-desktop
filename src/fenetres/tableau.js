@@ -199,25 +199,25 @@ ${JS_ACTIVITE}${JS_DIRE}
      inconnue de la preference est AFFICHEE par defaut — sans quoi personne ne
      verrait jamais une tuile ajoutee apres coup. */
   var TUILES = [
-    ['a_traiter', '🎯', 'Commandes à traiter'],
-    ['products', '👗', 'Produits actifs'],
-    ['orders', '📦', 'Commandes'],
-    ['customers', '👥', 'Clients actifs'],
-    ['revenue', '💰', 'Revenus (payés)'],
-    ['messagerie', '💬', 'Messagerie'],
-    ['returns_new', '↩', 'Nouveaux retours'],
-    ['returns_expiring', '⏳', 'Retours sur le point d’expirer'],
-    ['en_livraison', '🚚', 'En livraison'],
-    ['ruptures', '🚫', 'Ruptures de stock'],
-    ['avis', '⭐', 'Avis à modérer'],
-    ['factures_retard', '⌛', 'Factures en retard'],
-    ['incidents', '🛡', 'Incidents ouverts'],
-    ['sauvegarde', '💾', 'Dernière sauvegarde']
+    ['a_traiter', 'Commandes à traiter'],
+    ['products', 'Produits actifs'],
+    ['orders', 'Commandes'],
+    ['customers', 'Clients actifs'],
+    ['revenue', 'Revenus (payés)'],
+    ['messagerie', 'Messagerie'],
+    ['returns_new', 'Nouveaux retours'],
+    ['returns_expiring', 'Retours sur le point d’expirer'],
+    ['en_livraison', 'En livraison'],
+    ['ruptures', 'Ruptures de stock'],
+    ['avis', 'Avis à modérer'],
+    ['factures_retard', 'Factures en retard'],
+    ['incidents', 'Incidents ouverts'],
+    ['sauvegarde', 'Dernière sauvegarde']
   ];
 
-  function tuile(cle, ic, lbl, valeur, ton, sousTitre, sousTon){
+  function tuile(cle, lbl, valeur, ton, sousTitre, sousTon){
     return '<div class="tuile" data-tuile="' + cle + '">'
-      + '<div class="lbl">' + ic + ' ' + esc(lbl) + '</div>'
+      + '<div class="lbl">' + esc(lbl) + '</div>'
       + '<div class="val' + (ton ? ' ' + ton : '') + '">' + valeur + '</div>'
       + '<div class="sub' + (sousTon ? ' ' + sousTon : '') + '">' + sousTitre + '</div></div>';
   }
@@ -240,13 +240,13 @@ ${JS_ACTIVITE}${JS_DIRE}
      ne doit pas se lire comme une ligne d information parmi d autres. */
   function tuileSauvegarde(){
     if (SAUV === null) {
-      return tuile('sauvegarde', '💾', 'Dernière sauvegarde', '…', '', 'lecture en cours…', '');
+      return tuile('sauvegarde', 'Dernière sauvegarde', '…', '', 'lecture en cours…', '');
     }
     if (SAUV.erreur) {
-      return tuile('sauvegarde', '💾', 'Dernière sauvegarde', '—', '', esc(SAUV.erreur), 'att');
+      return tuile('sauvegarde', 'Dernière sauvegarde', '—', '', esc(SAUV.erreur), 'att');
     }
     if (SAUV.aucune) {
-      return tuile('sauvegarde', '💾', 'Dernière sauvegarde', 'jamais', 'err',
+      return tuile('sauvegarde', 'Dernière sauvegarde', 'jamais', 'err',
         'la base n’est pas protégée', 'att');
     }
     var j = SAUV.jours;
@@ -255,7 +255,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var val = (j === 0) ? 'aujourd’hui' : (j === 1 ? 'hier' : j + ' jours');
     var ton = (j > 30) ? 'err' : (j > 7 ? 'att' : '');
     var sous = esc(SAUV.quand) + (SAUV.taille ? ' · ' + esc(SAUV.taille) : '');
-    return tuile('sauvegarde', '💾', 'Dernière sauvegarde', val, ton, sous, (j > 7 ? 'att' : ''));
+    return tuile('sauvegarde', 'Dernière sauvegarde', val, ton, sous, (j > 7 ? 'att' : ''));
   }
 
   function pilule(statut, libelle){
@@ -351,7 +351,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="panneau">'
         + TUILES.filter(offerte).map(function(x){
             return '<label><input type="checkbox" data-cfg="' + x[0] + '"'
-              + (cfg[x[0]] !== false ? ' checked' : '') + '> ' + x[1] + ' ' + esc(x[2]) + '</label>';
+              + (cfg[x[0]] !== false ? ' checked' : '') + '> ' + esc(x[1]) + '</label>';
           }).join('')
         + '</div>';
     }
@@ -359,28 +359,28 @@ ${JS_ACTIVITE}${JS_DIRE}
     // Le meme contenu de tuiles que l ecran du site, valeur par valeur.
     var an = (ANNEE === 'all') ? '' : ' ' + ANNEE;
     var contenu = {
-      products: tuile('products', '👗', 'Produits actifs', t.produits.actifs, '',
+      products: tuile('products', 'Produits actifs', t.produits.actifs, '',
         t.produits.produitsBas
           ? t.produits.variantesReappro + ' variante' + (t.produits.variantesReappro > 1 ? 's' : '') + ' à réapprovisionner'
           : 'aucun réapprovisionnement',
         t.produits.produitsBas ? 'att' : ''),
-      orders: tuile('orders', '📦', 'Commandes' + an, t.commandes.total, '',
+      orders: tuile('orders', 'Commandes' + an, t.commandes.total, '',
         t.commandes.enAttente + ' en attente', t.commandes.enAttente > 0 ? 'att' : ''),
-      customers: tuile('customers', '👥', 'Clients actifs', t.clients.actifs, '',
+      customers: tuile('customers', 'Clients actifs', t.clients.actifs, '',
         t.clients.inactifs > 0 ? 'Comptes inactifs : ' + t.clients.inactifs : '&nbsp;', ''),
-      revenue: tuile('revenue', '💰', 'Revenus (net)' + an, esc(fmt(t.revenus.net)), '',
+      revenue: tuile('revenue', 'Revenus (net)' + an, esc(fmt(t.revenus.net)), '',
         t.revenus.factures + ' factures encaissées'
           + (t.revenus.rembourse > 0 ? ' · −' + esc(fmt(t.revenus.rembourse)) + ' remboursés' : ''), ''),
-      messagerie: tuile('messagerie', '💬', 'Messagerie', t.messagerie, t.messagerie > 0 ? 'att' : '',
+      messagerie: tuile('messagerie', 'Messagerie', t.messagerie, t.messagerie > 0 ? 'att' : '',
         t.messagerie > 0
           ? 'nouveau' + (t.messagerie > 1 ? 'x' : '') + ' message' + (t.messagerie > 1 ? 's' : '') + ' en attente'
           : 'aucun message en attente', ''),
-      returns_new: tuile('returns_new', '↩', 'Nouveaux retours', t.retoursNouveaux,
+      returns_new: tuile('returns_new', 'Nouveaux retours', t.retoursNouveaux,
         t.retoursNouveaux > 0 ? 'att' : '',
         t.retoursNouveaux > 0
           ? 'demande' + (t.retoursNouveaux > 1 ? 's' : '') + ' à traiter'
           : 'aucune demande en attente', ''),
-      returns_expiring: tuile('returns_expiring', '⏳', 'Retours sur le point d’expirer', t.retoursExpirent,
+      returns_expiring: tuile('returns_expiring', 'Retours sur le point d’expirer', t.retoursExpirent,
         t.retoursExpirent > 0 ? 'err' : '',
         t.retoursExpirent > 0 ? 'colis pas encore reçu' : 'aucun retour à risque', ''),
       // ── Ce qu il reste a faire (#25) ──────────────────────────────
@@ -389,22 +389,22 @@ ${JS_ACTIVITE}${JS_DIRE}
          sortait tronque (<< confirmees, en preparation ou en ver... >>) et
          n apprenait rien de plus que le chiffre. Une ligne coupee au milieu
          d un mot coute plus d attention qu elle n en rend. */
-      a_traiter: tuile('a_traiter', '🎯', 'Commandes à traiter', f.aTraiter,
+      a_traiter: tuile('a_traiter', 'Commandes à traiter', f.aTraiter,
         f.aTraiter > 0 ? 'att' : '', '&nbsp;', ''),
-      en_livraison: tuile('en_livraison', '🚚', 'En livraison', f.enLivraison, '',
+      en_livraison: tuile('en_livraison', 'En livraison', f.enLivraison, '',
         f.enLivraison > 0 ? 'colis partis, pas encore livrés' : 'aucun colis en route', ''),
       // ⚠ SANS SOUS-TITRE, comme << Commandes a traiter >> (retire a sa demande,
       // 2026-08-14). Le chiffre et le titre suffisent ; la ligne du dessous
       // n ajoutait qu un commentaire, coupe des que la tuile retrecit.
-      ruptures: tuile('ruptures', '🚫', 'Ruptures de stock', f.ruptures,
+      ruptures: tuile('ruptures', 'Ruptures de stock', f.ruptures,
         f.ruptures > 0 ? 'err' : '', '&nbsp;', ''),
-      avis: tuile('avis', '⭐', 'Avis à modérer', f.avis, f.avis > 0 ? 'att' : '',
+      avis: tuile('avis', 'Avis à modérer', f.avis, f.avis > 0 ? 'att' : '',
         f.avis > 0 ? 'en attente d’approbation' : 'aucun avis en attente', ''),
-      factures_retard: tuile('factures_retard', '⌛', 'Factures en retard', f.facturesRetard,
+      factures_retard: tuile('factures_retard', 'Factures en retard', f.facturesRetard,
         f.facturesRetard > 0 ? 'err' : '',
         f.facturesRetard > 0 ? esc(fmt(f.facturesRetardMontant)) + ' impayés' : 'aucune échéance dépassée',
         f.facturesRetard > 0 ? 'att' : ''),
-      incidents: tuile('incidents', '🛡', 'Incidents ouverts', f.incidentsOuverts,
+      incidents: tuile('incidents', 'Incidents ouverts', f.incidentsOuverts,
         f.incidentsOuverts > 0 ? 'att' : '',
         f.incidentsCai > 0
           ? f.incidentsCai + ' avis à la CAI à transmettre'

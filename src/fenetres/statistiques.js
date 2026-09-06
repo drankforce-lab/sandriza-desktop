@@ -271,11 +271,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<th class="num">Vues</th></tr></thead><tbody>' + pages + '</tbody></table></div>';
 
     h += '<div class="grilles">'
-      + tableau('🌍 Pays', 'Pays', 'Visiteurs', DGA.pays, 'nom', 'visiteurs')
-      + tableau('🏙️ Villes', 'Ville', 'Visiteurs', DGA.villes, 'nom', 'visiteurs')
-      + tableau('📱 Appareils', 'Type', 'Visiteurs', DGA.appareils, 'nom', 'visiteurs')
-      + tableau('🌐 Sources de trafic', 'Canal', 'Sessions', DGA.sources, 'nom', 'sessions')
-      + tableau('🧑 Nouveaux / connus', 'Type', 'Visiteurs', DGA.nouveauxConnus, 'nom', 'visiteurs')
+      + tableau('Pays', 'Pays', 'Visiteurs', DGA.pays, 'nom', 'visiteurs')
+      + tableau('Villes', 'Ville', 'Visiteurs', DGA.villes, 'nom', 'visiteurs')
+      + tableau('Appareils', 'Type', 'Visiteurs', DGA.appareils, 'nom', 'visiteurs')
+      + tableau('Sources de trafic', 'Canal', 'Sessions', DGA.sources, 'nom', 'sessions')
+      + tableau('Nouveaux / connus', 'Type', 'Visiteurs', DGA.nouveauxConnus, 'nom', 'visiteurs')
       + '</div>';
     return h;
   }

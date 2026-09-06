@@ -178,7 +178,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var t = (EDIT ? gabParId(EDIT) : null) || { name: '', headerBgFrom: '#1a1a2e', headerBgTo: '#2d1b69',
       headerSubtitle: '', footerBg: '#1a1a2e', footerTextColor: '#c4a882', animated: false, gifBanner: false };
     var brand = (D && D.marque) || 'SANDRIZA';
-    var h = '<div class="carte edit"><div class="stitre">' + (EDIT ? '✏️ Modifier — ' + esc(t.name || '') : '✨ Nouveau gabarit') + '</div>';
+    var h = '<div class="carte edit"><div class="stitre">' + (EDIT ? 'Modifier — ' + esc(t.name || '') : 'Nouveau gabarit') + '</div>';
     h += '<div class="ch"><label>Nom du gabarit</label><input type="text" id="g-name" value="' + esc(t.name || '') + '"' + (RO ? ' disabled' : '') + '></div>';
     h += '<div class="gr2">' + coulChamp('g-hfrom', 'En-tête : couleur de départ', t.headerBgFrom || '#1a1a2e')
       + coulChamp('g-hto', 'En-tête : couleur de fin', t.headerBgTo || '#2d1b69') + '</div>';
@@ -217,7 +217,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="swatch"><div class="b1" style="background:linear-gradient(90deg,' + esc(t.headerBgFrom) + ',' + esc(t.headerBgTo) + ')"></div>'
         + '<span class="lb">en-tête</span><div class="b2" style="background:' + esc(t.footerBg) + '"></div><span class="lb">pied</span></div></div>'
         + '<div style="display:flex;gap:.35rem">'
-        + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✏</span>️ Modifier</button>'
+        + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✏</span> Modifier</button>'
         + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span> Copier</button>')
         + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? 'Confirmer ?' : '<span class="ic">🗑</span>') + '</button>') : '')
         + '</div></div>';

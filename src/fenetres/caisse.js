@@ -675,7 +675,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '<span class="ic">🔗</span> Vente en attente de paiement'
-      : '✅ Vente enregistrée') + '</h3>' + lignes + lien + avis
+      : 'Vente enregistrée') + '</h3>' + lignes + lien + avis
       + '<div class="fin"><button class="prim" id="btn-ok">Continuer</button></div></div>';
     document.body.appendChild(v);
     /* ⚠ LE VERDICT EST DIT DANS LES MOTS DE CET ECRAN, pas herite du site : le
@@ -693,7 +693,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
         if (res.etat === 'paye') {
           dire('Paiement confirmé' + (res.numero ? ' — ' + res.numero : '')
-            + (res.stockOk ? ' · stock décompté.' : ' · ⚠ stock à vérifier.'),
+            + (res.stockOk ? ' · stock décompté.' : ' · stock à vérifier.'),
             res.stockOk ? 'bon' : 'att');
           v.remove();
           var sc = document.getElementById('scan');
@@ -702,7 +702,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         }
         if (res.etat === 'annule') { dire('Paiement annulé par le client.', 'att'); return; }
         if (res.etat === 'insuffisant') {
-          dire('⚠ Montant reçu INFÉRIEUR au total — à vérifier dans Square.', 'err');
+          dire('Montant reçu INFÉRIEUR au total — à vérifier dans Square.', 'err');
           return;
         }
         dire('Pas encore payé. Le lien reste valide — réessayez plus tard.', 'att');

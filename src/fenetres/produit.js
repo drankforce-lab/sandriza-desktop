@@ -473,7 +473,7 @@ function pageProduit(id) {
       + '<div class="vues" id="p-parcoul"></div>'
       + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
       + 'title="Teinter les photos du produit pour chaque couleur — local, sans crédit ni service">'
-      + '⚡ Tout générer</button></div></div></div>');
+      + 'Tout générer</button></div></div></div>');
 
     // 6 — Détails
     // ⚠ LE REGIME DE VENTE N EST PAS UN JEU DE CASES INDEPENDANTES. Mes cases
@@ -978,7 +978,7 @@ function pageProduit(id) {
     var al = document.getElementById('p-alerte');
     if (al) {
       if (c > 0 && eff > 0 && eff < c) {
-        al.textContent = '⚠ Le prix de vente effectif (' + eff.toFixed(2) + ' $) est inférieur au coût d’acquisition ('
+        al.textContent = 'Le prix de vente effectif (' + eff.toFixed(2) + ' $) est inférieur au coût d’acquisition ('
           + c.toFixed(2) + ' $).';
         al.style.display = 'block';
       } else { al.style.display = 'none'; }
@@ -1022,7 +1022,7 @@ function pageProduit(id) {
     if (carte) carte.style.display = '';
     var auto = modeAutoCouleur();
     var titre = document.getElementById('p-parcoul-titre');
-    if (titre) titre.textContent = auto ? '⚡ Variantes de couleur (Auto)' : 'Photo par couleur (Manuel)';
+    if (titre) titre.textContent = auto ? 'Variantes de couleur (Auto)' : 'Photo par couleur (Manuel)';
     var aide = document.getElementById('p-parcoul-aide');
     if (aide) aide.textContent = auto
       ? 'Générées en teintant les photos du produit — et régénérées automatiquement '
@@ -1678,7 +1678,7 @@ function pageProduit(id) {
     var idn = document.getElementById('ia-desc');
     if (idn) idn.value = val('p-nom').trim();
     function zone(html){ var z = document.getElementById('ia-zone'); if (z) z.innerHTML = html; }
-    zone('<span class="aide">Choisissez un modèle, puis ✨ Générer.</span>');
+    zone('<span class="aide">Choisissez un modèle, puis Générer.</span>');
     P.appeler('produit:modeles').then(function(r){
       var z = document.getElementById('ia-modeles');
       if (!z) return;
@@ -1774,7 +1774,7 @@ function pageProduit(id) {
     var sautees = [], iC = 0, iS = 0, arret = '';
     function conclure(){
       GEN_ENCOURS = false;
-      if (b) { b.disabled = false; b.textContent = '⚡ Tout générer'; }
+      if (b) { b.disabled = false; b.textContent = 'Tout générer'; }
       dessinerVues();
       if (arret) { dire('Variantes de couleur : ' + arret, 'err'); }
       else {
@@ -2104,7 +2104,7 @@ function pageProduit(id) {
       // quota en silence ; ici on l'annonce, parce que se croire à l'abri est pire
       // que de savoir qu'on ne l'est pas.
       BR_DERNIER = '';
-      dire('⚠ Brouillon non conservé — ' + expliquer(r), 'att');
+      dire('Brouillon non conservé — ' + expliquer(r), 'att');
     });
   }
   function brArreter(){ if (BR_T) { clearInterval(BR_T); BR_T = null; } }
@@ -2187,8 +2187,8 @@ function pageProduit(id) {
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'products', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
       dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
     });

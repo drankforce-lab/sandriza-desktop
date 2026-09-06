@@ -547,7 +547,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var f = FORM;
     var neuf = (f.id === '__new__');
     var h = '<div class="voile" id="d-voile"><div class="boite">'
-      + '<h3>' + (neuf ? '➕ Nouvelle dépense' : '✎ Modifier la dépense') + '</h3>';
+      + '<h3>' + (neuf ? '➕ Nouvelle dépense' : 'Modifier la dépense') + '</h3>';
 
     /* ⚠ LA ZONE DE DEPOT S EFFACE UNE FOIS LA FACTURE PRISE (demande du
        2026-08-09 : << quand on glisse une facture, plus besoin de montrer ca >>).
@@ -688,7 +688,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return appeler('depenses:brouillonEcrire', [v]).then(function(r){
       /* ⚠ UN ECHEC D ENREGISTREMENT SE DIT. Croire son travail a l abri alors
          qu il ne l est pas est pire que de le savoir. */
-      if (!r.ok) dire('⚠ Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
+      if (!r.ok) dire('Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
       else if (r.sansRecu) dire('Brouillon conservé, mais SANS le reçu (stockage plein).', 'att');
       return r;
     });
@@ -780,7 +780,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           var dd = (r.depuisDocument || []);
           FORM.lecture = (r.verifie
               ? ('✓ Lu directement dans le document : ' + esc(dd.join(', ') || 'les montants') + '.')
-              : '⚠ Aucun texte à lire dans ce document (photo ou numérisation) : tout vient de la lecture automatique. Vérifiez CHAQUE champ.')
+              : 'Aucun texte à lire dans ce document (photo ou numérisation) : tout vient de la lecture automatique. Vérifiez CHAQUE champ.')
             + (r.modeleEcarte
                 ? ' La lecture automatique a été écartée (elle ne correspondait pas au document) — complétez la description et la catégorie.'
                 : '')
@@ -799,7 +799,7 @@ ${JS_ACTIVITE}${JS_DIRE}
              declaration de revenus, alors qu un champ vide se remarque. */
           FORM.lectureErr = true;
           FORM.lecture = (r.motifLecture === 'non_fiable')
-            ? ('⛔ Lecture REFUSÉE : ce qui a été proposé ne correspond pas au document ('
+            ? ('Lecture REFUSÉE : ce qui a été proposé ne correspond pas au document ('
                + esc((r.ecarts || []).join(' ; ') || 'écart détecté')
                + '), et le document lui-même n’a pas pu être lu (photo ou numérisation). '
                + 'Rien n’a été rempli — saisissez à la main. Le reçu, lui, est joint.')

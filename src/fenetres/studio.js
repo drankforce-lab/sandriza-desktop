@@ -114,12 +114,9 @@ body{background:var(--f-page);color:var(--tx);
   background:transparent;color:var(--tx-bleute);cursor:pointer}
 .ong:hover:not(.on){background:var(--v05)}
 .ong.on{background:var(--f-carte);border-color:rgba(201,169,126,.45)}
-/* ⚠ MEME L ONGLET OUVERT RESTE EN GRIS. Il etait degrise pour se distinguer —
-   mais c est la seule couleur qui restait dans la bande, et la regle est
-   << toujours >>. L onglet ouvert se marque par son fond et son liseré dores,
-   pas par un emoji qui reprend des couleurs. */
-.ong .oi{flex:0 0 auto;font-size:.95rem;filter:grayscale(1) brightness(1.7);opacity:.85}
-.ong.on .oi{opacity:1}
+/* ⚠ L ONGLET OUVERT SE MARQUE PAR SON FOND ET SON LISERE DORES, jamais par un
+   pictogramme. Il en portait un, grise ; les pictogrammes ont ete retires le
+   2026-09-05 et les regles .oi / .pi sont parties avec eux. */
 .ong .ot{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.2}
 .ong .ot b{font:600 .79rem/1.25 system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ong .oe{font-size:.68rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -129,7 +126,6 @@ body{background:var(--f-page);color:var(--tx);
   background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
   padding:.85rem .95rem}
 .pnt{display:flex;align-items:center;gap:.55rem}
-.pnt .pi{font-size:1rem;filter:grayscale(1) brightness(1.7);opacity:.9}
 .pnt h2{margin:0;font:700 .95rem/1.2 Georgia,serif}
 .panneau .sous{margin:.28rem 0 .7rem;font-size:.74rem;color:var(--tx3);line-height:1.4}
 .onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
@@ -313,20 +309,19 @@ body{background:var(--f-page);color:var(--tx);
    disputaient la largeur d une tuile large d un tiers de demi-carte, et l on ne
    lisait ni l un ni l autre. La regle .tuile .txt existait pour les empiler,
    mais AUCUN des deux rendus ne posait ce conteneur — elle n a jamais servi.
-   La tuile est donc une grille : l emoji tient la colonne de gauche sur deux
-   rangs, le titre et la description se rangent l un SOUS l autre a droite. */
+   La tuile empile donc le titre et sa description.
+   ⚠ ELLE AVAIT UNE COLONNE DE GAUCHE POUR L EMOJI. Les pictogrammes sont
+   retires depuis le 2026-09-05, et la colonne est partie AVEC : la garder
+   aurait laisse un retrait vide devant chaque titre, que plus rien n explique. */
 .tuiles{display:grid;grid-template-columns:1fr;gap:.4rem}
 .tuile{background:var(--f-pill);border:1px solid var(--v09);border-radius:10px;
   padding:.58rem .7rem;cursor:pointer;-webkit-user-select:none;user-select:none;
-  display:grid;grid-template-columns:auto 1fr;column-gap:.65rem;row-gap:.08rem;
+  display:grid;grid-template-columns:1fr;row-gap:.08rem;
   align-items:center;text-align:left;transition:border-color .12s,background .12s}
 .tuile:hover{border-color:rgba(201,169,126,.5)}
 .tuile.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-/* ⚠ Emoji en GRIS (comme le reste de l administration), jamais en couleur. */
-.tuile .em{grid-row:1/3;align-self:center;font-size:1.35rem;line-height:1;
-  filter:grayscale(1) brightness(1.45);opacity:.9}
-.tuile .t{grid-column:2;font-size:.85rem;font-weight:700;line-height:1.25}
-.tuile .d{grid-column:2;font-size:.72rem;color:var(--tx3);line-height:1.32}
+.tuile .t{font-size:.85rem;font-weight:700;line-height:1.25}
+.tuile .d{font-size:.72rem;color:var(--tx3);line-height:1.32}
 /* Les ambiances passent a deux colonnes DES QUE le volet est assez large, et
    restent sur une seule quand il ne l est pas. C est auto-fill qui en decide,
    pas un nombre de colonnes ecrit en dur. */
@@ -619,9 +614,9 @@ ${JS_ACTIVITE}${JS_DIRE}
      Les seize images de R2 sont effacees par un menage unique cote site
      (_purgerPortraits dans pont.js). */
   var VOIES = [
-    { cle: 'humain',  em: '👗', t: 'Mannequin virtuel', d: 'Porté par un modèle, décor intégré' },
-    { cle: 'fantome', em: '👻', t: 'Fantôme habillé',   d: 'Sans mannequin, décor pro ajouté' },
-    { cle: 'plat',    em: '📦', t: 'Produit à plat',    d: 'Détourage + décor + ombre' }
+    { cle: 'humain',  t: 'Mannequin virtuel', d: 'Porté par un modèle, décor intégré' },
+    { cle: 'fantome', t: 'Fantôme habillé',   d: 'Sans mannequin, décor pro ajouté' },
+    { cle: 'plat',    t: 'Produit à plat',    d: 'Détourage + décor + ombre' }
   ];
   /* Les 16 modeles REELS de Photoroom (virtualModel.model.preset.name, verifies
      dans la doc 2026-08-11). Sophia en tete = choix par defaut.
@@ -861,7 +856,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (x.etat === 'encours' || x.etat === 'file' || x.etat === 'pause') {
           g += '<button class="jeton' + (x.priorite ? ' on' : '') + '" data-lot="' + esc(x.id)
             + '" data-geste="priorite" data-val="' + (x.priorite ? '0' : '1') + '">'
-            + (x.priorite ? '★ Prioritaire' : '☆ Prioriser') + '</button>';
+            + (x.priorite ? 'Prioritaire' : 'Prioriser') + '</button>';
         }
         if (x.etat !== 'encours') {
           g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="retirer">✕ Retirer</button>';
@@ -975,7 +970,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var apercu = PHOTO || PHOTO_URL;
       h += '<div class="depot" id="depot">'
         + (apercu ? '<img src="' + apercu + '" alt="photo">'
-                  : '<span class="gros"><span class="ic">🖼</span>️</span><span>Photo de la photothèque sélectionnée</span>')
+                  : '<span class="gros"><span class="ic">🖼</span></span><span>Photo de la photothèque sélectionnée</span>')
         + '<span class="refaire">Choisir une autre photo</span></div>';
     } else {
       h += '<div class="depot" id="depot"><span class="gros"><span class="ic">📷</span></span>'
@@ -1021,7 +1016,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function voiesHtml(){
     return VOIES.map(function(v){
       return '<div class="tuile' + (VOIE === v.cle ? ' on' : '') + '" data-voie="' + v.cle + '">'
-        + '<span class="em">' + v.em + '</span><span class="t">' + esc(v.t) + '</span>'
+        + '<span class="t">' + esc(v.t) + '</span>'
         + '<span class="d">' + esc(v.d) + '</span></div>';
     }).join('');
   }
@@ -1055,7 +1050,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!PRESETS.length) return '<div class="vide">Aucune ambiance.</div>';
     return '<div class="tuiles amb">' + PRESETS.map(function(p){
       return '<div class="tuile' + (PRESET === p.cle ? ' on' : '') + '" data-preset="' + esc(p.cle) + '">'
-        + '<span class="em">' + (p.emoji || '🎨') + '</span><span class="t">' + esc(p.label) + '</span>'
+        + '<span class="t">' + esc(p.label) + '</span>'
         + '<span class="d">' + esc(p.desc || '') + '</span></div>';
     }).join('') + '</div>';
   }
@@ -1187,7 +1182,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h.push('<div class="ch avun"><label for="av-extra">Précisions libres</label>'
         + '<textarea id="av-extra" rows="3" maxlength="200"' + (RO ? ' disabled' : '')
         + ' placeholder="black heels, hair tied back, delicate jewellery">' + esc(AV.extra) + '</textarea>'
-        + '<div class="aidep">Chaussures, bijoux, coiffure, ambiance… ⚠ Photoroom n’a <strong>aucun '
+        + '<div class="aidep">Chaussures, bijoux, coiffure, ambiance… Photoroom n’a <strong>aucun '
         + 'réglage dédié</strong> pour ces éléments : c’est du texte libre ajouté à la consigne, au mieux '
         + 'une suggestion, jamais une garantie. Le service comprend mieux l’anglais.</div></div>');
       h.push('<div class="avun"><div class="aidep att"><span class="ic">⚠</span> Le décor décrit au texte, l’ombre réglable et '
@@ -1447,15 +1442,15 @@ ${JS_ACTIVITE}${JS_DIRE}
      qu il decoupe. */
   var ONGLET = 'photo';
   var ONGLETS = [
-    { cle: 'photo',     em: '📷', t: 'Photo',          voies: '*' },
-    { cle: 'valeur',    em: '👗', t: 'Mise en valeur', voies: '*' },
-    { cle: 'ambiance',  em: '🎨', t: 'Ambiance',       voies: '*' },
-    { cle: 'decor',     em: '🖼', t: 'Décor',          voies: '*' },
-    { cle: 'ombres',    em: '🌑', t: 'Ombres',         voies: 'fantome,plat' },
-    { cle: 'lumiere',   em: '💡', t: 'Lumière',        voies: 'fantome,plat' },
-    { cle: 'interieur', em: '🧥', t: 'Intérieur',      voies: 'fantome' },
-    { cle: 'agrandir',  em: '🔍', t: 'Agrandissement', voies: '*' },
-    { cle: 'filigrane', em: '💧', t: 'Filigrane',      voies: '*' }
+    { cle: 'photo',     t: 'Photo',          voies: '*' },
+    { cle: 'valeur',    t: 'Mise en valeur', voies: '*' },
+    { cle: 'ambiance',  t: 'Ambiance',       voies: '*' },
+    { cle: 'decor',     t: 'Décor',          voies: '*' },
+    { cle: 'ombres',    t: 'Ombres',         voies: 'fantome,plat' },
+    { cle: 'lumiere',   t: 'Lumière',        voies: 'fantome,plat' },
+    { cle: 'interieur', t: 'Intérieur',      voies: 'fantome' },
+    { cle: 'agrandir',  t: 'Agrandissement', voies: '*' },
+    { cle: 'filigrane', t: 'Filigrane',      voies: '*' }
   ];
   function ongletsDispo(){
     return ONGLETS.filter(function(o){
@@ -1497,7 +1492,6 @@ ${JS_ACTIVITE}${JS_DIRE}
       var ok = ongletRequis(o.cle) ? !!e : false;
       return '<button class="ong' + (o.cle === courant ? ' on' : '') + '" data-ong="' + o.cle
         + '" role="tab" aria-selected="' + (o.cle === courant ? 'true' : 'false') + '">'
-        + '<span class="oi">' + o.em + '</span>'
         + '<span class="ot"><b>' + esc(o.t) + '</b>'
         + '<span class="oe">' + esc(e || (ongletRequis(o.cle) ? 'À choisir' : '—')) + '</span></span>'
         + (ok ? '<span class="oc">✓</span>' : '') + '</button>';
@@ -1516,7 +1510,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     else if (o.cle === 'interieur') corpsG = avInterieurHtml();
     else if (o.cle === 'agrandir')  corpsG = avAgrandirHtml();
     else if (o.cle === 'filigrane') corpsG = filigraneCorpsHtml();
-    return '<div class="pnt"><span class="pi">' + o.em + '</span><h2>' + esc(o.t) + '</h2></div>'
+    return '<div class="pnt"><h2>' + esc(o.t) + '</h2></div>'
       + '<p class="sous">' + panneauSousHtml(o.cle) + '</p>'
       + '<div class="pnc">' + corpsG + '</div>';
   }
@@ -1676,7 +1670,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     dessiner();
     var m = 'Profil « ' + x.nom +' » appliqué.';
     if (perdus.length) {
-      dire(m + ' ⚠ ' + perdus.join(' et ') + ' de ce profil '
+      dire(m + ' ' + perdus.join(' et ') + ' de ce profil '
         + (perdus.length > 1 ? 'n’existent plus' : 'n’existe plus')
         + ' — ce réglage est resté au défaut.', 'att');
     } else {
@@ -1709,7 +1703,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<p><input type="text" id="rc-nom" maxlength="60" placeholder="Ex. : Collection automne — plage dorée" '
       + 'value="' + esc(x ? x.nom : '') + '"></p>'
       + '<p class="rcav" id="rc-av">' + (x
-          ? '⚠ Ce nom est celui du profil choisi : il sera <strong>remplacé</strong>.'
+          ? 'Ce nom est celui du profil choisi : il sera <strong>remplacé</strong>.'
           : '') + '</p>'
       + '<div class="fin2"><button id="rc-non">Annuler</button>'
       + '<button class="prim" id="rc-oui">Enregistrer</button></div>',
@@ -1726,14 +1720,14 @@ ${JS_ACTIVITE}${JS_DIRE}
           var v = String((n && n.value) || '').trim().toLowerCase();
           var d = RECETTES.filter(function(o){ return String(o.nom).trim().toLowerCase() === v; })[0];
           av.innerHTML = (v && d)
-            ? '⚠ Un profil porte déjà ce nom : il sera <strong>remplacé</strong>.'
+            ? 'Un profil porte déjà ce nom : il sera <strong>remplacé</strong>.'
             : '';
         };
         if (n) { n.oninput = majAv; majAv(); }
         if (non) non.onclick = fermer;
         var lancer = function(){
           var nom = String((n && n.value) || '').trim();
-          if (!nom) { if (av) av.innerHTML = '⚠ Donnez-lui un nom.'; if (n) n.focus(); return; }
+          if (!nom) { if (av) av.innerHTML = 'Donnez-lui un nom.'; if (n) n.focus(); return; }
           if (oui) oui.disabled = true;
           enregistrerRecette(nom, fermer);
         };
@@ -3166,7 +3160,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (n <= 1) { dire(''); suite(); return; }
         var causes = causesAppels();
         var bu = r.budget || {};
-        var h = '<h3>' + (apercu ? '<span class="ic">👁</span> Aperçu — ' : '⚠ ')
+        var h = '<h3>' + (apercu ? '<span class="ic">👁</span> Aperçu — ' : '')
       + n + ' appels pour <em>une seule</em> photo</h3>';
         if (apercu) {
           h += '<p>Cet aperçu demande <strong>' + n + ' appels</strong> au service au lieu d’un seul. '

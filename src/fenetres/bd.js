@@ -123,9 +123,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function occuper(o){ OCCUPE = o; var bs = corps.querySelectorAll('button[data-act]'); for (var i=0;i<bs.length;i++) bs[i].disabled = o || (RO && bs[i].getAttribute('data-act') !== 'tester'); }
 
-  function jauge(em, titre, sous, bytes, limit){
+  function jauge(titre, sous, bytes, limit){
     var pct = (limit > 0) ? Math.min(100, Math.round(bytes / limit * 100)) : 0;
-    return '<div class="jauge"><div class="lg"><span class="em">' + em + '</span><strong>' + esc(titre) + '</strong>'
+    return '<div class="jauge"><div class="lg"><strong>' + esc(titre) + '</strong>'
       + '<span class="v">' + octets(bytes) + (limit > 0 ? ' / ' + octets(limit) + ' (' + pct + '%)' : '') + '</span></div>'
       + '<div class="barre"><i style="width:' + pct + '%"></i></div>'
       + '<div class="sous">' + esc(sous) + '</div></div>';
@@ -134,8 +134,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (STOCK === null) return '<div class="vide charge">Lecture de l’occupation…</div>';
     if (STOCK.erreur) return '<div class="vide">' + esc(STOCK.erreur) + '</div>';
     var h = '<div class="stock">';
-    if (STOCK.turso && STOCK.turso.bytes != null) h += jauge('☁️', 'Turso (base de données)', 'Produits, commandes, clients, dépenses…', STOCK.turso.bytes, STOCK.turso.limit);
-    if (STOCK.r2 && STOCK.r2.bytes != null) h += jauge('📦', 'Cloudflare R2 (fichiers)', 'Reçus, photos, logos, documents, sauvegardes…', STOCK.r2.bytes, STOCK.r2.limit);
+    if (STOCK.turso && STOCK.turso.bytes != null) h += jauge('Turso (base de données)', 'Produits, commandes, clients, dépenses…', STOCK.turso.bytes, STOCK.turso.limit);
+    if (STOCK.r2 && STOCK.r2.bytes != null) h += jauge('Cloudflare R2 (fichiers)', 'Reçus, photos, logos, documents, sauvegardes…', STOCK.r2.bytes, STOCK.r2.limit);
     else h += '<div class="jauge"><div class="sous"><span class="ic">📦</span> Cloudflare R2 : en attente de connexion.</div></div>';
     return h + '</div>';
   }
@@ -143,7 +143,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var dis = RO ? ' disabled' : '';
-    var h = '<div class="carte"><div class="stitre"><span class="ic">☁</span>️ Turso Cloud DB</div>'
+    var h = '<div class="carte"><div class="stitre"><span class="ic">☁</span> Turso Cloud DB</div>'
       + '<div class="info">Toute la configuration (thèmes, logos, clés API, navigation, profil…) est '
       + 'synchronisée vers Turso à <b>chaque sauvegarde</b>. Ces boutons servent à forcer une synchronisation, '
       + 'par exemple après avoir vidé le cache du navigateur.</div>'

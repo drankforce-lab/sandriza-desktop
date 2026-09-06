@@ -183,7 +183,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var it = l[i];
       var masque = (it.visible === false);
       h.push('<div class="item' + (masque ? ' masque' : '') + '">');
-      h.push('<div class="lg"><span class="mk">' + (it.fixed ? '<span class="ic">🔒</span>' : '✎') + '</span><div class="co">');
+      h.push('<div class="lg"><span class="mk">' + (it.fixed ? '<span class="ic">🔒</span>' : '') + '</span><div class="co">');
       if (it.fixed) {
         h.push('<span class="lab">' + esc(it.label) + '</span><span class="href">' + esc(it.href) + '</span>');
       } else {

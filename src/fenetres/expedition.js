@@ -381,7 +381,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('expedition:etiquette', [CMD.commande.id, TRANSPORTEUR, service, poids]).then(function(r){
       enCours = false;
       if (!r.ok) {
-        if (b) { b.disabled = false; b.textContent = '💳 Créer l’étiquette'; }
+        if (b) { b.disabled = false; b.textContent = 'Créer l’étiquette'; }
         dire(expliquer(r), 'err');
         return;
       }
@@ -486,7 +486,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!c || !c.ok) { vide('Expédition indisponible', expliquer(c)); return; }
       CTX = c;
       TRANSPORTEUR = c.dernier || 'postes-canada';
-      sous.textContent = c.peutExpedier ? '' : '👁 Lecture seule';
+      sous.textContent = c.peutExpedier ? '' : 'Lecture seule';
       if (!depart) { vide('Aucune commande', 'Ouvrez une commande depuis l’écran Expéditions.'); return; }
       return appeler('expedition:lire', [depart]).then(function(r){
         if (!r.ok) { vide('Commande indisponible', expliquer(r)); return; }
@@ -506,8 +506,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('verrou:prendre', ['orders', cid]).then(function(v){
       if (!v || !v.ok) { return; }
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       ['btn-etiquette', 'btn-expedier'].forEach(function(k){
         var b = document.getElementById(k); if (b) b.disabled = true;
       });

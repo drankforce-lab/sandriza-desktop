@@ -480,7 +480,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         var av = r.avertissements || [];
         dire(n + ' étiquette' + (n > 1 ? 's' : '') + ' envoyée' + (n > 1 ? 's' : '')
           + (r.imprimante ? ' à « ' + r.imprimante + ' »' : '') + '.'
-          + (av.length ? ' ⚠ ' + esc(av[0].sku) + ' ne se scannera pas ('
+          + (av.length ? ' ' + esc(av[0].sku) + ' ne se scannera pas ('
              + av[0].points + ' point par barre).' : ''), av.length ? 'att' : 'bon');
         FILE = [];
         redessinerFile();

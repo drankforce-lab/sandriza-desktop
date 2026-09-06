@@ -441,7 +441,7 @@ function pageCommande(id) {
       if (!r || !r.ok) {
         bip(false);
         scanMsg(r && r.motif === 'code_inconnu'
-          ? '⚠ Code inconnu : ' + (r.code || code)
+          ? 'Code inconnu : ' + (r.code || code)
           : expliquer(r), 'var(--tx-err)');
         return;
       }
@@ -450,7 +450,7 @@ function pageCommande(id) {
       var v = COMPTES[r.cle] || 0;
       if (v >= att) {
         bip(false);
-        scanMsg('⚠ Déjà complet : ' + r.sku + ' (' + att + '/' + att + ')', 'var(--tx-att)');
+        scanMsg('Déjà complet : ' + r.sku + ' (' + att + '/' + att + ')', 'var(--tx-att)');
         return;
       }
       COMPTES[r.cle] = v + 1;
@@ -496,8 +496,8 @@ function pageCommande(id) {
         var n = document.getElementById('c-poids-note');
         if (n) {
           n.textContent = r.poids.estime
-            ? '⚠ Certains articles n’ont pas de poids configuré — estimation à 300 g par article. Vérifiez : le poids fixe le prix.'
-            : '✅ Poids calculé depuis les articles de la commande.';
+            ? 'Certains articles n’ont pas de poids configuré — estimation à 300 g par article. Vérifiez : le poids fixe le prix.'
+            : 'Poids calculé depuis les articles de la commande.';
           n.style.color = r.poids.estime ? '#f0c987' : '#86e5a8';
         }
       }
@@ -531,7 +531,7 @@ function pageCommande(id) {
     }
     var n = document.getElementById('c-poids-note');
     if (!pret && n) {
-      n.textContent = '⚠ Ce transporteur n’a pas d’identifiants — aucune étiquette ne peut être achetée. Configuration → Transporteurs.';
+      n.textContent = 'Ce transporteur n’a pas d’identifiants — aucune étiquette ne peut être achetée. Configuration → Transporteurs.';
       n.style.color = '#f0c987';
     }
   }
@@ -551,7 +551,7 @@ function pageCommande(id) {
        natif qui expirait a 60 s). L aveu part au pont (forcer) : sans lui, le
        garde du site refuse. */
     if (CMD.aUneEtiquette || String(val('c-suivi') || '').trim()) {
-      voileEtiq('⚠ Une étiquette existe déjà',
+      voileEtiq('Une étiquette existe déjà',
         '<p style="margin:.35rem 0;font-size:.9rem">Une étiquette a déjà été facturée pour cette commande'
         + (CMD.suivi ? ' (suivi <strong>' + esc(CMD.suivi) + '</strong>)' : '') + '.</p>'
         + '<p style="margin:.35rem 0;font-size:.9rem">En commander une seconde sera <strong>facturé une '
@@ -579,10 +579,10 @@ function pageCommande(id) {
       CMD.suivi = r.suivi;
       majExpedier();
       majBoutonImpression();
-      voileEtiq('✅ Étiquette créée',
+      voileEtiq('Étiquette créée',
         '<p style="margin:.35rem 0;font-size:.9rem">Suivi : <strong>' + esc(r.suivi) + '</strong></p>'
         + '<p style="margin:.35rem 0;font-size:.9rem">Imprimer l’étiquette et le bordereau maintenant ?</p>',
-        '🖨 Imprimer maintenant', imprimerEtiquette);
+        'Imprimer maintenant', imprimerEtiquette);
     }).catch(function(){ b.disabled = false; dire('L’opération a échoué.', 'err'); });
   }
   // Un voile a deux boutons, pour la question du rachat et la proposition
@@ -627,8 +627,8 @@ function pageCommande(id) {
   function verrou(){
     return P.appeler('verrou:prendre', 'orders', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = '⚠ en traitement par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
+      sous.textContent = 'en traitement par ' + (v.parQui || 'quelqu’un d’autre');
       /* ⚠ EN LECTURE POUR DE BON (releve du 2026-08-08) : on ne desarmait que
          le bouton Expedier, que majExpedier REARMAIT au premier input — et le
          scan, le statut, l impression et meme l ACHAT D UNE ETIQUETTE

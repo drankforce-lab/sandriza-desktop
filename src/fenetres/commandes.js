@@ -353,7 +353,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</span>'
       + '<button class="mini prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
       + 'title="N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées">'
-      + '⚡ Prioritaires' + (d && d.prioritairesNonTraitees
+      + 'Prioritaires' + (d && d.prioritairesNonTraitees
           ? ' · ' + d.prioritairesNonTraitees + ' non traitée' + (d.prioritairesNonTraitees > 1 ? 's' : '')
           : '') + '</button>';
     if (expedition && CTX && (CTX.annees || []).length) {
@@ -662,11 +662,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!v || !v.ok) { sous.textContent = ''; return; }
       if (v.obtenu) {
         VERROU_PRIS = true; VERROU_PAR = '';
-        sous.textContent = v.horsLigne ? '🔓 hors ligne'
-          : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous');
+        sous.textContent = v.horsLigne ? 'hors ligne'
+          : 'Section verrouillée en modification par : ' + (v.par || 'vous');
       } else {
         VERROU_PRIS = false; VERROU_PAR = v.parQui || 'quelqu’un d’autre';
-        sous.textContent = '⚠ en traitement par ' + VERROU_PAR;
+        sous.textContent = 'en traitement par ' + VERROU_PAR;
       }
       if (VUE === 'detail') dessiner();
     });
@@ -681,7 +681,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (SEUL) { P.fermer(); return; }
     VERROU_PAR = ''; DET = null; DET_ID = '';
     VUE = 'liste';
-    sous.textContent = (CTX && CTX.peutEditer) ? '' : '👁 Lecture seule';
+    sous.textContent = (CTX && CTX.peutEditer) ? '' : 'Lecture seule';
     charger(true);
   }
 
@@ -932,8 +932,8 @@ ${JS_ACTIVITE}${JS_DIRE}
               var sq = r.square || {};
               var note = sq.etat === 'initie' ? ' Remboursement Square de ' + argent(sq.montant) + ' initié.'
                 : sq.etat === 'deja' ? ' Déjà entièrement remboursée — rien de plus envoyé à Square.'
-                : sq.etat === 'echec' ? ' ⚠ Remboursement Square échoué : ' + (sq.detail || '?')
-                : sq.etat === 'reseau' ? ' ⚠ Erreur réseau Square : ' + (sq.detail || '?') : '';
+                : sq.etat === 'echec' ? ' Remboursement Square échoué : ' + (sq.detail || '?')
+                : sq.etat === 'reseau' ? ' Erreur réseau Square : ' + (sq.detail || '?') : '';
               if (!r.ok) {
                 dire('Suppression non confirmée par le serveur (' + (r.detail || 'erreur inconnue') + ') — réessayez.' + note, 'err');
                 rechargerDetail();
@@ -1111,7 +1111,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('commandes:contexte').then(function(c){
       if (!c || !c.ok) { vide('Commandes indisponibles', expliquer(c)); return; }
       CTX = c;
-      sous.textContent = c.peutEditer ? '' : '👁 Lecture seule';
+      sous.textContent = c.peutEditer ? '' : 'Lecture seule';
       if (DET_DEPART) { ouvrirDetail(DET_DEPART); DET_DEPART = ''; return; }
       charger();
     });

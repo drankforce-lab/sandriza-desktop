@@ -107,7 +107,7 @@ function pageModeles() {
   <div class="grille" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 
   <div class="sect"><h2>Mannequins (habillage IA)</h2><span class="tr"></span></div>
-  <p class="intro">La photo de la personne que l’intelligence artificielle <strong>habille</strong> avec votre vêtement — c’est le choix offert par « ✨ Mannequin IA » dans l’assistant Produit. Une photo nette, de face, cadrée en pied donne le meilleur résultat. <span id="mq-cle"></span></p>
+  <p class="intro">La photo de la personne que l’intelligence artificielle <strong>habille</strong> avec votre vêtement — c’est le choix offert par « Mannequin IA » dans l’assistant Produit. Une photo nette, de face, cadrée en pied donne le meilleur résultat. <span id="mq-cle"></span></p>
   <div class="mqs" id="mqs"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 </div>
 <input type="file" id="fichier" accept="image/*" style="display:none">

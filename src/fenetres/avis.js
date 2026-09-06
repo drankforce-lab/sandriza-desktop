@@ -211,7 +211,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<input type="search" id="a-q" placeholder="Nom ou n° de commande…" value="' + esc(Q) + '">'
       + '<select id="a-note"><option value=""' + (NOTE === '' ? ' selected' : '') + '>Toutes les notes</option>'
       + [5, 4, 3, 2, 1].map(function(n){
-          return '<option value="' + n + '"' + (String(NOTE) === String(n) ? ' selected' : '') + '>' + n + ' ★</option>';
+          return '<option value="' + n + '"' + (String(NOTE) === String(n) ? ' selected' : '') + '>' + n + ' sur 5</option>';
         }).join('')
       + '</select>'
       + '<select id="a-per"><option value=""' + (PER === '' ? ' selected' : '') + '>Toutes les dates</option>'
@@ -221,7 +221,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<option value="365"' + (PER === '365' ? ' selected' : '') + '>Cette année</option>'
       + '</select>'
       + '<span class="droite">'
-      + (c.moyenne != null ? 'moyenne ' + c.moyenne + ' <span class="etoile"><span class="ic">★</span></span> · ' : '')
+      + (c.moyenne != null ? 'moyenne ' + c.moyenne + ' sur 5 · ' : '')
       + (c.publies || 0) + ' publié' + ((c.publies || 0) > 1 ? 's' : '') + '</span>'
       + '</div>';
 
@@ -236,7 +236,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="Ouvrir l’avis">'
               + '<td>' + pastille(r.statut) + '</td>'
-              + '<td><span class="etoile">' + r.note + '★</span></td>'
+              + '<td><span class="etoile">' + r.note + ' sur 5</span></td>'
               + '<td><span class="num">' + esc(r.produit) + '</span></td>'
               + '<td>' + esc(r.client) + (r.verifie ? ' <span class="pill bon">achat vérifié</span>' : '') + '</td>'
               + '<td class="dt">' + esc(r.date) + '</td></tr>';
@@ -260,7 +260,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function boiteDetail(){
     var r = DETAIL;
     var h = '<div class="voile" id="a-voile"><div class="boite">'
-      + '<h3>' + pastille(r.statut) + ' <span class="etoile">' + r.note + '★</span> '
+      + '<h3>' + pastille(r.statut) + ' <span class="etoile">' + r.note + ' sur 5</span> '
       + esc(r.produit) + '</h3>'
       + '<div class="grille">'
       + '<div><div class="l">Client</div><div class="v">' + esc(r.client)

@@ -436,7 +436,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Envoi en cours…');
     appeler('transfert:partir', [{ productId: productId, cle: cle, vers: vers }]).then(function(r){
       BUSY = false;
-      if (!r || !r.ok) { dessiner(); dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dessiner(); dire(expliquer(r), 'err'); return; }
       CAND = null; TAB = 'transit';
       charger().then(function(){ dire('Transfert lancé — les unités sont en transit.', 'bon'); });
     });
@@ -467,7 +467,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       motifEcart: mo ? mo.value : '', noteEcart: no ? no.value : '',
     }]).then(function(r){
       BUSY = false;
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       OUVERT = '';
       charger().then(function(){
         dire(r.ecart
@@ -482,7 +482,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     BUSY = true;
     appeler('transfert:annuler', [{ id: id }]).then(function(r){
       BUSY = false;
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       OUVERT = '';
       charger().then(function(){ dire('Transfert annulé — le stock est rendu à l’entrepôt d’origine.', 'bon'); });
     });

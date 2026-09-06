@@ -315,7 +315,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           env.disabled = false;
           return;
         }
-        dire((r.echec ? '⚠ ' : '') + 'Ramassage ' + r.date + ' — ' + r.total + ' colis'
+        dire('Ramassage ' + r.date + ' — ' + r.total + ' colis'
           + ((r.parties || []).length ? ' · ' + r.parties.join(' · ') : ''), r.echec ? 'err' : 'bon');
         PLAN = null;
         charger();

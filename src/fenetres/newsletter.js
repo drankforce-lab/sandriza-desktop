@@ -162,7 +162,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function relire(){ return charger().then(function(ok){ if (ok) dessiner(); return ok; }); }
 
   function dessinerOnglets(){
-    ongletsEl.innerHTML = [['dashboard','📊 Tableau de bord'],['config','⚙ Configuration'],['offer','🎁 Offre bienvenue']]
+    ongletsEl.innerHTML = [['dashboard','Tableau de bord'],['config','⚙ Configuration'],['offer','Offre bienvenue']]
       .map(function(t){ return '<button data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'actif' : '') + '">' + t[1] + '</button>'; }).join('');
   }
 
@@ -185,7 +185,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="tuiles">'
       + '<div class="tuile"><div class="k"><span class="ic">👥</span> Abonnés actifs</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + ' désabonné' + plur(D.unsub) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">📣</span> Campagnes envoyées</div><div class="v">' + D.sentCamps + '</div><div class="z">' + D.draftCamps + ' en brouillon</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">✉</span>️ Courriels envoyés</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + ' échoué' + plur(D.failedSent) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">✉</span> Courriels envoyés</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + ' échoué' + plur(D.failedSent) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🔗</span> Chaînes actives</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + ' étape' + plur(D.pendingSteps) + ' en attente</div></div>'
       + '</div>'
       + (PEUT.edit ? '<div><button class="ghost mini" data-act="chains">⚙ Traiter les chaînes (' + D.pendingSteps + ')</button></div>' : '')
@@ -197,15 +197,15 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   /* ══ CONFIGURATION ═════════════════════════════════════════════════════════ */
   var SERVICES = [
-    { key:'orderConfirmation', label:'🛒 Confirmation de commande', desc:'Envoyé au client après chaque commande réussie.' },
-    { key:'shipping', label:'🚚 Expédition / suivi', desc:'Envoyé lors du marquage « Expédiée ».' },
-    { key:'delivery', label:'📬 Confirmation de livraison', desc:'Envoyé dès que le transporteur confirme la livraison.' },
-    { key:'welcomeOffer', label:'🎁 Offre de bienvenue', desc:'Code de réduction envoyé à l’inscription.' },
-    { key:'giftCard', label:'🎀 Carte-cadeau', desc:'Livraison par courriel lors de l’achat.' },
-    { key:'chatOffline', label:'💬 Message hors-ligne (chat)', desc:'Avis admin quand un visiteur écrit hors-ligne.' },
-    { key:'passwordReset', label:'🔑 Réinitialisation de mot de passe', desc:'Avis de sécurité après un changement.' },
-    { key:'chains', label:'🔗 Séquences automatisées', desc:'Étapes des chaînes d’automation.' },
-    { key:'supportTicket', label:'💬 Demande de support client', desc:'Avis à support@ et réponse au client.' },
+    { key:'orderConfirmation', label:'Confirmation de commande', desc:'Envoyé au client après chaque commande réussie.' },
+    { key:'shipping', label:'Expédition / suivi', desc:'Envoyé lors du marquage « Expédiée ».' },
+    { key:'delivery', label:'Confirmation de livraison', desc:'Envoyé dès que le transporteur confirme la livraison.' },
+    { key:'welcomeOffer', label:'Offre de bienvenue', desc:'Code de réduction envoyé à l’inscription.' },
+    { key:'giftCard', label:'Carte-cadeau', desc:'Livraison par courriel lors de l’achat.' },
+    { key:'chatOffline', label:'Message hors-ligne (chat)', desc:'Avis admin quand un visiteur écrit hors-ligne.' },
+    { key:'passwordReset', label:'Réinitialisation de mot de passe', desc:'Avis de sécurité après un changement.' },
+    { key:'chains', label:'Séquences automatisées', desc:'Étapes des chaînes d’automation.' },
+    { key:'supportTicket', label:'Demande de support client', desc:'Avis à support@ et réponse au client.' },
   ];
   function bascule(id, on){
     return '<label class="bascule"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + (PEUT.edit ? '' : ' disabled') + '><span class="piste"></span><span class="pouce"></span></label>';
@@ -320,7 +320,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     dire('Enregistrement…');
     appeler('newsletter:cfgEcrire', d).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       relire().then(function(){ dire('Configuration enregistrée.', 'bon'); });
     });
   }
@@ -329,7 +329,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     SERVICES.forEach(function(s){ ctrl[s.key] = chk('nl-ctrl-' + s.key); });
     dire('Enregistrement…');
     appeler('newsletter:controls', { controls: ctrl }).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       dire('Contrôles d’envoi enregistrés.', 'bon');
     });
   }
@@ -337,7 +337,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Envoi du courriel de test…');
     appeler('newsletter:testConn', {}).then(function(r){
       if (r && r.ok) dire('Courriel de test envoyé.', 'bon');
-      else dire('⚠ ' + expliquer(r), 'err');
+      else dire(expliquer(r), 'err');
     });
   }
   function saveOffer(){
@@ -347,7 +347,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     dire('Enregistrement…');
     appeler('newsletter:offerEcrire', d).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       relire().then(function(){ dire('Configuration enregistrée.', 'bon'); });
     });
   }
@@ -358,7 +358,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     fr.onload = function(){
       dire('Téléversement…');
       appeler('newsletter:offerImage', { dataUrl: fr.result }).then(function(r){
-        if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
         var inp = document.getElementById('offer-img'); if (inp) inp.value = r.url;
         var prev = document.querySelector('.apercu-img');
         if (!prev) { var box = inp && inp.parentNode; if (box) box.insertAdjacentHTML('afterbegin', '<img class="apercu-img" src="' + r.url.replace(/"/g, '&quot;') + '" alt="Aperçu">'); }
@@ -370,14 +370,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function resetOffer(){
     appeler('newsletter:offerReset', {}).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       relire().then(function(){ dire('Réinitialisé.', 'bon'); });
     });
   }
   function traiterChaines(){
     dire('Traitement des chaînes…');
     appeler('newsletter:processChains', {}).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       if (r.rien) { dire('Aucune étape en attente.', 'att'); return; }
       relire().then(function(){ dire(r.sent + ' envoyé' + plur(r.sent) + (r.failed ? ', ' + r.failed + ' échec' + plur(r.failed) : '') + '.', 'bon'); });
     });

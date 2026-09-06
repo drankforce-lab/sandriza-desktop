@@ -130,7 +130,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','🔎 Recherche'], ['acces','🔐 Accès'], ['automatisations','🤖 Automatisations'], ['impressions','🖨 Impressions'], ['sms','💬 SMS'], ['comptable','🔗 Accès aux liens'], ['recherches','❓ Sans résultat'], ['jserreurs','⚠ Erreurs des clients'] ];
+  var ONGLETS = [ ['recherche','Recherche'], ['acces','Accès'], ['automatisations','Automatisations'], ['impressions','Impressions'], ['sms','SMS'], ['comptable','Accès aux liens'], ['recherches','Sans résultat'], ['jserreurs','Erreurs des clients'] ];
   var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -164,7 +164,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     b = document.createElement('button');
     b.id = 'j-verrous'; b.type = 'button'; b.className = 'mini';
     b.style.marginLeft = '.6rem';
-    b.textContent = '🔓 Verrous';
+    b.textContent = 'Verrous';
     b.title = 'Qui tient une fiche en ce moment (ecran a part, en direct)';
     b.onclick = function(){ if (P && P.ouvrirModule) P.ouvrirModule('verrous'); };
     var d = document.getElementById('sz-detacher');
@@ -211,12 +211,12 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (smsR && smsR.ok){
           var sm=(smsR.sms||[]).filter(function(s){ return matchAny(ql,[s.from,s.to,s.body,s.direction,s.date]); })
             .map(function(s){ return { date:s.date, direction:s.direction, from:s.from, to:s.to, body:s.body }; });
-          if (sm.length){ groupes.push({ cle:'sms', label:'💬 SMS', onglet:'sms', total:sm.length, entrees:sm.slice(0,200) }); total+=sm.length; }
+          if (sm.length){ groupes.push({ cle:'sms', label:'SMS', onglet:'sms', total:sm.length, entrees:sm.slice(0,200) }); total+=sm.length; }
         }
         if (cpR && cpR.ok){
           var cp=(cpR.journal||[]).filter(function(e){ return matchAny(ql,[e.canal,e.genre,e.ip,e.lienId,e.detail,e.qui,e.au]); })
             .map(function(e){ return { au:e.au, canal:e.canal, genre:e.genre, ip:e.ip, lienId:e.lienId, detail:e.detail, qui:e.qui }; });
-          if (cp.length){ groupes.push({ cle:'comptable', label:'🧾 Accès comptables', onglet:'comptable', total:cp.length, entrees:cp.slice(0,200) }); total+=cp.length; }
+          if (cp.length){ groupes.push({ cle:'comptable', label:'Accès comptables', onglet:'comptable', total:cp.length, entrees:cp.slice(0,200) }); total+=cp.length; }
         }
         OCCUPE=false; RRES={ ok:true, q:RQ, total:total, groupes:groupes }; peindreResultats();
         dire(total?(total+' résultat(s) dans tous les journaux.'):'Aucun résultat.', 'bon');
@@ -275,10 +275,10 @@ ${JS_ACTIVITE}${JS_DIRE}
     login_ok:{k:'bon',l:'✓ Connexion'},
     login_fail:{k:'err',l:'✗ Échec'},
     logout:{k:'info',l:'⏻ Déconnexion'},
-    mfa_fail:{k:'att',l:'⚠ MFA échoué'},
+    mfa_fail:{k:'att',l:'MFA échoué'},
     mfa_timeout:{k:'att',l:'⏱ MFA expiré'},
     action:{k:'info',l:'⚙ Action'},
-    login_blocked_geo:{k:'err',l:'🌍 Bloqué (géo)'}
+    login_blocked_geo:{k:'err',l:'Bloqué (géo)'}
   };
   function drapeau(cc){ if (!cc||cc.length!==2) return ''; try { return String.fromCodePoint.apply(null,cc.toUpperCase().split('').map(function(x){return 127397+x.charCodeAt(0);})); } catch(e){ return ''; } }
   function vueAcces(){
@@ -329,8 +329,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   // ── Automatisations ──────────────────────────────────────────────
-  var SECT = { orders:'📦 Livraison', stats:'📊 Statistiques', marketing:'🎁 Marketing', staff:'🔑 Mot de passe',
-    'returns-mgmt':'↩️ Retours', sociaux:'📱 Réseaux sociaux', newsletter:'🔗 Infolettre', systeme:'🧹 Entretien', app:'🖥 Application' };
+  var SECT = { orders:'Livraison', stats:'Statistiques', marketing:'Marketing', staff:'Mot de passe',
+    'returns-mgmt':'↩ Retours', sociaux:'Réseaux sociaux', newsletter:'Infolettre', systeme:'Entretien', app:'Application' };
   function vueAuto(){
     var rows = D.automations||[];
     var h = '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.autoTotal, 'entrée', 'entrées')+' · conservation 30 jours</span><span class="pousse"></span>'
@@ -543,8 +543,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     for (var i = 0; i < rows.length; i++) {
       var x = rows[i];
-      var genre = x.genre === 'ressource' ? '📦 chargement'
-                : x.genre === 'promesse' ? '⏳ promesse' : '⚠ erreur';
+      var genre = x.genre === 'ressource' ? 'chargement'
+                : x.genre === 'promesse' ? '⏳ promesse' : 'erreur';
       h += '<tr' + (x.vu ? ' style="opacity:.62"' : '') + '>'
         + '<td><strong>' + esc(x.message) + '</strong>'
         +   '<div class="mut" style="font-size:.72rem">' + genre

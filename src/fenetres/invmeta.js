@@ -213,7 +213,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ══ ÉCRITURE générique : appelle l op, explique un refus, recharge sinon ══════
   function ecrire(op, arg, bon){
     return appeler(op, arg).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return false; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return false; }
       return relire().then(function(){ if (bon) dire(bon(r), 'bon'); return true; });
     });
   }
@@ -325,7 +325,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!D.custom.length) return '<p class="aide" style="margin:0">Aucune couleur personnalisée. Ajoutez-en via « Ajouter une nouvelle couleur ».</p>';
     return D.custom.map(function(c){
       var use = c.used > 0 ? '<span class="pill used">' + c.used + ' produit' + plur(c.used) + '</span>' : '<span class="pill no">non utilisée</span>';
-      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span>️ Modifier</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? 'utilisée — bloqué' : 'Supprimer') + '">Supprimer</button>' : '';
+      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span> Modifier</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? 'utilisée — bloqué' : 'Supprimer') + '">Supprimer</button>' : '';
       return '<div class="cust"><span class="pastille" style="' + (c.gradient ? 'border-radius:4px;' : '') + 'background:' + esc(c.hex) + '"></span>'
         + '<span class="nm">' + esc(c.nom) + '</span>' + use
         + '<span class="mono" style="color:var(--tx2);font-size:.72rem">' + (c.gradient ? 'dégradé' : esc(c.hex)) + '</span>' + act + '</div>';
@@ -387,7 +387,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var cats = D.categories || [];
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
-      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✏</span>️</button>' : '';
+      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✏</span></button>' : '';
       var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' produit(s) — bloqué' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '';
       return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
         + '<td style="font-weight:600">' + esc(c.name) + '</td>'

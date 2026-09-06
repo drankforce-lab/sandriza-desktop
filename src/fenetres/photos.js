@@ -1888,7 +1888,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (D.bureau ? '<button id="p-enreg">⤓ Enregistrer le fichier</button>' : '')
       + (ro || r.isole ? '' : '<button class="prim" id="p-isoler"><span class="ic">✂</span> Isoler le vêtement</button>')
       + (ro ? '' : '<button class="' + (r.isole ? 'prim' : '') + '" id="p-attacher">'
-          + (ATTACHE ? 'Annuler l’attache' : '⚭ Attacher à un article') + '</button>')
+          + (ATTACHE ? 'Annuler l’attache' : 'Attacher à un article') + '</button>')
       + '<button id="p-fermer">Fermer</button>'
       + '</div>';
 

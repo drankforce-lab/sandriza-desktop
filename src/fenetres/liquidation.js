@@ -396,7 +396,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function retirer(id){
     dire('Retrait…');
     appeler('liquidation:retirer', id).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       ARME = '';
       return charger().then(function(ok){
         if (ok) dessiner();
@@ -420,7 +420,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function chargerLot(){
     return appeler('liquidation:choix', { q:LOT.q, cats:LOT.cats, page:LOT.page, taille:LOT.taille })
       .then(function(r){
-        if (!r || !r.ok) { LOT = null; dire('⚠ ' + expliquer(r), 'err'); dessiner(); return false; }
+        if (!r || !r.ok) { LOT = null; dire(expliquer(r), 'err'); dessiner(); return false; }
         LOT.data = r; LOT.page = r.page;
         dessiner();
         return true;
@@ -500,7 +500,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '</div></div>'
       +   '<div class="col"><div class="bloc"><div class="titre">Le régime</div>'
       +     '<div style="display:flex;flex-direction:column;gap:.35rem">'
-      +       mode('liq_no', '🟡 Liquidation') + mode('final', '🔴 Vente finale')
+      +       mode('liq_no', 'Liquidation') + mode('final', 'Vente finale')
       +     '</div>'
       +     '<div class="titre" style="margin:.7rem 0 .4rem">Durée</div>'
       +     '<label class="duree"><input type="radio" name="lot-duree" data-lotduree="depletion"'
@@ -548,7 +548,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Application…');
     appeler('liquidation:lot', { ids:LOT.ordre, mode:LOT.mode, duree:LOT.duree, du:LOT.du, au:LOT.au })
       .then(function(r){
-        if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
         var n = r.n;
         LOT = null; PLIQ = 0; PFIN = 0;
         ONGLET = (r.mode === 'liq_no') ? 'liq' : 'final';
@@ -567,7 +567,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function chargerCat(){
     return appeler('liquidation:cats', { q:CAT.q, regime:CAT.regime }).then(function(r){
-      if (!r || !r.ok) { CAT = null; dire('⚠ ' + expliquer(r), 'err'); dessiner(); return false; }
+      if (!r || !r.ok) { CAT = null; dire(expliquer(r), 'err'); dessiner(); return false; }
       CAT.data = r; dessiner(); return true;
     });
   }
@@ -623,7 +623,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var mode = (quoi === 'normal') ? 'normal' : CAT.mode;
     dire('Application…');
     appeler('liquidation:parCategorie', { cats:cles, mode:mode }).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       var n = r.n, nc = r.cats;
       CAT = null; PLIQ = 0; PFIN = 0;
       if (mode !== 'normal') ONGLET = (mode === 'liq_no') ? 'liq' : 'final';
@@ -658,12 +658,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (b && b.hasAttribute('data-lotretour')) { LOT.etape = 1; dessiner(); return; }
       if (b && b.hasAttribute('data-lotappliquer')) { appliquerLot(); return; }
       if (b && b.hasAttribute('data-lotsuite')) {
-        if (!LOT.ordre.length) { dire('⚠ ' + MOTIFS.aucun_produit, 'err'); return; }
+        if (!LOT.ordre.length) { dire(MOTIFS.aucun_produit, 'err'); return; }
         if (LOT.duree === 'period') {
           var du = document.getElementById('lot-du'), au = document.getElementById('lot-au');
           LOT.du = du ? du.value : ''; LOT.au = au ? au.value : '';
-          if (!LOT.du || !LOT.au) { dire('⚠ ' + MOTIFS.dates_requises, 'err'); return; }
-          if (LOT.du > LOT.au) { dire('⚠ ' + MOTIFS.dates_inversees, 'err'); return; }
+          if (!LOT.du || !LOT.au) { dire(MOTIFS.dates_requises, 'err'); return; }
+          if (LOT.du > LOT.au) { dire(MOTIFS.dates_inversees, 'err'); return; }
         }
         LOT.etape = 2; dessiner(); return;
       }

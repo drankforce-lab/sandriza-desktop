@@ -316,9 +316,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     var ansSet = !!c.securityAnswersSet;
 
     var ONG = [
-      ['identite', '👤 Identité'],
-      ['acces', '🔑 Accès'],
-      ['questions', '🔐 Questions' + (nouv ? '' : (ansSet ? ' ✓' : ' ⚠'))],
+      ['identite', 'Identité'],
+      ['acces', 'Accès'],
+      ['questions', 'Questions' + (nouv ? '' : (ansSet ? ' ✓' : ''))],
       ['perms', '⚙ Permissions']
     ];
     var tabs = '';
@@ -350,7 +350,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<span>Exempté de MFA<span class="quoi">À réserver aux cas où le second facteur est impossible : c’est un rempart en moins.</span></span></label>';
 
     var volQuestions = '<p class="aideOng">Elles servent à retrouver un accès quand le mot de passe est perdu. Les réponses sont <b>chiffrées</b> et ne se réaffichent jamais — laisser vide conserve celles déjà enregistrées.</p>'
-      + (nouv ? '' : '<div class="note">'+(ansSet?'✓ Des réponses sont déjà enregistrées pour ce compte.':'⚠ Aucune réponse enregistrée : ce compte ne pourra pas être récupéré par cette voie.')+'</div>')
+      + (nouv ? '' : '<div class="note">'+(ansSet?'✓ Des réponses sont déjà enregistrées pour ce compte.':'Aucune réponse enregistrée : ce compte ne pourra pas être récupéré par cette voie.')+'</div>')
       + '<div class="cols2">'
       + '<label class="champ"><span class="lbl">Question 1</span><select class="t" id="u-q1">'+qOpts(c.securityQ1||'')+'</select></label>'
       + '<label class="champ"><span class="lbl">Réponse 1</span><input class="t" id="u-a1" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
@@ -363,7 +363,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-u';
     sur.innerHTML = '<div class="boite">'
-      + '<div class="tt"><h3>'+(nouv?'＋ Créer un accès':'✏ '+esc(((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email||'Compte'))+'</h3>'
+      + '<div class="tt"><h3>'+(nouv?'＋ Créer un accès':esc(((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email||'Compte'))+'</h3>'
       + '<div><button class="sz-btnplein" id="u-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
       + '<button class="mini" id="u-x">Fermer</button></div></div>'
       + '<div class="ongEd" id="u-ong">'+tabs+'</div>'

@@ -194,7 +194,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     var pill = document.getElementById('pill');
     pill.style.display = '';
     pill.className = 'pill ' + (c.supprime ? 'rouge' : (c.actif ? 'vert' : 'gris'));
-    pill.textContent = c.supprime ? '🗑 Supprimé' : (c.actif ? 'Actif' : 'Inactif');
+    pill.textContent = c.supprime ? 'Supprimé' : (c.actif ? 'Actif' : 'Inactif');
     if (EDITION) dessinerEdition(); else dessinerFiche();
   }
 
@@ -458,7 +458,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     return appeler('client:lire', [ID]).then(function(r){
       if (!r.ok) { vide('Fiche indisponible', expliquer(r)); return; }
       R = r;
-      if (!r.peutEcrire) sous.textContent = '👁 Lecture seule';
+      if (!r.peutEcrire) sous.textContent = 'Lecture seule';
       dessiner();
     });
   }
@@ -468,8 +468,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     appeler('verrou:prendre', ['users', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       dire('Cette fiche est ouverte ailleurs — modifications bloquées.', 'att');
       R.peutEcrire = false;
       dessiner();

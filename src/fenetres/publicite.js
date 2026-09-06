@@ -147,8 +147,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   var FORM = null;            // surcouche nouvelle campagne : { seg0, audienceCount, promos }
   var UTM = { source:'facebook', campaign:'promo-2026', dest:'#shop' };
 
-  var LBL = { overview:'📊 Vue d’ensemble', segments:'👥 Segments', promos:'🎯 Promotions',
-    social:'📱 Attribution sociale', campaigns:'📢 Campagnes', satisfaction:'★ Satisfaction' };
+  var LBL = { overview:'Vue d’ensemble', segments:'Segments', promos:'Promotions',
+    social:'Attribution sociale', campaigns:'Campagnes', satisfaction:'Satisfaction' };
   var OP = { overview:'analytics:overview', segments:'analytics:segments', promos:'analytics:promos',
     social:'analytics:social', campaigns:'analytics:campaigns', satisfaction:'analytics:satisfaction' };
   var STATUTS = { confirmed:['ok','Confirmée'], pending:['warn','En attente'], shipped:['info','Expédiée'],
@@ -215,7 +215,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="tuile"><div class="k"><span class="ic">🎯</span> Revenu promo</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '% des commandes</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">👥</span> Clients actifs</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' inscrits</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🛒</span> Panier moyen</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">par commande</div></div>'
-      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> Réponse sondage</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + '★' : '') + '</div></div>' : '')
+      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> Réponse sondage</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + ' sur 5' : '') + '</div></div>' : '')
       + '</div>'
       + '<div class="deux">'
       +   '<div class="carte"><h2>Revenu mensuel — 6 mois<span class="legend"><span><i style="background:#c9a97e"></i>Total</span><span><i style="background:#dc2626;opacity:.7"></i>Promo</span></span></h2><div class="graph">' + graph + '</div></div>'
@@ -327,7 +327,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '<div class="champ"><label>Audience estimée</label><div class="aud" id="cf-aud">' + FORM.audienceCount + ' contact' + plur(FORM.audienceCount) + '</div></div>'
       + '</div>'
       + '<div class="champ"><label>Promotion associée (optionnel)</label><select id="cf-promo">' + promos + '</select></div>'
-      + '<div class="champ"><label>Message *</label><textarea id="cf-msg" rows="3" placeholder="Découvrez nos offres exclusives ! 🎉"></textarea></div>'
+      + '<div class="champ"><label>Message *</label><textarea id="cf-msg" rows="3" placeholder="Découvrez nos offres exclusives !"></textarea></div>'
       + '<div class="champ"><label>Canaux de diffusion</label><div class="chans">'
       +   '<label><input type="checkbox" id="cf-ch-facebook" checked> <span class="ic">📘</span> Facebook</label>'
       +   '<label><input type="checkbox" id="cf-ch-instagram" checked> <span class="ic">📷</span> Instagram</label>'
@@ -374,12 +374,12 @@ ${JS_ACTIVITE}${JS_DIRE}
   function exporter(){
     appeler('analytics:segExport', { seg:SEGF }).then(function(r){
       if (r && r.ok) dire(r.n + ' client' + plur(r.n) + ' exporté' + plur(r.n) + ' dans la fenêtre principale.', 'bon');
-      else dire('⚠ ' + expliquer(r), 'err');
+      else dire(expliquer(r), 'err');
     });
   }
   function ouvrirForm(seg){
     appeler('analytics:campForm', { seg: seg || 'all' }).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       FORM = { seg0:r.seg0, audienceCount:r.audienceCount, promos:r.promos };
       if (TAB !== 'campaigns') { TAB = 'campaigns'; charger().then(function(ok){ if (ok) dessiner(); }); }
       else dessiner();
@@ -397,7 +397,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var d = { name:val('cf-name'), segment:val('cf-seg'), promoId:val('cf-promo') || null, message:val('cf-msg'), channels:channels, launch:launch };
     dire('Enregistrement…');
     appeler('analytics:campSave', d).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       FORM = null;
       relire().then(function(){
         var m = r.launched ? ('Campagne lancée ! ' + r.audienceCount + ' contact' + plur(r.audienceCount) + (r.mailCount ? ' · ' + r.mailCount + ' courriel' + plur(r.mailCount) + ' ciblé' + plur(r.mailCount) : '')) : 'Brouillon enregistré.';
@@ -434,8 +434,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     else if (act === 'newcamp') ouvrirForm('all');
     else if (act === 'copyutm') copierUtm();
     else if (g('data-cibler')) { SEGF = g('data-cibler'); TAB = 'segments'; charger().then(function(ok){ if (ok) dessiner(); }); }
-    else if (g('data-launch')) { appeler('analytics:campLaunch', { id:g('data-launch') }).then(function(r){ if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; } relire().then(function(){ dire('Campagne lancée.', 'bon'); }); }); }
-    else if (g('data-del')) { appeler('analytics:campDelete', { id:g('data-del') }).then(function(r){ if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; } relire().then(function(){ dire('Campagne supprimée.', 'att'); }); }); }
+    else if (g('data-launch')) { appeler('analytics:campLaunch', { id:g('data-launch') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('Campagne lancée.', 'bon'); }); }); }
+    else if (g('data-del')) { appeler('analytics:campDelete', { id:g('data-del') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('Campagne supprimée.', 'att'); }); }); }
   });
 
   document.addEventListener('change', function(e){

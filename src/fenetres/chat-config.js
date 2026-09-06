@@ -173,7 +173,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var v = document.querySelectorAll('img.vign');
     for (var i=0;i<v.length;i++) v[i].onerror = function(){
       var s = document.createElement('span');
-      s.className = 'sansph'; s.textContent = '👤'; s.title = 'Photo introuvable à cette adresse';
+      s.className = 'sansph'; s.textContent = '—'; s.title = 'Photo introuvable à cette adresse';
       if (this.parentNode) this.parentNode.replaceChild(s, this);
     };
   }

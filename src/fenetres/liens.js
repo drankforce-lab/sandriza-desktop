@@ -219,7 +219,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     var fait = false;
     try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
     bouton.textContent = fait ? '✓ Copié' : 'Ctrl+C pour copier';
-    if (!motDejaLa) setTimeout(function(){ bouton.textContent = '📋 Copier'; }, 2500);
+    if (!motDejaLa) setTimeout(function(){ bouton.textContent = 'Copier'; }, 2500);
   }
 
   // ════════════════════════════════════════════════════════════════════════

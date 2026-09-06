@@ -556,7 +556,7 @@ ${JS_ACTIVITE}${JS_DIRE}
               + (r.faites > 1 ? 's' : '') + ' à l’état précédent.';
             if (r.sansPrecedent) m += ' ' + r.sansPrecedent + ' n’avai'
               + (r.sansPrecedent > 1 ? 'ent' : 't') + ' rien à annuler.';
-            if (r.echecs && r.echecs.length) m += ' ⚠ ' + r.echecs.length + ' en échec.';
+            if (r.echecs && r.echecs.length) m += ' ' + r.echecs.length + ' en échec.';
             dire(m, (r.echecs && r.echecs.length) ? 'att' : 'bon');
             charger();   // les vignettes ont changé : on relit
           });
@@ -628,9 +628,9 @@ ${JS_ACTIVITE}${JS_DIRE}
               + (res.faites > 1 ? 's' : '') + ' à jour.';
             if (res.nonLiees) m += ' ' + res.nonLiees + ' photo'
               + (res.nonLiees > 1 ? 's non rattachées' : ' non rattachée') + '.';
-            if (res.incertaines) m += ' ⚠ ' + res.incertaines + ' laissée'
+            if (res.incertaines) m += ' ' + res.incertaines + ' laissée'
               + (res.incertaines > 1 ? 's' : '') + ' de côté (plusieurs images, lien incertain).';
-            if (res.echecs && res.echecs.length) m += ' ⚠ ' + res.echecs.length + ' en échec.';
+            if (res.echecs && res.echecs.length) m += ' ' + res.echecs.length + ' en échec.';
             dire(m, ((res.echecs && res.echecs.length) || res.incertaines) ? 'att' : 'bon');
             charger();
           });

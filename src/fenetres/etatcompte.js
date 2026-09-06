@@ -157,11 +157,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (r.courriel) {
         bCourriel.disabled = false;
         bCourriel.title = 'Envoyer cet état de compte à ' + r.courriel;
-        bCourriel.textContent = '✉ Envoyer à ' + r.courriel;
+        bCourriel.textContent = 'Envoyer à ' + r.courriel;
       } else {
         bCourriel.disabled = true;
         bCourriel.title = 'Aucune adresse courriel au dossier de ce client';
-        bCourriel.textContent = '✉ Aucune adresse au dossier';
+        bCourriel.textContent = 'Aucune adresse au dossier';
       }
       dire('');
     });
@@ -183,17 +183,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!D || !D.courriel) return;
     if (!ARME) {
       ARME = true;
-      bCourriel.textContent = '✉ Confirmer l’envoi ?';
+      bCourriel.textContent = 'Confirmer l’envoi ?';
       dire('Cliquez de nouveau pour envoyer l’état de compte à ' + D.courriel + '.', 'att');
       return;
     }
     ARME = false;
     bCourriel.disabled = true;
-    bCourriel.textContent = '✉ Envoi…';
+    bCourriel.textContent = 'Envoi…';
     dire('Envoi du courriel…', 'att');
     appeler('etat:courriel', [ID, '']).then(function(r){
       bCourriel.disabled = false;
-      bCourriel.textContent = '✉ Envoyer à ' + D.courriel;
+      bCourriel.textContent = 'Envoyer à ' + D.courriel;
       dire(r.ok ? 'État de compte envoyé à ' + r.adresse + '.' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
@@ -203,7 +203,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   document.addEventListener('click', function(ev){
     if (ARME && ev.target !== bCourriel) {
       ARME = false;
-      if (D && D.courriel) bCourriel.textContent = '✉ Envoyer à ' + D.courriel;
+      if (D && D.courriel) bCourriel.textContent = 'Envoyer à ' + D.courriel;
       dire('');
     }
   }, true);

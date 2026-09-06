@@ -215,12 +215,12 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     if (R.livraison.cout > 0) {
       h += '<div class="carte"><h2>Livraison <span class="note">— ' + argent(R.livraison.cout)
-        + (R.livraison.prioritaire ? ' · ⚡ prioritaire' : '') + '</span></h2>'
+        + (R.livraison.prioritaire ? ' · prioritaire' : '') + '</span></h2>'
         + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.85rem;cursor:pointer">'
         + '<input type="checkbox" id="m-livraison"> Inclure les frais de livraison</label>'
         + '<div class="aide" style="margin-top:.3rem">' + (R.livraison.nonExpediee
             ? 'La commande n’a pas encore été expédiée — frais remboursables.'
-            : '⚠ Déjà expédiée : le transporteur a été payé. À votre discrétion (erreur, défaut, geste commercial).')
+            : 'Déjà expédiée : le transporteur a été payé. À votre discrétion (erreur, défaut, geste commercial).')
         + '</div></div>';
     }
 
@@ -412,7 +412,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             if (!r.ok) { majBouton(); dire(expliquer(r), 'err'); return; }
             var t = r.refundNumber + ' émis.';
             if (r.credit) t += ' Crédit ' + r.credit.numero + ' (' + argent(r.credit.montant) + '), courriel envoyé.';
-            if (r.squareErreur) t += ' ⚠ Remboursement local créé mais Square a échoué : ' + r.squareErreur;
+            if (r.squareErreur) t += ' Remboursement local créé mais Square a échoué : ' + r.squareErreur;
             else if (!r.credit) t += ' Square : ' + argent(r.net) + ' initié.';
             dire(t, r.squareErreur ? 'att' : 'bon');
             QTE = {}; TOT = null;
@@ -440,8 +440,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     appeler('verrou:prendre', ['orders', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = (sous.textContent ? sous.textContent + ' · ' : '') + '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = (sous.textContent ? sous.textContent + ' · ' : '') + 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       var b = document.getElementById('btn-rembourser');
       if (b) b.disabled = true;
       dire('Cette commande est ouverte ailleurs — remboursement bloqué.', 'err');

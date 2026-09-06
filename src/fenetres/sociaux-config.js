@@ -182,7 +182,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (bouton){ bouton.disabled=true; bouton.textContent='⏳ Test…'; }
     dire('Interrogation du réseau…');
     appeler('sociaux:config:tester',[net]).then(function(r){ OCCUPE=false;
-      if (bouton){ bouton.disabled=false; bouton.textContent='🔗 Tester la connexion'; }
+      if (bouton){ bouton.disabled=false; bouton.textContent='Tester la connexion'; }
       if (r&&r.ok) dire('Connecté — '+esc(r.quoi||''), 'bon');
       else dire('Échec : '+expliquer(r), 'err'); });
   }

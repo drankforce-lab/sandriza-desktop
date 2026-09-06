@@ -196,7 +196,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       champs: [{ k: 'hf', label: 'Token d’accès', place: 'hf_…',
         aide: 'Gratuit — Settings, Access Tokens, New token (Read). Modèle segformer_b2_clothes.' }] },
     { titre: 'Stripe Tax — Taxes internationales',
-      sous: 'Calcul auto de la TVA/TPS à l’international (le Canada garde la table manuelle). ⚠ Stripe ne perçoit que dans les pays où vous êtes inscrit ; ailleurs 0 (le client paie à la frontière). Ne couvre pas les droits de douane.',
+      sous: 'Calcul auto de la TVA/TPS à l’international (le Canada garde la table manuelle). Stripe ne perçoit que dans les pays où vous êtes inscrit ; ailleurs 0 (le client paie à la frontière). Ne couvre pas les droits de douane.',
       lien: ['dashboard.stripe.com', 'https://dashboard.stripe.com/tax'],
       champs: [{ k: 'stripeTax', label: 'Clé secrète Stripe', place: 'rk_… (clé restreinte Tax) ou sk_…',
         aide: 'Recommandé : une clé RESTREINTE (rk_) limitée à la permission Tax. La clé reste au serveur.' }],

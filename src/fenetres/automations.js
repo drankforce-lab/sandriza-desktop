@@ -137,7 +137,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function carteHtml(j){
-    var h = '<div class="carte"><div class="th"><span class="em">' + (j.icon || '⚙️') + '</span>'
+    var h = '<div class="carte"><div class="th"><span class="em">' + (j.icon || '⚙') + '</span>'
       + '<span class="nom">' + esc(j.name) + '</span>'
       + '<span class="pill">' + esc(j.schedule) + '</span>' + badgeDest(j.recipient) + '</div>';
     h += '<p class="desc">' + esc(j.desc) + '</p>';

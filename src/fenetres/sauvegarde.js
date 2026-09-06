@@ -246,7 +246,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── Créer ────────────────────────────────────────────────────────
   function ouvrirCreer(){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
-    ouvrirSur('💾 Nouvelle sauvegarde',
+    ouvrirSur('Nouvelle sauvegarde',
       '<p class="quoi" style="margin:0 0 1rem">Ajoutez une <b>note</b> pour reconnaître cette sauvegarde plus tard — c’est facultatif. L’opération dompe toute la base, elle peut prendre un moment.</p>'
       + '<label class="champ"><span class="lbl">Note (facultatif)</span>'
       + '<input class="t" id="s-note" maxlength="200" placeholder="Ex. : avant mise à jour">'
@@ -262,7 +262,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Sauvegarde en cours, ne fermez pas cette fenêtre…');
     appeler('sauvegarde:creer',[txv('s-note')]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ fermerSur(); D=r; RO=!r.peutEcrire; vueListe(); dire('Sauvegarde créée ('+(r.taille||'')+').', 'bon'); }
-      else { if (go){ go.disabled=false; go.textContent='💾 Créer la sauvegarde'; } dire('Échec : '+expliquer(r), 'err'); }
+      else { if (go){ go.disabled=false; go.textContent='Créer la sauvegarde'; } dire('Échec : '+expliquer(r), 'err'); }
     });
   }
 
@@ -318,7 +318,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── Supprimer (confirmation écrite) ──────────────────────────────
   function ouvrirSupprimer(encKey, id){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
-    ouvrirSur('🗑 Supprimer la sauvegarde',
+    ouvrirSur('Supprimer la sauvegarde',
       '<div class="garde rouge"><span class="ic">⚠</span> Cette action supprime <b>définitivement</b> la sauvegarde <b>'+esc(id)+'</b> de Cloudflare R2. Elle sera <b>irrécupérable</b>.</div>'
       + '<label class="champ"><span class="lbl">Pour confirmer, tapez DÉTRUIRE</span>'
       + '<input class="t" id="s-conf" autocomplete="off" placeholder="DÉTRUIRE"></label>',
@@ -348,7 +348,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── Purge (rétention) ────────────────────────────────────────────
   function ouvrirPurge(){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
-    ouvrirSur('🗑 Purger les vieilles sauvegardes',
+    ouvrirSur('Purger les vieilles sauvegardes',
       '<div class="garde rouge"><span class="ic">⚠</span> Toutes les sauvegardes de plus de <b>'+(D.retentionMois||12)+' mois</b> sont détruites de Cloudflare R2. <b>Irréversible.</b></div>'
       + '<p class="quoi" style="margin:0">Les sauvegardes plus récentes ne sont pas touchées.</p>',
       '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go">Purger</button>', '520px');

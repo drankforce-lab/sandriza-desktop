@@ -292,7 +292,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<div class="col"><div class="k">Relevé</div><div class="v">' + sou(s.bankTotal) + '</div></div>'
       + '<div class="col"><div class="k">Dépôts et sorties</div><div class="v">' + sou(s.squareTotal) + '</div></div>'
       + '<div class="col"><div class="k">Écart</div><div class="v">' + sou(s.difference) + '</div></div>'
-      + '<div class="verdict">' + (s.isBalanced ? '✓ Équilibrée' : '⚠ Écart non résolu') + '</div>'
+      + '<div class="verdict">' + (s.isBalanced ? '✓ Équilibrée' : 'Écart non résolu') + '</div>'
       + '</div>';
   }
 

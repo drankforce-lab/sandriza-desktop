@@ -353,7 +353,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + (coutsOk ? '' : ' disabled') + '><span>Inclure le coût d’acquisition et le motif de vente à perte'
         + '<br><span class="s">' + (coutsOk
             ? 'Données de marge — le fichier ne devrait pas sortir de l’entreprise.'
-            : '⚠ Coûts non relus : actualisez la fenêtre principale pour activer cette option.') + '</span></span></label>'
+            : 'Coûts non relus : actualisez la fenêtre principale pour activer cette option.') + '</span></span></label>'
       : '';
     var lignesCol = (e.colonnes || []).map(function(c){
       var tags = '';
@@ -649,7 +649,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       relireDossier().then(function(){
         var ou = (DOSSIER && DOSSIER.dir) ? DOSSIER.dir : 'le dossier des exports';
         dire(quoi + ' enregistré : ' + r.nom + ' — dans ' + ou + '.'
-          + ((DOSSIER && DOSSIER.repli) ? ' ⚠ Votre dossier ne répondait pas.' : ''),
+          + ((DOSSIER && DOSSIER.repli) ? ' Votre dossier ne répondait pas.' : ''),
           (DOSSIER && DOSSIER.repli) ? 'att' : 'bon');
         dessiner();
       });
@@ -739,7 +739,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function analyser(texte, nom){
     dire('Analyse du fichier…');
     appeler('catalogio:analyser', { text:texte, nom:nom }).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       IMP = r.imp; if (r.peut) PEUT = r.peut;
       RAP = null; FILTRE = 'tous'; PAGE = 0; LIGNES = null;
       chargerLignes().then(function(){ dire('Aperçu prêt. Rien n’est encore écrit.', 'bon'); });
@@ -756,7 +756,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     dire('Application en cours, ne fermez pas cette fenêtre…');
     appeler('catalogio:appliquer', {}).then(function(r){
       BUSY = false;
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); dessiner(); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
       RAP = r.rapport; IMP = null; LIGNES = null;
       dessiner();
       var tot = (RAP.crees || 0) + (RAP.majs || 0);
@@ -778,7 +778,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function envoyerAvis(pid){
     dire('Envoi des avis…');
     appeler('catalogio:avis', pid).then(function(r){
-      if (!r || !r.ok) { dire('⚠ ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       if (r.rapport) RAP = r.rapport;
       dessiner();
       dire(r.sent ? (r.sent + ' avis envoyé' + plur(r.sent) + '.') : 'Aucun avis envoyé — voir la configuration des courriels.', r.sent ? 'bon' : 'att');

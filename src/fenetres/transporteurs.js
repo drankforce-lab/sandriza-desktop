@@ -55,7 +55,6 @@ body{background:var(--f-page);color:var(--tx);
   break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:1rem}
 .carte .th{display:flex;align-items:center;gap:.5rem;margin:0 0 .3rem}
 /* ⚠ Emoji en GRIS, jamais en couleur (préférence 2026-08-11). */
-.carte .em{font-size:1rem;filter:grayscale(1) brightness(1.6);opacity:.9}
 .carte h2{margin:0;font:700 .85rem/1.2 system-ui}
 .carte .bascule{margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.8rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
@@ -186,20 +185,20 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   // Les quatre transporteurs « simples » (identifiant + secret + n° de compte).
   var SIMPLES = [
-    { cle: 'purolator', em: '🟡', titre: 'Purolator', enId: 'pur-en',
+    { cle: 'purolator', titre: 'Purolator', enId: 'pur-en',
       user: { id: 'pur-user', label: 'Nom d’utilisateur', champ: 'apiUsername', place: 'votre_identifiant' },
       sec:  { id: 'pur-pass', label: 'Mot de passe', champ: 'motDePasse', place: '••••••••' },
       acct: { id: 'pur-acct', label: 'Numéro de compte', place: 'Ex : 12345678' } },
-    { cle: 'fedex', em: '🟣', titre: 'FedEx', enId: 'fdx-en',
+    { cle: 'fedex', titre: 'FedEx', enId: 'fdx-en',
       user: { id: 'fdx-cid', label: 'Client ID', champ: 'clientId', place: 'l7xxXXXXXXXX' },
       sec:  { id: 'fdx-sec', label: 'Client Secret', champ: 'clientSecret', place: '••••••••' },
       acct: { id: 'fdx-acct', label: 'Numéro de compte', place: 'Ex : 123456789' },
       mode: { id: 'fdx-mode' } },
-    { cle: 'ups', em: '🟤', titre: 'UPS', enId: 'ups-en',
+    { cle: 'ups', titre: 'UPS', enId: 'ups-en',
       user: { id: 'ups-cid', label: 'Client ID', champ: 'clientId', place: 'votre_client_id' },
       sec:  { id: 'ups-sec', label: 'Client Secret', champ: 'clientSecret', place: '••••••••' },
       acct: { id: 'ups-acct', label: 'Numéro de compte (optionnel)', place: 'Ex : A1B2C3' } },
-    { cle: 'canpar', em: '🟠', titre: 'Canpar', enId: 'can-en',
+    { cle: 'canpar', titre: 'Canpar', enId: 'can-en',
       user: { id: 'can-user', label: 'Nom d’utilisateur', champ: 'apiUsername', place: 'votre@courriel.com' },
       sec:  { id: 'can-pass', label: 'Mot de passe', champ: 'motDePasse', place: '••••••••' },
       acct: { id: 'can-acct', label: 'Numéro de compte (optionnel)', place: 'Ex : 99999' } },
@@ -207,7 +206,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function carteSimpleHtml(sp){
     var d = (D.carriers || {})[sp.cle] || {};
-    var h = '<div class="carte"><div class="th"><span class="em">' + sp.em + '</span>'
+    var h = '<div class="carte"><div class="th">'
       + '<h2>' + esc(sp.titre) + '</h2>' + basculeHtml(sp.enId, d.enabled) + '</div>';
     h += '<div class="gr2">'
       + texteHtml(sp.user.id, sp.user.label, d[sp.user.champ], sp.user.place, true)
@@ -228,7 +227,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function cartePcHtml(){
     var pc = (D.carriers || {})['postes-canada'] || {};
     var m = pc.cle || { defini: false, fin: '' };
-    var h = '<div class="carte"><div class="th"><span class="em"><span class="ic">📮</span></span>'
+    var h = '<div class="carte"><div class="th">'
       + '<h2>Postes Canada</h2>' + basculeHtml('cp-en', pc.enabled) + '</div>';
     h += '<div class="info">Identifiants sur <b>developer.canadapost-postescanada.ca</b>. La clé API est au '
       + 'format <b>utilisateur:motdepasse</b>. Valeurs de test : '

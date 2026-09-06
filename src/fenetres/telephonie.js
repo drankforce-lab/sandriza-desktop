@@ -631,7 +631,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + (v.read || RO ? '' : '<button class="b" type="button" data-vmlu="' + esc(v.id) + '">✓ Marquer lu</button>')
         + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '"><span class="ic">🗑</span></button>')
         + '</div></div>'
-        + '<div class="meta" style="margin-top:.25rem">' + (v.emailed === false ? '⚠ Échec de l’envoi courriel' : '<span class="ic">🎧</span> Audio envoyé par courriel (MP3), non conservé') + '</div></div>';
+        + '<div class="meta" style="margin-top:.25rem">' + (v.emailed === false ? 'Échec de l’envoi courriel' : '<span class="ic">🎧</span> Audio envoyé par courriel (MP3), non conservé') + '</div></div>';
     }
     box.innerHTML = h;
     var lus = box.querySelectorAll('[data-vmlu]'); for (var a = 0; a < lus.length; a++) lus[a].onclick = function(){ vmAction('vm:lu', this.getAttribute('data-vmlu')); };
@@ -650,7 +650,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     for (var i = 0; i < sms.length; i++) {
       var m = sms[i], entrant = (m.direction === 'inbound');
       h += '<div class="item' + (entrant && !m.read ? ' neuf' : '') + '">'
-        + '<div class="meta">' + (entrant ? '⬅ Reçu de ' : '➡ Envoyé à ') + '<b>' + esc(entrant ? m.from : m.to) + '</b> · '
+        + '<div class="meta">' + (entrant ? 'Reçu de ' : 'Envoyé à ') + '<b>' + esc(entrant ? m.from : m.to) + '</b> · '
         + esc(String(m.date || '').replace('T', ' ').replace('Z', '')) + (entrant && !m.read ? ' · <span class="ic">🔵</span>' : '') + '</div>'
         + '<div class="corpsmsg">' + esc(m.body || '') + '</div>'
         + '<div class="actes" style="margin-top:.25rem">'
@@ -755,7 +755,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var defNeedsNum = (C.defaultAction === 'forward') || !!(C.queue && C.queue.enabled);
     var ack = !!(C.forward && C.forward.noForwardAck);
     if (!hasGeneral && (optNeedsNum || defNeedsNum) && !ack) {
-      setTimeout(function(){ dire('⚠ Aucun numéro à composer (onglet Redirection) — les appels iront en messagerie.', 'att'); }, 900);
+      setTimeout(function(){ dire('Aucun numéro à composer (onglet Redirection) — les appels iront en messagerie.', 'att'); }, 900);
     }
   }
 

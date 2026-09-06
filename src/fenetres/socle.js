@@ -905,8 +905,8 @@ function _brEcrire(v){
          montre, sinon on croit son travail a l abri alors qu il ne l est pas. */
       if (typeof szDire === 'function') {
         szDire(r && r.motif === 'trop_gros'
-          ? '⚠ Cette saisie est trop volumineuse pour etre gardee en brouillon (images). Enregistrez pour ne rien perdre.'
-          : '⚠ Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
+          ? 'Cette saisie est trop volumineuse pour etre gardee en brouillon (images). Enregistrez pour ne rien perdre.'
+          : 'Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
       }
       return r || { ok: false };
     }, function(){ return { ok: false }; });
