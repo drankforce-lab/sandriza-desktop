@@ -1,0 +1,13 @@
+# ⚠ LES SONS DU VEILLEUR SONT BINAIRES, ET IL FAUT LE DIRE.
+# Git l'a bien deviné tout seul au premier ajout (tailles identiques au bit
+# près, vérifié), mais la détection est heuristique : elle regarde le début du
+# fichier. Un WAV commence par « RIFF…WAVE », du texte lisible, et la marge est
+# donc plus mince qu'elle n'en a l'air. Sur un poste réglé en `core.autocrlf=true`,
+# une conversion de fins de ligne dans du PCM ne produit aucune erreur — elle
+# produit un fichier qui ne joue plus, ou qui craque. La panne se manifesterait
+# par « le veilleur ne fait plus de bruit », six mois plus tard, et personne ne
+# penserait aux fins de ligne.
+*.wav binary
+*.woff2 binary
+*.png binary
+*.ico binary
