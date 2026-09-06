@@ -184,4 +184,42 @@ contextBridge.exposeInMainWorld('szPont', {
     .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e), info: null })),
   dossierExportsDefaut: () => ipcRenderer.invoke('export:dossierDefaut')
     .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e), info: null })),
+
+  /* ══ LE VEILLEUR — RÉGLAGES DU POSTE ══════════════════════════════════════
+     ⚠⚠ CES OPÉRATIONS NE PASSENT PAS PAR `appeler`, ET CE N'EST PAS UN DÉTAIL
+     DE RANGEMENT. `appeler` fait exécuter l'opération par la FENÊTRE PRINCIPALE,
+     c'est-à-dire DANS LA PAGE DU SITE : le jeton du veilleur y traverserait un
+     `executeJavaScript`, deviendrait une chaîne dans le document
+     d'administration, et vivrait une deuxième fois dans une deuxième mémoire.
+     C'est exactement ce que la règle « un secret ne traverse pas le pont »
+     interdit — apprise en portant la Configuration des paiements, et ce projet a
+     déjà payé une rotation pour un jeton trop bavard.
+     Ces réglages ne touchent d'ailleurs AUCUNE donnée du site : ils vivent sur
+     le poste (fichier chiffré + entrée de démarrage). Le passage par le site
+     n'aurait rien apporté, et aurait tout exposé.
+
+     ⚠ `etat` NE REND JAMAIS LE JETON — seulement « défini ou non » et ses quatre
+     derniers caractères, assez pour reconnaître lequel on a posé. */
+  veilleur: {
+    etat: () => ipcRenderer.invoke('veilleur:etat')
+      .catch(() => ({ ok: false, motif: 'indisponible' })),
+    // ⚠ Un jeton VIDE veut dire « garde celui qui est enregistré », JAMAIS
+    // « efface-le ». Sans cette règle, ouvrir la fenêtre et changer la case
+    // « démarrer avec Windows » effacerait le jeton au passage.
+    poserJeton: (jeton) => ipcRenderer.invoke('veilleur:poserJeton', String(jeton == null ? '' : jeton))
+      .catch(() => ({ ok: false, motif: 'indisponible' })),
+    // Le RETRAIT est un geste explicite et nommé, jamais un champ vidé.
+    retirerJeton: () => ipcRenderer.invoke('veilleur:retirerJeton')
+      .catch(() => ({ ok: false, motif: 'indisponible' })),
+    activer: (on) => ipcRenderer.invoke('veilleur:activer', !!on)
+      .catch(() => ({ ok: false, motif: 'indisponible' })),
+    demarrageAuto: (on) => ipcRenderer.invoke('veilleur:demarrageAuto', !!on)
+      .catch(() => ({ ok: false, motif: 'indisponible' })),
+    // « Réinstaller » de sa demande : repose l'entrée de démarrage ET relance le
+    // processus. C'est le seul chemin de réparation quand il a été fermé à la main.
+    relancer: () => ipcRenderer.invoke('veilleur:relancer')
+      .catch(() => ({ ok: false, motif: 'indisponible' })),
+    arreter: () => ipcRenderer.invoke('veilleur:arreter')
+      .catch(() => ({ ok: false, motif: 'indisponible' })),
+  },
 });

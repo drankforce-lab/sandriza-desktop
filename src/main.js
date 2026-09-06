@@ -31,6 +31,26 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { execFile } = require('child_process');
+
+/* ══ AIGUILLAGE DU VEILLEUR — DOIT RESTER LA PREMIÈRE CHOSE QUI S'EXÉCUTE ═════
+   Le même binaire sert à deux processus : l'administration, et le veilleur de
+   commandes et retours (`--veilleur`). C'est ce qui satisfait son point 5 —
+   « il devrait s'installer en même temps que l'application » — sans second
+   installateur ni seconde mise à jour à tenir.
+
+   ⚠⚠ LA PLACE DE CE BLOC EST LA MOITIÉ DE SA CORRECTION. Tout ce qui suit dans
+   ce fichier s'exécute au CHARGEMENT du module : des dizaines d'`ipcMain.handle`,
+   la lecture des réglages, et surtout le `requestSingleInstanceLock()` de la fin,
+   qui ferait `app.quit()` sur le processus veilleur puisque l'administration
+   détient déjà le verrou. Placé plus bas, l'aiguillage n'empêcherait donc rien :
+   le veilleur mourrait avant d'avoir posé son icône, EN SILENCE.
+   `return` au premier niveau d'un module CommonJS est licite (Node enveloppe le
+   fichier dans une fonction) : rien de ce qui suit n'est même lu. */
+if (process.argv.includes('--veilleur')) {
+  require('./veilleur').demarrer();
+  return;
+}
+
 // ⚠ EN HAUT, PAS AVEC LES AUTRES MODULES DE LA COQUILLE (qui sont chargés plus
 // bas) : `_dossierUtilisable` prend sa référence au chargement du fichier, donc
 // ce module doit exister AVANT la phase 4. Chargé tard, la constante vaudrait
@@ -505,46 +525,166 @@ ipcMain.handle('doc:pdf', async (e, html, opts) => documentEnPdf(html, opts || {
    ⚠ LA LECTURE CONSULTE LES DEUX SOURCES : si le repli a écrit l'entrée,
    `getLoginItemSettings` peut très bien continuer à répondre « non ». Ne lire
    qu'Electron ferait une coche qui se relève toute seule au redémarrage. */
-const AUTOL_NOM = 'Administration Sandriza';
-const AUTOL_CLE = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run';
-const _reg = (args) => {
-  try {
-    return { ok: true, sortie: require('child_process')
-      .execFileSync('reg', args, { encoding: 'utf8', windowsHide: true }) };
-  } catch (e) {
-    return { ok: false, sortie: String((e && e.stdout) || (e && e.message) || '') };
-  }
-};
-const _autolDansRegistre = () => {
-  if (process.platform !== 'win32') return false;
-  const r = _reg(['query', AUTOL_CLE, '/v', AUTOL_NOM]);
-  return r.ok && r.sortie.indexOf(AUTOL_NOM) >= 0;
-};
-const autoLaunchEtat = () => {
-  let parElectron = false;
-  try { parElectron = !!app.getLoginItemSettings().openAtLogin; } catch (e) {}
-  return parElectron || _autolDansRegistre();
-};
-const autoLaunchPoser = (vouloir) => {
-  const on = !!vouloir;
-  try { app.setLoginItemSettings({ openAtLogin: on, path: process.execPath, args: [] }); }
-  catch (e) {}
-  if (autoLaunchEtat() === on) return { ok: true, actif: on, par: 'electron' };
-  if (process.platform !== 'win32') return { ok: false, actif: autoLaunchEtat(), detail: '' };
-  /* Le repli. On écrit le chemin de l'exécutable EN COURS, entre guillemets :
-     sans eux, un chemin à espaces (« Program Files », « Administration
-     Sandriza.exe ») ferait chercher à Windows un programme nommé « C:\Program ». */
-  const r = on
-    ? _reg(['add', AUTOL_CLE, '/v', AUTOL_NOM, '/t', 'REG_SZ', '/d', '"' + process.execPath + '"', '/f'])
-    : _reg(['delete', AUTOL_CLE, '/v', AUTOL_NOM, '/f']);
-  if (autoLaunchEtat() === on) return { ok: true, actif: on, par: 'registre' };
-  return { ok: false, actif: autoLaunchEtat(),
-    detail: String(r.sortie || '').trim().split('\n')[0] || '' };
-};
+/* ⚠ LA MÉCANIQUE CI-DESSUS VIT MAINTENANT DANS `demarrage-auto.js`, et le
+   commentaire qui l'explique l'a suivie — c'est là qu'il faut la lire. Elle a
+   déménagé le jour où le VEILLEUR a eu besoin de la même chose : recopier
+   quinze lignes aurait fabriqué une TABLE JUMELLE de plus, et ce dépôt s'est
+   déjà brûlé deux fois là-dessus (les plafonds du pont, le jeton Turso dans 27
+   fichiers). Un module, deux appels, DEUX NOMS d'entrée — sans quoi cocher
+   « démarrer le veilleur » décocherait l'administration.
+   Les deux fonctions gardent leur nom : elles sont appelées ailleurs. */
+const demarrageAuto = require('./demarrage-auto');
+const autoLaunchEtat = () => demarrageAuto.etat(demarrageAuto.ADMIN.nom, demarrageAuto.ADMIN.args);
+const autoLaunchPoser = (vouloir) =>
+  demarrageAuto.poser(demarrageAuto.ADMIN.nom, demarrageAuto.ADMIN.args, vouloir);
 
 ipcMain.handle('autolaunch:get', () => autoLaunchEtat());
 ipcMain.handle('autolaunch:set', (e, on) => {
   try { app.setLoginItemSettings({ openAtLogin: !!on }); return true; } catch { return false; }
+});
+
+/* ══ PHASE 4b — LE VEILLEUR, VU DEPUIS L'ADMINISTRATION ═════════════════════
+ * Son point 6 : « on pourrait le désactiver au besoin et le réinstaller
+ * manuellement via l'application ». Ces sept opérations sont ce point-là.
+ *
+ * ⚠⚠ ELLES NE PASSENT PAS PAR `OPS_PONT`, ET C'EST DÉLIBÉRÉ — même raison que
+ * le plein écran et l'ancrage : cette liste-là garde l'accès aux DONNÉES et à la
+ * SESSION du site. Ici, rien de tout ça n'est touché. Le jeton vit sur le poste,
+ * chiffré ; l'entrée de démarrage est dans le registre ; le veilleur est un
+ * autre processus. Y mêler le site aurait fait traverser le jeton par un
+ * `executeJavaScript` dans la page d'administration — une deuxième copie dans
+ * une deuxième mémoire, pour rien. Voir « un secret ne traverse pas le pont ».
+ *
+ * ⚠ `veilleur:etat` NE REND JAMAIS LE JETON. Seulement « défini ou non » et ses
+ * quatre derniers caractères — assez pour reconnaître lequel on a posé, inutile
+ * à qui voudrait s'en servir. */
+const veilleurSecret = require('./veilleur-secret');
+
+// Le fichier d'état du VEILLEUR (son dossier à lui, sous celui de l'application).
+const _veilleurEtatFichier = () => path.join(app.getPath('userData'), 'veilleur', 'veilleur-etat.json');
+
+const _veilleurLireEtat = () => {
+  try { return JSON.parse(fs.readFileSync(_veilleurEtatFichier(), 'utf8')) || {}; }
+  catch { return {}; }
+};
+
+/* ⚠ « TOURNE-T-IL ? » SE MESURE À DEUX CHOSES, JAMAIS À UNE.
+   Le numéro de processus seul ne suffit pas : Windows les RECYCLE, et un `pid`
+   réattribué à un tout autre programme ferait répondre « le veilleur tourne » à
+   propos du bloc-notes de quelqu'un. Le battement seul ne suffit pas non plus :
+   un veilleur tué net laisse son dernier battement en place, et paraîtrait vivant
+   pendant les trois minutes suivantes.
+   Les deux ensemble : un processus qui existe ET qui a donné signe de vie
+   récemment. */
+const _veilleurEnMarche = () => {
+  const e = _veilleurLireEtat();
+  const pid = parseInt(e.pid, 10);
+  if (!Number.isFinite(pid) || pid <= 0) return false;
+  try { process.kill(pid, 0); } catch { return false; }   // n'envoie rien : teste l'existence
+  const vu = Date.parse(e.vu || '');
+  if (!Number.isFinite(vu)) return false;
+  // Le veilleur bat toutes les 60 s ; on tolère trois tours ratés avant de le
+  // déclarer figé, pour ne pas crier au loup sur une machine qui a dormi.
+  return (Date.now() - vu) < 3.5 * 60 * 1000;
+};
+
+const _veilleurEtat = () => {
+  const e = _veilleurLireEtat();
+  const jeton = veilleurSecret.lire();
+  return {
+    ok: true,
+    // ⚠ « configuré », « en marche » et « à l'écoute » sont TROIS choses. Un
+    // veilleur peut tourner sans jeton (il ne dira rien), avoir un jeton sans
+    // tourner (personne ne l'a lancé), ou tourner en pause. L'écran doit
+    // pouvoir dire laquelle manque — sans quoi « ça ne marche pas » n'a pas
+    // de réponse.
+    jetonDefini: jeton !== '',
+    jetonFin: jeton ? jeton.slice(-4) : '',
+    chiffrementDispo: veilleurSecret.disponible(),
+    enMarche: _veilleurEnMarche(),
+    actif: e.actif !== false,
+    vu: e.vu || null,
+    depuis: e.depuis || null,
+    demarrageAuto: demarrageAuto.etat(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args),
+  };
+};
+
+/* Lancer le veilleur = relancer NOTRE PROPRE exécutable avec `--veilleur`.
+   `detached` + `unref` : il ne doit pas mourir avec l'administration — c'est
+   toute la demande (« même si l'application est fermée »). */
+const _veilleurLancer = () => {
+  try {
+    execFile(process.execPath, ['--veilleur'], { detached: true, stdio: 'ignore' }).unref();
+    return true;
+  } catch { return false; }
+};
+
+ipcMain.handle('veilleur:etat', () => _veilleurEtat());
+
+ipcMain.handle('veilleur:poserJeton', (e, jeton) => {
+  const v = String(jeton == null ? '' : jeton).trim();
+  /* ⚠⚠ UN CHAMP VIDE VEUT DIRE « GARDE CELUI QUI EST ENREGISTRÉ », JAMAIS
+     « efface-le ». Sans cette règle, ouvrir la fenêtre pour cocher « démarrer
+     avec Windows » et enregistrer effacerait le jeton au passage — et le veilleur
+     deviendrait muet sans que personne n'ait rien demandé. Le retrait a son
+     propre bouton, plus bas. */
+  if (v === '') return { ...(_veilleurEtat()), ok: true, inchange: true };
+  const r = veilleurSecret.ecrire(v);
+  if (!r.ok) return { ok: false, motif: r.motif };
+  return { ..._veilleurEtat(), ok: true };
+});
+
+ipcMain.handle('veilleur:retirerJeton', () => {
+  veilleurSecret.ecrire('');
+  return { ..._veilleurEtat(), ok: true };
+});
+
+ipcMain.handle('veilleur:activer', (e, on) => {
+  // On écrit dans le fichier du veilleur : il le relit à chaque tour, donc la
+  // pause prend effet au plus tard au tour suivant, même s'il tourne déjà.
+  const etat = { ..._veilleurLireEtat(), actif: !!on };
+  try {
+    fs.mkdirSync(path.dirname(_veilleurEtatFichier()), { recursive: true });
+    fs.writeFileSync(_veilleurEtatFichier(), JSON.stringify(etat, null, 2), 'utf8');
+  } catch { return { ok: false, motif: 'ecriture' }; }
+  return { ..._veilleurEtat(), ok: true };
+});
+
+ipcMain.handle('veilleur:demarrageAuto', (e, on) => {
+  const r = demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, on);
+  // ⚠ On rend le verdict COMPLET, `detail` compris : c'est lui qui nomme la
+  // cause à l'écran quand Windows refuse l'écriture. Un booléen nu ici, c'est
+  // le défaut de 2026-08-20 qu'on rejouerait.
+  return { ..._veilleurEtat(), ok: r.ok, par: r.par || '', detail: r.detail || '' };
+});
+
+/* « Réinstaller manuellement via l'application » (son point 6) : repose l'entrée
+   de démarrage ET relance le processus. C'est le seul chemin de réparation
+   quand il a été fermé à la main ou qu'il a disparu. */
+ipcMain.handle('veilleur:relancer', async () => {
+  const dm = demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, true);
+  if (!_veilleurEnMarche()) _veilleurLancer();
+  /* ⚠ ON LAISSE AU PROCESSUS LE TEMPS DE POSER SON PREMIER BATTEMENT AVANT DE
+     RELIRE. Sans cette attente, `enMarche` répondait FAUX juste après un
+     lancement RÉUSSI — l'écran aurait annoncé un échec sur une réussite, et on
+     aurait relancé une deuxième fois. */
+  await new Promise((r) => setTimeout(r, 1500));
+  const et = _veilleurEtat();
+  return { ...et, ok: et.enMarche, demarrageDetail: dm.ok ? '' : (dm.detail || '') };
+});
+
+ipcMain.handle('veilleur:arreter', async () => {
+  const e = _veilleurLireEtat();
+  const pid = parseInt(e.pid, 10);
+  // ⚠ On retire AUSSI l'entrée de démarrage : arrêter un veilleur qui revient
+  // à la prochaine ouverture de session n'est pas l'arrêter, c'est le reporter.
+  demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, false);
+  if (Number.isFinite(pid) && pid > 0) {
+    try { process.kill(pid); } catch { /* déjà parti, ou pas à nous : rien à faire */ }
+  }
+  await new Promise((r) => setTimeout(r, 600));
+  const et = _veilleurEtat();
+  return { ...et, ok: !et.enMarche };
 });
 
 // ══ PHASE 4 — FICHIERS D'EXPORT (ce que le navigateur ne peut pas) ═══════════
@@ -2738,6 +2878,12 @@ const PAGES_ANCRABLES = () => ({
      seul toutes les 3 s. Le droit super-administrateur reste dans le COEUR
      (journal:verrous refuse les autres) — la fenetre ne decide de rien. */
   'verrous': ['Verrous', () => pageVerrous()],
+  /* ⚠ ÉCRAN NÉ NATIF, SANS JUMEAU WEB — comme « Verrous ». Tout ce qu'il règle
+     vit sur le POSTE (jeton chiffré, entrée de registre, autre processus) : une
+     page du site n'a accès à aucun des trois. Il est donc branché en fenêtre à
+     part et NON dans le bloc ancrable, qui demanderait au site de naviguer vers
+     une section « veilleur » qui n'existe pas — le clic n'ouvrirait RIEN. */
+  'veilleur': ['Veilleur de commandes', () => pageVeilleurConfig()],
   'incidents': ['Incidents de sécurité', () => pageIncidents('')],
   'sauvegarde': ['Sauvegarde & Restauration', () => pageSauvegarde('')],
   'studio': ['Studio virtuel', () => pageStudio()],
@@ -3881,6 +4027,7 @@ const { pageListeNoire } = require('./fenetres/listenoire');
 const { pageProfil } = require('./fenetres/profil');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageVerrous } = require('./fenetres/verrous');
+const { pageVeilleurConfig } = require('./fenetres/veilleur-config');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -4041,6 +4188,16 @@ const actionApp = (nom) => {
         { width: 900, height: 660, minWidth: 680, minHeight: 440 });
       if (_reuV && winV && !winV.isDestroyed()) {
         winV.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
+    case 'veilleur': {
+      const _avVe = fenetresNatives.get('veilleur');
+      const _reuVe = !!(_avVe && !_avVe.isDestroyed());
+      const winVe = ouvrirNative('veilleur', 'Veilleur de commandes', pageVeilleurConfig(),
+        { width: 640, height: 700, minWidth: 520, minHeight: 520 });
+      if (_reuVe && winVe && !winVe.isDestroyed()) {
+        winVe.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
       }
       break;
     }

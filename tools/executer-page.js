@@ -104,7 +104,25 @@ const faireElement = (compteur) => ({
   // ⚠ PAS de `innerHTML` en propriété simple ici : dans un littéral d'objet la
   // dernière définition gagne, et elle écraserait l'accesseur ci-dessus — le
   // compteur resterait à zéro sans que rien ne le signale.
-  outerHTML: '', textContent: '', value: '', checked: false,
+  /* ⚠⚠ `textContent` COMPTE AUSSI, ET IL NE COMPTAIT PAS. Le compteur ne
+     regardait que `innerHTML` : une fenêtre qui dessine en posant du TEXTE dans
+     des éléments déjà présents dans le gabarit — ce que fait la fenêtre du
+     veilleur, et ce qui est la bonne façon d'écrire un état — était déclarée
+     « ne dessine RIEN », alors que son dessin s'était parfaitement exécuté.
+     Le contrôle accusait donc le jeu de réponses au lieu d'accuser sa propre
+     cécité, et la seule façon de le faire taire aurait été de réécrire la
+     fenêtre en `innerHTML` pour plaire à la mesure. C'est l'inverse qu'il faut
+     faire : la mesure suit le code, pas le contraire.
+     ⚠ Seuil plus bas que pour `innerHTML` (40) : du texte est bien plus dense
+     que du balisage. 12 caractères laissent passer une vraie phrase d'état et
+     écartent un compteur (« 3 ») ou une pastille. */
+  get textContent() { return this._texte || ''; },
+  set textContent(v) {
+    this._texte = v;
+    if (compteur && String(v).length > 12) compteur.ecritures++;
+    if (compteur && compteur.ecrit) compteur.ecrit.push(String(v));
+  },
+  outerHTML: '', value: '', checked: false,
   disabled: false, selected: false, id: '', className: '', tagName: 'DIV',
   files: [], options: [], selectedIndex: 0, scrollHeight: 100, offsetHeight: 100,
   appendChild(c) { this.children.push(c); return c; },
@@ -180,6 +198,22 @@ function executerPage(script, reponses, opts) {
     )),
     fermer() {}, pleinEcran: () => surveille(Promise.resolve(false)),
     surEtatCaisse: () => () => {}, ajusterHauteur() {},
+    /* ⚠ LE VEILLEUR N'A PAS D'OPÉRATIONS `appeler` — son jeton ne doit pas
+       traverser la page du site, il a donc son propre canal. S'il manquait ici,
+       sa fenêtre prendrait la branche « cette version ne connaît pas le
+       veilleur », désactiverait tout et n'atteindrait JAMAIS son dessin : le
+       contrôle serait vert sans avoir rien regardé. C'est exactement le chemin
+       d'à côté décrit en tête de `reponses-fenetres.js`.
+       Les réponses viennent de la même table que les autres, sous les clés
+       `veilleur:xxx`. */
+    veilleur: ['etat', 'poserJeton', 'retirerJeton', 'activer', 'demarrageAuto',
+               'relancer', 'arreter'].reduce((o, nom) => {
+      o[nom] = () => surveille(Promise.resolve(
+        Object.prototype.hasOwnProperty.call(rep, 'veilleur:' + nom)
+          ? rep['veilleur:' + nom] : { ok: true }
+      ));
+      return o;
+    }, {}),
   };
 
   const socle = {
