@@ -2146,30 +2146,19 @@ module.exports = {
     ];
   })(),
 
-  /* Veilleur de commandes — les QUATRE états qui ne se ressemblent pas, et dont
-     la confusion rendrait « ça ne marche pas » indiagnosticable :
-     - il tourne, avec jeton, à l'écoute (le cas nominal) ;
-     - il tourne, SANS jeton (il ne peut rien demander) ;
-     - il a un jeton mais NE TOURNE PAS (personne ne l'a lancé) ;
-     - le poste ne sait pas ranger un secret (magasin du système indisponible).
-     ⚠ AUCUN JEU NE PORTE DE JETON ENTIER — `jetonFin` seulement. Un jeu qui en
-     contiendrait un signalerait que la fenêtre en attend un, et c'est justement
-     ce qu'elle ne doit jamais recevoir. */
+  /* Veilleur de commandes — les états qui ne se ressemblent pas.
+     ⚠ IL Y EN AVAIT QUATRE, IL EN RESTE TROIS : « sans jeton » et « poste qui ne
+     sait pas ranger un secret » ont disparu le 2026-09-06 avec le jeton
+     lui-même. Un jeu d'essai qui décrit un état devenu impossible ne protège
+     plus rien — il fige une conception abandonnée. */
   'veilleur-config.js': (function(){
-    var base = { ok: true, chiffrementDispo: true, actif: true, depuis: null };
-    var enMarche = Object.assign({}, base, { jetonDefini: true, jetonFin: 'a9f2',
-      enMarche: true, vu: '2026-09-06T13:40:00.000Z', demarrageAuto: true });
+    var base = { ok: true, actif: true, depuis: null };
+    var enMarche = Object.assign({}, base, { enMarche: true,
+      vu: '2026-09-06T13:40:00.000Z', demarrageAuto: true, avecApp: true });
     return [
-      { nom: 'en marche, jeton pose, a l ecoute', reponses: { 'veilleur:etat': enMarche } },
-      { nom: 'en marche mais SANS jeton', reponses: { 'veilleur:etat':
-        Object.assign({}, base, { jetonDefini: false, jetonFin: '', enMarche: true,
-          vu: '2026-09-06T13:40:00.000Z', demarrageAuto: false }) } },
-      { nom: 'jeton pose mais le processus NE TOURNE PAS', reponses: { 'veilleur:etat':
-        Object.assign({}, base, { jetonDefini: true, jetonFin: 'a9f2', enMarche: false,
-          vu: null, demarrageAuto: false }) } },
-      { nom: 'le poste ne sait pas ranger un secret', reponses: { 'veilleur:etat':
-        Object.assign({}, base, { chiffrementDispo: false, jetonDefini: false,
-          jetonFin: '', enMarche: false, vu: null, demarrageAuto: false }) } },
+      { nom: 'en marche, a l ecoute', reponses: { 'veilleur:etat': enMarche } },
+      { nom: 'le processus NE TOURNE PAS', reponses: { 'veilleur:etat':
+        Object.assign({}, base, { enMarche: false, vu: null, demarrageAuto: false, avecApp: true }) } },
       { nom: 'en pause', reponses: { 'veilleur:etat':
         Object.assign({}, enMarche, { actif: false }) } }
     ];

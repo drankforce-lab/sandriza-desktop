@@ -206,7 +206,7 @@ function executerPage(script, reponses, opts) {
        d'à côté décrit en tête de `reponses-fenetres.js`.
        Les réponses viennent de la même table que les autres, sous les clés
        `veilleur:xxx`. */
-    veilleur: ['etat', 'poserJeton', 'retirerJeton', 'activer', 'demarrageAuto',
+    veilleur: ['etat', 'activer', 'demarrageAuto', 'avecApp',
                'relancer', 'arreter'].reduce((o, nom) => {
       o[nom] = () => surveille(Promise.resolve(
         Object.prototype.hasOwnProperty.call(rep, 'veilleur:' + nom)

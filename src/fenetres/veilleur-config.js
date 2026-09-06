@@ -7,28 +7,32 @@
  * réinstaller manuellement via l'application ». C'est cet écran.
  *
  * ⚠⚠ IL N'A PAS DE JUMEAU WEB, ET IL NE PEUT PAS EN AVOIR. Tout ce qu'il règle
- * vit SUR LE POSTE : un jeton chiffré par le magasin du système, une entrée de
- * registre, un autre processus. Une page web n'a accès à aucun des trois. C'est
- * le même cas que « Verrous » — un écran né natif — et il est donc branché comme
- * lui : une fenêtre à part, pas une section ancrable du dock (le chemin ancrable
- * demande au SITE de naviguer vers une section du même nom, qui n'existe pas ici,
- * et le clic de menu n'ouvrirait RIEN).
+ * vit SUR LE POSTE : une entrée de registre, un réglage de poste, un autre
+ * processus. Une page web n'a accès à aucun des trois. C'est le même cas que
+ * « Verrous » — un écran né natif — et il est donc branché comme lui : une
+ * fenêtre à part, pas une section ancrable du dock (le chemin ancrable demande au
+ * SITE de naviguer vers une section du même nom, qui n'existe pas ici, et le clic
+ * de menu n'ouvrirait RIEN).
  *
- * ⚠⚠ LE JETON NE TRAVERSE PAS LE PONT. Les opérations passent par
- * `szPont.veilleur.*`, pas par `szPont.appeler` : `appeler` fait exécuter
- * l'opération DANS LA PAGE DU SITE, et le jeton y deviendrait une deuxième copie
- * dans une deuxième mémoire. La lecture ne rend d'ailleurs jamais sa valeur —
- * seulement « défini ou non » et ses quatre derniers caractères.
+ * ══⚠⚠ CET ÉCRAN A PERDU SA MOITIÉ LE 2026-09-06, ET C'EST UN PROGRÈS ═════════
+ * Il portait une carte « Jeton de veille » : un secret à coller sur CHAQUE
+ * poste, avec ses règles (champ vide = inchangé, retrait explicite, chiffrement
+ * du magasin système). Tout cela était soigné — et tout cela était de trop.
+ * Ses mots : « je ne veux pas de jeton configuré côté poste pour le veilleur, il
+ * faut considérer que ce dernier pourra être installé aussi par nos employés et
+ * ça doit être simple ».
+ * Il a raison, et c'est la source des trois signalements précédents : un secret
+ * à poser à la main est une consigne à transmettre, un secret qui circule, et un
+ * employé bloqué le jour où il ne l'a pas. Le veilleur porte désormais la CLÉ DE
+ * L'APPLICATION, comme le canal de mise à jour. Rien à saisir.
+ * ⚠ La bonne question n'était pas « comment bien faire circuler ce secret »,
+ * c'était « pourquoi un secret de plus ». Un mécanisme irréprochable au service
+ * d'un besoin qui n'existe pas reste du travail à jeter.
  *
- * ⚠⚠ UN CHAMP VIDE VEUT DIRE « INCHANGÉ », JAMAIS « EFFACE ». Sans cette règle,
- * ouvrir la fenêtre pour cocher une case et enregistrer effacerait le jeton au
- * passage, et le veilleur deviendrait muet sans que personne n'ait rien demandé.
- * Le retrait a son propre bouton, et il le dit.
- *
- * ⚠ TROIS ÉTATS À NE PAS CONFONDRE, et c'est la moitié de l'écran : « configuré »
- * (il a un jeton), « en marche » (le processus tourne) et « à l'écoute » (il n'est
- * pas en pause). On peut tourner sans jeton, avoir un jeton sans tourner, ou
- * tourner en pause. Sans les distinguer, « ça ne marche pas » n'a pas de réponse.
+ * ⚠ DEUX ÉTATS À NE PAS CONFONDRE : « en marche » (le processus tourne) et « à
+ * l'écoute » (il n'est pas en pause). Sans les distinguer, « ça ne marche pas »
+ * n'a pas de réponse. (Il y en avait TROIS ; « configuré » est parti avec le
+ * jeton, et c'est autant de moins à expliquer.)
  *
  * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit.
@@ -105,14 +109,15 @@ function pageVeilleurConfig() {
     bulle et un son — <b>un son qui monte</b> pour une commande, <b>un son qui
     descend</b> pour un retour. Il continue de veiller <b>même quand cette
     application est fermée</b>.</p>
+  <p class="quoi"><b>Rien à configurer.</b> Le veilleur s'installe avec
+    l'application et se sert de la même autorisation qu'elle : aucun code, aucune
+    clé à saisir. Sur un poste d'employé, il suffit d'installer l'application.</p>
 
   <div class="carte">
     <h2>État</h2>
     <div class="etats">
       <div class="et"><span class="pastille" id="p-marche"></span>
         <span id="t-marche">Lecture…</span></div>
-      <div class="et"><span class="pastille" id="p-jeton"></span>
-        <span id="t-jeton">Lecture…</span></div>
       <div class="et"><span class="pastille" id="p-ecoute"></span>
         <span id="t-ecoute">Lecture…</span></div>
     </div>
@@ -129,22 +134,6 @@ function pageVeilleurConfig() {
     <p class="diag" id="diag"></p>
   </div>
 
-  <div class="carte">
-    <h2>Jeton de veille</h2>
-    <label class="champ">
-      <span class="lbl">Jeton</span>
-      <input class="t" type="password" id="f-jeton" autocomplete="off" spellcheck="false">
-      <span class="sub" id="s-jeton"></span>
-    </label>
-    <p class="quoi" style="margin:0">Ce jeton est celui posé sur le serveur dans la
-      variable <b>ELG_VEILLEUR_TOKEN</b>. Il ne donne accès qu'à des
-      <b>nombres</b> — jamais au contenu d'une commande. Il est rangé
-      <b>chiffré</b> sur ce poste et n'est jamais réaffiché.</p>
-    <div class="rangee">
-      <button class="prim" id="b-jeton">Enregistrer le jeton</button>
-      <button class="dgr" id="b-retirer">Retirer le jeton de ce poste</button>
-    </div>
-  </div>
 </div>
 <div class="pied">
   <span class="msg" id="msg"></span>
@@ -186,17 +175,6 @@ ${JS_DIRE}
     if (e.enMarche) pose('p-marche','t-marche','bon','Le veilleur tourne sur ce poste.');
     else pose('p-marche','t-marche','mal','Le veilleur ne tourne pas.');
 
-    if (e.jetonDefini) {
-      pose('p-jeton','t-jeton','bon','Jeton enregistre (se termine par ' + e.jetonFin + ').');
-      $('s-jeton').textContent = 'Un jeton est deja enregistre. Laissez le champ VIDE pour le garder tel quel.';
-    } else if (!e.chiffrementDispo) {
-      pose('p-jeton','t-jeton','mal','Ce poste ne peut pas ranger un secret en surete.');
-      $('s-jeton').textContent = 'Le magasin de secrets du systeme est indisponible : le jeton ne sera pas enregistre.';
-    } else {
-      pose('p-jeton','t-jeton','att','Aucun jeton : le veilleur ne peut rien demander.');
-      $('s-jeton').textContent = 'Collez ici le jeton pose sur le serveur (ELG_VEILLEUR_TOKEN).';
-    }
-
     if (!e.actif) pose('p-ecoute','t-ecoute','att','En pause : il ne signale rien.');
     else if (e.vu) pose('p-ecoute','t-ecoute','bon','A l ecoute. Dernier controle : ' + heure(e.vu) + '.');
     else pose('p-ecoute','t-ecoute','att','A l ecoute, pas encore de controle.');
@@ -226,7 +204,6 @@ ${JS_DIRE}
         + ' — le veilleur, lui, lit ' + la + '. Cliquez sur Demarrer / reinstaller.';
     }
     $('b-arreter').disabled = !e.enMarche;
-    $('b-retirer').disabled = !e.jetonDefini;
   };
 
   var heure = function(iso){
@@ -255,8 +232,8 @@ ${JS_DIRE}
   };
 
   var MOTIFS = {
-    trop_court: 'Ce jeton est trop court (24 caracteres au minimum).',
-    chiffrement_indisponible: 'Ce poste ne peut pas ranger un secret en surete : rien n a ete enregistre.',
+    sans_cle: 'Cette version de l application n a pas de cle (defaut de construction).',
+    refus: 'Le serveur a refuse cette version de l application.',
     ecriture: 'L enregistrement a echoue.',
     indisponible: 'L application n a pas repondu.'
   };
@@ -312,31 +289,6 @@ ${JS_DIRE}
       function(r){ return r.demarrageAuto
         ? 'Le veilleur demarrera avec Windows.'
         : 'Le veilleur ne demarrera plus avec Windows.'; });
-  };
-
-  $('b-jeton').onclick = function(){
-    var v = $('f-jeton').value.trim();
-    /* ⚠ VIDE = INCHANGE. On le DIT plutot que de laisser croire a un
-       enregistrement — et surtout on n efface pas. */
-    if (v === '' && etat && etat.jetonDefini) {
-      dire('Champ vide : le jeton enregistre est conserve tel quel.', 'att');
-      return;
-    }
-    if (v === '') { dire('Collez d abord le jeton.', 'err'); return; }
-    faire(V.poserJeton(v), 'Enregistrement du jeton…', function(){
-      $('f-jeton').value = '';
-      return 'Jeton enregistre, chiffre sur ce poste.';
-    });
-  };
-
-  $('b-retirer').onclick = function(){
-    /* Le RETRAIT est un geste explicite — jamais un champ vide. On confirme
-       quand meme : sans jeton, le veilleur devient muet. */
-    if (!window.confirm('Retirer le jeton de ce poste ? Le veilleur ne pourra plus rien signaler tant qu un nouveau jeton ne sera pas pose.')) return;
-    faire(V.retirerJeton(), 'Retrait…', function(){
-      $('f-jeton').value = '';
-      return 'Jeton retire de ce poste.';
-    });
   };
 
   relire();

@@ -198,18 +198,13 @@ contextBridge.exposeInMainWorld('szPont', {
      le poste (fichier chiffré + entrée de démarrage). Le passage par le site
      n'aurait rien apporté, et aurait tout exposé.
 
-     ⚠ `etat` NE REND JAMAIS LE JETON — seulement « défini ou non » et ses quatre
-     derniers caractères, assez pour reconnaître lequel on a posé. */
+     ⚠⚠ IL N'Y A PLUS DE JETON DEPUIS LE 2026-09-06 : le veilleur porte la clé
+     de l'application, comme le canal de mise à jour. Ces opérations ne
+     transportent donc plus AUCUN secret — elles pilotent un processus et
+     lisent deux réglages de poste. La raison de ne pas passer par `appeler`
+     tient quand même : rien de tout cela n'appartient au site. */
   veilleur: {
     etat: () => ipcRenderer.invoke('veilleur:etat')
-      .catch(() => ({ ok: false, motif: 'indisponible' })),
-    // ⚠ Un jeton VIDE veut dire « garde celui qui est enregistré », JAMAIS
-    // « efface-le ». Sans cette règle, ouvrir la fenêtre et changer la case
-    // « démarrer avec Windows » effacerait le jeton au passage.
-    poserJeton: (jeton) => ipcRenderer.invoke('veilleur:poserJeton', String(jeton == null ? '' : jeton))
-      .catch(() => ({ ok: false, motif: 'indisponible' })),
-    // Le RETRAIT est un geste explicite et nommé, jamais un champ vidé.
-    retirerJeton: () => ipcRenderer.invoke('veilleur:retirerJeton')
       .catch(() => ({ ok: false, motif: 'indisponible' })),
     activer: (on) => ipcRenderer.invoke('veilleur:activer', !!on)
       .catch(() => ({ ok: false, motif: 'indisponible' })),

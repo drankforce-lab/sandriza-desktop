@@ -110,14 +110,6 @@ function poser(nom, args, vouloir) {
 
 // Les deux entrées du dépôt, nommées ICI pour qu'on ne les invente pas deux fois.
 const ADMIN = { nom: 'Administration Sandriza', args: [] };
-/* ⚠ `args` EST UNE FONCTION POUR LE VEILLEUR, pas une liste figée : elle doit
-   porter `--racine=<userData>`, qui n'est connu qu'à l'exécution. Sans lui,
-   l'entrée de démarrage Windows lancerait un veilleur qui DÉDUIT son chemin —
-   c'est-à-dire le défaut du 2026-09-06, ressuscité au prochain redémarrage du
-   poste alors qu'il aurait disparu du lancement par l'application. */
-const VEILLEUR = {
-  nom: 'Veilleur Sandriza',
-  get args() { return ['--veilleur', '--racine=' + app.getPath('userData')]; },
-};
+const VEILLEUR = { nom: 'Veilleur Sandriza', args: ['--veilleur'] };
 
 module.exports = { etat, poser, ADMIN, VEILLEUR, CLE };

@@ -96,10 +96,11 @@ const ALLOWED_HOSTS = [
 // qu'on évite ici, c'est qu'elle soit GREPPABLE sur le web par le premier
 // scanner venu — ce qui est très différent d'avoir à obtenir un installateur
 // distribué sous mot de passe temporaire.
-const APP_KEY = (() => {
-  if (process.env.ELG_APP_KEY) return process.env.ELG_APP_KEY;
-  try { return require('./cle').APP_KEY || ''; } catch { return ''; }
-})();
+// ⚠ LA LECTURE VIT DANS `cle-app.js` DEPUIS LE 2026-09-06 : le veilleur a besoin
+// de la même clé, et il ne peut pas la prendre ici — `main.js` lui rend la main
+// à sa première ligne sans jamais définir cette constante. Un module, une
+// lecture ; le commentaire ci-dessus y a suivi.
+const { APP_KEY } = require('./cle-app');
 
 // Marque l'application auprès du serveur. Posé sur la session par défaut AVANT
 // toute navigation : l'en-tête accompagne le document, les assets et les appels
@@ -568,8 +569,6 @@ ipcMain.handle('autolaunch:set', (e, on) => {
  * ⚠ `veilleur:etat` NE REND JAMAIS LE JETON. Seulement « défini ou non » et ses
  * quatre derniers caractères — assez pour reconnaître lequel on a posé, inutile
  * à qui voudrait s'en servir. */
-const veilleurSecret = require('./veilleur-secret');
-
 // Le fichier d'état du VEILLEUR (son dossier à lui, sous celui de l'application).
 const _veilleurEtatFichier = () => path.join(app.getPath('userData'), 'veilleur', 'veilleur-etat.json');
 
@@ -600,7 +599,6 @@ const _veilleurEnMarche = () => {
 
 const _veilleurEtat = () => {
   const e = _veilleurLireEtat();
-  const jeton = veilleurSecret.lire();
   return {
     ok: true,
     // ⚠ « configuré », « en marche » et « à l'écoute » sont TROIS choses. Un
@@ -608,24 +606,10 @@ const _veilleurEtat = () => {
     // tourner (personne ne l'a lancé), ou tourner en pause. L'écran doit
     // pouvoir dire laquelle manque — sans quoi « ça ne marche pas » n'a pas
     // de réponse.
-    jetonDefini: jeton !== '',
-    jetonFin: jeton ? jeton.slice(-4) : '',
-    chiffrementDispo: veilleurSecret.disponible(),
     enMarche: _veilleurEnMarche(),
     actif: e.actif !== false,
     vu: e.vu || null,
     depuis: e.depuis || null,
-    /* ⚠⚠ LE DIAGNOSTIC QUI MANQUAIT LE 2026-09-06. Sa capture montrait
-       l'administration disant « jeton enregistré (se termine par 9d44) » et le
-       veilleur, au même instant, « jeton absent ». Les deux disaient vrai — ils
-       ne regardaient pas le même fichier — et RIEN à l'écran ne permettait de
-       s'en apercevoir. L'écran affiche donc les DEUX chemins : celui d'ici, et
-       celui que le veilleur a écrit dans son état au dernier battement. S'ils
-       diffèrent, ça se voit d'un coup d'œil au lieu de coûter un cycle
-       d'installation par hypothèse. */
-    jetonChemin: veilleurSecret.chemin(),
-    veilleurJetonChemin: e.jetonChemin || '',
-    veilleurJetonVu: !!e.jetonVu,
     avecApp: reglages.get('veilleurAvecApp') !== false,
     demarrageAuto: demarrageAuto.etat(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args),
   };
@@ -634,12 +618,14 @@ const _veilleurEtat = () => {
 /* Lancer le veilleur = relancer NOTRE PROPRE exécutable avec `--veilleur`.
    `detached` + `unref` : il ne doit pas mourir avec l'administration — c'est
    toute la demande (« même si l'application est fermée »). */
-/* ⚠ LES ARGUMENTS DU VEILLEUR, EN UN SEUL ENDROIT. `--racine` lui DIT où vit le
-   jeton, au lieu de le laisser le déduire : les deux processus le déduisaient
-   séparément et ne tombaient pas sur le même dossier (2026-09-06). L'entrée de
-   démarrage Windows porte les mêmes arguments, sinon un veilleur lancé par
-   Windows chercherait ailleurs que celui lancé par l'application. */
-const veilleurArgs = () => ['--veilleur', '--racine=' + app.getPath('userData')];
+/* Les arguments du veilleur, en un seul endroit.
+   ⚠ `--racine=` a existé une journée, pour dire au veilleur où vivait le jeton
+   partagé. Le jeton est parti (la clé d'application le remplace), donc plus rien
+   ne doit s'accorder entre les deux processus : l'argument est parti avec lui.
+   Un correctif dont la CAUSE disparaît doit disparaître aussi — sinon il reste
+   du code que personne n'ose retirer parce que plus personne ne sait pourquoi il
+   est là. */
+const veilleurArgs = () => ['--veilleur'];
 
 const _veilleurLancer = () => {
   try {
@@ -657,24 +643,6 @@ const _veilleurLancer = () => {
 };
 
 ipcMain.handle('veilleur:etat', () => _veilleurEtat());
-
-ipcMain.handle('veilleur:poserJeton', (e, jeton) => {
-  const v = String(jeton == null ? '' : jeton).trim();
-  /* ⚠⚠ UN CHAMP VIDE VEUT DIRE « GARDE CELUI QUI EST ENREGISTRÉ », JAMAIS
-     « efface-le ». Sans cette règle, ouvrir la fenêtre pour cocher « démarrer
-     avec Windows » et enregistrer effacerait le jeton au passage — et le veilleur
-     deviendrait muet sans que personne n'ait rien demandé. Le retrait a son
-     propre bouton, plus bas. */
-  if (v === '') return { ...(_veilleurEtat()), ok: true, inchange: true };
-  const r = veilleurSecret.ecrire(v);
-  if (!r.ok) return { ok: false, motif: r.motif };
-  return { ..._veilleurEtat(), ok: true };
-});
-
-ipcMain.handle('veilleur:retirerJeton', () => {
-  veilleurSecret.ecrire('');
-  return { ..._veilleurEtat(), ok: true };
-});
 
 ipcMain.handle('veilleur:activer', (e, on) => {
   // On écrit dans le fichier du veilleur : il le relit à chaque tour, donc la
@@ -4870,14 +4838,14 @@ if (!app.requestSingleInstanceLock()) {
        son propre verrou d'instance unique refuserait le second, qui s'éteindrait
        en silence — mais on aurait quand même payé le démarrage d'un Electron
        complet pour rien, à chaque ouverture de l'application.
-       ⚠ Et seulement si le jeton existe : lancer un veilleur qui n'a rien à
-       demander, c'est mettre une icône en zone de notification pour qu'elle
-       annonce qu'elle ne sert à rien. */
+       ⚠ Depuis le 2026-09-06 il n'y a plus rien à configurer : le veilleur porte
+       la clé de l'application. Il n'y a donc plus de raison de retenir son
+       lancement — la condition « seulement s'il a un jeton » est partie avec le
+       jeton. */
     setTimeout(() => {
       try {
         if (reglages.get('veilleurAvecApp') === false) return;
         if (_veilleurEnMarche()) return;
-        if (!veilleurSecret.existe()) return;
         _veilleurLancer();
       } catch {}
     }, 2500);

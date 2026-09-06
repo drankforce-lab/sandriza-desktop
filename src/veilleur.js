@@ -52,7 +52,19 @@ const { app, Tray, Menu, Notification, nativeImage, BrowserWindow, shell } = req
    la moitié de sa demande : « et ce même si l'application est fermée ». */
 const { spawn } = require('child_process');
 
-const secret = require('./veilleur-secret');
+/* ⚠⚠ PLUS DE JETON À CONFIGURER — RETIRÉ LE 2026-09-06, SUR SA DEMANDE.
+   Ses mots : « je ne veux pas de jeton configuré côté poste pour le veilleur, il
+   faut considérer que ce dernier pourra être installé aussi par nos employés et
+   ça doit être simple ». Il a raison, et c'était le défaut de conception qui a
+   produit les trois signalements précédents : un secret à poser sur chaque poste
+   est une consigne à transmettre, un secret qui circule, et un employé bloqué le
+   jour où il ne l'a pas.
+   Le veilleur est LE MÊME EXÉCUTABLE que l'administration : il porte déjà la clé
+   d'application, celle du canal de mise à jour. Il s'en sert. Aucun geste à
+   l'installation, aucun fichier chiffré à partager entre deux processus — et
+   toute la mécanique de racine partagée (`--racine`, `veilleur-secret.js`)
+   disparaît avec le besoin qui l'avait fait naître. */
+const { APP_KEY } = require('./cle-app');
 // La DÉCISION du curseur vit à part, sans Electron, pour être éprouvable —
 // même patron que `brouillon-garde.js`. Voir son en-tête : c'est la pièce dont
 // l'erreur est muette.
@@ -113,7 +125,9 @@ let pasErreur = 0;            // nombre d'échecs d'affilée (pour espacer)
 // ══ ÉTAT PERSISTANT ═════════════════════════════════════════════════════════
 // Dans le dossier du VEILLEUR (pas celui de l'administration) : c'est son état à
 // lui, et le curseur ne veut rien dire pour l'application principale.
-// ⚠ AUCUN SECRET ICI — le jeton passe par `veilleur-secret`, chiffré.
+// ⚠ AUCUN SECRET ICI, ET IL N'Y EN A PLUS NULLE PART : depuis le 2026-09-06 le
+// veilleur s'authentifie par la clé de l'application, embarquée. Ce fichier ne
+// porte qu'un curseur, un numéro de processus et un horodatage.
 /*
  * ⚠ `pid` ET `vu` NE SONT PAS DU CONFORT : ils sont le SEUL moyen pour
  * l'administration de savoir si le veilleur tourne. Ce sont deux processus
@@ -125,7 +139,7 @@ let pasErreur = 0;            // nombre d'échecs d'affilée (pour espacer)
  * Les deux ensemble, jamais l'un seul. Sans `vu`, un numéro de processus réutilisé
  * ferait dire « le veilleur tourne » à propos du bloc-notes de quelqu'un.
  */
-const ETAT_DEFAUT = { actif: true, depuis: null, pid: null, vu: null, jetonChemin: '', jetonVu: false };
+const ETAT_DEFAUT = { actif: true, depuis: null, pid: null, vu: null };
 const cheminEtat = () => path.join(app.getPath('userData'), 'veilleur-etat.json');
 
 function lireEtat() {
@@ -256,8 +270,7 @@ function ouvrirAdministration() {
  * processus de fond : il est là, il ne fait plus rien.
  */
 async function interroger() {
-  const jeton = secret.lire();
-  if (!jeton) return { ok: false, motif: 'sans_jeton' };
+  if (!APP_KEY) return { ok: false, motif: 'sans_cle' };
 
   const e = lireEtat();
   const u = new URL(URL_FLUX);
@@ -267,7 +280,8 @@ async function interroger() {
   const chrono = setTimeout(() => ctrl.abort(), 15000);
   try {
     const r = await fetch(u.toString(), {
-      headers: { 'Authorization': 'Bearer ' + jeton, 'Accept': 'application/json' },
+      // ⚠ Le MÊME en-tête que `armAppHeader()` et que le canal de mise à jour.
+      headers: { 'X-Sandriza-App': APP_KEY, 'Accept': 'application/json' },
       signal: ctrl.signal,
     });
     const j = await r.json().catch(() => null);
@@ -291,12 +305,7 @@ function battre() {
      d'un côté et « jeton enregistré » de l'autre est indécidable : les deux
      écrans disent vrai et rien ne dit qu'ils parlent de deux fichiers. Le coût
      est nul, et c'est exactement ce qui a manqué le 2026-09-06. */
-  ecrireEtat({
-    pid: process.pid,
-    vu: new Date().toISOString(),
-    jetonChemin: (function () { try { return secret.chemin(); } catch (e) { return ''; } })(),
-    jetonVu: (function () { try { return secret.existe(); } catch (e) { return false; } })(),
-  });
+  ecrireEtat({ pid: process.pid, vu: new Date().toISOString() });
 }
 
 async function unTour() {
@@ -306,20 +315,12 @@ async function unTour() {
   const res = await interroger();
   if (!res.ok) {
     dernierEchec = res.motif;
-    /* ⚠⚠ « PAS DE JETON » N'EST PAS UNE PANNE, C'EST UN ÉTAT — et les confondre
-       a produit le défaut qu'il a signalé le 2026-09-06 : « j'ai configuré le
-       jeton et il me dit que ce n'est pas configuré ». Les deux écrans disaient
-       vrai. Le veilleur avait démarré AVANT que le jeton n'existe, chaque tour
-       comptait un échec de plus, et le recul exponentiel avait porté la
-       prochaine lecture à DIX MINUTES. Il aurait fini par voir le jeton — dans
-       dix minutes, ce qui, pour quelqu'un qui vient de le coller, veut dire
-       jamais.
-       Espacer a un sens quand on martèle un serveur qui ne répond pas. Ça n'en a
-       aucun quand la réponse est ici, sur le disque, et qu'elle ne changera que
-       le jour où quelqu'un agira — d'où la surveillance du fichier plus bas, et
-       aucun recul pour ce motif-là. */
-    if (res.motif !== 'sans_jeton') pasErreur++;
-    else pasErreur = 0;
+    /* ⚠ ON N'ESPACE QUE SUR CE QUI PEUT S'ARRANGER TOUT SEUL. Un réseau absent,
+       un serveur qui redémarre : oui. Une clé manquante ou refusée ne changera
+       pas d'elle-même — marteler n'y sert à rien, et reculer jusqu'à dix minutes
+       ferait juste attendre plus longtemps une réponse identique. On garde donc
+       la cadence normale, et le menu dit la cause. */
+    if (res.motif !== 'sans_cle') pasErreur++;
     majTray();
     return;
   }
@@ -368,9 +369,11 @@ function ordonnancer() {
  * et on découvre la panne le jour où une commande a dormi trois jours.
  */
 const MOTIFS = {
-  sans_jeton: 'Pas encore configuré (jeton absent)',
-  non_configure: 'Le serveur n’a pas de jeton de veille',
-  refus: 'Jeton refusé par le serveur',
+  // ⚠ « sans_cle » ne devrait jamais paraître : la clé est embarquée dans
+  // l'application. Si elle manque, c'est la construction qui est en faute, pas
+  // le poste — et il faut le DIRE plutôt que de laisser un veilleur muet.
+  sans_cle: 'Cette version de l’application n’a pas de clé (défaut de construction)',
+  refus: 'Le serveur a refusé cette version de l’application',
   base_injoignable: 'Base de données injoignable',
   delai: 'Le serveur n’a pas répondu à temps',
   reseau: 'Réseau indisponible',
@@ -467,55 +470,12 @@ function poserDemarrageAuto(on) {
   return r;
 }
 
-/* ══ LE JETON PEUT ARRIVER APRÈS NOUS — ET C'EST MÊME LE CAS NORMAL ═════════
-   Le veilleur démarre avec Windows ; le jeton se colle dans l'administration,
-   plus tard. Sans cette surveillance, il n'existe AUCUN canal entre les deux
-   processus (c'était voulu : pas de port ouvert, pas de canal à protéger), et
-   le veilleur ne pouvait apprendre la nouvelle qu'au tour suivant.
-   On surveille donc le DOSSIER, pas le fichier : `fs.watch` sur un fichier qui
-   n'existe pas encore échoue, et c'est précisément la situation de départ.
-   ⚠ Un `fs.watch` émet souvent DEUX événements pour une seule écriture (le
-   contenu, puis l'horodatage). On regroupe sur 300 ms, sinon on relancerait deux
-   interrogations coup sur coup pour rien.
-   ⚠ Et l'on ne relit que si l'état a VRAIMENT changé : sans ça, chaque écriture
-   du dossier (l'état du veilleur lui-même) déclencherait un tour. */
-let _surveille = null;
-let _avaitJeton = false;
-function surveillerJeton() {
-  const f = secret.chemin();
-  _avaitJeton = secret.existe();
-  try {
-    fs.mkdirSync(path.dirname(f), { recursive: true });
-    fs.watch(path.dirname(f), (ev, nom) => {
-      if (nom && String(nom) !== path.basename(f)) return;
-      if (_surveille) clearTimeout(_surveille);
-      _surveille = setTimeout(() => {
-        const a = secret.existe();
-        if (a === _avaitJeton) return;
-        _avaitJeton = a;
-        // Le jeton vient d'arriver (ou de partir) : on repart tout de suite, et
-        // on remet le compteur d'échecs à zéro — la situation a changé.
-        pasErreur = 0; dernierEchec = '';
-        majTray();
-        unTour().catch(() => {});
-        ordonnancer();
-      }, 300);
-    });
-  } catch { /* système sans surveillance de fichiers : le tour suivant fera foi */ }
-}
-
 // ══ DÉMARRAGE ═══════════════════════════════════════════════════════════════
 function demarrer() {
   // ⚠ AVANT `requestSingleInstanceLock` — voir l'en-tête. Le dossier du veilleur
   // est un SOUS-dossier de celui de l'administration : on peut ainsi désigner
   // celui du parent pour le jeton, sans le calculer deux fois.
-  /* ⚠ LA RACINE VIENT DE L'ADMINISTRATION QUAND ELLE LA DONNE. On ne la déduit
-     plus en parallèle : deux processus qui déduisaient le même chemin ne
-     tombaient pas sur le même dossier (2026-09-06 — l'administration lisait le
-     jeton, le veilleur le déclarait absent, au même instant). Voir l'en-tête de
-     `veilleur-secret.js`. Le calcul reste en repli, pour un lancement à la main. */
-  const racineApp = secret.racineDesArguments() || app.getPath('userData');
-  secret.definirRacine(racineApp);
+  const racineApp = app.getPath('userData');
   try { app.setPath('userData', path.join(racineApp, 'veilleur')); } catch {}
 
   if (!app.requestSingleInstanceLock()) { app.exit(0); return; }
@@ -540,7 +500,6 @@ function demarrer() {
 
     ordonnancer();
     unTour().catch(() => {});
-    surveillerJeton();
   });
 
   /* ⚠⚠ SANS CECI, LE VEILLEUR MOURRAIT DÈS SON PREMIER SON. Le comportement par
