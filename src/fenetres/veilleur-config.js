@@ -72,6 +72,10 @@ input.t:focus{outline:none;border-color:#c9a97e}
 label.bascule{display:flex;align-items:center;gap:.45rem;font-size:.84rem;cursor:pointer;
   -webkit-user-select:none;user-select:none;margin:.2rem 0 0}
 label.bascule input{width:16px;height:16px;accent-color:#c9a97e;flex:0 0 auto}
+/* Le diagnostic : discret quand tout va, ROUGE quand les deux chemins diffèrent. */
+.diag{font-size:.7rem;color:var(--tx-gris);line-height:1.5;margin:.7rem 0 0;
+  word-break:break-all;font-family:ui-monospace,Consolas,monospace}
+.diag.mal{color:var(--tx-err2)}
 .rangee{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.7rem 0 0}
 button{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);
   border-radius:8px;padding:.4rem .8rem;cursor:pointer}
@@ -120,6 +124,9 @@ function pageVeilleurConfig() {
     </div>
     <label class="bascule"><input type="checkbox" id="c-demarrage">
       Démarrer le veilleur en même temps que Windows</label>
+    <label class="bascule"><input type="checkbox" id="c-avecapp">
+      Démarrer le veilleur en même temps que cette application</label>
+    <p class="diag" id="diag"></p>
   </div>
 
   <div class="carte">
@@ -196,6 +203,28 @@ ${JS_DIRE}
 
     $('b-pause').textContent = e.actif ? 'Mettre en pause' : 'Reprendre la veille';
     $('c-demarrage').checked = !!e.demarrageAuto;
+    $('c-avecapp').checked = e.avecApp !== false;
+
+    /* ⚠⚠ LES DEUX CHEMINS, AFFICHÉS. Le 2026-09-06, cet écran annonçait « jeton
+       enregistre » pendant que la zone de notification annoncait « jeton
+       absent » : les deux disaient vrai, ils ne regardaient pas le meme fichier,
+       et RIEN a l ecran ne permettait de s en apercevoir. Un desaccord entre
+       deux processus doit se VOIR, sinon il se paie en cycles d installation. */
+    var d = $('diag');
+    var ici = e.jetonChemin || '(inconnu)';
+    var la = e.veilleurJetonChemin || '';
+    if (!la) {
+      d.className = 'diag';
+      d.textContent = 'Jeton lu ici : ' + ici;
+    } else if (la === ici) {
+      d.className = 'diag';
+      d.textContent = 'Jeton : ' + ici + ' — le veilleur lit le meme fichier'
+        + (e.veilleurJetonVu ? ' et l y trouve.' : ' mais ne l y trouve PAS.');
+    } else {
+      d.className = 'diag mal';
+      d.textContent = 'DESACCORD : cette application lit ' + ici
+        + ' — le veilleur, lui, lit ' + la + '. Cliquez sur Demarrer / reinstaller.';
+    }
     $('b-arreter').disabled = !e.enMarche;
     $('b-retirer').disabled = !e.jetonDefini;
   };
@@ -269,6 +298,13 @@ ${JS_DIRE}
     faire(V.activer(vers), vers ? 'Reprise…' : 'Mise en pause…',
       vers ? 'Le veilleur signale de nouveau les commandes et les retours.'
            : 'Le veilleur reste en place mais ne signale plus rien.');
+  };
+
+  $('c-avecapp').onchange = function(){
+    faire(V.avecApp($('c-avecapp').checked), 'Enregistrement…',
+      function(r){ return r.avecApp !== false
+        ? 'Le veilleur partira avec cette application.'
+        : 'Le veilleur ne partira plus avec cette application.'; });
   };
 
   $('c-demarrage').onchange = function(){

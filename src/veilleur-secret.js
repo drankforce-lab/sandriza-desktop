@@ -40,8 +40,29 @@ const { app, safeStorage } = require('electron');
 // le veilleur qui le lit. Deux dossiers, ce serait deux jetons à synchroniser.
 // `_racine` est injectable pour que le veilleur, qui déplace son `userData`,
 // puisse quand même désigner celui de l'application.
+/* ⚠⚠ LA RACINE EST DONNÉE, PLUS DEVINÉE — ET C'EST LA CORRECTION DU 2026-09-06.
+   Les deux processus la CALCULAIENT chacun de leur côté, par
+   `app.getPath('userData')`, en supposant qu'ils tomberaient sur le même
+   dossier. Ils n'y tombaient pas : sa capture montre l'administration qui lit le
+   jeton (« se termine par 9d44 ») et le veilleur qui répond « jeton absent », au
+   même instant. Les deux disaient vrai.
+   Je n'ai pas cherché POURQUOI ils divergeaient — il y a plusieurs candidats
+   crédibles (une application lancée une fois en tant qu'administrateur n'a pas
+   le même `%APPDATA%`, et DPAPI ne déchiffre pas d'un compte à l'autre) et le
+   diagnostic aurait coûté un cycle d'installation par hypothèse.
+   ⚠ On supprime la CLASSE de défaut au lieu de trancher entre les causes :
+   l'administration PASSE le chemin au veilleur (`--racine=…`), qui ne calcule
+   donc plus rien. Deux processus qui doivent s'accorder sur un chemin ne doivent
+   pas le déduire séparément — l'un le dit, l'autre l'écoute.
+   Le calcul reste en repli, pour un veilleur lancé à la main sans argument. */
 let _racine = null;
 const definirRacine = (dossier) => { _racine = dossier || null; };
+
+/** La racine passée en ligne de commande, si elle y est. */
+const racineDesArguments = () => {
+  const a = (process.argv || []).find((x) => String(x).startsWith('--racine='));
+  return a ? String(a).slice('--racine='.length) : '';
+};
 
 const chemin = () => path.join(_racine || app.getPath('userData'), 'veilleur.dat');
 
@@ -86,4 +107,4 @@ function ecrire(jeton) {
 
 const existe = () => lire() !== '';
 
-module.exports = { definirRacine, lire, ecrire, existe, disponible, chemin };
+module.exports = { definirRacine, racineDesArguments, lire, ecrire, existe, disponible, chemin };

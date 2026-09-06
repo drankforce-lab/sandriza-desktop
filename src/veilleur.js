@@ -42,7 +42,15 @@
 const path = require('path');
 const fs = require('fs');
 const { app, Tray, Menu, Notification, nativeImage, BrowserWindow, shell } = require('electron');
-const { execFile } = require('child_process');
+/* ⚠⚠ `spawn` ET NON `execFile`, ET C'EST LA CAUSE DU « quand je ferme
+   l'application, le veilleur se ferme aussi » (signalé le 2026-09-06).
+   `execFile` est fait pour RÉCUPÉRER LA SORTIE d'une commande : il monte des
+   tuyaux d'entrée-sortie vers l'enfant et garde une référence dessus. `.unref()`
+   sur l'objet ne suffit alors pas — les tuyaux, eux, restent attachés, et sous
+   Windows l'enfant part avec le parent.
+   `spawn` + `detached: true` + `stdio: 'ignore'` détache pour de vrai. C'était
+   la moitié de sa demande : « et ce même si l'application est fermée ». */
+const { spawn } = require('child_process');
 
 const secret = require('./veilleur-secret');
 // La DÉCISION du curseur vit à part, sans Electron, pour être éprouvable —
@@ -117,7 +125,7 @@ let pasErreur = 0;            // nombre d'échecs d'affilée (pour espacer)
  * Les deux ensemble, jamais l'un seul. Sans `vu`, un numéro de processus réutilisé
  * ferait dire « le veilleur tourne » à propos du bloc-notes de quelqu'un.
  */
-const ETAT_DEFAUT = { actif: true, depuis: null, pid: null, vu: null };
+const ETAT_DEFAUT = { actif: true, depuis: null, pid: null, vu: null, jetonChemin: '', jetonVu: false };
 const cheminEtat = () => path.join(app.getPath('userData'), 'veilleur-etat.json');
 
 function lireEtat() {
@@ -230,7 +238,7 @@ function toast(titre, corps, sonNom) {
  */
 function ouvrirAdministration() {
   try {
-    execFile(process.execPath, [], { detached: true, stdio: 'ignore' }).unref();
+    spawn(process.execPath, [], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
   } catch {
     try { shell.openExternal('https://adm.sandriza.com/'); } catch {}
   }
@@ -278,7 +286,18 @@ const pluriel = (n, un, plusieurs) => n + ' ' + (n > 1 ? plusieurs : un);
    quand l'interrogation échoue : « je tourne » et « tout va bien » sont deux
    choses différentes, et l'administration doit pouvoir les distinguer. Un
    veilleur en panne de réseau tourne quand même. */
-function battre() { ecrireEtat({ pid: process.pid, vu: new Date().toISOString() }); }
+function battre() {
+  /* ⚠ ON ÉCRIT OÙ L'ON A CHERCHÉ LE JETON. Sans cette ligne, « jeton absent »
+     d'un côté et « jeton enregistré » de l'autre est indécidable : les deux
+     écrans disent vrai et rien ne dit qu'ils parlent de deux fichiers. Le coût
+     est nul, et c'est exactement ce qui a manqué le 2026-09-06. */
+  ecrireEtat({
+    pid: process.pid,
+    vu: new Date().toISOString(),
+    jetonChemin: (function () { try { return secret.chemin(); } catch (e) { return ''; } })(),
+    jetonVu: (function () { try { return secret.existe(); } catch (e) { return false; } })(),
+  });
+}
 
 async function unTour() {
   battre();
@@ -490,7 +509,12 @@ function demarrer() {
   // ⚠ AVANT `requestSingleInstanceLock` — voir l'en-tête. Le dossier du veilleur
   // est un SOUS-dossier de celui de l'administration : on peut ainsi désigner
   // celui du parent pour le jeton, sans le calculer deux fois.
-  const racineApp = app.getPath('userData');
+  /* ⚠ LA RACINE VIENT DE L'ADMINISTRATION QUAND ELLE LA DONNE. On ne la déduit
+     plus en parallèle : deux processus qui déduisaient le même chemin ne
+     tombaient pas sur le même dossier (2026-09-06 — l'administration lisait le
+     jeton, le veilleur le déclarait absent, au même instant). Voir l'en-tête de
+     `veilleur-secret.js`. Le calcul reste en repli, pour un lancement à la main. */
+  const racineApp = secret.racineDesArguments() || app.getPath('userData');
   secret.definirRacine(racineApp);
   try { app.setPath('userData', path.join(racineApp, 'veilleur')); } catch {}
 

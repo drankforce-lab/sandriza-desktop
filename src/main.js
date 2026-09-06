@@ -30,7 +30,7 @@ const { app, BrowserWindow, BaseWindow, WebContentsView, ipcMain, shell, Menu, N
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { execFile } = require('child_process');
+const { execFile, spawn } = require('child_process');
 
 /* ══ AIGUILLAGE DU VEILLEUR — DOIT RESTER LA PREMIÈRE CHOSE QUI S'EXÉCUTE ═════
    Le même binaire sert à deux processus : l'administration, et le veilleur de
@@ -615,6 +615,18 @@ const _veilleurEtat = () => {
     actif: e.actif !== false,
     vu: e.vu || null,
     depuis: e.depuis || null,
+    /* ⚠⚠ LE DIAGNOSTIC QUI MANQUAIT LE 2026-09-06. Sa capture montrait
+       l'administration disant « jeton enregistré (se termine par 9d44) » et le
+       veilleur, au même instant, « jeton absent ». Les deux disaient vrai — ils
+       ne regardaient pas le même fichier — et RIEN à l'écran ne permettait de
+       s'en apercevoir. L'écran affiche donc les DEUX chemins : celui d'ici, et
+       celui que le veilleur a écrit dans son état au dernier battement. S'ils
+       diffèrent, ça se voit d'un coup d'œil au lieu de coûter un cycle
+       d'installation par hypothèse. */
+    jetonChemin: veilleurSecret.chemin(),
+    veilleurJetonChemin: e.jetonChemin || '',
+    veilleurJetonVu: !!e.jetonVu,
+    avecApp: reglages.get('veilleurAvecApp') !== false,
     demarrageAuto: demarrageAuto.etat(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args),
   };
 };
@@ -622,9 +634,24 @@ const _veilleurEtat = () => {
 /* Lancer le veilleur = relancer NOTRE PROPRE exécutable avec `--veilleur`.
    `detached` + `unref` : il ne doit pas mourir avec l'administration — c'est
    toute la demande (« même si l'application est fermée »). */
+/* ⚠ LES ARGUMENTS DU VEILLEUR, EN UN SEUL ENDROIT. `--racine` lui DIT où vit le
+   jeton, au lieu de le laisser le déduire : les deux processus le déduisaient
+   séparément et ne tombaient pas sur le même dossier (2026-09-06). L'entrée de
+   démarrage Windows porte les mêmes arguments, sinon un veilleur lancé par
+   Windows chercherait ailleurs que celui lancé par l'application. */
+const veilleurArgs = () => ['--veilleur', '--racine=' + app.getPath('userData')];
+
 const _veilleurLancer = () => {
   try {
-    execFile(process.execPath, ['--veilleur'], { detached: true, stdio: 'ignore' }).unref();
+    /* ⚠⚠ `spawn` ET NON `execFile` — c'est la cause du « quand je ferme
+       l'application, le veilleur se ferme aussi ». `execFile` est fait pour
+       RÉCUPÉRER LA SORTIE d'une commande : il monte des tuyaux vers l'enfant et
+       garde une référence dessus, donc `.unref()` ne détache pas vraiment et
+       sous Windows l'enfant part avec le parent. C'était la moitié de sa demande
+       d'origine : « et ce même si l'application est fermée ». */
+    spawn(process.execPath, veilleurArgs(), {
+      detached: true, stdio: 'ignore', windowsHide: true,
+    }).unref();
     return true;
   } catch { return false; }
 };
@@ -657,6 +684,19 @@ ipcMain.handle('veilleur:activer', (e, on) => {
     fs.mkdirSync(path.dirname(_veilleurEtatFichier()), { recursive: true });
     fs.writeFileSync(_veilleurEtatFichier(), JSON.stringify(etat, null, 2), 'utf8');
   } catch { return { ok: false, motif: 'ecriture' }; }
+  return { ..._veilleurEtat(), ok: true };
+});
+
+/* Sa demande du 2026-09-06 : « à chaque fois que je pars l'application il ne se
+   lance pas automatiquement et je dois avoir une option pour cela ».
+   ⚠ Réglage de POSTE (`reglages.json`), comme la place du menu : le veilleur
+   s'installe par ordinateur. En Turso, il démarrerait sur le portable d'un
+   autre. */
+ipcMain.handle('veilleur:avecApp', (e, on) => {
+  try { reglages.set('veilleurAvecApp', !!on); } catch { return { ok: false, motif: 'ecriture' }; }
+  // Cocher la case ne doit pas obliger à redémarrer l'application pour en voir
+  // l'effet : si on l'active et qu'il ne tourne pas, on le lance maintenant.
+  if (on && !_veilleurEnMarche()) _veilleurLancer();
   return { ..._veilleurEtat(), ok: true };
 });
 
@@ -4817,6 +4857,23 @@ if (!app.requestSingleInstanceLock()) {
         view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageTableau()));
       } catch {}
     }, 250);
+
+    /* ══ LE VEILLEUR PART AVEC L'APPLICATION ═══════════════════════════════
+       Sa demande du 2026-09-06. ⚠ ON NE LE LANCE QUE S'IL NE TOURNE PAS DÉJÀ :
+       son propre verrou d'instance unique refuserait le second, qui s'éteindrait
+       en silence — mais on aurait quand même payé le démarrage d'un Electron
+       complet pour rien, à chaque ouverture de l'application.
+       ⚠ Et seulement si le jeton existe : lancer un veilleur qui n'a rien à
+       demander, c'est mettre une icône en zone de notification pour qu'elle
+       annonce qu'elle ne sert à rien. */
+    setTimeout(() => {
+      try {
+        if (reglages.get('veilleurAvecApp') === false) return;
+        if (_veilleurEnMarche()) return;
+        if (!veilleurSecret.existe()) return;
+        _veilleurLancer();
+      } catch {}
+    }, 2500);
 
     // PORTE DE LANCEMENT : vérifie la version AVANT d'ouvrir l'administration.
     // C'est elle, et elle seule, qui charge APP_URL — voir verifierAuLancement().

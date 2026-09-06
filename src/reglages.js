@@ -49,6 +49,16 @@ const DEFAUTS = {
   // redirigé vers OneDrive, ce qui arrive tout seul) le laisserait pointer dans
   // le vide. `null` veut dire « demande-le au système », pas « je ne sais pas ».
   dossierExports: null,
+  /* Le veilleur de commandes doit-il partir en même temps que l'application ?
+     ⚠ SA DEMANDE DU 2026-09-06 : « à chaque fois que je pars l'application il ne
+     se lance pas automatiquement et je dois avoir une option pour cela ».
+     ⚠ ET C'EST BIEN UN RÉGLAGE DE POSTE, comme la place du menu : le veilleur
+     s'installe et se règle PAR ORDINATEUR. Le mettre en Turso le ferait démarrer
+     sur le portable de quelqu'un d'autre.
+     ⚠ VRAI PAR DÉFAUT : il a installé le veilleur pour qu'il veille. Un réglage
+     dont la valeur par défaut oblige à un geste de plus pour obtenir le
+     comportement évident est un réglage mal posé. */
+  veilleurAvecApp: true,
 };
 
 let _cache = null;

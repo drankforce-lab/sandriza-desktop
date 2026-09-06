@@ -215,6 +215,9 @@ contextBridge.exposeInMainWorld('szPont', {
       .catch(() => ({ ok: false, motif: 'indisponible' })),
     demarrageAuto: (on) => ipcRenderer.invoke('veilleur:demarrageAuto', !!on)
       .catch(() => ({ ok: false, motif: 'indisponible' })),
+    // « Démarrer le veilleur en même temps que l'application » — réglage de poste.
+    avecApp: (on) => ipcRenderer.invoke('veilleur:avecApp', !!on)
+      .catch(() => ({ ok: false, motif: 'indisponible' })),
     // « Réinstaller » de sa demande : repose l'entrée de démarrage ET relance le
     // processus. C'est le seul chemin de réparation quand il a été fermé à la main.
     relancer: () => ipcRenderer.invoke('veilleur:relancer')
