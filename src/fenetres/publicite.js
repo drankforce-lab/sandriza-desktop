@@ -231,7 +231,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('') + '<div class="seg' + (SEGF === 'promo' ? ' pris' : '') + '" data-seg="promo"><div class="n" style="color:var(--tx-err2)">' + D.promoCnt + '</div><div class="l">Acheteurs promo</div><div class="d">Ont utilisé une offre</div></div>';
     var titre = SEGF === 'all' ? 'Tous les clients' : SEGF === 'promo' ? 'Acheteurs promo' : (function(){ var mm = D.segMeta.filter(function(x){ return x.key === SEGF; })[0]; return mm ? mm.label : SEGF; })();
     var rows = D.clients.length ? D.clients.map(function(c){
-      var col = c.daysSince > 60 ? '#f87171' : c.daysSince > 30 ? '#fbbf24' : '#4ade80';
+      var col = c.daysSince > 60 ? 'var(--tx-err)' : c.daysSince > 30 ? 'var(--tx-att)' : 'var(--tx-ok)';
       return '<tr><td><strong>' + esc(c.nom || '—') + '</strong></td><td style="color:var(--tx2)">' + esc(c.email || '—') + '</td>'
         + '<td><span class="pill">' + esc(c.segLabel) + '</span></td><td class="ctr" style="font-weight:700">' + c.orderCount + '</td>'
         + '<td class="num" style="color:var(--tx-creme);font-weight:600">' + argent(c.totalSpent) + '</td>'
@@ -278,8 +278,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var posts = D.posts.length ? D.posts.map(function(p){
       return '<tr><td style="white-space:nowrap;font-size:.74rem">' + esc(p.date) + '</td><td style="font-size:.74rem">' + esc(p.networks) + '</td>'
         + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem" title="' + esc(p.content) + '">' + esc(p.content || '—') + '</td>'
-        + '<td class="ctr"><strong style="color:' + (p.orders48h > 0 ? '#4ade80' : '#8fa1b8') + '">' + p.orders48h + '</strong></td>'
-        + '<td class="num" style="color:' + (p.revenue48h > 0 ? '#e8dcc6' : '#8fa1b8') + '">' + (p.revenue48h > 0 ? argent(p.revenue48h) : '—') + '</td></tr>';
+        + '<td class="ctr"><strong style="color:' + (p.orders48h > 0 ? 'var(--tx-ok)' : 'var(--tx2)') + '">' + p.orders48h + '</strong></td>'
+        + '<td class="num" style="color:' + (p.revenue48h > 0 ? 'var(--tx-creme)' : 'var(--tx2)') + '">' + (p.revenue48h > 0 ? argent(p.revenue48h) : '—') + '</td></tr>';
     }).join('') : '<tr><td colspan="5" class="vide">Aucune publication dans l’historique.</td></tr>';
     var recs = D.recs.length ? D.recs.map(function(r){
       return '<div class="rec">' + r.icon + ' ' + esc(r.txt) + ' <button class="ghost mini" data-cibler="' + esc(r.seg) + '">Cibler →</button></div>';
@@ -350,7 +350,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
     }).join('') + '</div>' : '';
     return '<div class="tuiles">'
-      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? '#4ade80' : '#f87171') + ';font-size:2rem">' + D.rate + '%</div><div class="z">Taux de satisfaction</div></div>'
+      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + D.rate + '%</div><div class="z">Taux de satisfaction</div></div>'
       + '<div class="carte" style="grid-column:span 2"><h2>Répartition des évaluations</h2>'
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> Satisfaits</div>' + bar(D.satisfied, D.rated, '#4ade80')
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> Insatisfaits</div>' + bar(D.unsatisfied, D.rated, '#f87171')

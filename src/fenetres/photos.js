@@ -1584,7 +1584,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     } else {
       box.textContent = (r && r.motif === 'non_configure') ? 'Clé Photoroom absente'
         : ((r && (r.detail || r.motif)) || 'échec');
-      box.style.color = '#fca5a5';
+      box.style.color = 'var(--tx-err2)';
     }
   }
   function apercuLot(quoi, scene, ids){

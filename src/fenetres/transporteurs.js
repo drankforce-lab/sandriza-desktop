@@ -38,7 +38,7 @@ body{background:var(--f-page);color:var(--tx);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .avert{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(248,113,113,.4);
   background:rgba(248,113,113,.1);color:var(--tx-err2);border-radius:9px;padding:.7rem .85rem;font-size:.8rem;line-height:1.5}
-.avert b{color:#fecaca}
+.avert b{color:var(--tx-err2)}
 .avert .g{margin-top:.55rem}
 .avert button{font:inherit;font-size:.78rem;color:var(--tx-err2);background:rgba(248,113,113,.08);
   border:1px solid rgba(248,113,113,.4);border-radius:7px;padding:.24rem .6rem;cursor:pointer}

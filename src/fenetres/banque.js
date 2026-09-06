@@ -235,7 +235,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
           + '<td>' + esc(r.label || '—') + '</td>'
           + '<td class="num">' + sou(s.bankTotal) + '</td>'
           + '<td class="num">' + sou(s.squareTotal) + '</td>'
-          + '<td class="num" style="color:' + (s.isBalanced ? '#6ee7b7' : '#fca5a5') + '">' + sou(s.difference) + '</td>'
+          + '<td class="num" style="color:' + (s.isBalanced ? 'var(--tx-ok2)' : 'var(--tx-err2)') + '">' + sou(s.difference) + '</td>'
           + '<td class="dt">' + r.nbBanque + ' / ' + r.nbVersements + '</td>'
           + '<td class="dt">' + jour(r.updatedAt) + '</td>'
           + '<td style="white-space:nowrap">'

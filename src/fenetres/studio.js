@@ -96,7 +96,7 @@ body{background:var(--f-page);color:var(--tx);
 .rcbar button:disabled{opacity:.4;cursor:default}
 .rcbar button.x{color:#e79a9a}
 /* L avertissement d ecrasement du voile d enregistrement. */
-.rcav{color:#d8b57a}
+.rcav{color:var(--tx-or)}
 /* ── LE VOLET DE GAUCHE EN ONGLETS (lot 3g du #29) ─────────────────────────
    Sa demande : << au lieu d avoir une scroll bar, des onglets orientes vers la
    gauche >>. Le volet ne defile donc plus DU TOUT : la bande d onglets tient a
@@ -365,7 +365,7 @@ select:focus{outline:none;border-color:#c9a97e}
   text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .avsec.prem{margin-top:0;padding-top:0;border-top:0}
 .aidep{font-size:.71rem;color:var(--tx3);line-height:1.45;margin-top:.22rem}
-.aidep.att{color:#d8b57a}
+.aidep.att{color:var(--tx-or)}
 textarea{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem;resize:vertical;min-height:3.2rem}
 textarea:focus{outline:none;border-color:#c9a97e}
@@ -893,7 +893,7 @@ ${JS_ACTIVITE}${JS_DIRE}
            que le plafond n aura pas ete releve. Les photos restantes n ont ete ni
            traitees ni facturees — elles attendent, elles ne sont pas perdues. */
         + (x.motifPause
-            ? '<div class="lote" style="color:#d8b57a">⏸ Mis en pause : ' + esc(x.motifPause) + '</div>'
+            ? '<div class="lote" style="color:var(--tx-or)">⏸ Mis en pause : ' + esc(x.motifPause) + '</div>'
             : '')
         + '</div>';
     }).join('');
@@ -2626,7 +2626,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     var voie = voiePourQuoi(quoi);
     if (!estVoie(voie)) {
-      return '<p style="color:#d8b57a;margin:.6rem 0 0"><span class="ic">⚠</span> Ce traitement ne passe pas par Photoroom : '
+      return '<p style="color:var(--tx-or);margin:.6rem 0 0"><span class="ic">⚠</span> Ce traitement ne passe pas par Photoroom : '
         + 'ni l’ambiance, ni la mise en scène, ni les réglages avancés n’y changent quoi que ce soit. '
         + 'Le détourage se fait au détoureur, et il n’a pas de décor à composer.</p>';
     }
@@ -2638,7 +2638,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     // ⚠ La photo d intérieur est la SEULE chose du panneau avancé qui ne peut pas
     // suivre un lot : elle est propre à UN vêtement, pas à cinq cents.
     var sup = (voie === 'fantome' && INTERIEUR)
-      ? '<br><span style="font-size:.74rem;color:#d8b57a"><span class="ic">⚠</span> La photo d’intérieur ne suit pas un lot : '
+      ? '<br><span style="font-size:.74rem;color:var(--tx-or)"><span class="ic">⚠</span> La photo d’intérieur ne suit pas un lot : '
         + 'chaque photo utilise celle qui lui est attachée dans la photothèque.</span>' : '';
     return '<label class="rc"><input type="checkbox" id="lot-reglages"'
       + (coche === false ? '' : ' checked') + '> '
@@ -2764,7 +2764,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             var z2 = document.getElementById('lot-estim');
             if (!z2) return;
             if (!r || !r.ok) {
-              z2.innerHTML = '<span style="color:#d8b57a"><span class="ic">⚠</span> Coût non estimé</span> — le relais n’a pas '
+              z2.innerHTML = '<span style="color:var(--tx-or)"><span class="ic">⚠</span> Coût non estimé</span> — le relais n’a pas '
                 + 'répondu (' + esc(expliquer(r)) + '). Le lot peut partir : le plafond mensuel, lui, '
                 + 'est appliqué au serveur et arrêtera la file s’il est atteint.';
               return;

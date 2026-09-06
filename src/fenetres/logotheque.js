@@ -144,7 +144,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (rw <= 32 && rh <= 32) return rw + ':' + rh;
     return fr(w/h) + ':1';
   }
-  function quality(dpi){ return dpi>=300 ? {lbl:'Excellent pour l’impression',c:'#4ade80'} : dpi>=200 ? {lbl:'Correct pour l’impression',c:'#facc15'} : {lbl:'Insuffisant pour l’impression',c:'#f87171'}; }
+  /* ⚠ DEUX CHAMPS, ET C EST VOULU. << c >> est l ENCRE : elle passe par un jeton,
+     donc elle suit le mode jour comme le reste — un vert de nuit sur une carte
+     blanche donnait 1.74 de contraste, illisible. << b >> est la BORDURE, qui se
+     construisait par q.c + 55 : un jeton ne se concatene pas a une paire
+     hexadecimale, et la bordure serait devenue invalide, donc invisible. Un
+     trait a 33 % d opacite n a pas besoin de reprise ; le texte, si. */
+  function quality(dpi){
+    return dpi>=300 ? {lbl:'Excellent pour l’impression',c:'var(--tx-ok)',b:'#4ade8055'}
+         : dpi>=200 ? {lbl:'Correct pour l’impression',c:'var(--tx-jaune)',b:'#facc1555'}
+                    : {lbl:'Insuffisant pour l’impression',c:'var(--tx-err)',b:'#f8717155'};
+  }
 
   // ── LISTE ───────────────────────────────────────────────────────────────────
   function carteHtml(l){
@@ -158,7 +168,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="bd">'
       + '<div class="nm" data-nm="' + esc(l.id) + '" title="' + esc(l.name) + '">' + esc(l.name || 'Sans nom') + '</div>'
       + '<div class="mt">' + meta + '</div>'
-      + (l.printW ? '<div class="pr" style="border-color:' + q.c + '55;color:' + q.c + '">' + fr(l.printW) + ' × ' + fr(l.printH) + ' po · ' + l.dpi + ' dpi</div>' : '')
+      + (l.printW ? '<div class="pr" style="border-color:' + q.b + ';color:' + q.c + '">' + fr(l.printW) + ' × ' + fr(l.printH) + ' po · ' + l.dpi + ' dpi</div>' : '')
       + (RO ? '' : '<div class="acts">'
         + '<button class="b" type="button" data-ren="' + esc(l.id) + '" title="Renommer"><span class="ic">✎</span></button>'
         + '<button class="b" type="button" data-cp="' + esc(l.id) + '" title="Copier l’adresse"><span class="ic">🔗</span></button>'

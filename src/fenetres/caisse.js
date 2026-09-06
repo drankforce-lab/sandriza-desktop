@@ -668,7 +668,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
 
     var avis = (r.avis || []).map(function(a){
-      var c = a.ton === 'error' ? '#f87171' : (a.ton === 'warning' ? '#fbbf24' : '#4ade80');
+      var c = a.ton === 'error' ? 'var(--tx-err)' : (a.ton === 'warning' ? 'var(--tx-att)' : 'var(--tx-ok)');
       return '<div class="aide" style="color:' + c + '">' + esc(a.texte) + '</div>';
     }).join('');
 

@@ -171,7 +171,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="stat-grid">'
       + '<div class="stat"><div class="l">Sauvegardes</div><div class="v">'+l.length+'</div><div class="s">rétention '+(D.retentionMois||12)+' mois</div></div>'
-      + '<div class="stat"><div class="l">La plus récente</div><div class="v" style="font-size:1.05rem;color:'+(l.length?'#6ee7a0':'#e6c14a')+'">'+(l.length?esc(l[0].quand):'aucune')+'</div><div class="s">'+(l.length?esc(l[0].taille):'le registre est vide')+'</div></div>'
+      + '<div class="stat"><div class="l">La plus récente</div><div class="v" style="font-size:1.05rem;color:'+(l.length?'var(--tx-ok2)':'var(--tx-att)')+'">'+(l.length?esc(l[0].quand):'aucune')+'</div><div class="s">'+(l.length?esc(l[0].taille):'le registre est vide')+'</div></div>'
       + '<div class="stat"><div class="l">Espace occupé</div><div class="v" style="font-size:1.3rem">'+fmtO(octets)+'</div><div class="s">dans Cloudflare R2</div></div>'
       + '</div>';
 

@@ -235,7 +235,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<table class="tb"><tbody>';
       for (var i=0;i<e.length;i++){ var x=e[i];
         if (grp.cle==='acces'){
-          var t=TYPE[x.type]||{bg:'var(--v06)',c:'#8fa1b8',l:x.type};
+          var t=TYPE[x.type]||{bg:'var(--v06)',c:'var(--tx2)',l:x.type};
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td>'
             + '<td><span class="pill '+(t.k||'')+'">'+esc(t.l)+'</span></td>'
             + '<td>'+esc(x.nom||'—')+'<div class="sub">'+esc(x.email)+'</div></td>'
@@ -304,7 +304,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (AC_PAGE < 0) AC_PAGE = 0;
     var avue = rows.slice(AC_PAGE * AC_PARPAGE, AC_PAGE * AC_PARPAGE + AC_PARPAGE);
     if (!avue.length) h += '<tr><td colspan="6" class="vide">Aucun journal.</td></tr>';
-    for (var i=0;i<avue.length;i++){ var l=avue[i]; var t=TYPE[l.type]||{bg:'var(--v06)',c:'#8fa1b8',l:l.type};
+    for (var i=0;i<avue.length;i++){ var l=avue[i]; var t=TYPE[l.type]||{bg:'var(--v06)',c:'var(--tx2)',l:l.type};
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(l.ts))+'</td>'
         + '<td><span class="pill '+(t.k||'')+'">'+esc(t.l)+'</span></td>'
         + '<td>'+esc(l.nom||'—')+'<div class="sub">'+esc(l.email)+'</div></td>'
@@ -412,7 +412,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!rows.length) h += '<tr><td colspan="5" class="vide">Aucun SMS.</td></tr>';
     for (var i=0;i<rows.length;i++){ var s=rows[i]; var ent=(s.direction==='inbound');
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(s.date))+'</td>'
-        + '<td><span class="pill" style="background:'+(ent?'rgba(14,165,233,.18)':'rgba(22,163,74,.2)')+';color:'+(ent?'#7dd3fc':'#6ee7a0')+'">'+(ent?'⬇ Reçu':'⬆ Envoyé')+'</span></td>'
+        + '<td><span class="pill" style="background:'+(ent?'rgba(14,165,233,.18)':'rgba(22,163,74,.2)')+';color:'+(ent?'var(--tx-bleu)':'var(--tx-ok2)')+'">'+(ent?'⬇ Reçu':'⬆ Envoyé')+'</span></td>'
         + '<td class="mono">'+esc(s.from||'—')+'</td><td class="mono">'+esc(s.to||'—')+'</td>'
         + '<td>'+esc(s.body||'')+'</td></tr>';
     }

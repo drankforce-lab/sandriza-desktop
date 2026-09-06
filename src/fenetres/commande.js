@@ -432,17 +432,17 @@ function pageCommande(id) {
   }
   function scanMsg(t, couleur){
     var el = document.getElementById('c-scan-msg');
-    if (el) { el.textContent = t || ''; el.style.color = couleur || '#8fa1b8'; }
+    if (el) { el.textContent = t || ''; el.style.color = couleur || 'var(--tx2)'; }
   }
   function scanner(code){
     if (!String(code || '').trim()) return;
-    if (LECTURE) { bip(false); scanMsg('Commande en traitement ailleurs — lecture seule.', '#f87171'); return; }
+    if (LECTURE) { bip(false); scanMsg('Commande en traitement ailleurs — lecture seule.', 'var(--tx-err)'); return; }
     P.appeler('commande:scan', ID, code).then(function(r){
       if (!r || !r.ok) {
         bip(false);
         scanMsg(r && r.motif === 'code_inconnu'
           ? '⚠ Code inconnu : ' + (r.code || code)
-          : expliquer(r), '#f87171');
+          : expliquer(r), 'var(--tx-err)');
         return;
       }
       var att = 0;
@@ -450,14 +450,14 @@ function pageCommande(id) {
       var v = COMPTES[r.cle] || 0;
       if (v >= att) {
         bip(false);
-        scanMsg('⚠ Déjà complet : ' + r.sku + ' (' + att + '/' + att + ')', '#fbbf24');
+        scanMsg('⚠ Déjà complet : ' + r.sku + ' (' + att + '/' + att + ')', 'var(--tx-att)');
         return;
       }
       COMPTES[r.cle] = v + 1;
       statutVerification();
       bip(true);
       scanMsg('✓ ' + r.sku + ' — ' + (v + 1) + '/' + att
-        + ((v + 1) === att ? ' (ligne complète)' : ''), '#4ade80');
+        + ((v + 1) === att ? ' (ligne complète)' : ''), 'var(--tx-ok)');
       if (PAGI2) { PAGI2.dessiner(); }
       majProgres();
       majExpedier();

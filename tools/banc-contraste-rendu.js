@@ -725,6 +725,23 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
     vrais.push(e);
   }
 
+  /* ── LA DETTE ÉTEINTE — CE QUE LE BANC NE SAVAIT PAS DIRE ─────────────────
+     ⚠⚠ ANGLE MORT TROUVÉ LE 2026-09-05, EN CHERCHANT POURQUOI IL SE TAISAIT.
+     44 encres avaient été rendues à leur jeton ce jour-là, et le banc n'a rien
+     annoncé. Ce n'était pas un échec du correctif : `baisse` ne parle que des
+     clés QUI ÉCHOUENT ENCORE, avec moins d'endroits. Une clé tombée à ZÉRO
+     disparaît de `echoue` et n'est donc mentionnée NULLE PART.
+     Conséquence : le fichier de déclaration accumulait des lignes mortes pour
+     toujours, et personne ne pouvait savoir qu'un chantier était fini. Le
+     meilleur résultat possible — la faute entièrement corrigée — était celui
+     dont le banc ne disait rien.
+     → On énumère donc ce qui est DÉCLARÉ mais plus rencontré. C'est la seule
+     façon de retirer une ligne AVEC UNE PREUVE, au lieu de la retirer parce
+     qu'on croit se souvenir de l'avoir corrigée. */
+  const rencontrees = new Set(echoue.map((e) => e.cle));
+  const eteintes = [];
+  for (const cle of Object.keys(reste)) if (!rencontrees.has(cle)) eteintes.push(cle);
+
   /* ⚠ `--reste` ÉCRIT LE PREMIER RELEVÉ, IL NE L'INVENTE PAS. Cent une paires à
      recopier à la main dans `contraste-rendu-declare.js`, c'est cent une
      occasions de se tromper d'un chiffre — et un plafond faux, c'est soit une
@@ -827,6 +844,25 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
   if (baisse.length) {
     console.log('── DETTE QUI RECULE — resserrer le plafond ──');
     baisse.forEach((c) => console.log(`   • ${c.cle} : ${c.n} endroits, plafond déclaré ${c.plafond}`));
+    console.log('');
+  }
+  /* ⚠⚠ ET ELLE NE SE DIT QUE SUR UN RELEVÉ COMPLET. Sur un parcours amputé —
+     un plafond de temps atteint, un moteur tombé — une clé « plus rencontrée »
+     n'est qu'une page NON REGARDÉE, et l'on retirerait la ligne qui la gardait.
+     C'est exactement la faute de la déclaration au `--dump-dom` : une conclusion
+     juste appuyée sur une preuve qui ne prouvait rien. Ici, s'il manque un seul
+     rendu, on se tait et on le dit. */
+  if (eteintes.length && manquants > 0) {
+    console.log(`── ${eteintes.length} ligne(s) semblent éteintes, MAIS ${manquants} rendu(s) manquent ──`);
+    console.log('   On ne retire rien sur un relevé amputé : une clé « plus rencontrée » peut');
+    console.log('   n\'être qu\'une page que le banc n\'a pas ouverte. Relancer un parcours complet.');
+    console.log('');
+  } else if (eteintes.length) {
+    console.log(`── DETTE ÉTEINTE — ${eteintes.length} ligne(s) à retirer de contraste-rendu-declare.js ──`);
+    console.log('   Ces couples ne sont plus rencontrés NULLE PART dans un relevé COMPLET.');
+    console.log('   C\'est la preuve qui manquait pour retirer la ligne sans se fier à sa mémoire.');
+    eteintes.slice(0, 40).forEach((c) => console.log(`   ✔ ${c}`));
+    if (eteintes.length > 40) console.log(`   … et ${eteintes.length - 40} autre(s).`);
     console.log('');
   }
 

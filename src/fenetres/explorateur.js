@@ -536,7 +536,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<p style="color:var(--tx2)">Un seul pas en arrière est conservé par photo : une photo '
       + 'passée par deux traitements ne remonte qu’au précédent, pas à l’originale.</p>'
       + (k < ids.length
-          ? ('<p style="color:#d8b57a"><span class="ic">⚠</span> ' + (ids.length - k) + ' photo'
+          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + ' photo'
              + ((ids.length - k) > 1 ? 's n’ont' : ' n’a') + ' rien à annuler et ne bougera'
              + ((ids.length - k) > 1 ? 'nt' : '') + ' pas.</p>')
           : '')
@@ -594,7 +594,7 @@ ${JS_ACTIVITE}${JS_DIRE}
          qui change ici, c est ce qu une cliente voit sur la boutique. */
       + '<p><strong>C’est ce que la boutique affichera</strong> — la photo du produit change '
       + 'pour de bon, en ligne.</p>'
-      + (r ? ('<p style="color:#d8b57a">' + r + ' fiche' + (r > 1 ? 's' : '') + ' montre'
+      + (r ? ('<p style="color:var(--tx-or)">' + r + ' fiche' + (r > 1 ? 's' : '') + ' montre'
               + (r > 1 ? 'nt' : '') + ' encore l’image d’<strong>avant</strong> le dernier '
               + 'traitement — c’est justement ce qu’on répare.</p>')
            : '<p style="color:var(--tx2)">Aucune de ces fiches n’est en retard : elles montrent déjà '
@@ -607,7 +607,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre. '
       + 'Rattachez-la de nouveau pour lever le doute.</p>'
       + (k < ids.length
-          ? ('<p style="color:#d8b57a"><span class="ic">⚠</span> ' + (ids.length - k) + ' photo'
+          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + ' photo'
              + ((ids.length - k) > 1 ? 's ne sont' : ' n’est') + ' rattachée'
              + ((ids.length - k) > 1 ? 's' : '') + ' à aucun article et ne bougera'
              + ((ids.length - k) > 1 ? 'nt' : '') + ' pas.</p>')

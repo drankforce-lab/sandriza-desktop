@@ -280,7 +280,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div style="display:flex;gap:.6rem;flex-wrap:wrap">'
       +   (PEUT.edit ? '<button class="prim" data-act="offersave">Enregistrer</button>' : '')
       +   '<button class="ghost" data-act="apercu">Aperçu du popup</button>'
-      +   (PEUT.edit ? '<button class="ghost mini" data-act="offerreset" style="color:#e0b47a">↺ Réinitialiser pour re-tester</button>' : '')
+      +   (PEUT.edit ? '<button class="ghost mini" data-act="offerreset" style="color:var(--tx-or)">↺ Réinitialiser pour re-tester</button>' : '')
       + '</div>'
       + '</div>';
   }

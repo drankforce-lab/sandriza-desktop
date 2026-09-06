@@ -236,7 +236,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<div class="ch"><label>Expéditeur</label><div>' + esc(g.expediteur || '—') + '</div></div>'
       + '<div class="ch"><label>Valeur initiale</label><div>' + fmt(g.initial) + '</div></div>'
       + '<div class="ch"><label>Solde restant</label>'
-      + '<div style="font-weight:800;color:' + (g.solde > 0 ? '#4ade80' : '#8fa1b8') + '">'
+      + '<div style="font-weight:800;color:' + (g.solde > 0 ? 'var(--tx-ok)' : 'var(--tx2)') + '">'
       + fmt(g.solde) + '</div></div>'
       + '<div class="ch"><label>Émise le</label><div>' + esc(g.date) + '</div></div>'
       + '</div>';
@@ -313,7 +313,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
               + '<td><span class="code">' + esc(g.code) + '</span></td>'
               + '<td>' + esc(g.destinataire || '—') + '<div class="dt">' + esc(g.courriel || '') + '</div></td>'
               + '<td class="num">' + fmt(g.initial) + '</td>'
-              + '<td class="num" style="font-weight:700;color:' + (g.solde > 0 ? '#4ade80' : '#8fa1b8') + '">'
+              + '<td class="num" style="font-weight:700;color:' + (g.solde > 0 ? 'var(--tx-ok)' : 'var(--tx2)') + '">'
               + fmt(g.solde) + '</td>'
               + '<td>' + esc(g.expediteur || '—') + '</td>'
               + '<td class="dt">' + esc(g.date) + '</td>'

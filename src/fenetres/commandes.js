@@ -91,7 +91,7 @@ button.prio{border-color:rgba(245,158,11,.4);color:var(--tx-bleute);border-radiu
 button.prio.on{background:rgba(245,158,11,.24);border-color:#f59e0b;color:#fde68a;
   font-weight:700;box-shadow:0 0 0 1px rgba(245,158,11,.35) inset}
 button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
-.eclair{color:#f59e0b;margin-right:.2rem}
+.eclair{color:var(--tx-att);margin-right:.2rem}
 
 /* La liste : la seule zone qui defile. */
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
@@ -556,7 +556,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + rb.lignes.map(function(r){
             return '<div class="lg2"><span><strong>' + esc(r.numero) + '</strong> · '
               + esc(dateCourte(r.date)) + ' · <em>' + esc(r.type) + '</em>'
-              + (r.fraisRetenus > 0 ? ' <span style="color:#f59e0b;font-size:.72rem">(frais retenus : ' + argent(r.fraisRetenus) + ')</span>' : '')
+              + (r.fraisRetenus > 0 ? ' <span style="color:var(--tx-att);font-size:.72rem">(frais retenus : ' + argent(r.fraisRetenus) + ')</span>' : '')
               + '</span><span style="font-weight:700;color:var(--tx-att)">−' + argent(r.montant) + '</span></div>'; }).join('');
       if (rb.fraisRetenus > 0) {
         h += '<div class="fin3" style="color:var(--tx-or2);font-weight:400">Frais de service retenus : <strong>'
