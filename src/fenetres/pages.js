@@ -334,7 +334,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         +(D.peutSupprimer && !p.protege ? ' <button class="b dgr" data-cdel="'+esc(p.id)+'">'+(DELP===p.id?'✓ Confirmer':'Supprimer')+'</button>' : '')+'</td></tr>';
     }
     h+='</tbody></table></div>';
-    h+='<div class="note">ℹ <b>Nos politiques</b> et le <b>contenu des pages personnalisées</b> se rédigent ici, avec l’éditeur riche complet (titres, listes, liens, variables, images, tableaux, aperçu). Cliquez sur « Modifier » ou « ＋ Nouvelle page ».</div>';
+    h+='';
     corps.innerHTML=h;
     brancherListe();
   }

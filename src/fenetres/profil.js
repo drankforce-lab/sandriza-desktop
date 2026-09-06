@@ -428,11 +428,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function panneauQuestions(){
     return '<div class="carte">'
       + '<h3>Questions de sécurité</h3>'
-      + '<p class="intro">Elles servent à retrouver votre accès si vous perdez votre mot de passe. '
-      + (D.questionsPosees
-          ? 'Vos réponses sont <b>enregistrées et chiffrées</b> : elles ne peuvent plus être réaffichées. Pour les changer, redonnez les <b>deux</b>.'
-          : '<b>Aucune réponse enregistrée</b> : sans elles, votre compte ne pourra pas être récupéré par cette voie.')
-      + '</p>'
+      + ''
       + '<div class="cols2">'
       + '<label class="champ"><span class="lbl">Question 1</span><select class="t" id="q-q1">' + qOpts(D.q1, D.q2) + '</select></label>'
       + '<label class="champ"><span class="lbl">Réponse 1</span><input class="t" id="q-a1" autocomplete="off"></label>'

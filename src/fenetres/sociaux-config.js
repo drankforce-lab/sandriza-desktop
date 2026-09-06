@@ -118,9 +118,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function dessiner(){
     var l = D.reseaux || [];
-    var h = '<p class="quoi">Chaque réseau se connecte avec un <b>jeton d’accès</b> obtenu chez lui. '
-      + 'Le jeton est enregistré dans le nuage et <b>ne se réaffiche jamais</b> : le champ reste vide, '
-      + 'et le laisser vide conserve celui qui est en place. Un réseau désactivé n’est jamais publié.</p>';
+    var h = '';
 
     h += '<label class="auto"><input type="checkbox" id="s-auto" '+(D.autoPublication?'checked':'')+(RO?' disabled':'')+'>'
       + '<span><b>Publier automatiquement la file, une fois par jour</b> — décoché, la file attend une publication manuelle.</span></label>';

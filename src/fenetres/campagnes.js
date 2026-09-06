@@ -426,11 +426,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     /* ⚠ L EDITEUR PAR BLOCS EST ICI DEPUIS LA 3.53.0 : ce renvoi ne doit plus le
        nommer comme un manque, sinon il envoie chercher a l ecran web quelque
        chose qui est sous les yeux. */
-    return '<div class="note">Créer et modifier se fait ici, corps du courriel compris — '
-      + 'en <strong>blocs</strong> ou en <strong>HTML</strong>, au choix. La '
-      + '<strong>configuration Resend</strong> et l’<strong>offre de bienvenue</strong> '
-      + 'restent à l’écran Infolettre. Le détail des envois se lit dans la fenêtre '
-      + '<strong>Journal d’envoi</strong>.</div>';
+    return '';
   }
 
   /* ══ FORMULAIRES — CREER / MODIFIER ═══════════════════════════════════════

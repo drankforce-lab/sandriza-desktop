@@ -282,7 +282,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('');
     var empty = (!items.length && ADDING !== 'labels') ? '<tr><td colspan="5" class="vide">Aucune étiquette — cliquez sur + pour en ajouter.</td></tr>' : '';
     var plus = (D.peut.edit && ADDING !== 'labels') ? '<button class="ic plus" data-attradd="labels" title="Ajouter">＋</button>' : '';
-    return '<p class="aide">Étiquettes personnalisées (badge coloré) affichées sur la fiche produit et dans le champ « Étiquette » de l’éditeur. Nom en français et en anglais.</p>'
+    return ''
       + '<div class="carte"><table><thead><tr><th>Aperçu</th><th>Nom FR</th><th>Nom EN</th><th>Couleur</th>'
       + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
       + '<tbody>' + addRow + empty + rows + '</tbody></table></div>';
@@ -318,7 +318,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<input id="cc-' + esc(c.nom) + '" value="' + esc(c.code) + '" maxlength="6"' + ro + '>'
         + save + '</div>';
     }).join('') : '<p class="aide" style="margin:0">Aucune couleur utilisée par un produit pour l’instant.</p>';
-    return '<p class="aide">Le code compose le SKU de variante (ex. <code>ROB-000001-XL-RO</code>). <strong>Deux caractères</strong> suffisent à tout distinguer. En gris = code auto (non enregistré) ; saisissez-en un pour le fixer.</p>'
+    return ''
       + alerte + bouton + rows;
   }
   function secCustom(){
@@ -401,7 +401,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('');
     var empty = (!cats.length && CATEDIT !== '__new__') ? '<tr><td colspan="9" class="vide">Aucune catégorie — cliquez sur + pour en créer une.</td></tr>' : '';
     var plus = (D.peut.ajout && CATEDIT !== '__new__') ? '<button class="ic plus" data-catadd="1" title="Ajouter">＋</button>' : '';
-    return '<p class="aide">Les codes de catégorie définissent les préfixes SKU (ex : ROB-0001). Les cases <strong>IA</strong> et <strong>Photos</strong> choisissent le mode (génération IA des couleurs ou galerie photos simple).</p>'
+    return ''
       + '<div class="carte" style="overflow-x:auto"><table><thead><tr>'
       + '<th>Couleur</th><th>Nom affiché</th><th>Nom EN</th><th>Slug</th><th>Code SKU</th>'
       + '<th style="text-align:center">IA</th><th style="text-align:center">Photos</th><th style="text-align:center">Produits</th>'
@@ -412,14 +412,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ══ ONGLET RÉACHAT ════════════════════════════════════════════════════════ */
   function vueReachat(){
     var r = D.reachat, ro = D.peut.edit ? '' : ' disabled';
-    return '<p class="aide">Seuil appliqué aux produits qui n’ont pas le leur. Une variante entre dans la liste de réachat quand sa quantité descend <strong>à ce nombre ou en dessous</strong>.</p>'
+    return ''
       + '<div class="champ" style="max-width:220px"><label>Seuil général</label>'
       + '<input type="number" min="0" step="1" id="rc-low" value="' + r.lowStockDefault + '"' + ro + ' style="width:100%"></div>'
       + '<div class="avis" style="margin:.7rem 0">Le seuil se règle à trois niveaux, <strong>le plus précis l’emporte</strong> : exception sur la variante, sinon seuil du produit, sinon celui-ci.<br>'
       + 'Actuellement : <strong>' + r.regles + '</strong> produit' + (r.regles > 1 ? 's ont' : ' a') + ' son propre seuil, <strong>' + r.exceptions + '</strong> variante' + (r.exceptions > 1 ? 's font' : ' fait') + ' exception.</div>'
       + (D.peut.edit ? '<button class="prim" data-act="reachatlow">Enregistrer le seuil</button>' : '')
       + '<hr style="border:none;border-top:1px solid var(--v10);margin:1.3rem 0">'
-      + '<p class="aide">Nombre maximal d’unités d’une <strong>même variante</strong> qu’un client peut commander, même si le stock est plus grand. La boutique ne révèle ainsi jamais le stock exact.</p>'
+      + ''
       + '<div class="champ" style="max-width:220px"><label>Limite d’achat par commande</label>'
       + '<input type="number" min="1" step="1" id="rc-buymax" value="' + r.buyMax + '"' + ro + ' style="width:100%"></div>'
       + (D.peut.edit ? '<button class="prim" style="margin-top:.7rem" data-act="reachatbuymax">Enregistrer la limite</button>' : '');

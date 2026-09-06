@@ -333,9 +333,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        ⚠ Elles se collent sur le NUMERO, pas dans Monitor > Errors : c est
        l erreur qui a fait perdre du temps la premiere fois. */
     h += '<hr class="sep"><div class="stitre">Adresses de rappel (webhooks)</div>'
-      + '<div class="note">À coller dans <strong>Twilio → Phone Numbers → votre numéro</strong>. '
-      + 'Sans elles, Twilio ne sait pas où joindre le site : les appels et les SMS '
-      + 'n’arriveront jamais. <strong>Ce n’est pas dans Monitor → Errors.</strong></div>';
+      + '';
     h += crochetHtml('A CALL COMES IN (Voice)', D.webhookVoice || '', 't-wh-voice');
     h += crochetHtml('A MESSAGE COMES IN (Messaging)', D.webhookSms || '', 't-wh-sms');
     return h + '</div>';
@@ -466,7 +464,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var selMus = estPreset ? curMus : (curMus ? 'custom' : '');
     var h = '<div class="carte"><div class="stitre">⏳ File d’attente d’appels</div>';
     h += checkHtml('t-q-enabled', 'Activer la file (faire patienter avec musique quand la ligne est occupée)', !!q.enabled);
-    h += '<div class="note">L’appel retente vos numéros de redirection et branche l’appelant dès qu’un agent se libère. Aucun appel sortant facturé, aucun webhook de plus.</div>';
+    h += '';
     h += '<div class="gr2">'
       + texteHtml('t-q-maxwait', 'Attente max avant messagerie (minutes)', Math.round((q.maxWaitSec || 180) / 60), '3', false, '', 'number')
       + texteHtml('t-q-firstdelay', 'Délai avant la 1re sonnerie (secondes)', (q.firstRingDelaySec != null ? q.firstRingDelaySec : 30), '30', false, '', 'number') + '</div>';

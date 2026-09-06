@@ -194,9 +194,7 @@ function pageCommande(id) {
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.85rem;margin-top:.7rem;cursor:pointer">'
       + '<input type="checkbox" id="c-sans"> Expédier sans numéro de suivi</label>'
-      + '<div class="aide" style="margin-top:.4rem">Remise en main propre, cueillette, transporteur local. '
-      + 'Le client reçoit alors un courriel <strong>sans lien de suivi</strong> — c’est préférable à un numéro '
-      + 'inventé qu’elle chercherait en vain.</div></div></div>');
+      + '</div></div>');
 
     // 3 — Expédition
     h.push('<div class="etape"><div class="carte plein"><h2>Récapitulatif</h2>'

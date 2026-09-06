@@ -167,7 +167,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>'
       + '</div>'
       + '<div class="grpH" style="margin-top:1rem">Verrouillage de session à l’écran</div>'
-      + '<div class="hint">Ferme la session d’administration après un temps sans clic ni changement de page — différent des comptes dormants ci-dessus (jours sans se connecter).</div>'
+      + ''
       + '<div class="cols3">'
       + champNum('idle-warn', 'Avertir après (minutes)', c.idleWarnMin||15, 'Défaut : 15.')
       + champNum('idle-out', 'Décompte avant fermeture (secondes)', c.idleLogoutSec||60, 'Défaut : 60.')

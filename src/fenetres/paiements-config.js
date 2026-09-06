@@ -238,19 +238,14 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     // ── Où la cliente saisit sa carte ──────────────────────────────────────
     h.push('<div class="carte"><h2>Où le client saisit sa carte</h2>');
-    h.push('<p class="sous">Par défaut, le champ de carte de Square s’affiche dans notre page de caisse. '
-      + 'S’il ne se charge pas, le client est bloqué au pire moment.</p>');
+    h.push('');
     h.push('<label class="bascule"><input type="checkbox" id="o-heb"' + (d.hebergee ? ' checked' : '')
       + (RO ? ' disabled' : '') + '><span><strong>Payer sur la page sécurisée de Square</strong>'
       + '<span class="d">Le client est dirigé vers Square, paie, puis revient sur un écran d’attente. '
       + 'Aucun numéro de carte ne passe par notre site.</span></span></label>');
-    h.push('<div class="note">Apple Pay et Google Pay restent offerts sur la page de Square. Afterpay, lui, '
-      + 'exige le champ intégré. Un bouton de secours vers la page de Square apparaît toujours si le champ '
-      + 'intégré refuse de s’afficher.</div>');
+    h.push('');
     if (d.mode !== 'production') {
-      h.push('<div class="note garde">En bac à sable, Square ouvre un panneau de simulation qui ne revient '
-        + 'jamais sur le site. Revenez à la boutique après l’avoir terminé : un bandeau « Vérifier mon '
-        + 'paiement » termine la commande. Le parcours complet ne se voit qu’en production.</div>');
+      h.push('');
     }
     h.push('<h2 style="margin-top:1.1rem">Modes de paiement à la caisse</h2>');
     h.push('<label class="bascule"><input type="checkbox" id="o-after"' + (d.afterpay ? ' checked' : '')

@@ -901,9 +901,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         });
       }
       h += '</div>';
-      h += '<p class="aide">Rien n’est importé à cette étape : on lit seulement les noms, '
-        + 'les tailles et les dates. Seuls les formats que nous savons lire (JPG, PNG, WebP) '
-        + 'sont proposés.</p>';
+      h += '';
 
     } else if (A.etape === 2 && A.chargement) {
       /* ⚠⚠ ON CHARGE AVANT DE MONTRER (demande du 2026-08-09). Afficher
@@ -1382,9 +1380,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="tt"><h3>Retrait du mannequin</h3>'
       + '<span class="pas">' + n + ' photo' + (n > 1 ? 's' : '') + '</span></div>'
       + '<div class="co">'
-      + '<p class="aide">Le fond et le mannequin sont retirés ; le col et les manches '
-      + 'sont reconstruits. Rien n’est engendré : c’est le vêtement de la photo, pas '
-      + 'une personne inventée.</p>'
+      + ''
       + '<div class="aide" style="margin-top:.5rem;color:var(--tx-or2)">Chaque photo coûte '
       + '1 crédit Photoroom. L’aperçu est gratuit et filigrané : de quoi juger avant '
       + 'de payer.</div>'
@@ -1438,13 +1434,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button type="button" data-sugg="coiffure soignée">+ Coiffure</button>'
       + '<button type="button" data-sugg="lumière chaude de fin de journée">+ Lumière chaude</button>'
       + '</div>'
-      + '<div class="aide" style="margin-top:.4rem">Ces précisions partent en texte au '
-      + 'générateur, qui en tient compte au mieux : Photoroom n’a pas de réglage dédié pour '
-      + 'les chaussures ou les bijoux. Un aperçu filigrané permet de vérifier avant de payer.</div>'
+      + ''
       + '</div>'
-      + '<div class="aide">Cette image est ENGENDRÉE : la personne, la pose et le décor '
-      + 'n’ont jamais existé. À réserver à la mise en scène — jamais pour montrer '
-      + 'l’état réel d’un article.</div>'
+      + ''
       + '</div>'
       + '<div class="pied"><button id="sc-non">Annuler</button>'
       + '<button id="sc-apercu" title="Voir un aperçu filigrané et gratuit avec ces réglages"><span class="ic">👁</span> Voir un aperçu</button>'
@@ -1893,12 +1885,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
 
     if (SUPPR_ARME_INSP) {
-      h += '<div class="aide" style="margin-top:.5rem">'
-        + (r.lieId
-            ? 'Cette photo est attachée à <strong>' + esc(r.lieNom) + '</strong>. La fiche de l’article '
-              + 'garde son image : elle en possède sa propre copie. Seule l’entrée de la médiathèque disparaît.'
-            : 'Le fichier devenu inutile est effacé du stockage par le ménage automatique, après sept jours.')
-        + '</div>';
+      h += '';
     }
 
     h += '</div></div>';

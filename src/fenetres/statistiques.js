@@ -202,9 +202,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function renvoi(){
-    return '<div class="note">Les <strong>réglages</strong> — clé du compte de service Google, '
-      + 'compte Twilio — vivent à l’écran <strong>Configuration</strong> de la fenêtre principale. '
-      + 'Les recherches sans résultat ont leur propre fenêtre.</div>';
+    return '';
   }
 
   function tuile(lbl, val, cl){

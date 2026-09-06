@@ -195,10 +195,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '</div>';
 
-    h += '<div class="aide" style="padding:.1rem">'
-      + '<strong>Rembourser</strong> se fait depuis la commande — cliquez une ligne pour l’ouvrir. '
-      + 'Les remboursements de commandes livrées depuis plus de 45 jours sont dans '
-      + '<strong>Archives</strong>, et ne sont pas comptés ici.</div>';
+    h += '';
 
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche

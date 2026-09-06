@@ -278,8 +278,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--tx2);margin-top:.5rem;cursor:pointer">'
       + '<input type="checkbox" id="e-aviser" checked> Aviser le client par courriel de ce changement</label>'
-      + '<div class="aide" style="margin-top:.3rem">Le mot de passe part par un canal séparé et le serveur le hache — '
-      + 'il n’est jamais gardé en clair, ni ici ni ailleurs.</div>'
+      + ''
       + '</div>';
     corps.innerHTML = h;
     actions.innerHTML = '<button id="btn-annuler">← Fiche</button>'

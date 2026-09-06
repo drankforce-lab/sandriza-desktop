@@ -576,12 +576,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '</span></div>';
     }
 
-    h += '<div class="aide" style="margin-top:.4rem">'
-      + 'Un <b>emplacement</b> est obligatoire pour chaque variante ayant une quantité. '
-      + 'La colonne <b>Seuil</b> ne se remplit que pour une variante qui fait exception ; '
-      + 'laissée vide, elle suit le seuil du produit'
-      + (PROD.seuilHerite == null ? '' : ' (<b>' + esc(PROD.seuilHerite) + '</b>)') + '.'
-      + '</div>';
+    h += '';
     h += '</div>';
     corps.innerHTML = h;
 

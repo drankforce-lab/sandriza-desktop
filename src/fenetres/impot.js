@@ -529,8 +529,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function vueDocuments(){
-    var h = '<div class="aide">Chaque document s’ouvre dans la fenêtre principale, prêt à imprimer '
-      + 'ou à enregistrer en PDF. Les chiffres sont ceux de l’année choisie ci-dessus.</div>';
+    var h = '';
     h += '<div class="carte"><h2>Trimestre <span class="n">pour les documents trimestriels</span></h2>'
       + '<div class="barreoutils">'
       + ['T1 — jan · mar', 'T2 — avr · juin', 'T3 — juil · sep', 'T4 — oct · déc'].map(function(l, i){

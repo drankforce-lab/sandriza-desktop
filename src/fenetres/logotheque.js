@@ -258,7 +258,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       +     '<div class="ch"><label>Largeur (po)</label><input id="lg-printw" type="number" step="0.05" min="0" value="" placeholder="ex. 2"></div>'
       +     '<div class="ch"><label>Largeur max (px)</label><input id="lg-maxw" type="number" step="50" min="0" max="' + MAXPX + '" value="" placeholder="' + MAXPX + '"></div>'
       +   '</div>'
-      +   '<p class="hint">La largeur en pouces sert à calculer la résolution (dpi) — affichée sur la vignette. Au-delà de ' + MAXPX + ' px, l’image est réduite au téléversement.</p>'
+      +   ''
       +   '<div style="display:flex;gap:.6rem;margin-top:.3rem"><button class="prim" id="lg-ok">Confirmer et téléverser</button><button class="b" id="lg-cancel">Annuler</button></div>'
       + '</div></div>';
   }

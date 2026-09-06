@@ -349,8 +349,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<label class="case"><input type="checkbox" id="u-exempt" '+(c.mfaExempt?'checked':'')+'>'
       + '<span>Exempté de MFA<span class="quoi">À réserver aux cas où le second facteur est impossible : c’est un rempart en moins.</span></span></label>';
 
-    var volQuestions = '<p class="aideOng">Elles servent à retrouver un accès quand le mot de passe est perdu. Les réponses sont <b>chiffrées</b> et ne se réaffichent jamais — laisser vide conserve celles déjà enregistrées.</p>'
-      + (nouv ? '' : '<div class="note">'+(ansSet?'✓ Des réponses sont déjà enregistrées pour ce compte.':'Aucune réponse enregistrée : ce compte ne pourra pas être récupéré par cette voie.')+'</div>')
+    var volQuestions = ''
+      + (nouv ? '' : '')
       + '<div class="cols2">'
       + '<label class="champ"><span class="lbl">Question 1</span><select class="t" id="u-q1">'+qOpts(c.securityQ1||'')+'</select></label>'
       + '<label class="champ"><span class="lbl">Réponse 1</span><input class="t" id="u-a1" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
@@ -358,7 +358,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<label class="champ"><span class="lbl">Réponse 2</span><input class="t" id="u-a2" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
       + '</div>';
 
-    var volPerms = '<p class="aideOng">Ces cases partent du rôle choisi. Les modifier crée des droits <b>personnalisés</b> pour cette personne ; changer de rôle les remet à ceux du rôle.</p>'
+    var volPerms = ''
       + '<div id="u-perms">'+permMatrice(F)+'</div>';
 
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-u';

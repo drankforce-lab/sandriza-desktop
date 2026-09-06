@@ -162,7 +162,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var l = D.sauvegardes || [];
     var octets = 0; for (var k=0;k<l.length;k++) octets += (+l[k].blobBytes || 0);
     var h = '<div class="entete">'
-      + '<p class="quoi">Chaque sauvegarde capture l’intégralité de la base <b>Turso</b> (clients, produits, commandes, factures, remboursements, crédits, configuration), un <b>inventaire des objets Cloudflare R2</b> (images, reçus, documents) et la <b>version du code déployé</b>. Le tout est compressé puis <b>chiffré (AES-256-GCM)</b> et conservé '+(D.retentionMois||12)+' mois. La clé de chiffrement ne quitte jamais le serveur : un fichier téléchargé est illisible sans elle.</p>'
+      + ''
       + '<div class="outils">'
       + (D.peutEcrire ? '<button class="prim" id="s-nouveau">＋ Créer une sauvegarde</button>' : '')
       + '<button class="b" id="s-refresh">↻ Actualiser</button>'

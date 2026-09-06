@@ -1182,13 +1182,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       h.push('<div class="ch avun"><label for="av-extra">Précisions libres</label>'
         + '<textarea id="av-extra" rows="3" maxlength="200"' + (RO ? ' disabled' : '')
         + ' placeholder="black heels, hair tied back, delicate jewellery">' + esc(AV.extra) + '</textarea>'
-        + '<div class="aidep">Chaussures, bijoux, coiffure, ambiance… Photoroom n’a <strong>aucun '
-        + 'réglage dédié</strong> pour ces éléments : c’est du texte libre ajouté à la consigne, au mieux '
-        + 'une suggestion, jamais une garantie. Le service comprend mieux l’anglais.</div></div>');
-      h.push('<div class="avun"><div class="aidep att"><span class="ic">⚠</span> Le décor décrit au texte, l’ombre réglable et '
-        + 'la relumière ne figurent pas dans cette voie : le mannequin virtuel <strong>compose sa scène '
-        + 'lui-même</strong> et le service les ignorerait. Ils sont offerts sur « Fantôme habillé » et '
-        + '« Produit à plat ».</div></div>');
+        + '</div>');
+      h.push('');
     } else {
       h.push('<div class="avsec prem">Décor décrit au texte</div>');
       h.push('<div class="ch avun"><label for="av-fond">Décor voulu</label>'
@@ -1199,8 +1194,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         // qu'un rows est ecrit a la main.
         + '<textarea id="av-fond" rows="3" maxlength="500"' + (RO ? ' disabled' : '')
         + ' placeholder="clean marble surface, soft window light from the left">' + esc(AV.fondPrompt)
-        + '</textarea><div class="aidep">Laissez vide pour garder le décor de l’ambiance ; rempli, il la '
-        + 'remplace. Le sujet reste où il est. Le service comprend mieux l’anglais.</div></div>');
+        + '</textarea></div>');
       h.push('<div class="ch"><label for="av-neg">À éviter</label>'
         + '<input type="text" id="av-neg" maxlength="300"' + (RO ? ' disabled' : '')
         + ' value="' + esc(AV.fondNegatif) + '" placeholder="text, logo, hands, harsh reflections">'
@@ -1208,8 +1202,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h.push('<div class="ch"><label for="av-seed">Graine</label>'
         + '<input type="text" id="av-seed" inputmode="numeric" maxlength="9"' + (RO ? ' disabled' : '')
         + ' value="' + esc(AV.fondGraine) + '" placeholder="vide = au hasard">'
-        + '<div class="aidep">Un même nombre redonne le <strong>même décor</strong> : c’est ce qui garde '
-        + 'une collection cohérente d’une photo à l’autre. Vide, chaque photo repart au hasard.</div></div>');
+        + '</div>');
     }
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
@@ -1248,24 +1241,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function avInterieurHtml(){
     var h = [];
     h.push('<div class="avsec prem">Photo de l’intérieur du vêtement</div>');
-    h.push('<div class="avun"><div class="aidep">Le studio photographie le vêtement à l’endroit, puis '
-      + '<strong>retourné</strong> ; le service raccorde les deux. C’est le <strong>seul chemin vers un '
-      + 'col qui ne soit pas inventé</strong> — sans elle, l’intérieur de l’encolure est imaginé par le '
-      + 'modèle.</div>'
-      + '<input type="file" id="av-int-f" hidden accept="image/*">'
-      + '<div class="avint">'
-      + (INTERIEUR ? '<img src="' + INTERIEUR + '" alt="intérieur du vêtement">' : '')
-      + '<span class="nm">' + (INTERIEUR ? esc(INTERIEUR_NOM || 'photo choisie')
-      : 'Aucune photo d’intérieur.') + '</span>'
-      + '<button id="av-int-b"' + (RO ? ' disabled' : '') + '>'
-      + (INTERIEUR ? 'Remplacer' : 'Choisir un fichier') + '</button>'
-      + (INTERIEUR ? '<button id="av-int-x"' + (RO ? ' disabled' : '') + '>Retirer</button>' : '')
-      + '</div>'
-      + '<div class="aidep att"><span class="ic">⚠</span> Photoroom ne documente pas ce paramètre pour le retrait de '
-      + 'mannequin, et l’on ne fait pas semblant du contraire : s’il est ignoré, le service le signale '
-      + 'et l’écran vous le rapporte.</div>'
-      + '<div class="aidep att"><span class="ic">⚠</span> Elle ne voyage <strong>pas</strong> avec un lot : là, l’intérieur '
-      + 'utilisé est celui déjà attaché à chaque photo dans la photothèque.</div></div>');
+    h.push('');
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
 
@@ -1280,11 +1256,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h.push(chSel('av-up-mode', 'Mode', [
         { cle: 'ai.fast', t: 'Rapide — entrée jusqu’à 1000 px' },
         { cle: 'ai.slow', t: 'Lent, plus fin — entrée jusqu’à 512 px' }], AV.upMode, ''));
-      h.push('<div class="avun"><div class="aidep att"><span class="ic">⚠</span> L’entrée est plafonnée à <strong>'
-        + (AV.upMode === 'ai.slow' ? '512' : '1000') + ' px</strong> sur le grand côté. Au-delà, le '
-        + 'service refuse : l’écran vous le dira plutôt que de le facturer. Une photo de studio dépasse '
-        + 'largement cette limite — l’agrandissement sert surtout à récupérer une <strong>petite</strong> '
-        + 'image (vignette, photo de fournisseur).</div></div>');
+      h.push('');
     }
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
@@ -1334,17 +1306,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="prim" id="fil-go"' + ((RESULT && lg && !RO) ? '' : ' disabled') + '>'
       + 'Appliquer au résultat</button>'
       + ((RESULT && RESULT.filigrane) ? '<button id="fil-off">Retirer</button>' : '')
-      + '</div><div class="aidep">'
-      + (RESULT
-          ? (lg ? 'S’applique à l’image de droite. Les formats de sortie en seront tirés, donc marqués eux aussi.'
-                : 'Choisissez un logo ci-dessus.')
-          : 'Il n’y a pas encore d’image à marquer — commencez par un aperçu gratuit.')
       + '</div>'
       /* ⚠ CE QUE ÇA COÛTE, DIT UNE FOIS POUR TOUTES : rien. C est le seul
          traitement de cet écran dont le prix ne dépend pas du nombre de photos. */
-      + '<div class="aidep">Le lot <strong>« Filigrane / logo »</strong> posera ce même réglage sur '
-      + 'chaque photo choisie — <strong>aucun appel, aucun crédit</strong>, qu’il y en ait cinq ou '
-      + 'cinq cents.</div></div>';
+      + '</div>';
     return h + '</div>';
   }
 
@@ -1695,11 +1660,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (RO) return;
     var x = recetteChoisie();
     voile('<h3><span class="ic">💾</span> Enregistrer le profil</h3>'
-      + '<p>Il retient <strong>tout</strong> : la mise en valeur, l’ambiance, le mannequin, la '
-      + 'pose, les réglages avancés (décor, ombres, lumière, agrandissement), le filigrane et le '
-      + 'format de sortie.</p>'
-      + '<p><strong>Pas la photo</strong>, ni la photo d’intérieur du fantôme : celle-là appartient '
-      + 'à un vêtement précis, et se promènerait d’un article à l’autre.</p>'
+      + ''
+      + ''
       + '<p><input type="text" id="rc-nom" maxlength="60" placeholder="Ex. : Collection automne — plage dorée" '
       + 'value="' + esc(x ? x.nom : '') + '"></p>'
       + '<p class="rcav" id="rc-av">' + (x
@@ -2030,14 +1992,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        centré COUPE — sur une silhouette entière, le 1:1 emporte forcément le haut
        et le bas. Le taire ferait découvrir la coupe une fois les quatre images
        enregistrées dans la photothèque. */
-    h += '<div class="note">'
-      + (FORM_MODE === 'marges'
-          ? 'Rien n’est coupé : l’image entière est <strong>bordée</strong> jusqu’au format voulu. '
-            + 'Les marges sont <strong>blanches</strong> ; sur une image détourée (fond transparent) '
-            + 'elles restent transparentes, et le fichier sort en PNG.'
-          : 'Le recadrage est <strong>centré</strong> : sur une silhouette entière, le 1:1 et le 9:16 '
-            + 'emportent forcément du haut et du bas. Choisissez « Marges » pour ne rien perdre.')
-      + '</div>';
+    h += '';
     if (FORMATS.length) {
       h += '<div class="fmtg">' + FORMATS.map(function(f){
         return '<div class="fmtc"><img src="' + f.image + '" alt="' + esc(f.label) + '" loading="lazy">'
@@ -2158,9 +2113,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (RESULT && RESULT.filigrane) j.push('<span class="jt">filigrané</span>');
     return '<div class="bloc recap"><span class="rt">Ce qui sera généré</span>'
       + '<div class="rc2">' + j.join('') + '</div>'
-      + '<div class="note">L’aperçu est <strong>gratuit</strong> et filigrané : jugez d’abord, '
-      + 'payez ensuite. Seul « Générer en pleine qualité » consomme un crédit, et il demande '
-      + 'deux clics.</div></div>';
+      + '</div>';
   }
 
   /* ⚠ INTUITIF = LE GESTE SUIVANT EST EVIDENT SANS LIRE. Les deux boutons du
@@ -3163,9 +3116,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         var h = '<h3>' + (apercu ? '<span class="ic">👁</span> Aperçu — ' : '')
       + n + ' appels pour <em>une seule</em> photo</h3>';
         if (apercu) {
-          h += '<p>Cet aperçu demande <strong>' + n + ' appels</strong> au service au lieu d’un seul. '
-            + 'Il reste <strong>gratuit</strong> : il part sur la clé d’essai, <strong>aucun crédit '
-            + 'n’est consommé</strong> et le plafond mensuel n’est pas entamé.</p>'
+          h += ''
             + '<p>Ce qu’il consomme, ce sont vos <strong>aperçus du mois</strong> — ' + n
             + ' d’un coup — et le résultat sera <strong>filigrané</strong>.</p>';
         } else {

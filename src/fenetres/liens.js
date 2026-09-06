@@ -300,9 +300,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<input id="rv-a" type="email" value="' + esc(RENVOI.a || l.destinataire || '') + '" '
       + 'placeholder="personne@exemple.com">'
       + (inscription
-          ? '<p class="aide">Ce lien s’ouvre avec <strong>le mot de passe du compte</strong> de la '
-            + 'personne. Il n’y a donc pas de mot de passe à joindre&nbsp;: le courriel rappellera '
-            + 'd’utiliser celui de son accueil.</p>'
+          ? ''
           : '<label style="margin-top:.5rem">Ce que contient le courriel</label>'
             + '<label style="margin:.2rem 0 0;font-size:.78rem;color:var(--tx)">'
             + '<input type="radio" name="rv-quoi" value="lien" style="width:auto;margin-right:.4rem"'
@@ -310,9 +308,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
             + '<label style="margin:.15rem 0 0;font-size:.78rem;color:var(--tx)">'
             + '<input type="radio" name="rv-quoi" value="mdp" style="width:auto;margin-right:.4rem"'
             + (RENVOI.quoi === 'lien' ? '' : ' checked') + '>Le lien <strong>et un nouveau mot de passe</strong></label>'
-            + '<p class="aide">L’ancien mot de passe ne peut pas être renvoyé&nbsp;: il n’existe nulle '
-            + 'part en clair, la base n’en garde que l’empreinte. En poser un nouveau le remplace, '
-            + 'et <strong>l’ancien cesse aussitôt de fonctionner</strong>.</p>')
+            + '')
       + '<div class="barreoutils" style="margin-top:.5rem">'
       + '<button class="prim" id="rv-envoyer">Envoyer</button>'
       + '<span class="droite"><button id="rv-annuler">Annuler</button></span></div>'
@@ -361,9 +357,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
             : 'Utilisations illimitées')
         + ' · échéance le ' + jour(n.expire) + '</span></div>'
       + (n.mdpCompte
-          ? '<p class="aide">Ce lien s’ouvre avec <strong>le mot de passe du compte</strong> de la '
-            + 'personne — celui de son courriel d’accueil. S’il change ou s’il est réinitialisé, '
-            + 'le lien suit automatiquement, pour toute sa durée de vie.</p>'
+          ? ''
           : '<label style="margin-top:.6rem">Mot de passe d’ouverture</label>'
             + '<div class="gros" id="n-mdp-vue">' + esc(n.mdp) + '</div>'
             + '<input id="n-mdp" type="text" readonly value="' + esc(n.mdp) + '" style="position:absolute;left:-9999px">'
@@ -379,8 +373,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + (n.mdpCompte ? ''
           : '<label style="margin-top:.5rem"><input type="checkbox" id="n-inclure" style="width:auto;margin-right:.4rem">'
             + 'Inclure le mot de passe dans ce courriel</label>'
-            + '<p class="aide">Les deux dans le même message, c’est une seule porte au lieu de deux. '
-            + 'À ne cocher que si vous n’avez aucun autre moyen de le transmettre.</p>')
+            + '')
       + '<div class="barreoutils" style="margin-top:.5rem">'
       + '<button class="prim" id="n-envoyer">Envoyer</button>'
       + '<span class="droite"><button id="n-fermer">Fermer</button></span></div>'

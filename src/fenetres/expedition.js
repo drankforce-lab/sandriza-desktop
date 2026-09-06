@@ -392,9 +392,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       recharger().then(function(){
         voile('<h3><span class="ic">✅</span> Étiquette créée</h3>'
           + '<p>Suivi : <strong>' + esc(r.suivi || '—') + '</strong></p>'
-          + '<p>Imprimez-la, puis revenez confirmer l’expédition. '
-          + '<strong>La commande n’est pas encore marquée expédiée</strong> — fermer cette '
-          + 'fenêtre est sans risque, vous pourrez y revenir.</p>'
+          + ''
           + '<div class="fin2"><button id="v-non">Plus tard</button>'
           + '<button class="prim" id="v-oui"><span class="ic">🖨</span> Imprimer maintenant</button></div>',
           function(fermer){

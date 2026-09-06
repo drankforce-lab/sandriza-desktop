@@ -257,9 +257,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     };
     var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('fr-CA') : 'jamais';
     return '<div class="carte large"><h2>Pays desservis</h2>'
-      + '<p class="sous">Un pays n’est livrable que si une <strong>inscription fiscale active</strong> '
-      + 'existe dans Stripe — c’est ce qui garantit qu’on perçoit la bonne taxe au lieu de zéro. '
-      + 'Décochez un pays pour ne pas y livrer malgré l’inscription.</p>'
+      + ''
       + '<div class="pbarre">'
       + '<input class="pfiltre" id="p-filtre" type="search" placeholder="Filtrer…" value="' + esc(FILTRE) + '">'
       + '<span class="info">' + PAYS.nbInscrits + ' pays inscrit' + (PAYS.nbInscrits > 1 ? 's' : '')

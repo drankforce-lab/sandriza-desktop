@@ -250,10 +250,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        moment où la file s arrête, c est le découvrir trop tard. */
     var teinte = pct >= 100 ? '#e08a8a' : pct >= 80 ? '#d8b57a' : '#6ea8a1';
     var h = '<div class="carte"><h2>Plafond mensuel de dépense</h2>';
-    h += '<p class="dt">Photoroom et fal.ai comptent ensemble : c est la dépense TOTALE '
-      + 'du mois en traitements d’image qui est plafonnée. Atteint, il arrête les lots '
-      + 'en cours au lieu de les laisser courir — les photos non traitées restent à faire, '
-      + 'elles ne sont pas marquées en échec. Les aperçus sandbox, gratuits, ne sont jamais bloqués.</p>';
+    h += '';
     h += '<label class="rc" style="display:flex;gap:.5rem;align-items:center;margin:.6rem 0">'
       + '<input type="checkbox" id="pl-actif"' + (b.actif ? ' checked' : '') + '> '
       + '<span><strong>Appliquer un plafond mensuel</strong></span></label>';

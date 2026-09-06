@@ -451,7 +451,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (CP_PAGE >= pages) CP_PAGE = pages - 1;
     if (CP_PAGE < 0) CP_PAGE = 0;
     var vue = rows.slice(CP_PAGE * CP_PARPAGE, CP_PAGE * CP_PARPAGE + CP_PARPAGE);
-    var h = '<div class="note">ℹ Tous les accès aux liens émis — installation de l’application, portail comptable et envois par courriel : visite, mot de passe refusé, téléchargement, révocation. La <b>gestion</b> des liens (créer, révoquer, supprimer) reste dans <b>Système → Liens d’installation</b>.</div>'
+    var h = ''
       + '<div class="carte"><div class="barre">'
       + '<select id="cp-canal"><option value="">Tous les canaux</option>'
       + '<option value="installation"' + (CP_CANAL==='installation'?' selected':'') + '>Installation</option>'
@@ -491,7 +491,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── Recherches sans résultat (#7 Lot 7b) ─────────────────────────
   function vueRecherchesRatees(){
     var rows = D.recherches||[];
-    var h = '<div class="note">ℹ Ce que des visiteurs ont cherché sans rien trouver. Son tableau de bord complet (tendances, archive) reste dans <b>Marketing → Statistiques</b> ; il est rassemblé ici et couvert par la recherche inter-journaux.</div>'
+    var h = ''
       + '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.recherchesTotal, 'terme distinct', 'termes distincts')+'</span></div>'
       + '<table class="tb"><thead><tr><th>Terme cherché</th><th style="text-align:center">Fois</th><th>Dernière fois</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="3" class="vide">Aucune recherche sans résultat.</td></tr>';
@@ -517,9 +517,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueJsErreurs(){
     var rows = D.jsErreurs || [];
     var neuves = D.jsErreursNeuves || 0;
-    var h = '<div class="note">ℹ Les erreurs JavaScript survenues chez des <b>visiteuses de la boutique</b>. '
-      + 'Elles sont <b>regroupées</b> : une ligne par défaut distinct, avec le nombre de fois. '
-      + 'Aucune donnée personnelle n’y entre — courriels, numéros et jetons sont remplacés avant l’envoi.</div>'
+    var h = ''
       + '<div class="carte"><div class="barre">'
       /* ⚠ jsErreursTotal N'ÉTAIT AFFICHÉ NULLE PART, et la liste est coupée à
          300 : on lisait « 300 défauts distincts » sur un site qui en avait mille.

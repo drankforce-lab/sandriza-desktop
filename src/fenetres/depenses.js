@@ -480,9 +480,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
     }
     h += '</div>';
-    h += '<div class="aide" style="padding:.1rem">L’annuaire sert à classer une facture dès '
-      + 'son import. <strong>Vos corrections priment</strong> sur ce qui est livré, et une '
-      + 'catégorie choisie à la main lors d’une saisie y entre toute seule.</div>';
+    h += '';
     return h;
   }
 

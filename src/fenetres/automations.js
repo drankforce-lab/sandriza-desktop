@@ -79,7 +79,7 @@ function pageAutomations() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.config}</span><h1>Automatisations</h1></div>
 <div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="intro">Chaque tâche s'exécute par un planificateur externe gratuit (cron-job.org). Copiez son URL dans le planificateur ; définissez le courriel destinataire pour celles qui en ont un.</div>
+
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>

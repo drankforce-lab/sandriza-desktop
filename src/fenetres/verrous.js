@@ -169,10 +169,7 @@ ${JS_ACTIVITE}${JS_DIRE}
        finissait par « normalement, il n'y a rien à faire ici ».
        Ce qui suit prévient d'une conséquence avant le geste qui la provoque —
        ça, c'est utile au moment où on le lit. */
-    var h = '<div class="note">'
-      + 'Forcer un déverrouillage ne sert '
-      + 'que si un poste est parti en laissant une fiche ouverte : la personne se fera alors refuser '
-      + 'son enregistrement. Chaque déverrouillage forcé est inscrit au journal d’accès.</div>';
+    var h = '';
 
     h += '<div class="barre"><button class="mini" id="v-reload"><span class="ic">🔄</span> Actualiser</button>'
       + (VERR.length && PEUT

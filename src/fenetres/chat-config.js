@@ -188,10 +188,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueWidget(){
     var d = D || {};
     var dis = RO ? ' disabled' : '';
-    var h = '<p class="quoi">Le bouton flottant en bas à droite de la boutique. '
-      + '<b>Actif</b> le fait paraître ; <b>En ligne</b> décide s’il ouvre une vraie conversation '
-      + 'ou le formulaire hors ligne. Les messages sont servis <b>en français ou en anglais</b> '
-      + 'selon la langue du visiteur.</p>';
+    var h = '';
 
     h += '<div class="grille">';
 
@@ -203,11 +200,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>'
       + '<label class="champ"><span class="lbl">Nom de l’agent</span>'
       + '<input class="t" id="c-nom" value="'+esc(d.nomAgent||'')+'" placeholder="Support"'+dis+'>'
-      + '<span class="sub">'
-      + (d.rotation
-          ? 'La rotation est active : le nom change toutes les 2 heures parmi les agents ci-dessous — actuellement <b>'+esc(d.nomAffiche||'')+'</b>. Ce champ reste le nom de repli, servi si plus aucun agent n’est actif.'
-          : 'Nom fixe, affiché à tous les visiteurs.')
-      + '</span></label>'
+      + '</label>'
       + '<label class="champ"><span class="lbl">Courriel d’avis (hors ligne)</span>'
       + '<input class="t" id="c-courriel" type="email" value="'+esc(d.courrielAvis||'')+'" placeholder="admin@sandriza.com"'+dis+'>'
       + '<span class="sub">Prévenu quand quelqu’un laisse un message pendant que le chat est hors ligne. Vide : personne n’est prévenu.</span></label>'
@@ -349,8 +342,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueIa(){
     var d = D || {}, ia = d.ia || {};
     var dis = RO ? ' disabled' : '';
-    var h = '<p class="quoi">L’assistant répond seul aux questions courantes en puisant dans les données de la '
-      + 'boutique. Il passe la main à l’équipe dès qu’il ne sait pas.</p>';
+    var h = '';
 
     h += d.groqPosee
       ? '<div class="avis ok">Clé Groq en place — modèle <code>'+esc(d.groqModele||'')+'</code>.</div>'
