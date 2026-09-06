@@ -1395,6 +1395,20 @@ const portePage = (titre, message, progression) => {
     +   'background:linear-gradient(90deg,transparent,#C49A6C,transparent);animation:slide 1.5s ease-in-out infinite}'
     + '.ver{margin-top:2.2rem;padding-top:1.2rem;border-top:1px solid rgba(196,154,108,.22);'
     +   'font-size:.72rem;color:#9a7d62;letter-spacing:.02em}'
+    /* ── LE TÉLÉCHARGEMENT : LE POURCENTAGE EN GROS ─────────────────────────
+       Sa demande du 2026-09-06 : « des pourcentages en plus des Mo restants ».
+       Le pourcentage EXISTAIT, noyé dans la phrase « Nouvelle version : 47 % » —
+       à la même taille que le reste, donc invisible. On lit un écran d'attente
+       du coin de l'œil, en faisant autre chose : le chiffre doit se voir sans
+       qu'on s'approche.
+       ⚠ `tabular-nums` : sans lui, les chiffres n'ont pas la même largeur et le
+       nombre TREMBLE à chaque rafraîchissement — sur un compteur qui change
+       plusieurs fois par seconde, ça donne l'impression d'un écran instable. */
+    + '.dl-pct{font:800 3.4rem/1 Georgia,serif;color:#C49A6C;margin:.2rem 0 .5rem;'
+    +   'font-variant-numeric:tabular-nums;letter-spacing:-.02em}'
+    + '.dl-mo{font-size:.95rem;color:#6b5340;font-variant-numeric:tabular-nums}'
+    + '.dl-vit{font-size:.78rem;color:#9a7d62;margin-top:.25rem;font-variant-numeric:tabular-nums}'
+    + '.dl-fin{font-size:.78rem;color:#9a7d62;margin-top:.9rem}'
     + '@keyframes f1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(36px,46px) scale(1.08)}}'
     + '@keyframes f2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-34px) scale(1.06)}}'
     + '@keyframes f3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(28px,-30px) scale(1.1)}}'
@@ -3585,6 +3599,13 @@ const _bandePorte = (dessus) => {
   } catch (_) {}
 };
 
+/* Le texte de l'écran de téléchargement vit à part, sans Electron : c'est du
+   calcul pur (pourcentage, Mo restants, vitesse, temps) avec de vrais cas
+   limites qui se cassent EN SILENCE — une vitesse à zéro rendrait
+   « environ Infinity s », et rien ne l'aurait signalé.
+   `tools/banc-porte-progression.js` les éprouve. */
+const { texteProgression } = require('./porte-progression');
+
 const montrerPorte = (titre, message, progression) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   _bandePorte(true);
@@ -3676,13 +3697,7 @@ const getUpdater = () => {
       majBoutonsFermeture();
       _majDernierOctet = Date.now();
       if (!_porteActive) return;
-      const pct = Math.round(p && p.percent ? p.percent : 0);
-      const mo = (n) => (n / 1048576).toFixed(0);
-      montrerPorte('Téléchargement en cours',
-        'Nouvelle version : ' + pct + ' %'
-        + (p && p.total ? '<br><span style="opacity:.7">' + mo(p.transferred) + ' Mo sur ' + mo(p.total) + '</span>' : '')
-        + '<br><span style="opacity:.7">L’application redémarrera à la fin.</span>',
-        pct);
+      montrerPorte('Téléchargement en cours', texteProgression(p), Math.round(p && p.percent ? p.percent : 0));
     });
 
     // ⚠ L'EN-TÊTE D'APPLICATION EST INDISPENSABLE ICI.
@@ -4527,6 +4542,28 @@ ipcMain.on('chrome:titlebar', (e, color, symbol) => {
 
 ipcMain.handle('menu:modele', (e, m) => {
   if (m && typeof m === 'object' && Array.isArray(m.menus)) {
+    /* ⚠⚠ LA TRACE D'ENTRÉE S'ARRÊTAIT AVANT LE SEUL MENU QU'IL VOIT.
+       `_trace` (app.js) datait « voile LEVÉ » et « barre DESSINÉE » — deux
+       événements de la PAGE. Or dans l'application, la barre de menus visible
+       est celle que la COQUILLE peint à partir de ce modèle : entre « barre
+       DESSINÉE » côté site et le menu réellement à l'écran, il y a un
+       aller-retour vers ce processus, qui est occupé au démarrage. Ces
+       millisecondes-là n'étaient mesurées par personne, et c'est très
+       exactement l'intervalle qu'il décrit (« 2 ou 3 secondes plus tard »).
+       On renvoie donc la marque DANS la page, pour qu'elle s'inscrive sur la
+       MÊME ligne de temps que le reste — deux horloges séparées ne se
+       comparent pas.
+       ⚠ Signalé APRÈS le modèle appliqué et `buildMenu()`, pas avant : ce qui
+       nous intéresse est l'instant où le menu EXISTE, pas celui où on a reçu
+       de quoi le faire. */
+    const _marquer = (quoi) => {
+      try {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        mainWindow.webContents.executeJavaScript(
+          'window._szTrace && window._szTrace(' + JSON.stringify(quoi) + ')', true
+        ).catch(() => {});
+      } catch {}
+    };
     const sombreAvant = !!_modele.sombre;
     _modele = m;
     panneauSale = true;   // le panneau flottant se reconstruira a sa prochaine ouverture
@@ -4537,6 +4574,7 @@ ipcMain.handle('menu:modele', (e, m) => {
       try { reglages.set('sombre', !!_modele.sombre); } catch {}
       appliquerThemePartout();
     }
+    _marquer('menu NATIF posé (' + _modele.menus.length + ' menus)');
   }
   return true;
 });
