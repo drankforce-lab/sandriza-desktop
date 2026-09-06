@@ -103,16 +103,6 @@ function pageVeilleurConfig() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><h1>Veilleur de commandes</h1></div>
 <div class="corps" id="corps">
-  <p class="quoi">Le veilleur est un petit programme qui reste dans la
-    <b>zone de notification</b>, à côté de l'horloge. Il annonce les
-    <b>nouvelles commandes</b> et les <b>nouvelles demandes de retour</b> par une
-    bulle et un son — <b>un son qui monte</b> pour une commande, <b>un son qui
-    descend</b> pour un retour. Il continue de veiller <b>même quand cette
-    application est fermée</b>.</p>
-  <p class="quoi"><b>Rien à configurer.</b> Le veilleur s'installe avec
-    l'application et se sert de la même autorisation qu'elle : aucun code, aucune
-    clé à saisir. Sur un poste d'employé, il suffit d'installer l'application.</p>
-
   <div class="carte">
     <h2>État</h2>
     <div class="etats">
