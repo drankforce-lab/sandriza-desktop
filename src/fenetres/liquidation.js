@@ -323,7 +323,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input class="rech" id="rech" type="search" placeholder="Rechercher un produit (nom, SKU, catégorie) — les deux régimes…" value="'
+      + '<input class="rech" id="rech" type="search" aria-label="Rechercher un produit (nom, SKU, catégorie)" placeholder="Rechercher un produit (nom, SKU, catégorie) — les deux régimes…" value="'
       +   esc(Q) + '">';
     if (D.peut.ajout) {
       h += '<button class="geste" data-ouvrir="lot">＋ Ajouter en lot</button>'

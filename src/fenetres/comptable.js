@@ -233,7 +233,13 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<span class="aide">Échéance le ' + jour(n.expireLe) + '</span></div>'
       + '<label style="margin-top:.6rem">Mot de passe d’ouverture</label>'
       + '<div class="gros" id="n-mdp-vue">' + esc(n.motDePasse || '') + '</div>'
-      + '<input id="n-mdp" type="text" readonly value="' + esc(n.motDePasse || '') + '" style="position:absolute;left:-9999px">'
+      /* ⚠ CE CHAMP N EST PAS CACHE, IL EST SEULEMENT HORS DE L ECRAN. Il ne sert
+         qu a la copie dans le presse-papiers, et left:-9999px — contrairement a
+         display:none — laisse le champ ATTEIGNABLE AU CLAVIER : on tabulait
+         dans un champ invisible qui repete le mot de passe deja affiche juste
+         au-dessus. aria-hidden le retire du lecteur d ecran, tabindex -1 du
+         parcours de tabulation. */
+      + '<input id="n-mdp" type="text" readonly aria-hidden="true" tabindex="-1" value="' + esc(n.motDePasse || '') + '" style="position:absolute;left:-9999px">'
       + '<div class="barreoutils" style="margin-top:.4rem">'
       + '<button id="n-copier-mdp"><span class="ic">📋</span> Copier le mot de passe</button></div>'
       + '<p class="aide"><strong>Il ne sera plus jamais affiché</strong> — le serveur n’en garde '

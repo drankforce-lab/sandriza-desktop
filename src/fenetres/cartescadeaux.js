@@ -183,14 +183,18 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<h3>Créer une carte-cadeau</h3>'
       + '<div class="grille">'
       + '<div class="ch"><label>Montant <span class="req">*</span></label>'
-      + '<input type="number" id="cc-montant" min="1" max="5000" step="0.01" placeholder="50.00"></div>'
+      /* ⚠ L etiquette porte un <span class="req">*</span> : elle N EST PAS un
+         texte pur, et aucune lecture par motif ne pouvait la reprendre. Le nom
+         est ecrit ici, sans l asterisque — << obligatoire >> se dit au champ par
+         l attribut required, pas dans son nom. */
+      + '<input type="number" id="cc-montant" aria-label="Montant" min="1" max="5000" step="0.01" placeholder="50.00"></div>'
       + '<div class="ch"><label for="cc-statut">Statut</label><select id="cc-statut">'
       + '<option value="active">Active (prête à utiliser)</option>'
       + '<option value="pending">En attente d’activation</option></select></div>'
       + '<div class="ch"><label>Nom du destinataire <span class="req">*</span></label>'
-      + '<input id="cc-dest" placeholder="Marie"></div>'
+      + '<input id="cc-dest" aria-label="Nom du destinataire" placeholder="Marie"></div>'
       + '<div class="ch"><label>Courriel du destinataire <span class="req">*</span></label>'
-      + '<input type="email" id="cc-mail" placeholder="marie@exemple.com"></div>'
+      + '<input type="email" id="cc-mail" aria-label="Courriel du destinataire" placeholder="marie@exemple.com"></div>'
       + '<div class="ch"><label for="cc-exp">Expéditeur</label><input id="cc-exp" placeholder="la boutique"></div>'
       + '<div class="ch"><label for="cc-note">Note interne</label><input id="cc-note" placeholder="Cadeau, correction…"></div>'
       + '</div>'

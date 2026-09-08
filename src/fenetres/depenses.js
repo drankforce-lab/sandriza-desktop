@@ -64,14 +64,37 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .stats .s .sub{font-size:.66rem;color:var(--tx3)}
 
-/* La zone de depot : c est la porte la plus rapide vers une depense saisie. */
-.depot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:.25rem;border:2px dashed var(--v20);
-  border-radius:12px;padding:.85rem 1rem;text-align:center;color:var(--tx2);
+/* La zone de depot : c est la porte la plus rapide vers une depense saisie.
+   ⚠⚠ ELLE PRENAIT TOUTE LA LARGEUR ET DEUX LIGNES DE HAUT, entre les tuiles et
+   le tableau — sa remarque : << ses trop gros >>. Une zone de depot n est pas le
+   sujet de l ecran, c est un raccourci : elle tient maintenant sur UNE ligne,
+   dans la barre d outils, a DROITE du bouton << Nouvelle depense >> (sa place
+   demandee). Le pointille reste, parce que c est lui qui dit qu on peut lacher
+   un fichier la ; le reste a maigri.
+   ⚠ Sa deuxieme ligne d explication est partie AVEC la hauteur : elle disait ce
+   que le survol et le resultat disent deja. Ce qu il faut garder, c est la
+   distinction lecture automatique / simple piece jointe — elle passe en
+   attribut title, donc au survol ET au lecteur d ecran. */
+.depot{flex:0 0 auto;display:inline-flex;align-items:center;gap:.35rem;
+  border:1px dashed var(--v20);border-radius:9px;padding:.26rem .6rem;
+  font-size:.78rem;color:var(--tx2);white-space:nowrap;
   cursor:pointer;transition:border-color .13s,background .13s}
-.depot:hover,.depot.survol{border-color:#c9a97e;background:rgba(201,169,126,.08)}
-.depot .gros{font-size:.9rem;font-weight:600;color:var(--tx)}
-.depot .pt{font-size:.74rem}
+.depot:hover,.depot.survol{border-color:#c9a97e;background:rgba(201,169,126,.08);color:var(--tx)}
+/* Au survol d un fichier, elle doit se voir sans changer de taille : la bordure
+   s epaissit vers l INTERIEUR (ombre portee interne), jamais en border-width
+   qui pousserait les voisins de la barre. */
+.depot.survol{box-shadow:inset 0 0 0 1px #c9a97e}
+/* ⚠⚠ LA ZONE DU FORMULAIRE GARDE SA TAILLE, ET CE N EST PAS UN OUBLI. Les deux
+   partagent la classe .depot, mais ce sont deux gestes differents : dans la
+   barre, c est un raccourci a cote d un bouton ; dans le formulaire d une
+   nouvelle depense, c est LA porte d entree du document, seule au milieu du
+   volet. La retrecir aussi aurait applique a un endroit une remarque faite sur
+   un autre. */
+#d-depot-form{display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:.25rem;border-width:2px;border-radius:12px;
+  padding:.85rem 1rem;text-align:center;font-size:inherit;white-space:normal}
+#d-depot-form .gros{font-size:.9rem;font-weight:600;color:var(--tx)}
+#d-depot-form .pt{font-size:.74rem}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
@@ -287,6 +310,11 @@ ${JS_ACTIVITE}${JS_DIRE}
             + esc(c.libelle) + '</option>';
         }).join('') + '</select>'
       + (D.peutAjouter ? '<button class="prim" id="d-nouvelle">＋ Nouvelle dépense</button>' : '')
+      + (D.peutAjouter ? '<div class="depot" id="d-depot" title="'
+          + esc(D.lectureAuto
+              ? 'Déposez une facture : elle est lue automatiquement, et vous vérifiez les champs avant d’enregistrer.'
+              : 'Déposez une facture : elle sera jointe comme reçu. La lecture automatique demande une clé (Configuration → Clés API).')
+          + '">Glissez une facture ici</div>' : '')
       + '<span class="droite">' + D.nombre + ' dépense' + (D.nombre > 1 ? 's' : '') + '</span>'
       + '</div>';
 
@@ -332,14 +360,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '</div>';
     }
 
-    if (D.peutAjouter) {
-      h += '<div class="depot" id="d-depot">'
-        + '<div class="gros">Glissez-déposez une facture ici</div>'
-        + '<div class="pt">' + (D.lectureAuto
-            ? 'Elle est lue automatiquement — vous vérifiez les champs avant d’enregistrer.'
-            : 'Elle sera jointe comme reçu. La lecture automatique demande une clé (écran Configuration → Clés API).')
-        + '</div></div>';
-    }
+    /* ⚠ La zone de depot vivait ICI, pleine largeur. Elle est remontee dans la
+       barre d outils, a droite de << Nouvelle depense >>. Ne pas la remettre : sa
+       taille etait le probleme, pas sa presence. */
 
     h += '<div class="carte">';
     var rows = D.lignes || [];
@@ -428,7 +451,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="carte"><h2>' + (ANN_FORM.neuf ? 'Ajouter un fournisseur' : 'Corriger le classement') + '</h2>'
         + '<div class="form">'
         + '<div class="champ"><label>Domaine ou nom</label>'
-        + '<input type="text" id="a-id" value="' + esc(ANN_FORM.id) + '"'
+        + '<input type="text" id="a-id" aria-label="Domaine ou nom" value="' + esc(ANN_FORM.id) + '"'
         + (ANN_FORM.neuf ? ' placeholder="ex. render.com"' : ' disabled') + '></div>'
         + '<div class="champ"><label for="a-nom">Nom affiché (facultatif)</label>'
         + '<input type="text" id="a-nom" value="' + esc(ANN_FORM.nom) + '" placeholder="ex. Render Services"></div>'
@@ -584,9 +607,9 @@ ${JS_ACTIVITE}${JS_DIRE}
             + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
       + '</select></div>'
       + champ('Description', '<input type="text" id="f-desc" value="' + esc(f.description)
-          + '" placeholder="Ex : Publicité Meta juillet">')
+          + '" placeholder="Ex : Publicité Meta juillet">', 'f-desc')
       + champ('Fournisseur', '<input type="text" id="f-four" value="' + esc(f.fournisseur)
-          + '" placeholder="Ex : Meta Platforms">')
+          + '" placeholder="Ex : Meta Platforms">', 'f-four')
       + '<div class="bloc-montants"><div class="trois">'
       + '<div class="champ"><label for="f-montant">Montant (hors taxes)</label>'
       + '<input type="number" step="0.01" min="0" id="f-montant" value="' + esc(f.montant) + '" placeholder="0.00"></div>'

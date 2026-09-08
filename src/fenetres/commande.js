@@ -289,7 +289,8 @@ function pageCommande(id) {
           + '<div class="v">' + esc([[a.taille, a.couleur].filter(Boolean).join(' · '), a.sku]
               .filter(Boolean).join(' · ')) + '</div></div>'
           + '<span class="cpt">' + v + '/' + a.quantite + '</span>'
-          + '<input class="q" type="number" min="0" step="1" data-cle="' + esc(a.cle) + '" value="' + v + '">'
+          + '<input class="q" type="number" min="0" step="1" data-cle="' + esc(a.cle) + '" value="' + v + '"'
+      +   ' aria-label="' + esc('Quantité préparée — ' + (a.nom || a.cle)) + '">'
           + '</div>';
       },
       surMaj: function(){

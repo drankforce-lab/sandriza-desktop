@@ -177,7 +177,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<h3>Importer des abonnés</h3>'
       + '<div class="dt" style="margin-bottom:.4rem">Une adresse par ligne, ou '
       + '« courriel,prénom ». Les adresses déjà inscrites sont ignorées, pas dupliquées.</div>'
-      + '<textarea id="ab-vrac" placeholder="marie@exemple.com,Marie'
+      + '<textarea id="ab-vrac" aria-label="Liste d’adresses à ajouter, une par ligne" placeholder="marie@exemple.com,Marie'
       + String.fromCharCode(10) + 'sophie@exemple.com"></textarea>'
       + '<div class="pied-boite"><button class="mini" id="ab-annuler">Annuler</button>'
       + '<button class="mini prim" id="ab-importer">Importer</button></div>'

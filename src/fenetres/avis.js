@@ -300,7 +300,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             + esc(r.reponse) + '</div>'
           : '');
     if (REPONDRE) {
-      h += '<div style="margin-top:.6rem"><textarea id="a-reptxt" '
+      h += '<div style="margin-top:.6rem"><textarea id="a-reptxt" aria-label="Votre réponse publique à cet avis" '
         + 'placeholder="Votre réponse sera affichée publiquement sous l’avis.">'
         + esc(r.reponse || '') + '</textarea>'
         + '<div class="pied-boite"><button id="a-repannuler">Annuler</button>'

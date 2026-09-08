@@ -211,7 +211,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     h += '<div class="ch large" id="' + prefixe + '-bloc-prods"'
       + (appliqueA === 'products' ? '' : ' style="display:none"') + '>'
       + '<label>Produits <span class="req">*</span></label>'
-      + '<input type="search" id="' + prefixe + '-qprod" placeholder="Chercher un nom ou un SKU…" value="' + esc(QPROD) + '">'
+      + '<input type="search" id="' + prefixe + '-qprod" aria-label="Chercher un produit par nom ou SKU" placeholder="Chercher un nom ou un SKU…" value="' + esc(QPROD) + '">'
       + '<div class="choix" id="' + prefixe + '-choix">' + listeCatalogue(prefixe) + '</div>'
       + '<span class="aide" id="' + prefixe + '-cpt">' + CHOISIS.length + ' produit'
       + (CHOISIS.length > 1 ? 's choisis' : ' choisi') + '</span></div>';
@@ -246,7 +246,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<h3>' + (o.id ? 'Modifier l’offre' : 'Nouvelle offre') + '</h3>'
       + '<div class="grille">'
       + '<div class="ch"><label>Nom interne <span class="req">*</span></label>'
-      + '<input id="of-nom" value="' + esc(o.nom || '') + '" placeholder="Solde du printemps"></div>'
+      + '<input id="of-nom" aria-label="Nom interne de l’offre" value="' + esc(o.nom || '') + '" placeholder="Solde du printemps"></div>'
       + '<div class="ch"><label for="of-actif">Statut</label><select id="of-actif">'
       + '<option value="1"' + (o.actif !== false ? ' selected' : '') + '>Actif</option>'
       + '<option value="0"' + (o.actif === false ? ' selected' : '') + '>Inactif</option></select></div>'
@@ -258,7 +258,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '</select></div>'
       + '<div class="ch" id="of-bloc-val"' + (genre === 'bogo' || genre === 'tiered' ? ' style="display:none"' : '') + '>'
       + '<label>Valeur <span class="req">*</span></label>'
-      + '<input type="number" id="of-valeur" min="0" step="0.01" value="' + esc(o.valeur || '') + '"></div>'
+      + '<input type="number" id="of-valeur" aria-label="Valeur de l’offre" min="0" step="0.01" value="' + esc(o.valeur || '') + '"></div>'
       + '</div>';
 
     h += '<div id="of-bloc-bogo"' + (genre === 'bogo' ? '' : ' style="display:none"') + '>'
@@ -311,9 +311,12 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (!PALIERS.length) return '<div class="dt">Aucun palier — ajoutez-en au moins un.</div>';
     return PALIERS.map(function(t, i){
       return '<div class="lg"><span class="dt">à partir de</span>'
-        + '<input type="number" min="2" step="1" class="pal-qty" data-i="' + i + '" value="' + esc(t.qty || '') + '">'
+        /* ⚠ DEUX CHAMPS DANS UNE PHRASE (<< a partir de N articles : P % >>) : les
+         mots qui les separent sont du TEXTE, pas des etiquettes. En tabulant, le
+         lecteur d ecran annoncait deux fois << nombre >>. */
+      + '<input type="number" min="2" step="1" class="pal-qty" data-i="' + i + '" aria-label="' + esc('Palier ' + (i + 1) + ' — nombre d’articles') + '" value="' + esc(t.qty || '') + '">'
         + '<span class="dt">articles :</span>'
-        + '<input type="number" min="1" max="100" step="1" class="pal-pct" data-i="' + i + '" value="' + esc(t.percent || '') + '">'
+        + '<input type="number" min="1" max="100" step="1" class="pal-pct" data-i="' + i + '" aria-label="' + esc('Palier ' + (i + 1) + ' — pourcentage de rabais') + '" value="' + esc(t.percent || '') + '">'
         + '<span class="dt">%</span>'
         + '<button class="mini danger" data-pal-moins="' + i + '">Retirer</button></div>';
     }).join('');
@@ -326,7 +329,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<h3>' + (a.id ? 'Modifier' : 'Nouvelle annonce') + '</h3>'
       + '<div class="grille">'
       + '<div class="ch"><label>Nom interne <span class="req">*</span></label>'
-      + '<input id="an-nom" value="' + esc(a.nom || '') + '"></div>'
+      + '<input id="an-nom" aria-label="Nom interne de l’annonce" value="' + esc(a.nom || '') + '"></div>'
       + '<div class="ch"><label for="an-genre">Genre</label><select id="an-genre">'
       + '<option value="announcement"' + (genre === 'announcement' ? ' selected' : '') + '>Bandeau de la boutique</option>'
       + '<option value="badge"' + (genre === 'badge' ? ' selected' : '') + '>Badge de fiche produit</option>'
@@ -343,7 +346,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     h += '<div id="an-bloc-bandeau"' + (genre === 'announcement' ? '' : ' style="display:none"') + '>'
       + '<h4>Bandeau</h4><div class="grille">'
       + '<div class="ch large"><label>Message <span class="req">*</span></label>'
-      + '<input id="an-message" value="' + esc(a.message || '') + '"></div>'
+      + '<input id="an-message" aria-label="Message de l’annonce" value="' + esc(a.message || '') + '"></div>'
       + '<div class="ch large"><label for="an-message-en">Message (anglais)</label>'
       + '<input id="an-message-en" value="' + esc(a.messageEN || '') + '"></div>'
       + '<div class="ch"><label for="an-fond">Couleur du fond</label>'
@@ -358,7 +361,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     h += '<div id="an-bloc-badge"' + (genre === 'badge' ? '' : ' style="display:none"') + '>'
       + '<h4>Badge</h4><div class="grille">'
       + '<div class="ch"><label>Texte <span class="req">*</span></label>'
-      + '<input id="an-badge" value="' + esc(a.badge || '') + '" placeholder="Nouveauté"></div>'
+      + '<input id="an-badge" aria-label="Texte de l’emblème" value="' + esc(a.badge || '') + '" placeholder="Nouveauté"></div>'
       + '<div class="ch"><label for="an-badge-en">Texte (anglais)</label><input id="an-badge-en" value="' + esc(a.badgeEN || '') + '"></div>'
       + '<div class="ch"><label for="an-badge-couleur">Couleur</label><select id="an-badge-couleur">'
       + [['accent', 'Or (accent)'], ['success', 'Vert'], ['error', 'Rouge'], ['info', 'Bleu'], ['warning', 'Orange']]

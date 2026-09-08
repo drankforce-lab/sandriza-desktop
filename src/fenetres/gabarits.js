@@ -170,9 +170,13 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   // ── VUE LISTE + ATTRIBUTIONS ────────────────────────────────────────────────
   function coulChamp(id, label, v){
-    return '<div class="ch"><label>' + esc(label) + '</label><div class="coul">'
+    /* ⚠ DEUX CHAMPS POUR UNE SEULE ETIQUETTE : le nuancier et sa valeur en
+       texte. Le for= ne peut en designer qu UN — il va au nuancier, et le
+       champ texte porte son propre nom, sinon il annoncait << zone de texte >>
+       sans dire de quelle couleur il s agit. */
+    return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><div class="coul">'
       + '<input type="color" id="' + id + '" value="' + esc(v) + '"' + (RO ? ' disabled' : '') + '>'
-      + '<input type="text" id="' + id + '-t" value="' + esc(v) + '"' + (RO ? ' disabled' : '') + '></div></div>';
+      + '<input type="text" id="' + id + '-t" aria-label="' + esc(label) + ' — code hexadécimal" value="' + esc(v) + '"' + (RO ? ' disabled' : '') + '></div></div>';
   }
   function editeurHtml(){
     var t = (EDIT ? gabParId(EDIT) : null) || { name: '', headerBgFrom: '#1a1a2e', headerBgTo: '#2d1b69',

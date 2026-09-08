@@ -452,7 +452,9 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + rb.lignes.map(function(l, i){
             return '<div class="ligne"><span>' + esc(l.nom)
               + (l.moitie ? ' <span style="color:var(--tx-or2);font-size:.74rem">(2 pour 1 — 50 % suggéré, plein : ' + argent(l.base) + ')</span>' : '')
-              + '</span><input type="number" step="0.01" min="0" data-mnt="' + i + '" value="' + (MONTANTS[i]).toFixed(2) + '"></div>'; }).join('')
+              + '</span><input type="number" step="0.01" min="0" data-mnt="' + i + '"'
+              + ' aria-label="' + esc('Montant à rembourser — ' + (l.nom || l.libelle || ('ligne ' + (i + 1)))) + '"'
+              + ' value="' + (MONTANTS[i]).toFixed(2) + '"></div>'; }).join('')
         + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.84rem;margin-top:.5rem;cursor:pointer'
         + (R.demande.fauteMarchande ? '' : ';opacity:.55') + '">'
         + '<input type="checkbox" id="g-livraison"' + (R.demande.fauteMarchande ? ' checked' : '') + '> '

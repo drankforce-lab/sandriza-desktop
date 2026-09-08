@@ -384,7 +384,7 @@ function pageProduit(id) {
       // caracteristique de l article, et il tenait seul dans une carte entiere.
       + '<div class="ch"><label for="p-poids">Poids unitaire <span class="req">*</span></label>'
       + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0" placeholder="Ex : 350">'
-      + '<select id="p-unite"><option value="g">g</option><option value="kg">kg</option>'
+      + '<select id="p-unite" aria-label="Unité du poids"><option value="g">g</option><option value="kg">kg</option>'
       + '<option value="lb">lb</option></select></div>'
       + '<div class="aide" style="margin-top:.2rem">Sert au calcul des frais d’expédition.</div></div>'
       + '<div class="ch large"><label for="p-desc">Description'
@@ -1348,6 +1348,7 @@ function pageProduit(id) {
             + '<span class="c1">' + esc(x.taille) + '</span>'
             + '<span class="c2">' + esc(x.couleur) + '</span>'
             + '<span class="c3"><input class="q" type="number" min="0" step="1" placeholder="0"'
+      + ' aria-label="' + esc('Quantité — ' + x.taille + ' / ' + x.couleur) + '"'
             + ' data-cle="' + esc(x.cle) + '" value="' + esc(q) + '">' + alerteSeuil(q) + '</span>'
             + (CTX.entrepots.length
                 ? '<span class="c4"><select class="loc' + (manque ? ' manque' : '') + '" data-cle="' + esc(x.cle) + '"'

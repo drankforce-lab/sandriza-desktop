@@ -540,7 +540,8 @@ ${JS_ACTIVITE}${JS_DIRE}
           +   '<span class="nom">' + esc(v.taille) + ' / ' + esc(v.couleur) + '</span></span></td>'
           + '<td>' + (v.sku ? '<span class="code">' + esc(v.sku) + '</span>'
                             : '<span class="rien">—</span>') + '</td>'
-          + '<td class="q"><input type="number" min="0" data-q="' + i + '" value="' + (parseInt(v.qte, 10) || 0) + '"></td>'
+          + '<td class="q"><input type="number" min="0" data-q="' + i + '" value="' + (parseInt(v.qte, 10) || 0) + '"'
+      +   ' aria-label="' + esc('Quantité — ' + v.taille + ' / ' + v.couleur) + '"></td>'
           // ⚠ TEXTE DE REMPLACEMENT = LE SEUIL HERITE, jamais une valeur posee dans
           // le champ : la poser en ferait une EXCEPTION que vider n effacerait plus.
           + '<td class="s"><input type="number" min="0" data-s="' + i + '" value="' + esc(v.seuil)
@@ -893,6 +894,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         h += '<tr data-ligne="' + esc(l.id) + '" title="'
           + (LOT ? 'Cliquer pour sélectionner' : 'Cliquer pour modifier la fiche produit') + '">'
           + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(l.id) + '"'
+              + ' aria-label="' + esc('Sélectionner ' + (l.nom || l.sku || l.id)) + '"'
               + (COCHES[l.id] ? ' checked' : '') + '></td>' : '')
           + '<td>' + (l.sku ? '<span class="code">' + esc(l.sku) + '</span>'
                             : '<span class="rien">sans SKU</span>') + '</td>'
@@ -1333,7 +1335,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     function ligneLieuEdition(l){
       return '<tr style="background:rgba(201,169,126,.08)">'
-        + '<td><input type="text" id="lx-nom" value="' + esc(l ? l.nom : '') + '" placeholder="Ex : Entrepot, Maison"></td>'
+        + '<td><input type="text" id="lx-nom" aria-label="Nom du lieu" value="' + esc(l ? l.nom : '') + '" placeholder="Ex : Entrepot, Maison"></td>'
         + '<td colspan="2"><input aria-label="Adresse (optionnel)" type="text" id="lx-adr" value="' + esc(l ? l.adresse : '') + '" placeholder="Adresse (optionnel)"></td>'
         + '<td class="c" style="white-space:nowrap">'
         + '<button class="mini prim" id="lx-enr" title="Enregistrer (Entrée)">✓</button> '
@@ -1347,8 +1349,8 @@ ${JS_ACTIVITE}${JS_DIRE}
               + esc(l.nom) + '</option>'; }).join('');
       return '<tr style="background:rgba(201,169,126,.08)">'
         + '<td><select id="wh-lieu" aria-label="Lieu de cet emplacement">' + opts + '</select></td>'
-        + '<td><input type="text" id="wh-casier" value="' + esc(w ? w.casier : '') + '" placeholder="Ex : Casier 1"></td>'
-        + '<td><input type="text" id="wh-section" value="' + esc(w ? w.section : '') + '" placeholder="Ex : Section A"></td>'
+        + '<td><input type="text" id="wh-casier" aria-label="Casier" value="' + esc(w ? w.casier : '') + '" placeholder="Ex : Casier 1"></td>'
+        + '<td><input type="text" id="wh-section" aria-label="Section" value="' + esc(w ? w.section : '') + '" placeholder="Ex : Section A"></td>'
         + '<td><input aria-label="Référence (optionnel)" type="text" id="wh-ref" value="' + esc(w ? w.reference : '') + '" placeholder="Référence (optionnel)"></td>'
         + '<td class="c"><span class="rien">' + (w ? w.usage : '—') + '</span></td>'
         + '<td class="c" style="white-space:nowrap">'
@@ -1857,7 +1859,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + (c.adresses.length > 1 ? 's attendent' : ' attend') + ' cette variante, et '
         + '<strong>aucun courriel n’est parti</strong> — la clé d’envoi n’est pas configurée '
         + '(Configuration puis Infolettre). Les demandes restent en attente.</p>'
-        + '<textarea rows="2" readonly>' + esc(c.adresses.join(', ')) + '</textarea>';
+        + '<textarea rows="2" readonly aria-label="Adresses des demandes en attente">' + esc(c.adresses.join(', ')) + '</textarea>';
     } else if (c) {
       h += '<p style="color:var(--tx-ok)"><span class="ic">✉</span> ' + c.envoyes + ' courriel' + (c.envoyes > 1 ? 's' : '')
         + ' de retour en inventaire envoyé' + (c.envoyes > 1 ? 's' : '')

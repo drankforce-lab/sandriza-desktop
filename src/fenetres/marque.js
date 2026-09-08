@@ -235,12 +235,12 @@ ${JS_ACTIVITE}${JS_DIRE}
   function coche(id){ var e = document.getElementById(id); return !!(e && e.checked); }
 
   function champ(id, lib, val, pt){
-    return '<div class="ch"><label>' + esc(lib) + (pt ? ' <span class="pt">' + esc(pt) + '</span>' : '')
+    return '<div class="ch"><label for="' + id + '">' + esc(lib) + (pt ? ' <span class="pt">' + esc(pt) + '</span>' : '')
       + '</label><input id="' + id + '" type="text" value="' + esc(val || '') + '"'
       + (RO ? ' disabled' : '') + '></div>';
   }
   function couleur(id, lib, val){
-    return '<div class="ch"><label>' + esc(lib) + '</label><input id="' + id + '" type="color" value="'
+    return '<div class="ch"><label for="' + id + '">' + esc(lib) + '</label><input id="' + id + '" type="color" value="'
       + esc(val || '#000000') + '"' + (RO ? ' disabled' : '') + '></div>';
   }
 

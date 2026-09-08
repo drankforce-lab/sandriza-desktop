@@ -1007,7 +1007,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     var grille = '<div class="phgrille" id="ph-grille">' + phVignettesHtml() + '</div>';
     return '<div class="phbarre"><button id="ph-retour">← Retour</button>'
-      + '<input type="search" id="ph-q" placeholder="Rechercher (nom, code, produit, SKU)…" value="' + esc(PH_Q) + '"'
+      + '<input type="search" id="ph-q" aria-label="Rechercher (nom, code, produit, SKU)" placeholder="Rechercher (nom, code, produit, SKU)…" value="' + esc(PH_Q) + '"'
       + (RO ? ' disabled' : '') + '>'
       + '<span class="phinfo" id="ph-info"></span></div>'
       + phFiltresHtml() + phSelectionHtml() + grille;
@@ -1662,7 +1662,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     voile('<h3><span class="ic">💾</span> Enregistrer le profil</h3>'
       + ''
       + ''
-      + '<p><input type="text" id="rc-nom" maxlength="60" placeholder="Ex. : Collection automne — plage dorée" '
+      + '<p><input type="text" id="rc-nom" aria-label="Nom de la recette" maxlength="60" placeholder="Ex. : Collection automne — plage dorée" '
       + 'value="' + esc(x ? x.nom : '') + '"></p>'
       + '<p class="rcav" id="rc-av">' + (x
           ? 'Ce nom est celui du profil choisi : il sera <strong>remplacé</strong>.'

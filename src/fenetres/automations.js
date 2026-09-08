@@ -144,7 +144,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (j.recommendation) h += '<div class="reco"><span class="ic">💡</span> Fréquence recommandée : ' + esc(j.recommendation) + '</div>';
     if (j.recipient === 'single') {
       h += '<div class="rangee"><div class="ch"><label>Courriel destinataire</label>'
-        + '<input id="em-' + j.key + '" value="' + esc(j.email) + '" placeholder="Vide = courriel professionnel"'
+        + '<input id="em-' + j.key + '" aria-label="Courriel destinataire" value="' + esc(j.email) + '" placeholder="Vide = courriel professionnel"'
         + (RO ? ' disabled' : '') + '></div>'
         + '<button class="prim" data-email="' + j.key + '"' + (RO ? ' disabled' : '') + '>Enregistrer</button></div>';
     }
@@ -157,7 +157,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '<div class="rangee" style="margin:0"><div class="ch plein"><label>URL à configurer ('
       + esc(String(j.schedule).toLowerCase()) + ')</label>'
-      + '<input class="mono" readonly value="' + esc(j.url) + '" data-url="1"></div>'
+      + '<input class="mono" aria-label="Adresse de rappel à copier" readonly value="' + esc(j.url) + '" data-url="1"></div>'
       + '<button data-copier="' + esc(j.url) + '"><span class="ic">📋</span> Copier</button></div>';
     return h + '</div>';
   }

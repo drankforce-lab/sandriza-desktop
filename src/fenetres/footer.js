@@ -147,7 +147,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   function champ(id, lib, val, pt, type){
-    return '<div class="ch"><label>' + esc(lib) + (pt ? ' <span class="pt">' + esc(pt) + '</span>' : '')
+    return '<div class="ch"><label for="' + id + '">' + esc(lib) + (pt ? ' <span class="pt">' + esc(pt) + '</span>' : '')
       + '</label><input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(val || '') + '"'
       + (RO ? ' disabled' : '') + '></div>';
   }

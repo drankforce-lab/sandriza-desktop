@@ -205,7 +205,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function champHtml(c){
     var e = (D && D[c.k]) || { defini: false, fin: '' };
-    return '<div class="ch"><label>' + esc(c.label) + '</label>'
+    return '<div class="ch"><label for="f-' + c.k + '">' + esc(c.label) + '</label>'
       + '<input id="f-' + c.k + '" type="password" value="" placeholder="'
       + (e.defini ? 'inchangé' : esc(c.place)) + '" autocomplete="off"'
       + (RO ? ' disabled' : '') + '>'
@@ -216,7 +216,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function soldeHtml(){
     var sv = (D && D.falSolde) || '';
     var maj = (D && D.falSoldeMaj) ? (' — saisi le ' + esc(String(D.falSoldeMaj).slice(0, 10))) : '';
-    return '<div class="ch"><label>Solde du compte (saisi à la main)</label>'
+    return '<div class="ch"><label for="f-falSolde">Solde du compte (saisi à la main)</label>'
       + '<input id="f-falSolde" class="solde" type="number" step="0.01" min="0" value="' + esc(sv) + '"'
       + ' placeholder="ex. 25.00"' + (RO ? ' disabled' : '') + '>'
       + '<div class="aide">fal.ai n’expose aucun solde par API. La fenêtre Traitements d’image affiche '

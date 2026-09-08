@@ -208,7 +208,8 @@ ${JS_ACTIVITE}${JS_DIRE}
           return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
             + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—')
             + ' · ' + argent(a.prix) + ' / unité</div></div>'
-            + '<input type="number" min="0" max="' + a.maxQty + '" value="' + q + '" data-q="' + i + '">'
+            + '<input type="number" min="0" max="' + a.maxQty + '" value="' + q + '" data-q="' + i + '"'
+      +   ' aria-label="' + esc('Quantité à rembourser — ' + (a.nom || '')) + '">'
             + '<span class="max">max ' + a.maxQty + '</span></div>';
         }).join('')
       + '</div>';
@@ -250,7 +251,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="carte"><h2>Motif <span class="note">— obligatoire</span></h2>'
       // rows="3" (2026-08-21) : motif OBLIGATOIRE d'un remboursement — de l'argent
       // au bout, et c'est la piece qu'on relit si la cliente conteste.
-      + '<textarea id="m-motif" rows="3" placeholder="Ex : article défectueux, mauvaise taille reçue, retour volontaire…"></textarea>'
+      + '<textarea id="m-motif" aria-label="Motif du remboursement" rows="3" placeholder="Ex : article défectueux, mauvaise taille reçue, retour volontaire…"></textarea>'
       + '</div>';
 
     h += '<div class="carte tot" id="z-totaux"><h2>Totaux <span class="note">— calculés par le site</span></h2>'

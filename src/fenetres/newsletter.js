@@ -211,7 +211,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<label class="bascule"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + (PEUT.edit ? '' : ' disabled') + '><span class="piste"></span><span class="pouce"></span></label>';
   }
   function ligneChamp(lbl, id, v, type, hint){
-    return '<div class="champ"><label>' + esc(lbl) + '</label><input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(v || '') + '"' + (PEUT.edit ? '' : ' readonly') + '>' + (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
+    return '<div class="champ"><label for="' + id + '">' + esc(lbl) + '</label><input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(v || '') + '"' + (PEUT.edit ? '' : ' readonly') + '>' + (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
   }
   function vueConfig(){
     var c = D.cfg;

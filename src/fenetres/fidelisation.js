@@ -212,7 +212,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<div class="dt" style="margin-bottom:.4rem">Quand un client laisse un commentaire, '
         + 'il vous est transféré à cette adresse. Laissez vide pour ne rien recevoir.</div>'
         + '<div style="display:flex;gap:.5rem;flex-wrap:wrap">'
-        + '<input type="email" id="fi-mail" style="flex:1 1 16rem" value="' + esc(D.courrielNotification || '') + '" placeholder="sondages@exemple.com">'
+        + '<input type="email" id="fi-mail" aria-label="Courriel de notification des sondages" style="flex:1 1 16rem" value="' + esc(D.courrielNotification || '') + '" placeholder="sondages@exemple.com">'
         + '<button class="mini" id="fi-mail-enr">Enregistrer</button></div></div>';
     }
 

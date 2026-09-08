@@ -233,7 +233,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   /* ══ LA BARRE ═══════════════════════════════════════════════════════════ */
   function dessinerBarre(){
-    var h = '<input type="search" id="q" placeholder="Rechercher (nom, code, produit, SKU)…" value="'
+    var h = '<input type="search" id="q" aria-label="Rechercher (nom, code, produit, SKU)" placeholder="Rechercher (nom, code, produit, SKU)…" value="'
       + esc(Q) + '">';
     h += (D && D.filtres ? D.filtres : []).map(function(f){
       return '<button class="jeton' + (FILTRES.indexOf(f.cle) >= 0 ? ' on' : '') + '"'

@@ -460,20 +460,24 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + (f.id ? 'Modifier la campagne' : 'Nouvelle campagne') + '</h3>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">Nom interne</span>'
-      + '<input id="f-nom" value="' + esc(c.nom || '') + '" placeholder="Infolettre de septembre"></div>'
+      + '<input id="f-nom" aria-label="Nom interne" value="' + esc(c.nom || '') + '" placeholder="Infolettre de septembre"></div>'
       // ⚠ CHAQUE SEGMENT MONTRE SA PORTEE : on choisit en voyant combien de
       // personnes il atteint MAINTENANT, pas en devinant. Un segment a 0 se
       // remarque avant l envoi, pas apres.
-      + '<div class="champ"><span class="lbl">Segment</span><select id="f-seg">'
+      /* ⚠ L ETIQUETTE EST UN <span>, PAS UN <label> : elle ne peut donc rien
+         relier. On pose un NOM sur le champ plutot que de convertir le span —
+         le rendu de ces fenetres ne peut pas etre verifie sur son poste
+         (aucun banc qui ouvre un navigateur), et un nom ne deplace rien. */
+      + '<div class="champ"><span class="lbl">Segment</span><select id="f-seg" aria-label="Segment">'
       + (d.segments || []).map(function(s){
           return '<option value="' + esc(s.cle) + '"' + ((c.segment || 'all') === s.cle ? ' selected' : '')
             + '>' + esc(s.nom) + ' (' + (s.compte || 0) + ')' + '</option>';
         }).join('') + '</select>'
       + '<span class="aide" id="f-seg-quoi"></span></div></div>'
       + '<div class="champ"><span class="lbl">Sujet du courriel</span>'
-      + '<input id="f-suj" value="' + esc(c.sujet || '') + '" placeholder="Nos nouveautés sont arrivées !"></div>'
+      + '<input id="f-suj" aria-label="Sujet du courriel" value="' + esc(c.sujet || '') + '" placeholder="Nos nouveautés sont arrivées !"></div>'
       + '<div class="rang">'
-      + '<div class="champ"><span class="lbl">Canal d’envoi</span><select id="f-canal">'
+      + '<div class="champ"><span class="lbl">Canal d’envoi</span><select id="f-canal" aria-label="Canal d’envoi">'
       + (d.canaux || []).map(function(x){
           return '<option value="' + esc(x.cle) + '"' + ((c.canal || 'email') === x.cle ? ' selected' : '')
             + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></div>'
@@ -483,7 +487,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> Téléphonie non configurée : l’envoi SMS échouera.</span>')
       + '</div></div></div>'
       + '<div class="champ" id="f-sms-bloc"><span class="lbl">Message texte (SMS)</span>'
-      + '<textarea id="f-sms" class="sms" maxlength="480" placeholder="SANDRIZA : nos nouveautés sont arrivées !">'
+      + '<textarea id="f-sms" aria-label="Message texte (SMS)" class="sms" maxlength="480" placeholder="SANDRIZA : nos nouveautés sont arrivées !">'
       + esc(c.sms || '') + '</textarea>'
       + '<div class="aide"><span id="f-sms-n">0</span>/480 · Variable : <code>{{firstName}}</code>. '
       + 'Twilio gère STOP et AIDE automatiquement.</div></div>'
@@ -521,16 +525,16 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + (f.id ? 'Modifier la chaîne' : 'Nouvelle chaîne') + '</h3>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">Nom</span>'
-      + '<input id="f-nom" value="' + esc(ch.nom || '') + '" placeholder="Bienvenue en trois temps"></div>'
-      + '<div class="champ"><span class="lbl">Déclencheur</span><select id="f-decl">'
+      + '<input id="f-nom" aria-label="Nom de la chaîne" value="' + esc(ch.nom || '') + '" placeholder="Bienvenue en trois temps"></div>'
+      + '<div class="champ"><span class="lbl">Déclencheur</span><select id="f-decl" aria-label="Déclencheur">'
       + (d.declencheurs || []).map(function(x){
           return '<option value="' + esc(x.cle) + '"'
             + ((ch.declencheur || 'subscribe') === x.cle ? ' selected' : '') + '>'
             + esc(x.nom) + '</option>'; }).join('') + '</select></div></div>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">Description</span>'
-      + '<input id="f-desc" value="' + esc(ch.description || '') + '"></div>'
-      + '<div class="champ"><span class="lbl">Statut</span><select id="f-statut">'
+      + '<input id="f-desc" aria-label="Description" value="' + esc(ch.description || '') + '"></div>'
+      + '<div class="champ"><span class="lbl">Statut</span><select id="f-statut" aria-label="Statut">'
       + '<option value="active"' + (ch.statut !== 'paused' ? ' selected' : '') + '>Active</option>'
       + '<option value="paused"' + (ch.statut === 'paused' ? ' selected' : '') + '>Suspendue</option>'
       + '</select></div></div>'
@@ -562,8 +566,11 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + (i < et.length - 1 ? '<button class="mini" data-desc="' + i + '" title="Descendre">↓</button>' : '')
         + '<button class="mini danger" data-etsup="' + i + '">Retirer</button></div></div>'
         + '<div class="rang"><div class="champ"><span class="lbl">Délai depuis le déclenchement</span>'
-        + '<div class="duo"><input type="number" min="0" id="e-j-' + i + '" value="' + (s.jours || 0)
-        + '"><span>jours</span><input type="number" min="0" max="23" id="e-h-' + i + '" value="'
+        /* ⚠ DEUX CHAMPS POUR UN SEUL LIBELLE (<< Delai depuis le declenchement >>)
+         et les mots << jours >> / << heures >> ne sont que du texte entre eux :
+         en tabulant, le lecteur d ecran annoncait deux fois << nombre >>. */
+      + '<div class="duo"><input type="number" min="0" id="e-j-' + i + '" aria-label="Délai — jours" value="' + (s.jours || 0)
+        + '"><span>jours</span><input type="number" min="0" max="23" id="e-h-' + i + '" aria-label="Délai — heures" value="'
         + (s.heures || 0) + '"><span>heures</span></div></div>'
         + '<div class="champ"><span class="lbl">Sujet</span>'
         + '<input aria-label="Sujet" id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'
@@ -571,7 +578,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('e-t-' + i, mods)
         + '<button class="mini" data-etcharger="' + i + '">Charger</button>'
         + '<button class="mini" data-etapercu="' + i + '">Aperçu</button></div>'
-        + '<textarea id="e-b-' + i + '" spellcheck="false">' + esc(s.html || '') + '</textarea></div>'
+        + '<textarea id="e-b-' + i + '" aria-label="Corps du courriel de l’étape ' + (i + 1) + '" spellcheck="false">' + esc(s.html || '') + '</textarea></div>'
         + '</div>';
     }).join('');
   }
@@ -980,7 +987,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
       + (f.id ? 'Modifier le segment' : 'Nouveau segment') + '</h3>'
       + '<div class="champ"><span class="lbl">Nom du segment</span>'
-      + '<input id="f-nom" value="' + esc(f.nom || '') + '" placeholder="Clients robes, 300 $ et plus"></div>'
+      + '<input id="f-nom" aria-label="Nom du segment" value="' + esc(f.nom || '') + '" placeholder="Clients robes, 300 $ et plus"></div>'
       + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
       + '<strong style="font-size:.8rem">Critères</strong>'
       + '<span class="dt">toutes ces conditions doivent être remplies</span>'
@@ -1137,7 +1144,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     // juste au-dessus de ce sur quoi elles agissent.
     h += '<div class="barreoutils">'
       + (D.peutModifier ? '<button class="mini prim" id="cp-nouvelle">+ Nouvelle campagne</button>' : '')
-      + '<div class="droite"><input type="search" id="cp-q" placeholder="Nom ou sujet…" value="'
+      + '<div class="droite"><input type="search" id="cp-q" aria-label="Nom ou sujet" placeholder="Nom ou sujet…" value="'
       + esc(Q) + '"></div></div>';
 
     h += '<div class="carte">';

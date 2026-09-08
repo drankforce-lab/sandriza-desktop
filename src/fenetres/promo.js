@@ -379,7 +379,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<option value="rect">Rectangle</option><option value="square">Carré</option>'
           + '<option value="circle">Rond</option></select></div>'
           + '<div class="champ"><label id="f-lw">Largeur (po)</label>'
-          + '<input type="number" id="f-w" step="0.1" min="0.4" value="2"></div>'
+          + '<input type="number" id="f-w" aria-label="Largeur en pouces" step="0.1" min="0.4" value="2"></div>'
           + '<div class="champ" id="f-boxh"><label for="f-h">Hauteur (po)</label>'
           + '<input type="number" id="f-h" step="0.1" min="0.4" value="1"></div>'
           + '</div>'

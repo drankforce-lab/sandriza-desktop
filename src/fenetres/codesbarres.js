@@ -283,7 +283,8 @@ ${JS_ACTIVITE}${JS_DIRE}
               + '<span>' + esc(v.taille) + ' / ' + esc(v.couleur) + '</span>'
               + '<span class="sku">' + esc(v.sku) + '</span>'
               + '<span class="dt">stock : ' + v.stock + '</span></label>'
-              + '<input type="number" min="1" value="' + qte + '" data-vqte="' + i + '">'
+              + '<input type="number" min="1" value="' + qte + '" data-vqte="' + i + '"'
+      +   ' aria-label="' + esc('Quantité à imprimer — ' + (v.taille || '') + ' / ' + (v.couleur || '')) + '">'
               + '</div>';
           }).join('')
         + '</div>'

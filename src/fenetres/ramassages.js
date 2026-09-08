@@ -233,9 +233,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('');
     h += '<div class="champs">'
       + '<div><div class="l">Poids estimé par colis (kg)</div>'
-      + '<input type="number" id="rm-p-poids" value="0.5" min="0.05" step="0.05"></div>'
+      + '<input type="number" id="rm-p-poids" aria-label="Poids estimé par colis en kilogrammes" value="0.5" min="0.05" step="0.05"></div>'
       + '<div><div class="l">Endroit du ramassage</div>'
-      + '<input type="text" id="rm-p-endroit" value="Porte principale"></div>'
+      + '<input type="text" id="rm-p-endroit" aria-label="Endroit du ramassage" value="Porte principale"></div>'
       + '</div>'
       + '<div class="pied-boite"><button id="rm-p-annuler">Annuler</button>'
       + '<button class="prim" id="rm-p-envoyer"><span class="ic">📨</span> Envoyer les demandes</button></div>'

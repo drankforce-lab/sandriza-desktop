@@ -232,7 +232,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h.push('<div class="carte"><h2>Ajouter une icône</h2>');
     h.push('<p class="sous">Insérez ensuite son code dans n’importe quel texte du site : il devient l’image.</p>');
     h.push('<div class="pose">' + vignette('pose', POSE, RO) + '<div>');
-    h.push('<div class="ch"><label>Nom</label><input id="i-nom" type="text" placeholder="coeur, etoile, feu…"'
+    h.push('<div class="ch"><label for="i-nom">Nom</label><input id="i-nom" type="text" placeholder="coeur, etoile, feu…"'
       + (RO ? ' disabled' : '') + '></div>');
     h.push('<label class="bascule"><input type="checkbox" id="i-fond"' + (RO ? ' disabled' : '')
       + '> Retirer le fond de l’image</label>');

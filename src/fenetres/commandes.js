@@ -338,7 +338,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var expedition = MODE === 'expeditions';
 
     var h = '<div class="carte">'
-      + '<input id="rech" autocomplete="off" placeholder="Numéro de commande, nom, courriel'
+      + '<input id="rech" aria-label="Rechercher une commande" autocomplete="off" placeholder="Numéro de commande, nom, courriel'
       + (expedition ? ', numéro de suivi' : '') + '…" value="' + esc(F.q) + '">'
       + '<div class="filtres"><span class="lbl">Statut :</span><span class="jetons">'
       + ((CTX && CTX.statuts) || []).filter(function(s){
@@ -357,7 +357,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           ? ' · ' + d.prioritairesNonTraitees + ' non traitée' + (d.prioritairesNonTraitees > 1 ? 's' : '')
           : '') + '</button>';
     if (expedition && CTX && (CTX.annees || []).length) {
-      h += '<span class="lbl" style="margin-left:.4rem">Année :</span><select id="f-annee">'
+      h += '<span class="lbl" style="margin-left:.4rem">Année :</span><select id="f-annee" aria-label="Année">'
         + '<option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>Toutes</option>'
         + CTX.annees.map(function(a){
             return '<option value="' + a + '"' + (String(F.annee) === String(a) ? ' selected' : '')

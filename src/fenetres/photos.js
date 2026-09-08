@@ -1435,7 +1435,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="ch"><label><input type="checkbox" id="sc-sourire" checked> '
       + 'Sourire naturel, regard vers l’objectif</label></div>'
       + '<div class="ch col"><label>Précisions (facultatif)</label>'
-      + '<textarea id="sc-extra" rows="3" maxlength="240" placeholder="ex. talons assortis, '
+      + '<textarea id="sc-extra" aria-label="Précisions (facultatif)" rows="3" maxlength="240" placeholder="ex. talons assortis, '
       + 'bijoux dorés discrets, cheveux attachés, lumière chaude de fin de journée"></textarea>'
       + '<div class="sugg">'
       + '<button type="button" data-sugg="chaussures assorties au vêtement">+ Chaussures</button>'
@@ -1819,6 +1819,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</span>');
     return '<tr data-id="' + esc(r.id) + '"' + (CHOIX[r.id] ? ' class="on"' : '') + '>'
       + '<td><input type="checkbox" class="chx" data-chx="' + esc(r.id) + '"'
+      +   ' aria-label="' + esc('Sélectionner ' + (r.nom || r.id)) + '"'
       + (CHOIX[r.id] ? ' checked' : '') + '></td>'
       + '<td>' + vignette(r) + '</td>'
       + '<td><span class="num">' + esc(r.code) + '</span></td>'
@@ -1879,7 +1880,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     if (ATTACHE) {
       h += '<div class="carte" style="margin-top:.4rem">'
-        + '<input type="search" id="p-pq" placeholder="Chercher un article (nom ou SKU)…" '
+        + '<input type="search" id="p-pq" aria-label="Chercher un article (nom ou SKU)" placeholder="Chercher un article (nom ou SKU)…" '
         + 'value="' + esc(PQ) + '" style="width:100%">'
         + '<div class="choix" id="p-choix">' + listeProduits() + '</div></div>';
     }

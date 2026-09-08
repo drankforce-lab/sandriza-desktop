@@ -187,8 +187,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (it.fixed) {
         h.push('<span class="lab">' + esc(it.label) + '</span><span class="href">' + esc(it.href) + '</span>');
       } else {
-        h.push('<input class="lab" data-field="label" data-id="' + esc(it.id) + '" value="' + esc(it.label) + '" placeholder="Étiquette"' + dis + '>');
-        h.push('<input class="href" data-field="href" data-id="' + esc(it.id) + '" value="' + esc(it.href) + '" placeholder="#shop ou https://…"' + dis + '>');
+        /* ⚠ Le second texte d exemple est un FORMAT (<< #shop ou https://… >>),
+           pas une description : repris tel quel il aurait donne un nom absurde.
+           Les deux noms disent de quelle entree de menu il s agit. */
+        h.push('<input class="lab" data-field="label" data-id="' + esc(it.id) + '" aria-label="' + esc('Étiquette du menu — ' + (it.label || it.id)) + '" value="' + esc(it.label) + '" placeholder="Étiquette"' + dis + '>');
+        h.push('<input class="href" data-field="href" data-id="' + esc(it.id) + '" aria-label="' + esc('Lien du menu — ' + (it.label || it.id)) + '" value="' + esc(it.href) + '" placeholder="#shop ou https://…"' + dis + '>');
       }
       h.push('</div><div class="gestes">');
       h.push('<button class="mini" data-act="up" data-id="' + esc(it.id) + '" title="Monter"' + (i===0||RO?' disabled':'') + '>↑</button>');

@@ -1030,10 +1030,13 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         +'<input aria-label="Nom (EN)" class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="Nom (EN)" style="max-width:240px"'+(RO?' disabled':'')+'></div>'
         +(RO?'':'<div style="display:flex;gap:.3rem"><button class="b" data-grow="'+gi+'">＋ Ligne</button><button class="b dgr" data-gdel="'+gi+'">Supprimer</button></div>')+'</div>';
       h+='<div style="overflow-x:auto"><table class="tb"><thead><tr>';
-      for (var hh=0; hh<g.headers.length; hh++) h+='<th><input class="t" data-gh="'+gi+'-'+hh+'" value="'+esc(g.headers[hh])+'" style="font-weight:600"'+(RO?' disabled':'')+'></th>';
+      /* ⚠ UN TABLEAU DE SAISIE : chaque cellule est un champ, et rien ne les
+         nomme puisque les EN-TETES SONT EUX AUSSI des champs. Le nom se compose
+         donc de la position — c est le seul repere qui existe ici. */
+      for (var hh=0; hh<g.headers.length; hh++) h+='<th><input class="t" data-gh="'+gi+'-'+hh+'" aria-label="En-tête de la colonne '+(hh+1)+'" value="'+esc(g.headers[hh])+'" style="font-weight:600"'+(RO?' disabled':'')+'></th>';
       h+='<th style="width:30px"></th></tr></thead><tbody>';
       for (var ri=0; ri<g.rows.length; ri++){ h+='<tr>';
-        for (var ci=0; ci<g.rows[ri].length; ci++) h+='<td><input class="t" data-gc="'+gi+'-'+ri+'-'+ci+'" value="'+esc(g.rows[ri][ci])+'"'+(RO?' disabled':'')+'></td>';
+        for (var ci=0; ci<g.rows[ri].length; ci++) h+='<td><input class="t" data-gc="'+gi+'-'+ri+'-'+ci+'" aria-label="Ligne '+(ri+1)+', colonne '+(ci+1)+'" value="'+esc(g.rows[ri][ci])+'"'+(RO?' disabled':'')+'></td>';
         h+='<td style="text-align:center">'+(RO?'':'<button class="b dgr" data-grrm="'+gi+'-'+ri+'" style="padding:.1rem .4rem">✕</button>')+'</td></tr>';
       }
       h+='</tbody></table></div></div>';

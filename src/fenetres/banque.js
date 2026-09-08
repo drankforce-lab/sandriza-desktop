@@ -210,7 +210,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     var a = (D.annees || []).map(function(y){
       return '<option value="' + y + '"' + (y === ANNEE ? ' selected' : '') + '>' + y + '</option>';
     }).join('');
-    return '<label style="margin:0">Année</label><select id="b-annee" style="width:auto">' + a + '</select>';
+    return '<label style="margin:0" for="b-annee">Année</label><select id="b-annee" style="width:auto">' + a + '</select>';
   }
 
   // ── LISTE ───────────────────────────────────────────────────────────────

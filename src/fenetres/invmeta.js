@@ -232,7 +232,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? 'Utilisée — suppression bloquée' : 'Retirer') + '">×</button>' : '';
       return '<span class="chip">' + esc(s.nom) + lock + x + '</span>';
     }).join('');
-    var inp = D.peut.edit ? '<input id="sz-input" placeholder="' + (D.sizes.length ? 'Ajouter une taille…' : 'Ex : 46, OS, 2XL…') + '" autocomplete="off">' : '';
+    var inp = D.peut.edit ? '<input id="sz-input" aria-label="Ajouter une taille" placeholder="' + (D.sizes.length ? 'Ajouter une taille…' : 'Ex : 46, OS, 2XL…') + '" autocomplete="off">' : '';
     return '<p class="aide">Ces tailles s’affichent dans le formulaire d’édition des produits.</p>'
       + '<div class="chips">' + chips + inp + '</div>'
       + (D.peut.edit ? '<div class="aide" style="margin:.5rem 0 0">Tapez une taille puis <strong>Entrée</strong> ou <strong>,</strong> — ou collez-en plusieurs séparées par des virgules. <strong>Retour arrière</strong> (champ vide) retire la dernière.</div>' : '');
@@ -294,7 +294,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="champ"><label for="inv-color-name">Nom</label><input id="inv-color-name" placeholder="Ex: corail rosé" style="width:170px"></div>'
       + '<div class="champ"><label for="inv-color-hex">Valeur hex</label><div style="display:flex;gap:.35rem;align-items:center">'
       +   '<input id="inv-color-hex" placeholder="#FF6B6B" class="mono" style="width:105px">'
-      +   '<input type="color" id="inv-color-picker" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
+      +   '<input type="color" id="inv-color-picker" aria-label="Choisir la couleur au nuancier" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
       + '<div class="champ"><label>Ou chercher par nom</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> Chercher</button></div>'
       + '</div>'
       + (CVARIANTS && CVARIANTS.length ? '<div style="margin-top:.6rem"><div class="aide" style="margin:0 0 .35rem">' + CVARIANTS.length + ' variante' + plur(CVARIANTS.length) + ' — cliquez pour choisir</div><div class="swatches">'
@@ -315,7 +315,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       return '<div class="cc"><span class="pt pastille" style="background:' + esc(c.hex) + ';width:22px;height:22px"></span>'
         + '<span class="nm">' + esc(c.nom) + autoTag + '</span>'
         + '<span class="mono" style="color:var(--tx2);font-size:.72rem">…-<strong style="color:var(--tx-creme)">' + esc(c.code) + '</strong></span>'
-        + '<input id="cc-' + esc(c.nom) + '" value="' + esc(c.code) + '" maxlength="6"' + ro + '>'
+        + '<input id="cc-' + esc(c.nom) + '" aria-label="' + esc('Code SKU de ' + c.nom) + '" value="' + esc(c.code) + '" maxlength="6"' + ro + '>'
         + save + '</div>';
     }).join('') : '<p class="aide" style="margin:0">Aucune couleur utilisée par un produit pour l’instant.</p>';
     return ''
@@ -451,7 +451,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="champ" style="margin-bottom:.6rem"><label for="ec-name">Nom</label><input id="ec-name" value="' + esc(EDITCOLOR.nom) + '" style="width:100%"></div>'
       + '<div class="champ"><label for="ec-hex">Valeur hex</label><div style="display:flex;gap:.4rem;align-items:center">'
       +   '<input id="ec-hex" value="' + esc(EDITCOLOR.hex) + '" class="mono" style="flex:1">'
-      +   '<input type="color" id="ec-picker" value="' + (EDITCOLOR.hex.charAt(0) === '#' && EDITCOLOR.hex.length <= 7 ? esc(EDITCOLOR.hex) : '#000000') + '" data-syncEc="1" style="width:38px;height:34px;padding:2px"></div></div>'
+      +   '<input type="color" id="ec-picker" aria-label="Choisir la couleur au nuancier" value="' + (EDITCOLOR.hex.charAt(0) === '#' && EDITCOLOR.hex.length <= 7 ? esc(EDITCOLOR.hex) : '#000000') + '" data-syncEc="1" style="width:38px;height:34px;padding:2px"></div></div>'
       + '<div class="pied-boite"><button data-eccancel="1">Annuler</button><button class="prim" data-ecsave="1">Enregistrer</button></div></div></div>';
   }
 

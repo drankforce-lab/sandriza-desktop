@@ -276,15 +276,19 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
 
   // ── FABRIQUES DE CHAMPS ────────────────────────────────────────────────────
+  /* ⚠ LE for= EST CALCULE, ET C EST SAIN : l identifiant et le libelle arrivent
+     dans LA MEME fabrique, donc les deux cotes portent la MEME expression et ne
+     peuvent pas diverger. Quatre fabriques, un for= chacune, et ce sont des
+     dizaines de champs de cette fenetre qui prennent leur nom d un coup. */
   function texteHtml(id, label, v, place, mono, aide, type){
-    return '<div class="ch"><label>' + esc(label) + '</label>'
+    return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label>'
       + '<input' + (mono ? ' class="mono"' : '') + ' id="' + id + '"' + (type ? ' type="' + type + '"' : '')
       + ' value="' + esc(v == null ? '' : v) + '" placeholder="' + esc(place || '') + '"'
       + (RO ? ' disabled' : '') + '>'
       + (aide ? '<div class="aide">' + esc(aide) + '</div>' : '') + '</div>';
   }
   function secretHtml(id, label, defini, place){
-    return '<div class="ch"><label>' + esc(label) + '</label>'
+    return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label>'
       + '<input class="mono" id="' + id + '" type="password" value="" placeholder="'
       + (defini ? 'inchangé (laisser vide pour conserver)' : esc(place || '')) + '" autocomplete="off"'
       + (RO ? ' disabled' : '') + '>'
@@ -292,7 +296,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (defini ? 'Enregistré. <b>Vide = conservé.</b>' : 'Aucun secret <b>enregistré</b>.') + '</div></div>';
   }
   function selectHtml(id, label, cur, opts, aide){
-    var h = '<div class="ch"><label>' + esc(label) + '</label><select id="' + id + '"' + (RO ? ' disabled' : '') + '>';
+    var h = '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><select id="' + id + '"' + (RO ? ' disabled' : '') + '>';
     for (var i = 0; i < opts.length; i++) {
       h += '<option value="' + esc(opts[i][0]) + '"' + (String(cur) === String(opts[i][0]) ? ' selected' : '') + '>'
         + esc(opts[i][1]) + '</option>';
@@ -300,7 +304,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h + '</select>' + (aide ? '<div class="aide">' + esc(aide) + '</div>' : '') + '</div>';
   }
   function taHtml(id, label, v, place){
-    return '<div class="ch"><label>' + esc(label) + '</label>'
+    return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label>'
       + '<textarea id="' + id + '" rows="2" placeholder="' + esc(place || '') + '"' + (RO ? ' disabled' : '') + '>'
       + esc(v == null ? '' : v) + '</textarea></div>';
   }

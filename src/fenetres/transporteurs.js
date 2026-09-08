@@ -165,7 +165,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // Un champ SECRET (masqué) : « inchangé » si déjà défini, vide = conservé.
   function secretHtml(id, label, mask, place){
     var m = mask || { defini: false, fin: '' };
-    return '<div class="ch"><label>' + esc(label) + '</label>'
+    return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label>'
       + '<input class="mono" id="' + id + '" type="password" value="" placeholder="'
       + (m.defini ? 'inchangé' : esc(place || '')) + '" autocomplete="off"' + (RO ? ' disabled' : '') + '>'
       + '<div class="etat' + (m.defini ? '' : ' non') + '">'
@@ -173,7 +173,7 @@ ${JS_ACTIVITE}${JS_DIRE}
                   : 'Aucun secret <b>enregistré</b>.') + '</div></div>';
   }
   function texteHtml(id, label, v, place, mono, aide){
-    return '<div class="ch"><label>' + esc(label) + '</label>'
+    return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label>'
       + '<input' + (mono ? ' class="mono"' : '') + ' id="' + id + '" value="' + esc(v || '') + '" placeholder="'
       + esc(place || '') + '"' + (RO ? ' disabled' : '') + '>'
       + (aide ? '<div class="aide">' + aide + '</div>' : '') + '</div>';

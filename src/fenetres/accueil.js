@@ -174,8 +174,14 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   }
 
   // ── ÉDITEUR ─────────────────────────────────────────────────────────────────
-  function chTexte(id, label, v, ph){ return '<div class="ch"><label>' + esc(label) + '</label><input id="' + id + '" value="' + esc(v||'') + '" placeholder="' + esc(ph||'') + '"' + (RO?' disabled':'') + '></div>'; }
-  function chAire(id, label, v, ph){ return '<div class="ch"><label>' + esc(label) + '</label><textarea id="' + id + '" rows="2" placeholder="' + esc(ph||'') + '"' + (RO?' disabled':'') + '>' + esc(v||'') + '</textarea></div>'; }
+  /* ⚠ LE for= EST CALCULE, ET C EST SAIN ICI : l identifiant et le libelle
+     arrivent dans LA MEME aide, donc les deux cotes portent la MEME expression
+     et ne peuvent pas divergrer. Le controle des etiquettes ecarte les
+     identifiants calcules (il ne peut pas les verifier en lisant le texte) —
+     il ne les REFUSE pas. Ce qu il refuse, c est un for= LITTERAL pose face a un
+     id calcule, et c est pour ca que photos.js recoit un nom au lieu d un for=. */
+  function chTexte(id, label, v, ph){ return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><input id="' + id + '" value="' + esc(v||'') + '" placeholder="' + esc(ph||'') + '"' + (RO?' disabled':'') + '></div>'; }
+  function chAire(id, label, v, ph){ return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><textarea id="' + id + '" rows="2" placeholder="' + esc(ph||'') + '"' + (RO?' disabled':'') + '>' + esc(v||'') + '</textarea></div>'; }
 
   function diapoHtml(s, i){
     var opts = GRADS.map(function(g, gi){ return '<option value="' + gi + '"' + ((s.gradient||gradVal(0))===g.value?' selected':'') + '>' + esc(g.label) + '</option>'; }).join('');

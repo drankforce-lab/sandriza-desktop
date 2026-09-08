@@ -218,11 +218,11 @@ ${JS_ACTIVITE}${JS_DIRE}
         + 'cartes sont débitées.</div>');
     }
     h.push('<div class="ch"><label>Identifiant d’application</label>'
-      + '<input id="f-app" type="text" value="' + esc(e.appId) + '" placeholder="sq0idp-…"'
+      + '<input id="f-app" type="text" aria-label="Identifiant d’application" value="' + esc(e.appId) + '" placeholder="sq0idp-…"'
       + (RO ? ' disabled' : '') + '>'
       + '<div class="aide">Tableau de bord développeur, section Credentials.</div></div>');
     h.push('<div class="ch"><label>Jeton d’accès</label>'
-      + '<input id="f-jeton" type="password" value="" placeholder="' + (e.jeton.defini ? 'inchangé' : 'EAAAl…')
+      + '<input id="f-jeton" type="password" aria-label="Jeton d’accès" value="" placeholder="' + (e.jeton.defini ? 'inchangé' : 'EAAAl…')
       + '" autocomplete="off"' + (RO ? ' disabled' : '') + '>'
       + '<div class="jeton' + (e.jeton.defini ? '' : ' non') + '">'
       + (e.jeton.defini
@@ -230,7 +230,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           : 'Aucun jeton <b>enregistré</b> pour cet environnement.')
       + '</div></div>');
     h.push('<div class="ch"><label>Identifiant d’emplacement</label>'
-      + '<input id="f-loc" type="text" value="' + esc(e.locId) + '" placeholder="L…"'
+      + '<input id="f-loc" type="text" aria-label="Identifiant d’emplacement" value="' + esc(e.locId) + '" placeholder="L…"'
       + (RO ? ' disabled' : '') + '>'
       + '<div class="aide">Testez la connexion pour voir vos emplacements.</div></div>');
     h.push('<div class="res" id="res"></div>');

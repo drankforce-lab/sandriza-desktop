@@ -360,7 +360,9 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
           ? ''
           : '<label style="margin-top:.6rem">Mot de passe d’ouverture</label>'
             + '<div class="gros" id="n-mdp-vue">' + esc(n.mdp) + '</div>'
-            + '<input id="n-mdp" type="text" readonly value="' + esc(n.mdp) + '" style="position:absolute;left:-9999px">'
+            /* Meme cas que comptable.js : hors ecran, mais atteignable au
+               clavier. On le retire du lecteur d ecran ET de la tabulation. */
+            + '<input id="n-mdp" type="text" readonly aria-hidden="true" tabindex="-1" value="' + esc(n.mdp) + '" style="position:absolute;left:-9999px">'
             + '<div class="barreoutils" style="margin-top:.4rem">'
             + '<button id="n-copier-mdp"><span class="ic">📋</span> Copier le mot de passe</button></div>'
             + '<p class="aide"><strong>Il ne sera plus jamais affiché</strong> — la base n’en garde '
@@ -604,7 +606,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function dessinerJournal(filtre, lien){
     var h = [];
     h.push('<div class="barreoutils">'
-      + '<label style="margin:0">Canal</label>'
+      + '<label style="margin:0" for="j-canal">Canal</label>'
       + '<select id="j-canal" style="width:auto">'
       + '<option value="">Tous</option>'
       + '<option value="telechargement"' + (filtre === 'telechargement' ? ' selected' : '') + '>Installation</option>'
