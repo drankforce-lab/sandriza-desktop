@@ -360,7 +360,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<div class="qedh"><span class="dt">Question ' + (i + 1) + '</span>'
         + '<button class="mini danger" data-q-suppr="' + i + '">✕</button></div>'
         + '<input class="t" data-q-lib="' + i + '" value="' + esc(q.libelle) + '" placeholder="Que pensez-vous de votre achat ?">'
-        + '<div class="qedr"><select class="t" data-q-type="' + i + '">'
+        + '<div class="qedr"><select class="t" data-q-type="' + i + '"'
+          + ' aria-label="Type de la question ' + (i + 1) + '">'
         + (FORM.typesQuestion || []).map(function(t){
             return '<option value="' + esc(t.v) + '"' + (q.type === t.v ? ' selected' : '') + '>'
               + esc(t.l) + '</option>'; }).join('')

@@ -1034,11 +1034,12 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     return cr.map(function(c, i){
       var def = champDef(c.champ) || { ops: [] };
       return '<div class="critere">'
-        + '<select id="c-c-' + i + '" data-critchamp="' + i + '">'
+        + '<select id="c-c-' + i + '" data-critchamp="' + i + '"'
+          + ' aria-label="Critère ' + (i + 1) + ' — champ">'
         + champs.map(function(x){
             return '<option value="' + esc(x.cle) + '"' + (x.cle === c.champ ? ' selected' : '')
               + '>' + esc(x.nom) + '</option>'; }).join('') + '</select>'
-        + '<select id="c-o-' + i + '">'
+        + '<select id="c-o-' + i + '" aria-label="Critère ' + (i + 1) + ' — opérateur">'
         + (def.ops || []).map(function(o){
             return '<option value="' + esc(o.cle) + '"' + (o.cle === c.op ? ' selected' : '')
               + '>' + esc(o.nom) + '</option>'; }).join('') + '</select>'

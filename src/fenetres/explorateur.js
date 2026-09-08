@@ -238,7 +238,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += (D && D.filtres ? D.filtres : []).map(function(f){
       return '<button class="jeton' + (FILTRES.indexOf(f.cle) >= 0 ? ' on' : '') + '"'
         + ' data-filtre="' + esc(f.cle) + '">' + esc(f.nom) + '</button>'; }).join('');
-    h += '<select id="sans"><option value="">Traitement — tous</option>'
+    h += '<select id="sans" aria-label="Filtrer les photos sans un traitement donné">'
+      + '<option value="">Traitement — tous</option>'
       + (D && D.traitements ? D.traitements : []).map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (SANS === t.cle ? ' selected' : '')
             + '>Sans « ' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
@@ -248,7 +249,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             return '<option value="' + esc(l.cle) + '"' + (LOT === l.cle ? ' selected' : '')
               + '>' + esc(l.nom) + '</option>'; }).join('') + '</select>';
     }
-    h += '<select id="tri">' + [['recent', 'Plus récentes'], ['code', 'Code'], ['name', 'Nom'],
+    h += '<select id="tri" aria-label="Ordre de tri">' + [['recent', 'Plus récentes'], ['code', 'Code'], ['name', 'Nom'],
         ['linked', 'Liées d’abord'], ['size', 'Plus lourdes']].map(function(t){
         return '<option value="' + t[0] + '"' + (TRI === t[0] ? ' selected' : '') + '>'
           + t[1] + '</option>'; }).join('') + '</select>';

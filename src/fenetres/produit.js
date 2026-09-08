@@ -1350,7 +1350,8 @@ function pageProduit(id) {
             + '<span class="c3"><input class="q" type="number" min="0" step="1" placeholder="0"'
             + ' data-cle="' + esc(x.cle) + '" value="' + esc(q) + '">' + alerteSeuil(q) + '</span>'
             + (CTX.entrepots.length
-                ? '<span class="c4"><select class="loc' + (manque ? ' manque' : '') + '" data-cle="' + esc(x.cle) + '">'
+                ? '<span class="c4"><select class="loc' + (manque ? ' manque' : '') + '" data-cle="' + esc(x.cle) + '"'
+                  + ' aria-label="' + esc('Emplacement — ' + x.taille + ' / ' + x.couleur) + '">'
                   + '<option value="">Choisir l’emplacement</option>'
                   + CTX.entrepots.map(function(w){
                       return '<option value="' + esc(w.id) + '"' + (lo === w.id ? ' selected' : '') + '>' + esc(w.nom) + '</option>';

@@ -230,7 +230,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<table class="tbl"><thead><tr><th>Module</th><th>Fonction</th><th>Gabarit</th></tr></thead><tbody>';
     for (var j = 0; j < fns.length; j++) {
       var f = fns[j], cur = (D.attributions && D.attributions[f.key]) || 'default';
-      var sel = '<select data-assign="' + esc(f.key) + '"' + (RO ? ' disabled' : '') + '>';
+      /* ⚠ Meme motif que la matrice des droits : le module et la fonction sont
+         dans les deux premieres cellules, << Gabarit >> dans l en-tete. En
+         tabulant, le lecteur d ecran n annonce ni l un ni l autre. */
+      var sel = '<select data-assign="' + esc(f.key) + '"'
+        + ' aria-label="' + esc('Gabarit de ' + f.label + ' — ' + f.module) + '"'
+        + (RO ? ' disabled' : '') + '>';
       for (var k = 0; k < opts.length; k++) sel += '<option value="' + esc(opts[k].id) + '"' + (cur === opts[k].id ? ' selected' : '') + '>' + esc(opts[k].name) + '</option>';
       sel += '</select>';
       h += '<tr><td class="mod">' + esc(f.module) + '</td><td>' + esc(f.label) + '</td><td>' + sel + '</td></tr>';

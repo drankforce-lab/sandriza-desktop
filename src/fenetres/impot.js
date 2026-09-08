@@ -270,7 +270,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       /* Le choix d annee n a aucun sens sur le profil ni sur l aide-memoire :
          l un decrit l entreprise, l autre le calendrier a venir. */
       + ((ONGLET === 'entreprise' || ONGLET === 'memo') ? ''
-          : '<select id="i-annee">' + (D.annees || []).map(function(a){
+          : '<select id="i-annee" aria-label="Année d’imposition">' + (D.annees || []).map(function(a){
               return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>'
                 + a + '</option>'; }).join('') + '</select>')
       + '<span class="droite">' + esc(D.profil.nom || 'entreprise sans nom') + '</span>'

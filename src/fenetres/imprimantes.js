@@ -276,7 +276,9 @@ ${JS_ACTIVITE}${JS_DIRE}
           + '<div class="n">' + esc(s.titre) + '</div>'
           + '<div class="m">' + esc(fmtFormat(s.largeurPo, s.hauteurPo))
           + (s.imprimante ? '' : ' · <span class="att">aucune imprimante choisie</span>') + '</div>'
-          + '<select data-svc="' + esc(s.cle) + '"' + (dispo && IMPRS ? '' : ' disabled') + '>' + opts + '</select>'
+          + '<select data-svc="' + esc(s.cle) + '"'
+          + ' aria-label="' + esc('Imprimante pour ' + s.titre) + '"'
+          + (dispo && IMPRS ? '' : ' disabled') + '>' + opts + '</select>'
           + '</div><div class="a">'
           + '<button data-tester="' + esc(s.cle) + '"' + (dispo && s.imprimante ? '' : ' disabled') + '>Test d’impression</button>'
           + '</div></div>');

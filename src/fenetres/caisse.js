@@ -269,7 +269,7 @@ function pageCaisse(mode) {
     <div class="carte">
       <h2>Encaissement</h2>
       <div class="r2">
-        <select id="v-paie"></select>
+        <select id="v-paie" aria-label="Mode de paiement"></select>
         <input id="v-note" placeholder="Note interne (facultatif)">
       </div>
       <button class="prim large" id="btn-vendre" disabled>Enregistrer la vente</button>

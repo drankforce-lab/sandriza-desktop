@@ -299,7 +299,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueModeles(ro){
     var h = '<div class="barreoutils" style="margin-top:.1rem">'
       + '<input type="search" id="p-q" placeholder="Nom ou format (3 car. min.)" value="' + esc(Q) + '">'
-      + '<select id="p-tri">'
+      + '<select id="p-tri" aria-label="Ordre de tri">'
       + '<option value="updated"' + (TRI === 'updated' ? ' selected' : '') + '>Modifié récemment</option>'
       + '<option value="name"' + (TRI === 'name' ? ' selected' : '') + '>Nom</option>'
       + '<option value="size"' + (TRI === 'size' ? ' selected' : '') + '>Format</option>'
@@ -490,7 +490,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div class="aide">Aucun gabarit Avery ne correspond exactement à ce format. '
         + 'L’impression directe sur l’imprimante d’étiquettes reste la voie recommandée.</div>';
     } else {
-      h += '<div class="champ"><select id="p-planche">'
+      h += '<div class="champ"><select id="p-planche" aria-label="Modèle de planche">'
         + pl.map(function(t){
             return '<option value="' + esc(t.id) + '"' + (PLANCHE === t.id ? ' selected' : '') + '>'
               + esc(t.nom) + '</option>'; }).join('')

@@ -404,7 +404,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
 
     return '<div class="voile" id="rc-voile"><div class="boite">'
       + '<h3>' + (L.nom ? 'Articles liés à « ' + esc(L.nom) + ' »' : 'Associer des produits') + '</h3>'
-      + (L.id ? '' : '<div class="ch" style="margin-bottom:.5rem"><select id="rc-source">'
+      + (L.id ? '' : '<div class="ch" style="margin-bottom:.5rem"><select id="rc-source" aria-label="Produit source">'
           + '<option value="">— Choisir le produit source —</option>'
           + tout.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.nom) + '</option>'; }).join('')
           + '</select></div>')

@@ -222,6 +222,71 @@ for (const m of mainTxt.matchAll(/\{\s*width:\s*(\d+),\s*height:\s*(\d+)\b/g)) {
 }
 if (!nGeoKo) dire('  OK   les ' + nGeo + ' ouvertures de fenetre declarent un minimum coherent');
 
+// ══ 4. LES <select> QUE RIEN N ANNONCE ══════════════════════════════════════
+/* ⚠⚠ LA QUESTION INVERSE DE LA SECTION 1, ET PERSONNE NE LA POSAIT. La section 1
+   demande « cette etiquette pointe-t-elle vers un champ ? ». Elle ne demande
+   jamais « ce champ a-t-il une etiquette ? » — et c est par la que 40 <select>
+   sont restes MUETS pour un lecteur d ecran jusqu au 2026-09-08.
+   ⚠ UN SELECT, PAS TOUS LES CHAMPS, ET C EST DELIBERE. Un `input` sans etiquette
+   garde souvent son `placeholder` (qui nomme, tant que le champ est vide) ; un
+   select n en a pas. Elargir maintenant rendrait 178 etiquettes voisines non
+   reliees et 91 placeholders — c est-a-dire un controle que personne ne lira.
+   ⚠ UN SELECT DE FILTRE SE NOMME PAR SA PREMIERE OPTION : « Toutes les
+   categories » annonce le champ aussi bien qu une etiquette, et il faut RETIRER
+   LES BALISES EN LIGNE avant d en juger — un pictogramme la precede souvent.
+   Sans ca, 21 champs corrects sont accuses.
+   ⚠ ET LES COMMENTAIRES SONT MASQUES : deux `<select>` CITES dans un commentaire
+   (socle.js, depenses.js) sont entres dans le premier relevé. Meme regle que les
+   pictogrammes, ou 450 des 1073 vivaient dans les commentaires. */
 dire('');
-dire(ko ? '>>> ' + ko + ' CAS EN ECHEC' : '>>> la mise en page ne porte aucun des trois defauts muets');
+dire('=== <select> sans nom accessible (aucune etiquette, aucun aria-label) ===');
+const declares = require('./selects-sans-nom-declares.js');
+const memeTaille = (s) => s.replace(/[^\n]/g, ' ');
+const sansCommentaires = (t) => t
+  .replace(/\/\*[\s\S]*?\*\//g, memeTaille)
+  .replace(/(^|[^:])\/\/[^\n]*/g, (m, p1) => p1 + memeTaille(m.slice(p1.length)));
+const sansBalises = (s) => s.replace(/<[^>]*>/g, '').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
+const PARLE = /^(tous|toutes|tout)\b.{2,}/i;
+let nSel = 0, nSelKo = 0, nTolere = 0;
+for (const f of fichiers) {
+  const txt = sansCommentaires(fs.readFileSync(path.join(dossier, f), 'utf8'));
+  const cibles = new Set();
+  for (const m of txt.matchAll(/<label[^>]*\bfor\s*=\s*(?:"([^"]*)"|'([^']*)')/g))
+    cibles.add((m[1] || m[2] || '').trim());
+  const tol = declares[f] || [];
+  for (const m of txt.matchAll(/<select\b([^>]*)>/g)) {
+    const attrs = m[1];
+    nSel++;
+    if (/\baria-label(?:ledby)?\s*=|\btitle\s*=/.test(attrs)) continue;
+    if (/\bhidden\b(?!\s*=)/.test(attrs)) continue;
+    if (/style\s*=\s*"[^"]*display\s*:\s*none/.test(attrs)) continue;
+    const id = (attrs.match(/\bid\s*=\s*"([^"]*)"/) || [])[1];
+    if (id && cibles.has(id.trim())) continue;
+    const avant = txt.slice(Math.max(0, m.index - 400), m.index);
+    const dl = avant.lastIndexOf('<label'), fl = avant.lastIndexOf('</label>');
+    if (dl >= 0 && dl > fl) continue;               // etiquette enveloppante
+    const bloc = txt.slice(m.index, m.index + 900);
+    const opts = [...bloc.matchAll(/<option[^>]*>((?:(?!<\/option>)[\s\S]){0,70})/g)]
+      .map((o) => sansBalises(o[1])).filter(Boolean);
+    if (opts.length && PARLE.test(opts[0])) continue;   // nomme par sa 1re option
+    const proche = txt.slice(Math.max(0, m.index - 220), m.index);
+    if (/<\/label>|class="(?:l|et|cle|lab|lbl)"/.test(proche)) continue;
+    /* TOLERE ET NOMME : voir `selects-sans-nom-declares.js`. On apparie sur un
+       FRAGMENT du contexte, jamais sur un numero de ligne — une ligne se decale
+       au premier ajout, et le cliquet se rouvrirait tout seul. */
+    const ctx = txt.slice(Math.max(0, m.index - 300), m.index + 200);
+    if (tol.some((frag) => ctx.indexOf(frag) >= 0)) { nTolere++; continue; }
+    nSelKo++; ko++;
+    const ligne = txt.slice(0, m.index).split('\n').length;
+    dire('  NON  ' + f + ':' + ligne + '  ' + (id ? 'id=' + id : 'sans id')
+      + '  — aucune etiquette, aucun aria-label, et sa 1re option ne le nomme pas');
+  }
+}
+if (!nSelKo) {
+  dire('  OK   les ' + nSel + ' listes deroulantes annoncent de quoi elles parlent'
+    + (nTolere ? '  (' + nTolere + ' tolere(s) et nomme(s) dans selects-sans-nom-declares.js)' : ''));
+}
+
+dire('');
+dire(ko ? '>>> ' + ko + ' CAS EN ECHEC' : '>>> la mise en page ne porte aucun des quatre defauts muets');
 process.exit(ko ? 1 : 0);

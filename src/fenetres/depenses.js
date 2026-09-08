@@ -274,7 +274,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (VUE === 'annuaire') { h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); return; }
 
     h += '<div class="barreoutils">'
-      + '<select id="d-annee">' + (D.annees || []).map(function(a){
+      + '<select id="d-annee" aria-label="Filtrer par année">' + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>' + a + '</option>';
         }).join('') + '</select>'
       + '<select id="d-mois"><option value="0"' + (!D.mois ? ' selected' : '') + '>Tous les mois</option>'
@@ -575,7 +575,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="form">'
       + champ('Date', '<input type="date" id="f-date" value="' + esc(f.date) + '">')
-      + champ('Mode de paiement', '<select id="f-pay">' + (D.paiements || []).map(function(p){
+      + champ('Mode de paiement', '<select id="f-pay" aria-label="Mode de paiement">' + (D.paiements || []).map(function(p){
           return '<option value="' + esc(p.cle) + '"' + (f.paiement === p.cle ? ' selected' : '') + '>'
             + esc(p.libelle) + '</option>'; }).join('') + '</select>')
       + '<div class="champ large"><label>Catégorie (ligne fiscale)</label><select id="f-cat">'

@@ -382,7 +382,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var viaOpts = ''; for (var v=0;v<viaKeys.length;v++) viaOpts += '<option value="'+viaKeys[v]+'"'+(PF_VIA===viaKeys[v]?' selected':'')+'>'+(viaKeys[v]==='all'?'Toutes les voies':VIA[viaKeys[v]])+'</option>';
 
     var h = kpis + '<div class="carte"><div class="barre">'
-      + '<select class="t" id="p-type">'+typeOpts+'</select><select class="t" id="p-via">'+viaOpts+'</select><span class="pousse"></span>'
+      + '<select class="t" id="p-type" aria-label="Filtrer par type de document">'+typeOpts+'</select>'
+      + '<select class="t" id="p-via" aria-label="Filtrer par voie d’impression">'+viaOpts+'</select><span class="pousse"></span>'
       + '<span class="sub">Rétention 30 jours</span>'
       + (D.peutModifier?'<button class="b" id="p-purge">Appliquer la purge</button>':'')
       + '<button class="b" id="p-csv">Exporter CSV</button></div>'

@@ -202,7 +202,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button class="mini' + (ONGLET === 'done' ? ' actif' : '') + '" data-onglet="done">'
       + 'Traités<span class="n">' + (c.traites || 0) + '</span></button>'
       + (ONGLET === 'done'
-          ? '<select id="a-etat">'
+          ? '<select id="a-etat" aria-label="Filtrer par état de traitement">'
             + '<option value=""' + (ETAT === '' ? ' selected' : '') + '>Approuvés et refusés</option>'
             + '<option value="published"' + (ETAT === 'published' ? ' selected' : '') + '>Approuvés</option>'
             + '<option value="hidden"' + (ETAT === 'hidden' ? ' selected' : '') + '>Refusés / masqués</option>'

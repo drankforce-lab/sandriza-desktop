@@ -522,7 +522,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<button id="p-studio" title="Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat"><span class="ic">🎨</span> Studio virtuel</button>'
       + '<span class="sep"></span>'
       + '<input type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
-      + '<select id="p-tri">'
+      + '<select id="p-tri" aria-label="Nombre de photos par page">'
       + opt('recent', 'Plus récentes') + opt('code', 'Par code') + opt('name', 'Par nom')
       + opt('linked', 'Liées d’abord') + opt('size', 'Plus lourdes')
       + '</select>'
@@ -920,7 +920,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     } else if (A.etape === 2) {
       var n = Object.keys(A.choix).length;
       h += '<div class="barreoutils" style="margin-bottom:.5rem">'
-        + '<select id="a-tri" style="width:auto">'
+        + '<select id="a-tri" aria-label="Ordre de tri" style="width:auto">'
         + '<option value="date"' + (A.tri === 'date' ? ' selected' : '') + '>Plus récentes d’abord</option>'
         + '<option value="date-vieux"' + (A.tri === 'date-vieux' ? ' selected' : '') + '>Plus anciennes d’abord</option>'
         + '<option value="nom"' + (A.tri === 'nom' ? ' selected' : '') + '>Par nom</option>'
@@ -1406,8 +1406,15 @@ ${JS_ACTIVITE}${JS_DIRE}
              extra: ex ? ex.value.trim().slice(0, 240) : '' };
   }
 
-  function liste_(id, options, choisi){
-    return '<select id="' + id + '">' + options.map(function(o){
+  /* ⚠ LE NOM SE POSE ICI, PAS PAR UN for= A L APPEL. L identifiant est un
+     PARAMETRE, donc CALCULE, et le controle des etiquettes (section 1 de
+     verifier-mise-en-page.js) ecarte deliberement les identifiants calcules :
+     un for="sc-mod" pose a l appel lui apparaissait comme une etiquette qui ne
+     pointe nulle part, et il refusait le push. Affaiblir ce controle pour trois
+     champs aurait ete le mauvais echange — la fabrique recoit le nom, et
+     l etiquette visible reste ce qu elle est. */
+  function liste_(id, options, choisi, nom){
+    return '<select id="' + id + '" aria-label="' + esc(nom || '') + '">' + options.map(function(o){
       return '<option value="' + esc(o[0]) + '"' + (o[0] === choisi ? ' selected' : '')
         + '>' + esc(o[1]) + '</option>';
     }).join('') + '</select>';
@@ -1419,9 +1426,12 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="tt"><h3>Mise en scène</h3>'
       + '<span class="pas">' + n + ' photo' + (n > 1 ? 's' : '') + '</span></div>'
       + '<div class="co">'
-      + '<div class="ch"><label>Mannequin</label>' + liste_('sc-mod', MODELES_SC, 'sophia') + '</div>'
-      + '<div class="ch"><label>Pose</label>' + liste_('sc-pose', POSES_SC, '34turn') + '</div>'
-      + '<div class="ch"><label>Décor</label>' + liste_('sc-dec', DECORS_SC, 'studio') + '</div>'
+      /* ⚠ L ETIQUETTE ETAIT LA, ET ELLE NE SERVAIT A RIEN AU LECTEUR D ECRAN :
+         sans lien, un <label> voisin est du texte, pas un nom. Le nom passe par
+         la fabrique (dernier argument) — voir le commentaire de liste_. */
+      + '<div class="ch"><label>Mannequin</label>' + liste_('sc-mod', MODELES_SC, 'sophia', 'Mannequin') + '</div>'
+      + '<div class="ch"><label>Pose</label>' + liste_('sc-pose', POSES_SC, '34turn', 'Pose') + '</div>'
+      + '<div class="ch"><label>Décor</label>' + liste_('sc-dec', DECORS_SC, 'studio', 'Décor') + '</div>'
       + '<div class="ch"><label><input type="checkbox" id="sc-sourire" checked> '
       + 'Sourire naturel, regard vers l’objectif</label></div>'
       + '<div class="ch col"><label>Précisions (facultatif)</label>'

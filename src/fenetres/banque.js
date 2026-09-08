@@ -435,7 +435,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<div class="dt">' + esc(e.date || '—') + ' · ' + esc(e.type || '—') + '</div></div>'
         + '<div style="font-variant-numeric:tabular-nums;font-weight:700">' + sou(e.amount) + '</div>'
         + (D.verrouille || !D.peutEcrire || !seulesV.length ? ''
-            : '<select data-app="' + esc(e.id) + '" style="width:auto;max-width:11rem">'
+            : '<select data-app="' + esc(e.id) + '" aria-label="Apparier cette écriture avec un versement"'
+              + ' style="width:auto;max-width:11rem">'
               + '<option value="">— apparier avec…</option>'
               + seulesV.map(function(p){
                   return '<option value="' + esc(p.id) + '">' + esc(p.arrivalDate || '?') + ' · ' + sou(p.amount) + '</option>';

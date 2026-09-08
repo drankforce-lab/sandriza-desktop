@@ -547,7 +547,9 @@ ${JS_ACTIVITE}${JS_DIRE}
           +   '" placeholder="' + esc(PROD.seuilHerite == null ? '' : PROD.seuilHerite)
           +   '" title="Seuil de cette variante — vide = celui du produit"'
           +   (v.seuil === '' ? ' style="opacity:.6"' : '') + '></td>'
-          + '<td class="e"><select data-e="' + i + '"' + (manqueLieu ? ' class="manque"' : '') + '>'
+          + '<td class="e"><select data-e="' + i + '"'
+          +   ' aria-label="' + esc('Emplacement — ' + v.taille + ' / ' + v.couleur) + '"'
+          +   (manqueLieu ? ' class="manque"' : '') + '>'
           +   '<option value="">—</option>'
           +   ENTREPOTS.map(function(w){
                 return '<option value="' + esc(w.id) + '"' + (v.entrepot === w.id ? ' selected' : '')
@@ -561,7 +563,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '</tbody></table></div>';
 
       h += '<div class="pagi">'
-        + '<span>Afficher</span><select id="pg-taille">'
+        + '<span>Afficher</span><select id="pg-taille" aria-label="Nombre de lignes par page">'
         + '<option value="auto"' + (GRILLE_AUTO ? ' selected' : '') + '>Auto</option>'
         + [5, 10, 25, 50, 9999].map(function(n){
             return '<option value="' + n + '"' + (!GRILLE_AUTO && TAILLE_PAGE === n ? ' selected' : '') + '>'
@@ -850,7 +852,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="carte plein">';
     h += '<div class="toolbar">'
       + '<input type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom produit…" value="' + esc(FP.q) + '">'
-      + '<select id="fp-etat">'
+      + '<select id="fp-etat" aria-label="Filtrer par état du stock">'
       + '<option value=""><span class="ic">📦</span> Tout l’inventaire</option>'
       + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '><span class="ic">🔴</span> En rupture</option>'
       + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> À commander</option>'
@@ -916,7 +918,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var debut = d.page * d.parPage + 1;
       var fin = Math.min((d.page + 1) * d.parPage, d.total);
       h += '<div class="pagi">'
-        + '<span>Afficher</span><select id="fp-taille">'
+        + '<span>Afficher</span><select id="fp-taille" aria-label="Nombre de produits par page">'
         + '<option value="auto"' + (FP.auto ? ' selected' : '') + '>Auto</option>'
         + [10, 25, 50, 100].map(function(n){
             return '<option value="' + n + '"' + (!FP.auto && FP.parPage === n ? ' selected' : '') + '>' + n + '</option>'; }).join('')
@@ -1344,7 +1346,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             return '<option value="' + esc(l.id) + '"' + (w && w.lieuId === l.id ? ' selected' : '') + '>'
               + esc(l.nom) + '</option>'; }).join('');
       return '<tr style="background:rgba(201,169,126,.08)">'
-        + '<td><select id="wh-lieu">' + opts + '</select></td>'
+        + '<td><select id="wh-lieu" aria-label="Lieu de cet emplacement">' + opts + '</select></td>'
         + '<td><input type="text" id="wh-casier" value="' + esc(w ? w.casier : '') + '" placeholder="Ex : Casier 1"></td>'
         + '<td><input type="text" id="wh-section" value="' + esc(w ? w.section : '') + '" placeholder="Ex : Section A"></td>'
         + '<td><input type="text" id="wh-ref" value="' + esc(w ? w.reference : '') + '" placeholder="Référence (optionnel)"></td>'

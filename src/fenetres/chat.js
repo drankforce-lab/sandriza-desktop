@@ -275,7 +275,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<div style="margin-top:.6rem"><textarea id="ch-reponse" placeholder="Votre réponse…"></textarea></div>'
         + '<div class="pied-boite">'
         + '<button class="mini danger" id="ch-suppr">' + (SUPPR_ARME ? 'Confirmer ?' : 'Supprimer') + '</button>'
-        + '<select id="ch-statut" style="max-width:11rem">'
+        + '<select id="ch-statut" aria-label="Changer l’état de la conversation" style="max-width:11rem">'
         + '<option value="">Changer l’état…</option>'
         + '<option value="pending">En attente</option>'
         + '<option value="open">Ouverte</option>'

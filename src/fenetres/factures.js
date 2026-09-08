@@ -261,7 +261,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (ETAT_OUVERT) {
       h += '<div class="voile" id="f-voile"><div class="boite">'
         + '<h3>État de compte client</h3>'
-        + '<select id="f-client"><option value="">— Choisir un client —</option>'
+        + '<select id="f-client" aria-label="Client de la facture">'
+        + '<option value="">— Choisir un client —</option>'
         + CLIENTS.map(function(c){
             return '<option value="' + esc(c.id) + '">' + esc(c.nom) + ' (' + esc(c.courriel) + ')</option>';
           }).join('')

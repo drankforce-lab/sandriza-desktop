@@ -393,7 +393,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var opt = function(v, t){ return '<option value="' + v + '"' + (FILT_PROV === v ? ' selected' : '') + '>' + t + '</option>'; };
     var h = [];
     h.push('<div class="barreoutils">'
-      + '<select id="h-prov">' + opt('tous', 'Toutes les opérations') + opt('fal', 'Fal.ai') + opt('photoroom', 'Photoroom') + '</select>'
+      + '<select id="h-prov" aria-label="Filtrer par service">'
+      + opt('tous', 'Toutes les opérations') + opt('fal', 'Fal.ai') + opt('photoroom', 'Photoroom') + '</select>'
       + '<input id="h-q" type="search" placeholder="Filtrer par photo (nom ou PH-000000)" value="' + esc(FILT_Q || '')
       + '" style="flex:1;min-width:13rem;background:var(--v05);color:var(--tx);'
       + 'border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem;font:inherit">'

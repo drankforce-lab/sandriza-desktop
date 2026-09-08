@@ -398,7 +398,9 @@ ${JS_ACTIVITE}${JS_DIRE}
             +   (c.lieuNom || c.section
                   ? '<br><span class="dt">' + esc([c.lieuNom, c.section].filter(Boolean).join(' · ')) + '</span>'
                   : '') + '</td>'
-            + '<td><select data-vers="' + esc(id) + '"><option value="">— destination —</option>'
+            + '<td><select data-vers="' + esc(id) + '"'
+            +   ' aria-label="' + esc('Destination du transfert depuis ' + (c.deNom || '')) + '">'
+            +   '<option value="">— destination —</option>'
             +   (D.entrepots || []).filter(function(w){ return w.id !== c.de; })
                 .map(function(w){ return '<option value="' + esc(w.id) + '">' + esc(w.code || w.nom) + '</option>'; }).join('')
             + '</select></td>'

@@ -417,7 +417,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
           var dec = DECISIONS[a.productId] || { backToStock: true, reason: '' };
           return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
             + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—') + ' · × ' + a.quantite + '</div></div>'
-            + '<select data-inv="' + i + '">'
+            + '<select data-inv="' + i + '"'
+            + ' aria-label="' + esc('Décision inventaire — ' + a.nom) + '">'
             + '<option value="1"' + (dec.backToStock ? ' selected' : '') + '><span class="ic">✅</span> Remettre en inventaire</option>'
             + '<option value="0"' + (dec.backToStock ? '' : ' selected') + '><span class="ic">❌</span> Ne pas remettre</option>'
             + '</select></div>'
@@ -473,7 +474,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '</div>';
     }
     h += '<div class="carte"><h2>Résolution finale</h2>'
-      + '<select id="g-statut"><option value="refunded">Remboursée</option>'
+      + '<select id="g-statut" aria-label="Issue du retour"><option value="refunded">Remboursée</option>'
       + '<option value="completed">Complétée (échange / crédit — aucun remboursement émis ici)</option></select>'
       + '<div class="jetons">' + (R.modeles || []).map(function(m, i){
           return '<button type="button" data-modele="' + i + '">' + esc(m) + '</button>'; }).join('') + '</div>'

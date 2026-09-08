@@ -414,7 +414,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       });
       h += '</tbody></table></div>';
 
-      h += '<div class="pagi"><span>Afficher</span><select id="pg-taille">'
+      h += '<div class="pagi"><span>Afficher</span>'
+        + '<select id="pg-taille" aria-label="Nombre de commandes par page">'
         + '<option value="auto"' + (F.auto ? ' selected' : '') + '>Auto</option>'
         + [10, 20, 50, 100].map(function(n){
             return '<option value="' + n + '"' + (!F.auto && F.parPage === n ? ' selected' : '') + '>' + n + '</option>';
@@ -479,7 +480,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (d.droits.statut && !ro) {
       // ⚠ MEME REGLE QUE LA FICHE DU SITE : ni << En attente >> ni << Annulee >>
       // dans le selecteur, sauf si c est deja le statut courant.
-      h += '<select class="statut" id="det-statut">'
+      h += '<select class="statut" id="det-statut" aria-label="Statut de la commande">'
         + (d.statuts || []).filter(function(x){
             return ['pending', 'cancelled'].indexOf(x.cle) < 0 || x.cle === c.statut;
           }).map(function(x){

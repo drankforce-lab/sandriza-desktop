@@ -232,6 +232,16 @@ jobs:
       # d'écran annonce un champ sans nom), une zone de texte où PERSONNE n'a choisi
       # de hauteur (le navigateur en met deux lignes), et une fenêtre
       # redimensionnable sans minHeight (ses boutons du bas sortent de l'écran).
+      # ⚠⚠ QUATRIÈME DÉFAUT depuis le 2026-09-08 : un <select> que RIEN n'annonce.
+      # La première section demande « cette étiquette pointe-t-elle vers un
+      # champ ? » — elle ne demandait JAMAIS l'inverse, « ce champ a-t-il une
+      # étiquette ? », et 40 listes déroulantes étaient muettes au lecteur
+      # d'écran. C'est un CLIQUET : le reste toléré est nommé un par un, avec sa
+      # raison, dans `selects-sans-nom-declares.js` — un nouveau select sans nom
+      # fait échouer la construction.
+      # ⚠ Il ne juge QUE les <select>, délibérément : un input garde souvent son
+      # placeholder, et élargir maintenant rendrait 178 étiquettes voisines non
+      # reliées plus 91 placeholders — un contrôle que personne ne lirait.
       # ⚠ Il ne MESURE rien — il lit le texte. Il attrape ce qui est décidable sans
       # dessiner, et se TAIT dès qu'une valeur est calculée ou qu'un rows= est écrit
       # à la main : un rows= explicite est une décision, pas un oubli.

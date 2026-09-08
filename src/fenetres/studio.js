@@ -2424,7 +2424,8 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (PH_META.filtres || []).map(function(f){ return jeton(f.cle, f.nom); }).join('');
     // Le filtre le plus utile : ce qui n a PAS encore recu tel traitement.
     // Retraiter une photo deja faite coute un appel pour rien.
-    h += '<select id="ph-sans"><option value="">Traitement — tous</option>'
+    h += '<select id="ph-sans" aria-label="Filtrer les photos sans un traitement donné">'
+      + '<option value="">Traitement — tous</option>'
       + (PH_META.traitements || []).map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (PH_SANS === t.cle ? ' selected' : '')
             + '>Sans « ' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
@@ -2434,7 +2435,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             return '<option value="' + esc(l.cle) + '"' + (PH_LOT === l.cle ? ' selected' : '')
               + '>' + esc(l.nom) + '</option>'; }).join('') + '</select>';
     }
-    h += '<select id="ph-tri">'
+    h += '<select id="ph-tri" aria-label="Ordre de tri">'
       + [['recent', 'Plus récentes'], ['code', 'Code'], ['name', 'Nom'],
          ['linked', 'Liées d’abord'], ['size', 'Plus lourdes']].map(function(t){
           return '<option value="' + t[0] + '"' + (PH_TRI === t[0] ? ' selected' : '') + '>'

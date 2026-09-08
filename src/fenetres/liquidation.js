@@ -285,7 +285,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + (g.page >= g.pages - 1 ? ' disabled' : '') + '>Suivant →</button>';
     }
     return '<div class="pager"><span class="gauche">Afficher '
-      + '<select id="taille">' + opts + '</select> par page · ' + g.total + ' produit'
+      + '<select id="taille" aria-label="Nombre de produits par page">' + opts + '</select> par page · ' + g.total + ' produit'
       + (g.total === 1 ? '' : 's') + '</span>' + nav + '</div>';
   }
 
