@@ -322,6 +322,15 @@ jobs:
           node tools/banc-jetons.js
           node tools/banc-fonds-jour.js
           node tools/banc-texte-sur-fond.js
+          # ⚠ `tools/bancs.js` (2026-09-08) lance TOUS ces bancs d'un coup, en
+          # LISANT leur liste dans CE fichier — à faire avant chaque push. Il est
+          # né d'un échec de construction sur `banc-pictogrammes.js` : le banc
+          # était vert plus tôt dans la séance, le fichier a changé après, et
+          # seul un SOUS-ENSEMBLE de bancs avait été rejoué à la main. Choisir
+          # soi-même quels contrôles rejouer, c'est décider sans savoir quels
+          # défauts on vient d'introduire.
+          # ⚠ Ne PAS y recopier la liste : il la lit ici. Un banc ajouté au CI et
+          # oublié là-bas donnerait un vert local suivi d'un rouge distant.
           node tools/banc-accent-grave.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js

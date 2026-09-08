@@ -199,14 +199,19 @@ ${JS_ACTIVITE}${JS_DIRE}
              (<< non conservee >>) plutot que d afficher un tiret muet qui
              laisserait croire a une lecture ratee. */
         + '<td style="white-space:nowrap">'
+        /* ⚠ AUCUN PICTOGRAMME DANS CE QUI S AFFICHE : sa decision du 2026-09-05
+           (<< les 269 pictogrammes, retire les >>), plafond a ZERO, et
+           banc-pictogrammes.js a refuse la construction quand j y ai mis deux
+           << attention >>. La couleur ambre et le mot << non conservee >>
+           disent la meme chose sans dessin. */
         +   (b.appVersion
               ? '<b>' + esc(b.appVersion) + '</b>'
                 + '<div style="font-size:.72rem;color:var(--tx-gris)">'
                 + (b.appFichiers || 0) + ' installateur' + ((b.appFichiers || 0) > 1 ? 's' : '')
                 + ' conservé' + ((b.appFichiers || 0) > 1 ? 's' : '') + '</div>'
-                + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">⚠ ' + esc(b.appErreur) + '</div>' : '')
+                + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">' + esc(b.appErreur) + '</div>' : '')
               : '<span style="color:var(--tx-gris);font-size:.78rem">non conservée</span>'
-                + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">⚠ ' + esc(b.appErreur) + '</div>' : ''))
+                + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">' + esc(b.appErreur) + '</div>' : ''))
         + '</td>'
         + '<td style="text-align:center">'+(b.r2Objects==null?'—':b.r2Objects)+'</td>'
         + '<td style="white-space:nowrap">'+esc(b.taille)+'</td>'
