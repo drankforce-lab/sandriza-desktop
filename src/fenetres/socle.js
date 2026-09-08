@@ -503,16 +503,57 @@ document.addEventListener('DOMContentLoaded', szFenPleinPoser);
    selection perdue pendant qu on tape. C est la regle du temps reel du projet.
    ⚠ Le minuteur s arrete a `pagehide` : une vue ancree dechargee laisserait
    sinon un sondage vivant pour rien.                                        */
+/* ⚠⚠ REFAIT LE 2026-09-08, SUR SA DEMANDE : << un systeme de cadenas VISIBLE
+   avec zone de survol qui indique la personne qui est dans la fiche pour voir
+   directement >>.
+   Ce qu il y avait : un emoji de 0,8 rem, sans fond, dont le NOM n etait que
+   dans l attribut title. Trois defauts, un par mot de sa demande :
+   • PAS VISIBLE — un caractere de la taille du texte, sans cadre, dans une
+     colonne pleine de texte. On ne le trouve que si on le cherche.
+   • LE NOM NE SE VOIT PAS — il fallait survoler pour savoir QUI. Sa demande dit
+     << pour voir directement >> : le nom est donc ECRIT.
+   • LA ZONE DE SURVOL ETAIT L EMOJI — viser douze pixels a la souris est un
+     exercice d adresse. C est la pastille entiere maintenant.
+   ⚠ AMBRE ET PAS ROUGE : une fiche tenue par un collegue n est pas une erreur,
+   c est un etat d attente. Le rouge ferait chercher une panne.
+   ⚠ << mine >> (je la tiens moi-meme) reste DISTINCT : meme forme, teinte or.
+   Confondre les deux ferait croire a un conflit la ou il n y en a pas.
+   ⚠ max-width sur le nom : un nom long ne doit pas pousser les colonnes du
+   tableau. Le survol donne toujours le nom entier. */
 const CSS_VERROUS = `
 .cadslot{display:inline}
-.cad{margin-left:.35rem;font-size:.8rem;color:var(--tx-att);vertical-align:middle;cursor:default}
-.cad.mine{color:var(--tx-or)}
+.cad{display:inline-flex;align-items:center;gap:.25em;margin-left:.4em;
+  padding:.05em .5em .05em .4em;border-radius:99px;cursor:help;vertical-align:middle;
+  font-size:.7rem;font-weight:600;line-height:1.5;white-space:nowrap;
+  background:rgba(217,119,6,.16);border:1px solid rgba(217,119,6,.42);color:var(--tx-att);
+  -webkit-user-select:none;user-select:none}
+.cad .cadn{max-width:11ch;overflow:hidden;text-overflow:ellipsis}
+.cad.mine{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-or)}
+/* Mode jour : l ambre translucide sur du blanc perd son fond, et le texte clair
+   devient illisible. On fonce les deux — valeurs du meme registre que les
+   autres pastilles de ce projet. */
+html.jour .cad{background:rgba(180,120,10,.13);border-color:rgba(180,120,10,.4);color:#6f4a00}
+html.jour .cad.mine{background:rgba(140,100,45,.12);border-color:rgba(140,100,45,.4);color:#5c451c}
 `;
 
 const JS_VERROUS = `
 var _szVerrous = {};      // { 'portee|id': { par, mine, depuis } }
 var _szVerrousT = null;
 var _szVerrousP = [];
+
+/* Le cadenas, en SVG monochrome plutot qu en emoji (2026-09-08). Meme facture
+   que la table ICO du socle : 24x24, trait 1,75, bouts arrondis, currentColor —
+   donc il prend la couleur de la pastille et suit le mode jour comme le mode
+   nuit. Un emoji gardait son dessin et ses couleurs quel que soit le theme, et
+   changeait de forme d un systeme a l autre.
+   aria-hidden : le nom est ecrit a cote, et la pastille porte deja son
+   aria-label. Sans ca, le lecteur d ecran annoncerait l image EN PLUS du texte. */
+var SZ_CAD_SVG = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none"'
+  + ' stroke="currentColor" stroke-width="1.75" stroke-linecap="round"'
+  + ' stroke-linejoin="round" aria-hidden="true" focusable="false"'
+  + ' style="flex:0 0 auto;display:block">'
+  + '<rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect>'
+  + '<path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path></svg>';
 
 function szVerrouCase(portee, id){
   return '<span class="cadslot" data-cad="' + String(portee) + '|' + String(id == null ? '' : id) + '"></span>';
@@ -521,10 +562,19 @@ function szVerrouCase(portee, id){
 function _szVerrouInner(cle){
   var v = _szVerrous[cle];
   if (!v) return '';
-  var t = v.mine ? 'Vous tenez cette fiche en modification'
-    : ('En traitement par ' + (v.par || 'un collegue') + (v.depuis ? ' — ' + v.depuis : ''));
-  return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="'
-    + String(t).replace(/"/g, '&quot;') + '"><span class="ic">🔒</span></span>';
+  var qui = v.mine ? 'Vous' : (v.par || 'un collègue');
+  var t = v.mine
+    ? ('Vous tenez cette fiche en modification' + (v.depuis ? ' — ' + v.depuis : ''))
+    : ('En traitement par ' + qui + (v.depuis ? ' — ' + v.depuis : '')
+       + ' · vous seriez en lecture seule');
+  var e = function(s){ return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  /* role=img + aria-label : une pastille n est pas un texte qu un lecteur
+     d ecran lit tout seul, et sans role il epellerait le dessin. Le title sert
+     la souris, l aria-label sert la voix — les deux disent la meme chose. */
+  return '<span class="cad' + (v.mine ? ' mine' : '') + '" role="img"'
+    + ' title="' + e(t) + '" aria-label="' + e(t) + '">'
+    + SZ_CAD_SVG + '<span class="cadn">' + e(qui) + '</span></span>';
 }
 
 function szVerrousPeindre(){
