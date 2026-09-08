@@ -434,7 +434,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var enRecherche = VUE === 'recherche';
     var lignes = enRecherche ? TROUVES : REAPPRO;
     var h = '<div class="carte">'
-      + '<input id="rech" autocomplete="off" placeholder="Scannez une étiquette, ou tapez un nom de produit…">'
+      + '<input aria-label="Scannez une étiquette, ou tapez un nom de produit" id="rech" autocomplete="off" placeholder="Scannez une étiquette, ou tapez un nom de produit…">'
       + '<div class="aide" style="margin-top:.35rem">Un code de variante scanné ouvre directement sa fiche. '
       + 'Trois caractères minimum pour une recherche par nom.</div>'
       + '</div>';
@@ -851,7 +851,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h += '<div class="carte plein">';
     h += '<div class="toolbar">'
-      + '<input type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom produit…" value="' + esc(FP.q) + '">'
+      + '<input aria-label="SKU, nom produit" type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom produit…" value="' + esc(FP.q) + '">'
       + '<select id="fp-etat" aria-label="Filtrer par état du stock">'
       + '<option value=""><span class="ic">📦</span> Tout l’inventaire</option>'
       + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '><span class="ic">🔴</span> En rupture</option>'
@@ -869,7 +869,7 @@ ${JS_ACTIVITE}${JS_DIRE}
               + esc(l.nom) + '</option>'; }).join('')
       +   '<option value="_sans"' + (FP.lieuId === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
       + '</select>'
-      + '<input type="text" id="fp-section" autocomplete="off" placeholder="Section…" value="' + esc(FP.section) + '" style="width:8rem">'
+      + '<input aria-label="Section" type="text" id="fp-section" autocomplete="off" placeholder="Section…" value="' + esc(FP.section) + '" style="width:8rem">'
       + '<span class="droite">'
       // ⚠ CE BOUTON MANQUAIT (#6) : depuis l inventaire, il fallait sortir vers
       // l ecran Produits pour en creer un. L op existait deja cote pont, elle
@@ -1334,7 +1334,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     function ligneLieuEdition(l){
       return '<tr style="background:rgba(201,169,126,.08)">'
         + '<td><input type="text" id="lx-nom" value="' + esc(l ? l.nom : '') + '" placeholder="Ex : Entrepot, Maison"></td>'
-        + '<td colspan="2"><input type="text" id="lx-adr" value="' + esc(l ? l.adresse : '') + '" placeholder="Adresse (optionnel)"></td>'
+        + '<td colspan="2"><input aria-label="Adresse (optionnel)" type="text" id="lx-adr" value="' + esc(l ? l.adresse : '') + '" placeholder="Adresse (optionnel)"></td>'
         + '<td class="c" style="white-space:nowrap">'
         + '<button class="mini prim" id="lx-enr" title="Enregistrer (Entrée)">✓</button> '
         + '<button class="mini" id="lx-annuler" title="Annuler (Échap)">✕</button></td></tr>';
@@ -1349,7 +1349,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<td><select id="wh-lieu" aria-label="Lieu de cet emplacement">' + opts + '</select></td>'
         + '<td><input type="text" id="wh-casier" value="' + esc(w ? w.casier : '') + '" placeholder="Ex : Casier 1"></td>'
         + '<td><input type="text" id="wh-section" value="' + esc(w ? w.section : '') + '" placeholder="Ex : Section A"></td>'
-        + '<td><input type="text" id="wh-ref" value="' + esc(w ? w.reference : '') + '" placeholder="Référence (optionnel)"></td>'
+        + '<td><input aria-label="Référence (optionnel)" type="text" id="wh-ref" value="' + esc(w ? w.reference : '') + '" placeholder="Référence (optionnel)"></td>'
         + '<td class="c"><span class="rien">' + (w ? w.usage : '—') + '</span></td>'
         + '<td class="c" style="white-space:nowrap">'
         + '<button class="mini prim" id="wh-enr" title="Enregistrer (Entrée)">✓</button> '
@@ -1416,7 +1416,7 @@ ${JS_ACTIVITE}${JS_DIRE}
               + esc(l.nom) + '</option>'; }).join('')
       +   '<option value="_sans"' + (WH_FILTRE.lieu === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
       + '</select>'
-      + '<input type="search" id="wh-f-txt" value="' + esc(WH_FILTRE.txt) + '" placeholder="Casier, section, adresse, référence…">'
+      + '<input aria-label="Casier, section, adresse, référence" type="search" id="wh-f-txt" value="' + esc(WH_FILTRE.txt) + '" placeholder="Casier, section, adresse, référence…">'
       + (WH_FILTRE.lieu || WH_FILTRE.txt ? '<button class="mini" id="wh-f-vider">Effacer</button>' : '')
       + '<span class="droite">'
       + (d.peutAjouter ? '<button class="mini" id="wh-ajouter"' + (WH_EDIT && WH_EDIT.id === '' ? ' disabled' : '')

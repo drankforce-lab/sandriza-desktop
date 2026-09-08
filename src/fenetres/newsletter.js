@@ -220,7 +220,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }).join('');
     var cleField = PEUT.edit
       ? ligneChamp('Clé API Resend *', 'nl-key', c.apiKey, 'password', 'Créez votre clé sur <strong>resend.com/api-keys</strong>')
-      : '<div class="champ"><label>Clé API Resend</label><input value="' + (c.hasKey ? '••••••••••••' : '') + '" readonly></div>';
+      : '<div class="champ"><label>Clé API Resend</label><input aria-label="Clé API Resend" value="' + (c.hasKey ? '••••••••••••' : '') + '" readonly></div>';
     return '<div class="deux">'
       + '<div class="carte"><h2><span class="ic">🔑</span> API Resend</h2>'
       +   cleField
@@ -265,18 +265,18 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (D.done ? '<div class="hint" style="color:#86efac;margin:0 0 .8rem">✓ Un visiteur a déjà soumis ce widget. Utilisez « Réinitialiser » pour re-tester.</div>' : '')
       + stats
       + '<div class="deux">'
-      +   '<div class="champ"><label>Titre (saut de ligne = ↵)</label><textarea id="offer-title" rows="2"' + ro + '>' + esc(c.title) + '</textarea></div>'
+      +   '<div class="champ"><label for="offer-title">Titre (saut de ligne = ↵)</label><textarea id="offer-title" rows="2"' + ro + '>' + esc(c.title) + '</textarea></div>'
       +   '<div class="champ"><label>Image côté gauche</label>' + img
       +     (PEUT.edit ? '<label style="display:inline-block;margin-bottom:.4rem"><span class="ghost mini" style="display:inline-block;padding:.16rem .5rem;border:1px solid var(--v16);border-radius:8px"><span class="ic">📁</span> Choisir une photo</span><input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
       +     '<input id="offer-img" value="' + esc(c.imageUrl) + '" placeholder="https://… ou coller une URL"' + ro + '>'
       +     '<div class="hint">700 × 900 px recommandé (portrait). Max 600 Ko.</div></div>'
       + '</div>'
-      + '<div class="champ"><label>Sous-titre</label><input id="offer-sub" value="' + esc(c.subtitle) + '"' + ro + '></div>'
+      + '<div class="champ"><label for="offer-sub">Sous-titre</label><input id="offer-sub" value="' + esc(c.subtitle) + '"' + ro + '></div>'
       + '<div class="deux">'
-      +   '<div class="champ"><label>Texte du bouton</label><input id="offer-cta" value="' + esc(c.cta) + '"' + ro + '></div>'
-      +   '<div class="champ"><label>Valeur de réduction (%)</label><input id="offer-discount" type="number" min="1" max="100" value="' + (c.discountValue || 10) + '"' + ro + '><div class="hint">Un code unique WB-XXXXXX par client, valide 1 commande, expire 30 j.</div></div>'
+      +   '<div class="champ"><label for="offer-cta">Texte du bouton</label><input id="offer-cta" value="' + esc(c.cta) + '"' + ro + '></div>'
+      +   '<div class="champ"><label for="offer-discount">Valeur de réduction (%)</label><input id="offer-discount" type="number" min="1" max="100" value="' + (c.discountValue || 10) + '"' + ro + '><div class="hint">Un code unique WB-XXXXXX par client, valide 1 commande, expire 30 j.</div></div>'
       + '</div>'
-      + '<div class="champ"><label>Mention légale</label><input id="offer-legal" value="' + esc(c.legal) + '"' + ro + '></div>'
+      + '<div class="champ"><label for="offer-legal">Mention légale</label><input id="offer-legal" value="' + esc(c.legal) + '"' + ro + '></div>'
       + '<div style="display:flex;gap:.6rem;flex-wrap:wrap">'
       +   (PEUT.edit ? '<button class="prim" data-act="offersave">Enregistrer</button>' : '')
       +   '<button class="ghost" data-act="apercu">Aperçu du popup</button>'

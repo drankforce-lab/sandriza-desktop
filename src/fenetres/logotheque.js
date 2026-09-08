@@ -250,13 +250,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '<div class="det" id="lg-out" style="margin-top:.6rem"></div>'
       + '</div>'
       + '<div class="carte">'
-      +   '<div class="ch"><label>Nom</label><input id="lg-name" value="' + esc(st.name) + '" placeholder="Nom du logo ou de l’image"></div>'
+      +   '<div class="ch"><label for="lg-name">Nom</label><input id="lg-name" value="' + esc(st.name) + '" placeholder="Nom du logo ou de l’image"></div>'
       +   '<div class="h">Format</div><div class="modes">' + modeBtn('keep','Conserver') + modeBtn('crop','Rogner') + modeBtn('fit','Ajuster (marges)') + '</div>'
       +   '<div id="lg-ratios" style="' + (st.mode==='keep'?'display:none':'') + '"><div class="h">Rapport visé</div><div class="rrow">' + RATIOS.map(ratioBtn).join('') + '</div>'
       +     '<p class="hint">« Rogner » coupe au centre pour atteindre le rapport (rien n’est déformé). « Ajuster » n’enlève rien et complète avec des marges transparentes.</p></div>'
       +   '<div class="h">Taille d’impression prévue</div><div class="deux">'
-      +     '<div class="ch"><label>Largeur (po)</label><input id="lg-printw" type="number" step="0.05" min="0" value="" placeholder="ex. 2"></div>'
-      +     '<div class="ch"><label>Largeur max (px)</label><input id="lg-maxw" type="number" step="50" min="0" max="' + MAXPX + '" value="" placeholder="' + MAXPX + '"></div>'
+      +     '<div class="ch"><label for="lg-printw">Largeur (po)</label><input id="lg-printw" type="number" step="0.05" min="0" value="" placeholder="ex. 2"></div>'
+      +     '<div class="ch"><label for="lg-maxw">Largeur max (px)</label><input id="lg-maxw" type="number" step="50" min="0" max="' + MAXPX + '" value="" placeholder="' + MAXPX + '"></div>'
       +   '</div>'
       +   ''
       +   '<div style="display:flex;gap:.6rem;margin-top:.3rem"><button class="prim" id="lg-ok">Confirmer et téléverser</button><button class="b" id="lg-cancel">Annuler</button></div>'
@@ -345,7 +345,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var nm = corps.querySelector('[data-nm="' + id.replace(/"/g,'') + '"]');
     if (!nm) return;
     var cur = l.name || '';
-    nm.innerHTML = '<input class="nmedit" id="ren-inp" value="' + esc(cur) + '">';
+    nm.innerHTML = '<input class="nmedit" id="ren-inp" aria-label="Nouveau nom du logo" value="' + esc(cur) + '">';
     var inp = document.getElementById('ren-inp'); if (!inp) return;
     inp.focus(); try { inp.select(); } catch(e){}
     var fini = false;

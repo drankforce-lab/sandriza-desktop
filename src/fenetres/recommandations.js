@@ -408,7 +408,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
           + '<option value="">— Choisir le produit source —</option>'
           + tout.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.nom) + '</option>'; }).join('')
           + '</select></div>')
-      + '<input type="search" id="rc-qprod" placeholder="Chercher un nom ou un SKU…" value="' + esc(QPROD) + '" style="margin-bottom:.4rem">'
+      + '<input aria-label="Chercher un nom ou un SKU" type="search" id="rc-qprod" placeholder="Chercher un nom ou un SKU…" value="' + esc(QPROD) + '" style="margin-bottom:.4rem">'
       + '<div class="choix" id="rc-choix">'
       + (vus.length ? vus.map(function(p){
           return '<label><input type="checkbox" class="rc-p" value="' + esc(p.id) + '"'

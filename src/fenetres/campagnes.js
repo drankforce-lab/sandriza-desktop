@@ -566,7 +566,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '"><span>jours</span><input type="number" min="0" max="23" id="e-h-' + i + '" value="'
         + (s.heures || 0) + '"><span>heures</span></div></div>'
         + '<div class="champ"><span class="lbl">Sujet</span>'
-        + '<input id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'
+        + '<input aria-label="Sujet" id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'
         + '<div class="champ"><span class="lbl">Corps du courriel (HTML)</span>'
         + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('e-t-' + i, mods)
         + '<button class="mini" data-etcharger="' + i + '">Charger</button>'

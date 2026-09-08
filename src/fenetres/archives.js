@@ -219,7 +219,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       h += '<button class="mini' + (ONGLET === g.k ? ' actif' : '') + '" data-onglet="' + g.k + '">'
         + g.l + (n ? '<span class="n">' + n + '</span>' : '') + '</button>';
     });
-    h += '<div class="droite"><input type="search" id="a-q" placeholder="Rechercher…" value="' + esc(Q) + '">'
+    h += '<div class="droite"><input aria-label="Rechercher" type="search" id="a-q" placeholder="Rechercher…" value="' + esc(Q) + '">'
       + '<span>' + rows.length + ' élément' + (rows.length > 1 ? 's' : '') + '</span></div></div>';
 
     h += '<div class="carte"><div class="avis">Les commandes livrées sont archivées automatiquement '

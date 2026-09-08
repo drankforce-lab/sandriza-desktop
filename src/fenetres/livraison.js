@@ -184,13 +184,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<span><strong>Activer la livraison internationale</strong>'
       + '<span class="d">La recherche d’adresse s’adapte au monde entier et un champ Pays apparaît à la caisse.</span></span></label></div>');
     h.push('<div class="carte"><h2>Tarification</h2>'
-      + '<div class="ch"><label>Frais de livraison standard (CA$)</label>'
+      + '<div class="ch"><label for="f-cost">Frais de livraison standard (CA$)</label>'
       + '<input id="f-cost" type="number" min="0" step="0.01" value="' + esc(num(d.shippingCost)) + '"' + dis + '>'
       + '<div class="aide">Facturé quand la commande n’atteint pas le seuil de livraison gratuite.</div></div>'
-      + '<div class="ch"><label>Seuil pour la livraison gratuite (CA$)</label>'
+      + '<div class="ch"><label for="f-thr">Seuil pour la livraison gratuite (CA$)</label>'
       + '<input id="f-thr" type="number" min="0" step="1" value="' + esc(num(d.freeThreshold)) + '"' + dis + '>'
       + '<div class="aide">Au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.</div></div>'
-      + '<div class="ch"><label>Frais traitement prioritaire (CA$)</label>'
+      + '<div class="ch"><label for="f-prio">Frais traitement prioritaire (CA$)</label>'
       + '<input id="f-prio" type="number" min="0" step="0.01" value="' + esc(num(d.priorityCost)) + '"' + dis + '>'
       + '<div class="aide">Supplément si le client choisit le traitement prioritaire. <strong>0</strong> masque l’option.</div></div></div>');
     /* ⚠ LE TABLEAU N EXISTE QUE SI L INTERNATIONAL EST ALLUME. Demande expresse :
@@ -266,7 +266,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     return '<div class="carte large"><h2>Pays desservis</h2>'
       + ''
       + '<div class="pbarre">'
-      + '<input class="pfiltre" id="p-filtre" type="search" placeholder="Filtrer…" value="' + esc(FILTRE) + '">'
+      + '<input aria-label="Filtrer" class="pfiltre" id="p-filtre" type="search" placeholder="Filtrer…" value="' + esc(FILTRE) + '">'
       + '<span class="info">' + PAYS.nbInscrits + ' pays inscrit' + (PAYS.nbInscrits > 1 ? 's' : '')
       + ' · dernière lecture : ' + esc(maj) + '</span>'
       + '<button id="p-relire"' + (OCCUPE ? ' disabled' : '') + '>↻ Relire Stripe</button></div>'

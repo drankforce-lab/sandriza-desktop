@@ -187,20 +187,20 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<button class="b dgr" type="button" data-sdel="' + i + '"><span class="ic">🗑</span></button>')
       + '</div>'
       + '<div class="gr2">'
-      + '<div class="ch"><label>Image URL (vide = dégradé)</label><input data-sf="image" data-si="' + i + '" value="' + esc(s.image||'') + '" placeholder="https://…"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Dégradé de fond</label><select data-sf="grad" data-si="' + i + '"' + (RO?' disabled':'') + '>' + opts + '</select></div>'
+      + '<div class="ch"><label>Image URL (vide = dégradé)</label><input aria-label="Image URL (vide = dégradé)" data-sf="image" data-si="' + i + '" value="' + esc(s.image||'') + '" placeholder="https://…"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>Dégradé de fond</label><select aria-label="Dégradé de fond" data-sf="grad" data-si="' + i + '"' + (RO?' disabled':'') + '>' + opts + '</select></div>'
       + '</div>'
-      + '<div class="ch"><label>Opacité du voile noir (0 = aucun, 0.7 = sombre)</label><input type="number" min="0" max="1" step="0.05" data-sf="overlay" data-si="' + i + '" value="' + (s.overlay!=null?s.overlay:0.4) + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>Opacité du voile noir (0 = aucun, 0.7 = sombre)</label><input aria-label="Opacité du voile noir (0 = aucun, 0.7 = sombre)" type="number" min="0" max="1" step="0.05" data-sf="overlay" data-si="' + i + '" value="' + (s.overlay!=null?s.overlay:0.4) + '"' + (RO?' disabled':'') + '></div>'
       + '<div class="gr2">'
-      + '<div class="ch"><label>Texte chapeau</label><input data-sf="eyebrow" data-si="' + i + '" value="' + esc(s.eyebrow||'') + '"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Titre principal</label><input data-sf="title" data-si="' + i + '" value="' + esc(s.title||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>Texte chapeau</label><input aria-label="Texte chapeau" data-sf="eyebrow" data-si="' + i + '" value="' + esc(s.eyebrow||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>Titre principal</label><input aria-label="Titre principal" data-sf="title" data-si="' + i + '" value="' + esc(s.title||'') + '"' + (RO?' disabled':'') + '></div>'
       + '</div>'
-      + '<div class="ch"><label>Sous-titre</label><textarea data-sf="subtitle" data-si="' + i + '" rows="2"' + (RO?' disabled':'') + '>' + esc(s.subtitle||'') + '</textarea></div>'
+      + '<div class="ch"><label>Sous-titre</label><textarea aria-label="Sous-titre" data-sf="subtitle" data-si="' + i + '" rows="2"' + (RO?' disabled':'') + '>' + esc(s.subtitle||'') + '</textarea></div>'
       + '<div class="gr4">'
-      + '<div class="ch"><label>Bouton 1 — Texte</label><input data-sf="cta1Text" data-si="' + i + '" value="' + esc(s.cta1Text||'') + '"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Bouton 1 — Lien</label><input data-sf="cta1Href" data-si="' + i + '" value="' + esc(s.cta1Href||'') + '"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Bouton 2 — Texte (opt.)</label><input data-sf="cta2Text" data-si="' + i + '" value="' + esc(s.cta2Text||'') + '"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Bouton 2 — Lien</label><input data-sf="cta2Href" data-si="' + i + '" value="' + esc(s.cta2Href||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>Bouton 1 — Texte</label><input aria-label="Bouton 1 — Texte" data-sf="cta1Text" data-si="' + i + '" value="' + esc(s.cta1Text||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>Bouton 1 — Lien</label><input aria-label="Bouton 1 — Lien" data-sf="cta1Href" data-si="' + i + '" value="' + esc(s.cta1Href||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>Bouton 2 — Texte (opt.)</label><input aria-label="Bouton 2 — Texte (opt.)" data-sf="cta2Text" data-si="' + i + '" value="' + esc(s.cta2Text||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>Bouton 2 — Lien</label><input aria-label="Bouton 2 — Lien" data-sf="cta2Href" data-si="' + i + '" value="' + esc(s.cta2Href||'') + '"' + (RO?' disabled':'') + '></div>'
       + '</div></div>';
   }
   function slidesListHtml(){ return SLIDES.map(diapoHtml).join('') || '<div class="vide">Aucune diapo.</div>'; }
@@ -211,9 +211,9 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     var h = '<div class="carte edit"><div class="stitre">Modifier : ' + esc(b.label) + '</div>';
     if (b.id === 'hero') {
       h += '<div class="gr2">'
-        + '<div class="ch"><label>Effet de transition</label><select id="a-effect"' + (RO?' disabled':'') + '>'
+        + '<div class="ch"><label for="a-effect">Effet de transition</label><select id="a-effect"' + (RO?' disabled':'') + '>'
         + EFFETS.map(function(e){ return '<option value="' + e[0] + '"' + ((c.sliderEffect||'fade')===e[0]?' selected':'') + '>' + esc(e[1]) + '</option>'; }).join('') + '</select></div>'
-        + '<div class="ch"><label>Intervalle (secondes)</label><input type="number" min="2" max="30" id="a-interval" value="' + (c.sliderInterval||6) + '"' + (RO?' disabled':'') + '></div></div>'
+        + '<div class="ch"><label for="a-interval">Intervalle (secondes)</label><input type="number" min="2" max="30" id="a-interval" value="' + (c.sliderInterval||6) + '"' + (RO?' disabled':'') + '></div></div>'
         + '<label class="ch" style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a-autoplay"' + (c.sliderAutoplay!==false?' checked':'') + (RO?' disabled':'') + ' style="width:auto;accent-color:#c9a97e"> Lecture automatique</label>'
         + '<div style="display:flex;align-items:center;justify-content:space-between;margin:.4rem 0 .5rem"><b style="font-size:.82rem">Diapos <span id="a-scount">(' + SLIDES.length + ')</span></b>'
         + (RO ? '' : '<button class="b" type="button" id="a-sadd">+ Ajouter une diapo</button>') + '</div>'

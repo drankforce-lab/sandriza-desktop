@@ -166,7 +166,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     h.push('<div class="carte"><h2>Fenêtre de retour</h2>'
       + '<p class="sous">Compté à partir de la réception de la commande. Doit être un nombre pair.</p>'
-      + '<div class="ch"><label>Nombre de jours autorisés pour un retour</label>'
+      + '<div class="ch"><label for="f-days">Nombre de jours autorisés pour un retour</label>'
       + '<input id="f-days" type="number" min="2" max="364" step="2" value="' + esc(d.windowDays == null ? '' : d.windowDays) + '"' + dis + '>'
       + '<div class="aide">La <strong>moitié</strong> (<span id="half">' + esc(half) + '</span> jours) permet le remboursement au moyen d’origine ; au-delà, crédit boutique.</div></div>'
       + '<div class="ch" style="margin-top:.85rem"><label class="bascule"><input type="checkbox" id="f-split"' + (d.splitRefundEnabled ? ' checked' : '') + dis + '>'
@@ -176,12 +176,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     h.push('<div class="carte"><h2>Adresse de renvoi</h2>'
       + '<p class="sous">L’adresse imprimée sur l’étiquette de retour et citée aux clients.</p>'
       + '<div class="gr">'
-      + '<div class="ch plein"><label>Nom de l’entreprise</label><input type="text" id="f-name" value="' + esc(d.name) + '"' + dis + '></div>'
-      + '<div class="ch plein"><label>Rue</label><input type="text" id="f-street" value="' + esc(d.street) + '"' + dis + '></div>'
-      + '<div class="ch"><label>Ville</label><input type="text" id="f-city" value="' + esc(d.city) + '"' + dis + '></div>'
-      + '<div class="ch"><label>Province</label><input type="text" id="f-province" value="' + esc(d.province) + '"' + dis + '></div>'
-      + '<div class="ch"><label>Code postal</label><input type="text" id="f-postal" value="' + esc(d.postal) + '"' + dis + '></div>'
-      + '<div class="ch"><label>Pays</label><input type="text" id="f-country" value="' + esc(d.country) + '"' + dis + '></div>'
+      + '<div class="ch plein"><label for="f-name">Nom de l’entreprise</label><input type="text" id="f-name" value="' + esc(d.name) + '"' + dis + '></div>'
+      + '<div class="ch plein"><label for="f-street">Rue</label><input type="text" id="f-street" value="' + esc(d.street) + '"' + dis + '></div>'
+      + '<div class="ch"><label for="f-city">Ville</label><input type="text" id="f-city" value="' + esc(d.city) + '"' + dis + '></div>'
+      + '<div class="ch"><label for="f-province">Province</label><input type="text" id="f-province" value="' + esc(d.province) + '"' + dis + '></div>'
+      + '<div class="ch"><label for="f-postal">Code postal</label><input type="text" id="f-postal" value="' + esc(d.postal) + '"' + dis + '></div>'
+      + '<div class="ch"><label for="f-country">Pays</label><input type="text" id="f-country" value="' + esc(d.country) + '"' + dis + '></div>'
       + '</div></div>');
 
     corps.innerHTML = h.join('');

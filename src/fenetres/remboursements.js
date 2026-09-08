@@ -157,7 +157,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'Remboursements<span class="n">' + (c.remboursements || 0) + '</span></button>'
       + '<button class="mini' + (ONGLET === 'credits' ? ' actif' : '') + '" data-onglet="credits">'
       + 'Crédits boutique<span class="n">' + (c.credits || 0) + '</span></button>'
-      + '<input type="search" id="r-q" placeholder="Numéro, commande, client…" value="' + esc(Q) + '">'
+      + '<input aria-label="Numéro, commande, client" type="search" id="r-q" placeholder="Numéro, commande, client…" value="' + esc(Q) + '">'
       + '</div>';
 
     /* ⚠ QUATRE CHIFFRES QUI NE DISENT PAS LA MEME CHOSE. << Rembourse >> est de

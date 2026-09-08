@@ -207,7 +207,7 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '</div>';
     }
     h += '<div class="barreoutils">'
-      + '<input type="search" id="f-q" placeholder="Numéro, commande ou client…" value="' + esc(Q) + '">'
+      + '<input aria-label="Numéro, commande ou client" type="search" id="f-q" placeholder="Numéro, commande ou client…" value="' + esc(Q) + '">'
       + '<select id="f-statut">'
       + '<option value=""' + (STATUT === '' ? ' selected' : '') + '>Tous les statuts</option>'
       + '<option value="paid"' + (STATUT === 'paid' ? ' selected' : '') + '>Payée</option>'

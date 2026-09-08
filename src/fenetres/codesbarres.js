@@ -229,7 +229,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var h = '<div class="barreoutils">'
-      + '<input type="search" id="cb-q" placeholder="Nom ou SKU…" value="' + esc(Q) + '">'
+      + '<input aria-label="Nom ou SKU" type="search" id="cb-q" placeholder="Nom ou SKU…" value="' + esc(Q) + '">'
       + '<select id="cb-cat"><option value="">Toutes les catégories</option>'
       + (D.cats || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(c.nom) + '</option>';

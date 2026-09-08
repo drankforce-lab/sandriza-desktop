@@ -146,7 +146,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           return '<button class="mini' + (ONGLET === o[0] ? ' actif' : '') + '" data-onglet="' + o[0] + '">'
             + o[1] + ' (' + o[2] + ')</button>';
         }).join('')
-      + '<input type="search" id="c-q" placeholder="Nom ou courriel…" value="' + esc(Q) + '">'
+      + '<input aria-label="Nom ou courriel" type="search" id="c-q" placeholder="Nom ou courriel…" value="' + esc(Q) + '">'
       + '<span class="droite">' + (D.total || 0) + ' client' + (D.total > 1 ? 's' : '') + '</span>'
       + '</div>';
 

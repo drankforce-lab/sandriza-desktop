@@ -418,7 +418,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input type="search" id="a-q" placeholder="Domaine, nom ou catégorie…" value="' + esc(ANN_Q) + '">'
+      + '<input aria-label="Domaine, nom ou catégorie" type="search" id="a-q" placeholder="Domaine, nom ou catégorie…" value="' + esc(ANN_Q) + '">'
       + ((ro || (VERROU && !VERROU.obtenu)) ? ''
           : '<button class="prim" id="a-nouveau">＋ Ajouter un fournisseur</button>')
       + '<span class="droite">' + ANN.trouves + ' affiché' + (ANN.trouves > 1 ? 's' : '') + '</span>'
@@ -430,9 +430,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="champ"><label>Domaine ou nom</label>'
         + '<input type="text" id="a-id" value="' + esc(ANN_FORM.id) + '"'
         + (ANN_FORM.neuf ? ' placeholder="ex. render.com"' : ' disabled') + '></div>'
-        + '<div class="champ"><label>Nom affiché (facultatif)</label>'
+        + '<div class="champ"><label for="a-nom">Nom affiché (facultatif)</label>'
         + '<input type="text" id="a-nom" value="' + esc(ANN_FORM.nom) + '" placeholder="ex. Render Services"></div>'
-        + '<div class="champ large"><label>Catégorie (ligne fiscale)</label><select id="a-cat">'
+        + '<div class="champ large"><label for="a-cat">Catégorie (ligne fiscale)</label><select id="a-cat">'
         + (ANN.categories || []).map(function(c){
             return '<option value="' + esc(c.cle) + '"' + (ANN_FORM.categorie === c.cle ? ' selected' : '') + '>'
               + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
@@ -574,11 +574,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
 
     h += '<div class="form">'
-      + champ('Date', '<input type="date" id="f-date" value="' + esc(f.date) + '">')
+      + champ('Date', '<input type="date" id="f-date" value="' + esc(f.date) + '">', 'f-date')
       + champ('Mode de paiement', '<select id="f-pay" aria-label="Mode de paiement">' + (D.paiements || []).map(function(p){
           return '<option value="' + esc(p.cle) + '"' + (f.paiement === p.cle ? ' selected' : '') + '>'
             + esc(p.libelle) + '</option>'; }).join('') + '</select>')
-      + '<div class="champ large"><label>Catégorie (ligne fiscale)</label><select id="f-cat">'
+      + '<div class="champ large"><label for="f-cat">Catégorie (ligne fiscale)</label><select id="f-cat">'
       + (D.categories || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (f.categorie === c.cle ? ' selected' : '') + '>'
             + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
@@ -588,11 +588,11 @@ ${JS_ACTIVITE}${JS_DIRE}
       + champ('Fournisseur', '<input type="text" id="f-four" value="' + esc(f.fournisseur)
           + '" placeholder="Ex : Meta Platforms">')
       + '<div class="bloc-montants"><div class="trois">'
-      + '<div class="champ"><label>Montant (hors taxes)</label>'
+      + '<div class="champ"><label for="f-montant">Montant (hors taxes)</label>'
       + '<input type="number" step="0.01" min="0" id="f-montant" value="' + esc(f.montant) + '" placeholder="0.00"></div>'
-      + '<div class="champ"><label>TPS payée</label>'
+      + '<div class="champ"><label for="f-tps">TPS payée</label>'
       + '<input type="number" step="0.01" min="0" id="f-tps" value="' + esc(f.tps) + '" placeholder="0.00"></div>'
-      + '<div class="champ"><label>TVQ payée</label>'
+      + '<div class="champ"><label for="f-tvq">TVQ payée</label>'
       + '<input type="number" step="0.01" min="0" id="f-tvq" value="' + esc(f.tvq) + '" placeholder="0.00"></div>'
       + '<button id="f-taxes" title="Déduire TPS et TVQ d’un total payé saisi dans Montant">↧ Calc. taxes</button>'
       + '</div>'
@@ -642,8 +642,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div></div></div>';
     return h;
   }
-  function champ(l, ctrl){
-    return '<div class="champ"><label>' + esc(l) + '</label>' + ctrl + '</div>';
+  /* ⚠ L ETIQUETTE ET SON CHAMP ARRIVENT PAR DEUX CHEMINS : le libelle ici, le
+     champ en ARGUMENT, deja assemble par l appelant. Aucune lecture du code ne
+     peut les rapprocher, et aucun for= ne pouvait donc etre pose par outil.
+     L identifiant se donne maintenant en 3e argument — un seul endroit a
+     changer, et les quatre appels en profitent. */
+  function champ(l, ctrl, id){
+    return '<div class="champ"><label' + (id ? ' for="' + id + '"' : '') + '>' + esc(l) + '</label>' + ctrl + '</div>';
   }
 
   /* ── LECTURE DU FICHIER, PUIS LE SITE FAIT LE RESTE ────────────────────── */

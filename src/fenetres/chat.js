@@ -188,7 +188,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueFile(){
     var rows = filtrees();
     var h = '<div class="barreoutils">'
-      + '<input type="search" id="ch-q" placeholder="Nom, courriel, téléphone…" value="' + esc(Q) + '">'
+      + '<input aria-label="Nom, courriel, téléphone" type="search" id="ch-q" placeholder="Nom, courriel, téléphone…" value="' + esc(Q) + '">'
       + [['', 'Toutes'], ['pending', 'En attente'], ['open', 'Ouvertes'], ['closed', 'Fermées']]
           .map(function(f){
             return '<button class="mini' + (FILTRE === f[0] ? ' actif' : '') + '" data-filtre="' + f[0] + '">'
@@ -272,7 +272,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '</div>';
 
     if (D.peutModifier) {
-      h += '<div style="margin-top:.6rem"><textarea id="ch-reponse" placeholder="Votre réponse…"></textarea></div>'
+      h += '<div style="margin-top:.6rem"><textarea aria-label="Votre réponse" id="ch-reponse" placeholder="Votre réponse…"></textarea></div>'
         + '<div class="pied-boite">'
         + '<button class="mini danger" id="ch-suppr">' + (SUPPR_ARME ? 'Confirmer ?' : 'Supprimer') + '</button>'
         + '<select id="ch-statut" aria-label="Changer l’état de la conversation" style="max-width:11rem">'

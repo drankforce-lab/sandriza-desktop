@@ -521,7 +521,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       // de la photothèque directement, d'où l'entrée ici.
       + '<button id="p-studio" title="Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat"><span class="ic">🎨</span> Studio virtuel</button>'
       + '<span class="sep"></span>'
-      + '<input type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
+      + '<input aria-label="Code, nom, article" type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
       + '<select id="p-tri" aria-label="Nombre de photos par page">'
       + opt('recent', 'Plus récentes') + opt('code', 'Par code') + opt('name', 'Par nom')
       + opt('linked', 'Liées d’abord') + opt('size', 'Plus lourdes')
@@ -1823,7 +1823,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<td>' + vignette(r) + '</td>'
       + '<td><span class="num">' + esc(r.code) + '</span></td>'
       + '<td class="nom">' + (RENOMME === r.id
-          ? '<input class="ren" id="p-ren" type="text" value="' + esc(r.nom) + '" maxlength="120">'
+          ? '<input class="ren" id="p-ren" aria-label="Nouveau nom de la photo" type="text" value="' + esc(r.nom) + '" maxlength="120">'
           : '<span class="txt" data-ren2="' + esc(r.id) + '" title="Cliquez pour renommer">' + esc(r.nom) + '</span>')
       + '</td>'
       + '<td>' + (r.lieId

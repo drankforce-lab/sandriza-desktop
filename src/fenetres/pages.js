@@ -513,8 +513,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (!FAQ.items.length) h+='<div class="vide">Aucune question.</div>';
     for (var i=0;i<FAQ.items.length;i++){ var it=FAQ.items[i];
       h+='<div class="qa">'
-        +'<label class="champ"><span class="lbl">Question</span><input class="t" data-fq="'+i+'" value="'+esc(it.q)+'"'+(RO?' disabled':'')+'></label>'
-        +'<label class="champ" style="margin:0"><span class="lbl">Réponse</span><textarea class="t" rows="3" data-fa="'+i+'"'+(RO?' disabled':'')+'>'+esc(it.a)+'</textarea></label>';
+        +'<label class="champ"><span class="lbl">Question</span><input aria-label="Question" class="t" data-fq="'+i+'" value="'+esc(it.q)+'"'+(RO?' disabled':'')+'></label>'
+        +'<label class="champ" style="margin:0"><span class="lbl">Réponse</span><textarea aria-label="Réponse" class="t" rows="3" data-fa="'+i+'"'+(RO?' disabled':'')+'>'+esc(it.a)+'</textarea></label>';
       if (!RO) h+='<div class="barre">'
         +(i>0?'<button class="b" data-fup="'+i+'">↑</button>':'')
         +(i<FAQ.items.length-1?'<button class="b" data-fdn="'+i+'">↓</button>':'')
@@ -1026,8 +1026,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
     if (!GUIDES.length) h+='<div class="vide">Aucun guide.</div>';
     for (var gi=0; gi<GUIDES.length; gi++){ var g=GUIDES[gi];
       h+='<div class="carte"><div class="entete" style="margin-bottom:.7rem"><div style="display:flex;gap:.4rem;flex:1;flex-wrap:wrap">'
-        +'<input class="t" data-gname="'+gi+'" value="'+esc(g.name)+'" placeholder="Nom du guide" style="max-width:280px;font-weight:600"'+(RO?' disabled':'')+'>'
-        +'<input class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="Nom (EN)" style="max-width:240px"'+(RO?' disabled':'')+'></div>'
+        +'<input aria-label="Nom du guide" class="t" data-gname="'+gi+'" value="'+esc(g.name)+'" placeholder="Nom du guide" style="max-width:280px;font-weight:600"'+(RO?' disabled':'')+'>'
+        +'<input aria-label="Nom (EN)" class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="Nom (EN)" style="max-width:240px"'+(RO?' disabled':'')+'></div>'
         +(RO?'':'<div style="display:flex;gap:.3rem"><button class="b" data-grow="'+gi+'">＋ Ligne</button><button class="b dgr" data-gdel="'+gi+'">Supprimer</button></div>')+'</div>';
       h+='<div style="overflow-x:auto"><table class="tb"><thead><tr>';
       for (var hh=0; hh<g.headers.length; hh++) h+='<th><input class="t" data-gh="'+gi+'-'+hh+'" value="'+esc(g.headers[hh])+'" style="font-weight:600"'+(RO?' disabled':'')+'></th>';

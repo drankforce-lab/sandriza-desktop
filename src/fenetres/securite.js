@@ -213,7 +213,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var superActifs = 0; for (var k=0;k<comptes.length;k++) if (comptes[k].estSuper && comptes[k].active) superActifs++;
 
     var h = '<div class="entete">'
-      + '<input class="recherche" id="u-q" placeholder="Rechercher un nom, un courriel, un rôle…" value="'+esc(FILTRE)+'">'
+      + '<input aria-label="Rechercher un nom, un courriel, un rôle" class="recherche" id="u-q" placeholder="Rechercher un nom, un courriel, un rôle…" value="'+esc(FILTRE)+'">'
       + (D.peutModifier ? '<button class="prim" id="u-nouveau">＋ Créer un accès</button>' : '')
       + '</div>';
 

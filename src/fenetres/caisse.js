@@ -222,7 +222,7 @@ function pageCaisse(mode) {
 <div class="corps" id="corps">
   <div class="col">
     <div class="carte">
-      <input id="scan" autocomplete="off" placeholder="Scannez le code-barres, ou tapez un nom d’article…">
+      <input aria-label="Scannez le code-barres, ou tapez un nom d’article" id="scan" autocomplete="off" placeholder="Scannez le code-barres, ou tapez un nom d’article…">
       <div id="res"></div>
     </div>
     <div class="carte plein">
@@ -241,9 +241,9 @@ function pageCaisse(mode) {
            La zone de droite defile maintenant, la hauteur est donc disponible ;
            la lisibilite d une adresse de courriel, elle, ne se negocie pas. -->
       <div class="champs">
-        <input id="c-nom" autocomplete="off" placeholder="Nom">
-        <input id="c-mail" autocomplete="off" inputmode="email" placeholder="Courriel">
-        <input id="c-tel" autocomplete="off" inputmode="tel" placeholder="Téléphone — 000 000-0000">
+        <input aria-label="Nom" id="c-nom" autocomplete="off" placeholder="Nom">
+        <input aria-label="Courriel" id="c-mail" autocomplete="off" inputmode="email" placeholder="Courriel">
+        <input aria-label="Téléphone — 000 000-0000" id="c-tel" autocomplete="off" inputmode="tel" placeholder="Téléphone — 000 000-0000">
       </div>
       <div id="c-res"></div>
       <label class="case"><input type="checkbox" id="c-creer">
@@ -270,7 +270,7 @@ function pageCaisse(mode) {
       <h2>Encaissement</h2>
       <div class="r2">
         <select id="v-paie" aria-label="Mode de paiement"></select>
-        <input id="v-note" placeholder="Note interne (facultatif)">
+        <input aria-label="Note interne (facultatif)" id="v-note" placeholder="Note interne (facultatif)">
       </div>
       <button class="prim large" id="btn-vendre" disabled>Enregistrer la vente</button>
       <div class="aide">Cet écran n’encaisse jamais la carte.</div>
@@ -650,7 +650,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var lien = '';
     if (r.enAttente) {
       lien = r.lien && r.lien.url
-        ? '<div class="lien"><input id="lien-url" readonly value="' + esc(r.lien.url) + '">'
+        ? '<div class="lien"><input id="lien-url" aria-label="Lien de paiement à copier" readonly value="' + esc(r.lien.url) + '">'
           + '<button class="mini" id="btn-copier"><span class="ic">📋</span> Copier</button>'
           /* ⚠ LE RECOURS QUAND LA CONFIRMATION AUTOMATIQUE N ARRIVE PAS. Le
              client ferme son onglet, le retour rate : la vente est PAYEE chez

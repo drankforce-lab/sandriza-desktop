@@ -492,7 +492,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '</tbody></table></div>');
 
     h.push('<div class="carte"><h2>Notes de conciliation</h2>'
-      + '<textarea id="r-notes"' + (D.verrouille || !D.peutEcrire ? ' readonly' : '') + '>' + esc(r.notes || '') + '</textarea>'
+      + '<textarea id="r-notes" aria-label="Notes du rapprochement"' + (D.verrouille || !D.peutEcrire ? ' readonly' : '') + '>' + esc(r.notes || '') + '</textarea>'
       + (D.verrouille || !D.peutEcrire ? ''
           : '<div class="barreoutils" style="margin-top:.4rem"><button id="r-notes-ok">Enregistrer les notes</button></div>')
       + '</div>');

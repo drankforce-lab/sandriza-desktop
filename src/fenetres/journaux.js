@@ -183,7 +183,7 @@ ${JS_ACTIVITE}${JS_DIRE}
   // ── Recherche inter-journaux ─────────────────────────────────────
   function vueRecherche(){
     var h = '<div class="carte"><div class="barre">'
-      + '<input class="t" id="r-q" placeholder="Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)" value="'+esc(RQ)+'" style="flex:1;min-width:220px">'
+      + '<input aria-label="Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)" class="t" id="r-q" placeholder="Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)" value="'+esc(RQ)+'" style="flex:1;min-width:220px">'
       + '<button class="b" id="r-go"><span class="ic">🔎</span> Rechercher</button></div>'
       + '<div class="sub">Le terme est cherché dans tous les champs de chaque journal (accès, automatisations, impressions). Minimum 2 caractères.</div>'
       + '<div id="r-res">'+(RRES ? resultatsHtml() : '<div class="vide">Tapez un terme puis « Rechercher ».</div>')+'</div></div>';

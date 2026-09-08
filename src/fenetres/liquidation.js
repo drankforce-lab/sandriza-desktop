@@ -482,8 +482,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     var chkPer = (LOT.duree === 'period') ? ' checked' : '';
     var blocDates = (LOT.duree === 'period')
       ? '<div class="dates">'
-        + '<div><label>Du</label><input type="date" id="lot-du" value="' + esc(LOT.du) + '"></div>'
-        + '<div><label>Au</label><input type="date" id="lot-au" value="' + esc(LOT.au) + '"></div>'
+        + '<div><label for="lot-du">Du</label><input type="date" id="lot-du" value="' + esc(LOT.du) + '"></div>'
+        + '<div><label for="lot-au">Au</label><input type="date" id="lot-au" value="' + esc(LOT.au) + '"></div>'
         + '</div>'
       : '';
     return '<div class="voile" id="lot-voile"><div class="boite">'
@@ -491,7 +491,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="deux">'
       +   '<div class="col"><div class="bloc"><div class="titre">Les produits</div>'
       +     '<div class="barreoutils" style="margin-bottom:.45rem">'
-      +       '<input class="rech" id="lot-rech" type="search" placeholder="Nom, SKU…" value="' + esc(LOT.q) + '">'
+      +       '<input aria-label="Nom, SKU" class="rech" id="lot-rech" type="search" placeholder="Nom, SKU…" value="' + esc(LOT.q) + '">'
       +       '<button class="mini" data-lottout="1">Tout cocher <span class="n">' + d.total + '</span></button>'
       +       btnRien
       +     '</div>'
@@ -606,7 +606,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div style="display:flex;gap:.5rem;margin-bottom:.6rem;flex-wrap:wrap">'
       +   mode('liq_no', '<span class="ic">🟡</span> Liquidation') + mode('final', '<span class="ic">🔴</span> Vente finale') + '</div>'
       + '<div class="barreoutils" style="margin-bottom:.5rem">'
-      +   '<input class="rech" id="cat-rech" type="search" placeholder="Rechercher une catégorie…" value="' + esc(CAT.q) + '">'
+      +   '<input aria-label="Rechercher une catégorie" class="rech" id="cat-rech" type="search" placeholder="Rechercher une catégorie…" value="' + esc(CAT.q) + '">'
       +   fil('', 'Toutes') + fil('liq', '<span class="ic">🟡</span> déjà') + fil('final', '<span class="ic">🔴</span> déjà') + '</div>'
       + '<div class="liste">' + lignes + '</div>'
       + '<div class="pied-boite">'

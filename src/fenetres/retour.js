@@ -424,7 +424,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
             + '</select></div>'
             + '<div class="ch" data-raison-z="' + i + '" style="' + (dec.backToStock ? 'display:none;' : '') + 'margin:.25rem 0 .1rem">'
             + '<label>Raison (obligatoire)</label>'
-            + '<input data-raison="' + i + '" value="' + esc(dec.reason) + '" placeholder="Ex : article endommagé, article porté…"></div>';
+            + '<input aria-label="Raison (obligatoire)" data-raison="' + i + '" value="' + esc(dec.reason) + '" placeholder="Ex : article endommagé, article porté…"></div>';
         }).join('')
       + '</div>';
     h += '<div class="carte"><h2>Réexpédition au client <span class="note">— échange ou renvoi</span></h2>'

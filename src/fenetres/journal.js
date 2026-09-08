@@ -151,7 +151,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input type="search" id="jo-q" placeholder="Adresse ou campagne…" value="' + esc(Q) + '">'
+      + '<input aria-label="Adresse ou campagne" type="search" id="jo-q" placeholder="Adresse ou campagne…" value="' + esc(Q) + '">'
       + '<button class="mini' + (ECHECS ? ' actif' : '') + '" id="jo-echecs">Échecs seulement</button>'
       + '<div class="droite">'
       + (D.peutModifier && (D.total || 0)

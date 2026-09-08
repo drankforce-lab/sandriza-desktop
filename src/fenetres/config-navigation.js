@@ -230,20 +230,20 @@ ${JS_ACTIVITE}${JS_DIRE}
     var cats = (D.categories || []);
     var cols = (D.collections || []);
     var s = '<div class="form" data-form="' + esc(id) + '">';
-    s += '<div class="ch"><label>Type</label><select data-typesel="' + esc(id) + '">'
+    s += '<div class="ch"><label>Type</label><select aria-label="Type" data-typesel="' + esc(id) + '">'
        + '<option value="custom">Lien personnalisé</option>'
        + '<option value="category">Catégorie</option>'
        + (cols.length ? '<option value="collection">Collection</option>' : '')
        + '</select></div>';
     s += '<div class="ch" data-grp="label"><label>Étiquette</label>'
-       + '<input data-role="label" placeholder="Nom affiché" style="width:10rem"></div>';
+       + '<input aria-label="Étiquette" data-role="label" placeholder="Nom affiché" style="width:10rem"></div>';
     s += '<div class="ch" data-grp="href"><label>Lien</label>'
-       + '<input data-role="href" placeholder="#shop?cat=robes" style="width:12rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem"></div>';
-    s += '<div class="ch" data-grp="cat" style="display:none"><label>Catégorie</label><select data-role="cat">'
+       + '<input aria-label="Lien" data-role="href" placeholder="#shop?cat=robes" style="width:12rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem"></div>';
+    s += '<div class="ch" data-grp="cat" style="display:none"><label>Catégorie</label><select aria-label="Catégorie" data-role="cat">'
        + cats.map(function(c){ return '<option value="' + esc(c.key) + '">' + esc(c.label) + '</option>'; }).join('')
        + '</select></div>';
     if (cols.length) {
-      s += '<div class="ch" data-grp="col" style="display:none"><label>Collection</label><select data-role="col">'
+      s += '<div class="ch" data-grp="col" style="display:none"><label>Collection</label><select aria-label="Collection" data-role="col">'
          + cols.map(function(c){ return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>'; }).join('')
          + '</select></div>';
     }

@@ -274,7 +274,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!ROM) {
       h += '<div class="mq"><div class="ajout" id="mq-plus">'
         + '<span class="em"><span class="ic">📸</span></span><span>Ajouter un mannequin</span></div>'
-        + '<input class="nomq" id="mq-nom" type="text" maxlength="40" placeholder="Nom (ex : Ana)"></div>';
+        + '<input aria-label="Nom (ex : Ana)" class="nomq" id="mq-nom" type="text" maxlength="40" placeholder="Nom (ex : Ana)"></div>';
     }
     if (!l.length && ROM) h = '<div class="vide-page">Aucun mannequin enregistré.</div>';
     grilleMq.innerHTML = h;

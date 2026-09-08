@@ -242,9 +242,9 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueAttr(type){
     var items = D[type] || [];
     var addRow = (ADDING === type) ? '<tr class="edit">'
-      + '<td><input class="tinp mono" id="at-key" placeholder="clé (ex: sport-luxe)"></td>'
-      + '<td><input class="tinp" id="at-fr" placeholder="Étiquette FR"></td>'
-      + '<td><input class="tinp" id="at-en" placeholder="Étiquette EN"></td>'
+      + '<td><input aria-label="clé (ex: sport-luxe)" class="tinp mono" id="at-key" placeholder="clé (ex: sport-luxe)"></td>'
+      + '<td><input aria-label="Étiquette FR" class="tinp" id="at-fr" placeholder="Étiquette FR"></td>'
+      + '<td><input aria-label="Étiquette EN" class="tinp" id="at-en" placeholder="Étiquette EN"></td>'
       + '<td style="text-align:right"><button class="ic prim" data-attrsave="' + type + '">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(it){
@@ -267,9 +267,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     var items = D.labels || [];
     var addRow = (ADDING === 'labels') ? '<tr class="edit">'
       + '<td style="color:var(--tx2);font-size:.78rem">aperçu à l’ajout</td>'
-      + '<td><input class="tinp" id="lb-fr" placeholder="Nom FR (ex: Coup de cœur)"></td>'
-      + '<td><input class="tinp" id="lb-en" placeholder="Nom EN"></td>'
-      + '<td><input type="color" id="lb-color" value="#c0392b" style="width:44px;height:32px;padding:2px"></td>'
+      + '<td><input aria-label="Nom FR (ex: Coup de cœur)" class="tinp" id="lb-fr" placeholder="Nom FR (ex: Coup de cœur)"></td>'
+      + '<td><input aria-label="Nom EN" class="tinp" id="lb-en" placeholder="Nom EN"></td>'
+      + '<td><input type="color" id="lb-color" aria-label="Couleur de l’étiquette" value="#c0392b" style="width:44px;height:32px;padding:2px"></td>'
       + '<td style="text-align:right"><button class="ic prim" data-labelsave="1">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(l){
@@ -291,8 +291,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   /* ══ ONGLET COULEURS ═══════════════════════════════════════════════════════ */
   function secAdd(){
     return '<div class="rangee">'
-      + '<div class="champ"><label>Nom</label><input id="inv-color-name" placeholder="Ex: corail rosé" style="width:170px"></div>'
-      + '<div class="champ"><label>Valeur hex</label><div style="display:flex;gap:.35rem;align-items:center">'
+      + '<div class="champ"><label for="inv-color-name">Nom</label><input id="inv-color-name" placeholder="Ex: corail rosé" style="width:170px"></div>'
+      + '<div class="champ"><label for="inv-color-hex">Valeur hex</label><div style="display:flex;gap:.35rem;align-items:center">'
       +   '<input id="inv-color-hex" placeholder="#FF6B6B" class="mono" style="width:105px">'
       +   '<input type="color" id="inv-color-picker" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
       + '<div class="champ"><label>Ou chercher par nom</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> Chercher</button></div>'
@@ -372,13 +372,17 @@ ${JS_ACTIVITE}${JS_DIRE}
   function catEditRow(cat){
     var isNew = !cat;
     return '<tr class="edit">'
-      + '<td><input type="color" id="ic-color" value="' + (cat ? esc(cat.color) : '#888888') + '" style="width:38px;height:30px;padding:2px"></td>'
-      + '<td><input class="tinp" id="ic-name" value="' + (cat ? esc(cat.name) : '') + '" placeholder="Nom FR"></td>'
-      + '<td><input class="tinp" id="ic-nameen" value="' + (cat ? esc(cat.nameEN) : '') + '" placeholder="Nom EN"></td>'
-      + '<td><input class="tinp mono" id="ic-key" value="' + (cat ? esc(cat.catKey) : '') + '" placeholder="slug"' + (isNew ? '' : ' readonly style="opacity:.55"') + '></td>'
-      + '<td><input class="tinp mono" id="ic-code" value="' + (cat ? esc(cat.code) : '') + '" maxlength="6" placeholder="ROB" style="width:76px;text-transform:uppercase;font-weight:700"></td>'
-      + '<td style="text-align:center"><input type="checkbox" id="ic-ai" ' + (!cat || cat.aiOn ? 'checked' : '') + ' data-excl="simple"></td>'
-      + '<td style="text-align:center"><input type="checkbox" id="ic-simple" ' + (cat && cat.simpleOn ? 'checked' : '') + ' data-excl="ai"></td>'
+      + '<td><input type="color" id="ic-color" aria-label="Couleur de la catégorie" value="' + (cat ? esc(cat.color) : '#888888') + '" style="width:38px;height:30px;padding:2px"></td>'
+      + '<td><input aria-label="Nom FR" class="tinp" id="ic-name" value="' + (cat ? esc(cat.name) : '') + '" placeholder="Nom FR"></td>'
+      + '<td><input aria-label="Nom EN" class="tinp" id="ic-nameen" value="' + (cat ? esc(cat.nameEN) : '') + '" placeholder="Nom EN"></td>'
+      + '<td><input aria-label="slug" class="tinp mono" id="ic-key" value="' + (cat ? esc(cat.catKey) : '') + '" placeholder="slug"' + (isNew ? '' : ' readonly style="opacity:.55"') + '></td>'
+      + '<td><input aria-label="ROB" class="tinp mono" id="ic-code" value="' + (cat ? esc(cat.code) : '') + '" maxlength="6" placeholder="ROB" style="width:76px;text-transform:uppercase;font-weight:700"></td>'
+      /* ⚠ DEUX CASES QUI S EXCLUENT, dans deux colonnes voisines : sans nom, le
+         lecteur d ecran annonce << case a cocher, cochee >> deux fois de suite,
+         et l on ne sait pas laquelle des deux on vient de decocher. Le nom
+         reprend l en-tete de sa colonne (IA, Photos). */
+      + '<td style="text-align:center"><input type="checkbox" id="ic-ai" aria-label="Traitement par IA" ' + (!cat || cat.aiOn ? 'checked' : '') + ' data-excl="simple"></td>'
+      + '<td style="text-align:center"><input type="checkbox" id="ic-simple" aria-label="Photos simples" ' + (cat && cat.simpleOn ? 'checked' : '') + ' data-excl="ai"></td>'
       + '<td style="text-align:center;color:var(--tx2)">' + (isNew ? '—' : cat.used) + '</td>'
       + '<td style="text-align:right"><button class="ic prim" data-catsave="' + (cat ? esc(cat.id) : '') + '">✓</button> '
       + '<button class="ic" data-catcancel="1">×</button></td></tr>';
@@ -413,14 +417,14 @@ ${JS_ACTIVITE}${JS_DIRE}
   function vueReachat(){
     var r = D.reachat, ro = D.peut.edit ? '' : ' disabled';
     return ''
-      + '<div class="champ" style="max-width:220px"><label>Seuil général</label>'
+      + '<div class="champ" style="max-width:220px"><label for="rc-low">Seuil général</label>'
       + '<input type="number" min="0" step="1" id="rc-low" value="' + r.lowStockDefault + '"' + ro + ' style="width:100%"></div>'
       + '<div class="avis" style="margin:.7rem 0">Le seuil se règle à trois niveaux, <strong>le plus précis l’emporte</strong> : exception sur la variante, sinon seuil du produit, sinon celui-ci.<br>'
       + 'Actuellement : <strong>' + r.regles + '</strong> produit' + (r.regles > 1 ? 's ont' : ' a') + ' son propre seuil, <strong>' + r.exceptions + '</strong> variante' + (r.exceptions > 1 ? 's font' : ' fait') + ' exception.</div>'
       + (D.peut.edit ? '<button class="prim" data-act="reachatlow">Enregistrer le seuil</button>' : '')
       + '<hr style="border:none;border-top:1px solid var(--v10);margin:1.3rem 0">'
       + ''
-      + '<div class="champ" style="max-width:220px"><label>Limite d’achat par commande</label>'
+      + '<div class="champ" style="max-width:220px"><label for="rc-buymax">Limite d’achat par commande</label>'
       + '<input type="number" min="1" step="1" id="rc-buymax" value="' + r.buyMax + '"' + ro + ' style="width:100%"></div>'
       + (D.peut.edit ? '<button class="prim" style="margin-top:.7rem" data-act="reachatbuymax">Enregistrer la limite</button>' : '');
   }
@@ -444,8 +448,8 @@ ${JS_ACTIVITE}${JS_DIRE}
   }
   function vueEditColor(){
     return '<div class="voile" id="ec-voile"><div class="boite"><h3>Modifier la couleur</h3>'
-      + '<div class="champ" style="margin-bottom:.6rem"><label>Nom</label><input id="ec-name" value="' + esc(EDITCOLOR.nom) + '" style="width:100%"></div>'
-      + '<div class="champ"><label>Valeur hex</label><div style="display:flex;gap:.4rem;align-items:center">'
+      + '<div class="champ" style="margin-bottom:.6rem"><label for="ec-name">Nom</label><input id="ec-name" value="' + esc(EDITCOLOR.nom) + '" style="width:100%"></div>'
+      + '<div class="champ"><label for="ec-hex">Valeur hex</label><div style="display:flex;gap:.4rem;align-items:center">'
       +   '<input id="ec-hex" value="' + esc(EDITCOLOR.hex) + '" class="mono" style="flex:1">'
       +   '<input type="color" id="ec-picker" value="' + (EDITCOLOR.hex.charAt(0) === '#' && EDITCOLOR.hex.length <= 7 ? esc(EDITCOLOR.hex) : '#000000') + '" data-syncEc="1" style="width:38px;height:34px;padding:2px"></div></div>'
       + '<div class="pied-boite"><button data-eccancel="1">Annuler</button><button class="prim" data-ecsave="1">Enregistrer</button></div></div></div>';

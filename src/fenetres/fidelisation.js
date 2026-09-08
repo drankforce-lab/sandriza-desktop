@@ -359,7 +359,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       return '<div class="qed">'
         + '<div class="qedh"><span class="dt">Question ' + (i + 1) + '</span>'
         + '<button class="mini danger" data-q-suppr="' + i + '">✕</button></div>'
-        + '<input class="t" data-q-lib="' + i + '" value="' + esc(q.libelle) + '" placeholder="Que pensez-vous de votre achat ?">'
+        + '<input aria-label="Que pensez-vous de votre achat ?" class="t" data-q-lib="' + i + '" value="' + esc(q.libelle) + '" placeholder="Que pensez-vous de votre achat ?">'
         + '<div class="qedr"><select class="t" data-q-type="' + i + '"'
           + ' aria-label="Type de la question ' + (i + 1) + '">'
         + (FORM.typesQuestion || []).map(function(t){
@@ -369,7 +369,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
         + '<label class="case"><input type="checkbox" data-q-obl="' + i + '"'
         + (q.obligatoire ? ' checked' : '') + '> Obligatoire</label></div>'
         + (q.type === 'choice'
-            ? '<textarea class="t" data-q-opt="' + i + '" rows="3" placeholder="Un choix par ligne">'
+            ? '<textarea aria-label="Un choix par ligne" class="t" data-q-opt="' + i + '" rows="3" placeholder="Un choix par ligne">'
               + esc((q.options || []).join('\\n')) + '</textarea>'
             : '')
         + '</div>';

@@ -312,7 +312,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       +   '<select id="rmo-' + t.id + '"><option value="">— choisir —</option>'
       +     (D.motifs || []).map(function(m){ return '<option value="' + esc(m.v) + '">' + esc(m.l) + '</option>'; }).join('')
       +   '</select>'
-      +   '<input type="text" id="rn-' + t.id + '" placeholder="Note (facultative)" style="flex:1;min-width:12rem">'
+      +   '<input aria-label="Note (facultative)" type="text" id="rn-' + t.id + '" placeholder="Note (facultative)" style="flex:1;min-width:12rem">'
       + '</div>'
       + '<div class="rangee" id="rw-' + t.id + '" style="display:none">'
       +   '<div class="avis jaune" style="flex:1">Il manque <strong id="re-' + t.id + '">0</strong> unité(s). '
@@ -376,8 +376,8 @@ ${JS_ACTIVITE}${JS_DIRE}
                 + esc(l.nom) + '</option>'; }).join('')
       +     '<option value="_sans"' + (F_LIEU === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
       +   '</select>'
-      +   '<input type="search" id="f-section" placeholder="Section…" value="' + esc(F_SECTION) + '" style="min-width:9rem">'
-      +   '<input type="search" id="q" placeholder="Nom, SKU ou taille-couleur…" value="' + esc(RECH) + '">'
+      +   '<input aria-label="Section" type="search" id="f-section" placeholder="Section…" value="' + esc(F_SECTION) + '" style="min-width:9rem">'
+      +   '<input aria-label="Nom, SKU ou taille-couleur" type="search" id="q" placeholder="Nom, SKU ou taille-couleur…" value="' + esc(RECH) + '">'
       +   '<button class="mini" data-act="chercher">Chercher</button>'
       + '</div>'
       + '<div class="dt" style="margin-top:.4rem">Le transfert emporte <strong>toute</strong> la quantité de la variante.</div></div>';

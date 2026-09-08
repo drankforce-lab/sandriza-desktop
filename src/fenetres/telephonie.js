@@ -381,20 +381,20 @@ ${JS_ACTIVITE}${JS_DIRE}
     o = o || {};
     var m = o.message || {};
     var h = '<div class="mrow" data-mrow="' + i + '"><div class="l1">'
-      + '<div class="ch" style="margin:0"><label>Touche</label><input data-mf="digit" style="width:4rem" value="' + esc(o.digit || '') + '"' + (RO ? ' disabled' : '') + '></div>'
-      + '<div class="ch" style="margin:0"><label>Libellé FR</label><input data-mf="label" style="width:9rem" value="' + esc(o.label || '') + '"' + (RO ? ' disabled' : '') + '></div>'
-      + '<div class="ch" style="margin:0"><label>Libellé EN</label><input data-mf="labelEN" style="width:9rem" value="' + esc(o.labelEN || '') + '"' + (RO ? ' disabled' : '') + '></div>'
-      + '<div class="ch" style="margin:0"><label>Action</label><select data-mf="action"' + (RO ? ' disabled' : '') + '>'
+      + '<div class="ch" style="margin:0"><label>Touche</label><input aria-label="Touche" data-mf="digit" style="width:4rem" value="' + esc(o.digit || '') + '"' + (RO ? ' disabled' : '') + '></div>'
+      + '<div class="ch" style="margin:0"><label>Libellé FR</label><input aria-label="Libellé FR" data-mf="label" style="width:9rem" value="' + esc(o.label || '') + '"' + (RO ? ' disabled' : '') + '></div>'
+      + '<div class="ch" style="margin:0"><label>Libellé EN</label><input aria-label="Libellé EN" data-mf="labelEN" style="width:9rem" value="' + esc(o.labelEN || '') + '"' + (RO ? ' disabled' : '') + '></div>'
+      + '<div class="ch" style="margin:0"><label>Action</label><select aria-label="Action" data-mf="action"' + (RO ? ' disabled' : '') + '>'
         + '<option value="forward"' + (o.action === 'forward' ? ' selected' : '') + '>Rediriger</option>'
         + '<option value="queue"' + (o.action === 'queue' ? ' selected' : '') + '>File d’attente</option>'
         + '<option value="voicemail"' + (o.action === 'voicemail' ? ' selected' : '') + '>Messagerie</option>'
         + '<option value="message"' + (o.action === 'message' ? ' selected' : '') + '>Message vocal</option>'
         + '<option value="repeat"' + (o.action === 'repeat' ? ' selected' : '') + '>Répéter l’accueil</option></select></div>'
-      + '<div class="ch" style="margin:0"><label>Numéro (Rediriger / File)</label><input data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
+      + '<div class="ch" style="margin:0"><label>Numéro (Rediriger / File)</label><input aria-label="Numéro (Rediriger / File)" data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
       + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="Retirer"><span class="ic">🗑</span></button>')
       + '</div><div class="l2">'
-      + '<div class="ch"><textarea data-mf="messageFr" rows="1" placeholder="Message vocal FR (si action = Message)"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
-      + '<div class="ch"><textarea data-mf="messageEn" rows="1" placeholder="Message vocal EN"' + (RO ? ' disabled' : '') + '>' + esc(m.en || '') + '</textarea></div>'
+      + '<div class="ch"><textarea aria-label="Message vocal FR (si action = Message)" data-mf="messageFr" rows="1" placeholder="Message vocal FR (si action = Message)"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
+      + '<div class="ch"><textarea aria-label="Message vocal EN" data-mf="messageEn" rows="1" placeholder="Message vocal EN"' + (RO ? ' disabled' : '') + '>' + esc(m.en || '') + '</textarea></div>'
       + '</div></div>';
     return h;
   }
@@ -450,8 +450,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += texteHtml('t-sms-email', 'Courriel de notification des SMS reçus', sms.notifyEmail, 'vous@exemple.com');
     h += '</div><div class="carte"><div class="stitre"><span class="ic">💬</span> Messages SMS <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="Voir les SMS dans le module Journaux" style="float:right;font-size:.76rem"><span class="ic">🔎</span> Dans Journaux</button></div>';
     h += '<div class="smsbox">'
-      + '<input class="to" id="t-sms-to" placeholder="+1…"' + (RO ? ' disabled' : '') + '>'
-      + '<input class="body" id="t-sms-body" placeholder="Votre message…"' + (RO ? ' disabled' : '') + '>'
+      + '<input aria-label="+1" class="to" id="t-sms-to" placeholder="+1…"' + (RO ? ' disabled' : '') + '>'
+      + '<input aria-label="Votre message" class="body" id="t-sms-body" placeholder="Votre message…"' + (RO ? ' disabled' : '') + '>'
       + '<button class="b" type="button" id="t-sms-send"' + (RO ? ' disabled' : '') + '>Envoyer</button></div>';
     h += '<div class="liste" id="t-sms-inbox"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>';
     return h;
@@ -474,7 +474,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var opts = MUSIQUES.slice(); opts.push(['custom', 'URL personnalisée…']);
     h += selectHtml('t-q-music-preset', 'Musique d’attente', selMus, opts);
     h += '<div class="ch" id="t-q-music-wrap"' + (selMus === 'custom' ? '' : ' style="display:none"') + '>'
-      + '<label>URL personnalisée (MP3)</label><input class="mono" id="t-q-music" value="' + esc(selMus === 'custom' ? curMus : '') + '" placeholder="https://…/musique.mp3"' + (RO ? ' disabled' : '') + '></div>';
+      + '<label for="t-q-music">URL personnalisée (MP3)</label><input class="mono" id="t-q-music" value="' + esc(selMus === 'custom' ? curMus : '') + '" placeholder="https://…/musique.mp3"' + (RO ? ' disabled' : '') + '></div>';
     h += checkHtml('t-q-pos', 'Annoncer la position dans la file (« vous êtes en position 2… »)', q.announcePosition !== false);
     h += '<div class="gr2">'
       + taHtml('t-q-msg-fr', 'Message d’attente (FR)', (q.waitMessage || {}).fr, 'Merci de patienter, toutes nos lignes sont occupées…')

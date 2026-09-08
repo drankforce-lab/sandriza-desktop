@@ -179,10 +179,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       headerSubtitle: '', footerBg: '#1a1a2e', footerTextColor: '#c4a882', animated: false, gifBanner: false };
     var brand = (D && D.marque) || 'SANDRIZA';
     var h = '<div class="carte edit"><div class="stitre">' + (EDIT ? 'Modifier — ' + esc(t.name || '') : 'Nouveau gabarit') + '</div>';
-    h += '<div class="ch"><label>Nom du gabarit</label><input type="text" id="g-name" value="' + esc(t.name || '') + '"' + (RO ? ' disabled' : '') + '></div>';
+    h += '<div class="ch"><label for="g-name">Nom du gabarit</label><input type="text" id="g-name" value="' + esc(t.name || '') + '"' + (RO ? ' disabled' : '') + '></div>';
     h += '<div class="gr2">' + coulChamp('g-hfrom', 'En-tête : couleur de départ', t.headerBgFrom || '#1a1a2e')
       + coulChamp('g-hto', 'En-tête : couleur de fin', t.headerBgTo || '#2d1b69') + '</div>';
-    h += '<div class="ch"><label>Sous-titre (vide = tagline du pied de page)</label>'
+    h += '<div class="ch"><label for="g-sub">Sous-titre (vide = tagline du pied de page)</label>'
       + '<input type="text" id="g-sub" value="' + esc(t.headerSubtitle || '') + '" placeholder="ÉLÉGANCE · RAFFINEMENT · STYLE"' + (RO ? ' disabled' : '') + '></div>';
     h += '<label class="bascule"><input type="checkbox" id="g-anim"' + (t.animated ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
       + '<span><span class="t"><span class="ic">✨</span> Effet animé CSS (en-tête &amp; pied)</span><br><span class="d">Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.</span></span></label>';

@@ -142,7 +142,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     var d = REP;
     var h = '<div class="barreoutils">'
       + '<button class="mini" id="rep-retour">← Mes fournisseurs</button>'
-      + '<input type="search" id="rep-q" placeholder="Nom, description, ville…" value="' + esc(REP_Q) + '">'
+      + '<input aria-label="Nom, description, ville" type="search" id="rep-q" placeholder="Nom, description, ville…" value="' + esc(REP_Q) + '">'
       + '<select id="rep-cat"><option value="">Toutes catégories</option>'
       + (d.cats || []).map(function(c){
           return '<option value="' + esc(c) + '"' + (REP_CAT === c ? ' selected' : '') + '>'
@@ -189,7 +189,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var rows = D.lignes || [];
     var h = '<div class="barreoutils">'
-      + '<input type="search" id="f-q" placeholder="Nom, contact ou courriel…" value="' + esc(Q) + '">'
+      + '<input aria-label="Nom, contact ou courriel" type="search" id="f-q" placeholder="Nom, contact ou courriel…" value="' + esc(Q) + '">'
       + '<span class="droite">' + (D.total || 0) + ' au total'
       + '<button class="mini" id="f-repertoire" title="Un carnet de grossistes connus, à ajouter en un clic"><span class="ic">🔎</span> Répertoire</button>'
       + '<button class="prim" id="f-nouveau">+ Nouveau fournisseur</button></span>'

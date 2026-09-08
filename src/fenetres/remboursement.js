@@ -349,7 +349,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     voile('<h3><span class="ic">🔐</span> Code d’exemption</h3>'
       + '<p>Renoncer aux frais de service Square exige le code confidentiel.</p>'
-      + '<input type="password" id="v-nip" autocomplete="off" '
+      + '<input type="password" id="v-nip" aria-label="NIP de validation" autocomplete="off" '
       + 'style="letter-spacing:.14em;text-align:center;font-family:ui-monospace,monospace">'
       + '<div id="v-nip-err" style="display:none;font-size:.78rem;color:var(--tx-err);margin-top:.35rem">Code incorrect — réessayez.</div>'
       + '<div class="fin2"><button id="v-non">Annuler</button>'

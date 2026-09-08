@@ -150,10 +150,10 @@ function pageCommande(id) {
          le retour du lecteur, se vider et le reprendre aussitot. Un champ qu il
          faut recliquer entre deux articles rend le lecteur inutile. */
       + '<div class="rech" style="margin-bottom:.35rem">'
-      + '<input id="c-scan" placeholder="Scannez le code-barres de l’article…" autocomplete="off">'
+      + '<input aria-label="Scannez le code-barres de l’article" id="c-scan" placeholder="Scannez le code-barres de l’article…" autocomplete="off">'
       + '</div>'
       + '<div id="c-scan-msg" style="min-height:1.2em;font-size:.8rem;color:var(--tx2);margin-bottom:.4rem"></div>'
-      + '<div class="rech"><input placeholder="Filtrer…"><span class="cpt" id="c-cpt2"></span></div>'
+      + '<div class="rech"><input aria-label="Filtrer" placeholder="Filtrer…"><span class="cpt" id="c-cpt2"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div>'
       + '<div style="margin-top:.6rem;display:flex;gap:.45rem;flex-wrap:wrap">'
       + '<button type="button" id="c-bon"><span class="ic">🖨</span> Bon de commande</button>'

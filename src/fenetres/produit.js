@@ -433,7 +433,7 @@ function pageProduit(id) {
       // Les jetons montrent les couleurs CHOISIES ; la recherche sert a en
       // ajouter, du referentiel ou hors referentiel.
       + '<div class="rech" style="margin-bottom:.4rem;position:relative">'
-      + '<input id="p-coul-libre" autocomplete="off" placeholder="Chercher une couleur, ou en saisir une nouvelle…">'
+      + '<input aria-label="Chercher une couleur, ou en saisir une nouvelle" id="p-coul-libre" autocomplete="off" placeholder="Chercher une couleur, ou en saisir une nouvelle…">'
       + '<button type="button" id="p-coul-add">Ajouter</button>'
       + '<div id="p-coul-sug"></div></div>'
       + '<div class="jetons" id="p-couleurs"></div>'
@@ -546,7 +546,7 @@ function pageProduit(id) {
           : '<div class="aide" style="margin:-.2rem 0 .5rem;color:var(--tx-att)"><span class="ic">⚠</span> Aucun emplacement '
             + 'configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux '
             + 'variantes en stock.</div>')
-      + '<div class="rech"><input placeholder="Filtrer par taille ou couleur…"><span class="cpt" id="p-somme"></span></div>'
+      + '<div class="rech"><input aria-label="Filtrer par taille ou couleur" placeholder="Filtrer par taille ou couleur…"><span class="cpt" id="p-somme"></span></div>'
       + '<div class="lgstk entete"><span class="c1">Taille</span><span class="c2">Couleur</span>'
       + '<span class="c3">Quantité</span><span class="c4">Entrepôt</span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');

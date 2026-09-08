@@ -264,7 +264,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + (g.enabled ? '' : ';display:none') + '">');
     h.push(couleur('m-grad-from', 'Couleur A', g.from));
     h.push(couleur('m-grad-to', 'Couleur B', g.to));
-    h.push('<div class="ch"><label>Direction</label><select id="m-grad-dir"' + (RO ? ' disabled' : '') + '>'
+    h.push('<div class="ch"><label for="m-grad-dir">Direction</label><select id="m-grad-dir"' + (RO ? ' disabled' : '') + '>'
       + ['135deg,↗ Diagonale', '90deg,→ Horizontale', '180deg,↓ Verticale'].map(function(o){
           var p = o.split(','); return '<option value="' + p[0] + '"'
             + ((g.dir || '135deg') === p[0] ? ' selected' : '') + '>' + esc(p[1]) + '</option>'; }).join('')

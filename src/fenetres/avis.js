@@ -208,7 +208,7 @@ ${JS_ACTIVITE}${JS_DIRE}
             + '<option value="hidden"' + (ETAT === 'hidden' ? ' selected' : '') + '>Refusés / masqués</option>'
             + '</select>'
           : '')
-      + '<input type="search" id="a-q" placeholder="Nom ou n° de commande…" value="' + esc(Q) + '">'
+      + '<input aria-label="Nom ou n° de commande" type="search" id="a-q" placeholder="Nom ou n° de commande…" value="' + esc(Q) + '">'
       + '<select id="a-note"><option value=""' + (NOTE === '' ? ' selected' : '') + '>Toutes les notes</option>'
       + [5, 4, 3, 2, 1].map(function(n){
           return '<option value="' + n + '"' + (String(NOTE) === String(n) ? ' selected' : '') + '>' + n + ' sur 5</option>';

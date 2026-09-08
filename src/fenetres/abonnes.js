@@ -164,8 +164,8 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
   function boiteAjout(){
     return '<div class="voile" id="ab-voile"><div class="boite">'
       + '<h3>Ajouter un abonné</h3>'
-      + '<div class="ch"><label>Courriel</label><input type="email" id="ab-mail" placeholder="marie@exemple.com"></div>'
-      + '<div class="ch"><label>Prénom</label><input id="ab-prenom" placeholder="Marie">'
+      + '<div class="ch"><label for="ab-mail">Courriel</label><input type="email" id="ab-mail" placeholder="marie@exemple.com"></div>'
+      + '<div class="ch"><label for="ab-prenom">Prénom</label><input id="ab-prenom" placeholder="Marie">'
       + '<span class="aide">Sert à personnaliser les envois.</span></div>'
       + '<div class="pied-boite"><button class="mini" id="ab-annuler">Annuler</button>'
       + '<button class="mini prim" id="ab-ajouter">Ajouter</button></div>'
@@ -199,7 +199,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input type="search" id="ab-q" placeholder="Courriel ou prénom…" value="' + esc(Q) + '">'
+      + '<input aria-label="Courriel ou prénom" type="search" id="ab-q" placeholder="Courriel ou prénom…" value="' + esc(Q) + '">'
       + [['all', 'Tous'], ['actifs', 'Actifs'], ['retires', 'Désabonnés']].map(function(f){
           return '<button class="mini' + (FILTRE === f[0] ? ' actif' : '') + '" data-filtre="' + f[0] + '">'
             + f[1] + '</button>';

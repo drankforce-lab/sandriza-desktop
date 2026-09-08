@@ -145,7 +145,7 @@ ${JS_ACTIVITE}${JS_DIRE}
           return '<button class="mini' + (ONGLET === o[0] ? ' actif' : '') + '" data-onglet="' + o[0] + '">'
             + o[1] + '<span class="n' + (o[0] === 'pending' && n > 0 ? ' hi' : '') + '">' + n + '</span></button>';
         }).join('')
-      + '<input type="search" id="r-q" placeholder="Nom, courriel, n° commande…" value="' + esc(Q) + '">'
+      + '<input aria-label="Nom, courriel, n° commande" type="search" id="r-q" placeholder="Nom, courriel, n° commande…" value="' + esc(Q) + '">'
       + '</div>';
 
     var rows = D.lignes || [];

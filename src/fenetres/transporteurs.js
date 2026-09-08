@@ -214,7 +214,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (sp.mode) {
       h += '<div class="gr2">'
         + texteHtml(sp.acct.id, sp.acct.label, d.accountNumber, sp.acct.place, false)
-        + '<div class="ch"><label>Environnement</label><select id="' + sp.mode.id + '"' + (RO ? ' disabled' : '') + '>'
+        + '<div class="ch"><label>Environnement</label><select aria-label="Environnement" id="' + sp.mode.id + '"' + (RO ? ' disabled' : '') + '>'
         + '<option value="sandbox"' + ((d.mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>Test (sandbox)</option>'
         + '<option value="production"' + (d.mode === 'production' ? ' selected' : '') + '>Production</option>'
         + '</select></div></div>';
@@ -237,7 +237,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="gr2">'
       + texteHtml('cp-cust', 'Numéro client', pc.customerNumber, 'Ex : 2004381', false)
       + texteHtml('cp-contract', 'ID contrat', pc.contractId, 'Ex : 42708517', false) + '</div>';
-    h += '<div class="ch"><label>Environnement</label><select id="cp-mode"' + (RO ? ' disabled' : '') + '>'
+    h += '<div class="ch"><label for="cp-mode">Environnement</label><select id="cp-mode"' + (RO ? ' disabled' : '') + '>'
       + '<option value="sandbox"' + ((pc.mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>Bac à sable (test)</option>'
       + '<option value="production"' + (pc.mode === 'production' ? ' selected' : '') + '>Production</option></select></div>';
     // Mapbox (jeton public) + adresse expéditeur.
@@ -251,7 +251,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += texteHtml('cp-oaddr', 'Adresse (rue)', pc.originAddress, '', false);
     h += '<div class="gr2">'
       + texteHtml('cp-ocity', 'Ville', pc.originCity, 'Montréal', false)
-      + '<div class="ch"><label>Province</label><select id="cp-oprov"' + (RO ? ' disabled' : '') + '>'
+      + '<div class="ch"><label for="cp-oprov">Province</label><select id="cp-oprov"' + (RO ? ' disabled' : '') + '>'
       + PROVS.map(function(p){ return '<option' + ((pc.originProvince || 'QC') === p ? ' selected' : '') + '>' + p + '</option>'; }).join('')
       + '</select></div></div>';
     h += texteHtml('cp-opostal', 'Code postal (sans espace)', pc.originPostal, 'H1A1A1', false);

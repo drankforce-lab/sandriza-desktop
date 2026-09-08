@@ -298,7 +298,7 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   function vueModeles(ro){
     var h = '<div class="barreoutils" style="margin-top:.1rem">'
-      + '<input type="search" id="p-q" placeholder="Nom ou format (3 car. min.)" value="' + esc(Q) + '">'
+      + '<input aria-label="Nom ou format (3 car. min.)" type="search" id="p-q" placeholder="Nom ou format (3 car. min.)" value="' + esc(Q) + '">'
       + '<select id="p-tri" aria-label="Ordre de tri">'
       + '<option value="updated"' + (TRI === 'updated' ? ' selected' : '') + '>Modifié récemment</option>'
       + '<option value="name"' + (TRI === 'name' ? ' selected' : '') + '>Nom</option>'
@@ -313,7 +313,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!ro && NOUVMOD) {
       var fmts = D.formats || [];
       h += '<div class="carte" style="margin-bottom:.6rem"><div class="deux">'
-        + '<div class="champ"><label>Format du nouveau modèle</label><select id="p-newmod-fmt">'
+        + '<div class="champ"><label for="p-newmod-fmt">Format du nouveau modèle</label><select id="p-newmod-fmt">'
         + fmts.map(function(x){ return '<option value="' + esc(x.cle) + '">' + esc(x.nom) + ' — ' + esc(x.dim) + '</option>'; }).join('')
         + '</select></div>'
         + '<div class="champ" style="align-self:end"><button class="prim" id="p-newmod-ok">Créer et ouvrir l’éditeur</button></div>'
@@ -371,16 +371,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (NOUVEAU) {
         h += '<div class="carte" style="margin-bottom:.6rem">'
           + '<div class="deux">'
-          + '<div class="champ"><label>Nom</label><input type="text" id="f-nom" placeholder="ex. Étiquette bijou"></div>'
-          + '<div class="champ"><label>Type</label><select id="f-type">'
+          + '<div class="champ"><label for="f-nom">Nom</label><input type="text" id="f-nom" placeholder="ex. Étiquette bijou"></div>'
+          + '<div class="champ"><label for="f-type">Type</label><select id="f-type">'
           + '<option value="label">Étiquette</option><option value="stick">Autocollant</option>'
           + '<option value="card">Carte d’affaires</option></select></div>'
-          + '<div class="champ"><label>Forme</label><select id="f-forme">'
+          + '<div class="champ"><label for="f-forme">Forme</label><select id="f-forme">'
           + '<option value="rect">Rectangle</option><option value="square">Carré</option>'
           + '<option value="circle">Rond</option></select></div>'
           + '<div class="champ"><label id="f-lw">Largeur (po)</label>'
           + '<input type="number" id="f-w" step="0.1" min="0.4" value="2"></div>'
-          + '<div class="champ" id="f-boxh"><label>Hauteur (po)</label>'
+          + '<div class="champ" id="f-boxh"><label for="f-h">Hauteur (po)</label>'
           + '<input type="number" id="f-h" step="0.1" min="0.4" value="1"></div>'
           + '</div>'
           + '<div class="aide" style="margin-bottom:.5rem">C’est ce format qui calibrera '
@@ -423,11 +423,11 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     //  ── Colonne 1 : le travail ──
     h += '<div class="carte"><h2>Impression directe — imprimante d’étiquettes</h2>'
-      + '<div class="champ"><label>Modèle</label><select id="p-cible">' + opts + '</select>'
+      + '<div class="champ"><label for="p-cible">Modèle</label><select id="p-cible">' + opts + '</select>'
       + (l.length < D.total ? '<div class="aide">Seuls les modèles de la page affichée sont listés — '
           + 'changez de page dans l’onglet Modèles pour en atteindre d’autres.</div>' : '')
       + '</div>'
-      + '<div class="champ"><label>Quantité</label>'
+      + '<div class="champ"><label for="p-qte">Quantité</label>'
       + '<input type="number" id="p-qte" min="1" max="5000" value="' + QTE + '">'
       + '<div class="rapide">' + rapides.map(function(n){
           return '<button class="mini" data-qte="' + n + '">' + n + '</button>'; }).join('') + '</div></div>';
@@ -453,9 +453,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!ro && CAL) {
       h += '<div class="carte" style="margin-bottom:.5rem"><h2>Ajustement fin (si l’étiquette sort décalée)</h2>'
         + '<div class="cal3">'
-        + '<div class="champ"><label>Échelle (%)</label><input type="number" id="c-scale" step="0.5" min="80" max="120" value="' + CAL.echelle + '"></div>'
-        + '<div class="champ"><label>Décalage X (mm)</label><input type="number" id="c-x" step="0.5" min="-10" max="10" value="' + CAL.decX + '"></div>'
-        + '<div class="champ"><label>Décalage Y (mm)</label><input type="number" id="c-y" step="0.5" min="-10" max="10" value="' + CAL.decY + '"></div>'
+        + '<div class="champ"><label for="c-scale">Échelle (%)</label><input type="number" id="c-scale" step="0.5" min="80" max="120" value="' + CAL.echelle + '"></div>'
+        + '<div class="champ"><label for="c-x">Décalage X (mm)</label><input type="number" id="c-x" step="0.5" min="-10" max="10" value="' + CAL.decX + '"></div>'
+        + '<div class="champ"><label for="c-y">Décalage Y (mm)</label><input type="number" id="c-y" step="0.5" min="-10" max="10" value="' + CAL.decY + '"></div>'
         + '</div><div class="aide">Retenu <strong>par imprimante et par format</strong>, dans votre profil.</div></div>';
     }
 

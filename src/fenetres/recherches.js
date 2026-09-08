@@ -157,7 +157,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input type="search" id="rs-q" placeholder="Chercher dans la liste…" value="' + esc(Q) + '">'
+      + '<input aria-label="Chercher dans la liste" type="search" id="rs-q" placeholder="Chercher dans la liste…" value="' + esc(Q) + '">'
       + '<div class="droite">'
       + '<button class="mini" id="rs-vers-journaux" title="Voir ce journal dans le module Journaux"><span class="ic">🔎</span> Dans Journaux</button>'
       + (D.peutModifier && (D.recentes || []).length
