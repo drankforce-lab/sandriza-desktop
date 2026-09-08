@@ -183,12 +183,31 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
 
     h += '<div class="carte" style="padding:0;overflow-x:auto"><table class="tb"><thead><tr>'
-      + '<th>Date</th><th>Contenu</th><th style="text-align:center">Objets R2</th><th>Taille</th><th>Note</th><th></th>'
+      + '<th>Date</th><th>Contenu</th><th>Application</th><th style="text-align:center">Objets R2</th><th>Taille</th><th>Note</th><th></th>'
       + '</tr></thead><tbody>';
     for (var i=0;i<l.length;i++){ var b=l[i];
       h += '<tr><td style="white-space:nowrap;font-weight:600">'+esc(b.quand)
         + (b.commit?'<div class="mono">'+esc(b.commit)+'</div>':'')+'</td>'
         + '<td>'+b.total+' enreg.<div style="font-size:.72rem;color:var(--tx-gris)">'+b.produits+' produits · '+b.commandes+' cmd · '+b.factures+' fact.</div></td>'
+        /* ⚠ L APPLICATION CONSERVEE AVEC CETTE SAUVEGARDE (2026-09-08, sur sa
+           demande). Trois etats, et les trois doivent se distinguer d un coup
+           d oeil :
+           • une version et N installateurs → la sauvegarde peut tout remonter ;
+           • un ECHEC d epinglage → il est ECRIT, en ambre. Une sauvegarde qui se
+             croit complete alors qu elle ne l est pas serait pire que rien ;
+           • rien du tout → sauvegarde d AVANT cette version, et on le dit
+             (<< non conservee >>) plutot que d afficher un tiret muet qui
+             laisserait croire a une lecture ratee. */
+        + '<td style="white-space:nowrap">'
+        +   (b.appVersion
+              ? '<b>' + esc(b.appVersion) + '</b>'
+                + '<div style="font-size:.72rem;color:var(--tx-gris)">'
+                + (b.appFichiers || 0) + ' installateur' + ((b.appFichiers || 0) > 1 ? 's' : '')
+                + ' conservé' + ((b.appFichiers || 0) > 1 ? 's' : '') + '</div>'
+                + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">⚠ ' + esc(b.appErreur) + '</div>' : '')
+              : '<span style="color:var(--tx-gris);font-size:.78rem">non conservée</span>'
+                + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">⚠ ' + esc(b.appErreur) + '</div>' : ''))
+        + '</td>'
         + '<td style="text-align:center">'+(b.r2Objects==null?'—':b.r2Objects)+'</td>'
         + '<td style="white-space:nowrap">'+esc(b.taille)+'</td>'
         + '<td style="color:var(--tx2)">'+esc(b.note||'—')+'</td>'
@@ -261,7 +280,22 @@ ${JS_ACTIVITE}${JS_DIRE}
     var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='⏳ Sauvegarde en cours…'; }
     dire('Sauvegarde en cours, ne fermez pas cette fenêtre…');
     appeler('sauvegarde:creer',[txv('s-note')]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ fermerSur(); D=r; RO=!r.peutEcrire; vueListe(); dire('Sauvegarde créée ('+(r.taille||'')+').', 'bon'); }
+      if (r&&r.ok){
+        fermerSur(); D=r; RO=!r.peutEcrire; vueListe();
+        /* ⚠ LA SAUVEGARDE A REUSSI MEME SI L EPINGLAGE A ECHOUE — la base est
+           sauvee, et c est l essentiel. Mais on ne l annonce pas << bon >> tout
+           court : le message dit AMBRE ce qui manque, ICI, au seul moment ou
+           quelqu un regarde. Le decouvrir le jour d une restauration serait le
+           pire des deux. */
+        if (r.appErreur) {
+          dire('Sauvegarde créée ('+(r.taille||'')+') — mais l’application n’a pas été conservée : '+r.appErreur, 'att');
+        } else if (r.appVersion) {
+          dire('Sauvegarde créée ('+(r.taille||'')+') — application '+r.appVersion
+            + ' conservée ('+(r.appFichiers||0)+' installateur'+((r.appFichiers||0)>1?'s':'')+').', 'bon');
+        } else {
+          dire('Sauvegarde créée ('+(r.taille||'')+').', 'bon');
+        }
+      }
       else { if (go){ go.disabled=false; go.textContent='Créer la sauvegarde'; } dire('Échec : '+expliquer(r), 'err'); }
     });
   }
