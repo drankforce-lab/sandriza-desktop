@@ -84,6 +84,25 @@ tbody tr.credit td{color:var(--tx-ok)}
   border-radius:9px;padding:.45rem .65rem;font-size:.79rem;line-height:1.5}
 .avis.bon{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);color:var(--tx-ok)}
 .avis.info{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.4);color:var(--tx-bleu)}
+/* ── FRAIS STRIPE TAX — arrive des Depenses le 2026-09-08 ────────────────────
+   Meme habillage que la ou il vivait, a la lettre : il est deja connu de lui, et
+   le deplacer d ecran n est pas une raison de le redessiner. Le violet le tient
+   a part des tuiles de taxes — ce n est pas un montant a remettre, c est ce que
+   le service nous facture.
+   ⚠ Les deux reprises html.jour sont OBLIGATOIRES : un fond violet a .07 sur
+   du blanc devient invisible, et le titre a #b6a6f7 sortait a 1,9 de contraste
+   en mode clair. Valeurs reprises telles quelles du CSS d origine. */
+.frais{border:1px solid rgba(124,92,255,.32);background:rgba(124,92,255,.07);
+  border-radius:11px;padding:.7rem .9rem;margin:0 0 .8rem}
+.frais .ft{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#b6a6f7}
+.frais .fv{font:700 1.35rem/1.2 Georgia,serif;margin:.15rem 0 .2rem}
+.frais .fx{font-size:.78rem;color:var(--tx2);line-height:1.55}
+.frais .fx b{color:var(--tx)}
+.frais .fm{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}
+.frais .fm span{font-size:.74rem;color:var(--tx2);background:var(--v05);
+  border:1px solid var(--v10);border-radius:99px;padding:.12rem .55rem}
+html.jour .frais{background:rgba(90,60,190,.08);border-color:rgba(90,60,190,.28)}
+html.jour .frais .ft{color:#5b3fb0}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
   background:rgba(148,163,184,.16);color:var(--tx-gris2);margin:.1rem .25rem 0 0}
 /* La pastille du panneau d'AVIS (fond bleu clair en mode jour) : les gris de la
@@ -183,6 +202,17 @@ ${JS_ACTIVITE}${JS_DIRE}
   var ONGLET = '${depart}';
   var ANNEE = 0;
   var TRIM = 0;             // trimestre choisi pour les documents trimestriels
+  /* Frais Stripe Tax (arrives des Depenses le 2026-09-08) : lus A PART, APRES le
+     premier dessin. C est un aller-retour reseau (le relais interroge Turso) ;
+     le joindre a impot:donnees ferait attendre tout l ecran pour un encart.
+     ⚠ SON ECHEC NE DOIT RIEN CASSER : l onglet est deja dessine et n en depend
+     pas. Un droit manquant ou un relais injoignable remplit l encart d une
+     explication, il ne vide pas l ecran. On ne relit qu au changement d annee. */
+  var FRAIS = null, FRAIS_AN = null;
+  function fmtArgent(n){
+    try { return (Number(n)||0).toLocaleString('fr-CA', { style:'currency', currency:'CAD' }); }
+    catch(e){ return (Number(n)||0).toFixed(2) + ' $'; }
+  }
   var OCCUPE = false;
   /* ⚠ LE PROFIL ET L AIDE-MEMOIRE SE LISENT A PART, ET SEULEMENT QUAND ON
      OUVRE LEUR ONGLET. Les charger avec le reste ferait attendre l ecran
@@ -422,6 +452,43 @@ ${JS_ACTIVITE}${JS_DIRE}
              + ' : l’inscription aux taxes est obligatoire, et les remises doivent être faites régulièrement.'))
       + '</div>';
 
+    /* ── FRAIS STRIPE TAX — ARRIVE DES DEPENSES LE 2026-09-08 ────────────────
+       Ses mots : << cela a rien a voir dans les depenses, cela devrait plutot
+       etre dans les impots >>. Il a raison, et l encart etait mal place depuis
+       le debut : ce n est pas une depense saisie, c est ce que le service de
+       CALCUL DE TAXE nous facture — donc ca se lit a cote des taxes qu il
+       calcule, pas au milieu des factures de fournisseurs.
+       ⚠ CE N EST PAS UNE DEPENSE ENREGISTREE, et l ecran continue de le dire.
+       Creer la depense tout seul la ferait compter DEUX FOIS le jour ou l on
+       saisit la vraie facture Stripe, sans que l ecart se voie nulle part. On
+       affiche NOTRE decompte pour qu il soit CONFRONTE a la facture.
+       ⚠ L op depenses:fraisStripe garde son nom : c est le relais qui tient ce
+       decompte, et le renommer casserait la liste blanche du pont pour un
+       deplacement d ECRAN. Le nom d une op dit d ou vient la donnee, pas ou elle
+       s affiche. */
+    if (FRAIS !== null) {
+      h += '<div class="frais">'
+        + '<div class="ft">Frais Stripe Tax ' + esc(String(FRAIS.annee || ANNEE)) + '</div>';
+      if (FRAIS.erreur) {
+        h += '<div class="fx">' + esc(FRAIS.erreur) + '</div>';
+      } else if (!FRAIS.transactions) {
+        h += '<div class="fx">Aucune transaction facturée cette année.</div>';
+      } else {
+        h += '<div class="fv">' + esc(fmtArgent(FRAIS.total)) + '</div>'
+          + '<div class="fx">' + FRAIS.transactions + ' transaction'
+          + (FRAIS.transactions > 1 ? 's' : '') + ' facturée'
+          + (FRAIS.transactions > 1 ? 's' : '') + ' par Stripe. '
+          + '<b>Notre décompte</b> : à confronter à la facture Stripe avant de le '
+          + 'saisir en dépense. Rien n’est enregistré automatiquement.</div>';
+        if ((FRAIS.mois || []).length) {
+          h += '<div class="fm">' + FRAIS.mois.map(function(m){
+            return '<span>' + esc(m.mois) + ' · ' + esc(fmtArgent(m.total)) + '</span>';
+          }).join('') + '</div>';
+        }
+      }
+      h += '</div>';
+    }
+
     if (t.nbRemb) {
       h += '<div class="aide">↩ ' + t.nbRemb + ' remboursement' + (t.nbRemb > 1 ? 's' : '')
         + ' déduit' + (t.nbRemb > 1 ? 's' : '') + ' de ces chiffres : −' + esc(t.rembSousTotal)
@@ -610,6 +677,20 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (ONGLET === 'memo') dessiner();
       });
     }
+    /* L encart des frais Stripe ne vit que dans l onglet des taxes : on ne va
+       pas chercher un decompte que personne ne regarde. */
+    if (ONGLET === 'taxes' || !ONGLET) chargerFrais();
+  }
+
+  function chargerFrais(){
+    if (FRAIS_AN === ANNEE) return;
+    FRAIS_AN = ANNEE;
+    appeler('depenses:fraisStripe', [ANNEE]).then(function(r){
+      if (r && r.ok) FRAIS = r;
+      else if (r && r.motif === 'droit') FRAIS = null;   // pas le droit : on se tait
+      else FRAIS = { annee: ANNEE, erreur: expliquer(r), transactions: 0, mois: [] };
+      if (ONGLET === 'taxes' || !ONGLET) dessiner();
+    });
   }
 
   corps.onclick = function(ev){

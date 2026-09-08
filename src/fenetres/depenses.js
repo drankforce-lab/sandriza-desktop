@@ -116,17 +116,9 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .avis{background:rgba(180,120,10,.1);border:1px solid rgba(180,120,10,.4);color:var(--tx-att);
   border-radius:9px;padding:.45rem .65rem;font-size:.79rem;line-height:1.5}
 
-.frais{border:1px solid rgba(124,92,255,.32);background:rgba(124,92,255,.07);
-  border-radius:11px;padding:.7rem .9rem;margin:0 0 .8rem}
-.frais .ft{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#b6a6f7}
-.frais .fv{font:700 1.35rem/1.2 Georgia,serif;margin:.15rem 0 .2rem}
-.frais .fx{font-size:.78rem;color:var(--tx2);line-height:1.55}
-.frais .fx b{color:var(--tx)}
-.frais .fm{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}
-.frais .fm span{font-size:.74rem;color:var(--tx2);background:var(--v05);
-  border:1px solid var(--v10);border-radius:99px;padding:.12rem .55rem}
-html.jour .frais{background:rgba(90,60,190,.08);border-color:rgba(90,60,190,.28)}
-html.jour .frais .ft{color:#5b3fb0}
+/* Le CSS de l encart << Frais Stripe Tax >> est parti AVEC lui vers impot.js
+   le 2026-09-08 : une regle qui ne peint plus rien est une regle qui trompe le
+   prochain lecteur. */
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
@@ -202,10 +194,6 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   var D = null;
   var ANNEE = 0, MOIS = 0, CAT = '';
-  /* Frais Stripe Tax : lus A PART, APRES le premier dessin. C est un
-     aller-retour reseau (le relais interroge Turso) ; le joindre a
-     depenses:donnees ferait attendre toute la liste pour une ligne. */
-  var FRAIS = null, FRAIS_AN = null;
   function fmtArgent(n){
     try { return (Number(n)||0).toLocaleString('fr-CA', { style:'currency', currency:'CAD' }); }
     catch(e){ return (Number(n)||0).toFixed(2) + ' $'; }
@@ -329,36 +317,17 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="sub">' + esc(D.periode) + '</div></div>'
       + '</div>';
 
-    /* ── FRAIS STRIPE TAX (#22) ────────────────────────────────────────
-       Stripe facture la TRANSACTION (0,50 $), pas le calcul. Le relais tient ce
-       decompte depuis le 2026-08-11 et PERSONNE ne le lisait : on payait ces
-       transactions sans jamais les voir passer en comptabilite.
-       ⚠ CE N EST PAS UNE DEPENSE ENREGISTREE, et l ecran le dit. Creer la
-       depense tout seul la ferait compter DEUX FOIS le jour ou l on saisit la
-       vraie facture Stripe, sans que l ecart se voie nulle part. On affiche
-       NOTRE decompte pour qu il soit CONFRONTE a la facture. */
-    if (FRAIS !== null) {
-      h += '<div class="frais">'
-        + '<div class="ft"><span class="ic">💳</span> Frais Stripe Tax ' + esc(String(FRAIS.annee || ANNEE)) + '</div>';
-      if (FRAIS.erreur) {
-        h += '<div class="fx">' + esc(FRAIS.erreur) + '</div>';
-      } else if (!FRAIS.transactions) {
-        h += '<div class="fx">Aucune transaction facturée cette année.</div>';
-      } else {
-        h += '<div class="fv">' + esc(fmtArgent(FRAIS.total)) + '</div>'
-          + '<div class="fx">' + FRAIS.transactions + ' transaction'
-          + (FRAIS.transactions > 1 ? 's' : '') + ' facturée'
-          + (FRAIS.transactions > 1 ? 's' : '') + ' par Stripe. '
-          + '<b>Notre décompte</b> : à confronter à la facture Stripe avant de le '
-          + 'saisir en dépense. Rien n’est enregistré automatiquement.</div>';
-        if ((FRAIS.mois || []).length) {
-          h += '<div class="fm">' + FRAIS.mois.map(function(m){
-            return '<span>' + esc(m.mois) + ' · ' + esc(fmtArgent(m.total)) + '</span>';
-          }).join('') + '</div>';
-        }
-      }
-      h += '</div>';
-    }
+    /* ── FRAIS STRIPE TAX (#22) — PARTI VERS L IMPOT LE 2026-09-08 ───────────
+       Ses mots : << cela a rien a voir dans les depenses, cela devrait plutot
+       etre dans les impots >>. L encart vit maintenant dans l onglet TAXES de la
+       fenetre Impot, avec son etat, son chargement et son habillage.
+       ⚠ NE PAS LE REMETTRE ICI : ce n est pas une depense saisie, c est ce que
+       le service de CALCUL DE TAXE facture — sa place est a cote des taxes qu il
+       calcule, pas au milieu des factures de fournisseurs.
+       ⚠ L op depenses:fraisStripe GARDE SON NOM, appelee depuis impot.js : le
+       nom d une op dit d OU VIENT la donnee (le relais), pas ou elle s affiche.
+       La renommer pour un deplacement d ecran casserait la liste blanche du pont
+       et la parite des deux listes, pour rien. */
 
     /* ⚠ La zone de depot vivait ICI, pleine largeur. Elle est remontee dans la
        barre d outils, a droite de << Nouvelle depense >>. Ne pas la remettre : sa
@@ -1264,22 +1233,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       var poserQuestion = (OUVERTURE === 'fermeture');
       if (ouvrirApres) OUVERTURE = 'liste';
       dessiner();
-      chargerFrais();
       if (ouvrirApres) { ouvrirNouvelle(); if (poserQuestion) { FERMER_DEMANDE = true; dessiner(); } }
-    });
-  }
-
-  /* ⚠ SON ECHEC NE DOIT RIEN CASSER : la liste est deja dessinee et n en depend
-     pas. Un droit manquant ou un relais injoignable remplit l encart d une
-     explication, il ne vide pas l ecran. On ne relit qu au changement d ANNEE. */
-  function chargerFrais(){
-    if (FRAIS_AN === ANNEE) return;
-    FRAIS_AN = ANNEE;
-    appeler('depenses:fraisStripe', [ANNEE]).then(function(r){
-      if (r && r.ok) FRAIS = r;
-      else if (r && r.motif === 'droit') FRAIS = null;
-      else FRAIS = { annee: ANNEE, erreur: expliquer(r), transactions: 0, mois: [] };
-      if (!FORM && !DETAIL) dessiner();
     });
   }
 
