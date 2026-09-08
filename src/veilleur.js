@@ -12,23 +12,31 @@
  *     devrait s'installer en même temps que l'application, et on pourrait le
  *     désactiver au besoin et le réinstaller manuellement via l'application. »
  *
- * ══ CE FICHIER EST UN PROCESSUS À PART, ET C'EST TOUTE LA DEMANDE ═══════════
- * « même si l'application est fermée » écarte la solution facile (garder la
- * fenêtre d'administration vivante et cachée). Le même binaire est donc lancé
- * une seconde fois avec `--veilleur` : `main.js` détecte le drapeau à sa
- * première ligne et confie tout à ce module, sans jamais construire
- * l'administration. Un binaire, deux processus, aucune seconde installation à
- * faire (son point 5).
+ * ══ CE FICHIER N'EST PLUS UN PROCESSUS À PART — 2026-09-08 ══════════════════
+ * Sa demande : « si on ferme l'application elle devrait se réduire dans la zone
+ * de notification et se mettre en mode veille pour les commandes AU LIEU DU
+ * VEILLEUR ». La veille vit donc DANS le processus de l'administration, dont la
+ * fenêtre se cache au lieu de se fermer. Un seul processus, une seule icône.
  *
- * ⚠⚠ LE PIÈGE QUI AURAIT TUÉ LE VEILLEUR AU DÉMARRAGE : `requestSingleInstanceLock`
- * est indexé sur le dossier `userData`. Le veilleur, partageant celui de
- * l'administration, se serait vu refuser le verrou par l'application déjà
- * ouverte et se serait ÉTEINT AUSSITÔT — sans rien dire, puisque `app.quit()`
- * est silencieux. Il déplace donc son `userData` dans un sous-dossier AVANT de
- * demander le verrou. Il garde ainsi son propre verrou (deux veilleurs restent
- * impossibles) sans marcher sur celui de l'administration.
- * ⚠ Et comme le jeton, lui, doit rester COMMUN aux deux, on dit explicitement au
- * module du secret d'aller le chercher dans le dossier de l'application.
+ * ⚠⚠ CE QUE CE CHANGEMENT FAIT DISPARAÎTRE, ET C'EST SON VRAI GAIN. Le processus
+ * séparé avait engendré, en une seule journée : un verrou d'instance à part, un
+ * sous-dossier `userData`, une racine partagée entre deux processus, un fichier
+ * chiffré, une surveillance de dossier, un diagnostic à deux chemins et une
+ * entrée de registre propre. Chaque pièce était défendable, aucune n'était
+ * nécessaire — c'est lui qui avait posé la bonne question (« pourquoi un secret
+ * de plus ? »). Tout ça part avec le second processus.
+ *
+ * ⚠⚠ ET ÇA CORRIGE LE DÉFAUT QU'IL A SIGNALÉ LE 2026-09-08 : depuis l'icône,
+ * « Ouvrir l'administration » et le double-clic ne faisaient RIEN. Les deux
+ * RELANÇAIENT LE BINAIRE par `spawn`, en espérant que le verrou d'instance
+ * unique ramène la fenêtre. Attachée, l'icône appartient à l'administration :
+ * « ouvrir » MONTRE la fenêtre qui est déjà là. Il n'y a plus de lancement à
+ * réussir, donc plus de lancement à rater.
+ *
+ * ⚠ « même si l'application est fermée » RESTE SERVI, et par le même geste : le
+ * bouton X ne quitte plus, il CACHE. La veille continue exactement comme avant,
+ * c'est la fenêtre qui disparaît. Quitter pour de vrai se fait par le menu
+ * (Fichier → Quitter, ou l'entrée de l'icône).
  *
  * ══ CE QU'IL NE FAIT PAS, ET POURQUOI ═══════════════════════════════════════
  * Il ne lit AUCUNE commande. Il interroge `notif-feed.php`, qui ne rend que des
@@ -42,15 +50,13 @@
 const path = require('path');
 const fs = require('fs');
 const { app, Tray, Menu, Notification, nativeImage, BrowserWindow, shell } = require('electron');
-/* ⚠⚠ `spawn` ET NON `execFile`, ET C'EST LA CAUSE DU « quand je ferme
-   l'application, le veilleur se ferme aussi » (signalé le 2026-09-06).
-   `execFile` est fait pour RÉCUPÉRER LA SORTIE d'une commande : il monte des
-   tuyaux d'entrée-sortie vers l'enfant et garde une référence dessus. `.unref()`
-   sur l'objet ne suffit alors pas — les tuyaux, eux, restent attachés, et sous
-   Windows l'enfant part avec le parent.
-   `spawn` + `detached: true` + `stdio: 'ignore'` détache pour de vrai. C'était
-   la moitié de sa demande : « et ce même si l'application est fermée ». */
-const { spawn } = require('child_process');
+/* ⚠⚠ PLUS AUCUN LANCEMENT DE PROCESSUS ICI (2026-09-08). Il y avait un `spawn`
+   — et tout un commentaire pour expliquer pourquoi ce n'était pas `execFile` (les
+   tuyaux d'`execFile` gardent l'enfant attaché au parent sous Windows, donc le
+   veilleur mourait avec l'application, signalé le 2026-09-06). Cette explication
+   était juste et elle n'a plus d'objet : il n'y a plus d'enfant à détacher.
+   ⚠ NE PAS RÉINTRODUIRE UN `spawn` ICI. C'est précisément ce chemin — relancer
+   le binaire depuis l'icône — qui ne faisait RIEN chez lui le 2026-09-08. */
 
 /* ⚠⚠ PLUS DE JETON À CONFIGURER — RETIRÉ LE 2026-09-06, SUR SA DEMANDE.
    Ses mots : « je ne veux pas de jeton configuré côté poste pour le veilleur, il
@@ -69,10 +75,11 @@ const { APP_KEY } = require('./cle-app');
 // même patron que `brouillon-garde.js`. Voir son en-tête : c'est la pièce dont
 // l'erreur est muette.
 const { curseurSuivant, aAnnoncer } = require('./veilleur-curseur');
-// Une seule implémentation de « démarrer avec Windows », partagée avec
-// l'administration — deux entrées de registre, deux noms. Voir son en-tête :
-// `setLoginItemSettings` seul n'écrit rien sur ce poste-là.
-const dem = require('./demarrage-auto');
+/* ⚠ `demarrage-auto` N'EST PLUS REQUIS ICI (2026-09-08) : la bascule « Démarrer
+   le veilleur avec Windows » et son entrée de registre propre existaient parce
+   que DEUX processus voulaient deux entrées sous deux noms. Il n'y en a plus
+   qu'un — c'est le « Démarrer avec Windows » de l'APPLICATION qui décide, et il
+   vit dans main.js. Le module, lui, garde `VEILLEUR` : voir plus bas. */
 
 // ── L'ADRESSE INTERROGÉE ─────────────────────────────────────────────────────
 // ⚠ `www.sandriza.com` et NON `adm.sandriza.com`, et ce n'est pas indifférent :
@@ -123,8 +130,11 @@ let dernierEchec = '';        // '' = tout va bien ; sinon le motif, écrit dans
 let pasErreur = 0;            // nombre d'échecs d'affilée (pour espacer)
 
 // ══ ÉTAT PERSISTANT ═════════════════════════════════════════════════════════
-// Dans le dossier du VEILLEUR (pas celui de l'administration) : c'est son état à
-// lui, et le curseur ne veut rien dire pour l'application principale.
+// ⚠ DEPUIS LE 2026-09-08, C'EST LE DOSSIER DE L'ADMINISTRATION — il n'y a plus
+// qu'un processus, donc plus de sous-dossier. `attacher()` reprend l'ancien
+// fichier (`userData/veilleur/veilleur-etat.json`) s'il existe : sans ça, une
+// pause en cours serait silencieusement oubliée et la veille repartirait toute
+// seule, ce qui est le pire résultat possible pour un réglage de pause.
 // ⚠ AUCUN SECRET ICI, ET IL N'Y EN A PLUS NULLE PART : depuis le 2026-09-06 le
 // veilleur s'authentifie par la clé de l'application, embarquée. Ce fichier ne
 // porte qu'un curseur, un numéro de processus et un horodatage.
@@ -250,12 +260,23 @@ function toast(titre, corps, sonNom) {
  * ramène au premier plan (`second-instance` dans main.js) et le nouveau
  * processus s'éteint : rien à détecter de notre côté.
  */
+/* ⚠⚠ RÉÉCRITE LE 2026-09-08, ET C'EST LE DÉFAUT QU'IL A SIGNALÉ. Elle faisait
+   `spawn(process.execPath)` : relancer le binaire dans un SECOND processus en
+   espérant que le verrou d'instance unique de l'administration ramène sa fenêtre
+   au premier plan. Chez lui, ni le double-clic ni l'entrée du menu ne faisaient
+   RIEN — et c'est le genre de panne qu'on ne peut pas diagnostiquer d'ici : un
+   lancement qui échoue silencieusement ne laisse aucune trace.
+   ⚠ LA CORRECTION N'EST PAS DE MIEUX LANCER, C'EST DE NE PLUS LANCER. Attachée
+   au processus de l'administration, cette fonction MONTRE la fenêtre qui existe
+   déjà. Il n'y a plus de processus à créer, donc plus de lancement à réussir.
+   ⚠ Le `spawn` de secours est parti AVEC elle : garder un chemin de repli vers
+   un mécanisme dont on vient de prouver qu'il ne marche pas ne protège de rien.
+   ⚠ Et si `_ouvrirHote` manquait (attacher jamais appelé), on ouvre le portail
+   dans le navigateur plutôt que de ne rien faire : une entrée de menu muette est
+   exactement le défaut dont on sort. */
 function ouvrirAdministration() {
-  try {
-    spawn(process.execPath, [], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
-  } catch {
-    try { shell.openExternal('https://adm.sandriza.com/'); } catch {}
-  }
+  if (_ouvrirHote) { try { _ouvrirHote(); return; } catch {} }
+  try { shell.openExternal('https://adm.sandriza.com/'); } catch {}
 }
 
 // ══ L'INTERROGATION ═════════════════════════════════════════════════════════
@@ -425,88 +446,112 @@ function majTray() {
       ],
     },
     { type: 'separator' },
-    { label: 'Ouvrir l’administration', click: ouvrirAdministration },
+    /* ⚠ EN PREMIER APRÈS LE SÉPARATEUR, ET EN GRAS PAR DÉFAUT (`default: true`) :
+       c'est le geste qu'on vient chercher neuf fois sur dix, et c'est aussi
+       celui qui ne marchait pas. Windows met l'entrée par défaut en gras et
+       l'associe au double-clic. */
+    { label: 'Ouvrir l’administration', default: true, click: ouvrirAdministration },
+    /* ⚠⚠ LA DÉCONNEXION EST ICI PARCE QU'IL L'A DEMANDÉE (2026-09-08) : « dans le
+       menu contextuel de l'icône on devrait pouvoir se déconnecter ». Elle passe
+       par la PAGE (`Admin._confirmLogout()` dans la fenêtre) — la confirmation
+       existe parce qu'une déconnexion perd les brouillons ouverts, et un menu de
+       zone de notification se clique par erreur encore plus facilement qu'un
+       menu de fenêtre.
+       ⚠ ELLE MONTRE LA FENÊTRE D'ABORD : poser une question dans une fenêtre
+       cachée, c'est une application qui ne répond plus sans dire pourquoi. */
+    ...(_deconnecterHote ? [{ label: 'Déconnexion…', click: () => { try { _deconnecterHote(); } catch {} } }] : []),
     { type: 'separator' },
-    {
-      /* ⚠ `name` EST OBLIGATOIRE ICI. Sans lui, Electron écrit l'entrée de
-         démarrage sous le nom du binaire — LE MÊME que celui de l'application —
-         et le veilleur ÉCRASERAIT le « Démarrer avec Windows » de
-         l'administration (et réciproquement). Deux entrées, deux noms. */
-      label: 'Démarrer le veilleur avec Windows',
-      type: 'checkbox',
-      checked: demarrageAuto(),
-      click: (item) => poserDemarrageAuto(item.checked),
-    },
-    { type: 'separator' },
-    { label: 'Quitter le veilleur', click: () => { app.exit(0); } },
+    /* ⚠⚠ « QUITTER » QUITTE TOUT MAINTENANT, ET LE LIBELLÉ LE DIT. Avant, cette
+       entrée faisait `app.exit(0)` sur un processus SÉPARÉ : elle ne tuait que la
+       veille, l'administration continuait. Attachée, elle fermerait l'application
+       entière — « Quitter le veilleur » serait donc devenu un mensonge, et le
+       pire genre : celui qui fait perdre le travail en cours.
+       ⚠ Elle passe par l'hôte, jamais par `app.exit(0)` : main.js doit pouvoir
+       refuser (mise à jour en cours) et poser la question des brouillons. */
+    { label: 'Quitter l’application', click: () => { if (_quitterHote) { try { _quitterHote(); } catch {} } } },
   ]);
   tray.setContextMenu(menu);
 }
 
-/* ⚠⚠ PAS D'APPEL DIRECT À `setLoginItemSettings` ICI, ET SURTOUT PAS ENTOURÉ
-   D'UN `catch {}` VIDE — c'est exactement le défaut que ce dépôt a déjà payé le
-   2026-08-20 : la bascule ne posait RIEN sur son poste (Sandboxie virtualise les
-   écritures registre) et ne le disait pas. `demarrage-auto.js` relit après avoir
-   écrit, retombe sur `reg.exe`, et rend un verdict. */
-const demarrageAuto = () => dem.etat(dem.VEILLEUR.nom, dem.VEILLEUR.args);
+/* ⚠⚠ TROIS CHOSES SONT PARTIES D ICI LE 2026-09-08, avec le processus separe :
+   • `demarrer()` — l entree du veilleur AUTONOME (verrou d instance,
+     sous-dossier userData, sortie du Dock, son propre window-all-closed). Le
+     mode ATTACHE, en bas de fichier, ne doit RIEN faire de tout ca : c est
+     l administration qui tient le verrou, le dossier et la fermeture.
+   • `demarrageAuto` / `poserDemarrageAuto` — la bascule << Demarrer le veilleur
+     avec Windows >> et son entree de registre PROPRE. Elle existait parce que
+     deux processus voulaient deux entrees sous deux noms differents. Il n y a
+     plus qu un processus : c est le << Demarrer avec Windows >> de
+     l APPLICATION qui decide, et il vit dans main.js.
+   ⚠ `dem.VEILLEUR` RESTE dans demarrage-auto.js, expres : une entree de
+   registre posee par une version anterieure doit pouvoir etre RETIREE. La
+   supprimer du code laisserait le veilleur d hier demarrer avec Windows pour
+   toujours, sans aucun moyen de l en empecher. */
 
-function poserDemarrageAuto(on) {
-  const r = dem.poser(dem.VEILLEUR.nom, dem.VEILLEUR.args, on);
-  // ⚠ On relit l'état RÉEL pour redessiner le menu : cocher une case qui n'a
-  // rien écrit est le mensonge le plus facile à faire ici.
+/* ══ MODE ATTACHÉ — LA VEILLE DANS LE PROCESSUS DE L'ADMINISTRATION ═══════════
+ * Sa demande du 2026-09-08 : « si on ferme l'application elle devrait se réduire
+ * dans la zone de notification et se mettre en mode veille pour les commandes AU
+ * LIEU DU VEILLEUR ».
+ *
+ * ⚠⚠ ET ÇA CORRIGE LE DÉFAUT QU'IL VENAIT DE SIGNALER, PAR DISPARITION DE SA
+ * CAUSE. Depuis l'icône du veilleur, « Ouvrir l'administration » et le
+ * double-clic ne faisaient RIEN chez lui. Les deux passaient par
+ * `ouvrirAdministration()`, qui RELANCE LE BINAIRE par `spawn` — un second
+ * processus, une seconde chance de rater. Attachée, l'icône appartient à
+ * l'administration : « ouvrir » ne lance plus rien, elle MONTRE la fenêtre qui
+ * est déjà là. Il n'y a plus de lancement à réussir.
+ *
+ * ⚠⚠ CE QUE CE MODE NE FAIT SURTOUT PAS, et c'est la moitié de sa correction :
+ *  • PAS de `requestSingleInstanceLock` — l'administration détient déjà le sien,
+ *    et le redemander ferait quitter le processus qui nous héberge ;
+ *  • PAS de `app.setPath('userData', …/veilleur)` — le sous-dossier séparé
+ *    n'avait de sens qu'entre DEUX processus. C'est lui qui avait engendré la
+ *    racine partagée, le fichier chiffré et la surveillance de dossier de la
+ *    26ᵉ séance, et sa disparition est le vrai gain de ce changement ;
+ *  • PAS de `window-all-closed` — main.js le tient, et deux gestionnaires qui
+ *    décident de la même chose finissent par se contredire.
+ *
+ * ⚠ LE FICHIER D'ÉTAT CHANGE DE PLACE, DONC ON REPREND L'ANCIEN. `cheminEtat()`
+ * lit `userData`, qui n'est plus le sous-dossier : sans reprise, une pause en
+ * cours serait silencieusement oubliée et la veille repartirait toute seule.
+ */
+let _ouvrirHote = null;   // montrer la fenêtre de l'administration
+let _quitterHote = null;  // quitter POUR DE VRAI (pas seulement fermer)
+let _deconnecterHote = null;
+
+/* Reprise de l'état laissé par l'ancien processus séparé. On ne l'écrase pas
+   s'il existe déjà à la nouvelle place : une reprise ne doit jamais défaire un
+   réglage plus récent. */
+function _reprendreEtatSepare() {
+  try {
+    const neuf = cheminEtat();
+    if (fs.existsSync(neuf)) return;
+    const ancien = path.join(app.getPath('userData'), 'veilleur', 'veilleur-etat.json');
+    if (!fs.existsSync(ancien)) return;
+    fs.mkdirSync(path.dirname(neuf), { recursive: true });
+    fs.copyFileSync(ancien, neuf);
+  } catch {}
+}
+
+function attacher(hote) {
+  _ouvrirHote = (hote && hote.ouvrir) || null;
+  _quitterHote = (hote && hote.quitter) || null;
+  _deconnecterHote = (hote && hote.deconnecter) || null;
+
+  _reprendreEtatSepare();
+  etat = null;   // force la relecture depuis la nouvelle place
+
+  let img = nativeImage.createFromPath(ICON_PATH);
+  try { if (!img.isEmpty()) img = img.resize({ width: 16, height: 16 }); } catch {}
+  tray = new Tray(img);
   majTray();
-  if (!r.ok) {
-    // Un échec silencieux redeviendrait le défaut de 2026-08-20. Le veilleur n'a
-    // pas d'écran : la notification est le seul endroit où le dire.
-    try {
-      new Notification({
-        title: 'Démarrage automatique non posé',
-        body: r.detail || 'Windows a refusé l’écriture. Le veilleur ne se relancera pas tout seul.',
-        icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
-        silent: true,
-      }).show();
-    } catch {}
-  }
-  return r;
+  // Double-clic : le geste que tout le monde essaie en premier, et celui qui ne
+  // marchait pas. Il montre la fenêtre, il ne lance plus rien.
+  tray.on('double-click', ouvrirAdministration);
+
+  ordonnancer();
+  unTour().catch(() => {});
+  return tray;
 }
 
-// ══ DÉMARRAGE ═══════════════════════════════════════════════════════════════
-function demarrer() {
-  // ⚠ AVANT `requestSingleInstanceLock` — voir l'en-tête. Le dossier du veilleur
-  // est un SOUS-dossier de celui de l'administration : on peut ainsi désigner
-  // celui du parent pour le jeton, sans le calculer deux fois.
-  const racineApp = app.getPath('userData');
-  try { app.setPath('userData', path.join(racineApp, 'veilleur')); } catch {}
-
-  if (!app.requestSingleInstanceLock()) { app.exit(0); return; }
-  app.on('second-instance', () => { majTray(); });
-
-  // ⚠ Le veilleur n'a PAS d'icône dans la barre des tâches et ne doit pas en
-  // avoir : sa place est la zone de notification. Sous macOS, cela veut dire
-  // sortir du Dock.
-  try { if (process.platform === 'darwin' && app.dock) app.dock.hide(); } catch {}
-
-  app.whenReady().then(() => {
-    // Même identité que l'administration : c'est elle qui relie la notification
-    // au raccourci du menu Démarrer, donc au nom et à l'icône affichés.
-    try { app.setAppUserModelId('com.sandriza.admin'); } catch {}
-
-    let img = nativeImage.createFromPath(ICON_PATH);
-    try { if (!img.isEmpty()) img = img.resize({ width: 16, height: 16 }); } catch {}
-    tray = new Tray(img);
-    majTray();
-    // Double-clic sur l'icône : le geste que tout le monde essaie en premier.
-    tray.on('double-click', ouvrirAdministration);
-
-    ordonnancer();
-    unTour().catch(() => {});
-  });
-
-  /* ⚠⚠ SANS CECI, LE VEILLEUR MOURRAIT DÈS SON PREMIER SON. Le comportement par
-     défaut d'Electron est de quitter quand la dernière fenêtre se ferme — or la
-     seule fenêtre du veilleur est le haut-parleur invisible. Un processus de
-     zone de notification n'a pas de fenêtre : il ne quitte que sur « Quitter ». */
-  app.on('window-all-closed', () => { /* on reste */ });
-}
-
-module.exports = { demarrer };
+module.exports = { attacher };

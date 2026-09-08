@@ -46,10 +46,21 @@ const { execFile, spawn } = require('child_process');
    le veilleur mourrait avant d'avoir posé son icône, EN SILENCE.
    `return` au premier niveau d'un module CommonJS est licite (Node enveloppe le
    fichier dans une fonction) : rien de ce qui suit n'est même lu. */
-if (process.argv.includes('--veilleur')) {
-  require('./veilleur').demarrer();
-  return;
-}
+/* ⚠⚠ L'AIGUILLAGE `--veilleur` EST RETIRÉ (2026-09-08), sur sa demande : « si on
+   ferme l'application elle devrait se réduire dans la zone de notification et se
+   mettre en mode veille pour les commandes AU LIEU DU VEILLEUR ». Il n'y a plus
+   de second processus : la veille est ATTACHÉE à celui-ci (voir `veilleur.attacher`
+   plus bas), et le bouton X cache la fenêtre au lieu de quitter.
+   ⚠ UN RACCOURCI DE DÉMARRAGE POSÉ PAR UNE VERSION ANTÉRIEURE PORTE ENCORE
+   `--veilleur`, et il faut qu'il ouvre quelque chose d'utile plutôt que rien.
+   Sans ce garde, Windows relancerait l'administration COMPLÈTE au démarrage
+   pour tous ceux qui avaient activé le veilleur — c'est-à-dire une fenêtre qui
+   s'ouvre sans qu'on l'ait demandée. On démarre donc CACHÉ : la veille tourne,
+   l'icône est là, et rien ne surgit à l'écran.
+   ⚠ Le drapeau n'est PAS retiré du registre ici : c'est le réglage
+   « Démarrer avec Windows » de l'application qui en décide, et le retirer de
+   force priverait quelqu'un d'un démarrage automatique qu'il avait voulu. */
+const DEMARRER_CACHE = process.argv.includes('--veilleur');
 
 // ⚠ EN HAUT, PAS AVEC LES AUTRES MODULES DE LA COQUILLE (qui sont chargés plus
 // bas) : `_dossierUtilisable` prend sa référence au chargement du fichier, donc
@@ -116,6 +127,74 @@ const armAppHeader = () => {
 const IN = 25400; // 1 pouce = 25 400 microns (unité attendue par print({pageSize}))
 
 let mainWindow = null;
+/* ══ LA VEILLE EN ZONE DE NOTIFICATION (2026-09-08) ══════════════════════════
+   `trayVeille` : l'icône, posée par `veilleur.attacher()` quand l'application
+   est prête. ⚠ ELLE CONDITIONNE LE « X CACHE » : sans icône, cacher la fenêtre
+   rendrait l'application INTROUVABLE — plus de fenêtre, plus d'icône, et un
+   processus vivant que seul le gestionnaire des tâches peut arrêter. Si la pose
+   de l'icône échoue (image absente, zone de notification refusée), le X
+   retrouve donc son ancien comportement et quitte.
+   `_szVraiQuit` : posé par les DEUX seules portes qui quittent pour de vrai —
+   Fichier → Quitter, et l'entrée de l'icône. */
+let trayVeille = null;
+let _szVraiQuit = false;
+/* Quitter POUR DE VRAI. ⚠ Passe par `app.quit()`, jamais `app.exit()` : `quit()`
+   déclenche `before-quit` et les `close` des fenêtres, donc la question des
+   brouillons et le refus pendant une mise à jour. `exit()` tuerait le processus
+   avec les saisies en cours. */
+const quitterVraiment = () => {
+  if (fermetureBloquee()) { refuserFermeture(); return; }
+  _szVraiQuit = true;
+  app.quit();
+};
+/* Montrer l'administration depuis l'icône. ⚠ TROIS GESTES, PAS UN : `show()` ne
+   suffit pas si la fenêtre a été RÉDUITE (elle reste dans la barre des tâches),
+   et sans `focus()` elle revient derrière la fenêtre active — on croit alors que
+   le clic n'a rien fait, ce qui est exactement le défaut qu'il a signalé. */
+const montrerAdministration = () => {
+  try {
+    if (!mainWindow || mainWindow.isDestroyed()) { createWindow(); return; }
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  } catch {}
+};
+/* Poser la veille et son icône. ⚠ UNE SEULE DÉFINITION, appelée au démarrage ET
+   quand on rallume la case : deux blocs qui attachent la même chose finiraient
+   par diverger (l'un aurait la déconnexion, l'autre pas). */
+const _veilleAttacher = () => {
+  if (trayVeille) return trayVeille;
+  try {
+    trayVeille = require('./veilleur').attacher({
+      ouvrir: montrerAdministration,
+      quitter: quitterVraiment,
+      /* La déconnexion passe par la PAGE, jamais par la coquille : c'est
+         `Admin._confirmLogout()` qui sait ce qu'une déconnexion emporte (les
+         brouillons ouverts) et qui pose la question. On MONTRE la fenêtre
+         d'abord — une question posée dans une fenêtre cachée est une
+         application qui ne répond plus sans dire pourquoi. */
+      deconnecter: () => {
+        montrerAdministration();
+        try {
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.executeJavaScript(
+              'window.Admin && Admin._confirmLogout ? Admin._confirmLogout() : null', true).catch(() => {});
+          }
+        } catch {}
+      },
+    });
+  } catch (e) { trayVeille = null; }
+  return trayVeille;
+};
+/* ⚠⚠ DÉTACHER DOIT MONTRER LA FENÊTRE SI ELLE EST CACHÉE. Retirer l'icône
+   pendant que la fenêtre est cachée laisserait une application sans fenêtre ET
+   sans icône : vivante, invisible, et arrêtable seulement par le gestionnaire
+   des tâches. C'est le pire état atteignable de tout ce mécanisme. */
+const _veilleDetacher = () => {
+  try { if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) montrerAdministration(); } catch {}
+  try { if (trayVeille) trayVeille.destroy(); } catch {}
+  trayVeille = null;
+};
 
 const isAllowed = (urlStr) => {
   try { return ALLOWED_HOSTS.includes(new URL(urlStr).hostname); }
@@ -585,17 +664,16 @@ const _veilleurLireEtat = () => {
    pendant les trois minutes suivantes.
    Les deux ensemble : un processus qui existe ET qui a donné signe de vie
    récemment. */
-const _veilleurEnMarche = () => {
-  const e = _veilleurLireEtat();
-  const pid = parseInt(e.pid, 10);
-  if (!Number.isFinite(pid) || pid <= 0) return false;
-  try { process.kill(pid, 0); } catch { return false; }   // n'envoie rien : teste l'existence
-  const vu = Date.parse(e.vu || '');
-  if (!Number.isFinite(vu)) return false;
-  // Le veilleur bat toutes les 60 s ; on tolère trois tours ratés avant de le
-  // déclarer figé, pour ne pas crier au loup sur une machine qui a dormi.
-  return (Date.now() - vu) < 3.5 * 60 * 1000;
-};
+/* ⚠⚠ RÉÉCRITE LE 2026-09-08 : LA QUESTION A CHANGÉ DE NATURE. Tout ce qui est
+   décrit au-dessus — le PID d'un autre processus, son battement, le PID
+   réattribué au bloc-notes de quelqu'un — répondait à « un SECOND PROCESSUS
+   tourne-t-il ? ». Il n'y en a plus. La veille est dans CE processus, donc la
+   réponse est simplement : l'icône a-t-elle été posée ?
+   ⚠ ET IL FAUT QUE CE SOIT `trayVeille`, PAS UN BOOLÉEN À NOUS. Si la pose de
+   l'icône échoue, la veille n'existe pas et l'écran doit le dire — un drapeau
+   posé à la main dirait « en marche » sur une veille absente, ce qui est
+   exactement le mensonge que l'ancien code se donnait tant de mal à éviter. */
+const _veilleurEnMarche = () => !!trayVeille;
 
 const _veilleurEtat = () => {
   const e = _veilleurLireEtat();
@@ -611,36 +689,35 @@ const _veilleurEtat = () => {
     vu: e.vu || null,
     depuis: e.depuis || null,
     avecApp: reglages.get('veilleurAvecApp') !== false,
-    demarrageAuto: demarrageAuto.etat(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args),
+    /* ⚠⚠ L'ENTRÉE DE DÉMARRAGE EST CELLE DE L'APPLICATION MAINTENANT
+       (2026-09-08). Il y en avait DEUX, sous deux noms, parce qu'il y avait deux
+       processus : `VEILLEUR` pour la veille, `APP` pour l'administration.
+       Attachée, la veille démarre AVEC l'application — demander « le veilleur
+       démarre-t-il avec Windows ? » revient à demander si l'application le fait.
+       ⚠ ET ON RÉPOND VRAI SI L'UNE OU L'AUTRE EST POSÉE : l'ancienne entrée
+       `--veilleur` existe encore chez lui, elle démarre bel et bien la veille
+       (main.js démarre caché sur ce drapeau). Répondre « non » alors qu'un
+       raccourci la lance tous les matins ferait cocher une case déjà vraie, et
+       poserait une seconde entrée pour rien. */
+    demarrageAuto: demarrageAuto.etat(demarrageAuto.ADMIN.nom, demarrageAuto.ADMIN.args)
+      || demarrageAuto.etat(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args),
   };
 };
 
-/* Lancer le veilleur = relancer NOTRE PROPRE exécutable avec `--veilleur`.
-   `detached` + `unref` : il ne doit pas mourir avec l'administration — c'est
-   toute la demande (« même si l'application est fermée »). */
-/* Les arguments du veilleur, en un seul endroit.
-   ⚠ `--racine=` a existé une journée, pour dire au veilleur où vivait le jeton
-   partagé. Le jeton est parti (la clé d'application le remplace), donc plus rien
-   ne doit s'accorder entre les deux processus : l'argument est parti avec lui.
-   Un correctif dont la CAUSE disparaît doit disparaître aussi — sinon il reste
-   du code que personne n'ose retirer parce que plus personne ne sait pourquoi il
-   est là. */
-const veilleurArgs = () => ['--veilleur'];
-
-const _veilleurLancer = () => {
-  try {
-    /* ⚠⚠ `spawn` ET NON `execFile` — c'est la cause du « quand je ferme
-       l'application, le veilleur se ferme aussi ». `execFile` est fait pour
-       RÉCUPÉRER LA SORTIE d'une commande : il monte des tuyaux vers l'enfant et
-       garde une référence dessus, donc `.unref()` ne détache pas vraiment et
-       sous Windows l'enfant part avec le parent. C'était la moitié de sa demande
-       d'origine : « et ce même si l'application est fermée ». */
-    spawn(process.execPath, veilleurArgs(), {
-      detached: true, stdio: 'ignore', windowsHide: true,
-    }).unref();
-    return true;
-  } catch { return false; }
-};
+/* ⚠⚠ LE LANCEUR DU PROCESSUS SÉPARÉ EST PARTI LE 2026-09-08. Il faisait
+   `spawn(process.execPath, ['--veilleur'], { detached: true })`, et tout un
+   commentaire expliquait pourquoi ce n'était pas `execFile` (ses tuyaux gardent
+   l'enfant attaché au parent sous Windows, donc le veilleur mourait avec
+   l'application — signalé le 2026-09-06).
+   Cette explication était juste, et elle n'a plus d'objet : la veille est dans
+   CE processus (`_veilleAttacher`), il n'y a plus d'enfant à détacher.
+   ⚠ `veilleurArgs()` part avec lui. `--racine=` avait déjà disparu quand le
+   jeton partagé a été retiré ; `--veilleur` disparaît maintenant que le second
+   processus n'existe plus. Le drapeau reste RECONNU au démarrage (voir
+   `DEMARRER_CACHE` en tête de fichier) parce que d'anciens raccourcis le
+   portent — mais on ne l'ÉMET plus jamais.
+   ⚠ NE PAS LE RÉTABLIR : c'est ce chemin de relance qui, depuis l'icône, ne
+   faisait RIEN chez lui le 2026-09-08. */
 
 ipcMain.handle('veilleur:etat', () => _veilleurEtat());
 
@@ -662,14 +739,27 @@ ipcMain.handle('veilleur:activer', (e, on) => {
    autre. */
 ipcMain.handle('veilleur:avecApp', (e, on) => {
   try { reglages.set('veilleurAvecApp', !!on); } catch { return { ok: false, motif: 'ecriture' }; }
-  // Cocher la case ne doit pas obliger à redémarrer l'application pour en voir
-  // l'effet : si on l'active et qu'il ne tourne pas, on le lance maintenant.
-  if (on && !_veilleurEnMarche()) _veilleurLancer();
+  /* ⚠ COCHER LA CASE AGIT TOUT DE SUITE, comme avant — mais « agir » ne veut
+     plus dire « lancer un processus » : on ATTACHE ou on DÉTACHE la veille.
+     ⚠ EN DÉCOCHANT, ON RETIRE L'ICÔNE — et il faut le savoir : sans icône, le
+     bouton X reprend son ancien comportement et QUITTE l'application. C'est
+     cohérent (pas de veille, donc rien à garder en fond) mais ce n'est pas
+     évident, et c'est écrit ici pour la prochaine lecture. */
+  if (on && !trayVeille) _veilleAttacher();
+  if (!on && trayVeille) _veilleDetacher();
   return { ..._veilleurEtat(), ok: true };
 });
 
 ipcMain.handle('veilleur:demarrageAuto', (e, on) => {
-  const r = demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, on);
+  /* ⚠ L'ENTRÉE POSÉE EST CELLE DE L'APPLICATION (2026-09-08) : la veille démarre
+     avec elle. Poser encore `VEILLEUR` créerait un raccourci `--veilleur` qui
+     ouvrirait l'administration cachée EN PLUS de celle qu'on lance déjà — deux
+     processus, et le verrou d'instance en éteindrait un en silence.
+     ⚠ ET ON RETIRE L'ANCIENNE au passage : laissée en place, elle continuerait à
+     démarrer une seconde instance chaque matin. C'est le seul moyen de s'en
+     débarrasser, et c'est pour ça que `dem.VEILLEUR` reste dans le module. */
+  if (on) { try { demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, false); } catch {} }
+  const r = demarrageAuto.poser(demarrageAuto.ADMIN.nom, demarrageAuto.ADMIN.args, on);
   // ⚠ On rend le verdict COMPLET, `detail` compris : c'est lui qui nomme la
   // cause à l'écran quand Windows refuse l'écriture. Un booléen nu ici, c'est
   // le défaut de 2026-08-20 qu'on rejouerait.
@@ -679,28 +769,40 @@ ipcMain.handle('veilleur:demarrageAuto', (e, on) => {
 /* « Réinstaller manuellement via l'application » (son point 6) : repose l'entrée
    de démarrage ET relance le processus. C'est le seul chemin de réparation
    quand il a été fermé à la main ou qu'il a disparu. */
+/* « Reinstaller manuellement via l application » (son point 6). ⚠ ATTACHEE, il
+   n y a plus rien a REINSTALLER : ce bouton RATTACHE la veille et repose
+   l entree de demarrage de l APPLICATION. Il reste le chemin de reparation quand
+   quelqu un a coupe la veille, ou que la pose de l icone a echoue au demarrage.
+   ⚠ ET IL RETIRE L ANCIENNE ENTREE `--veilleur` : laissee en place, elle
+   lancerait une seconde instance chaque matin, que le verrou d instance
+   eteindrait en silence. */
 ipcMain.handle('veilleur:relancer', async () => {
-  const dm = demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, true);
-  if (!_veilleurEnMarche()) _veilleurLancer();
-  /* ⚠ ON LAISSE AU PROCESSUS LE TEMPS DE POSER SON PREMIER BATTEMENT AVANT DE
-     RELIRE. Sans cette attente, `enMarche` répondait FAUX juste après un
-     lancement RÉUSSI — l'écran aurait annoncé un échec sur une réussite, et on
-     aurait relancé une deuxième fois. */
-  await new Promise((r) => setTimeout(r, 1500));
+  try { demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, false); } catch {}
+  const dm = demarrageAuto.poser(demarrageAuto.ADMIN.nom, demarrageAuto.ADMIN.args, true);
+  try { reglages.set('veilleurAvecApp', true); } catch {}
+  _veilleAttacher();
+  /* ⚠ PLUS D ATTENTE DE 1500 ms. Elle existait parce qu un PROCESSUS mettait du
+     temps a poser son premier battement, et que relire trop tot annoncait un
+     echec sur une reussite. Attachee, la veille est en marche des le retour
+     d `attacher()` : attendre ne ferait que rendre le bouton lent. */
   const et = _veilleurEtat();
   return { ...et, ok: et.enMarche, demarrageDetail: dm.ok ? '' : (dm.detail || '') };
 });
 
+/* ⚠⚠ ARRETER LA VEILLE NE QUITTE PLUS L APPLICATION. Avant, ce bouton TUAIT un
+   processus par son PID. Attachee, tuer ce processus-ci fermerait
+   l administration et le travail en cours avec elle. On DETACHE : l icone part,
+   le sondage s arrete, la fenetre reste.
+   ⚠ On retire aussi les DEUX entrees de demarrage : arreter une veille qui
+   revient a la prochaine ouverture de session n est pas l arreter, c est la
+   reporter. L ancienne `--veilleur` comprise, sans quoi elle la ressusciterait.
+   ⚠ ET LE REGLAGE EST ECRIT : sans lui, le prochain demarrage rattacherait la
+   veille et le bouton n aurait rien arrete de durable. */
 ipcMain.handle('veilleur:arreter', async () => {
-  const e = _veilleurLireEtat();
-  const pid = parseInt(e.pid, 10);
-  // ⚠ On retire AUSSI l'entrée de démarrage : arrêter un veilleur qui revient
-  // à la prochaine ouverture de session n'est pas l'arrêter, c'est le reporter.
-  demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, false);
-  if (Number.isFinite(pid) && pid > 0) {
-    try { process.kill(pid); } catch { /* déjà parti, ou pas à nous : rien à faire */ }
-  }
-  await new Promise((r) => setTimeout(r, 600));
+  try { demarrageAuto.poser(demarrageAuto.VEILLEUR.nom, demarrageAuto.VEILLEUR.args, false); } catch {}
+  try { demarrageAuto.poser(demarrageAuto.ADMIN.nom, demarrageAuto.ADMIN.args, false); } catch {}
+  try { reglages.set('veilleurAvecApp', false); } catch {}
+  _veilleDetacher();
   const et = _veilleurEtat();
   return { ...et, ok: !et.enMarche };
 });
@@ -1122,6 +1224,25 @@ const createWindow = () => {
      tentant une dernière écriture dans TOUTES les vues. Une application
      incondamnable est pire que la perte qu'on évite. */
   mainWindow.on('close', (ev) => {
+    /* ⚠⚠ LE X CACHE, IL NE QUITTE PLUS (2026-09-08, sa demande). C'est le
+       PREMIER test de ce gestionnaire, avant même la question des brouillons —
+       et c'est délibéré : cacher ne perd RIEN. Les saisies en cours restent en
+       mémoire, les vues ancrées restent vivantes, et tout revient tel quel au
+       clic suivant sur l'icône. Poser la question des brouillons ici serait
+       demander de choisir entre garder et jeter pour un geste qui ne jette rien
+       — et on prendrait l'habitude de répondre sans lire.
+       ⚠ ET LA MISE À JOUR GARDE LA PRIORITÉ : `fermetureBloquee()` est testée
+       AVANT, sinon réduire pendant une installation ferait disparaître le seul
+       écran qui dit ce qui se passe.
+       ⚠ `_szVraiQuit` est posé par les DEUX seules portes qui quittent pour de
+       vrai : Fichier → Quitter, et l'entrée de l'icône. Sans lui, l'application
+       serait incondamnable — le pire des deux, comme partout ailleurs ici. */
+    if (fermetureBloquee()) { ev.preventDefault(); refuserFermeture(); return; }
+    if (!_szVraiQuit && trayVeille) {
+      ev.preventDefault();
+      try { mainWindow.hide(); } catch {}
+      return;
+    }
     const sale = garde.premiereAncreeSale(ancrees, (id) => fenSale.has(id));
     const quoi = garde.decisionFermeture({
       bloqueeParMaj:  fermetureBloquee(),
@@ -4101,7 +4222,13 @@ const actionApp = (nom) => {
   switch (nom) {
     // Le bouton de la barre dessinée et l'entrée « Quitter » du menu passent tous
     // deux par ici : un seul garde couvre les deux.
-    case 'quit':        if (fermetureBloquee()) { refuserFermeture(); break; } app.quit(); break;
+    /* ⚠ `quitterVraiment()` ET NON `app.quit()` (2026-09-08) : depuis que le X
+       cache, il faut poser `_szVraiQuit` — sinon le `close` de la fenêtre
+       principale intercepterait ce quit-ci et se contenterait de la cacher.
+       « Quitter » qui réduit l'application serait exactement le genre de
+       mensonge qui fait chercher un processus dans le gestionnaire des tâches.
+       Le refus pendant une mise à jour est dans `quitterVraiment`. */
+    case 'quit':        quitterVraiment(); break;
     case 'minimize':    if (mainWindow) mainWindow.minimize(); break;
     case 'reload':      if (wc) wc.reload(); break;
     case 'reload-hard': if (wc) wc.reloadIgnoringCache(); break;
@@ -4684,7 +4811,13 @@ const buildMenu = () => {
     template.push({ label: 'Fichier', submenu: [
       { label: 'Recharger', role: 'reload' },
       { type: 'separator' },
-      { label: 'Quitter', role: 'quit' },
+      /* ⚠⚠ PAS `role: 'quit'` (2026-09-08). Le rôle d'Electron appelle
+         `app.quit()` sans passer par nous : `_szVraiQuit` resterait faux, le
+         `close` de la fenêtre principale intercepterait, et « Quitter »
+         RÉDUIRAIT l'application au lieu de la fermer. C'est le menu de REPLI —
+         celui qu'on voit avant que le site n'envoie le vrai — donc c'est
+         exactement celui qu'on utilise quand quelque chose va déjà mal. */
+      { label: 'Quitter', accelerator: 'Alt+F4', click: () => quitterVraiment() },
     ] });
   }
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -4839,22 +4972,38 @@ if (!app.requestSingleInstanceLock()) {
       } catch {}
     }, 250);
 
-    /* ══ LE VEILLEUR PART AVEC L'APPLICATION ═══════════════════════════════
-       Sa demande du 2026-09-06. ⚠ ON NE LE LANCE QUE S'IL NE TOURNE PAS DÉJÀ :
-       son propre verrou d'instance unique refuserait le second, qui s'éteindrait
-       en silence — mais on aurait quand même payé le démarrage d'un Electron
-       complet pour rien, à chaque ouverture de l'application.
-       ⚠ Depuis le 2026-09-06 il n'y a plus rien à configurer : le veilleur porte
-       la clé de l'application. Il n'y a donc plus de raison de retenir son
-       lancement — la condition « seulement s'il a un jeton » est partie avec le
-       jeton. */
-    setTimeout(() => {
-      try {
-        if (reglages.get('veilleurAvecApp') === false) return;
-        if (_veilleurEnMarche()) return;
-        _veilleurLancer();
-      } catch {}
-    }, 2500);
+    /* ══ LA VEILLE, DANS CE PROCESSUS-CI (2026-09-08) ═════════════════════════
+       Sa demande : « se mettre en mode veille pour les commandes AU LIEU DU
+       VEILLEUR ». Il n y a plus de second processus a lancer : `_veilleAttacher()`
+       pose l icone de la zone de notification et demarre le sondage ICI.
+       ⚠⚠ SI LA POSE DE L ICONE ECHOUE, `trayVeille` RESTE NUL — et le bouton X
+       reprend son ancien comportement (il quitte). C est le garde qui empeche le
+       pire scenario : une fenetre cachee SANS icone pour la rappeler,
+       c est-a-dire une application vivante et introuvable.
+       ⚠ APRES `createWindow()` : montrer et quitter s appuient sur `mainWindow`.
+       ⚠ Le reglage `veilleurAvecApp` est encore lu, a dessein : quelqu un avait
+       pu couper la veille, et ce choix reste le sien. */
+    if (reglages.get('veilleurAvecApp') !== false) _veilleAttacher();
+
+    /* ⚠⚠ DEMARRAGE CACHE : un raccourci de demarrage pose par une version
+       anterieure porte `--veilleur`. Sans ceci, Windows ouvrirait
+       l ADMINISTRATION COMPLETE a l ouverture de session chez tous ceux qui
+       avaient active le veilleur — une fenetre qui surgit tous les matins sans
+       qu on l ait demandee.
+       ⚠ ET SEULEMENT SI L ICONE EST LA, meme raison qu au-dessus. */
+    if (DEMARRER_CACHE && trayVeille) {
+      try { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide(); } catch {}
+    }
+
+    /* ⚠⚠ DÉMARRAGE CACHÉ : un raccourci de démarrage posé par une version
+       antérieure porte `--veilleur`. Sans ceci, Windows ouvrirait
+       l'ADMINISTRATION COMPLÈTE à l'ouverture de session chez tous ceux qui
+       avaient activé le veilleur — une fenêtre qui surgit sans qu'on l'ait
+       demandée, tous les matins.
+       ⚠ ET SEULEMENT SI L'ICÔNE EST LÀ, même raison qu'au-dessus. */
+    if (DEMARRER_CACHE && trayVeille) {
+      try { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide(); } catch {}
+    }
 
     // PORTE DE LANCEMENT : vérifie la version AVANT d'ouvrir l'administration.
     // C'est elle, et elle seule, qui charge APP_URL — voir verifierAuLancement().
@@ -4871,5 +5020,17 @@ if (!app.requestSingleInstanceLock()) {
     if (_usbTimer) clearInterval(_usbTimer);
   });
 
-  app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+  /* ⚠⚠ NE PAS QUITTER TANT QUE L'ICÔNE VEILLE (2026-09-08). Sans ce garde, tout
+     le « X cache » serait annulé par la porte de derrière : cacher la dernière
+     fenêtre ne déclenche pas `window-all-closed`, mais FERMER une fenêtre native
+     alors que la principale est cachée, oui — et l'application quitterait au
+     moment où l'on croit juste refermer un écran. La veille mourrait avec elle,
+     en silence.
+     ⚠ SANS ICÔNE, ON QUITTE COMME AVANT : c'est le même garde qu'au bouton X.
+     Un processus sans fenêtre ET sans icône n'est pas une veille, c'est une
+     fuite. */
+  app.on('window-all-closed', () => {
+    if (trayVeille) return;
+    if (process.platform !== 'darwin') app.quit();
+  });
 }

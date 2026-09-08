@@ -29,10 +29,19 @@
  * c'était « pourquoi un secret de plus ». Un mécanisme irréprochable au service
  * d'un besoin qui n'existe pas reste du travail à jeter.
  *
- * ⚠ DEUX ÉTATS À NE PAS CONFONDRE : « en marche » (le processus tourne) et « à
- * l'écoute » (il n'est pas en pause). Sans les distinguer, « ça ne marche pas »
- * n'a pas de réponse. (Il y en avait TROIS ; « configuré » est parti avec le
- * jeton, et c'est autant de moins à expliquer.)
+ * ⚠ DEUX ÉTATS À NE PAS CONFONDRE : « en marche » et « à l'écoute » (il n'est
+ * pas en pause). Sans les distinguer, « ça ne marche pas » n'a pas de réponse.
+ * (Il y en avait TROIS ; « configuré » est parti avec le jeton, et c'est autant
+ * de moins à expliquer.)
+ * ⚠⚠ « EN MARCHE » NE VEUT PLUS DIRE « UN PROCESSUS TOURNE » (2026-09-08). La
+ * veille vit maintenant DANS l'administration — sa demande : « se mettre en mode
+ * veille pour les commandes au lieu du veilleur ». « En marche » veut donc dire
+ * « l'icône de la zone de notification est posée », ce qui est la seule chose
+ * observable et la seule qui compte : sans icône, pas de veille.
+ * ⚠ ET « Arrêter » N'ARRÊTE PLUS UN PROCESSUS : il retire l'icône et le sondage.
+ * L'administration, elle, reste ouverte — la tuer emporterait le travail en
+ * cours. Le texte des boutons est resté le même parce qu'il décrit le GESTE, et
+ * le geste n'a pas changé ; c'est ce qui se passe derrière qui a changé.
  *
  * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit.
