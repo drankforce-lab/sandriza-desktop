@@ -2204,7 +2204,10 @@ module.exports = {
     };
     return [
       { nom: 'accès', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:stats': { ok: true, statsHidden: true }, 'journal:purger:acces': { ok: true, conserves: 2 }, 'journal:export:acces': { ok: true } } },
-      { nom: 'automatisations', id: 'automatisations', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
+      // ⚠ `autoTotal: 1` ET `conserves: 1` : le compte rendu par la purge de cet
+      // onglet est celui des AUTOMATISATIONS, pas le total du journal (4.58.0).
+      { nom: 'automatisations', id: 'automatisations', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
+        'journal:purger:auto': { ok: true, conserves: 1 }, 'journal:export:auto': { ok: true } } },
       { nom: 'impressions', id: 'impressions', reponses: { identite: IDENTITE, 'journal:donnees': donnees, 'journal:purger:prints': { ok: true, conserves: 2 }, 'journal:export:prints': { ok: true } } },
       { nom: 'sans résultat', id: 'recherches', reponses: { identite: IDENTITE, 'journal:donnees': donnees } },
       // ⚠ `id: 'jserreurs'` OUVRE L'ONGLET. Le contrôle ne clique pas : sans

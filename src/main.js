@@ -2043,6 +2043,11 @@ const OPS_PONT = new Set([
   'journal:donnees', 'journal:verrous', 'journal:purger:acces', 'journal:purger:prints',
   'journal:stats', 'journal:deverrouiller', 'journal:deverrouiller:tout',
   'journal:export:acces', 'journal:export:prints',
+  /* Les automatisations ont leur purge et leur export A ELLES (4.58.0). Avant,
+     l onglet Automatisations appelait les ops << acces >> : son export rendait
+     tout le journal (courriels, IP, ville du personnel) et sa purge annoncait
+     le total de TOUT le journal sur un onglet qui montre trente lignes. */
+  'journal:purger:auto', 'journal:export:auto',
   // Recherche inter-journaux (2.69.0, #7 Lot 7c).
   'journal:recherche',
   // SMS dans les journaux (2.72.0, #7 Lot 7b-2). Comptable reutilise liens:journal.
@@ -2486,6 +2491,7 @@ const LIMITES_PONT = {
   'journal:donnees': 40000, 'journal:verrous': 30000, 'journal:purger:acces': 20000, 'journal:purger:prints': 20000,
   'journal:stats': 20000, 'journal:deverrouiller': 30000, 'journal:deverrouiller:tout': 30000,
   'journal:export:acces': 30000, 'journal:export:prints': 30000,
+  'journal:purger:auto': 20000, 'journal:export:auto': 30000,
   'journal:recherche': 30000, 'journal:sms': 30000,
   /* Incidents : registre local pousse vers Turso a l ecriture (syncPrivateList),
      donc l ecriture attend le reseau — plus large que la lecture. */

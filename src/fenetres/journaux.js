@@ -345,8 +345,17 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     h += '</tbody></table></div>';
     corps.innerHTML = h;
-    var bp=document.getElementById('au-purge'); if (bp) bp.onclick=function(){ purger('journal:purger:acces'); };
-    var bc=document.getElementById('au-csv'); if (bc) bc.onclick=function(){ exporter('journal:export:acces'); };
+    /* ⚠⚠ CES DEUX BOUTONS APPELAIENT LES OPS << ACCES >>, ET RIEN NE LE DISAIT.
+       << Exporter CSV >> rendait exportLogsCSV : TOUT le journal, colonnes
+       Nom / Courriel / IP / Pays / Ville comprises. On demandait la liste des
+       actions automatiques et on recevait les connexions du personnel — un
+       fichier telecharge, pas un message d erreur. Et << Purger anciens >>
+       annoncait << N conservee(s) >> avec le total de TOUT le journal, sur un
+       onglet qui montre les seules automatisations.
+       Les ops journal:purger:auto et journal:export:auto (4.58.0) comptent
+       et exportent CE QUE CET ONGLET MONTRE. */
+    var bp=document.getElementById('au-purge'); if (bp) bp.onclick=function(){ purger('journal:purger:auto'); };
+    var bc=document.getElementById('au-csv'); if (bc) bc.onclick=function(){ exporter('journal:export:auto'); };
   }
 
   // ── Impressions ──────────────────────────────────────────────────

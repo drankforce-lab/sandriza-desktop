@@ -260,12 +260,17 @@ jobs:
       # ⚠ C'est un CLIQUET, pas une porte fermée : la queue restante est déclarée
       # avec son nombre dans `contraste-jour-declare.js`, et le banc refuse une
       # couleur neuve sous le seuil ou un plafond qui monte.
-      # ⚠ `banc-accent-grave-socle.js` (2026-09-04) refuse un accent grave a
-      # l'interieur d'un gabarit de socle.js. Trois fois dans la meme journee, un
-      # nom de code entre accents graves dans un commentaire CSS a referme le
-      # gabarit et fait tomber les 92 fenetres. `node --check` repond OK dessus :
-      # un gabarit referme trop tot reste syntaxiquement valide. Ce banc nomme la
-      # ligne en deux dixiemes de seconde.
+      # ⚠ `banc-accent-grave.js` (2026-09-04, ÉLARGI le 2026-09-08) refuse un
+      # accent grave a l'interieur d'un gabarit de fenetre. Trois fois dans la
+      # meme journee, un nom de code entre accents graves dans un commentaire CSS
+      # a referme le gabarit et fait tomber les 92 fenetres. `node --check` repond
+      # OK dessus des que le nombre d'accents graves reste PAIR : un gabarit
+      # referme trop tot reste syntaxiquement valide, et la portion de page part
+      # en silence. Ce banc nomme la ligne en deux dixiemes de seconde.
+      # ⚠⚠ IL NE LISAIT QUE `socle.js`, ET LA MEME FAUTE EST REVENUE LE
+      # 2026-09-08 DANS `journaux.js` — que rien ne regardait. Il lit maintenant
+      # les 94 fenetres et les DEUX formes d'ouverture (`const NOM = ` et
+      # `return `). 204 gabarits, zero faux positif a la livraison.
       # ⚠ `banc-texte-sur-fond.js` (2026-09-04) mesure le texte contre le fond de
       # SON PROPRE ELEMENT, pas contre celui de la page. C'est ce qui manquait :
       # un vert clair sur une pastille vert pale donne 1.02 de ratio, invisible,
@@ -307,7 +312,7 @@ jobs:
           node tools/banc-jetons.js
           node tools/banc-fonds-jour.js
           node tools/banc-texte-sur-fond.js
-          node tools/banc-accent-grave-socle.js
+          node tools/banc-accent-grave.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js
           # ⚠ CELUI-CI GARDE UN DÉFAUT QUI NE SE VOIT QU'APRÈS INSTALLATION :
