@@ -181,13 +181,25 @@ ${JS_ACTIVITE}${JS_DIRE}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
-  function champNom(cle, i, val){
+  /* ⚠ CE CHAMP EST NOMME PAR SA LIGNE ET SA COLONNE — MAIS SEULEMENT A L OEIL.
+     La province vit dans la premiere cellule de la rangee, le sujet dans
+     l en-tete de la colonne. En TABULANT d un champ a l autre, le lecteur
+     d ecran n annonce ni l une ni l autre : il dit << zone de texte >>, puis
+     << zone de texte >>, sur des dizaines de taux. Un tableau de taxes ou l on
+     ne sait pas quelle province on modifie est le pire endroit pour ca.
+     D ou un nom COMPOSE, passe par les appelants qui, eux, connaissent la
+     province et la composante. */
+  function champNom(cle, i, val, prov){
     return '<input type="text" class="nom" data-c="' + esc(cle) + '" data-i="' + i
-      + '" data-f="name" value="' + esc(val) + '"' + (RO ? ' disabled' : '') + '>';
+      + '" data-f="name" value="' + esc(val) + '" aria-label="'
+      + esc('Nom de la composante ' + (i + 1) + ' — ' + (prov || cle)) + '"'
+      + (RO ? ' disabled' : '') + '>';
   }
-  function champTaux(cle, i, val){
+  function champTaux(cle, i, val, prov, nom){
     return '<input type="number" step="0.001" min="0" class="taux" data-c="' + esc(cle) + '" data-i="' + i
-      + '" data-f="pct" value="' + esc(val == null ? '' : val) + '"' + (RO ? ' disabled' : '') + '>';
+      + '" data-f="pct" value="' + esc(val == null ? '' : val) + '" aria-label="'
+      + esc('Taux en pourcentage de ' + (nom || ('la composante ' + (i + 1))) + ' — ' + (prov || cle)) + '"'
+      + (RO ? ' disabled' : '') + '>';
   }
 
   function dessiner(){
@@ -205,7 +217,9 @@ ${JS_ACTIVITE}${JS_DIRE}
       h.push('<tr><td class="prov">' + esc(p.code) + '<div class="n">' + esc(p.nom) + '</div></td><td>');
       if (!p.composantes.length) h.push('<span style="color:var(--tx3)">—</span>');
       p.composantes.forEach(function(c, i){
-        h.push('<span class="comp">' + champNom('ca:' + p.code, i, c.name) + champTaux('ca:' + p.code, i, c.pct)
+        var prov = (p.nom || p.code);
+        h.push('<span class="comp">' + champNom('ca:' + p.code, i, c.name, prov)
+          + champTaux('ca:' + p.code, i, c.pct, prov, c.name)
           + '<span class="org">% · remis à ' + esc(c.remitTo || '—') + '</span></span>');
       });
       h.push('</td></tr>');

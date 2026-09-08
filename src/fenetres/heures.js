@@ -156,9 +156,17 @@ ${JS_ACTIVITE}${JS_DIRE}
       var fer = !!d.closed, dis = (RO || fer) ? ' disabled' : '';
       h.push('<tr>'
         + '<td class="jour">' + esc(nom) + '</td>'
-        + '<td><input type="time" id="h-o' + i + '" value="' + esc(d.open || '') + '"' + dis + '></td>'
-        + '<td><input type="time" id="h-c' + i + '" value="' + esc(d.close || '') + '"' + dis + '></td>'
-        + '<td class="c"><input type="checkbox" id="h-x' + i + '"' + (fer ? ' checked' : '')
+        /* ⚠ SEPT LIGNES DE TROIS CHAMPS, ET AUCUN NE DIT SON JOUR. Le jour est
+           dans la premiere cellule, le sujet dans l en-tete de colonne : a
+           l oeil c est limpide. En tabulant, le lecteur d ecran annonce vingt
+           et une fois << heure >> ou << case a cocher >>, sans jamais dire
+           lequel des sept jours on modifie. Le nom se compose ligne + colonne. */
+        + '<td><input type="time" id="h-o' + i + '" value="' + esc(d.open || '') + '"'
+        + ' aria-label="' + esc('Heure d’ouverture — ' + nom) + '"' + dis + '></td>'
+        + '<td><input type="time" id="h-c' + i + '" value="' + esc(d.close || '') + '"'
+        + ' aria-label="' + esc('Heure de fermeture — ' + nom) + '"' + dis + '></td>'
+        + '<td class="c"><input type="checkbox" id="h-x' + i + '"'
+        + ' aria-label="' + esc('Fermé le ' + nom) + '"' + (fer ? ' checked' : '')
         + (RO ? ' disabled' : '') + '></td>'
         + '</tr>');
     });

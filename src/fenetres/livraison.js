@@ -248,12 +248,19 @@ ${JS_ACTIVITE}${JS_DIRE}
         h += ets.map(function(e){
           return '<tr><td class="etatnom">↳ ' + esc(e.name || e.code) + ' <span class="code">' + esc(e.code) + '</span></td>'
             + '<td></td>'
-            + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '" data-etat="' + esc(e.code) + '"' + (e.livre ? ' checked' : '') + dis + '></td></tr>';
+            /* ⚠ Meme motif que la matrice des droits : le territoire est dans la
+               premiere cellule, << Livre >> dans l en-tete. En tabulant, rien.
+               On coche ou decoche une destination de livraison a l aveugle. */
+            + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '" data-etat="' + esc(e.code) + '"'
+            + ' aria-label="' + esc('Livrer vers ' + (e.name || e.code) + ', ' + (p.nom || p.code)) + '"'
+            + (e.livre ? ' checked' : '') + dis + '></td></tr>';
         }).join('');
         return h;
       }
       return '<tr><td>' + nomCol + '</td><td><span class="oui">✓ inscrit</span></td>'
-        + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '"' + (p.livre ? ' checked' : '') + dis + '></td></tr>';
+        + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '"'
+        + ' aria-label="' + esc('Livrer vers ' + (p.nom || p.code)) + '"'
+        + (p.livre ? ' checked' : '') + dis + '></td></tr>';
     };
     var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('fr-CA') : 'jamais';
     return '<div class="carte large"><h2>Pays desservis</h2>'

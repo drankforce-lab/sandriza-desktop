@@ -298,7 +298,14 @@ ${JS_ACTIVITE}${JS_DIRE}
         for (var a2=0;a2<acts.length;a2++){ var act=acts[a2];
           if (mod.actions.indexOf(act)<0){ h += '<td style="color:var(--tx3)">—</td>'; continue; }
           var key = mod.key+':'+act;
-          h += '<td><input type="checkbox" data-perm="'+esc(key)+'" '+(eff.indexOf(key)>=0?'checked':'')+'></td>';
+          /* ⚠ LA MATRICE DES DROITS EST LE PIRE ENDROIT POUR UNE CASE SANS NOM.
+             Le module est dans la premiere cellule, l action dans l en-tete de
+             colonne : a l oeil, tout est dit. En tabulant, le lecteur d ecran
+             annonce << case a cocher, cochee >> et rien d autre — on accorde ou
+             on retire un droit SANS SAVOIR LEQUEL. Le nom se compose des deux. */
+          h += '<td><input type="checkbox" data-perm="'+esc(key)+'" '
+            + 'aria-label="'+esc((mod.label||mod.key)+' — '+(lbls[act]||act))+'" '
+            + (eff.indexOf(key)>=0?'checked':'')+'></td>';
         }
         h += '</tr>';
       }
