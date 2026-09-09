@@ -2146,23 +2146,14 @@ module.exports = {
     ];
   })(),
 
-  /* Veilleur de commandes — les états qui ne se ressemblent pas.
-     ⚠ IL Y EN AVAIT QUATRE, IL EN RESTE TROIS : « sans jeton » et « poste qui ne
-     sait pas ranger un secret » ont disparu le 2026-09-06 avec le jeton
-     lui-même. Un jeu d'essai qui décrit un état devenu impossible ne protège
-     plus rien — il fige une conception abandonnée. */
-  'veilleur-config.js': (function(){
-    var base = { ok: true, actif: true, depuis: null };
-    var enMarche = Object.assign({}, base, { enMarche: true,
-      vu: '2026-09-06T13:40:00.000Z', demarrageAuto: true, avecApp: true });
-    return [
-      { nom: 'en marche, a l ecoute', reponses: { 'veilleur:etat': enMarche } },
-      { nom: 'le processus NE TOURNE PAS', reponses: { 'veilleur:etat':
-        Object.assign({}, base, { enMarche: false, vu: null, demarrageAuto: false, avecApp: true }) } },
-      { nom: 'en pause', reponses: { 'veilleur:etat':
-        Object.assign({}, enMarche, { actif: false }) } }
-    ];
-  })(),
+  /* ⚠⚠ LES JEUX D'ESSAI DE `veilleur-config.js` SONT PARTIS LE 2026-09-09, avec
+     la fenêtre. Ils décrivaient les états d'un SECOND PROCESSUS — « en marche »,
+     « ne tourne pas », « en pause » — et ce processus n'existe plus depuis
+     4.67.0 : la veille vit dans l'application, son icône lui appartient.
+     ⚠ C'est la DEUXIÈME purge de ce bloc, et c'est la même leçon que la
+     première (2026-09-06, le retrait du jeton) : un jeu d'essai qui décrit un
+     état devenu IMPOSSIBLE ne protège plus rien, il fige une conception
+     abandonnée — et il donne un vert qui ne parle de rien. */
 
   'journaux.js': (function(){
     var donnees = {

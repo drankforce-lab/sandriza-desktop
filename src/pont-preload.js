@@ -185,39 +185,19 @@ contextBridge.exposeInMainWorld('szPont', {
   dossierExportsDefaut: () => ipcRenderer.invoke('export:dossierDefaut')
     .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e), info: null })),
 
-  /* ══ LE VEILLEUR — RÉGLAGES DU POSTE ══════════════════════════════════════
-     ⚠⚠ CES OPÉRATIONS NE PASSENT PAS PAR `appeler`, ET CE N'EST PAS UN DÉTAIL
-     DE RANGEMENT. `appeler` fait exécuter l'opération par la FENÊTRE PRINCIPALE,
-     c'est-à-dire DANS LA PAGE DU SITE : le jeton du veilleur y traverserait un
-     `executeJavaScript`, deviendrait une chaîne dans le document
-     d'administration, et vivrait une deuxième fois dans une deuxième mémoire.
-     C'est exactement ce que la règle « un secret ne traverse pas le pont »
-     interdit — apprise en portant la Configuration des paiements, et ce projet a
-     déjà payé une rotation pour un jeton trop bavard.
-     Ces réglages ne touchent d'ailleurs AUCUNE donnée du site : ils vivent sur
-     le poste (fichier chiffré + entrée de démarrage). Le passage par le site
-     n'aurait rien apporté, et aurait tout exposé.
-
-     ⚠⚠ IL N'Y A PLUS DE JETON DEPUIS LE 2026-09-06 : le veilleur porte la clé
-     de l'application, comme le canal de mise à jour. Ces opérations ne
-     transportent donc plus AUCUN secret — elles pilotent un processus et
-     lisent deux réglages de poste. La raison de ne pas passer par `appeler`
-     tient quand même : rien de tout cela n'appartient au site. */
-  veilleur: {
-    etat: () => ipcRenderer.invoke('veilleur:etat')
-      .catch(() => ({ ok: false, motif: 'indisponible' })),
-    activer: (on) => ipcRenderer.invoke('veilleur:activer', !!on)
-      .catch(() => ({ ok: false, motif: 'indisponible' })),
-    demarrageAuto: (on) => ipcRenderer.invoke('veilleur:demarrageAuto', !!on)
-      .catch(() => ({ ok: false, motif: 'indisponible' })),
-    // « Démarrer le veilleur en même temps que l'application » — réglage de poste.
-    avecApp: (on) => ipcRenderer.invoke('veilleur:avecApp', !!on)
-      .catch(() => ({ ok: false, motif: 'indisponible' })),
-    // « Réinstaller » de sa demande : repose l'entrée de démarrage ET relance le
-    // processus. C'est le seul chemin de réparation quand il a été fermé à la main.
-    relancer: () => ipcRenderer.invoke('veilleur:relancer')
-      .catch(() => ({ ok: false, motif: 'indisponible' })),
-    arreter: () => ipcRenderer.invoke('veilleur:arreter')
-      .catch(() => ({ ok: false, motif: 'indisponible' })),
-  },
+  /* ⚠⚠ LE GROUPE `veilleur` EST PARTI LE 2026-09-09, avec l'écran qui était son
+     seul appelant. Ses mots : « considérant que l'icône et l'application font
+     maintenant office de veilleur tout en un tu peut retirer les menu de
+     configuration du veilleur dans les configuration aussi ».
+     Six opérations (`etat`, `activer`, `demarrageAuto`, `avecApp`, `relancer`,
+     `arreter`) qui pilotaient un SECOND PROCESSUS, disparu en 4.67.0. Le long
+     commentaire qui vivait ici expliquait pourquoi elles ne passaient pas par
+     `appeler` — « un secret ne traverse pas le pont » — et il avait raison ;
+     seulement il n'y a plus ni secret, ni processus, ni fenêtre pour appeler.
+     ⚠ LA SURFACE EXPOSÉE PAR UN PRÉCHARGEMENT EST UNE SURFACE D'ATTAQUE : un
+     verbe qu'aucune fenêtre n'utilise reste appelable par tout document chargé
+     dans une fenêtre native. On ne laisse donc pas traîner ce qui ne sert plus.
+     ⚠ Ce qui a survécu, et où : la PAUSE dans le menu de l'icône, l'INTERRUPTEUR
+     de la veille dans le menu Affichage (`veille-toggle`), et le retrait de
+     l'ancienne entrée de démarrage `--veilleur` au lancement de main.js. */
 });

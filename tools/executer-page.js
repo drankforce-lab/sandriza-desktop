@@ -198,22 +198,10 @@ function executerPage(script, reponses, opts) {
     )),
     fermer() {}, pleinEcran: () => surveille(Promise.resolve(false)),
     surEtatCaisse: () => () => {}, ajusterHauteur() {},
-    /* ⚠ LE VEILLEUR N'A PAS D'OPÉRATIONS `appeler` — son jeton ne doit pas
-       traverser la page du site, il a donc son propre canal. S'il manquait ici,
-       sa fenêtre prendrait la branche « cette version ne connaît pas le
-       veilleur », désactiverait tout et n'atteindrait JAMAIS son dessin : le
-       contrôle serait vert sans avoir rien regardé. C'est exactement le chemin
-       d'à côté décrit en tête de `reponses-fenetres.js`.
-       Les réponses viennent de la même table que les autres, sous les clés
-       `veilleur:xxx`. */
-    veilleur: ['etat', 'activer', 'demarrageAuto', 'avecApp',
-               'relancer', 'arreter'].reduce((o, nom) => {
-      o[nom] = () => surveille(Promise.resolve(
-        Object.prototype.hasOwnProperty.call(rep, 'veilleur:' + nom)
-          ? rep['veilleur:' + nom] : { ok: true }
-      ));
-      return o;
-    }, {}),
+    /* ⚠ LE FAUX GROUPE `veilleur` EST PARTI LE 2026-09-09, avec la fenêtre qu'il
+       servait et avec le groupe réel du préchargement. Il n'y a plus une seule
+       fenêtre native qui l'appelle : le simuler encore ferait croire à une
+       surface qui n'existe plus. */
   };
 
   const socle = {

@@ -149,7 +149,28 @@ let pasErreur = 0;            // nombre d'échecs d'affilée (pour espacer)
  * Les deux ensemble, jamais l'un seul. Sans `vu`, un numéro de processus réutilisé
  * ferait dire « le veilleur tourne » à propos du bloc-notes de quelqu'un.
  */
-const ETAT_DEFAUT = { actif: true, depuis: null, pid: null, vu: null };
+/* ⚠⚠ `notifs` — L'HISTORIQUE, AJOUTÉ LE 2026-09-09 SUR SA DEMANDE : « je doit
+   pouvoir consulter les derniers notification recus a partir de l'icone aussi ».
+   Il a raison, et le manque était réel : un toast Windows vit huit secondes puis
+   part dans le centre de notifications du système, où il se noie parmi ceux des
+   autres applications — et sur un poste laissé seul le midi, personne ne l'a vu
+   passer. La veille annonçait donc des commandes que rien ne permettait de
+   retrouver ensuite.
+   ⚠ IL EST DANS LE FICHIER D'ÉTAT, DONC IL SURVIT À UN REDÉMARRAGE. C'est la
+   moitié de l'intérêt : la question qu'on se pose le matin est « qu'est-ce qui
+   est arrivé pendant la nuit ? », et une liste tenue en mémoire y répond
+   « rien », ce qui est faux.
+   ⚠ PLAFONNÉ À 20, ET LES DEUX RAISONS COMPTENT : un menu de zone de
+   notification qui déroule cent lignes n'est plus consultable, et ce fichier est
+   réécrit à chaque tour de veille — le laisser grossir sans borne, c'est écrire
+   un fichier de plus en plus gros toutes les 60 secondes.
+   ⚠ ET IL NE PORTE AUCUNE DONNÉE DE CLIENTE, comme le reste de ce module : la
+   veille interroge `notif-feed.php`, qui ne rend que des NOMBRES et des
+   horodatages. L'historique ne peut donc dire que « 2 nouvelles commandes » —
+   jamais qui, jamais combien d'argent. C'est la règle de ce fichier depuis le
+   début, et elle vaut d'autant plus pour ce qui se garde sur le disque. */
+const NOTIFS_MAX = 20;
+const ETAT_DEFAUT = { actif: true, depuis: null, pid: null, vu: null, notifs: [] };
 const cheminEtat = () => path.join(app.getPath('userData'), 'veilleur-etat.json');
 
 function lireEtat() {
@@ -238,9 +259,36 @@ function jouer(nom) {
  * et les nôtres — les seuls qui distinguent commande et retour — deviendraient
  * indiscernables. Le son du veilleur est le nôtre, ou aucun.
  */
+/* ⚠ ON NOTE AVANT DE MONTRER, ET C'EST VOLONTAIRE. Sur macOS non signé, le
+   système peut refuser la notification (voir plus bas) ; sur Windows, le mode
+   « Assistance à la concentration » l'avale sans rien dire. Dans les deux cas le
+   son part, l'annonce est perdue — et c'est exactement la situation où
+   l'historique de l'icône est la SEULE trace. Noter après l'affichage aurait
+   fait disparaître la ligne dans les cas où elle sert le plus. */
+function _noter(titre, type) {
+  try {
+    const e = lireEtat();
+    const liste = Array.isArray(e.notifs) ? e.notifs.slice() : [];
+    liste.unshift({ t: new Date().toISOString(), titre: String(titre || ''), type: String(type || '') });
+    ecrireEtat({ notifs: liste.slice(0, NOTIFS_MAX) });
+  } catch { /* disque plein : le toast part quand même, c'est lui qui compte */ }
+}
+
 function toast(titre, corps, sonNom) {
   jouer(sonNom);
+  _noter(titre, sonNom);
   try {
+    /* ⚠⚠ `isSupported()` PLUTÔT QU'UN `try` MUET — 2026-09-09, avec le portage
+       macOS. Un `new Notification(...)` sur un système qui n'en veut pas ne lève
+       pas forcément : il ne montre RIEN. On se retrouve alors avec une veille qui
+       sonne et n'annonce rien, sans une ligne pour le dire — et c'est
+       indiagnosticable à distance, la panne la plus coûteuse de ce dépôt.
+       ⚠ SUR macOS, LE REFUS EST UN CAS RÉEL : l'application n'est pas signée
+       (`identity: null` dans electron-builder.yml), et le système peut lui
+       refuser les notifications. On l'écrit dans le motif, donc dans la ligne
+       d'état du menu de l'icône : « je sonne mais je ne peux pas afficher » est
+       une information, « rien ne se passe » n'en est pas une. */
+    if (!Notification.isSupported()) { dernierEchec = 'sans_notif'; majTray(); return; }
     const n = new Notification({
       title: titre,
       body: corps,
@@ -395,6 +443,11 @@ const MOTIFS = {
   // le poste — et il faut le DIRE plutôt que de laisser un veilleur muet.
   sans_cle: 'Cette version de l’application n’a pas de clé (défaut de construction)',
   refus: 'Le serveur a refusé cette version de l’application',
+  // ⚠ 2026-09-09, avec le portage macOS : le système refuse les notifications.
+  // La veille TOURNE et le son part — c'est l'affichage qui manque. Le dire
+  // évite de chercher une panne de réseau là où il y a un réglage de système
+  // (et, sur macOS, une application non signée).
+  sans_notif: 'Le système refuse les notifications (les sons et la liste ci-dessous fonctionnent)',
   base_injoignable: 'Base de données injoignable',
   delai: 'Le serveur n’a pas répondu à temps',
   reseau: 'Réseau indisponible',
@@ -407,12 +460,74 @@ function ligneEtat() {
   return 'À l’écoute des commandes et des retours';
 }
 
+/* ══ LE SOUS-MENU DES DERNIÈRES NOTIFICATIONS (2026-09-09) ═══════════════════
+ * Sa demande : « je doit pouvoir consulter les derniers notification recus a
+ * partir de l'icone aussi ».
+ *
+ * ⚠ CHAQUE LIGNE EST DATÉE, ET C'EST LE POINT. « 2 nouvelles commandes » sans
+ * heure ne dit pas si c'était il y a dix minutes ou avant-hier — donc ne dit pas
+ * s'il reste quelque chose à faire. C'est l'heure qu'on vient chercher.
+ * ⚠ HEURE SEULE POUR AUJOURD'HUI, DATE ET HEURE AU-DELÀ : dans un menu, « 14:32 »
+ * se lit d'un coup d'œil ; « 2026-09-09 14:32 » sur vingt lignes ne se lit plus.
+ * ⚠ UN CLIC OUVRE L'ADMINISTRATION, comme un clic sur le toast lui-même. Une
+ * ligne d'historique qui ne mène nulle part obligerait à retrouver la fenêtre à
+ * la main — et c'est précisément le geste qui ne marchait pas avant 4.67.0.
+ * ⚠ « Effacer la liste » EST LÀ, et sans confirmation : il n'y a rien à perdre
+ * (les commandes, elles, restent dans l'administration) et une question pour un
+ * geste sans conséquence apprend à répondre sans lire.
+ */
+/* ⚠ DEUX PICTOGRAMMES, ET C'EST LE SEUL ENDROIT DU DÉPÔT OÙ ILS RESTENT
+   LÉGITIMES. Le chantier « pictogrammes → SVG » vise les fenêtres et les pages :
+   là, un SVG monochrome suit le thème et garde sa forme d'un système à l'autre.
+   Un ITEM DE MENU d'Electron, lui, ne porte que du TEXTE — pas de balise, pas
+   d'image en ligne. Le caractère est donc la seule façon de distinguer une
+   commande d'un retour d'un coup d'œil dans la liste, et `banc-pictogrammes.js`
+   ne lit d'ailleurs que `src/fenetres/`, jamais ce fichier. */
+const _NOTIF_ICO = { commande: '🛍', retour: '↩' };
+
+function _quandCourt(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const h = d.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+  const auj = new Date();
+  const memeJour = d.getFullYear() === auj.getFullYear()
+    && d.getMonth() === auj.getMonth() && d.getDate() === auj.getDate();
+  if (memeJour) return h;
+  return d.toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' }) + ' ' + h;
+}
+
+function _sousMenuNotifs() {
+  const liste = (lireEtat().notifs || []).filter((n) => n && n.titre);
+  if (!liste.length) {
+    // ⚠ ON MONTRE L'ENTRÉE MÊME VIDE, désactivée. La faire disparaître laisserait
+    // « je n'ai rien reçu » et « cette version ne garde pas de liste »
+    // indiscernables — deux réponses très différentes à la même question.
+    return [{ label: 'Dernières notifications', enabled: false }];
+  }
+  return [{
+    label: 'Dernières notifications (' + liste.length + ')',
+    submenu: liste.map((n) => ({
+      label: (_NOTIF_ICO[n.type] || '•') + '  ' + _quandCourt(n.t) + ' — ' + n.titre,
+      click: ouvrirAdministration,
+    })).concat([
+      { type: 'separator' },
+      { label: 'Effacer la liste', click: () => { ecrireEtat({ notifs: [] }); majTray(); } },
+    ]),
+  }];
+}
+
 function majTray() {
   if (!tray) return;
   const e = lireEtat();
   try { tray.setToolTip('Veilleur SANDRIZA — ' + ligneEtat()); } catch {}
   const menu = Menu.buildFromTemplate([
     { label: ligneEtat(), enabled: false },
+    { type: 'separator' },
+    /* ⚠ L'HISTORIQUE EN HAUT, JUSTE SOUS L'ÉTAT (2026-09-09) : c'est ce qu'on
+       vient lire quand on clique l'icône après une absence. Les commandes de la
+       veille (pause, essayer les sons) sont des réglages — on les visite une
+       fois par mois ; la liste, elle, est la raison d'être de l'icône. */
+    ..._sousMenuNotifs(),
     { type: 'separator' },
     {
       label: e.actif ? 'Mettre en pause' : 'Reprendre la veille',
@@ -541,8 +656,21 @@ function attacher(hote) {
   _reprendreEtatSepare();
   etat = null;   // force la relecture depuis la nouvelle place
 
+  /* ⚠ LA TAILLE N'EST PAS LA MÊME SUR LES DEUX SYSTÈMES (2026-09-09, sa demande
+     « le veilleur fonctionnel pour mac »). La zone de notification de Windows
+     veut 16 px ; la BARRE DE MENUS de macOS fait 22 px de haut et rogne une image
+     plus grande, ce qui coupe le logo. 18 px laisse la marge que macOS attend.
+     ⚠ PAS DE `setTemplateImage(true)`, ET C'EST UN CHOIX MOTIVÉ. C'est la
+     convention macOS — une image en noir et alpha, que le système recolore selon
+     la barre — mais elle transforme le dessin en SILHOUETTE tirée du canal
+     alpha : sur un logo dont le fond est opaque (le « S » doré sur marine), on
+     obtiendrait un carré noir. macOS accepte parfaitement une icône en couleur.
+     ⚠⚠ ET JE NE PEUX PAS L'ÉPROUVER : je n'ai pas de Mac, et aucun banc de ce
+     dépôt n'ouvre une barre de menus macOS. Son essai est le seul contrôle — la
+     même règle que pour les trois gestes de 4.67.0. */
+  const cote = process.platform === 'darwin' ? 18 : 16;
   let img = nativeImage.createFromPath(ICON_PATH);
-  try { if (!img.isEmpty()) img = img.resize({ width: 16, height: 16 }); } catch {}
+  try { if (!img.isEmpty()) img = img.resize({ width: cote, height: cote }); } catch {}
   tray = new Tray(img);
   majTray();
   // Double-clic : le geste que tout le monde essaie en premier, et celui qui ne
