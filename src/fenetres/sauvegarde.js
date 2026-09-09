@@ -112,6 +112,25 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
    longtemps continue d avancer apres l arret de l operation, donc elle MENT
    quelques instants — et c est precisement ce que ce chantier evite. */
 .prog:empty{display:none}
+/* Le rapport du test d integrite. Meme grammaire que .prog : un encadre
+   discret sous le champ de confirmation, qui ne prend de place que quand il a
+   quelque chose a dire. */
+.intg:empty{display:none}
+.intg{margin:.9rem 0 0;padding:.6rem .7rem;border-radius:10px;
+  background:var(--v06);border:1px solid var(--v12);font-size:.78rem}
+html.jour .intg{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12)}
+.intg .it{display:flex;gap:.5rem;align-items:baseline;padding:.16rem 0}
+.intg .it .p{flex:0 0 auto;width:1.1rem;text-align:center}
+.intg .it .n{flex:0 0 auto;min-width:9.5rem;color:var(--tx)}
+.intg .it .d{color:var(--tx2);flex:1 1 auto}
+/* ⚠ LA FAUTE EST EN GRAS ET DANS LA COULEUR D ALERTE, PAS SEULEMENT MARQUEE
+   d une croix : c est la ligne qu on lira pour comprendre pourquoi la
+   restauration refuse, et elle doit se trouver du premier coup d oeil au
+   milieu des controles qui passent. */
+.intg .it.ko .n,.intg .it.ko .d{color:var(--tx-err2);font-weight:600}
+.intg .it.note .d{color:var(--tx-att)}
+.intg .ch{margin:0 0 .45rem;font-weight:600;color:var(--tx)}
+.intg .ch.ko{color:var(--tx-err2)}
 .prog{margin:.9rem 0 0;padding:.6rem .7rem;border-radius:10px;
   background:var(--v03);border:1px solid var(--v10)}
 .prog .pg-t{font-size:.82rem;color:var(--tx);margin-bottom:.4rem}
@@ -494,11 +513,74 @@ ${JS_ACTIVITE}${JS_DIRE}
          suivi etape par etape et vu a l ecran comme quand on fait la
          sauvegarde >>. Meme zone, meme mecanisme, meme sondage — on ne pose
          pas un second affichage d avancement a cote du premier. */
+      + '<div class="intg" id="s-intg"></div>'
       + '<div class="prog" id="s-prog"></div>',
-      '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go">Restaurer maintenant</button>');
+      '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go" disabled>Restaurer maintenant</button>');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=function(){ restaurer(encKey); };
     var c=document.getElementById('s-conf'); if (c) c.oninput=function(){ c.classList.remove('manque'); };
+    /* ⚠⚠ LE BOUTON PART ETEINT ET LE TEST DECIDE S IL S ALLUME. Sa demande du
+       2026-09-09 : << avant de lancer la restauration il est important que tu
+       effectues un test d integrite sur les fichiers necessaires ; s il en manque
+       un ou un est corrompu tu doit refuser et donner les details du refus >>.
+       Le serveur refuse de toute facon avant de toucher a quoi que ce soit — mais
+       s en contenter voudrait dire demander a quelqu un de taper RESTAURER sur une
+       operation qu on sait deja impossible, puis lui repondre non. On verifie
+       donc en OUVRANT, et le geste n est jamais propose s il ne peut pas aboutir.
+       ⚠ Eteint par defaut, pas eteint apres coup : si l appel echoue ou n arrive
+       jamais, le bouton reste eteint. Un bouton actif par defaut aurait laisse
+       passer exactement le cas ou l on ne sait rien. */
+    verifierIntegrite(encKey);
+  }
+
+  /* ── LE TEST D INTEGRITE, MONTRE LIGNE PAR LIGNE ────────────────────────── */
+  var PICTO_INTG = { bon: '\u2713', faute: '\u2717', note: '!' };
+  function verifierIntegrite(encKey){
+    var z = document.getElementById('s-intg');
+    if (z) z.innerHTML = '<div class="ch">Verification de l integrite de la sauvegarde...</div>';
+    appeler('sauvegarde:integrite',[encKey]).then(function(r){
+      var z2 = document.getElementById('s-intg');
+      var go = document.getElementById('s-go');
+      if (!z2) return;
+      /* ⚠ TROIS SORTIES, PAS DEUX. Un refus DU PONT (session, droit, reseau) n est
+         pas une sauvegarde corrompue : les deux empechent de restaurer, mais pas
+         pour la meme raison et pas avec le meme geste ensuite. Les confondre
+         ferait annoncer << sauvegarde corrompue >> sur une coupure de reseau. */
+      if (!r || !r.ok) {
+        z2.innerHTML = '<div class="ch ko">Verification impossible</div>'
+          + '<div class="it ko"><span class="p">' + PICTO_INTG.faute + '</span>'
+          + '<span class="n">Le controle n a pas pu etre fait</span>'
+          + '<span class="d">' + esc(expliquer(r)) + '</span></div>';
+        return;
+      }
+      var g = r.integrite;
+      if (!g || !g.controles) {
+        z2.innerHTML = '<div class="ch ko">Verification impossible</div>'
+          + '<div class="it ko"><span class="p">' + PICTO_INTG.faute + '</span>'
+          + '<span class="n">Rapport illisible</span>'
+          + '<span class="d">le serveur a repondu sans rapport d integrite</span></div>';
+        return;
+      }
+      var h = g.ok
+        ? '<div class="ch">Sauvegarde verifiee' + (g.lignes ? ' \u2014 ' + g.lignes + ' enregistrement(s)' : '') + '</div>'
+        : '<div class="ch ko">Restauration refusee \u2014 cette sauvegarde ne peut pas etre restauree</div>';
+      for (var i=0;i<g.controles.length;i++){
+        var c = g.controles[i];
+        var cl = c.etat === 'faute' ? ' ko' : (c.etat === 'note' ? ' note' : '');
+        h += '<div class="it' + cl + '"><span class="p">'
+          + (PICTO_INTG[c.etat] || '\u00b7') + '</span>'
+          + '<span class="n">' + esc(c.nom) + '</span>'
+          + '<span class="d">' + esc(c.detail) + '</span></div>';
+      }
+      if (!g.ok) h += '<div class="it note"><span class="p">\u00b7</span>'
+        + '<span class="n">Rien n a ete touche</span>'
+        + '<span class="d">aucune donnee modifiee, aucune session fermee</span></div>';
+      z2.innerHTML = h;
+      /* ⚠ ON N ALLUME QUE SUR UN VERDICT FRANCHEMENT BON. !g.ok et l absence de
+         verdict mènent au même endroit : eteint. */
+      if (go && g.ok) go.disabled = false;
+      if (!g.ok) dire('Restauration refusee : ' + (g.fautes && g.fautes[0] ? g.fautes[0] : 'sauvegarde inutilisable'), 'err');
+    });
   }
   function restaurer(encKey){
     if (OCCUPE) return;
@@ -583,6 +665,11 @@ ${JS_ACTIVITE}${JS_DIRE}
         // ⚠ On rend les sorties : sinon la surcouche reste incondamnable sur un
         // echec, et cette fenetre n a pas de touche Echap pour s en sortir.
         verrouSur(false);
+        /* ⚠ ON RALLUME, ET C EST JUSTE : pour arriver ici le test d integrite
+           avait DEJA dit oui (sans quoi le bouton n aurait jamais ete cliquable).
+           L echec vient donc d ailleurs — reseau, delai, refus serveur — et
+           reessayer a un sens. Le laisser eteint enfermerait dans une surcouche
+           sans issue, ce que cette fenetre n a pas de touche Echap pour quitter. */
         if (go){ go.disabled=false; go.textContent='Restaurer maintenant'; }
         dire('Échec : '+expliquer(r), 'err');
       }

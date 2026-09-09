@@ -2193,6 +2193,9 @@ const OPS_PONT = new Set([
      'sauvegarde:creer' est encore en vol. Deux operations du pont en parallele,
      ce qui est licite — chaque invocation est independante. */
   'sauvegarde:progres',
+  /* Le test d integrite avant restauration (sa demande du 2026-09-09). Il lit et
+     dechiffre la sauvegarde : quelques secondes, jamais plus. */
+  'sauvegarde:integrite',
   'sauvegarde:restaurer', 'sauvegarde:supprimer', 'sauvegarde:purger',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
@@ -2650,6 +2653,7 @@ const LIMITES_PONT = {
   /* ⚠ COURT, ET C EST VOULU : une lecture d etat qui traine bloquerait le
      sondage suivant, et un etat en retard vaut moins que pas d etat. */
   'sauvegarde:progres': 12000,
+  'sauvegarde:integrite': 180000,
   'sauvegarde:restaurer': 600000, 'sauvegarde:supprimer': 45000, 'sauvegarde:purger': 120000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
