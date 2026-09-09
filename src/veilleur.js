@@ -566,6 +566,34 @@ function majTray() {
        celui qui ne marchait pas. Windows met l'entrée par défaut en gras et
        l'associe au double-clic. */
     { label: 'Ouvrir l’administration', default: true, click: ouvrirAdministration },
+    /* ══ PERSONNEL CONNECTÉ — SUPER-ADMINISTRATEUR SEULEMENT (2026-09-09) ═════
+       La dernière partie de sa demande du 2026-09-08 : « le menu de l'icône doit
+       encore porter : voir les connectés · déconnecter à distance · envoyer un
+       message, pour le super-administrateur seulement ».
+
+       ⚠⚠ L'ENTRÉE OUVRE UNE FENÊTRE, ELLE NE PORTE PAS LA LISTE. Trois raisons,
+       et aucune n'est un renoncement :
+        • un menu de zone de notification se construit d'un seul coup, sans
+          attendre : afficher une liste venue du réseau exigerait de la sonder
+          d'avance, et sa consigne interdit tout second sondage ;
+        • un item de menu d'Electron ne peut recevoir AUCUNE saisie — il n'y a
+          donc pas de façon d'écrire un message dans un menu ;
+        • déconnecter quelqu'un demande de VOIR qui c'est, depuis quand, et
+          quand il s'est manifesté pour la dernière fois. Un sous-menu de noms
+          ferait couper une session sur la foi d'un seul mot.
+       L'icône reste le point d'entrée — et elle n'a rien à sonder pour ça.
+
+       ⚠⚠ ELLE NE PARAÎT PAS DU TOUT POUR LES AUTRES, elle n'est pas grisée. Sa
+       règle du 2026-09-09, pour les menus : « invisible et non pas juste griser ».
+       ⚠ ET LE RÔLE VIENT DU MODÈLE DU MENU, pas d'un appel réseau : il arrive
+       avec la connexion, donc l'entrée est là tout de suite. Voir `_estSuper`
+       plus bas — le menu est reconstruit dès que le rôle change.
+       ⚠ CE MASQUAGE N'EST PAS LA GARDE. Ce qui protège est le refus du serveur
+       (`case 'presence'` dans turso-proxy.php) : une requête forgée ne passe par
+       aucun menu. C'est l'autre bout dont il parlait. */
+    ...(_presenceHote && _estSuperHote && _estSuperHote()
+      ? [{ label: 'Personnel connecté…', click: () => { try { _presenceHote(); } catch {} } }]
+      : []),
     /* ⚠⚠ LA DÉCONNEXION EST ICI PARCE QU'IL L'A DEMANDÉE (2026-09-08) : « dans le
        menu contextuel de l'icône on devrait pouvoir se déconnecter ». Elle passe
        par la PAGE (`Admin._confirmLogout()` dans la fenêtre) — la confirmation
@@ -633,6 +661,13 @@ function majTray() {
 let _ouvrirHote = null;   // montrer la fenêtre de l'administration
 let _quitterHote = null;  // quitter POUR DE VRAI (pas seulement fermer)
 let _deconnecterHote = null;
+/* Ouvrir la fenêtre « Personnel connecté », et savoir si l'on a le droit de la
+   proposer. ⚠ LES DEUX SONT DES FONCTIONS DE L'HÔTE, pas des valeurs : le rôle
+   change en cours de route (connexion, déconnexion, changement de compte), et une
+   valeur capturée à l'attachement serait fausse dès la première déconnexion —
+   c'est-à-dire qu'elle laisserait l'entrée en place pour le compte suivant. */
+let _presenceHote = null;
+let _estSuperHote = null;
 
 /* Reprise de l'état laissé par l'ancien processus séparé. On ne l'écrase pas
    s'il existe déjà à la nouvelle place : une reprise ne doit jamais défaire un
@@ -652,6 +687,8 @@ function attacher(hote) {
   _ouvrirHote = (hote && hote.ouvrir) || null;
   _quitterHote = (hote && hote.quitter) || null;
   _deconnecterHote = (hote && hote.deconnecter) || null;
+  _presenceHote = (hote && hote.presence) || null;
+  _estSuperHote = (hote && hote.estSuper) || null;
 
   _reprendreEtatSepare();
   etat = null;   // force la relecture depuis la nouvelle place
@@ -682,4 +719,21 @@ function attacher(hote) {
   return tray;
 }
 
-module.exports = { attacher };
+/* ⚠⚠ RECONSTRUIRE LE MENU À LA DEMANDE (2026-09-09) — ET C'EST OBLIGATOIRE, PAS
+   UN CONFORT. Le menu de l'icône n'était reconstruit qu'au battement de la
+   veille, toutes les 60 secondes. Or l'entrée « Personnel connecté… » dépend du
+   RÔLE, qui change à la seconde où quelqu'un se connecte : sans cette porte, le
+   super-administrateur qui vient d'ouvrir sa session cliquerait sur l'icône et
+   ne trouverait rien pendant une minute — donc conclurait, à juste titre, que
+   « ça ne marche pas ». C'est exactement le genre de panne qu'on ne diagnostique
+   pas : elle se répare toute seule pendant qu'on la décrit.
+   ⚠ ET LE SENS INVERSE COMPTE AUTANT : à la déconnexion, l'entrée doit partir
+   TOUT DE SUITE. La laisser une minute, c'est un menu qui propose un pouvoir de
+   super-administrateur sur un poste où plus personne n'est connecté.
+   `main.js` l'appelle quand le modèle du menu annonce un rôle différent — le
+   canal qui porte déjà cette information. */
+function rafraichir() {
+  try { majTray(); } catch { /* icône absente : rien à reconstruire */ }
+}
+
+module.exports = { attacher, rafraichir };

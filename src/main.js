@@ -158,6 +158,18 @@ let _szVraiQuit = false;
 function _sessionOuverte() {
   try { return !!(_modele && _modele.connecte); } catch { return false; }
 }
+/* ⚠ LE RÔLE VIENT DU MÊME CANAL QUE `connecte`, et pour la même raison : il vit
+   dans la page, pas ici. Il ne sert QU'À AFFICHER — décider si le menu de
+   l'icône porte « Personnel connecté… ». La garde qui protège est le refus du
+   serveur (`case 'presence'` dans turso-proxy.php) ; masquer une entrée de menu
+   n'a jamais arrêté personne, et sa consigne le disait autrement : « super-admin
+   AUX DEUX BOUTS ». Ceci est le bout qui se voit.
+   ⚠ FAUX PAR DÉFAUT : modèle jamais reçu ⇒ pas d'entrée. Sur un pouvoir qui
+   déconnecte des collègues, le doute ne s'arbitre pas en faveur du pouvoir. */
+function _estSuperAdmin() {
+  try { return !!(_modele && _modele.connecte && _modele.role === 'superadmin'); }
+  catch { return false; }
+}
 /* Quitter POUR DE VRAI. ⚠ Passe par `app.quit()`, jamais `app.exit()` : `quit()`
    déclenche `before-quit` et les `close` des fenêtres, donc la question des
    brouillons et le refus pendant une mise à jour. `exit()` tuerait le processus
@@ -202,6 +214,23 @@ const _veilleAttacher = () => {
           }
         } catch {}
       },
+      /* ══ « PERSONNEL CONNECTÉ » DEPUIS L'ICÔNE (2026-09-09) ════════════════
+         La dernière partie de sa demande du 2026-09-08.
+         ⚠⚠ ON MONTRE LA FENÊTRE PRINCIPALE D'ABORD, ET CE N'EST PAS DU CONFORT.
+         Cette entrée est cliquée DEPUIS L'ICÔNE — donc typiquement pendant que
+         l'application est réduite dans la zone de notification. La fenêtre
+         native s'ouvrirait alors seule, sans parent visible ; la refermer
+         déclencherait `window-all-closed` et l'application quitterait par la
+         porte de derrière, au moment où l'on croit juste fermer un écran. C'est
+         la garde nº 2 de 4.67.0, vue depuis la porte qu'on vient d'ouvrir.
+         ⚠ ET LA FENÊTRE A BESOIN DE LA PAGE : ses trois opérations passent par
+         le pont, qui les fait exécuter par la fenêtre principale. Sans elle,
+         tout répondrait « la fenêtre principale ne répond pas ». */
+      presence: () => {
+        montrerAdministration();
+        try { actionApp('presence'); } catch {}
+      },
+      estSuper: _estSuperAdmin,
     });
   } catch (e) { trayVeille = null; }
   return trayVeille;
@@ -1924,6 +1953,22 @@ const OPS_PONT = new Set([
   // Le cadenas SUR LA LIGNE d une liste (#22). Sonde toutes les ~3 s, pour
   // qu un collegue voie qu une fiche est prise SANS avoir a l ouvrir.
   'verrous:liste',
+  /* PRESENCE DU PERSONNEL (2026-09-09) — sa demande : << voir les connectes ·
+     deconnecter a distance · envoyer un message >>, pour le super-administrateur
+     seulement.
+     ⚠⚠ CES TROIS-CI SONT DANS OPS_PONT, CONTRAIREMENT AUX ANCIENNES OPERATIONS
+     DU VEILLEUR — et la difference tient a une seule chose : elles touchent aux
+     DONNEES et a la SESSION du site. Les reglages du veilleur vivaient sur le
+     poste (un jeton chiffre, une entree de registre) et avaient donc leur canal
+     propre, pour que le secret ne traverse pas la page. Ici, il n y a aucun
+     secret a proteger : on lit la table des sessions et on ecrit un message.
+     C est exactement le terrain du pont.
+     ⚠ `presence:deconnecter` COUPE LA SESSION DE QUELQU UN D AUTRE et
+     `presence:message` AFFICHE QUELQUE CHOSE SUR SON ECRAN : les deux seules
+     operations de ce pont dont l effet visible est chez une tierce personne. Le
+     role est verifie au SERVEUR (turso-proxy.php), journalise, et aucun jeton de
+     session ne revient au poste — on deconnecte par identifiant de compte. */
+  'presence:liste', 'presence:deconnecter', 'presence:message',
   // Les quatre derniers trous fonctionnels de l audit (#6) : le REPERTOIRE de
   // grossistes (ajout en un clic) et la SUPPRESSION d une demande de retour
   // terminee, qui n existaient nulle part dans l application.
@@ -2661,6 +2706,17 @@ const LIMITES_PONT = {
   /* Sondage frequent et leger : une lecture de la table des verrous. Court
      expres — un sondage qui traine bloquerait le suivant. */
   'verrous:liste': 15000,
+  /* PRESENCE (2026-09-09). La LECTURE est un sondage (aux 4 s) : court, comme
+     celui des verrous. Les deux GESTES, eux, ecrivent dans la base ET
+     journalisent — deux allers-retours Turso chacun — donc 30 s, comme les
+     autres ecritures de ce fichier.
+     ⚠ ET SURTOUT PAS 8 s (le defaut) SUR LES GESTES : ce depot a deja paye ce
+     plafond trop court, le 2026-08-08. L operation REUSSIT derriere pendant que
+     le plafond annonce << delai >>, la personne recommence, et on fabrique un
+     doublon. Ici, le doublon serait un second message identique sur l ecran de
+     quelqu un, ou une seconde deconnexion — inoffensive, mais qui ferait douter
+     du mecanisme. */
+  'presence:liste': 15000, 'presence:deconnecter': 30000, 'presence:message': 30000,
   'repertoire:donnees': 20000, 'repertoire:ajouter': 30000,
   /* Parcourt toute la phototheque et rend AUSSI les identifiants du resultat
      complet (pour << tout selectionner >>) : plus lourd qu une page seule. */
@@ -2956,6 +3012,17 @@ const PAGES_ANCRABLES = () => ({
      seul toutes les 3 s. Le droit super-administrateur reste dans le COEUR
      (journal:verrous refuse les autres) — la fenetre ne decide de rien. */
   'verrous': ['Verrous', () => pageVerrous()],
+  /* ⚠ ECRAN NE NATIF, SANS JUMEAU WEB — comme << Verrous >>, et pour la meme
+     raison de fond : la question posee est << qui travaille EN CE MOMENT >>, pas
+     << qui a travaille >>. Il n existe aucune section << presence >> cote site,
+     donc il est branche en fenetre a part et NON dans le bloc ancrable, qui
+     demanderait au site de naviguer vers une section inexistante — le clic
+     n ouvrirait RIEN. C est le troisieme ecran de ce genre, et le controle 0b de
+     verifier.ps1 a deja rattrape ce piege trois fois.
+     ⚠ Le droit SUPER-ADMINISTRATEUR est dans le COEUR et au SERVEUR : cette
+     fenetre ne decide de rien, elle ne dessine pas ce qu elle n a pas le droit
+     de montrer. */
+  'presence': ['Personnel connecté', () => pagePresence()],
   /* ⚠⚠ « veilleur » A QUITTÉ CE REGISTRE LE 2026-09-09, avec sa fenêtre, son
      entrée de menu et ses sept opérations. Sa demande : « considérant que l'icône
      et l'application font maintenant office de veilleur tout en un tu peut
@@ -4109,6 +4176,7 @@ const { pageListeNoire } = require('./fenetres/listenoire');
 const { pageProfil } = require('./fenetres/profil');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageVerrous } = require('./fenetres/verrous');
+const { pagePresence } = require('./fenetres/presence');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -4275,6 +4343,24 @@ const actionApp = (nom) => {
         { width: 900, height: 660, minWidth: 680, minHeight: 440 });
       if (_reuV && winV && !winV.isDestroyed()) {
         winV.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
+    /* ⚠ FENETRE A PART, PAS UN ECRAN DU DOCK — meme montage que << Verrous >>,
+       et pour la meme raison : aucune section << presence >> n existe cote site.
+       ⚠ ELLE MONTRE LA FENETRE PRINCIPALE D ABORD quand elle est cachee. C est
+       le point qui compte : cette entree est cliquee DEPUIS LE MENU DE L ICONE,
+       donc typiquement alors que l application est reduite dans la zone de
+       notification. Sans cela, la fenetre native s ouvrirait seule, orpheline,
+       et refermer la ferait quitter l application par la porte de derriere.
+       C est le meme raisonnement que la deconnexion depuis l icone (4.67.0). */
+    case 'presence': {
+      const _avP = fenetresNatives.get('presence');
+      const _reuP = !!(_avP && !_avP.isDestroyed());
+      const winP = ouvrirNative('presence', 'Personnel connecté', pagePresence(),
+        { width: 860, height: 620, minWidth: 680, minHeight: 420 });
+      if (_reuP && winP && !winP.isDestroyed()) {
+        winP.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
       }
       break;
     }
@@ -4661,7 +4747,22 @@ ipcMain.handle('menu:modele', (e, m) => {
       } catch {}
     };
     const sombreAvant = !!_modele.sombre;
+    /* ⚠⚠ LE RÔLE AVANT / APRÈS, POUR RECONSTRUIRE LE MENU DE L'ICÔNE (2026-09-09).
+       L'entrée « Personnel connecté… » dépend du rôle ; sans ceci, elle
+       n'apparaîtrait qu'au prochain battement de la veille — jusqu'à 60 s après
+       la connexion. Le super-administrateur cliquerait sur l'icône, ne trouverait
+       rien, et conclurait que ça ne marche pas. Le sens inverse compte autant : à
+       la déconnexion, un menu qui propose encore ce pouvoir sur un poste où plus
+       personne n'est connecté est le vrai défaut.
+       ⚠ ON NE RECONSTRUIT QUE SI ÇA A CHANGÉ : ce modèle arrive souvent (thème,
+       taille, ancrage), et reconstruire le menu de l'icône à chaque fois serait
+       du travail pour rien — et c'est la règle de ce fichier depuis le
+       clignotement de la barre du 2026-08-09. */
+    const roleAvant = String(_modele.role || '') + '|' + (_modele.connecte ? '1' : '0');
     _modele = m;
+    if (roleAvant !== String(_modele.role || '') + '|' + (_modele.connecte ? '1' : '0')) {
+      try { require('./veilleur').rafraichir(); } catch {}
+    }
     panneauSale = true;   // le panneau flottant se reconstruira a sa prochaine ouverture
     buildMenu();
     if (reglages.get('menuMode') === 'fenetre') majPalette();
