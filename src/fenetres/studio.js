@@ -19,21 +19,21 @@
  * l'ambiance s'y résout.
  *
  * ⚠⚠ LE PANNEAU « RÉGLAGES AVANCÉS » NE MONTRE QUE CE QUE LA VOIE ACCEPTE. Le
- * relais ne pose `finition` (fond décrit au texte, ombre réglable, relumière)
+ * relais ne pose finition (fond décrit au texte, ombre réglable, relumière)
  * que sur le FANTÔME — en un second appel — et sur le PRODUIT À PLAT, en un
- * appel unique. Le mannequin virtuel compose sa scène par `options` (décor,
+ * appel unique. Le mannequin virtuel compose sa scène par options (décor,
  * pose, modèle, expression, précisions libres) et la photo d'intérieur n'est lue
  * que pour le fantôme. Dessiner une glissière d'ombre sous un mannequin virtuel
  * serait un mensonge d'écran : le réglage partirait, serait ignoré en silence, et
  * l'on chercherait la panne dans le résultat.
  *
- * ⚠ `preset` et `finition` voyagent À LA RACINE du corps, jamais dans `options` —
+ * ⚠ preset et finition voyagent À LA RACINE du corps, jamais dans options —
  * enfouis là, ils sont reçus et jetés sans un mot (le défaut des lots, 3.40.0).
  *
  * ⚠ L'APERÇU SANDBOX EST GRATUIT ET FILIGRANÉ : c'est le levier crédits. Le bouton
  * payant s'arme en deux temps pour qu'aucun crédit ne parte par mégarde.
  *
- * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
+ * ⚠ AUCUN CARACTÈRE  (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
@@ -50,6 +50,18 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .credits{margin-left:auto;font-size:.74rem;color:var(--tx2)}
+/* Le temoin des traitements, dans l en-tete (2026-09-09). Discret : pas de fond,
+   pas de cadre, la couleur du texte secondaire — il ne reclame rien tant qu on
+   ne le cherche pas. Il s eclaire au survol, comme tout ce qui se clique.
+   ⚠ 30 px de cote au minimum : une icone de 16 px sans cadre est une cible
+   qu on rate, et ce depot a deja paye ca sur les cadenas des listes (<< viser
+   douze pixels a la souris est un exercice d adresse >>). */
+.tete .tj{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;padding:0;margin-left:.55rem;border:0;border-radius:8px;
+  background:none;color:var(--tx2);cursor:pointer}
+.tete .tj:hover{background:var(--v08);color:var(--tx)}
+.tete .tj:focus-visible{outline:2px solid #c9a97e;outline-offset:1px}
+.tete .tj svg{width:17px;height:17px;display:block}
 .tete .credits b{color:var(--tx-or)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
@@ -121,7 +133,21 @@ body{background:var(--f-page);color:var(--tx);
 .ong .ot b{font:600 .79rem/1.25 system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ong .oe{font-size:.68rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ong.on .oe{color:var(--tx2)}
-.ong .oc{flex:0 0 auto;color:var(--tx-or);font-size:.8rem;font-weight:700}
+/* ⚠⚠ LE CROCHET EST VERT DEPUIS LE 2026-09-09, sa demande : << mets aussi un
+   crochet vert quand la section est remplie, exemple la photo est choisie tu
+   coches vert >>.
+   IL ETAIT OR — la couleur de l accent de toute cette fenetre, celle de l onglet
+   actif, des tuiles choisies, du bouton principal. Un crochet or au milieu de
+   tout ce qui est deja or ne se distingue de rien : il disait << rempli >> dans
+   la meme voix que << selectionne >> et << a faire >>. Le vert est la seule
+   couleur de cette interface qui ne veut dire qu une chose.
+   ⚠ --tx-ok2 et non un vert en dur : c est le vert du socle, dont la reprise en
+   mode jour est deja verifiee par les bancs. Un vert invente ici aurait ete a
+   corriger deux fois.
+   ⚠ ET IL GROSSIT UN PEU : a .8 rem, un crochet au bout d une ligne de rail
+   etroit passe inapercu — or c est justement ce qu on vient chercher d un coup
+   d oeil. */
+.ong .oc{flex:0 0 auto;color:var(--tx-ok2);font-size:.95rem;font-weight:700;line-height:1}
 .panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
   background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
   padding:.85rem .95rem}
@@ -499,7 +525,19 @@ function pageStudio(mode) {
 <title>Studio virtuel — Administration Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>Studio virtuel</h1>
-  <span class="credits" id="credits"></span></div>
+  <span class="credits" id="credits"></span>
+  <!-- ⚠ « Traitements » EST ICI DEPUIS LE 2026-09-09, sa demande : « une icône
+       plus discrète à un autre endroit que lors de la sélection des photos ».
+       C'était un bouton pleine largeur au milieu du chemin « choisir une photo »
+       — or ce n'est pas une étape du travail, c'est un TÉMOIN.
+       ⚠ ET IL N'A PAS BESOIN DE PORTER UN COMPTEUR : le bandeau des lots du
+       socle, en bas de CHAQUE fenêtre, montre déjà l'avancement en direct (nom,
+       jauge, 12/40, file). Cette icône ne porte donc que la PORTE vers l'écran
+       détaillé — celui où l'on met en pause et où l'on arrête. Ajouter un
+       compteur ici aurait dit deux fois la même chose, et le premier des deux
+       était périmé : le sondage des lots ne tournait que sur l'écran des lots. -->
+  <button class="tj" id="lots-voir" title="Traitements par lot — voir la file, mettre en pause, arrêter"
+    aria-label="Traitements par lot">${ICO.clock}</button></div>
 <div class="ro" id="ro" hidden>Lecture seule : votre rôle ne permet pas de lancer de traitement.</div>
 <div class="corps plein" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
@@ -963,36 +1001,76 @@ ${JS_ACTIVITE}${JS_DIRE}
      sont partis en plein ecran (pleinHtml) : une grille de plusieurs centaines
      de vignettes et une file de lots n ont jamais eu leur place dans une carte
      large d une demi-page — c est cet entassement qu on retire. */
+  /* ⚠⚠ TROIS ETATS, UN SEUL A LA FOIS — refonte du 2026-09-09, ses trois
+     demandes sur cette zone, qui n en font qu une :
+       << ici on ne va garder que Explorateur car il est deja lie a la
+          photothèque >>
+       << pour la visualisation des traitements par lot mets une icone plus
+          discrete a un autre endroit que lors de la selection des photos >>
+       << quand les photo sont selectionnees tu devrais retirer les option pour
+          ajouter une photo et les faire revenir seulement si on ferme ou retire
+          la selection >>
+     Le defaut commun : cette zone empilait les trois choses en meme temps — la
+     porte pour choisir, ce qui etait choisi, et un temoin de traitements sans
+     rapport. Trois etats superposes, donc aucun.
+
+     ① UNE SELECTION EXISTE (le panier de l explorateur) → on ne montre QUE la
+        selection. Les portes d ajout partent : elles ne servent a rien tant que
+        la selection est la, et son << X >> est ce qui les ramene. C est sa
+        demande mot pour mot.
+     ② UNE PHOTO EST CHOISIE → on la montre, avec << Choisir une autre photo >>.
+     ③ RIEN → la zone de depot et l explorateur.
+
+     ⚠ << DEPUIS LA PHOTOTHEQUE >> EST RETIRE, et il avait bien une raison
+     d exister : le commentaire d origine disait que le petit selecteur servait a
+     prendre UNE photo vite fait, l explorateur a en choisir des centaines. Sauf
+     que l explorateur fait les DEUX — c est la meme photothèque, avec de la place
+     et un apercu. Deux portes vers la meme piece, dont l une plus etroite.
+     ⚠⚠ ET J AI VERIFIE SA PREMISSE AVANT DE RETIRER LE BOUTON, parce que retirer
+     une porte c est repondre de ce qu elle ouvrait — la faute payee le 2026-09-08
+     avec << Mon profil >> et la zone du compte. L explorateur porte bien la
+     recherche, les filtres, la multi-selection au Maj-clic ET le panier
+     (panier:poser) : il couvre TOUT ce que faisait le selecteur interne, avec
+     de la place et un apercu en plus. Sa premisse etait juste.
+     ⚠⚠ CONSEQUENCE A NE PAS LAISSER DANS L OMBRE : ph-ouvrir etait la SEULE
+     porte vers le selecteur interne plein ecran (ouvrirPicker). Ce selecteur
+     est donc, a partir d ici, INJOIGNABLE — du code vivant que rien n appelle.
+     Il n est PAS retire dans le meme geste : c est une cinquantaine de points
+     d accroche dans ce fichier (grille, filtres, pagination, selection, lancement
+     de lot), et retirer deux choses d un coup, c est ne plus savoir laquelle a
+     casse quelque chose. Le retrait est inscrit comme tache a part, et
+     l utilisateur en est averti. La zone de depot, elle, garde son
+     glisser-deposer et son choix de fichier.
+     ⚠ << TRAITEMENTS >> MONTE DANS L EN-TETE, en icone discrete. Ce n est pas
+     une etape du travail, c est un temoin : sa place n est pas au milieu du
+     chemin << choisir une photo >>. Et le bandeau des lots du socle, en bas de
+     chaque fenetre, montre DEJA l avancement en direct — l en-tete ne porte donc
+     que la PORTE vers l ecran detaille. */
   function photoHtml(){
     var h = '';
+    if (PANIER.length) {
+      // ① Une selection venue de l explorateur : elle occupe la zone seule.
+      return panierHtml();
+    }
     if (aUnePhoto()) {
-      // Une photo est déjà choisie (fichier OU photothèque) : on la montre.
+      // ② Une photo est déjà choisie (fichier OU photothèque) : on la montre.
       var apercu = PHOTO || PHOTO_URL;
       h += '<div class="depot" id="depot">'
         + (apercu ? '<img src="' + apercu + '" alt="photo">'
                   : '<span class="gros"><span class="ic">🖼</span></span><span>Photo de la photothèque sélectionnée</span>')
-        + '<span class="refaire">Choisir une autre photo</span></div>';
-    } else {
-      h += '<div class="depot" id="depot"><span class="gros"><span class="ic">📷</span></span>'
-        + '<span>Glissez une photo ici, ou cliquez pour en choisir une</span>'
-        + '<span class="pt2">Studio, fond blanc, un vêtement — JPEG ou PNG</span></div>';
+        + '<span class="refaire">Choisir une autre photo</span></div>'
+        + '<input type="file" id="fichier" accept="image/*" hidden>';
+      return h;
     }
-    h += '<input type="file" id="fichier" accept="image/*" hidden><div class="pbtn">';
-    if (!aUnePhoto()) {
-      h += '<button id="ph-ouvrir"><span class="ic">📚</span> Depuis la photothèque</button>'
-        // ⚠ L EXPLORATEUR EST DANS SA PROPRE FENETRE (#32) : le selecteur
-        // ci-contre reste pour prendre UNE photo vite fait, l explorateur sert a
-        // en choisir des centaines — il lui faut de la place et un apercu.
-        + '<button id="ph-explorateur" title="Parcourir la photothèque en grand, avec aperçu">'
-        + '<span class="ic">🗂️</span> Explorateur…</button>';
-    }
-    /* ⚠ LE SUIVI RESTE JOIGNABLE UNE FOIS LA PHOTO CHOISIE, et c est nouveau :
-       avant, le bouton disparaissait avec le bloc de depart, si bien qu un lot
-       lance puis une photo prise a l ecran rendait la file introuvable sans
-       tout reinitialiser. */
-    h += '<button id="lots-voir">⚙ Traitements'
-      + ((LOTS && LOTS.lots && LOTS.lots.length) ? ' (' + LOTS.lots.length + ')' : '')
-      + '</button></div>' + panierHtml();
+    // ③ Rien de choisi : la zone de dépôt, et l explorateur.
+    h += '<div class="depot" id="depot"><span class="gros"><span class="ic">📷</span></span>'
+      + '<span>Glissez une photo ici, ou cliquez pour en choisir une</span>'
+      + '<span class="pt2">Studio, fond blanc, un vêtement — JPEG ou PNG</span></div>'
+      + '<input type="file" id="fichier" accept="image/*" hidden>'
+      + '<div class="pbtn">'
+      + '<button id="ph-explorateur" title="Parcourir la photothèque en grand, avec aperçu">'
+      + '<span class="ic">🗂️</span> Explorateur…</button>'
+      + '</div>';
     return h;
   }
 
@@ -1446,15 +1524,33 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (cle === 'filigrane') { var l = logoChoisi(); return l ? l.nom : ''; }
     return '';
   }
-  /* Les trois onglets qu il FAUT remplir pour lancer quoi que ce soit. Les six
-     autres sont facultatifs : leur coller une coche voudrait dire << il manque
-     quelque chose >> tant qu on n y a pas touche, ce qui est faux. */
+  /* Les deux onglets qu il FAUT remplir pour lancer quoi que ce soit. Les autres
+     sont facultatifs — et c est CE drapeau, pas le crochet, qui porte cette
+     information : un onglet requis et vide affiche << A choisir >>, un
+     facultatif vide affiche << — >>. La distinction se lit donc dans le
+     sous-titre, la ou elle est utile. */
   function ongletRequis(cle){ return cle === 'photo' || cle === 'ambiance'; }
   function ongletsHtml(){
     var courant = ongletSur().cle;
     return ongletsDispo().map(function(o){
       var e = ongletEtat(o.cle);
-      var ok = ongletRequis(o.cle) ? !!e : false;
+      /* ⚠⚠ LE CROCHET DIT << REMPLI >>, POINT — sa demande du 2026-09-09 :
+         << mets aussi un crochet vert quand la section est remplie, exemple la
+         photo est choisie tu coches vert >>.
+         Il ne paraissait QUE sur les deux onglets obligatoires. Consequence :
+         << Mise en valeur >> portait toujours une valeur et jamais de crochet,
+         << Decor >> et << Filigrane >> non plus une fois remplis — donc le rail
+         ne repondait pas a la question qu on lui pose en le parcourant : qu
+         est-ce qui est fait ?
+         ⚠ ET LE COMMENTAIRE QUI DEFENDAIT L ANCIEN CHOIX SE TROMPAIT DE
+         MECANISME. Il craignait qu une coche sur un facultatif fasse croire
+         qu il manque quelque chose tant qu on n y a pas touche — mais l ABSENCE
+         de crochet ne dit rien, et ce qui dit << il manque quelque chose >>,
+         c est deja le sous-titre : << A choisir >> pour un requis vide, << — >>
+         pour un facultatif vide. La coche et le sous-titre repondent a deux
+         questions differentes ; les faire dependre du meme drapeau melangeait
+         les deux. */
+      var ok = !!e;
       return '<button class="ong' + (o.cle === courant ? ' on' : '') + '" data-ong="' + o.cle
         + '" role="tab" aria-selected="' + (o.cle === courant ? 'true' : 'false') + '">'
         + '<span class="ot"><b>' + esc(o.t) + '</b>'
@@ -2174,7 +2270,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     // « Choisir une autre photo » : on repart de zéro.
     if (depot && aUnePhoto() && !RO) { depot.onclick = function(){ reinitPhoto(); }; }
-    var phO = document.getElementById('ph-ouvrir'); if (phO) phO.onclick = ouvrirPicker;
+    /* ⚠⚠ ph-ouvrir N EXISTE PLUS (2026-09-09) : le bouton << Depuis la
+       photothèque >> est retiré sur sa demande, l explorateur le remplace. Son
+       branchement est retiré avec lui — un branchement qui cherche un élément
+       absent n est pas une erreur, mais il fait croire que le bouton existe
+       encore quelque part.
+       ⚠ CONSEQUENCE ASSUMEE ET INSCRITE : ouvrirPicker — donc tout le
+       sélecteur interne plein écran — n a plus AUCUN appelant. Son retrait est
+       une tâche à part, pas ce même geste : cinquante points d accroche dans ce
+       fichier, et retirer deux choses d un coup c est ne plus savoir laquelle a
+       cassé quelque chose. */
     var px = document.getElementById('ph-explorateur');
     if (px) px.onclick = function(){
       appeler('explorateur:ouvrir', []).then(function(r){
