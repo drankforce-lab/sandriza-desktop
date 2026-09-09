@@ -194,4 +194,73 @@ provoquer(
   T(5)
 );
 
+console.log('\n── LA VEILLE NE DÉPEND D’AUCUNE SESSION ──────────────');
+
+/* ⚠⚠ POURQUOI CE GARDE EXISTE — IL L A DEMANDÉ DEUX FOIS.
+   « Quand on est déconnecté l’application doit quand même surveiller les
+   nouvelles commandes et retours » (2026-09-09), puis « si on a été connecté et
+   que l’application se déconnecte il faut que le veilleur de commande persiste
+   et soit fonctionnel même sans session ».
+
+   La règle tient aujourd’hui à une ABSENCE : il n’y a simplement aucune
+   vérification de session dans le chemin du sondage. Une absence ne se voit pas
+   en relisant, et rien n’empêche quelqu’un d’ajouter demain un innocent
+   `if (!_connecteHote()) return;` en croyant bien faire — la veille s’éteindrait
+   alors la nuit, sans un message, et personne ne le saurait avant d’avoir raté
+   des commandes. C’est exactement le genre de panne muette que ce dépôt paie le
+   plus cher.
+
+   ⚠ CE GARDE LIT LA SOURCE, et il faut savoir ce que ça vaut : il ne prouve pas
+   que la veille TOURNE, il prouve que son chemin ne consulte pas la session.
+   C’est la question posée, et c’est tout ce qu’il répond. `veilleur.js` charge
+   Electron : on ne peut pas l’exécuter ici, et un banc qui prétendrait le
+   contraire mentirait sur sa portée. */
+const _srcV = fs.readFileSync(path.join(__dirname, '..', 'src', 'veilleur.js'), 'utf8');
+
+// Le corps d’une fonction nommée, du `{` à l’accolade de même niveau.
+const _corps = (nom) => {
+  const i = _srcV.indexOf('function ' + nom + '(');
+  if (i < 0) return null;
+  const d = _srcV.indexOf('{', i);
+  if (d < 0) return null;
+  let n = 0;
+  for (let k = d; k < _srcV.length; k++) {
+    if (_srcV[k] === '{') n++;
+    else if (_srcV[k] === '}') { n--; if (!n) return _srcV.slice(d, k + 1); }
+  }
+  return null;
+};
+
+/* Les trois fonctions du chemin, et ce qui ne doit PAS y apparaître.
+   ⚠ `toast()` n’est PAS dans la liste, à dessein : il consulte légitimement
+   l’état de connexion pour écrire le texte du clic (« connectez-vous pour… »).
+   L’y mettre aurait fait crier le garde sur du code correct — et un contrôle qui
+   crie finit désactivé. */
+const _INTERDITS = ['_connecteHote', 'session', 'sessionToken', 'jetonSession'];
+
+for (const nom of ['interroger', 'unTour', 'ordonnancer']) {
+  cas(nom + '() ne consulte aucune session', () => {
+    const c = _corps(nom);
+    assert.ok(c, 'fonction ' + nom + ' introuvable dans veilleur.js — ce garde ne garde plus rien');
+    for (const mot of _INTERDITS) {
+      assert.ok(c.indexOf(mot) < 0,
+        nom + ' mentionne « ' + mot + ' » : la veille dependrait d une session, ce qu il a interdit deux fois');
+    }
+  });
+}
+
+cas('interroger() s authentifie bien avec la CLE D APPLICATION', () => {
+  const c = _corps('interroger');
+  assert.ok(c && c.indexOf('X-Sandriza-App') >= 0,
+    'l en-tete de cle d application a disparu : le sondage ne s authentifie plus, ou plus de la meme facon');
+});
+
+/* ⚠ ET LE TÉMOIN : un garde qui n’a jamais refusé ne prouve rien. On lui donne
+   ici le défaut exact qu’il cherche — la ligne qu’on ajouterait par mégarde. */
+cas('temoin : le garde REFUSE un unTour() qui consulterait la session', () => {
+  const faux = '{ if (!_connecteHote()) return; battre(); }';
+  let vu = false;
+  for (const mot of _INTERDITS) if (faux.indexOf(mot) >= 0) vu = true;
+  assert.ok(vu, 'le garde laisse passer une consultation de session : il ne prouve rien');
+});
 console.log('\n' + (process.exitCode ? '✗ DES CAS ONT ÉCHOUÉ' : '✓ ' + vert + ' cas verts') + '\n');

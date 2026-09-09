@@ -141,6 +141,11 @@ ${JS_ACTIVITE}${JS_DIRE}
   var D = null;            // les donnees du site (tableau:lire)
   var ANNEE = 'all';
   var PANNEAU = false;     // le panneau << Tuiles >> est ouvert
+  /* Le mode usage exclusif. « MX » reste nul tant que le serveur n a pas repondu,
+     et il refuse (superadmin_required) a qui n a pas le droit : le bouton ne
+     parait donc QUE pour un super-administrateur, sans que cette page ait a
+     connaitre le role. Sa regle du 2026-09-09 : masquer, pas griser. */
+  var MX = null;
   var PAR_PAGE = 10;       // les 10 dernieres, d un bloc (demande du 2026-08-08)
   /* L etat de la tuile << Derniere sauvegarde >> (#25). null = pas encore lue.
      ⚠ ELLE SE LIT A PART, APRES le premier dessin : c est le seul indicateur du
@@ -291,6 +296,49 @@ ${JS_ACTIVITE}${JS_DIRE}
     return h + '</div>';
   }
 
+  /* ══ MODE USAGE EXCLUSIF ══════════════════════════════════════════════════
+     Sa demande du 2026-09-09 : << une option usage exclusif dans l application
+     que je peux activer dans un mode de maintenance si je veux m assurer que
+     personne ne se connecte pendant cette periode >>, puis, une heure apres la
+     premiere livraison : << mets le bouton mode exclusif dans le tableau de bord
+     plutot et non dans personnel connecte >>.
+     ⚠⚠ ET CE DEPLACEMENT CORRIGE UN DEFAUT, pas seulement un rangement. Dans
+     << Personnel connecte >>, la liste se rafraichit toutes les 4 secondes et
+     redessine le corps entier : le selecteur de date natif que le systeme venait
+     d ouvrir disparaissait avec, une ou deux secondes apres le clic — impossible
+     de choisir quoi que ce soit. Ici, « dessiner() » n est appele que sur un GESTE,
+     et le seul sondage de cette fenetre (les verrous, 3 s) ne touche que les
+     cadenas. Le probleme n a donc plus lieu d etre, au lieu d etre contourne. */
+  /* ══ MODE USAGE EXCLUSIF — LE BOUTON, ET RIEN QUE LE BOUTON ══════════════
+     Sa demande du 2026-09-09 : << si je clique sur mode exclusif, une autre
+     fenetre native s ouvre en detache et me propose les options >>.
+     ⚠⚠ ET CE N EST PAS QU UNE PREFERENCE DE PLACEMENT. Le formulaire a d abord
+     vecu dans << Personnel connecte >>, qui se redessine toutes les 4 secondes :
+     le selecteur de date natif se refermait une seconde apres le clic. Puis ici,
+     en panneau deplie — mieux, mais un formulaire dans un ecran qui porte aussi
+     douze tuiles et un sondage de verrous reste un formulaire de passage. Une
+     fenetre a lui, qui ne se rafraichit sur rien, est le seul montage ou le
+     selecteur tient.
+     ⚠ LE BOUTON NE PARAIT QUE SI LE SERVEUR A DIT OUI. « maintenance:etat » refuse
+     (superadmin_required) a qui n a pas le droit : le masquage se fait donc sur
+     la reponse, pas sur une idee que cette fenetre se ferait du role. Sa regle du
+     meme jour : masquer, pas griser. */
+  function mxLire(){
+    appeler('maintenance:etat',[]).then(function(r){
+      var avant = MX && MX.ok ? (MX.actif ? 2 : 1) : 0;
+      MX = r || { ok: false };
+      var apres = MX && MX.ok ? (MX.actif ? 2 : 1) : 0;
+      /* ⚠ ON NE REDESSINE QUE SI LE BOUTON CHANGE. Le tableau de bord est le
+         premier ecran de la session : un redessin gratuit y coute plus cher
+         qu ailleurs, et il n y a rien d autre a mettre a jour ici. */
+      if (avant !== apres) dessiner();
+    });
+  }
+
+  /* Appelee par la fenetre du mode exclusif quand elle vient de poser ou de
+     lever : le libelle du bouton doit suivre sans attendre une reouverture. */
+  window.szMaintenanceChangee = function(){ mxLire(); };
+
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var cfg = D.cfgTuiles || {};
@@ -304,6 +352,12 @@ ${JS_ACTIVITE}${JS_DIRE}
           return '<option value="' + a + '"' + (String(ANNEE) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
       + '</select>'
       + '<button class="mini" id="tb-tuiles" title="Afficher ou masquer des tuiles">⚙ Tuiles</button>'
+      + ((MX && MX.ok)
+          ? '<button class="mini' + (MX.actif ? ' att' : '') + '" id="tb-mx" '
+            + 'title="Empecher toute autre connexion pendant une maintenance">'
+            + (MX.actif ? '\u{1F512} Mode exclusif : ACTIF' : '\u{1F512} Mode exclusif\u2026')
+            + '</button>'
+          : '')
       + '<span class="droite">' + esc(new Date().toLocaleDateString('fr-CA',
           { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })) + '</span>'
       + '</div>';
@@ -435,6 +489,16 @@ ${JS_ACTIVITE}${JS_DIRE}
     var ou = t.closest('[data-ouvre]');
     if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
     if (t.closest('#tb-tuiles')) { PANNEAU = !PANNEAU; dessiner(); return; }
+    /* ⚠ CES QUATRE-LA NE REDESSINENT PAS AVANT D AVOIR LU LES CHAMPS. Un
+       redessin efface la saisie et referme le selecteur de date : c est
+       exactement le defaut qu on vient de corriger en changeant d ecran, et il
+       reviendrait ici au premier raccourci. */
+    if (t.closest('#tb-mx')) {
+      appeler('maintenance:ouvrir',[]).then(function(r){
+        if (!r || !r.ok) dire(expliquer(r), 'err');
+      });
+      return;
+    }
     var tu = t.closest('[data-tuile]');
     if (tu) {
       var cibles = { products: 'products', orders: 'orders', customers: 'customers',
@@ -545,7 +609,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     charger();
   };
   // Ramenee au premier plan par le menu : les chiffres se relisent.
-  window.szRevenir = function(){ SAUV_QUAND = 0; charger(); };
+  window.szRevenir = function(){
+    SAUV_QUAND = 0;
+    charger();
+    /* ⚠ ET ON RELIT L ETAT DU MODE : quelqu un a pu le poser ou le lever depuis
+       l autre fenetre pendant que celle-ci etait derriere. */
+    mxLire();
+  };
 
   /* ── MODE ANCRE ── La coquille appelle szModeAncre(true) quand cette page
      vit DANS la fenetre principale : on offre alors << Detacher >>, qui
@@ -561,13 +631,19 @@ ${JS_ACTIVITE}${JS_DIRE}
 
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
+    if (ev.key !== 'Escape') return;
+    ev.preventDefault();
+    P.fermer();
   });
 
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
   charger();
   demarrerVerrous();   // #38 : cadenas en direct sur les commandes/factures verrouillees
+  /* ⚠ APRES « charger() » , ET SANS L ATTENDRE : le tableau de bord ne doit pas
+     retarder son affichage pour savoir s il faut dessiner un bouton. Le bouton
+     paraitra au retour de cette reponse, ou jamais si le droit manque. */
+  mxLire();
 })();
 </script>
 </body></html>`;

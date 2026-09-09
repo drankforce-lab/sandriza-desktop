@@ -527,7 +527,24 @@ function _sousMenuNotifs() {
      c'est exactement la raison pour laquelle cette liste existe.
      ⚠ ET ON N'AFFICHE PAS UNE ENTRÉE DÉSACTIVÉE : elle dirait qu'il y a quelque
      chose à voir. Sa règle est « invisible et non pas juste griser ». */
-  if (_connecteHote && !_connecteHote()) return [];
+  /* ⚠⚠ HORS SESSION ON NE MONTRE PAS LA LISTE — MAIS ON DIT QU ON VEILLE.
+     Sa demande du 2026-09-09, la seconde fois : « si on a ete connecte et que
+     l application se deconnecte il faut que le veilleur de commande persiste
+     et soit fonctionnel meme sans session ».
+     ⚠ IL L EST DEJA — le sondage s authentifie avec la cle d application, pas
+     avec une session, et rien dans la deconnexion ne l arrete. Mais le menu
+     de l icone ne montrait RIEN a ce moment-la : ni la liste (sa regle du
+     matin : rien de l entreprise hors session), ni un mot pour dire qu elle
+     existe. Un menu vide et une veille morte se ressemblent trait pour trait,
+     et c est la seule chose qu on regarde pour se rassurer.
+     ⚠ AUCUN COMPTE, AUCUN TITRE : le nombre de commandes recues est une
+     information sur l entreprise, et elle n a pas a paraitre devant un ecran
+     de connexion. On dit l ETAT du mecanisme, jamais son contenu.
+     ⚠ Desactivee, comme la ligne d etat : c est une phrase, pas une porte. */
+  if (_connecteHote && !_connecteHote()) {
+    return [{ label: 'Veille active — connectez-vous pour voir les notifications',
+      enabled: false }];
+  }
   const liste = (lireEtat().notifs || []).filter((n) => n && n.titre);
   if (!liste.length) {
     // ⚠ ON MONTRE L'ENTRÉE MÊME VIDE, désactivée. La faire disparaître laisserait

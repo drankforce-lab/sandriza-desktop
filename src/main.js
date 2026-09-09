@@ -2025,7 +2025,7 @@ const OPS_PONT = new Set([
      session ne revient au poste — on deconnecte par identifiant de compte. */
   /* Le mode << usage exclusif >> (sa demande du 2026-09-09) vit dans la meme
      fenetre que la presence : voir son commentaire dans admin.js. */
-  'maintenance:etat', 'maintenance:ecrire',
+  'maintenance:etat', 'maintenance:ecrire', 'maintenance:ouvrir',
   'presence:liste', 'presence:deconnecter', 'presence:message',
   // Les quatre derniers trous fonctionnels de l audit (#6) : le REPERTOIRE de
   // grossistes (ajout en un clic) et la SUPPRESSION d une demande de retour
@@ -2478,6 +2478,16 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
    derriere, remplace par << Ecran detache dans sa propre fenetre >>. Or les
    deux servent ENSEMBLE — on choisit dans l un pour travailler dans l autre.
    Il passe donc par ouvrirNative, qui ne touche pas au dock. */
+/* Le mode usage exclusif s ouvre en fenetre a lui (sa demande du 2026-09-09).
+   ⚠ On passe par `actionApp` plutot que d appeler `ouvrirNative` ici : c est la
+   MEME porte que le reste, donc la reprise au premier plan et la relecture de
+   l etat suivent la meme regle. Deux portes vers un ecran finissent par se
+   comporter differemment. */
+ipcMain.handle('fenetre:maintenance', () => {
+  try { actionApp('maintenance'); return { ok: true }; }
+  catch (e) { return { ok: false, motif: 'echec' }; }
+});
+
 ipcMain.handle('fenetre:explorateur', () => {
   const win = ouvrirNative('explorateur', 'Explorateur de photos', pageExplorateur(),
     { width: 1180, height: 720, minWidth: 900, minHeight: 520 });
@@ -2785,7 +2795,7 @@ const LIMITES_PONT = {
      doublon. Ici, le doublon serait un second message identique sur l ecran de
      quelqu un, ou une seconde deconnexion — inoffensive, mais qui ferait douter
      du mecanisme. */
-  'maintenance:etat': 15000, 'maintenance:ecrire': 30000,
+  'maintenance:etat': 15000, 'maintenance:ecrire': 30000, 'maintenance:ouvrir': 15000,
   'presence:liste': 15000, 'presence:deconnecter': 30000, 'presence:message': 30000,
   'repertoire:donnees': 20000, 'repertoire:ajouter': 30000,
   /* Parcourt toute la phototheque et rend AUSSI les identifiants du resultat
@@ -3093,6 +3103,7 @@ const PAGES_ANCRABLES = () => ({
      fenetre ne decide de rien, elle ne dessine pas ce qu elle n a pas le droit
      de montrer. */
   'presence': ['Personnel connecté', () => pagePresence()],
+  'maintenance': ['Mode usage exclusif', () => pageMaintenance()],
   /* ⚠⚠ « veilleur » A QUITTÉ CE REGISTRE LE 2026-09-09, avec sa fenêtre, son
      entrée de menu et ses sept opérations. Sa demande : « considérant que l'icône
      et l'application font maintenant office de veilleur tout en un tu peut
@@ -4266,6 +4277,7 @@ const { pageProfil } = require('./fenetres/profil');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageVerrous } = require('./fenetres/verrous');
 const { pagePresence } = require('./fenetres/presence');
+const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -4443,6 +4455,28 @@ const actionApp = (nom) => {
        notification. Sans cela, la fenetre native s ouvrirait seule, orpheline,
        et refermer la ferait quitter l application par la porte de derriere.
        C est le meme raisonnement que la deconnexion depuis l icone (4.67.0). */
+    /* ⚠ SA DEMANDE DU 2026-09-09 : « si je clique sur mode exclusif, une autre
+       fenêtre native s'ouvre en détaché et me propose les options ». Elle porte
+       un formulaire avec un sélecteur de date, et un formulaire n'a rien à
+       faire dans un écran qui se réécrit tout seul : sa première version vivait
+       dans « Personnel connecté », dont le rafraîchissement de 4 s refermait le
+       sélecteur une seconde après le clic.
+       ⚠ PETITE ET NON REDIMENSIONNABLE EN LARGEUR UTILE : c'est un formulaire de
+       quatre champs, pas un tableau. Lui donner la taille d'un écran de liste
+       ferait flotter quatre champs au milieu du vide. */
+    case 'maintenance': {
+      const _avM = fenetresNatives.get('maintenance');
+      const _reuM = !!(_avM && !_avM.isDestroyed());
+      const winM = ouvrirNative('maintenance', 'Mode usage exclusif', pageMaintenance(),
+        { width: 640, height: 620, minWidth: 520, minHeight: 460 });
+      /* ⚠ ON RELIT EN LA RAMENANT AU PREMIER PLAN : quelqu'un a pu lever le mode
+         ailleurs pendant qu'elle était derrière. C'est le seul rafraîchissement
+         de cette fenêtre, et il vient d'un geste — jamais d'une minuterie. */
+      if (_reuM && winM && !winM.isDestroyed()) {
+        winM.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
     case 'presence': {
       const _avP = fenetresNatives.get('presence');
       const _reuP = !!(_avP && !_avP.isDestroyed());

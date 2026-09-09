@@ -596,6 +596,10 @@ module.exports = {
       nom: 'journée chargée, taux de secours',
       id: '',
       reponses: {
+        /* Le mode exclusif AU REPOS : le bouton paraît, le panneau reste replié.
+           C est l état de tous les jours, et celui que voit un poste ordinaire. */
+        'maintenance:etat': { ok: true, actif: false, debut: '', fin: '', message: '',
+          moi: false, graceH: 12, nipMin: 6, nipMax: 12, phrase: '' },
         'tableau:lire': {
           ok: true,
           annee: 'all',
@@ -640,6 +644,28 @@ module.exports = {
       nom: 'journée calme, sauvegarde vieille',
       id: '',
       reponses: {
+        /* ⚠⚠ LE MODE USAGE EXCLUSIF ACTIF. Sans cet état, le bouton « Mode
+           exclusif : ACTIF » serait du code jamais exécuté — l angle mort qui a
+           laissé la ligne de diagnostic de « Personnel connecté » sous le seuil
+           de lisibilité pendant des jours.
+           ⚠ POSÉ SUR UN CAS QUI A DÉJÀ SES DONNÉES, plutôt que dans un cas neuf :
+           un sixième cas qui ne déclarerait que cette op mourrait sur `D.tuiles`
+           (le faux pont rend `{ok:true}` pour ce qu on ne déclare pas), et le
+           recopier ferait vivre deux fois le même jeu de tuiles.
+           ⚠ CE QU IL ÉPROUVE, ET CE QU IL N ÉPROUVE PAS : le harnais ne clique
+           pas, donc le panneau reste replié et son FORMULAIRE n est pas dessiné.
+           Ce cas éprouve la présence du bouton et son libellé, qui dépendent tous
+           deux de cette réponse. Mieux vaut l écrire que croire l inverse.
+           ⚠ Un `ok: false` ici ferait DISPARAÎTRE le bouton : c est ainsi qu il
+           est masqué pour qui n est pas super-administrateur, sans que cette
+           fenêtre ait à connaître le rôle. */
+        'maintenance:etat': { ok: true, actif: true,
+          debut: '2026-09-09T22:00', fin: '2026-09-10T02:00',
+          message: 'Mise à jour du système de facturation.',
+          moi: true, graceH: 12, nipMin: 6, nipMax: 12,
+          phrase: 'Une maintenance est en cours : l’application ne sera pas disponible'
+            + ' entre mercredi le 9 septembre à 22h00 et jeudi le 10 septembre à 02h00.' },
+        'maintenance:ecrire': { ok: true, actif: false },
         'tableau:lire': {
           ok: true, annee: 2026, annees: [2026],
           cfgTuiles: {},
@@ -6182,6 +6208,52 @@ module.exports = {
      ⚠ ET LE SECOND CAS EST UN REFUS `superadmin_required` : c est exactement ce
      que son écran affiche, donc le chemin du diagnostic — celui qu on lui
      demande de lire — doit s exécuter au moins une fois ici. */
+  // ── MODE USAGE EXCLUSIF ────────────────────────────────────────────────────
+  'maintenance.js': [
+    {
+      /* Le cas ordinaire : le mode est éteint, la fenêtre montre le formulaire.
+         C est celui-là qui porte le sélecteur de date — celui dont la première
+         version, logée dans « Personnel connecté », se refermait toute seule. */
+      nom: 'inactif — le formulaire',
+      id: '',
+      reponses: {
+        'maintenance:etat': { ok: true, actif: false, debut: '', fin: '', message: '',
+          moi: false, graceH: 12, nipMin: 6, nipMax: 12, phrase: '' },
+        'maintenance:ecrire': { ok: true, actif: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠ `moi: false` À DESSEIN : le mode a été posé par quelqu un d autre, et
+         cet écran porte alors un avertissement de plus — lever le mode d un
+         collègue rouvre les connexions pendant qu il travaille peut-être dessus.
+         Avec `moi: true` partout, cette phrase-là ne serait jamais dessinée. */
+      nom: 'actif — posé par quelqu un d autre',
+      id: '',
+      reponses: {
+        'maintenance:etat': { ok: true, actif: true,
+          debut: '2026-09-09T22:00', fin: '2026-09-10T02:00',
+          message: 'Mise à jour du système de facturation.',
+          moi: false, graceH: 12, nipMin: 6, nipMax: 12,
+          phrase: 'Une maintenance est en cours : l’application ne sera pas disponible'
+            + ' entre mercredi le 9 septembre à 22h00 et jeudi le 10 septembre à 02h00.'
+            + ' Mise à jour du système de facturation.' },
+        'maintenance:ecrire': { ok: true, actif: false },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* Le refus du serveur. C est l écran qu on lira le jour où ça ne marche
+         pas, donc le dernier qu on peut se permettre de ne jamais dessiner. */
+      nom: 'refus : pas super-administrateur',
+      id: '',
+      reponses: {
+        'maintenance:etat': { ok: false, motif: 'superadmin_required', detail: 'HTTP 403' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   'presence.js': [
     {
       nom: 'sessions ouvertes, dont la sienne',
@@ -6211,10 +6283,6 @@ module.exports = {
               frais: false, vuDepuisSec: 0, vu: '', depuis: '2026-09-09T14:33:00Z' },
           ],
         },
-        /* Mode exclusif au repos : le bouton s affiche, le panneau reste replié.
-           C est l état ordinaire, celui qu on voit 364 jours sur 365. */
-        'maintenance:etat': { ok: true, actif: false, debut: '', fin: '', message: '',
-          moi: false, graceH: 12, nipMin: 6, nipMax: 12, phrase: '' },
         'presence:deconnecter': { ok: true, nom: 'Martin Dubé' },
         'presence:message': { ok: true, nom: 'Martin Dubé' },
         identite: IDENTITE,
@@ -6226,42 +6294,6 @@ module.exports = {
       reponses: {
         'presence:liste': { ok: false, motif: 'superadmin_required',
           detail: 'HTTP 403', vu: { session: true, role: 'admin' } },
-        /* ⚠ MÊME REFUS POUR LES DEUX : le mode exclusif est réservé au
-           super-administrateur comme la liste. Rendre `{ok:true}` par défaut ici
-           aurait fait dessiner un panneau à quelqu un qui n y a pas droit — dans
-           le BANC seulement, mais c est exactement le genre d écart qui fait
-           croire qu on a éprouvé un chemin qui n existe pas. */
-        'maintenance:etat': { ok: false, motif: 'superadmin_required' },
-        identite: IDENTITE,
-      },
-    },
-    {
-      /* ⚠⚠ LE MODE EXCLUSIF ACTIF — ET C EST LE SEUL CAS QUI DESSINE LE PANNEAU.
-         Le harnais ne clique pas : sans cet état, le panneau du mode exclusif
-         serait du code jamais exécuté, exactement l angle mort qui a laissé la
-         ligne de diagnostic de cette même fenêtre à 4,48:1 pendant des jours.
-         C est pour ça que la fenêtre déplie le panneau d elle-même quand le mode
-         est actif : c est la bonne conduite (un blocage de toutes les connexions
-         doit se voir en ouvrant l écran des sessions) ET c est ce qui le rend
-         mesurable.
-         ⚠ `moi: true` : c est LUI qui a posé le mode, donc la fenêtre propose de
-         le lever sans avertissement. Le cas `moi: false` porte un avertissement
-         en plus — il reste non éprouvé ici, et c est écrit. */
-      nom: 'mode usage exclusif ACTIF (panneau déplié)',
-      id: '',
-      reponses: {
-        'presence:liste': { ok: true, fraisSec: 120, sessions: [
-          { staffId: 'stf_0001', nom: 'Brigitte Brousseau', courriel: 'brigitte@sandriza.com',
-            role: 'superadmin', moi: true, frais: true, vuDepuisSec: 3,
-            vu: '2026-09-09T20:40:00Z', depuis: '2026-09-09T19:00:00Z' } ] },
-        'maintenance:etat': { ok: true, actif: true,
-          debut: '2026-09-09T22:00', fin: '2026-09-10T02:00',
-          message: 'Mise a jour du systeme de facturation.',
-          moi: true, graceH: 12, nipMin: 6, nipMax: 12,
-          phrase: 'Une maintenance est en cours : l’application ne sera pas disponible'
-            + ' entre mercredi le 9 septembre à 22h00 et jeudi le 10 septembre à 02h00.'
-            + ' Mise a jour du systeme de facturation.' },
-        'maintenance:ecrire': { ok: true, actif: false },
         identite: IDENTITE,
       },
     },
@@ -6272,8 +6304,6 @@ module.exports = {
       id: '',
       reponses: {
         'presence:liste': { ok: true, fraisSec: 120, sessions: [] },
-        'maintenance:etat': { ok: true, actif: false, moi: false, graceH: 12,
-          nipMin: 6, nipMax: 12, phrase: '' },
         identite: IDENTITE,
       },
     },

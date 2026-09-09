@@ -179,6 +179,7 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   ouvrirClient: (id) => ipcRenderer.invoke('fenetre:client', String(id || '')),
   // L explorateur de photos, en fenetre a part — il ne remplace PAS le Studio.
   ouvrirExplorateur: () => ipcRenderer.invoke('fenetre:explorateur'),
+  ouvrirMaintenance: () => ipcRenderer.invoke('fenetre:maintenance'),
   // L'assistant Produit sur une fiche PRECISE (le << Modifier >> de l'inventaire).
   ouvrirProduitFiche: (id) => ipcRenderer.invoke('fenetre:produit', String(id || '')),
   // Le DETAIL d'une commande dans sa propre fenetre (une par commande).
