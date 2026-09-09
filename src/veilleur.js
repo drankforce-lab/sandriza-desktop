@@ -497,6 +497,21 @@ function _quandCourt(iso) {
 }
 
 function _sousMenuNotifs() {
+  /* ══ RIEN DE L'ENTREPRISE HORS SESSION (2026-09-09, sa demande) ════════════
+     Ses mots, capture du menu à l'appui : « lorsque l'on n'est pas connecté à
+     l'application cela ne devrait pas être visible ».
+     ⚠⚠ IL A RAISON, ET C'EST SA RÈGLE DU MATIN APPLIQUÉE À LA ZONE DE
+     NOTIFICATION. Cette liste dit « 2 nouvelles commandes », « 1 demande de
+     retour » — c'est de l'activité commerciale, lisible par quiconque a la
+     machine sous les yeux SANS avoir tapé un mot de passe. Le reste du menu ne
+     montre RIEN : l'état de la veille, la pause, les sons, ouvrir, quitter.
+     ⚠⚠ ON CONTINUE D'ENREGISTRER, ON N'AFFICHE PAS. `_noter` tourne quoi qu'il
+     arrive : la liste est là à la connexion suivante, avec ce qui est arrivé
+     pendant la nuit. Ne pas confondre « ne pas montrer » et « ne pas garder » —
+     c'est exactement la raison pour laquelle cette liste existe.
+     ⚠ ET ON N'AFFICHE PAS UNE ENTRÉE DÉSACTIVÉE : elle dirait qu'il y a quelque
+     chose à voir. Sa règle est « invisible et non pas juste griser ». */
+  if (_connecteHote && !_connecteHote()) return [];
   const liste = (lireEtat().notifs || []).filter((n) => n && n.titre);
   if (!liste.length) {
     // ⚠ ON MONTRE L'ENTRÉE MÊME VIDE, désactivée. La faire disparaître laisserait
@@ -602,7 +617,13 @@ function majTray() {
        menu de fenêtre.
        ⚠ ELLE MONTRE LA FENÊTRE D'ABORD : poser une question dans une fenêtre
        cachée, c'est une application qui ne répond plus sans dire pourquoi. */
-    ...(_deconnecterHote ? [{ label: 'Déconnexion…', click: () => { try { _deconnecterHote(); } catch {} } }] : []),
+    /* ⚠ ET ELLE NE PARAÎT PLUS HORS SESSION (2026-09-09) : il n'y a rien à
+       déconnecter, et une entrée qui propose de se déconnecter sur un poste où
+       personne n'est connecté est une porte qui ne mène nulle part. Elle
+       ouvrirait la confirmation `Admin._confirmLogout()` dans une page qui n'a
+       pas d'`Admin` — donc rien du tout, en silence. */
+    ...((_deconnecterHote && (!_connecteHote || _connecteHote()))
+      ? [{ label: 'Déconnexion…', click: () => { try { _deconnecterHote(); } catch {} } }] : []),
     { type: 'separator' },
     /* ⚠⚠ « QUITTER » QUITTE TOUT MAINTENANT, ET LE LIBELLÉ LE DIT. Avant, cette
        entrée faisait `app.exit(0)` sur un processus SÉPARÉ : elle ne tuait que la
@@ -668,6 +689,11 @@ let _deconnecterHote = null;
    c'est-à-dire qu'elle laisserait l'entrée en place pour le compte suivant. */
 let _presenceHote = null;
 let _estSuperHote = null;
+/* Quelqu'un est-il connecté ? ⚠ Une FONCTION de l'hôte, pas une valeur : l'état
+   change en cours de route, et une valeur capturée à l'attachement serait fausse
+   dès la première connexion. Sert à ne rien montrer de l'entreprise hors
+   session — voir `_sousMenuNotifs`. */
+let _connecteHote = null;
 
 /* Reprise de l'état laissé par l'ancien processus séparé. On ne l'écrase pas
    s'il existe déjà à la nouvelle place : une reprise ne doit jamais défaire un
@@ -689,6 +715,7 @@ function attacher(hote) {
   _deconnecterHote = (hote && hote.deconnecter) || null;
   _presenceHote = (hote && hote.presence) || null;
   _estSuperHote = (hote && hote.estSuper) || null;
+  _connecteHote = (hote && hote.connecte) || null;
 
   _reprendreEtatSepare();
   etat = null;   // force la relecture depuis la nouvelle place

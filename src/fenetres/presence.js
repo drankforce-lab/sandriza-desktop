@@ -162,8 +162,22 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   var MOTIFS = {
     session:            'Aucune session ouverte dans l’application.',
-    droit:              'Seul un super-administrateur peut voir et gérer les sessions.',
-    superadmin_required:'Seul un super-administrateur peut voir et gérer les sessions.',
+    /* ⚠⚠ DEUX CAUSES NE PEUVENT PAS PORTER LA MEME PHRASE — corrige le
+       2026-09-09, apres son signalement << pourquoi je ne vois pas ma session
+       active ? ca devrait >>.
+       Ces deux motifs disaient MOT POUR MOT la meme chose. Quand la fenetre lui
+       a refuse SA propre session, la capture ne permettait pas de savoir si
+       c etait la PAGE qui avait mal lu son role ou le SERVEUR qui refusait — et
+       ici, diagnostiquer par hypotheses coute un cycle construction +
+       publication + installation PAR hypothese. C est la faute payee le
+       2026-09-06, et je l ai refaite.
+       ⚠ Le motif << droit >> N EXISTE PLUS COTE PAGE : le pre-controle qui le produisait est
+       retire (voir admin.js). Le motif reste ici au cas ou une version plus
+       ancienne du site le renvoie encore — et il DIT qu il vient de la page. */
+    droit:              'La page a refusé : elle ne vous voit pas comme super-administrateur. '
+                        + '(Si vous l’êtes, l’administration de cette fenêtre est plus ancienne que le site.)',
+    superadmin_required:'Le serveur refuse : cette action est réservée au super-administrateur.',
+    session_serveur:    'Le serveur ne reconnaît plus cette session — reconnectez-vous.',
     indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
     pont_indisponible:  'La fenêtre principale ne répond pas.',
     delai:              'La fenêtre principale n’a pas répondu à temps.',
@@ -174,11 +188,32 @@ ${JS_ACTIVITE}${JS_DIRE}
     soi_meme:           'Pour vous déconnecter vous-même, utilisez Fichier → Déconnexion : elle prévient de ce qu’elle emporte.',
     echec:              'L’opération a échoué.'
   };
+  /* ⚠⚠ UN REFUS DIT CE QUE LA PAGE VOIT (2026-09-09). Il a signale un refus, et
+     sa capture ne permettait pas de savoir d ou il venait : la page ? le
+     serveur ? une session absente ? J ai du l isoler par elimination en lisant
+     trois fichiers, alors que l ecran pouvait le dire.
+     C est la lecon du 2026-09-06 : << un desaccord doit se VOIR a l ecran,
+     sinon il est INDECIDABLE >> — et ici chaque hypothese coute un cycle
+     construction + publication + installation.
+     ⚠ Le code du motif est ecrit AUSSI, en petit : le libelle est pour lui, le
+     code est pour moi quand il m envoie une capture. */
   function expliquer(r){
     var m = r && r.motif;
     var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 120)) + ')';
     return t;
+  }
+  function diagnostic(r){
+    if (!r) return '';
+    var v = r.vu || null;
+    var bouts = [];
+    if (r.motif) bouts.push('motif : ' + esc(r.motif));
+    if (v) {
+      bouts.push('jeton de session dans la page : ' + (v.session ? 'oui' : 'NON'));
+      bouts.push('rôle vu par la page : ' + esc(v.role || '(aucun)'));
+    }
+    if (!bouts.length) return '';
+    return '<div class="sub" style="margin-top:.6rem;opacity:.8">' + bouts.join(' · ') + '</div>';
   }
   function appeler(op, args){
     var p;
@@ -381,8 +416,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (OCC) return;
     appeler('presence:liste', []).then(function(r){
       if (!r || !r.ok) {
-        if (SESS === null) corps.innerHTML = '<div class="carte"><div class="vide">'
-          + expliquer(r) + '</div></div>';
+        if (SESS === null) corps.innerHTML = '<div class="carte"><div class="vide m-' + esc((r && r.motif) || 'echec') + '">'
+          + expliquer(r) + diagnostic(r) + '</div></div>';
         if (fort) dire(expliquer(r), 'err');
         return;
       }

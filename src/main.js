@@ -231,6 +231,10 @@ const _veilleAttacher = () => {
         try { actionApp('presence'); } catch {}
       },
       estSuper: _estSuperAdmin,
+      /* ⚠ « Quelqu'un est-il connecté ? » — pour que le menu de l'icône ne
+         montre RIEN de l'entreprise hors session (sa demande du 2026-09-09).
+         Même drapeau que celui qui décide si le X quitte : une seule source. */
+      connecte: _sessionOuverte,
     });
   } catch (e) { trayVeille = null; }
   return trayVeille;
