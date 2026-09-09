@@ -2134,6 +2134,10 @@ const OPS_PONT = new Set([
   'incidents:donnees', 'incidents:ecrire', 'incidents:supprimer',
   // Sauvegarde & restauration (fenetre Sauvegarde, 2.76.0, #27) — backup.php.
   'sauvegarde:donnees', 'sauvegarde:creer', 'sauvegarde:telecharger',
+  /* OU EN EST LA SAUVEGARDE (2026-09-09) : sondage court, appele PENDANT que
+     'sauvegarde:creer' est encore en vol. Deux operations du pont en parallele,
+     ce qui est licite — chaque invocation est independante. */
+  'sauvegarde:progres',
   'sauvegarde:restaurer', 'sauvegarde:supprimer', 'sauvegarde:purger',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
@@ -2588,6 +2592,9 @@ const LIMITES_PONT = {
      de 8 s le ferait passer pour un echec sur une liaison lente. */
   'depenses:fraisStripe': 45000,
   'sauvegarde:donnees': 60000, 'sauvegarde:creer': 600000, 'sauvegarde:telecharger': 180000,
+  /* ⚠ COURT, ET C EST VOULU : une lecture d etat qui traine bloquerait le
+     sondage suivant, et un etat en retard vaut moins que pas d etat. */
+  'sauvegarde:progres': 12000,
   'sauvegarde:restaurer': 600000, 'sauvegarde:supprimer': 45000, 'sauvegarde:purger': 120000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.

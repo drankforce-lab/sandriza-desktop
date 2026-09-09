@@ -97,6 +97,32 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .msgsur{flex:1 1 auto;min-width:0;font-size:.79rem;color:var(--tx2);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msgsur.err{color:var(--tx-err)}.msgsur.bon{color:var(--tx-ok)}.msgsur.att{color:var(--tx-jaune)}
+/* ══ L AVANCEMENT DE LA SAUVEGARDE (2026-09-09, sa demande) ═══════════════════
+   ⚠ LE POURCENTAGE EST GRAND, ET C EST UNE LECON DEJA APPRISE : le 2026-09-06,
+   sur l ecran de mise a jour, le chiffre etait deja la — noye dans une phrase, a
+   la taille du texte. On ne REGARDE pas un ecran d attente, on le CONSULTE du
+   coin de l oeil en faisant autre chose ; un chiffre noye n existe pas. La
+   correction n avait pas ete d ajouter une donnee mais de lui donner sa place.
+   Meme regle ici (voir porte-progression.js).
+   ⚠ ET L ETAPE EST NOMMEE AU-DESSUS DE LA BARRE, pas en dessous : c est ce qu il
+   a demande en premier (<< exemple Sauvegarde la base de donnee… >>). Le nom
+   repond a << que fait-il ? >>, le pourcentage a << combien de temps encore ? >>.
+   Deux questions, deux lignes, dans cet ordre.
+   ⚠ AUCUNE TRANSITION SUR LA LARGEUR AU-DELA DE .3 s : une barre qui glisse
+   longtemps continue d avancer apres l arret de l operation, donc elle MENT
+   quelques instants — et c est precisement ce que ce chantier evite. */
+.prog:empty{display:none}
+.prog{margin:.9rem 0 0;padding:.6rem .7rem;border-radius:10px;
+  background:var(--v03);border:1px solid var(--v10)}
+.prog .pg-t{font-size:.82rem;color:var(--tx);margin-bottom:.4rem}
+.prog .pg-b{height:.42rem;border-radius:99px;background:var(--v12);overflow:hidden}
+.prog .pg-b i{display:block;height:100%;background:#c9a97e;transition:width .3s}
+.prog .pg-p{display:flex;align-items:baseline;gap:.6rem;margin-top:.35rem;
+  font:700 1.25rem/1.1 system-ui;color:var(--tx-or);font-variant-numeric:tabular-nums}
+.prog .pg-e{font:400 .72rem/1.2 system-ui;color:var(--tx2);margin-left:auto}
+html.jour .prog{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12)}
+html.jour .prog .pg-b{background:rgba(0,0,0,.1)}
+@media (prefers-reduced-motion:reduce){.prog .pg-b i{transition:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -214,7 +240,31 @@ ${JS_ACTIVITE}${JS_DIRE}
                 + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">' + esc(b.appErreur) + '</div>' : ''))
         + '</td>'
         + '<td style="text-align:center">'+(b.r2Objects==null?'—':b.r2Objects)+'</td>'
-        + '<td style="white-space:nowrap">'+esc(b.taille)+'</td>'
+        /* ⚠⚠ LE TOTAL, ET SA DECOMPOSITION SOUS LUI — son signalement du
+           2026-09-09 : << verifier ton calcul de poids car ses impossible que
+           sa prenne que cette espace pour un exe inclus dans la sauvegarde >>.
+           Il avait raison, et le chiffre n etait pas faux : il disait le dump
+           chiffre de la base SEUL (107 Ko), sur la meme ligne que << 5
+           installateurs conserves >> (~430 Mo). Une partie qui se lit comme le
+           tout — et surtout, une purge INDECIDABLE : on ne peut pas juger de ce
+           qu occupe une sauvegarde quand la seule taille montree est mille fois
+           plus petite que la realite.
+           ⚠ LA DECOMPOSITION RESTE VISIBLE : un total nu ferait chercher ou sont
+           passes les 430 Mo. Deux lignes, la reponse est complete.
+           ⚠⚠ ET LES ANCIENNES SAUVEGARDES DISENT CE QU ELLES NE SAVENT PAS. Leur
+           meta ne porte pas le poids des installateurs : on affiche le dump et
+           << base seule >> en ambre, plutot que d estimer. Un chiffre invente
+           pour de vieilles sauvegardes dont on ne sait rien serait pire qu une
+           mention honnete — c est la lecon du 2026-09-08, la meme semaine. */
+        + '<td style="white-space:nowrap">'
+        +   (b.tailleAuMoins ? 'au moins ' : '') + esc(b.taille)
+        +   (b.tailleIncomplete
+              ? '<div style="font-size:.7rem;color:var(--tx-att)">base seule — installateurs non comptés</div>'
+              : (b.tailleApp
+                  ? '<div style="font-size:.7rem;color:var(--tx-gris)">'
+                    + esc(b.tailleBase) + ' de base + ' + esc(b.tailleApp) + ' d’application</div>'
+                  : ''))
+        + '</td>'
         + '<td style="color:var(--tx2)">'+esc(b.note||'—')+'</td>'
         + '<td class="acts">'
         + '<button class="b" data-dl="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="Télécharger le fichier chiffré">⬇ Télécharger</button>'
@@ -250,6 +300,41 @@ ${JS_ACTIVITE}${JS_DIRE}
 
   // ── Surcouche générique ──────────────────────────────────────────
   function fermerSur(){ szPleinReinit(); var s=document.getElementById('sur-s'); if (s) s.remove(); }
+  /* ══ VERROUILLER LES SORTIES PENDANT UNE OPERATION — sa demande du 2026-09-09
+     ══════════════════════════════════════════════════════════════════════════
+     Ses mots : << desactive le bouton fermer pendant la sauvegarde au lieu de
+     l ecrire >>.
+     ⚠⚠ IL A RAISON, ET LA FORMULATION DIT EXACTEMENT LE DEFAUT. La fenetre
+     ECRIVAIT << Sauvegarde en cours, ne fermez pas cette fenetre… >> et laissait
+     << Fermer >> et << Annuler >> parfaitement cliquables. Une consigne ecrite a
+     la place d un garde, c est un garde qui n existe pas : elle demande de se
+     souvenir, au moment precis ou l on attend et ou l on clique distraitement.
+     ⚠ ET LE MOT PARTAIT AVEC LE RESTE : il occupait la ligne d etat, donc il
+     remplacait ce que cette ligne sert a dire — ou en est l operation.
+
+     ⚠⚠ ON REPOND DE L ETAT LAISSE DERRIERE. Chaque appelant DOIT deverrouiller
+     sur echec, sinon la surcouche devient incondamnable — et ce depot considere
+     qu une fenetre qu on ne peut plus fermer est pire que la perte qu on evite
+     (c est la regle du bouton X, ecrite dans main.js). Les quatre appelants le
+     font dans leur branche d erreur.
+     ⚠ << Annuler >> EST VERROUILLE AUSSI, et il le faut : il appelle la meme
+     fonction de fermeture que le X, donc c est la meme porte sous un autre nom.
+     Un garde pose sur une seule des deux issues ne garde rien.
+     ⚠⚠ ET C EST LE BANC DE L ACCENT GRAVE QUI A TROUVE MA FAUTE ICI : j avais
+     ecrit le nom de la fonction entre accents graves, DANS un gabarit. Le
+     controle de syntaxe de Node etait passe — le compte etait PAIR. Douzieme
+     fois dans ce depot, et la troisieme fois silencieuse. */
+  function verrouSur(on){
+    ['s-x', 's-annuler'].forEach(function(id){
+      var b = document.getElementById(id);
+      if (!b) return;
+      b.disabled = !!on;
+      /* Le titre DIT pourquoi le bouton ne repond pas. Un bouton grise sans
+         explication se clique deux fois, puis on cherche la panne ailleurs. */
+      if (on) b.title = 'Indisponible pendant l’opération en cours';
+      else b.removeAttribute('title');
+    });
+  }
   function ouvrirSur(titre, corpsH, piedH, largeur){
     fermerSur();
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-s';
@@ -274,17 +359,89 @@ ${JS_ACTIVITE}${JS_DIRE}
       '<p class="quoi" style="margin:0 0 1rem">Ajoutez une <b>note</b> pour reconnaître cette sauvegarde plus tard — c’est facultatif. L’opération dompe toute la base, elle peut prendre un moment.</p>'
       + '<label class="champ"><span class="lbl">Note (facultatif)</span>'
       + '<input class="t" id="s-note" maxlength="200" placeholder="Ex. : avant mise à jour">'
-      + '<span class="sub">200 caractères au plus.</span></label>',
+      + '<span class="sub">200 caractères au plus.</span></label>'
+      /* La zone d avancement, VIDE au depart : elle n a rien a dire avant qu on
+         clique. Une barre a 0 % affichee d avance ferait croire qu une operation
+         est deja commencee — et sur un ecran de sauvegarde, c est exactement le
+         doute qu il ne faut pas semer. */
+      + '<div class="prog" id="s-prog"></div>',
       '<button class="b" id="s-annuler">Annuler</button><button class="prim" id="s-go"><span class="ic">💾</span> Créer la sauvegarde</button>');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=creer;
     var n=document.getElementById('s-note'); if (n) try { n.focus(); } catch(e){}
   }
+  /* ══ OU EN EST LA SAUVEGARDE — sa demande du 2026-09-09 ════════════════════
+     Ses mots : << un pourcentage et un avancement de la sauvegarde, exemple
+     Sauvegarde la base de donnee… etc. >>. La fenetre n affichait qu un bouton
+     << Sauvegarde en cours… >> : on ne savait ni ou on en etait, ni si ca
+     avancait encore. Sur une operation qui dure, ces deux questions sont la
+     meme, et c est la seconde qui inquiete.
+
+     ⚠⚠ LE CHIFFRE EST MESURE, PAS ANIME. C est backup.php qui ecrit son etape
+     APRES l avoir franchie ; cette fenetre ne fait que la relire. Une barre qui
+     monterait au chronometre aurait l air juste et annoncerait 90 % pendant
+     qu un envoi est refuse — ce depot a deja paye un chiffre faux quatre fois de
+     suite. Ici, rien n est devine.
+     ⚠ LE POURCENTAGE PLAFONNE A 99 % cote serveur : les 100 % appartiennent a la
+     REPONSE de la creation, la seule chose qui prouve que tout a reussi.
+     ⚠ LE JETON EST FABRIQUE ICI et voyage avec les deux appels : deux postes qui
+     sauvegardent en meme temps ne lisent donc pas l etat l un de l autre. */
+  var PROG_T = null;
+  function jetonProgres(){
+    var s = '';
+    var abc = '0123456789abcdef';
+    for (var i = 0; i < 24; i++) s += abc.charAt(Math.floor(Math.random() * 16));
+    return s;
+  }
+  function peindreProgres(p){
+    var z = document.getElementById('s-prog');
+    if (!z) return;
+    if (!p) { z.innerHTML = ''; return; }
+    var pct = Math.max(0, Math.min(99, parseInt(p.pct, 10) || 0));
+    /* Le detail d une etape divisible — les installateurs. C est la plus longue,
+       et sans son compte la barre resterait immobile a 33 % pendant l essentiel
+       de l attente, donc indiscernable d une operation bloquee. */
+    var sur = (p.sur && p.de) ? (' — ' + p.de + ' sur ' + p.sur) : '';
+    z.innerHTML = '<div class="pg-t">' + esc(p.libelle || '') + esc(sur) + '</div>'
+      + '<div class="pg-b"><i style="width:' + pct + '%"></i></div>'
+      + '<div class="pg-p">' + pct + ' %'
+      + '<span class="pg-e">etape ' + (parseInt(p.rang, 10) || 1)
+      + ' sur ' + (parseInt(p.total, 10) || 6) + '</span></div>';
+  }
+  function suivreProgres(jeton){
+    arreterProgres();
+    /* 1,2 s : assez vif pour qu une etape courte se voie passer, assez lent pour
+       ne peser sur rien. Le sondage s arrete DES que la creation repond. */
+    PROG_T = setInterval(function(){
+      appeler('sauvegarde:progres',[jeton]).then(function(r){
+        /* ⚠ ON NE REPEINT QUE SUR UNE REPONSE UTILE. Un refus reseau ou un etat
+           pas encore ecrit rendrait un etat vide : effacer ce qu on affiche
+           ferait clignoter l ecran entre << etape 3 >> et rien du tout, ce qui
+           donne l impression que ca a plante. On garde le dernier etat connu. */
+        if (r && r.ok && r.progres) peindreProgres(r.progres);
+      });
+    }, 1200);
+  }
+  function arreterProgres(){ if (PROG_T) { clearInterval(PROG_T); PROG_T = null; } }
+
   function creer(){
     if (OCCUPE) return; OCCUPE=true;
-    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='⏳ Sauvegarde en cours…'; }
-    dire('Sauvegarde en cours, ne fermez pas cette fenêtre…');
-    appeler('sauvegarde:creer',[txv('s-note')]).then(function(r){ OCCUPE=false;
+    /* ⚠ LES SORTIES SONT VERROUILLEES, PAS SEULEMENT DECONSEILLEES — sa demande
+       du 2026-09-09 : << desactive le bouton fermer pendant la sauvegarde au
+       lieu de l ecrire >>. Voir la fonction de verrouillage plus haut. */
+    verrouSur(true);
+    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='Sauvegarde en cours…'; }
+    var jeton = jetonProgres();
+    /* La zone d avancement remplace la phrase << ne fermez pas cette fenetre >>,
+       qui occupait la ligne d etat — donc qui prenait la place de ce que cette
+       ligne sert a dire : ou en est l operation. */
+    var z = document.getElementById('s-prog');
+    if (z) z.innerHTML = '<div class="pg-t">Preparation…</div>'
+      + '<div class="pg-b"><i style="width:0%"></i></div>';
+    dire('');
+    suivreProgres(jeton);
+    appeler('sauvegarde:creer',[txv('s-note'), jeton]).then(function(r){ OCCUPE=false;
+      arreterProgres();
       if (r&&r.ok){
         fermerSur(); D=r; RO=!r.peutEcrire; vueListe();
         /* ⚠ LA SAUVEGARDE A REUSSI MEME SI L EPINGLAGE A ECHOUE — la base est
@@ -301,7 +458,20 @@ ${JS_ACTIVITE}${JS_DIRE}
           dire('Sauvegarde créée ('+(r.taille||'')+').', 'bon');
         }
       }
-      else { if (go){ go.disabled=false; go.textContent='Créer la sauvegarde'; } dire('Échec : '+expliquer(r), 'err'); }
+      else {
+        /* ⚠⚠ ON REPOND DE L ETAT LAISSE DERRIERE. Sans verrouSur(false) ici,
+           un echec laisserait la surcouche INCONDAMNABLE : ni << Fermer >>, ni
+           << Annuler >>, et il n y a pas de touche Echap dans cette fenetre. Ce
+           depot considere qu une fenetre qu on ne peut plus fermer est pire que
+           la perte qu on evite — c est la regle du bouton X, ecrite dans main.js.
+           ⚠ ET LA ZONE D AVANCEMENT SE VIDE : laisser << Envoi, 66 % >> sous un
+           message d echec, c est afficher deux affirmations contradictoires, et
+           c est la rassurante qu on croit. */
+        verrouSur(false);
+        var zp = document.getElementById('s-prog'); if (zp) zp.innerHTML = '';
+        if (go){ go.disabled=false; go.textContent='Créer la sauvegarde'; }
+        dire('Échec : '+expliquer(r), 'err');
+      }
     });
   }
 
@@ -333,8 +503,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       dire('Tapez RESTAURER pour confirmer.', 'att'); return;
     }
     OCCUPE=true;
-    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='⏳ Restauration…'; }
-    dire('Restauration en cours, ne fermez pas cette fenêtre…');
+    /* ⚠ MEME VERROU QUE LA SAUVEGARDE, ET ICI IL COMPTE ENCORE PLUS : une
+       restauration REECRIT la base. La fenetre ecrivait << ne fermez pas cette
+       fenetre >> en laissant << Fermer >> et << Annuler >> cliquables — une
+       consigne a la place d un garde, sur l operation la plus destructrice de
+       tout l ecran. Sa demande du 2026-09-09 portait sur la sauvegarde ; laisser
+       la restauration en arriere aurait ete garder le defaut a l endroit ou il
+       coute le plus cher. */
+    verrouSur(true);
+    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='Restauration…'; }
+    dire('Restauration en cours…');
     appeler('sauvegarde:restaurer',[encKey]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){
         fermerSur();
@@ -348,6 +526,9 @@ ${JS_ACTIVITE}${JS_DIRE}
         if (rb) rb.onclick=function(){ FIGE=false; recharger('Liste actualisée.', 'bon'); };
         dire('Restauration terminée ('+(r.total||0)+' enregistrements).', 'bon');
       } else {
+        // ⚠ On rend les sorties : sinon la surcouche reste incondamnable sur un
+        // echec, et cette fenetre n a pas de touche Echap pour s en sortir.
+        verrouSur(false);
         if (go){ go.disabled=false; go.textContent='Restaurer maintenant'; }
         dire('Échec : '+expliquer(r), 'err');
       }

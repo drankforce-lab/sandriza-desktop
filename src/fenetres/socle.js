@@ -2237,13 +2237,35 @@ const CSS_ETATS = `
    bien a << aucun produit >>, a une erreur et a une information — alors qu une
    icone aurait ete juste pour un cas sur quatre. C est le mouvement qui fait le
    travail, pas le symbole. */
-/* ⚠ POSITIONNE EN ABSOLU, ET C EST OBLIGATOIRE : dans quatre fenetres, .vide est
-   un conteneur flex. Un ::before en flux y deviendrait un ELEMENT FLEX, donc un
-   trait pose A COTE du texte au lieu d etre au-dessus. Hors flux, il se comporte
-   pareil que le conteneur soit en bloc ou en flex. */
-.vide:not(.charge){padding-top:1.85rem}
-.vide:not(.charge)::before{content:"";position:absolute;top:.75rem;left:50%;
-  margin-left:-22px;width:44px;height:2px;
+/* ⚠⚠ REMIS DANS LE FLUX LE 2026-09-09, ET C EST LA CORRECTION D UN DEFAUT QU IL
+   A SIGNALE : << retire le trait dans le texte ici >>, capture du Studio a
+   l appui. Le trait BARRAIT << L image apparaitra ici. >>
+
+   CE QUI SE PASSAIT. Le trait etait en position ABSOLUE a top:.75rem, et la
+   place lui etait reservee par un padding-top:1.85rem sur le bloc. Deux
+   declarations qui doivent s accorder, dans deux regles differentes — et
+   padding est precisement ce qu une fenetre ajuste quand son bloc est petit.
+   NEUF fenetres ecrivent style="padding:.6rem" en ligne sur un .vide : le
+   padding gagne (style en ligne), la reserve disparait, le trait reste a .75rem
+   et tombe EN PLEIN MILIEU du texte. Il barrait donc du texte dans neuf ecrans,
+   pas un seul.
+
+   ⚠⚠ L ANCIEN COMMENTAIRE DISAIT << POSITIONNE EN ABSOLU, ET C EST OBLIGATOIRE >>,
+   et il avait tort — il craignait qu un ::before en flux devienne un ELEMENT
+   FLEX pose A COTE du texte. Verifie : les 91 definitions de .vide de ce depot
+   sont soit en bloc, soit flex-direction:column; align-items:center. AUCUNE en
+   ligne. Dans les deux cas, un bloc en flux se place AU-DESSUS et centre. La
+   crainte etait raisonnable et la mesure la dement.
+
+   ⚠ ET C EST TOUT L INTERET : en flux, le trait POUSSE le texte au lieu de se
+   poser dessus. Il n y a plus de reserve a tenir, donc plus rien a accorder
+   entre deux regles, donc plus aucune facon pour une fenetre de casser ca en
+   changeant son padding. Le padding-top:1.85rem disparait avec le besoin.
+   ⚠ margin:0 auto centre n importe quelle largeur : les variantes ci-dessous
+   n ont plus a corriger un margin-left negatif quand elles changent la
+   largeur du trait — c est une soustraction de moins a tenir juste. */
+.vide:not(.charge)::before{content:"";display:block;width:44px;height:2px;
+  margin:0 auto .85rem;
   border-radius:99px;background:var(--sz-accent);
   transform-origin:center;
   animation:sz-trait .42s cubic-bezier(.2,.7,.3,1) both}
@@ -2261,7 +2283,11 @@ const CSS_ETATS = `
    donnee absente, et ca peut revenir tout seul. */
 .vide.m-session::before,.vide.m-indisponible::before,.vide.m-pont_indisponible::before,
 .vide.m-delai::before,.vide.m-module_photos::before{
-  width:58px;margin-left:-29px;
+  /* ⚠ margin-left:-29px RETIRÉ le 2026-09-09 : le trait est en flux et centré
+     par margin:0 auto, donc une largeur différente n'a plus besoin d'être
+     recentrée à la main. Laissé en place, ce décalage aurait poussé le trait à
+     gauche — une soustraction à tenir juste pour rien. */
+  width:58px;
   background:linear-gradient(90deg,var(--sz-accent) 0 38%,transparent 38% 62%,var(--sz-accent) 62% 100%);
   animation:sz-trait .42s cubic-bezier(.2,.7,.3,1) both,
             sz-souffle 2.4s ease-in-out .5s infinite}
@@ -2269,7 +2295,7 @@ const CSS_ETATS = `
 
 /* Le REFUS et le VERROU : une barriere, pas une panne. Trait court, epais,
    IMMOBILE — rien ne va se debloquer tout seul en regardant l ecran. */
-.vide.m-droit::before,.vide.m-verrou::before{width:26px;margin-left:-13px;height:3px}
+.vide.m-droit::before,.vide.m-verrou::before{width:26px;height:3px}
 
 /* L ECHEC : le rouge de la charte, la ou tout le reste garde l accent. */
 .vide.m-echec::before,.vide.m-televersement::before,.vide.m-operation_inconnue::before,
