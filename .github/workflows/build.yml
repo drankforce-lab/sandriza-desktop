@@ -237,7 +237,7 @@ jobs:
       # champ ? » — elle ne demandait JAMAIS l'inverse, « ce champ a-t-il une
       # étiquette ? », et 40 listes déroulantes étaient muettes au lecteur
       # d'écran. C'est un CLIQUET : le reste toléré est nommé un par un, avec sa
-      # raison, dans `selects-sans-nom-declares.js` — un nouveau select sans nom
+      # raison, dans `champs-sans-nom-declares.js` — un nouveau select sans nom
       # fait échouer la construction.
       # ⚠ Il ne juge QUE les <select>, délibérément : un input garde souvent son
       # placeholder, et élargir maintenant rendrait 178 étiquettes voisines non

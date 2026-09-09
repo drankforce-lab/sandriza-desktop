@@ -227,10 +227,34 @@ if (!nGeoKo) dire('  OK   les ' + nGeo + ' ouvertures de fenetre declarent un mi
    demande « cette etiquette pointe-t-elle vers un champ ? ». Elle ne demande
    jamais « ce champ a-t-il une etiquette ? » — et c est par la que 40 <select>
    sont restes MUETS pour un lecteur d ecran jusqu au 2026-09-08.
-   ⚠ UN SELECT, PAS TOUS LES CHAMPS, ET C EST DELIBERE. Un `input` sans etiquette
-   garde souvent son `placeholder` (qui nomme, tant que le champ est vide) ; un
-   select n en a pas. Elargir maintenant rendrait 178 etiquettes voisines non
-   reliees et 91 placeholders — c est-a-dire un controle que personne ne lira.
+   ⚠⚠ ELARGI A TOUS LES CHAMPS LE 2026-09-09, ET LA RAISON DE NE PAS LE FAIRE A
+   DISPARU. Ce commentaire disait : « UN SELECT, PAS TOUS LES CHAMPS, ET C EST
+   DELIBERE — elargir maintenant rendrait 178 etiquettes voisines non reliees et
+   91 placeholders, c est-a-dire un controle que personne ne lira ».
+   C etait vrai le 2026-09-08. Ce ne l est plus : le chantier des 4.61.0 et
+   4.62.0 (287 champs nommes) a absorbe LES DEUX CLASSES. Mesure du 2026-09-09
+   sur 649 champs atteignables : 621 nommes, 20 nommes par leur premiere option,
+   ZERO etiquette voisine non reliee, et huit cas qui se sont tous reveles des
+   FAUX POSITIFS de la lecture statique (voir la liste nommee).
+   ⚠ Le carnet, lui, portait encore << 178 + 91 >> comme un chantier ouvert —
+   cinquieme fois qu un chiffre du carnet est perime dans ce depot. Un chiffre
+   herite se REMESURE avant qu on parte dessus.
+   ⚠ ET C EST POUR CA QUE L ELARGISSEMENT EST FAIT MAINTENANT : le controle ne
+   trouve rien, donc il est lisible, donc il sert de CLIQUET. Elargir un controle
+   le jour ou il rend 269 lignes aurait produit un rapport que personne n ouvre —
+   c est-a-dire aucun controle du tout.
+   ⚠⚠ TROIS EXCLUSIONS MECANIQUES SONT INDISPENSABLES, chacune payee par un faux
+   positif de ma propre mesure du 2026-09-09 :
+     • `aria-hidden="true"` ou `tabindex="-1"` : les deux champs hors ecran qui
+       recopient un mot de passe (comptable.js, liens.js) sont DEJA traites, et
+       de la bonne facon ;
+     • jamais focalisable : `type` hidden / file / submit / button / image ;
+     • et les cas ou l etiquette existe mais par un chemin que la lecture
+       statique ne peut pas voir — ils sont NOMMES dans le fichier de
+       declarations, jamais devines.
+   ⚠ `disabled` N EST PAS UNE EXCLUSION : un champ desactive se reactive, et il
+   lui faut son nom le jour ou il s allume. Ma premiere mesure l ecartait et
+   perdait 111 champs de vue.
    ⚠ UN SELECT DE FILTRE SE NOMME PAR SA PREMIERE OPTION : « Toutes les
    categories » annonce le champ aussi bien qu une etiquette, et il faut RETIRER
    LES BALISES EN LIGNE avant d en juger — un pictogramme la precede souvent.
@@ -239,8 +263,8 @@ if (!nGeoKo) dire('  OK   les ' + nGeo + ' ouvertures de fenetre declarent un mi
    (socle.js, depenses.js) sont entres dans le premier relevé. Meme regle que les
    pictogrammes, ou 450 des 1073 vivaient dans les commentaires. */
 dire('');
-dire('=== <select> sans nom accessible (aucune etiquette, aucun aria-label) ===');
-const declares = require('./selects-sans-nom-declares.js');
+dire('=== champs sans nom accessible (aucune etiquette, aucun aria-label) ===');
+const declares = require('./champs-sans-nom-declares.js');
 const memeTaille = (s) => s.replace(/[^\n]/g, ' ');
 const sansCommentaires = (t) => t
   .replace(/\/\*[\s\S]*?\*\//g, memeTaille)
@@ -254,37 +278,55 @@ for (const f of fichiers) {
   for (const m of txt.matchAll(/<label[^>]*\bfor\s*=\s*(?:"([^"]*)"|'([^']*)')/g))
     cibles.add((m[1] || m[2] || '').trim());
   const tol = declares[f] || [];
-  for (const m of txt.matchAll(/<select\b([^>]*)>/g)) {
-    const attrs = m[1];
+  for (const m of txt.matchAll(/<(input|textarea|select)\b([^>]*)>/g)) {
+    const balise = m[1];
+    const attrs = m[2];
+    /* Jamais focalisable : le compter FABRIQUE une faute. C est la meme famille
+       que `type="hidden"`, ecrite autrement, et un `<input type="file">` en
+       display:none declenche par un bouton en est le cas le plus courant. */
+    const type = ((attrs.match(/\btype\s*=\s*["']?([a-z]+)/i) || [])[1] || '').toLowerCase();
+    if (['hidden', 'file', 'submit', 'button', 'image'].indexOf(type) >= 0) continue;
     nSel++;
     if (/\baria-label(?:ledby)?\s*=|\btitle\s*=/.test(attrs)) continue;
     if (/\bhidden\b(?!\s*=)/.test(attrs)) continue;
     if (/style\s*=\s*"[^"]*display\s*:\s*none/.test(attrs)) continue;
+    /* ⚠ HORS DU PARCOURS ET HORS DU LECTEUR D ECRAN : deja traite, et bien.
+       Les deux champs qui recopient un mot de passe dans le presse-papiers
+       (comptable.js, liens.js) vivent en `left:-9999px` — donc ATTEIGNABLES au
+       clavier, contrairement a display:none — et portent pour cette raison
+       `aria-hidden="true" tabindex="-1"`. Sans cette exclusion, le controle
+       accuserait la correction elle-meme. */
+    if (/\baria-hidden\s*=\s*"true"/.test(attrs)) continue;
+    if (/\btabindex\s*=\s*"-1"/.test(attrs)) continue;
     const id = (attrs.match(/\bid\s*=\s*"([^"]*)"/) || [])[1];
     if (id && cibles.has(id.trim())) continue;
     const avant = txt.slice(Math.max(0, m.index - 400), m.index);
     const dl = avant.lastIndexOf('<label'), fl = avant.lastIndexOf('</label>');
     if (dl >= 0 && dl > fl) continue;               // etiquette enveloppante
-    const bloc = txt.slice(m.index, m.index + 900);
-    const opts = [...bloc.matchAll(/<option[^>]*>((?:(?!<\/option>)[\s\S]){0,70})/g)]
-      .map((o) => sansBalises(o[1])).filter(Boolean);
-    if (opts.length && PARLE.test(opts[0])) continue;   // nomme par sa 1re option
+    // La premiere option ne nomme qu un `select` — un input n en a pas.
+    if (balise === 'select') {
+      const bloc = txt.slice(m.index, m.index + 900);
+      const opts = [...bloc.matchAll(/<option[^>]*>((?:(?!<\/option>)[\s\S]){0,70})/g)]
+        .map((o) => sansBalises(o[1])).filter(Boolean);
+      if (opts.length && PARLE.test(opts[0])) continue;   // nomme par sa 1re option
+    }
     const proche = txt.slice(Math.max(0, m.index - 220), m.index);
     if (/<\/label>|class="(?:l|et|cle|lab|lbl)"/.test(proche)) continue;
-    /* TOLERE ET NOMME : voir `selects-sans-nom-declares.js`. On apparie sur un
+    /* TOLERE ET NOMME : voir `champs-sans-nom-declares.js`. On apparie sur un
        FRAGMENT du contexte, jamais sur un numero de ligne — une ligne se decale
        au premier ajout, et le cliquet se rouvrirait tout seul. */
     const ctx = txt.slice(Math.max(0, m.index - 300), m.index + 200);
     if (tol.some((frag) => ctx.indexOf(frag) >= 0)) { nTolere++; continue; }
     nSelKo++; ko++;
     const ligne = txt.slice(0, m.index).split('\n').length;
-    dire('  NON  ' + f + ':' + ligne + '  ' + (id ? 'id=' + id : 'sans id')
-      + '  — aucune etiquette, aucun aria-label, et sa 1re option ne le nomme pas');
+    dire('  NON  ' + f + ':' + ligne + '  <' + balise + '>  ' + (id ? 'id=' + id : 'sans id')
+      + '  — aucune etiquette, aucun aria-label'
+      + (balise === 'select' ? ', et sa 1re option ne le nomme pas' : ''));
   }
 }
 if (!nSelKo) {
-  dire('  OK   les ' + nSel + ' listes deroulantes annoncent de quoi elles parlent'
-    + (nTolere ? '  (' + nTolere + ' tolere(s) et nomme(s) dans selects-sans-nom-declares.js)' : ''));
+  dire('  OK   les ' + nSel + ' champs atteignables annoncent de quoi ils parlent'
+    + (nTolere ? '  (' + nTolere + ' tolere(s) et nomme(s) dans champs-sans-nom-declares.js)' : ''));
 }
 
 dire('');
