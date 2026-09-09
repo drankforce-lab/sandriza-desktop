@@ -489,7 +489,12 @@ ${JS_ACTIVITE}${JS_DIRE}
     ouvrirSur('↩ Restaurer la base de données',
       '<div class="garde jaune"><span class="ic">⚠</span> Cette opération <b>réécrit</b> les données actuelles de Turso avec le contenu de la sauvegarde <b>'+esc(id)+'</b>. Les enregistrements portant le même identifiant seront écrasés. Elle ne supprime pas ce qui a été créé après la sauvegarde.</div>'
       + '<label class="champ"><span class="lbl">Pour confirmer, tapez RESTAURER</span>'
-      + '<input class="t" id="s-conf" autocomplete="off" placeholder="RESTAURER"></label>',
+      + '<input class="t" id="s-conf" autocomplete="off" placeholder="RESTAURER"></label>'
+      /* Sa demande du 2026-09-09 : << le processus de restauration doit etre
+         suivi etape par etape et vu a l ecran comme quand on fait la
+         sauvegarde >>. Meme zone, meme mecanisme, meme sondage — on ne pose
+         pas un second affichage d avancement a cote du premier. */
+      + '<div class="prog" id="s-prog"></div>',
       '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go">Restaurer maintenant</button>');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=function(){ restaurer(encKey); };
@@ -512,8 +517,14 @@ ${JS_ACTIVITE}${JS_DIRE}
        coute le plus cher. */
     verrouSur(true);
     var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='Restauration…'; }
-    dire('Restauration en cours…');
-    appeler('sauvegarde:restaurer',[encKey]).then(function(r){ OCCUPE=false;
+    var jeton = jetonProgres();
+    var zr = document.getElementById('s-prog');
+    if (zr) zr.innerHTML = '<div class="pg-t">Preparation…</div>'
+      + '<div class="pg-b"><i style="width:0%"></i></div>';
+    dire('');
+    suivreProgres(jeton);
+    appeler('sauvegarde:restaurer',[encKey, jeton]).then(function(r){ OCCUPE=false;
+      arreterProgres();
       if (r&&r.ok){
         fermerSur();
         // ⚠ ON FIGE L'ÉCRAN. La fenêtre principale se recharge pour relire une
@@ -521,9 +532,52 @@ ${JS_ACTIVITE}${JS_DIRE}
         // pont ne répond pas. Laisser les boutons vivants inviterait à cliquer
         // dans le vide et à conclure que la restauration a échoué.
         FIGE = true;
-        corps.innerHTML = '<div class="carte"><div class="vide"><span class="ic">✅</span> Restauration terminée — <b>'+(r.total||0)+'</b> enregistrements rétablis.<br><br>La fenêtre principale se recharge pour relire la base. Patientez quelques secondes, puis cliquez « ↻ Actualiser ».<br><br><button class="b" id="s-reprendre">↻ Actualiser</button></div></div>';
+        /* ⚠⚠ LE CHEMIN DU RETOUR SE DIT ICI, AU SEUL MOMENT OU QUELQU UN
+           REGARDE. Sa demande : << ajoute une option de rollback aussi apres
+           restauration au besoin >>. Le filet existe (une sauvegarde prise
+           juste avant d ecraser), mais un chemin de retour dont personne ne
+           connait l existence n en est pas un — il faut le nommer, et offrir
+           d y aller sans le chercher dans la liste.
+           ⚠ Le bouton REPASSE par la meme confirmation ecrite : revenir en
+           arriere est une restauration, avec les memes consequences. Un
+           raccourci sans confirmation sur une operation destructrice serait
+           precisement le defaut qu on evite partout ailleurs ici. */
+        var fil = (r && r.filet) || {};
+        var appTxt = '';
+        if (r && r.app) {
+          appTxt = r.app.ok
+            ? ('<br>Application ramenee a la version <b>' + esc(r.app.version) + '</b>.')
+            : ('<br><span style="color:var(--tx-att)">Version de l application NON retablie : '
+               + esc(r.app.erreur || '') + '</span>');
+        }
+        corps.innerHTML = '<div class="carte"><div class="vide"><span class="ic">✅</span> Restauration terminée — <b>'+(r.total||0)+'</b> enregistrements rétablis.'
+          + ((r && r.sessionsFermees) ? '<br>' + r.sessionsFermees + ' session(s) fermée(s) pendant l opération.' : '')
+          + appTxt
+          + (fil.encKey ? '<br><br><b>Retour en arrière possible</b> — l état d avant cette restauration a été sauvegardé sous <span class="mono">' + esc(fil.id) + '</span>.' : '')
+          + '<br><br>La fenêtre principale se recharge pour relire la base. Patientez quelques secondes, puis cliquez « ↻ Actualiser ».'
+          + '<br><br><button class="b" id="s-reprendre">↻ Actualiser</button>'
+          + (fil.encKey ? ' <button class="b att" id="s-retour" disabled>↩ Revenir à l état d avant</button>' : '')
+          + '</div></div>';
         var rb=document.getElementById('s-reprendre');
         if (rb) rb.onclick=function(){ FIGE=false; recharger('Liste actualisée.', 'bon'); };
+        /* ⚠⚠ LE BOUTON DE RETOUR ATTEND QUE LA PAGE SOIT REVENUE, ET C EST LA
+           MEME RAISON QUI FAIT ECRIRE << patientez >> juste au-dessus : le
+           coeur programme un rechargement de la fenetre principale deux
+           secondes apres avoir repondu. Cliquer pendant ce temps-la enverrait
+           une restauration a un pont qui ne repond plus — un DELAI DEPASSE sur
+           l operation la plus destructrice de l ecran, et personne ne saurait
+           dire si elle a commence. Ne pas afficher le bouton du tout aurait
+           cache le chemin du retour au seul moment ou on le lit ; on l affiche
+           donc eteint, en disant pourquoi, et il s allume quand c est vrai. */
+        var rt=document.getElementById('s-retour');
+        if (rt) {
+          rt.title='Disponible des que la fenetre principale a fini de se recharger.';
+          setTimeout(function(){
+            if (!rt) return;
+            rt.disabled=false; rt.title='';
+            rt.onclick=function(){ FIGE=false; ouvrirRestaurer(fil.encKey, fil.id); };
+          }, 8000);
+        }
         dire('Restauration terminée ('+(r.total||0)+' enregistrements).', 'bon');
       } else {
         // ⚠ On rend les sorties : sinon la surcouche reste incondamnable sur un

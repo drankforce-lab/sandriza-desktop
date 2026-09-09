@@ -3876,6 +3876,25 @@ const getUpdater = () => {
     getUpdater._wired = true;
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
+    /* ══ LE RETOUR EN ARRIÈRE EST AUTORISÉ (2026-09-09, sa demande) ═══════════
+       Ses mots : « si une autre application fait une vérification de mise à jour
+       et voit que la version la plus récente ne correspond pas à sa version
+       actuelle il doit la ramener ».
+       ⚠⚠ SANS CETTE LIGNE, TOUT LE MÉCANISME DE RESTAURATION EST DÉCORATIF.
+       `electron-updater` compare les versions et n'installe QUE si la distante
+       est plus RÉCENTE. Réécrire `desktop/latest.json` avec une version
+       antérieure ne suffit donc pas : les autres postes verraient « rien de
+       neuf » et resteraient sur la version que nous venons de déclarer périmée.
+       Le manifeste ne serait plus la vérité, ce qui est exactement ce que la
+       restauration prétend établir.
+       ⚠⚠ ET C'EST UN POUVOIR À MANIER AVEC SOIN, IL FAUT LE SAVOIR EN LISANT :
+       avec ce réglage, TOUTE divergence entre le manifeste et la version
+       installée déclenche une réinstallation sur TOUS les postes. Un manifeste
+       erroné rétrograde donc le parc entier. C'est pourquoi `app_retablir`
+       (backup.php) copie les installateurs, VÉRIFIE qu'ils sont arrivés, et
+       n'écrit le manifeste qu'ensuite : cette garde-là n'est pas un luxe, c'est
+       ce qui empêche ce réglage de devenir dangereux. */
+    autoUpdater.allowDowngrade = true;
 
     autoUpdater.on('update-available', () => { _majDispo = true; });
     // Rien à télécharger : aucune raison de retenir quoi que ce soit.

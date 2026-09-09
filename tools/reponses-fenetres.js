@@ -6171,6 +6171,72 @@ module.exports = {
     ];
   })(),
 
+  /* ── PERSONNEL CONNECTÉ ────────────────────────────────────────────────────
+     ⚠ ELLE N ÉTAIT ÉPROUVÉE PAR RIEN, et le garde-fou le disait à chaque
+     passage (« exécution non éprouvée : presence.js »). C est la fenêtre qui
+     lui refuse SA session depuis 4.72.0 : la seule dont le code de dessin
+     n avait jamais été exécuté une fois.
+     ⚠ LA PREMIÈRE LIGNE PORTE `moi: true` — c est le cas de son signalement, et
+     c est aussi le seul chemin où `ligne()` prend sa branche « vous » au lieu
+     des deux boutons. Sans lui, la moitié du rendu resterait inexécutée.
+     ⚠ ET LE SECOND CAS EST UN REFUS `superadmin_required` : c est exactement ce
+     que son écran affiche, donc le chemin du diagnostic — celui qu on lui
+     demande de lire — doit s exécuter au moins une fois ici. */
+  'presence.js': [
+    {
+      nom: 'sessions ouvertes, dont la sienne',
+      id: '',
+      reponses: {
+        'presence:liste': {
+          ok: true, fraisSec: 120,
+          sessions: [
+            /* ⚠ `frais: true` ET `vuDepuisSec` PETIT vont ensemble : la pastille
+               lit `frais`, la sous-ligne lit `vu`. Les dissocier dessinerait
+               « a l ecran » au-dessus d une date de la semaine derniere. */
+            { staffId: 'stf_0001', nom: 'Brigitte Brousseau', courriel: 'brigitte@sandriza.com',
+              role: 'superadmin', moi: true, frais: true, vuDepuisSec: 4,
+              vu: '2026-09-09T14:32:11Z', depuis: '2026-09-09T08:02:00Z' },
+            { staffId: 'stf_0002', nom: 'Martin Dubé', courriel: 'martin@sandriza.com',
+              role: 'admin', moi: false, frais: true, vuDepuisSec: 31,
+              vu: '2026-09-09T14:31:44Z', depuis: '2026-09-09T09:15:00Z' },
+            /* Réduite dans la zone de notification : connectée, mais son dernier
+               passage recule — le cas que la note de la fenêtre explique. */
+            { staffId: 'stf_0003', nom: 'Claire Fortin', courriel: '',
+              role: 'employe', moi: false, frais: false, vuDepuisSec: 740,
+              vu: '2026-09-09T14:20:03Z', depuis: '2026-09-09T13:58:00Z' },
+            /* ⚠ JAMAIS VUE : `vu` vide prend la branche « pas encore vu », et un
+               nom absent la branche du tiret. Deux valeurs que le serveur rend
+               vraiment sur une session ouverte à la seconde même. */
+            { staffId: 'stf_0004', nom: '', courriel: '', role: '', moi: false,
+              frais: false, vuDepuisSec: 0, vu: '', depuis: '2026-09-09T14:33:00Z' },
+          ],
+        },
+        'presence:deconnecter': { ok: true, nom: 'Martin Dubé' },
+        'presence:message': { ok: true, nom: 'Martin Dubé' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus : pas super-administrateur',
+      id: '',
+      reponses: {
+        'presence:liste': { ok: false, motif: 'superadmin_required',
+          detail: 'HTTP 403', vu: { session: true, role: 'admin' } },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* Personne de connecté : la liste vide a son propre texte, et le sous-titre
+         change de forme (« personne n est connecte »). */
+      nom: 'aucune session',
+      id: '',
+      reponses: {
+        'presence:liste': { ok: true, fraisSec: 120, sessions: [] },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
 };
 
 // ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque
