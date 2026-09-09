@@ -124,7 +124,15 @@ body{background:var(--f-page);color:var(--tx);
 .ong{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;
   padding:.42rem .5rem;border-radius:9px;border:1px solid transparent;
   background:transparent;color:var(--tx-bleute);cursor:pointer}
-.ong:hover:not(.on){background:var(--v05)}
+.ong:hover:not(.on):not(:disabled){background:var(--v05)}
+/* ⚠ L ONGLET FERME TANT QU IL N Y A PAS DE PHOTO (2026-09-09, sa demande).
+   ⚠ LE CURSEUR INTERDIT ET PAS SEULEMENT L OPACITE : c est le curseur qui dit
+   << ce n est pas encore le moment >> avant meme le clic. L opacite seule se lit
+   comme un defaut d affichage.
+   ⚠ 55 % et non 40 % : on doit encore POUVOIR LIRE les noms des etapes. Un rail
+   illisible ne dit plus ce qui attend, et c est justement ce qu on regarde en
+   arrivant sur cet ecran. */
+.ong:disabled{opacity:.55;cursor:not-allowed}
 .ong.on{background:var(--f-carte);border-color:rgba(201,169,126,.45)}
 /* ⚠ L ONGLET OUVERT SE MARQUE PAR SON FOND ET SON LISERE DORES, jamais par un
    pictogramme. Il en portait un, grise ; les pictogrammes ont ete retires le
@@ -605,6 +613,20 @@ ${JS_ACTIVITE}${JS_DIRE}
   var SEL = {};          // { <idPhoto>: true } — le panier de selection
   var PH_DEB = null;     // minuterie anti-rebond de la recherche
   var VOIE = 'humain';   // humain | fantome | plat
+  /* ⚠⚠ << MISE EN VALEUR >> A UN DEFAUT, ET UN DEFAUT N EST PAS UN CHOIX.
+     C est ce drapeau qui repond au crochet vert, et il existe a cause de mon
+     defaut du 2026-09-09 : il a ouvert le Studio et vu << Mise en valeur >>
+     DEJA COCHEE alors qu il n avait rien choisi (<< le crochet est deja en place
+     ici alors que je n ai pas choisi le reste >>).
+     La cause : VOIE vaut << humain >> au demarrage, donc son libelle n est
+     JAMAIS vide, et j avais fait dependre le crochet de ce libelle.
+     ⚠⚠ ET C EST EXACTEMENT L ERREUR QUE JE VENAIS DE CORRIGER, DANS L AUTRE
+     SENS : le matin meme, le crochet dependait du drapeau << obligatoire >>, et
+     j ai ecrit qu il fallait deux mecanismes pour deux questions. J en ai remis
+     UN SEUL pour les deux — << que montrer sous le nom ? >> et << est-ce
+     regle ? >>. C est le seul onglet du rail dont l etat n est pas vide au
+     depart : tous les autres partent de rien, donc leur libelle suffit. */
+  var VOIE_CHOISIE = false;
   var PRESET = '';       // cle d ambiance
   var PRESETS = [];      // [{cle,label,emoji,desc}]
   var RESULT = null;     // { image, essai, decorErreur, upNote, largeur, hauteur }
@@ -1505,6 +1527,18 @@ ${JS_ACTIVITE}${JS_DIRE}
      Sans ce repli, le volet resterait VIDE et l on croirait l ecran casse. */
   function ongletSur(){
     var d = ongletsDispo();
+    /* ⚠⚠ ET ON NE RESTE PAS SUR UN ONGLET FERME (2026-09-09). Tant qu il n y a
+       pas de photo, tous les onglets sauf << Photo >> sont desactives : si
+       l onglet courant etait l un d eux — on retire la photo alors qu on reglait
+       l ambiance, ou un profil a ouvert << Ombres >> — le rail montrerait un
+       onglet actif et grise, et le volet reglerait quelque chose qu on ne peut
+       plus atteindre. C est le meme defaut que celui decrit juste au-dessus
+       (<< l onglet courant peut disparaitre sous le pied >>), vu par l autre
+       bout : il ne disparait pas, il devient injouable. */
+    if (ongletsFermes() && ONGLET !== 'photo') {
+      ONGLET = 'photo';
+      for (var k = 0; k < d.length; k++) { if (d[k].cle === 'photo') return d[k]; }
+    }
     for (var i = 0; i < d.length; i++) { if (d[i].cle === ONGLET) return d[i]; }
     ONGLET = d[0].cle;
     return d[0];
@@ -1530,29 +1564,56 @@ ${JS_ACTIVITE}${JS_DIRE}
      facultatif vide affiche << — >>. La distinction se lit donc dans le
      sous-titre, la ou elle est utile. */
   function ongletRequis(cle){ return cle === 'photo' || cle === 'ambiance'; }
+
+  /* ══ EST-CE REGLE ? — LE CROCHET VERT, ET RIEN D AUTRE ════════════════════
+     ⚠⚠ TROIS QUESTIONS, TROIS MECANISMES, ET C EST LE FOND DES DEUX DEFAUTS DE
+     LA JOURNEE :
+       • ongletEtat   : QUE MONTRER sous le nom (le libelle) ;
+       • ongletRequis : est-ce OBLIGATOIRE (<< A choisir >> contre << — >>) ;
+       • ongletFait   : est-ce REGLE (le crochet vert).
+     Le matin, le crochet dependait de ongletRequis : << Mise en valeur >>
+     portait toujours une valeur et jamais de crochet. J ai corrige en le faisant
+     dependre de ongletEtat… et il s est mis a cocher << Mise en valeur >> DES
+     L OUVERTURE, ce qu il a vu tout de suite : << le crochet est deja en place
+     ici alors que je n ai pas choisi le reste >>.
+     ⚠⚠ LES DEUX FOIS, LA MEME FAUTE : faire repondre UN indicateur a DEUX
+     questions. La troisieme fonction n est pas du zele, c est ce qui manquait.
+
+     ⚠ ET LA REGLE, EN UN MOT : << REMPLI >> VEUT DIRE CHOISI, PAS << NON VIDE >>.
+     La voie vaut << humain >> au demarrage — un DEFAUT n est pas un choix, et
+     cocher un defaut ferait croire qu on a decide quelque chose. C est le SEUL
+     onglet dans ce cas : tous les autres partent de rien, donc leur libelle
+     suffit a dire qu on y a touche. */
+  function ongletFait(cle){
+    if (cle === 'valeur') return VOIE_CHOISIE;
+    return !!ongletEtat(cle);
+  }
+
+  /* ══ TANT QU IL N Y A PAS DE PHOTO, LE RESTE EST FERME ════════════════════
+     Sa demande du 2026-09-09 : << tant que les photos ne sont pas selectionnees
+     les autres onglets devraient etre desactives >>.
+     Il a raison, et pas seulement pour la forme : regler une ambiance, un decor
+     ou un filigrane avant qu une photo existe, c est regler un traitement sur
+     rien — et le volet de droite ne peut alors rien montrer de ce qu on reglait.
+     ⚠ UNE SELECTION VENUE DE L EXPLORATEUR COMPTE AUSSI (PANIER) : c est bien
+     << les photos sont selectionnees >>, meme si aucune n est ouverte a l ecran.
+     ⚠ << Photo >> N EST JAMAIS FERME, evidemment : c est la seule porte pour
+     sortir de cet etat. */
+  function ongletsFermes(){ return !aUnePhoto() && !PANIER.length; }
+
   function ongletsHtml(){
     var courant = ongletSur().cle;
+    var fermes = ongletsFermes();
     return ongletsDispo().map(function(o){
       var e = ongletEtat(o.cle);
-      /* ⚠⚠ LE CROCHET DIT << REMPLI >>, POINT — sa demande du 2026-09-09 :
-         << mets aussi un crochet vert quand la section est remplie, exemple la
-         photo est choisie tu coches vert >>.
-         Il ne paraissait QUE sur les deux onglets obligatoires. Consequence :
-         << Mise en valeur >> portait toujours une valeur et jamais de crochet,
-         << Decor >> et << Filigrane >> non plus une fois remplis — donc le rail
-         ne repondait pas a la question qu on lui pose en le parcourant : qu
-         est-ce qui est fait ?
-         ⚠ ET LE COMMENTAIRE QUI DEFENDAIT L ANCIEN CHOIX SE TROMPAIT DE
-         MECANISME. Il craignait qu une coche sur un facultatif fasse croire
-         qu il manque quelque chose tant qu on n y a pas touche — mais l ABSENCE
-         de crochet ne dit rien, et ce qui dit << il manque quelque chose >>,
-         c est deja le sous-titre : << A choisir >> pour un requis vide, << — >>
-         pour un facultatif vide. La coche et le sous-titre repondent a deux
-         questions differentes ; les faire dependre du meme drapeau melangeait
-         les deux. */
-      var ok = !!e;
+      var ok = ongletFait(o.cle);
+      var bloque = fermes && o.cle !== 'photo';
+      /* ⚠ LE TITRE DIT POURQUOI. Un bouton grise sans explication se clique deux
+         fois, puis on cherche la panne ailleurs — c est la regle appliquee le
+         meme jour aux boutons verrouilles de la sauvegarde. */
       return '<button class="ong' + (o.cle === courant ? ' on' : '') + '" data-ong="' + o.cle
-        + '" role="tab" aria-selected="' + (o.cle === courant ? 'true' : 'false') + '">'
+        + '"' + (bloque ? ' disabled title="Choisissez d’abord une photo"' : '')
+        + ' role="tab" aria-selected="' + (o.cle === courant ? 'true' : 'false') + '">'
         + '<span class="ot"><b>' + esc(o.t) + '</b>'
         + '<span class="oe">' + esc(e || (ongletRequis(o.cle) ? 'À choisir' : '—')) + '</span></span>'
         + (ok ? '<span class="oc">✓</span>' : '') + '</button>';
@@ -1710,7 +1771,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!x) { dessiner(); dire('Aucun profil appliqué — les réglages sont ceux de l’écran.', 'att'); return; }
     var r = x.r || {};
     var perdus = [];
-    if (r.voie && estVoie(r.voie)) VOIE = r.voie;
+    if (r.voie && estVoie(r.voie)) { VOIE = r.voie; VOIE_CHOISIE = true; }
     if (r.modele && MODELES.indexOf(r.modele) >= 0) MODELE_SEL = r.modele;
     if (r.pose && POSES.filter(function(p){ return p.cle === r.pose; }).length) POSE_SEL = r.pose;
     if (r.formMode === 'recadrer' || r.formMode === 'marges') FORM_MODE = r.formMode;
@@ -2320,7 +2381,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     }
     brancherExplorateur();
     corps.querySelectorAll('[data-voie]').forEach(function(el){
-      el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); RESULT = null; dessiner();
+      el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); VOIE_CHOISIE = true; RESULT = null; dessiner();
         dire('Voie : ' + VOIE + '.', 'att'); };
     });
     corps.querySelectorAll('[data-preset]').forEach(function(el){
@@ -3386,8 +3447,23 @@ ${JS_ACTIVITE}${JS_DIRE}
      agrandissement actif et ouvre les OMBRES — c est le seul etat ou les
      glissieres d ombre et le mode d agrandissement existent. C est l ecran qui
      decide CE QU ON PAIE : il se verifie. */
-  if (${avOuvre ? 'true' : 'false'}) ONGLET = 'decor';
-  if (${avPlein ? 'true' : 'false'}) { VOIE = 'fantome'; AV.ombreActive = true; AV.upActive = true;
+  /* ⚠⚠ ET ILS POSENT UNE PHOTO TEMOIN DEPUIS LE 2026-09-09 — SANS QUOI CES DEUX
+     ECRANS AURAIENT ETE CONTROLES A VIDE, EN SILENCE. Ce jour-la, les onglets
+     autres que << Photo >> sont devenus DESACTIVES tant qu aucune photo n est
+     choisie (sa demande), et le choix de l onglet courant ramene alors de force
+     sur << Photo >>.
+     Ces deux identifiants ne posaient aucune photo : ils auraient donc dessine
+     le panneau PHOTO en croyant dessiner le decor et les ombres, et les bancs
+     auraient continue de passer — un vert qui ne parle de rien, exactement ce
+     que ce depot traque.
+     ⚠ Ce n est pas un contournement du verrou : un usager ne peut atteindre ces
+     onglets QU AVEC une photo. Le banc reproduit donc un etat REEL, ce qui est
+     tout ce qu on lui demande.
+     ⚠ Trouve en relisant l effet de mon changement sur les bancs, pas par les
+     bancs eux-memes. Les bancs passaient. */
+  if (${avOuvre ? 'true' : 'false'}) { PHOTO = PIXEL; PHOTO_NOM = 'photo témoin'; ONGLET = 'decor'; }
+  if (${avPlein ? 'true' : 'false'}) { PHOTO = PIXEL; PHOTO_NOM = 'photo témoin';
+    VOIE = 'fantome'; VOIE_CHOISIE = true; AV.ombreActive = true; AV.upActive = true;
     ONGLET = 'ombres'; }
   /* ⚠⚠ IDENTIFIANT D OUVERTURE << resultat >>. Tout le volet de droite garni — le
      comparateur avant/apres, les avis du service, les dimensions, les deux
