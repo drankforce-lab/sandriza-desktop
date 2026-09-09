@@ -295,9 +295,15 @@ function toast(titre, corps, sonNom) {
       icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
       silent: true,
     });
-    // Un clic ouvre l'administration : une notification qu'on ne peut pas suivre
-    // oblige à retrouver l'application à la main, et on a déjà oublié pourquoi.
-    n.on('click', ouvrirAdministration);
+    /* Un clic ouvre l'administration : une notification qu'on ne peut pas suivre
+       oblige à retrouver l'application à la main, et on a déjà oublié pourquoi.
+       ⚠ ET IL DIT POURQUOI SI PERSONNE N'EST CONNECTÉ (2026-09-09, sa demande).
+       Le texte nomme CE QU'ON VOULAIT VOIR, pas seulement « connectez-vous » :
+       c'est ce qui relie le clic au mot de passe qui s'affiche à la place. */
+    n.on('click', () => ouvrirAdministration(
+      sonNom === 'retour'
+        ? 'Connectez-vous pour voir les demandes de retour.'
+        : 'Connectez-vous pour voir les nouvelles commandes.'));
     n.show();
   } catch { /* rien de plus à faire : le son est déjà parti */ }
 }
@@ -322,8 +328,18 @@ function toast(titre, corps, sonNom) {
    ⚠ Et si `_ouvrirHote` manquait (attacher jamais appelé), on ouvre le portail
    dans le navigateur plutôt que de ne rien faire : une entrée de menu muette est
    exactement le défaut dont on sort. */
-function ouvrirAdministration() {
-  if (_ouvrirHote) { try { _ouvrirHote(); return; } catch {} }
+/* @param {string} [raison] ce qu'on dira sur la page si personne n'est connecté.
+   ⚠ CE PARAMÈTRE EXISTE POUR SA DEMANDE DU 2026-09-09 : « quand on clique pour y
+   accéder directement par la notification cela devrait nous demander de nous
+   connecter ou nous ramener à la fenêtre de connexion ». On y arrivait déjà —
+   la fenêtre montre l'écran de connexion — mais RIEN NE FAISAIT LE LIEN : on
+   clique pour voir une commande et on tombe sur un mot de passe.
+   ⚠ La raison n'est dite QUE hors session : c'est l'hôte qui en juge, pas nous.
+   ⚠ Et elle n'est PAS passée par les entrées du menu qui ouvrent l'écran pour
+   elles-mêmes (« Ouvrir l'administration », le double-clic) : là, on demande la
+   fenêtre, on ne demande pas à voir une commande. Un message y serait du bruit. */
+function ouvrirAdministration(raison) {
+  if (_ouvrirHote) { try { _ouvrirHote(raison); return; } catch {} }
   try { shell.openExternal('https://adm.sandriza.com/'); } catch {}
 }
 

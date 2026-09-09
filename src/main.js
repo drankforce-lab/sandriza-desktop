@@ -158,6 +158,28 @@ let _szVraiQuit = false;
 function _sessionOuverte() {
   try { return !!(_modele && _modele.connecte); } catch { return false; }
 }
+/* ══ « CE LANCEMENT A-T-IL SERVI ? » — DEUX QUESTIONS, PAS UNE (2026-09-09) ═══
+ * ⚠⚠ J'AVAIS ÉLARGI SA DEMANDE À TORT, ET SA FORMULATION D'ORIGINE LE DISAIT.
+ * Le 2026-09-09 au matin : « si l'application n'est pas **encore** connectée que
+ * l'icône ne soit pas persistante en cas de fermeture ». J'ai lu « pas
+ * connectée » et fait quitter le X dans les DEUX cas — jamais connectée, et
+ * déconnectée après usage.
+ * Il l'a corrigé le même jour : « quand on est déconnecté l'application doit
+ * quand même surveiller les nouvelles commandes et retours ». Et il a raison :
+ * après une journée de travail, se déconnecter le soir ne doit pas éteindre la
+ * veille — c'est justement la nuit qu'elle sert.
+ *
+ * ⚠ CE DRAPEAU NE REDEVIENT JAMAIS FAUX, et c'est tout son sens : il répond à
+ * « ce lancement a-t-il servi ? », pas à « quelqu'un est-il connecté MAINTENANT ? ».
+ * La seconde question est `_sessionOuverte()`, et elle décide de ce qu'on
+ * MONTRE (le menu de l'icône, l'entrée de déconnexion). Celle-ci décide de ce
+ * qu'on GARDE VIVANT. Les confondre était la faute.
+ *
+ * ⚠ ET LE CAS QUI L'A MOTIVÉ RESTE COUVERT : une application posée sur l'écran
+ * de connexion, jamais utilisée — celle qu'on ne pouvait plus fermer — se ferme
+ * vraiment au X. */
+let _aServi = false;
+function _lancementAServi() { return _aServi; }
 /* ⚠ LE RÔLE VIENT DU MÊME CANAL QUE `connecte`, et pour la même raison : il vit
    dans la page, pas ici. Il ne sert QU'À AFFICHER — décider si le menu de
    l'icône porte « Personnel connecté… ». La garde qui protège est le refus du
@@ -183,12 +205,31 @@ const quitterVraiment = () => {
    suffit pas si la fenêtre a été RÉDUITE (elle reste dans la barre des tâches),
    et sans `focus()` elle revient derrière la fenêtre active — on croit alors que
    le clic n'a rien fait, ce qui est exactement le défaut qu'il a signalé. */
-const montrerAdministration = () => {
+const montrerAdministration = (raison) => {
   try {
     if (!mainWindow || mainWindow.isDestroyed()) { createWindow(); return; }
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.show();
     mainWindow.focus();
+    /* ══ DIRE POURQUOI ON EST DEVANT UN MOT DE PASSE (2026-09-09, sa demande) ══
+       Ses mots : « quand on clique pour y accéder directement par la
+       notification cela devrait nous demander de nous connecter ou nous ramener
+       à la fenêtre de connexion ».
+       ⚠ IL Y ARRIVAIT DÉJÀ — la fenêtre montre l'écran de connexion — MAIS RIEN
+       NE FAISAIT LE LIEN. On clique pour voir une commande, on se retrouve
+       devant un mot de passe : les deux gestes n'ont aucun rapport visible, et
+       c'est le genre d'écran où l'on se demande si le clic a marché.
+       ⚠ ON NE LE DIT QUE HORS SESSION : connecté, il arrive sur son tableau de
+       bord et n'a rien à lire.
+       ⚠ MÊME CHEMIN QUE `runAdmin`, qui pose déjà un `Toast` de ce genre : le
+       site sert `Toast` avant la connexion. S'il manquait, le `if` du script
+       laisse la fenêtre s'ouvrir quand même — un message perdu ne doit pas
+       empêcher d'arriver à l'écran de connexion. */
+    if (raison && !_sessionOuverte()) {
+      mainWindow.webContents.executeJavaScript(
+        "(function(){try{if(typeof Toast!=='undefined')Toast.show("
+        + JSON.stringify(String(raison)) + ",'warning',9000);}catch(e){}})()", true).catch(() => {});
+    }
   } catch {}
 };
 /* Poser la veille et son icône. ⚠ UNE SEULE DÉFINITION, appelée au démarrage ET
@@ -198,6 +239,10 @@ const _veilleAttacher = () => {
   if (trayVeille) return trayVeille;
   try {
     trayVeille = require('./veilleur').attacher({
+      /* ⚠ LE VERBE EST ÉTENDU, PAS DOUBLÉ (2026-09-09) : il accepte une raison,
+         que la fenêtre affiche seulement si personne n'est connecté. Ajouter un
+         second verbe « ouvrir en disant » aurait fait deux chemins vers la même
+         fenêtre, et deux chemins finissent par diverger. */
       ouvrir: montrerAdministration,
       quitter: quitterVraiment,
       /* La déconnexion passe par la PAGE, jamais par la coquille : c'est
@@ -1183,7 +1228,13 @@ const createWindow = () => {
        quitter une application où personne ne travaille ne perd rien, la laisser
        vivante sans fenêtre est le pire état atteignable (voir les quatre gardes). */
     if (fermetureBloquee()) { ev.preventDefault(); refuserFermeture(); return; }
-    if (!_szVraiQuit && trayVeille && _sessionOuverte()) {
+    /* ⚠⚠ `_lancementAServi()` ET NON `_sessionOuverte()` — CORRIGÉ LE 2026-09-09
+       APRÈS SA PRÉCISION : « quand on est déconnecté l'application doit quand
+       même surveiller les nouvelles commandes et retours ». Se déconnecter le
+       soir ne doit pas éteindre la veille — c'est la nuit qu'elle sert. Ce qui
+       doit vraiment quitter, c'est l'application posée sur l'écran de connexion
+       et JAMAIS utilisée : celle-là, on ne pouvait plus la fermer. */
+    if (!_szVraiQuit && trayVeille && _lancementAServi()) {
       ev.preventDefault();
       try { mainWindow.hide(); } catch {}
       return;
@@ -4771,6 +4822,11 @@ ipcMain.handle('menu:modele', (e, m) => {
        clignotement de la barre du 2026-08-09. */
     const roleAvant = String(_modele.role || '') + '|' + (_modele.connecte ? '1' : '0');
     _modele = m;
+    /* ⚠ ON RETIENT QUE CE LANCEMENT A SERVI, et on ne l'oublie jamais : c'est ce
+       qui distingue « jamais connectée » de « déconnectée après usage ». Voir
+       `_lancementAServi`. Posé ICI parce que c'est le seul endroit où l'état de
+       session arrive dans ce processus. */
+    if (_modele.connecte) _aServi = true;
     if (roleAvant !== String(_modele.role || '') + '|' + (_modele.connecte ? '1' : '0')) {
       try { require('./veilleur').rafraichir(); } catch {}
     }
@@ -5100,7 +5156,10 @@ if (!app.requestSingleInstanceLock()) {
        (le menu de l'icône, super-admin) pendant que la fenêtre est cachée
        laisserait le processus vivre indéfiniment sur un poste où plus personne
        n'est connecté — exactement ce qu'il demande d'éviter. */
-    if (trayVeille && _sessionOuverte()) return;
+    /* ⚠ MÊME DRAPEAU QU'AU BOUTON X (2026-09-09) : deux gardes qui décident de
+       la même chose selon deux règles finissent par se contredire. « Ce
+       lancement a-t-il servi » décide de ce qu'on garde vivant. */
+    if (trayVeille && _lancementAServi()) return;
     if (process.platform !== 'darwin') app.quit();
   });
 }
