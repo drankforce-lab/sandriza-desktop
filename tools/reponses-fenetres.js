@@ -6211,6 +6211,10 @@ module.exports = {
               frais: false, vuDepuisSec: 0, vu: '', depuis: '2026-09-09T14:33:00Z' },
           ],
         },
+        /* Mode exclusif au repos : le bouton s affiche, le panneau reste replié.
+           C est l état ordinaire, celui qu on voit 364 jours sur 365. */
+        'maintenance:etat': { ok: true, actif: false, debut: '', fin: '', message: '',
+          moi: false, graceH: 12, nipMin: 6, nipMax: 12, phrase: '' },
         'presence:deconnecter': { ok: true, nom: 'Martin Dubé' },
         'presence:message': { ok: true, nom: 'Martin Dubé' },
         identite: IDENTITE,
@@ -6222,6 +6226,42 @@ module.exports = {
       reponses: {
         'presence:liste': { ok: false, motif: 'superadmin_required',
           detail: 'HTTP 403', vu: { session: true, role: 'admin' } },
+        /* ⚠ MÊME REFUS POUR LES DEUX : le mode exclusif est réservé au
+           super-administrateur comme la liste. Rendre `{ok:true}` par défaut ici
+           aurait fait dessiner un panneau à quelqu un qui n y a pas droit — dans
+           le BANC seulement, mais c est exactement le genre d écart qui fait
+           croire qu on a éprouvé un chemin qui n existe pas. */
+        'maintenance:etat': { ok: false, motif: 'superadmin_required' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠⚠ LE MODE EXCLUSIF ACTIF — ET C EST LE SEUL CAS QUI DESSINE LE PANNEAU.
+         Le harnais ne clique pas : sans cet état, le panneau du mode exclusif
+         serait du code jamais exécuté, exactement l angle mort qui a laissé la
+         ligne de diagnostic de cette même fenêtre à 4,48:1 pendant des jours.
+         C est pour ça que la fenêtre déplie le panneau d elle-même quand le mode
+         est actif : c est la bonne conduite (un blocage de toutes les connexions
+         doit se voir en ouvrant l écran des sessions) ET c est ce qui le rend
+         mesurable.
+         ⚠ `moi: true` : c est LUI qui a posé le mode, donc la fenêtre propose de
+         le lever sans avertissement. Le cas `moi: false` porte un avertissement
+         en plus — il reste non éprouvé ici, et c est écrit. */
+      nom: 'mode usage exclusif ACTIF (panneau déplié)',
+      id: '',
+      reponses: {
+        'presence:liste': { ok: true, fraisSec: 120, sessions: [
+          { staffId: 'stf_0001', nom: 'Brigitte Brousseau', courriel: 'brigitte@sandriza.com',
+            role: 'superadmin', moi: true, frais: true, vuDepuisSec: 3,
+            vu: '2026-09-09T20:40:00Z', depuis: '2026-09-09T19:00:00Z' } ] },
+        'maintenance:etat': { ok: true, actif: true,
+          debut: '2026-09-09T22:00', fin: '2026-09-10T02:00',
+          message: 'Mise a jour du systeme de facturation.',
+          moi: true, graceH: 12, nipMin: 6, nipMax: 12,
+          phrase: 'Une maintenance est en cours : l’application ne sera pas disponible'
+            + ' entre mercredi le 9 septembre à 22h00 et jeudi le 10 septembre à 02h00.'
+            + ' Mise a jour du systeme de facturation.' },
+        'maintenance:ecrire': { ok: true, actif: false },
         identite: IDENTITE,
       },
     },
@@ -6232,6 +6272,8 @@ module.exports = {
       id: '',
       reponses: {
         'presence:liste': { ok: true, fraisSec: 120, sessions: [] },
+        'maintenance:etat': { ok: true, actif: false, moi: false, graceH: 12,
+          nipMin: 6, nipMax: 12, phrase: '' },
         identite: IDENTITE,
       },
     },

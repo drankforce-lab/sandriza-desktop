@@ -78,6 +78,25 @@ thead th{text-align:left;padding:.24rem .4rem;font-size:.67rem;text-transform:up
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .sub{font-size:.71rem;color:var(--tx2)}
+/* ── Mode usage exclusif (sa demande du 2026-09-09) ──────────────────────
+   Meme grammaire que la zone d ecriture d un message : un panneau qui se
+   deplie dans la barre, pas une seconde fenetre. */
+.mx{margin:0 0 .8rem;padding:.75rem .85rem;border-radius:11px;
+  background:var(--v06);border:1px solid var(--v12)}
+html.jour .mx{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12)}
+.mx.on{border-color:rgba(240,180,80,.45);background:rgba(240,180,80,.10)}
+.mx .mxt{font-weight:600;font-size:.84rem;color:var(--tx);margin:0 0 .35rem;
+  display:flex;align-items:center;gap:.45rem}
+.mx .mxd{font-size:.76rem;line-height:1.5;color:var(--tx2)}
+.mx .mxg{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin:.65rem 0 0}
+@media (max-width:560px){.mx .mxg{grid-template-columns:1fr}}
+.mx label{display:block;font-size:.7rem;color:var(--tx2);margin:0 0 .2rem}
+.mx input{width:100%;box-sizing:border-box;padding:.45rem .55rem;border-radius:8px;
+  border:1px solid var(--v12);background:var(--f-champ);color:var(--tx);
+  font:400 .8rem/1.2 system-ui}
+.mx input.manque{border-color:var(--tx-err)}
+.mx .mxp{display:flex;gap:.5rem;margin:.7rem 0 0;flex-wrap:wrap}
+.mx .mxm{font-size:.74rem;color:var(--tx-att);margin:.5rem 0 0;min-height:1rem}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.72rem}
 .mut{color:var(--tx2)}
 /* ⚠⚠ LES PASTILLES VIENNENT DU SOCLE, ET C'EST LE BANC QUI M'A RAMENÉ ICI.
@@ -292,7 +311,10 @@ ${JS_ACTIVITE}${JS_DIRE}
       ? (SESS.length + ' session' + (SESS.length > 1 ? 's' : '') + ' ouverte' + (SESS.length > 1 ? 's' : ''))
       : 'personne n est connecte';
 
-    var h = '<div class="barre"><button class="mini" id="p-reload">Actualiser</button></div>';
+    var h = '<div class="barre"><button class="mini" id="p-reload">Actualiser</button>'
+      + ' <button class="mini" id="p-mx">' + (MX && MX.actif ? 'Mode exclusif : ACTIF' : 'Mode exclusif...') + '</button>'
+      + '</div>';
+    h += panneauExclusif();
 
     /* ⚠ CETTE NOTE RESTE, contrairement a celles qu on a retirees ailleurs. Les
        exposes retires expliquaient a quelqu un un mecanisme qu il avait sous les
@@ -324,6 +346,12 @@ ${JS_ACTIVITE}${JS_DIRE}
 
     var pr = document.getElementById('p-reload');
     if (pr) pr.onclick = function(){ CONF = ''; charger(true); };
+    /* ⚠ LE PANNEAU SE REBRANCHE A CHAQUE DESSIN, comme tout le reste ici : ce
+       fichier redessine le corps entier, donc les gestionnaires poses au dessin
+       precedent sont partis avec les elements qui les portaient. Les brancher une
+       seule fois a l ouverture aurait rendu le panneau muet des le premier
+       rafraichissement automatique — toutes les 4 secondes. */
+    mxBrancher();
 
     var es = corps.querySelectorAll('[data-ecrire]');
     for (var e = 0; e < es.length; e++) {
@@ -422,6 +450,176 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* ══ MODE USAGE EXCLUSIF ══════════════════════════════════════════════════
+     Sa demande du 2026-09-09 : << une option usage exclusif dans l application
+     que je peux activer dans un mode de maintenance si je veux m assurer que
+     personne ne se connecte pendant cette periode >>.
+     ⚠ IL EST ICI PARCE QUE C EST LA FENETRE DES SESSIONS. Elle montre qui est
+     entre et permet de le faire sortir ; empecher d entrer est la meme
+     question, vue de l autre cote de la porte. Un ecran separe aurait cree un
+     second endroit ou l on parle des connexions. */
+  var MX = null;          // dernier etat connu, null = pas encore lu
+  var MXOUVERT = false;   // le panneau est-il deplie
+  var MXBROUILLON = {};   // ce qui est tape, garde entre deux redessins
+  /* ⚠ SANS CE DRAPEAU, LE PANNEAU SE REOUVRIRAIT TOUT SEUL toutes les 4
+     secondes. La liste se rafraichit sans arret ; si un mode actif deplie le
+     panneau a chaque passage, le fermer devient impossible — on refermerait
+     dans le vide indefiniment. Fermer exprès doit tenir. */
+  var MXFERME = false;
+
+  function mxRetenir(){
+    if (!MXOUVERT) return;
+    ['mx-debut','mx-fin','mx-msg','mx-nip'].forEach(function(id){
+      var e = document.getElementById(id);
+      if (e) MXBROUILLON[id] = e.value;
+    });
+  }
+
+  function panneauExclusif(){
+    if (!MXOUVERT) return '';
+    if (!MX) return '<div class="mx"><div class="mxd">Lecture de l etat...</div></div>';
+    if (!MX.ok) return '<div class="mx"><div class="mxt">Mode usage exclusif</div>'
+      + '<div class="mxd">' + expliquer(MX) + diagnostic(MX) + '</div></div>';
+
+    if (MX.actif) {
+      /* ⚠ ON NE PROPOSE DE LEVER QUE CE QU ON A POSE. Un mode pose par quelqu un
+         d autre se leve aussi — il faut bien que ce soit possible — mais on le
+         DIT, parce que lever le mode d un collegue en pleine maintenance rouvre
+         la porte pendant qu il travaille dessus. */
+      return '<div class="mx on">'
+        + '<div class="mxt"><span>&#128274;</span><span>Mode usage exclusif : ACTIF</span></div>'
+        + '<div class="mxd">' + esc(MX.phrase || '') + '<br>'
+        + 'Personne ne peut se connecter, sauf '
+        + (MX.moi ? '<strong>vous</strong> (vous l avez active)' : 'la personne qui l a active')
+        + '. Vous pouvez vous deconnecter et vous reconnecter sans probleme.'
+        + (MX.moi ? '' : '<br><strong>Attention :</strong> ce mode a ete active par quelqu un d autre.')
+        + '</div>'
+        + '<div class="mxp"><button class="mini dgr" id="mx-lever">Lever le mode</button>'
+        + '<button class="mini" id="mx-fermer">Fermer</button></div>'
+        + '<div class="mxm" id="mx-m"></div>'
+        + '</div>';
+    }
+
+    var b = MXBROUILLON;
+    return '<div class="mx">'
+      + '<div class="mxt"><span>&#128274;</span><span>Activer le mode usage exclusif</span></div>'
+      + '<div class="mxd">Personne d autre ne pourra se connecter, et une banniere '
+      + 'annoncera la periode sur l ecran de connexion de tous les postes. '
+      + '<strong>Vous resterez le seul a pouvoir entrer</strong>, meme apres vous etre '
+      + 'deconnecte.</div>'
+      + '<div class="mxg">'
+      + '<div><label for="mx-debut">Debut de la periode</label>'
+      + '<input type="datetime-local" id="mx-debut" value="' + esc(b['mx-debut'] || '') + '"></div>'
+      + '<div><label for="mx-fin">Fin de la periode</label>'
+      + '<input type="datetime-local" id="mx-fin" value="' + esc(b['mx-fin'] || '') + '"></div>'
+      + '</div>'
+      + '<div style="margin-top:.55rem"><label for="mx-msg">Message ajoute a la banniere (facultatif)</label>'
+      + '<input type="text" id="mx-msg" maxlength="300" placeholder="Ex. : mise a jour du systeme de facturation." value="' + esc(b['mx-msg'] || '') + '"></div>'
+      /* ⚠ LE NIP SE DEMANDE ICI, ET C EST LE SEUL MOMENT POSSIBLE : il sert a
+         SORTIR du mode depuis l ecran de connexion, donc le poser sans lui, c est
+         se mettre dehors sans cle. Sa demande le dit — << le NIP devra etre
+         configure au moment de l activation >>. */
+      + '<div style="margin-top:.55rem"><label for="mx-nip">NIP de desactivation d urgence '
+      + '(' + (MX.nipMin || 6) + ' a ' + (MX.nipMax || 12) + ' chiffres)</label>'
+      + '<input type="password" id="mx-nip" inputmode="numeric" maxlength="' + (MX.nipMax || 12) + '" '
+      + 'autocomplete="new-password" value="' + esc(b['mx-nip'] || '') + '"></div>'
+      + '<div class="mxd" style="margin-top:.5rem">Ce NIP se saisit depuis l ecran de connexion avec <strong>Ctrl + Maj + 0</strong>. Notez-le ailleurs : c est la seule facon de rouvrir l application si plus aucune session n est ouverte.<br>Le mode se levera de lui-meme au plus tard ' + (MX.graceH || 12) + ' h apres l heure de fin annoncee — un blocage sans issue serait pire que la panne qu il evite.</div>'
+      + '<div class="mxp"><button class="mini" id="mx-poser">Activer le mode</button>'
+      + '<button class="mini" id="mx-fermer">Annuler</button></div>'
+      + '<div class="mxm" id="mx-m"></div>'
+      + '</div>';
+  }
+
+  function mxBrancher(){
+    var t = document.getElementById('p-mx');
+    if (t) t.onclick = function(){
+      mxRetenir();
+      MXOUVERT = !MXOUVERT;
+      MXFERME = !MXOUVERT;
+      if (MXOUVERT && !MX) mxLire();
+      dessiner();
+    };
+    var f = document.getElementById('mx-fermer');
+    if (f) f.onclick = function(){ mxRetenir(); MXOUVERT = false; MXFERME = true; dessiner(); };
+    var p = document.getElementById('mx-poser');
+    if (p) p.onclick = mxPoser;
+    var l = document.getElementById('mx-lever');
+    if (l) l.onclick = mxLever;
+  }
+
+  function mxLire(){
+    appeler('maintenance:etat',[]).then(function(r){
+      MX = r || { ok: false, motif: 'echec' };
+      /* ⚠⚠ UN MODE ACTIF SE MONTRE, IL NE SE CHERCHE PAS. C est l etat le plus
+         consequent que cette fenetre puisse porter — personne ne peut se
+         connecter — et le laisser replie derriere un bouton, c est le rendre
+         invisible a celui qui ouvre l ecran des sessions justement pour
+         comprendre pourquoi ses collegues n arrivent pas a entrer.
+         ⚠ Une seule fois, et jamais s il l a ferme exprès : voir MXFERME. */
+      if (MX && MX.ok && MX.actif && !MXFERME) MXOUVERT = true;
+      if (MXOUVERT) { mxRetenir(); dessiner(); }
+    });
+  }
+
+  function mxPoser(){
+    var d = document.getElementById('mx-debut');
+    var f = document.getElementById('mx-fin');
+    var m = document.getElementById('mx-msg');
+    var n = document.getElementById('mx-nip');
+    var z = document.getElementById('mx-m');
+    if (!d || !f || !n || !z) return;
+    /* ⚠ ON MONTRE LE CHAMP FAUTIF, PAS SEULEMENT LA PHRASE. Le serveur refuse
+       et explique, mais devant quatre champs il faut aussi savoir LEQUEL. */
+    [d, f, n].forEach(function(e){ e.classList.remove('manque'); });
+    if (!d.value) { d.classList.add('manque'); z.textContent = 'Indiquez le debut de la periode.'; return; }
+    if (!f.value) { f.classList.add('manque'); z.textContent = 'Indiquez la fin de la periode.'; return; }
+    var min = MX && MX.nipMin ? MX.nipMin : 6;
+    var max = MX && MX.nipMax ? MX.nipMax : 12;
+    if (!new RegExp('^[0-9]{' + min + ',' + max + '}$').test(n.value || '')) {
+      n.classList.add('manque');
+      z.textContent = 'Le NIP doit compter de ' + min + ' a ' + max + ' chiffres.';
+      return;
+    }
+    var p = document.getElementById('mx-poser');
+    if (p) p.disabled = true;
+    z.textContent = 'Activation...';
+    appeler('maintenance:ecrire',['poser', { debut: d.value, fin: f.value,
+      message: m ? m.value : '', nip: n.value }]).then(function(r){
+      if (p) p.disabled = false;
+      if (!r || !r.ok) {
+        var z2 = document.getElementById('mx-m');
+        if (z2) z2.textContent = expliquer(r);
+        return;
+      }
+      /* ⚠ LE BROUILLON DU NIP EST EFFACE DES QUE LE MODE EST POSE. Le garder
+         laisserait un NIP en clair dans la memoire de la fenetre, visible au
+         prochain depliage du panneau — un secret qui traine par commodite. */
+      MXBROUILLON = {};
+      MXOUVERT = false;
+      mxLire();
+      dire('Mode usage exclusif active. Personne d autre ne peut se connecter.', 'bon');
+      charger(false);
+    });
+  }
+
+  function mxLever(){
+    var z = document.getElementById('mx-m');
+    var l = document.getElementById('mx-lever');
+    if (l) l.disabled = true;
+    if (z) z.textContent = 'Levee...';
+    appeler('maintenance:ecrire',['lever', {}]).then(function(r){
+      if (l) l.disabled = false;
+      if (!r || !r.ok) {
+        var z2 = document.getElementById('mx-m');
+        if (z2) z2.textContent = expliquer(r);
+        return;
+      }
+      MXOUVERT = false;
+      mxLire();
+      dire('Mode usage exclusif leve. Les connexions sont de nouveau possibles.', 'bon');
+    });
+  }
+
   function charger(fort){
     if (OCC) return;
     appeler('presence:liste', []).then(function(r){
@@ -433,6 +631,13 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       SESS = r.sessions || [];
       if (r.fraisSec) FRAIS = r.fraisSec;
+      /* ⚠ L ETAT DU MODE SE LIT AU PREMIER CHARGEMENT, pas seulement quand on
+         deplie le panneau : c est ce qui permet au bouton d annoncer
+         << Mode exclusif : ACTIF >> sans qu on ait rien a ouvrir, et au panneau
+         de se montrer de lui-meme. UNE seule fois — le rafraichissement de la
+         liste tourne toutes les 4 s, et relire ceci a chaque passage serait un
+         second sondage pour une valeur qui ne change qu a la main. */
+      if (MX === null) mxLire();
       retenirBrouillon();
       dessiner();
       if (fort) dire('');

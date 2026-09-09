@@ -2023,6 +2023,9 @@ const OPS_PONT = new Set([
      operations de ce pont dont l effet visible est chez une tierce personne. Le
      role est verifie au SERVEUR (turso-proxy.php), journalise, et aucun jeton de
      session ne revient au poste — on deconnecte par identifiant de compte. */
+  /* Le mode << usage exclusif >> (sa demande du 2026-09-09) vit dans la meme
+     fenetre que la presence : voir son commentaire dans admin.js. */
+  'maintenance:etat', 'maintenance:ecrire',
   'presence:liste', 'presence:deconnecter', 'presence:message',
   // Les quatre derniers trous fonctionnels de l audit (#6) : le REPERTOIRE de
   // grossistes (ajout en un clic) et la SUPPRESSION d une demande de retour
@@ -2782,6 +2785,7 @@ const LIMITES_PONT = {
      doublon. Ici, le doublon serait un second message identique sur l ecran de
      quelqu un, ou une seconde deconnexion — inoffensive, mais qui ferait douter
      du mecanisme. */
+  'maintenance:etat': 15000, 'maintenance:ecrire': 30000,
   'presence:liste': 15000, 'presence:deconnecter': 30000, 'presence:message': 30000,
   'repertoire:donnees': 20000, 'repertoire:ajouter': 30000,
   /* Parcourt toute la phototheque et rend AUSSI les identifiants du resultat
