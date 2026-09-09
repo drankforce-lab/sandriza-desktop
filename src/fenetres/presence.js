@@ -213,7 +213,17 @@ ${JS_ACTIVITE}${JS_DIRE}
       bouts.push('rôle vu par la page : ' + esc(v.role || '(aucun)'));
     }
     if (!bouts.length) return '';
-    return '<div class="sub" style="margin-top:.6rem;opacity:.8">' + bouts.join(' · ') + '</div>';
+    /* ⚠⚠ PAS D OPACITE ICI, ET C EST LE BANC AU RENDU QUI L A TROUVE. Le
+       estompage a 0,8 posait --tx2 a 4,48:1 sur le fond de nuit — sous le
+       seuil, donc sous-lisible — sur la SEULE ligne de tout l ecran dont le
+       but est d etre LUE et recopiee : c est elle qu on demande de nous
+       transmettre quand la fenetre refuse. Estomper le diagnostic pour qu il
+       se fasse discret, c est le rendre penible a lire au moment ou il sert.
+       ⚠ Et il n a ete mesure qu au jour ou un jeu de reponses a enfin dessine
+       le cas du refus : la couleur existait depuis la naissance de la fenetre,
+       aucun controle ne la voyait parce que RIEN NE L AFFICHAIT. Un vert ne
+       vaut que ce que l outil regarde. */
+    return '<div class="sub" style="margin-top:.6rem">' + bouts.join(' · ') + '</div>';
   }
   function appeler(op, args){
     var p;
