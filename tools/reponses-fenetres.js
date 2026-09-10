@@ -6311,6 +6311,129 @@ module.exports = {
         identite: IDENTITE,
       },
     },
+    {
+      /* ⚠⚠ CINQ CAS DE PLUS, ET C EST UN TROU QUI ETAIT LA DEPUIS 5.9.0. Le
+         harnais CHARGE la page, il ne CLIQUE pas : les quatre cas d origine
+         dessinaient donc tous le meme ecran de connexion, et le code a six
+         chiffres — pourtant porte en 5.9.0 — n a JAMAIS ete execute une seule
+         fois. C est exactement ce qui a laisse passer un `dire()` inexistant
+         dans la fenetre du mode exclusif : compile, jamais joue.
+         ⚠ L ecran de depart (`id`) est ce qui rend ces cas possibles. Voir le
+         commentaire de `pageConnexion(depart)`. */
+      nom: 'le code a six chiffres',
+      id: 'mfa',
+      exige: ['id="sl-mfa-code"', 'Temps restant'],
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:mfa': { ok: false, motif: 'refus', message: 'Code invalide.' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠ LA CLE MANUELLE EST EXIGEE, PAS LE QR : le QR vient d un service
+         externe et ne se dessine pas dans le harnais, alors qu il vaut mieux
+         garantir la voie qui marche HORS RESEAU — celle qui ne fait pas sortir
+         le secret du poste. */
+      nom: 'configuration du code a six chiffres',
+      id: 'mfaConfig',
+      exige: ['id="wz-cle"', 'id="wz-code"', 'ne quitte pas ce poste'],
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:mfaConfig': { ok: true, prenom: 'Bruno',
+          secret: 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP',
+          secretGroupe: 'JBSW Y3DP EHPK 3PXP JBSW Y3DP EHPK 3PXP',
+          qrUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=x',
+          qrRepli: 'https://quickchart.io/qr?text=x&size=200' },
+        'connexion:mfaConfigConfirmer': { ok: false, motif: 'refus', message: 'Code invalide.' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠ LES EXIGENCES DE MOT DE PASSE VIENNENT DE LA POLITIQUE : ce cas en
+         donne quatre pour que la liste de pastilles soit reellement dessinee.
+         Avec une liste vide, la branche qui les affiche ne s executerait pas. */
+      nom: 'mot de passe impose',
+      id: 'mdp',
+      exige: ['id="pc-pw1"', 'id="pc-pw2"', 'Au moins 12 caractères'],
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:mdpDonnees': { ok: true, prenom: 'Bruno',
+          exigences: ['Au moins 12 caractères', '1 majuscule', '1 chiffre', '1 caractère spécial'] },
+        'connexion:mdpEcrire': { ok: false, motif: 'discordance',
+          message: 'Les mots de passe ne correspondent pas.' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠ DEUX LISTES ET LEUR EXCLUSION MUTUELLE : le cas fournit de VRAIES
+         questions, sinon `opts()` boucle sur un tableau vide et les deux
+         <select> paraissent vides — l ecran serait vert et inutilisable. */
+      nom: 'questions de securite',
+      id: 'questions',
+      exige: ['id="sq-q1"', 'id="sq-q2"', 'Quel est le nom'],
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:questionsDonnees': { ok: true, prenom: 'Bruno',
+          questions: ['Quel est le nom de votre premier animal ?',
+            'Quel est le nom de jeune fille de votre mère ?',
+            'Dans quelle ville êtes-vous né ?',
+            'Quel était le modèle de votre première voiture ?'] },
+        'connexion:questionsEcrire': { ok: false, motif: 'memea',
+          message: 'Les deux réponses doivent être différentes.' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠⚠ UN ASSISTANT DONT L AMORCE A EXPIRE, ET C EST LE CAS QU ON OUBLIE.
+         Les trois assistants gardent leur amorce dans sessionStorage ; passe le
+         delai, le coeur rend `expire`. La fenetre doit alors REVENIR a la
+         connexion en le disant — pas rester sur un ecran vide qui ne mene
+         nulle part. */
+      nom: 'assistant expire — retour a la connexion, en le disant',
+      id: 'mfaConfig',
+      exige: ['id="sl-password"', 'Session expirée'],
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:mfaConfig': { ok: false, motif: 'expire',
+          message: 'Session expirée — reconnectez-vous.' },
+        identite: IDENTITE,
+      },
+    },
   ],
 
   'maintenance.js': [

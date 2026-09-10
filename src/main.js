@@ -2040,6 +2040,12 @@ const OPS_PONT = new Set([
   'connexion:contexte', 'connexion:captcha', 'connexion:entrer', 'connexion:mfa',
   'connexion:mfaAbandon', 'connexion:oubli', 'connexion:nip', 'connexion:maintenance',
   'connexion:ecranWeb', 'connexion:ouvrir',
+  /* La suite du parcours, portée dans la même fenêtre (sa demande du 2026-09-10) :
+     configuration du code à six chiffres, changement de mot de passe imposé,
+     questions de sécurité. ⚠ Elles n'ont pas de garde de session non plus. */
+  'connexion:mfaConfig', 'connexion:mfaConfigConfirmer',
+  'connexion:mdpDonnees', 'connexion:mdpEcrire',
+  'connexion:questionsDonnees', 'connexion:questionsEcrire',
   'presence:liste', 'presence:deconnecter', 'presence:message',
   // Les quatre derniers trous fonctionnels de l audit (#6) : le REPERTOIRE de
   // grossistes (ajout en un clic) et la SUPPRESSION d une demande de retour
@@ -2568,6 +2574,12 @@ const LIMITES_PONT = {
      gardent le plafond ordinaire : leur donner 30 s ne ferait qu allonger
      l attente le jour ou la page ne repond vraiment plus. */
   'connexion:entrer': 30000, 'connexion:mfa': 30000, 'connexion:nip': 20000,
+  /* ⚠ MÊME RAISON POUR LES TROIS ÉCRIVAINS DE LA SUITE : chacun vérifie, écrit,
+     ouvre la session et journalise. Au plafond ordinaire de 8 s, un compte se
+     retrouverait configuré ET refusé — et l'écran redemanderait ce qui vient
+     d'être fait. */
+  'connexion:mfaConfigConfirmer': 30000, 'connexion:mdpEcrire': 30000,
+  'connexion:questionsEcrire': 30000,
   // Depot des photos dans le stockage : le plus long de tous.
   'produit:enregistrer': 90000,
   // Etiquettes demandees a un transporteur (Postes Canada, FedEx).
@@ -4683,7 +4695,16 @@ const actionApp = (nom) => {
        Le minimum (760 × 520) laisse le formulaire entier visible même replié. */
     case 'connexion': {
       const winCx = ouvrirNative('connexion', 'Connexion', pageConnexion(),
-        { width: 1000, height: 660, minWidth: 760, minHeight: 520 });
+        /* ⚠ 1180 × 900, ET LE CHIFFRE VIENT D UN CALCUL, PAS DU GOÛT. Le pire cas
+           du panneau de droite : titre 70 + nom 70 + case 30 + mot de passe 70 +
+           message d erreur 90 + casse-tête 196 + bouton 45 + pastille 45 + ligne de
+           message 30 = 646, plus 88 de marge intérieure = 734. Le panneau de gauche
+           en demande 492. 900 laisse donc respirer les deux — et sa capture du
+           2026-09-10 montrait exactement ce que 660 coupait : le bas du casse-tête
+           et la troisième ligne de la liste de sécurité.
+           ⚠ Le minimum descend à 620 : sous cette hauteur le panneau du formulaire
+           DÉFILE (voir le CSS de la fenêtre) au lieu d être coupé. */
+        { width: 1180, height: 900, minWidth: 860, minHeight: 620 });
       /* ⚠ AU PREMIER PLAN, mais PAS << toujours au-dessus >>. C est la porte : on
          doit la voir. Mais la clouer au-dessus de tout empêcherait de consulter
          quoi que ce soit d autre pendant qu on cherche son mot de passe. */

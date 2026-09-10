@@ -7,7 +7,7 @@
  * tu gardes le plus possible notre interface actuelle mais en natif ».
  *
  * ⚠⚠ LE CSS N'A PAS ÉTÉ RETAPÉ, IL A ÉTÉ EXTRAIT. Les 7 500 caractères de
- * `CSS_WEB` sortent tels quels de `_loginCSS` dans `assets/js/staff.js`, lus par
+ * CSS_WEB sortent tels quels de _loginCSS dans assets/js/staff.js, lus par
  * un script qui a évalué la concaténation. Retaper 71 blocs de règles à la main
  * aurait donné une ressemblance, pas l'écran — et sa demande dit « garder LE PLUS
  * POSSIBLE notre interface actuelle ». Halos violets animés, plaque de logo en
@@ -20,21 +20,21 @@
  * le casse-tête à glissière, qui dans le web est dessiné par des styles en ligne
  * plutôt que par cette feuille.
  *
- * ⚠⚠ ELLE NE DÉCIDE RIEN — même discipline que `inactivite.js`, et elle compte
+ * ⚠⚠ ELLE NE DÉCIDE RIEN — même discipline que inactivite.js, et elle compte
  * double ici. La limitation de débit, le verrou de quinze minutes, le TOTP,
  * l'ouverture de session, le contrôle géographique et le journal restent dans la
- * page, derrière les cœurs `Staff.connexion*`. Cette fenêtre saisit deux champs,
+ * page, derrière les cœurs Staff.connexion*. Cette fenêtre saisit deux champs,
  * peint un message qu'on lui donne, et rend la main. Une seconde
  * implémentation de l'authentification dans la coquille serait une seconde
  * surface à tenir à jour, et celle qu'on oublierait serait celle qui garde la
  * porte.
  *
  * ⚠ MÊME LE TEXTE DU REFUS VIENT DE LA PAGE. « Il vous reste 2 tentatives avant
- * un verrouillage de 15 minutes » se calcule depuis `RateLimit` ; le composer ici
+ * un verrouillage de 15 minutes » se calcule depuis RateLimit ; le composer ici
  * obligerait cette fenêtre à connaître LOCK_MAX et l'état du verrou. On reçoit le
  * texte ET le ton (rouge / orange / sombre), et on peint.
  *
- * ⚠ TROIS ÉCRANS, ET AUCUN NE SE RAFRAÎCHIT SOUS LES DOIGTS : connexion, code à
+ * ⚠ SIX ÉCRANS, ET AUCUN NE SE RAFRAÎCHIT SOUS LES DOIGTS : connexion, code à
  * six chiffres, mot de passe oublié. C'est la leçon de la 5.3.0 — un formulaire
  * dans un écran qui se redessine perd la frappe en cours. Seule la BANNIÈRE de
  * maintenance se relit (20 s), et elle est hors du formulaire.
@@ -46,7 +46,7 @@
 
 const { JS_DIRE } = require('./socle.js');
 
-/* Extrait de `_loginCSS` (assets/js/staff.js) — ne pas modifier à la main : si
+/* Extrait de _loginCSS (assets/js/staff.js) — ne pas modifier à la main : si
    l'écran web change, réextraire. */
 const CSS_WEB = `
 .admlogin-root{min-height:100vh;background:var(--al-bg);-webkit-font-smoothing:antialiased}.admlogin-split{display:flex;min-height:100vh;align-items:stretch}.admlogin-brand{position:relative;flex:1 1 46%;display:flex;flex-direction:column;justify-content:center;padding:3.5rem 3.2rem;overflow:hidden;color:var(--al-title)}.admlogin-orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.5;z-index:0;pointer-events:none;will-change:transform}.admlogin-orb.o1{width:360px;height:360px;background:var(--al-logoG);top:-80px;left:-60px;animation:al-f1 17s ease-in-out infinite}.admlogin-orb.o2{width:300px;height:300px;opacity:0.42;background:linear-gradient(135deg,#7c5cff,#4338ca);bottom:-70px;right:6%;animation:al-f2 21s ease-in-out infinite}.admlogin-orb.o3{width:220px;height:220px;opacity:0.4;background:linear-gradient(135deg,#a855f7,#6d28d9);top:40%;right:-50px;animation:al-f3 25s ease-in-out infinite}.admlogin-brand::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(115deg,rgba(6,4,16,0.55) 0%,rgba(6,4,16,0.34) 46%,rgba(6,4,16,0.14) 100%);pointer-events:none}.admlogin-brand::after{content:'';position:absolute;inset:0;z-index:1;background:radial-gradient(85% 62% at 16% 12%,rgba(255,255,255,0.10),transparent 55%);pointer-events:none}.admlogin-brand-inner{position:relative;z-index:2;max-width:460px}.admlogin-logo-badge{width:74px;height:74px;border-radius:19px;display:inline-flex;align-items:center;justify-content:center;font:800 2rem/1 Georgia,serif;color:#fff;margin:0 0 1.5rem;box-shadow:0 14px 34px rgba(0,0,0,0.34)}.admlogin-logo-plate{position:relative;display:inline-block;padding:1.8rem 2.4rem;margin:0 0 1.9rem;animation:al-logofloat 7s ease-in-out infinite}.admlogin-logo-plate::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(118% 135% at 50% 48%,rgba(248,242,233,0.55) 0%,rgba(233,219,200,0.32) 42%,rgba(233,219,200,0) 76%);filter:blur(13px)}.admlogin-logo-img{position:relative;z-index:1;display:block;margin:0 auto}.admlogin-brand h1{font-family:Georgia,serif;font-size:2.15rem;font-weight:800;margin:0 0 0.9rem;line-height:1.12;letter-spacing:0.01em}.admlogin-eyebrow{display:flex;align-items:center;gap:0.9rem;margin:0 0 2.4rem;text-transform:uppercase;letter-spacing:0.26em;font-size:0.8rem;font-weight:600;color:var(--al-sub)}.admlogin-eyebrow .al-line{flex:0 0 auto;height:2px;width:42px;border-radius:2px;background:linear-gradient(90deg,#C49A6C,rgba(196,154,108,0.08))}.admlogin-eyebrow span:last-child{white-space:nowrap}.admlogin-feats{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1.05rem}.admlogin-feat{display:flex;align-items:center;gap:0.9rem;font-size:0.9rem;line-height:1.4;font-weight:500;color:rgba(243,237,227,0.95)}.admlogin-feat .al-ic{flex:0 0 auto;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.28)}.admlogin-form-panel{flex:1 1 54%;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#faf8f5;padding:2.75rem 2rem;overflow-y:auto}.admlogin-formwrap{width:100%;max-width:400px;animation:al-rise 0.6s cubic-bezier(0.16,0.84,0.44,1) both}.admlogin-formwrap input,.admlogin-formwrap select{transition:border-color 0.18s ease,box-shadow 0.18s ease}.admlogin-formwrap button[type=submit]{transition:transform 0.14s ease,box-shadow 0.24s ease,filter 0.2s ease}.admlogin-formwrap button[type=submit]:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(26,18,7,0.26);filter:brightness(1.06)}.admlogin-formwrap button[type=submit]:active{transform:translateY(0);filter:brightness(0.98)}.admlogin-back{display:inline-flex;align-items:center;gap:0.45rem;padding:0.5rem 1.1rem;border-radius:99px;background:rgba(196,154,108,0.09);border:1px solid rgba(196,154,108,0.3);color:#7d5f3c;font-family:inherit;font-size:0.8rem;font-weight:600;text-decoration:none;cursor:pointer;transition:background 0.18s ease,border-color 0.18s ease,transform 0.18s ease,box-shadow 0.18s ease}.admlogin-back:hover{background:rgba(196,154,108,0.17);border-color:rgba(196,154,108,0.5);transform:translateX(-3px);box-shadow:0 4px 14px rgba(196,154,108,0.2)}.admlogin-back:active{transform:translateX(0)}.admlogin-forgot{display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1.1rem;border-radius:99px;background:rgba(196,154,108,0.09);border:1px solid rgba(196,154,108,0.3);color:#7d5f3c;font-family:inherit;font-size:0.8rem;font-weight:600;text-decoration:none;cursor:pointer;transition:background 0.18s ease,border-color 0.18s ease,transform 0.18s ease,box-shadow 0.18s ease}.admlogin-forgot:hover{background:rgba(196,154,108,0.17);border-color:rgba(196,154,108,0.5);transform:translateY(-2px);box-shadow:0 6px 16px rgba(196,154,108,0.22)}.admlogin-forgot:active{transform:translateY(0)}@keyframes al-f1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(36px,46px) scale(1.08)}}@keyframes al-f2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-34px) scale(1.06)}}@keyframes al-f3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(28px,-30px) scale(1.1)}}@keyframes al-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}@keyframes al-logofloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}@media (max-width:860px){.admlogin-split{flex-direction:column}.admlogin-brand{flex:0 0 auto;padding:2.5rem 1.5rem 2.1rem;text-align:center;align-items:center}.admlogin-brand-inner{max-width:none;display:flex;flex-direction:column;align-items:center}.admlogin-brand h1{font-size:1.7rem}.admlogin-eyebrow{justify-content:center;margin-bottom:0.4rem}.admlogin-logo-plate{padding:1.2rem 1.5rem}.admlogin-feats{gap:0.65rem;margin-top:0.3rem;align-items:flex-start;text-align:left}.admlogin-feat{font-size:0.82rem}.admlogin-feat .al-ic{width:34px;height:34px;border-radius:10px}.admlogin-form-panel{flex:1 1 auto;padding:2.1rem 1.3rem 2.8rem}}@media (prefers-reduced-motion:reduce){.admlogin-orb,.admlogin-formwrap,.admlogin-logo-plate{animation:none}}.admlogin-maint{width:100%;max-width:400px;margin:0 auto 1.35rem;padding:0.85rem 1rem;border-radius:12px;background:#fdf4e3;border:1px solid rgba(180,120,20,0.3);box-shadow:0 6px 18px rgba(120,80,10,0.1);animation:al-rise 0.5s cubic-bezier(0.16,0.84,0.44,1) both}.admlogin-maint .amt{display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:700;color:#6b4a06;margin:0 0 0.3rem}.admlogin-maint .amd{font-size:0.8rem;line-height:1.5;color:#5b4a33}.admlogin-nipbox{width:100%;max-width:400px;margin:0 auto 1.35rem;padding:0.9rem 1rem;border-radius:12px;background:#f3f0ea;border:1px solid rgba(196,154,108,0.4)}.admlogin-nipbox .npt{font-size:0.82rem;font-weight:700;color:#4a3a20;margin:0 0 0.5rem}.admlogin-nipbox .npm{font-size:0.76rem;line-height:1.45;color:#8a5a2a;margin:0.45rem 0 0;min-height:1.05rem}.admlogin-nipbox input{width:100%;padding:0.6rem 0.75rem;border-radius:8px;border:1px solid rgba(196,154,108,0.45);background:#fff;color:#2a2216;font:600 1.05rem/1 ui-monospace,Consolas,monospace;letter-spacing:0.35em;text-align:center}.admlogin-nipbox .npr{display:flex;gap:0.5rem;margin-top:0.6rem}.admlogin-nipbox .npr button{flex:1 1 0;padding:0.5rem 0.7rem;border-radius:8px;border:1px solid rgba(196,154,108,0.4);background:rgba(196,154,108,0.12);color:#6b4a20;font:600 0.78rem/1.2 inherit;cursor:pointer}.admlogin-nipbox .npr button:disabled{opacity:0.5;cursor:default}
@@ -60,11 +60,12 @@ const CSS_FEN = `
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{overflow:hidden;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-/* La fenetre EST le cadre : la racine remplit, et c est le panneau de
-   formulaire qui defile si l ecran est court - jamais la fenetre entiere. */
-.admlogin-root{height:100%;min-height:0}
+.admlogin-root{height:100%;min-height:0;overflow:hidden}
 .admlogin-split{height:100%;min-height:0}
-.admlogin-form-panel{min-height:0}
+.admlogin-brand{min-height:0}
+.admlogin-form-panel{min-height:0;overflow-y:auto}
+.admlogin-form-panel{justify-content:flex-start}
+.admlogin-formwrap{margin:auto 0}
 /* Le casse-tete a glissiere. Dans le web il est habille de styles en ligne ;
    ici il a ses regles, et elles disent la meme chose. */
 #sl-captcha{margin-bottom:1.25rem}
@@ -140,10 +141,39 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
 .cx-msg{width:100%;max-width:400px;margin:0.9rem auto 0;min-height:1.1rem;text-align:center}
 .cx-msg .msg{font-size:0.76rem;color:#7a6652;line-height:1.4}
 .cx-msg .msg.err{color:#b91c1c}.cx-msg .msg.bon{color:#166534}.cx-msg .msg.att{color:#9a3412}
+/* Les trois ecrans de la SUITE : code a six chiffres, mot de passe impose,
+   questions de securite. */
+.cx-etape{background:#faf6f0;border:1px solid rgba(196,154,108,0.25);
+  border-radius:10px;padding:1rem;margin-bottom:1rem}
+.cx-etl{font-size:0.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.08em;color:#836850;margin-bottom:0.5rem}
+.cx-etc{font-size:0.8rem;color:#5a4a3a;line-height:1.6}
+.cx-qr{text-align:center;margin:0.5rem 0 0.4rem}
+.cx-qr img{width:164px;height:164px;border-radius:8px;
+  border:2px solid rgba(196,154,108,0.35)}
+.cx-cle{background:rgba(196,154,108,0.08);border:1px solid rgba(196,154,108,0.3);
+  border-radius:6px;padding:0.6rem;text-align:center}
+.cx-cle code{font:0.88rem/1.4 ui-monospace,Consolas,monospace;letter-spacing:0.15em;
+  color:#3d2810;word-break:break-all}
+.cx-cle .fine{font-size:0.68rem;color:#6b5a48;margin-top:0.25rem;line-height:1.4}
+.cx-cle button{margin-top:0.5rem;padding:0.35rem 0.8rem;border-radius:99px;
+  border:1px solid rgba(196,154,108,0.45);background:rgba(196,154,108,0.14);
+  color:#6b4a20;font:600 0.74rem/1.2 inherit;cursor:pointer}
+.cx-exig{list-style:none;padding:0;margin:0.5rem 0 0;display:flex;
+  flex-wrap:wrap;gap:0.35rem}
+.cx-exig li{font-size:0.7rem;color:#6b5a48;background:rgba(196,154,108,0.1);
+  border:1px solid rgba(196,154,108,0.25);border-radius:99px;padding:0.15rem 0.55rem}
+select{width:100%;box-sizing:border-box;padding:0.7rem 1rem;
+  background:rgba(255,255,255,0.82);border:1.5px solid rgba(196,154,108,0.35);
+  border-radius:8px;color:#1a1207;font:0.9rem/1.5 inherit;outline:none;cursor:pointer}
+select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
+.cx-bloc{margin-bottom:1rem}
+.admlogin-formwrap.large{max-width:460px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-function pageConnexion() {
+function pageConnexion(depart) {
+  var _dep = String(depart || '').replace(/[^a-zA-Z]/g, '');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>Connexion</title>
 <style>${CSS_WEB}${CSS_FEN}</style></head><body>
@@ -160,6 +190,8 @@ ${JS_DIRE}
   var MAINT = null;        // dernier etat de maintenance connu
   var MAINT_T = null;
   var MFA_T = null, MFA_FIN = 0;
+  var CTX_Q = null;        // les questions de securite, pour les listes croisees
+  var DEPART = '${_dep}';
 
   function esc(v){
     return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -323,6 +355,235 @@ ${JS_DIRE}
       + '</div></div>';
   }
 
+  /* ══ ① LA CONFIGURATION DU CODE A SIX CHIFFRES ═════════════════════════════
+     ⚠⚠ LA CLE MANUELLE EST MISE EN AVANT, PAS EN REPLI, ET C EST DELIBERE. Le QR
+     est construit par un service TIERS (api.qrserver.com) avec l URI otpauth
+     COMPLETE dans l URL — donc le secret TOTP en clair, chez quelqu un d autre.
+     C est le comportement de l ecran web depuis toujours, et le porter ne
+     l aggrave pas ; mais la cle tapee a la main NE SORT PAS DU POSTE, alors on la
+     montre comme une voie normale et non comme un dernier recours.
+     ⚠ Le vrai remede — dessiner le QR sur place, sans reseau — est un chantier a
+     part, et il est signale : un QR subtilement faux ne se voit pas, et il
+     enfermerait dehors le compte qu on essaie justement de configurer. */
+  function ecranMfaConfig(d){
+    return '<div>'
+      + '<div style="margin-bottom:1.3rem">'
+      + '<div class="cx-titre">Authentification à deux facteurs</div>'
+      + '<div class="cx-sous">Bonjour ' + esc(d.prenom) + ' — votre administrateur exige '
+      + 'cette configuration avant l’accès au panneau.</div>'
+      + '</div>'
+      + '<div class="cx-etape">'
+      + '<div class="cx-etl">Étape 1 — une application TOTP</div>'
+      + '<div class="cx-etc">Installez <strong>Google Authenticator</strong>, '
+      + '<strong>Authy</strong> ou toute application TOTP sur votre téléphone.</div>'
+      + '</div>'
+      + '<div class="cx-etape">'
+      + '<div class="cx-etl">Étape 2 — la clé</div>'
+      + '<div class="cx-cle"><code id="wz-cle">' + esc(d.secretGroupe) + '</code>'
+      + '<div class="fine">SHA-1 · 6 chiffres · 30 s — cette clé ne quitte pas ce poste.</div>'
+      + '<button type="button" id="wz-copier">Copier la clé</button></div>'
+      + '<div class="cx-etc" style="margin-top:0.7rem">Ou scannez le code ci-dessous, '
+      + 'produit par un service externe.</div>'
+      + '<div class="cx-qr"><img id="wz-qr" src="' + esc(d.qrUrl) + '" alt="Code QR"></div>'
+      + '<div class="cx-err" id="wz-qr-err">Code QR indisponible — utilisez la clé ci-dessus.</div>'
+      + '</div>'
+      + '<div class="cx-etape">'
+      + '<div class="cx-etl">Étape 3 — confirmez</div>'
+      + '<form id="cx-form-wz">'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="wz-code">Code à 6 chiffres</label>'
+      + '<input type="text" id="wz-code" inputmode="numeric" maxlength="6" '
+      + 'autocomplete="one-time-code" required placeholder="000000">'
+      + '</div>'
+      + '<div class="cx-err" id="wz-err"></div>'
+      + '<button type="submit" class="cx-btn" id="wz-btn" style="' + btnStyle() + '">'
+      + 'Activer et accéder au panneau</button>'
+      + '</form></div>'
+      + '<div class="cx-centre">'
+      + '<button type="button" class="admlogin-back" id="wz-annuler">← Annuler</button>'
+      + '</div></div>';
+  }
+
+  /* ══ ② LE CHANGEMENT DE MOT DE PASSE IMPOSE ════════════════════════════════
+     ⚠ LES EXIGENCES VIENNENT DE LA POLITIQUE, pas d un texte fige : elle est
+     configurable, et une liste ecrite en dur mentirait des qu on la change. */
+  function ecranMdp(d){
+    var ex = (d.exigences || []).map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('');
+    return '<div>'
+      + '<div style="margin-bottom:1.5rem">'
+      + '<div class="cx-titre">Changement de mot de passe requis</div>'
+      + '<div class="cx-sous">Bienvenue ' + esc(d.prenom) + ' — définissez votre mot de '
+      + 'passe avant d’accéder au panneau.</div>'
+      + (ex ? ('<ul class="cx-exig">' + ex + '</ul>') : '')
+      + '</div>'
+      + '<form id="cx-form-mdp">'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="pc-pw1">Nouveau mot de passe</label>'
+      + '<input type="password" id="pc-pw1" class="padd" autocomplete="new-password" required>'
+      + '</div>'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="pc-pw2">Confirmer le mot de passe</label>'
+      + '<input type="password" id="pc-pw2" autocomplete="new-password" required>'
+      + '</div>'
+      + '<div class="cx-err" id="pc-err"></div>'
+      + '<button type="submit" class="cx-btn" id="pc-btn" style="' + btnStyle() + '">'
+      + 'Enregistrer et accéder</button>'
+      + '</form>'
+      + '<div class="cx-centre">'
+      + '<button type="button" class="admlogin-back" id="pc-annuler">← Retour à la connexion</button>'
+      + '</div></div>';
+  }
+
+  /* ══ ③ LES QUESTIONS DE SECURITE ═══════════════════════════════════════════
+     ⚠ LES DEUX LISTES S EXCLUENT L UNE L AUTRE, ET SE LIBERENT. La question
+     choisie d un cote disparait de l autre, et REAPPARAIT des qu on la relache.
+     Sans ce second temps, changer d avis laisserait une question introuvable. */
+  function ecranQuestions(d){
+    var qs = d.questions || [];
+    var opts = function(exclu, sel){
+      var o = '<option value="">— Choisir une question —</option>';
+      for (var i = 0; i < qs.length; i++) {
+        if (exclu && qs[i] === exclu) continue;
+        o += '<option value="' + esc(qs[i]) + '"'
+          + (qs[i] === sel ? ' selected' : '') + '>' + esc(qs[i]) + '</option>';
+      }
+      return o;
+    };
+    return '<div>'
+      + '<div style="margin-bottom:1.4rem">'
+      + '<div class="cx-titre">Questions de sécurité</div>'
+      + '<div class="cx-sous">' + esc(d.prenom) + ', choisissez deux questions. Elles servent '
+      + 'à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.</div>'
+      + '</div>'
+      + '<form id="cx-form-q">'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="sq-q1">Question 1</label>'
+      + '<select id="sq-q1" required>' + opts('', '') + '</select>'
+      + '</div>'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="sq-a1">Réponse 1</label>'
+      + '<input type="text" id="sq-a1" autocomplete="off" required>'
+      + '</div>'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="sq-q2">Question 2</label>'
+      + '<select id="sq-q2" required>' + opts('', '') + '</select>'
+      + '</div>'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="sq-a2">Réponse 2</label>'
+      + '<input type="text" id="sq-a2" autocomplete="off" required>'
+      + '</div>'
+      + '<div class="cx-err" id="sq-err"></div>'
+      + '<button type="submit" class="cx-btn" id="sq-btn" style="' + btnStyle() + '">'
+      + 'Enregistrer et accéder</button>'
+      + '</form>'
+      + '<div class="cx-centre">'
+      + '<button type="button" class="admlogin-back" id="sq-annuler">← Retour à la connexion</button>'
+      + '</div></div>';
+  }
+
+  /* Les listes s excluent : appele a chaque changement, dans les deux sens. */
+  function questionsAccorder(){
+    var s1 = el('sq-q1'), s2 = el('sq-q2');
+    if (!s1 || !s2) return;
+    var refaire = function(cible, autre){
+      var garde = cible.value;
+      var exclu = autre.value;
+      var o = '<option value="">— Choisir une question —</option>';
+      var qs = (CTX_Q && CTX_Q.questions) || [];
+      for (var i = 0; i < qs.length; i++) {
+        if (exclu && qs[i] === exclu) continue;
+        o += '<option value="' + esc(qs[i]) + '"'
+          + (qs[i] === garde ? ' selected' : '') + '>' + esc(qs[i]) + '</option>';
+      }
+      cible.innerHTML = o;
+      cible.value = garde;
+    };
+    refaire(s1, s2);
+    refaire(s2, s1);
+  }
+
+  /* ══ LES TROIS ENVOIS ══════════════════════════════════════════════════════
+     ⚠ CHACUN REND UN suite NOMME, et c est ce qui permet d enchainer les trois
+     ecrans SANS quitter cette fenetre — sa demande du 2026-09-10 : << il faut
+     integrer ca dans la meme fenetre >>. Le mot de passe peut mener aux
+     questions, les questions aux deux facteurs, et n importe lequel au panneau :
+     un seul aiguillage, suivre, plutot que trois enchainements ecrits a la
+     main qui finiraient par diverger. */
+  function suivre(r){
+    if (r.suite === 'questions')  { chargerQuestions(); return; }
+    if (r.suite === 'mfaConfig')  { chargerMfaConfig(); return; }
+    if (r.suite === 'motdepasse') { chargerMdp(); return; }
+    reussi(r.prenom);
+  }
+
+  function chargerMfaConfig(){
+    appeler('connexion:mfaConfig').then(function(r){
+      if (!r || !r.ok) { dessiner('login'); apresLogin(); faute('sl-error', r); return; }
+      dessiner('mfaConfig', r);
+    });
+  }
+  function chargerMdp(){
+    appeler('connexion:mdpDonnees').then(function(r){
+      if (!r || !r.ok) { dessiner('login'); apresLogin(); faute('sl-error', r); return; }
+      dessiner('mdp', r);
+    });
+  }
+  function chargerQuestions(){
+    appeler('connexion:questionsDonnees').then(function(r){
+      if (!r || !r.ok) { dessiner('login'); apresLogin(); faute('sl-error', r); return; }
+      CTX_Q = r;
+      dessiner('questions', r);
+    });
+  }
+
+  function mfaConfigEnvoyer(){
+    var c = el('wz-code'), b = el('wz-btn');
+    if (!c || !b) return;
+    fauteEffacer('wz-err');
+    b.disabled = true; b.textContent = 'Vérification…';
+    c.disabled = true;
+    appeler('connexion:mfaConfigConfirmer', [c.value]).then(function(r){
+      if (r.ok) { suivre(r); return; }
+      var c2 = el('wz-code'), b2 = el('wz-btn');
+      if (b2) { b2.disabled = false; b2.textContent = 'Activer et accéder au panneau'; }
+      if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
+      faute('wz-err', r);
+    });
+  }
+
+  function mdpEnvoyer(){
+    var a = el('pc-pw1'), b = el('pc-pw2'), bt = el('pc-btn');
+    if (!a || !b || !bt) return;
+    fauteEffacer('pc-err');
+    bt.disabled = true; bt.textContent = 'Enregistrement…';
+    appeler('connexion:mdpEcrire', [a.value, b.value]).then(function(r){
+      if (r.ok) { suivre(r); return; }
+      var bt2 = el('pc-btn');
+      if (bt2) { bt2.disabled = false; bt2.textContent = 'Enregistrer et accéder'; }
+      faute('pc-err', r);
+      /* ⚠ ON NE VIDE QUE LA CONFIRMATION sur une discordance : effacer les deux
+         obligerait a retaper un mot de passe peut-etre bon. Sur un refus de
+         politique, on ne vide RIEN — la personne doit voir ce qu elle a ecrit
+         pour le corriger. */
+      if (r.motif === 'discordance') { var b3 = el('pc-pw2'); if (b3) { b3.value = ''; b3.focus(); } }
+    });
+  }
+
+  function questionsEnvoyer(){
+    var q1 = el('sq-q1'), a1 = el('sq-a1'), q2 = el('sq-q2'), a2 = el('sq-a2'), b = el('sq-btn');
+    if (!q1 || !a1 || !q2 || !a2 || !b) return;
+    fauteEffacer('sq-err');
+    b.disabled = true; b.textContent = 'Enregistrement…';
+    appeler('connexion:questionsEcrire', [q1.value, a1.value, q2.value, a2.value])
+      .then(function(r){
+        if (r.ok) { suivre(r); return; }
+        var b2 = el('sq-btn');
+        if (b2) { b2.disabled = false; b2.textContent = 'Enregistrer et accéder'; }
+        faute('sq-err', r);
+      });
+  }
+
+
   /* ══ LE DESSIN ═══════════════════════════════════════════════════════════
      ⚠ SEUL LE PANNEAU DE DROITE CHANGE. La racine et le panneau de marque sont
      ecrits UNE fois (voir marquePanneau) ; ensuite on ne remplace que
@@ -347,9 +608,16 @@ ${JS_DIRE}
     ECRAN = quoi;
     var z = el('cx-corps');
     if (!z) { socle(); z = el('cx-corps'); }
-    if (quoi === 'mfa')        z.innerHTML = ecranMfa(donnee || 60);
-    else if (quoi === 'oubli') z.innerHTML = ecranOubli(donnee);
-    else                       z.innerHTML = ecranLogin();
+    /* ⚠ LA LARGEUR SUIT L ECRAN : les trois assistants sont plus hauts et
+       plus denses que la connexion. */
+    var large = (quoi === 'mfaConfig' || quoi === 'questions');
+    z.className = 'admlogin-formwrap' + (large ? ' large' : '');
+    if (quoi === 'mfa')            z.innerHTML = ecranMfa(donnee || 60);
+    else if (quoi === 'oubli')     z.innerHTML = ecranOubli(donnee);
+    else if (quoi === 'mfaConfig') z.innerHTML = ecranMfaConfig(donnee || {});
+    else if (quoi === 'mdp')       z.innerHTML = ecranMdp(donnee || {});
+    else if (quoi === 'questions') z.innerHTML = ecranQuestions(donnee || {});
+    else                           z.innerHTML = ecranLogin();
     brancher();
   }
 
@@ -388,7 +656,7 @@ ${JS_DIRE}
     var fill = el('cap-fill'), hint = el('cap-hint'), flash = el('cap-flash');
     if (!stage || !bg || !pc || !track || !handle) return;
     var W = Math.max(240, Math.min(360, stage.clientWidth || 320));
-    var H = 120, T = 42;                       // taille de la piece
+    var H = 96, T = 42;                        // taille de la piece
     bg.width = W; bg.height = H; pc.width = W; pc.height = H;
     stage.style.height = H + 'px';
     /* La cible reste loin des deux bords : collee au bord, la piece serait
@@ -511,15 +779,17 @@ ${JS_DIRE}
           faute('sl-error', { message: r.message, ton: 'sombre' });
           return;
         }
-        /* Les ecrans qui n ont pas encore de version native : la page les
-           montre, et cette fenetre se retire. On ne fait PAS semblant de les
-           porter - un assistant a moitie porte s arreterait au milieu. */
-        if (r.suite === 'mfaConfig' || r.suite === 'motdepasse') {
-          szDire('Un écran supplémentaire est requis — il s’ouvre dans la fenêtre principale.');
-          appeler('connexion:ecranWeb', [r.suite]).then(function(){ partir(); });
-          return;
-        }
-        reussi(r.prenom);
+        /* ⚠⚠ TOUT SE PASSE DANS CETTE FENETRE — sa demande du 2026-09-10 :
+           << il faut integrer ca dans la meme fenetre >>. En 5.9.0 ces deux
+           suites partaient vers la fenetre principale, et j avais ecrit qu un
+           assistant a moitie porte s arreterait au milieu. C etait le cas : on
+           entrait ici et on ressortait ailleurs.
+           ⚠ ET IL Y EN AVAIT TROIS, pas deux : le mot de passe impose peut
+           mener aux questions de securite. suivre est le seul aiguillage.
+           ⚠ ON NE FERME PAS LA FENETRE ICI : partir() n arrive plus qu a la
+           reussite finale, dans reussi. La fermer entre deux etapes aurait
+           laisse l assistant sans ecran. */
+        suivre(r);
       });
   }
 
@@ -702,6 +972,48 @@ ${JS_DIRE}
     /* Le seuil du casse-tete depend du NOM D UTILISATEUR : deux comptes sur le
        meme poste n ont pas le meme compte d echecs, et exiger le casse-tete a
        l un parce que l autre s est trompe serait faux dans les deux sens. */
+    /* Les trois assistants de la suite. Chaque element est cherche, et son
+       absence est normale : brancher est appele apres CHAQUE dessin. */
+    var fw = el('cx-form-wz');
+    if (fw) fw.onsubmit = function(e){ e.preventDefault(); mfaConfigEnvoyer(); };
+    var wc = el('wz-code');
+    if (wc) wc.oninput = function(){ wc.value = wc.value.replace(/D/g, '').slice(0, 6); };
+    var wcp = el('wz-copier');
+    if (wcp) wcp.onclick = function(){
+      var z = el('wz-cle');
+      if (!z) return;
+      /* ⚠ LA CLE SE COPIE SANS LES ESPACES : ils sont la pour la LIRE (groupes
+         de quatre), et les applications TOTP refusent la plupart du temps une
+         cle qui en contient. Copier ce qu on voit aurait fait echouer le
+         collage sans dire pourquoi. */
+      var v = String(z.textContent || '').replace(/s+/g, '');
+      try { navigator.clipboard.writeText(v); szDire('Clé copiée (sans les espaces).', 'bon'); }
+      catch (e) { szDire('La copie a échoué — recopiez la clé à la main.', 'att'); }
+    };
+    var wq = el('wz-qr');
+    if (wq) wq.onerror = function(){
+      /* Le QR vient d un service externe : sans reseau, ou si le service est
+         indisponible, on le retire et on renvoie a la cle — qui, elle, est la. */
+      wq.style.display = 'none';
+      var z = el('wz-qr-err');
+      if (z) z.className = 'cx-err on';
+    };
+    var wa = el('wz-annuler');
+    if (wa) wa.onclick = function(){ dessiner('login'); apresLogin(); };
+
+    var fmdp = el('cx-form-mdp');
+    if (fmdp) fmdp.onsubmit = function(e){ e.preventDefault(); mdpEnvoyer(); };
+    var pca = el('pc-annuler');
+    if (pca) pca.onclick = function(){ dessiner('login'); apresLogin(); };
+
+    var fq = el('cx-form-q');
+    if (fq) fq.onsubmit = function(e){ e.preventDefault(); questionsEnvoyer(); };
+    var sq1 = el('sq-q1'), sq2 = el('sq-q2');
+    if (sq1) sq1.onchange = questionsAccorder;
+    if (sq2) sq2.onchange = questionsAccorder;
+    var sqa = el('sq-annuler');
+    if (sqa) sqa.onclick = function(){ dessiner('login'); apresLogin(); };
+
     var idc = el('sl-email');
     if (idc) idc.onchange = function(){
       appeler('connexion:captcha', [idc.value.trim()]).then(function(r){
@@ -746,8 +1058,18 @@ ${JS_DIRE}
       CTX = (r && r.ok && r.theme && r.marque) ? r : REPLI;
       if (CTX === REPLI) szDire('Décor par défaut — la fenêtre principale n’a pas répondu.', 'att');
       socle();
-      dessiner('login');
-      apresLogin();
+      /* ⚠ LE DEPART EST HONORE APRES LE SOCLE, PAS AVANT : les assistants ont
+         besoin du panneau de marque et de la zone de message deja en place. */
+      if (DEPART === 'mfa')            { mfaDemarrer(60); }
+      else if (DEPART === 'mfaConfig') { chargerMfaConfig(); }
+      else if (DEPART === 'mdp')       { chargerMdp(); }
+      else if (DEPART === 'questions') { chargerQuestions(); }
+      else if (DEPART === 'oubli')     {
+        appeler('connexion:oubli').then(function(x){ dessiner('oubli', x); });
+      } else {
+        dessiner('login');
+        apresLogin();
+      }
       /* La banniere se lit tout de suite, puis toutes les vingt secondes :
          assez pour qu une levee se voie dans le temps qu on met a retaper un mot
          de passe, assez lent pour ne peser sur rien. */
