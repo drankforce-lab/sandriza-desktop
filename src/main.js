@@ -3290,6 +3290,11 @@ ipcMain.on('dock:zone', (e, rect) => {
   zoneAncrage = { x: Number(rect.x) || 0, y: Number(rect.y) || 0,
     largeur: Number(rect.largeur) || 0, hauteur: Number(rect.hauteur) || 0 };
   reposerAncrees();
+  /* ⚠ LA VUE DE CONNEXION SUIT LA MÊME ZONE. Elle n est pas dans `ancrees` (elle
+     ne se détache jamais), donc `reposerAncrees` ne la voit pas — il faut la
+     reposer explicitement, sinon elle garde la zone d avant le redimensionnement
+     et la bande de fond réapparaît. */
+  poserVueConnexion();
 });
 ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
   if (!mainWindow || e.sender !== mainWindow.webContents) return false;
@@ -3946,7 +3951,32 @@ let vueConnexion = null;
 
 const poserVueConnexion = () => {
   if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
+  /* ⚠⚠ LA ZONE VIENT DE LA PAGE, PAS D UN CALCUL — SON SIGNALEMENT DU 2026-09-10 :
+     « il y a une zone bleue et le menu est inexistant ». Mon premier jet posait la
+     vue sur TOUT le cadre (`getContentSize()`, x:0 y:0). Deux conséquences, les
+     deux visibles sur sa capture : la vue RECOUVRAIT la barre de menus dessinée
+     par la page (le menu « disparaissait »), et là où elle s arrêtait on voyait le
+     fond de la fenêtre à nu — la zone bleue.
+
+     ⚠⚠ ET CETTE LEÇON ÉTAIT DÉJÀ ÉCRITE, en août, pour les écrans ancrés : « la
+     vue native se peint AU-DESSUS de la page : sa zone doit suivre […] elle
+     RECOUVRE le rail : le menu semble avoir disparu ». J avais recalculé la
+     géométrie ici au lieu de réutiliser `boundsAncrage()`, qui porte cette leçon
+     ET le facteur de zoom. Réinventer un mécanisme, c est recommencer à zéro
+     l apprentissage de ses cas limites.
+
+     ⚠ LE FACTEUR DE ZOOM EST LA MOITIÉ DU PROBLÈME : la page rapporte des pixels
+     CSS, la vue se pose en pixels de périphérique. Avec « Affichage → Zoom », un
+     calcul en `getContentSize()` ne pouvait pas tomber juste. `boundsAncrage()`
+     multiplie déjà — c est exactement pour ça qu il existe.
+
+     ⚠ ET UN REPLI, parce qu une page plus ancienne que cette coquille ne rapporte
+     aucune zone : plein cadre, comme avant. Imparfait (la barre serait couverte)
+     mais utilisable — mieux qu une vue de taille nulle, donc invisible, donc
+     aucun moyen d entrer. */
   try {
+    const b = boundsAncrage();
+    if (b && b.width > 40 && b.height > 40) { vueConnexion.setBounds(b); return; }
     const [w, h] = mainWindow.getContentSize();
     vueConnexion.setBounds({ x: 0, y: 0, width: w, height: h });
   } catch (e) {}

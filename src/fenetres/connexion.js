@@ -113,16 +113,31 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
    peut encore agir ; le sombre annonce un courriel parti, pas un refus. */
 .cx-err.orange{background:#fff7ed;border-color:#fdba74;color:#9a3412}
 .cx-err.sombre{background:#172033;border-color:#C49A6C;color:#f5e6d0}
-.cx-btn{width:100%;padding:0.78rem;border:none;border-radius:8px;
-  font:600 0.9rem/1.5 inherit;cursor:pointer;letter-spacing:0.03em;
-  transition:transform 0.14s,box-shadow 0.24s,filter 0.2s}
-.cx-btn:hover:not(:disabled){transform:translateY(-1px);
-  box-shadow:0 12px 28px rgba(26,18,7,0.26);filter:brightness(1.06)}
-.cx-btn:active:not(:disabled){transform:translateY(0);filter:brightness(0.98)}
-.cx-btn:disabled{opacity:0.7;cursor:wait}
+.cx-btn{width:100%;padding:0.72rem 0.9rem;border-radius:6px;
+  font:600 0.9rem/1.4 inherit;cursor:pointer;letter-spacing:0.02em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.14);
+  transition:background-color 0.12s,box-shadow 0.12s}
+.cx-btn:active:not(:disabled){box-shadow:inset 0 2px 5px rgba(0,0,0,0.32)}
+.cx-btn:disabled{opacity:0.55;cursor:default;box-shadow:none}
+.cx-btn:focus-visible{outline:2px solid #C49A6C;outline-offset:2px}
+.admlogin-formwrap button[type=submit],
+.admlogin-formwrap button[type=submit]:hover{transform:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.14);filter:none}
+.admlogin-formwrap button[type=submit]:active{transform:none;filter:none;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,0.32)}
 .cx-souvenir{margin:-0.25rem 0 1rem;display:flex;align-items:center;gap:0.45rem}
 .cx-souvenir input{width:15px;height:15px;cursor:pointer;accent-color:#C49A6C;color-scheme:light}
 .cx-souvenir label{font-size:0.76rem;color:#7a6652;cursor:pointer;user-select:none}
+.admlogin-forgot,.admlogin-back{border-radius:6px;padding:0.5rem 0.9rem;
+  background:#efe9df;border:1px solid rgba(131,104,80,0.38);color:#5f4a30;
+  box-shadow:none;transition:background-color 0.12s,box-shadow 0.12s}
+.admlogin-forgot:hover,.admlogin-back:hover{background:#e6ddcd;
+  border-color:rgba(131,104,80,0.55);transform:none;box-shadow:none}
+.admlogin-forgot:active,.admlogin-back:active{transform:none;
+  box-shadow:inset 0 2px 4px rgba(90,70,45,0.22)}
+.admlogin-forgot:focus-visible,.admlogin-back:focus-visible{
+  outline:2px solid #C49A6C;outline-offset:2px}
+input:focus{border-color:#C49A6C;box-shadow:0 0 0 1.5px rgba(196,154,108,0.55)}
 .cx-centre{text-align:center;margin-top:0.85rem}
 .cx-chrono{font-size:0.72rem;color:#776654;margin-top:0.5rem}
 .cx-chrono strong{color:#b45309}
@@ -255,9 +270,58 @@ ${JS_DIRE}
       + '</ul></div></aside>';
   }
 
+  /* ⚠ LES ETATS SE CALCULENT, ils ne sont pas choisis : ecrits en dur, ils
+     cesseraient de suivre le theme des la premiere fois qu il change de
+     couleur. k positif eclaircit, negatif assombrit. */
+  function melanger(hex, k){
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+    if (!m) return hex;
+    var n = parseInt(m[1], 16);
+    var c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    return '#' + c.map(function(x){
+      var y = k >= 0 ? x + (255 - x) * k : x * (1 + k);
+      y = Math.max(0, Math.min(255, Math.round(y)));
+      return (y < 16 ? '0' : '') + y.toString(16);
+    }).join('');
+  }
+  function lumi(hex){
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+    if (!m) return 0.5;
+    var n = parseInt(m[1], 16);
+    return (((n >> 16) & 255) * 0.2126 + ((n >> 8) & 255) * 0.7152
+      + (n & 255) * 0.0722) / 255;
+  }
+  /* ⚠⚠ UN APLAT PRIS SUR CELLE DES DEUX COULEURS DU THEME QUI CONTRASTE LE
+     MIEUX avec le texte du bouton — pas la premiere, pas la seconde : celle
+     qui rend le texte lisible. Son theme rend noir → creme, et le texte clair
+     devenait invisible sur la moitie droite (sa capture du 2026-09-10). C est
+     le CONTRASTE qui decide, pas l ordre dans lequel elles arrivent. */
+  function btnFond(){
+    var t = CTX.theme;
+    var txtClair = lumi(t.btnTexte) > 0.5;
+    var a = t.btnFrom, b = t.btnTo;
+    return txtClair ? (lumi(a) <= lumi(b) ? a : b) : (lumi(a) >= lumi(b) ? a : b);
+  }
   function btnStyle(){
     var t = CTX.theme;
-    return 'background:linear-gradient(135deg,' + t.btnFrom + ',' + t.btnTo + ');color:' + t.btnTexte;
+    var fond = btnFond();
+    var clair = lumi(t.btnTexte) > 0.5;
+    return 'background-color:' + fond
+      + ';border:1px solid ' + melanger(fond, clair ? 0.12 : -0.14)
+      + ';color:' + t.btnTexte;
+  }
+  /* Le survol eclaircit un fond sombre et assombrit un fond clair. En JS et
+     non en CSS parce que la couleur vient du theme : une regle :hover ne
+     saurait pas quelle valeur viser sans la recopier. */
+  function btnSurvol(z){
+    if (!z) return;
+    var fond = btnFond();
+    var clair = lumi(CTX.theme.btnTexte) > 0.5;
+    var haut = melanger(fond, clair ? 0.10 : -0.08);
+    z.addEventListener('mouseenter', function(){
+      if (!z.disabled) z.style.backgroundColor = haut;
+    });
+    z.addEventListener('mouseleave', function(){ z.style.backgroundColor = fond; });
   }
 
   /* ══ L ECRAN DE CONNEXION ════════════════════════════════════════════════ */
@@ -945,6 +1009,16 @@ ${JS_DIRE}
      fonctions citees ici existent - une fenetre dont un bouton appelle un nom
      absent << ne fait rien >> au clic, et rien d autre ne l attrape. */
   function brancher(){
+    /* ⚠ LE SURVOL DES BOUTONS PRINCIPAUX SE BRANCHE ICI, apres chaque dessin.
+       La couleur du survol se calcule depuis le theme, donc elle ne peut pas
+       vivre dans une regle CSS : une regle :hover ne saurait pas quelle valeur
+       viser sans la recopier — et une couleur recopiee cesse de suivre le
+       theme des la premiere fois qu il change.
+       ⚠ TOUS les boutons principaux de TOUS les ecrans : la liste est un
+       selecteur, pas une enumeration, sinon un ecran ajoute demain aurait un
+       bouton qui ne reagit plus au survol sans que rien ne le dise. */
+    var prims = document.querySelectorAll('.cx-btn');
+    for (var pi = 0; pi < prims.length; pi++) btnSurvol(prims[pi]);
     var f = el('cx-form');
     if (f) f.onsubmit = function(e){ e.preventDefault(); entrer(); };
     var fm = el('cx-form-mfa');
