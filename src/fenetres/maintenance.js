@@ -195,12 +195,37 @@ function pageMaintenance() {
         + (MX.moi ? '' : '<br><br><strong>Attention :</strong> ce mode a été activé par quelqu’un d’autre. '
             + 'Le lever rouvre les connexions pendant qu’il travaille peut-être dessus.')
         + '</div>'
-        + '<div class="avert">Le mode se lèvera de lui-même au plus tard '
-        + (MX.graceH || 12) + ' h après l’heure de fin annoncée — un blocage sans issue serait '
-        + 'pire que la panne qu’il évite.<br>'
+        /* ══ PROLONGER, SANS RELANCER — sa demande du 2026-09-10 ══════════════
+           « Je préfère que ça se lève automatiquement, et de toute façon si j ai
+           besoin de plus de temps je pourrai en ajouter dans les options du mode
+           exclusif ; fais juste sûr que si je rajoute du temps en prolongeant la
+           période, cela soit effectif sans devoir relancer le mode. »
+           ⚠⚠ TROIS BOUTONS D ABORD, LE CHAMP ENSUITE. Prolonger arrive quand la
+           maintenance déborde — donc les mains dans le moteur, pas dans un
+           formulaire. << +1 h >> est un clic ; retaper une date complète en est
+           dix, et c est le moment où l on en a le moins envie. Le champ reste
+           là pour une heure précise.
+           ⚠ ON CALCULE DEPUIS LA FIN ACTUELLE, PAS DEPUIS MAINTENANT : << +1 h >>
+           veut dire << une heure de plus >>, pas << une heure à partir de ce
+           clic >>. Depuis maintenant, prolonger de 1 h une maintenance qui a
+           encore 40 minutes la RACCOURCIRAIT de 20 minutes.
+           ⚠ ET SI LA FIN EST DÉJÀ PASSÉE, on repart de maintenant : sinon << +1 h >>
+           sur une période finie depuis deux heures rendrait une fin encore dans
+           le passé, donc un refus incompréhensible. */
+        + '<div class="champ"><label for="mx-fin2">Prolonger jusqu’à</label>'
+        + '<input type="datetime-local" id="mx-fin2" value="' + esc(mxLocal(mxBase())) + '"></div>'
+        + '<div class="pieds">'
+        + '<button id="mx-p1" data-h="1">+ 1 h</button>'
+        + '<button id="mx-p2" data-h="2">+ 2 h</button>'
+        + '<button id="mx-p4" data-h="4">+ 4 h</button>'
+        + '<button class="prim" id="mx-prolonger">Prolonger</button>'
+        + '</div>'
+        + '<div class="avert"><strong>Le mode se lève tout seul à l’heure de fin.</strong> '
+        + 'Aucun geste à faire — les connexions rouvrent à la seconde dite, sur tous les '
+        + 'postes, sans que personne ait à fermer ou rouvrir l’application.<br>'
         + 'Depuis l’écran de connexion, <strong>Ctrl + Maj + 0</strong> demande le NIP '
-        + 'et lève la maintenance.</div>'
-        + '<div class="pieds"><button class="dgr" id="mx-lever">Lever le mode</button>'
+        + 'et lève la maintenance immédiatement.</div>'
+        + '<div class="pieds"><button class="dgr" id="mx-lever">Lever maintenant</button>'
         + '<button id="mx-fermer">Fermer</button></div>'
         + '</div>';
       brancher();
@@ -228,10 +253,10 @@ function pageMaintenance() {
       + '<input type="password" id="mx-nip" inputmode="numeric" autocomplete="new-password" '
       + 'maxlength="' + (MX.nipMax || 12) + '"></div>'
       + '<div class="avert"><strong>Notez ce NIP ailleurs.</strong> Il se saisit depuis l’écran '
-      + 'de connexion avec <strong>Ctrl + Maj + 0</strong>, et c’est la seule façon de rouvrir '
-      + 'l’application si plus aucune session n’est ouverte.<br>'
-      + 'Le mode se lèvera de lui-même au plus tard ' + (MX.graceH || 12) + ' h après l’heure '
-      + 'de fin annoncée — un blocage sans issue serait pire que la panne qu’il évite.</div>'
+      + 'de connexion avec <strong>Ctrl + Maj + 0</strong>, et il lève la maintenance '
+      + 'immédiatement.<br>'
+      + '<strong>Le mode se lève tout seul à l’heure de fin</strong> — vous pourrez le '
+      + 'prolonger en cours de route sans le relancer, et sans changer ce NIP.</div>'
       + '<div class="pieds"><button class="prim" id="mx-poser">Activer le mode</button>'
       + '<button id="mx-fermer">Annuler</button></div>'
       + '</div>';
@@ -240,11 +265,45 @@ function pageMaintenance() {
     if (d) d.focus();
   }
 
+  /* La fin depuis laquelle on compte un << +N h >> : la fin annoncée si elle est
+     encore devant, maintenant sinon. Voir la note de l ecran ACTIF. */
+  function mxBase(){
+    var t = MX && MX.fin ? Date.parse(MX.fin) : 0;
+    if (!t || t < Date.now()) t = Date.now();
+    return t + 3600000;          // par defaut, une heure de plus
+  }
+  /* ⚠ « datetime-local » VEUT DE L HEURE LOCALE, PAS DE L ISO UTC. « toISOString() » 
+     rend du Z : le champ afficherait l heure de Greenwich, donc quatre heures de
+     décalage l été à Montréal — et il aurait prolongé dans le passé sans
+     comprendre pourquoi. */
+  function mxLocal(ms){
+    var d = new Date(ms);
+    var p = function(n){ return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+      + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
   function brancher(){
     var p = document.getElementById('mx-poser');
     if (p) p.onclick = poser;
     var l = document.getElementById('mx-lever');
     if (l) l.onclick = lever;
+    var pr = document.getElementById('mx-prolonger');
+    if (pr) pr.onclick = function(){ prolonger(null); };
+    /* Les trois raccourcis POSENT la valeur dans le champ au lieu d envoyer tout
+       de suite : on voit ce qu on va faire avant de le faire, et on peut ajuster
+       de dix minutes sans repartir de zéro. */
+    ['mx-p1', 'mx-p2', 'mx-p4'].forEach(function(id){
+      var b = document.getElementById(id);
+      if (!b) return;
+      b.onclick = function(){
+        var h = parseInt(b.getAttribute('data-h'), 10) || 1;
+        var t = MX && MX.fin ? Date.parse(MX.fin) : 0;
+        if (!t || t < Date.now()) t = Date.now();
+        var c = document.getElementById('mx-fin2');
+        if (c) c.value = mxLocal(t + h * 3600000);
+      };
+    });
     var f = document.getElementById('mx-fermer');
     if (f) f.onclick = function(){ P.fermer(); };
   }
@@ -278,6 +337,32 @@ function pageMaintenance() {
       /* ⚠ LE TABLEAU DE BORD DOIT LE SAVOIR TOUT DE SUITE : c est lui qui porte
          le bouton, et son libelle change avec l etat. Sans cet avis, il
          annoncerait << inactif >> jusqu a sa prochaine ouverture. */
+      try { P.appeler('tableau:rafraichirMaintenance'); } catch (e) {}
+      charger();
+    });
+  }
+
+  function prolonger(){
+    var f = document.getElementById('mx-fin2');
+    if (!f) return;
+    f.classList.remove('manque');
+    if (!f.value) { f.classList.add('manque'); f.focus(); dire('Indiquez la nouvelle heure de fin.', 'att'); return; }
+    if (Date.parse(f.value) <= Date.now()) {
+      f.classList.add('manque'); f.focus();
+      dire('Cette heure est déjà passée.', 'att');
+      return;
+    }
+    var b = document.getElementById('mx-prolonger');
+    if (b) b.disabled = true;
+    dire('Prolongation…');
+    /* ⚠ ON N ENVOIE QUE LA FIN. Le NIP, l initiateur et le compte de tentatives
+       restent ceux du mode en cours — c est tout le sens de << sans devoir
+       relancer >> : le NIP noté ailleurs reste valable. */
+    appeler('maintenance:ecrire',['prolonger', { fin: f.value }]).then(function(r){
+      var b2 = document.getElementById('mx-prolonger');
+      if (b2) b2.disabled = false;
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('Maintenance prolongée. Le NIP n’a pas changé.', 'bon');
       try { P.appeler('tableau:rafraichirMaintenance'); } catch (e) {}
       charger();
     });

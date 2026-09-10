@@ -599,7 +599,7 @@ module.exports = {
         /* Le mode exclusif AU REPOS : le bouton paraît, le panneau reste replié.
            C est l état de tous les jours, et celui que voit un poste ordinaire. */
         'maintenance:etat': { ok: true, actif: false, debut: '', fin: '', message: '',
-          moi: false, graceH: 12, nipMin: 6, nipMax: 12, phrase: '' },
+          moi: false, dureeMaxJ: 30, nipMin: 6, nipMax: 12, phrase: '' },
         'tableau:lire': {
           ok: true,
           annee: 'all',
@@ -662,7 +662,7 @@ module.exports = {
         'maintenance:etat': { ok: true, actif: true,
           debut: '2026-09-09T22:00', fin: '2026-09-10T02:00',
           message: 'Mise à jour du système de facturation.',
-          moi: true, graceH: 12, nipMin: 6, nipMax: 12,
+          moi: true, dureeMaxJ: 30, nipMin: 6, nipMax: 12,
           phrase: 'Une maintenance est en cours : l’application ne sera pas disponible'
             + ' entre mercredi le 9 septembre à 22h00 et jeudi le 10 septembre à 02h00.' },
         'maintenance:ecrire': { ok: true, actif: false },
@@ -6218,7 +6218,7 @@ module.exports = {
       id: '',
       reponses: {
         'maintenance:etat': { ok: true, actif: false, debut: '', fin: '', message: '',
-          moi: false, graceH: 12, nipMin: 6, nipMax: 12, phrase: '' },
+          moi: false, dureeMaxJ: 30, nipMin: 6, nipMax: 12, phrase: '' },
         'maintenance:ecrire': { ok: true, actif: true },
         identite: IDENTITE,
       },
@@ -6234,7 +6234,7 @@ module.exports = {
         'maintenance:etat': { ok: true, actif: true,
           debut: '2026-09-09T22:00', fin: '2026-09-10T02:00',
           message: 'Mise à jour du système de facturation.',
-          moi: false, graceH: 12, nipMin: 6, nipMax: 12,
+          moi: false, dureeMaxJ: 30, nipMin: 6, nipMax: 12,
           phrase: 'Une maintenance est en cours : l’application ne sera pas disponible'
             + ' entre mercredi le 9 septembre à 22h00 et jeudi le 10 septembre à 02h00.'
             + ' Mise à jour du système de facturation.' },
