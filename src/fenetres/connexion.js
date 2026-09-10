@@ -86,7 +86,7 @@ body{overflow:hidden;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,san
 /* Les champs et les etiquettes : memes valeurs que les styles en ligne du web
    (_inputStyle, _labelStyle, _fpErrStyle, _hTitle, _hSub), rassembles en
    regles parce qu ici on n a pas de raison de les repeter sur chaque balise. */
-.cx-lbl{display:block;font-size:0.69rem;font-weight:600;color:#9a7d62;
+.cx-lbl{display:block;font-size:0.69rem;font-weight:600;color:#836850;
   margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em}
 .cx-champ{position:relative}
 .cx-champ .cx-ic{position:absolute;left:0.95rem;top:50%;transform:translateY(-50%);

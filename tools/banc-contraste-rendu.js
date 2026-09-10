@@ -258,6 +258,37 @@ function fenetres() {
       out.push({ nom, fichier: f, fabrique, jeu, cas: i, casNom: (jeu && jeu.nom) || ('cas ' + i) });
     });
   }
+  /* ⚠⚠ UN FILTRE, PARCE QUE << TOUT OU RIEN >> POUSSE A NE RIEN LANCER. Ce banc
+     ouvre Chrome des dizaines de fois : sur le poste de l'utilisateur, il a epuise
+     la memoire et fait TOMBER L'AFFICHAGE — deux ecrans noirs, deux redemarrages
+     en catastrophe. D'ou `-SansRendu` dans verifier.ps1, qui le saute. Resultat
+     mesure le 2026-09-10 : un defaut reel (etiquettes de champ a 3,61:1 dans la
+     fenetre de connexion) n'a ete vu QUE par GitHub, apres un build de huit
+     minutes et une publication perdue.
+     ⚠ Avec `SZ_CONTRASTE_FENETRE=connexion`, on mesure UNE fenetre en quelques
+     secondes et deux ou trois Chrome. C'est la difference entre un controle qu'on
+     saute et un controle qu'on lance : celui qui coute deux minutes ne se lance
+     jamais quand on vient de toucher un seul fichier.
+     ⚠ CE N'EST PAS UNE DISPENSE : le travail `contrastes` de build.yml continue de
+     tout mesurer, sans filtre. Le filtre sert a TROUVER avant de pousser, pas a
+     regarder moins.
+     ⚠ ET IL REFUSE UN FILTRE QUI NE TROUVE RIEN : `SZ_CONTRASTE_FENETRE=conexion`
+     (faute de frappe) rendrait zero scenario, et un banc sur zero scenario dit
+     << tout est bon >>. C'est le pire des verdicts : faux et rassurant. */
+  const FILTRE = String(process.env.SZ_CONTRASTE_FENETRE || '').trim();
+  if (FILTRE) {
+    const gardes = out.filter((x) => x.nom === FILTRE || x.fichier === FILTRE
+      || x.fichier === FILTRE + '.js');
+    if (!gardes.length) {
+      console.log('ECHEC  SZ_CONTRASTE_FENETRE=' + FILTRE + ' ne designe aucune fenetre.');
+      console.log('       Un banc sur zero scenario dirait << tout est bon >> : on refuse.');
+      process.exit(1);
+    }
+    console.log('⚠ FILTRE ACTIF : SZ_CONTRASTE_FENETRE=' + FILTRE + ' — '
+      + gardes.length + ' scenario(s) sur ' + out.length + '. Ce passage ne dit RIEN',
+      'des autres fenetres.');
+    return { liste: gardes, sansJeu };
+  }
   return { liste: out, sansJeu };
 }
 
