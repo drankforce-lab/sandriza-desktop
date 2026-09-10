@@ -3885,6 +3885,147 @@ const ouvrirAdmin = () => {
 //     → installation silencieuse, puis RELANCE automatique de l'application.
 // ⚠ L'installateur est `perMachine` (C:\Program Files) : Windows demandera quand
 // même l'élévation (UAC). Silencieux ne veut pas dire sans autorisation.
+/* ══════════════════════════════════════════════════════════════════════════
+   LE TOAST DE MISE À JOUR, LE REPORT, ET LE REDÉMARRAGE FORCÉ
+   ══════════════════════════════════════════════════════════════════════════
+   Sa demande du 2026-09-09, mot pour mot : « ajoute une notification sous
+   forme de toast dès qu'une nouvelle version est publiée, aussi en donner le
+   choix de l'installer maintenant ou plus tard ; si cette option est choisie
+   alors on doit proposer des heures pour le faire, soit 2 heures plus tard, 4
+   ou 8 ; si une planification est activée alors à l'heure planifiée on donne un
+   message pour le redémarrage de l'application dans 30 sec pour donner le temps
+   à la personne de finaliser ses documents, et on relance l'application par la
+   force ».
+
+   ⚠⚠ CE QUI ÉTAIT LÀ AVANT, ET POURQUOI ÇA NE SUFFISAIT PAS. Une boîte NATIVE
+   d'Electron avec « Redémarrer maintenant » / « Plus tard ». Deux défauts :
+   elle est MODALE (elle interrompt un travail pour une mise à jour qui peut
+   attendre), et « Plus tard » ne signifiait RIEN — aucune suite, aucune
+   échéance. On pouvait donc travailler des semaines sur une version périmée en
+   cliquant « Plus tard » chaque fois.
+
+   ⚠⚠ LE REPORT EST ÉCRIT SUR LE DISQUE (`reglages.majPlanifiee`), PAS EN
+   MÉMOIRE. Huit heures couvrent forcément un redémarrage de l'application : une
+   minuterie en mémoire aurait oublié le report en silence, et la mise à jour ne
+   se serait jamais installée — le défaut d'avant, déguisé en fonctionnalité.
+
+   ⚠⚠ ET macOS N'EST PAS SERVI, à dessein. L'application n'y est pas signée
+   (`identity: null`), donc `electron-updater` n'installe rien et
+   `update-downloaded` ne se déclenche jamais. Planifier un redémarrage qui
+   n'installerait rien serait promettre une mise à jour qui n'arrive pas.
+
+   ⚠ CE QUE JE N'AI PAS PU ÉPROUVER : aucun banc ne fabrique une mise à jour
+   réelle. Le chemin complet — publication, téléchargement, toast, report,
+   compte à rebours, redémarrage — ne se vérifie qu'en publiant une version de
+   plus. C'est son essai, et c'est écrit dans la liste.
+   ══════════════════════════════════════════════════════════════════════════ */
+const MAJ_HEURES = [2, 4, 8];
+/* 30 secondes, comme il l'a demandé — « pour donner le temps de finaliser ses
+   documents ». C'est court, et c'est voulu : un avertissement long finit ignoré,
+   et le redémarrage est de toute façon FORCÉ. */
+const MAJ_GRACE_S = 30;
+let _majMinuterie = null;
+let _majVersionPrete = '';
+
+/* ⚠⚠ ON ATTEND CE QUE LA PAGE RÉPOND, et c'est la correction de mon premier
+   jet. Le code injecté se termine par un marqueur ; si le site est plus ancien
+   que la coquille, `Admin._majPrete` n'existe pas, l'expression rend `false`, et
+   l'appelant SAIT que rien n'a été montré. Se contenter de « l'appel n'a pas
+   levé » aurait donné un repli silencieux : pas de toast, et pas
+   d'installation non plus. */
+const _majPage = async (code) => {
+  try {
+    if (!mainWindow || mainWindow.isDestroyed()) return false;
+    const wc = mainWindow.webContents;
+    if (!wc || wc.isDestroyed()) return false;
+    return !!(await wc.executeJavaScript(code, true));
+  } catch { return false; }
+};
+
+/* ⚠ LE COMPTE À REBOURS SE VOIT, MÊME RÉDUIT DANS LA ZONE DE NOTIFICATION.
+   Sa demande dit « on donne un message […] pour donner le temps de finaliser
+   ses documents » : un message que personne ne voit ne donne aucun temps. On
+   ramène donc la fenêtre devant, et on double d'une notification du système —
+   la fenêtre peut être sur un autre bureau virtuel. */
+const _majCompteARebours = async (version) => {
+  try { montrerAdministration(); } catch {}
+  try {
+    if (Notification.isSupported()) {
+      new Notification({
+        title: 'Redémarrage dans ' + MAJ_GRACE_S + ' secondes',
+        body: 'La version ' + version + ' s’installe. Enregistrez ce qui est ouvert.',
+      }).show();
+    }
+  } catch {}
+  await _majPage('window.Admin && Admin._majCompteARebours'
+    + '? Admin._majCompteARebours(' + litteralJs(String(version)) + ',' + MAJ_GRACE_S + ')'
+    + ': false');
+  /* ⚠⚠ LA COQUILLE COMPTE ELLE-MÊME, ET NE FAIT PAS CONFIANCE À LA PAGE. Si la
+     page ne répond pas (pas chargée, plus ancienne, plantée), le redémarrage
+     doit partir quand même — sinon un report se transformerait en mise à jour
+     jamais installée. La page AFFICHE le compte à rebours ; elle ne le décide
+     pas. */
+  setTimeout(() => {
+    try { installerEtRelancer(autoUpdaterCourant || getUpdater()); } catch {}
+  }, MAJ_GRACE_S * 1000);
+};
+
+/* Armer (ou réarmer au démarrage) la minuterie du report. */
+const _majArmer = () => {
+  clearTimeout(_majMinuterie); _majMinuterie = null;
+  if (process.platform === 'darwin') return;            // voir l'en-tête
+  let p = null;
+  try { p = reglages.get('majPlanifiee') || null; } catch { p = null; }
+  if (!p || !p.quand) return;
+  const t = Date.parse(p.quand);
+  if (!t) { try { reglages.set('majPlanifiee', null); } catch {} return; }
+  const reste = t - Date.now();
+  /* ⚠ UNE ÉCHÉANCE DÉPASSÉE PART TOUT DE SUITE, MAIS PAS DANS LA SECONDE : au
+     démarrage, l'application ouvre sa fenêtre et charge le panneau. Redémarrer
+     pendant ce temps donnerait une suite d'ouvertures dont on ne verrait jamais
+     le message. Dix secondes suffisent à ce que l'écran existe. */
+  if (reste < -21600000) { try { reglages.set('majPlanifiee', null); } catch {} return; }
+  const delai = reste > 0 ? reste : 10000;
+  _majMinuterie = setTimeout(() => {
+    _majMinuterie = null;
+    /* ⚠ ON EFFACE LA PLANIFICATION AVANT D'AGIR. Si le redémarrage échoue ou
+       si l'application est tuée pendant le compte à rebours, une planification
+       restée en place relancerait un compte à rebours à chaque démarrage — une
+       application qui se redémarre en boucle est pire que non mise à jour. */
+    try { reglages.set('majPlanifiee', null); } catch {}
+    _majCompteARebours(String((p && p.version) || ''));
+  }, delai);
+};
+
+/* La proposition : le toast, et son sous-choix d'heures côté page. */
+const _majProposer = async (version) => {
+  if (process.platform === 'darwin') return false;
+  _majVersionPrete = String(version || '');
+  return _majPage('window.Admin && Admin._majPrete'
+    + '? Admin._majPrete(' + litteralJs(_majVersionPrete) + ','
+    + JSON.stringify(MAJ_HEURES) + ')'
+    + ': false');
+};
+
+/* La page répond. `heures` nul ou 0 = installer maintenant. */
+ipcMain.handle('maj:decision', (e, heures) => {
+  const h = parseInt(heures, 10) || 0;
+  if (!h) {
+    try { reglages.set('majPlanifiee', null); } catch {}
+    try { installerEtRelancer(autoUpdaterCourant || getUpdater()); } catch {}
+    return { ok: true, quand: null };
+  }
+  /* ⚠ ON N'ACCEPTE QUE LES TROIS VALEURS PROPOSÉES. Le choix vient de la page,
+     et une page est un document : elle peut envoyer n'importe quoi. Sans cette
+     liste, « 9999 » écrirait une échéance dans onze ans — un report qui ne
+     revient jamais, donc une mise à jour jamais installée. */
+  if (MAJ_HEURES.indexOf(h) < 0) return { ok: false, motif: 'parametre' };
+  const quand = new Date(Date.now() + h * 3600000).toISOString();
+  try { reglages.set('majPlanifiee', { quand, version: _majVersionPrete }); } catch {}
+  _majArmer();
+  return { ok: true, quand, heures: h };
+});
+
 const installerEtRelancer = (autoUpdater) => {
   // ⚠ LE LAISSEZ-PASSER, SANS QUOI LA PROTECTION SE MORD LA QUEUE. Le garde de
   // fermeture bloque tout départ pendant une mise à jour ; or installer EXIGE de
@@ -3896,8 +4037,12 @@ const installerEtRelancer = (autoUpdater) => {
   catch { autoUpdater.quitAndInstall(); }   // repli : mieux vaut l'assistant que rien
 };
 
+/* ⚠ ON RETIENT L'UPDATER, parce que la minuterie du report se déclenche HORS de
+   tout gestionnaire d'événement : elle n'a personne pour le lui passer. */
+let autoUpdaterCourant = null;
 const getUpdater = () => {
   const { autoUpdater } = require('electron-updater');
+  autoUpdaterCourant = autoUpdater;
   if (!getUpdater._wired) {
     getUpdater._wired = true;
     autoUpdater.autoDownload = true;
@@ -3990,16 +4135,21 @@ const getUpdater = () => {
       _majCritique = false;
       majBoutonsFermeture();
 
-      const { response } = await dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        buttons: ['Redémarrer maintenant', 'Plus tard'],
-        defaultId: 0,
-        cancelId: 1,
-        title: 'Mise à jour prête',
-        message: 'La version ' + version + ' est téléchargée.',
-        detail: 'Elle s’installera au redémarrage de l’application.',
-      });
-      if (response === 0) { installerEtRelancer(autoUpdater); }
+      /* ══ LE TOAST REMPLACE LA BOÎTE NATIVE — sa demande du 2026-09-09 ═══════
+         ⚠ La boîte native était MODALE : elle interrompait le travail pour une
+         mise à jour qui peut attendre. Et son « Plus tard » ne menait à rien —
+         aucune suite, aucune échéance. Le toast propose, le travail continue
+         derrière, et « Plus tard » demande MAINTENANT quand.
+         ⚠ SI LA PAGE NE MONTRE RIEN, ON INSTALLE. C'est le raisonnement déjà
+         écrit plus haut pour la porte de progression : à cet instant personne ne
+         travaille dans l'administration, rien ne peut être perdu. Ne rien faire
+         laisserait la mise à jour en suspens sans que personne le sache — et
+         `_majProposer` rend faux aussi bien quand la fenêtre est absente que
+         quand le site est plus ancien que la coquille. */
+      if (!(await _majProposer(version))) {
+        if (process.platform === 'darwin') return;   // rien à installer ici
+        installerEtRelancer(autoUpdater);
+      }
     });
 
     autoUpdater.on('error', async (err) => {
@@ -5158,6 +5308,11 @@ if (!app.requestSingleInstanceLock()) {
        ⚠ Le reglage `veilleurAvecApp` est encore lu, a dessein : quelqu un avait
        pu couper la veille, et ce choix reste le sien. */
     if (reglages.get('veilleurAvecApp') !== false) _veilleAttacher();
+
+    /* ⚠⚠ UN REPORT EN COURS SE RÉARME AU DÉMARRAGE, et c'est tout l'intérêt de
+       l'avoir écrit sur le disque. Huit heures couvrent forcément un
+       redémarrage : sans cette ligne, le report serait oublié en silence. */
+    try { _majArmer(); } catch {}
 
     /* ⚠⚠ ET LE MÉNAGE DE L'ANCIENNE ENTRÉE `--veilleur`, À CHAQUE DÉMARRAGE
        (2026-09-09). Il vivait dans trois boutons de l'écran « Veilleur de

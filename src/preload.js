@@ -180,6 +180,11 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // L explorateur de photos, en fenetre a part — il ne remplace PAS le Studio.
   ouvrirExplorateur: () => ipcRenderer.invoke('fenetre:explorateur'),
   ouvrirMaintenance: () => ipcRenderer.invoke('fenetre:maintenance'),
+  /* Le choix de mise à jour : `heures` nul ou 0 = installer maintenant, sinon
+     2, 4 ou 8. ⚠ La coquille REVÉRIFIE la valeur : une page peut envoyer
+     n'importe quoi, et une échéance dans onze ans serait un report qui ne
+     revient jamais. */
+  majDecision: (heures) => ipcRenderer.invoke('maj:decision', heures),
   // L'assistant Produit sur une fiche PRECISE (le << Modifier >> de l'inventaire).
   ouvrirProduitFiche: (id) => ipcRenderer.invoke('fenetre:produit', String(id || '')),
   // Le DETAIL d'une commande dans sa propre fenetre (une par commande).
