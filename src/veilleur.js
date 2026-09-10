@@ -338,8 +338,25 @@ function toast(titre, corps, sonNom) {
    ⚠ Et elle n'est PAS passée par les entrées du menu qui ouvrent l'écran pour
    elles-mêmes (« Ouvrir l'administration », le double-clic) : là, on demande la
    fenêtre, on ne demande pas à voir une commande. Un message y serait du bruit. */
+/* ⚠⚠ UNE RAISON EST UNE CHAINE, ET RIEN D AUTRE — son signalement du
+   2026-09-09 : << quand on clique pour ouvrir l administration a partir de
+   l icone j ai ce message erreur >>, capture d un toast disant
+   << [object Object] >>.
+   CAUSE : cette fonction est passee DIRECTEMENT comme gestionnaire a trois
+   endroits (le sous-menu des notifications, l entree du menu de l icone, le
+   double-clic sur l icone). Electron appelle un `click` avec
+   (menuItem, fenetre, evenement) et un `double-click` avec (evenement,
+   bornes) : `raison` recevait donc un OBJET, et `String(objet)` rend
+   << [object Object] >>, qui partait dans le toast.
+   ⚠ LE GARDE EST ICI, PAS AUX TROIS APPELS. Une fonction utilisee comme
+   gestionnaire doit etre SURE de l etre : corriger les trois appels laisserait
+   le quatrieme, ecrit demain, refaire exactement la meme chose.
+   ⚠ Et ce defaut vit depuis 4.74.0, quand la raison a ete ajoutee. Il etait
+   visible a chaque geste sur l icone, et aucun controle ne regarde ce qu un
+   toast AFFICHE. */
 function ouvrirAdministration(raison) {
-  if (_ouvrirHote) { try { _ouvrirHote(raison); return; } catch {} }
+  var motif = (typeof raison === 'string' && raison) ? raison : '';
+  if (_ouvrirHote) { try { _ouvrirHote(motif); return; } catch {} }
   try { shell.openExternal('https://adm.sandriza.com/'); } catch {}
 }
 

@@ -120,6 +120,21 @@ function pageMaintenance() {
   ${JS_DIRE}
   ${JS_ACTIVITE}
 
+  /* ⚠⚠ CE « dire » MANQUAIT, ET LE BOUTON << Activer le mode >> NE FAISAIT RIEN.
+     Son signalement : << quand je clique sur activer rien ne se passe >>.
+     « poser() » appelle « dire('Activation…') » avant l appel au pont ; « dire » 
+     n etait defini nulle part ici — seul « szDire » existe, fourni par le socle.
+     Le gestionnaire de clic levait donc une ReferenceError et mourait AVANT de
+     rien envoyer. Aucun message, aucune trace : << rien ne se passe >> est la
+     description exacte.
+     ⚠ ET AUCUN CONTROLE NE POUVAIT L ATTRAPER : « node --check » compile (un
+     identifiant libre est licite a la compilation), et le harnais des fenetres
+     n execute que le CHARGEMENT — il ne clique jamais. Mes trois cas de
+     reponses prouvaient que les trois ECRANS se dessinent ; ils ne pouvaient
+     pas prouver qu un bouton fonctionne. Les deux fenetres soeurs (presence,
+     tableau) portent cette meme ligne : je l ai simplement oubliee. */
+  function dire(t, cl){ szDire(t, cl); }
+
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 

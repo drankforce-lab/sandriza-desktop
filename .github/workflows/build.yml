@@ -314,6 +314,12 @@ jobs:
           for f in src/*.js; do node --check "$f"; done
           node tools/banc-executer-page.js
           node tools/verifier-fenetres.js
+          # ⚠ `verifier-fenetres` EXÉCUTE le chargement, jamais un clic : un
+          # gestionnaire de bouton qui appelle une fonction inexistante lui échappe.
+          # C'est arrivé le 2026-09-09 (« quand je clique sur activer rien ne se
+          # passe »). Celui-ci lit la source et exige que tout appel nu vise une
+          # fonction qui existe.
+          node tools/verifier-appels-fenetres.js
           node tools/verifier-mise-en-page.js
           node tools/banc-dossier-exports.js
           node tools/banc-brouillon-garde.js

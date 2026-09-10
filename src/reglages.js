@@ -36,6 +36,14 @@ const DEFAUTS = {
   // collection, de fournisseur), retenues par TYPE. Elles reprennent ainsi leur
   // place d'une fois à l'autre, y compris sur un second écran.
   fenetres: {},
+  /* ⚠⚠ LA PLANIFICATION DE MISE À JOUR VIT ICI, ET C'EST OBLIGATOIRE.
+     Sa demande du 2026-09-09 : reporter l'installation de 2, 4 ou 8 heures.
+     Une minuterie en mémoire ne survit pas à un redémarrage de l'application —
+     or huit heures en couvrent forcément un. Le report serait alors
+     silencieusement oublié, et la personne travaillerait sur une version
+     périmée en croyant l'avoir seulement reportée.
+     `{ quand: <ISO>, version: '5.5.0' }`, ou `null`. */
+  majPlanifiee: null,
   // Écrans ancrables : état retenu par écran, 'ancre' (défaut) ou 'detache' —
   // « Tout voir » et la barre latérale rouvrent l'écran comme on l'a laissé.
   ancrage: {},

@@ -205,7 +205,14 @@ const quitterVraiment = () => {
    suffit pas si la fenêtre a été RÉDUITE (elle reste dans la barre des tâches),
    et sans `focus()` elle revient derrière la fenêtre active — on croit alors que
    le clic n'a rien fait, ce qui est exactement le défaut qu'il a signalé. */
-const montrerAdministration = (raison) => {
+/* ⚠ DEUX GARDES, ET LE SECOND N EST PAS DE LA REDONDANCE. Celui de
+   `ouvrirAdministration` (veilleur.js) protege la porte de l icone ; celui-ci
+   protege TOUTES les autres — cette fonction est exportee vers le veilleur, et
+   n importe quel appelant futur peut la brancher sur un evenement. C est ici
+   que le texte du toast est fabrique : c est donc ici que la derniere chance de
+   ne pas afficher << [object Object] >> se joue. */
+const montrerAdministration = (raisonEntrante) => {
+  const raison = (typeof raisonEntrante === 'string' && raisonEntrante) ? raisonEntrante : '';
   try {
     if (!mainWindow || mainWindow.isDestroyed()) { createWindow(); return; }
     if (mainWindow.isMinimized()) mainWindow.restore();
