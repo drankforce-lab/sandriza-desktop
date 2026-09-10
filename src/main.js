@@ -1312,7 +1312,23 @@ const createWindow = () => {
       partir('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null');
     });
   });
-  mainWindow.on('closed', () => { mainWindow = null; });
+  /* ⚠⚠ LA VUE DE CONNEXION SUIT LE CADRE — SANS CECI, ELLE NE LE SUIT PAS.
+     Elle est posée en pixels absolus (`setBounds`), pas en pourcentage : agrandir
+     ou maximiser la fenêtre laisserait un écran de connexion figé dans un coin,
+     avec le vieil écran web visible autour. Ce serait EXACTEMENT le défaut de
+     deux écrans empilés qu'il vient de photographier, en pire — car cette fois
+     l'un des deux serait sans cadre.
+     ⚠ `resize` ET `maximize`/`unmaximize` : sur Windows, maximiser n'émet pas
+     toujours `resize` avant que la taille de contenu soit à jour. Les trois
+     appellent la même fonction, qui est idempotente. */
+  mainWindow.on('resize', poserVueConnexion);
+  mainWindow.on('maximize', poserVueConnexion);
+  mainWindow.on('unmaximize', poserVueConnexion);
+  mainWindow.on('enter-full-screen', poserVueConnexion);
+  mainWindow.on('leave-full-screen', poserVueConnexion);
+  /* ⚠ ET ON LA RETIRE AVEC LA FENÊTRE : une vue dont le parent meurt garde son
+     processus de rendu et ses minuteries. */
+  mainWindow.on('closed', () => { connexionRetirer(); mainWindow = null; });
 };
 
 // ── VRAIS BOUTONS D'APPLICATION (barre de menus native) ───────────────────────
@@ -2507,7 +2523,7 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
    sait pas si la coquille est là — dans un navigateur, `sandrizaDesktop`
    n existe pas et l écran web reste seul. */
 ipcMain.handle('fenetre:connexion', () => {
-  try { actionApp('connexion'); return { ok: true }; }
+  try { return { ok: connexionMontrer() }; }
   catch (e) { return { ok: false, motif: 'echec' }; }
 });
 
@@ -2516,11 +2532,8 @@ ipcMain.handle('fenetre:connexion', () => {
    une veille de maintenance qui tourne — et un second mot de passe saisi là
    rouvrirait une session par-dessus la sienne. */
 ipcMain.handle('fenetre:connexionFermer', () => {
-  try {
-    const w = fenetresNatives.get('connexion');
-    if (w && !w.isDestroyed()) w.close();
-    return { ok: true };
-  } catch (e) { return { ok: false, motif: 'echec' }; }
+  try { connexionRetirer(); return { ok: true }; }
+  catch (e) { return { ok: false, motif: 'echec' }; }
 });
 
 ipcMain.handle('fenetre:maintenance', () => {
@@ -3193,7 +3206,18 @@ const PAGES_ANCRABLES = () => ({
 // d ouverture de session — detache, la fenetre principale n aurait qu un fond
 // vide. Il est ancre en permanence ; un etat << detache >> retenu d avant
 // cette regle est ignore.
-const NON_DETACHABLES = new Set(['tableau']);
+/* ⚠⚠ ET LA CONNEXION NON PLUS — sa demande du 2026-09-10 : « la fenêtre de
+   connexion ne doit pas être déancrable, elle doit être ancrée en permanence ».
+   Elle l'est déjà par CONSTRUCTION : `vueConnexion` n'est pas dans la table
+   `ancrees`, donc la boucle de `dock:detacher` ne peut pas la trouver. Mais une
+   protection qui repose sur une ABSENCE est invisible pour qui relit — il
+   suffirait de l'inscrire dans `ancrees` un jour pour qu'elle redevienne
+   détachable, sans que rien ne le signale. Le nom est donc ici AUSSI, là où un
+   lecteur cherche la règle.
+   ⚠ Même raison que le tableau de bord, en plus fort : détachée, la fenêtre
+   principale n'aurait qu'un fond vide — et sur l'écran de CONNEXION, ce fond vide
+   serait la seule chose visible avant d'entrer. */
+const NON_DETACHABLES = new Set(['tableau', 'connexion']);
 /* ⚠ DETACHE PAR DEFAUT (#32). L explorateur de photos n a aucun sens ancre :
    c est justement parce qu il vivait dans la colonne du Studio — etroit,
    vignettes minuscules, aucune place pour l apercu — qu il a fallu l en
@@ -3411,6 +3435,12 @@ ipcMain.on('dock:voiler', (e, visible) => {
 // << Detacher >> — demande par la VUE elle-meme : on DEPLACE la vue dans une
 // BaseWindow, sans recharger : l etat (filtres, saisies, page) voyage avec.
 ipcMain.handle('dock:detacher', (e) => {
+  /* ⚠ LA VUE DE CONNEXION REFUSE, quel que soit le chemin. La boucle ci-dessous
+     ne la trouverait pas aujourd hui (elle n est pas dans `ancrees`), mais ce
+     refus-ci ne dépend pas de cette absence : il regarde QUI demande. */
+  try {
+    if (vueConnexion && e.sender === vueConnexion.webContents) return false;
+  } catch (er) {}
   for (const [c, a] of ancrees) {
     if (!a.view || a.view.webContents !== e.sender || a.fenetre) continue;
     if (NON_DETACHABLES.has(c)) return false;   // le tableau de bord reste ancre
@@ -3884,6 +3914,107 @@ const _bandePorte = (dessus) => {
    `tools/banc-porte-progression.js` les éprouve. */
 const { texteProgression } = require('./porte-progression');
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LA CONNEXION EST UNE VUE DANS LA FENÊTRE PRINCIPALE, PAS UNE FENÊTRE (#65)
+   ═══════════════════════════════════════════════════════════════════════════
+   Ses mots du 2026-09-10, capture à l'appui : « peux-tu mettre la fenêtre de
+   connexion native avec la même taille que la fenêtre web actuelle… de plus je
+   ne veux pas deux fenêtres mais une seule et intégrée dans l'application comme
+   avant ».
+
+   ⚠⚠ IL AVAIT RAISON, ET MON RAISONNEMENT DE 5.9.0 ÉTAIT À MOITIÉ JUSTE. J'avais
+   ouvert une fenêtre PAR-DESSUS pour garder une porte de secours : « la seule
+   surface où un portage raté enfermerait tout le monde dehors ». Le filet était
+   bon ; sa forme était mauvaise. Deux fenêtres empilées montrent deux écrans de
+   connexion, dont un faux — c'est confus, et ça ne rassure personne.
+
+   ⚠ LE FILET SURVIT, SOUS UNE AUTRE FORME : la vue n'est ATTACHÉE qu'après
+   `did-finish-load`. Si la page de connexion ne charge pas, rien ne se pose
+   par-dessus et l'écran web reste visible dessous — la porte de secours est
+   toujours là, simplement invisible tant qu'elle ne sert pas.
+
+   ⚠ POURQUOI PAS LE MÉCANISME D'ANCRAGE EXISTANT (`ancrees`, `zoneAncrage`) :
+   il pose la vue dans un RECTANGLE que le site déclare (`dock:zone`), c'est-à-dire
+   la zone de contenu du panneau d'administration. Avant la connexion, ce panneau
+   n'existe pas et ce rectangle n'a jamais été envoyé. Cette vue-ci couvre le
+   cadre ENTIER — la même taille que l'écran web, exactement ce qu'il demande.
+
+   ⚠ ET UNE SEULE VOIE : `actionApp('connexion')` et `fenetre:connexion` mènent
+   tous deux ici. Deux chemins vers la même fenêtre finissent par diverger, c'est
+   écrit noir sur blanc pour `montrerAdministration`. */
+let vueConnexion = null;
+
+const poserVueConnexion = () => {
+  if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
+  try {
+    const [w, h] = mainWindow.getContentSize();
+    vueConnexion.setBounds({ x: 0, y: 0, width: w, height: h });
+  } catch (e) {}
+};
+
+const connexionMontrer = () => {
+  if (!mainWindow || mainWindow.isDestroyed()) return false;
+  /* Déjà là : on la repose et on la ramène devant plutôt que d'en créer une
+     seconde. C'est le seul endroit qui pouvait produire la pile de fenêtres
+     qu'il a photographiée. */
+  if (vueConnexion) {
+    poserVueConnexion();
+    try { vueConnexion.setVisible(true); vueConnexion.webContents.focus(); } catch (e) {}
+    return true;
+  }
+  let view;
+  try {
+    view = new WebContentsView({ webPreferences: {
+      preload: path.join(__dirname, 'pont-preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
+    } });
+  } catch (e) { return false; }
+  /* UN FOND DÈS LA CRÉATION : sans lui la vue est BLANCHE avant sa première
+     peinture, et un rectangle blanc plein cadre se lit comme une panne. */
+  try { view.setBackgroundColor('#191238'); } catch (e) {}
+  vueConnexion = view;
+  /* ⚠⚠ ATTACHÉE APRÈS LE CHARGEMENT, JAMAIS AVANT — c'est là que vit le filet.
+     Attachée d'emblée, une page qui ne charge pas laisserait un rectangle vide
+     par-dessus l'écran de connexion web, donc AUCUN moyen d'entrer. Attachée
+     après, un échec ne cache rien.
+     ⚠ Le filet de 4 s : si `did-finish-load` n'arrive jamais (cas qu'on ne
+     saurait pas nommer), on abandonne la vue plutôt que de la laisser en
+     suspens — l'écran web reste, et on peut se connecter. */
+  let pose = false;
+  const attacher = () => {
+    if (pose) return;
+    pose = true;
+    if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
+    try { mainWindow.contentView.addChildView(vueConnexion); } catch (e) { return; }
+    poserVueConnexion();
+    try { vueConnexion.setVisible(true); vueConnexion.webContents.focus(); } catch (e) {}
+  };
+  try {
+    view.webContents.once('did-finish-load', attacher);
+    view.webContents.once('did-fail-load', () => { pose = true; connexionRetirer(); });
+  } catch (e) {}
+  setTimeout(() => { if (!pose) { pose = true; connexionRetirer(); } }, 4000);
+  try {
+    view.webContents.loadURL('data:text/html;charset=utf-8,'
+      + encodeURIComponent(pageConnexion()));
+  } catch (e) { vueConnexion = null; return false; }
+  return true;
+};
+
+const connexionRetirer = () => {
+  const v = vueConnexion;
+  vueConnexion = null;
+  if (!v) return false;
+  try { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.contentView.removeChildView(v); }
+  catch (e) {}
+  /* ⚠ ON FERME LE CONTENU, on ne se contente pas de détacher la vue : une vue
+     détachée garde son processus de rendu, ses minuteries (la veille de
+     maintenance tourne toutes les 20 s) et son formulaire vivant. C'est
+     exactement ce que la fenêtre détachée risquait de laisser derrière le
+     tableau de bord. */
+  try { v.webContents.close(); } catch (e) {}
+  return true;
+};
 const montrerPorte = (titre, message, progression) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   _bandePorte(true);
@@ -4711,70 +4842,20 @@ const actionApp = (nom, arg) => {
        ⚠ PETITE ET NON REDIMENSIONNABLE EN LARGEUR UTILE : c'est un formulaire de
        quatre champs, pas un tableau. Lui donner la taille d'un écran de liste
        ferait flotter quatre champs au milieu du vide. */
-    /* ══ L ÉCRAN DE CONNEXION EN NATIF (#57) ═══════════════════════════════
-       ⚠⚠ ELLE S OUVRE PAR-DESSUS, ELLE NE REMPLACE PAS. La page continue de
-       dessiner son écran de connexion web dans la fenêtre principale, et c est
-       DÉLIBÉRÉ : si cette fenêtre-ci ne s ouvrait pas (une erreur au dessin, un
-       écran secondaire débranché), il resterait un moyen d entrer. Un portage
-       qui retire l ancienne porte avant d avoir vu la nouvelle s ouvrir peut
-       enfermer tout le monde dehors — et c est la seule fenêtre de
-       l application où ce risque-là existe.
-
-       ⚠ 1000 × 660 : l écran divisé se replie en colonne sous 860 px (règle du
-       CSS extrait). Plus étroit, on perdrait le panneau de marque — c est-à-dire
-       précisément ce qu il demande de garder.
-
-       ⚠ NON REDIMENSIONNABLE, NON, JUSTEMENT : elle l est. Une fenêtre de
-       connexion figée sur un poste à petit écran ne montrerait pas son bouton.
-       Le minimum (760 × 520) laisse le formulaire entier visible même replié. */
-    /* ══ LA MISE À JOUR EN NATIF (#64) ═════════════════════════════════════
-       ⚠⚠ DEUX ÉCRANS, DEUX COMPORTEMENTS DE FENÊTRE, ET C EST LE SUJET.
-       · La PROPOSITION se montre et prend le focus, mais ne se cloue PAS
-         au-dessus : c est exactement la boîte modale retirée le 2026-09-09,
-         « elle interrompait le travail pour une mise à jour qui peut attendre ».
-       · Le DÉCOMPTE, lui, est TOUJOURS AU-DESSUS. Même raisonnement que la
-         fenêtre d inactivité : un avertissement dont la visibilité dépend de
-         l endroit où se trouve une autre fenêtre n est pas un avertissement.
-         Trente secondes derrière une vue détachée, c est zéro seconde.
-
-       ⚠ ON RÉUTILISE LA MÊME FENÊTRE pour les deux écrans (même clé 'maj') :
-       la proposition mène au décompte, et deux fenêtres empilées feraient
-       cohabiter un choix périmé avec un compte à rebours en cours.
-
-       ⚠ L identifiant PORTE l écran ET ses données ('compte|5.11.0|30') parce
-       que le registre ne sait passer qu un argument. Voir l en-tête de
-       `pageMaj`. */
-    case 'maj': {
-      const presse = String(id || '').indexOf('compte') === 0;
-      const winMj = ouvrirNative('maj', presse ? 'Redémarrage imminent' : 'Mise à jour',
-        pageMaj(String(id || '')),
-        { width: 560, height: presse ? 300 : 430, minWidth: 460, minHeight: 260 });
-      try {
-        if (winMj && !winMj.isDestroyed()) {
-          winMj.setAlwaysOnTop(presse, 'screen-saver');
-          winMj.show(); winMj.focus();
-        }
-      } catch (e) {}
-      return;
-    }
-    case 'connexion': {
-      const winCx = ouvrirNative('connexion', 'Connexion', pageConnexion(),
-        /* ⚠ 1180 × 900, ET LE CHIFFRE VIENT D UN CALCUL, PAS DU GOÛT. Le pire cas
-           du panneau de droite : titre 70 + nom 70 + case 30 + mot de passe 70 +
-           message d erreur 90 + casse-tête 196 + bouton 45 + pastille 45 + ligne de
-           message 30 = 646, plus 88 de marge intérieure = 734. Le panneau de gauche
-           en demande 492. 900 laisse donc respirer les deux — et sa capture du
-           2026-09-10 montrait exactement ce que 660 coupait : le bas du casse-tête
-           et la troisième ligne de la liste de sécurité.
-           ⚠ Le minimum descend à 620 : sous cette hauteur le panneau du formulaire
-           DÉFILE (voir le CSS de la fenêtre) au lieu d être coupé. */
-        { width: 1180, height: 900, minWidth: 860, minHeight: 620 });
-      /* ⚠ AU PREMIER PLAN, mais PAS << toujours au-dessus >>. C est la porte : on
-         doit la voir. Mais la clouer au-dessus de tout empêcherait de consulter
-         quoi que ce soit d autre pendant qu on cherche son mot de passe. */
-      try { if (winCx && !winCx.isDestroyed()) { winCx.show(); winCx.focus(); } } catch (e) {}
-      return;
-    }
+    /* ══ L ÉCRAN DE CONNEXION : UNE VUE, PAS UNE FENÊTRE (#57 puis #65) ════
+       ⚠⚠ C ÉTAIT UNE FENÊTRE DÉTACHÉE JUSQU AU 2026-09-10, et sa capture a
+       tranché : « je ne veux pas deux fenêtres mais une seule et intégrée dans
+       l application comme avant ». Elle est maintenant une vue plein cadre dans
+       la fenêtre principale — donc exactement la taille de l écran web qu elle
+       remplace, et il n y a plus qu une fenêtre. Voir `connexionMontrer`.
+       ⚠ Les tailles calculées (1180 × 900) sont devenues sans objet : la vue
+       prend le cadre. Ce qui reste vrai, c est le CSS de la fenêtre — le panneau
+       du formulaire défile si la hauteur ne suffit pas.
+       ⚠ ET LE FILET N A PAS DISPARU, il a changé de forme : la vue ne s attache
+       qu après `did-finish-load`, donc un échec de chargement laisse l écran web
+       visible dessous au lieu de poser un rectangle vide par-dessus la seule
+       porte d entrée. */
+    case 'connexion': { connexionMontrer(); return; }
     case 'maintenance': {
       const _avM = fenetresNatives.get('maintenance');
       const _reuM = !!(_avM && !_avM.isDestroyed());
