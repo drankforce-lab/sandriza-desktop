@@ -6436,6 +6436,35 @@ module.exports = {
     },
   ],
 
+  'maj.js': [
+    {
+      /* La proposition : la version est prête, on choisit. */
+      nom: 'proposition — installer maintenant ou plus tard',
+      id: 'proposition|5.11.0',
+      exige: ['5.11.0', 'id="b-maintenant"', 'id="b-tard"', '2 heures'],
+      reponses: { identite: IDENTITE },
+    },
+    {
+      /* ⚠ LE DÉCOMPTE, ET C EST L ÉCRAN QU ON NE PEUT PAS SE PERMETTRE DE NE
+         JAMAIS DESSINER : il n apparaît qu une fois par mise à jour, au pire
+         moment, et il n a pas de bouton pour se rattraper. */
+      nom: 'décompte — trente secondes avant le redémarrage forcé',
+      id: 'compte|5.11.0|30',
+      exige: ['id="anneau"', 'Redémarrage dans', 'id="b-vite"', '5.11.0'],
+      reponses: { identite: IDENTITE },
+    },
+    {
+      /* ⚠ UN ARGUMENT VIDE : la fenêtre doit retomber sur la proposition, pas
+         rendre un écran nu. Une valeur fautive arrive tôt ou tard (registre
+         appelé sans identifiant, clic de menu), et une fenêtre vide sur une
+         mise à jour se lit comme « rien à installer ». */
+      nom: 'argument vide — repli sur la proposition',
+      id: '',
+      exige: ['id="b-maintenant"'],
+      reponses: { identite: IDENTITE },
+    },
+  ],
+
   'maintenance.js': [
     {
       /* Le cas ordinaire : le mode est éteint, la fenêtre montre le formulaire.

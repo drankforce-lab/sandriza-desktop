@@ -94,6 +94,24 @@ contextBridge.exposeInMainWorld('szPont', {
     return Promise.race([attente, plafond]);
   },
 
+  /* ══ LA DÉCISION DE MISE À JOUR — SA DEMANDE DU 2026-09-10 ════════════════
+     « Installation des mises à jour aussi doit être en natif. »
+     ⚠⚠ POURQUOI ÇA NE PASSE PAS PAR `appeler`. Cette voie-là mène à la fenêtre
+     PRINCIPALE, donc au site et à sa session — et c'est exactement ce dont la
+     mise à jour ne doit PAS dépendre. Le toast qu'elle remplace en dépendait :
+     page pas encore chargée, page plus ancienne que la coquille, page plantée,
+     et dans les trois cas la coquille installait sans rien demander. Une
+     décision de mise à jour appartient à la coquille seule.
+     ⚠ LE CANAL EXISTE DÉJÀ (`maj:decision`) : on l'ouvre à la fenêtre native,
+     on n'en invente pas un second qui divergerait. Le principal filtre la
+     valeur (0 = maintenant, sinon 2, 4 ou 8) — une fenêtre est un document,
+     elle peut envoyer n'importe quoi.
+     ⚠ UN SEUL VERBE, UN SEUL NOMBRE. Pas de « annuler », pas de « repousser
+     encore » : le redémarrage est forcé côté principal, et un verbe qui ne peut
+     rien annuler serait un mensonge dans le pire moment. */
+  majDecision: (heures) => ipcRenderer.invoke('maj:decision', parseInt(heures, 10) || 0)
+    .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e) })),
+
   // Fermer proprement — la fenêtre n'a pas de barre de menu à elle.
   fermer: () => ipcRenderer.send('pont:fermer'),
   /* ⚠ << J'AI UNE SAISIE EN COURS >>. Le bouton de fermeture DESSINÉ dans la page

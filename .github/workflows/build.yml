@@ -320,6 +320,13 @@ jobs:
           # passe »). Celui-ci lit la source et exige que tout appel nu vise une
           # fonction qui existe.
           node tools/verifier-appels-fenetres.js
+          # ⚠ ET CELUI-CI GARDE L AUTRE MOITIE : les appels de MEMBRE vers le
+          # prechargement (`P.majDecision(...)`, `P.fermer()`). `verifier-appels`
+          # ne resout que les noms nus, DANS la fenetre ; ces verbes-la vivent
+          # dans src/pont-preload.js. Provoque le 2026-09-10 : en retirant un
+          # verbe du prechargement, les QUINZE bancs repondaient << tout passe >>,
+          # et le symptome reel etait un bouton << Installer maintenant >> inerte.
+          node tools/verifier-verbes-pont.js
           node tools/verifier-mise-en-page.js
           node tools/banc-dossier-exports.js
           node tools/banc-brouillon-garde.js

@@ -243,6 +243,17 @@ function executerPage(script, reponses, opts) {
       Object.prototype.hasOwnProperty.call(rep, op) ? rep[op] : { ok: true }
     )),
     fermer() {}, pleinEcran: () => surveille(Promise.resolve(false)),
+    /* ⚠ LA DÉCISION DE MISE À JOUR (2026-09-10, #64). Elle ne passe PAS par
+       `appeler` — c est un canal étroit du préchargement, parce qu une mise à
+       jour ne doit pas dépendre du site. Sans ce faux verbe, `P.majDecision`
+       serait `undefined`, la fenêtre prendrait son chemin « indisponible », et
+       le chemin du SUCCÈS — celui où vivent les fautes — ne serait jamais joué.
+       ⚠ Le jeu de réponses peut le piloter sous la clé `maj:decision`, comme
+       n importe quelle opération. Sans réponse prévue : succès. */
+    majDecision: () => surveille(Promise.resolve(
+      Object.prototype.hasOwnProperty.call(rep, 'maj:decision')
+        ? rep['maj:decision'] : { ok: true, quand: null }
+    )),
     surEtatCaisse: () => () => {}, ajusterHauteur() {},
     /* ⚠ LE FAUX GROUPE `veilleur` EST PARTI LE 2026-09-09, avec la fenêtre qu'il
        servait et avec le groupe réel du préchargement. Il n'y a plus une seule

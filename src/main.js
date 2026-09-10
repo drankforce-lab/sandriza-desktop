@@ -3166,6 +3166,7 @@ const PAGES_ANCRABLES = () => ({
   'presence': ['Personnel connecté', () => pagePresence()],
   'maintenance': ['Mode usage exclusif', () => pageMaintenance()],
   'connexion': ['Connexion', () => pageConnexion()],
+  'maj': ['Mise à jour', (id) => pageMaj(id)],
   /* ⚠⚠ « veilleur » A QUITTÉ CE REGISTRE LE 2026-09-09, avec sa fenêtre, son
      entrée de menu et ses sept opérations. Sa demande : « considérant que l'icône
      et l'application font maintenant office de veilleur tout en un tu peut
@@ -3982,21 +3983,23 @@ const MAJ_GRACE_S = 30;
 let _majMinuterie = null;
 let _majVersionPrete = '';
 
-/* ⚠⚠ ON ATTEND CE QUE LA PAGE RÉPOND, et c'est la correction de mon premier
-   jet. Le code injecté se termine par un marqueur ; si le site est plus ancien
-   que la coquille, `Admin._majPrete` n'existe pas, l'expression rend `false`, et
-   l'appelant SAIT que rien n'a été montré. Se contenter de « l'appel n'a pas
-   levé » aurait donné un repli silencieux : pas de toast, et pas
-   d'installation non plus. */
-const _majPage = async (code) => {
-  try {
-    if (!mainWindow || mainWindow.isDestroyed()) return false;
-    const wc = mainWindow.webContents;
-    if (!wc || wc.isDestroyed()) return false;
-    return !!(await wc.executeJavaScript(code, true));
-  } catch { return false; }
-};
-
+/* ⚠⚠ `_majPage` EST PARTI LE 2026-09-10, AVEC LE TOAST QU IL SERVAIT. Il
+   injectait `Admin._majPrete(...)` dans la fenêtre principale et attendait sa
+   réponse — un mécanisme soigné, avec un long commentaire sur pourquoi il fallait
+   ATTENDRE le booléen plutôt que se contenter de « l appel n a pas levé ».
+   ⚠ Ce raisonnement était juste ET il est devenu inutile : la mise à jour ne
+   passe plus par la page du tout (sa demande — « installation des mises à jour
+   aussi doit être en natif »). Une fenêtre native n a besoin que de la coquille.
+   ⚠ LE GARDER « AU CAS OÙ » AURAIT LAISSÉ UNE FONCTION QUE PLUS RIEN N APPELLE,
+   et qu on croirait éprouvée. C est la leçon de la branche « période dépassée »
+   retirée le même jour : du code mort en un jour se retire le jour même.
+   ⚠ CE QUI RESTE DU CÔTÉ SITE, et pourquoi ce n est PAS mort : `Admin._majPrete`
+   et `Admin._majCompteARebours` servent encore aux coquilles PLUS ANCIENNES que
+   ce site. Le site se déploie en une poussée ; une coquille demande un build, une
+   publication et un téléchargement. Retirer le toast maintenant ferait installer
+   SANS RIEN DEMANDER sur tout poste encore en 5.10.0 ou avant — le repli est sûr,
+   mais la surprise ne l est pas. Ils partiront quand plus aucun poste ne portera
+   une version antérieure à 5.11.0. */
 /* ⚠ LE COMPTE À REBOURS SE VOIT, MÊME RÉDUIT DANS LA ZONE DE NOTIFICATION.
    Sa demande dit « on donne un message […] pour donner le temps de finaliser
    ses documents » : un message que personne ne voit ne donne aucun temps. On
@@ -4012,9 +4015,14 @@ const _majCompteARebours = async (version) => {
       }).show();
     }
   } catch {}
-  await _majPage('window.Admin && Admin._majCompteARebours'
-    + '? Admin._majCompteARebours(' + litteralJs(String(version)) + ',' + MAJ_GRACE_S + ')'
-    + ': false');
+  /* ⚠⚠ LA MÊME FENÊTRE, SUR SON SECOND ÉCRAN. Elle est clouée au-dessus ici et
+     seulement ici — voir le cas 'maj' de `actionApp`. La page n est plus
+     sollicitée du tout : c était la dernière chose que le décompte lui
+     demandait, et c était la plus fragile (trente secondes derrière un site qui
+     ne répond pas, ce sont trente secondes que personne ne voit).
+     ⚠ ON N ATTEND PAS SON SUCCÈS : la minuterie ci-dessous part de toute façon.
+     Une fenêtre qui ne s ouvre pas ne doit pas empêcher l installation. */
+  try { actionApp('maj', 'compte|' + String(version) + '|' + MAJ_GRACE_S); } catch (e) {}
   /* ⚠⚠ LA COQUILLE COMPTE ELLE-MÊME, ET NE FAIT PAS CONFIANCE À LA PAGE. Si la
      page ne répond pas (pas chargée, plus ancienne, plantée), le redémarrage
      doit partir quand même — sinon un report se transformerait en mise à jour
@@ -4052,14 +4060,32 @@ const _majArmer = () => {
   }, delai);
 };
 
-/* La proposition : le toast, et son sous-choix d'heures côté page. */
+/* ══ LA PROPOSITION — DANS UNE FENÊTRE NATIVE (sa demande du 2026-09-10) ════
+   « Installation des mises à jour aussi doit être en natif. »
+
+   ⚠⚠ CE N EST PAS QU UN CHANGEMENT DE DÉCOR — ÇA RETIRE TROIS FAÇONS DE NE
+   RIEN MONTRER. Le toast passait par `_majPage`, qui injecte
+   `Admin._majPrete(...)` dans la fenêtre principale : il rendait faux si la
+   page n était pas chargée, si le site était plus ancien que la coquille
+   (`_majPrete` inexistant), ou s il avait planté. Et le repli, écrit plus bas,
+   est « on installe sans rien demander ». Une fenêtre native n a besoin de
+   rien d autre que la coquille.
+
+   ⚠ ON RETOURNE QUAND MÊME UN BOOLÉEN, et l appelant garde son repli : si
+   `ouvrirNative` échoue (écran débranché, mémoire), il vaut mieux installer que
+   laisser une mise à jour en suspens que personne ne voit.
+   ⚠ ET ON VÉRIFIE QUE LA FENÊTRE EXISTE VRAIMENT, pas seulement que l appel n a
+   pas levé : `actionApp` avale ses erreurs, donc « ça n a pas planté » ne veut
+   pas dire « c est affiché ». C est le même défaut que le toast, une couche plus
+   bas — et il aurait été invisible. */
 const _majProposer = async (version) => {
   if (process.platform === 'darwin') return false;
   _majVersionPrete = String(version || '');
-  return _majPage('window.Admin && Admin._majPrete'
-    + '? Admin._majPrete(' + litteralJs(_majVersionPrete) + ','
-    + JSON.stringify(MAJ_HEURES) + ')'
-    + ': false');
+  try {
+    actionApp('maj', 'proposition|' + _majVersionPrete);
+    const w = fenetresNatives.get('maj');
+    return !!(w && !w.isDestroyed());
+  } catch (e) { return false; }
 };
 
 /* La page répond. `heures` nul ou 0 = installer maintenant. */
@@ -4491,6 +4517,7 @@ const { pageVerrous } = require('./fenetres/verrous');
 const { pagePresence } = require('./fenetres/presence');
 const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageConnexion } = require('./fenetres/connexion');
+const { pageMaj } = require('./fenetres/maj');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -4513,7 +4540,14 @@ const reglages = require('./reglages');
 let _modele = { menus: [], taille: 1.15, mode: 'haut', sombre: !!reglages.get('sombre') };
 
 // ── ACTIONS DE L'APPLICATION ─────────────────────────────────────────────────
-const actionApp = (nom) => {
+/* ⚠ UN SECOND ARGUMENT, FACULTATIF (2026-09-10, #64). La fenêtre de mise à jour
+   porte DEUX écrans et a besoin de savoir lequel ouvrir, avec sa version et son
+   décompte. Les huit autres appelants passent un seul nom et ne changent pas.
+   ⚠ Étendre CE répartiteur plutôt qu ouvrir une seconde voie vers les fenêtres :
+   deux chemins vers la même fenêtre finissent par diverger — c est écrit noir sur
+   blanc pour `montrerAdministration`, et ça vaut ici aussi. */
+const actionApp = (nom, arg) => {
+  const id = String(arg == null ? '' : arg);
   const wc = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
   switch (nom) {
     // Le bouton de la barre dessinée et l'entrée « Quitter » du menu passent tous
@@ -4693,6 +4727,36 @@ const actionApp = (nom) => {
        ⚠ NON REDIMENSIONNABLE, NON, JUSTEMENT : elle l est. Une fenêtre de
        connexion figée sur un poste à petit écran ne montrerait pas son bouton.
        Le minimum (760 × 520) laisse le formulaire entier visible même replié. */
+    /* ══ LA MISE À JOUR EN NATIF (#64) ═════════════════════════════════════
+       ⚠⚠ DEUX ÉCRANS, DEUX COMPORTEMENTS DE FENÊTRE, ET C EST LE SUJET.
+       · La PROPOSITION se montre et prend le focus, mais ne se cloue PAS
+         au-dessus : c est exactement la boîte modale retirée le 2026-09-09,
+         « elle interrompait le travail pour une mise à jour qui peut attendre ».
+       · Le DÉCOMPTE, lui, est TOUJOURS AU-DESSUS. Même raisonnement que la
+         fenêtre d inactivité : un avertissement dont la visibilité dépend de
+         l endroit où se trouve une autre fenêtre n est pas un avertissement.
+         Trente secondes derrière une vue détachée, c est zéro seconde.
+
+       ⚠ ON RÉUTILISE LA MÊME FENÊTRE pour les deux écrans (même clé 'maj') :
+       la proposition mène au décompte, et deux fenêtres empilées feraient
+       cohabiter un choix périmé avec un compte à rebours en cours.
+
+       ⚠ L identifiant PORTE l écran ET ses données ('compte|5.11.0|30') parce
+       que le registre ne sait passer qu un argument. Voir l en-tête de
+       `pageMaj`. */
+    case 'maj': {
+      const presse = String(id || '').indexOf('compte') === 0;
+      const winMj = ouvrirNative('maj', presse ? 'Redémarrage imminent' : 'Mise à jour',
+        pageMaj(String(id || '')),
+        { width: 560, height: presse ? 300 : 430, minWidth: 460, minHeight: 260 });
+      try {
+        if (winMj && !winMj.isDestroyed()) {
+          winMj.setAlwaysOnTop(presse, 'screen-saver');
+          winMj.show(); winMj.focus();
+        }
+      } catch (e) {}
+      return;
+    }
     case 'connexion': {
       const winCx = ouvrirNative('connexion', 'Connexion', pageConnexion(),
         /* ⚠ 1180 × 900, ET LE CHIFFRE VIENT D UN CALCUL, PAS DU GOÛT. Le pire cas
