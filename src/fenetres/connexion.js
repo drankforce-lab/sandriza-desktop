@@ -1,0 +1,769 @@
+'use strict';
+
+/*
+ * L'ÉCRAN DE CONNEXION — EN NATIF (#57)
+ * =============================================================================
+ * Sa demande du 2026-09-10 : « fait la page native de connexion, et je veux que
+ * tu gardes le plus possible notre interface actuelle mais en natif ».
+ *
+ * ⚠⚠ LE CSS N'A PAS ÉTÉ RETAPÉ, IL A ÉTÉ EXTRAIT. Les 7 500 caractères de
+ * `CSS_WEB` sortent tels quels de `_loginCSS` dans `assets/js/staff.js`, lus par
+ * un script qui a évalué la concaténation. Retaper 71 blocs de règles à la main
+ * aurait donné une ressemblance, pas l'écran — et sa demande dit « garder LE PLUS
+ * POSSIBLE notre interface actuelle ». Halos violets animés, plaque de logo en
+ * verre dépoli qui flotte, filet doré de l'eyebrow, panneau beige #faf8f5,
+ * animation d'entrée : tout vient de là, au pixel.
+ *
+ * ⚠ CE QUI EST AJOUTÉ PAR-DESSUS (et pourquoi, sinon on ne saurait pas quoi
+ * remettre le jour où le web change) : un rétablissement html/body pour une
+ * fenêtre (le web vit dans une page qui défile, ici la fenêtre EST le cadre), et
+ * le casse-tête à glissière, qui dans le web est dessiné par des styles en ligne
+ * plutôt que par cette feuille.
+ *
+ * ⚠⚠ ELLE NE DÉCIDE RIEN — même discipline que `inactivite.js`, et elle compte
+ * double ici. La limitation de débit, le verrou de quinze minutes, le TOTP,
+ * l'ouverture de session, le contrôle géographique et le journal restent dans la
+ * page, derrière les cœurs `Staff.connexion*`. Cette fenêtre saisit deux champs,
+ * peint un message qu'on lui donne, et rend la main. Une seconde
+ * implémentation de l'authentification dans la coquille serait une seconde
+ * surface à tenir à jour, et celle qu'on oublierait serait celle qui garde la
+ * porte.
+ *
+ * ⚠ MÊME LE TEXTE DU REFUS VIENT DE LA PAGE. « Il vous reste 2 tentatives avant
+ * un verrouillage de 15 minutes » se calcule depuis `RateLimit` ; le composer ici
+ * obligerait cette fenêtre à connaître LOCK_MAX et l'état du verrou. On reçoit le
+ * texte ET le ton (rouge / orange / sombre), et on peint.
+ *
+ * ⚠ TROIS ÉCRANS, ET AUCUN NE SE RAFRAÎCHIT SOUS LES DOIGTS : connexion, code à
+ * six chiffres, mot de passe oublié. C'est la leçon de la 5.3.0 — un formulaire
+ * dans un écran qui se redessine perd la frappe en cours. Seule la BANNIÈRE de
+ * maintenance se relit (20 s), et elle est hors du formulaire.
+ *
+ * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
+ * COMPRIS : le script vit dans un littéral de gabarit, et un accent grave égaré
+ * referme la chaîne. Payé cinq fois sur ce projet.
+ */
+
+const { JS_DIRE } = require('./socle.js');
+
+/* Extrait de `_loginCSS` (assets/js/staff.js) — ne pas modifier à la main : si
+   l'écran web change, réextraire. */
+const CSS_WEB = `
+.admlogin-root{min-height:100vh;background:var(--al-bg);-webkit-font-smoothing:antialiased}.admlogin-split{display:flex;min-height:100vh;align-items:stretch}.admlogin-brand{position:relative;flex:1 1 46%;display:flex;flex-direction:column;justify-content:center;padding:3.5rem 3.2rem;overflow:hidden;color:var(--al-title)}.admlogin-orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.5;z-index:0;pointer-events:none;will-change:transform}.admlogin-orb.o1{width:360px;height:360px;background:var(--al-logoG);top:-80px;left:-60px;animation:al-f1 17s ease-in-out infinite}.admlogin-orb.o2{width:300px;height:300px;opacity:0.42;background:linear-gradient(135deg,#7c5cff,#4338ca);bottom:-70px;right:6%;animation:al-f2 21s ease-in-out infinite}.admlogin-orb.o3{width:220px;height:220px;opacity:0.4;background:linear-gradient(135deg,#a855f7,#6d28d9);top:40%;right:-50px;animation:al-f3 25s ease-in-out infinite}.admlogin-brand::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(115deg,rgba(6,4,16,0.55) 0%,rgba(6,4,16,0.34) 46%,rgba(6,4,16,0.14) 100%);pointer-events:none}.admlogin-brand::after{content:'';position:absolute;inset:0;z-index:1;background:radial-gradient(85% 62% at 16% 12%,rgba(255,255,255,0.10),transparent 55%);pointer-events:none}.admlogin-brand-inner{position:relative;z-index:2;max-width:460px}.admlogin-logo-badge{width:74px;height:74px;border-radius:19px;display:inline-flex;align-items:center;justify-content:center;font:800 2rem/1 Georgia,serif;color:#fff;margin:0 0 1.5rem;box-shadow:0 14px 34px rgba(0,0,0,0.34)}.admlogin-logo-plate{position:relative;display:inline-block;padding:1.8rem 2.4rem;margin:0 0 1.9rem;animation:al-logofloat 7s ease-in-out infinite}.admlogin-logo-plate::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(118% 135% at 50% 48%,rgba(248,242,233,0.55) 0%,rgba(233,219,200,0.32) 42%,rgba(233,219,200,0) 76%);filter:blur(13px)}.admlogin-logo-img{position:relative;z-index:1;display:block;margin:0 auto}.admlogin-brand h1{font-family:Georgia,serif;font-size:2.15rem;font-weight:800;margin:0 0 0.9rem;line-height:1.12;letter-spacing:0.01em}.admlogin-eyebrow{display:flex;align-items:center;gap:0.9rem;margin:0 0 2.4rem;text-transform:uppercase;letter-spacing:0.26em;font-size:0.8rem;font-weight:600;color:var(--al-sub)}.admlogin-eyebrow .al-line{flex:0 0 auto;height:2px;width:42px;border-radius:2px;background:linear-gradient(90deg,#C49A6C,rgba(196,154,108,0.08))}.admlogin-eyebrow span:last-child{white-space:nowrap}.admlogin-feats{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1.05rem}.admlogin-feat{display:flex;align-items:center;gap:0.9rem;font-size:0.9rem;line-height:1.4;font-weight:500;color:rgba(243,237,227,0.95)}.admlogin-feat .al-ic{flex:0 0 auto;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.28)}.admlogin-form-panel{flex:1 1 54%;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#faf8f5;padding:2.75rem 2rem;overflow-y:auto}.admlogin-formwrap{width:100%;max-width:400px;animation:al-rise 0.6s cubic-bezier(0.16,0.84,0.44,1) both}.admlogin-formwrap input,.admlogin-formwrap select{transition:border-color 0.18s ease,box-shadow 0.18s ease}.admlogin-formwrap button[type=submit]{transition:transform 0.14s ease,box-shadow 0.24s ease,filter 0.2s ease}.admlogin-formwrap button[type=submit]:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(26,18,7,0.26);filter:brightness(1.06)}.admlogin-formwrap button[type=submit]:active{transform:translateY(0);filter:brightness(0.98)}.admlogin-back{display:inline-flex;align-items:center;gap:0.45rem;padding:0.5rem 1.1rem;border-radius:99px;background:rgba(196,154,108,0.09);border:1px solid rgba(196,154,108,0.3);color:#7d5f3c;font-family:inherit;font-size:0.8rem;font-weight:600;text-decoration:none;cursor:pointer;transition:background 0.18s ease,border-color 0.18s ease,transform 0.18s ease,box-shadow 0.18s ease}.admlogin-back:hover{background:rgba(196,154,108,0.17);border-color:rgba(196,154,108,0.5);transform:translateX(-3px);box-shadow:0 4px 14px rgba(196,154,108,0.2)}.admlogin-back:active{transform:translateX(0)}.admlogin-forgot{display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1.1rem;border-radius:99px;background:rgba(196,154,108,0.09);border:1px solid rgba(196,154,108,0.3);color:#7d5f3c;font-family:inherit;font-size:0.8rem;font-weight:600;text-decoration:none;cursor:pointer;transition:background 0.18s ease,border-color 0.18s ease,transform 0.18s ease,box-shadow 0.18s ease}.admlogin-forgot:hover{background:rgba(196,154,108,0.17);border-color:rgba(196,154,108,0.5);transform:translateY(-2px);box-shadow:0 6px 16px rgba(196,154,108,0.22)}.admlogin-forgot:active{transform:translateY(0)}@keyframes al-f1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(36px,46px) scale(1.08)}}@keyframes al-f2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-34px) scale(1.06)}}@keyframes al-f3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(28px,-30px) scale(1.1)}}@keyframes al-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}@keyframes al-logofloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}@media (max-width:860px){.admlogin-split{flex-direction:column}.admlogin-brand{flex:0 0 auto;padding:2.5rem 1.5rem 2.1rem;text-align:center;align-items:center}.admlogin-brand-inner{max-width:none;display:flex;flex-direction:column;align-items:center}.admlogin-brand h1{font-size:1.7rem}.admlogin-eyebrow{justify-content:center;margin-bottom:0.4rem}.admlogin-logo-plate{padding:1.2rem 1.5rem}.admlogin-feats{gap:0.65rem;margin-top:0.3rem;align-items:flex-start;text-align:left}.admlogin-feat{font-size:0.82rem}.admlogin-feat .al-ic{width:34px;height:34px;border-radius:10px}.admlogin-form-panel{flex:1 1 auto;padding:2.1rem 1.3rem 2.8rem}}@media (prefers-reduced-motion:reduce){.admlogin-orb,.admlogin-formwrap,.admlogin-logo-plate{animation:none}}.admlogin-maint{width:100%;max-width:400px;margin:0 auto 1.35rem;padding:0.85rem 1rem;border-radius:12px;background:#fdf4e3;border:1px solid rgba(180,120,20,0.3);box-shadow:0 6px 18px rgba(120,80,10,0.1);animation:al-rise 0.5s cubic-bezier(0.16,0.84,0.44,1) both}.admlogin-maint .amt{display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:700;color:#6b4a06;margin:0 0 0.3rem}.admlogin-maint .amd{font-size:0.8rem;line-height:1.5;color:#5b4a33}.admlogin-nipbox{width:100%;max-width:400px;margin:0 auto 1.35rem;padding:0.9rem 1rem;border-radius:12px;background:#f3f0ea;border:1px solid rgba(196,154,108,0.4)}.admlogin-nipbox .npt{font-size:0.82rem;font-weight:700;color:#4a3a20;margin:0 0 0.5rem}.admlogin-nipbox .npm{font-size:0.76rem;line-height:1.45;color:#8a5a2a;margin:0.45rem 0 0;min-height:1.05rem}.admlogin-nipbox input{width:100%;padding:0.6rem 0.75rem;border-radius:8px;border:1px solid rgba(196,154,108,0.45);background:#fff;color:#2a2216;font:600 1.05rem/1 ui-monospace,Consolas,monospace;letter-spacing:0.35em;text-align:center}.admlogin-nipbox .npr{display:flex;gap:0.5rem;margin-top:0.6rem}.admlogin-nipbox .npr button{flex:1 1 0;padding:0.5rem 0.7rem;border-radius:8px;border:1px solid rgba(196,154,108,0.4);background:rgba(196,154,108,0.12);color:#6b4a20;font:600 0.78rem/1.2 inherit;cursor:pointer}.admlogin-nipbox .npr button:disabled{opacity:0.5;cursor:default}
+`;
+
+/* Ce que la FENÊTRE ajoute au décor du web. */
+const CSS_FEN = `
+:root{--al-bg:linear-gradient(135deg,#191238 0%,#2b2262 50%,#191238 100%);
+  --al-logoG:linear-gradient(135deg,#4f46e5,#7c3aed);
+  --al-title:#f5e6d0;--al-sub:rgba(236,229,217,0.92)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{overflow:hidden;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+/* La fenetre EST le cadre : la racine remplit, et c est le panneau de
+   formulaire qui defile si l ecran est court - jamais la fenetre entiere. */
+.admlogin-root{height:100%;min-height:0}
+.admlogin-split{height:100%;min-height:0}
+.admlogin-form-panel{min-height:0}
+/* Le casse-tete a glissiere. Dans le web il est habille de styles en ligne ;
+   ici il a ses regles, et elles disent la meme chose. */
+#sl-captcha{margin-bottom:1.25rem}
+#cap-stage{position:relative;margin:0 auto;border-radius:8px;overflow:hidden;
+  border:1px solid rgba(196,154,108,0.35);touch-action:none;user-select:none}
+#cap-bg{display:block}
+#cap-piece{position:absolute;top:0;left:0;pointer-events:none}
+#cap-flash{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 0.25s}
+#cap-track{position:relative;height:40px;margin:0.6rem auto 0;
+  background:rgba(196,154,108,0.14);border:1px solid rgba(196,154,108,0.3);
+  border-radius:8px;overflow:hidden;touch-action:none;user-select:none}
+#cap-fill{position:absolute;top:0;left:0;height:100%;width:0;background:rgba(196,154,108,0.28)}
+#cap-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:0.74rem;color:#776654;pointer-events:none}
+#cap-handle{position:absolute;top:0;left:0;width:44px;height:100%;
+  background:linear-gradient(135deg,#1a1207,#3d2810);border-radius:8px;cursor:grab;
+  display:flex;align-items:center;justify-content:center;color:#f5e6d0;font-size:1rem;
+  box-shadow:0 2px 8px rgba(0,0,0,0.25)}
+/* Les champs et les etiquettes : memes valeurs que les styles en ligne du web
+   (_inputStyle, _labelStyle, _fpErrStyle, _hTitle, _hSub), rassembles en
+   regles parce qu ici on n a pas de raison de les repeter sur chaque balise. */
+.cx-lbl{display:block;font-size:0.69rem;font-weight:600;color:#9a7d62;
+  margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em}
+.cx-champ{position:relative}
+.cx-champ .cx-ic{position:absolute;left:0.95rem;top:50%;transform:translateY(-50%);
+  pointer-events:none;opacity:0.5;display:flex}
+input[type=text],input[type=password],input[type=email]{width:100%;box-sizing:border-box;
+  padding:0.7rem 1rem;background:rgba(255,255,255,0.82);
+  border:1.5px solid rgba(196,154,108,0.35);border-radius:8px;color:#1a1207;
+  font:0.9rem/1.5 inherit;outline:none;transition:border-color 0.18s,box-shadow 0.18s}
+input.pad{padding-left:2.7rem}
+input.padd{padding-right:2.6rem}
+input:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
+.cx-oeil{position:absolute;right:0.55rem;top:50%;transform:translateY(-50%);
+  background:none;border:none;padding:0.2rem;cursor:pointer;display:inline-flex;
+  align-items:center;color:#776654;opacity:0.75}
+.cx-titre{font-size:1.5rem;font-weight:800;color:#1a1207;font-family:Georgia,serif;
+  letter-spacing:0.01em;line-height:1.2}
+.cx-sous{font-size:0.8rem;color:#7a6652;line-height:1.5;margin-top:0.35rem}
+.cx-err{display:none;background:rgba(254,226,226,0.92);border:1px solid #fca5a5;
+  border-radius:8px;padding:0.55rem 0.8rem;font-size:0.8rem;color:#b91c1c;
+  margin-bottom:0.75rem;line-height:1.5}
+.cx-err.on{display:block}
+/* Les trois tons que la page peut demander. L orange previent PENDANT qu on
+   peut encore agir ; le sombre annonce un courriel parti, pas un refus. */
+.cx-err.orange{background:#fff7ed;border-color:#fdba74;color:#9a3412}
+.cx-err.sombre{background:#172033;border-color:#C49A6C;color:#f5e6d0}
+.cx-btn{width:100%;padding:0.78rem;border:none;border-radius:8px;
+  font:600 0.9rem/1.5 inherit;cursor:pointer;letter-spacing:0.03em;
+  transition:transform 0.14s,box-shadow 0.24s,filter 0.2s}
+.cx-btn:hover:not(:disabled){transform:translateY(-1px);
+  box-shadow:0 12px 28px rgba(26,18,7,0.26);filter:brightness(1.06)}
+.cx-btn:active:not(:disabled){transform:translateY(0);filter:brightness(0.98)}
+.cx-btn:disabled{opacity:0.7;cursor:wait}
+.cx-souvenir{margin:-0.25rem 0 1rem;display:flex;align-items:center;gap:0.45rem}
+.cx-souvenir input{width:15px;height:15px;cursor:pointer;accent-color:#C49A6C;color-scheme:light}
+.cx-souvenir label{font-size:0.76rem;color:#7a6652;cursor:pointer;user-select:none}
+.cx-centre{text-align:center;margin-top:0.85rem}
+.cx-chrono{font-size:0.72rem;color:#776654;margin-top:0.5rem}
+.cx-chrono strong{color:#b45309}
+.cx-chrono strong.presse{color:#dc2626}
+#sl-mfa-code{font-size:1.8rem;font-family:monospace;letter-spacing:0.35em;text-align:center}
+/* La verite sur << mot de passe oublie >> : une liste de ce qui MARCHE. */
+.cx-voies{list-style:none;padding:0;margin:0.9rem 0 0;display:flex;
+  flex-direction:column;gap:0.75rem}
+.cx-voie{display:flex;gap:0.7rem;align-items:flex-start;padding:0.8rem 0.9rem;
+  border-radius:10px;background:rgba(196,154,108,0.08);
+  border:1px solid rgba(196,154,108,0.22)}
+.cx-voie b{display:block;font-size:0.82rem;color:#6b4a20;margin-bottom:0.15rem}
+.cx-voie span{font-size:0.78rem;color:#7a6652;line-height:1.5}
+.cx-voie .n{flex:0 0 auto;width:22px;height:22px;border-radius:50%;
+  background:#C49A6C;color:#fff;font:700 0.72rem/22px inherit;text-align:center}
+.cx-msg{width:100%;max-width:400px;margin:0.9rem auto 0;min-height:1.1rem;text-align:center}
+.cx-msg .msg{font-size:0.76rem;color:#7a6652;line-height:1.4}
+.cx-msg .msg.err{color:#b91c1c}.cx-msg .msg.bon{color:#166534}.cx-msg .msg.att{color:#9a3412}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+`;
+
+function pageConnexion() {
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<title>Connexion</title>
+<style>${CSS_WEB}${CSS_FEN}</style></head><body>
+<div id="corps"></div>
+<script>
+(function(){
+  'use strict';
+  var P = window.szPont;
+${JS_DIRE}
+
+  var CTX = null;          // le contexte de dessin, lu UNE fois
+  var ECRAN = 'login';     // login | mfa | oubli
+  var CAPTCHA_OK = false;
+  var MAINT = null;        // dernier etat de maintenance connu
+  var MAINT_T = null;
+  var MFA_T = null, MFA_FIN = 0;
+
+  function esc(v){
+    return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function el(id){ return document.getElementById(id); }
+
+  /* ⚠ UN APPEL QUI N EST PAS UNE PROMESSE N EST PAS UN APPEL. Si la fenetre
+     principale ne repond pas, P.appeler peut rendre autre chose ; on le
+     transforme en refus nomme plutot que de laisser un .then exploser sans
+     que personne ne voie rien. */
+  function appeler(op, args){
+    var pr;
+    try { pr = P.appeler.apply(P, [op].concat(args || [])); }
+    catch (e) { pr = null; }
+    if (!pr || typeof pr.then !== 'function') {
+      return Promise.resolve({ ok: false, motif: 'muet',
+        message: 'La fenetre principale ne repond pas.' });
+    }
+    return pr.then(function(r){ return r || { ok: false, motif: 'vide' }; })
+      .catch(function(e){ return { ok: false, motif: 'echec',
+        message: String((e && e.message) || e) }; });
+  }
+
+  var IC = {
+    personne: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a6652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>',
+    cadenas:  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a6652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+    oeil:     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+    oeilBarre:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="m2 2 20 20"/></svg>',
+    verrouSm: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+    bouclier: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>',
+    epingle:  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'
+  };
+
+  /* ══ LE PANNEAU DE MARQUE — la moitie gauche, identique au web ═══════════
+     ⚠ IL NE SE REDESSINE JAMAIS. Les trois halos portent des animations de 17,
+     21 et 25 secondes ; les redessiner a chaque changement d ecran les
+     RELANCERAIT depuis zero, et le fond sauterait a chaque fois qu on passe au
+     code a six chiffres. */
+  function marquePanneau(){
+    var m = CTX.marque, t = CTX.theme;
+    var logo = m.logo
+      ? '<div class="admlogin-logo-plate"><img src="' + esc(m.logo) + '" alt="' + esc(m.nom)
+        + '" class="admlogin-logo-img" style="width:min(340px,70vw);height:auto"></div>'
+      : '<div class="admlogin-logo-badge" style="background:linear-gradient(135deg,'
+        + t.logoFrom + ',' + t.logoTo + ')">' + esc(m.lettre) + '</div>';
+    var nom = m.logo ? '' : '<h1>' + esc(m.nom) + '</h1>';
+    var f = function(ic, txt){
+      return '<li class="admlogin-feat"><span class="al-ic">' + ic + '</span><span>' + txt + '</span></li>';
+    };
+    return '<aside class="admlogin-brand">'
+      + '<span class="admlogin-orb o1"></span><span class="admlogin-orb o2"></span>'
+      + '<span class="admlogin-orb o3"></span>'
+      + '<div class="admlogin-brand-inner">' + logo + nom
+      + '<div class="admlogin-eyebrow"><span class="al-line"></span><span>'
+      + esc(t.sousTexte) + '</span></div>'
+      + '<ul class="admlogin-feats">'
+      + f(IC.verrouSm, 'Connexion chiffrée de bout en bout (HTTPS)')
+      + f(IC.bouclier, 'Accès renforcé par mot de passe et authentification MFA')
+      + f(IC.epingle,  'Chaque tentative journalisée (adresse IP et pays)')
+      + '</ul></div></aside>';
+  }
+
+  function btnStyle(){
+    var t = CTX.theme;
+    return 'background:linear-gradient(135deg,' + t.btnFrom + ',' + t.btnTo + ');color:' + t.btnTexte;
+  }
+
+  /* ══ L ECRAN DE CONNEXION ════════════════════════════════════════════════ */
+  function ecranLogin(){
+    return '<div>'
+      + '<div style="margin-bottom:1.75rem">'
+      + '<div class="cx-titre">Connexion sécurisée</div>'
+      + '<div class="cx-sous">Réservé au personnel autorisé uniquement</div>'
+      + '</div>'
+      + '<form id="cx-form">'
+      + '<div style="margin-bottom:1rem">'
+      + '<label class="cx-lbl" for="sl-email">Nom d’utilisateur</label>'
+      + '<div class="cx-champ"><span class="cx-ic">' + IC.personne + '</span>'
+      + '<input type="text" id="sl-email" class="pad" autocomplete="username" required value="'
+      + esc(CTX.prefill) + '"></div>'
+      + '</div>'
+      + '<div class="cx-souvenir">'
+      + '<input type="checkbox" id="sl-remember"' + (CTX.souvenir ? ' checked' : '') + '>'
+      + '<label for="sl-remember">Se souvenir de mon nom d’utilisateur</label>'
+      + '</div>'
+      + '<div style="margin-bottom:1.25rem">'
+      + '<label class="cx-lbl" for="sl-password">Mot de passe</label>'
+      + '<div class="cx-champ"><span class="cx-ic">' + IC.cadenas + '</span>'
+      + '<input type="password" id="sl-password" class="pad padd" autocomplete="current-password" required>'
+      + '<button type="button" class="cx-oeil" id="sl-oeil" aria-label="Afficher le mot de passe">'
+      + IC.oeil + '</button></div>'
+      + '</div>'
+      + '<div class="cx-err" id="sl-error"></div>'
+      + '<div id="cap-zone"></div>'
+      + '<button type="submit" class="cx-btn" id="sl-btn" style="' + btnStyle() + '">Se connecter</button>'
+      + '</form>'
+      + '<div class="cx-centre">'
+      + '<button type="button" class="admlogin-forgot" id="sl-oubli">Mot de passe oublié ?</button>'
+      + '</div></div>';
+  }
+
+  /* ══ LE CODE A SIX CHIFFRES ══════════════════════════════════════════════ */
+  function ecranMfa(sec){
+    return '<div>'
+      + '<div style="margin-bottom:1.75rem">'
+      + '<div class="cx-titre">Vérification en deux étapes</div>'
+      + '<div class="cx-sous">Entrez le code de votre application d’authentification</div>'
+      + '<div class="cx-chrono">⏱ Temps restant : <strong id="sl-mfa-timer">' + sec + ' s</strong></div>'
+      + '</div>'
+      + '<form id="cx-form-mfa">'
+      + '<div style="margin-bottom:1.25rem">'
+      + '<label class="cx-lbl" for="sl-mfa-code">Code à 6 chiffres</label>'
+      + '<input type="text" id="sl-mfa-code" inputmode="numeric" maxlength="6"'
+      + ' autocomplete="one-time-code" required placeholder="000000">'
+      + '</div>'
+      + '<div class="cx-err" id="sl-mfa-error"></div>'
+      + '<button type="submit" class="cx-btn" id="sl-mfa-btn" style="' + btnStyle() + '">Vérifier</button>'
+      + '</form>'
+      + '<div class="cx-centre">'
+      + '<button type="button" class="admlogin-back" id="sl-mfa-retour">← Retour à la connexion</button>'
+      + '</div></div>';
+  }
+
+  /* ══ MOT DE PASSE OUBLIE — CE QUI MARCHE VRAIMENT ════════════════════════
+     ⚠⚠ CE N EST PAS LE PARCOURS WEB, ET C EST DELIBERE. Le web pose deux
+     questions de securite puis un nouveau mot de passe. Ce parcours NE
+     FONCTIONNE PAS : il tourne sur l ecran de connexion, donc sans session ; les
+     reponses sont hachees cote serveur, et toute ecriture de staff_users exige
+     une session. Les commentaires de submitForgotStep2 et submitForgotStep3
+     le disent depuis des semaines - l etape 2 refuse tout le monde, et l etape 3
+     n ecrivait que dans le cache du poste en annoncant << Mot de passe
+     reinitialise >>. Porter trois ecrans pour arriver a un mur aurait ete porter
+     le mur. On rend ce qui marche, en un ecran. */
+  function ecranOubli(d){
+    var contact = (d && d.contact)
+      ? ('<a href="mailto:' + esc(d.contact) + '" style="color:#8a6a44">' + esc(d.contact) + '</a>')
+      : 'un super-administrateur';
+    return '<div>'
+      + '<div style="margin-bottom:1.2rem">'
+      + '<div class="cx-titre">Mot de passe oublié</div>'
+      + '<div class="cx-sous">Deux chemins fonctionnent, et les voici. La récupération '
+      + 'par questions de sécurité n’est pas disponible : les réponses sont chiffrées '
+      + 'côté serveur et cet écran n’a pas de session pour les vérifier.</div>'
+      + '</div>'
+      + '<ul class="cx-voies">'
+      + '<li class="cx-voie"><span class="n">1</span><div>'
+      + '<b>Le lien de renouvellement</b>'
+      + '<span>Si votre mot de passe a expiré, un courriel part automatiquement à '
+      + 'votre adresse à la prochaine tentative. Le lien vaut 24 heures.</span>'
+      + '</div></li>'
+      + '<li class="cx-voie"><span class="n">2</span><div>'
+      + '<b>Un accès réémis</b>'
+      + '<span>Demandez à ' + contact + ' de vous réémettre un mot de passe '
+      + 'temporaire depuis la fiche du personnel. Il vous sera demandé de le '
+      + 'changer à la première connexion.</span>'
+      + '</div></li>'
+      + '</ul>'
+      + '<div class="cx-centre" style="margin-top:1.4rem">'
+      + '<button type="button" class="admlogin-back" id="sl-oubli-retour">← Retour à la connexion</button>'
+      + '</div></div>';
+  }
+
+  /* ══ LE DESSIN ═══════════════════════════════════════════════════════════
+     ⚠ SEUL LE PANNEAU DE DROITE CHANGE. La racine et le panneau de marque sont
+     ecrits UNE fois (voir marquePanneau) ; ensuite on ne remplace que
+     #cx-corps. C est ce qui garde les halos en mouvement continu et evite
+     qu un changement d ecran fasse clignoter la moitie de la fenetre. */
+  function socle(){
+    var t = CTX.theme;
+    var bg = 'linear-gradient(135deg,' + t.bgFrom + ' 0%,' + t.bgMid + ' 50%,' + t.bgFrom + ' 100%)';
+    var lg = 'linear-gradient(135deg,' + t.logoFrom + ',' + t.logoTo + ')';
+    el('corps').innerHTML =
+      '<div class="admlogin-root" style="--al-bg:' + bg + ';--al-logoG:' + lg
+      + ';--al-title:' + t.titre + ';--al-sub:' + t.sous + '">'
+      + '<div class="admlogin-split">' + marquePanneau()
+      + '<main class="admlogin-form-panel">'
+      + '<div id="al-maint"></div><div id="al-nipbox"></div>'
+      + '<div class="admlogin-formwrap" id="cx-corps"></div>'
+      + '<div class="cx-msg"><span class="msg" id="msg"></span></div>'
+      + '</main></div></div>';
+  }
+
+  function dessiner(quoi, donnee){
+    ECRAN = quoi;
+    var z = el('cx-corps');
+    if (!z) { socle(); z = el('cx-corps'); }
+    if (quoi === 'mfa')        z.innerHTML = ecranMfa(donnee || 60);
+    else if (quoi === 'oubli') z.innerHTML = ecranOubli(donnee);
+    else                       z.innerHTML = ecranLogin();
+    brancher();
+  }
+
+  /* ══ LE CASSE-TETE A GLISSIERE ═══════════════════════════════════════════
+     ⚠ IL NE GARDE PAS LA PORTE, ET IL FAUT LE SAVOIR POUR NE PAS SUR-INVESTIR.
+     Ce qui garde la porte, c est le verrou de quinze minutes apres cinq echecs,
+     cote RateLimit, dans la page. Le casse-tete ralentit un bourrage a la
+     main. Dans le web il tient dans une variable de module de la page ; ici dans
+     une variable de la fenetre - aussi peu verifiable dans les deux cas, donc le
+     deplacer ne retire aucune garantie parce qu il n en apportait aucune. */
+  function captchaPoser(){
+    var z = el('cap-zone');
+    if (!z) return;
+    CAPTCHA_OK = false;
+    z.innerHTML = '<div id="sl-captcha">'
+      + '<label class="cx-lbl">Vérification de sécurité</label>'
+      + '<div style="font-size:0.72rem;color:#7a6652;margin:-0.1rem 0 0.5rem">'
+      + 'Faites glisser la pièce pour compléter l’image.</div>'
+      + '<div id="cap-stage"><canvas id="cap-bg"></canvas>'
+      + '<canvas id="cap-piece"></canvas><div id="cap-flash"></div></div>'
+      + '<div id="cap-track"><div id="cap-fill"></div>'
+      + '<div id="cap-hint">Glissez vers la droite →</div>'
+      + '<div id="cap-handle">⇢</div></div></div>';
+    captchaArmer();
+  }
+
+  function captchaRetirer(){
+    var z = el('cap-zone');
+    if (z) z.innerHTML = '';
+    CAPTCHA_OK = false;
+  }
+
+  function captchaArmer(){
+    var stage = el('cap-stage'), bg = el('cap-bg'), pc = el('cap-piece');
+    var track = el('cap-track'), handle = el('cap-handle');
+    var fill = el('cap-fill'), hint = el('cap-hint'), flash = el('cap-flash');
+    if (!stage || !bg || !pc || !track || !handle) return;
+    var W = Math.max(240, Math.min(360, stage.clientWidth || 320));
+    var H = 120, T = 42;                       // taille de la piece
+    bg.width = W; bg.height = H; pc.width = W; pc.height = H;
+    stage.style.height = H + 'px';
+    /* La cible reste loin des deux bords : collee au bord, la piece serait
+       trouvee sans chercher, et hors du cadre elle serait introuvable. */
+    var cx = Math.round(W * 0.45 + Math.random() * W * 0.3);
+    var cy = Math.round((H - T) / 2);
+    var c = null, q = null;
+    try { c = bg.getContext('2d'); q = pc.getContext('2d'); } catch (e) {}
+    if (!c || !q) {
+      var zc = el('cap-zone');
+      if (zc) zc.innerHTML = '';
+      CAPTCHA_OK = true;          // sinon la tentative serait refusee sans recours
+      szDire('Vérification visuelle indisponible sur ce poste — le verrou de sécurité reste actif.', 'att');
+      return;
+    }
+    /* Un fond DESSINE, pas une image telechargee : une fenetre native ne doit
+       rien aller chercher sur le reseau pour afficher sa propre porte. */
+    var g = c.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#2b2262'); g.addColorStop(0.5, '#4f46e5'); g.addColorStop(1, '#191238');
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    for (var i = 0; i < 26; i++) {
+      c.beginPath();
+      c.arc(Math.random() * W, Math.random() * H, 4 + Math.random() * 26, 0, 6.284);
+      c.fillStyle = 'rgba(255,255,255,' + (0.02 + Math.random() * 0.07) + ')';
+      c.fill();
+    }
+    var img = c.getImageData(cx, cy, T, T);
+    q.putImageData(img, 0, cy);                 // la piece part a gauche
+    q.strokeStyle = 'rgba(255,255,255,0.8)'; q.lineWidth = 2;
+    q.strokeRect(1, cy + 1, T - 2, T - 2);
+    c.fillStyle = 'rgba(0,0,0,0.55)'; c.fillRect(cx, cy, T, T);
+    c.strokeStyle = 'rgba(255,255,255,0.35)'; c.lineWidth = 2;
+    c.strokeRect(cx + 1, cy + 1, T - 2, T - 2);
+
+    var max = track.clientWidth - handle.offsetWidth;
+    var pris = false, x0 = 0, dx = 0;
+    var poser = function(v){
+      dx = Math.max(0, Math.min(max, v));
+      handle.style.left = dx + 'px';
+      fill.style.width = (dx + handle.offsetWidth) + 'px';
+      q.clearRect(0, 0, W, H);
+      var px = Math.round(dx / Math.max(1, max) * (W - T));
+      q.putImageData(img, px, cy);
+      q.strokeStyle = 'rgba(255,255,255,0.8)'; q.lineWidth = 2;
+      q.strokeRect(px + 1, cy + 1, T - 2, T - 2);
+    };
+    var relacher = function(){
+      if (!pris) return;
+      pris = false; handle.style.cursor = 'grab';
+      var px = Math.round(dx / Math.max(1, max) * (W - T));
+      /* Six pixels de tolerance : au pixel pres, la souris ne suffirait pas et
+         un ecran tactile serait impossible. */
+      if (Math.abs(px - cx) <= 6) {
+        CAPTCHA_OK = true;
+        if (hint) hint.textContent = 'Vérifié';
+        if (flash) { flash.style.background = 'rgba(74,222,128,0.28)'; flash.style.opacity = '1'; }
+        handle.textContent = 'OK';
+        handle.style.pointerEvents = 'none';
+        var mp = el('sl-password'); if (mp) mp.focus();
+      } else {
+        CAPTCHA_OK = false;
+        if (flash) { flash.style.background = 'rgba(248,113,113,0.3)'; flash.style.opacity = '1'; }
+        setTimeout(function(){
+          if (flash) flash.style.opacity = '0';
+          poser(0);
+          if (hint) hint.textContent = 'Glissez vers la droite →';
+        }, 350);
+      }
+    };
+    handle.addEventListener('pointerdown', function(e){
+      pris = true; x0 = e.clientX - dx; handle.style.cursor = 'grabbing';
+      try { handle.setPointerCapture(e.pointerId); } catch (er) {}
+    });
+    handle.addEventListener('pointermove', function(e){ if (pris) poser(e.clientX - x0); });
+    handle.addEventListener('pointerup', relacher);
+    handle.addEventListener('pointercancel', relacher);
+    poser(0);
+  }
+
+  /* ══ LES MESSAGES D ERREUR — LE TEXTE ET LE TON VIENNENT DE LA PAGE ══════ */
+  function faute(id, r){
+    var z = el(id);
+    if (!z) return;
+    z.className = 'cx-err on' + (r && r.ton === 'orange' ? ' orange' : (r && r.ton === 'sombre' ? ' sombre' : ''));
+    var txt = esc((r && r.message) || 'L’opération a échoué.');
+    if (r && typeof r.restant === 'number' && r.restant > 0) {
+      txt += '<br><span style="font-size:0.78rem">Attention — il vous reste <strong>' + r.restant
+        + '</strong> tentative' + (r.restant > 1 ? 's' : '')
+        + ' avant un verrouillage de 15 minutes.</span>';
+    }
+    z.innerHTML = txt;
+  }
+  function fauteEffacer(id){
+    var z = el(id);
+    if (z) { z.className = 'cx-err'; z.innerHTML = ''; }
+  }
+
+  /* ══ LA TENTATIVE ════════════════════════════════════════════════════════ */
+  function entrer(){
+    var idc = el('sl-email'), pwc = el('sl-password'), b = el('sl-btn');
+    if (!idc || !pwc || !b) return;
+    fauteEffacer('sl-error');
+    b.disabled = true; b.textContent = 'Connexion…';
+    var sv = el('sl-remember');
+    appeler('connexion:entrer', [idc.value.trim(), pwc.value, !!(sv && sv.checked), CAPTCHA_OK])
+      .then(function(r){
+        var b2 = el('sl-btn');
+        if (!r.ok) {
+          if (b2) { b2.disabled = false; b2.textContent = 'Se connecter'; }
+          faute('sl-error', r);
+          /* Un echec peut FAIRE APPARAITRE le casse-tete (seuil atteint) ou le
+             rendre inutile (compte verrouille : il n y a plus rien a ralentir). */
+          if (r.captchaRequis) captchaPoser(); else if (r.motif === 'verrou') captchaRetirer();
+          var pw = el('sl-password'); if (pw) { pw.value = ''; pw.focus(); }
+          return;
+        }
+        if (r.suite === 'mfa')   { mfaDemarrer(r.secondes || 60); return; }
+        if (r.suite === 'expire') {
+          if (b2) { b2.disabled = false; b2.textContent = 'Se connecter'; }
+          faute('sl-error', { message: r.message, ton: 'sombre' });
+          return;
+        }
+        /* Les ecrans qui n ont pas encore de version native : la page les
+           montre, et cette fenetre se retire. On ne fait PAS semblant de les
+           porter - un assistant a moitie porte s arreterait au milieu. */
+        if (r.suite === 'mfaConfig' || r.suite === 'motdepasse') {
+          szDire('Un écran supplémentaire est requis — il s’ouvre dans la fenêtre principale.');
+          appeler('connexion:ecranWeb', [r.suite]).then(function(){ partir(); });
+          return;
+        }
+        reussi(r.prenom);
+      });
+  }
+
+  /* ══ LE CODE A SIX CHIFFRES ══════════════════════════════════════════════
+     ⚠ LE DECOMPTE EST DESSINE ICI, MAIS L ECHEANCE RESTE CELLE DE LA PAGE.
+     _mfaTimeout y revoque le jeton en attente et purge le sessionStorage. Si
+     ce chrono arrive a zero avant, il ne ferme rien lui-meme : il appelle
+     connexion:mfaAbandon et laisse la page faire le menage. Deux horloges qui
+     decident, c est une qui se trompe. */
+  function mfaDemarrer(sec){
+    dessiner('mfa', sec);
+    MFA_FIN = Date.now() + sec * 1000;
+    if (MFA_T) clearInterval(MFA_T);
+    MFA_T = setInterval(function(){
+      var reste = Math.max(0, Math.ceil((MFA_FIN - Date.now()) / 1000));
+      var z = el('sl-mfa-timer');
+      if (z) { z.textContent = reste + ' s'; if (reste <= 5) z.className = 'presse'; }
+      if (reste <= 0) { clearInterval(MFA_T); MFA_T = null; mfaExpire(); }
+    }, 250);
+    var c = el('sl-mfa-code'); if (c) c.focus();
+  }
+  function mfaExpire(){
+    appeler('connexion:mfaAbandon').then(function(){
+      dessiner('login');
+      faute('sl-error', { message: 'Délai de vérification dépassé — veuillez vous reconnecter.' });
+    });
+  }
+  function mfaEnvoyer(){
+    var c = el('sl-mfa-code'), b = el('sl-mfa-btn');
+    if (!c || !b) return;
+    fauteEffacer('sl-mfa-error');
+    /* On arrete le chrono PENDANT la verification : sinon un << delai depasse >>
+       tomberait au milieu de l attente reseau, et le bouton resterait cliquable
+       pour un second envoi. */
+    if (MFA_T) { clearInterval(MFA_T); MFA_T = null; }
+    var ch = el('sl-mfa-timer');
+    if (ch && ch.parentElement) ch.parentElement.style.display = 'none';
+    b.disabled = true; b.textContent = 'Vérification…';
+    c.disabled = true;
+    appeler('connexion:mfa', [c.value]).then(function(r){
+      if (r.ok) { reussi(r.prenom); return; }
+      var c2 = el('sl-mfa-code'), b2 = el('sl-mfa-btn');
+      if (b2) { b2.disabled = false; b2.textContent = 'Vérifier'; }
+      if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
+      var ch2 = el('sl-mfa-timer');
+      if (ch2 && ch2.parentElement) ch2.parentElement.style.display = '';
+      faute('sl-mfa-error', r);
+      /* Le chrono reprend la ou il en etait : le remettre a soixante offrirait
+         du temps que la page n accorde pas, et le laisser mort ferait attendre
+         un delai qui ne viendrait jamais. */
+      var reste = Math.max(0, Math.ceil((MFA_FIN - Date.now()) / 1000));
+      if (reste <= 0) { mfaExpire(); return; }
+      MFA_T = setInterval(function(){
+        var x = Math.max(0, Math.ceil((MFA_FIN - Date.now()) / 1000));
+        var zz = el('sl-mfa-timer');
+        if (zz) { zz.textContent = x + ' s'; if (x <= 5) zz.className = 'presse'; }
+        if (x <= 0) { clearInterval(MFA_T); MFA_T = null; mfaExpire(); }
+      }, 250);
+    });
+  }
+
+  /* ══ LA REUSSITE ═════════════════════════════════════════════════════════
+     ⚠ L ORDRE EST LE SUJET. connexion:ouvrir leve le voile de chargement dans
+     la page AVANT App.render(), puis dessine le tableau de bord. On ne ferme
+     cette fenetre QU APRES : la fermer d abord laisserait voir l ecran de
+     connexion web une fraction de seconde, juste avant le panneau - exactement
+     le clignotement du #38, mais a l entree. */
+  function reussi(prenom){
+    szDire('Bienvenue' + (prenom ? ', ' + prenom : '') + '.', 'bon');
+    appeler('connexion:ouvrir').then(function(){ setTimeout(partir, 220); });
+  }
+  function partir(){
+    if (MAINT_T) { clearInterval(MAINT_T); MAINT_T = null; }
+    if (MFA_T) { clearInterval(MFA_T); MFA_T = null; }
+    try { window.close(); } catch (e) {}
+  }
+
+  /* ══ LA BANNIERE DE MAINTENANCE ══════════════════════════════════════════
+     ⚠ ELLE SE RELIT, ET C EST LE DEFAUT CORRIGE EN 5.7.0 : lue une fois, elle
+     restait apres la levee, et la boite du NIP avec. Un ecran qui annonce un
+     blocage deja leve empeche de se connecter alors que plus rien n empeche.
+     ⚠ UN APPEL QUI ECHOUE NE CHANGE RIEN : effacer la banniere sur une coupure
+     reseau ferait croire la maintenance levee alors qu on n en sait rien.
+     ⚠ ON NE REECRIT QUE SI LA PHRASE A CHANGE : sinon elle clignote sous les
+     doigts toutes les vingt secondes. */
+  function maintLire(){
+    appeler('connexion:maintenance').then(function(r){
+      if (!r || !r.ok) return;
+      var avant = MAINT;
+      MAINT = { actif: !!r.actif, phrase: r.phrase || '' };
+      if (avant && avant.actif === MAINT.actif && avant.phrase === MAINT.phrase) return;
+      maintPeindre();
+    });
+  }
+  function maintPeindre(){
+    var z = el('al-maint'), n = el('al-nipbox');
+    if (!z) return;
+    if (!MAINT || !MAINT.actif) {
+      z.innerHTML = '';
+      /* La boite du NIP part AVEC la banniere : une porte devant un mur se
+         retire, et c est la seule surface qu un inconnu peut marteler. */
+      if (n) n.innerHTML = '';
+      return;
+    }
+    z.innerHTML = '<div class="admlogin-maint"><strong>Maintenance en cours</strong>'
+      + '<div>' + esc(MAINT.phrase) + '</div></div>';
+  }
+
+  /* ══ LE NIP D URGENCE — Ctrl + Maj + 0 ═══════════════════════════════════
+     ⚠ IL N EXISTE QUE PENDANT UNE MAINTENANCE ACTIVE. Hors maintenance, le
+     raccourci ne dessine rien : le serveur refusait deja, donc rien ne cassait,
+     mais offrir une porte devant un mur RETIRE des tentatives possibles au lieu
+     d en compter. */
+  function nipOuvrir(){
+    if (!MAINT || !MAINT.actif) return;
+    var n = el('al-nipbox');
+    if (!n || n.firstChild) return;
+    n.innerHTML = '<div class="admlogin-nipbox">'
+      + '<strong>Désactivation d’urgence</strong>'
+      + '<div style="font-size:0.76rem;margin:0.3rem 0 0.5rem">Entrez le NIP posé à '
+      + 'l’activation du mode exclusif.</div>'
+      + '<label class="cx-lbl" for="nip-champ">NIP de désactivation</label>'
+      + '<input type="password" id="nip-champ" inputmode="numeric" maxlength="12" '
+      + 'autocomplete="off" placeholder="NIP">'
+      + '<div class="cx-err" id="nip-err"></div>'
+      + '<div class="npr"><button type="button" id="nip-ok">Lever la maintenance</button>'
+      + '<button type="button" id="nip-non">Annuler</button></div></div>';
+    var c = el('nip-champ'); if (c) c.focus();
+    var ok = el('nip-ok'); if (ok) ok.onclick = nipEnvoyer;
+    var no = el('nip-non');
+    if (no) no.onclick = function(){ var b = el('al-nipbox'); if (b) b.innerHTML = ''; };
+    if (c) c.onkeydown = function(e){ if (e.key === 'Enter') nipEnvoyer(); };
+  }
+  function nipEnvoyer(){
+    var c = el('nip-champ'), b = el('nip-ok');
+    if (!c || !b) return;
+    fauteEffacer('nip-err');
+    b.disabled = true;
+    appeler('connexion:nip', [c.value]).then(function(r){
+      var b2 = el('nip-ok');
+      if (b2) b2.disabled = false;
+      if (!r.ok) { faute('nip-err', r); var cc = el('nip-champ'); if (cc) { cc.value = ''; cc.focus(); } return; }
+      szDire(r.message || 'Maintenance levée.', 'bon');
+      MAINT = { actif: false, phrase: '' };
+      maintPeindre();
+    });
+  }
+
+  /* ══ LE BRANCHEMENT ══════════════════════════════════════════════════════
+     ⚠ APPELE APRES CHAQUE DESSIN, et il ne suppose rien : chaque element est
+     cherche, et son absence est normale (l ecran du code n a pas de case << se
+     souvenir >>). C est le banc verifier-appels-fenetres qui garantit que les
+     fonctions citees ici existent - une fenetre dont un bouton appelle un nom
+     absent << ne fait rien >> au clic, et rien d autre ne l attrape. */
+  function brancher(){
+    var f = el('cx-form');
+    if (f) f.onsubmit = function(e){ e.preventDefault(); entrer(); };
+    var fm = el('cx-form-mfa');
+    if (fm) fm.onsubmit = function(e){ e.preventDefault(); mfaEnvoyer(); };
+    var oeil = el('sl-oeil');
+    if (oeil) oeil.onclick = function(){
+      var p2 = el('sl-password');
+      if (!p2) return;
+      var cache = p2.type === 'password';
+      p2.type = cache ? 'text' : 'password';
+      oeil.innerHTML = cache ? IC.oeilBarre : IC.oeil;
+      oeil.setAttribute('aria-label', cache ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+      p2.focus();
+    };
+    var ou = el('sl-oubli');
+    if (ou) ou.onclick = function(){
+      appeler('connexion:oubli').then(function(r){ dessiner('oubli', r); });
+    };
+    var our = el('sl-oubli-retour');
+    if (our) our.onclick = function(){ dessiner('login'); apresLogin(); };
+    var mr = el('sl-mfa-retour');
+    if (mr) mr.onclick = function(){ mfaExpire(); };
+    var code = el('sl-mfa-code');
+    if (code) code.oninput = function(){ code.value = code.value.replace(/\D/g, '').slice(0, 6); };
+    /* Le seuil du casse-tete depend du NOM D UTILISATEUR : deux comptes sur le
+       meme poste n ont pas le meme compte d echecs, et exiger le casse-tete a
+       l un parce que l autre s est trompe serait faux dans les deux sens. */
+    var idc = el('sl-email');
+    if (idc) idc.onchange = function(){
+      appeler('connexion:captcha', [idc.value.trim()]).then(function(r){
+        if (!r || !r.ok) return;
+        if (r.requis && !r.verrouille) captchaPoser(); else captchaRetirer();
+      });
+    };
+  }
+
+  /* Le curseur va DIRECTEMENT au mot de passe quand le nom est deja connu :
+     l y renvoyer serait lui faire retaper ce que le poste a retenu. */
+  function apresLogin(){
+    if (CTX.captchaRequis && !CTX.verrouille) captchaPoser();
+    var z = el(CTX.prefill ? 'sl-password' : 'sl-email');
+    if (z) z.focus();
+  }
+
+  /* ══ LE RACCOURCI ════════════════════════════════════════════════════════ */
+  window.addEventListener('keydown', function(e){
+    if (e.ctrlKey && e.shiftKey && (e.key === '0' || e.code === 'Digit0' || e.code === 'Numpad0')) {
+      e.preventDefault();
+      nipOuvrir();
+    }
+  });
+
+  /* ══ LE CHARGEMENT ═══════════════════════════════════════════════════════
+     ⚠ SI LE CONTEXTE NE VIENT PAS, ON DESSINE QUAND MEME. Un ecran de connexion
+     qui refuserait de s afficher parce qu il n a pas pu lire la couleur d un
+     halo serait une panne bien pire que celle qu il evite - et il n y aurait
+     plus aucun moyen d entrer. D ou les valeurs de repli. */
+  var REPLI = {
+    ok: true,
+    theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5', logoTo: '#7c3aed',
+      titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)', sousTexte: 'Panneau d’administration',
+      btnFrom: '#1a1207', btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+    marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+    prefill: '', souvenir: false, captchaRequis: false, verrouille: false
+  };
+
+  function charger(){
+    appeler('connexion:contexte').then(function(r){
+      CTX = (r && r.ok && r.theme && r.marque) ? r : REPLI;
+      if (CTX === REPLI) szDire('Décor par défaut — la fenêtre principale n’a pas répondu.', 'att');
+      socle();
+      dessiner('login');
+      apresLogin();
+      /* La banniere se lit tout de suite, puis toutes les vingt secondes :
+         assez pour qu une levee se voie dans le temps qu on met a retaper un mot
+         de passe, assez lent pour ne peser sur rien. */
+      maintLire();
+      MAINT_T = setInterval(maintLire, 20000);
+    });
+  }
+
+  window.addEventListener('beforeunload', function(){
+    if (MAINT_T) clearInterval(MAINT_T);
+    if (MFA_T) clearInterval(MFA_T);
+  });
+
+  charger();
+})();
+</script></body></html>`;
+}
+
+module.exports = { pageConnexion };

@@ -131,6 +131,52 @@ const faireElement = (compteur) => ({
   hasAttribute() { return false; },
   addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true; },
   focus() {}, blur() {}, click() {}, scrollIntoView() {}, select() {},
+  /* ⚠⚠ UNE TOILE, PARCE QUE LE FAUX DOM N EN AVAIT PAS — ET TROIS FENÊTRES EN
+     DESSINENT (2026-09-10). `connexion.js` (le casse-tête à glissière),
+     `logotheque.js` et `studio.js` appellent `getContext`. Sans cette méthode,
+     un cas d'épreuve qui atteint le dessin meurt sur
+     « bg.getContext is not a function » — et les deux autres fenêtres passaient
+     au VERT depuis des mois uniquement parce que leur cas n'atteignait jamais
+     leur toile. Le trou n'était donc pas dans les fenêtres : il était ICI, et il
+     rendait tout code de dessin sur toile INÉPROUVABLE.
+
+     ⚠ CE CONTEXTE NE DESSINE RIEN, ET C'EST SUFFISANT. Ce que le banc doit
+     prouver, c'est que le code de dessin S'EXÉCUTE SANS LEVER — pas que les
+     pixels sont beaux (ça, c'est `banc-contraste-rendu.js`, dans un vrai
+     Chrome). Chaque verbe rend donc ce que l'appelant attend de lui plutôt que
+     `undefined` : `createLinearGradient` doit rendre un objet qui a
+     `addColorStop`, et `getImageData` un objet qu'on peut repasser à
+     `putImageData`. Rendre `undefined` ferait mourir la ligne suivante, et on
+     accuserait la fenêtre d'un défaut du harnais. */
+  getContext() {
+    const rien = () => {};
+    return {
+      fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', globalAlpha: 1,
+      lineCap: 'butt', lineJoin: 'miter', textAlign: 'start', textBaseline: 'alphabetic',
+      fillRect: rien, strokeRect: rien, clearRect: rien, drawImage: rien,
+      beginPath: rien, closePath: rien, moveTo: rien, lineTo: rien, arc: rien,
+      arcTo: rien, ellipse: rien, rect: rien, quadraticCurveTo: rien,
+      bezierCurveTo: rien, fill: rien, stroke: rien, clip: rien,
+      save: rien, restore: rien, translate: rien, rotate: rien, scale: rien,
+      setTransform: rien, transform: rien, setLineDash: rien,
+      fillText: rien, strokeText: rien,
+      measureText: () => ({ width: 40, actualBoundingBoxAscent: 8, actualBoundingBoxDescent: 2 }),
+      createLinearGradient: () => ({ addColorStop: rien }),
+      createRadialGradient: () => ({ addColorStop: rien }),
+      createPattern: () => null,
+      /* Les données sont VRAIES (un tableau de la bonne taille) : du code qui
+         parcourt les pixels doit pouvoir le faire sans sortir du tableau. */
+      getImageData: (x, y, w, h) => ({
+        width: Math.max(1, w | 0), height: Math.max(1, h | 0),
+        data: new Uint8ClampedArray(Math.max(1, (w | 0)) * Math.max(1, (h | 0)) * 4),
+      }),
+      putImageData: rien, createImageData: (w, h) => ({
+        width: Math.max(1, w | 0), height: Math.max(1, h | 0),
+        data: new Uint8ClampedArray(Math.max(1, (w | 0)) * Math.max(1, (h | 0)) * 4),
+      }),
+    };
+  },
+  toDataURL() { return 'data:image/png;base64,'; },
   querySelector() { return faireElement(compteur); },
   querySelectorAll() { return []; },
   closest() { return null; },

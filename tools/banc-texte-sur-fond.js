@@ -39,6 +39,28 @@ const fs = require('fs');
 const path = require('path');
 
 const DOSSIER = path.join(__dirname, '..', 'src', 'fenetres');
+/* ⚠⚠ LES FENÊTRES SANS MODE JOUR SONT ÉCARTÉES — ET LA DÉCLARATION SE VÉRIFIE.
+   Ce banc demande « quand cette fenêtre bascule en jour, reste-t-elle lisible ? ».
+   Une fenêtre qui n'inclut pas CSS_JOUR ne bascule JAMAIS : on mesurerait ses
+   couleurs contre un fond qui n'existera pas, et l'on rapporterait des ratios de
+   1,10 pour du texte blanc qui vit sur un fond sombre — les mêmes faux positifs
+   que les « 55 fautes » de la première version du banc au rendu, que la capture
+   d'écran a fait disparaître. Voir `tools/fenetres-mono-mode.js`, qui porte la
+   raison de chaque nom ET refuse une fenêtre déclarée qui inclurait CSS_JOUR.
+   ⚠ Ce qui continue de couvrir ces fenêtres : banc-jetons (aucune dispense),
+   verifier-fenetres, verifier-appels-fenetres, verifier-mise-en-page,
+   banc-accent-grave. Seule la question du BASCULEMENT est écartée, et seulement
+   là où il n'existe pas. */
+const MONO = require('./fenetres-mono-mode.js');
+{
+  const fMono = MONO.verifie(DOSSIER);
+  if (fMono.length) {
+    console.log('ECHEC  la déclaration mono-mode ne dit plus la vérité :');
+    for (const x of fMono) console.log('  ' + x);
+    process.exit(1);
+  }
+}
+
 const SEUIL = 4.5;
 const PAGE = '#f4f2ec';
 const LISTE = process.argv.indexOf('--liste') >= 0;
@@ -71,6 +93,7 @@ const defauts = [];
 let regardees = 0;
 
 for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js') && n !== 'socle.js')) {
+  if (MONO.estMonoMode(f)) continue;
   const mod = require(path.join(DOSSIER, f));
   const fabrique = Object.values(mod).find((v) => typeof v === 'function');
   if (!fabrique) continue;

@@ -43,6 +43,28 @@ const path = require('path');
 const DECLARE = require('./contraste-jour-declare.js');
 
 const DOSSIER = path.join(__dirname, '..', 'src', 'fenetres');
+/* ⚠⚠ LES FENÊTRES SANS MODE JOUR SONT ÉCARTÉES — ET LA DÉCLARATION SE VÉRIFIE.
+   Ce banc demande « quand cette fenêtre bascule en jour, reste-t-elle lisible ? ».
+   Une fenêtre qui n'inclut pas CSS_JOUR ne bascule JAMAIS : on mesurerait ses
+   couleurs contre un fond qui n'existera pas, et l'on rapporterait des ratios de
+   1,10 pour du texte blanc qui vit sur un fond sombre — les mêmes faux positifs
+   que les « 55 fautes » de la première version du banc au rendu, que la capture
+   d'écran a fait disparaître. Voir `tools/fenetres-mono-mode.js`, qui porte la
+   raison de chaque nom ET refuse une fenêtre déclarée qui inclurait CSS_JOUR.
+   ⚠ Ce qui continue de couvrir ces fenêtres : banc-jetons (aucune dispense),
+   verifier-fenetres, verifier-appels-fenetres, verifier-mise-en-page,
+   banc-accent-grave. Seule la question du BASCULEMENT est écartée, et seulement
+   là où il n'existe pas. */
+const MONO = require('./fenetres-mono-mode.js');
+{
+  const fMono = MONO.verifie(DOSSIER);
+  if (fMono.length) {
+    console.log('ECHEC  la déclaration mono-mode ne dit plus la vérité :');
+    for (const x of fMono) console.log('  ' + x);
+    process.exit(1);
+  }
+}
+
 const FOND_JOUR = '#f4f2ec';
 const SEUIL = 4.5;
 
@@ -89,6 +111,7 @@ const RX = /(^|[;{\s"'])color\s*:\s*(#[0-9a-fA-F]{3,6})/gm;
 const trouve = new Map();          // couleur -> { n, fichiers:Set }
 let lus = 0;
 for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
+  if (MONO.estMonoMode(f)) continue;
   const src = sansDefinitions(fs.readFileSync(path.join(DOSSIER, f), 'utf8'));
   lus++;
   let m;
@@ -116,6 +139,7 @@ for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
 const RX_VOILE = /rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*[0-9.]+\s*\)/g;
 const voiles = new Map();
 for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
+  if (MONO.estMonoMode(f)) continue;
   const src = sansDefinitions(fs.readFileSync(path.join(DOSSIER, f), 'utf8'));
   let m;
   RX_VOILE.lastIndex = 0;
@@ -151,6 +175,7 @@ let mal = 0, total = 0;
   for (const m of socleBrut.matchAll(/(--[a-z0-9-]+)\s*:\s*[^;}]+[;}]/g)) definis.add(m[1]);
   const orphelins = new Map();
   for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
+    if (MONO.estMonoMode(f)) continue;
     const src = fs.readFileSync(path.join(DOSSIER, f), 'utf8');
     for (const m of src.matchAll(/var\(\s*(--[a-z0-9-]+)\s*\)/g)) {
       if (definis.has(m[1])) continue;
@@ -259,6 +284,7 @@ for (const m of socleTxt.matchAll(/html\.jour\s+([^{,]+?)\s*\{([^}]*)\}/g)) {
 }
 const paires = new Map();
 for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
+  if (MONO.estMonoMode(f)) continue;
   const src = sansDefinitions(fs.readFileSync(path.join(DOSSIER, f), 'utf8'));
   for (const m of src.matchAll(/([.#a-zA-Z][^{}\n;]{0,80}?)\s*\{([^{}]{0,400})\}/g)) {
     const sel = m[1].trim(), decl = m[2];

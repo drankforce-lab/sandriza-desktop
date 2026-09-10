@@ -2033,6 +2033,13 @@ const OPS_PONT = new Set([
   /* Le mode << usage exclusif >> (sa demande du 2026-09-09) vit dans la meme
      fenetre que la presence : voir son commentaire dans admin.js. */
   'maintenance:etat', 'maintenance:ecrire', 'maintenance:ouvrir',
+  /* #57 — la connexion native. ⚠ CES DIX OPS S EXÉCUTENT SANS SESSION, et
+     c est leur métier de la créer : le garde `_session()` de pont.js est
+     volontairement absent côté page. Voir le bloc au-dessus de leurs
+     définitions dans `assets/js/pont.js`. */
+  'connexion:contexte', 'connexion:captcha', 'connexion:entrer', 'connexion:mfa',
+  'connexion:mfaAbandon', 'connexion:oubli', 'connexion:nip', 'connexion:maintenance',
+  'connexion:ecranWeb', 'connexion:ouvrir',
   'presence:liste', 'presence:deconnecter', 'presence:message',
   // Les quatre derniers trous fonctionnels de l audit (#6) : le REPERTOIRE de
   // grossistes (ajout en un clic) et la SUPPRESSION d une demande de retour
@@ -2490,6 +2497,26 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
    MEME porte que le reste, donc la reprise au premier plan et la relecture de
    l etat suivent la meme regle. Deux portes vers un ecran finissent par se
    comporter differemment. */
+/* La page appelle ceci depuis son écran de connexion (voir app.js). Elle ne
+   sait pas si la coquille est là — dans un navigateur, `sandrizaDesktop`
+   n existe pas et l écran web reste seul. */
+ipcMain.handle('fenetre:connexion', () => {
+  try { actionApp('connexion'); return { ok: true }; }
+  catch (e) { return { ok: false, motif: 'echec' }; }
+});
+
+/* ⚠ FERMER LA PORTE QUAND ON EST ENTRÉ. Sans ceci, la fenêtre de connexion
+   resterait ouverte derrière le tableau de bord, avec un formulaire vivant et
+   une veille de maintenance qui tourne — et un second mot de passe saisi là
+   rouvrirait une session par-dessus la sienne. */
+ipcMain.handle('fenetre:connexionFermer', () => {
+  try {
+    const w = fenetresNatives.get('connexion');
+    if (w && !w.isDestroyed()) w.close();
+    return { ok: true };
+  } catch (e) { return { ok: false, motif: 'echec' }; }
+});
+
 ipcMain.handle('fenetre:maintenance', () => {
   try { actionApp('maintenance'); return { ok: true }; }
   catch (e) { return { ok: false, motif: 'echec' }; }
@@ -2526,6 +2553,21 @@ const LIMITES_PONT = {
      redessine un écran. Au plafond ordinaire de 8 s, on obtiendrait un << délai >>
      sur la seule écriture qui n'a pas droit à l'échec. */
   'brouillon:ecrire': 20000, 'brouillon:lire': 20000,
+  /* ⚠⚠ LA CONNEXION A UN PLAFOND LARGE, ET C EST LE CAS OU UN DELAI COUTE LE
+     PLUS CHER (#57). `connexion:entrer` fait un aller-retour au serveur pour
+     verifier le mot de passe, PUIS lit la fiche complete du compte, PUIS ouvre
+     la session, PUIS ecrit au journal. Au plafond ordinaire de 8 s, une
+     connexion lente annoncerait << delai >> alors que la session vient de
+     s ouvrir : on serait connecte ET refuse en meme temps, et le second essai
+     compterait comme un echec dans la limitation de debit. Un mecanisme qui
+     AGIT en annonçant qu il a echoue est le defaut de la 5.6.0, et il n a pas
+     sa place sur la porte d entree.
+     ⚠ `connexion:mfa` fait le meme travail (verification, session, journal), et
+     il court en plus contre le decompte de 60 s cote page.
+     ⚠ Les autres ops de connexion (contexte, captcha, oubli) sont locales et
+     gardent le plafond ordinaire : leur donner 30 s ne ferait qu allonger
+     l attente le jour ou la page ne repond vraiment plus. */
+  'connexion:entrer': 30000, 'connexion:mfa': 30000, 'connexion:nip': 20000,
   // Depot des photos dans le stockage : le plus long de tous.
   'produit:enregistrer': 90000,
   // Etiquettes demandees a un transporteur (Postes Canada, FedEx).
@@ -3111,6 +3153,7 @@ const PAGES_ANCRABLES = () => ({
      de montrer. */
   'presence': ['Personnel connecté', () => pagePresence()],
   'maintenance': ['Mode usage exclusif', () => pageMaintenance()],
+  'connexion': ['Connexion', () => pageConnexion()],
   /* ⚠⚠ « veilleur » A QUITTÉ CE REGISTRE LE 2026-09-09, avec sa fenêtre, son
      entrée de menu et ses sept opérations. Sa demande : « considérant que l'icône
      et l'application font maintenant office de veilleur tout en un tu peut
@@ -4435,6 +4478,7 @@ const { pageJournaux } = require('./fenetres/journaux');
 const { pageVerrous } = require('./fenetres/verrous');
 const { pagePresence } = require('./fenetres/presence');
 const { pageMaintenance } = require('./fenetres/maintenance');
+const { pageConnexion } = require('./fenetres/connexion');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -4621,6 +4665,31 @@ const actionApp = (nom) => {
        ⚠ PETITE ET NON REDIMENSIONNABLE EN LARGEUR UTILE : c'est un formulaire de
        quatre champs, pas un tableau. Lui donner la taille d'un écran de liste
        ferait flotter quatre champs au milieu du vide. */
+    /* ══ L ÉCRAN DE CONNEXION EN NATIF (#57) ═══════════════════════════════
+       ⚠⚠ ELLE S OUVRE PAR-DESSUS, ELLE NE REMPLACE PAS. La page continue de
+       dessiner son écran de connexion web dans la fenêtre principale, et c est
+       DÉLIBÉRÉ : si cette fenêtre-ci ne s ouvrait pas (une erreur au dessin, un
+       écran secondaire débranché), il resterait un moyen d entrer. Un portage
+       qui retire l ancienne porte avant d avoir vu la nouvelle s ouvrir peut
+       enfermer tout le monde dehors — et c est la seule fenêtre de
+       l application où ce risque-là existe.
+
+       ⚠ 1000 × 660 : l écran divisé se replie en colonne sous 860 px (règle du
+       CSS extrait). Plus étroit, on perdrait le panneau de marque — c est-à-dire
+       précisément ce qu il demande de garder.
+
+       ⚠ NON REDIMENSIONNABLE, NON, JUSTEMENT : elle l est. Une fenêtre de
+       connexion figée sur un poste à petit écran ne montrerait pas son bouton.
+       Le minimum (760 × 520) laisse le formulaire entier visible même replié. */
+    case 'connexion': {
+      const winCx = ouvrirNative('connexion', 'Connexion', pageConnexion(),
+        { width: 1000, height: 660, minWidth: 760, minHeight: 520 });
+      /* ⚠ AU PREMIER PLAN, mais PAS << toujours au-dessus >>. C est la porte : on
+         doit la voir. Mais la clouer au-dessus de tout empêcherait de consulter
+         quoi que ce soit d autre pendant qu on cherche son mot de passe. */
+      try { if (winCx && !winCx.isDestroyed()) { winCx.show(); winCx.focus(); } } catch (e) {}
+      return;
+    }
     case 'maintenance': {
       const _avM = fenetresNatives.get('maintenance');
       const _reuM = !!(_avM && !_avM.isDestroyed());

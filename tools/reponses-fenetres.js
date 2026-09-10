@@ -6209,6 +6209,110 @@ module.exports = {
      que son écran affiche, donc le chemin du diagnostic — celui qu on lui
      demande de lire — doit s exécuter au moins une fois ici. */
   // ── MODE USAGE EXCLUSIF ────────────────────────────────────────────────────
+  'connexion.js': [
+    {
+      /* Le cas de tous les jours : personne n est memorise, pas de casse-tete,
+         pas de maintenance. C est l ecran que 95 % des ouvertures montrent. */
+      nom: 'la connexion, ecran nu',
+      /* Les trois choses sans lesquelles ce n est plus un ecran de connexion. */
+      exige: ['id="sl-email"', 'id="sl-password"', 'Se connecter'],
+      id: '',
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠ LE NOM MEMORISE ET LE CASSE-TETE DANS LE MEME CAS, A DESSEIN : c est
+         la seule facon d executer `captchaPoser` ET la branche de focus qui va
+         directement au mot de passe. Avec le cas nu seul, les deux cents lignes
+         du casse-tete (canvas, piece decoupee, glissiere) ne seraient JAMAIS
+         dessinees — et une erreur dedans ne se verrait qu au troisieme echec de
+         connexion d un vrai utilisateur. */
+      nom: 'nom memorise + casse-tete exige (3e essai)',
+      /* ⚠⚠ `exige` PARCE QUE LE CAS ETAIT VERT SANS LUI. Panne provoquee le
+         2026-09-10 : en remplacant `if (CTX.captchaRequis...)` par
+         `if (false)`, le casse-tete n etait plus dessine du tout — 11 ecritures
+         devenaient 10 — et le banc passait. Un cas qui ne distingue pas la
+         version saine de la version cassee ne prouve rien. Les deux ancres
+         ci-dessous sont la glissiere et la toile : sans elles, pas de
+         casse-tete. */
+      exige: ['id="cap-track"', 'id="cap-bg"'],
+      id: '',
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: 'bbrousseau', souvenir: true, captchaRequis: true, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:captcha': { ok: true, requis: true, verrouille: false },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠ LA MAINTENANCE ACTIVE : c est ce cas-la qui dessine la banniere ET
+         rend le raccourci Ctrl + Maj + 0 vivant. Sans lui, `maintPeindre` et
+         `nipOuvrir` ne s executeraient jamais — et c est precisement le couple
+         qui a du etre corrige deux fois (5.7.0 : banniere lue une fois, porte
+         devant un mur). */
+      nom: 'maintenance en cours — banniere et NIP vivants',
+      /* ⚠ MEME RAISON. `maintPeindre` pourrait cesser d ecrire sans qu une
+         seule exception ne soit levee : l ecran de connexion resterait
+         parfaitement fonctionnel, simplement muet sur la maintenance — et
+         personne ne saurait pourquoi il ne peut pas entrer. C est le defaut de
+         la 5.7.0, dans l autre sens. */
+      exige: ['admlogin-maint', 'Maintenance en cours'],
+      id: '',
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: true,
+          phrase: 'Une maintenance est en cours : l’application ne sera pas disponible'
+            + ' entre jeudi le 10 septembre à 20h00 et jeudi le 10 septembre à 22h00.' },
+        'connexion:nip': { ok: false, motif: 'refus', restant: 4,
+          message: 'NIP refusé. Il reste 4 tentatives.' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠⚠ LE CAS OU LA PAGE NE REPOND PAS, ET C EST LE PLUS IMPORTANT DES
+         QUATRE. Une fenetre de connexion qui refuserait de s afficher parce
+         qu elle n a pas pu lire la couleur d un halo serait une panne bien pire
+         que celle qu elle evite : il n y aurait plus AUCUN moyen d entrer. Ce
+         cas prouve que les valeurs de repli (`REPLI`) dessinent un ecran
+         complet et utilisable.
+         ⚠ Il prouve aussi que `szDire` parle : c est ici que la ligne de
+         message affiche << Decor par defaut >>, et c est l ancre `#msg` que le
+         verificateur exigeait — sans elle la fenetre etait MUETTE. */
+      nom: 'refus du contexte — le decor de repli doit suffire',
+      /* ⚠ ON EXIGE LE PANNEAU DE MARQUE ET LE FORMULAIRE : un repli qui
+         dessinerait une page blanche << sans lever >> serait vert, et il n y
+         aurait plus aucun moyen d entrer. */
+      exige: ['admlogin-brand', 'id="sl-password"', 'SANDRIZA'],
+      id: '',
+      reponses: {
+        'connexion:contexte': { ok: false, motif: 'indisponible' },
+        'connexion:maintenance': { ok: false, motif: 'panne' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   'maintenance.js': [
     {
       /* Le cas ordinaire : le mode est éteint, la fenêtre montre le formulaire.

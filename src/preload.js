@@ -180,6 +180,11 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // L explorateur de photos, en fenetre a part — il ne remplace PAS le Studio.
   ouvrirExplorateur: () => ipcRenderer.invoke('fenetre:explorateur'),
   ouvrirMaintenance: () => ipcRenderer.invoke('fenetre:maintenance'),
+  /* #57 — l'écran de connexion natif. La page l'ouvre depuis `renderLogin`,
+     et la ferme quand la session est ouverte. ⚠ Dans un navigateur ces deux
+     verbes n'existent pas : l'écran web reste seul, et c'est le filet. */
+  ouvrirConnexion: () => ipcRenderer.invoke('fenetre:connexion'),
+  fermerConnexion: () => ipcRenderer.invoke('fenetre:connexionFermer'),
   /* Le choix de mise à jour : `heures` nul ou 0 = installer maintenant, sinon
      2, 4 ou 8. ⚠ La coquille REVÉRIFIE la valeur : une page peut envoyer
      n'importe quoi, et une échéance dans onze ans serait un report qui ne
