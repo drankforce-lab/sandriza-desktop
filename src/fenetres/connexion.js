@@ -442,11 +442,11 @@ ${JS_DIRE}
       + '<div class="cx-titre">Connexion sécurisée</div>'
       + '<div class="cx-sous">Réservé au personnel autorisé uniquement</div>'
       + '</div>'
-      + '<form id="cx-form">'
+      + '<form id="cx-form" novalidate>'
       + '<div style="margin-bottom:1rem">'
       + '<label class="cx-lbl" for="sl-email">Nom d’utilisateur</label>'
       + '<div class="cx-champ"><span class="cx-ic">' + IC.personne + '</span>'
-      + '<input type="text" id="sl-email" class="pad" autocomplete="username" required value="'
+      + '<input type="text" id="sl-email" class="pad" autocomplete="username" value="'
       + esc(CTX.prefill) + '"></div>'
       + '</div>'
       + '<div class="cx-souvenir">'
@@ -456,7 +456,7 @@ ${JS_DIRE}
       + '<div style="margin-bottom:1.25rem">'
       + '<label class="cx-lbl" for="sl-password">Mot de passe</label>'
       + '<div class="cx-champ"><span class="cx-ic">' + IC.cadenas + '</span>'
-      + '<input type="password" id="sl-password" class="pad padd" autocomplete="current-password" required>'
+      + '<input type="password" id="sl-password" class="pad padd" autocomplete="current-password">'
       + '<button type="button" class="cx-oeil" id="sl-oeil" aria-label="Afficher le mot de passe">'
       + IC.oeil + '</button></div>'
       + '</div>'
@@ -477,11 +477,11 @@ ${JS_DIRE}
       + '<div class="cx-sous">Entrez le code de votre application d’authentification</div>'
       + '<div class="cx-chrono">⏱ Temps restant : <strong id="sl-mfa-timer">' + sec + ' s</strong></div>'
       + '</div>'
-      + '<form id="cx-form-mfa">'
+      + '<form id="cx-form-mfa" novalidate>'
       + '<div style="margin-bottom:1.25rem">'
       + '<label class="cx-lbl" for="sl-mfa-code">Code à 6 chiffres</label>'
       + '<input type="text" id="sl-mfa-code" inputmode="numeric" maxlength="6"'
-      + ' autocomplete="one-time-code" required placeholder="000000">'
+      + ' autocomplete="one-time-code" placeholder="000000">'
       + '</div>'
       + '<div class="cx-err" id="sl-mfa-error"></div>'
       + '<button type="submit" class="cx-btn" id="sl-mfa-btn" style="' + btnStyle() + '">Vérifier</button>'
@@ -564,11 +564,11 @@ ${JS_DIRE}
       + '</div>'
       + '<div class="cx-etape">'
       + '<div class="cx-etl">Étape 3 — confirmez</div>'
-      + '<form id="cx-form-wz">'
+      + '<form id="cx-form-wz" novalidate>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="wz-code">Code à 6 chiffres</label>'
       + '<input type="text" id="wz-code" inputmode="numeric" maxlength="6" '
-      + 'autocomplete="one-time-code" required placeholder="000000">'
+      + 'autocomplete="one-time-code" placeholder="000000">'
       + '</div>'
       + '<div class="cx-err" id="wz-err"></div>'
       + '<button type="submit" class="cx-btn" id="wz-btn" style="' + btnStyle() + '">'
@@ -591,14 +591,14 @@ ${JS_DIRE}
       + 'passe avant d’accéder au panneau.</div>'
       + (ex ? ('<ul class="cx-exig">' + ex + '</ul>') : '')
       + '</div>'
-      + '<form id="cx-form-mdp">'
+      + '<form id="cx-form-mdp" novalidate>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="pc-pw1">Nouveau mot de passe</label>'
-      + '<input type="password" id="pc-pw1" class="padd" autocomplete="new-password" required>'
+      + '<input type="password" id="pc-pw1" class="padd" autocomplete="new-password">'
       + '</div>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="pc-pw2">Confirmer le mot de passe</label>'
-      + '<input type="password" id="pc-pw2" autocomplete="new-password" required>'
+      + '<input type="password" id="pc-pw2" autocomplete="new-password">'
       + '</div>'
       + '<div class="cx-err" id="pc-err"></div>'
       + '<button type="submit" class="cx-btn" id="pc-btn" style="' + btnStyle() + '">'
@@ -630,22 +630,22 @@ ${JS_DIRE}
       + '<div class="cx-sous">' + esc(d.prenom) + ', choisissez deux questions. Elles servent '
       + 'à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.</div>'
       + '</div>'
-      + '<form id="cx-form-q">'
+      + '<form id="cx-form-q" novalidate>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="sq-q1">Question 1</label>'
-      + '<select id="sq-q1" required>' + opts('', '') + '</select>'
+      + '<select id="sq-q1">' + opts('', '') + '</select>'
       + '</div>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="sq-a1">Réponse 1</label>'
-      + '<input type="text" id="sq-a1" autocomplete="off" required>'
+      + '<input type="text" id="sq-a1" autocomplete="off">'
       + '</div>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="sq-q2">Question 2</label>'
-      + '<select id="sq-q2" required>' + opts('', '') + '</select>'
+      + '<select id="sq-q2">' + opts('', '') + '</select>'
       + '</div>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="sq-a2">Réponse 2</label>'
-      + '<input type="text" id="sq-a2" autocomplete="off" required>'
+      + '<input type="text" id="sq-a2" autocomplete="off">'
       + '</div>'
       + '<div class="cx-err" id="sq-err"></div>'
       + '<button type="submit" class="cx-btn" id="sq-btn" style="' + btnStyle() + '">'
@@ -715,6 +715,10 @@ ${JS_DIRE}
     var c = el('wz-code'), b = el('wz-btn');
     if (!c || !b) return;
     fauteEffacer('wz-err');
+    if (manque(['wz-code'])) {
+      faute('wz-err', { message: 'Entrez le code à six chiffres affiché par votre application.' });
+      return;
+    }
     b.disabled = true;
     b.innerHTML = '<span class="cx-spin"></span><span>Vérification…</span>';
     c.disabled = true;
@@ -731,6 +735,10 @@ ${JS_DIRE}
     var a = el('pc-pw1'), b = el('pc-pw2'), bt = el('pc-btn');
     if (!a || !b || !bt) return;
     fauteEffacer('pc-err');
+    if (manque(['pc-pw1', 'pc-pw2'])) {
+      faute('pc-err', { message: 'Remplissez les deux champs.' });
+      return;
+    }
     bt.disabled = true;
     bt.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
     appeler('connexion:mdpEcrire', [a.value, b.value]).then(function(r){
@@ -750,6 +758,10 @@ ${JS_DIRE}
     var q1 = el('sq-q1'), a1 = el('sq-a1'), q2 = el('sq-q2'), a2 = el('sq-a2'), b = el('sq-btn');
     if (!q1 || !a1 || !q2 || !a2 || !b) return;
     fauteEffacer('sq-err');
+    if (manque(['sq-q1', 'sq-a1', 'sq-q2', 'sq-a2'])) {
+      faute('sq-err', { message: 'Choisissez les deux questions et écrivez leurs réponses.' });
+      return;
+    }
     b.disabled = true;
     b.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
     appeler('connexion:questionsEcrire', [q1.value, a1.value, q2.value, a2.value])
@@ -936,6 +948,33 @@ ${JS_DIRE}
     var z = document.querySelector('.cx-recours.cx-voile');
     if (z) z.className = 'cx-centre cx-recours';
   }
+  /* ══ CE QUI REMPLACE LA BULLE DU NAVIGATEUR ═════════════════════════
+     ⚠⚠ SA DEMANDE DU 2026-09-11 : << retire le texte de survol au-dessus du
+     champ de mot de passe, ça ne sert à rien >>. C était la bulle native de
+     Chromium, celle que << required >> fait apparaître à la soumission. Il a
+     raison : dans une fenêtre qui cherche à ne plus avoir l air d une page
+     web, une info-bulle grise du moteur est exactement ce qui trahit — elle
+     ne suit ni le thème, ni la police, ni la langue de l application.
+     ⚠ MAIS ON NE RETIRE PAS LA VÉRIFICATION, ON LA RAPATRIE. Sans elle, un
+     formulaire vide partirait au réseau pour revenir avec un refus — un
+     aller-retour, une attente, et un message venu d ailleurs. Ici : premier
+     champ vide, on le met au foyer et on écrit dans la MÊME zone que tous
+     les autres refus de cet écran. Une seule voix.
+     ⚠ ET LE BOUTON RESTE CLIQUABLE. Le griser tant que les champs sont vides
+     serait plus net — et le jour où cette règle a un trou, plus personne ne
+     peut se connecter. Sur l écran qui OUVRE l application, on ne pose pas un
+     verrou dont la panne se solde par une porte fermée.
+     ⚠ << novalidate >> EN PLUS de retirer << required >> : les deux disent la même
+     chose, et c est voulu. Un champ auquel on rendrait << required >> demain
+     ferait revenir la bulle sans que personne ne comprenne d où elle sort ;
+     l attribut sur le formulaire, lui, la tient fermée quoi qu il arrive. */
+  function manque(ids){
+    for (var i = 0; i < ids.length; i++) {
+      var c = el(ids[i]);
+      if (c && !String(c.value == null ? '' : c.value).trim()) { try { c.focus(); } catch (e) {} return true; }
+    }
+    return false;
+  }
   function fauteEffacer(id){
     var z = el(id);
     if (z) { z.className = 'cx-err'; z.innerHTML = ''; }
@@ -946,6 +985,10 @@ ${JS_DIRE}
     var idc = el('sl-email'), pwc = el('sl-password'), b = el('sl-btn');
     if (!idc || !pwc || !b) return;
     fauteEffacer('sl-error');
+    if (manque(['sl-email', 'sl-password'])) {
+      faute('sl-error', { message: 'Entrez votre nom d’utilisateur et votre mot de passe.' });
+      return;
+    }
     /* ⚠ LE DISQUE REMPLACE LE TEXTE SANS CHANGER LA TAILLE DU BOUTON : sa
        hauteur est fixée (min-height) et son contenu est centré. Un bouton qui
        rétrécit pendant qu on attend fait sauter tout le formulaire — c est la
@@ -1020,6 +1063,10 @@ ${JS_DIRE}
     var c = el('sl-mfa-code'), b = el('sl-mfa-btn');
     if (!c || !b) return;
     fauteEffacer('sl-mfa-error');
+    if (manque(['sl-mfa-code'])) {
+      faute('sl-mfa-error', { message: 'Entrez le code à six chiffres.' });
+      return;
+    }
     /* On arrete le chrono PENDANT la verification : sinon un << delai depasse >>
        tomberait au milieu de l attente reseau, et le bouton resterait cliquable
        pour un second envoi. */
@@ -1187,7 +1234,7 @@ ${JS_DIRE}
     var fw = el('cx-form-wz');
     if (fw) fw.onsubmit = function(e){ e.preventDefault(); mfaConfigEnvoyer(); };
     var wc = el('wz-code');
-    if (wc) wc.oninput = function(){ wc.value = wc.value.replace(/D/g, '').slice(0, 6); };
+    if (wc) wc.oninput = function(){ wc.value = wc.value.replace(/\D/g, '').slice(0, 6); };
     var wcp = el('wz-copier');
     if (wcp) wcp.onclick = function(){
       var z = el('wz-cle');
@@ -1196,7 +1243,7 @@ ${JS_DIRE}
          de quatre), et les applications TOTP refusent la plupart du temps une
          cle qui en contient. Copier ce qu on voit aurait fait echouer le
          collage sans dire pourquoi. */
-      var v = String(z.textContent || '').replace(/s+/g, '');
+      var v = String(z.textContent || '').replace(/\s+/g, '');
       try { navigator.clipboard.writeText(v); szDire('Clé copiée (sans les espaces).', 'bon'); }
       catch (e) { szDire('La copie a échoué — recopiez la clé à la main.', 'att'); }
     };

@@ -32,11 +32,11 @@
       + '</div>'
       + '<div class="cx-etape">'
       + '<div class="cx-etl">Étape 3 — confirmez</div>'
-      + '<form id="cx-form-wz">'
+      + '<form id="cx-form-wz" novalidate>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="wz-code">Code à 6 chiffres</label>'
       + '<input type="text" id="wz-code" inputmode="numeric" maxlength="6" '
-      + 'autocomplete="one-time-code" required placeholder="000000">'
+      + 'autocomplete="one-time-code" placeholder="000000">'
       + '</div>'
       + '<div class="cx-err" id="wz-err"></div>'
       + '<button type="submit" class="cx-btn" id="wz-btn" style="' + btnStyle() + '">'
@@ -59,14 +59,14 @@
       + 'passe avant d’accéder au panneau.</div>'
       + (ex ? ('<ul class="cx-exig">' + ex + '</ul>') : '')
       + '</div>'
-      + '<form id="cx-form-mdp">'
+      + '<form id="cx-form-mdp" novalidate>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="pc-pw1">Nouveau mot de passe</label>'
-      + '<input type="password" id="pc-pw1" class="padd" autocomplete="new-password" required>'
+      + '<input type="password" id="pc-pw1" class="padd" autocomplete="new-password">'
       + '</div>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="pc-pw2">Confirmer le mot de passe</label>'
-      + '<input type="password" id="pc-pw2" autocomplete="new-password" required>'
+      + '<input type="password" id="pc-pw2" autocomplete="new-password">'
       + '</div>'
       + '<div class="cx-err" id="pc-err"></div>'
       + '<button type="submit" class="cx-btn" id="pc-btn" style="' + btnStyle() + '">'
@@ -98,22 +98,22 @@
       + '<div class="cx-sous">' + esc(d.prenom) + ', choisissez deux questions. Elles servent '
       + 'à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.</div>'
       + '</div>'
-      + '<form id="cx-form-q">'
+      + '<form id="cx-form-q" novalidate>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="sq-q1">Question 1</label>'
-      + '<select id="sq-q1" required>' + opts('', '') + '</select>'
+      + '<select id="sq-q1">' + opts('', '') + '</select>'
       + '</div>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="sq-a1">Réponse 1</label>'
-      + '<input type="text" id="sq-a1" autocomplete="off" required>'
+      + '<input type="text" id="sq-a1" autocomplete="off">'
       + '</div>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="sq-q2">Question 2</label>'
-      + '<select id="sq-q2" required>' + opts('', '') + '</select>'
+      + '<select id="sq-q2">' + opts('', '') + '</select>'
       + '</div>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="sq-a2">Réponse 2</label>'
-      + '<input type="text" id="sq-a2" autocomplete="off" required>'
+      + '<input type="text" id="sq-a2" autocomplete="off">'
       + '</div>'
       + '<div class="cx-err" id="sq-err"></div>'
       + '<button type="submit" class="cx-btn" id="sq-btn" style="' + btnStyle() + '">'
@@ -183,6 +183,10 @@
     var c = el('wz-code'), b = el('wz-btn');
     if (!c || !b) return;
     fauteEffacer('wz-err');
+    if (manque(['wz-code'])) {
+      faute('wz-err', { message: 'Entrez le code à six chiffres affiché par votre application.' });
+      return;
+    }
     b.disabled = true;
     b.innerHTML = '<span class="cx-spin"></span><span>Vérification…</span>';
     c.disabled = true;
@@ -199,6 +203,10 @@
     var a = el('pc-pw1'), b = el('pc-pw2'), bt = el('pc-btn');
     if (!a || !b || !bt) return;
     fauteEffacer('pc-err');
+    if (manque(['pc-pw1', 'pc-pw2'])) {
+      faute('pc-err', { message: 'Remplissez les deux champs.' });
+      return;
+    }
     bt.disabled = true;
     bt.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
     appeler('connexion:mdpEcrire', [a.value, b.value]).then(function(r){
@@ -218,6 +226,10 @@
     var q1 = el('sq-q1'), a1 = el('sq-a1'), q2 = el('sq-q2'), a2 = el('sq-a2'), b = el('sq-btn');
     if (!q1 || !a1 || !q2 || !a2 || !b) return;
     fauteEffacer('sq-err');
+    if (manque(['sq-q1', 'sq-a1', 'sq-q2', 'sq-a2'])) {
+      faute('sq-err', { message: 'Choisissez les deux questions et écrivez leurs réponses.' });
+      return;
+    }
     b.disabled = true;
     b.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
     appeler('connexion:questionsEcrire', [q1.value, a1.value, q2.value, a2.value])

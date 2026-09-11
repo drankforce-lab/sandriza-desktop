@@ -353,6 +353,12 @@ jobs:
           # des quatre laisse la fenêtre saine et tous les autres bancs verts — le
           # bouton est simplement toujours visible, ou plus jamais.
           node tools/banc-recours-oubli.js
+          # ⚠ CELUI-CI GARDE UN DÉFAUT QUI NE LÈVE RIEN. Les fenêtres natives sont
+          # ENGENDRÉES, et un `\d` tapé dans le générateur arrive `d` dans le fichier
+          # produit : l'expression reste VALIDE, elle cherche simplement autre chose.
+          # Payé quatre fois — dont une clé TOTP copiée AVEC ses espaces, sous un
+          # message qui annonçait le contraire.
+          node tools/banc-antislash-fondu.js
           # ⚠ CELUI-CI GARDE UN DÉFAUT QUI NE SE VOIT QU'APRÈS INSTALLATION :
           # une ressource citée par src/ mais rangée hors de src/ existe en
           # développement et disparaît de l'archive. C'est ce qui a fait un carré

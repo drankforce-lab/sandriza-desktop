@@ -3971,62 +3971,52 @@ const cnxDire = (x) => {
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
-   OÙ S ARRÊTE LA BARRE DE MENUS — ON LA MESURE, ON NE L ATTEND PLUS
+   LA BARRE DE MENUS PENDANT LA CONNEXION : CELLE D ELECTRON, PAS CELLE DE LA PAGE
    ═══════════════════════════════════════════════════════════════════════════
-   ⚠⚠ SA QUATRIÈME REMARQUE SUR LE MENU, ET MES DEUX EXPLICATIONS ÉTAIENT
-   FAUSSES. J ai d abord dit « la zone rapportée est rejetée », puis « c est
-   `autoHideMenuBar`, la barre revient avec Alt ». Ni l un ni l autre : l écran
-   « À propos » dit « Menu : EN HAUT · taille 115 % » — c est un réglage de
-   l application pour SA barre, celle que la PAGE dessine (`#sz-menubar`). Elle
-   vit donc DANS la zone de contenu, et ma vue la recouvrait.
+   ⚠⚠ SES MOTS DU 2026-09-11 : « le menu ne fonctionne pas dans l écran de
+   connexion, tu cliques, rien ne se passe ». La 5.20.0 avait rendu la barre
+   VISIBLE en mesurant sa hauteur et en descendant la vue en dessous. Elle se
+   voyait, elle réagissait au survol — et aucun menu ne s ouvrait.
 
-   ⚠ POURQUOI LE CANAL NE SUFFISAIT PAS : la page devait rapporter sa zone
-   (`dockZone`) et la coquille l attendre. Son journal ne montre aucune zone —
-   donc elle n est jamais arrivée, et je n ai aucun moyen de savoir pourquoi
-   depuis ici. Attendre un message qui ne vient pas est un mécanisme qui échoue
-   en SILENCE.
+   ⚠ LA CAUSE, ET ELLE EST STRUCTURELLE : les panneaux du menu sont des `div`
+   que la PAGE ajoute dans son propre document (`.sz-panneau`). Une
+   `WebContentsView` est une surface native posée PAR-DESSUS le contenu de la
+   page — rien de ce que la page dessine ne peut passer devant. Le panneau
+   s ouvrait bel et bien, à l endroit prévu, sous la vue.
+   ⚠ MONTRER LA BARRE SANS SES PANNEAUX, C ÉTAIT UN DEMI-CORRECTIF — et un
+   demi-correctif se remarque à l usage, pas à la relecture : la barre avait
+   l air juste.
 
-   ⚠ ON DEMANDE DIRECTEMENT À LA PAGE, et on journalise la réponse. Un aller
-   simple, sans canal intermédiaire, sans rien à enregistrer côté page : si la
-   barre existe, on a son bas ; si elle n existe pas, on a zéro ; si la page ne
-   répond pas, on a le message d erreur — et dans les trois cas c est ÉCRIT.
-   ⚠ La vue reste posée pendant ce temps : la mesure ne fait que la RÉTRÉCIR par
-   le haut, elle ne conditionne jamais son affichage. */
-let _cnxHautBarre = 0;
+   ⚠ CE QUI EXISTAIT DÉJÀ ET QUE JE N AVAIS PAS VU : `buildMenu()` construit
+   depuis toujours un menu NATIF complet à partir du même modèle
+   (`versTemplateNatif`), et le garde MASQUÉ pour ses seuls raccourcis. Tout
+   était là. Il suffit de le MONTRER le temps de la connexion : ses panneaux
+   sont des fenêtres du système, elles flottent au-dessus de tout, vue
+   comprise. Un seul modèle, deux rendus — pas une seconde implémentation.
+   ⚠ ET LA VUE REDEVIENT PLEIN CADRE : la barre native vit HORS de la zone de
+   contenu (`getContentSize` l exclut), donc plus rien à mesurer, plus de
+   facteur de zoom à appliquer, plus de bande à laisser. La barre de la page,
+   elle, reste dessinée dessous, invisible — et c est très bien : elle reprend
+   la main intacte dès que la vue s en va.
 
-const cnxMesurerBarre = () => {
+   ⚠ POURQUOI PAS L INVERSE (rendre le menu dans la vue) : il faudrait
+   réimplémenter la barre du site dans un second endroit, et
+   `src/menubar.js` raconte déjà ce que ça coûte — la copie a dérivé, deux
+   menus qui ne se ressemblaient plus. */
+const cnxBarreNative = (montrer) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  let wc = null;
-  try { wc = mainWindow.webContents; } catch (e) { return; }
-  if (!wc || wc.isDestroyed()) return;
-  /* ⚠ `bottom` ET NON `height` : la barre peut avoir une marge au-dessus, et
-     c est le bas qui dit où la vue peut commencer. */
-  const code = "(function(){var b=document.getElementById('sz-menubar');"
-    + "if(!b)return 0;var r=b.getBoundingClientRect();"
-    + "return (r.height>4 && r.top<40) ? Math.round(r.bottom) : 0;})()";
   try {
-    wc.executeJavaScript(code, true).then((v) => {
-      const h = Math.max(0, Math.min(200, parseInt(v, 10) || 0));
-      if (h === _cnxHautBarre) return;
-      _cnxHautBarre = h;
-      cnxDire("barre de menus mesuree : bas a " + h + " px");
-      poserVueConnexion();
-    }).catch((e) => cnxDire("mesure de la barre refusee : " + ((e && e.message) || e)));
-  } catch (e) { cnxDire("mesure de la barre impossible : " + ((e && e.message) || e)); }
+    mainWindow.autoHideMenuBar = !montrer;
+    mainWindow.setMenuBarVisibility(!!montrer);
+    cnxDire(montrer ? "barre de menus NATIVE montree" : "barre de menus native remasquee");
+  } catch (e) { cnxDire("barre native refusee : " + ((e && e.message) || e)); }
 };
 
 const poserVueConnexion = () => {
   if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
   try {
     const [w, h] = mainWindow.getContentSize();
-    /* ⚠ LE FACTEUR DE ZOOM S APPLIQUE À LA MESURE, pas au cadre : la page rend
-       des pixels CSS, la vue se pose en pixels de fenêtre. Son affichage est à
-       115 % — sans cette conversion, la vue commencerait 15 % trop haut et
-       mordrait encore sur la barre. */
-    let f = 1;
-    try { f = mainWindow.webContents.getZoomFactor() || 1; } catch (e) {}
-    const y = Math.max(0, Math.min(Math.round(_cnxHautBarre * f), h - 200));
-    vueConnexion.setBounds({ x: 0, y, width: w, height: h - y });
+    vueConnexion.setBounds({ x: 0, y: 0, width: w, height: h });
   } catch (e) {}
 };
 
@@ -4100,10 +4090,13 @@ const connexionMontrer = () => {
      menu apparaît trois secondes après le tableau de bord ». Trois instants
      couvrent le cas normal et le cas lent, et chacun journalise s il change
      quelque chose. */
-  cnxMesurerBarre();
-  setTimeout(() => { cnxMesurerBarre(); poserVueConnexion(); }, 250);
-  setTimeout(() => { cnxMesurerBarre(); poserVueConnexion(); }, 1200);
-  setTimeout(() => { cnxMesurerBarre(); poserVueConnexion(); }, 3500);
+  cnxBarreNative(true);
+  /* ⚠ ON REPOSE QUAND MÊME DEUX FOIS : la fenêtre n a pas toujours sa taille
+     définitive à cet instant (elle se restaure, l affichage s ajuste), et
+     MONTRER la barre native change elle-même la hauteur de la zone de
+     contenu. Une vue posée une seule fois garderait les dimensions d avant. */
+  setTimeout(poserVueConnexion, 250);
+  setTimeout(poserVueConnexion, 1200);
   try {
     view.webContents.once('did-finish-load', () => {
       charge = true;
@@ -4157,6 +4150,11 @@ const connexionRetirer = () => {
   const v = vueConnexion;
   vueConnexion = null;
   if (!v) return false;
+  /* ⚠ AVANT TOUT LE RESTE : la barre native ne sert QUE pendant la connexion.
+     Passé ce point, c est la barre de la page qui reprend — et deux barres
+     l une sur l autre, c est ce que l administration montrerait si on oubliait
+     cette ligne. */
+  cnxBarreNative(false);
   try { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.contentView.removeChildView(v); }
   catch (e) {}
   /* ⚠ ON FERME LE CONTENU, on ne se contente pas de détacher la vue : une vue
@@ -5533,8 +5531,17 @@ const buildMenu = () => {
   }
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.setMenuBarVisibility(false);
-    mainWindow.autoHideMenuBar = true;
+    /* ⚠⚠ SAUF PENDANT LA CONNEXION. Ce modèle arrive souvent — thème, taille,
+       ancrage, session — et chaque arrivée rappelle `buildMenu`. Sans cette
+       garde, la barre native montrée à l ouverture de l écran de connexion
+       serait remasquée à la première mise à jour du modèle, c est-à-dire
+       presque tout de suite, et le défaut reviendrait EXACTEMENT comme avant.
+       ⚠ Le menu lui-même, lui, est bien reconstruit : c est sa VISIBILITÉ
+       qu on laisse tranquille, pas son contenu — la barre suit donc la session
+       qui s ouvre pendant qu elle est affichée. */
+    const cnx = !!vueConnexion;
+    mainWindow.setMenuBarVisibility(cnx);
+    mainWindow.autoHideMenuBar = !cnx;
   }
 };
 
