@@ -321,6 +321,7 @@ ${JS_DIRE}
       "Annuler": "Cancel",
       "Authentification à deux facteurs": "Two-factor authentication",
       "Copier la clé": "Copy the key",
+      "Ou scannez le code ci-dessous.": "Or scan the code below.",
       "Code QR indisponible — utilisez la clé ci-dessus.": "QR code unavailable — use the key above.",
       "← Annuler": "← Cancel",
       "Activer et accéder au panneau": "Enable and continue",
@@ -664,15 +665,16 @@ ${JS_DIRE}
   }
 
   /* ══ ① LA CONFIGURATION DU CODE A SIX CHIFFRES ═════════════════════════════
-     ⚠⚠ LA CLE MANUELLE EST MISE EN AVANT, PAS EN REPLI, ET C EST DELIBERE. Le QR
-     est construit par un service TIERS (api.qrserver.com) avec l URI otpauth
-     COMPLETE dans l URL — donc le secret TOTP en clair, chez quelqu un d autre.
-     C est le comportement de l ecran web depuis toujours, et le porter ne
-     l aggrave pas ; mais la cle tapee a la main NE SORT PAS DU POSTE, alors on la
-     montre comme une voie normale et non comme un dernier recours.
-     ⚠ Le vrai remede — dessiner le QR sur place, sans reseau — est un chantier a
-     part, et il est signale : un QR subtilement faux ne se voit pas, et il
-     enfermerait dehors le compte qu on essaie justement de configurer. */
+     ⚠⚠ LA CLE MANUELLE EST MISE EN AVANT, PAS EN REPLI, ET C EST DELIBERE.
+     Jusqu au 2026-09-11, le QR etait construit par un service TIERS avec l URI
+     otpauth COMPLETE dans l adresse — donc le secret TOTP en clair chez quelqu un
+     d autre, a chaque configuration d un second facteur. Il est desormais dessine
+     SUR LE POSTE et arrive tout fait par le pont (assets/js/qr.js, eprouve par
+     tools/check/banc-qr.js qui decode la matrice a l envers).
+     ⚠ LA CLE RESTE DEVANT MALGRE TOUT, et ce n est plus une precaution mais un
+     choix : elle se tape sans camera, elle marche quand le dessin manque, et
+     c est la seule chose que la personne peut verifier de ses yeux. Un QR est un
+     confort, pas la voie principale. */
   function ecranMfaConfig(d){
     return '<div>'
       + '<div style="margin-bottom:1.3rem">'
@@ -690,9 +692,19 @@ ${JS_DIRE}
       + '<div class="cx-cle"><code id="wz-cle">' + esc(d.secretGroupe) + '</code>'
       + '<div class="fine">SHA-1 · 6 chiffres · 30 s — cette clé ne quitte pas ce poste.</div>'
       + '<button type="button" id="wz-copier">' + T('Copier la clé') + '</button></div>'
-      + '<div class="cx-etc" style="margin-top:0.7rem">Ou scannez le code ci-dessous, '
-      + 'produit par un service externe.</div>'
-      + '<div class="cx-qr"><img id="wz-qr" src="' + esc(d.qrUrl) + '" alt="Code QR"></div>'
+      + '<div class="cx-etc" style="margin-top:0.7rem">' + T('Ou scannez le code ci-dessous.') + '</div>'
+      /* ⚠⚠ LE DESSIN ARRIVE TOUT FAIT, IL N EST PLUS ALLE LE CHERCHER. Jusqu au
+         2026-09-11, cette ligne posait une <img> vers api.qrserver.com avec l URI
+         otpauth COMPLETE dans l adresse — donc le secret TOTP en clair chez un
+         tiers, a chaque configuration d un second facteur.
+         ⚠ ON INSERE DU SVG RECU DU PONT, sans esc() : << esc >> echapperait les
+         chevrons et afficherait le code source du dessin au lieu du dessin. Ce
+         n est pas un trou : ce SVG n est pas une saisie, il est ENGENDRE par
+         << assets/js/qr.js >> a partir d une URI que nous avons construite nous-memes,
+         et le banc << banc-qr >> verifie qu il ne contient que <svg>, <rect> et
+         <path>. Une chaine vide (encodeur absent) laisse simplement la case vide,
+         et la cle a recopier reste au-dessus. */
+      + '<div class="cx-qr" id="wz-qr">' + (d.qrSvg || '') + '</div>'
       + '<div class="cx-err" id="wz-qr-err">' + T('Code QR indisponible — utilisez la clé ci-dessus.') + '</div>'
       + '</div>'
       + '<div class="cx-etape">'
@@ -1395,14 +1407,19 @@ ${JS_DIRE}
       try { navigator.clipboard.writeText(v); szDire(T('Clé copiée (sans les espaces).'), 'bon'); }
       catch (e) { szDire(T('La copie a échoué — recopiez la clé à la main.'), 'att'); }
     };
+    /* ⚠⚠ LE CODE QR NE SE CHARGE PLUS, IL EST DÉJÀ DESSINÉ (2026-09-11).
+       Il venait d un service externe, avec le secret TOTP en clair dans
+       l adresse ; il est maintenant encodé sur le poste et arrive par le pont.
+       Il n y a donc plus d image à charger, donc plus d échec de chargement à
+       guetter — << onerror >> n avait de sens que pour une image distante.
+       ⚠ CE QUI REMPLACE LE REPLI : si la case est vide (encodeur absent), on
+       le DIT, au lieu de laisser un carré blanc que personne ne sait lire. La
+       clé à recopier reste juste au-dessus, et c est elle la voie sûre. */
     var wq = el('wz-qr');
-    if (wq) wq.onerror = function(){
-      /* Le QR vient d un service externe : sans reseau, ou si le service est
-         indisponible, on le retire et on renvoie a la cle — qui, elle, est la. */
-      wq.style.display = 'none';
+    if (wq && !wq.firstChild) {
       var z = el('wz-qr-err');
       if (z) z.className = 'cx-err on';
-    };
+    }
     var wa = el('wz-annuler');
     if (wa) wa.onclick = function(){ dessiner('login'); apresLogin(); };
 

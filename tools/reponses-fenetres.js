@@ -1899,7 +1899,7 @@ module.exports = {
       { nom: 'MFA — à activer (QR)', id: 'mfa-s2',
         reponses: { identite: IDENTITE, 'securite:donnees': donnees,
           'securite:mfa:etat': { ok: true, nom: 'Marie Tremblay', mfaEnabled: false, mfaExempt: true },
-          'securite:mfa:init': { ok: true, nom: 'Marie Tremblay', secret: 'ABCDEFGHIJKLMNOP', secretGroupe: 'ABCD EFGH IJKL MNOP', qrUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=x', qrFallback: 'https://quickchart.io/qr?text=x', mfaExempt: true },
+          'securite:mfa:init': { ok: true, nom: 'Marie Tremblay', secret: 'ABCDEFGHIJKLMNOP', secretGroupe: 'ABCD EFGH IJKL MNOP', qrSvg: '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 33 33\"><rect width=\"33\" height=\"33\" fill=\"#fff\"/><path d=\"M4 4h7v1h-7z\" fill=\"#000\"/></svg>', mfaExempt: true },
           'securite:mfa:confirmer': { ok: true } } }
     ];
   })(),
@@ -6420,8 +6420,11 @@ module.exports = {
         'connexion:mfaConfig': { ok: true, prenom: 'Bruno',
           secret: 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP',
           secretGroupe: 'JBSW Y3DP EHPK 3PXP JBSW Y3DP EHPK 3PXP',
-          qrUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=x',
-          qrRepli: 'https://quickchart.io/qr?text=x&size=200' },
+          /* ⚠ UN VRAI FRAGMENT DE SVG, pas une adresse : depuis le 2026-09-11 le
+             code QR est DESSINE sur le poste et voyage par le pont. Un jeu qui
+             enverrait encore une URL laisserait la case vide sans le dire. */
+          qrSvg: '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 33 33\"><rect width=\"33\" height=\"33\" fill=\"#fff\"/><path d=\"M4 4h7v1h-7z\" fill=\"#000\"/></svg>',
+        },
         'connexion:mfaConfigConfirmer': { ok: false, motif: 'refus', message: 'Code invalide.' },
         identite: IDENTITE,
       },

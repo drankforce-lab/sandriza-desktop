@@ -497,7 +497,15 @@ ${JS_ACTIVITE}${JS_DIRE}
       + '<div class="liste">'
       + '<p class="aideOng"><b>Étape 1</b> — Scannez le QR avec Google Authenticator, Authy ou une application TOTP compatible, ou entrez la clé manuellement.</p>'
       + '<div style="text-align:center;background:var(--f-pied);padding:1rem;border-radius:9px;margin:.6rem 0">'
-      + '<img id="m-qr" src="'+esc(s.qrUrl)+'" alt="QR MFA" style="width:190px;height:190px;border-radius:8px;background:#fff"></div>'
+      /* ⚠⚠ LE DESSIN, PLUS L ADRESSE (2026-09-11). Cette image venait de
+         api.qrserver.com avec l URI otpauth COMPLETE dans son adresse — donc le
+         secret TOTP en clair chez un tiers, a chaque configuration. Il est
+         maintenant encode sur le poste (assets/js/qr.js) et arrive tout dessine.
+         ⚠ PAS d esc() sur du SVG : esc echapperait les chevrons et afficherait le
+         code source au lieu du dessin. Ce SVG n est pas une saisie — il est
+         ENGENDRE chez nous a partir d une URI que nous construisons. */
+      + '<div id="m-qr" style="width:190px;height:190px;border-radius:8px;background:#fff;overflow:hidden">'
+      + (s.qrSvg || '') + '</div></div>'
       + '<div style="text-align:center;background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;padding:.6rem">'
       + '<div class="sub" style="color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;font-size:.72rem">Clé secrète (saisie manuelle)</div>'
       + '<code style="font-size:.9rem;letter-spacing:.12em;word-break:break-all;color:var(--tx)">'+esc(s.secretGroupe||s.secret||'')+'</code>'
@@ -516,7 +524,9 @@ ${JS_ACTIVITE}${JS_DIRE}
     var cc=document.getElementById('m-code'); if (cc) cc.oninput=function(){ cc.value=cc.value.replace(/[^0-9]/g,''); };
     // Repli du QR câblé en JS : un guillemet imbriqué dans un attribut serait
     // avalé par le littéral de gabarit de cette fenêtre (piège vécu, Lot B2).
-    var qi=document.getElementById('m-qr'); if (qi) qi.onerror=function(){ qi.onerror=null; if (s.qrFallback) qi.src=s.qrFallback; };
+    /* ⚠ PLUS RIEN A GUETTER : il n y a plus d image distante, donc plus d echec
+       de chargement. Si la case est vide, la cle a recopier reste au-dessus —
+       c est elle la voie sure, et elle ne sort pas du poste. */
   }
   function mfaExempter(id, exempt){
     if (OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
