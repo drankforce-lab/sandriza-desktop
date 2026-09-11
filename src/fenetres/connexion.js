@@ -1413,8 +1413,20 @@ ${JS_DIRE}
       /* La banniere se lit tout de suite, puis toutes les vingt secondes :
          assez pour qu une levee se voie dans le temps qu on met a retaper un mot
          de passe, assez lent pour ne peser sur rien. */
+      /* ⚠ SIX TENTATIVES ESPACÉES, PAS DEUX. Les intitulés viennent du
+         modèle que la PAGE PRINCIPALE envoie à la coquille, et rien ne
+         garantit qu il soit arrivé quand cet écran s ouvre — c est tout le
+         sujet du défaut #38, << le menu apparaît trois secondes après le
+         tableau de bord >>. Mon premier jet réessayait UNE fois à deux
+         secondes : un démarrage un peu lent et la barre ne venait jamais,
+         sans que rien ne le dise.
+         ⚠ ON S ARRÊTE DÈS QU ON A LA RÉPONSE (barrePoser sort sur
+         BARRE_FAITE), donc le cas normal ne coûte qu un appel. Et on
+         s arrête TOUT COURT au bout de dix secondes : une barre de menus ne
+         vaut pas un sondage perpétuel. */
       barrePoser();
-      setTimeout(barrePoser, 2000);
+      var _bT = [600, 1500, 3000, 6000, 10000];
+      for (var _bi = 0; _bi < _bT.length; _bi++) setTimeout(barrePoser, _bT[_bi]);
       maintLire();
       MAINT_T = setInterval(maintLire, 20000);
     });

@@ -5518,10 +5518,18 @@ ipcMain.on('palette:action', (e, it) => {
    — on ouvrirait « Aide » en cliquant « Affichage ». */
 ipcMain.handle('cnxmenu:labels', () => {
   try {
-    return _sansPseudo(_modele.menus)
+    const noms = _sansPseudo(_modele.menus)
       .filter((m) => m && (m.items || []).length)
       .map((m) => String(m.label || ''));
-  } catch (e) { return []; }
+    /* ⚠ ON JOURNALISE LE COMPTE, ET SURTOUT LE ZERO. Un modele pas encore
+       arrive rend une liste vide, et l ecran ne dessine alors AUCUNE barre --
+       comportement voulu (une bande vide serait pire), mais impossible a
+       distinguer d une panne sur une capture d ecran. Une ligne dans
+       `connexion.log` tranche la question sans un aller-retour de plus. */
+    cnxDire('intitules de menu servis : ' + noms.length
+      + (noms.length ? ' (' + noms.join(', ') + ')' : ' — MODELE PAS ENCORE ARRIVE'));
+    return noms;
+  } catch (e) { cnxDire('intitules de menu refuses : ' + ((e && e.message) || e)); return []; }
 });
 
 ipcMain.handle('cnxmenu:ouvrir', (e, i, x, y) => {
