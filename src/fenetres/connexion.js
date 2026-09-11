@@ -64,6 +64,7 @@ const CSS_FEN = `
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{overflow:hidden;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body,#corps{height:100%}
 .admlogin-root{height:100%;min-height:0;overflow:hidden}
 .admlogin-split{height:100%;min-height:0}
 .admlogin-brand{min-height:0}
