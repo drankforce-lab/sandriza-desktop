@@ -6209,6 +6209,30 @@ module.exports = {
      que son écran affiche, donc le chemin du diagnostic — celui qu on lui
      demande de lire — doit s exécuter au moins une fois ici. */
   // ── MODE USAGE EXCLUSIF ────────────────────────────────────────────────────
+  /* ══ LA CONFIRMATION DE DÉCONNEXION (#56) ═══════════════════════════════════
+     ⚠ DEUX CAS, ET LE SECOND EST CELUI QU ON OUBLIE : la boîte doit s ouvrir
+     MÊME SANS NOM. Elle reçoit « nom|role » du site ; le jour où cette chaîne
+     arrive vide (session lue trop tôt, champ renommé), une boîte qui refuserait
+     de se dessiner transformerait une confirmation en impossibilité de se
+     déconnecter. Le cas nu le prouve. */
+  'deconnexion.js': [
+    {
+      nom: 'la confirmation, avec le nom de la session',
+      exige: ['id="oui"', 'id="non"', 'Voulez-vous vraiment vous déconnecter ?',
+        'Bruno Brousseau'],
+      id: 'Bruno Brousseau|superadmin',
+      reponses: { identite: IDENTITE },
+    },
+    {
+      nom: 'la confirmation, sans nom (session illisible)',
+      /* ⚠ ON EXIGE LES DEUX BOUTONS, PAS LE NOM : c est justement son absence
+         qu on éprouve ici. */
+      exige: ['id="oui"', 'id="non"', 'Voulez-vous vraiment vous déconnecter ?'],
+      id: '',
+      reponses: { identite: IDENTITE },
+    },
+  ],
+
   'connexion.js': [
     {
       /* Le cas de tous les jours : personne n est memorise, pas de casse-tete,

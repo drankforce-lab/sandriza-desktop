@@ -143,6 +143,11 @@ contextBridge.exposeInMainWorld('szPont', {
      principale ne répond pas, c est-à-dire exactement à l écran de connexion.
      ⚠ `langue()` REND TOUJOURS QUELQUE CHOSE : en cas de refus, « fr ». Un
      écran qui attend une langue et reçoit une exception ne s affiche pas. */
+  /* ⚠ LA RÉPONSE DE LA BOÎTE DE DÉCONNEXION. Un `send`, pas un `invoke` : la
+     boîte n'attend rien en retour, elle annonce et se fait fermer. Un aller
+     simple qui n'a rien à attendre ne doit pas ouvrir de promesse — c'est une
+     promesse de plus qui peut rester en l'air. */
+  deconnexionReponse: (oui) => ipcRenderer.send('deconnexion:reponse', !!oui),
   langue: () => ipcRenderer.invoke('langue:lire').catch(() => 'fr'),
   langueEcrire: (l) => ipcRenderer.invoke('langue:ecrire', String(l || 'fr'))
     .catch(() => 'fr'),

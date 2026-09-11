@@ -364,6 +364,12 @@ jobs:
           # FRANÇAISE. Une clé oubliée donne donc un écran parfaitement normal en
           # français, et une phrase française au milieu de l'anglais.
           node tools/banc-langue-connexion.js
+          # ⚠ ET CELUI-CI GARDE UNE TABLE QUI VIT DANS UN AUTRE DÉPÔT QUE SA SOURCE :
+          # les entrées libres du menu sont déclarées dans `appbar.js` (le site), leur
+          # traduction dans `MENU_EN` (la coquille). Ajouter une entrée libre laisserait
+          # la table en arrière sans aucun signal — elle s'afficherait simplement en
+          # français au milieu d'un menu anglais.
+          node tools/banc-menu-langue.js
           # ⚠ CELUI-CI GARDE UN DÉFAUT QUI NE SE VOIT QU'APRÈS INSTALLATION :
           # une ressource citée par src/ mais rangée hors de src/ existe en
           # développement et disparaît de l'archive. C'est ce qui a fait un carré

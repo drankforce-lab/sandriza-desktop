@@ -611,6 +611,94 @@ const ouvrirDecompte = (secondes) => {
   decompteWin.loadURL('data:text/html;charset=utf-8,'
     + encodeURIComponent(pageInactivite(secondes)));
 };
+/* ══════════════════════════════════════════════════════════════════════════
+   LA CONFIRMATION DE DÉCONNEXION — #56, SA DEMANDE FAITE DEUX FOIS
+   ═══════════════════════════════════════════════════════════════════════════
+   ⚠⚠ IL A DÛ LA REDEMANDER PARCE QUE JE NE L'AVAIS PAS NOTÉE. C'est la seule
+   raison pour laquelle elle arrive si tard, et ça vaut d'être écrit ici plutôt
+   que dans un journal que personne ne relit.
+
+   ⚠ CE N'EST PAS QU'UNE QUESTION D'APPARENCE. La boîte remplacée vivait dans la
+   PAGE : posée pendant qu'un écran natif est ancré, elle s'ouvrait DESSOUS. On
+   ne voyait rien, et rien ne se passait — un clic qui a l'air de n'avoir pas
+   pris. Une fenêtre de l'application, elle, passe au-dessus de tout.
+
+   ⚠ MODALE ET ENFANT : `modal: true` bloque la fenêtre principale le temps de
+   la question. Sans ça, on peut cliquer « Déconnexion » trois fois et empiler
+   trois boîtes — vécu ailleurs, et c'est le genre de défaut qu'on ne voit qu'en
+   s'énervant sur un bouton lent.
+
+   ⚠ LA FERMETURE VAUT NON, et la promesse est TOUJOURS tenue. Une question qui
+   ne répond jamais laisse le site accroché à une promesse morte : le menu
+   « Déconnexion » cesserait de répondre pour le reste de la session. */
+let deconnexionWin = null;
+let deconnexionRepondre = null;
+
+const deconnexionFermer = (oui) => {
+  const rep = deconnexionRepondre;
+  deconnexionRepondre = null;
+  const w = deconnexionWin;
+  deconnexionWin = null;
+  if (w && !w.isDestroyed()) { try { w.destroy(); } catch (e) {} }
+  if (rep) rep(!!oui);
+};
+
+ipcMain.handle('deconnexion:demander', (_e, nom, role) => new Promise((resolve) => {
+  /* Déjà ouverte : on la ramène devant et on rend NON tout de suite à ce
+     second appel. Deux promesses en attente sur une seule boîte, c'est une
+     promesse qui ne sera jamais tenue. */
+  if (deconnexionWin && !deconnexionWin.isDestroyed()) {
+    try { deconnexionWin.focus(); } catch (e) {}
+    resolve(false);
+    return;
+  }
+  if (!mainWindow || mainWindow.isDestroyed()) { resolve(false); return; }
+  deconnexionRepondre = resolve;
+
+  const L = 440, H = 268;
+  let x, y;
+  try {
+    const b = mainWindow.getBounds();
+    x = Math.round(b.x + (b.width - L) / 2);
+    y = Math.round(b.y + (b.height - H) / 3);
+  } catch (e) {}
+
+  deconnexionWin = new BrowserWindow({
+    width: L, height: H,
+    ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}),
+    parent: mainWindow, modal: true,
+    resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
+    skipTaskbar: true, show: false, autoHideMenuBar: true,
+    title: 'Déconnexion', backgroundColor: '#0e1522',
+    webPreferences: {
+      preload: path.join(__dirname, 'pont-preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true,
+    },
+  });
+  deconnexionWin.on('page-title-updated', (ev) => { ev.preventDefault(); });
+  /* ⚠ `closed` ET NON `close` : on veut le cas où la fenêtre part pour une
+     raison qu'on n'a pas prévue (fermeture du parent, plantage du rendu). Dans
+     tous ces cas-là, la réponse est NON — et elle part. */
+  deconnexionWin.on('closed', () => {
+    const rep = deconnexionRepondre;
+    deconnexionRepondre = null;
+    deconnexionWin = null;
+    if (rep) rep(false);
+  });
+  deconnexionWin.once('ready-to-show', () => {
+    try { deconnexionWin.show(); deconnexionWin.focus(); } catch (e) {}
+  });
+  try { appliquerTheme(deconnexionWin.webContents); } catch (e) {}
+  deconnexionWin.loadURL('data:text/html;charset=utf-8,'
+    + encodeURIComponent(pageDeconnexion(String(nom || '') + '|' + String(role || ''))));
+}));
+
+ipcMain.on('deconnexion:reponse', (e, oui) => {
+  if (!deconnexionWin || deconnexionWin.isDestroyed()) return;
+  if (e.sender !== deconnexionWin.webContents) return;
+  deconnexionFermer(!!oui);
+});
+
 ipcMain.on('session:decompte', (_e, secondes) => {
   const n = parseInt(secondes, 10);
   if (Number.isFinite(n) && n > 0) ouvrirDecompte(n); else fermerDecompte();
@@ -4807,6 +4895,7 @@ const { pagePresence } = require('./fenetres/presence');
 const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageConnexion } = require('./fenetres/connexion');
 const { pageMaj } = require('./fenetres/maj');
+const { pageDeconnexion } = require('./fenetres/deconnexion');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -5253,6 +5342,7 @@ const fermerPanneauBientot = () => {
    La pose est retenue ici et appliquee quand la page a MESURE son contenu :
    avant, on ignore la largeur, donc on ne peut pas aligner un bord droit. */
 let panneauPose = { mode: 'bas', x: 0, y: 0 };
+let panneauContexte = '';
 
 /* ══════════════════════════════════════════════════════════════════════════
    QUI A LE DROIT D OUVRIR UN PANNEAU DE MENU
@@ -5334,11 +5424,34 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
      chaque survol etait le << lag >> releve le 2026-08-09. `montrer` ne fait
      ensuite que basculer l affichage. Rechargee seulement si le modele a
      change (menu:modele pose panneauSale). */
+  /* ⚠⚠ LE CONTEXTE FAIT PARTIE DE LA PAGE MISE EN CACHE. Elle n'est bâtie
+     qu'une fois ; si l'on change de langue, ou qu'on passe de l'écran de
+     connexion à l'administration, la page gardée en mémoire n'est plus la
+     bonne. Un cache dont la clé oublie un paramètre sert la mauvaise réponse
+     sans jamais se plaindre — et ce défaut-là ne se voit qu'au deuxième
+     usage, jamais au premier. */
+  {
+    const ctx = (vueConnexion && e.sender === vueConnexion.webContents ? 'cnx' : 'page')
+      + '|' + _langueCourante();
+    if (ctx !== panneauContexte) { panneauContexte = ctx; panneauSale = true; }
+  }
   if (panneauSale || !panneauPret) {
     panneauSale = false; panneauPret = false;
     panneauWin.webContents.once('did-finish-load', () => { panneauPret = true; montrer(); });
+    /* ⚠ LE PANNEAU EST TRADUIT QUAND IL EST OUVERT DEPUIS L ÉCRAN DE CONNEXION
+       (sa demande du 2026-09-11 : « traduire les menus aussi »). Ailleurs, il
+       reste tel que le site l'envoie — la traduction intégrale est le chantier
+       gardé pour la fin, et changer le menu de toute l'application au passage
+       serait faire autre chose que ce qu'il a demandé.
+       ⚠ `panneauSale` EST POSÉ PLUS BAS DÈS QUE LE CONTEXTE CHANGE : cette page
+       est mise en cache et seulement RÉAFFICHÉE aux ouvertures suivantes. Sans
+       ça, le premier panneau ouvert figerait sa langue pour toute la session —
+       exactement le genre de défaut qu'on ne voit qu'en changeant de langue
+       APRÈS avoir ouvert un menu. */
+    const _cnx = !!(vueConnexion && e.sender === vueConnexion.webContents);
     panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
-      menus: _modele.menus || [], cssRail: _modele.cssRail || '', sombre: !!_modele.sombre,
+      menus: _cnx ? _trItems(_modele.menus || []) : (_modele.menus || []),
+      cssRail: _modele.cssRail || '', sombre: !!_modele.sombre,
     })));
   } else {
     montrer();
@@ -5580,11 +5693,67 @@ ipcMain.handle('langue:ecrire', (e, l) => {
   return v;
 });
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LE MENU DE L ÉCRAN DE CONNEXION, DANS LA LANGUE CHOISIE
+   ═══════════════════════════════════════════════════════════════════════════
+   ⚠⚠ SA DEMANDE DU 2026-09-11 : « dans le changement de langue de la page de
+   connexion tu dois aussi traduire les menus, c'est important ». Il a raison :
+   un écran anglais surmonté d'un menu français n'est pas un écran traduit,
+   c'est un écran à moitié fait — et la moitié qui reste est celle qu'on voit en
+   premier.
+
+   ⚠ LA TRADUCTION SE FAIT ICI, PAS DANS LE SITE. Le menu appartient au site et
+   il est FRANÇAIS partout ailleurs : la traduction intégrale est le chantier
+   qu'il a demandé de garder pour la fin. Traduire dans `appbar.js` aurait donc
+   changé le menu de TOUTE l'application pour une demande qui ne porte que sur
+   l'écran de connexion. On traduit donc au point de passage, et seulement quand
+   la demande vient de la vue de connexion.
+   ⚠ CONSÉQUENCE ASSUMÉE : hors session seules les entrées LIBRES paraissent —
+   une dizaine. C'est exactement le terrain concerné, ni plus ni moins.
+
+   ⚠ CE QUI N EST PAS DANS LA TABLE RESTE EN FRANÇAIS, sans erreur ni trou : une
+   entrée ajoutée demain s'affichera dans sa langue d'origine plutôt que de
+   disparaître. `tools/banc-menu-langue.js` refuse ce silence-là — il relève les
+   entrées libres DANS `appbar.js` et exige que chacune ait sa traduction. */
+const MENU_EN = {
+  'Fichier': 'File',
+  'Affichage': 'View',
+  'Aide': 'Help',
+  'Quitter': 'Quit',
+  'Recharger': 'Reload',
+  'Recharger (vider le cache)': 'Reload (clear cache)',
+  'Plein écran': 'Full screen',
+  'Zoom avant': 'Zoom in',
+  'Zoom arrière': 'Zoom out',
+  'Zoom normal': 'Reset zoom',
+  'Réduire': 'Minimize',
+  'Vérifier les mises à jour…': 'Check for updates…',
+  'À propos': 'About',
+};
+
+const _langueCourante = () => {
+  try { return (reglages.get('langue') === 'en') ? 'en' : 'fr'; } catch (e) { return 'fr'; }
+};
+const _trMenu = (x) => {
+  if (_langueCourante() !== 'en') return x;
+  return Object.prototype.hasOwnProperty.call(MENU_EN, x) ? MENU_EN[x] : x;
+};
+/* ⚠ RÉCURSIF SUR `sub` : « Position du menu » et « Jeu de couleurs » sont des
+   sous-groupes. Hors session ils sont vides et disparaissent — mais traduire à
+   un seul niveau est le genre de raccourci qui tient jusqu au jour où une
+   entrée libre entre dans un sous-groupe. */
+const _trItems = (items) => (items || []).map((it) => {
+  if (!it || it.sep) return it;
+  const n = { ...it, label: _trMenu(it.label) };
+  if (it.sub) n.sub = _trItems(it.sub);
+  return n;
+});
+
 ipcMain.handle('cnxmenu:labels', () => {
   try {
     const noms = _sansPseudo(_modele.menus)
       .filter((m) => m && (m.items || []).length)
-      .map((m) => String(m.label || ''));
+      .map((m) => _trMenu(String(m.label || '')));
     /* ⚠ ON JOURNALISE LE COMPTE, ET SURTOUT LE ZERO. Un modele pas encore
        arrive rend une liste vide, et l ecran ne dessine alors AUCUNE barre --
        comportement voulu (une bande vide serait pire), mais impossible a

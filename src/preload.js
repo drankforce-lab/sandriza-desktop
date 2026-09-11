@@ -42,6 +42,16 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // appellent `Admin` directement dans la page, donc les gardes de permission
   // et de lecture seule du site s'appliquent sans qu'on ait rien à recopier.
   menuAction: (nom) => ipcRenderer.invoke('menu:action', String(nom || '')),
+  /* ⚠ LA CONFIRMATION DE DÉCONNEXION, EN NATIF (#56). Elle rend `true`/`false` ;
+     c'est le SITE qui déconnecte ensuite. Une fenêtre qui fermerait la session
+     elle-même court-circuiterait tout ce que `Staff.logout()` fait d'autre.
+     ⚠ EN CAS DE REFUS DU CANAL, ON REND `null` — et surtout PAS `false`. Le
+     site doit pouvoir distinguer « il a répondu non » de « la question n'a pas
+     pu être posée », parce que le second cas doit retomber sur la boîte web.
+     Rendre `false` ferait silencieusement disparaître le bouton Déconnexion. */
+  deconnexionDemander: (nom, role) => ipcRenderer
+    .invoke('deconnexion:demander', String(nom || ''), String(role || ''))
+    .catch(() => null),
 
   // ── LA BARRE EST DESSINÉE PAR LE SITE (assets/js/appbar.js) ────────────────
   // Ce drapeau est le POINT DE BASCULE : `appbar.js` reste inerte tant qu'il ne
