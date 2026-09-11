@@ -138,6 +138,14 @@ contextBridge.exposeInMainWorld('szPont', {
      continue d atteindre la barre. Mêmes canaux que les écrans ancrés.
      ⚠ `x` ET `y` SONT CEUX DU BOUTON dans la vue, en pixels de page : la
      coquille y ajoute la position de la fenêtre et le facteur de zoom. */
+  /* ⚠ LA LANGUE. Elle ne passe pas par `appeler` : ce canal-là va au SITE, et
+     la langue est un réglage du POSTE — elle doit répondre même quand la page
+     principale ne répond pas, c est-à-dire exactement à l écran de connexion.
+     ⚠ `langue()` REND TOUJOURS QUELQUE CHOSE : en cas de refus, « fr ». Un
+     écran qui attend une langue et reçoit une exception ne s affiche pas. */
+  langue: () => ipcRenderer.invoke('langue:lire').catch(() => 'fr'),
+  langueEcrire: (l) => ipcRenderer.invoke('langue:ecrire', String(l || 'fr'))
+    .catch(() => 'fr'),
   menuPanneau: (label, x, y) => ipcRenderer.send('menu:panneau',
     String(label || ''), Math.round(x) || 0, Math.round(y) || 0, 'bas'),
   menuPanneauFermer: () => ipcRenderer.send('menu:panneau:fermer'),

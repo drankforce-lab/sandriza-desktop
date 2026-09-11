@@ -1,6 +1,6 @@
 'use strict';
 /*
- * LE MENU EST-IL UTILISABLE PENDANT LA CONNEXION ?
+ * L ÉCRAN DE CONNEXION, ÉPROUVÉ DANS UN VRAI ELECTRON
  * =============================================================================
  * ⚠⚠ CE BANC A DÉJÀ MENTI UNE FOIS, ET C EST SA RAISON D ÊTRE.
  * Sa première version ouvrait une `BrowserWindow` ORDINAIRE, montrait la barre
@@ -24,7 +24,10 @@
  *   ③ l écran dessine SA barre dès que la coquille lui donne des intitulés ;
  *   ④ cliquer un intitulé demande le panneau du bon menu, au bon endroit ;
  *   ⑤ et GLISSER sur l intitulé voisin déroule le sien — le geste qu il a signalé
- *     comme manquant, qu un menu du SYSTÈME ne peut pas rendre (il prend la souris).
+ *     comme manquant, qu un menu du SYSTÈME ne peut pas rendre (il prend la souris) ;
+ *   ⑥ et le sélecteur FR/EN : le clic redessine, le bouton actif se marque, le retour
+ *     fonctionne, et la saisie en cours survit. C est le SEUL contrôle qui clique
+ *     vraiment dessus — les deux autres prouvent la traduction et le premier dessin.
  *
  * ⚠ IL SE FERME TOUT SEUL.
  *
@@ -167,9 +170,51 @@ app.whenReady().then(async () => {
     '⑤ mais AUCUN menu ouvert, le survol ne déclenche rien (' + recus.length
     + ' demande(s)) — sinon traverser la barre déplierait des menus non demandés');
 
+  /* ══ ⑥ LE SÉLECTEUR DE LANGUE, DE BOUT EN BOUT ═══════════════════════════
+     ⚠⚠ C EST LE SEUL CONTRÔLE QUI CLIQUE VRAIMENT DESSUS. `banc-langue-connexion`
+     prouve que chaque clé a sa traduction ; le cas « en anglais » de
+     `verifier-fenetres` prouve que la langue LUE s applique au premier dessin.
+     Ni l un ni l autre ne prouve qu un CLIC sur EN redessine l écran — et c est
+     le geste que l utilisateur fait.
+     ⚠ ON ÉPROUVE AUSSI LE RETOUR EN ARRIÈRE : une bascule qui ne sait qu aller
+     dans un sens est une bascule qu on n ose plus toucher. */
+  const lire = (js) => vue.webContents.executeJavaScript(js, true);
+  const titre = () => lire("(document.querySelector('.cx-titre')||{}).textContent||''");
+
+  const avantL = await titre();
+  const boutons = await lire("document.querySelectorAll('.cx-langue button').length");
+  dire('sélecteur de langue — ' + boutons + ' bouton(s), titre « ' + avantL + ' »');
+  exige(boutons === 2, '⑥ le sélecteur montre les DEUX langues (pas une bascule : on doit '
+    + 'voir laquelle est active ET qu’une autre existe)');
+
+  await lire("document.getElementById('lg-en').click()");
+  await dodo(500);
+  const enL = await titre();
+  dire('après EN — titre « ' + enL + ' »');
+  exige(enL === 'Secure sign-in',
+    '⑥ cliquer EN redessine l’écran en anglais (lu : « ' + enL + ' »)');
+  exige(await lire("document.getElementById('lg-en').className === 'on'"),
+    '⑥ le bouton EN se marque actif — sans quoi on ne sait plus quelle langue on lit');
+
+  await lire("document.getElementById('lg-fr').click()");
+  await dodo(500);
+  const frL = await titre();
+  dire('après FR — titre « ' + frL + ' »');
+  exige(frL === 'Connexion sécurisée',
+    '⑥ et le retour au français fonctionne aussi (lu : « ' + frL + ' »)');
+
+  /* ⚠ LA SAISIE EN COURS SURVIT AU CHANGEMENT. Perdre son nom d utilisateur
+     parce qu on a cliqué sur EN serait une punition pour avoir lu l écran. */
+  await lire("(function(){var e=document.getElementById('sl-email');e.value='broubob';})()");
+  await lire("document.getElementById('lg-en').click()");
+  await dodo(500);
+  const garde = await lire("(document.getElementById('sl-email')||{}).value||''");
+  exige(garde === 'broubob',
+    '⑥ le nom d’utilisateur déjà tapé survit au changement de langue (lu : « ' + garde + ' »)');
+
   try { fenetre.destroy(); } catch (e) {}
   dire('');
   if (fautes.length) { dire('✗ ' + fautes.length + ' point(s) en échec.'); app.exit(1); return; }
-  dire('✓ le menu de l’écran de connexion tient — intitulés dessinés, clic ET survol.');
+  dire('✓ l’écran de connexion tient — menu (clic ET survol) et langue (aller ET retour).');
   app.exit(0);
 });

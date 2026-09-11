@@ -359,6 +359,11 @@ jobs:
           # Payé quatre fois — dont une clé TOTP copiée AVEC ses espaces, sous un
           # message qui annonçait le contraire.
           node tools/banc-antislash-fondu.js
+          # ⚠ CELUI-CI GARDE UN DÉFAUT INVISIBLE DANS LA LANGUE OÙ L'ON TRAVAILLE :
+          # `T(cle)` rend la CLÉ quand la traduction manque, et la clé est la phrase
+          # FRANÇAISE. Une clé oubliée donne donc un écran parfaitement normal en
+          # français, et une phrase française au milieu de l'anglais.
+          node tools/banc-langue-connexion.js
           # ⚠ CELUI-CI GARDE UN DÉFAUT QUI NE SE VOIT QU'APRÈS INSTALLATION :
           # une ressource citée par src/ mais rangée hors de src/ existe en
           # développement et disparaît de l'archive. C'est ce qui a fait un carré

@@ -11,7 +11,7 @@
   function ecranMfaConfig(d){
     return '<div>'
       + '<div style="margin-bottom:1.3rem">'
-      + '<div class="cx-titre">Authentification à deux facteurs</div>'
+      + '<div class="cx-titre">' + T('Authentification à deux facteurs') + '</div>'
       + '<div class="cx-sous">Bonjour ' + esc(d.prenom) + ' — votre administrateur exige '
       + 'cette configuration avant l’accès au panneau.</div>'
       + '</div>'
@@ -24,17 +24,17 @@
       + '<div class="cx-etl">Étape 2 — la clé</div>'
       + '<div class="cx-cle"><code id="wz-cle">' + esc(d.secretGroupe) + '</code>'
       + '<div class="fine">SHA-1 · 6 chiffres · 30 s — cette clé ne quitte pas ce poste.</div>'
-      + '<button type="button" id="wz-copier">Copier la clé</button></div>'
+      + '<button type="button" id="wz-copier">' + T('Copier la clé') + '</button></div>'
       + '<div class="cx-etc" style="margin-top:0.7rem">Ou scannez le code ci-dessous, '
       + 'produit par un service externe.</div>'
       + '<div class="cx-qr"><img id="wz-qr" src="' + esc(d.qrUrl) + '" alt="Code QR"></div>'
-      + '<div class="cx-err" id="wz-qr-err">Code QR indisponible — utilisez la clé ci-dessus.</div>'
+      + '<div class="cx-err" id="wz-qr-err">' + T('Code QR indisponible — utilisez la clé ci-dessus.') + '</div>'
       + '</div>'
       + '<div class="cx-etape">'
       + '<div class="cx-etl">Étape 3 — confirmez</div>'
       + '<form id="cx-form-wz" novalidate>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="wz-code">Code à 6 chiffres</label>'
+      + '<label class="cx-lbl" for="wz-code">' + T('Code à 6 chiffres') + '</label>'
       + '<input type="text" id="wz-code" inputmode="numeric" maxlength="6" '
       + 'autocomplete="one-time-code" placeholder="000000">'
       + '</div>'
@@ -43,7 +43,7 @@
       + 'Activer et accéder au panneau</button>'
       + '</form></div>'
       + '<div class="cx-centre">'
-      + '<button type="button" class="admlogin-back" id="wz-annuler">← Annuler</button>'
+      + '<button type="button" class="admlogin-back" id="wz-annuler">' + T('← Annuler') + '</button>'
       + '</div></div>';
   }
 
@@ -54,18 +54,18 @@
     var ex = (d.exigences || []).map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('');
     return '<div>'
       + '<div style="margin-bottom:1.5rem">'
-      + '<div class="cx-titre">Changement de mot de passe requis</div>'
+      + '<div class="cx-titre">' + T('Changement de mot de passe requis') + '</div>'
       + '<div class="cx-sous">Bienvenue ' + esc(d.prenom) + ' — définissez votre mot de '
       + 'passe avant d’accéder au panneau.</div>'
       + (ex ? ('<ul class="cx-exig">' + ex + '</ul>') : '')
       + '</div>'
       + '<form id="cx-form-mdp" novalidate>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="pc-pw1">Nouveau mot de passe</label>'
+      + '<label class="cx-lbl" for="pc-pw1">' + T('Nouveau mot de passe') + '</label>'
       + '<input type="password" id="pc-pw1" class="padd" autocomplete="new-password">'
       + '</div>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="pc-pw2">Confirmer le mot de passe</label>'
+      + '<label class="cx-lbl" for="pc-pw2">' + T('Confirmer le mot de passe') + '</label>'
       + '<input type="password" id="pc-pw2" autocomplete="new-password">'
       + '</div>'
       + '<div class="cx-err" id="pc-err"></div>'
@@ -73,7 +73,7 @@
       + 'Enregistrer et accéder</button>'
       + '</form>'
       + '<div class="cx-centre">'
-      + '<button type="button" class="admlogin-back" id="pc-annuler">← Retour à la connexion</button>'
+      + '<button type="button" class="admlogin-back" id="pc-annuler">' + T('← Retour à la connexion') + '</button>'
       + '</div></div>';
   }
 
@@ -84,7 +84,7 @@
   function ecranQuestions(d){
     var qs = d.questions || [];
     var opts = function(exclu, sel){
-      var o = '<option value="">— Choisir une question —</option>';
+      var o = '<option value="">' + T('— Choisir une question —') + '</option>';
       for (var i = 0; i < qs.length; i++) {
         if (exclu && qs[i] === exclu) continue;
         o += '<option value="' + esc(qs[i]) + '"'
@@ -94,25 +94,25 @@
     };
     return '<div>'
       + '<div style="margin-bottom:1.4rem">'
-      + '<div class="cx-titre">Questions de sécurité</div>'
+      + '<div class="cx-titre">' + T('Questions de sécurité') + '</div>'
       + '<div class="cx-sous">' + esc(d.prenom) + ', choisissez deux questions. Elles servent '
       + 'à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.</div>'
       + '</div>'
       + '<form id="cx-form-q" novalidate>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="sq-q1">Question 1</label>'
+      + '<label class="cx-lbl" for="sq-q1">' + T('Question 1') + '</label>'
       + '<select id="sq-q1">' + opts('', '') + '</select>'
       + '</div>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="sq-a1">Réponse 1</label>'
+      + '<label class="cx-lbl" for="sq-a1">' + T('Réponse 1') + '</label>'
       + '<input type="text" id="sq-a1" autocomplete="off">'
       + '</div>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="sq-q2">Question 2</label>'
+      + '<label class="cx-lbl" for="sq-q2">' + T('Question 2') + '</label>'
       + '<select id="sq-q2">' + opts('', '') + '</select>'
       + '</div>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="sq-a2">Réponse 2</label>'
+      + '<label class="cx-lbl" for="sq-a2">' + T('Réponse 2') + '</label>'
       + '<input type="text" id="sq-a2" autocomplete="off">'
       + '</div>'
       + '<div class="cx-err" id="sq-err"></div>'
@@ -120,7 +120,7 @@
       + 'Enregistrer et accéder</button>'
       + '</form>'
       + '<div class="cx-centre">'
-      + '<button type="button" class="admlogin-back" id="sq-annuler">← Retour à la connexion</button>'
+      + '<button type="button" class="admlogin-back" id="sq-annuler">' + T('← Retour à la connexion') + '</button>'
       + '</div></div>';
   }
 
@@ -131,7 +131,7 @@
     var refaire = function(cible, autre){
       var garde = cible.value;
       var exclu = autre.value;
-      var o = '<option value="">— Choisir une question —</option>';
+      var o = '<option value="">' + T('— Choisir une question —') + '</option>';
       var qs = (CTX_Q && CTX_Q.questions) || [];
       for (var i = 0; i < qs.length; i++) {
         if (exclu && qs[i] === exclu) continue;
@@ -184,16 +184,16 @@
     if (!c || !b) return;
     fauteEffacer('wz-err');
     if (manque(['wz-code'])) {
-      faute('wz-err', { message: 'Entrez le code à six chiffres affiché par votre application.' });
+      faute('wz-err', { message: T('Entrez le code à six chiffres affiché par votre application.') });
       return;
     }
     b.disabled = true;
-    b.innerHTML = '<span class="cx-spin"></span><span>Vérification…</span>';
+    b.innerHTML = '<span class="cx-spin"></span><span>' + T('Vérification…') + '</span>';
     c.disabled = true;
     appeler('connexion:mfaConfigConfirmer', [c.value]).then(function(r){
       if (r.ok) { suivre(r); return; }
       var c2 = el('wz-code'), b2 = el('wz-btn');
-      if (b2) { b2.disabled = false; b2.textContent = 'Activer et accéder au panneau'; }
+      if (b2) { b2.disabled = false; b2.textContent = T('Activer et accéder au panneau'); }
       if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
       faute('wz-err', r);
     });
@@ -204,15 +204,15 @@
     if (!a || !b || !bt) return;
     fauteEffacer('pc-err');
     if (manque(['pc-pw1', 'pc-pw2'])) {
-      faute('pc-err', { message: 'Remplissez les deux champs.' });
+      faute('pc-err', { message: T('Remplissez les deux champs.') });
       return;
     }
     bt.disabled = true;
-    bt.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
+    bt.innerHTML = '<span class="cx-spin"></span><span>' + T('Enregistrement…') + '</span>';
     appeler('connexion:mdpEcrire', [a.value, b.value]).then(function(r){
       if (r.ok) { suivre(r); return; }
       var bt2 = el('pc-btn');
-      if (bt2) { bt2.disabled = false; bt2.textContent = 'Enregistrer et accéder'; }
+      if (bt2) { bt2.disabled = false; bt2.textContent = T('Enregistrer et accéder'); }
       faute('pc-err', r);
       /* ⚠ ON NE VIDE QUE LA CONFIRMATION sur une discordance : effacer les deux
          obligerait a retaper un mot de passe peut-etre bon. Sur un refus de
@@ -227,16 +227,16 @@
     if (!q1 || !a1 || !q2 || !a2 || !b) return;
     fauteEffacer('sq-err');
     if (manque(['sq-q1', 'sq-a1', 'sq-q2', 'sq-a2'])) {
-      faute('sq-err', { message: 'Choisissez les deux questions et écrivez leurs réponses.' });
+      faute('sq-err', { message: T('Choisissez les deux questions et écrivez leurs réponses.') });
       return;
     }
     b.disabled = true;
-    b.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
+    b.innerHTML = '<span class="cx-spin"></span><span>' + T('Enregistrement…') + '</span>';
     appeler('connexion:questionsEcrire', [q1.value, a1.value, q2.value, a2.value])
       .then(function(r){
         if (r.ok) { suivre(r); return; }
         var b2 = el('sq-btn');
-        if (b2) { b2.disabled = false; b2.textContent = 'Enregistrer et accéder'; }
+        if (b2) { b2.disabled = false; b2.textContent = T('Enregistrer et accéder'); }
         faute('sq-err', r);
       });
   }

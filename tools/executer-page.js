@@ -271,6 +271,14 @@ function executerPage(script, reponses, opts) {
       Object.prototype.hasOwnProperty.call(rep, '__menuLabels')
         ? rep['__menuLabels'] : ['Fichier', 'Affichage', 'Aide']
     )),
+    /* ⚠ LA LANGUE, pilotable par le jeu de réponses sous `__langue`. Sans ce
+       faux verbe, `P.langue()` serait `undefined`, la fenêtre partirait par son
+       repli et le chemin de la langue ne serait JAMAIS joué — le même trou que
+       `majDecision` et `menuLabels` avant lui. */
+    langue: () => surveille(Promise.resolve(
+      Object.prototype.hasOwnProperty.call(rep, '__langue') ? rep['__langue'] : 'fr'
+    )),
+    langueEcrire: (l) => surveille(Promise.resolve(String(l || 'fr'))),
     menuPanneau() {}, menuPanneauFermer() {},
     surEtatCaisse: () => () => {}, ajusterHauteur() {},
     /* ⚠ LE FAUX GROUPE `veilleur` EST PARTI LE 2026-09-09, avec la fenêtre qu'il

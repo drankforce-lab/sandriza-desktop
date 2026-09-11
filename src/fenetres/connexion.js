@@ -181,6 +181,17 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 2px rgba(196,154,108,0.28)}
 .cx-barre button:focus-visible{outline:2px solid rgba(196,154,108,0.85);
   outline-offset:2px}
 body.cx-abarre #corps{padding-top:32px;box-sizing:border-box}
+.cx-langue{display:flex;justify-content:flex-end;gap:0;margin:0 0 1.1rem;
+  align-self:stretch}
+.cx-langue .grp{display:inline-flex;border-radius:9px;overflow:hidden;
+  background:rgba(120,95,66,0.10)}
+.cx-langue button{border:0;background:none;color:#6b5842;cursor:pointer;
+  font:600 0.72rem/1 inherit;letter-spacing:0.05em;padding:0.4rem 0.72rem;
+  transition:background-color .14s ease,color .14s ease}
+.cx-langue button:hover{background:rgba(120,95,66,0.10)}
+.cx-langue button.on{background:#7d5f3c;color:#f6f1e9}
+.cx-langue button:focus-visible{outline:2px solid rgba(196,154,108,0.9);
+  outline-offset:-2px}
 .cx-centre{text-align:center;margin-top:0.85rem}
 .cx-recours{transition:opacity .32s cubic-bezier(.2,.8,.2,1),
   max-height .32s cubic-bezier(.2,.8,.2,1),margin-top .32s cubic-bezier(.2,.8,.2,1);
@@ -259,6 +270,118 @@ ${JS_DIRE}
      du sélecteur de date de la 5.3.0 — un état posé dans un écran qui se
      redessine n est pas un état. */
   var DEJA_RATE = false;
+  var ECRAN_DONNEE = null;
+  var LANGUE = 'fr';
+
+  /* ══ LES DEUX LANGUES DE CET ÉCRAN ═══════════════════════════════════
+     ⚠ UN DICTIONNAIRE PLAT, PAS DES PHRASES DÉCOUPÉES. La tentation est de
+     traduire morceau par morceau pour réutiliser les bouts ; en anglais
+     l ordre des mots change, et on obtient des phrases qui n en sont pas.
+     Chaque phrase entière porte sa clé, et les valeurs variables passent
+     par {0}.
+     ⚠ CE QUI N EST PAS TRADUIT, ET IL FAUT LE DIRE : le sous-titre du
+     panneau de marque vient de VOS réglages (c est votre texte, pas le
+     nôtre), les intitulés du menu viennent du site, et les refus renvoyés
+     par le serveur sont traduits PAR MOTIF quand le motif est connu — le
+     texte du serveur reste sinon, en français. Un écran à moitié traduit
+     qui le CACHE serait pire qu un écran qui l assume. */
+  var DICT = {
+    en: {
+      "Connexion sécurisée": "Secure sign-in",
+      "Réservé au personnel autorisé uniquement": "Authorized staff only",
+      "Nom d’utilisateur": "Username",
+      "Se souvenir de mon nom d’utilisateur": "Remember my username",
+      "Mot de passe": "Password",
+      "Afficher le mot de passe": "Show password",
+      "Masquer le mot de passe": "Hide password",
+      "Se connecter": "Sign in",
+      "Connexion…": "Signing in…",
+      "Mot de passe oublié ?": "Forgot your password?",
+      "Connexion chiffrée de bout en bout (HTTPS)": "End-to-end encrypted connection (HTTPS)",
+      "Accès renforcé par mot de passe et authentification MFA": "Password and multi-factor authentication",
+      "Chaque tentative journalisée (adresse IP et pays)": "Every attempt logged (IP address and country)",
+      "Version ": "Version ",
+      "Vérification en deux étapes": "Two-step verification",
+      "Entrez le code de votre application d’authentification": "Enter the code from your authenticator app",
+      "⏱ Temps restant : ": "⏱ Time remaining: ",
+      "Code à 6 chiffres": "6-digit code",
+      "Vérifier": "Verify",
+      "Vérification…": "Verifying…",
+      "Mot de passe oublié": "Forgot password",
+      "← Retour à la connexion": "← Back to sign-in",
+      "un super-administrateur": "a super-administrator",
+      "Vérification de sécurité": "Security check",
+      "Faites glisser la pièce pour compléter l’image.": "Drag the piece to complete the image.",
+      "Glissez vers la droite →": "Slide to the right →",
+      "Vérifié": "Verified",
+      "Maintenance en cours": "Maintenance in progress",
+      "Désactivation d’urgence": "Emergency override",
+      "NIP de désactivation": "Override PIN",
+      "Lever la maintenance": "Lift maintenance",
+      "Annuler": "Cancel",
+      "Authentification à deux facteurs": "Two-factor authentication",
+      "Copier la clé": "Copy the key",
+      "Code QR indisponible — utilisez la clé ci-dessus.": "QR code unavailable — use the key above.",
+      "← Annuler": "← Cancel",
+      "Activer et accéder au panneau": "Enable and continue",
+      "Changement de mot de passe requis": "Password change required",
+      "Nouveau mot de passe": "New password",
+      "Confirmer le mot de passe": "Confirm password",
+      "Enregistrer et accéder": "Save and continue",
+      "Enregistrement…": "Saving…",
+      "Questions de sécurité": "Security questions",
+      "Question 1": "Question 1",
+      "Question 2": "Question 2",
+      "Réponse 1": "Answer 1",
+      "Réponse 2": "Answer 2",
+      "— Choisir une question —": "— Choose a question —",
+      "Entrez votre nom d’utilisateur et votre mot de passe.": "Enter your username and your password.",
+      "Entrez le code à six chiffres.": "Enter the six-digit code.",
+      "Entrez le code à six chiffres affiché par votre application.": "Enter the six-digit code shown by your app.",
+      "Remplissez les deux champs.": "Fill in both fields.",
+      "Choisissez les deux questions et écrivez leurs réponses.": "Choose both questions and write their answers.",
+      "Délai de vérification dépassé — veuillez vous reconnecter.": "Verification timed out — please sign in again.",
+      "Décor par défaut — la fenêtre principale n’a pas répondu.": "Default appearance — the main window did not answer.",
+      "La fenetre principale ne repond pas.": "The main window is not answering.",
+      "Clé copiée (sans les espaces).": "Key copied (without the spaces).",
+      "La copie a échoué — recopiez la clé à la main.": "Copy failed — type the key by hand.",
+      "L’opération a échoué.": "The operation failed.",
+      "motif.vide": "Username and password are required.",
+      "motif.captcha": "Please complete the security check.",
+      "motif.verrou": "Account locked — try again in a few minutes.",
+      "motif.refus": "Incorrect username or password.",
+      "motif.forme": "Enter the 6-digit code.",
+      "motif.panne": "Verification failed. Please try again.",
+      "motif.expire": "Session expired — please sign in again.",
+      "motif.echec": "The operation could not be completed.",
+      "motif.inconnu": "Unknown screen.",
+      "motif.discordance": "The passwords do not match.",
+      "motif.memeq": "The two questions must be different.",
+      "motif.memea": "The two answers must be different.",
+      "motif.q1": "Please choose question 1.",
+      "motif.q2": "Please choose question 2.",
+      "motif.a1": "Answer 1 must be at least 3 characters long.",
+      "motif.a2": "Answer 2 must be at least 3 characters long.",
+      "motif.a1nom": "Answer 1: cannot contain your name or username.",
+      "motif.a2nom": "Answer 2: cannot contain your name or username.",
+    }
+  };
+  function T(k, a){
+    var d = (LANGUE !== 'fr' && DICT[LANGUE]) ? DICT[LANGUE] : null;
+    var v = (d && Object.prototype.hasOwnProperty.call(d, k)) ? d[k] : k;
+    return (a === undefined) ? v : String(v).split('{0}').join(String(a));
+  }
+  /* ⚠ LES REFUS DU SERVEUR SE TRADUISENT PAR LEUR MOTIF, pas par leur
+     texte : comparer des phrases françaises pour retrouver leur sens est
+     un piège qui casse au premier mot changé côté serveur. Motif inconnu
+     = on garde la phrase du serveur, telle quelle. */
+  function TM(r){
+    var m = r && r.motif ? ('motif.' + r.motif) : '';
+    if (LANGUE === 'fr' || !m) return (r && r.message) || '';
+    var d = DICT[LANGUE] || {};
+    return Object.prototype.hasOwnProperty.call(d, m)
+      ? d[m] : ((r && r.message) || '');
+  }
   var MAINT = null;        // dernier etat de maintenance connu
   var MAINT_T = null;
   var MFA_T = null, MFA_FIN = 0;
@@ -282,7 +405,7 @@ ${JS_DIRE}
     catch (e) { pr = null; }
     if (!pr || typeof pr.then !== 'function') {
       return Promise.resolve({ ok: false, motif: 'muet',
-        message: 'La fenetre principale ne repond pas.' });
+        message: T('La fenetre principale ne repond pas.') });
     }
     return pr.then(function(r){ return r || { ok: false, motif: 'vide' }; })
       .catch(function(e){ return { ok: false, motif: 'echec',
@@ -322,11 +445,11 @@ ${JS_DIRE}
       + '<div class="admlogin-eyebrow"><span class="al-line"></span><span>'
       + esc(t.sousTexte) + '</span></div>'
       + '<ul class="admlogin-feats">'
-      + f(IC.verrouSm, 'Connexion chiffrée de bout en bout (HTTPS)')
-      + f(IC.bouclier, 'Accès renforcé par mot de passe et authentification MFA')
-      + f(IC.epingle,  'Chaque tentative journalisée (adresse IP et pays)')
+      + f(IC.verrouSm, T('Connexion chiffrée de bout en bout (HTTPS)'))
+      + f(IC.bouclier, T('Accès renforcé par mot de passe et authentification MFA'))
+      + f(IC.epingle,  T('Chaque tentative journalisée (adresse IP et pays)'))
       + '</ul>'
-      + (VERSION ? ('<div class="cx-ver">Version ' + esc(VERSION) + '</div>') : '')
+      + (VERSION ? ('<div class="cx-ver">' + T('Version ') + esc(VERSION) + '</div>') : '')
       + '</div></aside>';
   }
 
@@ -451,33 +574,33 @@ ${JS_DIRE}
   function ecranLogin(){
     return '<div>'
       + '<div style="margin-bottom:1.75rem">'
-      + '<div class="cx-titre">Connexion sécurisée</div>'
-      + '<div class="cx-sous">Réservé au personnel autorisé uniquement</div>'
+      + '<div class="cx-titre">' + T('Connexion sécurisée') + '</div>'
+      + '<div class="cx-sous">' + T('Réservé au personnel autorisé uniquement') + '</div>'
       + '</div>'
       + '<form id="cx-form" novalidate>'
       + '<div style="margin-bottom:1rem">'
-      + '<label class="cx-lbl" for="sl-email">Nom d’utilisateur</label>'
+      + '<label class="cx-lbl" for="sl-email">' + T('Nom d’utilisateur') + '</label>'
       + '<div class="cx-champ"><span class="cx-ic">' + IC.personne + '</span>'
       + '<input type="text" id="sl-email" class="pad" autocomplete="username" value="'
       + esc(CTX.prefill) + '"></div>'
       + '</div>'
       + '<div class="cx-souvenir">'
       + '<input type="checkbox" id="sl-remember"' + (CTX.souvenir ? ' checked' : '') + '>'
-      + '<label for="sl-remember">Se souvenir de mon nom d’utilisateur</label>'
+      + '<label for="sl-remember">' + T('Se souvenir de mon nom d’utilisateur') + '</label>'
       + '</div>'
       + '<div style="margin-bottom:1.25rem">'
-      + '<label class="cx-lbl" for="sl-password">Mot de passe</label>'
+      + '<label class="cx-lbl" for="sl-password">' + T('Mot de passe') + '</label>'
       + '<div class="cx-champ"><span class="cx-ic">' + IC.cadenas + '</span>'
       + '<input type="password" id="sl-password" class="pad padd" autocomplete="current-password">'
-      + '<button type="button" class="cx-oeil" id="sl-oeil" aria-label="Afficher le mot de passe">'
+      + '<button type="button" class="cx-oeil" id="sl-oeil" aria-label="' + T('Afficher le mot de passe') + '">'
       + IC.oeil + '</button></div>'
       + '</div>'
       + '<div class="cx-err" id="sl-error"></div>'
       + '<div id="cap-zone"></div>'
-      + '<button type="submit" class="cx-btn" id="sl-btn" style="' + btnStyle() + '">Se connecter</button>'
+      + '<button type="submit" class="cx-btn" id="sl-btn" style="' + btnStyle() + '">' + T('Se connecter') + '</button>'
       + '</form>'
       + '<div class="cx-centre cx-recours' + (DEJA_RATE ? '' : ' cx-voile') + '">'
-      + '<button type="button" class="admlogin-forgot" id="sl-oubli">Mot de passe oublié ?</button>'
+      + '<button type="button" class="admlogin-forgot" id="sl-oubli">' + T('Mot de passe oublié ?') + '</button>'
       + '</div></div>';
   }
 
@@ -485,18 +608,18 @@ ${JS_DIRE}
   function ecranMfa(sec){
     return '<div>'
       + '<div style="margin-bottom:1.75rem">'
-      + '<div class="cx-titre">Vérification en deux étapes</div>'
-      + '<div class="cx-sous">Entrez le code de votre application d’authentification</div>'
-      + '<div class="cx-chrono">⏱ Temps restant : <strong id="sl-mfa-timer">' + sec + ' s</strong></div>'
+      + '<div class="cx-titre">' + T('Vérification en deux étapes') + '</div>'
+      + '<div class="cx-sous">' + T('Entrez le code de votre application d’authentification') + '</div>'
+      + '<div class="cx-chrono">' + T('⏱ Temps restant : ') + '<strong id="sl-mfa-timer">' + sec + ' s</strong></div>'
       + '</div>'
       + '<form id="cx-form-mfa" novalidate>'
       + '<div style="margin-bottom:1.25rem">'
-      + '<label class="cx-lbl" for="sl-mfa-code">Code à 6 chiffres</label>'
+      + '<label class="cx-lbl" for="sl-mfa-code">' + T('Code à 6 chiffres') + '</label>'
       + '<input type="text" id="sl-mfa-code" inputmode="numeric" maxlength="6"'
       + ' autocomplete="one-time-code" placeholder="000000">'
       + '</div>'
       + '<div class="cx-err" id="sl-mfa-error"></div>'
-      + '<button type="submit" class="cx-btn" id="sl-mfa-btn" style="' + btnStyle() + '">Vérifier</button>'
+      + '<button type="submit" class="cx-btn" id="sl-mfa-btn" style="' + btnStyle() + '">' + T('Vérifier') + '</button>'
       + '</form>'
       + '</div>';
   }
@@ -514,10 +637,10 @@ ${JS_DIRE}
   function ecranOubli(d){
     var contact = (d && d.contact)
       ? ('<a href="mailto:' + esc(d.contact) + '" style="color:#8a6a44">' + esc(d.contact) + '</a>')
-      : 'un super-administrateur';
+      : T('un super-administrateur');
     return '<div>'
       + '<div style="margin-bottom:1.2rem">'
-      + '<div class="cx-titre">Mot de passe oublié</div>'
+      + '<div class="cx-titre">' + T('Mot de passe oublié') + '</div>'
       + '<div class="cx-sous">Deux chemins fonctionnent, et les voici. La récupération '
       + 'par questions de sécurité n’est pas disponible : les réponses sont chiffrées '
       + 'côté serveur et cet écran n’a pas de session pour les vérifier.</div>'
@@ -536,7 +659,7 @@ ${JS_DIRE}
       + '</div></li>'
       + '</ul>'
       + '<div class="cx-centre" style="margin-top:1.4rem">'
-      + '<button type="button" class="admlogin-back" id="sl-oubli-retour">← Retour à la connexion</button>'
+      + '<button type="button" class="admlogin-back" id="sl-oubli-retour">' + T('← Retour à la connexion') + '</button>'
       + '</div></div>';
   }
 
@@ -553,7 +676,7 @@ ${JS_DIRE}
   function ecranMfaConfig(d){
     return '<div>'
       + '<div style="margin-bottom:1.3rem">'
-      + '<div class="cx-titre">Authentification à deux facteurs</div>'
+      + '<div class="cx-titre">' + T('Authentification à deux facteurs') + '</div>'
       + '<div class="cx-sous">Bonjour ' + esc(d.prenom) + ' — votre administrateur exige '
       + 'cette configuration avant l’accès au panneau.</div>'
       + '</div>'
@@ -566,17 +689,17 @@ ${JS_DIRE}
       + '<div class="cx-etl">Étape 2 — la clé</div>'
       + '<div class="cx-cle"><code id="wz-cle">' + esc(d.secretGroupe) + '</code>'
       + '<div class="fine">SHA-1 · 6 chiffres · 30 s — cette clé ne quitte pas ce poste.</div>'
-      + '<button type="button" id="wz-copier">Copier la clé</button></div>'
+      + '<button type="button" id="wz-copier">' + T('Copier la clé') + '</button></div>'
       + '<div class="cx-etc" style="margin-top:0.7rem">Ou scannez le code ci-dessous, '
       + 'produit par un service externe.</div>'
       + '<div class="cx-qr"><img id="wz-qr" src="' + esc(d.qrUrl) + '" alt="Code QR"></div>'
-      + '<div class="cx-err" id="wz-qr-err">Code QR indisponible — utilisez la clé ci-dessus.</div>'
+      + '<div class="cx-err" id="wz-qr-err">' + T('Code QR indisponible — utilisez la clé ci-dessus.') + '</div>'
       + '</div>'
       + '<div class="cx-etape">'
       + '<div class="cx-etl">Étape 3 — confirmez</div>'
       + '<form id="cx-form-wz" novalidate>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="wz-code">Code à 6 chiffres</label>'
+      + '<label class="cx-lbl" for="wz-code">' + T('Code à 6 chiffres') + '</label>'
       + '<input type="text" id="wz-code" inputmode="numeric" maxlength="6" '
       + 'autocomplete="one-time-code" placeholder="000000">'
       + '</div>'
@@ -585,7 +708,7 @@ ${JS_DIRE}
       + 'Activer et accéder au panneau</button>'
       + '</form></div>'
       + '<div class="cx-centre">'
-      + '<button type="button" class="admlogin-back" id="wz-annuler">← Annuler</button>'
+      + '<button type="button" class="admlogin-back" id="wz-annuler">' + T('← Annuler') + '</button>'
       + '</div></div>';
   }
 
@@ -596,18 +719,18 @@ ${JS_DIRE}
     var ex = (d.exigences || []).map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('');
     return '<div>'
       + '<div style="margin-bottom:1.5rem">'
-      + '<div class="cx-titre">Changement de mot de passe requis</div>'
+      + '<div class="cx-titre">' + T('Changement de mot de passe requis') + '</div>'
       + '<div class="cx-sous">Bienvenue ' + esc(d.prenom) + ' — définissez votre mot de '
       + 'passe avant d’accéder au panneau.</div>'
       + (ex ? ('<ul class="cx-exig">' + ex + '</ul>') : '')
       + '</div>'
       + '<form id="cx-form-mdp" novalidate>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="pc-pw1">Nouveau mot de passe</label>'
+      + '<label class="cx-lbl" for="pc-pw1">' + T('Nouveau mot de passe') + '</label>'
       + '<input type="password" id="pc-pw1" class="padd" autocomplete="new-password">'
       + '</div>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="pc-pw2">Confirmer le mot de passe</label>'
+      + '<label class="cx-lbl" for="pc-pw2">' + T('Confirmer le mot de passe') + '</label>'
       + '<input type="password" id="pc-pw2" autocomplete="new-password">'
       + '</div>'
       + '<div class="cx-err" id="pc-err"></div>'
@@ -615,7 +738,7 @@ ${JS_DIRE}
       + 'Enregistrer et accéder</button>'
       + '</form>'
       + '<div class="cx-centre">'
-      + '<button type="button" class="admlogin-back" id="pc-annuler">← Retour à la connexion</button>'
+      + '<button type="button" class="admlogin-back" id="pc-annuler">' + T('← Retour à la connexion') + '</button>'
       + '</div></div>';
   }
 
@@ -626,7 +749,7 @@ ${JS_DIRE}
   function ecranQuestions(d){
     var qs = d.questions || [];
     var opts = function(exclu, sel){
-      var o = '<option value="">— Choisir une question —</option>';
+      var o = '<option value="">' + T('— Choisir une question —') + '</option>';
       for (var i = 0; i < qs.length; i++) {
         if (exclu && qs[i] === exclu) continue;
         o += '<option value="' + esc(qs[i]) + '"'
@@ -636,25 +759,25 @@ ${JS_DIRE}
     };
     return '<div>'
       + '<div style="margin-bottom:1.4rem">'
-      + '<div class="cx-titre">Questions de sécurité</div>'
+      + '<div class="cx-titre">' + T('Questions de sécurité') + '</div>'
       + '<div class="cx-sous">' + esc(d.prenom) + ', choisissez deux questions. Elles servent '
       + 'à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.</div>'
       + '</div>'
       + '<form id="cx-form-q" novalidate>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="sq-q1">Question 1</label>'
+      + '<label class="cx-lbl" for="sq-q1">' + T('Question 1') + '</label>'
       + '<select id="sq-q1">' + opts('', '') + '</select>'
       + '</div>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="sq-a1">Réponse 1</label>'
+      + '<label class="cx-lbl" for="sq-a1">' + T('Réponse 1') + '</label>'
       + '<input type="text" id="sq-a1" autocomplete="off">'
       + '</div>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="sq-q2">Question 2</label>'
+      + '<label class="cx-lbl" for="sq-q2">' + T('Question 2') + '</label>'
       + '<select id="sq-q2">' + opts('', '') + '</select>'
       + '</div>'
       + '<div class="cx-bloc">'
-      + '<label class="cx-lbl" for="sq-a2">Réponse 2</label>'
+      + '<label class="cx-lbl" for="sq-a2">' + T('Réponse 2') + '</label>'
       + '<input type="text" id="sq-a2" autocomplete="off">'
       + '</div>'
       + '<div class="cx-err" id="sq-err"></div>'
@@ -662,7 +785,7 @@ ${JS_DIRE}
       + 'Enregistrer et accéder</button>'
       + '</form>'
       + '<div class="cx-centre">'
-      + '<button type="button" class="admlogin-back" id="sq-annuler">← Retour à la connexion</button>'
+      + '<button type="button" class="admlogin-back" id="sq-annuler">' + T('← Retour à la connexion') + '</button>'
       + '</div></div>';
   }
 
@@ -673,7 +796,7 @@ ${JS_DIRE}
     var refaire = function(cible, autre){
       var garde = cible.value;
       var exclu = autre.value;
-      var o = '<option value="">— Choisir une question —</option>';
+      var o = '<option value="">' + T('— Choisir une question —') + '</option>';
       var qs = (CTX_Q && CTX_Q.questions) || [];
       for (var i = 0; i < qs.length; i++) {
         if (exclu && qs[i] === exclu) continue;
@@ -726,16 +849,16 @@ ${JS_DIRE}
     if (!c || !b) return;
     fauteEffacer('wz-err');
     if (manque(['wz-code'])) {
-      faute('wz-err', { message: 'Entrez le code à six chiffres affiché par votre application.' });
+      faute('wz-err', { message: T('Entrez le code à six chiffres affiché par votre application.') });
       return;
     }
     b.disabled = true;
-    b.innerHTML = '<span class="cx-spin"></span><span>Vérification…</span>';
+    b.innerHTML = '<span class="cx-spin"></span><span>' + T('Vérification…') + '</span>';
     c.disabled = true;
     appeler('connexion:mfaConfigConfirmer', [c.value]).then(function(r){
       if (r.ok) { suivre(r); return; }
       var c2 = el('wz-code'), b2 = el('wz-btn');
-      if (b2) { b2.disabled = false; b2.textContent = 'Activer et accéder au panneau'; }
+      if (b2) { b2.disabled = false; b2.textContent = T('Activer et accéder au panneau'); }
       if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
       faute('wz-err', r);
     });
@@ -746,15 +869,15 @@ ${JS_DIRE}
     if (!a || !b || !bt) return;
     fauteEffacer('pc-err');
     if (manque(['pc-pw1', 'pc-pw2'])) {
-      faute('pc-err', { message: 'Remplissez les deux champs.' });
+      faute('pc-err', { message: T('Remplissez les deux champs.') });
       return;
     }
     bt.disabled = true;
-    bt.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
+    bt.innerHTML = '<span class="cx-spin"></span><span>' + T('Enregistrement…') + '</span>';
     appeler('connexion:mdpEcrire', [a.value, b.value]).then(function(r){
       if (r.ok) { suivre(r); return; }
       var bt2 = el('pc-btn');
-      if (bt2) { bt2.disabled = false; bt2.textContent = 'Enregistrer et accéder'; }
+      if (bt2) { bt2.disabled = false; bt2.textContent = T('Enregistrer et accéder'); }
       faute('pc-err', r);
       /* ⚠ ON NE VIDE QUE LA CONFIRMATION sur une discordance : effacer les deux
          obligerait a retaper un mot de passe peut-etre bon. Sur un refus de
@@ -769,16 +892,16 @@ ${JS_DIRE}
     if (!q1 || !a1 || !q2 || !a2 || !b) return;
     fauteEffacer('sq-err');
     if (manque(['sq-q1', 'sq-a1', 'sq-q2', 'sq-a2'])) {
-      faute('sq-err', { message: 'Choisissez les deux questions et écrivez leurs réponses.' });
+      faute('sq-err', { message: T('Choisissez les deux questions et écrivez leurs réponses.') });
       return;
     }
     b.disabled = true;
-    b.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
+    b.innerHTML = '<span class="cx-spin"></span><span>' + T('Enregistrement…') + '</span>';
     appeler('connexion:questionsEcrire', [q1.value, a1.value, q2.value, a2.value])
       .then(function(r){
         if (r.ok) { suivre(r); return; }
         var b2 = el('sq-btn');
-        if (b2) { b2.disabled = false; b2.textContent = 'Enregistrer et accéder'; }
+        if (b2) { b2.disabled = false; b2.textContent = T('Enregistrer et accéder'); }
         faute('sq-err', r);
       });
   }
@@ -798,6 +921,12 @@ ${JS_DIRE}
       + ';--al-title:' + t.titre + ';--al-sub:' + t.sous + '">'
       + '<div class="admlogin-split">' + marquePanneau()
       + '<main class="admlogin-form-panel">'
+      + '<div class="cx-langue"><div class="grp">'
+      + '<button type="button" id="lg-fr" class="' + (LANGUE === 'fr' ? 'on' : '')
+      + '" aria-pressed="' + (LANGUE === 'fr') + '">FR</button>'
+      + '<button type="button" id="lg-en" class="' + (LANGUE === 'en' ? 'on' : '')
+      + '" aria-pressed="' + (LANGUE === 'en') + '">EN</button>'
+      + '</div></div>'
       + '<div id="al-maint"></div><div id="al-nipbox"></div>'
       + '<div class="admlogin-formwrap" id="cx-corps"></div>'
       + '<div class="cx-msg"><span class="msg" id="msg"></span></div>'
@@ -806,6 +935,10 @@ ${JS_DIRE}
 
   function dessiner(quoi, donnee){
     ECRAN = quoi;
+    /* ⚠ ON RETIENT LA DONNÉE : changer de langue redessine l écran COURANT,
+       et sans elle l assistant repartirait vide — questions de sécurité sans
+       questions, clé TOTP sans clé. */
+    ECRAN_DONNEE = donnee;
     var z = el('cx-corps');
     if (!z) { socle(); z = el('cx-corps'); }
     /* ⚠ LA LARGEUR SUIT L ECRAN : les trois assistants sont plus hauts et
@@ -833,13 +966,13 @@ ${JS_DIRE}
     if (!z) return;
     CAPTCHA_OK = false;
     z.innerHTML = '<div id="sl-captcha">'
-      + '<label class="cx-lbl">Vérification de sécurité</label>'
+      + '<label class="cx-lbl">' + T('Vérification de sécurité') + '</label>'
       + '<div style="font-size:0.72rem;color:#7a6652;margin:-0.1rem 0 0.5rem">'
-      + 'Faites glisser la pièce pour compléter l’image.</div>'
+      + T('Faites glisser la pièce pour compléter l’image.') + '</div>'
       + '<div id="cap-stage"><canvas id="cap-bg"></canvas>'
       + '<canvas id="cap-piece"></canvas><div id="cap-flash"></div></div>'
       + '<div id="cap-track"><div id="cap-fill"></div>'
-      + '<div id="cap-hint">Glissez vers la droite →</div>'
+      + '<div id="cap-hint">' + T('Glissez vers la droite →') + '</div>'
       + '<div id="cap-handle">⇢</div></div></div>';
     captchaArmer();
   }
@@ -911,7 +1044,7 @@ ${JS_DIRE}
          un ecran tactile serait impossible. */
       if (Math.abs(px - cx) <= 6) {
         CAPTCHA_OK = true;
-        if (hint) hint.textContent = 'Vérifié';
+        if (hint) hint.textContent = T('Vérifié');
         if (flash) { flash.style.background = 'rgba(74,222,128,0.28)'; flash.style.opacity = '1'; }
         handle.textContent = 'OK';
         handle.style.pointerEvents = 'none';
@@ -922,7 +1055,7 @@ ${JS_DIRE}
         setTimeout(function(){
           if (flash) flash.style.opacity = '0';
           poser(0);
-          if (hint) hint.textContent = 'Glissez vers la droite →';
+          if (hint) hint.textContent = T('Glissez vers la droite →');
         }, 350);
       }
     };
@@ -941,7 +1074,7 @@ ${JS_DIRE}
     var z = el(id);
     if (!z) return;
     z.className = 'cx-err on' + (r && r.ton === 'orange' ? ' orange' : (r && r.ton === 'sombre' ? ' sombre' : ''));
-    var txt = esc((r && r.message) || 'L’opération a échoué.');
+    var txt = esc(TM(r) || T('L’opération a échoué.'));
     if (r && typeof r.restant === 'number' && r.restant > 0) {
       txt += '<br><span style="font-size:0.78rem">Attention — il vous reste <strong>' + r.restant
         + '</strong> tentative' + (r.restant > 1 ? 's' : '')
@@ -996,7 +1129,7 @@ ${JS_DIRE}
     if (!idc || !pwc || !b) return;
     fauteEffacer('sl-error');
     if (manque(['sl-email', 'sl-password'])) {
-      faute('sl-error', { message: 'Entrez votre nom d’utilisateur et votre mot de passe.' });
+      faute('sl-error', { message: T('Entrez votre nom d’utilisateur et votre mot de passe.') });
       return;
     }
     /* ⚠ LE DISQUE REMPLACE LE TEXTE SANS CHANGER LA TAILLE DU BOUTON : sa
@@ -1004,13 +1137,13 @@ ${JS_DIRE}
        rétrécit pendant qu on attend fait sauter tout le formulaire — c est la
        chose la plus datée qu une commande puisse faire. */
     b.disabled = true;
-    b.innerHTML = '<span class="cx-spin"></span><span>Connexion…</span>';
+    b.innerHTML = '<span class="cx-spin"></span><span>' + T('Connexion…') + '</span>';
     var sv = el('sl-remember');
     appeler('connexion:entrer', [idc.value.trim(), pwc.value, !!(sv && sv.checked), CAPTCHA_OK])
       .then(function(r){
         var b2 = el('sl-btn');
         if (!r.ok) {
-          if (b2) { b2.disabled = false; b2.textContent = 'Se connecter'; }
+          if (b2) { b2.disabled = false; b2.textContent = T('Se connecter'); }
           faute('sl-error', r);
           /* ⚠ ICI ET NULLE PART AILLEURS. Les autres échecs de cet écran —
              un code à six chiffres refusé, un chargement d étape qui rate —
@@ -1027,7 +1160,7 @@ ${JS_DIRE}
         }
         if (r.suite === 'mfa')   { mfaDemarrer(r.secondes || 60); return; }
         if (r.suite === 'expire') {
-          if (b2) { b2.disabled = false; b2.textContent = 'Se connecter'; }
+          if (b2) { b2.disabled = false; b2.textContent = T('Se connecter'); }
           faute('sl-error', { message: r.message, ton: 'sombre' });
           return;
         }
@@ -1066,7 +1199,7 @@ ${JS_DIRE}
   function mfaExpire(){
     appeler('connexion:mfaAbandon').then(function(){
       dessiner('login');
-      faute('sl-error', { message: 'Délai de vérification dépassé — veuillez vous reconnecter.' });
+      faute('sl-error', { message: T('Délai de vérification dépassé — veuillez vous reconnecter.') });
     });
   }
   function mfaEnvoyer(){
@@ -1074,7 +1207,7 @@ ${JS_DIRE}
     if (!c || !b) return;
     fauteEffacer('sl-mfa-error');
     if (manque(['sl-mfa-code'])) {
-      faute('sl-mfa-error', { message: 'Entrez le code à six chiffres.' });
+      faute('sl-mfa-error', { message: T('Entrez le code à six chiffres.') });
       return;
     }
     /* On arrete le chrono PENDANT la verification : sinon un << delai depasse >>
@@ -1084,12 +1217,12 @@ ${JS_DIRE}
     var ch = el('sl-mfa-timer');
     if (ch && ch.parentElement) ch.parentElement.style.display = 'none';
     b.disabled = true;
-    b.innerHTML = '<span class="cx-spin"></span><span>Vérification…</span>';
+    b.innerHTML = '<span class="cx-spin"></span><span>' + T('Vérification…') + '</span>';
     c.disabled = true;
     appeler('connexion:mfa', [c.value]).then(function(r){
       if (r.ok) { reussi(r.prenom); return; }
       var c2 = el('sl-mfa-code'), b2 = el('sl-mfa-btn');
-      if (b2) { b2.disabled = false; b2.textContent = 'Vérifier'; }
+      if (b2) { b2.disabled = false; b2.textContent = T('Vérifier'); }
       if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
       var ch2 = el('sl-mfa-timer');
       if (ch2 && ch2.parentElement) ch2.parentElement.style.display = '';
@@ -1151,7 +1284,7 @@ ${JS_DIRE}
       if (n) n.innerHTML = '';
       return;
     }
-    z.innerHTML = '<div class="admlogin-maint"><strong>Maintenance en cours</strong>'
+    z.innerHTML = '<div class="admlogin-maint"><strong>' + T('Maintenance en cours') + '</strong>'
       + '<div>' + esc(MAINT.phrase) + '</div></div>';
   }
 
@@ -1165,15 +1298,15 @@ ${JS_DIRE}
     var n = el('al-nipbox');
     if (!n || n.firstChild) return;
     n.innerHTML = '<div class="admlogin-nipbox">'
-      + '<strong>Désactivation d’urgence</strong>'
+      + '<strong>' + T('Désactivation d’urgence') + '</strong>'
       + '<div style="font-size:0.76rem;margin:0.3rem 0 0.5rem">Entrez le NIP posé à '
       + 'l’activation du mode exclusif.</div>'
-      + '<label class="cx-lbl" for="nip-champ">NIP de désactivation</label>'
+      + '<label class="cx-lbl" for="nip-champ">' + T('NIP de désactivation') + '</label>'
       + '<input type="password" id="nip-champ" inputmode="numeric" maxlength="12" '
       + 'autocomplete="off" placeholder="NIP">'
       + '<div class="cx-err" id="nip-err"></div>'
-      + '<div class="npr"><button type="button" id="nip-ok">Lever la maintenance</button>'
-      + '<button type="button" id="nip-non">Annuler</button></div></div>';
+      + '<div class="npr"><button type="button" id="nip-ok">' + T('Lever la maintenance') + '</button>'
+      + '<button type="button" id="nip-non">' + T('Annuler') + '</button></div></div>';
     var c = el('nip-champ'); if (c) c.focus();
     var ok = el('nip-ok'); if (ok) ok.onclick = nipEnvoyer;
     var no = el('nip-non');
@@ -1223,9 +1356,16 @@ ${JS_DIRE}
       var cache = p2.type === 'password';
       p2.type = cache ? 'text' : 'password';
       oeil.innerHTML = cache ? IC.oeilBarre : IC.oeil;
-      oeil.setAttribute('aria-label', cache ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+      /* ⚠ LES DEUX ÉTIQUETTES PASSENT PAR T(). Un lecteur d écran lit CETTE
+         phrase-là et rien d autre ; la laisser en dur, c est un écran anglais
+         qui parle français à la seule personne qui ne voit pas l écran. Trou
+         trouvé par << banc-langue-connexion >> — pas par la relecture. */
+      oeil.setAttribute('aria-label',
+        cache ? T('Masquer le mot de passe') : T('Afficher le mot de passe'));
       p2.focus();
     };
+    var lgf = el('lg-fr'); if (lgf) lgf.onclick = function(){ langueMettre('fr'); };
+    var lge = el('lg-en'); if (lge) lge.onclick = function(){ langueMettre('en'); };
     var ou = el('sl-oubli');
     if (ou) ou.onclick = function(){
       appeler('connexion:oubli').then(function(r){ dessiner('oubli', r); });
@@ -1252,8 +1392,8 @@ ${JS_DIRE}
          cle qui en contient. Copier ce qu on voit aurait fait echouer le
          collage sans dire pourquoi. */
       var v = String(z.textContent || '').replace(/\s+/g, '');
-      try { navigator.clipboard.writeText(v); szDire('Clé copiée (sans les espaces).', 'bon'); }
-      catch (e) { szDire('La copie a échoué — recopiez la clé à la main.', 'att'); }
+      try { navigator.clipboard.writeText(v); szDire(T('Clé copiée (sans les espaces).'), 'bon'); }
+      catch (e) { szDire(T('La copie a échoué — recopiez la clé à la main.'), 'att'); }
     };
     var wq = el('wz-qr');
     if (wq) wq.onerror = function(){
@@ -1290,6 +1430,37 @@ ${JS_DIRE}
 
   /* Le curseur va DIRECTEMENT au mot de passe quand le nom est deja connu :
      l y renvoyer serait lui faire retaper ce que le poste a retenu. */
+  /* ══ CHANGER DE LANGUE ════════════════════════════════════════════════
+     ⚠ ON REDESSINE TOUT, panneau de marque compris : ses trois lignes de
+     sécurité sont du texte, elles aussi. Les halos repartent de zéro — c est
+     le seul endroit du parcours où on l accepte, parce que c est un geste
+     DEMANDÉ, une fois, et qu il vaut mieux qu une moitié d écran reste dans
+     l autre langue.
+     ⚠ LE NOM D UTILISATEUR DÉJÀ TAPÉ EST RENDU. Perdre une saisie parce
+     qu on a cliqué sur EN serait une punition pour avoir lu l écran.
+     ⚠ LE MOT DE PASSE, LUI, N EST PAS REPORTÉ : le remettre dans le document
+     n apporte rien qu un aller-retour de plus pour une valeur secrète, et le
+     curseur revient dessus. */
+  function langueMettre(l){
+    l = (l === 'en') ? 'en' : 'fr';
+    if (l === LANGUE) return;
+    LANGUE = l;
+    try { if (P && P.langueEcrire) P.langueEcrire(l); } catch (e) {}
+    var idc = el('sl-email');
+    var garde = idc ? idc.value : null;
+    var reste = (ECRAN === 'mfa' && MFA_FIN)
+      ? Math.max(0, Math.ceil((MFA_FIN - Date.now()) / 1000)) : null;
+    socle();
+    dessiner(ECRAN, (reste === null) ? ECRAN_DONNEE : reste);
+    if (ECRAN === 'login') {
+      var n = el('sl-email');
+      if (n && garde !== null) n.value = garde;
+      apresLogin();
+    }
+    try { document.documentElement.lang = LANGUE; } catch (e) {}
+    maintLire();
+  }
+
   function apresLogin(){
     if (CTX.captchaRequis && !CTX.verrouille) captchaPoser();
     var z = el(CTX.prefill ? 'sl-password' : 'sl-email');
@@ -1415,10 +1586,30 @@ ${JS_DIRE}
     }).catch(function(){});
   }
 
+  /* ══ LA LANGUE SE LIT AVANT LE PREMIER DESSIN ═════════════════════
+     ⚠ ET SON ÉCHEC NE BLOQUE RIEN : sans réponse on reste en français, et
+     l écran s ouvre. Un écran de CONNEXION qui attendrait après un réglage
+     d affichage serait un écran qui ne s ouvre pas le jour où ce réglage
+     manque : on troquerait un confort contre la porte d entrée.
+     ⚠ << charger >> NE FAIT QUE ÇA, et passe la main à << chargerSuite >>. Insérer
+     cette attente AU MILIEU de l ancien corps aurait mêlé deux suites de
+     promesses, et c est l empilement qui fait qu un jour l une avale
+     l erreur de l autre. */
   function charger(){
+    var fini = function(){ chargerSuite(); };
+    var pl = null;
+    try { pl = (P && P.langue) ? P.langue() : null; } catch (e) { pl = null; }
+    if (pl && typeof pl.then === 'function') {
+      pl.then(function(l){ LANGUE = (l === 'en') ? 'en' : 'fr'; })
+        .catch(function(){})
+        .then(fini, fini);
+    } else { fini(); }
+  }
+
+  function chargerSuite(){
     appeler('connexion:contexte').then(function(r){
       CTX = (r && r.ok && r.theme && r.marque) ? r : REPLI;
-      if (CTX === REPLI) szDire('Décor par défaut — la fenêtre principale n’a pas répondu.', 'att');
+      if (CTX === REPLI) szDire(T('Décor par défaut — la fenêtre principale n’a pas répondu.'), 'att');
       socle();
       /* ⚠ LE DEPART EST HONORE APRES LE SOCLE, PAS AVANT : les assistants ont
          besoin du panneau de marque et de la zone de message deja en place. */

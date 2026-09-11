@@ -56,6 +56,11 @@
     menuLabels: function () {
       return Promise.resolve(REP['__menuLabels'] || ['Fichier', 'Affichage', 'Aide']);
     },
+    /* ⚠ La langue, pilotable par le jeu sous `__langue` : sans elle, l'écran ne
+       serait mesuré qu'en français et la version anglaise — dont les phrases
+       sont PLUS LONGUES — ne passerait jamais devant ce banc. */
+    langue: function () { return Promise.resolve(REP['__langue'] || 'fr'); },
+    langueEcrire: function (l) { return Promise.resolve(l); },
     menuPanneau: function () {},
     menuPanneauFermer: function () {},
     detacher: function () { return Promise.resolve(false); },

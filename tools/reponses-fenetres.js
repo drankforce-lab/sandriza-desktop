@@ -6227,7 +6227,7 @@ module.exports = {
          une LIMITE, pas un oubli : elle est posee par appendChild sur le corps,
          et le faux document de cet executeur ne rend que les ecritures d ecran.
          Exiger une chose que l outil ne peut pas voir ferait echouer une fenetre
-         saine. C est  qui l eprouve, dans un vrai
+         saine. C est tools/essai-menu-connexion.js qui l eprouve, dans un vrai
          Electron, sur une fenetre reglee comme la vraie — et il compte les
          boutons. */
       id: '',
@@ -6238,6 +6238,32 @@ module.exports = {
             sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
             btnTo: '#3d2810', btnTexte: '#f5e6d0' },
           marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠⚠ L ECRAN EN ANGLAIS, ET C EST LE SEUL CAS QUI PROUVE QUE LA TRADUCTION
+         SORT VRAIMENT. `T(cle)` rend la CLE quand elle manque — et la cle est la
+         phrase francaise. Un dictionnaire vide, une langue jamais lue, un T()
+         oublie : dans les trois cas l ecran s affiche NORMALEMENT en francais, et
+         tous les autres cas restent verts. Sans ce cas-ci, la moitie anglaise du
+         travail ne serait eprouvee par rien.
+         ⚠ `banc-langue-connexion.js` verifie que chaque cle a sa traduction ; lui
+         ne peut pas verifier que la langue est LUE et APPLIQUEE. Les deux sont
+         necessaires, et aucun ne remplace l autre. */
+      nom: 'la connexion, en anglais',
+      exige: ['Secure sign-in', 'Authorized staff only', 'Sign in', 'Forgot your password?'],
+      id: '',
+      reponses: {
+        __langue: 'en',
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Administration panel', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'S', logo: '' },
           prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
         'connexion:maintenance': { ok: true, actif: false, phrase: '' },
         identite: IDENTITE,

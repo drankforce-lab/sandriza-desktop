@@ -5555,6 +5555,31 @@ ipcMain.on('palette:action', (e, it) => {
    ⚠ `_sansPseudo` DES DEUX CÔTÉS : les entrées techniques (préfixe `__`) ne sont
    pas des menus, et les compter d un côté seulement décalerait tous les indices
    — on ouvrirait « Aide » en cliquant « Affichage ». */
+/* ══════════════════════════════════════════════════════════════════════════
+   LA LANGUE — RANGÉE DANS LA COQUILLE, PAS DANS L ÉCRAN QUI S EN SERT
+   ═══════════════════════════════════════════════════════════════════════════
+   ⚠⚠ SA DEMANDE DU 2026-09-11 : « un switcheur de langue français et anglais
+   (EN/FR) dans la page de connexion », et « traduire l application
+   intégralement en anglais dans un projet final, mais à mettre en dernier ».
+   ⚠ LE RÉGLAGE VIT DONC ICI DÈS MAINTENANT, même si un seul écran le lit
+   encore. Le poser dans la fenêtre de connexion aurait coûté zéro aujourd hui
+   et un déménagement le jour du grand chantier — avec, entre les deux, une
+   période où deux endroits décident de la langue. Un réglage qui concerne
+   toute l application n a qu un seul domicile, choisi tout de suite.
+   ⚠ ET IL SURVIT AU REDÉMARRAGE : c est un réglage de poste, pas une humeur de
+   session. Quelqu un qui travaille en anglais ne redemande pas l anglais à
+   chaque lancement. */
+ipcMain.handle('langue:lire', () => {
+  try { return (reglages.get('langue') === 'en') ? 'en' : 'fr'; }
+  catch (e) { return 'fr'; }
+});
+ipcMain.handle('langue:ecrire', (e, l) => {
+  const v = (String(l || '') === 'en') ? 'en' : 'fr';
+  try { reglages.set('langue', v); } catch (er) {}
+  cnxDire('langue reglee : ' + v);
+  return v;
+});
+
 ipcMain.handle('cnxmenu:labels', () => {
   try {
     const noms = _sansPseudo(_modele.menus)
