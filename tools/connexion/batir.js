@@ -747,9 +747,19 @@ p("      + '</div>'");
 p("      + '<div class=\"cx-err\" id=\"sl-mfa-error\"></div>'");
 p("      + '<button type=\"submit\" class=\"cx-btn\" id=\"sl-mfa-btn\" style=\"' + btnStyle() + '\">Vérifier</button>'");
 p("      + '</form>'");
-p("      + '<div class=\"cx-centre\">'");
-p("      + '<button type=\"button\" class=\"admlogin-back\" id=\"sl-mfa-retour\">← Retour à la connexion</button>'");
-p("      + '</div></div>';");
+/* ══ PAS DE << RETOUR À LA CONNEXION >> ICI ═══════════════════════════════
+   ⚠⚠ SA DEMANDE DU 2026-09-11 : << dans le mfa on va retirer ce bouton inutile >>.
+   Il a raison, et pour une raison précise : à cet instant, le mot de passe est
+   DÉJÀ accepté et le jeton en attente vit côté serveur. Le seul geste utile est
+   de taper les six chiffres. << Retour >> ne ramenait pas en arrière — il
+   ABANDONNAIT la vérification, ce que le décompte fait déjà tout seul.
+   ⚠ UN BOUTON QUI RÉPÈTE CE QUE LE TEMPS FAIT DÉJÀ N EST PAS UNE SORTIE, c est
+   une troisième chose à lire sur un écran qui n en demande qu une.
+   ⚠ CE QU ON PERD, ET C EST ASSUMÉ : qui se rend compte de s être trompé de
+   compte doit attendre la fin du décompte (une minute, affichée). Le chemin
+   existe toujours — `mfaExpire` est appelée par le chrono — il n est plus
+   déclenchable à la main. */
+p("      + '</div>';");
 p("  }");
 p("");
 p("  /* ══ MOT DE PASSE OUBLIE — CE QUI MARCHE VRAIMENT ════════════════════════");
@@ -1266,8 +1276,7 @@ p("      appeler('connexion:oubli').then(function(r){ dessiner('oubli', r); });"
 p("    };");
 p("    var our = el('sl-oubli-retour');");
 p("    if (our) our.onclick = function(){ dessiner('login'); apresLogin(); };");
-p("    var mr = el('sl-mfa-retour');");
-p("    if (mr) mr.onclick = function(){ mfaExpire(); };");
+
 p("    var code = el('sl-mfa-code');");
 p("    if (code) code.oninput = function(){ code.value = code.value.replace(/\\D/g, '').slice(0, 6); };");
 p("    /* Le seuil du casse-tete depend du NOM D UTILISATEUR : deux comptes sur le");

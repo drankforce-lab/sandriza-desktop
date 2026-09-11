@@ -498,9 +498,7 @@ ${JS_DIRE}
       + '<div class="cx-err" id="sl-mfa-error"></div>'
       + '<button type="submit" class="cx-btn" id="sl-mfa-btn" style="' + btnStyle() + '">Vérifier</button>'
       + '</form>'
-      + '<div class="cx-centre">'
-      + '<button type="button" class="admlogin-back" id="sl-mfa-retour">← Retour à la connexion</button>'
-      + '</div></div>';
+      + '</div>';
   }
 
   /* ══ MOT DE PASSE OUBLIE — CE QUI MARCHE VRAIMENT ════════════════════════
@@ -1234,8 +1232,6 @@ ${JS_DIRE}
     };
     var our = el('sl-oubli-retour');
     if (our) our.onclick = function(){ dessiner('login'); apresLogin(); };
-    var mr = el('sl-mfa-retour');
-    if (mr) mr.onclick = function(){ mfaExpire(); };
     var code = el('sl-mfa-code');
     if (code) code.oninput = function(){ code.value = code.value.replace(/\D/g, '').slice(0, 6); };
     /* Le seuil du casse-tete depend du NOM D UTILISATEUR : deux comptes sur le
