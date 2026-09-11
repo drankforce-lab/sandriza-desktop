@@ -46,6 +46,10 @@
 
 const { JS_DIRE } = require('./socle.js');
 
+let SZ_VERSION = '';
+try { SZ_VERSION = String(require('../../package.json').version || ''); }
+catch (e) { SZ_VERSION = ''; }
+
 /* Extrait de _loginCSS (assets/js/staff.js) — ne pas modifier à la main : si
    l'écran web change, réextraire. */
 const CSS_WEB = `
@@ -179,6 +183,8 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 2px rgba(196,154,108,0.28)}
 .cx-voie span{font-size:0.78rem;color:#7a6652;line-height:1.5}
 .cx-voie .n{flex:0 0 auto;width:22px;height:22px;border-radius:50%;
   background:#C49A6C;color:#fff;font:700 0.72rem/22px inherit;text-align:center}
+.cx-ver{margin-top:1.6rem;font-size:0.72rem;letter-spacing:0.06em;
+  color:rgba(243,237,227,0.62)}
 .cx-msg{width:100%;max-width:400px;margin:0.9rem auto 0;min-height:1.1rem;text-align:center}
 .cx-msg .msg{font-size:0.76rem;color:#7a6652;line-height:1.4}
 .cx-msg .msg.err{color:#b91c1c}.cx-msg .msg.bon{color:#166534}.cx-msg .msg.att{color:#9a3412}
@@ -233,6 +239,7 @@ ${JS_DIRE}
   var MFA_T = null, MFA_FIN = 0;
   var CTX_Q = null;        // les questions de securite, pour les listes croisees
   var DEPART = '${_dep}';
+  var VERSION = '${SZ_VERSION}';
 
   function esc(v){
     return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -293,7 +300,9 @@ ${JS_DIRE}
       + f(IC.verrouSm, 'Connexion chiffrée de bout en bout (HTTPS)')
       + f(IC.bouclier, 'Accès renforcé par mot de passe et authentification MFA')
       + f(IC.epingle,  'Chaque tentative journalisée (adresse IP et pays)')
-      + '</ul></div></aside>';
+      + '</ul>'
+      + (VERSION ? ('<div class="cx-ver">Version ' + esc(VERSION) + '</div>') : '')
+      + '</div></aside>';
   }
 
   /* ⚠ LES ETATS SE CALCULENT, ils ne sont pas choisis : ecrits en dur, ils
