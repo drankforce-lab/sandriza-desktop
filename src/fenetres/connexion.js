@@ -1457,6 +1457,25 @@ ${JS_DIRE}
       if (n && garde !== null) n.value = garde;
       apresLogin();
     }
+    /* ══⚠⚠ LA BARRE DE MENUS SE REFAIT, ET C EST LE DÉFAUT DE LA 5.28.0.
+       Ses mots : << le menu est en anglais, quand je change la langue la
+       langue du menu ne change pas, et le menu n est plus cliquable, rien
+       ne s ouvre >>. UN SEUL DÉFAUT, DEUX SYMPTÔMES.
+       La barre est posée sur le CORPS, pas dans #cx-corps : << socle() >> ne la
+       touche donc pas, et << BARRE_FAITE >> l empêchait d être rebâtie. Elle
+       gardait ses intitulés d origine.
+       ⚠ ET C EST CE QUI CASSAIT LE CLIC : la coquille retrouve le menu
+       demandé PAR SON INTITULÉ. Panneau reconstruit en anglais, barre restée
+       en français — plus aucune correspondance, donc plus rien qui s ouvre.
+       ⚠ LA LEÇON : deux copies d une même donnée dans deux endroits qui ne
+       se rafraîchissent pas ensemble finissent par diverger, et la panne ne
+       ressemble JAMAIS à sa cause — ici, une traduction incomplète s est
+       manifestée par un menu mort. */
+    BARRE_FAITE = false;
+    barreEteindre();
+    var vieille = document.querySelector('.cx-barre');
+    if (vieille && vieille.parentNode) vieille.parentNode.removeChild(vieille);
+    barrePoser();
     try { document.documentElement.lang = LANGUE; } catch (e) {}
     maintLire();
   }

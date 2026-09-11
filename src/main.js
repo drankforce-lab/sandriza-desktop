@@ -5372,7 +5372,23 @@ const _peutOuvrirPanneau = (e) => {
 
 ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
   if (!_peutOuvrirPanneau(e)) return;
-  const m = (_modele.menus || []).find((mm) => mm && mm.label === String(label || ''));
+  /* ⚠⚠ ON RETROUVE LE MENU PAR SON INTITULÉ TRADUIT *OU* D ORIGINE, et ce
+     second essai est né d une panne réelle (5.28.0). L écran de connexion
+     affiche des intitulés traduits ; si sa barre et le panneau ne sont pas
+     rafraîchis au même instant, l un demande « Affichage » quand l autre ne
+     connaît plus que « View » — et le menu devient MUET. Le clic part, la
+     coquille cherche, ne trouve rien, et ne dit rien.
+     ⚠ LA VRAIE CORRECTION EST AILLEURS (la barre se refait maintenant au
+     changement de langue). Celle-ci est le FILET : une désynchronisation ne
+     doit pas se solder par un menu mort, parce qu un menu mort ne ressemble pas
+     à sa cause et coûte un aller-retour complet pour être compris. */
+  const _cherche = (x) => (_modele.menus || []).find((mm) => mm && mm.label === x);
+  const _brut = String(label || '');
+  let m = _cherche(_brut);
+  if (!m) {
+    const orig = Object.keys(MENU_EN).find((k) => MENU_EN[k] === _brut);
+    if (orig) m = _cherche(orig);
+  }
   if (!m || !(m.items || []).length) return;
   clearTimeout(panneauFermeT); panneauFermeT = null; panneauSurvole = false;
   if (!panneauWin || panneauWin.isDestroyed()) {

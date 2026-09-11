@@ -57,7 +57,12 @@ app.whenReady().then(async () => {
 
   /* La coquille répond ces deux-là ; on les tient ici pour éprouver la fenêtre
      sans lancer toute l application. */
-  ipcMain.handle('cnxmenu:labels', () => LABELS);
+  /* ⚠ ON COMPTE LES DEMANDES D INTITULÉS : c est la seule façon de prouver que la
+     barre est REBÂTIE, et pas seulement redessinée autour. */
+  let nLabels = 0;
+  ipcMain.handle('cnxmenu:labels', () => { nLabels++; return LABELS; });
+  ipcMain.handle('langue:lire', () => 'fr');
+  ipcMain.handle('langue:ecrire', (_e, l) => l);
 
   const fenetre = new BrowserWindow({
     width: 1200, height: 820, show: true, backgroundColor: '#101828',
@@ -211,6 +216,40 @@ app.whenReady().then(async () => {
   const garde = await lire("(document.getElementById('sl-email')||{}).value||''");
   exige(garde === 'broubob',
     '⑥ le nom d’utilisateur déjà tapé survit au changement de langue (lu : « ' + garde + ' »)');
+
+  /* ══ ⑦ LE MENU SURVIT AU CHANGEMENT DE LANGUE ════════════════════════════
+     ⚠⚠ C EST LE DÉFAUT DE LA 5.28.0, et il valait deux symptômes pour une seule
+     cause. La barre est posée sur le CORPS, pas dans la zone que le changement
+     de langue redessine : elle gardait donc ses intitulés d origine. Et comme la
+     coquille retrouve un menu PAR SON INTITULÉ, panneau reconstruit d un côté et
+     barre restée de l autre ne se reconnaissaient plus — le menu devenait MUET.
+     Ses mots : << le menu n est plus cliquable, rien ne s ouvre >>.
+     ⚠ AUCUN DES SIX POINTS PRÉCÉDENTS NE POUVAIT L ATTRAPER : ils éprouvaient le
+     menu, puis la langue, jamais les deux DANS LE MÊME ÉCRAN. Un défaut né de la
+     rencontre de deux mécanismes ne se voit pas en les éprouvant séparément. */
+  /* ⚠ ON REVIENT AU FRANÇAIS ICI, et ce n'est pas un détail : à ce stade le point
+     ⑥ a laissé l'écran en anglais, et `langueMettre` sort tout de suite quand on
+     lui redemande la langue courante. Un banc qui redemanderait l'anglais
+     n'éprouverait donc RIEN — il passerait au vert sans avoir rien déclenché.
+     Mon premier jet faisait exactement ça. */
+  const avantN = nLabels;
+  const avantP = recus.length;
+  await lire("document.getElementById('lg-fr').click()");
+  await dodo(700);
+  dire('après retour au FR — demandes d’intitulés : ' + avantN + ' → ' + nLabels);
+  exige(nLabels > avantN,
+    '⑦ changer de langue REBÂTIT la barre (ses intitulés sont redemandés) — sans '
+    + 'ça elle reste dans l’ancienne langue');
+
+  await lire("document.querySelectorAll('.cx-barre button')[0].click()");
+  await dodo(400);
+  dire('clic après changement de langue — ' + JSON.stringify(recus.slice(avantP)));
+  exige(recus.length > avantP,
+    '⑦ et le menu s’ouvre TOUJOURS après un changement de langue — c’est '
+    + 'exactement le geste qui ne marchait plus');
+  exige(recus.length > avantP && recus[recus.length - 1].label === LABELS[0],
+    '⑦ avec un intitulé que la coquille sait retrouver (reçu : « '
+    + (recus.length > avantP ? recus[recus.length - 1].label : '—') + ' »)');
 
   try { fenetre.destroy(); } catch (e) {}
   dire('');
