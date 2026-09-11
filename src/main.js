@@ -3970,39 +3970,64 @@ const cnxDire = (x) => {
   } catch (e) {}
 };
 
+/* ══════════════════════════════════════════════════════════════════════════
+   OÙ S ARRÊTE LA BARRE DE MENUS — ON LA MESURE, ON NE L ATTEND PLUS
+   ═══════════════════════════════════════════════════════════════════════════
+   ⚠⚠ SA QUATRIÈME REMARQUE SUR LE MENU, ET MES DEUX EXPLICATIONS ÉTAIENT
+   FAUSSES. J ai d abord dit « la zone rapportée est rejetée », puis « c est
+   `autoHideMenuBar`, la barre revient avec Alt ». Ni l un ni l autre : l écran
+   « À propos » dit « Menu : EN HAUT · taille 115 % » — c est un réglage de
+   l application pour SA barre, celle que la PAGE dessine (`#sz-menubar`). Elle
+   vit donc DANS la zone de contenu, et ma vue la recouvrait.
+
+   ⚠ POURQUOI LE CANAL NE SUFFISAIT PAS : la page devait rapporter sa zone
+   (`dockZone`) et la coquille l attendre. Son journal ne montre aucune zone —
+   donc elle n est jamais arrivée, et je n ai aucun moyen de savoir pourquoi
+   depuis ici. Attendre un message qui ne vient pas est un mécanisme qui échoue
+   en SILENCE.
+
+   ⚠ ON DEMANDE DIRECTEMENT À LA PAGE, et on journalise la réponse. Un aller
+   simple, sans canal intermédiaire, sans rien à enregistrer côté page : si la
+   barre existe, on a son bas ; si elle n existe pas, on a zéro ; si la page ne
+   répond pas, on a le message d erreur — et dans les trois cas c est ÉCRIT.
+   ⚠ La vue reste posée pendant ce temps : la mesure ne fait que la RÉTRÉCIR par
+   le haut, elle ne conditionne jamais son affichage. */
+let _cnxHautBarre = 0;
+
+const cnxMesurerBarre = () => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  let wc = null;
+  try { wc = mainWindow.webContents; } catch (e) { return; }
+  if (!wc || wc.isDestroyed()) return;
+  /* ⚠ `bottom` ET NON `height` : la barre peut avoir une marge au-dessus, et
+     c est le bas qui dit où la vue peut commencer. */
+  const code = "(function(){var b=document.getElementById('sz-menubar');"
+    + "if(!b)return 0;var r=b.getBoundingClientRect();"
+    + "return (r.height>4 && r.top<40) ? Math.round(r.bottom) : 0;})()";
+  try {
+    wc.executeJavaScript(code, true).then((v) => {
+      const h = Math.max(0, Math.min(200, parseInt(v, 10) || 0));
+      if (h === _cnxHautBarre) return;
+      _cnxHautBarre = h;
+      cnxDire("barre de menus mesuree : bas a " + h + " px");
+      poserVueConnexion();
+    }).catch((e) => cnxDire("mesure de la barre refusee : " + ((e && e.message) || e)));
+  } catch (e) { cnxDire("mesure de la barre impossible : " + ((e && e.message) || e)); }
+};
+
 const poserVueConnexion = () => {
   if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
-  let b = null;
-  try { const [w, h] = mainWindow.getContentSize(); b = { x: 0, y: 0, width: w, height: h }; }
-  catch (e) { return; }
-  /* ══ LA ZONE SE BORNE AU CADRE, ELLE NE SE FAIT PLUS ÉCARTER ═══════════
-     ⚠⚠ SA CAPTURE DU 2026-09-11 : la barre de menus recouverte. Mon garde
-     précédent REJETAIT toute zone qui dépassait le cadre de plus de 2 px — et
-     avec son affichage à 115 %, la conversion pixels CSS → pixels de fenêtre
-     donne des arrondis de plusieurs pixels. La zone était donc écartée à tous
-     les coups, on retombait en plein cadre, et le menu disparaissait sous la
-     vue.
-     ⚠ UN DÉBORDEMENT DE QUELQUES PIXELS N EST PAS UNE ZONE FAUSSE : on la
-     RAMÈNE dans le cadre. On ne rejette que l absurde — une zone minuscule,
-     ou qui ne couvre pas la moitié de la surface, c est-à-dire une mesure
-     prise avant que la page soit posée.
-     ⚠ ET LE BAS EST RECALCULÉ, jamais recopié : sa capture montrait aussi une
-     bande noire en bas, parce que la hauteur venait d une mesure faite avant
-     que la fenêtre ait sa taille définitive. Borner au cadre corrige les deux
-     défauts avec la même ligne. */
   try {
-    const z = boundsAncrage();
-    if (z && z.width > 200 && z.height > 200
-      && (z.width * z.height) >= (b.width * b.height) * 0.45) {
-      const x = Math.max(0, Math.min(z.x, b.width - 200));
-      const y = Math.max(0, Math.min(z.y, b.height - 200));
-      b = { x, y, width: b.width - x, height: b.height - y };
-    } else if (z) {
-      cnxDire("zone ECARTEE (absurde) " + JSON.stringify(z)
-        + " — cadre " + JSON.stringify({ w: b.width, h: b.height }));
-    }
+    const [w, h] = mainWindow.getContentSize();
+    /* ⚠ LE FACTEUR DE ZOOM S APPLIQUE À LA MESURE, pas au cadre : la page rend
+       des pixels CSS, la vue se pose en pixels de fenêtre. Son affichage est à
+       115 % — sans cette conversion, la vue commencerait 15 % trop haut et
+       mordrait encore sur la barre. */
+    let f = 1;
+    try { f = mainWindow.webContents.getZoomFactor() || 1; } catch (e) {}
+    const y = Math.max(0, Math.min(Math.round(_cnxHautBarre * f), h - 200));
+    vueConnexion.setBounds({ x: 0, y, width: w, height: h - y });
   } catch (e) {}
-  try { vueConnexion.setBounds(b); } catch (e) {}
 };
 
 const connexionMontrer = () => {
@@ -4070,8 +4095,15 @@ const connexionMontrer = () => {
      et 1,2 s (le cas où la fenêtre bouge encore). C est trois lignes contre un
      défaut qui, lui, se voit à chaque lancement.
      ⚠ `poserVueConnexion` est idempotente : la rappeler ne coûte rien. */
-  setTimeout(poserVueConnexion, 250);
-  setTimeout(poserVueConnexion, 1200);
+  /* ⚠ LA MESURE D ABORD, PUIS DEUX REPRISES : la barre est dessinée par la page,
+     donc elle peut arriver après nous — c est tout le sujet du défaut #38, « le
+     menu apparaît trois secondes après le tableau de bord ». Trois instants
+     couvrent le cas normal et le cas lent, et chacun journalise s il change
+     quelque chose. */
+  cnxMesurerBarre();
+  setTimeout(() => { cnxMesurerBarre(); poserVueConnexion(); }, 250);
+  setTimeout(() => { cnxMesurerBarre(); poserVueConnexion(); }, 1200);
+  setTimeout(() => { cnxMesurerBarre(); poserVueConnexion(); }, 3500);
   try {
     view.webContents.once('did-finish-load', () => {
       charge = true;

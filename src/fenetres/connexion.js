@@ -332,11 +332,61 @@ ${JS_DIRE}
      qui rend le texte lisible. Son theme rend noir → creme, et le texte clair
      devenait invisible sur la moitie droite (sa capture du 2026-09-10). C est
      le CONTRASTE qui decide, pas l ordre dans lequel elles arrivent. */
+  /* ⚠ LE CONTRASTE SE CALCULE, il ne s estime pas. Trois lignes de plus, et
+     plus jamais un bouton dont le texte se devine. */
+  function contraste(x, y){
+    var f = function(h){
+      var m = /^#?([0-9a-f]{6})$/i.exec(String(h || ''));
+      if (!m) return 0.5;
+      var n = parseInt(m[1], 16);
+      var v = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function(c){
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+    };
+    var A = f(x), B = f(y);
+    return (Math.max(A, B) + 0.05) / (Math.min(A, B) + 0.05);
+  }
+  /* La part de COULEUR d une teinte : 0 pour un gris, un noir ou un blanc. */
+  function couleur(hex){
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+    if (!m) return 0;
+    var n = parseInt(m[1], 16);
+    var c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    var mx = Math.max(c[0], c[1], c[2]), mn = Math.min(c[0], c[1], c[2]);
+    return mx === 0 ? 0 : (mx - mn) / mx;
+  }
+  /* ══ LA COULEUR DU BOUTON — ET POURQUOI CE N EST PLUS << LA PLUS SOMBRE >>
+     ⚠⚠ SES MOTS DU 2026-09-11 : << le bouton noir de connexion est affreux >>.
+     Il avait raison. Ma regle prenait la plus SOMBRE des deux couleurs du
+     theme pour garantir le contraste avec le texte clair ; son degrade va du
+     NOIR au creme, donc j obtenais un rectangle noir pur. Un contraste de
+     16:1, parfaitement lisible, et parfaitement laid.
+     ⚠ LA LECON : une regle qui n optimise qu UN critere (ici la lisibilite)
+     produit des resultats corrects et indefendables. Il fallait un second
+     critere — que la couleur en SOIT une.
+     ⚠ ON PREND DONC LA PLUS COLOREE DES DEUX, pas la plus sombre. Et si le
+     theme n en offre aucune (deux tons quasi neutres, comme le noir et le
+     creme de son degrade), on retombe sur le BRONZE DE LA MARQUE — celui de
+     la case a cocher et des pastilles, deja present partout sur cet ecran.
+     Un degrade a deux extremes n a pas de couleur de bouton : ses bouts n ont
+     jamais ete choisis pour etre vus en aplat.
+     ⚠ PUIS ON AJUSTE JUSQU AU CONTRASTE, par pas de 6 % : on ne choisit pas
+     une valeur en esperant qu elle passe, on l amene la ou elle doit etre. */
   function btnFond(){
     var t = CTX.theme;
-    var txtClair = lumi(t.btnTexte) > 0.5;
     var a = t.btnFrom, b = t.btnTo;
-    return txtClair ? (lumi(a) <= lumi(b) ? a : b) : (lumi(a) >= lumi(b) ? a : b);
+    var ca = couleur(a), cb = couleur(b);
+    var fond = (ca >= cb) ? a : b;
+    if (Math.max(ca, cb) < 0.30) fond = '#7d5f3c';   // le bronze de la marque
+    var clair = lumi(t.btnTexte) > 0.5;
+    var n = 0;
+    while (contraste(t.btnTexte, fond) < 4.6 && n < 24) {
+      fond = melanger(fond, clair ? -0.06 : 0.06);
+      n++;
+    }
+    return fond;
   }
   function btnStyle(){
     var t = CTX.theme;
