@@ -113,6 +113,27 @@ contextBridge.exposeInMainWorld('szPont', {
     .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e) })),
 
   // Fermer proprement — la fenêtre n'a pas de barre de menu à elle.
+  /* ══ LE MENU DE L APPLICATION, POUR L ÉCRAN DE CONNEXION ══════════════════
+     ⚠⚠ SES MOTS DU 2026-09-11 : « mauvaise nouvelle le menu n apparaît plus ».
+     Deux tentatives avant celle-ci, et les deux ratées pour la même raison de
+     fond : une vue native recouvre TOUT ce que la page dessine.
+       · 5.20.0 — je descends la vue sous la barre de la page. Elle se voit, et
+         ses panneaux s ouvrent dessous : visible, morte.
+       · 5.22.0 — je montre la barre NATIVE d Electron. Elle ne se dessine pas :
+         la fenêtre a sa barre de titre masquée (`titleBarStyle: hidden`), il n y
+         a donc aucun cadre où la peindre. Plus de menu du tout.
+     ⚠ CE QUI PASSE PAR-DESSUS UNE VUE NATIVE : une autre fenêtre du SYSTÈME. Un
+     menu contextuel en est une. On garde donc le menu natif — construit depuis
+     toujours à partir du même modèle — et on le fait sortir en POPUP, sous une
+     barre que l écran de connexion dessine lui-même.
+     ⚠ `labels` SEULEMENT : la fenêtre reçoit les intitulés du premier niveau, pas
+     les entrées ni leurs actions. Le contenu ne quitte jamais la coquille — une
+     seconde copie du menu est exactement ce que `src/menubar.js` raconte avoir
+     payé. */
+  menuLabels: () => ipcRenderer.invoke('cnxmenu:labels').catch(() => []),
+  menuOuvrir: (i, x, y) => ipcRenderer
+    .invoke('cnxmenu:ouvrir', parseInt(i, 10) || 0, Math.round(x) || 0, Math.round(y) || 0)
+    .catch(() => false),
   fermer: () => ipcRenderer.send('pont:fermer'),
   /* ⚠ << J'AI UNE SAISIE EN COURS >>. Le bouton de fermeture DESSINÉ dans la page
      passe par `fermer` ci-dessus, donc la page peut demander avant de partir.

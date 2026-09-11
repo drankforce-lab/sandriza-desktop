@@ -48,6 +48,15 @@
       }
       return Promise.resolve(REP[nom]);
     },
+    /* ⚠ LES INTITULÉS DU MENU (2026-09-11). Sans ce faux verbe, la barre de
+       l'écran de connexion n'est JAMAIS dessinée ici — et son texte clair sur
+       fond translucide, qui est exactement le genre de couple qui glisse sous le
+       seuil, ne serait mesuré par personne. Un jeu d'essai qui ne dessine pas
+       une surface ne prouve rien sur elle. */
+    menuLabels: function () {
+      return Promise.resolve(REP['__menuLabels'] || ['Fichier', 'Affichage', 'Aide']);
+    },
+    menuOuvrir: function () { return Promise.resolve(true); },
     detacher: function () { return Promise.resolve(false); },
     ancrer: function () { return Promise.resolve(false); },
     fermer: function () {},

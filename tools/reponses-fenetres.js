@@ -6223,6 +6223,13 @@ module.exports = {
          que cet executeur ne CLIQUE pas — ses addEventListener sont vides. */
       exige: ['id="sl-email"', 'id="sl-password"', 'Se connecter',
         'cx-centre cx-recours cx-voile'],
+      /* ⚠ ON N EXIGE PAS ICI LA BARRE DE MENUS DE L ECRAN (.cx-barre), et c est
+         une LIMITE, pas un oubli : elle est posee par appendChild sur le corps,
+         et le faux document de cet executeur ne rend que les ecritures d ecran.
+         Exiger une chose que l outil ne peut pas voir ferait echouer une fenetre
+         saine. C est  qui l eprouve, dans un vrai
+         Electron, sur une fenetre reglee comme la vraie — et il compte les
+         boutons. */
       id: '',
       reponses: {
         'connexion:contexte': { ok: true,

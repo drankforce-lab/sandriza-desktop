@@ -4003,14 +4003,22 @@ const cnxDire = (x) => {
    réimplémenter la barre du site dans un second endroit, et
    `src/menubar.js` raconte déjà ce que ça coûte — la copie a dérivé, deux
    menus qui ne se ressemblaient plus. */
-const cnxBarreNative = (montrer) => {
-  if (!mainWindow || mainWindow.isDestroyed()) return;
-  try {
-    mainWindow.autoHideMenuBar = !montrer;
-    mainWindow.setMenuBarVisibility(!!montrer);
-    cnxDire(montrer ? "barre de menus NATIVE montree" : "barre de menus native remasquee");
-  } catch (e) { cnxDire("barre native refusee : " + ((e && e.message) || e)); }
-};
+/* ⚠⚠ CE QUI NE MARCHE PAS, ET IL FAUT QUE ÇA RESTE ÉCRIT. `setMenuBarVisibility
+   (true)` N A AUCUN EFFET SUR CETTE FENÊTRE : elle est créée avec
+   `titleBarStyle: hidden` (barre de titre maison, boutons du système teintés),
+   donc il n existe aucun cadre où peindre une barre de menus. Mesuré le
+   2026-09-11, deux fenêtres côte à côte dans le même Electron :
+     · fenêtre ordinaire            → contenu 565 → 539 px, la barre prend 26 px ;
+     · fenêtre de l application     → contenu 600 → 600 px, `isMenuBarVisible()`
+       rend FAUX, rien n est dessiné.
+   ⚠ MON BANC DE LA VEILLE AVAIT OUVERT UNE FENÊTRE ORDINAIRE. Il a répondu
+   vert, honnêtement, à une question posée sur une fenêtre qui n était pas la
+   sienne. **Un banc qui n emploie pas les mêmes réglages que le produit mesure
+   autre chose que le produit** — et il le fait sans jamais avoir l air de se
+   tromper. C est le même travers que « tester une mise en page à une taille
+   d écran qui n est pas celle de la personne qui la signale ».
+   ⚠ D où le POPUP : voir `cnxmenu:ouvrir` plus bas. */
+const cnxBarreNative = () => {};
 
 const poserVueConnexion = () => {
   if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
@@ -4090,7 +4098,8 @@ const connexionMontrer = () => {
      menu apparaît trois secondes après le tableau de bord ». Trois instants
      couvrent le cas normal et le cas lent, et chacun journalise s il change
      quelque chose. */
-  cnxBarreNative(true);
+  /* La barre de menus est dessinée PAR L ÉCRAN lui-même (voir `cnxmenu:labels`) :
+     rien à montrer ici. */
   /* ⚠ ON REPOSE QUAND MÊME DEUX FOIS : la fenêtre n a pas toujours sa taille
      définitive à cet instant (elle se restaure, l affichage s ajuste), et
      MONTRER la barre native change elle-même la hauteur de la zone de
@@ -4150,11 +4159,8 @@ const connexionRetirer = () => {
   const v = vueConnexion;
   vueConnexion = null;
   if (!v) return false;
-  /* ⚠ AVANT TOUT LE RESTE : la barre native ne sert QUE pendant la connexion.
-     Passé ce point, c est la barre de la page qui reprend — et deux barres
-     l une sur l autre, c est ce que l administration montrerait si on oubliait
-     cette ligne. */
-  cnxBarreNative(false);
+  /* La barre de la page reprend la main d elle-même : la vue qui la couvrait
+     s en va avec ce retrait. */
   try { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.contentView.removeChildView(v); }
   catch (e) {}
   /* ⚠ ON FERME LE CONTENU, on ne se contente pas de détacher la vue : une vue
@@ -5496,6 +5502,44 @@ ipcMain.on('palette:action', (e, it) => {
   if (it.run) { runAdmin(String(it.run)); if (mainWindow) mainWindow.focus(); }
 });
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LE MENU DE L ÉCRAN DE CONNEXION — DES INTITULÉS D UN CÔTÉ, UN POPUP DE L AUTRE
+   ═══════════════════════════════════════════════════════════════════════════
+   ⚠ L écran de connexion est une vue native : tout ce que la page dessine passe
+   DESSOUS, panneaux de menu compris. Et la barre native d Electron ne se peint
+   pas ici (barre de titre masquée — voir `cnxBarreNative`). Il reste une seule
+   chose qui passe au-dessus d une vue native : une autre fenêtre du SYSTÈME.
+   Un menu contextuel en est une.
+   ⚠ L écran dessine donc les INTITULÉS, et demande à la coquille d ouvrir le
+   sous-menu correspondant, au pixel où il l affiche. Le contenu du menu — les
+   entrées, leurs actions, leurs droits — ne quitte jamais ce fichier.
+   ⚠ `_sansPseudo` DES DEUX CÔTÉS : les entrées techniques (préfixe `__`) ne sont
+   pas des menus, et les compter d un côté seulement décalerait tous les indices
+   — on ouvrirait « Aide » en cliquant « Affichage ». */
+ipcMain.handle('cnxmenu:labels', () => {
+  try {
+    return _sansPseudo(_modele.menus)
+      .filter((m) => m && (m.items || []).length)
+      .map((m) => String(m.label || ''));
+  } catch (e) { return []; }
+});
+
+ipcMain.handle('cnxmenu:ouvrir', (e, i, x, y) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return false;
+  try {
+    const menus = _sansPseudo(_modele.menus).filter((m) => m && (m.items || []).length);
+    const m = menus[parseInt(i, 10) || 0];
+    if (!m) return false;
+    const sous = Menu.buildFromTemplate(versTemplateNatif(m.items || []));
+    /* ⚠ LES COORDONNÉES SONT CELLES DE LA FENÊTRE, pas de l écran : la vue est
+       posée en (0,0) et couvre tout le contenu, donc ce que la page mesure chez
+       elle vaut ici. Le jour où la vue serait décalée, c est ce commentaire
+       qu il faudrait relire en premier. */
+    sous.popup({ window: mainWindow, x: Math.round(x) || 0, y: Math.round(y) || 0 });
+    return true;
+  } catch (er) { cnxDire("popup du menu refuse : " + ((er && er.message) || er)); return false; }
+});
+
 // ── MENU NATIF : MASQUÉ, GARDÉ POUR SES RACCOURCIS ───────────────────────────
 // ⚠ On ne le supprime pas : c'est lui qui porte Ctrl+1…5 et Ctrl+N. Les
 // réenregistrer en raccourcis GLOBAUX les volerait aux autres applications.
@@ -5531,17 +5575,8 @@ const buildMenu = () => {
   }
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
   if (mainWindow && !mainWindow.isDestroyed()) {
-    /* ⚠⚠ SAUF PENDANT LA CONNEXION. Ce modèle arrive souvent — thème, taille,
-       ancrage, session — et chaque arrivée rappelle `buildMenu`. Sans cette
-       garde, la barre native montrée à l ouverture de l écran de connexion
-       serait remasquée à la première mise à jour du modèle, c est-à-dire
-       presque tout de suite, et le défaut reviendrait EXACTEMENT comme avant.
-       ⚠ Le menu lui-même, lui, est bien reconstruit : c est sa VISIBILITÉ
-       qu on laisse tranquille, pas son contenu — la barre suit donc la session
-       qui s ouvre pendant qu elle est affichée. */
-    const cnx = !!vueConnexion;
-    mainWindow.setMenuBarVisibility(cnx);
-    mainWindow.autoHideMenuBar = !cnx;
+    mainWindow.setMenuBarVisibility(false);
+    mainWindow.autoHideMenuBar = true;
   }
 };
 

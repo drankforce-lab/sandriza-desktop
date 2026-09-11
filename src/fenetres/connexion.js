@@ -169,6 +169,18 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 2px rgba(196,154,108,0.28)}
   width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;
   transform:rotate(42deg)}
 .cx-souvenir input:focus-visible{outline:2px solid #C49A6C;outline-offset:3px}
+.cx-barre{position:fixed;top:0;left:0;right:0;height:32px;display:flex;
+  align-items:center;gap:2px;padding:0 6px;z-index:50;
+  background:var(--cxb-fond,#2a2118);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--cxb-trait,rgba(255,255,255,0.08))}
+.cx-barre button{border:0;background:none;color:var(--cxb-txt,#f3ede3);
+  font:500 0.78rem/1 inherit;padding:0.42rem 0.7rem;border-radius:7px;
+  cursor:pointer;transition:background-color .13s ease,color .13s ease}
+.cx-barre button:hover{background:var(--cxb-surv,rgba(255,255,255,0.12))}
+.cx-barre button.on{background:var(--cxb-surv,rgba(255,255,255,0.12))}
+.cx-barre button:focus-visible{outline:2px solid rgba(196,154,108,0.85);
+  outline-offset:2px}
+body.cx-abarre #corps{padding-top:32px;box-sizing:border-box}
 .cx-centre{text-align:center;margin-top:0.85rem}
 .cx-recours{transition:opacity .32s cubic-bezier(.2,.8,.2,1),
   max-height .32s cubic-bezier(.2,.8,.2,1),margin-top .32s cubic-bezier(.2,.8,.2,1);
@@ -1310,6 +1322,77 @@ ${JS_DIRE}
     prefill: '', souvenir: false, captchaRequis: false, verrouille: false
   };
 
+  /* ══ LES INTITULÉS ARRIVENT DE LA COQUILLE, LE POPUP AUSSI ══════════════
+     ⚠ SI LA COQUILLE N EN DONNE AUCUN, ON NE DESSINE RIEN. Une barre vide,
+     c est une bande sombre de trente pixels qui ne sert à rien et qui mange
+     le haut de l écran — pire que pas de barre. Le modèle peut aussi arriver
+     en retard (il vient de la page principale) : on redemande une fois à
+     deux secondes, et une seule — un sondage permanent pour une barre de
+     menus serait hors de proportion.
+     ⚠ ET ON N EN FAIT PAS UN PRÉALABLE : la barre se pose quand elle peut,
+     l écran de connexion n attend jamais après elle. */
+  var BARRE_FAITE = false;
+  /* ⚠ LE FOND PART DU HAUT DU DÉGRADÉ — c est ce qu on recouvre — puis on le
+     POUSSE franchement dans son propre sens : une barre doit se détacher du
+     panneau, pas s y fondre. Ensuite le texte prend le clair ou le foncé selon
+     ce fond-là, et on l amène au seuil par pas de 6 %. Le même calcul que le
+     bouton principal, et pour la même raison : on ne CHOISIT pas une couleur en
+     espérant qu elle passe, on l amène où elle doit être. */
+  function barreTeindre(z){
+    var t = (CTX && CTX.theme) ? CTX.theme : {};
+    var base = t.bgFrom || '#2a2118';
+    var sombre = lumi(base) <= 0.5;
+    var fond = melanger(base, sombre ? -0.22 : 0.22);
+    var txt = sombre ? '#f3ede3' : '#2a2118';
+    var n = 0;
+    while (contraste(txt, fond) < 4.6 && n < 24) {
+      fond = melanger(fond, sombre ? -0.06 : 0.06);
+      n++;
+    }
+    z.style.setProperty('--cxb-fond', fond);
+    z.style.setProperty('--cxb-txt', txt);
+    z.style.setProperty('--cxb-surv', sombre ? 'rgba(255,255,255,0.13)'
+      : 'rgba(0,0,0,0.10)');
+    z.style.setProperty('--cxb-trait', sombre ? 'rgba(255,255,255,0.09)'
+      : 'rgba(0,0,0,0.10)');
+  }
+  function barrePoser(){
+    if (BARRE_FAITE || !P || !P.menuLabels) return;
+    P.menuLabels().then(function(noms){
+      if (BARRE_FAITE || !noms || !noms.length) return;
+      BARRE_FAITE = true;
+      var z = document.createElement('div');
+      z.className = 'cx-barre';
+      z.setAttribute('role', 'menubar');
+      barreTeindre(z);
+      for (var i = 0; i < noms.length; i++) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = noms[i];
+        b.setAttribute('data-i', String(i));
+        b.onclick = function(){
+          var self = this;
+          var r = self.getBoundingClientRect();
+          /* ⚠ LE POPUP SORT SOUS LE BOUTON, pas sous le pointeur : un menu
+             qui s ouvre à deux pixels près de là où on a cliqué est un menu
+             qui a l air de flotter. << bottom >> et << left >> sont exactement ce
+             qu une barre de menus promet. */
+          self.className = 'on';
+          P.menuOuvrir(parseInt(self.getAttribute('data-i'), 10) || 0,
+            Math.round(r.left), Math.round(r.bottom));
+          /* Le menu contextuel est modal côté système : on ne saura pas
+             quand il se referme. On rend donc son air normal au bouton
+             après un court instant — la surbrillance a joué son rôle
+             (dire quel menu on a ouvert), elle n a pas à durer. */
+          setTimeout(function(){ self.className = ''; }, 400);
+        };
+        z.appendChild(b);
+      }
+      document.body.appendChild(z);
+      document.body.className = (document.body.className + ' cx-abarre').replace(/^ /, '');
+    }).catch(function(){});
+  }
+
   function charger(){
     appeler('connexion:contexte').then(function(r){
       CTX = (r && r.ok && r.theme && r.marque) ? r : REPLI;
@@ -1330,6 +1413,8 @@ ${JS_DIRE}
       /* La banniere se lit tout de suite, puis toutes les vingt secondes :
          assez pour qu une levee se voie dans le temps qu on met a retaper un mot
          de passe, assez lent pour ne peser sur rien. */
+      barrePoser();
+      setTimeout(barrePoser, 2000);
       maintLire();
       MAINT_T = setInterval(maintLire, 20000);
     });

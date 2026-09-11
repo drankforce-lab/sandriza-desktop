@@ -99,7 +99,16 @@ const faireElement = (compteur) => ({
        verifier-fenetres.js. */
     if (compteur && compteur.ecrit) compteur.ecrit.push(String(v));
   },
-  style: {}, dataset: {}, classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+  /* ⚠ `style` N'EST PAS UN OBJET NU : c'est une CSSStyleDeclaration, et elle a des
+     MÉTHODES. Sans `setProperty`, toute fenêtre qui pose une variable CSS
+     (`--quelque-chose`) meurt ici — et il n'y a pas d'autre façon d'en poser une,
+     `style.maVariable` n'existe pas. Trouvé le 2026-09-11 sur la barre de menus de
+     l'écran de connexion : le banc a refusé, et il avait raison de refuser, mais
+     le défaut était DANS CE FAUX DOCUMENT, pas dans la fenêtre.
+     ⚠ Même famille que le contexte 2D ajouté le 2026-09-08 : un faux document
+     incomplet ne dit pas « je ne sais pas faire », il fait ÉCHOUER du code sain. */
+  style: { setProperty() {}, removeProperty() {}, getPropertyValue() { return ''; } },
+  dataset: {}, classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
   children: [], childNodes: [], attributes: {},
   // ⚠ PAS de `innerHTML` en propriété simple ici : dans un littéral d'objet la
   // dernière définition gagne, et elle écraserait l'accesseur ci-dessus — le
@@ -254,6 +263,15 @@ function executerPage(script, reponses, opts) {
       Object.prototype.hasOwnProperty.call(rep, 'maj:decision')
         ? rep['maj:decision'] : { ok: true, quand: null }
     )),
+    /* ⚠ LES INTITULÉS DU MENU (2026-09-11). Même raison que `majDecision` : ce
+       verbe ne passe pas par `appeler`, et sans lui la barre de l'écran de
+       connexion n'est jamais bâtie — donc jamais éprouvée. Le jeu de réponses le
+       pilote sous la clé `__menuLabels`. */
+    menuLabels: () => surveille(Promise.resolve(
+      Object.prototype.hasOwnProperty.call(rep, '__menuLabels')
+        ? rep['__menuLabels'] : ['Fichier', 'Affichage', 'Aide']
+    )),
+    menuOuvrir: () => surveille(Promise.resolve(true)),
     surEtatCaisse: () => () => {}, ajusterHauteur() {},
     /* ⚠ LE FAUX GROUPE `veilleur` EST PARTI LE 2026-09-09, avec la fenêtre qu'il
        servait et avec le groupe réel du préchargement. Il n'y a plus une seule

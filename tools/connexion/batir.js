@@ -354,6 +354,42 @@ p(".cx-souvenir input:checked::after{content:'';position:absolute;left:5px;top:1
 p("  width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;");
 p("  transform:rotate(42deg)}");
 p(".cx-souvenir input:focus-visible{outline:2px solid #C49A6C;outline-offset:3px}");
+/* ══ LA BARRE DE MENUS DE L ÉCRAN ════════════════════════════════════════
+   ⚠⚠ TROISIÈME TENTATIVE, ET LES DEUX PREMIÈRES ONT ÉCHOUÉ POUR LA MÊME
+   RAISON DE FOND : une vue native recouvre TOUT ce que la page dessine.
+     · 5.20.0 — la vue descend sous la barre de la page : elle se voit, et ses
+       panneaux s ouvrent dessous. Visible, morte.
+     · 5.22.0 — on montre la barre native d Electron : elle ne se dessine pas,
+       la fenêtre ayant sa barre de titre masquée. Plus de menu du tout.
+   ⚠ ICI : l écran dessine LUI-MÊME les intitulés, et la coquille fait sortir le
+   sous-menu en menu contextuel — une fenêtre du système, la seule chose qui
+   passe au-dessus d une vue native.
+   ⚠ ELLE RESSEMBLE À LA BARRE DE L APPLICATION, elle ne la copie pas : ce sont
+   les intitulés qui voyagent, pas les entrées. Le contenu du menu ne quitte
+   jamais la coquille. */
+/* ⚠⚠ ET SES COULEURS VIENNENT DU THÈME, PAS D UN VOILE NOIR SUPPOSÉ. Premier
+   jet : fond `rgba(0,0,0,0.22)` et texte crème — j avais supposé un fond sombre.
+   Le banc de contraste AU RENDU a mesuré **1,38:1** (#EDE8DF sur #C7C7C7), vingt-
+   sept fois : sur un thème clair, ce voile donne un gris pâle et le texte crème
+   disparaît. ⚠ Une couleur écrite en dur dans une barre qui flotte au-dessus d un
+   dégradé variable est un pari sur le dégradé — et il se perd au premier thème
+   clair. Le fond et le texte se CALCULENT (voir `barreTeindre`), et le contraste
+   est amené au seuil, comme pour le bouton principal. */
+p(".cx-barre{position:fixed;top:0;left:0;right:0;height:32px;display:flex;");
+p("  align-items:center;gap:2px;padding:0 6px;z-index:50;");
+p("  background:var(--cxb-fond,#2a2118);backdrop-filter:blur(6px);");
+p("  border-bottom:1px solid var(--cxb-trait,rgba(255,255,255,0.08))}");
+p(".cx-barre button{border:0;background:none;color:var(--cxb-txt,#f3ede3);");
+p("  font:500 0.78rem/1 inherit;padding:0.42rem 0.7rem;border-radius:7px;");
+p("  cursor:pointer;transition:background-color .13s ease,color .13s ease}");
+p(".cx-barre button:hover{background:var(--cxb-surv,rgba(255,255,255,0.12))}");
+p(".cx-barre button.on{background:var(--cxb-surv,rgba(255,255,255,0.12))}");
+p(".cx-barre button:focus-visible{outline:2px solid rgba(196,154,108,0.85);");
+p("  outline-offset:2px}");
+/* ⚠ LA BARRE EST `fixed`, DONC HORS FLUX : sans cette réserve en haut du corps,
+   elle recouvrirait le panneau de marque. Et elle ne vaut QUE si la barre
+   existe — d où la classe sur le corps plutôt qu une marge inconditionnelle. */
+p("body.cx-abarre #corps{padding-top:32px;box-sizing:border-box}");
 p(".cx-centre{text-align:center;margin-top:0.85rem}");
 /* ══ LE RECOURS NE S OFFRE QU A CELUI QUI EN A BESOIN ═════════════════════
    ⚠⚠ SA DEMANDE DU 2026-09-11 : << ne l affiche pas si la personne ne s est
@@ -1318,6 +1354,77 @@ p("    marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },");
 p("    prefill: '', souvenir: false, captchaRequis: false, verrouille: false");
 p("  };");
 p("");
+p("  /* ══ LES INTITULÉS ARRIVENT DE LA COQUILLE, LE POPUP AUSSI ══════════════");
+p("     ⚠ SI LA COQUILLE N EN DONNE AUCUN, ON NE DESSINE RIEN. Une barre vide,");
+p("     c est une bande sombre de trente pixels qui ne sert à rien et qui mange");
+p("     le haut de l écran — pire que pas de barre. Le modèle peut aussi arriver");
+p("     en retard (il vient de la page principale) : on redemande une fois à");
+p("     deux secondes, et une seule — un sondage permanent pour une barre de");
+p("     menus serait hors de proportion.");
+p("     ⚠ ET ON N EN FAIT PAS UN PRÉALABLE : la barre se pose quand elle peut,");
+p("     l écran de connexion n attend jamais après elle. */");
+p("  var BARRE_FAITE = false;");
+p("  /* ⚠ LE FOND PART DU HAUT DU DÉGRADÉ — c est ce qu on recouvre — puis on le");
+p("     POUSSE franchement dans son propre sens : une barre doit se détacher du");
+p("     panneau, pas s y fondre. Ensuite le texte prend le clair ou le foncé selon");
+p("     ce fond-là, et on l amène au seuil par pas de 6 %. Le même calcul que le");
+p("     bouton principal, et pour la même raison : on ne CHOISIT pas une couleur en");
+p("     espérant qu elle passe, on l amène où elle doit être. */");
+p("  function barreTeindre(z){");
+p("    var t = (CTX && CTX.theme) ? CTX.theme : {};");
+p("    var base = t.bgFrom || '#2a2118';");
+p("    var sombre = lumi(base) <= 0.5;");
+p("    var fond = melanger(base, sombre ? -0.22 : 0.22);");
+p("    var txt = sombre ? '#f3ede3' : '#2a2118';");
+p("    var n = 0;");
+p("    while (contraste(txt, fond) < 4.6 && n < 24) {");
+p("      fond = melanger(fond, sombre ? -0.06 : 0.06);");
+p("      n++;");
+p("    }");
+p("    z.style.setProperty('--cxb-fond', fond);");
+p("    z.style.setProperty('--cxb-txt', txt);");
+p("    z.style.setProperty('--cxb-surv', sombre ? 'rgba(255,255,255,0.13)'");
+p("      : 'rgba(0,0,0,0.10)');");
+p("    z.style.setProperty('--cxb-trait', sombre ? 'rgba(255,255,255,0.09)'");
+p("      : 'rgba(0,0,0,0.10)');");
+p("  }");
+p("  function barrePoser(){");
+p("    if (BARRE_FAITE || !P || !P.menuLabels) return;");
+p("    P.menuLabels().then(function(noms){");
+p("      if (BARRE_FAITE || !noms || !noms.length) return;");
+p("      BARRE_FAITE = true;");
+p("      var z = document.createElement('div');");
+p("      z.className = 'cx-barre';");
+p("      z.setAttribute('role', 'menubar');");
+p("      barreTeindre(z);");
+p("      for (var i = 0; i < noms.length; i++) {");
+p("        var b = document.createElement('button');");
+p("        b.type = 'button';");
+p("        b.textContent = noms[i];");
+p("        b.setAttribute('data-i', String(i));");
+p("        b.onclick = function(){");
+p("          var self = this;");
+p("          var r = self.getBoundingClientRect();");
+p("          /* ⚠ LE POPUP SORT SOUS LE BOUTON, pas sous le pointeur : un menu");
+p("             qui s ouvre à deux pixels près de là où on a cliqué est un menu");
+p("             qui a l air de flotter. << bottom >> et << left >> sont exactement ce");
+p("             qu une barre de menus promet. */");
+p("          self.className = 'on';");
+p("          P.menuOuvrir(parseInt(self.getAttribute('data-i'), 10) || 0,");
+p("            Math.round(r.left), Math.round(r.bottom));");
+p("          /* Le menu contextuel est modal côté système : on ne saura pas");
+p("             quand il se referme. On rend donc son air normal au bouton");
+p("             après un court instant — la surbrillance a joué son rôle");
+p("             (dire quel menu on a ouvert), elle n a pas à durer. */");
+p("          setTimeout(function(){ self.className = ''; }, 400);");
+p("        };");
+p("        z.appendChild(b);");
+p("      }");
+p("      document.body.appendChild(z);");
+p("      document.body.className = (document.body.className + ' cx-abarre').replace(/^ /, '');");
+p("    }).catch(function(){});");
+p("  }");
+p("");
 p("  function charger(){");
 p("    appeler('connexion:contexte').then(function(r){");
 p("      CTX = (r && r.ok && r.theme && r.marque) ? r : REPLI;");
@@ -1338,6 +1445,8 @@ p("      }");
 p("      /* La banniere se lit tout de suite, puis toutes les vingt secondes :");
 p("         assez pour qu une levee se voie dans le temps qu on met a retaper un mot");
 p("         de passe, assez lent pour ne peser sur rien. */");
+p("      barrePoser();");
+p("      setTimeout(barrePoser, 2000);");
 p("      maintLire();");
 p("      MAINT_T = setInterval(maintLire, 20000);");
 p("    });");
