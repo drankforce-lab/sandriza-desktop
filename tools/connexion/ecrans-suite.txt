@@ -1,0 +1,231 @@
+  /* ══ ① LA CONFIGURATION DU CODE A SIX CHIFFRES ═════════════════════════════
+     ⚠⚠ LA CLE MANUELLE EST MISE EN AVANT, PAS EN REPLI, ET C EST DELIBERE. Le QR
+     est construit par un service TIERS (api.qrserver.com) avec l URI otpauth
+     COMPLETE dans l URL — donc le secret TOTP en clair, chez quelqu un d autre.
+     C est le comportement de l ecran web depuis toujours, et le porter ne
+     l aggrave pas ; mais la cle tapee a la main NE SORT PAS DU POSTE, alors on la
+     montre comme une voie normale et non comme un dernier recours.
+     ⚠ Le vrai remede — dessiner le QR sur place, sans reseau — est un chantier a
+     part, et il est signale : un QR subtilement faux ne se voit pas, et il
+     enfermerait dehors le compte qu on essaie justement de configurer. */
+  function ecranMfaConfig(d){
+    return '<div>'
+      + '<div style="margin-bottom:1.3rem">'
+      + '<div class="cx-titre">Authentification à deux facteurs</div>'
+      + '<div class="cx-sous">Bonjour ' + esc(d.prenom) + ' — votre administrateur exige '
+      + 'cette configuration avant l’accès au panneau.</div>'
+      + '</div>'
+      + '<div class="cx-etape">'
+      + '<div class="cx-etl">Étape 1 — une application TOTP</div>'
+      + '<div class="cx-etc">Installez <strong>Google Authenticator</strong>, '
+      + '<strong>Authy</strong> ou toute application TOTP sur votre téléphone.</div>'
+      + '</div>'
+      + '<div class="cx-etape">'
+      + '<div class="cx-etl">Étape 2 — la clé</div>'
+      + '<div class="cx-cle"><code id="wz-cle">' + esc(d.secretGroupe) + '</code>'
+      + '<div class="fine">SHA-1 · 6 chiffres · 30 s — cette clé ne quitte pas ce poste.</div>'
+      + '<button type="button" id="wz-copier">Copier la clé</button></div>'
+      + '<div class="cx-etc" style="margin-top:0.7rem">Ou scannez le code ci-dessous, '
+      + 'produit par un service externe.</div>'
+      + '<div class="cx-qr"><img id="wz-qr" src="' + esc(d.qrUrl) + '" alt="Code QR"></div>'
+      + '<div class="cx-err" id="wz-qr-err">Code QR indisponible — utilisez la clé ci-dessus.</div>'
+      + '</div>'
+      + '<div class="cx-etape">'
+      + '<div class="cx-etl">Étape 3 — confirmez</div>'
+      + '<form id="cx-form-wz">'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="wz-code">Code à 6 chiffres</label>'
+      + '<input type="text" id="wz-code" inputmode="numeric" maxlength="6" '
+      + 'autocomplete="one-time-code" required placeholder="000000">'
+      + '</div>'
+      + '<div class="cx-err" id="wz-err"></div>'
+      + '<button type="submit" class="cx-btn" id="wz-btn" style="' + btnStyle() + '">'
+      + 'Activer et accéder au panneau</button>'
+      + '</form></div>'
+      + '<div class="cx-centre">'
+      + '<button type="button" class="admlogin-back" id="wz-annuler">← Annuler</button>'
+      + '</div></div>';
+  }
+
+  /* ══ ② LE CHANGEMENT DE MOT DE PASSE IMPOSE ════════════════════════════════
+     ⚠ LES EXIGENCES VIENNENT DE LA POLITIQUE, pas d un texte fige : elle est
+     configurable, et une liste ecrite en dur mentirait des qu on la change. */
+  function ecranMdp(d){
+    var ex = (d.exigences || []).map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('');
+    return '<div>'
+      + '<div style="margin-bottom:1.5rem">'
+      + '<div class="cx-titre">Changement de mot de passe requis</div>'
+      + '<div class="cx-sous">Bienvenue ' + esc(d.prenom) + ' — définissez votre mot de '
+      + 'passe avant d’accéder au panneau.</div>'
+      + (ex ? ('<ul class="cx-exig">' + ex + '</ul>') : '')
+      + '</div>'
+      + '<form id="cx-form-mdp">'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="pc-pw1">Nouveau mot de passe</label>'
+      + '<input type="password" id="pc-pw1" class="padd" autocomplete="new-password" required>'
+      + '</div>'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="pc-pw2">Confirmer le mot de passe</label>'
+      + '<input type="password" id="pc-pw2" autocomplete="new-password" required>'
+      + '</div>'
+      + '<div class="cx-err" id="pc-err"></div>'
+      + '<button type="submit" class="cx-btn" id="pc-btn" style="' + btnStyle() + '">'
+      + 'Enregistrer et accéder</button>'
+      + '</form>'
+      + '<div class="cx-centre">'
+      + '<button type="button" class="admlogin-back" id="pc-annuler">← Retour à la connexion</button>'
+      + '</div></div>';
+  }
+
+  /* ══ ③ LES QUESTIONS DE SECURITE ═══════════════════════════════════════════
+     ⚠ LES DEUX LISTES S EXCLUENT L UNE L AUTRE, ET SE LIBERENT. La question
+     choisie d un cote disparait de l autre, et REAPPARAIT des qu on la relache.
+     Sans ce second temps, changer d avis laisserait une question introuvable. */
+  function ecranQuestions(d){
+    var qs = d.questions || [];
+    var opts = function(exclu, sel){
+      var o = '<option value="">— Choisir une question —</option>';
+      for (var i = 0; i < qs.length; i++) {
+        if (exclu && qs[i] === exclu) continue;
+        o += '<option value="' + esc(qs[i]) + '"'
+          + (qs[i] === sel ? ' selected' : '') + '>' + esc(qs[i]) + '</option>';
+      }
+      return o;
+    };
+    return '<div>'
+      + '<div style="margin-bottom:1.4rem">'
+      + '<div class="cx-titre">Questions de sécurité</div>'
+      + '<div class="cx-sous">' + esc(d.prenom) + ', choisissez deux questions. Elles servent '
+      + 'à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.</div>'
+      + '</div>'
+      + '<form id="cx-form-q">'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="sq-q1">Question 1</label>'
+      + '<select id="sq-q1" required>' + opts('', '') + '</select>'
+      + '</div>'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="sq-a1">Réponse 1</label>'
+      + '<input type="text" id="sq-a1" autocomplete="off" required>'
+      + '</div>'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="sq-q2">Question 2</label>'
+      + '<select id="sq-q2" required>' + opts('', '') + '</select>'
+      + '</div>'
+      + '<div class="cx-bloc">'
+      + '<label class="cx-lbl" for="sq-a2">Réponse 2</label>'
+      + '<input type="text" id="sq-a2" autocomplete="off" required>'
+      + '</div>'
+      + '<div class="cx-err" id="sq-err"></div>'
+      + '<button type="submit" class="cx-btn" id="sq-btn" style="' + btnStyle() + '">'
+      + 'Enregistrer et accéder</button>'
+      + '</form>'
+      + '<div class="cx-centre">'
+      + '<button type="button" class="admlogin-back" id="sq-annuler">← Retour à la connexion</button>'
+      + '</div></div>';
+  }
+
+  /* Les listes s excluent : appele a chaque changement, dans les deux sens. */
+  function questionsAccorder(){
+    var s1 = el('sq-q1'), s2 = el('sq-q2');
+    if (!s1 || !s2) return;
+    var refaire = function(cible, autre){
+      var garde = cible.value;
+      var exclu = autre.value;
+      var o = '<option value="">— Choisir une question —</option>';
+      var qs = (CTX_Q && CTX_Q.questions) || [];
+      for (var i = 0; i < qs.length; i++) {
+        if (exclu && qs[i] === exclu) continue;
+        o += '<option value="' + esc(qs[i]) + '"'
+          + (qs[i] === garde ? ' selected' : '') + '>' + esc(qs[i]) + '</option>';
+      }
+      cible.innerHTML = o;
+      cible.value = garde;
+    };
+    refaire(s1, s2);
+    refaire(s2, s1);
+  }
+
+  /* ══ LES TROIS ENVOIS ══════════════════════════════════════════════════════
+     ⚠ CHACUN REND UN suite NOMME, et c est ce qui permet d enchainer les trois
+     ecrans SANS quitter cette fenetre — sa demande du 2026-09-10 : << il faut
+     integrer ca dans la meme fenetre >>. Le mot de passe peut mener aux
+     questions, les questions aux deux facteurs, et n importe lequel au panneau :
+     un seul aiguillage, suivre, plutot que trois enchainements ecrits a la
+     main qui finiraient par diverger. */
+  function suivre(r){
+    if (r.suite === 'questions')  { chargerQuestions(); return; }
+    if (r.suite === 'mfaConfig')  { chargerMfaConfig(); return; }
+    if (r.suite === 'motdepasse') { chargerMdp(); return; }
+    reussi(r.prenom);
+  }
+
+  function chargerMfaConfig(){
+    appeler('connexion:mfaConfig').then(function(r){
+      if (!r || !r.ok) { dessiner('login'); apresLogin(); faute('sl-error', r); return; }
+      dessiner('mfaConfig', r);
+    });
+  }
+  function chargerMdp(){
+    appeler('connexion:mdpDonnees').then(function(r){
+      if (!r || !r.ok) { dessiner('login'); apresLogin(); faute('sl-error', r); return; }
+      dessiner('mdp', r);
+    });
+  }
+  function chargerQuestions(){
+    appeler('connexion:questionsDonnees').then(function(r){
+      if (!r || !r.ok) { dessiner('login'); apresLogin(); faute('sl-error', r); return; }
+      CTX_Q = r;
+      dessiner('questions', r);
+    });
+  }
+
+  function mfaConfigEnvoyer(){
+    var c = el('wz-code'), b = el('wz-btn');
+    if (!c || !b) return;
+    fauteEffacer('wz-err');
+    b.disabled = true;
+    b.innerHTML = '<span class="cx-spin"></span><span>Vérification…</span>';
+    c.disabled = true;
+    appeler('connexion:mfaConfigConfirmer', [c.value]).then(function(r){
+      if (r.ok) { suivre(r); return; }
+      var c2 = el('wz-code'), b2 = el('wz-btn');
+      if (b2) { b2.disabled = false; b2.textContent = 'Activer et accéder au panneau'; }
+      if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
+      faute('wz-err', r);
+    });
+  }
+
+  function mdpEnvoyer(){
+    var a = el('pc-pw1'), b = el('pc-pw2'), bt = el('pc-btn');
+    if (!a || !b || !bt) return;
+    fauteEffacer('pc-err');
+    bt.disabled = true;
+    bt.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
+    appeler('connexion:mdpEcrire', [a.value, b.value]).then(function(r){
+      if (r.ok) { suivre(r); return; }
+      var bt2 = el('pc-btn');
+      if (bt2) { bt2.disabled = false; bt2.textContent = 'Enregistrer et accéder'; }
+      faute('pc-err', r);
+      /* ⚠ ON NE VIDE QUE LA CONFIRMATION sur une discordance : effacer les deux
+         obligerait a retaper un mot de passe peut-etre bon. Sur un refus de
+         politique, on ne vide RIEN — la personne doit voir ce qu elle a ecrit
+         pour le corriger. */
+      if (r.motif === 'discordance') { var b3 = el('pc-pw2'); if (b3) { b3.value = ''; b3.focus(); } }
+    });
+  }
+
+  function questionsEnvoyer(){
+    var q1 = el('sq-q1'), a1 = el('sq-a1'), q2 = el('sq-q2'), a2 = el('sq-a2'), b = el('sq-btn');
+    if (!q1 || !a1 || !q2 || !a2 || !b) return;
+    fauteEffacer('sq-err');
+    b.disabled = true;
+    b.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
+    appeler('connexion:questionsEcrire', [q1.value, a1.value, q2.value, a2.value])
+      .then(function(r){
+        if (r.ok) { suivre(r); return; }
+        var b2 = el('sq-btn');
+        if (b2) { b2.disabled = false; b2.textContent = 'Enregistrer et accéder'; }
+        faute('sq-err', r);
+      });
+  }
+

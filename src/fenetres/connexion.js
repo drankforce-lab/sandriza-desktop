@@ -170,6 +170,12 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 2px rgba(196,154,108,0.28)}
   transform:rotate(42deg)}
 .cx-souvenir input:focus-visible{outline:2px solid #C49A6C;outline-offset:3px}
 .cx-centre{text-align:center;margin-top:0.85rem}
+.cx-recours{transition:opacity .32s cubic-bezier(.2,.8,.2,1),
+  max-height .32s cubic-bezier(.2,.8,.2,1),margin-top .32s cubic-bezier(.2,.8,.2,1);
+  max-height:120px}
+.cx-recours.cx-voile{opacity:0;visibility:hidden;margin-top:0;
+  max-height:0;overflow:hidden;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.cx-recours{transition:none}}
 .cx-chrono{font-size:0.72rem;color:#776654;margin-top:0.5rem}
 .cx-chrono strong{color:#b45309}
 .cx-chrono strong.presse{color:#dc2626}
@@ -235,6 +241,12 @@ ${JS_DIRE}
   var CTX = null;          // le contexte de dessin, lu UNE fois
   var ECRAN = 'login';     // login | mfa | oubli
   var CAPTCHA_OK = false;
+  /* ⚠ UN ÉTAT DE MODULE, PAS UN ÉTAT DU DOM : dessiner('login') refait
+     l écran entier (retour d une étape, échec d un chargement), et tout ce
+     qui vivait dans le HTML disparaît avec lui. C est exactement le défaut
+     du sélecteur de date de la 5.3.0 — un état posé dans un écran qui se
+     redessine n est pas un état. */
+  var DEJA_RATE = false;
   var MAINT = null;        // dernier etat de maintenance connu
   var MAINT_T = null;
   var MFA_T = null, MFA_FIN = 0;
@@ -452,7 +464,7 @@ ${JS_DIRE}
       + '<div id="cap-zone"></div>'
       + '<button type="submit" class="cx-btn" id="sl-btn" style="' + btnStyle() + '">Se connecter</button>'
       + '</form>'
-      + '<div class="cx-centre">'
+      + '<div class="cx-centre cx-recours' + (DEJA_RATE ? '' : ' cx-voile') + '">'
       + '<button type="button" class="admlogin-forgot" id="sl-oubli">Mot de passe oublié ?</button>'
       + '</div></div>';
   }
@@ -915,6 +927,15 @@ ${JS_DIRE}
     }
     z.innerHTML = txt;
   }
+  /* ⚠ ON NE TOUCHE À RIEN SI C EST DÉJÀ FAIT : la fonction est appelée à
+     chaque échec, et réécrire la classe à chaque fois relancerait la
+     transition — le bouton clignoterait à la troisième tentative. */
+  function devoilerOubli(){
+    if (DEJA_RATE) return;
+    DEJA_RATE = true;
+    var z = document.querySelector('.cx-recours.cx-voile');
+    if (z) z.className = 'cx-centre cx-recours';
+  }
   function fauteEffacer(id){
     var z = el(id);
     if (z) { z.className = 'cx-err'; z.innerHTML = ''; }
@@ -938,6 +959,13 @@ ${JS_DIRE}
         if (!r.ok) {
           if (b2) { b2.disabled = false; b2.textContent = 'Se connecter'; }
           faute('sl-error', r);
+          /* ⚠ ICI ET NULLE PART AILLEURS. Les autres échecs de cet écran —
+             un code à six chiffres refusé, un chargement d étape qui rate —
+             ne sont PAS des mots de passe oubliés, et offrir le recours à ce
+             moment-là enverrait quelqu un réinitialiser un mot de passe qui
+             était bon. Un compte verrouillé, lui, compte : c est justement là
+             qu on a besoin de la porte de sortie. */
+          devoilerOubli();
           /* Un echec peut FAIRE APPARAITRE le casse-tete (seuil atteint) ou le
              rendre inutile (compte verrouille : il n y a plus rien a ralentir). */
           if (r.captchaRequis) captchaPoser(); else if (r.motif === 'verrou') captchaRetirer();

@@ -347,6 +347,12 @@ jobs:
           node tools/banc-accent-grave.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js
+          # ⚠ CELUI-CI GARDE UNE CHAÎNE DE QUATRE MORCEAUX que rien d'autre ne
+          # relie : le recours « mot de passe oublié » ne doit apparaître qu'après
+          # un premier échec (sa demande du 2026-09-11). Retirer n'importe lequel
+          # des quatre laisse la fenêtre saine et tous les autres bancs verts — le
+          # bouton est simplement toujours visible, ou plus jamais.
+          node tools/banc-recours-oubli.js
           # ⚠ CELUI-CI GARDE UN DÉFAUT QUI NE SE VOIT QU'APRÈS INSTALLATION :
           # une ressource citée par src/ mais rangée hors de src/ existe en
           # développement et disparaît de l'archive. C'est ce qui a fait un carré

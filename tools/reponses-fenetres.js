@@ -6214,8 +6214,15 @@ module.exports = {
       /* Le cas de tous les jours : personne n est memorise, pas de casse-tete,
          pas de maintenance. C est l ecran que 95 % des ouvertures montrent. */
       nom: 'la connexion, ecran nu',
-      /* Les trois choses sans lesquelles ce n est plus un ecran de connexion. */
-      exige: ['id="sl-email"', 'id="sl-password"', 'Se connecter'],
+      /* Les trois choses sans lesquelles ce n est plus un ecran de connexion.
+         ⚠ ET LA QUATRIEME, AJOUTEE LE 2026-09-11 : le recours << mot de passe
+         oublie >> doit sortir VOILE d une premiere ouverture. Sa demande : ne le
+         montrer qu apres une erreur. Le voile se pose dans le gabarit, donc il
+         s eprouve ICI ; le reste de la chaine (l etat, le devoilement, l appel
+         dans la branche d echec) est garde par `banc-recours-oubli.js`, parce
+         que cet executeur ne CLIQUE pas — ses addEventListener sont vides. */
+      exige: ['id="sl-email"', 'id="sl-password"', 'Se connecter',
+        'cx-centre cx-recours cx-voile'],
       id: '',
       reponses: {
         'connexion:contexte': { ok: true,
