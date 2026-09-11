@@ -4896,6 +4896,7 @@ const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageConnexion } = require('./fenetres/connexion');
 const { pageMaj } = require('./fenetres/maj');
 const { pageDeconnexion } = require('./fenetres/deconnexion');
+const { MENU_EN, trMenu, trItems } = require('./menu-langue');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -5731,39 +5732,20 @@ ipcMain.handle('langue:ecrire', (e, l) => {
    entrée ajoutée demain s'affichera dans sa langue d'origine plutôt que de
    disparaître. `tools/banc-menu-langue.js` refuse ce silence-là — il relève les
    entrées libres DANS `appbar.js` et exige que chacune ait sa traduction. */
-const MENU_EN = {
-  'Fichier': 'File',
-  'Affichage': 'View',
-  'Aide': 'Help',
-  'Quitter': 'Quit',
-  'Recharger': 'Reload',
-  'Recharger (vider le cache)': 'Reload (clear cache)',
-  'Plein écran': 'Full screen',
-  'Zoom avant': 'Zoom in',
-  'Zoom arrière': 'Zoom out',
-  'Zoom normal': 'Reset zoom',
-  'Réduire': 'Minimize',
-  'Vérifier les mises à jour…': 'Check for updates…',
-  'À propos': 'About',
-};
+/* ⚠ LA TABLE ET LES DEUX AIDES ONT DÉMÉNAGÉ dans `src/menu-langue.js` le
+   2026-09-11, et ce n'est pas du rangement : ici, aucun banc ne pouvait les
+   éprouver sans lancer Electron, ouvrir un panneau et lire une AUTRE fenêtre.
+   Ma première version ne traduisait donc QUE le premier niveau — « View »,
+   « Help », et dessous « Recharger », « Plein écran » — et c'est LUI qui l'a vu,
+   sur une capture.
+   ➡ UN MORCEAU DE LOGIQUE QU'ON NE PEUT PAS ÉPROUVER SANS LANCER TOUTE
+     L'APPLICATION FINIT PAR N'ÊTRE ÉPROUVÉ PAR PERSONNE. */
 
 const _langueCourante = () => {
   try { return (reglages.get('langue') === 'en') ? 'en' : 'fr'; } catch (e) { return 'fr'; }
 };
-const _trMenu = (x) => {
-  if (_langueCourante() !== 'en') return x;
-  return Object.prototype.hasOwnProperty.call(MENU_EN, x) ? MENU_EN[x] : x;
-};
-/* ⚠ RÉCURSIF SUR `sub` : « Position du menu » et « Jeu de couleurs » sont des
-   sous-groupes. Hors session ils sont vides et disparaissent — mais traduire à
-   un seul niveau est le genre de raccourci qui tient jusqu au jour où une
-   entrée libre entre dans un sous-groupe. */
-const _trItems = (items) => (items || []).map((it) => {
-  if (!it || it.sep) return it;
-  const n = { ...it, label: _trMenu(it.label) };
-  if (it.sub) n.sub = _trItems(it.sub);
-  return n;
-});
+const _trMenu = (x) => trMenu(x, _langueCourante());
+const _trItems = (items) => trItems(items, _langueCourante());
 
 ipcMain.handle('cnxmenu:labels', () => {
   try {

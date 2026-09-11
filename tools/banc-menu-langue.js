@@ -36,16 +36,14 @@ if (!fs.existsSync(APPBAR)) {
   process.exit(0);
 }
 
-/* ── La table de la coquille. ─────────────────────────────────────────────── */
-const main = fs.readFileSync(MAIN, 'utf8');
-const iT = main.indexOf('const MENU_EN = {');
-if (iT < 0) { console.error('✗ `MENU_EN` introuvable dans src/main.js'); process.exit(1); }
-const table = main.slice(iT, main.indexOf('\n};', iT));
-const traduits = new Set();
-{
-  const rx = /^\s{2}'((?:[^'\\]|\\.)*)':/gm;
-  let m; while ((m = rx.exec(table))) traduits.add(m[1].replace(/\\'/g, "'"));
-}
+/* ── La table, LUE EN LA CHARGEANT (2026-09-11) ───────────────────────────────
+   ⚠ Elle était relevée à coups d'expression régulière dans `main.js`. Ça marchait,
+   et ça ne prouvait rien de plus que sa PRÉSENCE : on ne pouvait pas éprouver la
+   fonction qui s'en sert. Sortie dans `src/menu-langue.js`, on la charge — et on
+   peut enfin vérifier qu'elle est APPLIQUÉE, pas seulement remplie. C'est ce qui
+   manquait quand le menu est sorti à moitié traduit. */
+const { MENU_EN, trItems } = require('../src/menu-langue');
+const traduits = new Set(Object.keys(MENU_EN));
 if (traduits.size < 5) {
   console.error('✗ seulement ' + traduits.size + ' entrée(s) lue(s) dans MENU_EN — '
     + 'le motif de lecture ne marche plus, ce banc ne prouverait rien.');
@@ -99,6 +97,55 @@ for (const k of traduits) {
   if (!libres.has(k)) {
     fautes.push('MENU_EN traduit « ' + k + " » qui n’est plus une entrée libre du site — "
       + 'ligne morte, ou entrée renommée d’un seul côté');
+  }
+}
+
+/* ══ ET SURTOUT : LA TRADUCTION EST-ELLE APPLIQUÉE ? ════════════════════════
+   ⚠⚠ C'EST LE CONTRÔLE QUI MANQUAIT, ET SON ABSENCE A COÛTÉ UNE VERSION. La
+   table était complète, le banc était vert, et le menu sortait à moitié
+   traduit : « View », « Help », puis dessous « Recharger », « Plein écran »,
+   « Réduire ». `trItems` descendait dans les sous-groupes (`sub`) et sautait les
+   ENTRÉES (`items`), qui sont pourtant le cas courant.
+   ➡ **VÉRIFIER QU'UNE TABLE EST COMPLÈTE NE DIT RIEN SUR LE CODE QUI S'EN SERT.**
+   Deux questions différentes, deux contrôles.
+   ⚠ Le modèle ci-dessous a TROIS niveaux À DESSEIN — menu, entrée, sous-groupe —
+   parce qu'un parcours d'arbre qui ne suit qu'une branche sur deux passe le
+   premier niveau sans broncher. */
+{
+  const modele = [{
+    label: 'Affichage',
+    items: [
+      { label: 'Recharger', app: 'reload' },
+      { sep: true },
+      { label: 'Plein écran', app: 'fullscreen' },
+      { label: 'Aide', sub: [{ label: 'À propos', app: 'about' }] },
+    ],
+  }];
+  const sortie = trItems(modele, 'en');
+  const restes = [];
+  const arpenter = (l, chemin) => (l || []).forEach((it) => {
+    if (!it || it.sep) return;
+    if (Object.prototype.hasOwnProperty.call(MENU_EN, it.label)) {
+      restes.push(chemin + ' > ' + it.label);
+    }
+    arpenter(it.items, chemin + ' > ' + it.label);
+    arpenter(it.sub, chemin + ' > ' + it.label);
+  });
+  arpenter(sortie, '(racine)');
+  restes.forEach((x) => fautes.push('trItems() laisse « ' + x + " » en français alors que "
+    + 'la table le connaît — un niveau de l’arbre n’est pas parcouru'));
+
+  /* ⚠ ET LE SENS INVERSE, sinon un `trItems` qui rendrait n'importe quoi (une
+     liste vide, par exemple) passerait ce contrôle sans rien traduire du tout. */
+  const compte = (l) => (l || []).reduce((n, it) =>
+    n + (it && !it.sep ? 1 + compte(it.items) + compte(it.sub) : 0), 0);
+  if (compte(sortie) !== compte(modele)) {
+    fautes.push('trItems() rend ' + compte(sortie) + ' entrée(s) pour ' + compte(modele)
+      + ' — il en perd en route, et un menu amputé vaut un menu faux');
+  }
+  /* Et en français, rien ne doit bouger. */
+  if (JSON.stringify(trItems(modele, 'fr')) !== JSON.stringify(modele)) {
+    fautes.push('trItems(…, "fr") MODIFIE le modèle — le français doit être le passe-droit');
   }
 }
 
