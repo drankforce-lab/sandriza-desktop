@@ -1332,6 +1332,25 @@ ${JS_DIRE}
      ⚠ ET ON N EN FAIT PAS UN PRÉALABLE : la barre se pose quand elle peut,
      l écran de connexion n attend jamais après elle. */
   var BARRE_FAITE = false;
+  var BARRE_OUVERT = null;
+  function barreMontrer(b){
+    if (!b || !P || !P.menuPanneau) return;
+    if (BARRE_OUVERT === b) return;
+    barreEteindre();
+    BARRE_OUVERT = b;
+    b.className = 'on';
+    /* ⚠ SOUS LE BOUTON, pas sous le pointeur : un panneau qui s ouvre à deux
+       pixels près de là où on a cliqué a l air de flotter. */
+    var r = b.getBoundingClientRect();
+    P.menuPanneau(b.textContent, Math.round(r.left), Math.round(r.bottom));
+  }
+  function barreEteindre(){
+    if (BARRE_OUVERT) { BARRE_OUVERT.className = ''; BARRE_OUVERT = null; }
+  }
+  /* ⚠ LA COQUILLE APPELLE CECI quand le panneau se referme — après un clic
+     dedans, ou parce que la souris est partie. Sans ce retour, l intitulé
+     resterait allumé au-dessus d un menu fermé. */
+  window.szBarreFermee = function(){ barreEteindre(); };
   /* ⚠ LE FOND PART DU HAUT DU DÉGRADÉ — c est ce qu on recouvre — puis on le
      POUSSE franchement dans son propre sens : une barre doit se détacher du
      panneau, pas s y fondre. Ensuite le texte prend le clair ou le foncé selon
@@ -1370,24 +1389,31 @@ ${JS_DIRE}
         b.type = 'button';
         b.textContent = noms[i];
         b.setAttribute('data-i', String(i));
-        b.onclick = function(){
-          var self = this;
-          var r = self.getBoundingClientRect();
-          /* ⚠ LE POPUP SORT SOUS LE BOUTON, pas sous le pointeur : un menu
-             qui s ouvre à deux pixels près de là où on a cliqué est un menu
-             qui a l air de flotter. << bottom >> et << left >> sont exactement ce
-             qu une barre de menus promet. */
-          self.className = 'on';
-          P.menuOuvrir(parseInt(self.getAttribute('data-i'), 10) || 0,
-            Math.round(r.left), Math.round(r.bottom));
-          /* Le menu contextuel est modal côté système : on ne saura pas
-             quand il se referme. On rend donc son air normal au bouton
-             après un court instant — la surbrillance a joué son rôle
-             (dire quel menu on a ouvert), elle n a pas à durer. */
-          setTimeout(function(){ self.className = ''; }, 400);
-        };
+        /* ══ CLIC POUR OUVRIR, SURVOL POUR CHANGER ═══════════════════════
+           ⚠⚠ SES MOTS DU 2026-09-11 : << si je glisse la souris sur un autre
+           menu, le menu ne se déroule pas >>. C est le comportement que TOUTE
+           barre de menus promet, et il manquait parce que la 5.23.0 passait
+           par le menu du SYSTÈME — qui prend la souris et ne la rend qu à la
+           fermeture.
+           ⚠ LE PANNEAU FLOTTANT, LUI, S AFFICHE SANS PRENDRE LE FOYER : le
+           survol continue d arriver ici. Il ne reste qu à ne réagir QUE si un
+           menu est déjà ouvert — sinon un simple passage de souris au-dessus
+           de la barre ferait déplier des menus qu on ne demandait pas.
+           ⚠ ET LE BOUTON ALLUMÉ EST L ÉTAT, pas une décoration : c est lui qui
+           dit quel menu est ouvert, et << szBarreFermee >> (appelée par la
+           coquille) l éteint quand le panneau se referme. */
+        b.onclick = function(){ barreMontrer(this); };
+        b.onmouseenter = function(){ if (BARRE_OUVERT) barreMontrer(this); };
         z.appendChild(b);
       }
+      /* ⚠ SORTIR DE LA BARRE REFERME — mais la coquille attend un court
+         instant avant de retirer le panneau (elle sait si la souris est
+         passée DEDANS). Sans ce délai de son côté, descendre du bouton vers
+         le panneau le ferait disparaître en chemin. */
+      z.onmouseleave = function(){
+        if (P && P.menuPanneauFermer) P.menuPanneauFermer();
+        barreEteindre();
+      };
       document.body.appendChild(z);
       document.body.className = (document.body.className + ' cx-abarre').replace(/^ /, '');
     }).catch(function(){});

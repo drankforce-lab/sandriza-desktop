@@ -56,7 +56,8 @@
     menuLabels: function () {
       return Promise.resolve(REP['__menuLabels'] || ['Fichier', 'Affichage', 'Aide']);
     },
-    menuOuvrir: function () { return Promise.resolve(true); },
+    menuPanneau: function () {},
+    menuPanneauFermer: function () {},
     detacher: function () { return Promise.resolve(false); },
     ancrer: function () { return Promise.resolve(false); },
     fermer: function () {},

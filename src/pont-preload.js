@@ -131,9 +131,16 @@ contextBridge.exposeInMainWorld('szPont', {
      seconde copie du menu est exactement ce que `src/menubar.js` raconte avoir
      payé. */
   menuLabels: () => ipcRenderer.invoke('cnxmenu:labels').catch(() => []),
-  menuOuvrir: (i, x, y) => ipcRenderer
-    .invoke('cnxmenu:ouvrir', parseInt(i, 10) || 0, Math.round(x) || 0, Math.round(y) || 0)
-    .catch(() => false),
+  /* ⚠ LE PANNEAU FLOTTANT, PAS LE MENU DU SYSTÈME. Le second s ouvrait bien
+     au-dessus de la vue native, mais il PREND LA SOURIS : une fois ouvert,
+     glisser sur l intitulé voisin ne faisait plus rien. Le panneau, lui, est une
+     petite fenêtre de l application affichée SANS PRENDRE LE FOYER — le survol
+     continue d atteindre la barre. Mêmes canaux que les écrans ancrés.
+     ⚠ `x` ET `y` SONT CEUX DU BOUTON dans la vue, en pixels de page : la
+     coquille y ajoute la position de la fenêtre et le facteur de zoom. */
+  menuPanneau: (label, x, y) => ipcRenderer.send('menu:panneau',
+    String(label || ''), Math.round(x) || 0, Math.round(y) || 0, 'bas'),
+  menuPanneauFermer: () => ipcRenderer.send('menu:panneau:fermer'),
   fermer: () => ipcRenderer.send('pont:fermer'),
   /* ⚠ << J'AI UNE SAISIE EN COURS >>. Le bouton de fermeture DESSINÉ dans la page
      passe par `fermer` ci-dessus, donc la page peut demander avant de partir.

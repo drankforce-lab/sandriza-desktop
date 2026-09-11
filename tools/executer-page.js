@@ -271,7 +271,7 @@ function executerPage(script, reponses, opts) {
       Object.prototype.hasOwnProperty.call(rep, '__menuLabels')
         ? rep['__menuLabels'] : ['Fichier', 'Affichage', 'Aide']
     )),
-    menuOuvrir: () => surveille(Promise.resolve(true)),
+    menuPanneau() {}, menuPanneauFermer() {},
     surEtatCaisse: () => () => {}, ajusterHauteur() {},
     /* ⚠ LE FAUX GROUPE `veilleur` EST PARTI LE 2026-09-09, avec la fenêtre qu'il
        servait et avec le groupe réel du préchargement. Il n'y a plus une seule

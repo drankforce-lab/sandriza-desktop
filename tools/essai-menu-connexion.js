@@ -22,7 +22,9 @@
  *   ① la barre native ne se dessine PAS ici — la raison du défaut, épinglée ;
  *   ② la vue de connexion couvre tout le contenu ;
  *   ③ l écran dessine SA barre dès que la coquille lui donne des intitulés ;
- *   ④ un menu contextuel s ouvre bel et bien au-dessus de cette vue native.
+ *   ④ cliquer un intitulé demande le panneau du bon menu, au bon endroit ;
+ *   ⑤ et GLISSER sur l intitulé voisin déroule le sien — le geste qu il a signalé
+ *     comme manquant, qu un menu du SYSTÈME ne peut pas rendre (il prend la souris).
  *
  * ⚠ IL SE FERME TOUT SEUL.
  *
@@ -45,7 +47,6 @@ const dodo = (ms) => new Promise((r) => setTimeout(r, ms));
 app.on('window-all-closed', () => {});
 
 const LABELS = ['Fichier', 'Affichage', 'Aide'];
-let popupVu = false;
 
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(
@@ -123,20 +124,52 @@ app.whenReady().then(async () => {
   exige(!!(lu && lu.reserve),
     '③ le corps réserve la place de la barre — sans quoi elle mange le panneau de marque');
 
-  // ── ④ Un menu contextuel s'ouvre par-dessus la vue native. ───────────────
-  const sous = Menu.buildFromTemplate([{ label: 'Une entrée' }, { label: 'Une autre' }]);
-  sous.once('menu-will-show', () => { popupVu = true; });
-  sous.popup({ window: fenetre, x: 40, y: 32 });
-  await dodo(700);
-  try { sous.closePopup(fenetre); } catch (e) {}
-  await dodo(300);
-  exige(popupVu === true,
-    '④ le menu contextuel s’ouvre sur cette fenêtre — c’est une fenêtre du '
-    + 'SYSTÈME, la seule chose qui passe au-dessus d’une vue native');
+  /* ══ ④ ET ⑤ : LA CHAÎNE COMPLÈTE, CLIC PUIS SURVOL ═══════════════════════
+     ⚠⚠ SES MOTS DU 2026-09-11 : « si je clique sur un menu il s ouvre, mais si je
+     glisse la souris sur un autre menu le menu ne se déroule pas ». La 5.23.0
+     passait par un menu du SYSTÈME : il s ouvrait bien au-dessus de la vue, mais
+     il PREND LA SOURIS, donc le survol n arrivait jamais jusqu à la barre.
+     ⚠ ON ÉPROUVE DONC LES DEUX GESTES, et la chaîne entière : la vue clique, le
+     préchargement envoie, la coquille reçoit — avec le bon intitulé et les bonnes
+     coordonnées. Un banc qui ne vérifiait que le premier geste aurait laissé
+     passer exactement ce qu il a signalé. */
+  const recus = [];
+  ipcMain.on('menu:panneau', (e, label, x, y) => { recus.push({ label, x, y }); });
+
+  await vue.webContents.executeJavaScript(
+    "document.querySelectorAll('.cx-barre button')[0].click()", true);
+  await dodo(400);
+  dire('apres le clic — ' + JSON.stringify(recus));
+  exige(recus.length === 1 && recus[0].label === LABELS[0],
+    '④ cliquer un intitulé demande le panneau du bon menu (reçu : '
+    + JSON.stringify(recus.map((r) => r.label)) + ')');
+  exige(recus.length > 0 && recus[0].y > 0,
+    '④ la position envoyée est celle du BAS du bouton (y=' 
+    + (recus[0] ? recus[0].y : '—') + ') — un panneau qui sort ailleurs a l’air de flotter');
+
+  /* Le survol du voisin, PENDANT qu un menu est ouvert. */
+  await vue.webContents.executeJavaScript(
+    "(function(){var b=document.querySelectorAll('.cx-barre button')[1];"
+    + "b.dispatchEvent(new MouseEvent('mouseenter'));return true;})()", true);
+  await dodo(400);
+  dire('apres le survol du voisin — ' + JSON.stringify(recus.map((r) => r.label)));
+  exige(recus.length === 2 && recus[1].label === LABELS[1],
+    '⑤ glisser sur l’intitulé voisin déroule SON menu — c’est le geste qu’il a '
+    + 'signalé comme manquant');
+
+  /* Et hors ouverture, un simple passage de souris ne doit RIEN déclencher. */
+  await vue.webContents.executeJavaScript(
+    "(function(){window.szBarreFermee();"
+    + "document.querySelectorAll('.cx-barre button')[2]"
+    + ".dispatchEvent(new MouseEvent('mouseenter'));return true;})()", true);
+  await dodo(400);
+  exige(recus.length === 2,
+    '⑤ mais AUCUN menu ouvert, le survol ne déclenche rien (' + recus.length
+    + ' demande(s)) — sinon traverser la barre déplierait des menus non demandés');
 
   try { fenetre.destroy(); } catch (e) {}
   dire('');
   if (fautes.length) { dire('✗ ' + fautes.length + ' point(s) en échec.'); app.exit(1); return; }
-  dire('✓ le menu de l’écran de connexion tient — intitulés dessinés, popup au-dessus.');
+  dire('✓ le menu de l’écran de connexion tient — intitulés dessinés, clic ET survol.');
   app.exit(0);
 });

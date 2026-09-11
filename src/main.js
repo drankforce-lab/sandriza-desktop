@@ -4017,7 +4017,9 @@ const cnxDire = (x) => {
    autre chose que le produit** — et il le fait sans jamais avoir l air de se
    tromper. C est le même travers que « tester une mise en page à une taille
    d écran qui n est pas celle de la personne qui la signale ».
-   ⚠ D où le POPUP : voir `cnxmenu:ouvrir` plus bas. */
+   ⚠ D où le PANNEAU FLOTTANT : voir `menu:panneau` plus bas. Et pas le menu du
+   système, essayé en 5.23.0 : il s ouvrait bien au-dessus de la vue, mais il
+   PREND LA SOURIS — glisser sur l intitulé voisin ne faisait plus rien. */
 const cnxBarreNative = () => {};
 
 const poserVueConnexion = () => {
@@ -5252,8 +5254,34 @@ const fermerPanneauBientot = () => {
    avant, on ignore la largeur, donc on ne peut pas aligner un bord droit. */
 let panneauPose = { mode: 'bas', x: 0, y: 0 };
 
+/* ══════════════════════════════════════════════════════════════════════════
+   QUI A LE DROIT D OUVRIR UN PANNEAU DE MENU
+   ═══════════════════════════════════════════════════════════════════════════
+   ⚠⚠ LA PAGE PRINCIPALE, ET DÉSORMAIS LA VUE DE CONNEXION. Trois versions ont
+   cherché comment donner un menu à l écran de connexion, et la réponse était
+   dans ce fichier depuis la 1.56.1 — lisez le commentaire de `pagePanneau` :
+   « quand un écran est ANCRÉ, un panneau dessiné dans la page passe DESSOUS la
+   vue native ; et le menu du SYSTÈME imposait le thème de Windows et NE
+   S OUVRAIT QU AU CLIC ». Les deux phrases décrivent mot pour mot les deux
+   impasses de la 5.20.0 et de la 5.23.0.
+   ⚠ RÉINVENTER UN MÉCANISME, C EST REPRENDRE L APPRENTISSAGE DE SES CAS
+   LIMITES À ZÉRO — et les repayer un par un, en public. Le panneau flottant est
+   une petite fenêtre de l application : elle passe au-dessus de la vue native,
+   elle porte le thème du site, et elle s affiche SANS PRENDRE LE FOYER
+   (`showInactive`) — c est précisément ce qui laisse le survol continuer à
+   atteindre la barre, donc le passage d un menu à l autre à la souris.
+   ⚠ LE FACTEUR DE ZOOM VIENT DE L EXPÉDITEUR, pas de la fenêtre principale : la
+   vue de connexion a le sien. Prendre celui de la fenêtre poserait le panneau à
+   côté du bouton dès que les deux diffèrent. */
+const _peutOuvrirPanneau = (e) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return false;
+  try { if (e.sender === mainWindow.webContents) return true; } catch (er) {}
+  try { if (vueConnexion && e.sender === vueConnexion.webContents) return true; } catch (er) {}
+  return false;
+};
+
 ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
-  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  if (!_peutOuvrirPanneau(e)) return;
   const m = (_modele.menus || []).find((mm) => mm && mm.label === String(label || ''));
   if (!m || !(m.items || []).length) return;
   clearTimeout(panneauFermeT); panneauFermeT = null; panneauSurvole = false;
@@ -5276,7 +5304,8 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
     panneauWin.on('closed', () => { panneauWin = null; panneauPret = false; panneauSale = true; });
     panneauSale = true;
   }
-  const f = mainWindow.webContents.getZoomFactor() || 1;
+  let f = 1;
+  try { f = e.sender.getZoomFactor() || 1; } catch (er) {}
   const cb = mainWindow.getContentBounds();
   const _mode = ['bas', 'droite', 'gauche'].indexOf(String(ancrage || 'bas')) >= 0
     ? String(ancrage || 'bas') : 'bas';
@@ -5317,7 +5346,7 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
 });
 // Le site annonce que la souris a quitte la barre (ou qu on a clique ailleurs).
 ipcMain.on('menu:panneau:fermer', (e) => {
-  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  if (!_peutOuvrirPanneau(e)) return;
   fermerPanneauBientot();
 });
 // Le panneau annonce sa taille reelle : la fenetre s ajuste, position gardee
@@ -5485,6 +5514,16 @@ ipcMain.on('palette:action', (e, it) => {
   // pour ca ; jamais un Echap simule, qui fermerait aussi une modale du site).
   if (panneauWin && !panneauWin.isDestroyed() && e.sender === panneauWin.webContents) {
     fermerPanneauMenu();
+    /* ⚠ ET ON REND SON AIR NORMAL AU BOUTON DE L ÉCRAN DE CONNEXION, quand
+       c est lui qui a ouvert le panneau : sa barre n est pas celle du site,
+       `AppBar.fermer` ne la connaît pas. Sans ça, l intitulé resterait allumé
+       après le clic — un menu fermé sous un bouton qui dit le contraire. */
+    try {
+      if (vueConnexion && !vueConnexion.webContents.isDestroyed()) {
+        vueConnexion.webContents.executeJavaScript(
+          'window.szBarreFermee && window.szBarreFermee();', true).catch(() => {});
+      }
+    } catch (er) {}
     try {
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.executeJavaScript(
@@ -5532,21 +5571,16 @@ ipcMain.handle('cnxmenu:labels', () => {
   } catch (e) { cnxDire('intitules de menu refuses : ' + ((e && e.message) || e)); return []; }
 });
 
-ipcMain.handle('cnxmenu:ouvrir', (e, i, x, y) => {
-  if (!mainWindow || mainWindow.isDestroyed()) return false;
-  try {
-    const menus = _sansPseudo(_modele.menus).filter((m) => m && (m.items || []).length);
-    const m = menus[parseInt(i, 10) || 0];
-    if (!m) return false;
-    const sous = Menu.buildFromTemplate(versTemplateNatif(m.items || []));
-    /* ⚠ LES COORDONNÉES SONT CELLES DE LA FENÊTRE, pas de l écran : la vue est
-       posée en (0,0) et couvre tout le contenu, donc ce que la page mesure chez
-       elle vaut ici. Le jour où la vue serait décalée, c est ce commentaire
-       qu il faudrait relire en premier. */
-    sous.popup({ window: mainWindow, x: Math.round(x) || 0, y: Math.round(y) || 0 });
-    return true;
-  } catch (er) { cnxDire("popup du menu refuse : " + ((er && er.message) || er)); return false; }
-});
+/* ⚠ LE MENU DU SYSTÈME A ÉTÉ RETIRÉ (5.25.0), ET VOICI POURQUOI C EST NOTÉ.
+   `Menu.popup` marchait — il s ouvrait bien au-dessus de la vue native. Mais
+   un menu du système PREND LA SOURIS : une fois ouvert, glisser sur l intitulé
+   voisin ne fait plus rien, il faut refermer puis recliquer. Ses mots : « si je
+   glisse la souris sur un autre menu, il ne se déroule pas ».
+   ⚠ C EST ÉCRIT NOIR SUR BLANC DANS CE FICHIER DEPUIS LA 1.56.1, en tête de
+   `pagePanneau` : « le menu du SYSTÈME imposait le thème de Windows et ne
+   s ouvrait qu au clic ». J ai repayé la leçon plutôt que de la lire.
+   ⚠ ON PASSE DONC PAR `menu:panneau`, le panneau flottant — même mécanisme que
+   les écrans ancrés, aucune seconde implémentation. */
 
 // ── MENU NATIF : MASQUÉ, GARDÉ POUR SES RACCOURCIS ───────────────────────────
 // ⚠ On ne le supprime pas : c'est lui qui porte Ctrl+1…5 et Ctrl+N. Les
