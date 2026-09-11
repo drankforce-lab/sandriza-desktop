@@ -3972,32 +3972,33 @@ const cnxDire = (x) => {
 
 const poserVueConnexion = () => {
   if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
-  /* ══ LE PLEIN CADRE D ABORD, LA ZONE SEULEMENT SI ELLE EST CRÉDIBLE ═══════
-     ⚠⚠ J AVAIS INVERSÉ L ORDRE, et c est la leçon de ce défaut-ci. La zone
-     rapportée par la page était la SOURCE, et le plein cadre le repli. Une zone
-     fausse — vide, hors de la fenêtre, multipliée par un facteur de zoom qui ne
-     s applique pas — rendait donc la vue invisible SANS RIEN CASSER : aucune
-     exception, aucun message, juste un rectangle posé là où personne ne
-     regarde. Et mon repli remettait l écran web par-dessus le silence.
-     ⚠ Maintenant le plein cadre est la BASE : la vue est toujours visible. La
-     zone ne sert qu à la rétrécir pour laisser voir la barre de menus, et
-     seulement si elle tient VRAIMENT dans la fenêtre. Une correction cosmétique
-     ne doit jamais pouvoir faire disparaître ce qu elle corrige. */
   let b = null;
   try { const [w, h] = mainWindow.getContentSize(); b = { x: 0, y: 0, width: w, height: h }; }
   catch (e) { return; }
+  /* ══ LA ZONE SE BORNE AU CADRE, ELLE NE SE FAIT PLUS ÉCARTER ═══════════
+     ⚠⚠ SA CAPTURE DU 2026-09-11 : la barre de menus recouverte. Mon garde
+     précédent REJETAIT toute zone qui dépassait le cadre de plus de 2 px — et
+     avec son affichage à 115 %, la conversion pixels CSS → pixels de fenêtre
+     donne des arrondis de plusieurs pixels. La zone était donc écartée à tous
+     les coups, on retombait en plein cadre, et le menu disparaissait sous la
+     vue.
+     ⚠ UN DÉBORDEMENT DE QUELQUES PIXELS N EST PAS UNE ZONE FAUSSE : on la
+     RAMÈNE dans le cadre. On ne rejette que l absurde — une zone minuscule,
+     ou qui ne couvre pas la moitié de la surface, c est-à-dire une mesure
+     prise avant que la page soit posée.
+     ⚠ ET LE BAS EST RECALCULÉ, jamais recopié : sa capture montrait aussi une
+     bande noire en bas, parce que la hauteur venait d une mesure faite avant
+     que la fenêtre ait sa taille définitive. Borner au cadre corrige les deux
+     défauts avec la même ligne. */
   try {
     const z = boundsAncrage();
-    /* Crédible = non vide, dans le cadre, et couvrant au moins la moitié de la
-       surface. Une zone qui prendrait moins que ça n est pas un écran de
-       connexion : c est une mesure prise trop tôt. */
     if (z && z.width > 200 && z.height > 200
-      && z.x >= 0 && z.y >= 0
-      && z.x + z.width <= b.width + 2 && z.y + z.height <= b.height + 2
-      && (z.width * z.height) >= (b.width * b.height) * 0.5) {
-      b = z;
+      && (z.width * z.height) >= (b.width * b.height) * 0.45) {
+      const x = Math.max(0, Math.min(z.x, b.width - 200));
+      const y = Math.max(0, Math.min(z.y, b.height - 200));
+      b = { x, y, width: b.width - x, height: b.height - y };
     } else if (z) {
-      cnxDire("zone rapportee ECARTEE " + JSON.stringify(z)
+      cnxDire("zone ECARTEE (absurde) " + JSON.stringify(z)
         + " — cadre " + JSON.stringify({ w: b.width, h: b.height }));
     }
   } catch (e) {}
@@ -4060,6 +4061,17 @@ const connexionMontrer = () => {
   poserVueConnexion();
   try { view.setVisible(true); } catch (e) {}
   cnxDire("posee " + JSON.stringify(view.getBounds()));
+  /* ⚠⚠ ON REPOSE DEUX FOIS, ET C EST LA CAUSE DE SA BANDE NOIRE. Au moment de
+     l ouverture, la fenêtre principale n a pas toujours sa taille définitive :
+     elle se restaure, l affichage s ajuste, une barre apparaît. Une vue posée
+     une seule fois garde donc les dimensions d un instant qui n existe déjà
+     plus — et le bas du cadre reste nu.
+     ⚠ Deux instants plutôt qu un : tout de suite (le cas normal), puis à 250 ms
+     et 1,2 s (le cas où la fenêtre bouge encore). C est trois lignes contre un
+     défaut qui, lui, se voit à chaque lancement.
+     ⚠ `poserVueConnexion` est idempotente : la rappeler ne coûte rien. */
+  setTimeout(poserVueConnexion, 250);
+  setTimeout(poserVueConnexion, 1200);
   try {
     view.webContents.once('did-finish-load', () => {
       charge = true;
