@@ -4003,31 +4003,73 @@ const connexionMontrer = () => {
      peinture, et un rectangle blanc plein cadre se lit comme une panne. */
   try { view.setBackgroundColor('#191238'); } catch (e) {}
   vueConnexion = view;
-  /* ⚠⚠ ATTACHÉE APRÈS LE CHARGEMENT, JAMAIS AVANT — c'est là que vit le filet.
-     Attachée d'emblée, une page qui ne charge pas laisserait un rectangle vide
-     par-dessus l'écran de connexion web, donc AUCUN moyen d'entrer. Attachée
-     après, un échec ne cache rien.
-     ⚠ Le filet de 4 s : si `did-finish-load` n'arrive jamais (cas qu'on ne
-     saurait pas nommer), on abandonne la vue plutôt que de la laisser en
-     suspens — l'écran web reste, et on peut se connecter. */
-  let pose = false;
-  const attacher = () => {
-    if (pose) return;
-    pose = true;
-    if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
-    try { mainWindow.contentView.addChildView(vueConnexion); } catch (e) { return; }
-    poserVueConnexion();
-    try { vueConnexion.setVisible(true); vueConnexion.webContents.focus(); } catch (e) {}
-  };
+  /* ══════════════════════════════════════════════════════════════════════════
+     ⚠⚠ ON ATTACHE TOUT DE SUITE — LA DEUXIÈME CORRECTION, ET LA PLUS IMPORTANTE
+     ═══════════════════════════════════════════════════════════════════════════
+     Mon premier jet n attachait la vue qu APRÈS `did-finish-load`, pour garder
+     l écran web visible tant que la nouvelle porte n était pas prête. L intention
+     était juste ; la conséquence ne l était pas : LE SUCCÈS dépendait alors d un
+     événement, et tout ce qui empêchait cet événement d arriver — ou le faisait
+     précéder d un `did-fail-load` bénin — rendait l écran d AVANT, à l identique.
+     Il a cherché un changement de dessin pendant que la vue mourait à
+     l ouverture (« je ne vois pas vraiment de changement », puis « c est pourtant
+     la dernière version » — il avait raison les deux fois).
+
+     ⚠ LE RENVERSEMENT : on attache IMMÉDIATEMENT, et le délai ne sert plus qu au
+     cas d ÉCHEC. Le chemin normal ne dépend donc plus d aucun événement — c est
+     exactement ce que fait `ouvrirNative`, la voie qui n a jamais eu ce défaut.
+     Le filet demeure : si le contenu n a pas fini de charger au bout de huit
+     secondes, la vue est retirée et l écran web reparaît.
+
+     ⚠ ET PAS DE PAGE BLANCHE PENDANT LE CHARGEMENT : la vue porte déjà sa
+     couleur de fond (voir plus haut), donc on voit le décor, pas un rectangle
+     blanc. Le contenu arrive en quelques dizaines de millisecondes — c est une
+     URL `data:`, il n y a pas de réseau.
+
+     ⚠ JE N AI PAS PU MESURER CECI : ce poste n a pas Electron installé (pas de
+     `node_modules/electron`), donc aucun banc ne peut ouvrir une vraie fenêtre.
+     Je n ai donc pas corrigé UNE cause identifiée — j ai retiré la FRAGILITÉ qui
+     rendait plusieurs causes possibles. C est dit, et c est la raison pour
+     laquelle les deux branches journalisent. */
+  let charge = false;
+  try { mainWindow.contentView.addChildView(view); } catch (e) { vueConnexion = null; return false; }
+  poserVueConnexion();
+  try { view.setVisible(true); } catch (e) {}
   try {
-    view.webContents.once('did-finish-load', attacher);
-    view.webContents.once('did-fail-load', () => { pose = true; connexionRetirer(); });
+    view.webContents.once('did-finish-load', () => {
+      charge = true;
+      /* ⚠ LE THÈME S APPLIQUE ICI, comme pour toute fenêtre native (voir
+         `ouvrirNative`). Je l avais oublié : la vue ne suivait ni le mode jour,
+         ni le thème du poste. */
+      try { appliquerTheme(view.webContents); } catch (er) {}
+      poserVueConnexion();
+      try { view.webContents.focus(); } catch (er) {}
+    });
+    /* ⚠⚠ `did-fail-load` NE VEUT PAS DIRE « ÉCHEC ». Chromium l émet aussi pour
+       un abandon bénin (ERR_ABORTED, code -3) et pour n importe quel SOUS-CADRE.
+       Mon premier jet détruisait la vue au premier signal, quel qu il soit — un
+       garde que la voie éprouvée (`ouvrirNative`) n a même pas. */
+    view.webContents.on('did-fail-load', (ev, code, desc, url, principal) => {
+      if (code === -3) return;                 // abandon bénin
+      if (principal === false) return;         // un sous-cadre ne condamne rien
+      console.error('[connexion] chargement refusé (' + code + ' ' + desc + ') — on garde l écran web.');
+      connexionRetirer();
+    });
   } catch (e) {}
-  setTimeout(() => { if (!pose) { pose = true; connexionRetirer(); } }, 4000);
   try {
     view.webContents.loadURL('data:text/html;charset=utf-8,'
       + encodeURIComponent(pageConnexion()));
-  } catch (e) { vueConnexion = null; return false; }
+  } catch (e) { connexionRetirer(); return false; }
+  /* ⚠ HUIT SECONDES, ET SEULEMENT POUR L ÉCHEC : si le contenu n a jamais fini
+     de charger, on rend la place à l écran web plutôt que de laisser un cadre
+     figé par-dessus la seule porte d entrée. Et ON LE DIT — la prochaine fois, la
+     cause se lira dans la console au lieu de se deviner sur une capture. */
+  setTimeout(() => {
+    if (charge || !vueConnexion) return;
+    console.error('[connexion] la vue native n a pas fini de charger en 8 s — '
+      + 'on rend la place à l écran web.');
+    connexionRetirer();
+  }, 8000);
   return true;
 };
 
