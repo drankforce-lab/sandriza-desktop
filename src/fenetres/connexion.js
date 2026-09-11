@@ -113,13 +113,24 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
    peut encore agir ; le sombre annonce un courriel parti, pas un refus. */
 .cx-err.orange{background:#fff7ed;border-color:#fdba74;color:#9a3412}
 .cx-err.sombre{background:#172033;border-color:#C49A6C;color:#f5e6d0}
-.cx-btn{width:100%;padding:0.72rem 0.9rem;border-radius:6px;
-  font:600 0.9rem/1.4 inherit;cursor:pointer;letter-spacing:0.02em;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.14);
-  transition:background-color 0.12s,box-shadow 0.12s}
-.cx-btn:active:not(:disabled){box-shadow:inset 0 2px 5px rgba(0,0,0,0.32)}
-.cx-btn:disabled{opacity:0.55;cursor:default;box-shadow:none}
-.cx-btn:focus-visible{outline:2px solid #C49A6C;outline-offset:2px}
+.cx-btn{width:100%;min-height:46px;padding:0.78rem 1rem;border-radius:12px;
+  display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;
+  font:600 0.92rem/1.2 inherit;cursor:pointer;letter-spacing:0.01em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.16);
+  transition:background-color .16s cubic-bezier(.2,.8,.2,1),
+    box-shadow .16s cubic-bezier(.2,.8,.2,1),transform .11s cubic-bezier(.2,.8,.2,1)}
+.cx-btn:hover:not(:disabled){box-shadow:inset 0 1px 0 rgba(255,255,255,0.16),
+  0 4px 16px var(--cx-lueur,rgba(196,154,108,0.30))}
+.cx-btn:active:not(:disabled){transform:scale(.985);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.30)}
+.cx-btn:disabled{opacity:0.5;cursor:default;box-shadow:none;transform:none}
+.cx-btn:focus-visible{outline:2px solid #C49A6C;outline-offset:3px}
+.cx-spin{width:16px;height:16px;border-radius:50%;flex:0 0 auto;
+  border:2px solid currentColor;border-right-color:transparent;
+  animation:cx-tourne .7s linear infinite;opacity:.9}
+@keyframes cx-tourne{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.cx-spin{animation-duration:2.4s}
+  .cx-btn{transition:none}.cx-btn:active:not(:disabled){transform:none}}
 .admlogin-formwrap button[type=submit],
 .admlogin-formwrap button[type=submit]:hover{transform:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.14);filter:none}
@@ -128,16 +139,31 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
 .cx-souvenir{margin:-0.25rem 0 1rem;display:flex;align-items:center;gap:0.45rem}
 .cx-souvenir input{width:15px;height:15px;cursor:pointer;accent-color:#C49A6C;color-scheme:light}
 .cx-souvenir label{font-size:0.76rem;color:#7a6652;cursor:pointer;user-select:none}
-.admlogin-forgot,.admlogin-back{border-radius:6px;padding:0.5rem 0.9rem;
-  background:#efe9df;border:1px solid rgba(131,104,80,0.38);color:#5f4a30;
-  box-shadow:none;transition:background-color 0.12s,box-shadow 0.12s}
-.admlogin-forgot:hover,.admlogin-back:hover{background:#e6ddcd;
-  border-color:rgba(131,104,80,0.55);transform:none;box-shadow:none}
-.admlogin-forgot:active,.admlogin-back:active{transform:none;
-  box-shadow:inset 0 2px 4px rgba(90,70,45,0.22)}
+.admlogin-forgot,.admlogin-back{border:none;border-radius:10px;
+  padding:0.55rem 1rem;background:rgba(196,154,108,0.13);color:#5a4527;
+  font:600 0.8rem/1.2 inherit;box-shadow:none;
+  transition:background-color .16s cubic-bezier(.2,.8,.2,1),
+    transform .11s cubic-bezier(.2,.8,.2,1)}
+.admlogin-forgot:hover,.admlogin-back:hover{background:rgba(196,154,108,0.22);
+  transform:none;box-shadow:none}
+.admlogin-forgot:active,.admlogin-back:active{transform:scale(.97);
+  background:rgba(196,154,108,0.30);box-shadow:none}
 .admlogin-forgot:focus-visible,.admlogin-back:focus-visible{
-  outline:2px solid #C49A6C;outline-offset:2px}
-input:focus{border-color:#C49A6C;box-shadow:0 0 0 1.5px rgba(196,154,108,0.55)}
+  outline:2px solid #C49A6C;outline-offset:3px}
+input[type=text],input[type=password],input[type=email]{border-radius:10px;
+  min-height:46px;border-width:1px;background:#fff}
+input:focus{border-color:#C49A6C;box-shadow:0 0 0 2px rgba(196,154,108,0.28)}
+.cx-souvenir input{appearance:none;-webkit-appearance:none;width:18px;height:18px;
+  border-radius:5px;border:1.5px solid rgba(131,104,80,0.45);background:#fff;
+  cursor:pointer;position:relative;flex:0 0 auto;margin:0;
+  transition:background-color .14s cubic-bezier(.2,.8,.2,1),
+    border-color .14s cubic-bezier(.2,.8,.2,1)}
+.cx-souvenir input:hover{border-color:rgba(196,154,108,0.85)}
+.cx-souvenir input:checked{background:#8a6a44;border-color:#8a6a44}
+.cx-souvenir input:checked::after{content:'';position:absolute;left:5px;top:1.5px;
+  width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;
+  transform:rotate(42deg)}
+.cx-souvenir input:focus-visible{outline:2px solid #C49A6C;outline-offset:3px}
 .cx-centre{text-align:center;margin-top:0.85rem}
 .cx-chrono{font-size:0.72rem;color:#776654;margin-top:0.5rem}
 .cx-chrono strong{color:#b45309}
@@ -306,8 +332,21 @@ ${JS_DIRE}
     var t = CTX.theme;
     var fond = btnFond();
     var clair = lumi(t.btnTexte) > 0.5;
+    /* ⚠ LA LUEUR DU SURVOL EST CELLE DU BOUTON, à faible opacité — pas un
+       gris, pas un noir. Une ombre noire sous un bouton coloré est la
+       signature de 2015 ; une lueur de sa PROPRE couleur donne l impression
+       qu il éclaire ce qu il touche, et c est ce qui date 2026.
+       ⚠ Elle passe par une variable CSS parce que la règle :hover ne peut
+          pas connaître le thème : on la pose sur l élément, la feuille s en
+          sert. --cx-lueur a un repli dans le CSS, donc un bouton sans style
+          en ligne reste correct. */
+    var rv = parseInt(fond.slice(1, 3), 16), gv = parseInt(fond.slice(3, 5), 16);
+    var bv = parseInt(fond.slice(5, 7), 16);
+    var lueur = isNaN(rv) ? 'rgba(196,154,108,0.30)'
+      : ('rgba(' + rv + ',' + gv + ',' + bv + ',0.34)');
     return 'background-color:' + fond
       + ';border:1px solid ' + melanger(fond, clair ? 0.12 : -0.14)
+      + ';--cx-lueur:' + lueur
       + ';color:' + t.btnTexte;
   }
   /* Le survol eclaircit un fond sombre et assombrit un fond clair. En JS et
@@ -604,7 +643,8 @@ ${JS_DIRE}
     var c = el('wz-code'), b = el('wz-btn');
     if (!c || !b) return;
     fauteEffacer('wz-err');
-    b.disabled = true; b.textContent = 'Vérification…';
+    b.disabled = true;
+    b.innerHTML = '<span class="cx-spin"></span><span>Vérification…</span>';
     c.disabled = true;
     appeler('connexion:mfaConfigConfirmer', [c.value]).then(function(r){
       if (r.ok) { suivre(r); return; }
@@ -619,7 +659,8 @@ ${JS_DIRE}
     var a = el('pc-pw1'), b = el('pc-pw2'), bt = el('pc-btn');
     if (!a || !b || !bt) return;
     fauteEffacer('pc-err');
-    bt.disabled = true; bt.textContent = 'Enregistrement…';
+    bt.disabled = true;
+    bt.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
     appeler('connexion:mdpEcrire', [a.value, b.value]).then(function(r){
       if (r.ok) { suivre(r); return; }
       var bt2 = el('pc-btn');
@@ -637,7 +678,8 @@ ${JS_DIRE}
     var q1 = el('sq-q1'), a1 = el('sq-a1'), q2 = el('sq-q2'), a2 = el('sq-a2'), b = el('sq-btn');
     if (!q1 || !a1 || !q2 || !a2 || !b) return;
     fauteEffacer('sq-err');
-    b.disabled = true; b.textContent = 'Enregistrement…';
+    b.disabled = true;
+    b.innerHTML = '<span class="cx-spin"></span><span>Enregistrement…</span>';
     appeler('connexion:questionsEcrire', [q1.value, a1.value, q2.value, a2.value])
       .then(function(r){
         if (r.ok) { suivre(r); return; }
@@ -823,7 +865,12 @@ ${JS_DIRE}
     var idc = el('sl-email'), pwc = el('sl-password'), b = el('sl-btn');
     if (!idc || !pwc || !b) return;
     fauteEffacer('sl-error');
-    b.disabled = true; b.textContent = 'Connexion…';
+    /* ⚠ LE DISQUE REMPLACE LE TEXTE SANS CHANGER LA TAILLE DU BOUTON : sa
+       hauteur est fixée (min-height) et son contenu est centré. Un bouton qui
+       rétrécit pendant qu on attend fait sauter tout le formulaire — c est la
+       chose la plus datée qu une commande puisse faire. */
+    b.disabled = true;
+    b.innerHTML = '<span class="cx-spin"></span><span>Connexion…</span>';
     var sv = el('sl-remember');
     appeler('connexion:entrer', [idc.value.trim(), pwc.value, !!(sv && sv.checked), CAPTCHA_OK])
       .then(function(r){
@@ -891,7 +938,8 @@ ${JS_DIRE}
     if (MFA_T) { clearInterval(MFA_T); MFA_T = null; }
     var ch = el('sl-mfa-timer');
     if (ch && ch.parentElement) ch.parentElement.style.display = 'none';
-    b.disabled = true; b.textContent = 'Vérification…';
+    b.disabled = true;
+    b.innerHTML = '<span class="cx-spin"></span><span>Vérification…</span>';
     c.disabled = true;
     appeler('connexion:mfa', [c.value]).then(function(r){
       if (r.ok) { reussi(r.prenom); return; }
