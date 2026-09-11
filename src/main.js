@@ -3949,37 +3949,59 @@ const { texteProgression } = require('./porte-progression');
    écrit noir sur blanc pour `montrerAdministration`. */
 let vueConnexion = null;
 
+/* ══ UN JOURNAL POUR CET ÉCRAN, ET SEULEMENT POUR LUI ══════════════════════
+   ⚠⚠ TROIS VERSIONS ONT CHERCHÉ CE DÉFAUT SUR DES CAPTURES D ÉCRAN. Il a écrit
+   « je ne vois pas vraiment de changement », puis « c est pourtant la dernière
+   version », puis « et c est toujours la même chose » — et à chaque fois je ne
+   pouvais que RAISONNER, parce que rien de ce que fait cette vue ne laissait de
+   trace. Une ligne par étape aurait tranché au premier tour.
+   ⚠ Dans le dossier de données du poste (`connexion.log`), pas dans la console :
+   une application installée n a pas de console, et lui demander d en ouvrir une
+   est déjà un aller-retour de trop.
+   ⚠ IL NE GROSSIT PAS : réécrit à chaque tentative d ouverture. Ce qui intéresse
+   c est la DERNIÈRE, pas l historique — et un journal qui gonfle finit par être
+   la panne dont on parle. */
+let _cnxJournal = [];
+const cnxDire = (x) => {
+  try {
+    _cnxJournal.push(new Date().toISOString().slice(11, 23) + "  " + x);
+    const p = path.join(app.getPath("userData"), "connexion.log");
+    fs.writeFileSync(p, _cnxJournal.join("\n") + "\n", "utf8");
+  } catch (e) {}
+};
+
 const poserVueConnexion = () => {
   if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
-  /* ⚠⚠ LA ZONE VIENT DE LA PAGE, PAS D UN CALCUL — SON SIGNALEMENT DU 2026-09-10 :
-     « il y a une zone bleue et le menu est inexistant ». Mon premier jet posait la
-     vue sur TOUT le cadre (`getContentSize()`, x:0 y:0). Deux conséquences, les
-     deux visibles sur sa capture : la vue RECOUVRAIT la barre de menus dessinée
-     par la page (le menu « disparaissait »), et là où elle s arrêtait on voyait le
-     fond de la fenêtre à nu — la zone bleue.
-
-     ⚠⚠ ET CETTE LEÇON ÉTAIT DÉJÀ ÉCRITE, en août, pour les écrans ancrés : « la
-     vue native se peint AU-DESSUS de la page : sa zone doit suivre […] elle
-     RECOUVRE le rail : le menu semble avoir disparu ». J avais recalculé la
-     géométrie ici au lieu de réutiliser `boundsAncrage()`, qui porte cette leçon
-     ET le facteur de zoom. Réinventer un mécanisme, c est recommencer à zéro
-     l apprentissage de ses cas limites.
-
-     ⚠ LE FACTEUR DE ZOOM EST LA MOITIÉ DU PROBLÈME : la page rapporte des pixels
-     CSS, la vue se pose en pixels de périphérique. Avec « Affichage → Zoom », un
-     calcul en `getContentSize()` ne pouvait pas tomber juste. `boundsAncrage()`
-     multiplie déjà — c est exactement pour ça qu il existe.
-
-     ⚠ ET UN REPLI, parce qu une page plus ancienne que cette coquille ne rapporte
-     aucune zone : plein cadre, comme avant. Imparfait (la barre serait couverte)
-     mais utilisable — mieux qu une vue de taille nulle, donc invisible, donc
-     aucun moyen d entrer. */
+  /* ══ LE PLEIN CADRE D ABORD, LA ZONE SEULEMENT SI ELLE EST CRÉDIBLE ═══════
+     ⚠⚠ J AVAIS INVERSÉ L ORDRE, et c est la leçon de ce défaut-ci. La zone
+     rapportée par la page était la SOURCE, et le plein cadre le repli. Une zone
+     fausse — vide, hors de la fenêtre, multipliée par un facteur de zoom qui ne
+     s applique pas — rendait donc la vue invisible SANS RIEN CASSER : aucune
+     exception, aucun message, juste un rectangle posé là où personne ne
+     regarde. Et mon repli remettait l écran web par-dessus le silence.
+     ⚠ Maintenant le plein cadre est la BASE : la vue est toujours visible. La
+     zone ne sert qu à la rétrécir pour laisser voir la barre de menus, et
+     seulement si elle tient VRAIMENT dans la fenêtre. Une correction cosmétique
+     ne doit jamais pouvoir faire disparaître ce qu elle corrige. */
+  let b = null;
+  try { const [w, h] = mainWindow.getContentSize(); b = { x: 0, y: 0, width: w, height: h }; }
+  catch (e) { return; }
   try {
-    const b = boundsAncrage();
-    if (b && b.width > 40 && b.height > 40) { vueConnexion.setBounds(b); return; }
-    const [w, h] = mainWindow.getContentSize();
-    vueConnexion.setBounds({ x: 0, y: 0, width: w, height: h });
+    const z = boundsAncrage();
+    /* Crédible = non vide, dans le cadre, et couvrant au moins la moitié de la
+       surface. Une zone qui prendrait moins que ça n est pas un écran de
+       connexion : c est une mesure prise trop tôt. */
+    if (z && z.width > 200 && z.height > 200
+      && z.x >= 0 && z.y >= 0
+      && z.x + z.width <= b.width + 2 && z.y + z.height <= b.height + 2
+      && (z.width * z.height) >= (b.width * b.height) * 0.5) {
+      b = z;
+    } else if (z) {
+      cnxDire("zone rapportee ECARTEE " + JSON.stringify(z)
+        + " — cadre " + JSON.stringify({ w: b.width, h: b.height }));
+    }
   } catch (e) {}
+  try { vueConnexion.setBounds(b); } catch (e) {}
 };
 
 const connexionMontrer = () => {
@@ -4032,12 +4054,16 @@ const connexionMontrer = () => {
      rendait plusieurs causes possibles. C est dit, et c est la raison pour
      laquelle les deux branches journalisent. */
   let charge = false;
-  try { mainWindow.contentView.addChildView(view); } catch (e) { vueConnexion = null; return false; }
+  cnxDire("ouverture demandee — cadre " + JSON.stringify(mainWindow.getContentSize()));
+  try { mainWindow.contentView.addChildView(view); cnxDire("addChildView OK"); }
+  catch (e) { cnxDire("addChildView ECHEC : " + e.message); vueConnexion = null; return false; }
   poserVueConnexion();
   try { view.setVisible(true); } catch (e) {}
+  cnxDire("posee " + JSON.stringify(view.getBounds()));
   try {
     view.webContents.once('did-finish-load', () => {
       charge = true;
+      cnxDire("did-finish-load — bornes " + JSON.stringify(view.getBounds()));
       /* ⚠ LE THÈME S APPLIQUE ICI, comme pour toute fenêtre native (voir
          `ouvrirNative`). Je l avais oublié : la vue ne suivait ni le mode jour,
          ni le thème du poste. */
@@ -4052,7 +4078,7 @@ const connexionMontrer = () => {
     view.webContents.on('did-fail-load', (ev, code, desc, url, principal) => {
       if (code === -3) return;                 // abandon bénin
       if (principal === false) return;         // un sous-cadre ne condamne rien
-      console.error('[connexion] chargement refusé (' + code + ' ' + desc + ') — on garde l écran web.');
+      cnxDire("did-fail-load " + code + " " + desc + " — on rend la place a l ecran web");
       connexionRetirer();
     });
   } catch (e) {}
@@ -4064,12 +4090,22 @@ const connexionMontrer = () => {
      de charger, on rend la place à l écran web plutôt que de laisser un cadre
      figé par-dessus la seule porte d entrée. Et ON LE DIT — la prochaine fois, la
      cause se lira dans la console au lieu de se deviner sur une capture. */
+  /* ══ ⚠⚠ LE DÉLAI NE RETIRE PLUS RIEN — MESURÉ LE 2026-09-11 ═══════════════
+     Un banc a chronométré cette page : 252 ms toute seule, mais **29 418 ms**
+     dès qu on y ajoute le préchargement du pont, parce qu un `sendSync` qui ne
+     trouve pas son gestionnaire attend une demi-minute. En production le
+     gestionnaire existe — mais le chiffre dit ce qu il faut retenir : UN ÉCRAN
+     PEUT METTRE TRENTE SECONDES POUR UNE RAISON QUI N EST PAS UNE PANNE.
+     ⚠ Retirer la vue sur un délai, c est donc transformer une lenteur en
+     disparition — et la vue est DÉJÀ attachée, avec son fond : un chargement
+     lent se voit, il ne casse rien. Le seul vrai échec reste `did-fail-load` sur
+     le cadre principal, et lui rend bien la main.
+     ⚠ On journalise quand même : une page qui met plus de dix secondes est un
+     symptôme, même si ce n est pas une panne. */
   setTimeout(() => {
-    if (charge || !vueConnexion) return;
-    console.error('[connexion] la vue native n a pas fini de charger en 8 s — '
-      + 'on rend la place à l écran web.');
-    connexionRetirer();
-  }, 8000);
+    if (charge) return;
+    cnxDire("LENT : toujours pas chargee apres 10 s (la vue reste en place)");
+  }, 10000);
   return true;
 };
 
