@@ -220,16 +220,6 @@ contextBridge.exposeInMainWorld('szPont', {
      principal contre une liste blanche — une fenêtre ne choisit pas ce qu'elle
      ouvre dans l'application, elle le demande. */
   ouvrirModule: (nom) => ipcRenderer.invoke('module:ouvrir', String(nom || '')).catch(() => false),
-  /* ⚠⚠ LE CADRE LIT LA NAVIGATION DANS LA COQUILLE, PAS SUR LE SITE. Elle y est
-     deja : le site la lui envoie une fois (menu:modele) pour qu elle batisse sa
-     barre de menus. La redemander au site aurait fait DEUX sources pour la meme
-     liste — et deux listes finissent toujours par differer d une entree, celle
-     qu on cherche. Ces deux verbes ne passent donc PAS par `appeler`.
-     ⚠ `cadreAller` n a pas de liste blanche a tenir : la coquille refuse toute
-     cle absente du MODELE. Une entree devient ouvrable en recevant sa fenetre
-     native, et pas avant. */
-  cadreNavigation: () => ipcRenderer.invoke('cadre:navigation').catch(() => ({ ok: false })),
-  cadreAller: (app) => ipcRenderer.invoke('cadre:aller', String(app || '')).catch(() => false),
 
   /* ══ ÉCRIRE UN FICHIER D EXPORT — DEPUIS LA FENÊTRE QUI L A DEMANDÉ ════════
      ⚠⚠ POURQUOI CE CANAL EXISTE (2026-08-20, signalé : « ça apparaît dans les

@@ -271,19 +271,6 @@ function executerPage(script, reponses, opts) {
       Object.prototype.hasOwnProperty.call(rep, '__menuLabels')
         ? rep['__menuLabels'] : ['Fichier', 'Affichage', 'Aide']
     )),
-    /* ⚠ LA NAVIGATION DU CADRE (2026-09-12). Même raison que `menuLabels` : ces
-       deux verbes ne passent pas par `appeler` — la navigation vit dans la
-       COQUILLE, pas sur le site. Sans eux, `P.cadreNavigation` serait
-       `undefined`, la fenêtre partirait par son repli « navigation
-       indisponible », et le chemin où elle DESSINE ne serait jamais joué.
-       Pilotables sous `__cadreNavigation` et `__cadreAller`. */
-    cadreNavigation: () => surveille(Promise.resolve(
-      Object.prototype.hasOwnProperty.call(rep, '__cadreNavigation')
-        ? rep['__cadreNavigation'] : { ok: true, menus: [], ecartes: 0 }
-    )),
-    cadreAller: () => surveille(Promise.resolve(
-      Object.prototype.hasOwnProperty.call(rep, '__cadreAller') ? rep['__cadreAller'] : true
-    )),
     /* ⚠ LA LANGUE, pilotable par le jeu de réponses sous `__langue`. Sans ce
        faux verbe, `P.langue()` serait `undefined`, la fenêtre partirait par son
        repli et le chemin de la langue ne serait JAMAIS joué — le même trou que
