@@ -87,6 +87,11 @@ const OPT = (n) => ARGS.includes(n);
 const TOUT_VOIR = OPT('--tout-voir');
 const GARDER = OPT('--garder');
 const CHOISIES = ARGS.filter((a) => !a.startsWith('--'));
+/* ⚠⚠ LE FILTRE EST LU ICI, PAS SEULEMENT LÀ OÙ IL COUPE LA LISTE. Il vivait
+   dans la fonction qui choisit les scénarios, donc le VERDICT ne savait pas
+   qu’un filtre était actif — et concluait comme sur un relevé complet. Un
+   réglage que la conclusion ne voit pas est un réglage qui la fausse. */
+const FILTRE_FENETRE = String(process.env.SZ_CONTRASTE_FENETRE || '').trim();
 
 const MODES = ['nuit', 'jour'];
 /* ⚠⚠ LE BALAYAGE COMPLET N'EST PLUS LE DÉFAUT, ET C'EST DÉLIBÉRÉ.
@@ -275,7 +280,7 @@ function fenetres() {
      ⚠ ET IL REFUSE UN FILTRE QUI NE TROUVE RIEN : `SZ_CONTRASTE_FENETRE=conexion`
      (faute de frappe) rendrait zero scenario, et un banc sur zero scenario dit
      << tout est bon >>. C'est le pire des verdicts : faux et rassurant. */
-  const FILTRE = String(process.env.SZ_CONTRASTE_FENETRE || '').trim();
+  const FILTRE = FILTRE_FENETRE;
   if (FILTRE) {
     const gardes = out.filter((x) => x.nom === FILTRE || x.fichier === FILTRE
       || x.fichier === FILTRE + '.js');
@@ -883,7 +888,17 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
     monte.forEach((c) => console.log(`   ✗ ${c.cle} : ${c.n} endroits, plafond déclaré ${c.plafond}`));
     console.log('');
   }
-  if (baisse.length) {
+  /* ⚠ MÊME RAISON QUE POUR LA DETTE ÉTEINTE : sous filtre, un compteur plus bas
+     ne dit pas qu’une couleur a été corrigée, il dit qu’on a peint moins d’écrans.
+     ⚠ `monte`, au-dessus, reste JUSTE sous filtre : un relevé partiel ne peut pas
+     inventer des endroits, donc une hausse est une vraie hausse. Faire taire le
+     cliquet des deux côtés serait plus simple, et faux. */
+  if (baisse.length && FILTRE_FENETRE) {
+    console.log(`—— ${baisse.length} plafond(s) paraissent avoir reculé : RIEN N’EN EST CONCLU ——`);
+    console.log('   Un filtre est actif (SZ_CONTRASTE_FENETRE=' + FILTRE_FENETRE + ') : resserrer ici,');
+    console.log('   ce serait retirer des endroits mesurés dans les fenêtres non peintes.');
+    console.log('');
+  } else if (baisse.length) {
     console.log('── DETTE QUI RECULE — resserrer le plafond ──');
     baisse.forEach((c) => console.log(`   • ${c.cle} : ${c.n} endroits, plafond déclaré ${c.plafond}`));
     console.log('');
@@ -898,6 +913,20 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
     console.log(`── ${eteintes.length} ligne(s) semblent éteintes, MAIS ${manquants} rendu(s) manquent ──`);
     console.log('   On ne retire rien sur un relevé amputé : une clé « plus rencontrée » peut');
     console.log('   n\'être qu\'une page que le banc n\'a pas ouverte. Relancer un parcours complet.');
+    console.log('');
+  } else if (eteintes.length && FILTRE_FENETRE) {
+    /* ⚠⚠ UN FILTRE N’EST PAS UN RELEVÉ, ET C’EST LE PIÈGE LE PLUS COÛTEUX DU
+       BANC. `manquants` compte les rendus qui ont ÉCHOUÉ ; un filtre, lui, n’en
+       fait échouer aucun — il n’en DEMANDE qu’un. Le garde ci-dessus ne voyait
+       donc rien, et le banc annonçait « ces couples ne sont plus rencontrés
+       NULLE PART dans un relevé COMPLET » après avoir peint UNE fenêtre : il
+       proposait de retirer 63 lignes mesurées ailleurs, avec la preuve à
+       l’appui. Une ligne retirée ainsi ne revient pas toute seule — elle
+       gardait une couleur, et plus rien ne la garde. */
+    console.log(`—— ${eteintes.length} ligne(s) ne sont plus rencontrées, MAIS UN FILTRE EST ACTIF ——`);
+    console.log('   SZ_CONTRASTE_FENETRE=' + FILTRE_FENETRE + ' : ce passage n’a peint qu’une partie');
+    console.log('   des fenêtres. Une clé « plus rencontrée » est ici une clé NON CHERCHÉE.');
+    console.log('   → relancer SANS filtre avant de toucher contraste-rendu-declare.js.');
     console.log('');
   } else if (eteintes.length) {
     console.log(`── DETTE ÉTEINTE — ${eteintes.length} ligne(s) à retirer de contraste-rendu-declare.js ──`);
@@ -918,6 +947,13 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
     console.log(`✓ aucun texte sous le seuil dans ${quoi.scenarios} scénario(s) de ${quoi.fenetres} fenêtre(s), de jour comme de nuit`
       + (TOUS_THEMES ? ', les six thèmes compris.' : '.'));
     if (!TOUS_THEMES) console.log('  ⚠ les six THÈMES n\'ont pas été mesurés — `--themes` pour les inclure.');
+    /* ⚠ ET LE FILTRE SE DIT DANS LE VERDICT, pas seulement au début du passage :
+       la ligne d’ouverture a défilé depuis longtemps quand le signe de succès
+       s’affiche, et c’est LUI qu’on retient. */
+    if (FILTRE_FENETRE) {
+      console.log('  ⚠⚠ FILTRE ACTIF (SZ_CONTRASTE_FENETRE=' + FILTRE_FENETRE + ') : ce résultat ne vaut');
+      console.log('     QUE pour cette fenêtre. Il ne dit RIEN des autres, ni de la dette déclarée.');
+    }
     const zones = Object.keys(INMESURABLES);
     if (zones.length) console.log(`  ⚠ et ${zones.length} fenêtre(s) restent hors de portée : ${zones.join(', ')}.`);
     process.exit(0);

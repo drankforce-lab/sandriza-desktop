@@ -296,6 +296,20 @@ jobs:
       # taux de faux comme les premiers ne se corrige pas, il se désactive.
       # Éprouvé dans les DEUX SENS : 12 accusations sur le `promo-editeur.js` de
       # 5644178 (la version fautive, reprise de l'historique), zéro sur l'actuel.
+      # ⚠⚠ `banc-filtre-pas-releve.js` (2026-09-12) garde TROIS CONCLUSIONS que le
+      # banc de contraste au rendu n'a pas le droit de tirer sous `SZ_CONTRASTE_FENETRE`
+      # — le réglage qui restreint le parcours à UNE fenêtre. Sous filtre, une clé
+      # « plus rencontrée » est une clé NON CHERCHÉE : il annonçait « DETTE ÉTEINTE »
+      # et proposait de retirer 63 lignes mesurées ailleurs, preuve à l'appui. Une
+      # ligne retirée ainsi ne revient pas toute seule : elle gardait une couleur,
+      # et plus rien ne la garde.
+      # ⚠ LE CLIQUET RESTE DEBOUT DANS L'AUTRE SENS, et le banc l'exige : une dette
+      # qui MONTE sous filtre a vraiment monté. Faire taire le cliquet des deux
+      # côtés est la correction la plus simple, et la plus fausse.
+      # ⚠ C'est un contrôle de SOURCE, pas un essai : `banc-contraste-rendu.js` ouvre
+      # Chrome des dizaines de fois et ne tourne QUE dans le travail `contrastes`.
+      # Un garde qui exigerait un rendu ne serait jamais joué au moment où l'on
+      # modifie le fichier. Éprouvé par DEUX pannes provoquées.
       # ⚠ `banc-accent-grave.js` (2026-09-04, ÉLARGI le 2026-09-08) refuse un
       # accent grave a l'interieur d'un gabarit de fenetre. Trois fois dans la
       # meme journee, un nom de code entre accents graves dans un commentaire CSS
@@ -373,6 +387,7 @@ jobs:
           node tools/banc-accent-grave.js
           node tools/banc-couture-cadre.js
           node tools/banc-accents-visibles.js
+          node tools/banc-filtre-pas-releve.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js
           # ⚠ CELUI-CI GARDE UNE CHAÎNE DE QUATRE MORCEAUX que rien d'autre ne
