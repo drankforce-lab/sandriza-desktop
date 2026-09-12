@@ -226,10 +226,17 @@ function executerPage(script, reponses, opts) {
   // isolé n'est jamais signalé à `process.on('unhandledRejection')` — voir l'en-tête.
   // Ces fonctions-ci sont le seul passage obligé entre la page et le monde
   // extérieur : ce qu'une suite de promesse lève y est donc toujours vu.
+  /* ⚠ CE QUE `garde` A DÉJÀ NOTÉ. Il relaie la levée pour que la page réagisse
+     comme en vrai ; ce relais devient alors une promesse rejetée que personne
+     n’attrape, et l’écouteur plus bas la verrait une SECONDE fois. Un banc qui
+     compte deux fois la même faute apprend à se faire relire de travers. */
+  const dejaNotees = new WeakSet();
+  const direFaute = (e) => ((e && e.message) || e);
   const garde = (fn) => {
     try { return fn(); }
     catch (e) {
-      fautes.push('levée dans une suite de promesse : ' + ((e && e.message) || e));
+      fautes.push('levée dans une suite de promesse : ' + direFaute(e));
+      if (e && typeof e === 'object') dejaNotees.add(e);
       throw e;                      // on ne masque rien : la page réagit comme en vrai
     }
   };
@@ -375,13 +382,29 @@ function executerPage(script, reponses, opts) {
   // une promesse que personne ne suit : sans écouteur, Node arrête le processus au
   // premier défaut trouvé, et le contrôle s'interrompt en pleine liste au lieu de
   // rendre son verdict. La détection, elle, est déjà faite — voir `garde`.
-  const muet = () => {};
-  process.on('unhandledRejection', muet);
+  /* ⚠⚠ IL NOTAIT RIEN, ET CÉTAIT UN TROU — TROUVÉ LE 2026-09-12 EN INJECTANT UNE
+     VARIABLE LIBRE DANS LE VOILE DE REPRISE D’UNE SAISIE. La page a bien cessé
+     d’écrire (une écriture d’écran en moins), et le contrôle est resté VERT.
+     La raison tient en une phrase de la norme : UNE LEVÉE DANS L’EXÉCUTEUR D’UN
+     `new Promise(...)` NE REMONTE PAS — elle REJETTE la promesse. Elle ne passe
+     donc jamais par `garde`, qui n’attrape que les levées SYNCHRONES des suites.
+     Et comme l’appelant écrit souvent `szBrouillonProposer();` sans attendre la
+     promesse, plus personne ne l’attrape : elle tombait dans cet écouteur, qui
+     ne faisait rien. Le commentaire d’avant disait « la détection est déjà faite
+     — voir garde » : c’était vrai pour une forme d’erreur sur deux.
+     ⚠ IL DOIT TOUJOURS EMPÊCHER NODE DE MOURIR : sans écouteur, le processus
+     s’arrête au premier défaut et le contrôle s’interrompt en pleine liste au lieu
+     de rendre son verdict. Il garde ce rôle — il cesse seulement d’être muet. */
+  const rejet = (e) => {
+    if (e && typeof e === 'object' && dejaNotees.has(e)) return;
+    fautes.push('promesse rejetée que personne n’attrape : ' + direFaute(e));
+  };
+  process.on('unhandledRejection', rejet);
   return new Promise((fin) => {
     let reste = 4;
     const tour = () => {
       if (--reste > 0) { setImmediate(tour); return; }
-      process.removeListener('unhandledRejection', muet);
+      process.removeListener('unhandledRejection', rejet);
       fin({ fautes, journal, ecritures: compteur.ecritures, html: compteur.ecrit.join('\n') });
     };
     setImmediate(tour);

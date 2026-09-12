@@ -378,6 +378,11 @@ module.exports = {
         },
         // Aucun identifiant : le site rend une fiche NULLE, pas une erreur.
         'fournisseur:lire': { ok: true, fiche: null },
+        /* ⚠ LE CHEMIN « RIEN À REPRENDRE », AVEC SA VRAIE FORME. Sans cette
+           ligne, le faux pont rendait `{ ok:true }` — assez pour que la fenêtre
+           n’affiche rien, mais SANS `profil`, donc `_BR_PROFIL` n’était jamais
+           posé. Or c’est lui qui dit OÙ écrire si la session tombe ensuite. */
+        'brouillon:lire': { ok: true, brouillon: null, profil: 'drankforce@gmail.com' },
         'fournisseur:enregistrer': { ok: true, modifie: false },
         'verrou:prendre': VERROU,
         identite: IDENTITE,
@@ -415,6 +420,72 @@ module.exports = {
           },
         },
         'fournisseur:enregistrer': { ok: true, modifie: true },
+        'verrou:prendre': VERROU,
+        identite: IDENTITE,
+      },
+    },
+    /* ⚠⚠ LA BOÎTE DE REPRISE D’UNE SAISIE — ELLE N’ÉTAIT DESSINÉE PAR AUCUN BANC.
+       `brouillon:lire` n’avait aucune réponse prévue ; le faux pont rend alors
+       `{ ok:true }`, donc `r.brouillon` était `undefined` et `szBrouillonProposer`
+       sortait par `return false` — SANS ERREUR, SANS RIEN AFFICHER. Dix-huit
+       fenêtres branchent ce mécanisme, et sa boîte n’a jamais été mesurée : ni sa
+       couleur, ni ses accents, ni le fait qu’elle se dessine encore.
+       ⚠ CE CAS-CI EST LE SEUL QUI Y MÈNE SANS SIMULER DE CLIC. Presque toutes les
+       fenêtres appellent `szBrouillonProposer()` depuis l’ouverture d’un éditeur,
+       c’est-à-dire derrière un geste que ce contrôle ne joue pas ; `fournisseur.js`
+       et `collection.js` l’appellent dans `charger()`, AU CHARGEMENT. C’est pour
+       cela que le cas vit ICI et pas ailleurs — le déplacer le rendrait muet.
+       ⚠ La forme vient de `brouillonLire` dans `assets/js/pont.js` (chaîne 6456) :
+       { ok, brouillon, ts, profil, ilYaMin }. Les champs sont ceux de BR_CHAMPS
+       dans `fournisseur.js`, plus `_cats` que la fenêtre ajoute elle-même. */
+    {
+      nom: 'reprise d’une saisie en cours',
+      id: '',
+      /* ⚠ SANS `exige`, CE CAS NE PROUVERAIT RIEN. Le défaut qu’il vient combler
+         est précisément une boîte qui NE SE DESSINE PAS sans rien casser : si
+         `szBrouillonProposer` ressortait un jour par `return false`, le cas
+         resterait vert et l’on aurait de nouveau un jeu d’épreuve qui ne mesure
+         que son propre passage. On exige donc le TEXTE de la boîte.
+         ⚠ Le « il y a 47 minutes » vérifie EN PLUS que `ilYaMin` a été composé :
+         sans lui, exiger le titre laisserait passer une durée affichée à vide. */
+      exige: ['Une saisie non terminée', 'il y a 47 minutes', 'Repartir à neuf'],
+      reponses: {
+        'fournisseur:contexte': {
+          ok: true,
+          categories: [
+            { cle: 'robes', libelle: 'Robes' },
+            { cle: 'hauts', libelle: 'Hauts' },
+            { cle: 'chaussures', libelle: 'Chaussures' },
+          ],
+          delais: ['1-3 jours', '4-7 jours', '1-2 semaines', '2-4 semaines', '1-2 mois', '2 mois et plus'],
+          provinces: ['QC', 'ON', 'NB', 'NS', 'PE', 'NL', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU'],
+          peutAjouter: true, peutModifier: true,
+        },
+        'fournisseur:lire': { ok: true, fiche: null },
+        'brouillon:lire': {
+          ok: true,
+          profil: 'drankforce@gmail.com',
+          ts: 1757000000000,
+          /* 47 minutes : assez pour que `_brIlYa` compose « il y a 47 minutes »
+             plutôt que l’une de ses formes courtes. */
+          ilYaMin: 47,
+          brouillon: {
+            'f-nom': 'Tissages du Saguenay',
+            'f-contact': 'Renée Bouchard',
+            'f-courriel': 'renee@tissages-saguenay.ca',
+            'f-tel': '418 555-0199',
+            'f-web': '',
+            'f-rue': '14 rue des Métiers',
+            'f-ville': 'Chicoutimi',
+            'f-prov': 'QC',
+            'f-cp': 'G7H 1X2',
+            'f-delai': '2-4 semaines',
+            'f-actif': true,
+            'f-notes': 'Devis reçu, à confirmer.',
+            _cats: ['hauts'],
+          },
+        },
+        'fournisseur:enregistrer': { ok: true, modifie: false },
         'verrou:prendre': VERROU,
         identite: IDENTITE,
       },
