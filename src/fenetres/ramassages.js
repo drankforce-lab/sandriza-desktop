@@ -109,7 +109,7 @@ function pageRamassages() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.orders}</span><h1>${T("Ramassages et rapport")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -141,18 +141,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès aux expéditions.")}',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     annulation:         '${T("L’annulation a échoué auprès du transporteur.")}',
-    echec:              'L’opération a échoué.'
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -197,7 +197,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + etat
           + (!r.annule
               ? '<button class="mini danger" style="margin-left:auto" data-annuler="' + esc(r.id) + '">'
-                + (ANNULER_ARME === r.id ? '${T("Confirmer l’annulation ?")}' : 'Annuler') + '</button>'
+                + (ANNULER_ARME === r.id ? '${T("Confirmer l’annulation ?")}' : '${T("Annuler")}') + '</button>'
               : '')
           + '</div>'
           + '<div class="dt">${T("Confirmation :")} <span class="mono">' + esc(r.confirmation || '—') + '</span>'
@@ -241,7 +241,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div><div class="l">${T("Endroit du ramassage")}</div>'
       + '<input type="text" id="rm-p-endroit" aria-label="${T("Endroit du ramassage")}" value="Porte principale"></div>'
       + '</div>'
-      + '<div class="pied-boite"><button id="rm-p-annuler">Annuler</button>'
+      + '<div class="pied-boite"><button id="rm-p-annuler">${T("Annuler")}</button>'
       + '<button class="prim" id="rm-p-envoyer"><span class="ic">📨</span> Envoyer les demandes</button></div>'
       + '</div></div>';
     return h;
@@ -385,12 +385,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

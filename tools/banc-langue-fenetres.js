@@ -76,6 +76,36 @@ const aTraduire = (t) => {
   return true;
 };
 
+/* ╔══ LE FRANÇAIS EST LE DÉFAUT, ET ÇA SE VÉRIFIE ══════════════════════╗
+   ║ Sa consigne du 2026-09-12 : « il faut que tu garde le français aussi par  ║
+   ║ défaut sauf si le toggle anglais est activé. »                            ║
+   ╚═════════════════════════════════════════════════════════════════════╝
+   ⚠⚠ CE N’EST PAS UNE PRÉCAUTION ABSTRAITE. Le 2026-09-12, un interrupteur passé
+   par défaut « allumé » lui a fait démarrer l’application SANS MENU. Un défaut qui
+   glisse ne prévient pas : il change ce que voit quelqu’un qui n’a rien demandé.
+   Ici le risque est double — un `||` mal placé, un réglage lu de travers, et toute
+   l’application passerait en anglais chez quelqu’un qui travaille en français.
+   ⚠ SEULE la chaîne exacte 'en' bascule. 'EN', 'english', true, 1 : français. */
+const DEFAUTS = [
+  [undefined, 'fr'], [null, 'fr'], ['', 'fr'], ['EN', 'fr'], ['English', 'fr'],
+  [true, 'fr'], [1, 'fr'], ['fr', 'fr'], ['en', 'en'],
+];
+let malDefaut = 0;
+for (const [donne, attendu] of DEFAUTS) {
+  const eu = LANGUE.poserLangue(donne);
+  if (eu !== attendu) {
+    malDefaut++;
+    console.log('  NON  poserLangue(' + JSON.stringify(donne) + ') rend '
+      + JSON.stringify(eu) + ' au lieu de ' + JSON.stringify(attendu));
+  }
+}
+LANGUE.poserLangue('fr');
+if (malDefaut) {
+  console.log('');
+  console.log('>>> LE FRANCAIS N EST PLUS LE DEFAUT — refus.');
+  process.exit(1);
+}
+
 const cible = process.argv[2] ? path.basename(process.argv[2]).replace(/\.js$/, '') : '';
 
 let fen = 0, aFaire = 0, fait = 0;
