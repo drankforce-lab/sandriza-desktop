@@ -17,6 +17,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠ On ne traduit QUE ce qui se lit — le CONTENU des notes vient du site
+   et reste tel qu’il a été écrit. */
+const T = require('../langue').tr('notes');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -71,9 +75,9 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 /** Page complète de la fenêtre native « Notes des mises à jour ». */
 function pageNotes() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Notes des mises à jour — Administration Sandriza</title>
+<title>${T('Notes des mises à jour — Administration Sandriza')}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.note}</span><h1>Notes des mises à jour</h1>
+<div class="tete"><span class="ico">${ICO.note}</span><h1>${T('Notes des mises à jour')}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -150,13 +154,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     if (!liste.length) {
       h += '<div class="vide">' + (ONGLET === 'archives'
-        ? 'Rien aux archives pour l’instant : les versions au-delà des ' + n + ' dernières viendront ici.'
-        : 'Aucune note.') + '</div>';
+        ? '${T('Rien aux archives pour l’instant : les versions au-delà des {0} dernières viendront ici.')}'.split('{0}').join(n)
+        : '${T('Aucune note.')}') + '</div>';
     } else {
       h += liste.map(function(e){
         var ouverte = !!DEPLIE[e.v];
         var ici = (D.installee && e.v === D.installee)
-          ? ' <span class="pill bon">installée ici</span>' : '';
+          ? ' <span class="pill bon">${T('installée ici')}</span>' : '';
         var det = '';
         if (ouverte) {
           /* ⚠ LE CORPS D UNE NOTE EST DU HTML, ET IL DOIT LE RESTER.
@@ -201,7 +205,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function charger(){
     appeler('notes:lire', []).then(function(r){
-      if (!r || !r.ok) { vide('Notes indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T('Notes indisponibles')}', expliquer(r)); return; }
       D = r;
       // La version installee ICI s ouvre d elle-meme : c est celle qu on vient lire.
       if (D.installee && (D.entrees || []).some(function(e){ return e.v === D.installee; })) {
