@@ -75,6 +75,21 @@ body{background:var(--f-page);color:var(--tx);
 .tete .sous{font-size:.73rem;color:var(--tx2)}
 .tete .fin{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 
+/* ── LA BARRE DE MENUS ───────────────────────────────────────────────────────
+   ⚠⚠ ELLE OUVRE LE VRAI MENU NATIF, elle n en fabrique pas une copie. Les
+   intitules viennent de la coquille (menuLabels) et le clic lui demande
+   d ouvrir SON panneau (menuPanneau) : il n y a donc qu UNE navigation dans
+   l application, et elle ne peut pas se desynchroniser de celle du menu.
+   ⚠ C est exactement ce que fait deja l ecran de connexion. Reinventer un
+   deroulant ici aurait perdu ce que celui-la a appris — le survol qui change de
+   menu quand un autre est ouvert, le retour << szBarreFermee >>, le delai de
+   fermeture cote coquille quand la souris descend vers le panneau. */
+.barre{display:flex;align-items:center;gap:.1rem}
+.barre button{background:transparent;border:0;color:var(--tx);font:inherit;
+  font-size:.84rem;padding:.3rem .6rem;border-radius:7px;cursor:pointer}
+.barre button:hover{background:var(--v08)}
+.barre button.on{background:var(--v12)}
+
 /* ── LA ZONE D ANCRAGE — la seule raison d etre de cette fenetre ──────────────
    ⚠ LE DAMIER DIT << RIEN N EST ENCORE POSE ICI >>. Une zone vide et unie se lit
    comme un ecran casse ; le damier dit qu elle attend. */
@@ -113,8 +128,8 @@ function pageCadre() {
 <title>Cadre de l’administration — Sandriza</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.tableau || ''}</span>
-  <h1>Cadre de l’administration</h1>
-  <span class="sous" id="sous">la zone où un écran vient s’ancrer</span>
+  <div class="barre" id="barre" role="menubar"></div>
+  <span class="sous" id="sous"></span>
   <span class="fin"><button class="btn" id="b-mesurer" type="button">↻ Remesurer</button></span></div>
 <div id="ancrage" class="zone">
   <div class="carte" id="corps">
@@ -122,8 +137,9 @@ function pageCadre() {
     <p>Elle est dessinée par l’application, plus par la page web. C’est la pièce qui manquait
        pour que le panneau d’administration web puisse être retiré : <strong>trente-six écrans
        natifs s’y ancrent</strong> aujourd’hui, et c’est le site qui dit où elle se trouve.</p>
-    <p><strong>Pas de barre latérale, et c’est voulu :</strong> dans l’application, la navigation
-       est le menu du haut. En redessiner une ici referait le doublon retiré du site en août.</p>
+    <p><strong>Le menu du haut est le vrai :</strong> les intitulés viennent de l’application, et
+       cliquer ouvre <em>son</em> menu — pas une copie. Il n’y a donc qu’une navigation, et elle ne
+       peut pas se désynchroniser. Pas de barre latérale : ce serait le doublon retiré en août.</p>
     <p><strong>Ce qui n’est pas encore fait :</strong> cette fenêtre n’a pas remplacé la fenêtre
        principale. Tant que la bascule n’est pas faite, c’est encore le site qui envoie la
        position de la zone, et les écrans s’ancrent là-bas.</p>
@@ -157,6 +173,67 @@ ${JS_ACTIVITE}${JS_DIRE}
     szDire('Zone mesurée : ' + Math.round(r.width) + ' × ' + Math.round(r.height)
       + ' px à ' + Math.round(r.left) + ', ' + Math.round(r.top) + '.', 'bon');
   }
+
+  /* ══ LA BARRE DE MENUS ═══════════════════════════════════════════════════
+     ⚠⚠ C EST LA PIECE QUI MANQUAIT, ET SON ABSENCE A COUTE UNE REGRESSION. Le
+     cadre recouvre la page du site — or LA BARRE DE MENU EST DESSINEE PAR LE
+     SITE. Allume par defaut en 5.40.0, il ne restait donc plus AUCUNE
+     navigation : << je n ai plus mon menu >>, et l interrupteur lui-meme vivait
+     dans ce menu. Un cadre sans menu n ampute pas un detail : il ampute la
+     seule facon de se deplacer.
+     ⚠ ON N EN FAIT PAS UN PREALABLE : si les intitules n arrivent pas (le
+     modele vient de la page principale, il peut tarder), la fenetre s ouvre
+     quand meme. Une barre absente vaut mieux qu un ecran qui attend. */
+  var BARRE_FAITE = false, BARRE_OUVERT = null;
+  function barreEteindre(){
+    if (BARRE_OUVERT) { BARRE_OUVERT.className = ''; BARRE_OUVERT = null; }
+  }
+  function barreMontrer(b){
+    if (!b || !P || !P.menuPanneau) return;
+    if (BARRE_OUVERT === b) return;
+    barreEteindre();
+    BARRE_OUVERT = b;
+    b.className = 'on';
+    /* Sous le bouton, pas sous le pointeur : un panneau qui s ouvre a deux
+       pixels pres de la ou on a clique a l air de flotter. */
+    var r = b.getBoundingClientRect();
+    P.menuPanneau(b.textContent, Math.round(r.left), Math.round(r.bottom));
+  }
+  /* La coquille appelle ceci quand le panneau se referme — sans ce retour,
+     l intitule resterait allume au-dessus d un menu ferme. */
+  window.szBarreFermee = function(){ barreEteindre(); };
+  function barrePoser(){
+    if (BARRE_FAITE || !P || !P.menuLabels) return;
+    P.menuLabels().then(function(noms){
+      if (BARRE_FAITE || !noms || !noms.length) return;
+      BARRE_FAITE = true;
+      var z = document.getElementById('barre');
+      if (!z) return;
+      noms.forEach(function(nom){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = nom;
+        /* Clic pour ouvrir, survol pour CHANGER — mais seulement si un menu est
+           deja ouvert, sinon un simple passage de souris deplierait des menus
+           qu on ne demandait pas. */
+        b.onclick = function(){ barreMontrer(this); };
+        b.onmouseenter = function(){ if (BARRE_OUVERT) barreMontrer(this); };
+        z.appendChild(b);
+      });
+      /* Sortir de la barre referme — la coquille attend un court instant, elle
+         sait si la souris est passee DANS le panneau. */
+      z.onmouseleave = function(){
+        if (P && P.menuPanneauFermer) P.menuPanneauFermer();
+        barreEteindre();
+      };
+      document.getElementById('sous').textContent = noms.length + ' menu(s)';
+    }).catch(function(){});
+  }
+  barrePoser();
+  /* Le modele vient de la page principale : il peut arriver en retard. On
+     redemande UNE fois, pas en boucle — un sondage permanent pour une barre de
+     menus serait hors de proportion. */
+  setTimeout(barrePoser, 2000);
 
   document.getElementById('b-mesurer').addEventListener('click', mesurerZone);
   /* ⚠ LA ZONE SE REMESURE AU REDIMENSIONNEMENT : ses pixels dependent de la

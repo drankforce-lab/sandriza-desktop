@@ -6814,18 +6814,29 @@ module.exports = {
   ],
 
 
-  // ── LE CADRE NATIF (la zone d ancrage, dessinee par la coquille) ──────────
-  // ⚠ UN SEUL CAS, ET C EST HONNETE : depuis que la barre laterale est partie
-  // (sa decision, 5.37.0), cette fenetre n appelle PLUS AUCUNE operation. Elle
-  // mesure sa propre zone, c est tout. Ecrire trois scenarios ici ferait croire
-  // a trois etats alors qu il n y en a qu un — et un jeu d epreuve qui gonfle
-  // ses cas se lit comme une couverture qu il n a pas.
-  // ⚠ Mais l entree RESTE : sans elle, le banc de contraste au rendu classe la
-  // fenetre << sans jeu, donc non eprouvee >> et ne la mesure jamais.
+  // ── LE CADRE NATIF (barre de menus + zone d ancrage) ──────────────────────
+  // ⚠⚠ DEUX CAS, ET LE SECOND EST CELUI QUI A COUTE UNE REGRESSION. Le cadre
+  // recouvre la page du site, et la barre de menu est dessinee PAR LE SITE :
+  // sans barre, il ne reste AUCUNE navigation (« je n ai plus mon menu »,
+  // 2026-09-12). Le cas << les intitules n arrivent pas >> eprouve donc le
+  // chemin exact de ce defaut — et il doit montrer une fenetre qui s ouvre
+  // quand meme, pas une fenetre qui attend.
   'cadre.js': [
     {
-      nom: 'la zone d ancrage',
-      reponses: { identite: IDENTITE },
+      nom: 'la barre de menus et la zone d ancrage',
+      reponses: {
+        __menuLabels: ['Fichier', 'Ventes', 'Catalogue', 'Configuration', 'Affichage', 'Aide'],
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ Le modele vient de la page principale : il PEUT tarder. La fenetre
+      // s ouvre sans barre, elle ne bloque pas — et elle redemande une fois.
+      nom: 'les intitules du menu ne sont pas arrives',
+      reponses: {
+        __menuLabels: [],
+        identite: IDENTITE,
+      },
     },
   ],
 };
