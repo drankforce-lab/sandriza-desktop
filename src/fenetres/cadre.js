@@ -29,6 +29,20 @@
  * et leurs deux gestionnaires. Un verbe du préchargement que plus rien n'appelle
  * n'est pas inoffensif — il se lit comme une fonction, et on bâtit dessus.
  *
+ * 🔴🔴 CE QUI A ÉTÉ APPRIS EN L'ALLUMANT PAR DÉFAUT (5.40.0 → 5.42.0), ET QUI
+ * INTERDIT DE RECOMMENCER : allumé, le CADRE recouvre la page du site — et LA
+ * BARRE DE MENU EST DESSINÉE PAR LE SITE (appbar.js). L'utilisateur se retrouve
+ * donc sans menu, c'est-à-dire SANS NAVIGATION : « je n'ai plus mon menu »
+ * (capture du 2026-09-12). Et comme l'interrupteur vit DANS ce menu, il ne
+ * pouvait même plus l'éteindre — la seule issue était la touche Alt, qui révèle
+ * le menu natif de Windows.
+ * ⚠⚠ C'EST LE MÊME FAIT QUE CELUI QUI A FAIT RETIRER LA BARRE LATÉRALE, VU PAR
+ * L'AUTRE BOUT : « dans l'application, la navigation EST le menu du haut ». Le
+ * cadre doit donc porter ce menu AVANT de pouvoir devenir le défaut — sinon il
+ * ne remplace pas le panneau web, il l'ampute.
+ * ⚠ TANT QUE CE N'EST PAS FAIT, cette fenêtre reste un APERÇU qu'on ouvre
+ * volontairement, et l'interrupteur reste ÉTEINT par défaut.
+ *
  * ⚠ CE QU'ELLE NE FAIT PAS ENCORE, ET ELLE LE DIT À L'ÉCRAN : elle n'a pas
  * remplacé la fenêtre principale. Tant que ce n'est pas fait, c'est toujours le
  * site qui envoie `dock:zone`. La bascule demande de retirer au site son rôle de

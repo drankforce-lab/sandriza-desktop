@@ -165,14 +165,21 @@ let mainWindow = null;
    l allume, il regarde, il l eteint.
    ⚠ IL SE LIT AU DEMARRAGE, pas a chaud : les deux vues naissent avec la
    fenetre. Le changer demande donc un redemarrage, et l entree de menu le DIT. */
-/* ⚠⚠ ALLUME PAR DEFAUT DEPUIS LA 5.40.0 — il a essaye, ca fonctionne.
-   ⚠ ET LA FORME DU TEST COMPTE : `!== false`, pas `=== true`. Un poste qui n a
-   jamais touche au reglage bascule donc au cadre natif ; un poste qui l a
-   ETEINT A LA MAIN reste eteint. Ecrire `=== true` aurait garde tout le monde
-   sur l ancien chemin, y compris lui ; ecrire `!!reglages.get(...)` aurait
-   rallume ceux qui venaient de l eteindre. La valeur `false` explicite est une
-   DECISION, et elle doit survivre a une mise a jour. */
-const cadreNatifAllume = () => reglages.get('cadreNatif') !== false;
+/* 🔴🔴 RETOUR A ETEINT PAR DEFAUT — 5.42.0, ET C EST UNE CORRECTION DE MA FAUTE.
+   Je l avais allume par defaut en 5.40.0 sur ses mots « oui elle fonctionne ».
+   ⚠⚠ MAIS CE QU IL AVAIT ESSAYE, C EST LA FENETRE CADRE OUVERTE DEPUIS LE MENU.
+   Allume par defaut, ce n est plus une fenetre qu on ouvre : c est l ECRAN
+   D ACCUEIL de l application. Et cet ecran est un APERCU — une carte qui dit
+   « cette zone est la place d un ecran » et « la bascule n est pas faite ».
+   Resultat chez lui : plus d administration du tout au lancement (capture du
+   2026-09-12).
+   ⚠ LA LECON, ET ELLE N EST PAS PETITE : un « ca fonctionne » porte sur CE QUI
+   A ETE TRAVERSE, pas sur tout ce que le changement touche. Elargir un essai
+   d une fenetre a un comportement par defaut, c est inventer un verdict qu il
+   n a pas donne. La question aurait du etre posee : « je le mets par defaut ? »
+   ⚠ Le cadre NE DOIT PAS redevenir le defaut tant qu il ne porte pas vraiment
+   les ecrans ancres — c est-a-dire tant que `dock:zone` vient encore du site. */
+const cadreNatifAllume = () => reglages.get('cadreNatif') === true;
 let vueSite = null;    // le SITE, derriere — il garde le pont
 let vueCadre = null;   // le CADRE, devant — la zone d ancrage
 
