@@ -87,7 +87,7 @@ function pageProduits() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.products}</span><h1>${T("Produits en vente")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -118,18 +118,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès aux produits.")}',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     introuvable:        '${T("Cette fiche n’existe plus.")}',
-    echec:              'L’opération a échoué.'
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -152,7 +152,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var h = '<div class="barreoutils">'
       + '<input aria-label="Rechercher un produit" type="search" id="p-q" placeholder="Rechercher un produit…" value="' + esc(Q) + '">'
       + '<select id="p-cat"><option value="">${T("Toutes les catégories")}</option>'
@@ -321,12 +321,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

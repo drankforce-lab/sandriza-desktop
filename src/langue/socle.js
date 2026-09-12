@@ -70,4 +70,55 @@ module.exports = {
   'Garder': 'Keep',
   'Jeter': 'Discard',
   'Revenir': 'Go back',
+
+  /* ── LES BOUTONS D UN FORMULAIRE, ET LE FIL D ETAPES ─────────────────── */
+  'Précédent': 'Back',
+  'Suivant': 'Next',
+  'Annuler': 'Cancel',
+  'Enregistrer': 'Save',
+  'Aucun résultat.': 'No result.',
+  'Remplissez ce champ pour continuer.': 'Fill in this field to continue.',
+  /* ⚠ Ces trois-la encadrent un NOM D ETAPE : « Terminez l etape « X » pour
+     continuer. » On garde les guillemets francais du gabarit, le nom vient du
+     code de la fenetre. */
+  'Terminez l’étape «': 'Finish the «',
+  '» pour continuer.': '» step to continue.',
+  'Il manque un renseignement à l’étape «': 'Something is missing in the «',
+
+  /* ── LES REFUS QUI VIENNENT DU PONT (suite) ──────────────────────── */
+  'Votre rôle ne donne pas accès à cette opération.': 'Your role does not give access to this operation.',
+  'La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).':
+    'The main window did not answer in time. Try again; if it persists, reload it (Ctrl+R).',
+  'Cette fiche n’existe plus.': 'This record no longer exists.',
+  'Le nom est obligatoire.': 'A name is required.',
+  'Le dépôt de l’image a échoué. Rien n’a été enregistré.':
+    'The image upload failed. Nothing was saved.',
+  'Fiche ouverte par quelqu’un d’autre.': 'Record open by someone else.',
+  'La photothèque n’a pas pu être chargée dans la fenêtre principale. Rechargez-la (Ctrl+R) ; si le message revient, la session du personnel a peut-être expiré — reconnectez-vous.':
+    'The photo library could not be loaded in the main window. Reload it (Ctrl+R); if the message comes back, the staff session may have expired — sign in again.',
+
+  /* ── LES VERROUS, VUS DEPUIS LA FENETRE ────────────────────────── */
+  'Section verrouillée en modification par :': 'Section locked for editing by:',
+  'quelqu’un d’autre': 'someone else',
+  'Consultation seulement — votre rôle ne permet pas d’enregistrer.':
+    'View only — your role does not allow saving.',
+
+  /* ── LA SAISIE EN COURS, EN ENTIER ──────────────────────────── */
+  'Vous avez une saisie en cours': 'You have an entry in progress',
+  'Conservée, elle vous sera proposée à la réouverture de cette fenêtre.':
+    'If you keep it, it will be offered again when you reopen this window.',
+  'Jetée, elle est perdue.': 'If you discard it, it is lost.',
+  'Jeter la saisie': 'Discard the entry',
+  'Revenir au formulaire': 'Back to the form',
+  'Conserver le brouillon': 'Keep the draft',
+  'a été laissée en cours': 'was left in progress',
+  '. La reprendre, ou repartir à neuf ?': '. Resume it, or start over?',
+  'Un brouillon disparaît de lui-même après': 'A draft disappears on its own after',
+  'heures, et il est jeté dès que la fiche est enregistrée.':
+    'hours, and it is discarded as soon as the record is saved.',
+  'Cette saisie est trop volumineuse pour etre gardee en brouillon (images). Enregistrez pour ne rien perdre.':
+    'This entry is too large to keep as a draft (images). Save it so nothing is lost.',
+  'Le brouillon n’a pas pu être conservé (stockage du poste plein).':
+    'The draft could not be kept (this computer’s storage is full).',
+  'Une saisie': 'An entry',
 };

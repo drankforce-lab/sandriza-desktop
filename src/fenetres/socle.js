@@ -402,8 +402,8 @@ function _szPoserBouton(v){
   var btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'sz-btnplein';
-  btn.textContent = '⛶ Plein écran';
-  btn.title = 'Occuper toute la fenêtre';
+  btn.textContent = '${T("⛶ Plein écran")}';
+  btn.title = '${T("Occuper toute la fenêtre")}';
   var tt = b.querySelector('.tt');
   if (tt) { tt.appendChild(btn); }
   else {
@@ -470,7 +470,7 @@ function _szFenEtat(){ return document.documentElement.classList.contains('sz-zo
 function _szFenLibelle(b, on){
   if (on === undefined) on = _szFenEtat();
   b.textContent = on ? '⤡' : '⛶';
-  b.title = on ? 'Quitter le plein écran' : 'Plein écran — toute la fenêtre';
+  b.title = on ? '${T("Quitter le plein écran")}' : '${T("Plein écran — toute la fenêtre")}';
 }
 function szFenPleinPoser(){
   var t = document.querySelector('.tete');
@@ -584,8 +584,8 @@ function _szVerrouInner(cle){
   if (!v) return '';
   var qui = v.mine ? '${T('Vous')}' : (v.par || '${T('un collègue')}');
   var t = v.mine
-    ? ('Vous tenez cette fiche en modification' + (v.depuis ? ' — ' + v.depuis : ''))
-    : ('En traitement par ' + qui + (v.depuis ? ' — ' + v.depuis : '')
+    ? ('${T("Vous tenez cette fiche en modification")}' + (v.depuis ? ' — ' + v.depuis : ''))
+    : ('${T("En traitement par")} ' + qui + (v.depuis ? ' — ' + v.depuis : '')
        + ' · vous seriez en lecture seule');
   var e = function(s){ return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
@@ -975,8 +975,8 @@ function _brEcrire(v){
          montre, sinon on croit son travail a l abri alors qu il ne l est pas. */
       if (typeof szDire === 'function') {
         szDire(r && r.motif === 'trop_gros'
-          ? 'Cette saisie est trop volumineuse pour etre gardee en brouillon (images). Enregistrez pour ne rien perdre.'
-          : 'Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
+          ? '${T("Cette saisie est trop volumineuse pour etre gardee en brouillon (images). Enregistrez pour ne rien perdre.")}'
+          : '${T("Le brouillon n’a pas pu être conservé (stockage du poste plein).")}', 'att');
       }
       return r || { ok: false };
     }, function(){ return { ok: false }; });
@@ -1102,13 +1102,13 @@ function szBrouillonDemander(){
          le matin meme dans les 23 en-tetes : le crayon-sur-papier est un dessin
          CLAIR, et le filtre monochrome ne lui laisse que son fond. On ne grise pas
          un pictogramme, on le remplace. */
-      + '<h3><span class="ico">${ICO.gabarit}</span> Vous avez une saisie en cours</h3>'
-      + '<p>Conserv\u00e9e, elle vous sera propos\u00e9e \u00e0 la r\u00e9ouverture de cette fen\u00eatre. '
-      + 'Jet\u00e9e, elle est perdue.</p>'
+      + '<h3><span class="ico">${ICO.gabarit}</span> ${T("Vous avez une saisie en cours")}</h3>'
+      + '<p>${T("Conservée, elle vous sera proposée à la réouverture de cette fenêtre.")} '
+      + '${T("Jetée, elle est perdue.")}</p>'
       + '<div class="szbr-pied">'
-      + '<button type="button" id="szbr-f-jeter">Jeter la saisie</button>'
-      + '<button type="button" id="szbr-f-revenir">Revenir au formulaire</button>'
-      + '<button type="button" class="prim" id="szbr-f-garder">Conserver le brouillon</button>'
+      + '<button type="button" id="szbr-f-jeter">${T("Jeter la saisie")}</button>'
+      + '<button type="button" id="szbr-f-revenir">${T("Revenir au formulaire")}</button>'
+      + '<button type="button" class="prim" id="szbr-f-garder">${T("Conserver le brouillon")}</button>'
       + '</div></div>';
     document.body.appendChild(v);
     var fini = function(choix){
@@ -1145,16 +1145,16 @@ function szBrouillonProposer(){
     return new Promise(function(resoudre){
       var v = document.createElement('div');
       v.className = 'szbr-voile';
-      var quoi = (_BR.libelle ? _BR.libelle : 'Une saisie');
+      var quoi = (_BR.libelle ? _BR.libelle : '${T("Une saisie")}');
       v.innerHTML = '<div class="szbr-boite" role="dialog" aria-modal="true">'
-        + '<h3><span class="ico">${ICO.gabarit}</span> Une saisie non termin\u00e9e</h3>'
-        + '<p>' + quoi + ' a \u00e9t\u00e9 laiss\u00e9e en cours <strong>'
-        + _brIlYa(r.ilYaMin) + '</strong>. La reprendre, ou repartir \u00e0 neuf ?</p>'
-        + '<p class="szbr-note">Un brouillon dispara\u00eet de lui-m\u00eame apr\u00e8s '
-        + Math.round((_BR.ttlMin || 720) / 60) + ' heures, et il est jet\u00e9 d\u00e8s que la fiche est enregistr\u00e9e.</p>'
+        + '<h3><span class="ico">${ICO.gabarit}</span> ${T("Une saisie non terminée")}</h3>'
+        + '<p>' + quoi + ' ${T("a été laissée en cours")} <strong>'
+        + _brIlYa(r.ilYaMin) + '</strong>${T(". La reprendre, ou repartir à neuf ?")}</p>'
+        + '<p class="szbr-note">${T("Un brouillon disparaît de lui-même après")} '
+        + Math.round((_BR.ttlMin || 720) / 60) + ' ${T("heures, et il est jeté dès que la fiche est enregistrée.")}</p>'
         + '<div class="szbr-pied">'
-        + '<button type="button" id="szbr-non">Repartir \u00e0 neuf</button>'
-        + '<button type="button" class="prim" id="szbr-oui">Reprendre</button>'
+        + '<button type="button" id="szbr-non">${T("Repartir à neuf")}</button>'
+        + '<button type="button" class="prim" id="szbr-oui">${T("Reprendre")}</button>'
         + '</div></div>';
       document.body.appendChild(v);
       var fini = function(repris){ if (v.parentNode) v.parentNode.removeChild(v); resoudre(repris); };
@@ -1233,16 +1233,16 @@ var P = window.szPont;
 ` + JS_ACTIVITE() + JS_DIRE() + `
 var MOTIFS = {
   session:            '${T('Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.')}',
-  droit:              'Votre rôle ne donne pas accès à cette opération.',
+  droit:              '${T("Votre rôle ne donne pas accès à cette opération.")}',
   indisponible:       '${T('L’administration n’est pas encore chargée dans la fenêtre principale.')}',
   pont_indisponible:  '${T('La fenêtre principale ne répond pas.')}',
-  delai:              'La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).',
+  delai:              '${T("La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).")}',
   operation_inconnue: '${T('Cette version de l’application ne connaît pas cette opération.')}',
-  introuvable:        'Cette fiche n’existe plus.',
-  nom_requis:         'Le nom est obligatoire.',
-  televersement:      'Le dépôt de l’image a échoué. Rien n’a été enregistré.',
-  verrou:             'Fiche ouverte par quelqu’un d’autre.',
-  module_photos:      'La photothèque n’a pas pu être chargée dans la fenêtre principale. Rechargez-la (Ctrl+R) ; si le message revient, la session du personnel a peut-être expiré — reconnectez-vous.',
+  introuvable:        '${T("Cette fiche n’existe plus.")}',
+  nom_requis:         '${T("Le nom est obligatoire.")}',
+  televersement:      '${T("Le dépôt de l’image a échoué. Rien n’a été enregistré.")}',
+  verrou:             '${T("Fiche ouverte par quelqu’un d’autre.")}',
+  module_photos:      '${T("La photothèque n’a pas pu être chargée dans la fenêtre principale. Rechargez-la (Ctrl+R) ; si le message revient, la session du personnel a peut-être expiré — reconnectez-vous.")}',
   echec:              '${T('L’opération a échoué.')}'
 };
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -1250,7 +1250,7 @@ function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c
 function expliquer(r){
   var m = r && r.motif;
   if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
-  return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+  return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
 }
 function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
 function poser(id, v){ var e = document.getElementById(id); if (e) e.value = (v == null ? '' : v); }
@@ -1286,7 +1286,7 @@ var Assist = {
       if (cible > self.i) {
         for (var k = self.i; k < cible; k++) {
           var m = self.manquant(k);
-          if (m) { self.aller(k); self.pointer(m, 'Remplissez ce champ pour continuer.'); return; }
+          if (m) { self.aller(k); self.pointer(m, '${T("Remplissez ce champ pour continuer.")}'); return; }
           var f = self.freine(k);
           if (f) { self.aller(k); dire(f, 'att'); return; }
         }
@@ -1322,7 +1322,7 @@ var Assist = {
     var e = this.etapes[k];
     if (e.fait && !e.fait()) {
       return (typeof e.refus === 'function' ? e.refus() : e.refus)
-        || ('Terminez l’étape « ' + e.t + ' » pour continuer.');
+        || ('${T("Terminez l’étape «")} ' + e.t + ' ${T("» pour continuer.")}');
     }
     return '';
   },
@@ -1374,7 +1374,7 @@ var Assist = {
     // ses pas sans savoir ou.
     if (d > 0) {
       var m = this.manquant(this.i);
-      if (m) { this.pointer(m, 'Remplissez ce champ pour continuer.'); return; }
+      if (m) { this.pointer(m, '${T("Remplissez ce champ pour continuer.")}'); return; }
       var f = this.freine(this.i);
       if (f) { dire(f, 'att'); return; }
     }
@@ -1393,7 +1393,7 @@ var Assist = {
   toutValide: function(){
     for (var k = 0; k < this.etapes.length; k++) {
       var m = this.manquant(k);
-      if (m) { this.aller(k); this.pointer(m, 'Il manque un renseignement à l’étape « ' + this.etapes[k].t + ' ».'); return false; }
+      if (m) { this.aller(k); this.pointer(m, '${T("Il manque un renseignement à l’étape «")} ' + this.etapes[k].t + ' ».'); return false; }
     }
     return true;
   }
@@ -1428,11 +1428,11 @@ Pagi.prototype.dessiner = function(){
   var l = this.zone.querySelector('.liste');
   var self = this;
   l.innerHTML = vues.length ? vues.map(function(x){ return self.ligne(x); }).join('')
-    : '<div class="aide" style="padding:.4rem .3rem">Aucun résultat.</div>';
+    : '<div class="aide" style="padding:.4rem .3rem">${T("Aucun résultat.")}</div>';
   var p = this.zone.querySelector('.pagi');
   if (p) {
-    p.innerHTML = '<button type="button" data-pg="-1"' + (this.page === 0 ? ' disabled' : '') + '>Précédent</button>'
-      + '<button type="button" data-pg="1"' + (this.page >= nb - 1 ? ' disabled' : '') + '>Suivant</button>'
+    p.innerHTML = '<button type="button" data-pg="-1"' + (this.page === 0 ? ' disabled' : '') + '>${T("Précédent")}</button>'
+      + '<button type="button" data-pg="1"' + (this.page >= nb - 1 ? ' disabled' : '') + '>${T("Suivant")}</button>'
       + '<span class="pos">' + (f.length ? (deb + 1) + '–' + Math.min(deb + pp, f.length) : 0)
       + ' sur ' + f.length + (nb > 1 ? '  ·  page ' + (this.page + 1) + ' / ' + nb : '') + '</span>';
   }

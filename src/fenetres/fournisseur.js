@@ -18,23 +18,27 @@
  */
 
 const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO } = require('./socle');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('fournisseur');
 
 /** Page complète de l'assistant. `id` vide = création. */
 function pageFournisseur(id) {
   const ident = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Fournisseur — Administration Sandriza</title>
+<title>${T("Fournisseur — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.suppliers}</span><h1 id="titre">Fournisseur</h1>
+<div class="tete"><span class="ico">${ICO.suppliers}</span><h1 id="titre">${T("Fournisseur")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions">
-    <button id="btn-prec">Précédent</button>
-    <button id="btn-suiv">Suivant</button>
-    <button id="btn-annuler">Annuler</button>
-    <button id="btn-enr" class="prim" disabled>Enregistrer</button>
+    <button id="btn-prec">${T("Précédent")}</button>
+    <button id="btn-suiv">${T("Suivant")}</button>
+    <button id="btn-annuler">${T("Annuler")}</button>
+    <button id="btn-enr" class="prim" disabled>${T("Enregistrer")}</button>
   </span></div>
 <script>
 (function(){
@@ -76,30 +80,30 @@ function pageFournisseur(id) {
   function dessiner(fiche){
     var h = [];
     h.push('<div class="etape"><div class="carte"><h2>Identification</h2><div class="grille">'
-      + ch('f-nom', 'Nom du fournisseur', { requis: true, large: true })
+      + ch('f-nom', '${T("Nom du fournisseur")}', { requis: true, large: true })
       + ch('f-contact', 'Personne-ressource')
       + ch('f-courriel', 'Courriel', { type: 'email' })
       + ch('f-tel', 'Téléphone', { type: 'tel' })
-      + ch('f-web', 'Site web', { placeholder: 'https://…' })
+      + ch('f-web', '${T("Site web")}', { placeholder: 'https://…' })
       + '</div></div></div>');
 
     h.push('<div class="etape"><div class="carte"><h2>Adresse</h2><div class="grille">'
       + ch('f-rue', 'Rue', { large: true })
       + ch('f-ville', 'Ville')
       + sel('f-prov', 'Province', CTX.provinces)
-      + ch('f-cp', 'Code postal', { placeholder: 'G1H 1T4' })
+      + ch('f-cp', '${T("Code postal")}', { placeholder: 'G1H 1T4' })
       + '</div></div></div>');
 
     h.push('<div class="etape"><div class="carte"><h2>Approvisionnement</h2>'
-      + '<div class="ch large" style="margin-bottom:.65rem"><label>Catégories fournies</label><div class="cases">'
+      + '<div class="ch large" style="margin-bottom:.65rem"><label>${T("Catégories fournies")}</label><div class="cases">'
       + CTX.categories.map(function(c){
           return '<label><input type="checkbox" class="f-cat" value="' + esc(c.cle) + '">' + esc(c.libelle) + '</label>';
         }).join('')
       + '</div></div><div class="grille">'
-      + sel('f-delai', 'Délai de livraison moyen', CTX.delais)
+      + sel('f-delai', '${T("Délai de livraison moyen")}', CTX.delais)
       + '<div class="ch"><label for="f-actif">Statut</label><select id="f-actif">'
       + '<option value="1">Actif</option><option value="0">Inactif</option></select></div>'
-      + ch('f-notes', 'Notes internes', { multi: true, large: true, rows: 3 })
+      + ch('f-notes', '${T("Notes internes")}', { multi: true, large: true, rows: 3 })
       + '</div></div></div>');
 
     document.getElementById('corps').innerHTML = h.join('');
@@ -128,7 +132,7 @@ function pageFournisseur(id) {
     ]);
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
-    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d’enregistrer.', 'att');
+    if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
   }
 
   // ⚠ LE VERROU EST PRIS A L OUVERTURE, pas seulement a l enregistrement.
@@ -138,20 +142,20 @@ function pageFournisseur(id) {
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'suppliers', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || '${T("quelqu’un d’autre")}');
       bEnr.disabled = true;
-      dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
+      dire('${T("Enregistrement bloqué : cette fiche est ouverte ailleurs.")}', 'err');
     });
   }
 
   function charger(){
     P.appeler('fournisseur:contexte').then(function(c){
-      if (!c || !c.ok) { vide('Formulaire indisponible', expliquer(c)); return; }
+      if (!c || !c.ok) { vide('${T("Formulaire indisponible")}', expliquer(c)); return; }
       CTX = c;
       return P.appeler('fournisseur:lire', ID).then(function(r){
-        if (!r || !r.ok) { vide('Fiche indisponible', expliquer(r)); return; }
-        document.getElementById('titre').textContent = ID ? 'Modifier le fournisseur' : 'Nouveau fournisseur';
+        if (!r || !r.ok) { vide('${T("Fiche indisponible")}', expliquer(r)); return; }
+        document.getElementById('titre').textContent = ID ? '${T("Modifier le fournisseur")}' : '${T("Nouveau fournisseur")}';
         dessiner(r.fiche);
         /* La boite de reprise remplit des champs : ils n existent qu apres le dessin. */
         szBrouillonProposer();
@@ -182,7 +186,7 @@ function pageFournisseur(id) {
   }
   szBrouillonBrancher({
     portee: 'fournisseur',
-    libelle: ID ? 'Une modification de cette fiche' : 'Une fiche de fournisseur',
+    libelle: ID ? '${T("Une modification de cette fiche")}' : '${T("Une fiche de fournisseur")}',
     ttlMin: 720,
     cle: function(){ return ID ? ('f:' + ID) : '__new__'; },
     actif: function(){ return !!document.getElementById('f-nom'); },

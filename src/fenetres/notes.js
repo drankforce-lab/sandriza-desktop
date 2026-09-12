@@ -79,7 +79,7 @@ function pageNotes() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.note}</span><h1>${T('Notes des mises à jour')}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -113,16 +113,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -138,7 +138,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var toutes = D.entrees || [];
     var n = D.recentes || 12;
     var recentes = toutes.slice(0, n);

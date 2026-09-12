@@ -68,6 +68,10 @@ const aTraduire = (t) => {
      des points-virgules et des minuscules, donc elle ressemble à de la prose aux
      yeux du filtre général. Trois d’entre elles pèsent 121 occurrences — assez
      pour qu’un compteur censé atteindre zéro ne l’atteigne jamais. */
+  /* ⚠ ET UN SÉLECTEUR CSS. `.etape.on input, .etape.on select` est une règle de
+     style assemblée en chaîne : elle a des minuscules, des espaces et des
+     virgules, donc elle ressemble à de la prose. Personne ne la lit à l’écran. */
+  if (/^[.#][\w.#\-]+(\s|,|:|\[)/.test(t)) return false;
   if (/var\(--|[a-z-]+\s*:\s*[^;]{1,30};/.test(t)) return false;
   return true;
 };
