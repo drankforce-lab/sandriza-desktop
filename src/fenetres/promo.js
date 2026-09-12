@@ -735,7 +735,32 @@ ${JS_ACTIVITE}${JS_DIRE}
     var ed = t.closest('[data-editeur]');
     if (ed) {
       var idE = ed.getAttribute('data-editeur');
+      /* ⚠⚠ L EDITEUR EST UNE FENETRE NATIVE (5.32.0). Avant, ce bouton appelait
+         << promo:editeur >>, qui faisait dessiner la SECTION WEB dans la fenetre
+         principale : c etait le dernier fil qui obligeait a garder tout le
+         panneau d administration web.
+         ⚠ Le repli reste, et il est volontaire : dans un navigateur il n y a
+         aucune application a qui demander une fenetre. Il se declenche sur
+         << la fenetre n a pas pu s ouvrir >>, jamais sur un refus — sans quoi le
+         bouton cesserait d agir sans rien dire, le defaut qui a coute quatre
+         versions sur l ecran de connexion. */
       dire('Ouverture de l’éditeur…');
+      var natif = null;
+      try { natif = (P && P.ouvrirPromoEditeur) ? P.ouvrirPromoEditeur(idE) : null; }
+      catch (e) { natif = null; }
+      if (natif && typeof natif.then === 'function') {
+        natif.then(function(ok){
+          if (ok) { dire('Éditeur ouvert dans sa fenêtre.', 'bon'); return; }
+          appeler('promo:editeur', [idE]).then(function(r){
+            dire(r.ok ? ('« ' + r.nom +' » ouvert dans la fenêtre principale.') : expliquer(r), r.ok ? 'bon' : 'err');
+          });
+        }).catch(function(){
+          appeler('promo:editeur', [idE]).then(function(r){
+            dire(r.ok ? ('« ' + r.nom +' » ouvert dans la fenêtre principale.') : expliquer(r), r.ok ? 'bon' : 'err');
+          });
+        });
+        return;
+      }
       appeler('promo:editeur', [idE]).then(function(r){
         dire(r.ok ? ('« ' + r.nom +' » ouvert dans la fenêtre principale.') : expliquer(r), r.ok ? 'bon' : 'err');
       });

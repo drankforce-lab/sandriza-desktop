@@ -206,6 +206,15 @@ contextBridge.exposeInMainWorld('szPont', {
   // Les fenêtres ancrées n'avaient aucun moyen d'ouvrir une autre section.
   ouvrirJournaux: (onglet) => ipcRenderer.invoke('journaux:ouvrir', String(onglet || '')).catch(() => false),
 
+  /* L ÉDITEUR VISUEL d un modèle promotionnel, dans sa propre fenêtre.
+     ⚠⚠ ET C EST ICI QU IL DOIT VIVRE, PAS DANS `preload.js`. Je l avais posé
+     dans le préchargement de la FENÊTRE PRINCIPALE : le bouton du Centre
+     d impression n y a aucun accès, donc il se serait affiché et n aurait RIEN
+     fait — le défaut « le bouton ne fait rien », celui qu on croit être un
+     mauvais clic et qu on recommence. C est `verifier-verbes-pont` qui l a
+     attrapé, pas la relecture. */
+  ouvrirPromoEditeur: (id) => ipcRenderer.invoke('fenetre:promoEditeur', String(id || '')).catch(() => false),
+
   /* Ouvre un AUTRE module depuis une fenêtre (#35 : le bouton « Verrous » des
      Journaux, qui pointe vers l'écran sorti de là). Le nom est filtré côté
      principal contre une liste blanche — une fenêtre ne choisit pas ce qu'elle

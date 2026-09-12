@@ -28,6 +28,13 @@
 
 module.exports = {
   RESTE: {
+  /* ⚠ LE BLANC DU PLAN DE TRAVAIL DE L EDITEUR, ET IL NE SE CONVERTIRA JAMAIS :
+     ce n est pas une couleur d interface, c est du PAPIER. Une etiquette sort
+     blanche de l imprimante de jour comme de nuit ; teinter la scene ferait
+     choisir des couleurs de texte lisibles sur un fond qui n existe pas, et le
+     defaut ne se verrait qu une fois imprime. Le damier autour dit deja ce qui
+     est transparent — c est lui qui empeche de confondre blanc et vide. */
+  "#fff": 1,              // 1.12  1 fenetre : promo-editeur.js (.scene — le papier)
   "#d8b57a": 9,           // 1.74  2 fenetre(s) : explorateur.js, studio.js
   "#f0c987": 9,           // 1.40  7 fenetre(s) : commande.js, commandes.js, expedition.js…
   "#e6c14a": 8,           // 1.55  6 fenetre(s) : chat-config.js, incidents.js, journaux.js…

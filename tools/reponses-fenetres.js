@@ -3002,6 +3002,89 @@ module.exports = {
     },
   ],
 
+  // ── ÉDITEUR VISUEL (le dernier écran porté depuis le web) ──────────────────
+  // ⚠ TROIS CAS, ET LE TROISIÈME EST LE PLUS UTILE. Un modèle garni éprouve le
+  // plan de travail et l'inspecteur ; un modèle SANS élément éprouve l'écran
+  // vide, qu'on n'écrit jamais tant qu'on ne l'a pas vu ; et l'APERÇU QUI N'A
+  // PAS PU SE PEINDRE (rendable: false) éprouve le seul cas où l'éditeur ment
+  // s'il se tait — on éditerait des poignées sur un fond vide en croyant que le
+  // modèle l'est aussi.
+  'promo-editeur.js': [
+    {
+      nom: 'modèle garni, aperçu peint',
+      id: 'pp1',
+      reponses: {
+        'promo:modeleLire': {
+          ok: true, rendable: true, image: IMAGE, detail: '',
+          modele: {
+            id: 'pp1', name: 'Étiquette prix — collection été', type: 'label',
+            w: 2, h: 1, shape: 'rect', corner: 0.08, safe: 0.06,
+            bg: { type: 'solid', color: '#ffffff', from: '#ffffff', to: '#efe6d8', angle: 135, src: '', fit: 'cover' },
+            border: { w: 1, color: '#C49A6C', inset: 0.04 },
+            elements: [
+              { id: 'e1', kind: 'text', name: 'Titre', text: 'SANDRIZA',
+                xPct: 10, yPct: 12, wPct: 80, hPct: 30, rot: 0, opacity: 100,
+                locked: false, hidden: false, font: 'Playfair Display', fontPct: 22,
+                weight: 700, color: '#111827', align: 'center', valign: 'middle' },
+              { id: 'e2', kind: 'text', name: 'Prix', text: '49,00 $',
+                xPct: 10, yPct: 52, wPct: 80, hPct: 34, rot: 0, opacity: 100,
+                locked: false, hidden: false, font: 'Playfair Display', fontPct: 28,
+                weight: 700, color: '#83570B', align: 'center', valign: 'middle' },
+              // ⚠ UN ÉLÉMENT VERROUILLÉ ET UN MASQUÉ : ce sont les deux états que
+              // le plan de travail doit dessiner AUTREMENT, et qu'on oublie.
+              { id: 'e3', kind: 'image', name: 'Logo', src: '',
+                xPct: 70, yPct: 4, wPct: 26, hPct: 26, rot: 0, opacity: 100,
+                locked: true, hidden: false, fit: 'contain' },
+              { id: 'e4', kind: 'text', name: 'Note interne', text: 'ne pas imprimer',
+                xPct: 4, yPct: 82, wPct: 40, hPct: 14, rot: 0, opacity: 60,
+                locked: false, hidden: true, font: 'Inter', fontPct: 10,
+                weight: 400, color: '#6b7280', align: 'left', valign: 'middle' },
+            ],
+          },
+        },
+        'promo:modeleEcrire': { ok: true, nom: 'Étiquette prix — collection été', elements: 4, modifie: 1757625000000 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'modèle sans aucun élément',
+      id: 'pp5',
+      reponses: {
+        'promo:modeleLire': {
+          ok: true, rendable: true, image: IMAGE, detail: '',
+          modele: {
+            id: 'pp5', name: 'Étiquette vierge', type: 'label',
+            w: 2, h: 1, shape: 'rect', corner: 0, safe: 0.06,
+            bg: { type: 'solid', color: '#ffffff' }, border: { w: 0, color: '#C49A6C', inset: 0.04 },
+            elements: [],
+          },
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'aperçu impossible — le canevas a été teint',
+      id: 'pp2',
+      reponses: {
+        'promo:modeleLire': {
+          ok: true, rendable: false, image: '', detail: 'une image du stockage a teint le canevas',
+          modele: {
+            id: 'pp2', name: 'Autocollant rond 2 po', type: 'sticker',
+            w: 2, h: 2, shape: 'circle', corner: 0, safe: 0.06,
+            bg: { type: 'solid', color: '#ffffff' }, border: { w: 0, color: '#C49A6C', inset: 0.04 },
+            elements: [
+              { id: 'f1', kind: 'text', name: 'Marque', text: 'SANDRIZA',
+                xPct: 12, yPct: 40, wPct: 76, hPct: 20, rot: 0, opacity: 100,
+                locked: false, hidden: false, font: 'Playfair Display', fontPct: 18,
+                weight: 700, color: '#111827', align: 'center', valign: 'middle' },
+            ],
+          },
+        },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   // ── CENTRE D'IMPRESSION (studio promo) ─────────────────────────────────────
   // ⚠ FORME RÉELLE de promo:donnees (cœur PromoPrint._promoDonnees). Quatre cas :
   // la liste garnie, le volet d'IMPRESSION (le seul qui atteigne l'aperçu, la

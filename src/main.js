@@ -2515,6 +2515,23 @@ ipcMain.handle('fenetre:produit', (e, id) => {
   return true;
 });
 
+/* L EDITEUR VISUEL d un modele promotionnel — une fenetre PAR modele.
+   ⚠⚠ C EST LA FENETRE QUI FERME LE DERNIER RENVOI VERS LE WEB. Le bouton
+   << Editeur >> du Centre d impression appelait `promo:editeur`, qui faisait
+   dessiner la section web dans la fenetre principale : c est ce fil, et lui
+   seul, qui obligeait a garder tout le panneau d administration.
+   ⚠ Le MODELE voyage, le RENDU reste : la fenetre recoit une structure plate
+   (geometrie en pourcentages) et une image deja peinte par la fenetre
+   principale, seule a posseder l origine du site. Elle ne peint rien. */
+ipcMain.handle('fenetre:promoEditeur', (e, id) => {
+  const brut = String(id || '');
+  if (!brut) return false;
+  const cle = 'promo-editeur-' + brut.replace(/[^\w-]/g, '');
+  ouvrirNative(cle, 'Editeur visuel', pagePromoEditeur(brut),
+    { width: 1120, height: 780, minHeight: 520 });
+  return true;
+});
+
 ipcMain.handle('fenetre:etatcompte', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
@@ -4857,6 +4874,7 @@ const { pageCampagnes } = require('./fenetres/campagnes');
 const { pageStatistiques } = require('./fenetres/statistiques');
 const { pagePhotos } = require('./fenetres/photos');
 const { pagePromo } = require('./fenetres/promo');
+const { pagePromoEditeur } = require('./fenetres/promo-editeur');
 const { pageDepenses } = require('./fenetres/depenses');
 const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
