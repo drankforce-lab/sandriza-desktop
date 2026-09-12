@@ -740,7 +740,20 @@ ipcMain.handle('deconnexion:demander', (_e, nom, role) => new Promise((resolve) 
   if (!mainWindow || mainWindow.isDestroyed()) { resolve(false); return; }
   deconnexionRepondre = resolve;
 
-  const L = 440, H = 268;
+  /* ⚠⚠ 440 x 268 ÉTAIT TROP JUSTE, ET LE DÉFILEMENT LE DISAIT. Sa capture du
+     2026-09-12 : trois lignes de texte, et une BARRE DE DÉFILEMENT — le dernier
+     paragraphe coupé en son milieu. Une question de confirmation qu'il faut
+     faire défiler pour lire, c'est une question qu'on répond sans avoir lu.
+     ⚠ LE CALCUL, plutôt qu'un chiffre au jugé. En-tête ~52 px + pied ~52 px +
+     corps (padding 1,05 rem de chaque côté). À 440 de large il restait 406 px
+     pour le texte : le nom de la personne passait à la ligne, la note prenait
+     deux lignes, et le tout dépassait les 268 de hauteur.
+     ⚠ ET LA FENÊTRE N'EST PAS REDIMENSIONNABLE — c'est une modale. Elle doit
+     donc tenir dans TOUS les cas, pas dans le cas qu'on a sous les yeux : un nom
+     long, un rôle long, et l'anglais, qui est plus bavard que le français ici
+     (« Do you really want to sign out? »). D'où de la marge franche plutôt
+     qu'un ajustement au pixel, qui se ferait reprendre à la première traduction. */
+  const L = 560, H = 340;
   let x, y;
   try {
     const b = mainWindow.getBounds();

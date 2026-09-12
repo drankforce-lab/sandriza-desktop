@@ -92,7 +92,11 @@ function pageDeconnexion(arg) {
   const propre = (x) => String(x || '').replace(/[<>&"]/g, '').slice(0, 60);
   const nom = propre(bouts[0]);
   const role = propre(bouts[1]);
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  /* ⚠ `data-sans-plein` : cette fenetre REFUSE le bouton de plein ecran que le
+     socle pose partout ailleurs. Elle fait 560 x 340, elle n est pas
+     redimensionnable, et sa carte remplit deja tout — proposer d << occuper
+     toute la fenetre >> n y veut rien dire. Sa remarque du 2026-09-12. */
+  return `<!doctype html><html lang="fr" data-sans-plein><head><meta charset="utf-8">
 <title>Déconnexion</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete">

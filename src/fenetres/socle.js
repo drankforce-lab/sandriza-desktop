@@ -374,6 +374,17 @@ function szDireSurcouche(t, genre){
   z.style.display = t ? '' : 'none';
 }
 function _szPoserBouton(v){
+  /* ⚠⚠ UNE FENETRE PEUT DIRE NON, ET C EST UNE VRAIE REPONSE. Le bouton se pose
+     TOUT SEUL sur chaque fenetre — ce qui est bien, sauf quand il n a aucun sens.
+     Sur la confirmation de deconnexion (560 x 340, non redimensionnable), il
+     proposait d << occuper toute la fenetre >> a une carte qui la remplit deja.
+     Ses mots, 2026-09-12 : << le mode plein ecran n est pas necessaire pour
+     cette derniere >>.
+     ⚠ Le refus se declare sur la RACINE de la page (data-sans-plein) plutot que
+     par une liste de fenetres tenue ici : une liste vieillirait a la premiere
+     fenetre ajoutee, et c est la fenetre qui sait si le plein ecran a un sens
+     chez elle. */
+  try { if (document.documentElement.hasAttribute('data-sans-plein')) return; } catch (e) {}
   if (v.getAttribute('data-szplein') === '1') return;
   var b = _szBoite(v); if (!b) return;
   v.setAttribute('data-szplein', '1');
