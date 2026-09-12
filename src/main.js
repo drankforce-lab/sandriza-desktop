@@ -4122,6 +4122,24 @@ const ouvrirImprimantes = () => {
    flottaient sur une bande sombre au coin d'un écran clair.
    Les boutons sont posés sur le panneau de DROITE (#faf8f5) : c'est cette
    couleur-là qu'il faut, avec des symboles foncés pour rester lisibles. */
+/* ⚠⚠ LA BANDE DU HAUT EST EN DEUX COULEURS, ET C EST ASSUME — SA DECISION DU
+   2026-09-12. Il l a signalee (<< la couleur de la barre de menu est en 2
+   couleur >>), on a regarde, et il a tranche : << on laisse ca comme ca >>.
+   ⚠ NE PAS LA << CORRIGER >> EN LA VOYANT : ce qui ressemble a un oubli est un
+   choix, et le refaire coute une version pour revenir au meme endroit.
+
+   LE FAIT, pour ne pas avoir a le rechercher : la bande est peinte par DEUX
+   choses qui ne se parlent pas.
+     · a GAUCHE, la barre de menu NATIVE — Electron la dessine sur le fond de la
+       fenetre, et n offre AUCUN moyen de la colorer ;
+     · a DROITE, le `titleBarOverlay` des boutons Windows, que voici.
+   Sur la porte, l overlay est CLAIR parce que les boutons se posent sur le
+   panneau creme de droite — sans quoi ils flottaient sur une bande sombre au
+   coin d un ecran clair, ce qui etait pire.
+   ➡ Les deux ont raison separement. La seule bande UNIFORME possible serait
+   SOMBRE, et il faudrait alors que l ecran de connexion reserve une bande
+   pleine largeur en haut au lieu de faire monter son panneau creme jusqu a
+   y = 0. C est ce qui a ete propose, et refuse. */
 const PORTE_BANDE = { color: '#faf8f5', symbolColor: '#1d2433' };
 const _bandePorte = (dessus) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
