@@ -285,7 +285,7 @@ function pagePromoEditeur(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var ID = '${cible}';
   var M = null;          // le modele, tel qu il voyage
   var SEL = '';          // id de l element choisi ; vide = le MODELE lui-meme

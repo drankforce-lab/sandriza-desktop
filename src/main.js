@@ -5150,6 +5150,12 @@ const { pageConnexion } = require('./fenetres/connexion');
 const { pageMaj } = require('./fenetres/maj');
 const { pageDeconnexion } = require('./fenetres/deconnexion');
 const { MENU_EN, trMenu, trItems } = require('./menu-langue');
+/* ⚠⚠ LA LANGUE DES FENÊTRES SE POSE ICI, AVANT QUE LA PAGE NE SOIT BÂTIE. Les
+   gabarits résolvent leurs textes À LA GÉNÉRATION (voir `src/langue/index.js`) :
+   une fenêtre naît donc en anglais, au lieu de paraître en français puis de se
+   redessiner — ce demi-instant est exactement ce qui trahit une application
+   traduite après coup. */
+const { poserLangue: poserLangueFenetres } = require('./langue');
 const { pageIncidents } = require('./fenetres/incidents');
 const { pageSauvegarde } = require('./fenetres/sauvegarde');
 const { pageCollections } = require('./fenetres/collections');
@@ -5989,6 +5995,11 @@ ipcMain.on('palette:action', (e, it) => {
    ⚠ ET IL SURVIT AU REDÉMARRAGE : c est un réglage de poste, pas une humeur de
    session. Quelqu un qui travaille en anglais ne redemande pas l anglais à
    chaque lancement. */
+/* ⚠ AU DÉMARRAGE : le réglage survit au redémarrage, donc la première fenêtre de
+   la session doit déjà être dans la bonne langue. L’oublier aurait donné le défaut
+   le plus vicieux qui soit : tout marche « sauf au lancement ». */
+try { poserLangueFenetres(reglages.get('langue')); } catch (e) {}
+
 ipcMain.handle('langue:lire', () => {
   try { return (reglages.get('langue') === 'en') ? 'en' : 'fr'; }
   catch (e) { return 'fr'; }
@@ -5996,6 +6007,12 @@ ipcMain.handle('langue:lire', () => {
 ipcMain.handle('langue:ecrire', (e, l) => {
   const v = (String(l || '') === 'en') ? 'en' : 'fr';
   try { reglages.set('langue', v); } catch (er) {}
+  /* ⚠ ET LES FENÊTRES SUIVANTES NAÎTRONT DANS CETTE LANGUE. ⚠⚠ CELLES DÉJÀ
+     OUVERTES GARDENT LA LEUR, et c’est dit ici plutôt que découvert : leur page
+     est une adresse `data:` déjà assemblée, la coquille n’en garde pas la
+     recette. Les refabriquer demanderait de retenir les arguments de chaque
+     ouverture — c’est un chantier à part, pas un effet de bord à improviser ici. */
+  poserLangueFenetres(v);
   cnxDire('langue reglee : ' + v);
   return v;
 });

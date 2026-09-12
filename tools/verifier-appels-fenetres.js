@@ -66,8 +66,19 @@ const litSocle = () => {
    Volontairement courte : on n'y met que ce que les fenêtres emploient
    réellement en appel NU. Un nom manquant se signale une fois, on l'ajoute, et
    le contrôle reste précis. Un « et tout le reste » aurait rendu l'outil muet. */
+/* ⚠⚠ LES BLOCS DU SOCLE NE SONT PAS DES APPELS DU SCRIPT. Depuis le 2026-09-12
+   ils s’interpolent avec des parenthèses — `${JS_DIRE()}` — parce qu’ils sont
+   devenus des FONCTIONS pour que la langue s’y résolve à chaque page bâtie (une
+   constante de module fige la langue du premier `require`). Node les résout AVANT
+   que le script existe : ce que ce banc lit ensuite est leur CONTENU, pas leur
+   nom. Les compter comme des appels non déclarés ferait rougir 99 fenêtres pour
+   une transformation qui n’a rien changé au script.
+   ⚠ On les nomme UN PAR UN plutôt que d’ignorer tout `JS_*` : un nom en JS_ qui
+   n’existerait pas doit rester une faute. */
+const BLOCS_SOCLE = ['JS_SOCLE', 'JS_ACTIVITE', 'JS_DIRE', 'JS_BROUILLON'];
+
 const GLOBALES = new Set([
-  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',
+  ...BLOCS_SOCLE,  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',
   'requestAnimationFrame', 'cancelAnimationFrame', 'queueMicrotask',
   'parseInt', 'parseFloat', 'isNaN', 'isFinite', 'Number', 'String', 'Boolean',
   'Array', 'Object', 'Date', 'RegExp', 'Error', 'Promise', 'Map', 'Set',

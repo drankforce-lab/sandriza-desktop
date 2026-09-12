@@ -264,7 +264,7 @@ function pageProduit(id) {
 <script>
 (function(){
   'use strict';
-  ${JS_SOCLE}
+  ${JS_SOCLE()}
   MOTIFS.prix_invalide  = 'Le prix doit être supérieur à zéro.';
   MOTIFS.cout_requis    = 'Le coût d’acquisition est obligatoire.';
   MOTIFS.poids_requis   = 'Le poids unitaire est obligatoire.';

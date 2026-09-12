@@ -230,7 +230,14 @@ function fenetres() {
     let mod;
     try { mod = require(path.join(DOS_FEN, f)); } catch (e) { continue; }
     const fabrique = Object.values(mod).find((v) => typeof v === 'function');
-    if (!fabrique) continue;                       // socle.js : pas une fenêtre
+/* ⚠⚠ LE SOCLE SE RECONNAÎT PAR SON NOM, PLUS PAR SES EXPORTS. Il exportait des
+   CHAÎNES, donc « aucune fonction exportée » suffisait à le distinguer d’une
+   fenêtre. Depuis que ses blocs sont des FONCTIONS (pour que la langue s’y
+   résolve à chaque page), cette heuristique le prend pour une fenêtre et tente
+   d’en tirer une page. ⚠ Une reconnaissance par EFFET DE BORD tient jusqu’au jour
+   où l’effet change ; le nom, lui, ne bouge pas. */
+    if (f === 'socle.js') continue;
+    if (!fabrique) continue;
     /* ⚠ LE JEU DE RÉPONSES A DEUX FORMES, et n'en connaître qu'une écarte des
        fenêtres en silence. La plupart sont un TABLEAU de scénarios
        ({nom, id, reponses}) ; cinq sont un OBJET d'opérations directement

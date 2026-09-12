@@ -85,7 +85,7 @@ function pageClients() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 

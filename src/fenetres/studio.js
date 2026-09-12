@@ -583,7 +583,7 @@ function pageStudio(mode) {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var bApercu = document.getElementById('b-apercu');
   var bFinal = document.getElementById('b-final');

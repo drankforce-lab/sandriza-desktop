@@ -99,7 +99,7 @@ function pageAutomations() {
     if (actif) { b.textContent = '⧉ Détacher'; b.onclick = function(){ if (P && P.detacher) P.detacher(); }; }
     else { b.textContent = '⚓ Ancrer'; b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var D = null, RO = false, OCCUPE = false;
 

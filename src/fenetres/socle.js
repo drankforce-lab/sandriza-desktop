@@ -1,5 +1,14 @@
 'use strict';
 
+/* ⚠⚠ LES DEUX LANGUES. `T` rend le français tant que la langue courante est le
+   français, et la phrase anglaise sinon — résolue À LA GÉNÉRATION, donc la page
+   naît dans la bonne langue. Le dictionnaire est `src/langue/socle.js` : ce qu’il
+   contient paraît dans les 99 fenêtres, d’où son poids — 28 textes, 1 978
+   occurrences. Voir `src/langue/index.js` pour les trois décisions du chantier.
+   ⚠ C’est aussi POURQUOI les blocs ci-dessous sont des FONCTIONS : une constante
+   de module figerait la langue du premier `require`. */
+const T = require('../langue').tr('socle');
+
 /*
  * SOCLE COMMUN DES FENÊTRES NATIVES
  * =============================================================================
@@ -215,7 +224,7 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
  * ajustement, et une fenetre oubliee aurait continue de faire deconnecter son
  * usager sans qu on comprenne pourquoi.
  */
-const JS_ACTIVITE = `
+const JS_ACTIVITE = () => `
 // ⚠⚠ << IL Y A QUELQU UN >> — CE BLOC EMPECHE DE DECONNECTER UNE PERSONNE AFFAIREE.
 // Le minuteur d inactivite du site n ecoute que les evenements de SA page. Une
 // fenetre native est un document separe : ses clics et ses frappes ne l atteignent
@@ -285,7 +294,7 @@ signalerActivite();
    L'inclure une seconde fois redéclarerait ses fonctions.
    ⚠ szPleinReinit est appelé tout seul par l'observateur dès qu'il n'y a plus de
    surcouche — la classe de zoom vit sur <html>, pas sur la boîte. */
-const JS_PLEIN = `
+const JS_PLEIN = () => `
 var _szPleinOn = false;
 function szPleinEtat(){ return _szPleinOn; }
 function szPleinBasculer(boite, bouton){
@@ -293,8 +302,8 @@ function szPleinBasculer(boite, bouton){
   if (boite) boite.classList.toggle('sz-plein', _szPleinOn);
   document.documentElement.classList.toggle('sz-zoom', _szPleinOn);
   if (bouton){
-    bouton.textContent = _szPleinOn ? '⤡ Réduire' : '⛶ Plein écran';
-    bouton.title = _szPleinOn ? 'Revenir à la taille normale' : 'Occuper toute la fenêtre';
+    bouton.textContent = _szPleinOn ? '${T('⤡ Réduire')}' : '${T('⛶ Plein écran')}';
+    bouton.title = _szPleinOn ? '${T('Revenir à la taille normale')}' : '${T('Occuper toute la fenêtre')}';
   }
 }
 function szPleinReinit(){
@@ -310,7 +319,7 @@ function szPleinReinit(){
    l'assistant des incidents — mais le défaut valait pour TOUTES les fenêtres).
    ⚠ Le repli sur `#msg` est passé APRÈS : il sortait par `return` quand la
    fenêtre n'a pas de pied, ce qui aurait sauté aussi le routage. */
-const JS_DIRE_BASE = `
+const JS_DIRE_BASE = () => `
 var _szDireT = null;
 function szDire(texte, genre){
   var t = texte == null ? '' : String(texte);
@@ -345,7 +354,7 @@ function szDire(texte, genre){
    <html>, et la plupart des fenêtres retirent leur voile sans rien nous dire :
    sans ce filet, la fenêtre entière resterait en gros caractères après la
    fermeture, sans rien pour l'expliquer. */
-const JS_PLEIN_AUTO = `
+const JS_PLEIN_AUTO = () => `
 var SZ_VOILES = '.voile,.sur,.asst';
 function _szVoileVisible(){
   var l = document.querySelectorAll(SZ_VOILES);
@@ -456,7 +465,7 @@ szPleinAuto();
    ⚠ AUCUN BOUTON MORT : sans szPont.pleinEcran (coquille antérieure à 1.19.0,
    ou page ouverte dans un navigateur), on ne pose rien du tout. Un bouton qui
    reste là sans rien faire est un défaut qu'on ne peut pas diagnostiquer. */
-const JS_FENPLEIN = `
+const JS_FENPLEIN = () => `
 function _szFenEtat(){ return document.documentElement.classList.contains('sz-zoom-fen'); }
 function _szFenLibelle(b, on){
   if (on === undefined) on = _szFenEtat();
@@ -547,7 +556,7 @@ html.jour .cad{background:rgba(180,120,10,.13);border-color:rgba(180,120,10,.4);
 html.jour .cad.mine{background:rgba(140,100,45,.12);border-color:rgba(140,100,45,.4);color:#5c451c}
 `;
 
-const JS_VERROUS = `
+const JS_VERROUS = () => `
 var _szVerrous = {};      // { 'portee|id': { par, mine, depuis } }
 var _szVerrousT = null;
 var _szVerrousP = [];
@@ -573,7 +582,7 @@ function szVerrouCase(portee, id){
 function _szVerrouInner(cle){
   var v = _szVerrous[cle];
   if (!v) return '';
-  var qui = v.mine ? 'Vous' : (v.par || 'un collègue');
+  var qui = v.mine ? '${T('Vous')}' : (v.par || '${T('un collègue')}');
   var t = v.mine
     ? ('Vous tenez cette fiche en modification' + (v.depuis ? ' — ' + v.depuis : ''))
     : ('En traitement par ' + qui + (v.depuis ? ' — ' + v.depuis : '')
@@ -671,7 +680,7 @@ html.jour .sz-lots .jauge{background:rgba(0,0,0,.1)}
 html.jour .sz-lots .file{color:#6b5c47}
 `;
 
-const JS_LOTS = `
+const JS_LOTS = () => `
 var _szLotsT = null, _szLotsEl = null;
 
 function _szLotsPeindre(r){
@@ -740,7 +749,7 @@ window.addEventListener('pagehide', function(){
    ⚠ ON NE TOUCHE A RIEN SI LA MESURE EST ABSURDE (hauteur nulle ou NaN) :
    c est le cas au banc, ou rien n est reellement dispose. Un compte devine
    dans ces conditions ferait recharger la liste avec une valeur inventee. */
-const JS_AUTOPAGE = `
+const JS_AUTOPAGE = () => `
 var _szAutoT = null, _szAutoDernier = 0;
 
 function szAutoPagination(selecteur, surChangement){
@@ -912,7 +921,7 @@ const ICO = {
  *   szBrouillonProposer();     // a l ouverture du formulaire
  *   szBrouillonJeter();        // apres un enregistrement REUSSI
  */
-const JS_BROUILLON = `
+const JS_BROUILLON = () => `
 var _BR = null;          // la declaration de la fenetre
 var _BR_T = null;        // minuterie de l ecriture differee
 var _BR_DERNIER = '';    // derniere valeur ecrite : on n envoie rien d inutile
@@ -1200,7 +1209,7 @@ window.szBrouillonJeter = szBrouillonJeter;
    montre veut dire « la liste est complète » : on écrit le nombre, sans « sur ».
    Affirmer « 300 sur 300 » là où le cœur n'a rien dit serait une affirmation
    fabriquée par l'affichage. */
-const JS_COMPTE = `
+const JS_COMPTE = () => `
 function szCompte(n, tot, sing, plur){
   n = Number(n) || 0; tot = Number(tot) || 0;
   var mot = (n > 1 ? plur : sing);
@@ -1209,24 +1218,32 @@ function szCompte(n, tot, sing, plur){
 }
 `;
 
-const JS_DIRE = JS_DIRE_BASE + JS_PLEIN + JS_PLEIN_AUTO + JS_FENPLEIN + JS_VERROUS + JS_LOTS + JS_AUTOPAGE + JS_COMPTE;
+/* ⚠⚠ CES BLOCS SONT DES FONCTIONS, PAS DES CONSTANTES — ET C’EST LA LANGUE QUI
+   L’EXIGE. Une constante de module est évaluée UNE FOIS, au premier `require`.
+   Un `T('…')` écrit dedans aurait donc figé la langue du démarrage : changer de
+   langue n’aurait plus rien changé aux fenêtres, et rien ne l’aurait dit — le
+   réglage aurait marché « sauf pour le socle », c’est-à-dire pour ce que TOUTES
+   les fenêtres montrent. Une fonction se réévalue à chaque page bâtie.
+   ⚠ Les fenêtres les interpolent donc avec des parenthèses : ${JS_DIRE()}. */
+const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
+  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE();
 
-const JS_SOCLE = `
+const JS_SOCLE = () => `
 var P = window.szPont;
-` + JS_ACTIVITE + JS_DIRE + `
+` + JS_ACTIVITE() + JS_DIRE() + `
 var MOTIFS = {
-  session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
+  session:            '${T('Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.')}',
   droit:              'Votre rôle ne donne pas accès à cette opération.',
-  indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-  pont_indisponible:  'La fenêtre principale ne répond pas.',
+  indisponible:       '${T('L’administration n’est pas encore chargée dans la fenêtre principale.')}',
+  pont_indisponible:  '${T('La fenêtre principale ne répond pas.')}',
   delai:              'La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).',
-  operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
+  operation_inconnue: '${T('Cette version de l’application ne connaît pas cette opération.')}',
   introuvable:        'Cette fiche n’existe plus.',
   nom_requis:         'Le nom est obligatoire.',
   televersement:      'Le dépôt de l’image a échoué. Rien n’a été enregistré.',
   verrou:             'Fiche ouverte par quelqu’un d’autre.',
   module_photos:      'La photothèque n’a pas pu être chargée dans la fenêtre principale. Rechargez-la (Ctrl+R) ; si le message revient, la session du personnel a peut-être expiré — reconnectez-vous.',
-  echec:              'L’opération a échoué.'
+  echec:              '${T('L’opération a échoué.')}'
 };
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
   return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }

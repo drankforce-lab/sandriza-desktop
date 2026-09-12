@@ -164,7 +164,7 @@ function pageTransferts(ouverture) {
   var OUVERT = '';           // id du transfert dont le volet Recevoir est ouvert
   var BUSY = false;
 
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }

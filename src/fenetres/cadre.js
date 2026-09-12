@@ -151,7 +151,7 @@ function pageCadre() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ⚠ ELLE NE S APPELLE PAS mesurer : ce nom est DEJA pris par le socle, et le
      redeclarer ici tuait la sienne en silence — le dernier gagne. C est

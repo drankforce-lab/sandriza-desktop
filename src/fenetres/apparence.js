@@ -115,7 +115,7 @@ function pageApparence() {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var D = null, RO = false, OCCUPE = false;
 

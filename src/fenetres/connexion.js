@@ -259,7 +259,7 @@ function pageConnexion(depart) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_DIRE}
+${JS_DIRE()}
 
   var CTX = null;          // le contexte de dessin, lu UNE fois
   var ECRAN = 'login';     // login | mfa | oubli

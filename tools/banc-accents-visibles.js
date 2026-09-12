@@ -70,54 +70,13 @@ const LETTRE = 'A-Za-z\u00C0-\u024F';
 const RE_MOT = new RegExp(
   '(?<![' + LETTRE + '])(' + FAUTIFS.join('|') + ')(?![' + LETTRE + '])', 'gi');
 
-/* ⚠ ON RETIRE LES COMMENTAIRES EN GARDANT LES LIGNES : sans ça, le numéro de
-   ligne rapporté ne désigne plus rien, et un banc dont on ne sait pas relire la
-   sortie ne sert qu'à faire rouge. */
-const sansCommentaires = (s) => s
-  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
-  .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '));
-
-/* ⚠⚠ ON NE GARDE QUE CE QUI SERA VU. Une chaîne de ces fenêtres est presque
-   toujours du HTML : « <div class="etat"> », « <label for="modele-sel">Modèle
-   </label> ». Les noms de classes et d'identifiants y sont en ASCII PAR
-   CONVENTION — les compter, c'est accuser la convention. La première version du
-   banc le faisait : 152 accusations dans 52 fenêtres, dont la quasi-totalité
-   sur `etat`, `modele`, `annee` employés comme NOMS. ⚠ Un banc à ce taux-là ne
-   se corrige pas, il se désactive.
-   ⚠ Un fragment commence ou finit souvent AU MILIEU d'une balise, parce que la
-   suite est une concaténation : on retire donc aussi la balise ouverte à la fin
-   et la fin de balise au début. */
-const texteVisible = (s) => {
-  let t = s.replace(/<[^>]*>/g, ' ').replace(/<[^>]*$/, ' ');
-  const g = t.indexOf('>');                      // le fragment commençait DANS une balise
-  if (g >= 0) t = t.slice(g + 1);
-  return t.replace(/&[a-z#0-9]{2,8};/gi, ' ').replace(/\s+/g, ' ').trim();
-};
-
-/* ⚠⚠ AUCUNE LONGUEUR MINIMALE DANS LA RECHERCHE DES CHAÎNES — elle FAUSSE
-   L'APPARIEMENT DES GUILLEMETS, et c'est invisible à la lecture. Avec
-   `{6,300}`, dans `x.etat === "clos" || x.etat === "actif"`, le moteur renonçait
-   à « clos » (5 caractères) puis appariait ce guillemet FERMANT avec l'OUVRANT
-   suivant : le banc rapportait « || x.etat === » comme un texte affiché. On
-   prend TOUTES les chaînes, et on filtre après.
-   On ne garde ensuite que ce qui ressemble à de la PROSE : deux mots au moins,
-   une minuscule au moins, et rien qui ressemble à du code. */
-const chainesProse = (js) => {
-  const out = [];
-  const re = /'([^'\\\n]*)'|"([^"\\\n]*)"/g;
-  let m;
-  while ((m = re.exec(js))) {
-    const t = texteVisible(m[1] !== undefined ? m[1] : m[2]);
-    if (t.length < 6) continue;
-    if (!/\s/.test(t)) continue;                 // un seul mot : pas de la prose
-    if (!/[a-z]/.test(t)) continue;              // que des majuscules : un libellé technique
-    if (/^[\w.:\-\/#]+$/.test(t)) continue;      // chemin, sélecteur, clé
-    if (/===|!==|\|\||&&|\breturn\b|\bfunction\b/.test(t)) continue;   // du code
-    if (!PHRASE.test(t)) continue;               // ni majuscule ni ponctuation : un nom
-    out.push({ texte: t, index: m.index });
-  }
-  return out;
-};
+/* ⚠⚠ L’EXTRACTION DU TEXTE VISIBLE EST PARTAGÉE, PAS RECOPIÉE. `banc-langue-fenetres`
+   pose la même question — « que montre cette fenêtre ? » — pour savoir si c’est
+   TRADUIT là où celui-ci demande si c’est ACCENTUÉ. Deux copies auraient divergé,
+   et la divergence ne fait rien tomber : elle fait juste rétrécir un banc en
+   silence. La définition vit dans `tools/textes-visibles.js`, avec les quatre
+   pièges qu’il a fallu payer pour la rendre juste. */
+const { sansCommentaires, chainesProse, texteAffiche } = require('./textes-visibles.js');
 
 const ligneDe = (s, i) => s.slice(0, i).split('\n').length;
 
@@ -139,49 +98,18 @@ const fautes = (texte) => {
   return out;
 };
 
-/* ⚠ DE LA PROSE PORTE UNE MAJUSCULE, UN ACCENT OU UNE PONCTUATION. « etat non »
-   est un nom de classe (cles.js : res.className = 'etat non'), et aucune phrase
-   affichée de cette interface ne ressemble à ça.
-   ⚠⚠ On ne peut PAS exiger un accent : c’est justement ce qui manque dans le
-   défaut cherché. La majuscule et la ponctuation, elles, ne disparaissent pas
-   quand on oublie les accents. */
-const PHRASE = /[A-ZÀ-ɏ]|[.,;:!?…’—]/;
-
-/* ⚠⚠ DEUX SOURCES, DEUX RÈGLES, PARCE QUE LA PREUVE N’EST PAS LA MÊME.
-   · Un NŒUD DE TEXTE du HTML est affiché — point. Un mot seul y compte, et c’est
-     indispensable : « Opacité » et « Aperçu », deux des quatre fautes de
-     2026-09-11, sont des étiquettes d’UN mot. Exiger deux mots ici, c’est rater
-     la moitié du défaut que ce banc existe pour voir.
-   · Une CHAÎNE DU SCRIPT peut être un identifiant : elle doit ressembler à de la
-     prose avant d’être accusée. */
-const blanchir = (s, re) => s.replace(re, (m) => m.replace(/[^\n]/g, ' '));
-
-const texteAffiche = (page) => {
-  const sans = blanchir(blanchir(page, /<script[\s\S]*?<\/script>/gi),
-    /<style[\s\S]*?<\/style>/gi);
-  const out = [];
-  let m;
-  const re = />([^<>]+)</g;
-  while ((m = re.exec(sans))) {
-    const t = m[1].replace(/&[a-z#0-9]{2,8};/gi, ' ').replace(/\s+/g, ' ').trim();
-    if (t) out.push({ texte: t, index: m.index });
-  }
-  /* Les attributs qui S’AFFICHENT : une infobulle, un texte de remplacement, le
-     libellé porté par un bouton. Ce ne sont pas des nœuds de texte, mais ils se
-     lisent à l’écran comme le reste. */
-  const ra = /(?:title|placeholder|aria-label|alt)\s*=\s*"([^"<>]+)"/gi;
-  while ((m = ra.exec(sans))) {
-    const t = m[1].replace(/\s+/g, ' ').trim();
-    if (t && PHRASE.test(t)) out.push({ texte: t, index: m.index });
-  }
-  return out;
-};
-
 const analyser = (fichier) => {
   let mod;
   try { mod = require(path.join(DOS, fichier)); } catch (e) { return null; }
   const fabrique = Object.values(mod).find((v) => typeof v === 'function');
-  if (!fabrique) return null;                    // socle.js : pas une fenetre
+/* ⚠⚠ LE SOCLE SE RECONNAÎT PAR SON NOM, PLUS PAR SES EXPORTS. Il exportait des
+   CHAÎNES, donc « aucune fonction exportée » suffisait à le distinguer d’une
+   fenêtre. Depuis que ses blocs sont des FONCTIONS (pour que la langue s’y
+   résolve à chaque page), cette heuristique le prend pour une fenêtre et tente
+   d’en tirer une page. ⚠ Une reconnaissance par EFFET DE BORD tient jusqu’au jour
+   où l’effet change ; le nom, lui, ne bouge pas. */
+  if (fichier === 'socle.js') return null;
+  if (!fabrique) return null;
   let page;
   try { page = fabrique(''); } catch (e) {
     try { page = fabrique(); } catch (e2) { return null; }

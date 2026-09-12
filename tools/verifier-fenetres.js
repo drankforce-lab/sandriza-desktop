@@ -397,7 +397,7 @@ try {
    RIEN :
      ① sans l import de JS_BROUILLON, la page appelle une fonction absente — une
        erreur avalee par la suite de promesse, et le dessin s arrete la ;
-     ② sans l injection ${JS_BROUILLON} dans le gabarit, meme chose ;
+     ② sans l injection ${JS_BROUILLON()} dans le gabarit, meme chose ;
      ③ sans szBrouillonEcouter(), le brouillon ne s ecrit JAMAIS pendant la frappe.
        La fenetre a l air protegee, la boite de reprise existe, et il n y a jamais
        rien a reprendre. C est le pire des quatre : tout paraît en place ;
@@ -479,7 +479,11 @@ console.log('=== Le montage du brouillon est complet ===');
     if (!/require\('\.\/socle(?:\.js)?'\)/.test(t) || !/\{[^}]*\bJS_BROUILLON\b[^}]*\}\s*=\s*require/.test(t)) {
       manque.push('JS_BROUILLON absent de l import du socle');
     }
-    if (t.indexOf('${JS_BROUILLON}') < 0) manque.push('${JS_BROUILLON} pas injecte dans le gabarit');
+    /* ⚠ AVEC SES PARENTHÈSES depuis le 2026-09-12 : les blocs du socle sont
+       devenus des FONCTIONS pour que la langue s’y résolve à chaque page bâtie
+       (une constante de module fige la langue du premier `require`). Le garde
+       suit la forme réelle — sans quoi il réclamerait une forme qui n’existe plus. */
+    if (t.indexOf('${JS_BROUILLON()}') < 0) manque.push('${JS_BROUILLON()} pas injecte dans le gabarit');
     /* ⚠ ON CHERCHE LE NOM, PAS L APPEL. `banque.js` passe szBrouillonJeter EN
        REFERENCE a sa fonction `agir` (qui ne l appelle qu au succes) : chercher
        << szBrouillonJeter( >> le declarait manquant alors qu il est bien la. Un

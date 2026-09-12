@@ -175,7 +175,7 @@ function pageMarque(onglet) {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var ongl = document.getElementById('onglets');
   var bsave = document.getElementById('b-save');

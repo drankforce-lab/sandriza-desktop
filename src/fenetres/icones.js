@@ -149,7 +149,7 @@ function pageIcones() {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var cpt = document.getElementById('cpt');
   var D = null, RO = false, OCCUPE = false;

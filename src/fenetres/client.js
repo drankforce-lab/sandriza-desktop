@@ -114,7 +114,7 @@ function pageClient(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');

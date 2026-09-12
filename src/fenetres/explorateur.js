@@ -177,7 +177,7 @@ function pageExplorateur(mode) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var zone = document.getElementById('liste');
   var barreEl = document.getElementById('barre');
   var apercuEl = document.getElementById('apercu');

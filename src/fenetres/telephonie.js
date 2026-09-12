@@ -164,7 +164,7 @@ function pageTelephonie() {
     else { b.textContent = '⚓ Ancrer'; b.title = 'Ramener cet écran dans la fenêtre principale';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var ongletsEl = document.getElementById('onglets');
   var bsave = document.getElementById('b-save');

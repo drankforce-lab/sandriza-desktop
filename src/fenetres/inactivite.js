@@ -84,7 +84,7 @@ function pageInactivite(secondes) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_DIRE}
+${JS_DIRE()}
   var TOTAL = ${total};
   var depart = Date.now();
 

@@ -117,8 +117,8 @@ function pageMaintenance() {
   var corps = document.getElementById('corps');
   var sousEl = document.getElementById('sous');
 
-  ${JS_DIRE}
-  ${JS_ACTIVITE}
+  ${JS_DIRE()}
+  ${JS_ACTIVITE()}
 
   /* ⚠⚠ CE « dire » MANQUAIT, ET LE BOUTON << Activer le mode >> NE FAISAIT RIEN.
      Son signalement : << quand je clique sur activer rien ne se passe >>.

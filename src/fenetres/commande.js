@@ -74,7 +74,7 @@ function pageCommande(id) {
 <script>
 (function(){
   'use strict';
-  ${JS_SOCLE}
+  ${JS_SOCLE()}
   MOTIFS.suivi_requis = 'Entrez un numéro de suivi, ou cochez « expédier sans numéro ».';
   // Les motifs de l etiquette et de l impression — le dictionnaire de la
   // fenetre Expedition, repris : les codes AA de Postes Canada et les motifs

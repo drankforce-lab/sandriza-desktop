@@ -108,7 +108,7 @@ function pageRemboursements(onglet) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
 
   var D = null;

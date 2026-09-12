@@ -109,7 +109,7 @@ function pageDeconnexion(arg) {
 <div class="corps" id="corps"></div>
 <div class="pied" id="pied"></div>
 <script>
-${JS_DIRE}
+${JS_DIRE()}
 (function(){
   'use strict';
   var P = window.szPont;

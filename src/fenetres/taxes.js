@@ -136,7 +136,7 @@ function pageTaxes(ouverture) {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var rev = document.getElementById('rev');
   var bsave = document.getElementById('b-save');

@@ -107,7 +107,7 @@ function pageJournaux(onglet) {
     if (['recherche','acces','automatisations','impressions','sms','comptable','recherches','jserreurs'].indexOf(String(t||'')) < 0) return;
     ONGLET = String(t); rendre();
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   /* ⚠⚠ IL Y AVAIT ICI UN cpt(n, tot) QUI DISAIT EXACTEMENT << 300 sur 5 000 >>,
      ET PERSONNE NE L APPELAIT. Ecrit avec la bonne intention, jamais branche :

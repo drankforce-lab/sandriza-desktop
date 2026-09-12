@@ -139,7 +139,7 @@ function pagePaiementsConfig() {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE}${JS_DIRE}
+${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var envEl = document.getElementById('env');
   var bsave = document.getElementById('b-save');

@@ -39,8 +39,8 @@ function pageFournisseur(id) {
 <script>
 (function(){
   'use strict';
-  ${JS_SOCLE}
-  ${JS_BROUILLON}
+  ${JS_SOCLE()}
+  ${JS_BROUILLON()}
 
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');

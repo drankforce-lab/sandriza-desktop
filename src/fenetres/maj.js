@@ -126,7 +126,7 @@ function pageMaj(arg) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_DIRE}
+${JS_DIRE()}
   var ECRAN = '${ecran}';
   var VERSION = '${version}';
   var TOTAL = ${secondes};
