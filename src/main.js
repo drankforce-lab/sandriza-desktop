@@ -152,8 +152,52 @@ let mainWindow = null;
    zoom, le theme, les gardes de navigation, les reglages du menu. Ce sont des
    affaires de FENETRE VISIBLE — et apres la bascule, la fenetre visible EST le
    cadre, donc ces appels seront deja justes. */
-const siteWC = () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null);
-const cadreWC = () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null);
+/* ⚠⚠ L INTERRUPTEUR DU CADRE NATIF — ETEINT PAR DEFAUT, ET IL LE RESTE.
+   Allume, la fenetre principale porte DEUX vues : le SITE derriere (il garde le
+   pont, il perd le cadre) et le CADRE devant. Eteint, `vueSite` et `vueCadre`
+   valent null, les deux accesseurs rendent `mainWindow.webContents` et le
+   comportement est celui d hier, a la ligne pres.
+   ⚠ POURQUOI UN INTERRUPTEUR ET PAS UNE BASCULE FRANCHE : aucun controle de ce
+   poste ne demarre l application. Les bancs executent des pages de fenetre dans
+   un faux DOM, jamais le processus principal. Basculer sans pouvoir ouvrir
+   l application une seule fois, ce serait risquer une fenetre blanche chez lui
+   et l apprendre a l usage. L interrupteur rend l essai REVERSIBLE : il
+   l allume, il regarde, il l eteint.
+   ⚠ IL SE LIT AU DEMARRAGE, pas a chaud : les deux vues naissent avec la
+   fenetre. Le changer demande donc un redemarrage, et l entree de menu le DIT. */
+const cadreNatifAllume = () => reglages.get('cadreNatif') === true;
+let vueSite = null;    // le SITE, derriere — il garde le pont
+let vueCadre = null;   // le CADRE, devant — la zone d ancrage
+
+/* ⚠ CHAQUE ACCESSEUR RETOMBE SUR LA FENETRE PRINCIPALE. Une vue morte ou jamais
+   nee ne doit pas rendre `null` a un appelant qui en attendait une : c est ce
+   qui transforme une bascule ratee en fonctions muettes plutot qu en erreur. */
+const _vivant = (v) => {
+  try { return v && v.webContents && !v.webContents.isDestroyed() ? v.webContents : null; }
+  catch (e) { return null; }
+};
+/* ⚠⚠ ALLUME, LA FENETRE PRINCIPALE A TROIS VISAGES : elle-meme, la vue du SITE
+   et la vue du CADRE. Les gardes `e.sender !== mainWindow.webContents` en
+   connaissaient UN SEUL — ils auraient donc rejete en silence les messages de
+   nos propres pages des que l interrupteur s allume, et le defaut se serait lu
+   comme << le cadre ne fait rien >>.
+   ⚠ Ce garde ne s affaiblit pas pour autant : il existe pour refuser les AUTRES
+   fenetres (une vue ancree, une fenetre detachee), pas pour departager trois
+   faces d une meme fenetre. Eteint, deux des trois valent null et il se comporte
+   exactement comme avant. */
+const _deLaPrincipale = (e) => {
+  try {
+    if (!mainWindow || mainWindow.isDestroyed()) return false;
+    if (e.sender === mainWindow.webContents) return true;
+    if (_vivant(vueSite) && e.sender === vueSite.webContents) return true;
+    if (_vivant(vueCadre) && e.sender === vueCadre.webContents) return true;
+  } catch (er) {}
+  return false;
+};
+const siteWC = () => _vivant(vueSite)
+  || (mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null);
+const cadreWC = () => _vivant(vueCadre)
+  || (mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null);
 /* ══ LA VEILLE EN ZONE DE NOTIFICATION (2026-09-08) ══════════════════════════
    `trayVeille` : l'icône, posée par `veilleur.attacher()` quand l'application
    est prête. ⚠ ELLE CONDITIONNE LE « X CACHE » : sans icône, cacher la fenêtre
@@ -1271,30 +1315,15 @@ const createWindow = () => {
   // vues ancrées qu'elle porte (voir _zoomPartout).
   _suivrePleinEcran(mainWindow);
 
-  mainWindow.webContents.on('did-finish-load', () => {
-    applySidebarPref(mainWindow.webContents);
-    // Un rechargement de la page perd la classe : on la repose si l'on est
-    // toujours en plein écran.
-    _zoomRattraper(mainWindow.webContents);
-    capturerMarque();
-    // La barre elle-même est dessinée par le SITE (appbar.js). Ici on remet
-    // seulement le menu natif — qui porte les raccourcis — et la palette.
-    dessinerMenus();
-  });
-
-  // Liens externes → navigateur par défaut ; jamais dans l'application.
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    // La page vierge sert aux documents a imprimer : on la laisse s ouvrir.
-    if (estPageVierge(url)) return { action: 'allow' };
-    if (!isAllowed(url)) { versLExterieur(url); return { action: 'deny' }; }
-    return { action: 'allow' };
-  });
-
-  // Navigation hors des hôtes autorisés bloquée (défense en profondeur).
-  mainWindow.webContents.on('will-navigate', (e, url) => {
-    if (estPageVierge(url)) return;
-    if (!isAllowed(url)) { e.preventDefault(); versLExterieur(url); }
-  });
+  /* ⚠⚠ CES TROIS GARDES SUIVENT LE SITE, PAS LA FENETRE. Ils sont poses ici sur
+     `mainWindow.webContents` parce que c est LUI qui porte le site aujourd hui.
+     Interrupteur allume, le site vit dans `vueSite` : les memes gardes doivent
+     l y suivre, sinon un lien externe s ouvrirait DANS l application et la
+     defense en profondeur ne garderait plus que la coquille vide.
+     ⚠ D ou une fonction, appelee aux DEUX endroits. Les recopier aurait donne
+     deux versions qui divergent — et celle qu on oublie de corriger est celle
+     qui garde le site. */
+  _poserGardesDeSite(mainWindow.webContents);
 
   // ⚠ QUATRE CHEMINS MÈNENT À LA FERMETURE, et il faut les quatre : le X du
   // cadre natif, Alt+F4, l'entrée « Quitter » du menu, et le bouton de la barre
@@ -3224,7 +3253,7 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
 // moment de payer.
 ipcMain.on('pos:diffuser', (e, etat) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  if (e.sender !== mainWindow.webContents) return;
+  if (!_deLaPrincipale(e)) return;
   const w = fenetresNatives.get('pos-client');
   if (!w || w.isDestroyed()) return;          // afficheur fermé : rien à faire
   try { w.webContents.send('pos:etat', etat || {}); } catch {}
@@ -3453,7 +3482,7 @@ const reposerAncrees = () => {
   ancrees.forEach((a) => { if (!a.fenetre && a.view) { try { a.view.setBounds(b); } catch {} } });
 };
 ipcMain.on('dock:zone', (e, rect) => {
-  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  if (!_deLaPrincipale(e)) return;
   if (!rect || typeof rect !== 'object') return;
   zoneAncrage = { x: Number(rect.x) || 0, y: Number(rect.y) || 0,
     largeur: Number(rect.largeur) || 0, hauteur: Number(rect.hauteur) || 0 };
@@ -3465,7 +3494,7 @@ ipcMain.on('dock:zone', (e, rect) => {
   poserVueConnexion();
 });
 ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
-  if (!mainWindow || e.sender !== mainWindow.webContents) return false;
+  if (!_deLaPrincipale(e)) return false;
   const defs = PAGES_ANCRABLES();
   const c = String(cle || '');
   if (!defs[c]) return false;
@@ -3569,7 +3598,7 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
 // Le site navigue vers une section ordinaire : les vues ancrees se cachent
 // (JAMAIS detruites — revenir est instantane et l etat survit).
 ipcMain.on('dock:cacher', (e) => {
-  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  if (!_deLaPrincipale(e)) return;
   ancrees.forEach((a) => { if (!a.fenetre && a.view) { try { a.view.setVisible(false); } catch {} } });
   ancreeVisible = null; vueVoilee = null;
 });
@@ -3587,7 +3616,7 @@ ipcMain.on('dock:cacher', (e) => {
 let ancreeVisible = null;
 let vueVoilee = null;
 ipcMain.on('dock:voiler', (e, visible) => {
-  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  if (!_deLaPrincipale(e)) return;
   if (visible) {
     const a = vueVoilee && ancrees.get(vueVoilee);
     vueVoilee = null;
@@ -4347,6 +4376,99 @@ const montrerPorte = (titre, message, progression) => {
   mainWindow.loadURL(portePage(titre, message, progression)).catch(() => {});
 };
 
+/* Les gardes qui appartiennent a la PAGE DU SITE, ou qu elle vive. */
+const _poserGardesDeSite = (wc) => {
+  if (!wc) return;
+  wc.on('did-finish-load', () => {
+    applySidebarPref(wc);
+    // Un rechargement de la page perd la classe : on la repose si l'on est
+    // toujours en plein écran.
+    _zoomRattraper(wc);
+    capturerMarque();
+    // La barre elle-même est dessinée par le SITE (appbar.js). Ici on remet
+    // seulement le menu natif — qui porte les raccourcis — et la palette.
+    dessinerMenus();
+  });
+  // Liens externes → navigateur par défaut ; jamais dans l'application.
+  wc.setWindowOpenHandler(({ url }) => {
+    // La page vierge sert aux documents a imprimer : on la laisse s ouvrir.
+    if (estPageVierge(url)) return { action: 'allow' };
+    if (!isAllowed(url)) { versLExterieur(url); return { action: 'deny' }; }
+    return { action: 'allow' };
+  });
+  // Navigation hors des hôtes autorisés bloquée (défense en profondeur).
+  wc.on('will-navigate', (e, url) => {
+    if (estPageVierge(url)) return;
+    if (!isAllowed(url)) { e.preventDefault(); versLExterieur(url); }
+  });
+};
+
+/* ══ LA BASCULE — le site derriere, le cadre devant ═════════════════════════
+   ⚠ L ORDRE D ATTACHEMENT EST LE Z : `addChildView` empile, le dernier est
+   DEVANT. Le SITE entre en premier, le CADRE par-dessus. C est aussi pourquoi le
+   site garde sa TAILLE PLEINE au lieu d etre reduit a un pixel : une page rendue
+   dans 1 x 1 px calcule une mise en page qui n a rien a voir avec la vraie, et
+   ce qui casse alors ne casse QUE sous l interrupteur — le pire des defauts a
+   diagnostiquer. Il est cache parce qu il est DESSOUS, pas parce qu il est petit.
+   ⚠ LES VUES ANCREES S ATTACHENT APRES, donc au-dessus du cadre : c est
+   exactement ce qu on veut, un ecran ancre se pose SUR la zone. */
+const _ajusterVuesCadre = () => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  let l = 0, h = 0;
+  try { const t = mainWindow.getContentSize(); l = t[0]; h = t[1]; } catch (e) { return; }
+  const b = { x: 0, y: 0, width: Math.max(1, l), height: Math.max(1, h) };
+  try { if (vueSite) vueSite.setBounds(b); } catch (e) {}
+  try { if (vueCadre) vueCadre.setBounds(b); } catch (e) {}
+};
+const poserCadreNatif = () => {
+  if (!mainWindow || mainWindow.isDestroyed()) return false;
+  try {
+    /* Le SITE : MEME prechargement et MEMES options que la fenetre principale
+       d hier. Il doit rester exactement la page qu il etait — c est lui qui
+       porte les 429 coeurs. */
+    vueSite = new WebContentsView({ webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
+      /* ⚠ LES MEMES ARGUMENTS QUE LA FENETRE PRINCIPALE, ET C EST OBLIGATOIRE :
+         `printagent.js` lit la version et le NOM DU POSTE dans `process.argv`
+         pour remplir la colonne << poste >> du journal des impressions. Les
+         oublier ici viderait cette colonne des que l interrupteur est allume —
+         et personne ne ferait le lien entre un cadre et un journal. */
+      additionalArguments: ['--sz-version=' + app.getVersion(),
+                            '--sz-poste=' + String(os.hostname() || '').slice(0, 40)],
+    } });
+    try { vueSite.setBackgroundColor('#111827'); } catch (e) {}
+    mainWindow.contentView.addChildView(vueSite);
+    _poserGardesDeSite(vueSite.webContents);
+
+    /* Le CADRE : c est une fenetre NATIVE, donc `pont-preload.js` — celui des
+       fenetres, pas celui de la fenetre principale. S y tromper donnerait une
+       page sans `szPont`, donc un cadre muet. */
+    vueCadre = new WebContentsView({ webPreferences: {
+      preload: path.join(__dirname, 'pont-preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
+    } });
+    try { vueCadre.setBackgroundColor('#0e1522'); } catch (e) {}
+    mainWindow.contentView.addChildView(vueCadre);
+
+    _ajusterVuesCadre();
+    mainWindow.on('resize', _ajusterVuesCadre);
+
+    vueCadre.webContents.loadURL('data:text/html;charset=utf-8,'
+      + encodeURIComponent(pageCadre())).catch(() => {});
+    vueSite.webContents.loadURL(APP_URL).catch(() => {});
+    return true;
+  } catch (e) {
+    /* ⚠ ON REVIENT AU CHEMIN D HIER PLUTOT QUE DE LAISSER UNE FENETRE VIDE. Un
+       interrupteur qui echoue doit rendre l application telle qu elle etait,
+       pas un rectangle noir dans lequel on ne peut rien faire — sinon on ne peut
+       meme plus l eteindre. */
+    vueSite = null; vueCadre = null;
+    try { mainWindow.loadURL(APP_URL).catch(() => {}); } catch (er) {}
+    return false;
+  }
+};
+
 // Ouvre (enfin) l'administration. Seul endroit qui charge APP_URL après le
 // lancement : si la porte ne l'appelle pas, l'admin ne s'ouvre pas.
 const ouvrirAdmin = () => {
@@ -4378,6 +4500,10 @@ const ouvrirAdmin = () => {
     parti = true;
     _porteActive = false;
     if (!mainWindow || mainWindow.isDestroyed()) return;
+    /* ⚠ LE SEUL ENDROIT OU LE CHEMIN SE SEPARE. Eteint, on charge APP_URL dans
+       la fenetre principale comme depuis toujours. Allume, on pose les deux
+       vues et la fenetre principale ne charge plus rien elle-meme. */
+    if (cadreNatifAllume() && poserCadreNatif()) return;
     mainWindow.loadURL(APP_URL).catch(() => {});
   };
   try {
@@ -5250,6 +5376,32 @@ const actionApp = (nom, arg) => {
        qu'on vient de corriger : la coche du menu se relit déjà toute seule, mais
        elle ne peut pas expliquer un ÉCHEC — elle se contenterait de rester au
        même endroit, ce qui se lit comme « le clic n'a rien fait ». */
+    /* ⚠⚠ L INTERRUPTEUR DU CADRE NATIF. Il se lit AU DEMARRAGE — les deux vues
+       naissent avec la fenetre —, donc le changer demande un redemarrage. On le
+       fait tout de suite plutot que de laisser croire que c est pris en compte :
+       un reglage qui n agit qu au prochain lancement, sans le dire, se lit comme
+       un bouton qui ne fait rien.
+       ⚠ ET C EST UN ALLER-RETOUR, pas un aller simple : la meme entree l eteint.
+       C est ce qui rend l essai sans risque — il l allume, il regarde, il
+       l eteint si ca ne va pas. */
+    case 'cadre-bascule': {
+      const _cn = !cadreNatifAllume();
+      reglages.set('cadreNatif', _cn);
+      try {
+        app.relaunch();
+        app.exit(0);
+      } catch (e) {
+        /* Si le redemarrage echoue, le reglage est POSE quand meme : il prendra
+           au prochain lancement. On le dit, plutot que de le taire. */
+        if (wc) {
+          wc.executeJavaScript('window.Toast && Toast.show('
+            + JSON.stringify((_cn ? 'Cadre natif activé' : 'Cadre natif désactivé')
+                + ' — fermez et rouvrez l’application pour voir le changement.')
+            + ",'warning',9000)", true).catch(() => {});
+        }
+      }
+      break;
+    }
     case 'autolaunch-toggle': {
       const _al = autoLaunchPoser(!autoLaunchEtat());
       const _alMsg = _al.ok
@@ -5459,7 +5611,7 @@ let panneauContexte = '';
    côté du bouton dès que les deux diffèrent. */
 const _peutOuvrirPanneau = (e) => {
   if (!mainWindow || mainWindow.isDestroyed()) return false;
-  try { if (e.sender === mainWindow.webContents) return true; } catch (er) {}
+  if (_deLaPrincipale(e)) return true;
   try { if (vueConnexion && e.sender === vueConnexion.webContents) return true; } catch (er) {}
   return false;
 };
@@ -5612,7 +5764,7 @@ ipcMain.on('panneau:survol', (e, dedans) => {
    pousse maintenant le theme DES la bascule ; il est aussi RETENU (reglages)
    pour que les fenetres du prochain demarrage naissent du bon cote. */
 ipcMain.on('theme:changer', (e, sombre) => {
-  if (!mainWindow || e.sender !== mainWindow.webContents) return;
+  if (!_deLaPrincipale(e)) return;
   const v = !!sombre;
   if (v === !!_modele.sombre) return;
   _modele.sombre = v;
@@ -5636,7 +5788,7 @@ const _hexOuRien = (v) => {
 };
 ipcMain.on('chrome:titlebar', (e, color, symbol) => {
   try {
-    if (!mainWindow || e.sender !== mainWindow.webContents) return;
+    if (!_deLaPrincipale(e)) return;
     if (typeof mainWindow.setTitleBarOverlay !== 'function') return;
     mainWindow.setTitleBarOverlay({
       color: _hexOuRien(color) || '#0e1522',
