@@ -415,6 +415,17 @@ jobs:
       # portaient déjà (depenses:820, ramassages:140), après relecture à la main.
       # Éprouvé par quatre pannes provoquées, une par signature.
           node tools/banc-langue-sur-code.js
+      # ⚠⚠ ET CELUI-CI DESSINE LA PAGE **ANGLAISE** ET Y CHERCHE DU FRANÇAIS —
+      # une question que le compteur ne pose pas. `chainesProse` écarte à dessein
+      # les chaînes d'UN SEUL MOT (pour ne pas prendre un identifiant pour une
+      # phrase) : un mot français collé à un nombre — « 3 unité », « 12 étiquette »
+      # — traverse donc le compteur sans un bruit et s'affiche tel quel en anglais.
+      # Sur la page anglaise, un mot accentué n'a aucune raison d'être là :
+      # l'accent devient une signature, pas une ressemblance.
+      # ⚠ Ce contrôle avait été refait À LA MAIN trois séances de suite, et il
+      # trouvait quelque chose à chaque fois. Au premier passage : 34 textes
+      # français dans 7 fenêtres déclarées TERMINÉES.
+          node tools/banc-langue-residuel.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js
           # ⚠ CELUI-CI GARDE UNE CHAÎNE DE QUATRE MORCEAUX que rien d'autre ne

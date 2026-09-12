@@ -83,7 +83,7 @@ function pageFournisseur(id) {
       + ch('f-nom', '${T("Nom du fournisseur")}', { requis: true, large: true })
       + ch('f-contact', 'Personne-ressource')
       + ch('f-courriel', 'Courriel', { type: 'email' })
-      + ch('f-tel', 'Téléphone', { type: 'tel' })
+      + ch('f-tel', '${T("Téléphone")}', { type: 'tel' })
       + ch('f-web', '${T("Site web")}', { placeholder: 'https://…' })
       + '</div></div></div>');
 
@@ -231,7 +231,7 @@ function pageFournisseur(id) {
          dans 550 ms, et son garde de fermeture demanderait sinon quoi faire d une
          saisie qui vient d etre enregistree. */
       szBrouillonJeter();
-      dire('Enregistré.', 'bon');
+      dire('${T("Enregistré.")}', 'bon');
       setTimeout(function(){ P.fermer(); }, 550);
     });
   }

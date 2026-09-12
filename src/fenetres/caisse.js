@@ -519,7 +519,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var vars = (a.variantes || []).map(function(v){
         return '<button data-pid="' + esc(a.id) + '" data-sz="' + esc(v.taille) + '"'
           + ' data-col="' + esc(v.couleur) + '"'
-          + (v.quantite <= 0 ? ' disabled title="Aucun en stock"' : '') + '>'
+          + (v.quantite <= 0 ? ' disabled title="${T("Aucun en stock")}"' : '') + '>'
           + esc(v.cle) + ' <span class="q">(' + v.quantite + ')</span></button>';
       }).join('');
       return '<div class="art"><div class="nom">' + esc(a.nom)
@@ -644,7 +644,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       lignes += rangee('${T("Stock décompté")}', r.stockOk ? 'oui'
         : '<strong style="color:var(--tx-err)">${T("NON — à vérifier")}</strong>');
     }
-    lignes += rangee('${T("Enregistrement en base")}', r.nuageOk ? 'confirmé'
+    lignes += rangee('${T("Enregistrement en base")}', r.nuageOk ? '${T("confirmé")}'
       : '<strong style="color:var(--tx-err)">${T("non confirmé")}</strong>');
     if (r.envoiCourriel === true)  lignes += rangee('${T("Facture")}', '${T("envoyée par courriel")}');
     if (r.envoiCourriel === false) lignes += rangee('${T("Facture")}', '<strong style="color:var(--tx-err)">${T("NON envoyée")}</strong>');

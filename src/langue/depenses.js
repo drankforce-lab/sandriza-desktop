@@ -243,4 +243,18 @@ module.exports = {
      entière, l’anglais peut mettre le gras ailleurs, et rien ne se perd. */
   'Saisissez le <strong>total payé</strong> dans ': 'Enter the <strong>total paid</strong> under ',
   'Déduire TPS et TVQ d’un total payé saisi dans ': 'Work out GST and QST from a total paid entered under ',
+
+  /* ── LA LONGUE TRAINE (voir banc-langue-residuel) ───────────────────────── */
+  /* ⚠⚠ L AVERTISSEMENT DES FRAIS SQUARE EVITE UNE DOUBLE DEDUCTION : ils sont
+     deja comptes a l Impot (ligne 8710). Le balisage vit DANS la chaine, pour
+     que l anglais place « Square » ou sa grammaire le demande. */
+  'Les <strong>frais de traitement Square</strong> ': 'Square <strong>processing fees</strong> ',
+  'Dépenses': 'Expenses',
+  'Dépense': 'Expense',
+  'dépense': 'expense',
+  'Importer une facture': 'Import an invoice',
+  'livrés': 'delivered',
+  'livré': 'delivered',
+  'affiché': 'shown',
+  'ajouté': 'added'
 };

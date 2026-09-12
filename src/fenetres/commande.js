@@ -194,14 +194,14 @@ function pageCommande(id) {
       + '<div class="aide" id="c-poids-note" style="margin-top:.4rem"></div>'
       + '</div>'
       + '<div class="carte plein"><h2>${T("Numéro de suivi")}</h2><div class="duo">'
-      + '<div class="ch"><label for="c-suivi">Numéro</label><input id="c-suivi" placeholder="rempli par l’étiquette"></div>'
+      + '<div class="ch"><label for="c-suivi">${T("Numéro")}</label><input id="c-suivi" placeholder="rempli par l’étiquette"></div>'
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.85rem;margin-top:.7rem;cursor:pointer">'
       + '<input type="checkbox" id="c-sans"> ${T("Expédier sans numéro de suivi")}</label>'
       + '</div></div>');
 
     // 3 — Expédition
-    h.push('<div class="etape"><div class="carte plein"><h2>Récapitulatif</h2>'
+    h.push('<div class="etape"><div class="carte plein"><h2>${T("Récapitulatif")}</h2>'
       + '<div id="c-recap"></div>'
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.86rem;margin-top:.8rem;cursor:pointer">'
       + '<input type="checkbox" id="c-pret"> ${T("Marquer « prête à l’expédition »")}</label>'
@@ -234,7 +234,7 @@ function pageCommande(id) {
          aux DEUX endroits : le vert du fil ET le refus d avancer — Suivant comme
          un clic direct dans le fil. Signale le 2026-08-07 : << Suivant ne doit
          pas etre disponible tant que la verification n est pas complete >>. */
-      { t: 'Vérification', obl: [],
+      { t: '${T("Vérification")}', obl: [],
         fait: toutVerifie,
         refus: function(){ return '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' sur ' + attendus() + ' ${T("unités confirmées.")}'; } },
       /* ⚠ << suivi rempli OU envoi sans numero assume >>. L ancienne forme
@@ -242,10 +242,10 @@ function pageCommande(id) {
          en main propre : la case cochee ne remplit aucun champ, et le fil comme
          Suivant refusaient — alors que le bouton Expedier, lui, acceptait. Deux
          regles pour le meme etat finissent toujours par se contredire. */
-      { t: 'Étiquette',    obl: [],
+      { t: '${T("Étiquette")}',    obl: [],
         fait: function(){ return !!String(val('c-suivi') || '').trim() || coché('c-sans'); },
         refus: '${T("Générez l’étiquette, ou cochez « Expédier sans numéro de suivi ».")}' },
-      { t: 'Expédition',   obl: [] }
+      { t: '${T("Expédition")}',   obl: [] }
     ], function(i){
       if (i === 0 && PAGI2) { PAGI2.dessiner(); majProgres(); }
       if (i === 2) recap();
@@ -330,7 +330,7 @@ function pageCommande(id) {
     var complet = toutVerifie();
     z.innerHTML = lg('Commande', esc(CMD.numero))
       + lg('Client', esc(CMD.client))
-      + lg('Vérification', complet ? 'colis complet' : (comptes() + ' sur ' + attendus() + ' — INCOMPLET'), !complet)
+      + lg('${T("Vérification")}', complet ? 'colis complet' : (comptes() + ' sur ' + attendus() + ' — INCOMPLET'), !complet)
       + lg('Transporteur', esc(t))
       + lg('${T("Numéro de suivi")}', val('c-suivi') ? esc(val('c-suivi'))
             : (coché('c-sans') ? '${T("aucun — assumé")}' : 'aucun'), !val('c-suivi') && !coché('c-sans'));
@@ -747,7 +747,7 @@ function pageCommande(id) {
     var refus = majExpedier();
     if (refus) { dire(refus, 'att'); return; }
     bEnr.disabled = true;
-    dire('Expédition…');
+    dire('${T("Expédition")}…');
     var pret = coché('c-pret');
     P.appeler('commande:prete', ID, pret).then(function(){
       return P.appeler('commande:expedier', ID, val('c-transp'), val('c-suivi'), coché('c-sans'));

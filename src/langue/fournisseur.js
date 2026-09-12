@@ -39,4 +39,8 @@ module.exports = {
      minuscule initiale du second et l article du premier. */
   'Une modification de cette fiche': 'An edit to this record',
   'Une fiche de fournisseur': 'A supplier record',
+
+  /* ── LA LONGUE TRAINE (voir banc-langue-residuel) ───────────────────────── */
+  'Téléphone': 'Phone',
+  'Enregistré.': 'Saved.'
 };

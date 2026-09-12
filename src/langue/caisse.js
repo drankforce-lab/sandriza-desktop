@@ -143,4 +143,13 @@ module.exports = {
   'S’il a payé mais que rien ne bouge, pressez ':
     'If they paid but nothing moves, press ',
   'Vérifier le paiement': 'Check the payment',
+
+  /* ── LA LONGUE TRAINE : CE QUE LE COMPTEUR NE PEUT PAS VOIR ─────────────── */
+  /* ⚠⚠ `chainesProse` ecarte les chaines d UN SEUL MOT pour ne pas prendre un
+     identifiant pour une phrase : ces textes-la traversent le compteur sans un
+     bruit et s affichent en francais sur la page anglaise. Seul
+     `banc-langue-residuel` les voit. Tous verifies un par un : ce sont des
+     textes AFFICHES, pas des etats enregistres. */
+  'Aucun en stock': 'None in stock',
+  'confirmé': 'confirmed'
 };

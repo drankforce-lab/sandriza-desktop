@@ -109,4 +109,8 @@ module.exports = {
      deux fragments, deux entrées. */
   'Taux de change indisponible.': 'Exchange rate unavailable.',
   'Les prix affichés en USD utilisent un taux ': 'Prices shown in USD use a fallback ',
+
+  /* ── LA LONGUE TRAINE (voir banc-langue-residuel) ───────────────────────── */
+  'remboursés': 'refunded',
+  'impayés': 'unpaid'
 };

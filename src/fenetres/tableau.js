@@ -428,7 +428,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         t.clients.inactifs > 0 ? '${T("Comptes inactifs :")} ' + t.clients.inactifs : '&nbsp;', ''),
       revenue: tuile('revenue', '${T("Revenus (net)")}' + an, esc(fmt(t.revenus.net)), '',
         t.revenus.factures + ' ${T("factures encaissées")}'
-          + (t.revenus.rembourse > 0 ? ' · −' + esc(fmt(t.revenus.rembourse)) + ' remboursés' : ''), ''),
+          + (t.revenus.rembourse > 0 ? ' · −' + esc(fmt(t.revenus.rembourse)) + ' ${T("remboursés")}' : ''), ''),
       messagerie: tuile('messagerie', 'Messagerie', t.messagerie, t.messagerie > 0 ? 'att' : '',
         t.messagerie > 0
           ? 'nouveau' + (t.messagerie > 1 ? 'x' : '') + ' message' + (t.messagerie > 1 ? 's' : '') + ' en attente'
@@ -460,7 +460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         f.avis > 0 ? '${T("en attente d’approbation")}' : 'aucun avis en attente', ''),
       factures_retard: tuile('factures_retard', '${T("Factures en retard")}', f.facturesRetard,
         f.facturesRetard > 0 ? 'err' : '',
-        f.facturesRetard > 0 ? esc(fmt(f.facturesRetardMontant)) + ' impayés' : '${T("aucune échéance dépassée")}',
+        f.facturesRetard > 0 ? esc(fmt(f.facturesRetardMontant)) + ' ${T("impayés")}' : '${T("aucune échéance dépassée")}',
         f.facturesRetard > 0 ? 'att' : ''),
       incidents: tuile('incidents', '${T("Incidents ouverts")}', f.incidentsOuverts,
         f.incidentsOuverts > 0 ? 'att' : '',

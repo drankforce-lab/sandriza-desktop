@@ -79,4 +79,16 @@ module.exports = {
   'Suivi': 'Tracking',
   'Frais': 'Cost',
   'Statut': 'Status',
+
+  /* ── LA LONGUE TRAINE (voir banc-langue-residuel) ───────────────────────── */
+  /* ⚠ CE SONT DES PASTILLES, PAS DES ETATS : ce qui decide est `r.annule`,
+     `o.livree`, `o.ramasse` — des booleens qui ne passent pas par ces mots. */
+  'Planifier les ramassages —': 'Schedule pickups —',
+  'Envoyer les demandes': 'Send the requests',
+  'Annulé': 'Cancelled',
+  'Planifié': 'Scheduled',
+  'Livrée': 'Delivered',
+  'Expédiée': 'Shipped',
+  'expédition': 'shipment',
+  'ramassé': 'picked up'
 };

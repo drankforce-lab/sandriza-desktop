@@ -188,7 +188,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="vide">${T("Aucun ramassage planifié.")}</div>';
     } else {
       h += rows.map(function(r){
-        var etat = r.annule ? '<span class="pill err">Annulé</span>' : '<span class="pill bon">Planifié</span>';
+        var etat = r.annule ? '<span class="pill err">${T("Annulé")}</span>' : '<span class="pill bon">${T("Planifié")}</span>';
         return '<div class="ligne' + (r.annule ? ' annule' : '') + '">'
           + '<div class="haut">'
           + '<span>' + r.logo + '</span><span class="num">' + esc(r.transporteur) + '</span>'
@@ -217,7 +217,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function boitePlan(){
     var p = PLAN;
     var h = '<div class="voile" id="rm-voile"><div class="boite">'
-      + '<h3><span class="ic">📦</span> Planifier les ramassages — ' + (p.total || 0) + ' colis</h3>';
+      + '<h3><span class="ic">📦</span> ${T("Planifier les ramassages —")} ' + (p.total || 0) + ' colis</h3>';
     if (!p.total) {
       h += '<div class="vide">${T("Aucun colis à ramasser pour l’instant.")}<br>'
         + '${T("Une commande doit être marquée Expédiée et avoir un numéro de suivi.")}</div>'
@@ -242,7 +242,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<input type="text" id="rm-p-endroit" aria-label="${T("Endroit du ramassage")}" value="Porte principale"></div>'
       + '</div>'
       + '<div class="pied-boite"><button id="rm-p-annuler">${T("Annuler")}</button>'
-      + '<button class="prim" id="rm-p-envoyer"><span class="ic">📨</span> Envoyer les demandes</button></div>'
+      + '<button class="prim" id="rm-p-envoyer"><span class="ic">📨</span> ${T("Envoyer les demandes")}</button></div>'
       + '</div></div>';
     return h;
   }
@@ -254,7 +254,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       corps.innerHTML = h;
       return;
     }
-    h += '<div class="carte"><h2>${T("Par transporteur —")} ' + RAP.total + ' expédition' + (RAP.total > 1 ? 's' : '') + '</h2>'
+    h += '<div class="carte"><h2>${T("Par transporteur —")} ' + RAP.total + ' ${T("expédition")}' + (RAP.total > 1 ? 's' : '') + '</h2>'
       + '<table><thead><tr><th>${T("Transporteur")}</th><th style="text-align:center">${T("Colis")}</th>'
       + '<th style="text-align:right">${T("Total frais")}</th><th style="text-align:right">${T("Moy. par colis")}</th></tr></thead><tbody>'
       + (RAP.transporteurs || []).map(function(t){
@@ -275,8 +275,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td>' + o.logo + ' ' + esc(o.transporteur) + '</td>'
             + '<td class="mono">' + esc(o.suivi || '—') + '</td>'
             + '<td style="text-align:right">' + esc(fmt(o.frais)) + '</td>'
-            + '<td>' + (o.livree ? '<span class="pill bon">Livrée</span>' : '<span class="pill info">Expédiée</span>')
-            + (o.ramasse ? ' <span class="pill bon">ramassé</span>' : '') + '</td></tr>';
+            + '<td>' + (o.livree ? '<span class="pill bon">${T("Livrée")}</span>' : '<span class="pill info">${T("Expédiée")}</span>')
+            + (o.ramasse ? ' <span class="pill bon">${T("ramassé")}</span>' : '') + '</td></tr>';
         }).join('')
       + '</tbody></table></div>';
     corps.innerHTML = h;

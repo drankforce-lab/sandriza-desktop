@@ -282,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
 
     h += '<div class="barreoutils">'
-      + '<button class="mini' + (VUE === 'depenses' ? ' actif' : '') + '" data-vue="depenses">Dépenses</button>'
+      + '<button class="mini' + (VUE === 'depenses' ? ' actif' : '') + '" data-vue="depenses">${T("Dépenses")}</button>'
       + '<button class="mini' + (VUE === 'annuaire' ? ' actif' : '') + '" data-vue="annuaire">Fournisseurs</button>'
       + '</div>';
 
@@ -307,7 +307,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               ? '${T("Déposez une facture : elle est lue automatiquement, et vous vérifiez les champs avant d’enregistrer.")}'
               : '${T("Déposez une facture : elle sera jointe comme reçu. La lecture automatique demande une clé (Configuration → Clés API).")}')
           + '">${T("Glissez une facture ici")}</div>' : '')
-      + '<span class="droite">' + D.nombre + ' dépense' + (D.nombre > 1 ? 's' : '') + '</span>'
+      + '<span class="droite">' + D.nombre + ' ${T("dépense")}' + (D.nombre > 1 ? 's' : '') + '</span>'
       + '</div>';
 
     h += '<div class="stats">'
@@ -317,7 +317,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="sub">${T("crédit sur intrants")}</div></div>'
       + '<div class="s"><div class="n">' + esc(D.totalTvq) + '</div><div class="l">${T("TVQ payée")}</div>'
       + '<div class="sub">remboursement sur intrants</div></div>'
-      + '<div class="s"><div class="n">' + D.nombre + '</div><div class="l">Dépenses</div>'
+      + '<div class="s"><div class="n">' + D.nombre + '</div><div class="l">${T("Dépenses")}</div>'
       + '<div class="sub">' + esc(D.periode) + '</div></div>'
       + '</div>';
 
@@ -371,7 +371,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     h += '</div>';
 
-    h += '<div class="aide" style="padding:.1rem">Les <strong>frais de traitement Square</strong> '
+    h += '<div class="aide" style="padding:.1rem">${T("Les <strong>frais de traitement Square</strong> ")}'
       + '${T("sont déjà comptés dans l’Impôt (ligne 8710) — ne les ressaisissez pas ici.")} '
       + '${T("La ")}<strong>${T("fiscalité")}</strong>${T(" et la ")}<strong>${T("conciliation bancaire")}</strong>${T(" restent à ")}'
       + '${T("l’écran Comptabilité de la fenêtre principale.")}</div>';
@@ -407,7 +407,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="stats">'
       + '<div class="s"><div class="n">' + ANN.total + '</div><div class="l">fournisseurs</div>'
       + '<div class="sub">${T("reconnus d’emblée")}</div></div>'
-      + '<div class="s"><div class="n">' + ANN.integres + '</div><div class="l">livrés</div>'
+      + '<div class="s"><div class="n">' + ANN.integres + '</div><div class="l">${T("livrés")}</div>'
       + '<div class="sub">${T("avec l’application")}</div></div>'
       + '<div class="s"><div class="n">' + ANN.appris + '</div><div class="l">vos corrections</div>'
       + '<div class="sub">elles priment</div></div>'
@@ -417,7 +417,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<input aria-label="Domaine, nom ou catégorie" type="search" id="a-q" placeholder="Domaine, nom ou catégorie…" value="' + esc(ANN_Q) + '">'
       + ((ro || (VERROU && !VERROU.obtenu)) ? ''
           : '<button class="prim" id="a-nouveau">${T("＋ Ajouter un fournisseur")}</button>')
-      + '<span class="droite">' + ANN.trouves + ' affiché' + (ANN.trouves > 1 ? 's' : '') + '</span>'
+      + '<span class="droite">' + ANN.trouves + ' ${T("affiché")}' + (ANN.trouves > 1 ? 's' : '') + '</span>'
       + '</div>';
 
     if (ANN_FORM) {
@@ -453,11 +453,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td>' + esc(r.categorieLbl)
               + (r.ligne ? ' <span class="dt">· L.' + esc(r.ligne) + '</span>' : '')
               + (r.flou ? ' <span class="pill att">polyvalent</span>' : '') + '</td>'
-              + '<td>' + (r.origine === 'integre' ? '<span class="pill neutre">livré</span>'
+              + '<td>' + (r.origine === 'integre' ? '<span class="pill neutre">${T("livré")}</span>'
                   : (r.origine === 'corrige'
                       ? '<span class="pill bon">${T("corrigé")}</span> <span class="dt">au lieu de '
                         + esc(r.categorieBaseLbl) + '</span>'
-                      : '<span class="pill bon">ajouté</span>')) + '</td>'
+                      : '<span class="pill bon">${T("ajouté")}</span>')) + '</td>'
               + '<td style="text-align:right;white-space:nowrap">'
               + ((ro || (VERROU && !VERROU.obtenu)) ? '<span class="dt">—</span>'
                   : '<button class="mini" data-annmod="' + esc(r.id) + '">Modifier</button>'
@@ -483,7 +483,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function boiteDetail(){
     var e = DETAIL;
     var h = '<div class="voile" id="d-voile"><div class="boite">'
-      + '<h3>' + esc(e.fournisseur || e.description || 'Dépense') + '</h3>'
+      + '<h3>' + esc(e.fournisseur || e.description || '${T("Dépense")}') + '</h3>'
       + '<div style="text-align:center"><span class="pill neutre">' + esc(e.categorieLbl)
       + (e.ligne ? ' · L.' + esc(e.ligne) : '') + '</span></div>'
       + '<div class="gros-montant">' + esc(e.totalTTC)
@@ -550,7 +550,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        Une ligne discrete la remplace : le fichier reste remplacable. */
     if (neuf && !f.recu) {
       h += '<div class="depot" id="d-depot-form" style="margin-bottom:.6rem">'
-        + '<div class="gros"><span class="ic">📄</span> Importer une facture</div>'
+        + '<div class="gros"><span class="ic">📄</span> ${T("Importer une facture")}</div>'
         + '<div class="pt">' + (D.lectureAuto
             ? '${T("Photo, image ou PDF — les champs sont pré-remplis, vous vérifiez avant d’enregistrer.")}'
             : '${T("Elle sera jointe comme reçu (lecture automatique indisponible sans clé).")}') + '</div>'

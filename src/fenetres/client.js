@@ -198,7 +198,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var pill = document.getElementById('pill');
     pill.style.display = '';
     pill.className = 'pill ' + (c.supprime ? 'rouge' : (c.actif ? 'vert' : 'gris'));
-    pill.textContent = c.supprime ? 'Supprimé' : (c.actif ? 'Actif' : 'Inactif');
+    pill.textContent = c.supprime ? '${T("Supprimé")}' : (c.actif ? 'Actif' : 'Inactif');
     if (EDITION) dessinerEdition(); else dessinerFiche();
   }
 
@@ -210,8 +210,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="tuile"><div class="k">${T("Total dépensé")}</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v" style="font-size:.92rem">' + esc(dateFr(c.inscritLe)) + '</div></div>'
       + '</div></div>';
-    h += '<div class="carte"><h2>Coordonnées</h2>'
-      + (c.tel ? '<div class="ligne"><span class="k">Téléphone</span><span>' + esc(c.tel) + '</span></div>' : '')
+    h += '<div class="carte"><h2>${T("Coordonnées")}</h2>'
+      + (c.tel ? '<div class="ligne"><span class="k">${T("Téléphone")}</span><span>' + esc(c.tel) + '</span></div>' : '')
       + '<div class="ligne"><span class="k">Adresse</span><span style="text-align:right">'
       + esc([a.rue, a.ville, a.province, a.codePostal, a.pays].filter(Boolean).join(', ') || '—') + '</span></div>'
       + '<div class="ligne"><span class="k">${T("Langue des courriels")}</span><span>' + (c.langue === 'en' ? 'English' : 'Français') + '</span></div>'
@@ -254,11 +254,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function dessinerEdition(){
     var c = R.client, a = c.adresse;
-    var h = '<div class="carte"><h2>Identité</h2><div class="r2">'
-      + '<div class="ch"><label for="e-prenom">Prénom</label><input id="e-prenom" value="' + esc(c.prenom) + '"></div>'
+    var h = '<div class="carte"><h2>${T("Identité")}</h2><div class="r2">'
+      + '<div class="ch"><label for="e-prenom">${T("Prénom")}</label><input id="e-prenom" value="' + esc(c.prenom) + '"></div>'
       + '<div class="ch"><label for="e-nom">Nom</label><input id="e-nom" value="' + esc(c.nom) + '"></div>'
       + '<div class="ch"><label for="e-courriel">${T("Adresse courriel")}</label><input id="e-courriel" inputmode="email" value="' + esc(c.courriel) + '"></div>'
-      + '<div class="ch"><label for="e-tel">Téléphone</label><input id="e-tel" inputmode="tel" value="' + esc(c.tel) + '"></div>'
+      + '<div class="ch"><label for="e-tel">${T("Téléphone")}</label><input id="e-tel" inputmode="tel" value="' + esc(c.tel) + '"></div>'
       + '</div></div>';
     h += '<div class="carte"><h2>${T("Adresse de livraison")}</h2><div class="r2">'
       + '<div class="ch large"><label for="e-rue">Rue</label><input id="e-rue" value="' + esc(a.rue) + '"></div>'

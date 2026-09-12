@@ -144,4 +144,14 @@ module.exports = {
      écrit « … sera <strong>facturé une » puis « seconde fois</strong> ». */
   'En commander une seconde sera ': 'Ordering a second one will be ',
   'facturé une ': 'billed a ',
+
+  /* ── LA LONGUE TRAINE (voir banc-langue-residuel) ───────────────────────── */
+  /* ⚠ LES TITRES DES ETAPES DE L ASSISTANT : ils s AFFICHENT dans le fil. Ce qui
+     decide du passage a l etape suivante est `fait()`, une fonction — aucun de
+     ces mots n est compare a quoi que ce soit. */
+  'Vérification': 'Verification',
+  'Étiquette': 'Label',
+  'Expédition': 'Shipping',
+  'Récapitulatif': 'Summary',
+  'Numéro': 'Number'
 };

@@ -128,4 +128,13 @@ module.exports = {
     'The account goes to the bin and stays restorable at any time.',
   'Ce compte n’a aucune commande — rien de comptable n’est perdu.':
     'This account has no order — nothing accounting-related is lost.',
+
+  /* ── LA LONGUE TRAINE (voir banc-langue-residuel) ───────────────────────── */
+  /* ⚠ « Supprime » est ici la PASTILLE qu on lit, pas l etat qu on enregistre :
+     la valeur est `c.supprime`, un booleen, et il ne passe pas par ici. */
+  'Supprimé': 'Deleted',
+  'Coordonnées': 'Contact details',
+  'Téléphone': 'Phone',
+  'Identité': 'Identity',
+  'Prénom': 'First name'
 };
