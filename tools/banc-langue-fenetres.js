@@ -82,6 +82,12 @@ const aTraduire = (t) => {
      part : sans cette condition, « rouge, vert, bleu » — trois mots minuscules
      séparés par des virgules — serait écarté comme un sélecteur. Un filtre trop
      large ne fait pas de bruit : il RÉTRÉCIT le banc en silence. */
+  /* ⚠ ET UNE VALEUR CSS EN FONCTION. `repeating-conic-gradient(#2a3444 0 25%,
+     #222c3a 0 50%) 0 0/16px 16px` (photos) a des minuscules, des espaces et des
+     virgules : de la prose, aux yeux du filtre general. On NOMME les fonctions
+     plutot que d ecarter « tout ce qui a une parenthese » — une phrase peut
+     parfaitement commencer par un mot suivi d une parenthese. */
+  if (/^(?:(?:repeating-)?(?:linear|radial|conic)-gradient|url|calc|var|rgba?|hsla?)\(/.test(t)) return false;
   const parts = t.split(',').map((p) => p.trim());
   const UNE_PART = /^[a-z][\w-]*$|^[a-z][\w-]*\[[^\]]+\]$|^\[[^\]]+\]$|^[.#][\w-]+$/;
   if (parts.length > 1 && parts.every((p) => UNE_PART.test(p))

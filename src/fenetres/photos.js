@@ -24,6 +24,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('photos');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -331,11 +335,11 @@ html.jour .asst .pi{background:#faf8f3}
 /** Page complète de la fenêtre native « Photos ». */
 function pagePhotos() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Photos — Administration Sandriza</title>
+<title>${T("Photos — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.image}</span><h1>Photos</h1>
+<div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Photos")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -409,8 +413,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     VEILLE = setTimeout(function(){
       if (!OCCUPE) return;
       liberer();
-      dire('Aucune réponse de la fenêtre principale pour cette opération. '
-        + 'Elle a peut-être abouti quand même — rechargez la liste pour voir.', 'err');
+      dire('${T("Aucune réponse de la fenêtre principale pour cette opération.")} '
+        + '${T("Elle a peut-être abouti quand même — rechargez la liste pour voir.")}', 'err');
     }, VEILLE_MS);
   }
   function liberer(){
@@ -422,8 +426,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      casse ; un bouton qui dit pourquoi il attend passe pour occupe. */
   function occupeDeja(quoi){
     if (!OCCUPE) return false;
-    dire(quoi + ' — un travail est déjà en cours dans cette fenêtre. Patientez, '
-      + 'ou rechargez la liste s’il ne se termine pas.', 'att');
+    dire(quoi + ' ${T("— un travail est déjà en cours dans cette fenêtre. Patientez,")} '
+      + '${T("ou rechargez la liste s’il ne se termine pas.")}', 'att');
     return true;
   }
 
@@ -440,30 +444,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la photothèque.',
-    droit_produit:      'Attacher une photo modifie une fiche produit — votre rôle ne le permet pas.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps. Une photo très lourde peut en être la cause.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    module_photos:      'La photothèque n’a pas pu être chargée dans la fenêtre principale. Rechargez-la (Ctrl+R) ; si le message revient, la session du personnel a peut-être expiré.',
-    introuvable:        'Cette photo n’existe plus.',
-    produit_introuvable:'Cet article n’existe plus.',
-    image_absente:      'Aucune image lisible dans ce fichier.',
-    non_isolee:         'Isolez d’abord le vêtement : un fond se pose derrière un détourage.',
-    isolation:          'L’isolation a échoué.',
-    fond:               'Le fond n’a pas pu être appliqué.',
-    attache:            'L’attache a échoué — rien n’a été écrit sur la fiche.',
-    import:             'L’import a échoué.',
-    nuage:              'Écriture dans le nuage refusée — rien n’a été retiré.',
-    usb_hors_app:       'La détection de clé USB n’existe que dans l’application de bureau.',
-    export_hors_app:    'L’enregistrement de fichier n’existe que dans l’application de bureau.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la photothèque.")}',
+    droit_produit:      '${T("Attacher une photo modifie une fiche produit — votre rôle ne le permet pas.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps. Une photo très lourde peut en être la cause.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    module_photos:      '${T("La photothèque n’a pas pu être chargée dans la fenêtre principale. Rechargez-la (Ctrl+R) ; si le message revient, la session du personnel a peut-être expiré.")}',
+    introuvable:        '${T("Cette photo n’existe plus.")}',
+    produit_introuvable:'${T("Cet article n’existe plus.")}',
+    image_absente:      '${T("Aucune image lisible dans ce fichier.")}',
+    non_isolee:         '${T("Isolez d’abord le vêtement : un fond se pose derrière un détourage.")}',
+    isolation:          '${T("L’isolation a échoué.")}',
+    fond:               '${T("Le fond n’a pas pu être appliqué.")}',
+    attache:            '${T("L’attache a échoué — rien n’a été écrit sur la fiche.")}',
+    import:             '${T("L’import a échoué.")}',
+    nuage:              '${T("Écriture dans le nuage refusée — rien n’a été retiré.")}',
+    usb_hors_app:       '${T("La détection de clé USB n’existe que dans l’application de bureau.")}',
+    export_hors_app:    '${T("L’enregistrement de fichier n’existe que dans l’application de bureau.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -488,14 +492,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── LE DESSIN ─────────────────────────────────────────────────────────── */
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var ro = !D.peutModifier;
     var h = '';
 
     if (ro) {
       h += '<div class="carte" style="border-color:rgba(180,120,10,.4)">'
-        + '<span class="pill att">◉ Lecture seule</span> '
-        + '<span class="aide">Votre rôle permet de consulter la photothèque, pas de la modifier.</span></div>';
+        + '<span class="pill att">${T("◉ Lecture seule")}</span> '
+        + '<span class="aide">${T("Votre rôle permet de consulter la photothèque, pas de la modifier.")}</span></div>';
     }
 
     /* ══════════════════════════════════════════════════════════════════════
@@ -509,53 +513,53 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        panneau publicitaire pour une action qu on peut faire d un bouton. Le
        glisser-deposer, lui, marche partout dans la fenetre. */
     h += '<div class="cmd">'
-      + '<button class="prim" id="p-choisir"' + (ro ? ' disabled' : '') + '>＋ Importer</button>'
+      + '<button class="prim" id="p-choisir"' + (ro ? ' disabled' : '') + '>${T("＋ Importer")}</button>'
       /* ⚠ LE CHAMP << NOM DU LOT >> A QUITTE CETTE BARRE. Il n y servait a rien
          tant qu on n avait pas choisi de photos, et il encombrait la seule
          ligne qu on regarde tout le temps. Il vit maintenant a l etape ou il
          a un sens : quand le lot existe. */
       + (ro ? '' : '<button id="p-assistant"'
           + ' title="Choisir une source, sélectionner les photos, puis les traiter">'
-          + '⚙ Traitement en lot</button>')
+          + '${T("⚙ Traitement en lot")}</button>')
       // Studio virtuel : mise en scène guidée (Photoroom). On y choisit une photo
       // de la photothèque directement, d'où l'entrée ici.
-      + '<button id="p-studio" title="Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat"><span class="ic">🎨</span> Studio virtuel</button>'
+      + '<button id="p-studio" title="${T("Mise en scène")} guidée : mannequin virtuel, fantôme habillé, produit à plat"><span class="ic">🎨</span> ${T("Studio virtuel")}</button>'
       + '<span class="sep"></span>'
-      + '<input aria-label="Code, nom, article" type="search" id="p-q" placeholder="Code, nom, article…" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Code")}, nom, article" type="search" id="p-q" placeholder="${T("Code")}, nom, article…" value="' + esc(Q) + '">'
       + '<select id="p-tri" aria-label="Nombre de photos par page">'
-      + opt('recent', 'Plus récentes') + opt('code', 'Par code') + opt('name', 'Par nom')
-      + opt('linked', 'Liées d’abord') + opt('size', 'Plus lourdes')
+      + opt('recent', '${T("Plus récentes")}') + opt('code', '${T("Par code")}') + opt('name', '${T("Par nom")}')
+      + opt('linked', '${T("Liées d’abord")}') + opt('size', '${T("Plus lourdes")}')
       + '</select>'
       /* ⚠ JUSQU A 500 PAR PAGE. Le plafond de 24 obligeait a paginer pour cocher
          un lot de deux cents, et un choix qui se perd entre deux pages n en est
          pas un. */
-      + '<select id="p-taille" title="Photos par page">'
+      + '<select id="p-taille" title="${T("Photos")} par page">'
       + [24, 50, 100, 200, 500].map(function(n){
           return '<option value="' + n + '"' + (TAILLE === n ? ' selected' : '') + '>' + n + ' / page</option>';
         }).join('')
       + '</select>'
       + '<span class="droite">'
       + (DERNIER_SUIVI && !SUIVI
-          ? '<button class="mini" id="p-suivi" title="Revoir le compte rendu du dernier traitement">Dernier suivi</button>'
+          ? '<button class="mini" id="p-suivi" title="Revoir le compte rendu du dernier traitement">${T("Dernier suivi")}</button>'
           : '')
       + '<button class="mini" id="p-lots"' + (D.total ? '' : ' disabled')
-      + ' title="' + (D.total ? 'Historique des lots importés'
-                             : 'Aucune photo : il n’y a pas encore de lot') + '">Lots</button>'
+      + ' title="' + (D.total ? '${T("Historique des lots importés")}'
+                             : '${T("Aucune photo : il n’y a pas encore de lot")}') + '">Lots</button>'
       /* ⚠ PLUS DE BOUTON « Traitements IA » ICI (2026-08-10) : c'est un JOURNAL,
          et les journaux ne s'ouvrent plus depuis d'autres fenêtres — ils vivront
          dans la fenêtre Journaux unifiée (palier 5). L'écran reste accessible par
          le menu Configuration en attendant. */
       + (D.total && !ro
-          ? '<button class="mini danger" id="p-vider">' + (VIDER_ARME ? 'Confirmer — vider les ' + D.total + ' ?' : 'Tout vider') + '</button>'
+          ? '<button class="mini danger" id="p-vider">' + (VIDER_ARME ? '${T("Confirmer — vider les")} ' + D.total + ' ?' : '${T("Tout vider")}') + '</button>'
           : '')
       + '</span></div>';
 
     h += '<div class="etat">'
-      + '<b>' + D.trouvees + '</b> affichée' + (D.trouvees > 1 ? 's' : '')
+      + '<b>' + D.trouvees + '</b> ${T("affichée")}' + (D.trouvees > 1 ? 's' : '')
       + ' sur <b>' + D.total + '</b>'
-      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.isolees + '</b> isolée' + (D.isolees > 1 ? 's' : '')
-      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.liees + '</b> attachée' + (D.liees > 1 ? 's' : '')
-      + '<span class="sp" aria-hidden="true">·</span> ' + poids(D.poidsTotal) + ' rangés'
+      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.isolees + '</b> ${T("isolée")}' + (D.isolees > 1 ? 's' : '')
+      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.liees + '</b> ${T("attachée")}' + (D.liees > 1 ? 's' : '')
+      + '<span class="sp" aria-hidden="true">·</span> ' + poids(D.poidsTotal) + ' ${T("rangés")}'
       /* ⚠⚠ DEUX CHIFFRES DIFFERENTS, ET C EST VOULU. << rangés >> additionne le
          poids inscrit sur chaque fiche ; << dans R2 >> est ce que le stockage
          contient VRAIMENT, mesure en l interrogeant. Les confondre ferait passer
@@ -563,17 +567,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          plus aucune fiche ne cite, et c est justement ceux-la qu on paie sans
          les voir. L ecart entre les deux EST l information. */
       + '<span class="sp" aria-hidden="true">·</span> <span id="p-r2">'
-      + (ESPACE === null ? '<a href="#" id="p-mesurer">mesurer l’espace R2</a>'
-         : ESPACE.ok === false ? '<span class="err">espace R2 : ' + esc(ESPACE.detail || 'illisible') + '</span>'
+      + (ESPACE === null ? '<a href="#" id="p-mesurer">${T("mesurer l’espace R2")}</a>'
+         : ESPACE.ok === false ? '<span class="err">${T("espace R2 :")} ' + esc(ESPACE.detail || 'illisible') + '</span>'
          : espaceTexte(ESPACE))
       + '</span>'
       + '</div>';
 
     if (!ro && !D.total) {
       h += '<div class="depot" id="p-depot">'
-        + '<div class="gros">Glissez-déposez vos photos ici</div>'
+        + '<div class="gros">${T("Glissez-déposez vos photos ici")}</div>'
         + '<div class="pt">ou cliquez pour choisir des fichiers'
-        + (D.bureau ? ' · ou « Clé USB »' : '') + '</div></div>';
+        + (D.bureau ? ' ${T("· ou « Clé USB »")}' : '') + '</div></div>';
     }
 
     h += '<div class="carte">';
@@ -582,14 +586,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       /* ⚠ TROIS ETATS, PAS DEUX. Dire << Aucune photo >> pendant la
          synchronisation ferait croire que la mediatheque a ete perdue. */
       h += '<div class="vide">' + (!D.charge
-        ? 'Lecture de la photothèque…'
-        : (D.total ? 'Aucune photo ne correspond à cette recherche.'
-                   : 'Aucune photo. Déposez-en ci-dessus.')) + '</div>';
+        ? '${T("Lecture de la photothèque…")}'
+        : (D.total ? '${T("Aucune photo ne correspond à cette recherche.")}'
+                   : '${T("Aucune photo. Déposez-en ci-dessus.")}')) + '</div>';
     } else {
       h += '<table class="grille"><thead><tr>'
-        + '<th style="width:26px"><input type="checkbox" id="p-tout" title="Tout choisir sur cette page"></th>'
-        + '<th style="width:46px"></th><th>Code</th><th>Nom</th>'
-        + '<th>Article lié</th><th class="num">Poids</th><th>État</th>'
+        + '<th style="width:26px"><input type="checkbox" id="p-tout" title="${T("Tout choisir")} sur cette page"></th>'
+        + '<th style="width:46px"></th><th>${T("Code")}</th><th>${T("Nom")}</th>'
+        + '<th>${T("Article lié")}</th><th class="num">${T("Poids")}</th><th>${T("État")}</th>'
         + '<th style="width:1%">Actions</th></tr></thead><tbody>'
         + rows.map(ligne).join('') + '</tbody></table>';
       if ((D.pages || 1) > 1) {
@@ -621,9 +625,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      L ASSISTANT — dessin et conduite
      ══════════════════════════════════════════════════════════════════════════ */
   var BUTS = [
-    ['detourage', 'Retirer le fond', 'Isole le vêtement de son arrière-plan.'],
-    ['fantome', 'Retirer le mannequin', 'Retire le fond PUIS le mannequin. Le col et les manches sont reconstruits.'],
-    ['humain', 'Mannequin humain', 'Retire le fond, retire le mannequin, PUIS engendre une personne qui porte le vêtement.'],
+    ['detourage', '${T("Retirer le fond")}', '${T("Isole le vêtement de son arrière-plan.")}'],
+    ['fantome', '${T("Retirer le mannequin")}', '${T("Retire le fond PUIS le mannequin. Le col et les manches sont reconstruits.")}'],
+    ['humain', '${T("Mannequin humain")}', '${T("Retire le fond, retire le mannequin, PUIS engendre une personne qui porte le vêtement.")}'],
   ];
 
   /* ══════════════════════════════════════════════════════════════════════════
@@ -649,7 +653,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      d objets plats, eprouve depuis des mois. Une forme qui marche partout
      ailleurs vaut mieux qu une explication. */
   function lotsOuvrir(){
-    dire('Lecture des lots…');
+    dire('${T("Lecture des lots…")}');
     appeler('photos:toutes', []).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       var par = {};
@@ -667,7 +671,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if ((x.lotTs || 0) > l.ts) l.ts = x.lotTs;
       });
       if (par['@avant']) {
-        par['@avant'].nom = 'Avant le suivi des lots';
+        par['@avant'].nom = '${T("Avant le suivi des lots")}';
         par['@avant'].source = 'origine inconnue';
       }
       LOTS = Object.keys(par).map(function(k){ return par[k]; })
@@ -688,10 +692,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (LOTS.length && typeof LOTS[0].nombre !== 'number') {
         var champs = [];
         try { champs = Object.keys(LOTS[0]); } catch (e) { champs = []; }
-        dire('Les lots arrivent sans leurs compteurs (champs reçus : '
-          + esc(champs.join(', ') || 'aucun') + '). Rechargez avec '
-          + '« Affichage ▸ Recharger (vider le cache) » ; si cela persiste, '
-          + 'transmettez-moi cette ligne.', 'err');
+        dire('${T("Les lots arrivent sans leurs compteurs (champs reçus :")} '
+          + esc(champs.join(', ') || 'aucun') + '${T("). Rechargez avec")} '
+          + '${T("« Affichage ▸ Recharger (vider le cache) » ; si cela persiste,")} '
+          + '${T("transmettez-moi cette ligne.")}', 'err');
       }
       dire('');
       dessiner();
@@ -710,10 +714,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function espaceTexte(e){
     var t = 'R2 : <b>' + poids(e.octets) + '</b>';
-    if (!e.complet) t = 'R2 : <b>au moins ' + poids(e.octets) + '</b>';
+    if (!e.complet) t = '${T("R2 : <b>au moins ")}' + poids(e.octets) + '</b>';
     t += ' <span class="pt">(' + e.objets + ' objet' + (e.objets > 1 ? 's' : '');
     if (e.orphelins && e.orphelins.sur && e.orphelins.objets) {
-      t += ', dont <b class="att">' + e.orphelins.objets + ' orphelin'
+      t += '${T(", dont")} <b class="att">' + e.orphelins.objets + ' orphelin'
         + (e.orphelins.objets > 1 ? 's' : '') + ' — ' + poids(e.orphelins.octets) + '</b>';
     }
     t += ')</span>';
@@ -722,13 +726,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function mesurerEspace(){
     var z = document.getElementById('p-r2');
-    if (z) z.innerHTML = 'mesure de l’espace R2…';
+    if (z) z.innerHTML = '${T("mesure de l’espace R2…")}';
     appeler('photos:espace', []).then(function(r){
       ESPACE = r;
       dessiner();
       if (r && r.ok && r.orphelins && r.orphelins.sur && r.orphelins.objets) {
-        dire(r.orphelins.objets + ' objet(s) ne sont cités par aucune photo : '
-          + poids(r.orphelins.octets) + ' payés pour rien. Le passage de nuit les retire.', 'att');
+        dire(r.orphelins.objets + ' ${T("objet(s) ne sont cités par aucune photo :")} '
+          + poids(r.orphelins.octets) + ' ${T("payés pour rien. Le passage de nuit les retire.")}', 'att');
       }
     });
   }
@@ -739,7 +743,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function lotsHtml(){
     var h = '<div class="asst"><div class="bo">'
-      + '<div class="tt"><h3>Lots importés</h3>'
+      + '<div class="tt"><h3>${T("Lots importés")}</h3>'
       + '<span class="pas">' + LOTS.length + ' lot' + (LOTS.length > 1 ? 's' : '') + '</span></div>'
       + '<div class="co">';
     /* ⚠⚠ LE DIAGNOSTIC EST DANS LE PANNEAU, PAS DANS LE BANDEAU DU BAS. Un
@@ -752,21 +756,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var champs = [];
       try { champs = Object.keys(LOTS[0]); } catch (e) { champs = []; }
       h += '<div class="franc" style="margin-bottom:.6rem">'
-        + '<b>Les lots arrivent sans leurs compteurs.</b><br>'
-        + 'Champs reçus : <code>' + esc(champs.join(', ') || '(aucun)') + '</code><br>'
-        + 'Module du site : <code>' + esc(LOTS_VERSION || '(non annoncée)') + '</code><br>'
-        + 'Rechargez avec « Affichage ▸ Recharger (vider le cache) ». Si cela '
-        + 'persiste, transmettez ces deux lignes.</div>';
+        + '<b>${T("Les lots arrivent sans leurs compteurs.")}</b><br>'
+        + '${T("Champs reçus :")} <code>' + esc(champs.join(', ') || '(aucun)') + '</code><br>'
+        + '${T("Module du site :")} <code>' + esc(LOTS_VERSION || '${T("(non annoncée)")}') + '</code><br>'
+        + '${T("Rechargez avec « Affichage ▸ Recharger (vider le cache) ». Si cela")} '
+        + '${T("persiste, transmettez ces deux lignes.")}</div>';
     }
-    if (!LOTS.length) h += '<div class="vide">Aucune photo dans la photothèque.</div>';
+    if (!LOTS.length) h += '<div class="vide">${T("Aucune photo dans la photothèque.")}</div>';
     else {
-      h += '<table><thead><tr><th>Lot</th><th>Entré</th><th class="num">Photos</th>'
-        + '<th class="num">Traitées</th><th class="num">Attachées</th><th class="num">Poids</th>'
+      h += '<table><thead><tr><th>Lot</th><th>${T("Entré")}</th><th class="num">${T("Photos")}</th>'
+        + '<th class="num">${T("Traitées")}</th><th class="num">${T("Attachées")}</th><th class="num">${T("Poids")}</th>'
         + '<th></th></tr></thead><tbody>';
       LOTS.forEach(function(l){
         var arme = (LOT_ARME === l.id);
         h += '<tr>'
-          + '<td><b>' + esc(l.nom || 'Sans nom') + '</b>'
+          + '<td><b>' + esc(l.nom || '${T("Sans nom")}') + '</b>'
           + (l.source ? '<div class="dt">' + esc(l.source) + '</div>' : '') + '</td>'
           + '<td class="dt">' + (l.ts ? dateFr(l.ts) : '—') + '</td>'
           /* ⚠ UN NOMBRE MANQUANT S ECRIT << — >>, JAMAIS << undefined >>. Le mot
@@ -778,25 +782,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td class="num">' + nb(l.liees) + '</td>'
           + '<td class="num">' + poids(l.poids) + '</td>'
           + '<td style="white-space:nowrap">'
-          + '<button class="mini" data-lotsel="' + esc(l.id) + '">Tout cocher</button> '
+          + '<button class="mini" data-lotsel="' + esc(l.id) + '">${T("Tout cocher")}</button> '
           + (D.peutModifier
               ? '<button class="mini dgr" data-lotdel="' + esc(l.id) + '">'
-                + (arme ? 'Confirmer ?' : 'Supprimer le lot') + '</button>'
+                + (arme ? '${T("Confirmer ?")}' : '${T("Supprimer le lot")}') + '</button>'
               : '')
           + '</td></tr>'
           + (arme
               ? '<tr><td colspan="7" class="dt" style="color:var(--tx-jaune)">'
-                + 'Les ' + Math.max(0, (l.nombre || 0) - (l.liees || 0)) + ' photo(s) non attachées seront retirées. '
-                + (l.liees ? ('Les ' + l.liees + ' attachées à un article sont GARDÉES : '
-                              + 'retirer la photothèque ne doit jamais dépouiller une fiche produit.')
+                + 'Les ' + Math.max(0, (l.nombre || 0) - (l.liees || 0)) + ' ${T("photo(s) non attachées seront retirées.")} '
+                + (l.liees ? ('Les ' + l.liees + ' ${T("attachées à un article sont GARDÉES :")} '
+                              + '${T("retirer la photothèque ne doit jamais dépouiller une fiche produit.")}')
                            : '')
                 + '</td></tr>'
               : '');
       });
       h += '</tbody></table>';
     }
-    h += '</div><div class="pi"><span class="aide">Un lot est un import. '
-      + 'Le retirer défait cet import d’un geste.</span>'
+    h += '</div><div class="pi"><span class="aide">${T("Un lot est un import.")} '
+      + '${T("Le retirer défait cet import d’un geste.")}</span>'
       + '<span class="dr"><button class="prim" id="l-fermer">Fermer</button></span>'
       + '</div></div></div>';
     return h;
@@ -818,11 +822,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var lot = LOTS.filter(function(x){ return x.id === id; })[0];
         lotsFermer();
         dire(n
-          ? (n + ' photo(s) cochée(s)'
+          ? (n + ' ${T("photo(s) cochée(s)")}'
              + (lot && lot.nombre > n
-                 ? (' — le lot en compte ' + lot.nombre + ' ; augmentez « photos par page » pour toutes les voir.')
+                 ? (' ${T("— le lot en compte")} ' + lot.nombre + ' ${T("; augmentez « photos par page » pour toutes les voir.")}')
                  : '.'))
-          : 'Aucune photo de ce lot sur cette page — augmentez « photos par page ».',
+          : '${T("Aucune photo de ce lot sur cette page — augmentez « photos par page ».")}',
           n ? 'bon' : 'att');
       };
     });
@@ -831,12 +835,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var id = b.getAttribute('data-lotdel');
         if (LOT_ARME !== id) { LOT_ARME = id; dessiner(); return; }
         LOT_ARME = '';
-        dire('Suppression du lot…');
+        dire('${T("Suppression du lot…")}');
         appeler('lot:jeter', [id]).then(function(r){
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
-          dire(r.retirees + ' photo(s) retirée(s)'
-            + (r.gardees ? ' · ' + r.gardees + ' gardée(s) car attachée(s) à un article' : '')
-            + (r.echecs ? ' · ' + r.echecs + ' en échec' : '') + '.',
+          dire(r.retirees + ' ${T("photo(s) retirée(s)")}'
+            + (r.gardees ? ' · ' + r.gardees + ' ${T("gardée(s) car attachée(s) à un article")}' : '')
+            + (r.echecs ? ' · ' + r.echecs + ' ${T("en échec")}' : '') + '.',
             r.echecs ? 'att' : 'bon');
           LOTS = null;
           charger();
@@ -849,7 +853,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ASSIST = { etape: 1, sources: null, lecteur: '', fichiers: [], choix: {},
                tri: 'date', nom: '', but: 'detourage' };
     dessiner();
-    dire('Lecture des sources…');
+    dire('${T("Lecture des sources…")}');
     appeler('lot:sources', []).then(function(r){
       ASSIST.sources = (r && r.ok) ? (r.lecteurs || []) : [];
       ASSIST.erreurSource = (r && r.ok) ? '' : expliquer(r);
@@ -870,32 +874,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var A = ASSIST;
     var pas = function(n){ return '<b' + (A.etape === n ? ' class="on"' : '') + '>' + n + '</b>'; };
     var h = '<div class="asst"><div class="bo">'
-      + '<div class="tt"><h3>Traitement en lot</h3>'
+      + '<div class="tt"><h3>${T("Traitement en lot")}</h3>'
       + '<span class="pas">' + pas(1) + '<span>source</span>' + pas(2) + '<span>choix</span>'
       + pas(3) + '<span>traitement</span></span>'
       /* ⚠ VRAI PLEIN ECRAN DU SYSTEME, pas une classe CSS qui etire un panneau :
          on ouvre cet ecran pour VOIR les photos, et une planche de soixante-six
          vignettes gagne plus a la place qu a n importe quel reglage. */
-      + '<button class="mini" id="a-plein" title="Plein écran">⛶</button>'
+      + '<button class="mini" id="a-plein" title="${T("Plein écran")}">⛶</button>'
       + '</div><div class="co">';
 
     if (A.etape === 1) {
-      h += '<p class="aide" style="margin:0 0 .5rem">D’où viennent les photos&nbsp;?</p><div class="src">';
+      h += '<p class="aide" style="margin:0 0 .5rem">${T("D’où viennent les photos&nbsp;?")}</p><div class="src">';
       /* ⚠ LES PHOTOS DEJA IMPORTEES SONT UNE SOURCE COMME UNE AUTRE : le meme
          traitement doit s appliquer a ce qui est deja dans la photothèque, sans
          avoir a le reimporter. */
       h += '<div class="l' + (A.lecteur === '@lib' ? ' on' : '') + '" data-src="@lib">'
-        + '<b>Photos déjà importées</b><span class="aide">'
-        + (D.total || 0) + ' dans la photothèque</span></div>';
-      if (!A.sources) h += '<div class="vide charge">Lecture des clés branchées…</div>';
+        + '<b>${T("Photos déjà importées")}</b><span class="aide">'
+        + (D.total || 0) + ' ${T("dans la photothèque")}</span></div>';
+      if (!A.sources) h += '<div class="vide charge">${T("Lecture des clés branchées…")}</div>';
       else if (!A.sources.length) {
         h += '<div class="vide">' + (A.erreurSource
           ? esc(A.erreurSource)
-          : 'Aucune clé ou carte mémoire branchée avec des photos.') + '</div>';
+          : '${T("Aucune clé ou carte mémoire branchée avec des photos.")}') + '</div>';
       } else {
         A.sources.forEach(function(x){
           h += '<div class="l' + (A.lecteur === x.lecteur ? ' on' : '') + '" data-src="' + esc(x.lecteur) + '">'
-            + '<b>Clé ' + esc(x.lecteur) + '</b>'
+            + '<b>${T("Clé")} ' + esc(x.lecteur) + '</b>'
             + '<span class="aide">' + x.photos.length + ' photo' + (x.photos.length > 1 ? 's' : '')
             + ' lisible' + (x.photos.length > 1 ? 's' : '') + '</span></div>';
         });
@@ -911,28 +915,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          d un coup — prete a servir. */
       h += '<div class="chargement">'
         + '<div class="tourne"></div>'
-        + '<div class="gros">Chargement des aperçus…</div>'
+        + '<div class="gros">${T("Chargement des aperçus…")}</div>'
         + '<div class="cpt"><b id="a-fait">' + A.fait + '</b> / ' + A.fichiers.length + '</div>'
-        + '<div class="aide">Les photos sont seulement LUES : rien n’est importé '
-        + 'tant que vous n’avez pas choisi.</div>'
+        + '<div class="aide">${T("Les photos sont seulement LUES : rien n’est importé")} '
+        + '${T("tant que vous n’avez pas choisi.")}</div>'
         + '</div>';
 
     } else if (A.etape === 2) {
       var n = Object.keys(A.choix).length;
       h += '<div class="barreoutils" style="margin-bottom:.5rem">'
         + '<select id="a-tri" aria-label="Ordre de tri" style="width:auto">'
-        + '<option value="date"' + (A.tri === 'date' ? ' selected' : '') + '>Plus récentes d’abord</option>'
-        + '<option value="date-vieux"' + (A.tri === 'date-vieux' ? ' selected' : '') + '>Plus anciennes d’abord</option>'
-        + '<option value="nom"' + (A.tri === 'nom' ? ' selected' : '') + '>Par nom</option>'
-        + '<option value="poids"' + (A.tri === 'poids' ? ' selected' : '') + '>Plus lourdes d’abord</option>'
+        + '<option value="date"' + (A.tri === 'date' ? ' selected' : '') + '>${T("Plus récentes d’abord")}</option>'
+        + '<option value="date-vieux"' + (A.tri === 'date-vieux' ? ' selected' : '') + '>${T("Plus anciennes d’abord")}</option>'
+        + '<option value="nom"' + (A.tri === 'nom' ? ' selected' : '') + '>${T("Par nom")}</option>'
+        + '<option value="poids"' + (A.tri === 'poids' ? ' selected' : '') + '>${T("Plus lourdes d’abord")}</option>'
         + '</select>'
-        + '<button class="mini" id="a-tous">Tout choisir</button>'
-        + '<button class="mini" id="a-rien">Tout décocher</button>'
+        + '<button class="mini" id="a-tous">${T("Tout choisir")}</button>'
+        + '<button class="mini" id="a-rien">${T("Tout décocher")}</button>'
         + '<span class="droite">'
         + '<span id="a-apercus" class="aide"></span>'
         + '<b id="a-nb">' + n + '</b> sur ' + A.fichiers.length + ' choisie'
         + (n > 1 ? 's' : '') + '</span></div>';
-      if (!A.fichiers.length) h += '<div class="vide">Cette source ne contient aucune photo lisible.</div>';
+      if (!A.fichiers.length) h += '<div class="vide">${T("Cette source ne contient aucune photo lisible.")}</div>';
       else {
         h += '<div class="pl">';
         assistTriees().forEach(function(f, i){
@@ -958,33 +962,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     } else {
       var m = Object.keys(A.choix).length;
-      h += '<label for="a-nom">Nom du lot</label>'
+      h += '<label for="a-nom">${T("Nom du lot")}</label>'
         + '<input id="a-nom" type="text" value="' + esc(A.nom) + '" maxlength="80"'
         + ' placeholder="ex. Collection printemps">'
-        + '<p class="aide">Les photos importées seront nommées « Nom 01 », « Nom 02 »… '
-        + 'Laissé vide, on garde le nom d’origine.</p>'
-        + '<label style="margin-top:.7rem">Que faut-il en faire&nbsp;?</label><div class="but">';
+        + '<p class="aide">${T("Les photos importées seront nommées « Nom 01 », « Nom 02 »…")} '
+        + '${T("Laissé vide, on garde le nom d’origine.")}</p>'
+        + '<label style="margin-top:.7rem">${T("Que faut-il en faire&nbsp;?")}</label><div class="but">';
       BUTS.forEach(function(b){
         h += '<label class="' + (A.but === b[0] ? 'on' : '') + '">'
           + '<input type="radio" name="a-but" value="' + b[0] + '"' + (A.but === b[0] ? ' checked' : '') + '>'
           + '<span><strong>' + b[1] + '</strong><span class="d">' + b[2] + '</span></span></label>';
       });
       h += '</div>'
-        + '<div class="franc" style="margin-top:.6rem"><b>L’ordre est imposé, et c’est voulu.</b> '
-        + 'Demander un mannequin humain sur une photo brute donne un modèle qui porte le décor '
-        + 'autant que le vêtement. Le fond part d’abord, puis le mannequin, et seulement ensuite '
-        + 'la personne est engendrée.<br>'
-        + '<b>Ce qui est déjà fait n’est pas refait</b> : une étape déjà présente est sautée, '
-        + 'et la raison est inscrite au suivi et au journal.</div>'
-        + '<p class="aide"><b>' + m + '</b> photo' + (m > 1 ? 's' : '') + ' à traiter.</p>';
+        + '<div class="franc" style="margin-top:.6rem"><b>${T("L’ordre est imposé, et c’est voulu.")}</b> '
+        + '${T("Demander un mannequin humain sur une photo brute donne un modèle qui porte le décor")} '
+        + '${T("autant que le vêtement. Le fond part d’abord, puis le mannequin, et seulement ensuite")} '
+        + '${T("la personne est engendrée.")}<br>'
+        + '${T("<b>Ce qui est déjà fait n’est pas refait</b> : une étape déjà présente est sautée, ")}'
+        + '${T("et la raison est inscrite au suivi et au journal.")}</div>'
+        + '<p class="aide"><b>' + m + '</b> photo' + (m > 1 ? 's' : '') + ' ${T("à traiter.")}</p>';
     }
 
     h += '</div><div class="pi">'
-      + '<button id="a-annuler">Annuler</button>'
+      + '<button id="a-annuler">${T("Annuler")}</button>'
       + '<span class="dr">'
-      + (ASSIST.etape > 1 ? '<button id="a-prec">← Retour</button>' : '')
+      + (ASSIST.etape > 1 ? '<button id="a-prec">${T("← Retour")}</button>' : '')
       + '<button class="prim" id="a-suiv">'
-      + (ASSIST.etape === 3 ? 'Lancer le traitement' : 'Continuer →') + '</button>'
+      + (ASSIST.etape === 3 ? '${T("Lancer le traitement")}' : '${T("Continuer →")}') + '</button>'
       + '</span></div></div></div>';
     return h;
   }
@@ -1050,13 +1054,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     var pe = document.getElementById('a-plein');
     if (pe) pe.onclick = function(){
-      if (!P || !P.pleinEcran) { dire('Le plein écran n’existe que dans l’application.', 'att'); return; }
+      if (!P || !P.pleinEcran) { dire('${T("Le plein écran n’existe que dans l’application.")}', 'att'); return; }
       P.pleinEcran().then(function(etat){
         // ⚠ Le bouton dit l ETAT REEL rendu par la fenetre, pas celui qu on
         // suppose : un plein ecran refuse par le systeme laisserait sinon un
         // bouton qui ment.
         pe.textContent = etat ? '⤡' : '⛶';
-        pe.title = etat ? 'Quitter le plein écran' : 'Plein écran';
+        pe.title = etat ? '${T("Quitter le plein écran")}' : '${T("Plein écran")}';
       });
     };
 
@@ -1095,19 +1099,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function assistLancer(){
     var A = ASSIST;
     var cles = Object.keys(A.choix);
-    if (!cles.length) { dire('Choisissez au moins une photo.', 'att'); return; }
-    if (occupeDeja('Traitement en lot')) return;
+    if (!cles.length) { dire('${T("Choisissez au moins une photo.")}', 'att'); return; }
+    if (occupeDeja('${T("Traitement en lot")}')) return;
 
     var fichiers = assistTriees().filter(function(f){ return A.choix[f.cle]; });
     var nomLot = A.nom.trim();
     var but = A.but;
-    var libelle = { detourage: 'Retrait du fond', fantome: 'Retrait du mannequin',
-                    humain: 'Mannequin humain' }[but] || 'Traitement';
+    var libelle = { detourage: '${T("Retrait du fond")}', fantome: '${T("Retrait du mannequin")}',
+                    humain: '${T("Mannequin humain")}' }[but] || 'Traitement';
     var titres = fichiers.map(function(f, i){
       return nomLot ? (nomLot + ' ' + (i + 1 < 10 ? '0' : '') + (i + 1)) : f.nom;
     });
 
-    var source = (A.lecteur === '@lib') ? 'photothèque' : ('clé ' + A.lecteur);
+    var source = (A.lecteur === '@lib') ? '${T("photothèque")}' : ('${T("clé")} ' + A.lecteur);
     ASSIST = null;
     VIGNETTES = {};
     occuper(libelle + ' · ' + fichiers.length + ' photo(s)…');
@@ -1126,17 +1130,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       suiviCompte(k, fichiers.length);
       if (ANNULE && k < fichiers.length) {
         abandon = fichiers.length - k;
-        for (var z = k; z < fichiers.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+        for (var z = k; z < fichiers.length; z++) suiviLigne(z, 'echec', '${T("abandonnée")}');
         k = fichiers.length;
       }
       if (k >= fichiers.length) {
         appeler('lot:clore', []);
         liberer();
-        var t = faites + ' traitée' + (faites > 1 ? 's' : '');
-        if (sautees) t += ' · ' + sautees + ' déjà à jour';
-        if (echecs) t += ' · ' + echecs + ' en échec';
-        if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
-        suiviFin(t + '.', abandon ? (libelle + ' interrompu') : (libelle + ' terminé'));
+        var t = faites + ' ${T("traitée")}' + (faites > 1 ? 's' : '');
+        if (sautees) t += ' · ' + sautees + ' ${T("déjà à jour")}';
+        if (echecs) t += ' · ' + echecs + ' ${T("en échec")}';
+        if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+        suiviFin(t + '.', abandon ? (libelle + ' interrompu') : (libelle + ' ${T("terminé")}'));
         if (!echecs && !abandon) suiviAutoFermer(3000);
         dire(t + '.', echecs ? 'att' : 'bon');
         charger();
@@ -1154,15 +1158,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         appeler('lot:traiter', [id, but, {}]).then(function(r){
           var eps = [{ nom: 'import', ok: true }];
           (r && r.etapes || []).forEach(function(e){
-            eps.push({ nom: e.etape + (e.saute ? ' (sautée)' : ''), ok: e.ok,
-                       chiffre: e.saute ? 'déjà fait'
+            eps.push({ nom: e.etape + (e.saute ? ' (${T("sautée")})' : ''), ok: e.ok,
+                       chiffre: e.saute ? '${T("déjà fait")}'
                               : (e.ms ? (Math.round(e.ms / 100) / 10) + ' s' : (e.raison || '')) });
           });
           suiviEtapes(k, eps);
           if (r && r.ok) {
             var toutSaute = (r.etapes || []).every(function(e){ return e.saute; });
-            if (toutSaute) { sautees++; suiviLigne(k, 'double', 'déjà à jour'); }
-            else { faites++; suiviLigne(k, 'faite', 'traitée'); }
+            if (toutSaute) { sautees++; suiviLigne(k, 'double', '${T("déjà à jour")}'); }
+            else { faites++; suiviLigne(k, 'faite', '${T("traitée")}'); }
           } else {
             /* ⚠⚠ UN ECHEC SANS RAISON N EST PAS UN COMPTE RENDU. La ligne disait
                << echec >> et rien d autre quand la chaine s arretait AVANT sa
@@ -1172,10 +1176,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                echeant, qui dit s il s agit d un credit epuise ou d une cle
                invalide. */
             echecs++;
-            suiviLigne(k, 'echec', 'échec' + (r && r.arretA ? ' · ' + r.arretA : ''));
+            suiviLigne(k, 'echec', '${T("échec")}' + (r && r.arretA ? ' · ' + r.arretA : ''));
             if (!(r && r.etapes && r.etapes.length)) {
               suiviEtapes(k, [{ nom: 'import', ok: true },
-                { nom: (r && r.motif) ? String(r.motif) : 'échec', ok: false,
+                { nom: (r && r.motif) ? String(r.motif) : '${T("échec")}', ok: false,
                   chiffre: (r && r.detail) ? String(r.detail).slice(0, 120) : '' }]);
             }
             dire(expliquer(r), 'err');
@@ -1186,7 +1190,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
       if (f.id) {
         // Déjà dans la photothèque : rien à importer.
-        suiviEtapes(k, [{ nom: 'déjà importée', ok: true }]);
+        suiviEtapes(k, [{ nom: '${T("déjà importée")}', ok: true }]);
         apresImport(f.id);
         return;
       }
@@ -1195,7 +1199,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('lot:importer', [f.chemin, nom]).then(function(r){
         if (!r.ok) {
           echecs++;
-          suiviLigne(k, 'echec', 'import refusé');
+          suiviLigne(k, 'echec', '${T("import refusé")}');
           suiviEtapes(k, [{ nom: 'import', ok: false, chiffre: (r.detail || r.motif || '') }]);
           suite(k + 1);
           return;
@@ -1273,7 +1277,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function assistSuivant(){
     var A = ASSIST;
     if (A.etape === 1) {
-      if (!A.lecteur) { dire('Choisissez une source.', 'att'); return; }
+      if (!A.lecteur) { dire('${T("Choisissez une source.")}', 'att'); return; }
       if (A.lecteur === '@lib') {
         // Les photos deja importees : la source, ce sont les lignes affichees.
         A.fichiers = (D.lignes || []).map(function(x){
@@ -1297,7 +1301,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     if (A.etape === 2) {
-      if (!Object.keys(A.choix).length) { dire('Choisissez au moins une photo.', 'att'); return; }
+      if (!Object.keys(A.choix).length) { dire('${T("Choisissez au moins une photo.")}', 'att'); return; }
       A.etape = 3;
       dessiner();
       return;
@@ -1329,9 +1333,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      deux versions. Le contrôle qui manquait est maintenant posé
      (tools/verifier-fenetres.js, § « un nom, une déclaration »). */
   var TRAITEMENTS_LOT = [
-    ['detourage', 'Détourer', 'Isole le vêtement de son fond.'],
-    ['fantome', 'Retirer le mannequin', 'Ne garde que le vêtement, col et manches reconstruits.'],
-    ['humain', 'Mettre sur un mannequin', 'Fait porter le vêtement par une personne engendrée.'],
+    ['detourage', '${T("Détourer")}', '${T("Isole le vêtement de son fond.")}'],
+    ['fantome', '${T("Retirer le mannequin")}', '${T("Ne garde que le vêtement, col et manches reconstruits.")}'],
+    ['humain', '${T("Mettre sur un mannequin")}', '${T("Fait porter le vêtement par une personne engendrée.")}'],
   ];
 
   /* ══════════════════════════════════════════════════════════════════════════
@@ -1345,20 +1349,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      bien. Ce n est pas un avis : les deux essais sont cote a cote.
      ══════════════════════════════════════════════════════════════════════════ */
   var SCENE_IDS = null;
-  var MODELES_SC = [['sophia','Sophia'],['emma','Emma'],['ava','Ava'],['zoe','Zoé'],
+  var MODELES_SC = [['sophia','Sophia'],['emma','Emma'],['ava','Ava'],['zoe','${T("Zoé")}'],
     ['maya','Maya'],['lena','Lena'],['julia','Julia'],['fiona','Fiona'],
     ['avery','Avery'],['taylor','Taylor'],['kendall','Kendall'],['casey','Casey'],
     ['jordan','Jordan'],['sam','Sam'],['reece','Reece'],['jackson','Jackson']];
-  var POSES_SC = [['34turn','Trois-quarts (met la coupe en valeur)'],
-    ['standing','Debout, de face'],['adjustingclothing','Ajuste son vêtement'],
-    ['handinpocket','Main dans la poche'],['crossedarms','Bras croisés'],
-    ['walkingforward','En marche'],['powerstance','Posture assurée'],
-    ['overtheshoulder','Regard par-dessus l’épaule'],['playfulspin','Tour sur soi'],
-    ['seated','Assise'],['back','De dos'],['random','Au hasard']];
-  var DECORS_SC = [['studio','Studio'],['street','Rue'],['beach','Bord de mer'],
-    ['sunset','Coucher de soleil'],['forest','Forêt'],['bedroom','Chambre'],
-    ['library','Bibliothèque'],['mountain','Montagne'],['pool','Piscine'],
-    ['factory','Friche industrielle']];
+  var POSES_SC = [['34turn','${T("Trois-quarts (met la coupe en valeur)")}'],
+    ['standing','${T("Debout, de face")}'],['adjustingclothing','${T("Ajuste son vêtement")}'],
+    ['handinpocket','${T("Main dans la poche")}'],['crossedarms','${T("Bras croisés")}'],
+    ['walkingforward','${T("En marche")}'],['powerstance','${T("Posture assurée")}'],
+    ['overtheshoulder','${T("Regard par-dessus l’épaule")}'],['playfulspin','${T("Tour sur soi")}'],
+    ['seated','${T("Assise")}'],['back','${T("De dos")}'],['random','${T("Au hasard")}']];
+  var DECORS_SC = [['studio','${T("Studio")}'],['street','${T("Rue")}'],['beach','${T("Bord de mer")}'],
+    ['sunset','${T("Coucher de soleil")}'],['forest','${T("Forêt")}'],['bedroom','${T("Chambre")}'],
+    ['library','${T("Bibliothèque")}'],['mountain','${T("Montagne")}'],['pool','${T("Piscine")}'],
+    ['factory','${T("Friche industrielle")}']];
 
   function sceneOuvrir(ids){ SCENE_IDS = ids; SCENE_OUVERT = true; dessiner(); }
   function sceneFermer(){ SCENE_OUVERT = false; SCENE_IDS = null; dessiner(); }
@@ -1377,17 +1381,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function retraitHtml(){
     var n = RETRAIT_IDS ? RETRAIT_IDS.length : 0;
     return '<div class="asst"><div class="bo">'
-      + '<div class="tt"><h3>Retrait du mannequin</h3>'
+      + '<div class="tt"><h3>${T("Retrait du mannequin")}</h3>'
       + '<span class="pas">' + n + ' photo' + (n > 1 ? 's' : '') + '</span></div>'
       + '<div class="co">'
       + ''
-      + '<div class="aide" style="margin-top:.5rem;color:var(--tx-or2)">Chaque photo coûte '
-      + '1 crédit Photoroom. L’aperçu est gratuit et filigrané : de quoi juger avant '
-      + 'de payer.</div>'
+      + '<div class="aide" style="margin-top:.5rem;color:var(--tx-or2)">${T("Chaque photo coûte")} '
+      + '${T("1 crédit Photoroom. L’aperçu est gratuit et filigrané : de quoi juger avant")} '
+      + '${T("de payer.")}</div>'
       + '</div>'
-      + '<div class="pied"><button id="rt-non">Annuler</button>'
-      + '<button id="rt-apercu" title="Voir le rendu filigrané, gratuit"><span class="ic">👁</span> Voir un aperçu</button>'
-      + '<button class="prim" id="rt-go">Lancer le retrait sur ' + n + ' photo'
+      + '<div class="pied"><button id="rt-non">${T("Annuler")}</button>'
+      + '<button id="rt-apercu" title="Voir le rendu filigrané, gratuit"><span class="ic">👁</span> ${T("Voir un aperçu")}</button>'
+      + '<button class="prim" id="rt-go">${T("Lancer le retrait sur")} ' + n + ' photo'
       + (n > 1 ? 's' : '') + '</button>'
       + '</div></div></div>';
   }
@@ -1423,7 +1427,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function sceneHtml(){
     var n = SCENE_IDS ? SCENE_IDS.length : 0;
     return '<div class="asst"><div class="bo">'
-      + '<div class="tt"><h3>Mise en scène</h3>'
+      + '<div class="tt"><h3>${T("Mise en scène")}</h3>'
       + '<span class="pas">' + n + ' photo' + (n > 1 ? 's' : '') + '</span></div>'
       + '<div class="co">'
       /* ⚠ L ETIQUETTE ETAIT LA, ET ELLE NE SERVAIT A RIEN AU LECTEUR D ECRAN :
@@ -1431,26 +1435,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          la fabrique (dernier argument) — voir le commentaire de liste_. */
       + '<div class="ch"><label>Mannequin</label>' + liste_('sc-mod', MODELES_SC, 'sophia', 'Mannequin') + '</div>'
       + '<div class="ch"><label>Pose</label>' + liste_('sc-pose', POSES_SC, '34turn', 'Pose') + '</div>'
-      + '<div class="ch"><label>Décor</label>' + liste_('sc-dec', DECORS_SC, 'studio', 'Décor') + '</div>'
+      + '<div class="ch"><label>${T("Décor")}</label>' + liste_('sc-dec', DECORS_SC, 'studio', '${T("Décor")}') + '</div>'
       + '<div class="ch"><label><input type="checkbox" id="sc-sourire" checked> '
-      + 'Sourire naturel, regard vers l’objectif</label></div>'
-      + '<div class="ch col"><label>Précisions (facultatif)</label>'
-      + '<textarea id="sc-extra" aria-label="Précisions (facultatif)" rows="3" maxlength="240" placeholder="ex. talons assortis, '
+      + '${T("Sourire naturel, regard vers l’objectif")}</label></div>'
+      + '<div class="ch col"><label>${T("Précisions (facultatif)")}</label>'
+      + '<textarea id="sc-extra" aria-label="${T("Précisions (facultatif)")}" rows="3" maxlength="240" placeholder="ex. talons assortis, '
       + 'bijoux dorés discrets, cheveux attachés, lumière chaude de fin de journée"></textarea>'
       + '<div class="sugg">'
-      + '<button type="button" data-sugg="chaussures assorties au vêtement">+ Chaussures</button>'
-      + '<button type="button" data-sugg="bijoux fins et discrets">+ Bijoux</button>'
-      + '<button type="button" data-sugg="sac à main coordonné">+ Sac à main</button>'
-      + '<button type="button" data-sugg="coiffure soignée">+ Coiffure</button>'
-      + '<button type="button" data-sugg="lumière chaude de fin de journée">+ Lumière chaude</button>'
+      + '<button type="button" data-sugg="chaussures assorties au vêtement">${T("+ Chaussures")}</button>'
+      + '<button type="button" data-sugg="bijoux fins et discrets">${T("+ Bijoux")}</button>'
+      + '<button type="button" data-sugg="sac à main coordonné">${T("+ Sac à main")}</button>'
+      + '<button type="button" data-sugg="coiffure soignée">${T("+ Coiffure")}</button>'
+      + '<button type="button" data-sugg="lumière chaude de fin de journée">${T("+ Lumière chaude")}</button>'
       + '</div>'
       + ''
       + '</div>'
       + ''
       + '</div>'
-      + '<div class="pied"><button id="sc-non">Annuler</button>'
-      + '<button id="sc-apercu" title="Voir un aperçu filigrané et gratuit avec ces réglages"><span class="ic">👁</span> Voir un aperçu</button>'
-      + '<button class="prim" id="sc-go">Lancer sur ' + n + ' photo' + (n > 1 ? 's' : '') + '</button>'
+      + '<div class="pied"><button id="sc-non">${T("Annuler")}</button>'
+      + '<button id="sc-apercu" title="${T("Voir un aperçu")} filigrané et gratuit avec ces réglages"><span class="ic">👁</span> ${T("Voir un aperçu")}</button>'
+      + '<button class="prim" id="sc-go">${T("Lancer sur")} ' + n + ' photo' + (n > 1 ? 's' : '') + '</button>'
       + '</div></div></div>';
   }
 
@@ -1462,13 +1466,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + TRAITEMENTS_LOT.map(function(l){
           return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
         }).join('')
-      + '<button class="mini" data-lot="pivot" title="Pivoter d’un quart de tour vers la droite">⟳ Pivoter</button>'
-      + '<button class="mini" data-apercu="fantome" title="Voir le retrait du mannequin, filigrané et gratuit, avant de payer"><span class="ic">👁</span> Aperçu du retrait</button>'
+      + '<button class="mini" data-lot="pivot" title="Pivoter d’un quart de tour vers la droite">${T("⟳ Pivoter")}</button>'
+      + '<button class="mini" data-apercu="fantome" title="Voir le retrait du mannequin, filigrané et gratuit, avant de payer"><span class="ic">👁</span> ${T("Aperçu du retrait")}</button>'
       + '<button class="mini dgr" id="p-lot-sup">'
-      + (SUP_LOT_ARME ? 'Confirmer — supprimer ' + n + ' ?' : 'Supprimer') + '</button>'
-      + '<button class="mini" id="p-rien">Tout décocher</button>'
-      + '<span class="av">Les deux derniers traitements <strong>engendrent</strong> une image&nbsp;: '
-      + 'l’original est conservé à côté.</span></div>';
+      + (SUP_LOT_ARME ? '${T("Confirmer — supprimer")} ' + n + ' ?' : 'Supprimer') + '</button>'
+      + '<button class="mini" id="p-rien">${T("Tout décocher")}</button>'
+      + '<span class="av">${T("Les deux derniers traitements <strong>engendrent</strong> une image&nbsp;: ")}'
+      + '${T("l’original est conservé à côté.")}</span></div>';
   }
 
   /* L AVERTISSEMENT DES FRAIS, GROUPE ET FRANC. Une decision qui coute de l argent
@@ -1499,23 +1503,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + 'border:1px solid var(--v12);border-radius:13px;padding:1.1rem 1.2rem;'
       + 'box-shadow:0 18px 50px rgba(0,0,0,.5)">'
       + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-or2)">'
-      + 'Des photos ont déjà été facturées</h2>'
+      + '${T("Des photos ont déjà été facturées")}</h2>'
       + '<p style="margin:0;color:var(--tx);font-size:.86rem;line-height:1.6"><b>' + n
       + '</b> photo' + (n > 1 ? 's' : '') + ' sur ' + total + ' '
-      + (n > 1 ? 'ont' : 'a') + ' déjà coûté un crédit Photoroom. Les relancer '
-      + 'entraînera de nouveaux frais.</p>' + liste
+      + (n > 1 ? 'ont' : 'a') + ' ${T("déjà coûté un crédit Photoroom. Les relancer")} '
+      + '${T("entraînera de nouveaux frais.")}</p>' + liste
       + '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">'
       + '<button id="frais-non" style="font:inherit;color:var(--tx);'
       + 'background:var(--v06);border:1px solid var(--v18);'
-      + 'border-radius:8px;padding:.42rem .85rem;cursor:pointer">Annuler</button>'
+      + 'border-radius:8px;padding:.42rem .85rem;cursor:pointer">${T("Annuler")}</button>'
       + '<button id="frais-oui" style="font:inherit;color:#0e1522;background:#f0d6a0;'
       + 'border:1px solid #f0d6a0;border-radius:8px;padding:.42rem .85rem;cursor:pointer;'
-      + 'font-weight:700">Continuer et payer</button></div></div>';
+      + 'font-weight:700">${T("Continuer et payer")}</button></div></div>';
     document.body.appendChild(v);
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
     var non = document.getElementById('frais-non');
     var oui = document.getElementById('frais-oui');
-    if (non) non.onclick = function(){ fermer(); dire('Traitement annulé : rien n’a été refait ni facturé.', 'att'); };
+    if (non) non.onclick = function(){ fermer(); dire('${T("Traitement annulé : rien n’a été refait ni facturé.")}', 'att'); };
     if (oui) oui.onclick = function(){ fermer(); onOui(); };
     v.onclick = function(ev){ if (ev.target === v) fermer(); };
     if (oui) oui.focus();
@@ -1536,8 +1540,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function apercuOuvrir(items, quoi){
     apercuFermer();
-    var titre = (quoi === 'humain') ? 'Aperçu de la mise en scène'
-                                    : 'Aperçu du retrait de mannequin';
+    var titre = (quoi === 'humain') ? '${T("Aperçu de la mise en scène")}'
+                                    : '${T("Aperçu du retrait de mannequin")}';
     var cells = items.map(function(it, i){
       return '<figure id="apr-c' + i + '" style="margin:0;background:var(--f-page);'
         + 'border:1px solid var(--v09);border-radius:10px;overflow:hidden;'
@@ -1555,7 +1559,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + 'display:flex;flex-direction:column;padding:1rem';
     v.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">'
       + '<h2 style="margin:0;font:700 1rem/1.2 Georgia,serif;color:var(--tx-or2)">' + esc(titre) + '</h2>'
-      + '<span style="font-size:.74rem;color:var(--tx2)">gratuit · filigrané · aucun crédit réel</span>'
+      + '<span style="font-size:.74rem;color:var(--tx2)">${T("gratuit · filigrané · aucun crédit réel")}</span>'
       + '<button id="apr-x" style="margin-left:auto;font:inherit;color:var(--tx);'
       + 'background:var(--v06);border:1px solid var(--v18);'
       + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">Fermer</button></div>'
@@ -1565,8 +1569,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div style="flex:1 1 auto;min-height:0;overflow:auto;display:grid;'
       + 'grid-template-columns:repeat(auto-fit,minmax(260px,360px));gap:.7rem;'
       + 'justify-content:center;align-content:start">' + cells + '</div>'
-      + '<div style="margin-top:.55rem;font-size:.74rem;color:var(--tx2)">Pour la version '
-      + 'définitive sans filigrane, lancez le traitement : il consomme alors un crédit '
+      + '<div style="margin-top:.55rem;font-size:.74rem;color:var(--tx2)">${T("Pour la version")} '
+      + '${T("définitive sans filigrane, lancez le traitement : il consomme alors un crédit")} '
       + 'Photoroom.</div>';
     document.body.appendChild(v);
     document.getElementById('apr-x').onclick = apercuFermer;
@@ -1584,24 +1588,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain';
       box.appendChild(img);
     } else {
-      box.textContent = (r && r.motif === 'non_configure') ? 'Clé Photoroom absente'
-        : ((r && (r.detail || r.motif)) || 'échec');
+      box.textContent = (r && r.motif === 'non_configure') ? '${T("Clé Photoroom absente")}'
+        : ((r && (r.detail || r.motif)) || '${T("échec")}');
       box.style.color = 'var(--tx-err2)';
     }
   }
   function apercuLot(quoi, scene, ids){
     ids = ids || Object.keys(CHOIX);
     if (!ids.length) return;
-    if (occupeDeja('Aperçu')) return;
+    if (occupeDeja('${T("Aperçu")}')) return;
     var items = ids.map(function(i){
       var c = CHOIX[i] || {};
       return { id: i, code: c.code || '', nom: c.nom || '' };
     });
     apercuOuvrir(items, quoi);
-    occuper('Aperçu de ' + ids.length + '…');
+    occuper('${T("Aperçu de")} ' + ids.length + '…');
     var suite = function(k){
-      if (k >= ids.length){ liberer(); dire('Aperçu prêt.', 'bon'); return; }
-      occuper('Aperçu ' + (k + 1) + ' / ' + ids.length + '…');
+      if (k >= ids.length){ liberer(); dire('${T("Aperçu prêt.")}', 'bon'); return; }
+      occuper('${T("Aperçu")} ' + (k + 1) + ' / ' + ids.length + '…');
       appeler('photos:apercu', [ids[k], quoi, scene || {}]).then(function(r){
         apercuRemplir(k, r);
         suite(k + 1);
@@ -1628,7 +1632,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        « Lancer » du panneau rappelle lancerLot avec une valeur truthy, ce qui
        saute cette porte et va droit a la garde des frais. */
     if (quoi === 'fantome' && !scene) { retraitOuvrir(ids); return; }
-    if (occupeDeja('Traitement en lot')) return;
+    if (occupeDeja('${T("Traitement en lot")}')) return;
     /* ⚠ LA GARDE DES FRAIS PHOTOROOM, EN PRE-VOL ET GROUPEE. On demande au coeur
        quelles photos de ce lot ont deja coute un credit Photoroom, et l on
        avertit UNE seule fois avant de relancer, plutot que photo par photo. Le
@@ -1636,7 +1640,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        et rien n interrompt.
        ⚠ LA FENETRE RESTE OCCUPEE PENDANT L INTERROGATION : sans cela, un second
        clic repartirait une deuxieme verification par-dessus la premiere. */
-    occuper('Vérification des crédits…');
+    occuper('${T("Vérification des crédits…")}');
     appeler('photos:fraisEtat', [ids, quoi]).then(function(g){
       liberer();
       var deja = (g && g.ok && g.dejaTraitees) ? g.dejaTraitees : [];
@@ -1648,15 +1652,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* Le lancement proprement dit, une fois la garde des frais franchie. Separe de
      lancerLot pour que la garde puisse s intercaler sans dupliquer le suivi. */
   function demarrerLot(quoi, scene, ids){
-    if (occupeDeja('Traitement en lot')) return;
+    if (occupeDeja('${T("Traitement en lot")}')) return;
     /* ⚠ LES NOMS VIENNENT DU CHOIX, PAS DE LA PAGE : une photo cochee page 1 et
        traitee depuis la page 4 doit garder son nom dans le suivi. */
     var titres = ids.map(function(i){
       var c = CHOIX[i];
       return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
     });
-    var nomLot = { detourage: 'Détourage', fantome: 'Retrait du mannequin',
-                   humain: 'Mise sur un mannequin' }[quoi] || 'Traitement';
+    var nomLot = { detourage: '${T("Détourage")}', fantome: '${T("Retrait du mannequin")}',
+                   humain: '${T("Mise sur un mannequin")}' }[quoi] || 'Traitement';
     occuper(nomLot + ' de ' + ids.length + ' photo' + (ids.length > 1 ? 's' : '') + '…');
     suiviOuvrir(titres, nomLot + ' · ' + ids.length + ' photo(s)');
     var faites = 0, echecs = 0, replis = 0, abandon = 0;
@@ -1667,16 +1671,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          seulement le resultat. */
       if (ANNULE && k < ids.length) {
         abandon = ids.length - k;
-        for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+        for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', '${T("abandonnée")}');
         k = ids.length;
       }
       if (k >= ids.length) {
         liberer();
-        var t = faites + ' traitée' + (faites > 1 ? 's' : '');
+        var t = faites + ' ${T("traitée")}' + (faites > 1 ? 's' : '');
         if (replis) t += ' · ' + replis + ' en repli local';
-        if (echecs) t += ' · ' + echecs + ' en échec';
-        if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
-        suiviFin(t + '.', abandon ? (nomLot + ' interrompu') : (nomLot + ' terminé'));
+        if (echecs) t += ' · ' + echecs + ' ${T("en échec")}';
+        if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+        suiviFin(t + '.', abandon ? (nomLot + ' interrompu') : (nomLot + ' ${T("terminé")}'));
         if (!echecs && !replis && !abandon) suiviAutoFermer(2500);
         dire(t + '.', echecs ? 'att' : 'bon');
         CHOIX = {};
@@ -1684,23 +1688,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       suiviLigne(k, 'cours', 'en cours');
-      suiviEtapes(k, [{ nom: 'envoi au modèle', etat: 'encours' }]);
+      suiviEtapes(k, [{ nom: '${T("envoi au modèle")}', etat: 'encours' }]);
       occuper('Traitement ' + (k + 1) + ' / ' + ids.length + '…');
       appeler('photos:traiter', [ids[k], quoi, scene || {}]).then(function(r){
         if (r && r.ok) {
           faites++;
           if (r.par === 'canevas') replis++;
           suiviLigne(k, r.par === 'canevas' ? 'double' : 'faite',
-            r.par === 'canevas' ? 'repli local' : 'traitée');
+            r.par === 'canevas' ? 'repli local' : '${T("traitée")}');
           suiviEtapes(k, [
-            { nom: (r.par === 'canevas' ? 'détourage local' : 'modèle'), ok: true,
+            { nom: (r.par === 'canevas' ? '${T("détourage local")}' : '${T("modèle")}'), ok: true,
               chiffre: r.ms ? (Math.round(r.ms / 100) / 10) + ' s' : '' },
-            { nom: 'dépôt', ok: true },
+            { nom: '${T("dépôt")}', ok: true },
           ]);
         } else {
           echecs++;
-          suiviLigne(k, 'echec', 'refusée');
-          suiviEtapes(k, [{ nom: 'modèle', ok: false,
+          suiviLigne(k, 'echec', '${T("refusée")}');
+          suiviEtapes(k, [{ nom: '${T("modèle")}', ok: false,
                             chiffre: (r && (r.detail || r.motif)) || '' }]);
         }
         suite(k + 1);
@@ -1715,23 +1719,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var c = CHOIX[i];
       return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
     });
-    occuper('Rotation de ' + ids.length + ' photo(s)…');
-    suiviOuvrir(titres, 'Rotation · ' + ids.length + ' photo(s)');
+    occuper('${T("Rotation de")} ' + ids.length + ' photo(s)…');
+    suiviOuvrir(titres, '${T("Rotation ·")} ' + ids.length + ' photo(s)');
     var faits = 0, rates = 0, perdus = 0, abandon = 0;
     var pas = function(k){
       suiviCompte(k, ids.length);
       if (ANNULE && k < ids.length) {
         abandon = ids.length - k;
-        for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+        for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', '${T("abandonnée")}');
         k = ids.length;
       }
       if (k >= ids.length) {
         liberer();
-        var t = faits + ' pivotée' + (faits > 1 ? 's' : '');
-        if (perdus) t += ' · ' + perdus + ' traitement(s) à refaire';
-        if (rates) t += ' · ' + rates + ' en échec';
-        if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
-        suiviFin(t + '.', abandon ? 'Rotation interrompue' : 'Rotation terminée');
+        var t = faits + ' ${T("pivotée")}' + (faits > 1 ? 's' : '');
+        if (perdus) t += ' · ' + perdus + ' ${T("traitement(s) à refaire")}';
+        if (rates) t += ' · ' + rates + ' ${T("en échec")}';
+        if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+        suiviFin(t + '.', abandon ? '${T("Rotation interrompue")}' : '${T("Rotation terminée")}');
         if (!rates && !abandon) suiviAutoFermer(2500);
         dire(t + '.', rates ? 'att' : 'bon');
         charger();
@@ -1742,13 +1746,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (r && r.ok) {
           faits++;
           perdus += (r.perdus || 0);
-          suiviLigne(k, 'faite', 'pivotée');
+          suiviLigne(k, 'faite', '${T("pivotée")}');
           suiviEtapes(k, [{ nom: 'rotation', ok: true },
-            (r.perdus ? { nom: 'traitements écartés', ok: true, chiffre: r.perdus + ' à refaire' }
-                      : { nom: 'dépôt', ok: true })]);
+            (r.perdus ? { nom: '${T("traitements écartés")}', ok: true, chiffre: r.perdus + ' ${T("à refaire")}' }
+                      : { nom: '${T("dépôt")}', ok: true })]);
         } else {
           rates++;
-          suiviLigne(k, 'echec', 'refusée');
+          suiviLigne(k, 'echec', '${T("refusée")}');
           suiviEtapes(k, [{ nom: 'rotation', ok: false, chiffre: (r && (r.detail || r.motif)) || '' }]);
         }
         pas(k + 1);
@@ -1768,22 +1772,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r.apercu) return '<div class="vign"><img src="' + esc(r.apercu) + '" alt=""></div>';
     /* Pas d aperçu = l image n a pas atteint le stockage. On le DIT : un cadre
        vide passerait pour une photo perdue. */
-    return '<div class="vign"><span class="att">non<br>rangée</span></div>';
+    return '<div class="vign"><span class="att">non<br>${T("rangée")}</span></div>';
   }
   /* ⚠ LE NOM DES TRAITEMENTS, TEL QU'ON L'A CLIQUÉ. La ligne annonçait
      « isolée » quel que soit le traitement subi : on retirait un mannequin et
      l'écran continuait de parler de détourage. Un verdict doit nommer ce qui a
      eu lieu, sinon il ne vaut rien comme verdict. */
-  var NOM_TRAIT = { detourage: 'détourée', fantome: 'sans mannequin', humain: 'sur mannequin' };
+  var NOM_TRAIT = { detourage: '${T("détourée")}', fantome: 'sans mannequin', humain: 'sur mannequin' };
   function traits(r){ return (r.faits || []).map(function(f){ return NOM_TRAIT[f] || f; }); }
 
   function etat(r){
-    if (r.enAttente) return '<span class="pill err">non rangée</span>';
+    if (r.enAttente) return '<span class="pill err">${T("non rangée")}</span>';
     var t = traits(r);
     var h = t.map(function(x){ return '<span class="pill att">' + esc(x) + '</span>'; }).join(' ');
-    if (!h && r.isole) h = '<span class="pill att">détourée</span>';
-    if (r.lieId) h = '<span class="pill bon">attachée</span>' + (h ? ' ' + h : '');
-    return h || '<span class="pill neutre">' + esc(r.statut || 'importée') + '</span>';
+    if (!h && r.isole) h = '<span class="pill att">${T("détourée")}</span>';
+    if (r.lieId) h = '<span class="pill bon">${T("attachée")}</span>' + (h ? ' ' + h : '');
+    return h || '<span class="pill neutre">' + esc(r.statut || '${T("importée")}') + '</span>';
   }
   function gain(r){
     var t = poids(r.poids);
@@ -1808,18 +1812,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var arme = (SUPPR_ARME === r.id);
     var act = ro ? '' : ('<span class="act">'
       + '<button class="ic" data-ren="' + esc(r.id) + '" title="Renommer">✎</button>'
-      + '<button class="ic" data-t1="' + esc(r.id) + '" title="Détourer le vêtement">✂</button>'
-      + '<button class="ic" data-t2="' + esc(r.id) + '" title="Retirer le mannequin">◍</button>'
-      + '<button class="ic" data-t3="' + esc(r.id) + '" title="Mettre sur un mannequin">☖</button>'
+      + '<button class="ic" data-t1="' + esc(r.id) + '" title="${T("Détourer")} le vêtement">✂</button>'
+      + '<button class="ic" data-t2="' + esc(r.id) + '" title="${T("Retirer le mannequin")}">◍</button>'
+      + '<button class="ic" data-t3="' + esc(r.id) + '" title="${T("Mettre sur un mannequin")}">☖</button>'
       + '<button class="ic" data-piv="' + esc(r.id) + '" title="Pivoter d’un quart de tour">⟳</button>'
       + '<button class="ic" data-ouvre="' + esc(r.id) + '" title="Ouvrir la fiche (fond, article, export)">⋯</button>'
       + '<button class="ic sup' + (arme ? ' arme' : '') + '" data-sup="' + esc(r.id) + '"'
-      + ' title="' + (arme ? 'Cliquez encore pour supprimer' : 'Supprimer') + '">'
+      + ' title="' + (arme ? '${T("Cliquez encore pour supprimer")}' : 'Supprimer') + '">'
       + (arme ? '!' : '✕') + '</button>'
       + '</span>');
     return '<tr data-id="' + esc(r.id) + '"' + (CHOIX[r.id] ? ' class="on"' : '') + '>'
       + '<td><input type="checkbox" class="chx" data-chx="' + esc(r.id) + '"'
-      +   ' aria-label="' + esc('Sélectionner ' + (r.nom || r.id)) + '"'
+      +   ' aria-label="' + esc('${T("Sélectionner")} ' + (r.nom || r.id)) + '"'
       + (CHOIX[r.id] ? ' checked' : '') + '></td>'
       + '<td>' + vignette(r) + '</td>'
       + '<td><span class="num">' + esc(r.code) + '</span></td>'
@@ -1854,14 +1858,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + ' ' + etat(r) + '</h3>'
       + '<div class="apercu">'
       + (r.apercu ? '<img src="' + esc(r.apercu) + '" alt="">'
-                  : '<span class="aide" style="padding:1rem;text-align:center">Cette photo n’a pas atteint le stockage.<br>'
-                    + 'Elle reste ouverte dans la fenêtre principale ; réessayez l’import.</span>')
+                  : '<span class="aide" style="padding:1rem;text-align:center">${T("Cette photo n’a pas atteint le stockage.")}<br>'
+                    + '${T("Elle reste ouverte dans la fenêtre principale ; réessayez l’import.")}</span>')
       + '</div>'
       + '<div class="grille">'
-      + '<div><div class="l">Poids rangé</div><div class="v">' + gain(r) + '</div></div>'
-      + (r.poidsSrc ? '<div><div class="l">Avant compression</div><div class="v">' + poids(r.poidsSrc) + '</div></div>' : '')
+      + '<div><div class="l">${T("Poids rangé")}</div><div class="v">' + gain(r) + '</div></div>'
+      + (r.poidsSrc ? '<div><div class="l">${T("Avant compression")}</div><div class="v">' + poids(r.poidsSrc) + '</div></div>' : '')
       + '<div><div class="l">Traitements</div><div class="v">'
-      + (traits(r).join(' · ') || (r.isole ? 'détourée' : 'aucun')) + '</div></div>'
+      + (traits(r).join(' · ') || (r.isole ? '${T("détourée")}' : 'aucun')) + '</div></div>'
       + (r.lieId ? '<div><div class="l">Article</div><div class="v">' + esc(r.lieNom)
           + (r.lieSku ? ' · ' + esc(r.lieSku) : '') + '</div></div>' : '')
       + '</div>';
@@ -1874,7 +1878,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             return '<button data-fond="' + esc(f.cle) + '" class="' + (r.fond === f.cle ? 'on' : '') + '">'
               + esc(f.libelle) + '</button>';
           }).join('')
-        + '<button id="p-fondperso" class="' + (r.fond === '__custom' ? 'on' : '') + '">+ Mon fond…</button>'
+        + '<button id="p-fondperso" class="' + (r.fond === '__custom' ? 'on' : '') + '">${T("+ Mon fond…")}</button>'
         + '</div>';
     }
 
@@ -1887,11 +1891,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="pied-boite">'
       + (ro ? '' : '<button class="danger" id="p-suppr">'
-          + (SUPPR_ARME_INSP ? 'Confirmer le retrait ?' : '✕ Retirer de la médiathèque') + '</button>')
-      + (D.bureau ? '<button id="p-enreg">⤓ Enregistrer le fichier</button>' : '')
-      + (ro || r.isole ? '' : '<button class="prim" id="p-isoler"><span class="ic">✂</span> Isoler le vêtement</button>')
+          + (SUPPR_ARME_INSP ? '${T("Confirmer le retrait ?")}' : '${T("✕ Retirer de la médiathèque")}') + '</button>')
+      + (D.bureau ? '<button id="p-enreg">${T("⤓ Enregistrer le fichier")}</button>' : '')
+      + (ro || r.isole ? '' : '<button class="prim" id="p-isoler"><span class="ic">✂</span> ${T("Isoler le vêtement")}</button>')
       + (ro ? '' : '<button class="' + (r.isole ? 'prim' : '') + '" id="p-attacher">'
-          + (ATTACHE ? 'Annuler l’attache' : 'Attacher à un article') + '</button>')
+          + (ATTACHE ? '${T("Annuler l’attache")}' : '${T("Attacher à un article")}') + '</button>')
       + '<button id="p-fermer">Fermer</button>'
       + '</div>';
 
@@ -1904,21 +1908,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function listeProduits(){
-    if (!PRODUITS) return '<div class="aide" style="padding:.4rem">Lecture du catalogue…</div>';
-    if (!PRODUITS.length) return '<div class="aide" style="padding:.4rem">Aucun article ne correspond.</div>';
+    if (!PRODUITS) return '<div class="aide" style="padding:.4rem">${T("Lecture du catalogue…")}</div>';
+    if (!PRODUITS.length) return '<div class="aide" style="padding:.4rem">${T("Aucun article ne correspond.")}</div>';
     /* ⚠ ON DIT QUAND LA RECHERCHE EST COUPEE. Le coeur rend au plus 50 articles ;
        chercher un mot courant en trouvait cent vingt et l ecran en montrait
        cinquante, sans un mot. On croit alors que l article cherche n existe pas
        et l on va le creer une deuxieme fois. */
     var coupe = (PRODUITS_TOTAL && PRODUITS_TOTAL > PRODUITS.length)
       ? '<div class="aide" style="padding:.35rem">' + szCompte(PRODUITS.length, PRODUITS_TOTAL, 'article', 'articles')
-        + ' — precisez la recherche pour voir les autres.</div>'
+        + ' ${T("— precisez la recherche pour voir les autres.")}</div>'
       : '';
     return coupe + PRODUITS.map(function(p){
       return '<div class="p" data-pid="' + esc(p.id) + '">'
         + (p.image ? '<img src="' + esc(p.image) + '" alt="">' : '<span class="creux"></span>')
         + '<div style="min-width:0"><div class="nm">' + esc(p.nom) + '</div>'
-        + '<div class="sk">' + esc(p.sku || 'sans SKU') + (p.enVente ? '' : ' · hors vente') + '</div></div></div>';
+        + '<div class="sk">' + esc(p.sku || '${T("sans SKU")}') + (p.enVente ? '' : ' · hors vente') + '</div></div></div>';
     }).join('');
   }
 
@@ -1971,7 +1975,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ANNULE = false;
     var d = document.createElement('div');
     d.className = 'suivi';
-    d.innerHTML = '<div class="st"><span id="sv-t">' + esc(titre || 'Import en cours')
+    d.innerHTML = '<div class="st"><span id="sv-t">' + esc(titre || '${T("Import en cours")}')
       + '</span><span class="n" id="sv-n">0 / ' + noms.length + '</span></div>'
       + '<div class="lst" id="sv-l">'
       + noms.map(function(n, i){
@@ -1981,9 +1985,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         }).join('')
       + '</div><div class="pd" id="sv-p">'
       + '<div class="jauge"><i id="sv-j" style="width:0%"></i></div>'
-      + '<span class="pc" id="sv-pc">0 %</span><span id="sv-r">Préparation…</span>'
+      + '<span class="pc" id="sv-pc">0 %</span><span id="sv-r">${T("Préparation…")}</span>'
       + '<span class="bt">'
-      + '<button class="mini dgr" id="sv-a">Annuler</button>'
+      + '<button class="mini dgr" id="sv-a">${T("Annuler")}</button>'
       + '<button class="mini" id="sv-x">Fermer</button></span></div>';
     document.body.appendChild(d);
     SUIVI = d;
@@ -1995,8 +1999,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       a.disabled = true;
       if (SUIVI) SUIVI.className = 'suivi annule';
       var r = document.getElementById('sv-r');
-      if (r) r.textContent = 'Annulation… la tâche en cours se termine, les suivantes sont abandonnées.';
-      dire('Annulation demandée — la tâche en cours va au bout, les suivantes sont abandonnées.', 'att');
+      if (r) r.textContent = '${T("Annulation… la tâche en cours se termine, les suivantes sont abandonnées.")}';
+      dire('${T("Annulation demandée — la tâche en cours va au bout, les suivantes sont abandonnées.")}', 'att');
     };
   }
   /* ⚠⚠ FERMER NE DOIT PAS VOULOIR DIRE PERDRE. Le compte rendu disparaissait
@@ -2071,7 +2075,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var r = document.getElementById('sv-r');
     if (r) r.textContent = mot;
     var t = document.getElementById('sv-t');
-    if (t) t.textContent = titre || 'Terminé';
+    if (t) t.textContent = titre || '${T("Terminé")}';
     var a = document.getElementById('sv-a');
     if (a) a.remove();
     // ⚠ « DERNIER SUIVI » = LE COMPTE RENDU TERMINÉ, capturé ICI (pas à la
@@ -2086,7 +2090,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var i = 0; i < fichiers.length; i++) {
       if (/^image\\//.test(fichiers[i].type || '')) liste.push(fichiers[i]);
     }
-    if (!liste.length) { dire('Aucune image dans ce dépôt (JPG, PNG ou WebP).', 'att'); return; }
+    if (!liste.length) { dire('${T("Aucune image dans ce dépôt (JPG, PNG ou WebP).")}', 'att'); return; }
     if (occupeDeja('Import')) return;
     var champLot = document.getElementById('p-lot-nom');
     if (champLot) LOT_NOM = champLot.value.trim();
@@ -2099,13 +2103,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var n = String(i + 1);
       return LOT_NOM + ' ' + (n.length < 2 ? '0' + n : n);
     };
-    occuper('Préparation de l’import…');
+    occuper('${T("Préparation de l’import…")}');
     /* ⚠ MEME UN GLISSER-DEPOSER EST UN LOT. Sans cela, l historique ne montrerait
        que les imports passes par l assistant, et l on ne pourrait pas defaire un
        depot fait a la main — c est-a-dire le plus courant. */
-    appeler('lot:ouvrir', [LOT_NOM || ('Import du ' + new Date().toLocaleDateString('fr-CA')), 'fichiers']);
+    appeler('lot:ouvrir', [LOT_NOM || ('${T("Import du")} ' + new Date().toLocaleDateString('fr-CA')), 'fichiers']);
     suiviOuvrir(liste.map(function(f, i){ return nommer(f, i); }),
-      (LOT_NOM ? ('Import · ' + LOT_NOM) : 'Import') + ' · ' + liste.length + ' photo(s)');
+      (LOT_NOM ? ('${T("Import ·")} ' + LOT_NOM) : 'Import') + ' · ' + liste.length + ' photo(s)');
     var faites = 0, doubles = 0, refuses = 0, echoues = 0;
     var abandonnees = 0;
     var suite = function(k){
@@ -2114,18 +2118,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          moitie envoye laisserait une entree sans image. */
       if (ANNULE && k < liste.length) {
         abandonnees = liste.length - k;
-        for (var z = k; z < liste.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+        for (var z = k; z < liste.length; z++) suiviLigne(z, 'echec', '${T("abandonnée")}');
         k = liste.length;
       }
       if (k >= liste.length) {
         appeler('lot:clore', []);
         liberer();
-        var t = faites + ' importée' + (faites > 1 ? 's' : '');
-        if (doubles) t += ' · ' + doubles + ' déjà présente' + (doubles > 1 ? 's' : '');
+        var t = faites + ' ${T("importée")}' + (faites > 1 ? 's' : '');
+        if (doubles) t += ' · ' + doubles + ' ${T("déjà présente")}' + (doubles > 1 ? 's' : '');
         if (refuses) t += ' · ' + refuses + ' trop lourde' + (refuses > 1 ? 's' : '');
-        if (echoues) t += ' · ' + echoues + ' en échec';
-        if (abandonnees) t += ' · ' + abandonnees + ' abandonnée' + (abandonnees > 1 ? 's' : '');
-        suiviFin(t + '.', abandonnees ? 'Import interrompu' : 'Import terminé');
+        if (echoues) t += ' · ' + echoues + ' ${T("en échec")}';
+        if (abandonnees) t += ' · ' + abandonnees + ' ${T("abandonnée")}' + (abandonnees > 1 ? 's' : '');
+        suiviFin(t + '.', abandonnees ? '${T("Import interrompu")}' : '${T("Import terminé")}');
         /* ⚠ IL SE FERME TOUT SEUL QUAND TOUT EST PASSE (demande du 2026-08-09) :
            il n y a rien a y lire, et un panneau qui reste apres coup encombre.
            ⚠ MAIS IL RESTE DES QU IL Y A QUELQUE CHOSE A VOIR — un echec, une
@@ -2175,14 +2179,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                celle qui existe deja : << deja presente >> tout court n aide
                personne a la retrouver. */
             doubles++;
-            suiviLigne(k, 'double', 'déjà là · ' + (r.code || ''));
+            suiviLigne(k, 'double', '${T("déjà là ·")} ' + (r.code || ''));
           } else if (r && r.ok) {
             faites++;
-            suiviLigne(k, r.rangee ? 'faite' : 'echec', r.rangee ? 'importée' : 'non rangée');
+            suiviLigne(k, r.rangee ? 'faite' : 'echec', r.rangee ? '${T("importée")}' : '${T("non rangée")}');
             if (!r.rangee) { echoues++; faites--; }
           } else {
             echoues++;
-            suiviLigne(k, 'echec', 'refusée');
+            suiviLigne(k, 'echec', '${T("refusée")}');
             dire(expliquer(r), 'err');
           }
           suite(k + 1);
@@ -2208,8 +2212,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function isoler(){
-    if (occupeDeja('Opération')) return;
-    occuper('Isolation du vêtement… (quelques secondes)');
+    if (occupeDeja('${T("Opération")}')) return;
+    occuper('${T("Isolation du vêtement… (quelques secondes)")}');
     appeler('photos:isoler', [DETAIL.id]).then(function(r){
       liberer();
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -2217,23 +2221,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          pixels de bordure : sur une photo reelle il mange le vetement ou garde
          le mur. Laisser croire que le modele a travaille, c est mettre en ligne
          une photo qu on croit traitee correctement. */
-      dire(r.deja ? 'Cette photo était déjà isolée.'
+      dire(r.deja ? '${T("Cette photo était déjà isolée.")}'
         : (r.par === 'canevas'
-            ? ('Vêtement isolé LOCALEMENT — le modèle n’a pas répondu'
-               + (r.repli ? ' (' + esc(r.repli) + ')' : '') + '. Le résultat est moins net.')
-            : 'Vêtement isolé par le modèle. Choisissez un fond.'),
+            ? ('${T("Vêtement isolé LOCALEMENT — le modèle n’a pas répondu")}'
+               + (r.repli ? ' (' + esc(r.repli) + ')' : '') + '${T(". Le résultat est moins net.")}')
+            : '${T("Vêtement isolé par le modèle. Choisissez un fond.")}'),
         r.par === 'canevas' ? 'att' : 'bon');
       rouvrir(r.photo);
     });
   }
 
   function fond(cle, image){
-    if (occupeDeja('Opération')) return;
-    occuper('Application du fond…');
+    if (occupeDeja('${T("Opération")}')) return;
+    occuper('${T("Application du fond…")}');
     appeler('photos:fond', [DETAIL.id, cle, image || '']).then(function(r){
       liberer();
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Fond appliqué.', 'bon');
+      dire('${T("Fond appliqué.")}', 'bon');
       rouvrir(r.photo);
     });
   }
@@ -2248,12 +2252,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function attacher(pid){
-    if (occupeDeja('Opération')) return;
-    occuper('Attache et téléversement…');
+    if (occupeDeja('${T("Opération")}')) return;
+    occuper('${T("Attache et téléversement…")}');
     appeler('photos:attacher', [DETAIL.id, pid]).then(function(r){
       liberer();
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Photo ' + r.code + ' attachée à ' + r.produit + '.', 'bon');
+      dire('Photo ' + r.code + ' ${T("attachée à")} ' + r.produit + '.', 'bon');
       ATTACHE = false; PRODUITS = null; PQ = '';
       rouvrir(r.photo);
     });
@@ -2364,12 +2368,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (ev.key === 'Escape') { RENOMME = ''; dessiner(); return; }
         if (ev.key !== 'Enter') return;
         var n = champRen.value.trim();
-        if (!n) { dire('Le nom ne peut pas être vide.', 'err'); return; }
+        if (!n) { dire('${T("Le nom ne peut pas être vide.")}', 'err'); return; }
         var id = RENOMME;
         RENOMME = '';
         dire('Renommage…');
         appeler('photos:renommer', [id, n]).then(function(r){
-          dire(r.ok ? 'Photo renommée.' : expliquer(r), r.ok ? 'bon' : 'err');
+          dire(r.ok ? '${T("Photo renommée.")}' : expliquer(r), r.ok ? 'bon' : 'err');
           charger();
         });
       };
@@ -2424,7 +2428,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (SUPPR_ARME !== id) {
           SUPPR_ARME = id;
           dessiner();
-          dire('Cliquez encore sur la corbeille pour supprimer — l’article lié, lui, garde son image.', 'att');
+          dire('${T("Cliquez encore sur la corbeille pour supprimer — l’article lié, lui, garde son image.")}', 'att');
           setTimeout(function(){ if (SUPPR_ARME === id) { SUPPR_ARME = ''; dessiner(); } }, 5000);
           return;
         }
@@ -2433,7 +2437,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         appeler('photos:supprimer', [id]).then(function(r){
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
           delete CHOIX[id];
-          dire('Photo retirée de la photothèque.', 'bon');
+          dire('${T("Photo retirée de la photothèque.")}', 'bon');
           charger();
         });
       };
@@ -2479,8 +2483,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!SUP_LOT_ARME) {
         SUP_LOT_ARME = true;
         dessiner();
-        dire('Cliquez encore pour supprimer les ' + ids.length + ' photo(s) cochée(s). '
-          + 'Les articles liés gardent leur image.', 'att');
+        dire('${T("Cliquez encore pour supprimer les")} ' + ids.length + ' ${T("photo(s) cochée(s).")} '
+          + '${T("Les articles liés gardent leur image.")}', 'att');
         setTimeout(function(){ if (SUP_LOT_ARME) { SUP_LOT_ARME = false; dessiner(); } }, 6000);
         return;
       }
@@ -2490,22 +2494,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var c = CHOIX[i];
         return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
       });
-      occuper('Suppression de ' + ids.length + ' photo(s)…');
-      suiviOuvrir(titres, 'Suppression · ' + ids.length + ' photo(s)');
+      occuper('${T("Suppression de")} ' + ids.length + ' photo(s)…');
+      suiviOuvrir(titres, '${T("Suppression ·")} ' + ids.length + ' photo(s)');
       var faits = 0, rates = 0, abandon = 0;
       var pas = function(k){
         suiviCompte(k, ids.length);
         if (ANNULE && k < ids.length) {
           abandon = ids.length - k;
-          for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+          for (var z = k; z < ids.length; z++) suiviLigne(z, 'echec', '${T("abandonnée")}');
           k = ids.length;
         }
         if (k >= ids.length) {
           liberer();
-          var t = faits + ' retirée' + (faits > 1 ? 's' : '');
-          if (rates) t += ' · ' + rates + ' refusée' + (rates > 1 ? 's' : '');
-          if (abandon) t += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
-          suiviFin(t + '.', abandon ? 'Suppression interrompue' : 'Suppression terminée');
+          var t = faits + ' ${T("retirée")}' + (faits > 1 ? 's' : '');
+          if (rates) t += ' · ' + rates + ' ${T("refusée")}' + (rates > 1 ? 's' : '');
+          if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+          suiviFin(t + '.', abandon ? '${T("Suppression interrompue")}' : '${T("Suppression terminée")}');
           if (!rates && !abandon) suiviAutoFermer(2500);
           dire(t + '.', rates ? 'att' : 'bon');
           charger();
@@ -2513,10 +2517,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         }
         suiviLigne(k, 'cours', 'en cours');
         appeler('photos:supprimer', [ids[k]]).then(function(r){
-          if (r && r.ok) { faits++; delete CHOIX[ids[k]]; suiviLigne(k, 'faite', 'retirée'); }
+          if (r && r.ok) { faits++; delete CHOIX[ids[k]]; suiviLigne(k, 'faite', '${T("retirée")}'); }
           else {
             rates++;
-            suiviLigne(k, 'echec', 'refusée');
+            suiviLigne(k, 'echec', '${T("refusée")}');
             suiviEtapes(k, [{ nom: 'retrait', ok: false, chiffre: (r && (r.detail || r.motif)) || '' }]);
           }
           pas(k + 1);
@@ -2537,11 +2541,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var nomOk = document.getElementById('p-nom-ok');
     if (nomOk) nomOk.onclick = function(){
       var c = document.getElementById('p-nom');
-      if (!c || !c.value.trim()) { dire('Le nom ne peut pas être vide.', 'err'); return; }
+      if (!c || !c.value.trim()) { dire('${T("Le nom ne peut pas être vide.")}', 'err'); return; }
       dire('Renommage…');
       appeler('photos:renommer', [DETAIL.id, c.value.trim()]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Photo renommée.', 'bon');
+        dire('${T("Photo renommée.")}', 'bon');
         rouvrir(r.photo);
       });
     };
@@ -2560,23 +2564,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (stud) stud.onclick = function(){
       appeler('studio:ouvrir', []).then(function(r){
         if (!r || !r.ok) dire((r && r.motif === 'version_coquille')
-          ? 'Cette version ne sait pas encore ouvrir le Studio.'
-          : 'Ouverture du Studio impossible.', 'err');
+          ? '${T("Cette version ne sait pas encore ouvrir le Studio.")}'
+          : '${T("Ouverture du Studio impossible.")}', 'err');
       });
     };
 
     var usb = document.getElementById('p-usb');
     if (usb) usb.onclick = function(){
-      if (occupeDeja('Détection de clé USB')) return;
-      occuper('Recherche de clés USB…');
+      if (occupeDeja('${T("Détection de clé USB")}')) return;
+      occuper('${T("Recherche de clés USB…")}');
       appeler('photos:usb', []).then(function(r){
         liberer();
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        if (!r.trouvees) { dire('Aucune photo trouvée sur une clé USB.', 'att'); return; }
-        var t = r.importees + ' photo' + (r.importees > 1 ? 's' : '') + ' importée'
-          + (r.importees > 1 ? 's' : '') + ' depuis la clé ' + (r.lecteur || 'USB');
-        if (r.doublons) t += ' · ' + r.doublons + ' déjà présente' + (r.doublons > 1 ? 's' : '');
-        if (r.echecs) t += ' · ' + r.echecs + ' en échec';
+        if (!r.trouvees) { dire('${T("Aucune photo trouvée sur une clé USB.")}', 'att'); return; }
+        var t = r.importees + ' photo' + (r.importees > 1 ? 's' : '') + ' ${T("importée")}'
+          + (r.importees > 1 ? 's' : '') + ' ${T("depuis la clé")} ' + (r.lecteur || 'USB');
+        if (r.doublons) t += ' · ' + r.doublons + ' ${T("déjà présente")}' + (r.doublons > 1 ? 's' : '');
+        if (r.echecs) t += ' · ' + r.echecs + ' ${T("en échec")}';
         dire(t + '.', r.importees ? 'bon' : 'att');
         charger();
       });
@@ -2591,7 +2595,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       VIDER_ARME = false;
-      if (occupeDeja('Vidage de la photothèque')) return;
+      if (occupeDeja('${T("Vidage de la photothèque")}')) return;
       /* ⚠⚠ LE VIDAGE MENE SA SUITE, LIGNE PAR LIGNE. Il n affichait qu un
          << Retrait des entrees... >> qui restait des minutes sans rien dire :
          ni combien, ni lesquelles, ni ou l on en etait — et rien pour arreter.
@@ -2599,29 +2603,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          ⚠ Et chaque retrait efface AUSSI les images dans le stockage : la fiche
          seule partait, les objets restaient. << C est efface >> ne doit pas
          vouloir dire << ce le sera peut-etre demain >>. */
-      occuper('Lecture de ce qu il y a à retirer…');
+      occuper('${T("Lecture de ce qu il y a à retirer…")}');
       appeler('photos:toutes', []).then(function(t){
         if (!t.ok) { liberer(); dire(expliquer(t), 'err'); return; }
         var l = t.photos || [];
-        if (!l.length) { liberer(); dire('La photothèque est déjà vide.', 'att'); return; }
+        if (!l.length) { liberer(); dire('${T("La photothèque est déjà vide.")}', 'att'); return; }
         var titres = l.map(function(x){ return x.code + ' · ' + x.nom; });
-        suiviOuvrir(titres, 'Vidage · ' + l.length + ' photo(s)');
+        suiviOuvrir(titres, '${T("Vidage ·")} ' + l.length + ' photo(s)');
         var faits = 0, rates = 0, abandon = 0;
         var pas = function(k){
           suiviCompte(k, l.length);
           if (ANNULE && k < l.length) {
             abandon = l.length - k;
-            for (var z = k; z < l.length; z++) suiviLigne(z, 'echec', 'abandonnée');
+            for (var z = k; z < l.length; z++) suiviLigne(z, 'echec', '${T("abandonnée")}');
             k = l.length;
           }
           if (k >= l.length) {
             liberer();
-            var m = faits + ' retirée' + (faits > 1 ? 's' : '');
-            if (rates) m += ' · ' + rates + ' refusée' + (rates > 1 ? 's' : '');
-            if (abandon) m += ' · ' + abandon + ' abandonnée' + (abandon > 1 ? 's' : '');
-            suiviFin(m + '.', abandon ? 'Vidage interrompu' : 'Vidage terminé');
+            var m = faits + ' ${T("retirée")}' + (faits > 1 ? 's' : '');
+            if (rates) m += ' · ' + rates + ' ${T("refusée")}' + (rates > 1 ? 's' : '');
+            if (abandon) m += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+            suiviFin(m + '.', abandon ? '${T("Vidage interrompu")}' : '${T("Vidage terminé")}');
             if (!rates && !abandon) suiviAutoFermer(2500);
-            dire(m + '. Les fiches produits gardent leurs images.', rates ? 'att' : 'bon');
+            dire(m + '${T(". Les fiches produits gardent leurs images.")}', rates ? 'att' : 'bon');
             CHOIX = {};
             charger();
             return;
@@ -2632,11 +2636,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           appeler('photos:supprimer', [l[k].id]).then(function(r){
             if (r && r.ok) {
               faits++;
-              suiviLigne(k, 'faite', 'retirée');
+              suiviLigne(k, 'faite', '${T("retirée")}');
               suiviEtapes(k, [{ nom: 'fiche', ok: true }, { nom: 'images du stockage', ok: true }]);
             } else {
               rates++;
-              suiviLigne(k, 'echec', 'refusée');
+              suiviLigne(k, 'echec', '${T("refusée")}');
               suiviEtapes(k, [{ nom: 'fiche', ok: false, chiffre: (r && (r.detail || r.motif)) || '' }]);
             }
             pas(k + 1);
@@ -2650,8 +2654,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         liberer();
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire(r.echecs
-          ? (r.retirees + ' retirée(s), ' + r.echecs + ' refusée(s) par le nuage.')
-          : 'Photothèque vidée — les fiches produits gardent leurs images.',
+          ? (r.retirees + ' ${T("retirée(s), ")}' + r.echecs + ' ${T("refusée(s) par le nuage.")}')
+          : '${T("Photothèque vidée — les fiches produits gardent leurs images.")}',
           r.echecs ? 'att' : 'bon');
         DETAIL = null;
         charger();
@@ -2790,7 +2794,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     RANGE = true;
     appeler('photos:ranger', []).then(function(r){
       if (r && r.ok && r.repliees) {
-        dire(r.repliees + ' photo(s) rangée(s) : une seule image conservée par photo.', 'bon');
+        dire(r.repliees + ' ${T("photo(s) rangée(s) : une seule image conservée par photo.")}', 'bon');
         charger();
       }
     }).catch(function(){});
@@ -2802,7 +2806,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('photos:donnees', [{ q: Q, tri: TRI, taille: TAILLE, page: PAGE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Photothèque indisponible', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Photothèque indisponible")}', expliquer(r)); return; }
       D = r;
       /* ⚠⚠ LE CHOIX SURVIT AU CHANGEMENT DE PAGE, ET C EST TOUT L INTERET.
          La version precedente le taillait sur les lignes de la PAGE COURANTE :
@@ -2867,12 +2871,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
