@@ -18,6 +18,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('client');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -101,13 +105,13 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 function pageClient(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Fiche client — Administration Sandriza</title>
+<title>${T("Fiche client — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="av" id="t-av">?</span>
-  <div><h1 id="titre">Fiche client</h1><div class="mail" id="t-mail"></div></div>
+  <div><h1 id="titre">${T("Fiche client")}</h1><div class="mail" id="t-mail"></div></div>
   <span class="pill gris" id="pill" style="display:none"></span>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions" id="actions"></span></div>
 <script>
@@ -142,31 +146,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   var MOTIFS = {
-    session: 'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit: 'Votre rôle ne donne pas accès aux clients.',
-    indisponible: 'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible: 'La fenêtre principale ne répond pas.',
-    delai: 'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable: 'Ce client n’existe plus.',
-    verrou: 'Fiche ouverte par quelqu’un d’autre.',
-    nom_requis: 'Prénom et nom requis.',
-    courriel_invalide: 'Adresse courriel invalide.',
-    courriel_pris: 'Cette adresse courriel est déjà utilisée par un autre compte.',
-    tel_invalide: 'Numéro de téléphone invalide.',
-    mdp_court: 'Le nouveau mot de passe doit contenir au moins 6 caractères.',
-    mdp_echec: 'Mot de passe NON changé — réessayez.',
-    pas_en_corbeille: 'Le compte doit d’abord être mis à la corbeille.',
-    refus_serveur: 'Suppression refusée par le serveur — le compte est intact.',
-    echec: 'L’opération a échoué.'
+    session: '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit: '${T("Votre rôle ne donne pas accès aux clients.")}',
+    indisponible: '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible: '${T("La fenêtre principale ne répond pas.")}',
+    delai: '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable: '${T("Ce client n’existe plus.")}',
+    verrou: '${T("Fiche ouverte par quelqu’un d’autre.")}',
+    nom_requis: '${T("Prénom et nom requis.")}',
+    courriel_invalide: '${T("Adresse courriel invalide.")}',
+    courriel_pris: '${T("Cette adresse courriel est déjà utilisée par un autre compte.")}',
+    tel_invalide: '${T("Numéro de téléphone invalide.")}',
+    mdp_court: '${T("Le nouveau mot de passe doit contenir au moins 6 caractères.")}',
+    mdp_echec: '${T("Mot de passe NON changé — réessayez.")}',
+    pas_en_corbeille: '${T("Le compte doit d’abord être mis à la corbeille.")}',
+    refus_serveur: '${T("Suppression refusée par le serveur — le compte est intact.")}',
+    echec: '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
-    if (m === 'commandes_presentes') return 'Suppression définitive impossible : ' + (r.nb || '?')
-      + ' commande(s) — conservation fiscale de 6 ans. Le compte reste en corbeille.';
+    if (m === 'commandes_presentes') return '${T("Suppression définitive impossible :")} ' + (r.nb || '?')
+      + ' ${T("commande(s) — conservation fiscale de 6 ans. Le compte reste en corbeille.")}';
     if (r && r.detail) return r.detail;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -203,17 +207,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var h = '<div class="carte"><div class="tuiles">'
       + '<div class="tuile"><div class="k">Commandes</div><div class="v">' + R.stats.commandes + '</div></div>'
       + '<div class="tuile"><div class="k">Retours</div><div class="v"' + (R.stats.retours ? ' style="color:var(--tx-f6a5a5)"' : '') + '>' + R.stats.retours + '</div></div>'
-      + '<div class="tuile"><div class="k">Total dépensé</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
-      + '<div class="tuile"><div class="k">Inscrit le</div><div class="v" style="font-size:.92rem">' + esc(dateFr(c.inscritLe)) + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Total dépensé")}</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v" style="font-size:.92rem">' + esc(dateFr(c.inscritLe)) + '</div></div>'
       + '</div></div>';
     h += '<div class="carte"><h2>Coordonnées</h2>'
       + (c.tel ? '<div class="ligne"><span class="k">Téléphone</span><span>' + esc(c.tel) + '</span></div>' : '')
       + '<div class="ligne"><span class="k">Adresse</span><span style="text-align:right">'
       + esc([a.rue, a.ville, a.province, a.codePostal, a.pays].filter(Boolean).join(', ') || '—') + '</span></div>'
-      + '<div class="ligne"><span class="k">Langue des courriels</span><span>' + (c.langue === 'en' ? 'English' : 'Français') + '</span></div>'
-      + (c.supprime && c.supprimeLe ? '<div class="ligne"><span class="k">Supprimé le</span><span>' + esc(dateFr(c.supprimeLe)) + '</span></div>' : '')
+      + '<div class="ligne"><span class="k">${T("Langue des courriels")}</span><span>' + (c.langue === 'en' ? 'English' : 'Français') + '</span></div>'
+      + (c.supprime && c.supprimeLe ? '<div class="ligne"><span class="k">${T("Supprimé le")}</span><span>' + esc(dateFr(c.supprimeLe)) + '</span></div>' : '')
       + '</div>';
-    h += '<div class="carte"><h2>Commandes récentes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">— '
+    h += '<div class="carte"><h2>${T("Commandes récentes")} <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">— '
       + R.stats.commandes + ' au total</span></h2>'
       + (R.dernieres.length
         ? R.dernieres.map(function(o){
@@ -221,29 +225,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + '<div class="d"></div><span class="fin">' + esc(dateFr(o.date)) + ' · ' + argent(o.total) + '</span></div>'; }).join('')
           + (R.stats.commandes > 6 ? '<div class="aide" style="text-align:center;padding-top:.35rem">+ '
             + (R.stats.commandes - 6) + ' autre' + (R.stats.commandes - 6 > 1 ? 's' : '')
-            + ' — voir la fenêtre Commandes</div>' : '')
-        : '<div class="aide">Aucune commande.</div>')
+            + ' ${T("— voir la fenêtre Commandes")}</div>' : '')
+        : '<div class="aide">${T("Aucune commande.")}</div>')
       + '</div>';
     corps.innerHTML = h;
 
     var c2 = R.client;
     var b = '';
     if (c2.supprime) {
-      if (R.peutEcrire) b += '<button class="prim" id="btn-restaurer">↩ Restaurer</button>';
-      b += '<button id="btn-releve"><span class="ic">📄</span> État de compte</button>';
+      if (R.peutEcrire) b += '<button class="prim" id="btn-restaurer">${T("↩ Restaurer")}</button>';
+      b += '<button id="btn-releve"><span class="ic">📄</span> ${T("État de compte")}</button>';
       /* ⚠ Le bouton de purge N APPARAIT PAS sur un dossier non purgeable : une
          commande impose 6 ans de conservation, et un bouton qui refuse toujours
          fait chercher la panne ailleurs. La fiche le DIT a la place. */
-      if (R.peutSupprimer && R.purgeable) b += '<button class="danger" id="btn-purger"><span class="ic">🗑</span> Supprimer définitivement</button>';
+      if (R.peutSupprimer && R.purgeable) b += '<button class="danger" id="btn-purger"><span class="ic">🗑</span> ${T("Supprimer définitivement")}</button>';
     } else {
-      if (R.peutEcrire) b += '<button class="prim" id="btn-modifier"><span class="ic">✎</span> Modifier</button>';
-      b += '<button id="btn-releve"><span class="ic">📄</span> État de compte</button>';
-      if (R.peutEcrire) b += '<button id="btn-etat">' + (c2.actif ? '⏸ Désactiver' : '▶ Activer') + '</button>';
-      if (R.peutSupprimer) b += '<button class="danger" id="btn-corbeille"><span class="ic">🗑</span> Supprimer</button>';
+      if (R.peutEcrire) b += '<button class="prim" id="btn-modifier"><span class="ic">✎</span> ${T("Modifier")}</button>';
+      b += '<button id="btn-releve"><span class="ic">📄</span> ${T("État de compte")}</button>';
+      if (R.peutEcrire) b += '<button id="btn-etat">' + (c2.actif ? '${T("⏸ Désactiver")}' : '${T("▶ Activer")}') + '</button>';
+      if (R.peutSupprimer) b += '<button class="danger" id="btn-corbeille"><span class="ic">🗑</span> ${T("Supprimer")}</button>';
     }
     actions.innerHTML = b;
     if (c2.supprime && !R.purgeable && R.peutSupprimer) {
-      dire('Suppression définitive impossible : ' + R.stats.commandes + ' commande(s) — conservation fiscale de 6 ans.', 'att');
+      dire('${T("Suppression définitive impossible :")} ' + R.stats.commandes + ' ${T("commande(s) — conservation fiscale de 6 ans.")}', 'att');
     }
     brancherFiche();
   }
@@ -253,36 +257,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var h = '<div class="carte"><h2>Identité</h2><div class="r2">'
       + '<div class="ch"><label for="e-prenom">Prénom</label><input id="e-prenom" value="' + esc(c.prenom) + '"></div>'
       + '<div class="ch"><label for="e-nom">Nom</label><input id="e-nom" value="' + esc(c.nom) + '"></div>'
-      + '<div class="ch"><label for="e-courriel">Adresse courriel</label><input id="e-courriel" inputmode="email" value="' + esc(c.courriel) + '"></div>'
+      + '<div class="ch"><label for="e-courriel">${T("Adresse courriel")}</label><input id="e-courriel" inputmode="email" value="' + esc(c.courriel) + '"></div>'
       + '<div class="ch"><label for="e-tel">Téléphone</label><input id="e-tel" inputmode="tel" value="' + esc(c.tel) + '"></div>'
       + '</div></div>';
-    h += '<div class="carte"><h2>Adresse de livraison</h2><div class="r2">'
+    h += '<div class="carte"><h2>${T("Adresse de livraison")}</h2><div class="r2">'
       + '<div class="ch large"><label for="e-rue">Rue</label><input id="e-rue" value="' + esc(a.rue) + '"></div>'
       + '<div class="ch"><label for="e-ville">Ville</label><input id="e-ville" value="' + esc(a.ville) + '"></div>'
       + '<div class="ch"><label for="e-prov">Province</label><select id="e-prov">'
       + R.provinces.map(function(p){ return '<option value="' + p + '"' + (p === a.province ? ' selected' : '') + '>' + p + '</option>'; }).join('')
       + '</select></div>'
-      + '<div class="ch"><label for="e-postal">Code postal</label><input id="e-postal" value="' + esc(a.codePostal) + '"></div>'
+      + '<div class="ch"><label for="e-postal">${T("Code postal")}</label><input id="e-postal" value="' + esc(a.codePostal) + '"></div>'
       + '<div class="ch"><label for="e-pays">Pays</label><input id="e-pays" value="' + esc(a.pays) + '"></div>'
-      + '<div class="ch large"><label for="e-langue">Langue des courriels</label><select id="e-langue">'
-      + '<option value="fr"' + (c.langue !== 'en' ? ' selected' : '') + '><span class="ic">🇫🇷</span> Français (par défaut)</option>'
+      + '<div class="ch large"><label for="e-langue">${T("Langue des courriels")}</label><select id="e-langue">'
+      + '<option value="fr"' + (c.langue !== 'en' ? ' selected' : '') + '><span class="ic">🇫🇷</span> ${T("Français (par défaut)")}</option>'
       + '<option value="en"' + (c.langue === 'en' ? ' selected' : '') + '><span class="ic">🇬🇧</span> English</option>'
       + '</select></div>'
       + '</div></div>';
-    h += '<div class="carte"><h2>Mot de passe</h2>'
+    h += '<div class="carte"><h2>${T("Mot de passe")}</h2>'
       + '<div style="display:flex;gap:.45rem;align-items:flex-end">'
-      + '<div class="ch" style="flex:1"><label for="e-mdp">Nouveau (laisser vide = inchangé)</label>'
+      + '<div class="ch" style="flex:1"><label for="e-mdp">${T("Nouveau (laisser vide = inchangé)")}</label>'
       + '<input id="e-mdp" type="password" placeholder="Min. 6 caractères" autocomplete="new-password"></div>'
       + '<button class="mini" id="btn-voir" title="Afficher / masquer"><span class="ic">👁</span></button>'
-      + '<button class="mini" id="btn-gen"><span class="ic">🎲</span> Générer</button>'
+      + '<button class="mini" id="btn-gen"><span class="ic">🎲</span> ${T("Générer")}</button>'
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--tx2);margin-top:.5rem;cursor:pointer">'
-      + '<input type="checkbox" id="e-aviser" checked> Aviser le client par courriel de ce changement</label>'
+      + '<input type="checkbox" id="e-aviser" checked> ${T("Aviser le client par courriel de ce changement")}</label>'
       + ''
       + '</div>';
     corps.innerHTML = h;
-    actions.innerHTML = '<button id="btn-annuler">← Fiche</button>'
-      + '<button class="prim" id="btn-enr">Enregistrer</button>';
+    actions.innerHTML = '<button id="btn-annuler">${T("← Fiche")}</button>'
+      + '<button class="prim" id="btn-enr">${T("Enregistrer")}</button>';
     brancherEdition();
   }
 
@@ -294,9 +298,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (m) m.onclick = function(){ EDITION = true; dessiner(); szBrouillonProposer(); };
     var rl = document.getElementById('btn-releve');
     if (rl) rl.onclick = function(){
-      dire('Impression de l’état de compte…');
+      dire('${T("Impression de l’état de compte…")}');
       appeler('client:etatCompte', [ID]).then(function(r){
-        dire(r.ok ? 'État de compte envoyé à l’impression.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("État de compte envoyé à l’impression.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
     var et = document.getElementById('btn-etat');
@@ -304,25 +308,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var versActif = !R.client.actif;
       appeler('client:etat', [ID, versActif]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire(versActif ? 'Compte activé.' : 'Compte désactivé.', 'bon');
+        dire(versActif ? '${T("Compte activé.")}' : '${T("Compte désactivé.")}', 'bon');
         recharger();
       });
     };
     var cb = document.getElementById('btn-corbeille');
     if (cb) cb.onclick = function(){
-      voile('<h3><span class="ic">🗑</span> Supprimer le client ?</h3>'
+      voile('<h3><span class="ic">🗑</span> ${T("Supprimer le client ?")}</h3>'
         + '<p><strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + ')</p>'
-        + '<p class="aide"><span class="ic">🛡</span> Le compte part dans la corbeille et reste restaurable à tout moment. '
-        + (R.stats.commandes ? 'L’historique de ' + R.stats.commandes + ' commande(s) est conservé intégralement.' : '') + '</p>'
-        + '<div class="fin2"><button id="v-non">Annuler</button>'
-        + '<button class="danger" id="v-oui">Supprimer</button></div>',
+        + '<p class="aide"><span class="ic">🛡</span> ${T("Le compte part dans la corbeille et reste restaurable à tout moment.")} '
+        + (R.stats.commandes ? '${T("L’historique de")} ' + R.stats.commandes + ' ${T("commande(s) est conservé intégralement.")}' : '') + '</p>'
+        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+        + '<button class="danger" id="v-oui">${T("Supprimer")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){
             fermer();
             appeler('client:corbeille', [ID]).then(function(r){
               if (!r.ok) { dire(expliquer(r), 'err'); return; }
-              dire('Client mis à la corbeille.', 'bon');
+              dire('${T("Client mis à la corbeille.")}', 'bon');
               recharger();
             });
           };
@@ -332,26 +336,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (rs) rs.onclick = function(){
       appeler('client:restaurer', [ID]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Client restauré.', 'bon');
+        dire('${T("Client restauré.")}', 'bon');
         recharger();
       });
     };
     var pg = document.getElementById('btn-purger');
     if (pg) pg.onclick = function(){
-      voile('<h3><span class="ic">⚠</span> Supprimer définitivement ?</h3>'
-        + '<p>Effacer <strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + ') de la base ?</p>'
-        + '<p style="color:var(--tx-f6a5a5)">Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.</p>'
-        + '<p class="aide"><span class="ic">✅</span> Ce compte n’a aucune commande — rien de comptable n’est perdu.</p>'
-        + '<div class="fin2"><button id="v-non">Annuler</button>'
-        + '<button class="danger" id="v-oui"><span class="ic">🗑</span> Supprimer définitivement</button></div>',
+      voile('<h3><span class="ic">⚠</span> ${T("Supprimer définitivement ?")}</h3>'
+        + '<p>Effacer <strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + '${T(") de la base ?")}</p>'
+        + '<p style="color:var(--tx-f6a5a5)">${T("Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.")}</p>'
+        + '<p class="aide"><span class="ic">✅</span> ${T("Ce compte n’a aucune commande — rien de comptable n’est perdu.")}</p>'
+        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+        + '<button class="danger" id="v-oui"><span class="ic">🗑</span> ${T("Supprimer définitivement")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){
             fermer();
             appeler('client:purger', [ID]).then(function(r){
               if (!r.ok) { dire(expliquer(r), 'err'); return; }
-              dire('Compte supprimé définitivement.', 'bon');
-              vide('Compte supprimé', 'Le dossier a été effacé de la base.');
+              dire('${T("Compte supprimé définitivement.")}', 'bon');
+              vide('${T("Compte supprimé")}', '${T("Le dossier a été effacé de la base.")}');
             });
           };
         });
@@ -411,7 +415,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   szBrouillonBrancher({
     portee: 'client',
-    libelle: 'Une modification de cette fiche',
+    libelle: '${T("Une modification de cette fiche")}',
     ttlMin: 720,
     cle: function(){ return 'c:' + ID; },
     actif: function(){ return !!(EDITION && R && R.client); },
@@ -442,8 +446,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       enCours = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(r.mdpChange
-        ? ('Fiche et mot de passe mis à jour.' + (r.avisEnvoye ? ' Client avisé par courriel.' : ''))
-        : 'Fiche client mise à jour.', 'bon');
+        ? ('${T("Fiche et mot de passe mis à jour.")}' + (r.avisEnvoye ? ' ${T("Client avisé par courriel.")}' : ''))
+        : '${T("Fiche client mise à jour.")}', 'bon');
       /* ⚠ LE BROUILLON MEURT ICI, et seulement ici : le garder ferait concurrence
          a la fiche enregistree sans qu on sache laquelle fait foi. */
       szBrouillonJeter();
@@ -455,9 +459,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ══ CHARGEMENT ════════════════════════════════════════════════════════════
   function recharger(){
     return appeler('client:lire', [ID]).then(function(r){
-      if (!r.ok) { vide('Fiche indisponible', expliquer(r)); return; }
+      if (!r.ok) { vide('${T("Fiche indisponible")}', expliquer(r)); return; }
       R = r;
-      if (!r.peutEcrire) sous.textContent = 'Lecture seule';
+      if (!r.peutEcrire) sous.textContent = '${T("Lecture seule")}';
       dessiner();
     });
   }
@@ -467,9 +471,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('verrou:prendre', ['users', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
-      dire('Cette fiche est ouverte ailleurs — modifications bloquées.', 'att');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || '${T("quelqu’un d’autre")}');
+      dire('${T("Cette fiche est ouverte ailleurs — modifications bloquées.")}', 'att');
       R.peutEcrire = false;
       dessiner();
     });

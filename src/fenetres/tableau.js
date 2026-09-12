@@ -24,6 +24,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('tableau');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -124,11 +128,11 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 /** Page complète de la fenêtre native « Tableau de bord ». */
 function pageTableau() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Tableau de bord — Administration Sandriza</title>
+<title>${T("Tableau de bord — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.tableau}</span><h1>Tableau de bord</h1>
+<div class="tete"><span class="ico">${ICO.tableau}</span><h1>${T("Tableau de bord")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -172,17 +176,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès au tableau de bord.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès au tableau de bord.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -204,20 +208,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      inconnue de la preference est AFFICHEE par defaut — sans quoi personne ne
      verrait jamais une tuile ajoutee apres coup. */
   var TUILES = [
-    ['a_traiter', 'Commandes à traiter'],
-    ['products', 'Produits actifs'],
+    ['a_traiter', '${T("Commandes à traiter")}'],
+    ['products', '${T("Produits actifs")}'],
     ['orders', 'Commandes'],
-    ['customers', 'Clients actifs'],
-    ['revenue', 'Revenus (payés)'],
+    ['customers', '${T("Clients actifs")}'],
+    ['revenue', '${T("Revenus (payés)")}'],
     ['messagerie', 'Messagerie'],
-    ['returns_new', 'Nouveaux retours'],
-    ['returns_expiring', 'Retours sur le point d’expirer'],
-    ['en_livraison', 'En livraison'],
-    ['ruptures', 'Ruptures de stock'],
-    ['avis', 'Avis à modérer'],
-    ['factures_retard', 'Factures en retard'],
-    ['incidents', 'Incidents ouverts'],
-    ['sauvegarde', 'Dernière sauvegarde']
+    ['returns_new', '${T("Nouveaux retours")}'],
+    ['returns_expiring', '${T("Retours sur le point d’expirer")}'],
+    ['en_livraison', '${T("En livraison")}'],
+    ['ruptures', '${T("Ruptures de stock")}'],
+    ['avis', '${T("Avis à modérer")}'],
+    ['factures_retard', '${T("Factures en retard")}'],
+    ['incidents', '${T("Incidents ouverts")}'],
+    ['sauvegarde', '${T("Dernière sauvegarde")}']
   ];
 
   function tuile(cle, lbl, valeur, ton, sousTitre, sousTon){
@@ -245,14 +249,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ne doit pas se lire comme une ligne d information parmi d autres. */
   function tuileSauvegarde(){
     if (SAUV === null) {
-      return tuile('sauvegarde', 'Dernière sauvegarde', '…', '', 'lecture en cours…', '');
+      return tuile('sauvegarde', '${T("Dernière sauvegarde")}', '…', '', '${T("lecture en cours…")}', '');
     }
     if (SAUV.erreur) {
-      return tuile('sauvegarde', 'Dernière sauvegarde', '—', '', esc(SAUV.erreur), 'att');
+      return tuile('sauvegarde', '${T("Dernière sauvegarde")}', '—', '', esc(SAUV.erreur), 'att');
     }
     if (SAUV.aucune) {
-      return tuile('sauvegarde', 'Dernière sauvegarde', 'jamais', 'err',
-        'la base n’est pas protégée', 'att');
+      return tuile('sauvegarde', '${T("Dernière sauvegarde")}', 'jamais', 'err',
+        '${T("la base n’est pas protégée")}', 'att');
     }
     var j = SAUV.jours;
     // « jours » en toutes lettres (sa demande) : un « j » collé au chiffre se
@@ -260,7 +264,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var val = (j === 0) ? 'aujourd’hui' : (j === 1 ? 'hier' : j + ' jours');
     var ton = (j > 30) ? 'err' : (j > 7 ? 'att' : '');
     var sous = esc(SAUV.quand) + (SAUV.taille ? ' · ' + esc(SAUV.taille) : '');
-    return tuile('sauvegarde', 'Dernière sauvegarde', val, ton, sous, (j > 7 ? 'att' : ''));
+    return tuile('sauvegarde', '${T("Dernière sauvegarde")}', val, ton, sous, (j > 7 ? 'att' : ''));
   }
 
   function pilule(statut, libelle){
@@ -275,11 +279,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // chose, ouverte par << Tout voir >> dans son etat retenu (ancre/detache).
     var vue = lignes.slice(0, PAR_PAGE);
     var h = '<div class="carte"><h2>' + esc(titre)
-      + '<button class="mini tout" data-ouvre="' + cibleTout + '">Tout voir →</button></h2>';
+      + '<button class="mini tout" data-ouvre="' + cibleTout + '">${T("Tout voir →")}</button></h2>';
     if (!vue.length) {
-      h += '<div class="vide">Aucune entrée.</div>';
+      h += '<div class="vide">${T("Aucune entrée.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Numéro</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Numéro")}</th><th>${T("Client")}</th><th>${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + vue.map(function(r){
             // ⚠ CADENAS DYNAMIQUE (#38) : la case data-cad est remplie/videe par
             // le sondage des verrous, SANS redessiner le tableau. Une commande ET
@@ -340,18 +344,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szMaintenanceChangee = function(){ mxLire(); };
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var cfg = D.cfgTuiles || {};
     var t = D.tuiles;
     var f = D.aFaire || {};
     var h = '';
 
     h += '<div class="barreoutils">'
-      + '<select id="tb-annee"><option value="all"' + (ANNEE === 'all' ? ' selected' : '') + '>Tout cumulé</option>'
+      + '<select id="tb-annee"><option value="all"' + (ANNEE === 'all' ? ' selected' : '') + '>${T("Tout cumulé")}</option>'
       + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (String(ANNEE) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
       + '</select>'
-      + '<button class="mini" id="tb-tuiles" title="Afficher ou masquer des tuiles">⚙ Tuiles</button>'
+      + '<button class="mini" id="tb-tuiles" title="Afficher ou masquer des tuiles">${T("⚙ Tuiles")}</button>'
       + ((MX && MX.ok)
           ? '<button class="mini' + (MX.actif ? ' att' : '') + '" id="tb-mx" '
             + 'title="Empecher toute autre connexion pendant une maintenance">'
@@ -366,11 +370,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (D.taux) {
       h += '<div class="avis"><span class="ic">💱</span> ' + (D.taux.genre === 'secours'
         ? '<strong>Taux de change indisponible.</strong> Les prix affichés en USD utilisent un taux '
-          + 'de secours (1 USD = ' + Number(D.taux.rate).toFixed(4) + ' CAD), donc approximatif. '
-          + 'Les commandes, elles, sont toujours facturées en dollars canadiens.'
-        : '<strong>Taux de change vieux de ' + D.taux.ageHeures + ' h</strong> (relevé du '
+          + '${T("de secours (1 USD =")} ' + Number(D.taux.rate).toFixed(4) + ' ${T("CAD), donc approximatif.")} '
+          + '${T("Les commandes, elles, sont toujours facturées en dollars canadiens.")}'
+        : '<strong>${T("Taux de change vieux de")} ' + D.taux.ageHeures + ' h</strong> ${T("(relevé du ")}'
           + esc(D.taux.quand || '') + ', 1 USD = ' + Number(D.taux.rate).toFixed(4) + ' CAD). '
-          + 'Les prix en USD peuvent s’écarter du marché.') + '</div>';
+          + '${T("Les prix en USD peuvent s’écarter du marché.")}') + '</div>';
     }
 
     /* ── LA BANDE << A FAIRE MAINTENANT >> (#25) ────────────────────────
@@ -381,16 +385,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        bande allumee en permanence. Meme raisonnement que la pastille de la
        barre des taches, qui exclut le stock pour la meme raison. */
     var files = [
-      ['orders', f.aTraiter, 'commande à traiter', 'commandes à traiter', false],
-      ['support-mgmt', t.messagerie, 'message sans réponse', 'messages sans réponse', false],
-      ['returns-pending', t.retoursNouveaux, 'retour à traiter', 'retours à traiter', false],
-      ['returns-expiring', t.retoursExpirent, 'retour sur le point d’expirer', 'retours sur le point d’expirer', true],
-      ['reviews', f.avis, 'avis à modérer', 'avis à modérer', false],
+      ['orders', f.aTraiter, '${T("commande à traiter")}', '${T("commandes à traiter")}', false],
+      ['support-mgmt', t.messagerie, '${T("message sans réponse")}', '${T("messages sans réponse")}', false],
+      ['returns-pending', t.retoursNouveaux, '${T("retour à traiter")}', '${T("retours à traiter")}', false],
+      ['returns-expiring', t.retoursExpirent, '${T("retour sur le point d’expirer")}', '${T("retours sur le point d’expirer")}', true],
+      ['reviews', f.avis, '${T("avis à modérer")}', '${T("avis à modérer")}', false],
       ['billing', f.facturesRetard, 'facture en retard', 'factures en retard', true],
-      ['security-incidents', f.incidentsCai, 'avis à la CAI à transmettre', 'avis à la CAI à transmettre', true]
+      ['security-incidents', f.incidentsCai, '${T("avis à la CAI à transmettre")}', '${T("avis à la CAI à transmettre")}', true]
     ].filter(function(x){ return (x[1] || 0) > 0; });
     if (files.length) {
-      h += '<div class="afaire"><span class="titre">À faire maintenant</span>'
+      h += '<div class="afaire"><span class="titre">${T("À faire maintenant")}</span>'
         + files.map(function(x){
             return '<button data-ouvre="' + x[0] + '"' + (x[4] ? ' class="urgent"' : '') + '>'
               // Point median entre le nombre et le libelle : c est le separateur
@@ -413,56 +417,56 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // Le meme contenu de tuiles que l ecran du site, valeur par valeur.
     var an = (ANNEE === 'all') ? '' : ' ' + ANNEE;
     var contenu = {
-      products: tuile('products', 'Produits actifs', t.produits.actifs, '',
+      products: tuile('products', '${T("Produits actifs")}', t.produits.actifs, '',
         t.produits.produitsBas
-          ? t.produits.variantesReappro + ' variante' + (t.produits.variantesReappro > 1 ? 's' : '') + ' à réapprovisionner'
-          : 'aucun réapprovisionnement',
+          ? t.produits.variantesReappro + ' variante' + (t.produits.variantesReappro > 1 ? 's' : '') + ' ${T("à réapprovisionner")}'
+          : '${T("aucun réapprovisionnement")}',
         t.produits.produitsBas ? 'att' : ''),
       orders: tuile('orders', 'Commandes' + an, t.commandes.total, '',
         t.commandes.enAttente + ' en attente', t.commandes.enAttente > 0 ? 'att' : ''),
-      customers: tuile('customers', 'Clients actifs', t.clients.actifs, '',
-        t.clients.inactifs > 0 ? 'Comptes inactifs : ' + t.clients.inactifs : '&nbsp;', ''),
-      revenue: tuile('revenue', 'Revenus (net)' + an, esc(fmt(t.revenus.net)), '',
-        t.revenus.factures + ' factures encaissées'
+      customers: tuile('customers', '${T("Clients actifs")}', t.clients.actifs, '',
+        t.clients.inactifs > 0 ? '${T("Comptes inactifs :")} ' + t.clients.inactifs : '&nbsp;', ''),
+      revenue: tuile('revenue', '${T("Revenus (net)")}' + an, esc(fmt(t.revenus.net)), '',
+        t.revenus.factures + ' ${T("factures encaissées")}'
           + (t.revenus.rembourse > 0 ? ' · −' + esc(fmt(t.revenus.rembourse)) + ' remboursés' : ''), ''),
       messagerie: tuile('messagerie', 'Messagerie', t.messagerie, t.messagerie > 0 ? 'att' : '',
         t.messagerie > 0
           ? 'nouveau' + (t.messagerie > 1 ? 'x' : '') + ' message' + (t.messagerie > 1 ? 's' : '') + ' en attente'
           : 'aucun message en attente', ''),
-      returns_new: tuile('returns_new', 'Nouveaux retours', t.retoursNouveaux,
+      returns_new: tuile('returns_new', '${T("Nouveaux retours")}', t.retoursNouveaux,
         t.retoursNouveaux > 0 ? 'att' : '',
         t.retoursNouveaux > 0
-          ? 'demande' + (t.retoursNouveaux > 1 ? 's' : '') + ' à traiter'
+          ? 'demande' + (t.retoursNouveaux > 1 ? 's' : '') + ' ${T("à traiter")}'
           : 'aucune demande en attente', ''),
-      returns_expiring: tuile('returns_expiring', 'Retours sur le point d’expirer', t.retoursExpirent,
+      returns_expiring: tuile('returns_expiring', '${T("Retours sur le point d’expirer")}', t.retoursExpirent,
         t.retoursExpirent > 0 ? 'err' : '',
-        t.retoursExpirent > 0 ? 'colis pas encore reçu' : 'aucun retour à risque', ''),
+        t.retoursExpirent > 0 ? '${T("colis pas encore reçu")}' : '${T("aucun retour à risque")}', ''),
       // ── Ce qu il reste a faire (#25) ──────────────────────────────
       /* ⚠ PAS DE SOUS-TITRE ICI (retire a sa demande, 2026-08-14). Il enumerait
          les trois statuts comptes — un texte trop long pour la tuile, qui
          sortait tronque (<< confirmees, en preparation ou en ver... >>) et
          n apprenait rien de plus que le chiffre. Une ligne coupee au milieu
          d un mot coute plus d attention qu elle n en rend. */
-      a_traiter: tuile('a_traiter', 'Commandes à traiter', f.aTraiter,
+      a_traiter: tuile('a_traiter', '${T("Commandes à traiter")}', f.aTraiter,
         f.aTraiter > 0 ? 'att' : '', '&nbsp;', ''),
-      en_livraison: tuile('en_livraison', 'En livraison', f.enLivraison, '',
-        f.enLivraison > 0 ? 'colis partis, pas encore livrés' : 'aucun colis en route', ''),
+      en_livraison: tuile('en_livraison', '${T("En livraison")}', f.enLivraison, '',
+        f.enLivraison > 0 ? '${T("colis partis, pas encore livrés")}' : 'aucun colis en route', ''),
       // ⚠ SANS SOUS-TITRE, comme << Commandes a traiter >> (retire a sa demande,
       // 2026-08-14). Le chiffre et le titre suffisent ; la ligne du dessous
       // n ajoutait qu un commentaire, coupe des que la tuile retrecit.
-      ruptures: tuile('ruptures', 'Ruptures de stock', f.ruptures,
+      ruptures: tuile('ruptures', '${T("Ruptures de stock")}', f.ruptures,
         f.ruptures > 0 ? 'err' : '', '&nbsp;', ''),
-      avis: tuile('avis', 'Avis à modérer', f.avis, f.avis > 0 ? 'att' : '',
-        f.avis > 0 ? 'en attente d’approbation' : 'aucun avis en attente', ''),
-      factures_retard: tuile('factures_retard', 'Factures en retard', f.facturesRetard,
+      avis: tuile('avis', '${T("Avis à modérer")}', f.avis, f.avis > 0 ? 'att' : '',
+        f.avis > 0 ? '${T("en attente d’approbation")}' : 'aucun avis en attente', ''),
+      factures_retard: tuile('factures_retard', '${T("Factures en retard")}', f.facturesRetard,
         f.facturesRetard > 0 ? 'err' : '',
-        f.facturesRetard > 0 ? esc(fmt(f.facturesRetardMontant)) + ' impayés' : 'aucune échéance dépassée',
+        f.facturesRetard > 0 ? esc(fmt(f.facturesRetardMontant)) + ' impayés' : '${T("aucune échéance dépassée")}',
         f.facturesRetard > 0 ? 'att' : ''),
-      incidents: tuile('incidents', 'Incidents ouverts', f.incidentsOuverts,
+      incidents: tuile('incidents', '${T("Incidents ouverts")}', f.incidentsOuverts,
         f.incidentsOuverts > 0 ? 'att' : '',
         f.incidentsCai > 0
-          ? f.incidentsCai + ' avis à la CAI à transmettre'
-          : (f.incidentsOuverts > 0 ? 'dossiers non clôturés' : 'registre Loi 25 à jour'),
+          ? f.incidentsCai + ' ${T("avis à la CAI à transmettre")}'
+          : (f.incidentsOuverts > 0 ? '${T("dossiers non clôturés")}' : '${T("registre Loi 25 à jour")}'),
         f.incidentsCai > 0 ? 'att' : ''),
       // ⚠ Elle arrive APRES le premier dessin (reseau) : d ici la, elle dit
       // qu elle cherche, plutot que d afficher un zero qui serait un mensonge.
@@ -474,8 +478,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>';
 
     h += '<div class="deux">'
-      + tableRecent('Commandes récentes', 'orders', D.recentesCommandes || [])
-      + tableRecent('Factures récentes', 'billing', D.recentesFactures || [])
+      + tableRecent('${T("Commandes récentes")}', 'orders', D.recentesCommandes || [])
+      + tableRecent('${T("Factures récentes")}', 'billing', D.recentesFactures || [])
       + '</div>';
 
     corps.innerHTML = h;
@@ -537,7 +541,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function charger(){
     appeler('tableau:lire', [ANNEE]).then(function(r){
-      if (!r || !r.ok) { vide('Tableau de bord indisponible', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Tableau de bord indisponible")}', expliquer(r)); return; }
       D = r;
       dire('');
       dessiner();
@@ -577,8 +581,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function cadInner(oid){
     if (!oid || !VERROUS[oid]) return '';
     var v = VERROUS[oid];
-    var t = v.mine ? 'Vous tenez cette fiche en modification'
-      : ('En traitement par ' + (v.par || 'un collegue'));
+    var t = v.mine ? '${T("Vous tenez cette fiche en modification")}'
+      : ('${T("En traitement par")} ' + (v.par || 'un collegue'));
     return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="' + esc(t) + '"><span class="ic">🔒</span></span>';
   }
   function appliquerVerrous(){
@@ -621,7 +625,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      vit DANS la fenetre principale : on offre alors << Detacher >>, qui
      emporte la vue — et tout son etat — dans une vraie fenetre. */
   /* \u26a0 LE TABLEAU DE BORD NE SE DETACHE PAS (demande du 2026-08-09) : c est
-     l ecran d ouverture de session \u2014 detache, la fenetre principale n aurait
+     l ecran d ouverture de session — detache, la fenetre principale n aurait
      qu un fond vide. Pas de bouton ; la coquille refuse aussi (dock:detacher,
      NON_DETACHABLES), pour que la regle tienne meme sans ce dessin. */
   window.szModeAncre = function(){
