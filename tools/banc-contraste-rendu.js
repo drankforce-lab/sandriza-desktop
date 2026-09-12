@@ -567,7 +567,18 @@ function main() {
      lentement. On le dit, et on s'arrête. */
   const RATTRAPAGE_MAX = 24;
   const mesures = new Set(
-    lignes.filter((l) => l.startsWith('COMPTES|')).map((l) => l.split('|').slice(8).join('|')));
+    /* ⚠⚠ `slice(10)`, ET LE 8 QUI ÉTAIT ÉCRIT ICI TUAIT LE FILET SANS RIEN DIRE.
+       Une ligne COMPTES porte NEUF nombres (indices 1 à 9) puis le nom du rendu :
+       le nom commence donc à 10 — c'est ce que fait le rapport, plus bas. En
+       coupant à 8, on comparait « 286|0|abonnes_c2/nuit » à « abonnes_c2/nuit »,
+       donc AUCUN nom ne correspondait, donc les 1690 rendus passaient pour
+       perdus. Au-delà de RATTRAPAGE_MAX, on renonce à les rejouer : le filet du
+       rattrapage page par page n'a donc JAMAIS pu se déclencher, et le rapport
+       s'ouvrait sur « 1690 rendus perdus » juste avant d'annoncer « 1690 mesurés
+       sur 1690 ». Deux phrases contradictoires dans le même rapport, et c'est la
+       rassurante qu'on lit. ⚠ Un décalage d'indice ne tombe pas en panne : il
+       répond, et il répond faux. */
+    lignes.filter((l) => l.startsWith('COMPTES|')).map((l) => l.split('|').slice(10).join('|')));
   const perdus1 = adresses.filter((a) => !mesures.has(nomDeRendu(a)));
   if (perdus1.length && perdus1.length <= RATTRAPAGE_MAX) {
     console.log(`   … ${perdus1.length} rendu(s) perdus avec leur lot : on les rejoue un par un.`);

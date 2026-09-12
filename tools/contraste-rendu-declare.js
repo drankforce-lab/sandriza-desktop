@@ -60,54 +60,28 @@ module.exports = {
     '#1D2433 sur #1A1A2E @4.5': 1,
     // 1.18 · div.pop > button.sz-btnplein.flottant « ⛶ Plein écran » · newsletter_c5/nuit
     '#E8EDF5 sur #FFFFFF @4.5': 1,
-    // 1.18 · div#avert.avert > b « Identifiants non chargés » · transporteurs_c1/jour
-    '#FECACA sur #F4E5E0 @4.5': 1,
-    // 1.27 · div.stat > div.v « 13 août 2026, 00:12 » · sauvegarde/jour sauvegarde_c2/jour
-    '#6EE7A0 sur #EBE9E4 @4.5': 2,
-    // 1.36 · tr > td.num « 512.00 $ » · publicite_c3/jour
-    '#E8DCC6 sur #FFFFFF @4.5': 1,
-    // 1.39 · td > span.pill « ⬇ Reçu » · journaux_c5/jour
-    '#7DD3FC sur #D4EFFB @4.5': 1,
     // 1.39 · div#cmp.cmp > span.cet.g « Avant » · studio_c5/jour studio_c7/jour
     '#5F666C sur #4D5056 @4.5': 4,
     // 1.41 · div.pop > button.x « × » · newsletter_c5/nuit
     '#FFFFFF sur #D9D9D9 @4.5': 1,
     // 1.42 · span.phpast > span.pt « ◇ » · studio/jour
     '#56606E sur #46494F @4.5': 4,
-    // 1.43 · div.stat > div.v « aucune » · sauvegarde_c1/jour
-    '#E6C14A sur #EBE9E4 @4.5': 1,
     // 1.48 · div.rangee > button#b-bascule.bsc « Repasser en pré-lancement » · lancement_c1/jour
     '#8B5C5C sur #EF4444 @4.5': 1,
     // 1.49 · tr > th « Facture » · etatcompte/nuit
     '#111111 sur #26334A @4.5': 2,
-    // 1.52 · tr.lg > td.num « 0,00 $ » · banque/jour
-    '#6EE7B7 sur #FFFFFF @4.5': 1,
     // 1.66 · div#g-prev-head.head.anim > div.ti « SANDRIZA » · gabarits_c1/jour
     '#1D2433 sur #7C2D12 @4.5': 1,
-    // 1.67 · div.boite > div.aide « Temoin : aucune vente n a eu lieu. » · caisse_c1/jour
-    '#FBBF24 sur #FFFFFF @4.5': 1,
     // 1.68 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/jour
     '#8B5C5C sur #16A34A @4.5': 1,
     // 1.71 · span.phpast > span.pt.fait « ✓ » · studio/jour
     '#297A46 sur #46494F @4.5': 3,
-    // 1.74 · tr > td.num « 75,50 $ » · cartescadeaux/jour logotheque/jour logotheque_c1/jour publicite_c1/jour publicite_c3/jour
-    '#4ADE80 sur #FFFFFF @4.5': 7,
-    // 1.74 · div.tuile > div.v « 83% » · publicite_c6/jour
-    '#4ADE80 sur #FFFFFF @3': 1,
-    // 1.90 · tr.lg > td.num « 2 210,00 $ » · banque/jour
-    '#FCA5A5 sur #FFFFFF @4.5': 1,
-    // 1.91 · div > button.ghost.mini « ↺ Réinitialiser pour re-tester » · newsletter_c4/jour
-    '#E0B47A sur #FFFFFF @4.5': 1,
-    // 1.94 · div.boite > p « 2 photos n’ont rien à annuler et ne boug » · explorateur_c1/jour explorateur_c2/jour studio_c2/jour studio_c4/jour studio_c6/jour
-    '#D8B57A sur #FFFFFF @4.5': 7,
     // 2.06 · div.ph > button.phx « ✕ » · avis/jour
     '#AB4E4E sur #393C43 @4.5': 2,
     // 2.13 · span#p-r2 > a#p-mesurer « mesurer l’espace R2 » · photos/jour photos_c1/jour photos_c2/jour photos_c4/jour
     '#9E9EFF sur #F4F2EC @4.5': 4,
     // 2.13 · span > span.exp « Aucun paiement Square enregistré sur cet » · remboursement_c1/jour
     '#ADB2BA sur #FFFFFF @4.5': 1,
-    // 2.15 · span > span « (frais retenus : 2,75 $) » · commandes/jour
-    '#F59E0B sur #FFFFFF @4.5': 1,
     // 2.42 · td > span.num « CRD-0002-010 » · remboursements_c1/jour
     '#B6A48C sur #FFFFFF @4.5': 1,
     // 2.43 · span.pastille > span.coche « ✓ » · apparence/jour apparence/nuit
@@ -124,8 +98,6 @@ module.exports = {
     '#9299A7 sur #F4F5F6 @4.5': 1,
     // 2.63 · div.g > div.lg « 🔒 Pré-lancement » · lancement/jour
     '#D97706 sur #F2E8DA @4.5': 1,
-    // 2.64 · tr > td.num « 0,00 $ » · cartescadeaux/jour
-    '#8FA1B8 sur #FFFFFF @4.5': 1,
     // 2.65 · td > div.mut « ⏳ promesse » · journaux_c11/jour journaux_c4/jour
     '#99A0A9 sur #FFFFFF @4.5': 10,
     // 2.71 · div.g > div.lg « 🌐 En ligne » · lancement_c1/jour
@@ -172,8 +144,6 @@ module.exports = {
     '#8A6A3E sur #E9E7E2 @4.5': 35,
     // 4.09 · button.mini.actif > span.n.hi « 2 » · avis_c2/jour messagerie/jour retours/jour sociaux_c2/jour
     '#83570B sur #DECFB2 @4.5': 4,
-    // 4.11 · div.fm > span « 2026-07 · 0,50 $ » · depenses_c2/jour depenses_c4/jour
-    '#5A6574 sur #D9D6DC @4.5': 4,
     // 4.16 · div#onglets.onglets > button.actif « ⬇ Exporter » · catalogio/jour catalogio_c1/jour catalogio_c2/jour catalogio_c4/jour invmeta/jour invmeta_c1/jour invmeta_c2/jour invmeta_c3/jour invmeta_c4/jour invmeta_c5/jour invmeta_c6/jour invmeta_c7/jour invmeta_c8/jour newsletter/jour newsletter_c1/jour newsletter_c2/jour newsletter_c3/jour newsletter_c4/jour publicite/jour publicite_c1/jour publicite_c2/jour publicite_c3/jour publicite_c4/jour publicite_c6/jour transferts/jour transferts_c1/jour transferts_c2/jour
     '#6F6A5F sur #E7E2D7 @4.5': 27,
     // 4.25 · div.pied > span#msg.msg.bon « 4 résultat(s) dans tous les journaux. » · journaux_c13/jour livraison/jour
