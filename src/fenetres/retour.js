@@ -27,6 +27,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('retour');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -133,13 +137,13 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 function pageRetour(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Demande de retour — Administration Sandriza</title>
+<title>${T("Demande de retour — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.returns}</span><h1 id="titre">Demande de retour</h1>
+<div class="tete"><span class="ico">${ICO.returns}</span><h1 id="titre">${T("Demande de retour")}</h1>
   <span class="pill" id="pill" style="display:none"></span>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions" id="actions"></span></div>
 <script>
@@ -179,34 +183,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   var STATUTS = {
-    awaiting_photo: 'Photo requise', pending: 'En attente', approved: 'Approuvée',
-    rejected: 'Rejetée', in_transit: 'En transit', received: 'Reçu — en traitement',
-    refunded: 'Remboursée', completed: 'Complétée', disputed: 'En attente d’analyse'
+    awaiting_photo: '${T("Photo requise")}', pending: '${T("En attente")}', approved: '${T("Approuvée")}',
+    rejected: '${T("Rejetée")}', in_transit: '${T("En transit")}', received: '${T("Reçu — en traitement")}',
+    refunded: '${T("Remboursée")}', completed: '${T("Complétée")}', disputed: '${T("En attente d’analyse")}'
   };
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne permet pas de traiter les retours.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette demande n’existe plus.',
-    verrou:             'Dossier ouvert par quelqu’un d’autre.',
-    echange_indisponible:'Échange impossible : l’article n’est plus disponible.',
-    liberation_echouee: 'La taille réservée n’a pas pu être libérée — réessayez.',
-    raison_requise:     'Une raison est requise pour chaque article non remis en inventaire.',
-    montant_invalide:   'Montant du remboursement invalide.',
-    etiquette_absente:  'Aucune étiquette générée pour cette demande.',
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne permet pas de traiter les retours.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette demande n’existe plus.")}',
+    verrou:             '${T("Dossier ouvert par quelqu’un d’autre.")}',
+    echange_indisponible:'${T("Échange impossible : l’article n’est plus disponible.")}',
+    liberation_echouee: '${T("La taille réservée n’a pas pu être libérée — réessayez.")}',
+    raison_requise:     '${T("Une raison est requise pour chaque article non remis en inventaire.")}',
+    montant_invalide:   '${T("Montant du remboursement invalide.")}',
+    etiquette_absente:  '${T("Aucune étiquette générée pour cette demande.")}',
     /* Les motifs du RECOURS (reprendre l’étiquette chez Postes Canada). Chacun
        dit où aller : un « échec » sans direction fait rouvrir le dossier demain
        avec la même question. */
-    envoi_absent:       'Aucun envoi Postes Canada n’est rattaché à cette demande — il n’y a rien à reprendre. Générez l’étiquette depuis l’étape Décision.',
-    identifiants:       'Identifiants Postes Canada indisponibles.',
-    config:             'Configuration Postes Canada incomplète — Configuration → Transporteurs.',
-    cp_refus:           'Postes Canada a refusé la demande.',
-    pdf_absent:         'Postes Canada n’a pas renvoyé de PDF pour cet envoi.',
-    reseau:             'Le réseau n’a pas répondu.',
-    echec:              'L’opération a échoué.'
+    envoi_absent:       '${T("Aucun envoi Postes Canada n’est rattaché à cette demande — il n’y a rien à reprendre. Générez l’étiquette depuis l’étape Décision.")}',
+    identifiants:       '${T("Identifiants Postes Canada indisponibles.")}',
+    config:             '${T("Configuration Postes Canada incomplète — Configuration → Transporteurs.")}',
+    cp_refus:           '${T("Postes Canada a refusé la demande.")}',
+    pdf_absent:         '${T("Postes Canada n’a pas renvoyé de PDF pour cet envoi.")}',
+    reseau:             '${T("Le réseau n’a pas répondu.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   /* Motifs dont le detail est un FRAGMENT a coller apres la phrase, pas une
      phrase de remplacement (voir la fonction expliquer).
@@ -216,9 +220,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
-    if (m === 'echange_indisponible') return MOTIFS.echange_indisponible + ' Basculez sur '
-      + (r.modeRepli === 'creditOnly' ? 'un crédit boutique.' : 'un remboursement complet.');
-    if (m === 'raison_requise' && r.article) return 'Raison requise pour « ' + r.article + ' ».';
+    if (m === 'echange_indisponible') return MOTIFS.echange_indisponible + ' ${T("Basculez sur")} '
+      + (r.modeRepli === 'creditOnly' ? '${T("un crédit boutique.")}' : '${T("un remboursement complet.")}');
+    if (m === 'raison_requise' && r.article) return '${T("Raison requise pour «")} ' + r.article + ' ».';
     /* ⚠ POUR CEUX-CI, LE DETAIL COMPLETE LA PHRASE — IL NE LA REMPLACE PAS.
        La regle generale plus bas rend r.detail SEUL des qu il existe : sur le
        recours d etiquette, ca donnait « mot de passe API » tout court, sans dire
@@ -226,7 +230,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        champs manquants, le message brut de Postes Canada), pas une phrase. */
     if (COMPLEMENT[m]) return MOTIFS[m] + (r.detail ? ' ' + r.detail : '');
     if (r && r.detail) return r.detail;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
 
   function appeler(op, args){
@@ -257,10 +261,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   // ══ DESSIN ════════════════════════════════════════════════════════════════
   function fil(){
-    var t = ['1 Demande', '2 Traitement', '3 Règlement'];
+    var t = ['${T("1 Demande")}', '${T("2 Traitement")}', '${T("3 Règlement")}'];
     document.getElementById('pas').innerHTML = t.map(function(x, k){
       return '<button type="button" data-et="' + k + '" class="' + (k === ETAPE ? 'on' : '') + '"'
-        + ((k > 0 && !traitable()) ? ' disabled title="Le dossier doit être approuvé ou reçu"' : '')
+        + ((k > 0 && !traitable()) ? ' disabled title="${T("Le dossier doit être approuvé ou reçu")}"' : '')
         + '>' + esc(x) + '</button>';
     }).join('');
   }
@@ -290,12 +294,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div><div class="k">Client</div><div class="v">' + esc(d.client || '—') + '</div></div>'
       + '<div><div class="k">Courriel</div><div class="v">' + esc(d.courriel || '—') + '</div></div>'
       + '<div class="large"><div class="k">Motif</div><div class="v">' + esc(d.motif || '—') + '</div></div>'
-      + (d.description ? '<div class="large"><div class="k">Description du client</div><div class="v" style="white-space:pre-wrap;font-weight:400">' + esc(d.description) + '</div></div>' : '')
-      + (d.modeRemboursement ? '<div class="large"><div class="k">Mode communiqué au client</div><div class="v">'
-          + (d.modeRemboursement === 'creditOnly' ? 'Crédit boutique uniquement' : 'Moyen original ou crédit, au choix')
-          + (d.preference ? ' · préférence : ' + (d.preference === 'credit' ? 'crédit boutique' : 'moyen original') : '') + '</div></div>' : '')
-      + (d.fraisPayesPar ? '<div class="large"><div class="k">Frais de retour</div><div class="v">'
-          + (d.fraisPayesPar === 'store' ? '<span class="ic">🛠</span> Pris en charge par la boutique (défaut / erreur)' : '<span class="ic">📦</span> À la charge du client') + '</div></div>' : '')
+      + (d.description ? '<div class="large"><div class="k">${T("Description du client")}</div><div class="v" style="white-space:pre-wrap;font-weight:400">' + esc(d.description) + '</div></div>' : '')
+      + (d.modeRemboursement ? '<div class="large"><div class="k">${T("Mode communiqué au client")}</div><div class="v">'
+          + (d.modeRemboursement === 'creditOnly' ? '${T("Crédit boutique uniquement")}' : '${T("Moyen original ou crédit, au choix")}')
+          + (d.preference ? ' ${T("· préférence :")} ' + (d.preference === 'credit' ? '${T("crédit boutique")}' : 'moyen original') : '') + '</div></div>' : '')
+      + (d.fraisPayesPar ? '<div class="large"><div class="k">${T("Frais de retour")}</div><div class="v">'
+          + (d.fraisPayesPar === 'store' ? '<span class="ic">🛠</span> ${T("Pris en charge par la boutique (défaut / erreur)")}' : '<span class="ic">📦</span> ${T("À la charge du client")}') + '</div></div>' : '')
       + '</div></div>';
 
     // Articles
@@ -308,72 +312,72 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '</div>';
 
     // Photo — la demande n est pas actionnable sans elle.
-    h += '<div class="carte"><h2>Photo de l’article</h2>'
+    h += '<div class="carte"><h2>${T("Photo de l’article")}</h2>'
       + (d.photo ? '<img class="photo" src="' + esc(d.photo) + '">'
-                 : '<div class="aide">⏳ Le client n’a pas encore téléversé de photo — la demande n’est pas actionnable.</div>')
+                 : '<div class="aide">${T("⏳ Le client n’a pas encore téléversé de photo — la demande n’est pas actionnable.")}</div>')
       + '</div>';
 
     if (d.suivi) {
-      h += '<div class="carte"><h2>Retour expédié par le client</h2>'
+      h += '<div class="carte"><h2>${T("Retour expédié par le client")}</h2>'
         + '<div class="info"><div><div class="k">Transporteur</div><div class="v">' + esc(d.suiviTransporteur || '—') + '</div></div>'
-        + '<div><div class="k">Numéro de suivi</div><div class="v" style="font-family:ui-monospace,monospace">' + esc(d.suivi) + '</div></div></div></div>';
+        + '<div><div class="k">${T("Numéro de suivi")}</div><div class="v" style="font-family:ui-monospace,monospace">' + esc(d.suivi) + '</div></div></div></div>';
     }
 
     if (d.litige) {
-      h += '<div class="carte"><h2>Réponse du client <span class="note">— suite au rejet automatique</span></h2>'
+      h += '<div class="carte"><h2>${T("Réponse du client ")}<span class="note">${T("— suite au rejet automatique")}</span></h2>'
         + (d.litige.message ? '<div style="white-space:pre-wrap;font-size:.87rem">' + esc(d.litige.message) + '</div>'
-                            : '<div class="aide">(aucun message écrit)</div>')
+                            : '<div class="aide">${T("(aucun message écrit)")}</div>')
         + (d.litige.preuve ? '<div style="margin-top:.5rem"><img class="photo" src="' + esc(d.litige.preuve) + '"></div>' : '')
         + (R.peutEcrire ? '<div style="display:flex;gap:.45rem;margin-top:.6rem">'
-          + '<button class="mini" id="btn-rouvrir">↩ Rouvrir la demande</button>'
-          + '<button class="mini" id="btn-rejeter">✕ Confirmer le rejet</button></div>' : '')
+          + '<button class="mini" id="btn-rouvrir">${T("↩ Rouvrir la demande")}</button>'
+          + '<button class="mini" id="btn-rejeter">${T("✕ Confirmer le rejet")}</button></div>' : '')
         + '</div>';
     }
 
     // Statut, note de refus, etiquette, notes — la partie qui S ENREGISTRE.
     var fige = d.statut === 'awaiting_photo' || d.statut === 'completed' || d.statut === 'refunded' || R.archive;
-    h += '<div class="carte"><h2>Décision</h2>';
+    h += '<div class="carte"><h2>${T("Décision")}</h2>';
     if (R.archive) {
-      h += '<div class="aide"><span class="ic">🗄</span> Demande archivée — lecture seule.</div>';
+      h += '<div class="aide"><span class="ic">🗄</span> ${T("Demande archivée — lecture seule.")}</div>';
     } else if (fige) {
       h += '<div class="aide">' + (d.statut === 'awaiting_photo'
-        ? 'Pas de changement de statut tant que la photo n’est pas fournie — seules les notes s’enregistrent.'
-        : 'Dossier ' + (d.statut === 'refunded' ? 'remboursé' : 'complété') + ' — seules les notes s’enregistrent.') + '</div>';
+        ? '${T("Pas de changement de statut tant que la photo n’est pas fournie — seules les notes s’enregistrent.")}'
+        : '${T("Dossier ")}' + (d.statut === 'refunded' ? '${T("remboursé")}' : '${T("complété")}') + ' ${T("— seules les notes s’enregistrent.")}') + '</div>';
     } else {
       h += '<div class="r2"><div class="ch"><label for="r-statut">Statut</label><select id="r-statut">'
         + ['pending','approved','rejected','in_transit','received','refunded','completed'].map(function(s){
             return '<option value="' + s + '"' + (d.statut === s ? ' selected' : '') + '>' + esc(STATUTS[s] || s) + '</option>'; }).join('')
         + '</select></div><div class="ch" id="z-refus" style="' + (d.statut === 'rejected' ? '' : 'display:none') + '">'
-        + '<label for="r-refus">Note de refus — visible au client</label>'
+        + '<label for="r-refus">${T("Note de refus — visible au client")}</label>'
         + '<input id="r-refus" value="' + esc(d.noteRefus) + '" placeholder="Expliquez la raison du refus…"></div></div>';
 
       // Etiquette de retour — visible quand on approuve.
       h += '<div id="z-etiq" style="' + (d.statut === 'approved' ? '' : 'display:none') + ';margin-top:.55rem;'
         + 'padding:.55rem .7rem;background:var(--v03);border:1px solid var(--v08);border-radius:9px">'
-        + '<div style="font-size:.72rem;color:var(--tx2);font-weight:700;text-transform:uppercase;letter-spacing:.07em"><span class="ic">📦</span> Étiquette de retour</div>'
-        + (d.aUneEtiquette ? '<div class="avis jaune"><span class="ic">⚠</span> Une étiquette existe déjà ('
-            + (d.etiquetteReelle ? 'réelle Postes Canada — la régénérer sera FACTURÉ une seconde fois' : 'PDF interne')
+        + '<div style="font-size:.72rem;color:var(--tx2);font-weight:700;text-transform:uppercase;letter-spacing:.07em"><span class="ic">📦</span> ${T("Étiquette de retour")}</div>'
+        + (d.aUneEtiquette ? '<div class="avis jaune"><span class="ic">⚠</span> ${T("Une étiquette existe déjà (")}'
+            + (d.etiquetteReelle ? '${T("réelle Postes Canada — la régénérer sera FACTURÉ une seconde fois")}' : '${T("PDF interne")}')
             + (d.suivi ? ' · suivi ' + esc(d.suivi) : '') + ').</div>' : '')
         + '<div class="r3" style="margin-top:.45rem">'
         + '<div class="ch"><label for="r-transp">Transporteur</label><select id="r-transp">'
         + R.etiquette.transporteurs.map(function(t){
             return '<option value="' + esc(t.cle) + '"' + (t.cle === (d.etiquetteTransporteur || 'postes-canada') ? ' selected' : '') + '>' + esc(t.nom) + '</option>'; }).join('')
         + '</select></div>'
-        + '<div class="ch" id="z-cp-serv"><label for="r-service">Service Postes Canada</label><select id="r-service"'
+        + '<div class="ch" id="z-cp-serv"><label for="r-service">${T("Service Postes Canada")}</label><select id="r-service"'
         + (R.etiquette.cpPret ? '' : ' disabled') + '>'
         + R.etiquette.services.map(function(s2){ return '<option value="' + esc(s2.cle) + '">' + esc(s2.libelle) + '</option>'; }).join('')
         + '</select></div>'
-        + '<div class="ch"><label for="r-poids">Poids (kg)</label>'
+        + '<div class="ch"><label for="r-poids">${T("Poids (kg)")}</label>'
         + '<input id="r-poids" type="number" min="0.001" step="0.001" value="' + esc(R.etiquette.poidsCalcule) + '"></div>'
         + '</div>'
         + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;margin-top:.5rem;cursor:pointer">'
         + '<input type="checkbox" id="r-generer"' + (d.aUneEtiquette ? '' : ' checked') + '> '
-        + (d.aUneEtiquette ? 'Régénérer et joindre au courriel' : 'Générer et joindre l’étiquette au courriel') + '</label>'
-        + (R.etiquette.cpPret ? '' : '<div class="aide" style="margin-top:.3rem"><span class="ic">💡</span> Postes Canada non configuré : un PDF interne sera généré (sans suivi réel).</div>')
+        + (d.aUneEtiquette ? '${T("Régénérer et joindre au courriel")}' : '${T("Générer et joindre l’étiquette au courriel")}') + '</label>'
+        + (R.etiquette.cpPret ? '' : '<div class="aide" style="margin-top:.3rem"><span class="ic">💡</span> ${T("Postes Canada non configuré : un PDF interne sera généré (sans suivi réel).")}</div>')
         + '</div>';
     }
     if (!R.archive) {
-      h += '<div class="ch" style="margin-top:.55rem"><label for="r-notes">Notes internes (jamais vues du client)</label>'
+      h += '<div class="ch" style="margin-top:.55rem"><label for="r-notes">${T("Notes internes (jamais vues du client)")}</label>'
         // rows="3" (2026-08-21, sur sa demande) : on y ecrit une vraie phrase, et
         // elle se relit des semaines plus tard. Bloc empile en une colonne, donc la
         // ligne de plus ne deplace rien ; la fenetre a 760 px pour 540 de minimum.
@@ -384,7 +388,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     var boutons = '';
     if (d.aUneEtiquette) {
-      boutons += '<button id="btn-apercu"><span class="ic">👁</span> Étiquette</button>';
+      boutons += '<button id="btn-apercu"><span class="ic">👁</span> ${T("Étiquette")}</button>';
       if (R.peutEcrire) boutons += '<button id="btn-renvoyer"><span class="ic">🔁</span> Renvoyer au client</button>';
     }
     /* ⚠ HORS DU BLOC CI-DESSUS, ET C EST TOUT L INTERET. Le recours sert quand
@@ -394,11 +398,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        on n en commande pas un second (ce qui serait FACTURE). */
     if (d.aUnEnvoiCP && R.peutEcrire) {
       boutons += '<button id="btn-reprendre" title="Redemande le PDF de l’envoi déjà créé chez Postes Canada. Aucun nouvel envoi n’est commandé, rien n’est facturé.">'
-        + '<span class="ic">📥</span> ' + (d.aUneEtiquette ? 'Reprendre chez Postes Canada' : 'Reprendre l’étiquette') + '</button>';
+        + '<span class="ic">📥</span> ' + (d.aUneEtiquette ? '${T("Reprendre chez Postes Canada")}' : '${T("Reprendre l’étiquette")}') + '</button>';
     }
-    if (R.peutEcrire && d.statut === 'in_transit') boutons += '<button id="btn-recu"><span class="ic">📬</span> Marquer reçu</button>';
-    if (R.peutEcrire && !fige) boutons += '<button class="prim" id="btn-enr">Enregistrer + courriel</button>';
-    else if (R.peutEcrire && !R.archive) boutons += '<button class="prim" id="btn-enr">Enregistrer les notes</button>';
+    if (R.peutEcrire && d.statut === 'in_transit') boutons += '<button id="btn-recu"><span class="ic">📬</span> ${T("Marquer reçu")}</button>';
+    if (R.peutEcrire && !fige) boutons += '<button class="prim" id="btn-enr">${T("Enregistrer + courriel")}</button>';
+    else if (R.peutEcrire && !R.archive) boutons += '<button class="prim" id="btn-enr">${T("Enregistrer les notes")}</button>';
     /* ⚠ SUPPRIMER : uniquement sur un dossier TERMINE (#6). C etait impossible
        depuis l application — un retour complete restait dans la liste pour
        toujours. Effacer une demande EN COURS ferait disparaitre un dossier que
@@ -411,28 +415,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function dessinerTraitement(){
-    var h = '<div class="carte"><h2>Décision inventaire <span class="note">— par article</span></h2>'
-      + '<div class="aide">La remise en stock incrémente la VARIANTE (taille · couleur) reprise de la commande d’origine.</div>'
+    var h = '<div class="carte"><h2>${T("Décision inventaire ")}<span class="note">${T("— par article")}</span></h2>'
+      + '<div class="aide">${T("La remise en stock incrémente la VARIANTE (taille · couleur) reprise de la commande d’origine.")}</div>'
       + R.articles.map(function(a, i){
           var dec = DECISIONS[a.productId] || { backToStock: true, reason: '' };
           return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
             + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—') + ' · × ' + a.quantite + '</div></div>'
             + '<select data-inv="' + i + '"'
-            + ' aria-label="' + esc('Décision inventaire — ' + a.nom) + '">'
-            + '<option value="1"' + (dec.backToStock ? ' selected' : '') + '><span class="ic">✅</span> Remettre en inventaire</option>'
-            + '<option value="0"' + (dec.backToStock ? '' : ' selected') + '><span class="ic">❌</span> Ne pas remettre</option>'
+            + ' aria-label="' + esc('${T("Décision inventaire — ")}' + a.nom) + '">'
+            + '<option value="1"' + (dec.backToStock ? ' selected' : '') + '><span class="ic">✅</span> ${T("Remettre en inventaire")}</option>'
+            + '<option value="0"' + (dec.backToStock ? '' : ' selected') + '><span class="ic">❌</span> ${T("Ne pas remettre")}</option>'
             + '</select></div>'
             + '<div class="ch" data-raison-z="' + i + '" style="' + (dec.backToStock ? 'display:none;' : '') + 'margin:.25rem 0 .1rem">'
-            + '<label>Raison (obligatoire)</label>'
-            + '<input aria-label="Raison (obligatoire)" data-raison="' + i + '" value="' + esc(dec.reason) + '" placeholder="Ex : article endommagé, article porté…"></div>';
+            + '<label>${T("Raison (obligatoire)")}</label>'
+            + '<input aria-label="${T("Raison (obligatoire)")}" data-raison="' + i + '" value="' + esc(dec.reason) + '" placeholder="Ex : article endommagé, article porté…"></div>';
         }).join('')
       + '</div>';
-    h += '<div class="carte"><h2>Réexpédition au client <span class="note">— échange ou renvoi</span></h2>'
-      + '<div class="aide">La fenêtre Expédition fait ce travail — service, poids et confirmation avant de dépenser.</div>'
-      + '<button class="mini" id="btn-reexp" style="margin-top:.45rem"><span class="ic">🚚</span> Ouvrir l’expédition de la commande</button>'
+    h += '<div class="carte"><h2>${T("Réexpédition au client ")}<span class="note">${T("— échange ou renvoi")}</span></h2>'
+      + '<div class="aide">${T("La fenêtre Expédition fait ce travail — service, poids et confirmation avant de dépenser.")}</div>'
+      + '<button class="mini" id="btn-reexp" style="margin-top:.45rem"><span class="ic">🚚</span> ${T("Ouvrir l’expédition de la commande")}</button>'
       + '</div>';
     corps.innerHTML = h;
-    actions.innerHTML = '<button class="prim" id="btn-vers-reglement">Vers le règlement →</button>';
+    actions.innerHTML = '<button class="prim" id="btn-vers-reglement">${T("Vers le règlement →")}</button>';
     brancherTraitement();
   }
 
@@ -440,51 +444,51 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var rb = R.remboursement;
     var h = '';
     if (!rb) {
-      h += '<div class="carte"><div class="vide">Suggestion de remboursement indisponible.</div></div>';
+      h += '<div class="carte"><div class="vide">${T("Suggestion de remboursement indisponible.")}</div></div>';
     } else {
       if (!MONTANTS) MONTANTS = rb.lignes.map(function(l){ return l.montant; });
-      h += '<div class="carte"><h2><span class="ic">💰</span> Règlement <span class="note">— si « Remboursée »</span></h2>'
+      h += '<div class="carte"><h2><span class="ic">💰</span> ${T("Règlement ")}<span class="note">${T("— si « Remboursée »")}</span></h2>'
         + '<div class="avis ' + (rb.dansFenetre ? 'vert' : 'jaune') + '">'
         + (rb.dansFenetre
-            ? rb.joursOuvrables + ' jours ouvrables — dans la fenêtre de ' + rb.joursFenetre + ' : moyen original ou crédit, au choix.'
-            : rb.joursOuvrables + ' jours ouvrables — hors fenêtre de ' + rb.joursFenetre + ' : crédit boutique uniquement.')
+            ? rb.joursOuvrables + ' ${T("jours ouvrables — dans la fenêtre de")} ' + rb.joursFenetre + ' ${T(": moyen original ou crédit, au choix.")}'
+            : rb.joursOuvrables + ' ${T("jours ouvrables — hors fenêtre de")} ' + rb.joursFenetre + ' ${T(": crédit boutique uniquement.")}')
         + '</div>'
         + rb.lignes.map(function(l, i){
             return '<div class="ligne"><span>' + esc(l.nom)
-              + (l.moitie ? ' <span style="color:var(--tx-or2);font-size:.74rem">(2 pour 1 — 50 % suggéré, plein : ' + argent(l.base) + ')</span>' : '')
+              + (l.moitie ? ' <span style="color:var(--tx-or2);font-size:.74rem">${T("(2 pour 1 — 50 % suggéré, plein :")} ' + argent(l.base) + ')</span>' : '')
               + '</span><input type="number" step="0.01" min="0" data-mnt="' + i + '"'
-              + ' aria-label="' + esc('Montant à rembourser — ' + (l.nom || l.libelle || ('ligne ' + (i + 1)))) + '"'
+              + ' aria-label="' + esc('${T("Montant à rembourser —")} ' + (l.nom || l.libelle || ('ligne ' + (i + 1)))) + '"'
               + ' value="' + (MONTANTS[i]).toFixed(2) + '"></div>'; }).join('')
         + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.84rem;margin-top:.5rem;cursor:pointer'
         + (R.demande.fauteMarchande ? '' : ';opacity:.55') + '">'
         + '<input type="checkbox" id="g-livraison"' + (R.demande.fauteMarchande ? ' checked' : '') + '> '
-        + 'Frais de livraison (' + argent(rb.livraisonBase) + ')' + (R.demande.fauteMarchande ? '' : ' — non suggéré (motif client)') + '</label>'
-        + '<div class="aide">Traitement prioritaire (' + argent(rb.prioritaireExclu) + ') jamais remboursable — exclu. '
-        + 'Les taxes sont recalculées par le site aux taux réels de la commande.</div>'
+        + '${T("Frais de livraison (")}' + argent(rb.livraisonBase) + ')' + (R.demande.fauteMarchande ? '' : ' ${T("— non suggéré (motif client)")}') + '</label>'
+        + '<div class="aide">${T("Traitement prioritaire (")}' + argent(rb.prioritaireExclu) + '${T(") jamais remboursable — exclu.")} '
+        + '${T("Les taxes sont recalculées par le site aux taux réels de la commande.")}</div>'
         + '<div class="r2" style="margin-top:.5rem">'
         + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.84rem;cursor:pointer'
         + ((rb.dansFenetre && rb.squareDisponible) ? '' : ';opacity:.5') + '">'
         + '<input type="radio" name="g-methode" value="original"'
         + ((rb.dansFenetre && rb.squareDisponible) ? ((R.demande.preference !== 'credit') ? ' checked' : '') : ' disabled') + '> '
-        + 'Moyen de paiement original' + (rb.squareDisponible ? '' : ' (aucun paiement Square lié)') + '</label>'
+        + '${T("Moyen de paiement original")}' + (rb.squareDisponible ? '' : ' ${T("(aucun paiement Square lié)")}') + '</label>'
         + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.84rem;cursor:pointer">'
         + '<input type="radio" name="g-methode" value="credit"'
-        + ((rb.dansFenetre && rb.squareDisponible && R.demande.preference !== 'credit') ? '' : ' checked') + '> Crédit boutique</label>'
+        + ((rb.dansFenetre && rb.squareDisponible && R.demande.preference !== 'credit') ? '' : ' checked') + '> ${T("Crédit boutique")}</label>'
         + '</div>'
-        + (R.demande.preference ? '<div class="avis bleu"><span class="ic">👤</span> Préférence du client : '
-            + (R.demande.preference === 'credit' ? 'crédit boutique' : 'moyen original') + '</div>' : '')
+        + (R.demande.preference ? '<div class="avis bleu"><span class="ic">👤</span> ${T("Préférence du client : ")}'
+            + (R.demande.preference === 'credit' ? '${T("crédit boutique")}' : 'moyen original') + '</div>' : '')
         + '</div>';
     }
-    h += '<div class="carte"><h2>Résolution finale</h2>'
-      + '<select id="g-statut" aria-label="Issue du retour"><option value="refunded">Remboursée</option>'
-      + '<option value="completed">Complétée (échange / crédit — aucun remboursement émis ici)</option></select>'
+    h += '<div class="carte"><h2>${T("Résolution finale")}</h2>'
+      + '<select id="g-statut" aria-label="Issue du retour"><option value="refunded">${T("Remboursée")}</option>'
+      + '<option value="completed">${T("Complétée (échange / crédit — aucun remboursement émis ici)")}</option></select>'
       + '<div class="jetons">' + (R.modeles || []).map(function(m, i){
           return '<button type="button" data-modele="' + i + '">' + esc(m) + '</button>'; }).join('') + '</div>'
-      + '<div class="ch" style="margin-top:.45rem"><label for="g-note">Note pour le client (facultative)</label>'
+      + '<div class="ch" style="margin-top:.45rem"><label for="g-note">${T("Note pour le client (facultative)")}</label>'
       + '<textarea id="g-note" rows="3">' + esc(R.demande.notes) + '</textarea></div>'
       + '</div>';
     corps.innerHTML = h;
-    actions.innerHTML = '<button class="paie" id="btn-finaliser"' + (R.peutEcrire ? '' : ' disabled') + '><span class="ic">✅</span> Finaliser le traitement</button>';
+    actions.innerHTML = '<button class="paie" id="btn-finaliser"' + (R.peutEcrire ? '' : ' disabled') + '><span class="ic">✅</span> ${T("Finaliser le traitement")}</button>';
     brancherReglement();
   }
 
@@ -546,10 +550,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       // ⚠ L expedition s ouvre sur la COMMANDE D ORIGINE, pas sur le retour : on
       // passe par l operation des listes, qui connait deja le chemin (la coquille
       // ouvre la fenetre Expedition avec service, poids et confirmation).
-      if (!R.demande.commandeId) { dire('Commande originale introuvable.', 'err'); return; }
-      dire('Ouverture de l’expédition…');
+      if (!R.demande.commandeId) { dire('${T("Commande originale introuvable.")}', 'err'); return; }
+      dire('${T("Ouverture de l’expédition…")}');
       appeler('commandes:expedier', [R.demande.commandeId]).then(function(r){
-        dire(r.ok ? 'Expédition ouverte dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Expédition ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
     var vg = document.getElementById('btn-vers-reglement');
@@ -588,7 +592,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var BR_CHAMPS = ['r-statut', 'r-refus', 'r-transp', 'r-service', 'r-poids', 'r-notes'];
   szBrouillonBrancher({
     portee: 'retour',
-    libelle: 'Une modification de cette demande',
+    libelle: '${T("Une modification de cette demande")}',
     ttlMin: 720,
     cle: function(){ return 'r:' + ID; },
     actif: function(){ return !!document.getElementById('r-notes'); },
@@ -617,9 +621,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('retour:enregistrer', [ID, saisie]).then(function(r){
       enCours = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      var t = 'Demande mise à jour.';
-      if (r.etiquetteErreur) t += ' Étiquette : ' + r.etiquetteErreur;
-      if (r.courriel) t += r.courriel.envoye ? ' Courriel envoyé.' : (r.courriel.erreur ? ' Courriel NON envoyé : ' + r.courriel.erreur : '');
+      var t = '${T("Demande mise à jour.")}';
+      if (r.etiquetteErreur) t += ' ${T("Étiquette :")} ' + r.etiquetteErreur;
+      if (r.courriel) t += r.courriel.envoye ? ' ${T("Courriel envoyé.")}' : (r.courriel.erreur ? ' ${T("Courriel NON envoyé :")} ' + r.courriel.erreur : '');
       /* Le brouillon meurt a l'enregistrement REUSSI, pas avant. */
       szBrouillonJeter();
       dire(t, r.etiquetteErreur || (r.courriel && !r.courriel.envoye && r.courriel.erreur) ? 'att' : 'bon');
@@ -628,15 +632,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function marquerRecu(){
-    voile('<h3><span class="ic">📬</span> Réception du colis</h3><p>Confirmer la réception du colis de retour en entrepôt ?</p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button><button class="prim" id="v-oui">Confirmer</button></div>',
+    voile('<h3><span class="ic">📬</span> ${T("Réception du colis")}</h3><p>${T("Confirmer la réception du colis de retour en entrepôt ?")}</p>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button><button class="prim" id="v-oui">Confirmer</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
-          fermer(); dire('Réception…', 'att');
+          fermer(); dire('${T("Réception…")}', 'att');
           appeler('retour:recu', [ID]).then(function(r){
             if (!r.ok) { dire(expliquer(r), 'err'); return; }
-            dire('Retour marqué reçu.' + (r.courriel && r.courriel.envoye ? ' Courriel envoyé.' : ''), 'bon');
+            dire('${T("Retour marqué reçu.")}' + (r.courriel && r.courriel.envoye ? ' ${T("Courriel envoyé.")}' : ''), 'bon');
             recharger();
           });
         };
@@ -647,13 +651,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     dire('…');
     appeler('retour:litige', [ID, action]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(action === 'reopen' ? 'Demande rouverte — marquée comme reçue.' : 'Rejet confirmé.', 'bon');
+      dire(action === 'reopen' ? '${T("Demande rouverte — marquée comme reçue.")}' : '${T("Rejet confirmé.")}', 'bon');
       recharger();
     });
   }
 
   function voilePdf(b64){
-    voile('<h3><span class="ic">👁</span> Étiquette de retour</h3>'
+    voile('<h3><span class="ic">👁</span> ${T("Étiquette de retour")}</h3>'
       + '<iframe src="data:application/pdf;base64,' + b64 + '" '
       + 'style="width:100%;height:52vh;border:1px solid var(--v14);border-radius:8px;background:#3c3c3c"></iframe>'
       + '<div class="fin2"><button id="v-non">Fermer</button></div>',
@@ -673,14 +677,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function reprendre(){
     var b = document.getElementById('btn-reprendre');
     if (b) b.disabled = true;
-    dire('Reprise de l’étiquette chez Postes Canada…', 'att');
+    dire('${T("Reprise de l’étiquette chez Postes Canada…")}', 'att');
     appeler('retour:reprendreEtiquette', [ID]).then(function(r){
       if (!r.ok) {
         if (b) b.disabled = false;
         dire(expliquer(r), 'err');
         return;
       }
-      dire('Étiquette reprise — aucun nouvel envoi n’a été créé, rien n’a été facturé.', 'bon');
+      dire('${T("Étiquette reprise — aucun nouvel envoi n’a été créé, rien n’a été facturé.")}', 'bon');
       // recharger redessine les boutons (« Étiquette » apparaît), le voile est
       // posé sur le body et survit au redessin.
       recharger();
@@ -692,8 +696,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     dire('Envoi…', 'att');
     appeler('retour:renvoyer', [ID]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(r.courriel && r.courriel.envoye ? 'Étiquette renvoyée au client.'
-        : 'Étiquette prête, mais courriel non envoyé' + (r.courriel && r.courriel.erreur ? ' : ' + r.courriel.erreur : '.'),
+      dire(r.courriel && r.courriel.envoye ? '${T("Étiquette renvoyée au client.")}'
+        : '${T("Étiquette prête, mais courriel non envoyé")}' + (r.courriel && r.courriel.erreur ? ' : ' + r.courriel.erreur : '.'),
         r.courriel && r.courriel.envoye ? 'bon' : 'att');
     });
   }
@@ -707,7 +711,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // Le refus de raison manquante se dit AVANT la confirmation d argent.
     for (var i = 0; i < decisions.length; i++) {
       if (!decisions[i].backToStock && !String(decisions[i].reason || '').trim()) {
-        dire('Raison requise pour « ' + R.articles[i].nom + ' » (étape Traitement).', 'err');
+        dire('${T("Raison requise pour «")} ' + R.articles[i].nom + ' ${T("» (étape Traitement).")}', 'err');
         return;
       }
     }
@@ -720,21 +724,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     /* ⚠ CONFIRMATION AVANT L ARGENT, montants sous les yeux — taxes en sus,
        recalculees par le site aux taux reels de la commande. */
-    voile('<h3>' + (statutFinal === 'refunded' ? '<span class="ic">💳</span> Rembourser et clore ?' : 'Clore le dossier ?') + '</h3>'
+    voile('<h3>' + (statutFinal === 'refunded' ? '<span class="ic">💳</span> ${T("Rembourser et clore ?")}' : '${T("Clore le dossier ?")}') + '</h3>'
       + (statutFinal === 'refunded'
-          ? '<p>Articles : <strong>' + argent(montants.reduce(function(s,v){ return s+(parseFloat(v)||0); }, 0)) + '</strong>'
+          ? '<p>${T("Articles :")} <strong>' + argent(montants.reduce(function(s,v){ return s+(parseFloat(v)||0); }, 0)) + '</strong>'
             + (livraison && R.remboursement ? ' + livraison <strong>' + argent(R.remboursement.livraisonBase) + '</strong>' : '')
-            + ' <span style="color:var(--tx2)">(+ taxes aux taux réels)</span><br>'
-            + 'Méthode : <strong>' + (methode === 'original' ? 'moyen de paiement original (Square)' : 'crédit boutique') + '</strong></p>'
-            + '<p style="color:var(--tx-att)">Un remboursement ne s’annule pas d’un clic.</p>'
-          : '<p>Aucun remboursement ne sera émis ici — le règlement s’est fait autrement (échange, crédit déjà émis…).</p>')
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
+            + ' <span style="color:var(--tx2)">${T("(+ taxes aux taux réels)")}</span><br>'
+            + '${T("Méthode :")} <strong>' + (methode === 'original' ? '${T("moyen de paiement original (Square)")}' : '${T("crédit boutique")}') + '</strong></p>'
+            + '<p style="color:var(--tx-att)">${T("Un remboursement ne s’annule pas d’un clic.")}</p>'
+          : '<p>${T("Aucun remboursement ne sera émis ici — le règlement s’est fait autrement (échange, crédit déjà émis…).")}</p>')
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
       + '<button class="paie" id="v-oui">' + (statutFinal === 'refunded' ? 'Rembourser' : 'Clore') + '</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
           fermer();
-          enCours = true; dire('Règlement en cours…', 'att');
+          enCours = true; dire('${T("Règlement en cours…")}', 'att');
           appeler('retour:finaliser', [ID, {
             decisions: decisions, statutFinal: statutFinal,
             remboursement: { montants: montants, livraison: livraison, methode: methode },
@@ -742,11 +746,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           }]).then(function(r){
             enCours = false;
             if (!r.ok) { dire(expliquer(r), 'err'); return; }
-            var t = 'Retour traité.';
-            if (r.credit) t += ' Crédit ' + r.credit.numero + ' (' + argent(r.credit.montant) + ') émis.';
-            if (r.squareErreur) t += ' Square a échoué : ' + r.squareErreur;
-            if (r.nonRestockes && r.nonRestockes.length) t += ' Non remis en stock : ' + r.nonRestockes.join(' ; ');
-            if (r.courriel) t += r.courriel.envoye ? ' Courriel envoyé.' : '';
+            var t = '${T("Retour traité.")}';
+            if (r.credit) t += ' ${T("Crédit")} ' + r.credit.numero + ' (' + argent(r.credit.montant) + '${T(") émis.")}';
+            if (r.squareErreur) t += ' ${T("Square a échoué :")} ' + r.squareErreur;
+            if (r.nonRestockes && r.nonRestockes.length) t += ' ${T("Non remis en stock :")} ' + r.nonRestockes.join(' ; ');
+            if (r.courriel) t += r.courriel.envoye ? ' ${T("Courriel envoyé.")}' : '';
             dire(t, (r.squareErreur || (r.nonRestockes || []).length) ? 'att' : 'bon');
             ETAPE = 0;
             recharger();
@@ -764,15 +768,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function recharger(){
     return appeler('retour:lire', [ID]).then(function(r){
-      if (!r.ok) { vide('Retour indisponible', expliquer(r)); return; }
+      if (!r.ok) { vide('${T("Retour indisponible")}', expliquer(r)); return; }
       R = r;
       ETAPE = etapePour(r.demande.statut);
       DECISIONS = {}; MONTANTS = null;
-      document.getElementById('titre').textContent = 'Retour — ' + r.demande.commande;
+      document.getElementById('titre').textContent = '${T("Retour —")} ' + r.demande.commande;
       var pill = document.getElementById('pill');
       pill.style.display = '';
       pill.textContent = STATUTS[r.demande.statut] || r.demande.statut;
-      if (!r.peutEcrire) sous.textContent = r.archive ? 'Archivée' : 'Lecture seule';
+      if (!r.peutEcrire) sous.textContent = r.archive ? '${T("Archivée")}' : '${T("Lecture seule")}';
       dessiner();
     });
   }
@@ -782,9 +786,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('verrou:prendre', ['return_reqs', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouvert par ' + (v.parQui || 'quelqu’un d’autre');
-      dire('Ce dossier est déjà ouvert ailleurs — lecture seule conseillée.', 'att');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouvert par ' + (v.parQui || '${T("quelqu’un d’autre")}');
+      dire('${T("Ce dossier est déjà ouvert ailleurs — lecture seule conseillée.")}', 'att');
     });
   }
   function rendreVerrou(){
@@ -817,19 +821,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('retour:supprimerApercu', [ID]).then(function(ap){
       if (!ap.ok) {
         dire(ap.motif === 'non_terminee'
-          ? 'Seule une demande terminée peut être supprimée.' : expliquer(ap), 'err');
+          ? '${T("Seule une demande terminée peut être supprimée.")}' : expliquer(ap), 'err');
         return;
       }
-      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> Supprimer la demande</h3>'
+      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> ${T("Supprimer la demande")}</h3>'
         + '<p><strong>' + esc(ap.commande) + '</strong>'
         + (ap.client ? ' — ' + esc(ap.client) : '') + '</p>'
-        + '<p>La demande disparaît de la liste'
-        + (ap.aPhoto ? ', <strong>et la photo envoyée par le client est effacée du stockage</strong>' : '')
+        + '<p>${T("La demande disparaît de la liste")}'
+        + (ap.aPhoto ? ', <strong>${T("et la photo envoyée par le client est effacée du stockage")}</strong>' : '')
         + '.</p>'
-        + '<p style="color:var(--tx-err);font-weight:600"><span class="ic">⚠</span> Cette action est irréversible.</p>'
-        + '<div class="fin2"><button id="v-non">Annuler</button>'
+        + '<p style="color:var(--tx-err);font-weight:600"><span class="ic">⚠</span> ${T("Cette action est irréversible.")}</p>'
+        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
         + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">'
-        + 'Supprimer définitivement</button></div>',
+        + '${T("Supprimer définitivement")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){
@@ -837,7 +841,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             appeler('retour:supprimerEcrire', [ID]).then(function(r){
               fermer();
               if (!r.ok) { dire(expliquer(r), 'err'); return; }
-              dire('Demande supprimée.', 'bon');
+              dire('${T("Demande supprimée.")}', 'bon');
               // Le dossier n existe plus : rester dessus n aurait aucun sens.
               rendreVerrou();
               P.fermer();
