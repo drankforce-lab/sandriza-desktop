@@ -387,7 +387,23 @@ jobs:
           node tools/banc-accent-grave.js
           node tools/banc-couture-cadre.js
           node tools/banc-accents-visibles.js
+      # ⚠⚠⚠ `banc-langue-donnees.js` (2026-09-12) GARDE LA CONSIGNE LA PLUS
+      # IMPORTANTE DU CHANTIER BILINGUE, dite par lui mot pour mot : « la traduction
+      # doit affecter que la lecture et non pas les données enregistrées — autrement
+      # dit une donnée écrite en français ne doit pas être altérée. »
+      # ⚠ CETTE FAUTE-LÀ EST SILENCIEUSE ET DIFFÉRÉE : rien ne casse au moment où on
+      # la commet. Elle se découvre des semaines plus tard, quand une fiche ne répond
+      # plus à son nom ou qu'un filtre ne trouve plus rien — et la donnée fausse est
+      # DÉJÀ enregistrée. On ne la retrouve pas en relisant le code : il faudrait
+      # relire la base. D'où un banc, et pas une consigne de plus.
+      # Il refuse qu'une chaîne atteignant un chemin d'écriture ait une entrée de
+      # dictionnaire : valeur d'option, champ pré-rempli, argument d'une opération
+      # d'écriture. On traduit le LIBELLÉ, jamais la VALEUR.
+      # ⚠ Sa première version annonçait 504 chaînes protégées dont PAS UNE n'en était :
+      # elle ramassait des morceaux de concaténation (`value="' + esc(v) + '"`). Vert
+      # parce qu'il regardait à côté — éprouvé depuis par une panne provoquée.
           node tools/banc-filtre-pas-releve.js
+          node tools/banc-langue-donnees.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js
           # ⚠ CELUI-CI GARDE UNE CHAÎNE DE QUATRE MORCEAUX que rien d'autre ne

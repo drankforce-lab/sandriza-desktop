@@ -35,6 +35,36 @@
  *    se marcher dessus. `src/langue/<fenetre>.js` — le nom du fichier dit à quel
  *    écran on est.
  *
+ * ╔══ LA RÈGLE QUI PASSE AVANT TOUTES LES AUTRES ═════════════════════════╗
+ * ║ ⚠⚠⚠ LA TRADUCTION NE TOUCHE QUE CE QU ON LIT. JAMAIS CE QUI EST ÉCRIT.   ║
+ * ║ Sa consigne du 2026-09-12, mot pour mot : « la traduction doit affecter    ║
+ * ║ que la lecture et non pas les données enregistrées — autrement dit une      ║
+ * ║ donnée écrite en français ne doit pas être altérée. »                        ║
+ * ╚════════════════════════════════════════════════════════════════════════╝
+ *
+ * ⚠ POURQUOI C EST LA PIRE FAUTE POSSIBLE ICI, et pas seulement une erreur de
+ * plus : elle est SILENCIEUSE et DIFFÉRÉE. Rien ne casse au moment où on la fait.
+ * Elle se découvre des semaines plus tard, quand une fiche ne répond plus à son
+ * nom, qu un filtre ne trouve plus rien, ou qu une recherche rate la moitié des
+ * lignes — et il est alors trop tard, parce que la donnée fausse est DÉJÀ
+ * ENREGISTRÉE. On ne la retrouve pas en relisant le code : il faudrait relire la
+ * base.
+ *
+ * ⚠ LES QUATRE ENDROITS OU LA FAUTE SE GLISSE, dans l ordre de danger :
+ *   1. LA VALEUR D UNE OPTION. `<option value="robes">Robes</option>` : on traduit
+ *      le LIBELLÉ, jamais le `value` — c est lui qui part dans la base.
+ *   2. UN CHAMP PRÉ-REMPLI. `value="Nouvelle diapo"` est du TEXTE QUI SERA
+ *      ENREGISTRÉ tel quel si personne ne le change. Le traduire écrit de
+ *      l anglais dans les données de quelqu un qui travaille en français.
+ *   3. UNE CLÉ D ÉTAT comparée ailleurs (`'paid'`, `'en_cours'`) : la traduire
+ *      casse la comparaison, pas l affichage.
+ *   4. UN TEXTE ENVOYÉ AU SERVEUR — un motif, une note, une ligne de journal.
+ *      Il sera relu par quelqu un d autre, peut-être en français.
+ *
+ * ⚠⚠ ET CE N EST PAS QU UNE CONSIGNE : `banc-langue-donnees.js` REFUSE qu une
+ * chaîne atteignant un chemin d écriture ait une entrée de dictionnaire. Une
+ * consigne se re-trompe ; une mesure non — c est la leçon de la journée.
+ *
  * ⚠⚠ CE QUI N EST PAS TRADUIT, ET IL FAUT LE DIRE PLUTÔT QUE LE CACHER :
  *   · les DONNÉES (noms de produits, notes, adresses) — c est son contenu ;
  *   · ce que le SERVEUR renvoie, sauf quand un motif connu permet de le
