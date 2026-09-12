@@ -32,6 +32,10 @@
  */
 
 const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO } = require('./socle');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('produit');
 
 const CSS_PROPRE = `
 .jetons{display:flex;flex-wrap:wrap;gap:.35rem;align-content:flex-start;
@@ -244,40 +248,40 @@ const CSS_PROPRE = `
 function pageProduit(id) {
   const ident = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Produit — Administration Sandriza</title>
+<title>${T("Produit — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.products}</span><h1 id="titre">Produit</h1>
+<div class="tete"><span class="ico">${ICO.products}</span><h1 id="titre">${T("Produit")}</h1>
   <span class="outils">
-    <button type="button" id="btn-jrn" title="Modifications de cette fiche" style="display:none"><span class="ic">🕘</span> <span class="n" id="jrn-n">0</span></button>
-    <button type="button" id="btn-apercu" title="Aperçu boutique — dessiné par le site, avec ses vraies fonctions"><span class="ic">👁</span> Aperçu</button>
+    <button type="button" id="btn-jrn" title="${T("Modifications de cette fiche")}" style="display:none"><span class="ic">🕘</span> <span class="n" id="jrn-n">0</span></button>
+    <button type="button" id="btn-apercu" title="${T("Aperçu boutique — dessiné par le site, avec ses vraies fonctions")}"><span class="ic">👁</span> ${T("Aperçu")}</button>
   </span>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions">
-    <button id="btn-prec">Précédent</button>
-    <button id="btn-suiv">Suivant</button>
-    <button id="btn-annuler">Annuler</button>
-    <button id="btn-enr" class="prim" disabled>Enregistrer</button>
+    <button id="btn-prec">${T("Précédent")}</button>
+    <button id="btn-suiv">${T("Suivant")}</button>
+    <button id="btn-annuler">${T("Annuler")}</button>
+    <button id="btn-enr" class="prim" disabled>${T("Enregistrer")}</button>
   </span></div>
 <script>
 (function(){
   'use strict';
   ${JS_SOCLE()}
-  MOTIFS.prix_invalide  = 'Le prix doit être supérieur à zéro.';
-  MOTIFS.cout_requis    = 'Le coût d’acquisition est obligatoire.';
-  MOTIFS.poids_requis   = 'Le poids unitaire est obligatoire.';
+  MOTIFS.prix_invalide  = '${T("Le prix doit être supérieur à zéro.")}';
+  MOTIFS.cout_requis    = '${T("Le coût d’acquisition est obligatoire.")}';
+  MOTIFS.poids_requis   = '${T("Le poids unitaire est obligatoire.")}';
   // Les motifs du DOUBLE FILET du pont (produit:enregistrer). Les gardes
   // locales les attrapent avant lui en temps normal : s’ils arrivent ici,
   // c’est qu’une garde a été contournée — ils doivent avoir une phrase,
   // sinon le socle dirait « Erreur inattendue » sur un refus légitime.
-  MOTIFS.photo_requise = 'La photo principale est obligatoire.';
-  MOTIFS.tailles_couleurs_requises = 'Choisissez au moins une taille ET une couleur.';
-  MOTIFS.emplacement_requis = 'Un emplacement d’entrepôt manque pour des variantes en stock.';
-  MOTIFS.stock_requis = 'Saisissez une quantité pour au moins une variante.';
-  MOTIFS.couleur_non_mappee = 'Cette couleur n’a pas de teinte unie attribuée.';
-  MOTIFS.non_enregistre = 'La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.';
+  MOTIFS.photo_requise = '${T("La photo principale est obligatoire.")}';
+  MOTIFS.tailles_couleurs_requises = '${T("Choisissez au moins une taille ET une couleur.")}';
+  MOTIFS.emplacement_requis = '${T("Un emplacement d’entrepôt manque pour des variantes en stock.")}';
+  MOTIFS.stock_requis = '${T("Saisissez une quantité pour au moins une variante.")}';
+  MOTIFS.couleur_non_mappee = '${T("Cette couleur n’a pas de teinte unie attribuée.")}';
+  MOTIFS.non_enregistre = '${T("La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.")}';
 
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
@@ -294,7 +298,7 @@ function pageProduit(id) {
   // demandent des vues par ANGLE plus une photo par couleur. Ce reglage vit dans
   // Inventaire → Categories : si la fenetre en decidait autrement, deux ecrans du
   // meme produit ne demanderaient pas les memes photos.
-  var ANGLES = { devant: 'Devant', derriere: 'Derrière', coteG: 'Côté gauche', coteD: 'Côté droit', autres: 'Autre' };
+  var ANGLES = { devant: '${T("Devant")}', derriere: '${T("Derrière")}', coteG: '${T("Côté gauche")}', coteD: '${T("Côté droit")}', autres: '${T("Autre")}' };
   function modeStandard(){
     var c = val('p-cat');
     return !!(c && CTX.modesPhoto && CTX.modesPhoto[c] === 'standard');
@@ -361,7 +365,7 @@ function pageProduit(id) {
     return '<label style="display:flex;align-items:center;gap:.45rem;font-size:.86rem;cursor:pointer">'
       + '<input type="checkbox" id="' + id + '">' + esc(lbl) + '</label>';
   }
-  var rien = [{ v: '', l: 'Non précisé' }];
+  var rien = [{ v: '', l: '${T("Non précisé")}' }];
   function opt(l, cV, cL){ return l.map(function(x){ return { v: x[cV], l: x[cL] }; }); }
 
   function dessiner(){
@@ -371,22 +375,22 @@ function pageProduit(id) {
     // et les séparer obligeait à un aller-retour pour une poignée de listes).
     h.push('<div class="etape">'
       + '<div class="carte"><h2>Identification</h2><div class="grille">'
-      + ch('p-nom', 'Nom du produit', { requis: true, large: true, placeholder: 'Ex : Robe fleurie été' })
-      + sel('p-cat', 'Catégorie', rien.concat(opt(CTX.categories, 'cle', 'libelle')), { requis: true })
+      + ch('p-nom', '${T("Nom du produit")}', { requis: true, large: true, placeholder: '${T("Ex : Robe fleurie été")}' })
+      + sel('p-cat', '${T("Catégorie")}', rien.concat(opt(CTX.categories, 'cle', 'libelle')), { requis: true })
       // ⚠ LE SKU EST VISIBLE, en lecture seule. Un code attribué « quelque part
       // plus tard » ne peut ni être lu, ni recopié sur une étiquette, ni
       // vérifié. Il se calcule dès que la catégorie est choisie.
-      + '<div class="ch"><label for="p-sku">Code (SKU)</label>'
+      + '<div class="ch"><label for="p-sku">${T("Code (SKU)")}</label>'
       + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
       + 'background:var(--f-pied);color:var(--tx-or)" placeholder="choisissez une catégorie"></div>'
       + ch('p-marque', 'Marque')
       // Le poids appartient a l identite du vetement, pas au prix : c est une
       // caracteristique de l article, et il tenait seul dans une carte entiere.
-      + '<div class="ch"><label for="p-poids">Poids unitaire <span class="req">*</span></label>'
+      + '<div class="ch"><label for="p-poids">${T("Poids unitaire ")}<span class="req">*</span></label>'
       + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0" placeholder="Ex : 350">'
-      + '<select id="p-unite" aria-label="Unité du poids"><option value="g">g</option><option value="kg">kg</option>'
+      + '<select id="p-unite" aria-label="${T("Unité du poids")}"><option value="g">g</option><option value="kg">kg</option>'
       + '<option value="lb">lb</option></select></div>'
-      + '<div class="aide" style="margin-top:.2rem">Sert au calcul des frais d’expédition.</div></div>'
+      + '<div class="aide" style="margin-top:.2rem">${T("Sert au calcul des frais d’expédition.")}</div></div>'
       + '<div class="ch large"><label for="p-desc">Description'
       + '<span id="p-desc-etat" style="float:right;color:var(--tx2);font-size:.72rem"></span></label>'
       + '<textarea id="p-desc" rows="3"></textarea>'
@@ -394,26 +398,26 @@ function pageProduit(id) {
       // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
       // d ici, aucune cle ne voyage.
       + '<div style="margin-top:.35rem">'
-      + '<button type="button" id="p-ia"><span class="ic">✨</span> Rédiger avec l’IA</button></div></div>'
+      + '<button type="button" id="p-ia"><span class="ic">✨</span> ${T("Rédiger avec l’IA")}</button></div></div>'
       + '</div></div>'
       + '<div class="cote">'
-      + '<div class="carte"><h2>Classement</h2><div class="grille">'
-      + sel('p-genre', 'Genre', rien.concat(opt(CTX.genres, 'cle', 'libelle')))
-      + sel('p-age', 'Groupe d’âge', rien.concat(opt(CTX.groupesAge, 'cle', 'libelle')))
-      + sel('p-style', 'Style', rien.concat(opt(CTX.styles, 'cle', 'libelle')))
-      + sel('p-guide', 'Guide des tailles', rien.concat(opt(CTX.guides, 'id', 'nom')))
-      + sel('p-etiq', 'Étiquette', [{ v: '', l: 'Aucune' }, { v: 'Populaire', l: 'Populaire' },
+      + '<div class="carte"><h2>${T("Classement")}</h2><div class="grille">'
+      + sel('p-genre', '${T("Genre")}', rien.concat(opt(CTX.genres, 'cle', 'libelle')))
+      + sel('p-age', '${T("Groupe d’âge")}', rien.concat(opt(CTX.groupesAge, 'cle', 'libelle')))
+      + sel('p-style', '${T("Style")}', rien.concat(opt(CTX.styles, 'cle', 'libelle')))
+      + sel('p-guide', '${T("Guide des tailles")}', rien.concat(opt(CTX.guides, 'id', 'nom')))
+      + sel('p-etiq', '${T("Étiquette")}', [{ v: '', l: '${T("Aucune")}' }, { v: '${T("Populaire")}', l: '${T("Populaire")}' },
             { v: 'Solde', l: 'Solde' }].concat(opt(CTX.etiquettes, 'cle', 'libelle')))
       + sel('p-fourn', 'Fournisseur', rien.concat(opt(CTX.fournisseurs, 'id', 'nom')))
       + '</div></div>'
       + '<div class="carte"><h2>Prix</h2>'
       + '<div class="prixgrille">'
-      + ch('p-prix', 'Prix de vente ($)', { requis: true, argent: true })
-      + '<div class="ch"><label for="p-solde">Prix soldé ($)'
+      + ch('p-prix', '${T("Prix de vente ($)")}', { requis: true, argent: true })
+      + '<div class="ch"><label for="p-solde">${T("Prix soldé ($)")}'
       + '<span id="p-pastille" class="pastille"></span></label>'
       + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="aucun">'
       + '<div id="p-rabais" class="rabais"></div></div>'
-      + ch('p-cout', 'Coût d’acquisition ($)', { requis: true, argent: true })
+      + ch('p-cout', '${T("Coût d’acquisition ($)")}', { requis: true, argent: true })
       + '</div>'
       + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
       + '<div id="p-alerte" style="display:none;color:var(--tx-err);font-size:.78rem;margin-top:.4rem"></div></div>'
@@ -421,12 +425,12 @@ function pageProduit(id) {
 
     // 3 — Tailles et couleurs
     h.push('<div class="etape">'
-      + '<div class="carte"><h2>Tailles offertes</h2><div class="jetons" id="p-tailles">'
+      + '<div class="carte"><h2>${T("Tailles offertes")}</h2><div class="jetons" id="p-tailles">'
       + (CTX.tailles.length
           ? CTX.tailles.map(function(t){ return '<span class="jeton" data-t="' + esc(t) + '">' + esc(t) + '</span>'; }).join('')
-          : '<span class="aide">Aucune taille au référentiel.</span>')
+          : '<span class="aide">${T("Aucune taille au référentiel.")}</span>')
       + '</div></div>'
-      + '<div class="carte plein"><h2>Couleurs offertes</h2>'
+      + '<div class="carte plein"><h2>${T("Couleurs offertes")}</h2>'
       // ⚠ UNE RECHERCHE, PAS UN MUR DE JETONS. Le moteur de couleurs en propose
       // des centaines : les afficher toutes etait impossible, et c est
       // exactement pour cela que l editeur du site propose une recherche.
@@ -437,7 +441,7 @@ function pageProduit(id) {
       + '<button type="button" id="p-coul-add">Ajouter</button>'
       + '<div id="p-coul-sug"></div></div>'
       + '<div class="jetons" id="p-couleurs"></div>'
-      + '<div class="aide" id="p-coul-vide" style="margin-top:.3rem">Aucune couleur choisie.</div>'
+      + '<div class="aide" id="p-coul-vide" style="margin-top:.3rem">${T("Aucune couleur choisie.")}</div>'
       + '</div></div>');
 
     // 5 — Photos : principale, vues supplémentaires, et par couleur
@@ -454,12 +458,12 @@ function pageProduit(id) {
       + '<div class="carte"><h2 id="p-vues-titre">Photos</h2>'
       + '<div class="ligne-photos">'
       + '<div class="vue-principale">'
-      + '<div class="vign" id="p-vign" title="Photo principale — cliquer pour choisir, ou déposer une secondaire ici">choisir une photo</div>'
-      + '<div class="lgd-principale">Photo principale</div>'
+      + '<div class="vign" id="p-vign" title="${T("Photo principale")} — cliquer pour choisir, ou déposer une secondaire ici">choisir une photo</div>'
+      + '<div class="lgd-principale">${T("Photo principale")}</div>'
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
-      + 'title="Détourer la photo et poser un décor (studio, jardin, Paris…)"><span class="ic">✂</span> Décor</button>'
+      + 'title="${T("Détourer la photo et poser un décor (studio, jardin, Paris…)")}"><span class="ic">✂</span> ${T("Décor")}</button>'
       + '<button type="button" id="p-mannequin" class="mini-decor" disabled '
-      + 'title="Faire porter le vêtement par un modèle (IA Fal.ai — chaque génération consomme des crédits)"><span class="ic">✨</span> Mannequin IA</button></div>'
+      + 'title="${T("Faire porter le vêtement par un modèle (IA Fal.ai — chaque génération consomme des crédits)")}"><span class="ic">✨</span> ${T("Mannequin IA")}</button></div>'
       + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
       /* ⚠ DEUX MODES, DÉCIDÉS PAR LA CATÉGORIE, comme l’éditeur du site :
@@ -468,20 +472,20 @@ function pageProduit(id) {
          l’enregistrement ; MANUEL = on dépose une photo par couleur. La
          1ʳᵉ couleur n’a jamais de variante : ses photos SONT celles du
          produit (la boutique ne lit une variante que pour les autres). */
-      + '<div class="carte plein"><h2 id="p-parcoul-titre">Photo par couleur</h2>'
+      + '<div class="carte plein"><h2 id="p-parcoul-titre">${T("Photo par couleur")}</h2>'
       + '<div class="aide" id="p-parcoul-aide" style="margin-bottom:.5rem"></div>'
       + '<div class="vues" id="p-parcoul"></div>'
       + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
       + 'title="Teinter les photos du produit pour chaque couleur — local, sans crédit ni service">'
-      + 'Tout générer</button></div></div></div>');
+      + '${T("Tout générer")}</button></div></div></div>');
 
     // 6 — Détails
     // ⚠ LE REGIME DE VENTE N EST PAS UN JEU DE CASES INDEPENDANTES. Mes cases
     // permettaient « vente finale ET aucun retour ET liquidation » — une
     // combinaison que l editeur du site ne peut pas produire et que la boutique
     // ne sait pas afficher. D ou deux menus dont les valeurs se contraignent.
-    h.push('<div class="etape"><div class="carte"><h2>Mise en marché</h2><div class="bascules">'
-      + bascule('p-actif', 'Produit actif (visible en boutique)')
+    h.push('<div class="etape"><div class="carte"><h2>${T("Mise en marché")}</h2><div class="bascules">'
+      + bascule('p-actif', '${T("Produit actif (visible en boutique)")}')
       // ⚠ DEUX CONTROLES, LES MEMES QUATRE ETATS QU AVANT. Un menu unique
       // melangeait deux questions sans rapport : comment l article est mis en
       // marche, et si la cliente peut le retourner. Rien ne disait que
@@ -489,16 +493,16 @@ function pageProduit(id) {
       // Combinaisons : normal+retour, normal+aucun, liquidation, vente finale.
       // Soit les quatre d origine, ni plus ni moins.
       + '<div class="cote" style="margin-top:.3rem">'
-      + '<div class="ch"><label for="p-regime">Régime de vente</label>'
+      + '<div class="ch"><label for="p-regime">${T("Régime de vente")}</label>'
       + '<select id="p-regime">'
-      + '<option value="normal"><span class="ic">🛍</span> Normal</option>'
-      + '<option value="liq"><span class="ic">🟡</span> Liquidation</option>'
-      + '<option value="final"><span class="ic">🔴</span> Vente finale</option>'
+      + '<option value="normal"><span class="ic">🛍</span> ${T("Normal")}</option>'
+      + '<option value="liq"><span class="ic">🟡</span> ${T("Liquidation")}</option>'
+      + '<option value="final"><span class="ic">🔴</span> ${T("Vente finale")}</option>'
       + '</select></div>'
       + '<div class="ch"><label for="p-retours">Retours</label>'
       + '<select id="p-retours">'
-      + '<option value="ok"><span class="ic">✅</span> Acceptés</option>'
-      + '<option value="aucun"><span class="ic">🚫</span> Aucun retour</option>'
+      + '<option value="ok"><span class="ic">✅</span> ${T("Acceptés")}</option>'
+      + '<option value="aucun"><span class="ic">🚫</span> ${T("Aucun retour")}</option>'
       + '</select></div>'
       + '</div>'
       // ⚠ DEUX ENCARTS RETIRES le 2026-08-07, a la demande : ils EXPLIQUAIENT ce
@@ -520,35 +524,35 @@ function pageProduit(id) {
       // servent qu au rendu interne des listes ; les demander a la creation d un
       // produit occupait une carte entiere pour deux reglages qu on ne touche
       // jamais. Le SEUIL, lui, reste : il declenche les alertes de stock.
-      + '<div class="carte"><h2>Alerte et limites</h2><div class="grille">'
-      + ch('p-seuil', 'Seuil d’alerte', { type: 'number', min: 0, pas: '1' })
+      + '<div class="carte"><h2>${T("Alerte et limites")}</h2><div class="grille">'
+      + ch('p-seuil', '${T("Seuil d’alerte")}', { type: 'number', min: 0, pas: '1' })
       // ⚠ LIMITE PAR CLIENT (2026-08-08) : toutes commandes confondues, par
       // adresse courriel — le cumul est tranché par le SERVEUR à la caisse
       // (client_limit_check). Vide = aucune limite propre au produit.
       // ⚠ SANS texte d aide (retire a la demande, 2026-08-08) : l explication
       // vit dans l INFOBULLE, comme le veut la regle des encarts qui expliquent
       // ce que l ecran montre deja.
-      + '<div class="ch"><label for="p-limclient">Limite par client</label>'
+      + '<div class="ch"><label for="p-limclient">${T("Limite par client")}</label>'
       + '<input id="p-limclient" type="number" min="1" step="1" placeholder="aucune" '
       + 'title="Unités de ce produit qu’un même client peut acheter, toutes commandes confondues (par adresse courriel)."></div>'
       + '</div></div></div>');
 
     // 7 — Stock
-    h.push('<div class="etape"><div class="carte plein" id="p-zone"><h2>Stock par variante</h2>'
+    h.push('<div class="etape"><div class="carte plein" id="p-zone"><h2>${T("Stock par variante")}</h2>'
       // ⚠ LA REGLE DE L EDITEUR DU SITE, DITE ICI AUSSI. Sans entrepot configure,
       // la colonne disparaissait sans un mot : on saisissait des quantites en
       // croyant l emplacement facultatif, alors qu il est obligatoire des que la
       // quantite depasse zero.
       + (CTX.entrepots.length
-          ? '<div class="aide" style="margin:-.2rem 0 .5rem">Au moins une variante doit porter '
-            + 'une quantité, et un emplacement d’entrepôt est obligatoire dès qu’une quantité '
-            + 'dépasse zéro.</div>'
-          : '<div class="aide" style="margin:-.2rem 0 .5rem;color:var(--tx-att)"><span class="ic">⚠</span> Aucun emplacement '
-            + 'configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux '
-            + 'variantes en stock.</div>')
+          ? '<div class="aide" style="margin:-.2rem 0 .5rem">${T("Au moins une variante doit porter")} '
+            + '${T("une quantité, et un emplacement d’entrepôt est obligatoire dès qu’une quantité")} '
+            + '${T("dépasse zéro.")}</div>'
+          : '<div class="aide" style="margin:-.2rem 0 .5rem;color:var(--tx-att)"><span class="ic">⚠</span> ${T("Aucun emplacement ")}'
+            + '${T("configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux")} '
+            + '${T("variantes en stock.")}</div>')
       + '<div class="rech"><input aria-label="Filtrer par taille ou couleur" placeholder="Filtrer par taille ou couleur…"><span class="cpt" id="p-somme"></span></div>'
-      + '<div class="lgstk entete"><span class="c1">Taille</span><span class="c2">Couleur</span>'
-      + '<span class="c3">Quantité</span><span class="c4">Entrepôt</span></div>'
+      + '<div class="lgstk entete"><span class="c1">${T("Taille")}</span><span class="c2">${T("Couleur")}</span>'
+      + '<span class="c3">${T("Quantité")}</span><span class="c4">${T("Entrepôt")}</span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
 
     document.getElementById('corps').innerHTML = h.join('');
@@ -570,15 +574,15 @@ function pageProduit(id) {
       // ⚠ Les obligations du prix rejoignent la PREMIERE etape avec ses champs :
       // une etape ne peut pas exiger un champ qui vit ailleurs — le fil dirait
       // « incomplet » sur une etape ou rien ne manque a l ecran.
-      { t: 'Identité, prix et poids', obl: ['p-nom', 'p-cat', 'p-poids', 'p-prix', 'p-cout'] },
-      { t: 'Tailles et couleurs',     obl: [] },
+      { t: '${T("Identité, prix et poids")}', obl: ['p-nom', 'p-cat', 'p-poids', 'p-prix', 'p-cout'] },
+      { t: '${T("Tailles et couleurs")}',     obl: [] },
       { t: 'Photo',                   obl: [] },
-      { t: 'Mise en marché',          obl: [] },
+      { t: '${T("Mise en marché")}',          obl: [] },
       { t: 'Stock',                   obl: [] }
     ], function(i){ if (i === 2) dessinerVues(); if (i === 4) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
-    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d’enregistrer.', 'att');
+    if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
   }
 
   function brancher(){
@@ -683,8 +687,8 @@ function pageProduit(id) {
           var deja = Object.keys(VUES).filter(function(x){ return x.indexOf('libre') === 0; }).length;
           var place = Math.max(0, MAX_PHOTOS - deja);
           if (ds.length > place) {
-            dire('Maximum ' + MAX_PHOTOS + ' photos supplémentaires — '
-              + (ds.length - place) + ' ignorée(s).', 'att');
+            dire('Maximum ' + MAX_PHOTOS + ' ${T("photos supplémentaires —")} '
+              + (ds.length - place) + ' ${T("ignorée(s).")}', 'att');
           }
           ds.slice(0, place).forEach(function(d, i){ VUES['libre' + (deja + i + 1)] = d; });
           dessinerVues();
@@ -747,7 +751,7 @@ function pageProduit(id) {
     var c = val('p-cat');
     if (!c) { poser('p-sku', ''); return; }
     var e = document.getElementById('p-sku');
-    if (e) e.placeholder = 'calcul du code…';
+    if (e) e.placeholder = '${T("calcul du code…")}';
     P.appeler('produit:sku', c).then(function(r){
       if (!e) return;
       // ⚠ UN ECHEC NE DOIT PAS VIDER LE CHAMP EN SILENCE. C est ce que je faisais :
@@ -757,13 +761,13 @@ function pageProduit(id) {
       if (!r || !r.ok) {
         poser('p-sku', '');
         e.placeholder = 'code indisponible';
-        dire('Code (SKU) : ' + expliquer(r), 'att');
+        dire('${T("Code (SKU) :")} ' + expliquer(r), 'att');
         return;
       }
       poser('p-sku', r.sku);
-      e.placeholder = r.configure ? '' : 'aucun code configuré pour cette catégorie';
+      e.placeholder = r.configure ? '' : '${T("aucun code configuré pour cette catégorie")}';
       if (!r.configure) {
-        dire('Aucun préfixe de code n’est configuré pour cette catégorie — voyez Inventaire → Catégories.', 'att');
+        dire('${T("Aucun préfixe de code n’est configuré pour cette catégorie — voyez Inventaire → Catégories.")}', 'att');
       } else { dire(''); }
     });
   }
@@ -819,13 +823,13 @@ function pageProduit(id) {
     // Une phrase d aide permanente occupe la place du formulaire pour dire une
     // chose qu on n a besoin de lire qu une fois.
     b.title = pret
-      ? 'Analyse la photo du produit et propose une description.'
-      : 'Ajoutez d’abord une photo à l’étape « Photo » : le service regarde le vêtement.';
+      ? '${T("Analyse la photo du produit et propose une description.")}'
+      : '${T("Ajoutez d’abord une photo à l’étape « Photo » : le service regarde le vêtement.")}';
   }
 
   function rediger(){
     var b = document.getElementById('p-ia');
-    b.disabled = true; dire('Rédaction en cours…');
+    b.disabled = true; dire('${T("Rédaction en cours…")}');
     var cat = (CTX.categories.find(function(c){ return c.cle === val('p-cat'); }) || {}).libelle || '';
     P.appeler('produit:decrire', {
       nom: val('p-nom'), categorie: cat, couleurs: couleurs(), imageDataUrl: IMAGE
@@ -833,7 +837,7 @@ function pageProduit(id) {
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
       poser('p-desc', r.texte);
-      dire('Description rédigée — relisez-la avant d’enregistrer.', 'bon');
+      dire('${T("Description rédigée — relisez-la avant d’enregistrer.")}', 'bon');
     });
   }
 
@@ -860,7 +864,7 @@ function pageProduit(id) {
     var e = document.getElementById('p-coul-libre');
     var v = String(nom != null ? nom : (e ? e.value : '')).trim();
     if (!v) return;
-    if (CHOIX.indexOf(v) >= 0) { dire('« ' + v +' » est déjà dans la liste.', 'att'); }
+    if (CHOIX.indexOf(v) >= 0) { dire('« ' + v +' ${T("» est déjà dans la liste.")}', 'att'); }
     else { CHOIX.push(v); dire(''); }
     if (e) e.value = '';
     cacherSug();
@@ -897,7 +901,7 @@ function pageProduit(id) {
       return '<div class="s' + (i === 0 ? ' vis' : '') + '" data-sug="' + esc(c.nom) + '">'
         + '<span class="pt" style="background:' + esc(c.hex || '#888') + '"></span>'
         + '<span style="text-transform:capitalize">' + esc(c.nom) + '</span>'
-        + (deja ? '<span class="deja">déjà choisie</span>' : '') + '</div>';
+        + (deja ? '<span class="deja">${T("déjà choisie")}</span>' : '') + '</div>';
     }).join('');
     z.classList.add('on');
   }
@@ -950,7 +954,7 @@ function pageProduit(id) {
         var actif = s > 0 && p > 0 && Math.round((1 - s / p) * 100) === pct;
         return '<button type="button" data-pct="' + pct + '"' + (actif ? ' class="on"' : '')
           + (!p || sousCout ? ' disabled' : '')
-          + ' title="' + (sousCout ? 'sous le coût d’acquisition'
+          + ' title="' + (sousCout ? '${T("sous le coût d’acquisition")}'
               : (actif ? 'recliquez pour retirer le rabais' : (sp ? sp.toFixed(2) + ' $' : ''))) + '">'
           + '-' + pct + '%</button>';
       }).join('');
@@ -978,7 +982,7 @@ function pageProduit(id) {
     var al = document.getElementById('p-alerte');
     if (al) {
       if (c > 0 && eff > 0 && eff < c) {
-        al.textContent = 'Le prix de vente effectif (' + eff.toFixed(2) + ' $) est inférieur au coût d’acquisition ('
+        al.textContent = '${T("Le prix de vente effectif (")}' + eff.toFixed(2) + ' ${T("$) est inférieur au coût d’acquisition (")}'
           + c.toFixed(2) + ' $).';
         al.style.display = 'block';
       } else { al.style.display = 'none'; }
@@ -987,23 +991,23 @@ function pageProduit(id) {
     var el = document.getElementById('p-marge'); if (!el) return;
     if (!(eff > 0) || !(c > 0)) { el.textContent = ''; return; }
     var m = eff - c, pct = Math.round((m / eff) * 100);
-    el.innerHTML = 'Marge : <strong>' + m.toFixed(2) + ' $</strong> (' + pct + ' %)'
-      + (s > 0 && s < p ? ' — calculée sur le prix soldé' : '')
-      + (m <= 0 ? ' <span style="color:var(--tx-err)">— vente à perte</span>' : '');
+    el.innerHTML = '${T("Marge :")} <strong>' + m.toFixed(2) + ' $</strong> (' + pct + ' %)'
+      + (s > 0 && s < p ? ' ${T("— calculée sur le prix soldé")}' : '')
+      + (m <= 0 ? ' <span style="color:var(--tx-err)">${T("— vente à perte")}</span>' : '');
   }
 
   // Un cadre par vue : on clique, on choisit un fichier. Le « x » retire.
   function dessinerVues(){
     var t = document.getElementById('p-vues-titre');
     if (t) t.textContent = modeStandard()
-      ? 'Photos — 1 principale + ' + MAX_PHOTOS + ' supplémentaires maximum'
-      : 'Photos — principale + vues';
+      ? '${T("Photos — 1 principale +")} ' + MAX_PHOTOS + ' ${T("supplémentaires maximum")}'
+      : '${T("Photos — principale + vues")}';
     var z = document.getElementById('p-vues');
     if (z) {
       z.innerHTML = clesVues().map(function(cle){
         var src = VUES[cle] || '';
         return '<div class="vue"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '"'
-          + (src ? ' title="Glisser pour réordonner, ou déposer sur la principale"' : '') + '>'
+          + (src ? ' title="${T("Glisser pour réordonner, ou déposer sur la principale")}"' : '') + '>'
           + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="Retirer">×</button>' : '')
           + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
@@ -1022,13 +1026,13 @@ function pageProduit(id) {
     if (carte) carte.style.display = '';
     var auto = modeAutoCouleur();
     var titre = document.getElementById('p-parcoul-titre');
-    if (titre) titre.textContent = auto ? 'Variantes de couleur (Auto)' : 'Photo par couleur (Manuel)';
+    if (titre) titre.textContent = auto ? '${T("Variantes de couleur (Auto)")}' : '${T("Photo par couleur (Manuel)")}';
     var aide = document.getElementById('p-parcoul-aide');
     if (aide) aide.textContent = auto
-      ? 'Générées en teintant les photos du produit — et régénérées automatiquement '
-        + 'à l’enregistrement. Le client voit la photo de la couleur qu’il choisit.'
-      : 'Ajoutez une photo par couleur. Le client voit la photo de la couleur qu’il '
-        + 'choisit ; sans photo, c’est la photo principale qui s’affiche.';
+      ? '${T("Générées en teintant les photos du produit — et régénérées automatiquement")} '
+        + '${T("à l’enregistrement. Le client voit la photo de la couleur qu’il choisit.")}'
+      : '${T("Ajoutez une photo par couleur. Le client voit la photo de la couleur qu’il")} '
+        + '${T("choisit ; sans photo, c’est la photo principale qui s’affiche.")}';
     var cs = couleurs();
     var bg = document.getElementById('p-cv-gen');
     // ⚠ LA 1ʳᵉ COULEUR N’A PAS DE CASE : ses photos sont celles du produit, et
@@ -1037,12 +1041,12 @@ function pageProduit(id) {
     var variantes = cs.slice(1);
     if (bg) bg.style.display = (auto && variantes.length && IMAGE) ? '' : 'none';
     if (!cs.length) {
-      p.innerHTML = '<div class="aide">Choisissez d’abord des couleurs à l’étape « Tailles et couleurs ».</div>';
+      p.innerHTML = '<div class="aide">${T("Choisissez d’abord des couleurs à l’étape « Tailles et couleurs ».")}</div>';
       return;
     }
     if (!variantes.length) {
-      p.innerHTML = '<div class="aide">Ajoutez au moins une couleur de plus — « ' + esc(cs[0])
-        + ' » est la couleur principale, ses photos sont celles du produit.</div>';
+      p.innerHTML = '<div class="aide">${T("Ajoutez au moins une couleur de plus — «")} ' + esc(cs[0])
+        + ' ${T("» est la couleur principale, ses photos sont celles du produit.")}</div>';
       return;
     }
     p.innerHTML = variantes.map(function(c){
@@ -1050,9 +1054,9 @@ function pageProduit(id) {
       // En mode AUTO la case ne se clique pas : un dépôt manuel serait écrasé
       // par la régénération de l’enregistrement, sans un mot.
       return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '')
-        + (auto ? '" style="cursor:default" title="Générée par « Tout générer » et à l’enregistrement"'
+        + (auto ? '" style="cursor:default" title="${T("Générée par « Tout générer » et à l’enregistrement")}"'
                 : '" data-coul="' + esc(c) + '"')
-        + '>' + (src ? '<img src="' + esc(src) + '" alt="">' : (auto ? 'à générer' : 'ajouter')) + '</div>'
+        + '>' + (src ? '<img src="' + esc(src) + '" alt="">' : (auto ? '${T("à générer")}' : 'ajouter')) + '</div>'
         + (src && !auto ? '<button type="button" class="x" data-coulx="' + esc(c) + '" title="Retirer">×</button>' : '')
         + '<div class="lgd">' + esc(c) + '</div></div>';
     }).join('');
@@ -1259,7 +1263,7 @@ function pageProduit(id) {
         if (ancienne) VUES[src] = ancienne; else delete VUES[src];
       }
       montrerImage(IMAGE); dessinerVues(); majIa();
-      dire('Photo principale remplacée — l’ancienne est restée dans la ligne.', 'bon');
+      dire('${T("Photo principale remplacée — l’ancienne est restée dans la ligne.")}', 'bon');
       return;
     }
     var cible = surVue.getAttribute('data-vue');
@@ -1269,7 +1273,7 @@ function pageProduit(id) {
       if (valC) { VUES[cible] = IMAGE; IMAGE = valC; }
       else if (cible.indexOf('libre') === 0) {
         var a0 = libresOrdonnees();
-        if (a0.length >= MAX_PHOTOS) { dire('Maximum ' + MAX_PHOTOS + ' photos supplémentaires.', 'att'); return; }
+        if (a0.length >= MAX_PHOTOS) { dire('Maximum ' + MAX_PHOTOS + ' ${T("photos supplémentaires.")}', 'att'); return; }
         a0.push(IMAGE); poserLibres(a0); IMAGE = '';
       } else { VUES[cible] = IMAGE; IMAGE = ''; }
       montrerImage(IMAGE); dessinerVues(); majIa();
@@ -1323,7 +1327,7 @@ function pageProduit(id) {
     var s = parseInt(val('p-seuil'), 10);
     if (!(s > 0) || !(q > 0) || q >= s) return '';
     return '<span class="al" title="Sous le seuil d’alerte (' + s + '). '
-      + 'Il en manque ' + (s - q) + ' pour l’atteindre."><span class="ic">⚠</span></span>';
+      + '${T("Il en manque")} ' + (s - q) + ' pour l’atteindre."><span class="ic">⚠</span></span>';
   }
 
   function majStock(){
@@ -1348,12 +1352,12 @@ function pageProduit(id) {
             + '<span class="c1">' + esc(x.taille) + '</span>'
             + '<span class="c2">' + esc(x.couleur) + '</span>'
             + '<span class="c3"><input class="q" type="number" min="0" step="1" placeholder="0"'
-      + ' aria-label="' + esc('Quantité — ' + x.taille + ' / ' + x.couleur) + '"'
+      + ' aria-label="' + esc('${T("Quantité —")} ' + x.taille + ' / ' + x.couleur) + '"'
             + ' data-cle="' + esc(x.cle) + '" value="' + esc(q) + '">' + alerteSeuil(q) + '</span>'
             + (CTX.entrepots.length
                 ? '<span class="c4"><select class="loc' + (manque ? ' manque' : '') + '" data-cle="' + esc(x.cle) + '"'
-                  + ' aria-label="' + esc('Emplacement — ' + x.taille + ' / ' + x.couleur) + '">'
-                  + '<option value="">Choisir l’emplacement</option>'
+                  + ' aria-label="' + esc('${T("Emplacement —")} ' + x.taille + ' / ' + x.couleur) + '">'
+                  + '<option value="">${T("Choisir l’emplacement")}</option>'
                   + CTX.entrepots.map(function(w){
                       return '<option value="' + esc(w.id) + '"' + (lo === w.id ? ' selected' : '') + '>' + esc(w.nom) + '</option>';
                     }).join('') + '</select></span>'
@@ -1364,7 +1368,7 @@ function pageProduit(id) {
           var n = 0;
           Object.keys(STOCK).forEach(function(k){ n += STOCK[k] || 0; });
           var s = document.getElementById('p-somme');
-          if (s) s.textContent = n + (n > 1 ? ' unités au total' : ' unité au total');
+          if (s) s.textContent = n + (n > 1 ? ' ${T("unités au total")}' : ' ${T("unité au total")}');
         }
       });
       PAGI.brancher();
@@ -1406,7 +1410,7 @@ function pageProduit(id) {
     PAGI.tout = lignes;
     if (!lignes.length) {
       zone.querySelector('.liste').innerHTML =
-        '<div class="aide">Choisissez au moins une taille et une couleur à l’étape « Tailles et couleurs ».</div>';
+        '<div class="aide">${T("Choisissez au moins une taille et une couleur à l’étape « Tailles et couleurs ».")}</div>';
       zone.querySelector('.pagi').innerHTML = '';
       return;
     }
@@ -1544,10 +1548,10 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:36rem">'
-      + '<h3><span class="ic">👁</span> Aperçu boutique</h3>'
+      + '<h3><span class="ic">👁</span> ${T("Aperçu boutique")}</h3>'
       + '<div style="display:flex;gap:.4rem;margin:.45rem 0 .6rem">'
-      + '<button type="button" id="ap-card">Grille boutique</button>'
-      + '<button type="button" id="ap-detail">Page produit</button></div>'
+      + '<button type="button" id="ap-card">${T("Grille boutique")}</button>'
+      + '<button type="button" id="ap-detail">${T("Page produit")}</button></div>'
       + '<div id="ap-zone" style="background:#f6f4ef;border-radius:10px;padding:.85rem;'
       + 'color:#1a1a1a;max-height:62vh;overflow-y:auto"></div>'
       + '<div class="pied2"><button type="button" id="ap-non">Fermer</button></div></div>';
@@ -1587,17 +1591,17 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:32rem">'
-      + '<h3><span class="ic">✂</span> Détourer et changer le décor</h3>'
+      + '<h3><span class="ic">✂</span> ${T("Détourer et changer le décor")}</h3>'
       + '<div class="fonds" id="dt-fonds"></div>'
       + '<div id="dt-zone" style="background:var(--f-0f1826);border-radius:10px;min-height:14rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
-      + '<div class="pied2"><button type="button" id="dt-non">Annuler</button>'
-      + '<button type="button" class="prim" id="dt-oui" disabled>✓ Utiliser cette photo</button></div></div>';
+      + '<div class="pied2"><button type="button" id="dt-non">${T("Annuler")}</button>'
+      + '<button type="button" class="prim" id="dt-oui" disabled>${T("✓ Utiliser cette photo")}</button></div></div>';
     document.body.appendChild(v);
     var RESULTAT = '';
     function zone(html){ var z = document.getElementById('dt-zone'); if (z) z.innerHTML = html; }
     function lancer(){
-      zone('<div style="padding:2rem;text-align:center;color:var(--tx2)">Détourage…</div>');
+      zone('<div style="padding:2rem;text-align:center;color:var(--tx2)">${T("Détourage…")}</div>');
       var oui = document.getElementById('dt-oui');
       if (oui) oui.disabled = true;
       P.appeler('produit:detourer', IMAGE, FOND_CHOISI).then(function(r){
@@ -1639,7 +1643,7 @@ function pageProduit(id) {
       IMAGE = RESULTAT;
       montrerImage(IMAGE); majIa();
       v.remove();
-      dire('Photo principale remplacée par la version détourée.', 'bon');
+      dire('${T("Photo principale remplacée par la version détourée.")}', 'bon');
     };
   }
 
@@ -1655,22 +1659,22 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:34rem">'
-      + '<h3><span class="ic">✨</span> Mannequin IA</h3>'
-      + '<div class="aide">Le vêtement de la photo principale sera porté par le modèle choisi. '
-      + 'Chaque génération consomme des crédits Fal.ai.</div>'
+      + '<h3><span class="ic">✨</span> ${T("Mannequin IA")}</h3>'
+      + '<div class="aide">${T("Le vêtement de la photo principale sera porté par le modèle choisi.")} '
+      + '${T("Chaque génération consomme des crédits Fal.ai.")}</div>'
       + '<div class="modeles" id="ia-modeles"><span class="aide">Chargement…</span></div>'
       + '<div class="grille" style="grid-template-columns:1fr 1fr;margin:.3rem 0 .5rem">'
-      + '<div class="ch"><label for="ia-cat">Type de vêtement</label><select id="ia-cat">'
-      + '<option value="one-pieces">Robes / Combinaisons</option>'
-      + '<option value="upper_body">Hauts / Vestes / Manteaux</option>'
-      + '<option value="lower_body">Bas — Pantalons / Jupes</option></select></div>'
-      + '<div class="ch"><label for="ia-desc">Description courte</label>'
+      + '<div class="ch"><label for="ia-cat">${T("Type de vêtement")}</label><select id="ia-cat">'
+      + '<option value="one-pieces">${T("Robes / Combinaisons")}</option>'
+      + '<option value="upper_body">${T("Hauts / Vestes / Manteaux")}</option>'
+      + '<option value="lower_body">${T("Bas — Pantalons / Jupes")}</option></select></div>'
+      + '<div class="ch"><label for="ia-desc">${T("Description courte")}</label>'
       + '<input id="ia-desc" type="text" placeholder="Ex : robe fleurie été"></div></div>'
       + '<div id="ia-zone" style="background:var(--f-0f1826);border-radius:10px;min-height:10rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
       + '<div class="pied2"><button type="button" id="ia-non">Fermer</button>'
-      + '<button type="button" id="ia-gen"><span class="ic">✨</span> Générer</button>'
-      + '<button type="button" class="prim" id="ia-oui" disabled>✓ Utiliser cette photo</button></div></div>';
+      + '<button type="button" id="ia-gen"><span class="ic">✨</span> ${T("Générer")}</button>'
+      + '<button type="button" class="prim" id="ia-oui" disabled>${T("✓ Utiliser cette photo")}</button></div></div>';
     document.body.appendChild(v);
     // La categorie part de celle du produit : robes -> one-pieces, bas -> lower_body.
     var cat = val('p-cat');
@@ -1680,14 +1684,14 @@ function pageProduit(id) {
     var idn = document.getElementById('ia-desc');
     if (idn) idn.value = val('p-nom').trim();
     function zone(html){ var z = document.getElementById('ia-zone'); if (z) z.innerHTML = html; }
-    zone('<span class="aide">Choisissez un modèle, puis Générer.</span>');
+    zone('<span class="aide">${T("Choisissez un modèle, puis Générer.")}</span>');
     P.appeler('produit:modeles').then(function(r){
       var z = document.getElementById('ia-modeles');
       if (!z) return;
       if (!r || !r.ok) { z.innerHTML = '<span class="aide" style="color:var(--tx-err)">' + esc(expliquer(r)) + '</span>'; return; }
       if (!r.cleConfiguree) {
-        z.innerHTML = '<span class="aide" style="color:var(--tx-att)"><span class="ic">⚠</span> Clé Fal.ai non configurée — '
-          + 'Configuration de la fenêtre principale.</span>';
+        z.innerHTML = '<span class="aide" style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Clé Fal.ai non configurée — ")}'
+          + '${T("Configuration de la fenêtre principale.")}</span>';
         return;
       }
       if (!(r.modeles || []).length) {
@@ -1696,9 +1700,9 @@ function pageProduit(id) {
         // vivait que dans la modale de l ecran web de l editeur produit. La
         // fenetre << Modeles par vue >> la porte maintenant. On nomme le chemin
         // exact : un renvoi vague fait chercher, et c est ce qui l avait cache.
-        z.innerHTML = '<span class="aide" style="color:var(--tx-att)"><span class="ic">⚠</span> Aucun mannequin enregistré — '
-          + 'ajoutez-en dans <strong>Configuration → Apparence → Modèles par vue</strong>, '
-          + 'section « Mannequins ».</span>';
+        z.innerHTML = '<span class="aide" style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Aucun mannequin enregistré — ")}'
+          + '${T("ajoutez-en dans <strong>Configuration → Apparence → Modèles par vue</strong>, ")}'
+          + '${T("section « Mannequins ».")}</span>';
         return;
       }
       z.innerHTML = r.modeles.map(function(m){
@@ -1716,21 +1720,21 @@ function pageProduit(id) {
     });
     document.getElementById('ia-non').onclick = function(){ v.remove(); };
     document.getElementById('ia-gen').onclick = function(){
-      if (!MODELE) { zone('<span class="aide" style="color:var(--tx-att)">Choisissez d’abord un modèle.</span>'); return; }
+      if (!MODELE) { zone('<span class="aide" style="color:var(--tx-att)">${T("Choisissez d’abord un modèle.")}</span>'); return; }
       var g = this;
       g.disabled = true; // anti double-clic : chaque generation COUTE
       var oui = document.getElementById('ia-oui');
       if (oui) oui.disabled = true;
-      zone('<span class="aide">Génération en cours — jusqu’à 2 minutes…</span>');
+      zone('<span class="aide">${T("Génération en cours — jusqu’à 2 minutes…")}</span>');
       P.appeler('produit:photoIa', IMAGE, MODELE,
         (document.getElementById('ia-cat') || {}).value,
         (document.getElementById('ia-desc') || {}).value).then(function(r){
         g.disabled = false;
-        g.textContent = '↻ Régénérer';
+        g.textContent = '${T("↻ Régénérer")}';
         if (!r || !r.ok) {
           zone('<span class="aide" style="color:var(--tx-err)">'
-            + esc((r && r.detail) || (r && r.motif === 'cle_absente' ? 'Clé Fal.ai non configurée.'
-              : r && r.motif === 'modele_absent' ? 'Ce modèle n’existe plus — rechargez.' : expliquer(r))) + '</span>');
+            + esc((r && r.detail) || (r && r.motif === 'cle_absente' ? '${T("Clé Fal.ai non configurée.")}'
+              : r && r.motif === 'modele_absent' ? '${T("Ce modèle n’existe plus — rechargez.")}' : expliquer(r))) + '</span>');
           return;
         }
         RES = r.image || '';
@@ -1744,7 +1748,7 @@ function pageProduit(id) {
       IMAGE = RES;
       montrerImage(IMAGE); majIa();
       v.remove();
-      dire('Photo principale remplacée par la photo portée.', 'bon');
+      dire('${T("Photo principale remplacée par la photo portée.")}', 'bon');
     };
   }
 
@@ -1771,18 +1775,18 @@ function pageProduit(id) {
     if (!cibles.length || !slots.length) { if (fini) fini(); return; }
     GEN_ENCOURS = true;
     var b = document.getElementById('p-cv-gen');
-    if (b) { b.disabled = true; b.textContent = '⏳ Génération…'; }
+    if (b) { b.disabled = true; b.textContent = '${T("⏳ Génération…")}'; }
     var total = cibles.length * slots.length, fait = 0;
     var sautees = [], iC = 0, iS = 0, arret = '';
     function conclure(){
       GEN_ENCOURS = false;
-      if (b) { b.disabled = false; b.textContent = 'Tout générer'; }
+      if (b) { b.disabled = false; b.textContent = '${T("Tout générer")}'; }
       dessinerVues();
-      if (arret) { dire('Variantes de couleur : ' + arret, 'err'); }
+      if (arret) { dire('${T("Variantes de couleur :")} ' + arret, 'err'); }
       else {
-        dire('Variantes de couleur générées'
-          + (sautees.length ? ' — sans teinte attribuée pour : ' + sautees.join(', ')
-            + ' (Inventaire → Références)' : '') + '.', sautees.length ? 'att' : 'bon');
+        dire('${T("Variantes de couleur générées")}'
+          + (sautees.length ? ' ${T("— sans teinte attribuée pour :")} ' + sautees.join(', ')
+            + ' ${T("(Inventaire → Références)")}' : '') + '.', sautees.length ? 'att' : 'bon');
       }
       if (fini) fini(arret || null);
     }
@@ -1791,7 +1795,7 @@ function pageProduit(id) {
       if (iS >= slots.length) { iC++; iS = 0; suivant(); return; }
       var coul = cibles[iC], slot = slots[iS];
       fait++;
-      dire('Variantes de couleur : ' + coul + ' (' + fait + '/' + total + ')…');
+      dire('${T("Variantes de couleur :")} ' + coul + ' (' + fait + '/' + total + ')…');
       P.appeler('produit:teinter', slot.src, coul).then(function(r){
         if (!r || !r.ok) {
           if (r && r.motif === 'couleur_non_mappee') {
@@ -1857,17 +1861,17 @@ function pageProduit(id) {
   // même modification. À corriger DES DEUX CÔTÉS, pas d'un seul.
   var SUIVIS = [
     { c: 'nom',      l: 'Nom' },
-    { c: 'cat',      l: 'Catégorie',            f: libCat },
+    { c: 'cat',      l: '${T("Catégorie")}',            f: libCat },
     { c: 'marque',   l: 'Marque' },
-    { c: 'etiq',     l: 'Étiquette',            f: libEtiq },
-    { c: 'actif',    l: 'Visible en boutique',  f: function(x){ return x === '1' ? 'Oui' : 'Non'; } },
-    { c: 'prix',     l: 'Prix régulier',        f: argentTxt },
-    { c: 'solde',    l: 'Prix soldé',           f: argentTxt },
-    { c: 'cout',     l: 'Coût d’acquisition',   f: argentTxt },
-    { c: 'genre',    l: 'Genre' },
-    { c: 'age',      l: 'Groupe d’âge' },
-    { c: 'style',    l: 'Style' },
-    { c: 'guide',    l: 'Guide des tailles' },
+    { c: 'etiq',     l: '${T("Étiquette")}',            f: libEtiq },
+    { c: 'actif',    l: '${T("Visible en boutique")}',  f: function(x){ return x === '1' ? 'Oui' : 'Non'; } },
+    { c: 'prix',     l: '${T("Prix régulier")}',        f: argentTxt },
+    { c: 'solde',    l: '${T("Prix soldé")}',           f: argentTxt },
+    { c: 'cout',     l: '${T("Coût d’acquisition")}',   f: argentTxt },
+    { c: 'genre',    l: '${T("Genre")}' },
+    { c: 'age',      l: '${T("Groupe d’âge")}' },
+    { c: 'style',    l: '${T("Style")}' },
+    { c: 'guide',    l: '${T("Guide des tailles")}' },
     { c: 'desc',     l: 'Description' },
     { c: 'tailles',  l: 'Tailles',   f: function(x){ return String(x).split(',').filter(Boolean).join(', '); } },
     { c: 'couleurs', l: 'Couleurs',  f: function(x){ return String(x).split(',').filter(Boolean).join(', '); } }
@@ -1896,7 +1900,7 @@ function pageProduit(id) {
   // Reprise de _pfAgo : « à l’instant », « il y a 12 min », « il y a 3 h 20 min ».
   function ilYa(ts){
     var m = Math.max(0, Math.round((Date.now() - ts) / 60000));
-    if (m < 1) return 'à l’instant';
+    if (m < 1) return '${T("à l’instant")}';
     if (m < 60) return 'il y a ' + m + ' min';
     var h = Math.floor(m / 60);
     return 'il y a ' + h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');
@@ -1947,21 +1951,21 @@ function pageProduit(id) {
     var att = enAttente();
     var h = '';
     if (att.length) {
-      h += sec('Non enregistrées')
+      h += sec('${T("Non enregistrées")}')
         + att.map(function(r){
             return '<div class="bl"><div class="et">' + esc(r.l) + '</div>' + dif(r.av, r.ap) + '</div>';
           }).join('');
     }
     if (RECENT && RECENT.etat === 'attente' && !(RECENT.entrees || []).length) {
-      h += '<div class="fin">Lecture des modifications enregistrées…</div>';
+      h += '<div class="fin">${T("Lecture des modifications enregistrées…")}</div>';
     } else if (RECENT && RECENT.etat === 'erreur') {
       // ⚠ « INDISPONIBLE » N EST PAS « AUCUNE MODIFICATION ». Afficher une fiche
       // vierge sur une panne de réseau ferait croire qu’elle n’a jamais été
       // touchée — exactement l’inverse de ce qu’un journal doit garantir.
-      h += '<div class="fin" style="color:var(--tx-att)">Modifications enregistrées indisponibles ('
-        + esc(RECENT.motif) + ') — <span class="lien" id="jrn-retry">réessayer</span>.</div>';
+      h += '<div class="fin" style="color:var(--tx-att)">${T("Modifications enregistrées indisponibles (")}'
+        + esc(RECENT.motif) + ') — <span class="lien" id="jrn-retry">${T("réessayer")}</span>.</div>';
     } else if (RECENT && (RECENT.entrees || []).length) {
-      h += sec('Enregistrées — dernières 24 h')
+      h += sec('${T("Enregistrées — dernières 24 h")}')
         + RECENT.entrees.map(function(e){
             var k = String(e.ts), vu = !!OUVERT[k];
             return '<div class="bl cliq" data-qui="' + esc(k) + '" title="Cliquer pour voir qui a fait cette modification">'
@@ -1972,17 +1976,17 @@ function pageProduit(id) {
                     + dif(c.avant || '—', c.apres || '—') + '</div>';
                 }).join('')
               + (vu ? '<div class="qui"><span class="ic">👤</span> <strong style="color:var(--tx)">'
-                  + esc(e.par || 'Auteur non enregistré') + '</strong><br><span class="ic">🕘</span> '
+                  + esc(e.par || '${T("Auteur non enregistré")}') + '</strong><br><span class="ic">🕘</span> '
                   + esc(dateLongue(e.ts)) + '</div>' : '')
               + '</div>';
           }).join('')
-        + '<div class="fin">Après 24 h, ces modifications ne s’affichent plus ici — elles restent '
-        + 'consultables dans <span class="lien" id="jrn-tout"><span class="ic">🕘</span> tout l’historique</span>.</div>';
+        + '<div class="fin">${T("Après 24 h, ces modifications ne s’affichent plus ici — elles restent")} '
+        + '${T("consultables dans ")}<span class="lien" id="jrn-tout"><span class="ic">🕘</span> ${T("tout l’historique")}</span>.</div>';
     } else if (RECENT && RECENT.etat === 'pret' && !att.length) {
-      h += '<div class="fin">Aucune modification depuis l’ouverture, et aucune enregistrée '
-        + 'dans les dernières 24 h. <span class="lien" id="jrn-tout"><span class="ic">🕘</span> Tout l’historique</span></div>';
+      h += '<div class="fin">${T("Aucune modification depuis l’ouverture, et aucune enregistrée")} '
+        + '${T("dans les dernières 24 h. ")}<span class="lien" id="jrn-tout"><span class="ic">🕘</span> ${T("Tout l’historique")}</span></div>';
     }
-    if (!h) h = '<div class="fin">Aucune modification.</div>';
+    if (!h) h = '<div class="fin">${T("Aucune modification.")}</div>';
     z.innerHTML = h;
   }
 
@@ -1990,7 +1994,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:640px">'
-      + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> Modifications de cette fiche</h3>'
+      + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> ${T("Modifications de cette fiche")}</h3>'
       + '<div class="jrn" id="jrn-corps"></div>'
       + '<div class="pied2"><button type="button" id="jrn-non">Fermer</button></div></div>';
     document.body.appendChild(v);
@@ -2016,7 +2020,7 @@ function pageProduit(id) {
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:640px">'
-      + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> Historique complet</h3>'
+      + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> ${T("Historique complet")}</h3>'
       + '<div class="jrn" id="hist-corps"><div class="fin">Lecture…</div></div>'
       + '<div class="pied2"><button type="button" id="hist-non">Fermer</button></div></div>';
     document.body.appendChild(v);
@@ -2026,12 +2030,12 @@ function pageProduit(id) {
       var z = document.getElementById('hist-corps');
       if (!z) return;
       if (!r || !r.ok) {
-        z.innerHTML = '<div class="fin" style="color:var(--tx-att)">Historique indisponible : '
-          + esc(expliquer(r)) + '.<br>Rien n’est perdu — réessayez une fois reconnecté.</div>';
+        z.innerHTML = '<div class="fin" style="color:var(--tx-att)">${T("Historique indisponible :")} '
+          + esc(expliquer(r)) + '${T(".<br>Rien n’est perdu — réessayez une fois reconnecté.")}</div>';
         return;
       }
       var e2 = r.entrees || [];
-      if (!e2.length) { z.innerHTML = '<div class="fin">Aucune modification enregistrée pour cet article.</div>'; return; }
+      if (!e2.length) { z.innerHTML = '<div class="fin">${T("Aucune modification enregistrée pour cet article.")}</div>'; return; }
       var parAn = {};
       e2.forEach(function(e){
         var a;
@@ -2039,8 +2043,8 @@ function pageProduit(id) {
         (parAn[a] = parAn[a] || []).push(e);
       });
       var ans = Object.keys(parAn).sort(function(a, b){ return b - a; });
-      z.innerHTML = '<div class="fin" style="text-align:left;margin:0 0 .6rem">Modifications conservées '
-        + 'jusqu’au retrait de l’article, archivées par année, purgées au-delà de 5 ans.</div>'
+      z.innerHTML = '<div class="fin" style="text-align:left;margin:0 0 .6rem">${T("Modifications conservées")} '
+        + '${T("jusqu’au retrait de l’article, archivées par année, purgées au-delà de 5 ans.")}</div>'
         + ans.map(function(a){
             var l = parAn[a];
             return '<div class="an">' + esc(a) + ' · ' + l.length + ' modification'
@@ -2106,7 +2110,7 @@ function pageProduit(id) {
       // quota en silence ; ici on l'annonce, parce que se croire à l'abri est pire
       // que de savoir qu'on ne l'est pas.
       BR_DERNIER = '';
-      dire('Brouillon non conservé — ' + expliquer(r), 'att');
+      dire('${T("Brouillon non conservé —")} ' + expliquer(r), 'att');
     });
   }
   function brArreter(){ if (BR_T) { clearInterval(BR_T); BR_T = null; } }
@@ -2153,7 +2157,7 @@ function pageProduit(id) {
     // Le brouillon restauré est déjà celui du stockage : sans cette ligne, le
     // premier tic le réécrirait à l'identique.
     BR_DERNIER = JSON.stringify(brCapturer());
-    dire('Brouillon repris.', 'bon');
+    dire('${T("Brouillon repris.")}', 'bon');
   }
 
   // ⚠ UNE BOÎTE, PAS UN BANDEAU. L'éditeur du site pose un bandeau au-dessus du
@@ -2167,13 +2171,13 @@ function pageProduit(id) {
       return new Promise(function(resoudre){
         var v = document.createElement('div');
         v.className = 'voile';
-        v.innerHTML = '<div class="boite"><h3 style="color:var(--tx-creme)"><span class="ic">📝</span> Un brouillon non terminé</h3>'
-          + '<p>Une saisie a été laissée en cours <strong>' + esc(ilYa(r.brouillon.ts))
-          + '</strong>. La reprendre, ou repartir d’une fiche vierge ?</p>'
-          + '<p style="font-size:.78rem;color:var(--tx2)">Un brouillon est gardé 15 minutes, '
-          + 'puis il disparaît de lui-même.</p>'
-          + '<div class="pied2"><button type="button" id="br-non">Repartir à neuf</button>'
-          + '<button type="button" class="prim" id="br-oui">Reprendre</button></div></div>';
+        v.innerHTML = '<div class="boite"><h3 style="color:var(--tx-creme)"><span class="ic">📝</span> ${T("Un brouillon non terminé")}</h3>'
+          + '<p>${T("Une saisie a été laissée en cours")} <strong>' + esc(ilYa(r.brouillon.ts))
+          + '</strong>${T(". La reprendre, ou repartir d’une fiche vierge ?")}</p>'
+          + '<p style="font-size:.78rem;color:var(--tx2)">${T("Un brouillon est gardé 15 minutes,")} '
+          + '${T("puis il disparaît de lui-même.")}</p>'
+          + '<div class="pied2"><button type="button" id="br-non">${T("Repartir à neuf")}</button>'
+          + '<button type="button" class="prim" id="br-oui">${T("Reprendre")}</button></div></div>';
         document.body.appendChild(v);
         document.getElementById('br-oui').onclick = function(){
           v.remove(); brReprendre(r.brouillon); resoudre();
@@ -2189,21 +2193,21 @@ function pageProduit(id) {
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'products', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || '${T("quelqu’un d’autre")}');
       bEnr.disabled = true;
-      dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
+      dire('${T("Enregistrement bloqué : cette fiche est ouverte ailleurs.")}', 'err');
     });
   }
 
   function charger(){
     P.appeler('produit:contexte').then(function(c){
-      if (!c || !c.ok) { vide('Formulaire indisponible', expliquer(c)); return; }
+      if (!c || !c.ok) { vide('${T("Formulaire indisponible")}', expliquer(c)); return; }
       CTX = c;
       return P.appeler('produit:lire', ID).then(function(r){
-        if (!r || !r.ok) { vide('Fiche indisponible', expliquer(r)); return; }
+        if (!r || !r.ok) { vide('${T("Fiche indisponible")}', expliquer(r)); return; }
         FICHE = r.fiche;
-        document.getElementById('titre').textContent = ID ? 'Modifier le produit' : 'Nouveau produit';
+        document.getElementById('titre').textContent = ID ? '${T("Modifier le produit")}' : '${T("Nouveau produit")}';
         dessiner();
         brancherApercu();
         if (ID) {
@@ -2242,27 +2246,27 @@ function pageProduit(id) {
       return new Promise(function(resoudre){
         var v = document.createElement('div');
         v.className = 'voile';
-        v.innerHTML = '<div class="boite"><h3><span class="ic">⚠</span> Prix inférieur au coût d’acquisition</h3>'
-          + '<p>Le prix de vente effectif (<strong>' + eff.toFixed(2) + ' $</strong>) est inférieur '
-          + 'au coût d’acquisition (<strong>' + cout.toFixed(2) + ' $</strong>).</p>'
-          + '<div class="ch"><label for="bc-raison">Raison <span class="req">*</span></label>'
+        v.innerHTML = '<div class="boite"><h3><span class="ic">⚠</span> ${T("Prix inférieur au coût d’acquisition")}</h3>'
+          + '<p>${T("Le prix de vente effectif (")}<strong>' + eff.toFixed(2) + ' $</strong>${T(") est inférieur ")}'
+          + '${T("au coût d’acquisition (")}<strong>' + cout.toFixed(2) + ' $</strong>).</p>'
+          + '<div class="ch"><label for="bc-raison">${T("Raison ")}<span class="req">*</span></label>'
           + '<textarea id="bc-raison" rows="3" placeholder="Écoulement de fin de série, article abîmé…"></textarea></div>'
-          + (exige ? '<div class="ch" style="margin-top:.5rem"><label for="bc-nip">Code d’autorisation <span class="req">*</span></label>'
+          + (exige ? '<div class="ch" style="margin-top:.5rem"><label for="bc-nip">${T("Code d’autorisation ")}<span class="req">*</span></label>'
               + '<input id="bc-nip" type="password" autocomplete="off"></div>' : '')
           + '<div class="msg err" id="bc-err" style="min-height:1.1em;margin-top:.4rem"></div>'
-          + '<div class="pied2"><button type="button" id="bc-non">Annuler</button>'
-          + '<button type="button" class="prim" id="bc-oui">Autoriser et enregistrer</button></div></div>';
+          + '<div class="pied2"><button type="button" id="bc-non">${T("Annuler")}</button>'
+          + '<button type="button" class="prim" id="bc-oui">${T("Autoriser et enregistrer")}</button></div></div>';
         document.body.appendChild(v);
         var r = document.getElementById('bc-raison'); if (r) r.focus();
         document.getElementById('bc-non').onclick = function(){ v.remove(); resoudre(null); };
         document.getElementById('bc-oui').onclick = function(){
           var raison = (document.getElementById('bc-raison').value || '').trim();
           var err = document.getElementById('bc-err');
-          if (!raison) { err.textContent = 'La raison est obligatoire.'; return; }
+          if (!raison) { err.textContent = '${T("La raison est obligatoire.")}'; return; }
           var nip = exige ? (document.getElementById('bc-nip').value || '') : '';
           P.appeler('produit:nip', nip).then(function(z){
             if (!z || !z.ok) { err.textContent = expliquer(z); return; }
-            if (!z.valide) { err.textContent = 'Code incorrect — réessayez.'; return; }
+            if (!z.valide) { err.textContent = '${T("Code incorrect — réessayez.")}'; return; }
             v.remove(); resoudre({ raison: raison });
           });
         };
@@ -2274,12 +2278,12 @@ function pageProduit(id) {
     if (!Assist.toutValide()) return;
     if (!tailles().length || !couleurs().length) {
       Assist.aller(1);
-      dire('Choisissez au moins une taille ET une couleur avant d’enregistrer.', 'err');
+      dire('${T("Choisissez au moins une taille ET une couleur avant d’enregistrer.")}', 'err');
       return;
     }
     if (!IMAGE) {
       Assist.aller(2);
-      dire('La photo principale est obligatoire.', 'err');
+      dire('${T("La photo principale est obligatoire.")}', 'err');
       return;
     }
     // ⚠ REGLE ARRETEE le 2026-08-08 (2e passe, a sa demande) : l emplacement
@@ -2293,14 +2297,14 @@ function pageProduit(id) {
     }); });
     if (!ID && !enStock.length) {
       Assist.aller(4);
-      dire('Saisissez une quantité pour au moins une variante avant d’enregistrer.', 'err');
+      dire('${T("Saisissez une quantité pour au moins une variante avant d’enregistrer.")}', 'err');
       return;
     }
     if (CTX && (CTX.entrepots || []).length) {
       var sansLieu = enStock.filter(function(k){ return !LOCS[k]; });
       if (sansLieu.length) {
         Assist.aller(4);
-        dire('Sélectionnez un emplacement d’entrepôt pour : '
+        dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '
           + sansLieu.slice(0, 3).join(', ')
           + (sansLieu.length > 3 ? '… (' + sansLieu.length + ' variantes)' : '') + '.', 'err');
         return;
@@ -2314,7 +2318,7 @@ function pageProduit(id) {
     var eff = (so > 0 && so < pr) ? so : pr;
     if (co > 0 && eff > 0 && eff < co && !SOUSCOUT) {
       demanderSousCout(eff, co).then(function(a){
-        if (!a) { dire('Enregistrement annulé.', 'att'); return; }
+        if (!a) { dire('${T("Enregistrement annulé.")}', 'att'); return; }
         SOUSCOUT = a; enregistrer();
       });
       return;
@@ -2343,7 +2347,7 @@ function pageProduit(id) {
     Object.keys(LOCS).forEach(function(k){ if (valides[k] && LOCS[k]) locs[k] = LOCS[k]; });
 
     bEnr.disabled = true;
-    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? 'Dépôt de la photo et enregistrement…' : 'Enregistrement…');
+    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de la photo et enregistrement…")}' : 'Enregistrement…');
     P.appeler('produit:enregistrer', ID, {
       name: val('p-nom').trim(), category: val('p-cat'), sku: val('p-sku'),
       brand: val('p-marque'), description: val('p-desc'),
@@ -2379,8 +2383,8 @@ function pageProduit(id) {
           // ⚠ Le plafond du pont a sonne mais le SITE continue le depot de la
           // photo : la fiche est souvent enregistree quand meme. Recommencer
           // tout de suite fabriquerait un DOUBLON.
-          dire('L’enregistrement prend du temps (dépôt de la photo) et se poursuit '
-            + 'peut-être — vérifiez la liste des produits avant de recommencer.', 'att');
+          dire('${T("L’enregistrement prend du temps (dépôt de la photo) et se poursuit")} '
+            + '${T("peut-être — vérifiez la liste des produits avant de recommencer.")}', 'att');
           return;
         }
         // Le DOUBLE FILET du pont : on RAMÈNE à l’étape fautive, exactement
@@ -2391,7 +2395,7 @@ function pageProduit(id) {
         if (r && r.motif === 'stock_requis') Assist.aller(4);
         if (r && r.motif === 'emplacement_requis') {
           Assist.aller(4);
-          dire('Sélectionnez un emplacement d’entrepôt pour : '
+          dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '
             + (r.manquants || []).join(', ') + '.', 'err');
           return;
         }
@@ -2403,7 +2407,7 @@ function pageProduit(id) {
       // et la prochaine ouverture proposerait de reprendre une fiche déjà créée.
       BR_FINI = true; brArreter();
       if (!ID) P.appeler('produit:brouillonJeter');
-      dire('Enregistré.', 'bon');
+      dire('${T("Enregistré.")}', 'bon');
       setTimeout(function(){ P.fermer(); }, 700);
     });
   }
@@ -2417,7 +2421,7 @@ function pageProduit(id) {
     if (ID || BR_FINI) { P.fermer(); return; }
     var d = brCapturer();
     if (!brUtile(d)) { P.fermer(); return; }
-    dire('Brouillon conservé…');
+    dire('${T("Brouillon conservé…")}');
     P.appeler('produit:brouillonEcrire', d).then(function(){ P.fermer(); });
   }
 
