@@ -3043,6 +3043,23 @@ module.exports = {
           },
         },
         'promo:modeleEcrire': { ok: true, nom: 'Étiquette prix — collection été', elements: 4, modifie: 1757625000000 },
+        // ⚠ LA REPEINTURE D'UN MODÈLE NON ENREGISTRÉ : c'est elle qui rend un
+        // élément AJOUTÉ visible. Sans elle, la fenêtre montrerait une poignée
+        // par-dessus une image qui ne connaît pas encore cet élément.
+        'promo:modeleApercu': { ok: true, rendable: true, image: IMAGE, detail: '' },
+        // Un élément NEUF vient toujours du site, défauts et identifiant compris.
+        'promo:elementModele': { ok: true, element: { id: 'e9', kind: 'text', name: 'Texte',
+          text: 'Votre texte', xPct: 12, yPct: 34, wPct: 76, hPct: 26, rot: 0, opacity: 100,
+          locked: false, hidden: false, font: 'Playfair Display', fontPct: 20, weight: 700,
+          color: '#111827', align: 'center', valign: 'middle' } },
+        // ⚠ LA LOGOTHÈQUE PORTE DEUX ADRESSES PAR IMAGE, et le cas d'épreuve les
+        // distingue : adresse = ce qui s'écrit au modèle, vignette = ce qui
+        // s'affiche ici. Et il y a UNE ÉCARTÉE : la fenêtre doit le DIRE, sinon
+        // on cherche une image qu'on croit avoir déposée.
+        'promo:logos': { ok: true, total: 3, plafond: 60, ecartes: 1, logos: [
+          { id: 'lg1', nom: 'Logo Sandriza', adresse: 'https://exemple/logos/lg1.png', vignette: IMAGE, w: 600, h: 200 },
+          { id: 'lg2', nom: 'Sceau argile', adresse: 'https://exemple/logos/lg2.png', vignette: IMAGE, w: 400, h: 400 },
+        ] },
         identite: IDENTITE,
       },
     },
@@ -3059,6 +3076,14 @@ module.exports = {
             elements: [],
           },
         },
+        // ⚠ SUR UN MODÈLE VIDE, AJOUTER EST LE SEUL GESTE POSSIBLE : c'est donc
+        // ici qu'il faut l'éprouver. Et la logothèque y est VIDE, pour voir
+        // l'écran qui invite à importer plutôt qu'une grille déserte et muette.
+        'promo:elementModele': { ok: true, element: { id: 'n1', kind: 'image', name: 'Image',
+          src: '', fit: 'contain', xPct: 28, yPct: 12, wPct: 44, hPct: 44, rot: 0,
+          opacity: 100, locked: false, hidden: false } },
+        'promo:logos': { ok: true, total: 0, plafond: 60, ecartes: 0, logos: [] },
+        'promo:modeleApercu': { ok: true, rendable: true, image: IMAGE, detail: '' },
         identite: IDENTITE,
       },
     },

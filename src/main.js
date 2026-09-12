@@ -2369,6 +2369,15 @@ const OPS_PONT = new Set([
   // modele modifie. La fenetre native ne peint pas : elle n a pas l origine du
   // site, et un canevas teint ne se relit plus — donc plus d apercu ni d impression.
   'promo:modeleLire', 'promo:modeleEcrire',
+  // 'promo:elementModele' rend un ELEMENT NEUF, defauts compris : la fenetre
+  // n en recopie aucun, ils vivent dans un seul depot. 'promo:logos' rend la
+  // logotheque avec, pour chaque image, SON ADRESSE (ce qui s ecrit au modele)
+  // ET une vignette 'data:' (ce qui s affiche ici, faute d origine du site).
+  'promo:elementModele', 'promo:logos',
+  // 'promo:modeleApercu' PEINT un modele qui n est pas encore enregistre : sans
+  // lui, ajouter un element ou changer le fond ne produisait aucun retour a l
+  // ecran, puisque la fenetre ne peint rien. Il n ECRIT rien.
+  'promo:modeleApercu',
   // Depenses d entreprise (fenetre Depenses, 2.5.0) — premier ecran du palier 5.
   // ⚠ 'depenses:facture' LIT une facture par le service d IA : la cle, pdf.js, le
   // canevas et le taux de change restent au site. La fenetre envoie un fichier et
@@ -3032,6 +3041,11 @@ const LIMITES_PONT = {
   // La planche compose une feuille entiere a 300 dpi.
   'promo:planche': 60000,
   'promo:imprimante': 20000,
+  // Le selecteur de logos RASTERISE une vignette par image (jusqu a 60), et
+  // chacune peut demander un aller-retour au stockage avant d etre peinte.
+  'promo:logos': 60000,
+  // Le meme travail que 'promo:apercu' : une image peinte, ses photos chargees.
+  'promo:modeleApercu': 45000,
   // Une facture passe par la compression, l extraction du texte d un PDF (ou le
   // rendu de ses pages), le service d IA et le taux de change : c est la plus
   // longue chaine du module.
@@ -5284,7 +5298,11 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
    verifie ce nom contre une LISTE BLANCHE avant de le passer a actionApp.
    Sans ce filtre, n importe quel nom traverserait le pont vers la commande
    d ouverture d ecran. */
-const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents'];
+// ⚠ 'config-logotheque' EST DANS CETTE LISTE DEPUIS QUE L EDITEUR VISUEL EST
+// NATIF : c est la SEULE porte d import d une image, et l editeur doit pouvoir
+// l ouvrir. Sans elle, son bouton << Importer >> serait muet — et un bouton
+// muet se lit comme une fonction cassee, pas comme une fonction absente.
+const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents', 'config-logotheque'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;
