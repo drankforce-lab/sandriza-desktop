@@ -564,6 +564,11 @@ module.exports = {
   'commande.js': [
     {
       nom: 'à préparer',
+      /* ⚠ ON EXIGE LA NOTE DE POIDS : c’est elle qui prouve que le panneau
+         d’expédition s’est vraiment rempli. Sans ça, `expedition:lire` pourrait
+         redevenir muet et le cas resterait vert — la fenêtre dessine de toute
+         façon le reste de la commande. */
+      exige: ['estimation à 300 g par article'],
       id: 'ord_0001',
       reponses: {
         'commande:contexte': {
@@ -595,6 +600,43 @@ module.exports = {
           ],
           nbColis: 3,
         },
+        /* ⚠⚠ SANS CES DEUX-CI, TOUT LE PANNEAU D’EXPÉDITION SE DESSINAIT VIDE.
+           `chargerExpedition()` part AU CHARGEMENT (après le verrou) ; sans
+           réponse prévue le faux pont rend `{ ok:true }`, donc `EXP` restait nul,
+           la liste des services vide, le champ de poids vide — et surtout LES
+           DEUX NOTES DE POIDS n’étaient jamais écrites. L’une d’elles pose sa
+           couleur EN DUR (#f0c987 sur l’estimation, #86e5a8 sur le calcul) : deux
+           couleurs qu’aucun relevé de contraste n’avait pu voir.
+           ⚠ Forme relevée dans `Admin.CARRIERS_PONT()` (admin.js) et
+           `expeditionLire` (pont.js) — pas inventée ici. */
+        'expedition:contexte': {
+          ok: true, peutExpedier: true, dernier: 'postes-canada',
+          transporteurs: [
+            { cle: 'postes-canada', nom: 'Postes Canada', pret: true, services: [
+              { cle: 'DOM.EP', libelle: '⚡ Colis accéléré (DOM.EP)' },
+              { cle: 'DOM.RP', libelle: '📦 Colis régulier (DOM.RP)' },
+              { cle: 'DOM.XP', libelle: '🚀 Xpresspost (DOM.XP)' },
+            ] },
+            /* ⚠ UN TRANSPORTEUR QUI A DES SERVICES MAIS N’EST PAS PRÊT : c’est la
+               distinction que la fenêtre fait elle-même (« avoir des services
+               n’est pas être prêt »), et sans ce cas elle n’est jamais jouée. */
+            { cle: 'fedex', nom: 'FedEx', pret: false, services: [
+              { cle: 'FEDEX_GROUND', libelle: '📦 FedEx Ground' },
+            ] },
+            { cle: 'purolator', nom: 'Purolator', pret: false, services: [] },
+          ],
+        },
+        'expedition:lire': {
+          ok: true,
+          commande: { id: 'ord_1042', numero: '1042', statut: 'paid',
+            transporteur: '', suivi: '',
+            etiquetteLe: '',
+            aUneEtiquette: false, articles: 3 },
+          destinataire: { nom: 'Marie Tremblay', rue: '88 avenue Cartier',
+            ville: 'Québec', province: 'QC', codePostal: 'G1R 2R7', pays: 'CA',
+            tel: '418 555-0110' },
+          poids: { calcule: 0.9, estime: true, remboursements: 0 },
+        },
         'commande:bon': { ok: true },
         'commande:etiquette': { ok: true, suivi: '1Z999AA10123456784', transporteur: 'postes-canada' },
         'commande:prete': { ok: true },
@@ -605,6 +647,11 @@ module.exports = {
     },
     {
       nom: 'déjà prête, avec suivi',
+      /* ⚠ ON EXIGE LA NOTE DE POIDS : c’est elle qui prouve que le panneau
+         d’expédition s’est vraiment rempli. Sans ça, `expedition:lire` pourrait
+         redevenir muet et le cas resterait vert — la fenêtre dessine de toute
+         façon le reste de la commande. */
+      exige: ['Poids calculé depuis les articles'],
       id: 'ord_0002',
       reponses: {
         'commande:contexte': {
@@ -634,6 +681,43 @@ module.exports = {
             { rang: 0, cle: 'p_0003||', nom: 'Foulard de laine', sku: 'ACC-0012', taille: '', couleur: '', quantite: 1 },
           ],
           nbColis: 1,
+        },
+        /* ⚠⚠ SANS CES DEUX-CI, TOUT LE PANNEAU D’EXPÉDITION SE DESSINAIT VIDE.
+           `chargerExpedition()` part AU CHARGEMENT (après le verrou) ; sans
+           réponse prévue le faux pont rend `{ ok:true }`, donc `EXP` restait nul,
+           la liste des services vide, le champ de poids vide — et surtout LES
+           DEUX NOTES DE POIDS n’étaient jamais écrites. L’une d’elles pose sa
+           couleur EN DUR (#f0c987 sur l’estimation, #86e5a8 sur le calcul) : deux
+           couleurs qu’aucun relevé de contraste n’avait pu voir.
+           ⚠ Forme relevée dans `Admin.CARRIERS_PONT()` (admin.js) et
+           `expeditionLire` (pont.js) — pas inventée ici. */
+        'expedition:contexte': {
+          ok: true, peutExpedier: true, dernier: 'postes-canada',
+          transporteurs: [
+            { cle: 'postes-canada', nom: 'Postes Canada', pret: true, services: [
+              { cle: 'DOM.EP', libelle: '⚡ Colis accéléré (DOM.EP)' },
+              { cle: 'DOM.RP', libelle: '📦 Colis régulier (DOM.RP)' },
+              { cle: 'DOM.XP', libelle: '🚀 Xpresspost (DOM.XP)' },
+            ] },
+            /* ⚠ UN TRANSPORTEUR QUI A DES SERVICES MAIS N’EST PAS PRÊT : c’est la
+               distinction que la fenêtre fait elle-même (« avoir des services
+               n’est pas être prêt »), et sans ce cas elle n’est jamais jouée. */
+            { cle: 'fedex', nom: 'FedEx', pret: false, services: [
+              { cle: 'FEDEX_GROUND', libelle: '📦 FedEx Ground' },
+            ] },
+            { cle: 'purolator', nom: 'Purolator', pret: false, services: [] },
+          ],
+        },
+        'expedition:lire': {
+          ok: true,
+          commande: { id: 'ord_1042', numero: '1042', statut: 'shipped',
+            transporteur: 'postes-canada', suivi: '1234567890123456',
+            etiquetteLe: '2026-09-11T14:22:00.000Z',
+            aUneEtiquette: true, articles: 3 },
+          destinataire: { nom: 'Marie Tremblay', rue: '88 avenue Cartier',
+            ville: 'Québec', province: 'QC', codePostal: 'G1R 2R7', pays: 'CA',
+            tel: '418 555-0110' },
+          poids: { calcule: 1.24, estime: false, remboursements: 1 },
         },
         'commande:bon': { ok: true },
         'commande:etiquette': { ok: true, suivi: '1Z999AA10123456784', transporteur: 'postes-canada' },
@@ -1889,11 +1973,21 @@ module.exports = {
       // cas, l'éditeur des pages perso ne serait jamais dessiné, donc jamais
       // éprouvé — exactement l'angle mort que ce banc existe pour éviter.
       { nom: 'page perso — nouvelle', id: 'custom-nouvelle',
+        /* ⚠ CE SCÉNARIO OUVRE UNE SURCOUCHE, DONC TOUT LE FOND EST ESTOMPÉ ET
+           EXEMPTÉ : le relevé de contraste n’y juge qu’une poignée de textes. Si la
+           surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
+           exactement « un écran non regardé qui se lit comme un écran propre ». */
+        exige: ['Nouvelle page'],
         reponses: { identite: IDENTITE, 'pages:donnees': donnees,
           'pages:custom:ecrire': { ok: true, id: 'cp_new', content: '<p>Bonjour</p>',
             page: { id: 'cp_new', slug: 'ma-page', title: 'Ma page', subtitle: '', footerLabel: 'Ma page', footerVisible: false, content: '<p>Bonjour</p>', protege: false },
             customPages: donnees.customPages.concat([{ id: 'cp_new', slug: 'ma-page', title: 'Ma page', footerVisible: false, protege: false }]) } } },
       { nom: 'page perso — modifier', id: 'custom-c1',
+        /* ⚠ CE SCÉNARIO OUVRE UNE SURCOUCHE, DONC TOUT LE FOND EST ESTOMPÉ ET
+           EXEMPTÉ : le relevé de contraste n’y juge qu’une poignée de textes. Si la
+           surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
+           exactement « un écran non regardé qui se lit comme un écran propre ». */
+        exige: ['Modifier — À propos'],
         reponses: { identite: IDENTITE, 'pages:donnees': donnees,
           'pages:custom:donnees': { ok: true, page: { id: 'c1', slug: 'a-propos', title: 'À propos', subtitle: 'Notre histoire', footerLabel: 'À propos', footerVisible: true,
             content: '<h3>Titre</h3><p>Un mot chez <span class="re-var-token" contenteditable="false" data-var="{{MARQUE}}">{{MARQUE}}</span>.</p><ul><li>Un</li><li>Deux</li></ul>', protege: false } },
@@ -1901,6 +1995,11 @@ module.exports = {
             page: { id: 'c1', slug: 'a-propos', title: 'À propos', subtitle: 'Notre histoire', footerLabel: 'À propos', footerVisible: true, content: '<h3>Titre</h3><p>Enregistré.</p>', protege: false },
             customPages: donnees.customPages } } },
       { nom: 'page perso — lecture seule', id: 'custom-c1',
+        /* ⚠ CE SCÉNARIO OUVRE UNE SURCOUCHE, DONC TOUT LE FOND EST ESTOMPÉ ET
+           EXEMPTÉ : le relevé de contraste n’y juge qu’une poignée de textes. Si la
+           surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
+           exactement « un écran non regardé qui se lit comme un écran propre ». */
+        exige: ['Modifier — À propos'],
         reponses: { identite: IDENTITE, 'pages:donnees': Object.assign({}, donnees, ro),
           'pages:custom:donnees': { ok: true, page: { id: 'c1', slug: 'a-propos', title: 'À propos', subtitle: '', footerLabel: 'À propos', footerVisible: true, content: '<p>Texte.</p>', protege: false } } } }
     ];
@@ -3202,6 +3301,12 @@ module.exports = {
       // etiquette deja collee. La fenetre doit le DIRE — dans la liste ET dans
       // l inspecteur — et c est ce que ce cas eprouve.
       nom: 'code-barres qui ne se lira pas au lecteur',
+      /* ⚠ CE SCÉNARIO OUVRE UNE SURCOUCHE, DONC TOUT LE FOND EST ESTOMPÉ ET
+         EXEMPTÉ : le relevé de contraste n’y juge qu’une poignée de textes. Si la
+         surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
+         exactement « un écran non regardé qui se lit comme un écran propre ».
+         L’exigence ci-dessous est ce qui l’empêche. */
+      exige: ['Code du produit'],
       id: 'pp7',
       reponses: {
         'promo:modeleLire': {
@@ -3928,6 +4033,11 @@ module.exports = {
       { nom: 'apercu d un import catalogue', id: 'apercu',
         reponses: { identite: IDENTITE, 'catalogio:etat': etat({ imp: IMP }), 'catalogio:lignes': LIGNES } },
       { nom: 'resume avant d appliquer', id: 'confirmer',
+        /* ⚠ CE SCÉNARIO OUVRE UNE SURCOUCHE, DONC TOUT LE FOND EST ESTOMPÉ ET
+           EXEMPTÉ : le relevé de contraste n’y juge qu’une poignée de textes. Si la
+           surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
+           exactement « un écran non regardé qui se lit comme un écran propre ». */
+        exige: ['Appliquer l’import'],
         reponses: { identite: IDENTITE, 'catalogio:etat': etat({ imp: IMP }), 'catalogio:lignes': LIGNES } },
       { nom: 'rapport d un import termine', id: 'rapport',
         reponses: { identite: IDENTITE, 'catalogio:etat': etat({ rapport: RAP }),
@@ -4990,6 +5100,12 @@ module.exports = {
     },
     {
       nom: 'voile du retour en arriere',
+      /* ⚠ CE SCÉNARIO OUVRE UNE SURCOUCHE, DONC TOUT LE FOND EST ESTOMPÉ ET
+         EXEMPTÉ : le relevé de contraste n’y juge qu’une poignée de textes. Si la
+         surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
+         exactement « un écran non regardé qui se lit comme un écran propre ».
+         L’exigence ci-dessous est ce qui l’empêche. */
+      exige: ['↩ Revenir à l’état précédent'],
       id: 'annuler',
       reponses: {
         'studio:explorer': {
@@ -5045,6 +5161,12 @@ module.exports = {
     },
     {
       nom: 'voile de mise a jour de la vitrine',
+      /* ⚠ CE SCÉNARIO OUVRE UNE SURCOUCHE, DONC TOUT LE FOND EST ESTOMPÉ ET
+         EXEMPTÉ : le relevé de contraste n’y juge qu’une poignée de textes. Si la
+         surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
+         exactement « un écran non regardé qui se lit comme un écran propre ».
+         L’exigence ci-dessous est ce qui l’empêche. */
+      exige: ['C’est ce que la boutique affichera'],
       id: 'appliquer',
       reponses: {
         'studio:explorer': {

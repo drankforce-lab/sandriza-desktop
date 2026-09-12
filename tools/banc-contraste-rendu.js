@@ -734,22 +734,49 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
      jugés a beau montrer un chiffre honnête, il a surtout mesuré le voile.
       en est là : 8 textes jugés, 98 derrière sa modale. Un seuil fixe
      ne l aurait pas vu — 8 n a rien d alarmant dans l absolu. */
-  const maigres = parRendu.filter((r) => r.vus < 10 || r.voile > r.vus)
-    .sort((a2, b2) => a2.vus - b2.vus);
-  if (maigres.length) {
-    console.log(`   ⚠ ${maigres.length} rendu(s) où presque rien n a été jugé — ` +
-                `couverture proche de zéro, pas un écran propre :`);
-    /* ⚠⚠ ON LES NOMME TOUS, AVEC LEURS TROIS NOMBRES. La version d’avant en
-       montrait DOUZE et finissait par « … et 190 autre(s) » : impossible de
-       savoir lesquels, donc impossible d’agir, donc on n’agissait pas. Un banc
-       qui dit « il en reste 190 » sans dire lesquels oblige à refaire sa
-       recherche à la main — et personne ne la refait.
-       ⚠ `jugés / cachés / voile` : c’est le rapport entre les deux premiers qui
-       sépare « maigre parce que vide » de « maigre parce qu’il manque l’écran ». */
-    for (const r of maigres) {
-      console.log(`        ${r.ctx} : ${r.vus} jugé(s) · ${r.invisibles} non affiché(s)`
-        + (r.voile ? ` · ${r.voile} derrière une modale` : ''));
+  /* ⚠⚠ DEUX FAÇONS D’ÊTRE MAIGRE, ET UNE SEULE DEMANDE QUELQUE CHOSE — mesuré
+     le 2026-09-12 sur les 202 rendus que ce rapport annonçait en bloc :
+       · 62 scénarios étaient maigres parce que L’ÉCRAN EST PAUVRE : refus de
+         droit, fiche introuvable, module absent, compte à rebours, liste vide.
+         Zéro caché, zéro voile — la page a été mesurée EN ENTIER. Les accuser,
+         c’est accuser l’écran d’exister.
+       · 39 étaient maigres parce qu’UNE SURCOUCHE EST OUVERTE : le fond est
+         estompé, donc exempté par la norme, et ce qui est jugé EST la surcouche.
+     ⚠ L’ancien message disait « couverture proche de zéro, pas un écran propre »
+     sur les deux à la fois. Un avertissement qui a raison une fois sur trois
+     n’est pas lu : c’est la même famille que le banc qui crie au loup.
+
+     ⚠⚠ ET LE VRAI RISQUE EST DANS LA SECONDE FAMILLE, PAS DANS LA PREMIÈRE. Si
+     la surcouche cessait un jour de s’ouvrir, le rendu resterait maigre — et
+     VERT. C’est « un écran non regardé qui se lit comme un écran propre », et
+     rien ici ne peut le voir : c’est `exige` (dans le jeu de réponses, appliqué
+     par verifier-fenetres) qui le tient. On NOMME donc ceux qui n’en ont pas. */
+  const casDe = (ctx) => {
+    const base = String(ctx).split('/')[0];
+    const m = /^(.*?)(?:_c(\d+))?$/.exec(base);
+    const t = REPONSES[m[1] + '.js'];
+    return Array.isArray(t) ? (t[m[2] ? parseInt(m[2], 10) : 0] || {}) : {};
+  };
+  const pauvres = parRendu.filter((r) => r.vus < 10 && r.voile <= r.vus);
+  const souscouche = parRendu.filter((r) => r.voile > r.vus);
+  if (pauvres.length) {
+    console.log(`   · ${pauvres.length} rendu(s) avec PEU DE TEXTE À L’ÉCRAN (refus, introuvable,`
+      + ` module absent, liste vide) — la page a été mesurée en entier.`);
+  }
+  if (souscouche.length) {
+    const nus = souscouche.filter((r) => {
+      const c = casDe(r.ctx);
+      return !(Array.isArray(c.exige) && c.exige.length);
+    });
+    console.log(`   · ${souscouche.length} rendu(s) où UNE SURCOUCHE EST OUVERTE : le fond est estompé`
+      + ` (exempté par la norme), seule la surcouche est jugée.`);
+    console.log(`     ⚠ dont ${nus.length} dont le scénario NE DÉCLARE PAS ce que la surcouche doit`
+      + ` montrer (\`exige\`) : si elle cessait de s’ouvrir, le rendu resterait maigre ET VERT.`);
+    for (const r of nus.slice(0, 20)) {
+      console.log(`        ${r.ctx} : ${r.vus} jugé(s) · ${r.voile} derrière la surcouche`
+        + `   « ${casDe(r.ctx).nom || '?'} »`);
     }
+    if (nus.length > 20) console.log(`        … et ${nus.length - 20} autre(s).`);
   }
   console.log(`   ${paires.size} couples DISTINCTS de couleurs`);
   if (sansJeu.length) console.log(`   ⚠ ${sansJeu.length} fenêtre(s) SANS jeu de réponses, donc NON éprouvées : ${sansJeu.join(', ')}`);
