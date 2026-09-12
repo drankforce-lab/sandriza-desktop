@@ -669,7 +669,13 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
          aussi une couverture proche de zéro qui, noyée dans un total, se lirait
          comme un écran propre. Le nom du rendu est donc gardé avec son compte. */
       const ctx = l.split('|').slice(10).join('|');
-      if (ctx) parRendu.push({ ctx, vus: p[0] || 0, voile: p[6] || 0 });
+      /* ⚠ ON GARDE AUSSI `invisibles` : c’est lui qui distingue les deux façons
+         d’être maigre. Un écran de REFUS DE DROIT est maigre parce qu’il n’a rien
+         à dire — peu jugé, peu caché. Un écran qui n’a pas fini de se dessiner est
+         maigre alors que la page PORTAIT du texte — peu jugé, BEAUCOUP caché.
+         Sans ce nombre, les deux se ressemblent, et le second se lit comme le
+         premier. */
+      if (ctx) parRendu.push({ ctx, vus: p[0] || 0, invisibles: p[1] || 0, voile: p[6] || 0 });
     } else if (l.startsWith('MUETTE ')) {
       muettes.push(l.slice(7));
     } else if (l.startsWith('MANQUE|')) {
@@ -733,10 +739,17 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
   if (maigres.length) {
     console.log(`   ⚠ ${maigres.length} rendu(s) où presque rien n a été jugé — ` +
                 `couverture proche de zéro, pas un écran propre :`);
-    for (const r of maigres.slice(0, 12)) {
-      console.log(`        ${r.ctx} : ${r.vus} jugé(s)` + (r.voile ? `, ${r.voile} derrière une modale` : ''));
+    /* ⚠⚠ ON LES NOMME TOUS, AVEC LEURS TROIS NOMBRES. La version d’avant en
+       montrait DOUZE et finissait par « … et 190 autre(s) » : impossible de
+       savoir lesquels, donc impossible d’agir, donc on n’agissait pas. Un banc
+       qui dit « il en reste 190 » sans dire lesquels oblige à refaire sa
+       recherche à la main — et personne ne la refait.
+       ⚠ `jugés / cachés / voile` : c’est le rapport entre les deux premiers qui
+       sépare « maigre parce que vide » de « maigre parce qu’il manque l’écran ». */
+    for (const r of maigres) {
+      console.log(`        ${r.ctx} : ${r.vus} jugé(s) · ${r.invisibles} non affiché(s)`
+        + (r.voile ? ` · ${r.voile} derrière une modale` : ''));
     }
-    if (maigres.length > 12) console.log(`        … et ${maigres.length - 12} autre(s).`);
   }
   console.log(`   ${paires.size} couples DISTINCTS de couleurs`);
   if (sansJeu.length) console.log(`   ⚠ ${sansJeu.length} fenêtre(s) SANS jeu de réponses, donc NON éprouvées : ${sansJeu.join(', ')}`);
