@@ -27,6 +27,10 @@
  */
 
 const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO } = require('./socle');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('commande');
 
 const CSS_PROPRE = `
 .entete{display:flex;gap:1.1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.55rem}
@@ -59,36 +63,36 @@ const CSS_PROPRE = `
 function pageCommande(id) {
   const ident = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Préparation — Administration Sandriza</title>
+<title>${T("Préparation — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.orders}</span><h1 id="titre">Préparation</h1>
+<div class="tete"><span class="ico">${ICO.orders}</span><h1 id="titre">${T("Préparation")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions">
-    <button id="btn-prec">Précédent</button>
-    <button id="btn-suiv">Suivant</button>
-    <button id="btn-enr" class="prim" disabled>Expédier</button>
+    <button id="btn-prec">${T("Précédent")}</button>
+    <button id="btn-suiv">${T("Suivant")}</button>
+    <button id="btn-enr" class="prim" disabled>${T("Expédier")}</button>
   </span></div>
 <script>
 (function(){
   'use strict';
   ${JS_SOCLE()}
-  MOTIFS.suivi_requis = 'Entrez un numéro de suivi, ou cochez « expédier sans numéro ».';
+  MOTIFS.suivi_requis = '${T("Entrez un numéro de suivi, ou cochez « expédier sans numéro ».")}';
   // Les motifs de l etiquette et de l impression — le dictionnaire de la
   // fenetre Expedition, repris : les codes AA de Postes Canada et les motifs
   // du transporteur n arrivaient jamais jusqu ici (releve du 2026-08-08).
-  MOTIFS.poids_invalide = 'Le poids du colis doit être supérieur à zéro.';
-  MOTIFS.deja_etiquetee = 'Une étiquette existe déjà pour cette commande — rien n’a été commandé.';
-  MOTIFS.secrets = 'Identifiants du transporteur indisponibles. Reconnectez-vous, puis réessayez.';
-  MOTIFS.config = 'Configuration du transporteur incomplète.';
-  MOTIFS.origine = 'Adresse d’expédition incomplète — Configuration puis Transporteurs.';
-  MOTIFS.destination = 'Adresse du destinataire incomplète dans la commande.';
-  MOTIFS.refus_transporteur = 'Le transporteur a refusé la demande.';
-  MOTIFS.etiquette_absente = 'Aucune étiquette enregistrée pour cette commande.';
-  MOTIFS.impression = 'L’impression a échoué.';
-  MOTIFS.reseau = 'Le réseau a échoué — rien n’a été commandé.';
+  MOTIFS.poids_invalide = '${T("Le poids du colis doit être supérieur à zéro.")}';
+  MOTIFS.deja_etiquetee = '${T("Une étiquette existe déjà pour cette commande — rien n’a été commandé.")}';
+  MOTIFS.secrets = '${T("Identifiants du transporteur indisponibles. Reconnectez-vous, puis réessayez.")}';
+  MOTIFS.config = '${T("Configuration du transporteur incomplète.")}';
+  MOTIFS.origine = '${T("Adresse d’expédition incomplète — Configuration puis Transporteurs.")}';
+  MOTIFS.destination = '${T("Adresse du destinataire incomplète dans la commande.")}';
+  MOTIFS.refus_transporteur = '${T("Le transporteur a refusé la demande.")}';
+  MOTIFS.etiquette_absente = '${T("Aucune étiquette enregistrée pour cette commande.")}';
+  MOTIFS.impression = '${T("L’impression a échoué.")}';
+  MOTIFS.reseau = '${T("Le réseau a échoué — rien n’a été commandé.")}';
   // Le DETAIL du transporteur est conserve tel quel (les codes AA de Postes
   // Canada designent toujours les identifiants) — l expliquer du socle le
   // jetait, et l on cherchait la panne du mauvais cote.
@@ -141,9 +145,9 @@ function pageCommande(id) {
        boutons d impression (Bon de commande, Bordereau) ont migre dans cette
        etape — ils n ont pas disparu avec elle. */
     h.push('<div class="etape"><div class="carte plein" id="c-zone2">' + enTete
-      + '<h2>Vérification du colis</h2>'
+      + '<h2>${T("Vérification du colis")}</h2>'
       + '<div class="etat"><span class="gros" id="c-prog">0</span>'
-      + '<span style="color:var(--tx2)">sur ' + attendus() + ' unités confirmées</span></div>'
+      + '<span style="color:var(--tx2)">sur ' + attendus() + ' ${T("unités confirmées")}</span></div>'
       + '<div class="barre"><span id="c-barre"></span></div>'
       /* ⚠ LE CHAMP DE SCAN, ET IL EST EN PREMIER. On verifie un colis un lecteur
          a la main, sans regarder l ecran : le champ doit avoir le focus, avaler
@@ -169,7 +173,7 @@ function pageCommande(id) {
        On garde donc l etiquette ICI, et l on y ajoute ce qui manquait — le
        SERVICE et le POIDS, qui fixent le prix — en passant par expedition:etiquette,
        la seule operation qui les recoit explicitement. */
-    h.push('<div class="etape"><div class="carte"><h2>Étiquette d’expédition</h2><div class="duo">'
+    h.push('<div class="etape"><div class="carte"><h2>${T("Étiquette d’expédition")}</h2><div class="duo">'
       /* ⚠ UN TRANSPORTEUR NON CONFIGURE SE DIT ICI, PAS AU MOMENT DE PAYER.
          Le contexte rend maintenant « pret » (une seule source, la meme que les
          services) : on le marque dans la liste. Avant, un transporteur sans
@@ -178,31 +182,31 @@ function pageCommande(id) {
       + '<div class="ch"><label for="c-transp">Transporteur</label><select id="c-transp">'
       + CTX.transporteurs.map(function(t){
           return '<option value="' + esc(t.cle) + '">' + esc(t.nom)
-            + (t.pret === false ? ' — non configuré' : '') + '</option>'; }).join('')
+            + (t.pret === false ? ' ${T("— non configuré")}' : '') + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="ch"><label for="c-service">Service</label><select id="c-service"></select></div>'
       + '</div><div class="duo" style="margin-top:.5rem">'
-      + '<div class="ch"><label for="c-poids">Poids du colis (kg)</label>'
+      + '<div class="ch"><label for="c-poids">${T("Poids du colis (kg)")}</label>'
       + '<input id="c-poids" type="number" min="0.001" step="0.001" value="0.5"></div>'
-      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq">Générer l’étiquette</button></div>'
-      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq-imp" style="display:none"><span class="ic">🖨</span> Imprimer l’étiquette</button></div>'
+      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq">${T("Générer l’étiquette")}</button></div>'
+      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq-imp" style="display:none"><span class="ic">🖨</span> ${T("Imprimer l’étiquette")}</button></div>'
       + '</div>'
       + '<div class="aide" id="c-poids-note" style="margin-top:.4rem"></div>'
       + '</div>'
-      + '<div class="carte plein"><h2>Numéro de suivi</h2><div class="duo">'
+      + '<div class="carte plein"><h2>${T("Numéro de suivi")}</h2><div class="duo">'
       + '<div class="ch"><label for="c-suivi">Numéro</label><input id="c-suivi" placeholder="rempli par l’étiquette"></div>'
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.85rem;margin-top:.7rem;cursor:pointer">'
-      + '<input type="checkbox" id="c-sans"> Expédier sans numéro de suivi</label>'
+      + '<input type="checkbox" id="c-sans"> ${T("Expédier sans numéro de suivi")}</label>'
       + '</div></div>');
 
     // 3 — Expédition
     h.push('<div class="etape"><div class="carte plein"><h2>Récapitulatif</h2>'
       + '<div id="c-recap"></div>'
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.86rem;margin-top:.8rem;cursor:pointer">'
-      + '<input type="checkbox" id="c-pret"> Marquer « prête à l’expédition »</label>'
-      + '<div class="aide" style="margin-top:.5rem">« Expédier » écrit le statut, envoie le courriel de suivi '
-      + 'au client et referme cette fenêtre.</div></div></div>');
+      + '<input type="checkbox" id="c-pret"> ${T("Marquer « prête à l’expédition »")}</label>'
+      + '<div class="aide" style="margin-top:.5rem">${T("« Expédier » écrit le statut, envoie le courriel de suivi")} '
+      + '${T("au client et referme cette fenêtre.")}</div></div></div>');
 
     document.getElementById('corps').innerHTML = h.join('');
     document.getElementById('c-pret').checked = !!CMD.dejaPret;
@@ -212,10 +216,10 @@ function pageCommande(id) {
        dossier et y revenir plus tard. L ecran du site l enregistre au clic
        (toggleReadyToShip), on fait pareil. */
     document.getElementById('c-pret').onchange = function(){
-      if (LECTURE) { this.checked = !this.checked; dire('Commande en traitement ailleurs — lecture seule.', 'err'); return; }
+      if (LECTURE) { this.checked = !this.checked; dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
       var v = this.checked;
       P.appeler('commande:prete', ID, v).then(function(r){
-        if (r && r.ok) { CMD.dejaPret = v; dire(v ? 'Marquée prête à l’expédition.' : 'Marque « prête » retirée.', 'bon'); }
+        if (r && r.ok) { CMD.dejaPret = v; dire(v ? '${T("Marquée prête à l’expédition.")}' : '${T("Marque « prête » retirée.")}', 'bon'); }
         else dire(expliquer(r), 'err');
       });
     };
@@ -232,7 +236,7 @@ function pageCommande(id) {
          pas etre disponible tant que la verification n est pas complete >>. */
       { t: 'Vérification', obl: [],
         fait: toutVerifie,
-        refus: function(){ return 'Vérifiez le colis d’abord — ' + comptes() + ' sur ' + attendus() + ' unités confirmées.'; } },
+        refus: function(){ return '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' sur ' + attendus() + ' ${T("unités confirmées.")}'; } },
       /* ⚠ << suivi rempli OU envoi sans numero assume >>. L ancienne forme
          (obl: c-suivi) rendait l etape Expedition INATTEIGNABLE pour une remise
          en main propre : la case cochee ne remplit aucun champ, et le fil comme
@@ -240,7 +244,7 @@ function pageCommande(id) {
          regles pour le meme etat finissent toujours par se contredire. */
       { t: 'Étiquette',    obl: [],
         fait: function(){ return !!String(val('c-suivi') || '').trim() || coché('c-sans'); },
-        refus: 'Générez l’étiquette, ou cochez « Expédier sans numéro de suivi ».' },
+        refus: '${T("Générez l’étiquette, ou cochez « Expédier sans numéro de suivi ».")}' },
       { t: 'Expédition',   obl: [] }
     ], function(i){
       if (i === 0 && PAGI2) { PAGI2.dessiner(); majProgres(); }
@@ -248,7 +252,7 @@ function pageCommande(id) {
     });
 
     majExpedier();
-    if (!CTX.peutExpedier) dire('Votre rôle ne permet pas d’expédier.', 'att');
+    if (!CTX.peutExpedier) dire('${T("Votre rôle ne permet pas d’expédier.")}', 'att');
   }
 
   /* ⚠ LE STATUT SUIT LES GESTES, PLUS LES INDEX D ETAPES (revu au retrait de
@@ -290,7 +294,7 @@ function pageCommande(id) {
               .filter(Boolean).join(' · ')) + '</div></div>'
           + '<span class="cpt">' + v + '/' + a.quantite + '</span>'
           + '<input class="q" type="number" min="0" step="1" data-cle="' + esc(a.cle) + '" value="' + v + '"'
-      +   ' aria-label="' + esc('Quantité préparée — ' + (a.nom || a.cle)) + '">'
+      +   ' aria-label="' + esc('${T("Quantité préparée —")} ' + (a.nom || a.cle)) + '">'
           + '</div>';
       },
       surMaj: function(){
@@ -328,8 +332,8 @@ function pageCommande(id) {
       + lg('Client', esc(CMD.client))
       + lg('Vérification', complet ? 'colis complet' : (comptes() + ' sur ' + attendus() + ' — INCOMPLET'), !complet)
       + lg('Transporteur', esc(t))
-      + lg('Numéro de suivi', val('c-suivi') ? esc(val('c-suivi'))
-            : (coché('c-sans') ? 'aucun — assumé' : 'aucun'), !val('c-suivi') && !coché('c-sans'));
+      + lg('${T("Numéro de suivi")}', val('c-suivi') ? esc(val('c-suivi'))
+            : (coché('c-sans') ? '${T("aucun — assumé")}' : 'aucun'), !val('c-suivi') && !coché('c-sans'));
   }
 
   function brancher(){
@@ -383,16 +387,16 @@ function pageCommande(id) {
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
     v.innerHTML = '<div style="background:var(--f-carte);border:1px solid var(--v12);'
       + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%">'
-      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif"><span class="ic">🚀</span> Préparation de la commande '
+      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif"><span class="ic">🚀</span> ${T("Préparation")} de la commande '
       + esc(CMD.numero) + '</h3>'
       + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
-          ? 'Cette commande est déjà en préparation.'
-          : 'Vous vous apprêtez à commencer la préparation de cette commande.') + '</p>'
+          ? '${T("Cette commande est déjà en préparation.")}'
+          : '${T("Vous vous apprêtez à commencer la préparation de cette commande.")}') + '</p>'
       + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
-          ? 'Désirez-vous (ré)imprimer un <strong>bon de commande</strong> avant de poursuivre ?'
-          : 'Pour débuter, désirez-vous imprimer un <strong>bon de commande</strong> ?') + '</p>'
+          ? '${T("Désirez-vous (ré)imprimer un ")}<strong>${T("bon de commande")}</strong>${T(" avant de poursuivre ?")}'
+          : '${T("Pour débuter, désirez-vous imprimer un ")}<strong>${T("bon de commande")}</strong> ?') + '</p>'
       + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
-      + '<button type="button" id="bc-non">Non, continuer sans imprimer</button>'
+      + '<button type="button" id="bc-non">${T("Non, continuer sans imprimer")}</button>'
       + '<button type="button" class="prim" id="bc-oui"><span class="ic">🖨</span> Oui, imprimer le bon</button>'
       + '</div></div>';
     document.body.appendChild(v);
@@ -435,12 +439,12 @@ function pageCommande(id) {
   }
   function scanner(code){
     if (!String(code || '').trim()) return;
-    if (LECTURE) { bip(false); scanMsg('Commande en traitement ailleurs — lecture seule.', 'var(--tx-err)'); return; }
+    if (LECTURE) { bip(false); scanMsg('${T("Commande en traitement ailleurs — lecture seule.")}', 'var(--tx-err)'); return; }
     P.appeler('commande:scan', ID, code).then(function(r){
       if (!r || !r.ok) {
         bip(false);
         scanMsg(r && r.motif === 'code_inconnu'
-          ? 'Code inconnu : ' + (r.code || code)
+          ? '${T("Code inconnu :")} ' + (r.code || code)
           : expliquer(r), 'var(--tx-err)');
         return;
       }
@@ -449,14 +453,14 @@ function pageCommande(id) {
       var v = COMPTES[r.cle] || 0;
       if (v >= att) {
         bip(false);
-        scanMsg('Déjà complet : ' + r.sku + ' (' + att + '/' + att + ')', 'var(--tx-att)');
+        scanMsg('${T("Déjà complet :")} ' + r.sku + ' (' + att + '/' + att + ')', 'var(--tx-att)');
         return;
       }
       COMPTES[r.cle] = v + 1;
       statutVerification();
       bip(true);
       scanMsg('✓ ' + r.sku + ' — ' + (v + 1) + '/' + att
-        + ((v + 1) === att ? ' (ligne complète)' : ''), 'var(--tx-ok)');
+        + ((v + 1) === att ? ' ${T("(ligne complète)")}' : ''), 'var(--tx-ok)');
       if (PAGI2) { PAGI2.dessiner(); }
       majProgres();
       majExpedier();
@@ -468,14 +472,14 @@ function pageCommande(id) {
   }
 
   function imprimer(genre, b){
-    if (LECTURE) { dire('Commande en traitement ailleurs — lecture seule.', 'err'); return; }
-    b.disabled = true; dire('Envoi à l’impression…');
+    if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
+    b.disabled = true; dire('${T("Envoi à l’impression…")}');
     P.appeler('commande:bon', ID, genre).then(function(r){
       b.disabled = false;
       // ⚠ Le pont rend maintenant un VERDICT (releve du 2026-08-08) : avant,
       // << Envoye a l impression >> s affichait meme quand rien ne sortait.
       if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
-      dire('Envoyé à l’impression.', 'bon');
+      dire('${T("Envoyé à l’impression.")}', 'bon');
     });
   }
 
@@ -495,8 +499,8 @@ function pageCommande(id) {
         var n = document.getElementById('c-poids-note');
         if (n) {
           n.textContent = r.poids.estime
-            ? 'Certains articles n’ont pas de poids configuré — estimation à 300 g par article. Vérifiez : le poids fixe le prix.'
-            : 'Poids calculé depuis les articles de la commande.';
+            ? '${T("Certains articles n’ont pas de poids configuré — estimation à 300 g par article. Vérifiez : le poids fixe le prix.")}'
+            : '${T("Poids calculé depuis les articles de la commande.")}';
           n.style.color = r.poids.estime ? '#f0c987' : '#86e5a8';
         }
       }
@@ -520,17 +524,17 @@ function pageCommande(id) {
     var utilisable = liste.length > 0 && pret;
     sel.innerHTML = liste.length
       ? liste.map(function(x){ return '<option value="' + esc(x.cle) + '">' + esc(x.libelle) + '</option>'; }).join('')
-      : '<option value="">— transporteur non configuré —</option>';
+      : '<option value="">${T("— transporteur non configuré —")}</option>';
     sel.disabled = !utilisable;
     var b = document.getElementById('c-etiq');
     if (b) {
       b.disabled = !utilisable;
       b.title = utilisable ? ''
-        : 'Ce transporteur n’a pas d’identifiants : Configuration → Transporteurs.';
+        : '${T("Ce transporteur n’a pas d’identifiants : Configuration → Transporteurs.")}';
     }
     var n = document.getElementById('c-poids-note');
     if (!pret && n) {
-      n.textContent = 'Ce transporteur n’a pas d’identifiants — aucune étiquette ne peut être achetée. Configuration → Transporteurs.';
+      n.textContent = '${T("Ce transporteur n’a pas d’identifiants — aucune étiquette ne peut être achetée. Configuration → Transporteurs.")}';
       n.style.color = '#f0c987';
     }
   }
@@ -541,34 +545,34 @@ function pageCommande(id) {
      service par defaut et a 0,5 kg. L operation reste en place pour les coquilles
      anterieures, mais cette fenetre ne l emprunte plus. */
   function etiquette(){
-    if (LECTURE) { dire('Commande en traitement ailleurs — lecture seule.', 'err'); return; }
+    if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
     var poids = parseFloat(val('c-poids'));
-    if (!(poids > 0)) { dire('Le poids du colis doit être supérieur à zéro.', 'err'); return; }
+    if (!(poids > 0)) { dire('${T("Le poids du colis doit être supérieur à zéro.")}', 'err'); return; }
     /* ⚠ UNE ETIQUETTE EXISTE DEJA ? La question se pose ICI, dans la fenetre —
        plus dans des modales du site invisibles depuis l entrepot (releve du
        2026-08-08 : double achat possible, modale du site detournee, appel
        natif qui expirait a 60 s). L aveu part au pont (forcer) : sans lui, le
        garde du site refuse. */
     if (CMD.aUneEtiquette || String(val('c-suivi') || '').trim()) {
-      voileEtiq('Une étiquette existe déjà',
-        '<p style="margin:.35rem 0;font-size:.9rem">Une étiquette a déjà été facturée pour cette commande'
+      voileEtiq('${T("Une étiquette existe déjà")}',
+        '<p style="margin:.35rem 0;font-size:.9rem">${T("Une étiquette a déjà été facturée pour cette commande")}'
         + (CMD.suivi ? ' (suivi <strong>' + esc(CMD.suivi) + '</strong>)' : '') + '.</p>'
-        + '<p style="margin:.35rem 0;font-size:.9rem">En commander une seconde sera <strong>facturé une '
-        + 'seconde fois</strong>. Pour réimprimer celle qui existe, « <span class="ic">🖨</span> Imprimer l’étiquette » suffit.</p>',
-        'Commander quand même', function(){ acheterEtiquette(poids, true); });
+        + '<p style="margin:.35rem 0;font-size:.9rem">${T("En commander une seconde sera ")}<strong>${T("facturé une ")}'
+        + '${T("seconde fois")}</strong>${T(". Pour réimprimer celle qui existe, « ")}<span class="ic">🖨</span>${T(" Imprimer l’étiquette » suffit.")}</p>',
+        '${T("Commander quand même")}', function(){ acheterEtiquette(poids, true); });
       return;
     }
     acheterEtiquette(poids, false);
   }
   function acheterEtiquette(poids, forcer){
     var b = document.getElementById('c-etiq');
-    b.disabled = true; dire('Demande au transporteur…', 'att');
+    b.disabled = true; dire('${T("Demande au transporteur…")}', 'att');
     P.appeler('expedition:etiquette', ID, val('c-transp'), val('c-service'), poids, forcer).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
       // ⚠ Pas de numero = pas d etiquette, meme sans exception levee. Annoncer un
       // succes ici ferait expedier une commande sans etiquette.
-      if (!r.suivi) { dire('Aucun numéro reçu : l’étiquette n’a PAS été générée.', 'err'); return; }
+      if (!r.suivi) { dire('${T("Aucun numéro reçu : l’étiquette n’a PAS été générée.")}', 'err'); return; }
       poser('c-suivi', r.suivi);
       /* ⚠ LE PDF EST GARDE ET S IMPRIME — il etait JETE (releve du 2026-08-08) :
          la fenetre achetait l etiquette et ne l imprimait jamais, ni le
@@ -578,11 +582,11 @@ function pageCommande(id) {
       CMD.suivi = r.suivi;
       majExpedier();
       majBoutonImpression();
-      voileEtiq('Étiquette créée',
-        '<p style="margin:.35rem 0;font-size:.9rem">Suivi : <strong>' + esc(r.suivi) + '</strong></p>'
-        + '<p style="margin:.35rem 0;font-size:.9rem">Imprimer l’étiquette et le bordereau maintenant ?</p>',
-        'Imprimer maintenant', imprimerEtiquette);
-    }).catch(function(){ b.disabled = false; dire('L’opération a échoué.', 'err'); });
+      voileEtiq('${T("Étiquette créée")}',
+        '<p style="margin:.35rem 0;font-size:.9rem">${T("Suivi :")} <strong>' + esc(r.suivi) + '</strong></p>'
+        + '<p style="margin:.35rem 0;font-size:.9rem">${T("Imprimer l’étiquette et le bordereau maintenant ?")}</p>',
+        '${T("Imprimer maintenant")}', imprimerEtiquette);
+    }).catch(function(){ b.disabled = false; dire('${T("L’opération a échoué.")}', 'err'); });
   }
   // Un voile a deux boutons, pour la question du rachat et la proposition
   // d impression — meme peau que la question du bon de commande.
@@ -595,7 +599,7 @@ function pageCommande(id) {
       + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif">' + titre + '</h3>'
       + corps
       + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
-      + '<button type="button" id="ve-non">Annuler</button>'
+      + '<button type="button" id="ve-non">${T("Annuler")}</button>'
       + '<button type="button" class="prim" id="ve-oui">' + libelle + '</button></div></div>';
     document.body.appendChild(v);
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
@@ -603,10 +607,10 @@ function pageCommande(id) {
     document.getElementById('ve-oui').onclick = function(){ fermer(); surOui(); };
   }
   function imprimerEtiquette(){
-    if (LECTURE) { dire('Commande en traitement ailleurs — lecture seule.', 'err'); return; }
-    dire('Impression de l’étiquette et du bordereau…');
+    if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
+    dire('${T("Impression de l’étiquette et du bordereau…")}');
     P.appeler('expedition:imprimer', ID, PDF).then(function(r){
-      dire(r && r.ok ? 'Étiquette et bordereau envoyés à l’impression.' : expliquerD(r),
+      dire(r && r.ok ? '${T("Étiquette et bordereau envoyés à l’impression.")}' : expliquerD(r),
         r && r.ok ? 'bon' : 'err');
     });
   }
@@ -626,8 +630,8 @@ function pageCommande(id) {
   function verrou(){
     return P.appeler('verrou:prendre', 'orders', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'en traitement par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
+      sous.textContent = 'en traitement par ' + (v.parQui || '${T("quelqu’un d’autre")}');
       /* ⚠ EN LECTURE POUR DE BON (releve du 2026-08-08) : on ne desarmait que
          le bouton Expedier, que majExpedier REARMAIT au premier input — et le
          scan, le statut, l impression et meme l ACHAT D UNE ETIQUETTE
@@ -635,7 +639,7 @@ function pageCommande(id) {
          etiquettes facturees et deux courriels au client. */
       LECTURE = true;
       bEnr.disabled = true;
-      dire('Cette commande est déjà en traitement ailleurs — lecture seule.', 'err');
+      dire('${T("Cette commande est déjà en traitement ailleurs — lecture seule.")}', 'err');
     });
   }
   function rendreVerrou(){
@@ -688,17 +692,17 @@ function pageCommande(id) {
 
   function charger(){
     P.appeler('commande:contexte').then(function(c){
-      if (!c || !c.ok) { vide('Préparation indisponible', expliquer(c)); return; }
+      if (!c || !c.ok) { vide('${T("Préparation indisponible")}', expliquer(c)); return; }
       CTX = c;
       return P.appeler('commande:lire', ID).then(function(r){
-        if (!r || !r.ok) { vide('Commande indisponible', expliquer(r)); return; }
+        if (!r || !r.ok) { vide('${T("Commande indisponible")}', expliquer(r)); return; }
         CMD = r;
         /* ⚠ Le statut D OUVERTURE est capture ICI : accueillir() passe la
            commande a << preparing >> des l ouverture, et lire CMD.statut apres
            coup aurait fait dire << deja en preparation >> a une commande qu on
            vient tout juste de commencer. */
         var statutOuverture = r.statut;
-        document.getElementById('titre').textContent = 'Préparation — ' + r.numero;
+        document.getElementById('titre').textContent = '${T("Préparation —")} ' + r.numero;
         dessiner();
         return verrou().then(function(){ chargerExpedition(); accueillir(statutOuverture); });
       });
@@ -728,11 +732,11 @@ function pageCommande(id) {
     var pret = !LECTURE && !!(CTX && CTX.peutExpedier) && verifOk && etiqOk;
     bEnr.disabled = !pret;
     var pourquoi = '';
-    if (LECTURE) pourquoi = 'Commande en traitement ailleurs — lecture seule.';
-    else if (!CTX || !CTX.peutExpedier) pourquoi = 'Votre rôle ne permet pas d’expédier.';
-    else if (!verifOk) pourquoi = 'Vérifiez le colis d’abord — ' + comptes() + ' sur ' + attendus() + ' unités confirmées.';
-    else if (!etiqOk) pourquoi = 'Générez l’étiquette (étape 2), ou cochez « Expédier sans numéro de suivi ».';
-    bEnr.title = pourquoi || 'Marquer la commande expédiée et prévenir le client';
+    if (LECTURE) pourquoi = '${T("Commande en traitement ailleurs — lecture seule.")}';
+    else if (!CTX || !CTX.peutExpedier) pourquoi = '${T("Votre rôle ne permet pas d’expédier.")}';
+    else if (!verifOk) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' sur ' + attendus() + ' ${T("unités confirmées.")}';
+    else if (!etiqOk) pourquoi = '${T("Générez l’étiquette (étape 2), ou cochez « Expédier sans numéro de suivi ».")}';
+    bEnr.title = pourquoi || '${T("Marquer la commande expédiée et prévenir le client")}';
     return pourquoi;
   }
 
@@ -749,7 +753,7 @@ function pageCommande(id) {
       return P.appeler('commande:expedier', ID, val('c-transp'), val('c-suivi'), coché('c-sans'));
     }).then(function(r){
       if (!r || !r.ok) { majExpedier(); dire(expliquer(r), "err"); return; }
-      dire(r.sansSuivi ? 'Expédiée sans numéro de suivi.' : 'Expédiée — courriel envoyé.', 'bon');
+      dire(r.sansSuivi ? '${T("Expédiée sans numéro de suivi.")}' : '${T("Expédiée — courriel envoyé.")}', 'bon');
       setTimeout(function(){ P.fermer(); }, 900);
     });
   }
