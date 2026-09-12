@@ -32,6 +32,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('caisse');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -213,27 +217,27 @@ function pageCaisse(mode) {
      appel, aucune vente. La coquille ne l ouvre jamais. */
   const attenteTemoin = String(mode || '') === 'attente';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Vente au comptoir — Administration Sandriza</title>
+<title>${T("Vente au comptoir — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.payments}</span><h1>Vente au comptoir</h1>
+<div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Vente au comptoir")}</h1>
   <button id="btn-afficheur" class="mini" style="margin-left:auto"
-    title="Ouvrir l’écran tourné vers le client, à poser sur un second moniteur"><span class="ic">🖥</span> Affichage client</button>
+    title="${T("Ouvrir l’écran tourné vers le client, à poser sur un second moniteur")}"><span class="ic">🖥</span> ${T("Affichage client")}</button>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps">
   <div class="col">
     <div class="carte">
-      <input aria-label="Scannez le code-barres, ou tapez un nom d’article" id="scan" autocomplete="off" placeholder="Scannez le code-barres, ou tapez un nom d’article…">
+      <input aria-label="${T("Scannez le code-barres, ou tapez un nom d’article")}" id="scan" autocomplete="off" placeholder="${T("Scannez le code-barres, ou tapez un nom d’article…")}">
       <div id="res"></div>
     </div>
     <div class="carte plein">
-      <h2>Articles</h2>
+      <h2>${T("Articles")}</h2>
       <div class="lignes" id="lignes"></div>
     </div>
   </div>
   <div class="col droite">
    <div class="defile">
     <div class="carte">
-      <h2>Client <span class="req">— requis</span><span class="lie" id="lie"></span></h2>
+      <h2>${T("Client")} <span class="req">${T("— requis")}</span><span class="lie" id="lie"></span></h2>
       <!-- ⚠ TROIS CHAMPS EN COLONNE, ET NON SUR UNE LIGNE. Sur une ligne, dans une
            colonne de 380 px, chacun faisait 120 px : un nom complet et une adresse
            de courriel y etaient coupes, donc illisibles — on ne pouvait pas
@@ -241,25 +245,24 @@ function pageCaisse(mode) {
            La zone de droite defile maintenant, la hauteur est donc disponible ;
            la lisibilite d une adresse de courriel, elle, ne se negocie pas. -->
       <div class="champs">
-        <input aria-label="Nom" id="c-nom" autocomplete="off" placeholder="Nom">
-        <input aria-label="Courriel" id="c-mail" autocomplete="off" inputmode="email" placeholder="Courriel">
-        <input aria-label="Téléphone — 000 000-0000" id="c-tel" autocomplete="off" inputmode="tel" placeholder="Téléphone — 000 000-0000">
+        <input aria-label="${T("Nom")}" id="c-nom" autocomplete="off" placeholder="${T("Nom")}">
+        <input aria-label="${T("Courriel")}" id="c-mail" autocomplete="off" inputmode="email" placeholder="${T("Courriel")}">
+        <input aria-label="${T("Téléphone — 000 000-0000")}" id="c-tel" autocomplete="off" inputmode="tel" placeholder="${T("Téléphone — 000 000-0000")}">
       </div>
       <div id="c-res"></div>
       <label class="case"><input type="checkbox" id="c-creer">
-        <span>Ouvrir un compte et lui envoyer le lien pour le finaliser
-        <span class="exp">Courriel requis. Historique et retours pour lui ; aucune
-        inscription à l’infolettre.</span></span></label>
-      <h2 style="margin-top:.75rem">Vente</h2>
+        <span>${T("Ouvrir un compte et lui envoyer le lien pour le finaliser")}
+        <span class="exp">${T("Courriel requis. Historique et retours pour lui ; aucune inscription à l’infolettre.")}</span></span></label>
+      <h2 style="margin-top:.75rem">${T("Vente")}</h2>
       <div class="r3">
-        <select id="v-prov" title="Province — elle détermine les taxes"></select>
-        <input id="v-liv" inputmode="decimal" value="0.00" title="Livraison" placeholder="Livraison">
-        <input id="v-rab" inputmode="decimal" value="0.00" title="Rabais" placeholder="Rabais">
+        <select id="v-prov" title="${T("Province — elle détermine les taxes")}"></select>
+        <input id="v-liv" inputmode="decimal" value="0.00" title="${T("Livraison")}" placeholder="${T("Livraison")}">
+        <input id="v-rab" inputmode="decimal" value="0.00" title="${T("Rabais")}" placeholder="${T("Rabais")}">
       </div>
-      <div class="sous-ch">Province · Livraison · Rabais</div>
-      <h2 style="margin-top:.75rem">Facture</h2>
-      <select id="v-remise" title="Ce qu’on fait de la facture après la vente"></select>
-      <div class="sous-ch">L’envoi exige une adresse. Toujours consultable dans Facturation.</div>
+      <div class="sous-ch">${T("Province · Livraison · Rabais")}</div>
+      <h2 style="margin-top:.75rem">${T("Facture")}</h2>
+      <select id="v-remise" title="${T("Ce qu’on fait de la facture après la vente")}"></select>
+      <div class="sous-ch">${T("L’envoi exige une adresse. Toujours consultable dans Facturation.")}</div>
     </div>
     <!-- ⚠ LES TOTAUX ET L ENCAISSEMENT SONT DANS LE FLUX, a la suite de la carte
          du client — plus ancres en bas. C est ce qui referme le trou de cent
@@ -267,20 +270,20 @@ function pageCaisse(mode) {
          la feuille de style avant de les redescendre. -->
     <div class="carte tot" id="totaux"></div>
     <div class="carte">
-      <h2>Encaissement</h2>
+      <h2>${T("Encaissement")}</h2>
       <div class="r2">
-        <select id="v-paie" aria-label="Mode de paiement"></select>
-        <input aria-label="Note interne (facultatif)" id="v-note" placeholder="Note interne (facultatif)">
+        <select id="v-paie" aria-label="${T("Mode de paiement")}"></select>
+        <input aria-label="${T("Note interne (facultatif)")}" id="v-note" placeholder="${T("Note interne (facultatif)")}">
       </div>
-      <button class="prim large" id="btn-vendre" disabled>Enregistrer la vente</button>
-      <div class="aide">Cet écran n’encaisse jamais la carte.</div>
+      <button class="prim large" id="btn-vendre" disabled>${T("Enregistrer la vente")}</button>
+      <div class="aide">${T("Cet écran n’encaisse jamais la carte.")}</div>
     </div>
    </div>
   </div>
 </div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions">
-    <button id="btn-vider">Vider la vente</button>
+    <button id="btn-vider">${T("Vider la vente")}</button>
   </span></div>
 <script>
 (function(){
@@ -290,8 +293,8 @@ function pageCaisse(mode) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var msg = document.getElementById('msg');
@@ -322,21 +325,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ressemble a une panne, et on cherche au mauvais endroit — chez l imprimante,
   // dans le reseau, partout sauf dans les permissions.
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne permet pas d’encaisser une vente.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cet article n’existe plus.',
-    aucun_article:      'Aucun article dans la vente.',
-    total_invalide:     'Total invalide — la vente n’a pas été enregistrée.',
-    client_requis:      'Le nom du client est obligatoire — aucune vente anonyme.',
-    courriel_invalide:  'Un courriel valide est requis pour ouvrir un compte.',
-    taxes_indisponibles:'Moteur de taxes indisponible — n’encaissez pas.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne permet pas d’encaisser une vente.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cet article n’existe plus.")}',
+    aucun_article:      '${T("Aucun article dans la vente.")}',
+    total_invalide:     '${T("Total invalide — la vente n’a pas été enregistrée.")}',
+    client_requis:      '${T("Le nom du client est obligatoire — aucune vente anonyme.")}',
+    courriel_invalide:  '${T("Un courriel valide est requis pour ouvrir un compte.")}',
+    taxes_indisponibles:'${T("Moteur de taxes indisponible — n’encaissez pas.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
-  function expliquer(m){ return MOTIFS[m] || 'Erreur inattendue (' + esc(m || '?') + ').'; }
+  function expliquer(m){ return MOTIFS[m] || '${T("Erreur inattendue (")}' + esc(m || '?') + ').'; }
 
   // ⚠ UN SEUL POINT D APPEL, avec le rattrapage CHAINE. Le second argument de
   // << then >> ne rattrape que le rejet de la promesse d avant : ce que le premier
@@ -389,13 +392,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var z = document.getElementById('totaux');
     if (!TOT) {
       z.innerHTML = '<div class="vide">' + (LIGNES.length
-        ? 'Calcul des totaux…'
-        : 'Aucun article — scannez un code-barres pour commencer.') + '</div>';
+        ? '${T("Calcul des totaux…")}'
+        : '${T("Aucun article — scannez un code-barres pour commencer.")}') + '</div>';
       return;
     }
     var h = '<div class="l"><span>Sous-total</span><span>' + argent(TOT.sousTotal) + '</span></div>';
-    if (TOT.rabais > 0) h += '<div class="l bon"><span>Rabais</span><span>-' + argent(TOT.rabais) + '</span></div>';
-    if (TOT.livraison > 0) h += '<div class="l"><span>Livraison</span><span>' + argent(TOT.livraison) + '</span></div>';
+    if (TOT.rabais > 0) h += '<div class="l bon"><span>${T("Rabais")}</span><span>-' + argent(TOT.rabais) + '</span></div>';
+    if (TOT.livraison > 0) h += '<div class="l"><span>${T("Livraison")}</span><span>' + argent(TOT.livraison) + '</span></div>';
     (TOT.taxes || []).forEach(function(x){
       // Le taux est affiche : c est ce qui permet de verifier une taxe d un coup
       // d oeil quand une vente part vers une autre province.
@@ -403,7 +406,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="l"><span>' + esc(x.nom) + ' (' + taux + ' %)</span><span>'
         + argent(x.montant) + '</span></div>';
     });
-    h += '<div class="l grand"><span>Total</span><span>' + argent(TOT.total) + '</span></div>';
+    h += '<div class="l grand"><span>${T("Total")}</span><span>' + argent(TOT.total) + '</span></div>';
     z.innerHTML = h;
   }
 
@@ -418,8 +421,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var pret = !!(TOT && TOT.total > 0 && LIGNES.length && nomOk && CTX && CTX.peutVendre && !enVente);
     b.disabled = !pret;
     b.textContent = enVente ? 'Enregistrement…'
-      : (pret ? 'Enregistrer la vente — ' + argent(TOT.total)
-              : (LIGNES.length && !nomOk ? 'Nom du client requis' : 'Enregistrer la vente'));
+      : (pret ? '${T("Enregistrer la vente —")} ' + argent(TOT.total)
+              : (LIGNES.length && !nomOk ? '${T("Nom du client requis")}' : '${T("Enregistrer la vente")}'));
     document.getElementById('btn-vider').disabled = !LIGNES.length || enVente;
   }
 
@@ -429,7 +432,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerLignes(){
     var z = document.getElementById('lignes');
     if (!LIGNES.length) {
-      z.innerHTML = '<div class="vide">Aucun article — scannez un code-barres pour commencer.</div>';
+      z.innerHTML = '<div class="vide">${T("Aucun article — scannez un code-barres pour commencer.")}</div>';
       return;
     }
     var corps = LIGNES.map(function(l, i){
@@ -445,8 +448,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td class="c"><button data-retirer="' + i + '" title="Retirer">✕</button></td>'
         + '</tr>';
     }).join('');
-    z.innerHTML = '<table><thead><tr><th>Article</th><th class="c">Qté</th>'
-      + '<th class="d">Prix</th><th class="d">Total</th><th></th></tr></thead>'
+    z.innerHTML = '<table><thead><tr><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
+      + '<th class="d">${T("Prix")}</th><th class="d">${T("Total")}</th><th></th></tr></thead>'
       + '<tbody>' + corps + '</tbody></table>';
   }
 
@@ -497,7 +500,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // ⚠ LE CODE EXACT GAGNE TOUJOURS. C est ce que le lecteur envoie, et il
         // doit ajouter l article sans passer par une liste d un seul element.
         if (r.sku) { ajouter(r.sku.produitId, r.sku.taille, r.sku.couleur); return; }
-        if (r.court) { videRecherche(); dire('Trois caractères minimum pour chercher.', 'att'); return; }
+        if (r.court) { videRecherche(); dire('${T("Trois caractères minimum pour chercher.")}', 'att'); return; }
         dessinerResultats(r.articles || [], q);
       });
     }, entree ? 0 : 160);
@@ -506,7 +509,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerResultats(articles, q){
     var z = document.getElementById('res');
     if (!articles.length) {
-      z.innerHTML = '<div class="res"><div class="art">Aucun article ne correspond à « '
+      z.innerHTML = '<div class="res"><div class="art">${T("Aucun article ne correspond à «")} '
         + esc(q) + ' ».</div></div>';
       return;
     }
@@ -572,10 +575,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     document.getElementById('c-res').innerHTML = '';
     majLie();
     majTotaux();
-    dire('Fiche de ' + (u.nom || u.courriel) + ' reprise.', 'bon');
+    dire('${T("Fiche de")} ' + (u.nom || u.courriel) + ' reprise.', 'bon');
   }
 
-  function majLie(){ document.getElementById('lie').textContent = CLI ? '✓ compte lié' : ''; }
+  function majLie(){ document.getElementById('lie').textContent = CLI ? '${T("✓ compte lié")}' : ''; }
 
   /* ⚠ MASQUE DU TELEPHONE — 000 000-0000, la forme deja utilisee dans les fiches.
      Il ne gene PAS la recherche : celle-ci compare des chiffres, jamais la mise en
@@ -634,18 +637,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function compteRendu(r){
     var lignes = '';
     lignes += rangee('Commande', esc(r.numero || '—'));
-    lignes += rangee('Total', argent(r.total));
+    lignes += rangee('${T("Total")}', argent(r.total));
     if (r.enAttente) {
-      lignes += rangee('Paiement', '<span style="color:var(--tx-att)">en attente — lien à envoyer</span>');
+      lignes += rangee('Paiement', '<span style="color:var(--tx-att)">${T("en attente — lien à envoyer")}</span>');
     } else {
-      lignes += rangee('Stock décompté', r.stockOk ? 'oui'
-        : '<strong style="color:var(--tx-err)">NON — à vérifier</strong>');
+      lignes += rangee('${T("Stock décompté")}', r.stockOk ? 'oui'
+        : '<strong style="color:var(--tx-err)">${T("NON — à vérifier")}</strong>');
     }
-    lignes += rangee('Enregistrement en base', r.nuageOk ? 'confirmé'
-      : '<strong style="color:var(--tx-err)">non confirmé</strong>');
-    if (r.envoiCourriel === true)  lignes += rangee('Facture', 'envoyée par courriel');
-    if (r.envoiCourriel === false) lignes += rangee('Facture', '<strong style="color:var(--tx-err)">NON envoyée</strong>');
-    if (r.compteNeuf) lignes += rangee('Compte client', 'ouvert · lien de finalisation envoyé');
+    lignes += rangee('${T("Enregistrement en base")}', r.nuageOk ? 'confirmé'
+      : '<strong style="color:var(--tx-err)">${T("non confirmé")}</strong>');
+    if (r.envoiCourriel === true)  lignes += rangee('${T("Facture")}', '${T("envoyée par courriel")}');
+    if (r.envoiCourriel === false) lignes += rangee('${T("Facture")}', '<strong style="color:var(--tx-err)">${T("NON envoyée")}</strong>');
+    if (r.compteNeuf) lignes += rangee('${T("Compte client")}', '${T("ouvert · lien de finalisation envoyé")}');
 
     var lien = '';
     if (r.enAttente) {
@@ -658,13 +661,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
              avait aucun moyen de les reconcilier au comptoir — il n existait que
              dans l ecran web, retire en 3.54.0. */
           + '<button class="mini" id="btn-verif" data-hc="' + esc((r.lien && r.lien.hcId) || '')
-          + '" data-cmd="' + esc(r.commandeId || '') + '">↻ Vérifier le paiement</button></div>'
-          + '<div class="aide">Le stock sera décompté et la facture marquée payée quand Square '
-          + 'confirmera — automatiquement au retour du client. Rien n’est encaissé par cet écran. '
-          + 'S’il a payé mais que rien ne bouge, pressez <strong>Vérifier le paiement</strong>.</div>'
-        : '<div class="aide" style="color:var(--tx-err)">La commande est enregistrée, mais Square a refusé '
-          + 'de créer le lien : ' + esc(r.lienMotif || 'raison inconnue') + '. Réessayez depuis la '
-          + 'commande, ou encaissez autrement.</div>';
+          + '" data-cmd="' + esc(r.commandeId || '') + '">${T("↻ Vérifier le paiement")}</button></div>'
+          + '<div class="aide">${T("Le stock sera décompté et la facture marquée payée quand Square")} '
+          + '${T("confirmera — automatiquement au retour du client. Rien n’est encaissé par cet écran.")} '
+          + '${T("S’il a payé mais que rien ne bouge, pressez ")}<strong>${T("Vérifier le paiement")}</strong>.</div>'
+        : '<div class="aide" style="color:var(--tx-err)">${T("La commande est enregistrée, mais Square a refusé")} '
+          + '${T("de créer le lien :")} ' + esc(r.lienMotif || 'raison inconnue') + '${T(". Réessayez depuis la")} '
+          + '${T("commande, ou encaissez autrement.")}</div>';
     }
 
     var avis = (r.avis || []).map(function(a){
@@ -674,8 +677,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var v = document.createElement('div');
     v.className = 'voile';
-    v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '<span class="ic">🔗</span> Vente en attente de paiement'
-      : 'Vente enregistrée') + '</h3>' + lignes + lien + avis
+    v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '<span class="ic">🔗</span> ${T("Vente")} en attente de paiement'
+      : '${T("Vente enregistrée")}') + '</h3>' + lignes + lien + avis
       + '<div class="fin"><button class="prim" id="btn-ok">Continuer</button></div></div>';
     document.body.appendChild(v);
     /* ⚠ LE VERDICT EST DIT DANS LES MOTS DE CET ECRAN, pas herite du site : le
@@ -685,27 +688,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var bvf = document.getElementById('btn-verif');
     if (bvf) bvf.onclick = function(){
       var hc = bvf.getAttribute('data-hc');
-      if (!hc) { dire('Aucun lien de paiement a verifier.', 'err'); return; }
+      if (!hc) { dire('${T("Aucun lien de paiement a verifier.")}', 'err'); return; }
       bvf.disabled = true;
-      dire('Vérification auprès de Square…');
+      dire('${T("Vérification auprès de Square…")}');
       appeler('caisse:verifierPaiement', [hc, bvf.getAttribute('data-cmd')]).then(function(res){
         bvf.disabled = false;
         if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
         if (res.etat === 'paye') {
-          dire('Paiement confirmé' + (res.numero ? ' — ' + res.numero : '')
-            + (res.stockOk ? ' · stock décompté.' : ' · stock à vérifier.'),
+          dire('${T("Paiement confirmé")}' + (res.numero ? ' — ' + res.numero : '')
+            + (res.stockOk ? ' ${T("· stock décompté.")}' : ' ${T("· stock à vérifier.")}'),
             res.stockOk ? 'bon' : 'att');
           v.remove();
           var sc = document.getElementById('scan');
           if (sc) sc.focus();
           return;
         }
-        if (res.etat === 'annule') { dire('Paiement annulé par le client.', 'att'); return; }
+        if (res.etat === 'annule') { dire('${T("Paiement annulé par le client.")}', 'att'); return; }
         if (res.etat === 'insuffisant') {
-          dire('Montant reçu INFÉRIEUR au total — à vérifier dans Square.', 'err');
+          dire('${T("Montant reçu INFÉRIEUR au total — à vérifier dans Square.")}', 'err');
           return;
         }
-        dire('Pas encore payé. Le lien reste valide — réessayez plus tard.', 'att');
+        dire('${T("Pas encore payé. Le lien reste valide — réessayez plus tard.")}', 'att');
       });
     };
 
@@ -726,7 +729,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // projet ; le vieil appel, lui, fonctionne.
       var fait = false;
       try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
-      cp.textContent = fait ? '✓ Copié' : 'Ctrl+C pour copier';
+      cp.textContent = fait ? '${T("✓ Copié")}' : '${T("Ctrl+C pour copier")}';
     };
   }
 
@@ -750,7 +753,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // ⚠ ON DESARME L ECRAN AU LIEU DE LE LAISSER CROIRE QU IL PEUT VENDRE.
         document.getElementById('corps').innerHTML =
           '<div class="vide" style="grid-column:1/-1"><div style="font-size:1rem;color:var(--tx);margin-bottom:.4rem">'
-          + 'Caisse indisponible</div>' + esc(expliquer(r.motif)) + '</div>';
+          + '${T("Caisse indisponible")}</div>' + esc(expliquer(r.motif)) + '</div>';
         dire(expliquer(r.motif), 'err');
         return;
       }
@@ -760,7 +763,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       remplirListe('v-remise', r.remises, 'courriel');
       document.getElementById('sous').textContent = r.par
         ? (r.par + (r.peutVendre ? '' : ' · lecture seule')) : '';
-      if (!r.peutVendre) dire('Votre rôle ne permet pas d’enregistrer une vente.', 'att');
+      if (!r.peutVendre) dire('${T("Votre rôle ne permet pas d’enregistrer une vente.")}', 'att');
       dessinerLignes(); dessinerTotaux(); majBouton();
       var s = document.getElementById('scan');
       if (s) s.focus();
@@ -799,7 +802,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // ouvert depuis cette fenetre, il afficherait un panier vide devant le
       // client alors que la vente est en cours.
       diffuser();
-      dire('Affichage client ouvert.', 'bon');
+      dire('${T("Affichage client ouvert.")}', 'bon');
     });
   };
 
@@ -839,7 +842,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       for (var k = 0; k < TROUVES.length; k++) {
         if (TROUVES[k].id === uid) { remplirClient(TROUVES[k]); return; }
       }
-      dire('Fiche introuvable — relancez la recherche.', 'err');
+      dire('${T("Fiche introuvable — relancez la recherche.")}', 'err');
     }
   });
 
@@ -856,7 +859,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       commandeId: 'ord_temoin', paiement: 'lien',
       lien: { url: 'https://square.link/u/TEMOIN', hcId: 'hc_temoin' },
       envoiCourriel: true, compteNeuf: false,
-      avis: [{ ton: 'warning', texte: 'Temoin : aucune vente n a eu lieu.' }] });
+      avis: [{ ton: 'warning', texte: '${T("Temoin : aucune vente n a eu lieu.")}' }] });
   }
 })();
 </script>

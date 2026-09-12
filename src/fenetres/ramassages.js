@@ -137,7 +137,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function fmtDate(d){
     if (!d) return '—';
-    try { return new Date(d).toLocaleDateString('fr-CA'); } catch (e) { return String(d); }
+    try { return new ${T("Date")}(d).toLocaleDateString('fr-CA'); } catch (e) { return String(d); }
   }
 
   var MOTIFS = {
@@ -224,7 +224,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="pied-boite"><button id="rm-p-annuler">Fermer</button></div></div></div>';
       return h;
     }
-    h += '<div class="dt"><span class="ic" aria-hidden="true">📅</span> Prévu le <strong>' + esc(p.date) + '</strong>${T(", entre 09 h et 17 h")}'
+    h += '<div class="dt"><span class="ic" aria-hidden="true">📅</span>${T(" Prévu le ")}<strong>' + esc(p.date) + '</strong>${T(", entre 09 h et 17 h")}'
       + (p.adresse ? ' · ' + esc(p.adresse) : '') + '</div>';
     h += (p.groupes || []).map(function(g){
       return '<div class="grp"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
@@ -255,8 +255,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     h += '<div class="carte"><h2>${T("Par transporteur —")} ' + RAP.total + ' expédition' + (RAP.total > 1 ? 's' : '') + '</h2>'
-      + '<table><thead><tr><th>Transporteur</th><th style="text-align:center">Colis</th>'
-      + '<th style="text-align:right">Total frais</th><th style="text-align:right">Moy. par colis</th></tr></thead><tbody>'
+      + '<table><thead><tr><th>${T("Transporteur")}</th><th style="text-align:center">${T("Colis")}</th>'
+      + '<th style="text-align:right">${T("Total frais")}</th><th style="text-align:right">${T("Moy. par colis")}</th></tr></thead><tbody>'
       + (RAP.transporteurs || []).map(function(t){
           return '<tr><td>' + t.logo + ' <span class="num">' + esc(t.nom) + '</span></td>'
             + '<td style="text-align:center;font-weight:700">' + t.colis + '</td>'
@@ -267,8 +267,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<td style="text-align:right">' + esc(fmt(RAP.totalFrais)) + '</td><td></td></tr></tfoot></table></div>';
 
     h += '<div class="carte"><h2>${T("Les 60 dernières expéditions")}</h2>'
-      + '<table><thead><tr><th>Commande</th><th>Date</th><th>Transporteur</th>'
-      + '<th>Suivi</th><th style="text-align:right">Frais</th><th>Statut</th></tr></thead><tbody>'
+      + '<table><thead><tr><th>${T("Commande")}</th><th>${T("Date")}</th><th>${T("Transporteur")}</th>'
+      + '<th>${T("Suivi")}</th><th style="text-align:right">${T("Frais")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
       + (RAP.expeditions || []).map(function(o){
           return '<tr><td><span class="num">' + esc(o.numero) + '</span></td>'
             + '<td class="dt">' + esc(fmtDate(o.date)) + '</td>'

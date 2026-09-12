@@ -51,4 +51,14 @@ module.exports = {
   /* ── CE QUE LA FENETRE DIT QUAND ELLE PASSE LA MAIN ─────────────────────── */
   'Assistant Produit ouvert dans sa fenêtre.': 'Product assistant opened in its own window.',
   'Fiche ouverte dans l’assistant Produit.': 'Record opened in the Product assistant.',
+
+  /* ── LES FRAGMENTS TELS QU ILS EXISTENT DANS LE GABARIT ────────────────
+     ⚠ Les en-têtes sont des cellules séparées : la forme jointe n existe qu à
+     l écran, jamais dans le fichier. */
+  'Produit': 'Product',
+  'Catégorie': 'Category',
+  'Étiquette': 'Tag',
+  'Prix': 'Price',
+  'Inventaire': 'Inventory',
+  'Paniers': 'Carts',
 };

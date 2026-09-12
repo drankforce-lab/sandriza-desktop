@@ -66,4 +66,17 @@ module.exports = {
   /* ── CE QUI SE DIT PENDANT L ATTENTE ────────────────────────────────────── */
   'Lecture des colis prêts…': 'Reading parcels ready to ship…',
   'Demandes envoyées aux transporteurs…': 'Requests sent to the carriers…',
+
+  /* ⚠ L émoji vit dans son propre <span> : la chaîne du gabarit est le texte
+     SEUL, avec ses espaces. */
+  ' Prévu le ': ' Scheduled for ',
+  'Transporteur': 'Carrier',
+  'Colis': 'Parcels',
+  'Total frais': 'Total cost',
+  'Moy. par colis': 'Avg. per parcel',
+  'Commande': 'Order',
+  'Date': 'Date',
+  'Suivi': 'Tracking',
+  'Frais': 'Cost',
+  'Statut': 'Status',
 };

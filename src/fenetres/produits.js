@@ -185,8 +185,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun produit ne correspond.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Produit</th><th>Catégorie</th><th>Étiquette</th>'
-        + '<th>Prix</th><th>Inventaire</th><th style="text-align:center">Paniers</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Produit")}</th><th>${T("Catégorie")}</th><th>${T("Étiquette")}</th>'
+        + '<th>${T("Prix")}</th><th>${T("Inventaire")}</th><th style="text-align:center">${T("Paniers")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var badges = '';
             if (r.finalSale && !r.liquidation) badges += ' <span class="pill err">${T("Vente finale")}</span>';

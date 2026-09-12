@@ -75,7 +75,9 @@ const litSocle = () => {
    une transformation qui n’a rien changé au script.
    ⚠ On les nomme UN PAR UN plutôt que d’ignorer tout `JS_*` : un nom en JS_ qui
    n’existerait pas doit rester une faute. */
-const BLOCS_SOCLE = ['JS_SOCLE', 'JS_ACTIVITE', 'JS_DIRE', 'JS_BROUILLON'];
+/* ⚠ `T` est le traducteur, résolu À LA GÉNÉRATION comme les blocs ci-dessus :
+   `${T('…')}` disparaît avant que le script existe. */
+const BLOCS_SOCLE = ['JS_SOCLE', 'JS_ACTIVITE', 'JS_DIRE', 'JS_BROUILLON', 'T'];
 
 const GLOBALES = new Set([
   ...BLOCS_SOCLE,  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',

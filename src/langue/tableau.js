@@ -104,4 +104,9 @@ module.exports = {
   '(relevé du ': '(taken on ',
   'Taux de change indisponible. Les prix affichés en USD utilisent un taux de secours (1 USD =':
     'Exchange rate unavailable. Prices shown in USD use a fallback rate (1 USD =',
+
+  /* ⚠ « Taux de change indisponible. » est en <strong>, la suite ne l est pas :
+     deux fragments, deux entrées. */
+  'Taux de change indisponible.': 'Exchange rate unavailable.',
+  'Les prix affichés en USD utilisent un taux ': 'Prices shown in USD use a fallback ',
 };
