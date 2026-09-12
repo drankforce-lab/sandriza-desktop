@@ -73,6 +73,19 @@ const aTraduire = (t) => {
      virgules, donc elle ressemble à de la prose. Personne ne la lit à l’écran. */
   if (/^[.#][\w.#\-]+(\s|,|:|\[)/.test(t)) return false;
   if (/var\(--|[a-z-]+\s*:\s*[^;]{1,30};/.test(t)) return false;
+  /* ⚠ ET UNE LISTE DE SÉLECTEURS QUI COMMENCE PAR UNE BALISE. La règle du dessus
+     ne reconnaît que ce qui débute par `.` ou `#` ; `button, [data-voie],
+     [data-preset], [data-ph], .depot` (studio) commence par un nom de balise et
+     passait pour de la prose — un texte qu on ne peut PAS traduire, donc un
+     compteur qui ne pourrait jamais atteindre zéro sur cette fenêtre.
+     ⚠⚠ ON EXIGE UN VRAI SIGNE DE SÉLECTEUR (`[`, `.` ou `#`) dans au moins une
+     part : sans cette condition, « rouge, vert, bleu » — trois mots minuscules
+     séparés par des virgules — serait écarté comme un sélecteur. Un filtre trop
+     large ne fait pas de bruit : il RÉTRÉCIT le banc en silence. */
+  const parts = t.split(',').map((p) => p.trim());
+  const UNE_PART = /^[a-z][\w-]*$|^[a-z][\w-]*\[[^\]]+\]$|^\[[^\]]+\]$|^[.#][\w-]+$/;
+  if (parts.length > 1 && parts.every((p) => UNE_PART.test(p))
+      && parts.some((p) => /[[.#]/.test(p))) return false;
   return true;
 };
 

@@ -38,6 +38,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('studio');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -530,9 +534,9 @@ function pageStudio(mode) {
   // Les recettes : la barre se voit toujours, le voile d enregistrement non.
   const rcTemoin = String(mode || '') === 'recettes';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Studio virtuel — Administration Sandriza</title>
+<title>${T("Studio virtuel — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.studio}</span><h1>Studio virtuel</h1>
+<div class="tete"><span class="ico">${ICO.studio}</span><h1>${T("Studio virtuel")}</h1>
   <span class="credits" id="credits"></span>
   <!-- ⚠ « Traitements » EST ICI DEPUIS LE 2026-09-09, sa demande : « une icône
        plus discrète à un autre endroit que lors de la sélection des photos ».
@@ -544,14 +548,14 @@ function pageStudio(mode) {
        détaillé — celui où l'on met en pause et où l'on arrête. Ajouter un
        compteur ici aurait dit deux fois la même chose, et le premier des deux
        était périmé : le sondage des lots ne tournait que sur l'écran des lots. -->
-  <button class="tj" id="lots-voir" title="Traitements par lot — voir la file, mettre en pause, arrêter"
-    aria-label="Traitements par lot">${ICO.clock}</button></div>
-<div class="ro" id="ro" hidden>Lecture seule : votre rôle ne permet pas de lancer de traitement.</div>
-<div class="corps plein" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+  <button class="tj" id="lots-voir" title="${T("Traitements par lot — voir la file, mettre en pause, arrêter")}"
+    aria-label="${T("Traitements par lot")}">${ICO.clock}</button></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : votre rôle ne permet pas de lancer de traitement.")}</div>
+<div class="corps plein" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button id="b-lot">⚙ Traiter en lot…</button>
-  <button class="gratuit" id="b-apercu" disabled>Aperçu gratuit</button>
-  <button class="prim" id="b-final" disabled>Générer en pleine qualité</button></div>
+  <button id="b-lot">${T("⚙ Traiter en lot…")}</button>
+  <button class="gratuit" id="b-apercu" disabled>${T("Aperçu gratuit")}</button>
+  <button class="prim" id="b-final" disabled>${T("Générer en pleine qualité")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -574,12 +578,12 @@ function pageStudio(mode) {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -645,11 +649,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      deux fois de suite, ne donne pas deux fois le meme resultat. */
   var FIL_DEF = { logoId: '', position: 'bd', taille: 20, opacite: 0.8, marge: 3 };
   var POSITIONS = [
-    { cle: 'hg', t: 'En haut à gauche' },  { cle: 'hc', t: 'En haut, au centre' },
-    { cle: 'hd', t: 'En haut à droite' },  { cle: 'mg', t: 'Au milieu, à gauche' },
-    { cle: 'mc', t: 'Au centre' },         { cle: 'md', t: 'Au milieu, à droite' },
-    { cle: 'bg', t: 'En bas à gauche' },   { cle: 'bc', t: 'En bas, au centre' },
-    { cle: 'bd', t: 'En bas à droite' }
+    { cle: 'hg', t: '${T("En haut à gauche")}' },  { cle: 'hc', t: '${T("En haut, au centre")}' },
+    { cle: 'hd', t: '${T("En haut à droite")}' },  { cle: 'mg', t: '${T("Au milieu, à gauche")}' },
+    { cle: 'mc', t: '${T("Au centre")}' },         { cle: 'md', t: '${T("Au milieu, à droite")}' },
+    { cle: 'bg', t: '${T("En bas à gauche")}' },   { cle: 'bc', t: '${T("En bas, au centre")}' },
+    { cle: 'bd', t: '${T("En bas à droite")}' }
   ];
   var FORM_MODE = 'recadrer'; // formats de sortie : recadrer (on coupe) ou marges
   var FORMATS = [];      // [{cle,label,largeur,hauteur,image,ext,enreg}] deja fabriques
@@ -674,9 +678,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      Les seize images de R2 sont effacees par un menage unique cote site
      (_purgerPortraits dans pont.js). */
   var VOIES = [
-    { cle: 'humain',  t: 'Mannequin virtuel', d: 'Porté par un modèle, décor intégré' },
-    { cle: 'fantome', t: 'Fantôme habillé',   d: 'Sans mannequin, décor pro ajouté' },
-    { cle: 'plat',    t: 'Produit à plat',    d: 'Détourage + décor + ombre' }
+    { cle: 'humain',  t: '${T("Mannequin virtuel")}', d: '${T("Porté par un modèle, décor intégré")}' },
+    { cle: 'fantome', t: '${T("Fantôme habillé")}',   d: '${T("Sans mannequin, décor pro ajouté")}' },
+    { cle: 'plat',    t: '${T("Produit à plat")}',    d: '${T("Détourage + décor + ombre")}' }
   ];
   /* Les 16 modeles REELS de Photoroom (virtualModel.model.preset.name, verifies
      dans la doc 2026-08-11). Sophia en tete = choix par defaut.
@@ -695,18 +699,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      tombe mieux qu une pose de face), mais il se change maintenant d un clic,
      et l apercu est gratuit : on juge sur piece sans depenser un credit. */
   var POSES = [
-    { cle: '34turn',           t: 'Trois-quarts (défaut)' },
-    { cle: 'standing',         t: 'Debout, de face' },
-    { cle: 'powerstance',      t: 'Posture affirmée' },
-    { cle: 'walkingforward',   t: 'En marche' },
-    { cle: 'handinpocket',     t: 'Main dans la poche' },
-    { cle: 'crossedarms',      t: 'Bras croisés' },
-    { cle: 'overtheshoulder',  t: 'Regard par-dessus l’épaule' },
-    { cle: 'back',             t: 'De dos' },
-    { cle: 'seated',           t: 'Assise' },
-    { cle: 'adjustingclothing',t: 'Ajuste son vêtement' },
-    { cle: 'playfulspin',      t: 'Tourne sur elle-même' },
-    { cle: 'random',           t: 'Au hasard' }
+    { cle: '34turn',           t: '${T("Trois-quarts (défaut)")}' },
+    { cle: 'standing',         t: '${T("Debout, de face")}' },
+    { cle: 'powerstance',      t: '${T("Posture affirmée")}' },
+    { cle: 'walkingforward',   t: '${T("En marche")}' },
+    { cle: 'handinpocket',     t: '${T("Main dans la poche")}' },
+    { cle: 'crossedarms',      t: '${T("Bras croisés")}' },
+    { cle: 'overtheshoulder',  t: '${T("Regard par-dessus l’épaule")}' },
+    { cle: 'back',             t: '${T("De dos")}' },
+    { cle: 'seated',           t: '${T("Assise")}' },
+    { cle: 'adjustingclothing',t: '${T("Ajuste son vêtement")}' },
+    { cle: 'playfulspin',      t: '${T("Tourne sur elle-même")}' },
+    { cle: 'random',           t: '${T("Au hasard")}' }
   ];
   var POSE_SEL = '34turn';
 
@@ -754,54 +758,54 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      liste fermée côté Photoroom). ⚠ Un nom hors liste est refusé par le service :
      on ne propose que ceux-là, jamais un champ libre. */
   var DECORS = [
-    { cle: 'studio',           t: 'Studio' },
-    { cle: 'coloredstudio',    t: 'Studio coloré' },
-    { cle: 'concretestudio',   t: 'Studio béton' },
-    { cle: 'street',           t: 'Rue' },
-    { cle: 'businessdistrict', t: 'Quartier des affaires' },
-    { cle: 'latincity',        t: 'Ville latine' },
-    { cle: 'asiancity',        t: 'Ville asiatique' },
-    { cle: 'nightlights',      t: 'Lumières de nuit' },
-    { cle: 'cafe',             t: 'Café' },
-    { cle: 'library',          t: 'Bibliothèque' },
-    { cle: 'bedroom',          t: 'Chambre' },
-    { cle: 'factory',          t: 'Usine' },
-    { cle: 'beach',            t: 'Plage' },
-    { cle: 'pool',             t: 'Piscine' },
-    { cle: 'tropical',         t: 'Tropical' },
-    { cle: 'forest',           t: 'Forêt' },
-    { cle: 'flowers',          t: 'Fleurs' },
-    { cle: 'countryside',      t: 'Campagne' },
-    { cle: 'mountain',         t: 'Montagne' },
-    { cle: 'desert',           t: 'Désert' },
-    { cle: 'sunset',           t: 'Coucher de soleil' },
-    { cle: 'goldenlight',      t: 'Lumière dorée' },
-    { cle: 'random',           t: 'Au hasard' }
+    { cle: 'studio',           t: '${T("Studio")}' },
+    { cle: 'coloredstudio',    t: '${T("Studio coloré")}' },
+    { cle: 'concretestudio',   t: '${T("Studio béton")}' },
+    { cle: 'street',           t: '${T("Rue")}' },
+    { cle: 'businessdistrict', t: '${T("Quartier des affaires")}' },
+    { cle: 'latincity',        t: '${T("Ville latine")}' },
+    { cle: 'asiancity',        t: '${T("Ville asiatique")}' },
+    { cle: 'nightlights',      t: '${T("Lumières de nuit")}' },
+    { cle: 'cafe',             t: '${T("Café")}' },
+    { cle: 'library',          t: '${T("Bibliothèque")}' },
+    { cle: 'bedroom',          t: '${T("Chambre")}' },
+    { cle: 'factory',          t: '${T("Usine")}' },
+    { cle: 'beach',            t: '${T("Plage")}' },
+    { cle: 'pool',             t: '${T("Piscine")}' },
+    { cle: 'tropical',         t: '${T("Tropical")}' },
+    { cle: 'forest',           t: '${T("Forêt")}' },
+    { cle: 'flowers',          t: '${T("Fleurs")}' },
+    { cle: 'countryside',      t: '${T("Campagne")}' },
+    { cle: 'mountain',         t: '${T("Montagne")}' },
+    { cle: 'desert',           t: '${T("Désert")}' },
+    { cle: 'sunset',           t: '${T("Coucher de soleil")}' },
+    { cle: 'goldenlight',      t: '${T("Lumière dorée")}' },
+    { cle: 'random',           t: '${T("Au hasard")}' }
   ];
   /* Direction de la lumière (donc de l ombre). ⚠ Le relais attend ces mots
      EXACTS (il les remet en camelCase lui-même) ou un angle. */
   var OMBRE_DIRS = [
-    { cle: 'front',       t: 'De face' },
-    { cle: 'frontleft',   t: 'Devant, à gauche' },
-    { cle: 'frontright',  t: 'Devant, à droite' },
-    { cle: 'left',        t: 'À gauche' },
-    { cle: 'right',       t: 'À droite' },
-    { cle: 'behind',      t: 'Derrière le sujet' },
-    { cle: 'behindleft',  t: 'Derrière, à gauche' },
-    { cle: 'behindright', t: 'Derrière, à droite' }
+    { cle: 'front',       t: '${T("De face")}' },
+    { cle: 'frontleft',   t: '${T("Devant, à gauche")}' },
+    { cle: 'frontright',  t: '${T("Devant, à droite")}' },
+    { cle: 'left',        t: '${T("À gauche")}' },
+    { cle: 'right',       t: '${T("À droite")}' },
+    { cle: 'behind',      t: '${T("Derrière le sujet")}' },
+    { cle: 'behindleft',  t: '${T("Derrière, à gauche")}' },
+    { cle: 'behindright', t: '${T("Derrière, à droite")}' }
   ];
   var OMBRE_ETENDUES = [
-    { cle: 'short',  t: 'Courte — collée au vêtement' },
-    { cle: 'medium', t: 'Moyenne' },
-    { cle: 'long',   t: 'Longue — lumière basse' }
+    { cle: 'short',  t: '${T("Courte — collée au vêtement")}' },
+    { cle: 'medium', t: '${T("Moyenne")}' },
+    { cle: 'long',   t: '${T("Longue — lumière basse")}' }
   ];
   /* Les trois modes de relumière du service. ⚠ « Préserver la teinte » est le
      seul vraiment sûr pour un vêtement : c est la couleur qu on vend. */
   var LUMIERES = [
-    { cle: '', t: 'Celle de l’ambiance' },
-    { cle: 'ai.preserve-hue-and-saturation', t: 'Préserver la teinte (recommandé)' },
-    { cle: 'ai.auto', t: 'Automatique — peut déplacer les couleurs' },
-    { cle: 'ai.optimize-portrait', t: 'Optimiser un portrait — s’il y a un visage' }
+    { cle: '', t: '${T("Celle de l’ambiance")}' },
+    { cle: 'ai.preserve-hue-and-saturation', t: '${T("Préserver la teinte (recommandé)")}' },
+    { cle: 'ai.auto', t: '${T("Automatique — peut déplacer les couleurs")}' },
+    { cle: 'ai.optimize-portrait', t: '${T("Optimiser un portrait — s’il y a un visage")}' }
   ];
 
   // Une image d un pixel, transparente : le porteur du mode de contrôle.
@@ -812,21 +816,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès au traitement d’image.',
-    photo_absente:      'Importez d’abord une photo.',
-    non_configure:      'Aucune clé Photoroom configurée (Configuration ▸ Clés API).',
-    indisponible:       'Le service n’est pas prêt dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    module_photos:      'La photothèque n’a pas pu être chargée. Rechargez (Ctrl+R) ; si cela revient, reconnectez-vous.',
-    version_coquille:   'Cette version de l’application ne sait pas encore ouvrir cet écran.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès au traitement d’image.")}',
+    photo_absente:      '${T("Importez d’abord une photo.")}',
+    non_configure:      '${T("Aucune clé Photoroom configurée (Configuration ▸ Clés API).")}',
+    indisponible:       '${T("Le service n’est pas prêt dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    module_photos:      '${T("La photothèque n’a pas pu être chargée. Rechargez (Ctrl+R) ; si cela revient, reconnectez-vous.")}',
+    version_coquille:   '${T("Cette version de l’application ne sait pas encore ouvrir cet écran.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -876,7 +880,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        photothèque. L exiger prete a l ecran priverait du lot celui qui n a
        justement pas ouvert de photo — le cas le plus courant. */
     if (bLot) bLot.disabled = RO || OCCUPE;
-    if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = 'Générer en pleine qualité'; }
+    if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}'; }
   }
 
   function aUnePhoto(){ return !!PHOTO || !!PHOTO_ID; }
@@ -891,15 +895,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      la liste — et il refuse tant que le lot tourne. */
   var LOTS = null, LOTS_VUE = false, LOTS_T = null;
 
-  var LOT_ETATS = { file: 'En file', encours: 'En cours', pause: 'En pause',
-    fini: 'Terminé', arrete: 'Arrêté' };
+  var LOT_ETATS = { file: '${T("En file")}', encours: '${T("En cours")}', pause: '${T("En pause")}',
+    fini: '${T("Terminé")}', arrete: '${T("Arrêté")}' };
 
   function lotsHtml(){
-    if (!LOTS) return '<div class="vide charge">Lecture des traitements…</div>';
+    if (!LOTS) return '<div class="vide charge">${T("Lecture des traitements…")}</div>';
     var l = LOTS.lots || [];
     if (!l.length) {
-      return '<div class="vide">Aucun traitement. Choisissez des photos depuis la '
-        + 'photothèque, puis « Traiter en lot ».</div>';
+      return '<div class="vide">${T("Aucun traitement. Choisissez des photos depuis la")} '
+        + '${T("photothèque, puis « Traiter en lot ».")}</div>';
     }
     return l.map(function(x){
       var fait = x.faits + x.echecs;
@@ -907,11 +911,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var g = '';
       if (LOTS.peutModifier) {
         if (x.etat === 'encours' || x.etat === 'file') {
-          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="pause">⏸ Pause</button>';
-          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="arreter">⏹ Arrêter</button>';
+          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="pause">${T("⏸ Pause")}</button>';
+          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="arreter">${T("⏹ Arrêter")}</button>';
         }
         if ((x.etat === 'pause' || x.etat === 'arrete') && x.restants) {
-          g += '<button class="jeton prim" data-lot="' + esc(x.id) + '" data-geste="reprendre">▶ Reprendre</button>';
+          g += '<button class="jeton prim" data-lot="' + esc(x.id) + '" data-geste="reprendre">${T("▶ Reprendre")}</button>';
         }
         if (x.etat === 'encours' || x.etat === 'file' || x.etat === 'pause') {
           g += '<button class="jeton' + (x.priorite ? ' on' : '') + '" data-lot="' + esc(x.id)
@@ -919,14 +923,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + (x.priorite ? 'Prioritaire' : 'Prioriser') + '</button>';
         }
         if (x.etat !== 'encours') {
-          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="retirer">✕ Retirer</button>';
+          g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="retirer">${T("✕ Retirer")}</button>';
         }
       }
       return '<div class="lotc' + (x.etat === 'encours' ? ' vif' : '') + '">'
         + '<div class="lott"><strong>' + esc(x.nom) + '</strong>'
         + '<span class="pill ' + (x.etat === 'fini' ? 'bon' : x.etat === 'encours' ? 'acc'
             : x.etat === 'arrete' ? 'err' : 'neutre') + '">' + (LOT_ETATS[x.etat] || x.etat) + '</span>'
-        + (x.priorite ? '<span class="pill acc"><span class="ic">★</span> Priorité</span>' : '')
+        + (x.priorite ? '<span class="pill acc"><span class="ic">★</span> ${T("Priorité")}</span>' : '')
         + '<span class="dt">' + esc(x.quoiLibelle) + '</span></div>'
         + '<div class="jauge"><i style="width:' + pct + '%"></i></div>'
         + '<div class="lotd">'
@@ -935,7 +939,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span>' + (x.etat === 'encours' && x.courant
             ? ('Photo ' + (fait + 1) + ' sur ' + x.total + ' — ' + esc(x.courant.nom))
             : (fait + ' sur ' + x.total)) + '</span>'
-        + (x.echecs ? '<span class="mal">' + x.echecs + ' échec' + (x.echecs > 1 ? 's' : '') + '</span>' : '')
+        + (x.echecs ? '<span class="mal">' + x.echecs + ' ${T("échec")}' + (x.echecs > 1 ? 's' : '') + '</span>' : '')
         + '<span class="droite">' + g + '</span></div>'
         + (x.echecs && x.detailEchecs.length
             ? '<div class="lote">' + x.detailEchecs.map(function(e){
@@ -948,7 +952,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            que le plafond n aura pas ete releve. Les photos restantes n ont ete ni
            traitees ni facturees — elles attendent, elles ne sont pas perdues. */
         + (x.motifPause
-            ? '<div class="lote" style="color:var(--tx-or)">⏸ Mis en pause : ' + esc(x.motifPause) + '</div>'
+            ? '<div class="lote" style="color:var(--tx-or)">${T("⏸ Mis en pause :")} ' + esc(x.motifPause) + '</div>'
             : '')
         + '</div>';
     }).join('');
@@ -997,13 +1001,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = PANIER.length;
     return '<div class="panier"><div class="pt">'
       + '<strong>' + n + ' photo' + (n > 1 ? 's' : '') + '</strong> '
-      + '<span class="dt">venue' + (n > 1 ? 's' : '') + ' de l’explorateur</span>'
-      + '<button class="mini" id="pn-vider" title="Oublier cette sélection">✕</button></div>'
+      + '<span class="dt">venue' + (n > 1 ? 's' : '') + ' ${T("de l’explorateur")}</span>'
+      + '<button class="mini" id="pn-vider" title="${T("Oublier cette sélection")}">✕</button></div>'
       + '<div class="pv">' + PANIER.slice(0, 8).map(function(p){
           return p.apercu ? '<img src="' + esc(p.apercu) + '" alt="" loading="lazy">'
                           : '<span class="tr"></span>'; }).join('')
       + (n > 8 ? '<span class="pl">+' + (n - 8) + '</span>' : '') + '</div>'
-      + '<button class="prim" id="pn-lot">⚙ Traiter ' + (n > 1 ? ('ces ' + n) : 'cette photo') + ' en lot…</button>'
+      + '<button class="prim" id="pn-lot">${T("⚙ Traiter")} ' + (n > 1 ? ('ces ' + n) : '${T("cette photo")}') + ' ${T("en lot…")}</button>'
       + '</div>';
   }
 
@@ -1079,8 +1083,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var apercu = PHOTO || PHOTO_URL;
       h += '<div class="depot" id="depot">'
         + (apercu ? '<img src="' + apercu + '" alt="photo">'
-                  : '<span class="gros"><span class="ic">🖼</span></span><span>Photo de la photothèque sélectionnée</span>')
-        + '<span class="refaire">Choisir une autre photo</span></div>'
+                  : '<span class="gros"><span class="ic">🖼</span></span><span>${T("Photo de la photothèque sélectionnée")}</span>')
+        + '<span class="refaire">${T("Choisir une autre photo")}</span></div>'
         + '<input type="file" id="fichier" accept="image/*" hidden>';
       return h;
     }
@@ -1101,12 +1105,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      pages) et le suivi des lots. Ce sont des ecrans, pas des encarts. */
   function pleinHtml(){
     if (LOTS_VUE) {
-      return '<div class="phbarre"><button id="lots-fermer">← Retour</button>'
-        + '<span class="phinfo">Traitements par lot</span></div>'
+      return '<div class="phbarre"><button id="lots-fermer">${T("← Retour")}</button>'
+        + '<span class="phinfo">${T("Traitements par lot")}</span></div>'
         + '<div class="lots">' + lotsHtml() + '</div>';
     }
     var grille = '<div class="phgrille" id="ph-grille">' + phVignettesHtml() + '</div>';
-    return '<div class="phbarre"><button id="ph-retour">← Retour</button>'
+    return '<div class="phbarre"><button id="ph-retour">${T("← Retour")}</button>'
       + '<input type="search" id="ph-q" aria-label="Rechercher (nom, code, produit, SKU)" placeholder="Rechercher (nom, code, produit, SKU)…" value="' + esc(PH_Q) + '"'
       + (RO ? ' disabled' : '') + '>'
       + '<span class="phinfo" id="ph-info"></span></div>'
@@ -1124,7 +1128,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function nomModele(m){ return m.charAt(0).toUpperCase() + m.slice(1); }
   function nomPose(p){
     var x = POSES.filter(function(o){ return o.cle === p; })[0];
-    return x ? x.t.replace(' (défaut)', '') : p;
+    return x ? x.t.replace(' ${T("(défaut)")}', '') : p;
   }
   function modeleHtml(){
     if (VOIE !== 'humain') return '';
@@ -1132,7 +1136,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // est retirée. Les aperçus par mannequin sortaient identiques et n'aidaient pas
     // au choix ; le nom suffit. Le modèle et la pose se choisissent dans deux listes.
     // Deux menus courts : cote a cote quand la place le permet, empiles sinon.
-    var h = '<div class="duo"><div class="ch"><label for="modele-sel">Modèle</label>'
+    var h = '<div class="duo"><div class="ch"><label for="modele-sel">${T("Modèle")}</label>'
       + '<select id="modele-sel"' + (RO ? ' disabled' : '') + '>'
       + MODELES.map(function(m){ return '<option value="' + esc(m) + '"'
           + (MODELE_SEL === m ? ' selected' : '') + '>' + esc(nomModele(m)) + '</option>'; }).join('')
@@ -1142,12 +1146,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + POSES.map(function(p){ return '<option value="' + p.cle + '"'
           + (POSE_SEL === p.cle ? ' selected' : '') + '>' + esc(p.t) + '</option>'; }).join('')
       + '</select></div></div>'
-      + '<div class="aidep">L’aperçu est gratuit : essayez plusieurs mannequins et plusieurs '
-      + 'poses avant de dépenser un crédit.</div>';
+      + '<div class="aidep">${T("L’aperçu est gratuit : essayez plusieurs mannequins et plusieurs")} '
+      + '${T("poses avant de dépenser un crédit.")}</div>';
     return h;
   }
   function ambiancesHtml(){
-    if (!PRESETS.length) return '<div class="vide">Aucune ambiance.</div>';
+    if (!PRESETS.length) return '<div class="vide">${T("Aucune ambiance.")}</div>';
     return '<div class="tuiles amb">' + PRESETS.map(function(p){
       return '<div class="tuile' + (PRESET === p.cle ? ' on' : '') + '" data-preset="' + esc(p.cle) + '">'
         + '<span class="t">' + esc(p.label) + '</span>'
@@ -1221,16 +1225,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!estVoie(voie)) return '';
     var b = [];
     if (voie === 'humain') {
-      if (AV.decor) b.push('décor ' + nomDecor(AV.decor));
+      if (AV.decor) b.push('${T("décor")} ' + nomDecor(AV.decor));
       if (!AV.sourire) b.push('expression neutre');
-      if (String(AV.extra || '').trim()) b.push('précisions libres');
+      if (String(AV.extra || '').trim()) b.push('${T("précisions libres")}');
     } else {
-      if (String(AV.fondPrompt || '').trim()) b.push('décor décrit');
-      if (AV.ombreActive) b.push('ombre réglée');
-      if (AV.lumiere) b.push('relumière');
-      if (voie === 'fantome' && INTERIEUR) b.push('photo d’intérieur');
+      if (String(AV.fondPrompt || '').trim()) b.push('${T("décor décrit")}');
+      if (AV.ombreActive) b.push('${T("ombre réglée")}');
+      if (AV.lumiere) b.push('${T("relumière")}');
+      if (voie === 'fantome' && INTERIEUR) b.push('${T("photo d’intérieur")}');
     }
-    if (AV.upActive) b.push('agrandissement ×4');
+    if (AV.upActive) b.push('${T("agrandissement ×4")}');
     return b.join(' · ');
   }
 
@@ -1271,22 +1275,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function avDecorHtml(){
     var h = [];
     if (VOIE === 'humain') {
-      h.push('<div class="avsec prem">Mise en scène du mannequin</div>');
-      h.push(chSel('av-decor', 'Décor', [{ cle: '', t: 'Celui de l’ambiance choisie' }].concat(DECORS),
-        AV.decor, 'Choisi ici, il remplace celui de l’ambiance. Ce sont les 23 décors que le service '
-        + 'connaît : un nom hors liste serait refusé.'));
+      h.push('<div class="avsec prem">${T("Mise en scène du mannequin")}</div>');
+      h.push(chSel('av-decor', '${T("Décor")}', [{ cle: '', t: '${T("Celui de l’ambiance choisie")}' }].concat(DECORS),
+        AV.decor, '${T("Choisi ici, il remplace celui de l’ambiance. Ce sont les 23 décors que le service")} '
+        + '${T("connaît : un nom hors liste serait refusé.")}'));
       h.push(chSel('av-sourire', 'Expression',
-        [{ cle: '1', t: 'Sourire naturel (défaut)' }, { cle: '0', t: 'Neutre' }],
-        AV.sourire ? '1' : '0', 'Sans consigne, le service rend un visage presque fermé — mesuré sur '
-        + 'pièce. Le sourire se demande, il ne vient pas tout seul.'));
-      h.push('<div class="ch avun"><label for="av-extra">Précisions libres</label>'
+        [{ cle: '1', t: '${T("Sourire naturel (défaut)")}' }, { cle: '0', t: 'Neutre' }],
+        AV.sourire ? '1' : '0', '${T("Sans consigne, le service rend un visage presque fermé — mesuré sur")} '
+        + '${T("pièce. Le sourire se demande, il ne vient pas tout seul.")}'));
+      h.push('<div class="ch avun"><label for="av-extra">${T("Précisions libres")}</label>'
         + '<textarea id="av-extra" rows="3" maxlength="200"' + (RO ? ' disabled' : '')
         + ' placeholder="black heels, hair tied back, delicate jewellery">' + esc(AV.extra) + '</textarea>'
         + '</div>');
       h.push('');
     } else {
-      h.push('<div class="avsec prem">Décor décrit au texte</div>');
-      h.push('<div class="ch avun"><label for="av-fond">Décor voulu</label>'
+      h.push('<div class="avsec prem">${T("Décor décrit au texte")}</div>');
+      h.push('<div class="ch avun"><label for="av-fond">${T("Décor voulu")}</label>'
         // rows="3" comme les autres zones libres (2026-08-21). /!\ CELLE-CI ACCEPTE
         // 500 CARACTERES, soit environ sept lignes : trois rangees restent en
         // dessous de ce qu'on peut y mettre. C'est un choix a lui, pas un defaut —
@@ -1295,10 +1299,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<textarea id="av-fond" rows="3" maxlength="500"' + (RO ? ' disabled' : '')
         + ' placeholder="clean marble surface, soft window light from the left">' + esc(AV.fondPrompt)
         + '</textarea></div>');
-      h.push('<div class="ch"><label for="av-neg">À éviter</label>'
+      h.push('<div class="ch"><label for="av-neg">${T("À éviter")}</label>'
         + '<input type="text" id="av-neg" maxlength="300"' + (RO ? ' disabled' : '')
         + ' value="' + esc(AV.fondNegatif) + '" placeholder="text, logo, hands, harsh reflections">'
-        + '<div class="aidep">Ce que le décor ne doit pas contenir.</div></div>');
+        + '<div class="aidep">${T("Ce que le décor ne doit pas contenir.")}</div></div>');
       h.push('<div class="ch"><label for="av-seed">Graine</label>'
         + '<input type="text" id="av-seed" inputmode="numeric" maxlength="9"' + (RO ? ' disabled' : '')
         + ' value="' + esc(AV.fondGraine) + '" placeholder="vide = au hasard">'
@@ -1309,38 +1313,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function avOmbresHtml(){
     var h = [];
-    h.push('<div class="avsec prem">Ombre portée</div>');
+    h.push('<div class="avsec prem">${T("Ombre portée")}</div>');
     h.push('<label class="bascule avun"><input type="checkbox" id="av-ombre"'
         + (AV.ombreActive ? ' checked' : '') + (RO ? ' disabled' : '')
-        + '> <span><strong>Régler l’ombre moi-même</strong><span class="d">Décochée, c’est l’ombre de '
-        + 'l’ambiance qui s’applique. Cochée, <strong>vos réglages remplacent entièrement les '
-        + 'siens</strong> — ce n’est pas un mélange des deux.</span></span></label>');
+        + '> <span><strong>${T("Régler l’ombre moi-même")}</strong><span class="d">${T("Décochée, c’est l’ombre de")} '
+        + '${T("l’ambiance qui s’applique. Cochée, <strong>vos réglages remplacent entièrement les ")}'
+        + '${T("siens</strong> — ce n’est pas un mélange des deux.")}</span></span></label>');
       if (AV.ombreActive) {
-        h.push(chRange('av-oi', 'Intensité', AV.ombreIntensite));
+        h.push(chRange('av-oi', '${T("Intensité")}', AV.ombreIntensite));
         h.push(chRange('av-od', 'Douceur', AV.ombreDouceur));
-        h.push(chSel('av-oe', 'Étendue', OMBRE_ETENDUES, AV.ombreEtendue, ''));
-        h.push(chSel('av-odir', 'Direction de la lumière', OMBRE_DIRS, AV.ombreDirection, ''));
-        h.push(chSel('av-op', 'Pose du sujet',
-          [{ cle: 'upright', t: 'Debout, posé au sol (défaut)' }, { cle: 'flatlay', t: 'À plat, vu de dessus' }],
-          AV.ombrePose, '« Debout » ancre le vêtement au sol pour qu’il ne flotte pas. Ne choisissez '
-          + '« à plat » que si la photo est prise à la verticale, au-dessus du vêtement.'));
+        h.push(chSel('av-oe', '${T("Étendue")}', OMBRE_ETENDUES, AV.ombreEtendue, ''));
+        h.push(chSel('av-odir', '${T("Direction de la lumière")}', OMBRE_DIRS, AV.ombreDirection, ''));
+        h.push(chSel('av-op', '${T("Pose du sujet")}',
+          [{ cle: 'upright', t: '${T("Debout, posé au sol (défaut)")}' }, { cle: 'flatlay', t: '${T("À plat, vu de dessus")}' }],
+          AV.ombrePose, '${T("« Debout » ancre le vêtement au sol pour qu’il ne flotte pas. Ne choisissez")} '
+          + '${T("« à plat » que si la photo est prise à la verticale, au-dessus du vêtement.")}'));
     }
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
 
   function avLumiereHtml(){
     var h = [];
-    h.push('<div class="avsec prem">Relumière</div>');
-    h.push(chSel('av-lum', 'Accorder la lumière du sujet au décor', LUMIERES, AV.lumiere,
-      '« Préserver la teinte » garde la <strong>vraie couleur du tissu</strong> : c’est le seul choix sûr '
-      + 'quand on vend l’article sur sa couleur. « Automatique » éclaire mieux mais peut la déplacer — '
-      + 'un bleu nuit qui ressort bleu roi fait un retour.'));
+    h.push('<div class="avsec prem">${T("Relumière")}</div>');
+    h.push(chSel('av-lum', '${T("Accorder la lumière du sujet au décor")}', LUMIERES, AV.lumiere,
+      '${T("« Préserver la teinte » garde la <strong>vraie couleur du tissu</strong> : c’est le seul choix sûr ")}'
+      + '${T("quand on vend l’article sur sa couleur. « Automatique » éclaire mieux mais peut la déplacer —")} '
+      + '${T("un bleu nuit qui ressort bleu roi fait un retour.")}'));
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
 
   function avInterieurHtml(){
     var h = [];
-    h.push('<div class="avsec prem">Photo de l’intérieur du vêtement</div>');
+    h.push('<div class="avsec prem">${T("Photo de l’intérieur du vêtement")}</div>');
     h.push('');
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
@@ -1350,12 +1354,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h.push('<div class="avsec prem">Agrandissement</div>');
     h.push('<label class="bascule avun"><input type="checkbox" id="av-up"'
       + (AV.upActive ? ' checked' : '') + (RO ? ' disabled' : '')
-      + '> <span><strong>Agrandir ×4</strong><span class="d">Un appel de plus, facturé, après le '
+      + '> <span><strong>${T("Agrandir ×4")}</strong><span class="d">${T("Un appel de plus, facturé, après le")} '
       + 'traitement.</span></span></label>');
     if (AV.upActive) {
       h.push(chSel('av-up-mode', 'Mode', [
-        { cle: 'ai.fast', t: 'Rapide — entrée jusqu’à 1000 px' },
-        { cle: 'ai.slow', t: 'Lent, plus fin — entrée jusqu’à 512 px' }], AV.upMode, ''));
+        { cle: 'ai.fast', t: '${T("Rapide — entrée jusqu’à 1000 px")}' },
+        { cle: 'ai.slow', t: '${T("Lent, plus fin — entrée jusqu’à 512 px")}' }], AV.upMode, ''));
       h.push('');
     }
     return '<div class="avgrille">' + h.join('') + '</div>';
@@ -1383,29 +1387,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function filigraneCorpsHtml(){
     if (!LOGOS.length) {
-      return '<div class="avgrille"><div class="aidep att">Aucun logo dans la logothèque. '
-        + 'Ajoutez-en un dans <strong>Configuration ▸ Logothèque</strong>, puis rouvrez cet écran.'
+      return '<div class="avgrille"><div class="aidep att">${T("Aucun logo dans la logothèque.")} '
+        + '${T("Ajoutez-en un dans <strong>Configuration ▸ Logothèque</strong>, puis rouvrez cet écran.")}'
         + '</div></div>';
     }
     var lg = logoChoisi();
-    var h = '<div class="avgrille"><div class="avsec prem">Le logo</div>'
+    var h = '<div class="avgrille"><div class="avsec prem">${T("Le logo")}</div>'
       + '<div class="loggr">' + LOGOS.map(function(l){
           return '<div class="logv' + (FIL.logoId === l.id ? ' on' : '') + '" data-logo="'
             + esc(l.id) + '" title="' + esc(l.nom) + '">'
             + '<img src="' + l.image + '" alt="' + esc(l.nom) + '">'
             + '<span class="ln">' + esc(l.nom) + '</span></div>'; }).join('') + '</div>';
-    h += '<div class="avsec">Où le poser</div>'
+    h += '<div class="avsec">${T("Où le poser")}</div>'
       + '<div class="posgr">' + POSITIONS.map(function(p){
           return '<button class="posc' + (FIL.position === p.cle ? ' on' : '') + '" data-pos="'
             + esc(p.cle) + '" title="' + esc(p.t) + '"><span></span></button>'; }).join('') + '</div>';
-    h += '<div class="avsec">Taille et discrétion</div>';
-    h += chRange2('fil-taille', 'Largeur du logo', FIL.taille, 5, 60, 1, ' % de l’image');
-    h += chRange2('fil-op', 'Opacité', Math.round(FIL.opacite * 100), 5, 100, 5, ' %');
+    h += '<div class="avsec">${T("Taille et discrétion")}</div>';
+    h += chRange2('fil-taille', '${T("Largeur du logo")}', FIL.taille, 5, 60, 1, ' ${T("% de l’image")}');
+    h += chRange2('fil-op', '${T("Opacité")}', Math.round(FIL.opacite * 100), 5, 100, 5, ' %');
     h += chRange2('fil-marge', 'Marge', FIL.marge, 0, 15, 1, ' %');
     h += '<div class="avun"><div class="fbar">'
       + '<button class="prim" id="fil-go"' + ((RESULT && lg && !RO) ? '' : ' disabled') + '>'
-      + 'Appliquer au résultat</button>'
-      + ((RESULT && RESULT.filigrane) ? '<button id="fil-off">Retirer</button>' : '')
+      + '${T("Appliquer au résultat")}</button>'
+      + ((RESULT && RESULT.filigrane) ? '<button id="fil-off">${T("Retirer")}</button>' : '')
       + '</div>'
       /* ⚠ CE QUE ÇA COÛTE, DIT UNE FOIS POUR TOUTES : rien. C est le seul
          traitement de cet écran dont le prix ne dépend pas du nombre de photos. */
@@ -1456,7 +1460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        aucun retour possible sans repayer un rendu. */
     var base = RESULT.brut || RESULT.image;
     occuper(true);
-    dire('Pose du filigrane…');
+    dire('${T("Pose du filigrane…")}');
     appeler('studio:filigraner', [{ image: base, logo: lg.image, position: FIL.position,
       taille: FIL.taille, opacite: FIL.opacite, marge: FIL.marge }]).then(function(r){
       occuper(false);
@@ -1470,7 +1474,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ENREG = false;
       peindreResultat();
       majFiligrane();
-      dire('Filigrane posé — aucun crédit dépensé.', 'bon');
+      dire('${T("Filigrane posé — aucun crédit dépensé.")}', 'bon');
     });
   }
 
@@ -1483,7 +1487,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ENREG = false;
     peindreResultat();
     majFiligrane();
-    dire('Filigrane retiré.', 'att');
+    dire('${T("Filigrane retiré.")}', 'att');
   }
 
   function chargerLogos(){
@@ -1508,14 +1512,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var ONGLET = 'photo';
   var ONGLETS = [
     { cle: 'photo',     t: 'Photo',          voies: '*' },
-    { cle: 'valeur',    t: 'Mise en valeur', voies: '*' },
+    { cle: 'valeur',    t: '${T("Mise en valeur")}', voies: '*' },
     { cle: 'ambiance',  t: 'Ambiance',       voies: '*' },
-    { cle: 'decor',     t: 'Décor',          voies: '*' },
+    { cle: 'decor',     t: '${T("Décor")}',          voies: '*' },
     { cle: 'ombres',    t: 'Ombres',         voies: 'fantome,plat' },
-    { cle: 'lumiere',   t: 'Lumière',        voies: 'fantome,plat' },
-    { cle: 'interieur', t: 'Intérieur',      voies: 'fantome' },
+    { cle: 'lumiere',   t: '${T("Lumière")}',        voies: 'fantome,plat' },
+    { cle: 'interieur', t: '${T("Intérieur")}',      voies: 'fantome' },
     { cle: 'agrandir',  t: 'Agrandissement', voies: '*' },
-    { cle: 'filigrane', t: 'Filigrane',      voies: '*' }
+    { cle: 'filigrane', t: '${T("Filigrane")}',      voies: '*' }
   ];
   function ongletsDispo(){
     return ONGLETS.filter(function(o){
@@ -1545,13 +1549,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   // Ce que l onglet a recu, dit SUR l onglet. Vide = rien de choisi.
   function ongletEtat(cle){
-    if (cle === 'photo')     return aUnePhoto() ? (PHOTO_NOM || 'photo prête') : '';
+    if (cle === 'photo')     return aUnePhoto() ? (PHOTO_NOM || '${T("photo prête")}') : '';
     if (cle === 'valeur')    return nomVoie(VOIE);
     if (cle === 'ambiance')  return PRESET ? nomPreset(PRESET) : '';
     if (cle === 'decor')     return (VOIE === 'humain')
       ? (AV.decor ? nomDecor(AV.decor) : '')
-      : (String(AV.fondPrompt || '').trim() ? 'décrit au texte' : '');
-    if (cle === 'ombres')    return AV.ombreActive ? 'réglée à la main' : '';
+      : (String(AV.fondPrompt || '').trim() ? '${T("décrit au texte")}' : '');
+    if (cle === 'ombres')    return AV.ombreActive ? '${T("réglée à la main")}' : '';
     if (cle === 'lumiere')   return AV.lumiere ? 'active' : '';
     if (cle === 'interieur') return INTERIEUR ? (INTERIEUR_NOM || 'photo choisie') : '';
     if (cle === 'agrandir')  return AV.upActive ? '×4' : '';
@@ -1612,10 +1616,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          fois, puis on cherche la panne ailleurs — c est la regle appliquee le
          meme jour aux boutons verrouilles de la sauvegarde. */
       return '<button class="ong' + (o.cle === courant ? ' on' : '') + '" data-ong="' + o.cle
-        + '"' + (bloque ? ' disabled title="Choisissez d’abord une photo"' : '')
+        + '"' + (bloque ? ' disabled title="${T("Choisissez d’abord une photo")}"' : '')
         + ' role="tab" aria-selected="' + (o.cle === courant ? 'true' : 'false') + '">'
         + '<span class="ot"><b>' + esc(o.t) + '</b>'
-        + '<span class="oe">' + esc(e || (ongletRequis(o.cle) ? 'À choisir' : '—')) + '</span></span>'
+        + '<span class="oe">' + esc(e || (ongletRequis(o.cle) ? '${T("À choisir")}' : '—')) + '</span></span>'
         + (ok ? '<span class="oc">✓</span>' : '') + '</button>';
     }).join('');
   }
@@ -1637,15 +1641,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="pnc">' + corpsG + '</div>';
   }
   function panneauSousHtml(cle){
-    if (cle === 'photo')     return 'Celle de départ, prise en studio sur fond blanc.';
-    if (cle === 'valeur')    return 'Comment le vêtement est présenté.';
-    if (cle === 'ambiance')  return 'Un clic règle décor, ombre ancrée et lumière.';
-    if (cle === 'decor')     return 'Ce qu’il y a derrière le vêtement. Facultatif : l’ambiance en pose déjà un.';
-    if (cle === 'ombres')    return 'Facultatif : sans réglage, c’est l’ombre de l’ambiance qui s’applique.';
-    if (cle === 'lumiere')   return 'Facultatif : accorder la lumière du sujet à celle du décor.';
-    if (cle === 'interieur') return 'La seconde prise de vue, vêtement retourné — le seul col qui ne soit pas inventé.';
-    if (cle === 'agrandir')  return 'Facultatif, et <strong>facturé un appel de plus</strong>.';
-    if (cle === 'filigrane') return 'Le logo de la marque, posé sur l’image. Aucun appel, aucun crédit.';
+    if (cle === 'photo')     return '${T("Celle de départ, prise en studio sur fond blanc.")}';
+    if (cle === 'valeur')    return '${T("Comment le vêtement est présenté.")}';
+    if (cle === 'ambiance')  return '${T("Un clic règle décor, ombre ancrée et lumière.")}';
+    if (cle === 'decor')     return '${T("Ce qu’il y a derrière le vêtement. Facultatif : l’ambiance en pose déjà un.")}';
+    if (cle === 'ombres')    return '${T("Facultatif : sans réglage, c’est l’ombre de l’ambiance qui s’applique.")}';
+    if (cle === 'lumiere')   return '${T("Facultatif : accorder la lumière du sujet à celle du décor.")}';
+    if (cle === 'interieur') return '${T("La seconde prise de vue, vêtement retourné — le seul col qui ne soit pas inventé.")}';
+    if (cle === 'agrandir')  return '${T("Facultatif, et <strong>facturé un appel de plus</strong>.")}';
+    if (cle === 'filigrane') return '${T("Le logo de la marque, posé sur l’image. Aucun appel, aucun crédit.")}';
     return '';
   }
   /* Repeindre le SEUL panneau, jamais toute la fenêtre : un redessin complet
@@ -1720,16 +1724,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="rcbar" id="rcbar">'
       + '<label for="rc-sel">Profil</label>'
       + '<select id="rc-sel"' + (RO ? ' disabled' : '') + '>'
-      + '<option value="">— Aucun —</option>'
+      + '<option value="">${T("— Aucun —")}</option>'
       + RECETTES.map(function(o){
           return '<option value="' + esc(o.id) + '"' + (RC_SEL === o.id ? ' selected' : '')
             + '>' + esc(o.nom) + '</option>'; }).join('')
       + '</select>'
       + '<button id="rc-enr"' + (RO ? ' disabled' : '')
-      + ' title="Enregistrer tous les réglages actuels sous un nom">'
-      + '<span class="ic">💾</span> Enregistrer…</button>'
+      + ' title="${T("Enregistrer")} tous les réglages actuels sous un nom">'
+      + '<span class="ic">💾</span> ${T("Enregistrer…")}</button>'
       + '<button class="x" id="rc-sup"' + ((RO || !x) ? ' disabled' : '')
-      + ' title="Retirer ce profil">✕</button></div>';
+      + ' title="${T("Retirer")} ce profil">✕</button></div>';
   }
   function brancherRecettes(){
     var s = document.getElementById('rc-sel');
@@ -1768,7 +1772,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function appliquerRecette(id){
     RC_SEL = String(id || '');
     var x = recetteChoisie();
-    if (!x) { dessiner(); dire('Aucun profil appliqué — les réglages sont ceux de l’écran.', 'att'); return; }
+    if (!x) { dessiner(); dire('${T("Aucun profil appliqué — les réglages sont ceux de l’écran.")}', 'att'); return; }
     var r = x.r || {};
     var perdus = [];
     if (r.voie && estVoie(r.voie)) { VOIE = r.voie; VOIE_CHOISIE = true; }
@@ -1790,13 +1794,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        enregistrer une image que l ecran ne decrit plus. */
     RESULT = null; FORMATS = []; ENREG = false;
     dessiner();
-    var m = 'Profil « ' + x.nom +' » appliqué.';
+    var m = '${T("Profil «")} ' + x.nom +' ${T("» appliqué.")}';
     if (perdus.length) {
       dire(m + ' ' + perdus.join(' et ') + ' de ce profil '
-        + (perdus.length > 1 ? 'n’existent plus' : 'n’existe plus')
-        + ' — ce réglage est resté au défaut.', 'att');
+        + (perdus.length > 1 ? '${T("n’existent plus")}' : '${T("n’existe plus")}')
+        + ' ${T("— ce réglage est resté au défaut.")}', 'att');
     } else {
-      dire(m + ' Tout est en place : il ne reste que la photo à choisir.', 'bon');
+      dire(m + ' ${T("Tout est en place : il ne reste que la photo à choisir.")}', 'bon');
     }
   }
 
@@ -1816,16 +1820,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function ouvrirRecetteVoile(){
     if (RO) return;
     var x = recetteChoisie();
-    voile('<h3><span class="ic">💾</span> Enregistrer le profil</h3>'
+    voile('<h3><span class="ic">💾</span> ${T("Enregistrer le profil")}</h3>'
       + ''
       + ''
       + '<p><input type="text" id="rc-nom" aria-label="Nom de la recette" maxlength="60" placeholder="Ex. : Collection automne — plage dorée" '
       + 'value="' + esc(x ? x.nom : '') + '"></p>'
       + '<p class="rcav" id="rc-av">' + (x
-          ? 'Ce nom est celui du profil choisi : il sera <strong>remplacé</strong>.'
+          ? '${T("Ce nom est celui du profil choisi : il sera <strong>remplacé</strong>.")}'
           : '') + '</p>'
-      + '<div class="fin2"><button id="rc-non">Annuler</button>'
-      + '<button class="prim" id="rc-oui">Enregistrer</button></div>',
+      + '<div class="fin2"><button id="rc-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="rc-oui">${T("Enregistrer")}</button></div>',
       function(fermer){
         var n = document.getElementById('rc-nom');
         var av = document.getElementById('rc-av');
@@ -1839,14 +1843,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var v = String((n && n.value) || '').trim().toLowerCase();
           var d = RECETTES.filter(function(o){ return String(o.nom).trim().toLowerCase() === v; })[0];
           av.innerHTML = (v && d)
-            ? 'Un profil porte déjà ce nom : il sera <strong>remplacé</strong>.'
+            ? '${T("Un profil porte déjà ce nom : il sera <strong>remplacé</strong>.")}'
             : '';
         };
         if (n) { n.oninput = majAv; majAv(); }
         if (non) non.onclick = fermer;
         var lancer = function(){
           var nom = String((n && n.value) || '').trim();
-          if (!nom) { if (av) av.innerHTML = 'Donnez-lui un nom.'; if (n) n.focus(); return; }
+          if (!nom) { if (av) av.innerHTML = '${T("Donnez-lui un nom.")}'; if (n) n.focus(); return; }
           if (oui) oui.disabled = true;
           enregistrerRecette(nom, fermer);
         };
@@ -1856,7 +1860,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function enregistrerRecette(nom, fermer){
-    dire('Enregistrement du profil…');
+    dire('${T("Enregistrement du profil…")}');
     /* ⚠ ON N ENVOIE PAS L IDENTIFIANT COURANT AVEUGLEMENT. Si le nom tape n est
        plus celui de la recette choisie, c est une recette NEUVE qu on veut, pas
        un renommage de l ancienne — sinon << Enregistrer sous un autre nom >>
@@ -1870,18 +1874,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       RC_SEL = res.id || '';
       if (fermer) fermer();
       dessiner();
-      dire('Profil « ' + nom + ' » enregistré.', 'bon');
+      dire('${T("Profil «")} ' + nom + ' ${T("» enregistré.")}', 'bon');
     });
   }
 
   function retirerRecette(){
     var x = recetteChoisie();
     if (!x || RO) return;
-    voile('<h3>Retirer le profil ?</h3>'
-      + '<p>« <strong>' + esc(x.nom) + '</strong> » sera effacé. Les réglages restent à l’écran : '
-      + 'c’est le raccourci qui disparaît, pas la mise en scène.</p>'
-      + '<div class="fin2"><button id="rs-non">Annuler</button>'
-      + '<button class="conf" id="rs-oui">Retirer</button></div>',
+    voile('<h3>${T("Retirer le profil ?")}</h3>'
+      + '<p>« <strong>' + esc(x.nom) + '</strong> ${T("» sera effacé. Les réglages restent à l’écran :")} '
+      + '${T("c’est le raccourci qui disparaît, pas la mise en scène.")}</p>'
+      + '<div class="fin2"><button id="rs-non">${T("Annuler")}</button>'
+      + '<button class="conf" id="rs-oui">${T("Retirer")}</button></div>',
       function(fermer){
         var non = document.getElementById('rs-non');
         var oui = document.getElementById('rs-oui');
@@ -1894,7 +1898,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             RECETTES = res.recettes || [];
             RC_SEL = '';
             dessiner();
-            dire('Profil retiré.', 'att');
+            dire('${T("Profil retiré.")}', 'att');
           });
         };
       });
@@ -1969,17 +1973,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (f) f.onchange = function(){ if (f.files && f.files[0]) lireInterieur(f.files[0]); };
     var ix = document.getElementById('av-int-x');
     if (ix) ix.onclick = function(){ INTERIEUR = null; INTERIEUR_NOM = ''; majAvance();
-      dire('Photo d’intérieur retirée.', 'att'); };
+      dire('${T("Photo d’intérieur retirée.")}', 'att'); };
   }
 
   function lireInterieur(fi){
-    if (!fi || String(fi.type).indexOf('image/') !== 0) { dire('Ce n’est pas une image.', 'err'); return; }
-    dire('Lecture de la photo d’intérieur…');
+    if (!fi || String(fi.type).indexOf('image/') !== 0) { dire('${T("Ce n’est pas une image.")}', 'err'); return; }
+    dire('${T("Lecture de la photo d’intérieur…")}');
     var fr = new FileReader();
     fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
       INTERIEUR = petite; INTERIEUR_NOM = String(fi.name || '');
-      majAvance(); dire('Photo d’intérieur prête.', 'bon'); }); };
-    fr.onerror = function(){ dire('Lecture impossible.', 'err'); };
+      majAvance(); dire('${T("Photo d’intérieur prête.")}', 'bon'); }); };
+    fr.onerror = function(){ dire('${T("Lecture impossible.")}', 'err'); };
     fr.readAsDataURL(fi);
   }
 
@@ -1991,21 +1995,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      censé lever. Sans cet affichage, la mise en garde sur la photo d intérieur
      (« s il est ignoré, l écran vous le rapporte ») serait une promesse fausse. */
   var IGN_NOMS = {
-    'editWithAI.additionalImages.interior.imageFile': 'la photo de l’intérieur du vêtement',
-    'background.prompt': 'le décor décrit au texte',
-    'background.negativePrompt': 'l’anti-consigne du décor',
-    'background.seed': 'la graine du décor',
-    'lighting.mode': 'la relumière',
+    'editWithAI.additionalImages.interior.imageFile': '${T("la photo de l’intérieur du vêtement")}',
+    'background.prompt': '${T("le décor décrit au texte")}',
+    'background.negativePrompt': '${T("l’anti-consigne du décor")}',
+    'background.seed': '${T("la graine du décor")}',
+    'lighting.mode': '${T("la relumière")}',
     'upscale.mode': 'l’agrandissement',
-    'shadow.mode': 'l’ombre portée',
-    'shadow.intensityOverride': 'l’intensité de l’ombre',
-    'shadow.softnessOverride': 'la douceur de l’ombre',
-    'shadow.spreadOverride': 'l’étendue de l’ombre',
-    'shadow.directionOverride': 'la direction de l’ombre',
-    'shadow.subjectPoseOverride': 'la pose du sujet pour l’ombre',
+    'shadow.mode': '${T("l’ombre portée")}',
+    'shadow.intensityOverride': '${T("l’intensité de l’ombre")}',
+    'shadow.softnessOverride': '${T("la douceur de l’ombre")}',
+    'shadow.spreadOverride': '${T("l’étendue de l’ombre")}',
+    'shadow.directionOverride': '${T("la direction de l’ombre")}',
+    'shadow.subjectPoseOverride': '${T("la pose du sujet pour l’ombre")}',
     'virtualModel.pose': 'la pose du mannequin',
-    'virtualModel.prompt': 'l’expression et les précisions libres',
-    'virtualModel.scene.preset.name': 'le décor du mannequin',
+    'virtualModel.prompt': '${T("l’expression et les précisions libres")}',
+    'virtualModel.scene.preset.name': '${T("le décor du mannequin")}',
     'virtualModel.model.preset.name': 'le mannequin choisi'
   };
   function ignoresLisible(s){
@@ -2025,13 +2029,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<img src="' + esc(av) + '" alt="avant">'
       + '<div class="cb"><img src="' + RESULT.image + '" alt="après"></div>'
       + '<div class="cpg" id="cmp-p" role="slider" tabindex="0"'
-      + ' aria-label="Position du rideau entre l’avant et l’après"'
+      + ' aria-label="${T("Position du rideau entre l’avant et l’après")}"'
       + ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(CMP_POS) + '">'
       + '<span class="cph">⇔</span></div>'
-      + '<span class="cet g">Avant</span><span class="cet d">Après</span></div>'
+      + '<span class="cet g">${T("Avant")}</span><span class="cet d">${T("Après")}</span></div>'
       + (!PHOTO && PHOTO_URL
-          ? '<div class="avis">L’« avant » est la vignette de la photothèque : un repère de '
-            + 'cadrage et de couleur, pas un juge de netteté.</div>'
+          ? '<div class="avis">${T("L’« avant » est la vignette de la photothèque : un repère de")} '
+            + '${T("cadrage et de couleur, pas un juge de netteté.")}</div>'
           : '');
   }
 
@@ -2096,7 +2100,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function preparerFormats(){
     if (!RESULT || !RESULT.image || FORM_OCC || RO) return;
     FORM_OCC = true; FORMATS = []; peindreResultat();
-    dire('Préparation des formats…');
+    dire('${T("Préparation des formats…")}');
     var fini = function(msg, cl){ FORM_OCC = false; peindreResultat(); dire(msg, cl); };
     /* ⚠ new Image() PEUT NE PAS EXISTER (banc de contrôle, contexte sans canevas).
        On ne fait pas semblant que ça a marché : la liste reste vide et l écran le
@@ -2114,21 +2118,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           }
           FORMATS = out;
           fini(out.length
-            ? (out.length + ' formats prêts — aucun appel, aucun crédit.')
-            : 'Aucun format n’a pu être préparé.', out.length ? 'bon' : 'err');
+            ? (out.length + ' ${T("formats prêts — aucun appel, aucun crédit.")}')
+            : '${T("Aucun format n’a pu être préparé.")}', out.length ? 'bon' : 'err');
         } catch (e) {
           FORMATS = [];
-          fini('Les formats n’ont pas pu être préparés (' + esc((e && e.message) || e) + ').', 'err');
+          fini('${T("Les formats n’ont pas pu être préparés (")}' + esc((e && e.message) || e) + ').', 'err');
         }
       };
       im.onerror = function(){
         FORMATS = [];
-        fini('L’image n’a pas pu être relue pour en tirer des formats.', 'err');
+        fini('${T("L’image n’a pas pu être relue pour en tirer des formats.")}', 'err');
       };
       im.src = RESULT.image;
     } catch (e) {
       FORMATS = [];
-      fini('Les formats ne sont pas disponibles dans cette fenêtre.', 'err');
+      fini('${T("Les formats ne sont pas disponibles dans cette fenêtre.")}', 'err');
     }
   }
 
@@ -2136,14 +2140,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function formatsHtml(){
     if (!RESULT) return '';
-    var h = '<span class="rt">Formats de sortie</span>'
-      + '<div class="note">La même image en 3:4, 1:1, 4:5 et 9:16, préparés ici même — '
-      + '<strong>aucun appel, aucun crédit</strong>.</div>'
+    var h = '<span class="rt">${T("Formats de sortie")}</span>'
+      + '<div class="note">${T("La même image en 3:4, 1:1, 4:5 et 9:16, préparés ici même —")} '
+      + '<strong>${T("aucun appel, aucun crédit")}</strong>.</div>'
       + '<div class="fbar">'
       + '<button class="jeton' + (FORM_MODE === 'recadrer' ? ' on' : '') + '" data-fmode="recadrer">Recadrer</button>'
       + '<button class="jeton' + (FORM_MODE === 'marges' ? ' on' : '') + '" data-fmode="marges">Marges</button>'
       + '<button class="jeton prim grand" id="fmt-go"' + (FORM_OCC || RO ? ' disabled' : '') + '>'
-      + (FORM_OCC ? 'Préparation…' : (FORMATS.length ? '↻ Refaire les 4 formats' : '⚙ Préparer les 4 formats'))
+      + (FORM_OCC ? '${T("Préparation…")}' : (FORMATS.length ? '${T("↻ Refaire les 4 formats")}' : '${T("⚙ Préparer les 4 formats")}'))
       + '</button></div>';
     /* ⚠ CE QUE CHAQUE GESTE COÛTE VRAIMENT, DIT AVANT DE CLIQUER. Un recadrage
        centré COUPE — sur une silhouette entière, le 1:1 emporte forcément le haut
@@ -2158,13 +2162,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<span class="fb">'
           + '<button data-fdl="' + esc(f.cle) + '" title="Télécharger ce format">⤓</button>'
           + '<button data-fsv="' + esc(f.cle) + '"' + (f.enreg ? ' disabled' : '')
-          + ' title="Enregistrer dans la photothèque">'
+          + ' title="${T("Enregistrer dans la photothèque")}">'
       + (f.enreg ? '✓' : '<span class="ic">💾</span>') + '</button>'
           + '</span></div>';
       }).join('') + '</div>'
         + '<div class="fbar"><button class="prim" id="fmt-save-all"'
-        + (RO ? ' disabled' : '') + '><span class="ic">💾</span> Enregistrer les ' + FORMATS.length
-        + ' dans la photothèque</button></div>';
+        + (RO ? ' disabled' : '') + '><span class="ic">💾</span> ${T("Enregistrer les")} ' + FORMATS.length
+        + ' ${T("dans la photothèque")}</button></div>';
     }
     return h;
   }
@@ -2185,9 +2189,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         occuper(false);
         peindreResultat();
         dire(rate
-          ? (faits + ' format' + (faits > 1 ? 's' : '') + ' enregistré' + (faits > 1 ? 's' : '')
-             + ', ' + rate + ' en échec.')
-          : (faits + ' formats enregistrés dans la photothèque.'), rate ? 'att' : 'bon');
+          ? (faits + ' format' + (faits > 1 ? 's' : '') + ' ${T("enregistré")}' + (faits > 1 ? 's' : '')
+             + ', ' + rate + ' ${T("en échec.")}')
+          : (faits + ' ${T("formats enregistrés dans la photothèque.")}'), rate ? 'att' : 'bon');
         return;
       }
       var f = FORMATS[i]; i++;
@@ -2204,37 +2208,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function enregistrerUnFormat(f){
     if (!f || f.enreg || OCCUPE || RO) return;
     occuper(true);
-    dire('Enregistrement du format ' + f.label + '…');
+    dire('${T("Enregistrement du format")} ' + f.label + '…');
     appeler('studio:enregistrer', [{ image: f.image, nom: nomFormat(f) }]).then(function(r){
       occuper(false);
       if (r && r.ok) {
         f.enreg = true;
         peindreResultat();
-        dire('Format ' + f.label + ' enregistré dans la photothèque.', 'bon');
+        dire('Format ' + f.label + ' ${T("enregistré dans la photothèque.")}', 'bon');
       } else dire(expliquer(r), 'err');
     });
   }
 
   function resultatHtml(){
     if (!RESULT) {
-      return '<div class="vide" style="padding:.2rem">L’image apparaîtra ici.</div>' + guideHtml();
+      return '<div class="vide" style="padding:.2rem">${T("L’image apparaîtra ici.")}</div>' + guideHtml();
     }
     var av = photoAvant();
     var h = '';
     if (av) {
       h += '<div class="cmpb">'
-        + '<button class="jeton' + (CMP ? ' on' : '') + '" id="cmp-on">⇔ Avant / après</button>'
-        + '<button class="jeton' + (CMP ? '' : ' on') + '" id="cmp-off">Résultat seul</button></div>';
+        + '<button class="jeton' + (CMP ? ' on' : '') + '" id="cmp-on">${T("⇔ Avant / après")}</button>'
+        + '<button class="jeton' + (CMP ? '' : ' on') + '" id="cmp-off">${T("Résultat seul")}</button></div>';
     }
     h += (av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="résultat">');
-    if (RESULT.essai) h += '<div class="filig"><span class="ic">⚠</span> Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.</div>';
-    if (RESULT.decorErreur) h += '<div class="filig"><span class="ic">⚠</span> Le décor n’a pas pu être appliqué : ' + esc(RESULT.decorErreur) + '</div>';
-    if (RESULT.ignores) h += '<div class="filig"><span class="ic">⚠</span> Le service a <strong>ignoré</strong> : '
-      + esc(ignoresLisible(RESULT.ignores)) + '. Le reste du traitement a bien eu lieu.</div>';
+    if (RESULT.essai) h += '<div class="filig"><span class="ic">⚠</span> ${T("Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.")}</div>';
+    if (RESULT.decorErreur) h += '<div class="filig"><span class="ic">⚠</span> ${T("Le décor n’a pas pu être appliqué :")} ' + esc(RESULT.decorErreur) + '</div>';
+    if (RESULT.ignores) h += '<div class="filig"><span class="ic">⚠</span> ${T("Le service a <strong>ignoré</strong> : ")}'
+      + esc(ignoresLisible(RESULT.ignores)) + '${T(". Le reste du traitement a bien eu lieu.")}</div>';
     if (RESULT.upNote) h += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
-    h += '<div class="dl"><button id="b-dl">Télécharger l’image</button> '
-      + '<button id="b-save"' + (ENREG ? ' disabled' : '') + '>' + (ENREG ? '✓ Dans la photothèque' : '<span class="ic">💾</span> Enregistrer dans la photothèque') + '</button></div>';
+    h += '<div class="dl"><button id="b-dl">${T("Télécharger l’image")}</button> '
+      + '<button id="b-save"' + (ENREG ? ' disabled' : '') + '>' + (ENREG ? '${T("✓ Dans la photothèque")}' : '<span class="ic">💾</span> ${T("Enregistrer dans la photothèque")}') + '</button></div>';
     return h;
   }
 
@@ -2258,7 +2262,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function recapHtml(){
     var j = ['<span class="jt">' + esc(nomVoie(VOIE)) + '</span>'];
     j.push(PRESET ? '<span class="jt">' + esc(nomPreset(PRESET)) + '</span>'
-                  : '<span class="jt gris">ambiance à choisir</span>');
+                  : '<span class="jt gris">${T("ambiance à choisir")}</span>');
     if (VOIE === 'humain') {
       j.push('<span class="jt">' + esc(nomModele(MODELE_SEL)) + '</span>');
       j.push('<span class="jt">' + esc(nomPose(POSE_SEL)) + '</span>');
@@ -2267,8 +2271,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (a) {
       a.split(' · ').forEach(function(x){ j.push('<span class="jt">' + esc(x) + '</span>'); });
     }
-    if (RESULT && RESULT.filigrane) j.push('<span class="jt">filigrané</span>');
-    return '<div class="bloc recap"><span class="rt">Ce qui sera généré</span>'
+    if (RESULT && RESULT.filigrane) j.push('<span class="jt">${T("filigrané")}</span>');
+    return '<div class="bloc recap"><span class="rt">${T("Ce qui sera généré")}</span>'
       + '<div class="rc2">' + j.join('') + '</div>'
       + '</div>';
   }
@@ -2283,9 +2287,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span class="n">' + (ok ? '✓' : n) + '</span><span>' + t + '</span></div>';
     };
     return '<div class="guide">'
-      + l(e1, !e1, '1', 'Choisissez une photo')
-      + l(e2, e1 && !e2, '2', 'Choisissez une ambiance')
-      + l(false, e1 && e2, '3', 'Cliquez « Aperçu gratuit », en bas de la fenêtre')
+      + l(e1, !e1, '1', '${T("Choisissez une photo")}')
+      + l(e2, e1 && !e2, '2', '${T("Choisissez une ambiance")}')
+      + l(false, e1 && e2, '3', '${T("Cliquez « Aperçu gratuit », en bas de la fenêtre")}')
       + '</div>';
   }
 
@@ -2344,7 +2348,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var px = document.getElementById('ph-explorateur');
     if (px) px.onclick = function(){
       appeler('explorateur:ouvrir', []).then(function(r){
-        dire(r && r.ok ? 'Explorateur ouvert dans sa fenêtre.' : expliquer(r),
+        dire(r && r.ok ? '${T("Explorateur ouvert dans sa fenêtre.")}' : expliquer(r),
           (r && r.ok) ? 'bon' : 'err');
       });
     };
@@ -2382,7 +2386,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     brancherExplorateur();
     corps.querySelectorAll('[data-voie]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); VOIE_CHOISIE = true; RESULT = null; dessiner();
-        dire('Voie : ' + VOIE + '.', 'att'); };
+        dire('${T("Voie :")} ' + VOIE + '.', 'att'); };
     });
     corps.querySelectorAll('[data-preset]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; PRESET = el.getAttribute('data-preset'); dessiner(); };
@@ -2391,7 +2395,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (ps) ps.onchange = function(){
       POSE_SEL = ps.value;
       dessiner();
-      dire('Pose : ' + (POSES.filter(function(p){ return p.cle === POSE_SEL; })[0] || {}).t + '.', 'att');
+      dire('${T("Pose :")} ' + (POSES.filter(function(p){ return p.cle === POSE_SEL; })[0] || {}).t + '.', 'att');
     };
     var msel = document.getElementById('modele-sel');
     if (msel) msel.onchange = function(){ choisirModele(msel.value); };
@@ -2508,7 +2512,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function choisirModele(m){
     var av = MODELE_SEL;
     MODELE_SEL = m;
-    if (av !== m) dire('Modèle : ' + nomModele(m) + '.', 'bon');
+    if (av !== m) dire('${T("Modèle :")} ' + nomModele(m) + '.', 'bon');
   }
 
   /* ⚠ << fabriquerPortraits >>, << refairePortraits >> et
@@ -2530,15 +2534,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function lireFichier(f){
-    if (!f || String(f.type).indexOf('image/') !== 0) { dire('Ce n’est pas une image.', 'err'); return; }
-    dire('Lecture de la photo…');
+    if (!f || String(f.type).indexOf('image/') !== 0) { dire('${T("Ce n’est pas une image.")}', 'err'); return; }
+    dire('${T("Lecture de la photo…")}');
     var fr = new FileReader();
     fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
       PHOTO = petite; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = String(f.name || '');
       PICKER = false; RESULT = null; ENREG = false;
       INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
-      dessiner(); dire('Photo prête.', 'bon'); }); };
-    fr.onerror = function(){ dire('Lecture impossible.', 'err'); };
+      dessiner(); dire('${T("Photo prête.")}', 'bon'); }); };
+    fr.onerror = function(){ dire('${T("Lecture impossible.")}', 'err'); };
     fr.readAsDataURL(f);
   }
 
@@ -2551,23 +2555,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          ete perdue — le message le plus inquietant possible sur des photos.
          Le site fait deja voyager l etat charge ; cette fenetre l ignorait. */
       if (!PH_CHARGE) {
-        return '<div class="vide" style="grid-column:1/-1">Lecture de la photothèque…</div>';
+        return '<div class="vide" style="grid-column:1/-1">${T("Lecture de la photothèque…")}</div>';
       }
       return '<div class="vide" style="grid-column:1/-1">'
-        + (PH_Q ? 'Aucune photo ne correspond à « ' + esc(PH_Q) + ' ».'
-                : 'Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.') + '</div>';
+        + (PH_Q ? '${T("Aucune photo ne correspond à «")} ' + esc(PH_Q) + ' ».'
+                : '${T("Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.")}') + '</div>';
     }
     return PHOTHQ.map(function(p){
       var img = p.apercu
         ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '" loading="lazy">'
-        : '<span class="attente">en cours…</span>';
+        : '<span class="attente">${T("en cours…")}</span>';
       var pris = !!SEL[p.id];
       // Les pastilles disent ce qu on ne devine pas d une vignette : deja
       // traitee (donc deja payee), detouree, rattachee a un produit.
       var pastilles = '';
       if ((p.faits || []).length) pastilles += '<span class="pt fait" title="Déjà traitée">✓</span>';
       if (p.isole) pastilles += '<span class="pt" title="Détourée">◇</span>';
-      if (p.lieId) pastilles += '<span class="pt ic" title="' + esc(p.lieNom || 'Produit lié') + '"><span class="ic">🔗</span></span>';
+      if (p.lieId) pastilles += '<span class="pt ic" title="' + esc(p.lieNom || '${T("Produit lié")}') + '"><span class="ic">🔗</span></span>';
       return '<div class="phvig' + (pris ? ' pris' : '') + '" data-ph="' + esc(p.id) + '"'
         + ' title="' + esc(p.nom) + (p.lieNom ? ' — ' + esc(p.lieNom) : '') + '">'
         + '<span class="phcoche" data-sel="' + esc(p.id) + '">' + (pris ? '✓' : '') + '</span>'
@@ -2591,23 +2595,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // Le filtre le plus utile : ce qui n a PAS encore recu tel traitement.
     // Retraiter une photo deja faite coute un appel pour rien.
     h += '<select id="ph-sans" aria-label="Filtrer les photos sans un traitement donné">'
-      + '<option value="">Traitement — tous</option>'
+      + '<option value="">${T("Traitement — tous")}</option>'
       + (PH_META.traitements || []).map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (PH_SANS === t.cle ? ' selected' : '')
-            + '>Sans « ' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
+            + '>${T("Sans «")} ' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
     if ((PH_META.lots || []).length) {
-      h += '<select id="ph-lot"><option value="">Tous les lots</option>'
+      h += '<select id="ph-lot"><option value="">${T("Tous les lots")}</option>'
         + PH_META.lots.map(function(l){
             return '<option value="' + esc(l.cle) + '"' + (PH_LOT === l.cle ? ' selected' : '')
               + '>' + esc(l.nom) + '</option>'; }).join('') + '</select>';
     }
     h += '<select id="ph-tri" aria-label="Ordre de tri">'
-      + [['recent', 'Plus récentes'], ['code', 'Code'], ['name', 'Nom'],
-         ['linked', 'Liées d’abord'], ['size', 'Plus lourdes']].map(function(t){
+      + [['recent', '${T("Plus récentes")}'], ['code', 'Code'], ['name', 'Nom'],
+         ['linked', '${T("Liées d’abord")}'], ['size', '${T("Plus lourdes")}']].map(function(t){
           return '<option value="' + t[0] + '"' + (PH_TRI === t[0] ? ' selected' : '') + '>'
             + t[1] + '</option>'; }).join('') + '</select>';
     if (PH_FILTRES.length || PH_SANS || PH_LOT || PH_Q) {
-      h += '<button class="jeton" id="ph-vider">✕ Tout effacer</button>';
+      h += '<button class="jeton" id="ph-vider">${T("✕ Tout effacer")}</button>';
     }
     return h + '</div>';
   }
@@ -2620,8 +2624,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = Object.keys(SEL).length;
     var dispo = (PH_META && PH_META.tousLesIds) ? PH_META.tousLesIds.length : 0;
     return '<div class="phsel">'
-      + '<span class="cpt' + (n ? ' on' : '') + '">' + (n ? n + ' photo' + (n > 1 ? 's' : '') + ' choisie' + (n > 1 ? 's' : '') : 'Aucune sélection') + '</span>'
-      + '<button class="jeton" id="ph-tout"' + (dispo ? '' : ' disabled') + '>Tout sélectionner (' + dispo + ')</button>'
+      + '<span class="cpt' + (n ? ' on' : '') + '">' + (n ? n + ' photo' + (n > 1 ? 's' : '') + ' choisie' + (n > 1 ? 's' : '') : '${T("Aucune sélection")}') + '</span>'
+      + '<button class="jeton" id="ph-tout"' + (dispo ? '' : ' disabled') + '>${T("Tout sélectionner (")}' + dispo + ')</button>'
       + '<button class="jeton" id="ph-inv"' + (dispo ? '' : ' disabled') + '>Inverser</button>'
       + '<button class="jeton" id="ph-rien"' + (n ? '' : ' disabled') + '>Vider</button>'
       + '<span class="droite">'
@@ -2630,8 +2634,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          a fait que mon câblage écrasait le sien — et le bouton d'entrée ne
          faisait plus rien. Un identifiant réutilisé ne casse rien de visible :
          il détourne, en silence. */
-      + (n === 1 ? '<button class="jeton prim" id="ph-ouvrir-sel">Ouvrir cette photo →</button>' : '')
-      + (n > 1 ? '<button class="jeton prim" id="ph-lot">⚙ Traiter ces ' + n + ' photos en lot…</button>' : '')
+      + (n === 1 ? '<button class="jeton prim" id="ph-ouvrir-sel">${T("Ouvrir cette photo →")}</button>' : '')
+      + (n > 1 ? '<button class="jeton prim" id="ph-lot">${T("⚙ Traiter ces")} ' + n + ' ${T("photos en lot…")}</button>' : '')
       + '</span></div>';
   }
 
@@ -2725,40 +2729,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (quoi === 'filigrane') {
       var lg = logoChoisi();
       if (!lg) {
-        return '<p style="color:#e08a8a;margin:.6rem 0 0"><span class="ic">⚠</span> <strong>Aucun logo choisi.</strong> '
-          + 'Ouvrez « Filigrane » dans la colonne de gauche et choisissez-en un : sans logo, '
-          + 'le lot échouerait photo après photo.</p>';
+        return '<p style="color:#e08a8a;margin:.6rem 0 0"><span class="ic">⚠</span> <strong>${T("Aucun logo choisi.")}</strong> '
+          + '${T("Ouvrez « Filigrane » dans la colonne de gauche et choisissez-en un : sans logo,")} '
+          + '${T("le lot échouerait photo après photo.")}</p>';
       }
       return '<label class="rc"><input type="checkbox" id="lot-reglages"'
         + (coche === false ? '' : ' checked') + '> '
-        + '<span><strong>Poser le filigrane réglé à l’écran</strong> — ' + esc(lg.nom) + ' · '
+        + '<span><strong>${T("Poser le filigrane réglé à l’écran")}</strong> — ' + esc(lg.nom) + ' · '
         + esc(nomPosition(FIL.position)) + ' · ' + FIL.taille + ' % · '
-        + Math.round(FIL.opacite * 100) + ' % d’opacité.<br>'
-        + '<span style="font-size:.74rem;color:var(--tx2)">Ce traitement ne passe par aucun service : '
-        + '<strong>aucun appel, aucun crédit</strong>, qu’il y ait cinq photos ou cinq cents.</span>'
+        + Math.round(FIL.opacite * 100) + ' ${T("% d’opacité.")}<br>'
+        + '<span style="font-size:.74rem;color:var(--tx2)">${T("Ce traitement ne passe par aucun service :")} '
+        + '<strong>${T("aucun appel, aucun crédit")}</strong>${T(", qu’il y ait cinq photos ou cinq cents.")}</span>'
         + '</span></label>';
     }
     var voie = voiePourQuoi(quoi);
     if (!estVoie(voie)) {
-      return '<p style="color:var(--tx-or);margin:.6rem 0 0"><span class="ic">⚠</span> Ce traitement ne passe pas par Photoroom : '
-        + 'ni l’ambiance, ni la mise en scène, ni les réglages avancés n’y changent quoi que ce soit. '
-        + 'Le détourage se fait au détoureur, et il n’a pas de décor à composer.</p>';
+      return '<p style="color:var(--tx-or);margin:.6rem 0 0"><span class="ic">⚠</span> ${T("Ce traitement ne passe pas par Photoroom :")} '
+        + '${T("ni l’ambiance, ni la mise en scène, ni les réglages avancés n’y changent quoi que ce soit.")} '
+        + '${T("Le détourage se fait au détoureur, et il n’a pas de décor à composer.")}</p>';
     }
     var r = resumeReglages(voie);
     if (!r) {
-      return '<p style="color:var(--tx2);margin:.6rem 0 0">Aucune ambiance ni mise en scène '
-        + 'choisie à l’écran : le lot partira avec les réglages par défaut.</p>';
+      return '<p style="color:var(--tx2);margin:.6rem 0 0">${T("Aucune ambiance ni mise en scène")} '
+        + '${T("choisie à l’écran : le lot partira avec les réglages par défaut.")}</p>';
     }
     // ⚠ La photo d intérieur est la SEULE chose du panneau avancé qui ne peut pas
     // suivre un lot : elle est propre à UN vêtement, pas à cinq cents.
     var sup = (voie === 'fantome' && INTERIEUR)
-      ? '<br><span style="font-size:.74rem;color:var(--tx-or)"><span class="ic">⚠</span> La photo d’intérieur ne suit pas un lot : '
-        + 'chaque photo utilise celle qui lui est attachée dans la photothèque.</span>' : '';
+      ? '<br><span style="font-size:.74rem;color:var(--tx-or)"><span class="ic">⚠</span> ${T("La photo d’intérieur ne suit pas un lot :")} '
+        + '${T("chaque photo utilise celle qui lui est attachée dans la photothèque.")}</span>' : '';
     return '<label class="rc"><input type="checkbox" id="lot-reglages"'
       + (coche === false ? '' : ' checked') + '> '
-      + '<span><strong>Appliquer la mise en scène de l’écran</strong> — ' + esc(r) + '.<br>'
-      + '<span style="font-size:.74rem;color:var(--tx2)">Décochez pour un traitement brut, '
-      + 'sans ambiance ni pose imposée.</span>' + sup + '</span></label>';
+      + '<span><strong>${T("Appliquer la mise en scène de l’écran")}</strong> — ' + esc(r) + '.<br>'
+      + '<span style="font-size:.74rem;color:var(--tx2)">${T("Décochez pour un traitement brut,")} '
+      + '${T("sans ambiance ni pose imposée.")}</span>' + sup + '</span></label>';
   }
 
   function ouvrirLotVoile(){
@@ -2770,8 +2774,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ids.length) return;
     var nP = ids.length;
     var opts = (PH_META && PH_META.traitements) || [
-      { cle: 'detourage', nom: 'Détourage' }, { cle: 'fantome', nom: 'Mannequin retiré' },
-      { cle: 'humain', nom: 'Porté par un mannequin' }];
+      { cle: 'detourage', nom: '${T("Détourage")}' }, { cle: 'fantome', nom: '${T("Mannequin retiré")}' },
+      { cle: 'humain', nom: '${T("Porté par un mannequin")}' }];
     /* ⚠ ON PRÉSÉLECTIONNE LA VOIE DE L ÉCRAN quand le lot sait la faire : le
        voile s ouvrait toujours sur le premier traitement de la liste, si bien
        qu on venait de régler un fantôme et qu on lançait un détourage. */
@@ -2787,39 +2791,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        laisser le menu du dessus sur l ancienne voie enverrait cinq cents photos
        dans une mise en scene que la recette ne decrit pas. */
     var rcListe = RECETTES.length
-      ? ('<div class="ch"><label for="lot-rc">Profil (facultatif)</label>'
-        + '<select id="lot-rc"><option value="">— Garder les réglages de l’écran —</option>'
+      ? ('<div class="ch"><label for="lot-rc">${T("Profil (facultatif)")}</label>'
+        + '<select id="lot-rc"><option value="">${T("— Garder les réglages de l’écran —")}</option>'
         + RECETTES.map(function(o){
             return '<option value="' + esc(o.id) + '"' + (RC_SEL === o.id ? ' selected' : '')
               + '>' + esc(o.nom) + '</option>'; }).join('')
-        + '</select><div class="aidep">Il pose d’un coup la voie, l’ambiance, le mannequin, la '
-        + 'pose, les réglages avancés et le filigrane de ce lot.</div></div>')
+        + '</select><div class="aidep">${T("Il pose d’un coup la voie, l’ambiance, le mannequin, la")} '
+        + '${T("pose, les réglages avancés et le filigrane de ce lot.")}</div></div>')
       : '';
-    voile('<h3>⚙ Traiter ' + nP + ' photo' + (nP > 1 ? 's' : '') + ' en lot</h3>'
+    voile('<h3>${T("⚙ Traiter")} ' + nP + ' photo' + (nP > 1 ? 's' : '') + ' en lot</h3>'
       + rcListe
-      + '<div class="ch"><label for="lot-quoi">Traitement à appliquer</label>'
+      + '<div class="ch"><label for="lot-quoi">${T("Traitement à appliquer")}</label>'
       + '<select id="lot-quoi">' + opts.map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (t.cle === voieDef ? ' selected' : '')
             + '>' + esc(t.nom) + '</option>'; }).join('')
       + '</select></div>'
-      + '<div class="ch"><label for="lot-nom">Nom du lot (pour le retrouver dans le suivi)</label>'
+      + '<div class="ch"><label for="lot-nom">${T("Nom du lot (pour le retrouver dans le suivi)")}</label>'
       + '<input id="lot-nom" placeholder="Collection automne — détourage"></div>'
       + '<div id="lot-reg">' + reglagesLotHtml(voieDef) + '</div>'
       + '<label class="rc"><input type="checkbox" id="lot-prio"> '
-      + '<span><strong>Priorité haute</strong> — ce lot passe devant ceux qui attendent.</span></label>'
+      + '<span><strong>${T("Priorité haute")}</strong> ${T("— ce lot passe devant ceux qui attendent.")}</span></label>'
       + '<label class="rc"><input type="checkbox" id="lot-refaire"> '
-      + '<span><strong>Refaire celles déjà traitées.</strong> Par défaut elles sont écartées : '
-      + 'les repasser coûte un appel chacune pour un résultat identique.</span></label>'
-      + '<p style="color:var(--tx2)">Chaque photo est un appel facturé. Le lot part en arrière-plan : '
-      + 'vous pouvez fermer cette fenêtre, le traitement continue et se suit depuis n’importe quel écran.</p>'
+      + '<span><strong>${T("Refaire celles déjà traitées.")}</strong> ${T("Par défaut elles sont écartées :")} '
+      + '${T("les repasser coûte un appel chacune pour un résultat identique.")}</span></label>'
+      + '<p style="color:var(--tx2)">${T("Chaque photo est un appel facturé. Le lot part en arrière-plan :")} '
+      + '${T("vous pouvez fermer cette fenêtre, le traitement continue et se suit depuis n’importe quel écran.")}</p>'
       /* ⚠ CE QUE ÇA VA COÛTER, AVANT DE CLIQUER. Le chiffre est demandé au relais
          (« studio:estimer ») et jamais recalculé ici : lui seul sait qu un fantôme
          avec décor est DEUX appels, et que le détourage part chez un autre
          fournisseur, cinquante fois moins cher. */
       + '<div id="lot-estim" style="margin:.6rem 0 0;padding:.5rem .6rem;border:1px solid #2a3a4e;'
-      + 'border-radius:6px;background:var(--f-16202c);font-size:.8rem;color:var(--tx2)">Estimation du coût…</div>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui">Lancer le lot</button></div>',
+      + 'border-radius:6px;background:var(--f-16202c);font-size:.8rem;color:var(--tx2)">${T("Estimation du coût…")}</div>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Lancer le lot")}</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         var g = function(i){ var e = document.getElementById(i); return e ? e.value : ''; };
@@ -2865,12 +2869,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
              une inquiétude fabriquée de toutes pièces. */
           if (quoi === 'filigrane') {
             z.innerHTML = '<strong>' + nP + ' photo' + (nP > 1 ? 's' : '')
-              + ' · aucun appel facturé</strong><br>Le filigrane est posé dans l’application, '
-              + 'au canevas : il ne coûte rien et n’entame pas le plafond mensuel.';
+              + ' ${T("· aucun appel facturé")}</strong><br>${T("Le filigrane est posé dans l’application,")} '
+              + '${T("au canevas : il ne coûte rien et n’entame pas le plafond mensuel.")}';
             if (b) b.disabled = false;
             return;
           }
-          z.textContent = 'Estimation du coût…';
+          z.textContent = '${T("Estimation du coût…")}';
           if (b) b.disabled = true;
           appeler('studio:estimer', [{ geste: (voie || quoi), nb: nP,
             preset: reg.preset || '', finition: reg.finition || {}, options: reg }]).then(function(r){
@@ -2878,9 +2882,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             var z2 = document.getElementById('lot-estim');
             if (!z2) return;
             if (!r || !r.ok) {
-              z2.innerHTML = '<span style="color:var(--tx-or)"><span class="ic">⚠</span> Coût non estimé</span> — le relais n’a pas '
-                + 'répondu (' + esc(expliquer(r)) + '). Le lot peut partir : le plafond mensuel, lui, '
-                + 'est appliqué au serveur et arrêtera la file s’il est atteint.';
+              z2.innerHTML = '<span style="color:var(--tx-or)"><span class="ic">⚠</span> ${T("Coût non estimé")}</span> ${T("— le relais n’a pas")} '
+                + '${T("répondu (")}' + esc(expliquer(r)) + '${T("). Le lot peut partir : le plafond mensuel, lui,")} '
+                + '${T("est appliqué au serveur et arrêtera la file s’il est atteint.")}';
               return;
             }
             var bu = r.budget || {};
@@ -2893,25 +2897,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             var app = (r.appelsMax > r.appelsMin)
               ? (r.appelsMin + ' à ' + r.appelsMax) : String(r.appelsMax);
             var h = '<strong>' + nP + ' photo' + (nP > 1 ? 's' : '') + ' · ' + app
-              + ' appel' + (r.appelsMax > 1 ? 's' : '') + ' facturé' + (r.appelsMax > 1 ? 's' : '')
+              + ' appel' + (r.appelsMax > 1 ? 's' : '') + ' ${T("facturé")}' + (r.appelsMax > 1 ? 's' : '')
               + ' ≈ ' + mt + '</strong>';
             if (bu.actif) {
-              h += '<br>Plafond du mois : ' + sous(bu.depense) + ' $ dépensés sur '
-                + sous(bu.mensuel) + ' $ — il reste ' + sous(bu.restant) + ' $.';
+              h += '<br>${T("Plafond du mois :")} ' + sous(bu.depense) + ' ${T("$ dépensés sur")} '
+                + sous(bu.mensuel) + ' ${T("$ — il reste")} ' + sous(bu.restant) + ' $.';
             } else {
-              h += '<br><span style="color:var(--tx2)">Aucun plafond mensuel n’est posé '
-                + '(fenêtre « Traitements d’image »).</span>';
+              h += '<br><span style="color:var(--tx2)">${T("Aucun plafond mensuel n’est posé")} '
+                + '${T("(fenêtre « Traitements d’image »).")}</span>';
             }
             if (r.depasse) {
               /* ⚠⚠ ON NE RÉPOND PAS << non >>, ON RÉPOND << COMBIEN >>. Un refus
                  sec laisse deviner ; le nombre de photos qui rentrent permet de
                  découper le lot et de lancer tout de suite ce qui est possible. */
               var n2 = (r.photosPossibles == null) ? 0 : r.photosPossibles;
-              h += '<br><span style="color:#e08a8a"><strong>Ce lot ne rentre pas dans le plafond.</strong> '
+              h += '<br><span style="color:#e08a8a"><strong>${T("Ce lot ne rentre pas dans le plafond.")}</strong> '
                 + (n2 > 0
-                    ? ('Il reste de quoi en traiter ' + n2 + ' — désélectionnez-en '
-                       + (nP - n2) + ', ou relevez le plafond.')
-                    : 'Relevez le plafond mensuel, ou attendez le mois prochain.')
+                    ? ('${T("Il reste de quoi en traiter")} ' + n2 + ' ${T("— désélectionnez-en")} '
+                       + (nP - n2) + '${T(", ou relevez le plafond.")}')
+                    : '${T("Relevez le plafond mensuel, ou attendez le mois prochain.")}')
                 + '</span>';
               if (b) b.disabled = true;
             }
@@ -2954,14 +2958,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             fermer();
             if (!r.ok) {
               dire(r.motif === 'toutes_deja_faites'
-                ? ('Ces ' + (r.deja || ids.length) + ' photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.')
+                ? ('Ces ' + (r.deja || ids.length) + ' ${T("photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.")}')
                 : expliquer(r), 'err');
               return;
             }
             SEL = {};
             dire(r.nom + ' — ' + r.total + ' photo' + (r.total > 1 ? 's' : '') + ' en traitement'
-              + (r.ignorees ? ' (' + r.ignorees + ' déjà faite' + (r.ignorees > 1 ? 's' : '') + ', écartée' + (r.ignorees > 1 ? 's' : '') + ')' : '')
-              + '. Suivez-le en bas de n’importe quel écran.', 'bon');
+              + (r.ignorees ? ' (' + r.ignorees + ' ${T("déjà faite")}' + (r.ignorees > 1 ? 's' : '') + '${T(", écartée")}' + (r.ignorees > 1 ? 's' : '') + ')' : '')
+              + '${T(". Suivez-le en bas de n’importe quel écran.")}', 'bon');
             PICKER = false;
             LOTS_VUE = true;
             chargerLots();
@@ -2973,8 +2977,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var el = document.getElementById('ph-info');
     if (!el) return;
     if (txt != null) { el.textContent = txt; return; }
-    if (PH_TOTAL <= 0) { el.textContent = PH_Q ? '0 résultat' : ''; return; }
-    el.textContent = PHOTHQ.length + ' sur ' + PH_TOTAL + (PH_FIN ? '' : ' — défilez pour en voir plus');
+    if (PH_TOTAL <= 0) { el.textContent = PH_Q ? '${T("0 résultat")}' : ''; return; }
+    el.textContent = PHOTHQ.length + ' sur ' + PH_TOTAL + (PH_FIN ? '' : ' ${T("— défilez pour en voir plus")}');
   }
   // Rafraichit UNIQUEMENT la grille + le compteur (garde le focus dans la recherche).
   function phMajGrille(){
@@ -3131,7 +3135,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function ouvrirPicker(){
     if (RO || OCCUPE) return;
     PICKER = true; PHOTHQ = []; PH_Q = ''; PH_PAGE = 0; PH_TOTAL = 0; PH_FIN = false; PH_OCC = false;
-    dessiner(); dire('Chargement de la photothèque…');
+    dessiner(); dire('${T("Chargement de la photothèque…")}');
     phChargerPage(true);
     var q = document.getElementById('ph-q'); if (q) { try { q.focus(); } catch (e) {} }
   }
@@ -3152,7 +3156,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     PHOTO = null; PHOTO_ID = id; PHOTO_URL = p.apercu || ''; PHOTO_NOM = p.nom || '';
     PICKER = false; RESULT = null; ENREG = false;
     INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
-    dessiner(); dire('Photo choisie : ' + (p.nom || id) + '.', 'bon');
+    dessiner(); dire('${T("Photo choisie :")} ' + (p.nom || id) + '.', 'bon');
   }
 
   function occuper(o){
@@ -3186,25 +3190,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function enregistrerResultat(){
     if (!RESULT || !RESULT.image || OCCUPE) return;
-    if (ENREG) { dire('Déjà enregistrée dans la photothèque.', 'att'); return; }
-    occuper(true); dire('Enregistrement dans la photothèque…');
+    if (ENREG) { dire('${T("Déjà enregistrée dans la photothèque.")}', 'att'); return; }
+    occuper(true); dire('${T("Enregistrement dans la photothèque…")}');
     appeler('studio:enregistrer', [{ image: RESULT.image, nom: 'studio-' + VOIE + '-' + PRESET }]).then(function(r){
       occuper(false);
       if (r && r.ok) {
         ENREG = true;
         var sv = document.getElementById('b-save');
-        if (sv) { sv.textContent = '✓ Dans la photothèque'; sv.disabled = true; }
-        dire('Enregistrée dans la photothèque — vous pouvez l’attacher à un article de là.', 'bon');
+        if (sv) { sv.textContent = '${T("✓ Dans la photothèque")}'; sv.disabled = true; }
+        dire('${T("Enregistrée dans la photothèque — vous pouvez l’attacher à un article de là.")}', 'bon');
       } else dire(expliquer(r), 'err');
     });
   }
 
   function lancer(apercu){
     if (RO || OCCUPE) return;
-    if (!aUnePhoto()) { dire('Importez d’abord une photo.', 'err'); return; }
-    if (!PRESET) { dire('Choisissez une ambiance.', 'err'); return; }
+    if (!aUnePhoto()) { dire('${T("Importez d’abord une photo.")}', 'err'); return; }
+    if (!PRESET) { dire('${T("Choisissez une ambiance.")}', 'err'); return; }
     occuper(true);
-    dire(apercu ? 'Aperçu gratuit en cours…' : 'Génération en pleine qualité…');
+    dire(apercu ? '${T("Aperçu gratuit en cours…")}' : '${T("Génération en pleine qualité…")}');
     appeler('studio:traiter', [saisie(apercu)]).then(function(r){
       occuper(false);
       if (r && r.ok) {
@@ -3225,7 +3229,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // peindreResultat redessine tout si le volet de droite n existe pas
         // (plein ecran) : sinon l image serait produite, facturee, et jamais vue.
         peindreResultat();
-        dire(apercu ? 'Aperçu prêt (gratuit).' : 'Image générée.', 'bon');
+        dire(apercu ? '${T("Aperçu prêt (gratuit).")}' : '${T("Image générée.")}', 'bon');
         if (!apercu) chargerCredits();
       } else {
         dire(expliquer(r), 'err');
@@ -3260,9 +3264,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function causesAppels(){
     var c = [];
     if (VOIE === 'fantome') {
-      c.push('le <strong>fantôme habillé</strong> demande deux gestes : retirer le mannequin, puis poser le décor');
+      c.push('${T("le <strong>fantôme habillé</strong> demande deux gestes : retirer le mannequin, puis poser le décor")}');
     }
-    if (AV.upActive) c.push('l’<strong>agrandissement ×4</strong> est un appel de plus, après le traitement');
+    if (AV.upActive) c.push('${T("l’<strong>agrandissement ×4</strong> est un appel de plus, après le traitement")}');
     return c;
   }
 
@@ -3270,28 +3274,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RO || OCCUPE) return;
     var fin = finitionPour(VOIE) || {};
     var opt = (VOIE === 'humain') ? optionsPour('humain') : {};
-    dire('Calcul du coût…');
+    dire('${T("Calcul du coût…")}');
     appeler('studio:estimer', [{ geste: VOIE, preset: PRESET, nb: 1, finition: fin, options: opt }])
       .then(function(r){
-        if (!r || !r.ok) { dire('Coût non estimé — le rendu part quand même.', 'att'); suite(); return; }
+        if (!r || !r.ok) { dire('${T("Coût non estimé — le rendu part quand même.")}', 'att'); suite(); return; }
         var n = r.appelsMax || 1;
         // Un seul appel par image : rien a confirmer, on ne met pas un voile
         // entre lui et le bouton pour le cas ordinaire.
         if (n <= 1) { dire(''); suite(); return; }
         var causes = causesAppels();
         var bu = r.budget || {};
-        var h = '<h3>' + (apercu ? '<span class="ic">👁</span> Aperçu — ' : '')
+        var h = '<h3>' + (apercu ? '<span class="ic">👁</span> ${T("Aperçu —")} ' : '')
       + n + ' appels pour <em>une seule</em> photo</h3>';
         if (apercu) {
           h += ''
-            + '<p>Ce qu’il consomme, ce sont vos <strong>aperçus du mois</strong> — ' + n
-            + ' d’un coup — et le résultat sera <strong>filigrané</strong>.</p>';
+            + '<p>${T("Ce qu’il consomme, ce sont vos <strong>aperçus du mois</strong> — ")}' + n
+            + '${T(" d’un coup — et le résultat sera <strong>filigrané</strong>.")}</p>';
         } else {
-          h += '<p><strong>' + n + ' appels facturés ≈ ' + argent(r.coutMax) + ' $</strong> pour cette '
-            + 'photo. Un mannequin virtuel n’en coûterait qu’un seul.</p>';
+          h += '<p><strong>' + n + ' ${T("appels facturés ≈")} ' + argent(r.coutMax) + ' $</strong> pour cette '
+            + '${T("photo. Un mannequin virtuel n’en coûterait qu’un seul.")}</p>';
           if (bu.actif) {
-            h += '<p>Plafond du mois : ' + argent(bu.depense) + ' $ dépensés sur ' + argent(bu.mensuel)
-              + ' $ — il reste ' + argent(bu.restant) + ' $.</p>';
+            h += '<p>${T("Plafond du mois :")} ' + argent(bu.depense) + ' ${T("$ dépensés sur")} ' + argent(bu.mensuel)
+              + ' ${T("$ — il reste")} ' + argent(bu.restant) + ' $.</p>';
           }
         }
         /* ⚠ ON DIT COMMENT REDESCENDRE A UN APPEL, pas seulement combien ça
@@ -3301,17 +3305,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            reglage qui n existe pas, et l ecran perd sa credibilite pour la fois
            suivante, celle ou le montant compte vraiment. */
         if (causes.length) {
-          h += '<p>Pourquoi : ' + causes.join(' ; ') + '.</p>';
+          h += '<p>${T("Pourquoi :")} ' + causes.join(' ; ') + '.</p>';
           var sortie = [];
-          if (AV.upActive) sortie.push('décochez l’agrandissement');
-          if (VOIE === 'fantome') sortie.push('passez au « Mannequin virtuel »');
+          if (AV.upActive) sortie.push('${T("décochez l’agrandissement")}');
+          if (VOIE === 'fantome') sortie.push('${T("passez au « Mannequin virtuel »")}');
           if (sortie.length) {
-            h += '<p class="rcav">Pour n’en payer qu’un : ' + sortie.join(', ou ') + '.</p>';
+            h += '<p class="rcav">${T("Pour n’en payer qu’un :")} ' + sortie.join(', ou ') + '.</p>';
           }
         }
-        h += '<div class="fin2"><button id="cd-non">Annuler</button>'
+        h += '<div class="fin2"><button id="cd-non">${T("Annuler")}</button>'
           + '<button class="' + (apercu ? 'prim' : 'conf') + '" id="cd-oui">'
-          + (apercu ? 'Lancer l’aperçu' : 'Lancer — ' + argent(r.coutMax) + ' $') + '</button></div>';
+          + (apercu ? '${T("Lancer l’aperçu")}' : '${T("Lancer —")} ' + argent(r.coutMax) + ' $') + '</button></div>';
         dire('');
         voile(h, function(fermer){
           var non = document.getElementById('cd-non');
@@ -3332,11 +3336,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   bFinal.onclick = function(){
     if (RO || OCCUPE) return;
     if (!ARME) {
-      ARME = true; bFinal.className = 'prim conf'; bFinal.textContent = 'Confirmer (consomme des crédits)';
-      dire('Un clic de plus lance un vrai rendu payant.', 'att');
+      ARME = true; bFinal.className = 'prim conf'; bFinal.textContent = '${T("Confirmer (consomme des crédits)")}';
+      dire('${T("Un clic de plus lance un vrai rendu payant.")}', 'att');
       return;
     }
-    ARME = false; bFinal.className = 'prim'; bFinal.textContent = 'Générer en pleine qualité';
+    ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}';
     confirmerDepense(false, function(){ lancer(false); });
   };
 
@@ -3353,7 +3357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ouvrirLotVoile();
       return;
     }
-    dire('Choisissez les photos du lot.', 'att');
+    dire('${T("Choisissez les photos du lot.")}', 'att');
     ouvrirPicker();
   };
 
@@ -3364,8 +3368,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       a.href = source;
       a.download = nom;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      dire('Téléchargement lancé.', 'bon');
-    } catch (e) { dire('Téléchargement impossible.', 'err'); }
+      dire('${T("Téléchargement lancé.")}', 'bon');
+    } catch (e) { dire('${T("Téléchargement impossible.")}', 'err'); }
   }
 
   function telecharger(){
@@ -3379,14 +3383,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var dispo = r.compte && r.compte.available != null ? r.compte.available : null;
       var sb = r.sandbox || {};
       var t = '';
-      if (dispo != null) t += 'Crédits : <b>' + dispo + '</b>';
-      if (sb.utilise != null) t += (t ? ' · ' : '') + 'Aperçus ce mois : ' + sb.utilise + (sb.quotaMois ? ' / ' + sb.quotaMois : '');
+      if (dispo != null) t += '${T("Crédits :")} <b>' + dispo + '</b>';
+      if (sb.utilise != null) t += (t ? ' · ' : '') + '${T("Aperçus ce mois :")} ' + sb.utilise + (sb.quotaMois ? ' / ' + sb.quotaMois : '');
       creditsEl.innerHTML = t;
     });
   }
 
   function charger(){
-    dire('Chargement des ambiances…');
+    dire('${T("Chargement des ambiances…")}');
     appeler('studio:presets').then(function(r){
       if (!r || !r.ok) {
         corps.className = 'corps plein';
@@ -3410,13 +3414,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ne seraient dessinées nulle part. */
   function posterResultatTemoin(){
     PHOTO = PIXEL;
-    PHOTO_NOM = 'photo témoin';
+    PHOTO_NOM = '${T("photo témoin")}';
     if (!PRESET) PRESET = (PRESETS[0] || {}).cle || '';
     ENREG = false;
     RESULT = { image: PIXEL, essai: true,
-               decorErreur: 'le décor n’a pas pu être appliqué (témoin)',
+               decorErreur: '${T("le décor n’a pas pu être appliqué (témoin)")}',
                ignores: 'background.prompt,shadow.mode',
-               upNote: 'Agrandissement ignoré : l’entrée dépasse 1000 px (témoin).',
+               upNote: '${T("Agrandissement ignoré : l’entrée dépasse 1000 px (témoin).")}',
                largeur: 1200, hauteur: 1600 };
     /* ⚠ DEUX FORMATS TÉMOINS, DONT UN DÉJÀ ENREGISTRÉ. Les vignettes ne naissent
        qu au CLIC sur « Préparer », et le banc ne clique pas ; et le canevas
@@ -3426,8 +3430,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* Deux logos témoins, pour que la grille, l état << choisi >> et le bouton
        << Appliquer >> soient dessinés au moins une fois. */
     if (!LOGOS.length) {
-      LOGOS = [{ id: 'lg1', nom: 'Logo témoin', image: PIXEL },
-               { id: 'lg2', nom: 'Logo témoin 2', image: PIXEL }];
+      LOGOS = [{ id: 'lg1', nom: '${T("Logo témoin")}', image: PIXEL },
+               { id: 'lg2', nom: '${T("Logo témoin 2")}', image: PIXEL }];
       if (!FIL.logoId) FIL.logoId = 'lg1';
     }
     FORMATS = [
@@ -3461,8 +3465,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      tout ce qu on lui demande.
      ⚠ Trouve en relisant l effet de mon changement sur les bancs, pas par les
      bancs eux-memes. Les bancs passaient. */
-  if (${avOuvre ? 'true' : 'false'}) { PHOTO = PIXEL; PHOTO_NOM = 'photo témoin'; ONGLET = 'decor'; }
-  if (${avPlein ? 'true' : 'false'}) { PHOTO = PIXEL; PHOTO_NOM = 'photo témoin';
+  if (${avOuvre ? 'true' : 'false'}) { PHOTO = PIXEL; PHOTO_NOM = '${T("photo témoin")}'; ONGLET = 'decor'; }
+  if (${avPlein ? 'true' : 'false'}) { PHOTO = PIXEL; PHOTO_NOM = '${T("photo témoin")}';
     VOIE = 'fantome'; VOIE_CHOISIE = true; AV.ombreActive = true; AV.upActive = true;
     ONGLET = 'ombres'; }
   /* ⚠⚠ IDENTIFIANT D OUVERTURE << resultat >>. Tout le volet de droite garni — le

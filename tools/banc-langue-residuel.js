@@ -130,10 +130,20 @@ for (const nom of traduites) {
   while ((bloc = re.exec(page))) {
     for (const c of chainesToutes(sansCommentaires(bloc[1]))) candidats.push(c);
   }
+  /* ⚠⚠ UNE ENTREE QUI REND LE MEME TEXTE EST UNE DECISION, PAS UN OUBLI — c est
+     deja la regle du compteur, et elle vaut ici. « Café » se dit « Café » en
+     anglais ; l accuser reviendrait a exiger qu on ecrive un mot faux pour faire
+     taire un banc. ⚠ On l exige DECLAREE : un texte accentue sans entree reste
+     une faute. La difference entre « decide » et « oublie » ne se devine pas. */
+  const dicoF = LANGUE.dico(nom) || {};
+  const dicoS = LANGUE.dico('socle') || {};
+  const memeTexte = (t) => dicoF[t] === t || dicoS[t] === t;
+
   for (const c of candidats) {
     const t = c.texte;
     if (vus.has(t)) continue;
     if (!PHRASE.test(t) && !ACCENT.test(t)) continue;
+    if (memeTexte(t)) continue;
     const mots = motsFrancais(t);
     if (!mots.length) continue;
     vus.add(t);
