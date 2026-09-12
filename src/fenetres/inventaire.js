@@ -42,6 +42,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('inventaire');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -250,9 +254,9 @@ button.vert:hover:not(:disabled){background:#22c55e;border-color:#22c55e}
 function pageInventaire(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Inventaire — Administration Sandriza</title>
+<title>${T("Inventaire — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.inventory}</span><h1 id="titre">Inventaire</h1>
+<div class="tete"><span class="ico">${ICO.inventory}</span><h1 id="titre">${T("Inventaire")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
 <div class="corps" id="corps"></div>
@@ -320,44 +324,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ⚠ CHAQUE REFUS A SA PHRASE. Un ecran muet sur un refus de droit ressemble a
   // une panne, et l on cherche partout sauf dans les permissions.
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne permet pas de modifier l’inventaire.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Ce produit n’existe plus.',
-    verrou:             'Produit ouvert par quelqu’un d’autre.',
-    session_expiree:    'Inventaire NON enregistré — session expirée (inactivité, ou même compte utilisé ailleurs). Reconnectez-vous, puis refaites la saisie.',
-    reseau:             'Inventaire NON enregistré (réseau). Réessayez.',
-    agent_absent:       'Impression indisponible dans cette fenêtre.',
-    aucune_etiquette:   'Aucune étiquette à imprimer (quantité 0).',
-    imprimante:         'Aucune imprimante de codes-barres prête — voir Configuration puis Imprimantes.',
-    impression:         'L’impression a échoué.',
-    categorie_sans_code: 'Aucun code de catégorie configuré.',
-    aucun_produit:      'Aucun produit sélectionné.',
-    code_requis:        'Donnez au moins un lieu, un casier ou une section.',
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne permet pas de modifier l’inventaire.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps. Réessayez ; si cela persiste, rechargez-la (Ctrl+R).")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Ce produit n’existe plus.")}',
+    verrou:             '${T("Produit ouvert par quelqu’un d’autre.")}',
+    session_expiree:    '${T("Inventaire NON enregistré — session expirée (inactivité, ou même compte utilisé ailleurs). Reconnectez-vous, puis refaites la saisie.")}',
+    reseau:             '${T("Inventaire NON enregistré (réseau). Réessayez.")}',
+    agent_absent:       '${T("Impression indisponible dans cette fenêtre.")}',
+    aucune_etiquette:   '${T("Aucune étiquette à imprimer (quantité 0).")}',
+    imprimante:         '${T("Aucune imprimante de codes-barres prête — voir Configuration puis Imprimantes.")}',
+    impression:         '${T("L’impression a échoué.")}',
+    categorie_sans_code: '${T("Aucun code de catégorie configuré.")}',
+    aucun_produit:      '${T("Aucun produit sélectionné.")}',
+    code_requis:        '${T("Donnez au moins un lieu, un casier ou une section.")}',
     // Les LIEUX (2026-08-22). ⚠ Sans ces phrases, ces refus tomberaient sur
     // « Erreur inattendue » : le pont les nomme, la fenêtre doit les traduire.
-    nom_requis:         'Donnez un nom au lieu.',
-    lieu_introuvable:   'Ce lieu n’existe plus — rechargez l’écran.',
-    version_coquille:   'Cette version de l’application ne sait pas ouvrir cette fenêtre — quittez et relancez pour la mettre à jour.',
-    echec:              'L’opération a échoué.'
+    nom_requis:         '${T("Donnez un nom au lieu.")}',
+    lieu_introuvable:   '${T("Ce lieu n’existe plus — rechargez l’écran.")}',
+    version_coquille:   '${T("Cette version de l’application ne sait pas ouvrir cette fenêtre — quittez et relancez pour la mettre à jour.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
     if ((m === 'imprimante' || m === 'impression') && r.detail) return MOTIFS[m] + ' ' + esc(r.detail);
     // Les refus RACONTES du nouvel onglet Produits / Entrepot.
-    if (m === 'collision') return 'Impossible : ' + esc(r.avant) + ' deviendrait ' + esc(r.apres) + ', déjà utilisé.';
-    if (m === 'emplacement_utilise') return 'Suppression impossible — ' + (r.n || '?')
-      + ' variante(s) utilisent l’emplacement ' + esc(r.code || '') + '. Réassignez-les d’abord.';
-    if (m === 'lieu_utilise') return 'Suppression impossible — ' + (r.n || '?')
-      + ' emplacement(s) sont dans le lieu ' + esc(r.nom || '') + '. Déplacez-les d’abord.';
+    if (m === 'collision') return '${T("Impossible :")} ' + esc(r.avant) + ' deviendrait ' + esc(r.apres) + '${T(", déjà utilisé.")}';
+    if (m === 'emplacement_utilise') return '${T("Suppression impossible —")} ' + (r.n || '?')
+      + ' ${T("variante(s) utilisent l’emplacement")} ' + esc(r.code || '') + '${T(". Réassignez-les d’abord.")}';
+    if (m === 'lieu_utilise') return '${T("Suppression impossible —")} ' + (r.n || '?')
+      + ' ${T("emplacement(s) sont dans le lieu")} ' + esc(r.nom || '') + '${T(". Déplacez-les d’abord.")}';
     // ⚠ Deux lieux du même nom rendraient les libellés d'emplacement
     // indiscernables — et c'est le libellé que l'import CSV retrouve.
-    if (m === 'nom_double') return 'Un lieu s’appelle déjà « ' + esc(r.nom || '') + ' ».';
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    if (m === 'nom_double') return '${T("Un lieu s’appelle déjà «")} ' + esc(r.nom || '') + ' ».';
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
 
   /* ⚠ UN SEUL POINT D APPEL, AVEC LE RATTRAPAGE CHAINE. Le second argument de
@@ -386,7 +390,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     // La grille d un produit prend la fenetre entiere : les onglets s effacent,
     // le << Retour >> ramene a l onglet d ou l on vient.
-    if (VUE === 'produit') { onglets.style.display = 'none'; dessinerProduit(); return; }
+    if (VUE === '${T("produit")}') { onglets.style.display = 'none'; dessinerProduit(); return; }
     onglets.style.display = '';
     dessinerOnglets();
     if (ONGLET === 'produits') { dessinerProduits(); return; }
@@ -398,10 +402,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerOnglets(){
     var reappro = (NB_REAPPRO === null) ? '' : (NB_REAPPRO ? ' (' + NB_REAPPRO + ')' : '');
     var defs = [
-      ['produits', 'Produits'],
-      ['reappro', 'Réapprovisionnement' + reappro],
-      ['endommages', 'Produits endommagés'],
-      ['entrepots', 'Entrepôt']
+      ['produits', '${T("Produits")}'],
+      ['reappro', '${T("Réapprovisionnement")}' + reappro],
+      ['endommages', '${T("Produits endommagés")}'],
+      ['entrepots', '${T("Entrepôt")}']
     ];
     onglets.innerHTML = defs.map(function(d){
       return '<button data-onglet="' + d[0] + '"' + (ONGLET === d[0] ? ' class="actif"' : '')
@@ -434,20 +438,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var enRecherche = VUE === 'recherche';
     var lignes = enRecherche ? TROUVES : REAPPRO;
     var h = '<div class="carte">'
-      + '<input aria-label="Scannez une étiquette, ou tapez un nom de produit" id="rech" autocomplete="off" placeholder="Scannez une étiquette, ou tapez un nom de produit…">'
-      + '<div class="aide" style="margin-top:.35rem">Un code de variante scanné ouvre directement sa fiche. '
-      + 'Trois caractères minimum pour une recherche par nom.</div>'
+      + '<input aria-label="Scannez une ${T("étiquette")}, ou tapez un nom de ${T("produit")}" id="rech" autocomplete="off" placeholder="Scannez une ${T("étiquette")}, ou tapez un nom de ${T("produit")}…">'
+      + '<div class="aide" style="margin-top:.35rem">${T("Un code de variante scanné ouvre directement sa fiche.")} '
+      + '${T("Trois caractères minimum pour une recherche par nom.")}</div>'
       + '</div>';
 
     h += '<div class="carte plein"><h2>' + (enRecherche
-        ? 'Résultats <span class="note">— ' + lignes.length + ' produit' + (lignes.length > 1 ? 's' : '') + '</span>'
-        : 'À réapprovisionner <span class="note">— ' + lignes.length + ' variante'
+        ? '${T("Résultats")} <span class="note">— ' + lignes.length + ' ${T("produit")}' + (lignes.length > 1 ? 's' : '') + '</span>'
+        : '${T("À réapprovisionner")} <span class="note">— ' + lignes.length + ' ${T("variante")}'
           + (lignes.length > 1 ? 's' : '') + ' sous leur seuil</span>') + '</h2>';
 
     if (!lignes.length) {
       h += '<div class="vide">' + (enRecherche
-        ? 'Aucun produit trouvé.'
-        : '✓ Aucune variante à réapprovisionner — toutes sont au-dessus de leur seuil.')
+        ? '${T("Aucun produit trouvé.")}'
+        : '${T("✓ Aucune variante à réapprovisionner — toutes sont au-dessus de leur seuil.")}')
         + '</div>';
     } else {
       h += '<div class="lignes">';
@@ -457,9 +461,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<span class="principal"><strong>' + esc(a.nom) + '</strong>'
             + (a.code ? ' <span class="code">' + esc(a.code) + '</span>' : '')
             + '</span>'
-            + '<span class="fin">' + a.unites + ' unité' + (a.unites > 1 ? 's' : '')
-            + ' · ' + a.variantes + ' variante' + (a.variantes > 1 ? 's' : '')
-            + (a.alertes ? ' · <span class="q bas">' + a.alertes + ' à commander</span>' : '')
+            + '<span class="fin">' + a.unites + ' ${T("unité")}' + (a.unites > 1 ? 's' : '')
+            + ' · ' + a.variantes + ' ${T("variante")}' + (a.variantes > 1 ? 's' : '')
+            + (a.alertes ? ' · <span class="q bas">' + a.alertes + ' ${T("à commander")}</span>' : '')
             + '</span></div>';
         });
       } else {
@@ -480,7 +484,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '</div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = enRecherche ? '<button id="btn-retour">← Réapprovisionnement</button>' : '';
+    actions.innerHTML = enRecherche ? '<button id="btn-retour">${T("← Réapprovisionnement")}</button>' : '';
     brancherListe();
   }
 
@@ -505,28 +509,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // on ne peut pas assigner d emplacement, et sans SKU de base il n y a ni code
     // de variante ni etiquette.
     if (!ENTREPOTS.length) {
-      h += '<div class="avis"><span class="ic">⚠</span> Aucun emplacement configuré — créez-en un dans '
-        + 'Inventaire puis Entrepôt pour pouvoir en assigner un aux variantes en stock.</div>';
+      h += '<div class="avis"><span class="ic">⚠</span> ${T("Aucun emplacement configuré — créez-en un dans")} '
+        + '${T("Inventaire puis Entrepôt pour pouvoir en assigner un aux variantes en stock.")}</div>';
     }
     if (!PROD.sku) {
-      h += '<div class="avis"><span class="ic">⚠</span> Ce produit n’a pas de SKU de base — assignez-lui un SKU '
-        + 'dans la liste d’inventaire pour générer les codes de variante et les étiquettes.</div>';
+      h += '<div class="avis"><span class="ic">⚠</span> ${T("Ce produit n’a pas de SKU de base — assignez-lui un SKU")} '
+        + '${T("dans la liste d’inventaire pour générer les codes de variante et les étiquettes.")}</div>';
     }
 
     h += '<div class="carte plein">';
     h += '<h2>' + esc(PROD.nom)
       + (PROD.sku ? ' <span class="note">— ' + esc(PROD.sku) + '</span>' : '')
-      + ' <span class="note">· ' + VARS.length + ' variante' + (VARS.length > 1 ? 's' : '')
+      + ' <span class="note">· ' + VARS.length + ' ${T("variante")}' + (VARS.length > 1 ? 's' : '')
       + '</span></h2>';
 
     h += dessinerFiltres();
 
     if (!lot.length) {
-      h += '<div class="vide">Aucune variante ne correspond aux filtres.</div>';
+      h += '<div class="vide">${T("Aucune variante ne correspond aux filtres.")}</div>';
     } else {
       h += '<div class="grille"><table><thead><tr>'
-        + '<th>Variante</th><th>Code</th><th class="c">Qté</th>'
-        + '<th class="c">Seuil</th><th>Emplacement</th><th class="c"></th>'
+        + '<th>${T("Variante")}</th><th>${T("Code")}</th><th class="c">${T("Qté")}</th>'
+        + '<th class="c">${T("Seuil")}</th><th>${T("Emplacement")}</th><th class="c"></th>'
         + '</tr></thead><tbody>';
       page.forEach(function(v){
         var i = VARS.indexOf(v);
@@ -541,15 +545,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td>' + (v.sku ? '<span class="code">' + esc(v.sku) + '</span>'
                             : '<span class="rien">—</span>') + '</td>'
           + '<td class="q"><input type="number" min="0" data-q="' + i + '" value="' + (parseInt(v.qte, 10) || 0) + '"'
-      +   ' aria-label="' + esc('Quantité — ' + v.taille + ' / ' + v.couleur) + '"></td>'
+      +   ' aria-label="' + esc('${T("Quantité —")} ' + v.taille + ' / ' + v.couleur) + '"></td>'
           // ⚠ TEXTE DE REMPLACEMENT = LE SEUIL HERITE, jamais une valeur posee dans
           // le champ : la poser en ferait une EXCEPTION que vider n effacerait plus.
           + '<td class="s"><input type="number" min="0" data-s="' + i + '" value="' + esc(v.seuil)
           +   '" placeholder="' + esc(PROD.seuilHerite == null ? '' : PROD.seuilHerite)
-          +   '" title="Seuil de cette variante — vide = celui du produit"'
+          +   '" title="${T("Seuil de cette variante — vide = celui du produit")}"'
           +   (v.seuil === '' ? ' style="opacity:.6"' : '') + '></td>'
           + '<td class="e"><select data-e="' + i + '"'
-          +   ' aria-label="' + esc('Emplacement — ' + v.taille + ' / ' + v.couleur) + '"'
+          +   ' aria-label="' + esc('${T("Emplacement —")} ' + v.taille + ' / ' + v.couleur) + '"'
           +   (manqueLieu ? ' class="manque"' : '') + '>'
           +   '<option value="">—</option>'
           +   ENTREPOTS.map(function(w){
@@ -557,7 +561,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                   + '>' + esc(w.code || w.nom || w.id) + '</option>'; }).join('')
           +   '</select></td>'
           + '<td class="c">' + (v.sku
-              ? '<button class="mini" data-etiq="' + i + '" title="Imprimer les étiquettes de cette variante"><span class="ic">🖨</span></button>'
+              ? '<button class="mini" data-etiq="' + i + '" title="${T("Imprimer les étiquettes")} de cette ${T("variante")}"><span class="ic">🖨</span></button>'
               : '') + '</td>'
           + '</tr>';
       });
@@ -572,10 +576,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</select><span>par page</span>'
         + '<span class="pos">'
         + (pages > 1
-            ? '<button class="mini" id="pg-prec"' + (PAGE <= 0 ? ' disabled' : '') + '>← Préc.</button>'
+            ? '<button class="mini" id="pg-prec"' + (PAGE <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
               + ' Page <strong>' + (PAGE + 1) + '</strong> / ' + pages + ' '
-              + '<button class="mini" id="pg-suiv"' + (PAGE >= pages - 1 ? ' disabled' : '') + '>Suiv. →</button>'
-            : lot.length + ' variante' + (lot.length > 1 ? 's' : ''))
+              + '<button class="mini" id="pg-suiv"' + (PAGE >= pages - 1 ? ' disabled' : '') + '>${T("Suiv. →")}</button>'
+            : lot.length + ' ${T("variante")}' + (lot.length > 1 ? 's' : ''))
         + '</span></div>';
     }
 
@@ -583,9 +587,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '</div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = '<button id="btn-retour">← Liste</button>'
-      + (PROD.sku ? '<button id="btn-tout"><span class="ic">🖨</span> Tous les codes-barres</button>' : '')
-      + '<button class="prim" id="btn-enr">Enregistrer l’inventaire</button>';
+    actions.innerHTML = '<button id="btn-retour">${T("← Liste")}</button>'
+      + (PROD.sku ? '<button id="btn-tout"><span class="ic">🖨</span> ${T("Tous les codes-barres")}</button>' : '')
+      + '<button class="prim" id="btn-enr">${T("Enregistrer l’inventaire")}</button>';
     brancherProduit();
     majBouton();
     grilleAutoAjuste();
@@ -595,7 +599,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // autant de lignes que la hauteur reelle le permet, jamais de glissiere.
   var AUTO_EN_COURS = false;      // voir le verrou, plus bas
   function grilleAutoAjuste(){
-    if (!GRILLE_AUTO || VUE !== 'produit') return;
+    if (!GRILLE_AUTO || VUE !== '${T("produit")}') return;
     var g = corps.querySelector('.grille');
     if (!g) return;
     var th = g.querySelector('thead');
@@ -645,7 +649,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (choisies.length ? ' (' + choisies.length + ')' : '') + (ouvert ? ' ▴' : ' ▾') + '</button>';
       if (ouvert) {
         h += '<div class="liste">';
-        if (choisies.length) h += '<button class="mini" data-vider="' + type + '" style="width:100%;margin-bottom:.2rem">Tout afficher</button>';
+        if (choisies.length) h += '<button class="mini" data-vider="' + type + '" style="width:100%;margin-bottom:.2rem">${T("Tout afficher")}</button>';
         toutes.forEach(function(v, k){
           h += '<label><input type="checkbox" data-f="' + type + '" data-fi="' + k + '"'
             + (choisies.indexOf(v) >= 0 ? ' checked' : '') + '><span>' + esc(v) + '</span></label>';
@@ -657,7 +661,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ FILTRER NE PERD AUCUNE SAISIE : les valeurs vivent dans VARS, pas dans les
     // champs. C etait deja la promesse de l ecran du site, elle est tenue ici par
     // construction et non par precaution.
-    var h = '<div class="filtres"><span class="lbl">Filtrer :</span>'
+    var h = '<div class="filtres"><span class="lbl">${T("Filtrer :")}</span>'
       + menu('couleur', 'Couleur', couleurs, FILTRE.couleur)
       + menu('taille', 'Taille', tailles, FILTRE.taille) + '</div>';
     // Les index servent au clic (voir brancherProduit) : on les retient.
@@ -671,7 +675,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var peut = !!(CTX && CTX.peutEcrire) && !enCours;
     b.disabled = !peut;
     b.textContent = enCours ? 'Enregistrement…'
-      : (CTX && CTX.peutEcrire ? 'Enregistrer l’inventaire' : 'Lecture seule');
+      : (CTX && CTX.peutEcrire ? '${T("Enregistrer l’inventaire")}' : '${T("Lecture seule")}');
   }
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
@@ -786,133 +790,133 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // genre de detour qu on ne fait qu une fois.
   function tuile(libelle, valeur, sousTitre, ton, geste){
     return '<div class="tuile' + (ton ? ' ' + ton : '') + (geste ? ' cliq" data-tuile="' + geste : '')
-      + '"' + (geste ? ' title="Cliquer pour voir la liste"' : '') + '>'
+      + '"' + (geste ? ' title="${T("Cliquer pour voir la liste")}"' : '') + '>'
       + '<div class="lbl">' + libelle + '</div>'
       + '<div class="val' + (ton ? ' ' + ton : '') + '">' + valeur + '</div>'
       + '<div class="sub">' + sousTitre + '</div></div>';
   }
 
   function pilule(l){
-    if (!l.sku) return '<span class="pill neutre">Non inventorié (sans SKU)</span>';
+    if (!l.sku) return '<span class="pill neutre">${T("Non inventorié (sans SKU)")}</span>';
     if (l.unites === 0) return '<span class="pill rup">Rupture</span>';
-    if (l.basses > 0) return '<span class="pill bas">' + l.basses + ' à commander</span>';
-    return '<span class="pill ok">Seuil non atteint</span>';
+    if (l.basses > 0) return '<span class="pill bas">' + l.basses + ' ${T("à commander")}</span>';
+    return '<span class="pill ok">${T("Seuil non atteint")}</span>';
   }
 
   function dessinerProduits(){
     var d = PRODS;
     if (!d) {
-      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>';
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>';
       actions.innerHTML = '';
       return;
     }
     var st = d.stats;
     var h = '<div class="tuiles">'
-      + tuile('Produits inventoriés', st.inventories, st.total + ' produits au total', '')
-      + tuile('Sans code SKU', st.sansSku,
-          st.sansSku > 0 ? 'non disponibles à l’achat' : 'tous assignés ✓',
+      + tuile('${T("Produits inventoriés")}', st.inventories, st.total + ' produits au total', '')
+      + tuile('${T("Sans code SKU")}', st.sansSku,
+          st.sansSku > 0 ? '${T("non disponibles à l’achat")}' : '${T("tous assignés ✓")}',
           st.sansSku > 0 ? 'att' : 'bon')
-      + tuile('En rupture', st.rupture, 'inventaire = 0', st.rupture > 0 ? 'err' : 'bon',
+      + tuile('${T("En rupture")}', st.rupture, 'inventaire = 0', st.rupture > 0 ? 'err' : 'bon',
           st.rupture > 0 ? 'rupture' : '')
-      + tuile('À réapprovisionner', st.aCommander,
-          st.aCommander ? 'voir l’onglet Réapprovisionnement' : 'tout est au-dessus du seuil ✓',
+      + tuile('${T("À réapprovisionner")}', st.aCommander,
+          st.aCommander ? '${T("voir l’onglet Réapprovisionnement")}' : 'tout est au-dessus du seuil ✓',
           st.aCommander ? 'att' : 'bon',
           st.aCommander > 0 ? 'reappro' : '')
-      + tuile('Unités en inventaire', st.unites, 'toutes variantes', '')
+      + tuile('${T("Unités en inventaire")}', st.unites, 'toutes variantes', '')
       + '</div>';
 
     // ⚠ LES DEUX BANDEAUX DE L ECRAN DU SITE, repris au mot — et comme lui, ils
     // disparaissent d eux-memes une fois la reprise faite.
     if (st.sansSku > 0 && d.peutEcrire) {
       h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
-        + '<span style="flex:1 1 auto"><span class="ic">⚠</span> <b>' + st.sansSku + ' produit(s)</b> sans code SKU '
-        + '— ils sont bloqués à l’achat en boutique.</span>'
-        + '<button class="mini" id="btn-skus-tous">Assigner automatiquement</button></div>';
+        + '<span style="flex:1 1 auto"><span class="ic">⚠</span> <b>' + st.sansSku + ' ${T("produit(s)")}</b> ${T("sans code SKU")} '
+        + '${T("— ils sont bloqués à l’achat en boutique.")}</span>'
+        + '<button class="mini" id="btn-skus-tous">${T("Assigner automatiquement")}</button></div>';
     }
     if (d.pad6 && d.pad6.n > 0 && d.peutEcrire) {
       h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
-        + '<span style="flex:1 1 auto"><span class="ic">🏷</span> <b>' + d.pad6.n + ' produit(s)</b> portent encore un '
-        + 'numéro à quatre chiffres (' + esc(d.pad6.avant || '') + '). Les nouveaux en comptent six '
-        + '— ' + esc(d.pad6.apres || '') + '. <em>Renuméroter oblige à réimprimer les étiquettes '
-        + 'déjà collées.</em></span>'
-        + '<button class="mini" id="btn-pad6">Passer à six chiffres</button></div>';
+        + '<span style="flex:1 1 auto"><span class="ic">🏷</span> <b>' + d.pad6.n + ' ${T("produit(s)")}</b> portent encore un '
+        + '${T("numéro à quatre chiffres (")}' + esc(d.pad6.avant || '') + '${T("). Les nouveaux en comptent six")} '
+        + '— ' + esc(d.pad6.apres || '') + '. <em>${T("Renuméroter oblige à réimprimer les étiquettes")} '
+        + '${T("déjà collées.")}</em></span>'
+        + '<button class="mini" id="btn-pad6">${T("Passer à six chiffres")}</button></div>';
     }
 
     if (LOT) {
       var nCoches = Object.keys(COCHES).length;
       h += '<div class="lot">'
-        + '<label><input type="checkbox" id="lot-page"> Toute la page</label>'
-        + '<span>' + nCoches + ' produit' + (nCoches > 1 ? 's' : '') + ' sélectionné'
+        + '<label><input type="checkbox" id="lot-page"> ${T("Toute la page")}</label>'
+        + '<span>' + nCoches + ' ${T("produit")}' + (nCoches > 1 ? 's' : '') + ' ${T("sélectionné")}'
         + (nCoches > 1 ? 's' : '') + '</span>'
         + '<span style="flex:1 1 auto"></span>'
-        + '<button class="mini rouge" id="lot-app"><span class="ic">🔴</span> Appliquer vente finale</button>'
-        + '<button class="mini vert" id="lot-ret"><span class="ic">✅</span> Retirer vente finale</button>'
-        + '<button class="mini" id="lot-annuler">Annuler</button></div>';
+        + '<button class="mini rouge" id="lot-app"><span class="ic">🔴</span> ${T("Appliquer vente finale")}</button>'
+        + '<button class="mini vert" id="lot-ret"><span class="ic">✅</span> ${T("Retirer vente finale")}</button>'
+        + '<button class="mini" id="lot-annuler">${T("Annuler")}</button></div>';
     }
 
     h += '<div class="carte plein">';
     h += '<div class="toolbar">'
-      + '<input aria-label="SKU, nom produit" type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom produit…" value="' + esc(FP.q) + '">'
+      + '<input aria-label="SKU, nom ${T("produit")}" type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom ${T("produit")}…" value="' + esc(FP.q) + '">'
       + '<select id="fp-etat" aria-label="Filtrer par état du stock">'
-      + '<option value=""><span class="ic">📦</span> Tout l’inventaire</option>'
-      + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '><span class="ic">🔴</span> En rupture</option>'
-      + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> À commander</option>'
-      + '<option value="ok"' + (FP.etat === 'ok' ? ' selected' : '') + '>✓ Seuil non atteint</option>'
+      + '<option value=""><span class="ic">📦</span> ${T("Tout l’inventaire")}</option>'
+      + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '><span class="ic">🔴</span> ${T("En rupture")}</option>'
+      + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> ${T("À commander")}</option>'
+      + '<option value="ok"' + (FP.etat === 'ok' ? ' selected' : '') + '>${T("✓ Seuil non atteint")}</option>'
       + '</select>'
       + menuCats(d.cats || [])
       /* ⚠ FILTRER PAR LIEU MONTRE UN PRODUIT DES QU UNE SEULE de ses variantes
          s y trouve — pas seulement ceux qui y sont en entier. C est la regle
          utile quand on prepare une commande : ce qu on a sous la main compte,
          meme si le reste dort ailleurs. Le detail est dans stockProduits. */
-      + '<select id="fp-lieu"><option value="">Tous les lieux</option>'
+      + '<select id="fp-lieu"><option value="">${T("Tous les lieux")}</option>'
       +   (d.lieux || []).map(function(l){
             return '<option value="' + esc(l.id) + '"' + (FP.lieuId === l.id ? ' selected' : '') + '>'
               + esc(l.nom) + '</option>'; }).join('')
-      +   '<option value="_sans"' + (FP.lieuId === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
+      +   '<option value="_sans"' + (FP.lieuId === '_sans' ? ' selected' : '') + '>${T("— sans lieu —")}</option>'
       + '</select>'
-      + '<input aria-label="Section" type="text" id="fp-section" autocomplete="off" placeholder="Section…" value="' + esc(FP.section) + '" style="width:8rem">'
+      + '<input aria-label="${T("Section")}" type="text" id="fp-section" autocomplete="off" placeholder="${T("Section")}…" value="' + esc(FP.section) + '" style="width:8rem">'
       + '<span class="droite">'
       // ⚠ CE BOUTON MANQUAIT (#6) : depuis l inventaire, il fallait sortir vers
       // l ecran Produits pour en creer un. L op existait deja cote pont, elle
       // n etait simplement offerte nulle part ici.
-      + (d.peutAjouterProduit ? '<button class="mini prim" id="btn-nouveau-produit">+ Ajouter un produit</button>' : '')
-      + (d.peutEcrire && !LOT ? '<button class="mini" id="btn-lot" title="Appliquer ou retirer la vente finale sur plusieurs produits à la fois">Vente finale en lot</button>' : '')
+      + (d.peutAjouterProduit ? '<button class="mini prim" id="btn-nouveau-${T("produit")}">${T("+ Ajouter un produit")}</button>' : '')
+      + (d.peutEcrire && !LOT ? '<button class="mini" id="btn-lot" title="Appliquer ou retirer la vente finale sur plusieurs produits à la fois">${T("Vente finale en lot")}</button>' : '')
       + '</span></div>';
 
     if (!d.lignes.length) {
-      h += '<div class="vide">Aucun produit trouvé.</div>';
+      h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
       h += '<div class="grille"><table><thead><tr>'
         + (LOT ? '<th class="c" style="width:2rem"></th>' : '')
-        + '<th>SKU</th><th>Produit</th><th class="c" title="Catégorie">Cat.</th>'
-        + '<th class="c">Tailles</th><th class="c">Couleurs</th>'
-        + '<th>Inventaire</th><th class="c">Actions</th>'
+        + '<th>SKU</th><th>${T("Produit")}</th><th class="c" title="Catégorie">${T("Cat.")}</th>'
+        + '<th class="c">${T("Tailles")}</th><th class="c">${T("Couleurs")}</th>'
+        + '<th>${T("Inventaire")}</th><th class="c">${T("Actions")}</th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
         // La ligne entiere est cliquable : elle ouvre la fiche (ou coche, en
         // mode lot). Les boutons de la colonne Actions restent prioritaires.
         h += '<tr data-ligne="' + esc(l.id) + '" title="'
-          + (LOT ? 'Cliquer pour sélectionner' : 'Cliquer pour modifier la fiche produit') + '">'
+          + (LOT ? '${T("Cliquer pour sélectionner")}' : '${T("Cliquer pour modifier la fiche produit")}') + '">'
           + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(l.id) + '"'
-              + ' aria-label="' + esc('Sélectionner ' + (l.nom || l.sku || l.id)) + '"'
+              + ' aria-label="' + esc('${T("Sélectionner")} ' + (l.nom || l.sku || l.id)) + '"'
               + (COCHES[l.id] ? ' checked' : '') + '></td>' : '')
           + '<td>' + (l.sku ? '<span class="code">' + esc(l.sku) + '</span>'
-                            : '<span class="rien">sans SKU</span>') + '</td>'
+                            : '<span class="rien">${T("sans SKU")}</span>') + '</td>'
           + '<td><span class="nom">' + esc(l.nom) + '</span>'
-          +   (l.enVente ? '<span class="badge vente">En vente</span>' : '')
-          +   (l.venteFinale ? '<span class="badge finale">Vente finale</span>' : '') + '</td>'
+          +   (l.enVente ? '<span class="badge vente">${T("En vente")}</span>' : '')
+          +   (l.venteFinale ? '<span class="badge finale">${T("Vente finale")}</span>' : '') + '</td>'
           + '<td class="c" title="' + esc(l.categorieNom) + '"><span class="puce" style="background:'
           +   esc(l.couleurCat || '#6d7f96') + '"></span></td>'
           + '<td class="c">' + l.tailles + '</td>'
           + '<td class="c">' + l.couleurs + '</td>'
           + '<td><b' + (l.unites === 0 ? ' style="color:var(--tx-err)"' : '') + '>' + l.unites + '</b> '
-          +   'unité' + (l.unites > 1 ? 's' : '') + ' ' + pilule(l) + '</td>'
+          +   '${T("unité")}' + (l.unites > 1 ? 's' : '') + ' ' + pilule(l) + '</td>'
           + '<td class="c" style="white-space:nowrap">'
-          +   '<button class="mini" data-inv="' + esc(l.id) + '" title="Gérer l’inventaire"><span class="ic">📦</span> Inventaire</button> '
+          +   '<button class="mini" data-inv="' + esc(l.id) + '" title="Gérer l’inventaire"><span class="ic">📦</span> ${T("Inventaire")}</button> '
           +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="Assigner un SKU"><span class="ic">🏷</span> SKU</button> ' : '')
-          +   (d.peutEcrire ? '<button class="mini" data-mod="' + esc(l.id) + '" title="Modifier la fiche produit"><span class="ic">✎</span> Modifier</button> ' : '')
-          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="Mettre en vente"><span class="ic">🛒</span> Vendre</button> ' : '')
-          +   (d.peutSupprimer ? '<button class="mini" data-suppr="' + esc(l.id) + '" data-nom="' + esc(l.nom) + '" title="Supprimer de l’inventaire" style="border-color:rgba(239,68,68,.45)"><span class="ic">🗑</span></button>' : '')
+          +   (d.peutEcrire ? '<button class="mini" data-mod="' + esc(l.id) + '" title="${T("Modifier")} la fiche ${T("produit")}"><span class="ic">✎</span> ${T("Modifier")}</button> ' : '')
+          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="Mettre en vente"><span class="ic">🛒</span> ${T("Vendre")}</button> ' : '')
+          +   (d.peutSupprimer ? '<button class="mini" data-suppr="' + esc(l.id) + '" data-nom="' + esc(l.nom) + '" title="${T("Supprimer de l’inventaire")}" style="border-color:rgba(239,68,68,.45)"><span class="ic">🗑</span></button>' : '')
           + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -927,9 +931,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</select><span>par page</span>'
         + '<span class="pos">' + debut + '–' + fin + ' sur ' + d.total + ' '
         + (d.pages > 1
-            ? '<button class="mini" id="fp-prec"' + (d.page <= 0 ? ' disabled' : '') + '>← Préc.</button>'
+            ? '<button class="mini" id="fp-prec"' + (d.page <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
               + ' Page <strong>' + (d.page + 1) + '</strong> / ' + d.pages + ' '
-              + '<button class="mini" id="fp-suiv"' + (d.page >= d.pages - 1 ? ' disabled' : '') + '>Suiv. →</button>'
+              + '<button class="mini" id="fp-suiv"' + (d.page >= d.pages - 1 ? ' disabled' : '') + '>${T("Suiv. →")}</button>'
             : '')
         + '</span></div>';
     }
@@ -951,7 +955,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var autoT = null;
   var AUTO_DEMANDE = 0;   // la derniere cadence DEMANDEE au site (voir plus bas)
   function pageAutoAjuste(){
-    if (!FP.auto || ONGLET !== 'produits' || VUE === 'produit' || !PRODS) return;
+    if (!FP.auto || ONGLET !== 'produits' || VUE === '${T("produit")}' || !PRODS) return;
     var g = corps.querySelector('.grille');
     if (!g) return;
     var th = g.querySelector('thead');
@@ -989,7 +993,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.addEventListener('resize', function(){
     clearTimeout(autoT);
     autoT = setTimeout(function(){
-      if (VUE === 'produit') grilleAutoAjuste(); else pageAutoAjuste();
+      if (VUE === '${T("produit")}') grilleAutoAjuste(); else pageAutoAjuste();
     }, 180);
   });
 
@@ -999,11 +1003,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="menu">';
     if (FP.menu) h += '<div class="voile2" data-menu-cats="1"></div>';
     h += '<button class="mini' + (n ? ' prim' : '') + '" data-menu-cats="1"'
-      + ' style="position:relative;z-index:41">Catégorie à afficher'
+      + ' style="position:relative;z-index:41">${T("Catégorie à afficher")}'
       + (n ? ' (' + n + ')' : '') + (FP.menu ? ' ▴' : ' ▾') + '</button>';
     if (FP.menu) {
       h += '<div class="liste">';
-      if (n) h += '<button class="mini" data-vider-cats="1" style="width:100%;margin-bottom:.2rem">Réinitialiser</button>';
+      if (n) h += '<button class="mini" data-vider-cats="1" style="width:100%;margin-bottom:.2rem">${T("Réinitialiser")}</button>';
       cats.forEach(function(c){
         h += '<label><input type="checkbox" data-cat="' + esc(c.cle) + '"'
           + (FP.cats.indexOf(c.cle) >= 0 ? ' checked' : '') + '>'
@@ -1059,7 +1063,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // suffit — redessiner ferait perdre la position de defilement.
         var lot = corps.querySelector('.lot span:nth-child(2)');
         var nc = Object.keys(COCHES).length;
-        if (lot) lot.textContent = nc + ' produit' + (nc > 1 ? 's' : '') + ' sélectionné' + (nc > 1 ? 's' : '');
+        if (lot) lot.textContent = nc + ' ${T("produit")}' + (nc > 1 ? 's' : '') + ' ${T("sélectionné")}' + (nc > 1 ? 's' : '');
       }
     };
     corps.onclick = function(ev){
@@ -1101,7 +1105,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           if (cc) cc.checked = !!COCHES[lid];
           var lot = corps.querySelector('.lot span:nth-child(2)');
           var nc = Object.keys(COCHES).length;
-          if (lot) lot.textContent = nc + ' produit' + (nc > 1 ? 's' : '') + ' sélectionné' + (nc > 1 ? 's' : '');
+          if (lot) lot.textContent = nc + ' ${T("produit")}' + (nc > 1 ? 's' : '') + ' ${T("sélectionné")}' + (nc > 1 ? 's' : '');
           return;
         }
         // Le geste principal de la ligne : MODIFIER la fiche. En lecture seule
@@ -1111,11 +1115,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       if (b.id === 'fp-prec') { FP.page--; chargerOnglet(); return; }
       if (b.id === 'fp-suiv') { FP.page++; chargerOnglet(); return; }
-      if (b.id === 'btn-nouveau-produit') {
+      if (b.id === 'btn-nouveau-${T("produit")}') {
         // L assistant Produit natif, en mode creation — le meme que celui de
         // l ecran Produits. Rien n est duplique ici.
         appeler('produits:nouveau', []).then(function(r){
-          dire(r && r.ok ? 'Nouveau produit ouvert dans sa fenêtre.' : expliquer(r),
+          dire(r && r.ok ? '${T("Nouveau produit ouvert dans sa fenêtre.")}' : expliquer(r),
             (r && r.ok) ? 'bon' : 'err');
         });
         return;
@@ -1145,7 +1149,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function skuUn(pid, b){
     b.disabled = true;
     appeler('stock:skuUn', [pid]).then(function(r){
-      dire(r.ok ? 'SKU assigné : ' + r.sku : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("SKU assigné :")} ' + r.sku : expliquer(r), r.ok ? 'bon' : 'err');
       if (r.ok) chargerOnglet();
       else b.disabled = false;
     });
@@ -1153,7 +1157,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function skusTous(b){
     b.disabled = true;
     appeler('stock:skuTous').then(function(r){
-      dire(r.ok ? r.n + ' SKU assigné(s) automatiquement.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? r.n + ' ${T("SKU assigné(s) automatiquement.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       if (r.ok) chargerOnglet();
       else b.disabled = false;
     });
@@ -1161,20 +1165,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function pad6(){
     var d = PRODS && PRODS.pad6;
     if (!d || !d.n) return;
-    voile('<h3>Passer les SKU à six chiffres</h3>'
-      + '<p>' + d.n + ' produit(s) seront renumérotés (ex. ' + esc(d.avant || '') + ' → '
-      + esc(d.apres || '') + '). Les étiquettes <strong>déjà imprimées</strong> ne correspondront '
-      + 'plus au nouveau code — il faudra les réimprimer pour la marchandise concernée. '
-      + '<strong>Irréversible.</strong></p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui">Renuméroter</button></div>',
+    voile('<h3>${T("Passer les SKU à six chiffres")}</h3>'
+      + '<p>' + d.n + ' ${T("produit(s) seront renumérotés (ex.")} ' + esc(d.avant || '') + ' → '
+      + esc(d.apres || '') + '${T("). Les étiquettes <strong>déjà imprimées</strong> ne correspondront ")}'
+      + '${T("plus au nouveau code — il faudra les réimprimer pour la marchandise concernée.")} '
+      + '<strong>${T("Irréversible.")}</strong></p>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Renuméroter")}</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
           this.disabled = true;
           appeler('stock:skuPad6').then(function(r){
             fermer();
-            dire(r.ok ? r.n + ' SKU normalisé(s).' : expliquer(r), r.ok ? 'bon' : 'err');
+            dire(r.ok ? r.n + ' ${T("SKU normalisé(s).")}' : expliquer(r), r.ok ? 'bon' : 'err');
             if (r.ok) chargerOnglet();
           });
         };
@@ -1183,13 +1187,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function modifier(pid){
     dire('Ouverture…');
     appeler('stock:modifier', [pid]).then(function(r){
-      dire(r.ok ? 'Fiche produit ouverte dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Fiche produit ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   }
   function vendre(pid, b){
     b.disabled = true;
     appeler('stock:vendre', [pid]).then(function(r){
-      dire(r.ok ? (r.nom || 'Le produit') + ' est maintenant en vente.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? (r.nom || '${T("Le produit")}') + ' ${T("est maintenant en vente.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       if (r.ok) chargerOnglet();
       else b.disabled = false;
     });
@@ -1205,16 +1209,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         ? '<label style="display:flex;align-items:flex-start;gap:.5rem;margin-top:.6rem;'
           + 'font-size:.83rem;cursor:pointer;text-align:left">'
           + '<input type="checkbox" id="v-ph" style="width:auto;margin-top:.2rem">'
-          + '<span>Retirer aussi ' + (photos.length > 1 ? 'ses ' + photos.length + ' photos' : 'sa photo')
-          + ' de la photothèque (' + photos.map(function(x){ return esc(x.code); }).join(', ') + '). '
-          + 'Sans cette case, ' + (photos.length > 1 ? 'elles y restent' : 'elle y reste')
-          + ' pour servir à d’autres fiches.</span></label>'
+          + '<span>${T("Retirer aussi")} ' + (photos.length > 1 ? 'ses ' + photos.length + ' photos' : 'sa photo')
+          + ' ${T("de la photothèque (")}' + photos.map(function(x){ return esc(x.code); }).join(', ') + '). '
+          + '${T("Sans cette case,")} ' + (photos.length > 1 ? 'elles y restent' : 'elle y reste')
+          + ' ${T("pour servir à d’autres fiches.")}</span></label>'
         : '';
-      voile('<h3>Supprimer de l’inventaire</h3>'
-        + '<p>Supprimer définitivement <strong>' + esc(nom) + '</strong> de l’inventaire ? '
-        + 'Cette action est <strong>irréversible</strong>.</p>' + q
-        + '<div class="fin2"><button id="v-non">Annuler</button>'
-        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">Supprimer</button></div>',
+      voile('<h3>${T("Supprimer de l’inventaire")}</h3>'
+        + '<p>${T("Supprimer définitivement")} <strong>' + esc(nom) + '</strong> ${T("de l’inventaire ?")} '
+        + '${T("Cette action est <strong>irréversible</strong>.")}</p>' + q
+        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">${T("Supprimer")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){
@@ -1222,8 +1226,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             var coche = document.getElementById('v-ph');
             appeler('stock:supprimer', [pid, !!(coche && coche.checked)]).then(function(r){
               fermer();
-              dire(r.ok ? ('Produit supprimé' + (r.photosRetirees
-                  ? ' — ' + r.photosRetirees + ' photo(s) retirée(s) de la photothèque' : '') + '.')
+              dire(r.ok ? ('${T("Produit supprimé")}' + (r.photosRetirees
+                  ? ' — ' + r.photosRetirees + ' ${T("photo(s) retirée(s) de la photothèque")}' : '') + '.')
                 : expliquer(r), r.ok ? 'bon' : 'err');
               if (r.ok) chargerOnglet();
             });
@@ -1237,7 +1241,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ids.length) { dire(MOTIFS.aucun_produit, 'att'); return; }
     appeler('stock:venteFinale', [ids, activer]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Vente finale ' + (activer ? 'activée' : 'retirée') + ' pour ' + r.n + ' produit(s).', 'bon');
+      dire('${T("Vente finale")} ' + (activer ? '${T("activée")}' : '${T("retirée")}') + '${T(" pour ")}' + r.n + ' produit(s).', 'bon');
       LOT = false; COCHES = {};
       chargerOnglet();
     });
@@ -1247,30 +1251,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerEndommages(){
     var d = DMG;
     if (!d) {
-      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>';
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>';
       actions.innerHTML = '';
       return;
     }
     var h = '<div class="carte plein">'
-      + '<h2>Produits endommagés <span class="note">— articles de retours non remis en inventaire</span></h2>'
+      + '<h2>${T("Produits endommagés <span class=\"note\">— articles de retours non remis en inventaire</span>")}</h2>'
       + '<div class="toolbar">'
-      + '<select id="dmg-an"><option value="all">Tout cumulé</option>'
+      + '<select id="dmg-an"><option value="all">${T("Tout cumulé")}</option>'
       + (d.annees || []).map(function(a){
           return '<option value="' + a + '"' + (String(DMG_AN) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
       + '</select>'
-      + '<button class="mini" id="dmg-imp"><span class="ic">🖨</span> Imprimer le rapport</button>'
+      + '<button class="mini" id="dmg-imp"><span class="ic">🖨</span> ${T("Imprimer le rapport")}</button>'
       + '<span class="droite aide"><span class="ic">🔧</span> <b>' + d.totalQte + '</b> article' + (d.totalQte > 1 ? 's' : '')
-      + ' endommagé' + (d.totalQte > 1 ? 's' : '') + ' · <span class="ic">💸</span> <b>' + d.totalValeur.toFixed(2)
-      + ' $</b> valeur perdue (avant taxes)</span>'
+      + ' ${T("endommagé")}' + (d.totalQte > 1 ? 's' : '') + ' · <span class="ic">💸</span> <b>' + d.totalValeur.toFixed(2)
+      + ' $</b> ${T("valeur perdue (avant taxes)")}</span>'
       + '</div>';
 
     if (!d.lignes.length) {
-      h += '<div class="vide">Aucun article endommagé'
-        + (DMG_AN === 'all' ? '' : ' pour ' + esc(String(DMG_AN))) + '.</div>';
+      h += '<div class="vide">${T("Aucun article endommagé")}'
+        + (DMG_AN === 'all' ? '' : '${T(" pour ")}' + esc(String(DMG_AN))) + '.</div>';
     } else {
       h += '<div class="grille"><table><thead><tr>'
-        + '<th>Date</th><th>Commande</th><th>Article</th><th class="c">Qté</th>'
-        + '<th style="text-align:right">Prix</th><th style="text-align:right">Valeur</th><th>Raison</th>'
+        + '<th>${T("Date")}</th><th>${T("Commande")}</th><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
+        + '<th style="text-align:right">${T("Prix")}</th><th style="text-align:right">${T("Valeur")}</th><th>${T("Raison")}</th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
         h += '<tr>'
@@ -1283,7 +1287,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td>' + esc(l.raison) + '</td></tr>';
       });
       h += '</tbody><tfoot><tr style="font-weight:700">'
-        + '<td colspan="3" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">Total</td>'
+        + '<td colspan="3" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">${T("Total")}</td>'
         + '<td class="c" style="border-top:1px solid var(--v14)">' + d.totalQte + '</td>'
         + '<td style="border-top:1px solid var(--v14)"></td>'
         + '<td style="text-align:right;border-top:1px solid var(--v14)">' + d.totalValeur.toFixed(2) + ' $</td>'
@@ -1313,7 +1317,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // l application — jamais en relisant le tableau affiche ici.
       appeler('stock:endommagesRapport', [DMG_AN]).then(function(r){
         b.disabled = false;
-        dire(r.ok ? 'Rapport envoyé à l’impression.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Rapport envoyé à l’impression.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
   }
@@ -1322,7 +1326,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerEntrepots(){
     var d = WHS;
     if (!d) {
-      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>';
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>';
       actions.innerHTML = '';
       return;
     }
@@ -1336,26 +1340,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     function ligneLieuEdition(l){
       return '<tr style="background:rgba(201,169,126,.08)">'
         + '<td><input type="text" id="lx-nom" aria-label="Nom du lieu" value="' + esc(l ? l.nom : '') + '" placeholder="Ex : Entrepot, Maison"></td>'
-        + '<td colspan="2"><input aria-label="Adresse (optionnel)" type="text" id="lx-adr" value="' + esc(l ? l.adresse : '') + '" placeholder="Adresse (optionnel)"></td>'
+        + '<td colspan="2"><input aria-label="${T("Adresse (optionnel)")}" type="text" id="lx-adr" value="' + esc(l ? l.adresse : '') + '" placeholder="${T("Adresse (optionnel)")}"></td>'
         + '<td class="c" style="white-space:nowrap">'
-        + '<button class="mini prim" id="lx-enr" title="Enregistrer (Entrée)">✓</button> '
-        + '<button class="mini" id="lx-annuler" title="Annuler (Échap)">✕</button></td></tr>';
+        + '<button class="mini prim" id="lx-enr" title="${T("Enregistrer")} (Entrée)">✓</button> '
+        + '<button class="mini" id="lx-annuler" title="${T("Annuler")} (Échap)">✕</button></td></tr>';
     }
 
     function ligneEdition(w){
-      var opts = '<option value="">— aucun —</option>'
+      var opts = '<option value="">${T("— aucun —")}</option>'
         + (d.lieux || []).map(function(l){
             return '<option value="' + esc(l.id) + '"' + (w && w.lieuId === l.id ? ' selected' : '') + '>'
               + esc(l.nom) + '</option>'; }).join('');
       return '<tr style="background:rgba(201,169,126,.08)">'
-        + '<td><select id="wh-lieu" aria-label="Lieu de cet emplacement">' + opts + '</select></td>'
-        + '<td><input type="text" id="wh-casier" aria-label="Casier" value="' + esc(w ? w.casier : '') + '" placeholder="Ex : Casier 1"></td>'
-        + '<td><input type="text" id="wh-section" aria-label="Section" value="' + esc(w ? w.section : '') + '" placeholder="Ex : Section A"></td>'
-        + '<td><input aria-label="Référence (optionnel)" type="text" id="wh-ref" value="' + esc(w ? w.reference : '') + '" placeholder="Référence (optionnel)"></td>'
+        + '<td><select id="wh-lieu" aria-label="${T("Lieu de cet emplacement")}">' + opts + '</select></td>'
+        + '<td><input type="text" id="wh-casier" aria-label="${T("Casier")}" value="' + esc(w ? w.casier : '') + '" placeholder="${T("Ex : Casier 1")}"></td>'
+        + '<td><input type="text" id="wh-section" aria-label="${T("Section")}" value="' + esc(w ? w.section : '') + '" placeholder="${T("Ex : Section A")}"></td>'
+        + '<td><input aria-label="${T("Référence (optionnel)")}" type="text" id="wh-ref" value="' + esc(w ? w.reference : '') + '" placeholder="${T("Référence (optionnel)")}"></td>'
         + '<td class="c"><span class="rien">' + (w ? w.usage : '—') + '</span></td>'
         + '<td class="c" style="white-space:nowrap">'
-        + '<button class="mini prim" id="wh-enr" title="Enregistrer (Entrée)">✓</button> '
-        + '<button class="mini" id="wh-annuler" title="Annuler (Échap)">✕</button></td></tr>';
+        + '<button class="mini prim" id="wh-enr" title="${T("Enregistrer")} (Entrée)">✓</button> '
+        + '<button class="mini" id="wh-annuler" title="${T("Annuler")} (Échap)">✕</button></td></tr>';
     }
 
     var h = '';
@@ -1367,63 +1371,63 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (d.migre && d.migre.repartis > 0) {
       h += '<div class="carte plein" style="border-color:rgba(201,169,126,.4)">'
         + '<div style="font-size:.84rem;line-height:1.6">'
-        + '<strong>' + d.migre.repartis + ' emplacement(s) répartis</strong> en lieu, casier et section'
-        + (d.migre.crees.length ? ' — lieu(x) créé(s) : <strong>' + d.migre.crees.map(esc).join(', ') + '</strong>' : '')
-        + '.<br><span class="note">Le libellé affiché n’a pas changé. Il ne manque que l’adresse de chaque lieu.</span>'
+        + '<strong>' + d.migre.repartis + ' ${T("emplacement(s) répartis")}</strong> ${T("en lieu, casier et section")}'
+        + (d.migre.crees.length ? ' ${T("— lieu(x) créé(s) :")} <strong>' + d.migre.crees.map(esc).join(', ') + '</strong>' : '')
+        + '.<br><span class="note">${T("Le libellé affiché n’a pas changé. Il ne manque que l’adresse de chaque lieu.")}</span>'
         + '</div></div>';
     }
 
     // ── LES LIEUX ────────────────────────────────────────────────────────────
     h += '<div class="carte plein">'
-      + '<h2>Lieux <span class="note">— les bâtiments, avec leur adresse</span></h2>';
+      + '<h2>${T("Lieux")} <span class="note">${T("— les bâtiments, avec leur adresse")}</span></h2>';
     if (d.peutAjouter) {
       h += '<div class="toolbar"><span class="droite">'
         + '<button class="mini" id="lx-ajouter"' + (LX_EDIT && LX_EDIT.id === '' ? ' disabled' : '')
-        + '>+ Ajouter un lieu</button></span></div>';
+        + '>${T("+ Ajouter un lieu")}</button></span></div>';
     }
     h += '<div class="grille"><table><thead><tr>'
-      + '<th>Lieu</th><th colspan="2">Adresse</th><th class="c">Actions</th>'
+      + '<th>${T("Lieu")}</th><th colspan="2">${T("Adresse")}</th><th class="c">${T("Actions")}</th>'
       + '</tr></thead><tbody>';
     if (LX_EDIT && LX_EDIT.id === '') h += ligneLieuEdition(null);
     if (!(d.lieux || []).length && !(LX_EDIT && LX_EDIT.id === '')) {
-      h += '<tr><td colspan="4"><div class="vide">Aucun lieu — cliquez sur '
-        + '<b>+ Ajouter un lieu</b> pour déclarer un bâtiment.</div></td></tr>';
+      h += '<tr><td colspan="4"><div class="vide">${T("Aucun lieu — cliquez sur")} '
+        + '<b>${T("+ Ajouter un lieu")}</b> ${T("pour déclarer un bâtiment.")}</div></td></tr>';
     }
     (d.lieux || []).forEach(function(l){
       if (LX_EDIT && LX_EDIT.id === l.id) { h += ligneLieuEdition(l); return; }
       var n = (d.lignes || []).filter(function(w){ return w.lieuId === l.id; }).length;
       h += '<tr>'
         + '<td style="font-weight:600">' + esc(l.nom) + '</td>'
-        + '<td colspan="2">' + (l.adresse ? esc(l.adresse) : '<span class="rien">— adresse à remplir —</span>') + '</td>'
+        + '<td colspan="2">' + (l.adresse ? esc(l.adresse) : '<span class="rien">${T("— adresse à remplir —")}</span>') + '</td>'
         + '<td class="c" style="white-space:nowrap">'
-        + (d.peutEcrire ? '<button class="mini" data-lx-mod="' + esc(l.id) + '" title="Modifier"><span class="ic">✎</span></button> ' : '')
+        + (d.peutEcrire ? '<button class="mini" data-lx-mod="' + esc(l.id) + '" title="${T("Modifier")}"><span class="ic">✎</span></button> ' : '')
         + (d.peutSupprimer ? '<button class="mini" data-lx-del="' + esc(l.id) + '" title="'
-            + (n > 0 ? n + ' emplacement(s) dans ce lieu' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '')
+            + (n > 0 ? n + ' ${T("emplacement(s)")} dans ce lieu' : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '')
         + '</td></tr>';
     });
     h += '</tbody></table></div></div>';
 
     // ── LES EMPLACEMENTS ─────────────────────────────────────────────────────
     h += '<div class="carte plein">'
-      + '<h2>Emplacements <span class="note">— où ranger les variantes</span></h2>';
+      + '<h2>${T("Emplacements")} <span class="note">${T("— où ranger les variantes")}</span></h2>';
     /* ⚠ LES FILTRES SONT LA MOITIE DE SA DEMANDE (<< la possibilite de filtre
        par entrepot et par section, adresse etc. >>). Ils portent sur ce qui est
        AFFICHE, pas sur ce qui est enregistre — une ligne en cours d edition
        reste visible meme si elle ne correspond plus au filtre, sinon elle
        disparaitrait sous les doigts. */
     h += '<div class="toolbar">'
-      + '<select id="wh-f-lieu"><option value="">Tous les lieux</option>'
+      + '<select id="wh-f-lieu"><option value="">${T("Tous les lieux")}</option>'
       +   (d.lieux || []).map(function(l){
             return '<option value="' + esc(l.id) + '"' + (WH_FILTRE.lieu === l.id ? ' selected' : '') + '>'
               + esc(l.nom) + '</option>'; }).join('')
-      +   '<option value="_sans"' + (WH_FILTRE.lieu === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
+      +   '<option value="_sans"' + (WH_FILTRE.lieu === '_sans' ? ' selected' : '') + '>${T("— sans lieu —")}</option>'
       + '</select>'
-      + '<input aria-label="Casier, section, adresse, référence" type="search" id="wh-f-txt" value="' + esc(WH_FILTRE.txt) + '" placeholder="Casier, section, adresse, référence…">'
-      + (WH_FILTRE.lieu || WH_FILTRE.txt ? '<button class="mini" id="wh-f-vider">Effacer</button>' : '')
+      + '<input aria-label="${T("Casier, section, adresse, référence")}" type="search" id="wh-f-txt" value="' + esc(WH_FILTRE.txt) + '" placeholder="${T("Casier, section, adresse, référence…")}">'
+      + (WH_FILTRE.lieu || WH_FILTRE.txt ? '<button class="mini" id="wh-f-vider">${T("Effacer")}</button>' : '')
       + '<span class="droite">'
       + (d.peutAjouter ? '<button class="mini" id="wh-ajouter"' + (WH_EDIT && WH_EDIT.id === '' ? ' disabled' : '')
-          + (!(d.lieux || []).length ? ' title="Déclarez d’abord un lieu"' : '')
-          + '>+ Ajouter un emplacement</button>' : '')
+          + (!(d.lieux || []).length ? ' title="${T("Déclarez d’abord un lieu")}"' : '')
+          + '>${T("+ Ajouter un emplacement")}</button>' : '')
       + '</span></div>';
 
     var visibles = (d.lignes || []).filter(function(w){
@@ -1437,30 +1441,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
 
     h += '<div class="grille"><table><thead><tr>'
-      + '<th>Lieu</th><th>Casier</th><th>Section</th><th>Référence</th>'
-      + '<th class="c">Variantes assignées</th><th class="c">Actions</th>'
+      + '<th>${T("Lieu")}</th><th>${T("Casier")}</th><th>${T("Section")}</th><th>${T("Référence")}</th>'
+      + '<th class="c">${T("Variantes assignées")}</th><th class="c">${T("Actions")}</th>'
       + '</tr></thead><tbody>';
     if (WH_EDIT && WH_EDIT.id === '') h += ligneEdition(null);
     if (!visibles.length && !(WH_EDIT && WH_EDIT.id === '')) {
       h += '<tr><td colspan="6"><div class="vide">'
         + ((d.lignes || []).length
-            ? 'Aucun emplacement ne correspond au filtre.'
-            : 'Aucun emplacement — cliquez sur <b>+ Ajouter un emplacement</b> pour en créer un.')
+            ? '${T("Aucun emplacement ne correspond au filtre.")}'
+            : '${T("Aucun emplacement — cliquez sur <b>+ Ajouter un emplacement</b> pour en créer un.")}')
         + '</div></td></tr>';
     }
     visibles.forEach(function(w){
       if (WH_EDIT && WH_EDIT.id === w.id) { h += ligneEdition(w); return; }
       h += '<tr>'
-        + '<td style="font-weight:600">' + (w.lieuNom ? esc(w.lieuNom) : '<span class="rien">— sans lieu —</span>')
+        + '<td style="font-weight:600">' + (w.lieuNom ? esc(w.lieuNom) : '<span class="rien">${T("— sans lieu —")}</span>')
         +   (w.adresse ? '<br><span class="note">' + esc(w.adresse) + '</span>' : '') + '</td>'
         + '<td>' + (w.casier ? esc(w.casier) : '<span class="rien">—</span>') + '</td>'
         + '<td>' + (w.section ? esc(w.section) : '<span class="rien">—</span>') + '</td>'
         + '<td>' + (w.reference ? esc(w.reference) : '<span class="rien">—</span>') + '</td>'
         + '<td class="c">' + w.usage + '</td>'
         + '<td class="c" style="white-space:nowrap">'
-        + (d.peutEcrire ? '<button class="mini" data-wh-mod="' + esc(w.id) + '" title="Modifier"><span class="ic">✎</span></button> ' : '')
+        + (d.peutEcrire ? '<button class="mini" data-wh-mod="' + esc(w.id) + '" title="${T("Modifier")}"><span class="ic">✎</span></button> ' : '')
         + (d.peutSupprimer ? '<button class="mini" data-wh-del="' + esc(w.id) + '" title="'
-            + (w.usage > 0 ? w.usage + ' variante(s) utilisent cet emplacement' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '')
+            + (w.usage > 0 ? w.usage + ' variante(s) utilisent cet emplacement' : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '')
         + '</td></tr>';
     });
     h += '</tbody></table></div></div>';
@@ -1533,14 +1537,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var nom = (document.getElementById('lx-nom') || {}).value || '';
     var adr = (document.getElementById('lx-adr') || {}).value || '';
     if (!String(nom).trim()) {
-      dire('Le nom du lieu est requis.', 'err');
+      dire('${T("Le nom du lieu est requis.")}', 'err');
       var c = document.getElementById('lx-nom');
       if (c) { c.className = 'manque'; c.focus(); }
       return;
     }
     appeler('stock:lieuEcrire', [LX_EDIT.id || '', nom, adr]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(LX_EDIT.id ? 'Lieu modifié.' : 'Lieu créé.', 'bon');
+      dire(LX_EDIT.id ? '${T("Lieu modifié.")}' : '${T("Lieu créé.")}', 'bon');
       LX_EDIT = null;
       chargerOnglet();
     });
@@ -1554,26 +1558,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        pas. Des casiers pointant vers un batiment disparu perdraient la premiere
        moitie de leur libelle — et c est ce libelle que l import CSV retrouve. */
     if (n > 0) {
-      voile('<h3>Suppression impossible</h3>'
-        + '<p>Le lieu <strong>' + esc(l.nom) + '</strong> contient <strong>'
-        + n + ' emplacement(s)</strong>.</p>'
-        + '<p style="color:var(--tx2);font-size:.8rem">Déplacez ou supprimez ces emplacements '
-        + 'avant de supprimer le lieu.</p>'
-        + '<div class="fin2"><button class="prim" id="v-ok">Compris</button></div>',
+      voile('<h3>${T("Suppression impossible")}</h3>'
+        + '<p>${T("Le lieu")} <strong>' + esc(l.nom) + '</strong> contient <strong>'
+        + n + ' ${T("emplacement(s)")}</strong>.</p>'
+        + '<p style="color:var(--tx2);font-size:.8rem">${T("Déplacez ou supprimez ces emplacements")} '
+        + '${T("avant de supprimer le lieu.")}</p>'
+        + '<div class="fin2"><button class="prim" id="v-ok">${T("Compris")}</button></div>',
         function(fermer){ document.getElementById('v-ok').onclick = fermer; });
       return;
     }
-    voile('<h3>Supprimer le lieu</h3>'
-      + '<p>Supprimer <strong>' + esc(l.nom) + '</strong> ? Aucun emplacement ne s’y trouve.</p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui">Supprimer</button></div>',
+    voile('<h3>${T("Supprimer le lieu")}</h3>'
+      + '<p>${T("Supprimer")} <strong>' + esc(l.nom) + '</strong> ${T("? Aucun emplacement ne s’y trouve.")}</p>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Supprimer")}</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
           this.disabled = true;
           appeler('stock:lieuSupprimer', [id]).then(function(r){
             fermer();
-            dire(r.ok ? 'Lieu « ' + (r.nom || '') + ' » supprimé.' : expliquer(r), r.ok ? 'bon' : 'err');
+            dire(r.ok ? '${T("Lieu «")} ' + (r.nom || '') + ' ${T("» supprimé.")}' : expliquer(r), r.ok ? 'bon' : 'err');
             chargerOnglet();
           });
         };
@@ -1598,7 +1602,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('stock:entrepotEcrire', [WH_EDIT.id || '',
       { lieuId: lieuId, casier: casier, section: section, reference: ref }]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(WH_EDIT.id ? 'Emplacement modifié.' : 'Emplacement créé.', 'bon');
+      dire(WH_EDIT.id ? '${T("Emplacement modifié.")}' : '${T("Emplacement créé.")}', 'bon');
       WH_EDIT = null;
       chargerOnglet();
     });
@@ -1610,26 +1614,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ MEME REGLE QUE L ECRAN DU SITE : utilise = pas supprimable, on
     // reassigne d abord. Le pont refuse aussi — ceci n est que le recit.
     if (w.usage > 0) {
-      voile('<h3>Suppression impossible</h3>'
-        + '<p>L’emplacement <strong>' + esc(w.code) + '</strong> est utilisé par <strong>'
-        + w.usage + ' variante(s)</strong> de produit.</p>'
-        + '<p style="color:var(--tx2);font-size:.8rem">Réassignez ces variantes à un autre '
-        + 'emplacement avant de supprimer celui-ci.</p>'
-        + '<div class="fin2"><button class="prim" id="v-ok">Compris</button></div>',
+      voile('<h3>${T("Suppression impossible")}</h3>'
+        + '<p>L’emplacement <strong>' + esc(w.code) + '</strong> ${T("est utilisé par")} <strong>'
+        + w.usage + ' ${T("variante(s)</strong> de produit.")}</p>'
+        + '<p style="color:var(--tx2);font-size:.8rem">${T("Réassignez ces variantes à un autre")} '
+        + '${T("emplacement avant de supprimer celui-ci.")}</p>'
+        + '<div class="fin2"><button class="prim" id="v-ok">${T("Compris")}</button></div>',
         function(fermer){ document.getElementById('v-ok').onclick = fermer; });
       return;
     }
-    voile('<h3>Supprimer l’emplacement</h3>'
-      + '<p>Supprimer <strong>' + esc(w.code) + '</strong> ? Aucune variante ne l’utilise.</p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui">Supprimer</button></div>',
+    voile('<h3>${T("Supprimer l’emplacement")}</h3>'
+      + '<p>${T("Supprimer")} <strong>' + esc(w.code) + '</strong> ${T("? Aucune variante ne l’utilise.")}</p>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Supprimer")}</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
           this.disabled = true;
           appeler('stock:entrepotSupprimer', [id]).then(function(r){
             fermer();
-            dire(r.ok ? 'Emplacement « ' + (r.code || '') + ' » supprimé.' : expliquer(r), r.ok ? 'bon' : 'err');
+            dire(r.ok ? '${T("Emplacement «")} ' + (r.code || '') + ' ${T("» supprimé.")}' : expliquer(r), r.ok ? 'bon' : 'err');
             chargerOnglet();
           });
         };
@@ -1643,7 +1647,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('stock:chercher', [q]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       if (r.sku) { dire(''); ouvrirProduit(r.sku.produitId, r.sku.cle); return; }
-      if (r.court) { dire('Trois caractères minimum.', 'att'); return; }
+      if (r.court) { dire('${T("Trois caractères minimum.")}', 'att'); return; }
       dire('');
       TROUVES = r.articles || [];
       VUE = 'recherche';
@@ -1680,8 +1684,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var v = VARS.filter(function(x){ return x.cle === cleEnAvant; })[0];
         if (v) FILTRE.couleur = [v.couleur];
       }
-      VUE = 'produit';
-      document.getElementById('titre').textContent = 'Ajustement de stock';
+      VUE = '${T("produit")}';
+      document.getElementById('titre').textContent = '${T("Ajustement de stock")}';
       dire('');
       dessiner();
       prendreVerrou(pid);
@@ -1695,11 +1699,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('verrou:prendre', ['products', pid]).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || '${T("quelqu’un d’autre")}');
       var b = document.getElementById('btn-enr');
-      if (b) { b.disabled = true; b.textContent = 'Ouverte ailleurs'; }
-      dire('Enregistrement bloqué : ce produit est ouvert ailleurs.', 'err');
+      if (b) { b.disabled = true; b.textContent = '${T("Ouverte ailleurs")}'; }
+      dire('${T("Enregistrement bloqué : ce produit est ouvert ailleurs.")}', 'err');
     });
   }
   function rendreVerrou(){
@@ -1715,7 +1719,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dessinerOnglets();
     if (ONGLET === 'produits') {
       appeler('stock:produits', [FP]).then(function(r){
-        if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
+        if (!r || !r.ok) { vide('${T("Inventaire indisponible")}', expliquer(r)); return; }
         PRODS = r;
         // Le site borne page et cadence : on reprend SES valeurs, pas les notres.
         FP.page = r.page; FP.parPage = r.parPage;
@@ -1734,7 +1738,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (ONGLET === 'reappro') {
       appeler('stock:reappro').then(function(r){
-        if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
+        if (!r || !r.ok) { vide('${T("Inventaire indisponible")}', expliquer(r)); return; }
         REAPPRO = r.lignes || [];
         NB_REAPPRO = REAPPRO.length;
         dessiner();
@@ -1743,14 +1747,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (ONGLET === 'endommages') {
       appeler('stock:endommages', [DMG_AN]).then(function(r){
-        if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
+        if (!r || !r.ok) { vide('${T("Inventaire indisponible")}', expliquer(r)); return; }
         DMG = r;
         dessiner();
       });
       return;
     }
     appeler('stock:entrepots').then(function(r){
-      if (!r || !r.ok) { vide('Inventaire indisponible', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Inventaire indisponible")}', expliquer(r)); return; }
       WHS = r;
       dessiner();
     });
@@ -1758,9 +1762,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function charger(){
     appeler('stock:contexte').then(function(c){
-      if (!c || !c.ok) { vide('Inventaire indisponible', expliquer(c)); return; }
+      if (!c || !c.ok) { vide('${T("Inventaire indisponible")}', expliquer(c)); return; }
       CTX = c;
-      sous.textContent = c.peutEcrire ? '' : 'Lecture seule';
+      sous.textContent = c.peutEcrire ? '' : '${T("Lecture seule")}';
       chargerOnglet();
     });
   }
@@ -1795,12 +1799,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function echec(r){
     if (r.motif === 'seuil_invalide') {
-      dire('Seuil invalide pour : ' + (r.seuilsInvalides || []).map(nommer).join(', ') + '.', 'err');
+      dire('${T("Seuil invalide pour :")} ' + (r.seuilsInvalides || []).map(nommer).join(', ') + '.', 'err');
       return;
     }
     if (r.motif === 'emplacement_requis') {
       var m = r.manquants || [];
-      dire('Sélectionnez un emplacement pour : ' + m.map(nommer).join(', ') + '.', 'err');
+      dire('${T("Sélectionnez un emplacement pour :")} ' + m.map(nommer).join(', ') + '.', 'err');
       // On amene la personne SUR la variante fautive : sans cela, la ligne
       // nommee peut se trouver sur une autre page et le message ne sert a rien.
       if (m.length) {
@@ -1816,8 +1820,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     if (r.motif === 'grille_incomplete') {
-      dire('Inventaire NON enregistré — la grille est incomplète ('
-        + (r.absentes || []).slice(0, 3).join(', ') + '). Rouvrez le produit.', 'err');
+      dire('${T("Inventaire NON enregistré — la grille est incomplète (")}'
+        + (r.absentes || []).slice(0, 3).join(', ') + '${T("). Rouvrez le produit.")}', 'err');
       return;
     }
     dire(expliquer(r), 'err');
@@ -1832,13 +1836,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var lignes = (r.conflits || []).map(function(c){
       return '<div class="rangee"><span>' + esc(nommer(c.cle)) + '</span><strong>' + c.actuel + '</strong></div>';
     }).join('');
-    voile('<h3><span class="ic">⚠</span> Inventaire non enregistré</h3>'
-      + '<p>Un collègue vient de modifier ' + ((r.conflits || []).length > 1 ? 'ces variantes' : 'cette variante')
-      + '. <strong>Rien n’a été écrit.</strong></p>'
+    voile('<h3><span class="ic">⚠</span> ${T("Inventaire non enregistré")}</h3>'
+      + '<p>${T("Un collègue vient de modifier")} ' + ((r.conflits || []).length > 1 ? 'ces variantes' : 'cette ${T("variante")}')
+      + '. <strong>${T("Rien n’a été écrit.")}</strong></p>'
       + lignes
-      + '<p style="color:var(--tx2);font-size:.8rem">La grille est rechargée avec les quantités à jour : '
-      + 'refaites votre saisie par-dessus.</p>'
-      + '<div class="fin2"><button class="prim" id="v-ok">Recharger la grille</button></div>',
+      + '<p style="color:var(--tx2);font-size:.8rem">${T("La grille est rechargée avec les quantités à jour :")} '
+      + '${T("refaites votre saisie par-dessus.")}</p>'
+      + '<div class="fin2"><button class="prim" id="v-ok">${T("Recharger la grille")}</button></div>',
       function(fermer){
         document.getElementById('v-ok').onclick = function(){
           fermer();
@@ -1850,34 +1854,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function apresSucces(r){
-    var h = '<h3><span class="ic">✅</span> Inventaire enregistré</h3><p>' + esc(r.nom || '') + '</p>';
+    var h = '<h3><span class="ic">✅</span> ${T("Inventaire enregistré")}</h3><p>' + esc(r.nom || '') + '</p>';
     var c = r.courriels;
     if (c && c.manuel) {
       // ⚠ ON NE PRETEND PAS QUE C EST PARTI. Resend n est pas configure : aucun
       // courriel n a ete envoye, et les demandes restent en attente en base.
       h += '<p class="" style="color:var(--tx-att)"><span class="ic">⚠</span> ' + c.adresses.length + ' client'
-        + (c.adresses.length > 1 ? 's attendent' : ' attend') + ' cette variante, et '
-        + '<strong>aucun courriel n’est parti</strong> — la clé d’envoi n’est pas configurée '
-        + '(Configuration puis Infolettre). Les demandes restent en attente.</p>'
+        + (c.adresses.length > 1 ? 's attendent' : ' attend') + ' ${T("cette variante, et")} '
+        + '<strong>${T("aucun courriel n’est parti")}</strong> ${T("— la clé d’envoi n’est pas configurée")} '
+        + '${T("(Configuration puis Infolettre). Les demandes restent en attente.")}</p>'
         + '<textarea rows="2" readonly aria-label="Adresses des demandes en attente">' + esc(c.adresses.join(', ')) + '</textarea>';
     } else if (c) {
-      h += '<p style="color:var(--tx-ok)"><span class="ic">✉</span> ' + c.envoyes + ' courriel' + (c.envoyes > 1 ? 's' : '')
-        + ' de retour en inventaire envoyé' + (c.envoyes > 1 ? 's' : '')
-        + (c.echecs ? ', <span style="color:var(--tx-err)">' + c.echecs + ' échec'
+      h += '<p style="color:var(--tx-ok)"><span class="ic">✉</span> ' + c.envoyes + ' ${T("courriel")}' + (c.envoyes > 1 ? 's' : '')
+        + ' ${T("de retour en inventaire envoyé")}' + (c.envoyes > 1 ? 's' : '')
+        + (c.echecs ? ', <span style="color:var(--tx-err)">' + c.echecs + ' ${T("échec")}'
             + (c.echecs > 1 ? 's' : '') + '</span>' : '') + '.</p>';
     }
     var etiq = r.etiquettes || [];
     var total = 0;
     etiq.forEach(function(it){ total += (parseInt(it.qty, 10) || 0); });
     if (etiq.length) {
-      h += '<p>Imprimer les étiquettes code-barres selon les quantités saisies ? '
-        + '<strong>' + total + '</strong> étiquette' + (total > 1 ? 's' : '')
-        + ' pour ' + etiq.length + ' variante' + (etiq.length > 1 ? 's' : '') + '.</p>';
+      h += '<p>${T("Imprimer les étiquettes code-barres selon les quantités saisies ?")} '
+        + '<strong>' + total + '</strong> ${T("étiquette")}' + (total > 1 ? 's' : '')
+        + '${T(" pour ")}' + etiq.length + ' ${T("variante")}' + (etiq.length > 1 ? 's' : '') + '.</p>';
     }
     h += '<div class="fin2">'
-      + (etiq.length ? '<button id="v-plus-tard">Plus tard</button>'
-                       + '<button class="prim" id="v-imprimer"><span class="ic">🖨</span> Imprimer maintenant</button>'
-                     : '<button class="prim" id="v-ok">Fermer</button>')
+      + (etiq.length ? '<button id="v-plus-tard">${T("Plus tard")}</button>'
+                       + '<button class="prim" id="v-imprimer"><span class="ic">🖨</span> ${T("Imprimer maintenant")}</button>'
+                     : '<button class="prim" id="v-ok">${T("Fermer")}</button>')
       + '</div>';
     voile(h, function(fermer){
       var ok = document.getElementById('v-ok');
@@ -1889,7 +1893,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         im.disabled = true; im.textContent = 'Impression…';
         appeler('stock:etiquettes', [etiq]).then(function(z){
           fermer();
-          dire(z.ok ? (z.envoyees + ' étiquette(s) envoyée(s) à « ' + z.imprimante + ' ».')
+          dire(z.ok ? (z.envoyees + ' ${T("étiquette(s) envoyée(s) à «")} ' + z.imprimante + ' ».')
                     : expliquer(z), z.ok ? 'bon' : 'err');
           retourListe();
         });
@@ -1911,18 +1915,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var v = VARS[i];
     if (!v || !v.sku) return;
     var defaut = Math.max(1, parseInt(v.qte, 10) || 1);
-    voile('<h3><span class="ic">🏷</span> Imprimer des étiquettes</h3>'
+    voile('<h3><span class="ic">🏷</span> ${T("Imprimer des étiquettes")}</h3>'
       + '<p><span class="code">' + esc(v.sku) + '</span> — ' + esc(v.taille) + ' / ' + esc(v.couleur) + '</p>'
-      + '<p><label>Nombre d’étiquettes<input type="number" min="1" id="v-qte" value="' + defaut + '"></label></p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui">Imprimer</button></div>',
+      + '<p><label>${T("Nombre d’étiquettes")}<input type="number" min="1" id="v-qte" value="' + defaut + '"></label></p>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Imprimer")}</button></div>',
       function(fermer){
         var champ = document.getElementById('v-qte');
         if (champ) champ.focus();
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
           var n = parseInt(champ.value, 10);
-          if (!(n > 0)) { dire('Quantité invalide.', 'err'); return; }
+          if (!(n > 0)) { dire('${T("Quantité invalide.")}', 'err'); return; }
           fermer();
           imprimer([{ sku: v.sku, name: PROD.nom, size: v.taille, color: v.couleur, qty: n }]);
         };
@@ -1939,14 +1943,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var q = parseInt(v.qte, 10) || 0;
       if (v.sku && q > 0) { items.push({ sku: v.sku, name: PROD.nom, size: v.taille, color: v.couleur, qty: q }); total += q; }
     });
-    if (!items.length) { dire('Aucune variante en stock à imprimer.', 'att'); return; }
-    voile('<h3><span class="ic">🏷</span> Imprimer les étiquettes</h3>'
-      + '<p>Imprimer <strong>' + total + '</strong> étiquette' + (total > 1 ? 's' : '')
-      + ' pour ' + items.length + ' variante' + (items.length > 1 ? 's' : '') + ' en stock ?</p>'
-      + '<p style="color:var(--tx2);font-size:.8rem">Quantités telles qu’elles sont saisies à l’écran, '
-      + 'même si l’inventaire n’est pas encore enregistré.</p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui">Imprimer</button></div>',
+    if (!items.length) { dire('${T("Aucune variante en stock à imprimer.")}', 'att'); return; }
+    voile('<h3><span class="ic">🏷</span> ${T("Imprimer les étiquettes")}</h3>'
+      + '<p>${T("Imprimer")} <strong>' + total + '</strong> ${T("étiquette")}' + (total > 1 ? 's' : '')
+      + '${T(" pour ")}' + items.length + ' ${T("variante")}' + (items.length > 1 ? 's' : '') + ' ${T("en stock ?")}</p>'
+      + '<p style="color:var(--tx2);font-size:.8rem">${T("Quantités telles qu’elles sont saisies à l’écran,")} '
+      + '${T("même si l’inventaire n’est pas encore enregistré.")}</p>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Imprimer")}</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(items); };
@@ -1956,7 +1960,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function imprimer(items){
     dire('Impression…');
     appeler('stock:etiquettes', [items]).then(function(z){
-      dire(z.ok ? (z.envoyees + ' étiquette(s) envoyée(s) à « ' + z.imprimante + ' ».')
+      dire(z.ok ? (z.envoyees + ' ${T("étiquette(s) envoyée(s) à «")} ' + z.imprimante + ' ».')
                 : expliquer(z), z.ok ? 'bon' : 'err');
     });
   }
@@ -1987,7 +1991,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      d un produit, un voile ouvert ou une ligne d entrepot en edition se
      laissent finir — leurs chemins de sortie rechargent deja tout. */
   window.szActualiser = function(){
-    if (VUE === 'produit') return;
+    if (VUE === '${T("produit")}') return;
     if (WH_EDIT) return;
     if (document.querySelector('.voile')) return;
     chargerOnglet(true);
@@ -2013,12 +2017,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // Le meme bouton dit l inverse selon le mode : detacher la vue ancree,
     // ou RAMENER la vue detachee dans la fenetre principale (etat retenu).
     if (actif) {
-      b.textContent = '\u29c9 D\u00e9tacher';
-      b.title = 'Ouvrir cet \u00e9cran dans sa propre fen\u00eatre';
+      b.textContent = '\u29c9 ${T("Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '\u2693 Ancrer';
-      b.title = 'Ramener cet \u00e9cran dans la fen\u00eatre principale';
+      b.textContent = '\u2693 ${T("Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

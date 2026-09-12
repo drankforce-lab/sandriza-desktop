@@ -27,6 +27,16 @@ module.exports = {
   'Plein écran — toute la fenêtre': 'Full screen — the whole window',
   '⧉ Détacher': '⧉ Detach',
   '⚓ Ancrer': '⚓ Dock',
+  /* ⚠⚠ ET LES MEMES MOTS SANS LEUR PICTOGRAMME, parce que la SOURCE les ecrit
+     autrement : `b.textContent = '\\u29c9 Detacher'`. Le signe y est un
+     ECHAPPEMENT, et le poseur ne decode que les lettres latines accentuees —
+     un `\\u29c9` decode au hasard casserait des echappements techniques. La cle
+     « ⧉ Detacher » (avec le vrai signe) ne correspondait donc a rien dans la
+     source, pendant que le COMPTEUR, qui lit la page rendue, la voyait decidee.
+     Mesure du 2026-09-12 : ce bouton restait en francais dans TOUTES les
+     fenetres declarees traduites. */
+  'Détacher': 'Detach',
+  'Ancrer': 'Dock',
   'Ouvrir cet écran dans sa propre fenêtre': 'Open this screen in its own window',
   'Ramener cet écran dans la fenêtre principale': 'Bring this screen back into the main window',
 

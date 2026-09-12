@@ -137,7 +137,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function fmtDate(d){
     if (!d) return '—';
-    try { return new ${T("Date")}(d).toLocaleDateString('fr-CA'); } catch (e) { return String(d); }
+    try { return new Date(d).toLocaleDateString('fr-CA'); } catch (e) { return String(d); }
   }
 
   var MOTIFS = {

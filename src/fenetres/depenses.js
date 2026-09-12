@@ -817,7 +817,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function formVierge(){
-    var auj = new ${T("Date")}().toISOString().slice(0, 10);
+    var auj = new Date().toISOString().slice(0, 10);
     /* ⚠ PAS LA PREMIERE DE LA LISTE. Le formulaire ouvrait sur << Publicite >>
        simplement parce qu elle vient en tete — une facture de serveurs s y est
        retrouvee classee. << Autres depenses >> n affirme rien ; la vraie

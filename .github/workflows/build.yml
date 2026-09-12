@@ -404,6 +404,17 @@ jobs:
       # parce qu'il regardait à côté — éprouvé depuis par une panne provoquée.
           node tools/banc-filtre-pas-releve.js
           node tools/banc-langue-donnees.js
+      # ⚠⚠ CELUI-CI ATTRAPE UNE FAUTE QUE QUATRE GARDES VERTS LAISSENT PASSER :
+      # un `${T("…")}` posé non pas sur une phrase mais sur du CODE, comme
+      # `new ${T("Date")}()`. Tant que la traduction rend le même mot, la page
+      # française ET la page anglaise sont justes — comparaison octet pour octet,
+      # `node --check`, compteur et coup d'œil à la page passent tous. La faute
+      # n'attend qu'une chose : que quelqu'un traduise ce mot autrement, et la
+      # fenêtre meurt DANS UNE SEULE LANGUE, celle que personne ne relit.
+      # ⚠ Ce n'est pas une crainte : DEUX fenêtres déclarées terminées le
+      # portaient déjà (depenses:820, ramassages:140), après relecture à la main.
+      # Éprouvé par quatre pannes provoquées, une par signature.
+          node tools/banc-langue-sur-code.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js
           # ⚠ CELUI-CI GARDE UNE CHAÎNE DE QUATRE MORCEAUX que rien d'autre ne
