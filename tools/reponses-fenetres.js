@@ -6813,6 +6813,54 @@ module.exports = {
     },
   ],
 
+
+  // ── LE CADRE NATIF (la piece qui manque pour retirer le panneau web) ───────
+  // ⚠ TROIS CAS, ET LE TROISIEME EST CELUI QU ON N ECRIT JAMAIS. La navigation
+  // garnie eprouve le dessin ; la navigation VIDE eprouve l ecran qu on voit
+  // quand le site n a pas encore parle (elle arrive au demarrage, pas avant) ;
+  // et le cas ou des entrees sont ECARTEES eprouve la phrase qui le DIT — une
+  // entree sans fenetre native n est pas dessinee, et le taire ferait chercher
+  // un ecran qu on croit avoir.
+  'cadre.js': [
+    {
+      nom: 'navigation garnie',
+      reponses: {
+        __cadreNavigation: { ok: true, ecartes: 0, menus: [
+          { label: 'Ventes', entrees: [
+            { label: 'Tableau de bord', app: 'tableau', accel: 'Ctrl+1' },
+            { label: 'Commandes', app: 'commandes', accel: 'Ctrl+2' },
+            { label: 'Caisse', app: 'caisse', accel: '' } ] },
+          { label: 'Configuration', entrees: [
+            { label: 'Thème et apparence', app: 'config-apparence', accel: '' },
+            { label: 'Logothèque', app: 'config-logotheque', accel: '' } ] },
+        ] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ LA NAVIGATION N EST PAS ENCORE ARRIVEE : le site l envoie au demarrage.
+      // Sans ce cas, l ecran d attente ne serait jamais regarde — et c est celui
+      // qu on voit en ouvrant la fenetre trop tot.
+      nom: 'navigation pas encore arrivee',
+      reponses: {
+        __cadreNavigation: { ok: false, motif: 'indisponible' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠⚠ DES ENTREES ECARTEES : elles n ont pas de fenetre native, donc elles
+      // ne sont PAS dessinees — les dessiner refabriquerait la page web deguisee
+      // en fenetre. La fenetre doit le DIRE, et c est ce que ce cas eprouve.
+      nom: 'des entrees sans fenetre native, ecartees et comptees',
+      reponses: {
+        __cadreNavigation: { ok: true, ecartes: 4, menus: [
+          { label: 'Comptabilité', entrees: [
+            { label: 'Dépenses', app: 'depenses', accel: '' } ] },
+        ] },
+        identite: IDENTITE,
+      },
+    },
+  ],
 };
 
 // ⚠ LE CONTEXTE DU PRODUIT EST UNE FONCTION, PAS UNE CONSTANTE PARTAGÉE : chaque

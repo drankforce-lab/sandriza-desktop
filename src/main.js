@@ -4896,6 +4896,7 @@ const { pageStatistiques } = require('./fenetres/statistiques');
 const { pagePhotos } = require('./fenetres/photos');
 const { pagePromo } = require('./fenetres/promo');
 const { pagePromoEditeur } = require('./fenetres/promo-editeur');
+const { pageCadre } = require('./fenetres/cadre');
 const { pageDepenses } = require('./fenetres/depenses');
 const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
@@ -5028,6 +5029,13 @@ const actionApp = (nom, arg) => {
     case 'update-check': checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
     case 'imprimantes': ouvrirImprimantes(); break;
+    /* Le CADRE natif : la barre laterale et la zone d ancrage, dessinees par la
+       coquille. Il n a pas encore remplace la fenetre principale — il le DIT a
+       l ecran, et c est en le regardant qu on decide de la bascule. */
+    case 'cadre':
+      ouvrirNative('cadre', 'Cadre de l administration', pageCadre(),
+        { width: 1180, height: 760, minWidth: 900, minHeight: 560 });
+      break;
     /* ⚠ Les quatre onglets de Configuration natifs ne s'ouvrent PLUS ici :
        ils sont passés au flux d'ancrage (voir la liste des ecrans ancrables
        plus bas), a la demande du 2026-08-10 — « fais attention de creer les
@@ -5836,6 +5844,47 @@ const versTemplateNatif = (items) => items.map((it) => {
 });
 
 const _sansPseudo = (menus) => (menus || []).filter((m) => m && !String(m.label || '').startsWith('__'));
+
+/* ══ LE CADRE NATIF — la piece qui manque pour retirer le panneau web ════════
+   ⚠⚠ Le panneau d administration web n est pas un ECRAN, c est le CADRE : 36
+   ecrans natifs s y ANCRENT (`admin.js`/_DOCKABLES), le site envoie la position
+   de sa zone `#admin-content` et on y pose la vue. Tous les ecrans ont beau
+   etre portes, le panneau ne se retire pas tant que ce cadre vit la-bas.
+   ⚠ LA NAVIGATION EST DEJA ICI : `_modele.menus`, envoye par le site une fois
+   au demarrage. Le cadre la lit d ICI — une seule source. */
+const _cadreEntrees = (items, sortie, ecartes) => {
+  (items || []).forEach((it) => {
+    if (!it || it.sep) return;
+    if (Array.isArray(it.sub)) { _cadreEntrees(it.sub, sortie, ecartes); return; }
+    /* ⚠⚠ SEULES LES ENTREES AVEC UNE CLE `app:` SONT DESSINEES, et ce n est pas
+       une precaution de plus : une entree sans `app:` est un REPLI WEB. La
+       dessiner dans un cadre natif refabriquerait la page web deguisee en
+       fenetre, bannie le 2026-08-19. La liste blanche est donc le modele
+       lui-meme — rien a tenir a la main. */
+    if (it.app) sortie.push({ label: String(it.label || ''), app: String(it.app), accel: String(it.accel || '') });
+    else if (it.label) ecartes.push(String(it.label));
+  });
+};
+ipcMain.handle('cadre:navigation', () => {
+  const menus = [];
+  const ecartes = [];
+  _sansPseudo(_modele.menus).forEach((m) => {
+    if (!m) return;
+    const entrees = [];
+    _cadreEntrees(m.sub || [], entrees, ecartes);
+    if (entrees.length) menus.push({ label: String(m.label || ''), entrees });
+  });
+  return { ok: true, menus, ecartes: ecartes.length };
+});
+ipcMain.handle('cadre:aller', (e, app) => {
+  const cle = String(app || '');
+  const vues = [];
+  const ecartes = [];
+  _sansPseudo(_modele.menus).forEach((m) => _cadreEntrees((m && m.sub) || [], vues, ecartes));
+  if (!vues.some((x) => x.app === cle)) return false;
+  actionApp(cle);
+  return true;
+});
 
 const buildMenu = () => {
   const template = _sansPseudo(_modele.menus)
