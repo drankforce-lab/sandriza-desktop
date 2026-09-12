@@ -273,7 +273,14 @@ const sansBalises = (s) => s.replace(/<[^>]*>/g, '').replace(/&[a-z]+;/g, ' ').r
 const PARLE = /^(tous|toutes|tout)\b.{2,}/i;
 let nSel = 0, nSelKo = 0, nTolere = 0;
 for (const f of fichiers) {
-  const txt = sansCommentaires(fs.readFileSync(path.join(dossier, f), 'utf8'));
+  /* ⚠⚠ ON LIT À TRAVERS `${T('…')}`, PARTOUT ET UNE SEULE FOIS. J’avais d’abord
+     corrigé le seul cas des `<option>` — et le banc a accusé trois `<label>` la
+     fois suivante. Un garde qui lit la SOURCE doit connaître les enveloppes
+     qu’on pose, et les connaître GLOBALEMENT : les traiter un endroit à la fois,
+     c’est se faire rattraper à chaque nouvelle balise touchée. */
+  const sansT = (x) => String(x).replace(/\$\{T\(\s*("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*\)\}/g,
+    (m, q) => q.slice(1, -1));
+  const txt = sansT(sansCommentaires(fs.readFileSync(path.join(dossier, f), 'utf8')));
   const cibles = new Set();
   for (const m of txt.matchAll(/<label[^>]*\bfor\s*=\s*(?:"([^"]*)"|'([^']*)')/g))
     cibles.add((m[1] || m[2] || '').trim());

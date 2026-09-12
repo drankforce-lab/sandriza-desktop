@@ -24,6 +24,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('depenses');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -179,11 +183,11 @@ function pageDepenses(ouverture) {
   const ok = ['nouvelle', 'fermeture', 'annuaire'];
   const depart = (ok.indexOf(String(ouverture || '')) >= 0) ? String(ouverture) : 'liste';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Dépenses d’entreprise — Administration Sandriza</title>
+<title>${T("Dépenses d’entreprise — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.depenses}</span><h1>Dépenses d’entreprise</h1>
+<div class="tete"><span class="ico">${ICO.depenses}</span><h1>${T("Dépenses d’entreprise")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -223,35 +227,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux dépenses.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    module_depenses:    'Le module des dépenses n’a pas pu être chargé dans la fenêtre principale. Rechargez-la (Ctrl+R).',
-    introuvable:        'Cette dépense n’existe plus.',
-    montant:            'Le montant doit être supérieur à 0.',
-    recu:               'Le reçu n’a pas pu être déposé dans le stockage — RIEN n’a été enregistré. Une dépense sans sa pièce justificative n’est pas défendable.',
-    nuage:              'Le nuage a refusé l’écriture — rien n’est conservé. Reconnectez-vous et refaites la saisie.',
-    total_absent:       'Saisissez d’abord le total payé (taxes incluses) dans « Montant ».',
-    format:             'Format non pris en charge — image ou PDF seulement.',
-    trop_lourd:         'Fichier trop volumineux (8 Mo maximum).',
-    fichier_illisible:  'Ce fichier n’a pas pu être lu.',
-    image_illisible:    'Cette image n’a pas pu être lue.',
-    aucun_recu:         'Cette dépense n’a pas de reçu.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux dépenses.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    module_depenses:    '${T("Le module des dépenses n’a pas pu être chargé dans la fenêtre principale. Rechargez-la (Ctrl+R).")}',
+    introuvable:        '${T("Cette dépense n’existe plus.")}',
+    montant:            '${T("Le montant doit être supérieur à 0.")}',
+    recu:               '${T("Le reçu n’a pas pu être déposé dans le stockage — RIEN n’a été enregistré. Une dépense sans sa pièce justificative n’est pas défendable.")}',
+    nuage:              '${T("Le nuage a refusé l’écriture — rien n’est conservé. Reconnectez-vous et refaites la saisie.")}',
+    total_absent:       '${T("Saisissez d’abord le total payé (taxes incluses) dans « Montant ».")}',
+    format:             '${T("Format non pris en charge — image ou PDF seulement.")}',
+    trop_lourd:         '${T("Fichier trop volumineux (8 Mo maximum).")}',
+    fichier_illisible:  '${T("Ce fichier n’a pas pu être lu.")}',
+    image_illisible:    '${T("Cette image n’a pas pu être lue.")}',
+    aucun_recu:         '${T("Cette dépense n’a pas de reçu.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   var LECTURE = {
-    cle_absente: 'Reçu joint. Lecture automatique indisponible : aucune clé du service d’IA n’est enregistrée (écran Configuration → Clés API).',
-    pdf:         'Reçu joint. Le PDF n’a pas pu être converti pour la lecture — saisie manuelle.',
-    illisible:   'Reçu joint. La réponse du service n’était pas exploitable — saisie manuelle.',
-    service:     'Reçu joint. Le service de lecture n’a pas répondu — saisie manuelle.',
-    non_fiable:  'Reçu joint. La lecture a été refusée : elle ne correspondait pas au document.'
+    cle_absente: '${T("Reçu joint. Lecture automatique indisponible : aucune clé du service d’IA n’est enregistrée (écran Configuration → Clés API).")}',
+    pdf:         '${T("Reçu joint. Le PDF n’a pas pu être converti pour la lecture — saisie manuelle.")}',
+    illisible:   '${T("Reçu joint. La réponse du service n’était pas exploitable — saisie manuelle.")}',
+    service:     '${T("Reçu joint. Le service de lecture n’a pas répondu — saisie manuelle.")}',
+    non_fiable:  '${T("Reçu joint. La lecture a été refusée : elle ne correspondait pas au document.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail && m !== 'recu') t += ' (' + esc(String(r.detail).slice(0, 150)) + ')';
     return t;
   }
@@ -270,11 +274,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── LE DESSIN ─────────────────────────────────────────────────────────── */
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var h = '';
 
     if (!D.peutModifier && !D.peutAjouter) {
-      h += '<div class="avis"><span class="ic">👁</span> Lecture seule — votre rôle permet de consulter les dépenses, pas de les saisir.</div>';
+      h += '<div class="avis"><span class="ic">👁</span> ${T("Lecture seule — votre rôle permet de consulter les dépenses, pas de les saisir.")}</div>';
     }
 
     h += '<div class="barreoutils">'
@@ -288,30 +292,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<select id="d-annee" aria-label="Filtrer par année">' + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>' + a + '</option>';
         }).join('') + '</select>'
-      + '<select id="d-mois"><option value="0"' + (!D.mois ? ' selected' : '') + '>Tous les mois</option>'
+      + '<select id="d-mois"><option value="0"' + (!D.mois ? ' selected' : '') + '>${T("Tous les mois")}</option>'
       + (D.moisNoms || []).map(function(m, i){
           return '<option value="' + (i + 1) + '"' + (D.mois === i + 1 ? ' selected' : '') + '>' + esc(m) + '</option>';
         }).join('') + '</select>'
-      + '<select id="d-cat"><option value="">Toutes catégories</option>'
+      + '<select id="d-cat"><option value="">${T("Toutes catégories")}</option>'
       + (D.categories || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (D.categorie === c.cle ? ' selected' : '') + '>'
             + esc(c.libelle) + '</option>';
         }).join('') + '</select>'
-      + (D.peutAjouter ? '<button class="prim" id="d-nouvelle">＋ Nouvelle dépense</button>' : '')
+      + (D.peutAjouter ? '<button class="prim" id="d-nouvelle">${T("＋ Nouvelle dépense")}</button>' : '')
       + (D.peutAjouter ? '<div class="depot" id="d-depot" title="'
           + esc(D.lectureAuto
-              ? 'Déposez une facture : elle est lue automatiquement, et vous vérifiez les champs avant d’enregistrer.'
-              : 'Déposez une facture : elle sera jointe comme reçu. La lecture automatique demande une clé (Configuration → Clés API).')
-          + '">Glissez une facture ici</div>' : '')
+              ? '${T("Déposez une facture : elle est lue automatiquement, et vous vérifiez les champs avant d’enregistrer.")}'
+              : '${T("Déposez une facture : elle sera jointe comme reçu. La lecture automatique demande une clé (Configuration → Clés API).")}')
+          + '">${T("Glissez une facture ici")}</div>' : '')
       + '<span class="droite">' + D.nombre + ' dépense' + (D.nombre > 1 ? 's' : '') + '</span>'
       + '</div>';
 
     h += '<div class="stats">'
-      + '<div class="s"><div class="n">' + esc(D.total) + '</div><div class="l">Total — ' + esc(D.periode) + '</div>'
-      + '<div class="sub">hors taxes, déductible</div></div>'
-      + '<div class="s"><div class="n">' + esc(D.totalTps) + '</div><div class="l">TPS payée</div>'
-      + '<div class="sub">crédit sur intrants</div></div>'
-      + '<div class="s"><div class="n">' + esc(D.totalTvq) + '</div><div class="l">TVQ payée</div>'
+      + '<div class="s"><div class="n">' + esc(D.total) + '</div><div class="l">${T("Total —")} ' + esc(D.periode) + '</div>'
+      + '<div class="sub">${T("hors taxes, déductible")}</div></div>'
+      + '<div class="s"><div class="n">' + esc(D.totalTps) + '</div><div class="l">${T("TPS payée")}</div>'
+      + '<div class="sub">${T("crédit sur intrants")}</div></div>'
+      + '<div class="s"><div class="n">' + esc(D.totalTvq) + '</div><div class="l">${T("TVQ payée")}</div>'
       + '<div class="sub">remboursement sur intrants</div></div>'
       + '<div class="s"><div class="n">' + D.nombre + '</div><div class="l">Dépenses</div>'
       + '<div class="sub">' + esc(D.periode) + '</div></div>'
@@ -336,11 +340,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
-      h += '<div class="vide">Aucune dépense pour ' + esc(D.periode) + '.</div>';
+      h += '<div class="vide">${T("Aucune dépense pour")} ' + esc(D.periode) + '.</div>';
     } else {
-      h += '<table><thead><tr><th>Date</th><th>Catégorie</th><th>Description</th>'
-        + '<th>Paiement</th><th style="text-align:right">Montant</th>'
-        + '<th style="text-align:right">Taxes</th><th style="text-align:center">Reçu</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Catégorie")}</th><th>${T("Description")}</th>'
+        + '<th>${T("Paiement")}</th><th style="text-align:right">${T("Montant")}</th>'
+        + '<th style="text-align:right">${T("Taxes")}</th><th style="text-align:center">${T("Reçu")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="Voir le détail">'
               + '<td class="dt" style="white-space:nowrap">' + esc(r.dateFr) + '</td>'
@@ -368,9 +372,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '</div>';
 
     h += '<div class="aide" style="padding:.1rem">Les <strong>frais de traitement Square</strong> '
-      + 'sont déjà comptés dans l’Impôt (ligne 8710) — ne les ressaisissez pas ici. '
-      + 'La <strong>fiscalité</strong> et la <strong>conciliation bancaire</strong> restent à '
-      + 'l’écran Comptabilité de la fenêtre principale.</div>';
+      + '${T("sont déjà comptés dans l’Impôt (ligne 8710) — ne les ressaisissez pas ici.")} '
+      + '${T("La ")}<strong>${T("fiscalité")}</strong>${T(" et la ")}<strong>${T("conciliation bancaire")}</strong>${T(" restent à ")}'
+      + '${T("l’écran Comptabilité de la fenêtre principale.")}</div>';
 
     if (FORM) h += boiteForm();
     else if (DETAIL) h += boiteDetail();
@@ -389,22 +393,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ferait croire qu on a detruit un fournisseur alors qu on l a seulement
      ramene a son reglage d usine. */
   function vueAnnuaire(){
-    if (!ANN) return '<div class="carte"><div class="vide charge">Lecture de l’annuaire…</div></div>';
+    if (!ANN) return '<div class="carte"><div class="vide charge">${T("Lecture de l’annuaire…")}</div></div>';
     var ro = !ANN.peutModifier;
     var h = '';
 
     if (VERROU && !VERROU.obtenu) {
       h += '<div class="avis"><span class="ic">🔒</span> Annuaire ouvert en modification par <strong>'
-        + esc(VERROU.parQui || 'un collègue') + '</strong> — vous pouvez le consulter, '
-        + 'pas le corriger. Deux corrections en même temps, c’est la dernière qui gagne '
-        + 'sans que la première le sache.</div>';
+        + esc(VERROU.parQui || '${T("un collègue")}') + '</strong> ${T("— vous pouvez le consulter,")} '
+        + '${T("pas le corriger. Deux corrections en même temps, c’est la dernière qui gagne")} '
+        + '${T("sans que la première le sache.")}</div>';
     }
 
     h += '<div class="stats">'
       + '<div class="s"><div class="n">' + ANN.total + '</div><div class="l">fournisseurs</div>'
-      + '<div class="sub">reconnus d’emblée</div></div>'
+      + '<div class="sub">${T("reconnus d’emblée")}</div></div>'
       + '<div class="s"><div class="n">' + ANN.integres + '</div><div class="l">livrés</div>'
-      + '<div class="sub">avec l’application</div></div>'
+      + '<div class="sub">${T("avec l’application")}</div></div>'
       + '<div class="s"><div class="n">' + ANN.appris + '</div><div class="l">vos corrections</div>'
       + '<div class="sub">elles priment</div></div>'
       + '</div>';
@@ -412,36 +416,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="barreoutils">'
       + '<input aria-label="Domaine, nom ou catégorie" type="search" id="a-q" placeholder="Domaine, nom ou catégorie…" value="' + esc(ANN_Q) + '">'
       + ((ro || (VERROU && !VERROU.obtenu)) ? ''
-          : '<button class="prim" id="a-nouveau">＋ Ajouter un fournisseur</button>')
+          : '<button class="prim" id="a-nouveau">${T("＋ Ajouter un fournisseur")}</button>')
       + '<span class="droite">' + ANN.trouves + ' affiché' + (ANN.trouves > 1 ? 's' : '') + '</span>'
       + '</div>';
 
     if (ANN_FORM) {
-      h += '<div class="carte"><h2>' + (ANN_FORM.neuf ? 'Ajouter un fournisseur' : 'Corriger le classement') + '</h2>'
+      h += '<div class="carte"><h2>' + (ANN_FORM.neuf ? '${T("Ajouter un fournisseur")}' : '${T("Corriger le classement")}') + '</h2>'
         + '<div class="form">'
-        + '<div class="champ"><label>Domaine ou nom</label>'
-        + '<input type="text" id="a-id" aria-label="Domaine ou nom" value="' + esc(ANN_FORM.id) + '"'
+        + '<div class="champ"><label>${T("Domaine ou nom")}</label>'
+        + '<input type="text" id="a-id" aria-label="${T("Domaine ou nom")}" value="' + esc(ANN_FORM.id) + '"'
         + (ANN_FORM.neuf ? ' placeholder="ex. render.com"' : ' disabled') + '></div>'
-        + '<div class="champ"><label for="a-nom">Nom affiché (facultatif)</label>'
+        + '<div class="champ"><label for="a-nom">${T("Nom affiché (facultatif)")}</label>'
         + '<input type="text" id="a-nom" value="' + esc(ANN_FORM.nom) + '" placeholder="ex. Render Services"></div>'
-        + '<div class="champ large"><label for="a-cat">Catégorie (ligne fiscale)</label><select id="a-cat">'
+        + '<div class="champ large"><label for="a-cat">${T("Catégorie (ligne fiscale)")}</label><select id="a-cat">'
         + (ANN.categories || []).map(function(c){
             return '<option value="' + esc(c.cle) + '"' + (ANN_FORM.categorie === c.cle ? ' selected' : '') + '>'
               + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
         + '</select></div></div>'
-        + '<div class="aide" style="margin:.3rem 0 .5rem">Un domaine complet est accepté et réduit '
-        + 'automatiquement : « render.com », « support@render.com » et « Render » désignent le même fournisseur.</div>'
-        + '<div class="pied-boite"><button id="a-annuler">Annuler</button>'
-        + '<button class="prim" id="a-ok">✓ Enregistrer</button></div></div>';
+        + '<div class="aide" style="margin:.3rem 0 .5rem">${T("Un domaine complet est accepté et réduit")} '
+        + '${T("automatiquement : « render.com », « support@render.com » et « Render » désignent le même fournisseur.")}</div>'
+        + '<div class="pied-boite"><button id="a-annuler">${T("Annuler")}</button>'
+        + '<button class="prim" id="a-ok">${T("✓ Enregistrer")}</button></div></div>';
     }
 
     h += '<div class="carte">';
     var rows = ANN.lignes || [];
     if (!rows.length) {
-      h += '<div class="vide">Aucun fournisseur ne correspond.</div>';
+      h += '<div class="vide">${T("Aucun fournisseur ne correspond.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Fournisseur</th><th>Catégorie</th>'
-        + '<th>Origine</th><th style="text-align:right">Actions</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Catégorie")}</th>'
+        + '<th>${T("Origine")}</th><th style="text-align:right">${T("Actions")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-ann="' + esc(r.id) + '">'
               + '<td><span class="num">' + esc(r.id) + '</span>'
@@ -451,7 +455,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + (r.flou ? ' <span class="pill att">polyvalent</span>' : '') + '</td>'
               + '<td>' + (r.origine === 'integre' ? '<span class="pill neutre">livré</span>'
                   : (r.origine === 'corrige'
-                      ? '<span class="pill bon">corrigé</span> <span class="dt">au lieu de '
+                      ? '<span class="pill bon">${T("corrigé")}</span> <span class="dt">au lieu de '
                         + esc(r.categorieBaseLbl) + '</span>'
                       : '<span class="pill bon">ajouté</span>')) + '</td>'
               + '<td style="text-align:right;white-space:nowrap">'
@@ -459,7 +463,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                   : '<button class="mini" data-annmod="' + esc(r.id) + '">Modifier</button>'
                     + (r.origine === 'integre' ? ''
                         : ' <button class="mini danger" data-annret="' + esc(r.id) + '">'
-                          + (ANN_RETIRE === r.id ? 'Confirmer ?' : '✕') + '</button>'))
+                          + (ANN_RETIRE === r.id ? '${T("Confirmer ?")}' : '✕') + '</button>'))
               + '</td></tr>';
           }).join('')
         + '</tbody></table>';
@@ -484,26 +488,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (e.ligne ? ' · L.' + esc(e.ligne) : '') + '</span></div>'
       + '<div class="gros-montant">' + esc(e.totalTTC)
       + (e.usd ? ' <span class="pill info">USD→CAD</span>' : '') + '</div>'
-      + '<div class="aide" style="text-align:center;margin-bottom:.5rem">Total payé'
+      + '<div class="aide" style="text-align:center;margin-bottom:.5rem">${T("Total payé")}'
       + (e.aTaxes ? ' (taxes incluses)' : '') + '</div>'
       + '<div class="grille">'
-      + '<div><div class="l">Date</div><div class="v">' + esc(e.dateFr) + '</div></div>'
-      + '<div><div class="l">Mode de paiement</div><div class="v">' + esc(e.paiementLbl) + '</div></div>'
+      + '<div><div class="l">${T("Date")}</div><div class="v">' + esc(e.dateFr) + '</div></div>'
+      + '<div><div class="l">${T("Mode de paiement")}</div><div class="v">' + esc(e.paiementLbl) + '</div></div>'
       + '</div>'
       + '<div class="texte">' + esc(e.description || '(aucune description)') + '</div>';
 
     if (e.aTaxes) {
       h += '<div class="carte" style="margin-top:.6rem">'
-        + '<div class="rang"><span>Montant (hors taxes)</span><strong>' + esc(e.montant) + '</strong></div>'
-        + '<div class="rang"><span>TPS payée</span><strong>' + esc(e.tps) + '</strong></div>'
-        + '<div class="rang"><span>TVQ payée</span><strong>' + esc(e.tvq) + '</strong></div>'
-        + '<div class="rang total"><span>Total payé</span><strong>' + esc(e.totalTTC) + '</strong></div>'
+        + '<div class="rang"><span>${T("Montant (hors taxes)")}</span><strong>' + esc(e.montant) + '</strong></div>'
+        + '<div class="rang"><span>${T("TPS payée")}</span><strong>' + esc(e.tps) + '</strong></div>'
+        + '<div class="rang"><span>${T("TVQ payée")}</span><strong>' + esc(e.tvq) + '</strong></div>'
+        + '<div class="rang total"><span>${T("Total payé")}</span><strong>' + esc(e.totalTTC) + '</strong></div>'
         + '</div>';
     }
     if (e.usd) {
-      h += '<div class="avis" style="margin-top:.6rem">Facture en dollars US — origine <strong>'
+      h += '<div class="avis" style="margin-top:.6rem">${T("Facture en dollars US — origine")} <strong>'
         + esc(e.origine || '—') + '</strong>'
-        + (e.fxTaux ? ' × taux <strong>' + esc(e.fxTaux) + '</strong>'
+        + (e.fxTaux ? ' ${T("× taux")} <strong>' + esc(e.fxTaux) + '</strong>'
             + (e.fxDate ? ' (' + esc(e.fxDate) + ')' : '')
             + (e.fxApprox ? ' approximatif' : '') : '') + '.</div>';
     }
@@ -520,14 +524,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="pied-boite">'
       + (D.peutSupprimer ? '<button class="danger" id="d-suppr">'
-          + (SUPPR_ARME ? 'Confirmer la suppression ?' : '<span class="ic">🗑</span> Supprimer') + '</button>' : '')
-      + (e.aRecu ? '<button id="d-recu"><span class="ic">📎</span> Ouvrir le reçu</button>' : '')
+          + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> Supprimer') + '</button>' : '')
+      + (e.aRecu ? '<button id="d-recu"><span class="ic">📎</span> ${T("Ouvrir le reçu")}</button>' : '')
       + (D.peutModifier ? '<button class="prim" id="d-modifier"><span class="ic">✎</span> Modifier</button>' : '')
       + '<button id="d-fermer">Fermer</button>'
       + '</div>';
     if (SUPPR_ARME) {
-      h += '<div class="aide" style="margin-top:.5rem">Elle disparaît de la comptabilité et des '
-        + 'rapports d’impôt. Irréversible.</div>';
+      h += '<div class="aide" style="margin-top:.5rem">${T("Elle disparaît de la comptabilité et des")} '
+        + '${T("rapports d’impôt. Irréversible.")}</div>';
     }
     h += '</div></div>';
     return h;
@@ -537,7 +541,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var f = FORM;
     var neuf = (f.id === '__new__');
     var h = '<div class="voile" id="d-voile"><div class="boite">'
-      + '<h3>' + (neuf ? '➕ Nouvelle dépense' : 'Modifier la dépense') + '</h3>';
+      + '<h3>' + (neuf ? '${T("➕ Nouvelle dépense")}' : '${T("Modifier la dépense")}') + '</h3>';
 
     /* ⚠ LA ZONE DE DEPOT S EFFACE UNE FOIS LA FACTURE PRISE (demande du
        2026-08-09 : << quand on glisse une facture, plus besoin de montrer ca >>).
@@ -548,17 +552,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="depot" id="d-depot-form" style="margin-bottom:.6rem">'
         + '<div class="gros"><span class="ic">📄</span> Importer une facture</div>'
         + '<div class="pt">' + (D.lectureAuto
-            ? 'Photo, image ou PDF — les champs sont pré-remplis, vous vérifiez avant d’enregistrer.'
-            : 'Elle sera jointe comme reçu (lecture automatique indisponible sans clé).') + '</div>'
+            ? '${T("Photo, image ou PDF — les champs sont pré-remplis, vous vérifiez avant d’enregistrer.")}'
+            : '${T("Elle sera jointe comme reçu (lecture automatique indisponible sans clé).")}') + '</div>'
         + '</div>';
     }
     if (BR_REPRIS && neuf) {
       h += '<div class="carte" style="margin-bottom:.6rem;font-size:.79rem;line-height:1.5;'
         + 'display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">'
-        + '<span>↩ Brouillon repris — saisie commencée il y a '
+        + '<span>${T("↩ Brouillon repris — saisie commencée il y a")} '
         + (BR_REPRIS < 60 ? (BR_REPRIS + ' min') : (Math.round(BR_REPRIS / 60) + ' h'))
-        + (f.recu ? ', reçu compris' : '') + '.</span>'
-        + '<button class="mini" id="f-neuf">Repartir à neuf</button></div>';
+        + (f.recu ? '${T(", reçu compris")}' : '') + '.</span>'
+        + '<button class="mini" id="f-neuf">${T("Repartir à neuf")}</button></div>';
     }
     if (f.lecture) {
       h += '<div class="' + (f.lectureErr ? 'avis' : 'carte') + '" style="margin-bottom:.6rem;font-size:.79rem;line-height:1.5">'
@@ -566,71 +570,71 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
 
     h += '<div class="form">'
-      + champ('Date', '<input type="date" id="f-date" value="' + esc(f.date) + '">', 'f-date')
-      + champ('Mode de paiement', '<select id="f-pay" aria-label="Mode de paiement">' + (D.paiements || []).map(function(p){
+      + champ('${T("Date")}', '<input type="date" id="f-date" value="' + esc(f.date) + '">', 'f-date')
+      + champ('${T("Mode de paiement")}', '<select id="f-pay" aria-label="${T("Mode de paiement")}">' + (D.paiements || []).map(function(p){
           return '<option value="' + esc(p.cle) + '"' + (f.paiement === p.cle ? ' selected' : '') + '>'
             + esc(p.libelle) + '</option>'; }).join('') + '</select>')
-      + '<div class="champ large"><label for="f-cat">Catégorie (ligne fiscale)</label><select id="f-cat">'
+      + '<div class="champ large"><label for="f-cat">${T("Catégorie (ligne fiscale)")}</label><select id="f-cat">'
       + (D.categories || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (f.categorie === c.cle ? ' selected' : '') + '>'
             + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
       + '</select></div>'
-      + champ('Description', '<input type="text" id="f-desc" value="' + esc(f.description)
+      + champ('${T("Description")}', '<input type="text" id="f-desc" value="' + esc(f.description)
           + '" placeholder="Ex : Publicité Meta juillet">', 'f-desc')
-      + champ('Fournisseur', '<input type="text" id="f-four" value="' + esc(f.fournisseur)
+      + champ('${T("Fournisseur")}', '<input type="text" id="f-four" value="' + esc(f.fournisseur)
           + '" placeholder="Ex : Meta Platforms">', 'f-four')
       + '<div class="bloc-montants"><div class="trois">'
-      + '<div class="champ"><label for="f-montant">Montant (hors taxes)</label>'
+      + '<div class="champ"><label for="f-montant">${T("Montant (hors taxes)")}</label>'
       + '<input type="number" step="0.01" min="0" id="f-montant" value="' + esc(f.montant) + '" placeholder="0.00"></div>'
-      + '<div class="champ"><label for="f-tps">TPS payée</label>'
+      + '<div class="champ"><label for="f-tps">${T("TPS payée")}</label>'
       + '<input type="number" step="0.01" min="0" id="f-tps" value="' + esc(f.tps) + '" placeholder="0.00"></div>'
-      + '<div class="champ"><label for="f-tvq">TVQ payée</label>'
+      + '<div class="champ"><label for="f-tvq">${T("TVQ payée")}</label>'
       + '<input type="number" step="0.01" min="0" id="f-tvq" value="' + esc(f.tvq) + '" placeholder="0.00"></div>'
-      + '<button id="f-taxes" title="Déduire TPS et TVQ d’un total payé saisi dans Montant">↧ Calc. taxes</button>'
+      + '<button id="f-taxes" title="${T("Déduire TPS et TVQ d’un total payé saisi dans ")}${T("Montant")}">${T("↧ Calc. taxes")}</button>'
       + '</div>'
       /* ⚠ LE MONTANT D ORIGINE RESTE SOUS LES YEUX pendant la saisie : c est la
          seule facon de verifier une conversion, et c est aussi ce qu on relit
          quand on corrige une taxe que la lecture a manquee. */
       + (f.origine
           ? '<div class="aide" style="margin-top:.35rem;color:var(--tx-bleu)"><span class="ic">💵</span> Facture en '
-            + esc(f.origine.devise || 'USD') + ' — original : '
+            + esc(f.origine.devise || 'USD') + ' ${T("— original :")} '
             + [['montant', 'montant'], ['tps', 'TPS'], ['tvq', 'TVQ']].map(function(p){
                 var v = f.origine[p[0]];
                 return (v == null) ? '' : (p[1] + ' ' + v.toFixed(2) + ' $ US');
               }).filter(Boolean).join(' · ')
             + (f.origine.total != null ? ' · total ' + f.origine.total.toFixed(2) + ' $ US' : '')
-            + (f.fx ? ' — taux ' + esc(f.fx.taux)
+            + (f.fx ? ' ${T("— taux")} ' + esc(f.fx.taux)
                 + (f.fx.date ? ' du ' + esc(f.fx.date) : '')
-                + (f.fx.approx ? ' (taux du jour, faute de mieux)' : '') : '')
+                + (f.fx.approx ? ' ${T("(taux du jour, faute de mieux)")}' : '') : '')
             + '</div>'
           : '')
-      + '<div class="aide" style="margin-top:.3rem">Saisissez le <strong>total payé</strong> dans '
-      + '« Montant » puis « Calc. taxes » pour en déduire la TPS et la TVQ. '
-      + 'Une facture en dollars US se convertit avec « ⇄ Convertir ».</div>'
+      + '<div class="aide" style="margin-top:.3rem">${T("Saisissez le <strong>total payé</strong> dans ")}'
+      + '${T("« Montant » puis « Calc. taxes » pour en déduire la TPS et la TVQ.")} '
+      + '${T("Une facture en dollars US se convertit avec « ⇄ Convertir ».")}</div>'
       + '<div class="barreoutils" style="margin-top:.4rem">'
       + '<button id="f-convertir" title="Convertir les montants saisis depuis le dollar US, au taux de la date">'
-      + '⇄ Convertir depuis USD</button></div></div>'
-      + '<div class="champ large"><label>Reçu (image ou PDF — facultatif)</label>'
-      + '<button id="f-recu">' + (f.recu ? '✓ Reçu joint — remplacer' : '<span class="ic">📎</span> Joindre un reçu') + '</button></div>'
+      + '${T("⇄ Convertir depuis USD")}</button></div></div>'
+      + '<div class="champ large"><label>${T("Reçu (image ou PDF — facultatif)")}</label>'
+      + '<button id="f-recu">' + (f.recu ? '${T("✓ Reçu joint — remplacer")}' : '<span class="ic">📎</span> ${T("Joindre un reçu")}') + '</button></div>'
       + '</div>';
 
     if (FERMER_DEMANDE) {
       h += '<div class="avis" style="margin-top:.7rem">'
-        + '<strong>Fermer sans enregistrer la dépense ?</strong><br>'
-        + 'Votre saisie' + (f.recu ? ' et le reçu importé' : '') + ' peuvent être conservés '
-        + 'en brouillon : « Nouvelle dépense » les reprendra.'
+        + '<strong>${T("Fermer sans enregistrer la dépense ?")}</strong><br>'
+        + '${T("Votre saisie")}' + (f.recu ? ' ${T("et le reçu importé")}' : '') + ' ${T("peuvent être conservés")} '
+        + '${T("en brouillon : « Nouvelle dépense » les reprendra.")}'
         + '</div>'
         + '<div class="pied-boite">'
-        + '<button id="f-revenir">← Revenir au formulaire</button>'
-        + '<button class="danger" id="f-jeter">Jeter la saisie</button>'
-        + '<button class="prim" id="f-conserver">Conserver le brouillon</button>'
+        + '<button id="f-revenir">${T("← Revenir au formulaire")}</button>'
+        + '<button class="danger" id="f-jeter">${T("Jeter la saisie")}</button>'
+        + '<button class="prim" id="f-conserver">${T("Conserver le brouillon")}</button>'
         + '</div></div></div>';
       return h;
     }
     h += '<div class="pied-boite">'
       + '<button id="f-annuler">Fermer</button>'
       + '<button class="prim" id="f-ok"' + (OCCUPE ? ' disabled' : '') + '>'
-      + (neuf ? '+ Ajouter la dépense' : '✓ Enregistrer') + '</button>'
+      + (neuf ? '${T("+ Ajouter la dépense")}' : '${T("✓ Enregistrer")}') + '</button>'
       + '</div></div></div>';
     return h;
   }
@@ -683,8 +687,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return appeler('depenses:brouillonEcrire', [v]).then(function(r){
       /* ⚠ UN ECHEC D ENREGISTREMENT SE DIT. Croire son travail a l abri alors
          qu il ne l est pas est pire que de le savoir. */
-      if (!r.ok) dire('Le brouillon n’a pas pu être conservé (stockage du poste plein).', 'att');
-      else if (r.sansRecu) dire('Brouillon conservé, mais SANS le reçu (stockage plein).', 'att');
+      if (!r.ok) dire('${T("Le brouillon n’a pas pu être conservé (stockage du poste plein).")}', 'att');
+      else if (r.sansRecu) dire('${T("Brouillon conservé, mais SANS le reçu (stockage plein).")}', 'att');
       return r;
     });
   }
@@ -733,12 +737,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function importerFacture(file){
     if (!file) return;
     if (file.size > MAX_OCTETS) { dire(MOTIFS.trop_lourd + ' (' + file.name + ')', 'att'); return; }
-    if (OCCUPE) { dire('Une lecture est déjà en cours.', 'att'); return; }
+    if (OCCUPE) { dire('${T("Une lecture est déjà en cours.")}', 'att'); return; }
     OCCUPE = true;
     if (!FORM) FORM = formVierge();
     else memoriserForm();
     dessiner();
-    dire('Lecture de la facture… (quelques secondes)');
+    dire('${T("Lecture de la facture… (quelques secondes)")}');
     lireFichier(file).then(function(data){
       if (!data) { OCCUPE = false; dire(MOTIFS.fichier_illisible, 'err'); dessiner(); return; }
       appeler('depenses:facture', [file.name, data]).then(function(r){
@@ -774,19 +778,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           FORM.lectureErr = !r.verifie;
           var dd = (r.depuisDocument || []);
           FORM.lecture = (r.verifie
-              ? ('✓ Lu directement dans le document : ' + esc(dd.join(', ') || 'les montants') + '.')
-              : 'Aucun texte à lire dans ce document (photo ou numérisation) : tout vient de la lecture automatique. Vérifiez CHAQUE champ.')
+              ? ('${T("✓ Lu directement dans le document :")} ' + esc(dd.join(', ') || 'les montants') + '.')
+              : '${T("Aucun texte à lire dans ce document (photo ou numérisation) : tout vient de la lecture automatique. Vérifiez CHAQUE champ.")}')
             + (r.modeleEcarte
-                ? ' La lecture automatique a été écartée (elle ne correspondait pas au document) — complétez la description et la catégorie.'
+                ? ' ${T("La lecture automatique a été écartée (elle ne correspondait pas au document) — complétez la description et la catégorie.")}'
                 : '')
-            + (r.preuve && !r.verifie ? ' Lu : « ' + esc(r.preuve) + ' »' : '')
+            + (r.preuve && !r.verifie ? ' ${T("Lu : «")} ' + esc(r.preuve) + ' »' : '')
             + (r.devise === 'USD' && r.fxTaux
-                ? ' Montants convertis depuis le dollar US au taux ' + esc(r.fxTaux)
+                ? ' ${T("Montants convertis depuis le dollar US au taux")} ' + esc(r.fxTaux)
                   + (r.fxDate ? ' du ' + esc(r.fxDate) : '') + (r.fxApprox ? ' (approximatif)' : '') + '.'
                 : '');
           dire(complet
-            ? 'Facture lue — vérifiez les informations, puis enregistrez.'
-            : 'Facture lue — complétez ce qui manque, puis enregistrez.',
+            ? '${T("Facture lue — vérifiez les informations, puis enregistrez.")}'
+            : '${T("Facture lue — complétez ce qui manque, puis enregistrez.")}',
             complet ? 'bon' : 'att');
         } else {
           /* ⚠ REFUS DE LECTURE : les champs restent VIDES, et l on dit pourquoi.
@@ -794,14 +798,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
              declaration de revenus, alors qu un champ vide se remarque. */
           FORM.lectureErr = true;
           FORM.lecture = (r.motifLecture === 'non_fiable')
-            ? ('Lecture REFUSÉE : ce qui a été proposé ne correspond pas au document ('
-               + esc((r.ecarts || []).join(' ; ') || 'écart détecté')
-               + '), et le document lui-même n’a pas pu être lu (photo ou numérisation). '
-               + 'Rien n’a été rempli — saisissez à la main. Le reçu, lui, est joint.')
-            : (LECTURE[r.motifLecture] || 'Reçu joint — saisie manuelle.');
+            ? ('${T("Lecture REFUSÉE : ce qui a été proposé ne correspond pas au document (")}'
+               + esc((r.ecarts || []).join(' ; ') || '${T("écart détecté")}')
+               + '${T("), et le document lui-même n’a pas pu être lu (photo ou numérisation).")} '
+               + '${T("Rien n’a été rempli — saisissez à la main. Le reçu, lui, est joint.")}')
+            : (LECTURE[r.motifLecture] || '${T("Reçu joint — saisie manuelle.")}');
           dire(r.motifLecture === 'non_fiable'
-            ? 'Lecture refusée — elle ne correspondait pas au document.'
-            : 'Reçu joint — saisie manuelle.', 'att');
+            ? '${T("Lecture refusée — elle ne correspondait pas au document.")}'
+            : '${T("Reçu joint — saisie manuelle.")}', 'att');
         }
         dessiner();
         /* ⚠ ECRITURE IMMEDIATE : la lecture remplit les champs PAR PROGRAMME,
@@ -813,7 +817,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function formVierge(){
-    var auj = new Date().toISOString().slice(0, 10);
+    var auj = new ${T("Date")}().toISOString().slice(0, 10);
     /* ⚠ PAS LA PREMIERE DE LA LISTE. Le formulaire ouvrait sur << Publicite >>
        simplement parce qu elle vient en tete — une facture de serveurs s y est
        retrouvee classee. << Autres depenses >> n affirme rien ; la vraie
@@ -841,7 +845,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }]).then(function(r){
       OCCUPE = false;
       if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-      dire('Dépense enregistrée — ' + r.montant + ' · ' + r.categorie + '.', 'bon');
+      dire('${T("Dépense enregistrée —")} ' + r.montant + ' · ' + r.categorie + '.', 'bon');
       /* ⚠ ON FERME, ON N ENCHAINE PAS. Je rouvrais ici un formulaire VIERGE pour
          permettre de saisir la facture suivante — copie de la question que pose
          l ecran web. Mais un formulaire qui se rouvre tout seul ne se lit pas
@@ -892,11 +896,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dire('Enregistrement…');
       appeler('depenses:annuaireEcrire', [saisie]).then(function(r){
         if (!r.ok) {
-          dire(r.motif === 'id_requis' ? 'Donnez un domaine ou un nom de fournisseur.'
-            : (r.motif === 'categorie' ? 'Choisissez une catégorie.' : expliquer(r)), 'err');
+          dire(r.motif === 'id_requis' ? '${T("Donnez un domaine ou un nom de fournisseur.")}'
+            : (r.motif === 'categorie' ? '${T("Choisissez une catégorie.")}' : expliquer(r)), 'err');
           return;
         }
-        dire('« ' + r.id + ' » classé en ' + r.categorie + '.', 'bon');
+        dire('« ' + r.id + ' ${T("» classé en")} ' + r.categorie + '.', 'bon');
         ANN_FORM = null;
         chargerAnnuaire();
       });
@@ -941,9 +945,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     };
     var rc = document.getElementById('d-recu');
     if (rc) rc.onclick = function(){
-      dire('Ouverture du reçu…');
+      dire('${T("Ouverture du reçu…")}');
       appeler('depenses:recuOuvrir', [DETAIL.id]).then(function(r){
-        dire(r.ok ? 'Reçu ouvert dans la fenêtre principale.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Reçu ouvert dans la fenêtre principale.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
     var su = document.getElementById('d-suppr');
@@ -957,7 +961,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dire('Suppression…');
       appeler('depenses:supprimer', [DETAIL.id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Dépense supprimée (' + r.montant + ' · ' + r.categorie + ').', 'bon');
+        dire('${T("Dépense supprimée (")}' + r.montant + ' · ' + r.categorie + ').', 'bon');
         DETAIL = null;
         charger();
       });
@@ -974,7 +978,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          corrige : fermer d abord, ecrire ensuite, c est ne rien ecrire. */
       brouillonMaintenant().then(function(){
         FORM = null; FERMER_DEMANDE = false; dessiner();
-        dire('Brouillon conservé — « Nouvelle dépense » le reprendra.', 'bon');
+        dire('${T("Brouillon conservé — « Nouvelle dépense » le reprendra.")}', 'bon');
       });
     };
     var jt = document.getElementById('f-jeter');
@@ -982,14 +986,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       clearTimeout(BR_MINUTE);
       appeler('depenses:brouillonJeter', []).then(function(){
         FORM = null; FERMER_DEMANDE = false; BR_REPRIS = 0; dessiner();
-        dire('Saisie jetée.', 'att');
+        dire('${T("Saisie jetée.")}', 'att');
       });
     };
     var bj = document.getElementById('f-neuf');
     if (bj) bj.onclick = function(){
       appeler('depenses:brouillonJeter', []).then(function(){
         BR_REPRIS = 0; FORM = formVierge(); dessiner();
-        dire('Brouillon jeté — formulaire vierge.', 'bon');
+        dire('${T("Brouillon jeté — formulaire vierge.")}', 'bon');
       });
     };
     var ok = document.getElementById('f-ok');
@@ -1003,20 +1007,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         FORM.tps = r.tps.toFixed(2);
         FORM.tvq = r.tvq.toFixed(2);
         dessiner();
-        dire('Taxes déduites du total payé.', 'bon');
+        dire('${T("Taxes déduites du total payé.")}', 'bon');
       });
     };
     var cv = document.getElementById('f-convertir');
     if (cv) cv.onclick = function(){
       memoriserForm();
       if (!(parseFloat(FORM.montant) || parseFloat(FORM.tps) || parseFloat(FORM.tvq))) {
-        dire('Saisissez d’abord les montants en dollars US.', 'att'); return;
+        dire('${T("Saisissez d’abord les montants en dollars US.")}', 'att'); return;
       }
-      dire('Lecture du taux de change…');
+      dire('${T("Lecture du taux de change…")}');
       appeler('depenses:convertir', [{ montant: FORM.montant, tps: FORM.tps,
         tvq: FORM.tvq, date: FORM.date }]).then(function(r){
         if (!r.ok) {
-          dire(r.motif === 'rien_a_convertir' ? 'Rien à convertir.' : expliquer(r), 'att');
+          dire(r.motif === 'rien_a_convertir' ? '${T("Rien à convertir.")}' : expliquer(r), 'att');
           return;
         }
         /* ⚠ ON GARDE CE QU ON VIENT DE CONVERTIR : sans le montant d origine
@@ -1029,9 +1033,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (r.tvq != null) FORM.tvq = r.tvq.toFixed(2);
         dessiner();
         brouillonMaintenant();
-        dire('Converti au taux ' + r.taux + (r.date ? ' du ' + r.date : '')
+        dire('${T("Converti au taux")} ' + r.taux + (r.date ? ' du ' + r.date : '')
           + (r.source ? ' (' + r.source + ')' : '')
-          + (r.approx ? ' — taux du jour, faute d’avoir trouvé celui de la date.' : '.'),
+          + (r.approx ? ' ${T("— taux du jour, faute d’avoir trouvé celui de la date.")}' : '.'),
           r.approx ? 'att' : 'bon');
       });
     };
@@ -1040,14 +1044,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       choisirFichier(function(file){
         if (file.size > MAX_OCTETS) { dire(MOTIFS.trop_lourd, 'att'); return; }
         memoriserForm();
-        dire('Préparation du reçu…');
+        dire('${T("Préparation du reçu…")}');
         lireFichier(file).then(function(data){
           if (!data) { dire(MOTIFS.fichier_illisible, 'err'); return; }
           appeler('depenses:recu', [file.name, data]).then(function(r){
             if (!r.ok) { dire(expliquer(r), 'err'); return; }
             FORM.recu = true;
             dessiner();
-            dire('Reçu joint — il partira dans le stockage à l’enregistrement.', 'bon');
+            dire('${T("Reçu joint — il partira dans le stockage à l’enregistrement.")}', 'bon');
           });
         });
       });
@@ -1071,7 +1075,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       FORM.recu = !!(b.recu || r.recu);
       BR_REPRIS = r.ilYaMin || 1;
       dessiner();
-      dire('Brouillon repris — rien n’avait été perdu.', 'bon');
+      dire('${T("Brouillon repris — rien n’avait été perdu.")}', 'bon');
     });
   }
 
@@ -1113,8 +1117,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('depenses:annuaireRetirer', [idr]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire(r.integre
-          ? ('« ' + r.id + ' » retrouve son classement livré : ' + r.categorie + '.')
-          : ('« ' + r.id + ' » retiré de l’annuaire.'), 'bon');
+          ? ('« ' + r.id + ' ${T("» retrouve son classement livré :")} ' + r.categorie + '.')
+          : ('« ' + r.id + ' ${T("» retiré de l’annuaire.")}'), 'bon');
         chargerAnnuaire();
       });
       return;
@@ -1201,7 +1205,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       VERROU = r && r.ok ? { obtenu: !!r.obtenu, parQui: r.parQui || '' } : { obtenu: true, parQui: '' };
       if (VUE === 'annuaire') dessiner();
       if (VERROU && !VERROU.obtenu) {
-        dire('Annuaire ouvert par ' + (VERROU.parQui || 'un collègue') + ' — consultation seulement.', 'att');
+        dire('${T("Annuaire ouvert par")} ' + (VERROU.parQui || '${T("un collègue")}') + ' ${T("— consultation seulement.")}', 'att');
       }
     });
   }
@@ -1219,7 +1223,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       page: PAGE, taille: 25 }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; return charger(); }
-      if (!r || !r.ok) { vide('Dépenses indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Dépenses indisponibles")}', expliquer(r)); return; }
       D = r;
       ANNEE = D.annee; MOIS = D.mois; CAT = D.categorie;
       var s = document.getElementById('sous');
@@ -1256,12 +1260,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
