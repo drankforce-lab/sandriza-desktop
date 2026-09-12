@@ -18,6 +18,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('ramassages');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -101,9 +105,9 @@ input:focus{outline:none;border-color:#c9a97e}
 /** Page complète de la fenêtre native « Ramassages et rapport ». */
 function pageRamassages() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Ramassages et rapport — Administration Sandriza</title>
+<title>${T("Ramassages et rapport — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.orders}</span><h1>Ramassages et rapport</h1>
+<div class="tete"><span class="ico">${ICO.orders}</span><h1>${T("Ramassages et rapport")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -138,12 +142,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   var MOTIFS = {
     session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux expéditions.',
+    droit:              '${T("Votre rôle ne donne pas accès aux expéditions.")}',
     indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
     pont_indisponible:  'La fenêtre principale ne répond pas.',
     delai:              'La fenêtre principale n’a pas répondu à temps.',
     operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    annulation:         'L’annulation a échoué auprès du transporteur.',
+    annulation:         '${T("L’annulation a échoué auprès du transporteur.")}',
     echec:              'L’opération a échoué.'
   };
   function expliquer(r){
@@ -181,7 +185,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = barre();
     var rows = RAM || [];
     if (!rows.length) {
-      h += '<div class="vide">Aucun ramassage planifié.</div>';
+      h += '<div class="vide">${T("Aucun ramassage planifié.")}</div>';
     } else {
       h += rows.map(function(r){
         var etat = r.annule ? '<span class="pill err">Annulé</span>' : '<span class="pill bon">Planifié</span>';
@@ -193,12 +197,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + etat
           + (!r.annule
               ? '<button class="mini danger" style="margin-left:auto" data-annuler="' + esc(r.id) + '">'
-                + (ANNULER_ARME === r.id ? 'Confirmer l’annulation ?' : 'Annuler') + '</button>'
+                + (ANNULER_ARME === r.id ? '${T("Confirmer l’annulation ?")}' : 'Annuler') + '</button>'
               : '')
           + '</div>'
-          + '<div class="dt">Confirmation : <span class="mono">' + esc(r.confirmation || '—') + '</span>'
-          + (r.par ? ' · planifié par ' + esc(r.par) : '')
-          + (r.annule && r.annulePar ? ' · annulé par ' + esc(r.annulePar) : '') + '</div>'
+          + '<div class="dt">${T("Confirmation :")} <span class="mono">' + esc(r.confirmation || '—') + '</span>'
+          + (r.par ? ' ${T("· planifié par")} ' + esc(r.par) : '')
+          + (r.annule && r.annulePar ? ' ${T("· annulé par")} ' + esc(r.annulePar) : '') + '</div>'
           + (r.commandes.length
               ? '<div class="dt">' + r.commandes.map(function(n){
                   return '<span class="pill neutre mono">' + esc(n) + '</span>'; }).join(' ') + '</div>'
@@ -215,27 +219,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="voile" id="rm-voile"><div class="boite">'
       + '<h3><span class="ic">📦</span> Planifier les ramassages — ' + (p.total || 0) + ' colis</h3>';
     if (!p.total) {
-      h += '<div class="vide">Aucun colis à ramasser pour l’instant.<br>'
-        + 'Une commande doit être marquée Expédiée et avoir un numéro de suivi.</div>'
+      h += '<div class="vide">${T("Aucun colis à ramasser pour l’instant.")}<br>'
+        + '${T("Une commande doit être marquée Expédiée et avoir un numéro de suivi.")}</div>'
         + '<div class="pied-boite"><button id="rm-p-annuler">Fermer</button></div></div></div>';
       return h;
     }
-    h += '<div class="dt"><span class="ic" aria-hidden="true">📅</span> Prévu le <strong>' + esc(p.date) + '</strong>, entre 09 h et 17 h'
+    h += '<div class="dt"><span class="ic" aria-hidden="true">📅</span> Prévu le <strong>' + esc(p.date) + '</strong>${T(", entre 09 h et 17 h")}'
       + (p.adresse ? ' · ' + esc(p.adresse) : '') + '</div>';
     h += (p.groupes || []).map(function(g){
       return '<div class="grp"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
         + '<span>' + g.logo + '</span><span class="num">' + esc(g.nom) + '</span>'
         + '<span class="pill neutre">' + g.colis + ' colis</span>'
-        + (g.api ? '<span class="pill bon">API — demande automatique</span>'
-                 : '<span class="pill att">à contacter manuellement</span>')
+        + (g.api ? '<span class="pill bon">${T("API — demande automatique")}</span>'
+                 : '<span class="pill att">${T("à contacter manuellement")}</span>')
         + '</div><div class="dt">' + (g.commandes || []).map(function(n){
             return '<span class="pill neutre mono">' + esc(n) + '</span>'; }).join(' ') + '</div></div>';
     }).join('');
     h += '<div class="champs">'
-      + '<div><div class="l">Poids estimé par colis (kg)</div>'
+      + '<div><div class="l">${T("Poids estimé par colis (kg)")}</div>'
       + '<input type="number" id="rm-p-poids" aria-label="Poids estimé par colis en kilogrammes" value="0.5" min="0.05" step="0.05"></div>'
-      + '<div><div class="l">Endroit du ramassage</div>'
-      + '<input type="text" id="rm-p-endroit" aria-label="Endroit du ramassage" value="Porte principale"></div>'
+      + '<div><div class="l">${T("Endroit du ramassage")}</div>'
+      + '<input type="text" id="rm-p-endroit" aria-label="${T("Endroit du ramassage")}" value="Porte principale"></div>'
       + '</div>'
       + '<div class="pied-boite"><button id="rm-p-annuler">Annuler</button>'
       + '<button class="prim" id="rm-p-envoyer"><span class="ic">📨</span> Envoyer les demandes</button></div>'
@@ -246,11 +250,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerRapport(){
     var h = barre();
     if (!RAP || !RAP.total) {
-      h += '<div class="vide">Aucune expédition enregistrée.</div>';
+      h += '<div class="vide">${T("Aucune expédition enregistrée.")}</div>';
       corps.innerHTML = h;
       return;
     }
-    h += '<div class="carte"><h2>Par transporteur — ' + RAP.total + ' expédition' + (RAP.total > 1 ? 's' : '') + '</h2>'
+    h += '<div class="carte"><h2>${T("Par transporteur —")} ' + RAP.total + ' expédition' + (RAP.total > 1 ? 's' : '') + '</h2>'
       + '<table><thead><tr><th>Transporteur</th><th style="text-align:center">Colis</th>'
       + '<th style="text-align:right">Total frais</th><th style="text-align:right">Moy. par colis</th></tr></thead><tbody>'
       + (RAP.transporteurs || []).map(function(t){
@@ -262,7 +266,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</tbody><tfoot><tr><td>TOTAL</td><td style="text-align:center">' + RAP.total + '</td>'
       + '<td style="text-align:right">' + esc(fmt(RAP.totalFrais)) + '</td><td></td></tr></tfoot></table></div>';
 
-    h += '<div class="carte"><h2>Les 60 dernières expéditions</h2>'
+    h += '<div class="carte"><h2>${T("Les 60 dernières expéditions")}</h2>'
       + '<table><thead><tr><th>Commande</th><th>Date</th><th>Transporteur</th>'
       + '<th>Suivi</th><th style="text-align:right">Frais</th><th>Statut</th></tr></thead><tbody>'
       + (RAP.expeditions || []).map(function(o){
@@ -293,7 +297,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       /* NATIF (1.59.1) : le formulaire s ouvre ICI — le renvoi a l assistant
          web contredisait la regle << plus rien au format web >> (releve du
          2026-08-09). */
-      dire('Lecture des colis prêts…');
+      dire('${T("Lecture des colis prêts…")}');
       appeler('ramassages:preparer', []).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire('');
@@ -308,10 +312,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var poids = parseFloat((document.getElementById('rm-p-poids') || {}).value) || 0.5;
       var endroit = ((document.getElementById('rm-p-endroit') || {}).value || '').trim();
       env.disabled = true;
-      dire('Demandes envoyées aux transporteurs…');
+      dire('${T("Demandes envoyées aux transporteurs…")}');
       appeler('ramassages:planifier', [{ poids: poids, endroit: endroit }]).then(function(r){
         if (!r.ok) {
-          dire(r.motif === 'aucun_colis' ? 'Aucun colis à ramasser.' : expliquer(r), 'err');
+          dire(r.motif === 'aucun_colis' ? '${T("Aucun colis à ramasser.")}' : expliquer(r), 'err');
           env.disabled = false;
           return;
         }
@@ -337,9 +341,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       ANNULER_ARME = '';
       an.disabled = true;
-      dire('Annulation auprès du transporteur…');
+      dire('${T("Annulation auprès du transporteur…")}');
       appeler('ramassages:annuler', [id]).then(function(r){
-        if (r.ok) { dire('Ramassage annulé.', 'bon'); charger(); }
+        if (r.ok) { dire('${T("Ramassage annulé.")}', 'bon'); charger(); }
         else { dire(expliquer(r), 'err'); dessiner(); }
       });
       return;
@@ -353,7 +357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var op = (ONGLET === 'rapport') ? 'expeditions:rapport' : 'ramassages:liste';
     appeler(op, []).then(function(r){
       enCours = false;
-      if (!r || !r.ok) { vide('Expéditions indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Expéditions indisponibles")}', expliquer(r)); return; }
       if (ONGLET === 'rapport') RAP = r;
       else RAM = r.lignes || [];
       dire('');

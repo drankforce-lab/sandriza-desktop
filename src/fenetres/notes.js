@@ -147,9 +147,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var h = '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'recentes' ? ' actif' : '') + '" data-onglet="recentes">'
-      + 'Récentes<span class="n">' + recentes.length + '</span></button>'
+      + '${T("Récentes")}<span class="n">' + recentes.length + '</span></button>'
       + '<button class="mini' + (ONGLET === 'archives' ? ' actif' : '') + '" data-onglet="archives">'
-      + 'Archives<span class="n">' + archives.length + '</span></button>'
+      + '${T("Archives")}<span class="n">' + archives.length + '</span></button>'
       + '</div>';
 
     if (!liste.length) {

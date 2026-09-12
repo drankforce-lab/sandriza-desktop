@@ -19,6 +19,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('produits');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -79,9 +83,9 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 /** Page complète de la fenêtre native « Produits en vente ». */
 function pageProduits() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Produits en vente — Administration Sandriza</title>
+<title>${T("Produits en vente — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.products}</span><h1>Produits en vente</h1>
+<div class="tete"><span class="ico">${ICO.products}</span><h1>${T("Produits en vente")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -115,12 +119,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   var MOTIFS = {
     session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux produits.',
+    droit:              '${T("Votre rôle ne donne pas accès aux produits.")}',
     indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
     pont_indisponible:  'La fenêtre principale ne répond pas.',
     delai:              'La fenêtre principale n’a pas répondu à temps.',
     operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette fiche n’existe plus.',
+    introuvable:        '${T("Cette fiche n’existe plus.")}',
     echec:              'L’opération a échoué.'
   };
   function expliquer(r){
@@ -143,49 +147,49 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function pilStock(r){
     if (r.stockTotal === 0) return '<span class="pill err" title="Aucune unité en stock">Rupture</span>';
     if (r.variantesBas > 0) return '<span class="pill att" title="' + esc(r.bassesDetail) + '">'
-      + r.variantesBas + ' cat. à commander</span>';
-    return '<span class="pill bon">Seuil non atteint</span>';
+      + r.variantesBas + ' ${T("cat. à commander")}</span>';
+    return '<span class="pill bon">${T("Seuil non atteint")}</span>';
   }
 
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
     var h = '<div class="barreoutils">'
       + '<input aria-label="Rechercher un produit" type="search" id="p-q" placeholder="Rechercher un produit…" value="' + esc(Q) + '">'
-      + '<select id="p-cat"><option value="">Toutes les catégories</option>'
+      + '<select id="p-cat"><option value="">${T("Toutes les catégories")}</option>'
       + (D.cats || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(c.nom) + '</option>';
         }).join('')
       + '</select>'
-      + '<select id="p-tag"><option value="">Toutes les étiquettes</option>'
+      + '<select id="p-tag"><option value="">${T("Toutes les étiquettes")}</option>'
       + (D.etiquettes || []).map(function(t){
           return '<option value="' + esc(t) + '"' + (TAG === t ? ' selected' : '') + '>' + esc(t) + '</option>';
         }).join('')
-      + (D.aFinal ? '<option value="__final__"' + (TAG === '__final__' ? ' selected' : '') + '><span class="ic">🔴</span> Vente finale</option>' : '')
+      + (D.aFinal ? '<option value="__final__"' + (TAG === '__final__' ? ' selected' : '') + '><span class="ic">🔴</span> ${T("Vente finale")}</option>' : '')
       + (D.aLiq ? '<option value="__liq__"' + (TAG === '__liq__' ? ' selected' : '') + '><span class="ic">🟡</span> Liquidation</option>' : '')
       + '</select>'
       + '<select id="p-stock">'
-      + '<option value=""' + (STOCK === '' ? ' selected' : '') + '>Tout l’inventaire</option>'
+      + '<option value=""' + (STOCK === '' ? ' selected' : '') + '>${T("Tout l’inventaire")}</option>'
       + '<option value="low"' + (STOCK === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> À commander</option>'
-      + '<option value="ok"' + (STOCK === 'ok' ? ' selected' : '') + '>✓ Seuil non atteint</option>'
+      + '<option value="ok"' + (STOCK === 'ok' ? ' selected' : '') + '>${T("✓ Seuil non atteint")}</option>'
       + '</select>'
       + '<button class="mini' + (TRI === 'cart' ? ' actif' : '') + '" id="p-tri" '
       + 'title="Mettre en premier les produits présents dans des paniers actifs">'
       + (TRI === 'cart' ? '<span class="ic">🛒</span> Tri panier ✓' : '<span class="ic">🛒</span> Trier par panier') + '</button>'
       + '<span class="droite">' + (D.total || 0) + ' produit' + (D.total > 1 ? 's' : '')
       + ' · ' + (D.stats && D.stats.ruptures || 0) + ' en rupture'
-      + '<button class="prim" id="p-nouveau">+ Nouveau produit</button></span>'
+      + '<button class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></span>'
       + '</div>';
 
     h += '<div class="carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
-      h += '<div class="vide">Aucun produit ne correspond.</div>';
+      h += '<div class="vide">${T("Aucun produit ne correspond.")}</div>';
     } else {
       h += '<table><thead><tr><th>Produit</th><th>Catégorie</th><th>Étiquette</th>'
         + '<th>Prix</th><th>Inventaire</th><th style="text-align:center">Paniers</th></tr></thead><tbody>'
         + rows.map(function(r){
             var badges = '';
-            if (r.finalSale && !r.liquidation) badges += ' <span class="pill err">Vente finale</span>';
+            if (r.finalSale && !r.liquidation) badges += ' <span class="pill err">${T("Vente finale")}</span>';
             if (r.liquidation) badges += ' <span class="pill att">Liquidation</span>';
             var prix = r.solde
               ? '<span class="prixbarre">' + esc(fmt(r.prix)) + '</span>' + esc(fmt(r.solde))
@@ -241,7 +245,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (nv) nv.onclick = function(){
       dire('Ouverture…');
       appeler('produits:nouveau', []).then(function(r){
-        dire(r.ok ? 'Assistant Produit ouvert dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Assistant Produit ouvert dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
   }
@@ -254,7 +258,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!tr) return;
     dire('Ouverture…');
     appeler('produits:ouvrir', [tr.getAttribute('data-id')]).then(function(r){
-      dire(r.ok ? 'Fiche ouverte dans l’assistant Produit.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Fiche ouverte dans l’assistant Produit.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
 
@@ -268,7 +272,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       stock: STOCK, tri: TRI, page: PAGE, taille: TAILLE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Produits indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Produits indisponibles")}', expliquer(r)); return; }
       D = r;
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();

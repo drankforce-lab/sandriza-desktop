@@ -308,7 +308,14 @@ for (const f of fichiers) {
       const bloc = txt.slice(m.index, m.index + 900);
       const opts = [...bloc.matchAll(/<option[^>]*>((?:(?!<\/option>)[\s\S]){0,70})/g)]
         .map((o) => sansBalises(o[1])).filter(Boolean);
-      if (opts.length && PARLE.test(opts[0])) continue;   // nomme par sa 1re option
+      /* ⚠⚠ ON LIT À TRAVERS `${T('…')}`. Depuis le chantier bilingue, un libellé
+         s’écrit `${T('Toutes les catégories')}` : le texte est toujours là, et il
+         paraît toujours à l’écran — c’est résolu À LA GÉNÉRATION. Sans cette ligne,
+         le banc accusait trois sélecteurs parfaitement nommés. ⚠ Un garde qui lit
+         la SOURCE doit connaître les enveloppes qu’on pose autour des textes,
+         sinon chaque enveloppe nouvelle lui fabrique des fautes. */
+      const nu0 = String(opts[0] || '').replace(/\$\{T\(\s*["']([^"']*)["'][^)]*\)\}/g, '$1');
+      if (opts.length && PARLE.test(nu0)) continue;   // nomme par sa 1re option
     }
     const proche = txt.slice(Math.max(0, m.index - 220), m.index);
     if (/<\/label>|class="(?:l|et|cle|lab|lbl)"/.test(proche)) continue;
