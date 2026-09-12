@@ -146,8 +146,6 @@ module.exports = {
     '#83570B sur #DECFB2 @4.5': 4,
     // 4.16 · div#onglets.onglets > button.actif « ⬇ Exporter » · catalogio/jour catalogio_c1/jour catalogio_c2/jour catalogio_c4/jour invmeta/jour invmeta_c1/jour invmeta_c2/jour invmeta_c3/jour invmeta_c4/jour invmeta_c5/jour invmeta_c6/jour invmeta_c7/jour invmeta_c8/jour newsletter/jour newsletter_c1/jour newsletter_c2/jour newsletter_c3/jour newsletter_c4/jour publicite/jour publicite_c1/jour publicite_c2/jour publicite_c3/jour publicite_c4/jour publicite_c6/jour transferts/jour transferts_c1/jour transferts_c2/jour
     '#6F6A5F sur #E7E2D7 @4.5': 27,
-    // 4.25 · div.pied > span#msg.msg.bon « 4 résultat(s) dans tous les journaux. » · journaux_c13/jour livraison/jour
-    '#15803D sur #EFECE4 @4.5': 2,
     // 4.31 · div.etats > span.pill.on « Actif » · securite/jour securite_c1/jour securite_c2/jour sociaux-config/jour sociaux-config_c1/jour sociaux-config_c2/jour
     '#326A49 sur #C0DBC5 @4.5': 12,
     // 4.31 · div.etats > span.pill.moi « vous » · securite/jour securite_c1/jour securite_c2/jour

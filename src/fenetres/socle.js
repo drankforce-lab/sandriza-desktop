@@ -1731,7 +1731,15 @@ html.jour tbody tr:hover td{background:rgba(15,23,42,.045)}
 html.jour tfoot td{border-top-color:rgba(15,23,42,.25)}
 html.jour .dt,html.jour .sub,html.jour .pagi,html.jour .vide,html.jour .msg{color:#414e66}
 html.jour .msg.err{color:#b91c1c}
-html.jour .msg.bon{color:#15803d}
+/* ⚠ #127136 ET NON #15803d : le vert de confirmation du bandeau tombait a
+   4,25:1 sur le fond de jour — sous le seuil, sur la ligne qui dit que le
+   geste a REUSSI. Il tenait parce que le plafond declare valait 2 ; la
+   fenetre de l editeur en a ajoute deux, et le cliquet a refuse la
+   construction. La bonne reparation n etait pas de relever le plafond : la
+   teinte etait sous-lisible AUX QUATRE endroits, pas seulement aux deux
+   nouveaux. #127136 est deja la teinte de << pill.bon >> en mode jour (5,2:1) —
+   on ne cree pas une nuance de plus pour la meme intention. */
+html.jour .msg.bon{color:#127136}
 html.jour .num{color:#1d2433}
 html.jour .sku,html.jour .etoile{color:#8a6a3e}
 html.jour .prixbarre{color:#414e66}
