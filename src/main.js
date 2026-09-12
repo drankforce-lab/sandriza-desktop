@@ -127,6 +127,33 @@ const armAppHeader = () => {
 const IN = 25400; // 1 pouce = 25 400 microns (unité attendue par print({pageSize}))
 
 let mainWindow = null;
+
+/* ══ LA COUTURE DU CADRE — deux ROLES, une seule fenetre (pour l instant) ════
+   ⚠⚠ POURQUOI CES DEUX FONCTIONS EXISTENT ALORS QU ELLES RENDENT LA MEME CHOSE.
+   La fenetre principale joue AUJOURD HUI deux roles a la fois :
+     · LE SITE — la page qui heberge le pont (les 429 coeurs), qu on interroge
+       par executeJavaScript et a qui on envoie les messages des modules ;
+     · LE CADRE — la page qui dessine la zone ou les ecrans natifs s ANCRENT,
+       a qui on envoie dock:naviguer / dock:ancree / dock:detachee / dock:fermee,
+       et de qui on accepte dock:zone.
+   Tant que le site dessine le cadre, les deux rendent `mainWindow.webContents`
+   et RIEN NE CHANGE. C est voulu : cette tranche ne deplace rien, elle NOMME.
+   ⚠ La tranche suivante fait passer le site dans une vue CACHEE : `siteWC` la
+   rendra, `cadreWC` continuera de rendre la fenetre principale. Trente-six
+   renvois a `mainWindow.webContents` auraient alors du etre tries A CE
+   MOMENT-LA, sous pression, dans un fichier de six mille lignes. Ils sont tries
+   MAINTENANT, a froid, pendant que le comportement est identique et verifiable.
+   ⚠⚠ ET CE N EST PAS DE LA PRUDENCE DE PRINCIPE : la difference entre les deux
+   roles ne se voit PAS a la lecture d un appel. `send('dock:ancree')` et
+   `send('usb:photos')` s ecrivent pareil et ne parlent pas a la meme page apres
+   la bascule. Un tri fait apres coup se fait a l oeil, sur des lignes qui se
+   ressemblent toutes.
+   ⚠ Ce qui n est NI l un NI l autre reste sur `mainWindow.webContents` : le
+   zoom, le theme, les gardes de navigation, les reglages du menu. Ce sont des
+   affaires de FENETRE VISIBLE — et apres la bascule, la fenetre visible EST le
+   cadre, donc ces appels seront deja justes. */
+const siteWC = () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null);
+const cadreWC = () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null);
 /* ══ LA VEILLE EN ZONE DE NOTIFICATION (2026-09-08) ══════════════════════════
    `trayVeille` : l'icône, posée par `veilleur.attacher()` quand l'application
    est prête. ⚠ ELLE CONDITIONNE LE « X CACHE » : sans icône, cacher la fenêtre
@@ -233,7 +260,7 @@ const montrerAdministration = (raisonEntrante) => {
        laisse la fenêtre s'ouvrir quand même — un message perdu ne doit pas
        empêcher d'arriver à l'écran de connexion. */
     if (raison && !_sessionOuverte()) {
-      mainWindow.webContents.executeJavaScript(
+      siteWC().executeJavaScript(
         "(function(){try{if(typeof Toast!=='undefined')Toast.show("
         + JSON.stringify(String(raison)) + ",'warning',9000);}catch(e){}})()", true).catch(() => {});
     }
@@ -261,7 +288,7 @@ const _veilleAttacher = () => {
         montrerAdministration();
         try {
           if (mainWindow && !mainWindow.isDestroyed()) {
-            mainWindow.webContents.executeJavaScript(
+            siteWC().executeJavaScript(
               'window.Admin && Admin._confirmLogout ? Admin._confirmLogout() : null', true).catch(() => {});
           }
         } catch {}
@@ -763,7 +790,7 @@ const notifier = (titre, corps, options = {}) => {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
       mainWindow.focus();
-      if (options.aller) { try { mainWindow.webContents.send('dock:naviguer', options.aller); } catch {} }
+      if (options.aller) { try { cadreWC().send('dock:naviguer', options.aller); } catch {} }
     });
     n.show();
     return true;
@@ -1125,7 +1152,7 @@ const startUsbWatch = () => {
       if (!_knownDrives.has(d)) {
         const photos = scanDrivePhotos(d);
         if (photos.length && mainWindow) {
-          mainWindow.webContents.send('usb:photos', { drive: d, photos });
+          siteWC().send('usb:photos', { drive: d, photos });
           /* ⚠ LE SUJET EN TITRE, LE DETAIL EN CORPS, et le clic MENE a la
              photothèque. L ancienne version repetait le nom de l application en
              titre et laissait l information en troisieme ligne, avec un tiret
@@ -1156,7 +1183,7 @@ const applySidebarPref = (wc) => {
     + "else if(s){s.remove();}}catch(e){}})()", true).catch(() => {});
 };
 const toggleSidebar = (hide) => {
-  const wc = mainWindow && mainWindow.webContents; if (!wc) return;
+  const wc = siteWC(); if (!wc) return;
   wc.executeJavaScript("localStorage.setItem('elg_hide_admin_sidebar','" + (hide ? '1' : '0') + "')", true).then(() => applySidebarPref(wc)).catch(() => {});
 };
 
@@ -1369,7 +1396,7 @@ const createWindow = () => {
       if (b) a.view.setBounds(b);
       a.view.setVisible(true);
       ancreeVisible = cle; vueVoilee = null;
-      mainWindow.webContents.send('dock:ancree', cle);
+      cadreWC().send('dock:ancree', cle);
     } catch (e) {}
     const partir = (js) => {
       let fait = false;
@@ -1432,10 +1459,17 @@ const runAdmin = (expr) => {
       "if(typeof Admin==='undefined'){if(typeof Toast!=='undefined')Toast.show('Connectez-vous pour continuer.','warning');return;}" +
       expr + ';' +
     "}catch(e){if(typeof Toast!=='undefined')Toast.show('Action indisponible : '+(e&&e.message||''),'error');}})()";
-  mainWindow.webContents.executeJavaScript(js, true).catch(() => {});
+  const wc = siteWC();
+  if (wc) wc.executeJavaScript(js, true).catch(() => {});
 };
-const goSection = (key) => runAdmin("Admin.renderSection('" + key + "')");
-const goConfig = (tab) => runAdmin("Admin.renderSection('config');if(Admin.switchConfigTab)Admin.switchConfigTab('" + tab + "')");
+/* ⚠ DEUX AIDES RETIREES LE 2026-09-12, ET C EST DU MENAGE REEL. Elles faisaient
+   dessiner une SECTION WEB depuis la coquille, et plus AUCUN appelant ne les
+   demandait — verifie par recherche sur tout le fichier. Moins la coquille
+   nomme Admin.renderSection, moins le panneau web est une piece porteuse.
+   ⚠ Les branches it.section / it.tab du gestionnaire de menu RESTENT : elles
+   sont le repli d une application plus ancienne que le minApp d une entree, et
+   rien ne prouve qu aucun poste ne les atteint. Les retirer demande de MESURER
+   d abord, pas de supposer. */
 
 // ── MISES À JOUR (paquets publiés sur GitHub) ────────────────────────────────
 // Les installateurs sont publiés en « Release » sur le dépôt PUBLIC
@@ -1715,14 +1749,16 @@ const portePage = (titre, message, progression) => {
 // chaque ouverture de fenêtre, il n'a pas à transporter une image lourde.
 const capturerMarque = () => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  const url = mainWindow.webContents.getURL() || '';
+  const url = (siteWC() && siteWC().getURL()) || '';
   if (url.indexOf('data:') === 0) return;   // c'est notre propre écran
   const js = '(function(){try{var t={};try{t=JSON.parse(localStorage.getItem("elg_login_theme"))||{}}catch(e){}'
     + 'return{logo:localStorage.getItem("elg_logo_login")||localStorage.getItem("elg_logo_admin")||"",'
     + 'nom:localStorage.getItem("elg_brand_name")||"",lettre:localStorage.getItem("elg_logo_letter")||"",'
     + 'sombre:(localStorage.getItem("elg_admin_ui_theme")||"light")==="dark",theme:t};'
     + '}catch(e){return null}})()';
-  mainWindow.webContents.executeJavaScript(js, true).then((m) => {
+  const wcT = siteWC();
+  if (!wcT) return;
+  wcT.executeJavaScript(js, true).then((m) => {
     if (!m || typeof m !== 'object') return;
     if (m.logo && m.logo.length > 400000) m.logo = '';
     const avant = JSON.stringify(reglages.get('marque') || {});
@@ -3125,7 +3161,7 @@ const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
 ipcMain.handle('pont:appeler', async (e, op, args) => {
   const nom = String(op || '');
   if (!OPS_PONT.has(nom)) return { ok: false, motif: 'operation_inconnue' };
-  const wc = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
+  const wc = siteWC();
   if (!wc) return { ok: false, motif: 'pont_indisponible' };
   const code = '(function(){try{'
     + 'if(!window.SzPont)return{ok:false,motif:"indisponible"};'
@@ -3512,7 +3548,7 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
     a.fenetre.show(); a.fenetre.focus();
     if (ancreeVisible !== c) { /* la vue posee, s il y en avait une, a ete cachee ci-dessus */ }
     ancreeVisible = null; vueVoilee = null;
-    try { mainWindow.webContents.send('dock:detachee', c); } catch {}
+    try { cadreWC().send('dock:detachee', c); } catch {}
     return { ok: true, detachee: true };
   }
   try { mainWindow.contentView.addChildView(a.view); } catch {}
@@ -3586,7 +3622,7 @@ ipcMain.handle('dock:detacher', (e) => {
     etatAncragePoser(c, 'detache');   // l ecran rouvrira DETACHE desormais
     if (ancreeVisible === c) ancreeVisible = null;
     vueVoilee = null;
-    try { mainWindow.webContents.send('dock:detachee', c); } catch {}
+    try { cadreWC().send('dock:detachee', c); } catch {}
     return true;
   }
   return false;
@@ -3616,7 +3652,7 @@ ipcMain.handle('dock:ancrer', (e) => {
     a.view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
     ancreeVisible = c; vueVoilee = null;
     mainWindow.show(); mainWindow.focus();
-    try { mainWindow.webContents.send('dock:ancree', c); } catch {}
+    try { cadreWC().send('dock:ancree', c); } catch {}
     return true;
   }
   return false;
@@ -3631,7 +3667,7 @@ ipcMain.on('pont:fermer', (e) => {
       try { a.view.setVisible(false); } catch {}
       if (ancreeVisible === c) ancreeVisible = null;
       vueVoilee = null;
-      try { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('dock:fermee', c); } catch {}
+      try { if (cadreWC()) cadreWC().send('dock:fermee', c); } catch {}
       return;
     }
   }
@@ -5104,7 +5140,7 @@ const actionApp = (nom, arg) => {
       if (_avA && !_avA.isDestroyed()) { _avA.show(); _avA.focus(); break; }
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.show(); mainWindow.focus();
-        try { mainWindow.webContents.send('dock:naviguer', nom); } catch {}
+        try { cadreWC().send('dock:naviguer', nom); } catch {}
         break;
       }
       break;
@@ -5628,7 +5664,7 @@ ipcMain.handle('menu:modele', (e, m) => {
     const _marquer = (quoi) => {
       try {
         if (!mainWindow || mainWindow.isDestroyed()) return;
-        mainWindow.webContents.executeJavaScript(
+        siteWC().executeJavaScript(
           'window._szTrace && window._szTrace(' + JSON.stringify(quoi) + ')', true
         ).catch(() => {});
       } catch {}
@@ -5713,7 +5749,7 @@ ipcMain.on('palette:action', (e, it) => {
     } catch (er) {}
     try {
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.executeJavaScript(
+        siteWC().executeJavaScript(
           'window.AppBar && AppBar.fermer && AppBar.fermer();', true).catch(() => {});
       }
     } catch {}
