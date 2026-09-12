@@ -2659,7 +2659,38 @@ module.exports = {
       {
         nom: 'ecran de depart',
         id: '',
+        /* ⚠ CE QUE LE BANDEAU DU PANIER DOIT AVOIR ÉCRIT. `chargerPanier()` part
+           AU CHARGEMENT et `panier:lire` n’avait aucune réponse prévue : le faux
+           pont rendait `{ ok:true }` sans `photos`, donc PANIER restait vide et
+           `panierHtml()` rendait la chaîne VIDE. Tout le bandeau — le compte, la
+           rangée de vignettes, le bouton « Traiter en lot » — n’était dessiné par
+           aucun banc. */
+        exige: ['venues de l’explorateur', 'Traiter ces 3 en lot'],
         reponses: {
+          /* ⚠ Forme relevée dans `Photos._panierLireCoeur` et `_photoLigne`
+             (assets/js/photos.js) — pas inventée ici. `apercu` doit être une
+             ADRESSE http pour que la vignette se dessine : sans elle la fenêtre
+             pose un carré d’attente, et l’on éprouverait l’autre chemin.
+             ⚠ TROIS photos, pas une : le bandeau accorde son texte au pluriel
+             (« venues », « ces 3 photos »), et un jeu à une seule photo laisserait
+             l’accord jamais éprouvé. */
+          'panier:lire': {
+            ok: true, quand: 1757000000000,
+            photos: [
+              { id: 'ph_001', code: 'P-1001', nom: 'Robe cintrée — face',
+                apercu: 'https://exemple.test/ph_001.jpg', enAttente: false, isole: false,
+                fond: '', lieId: null, lieNom: '', lieSku: '', poids: 412000, poidsSrc: 980000,
+                statut: 'pret', lotId: '', lotNom: '', faits: [] },
+              { id: 'ph_002', code: 'P-1002', nom: 'Robe cintrée — dos',
+                apercu: 'https://exemple.test/ph_002.jpg', enAttente: false, isole: true,
+                fond: 'studio-clair', lieId: 'p_0001', lieNom: 'Robe cintrée', lieSku: 'RB-001',
+                poids: 388000, poidsSrc: 910000, statut: 'pret', lotId: '', lotNom: '', faits: ['detoure'] },
+              { id: 'ph_003', code: 'P-1003', nom: 'Chemisier de soie',
+                apercu: 'https://exemple.test/ph_003.jpg', enAttente: false, isole: false,
+                fond: '', lieId: null, lieNom: '', lieSku: '', poids: 401000, poidsSrc: 955000,
+                statut: 'pret', lotId: '', lotNom: '', faits: [] },
+            ],
+          },
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
