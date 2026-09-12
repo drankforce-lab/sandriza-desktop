@@ -165,7 +165,14 @@ let mainWindow = null;
    l allume, il regarde, il l eteint.
    ⚠ IL SE LIT AU DEMARRAGE, pas a chaud : les deux vues naissent avec la
    fenetre. Le changer demande donc un redemarrage, et l entree de menu le DIT. */
-const cadreNatifAllume = () => reglages.get('cadreNatif') === true;
+/* ⚠⚠ ALLUME PAR DEFAUT DEPUIS LA 5.40.0 — il a essaye, ca fonctionne.
+   ⚠ ET LA FORME DU TEST COMPTE : `!== false`, pas `=== true`. Un poste qui n a
+   jamais touche au reglage bascule donc au cadre natif ; un poste qui l a
+   ETEINT A LA MAIN reste eteint. Ecrire `=== true` aurait garde tout le monde
+   sur l ancien chemin, y compris lui ; ecrire `!!reglages.get(...)` aurait
+   rallume ceux qui venaient de l eteindre. La valeur `false` explicite est une
+   DECISION, et elle doit survivre a une mise a jour. */
+const cadreNatifAllume = () => reglages.get('cadreNatif') !== false;
 let vueSite = null;    // le SITE, derriere — il garde le pont
 let vueCadre = null;   // le CADRE, devant — la zone d ancrage
 
