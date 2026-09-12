@@ -2363,6 +2363,12 @@ const OPS_PONT = new Set([
   'promo:calibrer', 'promo:lot', 'promo:dupliquer', 'promo:supprimer',
   'promo:formatEcrire', 'promo:formatSupprimer', 'promo:nouveau',
   'promo:editeur', 'promo:planche',
+  // ⚠ L EDITEUR VISUEL EN FENETRE NATIVE : le MODELE voyage, le RENDU reste.
+  // 'promo:modeleLire' rend la structure (geometrie en pourcentages) ET l image
+  // deja peinte par la fenetre principale ; 'promo:modeleEcrire' renvoie le
+  // modele modifie. La fenetre native ne peint pas : elle n a pas l origine du
+  // site, et un canevas teint ne se relit plus — donc plus d apercu ni d impression.
+  'promo:modeleLire', 'promo:modeleEcrire',
   // Depenses d entreprise (fenetre Depenses, 2.5.0) — premier ecran du palier 5.
   // ⚠ 'depenses:facture' LIT une facture par le service d IA : la cle, pdf.js, le
   // canevas et le taux de change restent au site. La fenetre envoie un fichier et

@@ -3046,6 +3046,28 @@ module.exports = {
         'promo:formatSupprimer': { ok: true, nom: 'Étiquette bijou', dim: '1,5 × 0,75 po' },
         'promo:nouveau': { ok: true, id: 'pp4', nom: 'Étiquette prix 2 × 1 po', dim: '2 × 1 po' },
         'promo:editeur': { ok: true, nom: 'Étiquette prix — collection été' },
+        /* ⚠ UN MODÈLE D'ÉPREUVE QUI RESSEMBLE AU PRODUIT, pas un objet vide : deux
+           éléments, une géométrie en pourcentages, un fond et une bordure. Un jeu
+           qui ne rend qu'un `ok` laisserait l'éditeur dessiner un plan de travail
+           SANS RIEN DESSUS — et c'est cet écran-là que les bancs mesureraient, en
+           le prenant pour l'écran réel. */
+        'promo:modeleLire': { ok: true, rendable: true, image: '', modele: {
+          id: 'pp1', name: 'Étiquette prix — collection été', type: 'label',
+          w: 2, h: 1, shape: 'rect', corner: 0.08, safe: 0.06,
+          bg: { type: 'solid', color: '#ffffff', from: '#ffffff', to: '#efe6d8', angle: 135, src: '', fit: 'cover' },
+          border: { w: 1, color: '#C49A6C', inset: 0.04 },
+          elements: [
+            { id: 'e1', kind: 'text', name: 'Titre', text: 'SANDRIZA',
+              xPct: 10, yPct: 12, wPct: 80, hPct: 30, rot: 0, opacity: 100,
+              locked: false, hidden: false, font: 'Playfair Display', fontPct: 22,
+              weight: 700, color: '#111827', align: 'center', valign: 'middle' },
+            { id: 'e2', kind: 'text', name: 'Prix', text: '49,00 $',
+              xPct: 10, yPct: 52, wPct: 80, hPct: 34, rot: 0, opacity: 100,
+              locked: false, hidden: false, font: 'Playfair Display', fontPct: 28,
+              weight: 700, color: '#83570B', align: 'center', valign: 'middle' },
+          ],
+        } },
+        'promo:modeleEcrire': { ok: true, nom: 'Étiquette prix — collection été', elements: 2, modifie: 1757625000000 },
         'promo:planche': { ok: true, planche: 'Avery 5160 — 2,625 × 1 po (30/feuille)', parFeuille: 30 },
         identite: IDENTITE,
       },
