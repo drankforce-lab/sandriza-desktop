@@ -574,7 +574,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       }
       if (!g.ok) h += '<div class="it note"><span class="p">\u00b7</span>'
         + '<span class="n">Rien n a ete touche</span>'
-        + '<span class="d">aucune donnee modifiee, aucune session fermee</span></div>';
+        + '<span class="d">aucune donnée modifiée, aucune session fermée</span></div>';
       z2.innerHTML = h;
       /* ⚠ ON N ALLUME QUE SUR UN VERDICT FRANCHEMENT BON. !g.ok et l absence de
          verdict mènent au même endroit : eteint. */
@@ -653,7 +653,7 @@ ${JS_ACTIVITE}${JS_DIRE}
            donc eteint, en disant pourquoi, et il s allume quand c est vrai. */
         var rt=document.getElementById('s-retour');
         if (rt) {
-          rt.title='Disponible des que la fenetre principale a fini de se recharger.';
+          rt.title='Disponible dès que la fenêtre principale a fini de se recharger.';
           setTimeout(function(){
             if (!rt) return;
             rt.disabled=false; rt.title='';

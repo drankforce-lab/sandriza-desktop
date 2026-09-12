@@ -304,7 +304,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       + 'son travail non enregistre est perdu, et ses fiches ouvertes se liberent. '
       + 'Deux clics sont demandes.<br>'
       + '<strong>« A l ecran »</strong> veut dire que le poste s est manifeste il y a '
-      + 'moins de ' + FRAIS + ' s. Une fenetre reduite dans la zone de notification '
+      + 'moins de ' + FRAIS + ' s. Une fenêtre réduite dans la zone de notification '
       + 'se manifeste moins souvent : la personne reste connectee et joignable, '
       + 'seul son dernier passage recule.'
       + '</div>';

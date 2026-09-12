@@ -513,7 +513,7 @@ ${JS_ACTIVITE}${JS_DIRE}${JS_BROUILLON}
       var idS = ps.getAttribute('data-patsuppr');
       if (PAT_ARME !== idS) {
         PAT_ARME = idS; dessiner();
-        dire('Recliquez pour confirmer — le gabarit disparait. Les publications deja faites ne bougent pas.', 'att');
+        dire('Recliquez pour confirmer — le gabarit disparaît. Les publications déjà faites ne bougent pas.', 'att');
         return;
       }
       PAT_ARME = '';

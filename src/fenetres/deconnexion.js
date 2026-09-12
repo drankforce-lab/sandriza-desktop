@@ -153,7 +153,7 @@ ${JS_DIRE}
          de ne rien faire est le pire des trois. */
       repondu = false;
       szDire('La reponse n a pas pu partir (' + ((e && e.message) || e)
-        + ') — fermez cette fenetre et reessayez.', 'err');
+        + ') — fermez cette fenêtre et réessayez.', 'err');
     }
   }
 

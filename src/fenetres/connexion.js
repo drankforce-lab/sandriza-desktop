@@ -343,7 +343,7 @@ ${JS_DIRE}
       "Choisissez les deux questions et écrivez leurs réponses.": "Choose both questions and write their answers.",
       "Délai de vérification dépassé — veuillez vous reconnecter.": "Verification timed out — please sign in again.",
       "Décor par défaut — la fenêtre principale n’a pas répondu.": "Default appearance — the main window did not answer.",
-      "La fenetre principale ne repond pas.": "The main window is not answering.",
+      "La fenêtre principale ne répond pas.": "The main window is not answering.",
       "Clé copiée (sans les espaces).": "Key copied (without the spaces).",
       "La copie a échoué — recopiez la clé à la main.": "Copy failed — type the key by hand.",
       "L’opération a échoué.": "The operation failed.",
@@ -406,7 +406,7 @@ ${JS_DIRE}
     catch (e) { pr = null; }
     if (!pr || typeof pr.then !== 'function') {
       return Promise.resolve({ ok: false, motif: 'muet',
-        message: T('La fenetre principale ne repond pas.') });
+        message: T('La fenêtre principale ne répond pas.') });
     }
     return pr.then(function(r){ return r || { ok: false, motif: 'vide' }; })
       .catch(function(e){ return { ok: false, motif: 'echec',
