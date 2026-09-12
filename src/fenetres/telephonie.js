@@ -23,6 +23,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('telephonie');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -129,20 +133,20 @@ button.prim:disabled{opacity:.5;cursor:default}
 
 function pageTelephonie() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Téléphonie — Administration Sandriza</title>
+<title>${T("Téléphonie — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.telephone}</span><h1>Téléphonie</h1>
+<div class="tete"><span class="ico">${ICO.telephone}</span><h1>${T("Téléphonie")}</h1>
   <span class="solde">Solde&nbsp;: <b id="t-solde">…</b></span>
   <span id="t-qlive"></span>
-  <a class="credit" href="https://console.twilio.com/us1/billing/manage-billing/billing-overview" target="_blank" rel="noopener">Crédits</a>
-  <button class="mini" id="t-refresh" title="Actualiser le solde, la file et les messages">↻</button>
-  <label class="actif"><input type="checkbox" id="t-enabled"> Active</label>
+  <a class="credit" href="https://console.twilio.com/us1/billing/manage-billing/billing-overview" target="_blank" rel="noopener">${T("Crédits")}</a>
+  <button class="mini" id="t-refresh" title="${T("Actualiser le solde, la file et les messages")}">↻</button>
+  <label class="actif"><input type="checkbox" id="t-enabled"> ${T("Active")}</label>
 </div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="onglets" id="onglets"></div>
-<div class="corps"><div class="panneau" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="corps"><div class="panneau" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-save" disabled>Enregistrer</button></div>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -159,9 +163,9 @@ function pageTelephonie() {
       b.style.marginLeft = '.2rem';
       t.appendChild(b);
     }
-    if (actif) { b.textContent = '⧉ Détacher'; b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+    if (actif) { b.textContent = '${T("⧉ Détacher")}'; b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); }; }
-    else { b.textContent = '⚓ Ancrer'; b.title = 'Ramener cet écran dans la fenêtre principale';
+    else { b.textContent = '${T("⚓ Ancrer")}'; b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
@@ -177,28 +181,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var RESUME = null; // dernier retour de tel:resume (solde, appels, vm, sms)
 
   var ONGLETS = [
-    ['general', 'Général'], ['accueil', 'Accueil & routage'], ['menu', 'Menu IVR'],
-    ['redirection', 'Redirection'], ['messagerie', 'Messagerie'], ['sms', 'SMS'], ['file', "File d'attente"],
+    ['general', '${T("Général")}'], ['accueil', '${T("Accueil & routage")}'], ['menu', '${T("Menu IVR")}'],
+    ['redirection', 'Redirection'], ['messagerie', 'Messagerie'], ['sms', 'SMS'], ['file', "${T('File d\'attente')}"],
   ];
   var VOIX_FR = [
-    ['Polly.Gabrielle-Neural', 'Gabrielle — femme, naturelle (neuronale)'],
-    ['Polly.Liam-Neural', 'Liam — homme, naturel (neuronale)'],
-    ['Polly.Chantal', 'Chantal — femme (standard)'],
-    ['default', 'Voix de base Twilio (robotique)'],
+    ['Polly.Gabrielle-Neural', '${T("Gabrielle — femme, naturelle (neuronale)")}'],
+    ['Polly.Liam-Neural', '${T("Liam — homme, naturel (neuronale)")}'],
+    ['Polly.Chantal', '${T("Chantal — femme (standard)")}'],
+    ['default', '${T("Voix de base Twilio (robotique)")}'],
   ];
   var VOIX_EN = [
-    ['Polly.Joanna-Neural', 'Joanna — female, natural (neural)'],
-    ['Polly.Matthew-Neural', 'Matthew — male, natural (neural)'],
-    ['Polly.Joanna', 'Joanna — female (standard)'],
-    ['default', 'Basic Twilio voice'],
+    ['Polly.Joanna-Neural', '${T("Joanna — female, natural (neural)")}'],
+    ['Polly.Matthew-Neural', '${T("Matthew — male, natural (neural)")}'],
+    ['Polly.Joanna', '${T("Joanna — female (standard)")}'],
+    ['default', '${T("Basic Twilio voice")}'],
   ];
   var MUSIQUES = [
-    ['', 'Guitare douce élégante (~1½ min) — défaut'],
-    ['http://com.twilio.music.electronica.s3.amazonaws.com/teru_-_110_Downtempo_Electronic_4.mp3', 'Électro downtempo (~1½ min)'],
-    ['http://com.twilio.music.electronica.s3.amazonaws.com/Kaer_Trouz_-_Seawall_Stepper.mp3', 'Lounge électro (~1½ min)'],
-    ['http://com.twilio.music.guitars.s3.amazonaws.com/Pitx_-_Long_Winter.mp3', 'Guitare feutrée (~2½ min)'],
-    ['http://com.twilio.music.classical.s3.amazonaws.com/ith_chopin-15-2.mp3', 'Chopin — élégance (~6 min · sonneries espacées)'],
-    ['http://com.twilio.music.ambient.s3.amazonaws.com/aerosolspray_-_Living_Taciturn.mp3', 'Ambiance zen / spa (~6 min · espacées)'],
+    ['', '${T("Guitare douce élégante (~1½ min) — défaut")}'],
+    ['http://com.twilio.music.electronica.s3.amazonaws.com/teru_-_110_Downtempo_Electronic_4.mp3', '${T("Électro downtempo (~1½ min)")}'],
+    ['http://com.twilio.music.electronica.s3.amazonaws.com/Kaer_Trouz_-_Seawall_Stepper.mp3', '${T("Lounge électro (~1½ min)")}'],
+    ['http://com.twilio.music.guitars.s3.amazonaws.com/Pitx_-_Long_Winter.mp3', '${T("Guitare feutrée (~2½ min)")}'],
+    ['http://com.twilio.music.classical.s3.amazonaws.com/ith_chopin-15-2.mp3', '${T("Chopin — élégance (~6 min · sonneries espacées)")}'],
+    ['http://com.twilio.music.ambient.s3.amazonaws.com/aerosolspray_-_Living_Taciturn.mp3', '${T("Ambiance zen / spa (~6 min · espacées)")}'],
   ];
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -247,23 +251,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule.',
-    indisponible:       "L'administration n'est pas encore chargée dans la fenêtre principale.",
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              "La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              "L'enregistrement dans le nuage a échoué. Réessayez.",
-    tel_desactive:      'La téléphonie est désactivée.',
-    tel_sans_compte:    'Aucun identifiant Twilio enregistré (onglet Général).',
-    refus:              'Twilio a refusé la requête. Vérifiez les identifiants.',
-    reseau:             'Erreur réseau en joignant Twilio.',
-    echec:              "L'opération a échoué.",
+    session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule.")}',
+    indisponible:       "${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              "${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              "${T('L\'enregistrement dans le nuage a échoué. Réessayez.')}",
+    tel_desactive:      '${T("La téléphonie est désactivée.")}',
+    tel_sans_compte:    '${T("Aucun identifiant Twilio enregistré (onglet Général).")}',
+    refus:              '${T("Twilio a refusé la requête. Vérifiez les identifiants.")}',
+    reseau:             '${T("Erreur réseau en joignant Twilio.")}',
+    echec:              "${T('L\'opération a échoué.')}",
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -290,10 +294,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function secretHtml(id, label, defini, place){
     return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label>'
       + '<input class="mono" id="' + id + '" type="password" value="" placeholder="'
-      + (defini ? 'inchangé (laisser vide pour conserver)' : esc(place || '')) + '" autocomplete="off"'
+      + (defini ? '${T("inchangé (laisser vide pour conserver)")}' : esc(place || '')) + '" autocomplete="off"'
       + (RO ? ' disabled' : '') + '>'
       + '<div class="etat' + (defini ? '' : ' non') + '">'
-      + (defini ? 'Enregistré. <b>Vide = conservé.</b>' : 'Aucun secret <b>enregistré</b>.') + '</div></div>';
+      + (defini ? '${T("Enregistré. <b>Vide = conservé.</b>")}' : '${T("Aucun secret <b>enregistré</b>.")}') + '</div></div>';
   }
   function selectHtml(id, label, cur, opts, aide){
     var h = '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><select id="' + id + '"' + (RO ? ' disabled' : '') + '>';
@@ -317,17 +321,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function panGeneral(){
     var h = '<div class="carte">';
     h += '<div class="gr2">'
-      + texteHtml('t-number', 'Numéro Twilio', C.twilioNumber, '+1 514 555 0123', true)
-      + selectHtml('t-langmode', 'Mode de langue', C.langMode || 'fr', [
+      + texteHtml('t-number', '${T("Numéro Twilio")}', C.twilioNumber, '+1 514 555 0123', true)
+      + selectHtml('t-langmode', '${T("Mode de langue")}', C.langMode || 'fr', [
           ['fr', 'Français'], ['en', 'Anglais'],
-          ['bilingual', 'Bilingue (FR + EN)'], ['select', "Français d'abord, anglais sur le #"]]) + '</div>';
+          ['bilingual', '${T("Bilingue (FR + EN)")}'], ['select', "${T('Français d\'abord, anglais sur le #')}"]]) + '</div>';
     h += '<div class="gr2">'
-      + selectHtml('t-voice-fr', 'Voix française (fr-CA)', C.voiceFr || 'Polly.Gabrielle-Neural', VOIX_FR)
-      + selectHtml('t-voice-en', 'Voix anglaise (en-US)', C.voiceEn || 'Polly.Joanna-Neural', VOIX_EN) + '</div>';
-    h += '<hr class="sep"><div class="stitre">Identifiants Twilio</div>';
+      + selectHtml('t-voice-fr', '${T("Voix française (fr-CA)")}', C.voiceFr || 'Polly.Gabrielle-Neural', VOIX_FR)
+      + selectHtml('t-voice-en', '${T("Voix anglaise (en-US)")}', C.voiceEn || 'Polly.Joanna-Neural', VOIX_EN) + '</div>';
+    h += '<hr class="sep"><div class="stitre">${T("Identifiants Twilio")}</div>';
     h += '<div class="gr2">'
-      + secretHtml('t-sid', 'Account SID', !!C.hasAccountSid, 'ACxxxxxxxx')
-      + secretHtml('t-token', 'Auth Token', !!C.hasAuthToken, 'votre Auth Token') + '</div>';
+      + secretHtml('t-sid', '${T("Account SID")}', !!C.hasAccountSid, 'ACxxxxxxxx')
+      + secretHtml('t-token', '${T("Auth Token")}', !!C.hasAuthToken, '${T("votre Auth Token")}') + '</div>';
 
     /* ⚠ LES DEUX URL DE RAPPEL — SANS ELLES, RIEN NE FONCTIONNE, ET LA
        CONFIGURATION ETAIT IMPOSSIBLE DEPUIS L APPLICATION. Twilio ne devine
@@ -336,10 +340,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        / webhookSms) — cette fenetre ne les affichait simplement pas.
        ⚠ Elles se collent sur le NUMERO, pas dans Monitor > Errors : c est
        l erreur qui a fait perdre du temps la premiere fois. */
-    h += '<hr class="sep"><div class="stitre">Adresses de rappel (webhooks)</div>'
+    h += '<hr class="sep"><div class="stitre">${T("Adresses de rappel (webhooks)")}</div>'
       + '';
-    h += crochetHtml('A CALL COMES IN (Voice)', D.webhookVoice || '', 't-wh-voice');
-    h += crochetHtml('A MESSAGE COMES IN (Messaging)', D.webhookSms || '', 't-wh-sms');
+    h += crochetHtml('${T("A CALL COMES IN (Voice)")}', D.webhookVoice || '', 't-wh-voice');
+    h += crochetHtml('${T("A MESSAGE COMES IN (Messaging)")}', D.webhookSms || '', 't-wh-sms');
     return h + '</div>';
   }
 
@@ -347,7 +351,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function crochetHtml(titre, url, id){
     if (!url) {
       return '<div class="ch"><label>' + esc(titre) + '</label>'
-        + '<div class="aide">Adresse indisponible — la fenêtre principale ne l’a pas fournie.</div></div>';
+        + '<div class="aide">${T("Adresse indisponible — la fenêtre principale ne l’a pas fournie.")}</div></div>';
     }
     return '<div class="ch"><label>' + esc(titre) + '</label>'
       + '<div class="crochet"><code id="' + id + '">' + esc(url) + '</code>'
@@ -359,25 +363,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cm = hr.closedMessage || {};
     var g = C.greeting || {};
     var ni = C.noInputMessage || {};
-    var h = '<div class="carte"><div class="stitre">Message d’accueil</div>';
+    var h = '<div class="carte"><div class="stitre">${T("Message d’accueil")}</div>';
     h += '<div class="gr2">'
-      + taHtml('t-greet-fr', 'Accueil (FR)', g.fr, "Bonjour et merci d'avoir appelé…")
-      + taHtml('t-greet-en', 'Accueil (EN)', g.en, 'Hello and thank you for calling…') + '</div>';
+      + taHtml('t-greet-fr', '${T("Accueil (FR)")}', g.fr, "${T('Bonjour et merci d\'avoir appelé…')}")
+      + taHtml('t-greet-en', '${T("Accueil (EN)")}', g.en, '${T("Hello and thank you for calling…")}') + '</div>';
     h += '<div class="gr2">'
-      + texteHtml('t-greet-pause', "Délai après l'accueil (secondes)", (C.greetingPause != null ? C.greetingPause : 5), '5', false, '', 'number')
-      + texteHtml('t-menu-timeout', 'Attente au menu avant de raccrocher (secondes)', (C.menuTimeout != null ? C.menuTimeout : 10), '10', false, '', 'number') + '</div>';
-    h += '</div><div class="carte"><div class="stitre">Aucun choix au menu</div>'
-      + '<div class="note">Si l’appelant ne fait aucun choix après le délai, on joue ce message (FR + EN) puis on raccroche.</div>';
+      + texteHtml('t-greet-pause', "${T('Délai après l\'accueil (secondes)')}", (C.greetingPause != null ? C.greetingPause : 5), '5', false, '', 'number')
+      + texteHtml('t-menu-timeout', '${T("Attente au menu avant de raccrocher (secondes)")}', (C.menuTimeout != null ? C.menuTimeout : 10), '10', false, '', 'number') + '</div>';
+    h += '</div><div class="carte"><div class="stitre">${T("Aucun choix au menu")}</div>'
+      + '<div class="note">${T("Si l’appelant ne fait aucun choix après le délai, on joue ce message (FR + EN) puis on raccroche.")}</div>';
     h += '<div class="gr2">'
-      + taHtml('t-noinput-fr', 'Message « aucun choix » (FR)', ni.fr, "Merci d'avoir contacté SANDRIZA. Au revoir !")
-      + taHtml('t-noinput-en', 'Message « aucun choix » (EN)', ni.en, 'Thank you for contacting SANDRIZA. Goodbye!') + '</div>';
-    h += selectHtml('t-default', "Action par défaut (à l'ouverture)", C.defaultAction || 'menu', [
-        ['menu', 'Robot / menu (IVR)'], ['forward', 'Rediriger directement'], ['voicemail', 'Messagerie vocale']]);
-    h += '</div><div class="carte"><div class="stitre">Heures d’ouverture</div>';
-    h += checkHtml('t-usehours', "Utiliser les heures d'ouverture — hors heures, message + messagerie", !!hr.useHours);
+      + taHtml('t-noinput-fr', '${T("Message « aucun choix » (FR)")}', ni.fr, "${T('Merci d\'avoir contacté SANDRIZA. Au revoir !')}")
+      + taHtml('t-noinput-en', '${T("Message « aucun choix » (EN)")}', ni.en, '${T("Thank you for contacting SANDRIZA. Goodbye!")}') + '</div>';
+    h += selectHtml('t-default', "${T('Action par défaut (à l\'ouverture)')}", C.defaultAction || 'menu', [
+        ['menu', '${T("Robot / menu (IVR)")}'], ['forward', '${T("Rediriger directement")}'], ['voicemail', '${T("Messagerie vocale")}']]);
+    h += '</div><div class="carte"><div class="stitre">${T("Heures d’ouverture")}</div>';
+    h += checkHtml('t-usehours', "${T('Utiliser les heures d\'ouverture — hors heures, message + messagerie')}", !!hr.useHours);
     h += '<div class="gr2">'
-      + taHtml('t-closed-fr', 'Message « fermé » (FR)', cm.fr, 'Nos bureaux sont fermés…')
-      + taHtml('t-closed-en', 'Message « fermé » (EN)', cm.en, 'Our offices are closed…') + '</div>';
+      + taHtml('t-closed-fr', '${T("Message « fermé » (FR)")}', cm.fr, '${T("Nos bureaux sont fermés…")}')
+      + taHtml('t-closed-en', '${T("Message « fermé » (EN)")}', cm.en, '${T("Our offices are closed…")}') + '</div>';
     return h + '</div>';
   }
 
@@ -386,78 +390,78 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var m = o.message || {};
     var h = '<div class="mrow" data-mrow="' + i + '"><div class="l1">'
       + '<div class="ch" style="margin:0"><label>Touche</label><input aria-label="Touche" data-mf="digit" style="width:4rem" value="' + esc(o.digit || '') + '"' + (RO ? ' disabled' : '') + '></div>'
-      + '<div class="ch" style="margin:0"><label>Libellé FR</label><input aria-label="Libellé FR" data-mf="label" style="width:9rem" value="' + esc(o.label || '') + '"' + (RO ? ' disabled' : '') + '></div>'
-      + '<div class="ch" style="margin:0"><label>Libellé EN</label><input aria-label="Libellé EN" data-mf="labelEN" style="width:9rem" value="' + esc(o.labelEN || '') + '"' + (RO ? ' disabled' : '') + '></div>'
+      + '<div class="ch" style="margin:0"><label>${T("Libellé FR")}</label><input aria-label="${T("Libellé FR")}" data-mf="label" style="width:9rem" value="' + esc(o.label || '') + '"' + (RO ? ' disabled' : '') + '></div>'
+      + '<div class="ch" style="margin:0"><label>${T("Libellé EN")}</label><input aria-label="${T("Libellé EN")}" data-mf="labelEN" style="width:9rem" value="' + esc(o.labelEN || '') + '"' + (RO ? ' disabled' : '') + '></div>'
       + '<div class="ch" style="margin:0"><label>Action</label><select aria-label="Action" data-mf="action"' + (RO ? ' disabled' : '') + '>'
         + '<option value="forward"' + (o.action === 'forward' ? ' selected' : '') + '>Rediriger</option>'
-        + '<option value="queue"' + (o.action === 'queue' ? ' selected' : '') + '>File d’attente</option>'
+        + '<option value="queue"' + (o.action === 'queue' ? ' selected' : '') + '>${T("File d’attente")}</option>'
         + '<option value="voicemail"' + (o.action === 'voicemail' ? ' selected' : '') + '>Messagerie</option>'
-        + '<option value="message"' + (o.action === 'message' ? ' selected' : '') + '>Message vocal</option>'
-        + '<option value="repeat"' + (o.action === 'repeat' ? ' selected' : '') + '>Répéter l’accueil</option></select></div>'
-      + '<div class="ch" style="margin:0"><label>Numéro (Rediriger / File)</label><input aria-label="Numéro (Rediriger / File)" data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
+        + '<option value="message"' + (o.action === 'message' ? ' selected' : '') + '>${T("Message vocal")}</option>'
+        + '<option value="repeat"' + (o.action === 'repeat' ? ' selected' : '') + '>${T("Répéter l’accueil")}</option></select></div>'
+      + '<div class="ch" style="margin:0"><label>${T("Numéro (Rediriger / File)")}</label><input aria-label="${T("Numéro (Rediriger / File)")}" data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
       + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="Retirer"><span class="ic">🗑</span></button>')
       + '</div><div class="l2">'
-      + '<div class="ch"><textarea aria-label="Message vocal FR (si action = Message)" data-mf="messageFr" rows="1" placeholder="Message vocal FR (si action = Message)"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
-      + '<div class="ch"><textarea aria-label="Message vocal EN" data-mf="messageEn" rows="1" placeholder="Message vocal EN"' + (RO ? ' disabled' : '') + '>' + esc(m.en || '') + '</textarea></div>'
+      + '<div class="ch"><textarea aria-label="${T("Message vocal")} FR (si action = Message)" data-mf="messageFr" rows="1" placeholder="${T("Message vocal")} FR (si action = Message)"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
+      + '<div class="ch"><textarea aria-label="${T("Message vocal")} EN" data-mf="messageEn" rows="1" placeholder="${T("Message vocal")} EN"' + (RO ? ' disabled' : '') + '>' + esc(m.en || '') + '</textarea></div>'
       + '</div></div>';
     return h;
   }
   function panMenu(){
-    var h = '<div class="carte"><div class="stitre"><span class="ic">🤖</span> Robot de réception (menu IVR)</div>';
-    if (!MENU.length) h += '<div class="note">Aucune option — ajoutez-en pour activer le robot de réception.</div>';
+    var h = '<div class="carte"><div class="stitre"><span class="ic">🤖</span> ${T("Robot de réception (menu IVR)")}</div>';
+    if (!MENU.length) h += '<div class="note">${T("Aucune option — ajoutez-en pour activer le robot de réception.")}</div>';
     else { for (var i = 0; i < MENU.length; i++) h += menuRowHtml(MENU[i], i); }
-    if (!RO) h += '<button class="b" type="button" id="t-menu-add">+ Ajouter une option de menu</button>';
+    if (!RO) h += '<button class="b" type="button" id="t-menu-add">${T("+ Ajouter une option de menu")}</button>';
     return h + '</div>';
   }
 
   function panRedirection(){
     var f = C.forward || {};
-    var h = '<div class="carte"><div class="stitre">Redirection (transfert d’appel direct)</div>';
+    var h = '<div class="carte"><div class="stitre">${T("Redirection (transfert d’appel direct)")}</div>';
     h += '<div class="gr2">'
-      + texteHtml('t-forward', 'Numéro(s) (séparés par des virgules)', (f.numbers || []).join(', '), '+1 514 555 0100, +1 514 555 0101', true)
-      + texteHtml('t-timeout', 'Délai de sonnerie (secondes)', (f.timeout != null ? f.timeout : 20), '20', false, '', 'number') + '</div>';
-    h += selectHtml('t-strategy', 'Stratégie (si plusieurs numéros)', f.strategy || 'simul', [
-        ['simul', 'Simultané — tous sonnent en même temps'], ['cascade', "Cascade — l'un après l'autre"]]);
-    h += selectHtml('t-callerid', 'Afficheur lors des transferts', f.callerIdMode || 'business', [
-        ['business', 'Numéro SANDRIZA (recommandé)'], ['caller', "Numéro réel de l'appelant"]],
-        'Numéro SANDRIZA : enregistrez votre numéro Twilio comme contact « SANDRIZA » pour voir le nom.');
-    h += checkHtml('t-no-forward', "Pas de numéro de renvoi pour l'instant — messagerie directe (ne plus avertir)", !!f.noForwardAck);
+      + texteHtml('t-forward', '${T("Numéro(s) (séparés par des virgules)")}', (f.numbers || []).join(', '), '+1 514 555 0100, +1 514 555 0101', true)
+      + texteHtml('t-timeout', '${T("Délai de sonnerie (secondes)")}', (f.timeout != null ? f.timeout : 20), '20', false, '', 'number') + '</div>';
+    h += selectHtml('t-strategy', '${T("Stratégie (si plusieurs numéros)")}', f.strategy || 'simul', [
+        ['simul', '${T("Simultané — tous sonnent en même temps")}'], ['cascade', "${T('Cascade — l\'un après l\'autre')}"]]);
+    h += selectHtml('t-callerid', '${T("Afficheur lors des transferts")}', f.callerIdMode || 'business', [
+        ['business', '${T("Numéro SANDRIZA (recommandé)")}'], ['caller', "${T('Numéro réel de l\'appelant')}"]],
+        '${T("Numéro SANDRIZA : enregistrez votre numéro Twilio comme contact « SANDRIZA » pour voir le nom.")}');
+    h += checkHtml('t-no-forward', "${T('Pas de numéro de renvoi pour l\'instant — messagerie directe (ne plus avertir)')}", !!f.noForwardAck);
     return h + '</div>';
   }
 
   function panMessagerie(){
     var vp = C.voicemailPrompt || {};
     var vpc = C.voicemailPromptClosed || {};
-    var h = '<div class="carte"><div class="stitre">Messagerie vocale</div>'
-      + '<div class="note"><span class="ic">🎧</span> Chaque message vocal est joint en MP3 au courriel ci-dessous, puis supprimé de Twilio. Un courriel valide est requis.</div>';
-    h += texteHtml('t-vm-email', 'Courriel de notification (reçoit le MP3)', C.voicemailEmail, 'vous@exemple.com');
+    var h = '<div class="carte"><div class="stitre">${T("Messagerie vocale")}</div>'
+      + '<div class="note"><span class="ic">🎧</span> ${T("Chaque message vocal est joint en MP3 au courriel ci-dessous, puis supprimé de Twilio. Un courriel valide est requis.")}</div>';
+    h += texteHtml('t-vm-email', '${T("Courriel de notification (reçoit le MP3)")}', C.voicemailEmail, '${T("vous@exemple.com")}');
     h += '<div class="gr2">'
-      + taHtml('t-vm-fr', 'Invite — heures ouverture (FR)', vp.fr, 'Laissez votre message après le bip…')
-      + taHtml('t-vm-en', 'Invite — heures ouverture (EN)', vp.en, 'Leave your message after the tone…') + '</div>';
-    h += '<div class="note"><span class="ic">🌙</span> Invite hors heures (laisser vide pour reprendre celle du dessus).</div>';
+      + taHtml('t-vm-fr', '${T("Invite — heures ouverture (FR)")}', vp.fr, '${T("Laissez votre message après le bip…")}')
+      + taHtml('t-vm-en', '${T("Invite — heures ouverture (EN)")}', vp.en, '${T("Leave your message after the tone…")}') + '</div>';
+    h += '<div class="note"><span class="ic">🌙</span> ${T("Invite hors heures (laisser vide pour reprendre celle du dessus).")}</div>';
     h += '<div class="gr2">'
-      + taHtml('t-vm-closed-fr', 'Invite — hors heures (FR)', vpc.fr, 'Nos bureaux sont fermés. Laissez un message…')
-      + taHtml('t-vm-closed-en', 'Invite — hors heures (EN)', vpc.en, "Our offices are closed. Leave a message…") + '</div>';
-    h += '</div><div class="carte"><div class="stitre"><span class="ic">🎙️</span> Boîte de réception vocale <span id="t-vm-badge"></span></div>'
-      + '<div class="liste" id="t-vm-inbox"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>';
+      + taHtml('t-vm-closed-fr', '${T("Invite — hors heures (FR)")}', vpc.fr, '${T("Nos bureaux sont fermés. Laissez un message…")}')
+      + taHtml('t-vm-closed-en', '${T("Invite — hors heures (EN)")}', vpc.en, "${T("Our offices are closed. Leave a message…")}") + '</div>';
+    h += '</div><div class="carte"><div class="stitre"><span class="ic">🎙️</span> ${T("Boîte de réception vocale")} <span id="t-vm-badge"></span></div>'
+      + '<div class="liste" id="t-vm-inbox"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>';
     return h;
   }
 
   function panSms(){
     var sms = C.sms || {};
     var ar = sms.autoReply || {};
-    var h = '<div class="carte"><div class="stitre">Réglages SMS</div>';
-    h += checkHtml('t-sms-enabled', 'Activer les SMS (réponse automatique aux entrants)', !!sms.enabled);
+    var h = '<div class="carte"><div class="stitre">${T("Réglages SMS")}</div>';
+    h += checkHtml('t-sms-enabled', '${T("Activer les SMS (réponse automatique aux entrants)")}', !!sms.enabled);
     h += '<div class="gr2">'
-      + taHtml('t-sms-fr', 'Réponse automatique (FR)', ar.fr, 'Merci pour votre message, nous vous répondrons bientôt.')
-      + taHtml('t-sms-en', 'Réponse automatique (EN)', ar.en, "Thanks for your message, we'll reply soon.") + '</div>';
-    h += texteHtml('t-sms-email', 'Courriel de notification des SMS reçus', sms.notifyEmail, 'vous@exemple.com');
-    h += '</div><div class="carte"><div class="stitre"><span class="ic">💬</span> Messages SMS <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="Voir les SMS dans le module Journaux" style="float:right;font-size:.76rem"><span class="ic">🔎</span> Dans Journaux</button></div>';
+      + taHtml('t-sms-fr', '${T("Réponse automatique (FR)")}', ar.fr, '${T("Merci pour votre message, nous vous répondrons bientôt.")}')
+      + taHtml('t-sms-en', '${T("Réponse automatique (EN)")}', ar.en, "${T('Thanks for your message, we\'ll reply soon.')}") + '</div>';
+    h += texteHtml('t-sms-email', '${T("Courriel de notification des SMS reçus")}', sms.notifyEmail, '${T("vous@exemple.com")}');
+    h += '</div><div class="carte"><div class="stitre"><span class="ic">💬</span> ${T("Messages SMS")} <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="Voir les SMS dans le module Journaux" style="float:right;font-size:.76rem"><span class="ic">🔎</span> ${T("Dans Journaux")}</button></div>';
     h += '<div class="smsbox">'
       + '<input aria-label="+1" class="to" id="t-sms-to" placeholder="+1…"' + (RO ? ' disabled' : '') + '>'
       + '<input aria-label="Votre message" class="body" id="t-sms-body" placeholder="Votre message…"' + (RO ? ' disabled' : '') + '>'
       + '<button class="b" type="button" id="t-sms-send"' + (RO ? ' disabled' : '') + '>Envoyer</button></div>';
-    h += '<div class="liste" id="t-sms-inbox"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>';
+    h += '<div class="liste" id="t-sms-inbox"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>';
     return h;
   }
 
@@ -466,23 +470,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var curMus = q.holdMusicUrl || '';
     var estPreset = false; for (var i = 0; i < MUSIQUES.length; i++) if (MUSIQUES[i][0] === curMus) estPreset = true;
     var selMus = estPreset ? curMus : (curMus ? 'custom' : '');
-    var h = '<div class="carte"><div class="stitre">⏳ File d’attente d’appels</div>';
-    h += checkHtml('t-q-enabled', 'Activer la file (faire patienter avec musique quand la ligne est occupée)', !!q.enabled);
+    var h = '<div class="carte"><div class="stitre">${T("⏳ File d’attente d’appels")}</div>';
+    h += checkHtml('t-q-enabled', '${T("Activer la file (faire patienter avec musique quand la ligne est occupée)")}', !!q.enabled);
     h += '';
     h += '<div class="gr2">'
-      + texteHtml('t-q-maxwait', 'Attente max avant messagerie (minutes)', Math.round((q.maxWaitSec || 180) / 60), '3', false, '', 'number')
-      + texteHtml('t-q-firstdelay', 'Délai avant la 1re sonnerie (secondes)', (q.firstRingDelaySec != null ? q.firstRingDelaySec : 30), '30', false, '', 'number') + '</div>';
+      + texteHtml('t-q-maxwait', '${T("Attente max avant messagerie (minutes)")}', Math.round((q.maxWaitSec || 180) / 60), '3', false, '', 'number')
+      + texteHtml('t-q-firstdelay', '${T("Délai avant la 1re sonnerie (secondes)")}', (q.firstRingDelaySec != null ? q.firstRingDelaySec : 30), '30', false, '', 'number') + '</div>';
     h += '<div class="gr2">'
-      + texteHtml('t-q-dialto', "Durée de sonnerie de l'agent (secondes)", (q.dialTimeout || 15), '15', false, '', 'number')
-      + texteHtml('t-q-vmdigit', 'Touche pour laisser un message pendant l’attente', (q.vmDigit || '9'), '9') + '</div>';
-    var opts = MUSIQUES.slice(); opts.push(['custom', 'URL personnalisée…']);
-    h += selectHtml('t-q-music-preset', 'Musique d’attente', selMus, opts);
+      + texteHtml('t-q-dialto', "${T('Durée de sonnerie de l\'agent (secondes)')}", (q.dialTimeout || 15), '15', false, '', 'number')
+      + texteHtml('t-q-vmdigit', '${T("Touche pour laisser un message pendant l’attente")}', (q.vmDigit || '9'), '9') + '</div>';
+    var opts = MUSIQUES.slice(); opts.push(['custom', '${T("URL personnalisée…")}']);
+    h += selectHtml('t-q-music-preset', '${T("Musique d’attente")}', selMus, opts);
     h += '<div class="ch" id="t-q-music-wrap"' + (selMus === 'custom' ? '' : ' style="display:none"') + '>'
-      + '<label for="t-q-music">URL personnalisée (MP3)</label><input class="mono" id="t-q-music" value="' + esc(selMus === 'custom' ? curMus : '') + '" placeholder="https://…/musique.mp3"' + (RO ? ' disabled' : '') + '></div>';
-    h += checkHtml('t-q-pos', 'Annoncer la position dans la file (« vous êtes en position 2… »)', q.announcePosition !== false);
+      + '<label for="t-q-music">${T("URL personnalisée (MP3)")}</label><input class="mono" id="t-q-music" value="' + esc(selMus === 'custom' ? curMus : '') + '" placeholder="https://…/musique.mp3"' + (RO ? ' disabled' : '') + '></div>';
+    h += checkHtml('t-q-pos', '${T("Annoncer la position dans la file (« vous êtes en position 2… »)")}', q.announcePosition !== false);
     h += '<div class="gr2">'
-      + taHtml('t-q-msg-fr', 'Message d’attente (FR)', (q.waitMessage || {}).fr, 'Merci de patienter, toutes nos lignes sont occupées…')
-      + taHtml('t-q-msg-en', 'Message d’attente (EN)', (q.waitMessage || {}).en, 'Please hold, all our lines are busy…') + '</div>';
+      + taHtml('t-q-msg-fr', '${T("Message d’attente (FR)")}', (q.waitMessage || {}).fr, '${T("Merci de patienter, toutes nos lignes sont occupées…")}')
+      + taHtml('t-q-msg-en', '${T("Message d’attente (EN)")}', (q.waitMessage || {}).en, '${T("Please hold, all our lines are busy…")}') + '</div>';
     return h + '</div>';
   }
 
@@ -604,10 +608,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           r.selectNodeContents(el); s.removeAllRanges(); s.addRange(r);
         } catch (e) {}
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(txt).then(function(){ dire('Adresse copiée.', 'bon'); },
-            function(){ dire('Copie refusée — l’adresse est sélectionnée, faites Ctrl+C.', 'att'); });
+          navigator.clipboard.writeText(txt).then(function(){ dire('${T("Adresse copiée.")}', 'bon'); },
+            function(){ dire('${T("Copie refusée — l’adresse est sélectionnée, faites Ctrl+C.")}', 'att'); });
         } else {
-          dire('L’adresse est sélectionnée, faites Ctrl+C.', 'att');
+          dire('${T("L’adresse est sélectionnée, faites Ctrl+C.")}', 'att');
         }
       };
     }
@@ -617,12 +621,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function rendreVm(){
     var box = document.getElementById('t-vm-inbox'); if (!box) return;
     var badge = document.getElementById('t-vm-badge');
-    if (!RESUME) { box.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!RESUME) { box.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (RESUME.erreur) { box.innerHTML = '<div class="vide">' + esc(RESUME.erreur) + '</div>'; return; }
     var vms = RESUME.voicemails || [];
     var nonlus = 0; for (var k = 0; k < vms.length; k++) if (!vms[k].read) nonlus++;
     if (badge) badge.innerHTML = nonlus ? '<span class="qlive">' + nonlus + ' non lu' + (nonlus > 1 ? 's' : '') + '</span>' : '';
-    if (!vms.length) { box.innerHTML = '<div class="vide">Aucun message vocal.</div>'; return; }
+    if (!vms.length) { box.innerHTML = '<div class="vide">${T("Aucun message vocal.")}</div>'; return; }
     var h = '';
     for (var i = 0; i < vms.length; i++) {
       var v = vms[i];
@@ -630,10 +634,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div><span class="qui">' + (v.read ? '' : '<span class="ic">🔵</span> ') + '<b>' + esc(v.from || 'Inconnu') + '</b></span>'
         + ' <span class="meta">· ' + esc(v.duration || '?') + ' s · ' + esc(String(v.date || '').replace('T', ' ').replace('Z', '')) + '</span></div>'
         + '<div class="actes">'
-        + (v.read || RO ? '' : '<button class="b" type="button" data-vmlu="' + esc(v.id) + '">✓ Marquer lu</button>')
+        + (v.read || RO ? '' : '<button class="b" type="button" data-vmlu="' + esc(v.id) + '">${T("✓ Marquer lu")}</button>')
         + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '"><span class="ic">🗑</span></button>')
         + '</div></div>'
-        + '<div class="meta" style="margin-top:.25rem">' + (v.emailed === false ? 'Échec de l’envoi courriel' : '<span class="ic">🎧</span> Audio envoyé par courriel (MP3), non conservé') + '</div></div>';
+        + '<div class="meta" style="margin-top:.25rem">' + (v.emailed === false ? '${T("Échec de l’envoi courriel")}' : '<span class="ic">🎧</span> ${T("Audio envoyé par courriel (MP3), non conservé")}') + '</div></div>';
     }
     box.innerHTML = h;
     var lus = box.querySelectorAll('[data-vmlu]'); for (var a = 0; a < lus.length; a++) lus[a].onclick = function(){ vmAction('vm:lu', this.getAttribute('data-vmlu')); };
@@ -642,21 +646,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function rendreSms(){
     var box = document.getElementById('t-sms-inbox'); if (!box) return;
     var badge = document.getElementById('t-sms-badge');
-    if (!RESUME) { box.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!RESUME) { box.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (RESUME.erreur) { box.innerHTML = '<div class="vide">' + esc(RESUME.erreur) + '</div>'; return; }
     var sms = RESUME.sms || [];
     var nonlus = 0; for (var k = 0; k < sms.length; k++) if (sms[k].direction === 'inbound' && !sms[k].read) nonlus++;
     if (badge) badge.innerHTML = nonlus ? '<span class="qlive">' + nonlus + ' non lu' + (nonlus > 1 ? 's' : '') + '</span>' : '';
-    if (!sms.length) { box.innerHTML = '<div class="vide">Aucun SMS.</div>'; return; }
+    if (!sms.length) { box.innerHTML = '<div class="vide">${T("Aucun SMS.")}</div>'; return; }
     var h = '';
     for (var i = 0; i < sms.length; i++) {
       var m = sms[i], entrant = (m.direction === 'inbound');
       h += '<div class="item' + (entrant && !m.read ? ' neuf' : '') + '">'
-        + '<div class="meta">' + (entrant ? 'Reçu de ' : 'Envoyé à ') + '<b>' + esc(entrant ? m.from : m.to) + '</b> · '
+        + '<div class="meta">' + (entrant ? '${T("Reçu de")} ' : '${T("Envoyé à")} ') + '<b>' + esc(entrant ? m.from : m.to) + '</b> · '
         + esc(String(m.date || '').replace('T', ' ').replace('Z', '')) + (entrant && !m.read ? ' · <span class="ic">🔵</span>' : '') + '</div>'
         + '<div class="corpsmsg">' + esc(m.body || '') + '</div>'
         + '<div class="actes" style="margin-top:.25rem">'
-        + (entrant ? '<button class="b" type="button" data-smsrep="' + esc(m.from) + '">↩ Répondre</button>' : '')
+        + (entrant ? '<button class="b" type="button" data-smsrep="' + esc(m.from) + '">${T("↩ Répondre")}</button>' : '')
         + (entrant && !m.read ? '<button class="b" type="button" data-smslu="' + esc(m.id) + '">✓</button>' : '')
         + (RO ? '' : '<button class="b dgr" type="button" data-smsdel="' + esc(m.id) + '"><span class="ic">🗑</span></button>')
         + '</div></div>';
@@ -693,24 +697,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vmAction(op, id){
     dire('…');
     appeler('tel:' + op, [{ id: id }]).then(function(r){
-      if (r && r.ok) { chargerResume(); dire(op === 'vm:suppr' ? 'Message supprimé.' : 'Marqué lu.', 'bon'); }
-      else dire('Échec : ' + expliquer(r), 'err');
+      if (r && r.ok) { chargerResume(); dire(op === 'vm:suppr' ? '${T("Message supprimé.")}' : '${T("Marqué lu.")}', 'bon'); }
+      else dire('${T("Échec :")} ' + expliquer(r), 'err');
     });
   }
   function smsAction(op, id){
     dire('…');
     appeler('tel:' + op, [{ id: id }]).then(function(r){
-      if (r && r.ok) { chargerResume(); dire(op === 'sms:suppr' ? 'SMS supprimé.' : 'Marqué lu.', 'bon'); }
-      else dire('Échec : ' + expliquer(r), 'err');
+      if (r && r.ok) { chargerResume(); dire(op === 'sms:suppr' ? '${T("SMS supprimé.")}' : '${T("Marqué lu.")}', 'bon'); }
+      else dire('${T("Échec :")} ' + expliquer(r), 'err');
     });
   }
   function smsEnvoyer(){
     var to = telE164(val('t-sms-to')), body = val('t-sms-body');
-    if (!to || !body) { dire('Numéro et message requis.', 'err'); return; }
-    dire('Envoi du SMS…');
+    if (!to || !body) { dire('${T("Numéro et message requis.")}', 'err'); return; }
+    dire('${T("Envoi du SMS…")}');
     appeler('tel:sms:envoyer', [{ to: to, body: body }]).then(function(r){
-      if (r && r.ok) { dire('SMS envoyé.', 'bon'); var bd = document.getElementById('t-sms-body'); if (bd) bd.value = ''; chargerResume(); }
-      else dire('Échec SMS : ' + expliquer(r), 'err');
+      if (r && r.ok) { dire('${T("SMS envoyé.")}', 'bon'); var bd = document.getElementById('t-sms-body'); if (bd) bd.value = ''; chargerResume(); }
+      else dire('${T("Échec SMS :")} ' + expliquer(r), 'err');
     });
   }
 
@@ -744,7 +748,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     occuper(true); dire('Enregistrement…');
     appeler('config:telephonie:ecrire', [saisie()]).then(function(r){
       occuper(false);
-      if (r && r.ok) { adopter(r); dessiner(); dire('Téléphonie enregistrée.', 'bon'); avertirRedirection(); }
+      if (r && r.ok) { adopter(r); dessiner(); dire('${T("Téléphonie enregistrée.")}', 'bon'); avertirRedirection(); }
       else dire(expliquer(r), 'err');
     });
   }
@@ -757,7 +761,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var defNeedsNum = (C.defaultAction === 'forward') || !!(C.queue && C.queue.enabled);
     var ack = !!(C.forward && C.forward.noForwardAck);
     if (!hasGeneral && (optNeedsNum || defNeedsNum) && !ack) {
-      setTimeout(function(){ dire('Aucun numéro à composer (onglet Redirection) — les appels iront en messagerie.', 'att'); }, 900);
+      setTimeout(function(){ dire('${T("Aucun numéro à composer (onglet Redirection) — les appels iront en messagerie.")}', 'att'); }, 900);
     }
   }
 

@@ -129,6 +129,7 @@ const cible = process.argv[2] ? path.basename(process.argv[2]).replace(/\.js$/, 
 
 let fen = 0, aFaire = 0, fait = 0;
 const parFenetre = [];
+const exemptees = [];
 const manquantsCible = [];
 
 for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
@@ -144,6 +145,18 @@ for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
    d’en tirer une page. ⚠ Une reconnaissance par EFFET DE BORD tient jusqu’au jour
    où l’effet change ; le nom, lui, ne bouge pas. */
   if (f === 'socle.js') continue;
+  /* ⚠⚠⚠ `connexion` EST DEJA BILINGUE, ET LA COMPTER EST UNE MESURE FAUSSE, pas
+     une exigence de plus. Elle porte le selecteur EN/FR elle-meme et doit
+     basculer SANS se recharger : son dictionnaire est donc EMBARQUE dans la
+     page (le seul cas justifie, voir src/langue/index.js). Resultat : la page
+     contient A LA FOIS « Se connecter » et « Sign in », et le compteur — qui lit
+     les textes visibles — reclamait la traduction de l ANGLAIS. 148 « textes a
+     traduire » dont la moitie etaient deja la traduction.
+     ⚠ Son garde est `banc-langue-connexion.js`, qui verifie que chaque texte
+     demande a sa traduction ET qu aucune entree ne dort. Il tourne au CI.
+     ⚠ UNE EXEMPTION SE DIT : elle est annoncee dans le verdict, plus bas. Un
+     ecran retire d un compte sans que personne ne le sache redevient un trou. */
+  if (f === 'connexion.js') { exemptees.push('connexion'); continue; }
   if (!fabrique) continue;
   let page;
   try { page = fabrique(''); } catch (e) {
@@ -187,6 +200,13 @@ const restants = parFenetre.filter((x) => x.manque).sort((a, b) => b.manque - a.
 const finies = parFenetre.filter((x) => !x.manque);
 console.log('  ' + fen + ' fenetres · ' + fait + ' texte(s) traduit(s) · ' + aFaire + ' a traduire');
 console.log('  ' + finies.length + ' fenetre(s) COMPLETE(S) sur ' + fen);
+/* ⚠ CE QUI N EST PAS COMPTE SE DIT, et se dit avec SON garde. Un ecran retire
+   d un releve sans que personne ne le sache redevient un trou. */
+if (exemptees.length) {
+  console.log('  ' + exemptees.length + ' ecran(s) HORS COMPTE : ' + exemptees.join(', ')
+    + ' — dictionnaire EMBARQUE (bascule sans rechargement),');
+  console.log('    la page contient les deux langues a la fois. Garde : banc-langue-connexion.js');
+}
 console.log('');
 if (finies.length) console.log('  finies : ' + finies.map((x) => x.nom).join(', '));
 console.log('');
