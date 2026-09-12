@@ -17,7 +17,7 @@
  *
  * Cette fenêtre ne peint donc RIEN. Elle reçoit :
  *   · le MODÈLE, une structure plate dont la géométrie est en POURCENTAGES ;
- *   · l'IMAGE déjà peinte par la fenêtre principale (promo:modeleLire).
+ *   · l'IMAGE peinte par la fenêtre principale, à la demande.
  * Elle pose ses poignées PAR-DESSUS l'image, en calculant sur des nombres, et
  * renvoie le modèle modifié. L'impression et l'aperçu ne bougent pas d'un pouce.
  *
@@ -27,15 +27,23 @@
  * pourcentage se placent toutes seules quand la fenêtre change de taille — ce
  * que le plan de travail web devait recalculer à la main.
  *
- * ⚠⚠ CE QUE LA DEUXIÈME TRANCHE A AJOUTÉ, ET LE TROU QU'ELLE A D'ABORD OUVERT.
- * Ajouter un élément, changer le fond, poser une image : ces trois gestes ne
- * DÉPLACENT aucune poignée. Dans une fenêtre qui ne peint pas, ils ne
- * produisaient donc strictement AUCUN retour à l'écran — on ajoutait un texte,
- * et il ne se passait rien jusqu'à l'enregistrement. Un éditeur dont le geste
- * le plus courant ne montre rien n'est pas un éditeur, c'est un formulaire.
- * ➡ D'où promo:modeleApercu : la fenêtre envoie le modèle EN COURS, le site le
- * peint là où le peintre a toujours vécu, et RIEN N'EST ENREGISTRÉ. C'est la
- * pièce qui rend l'ajout et le fond utilisables.
+ * ⚠⚠ CE QUE LA DEUXIÈME TRANCHE A APPRIS, ET QU'IL NE FAUT PAS REPERDRE.
+ * Ajouter un élément, changer le fond, poser une image : ces gestes ne DÉPLACENT
+ * aucune poignée. Dans une fenêtre qui ne peint pas, ils ne produisaient donc
+ * strictement AUCUN retour à l'écran. Un éditeur dont le geste le plus courant
+ * ne montre rien n'est pas un éditeur, c'est un formulaire. ➡ promo:modeleApercu
+ * fait peindre le modèle EN COURS par le site, sans rien enregistrer.
+ *
+ * ⚠ TROISIÈME TRANCHE — L'INSPECTEUR COMPLET, ET LES DEUX PORTES À PART.
+ * Tout ce que l'écran web savait régler se règle ici : la police et la COURBURE
+ * d'un texte (sans elle un autocollant rond ne se compose pas), le recadrage et
+ * la retouche d'une image, le code-barres, les formes, les aides du plan de
+ * travail. Deux choses ne passent PAS par l'écriture ordinaire :
+ *   · les REPÈRES (grille, zone sûre) — ce n'est pas un réglage du modèle mais
+ *     une consigne de REGARD ; ils ne s'enregistrent pas et ne s'impriment pas ;
+ *   · le FORMAT (w, h) — `promo:modeleEcrire` le refuse à dessein, pour qu'une
+ *     fenêtre un peu ancienne ne réécrive pas des dimensions lues avant un
+ *     changement. Il a sa porte : promo:redimensionner.
  *
  * ⚠ L'IMPORT D'UNE NOUVELLE IMAGE N'EST PAS ICI, ET C'EST VOULU. Il a sa propre
  * fenêtre native — la Logothèque — avec son assistant de recadrage, son plafond
@@ -49,14 +57,14 @@
  * désigne le caractère, PAS les lettres accentuées — la première version de
  * cette fenêtre a confondu les deux et affichait « Modele ouvert », « Element
  * verrouille », « Opacite ». C'est une faute d'orthographe à l'écran, dans une
- * interface en français du Québec ; elle est corrigée ici.
+ * interface en français du Québec.
  * ⚠⚠ ET LES APOSTROPHES S'ÉCRIVENT ’, PAS '. Ce n'est pas une coquetterie de
  * typographe, c'est ce qui rend le fichier sûr : une apostrophe droite dans une
  * chaîne à guillemets simples devrait être échappée, mais le GABARIT mange la
  * contre-oblique au passage — l'apostrophe sortirait NUE dans le script engendré
  * et y fermerait la chaîne. L'apostrophe typographique ne demande aucun
  * échappement, et c'est déjà la convention du reste des fenêtres.
- * ⚠ Le piège d'en face, celui où je suis tombé en écrivant cette version : les
+ * ⚠ Le piège d'en face, celui où je suis tombé en écrivant la 2ᵉ tranche : les
  * RETIRER pour contourner le problème. « n a pas », « s annule », « l image » —
  * ce n'est plus un problème d'échappement, c'est du français fautif à l'écran.
  */
@@ -93,7 +101,7 @@ body{background:var(--f-page);color:var(--tx);
    l imprimante — on choisirait un texte lisible sur un fond qui n existe pas.
    Declare dans tools/contraste-jour-declare.js pour la meme raison. */
 .scene{position:relative;box-shadow:0 8px 30px rgba(0,0,0,.45);
-  outline:1px solid var(--v12);background:#fff}
+  outline:1px solid var(--v12);background:#fff;flex:0 0 auto}
 .scene img{display:block;width:100%;height:100%;object-fit:fill;
   -webkit-user-drag:none;user-select:none}
 .boite{position:absolute;border:1px dashed var(--v50);
@@ -104,20 +112,30 @@ body{background:var(--f-page);color:var(--tx);
 .boite.verr{cursor:not-allowed}
 .poi{position:absolute;width:11px;height:11px;background:#7AA7FF;
   border:1px solid #0b1220;border-radius:2px}
-.poi.br{right:-6px;bottom:-6px;cursor:nwse-resize}
+.poi.nw{left:-6px;top:-6px;cursor:nwse-resize}
+.poi.ne{right:-6px;top:-6px;cursor:nesw-resize}
+.poi.sw{left:-6px;bottom:-6px;cursor:nesw-resize}
+.poi.se{right:-6px;bottom:-6px;cursor:nwse-resize}
+/* La poignee de rotation se tient EN DEHORS de la boite, au-dessus : dans un
+   coin elle se confondrait avec celle qui redimensionne. */
+.poi.rot{left:50%;top:-25px;margin-left:-6px;border-radius:50%;cursor:grab}
 .etiq{position:absolute;left:0;top:-19px;font-size:.62rem;white-space:nowrap;
   background:#7AA7FF;color:#0b1220;padding:0 .3rem;border-radius:3px;font-weight:700}
 
 /* ── L INSPECTEUR ─────────────────────────────────────────────────────────── */
-.insp{flex:0 0 330px;border-left:1px solid var(--v08);display:flex;flex-direction:column;
+.insp{flex:0 0 340px;border-left:1px solid var(--v08);display:flex;flex-direction:column;
   background:var(--f-carte);min-height:0}
 /* ⚠ LA BARRE D AJOUT EST EN HAUT DE L INSPECTEUR, PAS DANS LE PLAN. Le plan est
    une surface de manipulation directe : y poser des boutons ferait cliquer
    dessus en visant un element. */
-.outils{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:.3rem;padding:.5rem .6rem;
+.outils,.aides{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:.3rem;padding:.5rem .6rem;
   border-bottom:1px solid var(--v08)}
-.outils .btn{font-size:.75rem;padding:.26rem .48rem}
-.insp .lst{flex:0 0 auto;max-height:30%;overflow-y:auto;border-bottom:1px solid var(--v08)}
+.aides{padding-top:.35rem;padding-bottom:.35rem;align-items:center}
+.outils .btn,.aides .btn{font-size:.75rem;padding:.26rem .48rem}
+/* Un reglage ACTIF doit se voir sans lire : une case a cocher en mots se relit
+   a chaque fois, une pastille allumee se reconnait. */
+.btn.on{background:#7AA7FF;border-color:#7AA7FF;color:#0b1220;font-weight:650}
+.insp .lst{flex:0 0 auto;max-height:26%;overflow-y:auto;border-bottom:1px solid var(--v08)}
 .insp .prop{flex:1 1 auto;overflow-y:auto;padding:.7rem .8rem}
 .el{display:flex;align-items:center;gap:.45rem;padding:.34rem .7rem;cursor:pointer;
   border-bottom:1px solid var(--v04);font-size:.79rem}
@@ -132,6 +150,7 @@ body{background:var(--f-page);color:var(--tx);
    discret ce qui explique une impossibilite, c est cacher la reponse a la
    question qu on se pose a cet instant. */
 .el .oeil{color:var(--tx)}
+.el .mal{color:var(--tx-err2)}
 .bloc{margin-bottom:.7rem}
 .bloc>label{display:block;font-size:.68rem;color:var(--tx2);margin-bottom:.2rem;
   text-transform:uppercase;letter-spacing:.04em}
@@ -155,11 +174,17 @@ body{background:var(--f-page);color:var(--tx);
 .btn.danger{color:var(--tx-err2);border-color:rgba(200,90,90,.45)}
 .btn.danger:hover{background:rgba(200,90,90,.14)}
 .acts{display:flex;flex-wrap:wrap;gap:.35rem}
+.acts .btn{font-size:.76rem;padding:.26rem .5rem}
 .seg{display:inline-flex;border:1px solid var(--v12);border-radius:7px;overflow:hidden}
 .seg button{padding:.26rem .55rem;background:transparent;color:var(--tx2);border:0;
   font:inherit;font-size:.76rem;cursor:pointer}
 .seg button.on{background:#7AA7FF;color:#0b1220;font-weight:650}
 .seg button:hover:not(.on){background:var(--v08);color:var(--tx)}
+/* Les teintes n ont AUCUN texte : rien a mesurer au contraste, et un liset
+   suffit a distinguer un blanc d un fond clair. */
+.teintes{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.3rem}
+.teintes button{width:19px;height:19px;border-radius:5px;border:1px solid var(--v50);
+  padding:0;cursor:pointer}
 /* Le damier ici aussi : une image a coins transparents doit se voir comme telle
    AVANT d etre posee, sinon on decouvre le trou une fois imprime. */
 .vign{width:100%;height:96px;border:1px solid var(--v12);border-radius:8px;
@@ -173,6 +198,9 @@ body{background:var(--f-page);color:var(--tx);
 .vign img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 .vide{padding:1.1rem;color:var(--tx2);font-size:.83rem;text-align:center}
 .note{font-size:.71rem;color:var(--tx2);line-height:1.35;margin-top:.2rem}
+/* Un avertissement se lit EN PLEIN, jamais en estompe : c est la phrase qui
+   explique pourquoi le lecteur de la caisse ne bipera pas. */
+.avert{font-size:.73rem;color:var(--tx-err2);line-height:1.35;margin-top:.25rem}
 .pied{flex:0 0 auto;padding:.42rem 1.05rem;border-top:1px solid var(--v08);
   font-size:.76rem;min-height:1.9rem;background:var(--f-carte)}
 
@@ -213,6 +241,7 @@ html.jour .poi{background:#2f5fb5;border-color:#ffffff}
 html.jour .etiq{background:#2f5fb5;color:#fff}
 html.jour .boite.sel{border-color:#2f5fb5}
 html.jour .seg button.on{background:#2f5fb5;color:#ffffff}
+html.jour .btn.on{background:#2f5fb5;border-color:#2f5fb5;color:#ffffff}
 html.jour .lg:hover{border-color:#2f5fb5}
 /* Le voile reste sombre de jour — c est SA fonction : eteindre la page derriere.
    Mais il est DECLARE, et non herite d un oubli. */
@@ -235,6 +264,7 @@ function pagePromoEditeur(id) {
   <div class="plan" id="plan"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
   <div class="insp">
     <div class="outils" id="outils"></div>
+    <div class="aides" id="aides"></div>
     <div class="lst" id="lst"></div>
     <div class="prop" id="prop"></div>
   </div>
@@ -260,14 +290,26 @@ ${JS_ACTIVITE}${JS_DIRE}
   var M = null;          // le modele, tel qu il voyage
   var SEL = '';          // id de l element choisi ; vide = le MODELE lui-meme
   var SALE = false;      // des modifications non enregistrees
-  var IMG = '';          // l apercu deja peint par la fenetre principale
+  var IMG = '';          // l apercu peint par la fenetre principale
   var LOGOS = null;      // la logotheque, telle que le site nous l a rendue
   var CHOIX = null;      // ce qu on fait du logo choisi (une fonction)
+  var POLICES = [];      // les polices que le PEINTRE sait rendre
+  var TEINTES = [];      // la palette proposee, la meme que l ecran web
+  var CODES = {};        // id d un code-barres -> se lit-il au lecteur ?
+  var PRESSE = null;     // le presse-papiers d elements (Ctrl+C / Ctrl+V)
+
+  /* ⚠ LES REPERES NE SONT PAS UN REGLAGE DU MODELE. Grille et zone sure sont
+     une consigne de REGARD : elles ne s enregistrent jamais et ne sortent pas
+     sur le papier. Elles vivent donc ICI, et voyagent a chaque repeinture. */
+  var REPERES = { grille: false, zoneSure: true };
+  var AIMANT = true;     // l aimantation aux bords et au centre
+  var ZOOM = 1;          // 1 = ajuste a la fenetre
 
   var plan = document.getElementById('plan');
   var lst = document.getElementById('lst');
   var prop = document.getElementById('prop');
   var outils = document.getElementById('outils');
+  var aides = document.getElementById('aides');
   var bEnr = document.getElementById('b-enr');
   var bAnn = document.getElementById('b-annuler');
   var bRef = document.getElementById('b-refaire');
@@ -284,6 +326,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     introuvable:  'Ce modèle n’existe plus — il a peut-être été supprimé ailleurs.',
     parametre:    'Demande incomplète.',
     genre_inconnu:'Ce type d’élément n’existe pas.',
+    dimensions:   'Dimensions refusées : il faut entre 0,2 et 40 pouces.',
     trop_long:    'Le modèle dépasse la taille permise (8 Mo d’éléments).',
     pont_indisponible: 'La fenêtre principale ne répond pas.',
     echec:        'L’opération a échoué.'
@@ -377,11 +420,21 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!M) return;
     MINUTERIE = null;
     var mien = ++JETON;
-    appeler('promo:modeleApercu', [ID, M, 520]).then(function(r){
+    appeler('promo:modeleApercu', [ID, M, Math.round(560 * Math.min(2, ZOOM)), REPERES]).then(function(r){
       if (mien !== JETON) return;          // une demande plus recente a pris la main
       if (!r.ok) { dire('Aperçu non repeint : ' + expliquer(r), 'att'); return; }
       IMG = r.image || '';
+      /* ⚠ LA LISIBILITE DES CODES-BARRES ARRIVE AVEC L IMAGE. Un code non
+         encodable se DESSINE quand meme — il ne se lit simplement jamais au
+         lecteur, et le defaut se decouvre a la caisse, sur une etiquette deja
+         collee. Il faut donc le dire ici, pendant qu on peut encore corriger. */
+      var avant = CODES;
+      CODES = {};
+      (r.codes || []).forEach(function(c){ CODES[c.id] = !!c.lisible; });
       dessinerPlan();
+      dessinerListe();
+      var el = selEl();
+      if (el && el.kind === 'barcode' && avant[el.id] !== CODES[el.id]) dessinerProp();
       if (!r.rendable) dire('L’aperçu n’a pas pu être peint' + (r.detail ? ' : ' + r.detail : '')
         + '. Les poignées restent utilisables.', 'att');
     });
@@ -399,15 +452,22 @@ ${JS_ACTIVITE}${JS_DIRE}
     var dispoH = Math.max(120, plan.clientHeight - 40);
     var L = dispoL, H = Math.round(L * rap);
     if (H > dispoH) { H = dispoH; L = Math.round(H / rap); }
+    L = Math.max(80, Math.round(L * ZOOM)); H = Math.max(60, Math.round(H * ZOOM));
     var h = '<div class="scene" id="scene" style="width:' + L + 'px;height:' + H + 'px">';
     if (IMG) h += '<img src="' + esc(IMG) + '" alt="Aperçu du modèle">';
     els().forEach(function(el){
       var cl = 'boite' + (el.id === SEL ? ' sel' : '') + (el.hidden ? ' cache' : '') + (el.locked ? ' verr' : '');
+      var rot = nb(el.rot, 0);
       h += '<div class="' + cl + '" data-el="' + esc(el.id) + '" style="left:' + nb(el.xPct, 0) + '%;top:'
-        + nb(el.yPct, 0) + '%;width:' + nb(el.wPct, 10) + '%;height:' + nb(el.hPct, 10) + '%">';
+        + nb(el.yPct, 0) + '%;width:' + nb(el.wPct, 10) + '%;height:' + nb(el.hPct, 10) + '%'
+        + (rot ? ';transform:rotate(' + rot + 'deg)' : '') + '">';
       if (el.id === SEL) {
         h += '<span class="etiq">' + esc(el.name || el.kind || 'Élément') + '</span>';
-        if (!el.locked) h += '<span class="poi br" data-poi="br"></span>';
+        if (!el.locked) {
+          h += '<span class="poi nw" data-poi="nw"></span><span class="poi ne" data-poi="ne"></span>'
+            + '<span class="poi sw" data-poi="sw"></span><span class="poi se" data-poi="se"></span>'
+            + '<span class="poi rot" data-poi="rot" title="Faire pivoter"></span>';
+        }
       }
       h += '</div>';
     });
@@ -426,12 +486,31 @@ ${JS_ACTIVITE}${JS_DIRE}
     outils.innerHTML = h;
   }
 
+  /* ⚠ LES AIDES SE DISTINGUENT DES REGLAGES, ET LA BARRE LE DIT : rien de ce
+     qui est ici ne part a l impression. La zone sure est allumee par defaut
+     parce qu une decoupe n est jamais parfaitement centree — c est le repere
+     qu on oublie de demander et qu on regrette apres la commande. */
+  function dessinerAides(){
+    if (!M) { aides.innerHTML = ''; return; }
+    aides.innerHTML = ''
+      + '<button class="btn' + (REPERES.zoneSure ? ' on' : '') + '" type="button" data-repere="zoneSure"'
+      + ' title="La marge à ne pas dépasser — jamais imprimée">Zone sûre</button>'
+      + '<button class="btn' + (REPERES.grille ? ' on' : '') + '" type="button" data-repere="grille"'
+      + ' title="Une grille de repère — jamais imprimée">Grille</button>'
+      + '<button class="btn' + (AIMANT ? ' on' : '') + '" type="button" data-aimant="1"'
+      + ' title="Coller aux bords et au centre pendant le déplacement">Aimant</button>'
+      + '<span style="flex:1 1 auto"></span>'
+      + '<button class="btn" type="button" data-zoom="-1" title="Réduire">−</button>'
+      + '<button class="btn" type="button" data-zoom="0" title="Ajuster à la fenêtre">' + Math.round(ZOOM * 100) + ' %</button>'
+      + '<button class="btn" type="button" data-zoom="1" title="Agrandir">+</button>';
+  }
+
   function dessinerListe(){
     var l = els();
     /* La premiere ligne n est pas un element : c est le MODELE. Sans elle, il n y
        a aucun moyen de revenir au fond une fois qu on a choisi un element. */
     var h = '<div class="el' + (SEL ? '' : ' sel') + '" data-sel="">'
-      + '<span class="k">Mod</span><span class="n">Le modèle (fond, bordure)</span></div>';
+      + '<span class="k">Mod</span><span class="n">Le modèle (fond, format)</span></div>';
     if (!l.length) h += '<div class="vide">Ce modèle ne porte aucun élément. Ajoutez-en un ci-dessus.</div>';
     /* Le haut de la pile en premier : c est l ordre ou on le voit a l ecran. */
     l.slice().reverse().forEach(function(el){
@@ -439,6 +518,8 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<span class="k">' + esc(el.kind === 'text' ? 'Txt' : (el.kind === 'image' ? 'Img'
             : (el.kind === 'barcode' ? 'Cod' : (el.kind === 'line' ? 'Lig' : 'Frm')))) + '</span>'
         + '<span class="n">' + esc(el.name || el.text || 'Sans nom') + '</span>'
+        + (el.kind === 'barcode' && CODES[el.id] === false
+            ? '<span class="mal" title="Ce code ne se lira pas au lecteur">✗</span>' : '')
         + (el.hidden ? '<span class="oeil" title="Masqué">◌</span>' : '')
         + (el.locked ? '<span class="oeil" title="Verrouillé">⌧</span>' : '')
         + '</div>';
@@ -446,10 +527,27 @@ ${JS_ACTIVITE}${JS_DIRE}
     lst.innerHTML = h;
   }
 
+  /* ══ LES BRIQUES DE L INSPECTEUR ═════════════════════════════════════════
+     ⚠ LE PREFIXE DIT A QUOI LE CHAMP SE RATTACHE — num/txt a l ELEMENT, mnum au
+     MODELE, bnum/btxt au FOND, onum/otxt au LISERE. Une seule branche par
+     prefixe dans les ecouteurs, et rien a enumerer quand un champ s ajoute. */
   function champNum(cle, lbl, el, pas, prefixe){
     return '<div><label class="p">' + esc(lbl) + '</label>'
       + '<input type="number" data-' + (prefixe || 'num') + '="' + cle + '" step="' + (pas || 1) + '" value="'
       + (Math.round(nb(el[cle], 0) * 1000) / 1000) + '"></div>';
+  }
+  /* ⚠⚠ LE MODELE GARDE DES POURCENTAGES, MAIS ON COMPOSE EN POUCES. Un
+     pourcentage ne dit rien a qui place un logo sur une etiquette 2 x 1 : la
+     question est << a un quart de pouce du bord >>, pas << a 12,5 % >>. L ecran
+     web affichait donc des pouces, et la fenetre fait pareil — la conversion se
+     fait ICI, a l affichage et a la saisie, et ce qui voyage reste en
+     pourcentages. Changer le format ne deplace donc toujours rien. */
+  function champPouce(cle, lbl, el, axe, min, max){
+    var base = nb(M && M[axe], 1) || 1;
+    var v = nb(el[cle], 0) / 100 * base;
+    return '<div><label class="p">' + esc(lbl) + '</label>'
+      + '<input type="number" data-pouce="' + cle + ':' + axe + ':' + min + ':' + max + '"'
+      + ' step="0.01" value="' + (Math.round(v * 1000) / 1000) + '"></div>';
   }
   function segment(nom, options, courant){
     return '<div class="seg">' + options.map(function(o){
@@ -457,12 +555,25 @@ ${JS_ACTIVITE}${JS_DIRE}
         + (courant === o[0] ? ' class="on"' : '') + '>' + esc(o[1]) + '</button>';
     }).join('') + '</div>';
   }
+  function bascule(cible, libelle, actif, titre){
+    return '<button class="btn' + (actif ? ' on' : '') + '" type="button" data-bascule="' + cible + '"'
+      + (titre ? ' title="' + esc(titre) + '"' : '') + '>' + esc(libelle) + '</button>';
+  }
+  /* ⚠ UNE COULEUR SE TAPE *ET* SE CHOISIT. Le champ texte accepte toute notation
+     CSS — c est lui qui permet de recopier une couleur de marque exacte. Les
+     pastilles ne sont qu un raccourci vers la palette du site ; sans le champ,
+     on ne pourrait jamais sortir de ces douze teintes. */
+  function couleur(cle, lbl, val, prefixe, aide){
+    var p = prefixe || 'txt';
+    return '<div class="bloc"><label>' + esc(lbl) + '</label>'
+      + '<input type="text" data-' + p + '="' + cle + '" value="' + esc(val || '') + '">'
+      + '<div class="teintes">' + TEINTES.map(function(t){
+          return '<button type="button" data-teinte="' + p + ':' + cle + '" data-val="' + esc(t) + '"'
+            + ' style="background:' + esc(t) + '" title="' + esc(t) + '"></button>'; }).join('') + '</div>'
+      + (aide ? '<div class="note">' + esc(aide) + '</div>' : '') + '</div>';
+  }
 
-  /* ══ L INSPECTEUR DU MODELE (aucun element choisi) ════════════════════════
-     ⚠ LA FORME ET LES DIMENSIONS NE SE CHANGENT PAS ICI, et le dire evite de
-     les chercher : le coeur d ecriture les REFUSE volontairement. Redimensionner
-     un modele deplace tout ce qu il porte, et c est une operation a part, qui
-     sait ce qu elle deplace. */
+  /* ══ L INSPECTEUR DU MODELE (aucun element choisi) ═══════════════════════ */
   function dessinerPropModele(){
     var b = M.bg || {}, bo = M.border || {};
     var type = b.type || 'solid';
@@ -470,13 +581,11 @@ ${JS_ACTIVITE}${JS_DIRE}
     h += '<div class="bloc"><label>Nom du modèle</label>'
       + '<input type="text" data-mtxt="name" value="' + esc(M.name || '') + '"></div>';
     h += '<div class="bloc"><label>Fond</label>'
-      + segment('bgtype', [['solid', 'Uni'], ['gradient', 'Dégradé'], ['image', 'Image']], type) + '</div>';
+      + segment('bg:type', [['solid', 'Uni'], ['gradient', 'Dégradé'], ['image', 'Image']], type) + '</div>';
     if (type === 'gradient') {
-      h += '<div class="bloc"><label>Dégradé</label><div class="rang">'
-        + '<div><label class="p">De</label><input type="text" data-btxt="from" value="' + esc(b.from || '#ffffff') + '"></div>'
-        + '<div><label class="p">Vers</label><input type="text" data-btxt="to" value="' + esc(b.to || '#efe6d8') + '"></div>'
-        + '</div><div class="rang" style="margin-top:.3rem">'
-        + champNum('angle', 'Angle (degrés)', b, 5, 'bnum') + '</div></div>';
+      h += couleur('from', 'Départ du dégradé', b.from || '#ffffff', 'btxt');
+      h += couleur('to', 'Arrivée du dégradé', b.to || '#efe6d8', 'btxt');
+      h += '<div class="bloc"><div class="rang">' + champNum('angle', 'Angle (degrés)', b, 5, 'bnum') + '</div></div>';
     } else if (type === 'image') {
       h += '<div class="bloc"><label>Image de fond</label>'
         + (b.src ? '<div class="vign"><img src="' + esc(b.src) + '" alt="Image de fond"></div>'
@@ -487,68 +596,176 @@ ${JS_ACTIVITE}${JS_DIRE}
         + '<div class="note">Les images viennent de la logothèque. Pour en déposer une nouvelle,'
         + ' le sélecteur ouvre la fenêtre Logothèque.</div></div>';
       h += '<div class="bloc"><label>Ajustement</label>'
-        + segment('bgfit', [['cover', 'Remplir'], ['contain', 'Contenir']], b.fit || 'cover') + '</div>';
+        + segment('bg:fit', [['cover', 'Remplir'], ['contain', 'Contenir']], b.fit || 'cover') + '</div>';
     } else {
-      h += '<div class="bloc"><label>Couleur du fond</label>'
-        + '<input type="text" data-btxt="color" value="' + esc(b.color || '#ffffff') + '">'
-        + '<div class="note">Notation CSS : #ffffff, rgb(…), ou un nom.</div></div>';
+      h += couleur('color', 'Couleur du fond', b.color || '#ffffff', 'btxt', 'Notation CSS : #ffffff, rgb(…), ou un nom.');
     }
     h += '<div class="bloc"><label>Liseré imprimé</label><div class="rang">'
       + champNum('w', 'Épaisseur (po)', bo, .002, 'onum')
       + champNum('inset', 'Retrait (po)', bo, .005, 'onum') + '</div>'
-      + '<div style="margin-top:.3rem"><input type="text" data-otxt="color" value="' + esc(bo.color || '#C49A6C') + '"></div>'
       + '<div class="note">Une épaisseur de 0 ne dessine aucun liseré.</div></div>';
+    if (nb(bo.w, 0) > 0) h += couleur('color', 'Couleur du liseré', bo.color || '#C49A6C', 'otxt');
     h += '<div class="bloc"><label>Repères (aperçu seulement)</label><div class="rang">'
       + champNum('safe', 'Marge sûre (po)', M, .01, 'mnum')
       + (M.shape === 'circle' ? '' : champNum('corner', 'Coins (po)', M, .01, 'mnum'))
       + '</div><div class="note">La marge sûre ne sort pas sur le papier : elle rappelle que les découpes'
-      + ' ne sont jamais parfaitement centrées.</div></div>';
-    h += '<div class="note">Le format (' + esc(nb(M.w, 0) + ' × ' + nb(M.h, 0) + ' po')
-      + ') et la forme ne se changent pas ici : les redimensionner déplace tout ce que le modèle porte,'
-      + ' et cela se fait depuis le Centre d’impression.</div>';
+      + ' ne sont jamais parfaitement centrées. Affichez-la avec « Zone sûre », en haut.</div></div>';
+    /* ⚠ LE FORMAT A SA PROPRE PORTE, et la note dit pourquoi on peut oser :
+       toute la geometrie est en POURCENTAGES, donc rien ne se deforme. Sans
+       cette phrase, personne ne touche a ce champ. */
+    h += '<div class="bloc"><label>Format du support</label><div class="rang">'
+      + (M.shape === 'circle'
+          ? '<div><label class="p">Diamètre (po)</label><input type="number" id="rd-w" step="0.05" min="0.4" value="' + nb(M.w, 0) + '"></div>'
+          : '<div><label class="p">Largeur (po)</label><input type="number" id="rd-w" step="0.05" min="0.4" value="' + nb(M.w, 0) + '"></div>'
+            + '<div><label class="p">Hauteur (po)</label><input type="number" id="rd-h" step="0.05" min="0.4" value="' + nb(M.h, 0) + '"></div>')
+      + '</div><div class="acts" style="margin-top:.35rem">'
+      + '<button class="btn" type="button" data-redim="1">Appliquer le format</button></div>'
+      + '<div class="note">Les éléments sont placés en pourcentage : ils suivent le nouveau format sans se'
+      + ' déformer. Attention : ce changement s’enregistre tout de suite, et il ne s’annule pas'
+      + ' par Ctrl+Z — il ne passe pas par le même chemin que le reste.</div></div>';
+    h += '<div class="note">Forme : ' + (M.shape === 'circle' ? 'ronde' : 'rectangulaire')
+      + '. Elle se choisit à la création du modèle, dans le Centre d’impression.</div>';
     prop.innerHTML = h;
+  }
+
+  /* ══ L INSPECTEUR D UN ELEMENT ══════════════════════════════════════════ */
+  function propTexte(el){
+    var h = '';
+    h += '<div class="bloc"><label>Texte</label><textarea data-txt="text">' + esc(el.text || '') + '</textarea></div>';
+    h += '<div class="bloc"><label>Police</label><select data-sel-champ="font">'
+      + POLICES.map(function(f){
+          return '<option value="' + esc(f) + '"' + (el.font === f ? ' selected' : '') + '>' + esc(f) + '</option>'; }).join('')
+      + '</select></div>';
+    h += '<div class="bloc"><label>Style</label><div class="acts">'
+      + '<button class="btn' + (nb(el.weight, 600) >= 700 ? ' on' : '') + '" type="button" data-graisse="1"'
+      + ' title="Gras"><strong>G</strong></button>'
+      + bascule('el:italic', 'I', !!el.italic, 'Italique')
+      + bascule('el:underline', 'S', !!el.underline, 'Souligné')
+      + '</div></div>';
+    h += '<div class="bloc"><label>Taille (% de la hauteur)</label><div class="rang">'
+      + champNum('fontPct', 'Corps', el, .5)
+      + champNum('ls', 'Interlettre', el, .01)
+      + champNum('lh', 'Interligne', el, .05) + '</div></div>';
+    h += couleur('color', 'Couleur', el.color, 'txt', 'Notation CSS : #111827, rgb(…), ou un nom.');
+    h += '<div class="bloc"><label>Alignement</label>'
+      + segment('el:align', [['left', 'Gauche'], ['center', 'Centre'], ['right', 'Droite']], el.align || 'left')
+      + '<div style="margin-top:.3rem">'
+      + segment('el:valign', [['top', 'Haut'], ['middle', 'Milieu'], ['bottom', 'Bas']], el.valign || 'middle')
+      + '</div></div>';
+    h += '<div class="bloc"><label>Casse</label>'
+      + segment('el:caps', [['none', 'Aa'], ['upper', 'AA'], ['lower', 'aa'], ['title', 'Aa Aa']], el.caps || 'none')
+      + '</div>';
+    /* ⚠ LA COURBURE N EST PAS UN ORNEMENT : sans elle, un autocollant ROND ne se
+       compose pas — le texte doit suivre l arc. C est la seule commande de cet
+       inspecteur dont l absence rendait un format entier inutilisable. */
+    h += '<div class="bloc"><label>Courbure du texte</label><div class="rang">'
+      + champNum('curve', 'Arc (degrés)', el, 5) + '</div>'
+      + '<div class="note">0 = droit. Indispensable sur un autocollant rond : le texte suit l’arc.</div></div>';
+    h += '<div class="bloc"><label>Contour et ombre</label><div class="rang">'
+      + champNum('strokeW', 'Contour', el, .5) + champNum('shadow', 'Ombre', el, 1) + '</div></div>';
+    if (nb(el.strokeW, 0) > 0) h += couleur('strokeColor', 'Couleur du contour', el.strokeColor, 'txt');
+    return h;
+  }
+  function propImage(el){
+    var h = '';
+    h += '<div class="bloc"><label>Image</label>'
+      + (el.src ? '<div class="vign"><img src="' + esc(el.src) + '" alt="Image de cet élément"></div>'
+                : '<div class="vign"><span class="p">Aucune image</span></div>')
+      + '<div class="acts"><button class="btn" type="button" data-choisir="element">Choisir une image…</button>'
+      + (el.src ? '<button class="btn danger" type="button" data-img-retirer="1">Retirer</button>' : '')
+      + '</div></div>';
+    h += '<div class="bloc"><label>Ajustement</label>'
+      + segment('el:fit', [['contain', 'Contenir'], ['cover', 'Remplir']], el.fit || 'contain') + '</div>';
+    h += '<div class="bloc"><label>Recadrage</label><div class="rang">'
+      + champNum('zoom', 'Zoom', el, .05) + champNum('ox', 'Décalage X', el, .05)
+      + champNum('oy', 'Décalage Y', el, .05) + '</div>'
+      + '<div class="note">Zoom 1 = image entière. Le décalage va de −1 à 1.</div></div>';
+    h += '<div class="bloc"><label>Orientation</label><div class="acts">'
+      + bascule('el:flipH', '⇄ Miroir', !!el.flipH)
+      + bascule('el:flipV', '⇅ Retourner', !!el.flipV)
+      + '<button class="btn" type="button" data-rot90="1" title="Pivoter d’un quart de tour">↻ 90°</button>'
+      + '</div></div>';
+    h += '<div class="bloc"><label>Masque</label>'
+      + segment('el:mask', [['none', 'Aucun'], ['circle', 'Cercle']], el.mask || 'none')
+      + (el.mask === 'circle' ? '' : '<div class="rang" style="margin-top:.3rem">'
+          + champNum('corner', 'Coins arrondis (%)', el, 1) + '</div>')
+      + '</div>';
+    h += '<div class="bloc"><label>Retouche</label><div class="rang">'
+      + champNum('bright', 'Luminosité', el, 1) + champNum('contrast', 'Contraste', el, 1) + '</div>'
+      + '<div class="rang" style="margin-top:.3rem">'
+      + champNum('sat', 'Saturation', el, 1) + champNum('gray', 'Noir et blanc', el, 1)
+      + champNum('blur', 'Flou', el, 1) + '</div>'
+      + '<div class="acts" style="margin-top:.35rem">'
+      + '<button class="btn" type="button" data-retouche="1">Réinitialiser la retouche</button></div>'
+      + '<div class="note">En pourcentage : 100 = inchangé. Le flou et le noir et blanc partent de 0.</div></div>';
+    return h;
+  }
+  function propCodeBarres(el){
+    var h = '';
+    h += '<div class="bloc"><label>Contenu</label><input type="text" data-txt="text" value="' + esc(el.text || '') + '">'
+      + (CODES[el.id] === false
+          ? '<div class="avert">Attention : ce contenu ne s’encode pas en Code 128. Le code se dessinera,'
+            + ' mais aucun lecteur ne le lira. Lettres, chiffres et ponctuation ASCII seulement.</div>'
+          : '<div class="note">Code 128 — lettres, chiffres et ponctuation ASCII.</div>')
+      + '</div>';
+    h += couleur('color', 'Couleur', el.color || '#000000', 'txt');
+    h += '<div class="bloc"><label>Texte sous le code</label><div class="acts">'
+      + bascule('el:showText', el.showText ? 'Affiché' : 'Masqué', !!el.showText)
+      + '</div><div class="note">Plus le code est large, plus il est lisible : prévoyez au moins 1,5 po.</div></div>';
+    return h;
+  }
+  function propForme(el){
+    var h = '';
+    if (el.kind === 'line') {
+      h += '<div class="bloc"><label>Épaisseur du trait</label><div class="rang">'
+        + champNum('thick', 'Épaisseur', el, 1) + '</div></div>';
+    } else {
+      h += '<div class="bloc"><label>Forme</label>'
+        + segment('el:shape', [['rect', 'Rectangle'], ['ellipse', 'Ellipse'], ['triangle', 'Triangle'], ['star', 'Étoile']],
+            el.shape || 'rect') + '</div>';
+    }
+    h += couleur('fill', 'Remplissage', el.fill || '#C49A6C', 'txt');
+    if (el.kind !== 'line') {
+      if ((el.shape || 'rect') === 'rect') {
+        h += '<div class="bloc"><label>Coins arrondis (%)</label><div class="rang">'
+          + champNum('corner', 'Coins', el, 1) + '</div></div>';
+      }
+      h += '<div class="bloc"><label>Contour</label><div class="rang">'
+        + champNum('strokeW', 'Épaisseur', el, .5) + '</div></div>';
+      if (nb(el.strokeW, 0) > 0) h += couleur('strokeColor', 'Couleur du contour', el.strokeColor, 'txt');
+    }
+    return h;
   }
 
   function dessinerPropElement(el){
     var h = '';
     h += '<div class="bloc"><label>Nom</label><input type="text" data-txt="name" value="' + esc(el.name || '') + '"></div>';
-    if (el.kind === 'text' || el.kind === 'barcode') {
-      h += '<div class="bloc"><label>Texte</label><textarea data-txt="text">' + esc(el.text || '') + '</textarea></div>';
-    }
-    if (el.kind === 'text') {
-      h += '<div class="bloc"><label>Taille (% de la hauteur)</label><div class="rang">'
-        + champNum('fontPct', 'Corps', el, .5) + champNum('weight', 'Graisse', el, 100) + '</div></div>';
-      h += '<div class="bloc"><label>Couleur</label><input type="text" data-txt="color" value="' + esc(el.color || '') + '">'
-        + '<div class="note">Notation CSS : #111827, rgb(…), ou un nom.</div></div>';
-      h += '<div class="bloc"><label>Alignement</label><select data-sel-champ="align">'
-        + ['left', 'center', 'right'].map(function(v){
-            return '<option value="' + v + '"' + (el.align === v ? ' selected' : '') + '>'
-              + (v === 'left' ? 'Gauche' : (v === 'center' ? 'Centre' : 'Droite')) + '</option>'; }).join('')
-        + '</select></div>';
-    }
-    if (el.kind === 'image') {
-      h += '<div class="bloc"><label>Image</label>'
-        + (el.src ? '<div class="vign"><img src="' + esc(el.src) + '" alt="Image de cet élément"></div>'
-                  : '<div class="vign"><span class="p">Aucune image</span></div>')
-        + '<div class="acts"><button class="btn" type="button" data-choisir="element">Choisir une image…</button>'
-        + (el.src ? '<button class="btn danger" type="button" data-img-retirer="1">Retirer</button>' : '')
-        + '</div></div>';
-      h += '<div class="bloc"><label>Ajustement</label>'
-        + segment('elfit', [['contain', 'Contenir'], ['cover', 'Remplir']], el.fit || 'contain') + '</div>';
-    }
-    if (el.kind === 'shape' || el.kind === 'line') {
-      h += '<div class="bloc"><label>Couleur de remplissage</label>'
-        + '<input type="text" data-txt="fill" value="' + esc(el.fill || '#C49A6C') + '"></div>';
-    }
-    h += '<div class="bloc"><label>Position et taille (% du modèle)</label><div class="rang">'
-      + champNum('xPct', 'X', el, .5) + champNum('yPct', 'Y', el, .5) + '</div>'
+    if (el.kind === 'text') h += propTexte(el);
+    else if (el.kind === 'image') h += propImage(el);
+    else if (el.kind === 'barcode') h += propCodeBarres(el);
+    else h += propForme(el);
+
+    h += '<div class="bloc"><label>Position et taille (pouces)</label><div class="rang">'
+      + champPouce('xPct', 'X', el, 'w', -50, 150) + champPouce('yPct', 'Y', el, 'h', -50, 150) + '</div>'
       + '<div class="rang" style="margin-top:.3rem">'
-      + champNum('wPct', 'Largeur', el, .5) + champNum('hPct', 'Hauteur', el, .5) + '</div></div>';
+      + champPouce('wPct', 'Largeur', el, 'w', 1, 200) + champPouce('hPct', 'Hauteur', el, 'h', 1, 200) + '</div>'
+      + '<div class="note">Mesuré sur le support (' + esc(nb(M.w, 0) + ' × ' + nb(M.h, 0)) + ' po).'
+      + ' Les flèches du clavier déplacent de 0,5 % — 5 % avec Majuscule.</div></div>';
     h += '<div class="bloc"><div class="rang">'
       + champNum('rot', 'Rotation', el, 1) + champNum('opacity', 'Opacité', el, 5) + '</div></div>';
+    /* ⚠ ALIGNER SUR LE SUPPORT, PAS SUR UN AUTRE ELEMENT : c est le geste qui
+       sert vraiment sur une etiquette, ou tout se centre par rapport au papier. */
+    h += '<div class="bloc"><label>Aligner sur le support</label><div class="acts">'
+      + '<button class="btn" type="button" data-aligner="l" title="Gauche">⇤</button>'
+      + '<button class="btn" type="button" data-aligner="cx" title="Centrer horizontalement">↔</button>'
+      + '<button class="btn" type="button" data-aligner="r" title="Droite">⇥</button>'
+      + '<button class="btn" type="button" data-aligner="t" title="Haut">⇧</button>'
+      + '<button class="btn" type="button" data-aligner="cy" title="Centrer verticalement">↕</button>'
+      + '<button class="btn" type="button" data-aligner="b" title="Bas">⇩</button>'
+      + '</div></div>';
     h += '<div class="bloc"><label>État</label><div class="acts">'
-      + '<button class="btn" type="button" data-bascule="hidden">' + (el.hidden ? 'Afficher' : 'Masquer') + '</button>'
-      + '<button class="btn" type="button" data-bascule="locked">' + (el.locked ? 'Déverrouiller' : 'Verrouiller') + '</button>'
+      + bascule('el:hidden', el.hidden ? 'Afficher' : 'Masquer', !!el.hidden)
+      + bascule('el:locked', el.locked ? 'Déverrouiller' : 'Verrouiller', !!el.locked)
       + '</div><div class="note">Un élément verrouillé ne se déplace plus à la souris — il reste modifiable ici.</div></div>';
     h += '<div class="bloc"><label>Ordre dans la pile</label><div class="acts">'
       + '<button class="btn" type="button" data-ordre="1">↑ Avancer</button>'
@@ -569,12 +786,25 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (el) dessinerPropElement(el); else dessinerPropModele();
   }
 
-  function dessiner(){ dessinerOutils(); dessinerPlan(); dessinerListe(); dessinerProp(); }
+  function dessiner(){ dessinerOutils(); dessinerAides(); dessinerPlan(); dessinerListe(); dessinerProp(); }
+
+  function majSous(){
+    document.getElementById('sous').textContent = M
+      ? (nb(M.w, 0) + ' × ' + nb(M.h, 0) + ' po — ' + els().length + ' élément(s)') : '';
+  }
 
   /* ══ CHARGEMENT ══════════════════════════════════════════════════════════ */
   function charger(){
     dire('Lecture du modèle…');
-    appeler('promo:modeleLire', [ID, 520]).then(function(r){
+    /* ⚠ LES LISTES DE L INSPECTEUR VIENNENT DU SITE, ET ON NE BLOQUE PAS DESSUS.
+       Si elles manquent, l inspecteur perd son menu de polices et ses pastilles,
+       mais le modele s ouvre quand meme — une liste de commodite ne doit pas
+       empecher de travailler. */
+    appeler('promo:reglages', []).then(function(r){
+      if (r.ok) { POLICES = r.polices || []; TEINTES = r.teintes || []; }
+      if (M) dessinerProp();
+    });
+    appeler('promo:modeleLire', [ID, 560]).then(function(r){
       if (!r.ok) {
         plan.innerHTML = '<div class="vide"><strong>Modèle non ouvert</strong><div style="margin-top:.4rem">'
           + esc(expliquer(r)) + '</div></div>';
@@ -587,13 +817,16 @@ ${JS_ACTIVITE}${JS_DIRE}
       SALE = false; bEnr.disabled = true;
       HIST = []; REFAIRE = []; boutonsHist();
       document.getElementById('titre').textContent = (M && M.name) || 'Éditeur visuel';
-      document.getElementById('sous').textContent = M ? (M.w + ' × ' + M.h + ' po — ' + els().length + ' élément(s)') : '';
+      majSous();
       /* ⚠ UN APERCU QUI N A PAS PU SE PEINDRE SE DIT. Sans ca, on editerait des
          poignees sur un fond vide en croyant que le modele est vide. */
       if (!r.rendable) dire('L’aperçu n’a pas pu être peint' + (r.detail ? ' : ' + r.detail : '')
         + '. Les poignées restent utilisables.', 'att');
       else dire('Modèle ouvert.', 'bon');
       dessiner();
+      /* Une premiere repeinture pose les reperes : l image rendue par modeleLire
+         n en porte aucun, et la zone sure est allumee par defaut. */
+      repeindreBientot();
     });
   }
 
@@ -623,6 +856,26 @@ ${JS_ACTIVITE}${JS_DIRE}
     });
   }
 
+  /* ⚠⚠ LE FORMAT NE PASSE PAS PAR L ENREGISTREMENT ORDINAIRE, et la fenetre le
+     DIT dans sa note : le coeur d ecriture refuse w et h a dessein, pour qu une
+     fenetre un peu ancienne ne reecrive pas des dimensions lues avant un
+     changement. Corollaire honnete : ce geste-la ne s annule pas par Ctrl+Z,
+     puisqu il ne touche pas au modele que l historique garde. */
+  function redimensionner(){
+    if (!M) return;
+    var cw = document.getElementById('rd-w'), ch = document.getElementById('rd-h');
+    var w = nb(cw && cw.value, 0), hh = M.shape === 'circle' ? w : nb(ch && ch.value, 0);
+    dire('Changement de format…');
+    appeler('promo:redimensionner', [ID, w, hh]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      M.w = r.w; M.h = r.h;
+      majSous();
+      dessiner();
+      repeindreBientot();
+      dire('Format : ' + r.dim + '. Les éléments ont suivi.', 'bon');
+    });
+  }
+
   /* ══ LES ELEMENTS ════════════════════════════════════════════════════════
      ⚠⚠ LES DEFAUTS VIENNENT DU SITE, JAMAIS D ICI. Un element porte jusqu a une
      trentaine de proprietes que le peintre lit toutes ; les recopier dans cette
@@ -639,13 +892,14 @@ ${JS_ACTIVITE}${JS_DIRE}
       M.elements = els().concat([r.element]);
       SEL = r.element.id;
       salir();
+      majSous();
       dessiner();
       repeindreBientot();
       dire('Élément ajouté — pensez à enregistrer.', 'att');
     });
   }
-  function dupliquer(){
-    var el = selEl();
+  function dupliquer(source){
+    var el = source || selEl();
     if (!el) return;
     /* On redemande un modele du meme genre UNIQUEMENT pour son identifiant neuf
        et pour les proprietes qu une version plus recente aurait ajoutees ;
@@ -659,6 +913,7 @@ ${JS_ACTIVITE}${JS_DIRE}
       M.elements = els().concat([c]);
       SEL = c.id;
       salir();
+      majSous();
       dessiner();
       repeindreBientot();
       dire('Élément dupliqué.', 'bon');
@@ -671,6 +926,7 @@ ${JS_ACTIVITE}${JS_DIRE}
     M.elements = els().filter(function(x){ return x.id !== el.id; });
     SEL = '';
     salir();
+    majSous();
     dessiner();
     repeindreBientot();
     dire('Élément retiré — Ctrl+Z le ramène.', 'att');
@@ -684,6 +940,21 @@ ${JS_ACTIVITE}${JS_DIRE}
     l[i] = l[j]; l[j] = el;
     salir();
     dessiner();
+    repeindreBientot();
+  }
+  function aligner(a){
+    var el = selEl();
+    if (!el) return;
+    instantane();
+    if (a === 'l') el.xPct = 0;
+    else if (a === 'r') el.xPct = 100 - nb(el.wPct, 0);
+    else if (a === 'cx') el.xPct = (100 - nb(el.wPct, 0)) / 2;
+    else if (a === 't') el.yPct = 0;
+    else if (a === 'b') el.yPct = 100 - nb(el.hPct, 0);
+    else if (a === 'cy') el.yPct = (100 - nb(el.hPct, 0)) / 2;
+    salir();
+    dessinerPlan();
+    dessinerProp();
     repeindreBientot();
   }
 
@@ -789,7 +1060,8 @@ ${JS_ACTIVITE}${JS_DIRE}
     /* L instantane se pose au DEBUT du glissement : une annulation ramene alors
        la position d avant le geste, pas celle d avant le dernier pixel. */
     instantane();
-    GLISSE = { id: id, mode: poi ? 'taille' : 'place', x0: ev.clientX, y0: ev.clientY,
+    GLISSE = { id: id, mode: poi ? poi.getAttribute('data-poi') : 'place',
+      x0: ev.clientX, y0: ev.clientY,
       xPct: nb(el.xPct, 0), yPct: nb(el.yPct, 0), wPct: nb(el.wPct, 10), hPct: nb(el.hPct, 10) };
     try { plan.setPointerCapture(ev.pointerId); } catch (e) {}
     ev.preventDefault();
@@ -800,16 +1072,50 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!scene) return;
     var r = scene.getBoundingClientRect();
     if (!r.width || !r.height) return;
-    var dx = (ev.clientX - GLISSE.x0) / r.width * 100;
-    var dy = (ev.clientY - GLISSE.y0) / r.height * 100;
     var el = parId(GLISSE.id);
     if (!el) return;
-    if (GLISSE.mode === 'place') {
-      el.xPct = Math.round((GLISSE.xPct + dx) * 10) / 10;
-      el.yPct = Math.round((GLISSE.yPct + dy) * 10) / 10;
+    var g = GLISSE;
+    if (g.mode === 'rot') {
+      /* La rotation se mesure depuis le CENTRE de la boite, pas depuis le point
+         de depart : c est ce qui fait que la poignee suit le curseur au lieu de
+         deriver. Le +90 place le zero en haut, la ou la poignee se tient. */
+      var cx = r.left + (nb(el.xPct, 0) + nb(el.wPct, 10) / 2) / 100 * r.width;
+      var cy = r.top + (nb(el.yPct, 0) + nb(el.hPct, 10) / 2) / 100 * r.height;
+      var a = Math.atan2(ev.clientY - cy, ev.clientX - cx) * 180 / Math.PI + 90;
+      if (AIMANT && Math.abs(a % 15) < 4) a = Math.round(a / 15) * 15;
+      el.rot = Math.round(a);
     } else {
-      el.wPct = Math.round(Math.max(1, GLISSE.wPct + dx) * 10) / 10;
-      el.hPct = Math.round(Math.max(1, GLISSE.hPct + dy) * 10) / 10;
+      var dx = (ev.clientX - g.x0) / r.width * 100;
+      var dy = (ev.clientY - g.y0) / r.height * 100;
+      if (g.mode === 'place') {
+        var nx = g.xPct + dx, ny = g.yPct + dy;
+        /* ⚠ L AIMANTATION COLLE AU CENTRE ET AUX BORDS DU SUPPORT — les seules
+           references qui comptent sur une etiquette. Les seuils (1,6 au centre,
+           1,2 aux bords) viennent de l ecran web : les changer ferait coller
+           differemment dans les deux surfaces pour le meme geste. */
+        if (AIMANT) {
+          var ccx = (100 - nb(el.wPct, 0)) / 2, ccy = (100 - nb(el.hPct, 0)) / 2;
+          if (Math.abs(nx - ccx) < 1.6) nx = ccx;
+          if (Math.abs(ny - ccy) < 1.6) ny = ccy;
+          if (Math.abs(nx) < 1.2) nx = 0;
+          if (Math.abs(ny) < 1.2) ny = 0;
+          if (Math.abs(nx + nb(el.wPct, 0) - 100) < 1.2) nx = 100 - nb(el.wPct, 0);
+          if (Math.abs(ny + nb(el.hPct, 0) - 100) < 1.2) ny = 100 - nb(el.hPct, 0);
+        }
+        el.xPct = Math.round(nx * 10) / 10;
+        el.yPct = Math.round(ny * 10) / 10;
+      } else {
+        /* Quatre coins, et chacun garde le coin OPPOSE en place : tirer le coin
+           haut-gauche doit agrandir vers le haut et la gauche, pas deplacer la
+           boite entiere. */
+        var w = g.wPct, hh = g.hPct, x = g.xPct, y = g.yPct;
+        if (g.mode === 'se') { w = Math.max(2, g.wPct + dx); hh = Math.max(2, g.hPct + dy); }
+        else if (g.mode === 'ne') { w = Math.max(2, g.wPct + dx); hh = Math.max(2, g.hPct - dy); y = g.yPct + (g.hPct - hh); }
+        else if (g.mode === 'sw') { w = Math.max(2, g.wPct - dx); x = g.xPct + (g.wPct - w); hh = Math.max(2, g.hPct + dy); }
+        else { w = Math.max(2, g.wPct - dx); x = g.xPct + (g.wPct - w); hh = Math.max(2, g.hPct - dy); y = g.yPct + (g.hPct - hh); }
+        el.wPct = Math.round(w * 10) / 10; el.hPct = Math.round(hh * 10) / 10;
+        el.xPct = Math.round(x * 10) / 10; el.yPct = Math.round(y * 10) / 10;
+      }
     }
     salir();
     dessinerPlan();
@@ -824,10 +1130,31 @@ ${JS_ACTIVITE}${JS_DIRE}
   plan.addEventListener('pointerup', finGlisse);
   plan.addEventListener('pointercancel', finGlisse);
 
-  /* ══ LA BARRE D OUTILS, LA LISTE ET L INSPECTEUR ══════════════════════════ */
+  /* ══ LA BARRE D OUTILS, LES AIDES, LA LISTE ET L INSPECTEUR ══════════════ */
   outils.addEventListener('click', function(ev){
     var b = ev.target.closest('[data-ajout]');
     if (b) ajouter(b.getAttribute('data-ajout'));
+  });
+  aides.addEventListener('click', function(ev){
+    var b;
+    if ((b = ev.target.closest('[data-repere]'))) {
+      var k = b.getAttribute('data-repere');
+      REPERES[k] = !REPERES[k];
+      dessinerAides();
+      /* Tout de suite, pas dans 450 ms : c est une case a cocher, elle doit
+         repondre au clic. */
+      repeindre();
+      return;
+    }
+    if (ev.target.closest('[data-aimant]')) { AIMANT = !AIMANT; dessinerAides(); return; }
+    if ((b = ev.target.closest('[data-zoom]'))) {
+      var d = parseInt(b.getAttribute('data-zoom'), 10);
+      ZOOM = d === 0 ? 1 : borner(Math.round((ZOOM + d * 0.25) * 100) / 100, 0.5, 3);
+      dessinerAides();
+      dessinerPlan();
+      repeindreBientot();
+      return;
+    }
   });
   lst.addEventListener('click', function(ev){
     var t = ev.target.closest('[data-sel]');
@@ -839,6 +1166,13 @@ ${JS_ACTIVITE}${JS_DIRE}
     if (!M) return;
     var t = ev.target;
     var el = selEl();
+    if (t.hasAttribute('data-pouce') && el) {
+      var p = t.getAttribute('data-pouce').split(':');
+      var base = nb(M[p[1]], 1) || 1;
+      instantaneDoux();
+      el[p[0]] = borner(nb(t.value, 0) / base * 100, parseFloat(p[2]), parseFloat(p[3]));
+      salir(); dessinerPlan(); repeindreBientot(); return;
+    }
     if (t.hasAttribute('data-num') && el) { instantaneDoux(); el[t.getAttribute('data-num')] = nb(t.value, 0); salir(); dessinerPlan(); repeindreBientot(); return; }
     if (t.hasAttribute('data-txt') && el) { instantaneDoux(); el[t.getAttribute('data-txt')] = t.value; salir(); dessinerListe(); repeindreBientot(); return; }
     if (t.hasAttribute('data-mtxt')) { instantaneDoux(); M[t.getAttribute('data-mtxt')] = t.value; salir(); return; }
@@ -853,17 +1187,41 @@ ${JS_ACTIVITE}${JS_DIRE}
     var t = ev.target;
     if (el && t.hasAttribute('data-sel-champ')) { instantane(); el[t.getAttribute('data-sel-champ')] = t.value; salir(); repeindreBientot(); return; }
   });
+  /* ⚠ UN SEUL ECOUTEUR, ET LA CIBLE SE LIT DANS L ATTRIBUT (el:xxx, bg:xxx).
+     Enumerer chaque nom aurait demande d y revenir a chaque champ ajoute — et
+     c est exactement le genre d oubli qui donne un bouton muet. */
+  function appliquerCible(cible, valeur, estBascule){
+    var p = String(cible).split(':'), ou = p[0], cle = p[1];
+    var el = selEl();
+    if (ou === 'bg' || ou === 'btxt') { M.bg = Object.assign({}, M.bg || {}); M.bg[cle] = estBascule ? !M.bg[cle] : valeur; return true; }
+    if (ou === 'otxt') { M.border = Object.assign({}, M.border || {}); M.border[cle] = valeur; return true; }
+    if ((ou === 'el' || ou === 'txt') && el) { el[cle] = estBascule ? !el[cle] : valeur; return true; }
+    return false;
+  }
   prop.addEventListener('click', function(ev){
     if (!M) return;
     var el = selEl();
     var b;
     if ((b = ev.target.closest('[data-seg]'))) {
-      var nom = b.getAttribute('data-seg'), val = b.getAttribute('data-val');
       instantane();
-      if (nom === 'bgtype') { M.bg = Object.assign({}, M.bg || {}, { type: val }); }
-      else if (nom === 'bgfit') { M.bg = Object.assign({}, M.bg || {}, { fit: val }); }
-      else if (nom === 'elfit' && el) { el.fit = val; }
-      salir(); dessiner(); repeindreBientot(); return;
+      if (appliquerCible(b.getAttribute('data-seg'), b.getAttribute('data-val'), false)) {
+        salir(); dessiner(); repeindreBientot();
+      }
+      return;
+    }
+    if ((b = ev.target.closest('[data-teinte]'))) {
+      instantane();
+      if (appliquerCible(b.getAttribute('data-teinte'), b.getAttribute('data-val'), false)) {
+        salir(); dessinerProp(); repeindreBientot();
+      }
+      return;
+    }
+    if ((b = ev.target.closest('[data-bascule]'))) {
+      instantane();
+      if (appliquerCible(b.getAttribute('data-bascule'), null, true)) {
+        salir(); dessiner(); repeindreBientot();
+      }
+      return;
     }
     if ((b = ev.target.closest('[data-choisir]'))) {
       if (b.getAttribute('data-choisir') === 'fond') ouvrirChoix(poserImageFond, 'Choisir une image de fond');
@@ -878,15 +1236,30 @@ ${JS_ACTIVITE}${JS_DIRE}
       instantane(); el.src = '';
       salir(); dessiner(); repeindreBientot(); return;
     }
-    if ((b = ev.target.closest('[data-bascule]')) && el) {
-      instantane();
-      var cle = b.getAttribute('data-bascule');
-      el[cle] = !el[cle];
-      salir(); dessiner(); repeindreBientot(); return;
+    if (ev.target.closest('[data-graisse]') && el) {
+      instantane(); el.weight = nb(el.weight, 600) >= 700 ? 400 : 700;
+      salir(); dessinerProp(); repeindreBientot(); return;
     }
+    if (ev.target.closest('[data-rot90]') && el) {
+      instantane(); el.rot = (nb(el.rot, 0) + 90) % 360;
+      salir(); dessinerPlan(); dessinerProp(); repeindreBientot(); return;
+    }
+    /* ⚠ REINITIALISER LA RETOUCHE REMET AUSSI LE RECADRAGE ET LES MIROIRS, comme
+       l ecran web : c est ce qu on veut quand on dit << recommence cette image >>,
+       et separer les deux obligerait a chercher deux boutons. */
+    if (ev.target.closest('[data-retouche]') && el) {
+      instantane();
+      Object.assign(el, { bright: 100, contrast: 100, sat: 100, gray: 0, blur: 0,
+        zoom: 1, ox: 0, oy: 0, flipH: false, flipV: false });
+      salir(); dessinerProp(); repeindreBientot();
+      dire('Retouche et recadrage remis à zéro.', 'bon');
+      return;
+    }
+    if ((b = ev.target.closest('[data-aligner]'))) { aligner(b.getAttribute('data-aligner')); return; }
     if ((b = ev.target.closest('[data-ordre]'))) { ordonner(parseInt(b.getAttribute('data-ordre'), 10)); return; }
     if (ev.target.closest('[data-dupliquer]')) { dupliquer(); return; }
     if (ev.target.closest('[data-supprimer]')) { supprimer(); return; }
+    if (ev.target.closest('[data-redim]')) { redimensionner(); return; }
   });
 
   /* ══ LE SELECTEUR ════════════════════════════════════════════════════════ */
@@ -932,23 +1305,53 @@ ${JS_ACTIVITE}${JS_DIRE}
       if (!voile.hidden) { fermerChoix(); return; }
       if (SALE) { dire('Modifications non enregistrées — Enregistrer, ou Recharger pour abandonner.', 'att'); return; }
       P.fermer();
+      return;
     }
     var cmd = ev.ctrlKey || ev.metaKey;
     if (cmd && (ev.key === 's' || ev.key === 'S')) { ev.preventDefault(); enregistrer(); return; }
     if (cmd && (ev.key === 'z' || ev.key === 'Z')) { ev.preventDefault(); if (ev.shiftKey) refaire(); else annuler(); return; }
     if (cmd && (ev.key === 'y' || ev.key === 'Y')) { ev.preventDefault(); refaire(); return; }
-    /* ⚠ LA TOUCHE SUPPRIMER NE S APPLIQUE PAS DANS UN CHAMP : sans ce garde, on
-       effacerait l element pendant qu on corrige son texte. Et elle refuse un
-       element verrouille — c est exactement ce que le verrou promet. */
+    /* ⚠ LES RACCOURCIS QUI TOUCHENT UN ELEMENT NE S APPLIQUENT PAS DANS UN
+       CHAMP : sans ce garde, Ctrl+C copierait l element au lieu du texte
+       selectionne, et Suppr effacerait l element pendant qu on corrige son nom. */
+    var a = document.activeElement, n = a ? (a.tagName || '').toLowerCase() : '';
+    if (n === 'input' || n === 'textarea' || n === 'select') return;
+    if (!voile.hidden) return;
+    var el = selEl();
+    if (cmd && (ev.key === 'd' || ev.key === 'D')) { ev.preventDefault(); dupliquer(); return; }
+    if (cmd && (ev.key === 'c' || ev.key === 'C')) {
+      if (el) { PRESSE = JSON.stringify(el); dire('Élément copié.', 'bon'); }
+      return;
+    }
+    if (cmd && (ev.key === 'v' || ev.key === 'V')) {
+      if (!PRESSE) { dire('Rien à coller.', 'att'); return; }
+      ev.preventDefault();
+      dupliquer(JSON.parse(PRESSE));
+      return;
+    }
     if (ev.key === 'Delete' || ev.key === 'Backspace') {
-      var a = document.activeElement, n = a ? (a.tagName || '').toLowerCase() : '';
-      if (n === 'input' || n === 'textarea' || n === 'select') return;
-      if (!voile.hidden) return;
-      var el = selEl();
       if (!el) return;
       ev.preventDefault();
       if (el.locked) { dire('Élément verrouillé — déverrouillez-le pour le retirer.', 'att'); return; }
       supprimer();
+      return;
+    }
+    /* ⚠ LES FLECHES DEPLACENT DE 0,5 %, ET DE 5 % AVEC MAJUSCULE. C est le seul
+       moyen de placer au dixieme pres sans viser a la souris — et ce sont les
+       memes pas que l ecran web, pour que le geste se transporte. */
+    if (!el || el.locked) return;
+    var pas = ev.shiftKey ? 5 : 0.5, bouge = false;
+    if (ev.key === 'ArrowLeft')  { el.xPct = nb(el.xPct, 0) - pas; bouge = true; }
+    if (ev.key === 'ArrowRight') { el.xPct = nb(el.xPct, 0) + pas; bouge = true; }
+    if (ev.key === 'ArrowUp')    { el.yPct = nb(el.yPct, 0) - pas; bouge = true; }
+    if (ev.key === 'ArrowDown')  { el.yPct = nb(el.yPct, 0) + pas; bouge = true; }
+    if (bouge) {
+      ev.preventDefault();
+      instantaneDoux();
+      salir();
+      dessinerPlan();
+      dessinerProp();
+      repeindreBientot();
     }
   });
 

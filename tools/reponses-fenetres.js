@@ -3047,6 +3047,15 @@ module.exports = {
         // élément AJOUTÉ visible. Sans elle, la fenêtre montrerait une poignée
         // par-dessus une image qui ne connaît pas encore cet élément.
         'promo:modeleApercu': { ok: true, rendable: true, image: IMAGE, detail: '' },
+        // Les listes de l inspecteur viennent du SITE : une copie dans la
+        // fenetre aurait propose un jour une police qui sort en Arial.
+        'promo:reglages': { ok: true,
+          polices: ['Inter', 'Playfair Display', 'Georgia', 'Times New Roman', 'Arial',
+                    'Helvetica', 'Verdana', 'Trebuchet MS', 'Courier New', 'Impact'],
+          teintes: ['#111827', '#ffffff', '#C49A6C', '#8a6a44', '#1e1b4b', '#7c3aed',
+                    '#dc2626', '#16a34a', '#0ea5e9', '#f59e0b', '#6b7280', '#000000'] },
+        // Le format a sa PROPRE porte : 'modeleEcrire' refuse w et h a dessein.
+        'promo:redimensionner': { ok: true, w: 3, h: 1.5, dim: '3 × 1,5 po' },
         // Un élément NEUF vient toujours du site, défauts et identifiant compris.
         'promo:elementModele': { ok: true, element: { id: 'e9', kind: 'text', name: 'Texte',
           text: 'Votre texte', xPct: 12, yPct: 34, wPct: 76, hPct: 26, rot: 0, opacity: 100,
@@ -3083,6 +3092,13 @@ module.exports = {
           src: '', fit: 'contain', xPct: 28, yPct: 12, wPct: 44, hPct: 44, rot: 0,
           opacity: 100, locked: false, hidden: false } },
         'promo:logos': { ok: true, total: 0, plafond: 60, ecartes: 0, logos: [] },
+        // Les listes de l inspecteur viennent du SITE : une copie dans la
+        // fenetre aurait propose un jour une police qui sort en Arial.
+        'promo:reglages': { ok: true,
+          polices: ['Inter', 'Playfair Display', 'Georgia', 'Times New Roman', 'Arial',
+                    'Helvetica', 'Verdana', 'Trebuchet MS', 'Courier New', 'Impact'],
+          teintes: ['#111827', '#ffffff', '#C49A6C', '#8a6a44', '#1e1b4b', '#7c3aed',
+                    '#dc2626', '#16a34a', '#0ea5e9', '#f59e0b', '#6b7280', '#000000'] },
         'promo:modeleApercu': { ok: true, rendable: true, image: IMAGE, detail: '' },
         identite: IDENTITE,
       },
@@ -3105,6 +3121,41 @@ module.exports = {
             ],
           },
         },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠⚠ LE SEUL DEFAUT DE CET ECRAN QUI NE SE VOIT PAS A L OEIL : un code-barres
+      // dont le contenu ne s encode pas en Code 128 se DESSINE quand meme. Il ne se
+      // lit simplement jamais au lecteur, et on l apprend a la caisse, sur une
+      // etiquette deja collee. La fenetre doit le DIRE — dans la liste ET dans
+      // l inspecteur — et c est ce que ce cas eprouve.
+      nom: 'code-barres qui ne se lira pas au lecteur',
+      id: 'pp7',
+      reponses: {
+        'promo:modeleLire': {
+          ok: true, rendable: true, image: IMAGE, detail: '',
+          modele: {
+            id: 'pp7', name: 'Étiquette prix avec code', type: 'label',
+            w: 2, h: 1, shape: 'rect', corner: 0, safe: 0.06,
+            bg: { type: 'solid', color: '#ffffff' }, border: { w: 0, color: '#C49A6C', inset: 0.04 },
+            elements: [
+              { id: 'c1', kind: 'barcode', name: 'Code du produit', text: 'ROBE—ÉTÉ',
+                showText: true, color: '#000000',
+                xPct: 12, yPct: 55, wPct: 76, hPct: 32, rot: 0, opacity: 100,
+                locked: false, hidden: false },
+            ],
+          },
+        },
+        'promo:modeleApercu': { ok: true, rendable: true, image: IMAGE, detail: '',
+          codes: [{ id: 'c1', lisible: false }] },
+        // Les listes de l inspecteur viennent du SITE : une copie dans la
+        // fenetre aurait propose un jour une police qui sort en Arial.
+        'promo:reglages': { ok: true,
+          polices: ['Inter', 'Playfair Display', 'Georgia', 'Times New Roman', 'Arial',
+                    'Helvetica', 'Verdana', 'Trebuchet MS', 'Courier New', 'Impact'],
+          teintes: ['#111827', '#ffffff', '#C49A6C', '#8a6a44', '#1e1b4b', '#7c3aed',
+                    '#dc2626', '#16a34a', '#0ea5e9', '#f59e0b', '#6b7280', '#000000'] },
         identite: IDENTITE,
       },
     },

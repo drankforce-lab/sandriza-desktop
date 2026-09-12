@@ -2378,6 +2378,12 @@ const OPS_PONT = new Set([
   // lui, ajouter un element ou changer le fond ne produisait aucun retour a l
   // ecran, puisque la fenetre ne peint rien. Il n ECRIT rien.
   'promo:modeleApercu',
+  // 'promo:redimensionner' est la SEULE porte qui touche w et h : 'modeleEcrire'
+  // les refuse a dessein, pour qu une fenetre un peu ancienne ne reecrive pas
+  // des dimensions lues avant un changement. 'promo:reglages' rend les listes de
+  // l inspecteur (polices que le peintre sait rendre, teintes) — les recopier
+  // ici aurait propose un jour une police qui sort en Arial.
+  'promo:redimensionner', 'promo:reglages',
   // Depenses d entreprise (fenetre Depenses, 2.5.0) — premier ecran du palier 5.
   // ⚠ 'depenses:facture' LIT une facture par le service d IA : la cle, pdf.js, le
   // canevas et le taux de change restent au site. La fenetre envoie un fichier et
@@ -3046,6 +3052,7 @@ const LIMITES_PONT = {
   'promo:logos': 60000,
   // Le meme travail que 'promo:apercu' : une image peinte, ses photos chargees.
   'promo:modeleApercu': 45000,
+  'promo:redimensionner': 20000, 'promo:reglages': 15000,
   // Une facture passe par la compression, l extraction du texte d un PDF (ou le
   // rendu de ses pages), le service d IA et le taux de change : c est la plus
   // longue chaine du module.
