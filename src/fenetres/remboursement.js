@@ -22,6 +22,11 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable, et le MOTIF d'un remboursement en est une (voir
+   src/langue/index.js et l'en-tête de src/langue/remboursement.js). */
+const T = require('../langue').tr('remboursement');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -102,11 +107,11 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 function pageRemboursement(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Remboursement — Administration Sandriza</title>
+<title>${T("Remboursement — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.refunds}</span><h1 id="titre">Remboursement</h1>
+<div class="tete"><span class="ico">${ICO.refunds}</span><h1 id="titre">${T("Remboursement")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions" id="actions"></span></div>
 <script>
@@ -140,28 +145,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function cle(a){ return a.productId + '|' + a.taille + '|' + a.couleur; }
 
   var MOTIFS = {
-    session: 'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit: 'Votre rôle ne permet pas de rembourser.',
-    indisponible: 'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible: 'La fenêtre principale ne répond pas.',
-    delai: 'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable: 'Cette commande n’existe plus.',
-    verrou: 'Commande ouverte par quelqu’un d’autre.',
-    motif_requis: 'Indiquez le motif du remboursement.',
-    aucun_article: 'Sélectionnez au moins un article.',
-    deja_remboursee: 'Commande déjà entièrement remboursée.',
-    montant_invalide: 'Montant du remboursement invalide.',
-    square_indisponible: 'Aucun paiement Square lié à cette commande.',
-    nip_requis: 'Le code d’exemption est requis pour renoncer aux frais.',
-    nip_incorrect: 'Code d’exemption incorrect.',
-    echec: 'L’opération a échoué.'
+    session: '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit: '${T("Votre rôle ne permet pas de rembourser.")}',
+    indisponible: '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible: '${T("La fenêtre principale ne répond pas.")}',
+    delai: '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable: '${T("Cette commande n’existe plus.")}',
+    verrou: '${T("Commande ouverte par quelqu’un d’autre.")}',
+    motif_requis: '${T("Indiquez le motif du remboursement.")}',
+    aucun_article: '${T("Sélectionnez au moins un article.")}',
+    deja_remboursee: '${T("Commande déjà entièrement remboursée.")}',
+    montant_invalide: '${T("Montant du remboursement invalide.")}',
+    square_indisponible: '${T("Aucun paiement Square lié à cette commande.")}',
+    nip_requis: '${T("Le code d’exemption est requis pour renoncer aux frais.")}',
+    nip_incorrect: '${T("Code d’exemption incorrect.")}',
+    echec: '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
     if (r && r.detail) return r.detail;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -195,70 +200,70 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     if (R.complet || !R.articles.length) {
       corps.innerHTML = '<div class="carte">' + (R.complet
-        ? '<div class="avis vert" style="margin:0"><span class="ic">✅</span> Commande entièrement remboursée — total : '
+        ? '<div class="avis vert" style="margin:0"><span class="ic">✅</span> ${T("Commande entièrement remboursée — total : ")}'
           + argent(R.dejaRembourse) + '.</div>'
-        : '<div class="avis jaune" style="margin:0">Tous les articles de cette commande ont déjà été remboursés.</div>')
+        : '<div class="avis jaune" style="margin:0">${T("Tous les articles de cette commande ont déjà été remboursés.")}</div>')
         + '</div>';
       actions.innerHTML = '';
       return;
     }
-    var h = '<div class="carte"><h2>Articles à rembourser <span class="note">— quantités plafonnées au pas-encore-remboursé</span></h2>'
+    var h = '<div class="carte"><h2>${T("Articles à rembourser ")}<span class="note">${T("— quantités plafonnées au pas-encore-remboursé")}</span></h2>'
       + R.articles.map(function(a, i){
           var q = QTE[cle(a)] || 0;
           return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
             + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—')
-            + ' · ' + argent(a.prix) + ' / unité</div></div>'
+            + ' · ' + argent(a.prix) + '${T(" / unité")}</div></div>'
             + '<input type="number" min="0" max="' + a.maxQty + '" value="' + q + '" data-q="' + i + '"'
-      +   ' aria-label="' + esc('Quantité à rembourser — ' + (a.nom || '')) + '">'
-            + '<span class="max">max ' + a.maxQty + '</span></div>';
+      +   ' aria-label="' + esc('${T("Quantité à rembourser — ")}' + (a.nom || '')) + '">'
+            + '<span class="max">${T("max ")}' + a.maxQty + '</span></div>';
         }).join('')
       + '</div>';
 
     if (R.livraison.cout > 0) {
-      h += '<div class="carte"><h2>Livraison <span class="note">— ' + argent(R.livraison.cout)
-        + (R.livraison.prioritaire ? ' · prioritaire' : '') + '</span></h2>'
+      h += '<div class="carte"><h2>${T("Livraison")} <span class="note">— ' + argent(R.livraison.cout)
+        + (R.livraison.prioritaire ? '${T(" · prioritaire")}' : '') + '</span></h2>'
         + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.85rem;cursor:pointer">'
-        + '<input type="checkbox" id="m-livraison"> Inclure les frais de livraison</label>'
+        + '<input type="checkbox" id="m-livraison"> ${T("Inclure les frais de livraison")}</label>'
         + '<div class="aide" style="margin-top:.3rem">' + (R.livraison.nonExpediee
-            ? 'La commande n’a pas encore été expédiée — frais remboursables.'
-            : 'Déjà expédiée : le transporteur a été payé. À votre discrétion (erreur, défaut, geste commercial).')
+            ? '${T("La commande n’a pas encore été expédiée — frais remboursables.")}'
+            : '${T("Déjà expédiée : le transporteur a été payé. À votre discrétion (erreur, défaut, geste commercial).")}')
         + '</div></div>';
     }
 
-    h += '<div class="carte"><h2>Mode de remboursement</h2><div class="choix">'
+    h += '<div class="carte"><h2>${T("Mode de remboursement")}</h2><div class="choix">'
       + '<label><input type="radio" name="m-type" value="credit" checked>'
-      + '<span><strong><span class="ic">💳</span> Crédit boutique</strong>'
-      + '<span class="exp">Lié au compte du client, n’expire jamais, courriel envoyé automatiquement.</span></span></label>'
+      + '<span><strong><span class="ic">💳</span> ${T("Crédit boutique")}</strong>'
+      + '<span class="exp">${T("Lié au compte du client, n’expire jamais, courriel envoyé automatiquement.")}</span></span></label>'
       + '<label style="' + (R.squareDisponible ? '' : 'opacity:.5;cursor:not-allowed') + '">'
       + '<input type="radio" name="m-type" value="original"' + (R.squareDisponible ? '' : ' disabled') + '>'
-      + '<span><strong>↩ Moyen de paiement original</strong>'
+      + '<span><strong>${T("↩ Moyen de paiement original")}</strong>'
       + '<span class="exp">' + (R.squareDisponible
-          ? 'Sur la carte d’origine via Square — 5 à 7 jours ouvrables.'
-          : 'Aucun paiement Square enregistré sur cette commande.') + '</span></span></label>'
+          ? '${T("Sur la carte d’origine via Square — 5 à 7 jours ouvrables.")}'
+          : '${T("Aucun paiement Square enregistré sur cette commande.")}') + '</span></span></label>'
       + '</div>'
       + (R.squareDisponible
         ? '<div id="z-frais" style="display:none;margin-top:.5rem;padding:.5rem .65rem;'
           + 'background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.3);border-radius:9px">'
-          + '<div style="font-size:.83rem"><strong>Frais de service Square retenus</strong> — proportionnels ('
-          + argent(R.frais.commande) + ' sur ' + argent(R.frais.baseHT) + ' HT). Square ne rembourse pas ses frais.</div>'
+          + '<div style="font-size:.83rem"><strong>${T("Frais de service Square retenus")}</strong>${T(" — proportionnels (")}'
+          + argent(R.frais.commande) + '${T(" sur ")}' + argent(R.frais.baseHT) + '${T(" HT). Square ne rembourse pas ses frais.")}</div>'
           + '<button class="mini" id="btn-nip" style="margin-top:.4rem;font-size:.75rem;padding:.14rem .5rem">'
-          + '<span class="ic">🔐</span> Renoncer aux frais (rembourser au complet)</button>'
+          + '<span class="ic">🔐</span> ${T("Renoncer aux frais (rembourser au complet)")}</button>'
           + '<div id="z-nip-ok" style="display:none;font-size:.78rem;color:var(--tx-ok);margin-top:.3rem">'
-          + '✓ Exemption accordée — les frais ne seront pas retenus.</div>'
+          + '${T("✓ Exemption accordée — les frais ne seront pas retenus.")}</div>'
           + '</div>' : '')
       + '</div>';
 
-    h += '<div class="carte"><h2>Motif <span class="note">— obligatoire</span></h2>'
+    h += '<div class="carte"><h2>${T("Motif")} <span class="note">${T("— obligatoire")}</span></h2>'
       // rows="3" (2026-08-21) : motif OBLIGATOIRE d'un remboursement — de l'argent
       // au bout, et c'est la piece qu'on relit si la cliente conteste.
-      + '<textarea id="m-motif" aria-label="Motif du remboursement" rows="3" placeholder="Ex : article défectueux, mauvaise taille reçue, retour volontaire…"></textarea>'
+      + '<textarea id="m-motif" aria-label="${T("Motif du remboursement")}" rows="3" placeholder="${T("Ex : article défectueux, mauvaise taille reçue, retour volontaire…")}"></textarea>'
       + '</div>';
 
-    h += '<div class="carte tot" id="z-totaux"><h2>Totaux <span class="note">— calculés par le site</span></h2>'
-      + '<div class="vide" style="padding:.6rem">Choisissez des articles…</div></div>';
+    h += '<div class="carte tot" id="z-totaux"><h2>${T("Totaux")} <span class="note">${T("— calculés par le site")}</span></h2>'
+      + '<div class="vide" style="padding:.6rem">${T("Choisissez des articles…")}</div></div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = '<button class="paie" id="btn-rembourser" disabled>Confirmer le remboursement</button>';
+    actions.innerHTML = '<button class="paie" id="btn-rembourser" disabled>${T("Confirmer le remboursement")}</button>';
     brancher();
   }
 
@@ -266,21 +271,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var z = document.getElementById('z-totaux');
     if (!z) return;
     if (!TOT || !TOT.nbArticles) {
-      z.innerHTML = '<h2>Totaux <span class="note">— calculés par le site</span></h2>'
-        + '<div class="vide" style="padding:.6rem">Choisissez des articles…</div>';
+      z.innerHTML = '<h2>${T("Totaux")} <span class="note">${T("— calculés par le site")}</span></h2>'
+        + '<div class="vide" style="padding:.6rem">${T("Choisissez des articles…")}</div>';
       majBouton();
       return;
     }
-    var h = '<h2>Totaux <span class="note">— calculés par le site</span></h2>'
-      + '<div class="l"><span>Sous-total (' + TOT.nbArticles + ' unité' + (TOT.nbArticles > 1 ? 's' : '') + ')</span><span>' + argent(TOT.sousTotal) + '</span></div>';
-    if (TOT.livraison > 0) h += '<div class="l"><span>Livraison</span><span>' + argent(TOT.livraison) + '</span></div>';
+    var h = '<h2>${T("Totaux")} <span class="note">${T("— calculés par le site")}</span></h2>'
+      + '<div class="l"><span>${T("Sous-total (")}' + TOT.nbArticles + '${T(" unité")}' + (TOT.nbArticles > 1 ? 's' : '') + ')</span><span>' + argent(TOT.sousTotal) + '</span></div>';
+    if (TOT.livraison > 0) h += '<div class="l"><span>${T("Livraison")}</span><span>' + argent(TOT.livraison) + '</span></div>';
     (TOT.taxes || []).forEach(function(t){
       h += '<div class="l"><span>' + esc(t.nom) + ' (' + (Math.round(t.taux * 1000000) / 10000) + ' %)</span><span>' + argent(t.montant) + '</span></div>';
     });
-    h += '<div class="l grand"><span>Total brut</span><span>' + argent(TOT.total) + '</span></div>';
+    h += '<div class="l grand"><span>${T("Total brut")}</span><span>' + argent(TOT.total) + '</span></div>';
     if (TOT.retenu) {
-      h += '<div class="l frais"><span>Frais Square retenus</span><span>−' + argent(TOT.frais) + '</span></div>'
-        + '<div class="l net"><span>Net au client</span><span>' + argent(TOT.net) + '</span></div>';
+      h += '<div class="l frais"><span>${T("Frais Square retenus")}</span><span>−' + argent(TOT.frais) + '</span></div>'
+        + '<div class="l net"><span>${T("Net au client")}</span><span>' + argent(TOT.net) + '</span></div>';
     }
     z.innerHTML = h;
     majBouton();
@@ -291,8 +296,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!b) return;
     var pret = !!(TOT && TOT.nbArticles && TOT.total > 0) && !enCours;
     b.disabled = !pret;
-    b.textContent = enCours ? 'Remboursement…'
-      : (pret ? 'Rembourser — ' + argent(TOT.retenu ? TOT.net : TOT.total) : 'Confirmer le remboursement');
+    b.textContent = enCours ? '${T("Remboursement…")}'
+      : (pret ? '${T("Rembourser — ")}' + argent(TOT.retenu ? TOT.net : TOT.total) : '${T("Confirmer le remboursement")}');
   }
 
   var totT = null;
@@ -348,13 +353,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       apresNip();
       return;
     }
-    voile('<h3><span class="ic">🔐</span> Code d’exemption</h3>'
-      + '<p>Renoncer aux frais de service Square exige le code confidentiel.</p>'
-      + '<input type="password" id="v-nip" aria-label="NIP de validation" autocomplete="off" '
+    voile('<h3><span class="ic">🔐</span> ${T("Code d’exemption")}</h3>'
+      + '<p>${T("Renoncer aux frais de service Square exige le code confidentiel.")}</p>'
+      + '<input type="password" id="v-nip" aria-label="${T("NIP de validation")}" autocomplete="off" '
       + 'style="letter-spacing:.14em;text-align:center;font-family:ui-monospace,monospace">'
-      + '<div id="v-nip-err" style="display:none;font-size:.78rem;color:var(--tx-err);margin-top:.35rem">Code incorrect — réessayez.</div>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="prim" id="v-oui">Confirmer</button></div>',
+      + '<div id="v-nip-err" style="display:none;font-size:.78rem;color:var(--tx-err);margin-top:.35rem">${T("Code incorrect — réessayez.")}</div>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Confirmer")}</button></div>',
       function(fermer){
         var champ = document.getElementById('v-nip');
         champ.focus();
@@ -394,27 +399,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var s = saisie();
     if (!String(s.motif || '').trim()) { dire(MOTIFS.motif_requis, 'err'); return; }
     var enCredit = s.methode !== 'original';
-    voile('<h3><span class="ic">💳</span> Confirmer le remboursement ?</h3>'
-      + '<p>' + TOT.nbArticles + ' unité' + (TOT.nbArticles > 1 ? 's' : '')
-      + (TOT.livraison > 0 ? ' + livraison' : '') + ' — total <strong>' + argent(TOT.total) + '</strong>'
-      + (TOT.retenu ? ', net au client <strong>' + argent(TOT.net) + '</strong> (frais ' + argent(TOT.frais) + ' retenus)' : '')
-      + '</p><p>Méthode : <strong>' + (enCredit ? 'crédit boutique (n’expire jamais)' : 'moyen de paiement original — Square') + '</strong></p>'
-      + '<p style="color:var(--tx-att)">Un remboursement ne s’annule pas d’un clic.</p>'
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="paie" id="v-oui">Rembourser ' + argent(TOT.retenu ? TOT.net : TOT.total) + '</button></div>',
+    voile('<h3><span class="ic">💳</span> ${T("Confirmer le remboursement ?")}</h3>'
+      + '<p>' + TOT.nbArticles + '${T(" unité")}' + (TOT.nbArticles > 1 ? 's' : '')
+      + (TOT.livraison > 0 ? '${T(" + livraison")}' : '') + '${T(" — total ")}<strong>' + argent(TOT.total) + '</strong>'
+      + (TOT.retenu ? '${T(", net au client ")}<strong>' + argent(TOT.net) + '</strong>${T(" (frais ")}' + argent(TOT.frais) + '${T(" retenus)")}' : '')
+      + '</p><p>${T("Méthode : ")}<strong>' + (enCredit ? '${T("crédit boutique (n’expire jamais)")}' : '${T("moyen de paiement original — Square")}') + '</strong></p>'
+      + '<p style="color:var(--tx-att)">${T("Un remboursement ne s’annule pas d’un clic.")}</p>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="paie" id="v-oui">${T("Rembourser ")}' + argent(TOT.retenu ? TOT.net : TOT.total) + '</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
           fermer();
-          enCours = true; majBouton(); dire('Remboursement en cours…', 'att');
+          enCours = true; majBouton(); dire('${T("Remboursement en cours…")}', 'att');
           s.nipFrais = s.retenirFrais ? '' : NIP_SAISI;
           appeler('remboursement:ecrire', [ID, s]).then(function(r){
             enCours = false;
             if (!r.ok) { majBouton(); dire(expliquer(r), 'err'); return; }
-            var t = r.refundNumber + ' émis.';
-            if (r.credit) t += ' Crédit ' + r.credit.numero + ' (' + argent(r.credit.montant) + '), courriel envoyé.';
-            if (r.squareErreur) t += ' Remboursement local créé mais Square a échoué : ' + r.squareErreur;
-            else if (!r.credit) t += ' Square : ' + argent(r.net) + ' initié.';
+            var t = r.refundNumber + '${T(" émis.")}';
+            if (r.credit) t += '${T(" Crédit ")}' + r.credit.numero + ' (' + argent(r.credit.montant) + '${T("), courriel envoyé.")}';
+            if (r.squareErreur) t += '${T(" Remboursement local créé mais Square a échoué : ")}' + r.squareErreur;
+            else if (!r.credit) t += '${T(" Square : ")}' + argent(r.net) + '${T(" initié.")}';
             dire(t, r.squareErreur ? 'att' : 'bon');
             QTE = {}; TOT = null;
             recharger();
@@ -426,11 +431,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ══ CHARGEMENT ════════════════════════════════════════════════════════════
   function recharger(){
     return appeler('remboursement:lire', [ID]).then(function(r){
-      if (!r.ok) { vide('Remboursement indisponible', expliquer(r)); return; }
+      if (!r.ok) { vide('${T("Remboursement indisponible")}', expliquer(r)); return; }
       R = r;
-      document.getElementById('titre').textContent = 'Remboursement — ' + r.numero;
+      document.getElementById('titre').textContent = '${T("Remboursement — ")}' + r.numero;
       if (r.dejaRembourse > 0 && !r.complet) {
-        sous.textContent = argent(r.dejaRembourse) + ' déjà remboursés';
+        sous.textContent = argent(r.dejaRembourse) + '${T(" déjà remboursés")}';
       }
       dessiner();
     });
@@ -441,11 +446,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('verrou:prendre', ['orders', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = (sous.textContent ? sous.textContent + ' · ' : '') + 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = (sous.textContent ? sous.textContent + ' · ' : '') + '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
+      sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       var b = document.getElementById('btn-rembourser');
       if (b) b.disabled = true;
-      dire('Cette commande est ouverte ailleurs — remboursement bloqué.', 'err');
+      dire('${T("Cette commande est ouverte ailleurs — remboursement bloqué.")}', 'err');
     });
   }
   function rendreVerrou(){
