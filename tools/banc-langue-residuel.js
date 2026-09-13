@@ -62,6 +62,103 @@ const MOTS_FR = new Set([
   'ceci', 'cela', 'toute', 'tous', 'toutes', 'aucun', 'aucune', 'chaque',
 ]);
 
+/* ══ LE LEXIQUE, ET POURQUOI IL NE S ECRIT PAS A LA MAIN ════════════════════
+ * ⚠⚠⚠ CE QUE `MOTS_FR` NE POUVAIT PAS VOIR, ET CE QUE CA A COUTE. La liste
+ * ci-dessus est faite de mots-outils : elle attrape « dans », « pour », « sous ».
+ * Elle ne connait aucun mot de CONTENU sans accent — et c est la que tout passe.
+ * Mesure du 2026-09-12, sur des fenetres declarees COMPLETES : « Adresse »,
+ * « Actif », « Inactif », « Transporteur », « Bordereau », « Ordre de tri »,
+ * « Solde », « Retirer », « hors ligne », « colis complet », « Enregistrement… »
+ * etaient encore sur la page ANGLAISE. Le compteur annoncait zero, ce banc-ci
+ * annoncait zero, et les deux disaient vrai dans leur propre langue.
+ *
+ * ⚠⚠ LE LEXIQUE SE DEDUIT DES DICTIONNAIRES, IL NE S INVENTE PAS. Un mot ecrit
+ * dans une CLE est un mot que ce chantier a deja juge francais et traduit ;
+ * un mot ecrit dans une VALEUR est un mot anglais de cette meme application.
+ * Le lexique est la difference des deux — environ 1 070 mots aujourd hui, et il
+ * GROSSIT TOUT SEUL a chaque fenetre traduite. Une liste tenue a la main se
+ * serait perimee au premier dictionnaire ajoute ; celle-ci ne peut pas.
+ *
+ * ⚠ CE QUE LA SOUSTRACTION NE RETIRE PAS, il faut le nommer : un mot que les
+ * deux langues ecrivent pareil mais qu aucune valeur anglaise n emploie encore
+ * (« client », « article », « train », « plan »). Chacun porte sa raison. */
+const PAREILS = new Map([
+  ['article', 'le meme mot en anglais'], ['articles', 'idem'],
+  ['client', 'le meme mot en anglais'], ['clients', 'idem'],
+  ['train', 'le meme mot en anglais'], ['lots', 'le meme mot en anglais'],
+  ['pile', 'le meme mot en anglais'], ['plan', 'le meme mot en anglais'],
+  ['cents', 'le meme mot en anglais'], ['genre', 'le meme mot en anglais'],
+  ['regard', 'le meme mot en anglais'], ['tour', 'le meme mot en anglais'],
+  ['rupture', 'le meme mot en anglais'], ['ruptures', 'idem'],
+  ['brut', 'employe tel quel en anglais (fichier brut)'],
+  ['corps', 'parait dans des noms de police'],
+  ['plat', 'le « flat lay » du studio s ecrit ainsi'],
+  ['note', 'le meme mot en anglais'], ['sort', 'le meme mot en anglais'],
+  ['long', 'le meme mot en anglais'], ['marche', 'le meme mot en anglais'],
+  ['fond', 'parait dans des noms techniques'], ['bras', 'le meme mot en anglais'],
+  ['agence', 'parait dans des raisons sociales'],
+  ['relais', 'un point de relais garde son nom'],
+  ['tissu', 'le meme mot en anglais'], ['ombre', 'parait comme nom de reglage'],
+  ['objet', 'le meme mot en anglais'], ['objets', 'idem'],
+  ['figure', 'le meme mot en anglais'], ['image', 'le meme mot en anglais'],
+  ['images', 'idem'], ['service', 'le meme mot en anglais'], ['services', 'idem'],
+  ['chance', 'le meme mot en anglais'], ['sourire', 'parait comme nom de pose'],
+  ['grand', 'le meme mot en anglais'], ['patient', 'le meme mot en anglais'],
+]);
+
+const LEXIQUE = (() => {
+  const fr = new Set(), en = new Set();
+  const desMots = (s) => (String(s).match(/[A-Za-zÀ-ÿŒœ]{4,}/g) || []).map((m) => m.toLowerCase());
+  let noms = [];
+  try {
+    noms = fs.readdirSync(DICOS).filter((f) => f.endsWith('.js') && f !== 'index.js')
+      .map((f) => f.replace(/\.js$/, ''));
+  } catch (e) { return new Set(); }
+  for (const n of noms) {
+    const d = LANGUE.dico(n) || {};
+    for (const cle of Object.keys(d)) {
+      for (const m of desMots(cle)) if (!/[À-ÿŒœ]/.test(m)) fr.add(m);
+      for (const m of desMots(d[cle])) en.add(m);
+    }
+  }
+  return new Set([...fr].filter((m) => !en.has(m) && !PAREILS.has(m)));
+})();
+
+/* ══ LA DETTE DECLAREE DU 2026-09-12 ════════════════════════════════════════
+ * ⚠⚠ POURQUOI UN PLAFOND PLUTOT QUE ZERO TOUT DE SUITE. Le jour ou le lexique
+ * et les attributs sont entres dans ce banc, il a trouve 243 textes francais
+ * sur des pages ANGLAISES, dans 22 des 23 fenetres declarees completes. Les
+ * corriger toutes avant de poser la mesure aurait voulu dire garder la mesure
+ * DANS UNE SEANCE au lieu de dans le depot — et c est exactement ce que
+ * l en-tete de ce fichier reproche a un controle refait a la main.
+ *
+ * ⚠⚠ CE PLAFOND NE SERT QU A DESCENDRE. Chaque fenetre porte le nombre qu elle
+ * avait ce jour-la ; le banc REFUSE des qu une fenetre depasse le sien, donc
+ * rien ne peut empirer. Quand une fenetre est reparee, on ECRIT SON NOUVEAU
+ * NOMBRE ICI — et quand il tombe a zero, on retire la ligne. Une dette qu on ne
+ * chiffre pas est une dette qu on oublie.
+ *
+ * ⚠ LES CHIFFRES NE SE REMONTENT JAMAIS. Si une ligne doit grandir, c est qu on
+ * a ajoute du francais : c est la faute qu il faut corriger, pas le plafond. */
+const DETTE = new Map([
+  ['caisse', 5], ['campagnes', 19], ['catalogio', 3], ['client', 3],
+  ['commande', 11], ['commandes', 23], ['depenses', 13], ['fournisseur', 2],
+  ['impot', 4], ['inventaire', 22], ['invmeta', 15], ['photos', 22],
+  ['produit', 22], ['produits', 10], ['promo', 5], ['promo-editeur', 14],
+  ['ramassages', 5], ['retour', 11], ['studio', 19],
+  ['tableau', 4], ['telephonie', 9],
+]);
+
+/* ⚠ CE QUI N EST PAS DU TEXTE, meme quand ca porte des mots francais : un
+   selecteur (`[data-onglet]`, `.ligne[data-v]`), un attribut technique
+   (`class="fait"`), une adresse. Les accuser noierait le signal. */
+const PAS_DU_TEXTE = [
+  /^[.#\[]/,                                   // un selecteur
+  /^[a-z-]+="[^"]*"$/i,                        // un attribut nu
+  /^https?:\/\//i,                             // une adresse
+  /^[\w-]+\[[^\]]*\]$/,                        // balise[attribut]
+];
+
 const ACCENT = /[àâäçéèêëîïôöùûüÿœæÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸŒÆ]/;
 
 /* Les chaines du script, SANS le filtre « un seul mot » du compteur : c est
@@ -108,9 +205,29 @@ const motsFrancais = (t) => {
     if (!mot || mot.length < 3) continue;
     if (exempte(mot)) continue;
     if (ACCENT.test(mot)) { trouves.push(mot); continue; }
-    if (MOTS_FR.has(mot.toLowerCase())) trouves.push(mot);
+    if (MOTS_FR.has(mot.toLowerCase())) { trouves.push(mot); continue; }
+    if (LEXIQUE.has(mot.toLowerCase())) trouves.push(mot);
   }
   return trouves;
+};
+
+/* ⚠⚠ LES ATTRIBUTS ECRITS DANS LE SCRIPT — l autre moitie de l angle mort.
+   `texteAffiche` lit bien `title=`, `placeholder=`, `aria-label=` et `alt=`,
+   mais il BLANCHIT d abord les blocs <script> ; or dans ces fenetres la page se
+   fabrique DANS le script (`h += '<input aria-label="Rechercher un produit">'`).
+   Resultat : ces attributs-la n etaient lus par personne — « Aucune unité en
+   stock » portait meme un accent et passait quand meme. On les relit donc sur
+   la page ENTIERE, script compris. */
+const ATTRIBUTS = /\b(?:title|placeholder|aria-label|alt)\s*=\s*\\?"([^"<>\\]+)\\?"/gi;
+const attributsPartout = (page) => {
+  const out = [];
+  const re = new RegExp(ATTRIBUTS.source, 'gi');
+  let m;
+  while ((m = re.exec(page))) {
+    const t = m[1].replace(/\s+/g, ' ').trim();
+    if (t) out.push({ texte: t, index: m.index, ou: 'attribut' });
+  }
+  return out;
 };
 
 const cible = process.argv[2] ? path.basename(process.argv[2]).replace(/\.js$/, '') : '';
@@ -142,7 +259,7 @@ for (const nom of traduites) {
 
   const restes = [];
   const vus = new Set();
-  const candidats = texteAffiche(page);
+  const candidats = texteAffiche(page).concat(attributsPartout(page));
   const re = /<script[^>]*>([\s\S]*?)<\/script>/gi;
   let bloc;
   while ((bloc = re.exec(page))) {
@@ -160,7 +277,8 @@ for (const nom of traduites) {
   for (const c of candidats) {
     const t = c.texte;
     if (vus.has(t)) continue;
-    if (!PHRASE.test(t) && !ACCENT.test(t)) continue;
+    if (PAS_DU_TEXTE.some((re) => re.test(t))) continue;
+    if (!PHRASE.test(t) && !ACCENT.test(t) && !LEXIQUE.has(t.toLowerCase())) continue;
     if (memeTexte(t)) continue;
     const mots = motsFrancais(t);
     if (!mots.length) continue;
@@ -187,13 +305,29 @@ if (!cible && lues < 1) {
 const sales = parFenetre.filter((x) => x.restes.length);
 const total = sales.reduce((n, x) => n + x.restes.length, 0);
 
+/* ⚠ CE QUI FAIT ECHOUER : depasser son plafond, ou en porter un devenu trop
+   large. Les deux comptent — un plafond qu on ne redescend pas redevient une
+   liste ou l on range ce qu on ne corrige pas. */
+const depassent = sales.filter((x) => x.restes.length > (DETTE.get(x.nom) || 0));
+const perimes = [...DETTE.entries()].filter(([n, p]) => {
+  const x = parFenetre.find((y) => y.nom === n);
+  return x && x.restes.length < p;
+});
+
 if (cible) {
   const x = parFenetre[0];
   if (!x) { console.log('  ' + cible + ' : pas de dictionnaire — pas encore traduite.'); process.exit(0); }
-  console.log('  ' + cible + ' : ' + x.restes.length + ' texte(s) encore en francais');
+  const plafond = DETTE.get(cible);
+  console.log('  ' + cible + ' : ' + x.restes.length + ' texte(s) encore en francais'
+    + (plafond === undefined ? '' : '   (dette declaree : ' + plafond + ')'));
   console.log('');
   x.restes.forEach((r) => console.log('    ' + JSON.stringify(r.texte) + '   [' + r.mots.join(' ') + ']'));
-  process.exit(x.restes.length ? 1 : 0);
+  if (plafond !== undefined && x.restes.length < plafond) {
+    console.log('');
+    console.log('  ~~ la dette a baisse : ecrivez ' + x.restes.length + ' (ou retirez la ligne)');
+    console.log('     pour \'' + cible + '\' dans DETTE, tools/banc-langue-residuel.js');
+  }
+  process.exit(x.restes.length > (plafond || 0) ? 1 : 0);
 }
 
 for (const x of sales) {
@@ -204,6 +338,36 @@ for (const x of sales) {
 
 console.log('');
 if (!total) { console.log('>>> aucune fenetre traduite ne montre de francais en anglais'); process.exit(0); }
-console.log('>>> ' + total + ' texte(s) encore en francais dans ' + sales.length + ' fenetre(s) declaree(s) traduite(s)');
+
+if (depassent.length) {
+  console.log('  NON  ' + depassent.length + ' fenetre(s) DEPASSENT leur dette declaree :');
+  depassent.forEach((x) => console.log('         ' + x.nom + ' : ' + x.restes.length
+    + ' > ' + (DETTE.get(x.nom) || 0)));
+  console.log('');
+  console.log('>>> du francais a ete AJOUTE sur une page anglaise — c est la faute a corriger,');
+  console.log('    pas le plafond a remonter.');
+  process.exit(1);
+}
+
+/* ⚠ UNE DETTE QUI A BAISSE FAIT ECHOUER AUSSI, et ce n est pas de la severite
+   pour la forme : un plafond qu on ne redescend pas laisse rentrer en silence
+   tout ce qu on vient de corriger. Le banc dit le chiffre a ecrire ; c est une
+   ligne, dans le meme commit que la reparation.
+   ⚠ Sur UNE fenetre (l argument), il avertit seulement : on est en train de
+   travailler, pas de verrouiller. */
+if (perimes.length) {
+  console.log('  NON  ' + perimes.length + ' dette(s) ont baisse — le chiffre doit suivre :');
+  perimes.forEach(([n, p]) => {
+    const x = parFenetre.find((y) => y.nom === n);
+    console.log('         ' + n + ' : ecrivez ' + x.restes.length + ' au lieu de ' + p
+      + (x.restes.length ? '' : ' (retirez la ligne)'));
+  });
+  console.log('');
+  console.log('>>> DETTE, tools/banc-langue-residuel.js');
+  process.exit(1);
+}
+
+console.log('>>> ' + total + ' texte(s) encore en francais dans ' + sales.length
+  + ' fenetre(s) — DETTE DECLAREE du 2026-09-12, elle ne doit que descendre');
 console.log('    node tools/banc-langue-residuel.js <fenetre>   pour les voir toutes');
-process.exit(1);
+process.exit(0);

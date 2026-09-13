@@ -112,6 +112,7 @@ module.exports = {
   /* ⚠⚠ CELLE-LA EST DEFINITIVE, et la phrase le dit sans detour. */
   'Liaisons manuelles': 'Manual links',
   'Associer des produits': 'Link products together',
+  'Produit source': 'Source product',
   '— Choisir le produit source —': '— Choose the source product —',
   'Choisissez d’abord le produit source.': 'Choose the source product first.',
   'Aucun produit ne correspond.': 'No product matches.',
@@ -201,5 +202,11 @@ module.exports = {
    * la question est toujours « qui LIT ce que l on tape ici ? ».
    * ══════════════════════════════════════════════════════════════════════════ */
   'Ex : Accessoires tendance': 'E.g. Trending accessories',
-  'Ex : Vous aimerez aussi': 'Ex : Vous aimerez aussi'
+  'Ex : Vous aimerez aussi': 'Ex : Vous aimerez aussi',
+  /* ⚠⚠ TROISIEME CHAMP, MEME QUESTION — et celui-la, le code du site tranche
+     sans ambiguite. `_agencementPublierCoeur` ecrit `name: nom, title: nom` :
+     le nom tape ici DEVIENT le titre affiche sur la fiche produit. Un exemple
+     anglais ferait donc apparaitre de l anglais dans une boutique francophone,
+     exactement comme « Vous aimerez aussi ». Il reste en francais. */
+  'Look d’automne': 'Look d’automne'
 };

@@ -408,7 +408,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     return '<div class="voile" id="rc-voile"><div class="boite">'
       + '<h3>' + (L.nom ? '${T("Articles liés à «")} ' + esc(L.nom) + ' »' : '${T("Associer des produits")}') + '</h3>'
-      + (L.id ? '' : '<div class="ch" style="margin-bottom:.5rem"><select id="rc-source" aria-label="Produit source">'
+      + (L.id ? '' : '<div class="ch" style="margin-bottom:.5rem"><select id="rc-source" aria-label="${T("Produit source")}">'
           + '<option value="">${T("— Choisir le produit source —")}</option>'
           + tout.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.nom) + '</option>'; }).join('')
           + '</select></div>')
@@ -713,7 +713,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return h;
     }
     h += '<label class="champ"><span class="lbl">${T("Nom de la suggestion")}</span>'
-      + '<input class="t" id="ag-nom" placeholder="Look d’automne" value=""></label>'
+      + '<input class="t" id="ag-nom" placeholder="${T("Look d’automne")}" value=""></label>'
       + '<div class="styles">'
       + '<label class="case"><input type="checkbox" id="ag-produit" checked> ${T("Sur les fiches produit")}</label>'
       + '<label class="case"><input type="checkbox" id="ag-panier"> ${T("Dans le panier")}</label>'
