@@ -192,7 +192,10 @@ for (const k of Object.keys(LIBELLES_EN)) {
       }
       /* ⚠⚠ CE QUE LE LEXIQUE NE CONNAÎT PAS RESSORT MOT POUR MOT — le nom d une
          campagne écrit par quelqu un ne doit JAMAIS être réécrit. */
-      const donnee = 'Campagne Été — clientes VIP';
+      /* ⚠ AU MASCULIN — sa règle permanente, et `banc-francais.js` du site l a
+         attrapée ici même : mon premier échantillon disait « clientes VIP ». Un
+         texte d essai est un texte qui s affiche le jour où le banc échoue. */
+      const donnee = 'Campagne Été — clients VIP';
       const d = f({ segmentLibelle: donnee }, 0);
       if (d.segmentLibelle !== donnee) {
         fautes.push('[' + l + '] une DONNÉE est réécrite : « ' + donnee + ' » devient « '
