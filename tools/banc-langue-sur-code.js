@@ -133,6 +133,19 @@ const OUVRE_OBJET = /[{,]\s*$/;
    travail juste fait cesser de lire un banc — d ou la relecture de la ligne
    plutot qu une regle a un caractere. */
 const PARENTHESE_AVANT = /\(\s*$/;
+/* ⚠⚠⚠ DOUZIEME SIGNATURE — UNE CLE DE TABLE, ENTRE GUILLEMETS.
+   Mesure du 2026-09-13, dans `archives` : le type d un remboursement vient du
+   coeur ECRIT EN FRANCAIS (« Crédit », « Frais »), et une table le rendait
+   lisible. Le poseur a enveloppe la CLE autant que la valeur :
+       var TYPE_REMB = { '${T("Crédit")}': '${T("Crédit")}', … };
+   La neuvieme signature (« suivie d un : apres { ou , ») ne voyait rien : entre
+   l enveloppe et le `:` il y a le GUILLEMET FERMANT. Or la donnee comparee, elle,
+   reste « Crédit » — sur la page anglaise la table n aurait plus jamais repondu,
+   et la colonne serait restee francaise en annoncant zero aux deux mesures.
+   ⚠ Ce qui distingue une cle d un texte : un texte affiche n est jamais suivi
+   d un deux-points COLLE A SON GUILLEMET FERMANT, juste apres une accolade ou
+   une virgule. */
+const CLE_ENTRE_GUILLEMETS = /^\s*:/;
 const dansUneChaine = (ligne) => {
   let q = '';
   for (let k = 0; k < ligne.length; k++) {
@@ -191,6 +204,10 @@ for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
     else if (PARENTHESE_AVANT.test(s.slice(Math.max(0, i - 12), i))
              && !dansUneChaine(debutDeLigne(s, i)))
       raison = 'precedee d une parenthese HORS CHAINE — nom de parametre ou condition, pas un texte';
+    else if ((avant === "'" || avant === '"') && apres === avant
+             && CLE_ENTRE_GUILLEMETS.test(s.slice(fin + 1, fin + 6))
+             && OUVRE_OBJET.test(s.slice(Math.max(0, i - 41), i - 1)))
+      raison = 'entre guillemets et suivie d un : — c est une CLE DE TABLE, pas un texte';
     else if (IDENT.test(avant) || IDENT.test(apres)) raison = 'collee a un identifiant — c est un morceau de nom';
     if (!raison) continue;
     const ligne = s.slice(0, i).split('\n').length;

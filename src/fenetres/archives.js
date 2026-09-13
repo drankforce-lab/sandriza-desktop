@@ -20,6 +20,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un numero de commande, un
+   nom de cliente ni un montant (voir src/langue/archives.js). */
+const T = require('../langue').tr('archives');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -80,11 +85,11 @@ tbody .fin{white-space:nowrap;text-align:right}
 /** Page complète de la fenêtre native « Archives ». */
 function pageArchives() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Archives — Administration Sandriza</title>
+<title>${T("Archives — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.archives}</span><h1>Archives</h1>
-  <span class="sous" id="sous">livrées il y a plus de 45 jours · conservées 6 ans</span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="tete"><span class="ico">${ICO.archives}</span><h1>${T("Archives")}</h1>
+  <span class="sous" id="sous">${T("livrées il y a plus de 45 jours · conservées 6 ans")}</span></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -108,18 +113,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux archives.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cet élément n’existe plus dans l’archive.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux archives.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cet élément n’existe plus dans l’archive.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -153,14 +158,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function ligneCommande(o){
-    var gestes = '<button class="mini geste" data-voir="commande" data-id="' + esc(o.id) + '" title="Détails">&#128065;</button>';
-    if (D.peutRembourser) gestes += ' <button class="mini geste att" data-rembourser="' + esc(o.id) + '" title="Réactiver 45 jours et traiter le remboursement dans la fenêtre Commande">Rembourser</button>';
-    if (D.peutReactiver) gestes += ' <button class="mini geste" data-reactiver="' + esc(o.id) + '" title="Sortir de l’archive et remettre en commandes actives pour 45 jours">Réactiver</button>';
+    var gestes = '<button class="mini geste" data-voir="commande" data-id="' + esc(o.id) + '" title="${T("Détails")}">&#128065;</button>';
+    if (D.peutRembourser) gestes += ' <button class="mini geste att" data-rembourser="' + esc(o.id) + '" title="${T("Réactiver 45 jours et traiter le remboursement dans la fenêtre Commande")}">${T("Rembourser")}</button>';
+    if (D.peutReactiver) gestes += ' <button class="mini geste" data-reactiver="' + esc(o.id) + '" title="${T("Sortir de l’archive et remettre en commandes actives pour 45 jours")}">${T("Réactiver")}</button>';
     return '<tr><td class="num">' + esc(o.num) + '<div class="dt">' + esc(o.date) + '</div></td>'
       + '<td>' + esc(o.client) + '<div class="dt">' + esc(o.courriel) + '</div></td>'
       + '<td style="white-space:nowrap"><strong>' + esc(o.total) + '</strong></td>'
       + '<td><span class="pill neutre">' + esc(o.statut) + '</span>'
-      + (o.rembourse ? ' <span class="pill bon">Remboursé</span>' : '') + '</td>'
+      + (o.rembourse ? ' <span class="pill bon">${T("Remboursé")}</span>' : '') + '</td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(o.archivee) + '</td>'
       + '<td class="fin">' + gestes + '</td></tr>';
   }
@@ -170,43 +175,59 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<td><span class="pill neutre">' + esc(r.statut) + '</span></td>'
       + '<td class="dt" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.motif || '—') + '</td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(r.archivee) + '</td>'
-      + '<td class="fin"><button class="mini geste" data-voir="retour" data-id="' + esc(r.id) + '" title="Détails">&#128065;</button></td></tr>';
+      + '<td class="fin"><button class="mini geste" data-voir="retour" data-id="' + esc(r.id) + '" title="${T("Détails")}">&#128065;</button></td></tr>';
   }
   function ligneFacture(f){
     return '<tr><td class="num">' + esc(f.num) + '<div class="dt">' + esc(f.commande || '—') + ' · ' + esc(f.date) + '</div></td>'
-      + '<td>' + esc(f.client) + (f.manuel ? ' <span class="pill neutre" title="Vente saisie à la main dans Vente au comptoir">comptoir</span>' : '')
+      + '<td>' + esc(f.client) + (f.manuel ? ' <span class="pill neutre" title="${T("Vente saisie à la main dans Vente au comptoir")}">${T("comptoir")}</span>' : '')
       + '<div class="dt">' + esc(f.courriel) + '</div></td>'
       + '<td style="white-space:nowrap"><strong>' + esc(f.total) + '</strong></td>'
       + '<td><span class="pill neutre">' + esc(f.statut) + '</span></td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(f.archivee) + '</td>'
-      + '<td class="fin"><button class="mini geste" data-voir="facture" data-id="' + esc(f.id) + '" title="Détails">&#128065;</button></td></tr>';
+      + '<td class="fin"><button class="mini geste" data-voir="facture" data-id="' + esc(f.id) + '" title="${T("Détails")}">&#128065;</button></td></tr>';
   }
+  /* ⚠⚠ LE TYPE D UN REMBOURSEMENT VIENT DU COEUR, ECRIT EN FRANCAIS (admin.js le
+     fabrique a partir de credit / fees_refund). Ce sont des VALEURS COMPAREES,
+     pas du texte : declarees ici UNE FOIS pour qu on ne les traduise jamais par
+     megarde, puis rendues LISIBLES par TYPE_REMB. Le poseur avait enveloppe les
+     CLES du premier essai — la table ne repondait plus sur la page anglaise. */
+  var SZ_DONNEES = {
+    typeCredit:   'Crédit',
+    typeFrais:    'Frais',
+    typeOriginal: 'Original'
+  };
+  var TYPE_REMB = {};
+  TYPE_REMB[SZ_DONNEES.typeCredit]   = '${T("Crédit")}';
+  TYPE_REMB[SZ_DONNEES.typeFrais]    = '${T("Frais")}';
+  TYPE_REMB[SZ_DONNEES.typeOriginal] = '${T("Original")}';
+  function typeRemb(t){ return TYPE_REMB[t] || t; }
+
   function ligneRemboursement(r){
     return '<tr><td class="num" style="font-family:monospace;font-size:.78rem">' + esc(r.num) + '</td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(r.date) + '</td>'
       + '<td>' + esc(r.commande) + '</td>'
       + '<td>' + esc(r.client) + '</td>'
-      + '<td><span class="pill ' + (r.type === 'Crédit' ? 'neutre' : r.type === 'Frais' ? 'att' : 'neutre') + '">' + esc(r.type) + '</span></td>'
+      + '<td><span class="pill ' + (r.type === SZ_DONNEES.typeFrais ? 'att' : 'neutre') + '">' + esc(typeRemb(r.type)) + '</span></td>'
       + '<td class="fin" style="font-family:monospace;font-weight:700">' + esc(r.total) + '</td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(r.archivee) + '</td>'
       + '<td class="fin">' + (r.commandeId ? '<button class="mini geste" data-voir="commande" data-id="' + esc(r.commandeId) + '" title="Voir la commande">&#128065;</button>' : '') + '</td></tr>';
   }
 
   var TETES = {
-    commandes: '<th>Commande</th><th>Client</th><th>Total</th><th>Statut</th><th>Archivée le</th><th></th>',
-    retours: '<th>Commande</th><th>Client</th><th>Statut</th><th>Motif</th><th>Archivé le</th><th></th>',
-    factures: '<th>Facture</th><th>Client</th><th>Montant</th><th>Statut</th><th>Archivée le</th><th></th>',
-    remboursements: '<th>N&#176;</th><th>Date</th><th>Commande</th><th>Client</th><th>Mode</th><th style="text-align:right">Total</th><th>Archivé le</th><th></th>'
+    commandes: '<th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Total")}</th><th>${T("Statut")}</th><th>${T("Archivée le")}</th><th></th>',
+    retours: '<th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Statut")}</th><th>${T("Motif")}</th><th>${T("Archivé le")}</th><th></th>',
+    factures: '<th>${T("Facture")}</th><th>${T("Client")}</th><th>${T("Montant")}</th><th>${T("Statut")}</th><th>${T("Archivée le")}</th><th></th>',
+    remboursements: '<th>N&#176;</th><th>${T("Date")}</th><th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Mode")}</th><th style="text-align:right">${T("Total")}</th><th>${T("Archivé le")}</th><th></th>'
   };
   var VIDES = {
-    commandes: 'Aucune commande archivée.',
-    retours: 'Aucun retour archivé.',
-    factures: 'Aucune facture archivée.',
-    remboursements: 'Aucun remboursement archivé.'
+    commandes: '${T("Aucune commande archivée.")}',
+    retours: '${T("Aucun retour archivé.")}',
+    factures: '${T("Aucune facture archivée.")}',
+    remboursements: '${T("Aucun remboursement archivé.")}'
   };
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
     var pages = Math.max(1, Math.ceil(rows.length / PAR_PAGE));
     var p = Math.min(Math.max(0, PAGE), pages - 1);
@@ -219,17 +240,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<button class="mini' + (ONGLET === g.k ? ' actif' : '') + '" data-onglet="' + g.k + '">'
         + g.l + (n ? '<span class="n">' + n + '</span>' : '') + '</button>';
     });
-    h += '<div class="droite"><input aria-label="Rechercher" type="search" id="a-q" placeholder="Rechercher…" value="' + esc(Q) + '">'
-      + '<span>' + rows.length + ' élément' + (rows.length > 1 ? 's' : '') + '</span></div></div>';
+    h += '<div class="droite"><input aria-label="${T("Rechercher")}" type="search" id="a-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '">'
+      /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
+      + '<span>' + rows.length + (rows.length > 1 ? '${T(" éléments")}' : '${T(" élément")}') + '</span></div></div>';
 
-    h += '<div class="carte"><div class="avis">Les commandes livrées sont archivées automatiquement '
-      + '45 jours après leur livraison, avec leurs factures et remboursements associés, puis conservées 6 ans. '
-      + 'Pour rembourser une commande archivée, « Rembourser » la réactive pour un nouveau délai de 45 jours '
-      + 'et l’ouvre dans sa fenêtre.</div></div>';
+    /* Deux phrases ENTIERES, chacune dans un seul litteral : coupees, elles se
+       traduiraient en morceaux qui ne se recollent pas. */
+    h += '<div class="carte"><div class="avis">'
+      + '${T("Les commandes livrées sont archivées automatiquement 45 jours après leur livraison, avec leurs factures et remboursements associés, puis conservées 6 ans.")} '
+      + '${T("Pour rembourser une commande archivée, « Rembourser » la réactive pour un nouveau délai de 45 jours et l’ouvre dans sa fenêtre.")}'
+      + '</div></div>';
 
     h += '<div class="carte">';
     if (!vue.length) {
-      h += '<div class="vide">' + (Q ? 'Rien ne correspond à la recherche.' : VIDES[ONGLET]) + '</div>';
+      h += '<div class="vide">' + (Q ? '${T("Rien ne correspond à la recherche.")}' : VIDES[ONGLET]) + '</div>';
     } else {
       var dessine = ONGLET === 'commandes' ? ligneCommande
         : ONGLET === 'retours' ? ligneRetour
@@ -276,19 +300,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (og) { ONGLET = og.getAttribute('data-onglet'); PAGE = 0; Q = ''; dessiner(); return; }
     var bv = t.closest('[data-voir]');
     if (bv) {
-      dire('Ouverture…');
+      dire('${T("Ouverture…")}');
       appeler('archives:ouvrir', [bv.getAttribute('data-voir'), bv.getAttribute('data-id')]).then(function(r){
-        dire(r.ok ? 'Détail ouvert dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Détail ouvert dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
       return;
     }
     var br = t.closest('[data-rembourser]');
     if (br) {
       br.disabled = true;
-      dire('Réactivation…');
+      dire('${T("Réactivation…")}');
       appeler('archives:reactiver', [br.getAttribute('data-rembourser'), true]).then(function(r){
         if (!r.ok) { br.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('Commande ' + (r.num || '') + ' réactivée pour 45 jours — traitez le remboursement dans sa fenêtre.', 'bon');
+        dire('${T("Commande")} ' + (r.num || '') + '${T(" réactivée pour 45 jours — traitez le remboursement dans sa fenêtre.")}', 'bon');
         charger();
       });
       return;
@@ -296,10 +320,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ba = t.closest('[data-reactiver]');
     if (ba) {
       ba.disabled = true;
-      dire('Réactivation…');
+      dire('${T("Réactivation…")}');
       appeler('archives:reactiver', [ba.getAttribute('data-reactiver'), false]).then(function(r){
         if (!r.ok) { ba.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('Commande ' + (r.num || '') + ' réactivée — de retour dans les commandes actives pour 45 jours.', 'bon');
+        dire('${T("Commande")} ' + (r.num || '') + '${T(" réactivée — de retour dans les commandes actives pour 45 jours.")}', 'bon');
         charger();
       });
     }
@@ -307,7 +331,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function charger(){
     appeler('archives:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Archives indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Archives indisponibles")}', expliquer(r)); return; }
       D = r;
       dire('');
       dessiner();
@@ -339,12 +363,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
