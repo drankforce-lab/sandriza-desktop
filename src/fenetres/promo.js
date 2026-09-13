@@ -303,7 +303,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueModeles(ro){
     var h = '<div class="barreoutils" style="margin-top:.1rem">'
       + '<input aria-label="${T("Nom")} ou format (3 car. min.)" type="search" id="p-q" placeholder="${T("Nom")} ou format (3 car. min.)" value="' + esc(Q) + '">'
-      + '<select id="p-tri" aria-label="Ordre de tri">'
+      + '<select id="p-tri" aria-label="${T("Ordre de tri")}">'
       + '<option value="updated"' + (TRI === 'updated' ? ' selected' : '') + '>${T("Modifié récemment")}</option>'
       + '<option value="name"' + (TRI === 'name' ? ' selected' : '') + '>${T("Nom")}</option>'
       + '<option value="size"' + (TRI === 'size' ? ' selected' : '') + '>${T("Format")}</option>'
@@ -698,7 +698,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var fok = document.getElementById('p-fmtok');
     if (fok) fok.onclick = function(){
       var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-      dire('Enregistrement…');
+      dire('${T("Enregistrement…")}');
       appeler('promo:formatEcrire', [{ nom: g('f-nom'), type: g('f-type'), forme: g('f-forme'),
         w: g('f-w'), h: g('f-h') }]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }

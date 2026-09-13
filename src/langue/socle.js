@@ -131,4 +131,50 @@ module.exports = {
   'Le brouillon n’a pas pu être conservé (stockage du poste plein).':
     'The draft could not be kept (this computer’s storage is full).',
   'Une saisie': 'An entry',
+
+  /* ══ CE QUI N EST PAS ECRIT DANS `socle.js`, ET POURQUOI C EST QUAND MEME ICI
+   * ⚠⚠⚠ UN ELARGISSEMENT DELIBERE, PAS UNE DERIVE. Tout ce qui precede est
+   * ecrit une fois dans `socle.js`. Ce qui suit ne l est pas : chaque fenetre
+   * ecrit ces mots dans son propre code. Mesure du 2026-09-12 :
+   * « Enregistrement… » parait tel quel dans 12 fenetres, « Ouverture… » et
+   * « Lecture… » dans 3, « Suppression… », « Impression… », « Envoi… »,
+   * « Chargement… » dans 2. Les poser fenetre par fenetre, ce serait vingt
+   * copies de la meme decision — exactement les « 98 mensonges » que l en-tete
+   * de ce fichier refuse. La raison de mettre un texte ici n est donc pas
+   * « il est ecrit dans socle.js », c est « il est ECRIT PARTOUT ».
+   *
+   * ⚠⚠ CE QUI N A PAS SA PLACE ICI : un mot dont la traduction DEPEND de
+   * l ecran. « Retirer » se dit « Remove » quand on sort une ligne d une liste
+   * et « Withdraw » quand on retire de l argent ; s il devait un jour se dire
+   * autrement quelque part, cette fenetre-la ECRIT SA PROPRE ENTREE — son
+   * dictionnaire est regarde en premier (voir `index.js`), le partage n a pas
+   * besoin d etre touche. C est ce qui rend cet elargissement sans danger.
+   *
+   * ⚠ Les points de suspension sont ceux du francais typographique (…), un
+   * seul caractere : une cle avec trois points ne correspondrait a rien. */
+
+  /* ── CE QUI EST EN TRAIN DE SE FAIRE ─────────────────────────── */
+  'Enregistrement…': 'Saving…',
+  'Chargement…': 'Loading…',
+  'Lecture…': 'Reading…',
+  'Ouverture…': 'Opening…',
+  'Envoi…': 'Sending…',
+  'Impression…': 'Printing…',
+  'Suppression…': 'Deleting…',
+  'Création…': 'Creating…',
+  'Publication…': 'Publishing…',
+
+  /* ── LES GESTES ORDINAIRES D UNE LISTE ───────────────────────── */
+  'Modifier': 'Edit',
+  'Supprimer': 'Delete',
+  '🗑 Supprimer': '🗑 Delete',
+  'Retirer': 'Remove',
+  'Restaurer': 'Restore',
+  'Activer': 'Enable',
+  'Désactiver': 'Disable',
+  'Monter': 'Move up',
+  'Descendre': 'Move down',
+  'Ordre de tri': 'Sort order',
+  'Nombre de lignes par page': 'Rows per page',
+  'Afficher / masquer': 'Show / hide',
 };

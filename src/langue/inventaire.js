@@ -207,8 +207,12 @@ module.exports = {
   /* ── L ONGLET DES PRODUITS ENDOMMAGES ───────────────────────────────────── */
   /* ⚠ « Produits endommages » est aussi le LIBELLE d un onglet ; la VALEUR qui
      part au pont est `endommages`, et elle n a pas d entree ici — c est voulu. */
-  'Produits endommagés <span class="note">— articles de retours non remis en inventaire</span>':
-    'Damaged products <span class="note">— returned items not put back into inventory</span>',
+  /* ⚠⚠ LA CLE A ETE COUPEE AVANT L ATTRIBUT : posee en un morceau, elle
+     ecrivait `class=\"note\"` echappe, et les bancs qui cherchent l attribut
+     litteral ne le voyaient plus. Le <span> reste dans le code, les deux
+     moities du texte sont ici. */
+  '— articles de retours non remis en inventaire':
+    '— returned items not put back into inventory',
   'Produits endommagés — articles de retours non remis en inventaire':
     'Damaged products — returned items not put back into inventory',
   'Produits endommagés': 'Damaged products',

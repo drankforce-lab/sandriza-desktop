@@ -408,7 +408,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        toujours. Effacer une demande EN COURS ferait disparaitre un dossier que
        la cliente, elle, suit encore : le coeur du site le refuse aussi. */
     if (['completed', 'refunded'].indexOf(d.statut) >= 0 && !R.archive) {
-      boutons += '<button class="danger" id="btn-suppr"><span class="ic">🗑</span> Supprimer</button>';
+      boutons += '<button class="danger" id="btn-suppr"><span class="ic">🗑</span> ${T("Supprimer")}</button>';
     }
     actions.innerHTML = boutons;
     brancherDemande(fige);
@@ -612,7 +612,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ══ GESTES ════════════════════════════════════════════════════════════════
   function enregistrer(fige){
     if (enCours) return;
-    enCours = true; dire('Enregistrement…', 'att');
+    enCours = true; dire('${T("Enregistrement…")}', 'att');
     var saisie = fige
       ? { statut: '', notes: val('r-notes') }
       : { statut: val('r-statut'), notes: val('r-notes'), noteRefus: val('r-refus'),
@@ -693,7 +693,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function renvoyer(){
-    dire('Envoi…', 'att');
+    dire('${T("Envoi…")}', 'att');
     appeler('retour:renvoyer', [ID]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(r.courriel && r.courriel.envoye ? '${T("Étiquette renvoyée au client.")}'

@@ -583,7 +583,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (c.aFacture ? '<button id="det-fact"><span class="ic">🧾</span> Facture</button>' : '')
       + (d.droits.frais && !ro ? '<button id="det-frais"><span class="ic">💰</span> Frais retenus (' + argent(rb.fraisRestants) + ')</button>' : '')
       + (d.droits.rembourser && !ro ? '<button id="det-remb">${T("↩ Rembourser")}</button>' : '')
-      + (d.droits.supprimer && !ro ? '<button class="danger" id="det-suppr"><span class="ic">🗑</span> Supprimer</button>' : '');
+      + (d.droits.supprimer && !ro ? '<button class="danger" id="det-suppr"><span class="ic">🗑</span> ${T("Supprimer")}</button>' : '');
     brancherDetail();
   }
 
@@ -601,7 +601,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (b) b.onclick = function(){
       this.disabled = true;
       var moi = this;
-      dire('Impression…');
+      dire('${T("Impression…")}');
       appeler('commande:bon', [DET_ID]).then(function(z){
         moi.disabled = false;
         dire(z.ok ? '${T("Bon de commande envoyé à l’impression.")}' : expliquer(z), z.ok ? 'bon' : 'err');
@@ -918,7 +918,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function flowSupprimer(){
     appeler('commandes:supprimerApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
-      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> Supprimer la commande</h3>'
+      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> ${T("Supprimer")} la commande</h3>'
         + '<p><strong>' + esc(ap.numero) + '</strong> — ' + esc(ap.client) + '<br>'
         + '<span style="color:var(--tx2)">' + esc(dateCourte(ap.date)) + ' · ' + argent(ap.total)
         + ' · ' + esc(ap.statutLibelle) + '</span></p>'
@@ -1075,7 +1075,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function ouvrir(op, id, quoi){
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler(op, [id]).then(function(r){
       dire(r.ok ? (quoi + ' ${T("ouverte dans sa fenêtre.")}') : expliquer(r), r.ok ? 'bon' : 'err');
     });

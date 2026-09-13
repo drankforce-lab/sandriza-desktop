@@ -399,7 +399,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<option value="message"' + (o.action === 'message' ? ' selected' : '') + '>${T("Message vocal")}</option>'
         + '<option value="repeat"' + (o.action === 'repeat' ? ' selected' : '') + '>${T("Répéter l’accueil")}</option></select></div>'
       + '<div class="ch" style="margin:0"><label>${T("Numéro (Rediriger / File)")}</label><input aria-label="${T("Numéro (Rediriger / File)")}" data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
-      + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="Retirer"><span class="ic">🗑</span></button>')
+      + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="${T("Retirer")}"><span class="ic">🗑</span></button>')
       + '</div><div class="l2">'
       + '<div class="ch"><textarea aria-label="${T("Message vocal")} FR (si action = Message)" data-mf="messageFr" rows="1" placeholder="${T("Message vocal")} FR (si action = Message)"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
       + '<div class="ch"><textarea aria-label="${T("Message vocal")} EN" data-mf="messageEn" rows="1" placeholder="${T("Message vocal")} EN"' + (RO ? ' disabled' : '') + '>' + esc(m.en || '') + '</textarea></div>'
@@ -745,7 +745,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function enregistrer(){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Enregistrement…');
+    occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:telephonie:ecrire', [saisie()]).then(function(r){
       occuper(false);
       if (r && r.ok) { adopter(r); dessiner(); dire('${T("Téléphonie enregistrée.")}', 'bon'); avertirRedirection(); }
@@ -773,7 +773,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:telephonie:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

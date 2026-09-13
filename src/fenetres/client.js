@@ -277,7 +277,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div style="display:flex;gap:.45rem;align-items:flex-end">'
       + '<div class="ch" style="flex:1"><label for="e-mdp">${T("Nouveau (laisser vide = inchangé)")}</label>'
       + '<input id="e-mdp" type="password" placeholder="Min. 6 caractères" autocomplete="new-password"></div>'
-      + '<button class="mini" id="btn-voir" title="Afficher / masquer"><span class="ic">👁</span></button>'
+      + '<button class="mini" id="btn-voir" title="${T("Afficher / masquer")}"><span class="ic">👁</span></button>'
       + '<button class="mini" id="btn-gen"><span class="ic">🎲</span> ${T("Générer")}</button>'
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--tx2);margin-top:.5rem;cursor:pointer">'
@@ -435,7 +435,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function enregistrer(){
     if (enCours) return;
-    enCours = true; dire('Enregistrement…', 'att');
+    enCours = true; dire('${T("Enregistrement…")}', 'att');
     appeler('client:ecrire', [ID, {
       prenom: val('e-prenom'), nom: val('e-nom'), courriel: val('e-courriel'),
       tel: val('e-tel'), langue: val('e-langue'),

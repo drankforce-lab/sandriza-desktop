@@ -924,7 +924,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else if (A.etape === 2) {
       var n = Object.keys(A.choix).length;
       h += '<div class="barreoutils" style="margin-bottom:.5rem">'
-        + '<select id="a-tri" aria-label="Ordre de tri" style="width:auto">'
+        + '<select id="a-tri" aria-label="${T("Ordre de tri")}" style="width:auto">'
         + '<option value="date"' + (A.tri === 'date' ? ' selected' : '') + '>${T("Plus récentes d’abord")}</option>'
         + '<option value="date-vieux"' + (A.tri === 'date-vieux' ? ' selected' : '') + '>${T("Plus anciennes d’abord")}</option>'
         + '<option value="nom"' + (A.tri === 'nom' ? ' selected' : '') + '>${T("Par nom")}</option>'
@@ -1469,7 +1469,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="mini" data-lot="pivot" title="Pivoter d’un quart de tour vers la droite">${T("⟳ Pivoter")}</button>'
       + '<button class="mini" data-apercu="fantome" title="Voir le retrait du mannequin, filigrané et gratuit, avant de payer"><span class="ic">👁</span> ${T("Aperçu du retrait")}</button>'
       + '<button class="mini dgr" id="p-lot-sup">'
-      + (SUP_LOT_ARME ? '${T("Confirmer — supprimer")} ' + n + ' ?' : 'Supprimer') + '</button>'
+      + (SUP_LOT_ARME ? '${T("Confirmer — supprimer")} ' + n + ' ?' : '${T("Supprimer")}') + '</button>'
       + '<button class="mini" id="p-rien">${T("Tout décocher")}</button>'
       + '<span class="av">${T("Les deux derniers traitements <strong>engendrent</strong> une image&nbsp;: ")}'
       + '${T("l’original est conservé à côté.")}</span></div>';
@@ -1818,7 +1818,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="ic" data-piv="' + esc(r.id) + '" title="Pivoter d’un quart de tour">⟳</button>'
       + '<button class="ic" data-ouvre="' + esc(r.id) + '" title="Ouvrir la fiche (fond, article, export)">⋯</button>'
       + '<button class="ic sup' + (arme ? ' arme' : '') + '" data-sup="' + esc(r.id) + '"'
-      + ' title="' + (arme ? '${T("Cliquez encore pour supprimer")}' : 'Supprimer') + '">'
+      + ' title="' + (arme ? '${T("Cliquez encore pour supprimer")}' : '${T("Supprimer")}') + '">'
       + (arme ? '!' : '✕') + '</button>'
       + '</span>');
     return '<tr data-id="' + esc(r.id) + '"' + (CHOIX[r.id] ? ' class="on"' : '') + '>'
@@ -2433,7 +2433,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           return;
         }
         SUPPR_ARME = '';
-        dire('Suppression…');
+        dire('${T("Suppression…")}');
         appeler('photos:supprimer', [id]).then(function(r){
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
           delete CHOIX[id];

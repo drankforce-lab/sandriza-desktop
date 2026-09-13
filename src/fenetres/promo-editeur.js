@@ -595,7 +595,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (b.src ? '<div class="vign"><img src="' + esc(b.src) + '" alt="${T("Image de fond")}"></div>'
                  : '<div class="vign"><span class="p">${T("Aucune image")}</span></div>')
         + '<div class="acts"><button class="btn" type="button" data-choisir="fond">${T("Choisir une image…")}</button>'
-        + (b.src ? '<button class="btn danger" type="button" data-fond-retirer="1">Retirer</button>' : '')
+        + (b.src ? '<button class="btn danger" type="button" data-fond-retirer="1">${T("Retirer")}</button>' : '')
         + '</div>'
         + '<div class="note">${T("Les images viennent de la logothèque. Pour en déposer une nouvelle,")}'
         + ' ${T("le sélecteur ouvre la fenêtre Logothèque.")}</div></div>';
@@ -676,7 +676,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (el.src ? '<div class="vign"><img src="' + esc(el.src) + '" alt="${T("Image")} de cet élément"></div>'
                 : '<div class="vign"><span class="p">${T("Aucune image")}</span></div>')
       + '<div class="acts"><button class="btn" type="button" data-choisir="element">${T("Choisir une image…")}</button>'
-      + (el.src ? '<button class="btn danger" type="button" data-img-retirer="1">Retirer</button>' : '')
+      + (el.src ? '<button class="btn danger" type="button" data-img-retirer="1">${T("Retirer")}</button>' : '')
       + '</div></div>';
     h += '<div class="bloc"><label>Ajustement</label>'
       + segment('el:fit', [['contain', '${T("Contenir")}'], ['cover', '${T("Remplir")}']], el.fit || 'contain') + '</div>';
@@ -777,7 +777,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div><div class="note">${T("Le dernier de la pile est celui qui se dessine par-dessus les autres.")}</div></div>';
     h += '<div class="bloc"><label>${T("Cet élément")}</label><div class="acts">'
       + '<button class="btn" type="button" data-dupliquer="1">Dupliquer</button>'
-      + '<button class="btn danger" type="button" data-supprimer="1">Supprimer</button>'
+      + '<button class="btn danger" type="button" data-supprimer="1">${T("Supprimer")}</button>'
       + '</div><div class="note">'
       + '${T("Une suppression s’annule (Ctrl+Z) tant que la fenêtre reste ouverte.")}'
       + '</div></div>';
@@ -842,7 +842,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function enregistrer(){
     if (!M || !SALE) return;
     bEnr.disabled = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     els().forEach(function(el){
       el.xPct = borner(nb(el.xPct, 0), -50, 150);
       el.yPct = borner(nb(el.yPct, 0), -50, 150);

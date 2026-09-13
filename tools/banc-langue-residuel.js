@@ -141,12 +141,12 @@ const LEXIQUE = (() => {
  * ⚠ LES CHIFFRES NE SE REMONTENT JAMAIS. Si une ligne doit grandir, c est qu on
  * a ajoute du francais : c est la faute qu il faut corriger, pas le plafond. */
 const DETTE = new Map([
-  ['caisse', 5], ['campagnes', 19], ['catalogio', 3], ['client', 3],
-  ['commande', 11], ['commandes', 23], ['depenses', 13], ['fournisseur', 2],
-  ['impot', 4], ['inventaire', 22], ['invmeta', 15], ['photos', 22],
-  ['produit', 22], ['produits', 10], ['promo', 5], ['promo-editeur', 14],
-  ['ramassages', 5], ['retour', 11], ['studio', 19],
-  ['tableau', 4], ['telephonie', 9],
+  ['caisse', 3], ['campagnes', 15], ['catalogio', 2], ['client', 1],
+  ['commande', 11], ['commandes', 20], ['depenses', 8], ['fournisseur', 1],
+  ['impot', 3], ['inventaire', 18], ['invmeta', 12], ['photos', 19],
+  ['produit', 18], ['produits', 9], ['promo', 3], ['promo-editeur', 13],
+  ['ramassages', 5], ['retour', 8], ['studio', 17], ['tableau', 4],
+  ['telephonie', 6],
 ]);
 
 /* ⚠ CE QUI N EST PAS DU TEXTE, meme quand ca porte des mots francais : un

@@ -568,7 +568,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '</tbody></table></div>';
 
       h += '<div class="pagi">'
-        + '<span>Afficher</span><select id="pg-taille" aria-label="Nombre de lignes par page">'
+        + '<span>Afficher</span><select id="pg-taille" aria-label="${T("Nombre de lignes par page")}">'
         + '<option value="auto"' + (GRILLE_AUTO ? ' selected' : '') + '>Auto</option>'
         + [5, 10, 25, 50, 9999].map(function(n){
             return '<option value="' + n + '"' + (!GRILLE_AUTO && TAILLE_PAGE === n ? ' selected' : '') + '>'
@@ -674,7 +674,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!b) return;
     var peut = !!(CTX && CTX.peutEcrire) && !enCours;
     b.disabled = !peut;
-    b.textContent = enCours ? 'Enregistrement…'
+    b.textContent = enCours ? '${T("Enregistrement…")}'
       : (CTX && CTX.peutEcrire ? '${T("Enregistrer l’inventaire")}' : '${T("Lecture seule")}');
   }
 
@@ -1185,7 +1185,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
   }
   function modifier(pid){
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler('stock:modifier', [pid]).then(function(r){
       dire(r.ok ? '${T("Fiche produit ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
@@ -1256,7 +1256,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     var h = '<div class="carte plein">'
-      + '<h2>${T("Produits endommagés <span class=\"note\">— articles de retours non remis en inventaire</span>")}</h2>'
+      + '<h2>${T("Produits endommagés")} <span class="note">${T("— articles de retours non remis en inventaire")}</span></h2>'
       + '<div class="toolbar">'
       + '<select id="dmg-an"><option value="all">${T("Tout cumulé")}</option>'
       + (d.annees || []).map(function(a){
@@ -1312,7 +1312,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var b = ev.target && ev.target.closest ? ev.target.closest('button') : null;
       if (!b || b.id !== 'dmg-imp') return;
       b.disabled = true;
-      dire('Impression…');
+      dire('${T("Impression…")}');
       // Le rapport se reconstruit des DONNEES cote site et s imprime par
       // l application — jamais en relisant le tableau affiche ici.
       appeler('stock:endommagesRapport', [DMG_AN]).then(function(r){
@@ -1663,7 +1663,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function ouvrirProduit(pid, cleEnAvant){
     if (!pid) return;
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler('stock:lire', [pid]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       PROD = r.produit;
@@ -1772,7 +1772,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ══ ENREGISTREMENT ════════════════════════════════════════════════════════
   function enregistrer(){
     if (enCours || !PROD) return;
-    enCours = true; majBouton(); dire('Enregistrement…');
+    enCours = true; majBouton(); dire('${T("Enregistrement…")}');
     // ⚠ LA GRILLE PART ENTIERE, filtres et pagination ignores. Les cartes stock et
     // lowStockVar font autorite pour le produit : une saisie
     // partielle mettrait le reste a zero. Le coeur refuse d ailleurs une grille
@@ -1890,7 +1890,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (pt) pt.onclick = function(){ fermer(); retourListe(); };
       var im = document.getElementById('v-imprimer');
       if (im) im.onclick = function(){
-        im.disabled = true; im.textContent = 'Impression…';
+        im.disabled = true; im.textContent = '${T("Impression…")}';
         appeler('stock:etiquettes', [etiq]).then(function(z){
           fermer();
           dire(z.ok ? (z.envoyees + ' ${T("étiquette(s) envoyée(s) à «")} ' + z.imprimante + ' ».')
@@ -1958,7 +1958,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function imprimer(items){
-    dire('Impression…');
+    dire('${T("Impression…")}');
     appeler('stock:etiquettes', [items]).then(function(z){
       dire(z.ok ? (z.envoyees + ' ${T("étiquette(s) envoyée(s) à «")} ' + z.imprimante + ' ».')
                 : expliquer(z), z.ok ? 'bon' : 'err');

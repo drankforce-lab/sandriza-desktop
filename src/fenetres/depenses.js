@@ -460,7 +460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                       : '<span class="pill bon">${T("ajouté")}</span>')) + '</td>'
               + '<td style="text-align:right;white-space:nowrap">'
               + ((ro || (VERROU && !VERROU.obtenu)) ? '<span class="dt">—</span>'
-                  : '<button class="mini" data-annmod="' + esc(r.id) + '">Modifier</button>'
+                  : '<button class="mini" data-annmod="' + esc(r.id) + '">${T("Modifier")}</button>'
                     + (r.origine === 'integre' ? ''
                         : ' <button class="mini danger" data-annret="' + esc(r.id) + '">'
                           + (ANN_RETIRE === r.id ? '${T("Confirmer ?")}' : '✕') + '</button>'))
@@ -524,9 +524,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="pied-boite">'
       + (D.peutSupprimer ? '<button class="danger" id="d-suppr">'
-          + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> Supprimer') + '</button>' : '')
+          + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button>' : '')
       + (e.aRecu ? '<button id="d-recu"><span class="ic">📎</span> ${T("Ouvrir le reçu")}</button>' : '')
-      + (D.peutModifier ? '<button class="prim" id="d-modifier"><span class="ic">✎</span> Modifier</button>' : '')
+      + (D.peutModifier ? '<button class="prim" id="d-modifier"><span class="ic">✎</span> ${T("Modifier")}</button>' : '')
       + '<button id="d-fermer">Fermer</button>'
       + '</div>';
     if (SUPPR_ARME) {
@@ -837,7 +837,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     memoriserForm();
     OCCUPE = true;
     dessiner();
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('depenses:enregistrer', [{
       id: FORM.id, date: FORM.date, categorie: FORM.categorie, paiement: FORM.paiement,
       description: FORM.description, fournisseur: FORM.fournisseur,
@@ -893,7 +893,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
       var saisie = { id: ANN_FORM.neuf ? g('a-id') : ANN_FORM.id,
         nom: g('a-nom'), categorie: g('a-cat') };
-      dire('Enregistrement…');
+      dire('${T("Enregistrement…")}');
       appeler('depenses:annuaireEcrire', [saisie]).then(function(r){
         if (!r.ok) {
           dire(r.motif === 'id_requis' ? '${T("Donnez un domaine ou un nom de fournisseur.")}'
@@ -958,7 +958,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       SUPPR_ARME = false;
-      dire('Suppression…');
+      dire('${T("Suppression…")}');
       appeler('depenses:supprimer', [DETAIL.id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire('${T("Dépense supprimée (")}' + r.montant + ' · ' + r.categorie + ').', 'bon');
@@ -1142,7 +1142,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
 
   function ouvrirDetail(id){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('depenses:lire', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire('');

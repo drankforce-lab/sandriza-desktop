@@ -216,7 +216,7 @@ function pageFournisseur(id) {
   function enregistrer(){
     if (!Assist.toutValide()) return;
     bEnr.disabled = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     P.appeler('fournisseur:enregistrer', ID, {
       name: val('f-nom').trim(),
       contactName: val('f-contact'), email: val('f-courriel'),

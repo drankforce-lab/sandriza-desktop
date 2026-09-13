@@ -470,7 +470,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<button class="mini" data-page="' + (LIGNES.page + 1) + '"' + (LIGNES.page >= LIGNES.pages - 1 ? ' disabled' : '') + '>${T("Suivant →")}</button>';
     }
     return '<div class="pager"><span class="gauche">Afficher '
-      + '<select id="taille" aria-label="Nombre de lignes par page">' + opts + '</select> par page · '
+      + '<select id="taille" aria-label="${T("Nombre de lignes par page")}">' + opts + '</select> par page · '
       + LIGNES.total + ' ligne' + plur(LIGNES.total) + '</span>' + nav + '</div>';
   }
   function vueApercu(){

@@ -420,7 +420,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (champ) champ.className = (!nomOk && LIGNES.length) ? 'manque' : '';
     var pret = !!(TOT && TOT.total > 0 && LIGNES.length && nomOk && CTX && CTX.peutVendre && !enVente);
     b.disabled = !pret;
-    b.textContent = enVente ? 'Enregistrement…'
+    b.textContent = enVente ? '${T("Enregistrement…")}'
       : (pret ? '${T("Enregistrer la vente —")} ' + argent(TOT.total)
               : (LIGNES.length && !nomOk ? '${T("Nom du client requis")}' : '${T("Enregistrer la vente")}'));
     document.getElementById('btn-vider').disabled = !LIGNES.length || enVente;
@@ -445,7 +445,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<button data-q="' + i + '" data-d="1">+</button></td>'
         + '<td class="d">' + argent(l.price) + '</td>'
         + '<td class="d"><strong>' + argent(l.price * l.quantity) + '</strong></td>'
-        + '<td class="c"><button data-retirer="' + i + '" title="Retirer">✕</button></td>'
+        + '<td class="c"><button data-retirer="' + i + '" title="${T("Retirer")}">✕</button></td>'
         + '</tr>';
     }).join('');
     z.innerHTML = '<table><thead><tr><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
@@ -602,7 +602,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ══ ENREGISTRER LA VENTE ══════════════════════════════════════════════════
   function vendre(){
     if (enVente || !LIGNES.length || !TOT || !(TOT.total > 0)) return;
-    enVente = true; majBouton(); dire('Enregistrement…', 'att');
+    enVente = true; majBouton(); dire('${T("Enregistrement…")}', 'att');
     appeler('caisse:vendre', [{
       lignes: LIGNES,
       prov: val('v-prov'), liv: val('v-liv'), rab: val('v-rab'),

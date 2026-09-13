@@ -302,10 +302,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return '<div class="bloc">'
         + '<div class="bt"><span class="bi ic">' + esc(t.icone) + '</span><b>' + esc(t.label) + '</b>'
         + '<button class="mini" data-bhaut="' + i + '"' + (i === 0 ? ' disabled' : '')
-        + ' title="Monter">\u2191</button>'
+        + ' title="${T("Monter")}">\u2191</button>'
         + '<button class="mini" data-bbas="' + i + '"' + (i === BLOCS.length - 1 ? ' disabled' : '')
-        + ' title="Descendre">\u2193</button>'
-        + '<button class="mini" data-bsupp="' + i + '" title="Retirer ce bloc">\u2715</button></div>'
+        + ' title="${T("Descendre")}">\u2193</button>'
+        + '<button class="mini" data-bsupp="' + i + '" title="${T("Retirer")} ce bloc">\u2715</button></div>'
         + (champs ? '<div class="bg">' + champs + '</div>' : '')
         + '</div>';
     }).join('');
@@ -566,9 +566,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return et.map(function(s, i){
       return '<div class="etapef"><div class="tete2"><strong>${T("Étape")} ' + (i + 1) + '</strong>'
         + '<div class="gestes">'
-        + (i > 0 ? '<button class="mini" data-mont="' + i + '" title="Monter">↑</button>' : '')
-        + (i < et.length - 1 ? '<button class="mini" data-desc="' + i + '" title="Descendre">↓</button>' : '')
-        + '<button class="mini danger" data-etsup="' + i + '">Retirer</button></div></div>'
+        + (i > 0 ? '<button class="mini" data-mont="' + i + '" title="${T("Monter")}">↑</button>' : '')
+        + (i < et.length - 1 ? '<button class="mini" data-desc="' + i + '" title="${T("Descendre")}">↓</button>' : '')
+        + '<button class="mini danger" data-etsup="' + i + '">${T("Retirer")}</button></div></div>'
         + '<div class="rang"><div class="champ"><span class="lbl">${T("Délai depuis le déclenchement")}</span>'
         /* ⚠ DEUX CHAMPS POUR UN SEUL LIBELLE (<< Delai depuis le declenchement >>)
          et les mots << jours >> / << heures >> ne sont que du texte entre eux :
@@ -780,7 +780,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         dire('${T("Le message texte est requis pour ce canal.")}', 'err'); return;
       }
       if (b) b.disabled = true;
-      dire('Enregistrement…');
+      dire('${T("Enregistrement…")}');
       appeler('campagnes:ecrire', [FORM.id, data]).then(function(r){
         if (b) b.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -801,7 +801,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       dire('${T("Chaque étape doit avoir un sujet.")}', 'err'); return;
     }
     if (b) b.disabled = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('chaines:ecrire', [FORM.id, dch]).then(function(r){
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -969,10 +969,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + D.segments.map(function(s){
           var gestes = '';
           if (D.peutModifier) {
-            gestes += '<button class="mini geste" data-segmodif="' + esc(s.id) + '">Modifier</button> ';
+            gestes += '<button class="mini geste" data-segmodif="' + esc(s.id) + '">${T("Modifier")}</button> ';
             var armeS = (ARME === 'segsup:' + s.id);
             gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-segsup="'
-              + esc(s.id) + '">' + (armeS ? '${T("Confirmer ?")}' : 'Supprimer') + '</button>';
+              + esc(s.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
           }
           return '<tr><td><strong>' + esc(s.nom) + '</strong></td>'
             + '<td class="dt">' + esc(s.phrase || '—') + '</td>'
@@ -1098,7 +1098,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!(CRITERES || []).length) { dire('${T("Ajoutez au moins un critère.")}', 'err'); return; }
     var b = document.getElementById('f-ok');
     if (b) b.disabled = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('segments:ecrire', [FORM.id, { nom: nom, criteres: CRITERES }]).then(function(r){
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -1164,7 +1164,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             if (D.peutModifier) {
               // ⚠ MEME REGLE QUE LE WEB : une campagne PARTIE ne se modifie plus.
               if (c.etat !== 'sent') {
-                gestes += '<button class="mini geste" data-modif="' + esc(c.id) + '">Modifier</button> ';
+                gestes += '<button class="mini geste" data-modif="' + esc(c.id) + '">${T("Modifier")}</button> ';
               }
               if (c.etat !== 'sent') {
                 var armeE = (ARME === 'env:' + c.id);
@@ -1174,7 +1174,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               }
               var armeS = (ARME === 'sup:' + c.id);
               gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
-                + esc(c.id) + '">' + (armeS ? '${T("Confirmer ?")}' : 'Supprimer') + '</button>';
+                + esc(c.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
             }
             return '<tr><td><strong>' + esc(c.nom) + '</strong>'
               + '<div class="dt">' + esc(c.sujet) + '</div></td>'
@@ -1239,14 +1239,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h += (D.chaines || []).map(function(ch){
         var gestes = '';
         if (D.peutModifier) {
-          gestes += '<button class="mini geste" data-chmodif="' + esc(ch.id) + '">Modifier</button>';
+          gestes += '<button class="mini geste" data-chmodif="' + esc(ch.id) + '">${T("Modifier")}</button>';
           var armeB = (ARME === 'bas:' + ch.id);
           gestes += '<button class="mini geste' + (armeB ? ' arme' : '') + '" data-basculer="' + esc(ch.id)
             + '" data-active="' + (ch.active ? '0' : '1') + '">'
-            + (armeB ? '${T("Confirmer ?")}' : (ch.active ? 'Suspendre' : 'Activer')) + '</button>';
+            + (armeB ? '${T("Confirmer ?")}' : (ch.active ? 'Suspendre' : '${T("Activer")}')) + '</button>';
           var armeS = (ARME === 'chsup:' + ch.id);
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-chsuppr="'
-            + esc(ch.id) + '">' + (armeS ? '${T("Confirmer ?")}' : 'Supprimer') + '</button>';
+            + esc(ch.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
         }
         return '<div class="carte chaine">'
           + '<div class="entete"><div><h3>' + esc(ch.nom) + '</h3>'
@@ -1457,7 +1457,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       ARME = '';
       OCCUPE = true;
       be.disabled = true;
-      be.textContent = 'Envoi…';
+      be.textContent = '${T("Envoi…")}';
       dire('${T("Envoi en cours… ne fermez pas cette fenêtre.")}', 'att');
       appeler('campagnes:envoyer', [idE]).then(function(r){
         OCCUPE = false;

@@ -643,7 +643,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RO || OCCUPE) return;
     var v = function(id){ var el = document.getElementById(id); return el ? el.value : ''; };
     OCCUPE = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('impot:profil:ecrire', [{
       name: v('e-nom'), neq: v('e-neq'), sinBn: v('e-ne'), type: v('e-type'),
       tpsNo: v('e-tps'), tvqNo: v('e-tvq'),

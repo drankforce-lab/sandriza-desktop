@@ -62,8 +62,6 @@ module.exports = {
   'Règle mise à jour.': 'Rule updated.',
   'Panier': 'Basket',
   'Accueil': 'Home',
-  'Création…': 'Creating…',
-  'Enregistrement…': 'Saving…',
 
   /* ── L ORDRE, QUI EST LE SENS MEME DES REGLES ───────────────────────────── */
   /* ⚠⚠ SANS CETTE PHRASE, ON DEPLACE DES LIGNES SANS SAVOIR CE QU ON CHANGE. */
@@ -73,10 +71,6 @@ module.exports = {
     'it is the one the customer sees first on a product page.',
   'Ordre modifié — «': 'Order changed — «',
   '» a changé de place.': '» has moved.',
-  /* ⚠ Les deux fleches portent leur sens dans leur `title` — le pictogramme
-     ▲▼ seul ne dit pas CE QUE le geste deplace. */
-  'Monter': 'Move up',
-  'Descendre': 'Move down',
 
   /* ── LA LISTE DES REGLES ────────────────────────────────────────────────── */
   'Aucune règle pour l’instant': 'No rule yet',
@@ -89,11 +83,6 @@ module.exports = {
   'Affichée sur': 'Shown on',
   'État': 'Status',
   'par défaut': 'default',
-  'Modifier': 'Edit',
-  'Supprimer': 'Delete',
-  'Désactiver': 'Disable',
-  'Activer': 'Enable',
-  'Restaurer': 'Restore',
   'activée.': 'enabled.',
   'désactivée.': 'disabled.',
   /* ⚠ UNE SUPPRESSION QUI SE RATTRAPE LE DIT — sinon on n ose plus rien retirer. */
@@ -178,7 +167,6 @@ module.exports = {
   'Aucun article actif dans cette catégorie.': 'No active item in this category.',
   'Toutes': 'All',
   ' $ au total': ' $ total',
-  'Publication…': 'Publishing…',
   'Nom de la suggestion': 'Name of the suggestion',
   'Sur les fiches produit': 'On product pages',
   'Dans le panier': 'In the basket',

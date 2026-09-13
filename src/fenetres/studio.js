@@ -2605,7 +2605,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             return '<option value="' + esc(l.cle) + '"' + (PH_LOT === l.cle ? ' selected' : '')
               + '>' + esc(l.nom) + '</option>'; }).join('') + '</select>';
     }
-    h += '<select id="ph-tri" aria-label="Ordre de tri">'
+    h += '<select id="ph-tri" aria-label="${T("Ordre de tri")}">'
       + [['recent', '${T("Plus récentes")}'], ['code', 'Code'], ['name', 'Nom'],
          ['linked', '${T("Liées d’abord")}'], ['size', '${T("Plus lourdes")}']].map(function(t){
           return '<option value="' + t[0] + '"' + (PH_TRI === t[0] ? ' selected' : '') + '>'
@@ -3098,7 +3098,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!reset && PH_FIN) return;
     PH_OCC = true;
     var page = reset ? 0 : (PH_PAGE + 1);
-    majPhInfo(reset ? 'Recherche…' : 'Chargement…');
+    majPhInfo(reset ? 'Recherche…' : '${T("Chargement…")}');
     /* ⚠ studio:explorer D ABORD, studio:phototheque EN REPLI : sur un site
        plus ancien la nouvelle op n existe pas, et la fenetre doit continuer de
        marcher — sans filtres, mais elle marche. */

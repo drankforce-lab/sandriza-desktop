@@ -243,7 +243,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (bs) bs.onclick = function(){ PAGE = (D.page || 0) + 1; charger(); };
     var nv = document.getElementById('p-nouveau');
     if (nv) nv.onclick = function(){
-      dire('Ouverture…');
+      dire('${T("Ouverture…")}');
       appeler('produits:nouveau', []).then(function(r){
         dire(r.ok ? '${T("Assistant Produit ouvert dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
@@ -256,7 +256,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler('produits:ouvrir', [tr.getAttribute('data-id')]).then(function(r){
       dire(r.ok ? '${T("Fiche ouverte dans l’assistant Produit.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });

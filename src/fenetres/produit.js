@@ -1009,7 +1009,7 @@ function pageProduit(id) {
         return '<div class="vue"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '"'
           + (src ? ' title="${T("Glisser pour réordonner, ou déposer sur la principale")}"' : '') + '>'
           + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
-          + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="Retirer">×</button>' : '')
+          + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="${T("Retirer")}">×</button>' : '')
           + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
       }).join('');
     }
@@ -1057,7 +1057,7 @@ function pageProduit(id) {
         + (auto ? '" style="cursor:default" title="${T("Générée par « Tout générer » et à l’enregistrement")}"'
                 : '" data-coul="' + esc(c) + '"')
         + '>' + (src ? '<img src="' + esc(src) + '" alt="">' : (auto ? '${T("à générer")}' : 'ajouter')) + '</div>'
-        + (src && !auto ? '<button type="button" class="x" data-coulx="' + esc(c) + '" title="Retirer">×</button>' : '')
+        + (src && !auto ? '<button type="button" class="x" data-coulx="' + esc(c) + '" title="${T("Retirer")}">×</button>' : '')
         + '<div class="lgd">' + esc(c) + '</div></div>';
     }).join('');
   }
@@ -1563,7 +1563,7 @@ function pageProduit(id) {
     }
     function chargerApercu(){
       var z = document.getElementById('ap-zone');
-      if (z) z.innerHTML = '<div style="padding:2rem;text-align:center;color:#6b7280">Chargement…</div>';
+      if (z) z.innerHTML = '<div style="padding:2rem;text-align:center;color:#6b7280">${T("Chargement…")}</div>';
       P.appeler('produit:apercu', saisieApercu(), APERCU_ONGLET).then(function(r){
         var z2 = document.getElementById('ap-zone');
         if (!z2) return;
@@ -1662,7 +1662,7 @@ function pageProduit(id) {
       + '<h3><span class="ic">✨</span> ${T("Mannequin IA")}</h3>'
       + '<div class="aide">${T("Le vêtement de la photo principale sera porté par le modèle choisi.")} '
       + '${T("Chaque génération consomme des crédits Fal.ai.")}</div>'
-      + '<div class="modeles" id="ia-modeles"><span class="aide">Chargement…</span></div>'
+      + '<div class="modeles" id="ia-modeles"><span class="aide">${T("Chargement…")}</span></div>'
       + '<div class="grille" style="grid-template-columns:1fr 1fr;margin:.3rem 0 .5rem">'
       + '<div class="ch"><label for="ia-cat">${T("Type de vêtement")}</label><select id="ia-cat">'
       + '<option value="one-pieces">${T("Robes / Combinaisons")}</option>'
@@ -2021,7 +2021,7 @@ function pageProduit(id) {
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:640px">'
       + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> ${T("Historique complet")}</h3>'
-      + '<div class="jrn" id="hist-corps"><div class="fin">Lecture…</div></div>'
+      + '<div class="jrn" id="hist-corps"><div class="fin">${T("Lecture…")}</div></div>'
       + '<div class="pied2"><button type="button" id="hist-non">Fermer</button></div></div>';
     document.body.appendChild(v);
     document.getElementById('hist-non').onclick = function(){ v.remove(); };
@@ -2347,7 +2347,7 @@ function pageProduit(id) {
     Object.keys(LOCS).forEach(function(k){ if (valides[k] && LOCS[k]) locs[k] = LOCS[k]; });
 
     bEnr.disabled = true;
-    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de la photo et enregistrement…")}' : 'Enregistrement…');
+    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de la photo et enregistrement…")}' : '${T("Enregistrement…")}');
     P.appeler('produit:enregistrer', ID, {
       name: val('p-nom').trim(), category: val('p-cat'), sku: val('p-sku'),
       brand: val('p-marque'), description: val('p-desc'),

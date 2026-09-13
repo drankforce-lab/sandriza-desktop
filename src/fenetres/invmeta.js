@@ -233,7 +233,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueSizes(){
     var chips = D.sizes.map(function(s){
       var lock = s.used > 0 ? '<span class="lock" title="Utilisée par ' + s.used + ' ${T("produit")}' + plur(s.used) + '"><span class="ic">🔒</span></span>' : '';
-      var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? '${T("Utilisée — suppression bloquée")}' : 'Retirer') + '">×</button>' : '';
+      var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? '${T("Utilisée — suppression bloquée")}' : '${T("Retirer")}') + '">×</button>' : '';
       return '<span class="chip">' + esc(s.nom) + lock + x + '</span>';
     }).join('');
     var inp = D.peut.edit ? '<input id="sz-input" aria-label="Ajouter une taille" placeholder="' + (D.sizes.length ? '${T("Ajouter une taille…")}' : '${T("Ex : 46, OS, 2XL…")}') + '" autocomplete="off">' : '';
@@ -252,7 +252,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<td ${T("style")}="text-align:right"><button class="ic prim" data-attrsave="' + type + '">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(it){
-      var rm = D.peut.edit ? '<button class="mini danger" data-attrrm="' + type + '|' + esc(it.key) + '" title="' + (it.used > 0 ? it.used + ' ${T("produit(s) — bloqué")}' : 'Supprimer') + '">Retirer</button>' : '';
+      var rm = D.peut.edit ? '<button class="mini danger" data-attrrm="' + type + '|' + esc(it.key) + '" title="' + (it.used > 0 ? it.used + ' ${T("produit(s) — bloqué")}' : '${T("Supprimer")}') + '">${T("Retirer")}</button>' : '';
       return '<tr><td><${T("code")}>' + esc(it.key) + '</${T("code")}>' + (it.used > 0 ? ' <span class="pill used">' + it.used + '×</span>' : '') + '</td>'
         + '<td ${T("style")}="font-weight:500">' + esc(it.label) + '</td>'
         + '<td ${T("style")}="color:var(--tx2)">' + esc(it.labelEN || '') + '</td>'
@@ -277,7 +277,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<td ${T("style")}="text-align:right"><button class="ic prim" data-labelsave="1">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(l){
-      var rm = D.peut.edit ? '<button class="mini danger" data-labelrm="' + esc(l.key) + '" title="' + (l.used > 0 ? l.used + ' ${T("produit(s) — bloqué")}' : 'Supprimer') + '">Retirer</button>' : '';
+      var rm = D.peut.edit ? '<button class="mini danger" data-labelrm="' + esc(l.key) + '" title="' + (l.used > 0 ? l.used + ' ${T("produit(s) — bloqué")}' : '${T("Supprimer")}') + '">${T("Retirer")}</button>' : '';
       return '<tr><td><span class="badge" ${T("style")}="background:' + esc(l.color) + ';color:' + esc(l.textColor) + '">' + esc(l.label) + '</span></td>'
         + '<td ${T("style")}="font-weight:500">' + esc(l.label) + (l.used > 0 ? ' <span class="pill used">' + l.used + '×</span>' : '') + '</td>'
         + '<td ${T("style")}="color:var(--tx2)">' + esc(l.labelEN || '') + '</td>'
@@ -329,7 +329,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!D.custom.length) return '<p class="aide" ${T("style")}="margin:0">${T("Aucune couleur personnalisée. Ajoutez-en via « Ajouter une nouvelle couleur ».")}</p>';
     return D.custom.map(function(c){
       var use = c.used > 0 ? '<span class="pill used">' + c.used + ' ${T("produit")}' + plur(c.used) + '</span>' : '<span class="pill no">${T("non utilisée")}</span>';
-      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span> Modifier</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? '${T("utilisée — bloqué")}' : 'Supprimer') + '">Supprimer</button>' : '';
+      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span> ${T("Modifier")}</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? '${T("utilisée — bloqué")}' : '${T("Supprimer")}') + '">${T("Supprimer")}</button>' : '';
       return '<div class="cust"><span class="pastille" ${T("style")}="' + (c.gradient ? 'border-radius:4px;' : '') + 'background:' + esc(c.hex) + '"></span>'
         + '<span class="nm">' + esc(c.nom) + '</span>' + use
         + '<span class="mono" ${T("style")}="color:var(--tx2);font-size:.72rem">' + (c.gradient ? '${T("dégradé")}' : esc(c.hex)) + '</span>' + act + '</div>';
@@ -365,8 +365,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span class="caret">' + (collapsed ? '▸' : '▾') + '</span>'
         + '<span class="titre">' + esc(titres[k]) + '</span>'
         + '<span class="outils">'
-        +   '<button class="mini" ' + (i === 0 ? 'disabled' : '') + ' data-colmove="' + k + '|-1" title="Monter">↑</button>'
-        +   '<button class="mini" ' + (i === order.length - 1 ? 'disabled' : '') + ' data-colmove="' + k + '|1" title="Descendre">↓</button>'
+        +   '<button class="mini" ' + (i === 0 ? 'disabled' : '') + ' data-colmove="' + k + '|-1" title="${T("Monter")}">↑</button>'
+        +   '<button class="mini" ' + (i === order.length - 1 ? 'disabled' : '') + ' data-colmove="' + k + '|1" title="${T("Descendre")}">↓</button>'
         + '</span></div>'
         + (collapsed ? '' : '<div class="reco-body">' + inner[k]() + '</div>') + '</div>';
     }).join('');
@@ -396,7 +396,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
       var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✏</span></button>' : '';
-      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' ${T("produit(s) — bloqué")}' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '';
+      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' ${T("produit(s) — bloqué")}' : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '';
       return '<tr><td><span class="pastille" ${T("style")}="background:' + esc(c.color) + '"></span></td>'
         + '<td ${T("style")}="font-weight:600">' + esc(c.name) + '</td>'
         + '<td ${T("style")}="color:var(--tx2)">' + esc(c.nameEN || '—') + '</td>'
