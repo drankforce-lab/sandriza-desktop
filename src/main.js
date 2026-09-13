@@ -1841,29 +1841,41 @@ const capturerMarque = () => {
 // Et tant qu'à ouvrir une fenêtre, elle porte le même habillage que le reste.
 let aproposWin = null;
 
+/* ⚠⚠ ET CELLE-CI EST ARRIVEE DEUX JOURS APRES « 98 FENETRES SUR 98 ». Le
+   chantier bilingue a compte les fichiers de `src/fenetres/` ; cette fenetre-ci
+   est batie ICI, dans le processus principal, et n a donc jamais ete comptee.
+   Elle est restee entierement francaise sous un compte EXACT et des bancs verts
+   — pendant que l ecran de mise a jour, quelques lignes plus haut dans le MEME
+   fichier, passait deja par `TP()`.
+   ➡ Un compte exhaustif ne l est que sur le terrain qu il enumere. */
+const TA = require('./langue').tr('apropos');
+
 const infosApropos = () => {
   const cfg = reglages.lire();
   const sys = process.platform === 'win32' ? 'Windows'
     : process.platform === 'darwin' ? 'macOS' : process.platform;
-  const arch = { x64: '64 bits (x64)', ia32: '32 bits (ia32)', arm64: 'ARM 64 bits' }[process.arch] || process.arch;
-  const ancrage = { haut: 'en haut', gauche: 'à gauche', droite: 'à droite', fenetre: 'fenêtre séparée' }[cfg.menuMode] || cfg.menuMode;
+  const arch = { x64: TA('64 bits (x64)'), ia32: TA('32 bits (ia32)'), arm64: TA('ARM 64 bits') }[process.arch] || process.arch;
+  /* ⚠ CE SONT LES LIBELLES, PAS LE REGLAGE. La valeur ecrite dans
+     `reglages.json` reste `haut`/`gauche`/`droite`/`fenetre` : on traduit ce
+     qu on LIT, jamais ce qui est enregistre. */
+  const ancrage = { haut: TA('en haut'), gauche: TA('à gauche'), droite: TA('à droite'), fenetre: TA('fenêtre séparée') }[cfg.menuMode] || cfg.menuMode;
   return [
-    ['Application', [
-      ['Version', app.getVersion() + (app.isPackaged ? '' : '  (développement)')],
-      ['Portail', APP_URL],
-      ['Mises à jour', 'vérifiées à chaque lancement'],
-      ['Impression', 'native, sans agent local'],
+    [TA('Application'), [
+      [TA('Version'), app.isPackaged ? app.getVersion() : TA('{0}  (développement)', app.getVersion())],
+      [TA('Portail'), APP_URL],
+      [TA('Mises à jour'), TA('vérifiées à chaque lancement')],
+      [TA('Impression'), TA('native, sans agent local')],
     ]],
-    ['Poste', [
-      ['Système', sys + ' · ' + arch],
+    [TA('Poste'), [
+      [TA('Système'), TA('{0} · {1}', sys, arch)],
       ['Electron', process.versions.electron],
       ['Chromium', process.versions.chrome],
       ['Node', process.versions.node],
     ]],
-    ['Réglages', [
-      ['Menu', ancrage + ' · taille ' + Math.round(cfg.menuTaille * 100) + ' %'],
-      ['Fichier', path.join(app.getPath('userData'), 'reglages.json')],
-      ['Exports', EXPORT_DIR()],
+    [TA('Réglages'), [
+      [TA('Menu'), TA('{0} · taille {1} %', ancrage, Math.round(cfg.menuTaille * 100))],
+      [TA('Fichier'), path.join(app.getPath('userData'), 'reglages.json')],
+      [TA('Exports'), EXPORT_DIR()],
     ]],
   ];
 };
@@ -1925,20 +1937,23 @@ const pageApropos = () => {
     + '@keyframes f2{0%,100%{transform:translate(0,0)}50%{transform:translate(-22px,-26px)}}'
     + '@media (prefers-reduced-motion:reduce){.orb{animation:none}}';
 
-  return '<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>À propos</title>'
+  /* ⚠ LA LANGUE DE LA PAGE, comme dans les 99 fenetres : c est elle que lisent
+     la coupure des mots, le correcteur et le lecteur d ecran — pas le texte. */
+  return '<!doctype html><html lang="' + require('./langue').langueCourante() + '">'
+    + '<head><meta charset="utf-8"><title>' + esc(TA('À propos')) + '</title>'
     + '<style>' + css + '</style></head><body>'
     + '<aside class="brand"><span class="orb o1"></span><span class="orb o2"></span>'
     // ⚠ Le nom n'est ecrit QUE si le logo ne le porte pas deja. Le logo de
     // marque contient le mot SANDRIZA : l'afficher en dessous le repetait deux
     // fois, l'un sous l'autre.
     +   '<div class="bi">' + logo + (b.logo ? '' : '<div class="bn">' + esc(b.nom) + '</div>')
-    +   '<div class="bs">Administration</div>'
-    +   '<div class="bv">version ' + app.getVersion() + '</div></div></aside>'
+    +   '<div class="bs">' + esc(TA('Administration')) + '</div>'
+    +   '<div class="bv">' + esc(TA('version {0}', app.getVersion())) + '</div></div></aside>'
     + '<main class="panel"><div class="body">' + sections + '</div>'
     +   '<div class="pied">'
-    +     '<button onclick="szPalette.action({app:\'about-copy\'})">Copier les détails</button>'
-    +     '<button onclick="szPalette.action({app:\'update-check\'})">Vérifier les mises à jour</button>'
-    +     '<button class="p" onclick="window.close()">Fermer</button>'
+    +     '<button onclick="szPalette.action({app:\'about-copy\'})">' + esc(TA('Copier les détails')) + '</button>'
+    +     '<button onclick="szPalette.action({app:\'update-check\'})">' + esc(TA('Vérifier les mises à jour')) + '</button>'
+    +     '<button class="p" onclick="window.close()">' + esc(TA('Fermer')) + '</button>'
     +   '</div></main>'
     // ⚠ AUCUNE BARRE DE DÉFILEMENT, ET PAS PAR UNE HAUTEUR DEVINÉE.
     // Une fenêtre à hauteur fixe se fait démentir par la première ligne
@@ -1960,7 +1975,7 @@ const ouvrirApropos = () => {
   if (aproposWin && !aproposWin.isDestroyed()) { aproposWin.focus(); return; }
   aproposWin = new BrowserWindow({
     width: 830, height: 560, show: false, resizable: false, minimizable: false, maximizable: false,
-    title: 'À propos', parent: mainWindow || undefined, modal: false,
+    title: TA('À propos'), parent: mainWindow || undefined, modal: false,
     autoHideMenuBar: true, backgroundColor: '#faf8f5',
     webPreferences: {
       preload: path.join(__dirname, 'palette-preload.js'),

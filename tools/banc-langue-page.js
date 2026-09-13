@@ -76,15 +76,14 @@ const DECLAREES = {
   'src/fenetres/connexion.js':
     'ENGENDREE et dessinee avant la session : elle pose document.documentElement.lang a l execution.',
 
-  /* ⚠ ET CELLE-CI EST UN AVEU, pas un arrangement. La fenetre << A propos >>
-     est batie dans `main.js`, hors de `src/fenetres/` : elle n a JAMAIS ete
-     traduite (« Administration », « Copier les details », « Verifier les mises
-     a jour », « Fermer » y sont ecrits en francais en dur), alors que l ecran
-     de mise a jour juste a cote, lui, passe par TP(). Lui poser un `lang`
-     dynamique MENTIRAIT : la page resterait francaise en annoncant l anglais.
-     Elle attend sa traduction — tache ouverte — et l exception tombera avec. */
-  'src/main.js':
-    'La fenetre A propos n est pas encore traduite : un lang dynamique sur du texte francais serait un mensonge.',
+  /* ⚠ IL Y EN AVAIT UNE TROISIEME, ET ELLE A TENU UNE JOURNEE. `src/main.js`
+     etait declare ici avec cet aveu : la fenetre << A propos >>, batie hors de
+     `src/fenetres/`, n avait JAMAIS ete traduite — lui poser un `lang`
+     dynamique aurait MENTI, la page serait restee francaise en annoncant
+     l anglais. Elle a ete traduite le 2026-09-13 (`src/langue/apropos.js`),
+     et l exception est tombee avec sa raison.
+     ➡ C EST LA FORME QU ON VEUT POUR UNE EXCEPTION : elle porte ce qu il faut
+     faire pour qu elle disparaisse, et elle disparait. */
 };
 
 /* La condition attachee a une exception : elle doit etre VRAIE, sinon refus. */

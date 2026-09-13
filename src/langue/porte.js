@@ -89,8 +89,9 @@ module.exports = {
     'The application cannot be closed while an update is installing: the package is being written, and interrupting it would leave an incomplete installation.',
   'Elle redémarrera toute seule dès que ce sera terminé.':
     'It will restart on its own as soon as this is finished.',
-  /* ⚠ Le bouton de cette boite — trouve par `banc-langue-porte` des sa premiere
-     execution, pas par la relecture. Un bouton reste le dernier mot qu on lit. */
+  /* ⚠ Le bouton de cette boite — trouve par `banc-langue-processus-principal`
+     (alors nomme `banc-langue-porte`) des sa premiere execution, pas par la
+     relecture. Un bouton reste le dernier mot qu on lit. */
   'Compris': 'Understood',
 
 };

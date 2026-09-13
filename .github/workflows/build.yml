@@ -459,18 +459,26 @@ jobs:
           # `connexion.js` est une CONDITION que le banc vérifie vraiment.
           # Éprouvé par une panne provoquée, une par motif.
           node tools/banc-langue-page.js
-          # ⚠⚠ ET LES ECRANS DE CHARGEMENT, que NI le compteur NI le résiduel ne
-          # voient : ils sont bâtis dans `main.js`, le processus principal, qu'aucun
-          # banc ne peut faire tourner sans lancer toute l'application. C'était le
-          # seul endroit de la coquille où une phrase pouvait rester française sans
-          # que rien ne le dise — et ce sont les pires à laisser ainsi : ils
-          # paraissent au démarrage, pendant le téléchargement et pendant
-          # l'INSTALLATION, quand on ne peut rien faire d'autre que les lire.
+          # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
+          # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
+          # faire tourner sans lancer toute l'application. C'est le seul endroit de
+          # la coquille où une phrase peut rester française sans que rien ne le dise.
           # ⚠ Il vérifie dans les DEUX sens (texte sans traduction, entrée qui dort)
           # et compare les `{0}` : un chiffre présent en français et absent en
-          # anglais donnerait une phrase à trou. Il a trouvé un oubli dès sa
-          # première exécution.
-          node tools/banc-langue-porte.js
+          # anglais donnerait une phrase à trou.
+          # ⚠⚠ ET LA PREUVE EST VENUE DEUX FOIS. Les écrans de CHARGEMENT d'abord —
+          # les pires à laisser en français, puisqu'ils paraissent au démarrage,
+          # pendant le téléchargement et pendant l'INSTALLATION, quand on ne peut
+          # rien faire d'autre que les lire ; un oubli trouvé dès la première
+          # exécution. Puis la fenêtre « À PROPOS » (2026-09-13) : le chantier
+          # bilingue s'est fermé sur « 98 fenêtres sur 98 », un compte EXACT, et
+          # celle-là est restée ENTIÈREMENT française — elle n'avait jamais été
+          # comptée, parce qu'elle vit hors de `src/fenetres/`. Trouvée en posant
+          # la garde d'un AUTRE défaut, pas par un banc.
+          # ➡ Un compte exhaustif ne l'est que sur le terrain qu'il énumère — et
+          # c'est pour ça que ce banc s'appelait `banc-langue-porte` et ne gardait
+          # qu'une table. Sa liste `TABLES` est ce qu'il faut étendre.
+          node tools/banc-langue-processus-principal.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js
           # ⚠ CELUI-CI GARDE UNE CHAÎNE DE QUATRE MORCEAUX que rien d'autre ne
