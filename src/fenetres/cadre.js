@@ -141,7 +141,8 @@ function pageCadre() {
     <h2>${T("Cette zone est la place d’un écran")}</h2>
     <p>${T("Elle est dessinée par l’application, plus par la page web. C’est la pièce qui manquait pour que le panneau d’administration web puisse être retiré : <strong>trente-six écrans natifs s’y ancrent</strong> aujourd’hui, et c’est le site qui dit où elle se trouve.")}</p>
     <p>${T("<strong>Le menu du haut est le vrai :</strong> les intitulés viennent de l’application, et cliquer ouvre <em>son menu</em> — pas une copie. Il n’y a donc qu’une navigation, et elle ne peut pas se désynchroniser. Pas de barre latérale : ce serait le doublon retiré en août.")}</p>
-    <p>${T("<strong>Ce qui n’est pas encore fait :</strong> cette fenêtre n’a pas remplacé la fenêtre principale. Tant que la bascule n’est pas faite, c’est encore le site qui envoie la position de la zone, et les écrans s’ancrent là-bas.")}</p>
+    <p>${T("<strong>Cette zone est maintenant la vraie :</strong> c’est cette fenêtre qui envoie sa position, et les écrans s’y ancrent. Le site n’a plus ce rôle — tant qu’il l’avait, un écran allait se poser d’après une page cachée derrière celle-ci.")}</p>
+    <p>${T("<strong>Ce qui reste à faire :</strong> cette fenêtre n’a pas encore remplacé la fenêtre principale, et l’interrupteur garde sa position « éteint ». Il ne se retirera qu’une fois ce cadre éprouvé sur un vrai poste.")}</p>
     <div class="mes" id="mesures"></div>
   </div>
 </div>
@@ -160,11 +161,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ⚠⚠ ON MESURE LA ZONE, ET ON L AFFICHE. C est exactement le nombre que le
      site envoie aujourd hui (dock:zone) et que cette fenetre devra envoyer a sa
      place. L afficher, c est pouvoir COMPARER les deux au lieu de croire. */
+  /* ⚠⚠ ET ELLE L ENVOIE, DEPUIS LE 2026-09-13. C est la bascule que cette
+     fenetre annoncait comme << pas encore faite >> : jusqu ici le SITE envoyait
+     dock:zone, donc les ecrans s ancraient d apres le rectangle d une page
+     CACHEE DERRIERE ce cadre. Mesurer sans envoyer, c etait un apercu.
+     ⚠ LES DEUX VUES COUVRENT TOUTE LA FENETRE (voir _ajusterVuesCadre) : le
+     rectangle mesure ici est deja dans les memes coordonnees que celui du site.
+     Aucun decalage a corriger — et c est pour ca que la bascule tient en un
+     verbe plutot qu en une arithmetique qu on aurait fini par avoir fausse. */
+  function envoyerZone(r){
+    try {
+      if (!P || !P.dockZone) return;
+      P.dockZone({ x: Math.round(r.left), y: Math.round(r.top),
+        largeur: Math.round(r.width), hauteur: Math.round(r.height) });
+    } catch (e) {}
+  }
+
   function mesurerZone(){
     var z = document.getElementById('ancrage');
     var m = document.getElementById('mesures');
     if (!z || !m) return;
     var r = z.getBoundingClientRect();
+    envoyerZone(r);
     var d = window.devicePixelRatio || 1;
     m.innerHTML = '<span><b>${T("Position")}</b> ' + Math.round(r.left) + ', ' + Math.round(r.top) + ' px</span>'
       + '<span><b>${T("Taille")}</b> ' + Math.round(r.width) + ' × ' + Math.round(r.height) + ' px</span>'
@@ -226,6 +244,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         barreEteindre();
       };
       document.getElementById('sous').textContent = noms.length + ' menu(s)';
+      /* ⚠⚠ LA BARRE VIENT D APPARAITRE, DONC LA ZONE A BOUGE — et l evenement
+         de redimensionnement ne se declenche PAS : la fenetre n a pas change de
+         taille, c est la mise en page qui s est decalee. Sans ceci, la vue
+         ancree resterait a la place d avant la barre et la RECOUVRIRAIT,
+         exactement la panne du 2026-08-09 cote site (<< j ai tente de l ancrer
+         a gauche et le menu a disparu >>).
+         ⚠ DEUX PASSES : tout de suite, puis apres la mise en page — les
+         rectangles ne sont pas encore a jour au moment ou l on ecrit le HTML.
+         C est le patron de _dockZonePousser dans le site, repris tel quel. */
+      mesurerZone();
+      requestAnimationFrame(function(){ try { mesurerZone(); } catch (e) {} });
+      setTimeout(function(){ try { mesurerZone(); } catch (e) {} }, 180);
     }).catch(function(){});
   }
   barrePoser();

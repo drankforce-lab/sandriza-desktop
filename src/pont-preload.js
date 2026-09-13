@@ -30,6 +30,17 @@ contextBridge.exposeInMainWorld('szPont', {
   // ANCRAGE : la vue detachee demande a REVENIR dans la fenetre principale.
   // Inerte pour une page qui vit ancree ou dans une fenetre ordinaire.
   ancrer: () => ipcRenderer.invoke('dock:ancrer').catch(() => false),
+  /* ⚠⚠ LE CADRE DIT OU EST SA ZONE (2026-09-13). C est LE verbe qui manquait
+     pour que le cadre natif cesse d etre un apercu : jusqu ici, c est le SITE
+     qui envoyait `dock:zone` (le rectangle de son `#admin-content`), et les
+     ecrans s ancraient donc d apres une page qui, cadre allume, est CACHEE
+     DERRIERE. Le cadre mesurait sa zone et l affichait pour qu on puisse
+     comparer — il ne l envoyait a personne.
+     ⚠ LE PROCESSUS PRINCIPAL NE L ACCEPTE QUE DE LA VUE DU CADRE, et il ignore
+     alors celui du site : deux pages qui declarent la meme zone finiraient par
+     se contredire, et c est la vue VISIBLE qui a raison.
+     ⚠ Inerte dans une fenetre native ordinaire : elle n est le cadre de rien. */
+  dockZone: (rect) => ipcRenderer.send('dock:zone', rect || {}),
   // Rend toujours un objet : { ok:true, … } ou { ok:false, motif:'…' }.
   // ⚠ Jamais d'exception vers la page : une fenêtre qui plante sur un refus de
   // droit est plus difficile à comprendre qu'une fenêtre qui l'affiche.

@@ -3594,6 +3594,20 @@ const reposerAncrees = () => {
 };
 ipcMain.on('dock:zone', (e, rect) => {
   if (!_deLaPrincipale(e)) return;
+  /* ⚠⚠ QUAND LE CADRE EST LA, C EST LUI QUI DIT OU EST LA ZONE — ET LUI SEUL
+     (2026-09-13). Le site continue d envoyer le rectangle de son
+     `#admin-content` : c est sa mise en page a lui, et cadre allume elle est
+     CACHEE DERRIERE. Deux pages qui declarent la meme zone finissent par se
+     contredire, et l ecran ancre irait se poser d apres celle qu on ne voit
+     pas.
+     ➡ C EST LA BASCULE QUE LE CADRE ANNONCAIT COMME << PAS ENCORE FAITE >> :
+     retirer au site son role de cadre. Elle etait nommee en tete de ce fichier
+     comme la condition pour que le cadre puisse redevenir le defaut.
+     ⚠ ETEINT, RIEN NE CHANGE : `vueCadre` vaut null, la condition est fausse,
+     et le site reste la seule source comme depuis toujours. */
+  try {
+    if (_vivant(vueCadre) && e.sender !== vueCadre.webContents) return;
+  } catch (er) {}
   if (!rect || typeof rect !== 'object') return;
   zoneAncrage = { x: Number(rect.x) || 0, y: Number(rect.y) || 0,
     largeur: Number(rect.largeur) || 0, hauteur: Number(rect.hauteur) || 0 };

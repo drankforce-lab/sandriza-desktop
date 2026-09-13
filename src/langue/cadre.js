@@ -32,9 +32,14 @@ module.exports = {
   /* ⚠⚠ Le VRAI menu, pas une copie. */
   '<strong>Le menu du haut est le vrai :</strong> les intitulés viennent de l’application, et cliquer ouvre <em>son menu</em> — pas une copie. Il n’y a donc qu’une navigation, et elle ne peut pas se désynchroniser. Pas de barre latérale : ce serait le doublon retiré en août.':
     '<strong>The menu at the top is the real one:</strong> the labels come from the application, and clicking opens <em>its own menu</em> — not a copy. So there is only one navigation, and it cannot fall out of step. No side bar: that would be the duplicate taken away in August.',
-  /* ⚠⚠⚠ CE QUI N EST PAS ENCORE FAIT. Voir l en-tete : ne pas l adoucir. */
-  '<strong>Ce qui n’est pas encore fait :</strong> cette fenêtre n’a pas remplacé la fenêtre principale. Tant que la bascule n’est pas faite, c’est encore le site qui envoie la position de la zone, et les écrans s’ancrent là-bas.':
-    '<strong>What is not done yet:</strong> this window has not replaced the main window. Until the switch is made, it is still the site that sends the position of the area, and the screens dock over there.',
+  /* ⚠⚠ LA BASCULE EST FAITE (2026-09-13) : cette fenêtre envoie sa zone, et le
+     processus principal n’accepte plus celle du site tant que le cadre est là.
+     L’ancienne phrase disait l’inverse — elle est donc partie, pas adoucie. */
+  '<strong>Cette zone est maintenant la vraie :</strong> c’est cette fenêtre qui envoie sa position, et les écrans s’y ancrent. Le site n’a plus ce rôle — tant qu’il l’avait, un écran allait se poser d’après une page cachée derrière celle-ci.':
+    '<strong>This area is now the real one:</strong> it is this window that sends its position, and the screens dock in it. The site no longer has that role — while it did, a screen would place itself from a page hidden behind this one.',
+  /* ⚠⚠⚠ CE QUI RESTE À FAIRE. Voir l en-tete : ne pas l adoucir. */
+  '<strong>Ce qui reste à faire :</strong> cette fenêtre n’a pas encore remplacé la fenêtre principale, et l’interrupteur garde sa position « éteint ». Il ne se retirera qu’une fois ce cadre éprouvé sur un vrai poste.':
+    '<strong>What is left to do:</strong> this window has not replaced the main window yet, and the switch keeps its “off” position. It will only go once this frame has been tried on a real workstation.',
 
   /* Les formes RENDUES, pour le compteur : les balises sont tombees. */
   'Elle est dessinée par l’application, plus par la page web. C’est la pièce qui manquait pour que le panneau d’administration web puisse être retiré :':
