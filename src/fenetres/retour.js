@@ -786,7 +786,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('verrou:prendre', ['return_reqs', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
       sous.textContent = 'ouvert par ' + (v.parQui || '${T("quelqu’un d’autre")}');
       dire('${T("Ce dossier est déjà ouvert ailleurs — lecture seule conseillée.")}', 'att');
     });

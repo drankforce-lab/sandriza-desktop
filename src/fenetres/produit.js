@@ -2193,8 +2193,8 @@ function pageProduit(id) {
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'products', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || '${T("quelqu’un d’autre")}');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
+      sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       bEnr.disabled = true;
       dire('${T("Enregistrement bloqué : cette fiche est ouverte ailleurs.")}', 'err');
     });

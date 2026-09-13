@@ -29,6 +29,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('expedition');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -130,9 +134,9 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 function pageExpedition(id) {
   const depart = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Expédier une commande — Administration Sandriza</title>
+<title>${T("Expédier une commande — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.shipping}</span><h1 id="titre">Expédier une commande</h1>
+<div class="tete"><span class="ico">${ICO.shipping}</span><h1 id="titre">${T("Expédier une commande")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"></div>
 <div class="pied"><span class="msg" id="msg"></span>
@@ -162,26 +166,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne permet pas d’expédier une commande.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'Le transporteur n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette commande n’existe plus.',
-    verrou:             'Commande ouverte par quelqu’un d’autre.',
-    suivi_requis:       'Un numéro de suivi est requis — ou confirmez l’envoi sans numéro.',
-    poids_invalide:     'Le poids du colis doit être supérieur à zéro.',
-    deja_etiquetee:     'Une étiquette existe déjà pour cette commande — rien n’a été commandé.',
-    secrets:            'Identifiants du transporteur indisponibles. Reconnectez-vous, puis réessayez.',
-    config:             'Configuration du transporteur incomplète.',
-    origine:            'Adresse d’expédition incomplète — Configuration puis Transporteurs.',
-    destination:        'Adresse du destinataire incomplète dans la commande.',
-    refus_transporteur: 'Le transporteur a refusé la demande.',
-    etiquette_absente:  'Aucune étiquette enregistrée pour cette commande.',
-    impression:         'L’impression a échoué.',
-    reseau:             'Le réseau a échoué — rien n’a été commandé.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne permet pas d’expédier une commande.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("Le transporteur n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette commande n’existe plus.")}',
+    verrou:             '${T("Commande ouverte par quelqu’un d’autre.")}',
+    suivi_requis:       '${T("Un numéro de suivi est requis — ou confirmez l’envoi sans numéro.")}',
+    poids_invalide:     '${T("Le poids du colis doit être supérieur à zéro.")}',
+    deja_etiquetee:     '${T("Une étiquette existe déjà pour cette commande — rien n’a été commandé.")}',
+    secrets:            '${T("Identifiants du transporteur indisponibles. Reconnectez-vous, puis réessayez.")}',
+    config:             '${T("Configuration du transporteur incomplète.")}',
+    origine:            '${T("Adresse d’expédition incomplète — Configuration puis Transporteurs.")}',
+    destination:        '${T("Adresse du destinataire incomplète dans la commande.")}',
+    refus_transporteur: '${T("Le transporteur a refusé la demande.")}',
+    etiquette_absente:  '${T("Aucune étiquette enregistrée pour cette commande.")}',
+    impression:         '${T("L’impression a échoué.")}',
+    reseau:             '${T("Le réseau a échoué — rien n’a été commandé.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
@@ -191,7 +195,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // le dit deja en clair. Le remplacer par une phrase generique ferait chercher
     // la panne du mauvais cote pendant des heures.
     if (r && r.detail) return r.detail;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
 
   function appeler(op, args){
@@ -225,40 +229,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     // Pas-a-pas : ce qui est fait, ce qui reste.
     h += '<div class="pas">'
-      + '<span class="' + (c.aUneEtiquette ? 'fait' : 'on') + '">1 · Étiquette'
+      + '<span class="' + (c.aUneEtiquette ? 'fait' : 'on') + '">${T("1 · Étiquette")}'
       + (c.aUneEtiquette ? ' ✓' : '') + '</span>'
-      + '<span class="' + (c.aUneEtiquette && !expediee ? 'on' : (expediee ? 'fait' : '')) + '">2 · Impression</span>'
-      + '<span class="' + (expediee ? 'fait' : '') + '">3 · Expédiée' + (expediee ? ' ✓' : '') + '</span>'
+      + '<span class="' + (c.aUneEtiquette && !expediee ? 'on' : (expediee ? 'fait' : '')) + '">${T("2 · Impression")}</span>'
+      + '<span class="' + (expediee ? 'fait' : '') + '">${T("3 · Expédiée")}' + (expediee ? ' ✓' : '') + '</span>'
       + '</div>';
 
-    h += '<div class="carte"><h2>Commande <span class="note">— ' + esc(c.numero)
-      + ' · ' + c.articles + ' article' + (c.articles > 1 ? 's' : '') + '</span></h2>'
-      + '<div class="adresse"><div class="nom">' + esc(d.nom || 'Destinataire') + '</div>'
+    h += '<div class="carte"><h2>${T("Commande")} <span class="note">— ' + esc(c.numero)
+      + ' · ' + c.articles + '${T(" article")}' + (c.articles > 1 ? 's' : '') + '</span></h2>'
+      + '<div class="adresse"><div class="nom">' + esc(d.nom || '${T("Destinataire")}') + '</div>'
       + '<div class="det">' + esc(d.rue) + '<br>' + esc(d.ville) + ', ' + esc(d.province)
       + ' ' + esc(d.codePostal) + (d.tel ? ' · ' + esc(d.tel) : '') + '</div></div>';
     if (!d.codePostal) {
-      h += '<div class="avis rouge"><span class="ic">⚠</span> Aucun code postal sur cette commande — aucun transporteur '
-        + 'n’acceptera l’envoi. Corrigez l’adresse avant de commander une étiquette.</div>';
+      h += '<div class="avis rouge"><span class="ic">⚠</span> ${T("Aucun code postal sur cette commande — aucun transporteur ")}'
+        + '${T("n’acceptera l’envoi. Corrigez l’adresse avant de commander une étiquette.")}</div>';
     }
     h += '</div>';
 
     // ── Etiquette ───────────────────────────────────────────────────────────
-    h += '<div class="carte"><h2>Étiquette</h2>';
+    h += '<div class="carte"><h2>${T("Étiquette")}</h2>';
     if (c.aUneEtiquette) {
       // ⚠ ON LE DIT AVANT LE CLIC. Une etiquette est facturee : mieux vaut le
       // savoir en regardant l ecran qu apres avoir presse le bouton.
-      h += '<div class="avis jaune"><span class="ic">⚠</span> Une étiquette a déjà été créée pour cette commande'
-        + (c.suivi ? ' (suivi <strong>' + esc(c.suivi) + '</strong>)' : '')
-        + '. En commander une seconde serait <strong>facturé une seconde fois</strong>.</div>';
+      h += '<div class="avis jaune"><span class="ic">⚠</span> ${T("Une étiquette a déjà été créée pour cette commande")}'
+        + (c.suivi ? '${T(" (suivi ")}<strong>' + esc(c.suivi) + '</strong>)' : '')
+        + '${T(". En commander une seconde serait ")}<strong>${T("facturé une seconde fois")}</strong>.</div>';
     }
     h += '<div class="r3" style="margin-top:.45rem">'
-      + '<div class="ch"><label for="e-transporteur">Transporteur</label>'
+      + '<div class="ch"><label for="e-transporteur">${T("Transporteur")}</label>'
       +   '<select id="e-transporteur">'
       +   ((CTX && CTX.transporteurs) || []).map(function(x){
             return '<option value="' + esc(x.cle) + '"' + (x.cle === TRANSPORTEUR ? ' selected' : '')
-              + '>' + esc(x.nom) + (x.pret ? '' : ' — non configuré') + '</option>'; }).join('')
+              + '>' + esc(x.nom) + (x.pret ? '' : '${T(" — non configuré")}') + '</option>'; }).join('')
       +   '</select></div>'
-      + '<div class="ch"><label for="e-service">Service</label>'
+      + '<div class="ch"><label for="e-service">${T("Service")}</label>'
       +   '<select id="e-service"' + (t && t.pret && t.services.length ? '' : ' disabled') + '>'
       +   ((t && t.services) || []).map(function(s){
             return '<option value="' + esc(s.cle) + '">' + esc(s.libelle) + '</option>'; }).join('')
@@ -266,43 +270,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   '</select></div>'
       // ⚠ LE POIDS EST MODIFIABLE, ET PRE-REMPLI PAR LE CALCUL : c est lui qui
       // decide du prix. Le figer serait aussi faux que le deviner.
-      + '<div class="ch"><label for="e-poids">Poids du colis (kg)</label>'
+      + '<div class="ch"><label for="e-poids">${T("Poids du colis (kg)")}</label>'
       +   '<input id="e-poids" type="number" min="0.001" step="0.001" value="'
       +   esc(pw.calcule > 0 ? pw.calcule : 0.5) + '"></div>'
       + '</div>';
     h += pw.estime
-      ? '<div class="avis jaune"><span class="ic">⚠</span> Certains articles n’ont pas de poids configuré — estimation à '
-        + '300 g par article. Vérifiez avant de commander : c’est le poids qui fixe le prix.</div>'
-      : '<div class="avis vert"><span class="ic">✅</span> Poids calculé depuis les articles de la commande'
-        + (pw.remboursements ? ' (remboursements déduits)' : '') + '.</div>';
+      ? '<div class="avis jaune"><span class="ic">⚠</span> ${T("Certains articles n’ont pas de poids configuré — estimation à ")}'
+        + '${T("300 g par article. Vérifiez avant de commander : c’est le poids qui fixe le prix.")}</div>'
+      : '<div class="avis vert"><span class="ic">✅</span> ${T("Poids calculé depuis les articles de la commande")}'
+        + (pw.remboursements ? '${T(" (remboursements déduits)")}' : '') + '.</div>';
     if (t && !t.pret) {
-      h += '<div class="avis jaune"><span class="ic">💡</span> ' + esc(t.nom) + ' n’est pas configuré — aucune étiquette '
-        + 'réelle n’est possible. Configuration puis Transporteurs dans la fenêtre principale.</div>';
+      h += '<div class="avis jaune"><span class="ic">💡</span> ' + esc(t.nom) + '${T(" n’est pas configuré — aucune étiquette ")}'
+        + '${T("réelle n’est possible. Configuration puis Transporteurs dans la fenêtre principale.")}</div>';
     }
     h += '</div>';
 
     // ── Expedition ──────────────────────────────────────────────────────────
-    h += '<div class="carte"><h2>Marquer expédiée</h2>'
+    h += '<div class="carte"><h2>${T("Marquer expédiée")}</h2>'
       + '<div class="r2">'
-      + '<div class="ch"><label for="e-suivi">Numéro de suivi</label>'
+      + '<div class="ch"><label for="e-suivi">${T("Numéro de suivi")}</label>'
       +   '<input id="e-suivi" autocomplete="off" value="' + esc(c.suivi || '')
-      +   '" placeholder="Rempli tout seul par l’étiquette"></div>'
+      +   '" placeholder="${T("Rempli tout seul par l’étiquette")}"></div>'
       + '<div class="ch"><label>&nbsp;</label>'
       +   '<button id="btn-expedier"' + (expediee ? ' disabled' : '') + '>'
-      +   (expediee ? '✓ Déjà expédiée' : '✓ Marquer expédiée') + '</button></div>'
+      +   (expediee ? '${T("✓ Déjà expédiée")}' : '${T("✓ Marquer expédiée")}') + '</button></div>'
       + '</div>'
-      + '<div class="aide" style="margin-top:.4rem">Créer l’étiquette n’expédie pas : '
-      + 'c’est ce bouton qui marque la commande et envoie le courriel de suivi au client.</div>'
+      + '<div class="aide" style="margin-top:.4rem">${T("Créer l’étiquette n’expédie pas : ")}'
+      + '${T("c’est ce bouton qui marque la commande et envoie le courriel de suivi au client.")}</div>'
       + '</div>';
     corps.innerHTML = h;
 
     var pret = !!(t && t.pret) && !!CTX.peutExpedier && !expediee;
     actions.innerHTML =
-        '<button id="btn-apercu"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">👁</span> Aperçu</button>'
-      + '<button id="btn-imprimer"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">🖨</span> Étiquette + bordereau</button>'
-      + '<button id="btn-bordereau"><span class="ic">🧾</span> Bordereau seul</button>'
+        '<button id="btn-apercu"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">👁</span> ${T("Aperçu")}</button>'
+      + '<button id="btn-imprimer"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">🖨</span> ${T("Étiquette + bordereau")}</button>'
+      + '<button id="btn-bordereau"><span class="ic">🧾</span> ${T("Bordereau seul")}</button>'
       + '<button class="paie" id="btn-etiquette"' + (pret ? '' : ' disabled') + '>'
-      + (c.aUneEtiquette ? '<span class="ic">💳</span> Créer une AUTRE étiquette' : '<span class="ic">💳</span> Créer l’étiquette') + '</button>';
+      + (c.aUneEtiquette ? '<span class="ic">💳</span> ${T("Créer une AUTRE étiquette")}' : '<span class="ic">💳</span> ${T("Créer l’étiquette")}') + '</button>';
     brancher();
   }
 
@@ -324,9 +328,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (bi) bi.onclick = function(){ imprimer(); };
     var bb = document.getElementById('btn-bordereau');
     if (bb) bb.onclick = function(){
-      dire('Impression du bordereau…');
+      dire('${T("Impression du bordereau…")}');
       appeler('expedition:bordereau', [CMD.commande.id]).then(function(r){
-        dire(r.ok ? 'Bordereau envoyé à l’impression.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Bordereau envoyé à l’impression.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
   }
@@ -336,7 +340,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function majBoutonExpedier(){
     var b = document.getElementById('btn-expedier');
     if (!b) return;
-    b.textContent = aveuSansSuivi ? '✓ Expédier SANS numéro' : '✓ Marquer expédiée';
+    b.textContent = aveuSansSuivi ? '${T("✓ Expédier SANS numéro")}' : '${T("✓ Marquer expédiée")}';
   }
 
   // ══ ETIQUETTE — LE GESTE QUI COUTE ════════════════════════════════════════
@@ -354,16 +358,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        que l ancienne version allait chercher dans un formulaire absent. Les
        relire ici, en toutes lettres, est la derniere occasion de voir qu on
        s apprete a etiqueter quatre kilos pour cinq cents grammes. */
-    voile('<h3><span class="ic">💳</span> Commander l’étiquette ?</h3>'
-      + '<p>Une étiquette est <strong>facturée dès sa création</strong> et ne s’annule pas.</p>'
-      + '<p>Transporteur : <strong>' + esc(t ? t.nom : TRANSPORTEUR) + '</strong><br>'
-      + 'Service : <strong>' + esc(libelle || service || '—') + '</strong><br>'
-      + 'Poids : <strong>' + esc(poids) + ' kg</strong></p>'
+    voile('<h3><span class="ic">💳</span> ${T("Commander l’étiquette ?")}</h3>'
+      + '<p>${T("Une étiquette est ")}<strong>${T("facturée dès sa création")}</strong>${T(" et ne s’annule pas.")}</p>'
+      + '<p>${T("Transporteur : ")}<strong>' + esc(t ? t.nom : TRANSPORTEUR) + '</strong><br>'
+      + '${T("Service : ")}<strong>' + esc(libelle || service || '—') + '</strong><br>'
+      + '${T("Poids : ")}<strong>' + esc(poids) + ' kg</strong></p>'
       + (CMD.commande.aUneEtiquette
-          ? '<p style="color:var(--tx-att)"><span class="ic">⚠</span> Une étiquette existe déjà pour cette commande. '
-            + 'En commander une seconde sera facturé une seconde fois.</p>' : '')
-      + '<div class="fin2"><button id="v-non">Annuler</button>'
-      + '<button class="paie" id="v-oui">Commander</button></div>',
+          ? '<p style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Une étiquette existe déjà pour cette commande. ")}'
+            + '${T("En commander une seconde sera facturé une seconde fois.")}</p>' : '')
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="paie" id="v-oui">${T("Commander")}</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
@@ -376,25 +380,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function lancerEtiquette(service, poids){
     enCours = true;
     var b = document.getElementById('btn-etiquette');
-    if (b) { b.disabled = true; b.textContent = '⏳ Création… (jusqu’à 35 s)'; }
-    dire('Demande au transporteur…', 'att');
+    if (b) { b.disabled = true; b.textContent = '${T("⏳ Création… (jusqu’à 35 s)")}'; }
+    dire('${T("Demande au transporteur…")}', 'att');
     appeler('expedition:etiquette', [CMD.commande.id, TRANSPORTEUR, service, poids]).then(function(r){
       enCours = false;
       if (!r.ok) {
-        if (b) { b.disabled = false; b.textContent = 'Créer l’étiquette'; }
+        if (b) { b.disabled = false; b.textContent = '${T("Créer l’étiquette")}'; }
         dire(expliquer(r), 'err');
         return;
       }
       PDF = r.pdf || null;
-      dire('Étiquette créée — suivi ' + (r.suivi || '?') + '.', 'bon');
+      dire('${T("Étiquette créée — suivi ")}' + (r.suivi || '?') + '.', 'bon');
       // ⚠ ON RELIT LA COMMANDE plutot que de rafistoler l etat en memoire : le
       // suivi, l historique et le drapeau d etiquette viennent du site.
       recharger().then(function(){
-        voile('<h3><span class="ic">✅</span> Étiquette créée</h3>'
-          + '<p>Suivi : <strong>' + esc(r.suivi || '—') + '</strong></p>'
+        voile('<h3><span class="ic">✅</span> ${T("Étiquette créée")}</h3>'
+          + '<p>${T("Suivi : ")}<strong>' + esc(r.suivi || '—') + '</strong></p>'
           + ''
-          + '<div class="fin2"><button id="v-non">Plus tard</button>'
-          + '<button class="prim" id="v-oui"><span class="ic">🖨</span> Imprimer maintenant</button></div>',
+          + '<div class="fin2"><button id="v-non">${T("Plus tard")}</button>'
+          + '<button class="prim" id="v-oui"><span class="ic">🖨</span> ${T("Imprimer maintenant")}</button></div>',
           function(fermer){
             document.getElementById('v-non').onclick = fermer;
             document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(); };
@@ -405,9 +409,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // ══ IMPRESSION ET APERCU ══════════════════════════════════════════════════
   function imprimer(){
-    dire('Impression de l’étiquette et du bordereau…');
+    dire('${T("Impression de l’étiquette et du bordereau…")}');
     appeler('expedition:imprimer', [CMD.commande.id, PDF]).then(function(r){
-      dire(r.ok ? 'Étiquette et bordereau envoyés à l’impression.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Étiquette et bordereau envoyés à l’impression.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   }
 
@@ -418,18 +422,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function apercu(){
     var b = document.getElementById('btn-apercu');
     if (b) b.disabled = true;
-    dire('Lecture de l’étiquette…');
+    dire('${T("Lecture de l’étiquette…")}');
     appeler('expedition:pdf', [CMD.commande.id]).then(function(r){
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       PDF = r.pdf;
       dire('');
-      voile('<h3><span class="ic">👁</span> Étiquette — ' + esc(CMD.commande.numero) + '</h3>'
-        + '<p>Suivi : <strong>' + esc(CMD.commande.suivi || '—') + '</strong></p>'
+      voile('<h3><span class="ic">👁</span> ${T("Étiquette — ")}' + esc(CMD.commande.numero) + '</h3>'
+        + '<p>${T("Suivi : ")}<strong>' + esc(CMD.commande.suivi || '—') + '</strong></p>'
         + '<iframe src="data:application/pdf;base64,' + r.pdf + '" '
         + 'style="width:100%;height:52vh;border:1px solid var(--v14);border-radius:8px;background:#3c3c3c"></iframe>'
-        + '<div class="fin2"><button id="v-non">Fermer</button>'
-        + '<button class="prim" id="v-oui"><span class="ic">🖨</span> Imprimer</button></div>',
+        + '<div class="fin2"><button id="v-non">${T("Fermer")}</button>'
+        + '<button class="prim" id="v-oui"><span class="ic">🖨</span> ${T("Imprimer")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(); };
@@ -448,13 +452,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!suivi && !aveuSansSuivi) {
       aveuSansSuivi = true;
       majBoutonExpedier();
-      dire('Aucun numéro de suivi : le client recevra un courriel SANS lien de suivi. '
-         + 'Recliquez pour confirmer, ou collez le numéro du transporteur.', 'att');
+      dire('${T("Aucun numéro de suivi : le client recevra un courriel SANS lien de suivi. ")}'
+         + '${T("Recliquez pour confirmer, ou collez le numéro du transporteur.")}', 'att');
       return;
     }
     enCours = true;
     var b = document.getElementById('btn-expedier');
-    if (b) { b.disabled = true; b.textContent = 'Enregistrement…'; }
+    if (b) { b.disabled = true; b.textContent = '${T("Enregistrement…")}'; }
     appeler('expedition:confirmer', [CMD.commande.id,
       { carrier: TRANSPORTEUR, tracking: suivi, sansNumero: !suivi }]).then(function(r){
       enCours = false;
@@ -465,7 +469,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         dire(expliquer(r), 'err');
         return;
       }
-      dire('Commande ' + (r.numero || '') + ' expédiée — courriel envoyé.', 'bon');
+      dire('${T("Commande")} ' + (r.numero || '') + '${T(" expédiée — courriel envoyé.")}', 'bon');
       recharger();
     });
   }
@@ -481,18 +485,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function charger(depart){
     appeler('expedition:contexte').then(function(c){
-      if (!c || !c.ok) { vide('Expédition indisponible', expliquer(c)); return; }
+      if (!c || !c.ok) { vide('${T("Expédition indisponible")}', expliquer(c)); return; }
       CTX = c;
       TRANSPORTEUR = c.dernier || 'postes-canada';
-      sous.textContent = c.peutExpedier ? '' : 'Lecture seule';
-      if (!depart) { vide('Aucune commande', 'Ouvrez une commande depuis l’écran Expéditions.'); return; }
+      sous.textContent = c.peutExpedier ? '' : '${T("Lecture seule")}';
+      if (!depart) { vide('${T("Aucune commande")}', '${T("Ouvrez une commande depuis l’écran Expéditions.")}'); return; }
       return appeler('expedition:lire', [depart]).then(function(r){
-        if (!r.ok) { vide('Commande indisponible', expliquer(r)); return; }
+        if (!r.ok) { vide('${T("Commande indisponible")}', expliquer(r)); return; }
         CMD = r;
         // Le transporteur DEJA choisi sur la commande gagne sur le dernier utilise :
         // une etiquette FedEx deja creee ne doit pas se poursuivre en Postes Canada.
         if (r.commande.transporteur) TRANSPORTEUR = r.commande.transporteur;
-        document.getElementById('titre').textContent = 'Expédier ' + r.commande.numero;
+        document.getElementById('titre').textContent = '${T("Expédier ")}' + r.commande.numero;
         dessiner();
         prendreVerrou(depart);
       });
@@ -504,12 +508,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('verrou:prendre', ['orders', cid]).then(function(v){
       if (!v || !v.ok) { return; }
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
+      sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       ['btn-etiquette', 'btn-expedier'].forEach(function(k){
         var b = document.getElementById(k); if (b) b.disabled = true;
       });
-      dire('Expédition bloquée : cette commande est ouverte ailleurs.', 'err');
+      dire('${T("Expédition bloquée : cette commande est ouverte ailleurs.")}', 'err');
     });
   }
   function rendreVerrou(){

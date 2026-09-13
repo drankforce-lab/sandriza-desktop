@@ -110,6 +110,20 @@ module.exports = {
   /* ── LES VERROUS, VUS DEPUIS LA FENETRE ────────────────────────── */
   'Section verrouillée en modification par :': 'Section locked for editing by:',
   'quelqu’un d’autre': 'someone else',
+  /* ⚠⚠ « VOUS » : LE MOT QU AUCUN BANC NE POUVAIT VOIR. Onze fenetres ecrivent
+     `(v.par || 'vous')` — le nom de la personne qui tient le verrou, ou « vous »
+     quand c est soi-meme. Sur la page anglaise, la banniere disait donc
+     « Section locked for editing by: vous ». Ni le compteur ni le banc du
+     residuel ne l attrapaient : le residuel ECARTE les chaines d UN SEUL MOT de
+     la portion de script, parce qu elles ressemblent a des identifiants
+     (`getElementById('corps')`). Mesure du 2026-09-13 : 223 mots distincts dans
+     ce cas, 354 occurrences — mais la majorite SONT vraiment des identifiants,
+     et un banc qui crie au loup cesse d etre lu. Celui-ci se corrige a la main,
+     le discriminateur reste a ecrire.
+     ⚠ « hors ligne » vit ici pour la meme raison : deux mots, mais sans accent. */
+  'vous': 'you',
+  'hors ligne': 'offline',
+  'ouverte par ': 'open by ',
   'Consultation seulement — votre rôle ne permet pas d’enregistrer.':
     'View only — your role does not allow saving.',
 

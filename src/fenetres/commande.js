@@ -633,7 +633,7 @@ function pageCommande(id) {
   function verrou(){
     return P.appeler('verrou:prendre', 'orders', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
+      if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
       sous.textContent = 'en traitement par ' + (v.parQui || '${T("quelqu’un d’autre")}');
       /* ⚠ EN LECTURE POUR DE BON (releve du 2026-08-08) : on ne desarmait que
          le bouton Expedier, que majExpedier REARMAIT au premier input — et le

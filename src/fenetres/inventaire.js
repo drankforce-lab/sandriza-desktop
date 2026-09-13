@@ -1699,8 +1699,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('verrou:prendre', ['products', pid]).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || '${T("quelqu’un d’autre")}');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
+      sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       var b = document.getElementById('btn-enr');
       if (b) { b.disabled = true; b.textContent = '${T("Ouverte ailleurs")}'; }
       dire('${T("Enregistrement bloqué : ce produit est ouvert ailleurs.")}', 'err');

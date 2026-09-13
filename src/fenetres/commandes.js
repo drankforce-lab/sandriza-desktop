@@ -672,8 +672,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!v || !v.ok) { sous.textContent = ''; return; }
       if (v.obtenu) {
         VERROU_PRIS = true; VERROU_PAR = '';
-        sous.textContent = v.horsLigne ? 'hors ligne'
-          : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous');
+        sous.textContent = v.horsLigne ? '${T("hors ligne")}'
+          : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}');
       } else {
         VERROU_PRIS = false; VERROU_PAR = v.parQui || '${T("quelqu’un d’autre")}';
         sous.textContent = 'en traitement par ' + VERROU_PAR;

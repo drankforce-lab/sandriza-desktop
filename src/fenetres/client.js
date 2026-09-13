@@ -471,8 +471,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('verrou:prendre', ['users', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || '${T("quelqu’un d’autre")}');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
+      sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       dire('${T("Cette fiche est ouverte ailleurs — modifications bloquées.")}', 'att');
       R.peutEcrire = false;
       dessiner();
