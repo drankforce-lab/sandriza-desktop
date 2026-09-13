@@ -22,6 +22,11 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠ Le MESSAGE d'une campagne est PUBLIÉ sur les réseaux et envoyé par
+   infolettre : c'est de la donnée, et son exemple reste en français. Le NOM de
+   la campagne ne sort pas de l'administration — voir src/langue/publicite.js. */
+const T = require('../langue').tr('publicite');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -125,11 +130,11 @@ function pagePublicite(ouverture) {
   const tabDepart = ouv === 'camp-nouvelle' ? 'campaigns' : (ONGLETS.indexOf(ouv) >= 0 ? ouv : 'overview');
   const ouvreForm = (ouv === 'camp-nouvelle');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Publicité ciblée — Administration Sandriza</title>
+<title>${T("Publicité ciblée — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.mktstats}</span><h1>Publicité ciblée &amp; analytique</h1><span class="sous" id="sous"></span></div>
+<div class="tete"><span class="ico">${ICO.mktstats}</span><h1>${T("Publicité ciblée &amp; analytique")}</h1><span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -147,12 +152,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var FORM = null;            // surcouche nouvelle campagne : { seg0, audienceCount, promos }
   var UTM = { source:'facebook', campaign:'promo-2026', dest:'#shop' };
 
-  var LBL = { overview:'Vue d’ensemble', segments:'Segments', promos:'Promotions',
-    social:'Attribution sociale', campaigns:'Campagnes', satisfaction:'Satisfaction' };
+  var LBL = { overview:'${T("Vue d’ensemble")}', segments:'${T("Segments")}', promos:'${T("Promotions")}',
+    social:'${T("Attribution sociale")}', campaigns:'${T("Campagnes")}', satisfaction:'${T("Satisfaction")}' };
   var OP = { overview:'analytics:overview', segments:'analytics:segments', promos:'analytics:promos',
     social:'analytics:social', campaigns:'analytics:campaigns', satisfaction:'analytics:satisfaction' };
-  var STATUTS = { confirmed:['ok','Confirmée'], pending:['warn','En attente'], shipped:['info','Expédiée'],
-    delivered:['ok','Livrée'], cancelled:['def','Annulée'], preparing:['info','Préparation'], verification:['warn','Vérif.'] };
+  var STATUTS = { confirmed:['ok','${T("Confirmée")}'], pending:['warn','${T("En attente")}'], shipped:['info','${T("Expédiée")}'],
+    delivered:['ok','${T("Livrée")}'], cancelled:['def','${T("Annulée")}'], preparing:['info','${T("Préparation")}'], verification:['warn','${T("Vérif.")}'] };
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -163,16 +168,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
   function chk(id){ var e = document.getElementById(id); return e ? e.checked : false; }
 
-  var MOTIFS = { session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne permet pas cette action.', indisponible:'L’administration n’est pas chargée.',
-    nom:'Nom requis.', message:'Message requis.', introuvable:'Campagne introuvable.', echec:'L’opération a échoué.' };
-  function expliquer(r){ if (!r) return 'Aucune réponse de la fenêtre principale.'; if (r.detail) return String(r.detail); return MOTIFS[r.motif] || MOTIFS.echec; }
+  var MOTIFS = { session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne permet pas cette action.")}', indisponible:'${T("L’administration n’est pas chargée.")}',
+    nom:'${T("Nom requis.")}', message:'${T("Message requis.")}', introuvable:'${T("Campagne introuvable.")}', echec:'${T("L’opération a échoué.")}' };
+  function expliquer(r){ if (!r) return '${T("Aucune réponse de la fenêtre principale.")}'; if (r.detail) return String(r.detail); return MOTIFS[r.motif] || MOTIFS.echec; }
   function appeler(op, arg){ if (!P || !P.appeler) return Promise.resolve({ ok:false, motif:'indisponible' }); return P.appeler(op, arg).catch(function(){ return { ok:false, motif:'echec' }; }); }
 
   function charger(){
     var arg = TAB === 'segments' ? { filtre:SEGF } : {};
     return appeler(OP[TAB], arg).then(function(r){
-      if (!r || !r.ok) { vide('Analytique indisponible', expliquer(r)); return false; }
+      if (!r || !r.ok) { vide('${T("Analytique indisponible")}', expliquer(r)); return false; }
       D = r; if (r.peut) PEUT = r.peut; return true;
     });
   }
@@ -201,7 +206,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<div class="rang"><span class="pos">' + (i + 1) + '</span><div class="nm"><div>' + esc(p.name) + '</div>'
         + '<div style="font-size:.66rem;color:var(--tx2)">' + p.qty + ' vendu' + plur(p.qty) + '</div></div>'
         + '<div class="num" style="color:var(--tx-creme);font-weight:700">' + argent(p.rev) + '</div></div>';
-    }).join('') : '<div class="vide">Aucune vente.</div>';
+    }).join('') : '<div class="vide">${T("Aucune vente.")}</div>';
     var recent = D.recent.length ? D.recent.map(function(o){
       var st = STATUTS[o.status] || ['def', o.status];
       return '<tr><td><code>' + esc(o.num) + '</code></td><td>' + esc(o.client || '—') + '</td>'
@@ -209,27 +214,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td>' + (o.promo ? '<span class="badge err">' + esc(o.promo) + '</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td class="num" style="font-weight:700">' + argent(o.total) + '</td>'
         + '<td><span class="badge ' + st[0] + '">' + esc(st[1]) + '</span></td></tr>';
-    }).join('') : '<tr><td colspan="6" class="vide">Aucune commande.</td></tr>';
+    }).join('') : '<tr><td colspan="6" class="vide">${T("Aucune commande.")}</td></tr>';
     return '<div class="tuiles">'
-      + '<div class="tuile"><div class="k"><span class="ic">💰</span> Revenu total</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + D.orderCount + ' commande' + plur(D.orderCount) + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">🎯</span> Revenu promo</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '% des commandes</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">👥</span> Clients actifs</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' inscrits</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">🛒</span> Panier moyen</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">par commande</div></div>'
-      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> Réponse sondage</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + ' sur 5' : '') + '</div></div>' : '')
+      + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu total")}</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + D.orderCount + ' commande' + plur(D.orderCount) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🎯</span> ${T("Revenu promo")}</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '% des commandes</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Clients actifs")}</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' inscrits</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🛒</span> ${T("Panier moyen")}</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">par commande</div></div>'
+      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + ' sur 5' : '') + '</div></div>' : '')
       + '</div>'
       + '<div class="deux">'
-      +   '<div class="carte"><h2>Revenu mensuel — 6 mois<span class="legend"><span><i style="background:#c9a97e"></i>Total</span><span><i style="background:#dc2626;opacity:.7"></i>Promo</span></span></h2><div class="graph">' + graph + '</div></div>'
-      +   '<div class="carte"><h2><span class="ic">🏆</span> Top 5 produits</h2>' + tops + '</div>'
+      +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:#c9a97e"></i>${T("Total")}</span><span><i style="background:#dc2626;opacity:.7"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
+      +   '<div class="carte"><h2><span class="ic">🏆</span> ${T("Top 5 produits")}</h2>' + tops + '</div>'
       + '</div>'
-      + '<div class="carte"><h2>Commandes récentes</h2><table><thead><tr><th>Commande</th><th>Client</th><th>Date</th><th>Promo</th><th class="num">Total</th><th>Statut</th></tr></thead><tbody>' + recent + '</tbody></table></div>';
+      + '<div class="carte"><h2>${T("Commandes récentes")}</h2><table><thead><tr><th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Date")}</th><th>${T("Promo")}</th><th class="num">${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recent + '</tbody></table></div>';
   }
 
   /* ══ SEGMENTS ══════════════════════════════════════════════════════════════ */
   function vueSegments(){
     var cards = D.segMeta.map(function(m){
       return '<div class="seg' + (SEGF === m.key ? ' pris' : '') + '" data-seg="' + m.key + '"><div class="n">' + (D.segCounts[m.key] || 0) + '</div><div class="l">' + esc(m.label) + '</div><div class="d">' + esc(m.desc) + '</div></div>';
-    }).join('') + '<div class="seg' + (SEGF === 'promo' ? ' pris' : '') + '" data-seg="promo"><div class="n" style="color:var(--tx-err2)">' + D.promoCnt + '</div><div class="l">Acheteurs promo</div><div class="d">Ont utilisé une offre</div></div>';
-    var titre = SEGF === 'all' ? 'Tous les clients' : SEGF === 'promo' ? 'Acheteurs promo' : (function(){ var mm = D.segMeta.filter(function(x){ return x.key === SEGF; })[0]; return mm ? mm.label : SEGF; })();
+    }).join('') + '<div class="seg' + (SEGF === 'promo' ? ' pris' : '') + '" data-seg="promo"><div class="n" style="color:var(--tx-err2)">' + D.promoCnt + '</div><div class="l">${T("Acheteurs promo")}</div><div class="d">${T("Ont utilisé une offre")}</div></div>';
+    var titre = SEGF === 'all' ? '${T("Tous les clients")}' : SEGF === 'promo' ? '${T("Acheteurs promo")}' : (function(){ var mm = D.segMeta.filter(function(x){ return x.key === SEGF; })[0]; return mm ? mm.label : SEGF; })();
     var rows = D.clients.length ? D.clients.map(function(c){
       var col = c.daysSince > 60 ? 'var(--tx-err)' : c.daysSince > 30 ? 'var(--tx-att)' : 'var(--tx-ok)';
       return '<tr><td><strong>' + esc(c.nom || '—') + '</strong></td><td style="color:var(--tx2)">' + esc(c.email || '—') + '</td>'
@@ -237,14 +242,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td class="num" style="color:var(--tx-creme);font-weight:600">' + argent(c.totalSpent) + '</td>'
         + '<td style="color:var(--tx2)">' + esc(c.lastO || '—') + (c.daysSince !== null ? ' <span style="color:' + col + ';font-size:.7rem">(' + c.daysSince + 'j)</span>' : '') + '</td>'
         + '<td class="ctr">' + (c.isPromo ? '<span style="color:var(--tx-err2);font-weight:700">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td></tr>';
-    }).join('') : '<tr><td colspan="7" class="vide">Aucun client dans ce segment.</td></tr>';
-    var reste = (D.filteredTotal > 50) ? '<tr><td colspan="7" class="vide">+' + (D.filteredTotal - 50) + ' autres — exportez en CSV pour la liste complète</td></tr>' : '';
+    }).join('') : '<tr><td colspan="7" class="vide">${T("Aucun client dans ce segment.")}</td></tr>';
+    var reste = (D.filteredTotal > 50) ? '<tr><td colspan="7" class="vide">+' + (D.filteredTotal - 50) + ' ${T("autres — exportez en CSV pour la liste complète")}</td></tr>' : '';
     return '<div class="segc">' + cards + '</div>'
       + '<div class="carte"><h2>' + esc(titre) + ' — ' + D.filteredTotal + ' client' + plur(D.filteredTotal) + '<span style="display:flex;gap:.5rem">'
-      +   '<button class="ghost mini" data-act="export">⬇ Exporter CSV</button>'
-      +   (D.avecCourriel > 0 && PEUT.edit ? '<button class="prim mini" data-act="cibler"><span class="ic">📢</span> Cibler ce segment</button>' : '')
+      +   '<button class="ghost mini" data-act="export">${T("⬇ Exporter CSV")}</button>'
+      +   (D.avecCourriel > 0 && PEUT.edit ? '<button class="prim mini" data-act="cibler"><span class="ic">📢</span> ${T("Cibler ce segment")}</button>' : '')
       + '</span></h2>'
-      + '<table><thead><tr><th>Client</th><th>Courriel</th><th>Segment</th><th class="ctr">Cmd</th><th class="num">Dépense</th><th>Dernière cmd</th><th class="ctr">Promo</th></tr></thead><tbody>' + rows + reste + '</tbody></table></div>';
+      + '<table><thead><tr><th>${T("Client")}</th><th>${T("Courriel")}</th><th>${T("Segment")}</th><th class="ctr">${T("Cmd")}</th><th class="num">${T("Dépense")}</th><th>${T("Dernière cmd")}</th><th class="ctr">${T("Promo")}</th></tr></thead><tbody>' + rows + reste + '</tbody></table></div>';
   }
 
   /* ══ PROMOTIONS ════════════════════════════════════════════════════════════ */
@@ -252,21 +257,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var t = D.totaux;
     var rows = D.perfs.length ? D.perfs.map(function(p){
       return '<tr><td><strong>' + esc(p.name) + '</strong><div style="font-size:.66rem;color:var(--tx2)">' + esc(p.period) + '</div></td>'
-        + '<td><span class="badge ' + (p.type === 'discount' ? 'err' : 'info') + '">' + (p.type === 'discount' ? 'Rabais auto' : 'Coupon') + '</span></td>'
+        + '<td><span class="badge ' + (p.type === 'discount' ? 'err' : 'info') + '">' + (p.type === 'discount' ? '${T("Rabais auto")}' : 'Coupon') + '</span></td>'
         + '<td><strong style="color:var(--tx-err2)">' + esc(p.badge) + '</strong></td>'
         + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem">' + esc(p.scope) + '</td>'
         + '<td class="ctr" style="font-weight:700">' + p.orders + '</td>'
         + '<td class="num">' + (p.orders > 0 ? argent(p.revenue) : '—') + '</td>'
         + '<td class="num" style="color:var(--tx-err2)">' + (p.savings > 0 ? '-' + argent(p.savings) : '—') + '</td>'
         + '<td><span class="badge ' + (p.active ? 'ok' : 'def') + '">' + (p.active ? 'Actif' : 'Inactif') + '</span></td></tr>';
-    }).join('') : '<tr><td colspan="8" class="vide">Aucune promotion.</td></tr>';
+    }).join('') : '<tr><td colspan="8" class="vide">${T("Aucune promotion.")}</td></tr>';
     return '<div class="tuiles">'
-      + '<div class="tuile"><div class="k"><span class="ic">📣</span> Promotions</div><div class="v">' + t.count + '</div><div class="z">' + t.active + ' active' + plur(t.active) + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">📦</span> Cmd sous promo</div><div class="v">' + t.promoOrders + '</div><div class="z">' + t.promoConvRate + '% des cmd</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">💰</span> Revenu (promo)</div><div class="v">' + argentK(t.totalPromoRev) + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">🎁</span> Économies accordées</div><div class="v">' + argentK(t.totalSavings) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">📣</span> ${T("Promotions")}</div><div class="v">' + t.count + '</div><div class="z">' + t.active + ' active' + plur(t.active) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">📦</span> ${T("Cmd sous promo")}</div><div class="v">' + t.promoOrders + '</div><div class="z">' + t.promoConvRate + '% des cmd</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu (promo)")}</div><div class="v">' + argentK(t.totalPromoRev) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🎁</span> ${T("Économies accordées")}</div><div class="v">' + argentK(t.totalSavings) + '</div></div>'
       + '</div>'
-      + '<div class="carte"><h2>Toutes les offres &amp; coupons</h2><table><thead><tr><th>Nom</th><th>Type</th><th>Rabais</th><th>Portée</th><th class="ctr">Cmd</th><th class="num">Revenu</th><th class="num">Économies</th><th>Statut</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      + '<div class="carte"><h2>${T("Toutes les offres")} &amp; ${T("coupons")}</h2><table><thead><tr><th>${T("Nom")}</th><th>${T("Type")}</th><th>${T("Rabais")}</th><th>${T("Portée")}</th><th class="ctr">${T("Cmd")}</th><th class="num">${T("Revenu")}</th><th class="num">${T("Économies")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
 
   /* ══ ATTRIBUTION SOCIALE + UTM ═════════════════════════════════════════════ */
@@ -280,25 +285,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem" title="' + esc(p.content) + '">' + esc(p.content || '—') + '</td>'
         + '<td class="ctr"><strong style="color:' + (p.orders48h > 0 ? 'var(--tx-ok)' : 'var(--tx2)') + '">' + p.orders48h + '</strong></td>'
         + '<td class="num" style="color:' + (p.revenue48h > 0 ? 'var(--tx-creme)' : 'var(--tx2)') + '">' + (p.revenue48h > 0 ? argent(p.revenue48h) : '—') + '</td></tr>';
-    }).join('') : '<tr><td colspan="5" class="vide">Aucune publication dans l’historique.</td></tr>';
+    }).join('') : '<tr><td colspan="5" class="vide">${T("Aucune publication dans l’historique.")}</td></tr>';
     var recs = D.recs.length ? D.recs.map(function(r){
-      return '<div class="rec">' + r.icon + ' ' + esc(r.txt) + ' <button class="ghost mini" data-cibler="' + esc(r.seg) + '">Cibler →</button></div>';
-    }).join('') : '<div style="color:var(--tx2);font-size:.82rem">Continuez à accumuler des données pour obtenir des recommandations.</div>';
+      return '<div class="rec">' + r.icon + ' ' + esc(r.txt) + ' <button class="ghost mini" data-cibler="' + esc(r.seg) + '">${T("Cibler →")}</button></div>';
+    }).join('') : '<div style="color:var(--tx2);font-size:.82rem">${T("Continuez à accumuler des données pour obtenir des recommandations.")}</div>';
     var src = ['facebook','instagram','pinterest','tiktok','email'].map(function(s){ return '<option value="' + s + '"' + (UTM.source === s ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>'; }).join('');
-    var dst = [['#shop','Boutique'],['#shop?cat=robes','Robes'],['#shop?cat=hauts','Hauts'],['#shop?cat=accessoires','Accessoires'],['#giftcard','Cartes-cadeaux']].map(function(d){ return '<option value="' + d[0] + '"' + (UTM.dest === d[0] ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('');
+    var dst = [['#shop','${T("Boutique")}'],['#shop?cat=robes','${T("Robes")}'],['#shop?cat=hauts','${T("Hauts")}'],['#shop?cat=accessoires','${T("Accessoires")}'],['#giftcard','${T("Cartes-cadeaux")}']].map(function(d){ return '<option value="' + d[0] + '"' + (UTM.dest === d[0] ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('');
     return '<div class="deuxb">'
-      + '<div class="carte"><h2>Publications sociales &amp; impact ventes</h2>'
-      +   '<div style="font-size:.72rem;color:var(--tx2);margin:-.3rem 0 .4rem">Commandes passées dans les 48 h suivant chaque publication</div>'
-      +   '<table><thead><tr><th>Date</th><th>Réseaux</th><th>Contenu</th><th class="ctr">Cmd 48h</th><th class="num">Revenu 48h</th></tr></thead><tbody>' + posts + '</tbody></table></div>'
+      + '<div class="carte"><h2>${T("Publications sociales")} &amp; ${T("impact ventes")}</h2>'
+      +   '<div style="font-size:.72rem;color:var(--tx2);margin:-.3rem 0 .4rem">${T("Commandes passées dans les 48 h suivant chaque publication")}</div>'
+      +   '<table><thead><tr><th>${T("Date")}</th><th>${T("Réseaux")}</th><th>${T("Contenu")}</th><th class="ctr">${T("Cmd 48h")}</th><th class="num">${T("Revenu 48h")}</th></tr></thead><tbody>' + posts + '</tbody></table></div>'
       + '<div style="display:flex;flex-direction:column;gap:.85rem">'
-      +   '<div class="carte"><h2><span class="ic">🔗</span> Liens UTM trackés</h2>'
-      +     '<div class="champ"><label for="utm-source">Source</label><select id="utm-source" data-utm="source">' + src + '</select></div>'
-      +     '<div class="champ"><label for="utm-campaign">Campagne</label><input id="utm-campaign" data-utm="campaign" value="' + esc(UTM.campaign) + '"></div>'
-      +     '<div class="champ"><label for="utm-dest">Destination</label><select id="utm-dest" data-utm="dest">' + dst + '</select></div>'
-      +     '<div class="champ" style="margin-bottom:0"><label for="utm-result">Lien généré</label><div style="display:flex;gap:.35rem">'
-      +       '<input id="utm-result" readonly class="mono" style="font-size:.66rem" value="' + esc(lienUtm()) + '"><button class="ghost mini" data-act="copyutm">Copier</button></div></div>'
+      +   '<div class="carte"><h2><span class="ic">🔗</span> ${T("Liens UTM trackés")}</h2>'
+      +     '<div class="champ"><label for="utm-source">${T("Source")}</label><select id="utm-source" data-utm="source">' + src + '</select></div>'
+      +     '<div class="champ"><label for="utm-campaign">${T("Campagne")}</label><input id="utm-campaign" data-utm="campaign" value="' + esc(UTM.campaign) + '"></div>'
+      +     '<div class="champ"><label for="utm-dest">${T("Destination")}</label><select id="utm-dest" data-utm="dest">' + dst + '</select></div>'
+      +     '<div class="champ" style="margin-bottom:0"><label for="utm-result">${T("Lien généré")}</label><div style="display:flex;gap:.35rem">'
+      +       '<input id="utm-result" readonly class="mono" style="font-size:.66rem" value="' + esc(lienUtm()) + '"><button class="ghost mini" data-act="copyutm">${T("Copier")}</button></div></div>'
       +   '</div>'
-      +   '<div class="carte"><h2><span class="ic">💡</span> Recommandations</h2>' + recs + '</div>'
+      +   '<div class="carte"><h2><span class="ic">💡</span> ${T("Recommandations")}</h2>' + recs + '</div>'
       + '</div></div>';
   }
 
@@ -306,55 +311,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueCampaigns(){
     var rows = D.camps.length ? D.camps.map(function(c){
       return '<tr><td><strong>' + esc(c.name) + '</strong>' + (c.promoLabel ? '<div style="font-size:.68rem;color:var(--tx-creme)"><span class="ic">🎯</span> ' + esc(c.promoLabel) + '</div>' : '') + '</td>'
-        + '<td>' + esc(c.segLabel) + '</td><td><strong>' + c.audienceCount + '</strong> contact' + plur(c.audienceCount) + '</td>'
+        + '<td>' + esc(c.segLabel) + '</td><td><strong>' + c.audienceCount + '</strong> ${T("contact")}' + plur(c.audienceCount) + '</td>'
         + '<td style="font-size:.74rem;color:var(--tx2)">' + esc(c.channels || '—') + '</td><td style="font-size:.74rem;color:var(--tx2)">' + esc(c.date) + '</td>'
-        + '<td><span class="badge ' + (c.status === 'sent' ? 'ok' : 'warn') + '">' + (c.status === 'sent' ? 'Envoyée' : 'Brouillon') + '</span></td>'
-        + '<td class="num">' + (PEUT.edit ? ((c.status !== 'sent' ? '<button class="prim mini" data-launch="' + esc(c.id) + '">Lancer</button> ' : '') + '<button class="ghost mini" data-del="' + esc(c.id) + '" style="color:var(--tx-err)">✕</button>') : '') + '</td></tr>';
-    }).join('') : '<tr><td colspan="7" class="vide">Aucune campagne. Créez la première !</td></tr>';
+        + '<td><span class="badge ' + (c.status === 'sent' ? 'ok' : 'warn') + '">' + (c.status === 'sent' ? '${T("Envoyée")}' : '${T("Brouillon")}') + '</span></td>'
+        + '<td class="num">' + (PEUT.edit ? ((c.status !== 'sent' ? '<button class="prim mini" data-launch="' + esc(c.id) + '">${T("Lancer")}</button> ' : '') + '<button class="ghost mini" data-del="' + esc(c.id) + '" style="color:var(--tx-err)">✕</button>') : '') + '</td></tr>';
+    }).join('') : '<tr><td colspan="7" class="vide">${T("Aucune campagne. Créez la première !")}</td></tr>';
     return '<div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">'
-      + '<div style="font-size:.82rem;color:var(--tx2)">Créez des campagnes ciblées combinant publication sociale et infolettre selon les segments.</div>'
-      + (PEUT.edit ? '<button class="prim" data-act="newcamp">+ Nouvelle campagne</button>' : '') + '</div>'
-      + '<div class="carte"><table><thead><tr><th>Nom</th><th>Segment</th><th>Audience</th><th>Canaux</th><th>Date</th><th>Statut</th><th class="num">Actions</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      + '<div style="font-size:.82rem;color:var(--tx2)">${T("Créez des campagnes ciblées combinant publication sociale et infolettre selon les segments.")}</div>'
+      + (PEUT.edit ? '<button class="prim" data-act="newcamp">${T("+ Nouvelle campagne")}</button>' : '') + '</div>'
+      + '<div class="carte"><table><thead><tr><th>${T("Nom")}</th><th>${T("Segment")}</th><th>${T("Audience")}</th><th>${T("Canaux")}</th><th>${T("Date")}</th><th>${T("Statut")}</th><th class="num">${T("Actions")}</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
   function vueForm(){
-    var segs = [['all','Tous les clients'],['nouveau','Nouveaux (1 cmd)'],['regulier','Réguliers (2-4 cmd)'],['vip','VIP (5+ cmd ou 500 $+)'],['inactif','Inactifs (90j+)'],['promo','Acheteurs promo']]
+    var segs = [['all','${T("Tous les clients")}'],['nouveau','${T("Nouveaux (1 cmd)")}'],['regulier','${T("Réguliers (2-4 cmd)")}'],['vip','${T("VIP (5+ cmd ou 500 $+)")}'],['inactif','${T("Inactifs (90j+)")}'],['promo','${T("Acheteurs promo")}']]
       .map(function(s){ return '<option value="' + s[0] + '"' + (FORM.seg0 === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('');
-    var promos = '<option value="">Aucune promotion liée</option>' + FORM.promos.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.label) + '</option>'; }).join('');
-    return '<div class="voile" id="cf-voile"><div class="boite"><h3>Nouvelle campagne ciblée</h3>'
-      + '<div class="champ"><label for="cf-name">Nom de la campagne *</label><input id="cf-name" placeholder="Promo Été 2026"></div>'
+    var promos = '<option value="">${T("Aucune promotion liée")}</option>' + FORM.promos.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.label) + '</option>'; }).join('');
+    return '<div class="voile" id="cf-voile"><div class="boite"><h3>${T("Nouvelle campagne ciblée")}</h3>'
+      + '<div class="champ"><label for="cf-name">${T("Nom de la campagne *")}</label><input id="cf-name" placeholder="${T("Promo Été 2026")}"></div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">'
-      +   '<div class="champ"><label for="cf-seg">Segment ciblé</label><select id="cf-seg">' + segs + '</select></div>'
-      +   '<div class="champ"><label>Audience estimée</label><div class="aud" id="cf-aud">' + FORM.audienceCount + ' contact' + plur(FORM.audienceCount) + '</div></div>'
+      +   '<div class="champ"><label for="cf-seg">${T("Segment ciblé")}</label><select id="cf-seg">' + segs + '</select></div>'
+      +   '<div class="champ"><label>${T("Audience estimée")}</label><div class="aud" id="cf-aud">' + FORM.audienceCount + ' ${T("contact")}' + plur(FORM.audienceCount) + '</div></div>'
       + '</div>'
-      + '<div class="champ"><label for="cf-promo">Promotion associée (optionnel)</label><select id="cf-promo">' + promos + '</select></div>'
-      + '<div class="champ"><label for="cf-msg">Message *</label><textarea id="cf-msg" rows="3" placeholder="Découvrez nos offres exclusives !"></textarea></div>'
-      + '<div class="champ"><label>Canaux de diffusion</label><div class="chans">'
-      +   '<label><input type="checkbox" id="cf-ch-facebook" checked> <span class="ic">📘</span> Facebook</label>'
-      +   '<label><input type="checkbox" id="cf-ch-instagram" checked> <span class="ic">📷</span> Instagram</label>'
-      +   '<label><input type="checkbox" id="cf-ch-newsletter"> <span class="ic">📧</span> Infolettre</label>'
-      +   '<label><input type="checkbox" id="cf-ch-pinterest"> <span class="ic">📌</span> Pinterest</label>'
+      + '<div class="champ"><label for="cf-promo">${T("Promotion associée (optionnel)")}</label><select id="cf-promo">' + promos + '</select></div>'
+      + '<div class="champ"><label for="cf-msg">${T("Message *")}</label><textarea id="cf-msg" rows="3" placeholder="${T("Découvrez nos offres exclusives !")}"></textarea></div>'
+      + '<div class="champ"><label>${T("Canaux de diffusion")}</label><div class="chans">'
+      +   '<label><input type="checkbox" id="cf-ch-facebook" checked> <span class="ic">📘</span> ${T("Facebook")}</label>'
+      +   '<label><input type="checkbox" id="cf-ch-instagram" checked> <span class="ic">📷</span> ${T("Instagram")}</label>'
+      +   '<label><input type="checkbox" id="cf-ch-newsletter"> <span class="ic">📧</span> ${T("Infolettre")}</label>'
+      +   '<label><input type="checkbox" id="cf-ch-pinterest"> <span class="ic">📌</span> ${T("Pinterest")}</label>'
       + '</div></div>'
-      + '<div class="pied-boite"><button class="gauche" data-cf="annuler">Annuler</button>'
-      +   '<button data-cf="brouillon">Sauvegarder brouillon</button>'
-      +   '<button class="prim" data-cf="lancer">Sauvegarder &amp; Lancer</button></div>'
+      + '<div class="pied-boite"><button class="gauche" data-cf="annuler">${T("Annuler")}</button>'
+      +   '<button data-cf="brouillon">${T("Sauvegarder brouillon")}</button>'
+      +   '<button class="prim" data-cf="lancer">${T("Sauvegarder")} &amp; ${T("Lancer")}</button></div>'
       + '</div></div>';
   }
 
   /* ══ SATISFACTION ══════════════════════════════════════════════════════════ */
   function vueSatisfaction(){
-    if (D.indisponible) return '<div class="vide">Module chat non chargé.</div>';
-    if (!D.rated) return '<div class="carte"><div class="vide"><div style="font-size:2rem"><span class="ic">💬</span></div>Aucune évaluation chat pour le moment.<br><span style="font-size:.8rem">Les données apparaissent après que des clients aient noté leur conversation.</span></div></div>';
+    if (D.indisponible) return '<div class="vide">${T("Module chat non chargé.")}</div>';
+    if (!D.rated) return '<div class="carte"><div class="vide"><div style="font-size:2rem"><span class="ic">💬</span></div>${T("Aucune évaluation chat pour le moment.")}<br><span style="font-size:.8rem">${T("Les données apparaissent après que des clients aient noté leur conversation.")}</span></div></div>';
     var bar = function(v, tot, col){ var pct = tot ? Math.round(v / tot * 100) : 0; return '<div class="satbar"><div class="track"><div style="width:' + pct + '%;background:' + col + '"></div></div><span style="font-size:.78rem;color:var(--tx2);width:66px;text-align:right">' + v + ' (' + pct + '%)</span></div>'; };
-    var comments = D.comments.length ? '<div class="carte"><h2>Commentaires récents</h2>' + D.comments.map(function(c){
+    var comments = D.comments.length ? '<div class="carte"><h2>${T("Commentaires récents")}</h2>' + D.comments.map(function(c){
       return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--v055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
     }).join('') + '</div>' : '';
     return '<div class="tuiles">'
-      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + D.rate + '%</div><div class="z">Taux de satisfaction</div></div>'
-      + '<div class="carte" style="grid-column:span 2"><h2>Répartition des évaluations</h2>'
-      +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> Satisfaits</div>' + bar(D.satisfied, D.rated, '#4ade80')
-      +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> Insatisfaits</div>' + bar(D.unsatisfied, D.rated, '#f87171')
-      +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + ' éval. sur ' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '% de couverture)</div></div>'
+      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + D.rate + '%</div><div class="z">${T("Taux de satisfaction")}</div></div>'
+      + '<div class="carte" style="grid-column:span 2"><h2>${T("Répartition des évaluations")}</h2>'
+      +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> ${T("Satisfaits")}</div>' + bar(D.satisfied, D.rated, '#4ade80')
+      +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> ${T("Insatisfaits")}</div>' + bar(D.unsatisfied, D.rated, '#f87171')
+      +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + '${T(" éval. sur ")}' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '% de couverture)</div></div>'
       + '</div>' + comments;
   }
 
@@ -362,7 +367,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     if (!D) return;
     dessinerOnglets();
-    sous.textContent = PEUT.edit ? '' : 'Lecture seule';
+    sous.textContent = PEUT.edit ? '' : '${T("Lecture seule")}';
     var h = TAB === 'segments' ? vueSegments() : TAB === 'promos' ? vuePromos()
       : TAB === 'social' ? vueSocial() : TAB === 'campaigns' ? vueCampaigns()
       : TAB === 'satisfaction' ? vueSatisfaction() : vueOverview();
@@ -373,7 +378,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ GESTES ════════════════════════════════════════════════════════════════ */
   function exporter(){
     appeler('analytics:segExport', { seg:SEGF }).then(function(r){
-      if (r && r.ok) dire(r.n + ' client' + plur(r.n) + ' exporté' + plur(r.n) + ' dans la fenêtre principale.', 'bon');
+      if (r && r.ok) dire(r.n + ' client' + plur(r.n) + '${T(" exporté")}' + plur(r.n) + ' ${T("dans la fenêtre principale.")}', 'bon');
       else dire(expliquer(r), 'err');
     });
   }
@@ -389,18 +394,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var seg = val('cf-seg');
     appeler('analytics:audience', { seg:seg }).then(function(r){
       var el = document.getElementById('cf-aud');
-      if (el && r && r.ok) el.textContent = r.count + ' contact' + (r.count !== 1 ? 's' : '');
+      if (el && r && r.ok) el.textContent = r.count + ' ${T("contact")}' + (r.count !== 1 ? 's' : '');
     });
   }
   function enregistrerCamp(launch){
     var channels = ['facebook','instagram','newsletter','pinterest'].filter(function(c){ return chk('cf-ch-' + c); });
     var d = { name:val('cf-name'), segment:val('cf-seg'), promoId:val('cf-promo') || null, message:val('cf-msg'), channels:channels, launch:launch };
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('analytics:campSave', d).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       FORM = null;
       relire().then(function(){
-        var m = r.launched ? ('Campagne lancée ! ' + r.audienceCount + ' contact' + plur(r.audienceCount) + (r.mailCount ? ' · ' + r.mailCount + ' courriel' + plur(r.mailCount) + ' ciblé' + plur(r.mailCount) : '')) : 'Brouillon enregistré.';
+        var m = r.launched ? ('${T("Campagne lancée ! ")}' + r.audienceCount + ' ${T("contact")}' + plur(r.audienceCount) + (r.mailCount ? ' · ' + r.mailCount + ' courriel' + plur(r.mailCount) + '${T(" ciblé")}' + plur(r.mailCount) : '')) : '${T("Brouillon enregistré.")}';
         dire(m, 'bon');
       });
     });
@@ -408,9 +413,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function copierUtm(){
     var el = document.getElementById('utm-result'); if (!el) return;
     try {
-      if (navigator.clipboard) navigator.clipboard.writeText(el.value).then(function(){ dire('Lien copié.', 'bon'); }).catch(function(){ el.select(); document.execCommand('copy'); dire('Lien copié.', 'bon'); });
-      else { el.select(); document.execCommand('copy'); dire('Lien copié.', 'bon'); }
-    } catch(e){ dire('Copie impossible.', 'err'); }
+      if (navigator.clipboard) navigator.clipboard.writeText(el.value).then(function(){ dire('${T("Lien copié.")}', 'bon'); }).catch(function(){ el.select(); document.execCommand('copy'); dire('${T("Lien copié.")}', 'bon'); });
+      else { el.select(); document.execCommand('copy'); dire('${T("Lien copié.")}', 'bon'); }
+    } catch(e){ dire('${T("Copie impossible.")}', 'err'); }
   }
 
   document.addEventListener('click', function(e){
@@ -434,8 +439,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else if (act === 'newcamp') ouvrirForm('all');
     else if (act === 'copyutm') copierUtm();
     else if (g('data-cibler')) { SEGF = g('data-cibler'); TAB = 'segments'; charger().then(function(ok){ if (ok) dessiner(); }); }
-    else if (g('data-launch')) { appeler('analytics:campLaunch', { id:g('data-launch') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('Campagne lancée.', 'bon'); }); }); }
-    else if (g('data-del')) { appeler('analytics:campDelete', { id:g('data-del') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('Campagne supprimée.', 'att'); }); }); }
+    else if (g('data-launch')) { appeler('analytics:campLaunch', { id:g('data-launch') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('${T("Campagne lancée.")}', 'bon'); }); }); }
+    else if (g('data-del')) { appeler('analytics:campDelete', { id:g('data-del') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('${T("Campagne supprimée.")}', 'att'); }); }); }
   });
 
   document.addEventListener('change', function(e){

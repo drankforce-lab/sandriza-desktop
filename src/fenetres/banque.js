@@ -30,6 +30,12 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠ On ne traduit QUE ce qui se lit — le nom d'une conciliation, les
+   descriptions des lignes du relevé et les notes sont saisis par la
+   comptabilité et relus par elle. ⚠⚠⚠ Les phrases du VERROUILLAGE ne
+   s'adoucissent pas : voir l'en-tête de src/langue/banque.js. */
+const T = require('../langue').tr('banque');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -123,12 +129,12 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 function pageBanque(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Conciliation bancaire — Administration Sandriza</title>
+<title>${T("Conciliation bancaire — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.bankrec}</span><h1>Conciliation bancaire</h1>
+<div class="tete"><span class="ico">${ICO.bankrec}</span><h1>${T("Conciliation bancaire")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -145,21 +151,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'La conciliation bancaire est réservée au super-administrateur.',
-    indisponible:       'Le module de conciliation n’est pas chargé dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette conciliation n’existe plus.',
-    verrouille:         'Cette conciliation est verrouillée : elle ne peut plus être modifiée.',
-    cache_vide:         'Aucune transaction Square en mémoire pour cette année. Chargez-les d’abord depuis l’écran Paiements.',
-    aucune_depense:     'Aucune dépense enregistrée pour cette année.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("La conciliation bancaire est réservée au super-administrateur.")}',
+    indisponible:       '${T("Le module de conciliation n’est pas chargé dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette conciliation n’existe plus.")}',
+    verrouille:         '${T("Cette conciliation est verrouillée : elle ne peut plus être modifiée.")}',
+    cache_vide:         '${T("Aucune transaction Square en mémoire pour cette année. Chargez-les d’abord depuis l’écran Paiements.")}',
+    aucune_depense:     '${T("Aucune dépense enregistrée pour cette année.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var base = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var base = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     return base + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -179,9 +185,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var EDIT_V = null;
   var ARME = '';
 
-  var STATUTS = { open: 'Ouvert', in_progress: 'En cours', completed: 'Complété', locked: 'Verrouillé' };
-  var ONGLETS = [['releve', 'Relevé bancaire'], ['depots', 'Dépôts et sorties'],
-                 ['appariement', 'Appariement'], ['resume', 'Résumé']];
+  var STATUTS = { open: '${T("Ouvert")}', in_progress: '${T("En cours")}', completed: '${T("Complété")}', locked: '${T("Verrouillé")}' };
+  var ONGLETS = [['releve', '${T("Relevé bancaire")}'], ['depots', '${T("Dépôts et sorties")}'],
+                 ['appariement', '${T("Appariement")}'], ['resume', '${T("Résumé")}']];
 
   function sou(n){
     var v = parseFloat(n) || 0;
@@ -210,24 +216,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var a = (D.annees || []).map(function(y){
       return '<option value="' + y + '"' + (y === ANNEE ? ' selected' : '') + '>' + y + '</option>';
     }).join('');
-    return '<label style="margin:0" for="b-annee">Année</label><select id="b-annee" style="width:auto">' + a + '</select>';
+    return '<label style="margin:0" for="b-annee">${T("Année")}</label><select id="b-annee" style="width:auto">' + a + '</select>';
   }
 
   // ── LISTE ───────────────────────────────────────────────────────────────
   function dessinerListe(){
     var h = [];
     h.push('<div class="barreoutils">' + barreAnnees()
-      + (D.peutEcrire ? '<button class="prim" id="b-nouveau">+ Nouvelle conciliation</button>' : '')
+      + (D.peutEcrire ? '<button class="prim" id="b-nouveau">${T("+ Nouvelle conciliation")}</button>' : '')
       + '<span class="droite">'
-      + '<button id="b-zip">Archive de l’année</button>'
-      + '<button id="b-recharger">Recharger</button></span></div>');
+      + '<button id="b-zip">${T("Archive de l’année")}</button>'
+      + '<button id="b-recharger">${T("Recharger")}</button></span></div>');
 
     h.push('<div class="carte"><h2>Conciliations ' + ANNEE + '</h2>');
     if (!(D.liste || []).length) {
-      h.push('<div class="vide">Aucune conciliation pour cette année.</div>');
+      h.push('<div class="vide">${T("Aucune conciliation pour cette année.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>État</th><th>Nom</th><th class="num">Relevé</th>'
-        + '<th class="num">Dépôts</th><th class="num">Écart</th><th>Lignes</th><th>Modifié</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("État")}</th><th>${T("Nom")}</th><th class="num">${T("Relevé")}</th>'
+        + '<th class="num">${T("Dépôts")}</th><th class="num">${T("Écart")}</th><th>${T("Lignes")}</th><th>${T("Modifié")}</th><th></th></tr></thead><tbody>');
       D.liste.forEach(function(r){
         var s = r.resume || {};
         h.push('<tr class="lg" data-ouvrir="' + esc(r.id) + '">'
@@ -239,10 +245,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<td class="dt">' + r.nbBanque + ' / ' + r.nbVersements + '</td>'
           + '<td class="dt">' + jour(r.updatedAt) + '</td>'
           + '<td style="white-space:nowrap">'
-            + '<button class="mini" data-pdf="' + esc(r.id) + '">Rapport</button> '
+            + '<button class="mini" data-pdf="' + esc(r.id) + '">${T("Rapport")}</button> '
             + (D.peutEcrire
                 ? '<button class="mini dgr" data-jeter="' + esc(r.id) + '">'
-                  + (ARME === r.id ? 'Confirmer ?' : 'Supprimer') + '</button>'
+                  + (ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>'
                 : '')
           + '</td></tr>');
       });
@@ -280,19 +286,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function enteteDetail(){
     var r = D.rec, s = D.resume || {};
     return '<div class="barreoutils">'
-      + '<button id="b-retour">← Toutes les conciliations</button>'
+      + '<button id="b-retour">${T("← Toutes les conciliations")}</button>'
       + '<span class="pill ' + esc(r.status) + '">' + esc(STATUTS[r.status] || r.status) + '</span>'
       + '<strong>' + esc(r.label || '') + '</strong>'
-      + (D.verrouille ? '<span class="pill g">verrouillée le ' + jour(r.lockedAt) + '</span>' : '')
+      + (D.verrouille ? '<span class="pill g">${T("verrouillée le")} ' + jour(r.lockedAt) + '</span>' : '')
       + '<span class="droite">'
-      + '<button id="b-csv">CSV</button>'
-      + '<button id="b-pdf">Rapport</button>'
+      + '<button id="b-csv">${T("CSV")}</button>'
+      + '<button id="b-pdf">${T("Rapport")}</button>'
       + '</span></div>'
       + '<div class="ecart ' + (s.isBalanced ? 'bon' : 'mauvais') + '">'
-      + '<div class="col"><div class="k">Relevé</div><div class="v">' + sou(s.bankTotal) + '</div></div>'
-      + '<div class="col"><div class="k">Dépôts et sorties</div><div class="v">' + sou(s.squareTotal) + '</div></div>'
-      + '<div class="col"><div class="k">Écart</div><div class="v">' + sou(s.difference) + '</div></div>'
-      + '<div class="verdict">' + (s.isBalanced ? '✓ Équilibrée' : 'Écart non résolu') + '</div>'
+      + '<div class="col"><div class="k">${T("Relevé")}</div><div class="v">' + sou(s.bankTotal) + '</div></div>'
+      + '<div class="col"><div class="k">${T("Dépôts et sorties")}</div><div class="v">' + sou(s.squareTotal) + '</div></div>'
+      + '<div class="col"><div class="k">${T("Écart")}</div><div class="v">' + sou(s.difference) + '</div></div>'
+      + '<div class="verdict">' + (s.isBalanced ? '${T("✓ Équilibrée")}' : '${T("Écart non résolu")}') + '</div>'
       + '</div>';
   }
 
@@ -300,15 +306,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueReleve(){
     var r = D.rec;
     var h = [enteteDetail()];
-    h.push('<div class="carte"><div class="barreoutils"><h2 style="margin:0">Lignes du relevé</h2>'
-      + (D.verrouille || !D.peutEcrire ? '' : '<span class="droite"><button class="prim" id="e-ajouter">+ Ligne</button></span>')
+    h.push('<div class="carte"><div class="barreoutils"><h2 style="margin:0">${T("Lignes du relevé")}</h2>'
+      + (D.verrouille || !D.peutEcrire ? '' : '<span class="droite"><button class="prim" id="e-ajouter">${T("+ Ligne")}</button></span>')
       + '</div>');
     if (EDIT_E !== null) h.push(formEntree());
     if (!r.bankEntries.length) {
-      h.push('<div class="vide">Aucune ligne. Saisissez le relevé, ou collez-le ligne par ligne.</div>');
+      h.push('<div class="vide">${T("Aucune ligne. Saisissez le relevé, ou collez-le ligne par ligne.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>Date</th><th>Description</th><th>Type</th>'
-        + '<th class="num">Montant</th><th>État</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("Date")}</th><th>${T("Description")}</th><th>${T("Type")}</th>'
+        + '<th class="num">${T("Montant")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       r.bankEntries.forEach(function(e){
         h.push('<tr><td class="dt">' + esc(e.date || '—') + '</td>'
           + '<td>' + esc(e.description || '—')
@@ -316,13 +322,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<td class="dt">' + esc(e.type || '—') + '</td>'
           + '<td class="num">' + sou(e.amount) + '</td>'
           + '<td>' + (e.status === 'matched'
-              ? '<span class="pill completed">apparié</span>'
+              ? '<span class="pill completed">${T("apparié")}</span>'
               : '<span class="pill g">seul</span>') + '</td>'
           + '<td style="white-space:nowrap">'
             + (D.verrouille || !D.peutEcrire ? ''
-                : '<button class="mini" data-e-mod="' + esc(e.id) + '">Modifier</button> '
+                : '<button class="mini" data-e-mod="' + esc(e.id) + '">${T("Modifier")}</button> '
                   + '<button class="mini dgr" data-e-jeter="' + esc(e.id) + '">'
-                  + (ARME === e.id ? 'Confirmer ?' : 'Retirer') + '</button>')
+                  + (ARME === e.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>')
           + '</td></tr>');
       });
       h.push('</tbody></table>');
@@ -340,54 +346,54 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     e = e || {};
     return '<div class="carte" style="margin:.4rem 0">'
-      + '<h2>' + (EDIT_E ? 'Modifier la ligne' : 'Nouvelle ligne du relevé') + '</h2>'
+      + '<h2>' + (EDIT_E ? '${T("Modifier la ligne")}' : '${T("Nouvelle ligne du relevé")}') + '</h2>'
       + '<div class="duo">'
-      + '<div><label for="e-date">Date</label><input id="e-date" type="date" value="' + esc(e.date || '') + '"></div>'
-      + '<div style="flex:2 1 16rem"><label for="e-desc">Description</label>'
+      + '<div><label for="e-date">${T("Date")}</label><input id="e-date" type="date" value="' + esc(e.date || '') + '"></div>'
+      + '<div style="flex:2 1 16rem"><label for="e-desc">${T("Description")}</label>'
       + '<input id="e-desc" type="text" value="' + esc(e.description || '') + '"></div>'
-      + '<div><label for="e-type">Type</label><input id="e-type" type="text" value="' + esc(e.type || '') + '" placeholder="dépôt, retrait…"></div>'
-      + '<div><label for="e-mnt">Montant</label><input id="e-mnt" type="number" step="0.01" value="' + esc(e.amount != null ? e.amount : '') + '"></div>'
+      + '<div><label for="e-type">${T("Type")}</label><input id="e-type" type="text" value="' + esc(e.type || '') + '" placeholder="${T("dépôt, retrait…")}"></div>'
+      + '<div><label for="e-mnt">${T("Montant")}</label><input id="e-mnt" type="number" step="0.01" value="' + esc(e.amount != null ? e.amount : '') + '"></div>'
       + '</div>'
-      + '<label for="e-notes">Note</label><input id="e-notes" type="text" value="' + esc(e.notes || '') + '">'
-      + '<p class="aide">Une SORTIE se saisit en négatif — c’est ce qui fait que l’écart tombe à zéro quand elle est appariée.</p>'
-      + '<div class="barreoutils" style="margin-top:.5rem"><button class="prim" id="e-enregistrer">Enregistrer</button>'
-      + '<span class="droite"><button id="e-annuler">Annuler</button></span></div></div>';
+      + '<label for="e-notes">${T("Note")}</label><input id="e-notes" type="text" value="' + esc(e.notes || '') + '">'
+      + '<p class="aide">${T("Une SORTIE se saisit en négatif — c’est ce qui fait que l’écart tombe à zéro quand elle est appariée.")}</p>'
+      + '<div class="barreoutils" style="margin-top:.5rem"><button class="prim" id="e-enregistrer">${T("Enregistrer")}</button>'
+      + '<span class="droite"><button id="e-annuler">${T("Annuler")}</button></span></div></div>';
   }
 
   // ── ONGLET DÉPÔTS ET SORTIES ────────────────────────────────────────────
   function vueDepots(){
     var r = D.rec, sq = D.square || {};
     var h = [enteteDetail()];
-    h.push('<div class="carte"><div class="barreoutils"><h2 style="margin:0">Dépôts Square et sorties</h2>'
+    h.push('<div class="carte"><div class="barreoutils"><h2 style="margin:0">${T("Dépôts Square et sorties")}</h2>'
       + (D.verrouille || !D.peutEcrire ? '' : '<span class="droite">'
-          + '<button id="v-square">Importer Square</button>'
-          + '<button id="v-depenses">Importer les dépenses</button>'
-          + '<button class="prim" id="v-ajouter">+ Ligne</button></span>')
+          + '<button id="v-square">${T("Importer Square")}</button>'
+          + '<button id="v-depenses">${T("Importer les dépenses")}</button>'
+          + '<button class="prim" id="v-ajouter">${T("+ Ligne")}</button></span>')
       + '</div>');
-    h.push('<p class="aide">Square en mémoire pour ' + ANNEE + '&nbsp;: ' + (sq.nbTx || 0)
+    h.push('<p class="aide">${T("Square en mémoire pour")} ' + ANNEE + '&nbsp;: ' + (sq.nbTx || 0)
       + ' transaction' + ((sq.nbTx || 0) > 1 ? 's' : '') + ' · brut ' + sou(sq.brut)
       + ' · frais ' + sou(sq.frais) + ' · net ' + sou(sq.net) + '.</p>');
     if (EDIT_V !== null) h.push(formVersement());
     if (!r.squarePayouts.length) {
-      h.push('<div class="vide">Aucun dépôt ni sortie.</div>');
+      h.push('<div class="vide">${T("Aucun dépôt ni sortie.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>Arrivée</th><th>Description</th><th>Période</th>'
-        + '<th class="num">Montant</th><th>État</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("Arrivée")}</th><th>${T("Description")}</th><th>${T("Période")}</th>'
+        + '<th class="num">${T("Montant")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       r.squarePayouts.forEach(function(p){
         h.push('<tr><td class="dt">' + esc(p.arrivalDate || '—') + '</td>'
           + '<td>' + esc(p.description || '—')
             + (p.notes ? '<div class="dt">' + esc(p.notes) + '</div>' : '')
-            + (p.source ? ' <span class="pill g">' + esc(p.source === 'expense' ? 'dépense' : 'Square') + '</span>' : '') + '</td>'
+            + (p.source ? ' <span class="pill g">' + esc(p.source === 'expense' ? '${T("dépense")}' : 'Square') + '</span>' : '') + '</td>'
           + '<td class="dt">' + esc(p.periodFrom || '?') + ' → ' + esc(p.periodTo || '?') + '</td>'
           + '<td class="num">' + sou(p.amount) + '</td>'
           + '<td>' + (p.status === 'matched'
-              ? '<span class="pill completed">apparié</span>'
+              ? '<span class="pill completed">${T("apparié")}</span>'
               : '<span class="pill g">seul</span>') + '</td>'
           + '<td style="white-space:nowrap">'
             + (D.verrouille || !D.peutEcrire ? ''
-                : '<button class="mini" data-v-mod="' + esc(p.id) + '">Modifier</button> '
+                : '<button class="mini" data-v-mod="' + esc(p.id) + '">${T("Modifier")}</button> '
                   + '<button class="mini dgr" data-v-jeter="' + esc(p.id) + '">'
-                  + (ARME === p.id ? 'Confirmer ?' : 'Retirer') + '</button>')
+                  + (ARME === p.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>')
           + '</td></tr>');
       });
       h.push('</tbody></table>');
@@ -405,18 +411,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     p = p || {};
     return '<div class="carte" style="margin:.4rem 0">'
-      + '<h2>' + (EDIT_V ? 'Modifier la ligne' : 'Nouveau dépôt ou sortie') + '</h2>'
+      + '<h2>' + (EDIT_V ? '${T("Modifier la ligne")}' : '${T("Nouveau dépôt ou sortie")}') + '</h2>'
       + '<div class="duo">'
-      + '<div><label for="v-date">Arrivée</label><input id="v-date" type="date" value="' + esc(p.arrivalDate || '') + '"></div>'
-      + '<div><label for="v-du">Période du</label><input id="v-du" type="date" value="' + esc(p.periodFrom || '') + '"></div>'
+      + '<div><label for="v-date">${T("Arrivée")}</label><input id="v-date" type="date" value="' + esc(p.arrivalDate || '') + '"></div>'
+      + '<div><label for="v-du">${T("Période du")}</label><input id="v-du" type="date" value="' + esc(p.periodFrom || '') + '"></div>'
       + '<div><label for="v-au">au</label><input id="v-au" type="date" value="' + esc(p.periodTo || '') + '"></div>'
-      + '<div><label for="v-mnt">Montant</label><input id="v-mnt" type="number" step="0.01" value="' + esc(p.amount != null ? p.amount : '') + '"></div>'
+      + '<div><label for="v-mnt">${T("Montant")}</label><input id="v-mnt" type="number" step="0.01" value="' + esc(p.amount != null ? p.amount : '') + '"></div>'
       + '</div>'
-      + '<label for="v-desc">Description</label><input id="v-desc" type="text" value="' + esc(p.description || '') + '">'
-      + '<label for="v-notes">Note</label><input id="v-notes" type="text" value="' + esc(p.notes || '') + '">'
-      + '<p class="aide">Une SORTIE (dépense payée) se saisit en négatif.</p>'
-      + '<div class="barreoutils" style="margin-top:.5rem"><button class="prim" id="v-enregistrer">Enregistrer</button>'
-      + '<span class="droite"><button id="v-annuler">Annuler</button></span></div></div>';
+      + '<label for="v-desc">${T("Description")}</label><input id="v-desc" type="text" value="' + esc(p.description || '') + '">'
+      + '<label for="v-notes">${T("Note")}</label><input id="v-notes" type="text" value="' + esc(p.notes || '') + '">'
+      + '<p class="aide">${T("Une SORTIE (dépense payée) se saisit en négatif.")}</p>'
+      + '<div class="barreoutils" style="margin-top:.5rem"><button class="prim" id="v-enregistrer">${T("Enregistrer")}</button>'
+      + '<span class="droite"><button id="v-annuler">${T("Annuler")}</button></span></div></div>';
   }
 
   // ── ONGLET APPARIEMENT ──────────────────────────────────────────────────
@@ -428,16 +434,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var h = [enteteDetail()];
 
     h.push('<div class="duo" style="align-items:flex-start">');
-    h.push('<div style="flex:1 1 20rem"><div class="carte"><h2>Relevé — non appariés (' + seulesB.length + ')</h2>');
-    if (!seulesB.length) h.push('<div class="vide">Toutes les lignes du relevé sont appariées ✓</div>');
+    h.push('<div style="flex:1 1 20rem"><div class="carte"><h2>${T("Relevé — non appariés (")}' + seulesB.length + ')</h2>');
+    if (!seulesB.length) h.push('<div class="vide">${T("Toutes les lignes du relevé sont appariées ✓")}</div>');
     seulesB.forEach(function(e){
       h.push('<div class="seule"><div class="d"><div>' + esc(e.description || '—') + '</div>'
         + '<div class="dt">' + esc(e.date || '—') + ' · ' + esc(e.type || '—') + '</div></div>'
         + '<div style="font-variant-numeric:tabular-nums;font-weight:700">' + sou(e.amount) + '</div>'
         + (D.verrouille || !D.peutEcrire || !seulesV.length ? ''
-            : '<select data-app="' + esc(e.id) + '" aria-label="Apparier cette écriture avec un versement"'
+            : '<select data-app="' + esc(e.id) + '" aria-label="${T("Apparier cette écriture avec un versement")}"'
               + ' style="width:auto;max-width:11rem">'
-              + '<option value="">— apparier avec…</option>'
+              + '<option value="">${T("— apparier avec…")}</option>'
               + seulesV.map(function(p){
                   return '<option value="' + esc(p.id) + '">' + esc(p.arrivalDate || '?') + ' · ' + sou(p.amount) + '</option>';
                 }).join('') + '</select>')
@@ -445,8 +451,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     });
     h.push('</div></div>');
 
-    h.push('<div style="flex:1 1 20rem"><div class="carte"><h2>Dépôts et sorties — non appariés (' + seulesV.length + ')</h2>');
-    if (!seulesV.length) h.push('<div class="vide">Tout est apparié ✓</div>');
+    h.push('<div style="flex:1 1 20rem"><div class="carte"><h2>${T("Dépôts et sorties — non appariés (")}' + seulesV.length + ')</h2>');
+    if (!seulesV.length) h.push('<div class="vide">${T("Tout est apparié ✓")}</div>');
     seulesV.forEach(function(p){
       h.push('<div class="seule"><div class="d"><div>' + esc(p.description || '—') + '</div>'
         + '<div class="dt">' + esc(p.arrivalDate || '—') + '</div></div>'
@@ -456,7 +462,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     h.push('</div>');
 
     if (paires.length) {
-      h.push('<div class="carte"><h2>Appariements confirmés (' + paires.length + ')</h2>');
+      h.push('<div class="carte"><h2>${T("Appariements confirmés (")}' + paires.length + ')</h2>');
       paires.forEach(function(e){
         var p = null;
         for (var i = 0; i < r.squarePayouts.length; i++) {
@@ -466,13 +472,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         h.push('<div class="paire"><div class="d">'
           + '<div>' + esc(e.description || '—') + ' <span style="color:var(--tx-ok2)">→</span> '
           + esc((p && p.description) || '—') + '</div>'
-          + '<div class="dt">' + esc(e.date || '—') + ' · relevé ' + sou(e.amount)
-          + ' · dépôt ' + sou(p ? p.amount : 0) + ' · '
+          + '<div class="dt">' + esc(e.date || '—') + ' ${T("· relevé")} ' + sou(e.amount)
+          + ' ${T("· dépôt")} ' + sou(p ? p.amount : 0) + ' · '
           + (ec !== null && Math.abs(ec) > 0.005
-              ? '<span style="color:var(--tx-err2)">écart ' + sou(ec) + '</span>'
+              ? '<span style="color:var(--tx-err2)">${T("écart ")}' + sou(ec) + '</span>'
               : '<span style="color:var(--tx-ok2)">exact</span>') + '</div></div>'
           + (D.verrouille || !D.peutEcrire ? ''
-              : '<button class="mini" data-desapp="' + esc(e.id) + '">Défaire</button>')
+              : '<button class="mini" data-desapp="' + esc(e.id) + '">${T("Défaire")}</button>')
           + '</div>');
       });
       h.push('</div>');
@@ -484,32 +490,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueResume(){
     var r = D.rec, s = D.resume || {};
     var h = [enteteDetail()];
-    h.push('<div class="carte"><h2>Compte des lignes</h2><table><tbody>'
-      + '<tr><td>Lignes du relevé appariées</td><td class="num">' + s.matchedBank + '</td></tr>'
-      + '<tr><td>Lignes du relevé seules</td><td class="num">' + s.unmatchedBank + '</td></tr>'
-      + '<tr><td>Dépôts et sorties seuls</td><td class="num">' + s.unmatchedSquare + '</td></tr>'
-      + '<tr><td>Ajustements</td><td class="num">' + sou(s.adjTotal) + '</td></tr>'
+    h.push('<div class="carte"><h2>${T("Compte des lignes")}</h2><table><tbody>'
+      + '<tr><td>${T("Lignes du relevé appariées")}</td><td class="num">' + s.matchedBank + '</td></tr>'
+      + '<tr><td>${T("Lignes du relevé seules")}</td><td class="num">' + s.unmatchedBank + '</td></tr>'
+      + '<tr><td>${T("Dépôts et sorties seuls")}</td><td class="num">' + s.unmatchedSquare + '</td></tr>'
+      + '<tr><td>${T("Ajustements")}</td><td class="num">' + sou(s.adjTotal) + '</td></tr>'
       + '</tbody></table></div>');
 
-    h.push('<div class="carte"><h2>Notes de conciliation</h2>'
-      + '<textarea id="r-notes" aria-label="Notes du rapprochement"' + (D.verrouille || !D.peutEcrire ? ' readonly' : '') + '>' + esc(r.notes || '') + '</textarea>'
+    h.push('<div class="carte"><h2>${T("Notes de conciliation")}</h2>'
+      + '<textarea id="r-notes" aria-label="${T("Notes du rapprochement")}"' + (D.verrouille || !D.peutEcrire ? ' readonly' : '') + '>' + esc(r.notes || '') + '</textarea>'
       + (D.verrouille || !D.peutEcrire ? ''
-          : '<div class="barreoutils" style="margin-top:.4rem"><button id="r-notes-ok">Enregistrer les notes</button></div>')
+          : '<div class="barreoutils" style="margin-top:.4rem"><button id="r-notes-ok">${T("Enregistrer les notes")}</button></div>')
       + '</div>');
 
     if (!D.verrouille && D.peutEcrire) {
       h.push('<div class="carte"><h2>Clore</h2>'
         + '<div class="barreoutils">'
-        + '<button id="r-completer">Marquer complétée</button>'
+        + '<button id="r-completer">${T("Marquer complétée")}</button>'
         + '<button class="prim' + (s.isBalanced ? '' : ' ') + '" id="r-verrouiller">'
-        + (ARME === 'verrou' ? 'Confirmer le verrouillage ?' : 'Verrouiller') + '</button>'
+        + (ARME === 'verrou' ? '${T("Confirmer le verrouillage ?")}' : '${T("Verrouiller")}') + '</button>'
         + '</div>'
-        + '<p class="aide">« Complétée » n’est accordé que si l’écart est nul&nbsp;: sinon le statut '
-        + 'reste « en cours ». Le bouton ne peut donc pas mentir.</p>'
-        + '<div class="franc" style="margin-top:.5rem"><b>Le verrouillage est définitif.</b> '
-        + 'La conciliation ne pourra plus jamais être modifiée — c’est ce qui en fait une pièce '
-        + 'comptable opposable. Elle restera consultable et imprimable.'
-        + (s.isBalanced ? '' : ' <strong>L’écart n’est pas nul&nbsp;;</strong> verrouiller le fige tel quel.')
+        + '<p class="aide">« ${T("Complétée")} ${T("» n’est accordé que si l’écart est nul&nbsp;: sinon le statut ")}'
+        + '${T("reste « en cours ». Le bouton ne peut donc pas mentir.")}</p>'
+        + '<div class="franc" style="margin-top:.5rem"><b>${T("Le verrouillage est définitif.")}</b> '
+        + '${T("La conciliation ne pourra plus jamais être modifiée — c’est ce qui en fait une pièce")} '
+        + '${T("comptable opposable. Elle restera consultable et imprimable.")}'
+        + (s.isBalanced ? '' : ' <strong>${T("L’écart n’est pas nul&nbsp;;")}</strong>${T(" verrouiller le fige tel quel.")}')
         + '</div></div>');
     }
     return h.join('');
@@ -545,7 +551,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   szBrouillonBrancher({
     portee: 'banque',
-    libelle: 'Une ligne',
+    libelle: '${T("Une ligne")}',
     ttlMin: 720,
     cle: function(){
       var q = brQuel(); if (!q) return '';
@@ -599,7 +605,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       b.onclick = function(){ EDIT_E = b.getAttribute('data-e-mod'); dessiner(); szBrouillonProposer(); };
     });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-e-jeter]'), function(b){
-      b.onclick = function(){ jeter('banque:entree-jeter', b.getAttribute('data-e-jeter'), 'cette ligne du relevé'); };
+      b.onclick = function(){ jeter('banque:entree-jeter', b.getAttribute('data-e-jeter'), '${T("cette ligne du relevé")}'); };
     });
 
     var va = document.getElementById('v-ajouter');
@@ -612,7 +618,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       b.onclick = function(){ EDIT_V = b.getAttribute('data-v-mod'); dessiner(); };
     });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-v-jeter]'), function(b){
-      b.onclick = function(){ jeter('banque:versement-jeter', b.getAttribute('data-v-jeter'), 'ce dépôt ou cette sortie'); };
+      b.onclick = function(){ jeter('banque:versement-jeter', b.getAttribute('data-v-jeter'), '${T("ce dépôt ou cette sortie")}'); };
     });
     var vs = document.getElementById('v-square');
     if (vs) vs.onclick = function(){ importer('square'); };
@@ -622,28 +628,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-app]'), function(sel){
       sel.onchange = function(){
         if (!sel.value) return;
-        agir('banque:apparier', [ANNEE, REC, sel.getAttribute('data-app'), sel.value], 'Apparié.');
+        agir('banque:apparier', [ANNEE, REC, sel.getAttribute('data-app'), sel.value], '${T("Apparié.")}');
       };
     });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-desapp]'), function(b){
       b.onclick = function(){
-        agir('banque:desapparier', [ANNEE, REC, b.getAttribute('data-desapp')], 'Appariement défait.');
+        agir('banque:desapparier', [ANNEE, REC, b.getAttribute('data-desapp')], '${T("Appariement défait.")}');
       };
     });
 
     var no = document.getElementById('r-notes-ok');
     if (no) no.onclick = function(){
       var t = document.getElementById('r-notes');
-      agir('banque:notes', [ANNEE, REC, t ? t.value : ''], 'Notes enregistrées.');
+      agir('banque:notes', [ANNEE, REC, t ? t.value : ''], '${T("Notes enregistrées.")}');
     };
     var cp = document.getElementById('r-completer');
     if (cp) cp.onclick = function(){
-      dire('Vérification de l’écart…');
+      dire('${T("Vérification de l’écart…")}');
       appeler('banque:completer', [ANNEE, REC]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire(r.equilibre
-          ? 'Conciliation marquée complétée — l’écart est nul.'
-          : 'L’écart n’est pas nul : le statut reste « en cours ».', r.equilibre ? 'bon' : 'att');
+          ? '${T("Conciliation marquée complétée — l’écart est nul.")}'
+          : '${T("L’écart n’est pas nul : le statut reste « en cours ».")}', r.equilibre ? 'bon' : 'att');
         charger();
       });
     };
@@ -651,11 +657,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (vr) vr.onclick = function(){
       if (ARME !== 'verrou') {
         ARME = 'verrou'; dessiner();
-        dire('Cliquez de nouveau pour verrouiller — la conciliation ne pourra plus jamais être modifiée.', 'att');
+        dire('${T("Cliquez de nouveau pour verrouiller — la conciliation ne pourra plus jamais être modifiée.")}', 'att');
         return;
       }
       ARME = '';
-      agir('banque:verrouiller', [ANNEE, REC], 'Conciliation verrouillée.');
+      agir('banque:verrouiller', [ANNEE, REC], '${T("Conciliation verrouillée.")}');
     };
   }
 
@@ -677,23 +683,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function jeter(op, id, quoi){
     if (ARME !== id) {
       ARME = id; dessiner();
-      dire('Cliquez « Confirmer ? » pour retirer ' + quoi + '. Un appariement lié sera défait.', 'att');
+      dire('${T("Cliquez « Confirmer ? » pour retirer")} ' + quoi + '${T(". Un appariement lié sera défait.")}', 'att');
       return;
     }
     ARME = '';
-    agir(op, [ANNEE, REC, id], 'Ligne retirée.');
+    agir(op, [ANNEE, REC, id], '${T("Ligne retirée.")}');
   }
   function supprimer(id){
     if (ARME !== id) {
       ARME = id; dessinerListe();
-      dire('Cliquez « Confirmer ? » pour supprimer cette conciliation. Les transactions bancaires, elles, restent intactes.', 'att');
+      dire('${T("Cliquez « Confirmer ? » pour supprimer cette conciliation. Les transactions bancaires, elles, restent intactes.")}', 'att');
       return;
     }
     ARME = '';
-    dire('Suppression…');
+    dire('${T("Suppression…")}');
     appeler('banque:supprimer', [ANNEE, id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Conciliation supprimée.', 'bon');
+      dire('${T("Conciliation supprimée.")}', 'bon');
       charger();
     });
   }
@@ -701,11 +707,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // ⚠ Aucun prompt() : l ancien ecran en posait un, et une boite du systeme
     // bloque le processus. Le nom se corrige de toute facon en deux clics.
     var nom = 'Conciliation ' + new Date().toLocaleDateString('fr-CA');
-    dire('Création…');
+    dire('${T("Création…")}');
     appeler('banque:creer', [ANNEE, nom]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       REC = r.id; VUE = 'releve';
-      dire('Conciliation créée.', 'bon');
+      dire('${T("Conciliation créée.")}', 'bon');
       charger();
     });
   }
@@ -718,7 +724,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     agir('banque:entree', [ANNEE, REC, EDIT_E || '', {
       date: g('e-date'), description: g('e-desc'), type: g('e-type'),
       amount: g('e-mnt'), notes: g('e-notes')
-    }], 'Ligne enregistrée.', szBrouillonJeter);
+    }], '${T("Ligne enregistrée.")}', szBrouillonJeter);
     EDIT_E = null;
   }
   function enregistrerVersement(){
@@ -727,7 +733,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     agir('banque:versement', [ANNEE, REC, EDIT_V || '', {
       arrivalDate: g('v-date'), periodFrom: g('v-du'), periodTo: g('v-au'),
       amount: g('v-mnt'), description: g('v-desc'), notes: g('v-notes')
-    }], 'Ligne enregistrée.', szBrouillonJeter);
+    }], '${T("Ligne enregistrée.")}', szBrouillonJeter);
     EDIT_V = null;
   }
   function importer(quoi){
@@ -735,8 +741,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('banque:importer', [ANNEE, REC, quoi]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(r.ajoutes
-        ? (r.ajoutes + ' ligne' + (r.ajoutes > 1 ? 's' : '') + ' importée' + (r.ajoutes > 1 ? 's' : '') + '.')
-        : 'Rien de neuf à importer — tout y était déjà.', r.ajoutes ? 'bon' : 'att');
+        ? (r.ajoutes + '${T(" ligne")}' + (r.ajoutes > 1 ? 's' : '') + '${T(" importée")}' + (r.ajoutes > 1 ? 's' : '') + '.')
+        : '${T("Rien de neuf à importer — tout y était déjà.")}', r.ajoutes ? 'bon' : 'att');
       charger();
     });
   }
@@ -745,9 +751,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      fois le meme document comptable — et deux qui divergent, c est une piece
      fausse. */
   function document_(quoi){
-    dire('Préparation du document…');
+    dire('${T("Préparation du document…")}');
     appeler('banque:document', [ANNEE, REC, quoi]).then(function(r){
-      dire(r.ok ? 'Document préparé dans la fenêtre principale.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Document préparé dans la fenêtre principale.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   }
 
