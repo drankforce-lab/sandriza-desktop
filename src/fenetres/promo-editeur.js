@@ -70,6 +70,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('promo-editeur');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -251,17 +255,17 @@ html.jour .voile{background:rgba(18,24,33,.5)}
 function pagePromoEditeur(id) {
   const cible = String(id || '');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Éditeur visuel — Administration Sandriza</title>
+<title>${T("Éditeur visuel — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.promoprint}</span><h1 id="titre">Éditeur visuel</h1>
+<div class="tete"><span class="ico">${ICO.promoprint}</span><h1 id="titre">${T("Éditeur visuel")}</h1>
   <span class="sous" id="sous"></span>
   <span class="fin">
-  <button class="btn" id="b-annuler" type="button" title="Annuler (Ctrl+Z)" disabled>↶ Annuler</button>
-  <button class="btn" id="b-refaire" type="button" title="Refaire (Ctrl+Y)" disabled>↷ Refaire</button>
-  <button class="btn" id="b-recharger" type="button">↻ Recharger</button>
-  <button class="btn plein" id="b-enr" type="button" disabled>Enregistrer</button></span></div>
+  <button class="btn" id="b-annuler" type="button" title="${T("Annuler (Ctrl+Z)")}" disabled>${T("↶ Annuler")}</button>
+  <button class="btn" id="b-refaire" type="button" title="${T("Refaire (Ctrl+Y)")}" disabled>${T("↷ Refaire")}</button>
+  <button class="btn" id="b-recharger" type="button">${T("↻ Recharger")}</button>
+  <button class="btn plein" id="b-enr" type="button" disabled>${T("Enregistrer")}</button></span></div>
 <div class="zone" id="corps">
-  <div class="plan" id="plan"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+  <div class="plan" id="plan"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
   <div class="insp">
     <div class="outils" id="outils"></div>
     <div class="aides" id="aides"></div>
@@ -272,12 +276,12 @@ function pagePromoEditeur(id) {
 <div class="pied"><span class="msg" id="msg"></span></div>
 <div class="voile" id="voile" hidden>
   <div class="cadre">
-    <div class="ct"><span id="choix-titre">Choisir une image</span></div>
+    <div class="ct"><span id="choix-titre">${T("Choisir une image")}</span></div>
     <div class="cc" id="choix-corps"></div>
     <div class="cp"><span id="choix-etat"></span><span class="fin">
-      <button class="btn" id="b-importer" type="button">Importer une image…</button>
-      <button class="btn" id="b-relire" type="button">↻ Actualiser</button>
-      <button class="btn" id="b-fermer-choix" type="button">Fermer</button>
+      <button class="btn" id="b-importer" type="button">${T("Importer une image…")}</button>
+      <button class="btn" id="b-relire" type="button">${T("↻ Actualiser")}</button>
+      <button class="btn" id="b-fermer-choix" type="button">${T("Fermer")}</button>
     </span></div>
   </div>
 </div>
@@ -320,20 +324,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:      'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:        'Votre compte n’a pas le droit de modifier les objets promotionnels.',
-    module_promo: 'Le module d’impression n’est pas chargé dans la fenêtre principale.',
-    introuvable:  'Ce modèle n’existe plus — il a peut-être été supprimé ailleurs.',
-    parametre:    'Demande incomplète.',
-    genre_inconnu:'Ce type d’élément n’existe pas.',
-    dimensions:   'Dimensions refusées : il faut entre 0,2 et 40 pouces.',
-    trop_long:    'Le modèle dépasse la taille permise (8 Mo d’éléments).',
-    pont_indisponible: 'La fenêtre principale ne répond pas.',
-    echec:        'L’opération a échoué.'
+    session:      '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:        '${T("Votre compte n’a pas le droit de modifier les objets promotionnels.")}',
+    module_promo: '${T("Le module d’impression n’est pas chargé dans la fenêtre principale.")}',
+    introuvable:  '${T("Ce modèle n’existe plus — il a peut-être été supprimé ailleurs.")}',
+    parametre:    '${T("Demande incomplète.")}',
+    genre_inconnu:'${T("Ce type d’élément n’existe pas.")}',
+    dimensions:   '${T("Dimensions refusées : il faut entre 0,2 et 40 pouces.")}',
+    trop_long:    '${T("Le modèle dépasse la taille permise (8 Mo d’éléments).")}',
+    pont_indisponible: '${T("La fenêtre principale ne répond pas.")}',
+    echec:        '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 120)) + ')';
     return t;
   }
@@ -398,8 +402,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     repeindreBientot();
     return true;
   }
-  function annuler(){ if (reprendre(HIST, REFAIRE)) dire('Annulé.', 'bon'); }
-  function refaire(){ if (reprendre(REFAIRE, HIST)) dire('Rétabli.', 'bon'); }
+  function annuler(){ if (reprendre(HIST, REFAIRE)) dire('${T("Annulé.")}', 'bon'); }
+  function refaire(){ if (reprendre(REFAIRE, HIST)) dire('${T("Rétabli.")}', 'bon'); }
 
   /* ══ LA REPEINTURE — CE QUI REND L AJOUT VISIBLE ══════════════════════════
      ⚠⚠ CETTE FENETRE NE PEINT RIEN, et c est ce qui lui epargne l origine du
@@ -422,7 +426,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var mien = ++JETON;
     appeler('promo:modeleApercu', [ID, M, Math.round(560 * Math.min(2, ZOOM)), REPERES]).then(function(r){
       if (mien !== JETON) return;          // une demande plus recente a pris la main
-      if (!r.ok) { dire('Aperçu non repeint : ' + expliquer(r), 'att'); return; }
+      if (!r.ok) { dire('${T("Aperçu non repeint :")} ' + expliquer(r), 'att'); return; }
       IMG = r.image || '';
       /* ⚠ LA LISIBILITE DES CODES-BARRES ARRIVE AVEC L IMAGE. Un code non
          encodable se DESSINE quand meme — il ne se lit simplement jamais au
@@ -435,8 +439,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dessinerListe();
       var el = selEl();
       if (el && el.kind === 'barcode' && avant[el.id] !== CODES[el.id]) dessinerProp();
-      if (!r.rendable) dire('L’aperçu n’a pas pu être peint' + (r.detail ? ' : ' + r.detail : '')
-        + '. Les poignées restent utilisables.', 'att');
+      if (!r.rendable) dire('${T("L’aperçu n’a pas pu être peint")}' + (r.detail ? ' : ' + r.detail : '')
+        + '${T(". Les poignées restent utilisables.")}', 'att');
     });
   }
 
@@ -462,7 +466,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + nb(el.yPct, 0) + '%;width:' + nb(el.wPct, 10) + '%;height:' + nb(el.hPct, 10) + '%'
         + (rot ? ';transform:rotate(' + rot + 'deg)' : '') + '">';
       if (el.id === SEL) {
-        h += '<span class="etiq">' + esc(el.name || el.kind || 'Élément') + '</span>';
+        h += '<span class="etiq">' + esc(el.name || el.kind || '${T("Élément")}') + '</span>';
         if (!el.locked) {
           h += '<span class="poi nw" data-poi="nw"></span><span class="poi ne" data-poi="ne"></span>'
             + '<span class="poi sw" data-poi="sw"></span><span class="poi se" data-poi="se"></span>'
@@ -475,8 +479,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     plan.innerHTML = h;
   }
 
-  var GENRES = [['text', 'Texte'], ['image', 'Image'], ['shape', 'Forme'],
-                ['line', 'Ligne'], ['barcode', 'Code-barres']];
+  var GENRES = [['text', '${T("Texte")}'], ['image', '${T("Image")}'], ['shape', '${T("Forme")}'],
+                ['line', '${T("Ligne")}'], ['barcode', '${T("Code-barres")}']];
   function dessinerOutils(){
     var h = '';
     GENRES.forEach(function(g){
@@ -494,7 +498,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!M) { aides.innerHTML = ''; return; }
     aides.innerHTML = ''
       + '<button class="btn' + (REPERES.zoneSure ? ' on' : '') + '" type="button" data-repere="zoneSure"'
-      + ' title="La marge à ne pas dépasser — jamais imprimée">Zone sûre</button>'
+      + ' title="La marge à ne pas dépasser — jamais imprimée">${T("Zone sûre")}</button>'
       + '<button class="btn' + (REPERES.grille ? ' on' : '') + '" type="button" data-repere="grille"'
       + ' title="Une grille de repère — jamais imprimée">Grille</button>'
       + '<button class="btn' + (AIMANT ? ' on' : '') + '" type="button" data-aimant="1"'
@@ -510,17 +514,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* La premiere ligne n est pas un element : c est le MODELE. Sans elle, il n y
        a aucun moyen de revenir au fond une fois qu on a choisi un element. */
     var h = '<div class="el' + (SEL ? '' : ' sel') + '" data-sel="">'
-      + '<span class="k">Mod</span><span class="n">Le modèle (fond, format)</span></div>';
-    if (!l.length) h += '<div class="vide">Ce modèle ne porte aucun élément. Ajoutez-en un ci-dessus.</div>';
+      + '<span class="k">${T("Mod")}</span><span class="n">${T("Le modèle (fond, format)")}</span></div>';
+    if (!l.length) h += '<div class="vide">${T("Ce modèle ne porte aucun élément. Ajoutez-en un ci-dessus.")}</div>';
     /* Le haut de la pile en premier : c est l ordre ou on le voit a l ecran. */
     l.slice().reverse().forEach(function(el){
       h += '<div class="el' + (el.id === SEL ? ' sel' : '') + '" data-sel="' + esc(el.id) + '">'
-        + '<span class="k">' + esc(el.kind === 'text' ? 'Txt' : (el.kind === 'image' ? 'Img'
-            : (el.kind === 'barcode' ? 'Cod' : (el.kind === 'line' ? 'Lig' : 'Frm')))) + '</span>'
-        + '<span class="n">' + esc(el.name || el.text || 'Sans nom') + '</span>'
+        + '<span class="k">' + esc(el.kind === 'text' ? '${T("Txt")}' : (el.kind === 'image' ? '${T("Img")}'
+            : (el.kind === 'barcode' ? '${T("Cod")}' : (el.kind === 'line' ? '${T("Lig")}' : '${T("Frm")}')))) + '</span>'
+        + '<span class="n">' + esc(el.name || el.text || '${T("Sans nom")}') + '</span>'
         + (el.kind === 'barcode' && CODES[el.id] === false
             ? '<span class="mal" title="Ce code ne se lira pas au lecteur">✗</span>' : '')
-        + (el.hidden ? '<span class="oeil" title="Masqué">◌</span>' : '')
+        + (el.hidden ? '<span class="oeil" title="${T("Masqué")}">◌</span>' : '')
         + (el.locked ? '<span class="oeil" title="Verrouillé">⌧</span>' : '')
         + '</div>';
     });
@@ -578,79 +582,79 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var b = M.bg || {}, bo = M.border || {};
     var type = b.type || 'solid';
     var h = '';
-    h += '<div class="bloc"><label>Nom du modèle</label>'
+    h += '<div class="bloc"><label>${T("Nom du modèle")}</label>'
       + '<input type="text" data-mtxt="name" value="' + esc(M.name || '') + '"></div>';
     h += '<div class="bloc"><label>Fond</label>'
-      + segment('bg:type', [['solid', 'Uni'], ['gradient', 'Dégradé'], ['image', 'Image']], type) + '</div>';
+      + segment('bg:type', [['solid', '${T("Uni")}'], ['gradient', '${T("Dégradé")}'], ['image', '${T("Image")}']], type) + '</div>';
     if (type === 'gradient') {
-      h += couleur('from', 'Départ du dégradé', b.from || '#ffffff', 'btxt');
-      h += couleur('to', 'Arrivée du dégradé', b.to || '#efe6d8', 'btxt');
-      h += '<div class="bloc"><div class="rang">' + champNum('angle', 'Angle (degrés)', b, 5, 'bnum') + '</div></div>';
+      h += couleur('from', '${T("Départ du dégradé")}', b.from || '#ffffff', 'btxt');
+      h += couleur('to', '${T("Arrivée du dégradé")}', b.to || '#efe6d8', 'btxt');
+      h += '<div class="bloc"><div class="rang">' + champNum('angle', '${T("Angle (degrés)")}', b, 5, 'bnum') + '</div></div>';
     } else if (type === 'image') {
-      h += '<div class="bloc"><label>Image de fond</label>'
-        + (b.src ? '<div class="vign"><img src="' + esc(b.src) + '" alt="Image de fond"></div>'
-                 : '<div class="vign"><span class="p">Aucune image</span></div>')
-        + '<div class="acts"><button class="btn" type="button" data-choisir="fond">Choisir une image…</button>'
+      h += '<div class="bloc"><label>${T("Image de fond")}</label>'
+        + (b.src ? '<div class="vign"><img src="' + esc(b.src) + '" alt="${T("Image de fond")}"></div>'
+                 : '<div class="vign"><span class="p">${T("Aucune image")}</span></div>')
+        + '<div class="acts"><button class="btn" type="button" data-choisir="fond">${T("Choisir une image…")}</button>'
         + (b.src ? '<button class="btn danger" type="button" data-fond-retirer="1">Retirer</button>' : '')
         + '</div>'
-        + '<div class="note">Les images viennent de la logothèque. Pour en déposer une nouvelle,'
-        + ' le sélecteur ouvre la fenêtre Logothèque.</div></div>';
+        + '<div class="note">${T("Les images viennent de la logothèque. Pour en déposer une nouvelle,")}'
+        + ' ${T("le sélecteur ouvre la fenêtre Logothèque.")}</div></div>';
       h += '<div class="bloc"><label>Ajustement</label>'
-        + segment('bg:fit', [['cover', 'Remplir'], ['contain', 'Contenir']], b.fit || 'cover') + '</div>';
+        + segment('bg:fit', [['cover', '${T("Remplir")}'], ['contain', '${T("Contenir")}']], b.fit || 'cover') + '</div>';
     } else {
-      h += couleur('color', 'Couleur du fond', b.color || '#ffffff', 'btxt', 'Notation CSS : #ffffff, rgb(…), ou un nom.');
+      h += couleur('color', '${T("Couleur du fond")}', b.color || '#ffffff', 'btxt', '${T("Notation CSS : #ffffff, rgb(…), ou un nom.")}');
     }
-    h += '<div class="bloc"><label>Liseré imprimé</label><div class="rang">'
-      + champNum('w', 'Épaisseur (po)', bo, .002, 'onum')
-      + champNum('inset', 'Retrait (po)', bo, .005, 'onum') + '</div>'
-      + '<div class="note">Une épaisseur de 0 ne dessine aucun liseré.</div></div>';
-    if (nb(bo.w, 0) > 0) h += couleur('color', 'Couleur du liseré', bo.color || '#C49A6C', 'otxt');
-    h += '<div class="bloc"><label>Repères (aperçu seulement)</label><div class="rang">'
-      + champNum('safe', 'Marge sûre (po)', M, .01, 'mnum')
-      + (M.shape === 'circle' ? '' : champNum('corner', 'Coins (po)', M, .01, 'mnum'))
-      + '</div><div class="note">La marge sûre ne sort pas sur le papier : elle rappelle que les découpes'
-      + ' ne sont jamais parfaitement centrées. Affichez-la avec « Zone sûre », en haut.</div></div>';
+    h += '<div class="bloc"><label>${T("Liseré imprimé")}</label><div class="rang">'
+      + champNum('w', '${T("Épaisseur (po)")}', bo, .002, 'onum')
+      + champNum('inset', '${T("Retrait (po)")}', bo, .005, 'onum') + '</div>'
+      + '<div class="note">${T("Une épaisseur de 0 ne dessine aucun liseré.")}</div></div>';
+    if (nb(bo.w, 0) > 0) h += couleur('color', '${T("Couleur du liseré")}', bo.color || '#C49A6C', 'otxt');
+    h += '<div class="bloc"><label>${T("Repères (aperçu seulement)")}</label><div class="rang">'
+      + champNum('safe', '${T("Marge sûre (po)")}', M, .01, 'mnum')
+      + (M.shape === 'circle' ? '' : champNum('corner', '${T("Coins (po)")}', M, .01, 'mnum'))
+      + '</div><div class="note">${T("La marge sûre ne sort pas sur le papier : elle rappelle que les découpes")}'
+      + ' ${T("ne sont jamais parfaitement centrées. Affichez-la avec « Zone sûre », en haut.")}</div></div>';
     /* ⚠ LE FORMAT A SA PROPRE PORTE, et la note dit pourquoi on peut oser :
        toute la geometrie est en POURCENTAGES, donc rien ne se deforme. Sans
        cette phrase, personne ne touche a ce champ. */
-    h += '<div class="bloc"><label>Format du support</label><div class="rang">'
+    h += '<div class="bloc"><label>${T("Format du support")}</label><div class="rang">'
       + (M.shape === 'circle'
-          ? '<div><label class="p">Diamètre (po)</label><input type="number" id="rd-w" step="0.05" min="0.4" value="' + nb(M.w, 0) + '"></div>'
-          : '<div><label class="p">Largeur (po)</label><input type="number" id="rd-w" step="0.05" min="0.4" value="' + nb(M.w, 0) + '"></div>'
-            + '<div><label class="p">Hauteur (po)</label><input type="number" id="rd-h" step="0.05" min="0.4" value="' + nb(M.h, 0) + '"></div>')
+          ? '<div><label class="p">${T("Diamètre (po)")}</label><input type="number" id="rd-w" step="0.05" min="0.4" value="' + nb(M.w, 0) + '"></div>'
+          : '<div><label class="p">${T("Largeur (po)")}</label><input type="number" id="rd-w" step="0.05" min="0.4" value="' + nb(M.w, 0) + '"></div>'
+            + '<div><label class="p">${T("Hauteur (po)")}</label><input type="number" id="rd-h" step="0.05" min="0.4" value="' + nb(M.h, 0) + '"></div>')
       + '</div><div class="acts" style="margin-top:.35rem">'
-      + '<button class="btn" type="button" data-redim="1">Appliquer le format</button></div>'
-      + '<div class="note">Les éléments sont placés en pourcentage : ils suivent le nouveau format sans se'
-      + ' déformer. Attention : ce changement s’enregistre tout de suite, et il ne s’annule pas'
-      + ' par Ctrl+Z — il ne passe pas par le même chemin que le reste.</div></div>';
-    h += '<div class="note">Forme : ' + (M.shape === 'circle' ? 'ronde' : 'rectangulaire')
-      + '. Elle se choisit à la création du modèle, dans le Centre d’impression.</div>';
+      + '<button class="btn" type="button" data-redim="1">${T("Appliquer le format")}</button></div>'
+      + '<div class="note">${T("Les éléments sont placés en pourcentage : ils suivent le nouveau format sans se")}'
+      + ' ${T("déformer. Attention : ce changement s’enregistre tout de suite, et il ne s’annule pas")}'
+      + ' ${T("par Ctrl+Z — il ne passe pas par le même chemin que le reste.")}</div></div>';
+    h += '<div class="note">${T("Forme :")} ' + (M.shape === 'circle' ? 'ronde' : 'rectangulaire')
+      + '${T(". Elle se choisit à la création du modèle, dans le Centre d’impression.")}</div>';
     prop.innerHTML = h;
   }
 
   /* ══ L INSPECTEUR D UN ELEMENT ══════════════════════════════════════════ */
   function propTexte(el){
     var h = '';
-    h += '<div class="bloc"><label>Texte</label><textarea data-txt="text">' + esc(el.text || '') + '</textarea></div>';
+    h += '<div class="bloc"><label>${T("Texte")}</label><textarea data-txt="text">' + esc(el.text || '') + '</textarea></div>';
     h += '<div class="bloc"><label>Police</label><select data-sel-champ="font">'
       + POLICES.map(function(f){
           return '<option value="' + esc(f) + '"' + (el.font === f ? ' selected' : '') + '>' + esc(f) + '</option>'; }).join('')
       + '</select></div>';
     h += '<div class="bloc"><label>Style</label><div class="acts">'
       + '<button class="btn' + (nb(el.weight, 600) >= 700 ? ' on' : '') + '" type="button" data-graisse="1"'
-      + ' title="Gras"><strong>G</strong></button>'
-      + bascule('el:italic', 'I', !!el.italic, 'Italique')
-      + bascule('el:underline', 'S', !!el.underline, 'Souligné')
+      + ' title="${T("Gras")}"><strong>G</strong></button>'
+      + bascule('el:italic', 'I', !!el.italic, '${T("Italique")}')
+      + bascule('el:underline', 'S', !!el.underline, '${T("Souligné")}')
       + '</div></div>';
-    h += '<div class="bloc"><label>Taille (% de la hauteur)</label><div class="rang">'
-      + champNum('fontPct', 'Corps', el, .5)
-      + champNum('ls', 'Interlettre', el, .01)
-      + champNum('lh', 'Interligne', el, .05) + '</div></div>';
-    h += couleur('color', 'Couleur', el.color, 'txt', 'Notation CSS : #111827, rgb(…), ou un nom.');
+    h += '<div class="bloc"><label>${T("Taille (% de la hauteur)")}</label><div class="rang">'
+      + champNum('fontPct', '${T("Corps")}', el, .5)
+      + champNum('ls', '${T("Interlettre")}', el, .01)
+      + champNum('lh', '${T("Interligne")}', el, .05) + '</div></div>';
+    h += couleur('color', '${T("Couleur")}', el.color, 'txt', '${T("Notation CSS : #111827, rgb(…), ou un nom.")}');
     h += '<div class="bloc"><label>Alignement</label>'
-      + segment('el:align', [['left', 'Gauche'], ['center', 'Centre'], ['right', 'Droite']], el.align || 'left')
+      + segment('el:align', [['left', '${T("Gauche")}'], ['center', '${T("Centre")}'], ['right', '${T("Droite")}']], el.align || 'left')
       + '<div style="margin-top:.3rem">'
-      + segment('el:valign', [['top', 'Haut'], ['middle', 'Milieu'], ['bottom', 'Bas']], el.valign || 'middle')
+      + segment('el:valign', [['top', '${T("Haut")}'], ['middle', '${T("Milieu")}'], ['bottom', '${T("Bas")}']], el.valign || 'middle')
       + '</div></div>';
     h += '<div class="bloc"><label>Casse</label>'
       + segment('el:caps', [['none', 'Aa'], ['upper', 'AA'], ['lower', 'aa'], ['title', 'Aa Aa']], el.caps || 'none')
@@ -658,81 +662,81 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* ⚠ LA COURBURE N EST PAS UN ORNEMENT : sans elle, un autocollant ROND ne se
        compose pas — le texte doit suivre l arc. C est la seule commande de cet
        inspecteur dont l absence rendait un format entier inutilisable. */
-    h += '<div class="bloc"><label>Courbure du texte</label><div class="rang">'
-      + champNum('curve', 'Arc (degrés)', el, 5) + '</div>'
-      + '<div class="note">0 = droit. Indispensable sur un autocollant rond : le texte suit l’arc.</div></div>';
-    h += '<div class="bloc"><label>Contour et ombre</label><div class="rang">'
-      + champNum('strokeW', 'Contour', el, .5) + champNum('shadow', 'Ombre', el, 1) + '</div></div>';
-    if (nb(el.strokeW, 0) > 0) h += couleur('strokeColor', 'Couleur du contour', el.strokeColor, 'txt');
+    h += '<div class="bloc"><label>${T("Courbure du texte")}</label><div class="rang">'
+      + champNum('curve', '${T("Arc (degrés)")}', el, 5) + '</div>'
+      + '<div class="note">${T("0 = droit. Indispensable sur un autocollant rond : le texte suit l’arc.")}</div></div>';
+    h += '<div class="bloc"><label>${T("Contour et ombre")}</label><div class="rang">'
+      + champNum('strokeW', '${T("Contour")}', el, .5) + champNum('shadow', '${T("Ombre")}', el, 1) + '</div></div>';
+    if (nb(el.strokeW, 0) > 0) h += couleur('strokeColor', '${T("Couleur du contour")}', el.strokeColor, 'txt');
     return h;
   }
   function propImage(el){
     var h = '';
-    h += '<div class="bloc"><label>Image</label>'
-      + (el.src ? '<div class="vign"><img src="' + esc(el.src) + '" alt="Image de cet élément"></div>'
-                : '<div class="vign"><span class="p">Aucune image</span></div>')
-      + '<div class="acts"><button class="btn" type="button" data-choisir="element">Choisir une image…</button>'
+    h += '<div class="bloc"><label>${T("Image")}</label>'
+      + (el.src ? '<div class="vign"><img src="' + esc(el.src) + '" alt="${T("Image")} de cet élément"></div>'
+                : '<div class="vign"><span class="p">${T("Aucune image")}</span></div>')
+      + '<div class="acts"><button class="btn" type="button" data-choisir="element">${T("Choisir une image…")}</button>'
       + (el.src ? '<button class="btn danger" type="button" data-img-retirer="1">Retirer</button>' : '')
       + '</div></div>';
     h += '<div class="bloc"><label>Ajustement</label>'
-      + segment('el:fit', [['contain', 'Contenir'], ['cover', 'Remplir']], el.fit || 'contain') + '</div>';
+      + segment('el:fit', [['contain', '${T("Contenir")}'], ['cover', '${T("Remplir")}']], el.fit || 'contain') + '</div>';
     h += '<div class="bloc"><label>Recadrage</label><div class="rang">'
-      + champNum('zoom', 'Zoom', el, .05) + champNum('ox', 'Décalage X', el, .05)
-      + champNum('oy', 'Décalage Y', el, .05) + '</div>'
-      + '<div class="note">Zoom 1 = image entière. Le décalage va de −1 à 1.</div></div>';
+      + champNum('zoom', '${T("Zoom")}', el, .05) + champNum('ox', '${T("Décalage X")}', el, .05)
+      + champNum('oy', '${T("Décalage Y")}', el, .05) + '</div>'
+      + '<div class="note">${T("Zoom 1 = image entière. Le décalage va de −1 à 1.")}</div></div>';
     h += '<div class="bloc"><label>Orientation</label><div class="acts">'
-      + bascule('el:flipH', '⇄ Miroir', !!el.flipH)
-      + bascule('el:flipV', '⇅ Retourner', !!el.flipV)
+      + bascule('el:flipH', '${T("⇄ Miroir")}', !!el.flipH)
+      + bascule('el:flipV', '${T("⇅ Retourner")}', !!el.flipV)
       + '<button class="btn" type="button" data-rot90="1" title="Pivoter d’un quart de tour">↻ 90°</button>'
       + '</div></div>';
     h += '<div class="bloc"><label>Masque</label>'
-      + segment('el:mask', [['none', 'Aucun'], ['circle', 'Cercle']], el.mask || 'none')
+      + segment('el:mask', [['none', '${T("Aucun")}'], ['circle', '${T("Cercle")}']], el.mask || 'none')
       + (el.mask === 'circle' ? '' : '<div class="rang" style="margin-top:.3rem">'
-          + champNum('corner', 'Coins arrondis (%)', el, 1) + '</div>')
+          + champNum('corner', '${T("Coins arrondis (%)")}', el, 1) + '</div>')
       + '</div>';
     h += '<div class="bloc"><label>Retouche</label><div class="rang">'
-      + champNum('bright', 'Luminosité', el, 1) + champNum('contrast', 'Contraste', el, 1) + '</div>'
+      + champNum('bright', '${T("Luminosité")}', el, 1) + champNum('contrast', '${T("Contraste")}', el, 1) + '</div>'
       + '<div class="rang" style="margin-top:.3rem">'
-      + champNum('sat', 'Saturation', el, 1) + champNum('gray', 'Noir et blanc', el, 1)
-      + champNum('blur', 'Flou', el, 1) + '</div>'
+      + champNum('sat', '${T("Saturation")}', el, 1) + champNum('gray', '${T("Noir et blanc")}', el, 1)
+      + champNum('blur', '${T("Flou")}', el, 1) + '</div>'
       + '<div class="acts" style="margin-top:.35rem">'
-      + '<button class="btn" type="button" data-retouche="1">Réinitialiser la retouche</button></div>'
-      + '<div class="note">En pourcentage : 100 = inchangé. Le flou et le noir et blanc partent de 0.</div></div>';
+      + '<button class="btn" type="button" data-retouche="1">${T("Réinitialiser la retouche")}</button></div>'
+      + '<div class="note">${T("En pourcentage : 100 = inchangé. Le flou et le noir et blanc partent de 0.")}</div></div>';
     return h;
   }
   function propCodeBarres(el){
     var h = '';
     h += '<div class="bloc"><label>Contenu</label><input type="text" data-txt="text" value="' + esc(el.text || '') + '">'
       + (CODES[el.id] === false
-          ? '<div class="avert">Attention : ce contenu ne s’encode pas en Code 128. Le code se dessinera,'
-            + ' mais aucun lecteur ne le lira. Lettres, chiffres et ponctuation ASCII seulement.</div>'
-          : '<div class="note">Code 128 — lettres, chiffres et ponctuation ASCII.</div>')
+          ? '<div class="avert">${T("Attention : ce contenu ne s’encode pas en Code 128. Le code se dessinera,")}'
+            + ' ${T("mais aucun lecteur ne le lira. Lettres, chiffres et ponctuation ASCII seulement.")}</div>'
+          : '<div class="note">${T("Code 128 — lettres, chiffres et ponctuation ASCII.")}</div>')
       + '</div>';
-    h += couleur('color', 'Couleur', el.color || '#000000', 'txt');
-    h += '<div class="bloc"><label>Texte sous le code</label><div class="acts">'
-      + bascule('el:showText', el.showText ? 'Affiché' : 'Masqué', !!el.showText)
-      + '</div><div class="note">Plus le code est large, plus il est lisible : prévoyez au moins 1,5 po.</div></div>';
+    h += couleur('color', '${T("Couleur")}', el.color || '#000000', 'txt');
+    h += '<div class="bloc"><label>${T("Texte sous le code")}</label><div class="acts">'
+      + bascule('el:showText', el.showText ? '${T("Affiché")}' : '${T("Masqué")}', !!el.showText)
+      + '</div><div class="note">${T("Plus le code est large, plus il est lisible : prévoyez au moins 1,5 po.")}</div></div>';
     return h;
   }
   function propForme(el){
     var h = '';
     if (el.kind === 'line') {
-      h += '<div class="bloc"><label>Épaisseur du trait</label><div class="rang">'
-        + champNum('thick', 'Épaisseur', el, 1) + '</div></div>';
+      h += '<div class="bloc"><label>${T("Épaisseur du trait")}</label><div class="rang">'
+        + champNum('thick', '${T("Épaisseur")}', el, 1) + '</div></div>';
     } else {
-      h += '<div class="bloc"><label>Forme</label>'
-        + segment('el:shape', [['rect', 'Rectangle'], ['ellipse', 'Ellipse'], ['triangle', 'Triangle'], ['star', 'Étoile']],
+      h += '<div class="bloc"><label>${T("Forme")}</label>'
+        + segment('el:shape', [['rect', '${T("Rectangle")}'], ['ellipse', '${T("Ellipse")}'], ['triangle', '${T("Triangle")}'], ['star', '${T("Étoile")}']],
             el.shape || 'rect') + '</div>';
     }
-    h += couleur('fill', 'Remplissage', el.fill || '#C49A6C', 'txt');
+    h += couleur('fill', '${T("Remplissage")}', el.fill || '#C49A6C', 'txt');
     if (el.kind !== 'line') {
       if ((el.shape || 'rect') === 'rect') {
-        h += '<div class="bloc"><label>Coins arrondis (%)</label><div class="rang">'
-          + champNum('corner', 'Coins', el, 1) + '</div></div>';
+        h += '<div class="bloc"><label>${T("Coins arrondis (%)")}</label><div class="rang">'
+          + champNum('corner', '${T("Coins")}', el, 1) + '</div></div>';
       }
-      h += '<div class="bloc"><label>Contour</label><div class="rang">'
-        + champNum('strokeW', 'Épaisseur', el, .5) + '</div></div>';
-      if (nb(el.strokeW, 0) > 0) h += couleur('strokeColor', 'Couleur du contour', el.strokeColor, 'txt');
+      h += '<div class="bloc"><label>${T("Contour")}</label><div class="rang">'
+        + champNum('strokeW', '${T("Épaisseur")}', el, .5) + '</div></div>';
+      if (nb(el.strokeW, 0) > 0) h += couleur('strokeColor', '${T("Couleur du contour")}', el.strokeColor, 'txt');
     }
     return h;
   }
@@ -745,37 +749,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else if (el.kind === 'barcode') h += propCodeBarres(el);
     else h += propForme(el);
 
-    h += '<div class="bloc"><label>Position et taille (pouces)</label><div class="rang">'
+    h += '<div class="bloc"><label>${T("Position et taille (pouces)")}</label><div class="rang">'
       + champPouce('xPct', 'X', el, 'w', -50, 150) + champPouce('yPct', 'Y', el, 'h', -50, 150) + '</div>'
       + '<div class="rang" style="margin-top:.3rem">'
-      + champPouce('wPct', 'Largeur', el, 'w', 1, 200) + champPouce('hPct', 'Hauteur', el, 'h', 1, 200) + '</div>'
-      + '<div class="note">Mesuré sur le support (' + esc(nb(M.w, 0) + ' × ' + nb(M.h, 0)) + ' po).'
-      + ' Les flèches du clavier déplacent de 0,5 % — 5 % avec Majuscule.</div></div>';
+      + champPouce('wPct', '${T("Largeur")}', el, 'w', 1, 200) + champPouce('hPct', '${T("Hauteur")}', el, 'h', 1, 200) + '</div>'
+      + '<div class="note">${T("Mesuré sur le support (")}' + esc(nb(M.w, 0) + ' × ' + nb(M.h, 0)) + ' po).'
+      + ' ${T("Les flèches du clavier déplacent de 0,5 % — 5 % avec Majuscule.")}</div></div>';
     h += '<div class="bloc"><div class="rang">'
-      + champNum('rot', 'Rotation', el, 1) + champNum('opacity', 'Opacité', el, 5) + '</div></div>';
+      + champNum('rot', '${T("Rotation")}', el, 1) + champNum('opacity', '${T("Opacité")}', el, 5) + '</div></div>';
     /* ⚠ ALIGNER SUR LE SUPPORT, PAS SUR UN AUTRE ELEMENT : c est le geste qui
        sert vraiment sur une etiquette, ou tout se centre par rapport au papier. */
-    h += '<div class="bloc"><label>Aligner sur le support</label><div class="acts">'
-      + '<button class="btn" type="button" data-aligner="l" title="Gauche">⇤</button>'
+    h += '<div class="bloc"><label>${T("Aligner sur le support")}</label><div class="acts">'
+      + '<button class="btn" type="button" data-aligner="l" title="${T("Gauche")}">⇤</button>'
       + '<button class="btn" type="button" data-aligner="cx" title="Centrer horizontalement">↔</button>'
-      + '<button class="btn" type="button" data-aligner="r" title="Droite">⇥</button>'
-      + '<button class="btn" type="button" data-aligner="t" title="Haut">⇧</button>'
+      + '<button class="btn" type="button" data-aligner="r" title="${T("Droite")}">⇥</button>'
+      + '<button class="btn" type="button" data-aligner="t" title="${T("Haut")}">⇧</button>'
       + '<button class="btn" type="button" data-aligner="cy" title="Centrer verticalement">↕</button>'
-      + '<button class="btn" type="button" data-aligner="b" title="Bas">⇩</button>'
+      + '<button class="btn" type="button" data-aligner="b" title="${T("Bas")}">⇩</button>'
       + '</div></div>';
-    h += '<div class="bloc"><label>État</label><div class="acts">'
-      + bascule('el:hidden', el.hidden ? 'Afficher' : 'Masquer', !!el.hidden)
-      + bascule('el:locked', el.locked ? 'Déverrouiller' : 'Verrouiller', !!el.locked)
-      + '</div><div class="note">Un élément verrouillé ne se déplace plus à la souris — il reste modifiable ici.</div></div>';
-    h += '<div class="bloc"><label>Ordre dans la pile</label><div class="acts">'
-      + '<button class="btn" type="button" data-ordre="1">↑ Avancer</button>'
-      + '<button class="btn" type="button" data-ordre="-1">↓ Reculer</button>'
-      + '</div><div class="note">Le dernier de la pile est celui qui se dessine par-dessus les autres.</div></div>';
-    h += '<div class="bloc"><label>Cet élément</label><div class="acts">'
+    h += '<div class="bloc"><label>${T("État")}</label><div class="acts">'
+      + bascule('el:hidden', el.hidden ? '${T("Afficher")}' : '${T("Masquer")}', !!el.hidden)
+      + bascule('el:locked', el.locked ? '${T("Déverrouiller")}' : '${T("Verrouiller")}', !!el.locked)
+      + '</div><div class="note">${T("Un élément verrouillé ne se déplace plus à la souris — il reste modifiable ici.")}</div></div>';
+    h += '<div class="bloc"><label>${T("Ordre dans la pile")}</label><div class="acts">'
+      + '<button class="btn" type="button" data-ordre="1">${T("↑ Avancer")}</button>'
+      + '<button class="btn" type="button" data-ordre="-1">${T("↓ Reculer")}</button>'
+      + '</div><div class="note">${T("Le dernier de la pile est celui qui se dessine par-dessus les autres.")}</div></div>';
+    h += '<div class="bloc"><label>${T("Cet élément")}</label><div class="acts">'
       + '<button class="btn" type="button" data-dupliquer="1">Dupliquer</button>'
       + '<button class="btn danger" type="button" data-supprimer="1">Supprimer</button>'
       + '</div><div class="note">'
-      + 'Une suppression s’annule (Ctrl+Z) tant que la fenêtre reste ouverte.'
+      + '${T("Une suppression s’annule (Ctrl+Z) tant que la fenêtre reste ouverte.")}'
       + '</div></div>';
     prop.innerHTML = h;
   }
@@ -790,12 +794,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function majSous(){
     document.getElementById('sous').textContent = M
-      ? (nb(M.w, 0) + ' × ' + nb(M.h, 0) + ' po — ' + els().length + ' élément(s)') : '';
+      ? (nb(M.w, 0) + ' × ' + nb(M.h, 0) + ' po — ' + els().length + ' ${T("élément(s)")}') : '';
   }
 
   /* ══ CHARGEMENT ══════════════════════════════════════════════════════════ */
   function charger(){
-    dire('Lecture du modèle…');
+    dire('${T("Lecture du modèle…")}');
     /* ⚠ LES LISTES DE L INSPECTEUR VIENNENT DU SITE, ET ON NE BLOQUE PAS DESSUS.
        Si elles manquent, l inspecteur perd son menu de polices et ses pastilles,
        mais le modele s ouvre quand meme — une liste de commodite ne doit pas
@@ -806,7 +810,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     appeler('promo:modeleLire', [ID, 560]).then(function(r){
       if (!r.ok) {
-        plan.innerHTML = '<div class="vide"><strong>Modèle non ouvert</strong><div style="margin-top:.4rem">'
+        plan.innerHTML = '<div class="vide"><strong>${T("Modèle non ouvert")}</strong><div style="margin-top:.4rem">'
           + esc(expliquer(r)) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
@@ -816,13 +820,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       SEL = '';
       SALE = false; bEnr.disabled = true;
       HIST = []; REFAIRE = []; boutonsHist();
-      document.getElementById('titre').textContent = (M && M.name) || 'Éditeur visuel';
+      document.getElementById('titre').textContent = (M && M.name) || '${T("Éditeur visuel")}';
       majSous();
       /* ⚠ UN APERCU QUI N A PAS PU SE PEINDRE SE DIT. Sans ca, on editerait des
          poignees sur un fond vide en croyant que le modele est vide. */
-      if (!r.rendable) dire('L’aperçu n’a pas pu être peint' + (r.detail ? ' : ' + r.detail : '')
-        + '. Les poignées restent utilisables.', 'att');
-      else dire('Modèle ouvert.', 'bon');
+      if (!r.rendable) dire('${T("L’aperçu n’a pas pu être peint")}' + (r.detail ? ' : ' + r.detail : '')
+        + '${T(". Les poignées restent utilisables.")}', 'att');
+      else dire('${T("Modèle ouvert.")}', 'bon');
       dessiner();
       /* Une premiere repeinture pose les reperes : l image rendue par modeleLire
          n en porte aucun, et la zone sure est allumee par defaut. */
@@ -849,7 +853,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('promo:modeleEcrire', [ID, M]).then(function(r){
       if (!r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
       SALE = false;
-      dire('Enregistré — ' + r.elements + ' élément(s).', 'bon');
+      dire('${T("Enregistré —")} ' + r.elements + ' ${T("élément(s).")}', 'bon');
       var garde = SEL;
       charger();
       setTimeout(function(){ SEL = garde; dessiner(); }, 0);
@@ -865,14 +869,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!M) return;
     var cw = document.getElementById('rd-w'), ch = document.getElementById('rd-h');
     var w = nb(cw && cw.value, 0), hh = M.shape === 'circle' ? w : nb(ch && ch.value, 0);
-    dire('Changement de format…');
+    dire('${T("Changement de format…")}');
     appeler('promo:redimensionner', [ID, w, hh]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       M.w = r.w; M.h = r.h;
       majSous();
       dessiner();
       repeindreBientot();
-      dire('Format : ' + r.dim + '. Les éléments ont suivi.', 'bon');
+      dire('${T("Format :")} ' + r.dim + '${T(". Les éléments ont suivi.")}', 'bon');
     });
   }
 
@@ -895,7 +899,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       majSous();
       dessiner();
       repeindreBientot();
-      dire('Élément ajouté — pensez à enregistrer.', 'att');
+      dire('${T("Élément ajouté — pensez à enregistrer.")}', 'att');
     });
   }
   function dupliquer(source){
@@ -916,7 +920,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       majSous();
       dessiner();
       repeindreBientot();
-      dire('Élément dupliqué.', 'bon');
+      dire('${T("Élément dupliqué.")}', 'bon');
     });
   }
   function supprimer(){
@@ -929,13 +933,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     majSous();
     dessiner();
     repeindreBientot();
-    dire('Élément retiré — Ctrl+Z le ramène.', 'att');
+    dire('${T("Élément retiré — Ctrl+Z le ramène.")}', 'att');
   }
   function ordonner(dir){
     var el = selEl();
     if (!el) return;
     var l = els(), i = l.indexOf(el), j = i + dir;
-    if (i < 0 || j < 0 || j >= l.length) { dire('Déjà à cette extrémité de la pile.', 'att'); return; }
+    if (i < 0 || j < 0 || j >= l.length) { dire('${T("Déjà à cette extrémité de la pile.")}', 'att'); return; }
     instantane();
     l[i] = l[j]; l[j] = el;
     salir();
@@ -965,15 +969,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      native n a pas l origine du site et n afficherait qu un cadre vide. */
   function ouvrirChoix(apres, titre){
     CHOIX = apres;
-    document.getElementById('choix-titre').textContent = titre || 'Choisir une image';
+    document.getElementById('choix-titre').textContent = titre || '${T("Choisir une image")}';
     voile.hidden = false;
     if (LOGOS) dessinerChoix(); else lireLogos();
   }
   function fermerChoix(){ voile.hidden = true; CHOIX = null; }
   function lireLogos(){
     document.getElementById('choix-corps').innerHTML =
-      '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>';
-    document.getElementById('choix-etat').textContent = 'Lecture de la logothèque…';
+      '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
+    document.getElementById('choix-etat').textContent = '${T("Lecture de la logothèque…")}';
     appeler('promo:logos', [60]).then(function(r){
       if (!r.ok) {
         document.getElementById('choix-corps').innerHTML = '<div class="vide">' + esc(expliquer(r)) + '</div>';
@@ -987,8 +991,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerChoix(){
     var r = LOGOS, corps = document.getElementById('choix-corps');
     if (!r.logos.length) {
-      corps.innerHTML = '<div class="vide">La logothèque est vide. Utilisez « Importer une image… »'
-        + ' pour y déposer un premier fichier.</div>';
+      corps.innerHTML = '<div class="vide">${T("La logothèque est vide. Utilisez « Importer une image… »")}'
+        + ' ${T("pour y déposer un premier fichier.")}</div>';
     } else {
       corps.innerHTML = '<div class="gril">' + r.logos.map(function(l){
         return '<button class="lg" type="button" data-logo="' + esc(l.id) + '">'
@@ -1002,8 +1006,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        dit aussi, sinon on conclut que le reste a disparu. */
     var etat = r.logos.length + ' image(s)';
     if (r.ecartes) etat += ' · ' + r.ecartes
-      + ' écartée(s) : illisibles ici, elles ne sortiraient pas non plus sur le papier';
-    if (r.total > r.plafond) etat += ' · ' + r.total + ' au total, les ' + r.plafond + ' plus récentes sont montrées';
+      + ' ${T("écartée(s) : illisibles ici, elles ne sortiraient pas non plus sur le papier")}';
+    if (r.total > r.plafond) etat += ' · ' + r.total + ' ${T("au total, les")} ' + r.plafond + ' ${T("plus récentes sont montrées")}';
     document.getElementById('choix-etat').textContent = etat;
   }
   function choisirLogo(id){
@@ -1029,7 +1033,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     salir();
     dessiner();
     repeindreBientot();
-    dire('Image posée — pensez à enregistrer.', 'att');
+    dire('${T("Image posée — pensez à enregistrer.")}', 'att');
   }
   function poserImageFond(l){
     instantane();
@@ -1037,7 +1041,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     salir();
     dessiner();
     repeindreBientot();
-    dire('Fond changé — pensez à enregistrer.', 'att');
+    dire('${T("Fond changé — pensez à enregistrer.")}', 'att');
   }
 
   /* ══ LA SOURIS SUR LE PLAN ════════════════════════════════════════════════
@@ -1054,7 +1058,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var el = parId(id);
     if (!el) return;
     if (SEL !== id) { SEL = id; dessiner(); }
-    if (el.locked) { dire('Élément verrouillé — déverrouillez-le pour le déplacer.', 'att'); return; }
+    if (el.locked) { dire('${T("Élément verrouillé — déverrouillez-le pour le déplacer.")}', 'att'); return; }
     var scene = document.getElementById('scene');
     if (!scene) return;
     /* L instantane se pose au DEBUT du glissement : une annulation ramene alors
@@ -1124,7 +1128,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function finGlisse(){
     if (!GLISSE) return;
     GLISSE = null;
-    dire('Modifié — pensez à enregistrer.', 'att');
+    dire('${T("Modifié — pensez à enregistrer.")}', 'att');
     repeindreBientot();
   }
   plan.addEventListener('pointerup', finGlisse);
@@ -1224,8 +1228,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     if ((b = ev.target.closest('[data-choisir]'))) {
-      if (b.getAttribute('data-choisir') === 'fond') ouvrirChoix(poserImageFond, 'Choisir une image de fond');
-      else ouvrirChoix(poserImageElement, 'Choisir une image');
+      if (b.getAttribute('data-choisir') === 'fond') ouvrirChoix(poserImageFond, '${T("Choisir une image de fond")}');
+      else ouvrirChoix(poserImageElement, '${T("Choisir une image")}');
       return;
     }
     if (ev.target.closest('[data-fond-retirer]')) {
@@ -1252,7 +1256,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       Object.assign(el, { bright: 100, contrast: 100, sat: 100, gray: 0, blur: 0,
         zoom: 1, ox: 0, oy: 0, flipH: false, flipV: false });
       salir(); dessinerProp(); repeindreBientot();
-      dire('Retouche et recadrage remis à zéro.', 'bon');
+      dire('${T("Retouche et recadrage remis à zéro.")}', 'bon');
       return;
     }
     if ((b = ev.target.closest('[data-aligner]'))) { aligner(b.getAttribute('data-aligner')); return; }
@@ -1278,9 +1282,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     try { p = P.ouvrirModule('config-logotheque'); }
     catch (e) { p = null; }
     Promise.resolve(p).then(function(ok){
-      if (ok === false) { dire('La fenêtre Logothèque n’a pas pu s’ouvrir.', 'err'); return; }
+      if (ok === false) { dire('${T("La fenêtre Logothèque n’a pas pu s’ouvrir.")}', 'err'); return; }
       document.getElementById('choix-etat').textContent =
-        'Déposez l’image dans la fenêtre Logothèque, puis revenez ici et touchez « ↻ Actualiser ».';
+        '${T("Déposez l’image dans la fenêtre Logothèque, puis revenez ici et touchez « ↻ Actualiser ».")}';
     });
   });
 
@@ -1290,7 +1294,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.getElementById('b-recharger').addEventListener('click', function(){
     /* ⚠ RECHARGER JETTE CE QUI N EST PAS ENREGISTRE : on le demande avant, une
        seule fois. Un bouton qui efface sans prevenir est une porte piegee. */
-    if (SALE && !window.confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
+    if (SALE && !window.confirm('${T("Des modifications ne sont pas enregistrées. Les abandonner ?")}')) return;
     LOGOS = null;
     charger();
   });
@@ -1303,7 +1307,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (ev.key === 'Escape') {
       ev.preventDefault();
       if (!voile.hidden) { fermerChoix(); return; }
-      if (SALE) { dire('Modifications non enregistrées — Enregistrer, ou Recharger pour abandonner.', 'att'); return; }
+      if (SALE) { dire('${T("Modifications non enregistrées — Enregistrer, ou Recharger pour abandonner.")}', 'att'); return; }
       P.fermer();
       return;
     }
@@ -1320,11 +1324,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var el = selEl();
     if (cmd && (ev.key === 'd' || ev.key === 'D')) { ev.preventDefault(); dupliquer(); return; }
     if (cmd && (ev.key === 'c' || ev.key === 'C')) {
-      if (el) { PRESSE = JSON.stringify(el); dire('Élément copié.', 'bon'); }
+      if (el) { PRESSE = JSON.stringify(el); dire('${T("Élément copié.")}', 'bon'); }
       return;
     }
     if (cmd && (ev.key === 'v' || ev.key === 'V')) {
-      if (!PRESSE) { dire('Rien à coller.', 'att'); return; }
+      if (!PRESSE) { dire('${T("Rien à coller.")}', 'att'); return; }
       ev.preventDefault();
       dupliquer(JSON.parse(PRESSE));
       return;
@@ -1332,7 +1336,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (ev.key === 'Delete' || ev.key === 'Backspace') {
       if (!el) return;
       ev.preventDefault();
-      if (el.locked) { dire('Élément verrouillé — déverrouillez-le pour le retirer.', 'att'); return; }
+      if (el.locked) { dire('${T("Élément verrouillé — déverrouillez-le pour le retirer.")}', 'att'); return; }
       supprimer();
       return;
     }
