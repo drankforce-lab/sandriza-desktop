@@ -238,5 +238,10 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Journal': 'Log',
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) — les durées d'un lien. */
+  '1 heure 4 heures': '1 hour 4 hours',
+  '24 heures 3 jours': '24 hours 3 days',
+  '7 jours 30 jours': '7 days 30 days'
 };

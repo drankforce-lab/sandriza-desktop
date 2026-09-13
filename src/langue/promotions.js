@@ -198,5 +198,8 @@ module.exports = {
   /* ⚠⚠ SUPPRIMER UNE OFFRE CHANGE CE QUE LES CLIENTES VOIENT : la banniere de
      la boutique part avec. Sans cette phrase, on croit ranger une fiche. */
   'Cliquez « Confirmer ? » pour supprimer — la bannière de la boutique sera retirée avec.':
-    'Click « Confirm? » to delete — the storefront banner goes with it.'
+    'Click « Confirm? » to delete — the storefront banner goes with it.',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'j par produit': 'd per product'
 };

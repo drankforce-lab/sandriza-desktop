@@ -701,5 +701,15 @@ module.exports = {
   'Recadrer': 'Crop',
   'Marges': 'Margins',
   'Inverser': 'Invert',
-  'Vider': 'Clear'
+  'Vider': 'Clear',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'le logo': 'the logo',
+  'de ce profil': 'of this profile',
+  'la pose du mannequin': 'the model’s pose',
+  'le mannequin choisi': 'the chosen model',
+  'en lot': 'in batch',
+  'en traitement': 'processing',
+  'appels pour une seule photo': 'calls for a single photo',
+  '$ pour cette': '$ for this'
 };

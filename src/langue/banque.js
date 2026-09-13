@@ -219,5 +219,8 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Conciliations': 'Reconciliations',
-  'Clore': 'Close out'
+  'Clore': 'Close out',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '· lecture seule': '· read-only'
 };

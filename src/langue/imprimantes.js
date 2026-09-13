@@ -127,5 +127,8 @@ module.exports = {
   'Association…': 'Attaching…',
   'Retrait de l’association…': 'Detaching…',
   'Imprimante associée.': 'Printer attached.',
-  'Association retirée.': 'Printer detached.'
+  'Association retirée.': 'Printer detached.',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '· aucune imprimante choisie': '· no printer chosen'
 };

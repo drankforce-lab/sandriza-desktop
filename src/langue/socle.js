@@ -197,4 +197,16 @@ module.exports = {
   'Ordre de tri': 'Sort order',
   'Nombre de lignes par page': 'Rows per page',
   'Afficher / masquer': 'Show / hide',
+
+  /* ── LES DEUX FRAGMENTS LES PLUS RÉPANDUS DU PARC (2026-09-13) ─────────────
+     ⚠⚠ Ils étaient dans les QUATRE-VINGT-DIX-HUIT fenêtres, et invisibles aux
+     deux mesures : tout en minuscules, donc écartés par le filtre qui exige une
+     majuscule ou une ponctuation pour reconnaître une phrase. À eux deux ils
+     font 196 des 309 fragments relevés.
+     ⚠ Le premier suit le nom d'un collègue et une date ; le second suit un
+     nombre. Dans les deux cas ce qui précède est une DONNÉE — c'est pour ça
+     qu'ils avaient été écrits collés, et c'est pour ça qu'on les traduit
+     séparément plutôt que d'inventer une phrase à trous. */
+  '· vous seriez en lecture seule': '· you would be read-only',
+  'en file': 'queued',
 };

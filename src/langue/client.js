@@ -153,4 +153,8 @@ module.exports = {
   'Province': 'Province',
   'Pays': 'Country',
   'Effacer': 'Clear',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'au total': 'in total',
+  'ouverte par': 'open by',
 };

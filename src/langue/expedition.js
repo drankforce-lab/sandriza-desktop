@@ -209,5 +209,10 @@ module.exports = {
   'Expédition bloquée : cette commande est ouverte ailleurs.':
     'Shipping blocked: this order is open elsewhere.',
   'hors ligne': 'offline',
-  'ouverte par ': 'open by '
+  'ouverte par ': 'open by ',
+  /* ⚠ LA MÊME, SANS SON ESPACE FINALE. La source écrit `'ouverte par '` avant
+     de coller un nom ; le compteur, lui, lit le texte RENDU, donc rogné. Les
+     deux formes ont leur entrée — c'est la distinction source/rendu déjà connue
+     du dépôt, et elle se paie à chaque texte qui touche une donnée. */
+  'ouverte par': 'open by'
 };

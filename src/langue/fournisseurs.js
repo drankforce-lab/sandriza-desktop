@@ -89,5 +89,8 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Actif': 'Active',
-  'Inactif': 'Inactive'
+  'Inactif': 'Inactive',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'au total': 'in total'
 };

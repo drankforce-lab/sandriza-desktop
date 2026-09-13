@@ -134,6 +134,41 @@ const texteAffiche = (page) => {
 const CLES_LIBELLE = /\b(?:t|titre|title|label|libelle|nom|texte|legende|placeholder|aria)\s*:\s*$/;
 const MOT_AFFICHE  = /^[A-ZÀ-ÖØ-Þ]/;
 
+/* ══ LE FRAGMENT TOUT EN MINUSCULES — LE SECOND ANGLE MORT ═════════════════
+ * ⚠⚠ MEME JOURNEE, MEME SIGNALEMENT. Sa capture du tableau de bord montrait
+ * « 11 variantes to restock » : une phrase a MOITIE traduite. Le morceau
+ * francais etait `' variante'`, colle a un nombre.
+ *
+ * LA CAUSE EST LE FILTRE `PHRASE`, quelques lignes plus haut : il exige une
+ * MAJUSCULE ou une PONCTUATION pour reconnaitre une phrase. Or les morceaux
+ * qu on colle a une donnee n ont ni l une ni l autre — ils commencent au milieu
+ * d une phrase : `' en attente'`, `'aucun message en attente'`, `' jours'`,
+ * `' · vous seriez en lecture seule'`. Ce dernier etait dans les QUATRE-VINGT-
+ * DIX-HUIT fenetres.
+ *
+ * ⚠ ON NE PEUT PAS SE CONTENTER DE RETIRER `PHRASE` : une chaine en minuscules
+ * est aussi bien un selecteur, une classe, une valeur d attribut. La borne est
+ * donc un LEXIQUE — les MOTS-OUTILS du francais. Ils ne s ecrivent pas ainsi en
+ * anglais, ils sont invariables, et une phrase francaise en contient presque
+ * toujours un. C est la meme mecanique que `banc-langue-residuel`, qui a fait
+ * ses preuves : reconnaitre une LANGUE, pas une forme.
+ *
+ * ⚠ PAS DE MOT-OUTIL, PAS D ACCUSATION. Un fragment francais qui n en contient
+ * aucun passe encore — on le dit plutot que de le cacher. La couverture n est
+ * pas totale ; elle est mesurable, et elle vaut 309 releves le premier jour.
+ */
+const MOTS_OUTILS_FR = new RegExp(
+  '(^|[\\s\'’(«])(' + [
+    'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'au', 'aux', 'et', 'ou',
+    'en', 'est', 'sont', 'sur', 'dans', 'pour', 'par', 'avec', 'sans',
+    'aucun', 'aucune', 'plus', 'moins', 'tous', 'toutes', 'ce', 'cette', 'ces',
+    'son', 'sa', 'ses', 'leur', 'leurs', 'qui', 'que', 'dont', 'vers', 'chez',
+    'depuis', 'deja', 'déjà', 'encore', 'toujours', 'jamais',
+    'hier', 'aujourd', 'demain', 'jour', 'jours', 'mois', 'semaine',
+    'heure', 'heures', 'minute', 'minutes', 'attente', 'seriez', 'seule',
+    'lecture', 'file', 'variante', 'variantes', 'restent', 'reste',
+  ].join('|') + ')([\\s\'’),.·…:;!?]|$)', 'i');
+
 /* Les chaines du script qui ressemblent a de la prose. */
 const chainesProse = (js) => {
   const out = [];
@@ -163,7 +198,11 @@ const chainesProse = (js) => {
        texte a traduire. Une valeur d ombre ou de longueur commence par un
        NOMBRE — jamais une phrase, qui commence par un mot. */
     if (/^[-.\d]/.test(t) && /\b(?:px|rem|em|%|rgba?\(|hsla?\()/.test(t)) continue;
-    if (!PHRASE.test(t)) continue;               // ni majuscule ni ponctuation : un nom
+    /* ⚠ NI MAJUSCULE NI PONCTUATION : c est un nom… OU un fragment francais
+       colle a une donnee. Le lexique des mots-outils tranche — voir sa fiche
+       au-dessus de MOTS_OUTILS_FR. */
+    if (!PHRASE.test(t) && !MOTS_OUTILS_FR.test(t)) continue;
+    if (/[{};=<>]/.test(t)) continue;            // du balisage ou du code
     out.push({ texte: t, index: m.index, ou: 'script' });
   }
   return out;

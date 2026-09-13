@@ -481,5 +481,20 @@ module.exports = {
   'Auto': 'Auto',
   'Page': 'Page',
   'Rupture': 'Out of stock',
-  'L’emplacement': 'The location'
+  'L’emplacement': 'The location',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'sous leur seuil': 'below their threshold',
+  'par page': 'per page',
+  'produits au total': 'products in total',
+  'tout est au-dessus du seuil ✓': 'everything is above the threshold ✓',
+  'toutes variantes': 'all variants',
+  'produit(s) portent encore un': 'product(s) still carry a',
+  'sa photo': 'its photo',
+  'elles y restent': 'they stay there',
+  'elle y reste': 'it stays there',
+  'emplacement(s) dans ce lieu': 'location(s) in this place',
+  'ouverte par': 'open by',
+  'ces variantes': 'these variants',
+  'cette variante': 'this variant'
 };

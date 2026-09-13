@@ -183,5 +183,9 @@ module.exports = {
   'Traitement des chaînes…': 'Processing the chains…',
   'Aucune étape en attente.': 'No step pending.',
   ' envoyé': ' sent',
-  ' échec': ' failure'
+  ' échec': ' failure',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'en brouillon': 'draft',
+  'en attente': 'waiting'
 };

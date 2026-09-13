@@ -136,5 +136,8 @@ module.exports = {
   ' écarts': ' gaps',
   ' écart': ' gap',
   'écarts': 'gaps',
-  'écart': 'gap'
+  'écart': 'gap',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'la composante': 'the component'
 };

@@ -390,7 +390,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ['returns-pending', t.retoursNouveaux, '${T("retour à traiter")}', '${T("retours à traiter")}', false],
       ['returns-expiring', t.retoursExpirent, '${T("retour sur le point d’expirer")}', '${T("retours sur le point d’expirer")}', true],
       ['reviews', f.avis, '${T("avis à modérer")}', '${T("avis à modérer")}', false],
-      ['billing', f.facturesRetard, 'facture en retard', 'factures en retard', true],
+      ['billing', f.facturesRetard, '${T("facture en retard")}', '${T("factures en retard")}', true],
       ['security-incidents', f.incidentsCai, '${T("avis à la CAI à transmettre")}', '${T("avis à la CAI à transmettre")}', true]
     ].filter(function(x){ return (x[1] || 0) > 0; });
     if (files.length) {
@@ -417,27 +417,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // Le meme contenu de tuiles que l ecran du site, valeur par valeur.
     var an = (ANNEE === 'all') ? '' : ' ' + ANNEE;
     var contenu = {
+      /* ⚠⚠ SA CAPTURE DU 2026-09-13 MONTRAIT << 11 variantes to restock >> — une
+         phrase a MOITIE traduite. La cause : le singulier/pluriel etait COLLE
+         (le mot, puis un << s >> ajoute a part), donc seul le dernier morceau
+         passait par le dictionnaire. On ecrit desormais les DEUX alternatives EN
+         ENTIER, comme la doctrine le demande depuis le debut : en anglais le
+         pluriel ne se fabrique pas toujours en ajoutant une lettre.
+         ⚠ ET AUCUN ACCENT GRAVE ICI, commentaires compris : ce texte vit dans un
+         litteral de gabarit, il se refermerait. Je viens de le repayer. */
       products: tuile('products', '${T("Produits actifs")}', t.produits.actifs, '',
         t.produits.produitsBas
-          ? t.produits.variantesReappro + ' variante' + (t.produits.variantesReappro > 1 ? 's' : '') + ' ${T("à réapprovisionner")}'
+          ? t.produits.variantesReappro + (t.produits.variantesReappro > 1
+              ? ' ${T("variantes à réapprovisionner")}' : ' ${T("variante à réapprovisionner")}')
           : '${T("aucun réapprovisionnement")}',
         t.produits.produitsBas ? 'att' : ''),
-      orders: tuile('orders', 'Commandes' + an, t.commandes.total, '',
-        t.commandes.enAttente + ' en attente', t.commandes.enAttente > 0 ? 'att' : ''),
+      orders: tuile('orders', '${T("Commandes")}' + an, t.commandes.total, '',
+        t.commandes.enAttente + ' ${T("en attente")}', t.commandes.enAttente > 0 ? 'att' : ''),
       customers: tuile('customers', '${T("Clients actifs")}', t.clients.actifs, '',
         t.clients.inactifs > 0 ? '${T("Comptes inactifs :")} ' + t.clients.inactifs : '&nbsp;', ''),
       revenue: tuile('revenue', '${T("Revenus (net)")}' + an, esc(fmt(t.revenus.net)), '',
         t.revenus.factures + ' ${T("factures encaissées")}'
           + (t.revenus.rembourse > 0 ? ' · −' + esc(fmt(t.revenus.rembourse)) + ' ${T("remboursés")}' : ''), ''),
-      messagerie: tuile('messagerie', 'Messagerie', t.messagerie, t.messagerie > 0 ? 'att' : '',
+      messagerie: tuile('messagerie', '${T("Messagerie")}', t.messagerie, t.messagerie > 0 ? 'att' : '',
         t.messagerie > 0
-          ? 'nouveau' + (t.messagerie > 1 ? 'x' : '') + ' message' + (t.messagerie > 1 ? 's' : '') + ' en attente'
-          : 'aucun message en attente', ''),
+          ? (t.messagerie > 1 ? '${T("nouveaux messages en attente")}' : '${T("nouveau message en attente")}')
+          : '${T("aucun message en attente")}', ''),
       returns_new: tuile('returns_new', '${T("Nouveaux retours")}', t.retoursNouveaux,
         t.retoursNouveaux > 0 ? 'att' : '',
         t.retoursNouveaux > 0
-          ? 'demande' + (t.retoursNouveaux > 1 ? 's' : '') + ' ${T("à traiter")}'
-          : 'aucune demande en attente', ''),
+          ? (t.retoursNouveaux > 1 ? '${T("demandes à traiter")}' : '${T("demande à traiter")}')
+          : '${T("aucune demande en attente")}', ''),
       returns_expiring: tuile('returns_expiring', '${T("Retours sur le point d’expirer")}', t.retoursExpirent,
         t.retoursExpirent > 0 ? 'err' : '',
         t.retoursExpirent > 0 ? '${T("colis pas encore reçu")}' : '${T("aucun retour à risque")}', ''),
@@ -450,14 +459,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       a_traiter: tuile('a_traiter', '${T("Commandes à traiter")}', f.aTraiter,
         f.aTraiter > 0 ? 'att' : '', '&nbsp;', ''),
       en_livraison: tuile('en_livraison', '${T("En livraison")}', f.enLivraison, '',
-        f.enLivraison > 0 ? '${T("colis partis, pas encore livrés")}' : 'aucun colis en route', ''),
+        f.enLivraison > 0 ? '${T("colis partis, pas encore livrés")}' : '${T("aucun colis en route")}', ''),
       // ⚠ SANS SOUS-TITRE, comme << Commandes a traiter >> (retire a sa demande,
       // 2026-08-14). Le chiffre et le titre suffisent ; la ligne du dessous
       // n ajoutait qu un commentaire, coupe des que la tuile retrecit.
       ruptures: tuile('ruptures', '${T("Ruptures de stock")}', f.ruptures,
         f.ruptures > 0 ? 'err' : '', '&nbsp;', ''),
       avis: tuile('avis', '${T("Avis à modérer")}', f.avis, f.avis > 0 ? 'att' : '',
-        f.avis > 0 ? '${T("en attente d’approbation")}' : 'aucun avis en attente', ''),
+        f.avis > 0 ? '${T("en attente d’approbation")}' : '${T("aucun avis en attente")}', ''),
       factures_retard: tuile('factures_retard', '${T("Factures en retard")}', f.facturesRetard,
         f.facturesRetard > 0 ? 'err' : '',
         f.facturesRetard > 0 ? esc(fmt(f.facturesRetardMontant)) + ' ${T("impayés")}' : '${T("aucune échéance dépassée")}',
@@ -582,7 +591,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!oid || !VERROUS[oid]) return '';
     var v = VERROUS[oid];
     var t = v.mine ? '${T("Vous tenez cette fiche en modification")}'
-      : ('${T("En traitement par")} ' + (v.par || 'un collegue'));
+      : ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}'));
     return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="' + esc(t) + '"><span class="ic">🔒</span></span>';
   }
   function appliquerVerrous(){

@@ -96,5 +96,8 @@ module.exports = {
   'Client': 'Customer',
   'Courriel': 'Email',
   'Raison': 'Reason',
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '(aucun message)': '(no message)'
 };

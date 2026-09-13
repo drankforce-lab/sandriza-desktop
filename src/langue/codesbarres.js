@@ -164,5 +164,8 @@ module.exports = {
   'Robe Élégance mi-longue': 'Robe Élégance mi-longue',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Page': 'Page'
+  'Page': 'Page',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'modules · il faudrait une': 'modules · you would need a'
 };

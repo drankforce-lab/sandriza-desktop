@@ -270,4 +270,7 @@ module.exports = {
   'Rediriger': 'Forward',
   'Messagerie': 'Voicemail',
   'Envoyer': 'Send',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'en attente': 'waiting',
 };

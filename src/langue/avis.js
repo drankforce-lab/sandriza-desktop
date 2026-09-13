@@ -122,5 +122,9 @@ module.exports = {
   'Commande': 'Order',
   'Langue': 'Language',
   'Photos': 'Photos',
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) — collés à une donnée. */
+  'sur 5 ·': 'out of 5 ·',
+  '(aucun texte)': '(no text)'
 };

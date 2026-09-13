@@ -517,5 +517,15 @@ module.exports = {
   'Traitements': 'Treatments',
   'Article': 'Item',
   'Fond': 'Background',
-  'Transparent': 'Transparent'
+  'Transparent': 'Transparent',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'ou cliquez pour choisir des fichiers': 'or click to choose files',
+  'en cours': 'under way',
+  'reconnue au contenu': 'recognised by content',
+  'en repli local': 'on local fallback',
+  'sans mannequin': 'without a model',
+  'sur mannequin': 'on a model',
+  'en attente': 'waiting',
+  'images du stockage': 'images from storage'
 };

@@ -226,5 +226,8 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ───────────────────────────────────────────
      ⚠ « SMS » est le même sigle dans les deux langues. */
   'SMS': 'SMS',
-  'Page': 'Page'
+  'Page': 'Page',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '· conservation 30 jours': '· kept for 30 days'
 };

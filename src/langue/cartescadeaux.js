@@ -135,5 +135,8 @@ module.exports = {
   'Une carte-cadeau': 'A gift card',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'au total': 'in total'
 };

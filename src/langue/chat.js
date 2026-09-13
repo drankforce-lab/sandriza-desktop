@@ -109,5 +109,9 @@ module.exports = {
     'Click « Confirm? » to delete — the whole exchange will be lost.',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '· ouverte le': '· opened on',
+  'en attente': 'waiting'
 };

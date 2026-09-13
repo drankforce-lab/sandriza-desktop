@@ -375,5 +375,11 @@ module.exports = {
   'Compter': 'Count',
   'Oui': 'Yes',
   'Non': 'No',
-  'Brouillons': 'Drafts'
+  'Brouillons': 'Drafts',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'en cours ·': 'under way ·',
+  'les destinataires': 'the recipients',
+  'ces personnes ne recevront jamais': 'these people will never receive',
+  'cette personne ne recevra jamais': 'this person will never receive'
 };

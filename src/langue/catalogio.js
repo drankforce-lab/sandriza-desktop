@@ -309,4 +309,10 @@ module.exports = {
   'Appliquer': 'Apply',
   'Les': 'The',
   'Fichier': 'File',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'par page ·': 'per page ·',
+  'dans votre stockage': 'in your storage',
+  'le dossier des exports': 'the exports folder',
+  'ce dossier': 'this folder',
 };

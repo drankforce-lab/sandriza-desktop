@@ -614,8 +614,13 @@ function _szVerrouInner(cle){
   var qui = v.mine ? '${T('Vous')}' : (v.par || '${T('un collègue')}');
   var t = v.mine
     ? ('${T("Vous tenez cette fiche en modification")}' + (v.depuis ? ' — ' + v.depuis : ''))
+    /* ⚠ LA CLAUSE FINALE A SA PROPRE ENTREE, et c est licite : elle vient
+       APRES un « · », elle ne depend ni du nom ni de la date qui la precedent,
+       et son ordre ne change pas d une langue a l autre. Ce n est pas un
+       morceau de phrase decoupe — c est une phrase de plus.
+       ⚠ Elle etait le texte francais le plus repandu du parc : 98 fenetres. */
     : ('${T("En traitement par")} ' + qui + (v.depuis ? ' — ' + v.depuis : '')
-       + ' · vous seriez en lecture seule');
+       + ' ${T("· vous seriez en lecture seule")}');
   var e = function(s){ return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
   /* role=img + aria-label : une pastille n est pas un texte qu un lecteur
@@ -728,7 +733,9 @@ function _szLotsPeindre(r){
   document.documentElement.classList.add('sz-lots-on');
   var s = r.resume;
   var pct = s.total ? Math.round((s.fait / s.total) * 100) : 0;
-  var enFile = s.enFile ? ('<span class="file">+ ' + s.enFile + ' en file</span>') : '';
+  /* ⚠ « en file » suit un NOMBRE : le mot seul se traduit, le nombre reste une
+     donnee. L autre texte le plus repandu du parc — 98 fenetres, lui aussi. */
+  var enFile = s.enFile ? ('<span class="file">+ ' + s.enFile + ' ${T("en file")}</span>') : '';
   _szLotsEl.innerHTML = '<span>⚙</span>'
     + '<span class="nom">' + String(s.nom || 'Traitement').replace(/[&<>"]/g, '') + '</span>'
     + '<span class="jauge"><i style="width:' + pct + '%"></i></span>'

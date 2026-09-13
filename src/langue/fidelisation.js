@@ -199,5 +199,8 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Question': 'Question',
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'taux de': 'rate of'
 };

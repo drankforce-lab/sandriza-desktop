@@ -199,5 +199,8 @@ module.exports = {
   'sur': 'of',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Service': 'Service'
+  'Service': 'Service',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'en traitement par': 'being edited by'
 };

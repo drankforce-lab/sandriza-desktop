@@ -235,5 +235,11 @@ module.exports = {
   'Brouillon enregistré.': 'Draft saved.',
   'Lien copié.': 'Link copied.',
   'Copie impossible.': 'Cannot copy.',
-  'Campagne supprimée.': 'Campaign deleted.'
+  'Campagne supprimée.': 'Campaign deleted.',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '% des commandes': '% of orders',
+  'par commande': 'per order',
+  '% des cmd': '% of ord.',
+  '% de couverture)': '% coverage)'
 };

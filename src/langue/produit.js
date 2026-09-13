@@ -430,5 +430,9 @@ module.exports = {
   'Retours': 'Returns',
   'Photo': 'Photo',
   'Stock': 'Stock',
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'recliquez pour retirer le rabais': 'click again to remove the discount',
+  'ouverte par': 'open by'
 };

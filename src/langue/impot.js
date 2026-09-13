@@ -277,4 +277,10 @@ module.exports = {
   'TVQ.': 'TVQ.',
   'Total': 'Total',
   'Ouvrir': 'Open',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'entreprise sans nom': 'business with no name',
+  'des ventes de': 'of sales of',
+  'remboursement en votre faveur': 'refund in your favour',
+  ') sont sous le seuil de': ') are below the threshold of',
 };

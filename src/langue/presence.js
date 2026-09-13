@@ -143,5 +143,8 @@ module.exports = {
   'Message déposé pour': 'Message left for',
   'La personne': 'The person',
   ' est déconnectée.': ' is signed out.',
-  'est déconnectée.': 'is signed out.'
+  'est déconnectée.': 'is signed out.',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'moins de': 'less than'
 };

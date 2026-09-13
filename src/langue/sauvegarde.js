@@ -268,5 +268,9 @@ module.exports = {
   'Ramener cet écran dans la fenêtre principale': 'Bring this screen back into the main window',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'au moins': 'at least',
+  'de base +': 'base +'
 };

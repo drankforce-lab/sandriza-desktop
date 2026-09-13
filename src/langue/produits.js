@@ -80,4 +80,7 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Rupture': 'Out of stock',
   'Page': 'Page',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'en rupture': 'out of stock',
 };

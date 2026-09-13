@@ -294,4 +294,8 @@ module.exports = {
   'Transporteur': 'Carrier',
   'Statut': 'Status',
   'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '· soumise le': '· submitted on',
+  'ouvert par': 'open by',
 };

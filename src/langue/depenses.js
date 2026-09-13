@@ -280,4 +280,9 @@ module.exports = {
   'USD→CAD': 'USD→CAD',
   'Page': 'Page',
   'Fermer': 'Close',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'remboursement sur intrants': 'input tax credit',
+  '(aucune description)': '(no description)',
+  'les montants': 'the amounts',
 };

@@ -53,4 +53,7 @@ module.exports = {
   'Adresse': 'Address',
   'Approvisionnement': 'Supply',
   'Statut': 'Status',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'ouverte par': 'open by',
 };

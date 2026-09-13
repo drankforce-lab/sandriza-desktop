@@ -1280,7 +1280,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         AV.decor, '${T("Choisi ici, il remplace celui de l’ambiance. Ce sont les 23 décors que le service")} '
         + '${T("connaît : un nom hors liste serait refusé.")}'));
       h.push(chSel('av-sourire', 'Expression',
-        [{ cle: '1', t: '${T("Sourire naturel (défaut)")}' }, { cle: '0', t: 'Neutre' }],
+        [{ cle: '1', t: '${T("Sourire naturel (défaut)")}' }, { cle: '0', t: '${T("Neutre")}' }],
         AV.sourire ? '1' : '0', '${T("Sans consigne, le service rend un visage presque fermé — mesuré sur")} '
         + '${T("pièce. Le sourire se demande, il ne vient pas tout seul.")}'));
       h.push('<div class="ch avun"><label for="av-extra">${T("Précisions libres")}</label>'
@@ -1303,7 +1303,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<input type="text" id="av-neg" maxlength="300"' + (RO ? ' disabled' : '')
         + ' value="' + esc(AV.fondNegatif) + '" placeholder="text, logo, hands, harsh reflections">'
         + '<div class="aidep">${T("Ce que le décor ne doit pas contenir.")}</div></div>');
-      h.push('<div class="ch"><label for="av-seed">Graine</label>'
+      h.push('<div class="ch"><label for="av-seed">${T("Graine")}</label>'
         + '<input type="text" id="av-seed" inputmode="numeric" maxlength="9"' + (RO ? ' disabled' : '')
         + ' value="' + esc(AV.fondGraine) + '" placeholder="vide = au hasard">'
         + '</div>');
@@ -1351,7 +1351,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function avAgrandirHtml(){
     var h = [];
-    h.push('<div class="avsec prem">Agrandissement</div>');
+    h.push('<div class="avsec prem">${T("Agrandissement")}</div>');
     h.push('<label class="bascule avun"><input type="checkbox" id="av-up"'
       + (AV.upActive ? ' checked' : '') + (RO ? ' disabled' : '')
       + '> <span><strong>${T("Agrandir ×4")}</strong><span class="d">${T("Un appel de plus, facturé, après le")} '
@@ -1513,12 +1513,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var ONGLETS = [
     { cle: 'photo',     t: 'Photo',          voies: '*' },
     { cle: 'valeur',    t: '${T("Mise en valeur")}', voies: '*' },
-    { cle: 'ambiance',  t: 'Ambiance',       voies: '*' },
+    { cle: 'ambiance',  t: '${T("Ambiance")}',       voies: '*' },
     { cle: 'decor',     t: '${T("Décor")}',          voies: '*' },
-    { cle: 'ombres',    t: 'Ombres',         voies: 'fantome,plat' },
+    { cle: 'ombres',    t: '${T("Ombres")}',         voies: 'fantome,plat' },
     { cle: 'lumiere',   t: '${T("Lumière")}',        voies: 'fantome,plat' },
     { cle: 'interieur', t: '${T("Intérieur")}',      voies: 'fantome' },
-    { cle: 'agrandir',  t: 'Agrandissement', voies: '*' },
+    { cle: 'agrandir',  t: '${T("Agrandissement")}', voies: '*' },
     { cle: 'filigrane', t: '${T("Filigrane")}',      voies: '*' }
   ];
   function ongletsDispo(){
@@ -1722,7 +1722,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function recettesHtml(){
     var x = recetteChoisie();
     return '<div class="rcbar" id="rcbar">'
-      + '<label for="rc-sel">Profil</label>'
+      + '<label for="rc-sel">${T("Profil")}</label>'
       + '<select id="rc-sel"' + (RO ? ' disabled' : '') + '>'
       + '<option value="">${T("— Aucun —")}</option>'
       + RECETTES.map(function(o){
@@ -1787,7 +1787,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     FIL = fusionner(FIL_DEF, r.fil);
     if (FIL.logoId && !LOGOS.filter(function(l){ return l.id === FIL.logoId; }).length) {
       FIL.logoId = '';
-      perdus.push('le logo');
+      perdus.push('${T("le logo")}');
     }
     /* Les reglages viennent de changer : le resultat affiche n est plus celui
        qu ils produiraient, et ses formats non plus. Les garder ferait
@@ -2144,8 +2144,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="note">${T("La même image en 3:4, 1:1, 4:5 et 9:16, préparés ici même —")} '
       + '<strong>${T("aucun appel, aucun crédit")}</strong>.</div>'
       + '<div class="fbar">'
-      + '<button class="jeton' + (FORM_MODE === 'recadrer' ? ' on' : '') + '" data-fmode="recadrer">Recadrer</button>'
-      + '<button class="jeton' + (FORM_MODE === 'marges' ? ' on' : '') + '" data-fmode="marges">Marges</button>'
+      + '<button class="jeton' + (FORM_MODE === 'recadrer' ? ' on' : '') + '" data-fmode="recadrer">${T("Recadrer")}</button>'
+      + '<button class="jeton' + (FORM_MODE === 'marges' ? ' on' : '') + '" data-fmode="marges">${T("Marges")}</button>'
       + '<button class="jeton prim grand" id="fmt-go"' + (FORM_OCC || RO ? ' disabled' : '') + '>'
       + (FORM_OCC ? '${T("Préparation…")}' : (FORMATS.length ? '${T("↻ Refaire les 4 formats")}' : '${T("⚙ Préparer les 4 formats")}'))
       + '</button></div>';
@@ -2626,8 +2626,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="phsel">'
       + '<span class="cpt' + (n ? ' on' : '') + '">' + (n ? n + ' photo' + (n > 1 ? 's' : '') + ' choisie' + (n > 1 ? 's' : '') : '${T("Aucune sélection")}') + '</span>'
       + '<button class="jeton" id="ph-tout"' + (dispo ? '' : ' disabled') + '>${T("Tout sélectionner (")}' + dispo + ')</button>'
-      + '<button class="jeton" id="ph-inv"' + (dispo ? '' : ' disabled') + '>Inverser</button>'
-      + '<button class="jeton" id="ph-rien"' + (n ? '' : ' disabled') + '>Vider</button>'
+      + '<button class="jeton" id="ph-inv"' + (dispo ? '' : ' disabled') + '>${T("Inverser")}</button>'
+      + '<button class="jeton" id="ph-rien"' + (n ? '' : ' disabled') + '>${T("Vider")}</button>'
       + '<span class="droite">'
       /* ⚠ ph-ouvrir-sel, PAS ph-ouvrir : ce dernier est le bouton
          « Depuis la photothèque » de l'écran de départ. Le doublon d'identifiant

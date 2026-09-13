@@ -87,5 +87,9 @@ module.exports = {
   '» retirée de la liste.': '» removed from the list.',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Archive': 'Archive'
+  'Archive': 'Archive',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '30 derniers jours': 'last 30 days',
+  'toutes occurrences': 'all occurrences'
 };

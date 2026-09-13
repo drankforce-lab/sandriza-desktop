@@ -148,5 +148,8 @@ module.exports = {
   'Aperçu gratuit': 'Free preview',
   'réussi': 'succeeded',
   'échec': 'failed',
-  'est.': 'est.'
+  'est.': 'est.',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'saisi le': 'entered on'
 };

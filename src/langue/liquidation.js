@@ -207,5 +207,12 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Page': 'Page',
   'Afficher': 'Show',
-  'Choisis': 'Selected'
+  'Choisis': 'Selected',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'par page ·': 'per page ·',
+  'en liquidation': 'on clearance',
+  'en vente finale': 'final sale',
+  'produit dans': 'product in',
+  'produits dans': 'products in'
 };

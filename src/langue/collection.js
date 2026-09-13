@@ -92,5 +92,8 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) — les étapes de l'assistant. */
   'Description': 'Description',
   'Image': 'Image',
-  'Produits': 'Products'
+  'Produits': 'Products',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'ouverte par': 'open by'
 };

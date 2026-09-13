@@ -260,5 +260,11 @@ module.exports = {
   'Confirmer': 'Confirm',
   'Rembourser': 'Refund',
   'Fermer': 'Close',
-  'Lier': 'Link'
+  'Lier': 'Link',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'par page': 'per page',
+  '· reste': '· left',
+  'en traitement par': 'being edited by',
+  'de frais de service retenus': 'of service fees kept'
 };

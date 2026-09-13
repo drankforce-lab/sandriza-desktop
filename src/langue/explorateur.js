@@ -229,5 +229,8 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Inverser': 'Invert',
-  'Vider': 'Clear'
+  'Vider': 'Clear',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'leur dernier traitement': 'their last treatment'
 };

@@ -119,4 +119,29 @@ module.exports = {
   'Empecher toute autre connexion pendant une maintenance': 'Prevent anyone else from signing in during maintenance',
   'Mode exclusif : ACTIF': 'Exclusive mode: ON',
   'Mode exclusif': 'Exclusive mode',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ──────────────────────────────
+     ⚠⚠ CE SONT CEUX DE SA CAPTURE DU TABLEAU DE BORD. Les sous-titres des
+     tuiles étaient écrits collés à un nombre — « 11 variantes to restock », une
+     phrase à MOITIÉ traduite, moitié française moitié anglaise sur le même
+     écran. C'est la signature du morceau collé : le début vient d'un littéral
+     nu, la fin d'une entrée de dictionnaire. */
+  'facture en retard': 'invoice overdue',
+  'factures en retard': 'invoices overdue',
+  'en attente': 'waiting',
+  'aucun message en attente': 'no message waiting',
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER, jamais un « s » collé : c'est ce qui
+     donnait « 11 variantes to restock » sur sa capture. */
+  'variante à réapprovisionner': 'variant to restock',
+  'variantes à réapprovisionner': 'variants to restock',
+  'nouveau message en attente': 'new message waiting',
+  'nouveaux messages en attente': 'new messages waiting',
+  'demande à traiter': 'request to handle',
+  'demandes à traiter': 'requests to handle',
+  'Commandes': 'Orders',
+  'Messagerie': 'Messages',
+  'aucune demande en attente': 'no request waiting',
+  'aucun colis en route': 'no parcel on its way',
+  'aucun avis en attente': 'no review waiting',
+  'un collegue': 'a colleague',
 };

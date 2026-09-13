@@ -196,5 +196,8 @@ module.exports = {
      le nom tape ici DEVIENT le titre affiche sur la fiche produit. Un exemple
      anglais ferait donc apparaitre de l anglais dans une boutique francophone,
      exactement comme « Vous aimerez aussi ». Il reste en francais. */
-  'Look d’automne': 'Look d’automne'
+  'Look d’automne': 'Look d’automne',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  '$ au total': '$ in total'
 };

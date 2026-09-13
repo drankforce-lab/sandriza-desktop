@@ -157,5 +157,9 @@ module.exports = {
   'Retrait…': 'Removing…',
   'Cliquez « Confirmer ? » pour retirer ce comptable du carnet.':
     'Click « Confirm? » to remove this accountant from the address book.',
-  'Comptable retiré du carnet.': 'Accountant removed from the address book.'
+  'Comptable retiré du carnet.': 'Accountant removed from the address book.',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) — les durées d'un accès. */
+  '24 heures 3 jours': '24 hours 3 days',
+  '7 jours 14 jours': '7 days 14 days'
 };

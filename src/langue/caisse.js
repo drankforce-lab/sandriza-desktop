@@ -162,4 +162,10 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Sous-total': 'Subtotal',
   'Continuer': 'Continue',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'aucune variante': 'no variant',
+  '(sans nom)': '(no name)',
+  'sans courriel': 'no email',
+  '· lecture seule': '· read-only',
 };

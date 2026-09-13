@@ -88,5 +88,9 @@ module.exports = {
   'Déverrouillage…': 'Unlocking…',
   'Verrou libéré.': 'Lock released.',
   'Libération de tous les verrous…': 'Releasing every lock…',
-  'Verrous libérés.': 'Locks released.'
+  'Verrous libérés.': 'Locks released.',
+
+  /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
+  'fiches en cours de modification': 'records being edited',
+  'fiche en cours de modification': 'record being edited'
 };
