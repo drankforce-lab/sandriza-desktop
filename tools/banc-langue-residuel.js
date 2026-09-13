@@ -229,6 +229,7 @@ const NOMS_OFFICIELS = [
   ['Registraire des entreprises du Québec', 'le nom officiel de l’organisme, dans les deux langues'],
   ['Registraire des entreprises', 'idem, forme courte'],
   ['Revenu Québec', 'son nom officiel en anglais aussi (l’ARC l’écrit ainsi)'],
+  ['Commission d’accès à l’information', 'le nom officiel de l’organisme de la Loi 25 — il n’a pas de forme anglaise, et c’est à lui qu’on remet le registre des incidents'],
 ];
 const sansNomsOfficiels = (t) => NOMS_OFFICIELS
   .reduce((s, [nom]) => s.split(nom).join(' '), t);

@@ -25,6 +25,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('incidents');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -145,11 +149,11 @@ function pageIncidents(ouverture) {
   if (!NOUV0 && brut.indexOf('inc-') === 0) EDIT0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, '');
   else if (brut.indexOf('vue-') === 0) VUE0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, '');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Incidents de sécurité — Administration Sandriza</title>
+<title>${T("Incidents de sécurité — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.secincident}</span><h1>Incidents de sécurité</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter le registre, pas le modifier.</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.secincident}</span><h1>${T("Incidents de sécurité")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter le registre, pas le modifier.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -160,8 +164,8 @@ function pageIncidents(ouverture) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
@@ -183,18 +187,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès au registre des incidents.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    invalide:'Formulaire invalide.',
-    introuvable:'Incident introuvable.',
-    refus:'Action refusée par le serveur.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès au registre des incidents.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    invalide:'${T("Formulaire invalide.")}',
+    introuvable:'${T("Incident introuvable.")}',
+    refus:'${T("Action refusée par le serveur.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -203,46 +207,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   // ── Registre ─────────────────────────────────────────────────────
   function pilRisque(v){
-    if (v==='oui') return '<span class="pill grave">Préjudice sérieux</span>';
-    if (v==='evaluation') return '<span class="pill eval">En évaluation</span>';
-    return '<span class="pill sain">Sans risque sérieux</span>';
+    if (v==='oui') return '<span class="pill grave">${T("Préjudice sérieux")}</span>';
+    if (v==='evaluation') return '<span class="pill eval">${T("En évaluation")}</span>';
+    return '<span class="pill sain">${T("Sans risque sérieux")}</span>';
   }
   function pilEtat(v){
-    if (v==='clos') return '<span class="pill clos">Clôturé</span>';
-    if (v==='surveille') return '<span class="pill surveille">Surveillé</span>';
-    return '<span class="pill ouvert">Ouvert</span>';
+    if (v==='clos') return '<span class="pill clos">${T("Clôturé")}</span>';
+    if (v==='surveille') return '<span class="pill surveille">${T("Surveillé")}</span>';
+    return '<span class="pill ouvert">${T("Ouvert")}</span>';
   }
 
   function vueRegistre(){
     var st = D.stats||{}, lg = D.lignes||[];
     var h = '<div class="entete">'
-      + '<p class="loi">La <b>Loi 25</b> impose de consigner <b>tout</b> incident de confidentialité — même sans risque de préjudice sérieux — et de pouvoir remettre ce registre à la <b>Commission d’accès à l’information</b> sur demande. Chaque entrée est conservée <b>cinq ans</b> après la prise de connaissance, puis retirée d’elle-même. Ce registre n’est pas public.</p>'
-      + (D.peutModifier ? '<button class="prim" id="i-nouveau">＋ Consigner un incident</button>' : '')
+      + '<p class="loi">${T("La <b>Loi 25</b> impose de consigner <b>tout</b> incident de confidentialité — même sans risque de préjudice sérieux — et de pouvoir remettre ce registre à la <b>Commission d’accès à l’information</b> sur demande. Chaque entrée est conservée <b>cinq ans</b> après la prise de connaissance, puis retirée d’elle-même. Ce registre n’est pas public.")}</p>'
+      + (D.peutModifier ? '<button class="prim" id="i-nouveau">${T("＋ Consigner un incident")}</button>' : '')
       + '</div>';
     h += '<div class="stat-grid">'
-      + '<div class="stat"><div class="l">Au registre</div><div class="v">'+(st.total||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Dossiers ouverts</div><div class="v" style="color:var(--tx-att)">'+(st.ouverts||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Préjudice sérieux</div><div class="v" style="color:var(--tx-err2)">'+(st.serieux||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Avis CAI à faire</div><div class="v" style="color:var(--tx-err2)">'+(st.caiAFaire||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Au registre")}</div><div class="v">'+(st.total||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Dossiers ouverts")}</div><div class="v" style="color:var(--tx-att)">'+(st.ouverts||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Préjudice sérieux")}</div><div class="v" style="color:var(--tx-err2)">'+(st.serieux||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Avis CAI à faire")}</div><div class="v" style="color:var(--tx-err2)">'+(st.caiAFaire||0)+'</div></div>'
       + '</div>';
 
     if (!lg.length){
-      h += '<div class="carte"><div class="vide">Aucun incident consigné.<br>C’est la bonne nouvelle — le registre doit tout de même exister et être tenu à jour.</div></div>';
+      h += '<div class="carte"><div class="vide">${T("Aucun incident consigné.")}<br>${T("C’est la bonne nouvelle — le registre doit tout de même exister et être tenu à jour.")}</div></div>';
       corps.innerHTML = h; lier(); return;
     }
 
     var nc = 7 + (D.peutModifier||D.peutSupprimer ? 1 : 0);
     h += '<div class="carte" style="padding:0;overflow-x:auto"><table class="tb"><thead><tr>'
-      + '<th>Prise de connaissance</th><th>Survenance</th><th>Type</th><th style="text-align:center">Personnes</th>'
-      + '<th>Risque</th><th>Avis CAI</th><th>État</th>'
+      + '<th>${T("Prise de connaissance")}</th><th>${T("Survenance")}</th><th>${T("Type")}</th><th style="text-align:center">${T("Personnes")}</th>'
+      + '<th>${T("Risque")}</th><th>${T("Avis CAI")}</th><th>${T("État")}</th>'
       + ((D.peutModifier||D.peutSupprimer) ? '<th></th>' : '')
       + '</tr></thead><tbody>';
     for (var i=0;i<lg.length;i++){ var r=lg[i];
       var acts = '';
       if (D.peutModifier||D.peutSupprimer){
-        acts = '<td class="acts"><button class="b" data-vue="'+esc(r.id)+'" title="Voir le détail"><span class="ic">👁</span> Détail</button>'
-          + (D.peutModifier ? '<button class="b" data-edit="'+esc(r.id)+'"><span class="ic">✏</span> Modifier</button>' : '')
-          + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+(DELID===r.id?'✓ Confirmer':'Retirer')+'</button>' : '')
+        acts = '<td class="acts"><button class="b" data-vue="'+esc(r.id)+'" title="${T("Voir le détail")}"><span class="ic">👁</span>${T(" Détail")}</button>'
+          + (D.peutModifier ? '<button class="b" data-edit="'+esc(r.id)+'"><span class="ic">✏</span>${T(" Modifier")}</button>' : '')
+          + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+(DELID===r.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button>' : '')
           + '</td>';
       }
       h += '<tr><td style="white-space:nowrap;font-weight:600">'+esc(r.knownAt||'—')+'</td>'
@@ -267,7 +271,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var ds=corps.querySelectorAll('[data-del]'); for (var c=0;c<ds.length;c++) ds[c].onclick=function(){
       var id=this.getAttribute('data-del');
       if (DELID===id){ DELID=''; supprimer(id); }
-      else { DELID=id; vueRegistre(); dire('Le registre se conserve CINQ ANS. Ne retirez qu’une saisie erronée, jamais un incident réel — cliquez encore pour confirmer.', 'att'); }
+      else { DELID=id; vueRegistre(); dire('${T("Le registre se conserve CINQ ANS. Ne retirez qu’une saisie erronée, jamais un incident réel — cliquez encore pour confirmer.")}', 'att'); }
     };
   }
 
@@ -308,12 +312,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function navHtml(){
     var dernier = (D.etapes||[]).length - 1;
-    return '<button class="b" id="a-prec"'+(ETAPE===0?' style="visibility:hidden"':'')+'>← Précédent</button>'
+    return '<button class="b" id="a-prec"'+(ETAPE===0?' style="visibility:hidden"':'')+'>${T("← Précédent")}</button>'
       + '<span class="msgsur" id="a-msg"></span>'
       + (ETAPE<dernier
-          ? '<button class="prim" id="a-suiv">Suivant →</button>'
+          ? '<button class="prim" id="a-suiv">${T("Suivant →")}</button>'
           : (RO ? '<button class="b" id="a-fermer2">Fermer</button>'
-                : '<button class="prim" id="a-enr">✓ '+(EDITID?'Enregistrer les modifications':'Enregistrer')+'</button>'));
+                : '<button class="prim" id="a-enr">✓ '+(EDITID?'${T("Enregistrer les modifications")}':'${T("Enregistrer")}')+'</button>'));
   }
 
   function majAssistant(){
@@ -344,7 +348,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var el=document.getElementById('f-knownAt');
     if (el && !String(el.value||'').trim()){
       el.classList.add('manque');
-      dire('La date de prise de connaissance est obligatoire — elle fait courir les délais légaux.', 'att');
+      dire('${T("La date de prise de connaissance est obligatoire — elle fait courir les délais légaux.")}', 'att');
       try { el.focus(); } catch(e){}
       return false;
     }
@@ -353,7 +357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function ouvrirAssistant(id){
     if (!D) return;
-    if (id && !incParId(id)) { dire('Incident introuvable.', 'err'); return; }
+    if (id && !incParId(id)) { dire('${T("Incident introuvable.")}', 'err'); return; }
     EDITID = id||''; ETAPE = 0;
     var inc = id ? incParId(id) : null;
     var et = D.etapes||[];
@@ -364,11 +368,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       pasH += '<div class="pas'+(i===0?' ici':'')+'"><h4>'+esc(et[i].icone||'')+' '+esc(et[i].label)+'</h4>'+ch+'</div>';
     }
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inc';
-    sur.innerHTML = '<div class="boite"><div class="tt"><h3><span class="ic">🛡</span> '+(id?'Modifier l’incident':'Consigner un incident')+'</h3>'
-      + '<div><button class="sz-btnplein" id="a-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
+    sur.innerHTML = '<div class="boite"><div class="tt"><h3><span class="ic">🛡</span> '+(id?'${T("Modifier l’incident")}':'${T("Consigner un incident")}')+'</h3>'
+      + '<div><button class="sz-btnplein" id="a-plein" title="${T("Occuper toute la fenêtre")}">${T("⛶ Plein écran")}</button>'
       + '<button class="mini" id="a-x">Fermer</button></div></div>'
       + '<div class="liste">'
-      + '<p class="loi" style="margin:0 0 1rem">Registre des incidents de sécurité (Loi 25) — parcourez les étapes ; seule la <b>date de prise de connaissance</b> est obligatoire.</p>'
+      + '<p class="loi" style="margin:0 0 1rem">${T("Registre des incidents de sécurité (Loi 25) — parcourez les étapes ; seule la <b>date de prise de connaissance</b> est obligatoire.")}</p>'
       + '<div class="ferr" id="a-err"></div>'
       + '<div class="fil" id="a-fil">'+filHtml()+'</div>'
       + pasH
@@ -408,7 +412,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   szBrouillonBrancher({
     portee: 'incident',
-    libelle: 'Un incident',
+    libelle: '${T("Un incident")}',
     ttlMin: 720,
     cle: function(){ return EDITID ? ('i:' + EDITID) : '__new__'; },
     actif: function(){ return !!document.getElementById('sur-inc'); },
@@ -428,7 +432,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     for (var i=0;i<et.length;i++) for (var j=0;j<et[i].champs.length;j++){
       var c=et[i].champs[j]; d[c.cle]=txv('f-'+c.cle);
     }
-    OCCUPE=true; dire('Enregistrement…');
+    OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('incidents:ecrire',[EDITID||'', d]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){
         /* ⚠ JETER AVANT DE FERMER : fermerAssistant() ecrit le brouillon, et il le
@@ -436,19 +440,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         szBrouillonJeter();
         fermerAssistant();
         D=r; RO=!r.peutModifier; DELID=''; vueRegistre();
-        dire(r.mode==='create' ? 'Incident consigné au registre.' : 'Incident mis à jour.', 'bon');
+        dire(r.mode==='create' ? '${T("Incident consigné au registre.")}' : '${T("Incident mis à jour.")}', 'bon');
       } else {
         var e=document.getElementById('a-err'); if (e){ e.textContent=expliquer(r); e.style.display='block'; }
-        dire('Échec : '+expliquer(r), 'err');
+        dire('${T("Échec : ")}'+expliquer(r), 'err');
       }
     });
   }
 
   function supprimer(id){
-    if (OCCUPE) return; OCCUPE=true; dire('Retrait…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Retrait…")}');
     appeler('incidents:supprimer',[id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D=r; RO=!r.peutModifier; DELID=''; vueRegistre(); dire('Entrée retirée du registre.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ D=r; RO=!r.peutModifier; DELID=''; vueRegistre(); dire('${T("Entrée retirée du registre.")}', 'bon'); }
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── Fiche de consultation ────────────────────────────────────────
@@ -458,7 +462,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return String(v);
   }
   function ouvrirFiche(id){
-    var inc = incParId(id); if (!inc){ dire('Incident introuvable.', 'err'); return; }
+    var inc = incParId(id); if (!inc){ dire('${T("Incident introuvable.")}', 'err'); return; }
     var et=D.etapes||[], h='';
     for (var i=0;i<et.length;i++){
       var lignes='';
@@ -470,16 +474,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       }
       if (lignes) h += '<div class="grp"><div class="grpT">'+esc(et[i].icone||'')+' '+esc(et[i].label)+'</div>'+lignes+'</div>';
     }
-    if (!h) h = '<div class="vide">Aucun détail saisi.</div>';
+    if (!h) h = '<div class="vide">${T("Aucun détail saisi.")}</div>';
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-vue';
     sur.innerHTML = '<div class="boite" style="max-width:720px"><div class="tt">'
-      + '<h3>Incident — '+esc(inc.knownAt||'')+' '+pilRisque(inc.seriousRisk)+'</h3>'
-      + '<div><button class="sz-btnplein" id="v-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
+      + '<h3>${T("Incident — ")}'+esc(inc.knownAt||'')+' '+pilRisque(inc.seriousRisk)+'</h3>'
+      + '<div><button class="sz-btnplein" id="v-plein" title="${T("Occuper toute la fenêtre")}">${T("⛶ Plein écran")}</button>'
       + '<button class="mini" id="v-x">Fermer</button></div></div>'
       + '<div class="liste fiche">'+h+'</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
       + '<button class="b" id="v-fermer">Fermer</button>'
-      + (D.peutModifier ? '<button class="prim" id="v-edit"><span class="ic">✏</span> Modifier</button>' : '')
+      + (D.peutModifier ? '<button class="prim" id="v-edit"><span class="ic">✏</span>${T(" Modifier")}</button>' : '')
       + '</div></div>';
     document.body.appendChild(sur);
     function fermer(){ szPleinReinit(); var s=document.getElementById('sur-vue'); if (s) s.remove(); }
@@ -496,7 +500,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('incidents:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');

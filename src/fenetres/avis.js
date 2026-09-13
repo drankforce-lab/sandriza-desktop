@@ -26,6 +26,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('avis');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -122,11 +126,11 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 function pageAvis(ouverture) {
   const ouv = String(ouverture || '');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Avis produits — Administration Sandriza</title>
+<title>${T("Avis produits — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.star}</span><h1>Avis produits</h1>
+<div class="tete"><span class="ico">${ICO.star}</span><h1>${T("Avis produits")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -158,19 +162,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux avis.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cet avis n’existe plus.',
-    moderation:         'Le geste a échoué.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux avis.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cet avis n’existe plus.")}',
+    moderation:         '${T("Le geste a échoué.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -187,58 +191,58 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
-  var ETATS = { pending: ['att', 'En attente'], published: ['bon', 'Publié'], hidden: ['neutre', 'Masqué'] };
+  var ETATS = { pending: ['att', '${T("En attente")}'], published: ['bon', '${T("Publié")}'], hidden: ['neutre', '${T("Masqué")}'] };
   function pastille(st){
     var e = ETATS[st] || ETATS.hidden;
     return '<span class="pill ' + e[0] + '">' + e[1] + '</span>';
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var c = D.comptes || {};
     var h = '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'pending' ? ' actif' : '') + '" data-onglet="pending">'
-      + 'En attente<span class="n' + (c.attente > 0 ? ' hi' : '') + '">' + (c.attente || 0) + '</span></button>'
+      + '${T("En attente")}<span class="n' + (c.attente > 0 ? ' hi' : '') + '">' + (c.attente || 0) + '</span></button>'
       + '<button class="mini' + (ONGLET === 'done' ? ' actif' : '') + '" data-onglet="done">'
-      + 'Traités<span class="n">' + (c.traites || 0) + '</span></button>'
+      + '${T("Traités")}<span class="n">' + (c.traites || 0) + '</span></button>'
       + (ONGLET === 'done'
-          ? '<select id="a-etat" aria-label="Filtrer par état de traitement">'
-            + '<option value=""' + (ETAT === '' ? ' selected' : '') + '>Approuvés et refusés</option>'
-            + '<option value="published"' + (ETAT === 'published' ? ' selected' : '') + '>Approuvés</option>'
-            + '<option value="hidden"' + (ETAT === 'hidden' ? ' selected' : '') + '>Refusés / masqués</option>'
+          ? '<select id="a-etat" aria-label="${T("Filtrer par état de traitement")}">'
+            + '<option value=""' + (ETAT === '' ? ' selected' : '') + '>${T("Approuvés et refusés")}</option>'
+            + '<option value="published"' + (ETAT === 'published' ? ' selected' : '') + '>${T("Approuvés")}</option>'
+            + '<option value="hidden"' + (ETAT === 'hidden' ? ' selected' : '') + '>${T("Refusés / masqués")}</option>'
             + '</select>'
           : '')
-      + '<input aria-label="Nom ou n° de commande" type="search" id="a-q" placeholder="Nom ou n° de commande…" value="' + esc(Q) + '">'
-      + '<select id="a-note"><option value=""' + (NOTE === '' ? ' selected' : '') + '>Toutes les notes</option>'
+      + '<input aria-label="${T("Nom ou n° de commande")}" type="search" id="a-q" placeholder="${T("Nom ou n° de commande…")}" value="' + esc(Q) + '">'
+      + '<select id="a-note"><option value=""' + (NOTE === '' ? ' selected' : '') + '>${T("Toutes les notes")}</option>'
       + [5, 4, 3, 2, 1].map(function(n){
-          return '<option value="' + n + '"' + (String(NOTE) === String(n) ? ' selected' : '') + '>' + n + ' sur 5</option>';
+          return '<option value="' + n + '"' + (String(NOTE) === String(n) ? ' selected' : '') + '>' + n + '${T(" sur 5")}</option>';
         }).join('')
       + '</select>'
-      + '<select id="a-per"><option value=""' + (PER === '' ? ' selected' : '') + '>Toutes les dates</option>'
-      + '<option value="7"' + (PER === '7' ? ' selected' : '') + '>7 derniers jours</option>'
-      + '<option value="30"' + (PER === '30' ? ' selected' : '') + '>30 derniers jours</option>'
-      + '<option value="90"' + (PER === '90' ? ' selected' : '') + '>90 derniers jours</option>'
-      + '<option value="365"' + (PER === '365' ? ' selected' : '') + '>Cette année</option>'
+      + '<select id="a-per"><option value=""' + (PER === '' ? ' selected' : '') + '>${T("Toutes les dates")}</option>'
+      + '<option value="7"' + (PER === '7' ? ' selected' : '') + '>${T("7 derniers jours")}</option>'
+      + '<option value="30"' + (PER === '30' ? ' selected' : '') + '>${T("30 derniers jours")}</option>'
+      + '<option value="90"' + (PER === '90' ? ' selected' : '') + '>${T("90 derniers jours")}</option>'
+      + '<option value="365"' + (PER === '365' ? ' selected' : '') + '>${T("Cette année")}</option>'
       + '</select>'
       + '<span class="droite">'
-      + (c.moyenne != null ? 'moyenne ' + c.moyenne + ' sur 5 · ' : '')
-      + (c.publies || 0) + ' publié' + ((c.publies || 0) > 1 ? 's' : '') + '</span>'
+      + (c.moyenne != null ? '${T("moyenne ")}' + c.moyenne + '${T(" sur 5")} · ' : '')
+      + (c.publies || 0) + ((c.publies || 0) > 1 ? '${T(" publiés")}' : '${T(" publié")}') + '</span>'
       + '</div>';
 
     h += '<div class="carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">' + (ONGLET === 'pending'
-        ? 'Rien à approuver. La file est vide.' : 'Aucun avis ne correspond à ces filtres.') + '</div>';
+        ? '${T("Rien à approuver. La file est vide.")}' : '${T("Aucun avis ne correspond à ces filtres.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>État</th><th>Note</th><th>Produit</th>'
-        + '<th>Client</th><th>Date</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("État")}</th><th>${T("Note")}</th><th>${T("Produit")}</th>'
+        + '<th>${T("Client")}</th><th>${T("Date")}</th></tr></thead><tbody>'
         + rows.map(function(r){
-            return '<tr data-id="' + esc(r.id) + '" title="Ouvrir l’avis">'
+            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir l’avis")}">'
               + '<td>' + pastille(r.statut) + '</td>'
-              + '<td><span class="etoile">' + r.note + ' sur 5</span></td>'
+              + '<td><span class="etoile">' + r.note + '${T(" sur 5")}</span></td>'
               + '<td><span class="num">' + esc(r.produit) + '</span></td>'
-              + '<td>' + esc(r.client) + (r.verifie ? ' <span class="pill bon">achat vérifié</span>' : '') + '</td>'
+              + '<td>' + esc(r.client) + (r.verifie ? ' <span class="pill bon">${T("achat vérifié")}</span>' : '') + '</td>'
               + '<td class="dt">' + esc(r.date) + '</td></tr>';
           }).join('')
         + '</tbody></table>';
@@ -260,16 +264,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function boiteDetail(){
     var r = DETAIL;
     var h = '<div class="voile" id="a-voile"><div class="boite">'
-      + '<h3>' + pastille(r.statut) + ' <span class="etoile">' + r.note + ' sur 5</span> '
+      + '<h3>' + pastille(r.statut) + ' <span class="etoile">' + r.note + '${T(" sur 5")}</span> '
       + esc(r.produit) + '</h3>'
       + '<div class="grille">'
-      + '<div><div class="l">Client</div><div class="v">' + esc(r.client)
-      + (r.verifie ? ' <span class="pill bon">vérifié</span>' : '') + '</div></div>'
+      + '<div><div class="l">${T("Client")}</div><div class="v">' + esc(r.client)
+      + (r.verifie ? ' <span class="pill bon">${T("vérifié")}</span>' : '') + '</div></div>'
       + (r.commande ? '<div><div class="l">Commande</div><div class="v">' + esc(r.commande) + '</div></div>' : '')
-      + (r.taille ? '<div><div class="l">Taille achetée</div><div class="v">' + esc(r.taille) + '</div></div>' : '')
+      + (r.taille ? '<div><div class="l">${T("Taille achetée")}</div><div class="v">' + esc(r.taille) + '</div></div>' : '')
       + '<div><div class="l">Langue</div><div class="v">' + esc(r.langue) + '</div></div>'
-      + '<div><div class="l">Déposé le</div><div class="v">' + esc(r.date) + '</div></div>'
-      + (r.approuveLe ? '<div><div class="l">Approuvé le</div><div class="v">' + esc(r.approuveLe) + '</div></div>' : '')
+      + '<div><div class="l">${T("Déposé le")}</div><div class="v">' + esc(r.date) + '</div></div>'
+      + (r.approuveLe ? '<div><div class="l">${T("Approuvé le")}</div><div class="v">' + esc(r.approuveLe) + '</div></div>' : '')
       + (r.photos ? '<div><div class="l">Photos</div><div class="v">' + r.photos + '</div></div>' : '')
       + '</div>'
       /* ⚠ LES VIGNETTES SONT DES <img>, PAS UN fetch. Une balise image n a pas
@@ -286,7 +290,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                    apostrophe echappee y est avalee par le gabarit). */
                 + '<img src="' + esc(u) + '" alt="" title="Photo ' + (i + 1) + ' de l’avis">'
                 + (r.peutModifier
-                    ? '<button class="phx" data-photo="' + i + '" title="Retirer cette photo de l’avis et du stockage">'
+                    ? '<button class="phx" data-photo="' + i + '" title="${T("Retirer cette photo de l’avis et du stockage")}">'
                       + (PHOTO_ARMEE === i ? '?' : '✕') + '</button>'
                     : '')
                 + '</div>';
@@ -296,23 +300,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="texte">' + esc(r.texte || '(aucun texte)') + '</div>'
       + (r.reponse
           ? '<div class="reponse"><div class="dt" style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
-            + 'letter-spacing:.05em">Votre réponse' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
+            + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
             + esc(r.reponse) + '</div>'
           : '');
     if (REPONDRE) {
-      h += '<div style="margin-top:.6rem"><textarea id="a-reptxt" aria-label="Votre réponse publique à cet avis" '
-        + 'placeholder="Votre réponse sera affichée publiquement sous l’avis.">'
+      /* ⚠ LA PHRASE ENTIERE, PAS LA CLE COURTE DEDANS. Avec la seule cle
+         << Votre réponse >> au debut, ces deux textes sortaient a moitie
+         anglais — le banc du residuel les a dits. */
+      h += '<div style="margin-top:.6rem"><textarea id="a-reptxt" aria-label="${T("Votre réponse publique à cet avis")}" '
+        + 'placeholder="${T("Votre réponse sera affichée publiquement sous l’avis.")}">'
         + esc(r.reponse || '') + '</textarea>'
-        + '<div class="pied-boite"><button id="a-repannuler">Annuler</button>'
-        + '<button class="prim" id="a-repenvoyer">Enregistrer la réponse</button></div></div>';
+        + '<div class="pied-boite"><button id="a-repannuler">${T("Annuler")}</button>'
+        + '<button class="prim" id="a-repenvoyer">${T("Enregistrer la réponse")}</button></div></div>';
     }
     h += '<div class="pied-boite">'
-      + '<button class="danger" id="a-supprimer">' + (SUPPR_ARME ? 'Confirmer la suppression ?' : '<span class="ic">🗑</span> Supprimer') + '</button>'
-      + (!REPONDRE ? '<button id="a-repondre"><span class="ic">💬</span> Répondre</button>' : '')
+      + '<button class="danger" id="a-supprimer">' + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button>'
+      + (!REPONDRE ? '<button id="a-repondre"><span class="ic">💬</span>${T(" Répondre")}</button>' : '')
       + (r.statut !== 'pending'
-          ? '<button id="a-masquer">' + (r.statut === 'hidden' ? '<span class="ic">👁</span> Republier' : '<span class="ic">🙈</span> Masquer') + '</button>'
+          ? '<button id="a-masquer">' + (r.statut === 'hidden' ? '<span class="ic">👁</span>${T(" Republier")}' : '<span class="ic">🙈</span>${T(" Masquer")}') + '</button>'
           : '')
-      + (r.statut === 'pending' ? '<button class="prim" id="a-approuver">✓ Approuver</button>' : '')
+      + (r.statut === 'pending' ? '<button class="prim" id="a-approuver">${T("✓ Approuver")}</button>' : '')
       + '<button id="a-fermer">Fermer</button>'
       + '</div></div></div>';
     return h;
@@ -329,19 +336,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!DETAIL) return;
     if (PHOTO_ARMEE !== i) {
       PHOTO_ARMEE = i; dessiner();
-      dire('Recliquez pour confirmer — la photo quitte l’avis ET le stockage. Le texte reste intact.', 'att');
+      dire('${T("Recliquez pour confirmer — la photo quitte l’avis ET le stockage. Le texte reste intact.")}', 'att');
       return;
     }
     PHOTO_ARMEE = -1;
     var id = DETAIL.id;
-    dire('Retrait…');
+    dire('${T("Retrait…")}');
     appeler('avis:photoRetirer', [id, i]).then(function(r){
-      if (!r.ok) { dessiner(); dire('Échec : ' + expliquer(r), 'err'); return; }
+      if (!r.ok) { dessiner(); dire('${T("Échec : ")}' + expliquer(r), 'err'); return; }
       appeler('avis:lire', [id]).then(function(d){
         if (d && d.ok) { DETAIL = d; }
         dessiner();
-        dire(r.restantes ? ('Photo retirée — ' + r.restantes + ' restante'
-              + (r.restantes > 1 ? 's' : '') + '.') : 'Photo retirée — il n’en reste aucune.', 'bon');
+        /* ⚠ Le singulier et le pluriel, chacun entier. */
+        dire(r.restantes
+          ? ('${T("Photo retirée — ")}' + r.restantes + (r.restantes > 1 ? '${T(" restantes.")}' : '${T(" restante.")}'))
+          : '${T("Photo retirée — il n’en reste aucune.")}', 'bon');
       });
     });
   }
@@ -380,10 +389,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var f = document.getElementById('a-fermer');
     if (f) f.onclick = function(){ DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; dessiner(); };
     var ap = document.getElementById('a-approuver');
-    if (ap) ap.onclick = function(){ geste('avis:approuver', 'Avis approuvé — il est maintenant visible en boutique.'); };
+    if (ap) ap.onclick = function(){ geste('avis:approuver', '${T("Avis approuvé — il est maintenant visible en boutique.")}'); };
     var ma = document.getElementById('a-masquer');
     if (ma) ma.onclick = function(){
-      geste('avis:masquer', DETAIL.statut === 'hidden' ? 'Avis republié.' : 'Avis masqué.');
+      geste('avis:masquer', DETAIL.statut === 'hidden' ? '${T("Avis republié.")}' : '${T("Avis masqué.")}');
     };
     var su = document.getElementById('a-supprimer');
     if (su) su.onclick = function(){
@@ -395,7 +404,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       SUPPR_ARME = false;
-      geste('avis:supprimer', 'Avis supprimé définitivement.');
+      geste('avis:supprimer', '${T("Avis supprimé définitivement.")}');
     };
     /* Une adresse morte devient un cadre neutre plutot qu une icone brisee. */
     var vgs = document.querySelectorAll('.ph img');
@@ -405,7 +414,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!c.querySelector('.phmort')) {
         var m = document.createElement('span');
         m.className = 'phmort'; m.textContent = '⃠';
-        m.title = 'Image introuvable à cette adresse';
+        m.title = '${T("Image introuvable à cette adresse")}';
         c.appendChild(m);
       }
     };
@@ -421,10 +430,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (rv) rv.onclick = function(){
       var t = document.getElementById('a-reptxt');
       var txt = t ? t.value : '';
-      dire('Enregistrement…');
+      dire('${T("Enregistrement…")}');
       appeler('avis:repondre', [DETAIL.id, txt]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Réponse enregistrée.', 'bon');
+        dire('${T("Réponse enregistrée.")}', 'bon');
         REPONDRE = false;
         ouvrirDetail(DETAIL.id);
       });
@@ -445,7 +454,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
 
   function ouvrirDetail(id){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('avis:lire', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire('');
@@ -462,7 +471,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       page: PAGE, taille: TAILLE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Avis indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Avis indisponibles")}', expliquer(r)); return; }
       D = r;
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
@@ -510,12 +519,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
