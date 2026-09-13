@@ -34,6 +34,11 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠⚠ Deux choses ne s'adoucissent pas ici : « Il ne sera plus jamais
+   affiché » (la base ne garde que l'empreinte du mot de passe) et l'AVIS DE LA
+   LOI 25, qui est une obligation et non une note — voir src/langue/liens.js. */
+const T = require('../langue').tr('liens');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -116,15 +121,15 @@ tbody tr:hover td{background:var(--v03)}
 function pageLiens(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Liens d’installation — Administration Sandriza</title>
+<title>${T("Liens d’installation — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.lien}</span><h1>Liens d’installation</h1>
+<div class="tete"><span class="ico">${ICO.lien}</span><h1>${T("Liens d’installation")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets">
-  <button id="o-liens" class="on">Liens</button>
-  <button id="o-journal">Journal des accès</button>
+  <button id="o-liens" class="on">${T("Liens")}</button>
+  <button id="o-journal">${T("Journal des accès")}</button>
 </div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -134,8 +139,8 @@ function pageLiens(ouverture) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
@@ -147,17 +152,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne permet pas de distribuer l’application.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne permet pas de distribuer l’application.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var base = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var base = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     // ⚠ LE DETAIL DU SERVEUR EST RENDU TEL QUEL : << l operation a echoue >> ne
     // dit pas si la base est muette, si le paquet manque ou si le lien n existe
     // plus — et sans cela on cherche au mauvais endroit.
@@ -178,19 +183,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var ETAT = { version: '', paquets: [], liens: [], comptes: [], journal: [],
                conservation: 365, neuf: null, formulaire: (DEPART === 'nouveau') };
 
-  var ETATS = { actif: 'Actif', revoque: 'Révoqué', expire: 'Expiré', epuise: 'Épuisé' };
+  var ETATS = { actif: '${T("Actif")}', revoque: '${T("Révoqué")}', expire: '${T("Expiré")}', epuise: '${T("Épuisé")}' };
   var GENRES = { manuel: 'Manuel', inscription: 'Inscription' };
   var EVENEMENTS = {
-    cree: 'Créé', visite: 'Page ouverte', ouvert: 'Mot de passe accepté',
-    mdp_refuse: 'Mot de passe refusé', etrangle: 'Trop de tentatives',
-    telecharge: 'Téléchargement', revoque: 'Révoqué', expire: 'Expiré automatiquement',
-    refuse: 'Refusé', comptable_ouvert: 'Portail comptable ouvert',
-    comptable_refuse: 'Portail comptable — mot de passe refusé',
-    comptable_classeur: 'Classeur comptable téléchargé',
-    relais_refuse: 'Envoi de courriel refusé'
+    cree: '${T("Créé")}', visite: '${T("Page ouverte")}', ouvert: '${T("Mot de passe accepté")}',
+    mdp_refuse: '${T("Mot de passe refusé")}', etrangle: '${T("Trop de tentatives")}',
+    telecharge: '${T("Téléchargement")}', revoque: '${T("Révoqué")}', expire: '${T("Expiré automatiquement")}',
+    refuse: '${T("Refusé")}', comptable_ouvert: '${T("Portail comptable ouvert")}',
+    comptable_refuse: '${T("Portail comptable — mot de passe refusé")}',
+    comptable_classeur: '${T("Classeur comptable téléchargé")}',
+    relais_refuse: '${T("Envoi de courriel refusé")}'
   };
-  var CANAUX = { telechargement: 'Installation', comptable: 'Comptable',
-                 courriel: 'Courriel' };
+  var CANAUX = { telechargement: '${T("Installation")}', comptable: '${T("Comptable")}',
+                 courriel: '${T("Courriel")}' };
 
   function quand(iso){
     if (!iso) return '—';
@@ -218,8 +223,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // — l API moderne du presse-papiers y est refusee. Mesure sur ce projet.
     var fait = false;
     try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
-    bouton.textContent = fait ? '✓ Copié' : 'Ctrl+C pour copier';
-    if (!motDejaLa) setTimeout(function(){ bouton.textContent = 'Copier'; }, 2500);
+    bouton.textContent = fait ? '${T("✓ Copié")}' : '${T("Ctrl+C pour copier")}';
+    if (!motDejaLa) setTimeout(function(){ bouton.textContent = '${T("Copier")}'; }, 2500);
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -228,18 +233,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dessinerLiens(){
     var h = [];
 
-    h.push('<div class="barreoutils"><button class="prim" id="b-nouveau">+ Nouveau lien</button>'
-      + '<span class="droite"><button id="b-recharger">Recharger</button></span></div>');
+    h.push('<div class="barreoutils"><button class="prim" id="b-nouveau">${T("+ Nouveau lien")}</button>'
+      + '<span class="droite"><button id="b-recharger">${T("Recharger")}</button></span></div>');
 
     if (ETAT.neuf) h.push(carteNeuf());
     if (ETAT.formulaire) h.push(formulaire());
 
-    h.push('<div class="carte"><h2>Liens émis</h2>');
+    h.push('<div class="carte"><h2>${T("Liens émis")}</h2>');
     if (!ETAT.liens.length) {
-      h.push('<div class="vide">Aucun lien n’a encore été émis.</div>');
+      h.push('<div class="vide">${T("Aucun lien n’a encore été émis.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>État</th><th>Pour</th><th>Compte</th>'
-        + '<th>Usages</th><th>Échéance</th><th>Créé</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("État")}</th><th>${T("Pour")}</th><th>${T("Compte")}</th>'
+        + '<th>${T("Usages")}</th><th>${T("Échéance")}</th><th>${T("Créé")}</th><th></th></tr></thead><tbody>');
       ETAT.liens.forEach(function(l){
         var u = (l.maxUsages > 0) ? (l.usages + ' / ' + l.maxUsages) : (l.usages + ' / ∞');
         h.push('<tr>'
@@ -254,21 +259,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-copier="' + esc(l.url) + '"><span class="ic">📋</span></button> '
             + (l.etat === 'actif'
-                ? '<button class="mini" data-renvoyer="' + esc(l.id) + '"><span class="ic">✉</span> Renvoyer</button> '
+                ? '<button class="mini" data-renvoyer="' + esc(l.id) + '"><span class="ic">✉</span> ${T("Renvoyer")}</button> '
                   + '<button class="mini dgr" data-revoquer="' + esc(l.id) + '">'
-                  + (ARME === l.id ? 'Confirmer ?' : 'Révoquer') + '</button> '
+                  + (ARME === l.id ? '${T("Confirmer ?")}' : '${T("Révoquer")}') + '</button> '
                 /* ⚠ SUPPRIMER N EST OFFERT QUE SUR UN LIEN PERIME (#30). Sur un
                    lien ACTIF, le retirer le rendrait invisible ici tout en le
                    laissant fonctionner pour qui a l adresse : une porte ouverte
                    qu on ne voit plus. Il faut le revoquer d abord. */
                 : '<button class="mini dgr" data-supprimer="' + esc(l.id) + '" '
-                  + 'title="Retirer de la liste — le journal de ses accès est conservé">'
-                  + (ARME === 'sup:' + l.id ? 'Confirmer ?' : '<span class="ic">🗑</span>') + '</button> ')
+                  + 'title="${T("Retirer de la liste — le journal de ses accès est conservé")}">'
+                  + (ARME === 'sup:' + l.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>') + '</button> ')
             + '<button class="mini" data-journal="' + esc(l.id) + '">Journal</button>'
           + '</td></tr>');
         if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
         if (l.revoqueLe) {
-          h.push('<tr><td></td><td colspan="6" class="dt">Révoqué le ' + quand(l.revoqueLe)
+          h.push('<tr><td></td><td colspan="6" class="dt">${T("Révoqué le")} ' + quand(l.revoqueLe)
             + ' par ' + esc(l.revoquePar || '?')
             + (l.motif ? ' — ' + esc(l.motif) : '') + '</td></tr>');
         }
@@ -295,30 +300,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var inscription = (l.genre === 'inscription');
     return '<tr><td></td><td colspan="6">'
       + '<div class="carte" style="margin:.3rem 0">'
-      + '<h2>Renvoyer ce lien</h2>'
-      + '<label for="rv-a">Adresse</label>'
+      + '<h2>${T("Renvoyer ce lien")}</h2>'
+      + '<label for="rv-a">${T("Adresse")}</label>'
       + '<input id="rv-a" type="email" value="' + esc(RENVOI.a || l.destinataire || '') + '" '
-      + 'placeholder="personne@exemple.com">'
+      + 'placeholder="${T("personne@exemple.com")}">'
       + (inscription
           ? ''
-          : '<label style="margin-top:.5rem">Ce que contient le courriel</label>'
+          : '<label style="margin-top:.5rem">${T("Ce que contient le courriel")}</label>'
             + '<label style="margin:.2rem 0 0;font-size:.78rem;color:var(--tx)">'
             + '<input type="radio" name="rv-quoi" value="lien" style="width:auto;margin-right:.4rem"'
-            + (RENVOI.quoi === 'lien' ? ' checked' : '') + '>Le lien seul</label>'
+            + (RENVOI.quoi === 'lien' ? ' checked' : '') + '>${T("Le lien seul")}</label>'
             + '<label style="margin:.15rem 0 0;font-size:.78rem;color:var(--tx)">'
             + '<input type="radio" name="rv-quoi" value="mdp" style="width:auto;margin-right:.4rem"'
-            + (RENVOI.quoi === 'lien' ? '' : ' checked') + '>Le lien <strong>et un nouveau mot de passe</strong></label>'
+            + (RENVOI.quoi === 'lien' ? '' : ' checked') + '>${T("Le lien ")}<strong>${T("et un nouveau mot de passe")}</strong></label>'
             + '')
       + '<div class="barreoutils" style="margin-top:.5rem">'
-      + '<button class="prim" id="rv-envoyer">Envoyer</button>'
-      + '<span class="droite"><button id="rv-annuler">Annuler</button></span></div>'
+      + '<button class="prim" id="rv-envoyer">${T("Envoyer")}</button>'
+      + '<span class="droite"><button id="rv-annuler">${T("Annuler")}</button></span></div>'
       + '</div></td></tr>';
   }
 
   function renvoyer(l){
     var a = document.getElementById('rv-a');
     var b = document.getElementById('rv-envoyer');
-    if (!a || !a.value.trim()) { dire('Indiquez une adresse de courriel.', 'err'); return; }
+    if (!a || !a.value.trim()) { dire('${T("Indiquez une adresse de courriel.")}', 'err'); return; }
     var adresse = a.value.trim();
     var coche = corps.querySelector('input[name="rv-quoi"]:checked');
     var avecMdp = !!(coche && coche.value === 'mdp');
@@ -328,7 +333,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       ? appeler('liens:motdepasse', [l.id])
       : Promise.resolve({ ok: true, mdp: '' });
 
-    dire(avecMdp ? 'Nouveau mot de passe…' : 'Envoi du courriel…');
+    dire(avecMdp ? '${T("Nouveau mot de passe…")}' : '${T("Envoi du courriel…")}');
     neuf.then(function(r){
       if (!r.ok) { b.disabled = false; dire(expliquer(r), 'err'); return; }
       return appeler('liens:courriel', [{
@@ -339,8 +344,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (!e.ok) { dire(expliquer(e), 'err'); return; }
         RENVOI = null;
         dire(avecMdp
-          ? ('Courriel envoyé à ' + adresse + ' avec un nouveau mot de passe — l’ancien ne fonctionne plus.')
-          : ('Courriel envoyé à ' + adresse + '.'), 'bon');
+          ? ('${T("Courriel envoyé à ")}' + adresse + '${T(" avec un nouveau mot de passe — l’ancien ne fonctionne plus.")}')
+          : ('${T("Courriel envoyé à ")}' + adresse + '.'), 'bon');
         charger(false);
       });
     });
@@ -348,36 +353,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function carteNeuf(){
     var n = ETAT.neuf;
-    return '<div class="carte neuf"><h2>Lien fabriqué</h2>'
-      + '<label for="n-url">Adresse à remettre</label>'
+    return '<div class="carte neuf"><h2>${T("Lien fabriqué")}</h2>'
+      + '<label for="n-url">${T("Adresse à remettre")}</label>'
       + '<input id="n-url" type="text" readonly value="' + esc(n.url) + '">'
-      + '<div class="barreoutils" style="margin-top:.4rem"><button id="n-copier"><span class="ic">📋</span> Copier</button>'
+      + '<div class="barreoutils" style="margin-top:.4rem"><button id="n-copier"><span class="ic">📋</span> ${T("Copier")}</button>'
       + '<span class="aide">' + (n.maxUsages > 0
-            ? (n.maxUsages === 1 ? 'Utilisable une seule fois' : ('Utilisable ' + n.maxUsages + ' fois'))
-            : 'Utilisations illimitées')
-        + ' · échéance le ' + jour(n.expire) + '</span></div>'
+            ? (n.maxUsages === 1 ? '${T("Utilisable une seule fois")}' : ('${T("Utilisable ")}' + n.maxUsages + '${T(" fois")}'))
+            : '${T("Utilisations illimitées")}')
+        + '${T(" · échéance le ")}' + jour(n.expire) + '</span></div>'
       + (n.mdpCompte
           ? ''
-          : '<label style="margin-top:.6rem">Mot de passe d’ouverture</label>'
+          : '<label style="margin-top:.6rem">${T("Mot de passe d’ouverture")}</label>'
             + '<div class="gros" id="n-mdp-vue">' + esc(n.mdp) + '</div>'
             /* Meme cas que comptable.js : hors ecran, mais atteignable au
                clavier. On le retire du lecteur d ecran ET de la tabulation. */
             + '<input id="n-mdp" type="text" readonly aria-hidden="true" tabindex="-1" value="' + esc(n.mdp) + '" style="position:absolute;left:-9999px">'
             + '<div class="barreoutils" style="margin-top:.4rem">'
-            + '<button id="n-copier-mdp"><span class="ic">📋</span> Copier le mot de passe</button></div>'
-            + '<p class="aide"><strong>Il ne sera plus jamais affiché</strong> — la base n’en garde '
-            + 'que l’empreinte. Notez-le ou envoyez-le maintenant, et de préférence par un autre '
-            + 'canal que le lien.</p>')
+            + '<button id="n-copier-mdp"><span class="ic">📋</span> ${T("Copier le mot de passe")}</button></div>'
+            + '<p class="aide"><strong>${T("Il ne sera plus jamais affiché")}</strong>${T(" — la base n’en garde ")}'
+            + '${T("que l’empreinte. Notez-le ou envoyez-le maintenant, et de préférence par un autre ")}'
+            + '${T("canal que le lien.")}</p>')
       + '<div class="duo" style="margin-top:.6rem">'
-      + '<div><label for="n-a">Envoyer le lien par courriel à</label>'
-      + '<input id="n-a" type="email" value="' + esc(n.destinataire || '') + '" placeholder="personne@exemple.com"></div>'
+      + '<div><label for="n-a">${T("Envoyer le lien par courriel à")}</label>'
+      + '<input id="n-a" type="email" value="' + esc(n.destinataire || '') + '" placeholder="${T("personne@exemple.com")}"></div>'
       + '</div>'
       + (n.mdpCompte ? ''
           : '<label style="margin-top:.5rem"><input type="checkbox" id="n-inclure" style="width:auto;margin-right:.4rem">'
-            + 'Inclure le mot de passe dans ce courriel</label>'
+            + '${T("Inclure le mot de passe dans ce courriel")}</label>'
             + '')
       + '<div class="barreoutils" style="margin-top:.5rem">'
-      + '<button class="prim" id="n-envoyer">Envoyer</button>'
+      + '<button class="prim" id="n-envoyer">${T("Envoyer")}</button>'
       + '<span class="droite"><button id="n-fermer">Fermer</button></span></div>'
       + '</div>';
   }
@@ -386,30 +391,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var opts = ETAT.comptes.map(function(c){
       return '<option value="' + esc(c.id) + '">' + esc(c.nom) + (c.courriel ? ' — ' + esc(c.courriel) : '') + '</option>';
     }).join('');
-    return '<div class="carte"><h2>Nouveau lien</h2>'
+    return '<div class="carte"><h2>${T("Nouveau lien")}</h2>'
       + '<div class="duo">'
-      + '<div><label for="f-etiquette">Pour qui / pourquoi</label>'
-      + '<input id="f-etiquette" type="text" placeholder="ex. Poste de la boutique"></div>'
-      + '<div><label for="f-courriel">Courriel du destinataire</label>'
-      + '<input id="f-courriel" type="email" placeholder="facultatif"></div>'
+      + '<div><label for="f-etiquette">${T("Pour qui / pourquoi")}</label>'
+      + '<input id="f-etiquette" type="text" placeholder="${T("ex. Poste de la boutique")}"></div>'
+      + '<div><label for="f-courriel">${T("Courriel du destinataire")}</label>'
+      + '<input id="f-courriel" type="email" placeholder="${T("facultatif")}"></div>'
       + '</div>'
       + '<div class="duo">'
-      + '<div><label for="f-compte">Rattacher à un compte</label>'
-      + '<select id="f-compte"><option value="">Aucun</option>' + opts + '</select></div>'
-      + '<div><label for="f-duree">Validité</label><select id="f-duree">'
-      + '<option value="1">1 heure</option><option value="4">4 heures</option>'
-      + '<option value="24" selected>24 heures</option><option value="72">3 jours</option>'
-      + '<option value="168">7 jours</option><option value="720">30 jours</option></select></div>'
-      + '<div><label for="f-usages">Utilisations</label><select id="f-usages">'
-      + '<option value="1" selected>Une seule fois</option><option value="2">2 fois</option>'
-      + '<option value="3">3 fois</option><option value="5">5 fois</option>'
-      + '<option value="0">Illimitées</option></select></div>'
+      + '<div><label for="f-compte">${T("Rattacher à un compte")}</label>'
+      + '<select id="f-compte"><option value="">${T("Aucun")}</option>' + opts + '</select></div>'
+      + '<div><label for="f-duree">${T("Validité")}</label><select id="f-duree">'
+      + '<option value="1">${T("1 heure")}</option><option value="4">${T("4 heures")}</option>'
+      + '<option value="24" selected>${T("24 heures")}</option><option value="72">${T("3 jours")}</option>'
+      + '<option value="168">${T("7 jours")}</option><option value="720">${T("30 jours")}</option></select></div>'
+      + '<div><label for="f-usages">${T("Utilisations")}</label><select id="f-usages">'
+      + '<option value="1" selected>${T("Une seule fois")}</option><option value="2">${T("2 fois")}</option>'
+      + '<option value="3">${T("3 fois")}</option><option value="5">${T("5 fois")}</option>'
+      + '<option value="0">${T("Illimitées")}</option></select></div>'
       + '</div>'
-      + '<p class="aide">Un mot de passe d’ouverture est engendré au hasard&nbsp;: il ne sera '
-      + 'affiché qu’une seule fois, juste après la création.</p>'
+      + '<p class="aide">${T("Un mot de passe d’ouverture est engendré au hasard&nbsp;: il ne sera ")}'
+      + '${T("affiché qu’une seule fois, juste après la création.")}</p>'
       + '<div class="barreoutils" style="margin-top:.5rem">'
-      + '<button class="prim" id="f-creer">Fabriquer</button>'
-      + '<span class="droite"><button id="f-annuler">Annuler</button></span></div>'
+      + '<button class="prim" id="f-creer">${T("Fabriquer")}</button>'
+      + '<span class="droite"><button id="f-annuler">${T("Annuler")}</button></span></div>'
       + '</div>';
   }
 
@@ -420,7 +425,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var BR_CHAMPS = ['f-etiquette', 'f-courriel', 'f-compte', 'f-duree', 'f-usages'];
   szBrouillonBrancher({
     portee: 'lien-installation',
-    libelle: 'Un lien',
+    libelle: '${T("Un lien")}',
     ttlMin: 720,
     cle: function(){ return '__new__'; },
     actif: function(){ return !!(ETAT && ETAT.formulaire); },
@@ -471,7 +476,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         var fait = false;
         try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
         z.remove();
-        dire(fait ? 'Adresse copiée.' : 'Copie refusée par le système.', fait ? 'bon' : 'err');
+        dire(fait ? '${T("Adresse copiée.")}' : '${T("Copie refusée par le système.")}', fait ? 'bon' : 'err');
       };
     });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-renvoyer]'), function(b){
@@ -521,7 +526,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var u = document.getElementById('f-usages');
     var b = document.getElementById('f-creer');
     b.disabled = true;
-    dire('Fabrication du lien…');
+    dire('${T("Fabrication du lien…")}');
     appeler('liens:creer', [{
       etiquette: e ? e.value.trim() : '',
       destinataire: c ? c.value.trim() : '',
@@ -535,7 +540,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
                     maxUsages: r.maxUsages, destinataire: c ? c.value.trim() : '' };
       szBrouillonJeter();
       ETAT.formulaire = false;
-      dire('Lien fabriqué.', 'bon');
+      dire('${T("Lien fabriqué.")}', 'bon');
       charger(false);
     });
   }
@@ -544,15 +549,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var a = document.getElementById('n-a');
     var inc = document.getElementById('n-inclure');
     var b = document.getElementById('n-envoyer');
-    if (!a || !a.value.trim()) { dire('Indiquez une adresse de courriel.', 'err'); return; }
+    if (!a || !a.value.trim()) { dire('${T("Indiquez une adresse de courriel.")}', 'err'); return; }
     b.disabled = true;
-    dire('Envoi du courriel…');
+    dire('${T("Envoi du courriel…")}');
     appeler('liens:courriel', [{
       destinataire: a.value.trim(), url: ETAT.neuf.url, mdp: ETAT.neuf.mdp,
       inclureMdp: !!(inc && inc.checked), echeance: jour(ETAT.neuf.expire)
     }]).then(function(r){
       b.disabled = false;
-      dire(r.ok ? ('Courriel envoyé à ' + a.value.trim() + '.') : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? ('${T("Courriel envoyé à ")}' + a.value.trim() + '.') : expliquer(r), r.ok ? 'bon' : 'err');
     });
   }
 
@@ -566,14 +571,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (ARME !== id) {
       ARME = id;
       dessinerLiens();
-      dire('Cliquez « Confirmer ? » pour révoquer — le lien cessera aussitôt de fonctionner, même pour quelqu’un qui l’a déjà ouvert.', 'att');
+      dire('${T("Cliquez « Confirmer ? » pour révoquer — le lien cessera aussitôt de fonctionner, même pour quelqu’un qui l’a déjà ouvert.")}', 'att');
       return;
     }
     ARME = '';
-    dire('Révocation…');
+    dire('${T("Révocation…")}');
     appeler('liens:revoquer', [id, '']).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Lien révoqué. La révocation est inscrite au journal.', 'bon');
+      dire('${T("Lien révoqué. La révocation est inscrite au journal.")}', 'bon');
       charger(false);
     });
   }
@@ -587,15 +592,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (ARME !== 'sup:' + id) {
       ARME = 'sup:' + id;
       dessinerLiens();
-      dire('Cliquez « Confirmer ? » pour retirer ce lien de la liste. '
-        + 'Son journal d’accès est conservé.', 'att');
+      dire('${T("Cliquez « Confirmer ? » pour retirer ce lien de la liste.")} '
+        + '${T("Son journal d’accès est conservé.")}', 'att');
       return;
     }
     ARME = '';
-    dire('Suppression…');
+    dire('${T("Suppression…")}');
     appeler('liens:supprimer', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); dessinerLiens(); return; }
-      dire('Lien retiré de la liste — son journal d’accès reste consultable.', 'bon');
+      dire('${T("Lien retiré de la liste — son journal d’accès reste consultable.")}', 'bon');
       charger(false);
     });
   }
@@ -606,21 +611,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dessinerJournal(filtre, lien){
     var h = [];
     h.push('<div class="barreoutils">'
-      + '<label style="margin:0" for="j-canal">Canal</label>'
+      + '<label style="margin:0" for="j-canal">${T("Canal")}</label>'
       + '<select id="j-canal" style="width:auto">'
-      + '<option value="">Tous</option>'
-      + '<option value="telechargement"' + (filtre === 'telechargement' ? ' selected' : '') + '>Installation</option>'
-      + '<option value="comptable"' + (filtre === 'comptable' ? ' selected' : '') + '>Comptable</option>'
-      + '<option value="courriel"' + (filtre === 'courriel' ? ' selected' : '') + '>Courriel</option>'
+      + '<option value="">${T("Tous")}</option>'
+      + '<option value="telechargement"' + (filtre === 'telechargement' ? ' selected' : '') + '>${T("Installation")}</option>'
+      + '<option value="comptable"' + (filtre === 'comptable' ? ' selected' : '') + '>${T("Comptable")}</option>'
+      + '<option value="courriel"' + (filtre === 'courriel' ? ' selected' : '') + '>${T("Courriel")}</option>'
       + '</select>'
-      + (lien ? '<span class="pill g">Lien ' + esc(lien.slice(0, 8)) + '…</span>'
-                + '<button class="mini" id="j-tout">Tout le journal</button>' : '')
-      + '<span class="droite"><button id="j-vers-journaux" title="Voir ce journal dans le module Journaux"><span class="ic">🔎</span> Dans Journaux</button>'
-      + '<button id="j-recharger">Recharger</button></span></div>');
+      + (lien ? '<span class="pill g">${T("Lien ")}' + esc(lien.slice(0, 8)) + '…</span>'
+                + '<button class="mini" id="j-tout">${T("Tout le journal")}</button>' : '')
+      + '<span class="droite"><button id="j-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}"><span class="ic">🔎</span> ${T("Dans Journaux")}</button>'
+      + '<button id="j-recharger">${T("Recharger")}</button></span></div>');
 
-    h.push('<div class="carte"><h2>Accès aux liens</h2>');
+    h.push('<div class="carte"><h2>${T("Accès aux liens")}</h2>');
     if (!ETAT.journal.length) {
-      h.push('<div class="vide">Aucun événement pour ce filtre.</div>');
+      h.push('<div class="vide">${T("Aucun événement pour ce filtre.")}</div>');
     } else {
       /* ── PAGINATION AUTO (#30) ────────────────────────────────────────────
          Le journal deversait ses 500 evenements d un coup : on defilait pour
@@ -631,8 +636,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var pages = Math.max(1, Math.ceil(tot / JPARPAGE));
       if (JPAGE >= pages) JPAGE = pages - 1;
       var vue = ETAT.journal.slice(JPAGE * JPARPAGE, JPAGE * JPARPAGE + JPARPAGE);
-      h.push('<div class="liste"><table><thead><tr><th>Quand</th><th>Canal</th><th>Événement</th>'
-        + '<th>Adresse IP</th><th>Lien</th><th>Détail</th></tr></thead><tbody>');
+      h.push('<div class="liste"><table><thead><tr><th>${T("Quand")}</th><th>${T("Canal")}</th><th>${T("Événement")}</th>'
+        + '<th>${T("Adresse IP")}</th><th>${T("Lien")}</th><th>${T("Détail")}</th></tr></thead><tbody>');
       vue.forEach(function(e){
         h.push('<tr>'
           + '<td class="dt" style="white-space:nowrap">' + quand(e.au) + '</td>'
@@ -646,18 +651,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h.push('</tbody></table></div>');
       if (pages > 1) {
         h.push('<div class="pagi"><button class="mini" id="j-prec"' + (JPAGE <= 0 ? ' disabled' : '')
-          + '>‹ Précédent</button><span>Page ' + (JPAGE + 1) + ' sur ' + pages
-          + ' — ' + tot + ' événement' + (tot > 1 ? 's' : '') + '</span>'
+          + '>${T("‹ Précédent")}</button><span>${T("Page")} ' + (JPAGE + 1) + ' sur ' + pages
+          + ' — ' + tot + '${T(" événement")}' + (tot > 1 ? 's' : '') + '</span>'
           + '<button class="mini" id="j-suiv"' + (JPAGE >= pages - 1 ? ' disabled' : '')
-          + '>Suivant ›</button></div>');
+          + '>${T("Suivant ›")}</button></div>');
       }
     }
     h.push('</div>');
 
-    h.push('<div class="franc"><b>Renseignements personnels.</b> Les adresses IP consignées ici '
-      + 'sont conservées ' + ETAT.conservation + ' jours à des fins de sécurité et de traçabilité '
-      + 'des accès. Les personnes en sont averties sur la page du lien, avant tout '
-      + 'téléchargement, comme l’exige la Loi 25.</div>');
+    h.push('<div class="franc"><b>${T("Renseignements personnels.")}</b>${T(" Les adresses IP consignées ici")} '
+      + '${T("sont conservées")} ' + ETAT.conservation + ' ${T("jours à des fins de sécurité et de traçabilité")} '
+      + '${T("des accès. Les personnes en sont averties sur la page du lien, avant tout")} '
+      + '${T("téléchargement, comme l’exige la Loi 25.")}</div>');
 
     corps.innerHTML = h.join('');
     var jc = document.getElementById('j-canal');
@@ -681,7 +686,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function chargerJournal(canal, lien){
-    dire('Lecture du journal…');
+    dire('${T("Lecture du journal…")}');
     appeler('liens:journal', [{ canal: canal || '', lien: lien || '' }]).then(function(r){
       if (!r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
@@ -714,14 +719,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   document.getElementById('o-journal').onclick = function(){
     if (P && P.ouvrirJournaux) {
       P.ouvrirJournaux('comptable');
-      dire('Le journal des accès est dans la fenêtre Journaux.', 'bon');
+      dire('${T("Le journal des accès est dans la fenêtre Journaux.")}', 'bon');
       return;
     }
     VUE = 'journal'; marquerOnglets(); chargerJournal('', '');
   };
 
   function charger(dire_le){
-    if (dire_le) dire('Lecture…');
+    if (dire_le) dire('${T("Lecture…")}');
     Promise.all([
       appeler('liens:liste'),
       appeler('liens:comptes'),
@@ -737,7 +742,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       ETAT.comptes = (c && c.ok) ? (c.comptes || []) : [];
       if (p && p.ok) { ETAT.version = p.version || ''; ETAT.paquets = p.paquets || []; }
       var actifs = ETAT.liens.filter(function(x){ return x.etat === 'actif'; }).length;
-      sous.textContent = (ETAT.version ? ('Version publiée : ' + ETAT.version + ' · ') : '')
+      sous.textContent = (ETAT.version ? ('${T("Version publiée :")} ' + ETAT.version + ' · ') : '')
         + actifs + ' lien' + (actifs > 1 ? 's' : '') + ' actif' + (actifs > 1 ? 's' : '');
       dessinerLiens();
       if (dire_le) dire('');

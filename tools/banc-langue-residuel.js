@@ -172,6 +172,11 @@ const PAS_DU_TEXTE = [
      phrase francaise n en porte pas. Un banc qui accuse a tort finit par ne plus
      etre lu, et c est le plus cher des defauts pour un banc. */
   /^[\w.#[][^,]*(?:,\s*[.#[][^,]*)+$/,         // une liste de selecteurs
+  /* ⚠ UN SELECTEUR SEUL NE COMMENCE PAS FORCEMENT PAR UN POINT NON PLUS. Le
+     banc reclamait la traduction de `input[name="rv-quoi"]:checked` (liens) :
+     une balise, un attribut entre crochets, et une pseudo-classe. Une phrase
+     francaise ne porte pas de crochets colles a un nom. */
+  /^[A-Za-z][\w-]*\[[^\]]*\](?::[\w-]+)*$/,    // balise[attribut]:pseudo
   /^[a-z-]+="[^"]*"$/i,                        // un attribut nu
   /^https?:\/\//i,                             // une adresse
   /^[\w-]+\[[^\]]*\]$/,                        // balise[attribut]
