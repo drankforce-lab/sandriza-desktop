@@ -18,6 +18,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un destinataire, une
+   reference ni le detail rendu par le service (voir src/langue/journal.js). */
+const T = require('../langue').tr('journal');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -78,11 +83,11 @@ tbody tr:hover td{background:var(--v04)}
 /** Page complète de la fenêtre native « Journal d'envoi ». */
 function pageJournal() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Journal d’envoi — Administration Sandriza</title>
+<title>${T("Journal d’envoi — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.journaux}</span><h1>Journal d’envoi</h1>
+<div class="tete"><span class="ico">${ICO.journaux}</span><h1>${T("Journal d’envoi")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -106,17 +111,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à l’infolettre.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à l’infolettre.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -137,40 +142,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtres();
-    if (sous) sous.textContent = (D.lignes || []).length + ' derniers envois';
+    if (sous) sous.textContent = (D.lignes || []).length + '${T(" derniers envois")}';
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Envois enregistrés</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Envois enregistrés")}</div><div class="val">'
       + (D.total || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">Partis</div><div class="val bon">'
       + (D.envoyes || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Échecs</div><div class="val err">'
+      + '<div class="tuile"><div class="lbl">${T("Échecs")}</div><div class="val err">'
       + (D.echecs || 0) + '</div></div>'
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input aria-label="Adresse ou campagne" type="search" id="jo-q" placeholder="Adresse ou campagne…" value="' + esc(Q) + '">'
-      + '<button class="mini' + (ECHECS ? ' actif' : '') + '" id="jo-echecs">Échecs seulement</button>'
+      + '<input aria-label="${T("Adresse ou campagne")}" type="search" id="jo-q" placeholder="${T("Adresse ou campagne…")}" value="' + esc(Q) + '">'
+      + '<button class="mini' + (ECHECS ? ' actif' : '') + '" id="jo-echecs">${T("Échecs seulement")}</button>'
       + '<div class="droite">'
       + (D.peutModifier && (D.total || 0)
-          ? '<button class="mini danger" id="jo-vider">' + (ARME ? 'Confirmer ?' : 'Effacer le journal') + '</button>' : '')
+          ? '<button class="mini danger" id="jo-vider">' + (ARME ? '${T("Confirmer ?")}' : '${T("Effacer le journal")}') + '</button>' : '')
       + '<span>' + rows.length + ' ligne' + (rows.length > 1 ? 's' : '') + '</span></div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q || ECHECS ? 'Rien ne correspond.' : 'Aucun envoi enregistré.') + '</div>';
+      h += '<div class="vide">' + (Q || ECHECS ? '${T("Rien ne correspond.")}' : '${T("Aucun envoi enregistré.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>Date</th><th>Genre</th><th>Référence</th>'
-        + '<th>Destinataire</th><th>Résultat</th><th>Détail</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Genre")}</th><th>${T("Référence")}</th>'
+        + '<th>${T("Destinataire")}</th><th>${T("Résultat")}</th><th>${T("Détail")}</th></tr></thead><tbody>'
         + rows.map(function(l){
             return '<tr><td class="dt" style="white-space:nowrap">' + esc(l.date) + '</td>'
               + '<td><span class="pill neutre">' + esc(l.genre) + '</span></td>'
               + '<td>' + esc(l.reference || '—') + '</td>'
               + '<td>' + esc(l.courriel) + '</td>'
               + '<td><span class="pill ' + (l.envoye ? 'bon' : 'err') + '">'
-              + (l.envoye ? 'Parti' : 'Échec') + '</span>'
+              + (l.envoye ? 'Parti' : '${T("Échec")}') + '</span>'
               + (l.test ? ' <span class="pill att">test</span>' : '') + '</td>'
               /* Le detail porte l identifiant Resend (preuve d envoi) OU le
                  message d erreur : c est ce qui permet de repondre a
@@ -191,14 +196,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (bv) bv.onclick = function(){
       if (!ARME) {
         ARME = true; dessiner();
-        dire('Cliquez « Confirmer ? » — le journal est effacé, et avec lui la preuve '
-          + 'de ce qui est parti. Les envois eux-mêmes ne sont pas annulés.', 'att');
+        /* Une phrase ENTIERE dans un seul litteral. */
+        dire('${T("Cliquez « Confirmer ? » — le journal est effacé, et avec lui la preuve de ce qui est parti. Les envois eux-mêmes ne sont pas annulés.")}', 'att');
         return;
       }
       ARME = false;
       appeler('journal:vider', []).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(r.efface + ' entrée' + (r.efface > 1 ? 's effacées' : ' effacée') + '.', 'bon');
+        /* Deux formes ENTIERES : un fragment recolle ne se traduit pas. */
+        dire(r.efface + (r.efface > 1 ? '${T(" entrées effacées.")}' : '${T(" entrée effacée.")}'), 'bon');
         charger();
       });
     };
@@ -228,7 +234,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function charger(){
     appeler('journal:liste', []).then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="vide"><strong>Journal indisponible</strong>'
+        corps.innerHTML = '<div class="vide"><strong>${T("Journal indisponible")}</strong>'
           + '<div style="margin-top:.4rem">' + esc(expliquer(r)) + '</div></div>';
         return;
       }
@@ -260,12 +266,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

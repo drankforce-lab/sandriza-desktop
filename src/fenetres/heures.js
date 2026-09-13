@@ -18,6 +18,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d un jour, qui
+   vient du coeur (voir src/langue/heures.js). */
+const T = require('../langue').tr('heures');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -67,13 +72,13 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 
 function pageHeures() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Heures d’ouverture — Administration Sandriza</title>
+<title>${T("Heures d’ouverture — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.clock}</span><h1>Heures d’ouverture</h1>
-  <span class="sous">Heure de l’Est — Montréal / Québec</span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="tete"><span class="ico">${ICO.clock}</span><h1>${T("Heures d’ouverture")}</h1>
+  <span class="sous">${T("Heure de l’Est — Montréal / Québec")}</span></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-save" disabled>Enregistrer</button></div>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -96,12 +101,12 @@ function pageHeures() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -109,26 +114,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var bsave = document.getElementById('b-save');
   var CFG = null, RO = false;
-  var JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+  var JOURS = ['${T("Lundi")}','${T("Mardi")}','${T("Mercredi")}','${T("Jeudi")}','${T("Vendredi")}','${T("Samedi")}','${T("Dimanche")}'];
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : les heures ne peuvent pas être modifiées.',
-    indisponible:       'La configuration n’est pas prête dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : les heures ne peuvent pas être modifiées.")}',
+    indisponible:       '${T("La configuration n’est pas prête dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -143,14 +148,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     var days = (CFG && CFG.days) || [];
     var h = [];
-    if (RO) { h.push('<div class="ro">Lecture seule : vous pouvez consulter les heures, pas les modifier.</div>'); }
+    if (RO) { h.push('<div class="ro">${T("Lecture seule : vous pouvez consulter les heures, pas les modifier.")}</div>'); }
     h.push('<div class="carte">');
-    h.push('<div class="chef"><div><strong>Afficher les heures dans le pied de page</strong>'
-      + '<p>Statut « ouvert / fermé » calculé en temps réel à l’heure de l’Est.</p></div>'
+    h.push('<div class="chef"><div><strong>${T("Afficher les heures dans le pied de page")}</strong>'
+      + '<p>${T("Statut « ouvert / fermé » calculé en temps réel à l’heure de l’Est.")}</p></div>'
       + '<label class="bascule"><input type="checkbox" id="h-on"' + (CFG && CFG.enabled ? ' checked' : '')
       + (RO ? ' disabled' : '') + '> Afficher</label></div>');
-    h.push('<table><thead><tr><th>Jour</th><th>Ouverture</th><th>Fermeture</th>'
-      + '<th class="c">Fermé ce jour</th></tr></thead><tbody>');
+    h.push('<table><thead><tr><th>${T("Jour")}</th><th>${T("Ouverture")}</th><th>${T("Fermeture")}</th>'
+      + '<th class="c">${T("Fermé ce jour")}</th></tr></thead><tbody>');
     JOURS.forEach(function(nom, i){
       var d = days[i] || {};
       var fer = !!d.closed, dis = (RO || fer) ? ' disabled' : '';
@@ -162,11 +167,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            et une fois << heure >> ou << case a cocher >>, sans jamais dire
            lequel des sept jours on modifie. Le nom se compose ligne + colonne. */
         + '<td><input type="time" id="h-o' + i + '" value="' + esc(d.open || '') + '"'
-        + ' aria-label="' + esc('Heure d’ouverture — ' + nom) + '"' + dis + '></td>'
+        + ' aria-label="' + esc('${T("Heure d’ouverture — ")}' + nom) + '"' + dis + '></td>'
         + '<td><input type="time" id="h-c' + i + '" value="' + esc(d.close || '') + '"'
-        + ' aria-label="' + esc('Heure de fermeture — ' + nom) + '"' + dis + '></td>'
+        + ' aria-label="' + esc('${T("Heure de fermeture — ")}' + nom) + '"' + dis + '></td>'
         + '<td class="c"><input type="checkbox" id="h-x' + i + '"'
-        + ' aria-label="' + esc('Fermé le ' + nom) + '"' + (fer ? ' checked' : '')
+        + ' aria-label="' + esc('${T("Fermé le ")}' + nom) + '"' + (fer ? ' checked' : '')
         + (RO ? ' disabled' : '') + '></td>'
         + '</tr>');
     });
@@ -199,17 +204,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function enregistrer(){
     if (RO) return;
     bsave.disabled = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('config:heures:ecrire', [lire()]).then(function(r){
       bsave.disabled = false;
-      if (r && r.ok) { CFG = r.cfg || CFG; dire('Heures enregistrées.', 'bon'); }
+      if (r && r.ok) { CFG = r.cfg || CFG; dire('${T("Heures enregistrées.")}', 'bon'); }
       else { dire(expliquer(r), 'err'); }
     });
   }
   bsave.onclick = enregistrer;
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:heures:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

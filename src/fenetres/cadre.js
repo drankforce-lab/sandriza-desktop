@@ -57,6 +57,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠ On ne traduit QUE ce qui se lit — jamais les mesures, ni les
+   intitules du menu, qui viennent de l application (voir src/langue/cadre.js). */
+const T = require('../langue').tr('cadre');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -125,24 +130,18 @@ html.jour .tete{background:linear-gradient(180deg,#f3f1ec,#e9e6df)}
 
 function pageCadre() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Cadre de l’administration — Sandriza</title>
+<title>${T("Cadre de l’administration — Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.tableau || ''}</span>
   <div class="barre" id="barre" role="menubar"></div>
   <span class="sous" id="sous"></span>
-  <span class="fin"><button class="btn" id="b-mesurer" type="button">↻ Remesurer</button></span></div>
+  <span class="fin"><button class="btn" id="b-mesurer" type="button">${T("↻ Remesurer")}</button></span></div>
 <div id="ancrage" class="zone">
   <div class="carte" id="corps">
-    <h2>Cette zone est la place d’un écran</h2>
-    <p>Elle est dessinée par l’application, plus par la page web. C’est la pièce qui manquait
-       pour que le panneau d’administration web puisse être retiré : <strong>trente-six écrans
-       natifs s’y ancrent</strong> aujourd’hui, et c’est le site qui dit où elle se trouve.</p>
-    <p><strong>Le menu du haut est le vrai :</strong> les intitulés viennent de l’application, et
-       cliquer ouvre <em>son</em> menu — pas une copie. Il n’y a donc qu’une navigation, et elle ne
-       peut pas se désynchroniser. Pas de barre latérale : ce serait le doublon retiré en août.</p>
-    <p><strong>Ce qui n’est pas encore fait :</strong> cette fenêtre n’a pas remplacé la fenêtre
-       principale. Tant que la bascule n’est pas faite, c’est encore le site qui envoie la
-       position de la zone, et les écrans s’ancrent là-bas.</p>
+    <h2>${T("Cette zone est la place d’un écran")}</h2>
+    <p>${T("Elle est dessinée par l’application, plus par la page web. C’est la pièce qui manquait pour que le panneau d’administration web puisse être retiré : <strong>trente-six écrans natifs s’y ancrent</strong> aujourd’hui, et c’est le site qui dit où elle se trouve.")}</p>
+    <p>${T("<strong>Le menu du haut est le vrai :</strong> les intitulés viennent de l’application, et cliquer ouvre <em>son menu</em> — pas une copie. Il n’y a donc qu’une navigation, et elle ne peut pas se désynchroniser. Pas de barre latérale : ce serait le doublon retiré en août.")}</p>
+    <p>${T("<strong>Ce qui n’est pas encore fait :</strong> cette fenêtre n’a pas remplacé la fenêtre principale. Tant que la bascule n’est pas faite, c’est encore le site qui envoie la position de la zone, et les écrans s’ancrent là-bas.")}</p>
     <div class="mes" id="mesures"></div>
   </div>
 </div>
@@ -167,10 +166,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!z || !m) return;
     var r = z.getBoundingClientRect();
     var d = window.devicePixelRatio || 1;
-    m.innerHTML = '<span><b>Position</b> ' + Math.round(r.left) + ', ' + Math.round(r.top) + ' px</span>'
-      + '<span><b>Taille</b> ' + Math.round(r.width) + ' × ' + Math.round(r.height) + ' px</span>'
-      + '<span><b>Densité</b> ×' + (Math.round(d * 100) / 100) + '</span>';
-    szDire('Zone mesurée : ' + Math.round(r.width) + ' × ' + Math.round(r.height)
+    m.innerHTML = '<span><b>${T("Position")}</b> ' + Math.round(r.left) + ', ' + Math.round(r.top) + ' px</span>'
+      + '<span><b>${T("Taille")}</b> ' + Math.round(r.width) + ' × ' + Math.round(r.height) + ' px</span>'
+      + '<span><b>${T("Densité")}</b> ×' + (Math.round(d * 100) / 100) + '</span>';
+    szDire('${T("Zone mesurée : ")}' + Math.round(r.width) + ' × ' + Math.round(r.height)
       + ' px à ' + Math.round(r.left) + ', ' + Math.round(r.top) + '.', 'bon');
   }
 
