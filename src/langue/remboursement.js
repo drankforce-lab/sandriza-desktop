@@ -47,6 +47,9 @@ module.exports = {
   'Le code d’exemption est requis pour renoncer aux frais.':
     'The exemption code is required to waive the fees.',
   'Code d’exemption incorrect.': 'Incorrect exemption code.',
+  'Trop de tentatives. Réessayez dans quelques minutes.': 'Too many attempts. Try again in a few minutes.',
+  'Trop de tentatives. Réessayez dans {0} minute(s).': 'Too many attempts. Try again in {0} minute(s).',
+  'Le code n’a pas pu être vérifié : le serveur n’a pas répondu.': 'The code could not be verified: the server did not respond.',
 
   /* ── LA COMMANDE DEJA REMBOURSEE ────────────────────────────────────────── */
   'Commande entièrement remboursée — total : ': 'Order fully refunded — total: ',

@@ -158,11 +158,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     square_indisponible: '${T("Aucun paiement Square lié à cette commande.")}',
     nip_requis: '${T("Le code d’exemption est requis pour renoncer aux frais.")}',
     nip_incorrect: '${T("Code d’exemption incorrect.")}',
+    /* ⚠ TROIS MOTIFS DE PLUS DEPUIS QUE C EST LE SERVEUR QUI VERIFIE
+       (2026-09-13). Sans eux, un blocage apres cinq essais s afficherait
+       << Erreur inattendue (bloque) >> — vrai, et inutilisable. */
+    bloque: '${T("Trop de tentatives. Réessayez dans quelques minutes.")}',
+    nip_bloque: '${T("Trop de tentatives. Réessayez dans quelques minutes.")}',
+    nip_indisponible: '${T("Le code n’a pas pu être vérifié : le serveur n’a pas répondu.")}',
     echec: '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
+    /* On dit COMBIEN DE TEMPS quand le serveur le sait : « quelques minutes »
+       fait réessayer toutes les trente secondes. */
+    if ((m === 'bloque' || m === 'nip_bloque') && r.minutes) {
+      return '${T("Trop de tentatives. Réessayez dans {0} minute(s).")}'.split('{0}').join(r.minutes);
+    }
     if (r && r.detail) return r.detail;
     return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
