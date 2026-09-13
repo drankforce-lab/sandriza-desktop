@@ -20,6 +20,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le message de la cliente
+   ni la reponse qui part par courriel (voir src/langue/messagerie.js). */
+const T = require('../langue').tr('messagerie');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -91,17 +96,17 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 /** Page complète de la fenêtre native « Messagerie clients ». */
 function pageMessagerie() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Messagerie clients — Administration Sandriza</title>
+<title>${T("Messagerie clients — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.support}</span><h1>Messagerie clients</h1>
+<div class="tete"><span class="ico">${ICO.support}</span><h1>${T("Messagerie clients")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Chargement… (les demandes se resynchronisent)</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span id="ret" hidden style="margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--tx2)">
-    <span title="Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.">Réponses conservées</span>
-    <input id="ret-mois" aria-label="Durée de conservation en mois" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:6px;padding:.2rem .35rem">
-    <span>mois</span>
-    <button id="ret-save" style="font:inherit;font-size:.74rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:6px;padding:.22rem .5rem;cursor:pointer">Enregistrer</button>
+    <span title="${T("Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.")}">${T("Réponses conservées")}</span>
+    <input id="ret-mois" aria-label="${T("Durée de conservation en mois")}" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:6px;padding:.2rem .35rem">
+    <span>${T("mois")}</span>
+    <button id="ret-save" style="font:inherit;font-size:.74rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:6px;padding:.22rem .5rem;cursor:pointer">${T("Enregistrer")}</button>
   </span></div>
 <script>
 (function(){
@@ -124,19 +129,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la messagerie.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette demande n’existe plus.',
-    reponse:            'La réponse a échoué.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la messagerie.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette demande n’existe plus.")}',
+    reponse:            '${T("La réponse a échoué.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -154,35 +159,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function pastille(st){
-    return st === 'answered' ? '<span class="pill bon">Répondu</span>'
-      : st === 'pending' ? '<span class="pill att">En attente</span>'
+    return st === 'answered' ? '<span class="pill bon">${T("Répondu")}</span>'
+      : st === 'pending' ? '<span class="pill att">${T("En attente")}</span>'
       : '<span class="pill neutre">' + esc(st) + '</span>';
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide charge">Chargement… (les demandes se resynchronisent)</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div>'; return; }
     var c = D.comptes || {};
     var h = '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'pending' ? ' actif' : '') + '" data-onglet="pending">'
-      + 'En attente<span class="n' + (c.attente > 0 ? ' hi' : '') + '">' + (c.attente || 0) + '</span></button>'
+      + '${T("En attente")}<span class="n' + (c.attente > 0 ? ' hi' : '') + '">' + (c.attente || 0) + '</span></button>'
       + '<button class="mini' + (ONGLET === 'answered' ? ' actif' : '') + '" data-onglet="answered">'
-      + '<span class="ic">📁</span> Archive<span class="n">' + (c.repondues || 0) + '</span></button>'
+      + '<span class="ic">📁</span>${T(" Archive")}<span class="n">' + (c.repondues || 0) + '</span></button>'
       + '<button class="mini' + (ONGLET === 'all' ? ' actif' : '') + '" data-onglet="all">'
       + 'Toutes<span class="n">' + (c.toutes || 0) + '</span></button>'
       + '</div>';
 
     var rows = D.lignes || [];
     if (!rows.length) {
-      h += '<div class="vide">Aucune demande' + (ONGLET !== 'all' ? ' dans cette catégorie' : '') + '.</div>';
+      /* Deux phrases ENTIERES, pas un fragment recolle : « dans cette
+         categorie » seul ne se traduit pas, il se place. */
+      h += '<div class="vide">'
+        + (ONGLET !== 'all' ? '${T("Aucune demande dans cette catégorie.")}' : '${T("Aucune demande.")}')
+        + '</div>';
     } else {
       h += rows.map(function(r){
-        return '<div class="ligne" data-id="' + esc(r.id) + '" title="Ouvrir la demande">'
+        return '<div class="ligne" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande")}">'
           + '<div class="haut"><span class="num">' + esc(r.commande) + '</span>'
           + pastille(r.statut)
           + '<span class="droite">' + esc(r.date) + '</span></div>'
           + '<div class="dt"><strong>' + esc(r.client) + '</strong>'
           + (r.courriel ? ' · ' + esc(r.courriel) : '') + '</div>'
-          + '<div class="dt">Raison : ' + esc(r.raison || '–') + '</div>'
+          + '<div class="dt">${T("Raison : ")}' + esc(r.raison || '–') + '</div>'
           + '</div>';
       }).join('');
     }
@@ -199,25 +208,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div><div class="l">Client</div><div class="v">' + esc(r.client) + '</div></div>'
       + '<div><div class="l">Courriel</div><div class="v">' + esc(r.courriel || '–') + '</div></div>'
       + '<div><div class="l">Raison</div><div class="v">' + esc(r.raison || '–') + '</div></div>'
-      + '<div><div class="l">Déposée le</div><div class="v">' + esc(r.date) + '</div></div>'
-      + (r.reponduLe ? '<div><div class="l">Répondu le</div><div class="v">' + esc(r.reponduLe) + '</div></div>' : '')
+      + '<div><div class="l">${T("Déposée le")}</div><div class="v">' + esc(r.date) + '</div></div>'
+      + (r.reponduLe ? '<div><div class="l">${T("Répondu le")}</div><div class="v">' + esc(r.reponduLe) + '</div></div>' : '')
       + '</div>'
       + '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);'
-      + 'margin-bottom:.25rem">Message du client</div>'
+      + 'margin-bottom:.25rem">${T("Message du client")}</div>'
       + '<div class="texte">' + esc(r.message || '(aucun message)') + '</div>'
       + (r.reponse && r.statut === 'answered'
           ? '<div class="reponse"><div style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
-            + 'letter-spacing:.05em">Votre réponse' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
+            + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
             + esc(r.reponse) + '</div>'
           : '')
       + '<div style="margin-top:.6rem"><div class="l" style="font-size:.62rem;text-transform:uppercase;'
       + 'letter-spacing:.05em;color:var(--tx2);margin-bottom:.25rem">'
-      + (r.statut === 'answered' ? 'Modifier la réponse (renvoyée par courriel)' : 'Votre réponse (envoyée par courriel au client)') + '</div>'
-      + '<textarea aria-label="Rédigez votre réponse" id="m-reptxt" placeholder="Rédigez votre réponse…">' + esc(r.reponse || '') + '</textarea></div>'
+      + (r.statut === 'answered' ? '${T("Modifier la réponse (renvoyée par courriel)")}' : '${T("Votre réponse (envoyée par courriel au client)")}') + '</div>'
+      + '<textarea aria-label="${T("Rédigez votre réponse")}" id="m-reptxt" placeholder="${T("Rédigez votre réponse…")}">' + esc(r.reponse || '') + '</textarea></div>'
       + '<div class="pied-boite">'
-      + '<button class="danger" id="m-supprimer">' + (SUPPR_ARME ? 'Confirmer la suppression ?' : '<span class="ic">🗑</span> Supprimer') + '</button>'
+      + '<button class="danger" id="m-supprimer">' + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button>'
       + '<button id="m-fermer">Fermer</button>'
-      + '<button class="prim" id="m-envoyer"><span class="ic">📨</span> Envoyer la réponse</button>'
+      + '<button class="prim" id="m-envoyer"><span class="ic">📨</span>${T(" Envoyer la réponse")}</button>'
       + '</div></div></div>';
   }
 
@@ -232,10 +241,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       SUPPR_ARME = false;
-      dire('Suppression…');
+      dire('${T("Suppression…")}');
       appeler('messagerie:supprimer', [DETAIL.id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Demande supprimée.', 'bon');
+        dire('${T("Demande supprimée.")}', 'bon');
         DETAIL = null;
         charger();
       });
@@ -244,16 +253,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (en) en.onclick = function(){
       var t = document.getElementById('m-reptxt');
       var txt = (t ? t.value : '').trim();
-      if (!txt) { dire('Rédigez une réponse d’abord.', 'err'); return; }
+      if (!txt) { dire('${T("Rédigez une réponse d’abord.")}', 'err'); return; }
       en.disabled = true;
-      dire('Envoi de la réponse…');
+      dire('${T("Envoi de la réponse…")}');
       appeler('messagerie:repondre', [DETAIL.id, txt]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); en.disabled = false; return; }
         /* Le verdict distingue les deux issues : la reponse est toujours
            ENREGISTREE, mais le courriel peut ne pas etre parti (repli
            Newsletter) — et ca doit se dire, pas se deviner. */
-        if (r.courriel) dire('Réponse envoyée au client.', 'bon');
-        else dire('Réponse enregistrée — courriel NON envoyé (vérifiez Infolettre).', 'att');
+        if (r.courriel) dire('${T("Réponse envoyée au client.")}', 'bon');
+        else dire('${T("Réponse enregistrée — courriel NON envoyé (vérifiez Infolettre).")}', 'att');
         DETAIL = null;
         charger();
       });
@@ -273,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
 
   function ouvrirDetail(id){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('messagerie:lire', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire('');
@@ -292,7 +301,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('messagerie:liste', [{ onglet: ONGLET }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(); return; }
-      if (!r || !r.ok) { vide('Messagerie indisponible', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Messagerie indisponible")}', expliquer(r)); return; }
       D = r;
       dire('');
       dessiner();
@@ -306,7 +315,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function majRetention(){
     var box = document.getElementById('ret'); if (!box) return;
     box.hidden = false;
-    var inp = document.getElementById('ret-mois');
+    var inp = document.getElementById('ret-${T("mois")}');
     var btn = document.getElementById('ret-save');
     if (inp) inp.value = (D && D.retention) || 12;
     var ro = !(D && D.peutModifier);
@@ -315,11 +324,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       btn.onclick = function(){
         if (ro) return;
         var v = inp ? inp.value : '';
-        btn.disabled = true; dire('Enregistrement…');
+        btn.disabled = true; dire('${T("Enregistrement…")}');
         appeler('messagerie:retention', [v]).then(function(r){
           btn.disabled = false;
-          if (r && r.ok) { if (D) D.retention = r.retention; dire('Conservation enregistrée.', 'bon'); }
-          else dire(r && r.motif === 'invalide' ? 'Valeur entre 1 et 120 mois.' : expliquer(r), 'err');
+          if (r && r.ok) { if (D) D.retention = r.retention; dire('${T("Conservation enregistrée.")}', 'bon'); }
+          else dire(r && r.motif === 'invalide' ? '${T("Valeur entre 1 et 120 mois.")}' : expliquer(r), 'err');
         });
       };
     }
@@ -345,12 +354,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

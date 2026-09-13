@@ -16,6 +16,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d un pays ou d un
+   Etat, qui vient de Stripe, ni la devise CA$ (voir src/langue/livraison.js). */
+const T = require('../langue').tr('livraison');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -98,13 +103,13 @@ table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:#c9a97e;curs
 
 function pageLivraison() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Configuration de la livraison — Administration Sandriza</title>
+<title>${T("Configuration de la livraison — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.shipping}</span><h1>Configuration de la livraison</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les réglages, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.shipping}</span><h1>${T("Configuration de la livraison")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les réglages, pas les modifier.")}</div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-save" disabled>Enregistrer</button></div>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -127,12 +132,12 @@ function pageLivraison() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -148,19 +153,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : la livraison ne peut pas être modifiée.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : la livraison ne peut pas être modifiée.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -178,21 +183,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var d = D || {};
     var dis = RO ? ' disabled' : '';
     var h = [];
-    h.push('<div class="carte"><h2>Livraison internationale</h2>'
-      + '<p class="sous">Permet aux clients de saisir une adresse hors Canada.</p>'
+    h.push('<div class="carte"><h2>${T("Livraison internationale")}</h2>'
+      + '<p class="sous">${T("Permet aux clients de saisir une adresse hors Canada.")}</p>'
       + '<label class="bascule"><input type="checkbox" id="f-intl"' + (d.international ? ' checked' : '') + dis + '>'
-      + '<span><strong>Activer la livraison internationale</strong>'
-      + '<span class="d">La recherche d’adresse s’adapte au monde entier et un champ Pays apparaît à la caisse.</span></span></label></div>');
-    h.push('<div class="carte"><h2>Tarification</h2>'
-      + '<div class="ch"><label for="f-cost">Frais de livraison standard (CA$)</label>'
+      + '<span><strong>${T("Activer la livraison internationale")}</strong>'
+      + '<span class="d">${T("La recherche d’adresse s’adapte au monde entier et un champ Pays apparaît à la caisse.")}</span></span></label></div>');
+    h.push('<div class="carte"><h2>${T("Tarification")}</h2>'
+      + '<div class="ch"><label for="f-cost">${T("Frais de livraison standard (CA$)")}</label>'
       + '<input id="f-cost" type="number" min="0" step="0.01" value="' + esc(num(d.shippingCost)) + '"' + dis + '>'
-      + '<div class="aide">Facturé quand la commande n’atteint pas le seuil de livraison gratuite.</div></div>'
-      + '<div class="ch"><label for="f-thr">Seuil pour la livraison gratuite (CA$)</label>'
+      + '<div class="aide">${T("Facturé quand la commande n’atteint pas le seuil de livraison gratuite.")}</div></div>'
+      + '<div class="ch"><label for="f-thr">${T("Seuil pour la livraison gratuite (CA$)")}</label>'
       + '<input id="f-thr" type="number" min="0" step="1" value="' + esc(num(d.freeThreshold)) + '"' + dis + '>'
-      + '<div class="aide">Au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.</div></div>'
-      + '<div class="ch"><label for="f-prio">Frais traitement prioritaire (CA$)</label>'
+      + '<div class="aide">${T("Au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.")}</div></div>'
+      + '<div class="ch"><label for="f-prio">${T("Frais traitement prioritaire (CA$)")}</label>'
       + '<input id="f-prio" type="number" min="0" step="0.01" value="' + esc(num(d.priorityCost)) + '"' + dis + '>'
-      + '<div class="aide">Supplément si le client choisit le traitement prioritaire. <strong>0</strong> masque l’option.</div></div></div>');
+      + '<div class="aide">${T("Supplément si le client choisit le traitement prioritaire. <strong>0</strong> masque l’option.")}</div></div></div>');
     /* ⚠ LE TABLEAU N EXISTE QUE SI L INTERNATIONAL EST ALLUME. Demande expresse :
        decoche, on ne doit plus rien voir ni toucher de ce qui a trait a
        l international. On lit l etat REEL de la case a l ecran (pas seulement
@@ -206,8 +211,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       D.international = fintl.checked;
       dessiner();
       dire(fintl.checked
-        ? 'Enregistrez pour activer, puis relisez vos inscriptions Stripe.'
-        : 'Enregistrez pour désactiver.', 'att');
+        ? '${T("Enregistrez pour activer, puis relisez vos inscriptions Stripe.")}'
+        : '${T("Enregistrez pour désactiver.")}', 'att');
     };
     brancherPays();
   }
@@ -220,8 +225,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      l inscription. Ajouter un pays chez Stripe l ouvre tout seul. */
   function paysHtml(){
     if (!PAYS) {
-      return '<div class="carte large"><h2>Pays desservis</h2>'
-        + '<div class="vide charge">Lecture des destinations…</div></div>';
+      return '<div class="carte large"><h2>${T("Pays desservis")}</h2>'
+        + '<div class="vide charge">${T("Lecture des destinations…")}</div></div>';
     }
     var q = FILTRE.toLowerCase();
     var l = PAYS.pays.filter(function(p){
@@ -240,11 +245,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!p.inscrit) {
         return '<tr class="off"><td>' + nomCol + '</td>'
           + '<td><span class="non">—</span></td>'
-          + '<td class="mid"><span class="verrou" title="Ajoutez l inscription fiscale dans Stripe pour ouvrir ce pays">verrouillé</span></td></tr>';
+          + '<td class="mid"><span class="verrou" title="${T("Ajoutez l inscription fiscale dans Stripe pour ouvrir ce pays")}">${T("verrouillé")}</span></td></tr>';
       }
       if (ets.length) {
         var h = '<tr class="paystete"><td><strong>' + nomCol + '</strong></td>'
-          + '<td><span class="oui">✓ inscrit</span> <span class="ets">— livraison par État (' + ets.length + ')</span></td><td></td></tr>';
+          + '<td><span class="oui">${T("✓ inscrit")}</span> <span class="ets">${T("— livraison par État (")}' + ets.length + ')</span></td><td></td></tr>';
         h += ets.map(function(e){
           return '<tr><td class="etatnom">↳ ' + esc(e.name || e.code) + ' <span class="code">' + esc(e.code) + '</span></td>'
             + '<td></td>'
@@ -252,29 +257,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                premiere cellule, << Livre >> dans l en-tete. En tabulant, rien.
                On coche ou decoche une destination de livraison a l aveugle. */
             + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '" data-etat="' + esc(e.code) + '"'
-            + ' aria-label="' + esc('Livrer vers ' + (e.name || e.code) + ', ' + (p.nom || p.code)) + '"'
+            + ' aria-label="' + esc('${T("Livrer vers ")}' + (e.name || e.code) + ', ' + (p.nom || p.code)) + '"'
             + (e.livre ? ' checked' : '') + dis + '></td></tr>';
         }).join('');
         return h;
       }
-      return '<tr><td>' + nomCol + '</td><td><span class="oui">✓ inscrit</span></td>'
+      return '<tr><td>' + nomCol + '</td><td><span class="oui">${T("✓ inscrit")}</span></td>'
         + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '"'
-        + ' aria-label="' + esc('Livrer vers ' + (p.nom || p.code)) + '"'
+        + ' aria-label="' + esc('${T("Livrer vers ")}' + (p.nom || p.code)) + '"'
         + (p.livre ? ' checked' : '') + dis + '></td></tr>';
     };
-    var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('fr-CA') : 'jamais';
-    return '<div class="carte large"><h2>Pays desservis</h2>'
+    var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('fr-CA') : '${T("jamais")}';
+    return '<div class="carte large"><h2>${T("Pays desservis")}</h2>'
       + ''
       + '<div class="pbarre">'
-      + '<input aria-label="Filtrer" class="pfiltre" id="p-filtre" type="search" placeholder="Filtrer…" value="' + esc(FILTRE) + '">'
-      + '<span class="info">' + PAYS.nbInscrits + ' pays inscrit' + (PAYS.nbInscrits > 1 ? 's' : '')
-      + ' · dernière lecture : ' + esc(maj) + '</span>'
-      + '<button id="p-relire"' + (OCCUPE ? ' disabled' : '') + '>↻ Relire Stripe</button></div>'
+      + '<input aria-label="${T("Filtrer")}" class="pfiltre" id="p-filtre" type="search" placeholder="${T("Filtrer…")}" value="' + esc(FILTRE) + '">'
+      /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
+      + '<span class="info">' + PAYS.nbInscrits
+      + (PAYS.nbInscrits > 1 ? '${T(" pays inscrits")}' : '${T(" pays inscrit")}')
+      + '${T(" · dernière lecture : ")}' + esc(maj) + '</span>'
+      + '<button id="p-relire"' + (OCCUPE ? ' disabled' : '') + '>${T("↻ Relire Stripe")}</button></div>'
       + '<div class="ptab"><table class="pays"><thead><tr>'
-      + '<th>Pays</th><th>Inscription Stripe</th><th style="text-align:center">On livre</th>'
+      + '<th>${T("Pays")}</th><th>${T("Inscription Stripe")}</th><th style="text-align:center">${T("On livre")}</th>'
       + '</tr></thead><tbody>'
       + (l.length ? inscrits.map(ligne).join('') + autres.map(ligne).join('')
-                  : '<tr><td colspan="3" class="vide">Aucun pays ne correspond.</td></tr>')
+                  : '<tr><td colspan="3" class="vide">${T("Aucun pays ne correspond.")}</td></tr>')
       + '</tbody></table></div></div>';
   }
 
@@ -312,13 +319,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function relirePays(){
     if (OCCUPE) return;
-    OCCUPE = true; dire('Lecture des inscriptions chez Stripe…');
+    OCCUPE = true; dire('${T("Lecture des inscriptions chez Stripe…")}');
     appeler('config:pays:relire').then(function(r){
       OCCUPE = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       PAYS = r; dessiner();
-      dire(r.nbInscrits ? (r.nbInscrits + ' pays inscrit' + (r.nbInscrits > 1 ? 's' : '') + '.')
-                        : 'Aucune inscription active dans Stripe.', r.nbInscrits ? 'bon' : 'att');
+      dire(r.nbInscrits ? (r.nbInscrits + '${T(" pays inscrit")}' + (r.nbInscrits > 1 ? 's' : '') + '.')
+                        : '${T("Aucune inscription active dans Stripe.")}', r.nbInscrits ? 'bon' : 'att');
     });
   }
 
@@ -337,8 +344,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       el.disabled = false;
       if (!r || !r.ok) { el.checked = !veut; dire(expliquer(r), 'err'); return; }
       PAYS = r;
-      var quoi = etat ? 'État' : 'Pays';
-      dire(veut ? (quoi + ' desservi.') : (quoi + ' retiré.'), 'bon');
+      /* Quatre phrases ENTIERES : un mot recolle a un fragment ne se traduit
+         pas, il se devine — et pas dans toutes les langues. */
+      dire(etat
+        ? (veut ? '${T("État desservi.")}' : '${T("État retiré.")}')
+        : (veut ? '${T("Pays desservi.")}' : '${T("Pays retiré.")}'), 'bon');
     });
   }
 
@@ -346,19 +356,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RO || OCCUPE) return;
     var chk = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
     var val = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-    OCCUPE = true; bsave.disabled = true; dire('Enregistrement…');
+    OCCUPE = true; bsave.disabled = true; dire('${T("Enregistrement…")}');
     appeler('config:livraison:ecrire', [{
       international: chk('f-intl'), shippingCost: val('f-cost'),
       freeThreshold: val('f-thr'), priorityCost: val('f-prio') }]).then(function(r){
       OCCUPE = false;
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('Livraison enregistrée.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Livraison enregistrée.")}', 'bon'); }
       else { bsave.disabled = RO; dire(expliquer(r), 'err'); }
     });
   }
   bsave.onclick = enregistrer;
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:livraison:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

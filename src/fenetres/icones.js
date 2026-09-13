@@ -19,6 +19,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit — jamais [icon:xxx], qui est un
+   CODE tape dans les textes du site (voir src/langue/icones.js). */
+const T = require('../langue').tr('icones');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -111,12 +116,12 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 
 function pageIcones() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Icônes personnalisées — Administration Sandriza</title>
+<title>${T("Icônes personnalisées — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.image}</span><h1>Icônes personnalisées</h1>
+<div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Icônes personnalisées")}</h1>
   <span class="cpt" id="cpt"></span></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les icônes, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les icônes, pas les modifier.")}</div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -140,12 +145,12 @@ function pageIcones() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -162,25 +167,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : les icônes ne peuvent pas être modifiées.',
-    nom_requis:         'Donnez un nom à l’icône.',
-    pas_une_image:      'Ce fichier n’est pas une image.',
-    image_illisible:    'Cette image n’a pas pu être lue.',
-    depot:              'Le dépôt de l’icône dans le stockage a échoué. Rien n’a été ajouté.',
-    conversion:         'La conversion en .ico a échoué.',
-    introuvable:        'Cette icône n’existe plus.',
-    indisponible:       'La configuration n’est pas prête dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : les icônes ne peuvent pas être modifiées.")}',
+    nom_requis:         '${T("Donnez un nom à l’icône.")}',
+    pas_une_image:      '${T("Ce fichier n’est pas une image.")}',
+    image_illisible:    '${T("Cette image n’a pas pu être lue.")}',
+    depot:              '${T("Le dépôt de l’icône dans le stockage a échoué. Rien n’a été ajouté.")}',
+    conversion:         '${T("La conversion en .ico a échoué.")}',
+    introuvable:        '${T("Cette icône n’existe plus.")}',
+    indisponible:       '${T("La configuration n’est pas prête dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -206,9 +211,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (quoi === 'pose') POSE = String(r.result || '');
         else CONV = String(r.result || '');
         dessiner();
-        dire('Image prête.', 'att');
+        dire('${T("Image prête.")}', 'att');
       };
-      r.onerror = function(){ dire('Ce fichier n’a pas pu être lu.', 'err'); };
+      r.onerror = function(){ dire('${T("Ce fichier n’a pas pu être lu.")}', 'err'); };
       r.readAsDataURL(f);
     };
     inp.click();
@@ -217,51 +222,51 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vignette(id, src, fige){
     return '<div class="vig' + (fige ? ' fige' : '') + '" data-choisir="' + esc(id) + '">'
       + (src ? '<img src="' + esc(src) + '" alt="">'
-             : '<span class="rien">Choisir<br>une image</span>') + '</div>';
+             : '<span class="rien">${T("Choisir<br>une image")}</span>') + '</div>';
   }
 
   function dessiner(){
     var av = document.getElementById('ro');
     if (av) av.hidden = !RO;
     var liste = (D && D.icones) || [];
-    cpt.textContent = liste.length ? (liste.length + (liste.length > 1 ? ' icônes' : ' icône')) : '';
+    cpt.textContent = liste.length ? (liste.length + (liste.length > 1 ? '${T(" icônes")}' : '${T(" icône")}')) : '';
     var h = [];
 
     // ── Ajouter et convertir : deux cartes qui se partagent une ligne ──────
     h.push('<div class="rangee">');
-    h.push('<div class="carte"><h2>Ajouter une icône</h2>');
-    h.push('<p class="sous">Insérez ensuite son code dans n’importe quel texte du site : il devient l’image.</p>');
+    h.push('<div class="carte"><h2>${T("Ajouter une icône")}</h2>');
+    h.push('<p class="sous">${T("Insérez ensuite son code dans n’importe quel texte du site : il devient l’image.")}</p>');
     h.push('<div class="pose">' + vignette('pose', POSE, RO) + '<div>');
     h.push('<div class="ch"><label for="i-nom">Nom</label><input id="i-nom" type="text" placeholder="coeur, etoile, feu…"'
       + (RO ? ' disabled' : '') + '></div>');
     h.push('<label class="bascule"><input type="checkbox" id="i-fond"' + (RO ? ' disabled' : '')
-      + '> Retirer le fond de l’image</label>');
-    h.push('<button class="prim" id="b-ajouter"' + (RO ? ' disabled' : '') + '>Ajouter l’icône</button>');
+      + '> ${T("Retirer le fond de l’image")}</label>');
+    h.push('<button class="prim" id="b-ajouter"' + (RO ? ' disabled' : '') + '>${T("Ajouter l’icône")}</button>');
     h.push('</div></div></div>');
 
     // ── Convertisseur .ico ─────────────────────────────────────────────────
-    h.push('<div class="carte"><h2>Convertir une image en .ico</h2>');
-    h.push('<p class="sous">Toutes les tailles de 16 à 256 px, reprises de l’image d’origine — indépendant des icônes ci-contre.</p>');
+    h.push('<div class="carte"><h2>${T("Convertir une image en .ico")}</h2>');
+    h.push('<p class="sous">${T("Toutes les tailles de 16 à 256 px, reprises de l’image d’origine — indépendant des icônes ci-contre.")}</p>');
     h.push('<div class="pose">' + vignette('conv', CONV, false) + '<div>');
-    h.push('<label class="bascule"><input type="checkbox" id="c-fond"> Retirer le fond de l’image</label>');
-    h.push('<button class="prim" id="b-convertir"' + (CONV ? '' : ' disabled') + '>Télécharger le .ico</button>');
+    h.push('<label class="bascule"><input type="checkbox" id="c-fond"> ${T("Retirer le fond de l’image")}</label>');
+    h.push('<button class="prim" id="b-convertir"' + (CONV ? '' : ' disabled') + '>${T("Télécharger le .ico")}</button>');
     h.push('</div></div></div>');
     h.push('</div>');
 
     // ── La liste ───────────────────────────────────────────────────────────
-    h.push('<div class="carte"><h2>Les icônes du site</h2>');
+    h.push('<div class="carte"><h2>${T("Les icônes du site")}</h2>');
     if (!liste.length) {
-      h.push('<div class="vide">Aucune icône pour l’instant.</div>');
+      h.push('<div class="vide">${T("Aucune icône pour l’instant.")}</div>');
     } else {
       h.push('<div class="grille">');
       liste.forEach(function(ic){
         h.push('<div class="ico"><div class="im">'
           + (ic.url ? '<img src="' + esc(ic.url) + '" alt="">' : '') + '</div><div style="min-width:0">'
           + '<p class="nm" title="' + esc(ic.name) + '">' + esc(ic.name) + '</p>'
-          + '<div class="gestes"><code data-copier="' + esc(ic.tag) + '" title="Copier le code">[icon:'
+          + '<div class="gestes"><code data-copier="' + esc(ic.tag) + '" title="${T("Copier le code")}">[icon:'
           + esc(ic.tag) + ']</code>'
           + '<button class="pt" data-ico="' + esc(ic.id) + '">.ico</button>'
-          + '<button class="pt dgr" data-suppr="' + esc(ic.id) + '"' + (RO ? ' disabled' : '') + '>Supprimer</button>'
+          + '<button class="pt dgr" data-suppr="' + esc(ic.id) + '"' + (RO ? ' disabled' : '') + '>${T("Supprimer")}</button>'
           + '</div></div></div>');
       });
       h.push('</div>');
@@ -288,7 +293,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var texte = '[icon:' + tag + ']';
     try {
       navigator.clipboard.writeText(texte)
-        .then(function(){ dire('Code copié : ' + texte, 'bon'); })
+        .then(function(){ dire('${T("Code copié : ")}' + texte, 'bon'); })
         .catch(function(){ dire(texte, 'att'); });
     } catch (e) { dire(texte, 'att'); }
   }
@@ -304,9 +309,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var nom = (document.getElementById('i-nom') || {}).value || '';
     var fond = !!(document.getElementById('i-fond') || {}).checked;
     if (!nom.trim()) { dire(MOTIFS.nom_requis, 'err'); return; }
-    if (!POSE) { dire('Choisissez d’abord une image.', 'err'); return; }
+    if (!POSE) { dire('${T("Choisissez d’abord une image.")}', 'err'); return; }
     occuper(true);
-    dire('Ajout de l’icône…');
+    dire('${T("Ajout de l’icône…")}');
     appeler('config:icones:ajouter', [{ nom: nom, image: POSE, retirerFond: fond }]).then(function(r){
       occuper(false);
       if (r && r.ok) {
@@ -315,7 +320,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         POSE = null;
         D = r; RO = !r.peutModifier;
         dessiner();
-        dire('Icône ajoutée : [icon:' + r.tag + ']', 'bon');
+        // ⚠ [icon:xxx] est un CODE : il se tape dans les textes du site et se
+        // relit tel quel. Le prefixe se lit, le code ne se traduit pas.
+        dire('${T("Icône ajoutée : ")}' + '[icon:' + r.tag + ']', 'bon');
       } else dire(expliquer(r), 'err');
     });
   }
@@ -323,10 +330,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function supprimer(id){
     if (RO || OCCUPE) return;
     occuper(true);
-    dire('Suppression…');
+    dire('${T("Suppression…")}');
     appeler('config:icones:supprimer', [id]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('Icône supprimée.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Icône supprimée.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
@@ -337,7 +344,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dire('Conversion…');
     appeler('config:icones:ico', [id]).then(function(r){
       occuper(false);
-      dire(r && r.ok ? 'Fichier ' + esc(r.fichier) + ' téléchargé.' : expliquer(r), r && r.ok ? 'bon' : 'err');
+      dire(r && r.ok ? '${T("Fichier ")}' + esc(r.fichier) + '${T(" téléchargé.")}' : expliquer(r), r && r.ok ? 'bon' : 'err');
     });
   }
 
@@ -349,12 +356,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dire('Conversion…');
     appeler('config:icones:convertir', [{ image: CONV, retirerFond: fond, nom: nom }]).then(function(r){
       occuper(false);
-      dire(r && r.ok ? 'Fichier ' + esc(r.fichier) + ' téléchargé.' : expliquer(r), r && r.ok ? 'bon' : 'err');
+      dire(r && r.ok ? '${T("Fichier ")}' + esc(r.fichier) + '${T(" téléchargé.")}' : expliquer(r), r && r.ok ? 'bon' : 'err');
     });
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:icones:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

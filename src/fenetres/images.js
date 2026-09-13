@@ -28,6 +28,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d une fiche, son
+   SKU ni le chemin d une image (voir src/langue/images.js). */
+const T = require('../langue').tr('images');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -83,12 +88,12 @@ button.prim:disabled{opacity:.5;cursor:default}
 
 function pageImages() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Images des produits — Administration Sandriza</title>
+<title>${T("Images des produits — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.image}</span><h1>Images des produits</h1></div>
-<div class="corps"><div class="zone" id="corps"><div class="vide charge">Lecture du catalogue…</div></div></div>
+<div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Images des produits")}</h1></div>
+<div class="corps"><div class="zone" id="corps"><div class="vide charge">${T("Lecture du catalogue…")}</div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-migrer" disabled>Déplacer les images</button></div>
+  <button class="prim" id="b-migrer" disabled>${T("Déplacer les images")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -98,8 +103,8 @@ function pageImages() {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -117,23 +122,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne permet pas de modifier les fiches produits.',
-    indisponible:"Le catalogue n'est pas encore chargé dans la fenêtre principale.",
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:"L'opération a échoué.",
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne permet pas de modifier les fiches produits.")}',
+    indisponible:"${T('Le catalogue n\'est pas encore chargé dans la fenêtre principale.')}",
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:"${T('L\'opération a échoué.')}",
   };
   /* Les motifs d'un ÉCHEC PAR IMAGE. Ils ne sont pas décoratifs : chacun mène à
      un geste différent, et confondre les deux premiers ferait chercher au
      mauvais endroit pendant des heures. */
   var MOTIFS_IMG = {
-    televersement:'le dépôt de l’image a échoué (relais indisponible, ou fichier refusé)',
-    illisible:'l’image a bien été déposée, mais impossible de la relire ensuite — rien n’a donc été remplacé',
-    enregistrement:'les images sont déposées, mais la fiche n’a pas pu être enregistrée',
+    televersement:'${T("le dépôt de l’image a échoué (relais indisponible, ou fichier refusé)")}',
+    illisible:'${T("l’image a bien été déposée, mais impossible de la relire ensuite — rien n’a donc été remplacé")}',
+    enregistrement:'${T("les images sont déposées, mais la fiche n’a pas pu être enregistrée")}',
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -141,13 +146,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!E) { corps.innerHTML = '<div class="vide charge">Lecture du catalogue…</div>'; return; }
+    if (!E) { corps.innerHTML = '<div class="vide charge">${T("Lecture du catalogue…")}</div>'; return; }
     var h = '';
 
     if (!E.base64) {
       h += '<div class="carte"><div class="info bien"><span class="ic">✅</span> '
-        + '<b>Rien à déplacer.</b> Les ' + E.champs + ' image(s) du catalogue sont déjà dans le seau d’images : '
-        + 'le navigateur des clients peut les garder en cache, et le catalogue ne les transporte plus à chaque visite.'
+        + '${T("<b>Rien à déplacer.</b> Les ")}' + E.champs
+        + '${T(" image(s) du catalogue sont déjà dans le seau d’images : le navigateur des clients peut les garder en cache, et le catalogue ne les transporte plus à chaque visite.")}'
         + '</div>';
       if (ECHECS.length) h += echecsHtml();
       h += '</div>';
@@ -157,32 +162,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
 
     h += '<div class="carte">'
-      + '<div class="info"><span class="ic">🖼️</span> Ces fiches portent encore leur image <b>collée dans la fiche</b> plutôt qu’une adresse. '
-      + 'Elles s’affichent très bien — c’est pour ça que personne ne les voit passer : leur image voyage <b>entière, à chaque chargement du catalogue</b>, '
-      + 'et le navigateur ne peut pas la garder en cache.<br><br>'
-      + 'Le déplacement <b>ne perd rien</b> : une image n’est retirée de la fiche que si son dépôt a réussi <b>et</b> qu’elle a pu être relue ensuite. '
-      + 'Il peut être interrompu et repris — ce qui est déjà fait ne sera pas refait.</div>';
+      /* Deux paragraphes ENTIERS, chacun dans un seul litteral : les <b> coupent
+         la phrase, pas la pensee — une cle par paragraphe, balises comprises. */
+      + '<div class="info"><span class="ic">🖼️</span> '
+      + '${T("Ces fiches portent encore leur image <b>collée dans la fiche</b> plutôt qu’une adresse. Elles s’affichent très bien — c’est pour ça que personne ne les voit passer : leur image voyage <b>entière, à chaque chargement du catalogue</b>, et le navigateur ne peut pas la garder en cache.")}'
+      + '<br><br>'
+      + '${T("Le déplacement <b>ne perd rien</b> : une image n’est retirée de la fiche que si son dépôt a réussi <b>et</b> qu’elle a pu être relue ensuite. Il peut être interrompu et repris — ce qui est déjà fait ne sera pas refait.")}'
+      + '</div>';
 
     h += '<div class="chiffres">'
-      + '<div class="kpi chaud"><div class="n">' + E.fiches.length + '</div><div class="l">fiche(s) concernée(s)</div></div>'
-      + '<div class="kpi chaud"><div class="n">' + E.base64 + '</div><div class="l">image(s) à déplacer</div></div>'
-      + '<div class="kpi chaud"><div class="n">' + poids(E.octets) + '</div><div class="l">transportés à chaque visite</div></div>'
+      + '<div class="kpi chaud"><div class="n">' + E.fiches.length + '</div><div class="l">${T("fiche(s) concernée(s)")}</div></div>'
+      + '<div class="kpi chaud"><div class="n">' + E.base64 + '</div><div class="l">${T("image(s) à déplacer")}</div></div>'
+      + '<div class="kpi chaud"><div class="n">' + poids(E.octets) + '</div><div class="l">${T("transportés à chaque visite")}</div></div>'
       + '</div>';
 
     if (DEPART > 0) {
       var faits = Math.max(0, DEPART - E.fiches.length);
       h += '<div class="jauge"><i style="width:' + Math.round(faits * 100 / DEPART) + '%"></i></div>'
-        + '<div style="font-size:.72rem;color:var(--tx2)">' + faits + ' / ' + DEPART + ' fiche(s) traitée(s)</div>';
+        + '<div style="font-size:.72rem;color:var(--tx2)">' + faits + ' / ' + DEPART + '${T(" fiche(s) traitée(s)")}</div>';
     }
 
-    h += '<table><thead><tr><th>Fiche</th><th style="text-align:right">Images</th><th style="text-align:right">Poids</th></tr></thead><tbody>';
+    h += '<table><thead><tr><th>${T("Fiche")}</th><th style="text-align:right">${T("Images")}</th><th style="text-align:right">${T("Poids")}</th></tr></thead><tbody>';
     E.fiches.slice(0, 40).forEach(function(f){
       h += '<tr><td><div>' + esc(f.nom || f.id) + '</div>'
         + (f.sku ? '<div class="sku">' + esc(f.sku) + '</div>' : '')
         + '</td><td class="n">' + f.champs + '</td><td class="n">' + poids(f.octets) + '</td></tr>';
     });
     h += '</tbody></table>';
-    if (E.fiches.length > 40) h += '<div style="font-size:.72rem;color:var(--tx2);margin-top:.4rem">… et ' + (E.fiches.length - 40) + ' autre(s).</div>';
+    if (E.fiches.length > 40) h += '<div style="font-size:.72rem;color:var(--tx2);margin-top:.4rem">… et ' + (E.fiches.length - 40) + '${T(" autre(s).")}</div>';
 
     if (ECHECS.length) h += echecsHtml();
     h += '</div>';
@@ -194,19 +201,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      de la fiche et le motif, on ne peut rien en faire — et une migration qui se
      bloque toujours sur les deux mêmes fiches passerait pour terminée. */
   function echecsHtml(){
-    var h = '<div class="echec"><b>' + ECHECS.length + ' image(s) n’ont pas pu être déplacées</b> — '
-      + 'elles sont <b>restées intactes</b> dans leur fiche, rien n’a été perdu. Vous pouvez relancer.<ul>';
+    var h = '<div class="echec"><b>' + ECHECS.length
+      + '${T(" image(s) n’ont pas pu être déplacées</b> — elles sont <b>restées intactes</b> dans leur fiche, rien n’a été perdu. Vous pouvez relancer.")}'
+      + '<ul>';
     ECHECS.slice(0, 12).forEach(function(e){
       h += '<li>' + esc(e.nom || e.id) + ' <span class="sku">(' + esc(e.chemin) + ')</span> — '
         + esc(MOTIFS_IMG[e.motif] || e.motif) + '</li>';
     });
     h += '</ul>';
-    if (ECHECS.length > 12) h += '<div style="margin-top:.3rem">… et ' + (ECHECS.length - 12) + ' autre(s).</div>';
+    if (ECHECS.length > 12) h += '<div style="margin-top:.3rem">… et ' + (ECHECS.length - 12) + '${T(" autre(s).")}</div>';
     return h + '</div>';
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     return appeler('images:etat').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); bmig.disabled = true; return false; }
       E = r; dessiner(); dire(''); return true;
@@ -223,20 +231,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     function tour(){
       tours++;
-      dire('Déplacement en cours… (' + Math.max(0, DEPART - (E ? E.fiches.length : 0)) + ' / ' + DEPART + ')', 'att');
+      dire('${T("Déplacement en cours… (")}' + Math.max(0, DEPART - (E ? E.fiches.length : 0)) + ' / ' + DEPART + ')', 'att');
       var avant = E.fiches.length;
       return appeler('images:migrer', [{ lot: 3 }]).then(function(r){
         if (!r || !r.ok) { OCCUPE = false; bmig.disabled = false; dire(expliquer(r), 'err'); return; }
         if (r.echecs && r.echecs.length) ECHECS = ECHECS.concat(r.echecs);
         return charger().then(function(bon){
           if (!bon) { OCCUPE = false; return; }
-          if (!E.base64) { OCCUPE = false; bmig.disabled = true; dessiner(); dire('Terminé : toutes les images sont dans le seau.', 'bon'); return; }
+          if (!E.base64) { OCCUPE = false; bmig.disabled = true; dessiner(); dire('${T("Terminé : toutes les images sont dans le seau.")}', 'bon'); return; }
           if (E.fiches.length >= avant) {
             OCCUPE = false; bmig.disabled = false; dessiner();
-            dire('Arrêté : le dernier tour n’a rien fait avancer. Voyez les échecs ci-dessus.', 'err');
+            dire('${T("Arrêté : le dernier tour n’a rien fait avancer. Voyez les échecs ci-dessus.")}', 'err');
             return;
           }
-          if (tours > 400) { OCCUPE = false; bmig.disabled = false; dessiner(); dire('Arrêté par sécurité après 400 tours. Relancez pour continuer.', 'att'); return; }
+          if (tours > 400) { OCCUPE = false; bmig.disabled = false; dessiner(); dire('${T("Arrêté par sécurité après 400 tours. Relancez pour continuer.")}', 'att'); return; }
           dessiner();
           return tour();
         });
