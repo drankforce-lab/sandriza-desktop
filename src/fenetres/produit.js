@@ -382,7 +382,7 @@ function pageProduit(id) {
       // vérifié. Il se calcule dès que la catégorie est choisie.
       + '<div class="ch"><label for="p-sku">${T("Code (SKU)")}</label>'
       + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
-      + 'background:var(--f-pied);color:var(--tx-or)" placeholder="choisissez une catégorie"></div>'
+      + 'background:var(--f-pied);color:var(--tx-or)" placeholder="${T("choisissez une catégorie")}"></div>'
       + ch('p-marque', 'Marque')
       // Le poids appartient a l identite du vetement, pas au prix : c est une
       // caracteristique de l article, et il tenait seul dans une carte entiere.
@@ -415,7 +415,7 @@ function pageProduit(id) {
       + ch('p-prix', '${T("Prix de vente ($)")}', { requis: true, argent: true })
       + '<div class="ch"><label for="p-solde">${T("Prix soldé ($)")}'
       + '<span id="p-pastille" class="pastille"></span></label>'
-      + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="aucun">'
+      + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="${T("aucun")}">'
       + '<div id="p-rabais" class="rabais"></div></div>'
       + ch('p-cout', '${T("Coût d’acquisition ($)")}', { requis: true, argent: true })
       + '</div>'
@@ -437,7 +437,7 @@ function pageProduit(id) {
       // Les jetons montrent les couleurs CHOISIES ; la recherche sert a en
       // ajouter, du referentiel ou hors referentiel.
       + '<div class="rech" style="margin-bottom:.4rem;position:relative">'
-      + '<input aria-label="Chercher une couleur, ou en saisir une nouvelle" id="p-coul-libre" autocomplete="off" placeholder="Chercher une couleur, ou en saisir une nouvelle…">'
+      + '<input aria-label="${T("Chercher une couleur, ou en saisir une nouvelle")}" id="p-coul-libre" autocomplete="off" placeholder="${T("Chercher une couleur, ou en saisir une nouvelle…")}">'
       + '<button type="button" id="p-coul-add">Ajouter</button>'
       + '<div id="p-coul-sug"></div></div>'
       + '<div class="jetons" id="p-couleurs"></div>'
@@ -458,7 +458,7 @@ function pageProduit(id) {
       + '<div class="carte"><h2 id="p-vues-titre">Photos</h2>'
       + '<div class="ligne-photos">'
       + '<div class="vue-principale">'
-      + '<div class="vign" id="p-vign" title="${T("Photo principale")} — cliquer pour choisir, ou déposer une secondaire ici">choisir une photo</div>'
+      + '<div class="vign" id="p-vign" title="${T("Photo principale — cliquer pour choisir, ou déposer une secondaire ici")}">${T("choisir une photo")}</div>'
       + '<div class="lgd-principale">${T("Photo principale")}</div>'
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
       + 'title="${T("Détourer la photo et poser un décor (studio, jardin, Paris…)")}"><span class="ic">✂</span> ${T("Décor")}</button>'
@@ -476,7 +476,7 @@ function pageProduit(id) {
       + '<div class="aide" id="p-parcoul-aide" style="margin-bottom:.5rem"></div>'
       + '<div class="vues" id="p-parcoul"></div>'
       + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
-      + 'title="Teinter les photos du produit pour chaque couleur — local, sans crédit ni service">'
+      + 'title="${T("Teinter les photos du produit pour chaque couleur — local, sans crédit ni service")}">'
       + '${T("Tout générer")}</button></div></div></div>');
 
     // 6 — Détails
@@ -533,8 +533,8 @@ function pageProduit(id) {
       // vit dans l INFOBULLE, comme le veut la regle des encarts qui expliquent
       // ce que l ecran montre deja.
       + '<div class="ch"><label for="p-limclient">${T("Limite par client")}</label>'
-      + '<input id="p-limclient" type="number" min="1" step="1" placeholder="aucune" '
-      + 'title="Unités de ce produit qu’un même client peut acheter, toutes commandes confondues (par adresse courriel)."></div>'
+      + '<input id="p-limclient" type="number" min="1" step="1" placeholder="${T("aucune")}" '
+      + 'title="${T("Unités de ce produit qu’un même client peut acheter, toutes commandes confondues (par adresse courriel).")}"></div>'
       + '</div></div></div>');
 
     // 7 — Stock
@@ -550,7 +550,7 @@ function pageProduit(id) {
           : '<div class="aide" style="margin:-.2rem 0 .5rem;color:var(--tx-att)"><span class="ic">⚠</span> ${T("Aucun emplacement ")}'
             + '${T("configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux")} '
             + '${T("variantes en stock.")}</div>')
-      + '<div class="rech"><input aria-label="Filtrer par taille ou couleur" placeholder="Filtrer par taille ou couleur…"><span class="cpt" id="p-somme"></span></div>'
+      + '<div class="rech"><input aria-label="${T("Filtrer par taille ou couleur")}" placeholder="${T("Filtrer par taille ou couleur…")}"><span class="cpt" id="p-somme"></span></div>'
       + '<div class="lgstk entete"><span class="c1">${T("Taille")}</span><span class="c2">${T("Couleur")}</span>'
       + '<span class="c3">${T("Quantité")}</span><span class="c4">${T("Entrepôt")}</span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
@@ -1080,7 +1080,7 @@ function pageProduit(id) {
       var trop = fs.filter(function(f){ return f.size > MAX_MO * 1024 * 1024; });
       fs = fs.filter(function(f){ return f.size <= MAX_MO * 1024 * 1024; });
       if (trop.length) {
-        dire(trop.length + (trop.length > 1 ? ' photos ignorées : plus de ' : ' photo ignorée : plus de ')
+        dire(trop.length + (trop.length > 1 ? '${T(" photos ignorées : plus de ")}' : '${T(" photo ignorée : plus de ")}')
           + MAX_MO + ' Mo.', 'att');
       }
       if (!fs.length) return;
@@ -1126,8 +1126,8 @@ function pageProduit(id) {
         // ⚠ « INDISPONIBLE » N EST PAS « VIDE ». Un refus du pont affiche ici son
         // motif : sans lui, on croirait la photothèque vide et l on importerait
         // a la main sans jamais savoir qu elle n avait pas repondu.
-        corps = '<p style="font-size:.86rem;line-height:1.5;color:var(--tx-att)">Photothèque '
-          + 'indisponible : ' + esc(expliquer(r)) + '</p>';
+        corps = '<p style="font-size:.86rem;line-height:1.5;color:var(--tx-att)">${T("Photothèque")} '
+          + '${T("indisponible : ")}' + esc(expliquer(r)) + '</p>';
       } else if (r.photos.length) {
         // ⚠ ON MONTRE LE CODE DE L ARTICLE QUI SE SERT DEJA DE CETTE PHOTO.
         // Deux articles peuvent porter des noms voisins ; le SKU, lui, ne trompe
@@ -1153,15 +1153,15 @@ function pageProduit(id) {
               + '</div>';
           }).join('') + '</div>';
       } else {
-        corps = '<p style="font-size:.86rem;line-height:1.5;color:var(--tx2)">La photothèque est vide. '
-          + 'Elle se remplit par <strong>Catalogue → Photos</strong>, dans la fenêtre principale, '
-          + 'et repart à zéro à chaque démarrage de l’application.</p>';
+        corps = '<p style="font-size:.86rem;line-height:1.5;color:var(--tx2)">${T("La photothèque est vide. ")}'
+          + '${T("Elle se remplit par ")}<strong>${T("Catalogue → Photos")}</strong>${T(", dans la fenêtre principale, ")}'
+          + '${T("et repart à zéro à chaque démarrage de l’application.")}</p>';
       }
-      v.innerHTML = '<div class="boite" style="max-width:620px"><h3 style="color:var(--tx-creme)">Photothèque</h3>'
+      v.innerHTML = '<div class="boite" style="max-width:620px"><h3 style="color:var(--tx-creme)">${T("Photothèque")}</h3>'
         + corps
         + '<div class="pied2" style="justify-content:space-between">'
-        + '<button type="button" id="th-fich"><span class="ic">📂</span> Importer de l’ordinateur…</button>'
-        + '<button type="button" id="th-non">Annuler</button></div></div>';
+        + '<button type="button" id="th-fich"><span class="ic">📂</span> ${T("Importer de l’ordinateur…")}</button>'
+        + '<button type="button" id="th-non">${T("Annuler")}</button></div></div>';
       document.body.appendChild(v);
       document.getElementById('th-non').onclick = function(){ v.remove(); };
       document.getElementById('th-fich').onclick = function(){
@@ -1172,7 +1172,7 @@ function pageProduit(id) {
         var p2 = ev.target.closest('.ph'); if (!p2) return;
         v.remove();
         surChoix([p2.getAttribute('data-src')]);
-        dire('Photo reprise de la photothèque.', 'bon');
+        dire('${T("Photo reprise de la photothèque.")}', 'bon');
       });
     });
   }
@@ -1187,8 +1187,8 @@ function pageProduit(id) {
     if (bm) bm.disabled = !src;
     v.innerHTML = src
       ? '<img src="' + esc(src) + '" alt="">'
-        + '<button type="button" class="x" id="p-vider" title="Retirer la photo">×</button>'
-      : 'choisir une photo';
+        + '<button type="button" class="x" id="p-vider" title="${T("Retirer la photo")}">×</button>'
+      : '${T("choisir une photo")}';
   }
 
   /* ── GLISSER-DEPOSER DES PHOTOS (demande le 2026-08-08) ──
@@ -1438,7 +1438,7 @@ function pageProduit(id) {
     // de retour d un article par ailleurs normal. Les confondre ferait perdre
     // l un des deux a chaque ouverture.
     poser('p-regime', p.liquidation ? 'liq' : (p.finalSale ? 'final' : 'normal'));
-    poser('p-retours', p.noReturn ? 'aucun' : 'ok');
+    poser('p-retours', p.noReturn ? '${T("aucun")}' : 'ok');
     (p.sizes || []).forEach(function(t){
       var j = document.querySelector('#p-tailles .jeton[data-t="' + String(t).replace(/"/g, '') + '"]');
       if (j) j.classList.add('on');
@@ -1669,7 +1669,7 @@ function pageProduit(id) {
       + '<option value="upper_body">${T("Hauts / Vestes / Manteaux")}</option>'
       + '<option value="lower_body">${T("Bas — Pantalons / Jupes")}</option></select></div>'
       + '<div class="ch"><label for="ia-desc">${T("Description courte")}</label>'
-      + '<input id="ia-desc" type="text" placeholder="Ex : robe fleurie été"></div></div>'
+      + '<input id="ia-desc" type="text" placeholder="${T("Ex : robe fleurie été")}"></div></div>'
       + '<div id="ia-zone" style="background:var(--f-0f1826);border-radius:10px;min-height:10rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
       + '<div class="pied2"><button type="button" id="ia-non">Fermer</button>'
@@ -1968,7 +1968,7 @@ function pageProduit(id) {
       h += sec('${T("Enregistrées — dernières 24 h")}')
         + RECENT.entrees.map(function(e){
             var k = String(e.ts), vu = !!OUVERT[k];
-            return '<div class="bl cliq" data-qui="' + esc(k) + '" title="Cliquer pour voir qui a fait cette modification">'
+            return '<div class="bl cliq" data-qui="' + esc(k) + '" title="${T("Cliquer pour voir qui a fait cette modification")}">'
               + '<div class="qd"><span title="' + esc(dateCourte(e.ts)) + '">' + esc(ilYa(e.ts)) + '</span>'
               + '<span style="opacity:.7">' + (vu ? '▴' : '▾') + '</span></div>'
               + (e.changements || []).map(function(c){
@@ -2130,7 +2130,7 @@ function pageProduit(id) {
     // croit tout retrouver.
     poser('p-regime', f.regime === 'liq' || f.regime === '3' ? 'liq'
       : (f.regime === 'final' || f.regime === '1' ? 'final' : 'normal'));
-    poser('p-retours', f.retours === 'aucun' || f.regime === '4' ? 'aucun' : 'ok');
+    poser('p-retours', f.retours === '${T("aucun")}' || f.regime === '4' ? '${T("aucun")}' : 'ok');
     majRegime();
     // ⚠ L UNITÉ ET SA MÉMOIRE VONT ENSEMBLE. dataset.prec sert à convertir le
     // poids au changement d'unité ; le laisser sur « g » après avoir restauré
@@ -2250,7 +2250,7 @@ function pageProduit(id) {
           + '<p>${T("Le prix de vente effectif (")}<strong>' + eff.toFixed(2) + ' $</strong>${T(") est inférieur ")}'
           + '${T("au coût d’acquisition (")}<strong>' + cout.toFixed(2) + ' $</strong>).</p>'
           + '<div class="ch"><label for="bc-raison">${T("Raison ")}<span class="req">*</span></label>'
-          + '<textarea id="bc-raison" rows="3" placeholder="Écoulement de fin de série, article abîmé…"></textarea></div>'
+          + '<textarea id="bc-raison" rows="3" placeholder="${T("Écoulement de fin de série, article abîmé…")}"></textarea></div>'
           + (exige ? '<div class="ch" style="margin-top:.5rem"><label for="bc-nip">${T("Code d’autorisation ")}<span class="req">*</span></label>'
               + '<input id="bc-nip" type="password" autocomplete="off"></div>' : '')
           + '<div class="msg err" id="bc-err" style="min-height:1.1em;margin-top:.4rem"></div>'

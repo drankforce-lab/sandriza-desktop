@@ -60,7 +60,8 @@ if (traduits.size < 5) {
    motif court trouve toujours quelque chose quelque part, et une fausse faute
    coûte la confiance qu'on a dans les vraies. */
 const src = fs.readFileSync(APPBAR, 'utf8')
-  .replace(/\/\*[\s\S]*?\*\//g, ' ')
+  /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. */
+  .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + ' ')
   .split(String.fromCharCode(10))
   .map((l) => l.replace(/(^|[^:])\/\/.*$/, '$1'))
   .join(String.fromCharCode(10));

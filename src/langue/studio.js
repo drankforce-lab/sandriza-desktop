@@ -639,5 +639,44 @@ module.exports = {
   'Agrandir ×4 Un appel de plus, facturé, après le':
     'Upscale ×4 One more call, billed, after the',
   '· aucun appel facturé Le filigrane est posé dans l’application,':
-    '· no billed call The watermark is placed inside the application,'
+    '· no billed call The watermark is placed inside the application,',
+
+  /* ══ CE QUE LE FAUX COMMENTAIRE CACHAIT (2026-09-13) ════════════════════════
+   * ⚠⚠ `accept="image/*"` ouvrait ici deux commentaires FANTOMES : le poseur et
+   * les deux bancs de langue etaient aveugles sur toute leur longueur.
+   * ⚠ TROIS MOITIES DE PHRASE en sont sorties — « Save tous les reglages actuels
+   * sous un nom », « Remove ce profil » : une cle courte deja posee, la longue
+   * qui n a jamais correspondu, et une phrase juste dans aucune des deux
+   * langues. On ecrit la phrase ENTIERE. */
+  'Enregistrer tous les réglages actuels sous un nom': 'Save every current setting under a name',
+  'Retirer ce profil': 'Remove this profile',
+
+  /* ── LES INFOBULLES, LES TEXTES DE REMPLACEMENT ET LES EXEMPLES ──────────── */
+  'Parcourir la photothèque en grand, avec aperçu': 'Browse the media library large, with a preview',
+  'Rechercher (nom, code, produit, SKU)': 'Search (name, code, product, SKU)',
+  'Rechercher (nom, code, produit, SKU)…': 'Search (name, code, product, SKU)…',
+  'Nom de la recette': 'Recipe name',
+  'Télécharger ce format': 'Download this size',
+  'Déjà traitée': 'Already processed',
+  'Détourée': 'Cut out',
+  'Filtrer les photos sans un traitement donné': 'Filter photos without a given treatment',
+  'Glissez une photo ici, ou cliquez pour en choisir une':
+    'Drop a photo here, or click to choose one',
+  'Studio, fond blanc, un vêtement — JPEG ou PNG':
+    'Studio, white background, one garment — JPEG or PNG',
+  'Explorateur…': 'Browser…',
+  /* ⚠ La forme RENDUE, pour le compteur : le signe vit dans son <span> dans la
+     source, mais la page ecrite le lit d un seul tenant. */
+  '🗂️ Explorateur…': '🗂️ Browser…',
+  'Recherche…': 'Searching…',
+  /* ⚠ Les deux volets du comparateur : leur `alt` est ce que le lecteur d ecran
+     annonce pour distinguer la photo d origine du resultat. */
+  'avant': 'before',
+  'après': 'after',
+  'résultat': 'result',
+  /* ⚠ DEUX EXEMPLES DE NOM INTERNE — une recette de traitement et un lot. Ni
+     l un ni l autre ne sort de l administration : ils suivent la langue du
+     poste. */
+  'Ex. : Collection automne — plage dorée': 'Ex.: Autumn collection — golden beach',
+  'Collection automne — détourage': 'Autumn collection — cutout'
 };

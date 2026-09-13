@@ -76,7 +76,9 @@ for (const f of fs.readdirSync(DOSSIER).filter((x) => x.endsWith('.js'))) {
   const src = fs.readFileSync(path.join(DOSSIER, f), 'utf8');
   // Les commentaires ne s affichent pas : un pictogramme dans une fiche ne
   // viole rien, et l y compter rendrait le banc rouge sur de la prose.
-  const nu = src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. Un `/*` colle a une
+     lettre (`accept="image/*"`) n ouvre pas un commentaire. */
+  const nu = src.replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '))
                 .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '))
                 // ⚠ ET LES COMMENTAIRES HTML AUSSI (2026-09-05). Deux fiches de
                 // `caisse.js` vivent dans un littéral de gabarit, donc entre

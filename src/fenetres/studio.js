@@ -1090,12 +1090,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     // ③ Rien de choisi : la zone de dépôt, et l explorateur.
     h += '<div class="depot" id="depot"><span class="gros"><span class="ic">📷</span></span>'
-      + '<span>Glissez une photo ici, ou cliquez pour en choisir une</span>'
-      + '<span class="pt2">Studio, fond blanc, un vêtement — JPEG ou PNG</span></div>'
+      + '<span>${T("Glissez une photo ici, ou cliquez pour en choisir une")}</span>'
+      + '<span class="pt2">${T("Studio, fond blanc, un vêtement — JPEG ou PNG")}</span></div>'
       + '<input type="file" id="fichier" accept="image/*" hidden>'
       + '<div class="pbtn">'
-      + '<button id="ph-explorateur" title="Parcourir la photothèque en grand, avec aperçu">'
-      + '<span class="ic">🗂️</span> Explorateur…</button>'
+      + '<button id="ph-explorateur" title="${T("Parcourir la photothèque en grand, avec aperçu")}">'
+      + '<span class="ic">🗂️</span> ${T("Explorateur…")}</button>'
       + '</div>';
     return h;
   }
@@ -1111,7 +1111,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     var grille = '<div class="phgrille" id="ph-grille">' + phVignettesHtml() + '</div>';
     return '<div class="phbarre"><button id="ph-retour">${T("← Retour")}</button>'
-      + '<input type="search" id="ph-q" aria-label="Rechercher (nom, code, produit, SKU)" placeholder="Rechercher (nom, code, produit, SKU)…" value="' + esc(PH_Q) + '"'
+      + '<input type="search" id="ph-q" aria-label="${T("Rechercher (nom, code, produit, SKU)")}" placeholder="${T("Rechercher (nom, code, produit, SKU)…")}" value="' + esc(PH_Q) + '"'
       + (RO ? ' disabled' : '') + '>'
       + '<span class="phinfo" id="ph-info"></span></div>'
       + phFiltresHtml() + phSelectionHtml() + grille;
@@ -1730,10 +1730,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '>' + esc(o.nom) + '</option>'; }).join('')
       + '</select>'
       + '<button id="rc-enr"' + (RO ? ' disabled' : '')
-      + ' title="${T("Enregistrer")} tous les réglages actuels sous un nom">'
+      + ' title="${T("Enregistrer tous les réglages actuels sous un nom")}">'
       + '<span class="ic">💾</span> ${T("Enregistrer…")}</button>'
       + '<button class="x" id="rc-sup"' + ((RO || !x) ? ' disabled' : '')
-      + ' title="${T("Retirer")} ce profil">✕</button></div>';
+      + ' title="${T("Retirer ce profil")}">✕</button></div>';
   }
   function brancherRecettes(){
     var s = document.getElementById('rc-sel');
@@ -1823,7 +1823,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     voile('<h3><span class="ic">💾</span> ${T("Enregistrer le profil")}</h3>'
       + ''
       + ''
-      + '<p><input type="text" id="rc-nom" aria-label="Nom de la recette" maxlength="60" placeholder="Ex. : Collection automne — plage dorée" '
+      + '<p><input type="text" id="rc-nom" aria-label="${T("Nom de la recette")}" maxlength="60" placeholder="${T("Ex. : Collection automne — plage dorée")}" '
       + 'value="' + esc(x ? x.nom : '') + '"></p>'
       + '<p class="rcav" id="rc-av">' + (x
           ? '${T("Ce nom est celui du profil choisi : il sera <strong>remplacé</strong>.")}'
@@ -2026,8 +2026,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function comparateurHtml(av){
     return '<div class="cmp" id="cmp" style="--x:' + CMP_POS.toFixed(2) + '%">'
-      + '<img src="' + esc(av) + '" alt="avant">'
-      + '<div class="cb"><img src="' + RESULT.image + '" alt="après"></div>'
+      + '<img src="' + esc(av) + '" alt="${T("avant")}">'
+      + '<div class="cb"><img src="' + RESULT.image + '" alt="${T("après")}"></div>'
       + '<div class="cpg" id="cmp-p" role="slider" tabindex="0"'
       + ' aria-label="${T("Position du rideau entre l’avant et l’après")}"'
       + ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(CMP_POS) + '">'
@@ -2160,7 +2160,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<span class="ft">' + esc(f.label) + '</span>'
           + '<span class="fd">' + f.largeur + ' × ' + f.hauteur + '</span>'
           + '<span class="fb">'
-          + '<button data-fdl="' + esc(f.cle) + '" title="Télécharger ce format">⤓</button>'
+          + '<button data-fdl="' + esc(f.cle) + '" title="${T("Télécharger ce format")}">⤓</button>'
           + '<button data-fsv="' + esc(f.cle) + '"' + (f.enreg ? ' disabled' : '')
           + ' title="${T("Enregistrer dans la photothèque")}">'
       + (f.enreg ? '✓' : '<span class="ic">💾</span>') + '</button>'
@@ -2230,7 +2230,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<button class="jeton' + (CMP ? ' on' : '') + '" id="cmp-on">${T("⇔ Avant / après")}</button>'
         + '<button class="jeton' + (CMP ? '' : ' on') + '" id="cmp-off">${T("Résultat seul")}</button></div>';
     }
-    h += (av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="résultat">');
+    h += (av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="${T("résultat")}">');
     if (RESULT.essai) h += '<div class="filig"><span class="ic">⚠</span> ${T("Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.")}</div>';
     if (RESULT.decorErreur) h += '<div class="filig"><span class="ic">⚠</span> ${T("Le décor n’a pas pu être appliqué :")} ' + esc(RESULT.decorErreur) + '</div>';
     if (RESULT.ignores) h += '<div class="filig"><span class="ic">⚠</span> ${T("Le service a <strong>ignoré</strong> : ")}'
@@ -2569,8 +2569,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // Les pastilles disent ce qu on ne devine pas d une vignette : deja
       // traitee (donc deja payee), detouree, rattachee a un produit.
       var pastilles = '';
-      if ((p.faits || []).length) pastilles += '<span class="pt fait" title="Déjà traitée">✓</span>';
-      if (p.isole) pastilles += '<span class="pt" title="Détourée">◇</span>';
+      if ((p.faits || []).length) pastilles += '<span class="pt fait" title="${T("Déjà traitée")}">✓</span>';
+      if (p.isole) pastilles += '<span class="pt" title="${T("Détourée")}">◇</span>';
       if (p.lieId) pastilles += '<span class="pt ic" title="' + esc(p.lieNom || '${T("Produit lié")}') + '"><span class="ic">🔗</span></span>';
       return '<div class="phvig' + (pris ? ' pris' : '') + '" data-ph="' + esc(p.id) + '"'
         + ' title="' + esc(p.nom) + (p.lieNom ? ' — ' + esc(p.lieNom) : '') + '">'
@@ -2594,7 +2594,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (PH_META.filtres || []).map(function(f){ return jeton(f.cle, f.nom); }).join('');
     // Le filtre le plus utile : ce qui n a PAS encore recu tel traitement.
     // Retraiter une photo deja faite coute un appel pour rien.
-    h += '<select id="ph-sans" aria-label="Filtrer les photos sans un traitement donné">'
+    h += '<select id="ph-sans" aria-label="${T("Filtrer les photos sans un traitement donné")}">'
       + '<option value="">${T("Traitement — tous")}</option>'
       + (PH_META.traitements || []).map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (PH_SANS === t.cle ? ' selected' : '')
@@ -2807,7 +2807,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '>' + esc(t.nom) + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="ch"><label for="lot-nom">${T("Nom du lot (pour le retrouver dans le suivi)")}</label>'
-      + '<input id="lot-nom" placeholder="Collection automne — détourage"></div>'
+      + '<input id="lot-nom" placeholder="${T("Collection automne — détourage")}"></div>'
       + '<div id="lot-reg">' + reglagesLotHtml(voieDef) + '</div>'
       + '<label class="rc"><input type="checkbox" id="lot-prio"> '
       + '<span><strong>${T("Priorité haute")}</strong> ${T("— ce lot passe devant ceux qui attendent.")}</span></label>'
@@ -3098,7 +3098,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!reset && PH_FIN) return;
     PH_OCC = true;
     var page = reset ? 0 : (PH_PAGE + 1);
-    majPhInfo(reset ? 'Recherche…' : '${T("Chargement…")}');
+    majPhInfo(reset ? '${T("Recherche…")}' : '${T("Chargement…")}');
     /* ⚠ studio:explorer D ABORD, studio:phototheque EN REPLI : sur un site
        plus ancien la nouvelle op n existe pas, et la fenetre doit continuer de
        marcher — sans filtres, mais elle marche. */

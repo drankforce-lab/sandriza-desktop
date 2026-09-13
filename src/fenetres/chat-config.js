@@ -252,9 +252,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
     for (var i=0;i<AGENTS.length;i++){ var a = AGENTS[i];
       h += '<div class="agent">'
-        + '<input type="checkbox" data-ag-actif="'+i+'"'+(a.actif?' checked':'')+dis+' style="width:15px;height:15px;accent-color:#c9a97e;flex:0 0 auto">'
-        + '<input class="t nom" data-ag-nom="'+i+'" value="'+esc(a.nom)+'" placeholder="Nom"'+dis+'>'
-        + '<input class="t ph" data-ag-photo="'+i+'" value="'+esc(a.photo)+'" placeholder="URL de la photo (vide = sans photo)"'+dis+'>'
+        /* ⚠ TROIS NOMS ACCESSIBLES QUI MANQUAIENT. Ces champs sont dans une
+           LISTE : ils n ont pas d etiquette, et le lecteur d ecran annoncait
+           trois fois « zone de texte » sans dire de quel agent. Le placeholder
+           ne compte pas — il disparait des qu on tape. */
+        + '<input type="checkbox" aria-label="Agent actif" data-ag-actif="'+i+'"'+(a.actif?' checked':'')+dis+' style="width:15px;height:15px;accent-color:#c9a97e;flex:0 0 auto">'
+        + '<input class="t nom" aria-label="Nom de l’agent" data-ag-nom="'+i+'" value="'+esc(a.nom)+'" placeholder="Nom"'+dis+'>'
+        + '<input class="t ph" aria-label="URL de la photo de l’agent" data-ag-photo="'+i+'" value="'+esc(a.photo)+'" placeholder="URL de la photo (vide = sans photo)"'+dis+'>'
         + (RO ? '' : '<button class="mini" type="button" data-ag-imp="'+i+'" title="Importer une photo"><span class="ic">📁</span></button>')
         + (a.photo ? '<img class="vign" src="'+esc(a.photo)+'" alt="">' : '<span class="sansph"><span class="ic">👤</span></span>')
         + (RO ? '' : '<button class="b danger" type="button" data-ag-suppr="'+i+'" title="Retirer cet agent">✕</button>')

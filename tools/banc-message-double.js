@@ -42,7 +42,8 @@ const DOSSIER = path.join(__dirname, '..', 'src', 'fenetres');
    On les blanchit avant d'analyser, sinon le banc s'accuse lui-même. */
 function sansCommentaires(src) {
   return src
-    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. */
+    .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '))
     .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '));
 }
 

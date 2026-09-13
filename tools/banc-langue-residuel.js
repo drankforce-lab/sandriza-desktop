@@ -140,19 +140,37 @@ const LEXIQUE = (() => {
  *
  * ⚠ LES CHIFFRES NE SE REMONTENT JAMAIS. Si une ligne doit grandir, c est qu on
  * a ajoute du francais : c est la faute qu il faut corriger, pas le plafond. */
-/* 2026-09-13 : `commande` et `campagnes` sont tombees a zero, leurs lignes sont
-   parties. 131 -> 108, dans 7 fenetres. */
-const DETTE = new Map([
-  ['commandes', 19], ['inventaire', 16],
-  ['invmeta', 11], ['photos', 18], ['produit', 14], ['promo-editeur', 13],
-  ['studio', 17],
-]);
+/* ⚠⚠⚠ LA DETTE EST A ZERO DEPUIS LE 2026-09-13, ET LA TABLE RESTE — VIDE.
+ * Les neuf fenetres declarees le 2026-09-12 (131 textes) sont toutes tombees :
+ * campagnes, commande, commandes, inventaire, invmeta, photos, produit,
+ * promo-editeur, studio. La table vide ne coute rien et dit deux choses qu une
+ * table supprimee ne dirait plus : que le mecanisme existe, et qu il sert a
+ * DESCENDRE. La prochaine fenetre traduite y ecrira son nombre le jour ou elle
+ * en aura un, au lieu de le porter sans le dire.
+ *
+ * ⚠⚠ CE QUE LA JOURNEE A APPRIS SUR LES PLAFONDS. `photos` et `studio` ont
+ * d abord MONTE — 18 -> 25 et 17 -> 20 — sans qu une ligne de francais ait ete
+ * ajoutee. C est la MESURE qui avait change : un `/*` dans une chaine
+ * (`accept="image/*"`) ouvrait un commentaire FANTOME qui cachait des milliers
+ * de caracteres a ce banc. Un plafond ne vaut que ce que vaut l instrument qui
+ * l a pose, et un plafond qui monte n est pas toujours une faute nouvelle : il
+ * faut regarder si l oeil ne vient pas de s ouvrir. */
+const DETTE = new Map([]);
 
 /* ⚠ CE QUI N EST PAS DU TEXTE, meme quand ca porte des mots francais : un
    selecteur (`[data-onglet]`, `.ligne[data-v]`), un attribut technique
    (`class="fait"`), une adresse. Les accuser noierait le signal. */
 const PAS_DU_TEXTE = [
   /^[.#[]/,                                    // un selecteur
+  /* ⚠ UNE LISTE DE SELECTEURS NE COMMENCE PAS FORCEMENT PAR UN POINT. Le banc
+     reclamait la traduction de
+     `button, [data-voie], [data-preset], [data-ph], .depot` (studio) : la ligne
+     commence par un nom de balise, donc la borne du dessus ne la voyait pas.
+     ⚠ La signature est celle d une LISTE de selecteurs — au moins un membre qui
+     est un attribut entre crochets, ou une classe, separes par des virgules. Une
+     phrase francaise n en porte pas. Un banc qui accuse a tort finit par ne plus
+     etre lu, et c est le plus cher des defauts pour un banc. */
+  /^[\w.#[][^,]*(?:,\s*[.#[][^,]*)+$/,         // une liste de selecteurs
   /^[a-z-]+="[^"]*"$/i,                        // un attribut nu
   /^https?:\/\//i,                             // une adresse
   /^[\w-]+\[[^\]]*\]$/,                        // balise[attribut]

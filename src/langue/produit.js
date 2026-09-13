@@ -350,5 +350,74 @@ module.exports = {
   'Détourer la photo et poser un décor (studio, jardin, Paris…)':
     'Cut out the photo and set a scene (studio, garden, Paris…)',
   'Faire porter le vêtement par un modèle (IA Fal.ai — chaque génération consomme des crédits)':
-    'Have the garment worn by a model (Fal.ai AI — each generation uses credits)'
+    'Have the garment worn by a model (Fal.ai AI — each generation uses credits)',
+
+  /* ── LES INFOBULLES, LES EXEMPLES ET LES ATTRIBUTS DU SCRIPT ───────────────
+     ⚠ La fiche produit fabrique tout son HTML DANS le script : ses `title`, ses
+     `placeholder` et ses `aria-label` n etaient lus par aucun banc avant le
+     2026-09-12. Trois d entre eux sont le seul endroit ou une regle est
+     EXPLIQUEE — la limite par cliente, le teintage local, l historique. */
+  'Photo principale — cliquer pour choisir, ou déposer une secondaire ici':
+    'Main photo — click to choose, or drop a secondary one here',
+  'choisir une photo': 'choose a photo',
+  'Retirer la photo': 'Remove the photo',
+  'choisissez une catégorie': 'choose a category',
+  'Chercher une couleur, ou en saisir une nouvelle': 'Search a colour, or type a new one',
+  'Chercher une couleur, ou en saisir une nouvelle…': 'Search a colour, or type a new one…',
+  'Filtrer par taille ou couleur': 'Filter by size or colour',
+  'Filtrer par taille ou couleur…': 'Filter by size or colour…',
+  'Teinter les photos du produit pour chaque couleur — local, sans crédit ni service':
+    'Tint the product photos for each colour — local, no credits, no service',
+  'Unités de ce produit qu’un même client peut acheter, toutes commandes confondues (par adresse courriel).':
+    'Units of this product a single customer may buy, across all orders (per email address).',
+  'Cliquer pour voir qui a fait cette modification': 'Click to see who made this change',
+  /* ⚠ « aucun » et « aucune » sont des EXEMPLES de champ vide : le prix soldé et
+     la limite par cliente. Un champ laisse vide ne vaut pas « aucun » ecrit —
+     rien n est enregistre, seul l exemple change de langue. */
+  'aucun': 'none',
+  'aucune': 'none',
+  /* ⚠ CES DEUX EXEMPLES-LA SUIVENT LA LANGUE DU POSTE. La description courte
+     part vers le service d images et ne s enregistre pas ; le motif d ajustement
+     de stock est relu dans l administration. Ni l un ni l autre n atteint la
+     cliente — au contraire d un nom de produit ou d un sujet de courriel. */
+  'Ex : robe fleurie été': 'Ex: floral summer dress',
+  'Écoulement de fin de série, article abîmé…': 'End-of-line clearance, damaged item…',
+
+  /* ══ LA PHOTOTHEQUE — CE QUE LE FAUX COMMENTAIRE CACHAIT ═══════════════════
+   * ⚠⚠ `e.accept = 'image/*'` ouvrait ici un commentaire FANTOME de 6 600
+   * caracteres : le poseur n a jamais enveloppe la boite de la photothèque, ni
+   * le refus de fichier trop lourd, ni meme `title="Retirer la photo"` dont la
+   * cle etait pourtant ecrite. Le banc du residuel ne les voyait pas non plus —
+   * ils sont sortis le jour ou la borne du `/*` a ete posee.
+   * ⚠ La phrase de la photothèque vide est coupee par deux <strong> : on
+   * traduit les morceaux TELS QUE LA SOURCE LES ECRIT, et « Catalogue → Photos »
+   * est le chemin de menu de la fenetre principale — il suit la meme traduction
+   * que le menu, sinon on envoie la lectrice chercher un ecran qui n existe pas
+   * sous ce nom-la. */
+  ' photos ignorées : plus de ': ' photos ignored: over ',
+  ' photo ignorée : plus de ': ' photo ignored: over ',
+  'Photothèque': 'Media library',
+  'indisponible : ': 'unavailable: ',
+  'La photothèque est vide. ': 'The media library is empty. ',
+  'Elle se remplit par ': 'It fills up through ',
+  'Catalogue → Photos': 'Catalogue → Photos',
+  ', dans la fenêtre principale, ': ', in the main window, ',
+  'et repart à zéro à chaque démarrage de l’application.':
+    'and starts over at each launch of the application.',
+  'Importer de l’ordinateur…': 'Import from the computer…',
+  'Photo reprise de la photothèque.': 'Photo taken from the media library.',
+  /* ⚠⚠ LA FORME RENDUE, A COTE DE LA FORME DE LA SOURCE. Les six cles ci-dessus
+     sont ce que la SOURCE ecrit — avec leurs espaces de bord, et le pictogramme
+     dans son propre <span>. `banc-langue-fenetres` interroge la page une fois
+     ECRITE : il y lit « 📂 Importer de l’ordinateur… » d un seul tenant, et les
+     morceaux separes par un <strong> recolles. Les deux formes ne sont pas un
+     doublon : elles repondent a deux questions differentes, et il faut les
+     deux. */
+  'photos ignorées : plus de': 'photos ignored: over',
+  'photo ignorée : plus de': 'photo ignored: over',
+  'indisponible :': 'unavailable:',
+  'La photothèque est vide.': 'The media library is empty.',
+  'Elle se remplit par Catalogue → Photos , dans la fenêtre principale,':
+    'It fills up through Catalogue → Photos , in the main window,',
+  '📂 Importer de l’ordinateur…': '📂 Import from the computer…'
 };

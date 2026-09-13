@@ -236,7 +236,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? '${T("Utilisée — suppression bloquée")}' : '${T("Retirer")}') + '">×</button>' : '';
       return '<span class="chip">' + esc(s.nom) + lock + x + '</span>';
     }).join('');
-    var inp = D.peut.edit ? '<input id="sz-input" aria-label="Ajouter une taille" placeholder="' + (D.sizes.length ? '${T("Ajouter une taille…")}' : '${T("Ex : 46, OS, 2XL…")}') + '" autocomplete="off">' : '';
+    var inp = D.peut.edit ? '<input id="sz-input" aria-label="${T("Ajouter une taille")}" placeholder="' + (D.sizes.length ? '${T("Ajouter une taille…")}' : '${T("Ex : 46, OS, 2XL…")}') + '" autocomplete="off">' : '';
     return '<p class="aide">${T("Ces tailles s’affichent dans le formulaire d’édition des produits.")}</p>'
       + '<div class="chips">' + chips + inp + '</div>'
       + (D.peut.edit ? '<div class="aide" style="margin:.5rem 0 0">${T("Tapez une taille puis <strong>Entrée</strong> ou <strong>,</strong> — ou collez-en plusieurs séparées par des virgules. <strong>Retour arrière</strong> (champ vide) retire la dernière.")}</div>' : '');
@@ -246,7 +246,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueAttr(type){
     var items = D[type] || [];
     var addRow = (ADDING === type) ? '<tr class="edit">'
-      + '<td><input aria-label="clé (ex: sport-luxe)" class="tinp mono" id="at-key" placeholder="clé (ex: sport-luxe)"></td>'
+      + '<td><input aria-label="${T("clé (ex: sport-luxe)")}" class="tinp mono" id="at-key" placeholder="${T("clé (ex: sport-luxe)")}"></td>'
       + '<td><input aria-label="${T("Étiquette FR")}" class="tinp" id="at-fr" placeholder="${T("Étiquette FR")}"></td>'
       + '<td><input aria-label="${T("Étiquette EN")}" class="tinp" id="at-en" placeholder="${T("Étiquette EN")}"></td>'
       + '<td style="text-align:right"><button class="ic prim" data-attrsave="' + type + '">✓</button> '
@@ -259,7 +259,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td style="text-align:right">' + rm + '</td></tr>';
     }).join('');
     var empty = (!items.length && ADDING !== type) ? '<tr><td colspan="4" class="vide">${T("Aucun élément — cliquez sur + pour en ajouter.")}</td></tr>' : '';
-    var plus = (D.peut.edit && ADDING !== type) ? '<button class="ic plus" data-attradd="' + type + '" title="Ajouter">＋</button>' : '';
+    var plus = (D.peut.edit && ADDING !== type) ? '<button class="ic plus" data-attradd="' + type + '" title="${T("Ajouter")}">＋</button>' : '';
     return '<p class="aide">${T("Utilisés comme filtres dans la boutique et dans le formulaire produit.")}</p>'
       + '<div class="carte"><table><thead><tr><th>${T("Clé interne")}</th><th>${T("Étiquette FR")}</th><th>${T("Étiquette EN")}</th>'
       + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
@@ -271,9 +271,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var items = D.labels || [];
     var addRow = (ADDING === 'labels') ? '<tr class="edit">'
       + '<td style="color:var(--tx2);font-size:.78rem">${T("aperçu à l’ajout")}</td>'
-      + '<td><input aria-label="${T("Nom FR")} (ex: Coup de cœur)" class="tinp" id="lb-fr" placeholder="${T("Nom FR")} (ex: Coup de cœur)"></td>'
+      + '<td><input aria-label="${T("Nom FR (ex: Coup de cœur)")}" class="tinp" id="lb-fr" placeholder="${T("Nom FR (ex: Coup de cœur)")}"></td>'
       + '<td><input aria-label="${T("Nom EN")}" class="tinp" id="lb-en" placeholder="${T("Nom EN")}"></td>'
-      + '<td><input type="color" id="lb-color" aria-label="${T("Couleur")} de l’étiquette" value="#c0392b" style="width:44px;height:32px;padding:2px"></td>'
+      + '<td><input type="color" id="lb-color" aria-label="${T("Couleur de l’étiquette")}" value="#c0392b" style="width:44px;height:32px;padding:2px"></td>'
       + '<td style="text-align:right"><button class="ic prim" data-labelsave="1">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(l){
@@ -285,7 +285,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td style="text-align:right">' + rm + '</td></tr>';
     }).join('');
     var empty = (!items.length && ADDING !== 'labels') ? '<tr><td colspan="5" class="vide">${T("Aucune étiquette — cliquez sur + pour en ajouter.")}</td></tr>' : '';
-    var plus = (D.peut.edit && ADDING !== 'labels') ? '<button class="ic plus" data-attradd="labels" title="Ajouter">＋</button>' : '';
+    var plus = (D.peut.edit && ADDING !== 'labels') ? '<button class="ic plus" data-attradd="labels" title="${T("Ajouter")}">＋</button>' : '';
     return ''
       + '<div class="carte"><table><thead><tr><th>${T("Aperçu")}</th><th>${T("Nom FR")}</th><th>${T("Nom EN")}</th><th>${T("Couleur")}</th>'
       + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
@@ -295,11 +295,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ ONGLET COULEURS ═══════════════════════════════════════════════════════ */
   function secAdd(){
     return '<div class="rangee">'
-      + '<div class="champ"><label for="inv-color-name">Nom</label><input id="inv-color-name" placeholder="Ex: corail rosé" style="width:170px"></div>'
+      + '<div class="champ"><label for="inv-color-name">${T("Nom")}</label><input id="inv-color-name" placeholder="${T("Ex: corail rosé")}" style="width:170px"></div>'
       + '<div class="champ"><label for="inv-color-hex">${T("Valeur hex")}</label><div style="display:flex;gap:.35rem;align-items:center">'
       +   '<input id="inv-color-hex" placeholder="#FF6B6B" class="mono" style="width:105px">'
-      +   '<input type="color" id="inv-color-picker" aria-label="Choisir la couleur au nuancier" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
-      + '<div class="champ"><label>${T("Ou chercher par nom")}</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> Chercher</button></div>'
+      +   '<input type="color" id="inv-color-picker" aria-label="${T("Choisir la couleur au nuancier")}" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
+      + '<div class="champ"><label>${T("Ou chercher par nom")}</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> ${T("Chercher")}</button></div>'
       + '</div>'
       + (CVARIANTS && CVARIANTS.length ? '<div style="margin-top:.6rem"><div class="aide" style="margin:0 0 .35rem">' + CVARIANTS.length + ' variante' + plur(CVARIANTS.length) + ' ${T("— cliquez pour choisir")}</div><div class="swatches">'
           + CVARIANTS.map(function(v){ return '<button class="sw" data-pick="' + esc(v.nom) + '|' + esc(v.hex) + '"><span class="pt" style="background:' + esc(v.hex) + '"></span><span class="nm">' + esc(v.nom) + '</span></button>'; }).join('')
@@ -376,7 +376,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function catEditRow(cat){
     var isNew = !cat;
     return '<tr class="edit">'
-      + '<td><input type="color" id="ic-color" aria-label="${T("Couleur")} de la catégorie" value="' + (cat ? esc(cat.color) : '#888888') + '" style="width:38px;height:30px;padding:2px"></td>'
+      + '<td><input type="color" id="ic-color" aria-label="${T("Couleur de la catégorie")}" value="' + (cat ? esc(cat.color) : '#888888') + '" style="width:38px;height:30px;padding:2px"></td>'
       + '<td><input aria-label="${T("Nom FR")}" class="tinp" id="ic-name" value="' + (cat ? esc(cat.name) : '') + '" placeholder="${T("Nom FR")}"></td>'
       + '<td><input aria-label="${T("Nom EN")}" class="tinp" id="ic-nameen" value="' + (cat ? esc(cat.nameEN) : '') + '" placeholder="${T("Nom EN")}"></td>'
       + '<td><input aria-label="slug" class="tinp mono" id="ic-key" value="' + (cat ? esc(cat.catKey) : '') + '" placeholder="slug"' + (isNew ? '' : ' readonly style="opacity:.55"') + '></td>'
@@ -385,8 +385,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          lecteur d ecran annonce << case a cocher, cochee >> deux fois de suite,
          et l on ne sait pas laquelle des deux on vient de decocher. Le nom
          reprend l en-tete de sa colonne (IA, Photos). */
-      + '<td style="text-align:center"><input type="checkbox" id="ic-ai" aria-label="Traitement par IA" ' + (!cat || cat.aiOn ? 'checked' : '') + ' data-excl="simple"></td>'
-      + '<td style="text-align:center"><input type="checkbox" id="ic-simple" aria-label="Photos simples" ' + (cat && cat.simpleOn ? 'checked' : '') + ' data-excl="ai"></td>'
+      + '<td style="text-align:center"><input type="checkbox" id="ic-ai" aria-label="${T("Traitement par IA")}" ' + (!cat || cat.aiOn ? 'checked' : '') + ' data-excl="simple"></td>'
+      + '<td style="text-align:center"><input type="checkbox" id="ic-simple" aria-label="${T("Photos simples")}" ' + (cat && cat.simpleOn ? 'checked' : '') + ' data-excl="ai"></td>'
       + '<td style="text-align:center;color:var(--tx2)">' + (isNew ? '—' : cat.used) + '</td>'
       + '<td style="text-align:right"><button class="ic prim" data-catsave="' + (cat ? esc(cat.id) : '') + '">✓</button> '
       + '<button class="ic" data-catcancel="1">×</button></td></tr>';
@@ -408,11 +408,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td style="text-align:right">' + edit + del + '</td></tr>';
     }).join('');
     var empty = (!cats.length && CATEDIT !== '__new__') ? '<tr><td colspan="9" class="vide">${T("Aucune catégorie — cliquez sur + pour en créer une.")}</td></tr>' : '';
-    var plus = (D.peut.ajout && CATEDIT !== '__new__') ? '<button class="ic plus" data-catadd="1" title="Ajouter">＋</button>' : '';
+    var plus = (D.peut.ajout && CATEDIT !== '__new__') ? '<button class="ic plus" data-catadd="1" title="${T("Ajouter")}">＋</button>' : '';
     return ''
       + '<div class="carte" style="overflow-x:auto"><table><thead><tr>'
       + '<th>${T("Couleur")}</th><th>${T("Nom affiché")}</th><th>${T("Nom EN")}</th><th>${T("Slug")}</th><th>${T("Code SKU")}</th>'
-      + '<th style="text-align:center">IA</th><th style="text-align:center">Photos</th><th style="text-align:center">Produits</th>'
+      + '<th style="text-align:center">${T("IA")}</th><th style="text-align:center">Photos</th><th style="text-align:center">${T("Produits")}</th>'
       + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
       + '<tbody>' + (CATEDIT === '__new__' ? catEditRow(null) : '') + empty + rows + '</tbody></table></div>';
   }
@@ -452,10 +452,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function vueEditColor(){
     return '<div class="voile" id="ec-voile"><div class="boite"><h3>${T("Modifier la couleur")}</h3>'
-      + '<div class="champ" style="margin-bottom:.6rem"><label for="ec-name">Nom</label><input id="ec-name" value="' + esc(EDITCOLOR.nom) + '" style="width:100%"></div>'
+      + '<div class="champ" style="margin-bottom:.6rem"><label for="ec-name">${T("Nom")}</label><input id="ec-name" value="' + esc(EDITCOLOR.nom) + '" style="width:100%"></div>'
       + '<div class="champ"><label for="ec-hex">${T("Valeur hex")}</label><div style="display:flex;gap:.4rem;align-items:center">'
       +   '<input id="ec-hex" value="' + esc(EDITCOLOR.hex) + '" class="mono" style="flex:1">'
-      +   '<input type="color" id="ec-picker" aria-label="Choisir la couleur au nuancier" value="' + (EDITCOLOR.hex.charAt(0) === '#' && EDITCOLOR.hex.length <= 7 ? esc(EDITCOLOR.hex) : '#000000') + '" data-syncEc="1" style="width:38px;height:34px;padding:2px"></div></div>'
+      +   '<input type="color" id="ec-picker" aria-label="${T("Choisir la couleur au nuancier")}" value="' + (EDITCOLOR.hex.charAt(0) === '#' && EDITCOLOR.hex.length <= 7 ? esc(EDITCOLOR.hex) : '#000000') + '" data-syncEc="1" style="width:38px;height:34px;padding:2px"></div></div>'
       + '<div class="pied-boite"><button data-eccancel="1">${T("Annuler")}</button><button class="prim" data-ecsave="1">${T("Enregistrer")}</button></div></div></div>';
   }
 

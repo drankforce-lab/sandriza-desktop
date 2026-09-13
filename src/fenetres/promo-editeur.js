@@ -458,7 +458,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (H > dispoH) { H = dispoH; L = Math.round(H / rap); }
     L = Math.max(80, Math.round(L * ZOOM)); H = Math.max(60, Math.round(H * ZOOM));
     var h = '<div class="scene" id="scene" style="width:' + L + 'px;height:' + H + 'px">';
-    if (IMG) h += '<img src="' + esc(IMG) + '" alt="Aperçu du modèle">';
+    if (IMG) h += '<img src="' + esc(IMG) + '" alt="${T("Aperçu du modèle")}">';
     els().forEach(function(el){
       var cl = 'boite' + (el.id === SEL ? ' sel' : '') + (el.hidden ? ' cache' : '') + (el.locked ? ' verr' : '');
       var rot = nb(el.rot, 0);
@@ -470,7 +470,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (!el.locked) {
           h += '<span class="poi nw" data-poi="nw"></span><span class="poi ne" data-poi="ne"></span>'
             + '<span class="poi sw" data-poi="sw"></span><span class="poi se" data-poi="se"></span>'
-            + '<span class="poi rot" data-poi="rot" title="Faire pivoter"></span>';
+            + '<span class="poi rot" data-poi="rot" title="${T("Faire pivoter")}"></span>';
         }
       }
       h += '</div>';
@@ -498,15 +498,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!M) { aides.innerHTML = ''; return; }
     aides.innerHTML = ''
       + '<button class="btn' + (REPERES.zoneSure ? ' on' : '') + '" type="button" data-repere="zoneSure"'
-      + ' title="La marge à ne pas dépasser — jamais imprimée">${T("Zone sûre")}</button>'
+      + ' title="${T("La marge à ne pas dépasser — jamais imprimée")}">${T("Zone sûre")}</button>'
       + '<button class="btn' + (REPERES.grille ? ' on' : '') + '" type="button" data-repere="grille"'
-      + ' title="Une grille de repère — jamais imprimée">Grille</button>'
+      + ' title="${T("Une grille de repère — jamais imprimée")}">${T("Grille")}</button>'
       + '<button class="btn' + (AIMANT ? ' on' : '') + '" type="button" data-aimant="1"'
-      + ' title="Coller aux bords et au centre pendant le déplacement">Aimant</button>'
+      + ' title="${T("Coller aux bords et au centre pendant le déplacement")}">${T("Aimant")}</button>'
       + '<span style="flex:1 1 auto"></span>'
-      + '<button class="btn" type="button" data-zoom="-1" title="Réduire">−</button>'
-      + '<button class="btn" type="button" data-zoom="0" title="Ajuster à la fenêtre">' + Math.round(ZOOM * 100) + ' %</button>'
-      + '<button class="btn" type="button" data-zoom="1" title="Agrandir">+</button>';
+      + '<button class="btn" type="button" data-zoom="-1" title="${T("Réduire")}">−</button>'
+      + '<button class="btn" type="button" data-zoom="0" title="${T("Ajuster à la fenêtre")}">' + Math.round(ZOOM * 100) + ' %</button>'
+      + '<button class="btn" type="button" data-zoom="1" title="${T("Agrandir")}">+</button>';
   }
 
   function dessinerListe(){
@@ -523,9 +523,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             : (el.kind === 'barcode' ? '${T("Cod")}' : (el.kind === 'line' ? '${T("Lig")}' : '${T("Frm")}')))) + '</span>'
         + '<span class="n">' + esc(el.name || el.text || '${T("Sans nom")}') + '</span>'
         + (el.kind === 'barcode' && CODES[el.id] === false
-            ? '<span class="mal" title="Ce code ne se lira pas au lecteur">✗</span>' : '')
+            ? '<span class="mal" title="${T("Ce code ne se lira pas au lecteur")}">✗</span>' : '')
         + (el.hidden ? '<span class="oeil" title="${T("Masqué")}">◌</span>' : '')
-        + (el.locked ? '<span class="oeil" title="Verrouillé">⌧</span>' : '')
+        + (el.locked ? '<span class="oeil" title="${T("Verrouillé")}">⌧</span>' : '')
         + '</div>';
     });
     lst.innerHTML = h;
@@ -673,7 +673,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function propImage(el){
     var h = '';
     h += '<div class="bloc"><label>${T("Image")}</label>'
-      + (el.src ? '<div class="vign"><img src="' + esc(el.src) + '" alt="${T("Image")} de cet élément"></div>'
+      + (el.src ? '<div class="vign"><img src="' + esc(el.src) + '" alt="${T("Image de cet élément")}"></div>'
                 : '<div class="vign"><span class="p">${T("Aucune image")}</span></div>')
       + '<div class="acts"><button class="btn" type="button" data-choisir="element">${T("Choisir une image…")}</button>'
       + (el.src ? '<button class="btn danger" type="button" data-img-retirer="1">${T("Retirer")}</button>' : '')
@@ -687,7 +687,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="bloc"><label>Orientation</label><div class="acts">'
       + bascule('el:flipH', '${T("⇄ Miroir")}', !!el.flipH)
       + bascule('el:flipV', '${T("⇅ Retourner")}', !!el.flipV)
-      + '<button class="btn" type="button" data-rot90="1" title="Pivoter d’un quart de tour">↻ 90°</button>'
+      + '<button class="btn" type="button" data-rot90="1" title="${T("Pivoter d’un quart de tour")}">↻ 90°</button>'
       + '</div></div>';
     h += '<div class="bloc"><label>Masque</label>'
       + segment('el:mask', [['none', '${T("Aucun")}'], ['circle', '${T("Cercle")}']], el.mask || 'none')
@@ -889,7 +889,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      existe deja. */
   function ajouter(genre){
     if (!M) return;
-    dire('Ajout…');
+    dire('${T("Ajout…")}');
     appeler('promo:elementModele', [genre]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       instantane();

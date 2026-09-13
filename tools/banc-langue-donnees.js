@@ -45,7 +45,9 @@ const DOS = path.join(__dirname, '..', 'src', 'fenetres');
 /* ⚠ Les commentaires d abord retires : cette fiche-ci, comme celles des autres
    bancs, NOMME les motifs interdits pour expliquer pourquoi ils le sont. */
 const nu = (s) => s
-  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. Un `/*` colle a une
+     lettre (`accept="image/*"`) n ouvre pas un commentaire. */
+  .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '))
   .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '));
 
 const ECRITURE = /:(ecrire|enregistrer|creer|poser|modifier|ajouter|envoyer|sauver|appliquer)\b/i;

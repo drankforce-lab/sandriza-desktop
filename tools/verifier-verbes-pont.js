@@ -64,7 +64,8 @@ const PRELOAD = path.join(__dirname, '..', 'src', 'pont-preload.js');
 function blanchir(src) {
   return String(src)
     .replace(/'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"/g, "''")
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. */
+    .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + ' ')
     .replace(/(^|[^:'"])\/\/[^\n]*/g, '$1 ');
 }
 

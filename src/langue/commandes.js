@@ -199,5 +199,44 @@ module.exports = {
   'Expédition': 'Shipping',
   'Préparation': 'Preparation',
   'Détail': 'Detail',
-  'invité': 'guest'
+  'invité': 'guest',
+
+  /* ══ LE TITRE DES DEUX ECRANS ══════════════════════════════════════════════
+   * ⚠⚠ CE FICHIER DESSINE DEUX ECRANS, et son titre se CALCULE avant le
+   * gabarit (`const titre = (m === 'expeditions') ? … : …`). Or `${…}` n
+   * interpole QUE dans un litteral de gabarit : le poseur ne pouvait pas le
+   * toucher, et il le disait — « 1 occurrence HORS du gabarit ». Le T() y est
+   * donc ecrit A LA MAIN, ce qui est le geste prevu pour ce cas.
+   * ⚠ Sans ca, l onglet et le grand titre restaient « Commandes » sur toute la
+   * page anglaise : les deux textes les plus vus de l ecran. */
+  'Commandes': 'Orders',
+  'Expéditions': 'Shipments',
+
+  /* ── LES MOITIES DE PHRASE, REPRISES EN ENTIER ───────────────────────────── */
+  'Statut de la commande': 'Order status',
+  'Supprimer la commande': 'Delete the order',
+
+  /* ── LES INFOBULLES ET LES ATTRIBUTS DU SCRIPT ─────────────────────────────
+     ⚠ « Clic : détails · clic droit : changer le statut » est le SEUL endroit
+     ou le clic droit est enseigne. Sans lui, la moitie de l ecran est cachee. */
+  'Rechercher une commande': 'Search an order',
+  'N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées':
+    'Show only priority orders — the count is of priority orders not yet shipped',
+  'Clic : détails · clic droit : changer le statut':
+    'Click: details · right-click: change the status',
+  'Rattacher cette commande à un compte client': 'Link this order to a customer account',
+  'Nombre de commandes par page': 'Orders per page',
+  'Année': 'Year',
+
+  /* ── LES MOTS DERRIERE UN PICTOGRAMME (la forme de la SOURCE) ──────────────
+     ⚠ Le signe vit dans son propre <span class="ic"> et une cle ne traverse
+     jamais un attribut : la cle commence apres le </span>. */
+  'En traitement': 'Being handled',
+  'Prioritaire': 'Priority',
+  'Traitement prioritaire': 'Priority handling',
+  'Bon de commande': 'Picking slip',
+  'Facture': 'Invoice',
+  'Frais retenus (': 'Fees kept (',
+  'Partiel — remb.': 'Partial — refunded',
+  'remb.)': 'refunded)'
 };

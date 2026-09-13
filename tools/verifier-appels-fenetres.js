@@ -164,7 +164,8 @@ const appelsDe = (js) => {
      fichier se decale. C est ce qui restait de « faut( » dans telephonie.js. */
   const sansChaines = js
     .replace(/'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"/g, "''")
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. */
+    .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + ' ')
     .replace(/(^|[^:'"])\/\/[^\n]*/g, '$1 ');
   const out = new Map();
   /* ⚠ UNE BARRE OBLIQUE INVERSE DEVANT N EST PAS UN APPEL : c est une classe

@@ -267,7 +267,8 @@ dire('=== champs sans nom accessible (aucune etiquette, aucun aria-label) ===');
 const declares = require('./champs-sans-nom-declares.js');
 const memeTaille = (s) => s.replace(/[^\n]/g, ' ');
 const sansCommentaires = (t) => t
-  .replace(/\/\*[\s\S]*?\*\//g, memeTaille)
+  /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. */
+  .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + memeTaille(m.slice(p.length)))
   .replace(/(^|[^:])\/\/[^\n]*/g, (m, p1) => p1 + memeTaille(m.slice(p1.length)));
 const sansBalises = (s) => s.replace(/<[^>]*>/g, '').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
 const PARLE = /^(tous|toutes|tout)\b.{2,}/i;

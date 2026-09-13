@@ -435,5 +435,36 @@ module.exports = {
      Sans ces deux cles, « courriel » se traduisait seul et rendait une phrase
      moitie anglaise — sur l avertissement qui dit justement que RIEN n est parti. */
   'aucun courriel n’est parti': 'no email was sent',
-  '— la clé d’envoi n’est pas configurée': '— the sending key is not configured'
+  '— la clé d’envoi n’est pas configurée': '— the sending key is not configured',
+
+  /* ══ LES MOITIES DE PHRASE, REPRISES EN ENTIER (2026-09-13) ═════════════════
+   * ⚠⚠ QUATRE PHRASES ETAIENT MIXTES, justes dans aucune des deux langues :
+   * « Scannez une label, ou tapez un nom de product », « Print the labels de
+   * cette variant », « Edit la fiche product ». Les cles COURTES (« étiquette »,
+   * « produit », « variante », « Modifier ») existaient et se posaient ; la
+   * phrase, elle, n avait jamais ete ecrite. Une cle plus longue est essayee
+   * AVANT une cle plus courte : il suffit qu elle existe. */
+  'Scannez une étiquette, ou tapez un nom de produit': 'Scan a label, or type a product name',
+  'Scannez une étiquette, ou tapez un nom de produit…': 'Scan a label, or type a product name…',
+  'Imprimer les étiquettes de cette variante': 'Print the labels for this variant',
+  'Modifier la fiche produit': 'Edit the product sheet',
+
+  /* ── LES INFOBULLES ET LES ATTRIBUTS DU SCRIPT ───────────────────────────── */
+  'Filtrer par état du stock': 'Filter by stock status',
+  'Appliquer ou retirer la vente finale sur plusieurs produits à la fois':
+    'Apply or remove final sale on several products at once',
+  'Catégorie': 'Category',
+  'Gérer l’inventaire': 'Manage the stock',
+  'Assigner un SKU': 'Assign a SKU',
+  'Mettre en vente': 'Put on sale',
+  'Nombre de produits par page': 'Products per page',
+  'Nom du lieu': 'Location name',
+  'Adresses des demandes en attente': 'Addresses of the pending requests',
+  /* ⚠ Les deux raccourcis des lignes de lieu et d entrepot : « Entrée » et
+     « Échap » sont les NOMS des touches, et ils changent de nom en anglais. */
+  'Enregistrer (Entrée)': 'Save (Enter)',
+  'Annuler (Échap)': 'Cancel (Esc)',
+  /* ⚠ Le compte de la vente finale en lot : « 3 produit(s). » restait derriere
+     un T() pose sur la seule moitie qui precede. */
+  'produit(s).': 'product(s).'
 };

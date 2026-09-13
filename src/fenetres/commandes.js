@@ -219,7 +219,12 @@ function pageCommandes(mode) {
   const mBase = brut.indexOf('@') > 0 ? brut.slice(0, brut.indexOf('@')) : brut;
   const m = (mBase === 'expeditions') ? 'expeditions' : 'commandes';
   const depart = JSON.stringify(m + (idDetail ? '@' + idDetail : ''));
-  const titre = (m === 'expeditions') ? 'Expéditions' : 'Commandes';
+  /* ⚠⚠ LE T() EST ECRIT A LA MAIN ICI, ET C EST OBLIGE. Cette ligne vit AVANT
+     le litteral de gabarit : `${…}` n y interpole pas, il s afficherait en
+     toutes lettres. Le poseur le signale (« hors du gabarit ») et n y touche
+     pas — a dessein. Sans ce geste, l onglet et le grand titre restaient
+     « Commandes » sur toute la page anglaise. */
+  const titre = (m === 'expeditions') ? T('Expéditions') : T('Commandes');
   // ⚠ CE FICHIER DESSINE DEUX ECRANS, et son pictogramme est donc CALCULE — le
   // seul du lot. Il porte un trace comme les autres, pas un emoji.
   const icone = (m === 'expeditions') ? ICO.shipping : ICO.orders;
@@ -342,7 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var expedition = MODE === 'expeditions';
 
     var h = '<div class="carte">'
-      + '<input id="rech" aria-label="Rechercher une commande" autocomplete="off" placeholder="Numéro de commande, nom, courriel'
+      + '<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="Numéro de commande, nom, courriel'
       + (expedition ? '${T(", numéro de suivi")}' : '') + '…" value="' + esc(F.q) + '">'
       + '<div class="filtres"><span class="lbl">${T("Statut :")}</span><span class="jetons">'
       + ((CTX && CTX.statuts) || []).filter(function(s){
@@ -356,12 +361,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (F.statuts.length ? '<button class="mini" data-vider="1">${T("Tout afficher")}</button>' : '')
       + '</span>'
       + '<button class="mini prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
-      + 'title="N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées">'
+      + 'title="${T("N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées")}">'
       + '${T("Prioritaires")}' + (d && d.prioritairesNonTraitees
           ? ' · ' + d.prioritairesNonTraitees + ' ${T("non traitée")}' + (d.prioritairesNonTraitees > 1 ? 's' : '')
           : '') + '</button>';
     if (expedition && CTX && (CTX.annees || []).length) {
-      h += '<span class="lbl" style="margin-left:.4rem">${T("Année :")}</span><select id="f-annee" aria-label="Année">'
+      h += '<span class="lbl" style="margin-left:.4rem">${T("Année :")}</span><select id="f-annee" aria-label="${T("Année")}">'
         + '<option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>Toutes</option>'
         + CTX.annees.map(function(a){
             return '<option value="' + a + '"' + (String(F.annee) === String(a) ? ' selected' : '')
@@ -386,8 +391,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // perd le plus facilement, entre l impression et le depot au comptoir.
         var attente = o.aUneEtiquette && o.statut !== 'shipped' && o.statut !== 'delivered';
         h += '<tr class="' + (attente ? 'attente' : '') + '" data-id="' + esc(o.id)
-          + '" style="cursor:pointer" title="Clic : détails · clic droit : changer le statut">'
-          + '<td>' + (o.prioritaire ? '<span class="eclair" title="Traitement prioritaire"><span class="ic">⚡</span></span>' : '')
+          + '" style="cursor:pointer" title="${T("Clic : détails · clic droit : changer le statut")}">'
+          + '<td>' + (o.prioritaire ? '<span class="eclair" title="${T("Traitement prioritaire")}"><span class="ic">⚡</span></span>' : '')
           + '<span class="num">' + esc(o.numero) + '</span>'
           + (attente ? '<div class="det">${T("étiquette prête")}</div>' : '') + '</td>'
           + '<td>' + esc(o.client) + '</td>'
@@ -411,7 +416,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td class="c">'
           + (expedition || o.statut === 'shipped' || o.statut === 'delivered' ? ''
              : (o.enTraitement
-                ? '<button class="mini traite" disabled><span class="ic">🔒</span> En traitement' + (o.par ? ' par ' + esc(o.par) : '') + '</button>'
+                ? '<button class="mini traite" disabled><span class="ic">🔒</span> ${T("En traitement")}' + (o.par ? ' par ' + esc(o.par) : '') + '</button>'
                 : (CTX.peutEditer
                    ? '<button class="mini" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)"><span class="ic">📦</span></span> ${T("Préparer la commande")}</button>' : '')))
           + '</td></tr>';
@@ -419,7 +424,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '</tbody></table></div>';
 
       h += '<div class="pagi"><span>Afficher</span>'
-        + '<select id="pg-taille" aria-label="Nombre de commandes par page">'
+        + '<select id="pg-taille" aria-label="${T("Nombre de commandes par page")}">'
         + '<option value="auto"' + (F.auto ? ' selected' : '') + '>Auto</option>'
         + [10, 20, 50, 100].map(function(n){
             return '<option value="' + n + '"' + (!F.auto && F.parPage === n ? ' selected' : '') + '>' + n + '</option>';
@@ -484,7 +489,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (d.droits.statut && !ro) {
       // ⚠ MEME REGLE QUE LA FICHE DU SITE : ni << En attente >> ni << Annulee >>
       // dans le selecteur, sauf si c est deja le statut courant.
-      h += '<select class="statut" id="det-statut" aria-label="${T("Statut de")} la commande">'
+      h += '<select class="statut" id="det-statut" aria-label="${T("Statut de la commande")}">'
         + (d.statuts || []).filter(function(x){
             return ['pending', 'cancelled'].indexOf(x.cle) < 0 || x.cle === c.statut;
           }).map(function(x){
@@ -494,7 +499,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h += '<span class="et ' + couleurStatut(c.statut) + '">' + esc(libelleStatut(c.statut)) + '</span>';
     }
-    h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> Prioritaire</span>' : '')
+    h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> ${T("Prioritaire")}</span>' : '')
       + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursée")}</span>'
           : (d.remboursements.lignes.length
               ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' remb.</span>' : ''))
@@ -507,7 +512,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // Rattacher la commande a un COMPTE : possible meme sur une commande
       // invitee (c est justement le cas a corriger le plus souvent).
       + (d.droits.lier && !ro
-          ? '<button class="mini" id="det-lier" title="Rattacher cette commande à un compte client"><span class="ic">🔗</span> '
+          ? '<button class="mini" id="det-lier" title="${T("Rattacher cette commande à un compte client")}"><span class="ic">🔗</span> '
             + (c.compte ? 'Changer' : 'Lier') + '</button>' : '')
       + '</div>'
       + (c.compte
@@ -534,7 +539,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<th class="c">${T("Qté")}</th><th class="d">${T("Prix")}</th></tr></thead><tbody>'
       + d.articles.map(function(a){
           return '<tr><td>' + esc(a.nom)
-            + (a.rembourseQte > 0 ? ' <span style="font-size:.7rem;color:var(--tx-att)">(' + a.rembourseQte + ' remb.)</span>' : '')
+            + (a.rembourseQte > 0 ? ' <span style="font-size:.7rem;color:var(--tx-att)">(' + a.rembourseQte + ' ${T("remb.)")}</span>' : '')
             + '</td><td class="c det">' + esc(a.taille) + ' / ' + esc(a.couleur) + '</td>'
             + '<td class="c">' + a.qte + '</td>'
             + '<td class="d">' + argent(a.montant) + '</td></tr>'; }).join('')
@@ -545,7 +550,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div>Sous-total</div>'
       + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + (Math.round(x.taux * 1000000) / 10000) + ' %)</div>'; }).join('')
       + (t.livraison > 0 ? '<div>Livraison</div>' : '')
-      + (t.prioritaire > 0 ? '<div><span class="ic">⚡</span> Traitement prioritaire</div>' : '')
+      + (t.prioritaire > 0 ? '<div><span class="ic">⚡</span> ${T("Traitement prioritaire")}</div>' : '')
       + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">Coupon</div>' : '')
       + '<div class="tt">${T("Total")}</div></div>'
       + '<div class="d"><div>' + argent(t.sousTotal) + '</div>'
@@ -568,7 +573,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + argent(rb.fraisRetenus) + '</strong> '
           + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursés au client")}</span>'
              : rb.fraisRembourses > 0
-               ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> Partiel — remb. ' + argent(rb.fraisRembourses) + ' · reste ' + argent(rb.fraisRestants) + '</span>'
+               ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> ${T("Partiel — remb.")} ' + argent(rb.fraisRembourses) + ' · reste ' + argent(rb.fraisRestants) + '</span>'
                : '<span class="badge2 or">${T("⏳ Non remboursés")}</span>') + '</div>';
       }
       h += '<div class="fin3">${T("Total remboursé : −")}' + argent(rb.total)
@@ -579,9 +584,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     corps.innerHTML = h;
 
     actions.innerHTML = (SEUL ? '' : '<button id="btn-retour">${T("← Liste")}</button>')
-      + (d.droits.bon && !ro ? '<button id="det-bon"><span class="ic">🖨</span> Bon de commande</button>' : '')
-      + (c.aFacture ? '<button id="det-fact"><span class="ic">🧾</span> Facture</button>' : '')
-      + (d.droits.frais && !ro ? '<button id="det-frais"><span class="ic">💰</span> Frais retenus (' + argent(rb.fraisRestants) + ')</button>' : '')
+      + (d.droits.bon && !ro ? '<button id="det-bon"><span class="ic">🖨</span> ${T("Bon de commande")}</button>' : '')
+      + (c.aFacture ? '<button id="det-fact"><span class="ic">🧾</span> ${T("Facture")}</button>' : '')
+      + (d.droits.frais && !ro ? '<button id="det-frais"><span class="ic">💰</span> ${T("Frais retenus (")}' + argent(rb.fraisRestants) + ')</button>' : '')
       + (d.droits.rembourser && !ro ? '<button id="det-remb">${T("↩ Rembourser")}</button>' : '')
       + (d.droits.supprimer && !ro ? '<button class="danger" id="det-suppr"><span class="ic">🗑</span> ${T("Supprimer")}</button>' : '');
     brancherDetail();
@@ -918,7 +923,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function flowSupprimer(){
     appeler('commandes:supprimerApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
-      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> ${T("Supprimer")} la commande</h3>'
+      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> ${T("Supprimer la commande")}</h3>'
         + '<p><strong>' + esc(ap.numero) + '</strong> — ' + esc(ap.client) + '<br>'
         + '<span style="color:var(--tx2)">' + esc(dateCourte(ap.date)) + ' · ' + argent(ap.total)
         + ' · ' + esc(ap.statutLibelle) + '</span></p>'

@@ -57,7 +57,9 @@ catch (e) {
    Les compter ferait accuser la documentation qui garde la regle — la faute
    faite TROIS FOIS le 2026-09-12 en ecrivant des assertions de suppression. */
 const nu = src
-  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. Un `/*` colle a une
+     lettre (`accept="image/*"`) n ouvre pas un commentaire. */
+  .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '))
   .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '));
 
 let mal = 0;

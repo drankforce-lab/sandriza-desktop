@@ -276,5 +276,30 @@ module.exports = {
   'Affiché': 'Shown',
   'Masqué': 'Hidden',
   'Verrouiller': 'Lock',
-  'Déverrouiller': 'Unlock'
+  'Déverrouiller': 'Unlock',
+
+  /* ── LES INFOBULLES ET LES TEXTES DE REMPLACEMENT (banc-langue-residuel) ────
+     ⚠ Cette fenetre fabrique son HTML DANS le script : ses `title` et ses `alt`
+     n etaient lus par aucun banc avant le 2026-09-12. Or dans un editeur visuel
+     l infobulle EST le mode d emploi — les boutons de la barre d aides ne
+     portent qu un signe (− + ↻) ou un mot. */
+  'Aperçu du modèle': 'Template preview',
+  'Image de cet élément': 'This element’s image',
+  'Faire pivoter': 'Rotate',
+  'Pivoter d’un quart de tour': 'Rotate a quarter turn',
+  'La marge à ne pas dépasser — jamais imprimée': 'The margin not to cross — never printed',
+  'Une grille de repère — jamais imprimée': 'A guide grid — never printed',
+  'Coller aux bords et au centre pendant le déplacement':
+    'Snap to the edges and the centre while moving',
+  'Grille': 'Grid',
+  'Aimant': 'Snap',
+  'Réduire': 'Zoom out',
+  'Agrandir': 'Zoom in',
+  'Ajuster à la fenêtre': 'Fit to the window',
+  /* ⚠⚠ CELUI-CI EST UN AVERTISSEMENT, PAS UNE DECORATION : il dit qu un
+     code-barres au contenu accentue ne se lira pas au lecteur. L affaiblir en
+     traduisant ferait imprimer une planche d etiquettes inutilisable. */
+  'Ce code ne se lira pas au lecteur': 'This code will not scan',
+  'Verrouillé': 'Locked',
+  'Ajout…': 'Adding…'
 };

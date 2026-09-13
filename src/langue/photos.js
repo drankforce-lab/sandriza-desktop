@@ -444,5 +444,53 @@ module.exports = {
      pluriel francais, pas un appel : la cle courte est donc ecartee a juste
      titre, et il faut la forme complete. Un garde utile a toujours un cas ou il
      gene ; on lui donne ce qu il demande plutot que de le desarmer. */
-  'retirée(s), ': 'removed, '
+  'retirée(s), ': 'removed, ',
+
+  /* ══ CE QUE LE FAUX COMMENTAIRE CACHAIT (2026-09-13) ════════════════════════
+   * ⚠⚠ CETTE FENETRE PORTE DEUX `e.accept = 'image/*'`, et chacun ouvrait un
+   * commentaire FANTOME qui courait jusqu au prochain `*​/` du fichier. Le
+   * poseur, le banc du residuel et `banc-langue-sur-code` etaient aveugles sur
+   * toute la longueur — d ou les sept verdicts de la fin de fichier (2695-2725)
+   * qui restaient en francais alors que la fenetre etait declaree traduite.
+   * ⚠ Et TROIS MOITIES DE PHRASE, la faute la plus couteuse du chantier parce
+   * qu elle produit des phrases MIXTES, justes nulle part : « Choose all sur
+   * cette page », « See a preview filigrane et gratuit », « Cut out le
+   * vetement ». La cle courte existait et se posait ; la longue n a jamais
+   * correspondu. On ecrit la phrase ENTIERE. */
+  'Tout choisir sur cette page': 'Select all on this page',
+  'Voir un aperçu filigrané et gratuit avec ces réglages':
+    'See a free watermarked preview with these settings',
+  'Détourer le vêtement': 'Cut out the garment',
+  'Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat':
+    'Guided staging: virtual model, ghost mannequin, flat lay',
+
+  /* ── LES INFOBULLES ET LES ATTRIBUTS DU SCRIPT ─────────────────────────────
+     ⚠ Trois d entre elles disent que l apercu est GRATUIT et FILIGRANE : c est
+     la seule chose qui distingue un essai d un traitement facture. */
+  'Choisir une source, sélectionner les photos, puis les traiter':
+    'Choose a source, select the photos, then process them',
+  'Revoir le compte rendu du dernier traitement': 'Review the last run’s report',
+  'Voir le rendu filigrané, gratuit': 'See the watermarked render, free',
+  'Voir le retrait du mannequin, filigrané et gratuit, avant de payer':
+    'See the mannequin removal, watermarked and free, before paying',
+  'Nombre de photos par page': 'Photos per page',
+  'Pivoter d’un quart de tour vers la droite': 'Rotate a quarter turn clockwise',
+  'Pivoter d’un quart de tour': 'Rotate a quarter turn',
+  'Ouvrir la fiche (fond, article, export)': 'Open the sheet (background, item, export)',
+  'Nouveau nom de la photo': 'New photo name',
+  'Cliquez pour renommer': 'Click to rename',
+  'Renommer cette photo': 'Rename this photo',
+  'Renommer': 'Rename',
+  'Fermer le panneau': 'Close the panel',
+  'Chercher un article (nom ou SKU)': 'Search an item (name or SKU)',
+  'Chercher un article (nom ou SKU)…': 'Search an item (name or SKU)…',
+
+  /* ── LES VERDICTS DE LA FIN DE FICHIER ─────────────────────────────────── */
+  'Ce fond est trop lourd (25 Mo maximum).': 'This background is too large (25 MB maximum).',
+  'Fond illisible.': 'Unreadable background.',
+  'Enregistrement…': 'Saving…',
+  'Enregistré dans le dossier des exports (': 'Saved to the exports folder (',
+  'Retrait…': 'Removing…',
+  'retirée de la médiathèque': 'removed from the media library',
+  '— la fiche de l’article garde son image.': '— the item’s sheet keeps its image.'
 };

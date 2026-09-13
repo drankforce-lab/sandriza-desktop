@@ -100,7 +100,7 @@ function pageCollection(id) {
       + '</div></div></div></div>');
 
     h.push('<div class="etape"><div class="carte plein" id="c-zone"><h2>Produits de la collection</h2>'
-      + '<div class="rech"><input placeholder="Filtrer par nom…"><span class="cpt" id="c-cpt"></span></div>'
+      + '<div class="rech"><input aria-label="Filtrer par nom" placeholder="Filtrer par nom…"><span class="cpt" id="c-cpt"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
 
     document.getElementById('corps').innerHTML = h.join('');
@@ -207,8 +207,16 @@ function pageCollection(id) {
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'collections', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
-      if (v.obtenu) { sous.textContent = v.horsLigne ? '🔓 hors ligne' : '🔒 Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = '⚠ ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      /* ⚠ AUCUN PICTOGRAMME ICI, ET C EST LA REGLE DE TOUTE L INTERFACE. Ces
+         trois signes (verrou ouvert, verrou ferme, attention) reviennent EN
+         COULEUR sur certains postes, alors que l interface tient les siens en
+         gris par la classe ic — et textContent ne peut pas porter de balise.
+         Les onze autres fenetres a verrou ecrivent deja cette phrase sans
+         signe ; celle-ci etait la seule a diverger, cachee au banc des
+         pictogrammes par le faux commentaire qu ouvrait le type de fichier
+         accepte par le selecteur d image, 110 lignes plus haut. */
+      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
+      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
       bEnr.disabled = true;
       dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
     });

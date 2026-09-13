@@ -22,8 +22,29 @@
  *     seul y compte), une chaine du script peut etre un identifiant.
  */
 
+/* ══ UN `/*` DANS UNE CHAINE N OUVRE PAS UN COMMENTAIRE ═════════════════════
+ * ⚠⚠⚠ MESURE DU 2026-09-13 : `accept="image/*"` ouvrait un commentaire FANTOME
+ * qui courait jusqu au prochain `*​/` du fichier — souvent des milliers de
+ * caracteres plus loin, dans la vraie fiche d une autre fonction. Releve sur les
+ * 100 fenetres : 19 faux ouvreurs dans 13 d entre elles, environ 92 000
+ * caracteres rendus INVISIBLES a tout ce qui passe par ici.
+ * ⚠⚠ CE QUE CA COUTAIT VRAIMENT. Ce n est pas une accusation en trop, c est une
+ * absence d accusation : dans ces 92 000 caracteres, le poseur n enveloppait
+ * rien, `banc-langue-sur-code` ne voyait aucune enveloppe, et le banc du
+ * residuel ne lisait aucune chaine. Trouve en cherchant pourquoi
+ * `title="Retirer la photo"` (produit.js:1190) restait en francais alors que sa
+ * cle existait : il tombait dans le fantome ouvert par `e.accept = 'image/*'`,
+ * 6 600 caracteres plus haut.
+ * ⚠ LA SIGNATURE EST NETTE, et c est la meme famille que le `://` de la ligne
+ * d en dessous : un VRAI commentaire n est jamais colle a une lettre, a un
+ * chiffre ou a un guillemet. Il commence la ligne, ou suit un espace, un `;`,
+ * une accolade, une parenthese, une virgule ou un `=`. Dans `'image/*'`, le
+ * `/*` est precede d un `e`.
+ * ⚠ Un automate a etats aurait ete plus exact, mais ce depot en a deja paye un :
+ * il entrait en « chaine » sur le guillemet de `.replace(/"/g, …)`. Une borne
+ * qu on peut lire vaut mieux qu un automate qu on ne peut pas relire. */
 const sansCommentaires = (s) => s
-  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '))
   .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/./g, ' '));
 
 const texteVisible = (s) => {

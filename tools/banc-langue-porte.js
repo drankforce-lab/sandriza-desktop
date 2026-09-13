@@ -45,7 +45,9 @@ const DICO = require('../src/langue/porte.js');
 const SOURCES = ['src/main.js', 'src/porte-progression.js'];
 
 const sansCommentaires = (s) => s
-  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  /* ⚠ LA BORNE DU `/*` : voir `tools/textes-visibles.js`. Un `/*` colle a une
+     lettre (`accept="image/*"`) n ouvre pas un commentaire. */
+  .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '))
   .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '));
 
 /* Un appel `TP('…')` ou `T('…')`, guillemets simples ou doubles, echappements

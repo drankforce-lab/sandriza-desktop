@@ -191,7 +191,48 @@ module.exports = {
   'utilisée': 'in use',
   'disponible': 'available',
   'enregistré': 'saved',
-  'produit': 'product'
+  'produit': 'product',
+
+  /* ── LES MOITIES DE PHRASE, REPRISES EN ENTIER ─────────────────────────────
+     ⚠⚠ TROIS LIBELLES ETAIENT COUPES EN DEUX par une cle trop COURTE deja
+     posee : « Couleur » avait mordu dans « Couleur de l etiquette » et dans
+     « Couleur de la categorie », « Nom FR » dans « Nom FR (ex: Coup de coeur) ».
+     On lisait « Colour de l’étiquette » sur la page anglaise. La correction
+     n est pas d ajouter une cle de plus, c est d ecrire LA PHRASE ENTIERE : une
+     cle plus longue est essayee AVANT une cle plus courte. */
+  'Couleur de l’étiquette': 'Label colour',
+  'Couleur de la catégorie': 'Category colour',
+  /* ⚠ L EXEMPLE RESTE FRANCAIS, ET C EST LE SENS DU CHAMP : ce champ contient le
+     nom FRANCAIS de l etiquette — son voisin porte le nom anglais. Traduire
+     l exemple apprendrait a ecrire de l anglais dans la case du francais. */
+  'Nom FR (ex: Coup de cœur)': 'Name FR (e.g. Coup de cœur)',
+  /* ⚠ ET LA FORME ANGLAISE SE DECLARE AUSSI. Elle garde l exemple francais —
+     c est tout l objet de la ligne au-dessus — donc le banc du residuel y voit
+     un « cœur » accentue sur une page anglaise, et il a raison de le voir. Une
+     entree qui rend le MEME texte est la facon d ecrire « c est voulu ». */
+  'Name FR (e.g. Coup de cœur)': 'Name FR (e.g. Coup de cœur)',
+
+  /* ── LES MOTS NUS ET LES ATTRIBUTS DU SCRIPT ───────────────────────────────
+     ⚠ « IA » se dit « AI » en anglais : deux lettres, et c est l en-tete d une
+     colonne de cases a cocher qui decide du traitement des photos. */
+  'IA': 'AI',
+  'Produits': 'Products',
+  'Nom': 'Name',
+  'Ajouter': 'Add',
+  'Chercher': 'Search',
+  'Ajouter une taille': 'Add a size',
+  'clé (ex: sport-luxe)': 'key (e.g. sport-luxe)',
+  'Choisir la couleur au nuancier': 'Pick the colour from the palette',
+  'Traitement par IA': 'AI processing',
+  'Photos simples': 'Plain photos',
+
+  /* ⚠⚠ L EXEMPLE D UN NOM DE COULEUR RESTE FRANCAIS — une DECISION, pas un
+     oubli, et le banc ne l honore que si elle est ecrite. La question qui
+     tranche est « qui LIT ce que l on tape ici ? » : une couleur personnalisee
+     n a qu UN nom (au contraire d une categorie, qui en a deux), et ce nom-la
+     paraît sur la fiche produit que la cliente lit. Un exemple anglais
+     apprendrait a nommer les couleurs en anglais dans une boutique francaise. */
+  'Ex: corail rosé': 'Ex: corail rosé'
   /* ⚠⚠⚠ « code » -> « code » A ETE RETIREE LE 2026-09-13, ET C EST LA CLE QU IL
      NE FAUT PAS REMETTRE. Elle rendait le MEME mot : elle ne changeait donc rien
      a l ecran, ni en francais ni en anglais, et aucun des 28 bancs ne pouvait la

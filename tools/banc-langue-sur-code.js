@@ -86,8 +86,11 @@ const DOS = path.join(__dirname, '..', 'src', 'fenetres');
    `new ${T("Date")}()` pour l expliquer. Un banc qui s accuse lui-meme sur sa
    propre explication apprend a mentir a celui qui le lit. On remplace par des
    espaces pour que les numeros de ligne ne bougent pas d un caractere. */
+/* ⚠ LA BORNE DU `/*` : voir la fiche de `tools/textes-visibles.js`. Un `/*`
+   colle a une lettre (`accept="image/*"`) n ouvre pas un commentaire — sans
+   cette borne, 92 000 caracteres de fenetre etaient invisibles a ce banc. */
 const sansCommentaires = (s) => s
-  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '))
   .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + m.slice(p.length).replace(/[^\n]/g, ' '));
 
 /* La forme enveloppee, decrite EN ENTIER — guillemets simples ou doubles,
@@ -96,7 +99,19 @@ const sansCommentaires = (s) => s
 const ENVELOPPE = /\$\{T\((?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\)\}/g;
 
 const IDENT = /[A-Za-z0-9_$]/;
-const MOT_CLE = /(?:^|[^A-Za-z0-9_$])(?:new|typeof|instanceof|void|delete)\s+$/;
+/* ⚠⚠ `var`, `let`, `const`, `function`, `class` ATTENDENT UN NOM, pas une
+   phrase — et ils manquaient. Mesure du 2026-09-13 : la cle « avant » (le `alt`
+   du volet gauche du comparateur, dans studio) s est posee sur
+   `var avant = PANIER.length;`. En anglais la variable se serait appelee
+   `before` — ici les deux occurrences auraient suivi, donc rien n aurait casse,
+   mais la faute est la meme que `new Date()` : une enveloppe sur du CODE
+   n attend qu une traduction differente pour tuer la fenetre. */
+const MOT_CLE = /(?:^|[^A-Za-z0-9_$])(?:new|typeof|instanceof|void|delete|var|let|const|function|class|return)\s+$/;
+/* ⚠ PRECEDEE D UN `=` : c est une valeur affectee ou comparee, jamais un texte.
+   Un texte affiche a un guillemet a sa gauche (`title="…"`, `'…'`) ou un `>`
+   (le corps d une balise) — jamais le signe egal. Deuxieme occurrence de la
+   meme faute : `if (PANIER.length !== avant && …)`. */
+const APRES_EGAL = /=\s*$/;
 /* Ce qui ouvre un nom de propriete : une accolade, ou la virgule qui separe
    deux entrees. ⚠ Le `:` seul ne suffit pas — « Total : 12 » en porte un. */
 const OUVRE_OBJET = /[{,]\s*$/;
@@ -141,6 +156,8 @@ for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
     else if (avant === '<' || s.slice(Math.max(0, i - 2), i) === '</')
       raison = 'precedee d un < — c est un NOM DE BALISE, pas un texte';
     else if (apres === '{') raison = 'suivie d une accolade — c est un SELECTEUR CSS, pas un texte';
+    else if (APRES_EGAL.test(s.slice(Math.max(0, i - 12), i)))
+      raison = 'precedee d un = — c est une valeur affectee ou comparee, pas un texte';
     else if (IDENT.test(avant) || IDENT.test(apres)) raison = 'collee a un identifiant — c est un morceau de nom';
     if (!raison) continue;
     const ligne = s.slice(0, i).split('\n').length;
