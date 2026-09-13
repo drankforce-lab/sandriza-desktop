@@ -34,6 +34,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('catalogio');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -182,12 +186,12 @@ function pageCatalogio(ouverture) {
   const ouvConfirmer = (ouv === 'confirmer');
   const ouvRapport = (ouv === 'rapport');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Import / Export — Administration Sandriza</title>
+<title>${T("Import / Export — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.catalogio}</span><h1>Import / Export de la boutique</h1>
+<div class="tete"><span class="ico">${ICO.catalogio}</span><h1>${T("Import / Export de la boutique")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -224,19 +228,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function plur(n){ return n === 1 ? '' : 's'; }
 
   var MOTIFS = {
-    session:      'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:        'Votre rôle ne donne pas accès à cette opération.',
-    indisponible: 'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    occupe:       'Un import est déjà en cours.',
-    couts:        'Coûts non relus depuis le serveur — décochez la colonne Coût, ou actualisez la fenêtre principale.',
-    rien:         'Aucun fichier analysé.',
-    refus:        'Fichier refusé.',
-    illisible:    'Fichier illisible.',
-    introuvable:  'Élément introuvable.',
-    echec:        'L’opération a échoué.'
+    session:      '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:        '${T("Votre rôle ne donne pas accès à cette opération.")}',
+    indisponible: '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    occupe:       '${T("Un import est déjà en cours.")}',
+    couts:        '${T("Coûts non relus depuis le serveur — décochez la colonne Coût, ou actualisez la fenêtre principale.")}',
+    rien:         '${T("Aucun fichier analysé.")}',
+    refus:        '${T("Fichier refusé.")}',
+    illisible:    '${T("Fichier illisible.")}',
+    introuvable:  '${T("Élément introuvable.")}',
+    echec:        '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
-    if (!r) return 'Aucune réponse de la fenêtre principale.';
+    if (!r) return '${T("Aucune réponse de la fenêtre principale.")}';
     if (r.detail) return String(r.detail);
     return MOTIFS[r.motif] || MOTIFS.echec;
   }
@@ -271,26 +275,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      indice serait leur absence dans le dossier réglé. */
   function blocDossier(){
     var d = DOSSIER;
-    var chemin = (d && d.dir) ? d.dir : 'Documents › SANDRIZA › Exports';
+    var chemin = (d && d.dir) ? d.dir : '${T("Documents › SANDRIZA › Exports")}';
     var perso  = !!(d && d.choisi);
     var repli  = !!(d && d.repli);
-    var titre  = (DERNIER_EXPORT ? 'Dernier fichier écrit : ' + esc(DERNIER_EXPORT) + '. ' : '')
-               + 'Ouvre ce dossier';
+    var titre  = (DERNIER_EXPORT ? '${T("Dernier fichier écrit :")} ' + esc(DERNIER_EXPORT) + '. ' : '')
+               + '${T("Ouvre ce dossier")}';
     return '<div class="dossier' + (repli ? ' repli' : '') + '">'
       +   '<div class="dl">'
-      +     '<span class="dk">Les fichiers sortent dans</span>'
+      +     '<span class="dk">${T("Les fichiers sortent dans")}</span>'
       +     '<button class="chemin" data-act="dossier" title="' + titre + '"><span class="ic">📂</span> ' + esc(chemin) + '</button>'
       +     (perso && !repli ? '<span class="pill inchange">dossier choisi</span>' : '')
       +   '</div>'
       +   (repli
-          ? '<div class="avis jaune" style="margin:.45rem 0 .1rem">Votre dossier <strong>'
-            + esc(d.choisi) + '</strong> ne répond pas — clé retirée, lecteur réseau déconnecté '
-            + 'ou dossier renommé. Les fichiers sortent dans le dossier standard <strong>en attendant</strong> : '
-            + 'votre choix est gardé et redeviendra effectif dès qu’il réapparaîtra.</div>'
+          ? '<div class="avis jaune" style="margin:.45rem 0 .1rem">${T("Votre dossier")} <strong>'
+            + esc(d.choisi) + '</strong> ${T("ne répond pas — clé retirée, lecteur réseau déconnecté")} '
+            + '${T("ou dossier renommé. Les fichiers sortent dans le dossier standard <strong>en attendant</strong> : ")}'
+            + '${T("votre choix est gardé et redeviendra effectif dès qu’il réapparaîtra.")}</div>'
           : '')
       +   '<div class="dbtns">'
       +     '<button class="ghost mini" data-act="dosschoisir">Changer…</button>'
-      +     (perso ? '<button class="ghost mini" data-act="dossdefaut">Revenir au dossier standard</button>' : '')
+      +     (perso ? '<button class="ghost mini" data-act="dossdefaut">${T("Revenir au dossier standard")}</button>' : '')
       +   '</div>'
       + '</div>';
   }
@@ -315,7 +319,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ LECTURE DE L ÉTAT ═══════════════════════════════════════════════════════ */
   function chargerEtat(){
     return appeler('catalogio:etat', optsExport()).then(function(r){
-      if (!r || !r.ok) { vide('Import / Export indisponible', expliquer(r)); return false; }
+      if (!r || !r.ok) { vide('${T("Import / Export indisponible")}', expliquer(r)); return false; }
       ETAT = r; PEUT = r.peut || PEUT;
       if (r.imp && !IMP) IMP = r.imp;       // restauration d un import en cours
       if (r.rapport && !RAP) RAP = r.rapport;
@@ -332,8 +336,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ ONGLETS ═════════════════════════════════════════════════════════════════ */
   function dessinerOnglets(){
     ongletsEl.innerHTML =
-        '<button data-tab="export" class="' + (TAB === 'export' ? 'actif' : '') + '">⬇ Exporter</button>'
-      + '<button data-tab="import" class="' + (TAB === 'import' ? 'actif' : '') + '">⬆ Importer</button>';
+        '<button data-tab="export" class="' + (TAB === 'export' ? 'actif' : '') + '">${T("⬇ Exporter")}</button>'
+      + '<button data-tab="import" class="' + (TAB === 'import' ? 'actif' : '') + '">${T("⬆ Importer")}</button>';
   }
 
   /* ══ ONGLET EXPORTER ═════════════════════════════════════════════════════════ */
@@ -350,52 +354,52 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       : ((e.nbProduits || 0) + ' produit' + plur(e.nbProduits || 0));
     var caseCout = PEUT.edit
       ? '<label class="case"><input type="checkbox" data-opt="cout"' + (INCL_COUT ? ' checked' : '')
-        + (coutsOk ? '' : ' disabled') + '><span>Inclure le coût d’acquisition et le motif de vente à perte'
+        + (coutsOk ? '' : ' disabled') + '><span>${T("Inclure le coût d’acquisition et le motif de vente à perte")}'
         + '<br><span class="s">' + (coutsOk
-            ? 'Données de marge — le fichier ne devrait pas sortir de l’entreprise.'
-            : 'Coûts non relus : actualisez la fenêtre principale pour activer cette option.') + '</span></span></label>'
+            ? '${T("Données de marge — le fichier ne devrait pas sortir de l’entreprise.")}'
+            : '${T("Coûts non relus : actualisez la fenêtre principale pour activer cette option.")}') + '</span></span></label>'
       : '';
     var lignesCol = (e.colonnes || []).map(function(c){
       var tags = '';
-      if (c.key)  tags += '<span class="pill creation">clé</span> ';
-      if (c.info) tags += '<span class="pill inchange">information</span> ';
-      if (c.req)  tags += '<span class="pill maj">requise à la création</span> ';
-      if (c.priv) tags += '<span class="pill erreur">donnée de marge</span> ';
+      if (c.key)  tags += '<span class="pill creation">${T("clé")}</span> ';
+      if (c.info) tags += '<span class="pill inchange">${T("information")}</span> ';
+      if (c.req)  tags += '<span class="pill maj">${T("requise à la création")}</span> ';
+      if (c.priv) tags += '<span class="pill erreur">${T("donnée de marge")}</span> ';
       return '<tr><td style="white-space:nowrap"><strong>' + esc(c.lbl) + '</strong></td><td>'
         + tags + esc(c.aide || '') + '</td></tr>';
     }).join('');
 
     return '<div class="centre">'
       + '<div class="grille">'
-      +   '<div><div class="lbl">Feuille</div>'
-      +     radio('sheet', 'catalogue', SHEET, 'Catalogue', 'Une ligne par produit : prix, soldes, noms, catégorie, étiquettes, tailles et couleurs.', 'data-sheet="catalogue"')
-      +     radio('sheet', 'inventaire', SHEET, 'Inventaire', 'Une ligne par variante taille × couleur : quantité et emplacement d’entrepôt.', 'data-sheet="inventaire"')
+      +   '<div><div class="lbl">${T("Feuille")}</div>'
+      +     radio('sheet', 'catalogue', SHEET, '${T("Catalogue")}', '${T("Une ligne par produit : prix, soldes, noms, catégorie, étiquettes, tailles et couleurs.")}', 'data-sheet="catalogue"')
+      +     radio('sheet', 'inventaire', SHEET, '${T("Inventaire")}', '${T("Une ligne par variante taille × couleur : quantité et emplacement d’entrepôt.")}', 'data-sheet="inventaire"')
       +   '</div>'
-      +   '<div><div class="lbl">Séparateur de colonnes</div>'
-      +     radio('sep', ';', SEP, 'Point-virgule', 'Excel en français ouvre directement en colonnes ; les montants s’écrivent « 89,00 ».', 'data-sep=";"')
-      +     radio('sep', ',', SEP, 'Virgule', 'Google Sheets et les outils anglophones ; les montants s’écrivent « 89.00 ».', 'data-sep=","')
+      +   '<div><div class="lbl">${T("Séparateur de colonnes")}</div>'
+      +     radio('sep', ';', SEP, '${T("Point-virgule")}', '${T("Excel en français ouvre directement en colonnes ; les montants s’écrivent « 89,00 ».")}', 'data-sep=";"')
+      +     radio('sep', ',', SEP, '${T("Virgule")}', '${T("Google Sheets et les outils anglophones ; les montants s’écrivent « 89.00 ».")}', 'data-sep=","')
       +     '<div style="margin-top:.7rem">'
-      +       '<label class="case"><input type="checkbox" data-opt="hv"' + (INCL_HV ? ' checked' : '') + '><span>Inclure les produits hors vente</span></label>'
+      +       '<label class="case"><input type="checkbox" data-opt="hv"' + (INCL_HV ? ' checked' : '') + '><span>${T("Inclure les produits hors vente")}</span></label>'
       +       caseCout
       +     '</div>'
       +   '</div>'
       + '</div>'
       + '<div class="barre">'
-      +   '<button class="prim" data-act="exporter">⬇ Sortir le CSV</button>'
-      +   '<button class="ghost mini" data-act="modele">Modèle vide (en-têtes seuls)</button>'
+      +   '<button class="prim" data-act="exporter">${T("⬇ Sortir le CSV")}</button>'
+      +   '<button class="ghost mini" data-act="modele">${T("Modèle vide (en-têtes seuls)")}</button>'
       +   '<span class="compte">' + compte + '</span>'
       + '</div>'
       + blocDossier()
       + '<div style="margin-top:1.4rem">'
       +   '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
-      +     '<div class="lbl" style="margin:0">Colonnes de la feuille ' + esc(SHEET) + '</div>'
+      +     '<div class="lbl" style="margin:0">${T("Colonnes de la feuille")} ' + esc(SHEET) + '</div>'
       +     '<button class="ghost mini" data-act="colrepli">'
-      +       (COL_REPLI ? '▸ Afficher le détail des colonnes' : '▾ Masquer le détail des colonnes') + '</button>'
+      +       (COL_REPLI ? '${T("▸ Afficher le détail des colonnes")}' : '${T("▾ Masquer le détail des colonnes")}') + '</button>'
       +   '</div>'
       +   (COL_REPLI ? '' :
-            '<div class="avis" style="margin:.7rem 0">À l’import, <strong>seules les colonnes présentes dans votre fichier sont touchées</strong> : '
-          +   'un fichier « SKU ; Prix » ne change que le prix. Les colonnes <em>information</em> sont exportées pour vous repérer et ignorées à la relecture.</div>'
-          + '<div class="carte"><table><thead><tr><th>Colonne</th><th>Rôle</th></tr></thead><tbody>' + lignesCol + '</tbody></table></div>')
+            '<div class="avis" style="margin:.7rem 0">${T("À l’import, <strong>seules les colonnes présentes dans votre fichier sont touchées</strong> : ")}'
+          +   '${T("un fichier « SKU ; Prix » ne change que le prix. Les colonnes <em>information</em> sont exportées pour vous repérer et ignorées à la relecture.")}</div>'
+          + '<div class="carte"><table><thead><tr><th>${T("Colonne")}</th><th>${T("Rôle")}</th></tr></thead><tbody>' + lignesCol + '</tbody></table></div>')
       + '</div>'
       + '</div>';
   }
@@ -403,40 +407,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ ONGLET IMPORTER ═════════════════════════════════════════════════════════ */
   function vueImportDepart(){
     return '<div class="centre">'
-      + '<div class="lbl">Fichier CSV</div>'
+      + '<div class="lbl">${T("Fichier CSV")}</div>'
       + '<input type="file" id="fichier" accept=".csv,.txt,text/csv">'
-      + '<div class="avis" style="margin-top:.7rem">La feuille (catalogue ou inventaire) et le séparateur sont '
-      +   '<strong>reconnus automatiquement</strong> d’après les en-têtes, qui acceptent les accents, les majuscules '
-      +   'et les noms anglais courants (<em>price</em>, <em>sale price</em>, <em>qty</em>…).<br>'
-      +   'Maximum 8 Mo et 5000 lignes. <strong>Rien n’est écrit avant l’aperçu et votre confirmation.</strong></div>'
+      + '<div class="avis" style="margin-top:.7rem">${T("La feuille (catalogue ou inventaire) et le séparateur sont")} '
+      +   '${T("<strong>reconnus automatiquement</strong> d’après les en-têtes, qui acceptent les accents, les majuscules ")}'
+      +   '${T("et les noms anglais courants (<em>price</em>, <em>sale price</em>, <em>qty</em>…).<br>")}'
+      +   '${T("Maximum 8 Mo et 5000 lignes. <strong>Rien n’est écrit avant l’aperçu et votre confirmation.</strong>")}</div>'
       /* ⚠ LE MODÈLE SE TÉLÉCHARGE D ICI, et pas seulement de l onglet Exporter.
          C est ici qu on en a besoin : quelqu un qui veut importer en lot n a pas
          de fichier, et l envoyer chercher dans l autre onglet suppose qu il
          devine qu un « modèle vide » y dort. Les deux feuilles sont nommées,
          parce que cet onglet n a pas de sélecteur de feuille. */
       + '<div style="margin-top:1.1rem">'
-      +   '<div class="lbl">Partir d’un modèle</div>'
-      +   '<div class="avis" style="margin-bottom:.6rem">Un fichier CSV avec les <strong>bons en-têtes, dans le bon ordre</strong>, '
-      +     'et rien d’autre : remplissez une ligne par produit (ou par variante) et remontez-le ici. '
-      +     'Le séparateur suit ce que vous avez choisi dans <strong>Exporter</strong> (actuellement '
-      +     (SEP === ',' ? 'la virgule' : 'le point-virgule') + ').</div>'
+      +   '<div class="lbl">${T("Partir d’un modèle")}</div>'
+      +   '<div class="avis" style="margin-bottom:.6rem">${T("Un fichier CSV avec les <strong>bons en-têtes, dans le bon ordre</strong>, ")}'
+      +     '${T("et rien d’autre : remplissez une ligne par produit (ou par variante) et remontez-le ici.")} '
+      +     '${T("Le séparateur suit ce que vous avez choisi dans <strong>Exporter</strong> (actuellement ")}'
+      +     (SEP === ',' ? '${T("la virgule")}' : '${T("le point-virgule")}') + ').</div>'
       +   '<div class="barre">'
-      +     '<button class="ghost" data-act="modele" data-feuille="catalogue">⬇ Modèle catalogue</button>'
-      +     '<button class="ghost" data-act="modele" data-feuille="inventaire">⬇ Modèle inventaire</button>'
+      +     '<button class="ghost" data-act="modele" data-feuille="catalogue">${T("⬇ Modèle catalogue")}</button>'
+      +     '<button class="ghost" data-act="modele" data-feuille="inventaire">${T("⬇ Modèle inventaire")}</button>'
       +   '</div>'
       +   blocDossier()
-      +   '<div class="avis" style="margin-top:.6rem"><strong>Catalogue</strong> : une ligne par produit (prix, noms, catégorie, étiquettes). '
-      +     '<strong>Inventaire</strong> : une ligne par variante taille × couleur (quantité, entrepôt).</div>'
+      +   '<div class="avis" style="margin-top:.6rem">${T("<strong>Catalogue</strong> : une ligne par produit (prix, noms, catégorie, étiquettes). ")}'
+      +     '${T("<strong>Inventaire</strong> : une ligne par variante taille × couleur (quantité, entrepôt).")}</div>'
       + '</div>'
-      + '<div class="avis" style="margin-top:.9rem">Vous avez déjà des fiches ? Passez plutôt par l’onglet '
-      +   '<strong>Exporter</strong> : le fichier obtenu se remonte tel quel après modification, '
-      +   'et il porte déjà vos données.</div>'
+      + '<div class="avis" style="margin-top:.9rem">${T("Vous avez déjà des fiches ? Passez plutôt par l’onglet")} '
+      +   '${T("<strong>Exporter</strong> : le fichier obtenu se remonte tel quel après modification,")} '
+      +   '${T("et il porte déjà vos données.")}</div>'
       + '</div>';
   }
 
   function badge(etat){
-    var M = { creation:'À créer', maj:'À modifier', inchange:'Inchangée', erreur:'Erreur',
-              fait:'Écrit', conflit:'Conflit', echec:'Échec' };
+    var M = { creation:'${T("À créer")}', maj:'${T("À modifier")}', inchange:'${T("Inchangée")}', erreur:'Erreur',
+              fait:'${T("Écrit")}', conflit:'Conflit', echec:'${T("Échec")}' };
     return '<span class="pill ' + etat + '">' + (M[etat] || etat) + '</span>';
   }
   function ligneApercu(L, inv){
@@ -461,9 +465,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<option value="' + n + '"' + (TAILLE === n ? ' selected' : '') + '>' + n + '</option>'; }).join('');
     var nav = '';
     if (LIGNES.pages > 1) {
-      nav = '<button class="mini" data-page="' + (LIGNES.page - 1) + '"' + (LIGNES.page === 0 ? ' disabled' : '') + '>← Précédent</button>'
+      nav = '<button class="mini" data-page="' + (LIGNES.page - 1) + '"' + (LIGNES.page === 0 ? ' disabled' : '') + '>${T("← Précédent")}</button>'
         + '<span>Page ' + (LIGNES.page + 1) + ' / ' + LIGNES.pages + '</span>'
-        + '<button class="mini" data-page="' + (LIGNES.page + 1) + '"' + (LIGNES.page >= LIGNES.pages - 1 ? ' disabled' : '') + '>Suivant →</button>';
+        + '<button class="mini" data-page="' + (LIGNES.page + 1) + '"' + (LIGNES.page >= LIGNES.pages - 1 ? ' disabled' : '') + '>${T("Suivant →")}</button>';
     }
     return '<div class="pager"><span class="gauche">Afficher '
       + '<select id="taille" aria-label="Nombre de lignes par page">' + opts + '</select> par page · '
@@ -471,93 +475,93 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function vueApercu(){
     var c = IMP.compte, inv = IMP.feuille === 'inventaire';
-    var filtres = [['tous','Tout',IMP.total],['creation','À créer',c.creation],['maj','À modifier',c.maj],
-                   ['inchange','Inchangées',c.inchange],['erreur','Erreurs',c.erreur]];
+    var filtres = [['tous','${T("Tout")}',IMP.total],['creation','${T("À créer")}',c.creation],['maj','${T("À modifier")}',c.maj],
+                   ['inchange','${T("Inchangées")}',c.inchange],['erreur','${T("Erreurs")}',c.erreur]];
     var lignes = (LIGNES && LIGNES.lignes.length)
       ? LIGNES.lignes.map(function(L){ return ligneApercu(L, inv); }).join('')
-      : '<tr><td colspan="5" class="vide">Aucune ligne dans ce filtre.</td></tr>';
+      : '<tr><td colspan="5" class="vide">${T("Aucune ligne dans ce filtre.")}</td></tr>';
     var noteIgn = (IMP.ignorees && IMP.ignorees.length)
-      ? '<div class="avis" style="margin-bottom:.7rem">Colonne(s) non reconnue(s), donc <strong>ignorée(s)</strong> : '
+      ? '<div class="avis" style="margin-bottom:.7rem">${T("Colonne(s) non reconnue(s), donc <strong>ignorée(s)</strong> : ")}'
         + esc(IMP.ignorees.slice(0,12).join(', ')) + (IMP.ignorees.length > 12 ? '…' : '') + '</div>' : '';
     var notePhoto = IMP.nbPhotos
       ? '<div class="avis jaune" style="margin-bottom:.7rem"><span class="ic">📷</span> <strong>' + IMP.nbPhotos + ' photo' + plur(IMP.nbPhotos)
-        + '</strong> seront téléchargées depuis les adresses du fichier et copiées dans votre stockage — la boutique '
-        + 'ne pointera jamais sur le site du fournisseur. Une photo introuvable n’empêche pas le reste de sa ligne de passer.</div>' : '';
+        + '</strong> ${T("seront téléchargées depuis les adresses du fichier et copiées dans votre stockage — la boutique")} '
+        + '${T("ne pointera jamais sur le site du fournisseur. Une photo introuvable n’empêche pas le reste de sa ligne de passer.")}</div>' : '';
     return ''
       + '<div class="barre" style="border:none;padding:0;margin:0 0 .3rem">'
       +   '<div style="font-size:.85rem"><strong>' + esc(IMP.fichier) + '</strong> · feuille <strong>' + esc(IMP.feuille)
       +     '</strong> · ' + IMP.total + ' ligne' + plur(IMP.total) + '</div>'
       +   '<span style="flex:1"></span>'
-      +   '<button class="ghost mini" data-act="reinit">Choisir un autre fichier</button>'
+      +   '<button class="ghost mini" data-act="reinit">${T("Choisir un autre fichier")}</button>'
       + '</div>'
       + noteIgn + notePhoto
       + '<div class="tuiles" style="margin-bottom:.2rem">'
-      +   '<div class="tuile"><div class="k">À créer</div><div class="v">' + c.creation + '</div><div class="z">hors vente</div></div>'
-      +   '<div class="tuile"><div class="k">À modifier</div><div class="v">' + c.maj + '</div><div class="z">' + (inv ? 'variantes' : 'fiches') + '</div></div>'
-      +   '<div class="tuile"><div class="k">Inchangées</div><div class="v">' + c.inchange + '</div><div class="z">rien à écrire</div></div>'
-      +   '<div class="tuile' + (c.erreur ? ' err' : '') + '"><div class="k">Erreurs</div><div class="v">' + c.erreur + '</div><div class="z">ignorées</div></div>'
+      +   '<div class="tuile"><div class="k">${T("À créer")}</div><div class="v">' + c.creation + '</div><div class="z">${T("hors vente")}</div></div>'
+      +   '<div class="tuile"><div class="k">${T("À modifier")}</div><div class="v">' + c.maj + '</div><div class="z">' + (inv ? 'variantes' : 'fiches') + '</div></div>'
+      +   '<div class="tuile"><div class="k">${T("Inchangées")}</div><div class="v">' + c.inchange + '</div><div class="z">${T("rien à écrire")}</div></div>'
+      +   '<div class="tuile' + (c.erreur ? ' err' : '') + '"><div class="k">${T("Erreurs")}</div><div class="v">' + c.erreur + '</div><div class="z">${T("ignorées")}</div></div>'
       + '</div>'
       + '<div class="carte">'
       +   '<div class="filtres">'
       +     filtres.map(function(f){ return '<button class="mini ' + (FILTRE === f[0] ? 'actif' : '')
               + '" data-filtre="' + f[0] + '">' + f[1] + ' (' + f[2] + ')</button>'; }).join('')
       +     '<span style="flex:1"></span>'
-      +     '<button class="ghost mini" data-act="rapport">⬇ Aperçu en CSV</button>'
+      +     '<button class="ghost mini" data-act="rapport">${T("⬇ Aperçu en CSV")}</button>'
       +   '</div>'
-      +   '<table><thead><tr><th style="width:52px">Ligne</th><th style="width:120px">SKU</th>'
-      +     '<th>' + (inv ? 'Variante' : 'Produit') + '</th><th style="width:96px">État</th><th>Ce qui change</th></tr></thead>'
+      +   '<table><thead><tr><th style="width:52px">${T("Ligne")}</th><th style="width:120px">${T("SKU")}</th>'
+      +     '<th>' + (inv ? 'Variante' : '${T("Produit")}') + '</th><th style="width:96px">${T("État")}</th><th>${T("Ce qui change")}</th></tr></thead>'
       +     '<tbody>' + lignes + '</tbody></table>' + pager()
       + '</div>'
       + '<div class="barre">'
       +   '<button class="prim" ' + ((c.creation + c.maj) ? '' : 'disabled') + ' data-act="confirmer">Appliquer '
       +     (c.creation + c.maj) + ' changement' + plur(c.creation + c.maj) + '</button>'
-      +   '<span class="compte">Les lignes en erreur et inchangées sont ignorées. Aucun produit n’est supprimé, '
-      +     'et aucun produit absent du fichier n’est touché.</span>'
+      +   '<span class="compte">${T("Les lignes en erreur et inchangées sont ignorées. Aucun produit n’est supprimé,")} '
+      +     '${T("et aucun produit absent du fichier n’est touché.")}</span>'
       + '</div>';
   }
 
   function vueRapport(){
     var r = RAP, refus = (r.conflits.length + r.echecs.length);
     var cartesPhoto = (r.photos || r.photosEchecs.length)
-      ? '<div class="tuile"><div class="k">Photos reprises</div><div class="v">' + r.photos + '</div>'
-        + (r.photosEchecs.length ? '<div class="z rouge">' + r.photosEchecs.length + ' échec' + plur(r.photosEchecs.length) + '</div>' : '') + '</div>' : '';
+      ? '<div class="tuile"><div class="k">${T("Photos reprises")}</div><div class="v">' + r.photos + '</div>'
+        + (r.photosEchecs.length ? '<div class="z rouge">' + r.photosEchecs.length + ' ${T("échec")}' + plur(r.photosEchecs.length) + '</div>' : '') + '</div>' : '';
     var tblPhotos = r.photosEchecs.length
-      ? '<div class="carte" style="margin-top:.8rem"><h2>Photos non reprises — le reste de la ligne est passé</h2>'
-        + '<table><thead><tr><th style="width:52px">Ligne</th><th style="width:120px">SKU</th><th>Adresse</th><th>Motif</th></tr></thead><tbody>'
+      ? '<div class="carte" style="margin-top:.8rem"><h2>${T("Photos non reprises — le reste de la ligne est passé")}</h2>'
+        + '<table><thead><tr><th style="width:52px">${T("Ligne")}</th><th style="width:120px">${T("SKU")}</th><th>${T("Adresse")}</th><th>${T("Motif")}</th></tr></thead><tbody>'
         + r.photosEchecs.map(function(x){ return '<tr><td class="dt">' + x.n + '</td><td><code>' + esc(x.sku || '—') + '</code></td>'
             + '<td style="word-break:break-all"><code>' + esc(x.src) + '</code></td><td class="rouge">' + esc(x.msg) + '</td></tr>'; }).join('')
         + '</tbody></table></div>' : '';
     var noteCrees = r.crees
       ? '<div class="avis" style="margin-top:.8rem">Les ' + r.crees + ' produit' + plur(r.crees)
-        + ' créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire</strong>. Ajoutez leurs photos, puis mettez-les en vente.</div>' : '';
+        + '${T(" créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire</strong>. Ajoutez leurs photos, puis mettez-les en vente.")}</div>' : '';
     var noteHist = r.histEchecs
       ? '<div class="avis" style="margin-top:.8rem">' + r.histEchecs + ' modification' + plur(r.histEchecs)
-        + ' enregistrée' + plur(r.histEchecs) + ' mais absente' + plur(r.histEchecs) + ' de l’historique du produit.</div>' : '';
+        + ' ${T("enregistrée")}' + plur(r.histEchecs) + ' mais absente' + plur(r.histEchecs) + ' ${T("de l’historique du produit.")}</div>' : '';
     var blocNotifs = r.notifs.length
-      ? '<div class="carte" style="margin-top:.8rem"><h2><span class="ic">🔔</span> Demandes « avisez-moi » satisfaites</h2>'
-        + '<div class="dt" style="margin-bottom:.4rem">Des clients attendaient le retour de ces articles. Les avis ne partent pas tout seuls.</div>'
+      ? '<div class="carte" style="margin-top:.8rem"><h2><span class="ic">🔔</span> ${T("Demandes « avisez-moi » satisfaites")}</h2>'
+        + '<div class="dt" style="margin-bottom:.4rem">${T("Des clients attendaient le retour de ces articles. Les avis ne partent pas tout seuls.")}</div>'
         + r.notifs.map(function(g){ return '<div class="notif"><span>' + esc(g.nom) + ' <span class="dt">— ' + g.count + ' personne' + plur(g.count) + '</span></span>'
-            + '<button class="mini" data-avis="' + esc(g.pid) + '">Envoyer les avis (' + g.count + ')</button></div>'; }).join('')
+            + '<button class="mini" data-avis="' + esc(g.pid) + '">${T("Envoyer les avis (")}' + g.count + ')</button></div>'; }).join('')
         + '</div>' : '';
     var tblRefus = refus
-      ? '<div class="carte" style="margin-top:.8rem"><h2>Lignes refusées — rien n’a été écrit pour celles-ci</h2>'
-        + '<table><thead><tr><th style="width:52px">Ligne</th><th style="width:120px">SKU</th><th>Produit</th><th>Motif</th></tr></thead><tbody>'
+      ? '<div class="carte" style="margin-top:.8rem"><h2>${T("Lignes refusées — rien n’a été écrit pour celles-ci")}</h2>'
+        + '<table><thead><tr><th style="width:52px">${T("Ligne")}</th><th style="width:120px">${T("SKU")}</th><th>${T("Produit")}</th><th>${T("Motif")}</th></tr></thead><tbody>'
         + r.conflits.map(function(c){ return '<tr><td class="dt">' + c.n + '</td><td><code>' + esc(c.sku || '—') + '</code></td><td>' + esc(c.nom || '—') + '</td>'
-            + '<td class="rouge">Un collègue vient de modifier : ' + esc((c.champs || []).join(', ')) + '. Valeur actuelle : ' + esc(c.actuel || '') + '</td></tr>'; }).join('')
+            + '<td class="rouge">${T("Un collègue vient de modifier :")} ' + esc((c.champs || []).join(', ')) + '${T(". Valeur actuelle :")} ' + esc(c.actuel || '') + '</td></tr>'; }).join('')
         + r.echecs.map(function(c){ return '<tr><td class="dt">' + c.n + '</td><td><code>' + esc(c.sku || '—') + '</code></td><td>' + esc(c.nom || '—') + '</td>'
             + '<td class="rouge">' + esc(c.msg) + '</td></tr>'; }).join('')
         + '</tbody></table></div>' : '';
     return ''
       + '<div class="tuiles">'
-      +   '<div class="tuile"><div class="k">Créés</div><div class="v">' + r.crees + '</div></div>'
-      +   '<div class="tuile"><div class="k">Modifiés</div><div class="v">' + r.majs + '</div></div>'
+      +   '<div class="tuile"><div class="k">${T("Créés")}</div><div class="v">' + r.crees + '</div></div>'
+      +   '<div class="tuile"><div class="k">${T("Modifiés")}</div><div class="v">' + r.majs + '</div></div>'
       +   cartesPhoto
-      +   '<div class="tuile' + (refus ? ' err' : '') + '"><div class="k">Refusés</div><div class="v">' + refus + '</div></div>'
+      +   '<div class="tuile' + (refus ? ' err' : '') + '"><div class="k">${T("Refusés")}</div><div class="v">' + refus + '</div></div>'
       + '</div>'
       + tblPhotos + noteCrees + noteHist + blocNotifs + tblRefus
       + '<div class="barre">'
-      +   '<button class="prim" data-act="reinit">Importer un autre fichier</button>'
-      +   '<button class="ghost" data-act="rapport">⬇ Télécharger le rapport</button>'
+      +   '<button class="prim" data-act="reinit">${T("Importer un autre fichier")}</button>'
+      +   '<button class="ghost" data-act="rapport">${T("⬇ Télécharger le rapport")}</button>'
       + '</div>';
   }
 
@@ -566,19 +570,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueConfirmer(){
     if (!IMP) return '';
     var c = IMP.compte, inv = IMP.feuille === 'inventaire', parts = [];
-    if (c.creation) parts.push('<li><strong>' + c.creation + '</strong> produit' + plur(c.creation) + ' <strong>créé' + plur(c.creation) + '</strong> — hors vente, à relire et publier ensuite</li>');
-    if (c.maj) parts.push('<li><strong>' + c.maj + '</strong> ' + (inv ? 'variante' + plur(c.maj) : 'fiche' + plur(c.maj)) + ' <strong>modifiée' + plur(c.maj) + '</strong></li>');
-    if (IMP.nbPhotos) parts.push('<li><strong>' + IMP.nbPhotos + '</strong> photo' + plur(IMP.nbPhotos) + ' <strong>téléchargée' + plur(IMP.nbPhotos) + '</strong> depuis des sites externes et copiée' + plur(IMP.nbPhotos) + ' dans votre stockage</li>');
-    if (c.inchange) parts.push('<li>' + c.inchange + ' ligne' + plur(c.inchange) + ' identique' + plur(c.inchange) + ' : rien ne sera écrit</li>');
-    if (c.erreur) parts.push('<li>' + c.erreur + ' ligne' + plur(c.erreur) + ' en erreur : <strong>ignorée' + plur(c.erreur) + '</strong></li>');
+    if (c.creation) parts.push('<li><strong>' + c.creation + '</strong> produit' + plur(c.creation) + ' <strong>${T("créé")}' + plur(c.creation) + '</strong> ${T("— hors vente, à relire et publier ensuite")}</li>');
+    if (c.maj) parts.push('<li><strong>' + c.maj + '</strong> ' + (inv ? 'variante' + plur(c.maj) : 'fiche' + plur(c.maj)) + ' <strong>${T("modifiée")}' + plur(c.maj) + '</strong></li>');
+    if (IMP.nbPhotos) parts.push('<li><strong>' + IMP.nbPhotos + '</strong> photo' + plur(IMP.nbPhotos) + ' <strong>${T("téléchargée")}' + plur(IMP.nbPhotos) + '</strong> ${T("depuis des sites externes et copiée")}' + plur(IMP.nbPhotos) + ' dans votre stockage</li>');
+    if (c.inchange) parts.push('<li>' + c.inchange + ' ligne' + plur(c.inchange) + ' identique' + plur(c.inchange) + ' ${T(": rien ne sera écrit")}</li>');
+    if (c.erreur) parts.push('<li>' + c.erreur + ' ligne' + plur(c.erreur) + ' en erreur : <strong>${T("ignorée")}' + plur(c.erreur) + '</strong></li>');
     return '<div class="voile" id="conf-voile"><div class="boite">'
-      + '<h3>Appliquer l’import</h3>'
-      + '<p style="margin:0 0 .6rem;font-size:.86rem">Fichier <strong>' + esc(IMP.fichier) + '</strong> — feuille ' + esc(IMP.feuille) + '.</p>'
+      + '<h3>${T("Appliquer l’import")}</h3>'
+      + '<p style="margin:0 0 .6rem;font-size:.86rem">Fichier <strong>' + esc(IMP.fichier) + '</strong> ${T("— feuille")} ' + esc(IMP.feuille) + '.</p>'
       + '<ul>' + parts.join('') + '</ul>'
-      + '<div class="gare">Aucun produit absent du fichier n’est touché, et rien n’est supprimé. Une fiche '
-      +   'qu’un collègue est en train de modifier sera refusée et listée à la fin.</div>'
+      + '<div class="gare">${T("Aucun produit absent du fichier n’est touché, et rien n’est supprimé. Une fiche")} '
+      +   '${T("qu’un collègue est en train de modifier sera refusée et listée à la fin.")}</div>'
       + '<div class="pied-boite">'
-      +   '<button class="gauche" data-conf="annuler">Annuler</button>'
+      +   '<button class="gauche" data-conf="annuler">${T("Annuler")}</button>'
       +   '<button class="prim" data-conf="appliquer">Appliquer</button>'
       + '</div>'
       + '</div></div>';
@@ -588,11 +592,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     dessinerOnglets();
     var total = ETAT ? ((ETAT.nbProduits || 0)) : 0;
-    sous.textContent = PEUT.edit ? '' : (PEUT.vue ? 'Lecture seule' : '');
+    sous.textContent = PEUT.edit ? '' : (PEUT.vue ? '${T("Lecture seule")}' : '');
 
     if (BUSY) {
       ongletsEl.innerHTML = '';
-      corps.innerHTML = '<div class="avancement"><div style="font-size:.9rem">Import en cours — ne fermez pas cette fenêtre.</div>'
+      corps.innerHTML = '<div class="avancement"><div style="font-size:.9rem">${T("Import en cours — ne fermez pas cette fenêtre.")}</div>'
         + '<div class="tourne"></div></div>';
       return;
     }
@@ -626,17 +630,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      dossier des exports, en DISANT ou il est alle. */
   function ecrireExport(r, quoi){
     if (!P || !P.enregistrerExport) {
-      dire('Cette version de l’application ne sait pas encore écrire le fichier ici. '
-        + 'Fermez et relancez l’application : elle se met à jour au démarrage.', 'err');
+      dire('${T("Cette version de l’application ne sait pas encore écrire le fichier ici.")} '
+        + '${T("Fermez et relancez l’application : elle se met à jour au démarrage.")}', 'err');
       return;
     }
     if (!r.nom || r.contenu == null) {
-      dire('Le fichier n’a pas été reçu. Fermez et relancez l’application.', 'err');
+      dire('${T("Le fichier n’a pas été reçu. Fermez et relancez l’application.")}', 'err');
       return;
     }
     P.enregistrerExport(r.nom, r.contenu).then(function(res){
       if (!res || !res.ok) {
-        dire('Écriture impossible : ' + ((res && res.error) || 'motif inconnu'), 'err');
+        dire('${T("Écriture impossible :")} ' + ((res && res.error) || 'motif inconnu'), 'err');
         return;
       }
       DERNIER_EXPORT = r.nom;
@@ -649,8 +653,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          la phrase qui trompait dès qu un dossier personnel était réglé. */
       relireDossier().then(function(){
         var ou = (DOSSIER && DOSSIER.dir) ? DOSSIER.dir : 'le dossier des exports';
-        dire(quoi + ' enregistré : ' + r.nom + ' — dans ' + ou + '.'
-          + ((DOSSIER && DOSSIER.repli) ? ' Votre dossier ne répondait pas.' : ''),
+        dire(quoi + ' ${T("enregistré :")} ' + r.nom + ' ${T("— dans")} ' + ou + '.'
+          + ((DOSSIER && DOSSIER.repli) ? ' ${T("Votre dossier ne répondait pas.")}' : ''),
           (DOSSIER && DOSSIER.repli) ? 'att' : 'bon');
         dessiner();
       });
@@ -666,8 +670,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      qui répare (relancer l application, elle se met à jour au démarrage) —
      sinon deux boutons restent muets et se lisent comme des boutons cassés. */
   function pasCesCanaux(){
-    dire('Cette version de l’application ne sait pas encore changer le dossier des exports. '
-      + 'Fermez et relancez l’application : elle se met à jour au démarrage.', 'err');
+    dire('${T("Cette version de l’application ne sait pas encore changer le dossier des exports.")} '
+      + '${T("Fermez et relancez l’application : elle se met à jour au démarrage.")}', 'err');
   }
   function relireDossier(){
     if (!P || !P.dossierExports) return Promise.resolve(false);
@@ -680,29 +684,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!P || !P.dossierExportsChoisir) { pasCesCanaux(); return; }
     P.dossierExportsChoisir().then(function(r){
       if (r && r.info) { DOSSIER = r.info; dessiner(); }
-      if (r && r.ok) { dire('Les fichiers sortiront maintenant dans ' + r.info.dir + '.', 'bon'); return; }
+      if (r && r.ok) { dire('${T("Les fichiers sortiront maintenant dans")} ' + r.info.dir + '.', 'bon'); return; }
       var m = r && r.motif;
       if (m === 'annule') return;                       // il a fermé la boîte : rien à dire
       if (m === 'lecture_seule') {
-        dire('Impossible d’écrire dans ' + ((r && r.chemin) || 'ce dossier')
-          + '. Le dossier n’a pas été changé — choisissez-en un autre, '
-          + 'ou demandez les droits d’écriture sur celui-là.', 'err');
+        dire('${T("Impossible d’écrire dans")} ' + ((r && r.chemin) || 'ce dossier')
+          + '${T(". Le dossier n’a pas été changé — choisissez-en un autre,")} '
+          + '${T("ou demandez les droits d’écriture sur celui-là.")}', 'err');
         return;
       }
-      dire('Le dossier n’a pas pu être changé : ' + ((r && r.detail) || 'motif inconnu'), 'err');
+      dire('${T("Le dossier n’a pas pu être changé :")} ' + ((r && r.detail) || 'motif inconnu'), 'err');
     });
   }
   function dossierStandard(){
     if (!P || !P.dossierExportsDefaut) { pasCesCanaux(); return; }
     P.dossierExportsDefaut().then(function(r){
       if (r && r.info) { DOSSIER = r.info; dessiner(); }
-      if (r && r.ok) dire('Retour au dossier standard : ' + r.info.dir + '.', 'bon');
-      else dire('Le retour au dossier standard a échoué : ' + ((r && r.detail) || 'motif inconnu'), 'err');
+      if (r && r.ok) dire('${T("Retour au dossier standard :")} ' + r.info.dir + '.', 'bon');
+      else dire('${T("Le retour au dossier standard a échoué :")} ' + ((r && r.detail) || 'motif inconnu'), 'err');
     });
   }
 
   function exporter(){
-    dire('Préparation du fichier…');
+    dire('${T("Préparation du fichier…")}');
     appeler('catalogio:exporter', optsExport()).then(function(r){
       if (r && r.ok) ecrireExport(r, 'Fichier');
       else dire(expliquer(r), 'err');
@@ -717,44 +721,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var o = optsExport();
     if (feuille) o.sheet = feuille;
     var quoi = (o.sheet === 'inventaire') ? 'inventaire' : 'catalogue';
-    dire('Préparation du modèle ' + quoi + '…');
+    dire('${T("Préparation du modèle")} ' + quoi + '…');
     appeler('catalogio:modele', o).then(function(r){
-      if (r && r.ok) ecrireExport(r, 'Modèle ' + quoi + ' (en-têtes seuls)');
+      if (r && r.ok) ecrireExport(r, '${T("Modèle ")}' + quoi + ' ${T("(en-têtes seuls)")}');
       else dire(expliquer(r), 'err');
     });
   }
   function onFichier(f){
     if (!f) return;
-    if (f.size > 8 * 1024 * 1024) { dire('Fichier trop volumineux (8 Mo maximum).', 'err'); return; }
+    if (f.size > 8 * 1024 * 1024) { dire('${T("Fichier trop volumineux (8 Mo maximum).")}', 'err'); return; }
     var nom = f.name;
     var fr = new FileReader();
-    fr.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
+    fr.onerror = function(){ dire('${T("Lecture du fichier impossible.")}', 'err'); };
     fr.onload = function(){
       var texte;
       try { texte = decoder(fr.result); }
-      catch(e){ dire('Fichier illisible.', 'err'); return; }
+      catch(e){ dire('${T("Fichier illisible.")}', 'err'); return; }
       analyser(texte, nom);
     };
     fr.readAsArrayBuffer(f);
   }
   function analyser(texte, nom){
-    dire('Analyse du fichier…');
+    dire('${T("Analyse du fichier…")}');
     appeler('catalogio:analyser', { text:texte, nom:nom }).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       IMP = r.imp; if (r.peut) PEUT = r.peut;
       RAP = null; FILTRE = 'tous'; PAGE = 0; LIGNES = null;
-      chargerLignes().then(function(){ dire('Aperçu prêt. Rien n’est encore écrit.', 'bon'); });
+      chargerLignes().then(function(){ dire('${T("Aperçu prêt. Rien n’est encore écrit.")}', 'bon'); });
     });
   }
   function ouvrirConfirmer(){
     if (!IMP) return;
-    if (!(IMP.compte.creation + IMP.compte.maj)) { dire('Rien à appliquer.', 'att'); return; }
+    if (!(IMP.compte.creation + IMP.compte.maj)) { dire('${T("Rien à appliquer.")}', 'att'); return; }
     CONFIRM = true; dessiner();
   }
   function appliquer(){
     if (BUSY) return;
     CONFIRM = false; BUSY = true; dessiner();
-    dire('Application en cours, ne fermez pas cette fenêtre…');
+    dire('${T("Application en cours, ne fermez pas cette fenêtre…")}');
     appeler('catalogio:appliquer', {}).then(function(r){
       BUSY = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
@@ -762,7 +766,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dessiner();
       var tot = (RAP.crees || 0) + (RAP.majs || 0);
       var refus = (RAP.conflits.length + RAP.echecs.length);
-      dire(tot + ' fiche' + plur(tot) + ' enregistrée' + plur(tot) + (refus ? ', ' + refus + ' refusée' + plur(refus) : '') + '.', refus ? 'att' : 'bon');
+      dire(tot + ' fiche' + plur(tot) + ' ${T("enregistrée")}' + plur(tot) + (refus ? ', ' + refus + ' ${T("refusée")}' + plur(refus) : '') + '.', refus ? 'att' : 'bon');
     });
   }
   function reinit(){
@@ -777,12 +781,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
   function envoyerAvis(pid){
-    dire('Envoi des avis…');
+    dire('${T("Envoi des avis…")}');
     appeler('catalogio:avis', pid).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       if (r.rapport) RAP = r.rapport;
       dessiner();
-      dire(r.sent ? (r.sent + ' avis envoyé' + plur(r.sent) + '.') : 'Aucun avis envoyé — voir la configuration des courriels.', r.sent ? 'bon' : 'att');
+      dire(r.sent ? (r.sent + ' ${T("avis envoyé")}' + plur(r.sent) + '.') : '${T("Aucun avis envoyé — voir la configuration des courriels.")}', r.sent ? 'bon' : 'att');
     });
   }
 
@@ -848,7 +852,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     COL_REPLI = !COL_REPLI;
     dessiner();
     appeler('ui:repli', { nom: 'catalogio_colonnes', replie: COL_REPLI }).then(function(r){
-      if (!r || !r.ok) dire('Le repli n a pas pu être mémorisé : ' + expliquer(r), 'err');
+      if (!r || !r.ok) dire('${T("Le repli n a pas pu être mémorisé :")} ' + expliquer(r), 'err');
     });
   }
 
