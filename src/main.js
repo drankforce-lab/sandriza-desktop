@@ -3238,6 +3238,58 @@ const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
   'archives:reactiver', 'factures:payer', 'factures:supprimer',
 ]);
 
+/* ══ LES LIBELLÉS TRADUITS SUR LE TRAJET ════════════════════════════════════
+ * ⚠⚠⚠ SA CAPTURE DU 2026-09-13 : une pastille « Confirmée » et une pastille
+ * « Payée », en français, sous des en-têtes NUMBER / CUSTOMER / TOTAL / STATUS.
+ * Ses mots : « les status sont toujours pas traduit et c'est partout sur
+ * l'application ».
+ *
+ * ⚠⚠ CES MOTS NE SONT DANS AUCUN FICHIER DE LA COQUILLE. Le site les compose
+ * (`ORDER_STATUS[o.status]` dans `admin.js`) et les envoie DÉJÀ EN FRANÇAIS ;
+ * la fenêtre ne fait que les afficher. Les cinq bancs de langue relèvent la
+ * SOURCE, ou dessinent la page SANS DONNÉES — aucun ne pouvait voir une phrase
+ * qui arrive par le réseau.
+ * ➡ **UN TEXTE QUI ARRIVE AVEC LES DONNÉES N'EST DANS AUCUN FICHIER DE LA
+ *   FENÊTRE.** Quatrième forme de la même leçon, après la page qui déclarait sa
+ *   langue, les unités fabriquées à l'exécution, et les phrases enveloppées
+ *   sans entrée.
+ *
+ * ⚠⚠ POURQUOI ICI ET PAS DANS LA FENÊTRE. J'ai d'abord posé un lexique dans le
+ * script de chaque page. Deux bancs l'ont refusé, et ils avaient raison : une
+ * table français→anglais posée dans la page, c'est trente-trois mots français
+ * DANS la page anglaise. Traduire sur le trajet ne met rien du tout dans la
+ * page — et les quarante affichages n'ont pas eu à bouger.
+ *
+ * ⚠ CE QUE LE LEXIQUE NE CONNAÎT PAS RESSORT MOT POUR MOT. Ces mêmes champs
+ * portent aussi des DONNÉES : le nom d'un segment, d'une campagne, d'un
+ * fournisseur — écrit par quelqu'un. « La traduction ne touche que ce qu'on
+ * lit, jamais ce qui est écrit. »
+ * ⚠ ET ON NE TOUCHE QUE LES CHAMPS NOMMÉS `…Libelle` / `libelle` : c'est la
+ * convention que le site emploie déjà pour dire « ceci est fait pour être lu ».
+ * Un champ voisin qui porterait un identifiant n'est pas approché.
+ *
+ * Garde : `tools/banc-langue-libelles.js`, qui confronte le lexique aux tables
+ * du site DANS LES DEUX SENS et éprouve cette fonction-ci. */
+const { LIBELLES_EN } = require('./langue/libelles');
+const _unLibelle = (v) => {
+  if (typeof v !== 'string') return v;
+  try { if (require('./langue').langueCourante() !== 'en') return v; } catch (er) { return v; }
+  return Object.prototype.hasOwnProperty.call(LIBELLES_EN, v) ? LIBELLES_EN[v] : v;
+};
+const _traduireLibelles = (x, prof) => {
+  const p = prof || 0;
+  /* ⚠ UNE BORNE DE PROFONDEUR : une réponse du site est une structure qu'on ne
+     contrôle pas. Un cycle ou un arbre trop creux ferait boucler le processus
+     PRINCIPAL — donc toute l'application, pas seulement une fenêtre. */
+  if (p > 8 || x === null || typeof x !== 'object') return x;
+  if (Array.isArray(x)) { for (let i = 0; i < x.length; i++) x[i] = _traduireLibelles(x[i], p + 1); return x; }
+  for (const k of Object.keys(x)) {
+    if (/[Ll]ibelle$/.test(k)) x[k] = _unLibelle(x[k]);
+    else x[k] = _traduireLibelles(x[k], p + 1);
+  }
+  return x;
+};
+
 ipcMain.handle('pont:appeler', async (e, op, args) => {
   const nom = String(op || '');
   if (!OPS_PONT.has(nom)) return { ok: false, motif: 'operation_inconnue' };
@@ -3286,6 +3338,14 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
       if (nom === 'fournisseur:enregistrer') fenetres.push('fournisseurs');
       if (fenetres.length) actualiserFenetres(fenetres, e.sender);
     }
+    /* ⚠⚠ LA DERNIÈRE CHOSE AVANT QUE LA RÉPONSE N'ENTRE DANS LA FENÊTRE : les
+       libellés composés par le site passent en anglais ici, et NULLE PART
+       ailleurs. Voir la fiche de `_traduireLibelles` plus haut.
+       ⚠ APRÈS le rafraîchissement des fenêtres ci-dessus, qui ne regarde que le
+       nom de l'opération : l'ordre ne compte pas pour lui, mais une traduction
+       faite avant serait une traduction faite deux fois le jour où quelqu'un
+       relira `r` entre les deux. */
+    if (r && typeof r === 'object') { try { _traduireLibelles(r, 0); } catch (er) {} }
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
   } catch { return { ok: false, motif: 'pont_indisponible' }; }
 });

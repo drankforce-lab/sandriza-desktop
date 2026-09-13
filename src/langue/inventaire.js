@@ -21,6 +21,10 @@
 module.exports = {
   'Inventaire — Administration Sandriza': 'Inventory — Sandriza Administration',
   'Inventaire': 'Inventory',
+  /* ⚠ EN MINUSCULES : c est un fragment de phrase, pas un titre. Le relevé par
+     appels (banc-langue-appels) l a trouvé là où le relevé par texte rendu ne
+     pouvait pas — il n apparaît qu avec des photos à l écran. */
+  'photos': 'photos',
   'Inventaire indisponible': 'Inventory unavailable',
   'Votre rôle ne permet pas de modifier l’inventaire.': 'Your role does not allow changing inventory.',
   'Ce produit n’existe plus.': 'This product no longer exists.',

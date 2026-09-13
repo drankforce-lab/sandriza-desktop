@@ -467,6 +467,10 @@ module.exports = {
   'vous pouvez fermer cette fenêtre, le traitement continue et se suit depuis n’importe quel écran.':
     'you can close this window, the job carries on and can be followed from any screen.',
   'Lancer le lot': 'Start the batch',
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER : le pluriel ne se fabrique pas toujours
+     en ajoutant une lettre, et un « s » collé à part ne passe pas par ici. */
+  'photo en lot': 'photo in a batch',
+  'photos en lot': 'photos in a batch',
   'Choisissez les photos du lot.': 'Choose the photos for the batch.',
   'photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.':
     'photos already have this job. Tick « Redo » to run them again.',

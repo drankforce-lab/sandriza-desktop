@@ -499,6 +499,27 @@ jobs:
           # il ne mesurerait qu'une absence, et retirer `JS_MESURES` du socle le
           # laisserait vert avec 99 fenêtres incapables d'afficher un montant.
           node tools/banc-langue-mesures.js
+          # ⚠⚠ ET LES PHRASES ENVELOPPÉES SANS ENTRÉE. Sa capture du 2026-09-13
+          # montrait « COMMANDES » et « MESSAGERIE » en français au milieu de
+          # « ORDERS TO PROCESS » et « ACTIVE PRODUCTS ». Le T() était là ; le
+          # dictionnaire n'avait pas l'entrée, donc repli en français.
+          # ⚠ AUCUN BANC NE POUVAIT LE VOIR : le résiduel ne cherche que les
+          # littéraux NUS (ceux-ci sont enveloppés), et `banc-langue-effet`
+          # dessine la page SANS DONNÉES — une tuile qui n'existe qu'avec onze
+          # variantes en rupture ne paraît jamais devant lui.
+          # ➡ UN BANC QUI DESSINE NE VOIT QUE CE QUE SES DONNÉES FONT APPARAÎTRE.
+          # Celui-ci ne dessine rien : il lit les APPELS et exige l'entrée.
+          node tools/banc-langue-appels.js
+          # ⚠⚠⚠ ET LE TEXTE QUI ARRIVE AVEC LES DONNÉES. Sa capture du même jour :
+          # « Confirmée » et « Payée » sous des en-têtes NUMBER / CUSTOMER /
+          # TOTAL / STATUS. Ces mots ne sont dans AUCUN fichier de la coquille —
+          # le site les compose (ORDER_STATUS) et les envoie déjà en français.
+          # ➡ UN TEXTE QUI ARRIVE AVEC LES DONNÉES N'EST DANS AUCUN FICHIER DE
+          # LA FENÊTRE. Aucun relevé de source ne peut le trouver.
+          # ⚠ Le lexique est confronté à sa source (admin.js, pont.js) DANS LES
+          # DEUX SENS, et le banc vérifie AUSSI que ce que szLibelle ne connaît
+          # pas ressort mot pour mot : ces champs portent aussi des données.
+          node tools/banc-langue-libelles.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de

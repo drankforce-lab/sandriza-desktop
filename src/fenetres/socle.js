@@ -1344,6 +1344,26 @@ function szOctets(n){
 `;
 };
 
+/* ⚠⚠⚠ LES LIBELLÉS VENUS DES DONNÉES NE SE TRADUISENT **PAS** ICI, ET C'EST
+ * UNE DÉCISION PRISE APRÈS AVOIR ESSAYÉ L'AUTRE (2026-09-13).
+ *
+ * Premier jet : une table `SZ_LIBELLES` posée dans le script de chaque
+ * fenêtre, et un `szLibelle()` appelé aux quarante endroits qui affichent un
+ * libellé. Ça marchait — et ça a fait échouer DEUX bancs d'un coup. La raison
+ * est imparable : la table est un dictionnaire FRANÇAIS→anglais, donc poser la
+ * table, c'est poser trente-trois mots français DANS la page anglaise.
+ * `banc-langue-residuel` et `banc-langue-effet` les ont vus, et ils avaient
+ * raison de les voir.
+ *
+ * ➡ **QUAND UN CONTRÔLE REFUSE LA SOLUTION, C'EST PARFOIS LA SOLUTION QUI EST
+ *   MAUVAISE.** La tentation était de lui apprendre à fermer les yeux sur cette
+ *   table-là. Le vrai remède était de ne pas mettre le français dans la page :
+ *   la traduction se fait dans le PROCESSUS PRINCIPAL, sur le trajet des
+ *   données (`pont:appeler` dans `main.js`), donc la fenêtre ne reçoit QUE de
+ *   l'anglais et les quarante affichages n'ont pas eu à bouger.
+ *
+ * Voir `src/langue/libelles.js` et `_traduireLibelles` dans `main.js`. */
+
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE() + JS_MESURES();
 

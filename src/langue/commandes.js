@@ -29,6 +29,7 @@ module.exports = {
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Commandes — Administration Sandriza': 'Orders — Sandriza Administration',
   'Commandes': 'Orders',
+  'Changer': 'Change',
   'Commandes indisponibles': 'Orders unavailable',
   '— Administration Sandriza': '— Sandriza Administration',
   'Lecture seule': 'Read only',
