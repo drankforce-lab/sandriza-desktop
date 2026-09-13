@@ -39,7 +39,8 @@
 const fs = require('fs');
 const path = require('path');
 const LANGUE = require('../src/langue');
-const { sansCommentaires, texteVisible, texteAffiche, PHRASE } = require('./textes-visibles.js');
+const { sansCommentaires, texteVisible, texteAffiche, sansDonneesDeclarees, PHRASE } =
+  require('./textes-visibles.js');
 
 const DOS = path.join(__dirname, '..', 'src', 'fenetres');
 const DICOS = path.join(__dirname, '..', 'src', 'langue');
@@ -304,6 +305,12 @@ for (const nom of traduites) {
   let page;
   try { page = fabrique(''); } catch (e) { try { page = fabrique(); } catch (e2) { continue; } }
   if (typeof page !== 'string') continue;
+  /* ⚠ LES DONNEES PAR DEFAUT DECLAREES (`var SZ_DONNEES = { … };`) SORTENT DE LA
+     MESURE. Elles sont ecrites dans la base et relues par la cliente : elles
+     DOIVENT rester en francais sur la page anglaise. Les accuser reviendrait a
+     demander la faute que `src/langue/index.js` interdit. Voir la fiche de
+     `tools/textes-visibles.js`. */
+  page = sansDonneesDeclarees(page);
   lues++;
 
   const restes = [];

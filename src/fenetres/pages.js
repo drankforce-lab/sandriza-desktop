@@ -44,6 +44,12 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠⚠ CET ÉCRAN ÉDITE CE QUE LA CLIENTE LIT : la frontière entre
+   l'interface et la donnée y passe au milieu de la même phrase. Ce qui est une
+   DONNÉE est déclaré dans `SZ_DONNEES`, plus bas dans le script, et n'est
+   jamais traduit — voir l'en-tête de src/langue/pages.js. */
+const T = require('../langue').tr('pages');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -64,7 +70,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
-.carte h3{margin:0 0 .2rem;font:700 1rem/1.2 Georgia,serif}
+.carte h3{margin:0 0 .2rem;font:700 1rem/1.2 ${T("Georgia")},serif}
 .entete{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 label.champ{display:block;margin:0 0 .8rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
@@ -104,7 +110,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .sur{position:fixed;inset:0;background:rgba(4,8,15,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1.5rem}
 .sur .boite{background:var(--f-131c2b);border:1px solid var(--v12);border-radius:14px;max-width:640px;width:100%;max-height:80vh;display:flex;flex-direction:column}
 .sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.1rem;border-bottom:1px solid var(--v08)}
-.sur .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
+.sur .tt h3{margin:0;font:700 1rem/1.2 ${T("Georgia")},serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
 .mailmsg{border:1px solid var(--v10);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:var(--v02)}
 .mailmsg .hh{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.35rem}
@@ -142,9 +148,9 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 .ed .zone::-webkit-scrollbar{width:9px}
 .ed .zone::-webkit-scrollbar-thumb{background:var(--v12);border-radius:9px}
 .ed .zone:empty:before{content:attr(data-vide);color:#5c6b80}
-.ed .zone h2{font:700 1.15rem/1.3 Georgia,serif;margin:1.1rem 0 .5rem}
-.ed .zone h3{font:700 1rem/1.3 Georgia,serif;margin:1rem 0 .4rem;color:var(--tx-e6cfa8)}
-.ed .zone h4{font:700 .92rem/1.3 Georgia,serif;margin:.9rem 0 .35rem}
+.ed .zone h2{font:700 1.15rem/1.3 ${T("Georgia")},serif;margin:1.1rem 0 .5rem}
+.ed .zone h3{font:700 1rem/1.3 ${T("Georgia")},serif;margin:1rem 0 .4rem;color:var(--tx-e6cfa8)}
+.ed .zone h4{font:700 .92rem/1.3 ${T("Georgia")},serif;margin:.9rem 0 .35rem}
 .ed .zone p{margin:0 0 .7rem}
 .ed .zone ul,.ed .zone ol{margin:0 0 .8rem;padding-left:1.4rem}
 .ed .zone li{margin:0 0 .25rem}
@@ -187,7 +193,7 @@ table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
 
 /* Aperçu et liste des variables : memes surfaces que la boite de reception. */
 .apr{padding:1rem 1.15rem;overflow-y:auto;background:#fdfcfa;color:#2c2c2c;line-height:1.7;font-size:.88rem}
-.apr h2,.apr h3,.apr h4{font-family:Georgia,serif;color:#1a1a1a}
+.apr h2,.apr h3,.apr h4{font-family:${T("Georgia")},serif;color:#1a1a1a}
 .apr a{color:#a67c4e}
 .apr table{border-collapse:collapse;width:100%;margin:.9rem 0}
 .apr th,.apr td{border:1px solid #ddd;padding:.4rem .6rem;text-align:left}
@@ -223,12 +229,12 @@ function pagePages(onglet) {
   const ONGLET0 = (['list','faq','contact','retours','tailles','vedette'].indexOf(brut) >= 0)
     ? brut : 'list';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Pages du site — Administration Sandriza</title>
+<title>${T("Pages du site — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.pages}</span><h1>Pages du site</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
+<div class="tete"><span class="ico">${ICO.pages}</span><h1>${T("Pages du site")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="onglets" id="onglets"></div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -239,8 +245,8 @@ function pagePages(onglet) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
@@ -262,13 +268,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var SECP = 'returns';    // section affichée dans l onglet Nos politiques
   var SALE = { returns:false, shipping:false, promocodes:false };
 
+  /* ══ CE QUI EST UNE DONNEE, PAS DE L INTERFACE ═══════════════════════════════
+     ⚠⚠⚠ CES CINQ TEXTES SONT ECRITS DANS LA BASE ET RELUS PAR LA CLIENTE. Le
+     titre par defaut de la page FAQ, le nom et les en-tetes par defaut d un
+     guide des tailles : si personne ne les change, c est EUX qui paraissent sur
+     la boutique. Les traduire ecrirait de l anglais dans les donnees d une
+     boutique francaise — la faute la plus silencieuse du lot, parce qu elle ne
+     se decouvre qu en relisant la base.
+     ⚠⚠ « Taille » est aussi un LIBELLE ailleurs dans cette fenetre (la taille du
+     texte, dans la barre de l editeur riche) : c est bien la MEME chaine, mais
+     pas le meme role. C est pour ca que la declaration se fait par un bloc, et
+     non par une liste de mots.
+     ⚠ Le nom SZ_DONNEES est reconnu par trois outils — le compteur et le banc du
+     residuel les ecartent, le poseur en fait une zone interdite, et
+     banc-langue-donnees REFUSE qu un de ces textes ait une entree de
+     dictionnaire. Voir la fiche de tools/textes-visibles.js. */
+  var SZ_DONNEES = {
+    faqTitre: 'Foire aux questions',
+    guideNom: 'Nouveau guide',
+    guideEntete1: 'Taille',
+    guideEntete2: 'Mesure 1 (cm)',
+    guideEntete3: 'Mesure 2 (cm)',
+    /* ⚠ CELUI-CI EST PLUS DISCRET QUE LES AUTRES : il n est pas un defaut de
+       formulaire, il est INSERE DANS LE CONTENU de la page (edPoserTableau).
+       Une fois pose, il fait partie du texte que la cliente lit — et il y reste.
+       Le traduire mettrait « Header » dans une page francaise. */
+    tableauEntete: 'En-tête'
+  };
+
   var ONGLETS = [
-    { k:'list',    n:'Liste' },
+    { k:'list',    n:'${T("Liste")}' },
     { k:'faq',     n:'FAQ' },
-    { k:'contact', n:'Contact' },
-    { k:'retours', n:'Nos politiques' },
-    { k:'tailles', n:'Guide des tailles' },
-    { k:'vedette', n:'En vedette' }
+    { k:'contact', n:'${T("Contact")}' },
+    { k:'retours', n:'${T("Nos politiques")}' },
+    { k:'tailles', n:'${T("Guide des tailles")}' },
+    { k:'vedette', n:'${T("En vedette")}' }
   ];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -276,18 +310,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function val(id){ var e=document.getElementById(id); return e?String(e.value||'').trim():''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès aux pages du site.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    invalide:'Titre et slug sont requis.',
-    slug_pris:'Ce slug est déjà utilisé par une autre page.',
-    introuvable:'Élément introuvable.',
-    protege:'Cette page est protégée et ne peut pas être supprimée.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès aux pages du site.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    invalide:'${T("Titre et slug sont requis.")}',
+    slug_pris:'${T("Ce slug est déjà utilisé par une autre page.")}',
+    introuvable:'${T("Élément introuvable.")}',
+    protege:'${T("Cette page est protégée et ne peut pas être supprimée.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -308,30 +342,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var f=D.footer||{};
     var builtins=[
       { k:'faq',     nom:'FAQ',                route:'#faq',     onglet:'faq',     foot:true },
-      { k:'contact', nom:'Contactez-nous',     route:'#contact', onglet:'contact', foot:true },
-      { k:'retours', nom:'Nos politiques',     route:'#retours', onglet:'retours', foot:true },
-      { k:'tailles', nom:'Guide des Tailles',  route:'#tailles', onglet:'tailles', foot:true },
-      { k:'vedette', nom:'Menu Vêtements — En vedette', route:'(menu)', onglet:'vedette', foot:false }
+      { k:'contact', nom:'${T("Contactez-nous")}',     route:'#contact', onglet:'contact', foot:true },
+      { k:'retours', nom:'${T("Nos politiques")}',     route:'#retours', onglet:'retours', foot:true },
+      { k:'tailles', nom:'${T("Guide des Tailles")}',  route:'#tailles', onglet:'tailles', foot:true },
+      { k:'vedette', nom:'${T("Menu Vêtements — En vedette")}', route:'(menu)', onglet:'vedette', foot:false }
     ];
     var cp=D.customPages||[];
-    var boutonNouv = (D.peutAjouter && !RO) ? '<button class="prim" id="cp-nouvelle">＋ Nouvelle page</button>' : '';
-    var h='<div class="carte"><div class="entete"><h3>Toutes les pages <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+(builtins.length+cp.length)+' page(s)</span></h3>'+boutonNouv+'</div>';
-    h+='<table class="tb"><thead><tr><th style="text-align:left">Page</th><th style="text-align:left">Route</th><th>Type</th><th>Pied de page</th><th></th></tr></thead><tbody>';
+    var boutonNouv = (D.peutAjouter && !RO) ? '<button class="prim" id="cp-nouvelle">${T("＋ Nouvelle page")}</button>' : '';
+    var h='<div class="carte"><div class="entete"><h3>${T("Toutes les pages")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+(builtins.length+cp.length)+'${T(" page(s)")}</span></h3>'+boutonNouv+'</div>';
+    h+='<table class="tb"><thead><tr><th style="text-align:left">${T("Page")}</th><th style="text-align:left">${T("Route")}</th><th>${T("Type")}</th><th>${T("Pied de page")}</th><th></th></tr></thead><tbody>';
     for (var i=0;i<builtins.length;i++){ var b=builtins[i];
       var coche = f[b.k]!==false;
       h+='<tr><td style="text-align:left;font-weight:600">'+esc(b.nom)+'</td>'
         +'<td style="text-align:left"><code>'+esc(b.route)+'</code></td>'
-        +'<td style="text-align:center"><span class="pastille int">Intégrée</span></td>'
+        +'<td style="text-align:center"><span class="pastille int">${T("Intégrée")}</span></td>'
         +'<td style="text-align:center">'+(b.foot?('<label class="chk"><input type="checkbox" data-foot="'+b.k+'" '+(coche?'checked':'')+(RO?' disabled':'')+'></label>'):'—')+'</td>'
-        +'<td style="text-align:right"><button class="b" data-go="'+b.onglet+'">Modifier</button></td></tr>';
+        +'<td style="text-align:right"><button class="b" data-go="'+b.onglet+'">${T("Modifier")}</button></td></tr>';
     }
     for (var c=0;c<cp.length;c++){ var p=cp[c];
       h+='<tr><td style="text-align:left;font-weight:600">'+esc(p.title)+'</td>'
         +'<td style="text-align:left"><code>#page/'+esc(p.slug)+'</code></td>'
-        +'<td style="text-align:center"><span class="pastille perso">Personnalisée</span></td>'
+        +'<td style="text-align:center"><span class="pastille perso">${T("Personnalisée")}</span></td>'
         +'<td style="text-align:center"><label class="chk"><input type="checkbox" data-cfoot="'+esc(p.id)+'" '+(p.footerVisible?'checked':'')+(RO?' disabled':'')+'></label></td>'
-        +'<td style="text-align:right;white-space:nowrap"><button class="b" data-cedit="'+esc(p.id)+'">Modifier</button>'
-        +(D.peutSupprimer && !p.protege ? ' <button class="b dgr" data-cdel="'+esc(p.id)+'">'+(DELP===p.id?'✓ Confirmer':'Supprimer')+'</button>' : '')+'</td></tr>';
+        +'<td style="text-align:right;white-space:nowrap"><button class="b" data-cedit="'+esc(p.id)+'">${T("Modifier")}</button>'
+        +(D.peutSupprimer && !p.protege ? ' <button class="b dgr" data-cdel="'+esc(p.id)+'">'+(DELP===p.id?'${T("✓ Confirmer")}':'${T("Supprimer")}')+'</button>' : '')+'</td></tr>';
     }
     h+='</tbody></table></div>';
     h+='';
@@ -340,9 +374,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   function brancherListe(){
     var fts=corps.querySelectorAll('[data-foot]');
-    for (var i=0;i<fts.length;i++) fts[i].onchange=function(){ var k=this.getAttribute('data-foot'); enregistrer('pages:footer',[k,this.checked],'Pied de page mis à jour.'); };
+    for (var i=0;i<fts.length;i++) fts[i].onchange=function(){ var k=this.getAttribute('data-foot'); enregistrer('pages:footer',[k,this.checked],'${T("Pied de page mis à jour.")}'); };
     var cfs=corps.querySelectorAll('[data-cfoot]');
-    for (var j=0;j<cfs.length;j++) cfs[j].onchange=function(){ var id=this.getAttribute('data-cfoot'); enregistrer('pages:custom:footer',[id,this.checked],'Pied de page mis à jour.'); };
+    for (var j=0;j<cfs.length;j++) cfs[j].onchange=function(){ var id=this.getAttribute('data-cfoot'); enregistrer('pages:custom:footer',[id,this.checked],'${T("Pied de page mis à jour.")}'); };
     var gos=corps.querySelectorAll('[data-go]');
     for (var g=0;g<gos.length;g++) gos[g].onclick=function(){ ONGLET=this.getAttribute('data-go'); FAQ=null; GUIDES=null; rendre(); };
     var nv=document.getElementById('cp-nouvelle'); if (nv) nv.onclick=function(){ ouvrirEditeurPage(''); };
@@ -350,12 +384,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     for (var e=0;e<eds.length;e++) eds[e].onclick=function(){ ouvrirEditeurPage(this.getAttribute('data-cedit')); };
     var dls=corps.querySelectorAll('[data-cdel]');
     for (var d=0;d<dls.length;d++) dls[d].onclick=function(){ var id=this.getAttribute('data-cdel');
-      if (DELP===id){ DELP=''; supprimerPage(id); } else { DELP=id; vueListe(); dire('Cliquez encore pour supprimer cette page.', 'att'); } };
+      if (DELP===id){ DELP=''; supprimerPage(id); } else { DELP=id; vueListe(); dire('${T("Cliquez encore pour supprimer cette page.")}', 'att'); } };
   }
   function supprimerPage(id){
-    if (RO||OCCUPE) return; OCCUPE=true; dire('Suppression…');
+    if (RO||OCCUPE) return; OCCUPE=true; dire('${T("Suppression…")}');
     appeler('pages:custom:supprimer',[id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ recharger('Page supprimée.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ recharger('${T("Page supprimée.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── PAGES PERSONNALISÉES — ÉDITEUR RICHE DU CONTENU (5c) ─────────
@@ -366,10 +400,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function ouvrirEditeurPage(id){
     if (OCCUPE) return;
     if (!id){ dessinerEditeurPage(null); return; }
-    OCCUPE=true; dire('Ouverture de la page…');
+    OCCUPE=true; dire('${T("Ouverture de la page…")}');
     appeler('pages:custom:donnees',[id]).then(function(r){ OCCUPE=false;
       if (r && r.ok){ dire(''); dessinerEditeurPage(r.page); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   /* == LE BROUILLON D UNE PAGE DU SITE ======================================
      C'est le formulaire ou l'on perd le plus de temps : le CONTENU est un article
@@ -393,7 +427,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var BR_CHAMPS = ['cp-title', 'cp-slug', 'cp-sub', 'cp-flabel'];
   szBrouillonBrancher({
     portee: 'page-site',
-    libelle: 'Une page',
+    libelle: '${T("Une page")}',
     ttlMin: 720,
     cle: function(){ return CPSEL ? ('p:' + CPSEL) : '__new__'; },
     actif: function(){ return !!document.getElementById('sur-cp'); },
@@ -442,22 +476,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var dis=RO?' disabled':'';
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-cp';
     var h='<div class="boite" style="max-width:960px;max-height:92vh">'
-      +'<div class="tt"><h3>'+(nouv?'Nouvelle page':'Modifier — '+esc(p.title))+'</h3>'
-      +'<button class="mini" id="cp-x">Fermer</button></div>'
+      +'<div class="tt"><h3>'+(nouv?'${T("Nouvelle page")}':'${T("Modifier — ")}'+esc(p.title))+'</h3>'
+      +'<button class="mini" id="cp-x">${T("Fermer")}</button></div>'
       +'<div class="liste" id="cp-corps">'
       +'<div class="grille2">'
-      +'<label class="champ"><span class="lbl">Titre <span style="color:var(--tx-err)">*</span></span><input class="t" id="cp-title" value="'+esc(p.title)+'"'+dis+'></label>'
-      +'<label class="champ"><span class="lbl">Slug (URL) <span style="color:var(--tx-err)">*</span></span><input class="t" id="cp-slug" value="'+esc(p.slug)+'" placeholder="ma-page"'+dis+(p.protege?' readonly title="Slug protégé (Loi 25)"':'')+'></label>'
-      +'<label class="champ"><span class="lbl">Sous-titre</span><input class="t" id="cp-sub" value="'+esc(p.subtitle)+'"'+dis+'></label>'
-      +'<label class="champ"><span class="lbl">Libellé pied de page</span><input class="t" id="cp-flabel" value="'+esc(p.footerLabel)+'"'+dis+'></label>'
+      +'<label class="champ"><span class="lbl">${T("Titre ")}<span style="color:var(--tx-err)">*</span></span><input class="t" id="cp-title" value="'+esc(p.title)+'"'+dis+'></label>'
+      +'<label class="champ"><span class="lbl">${T("Slug (URL) ")}<span style="color:var(--tx-err)">*</span></span><input class="t" id="cp-slug" value="'+esc(p.slug)+'" placeholder="ma-page"'+dis+(p.protege?' readonly title="${T("Slug protégé (Loi 25)")}"':'')+'></label>'
+      +'<label class="champ"><span class="lbl">${T("Sous-titre")}</span><input class="t" id="cp-sub" value="'+esc(p.subtitle)+'"'+dis+'></label>'
+      +'<label class="champ"><span class="lbl">${T("Libellé pied de page")}</span><input class="t" id="cp-flabel" value="'+esc(p.footerLabel)+'"'+dis+'></label>'
       +'</div>'
-      +'<label class="chk" style="margin:.2rem 0 .9rem"><input type="checkbox" id="cp-foot" '+(p.footerVisible?'checked':'')+dis+'> Afficher dans le pied de page</label>'
-      +'<label class="champ" style="margin:0"><span class="lbl">Contenu de la page</span></label>'
+      +'<label class="chk" style="margin:.2rem 0 .9rem"><input type="checkbox" id="cp-foot" '+(p.footerVisible?'checked':'')+dis+'>${T(" Afficher dans le pied de page")}</label>'
+      +'<label class="champ" style="margin:0"><span class="lbl">${T("Contenu de la page")}</span></label>'
       +edHtml('cp-ed', p.content)
       +'</div>'
       +'<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
-      +'<button class="b" id="cp-annuler">Annuler</button>'
-      +(RO?'':'<button class="prim" id="cp-enr">'+(nouv?'Créer la page':'Enregistrer')+'</button>')
+      +'<button class="b" id="cp-annuler">${T("Annuler")}</button>'
+      +(RO?'':'<button class="prim" id="cp-enr">'+(nouv?'${T("Créer la page")}':'${T("Enregistrer")}')+'</button>')
       +'</div></div>';
     sur.innerHTML=h;
     document.body.appendChild(sur);
@@ -486,8 +520,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var flabel=val('cp-flabel');
     var fe=document.getElementById('cp-foot'); var foot=!!(fe&&fe.checked);
     var ze=document.getElementById('cp-ed'); var content=(ze&&ze.innerHTML)||'';
-    if (!title || !slug){ dire('Titre et slug sont requis.', 'err'); return; }
-    OCCUPE=true; dire('Enregistrement… (dépôt des images dans le nuage si besoin)');
+    if (!title || !slug){ dire('${T("Titre et slug sont requis.")}', 'err'); return; }
+    OCCUPE=true; dire('${T("Enregistrement… (dépôt des images dans le nuage si besoin)")}');
     var d={ title:title, slug:slug, subtitle:subtitle, footerLabel:flabel, footerVisible:foot, content:content };
     appeler('pages:custom:ecrire',[CPSEL||'', d]).then(function(r){ OCCUPE=false;
       if (r && r.ok){
@@ -497,28 +531,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         szBrouillonJeter();
         fermerEditeurPage();
         if (ONGLET==='list') vueListe();
-        dire(nouv?'Page créée.':'Page modifiée.', 'bon');
-      } else dire('Échec : '+expliquer(r), 'err'); });
+        dire(nouv?'${T("Page créée.")}':'${T("Page modifiée.")}', 'bon');
+      } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── FAQ ──────────────────────────────────────────────────────────
   function vueFaq(){
-    if (!FAQ){ var s=D.faq||{}; FAQ={ title:s.title||'Foire aux questions', subtitle:s.subtitle||'', items:(s.items||[]).map(function(it){ return {id:it.id,q:it.q||'',a:it.a||''}; }) }; }
-    var h='<div class="carte"><div class="entete"><h3>Foire aux questions</h3>'+boutonEnr('faqEnr')+'</div>'
+    if (!FAQ){ var s=D.faq||{}; FAQ={ title:s.title||SZ_DONNEES.faqTitre, subtitle:s.subtitle||'', items:(s.items||[]).map(function(it){ return {id:it.id,q:it.q||'',a:it.a||''}; }) }; }
+    /* ⚠ L EN-TETE DE LA CARTE NOMME L ECRAN, comme « Page Contact » a cote ; il
+       ne repete plus le titre PAR DEFAUT de la page, qui est une donnee. Les
+       deux etaient la meme chaine, et le poseur ne pouvait pas les distinguer. */
+    var h='<div class="carte"><div class="entete"><h3>${T("Page FAQ")}</h3>'+boutonEnr('faqEnr')+'</div>'
       +'<div class="grille2">'
-      +champ('faq-title','Titre de la page',FAQ.title)
-      +champ('faq-sub','Sous-titre',FAQ.subtitle)
+      +champ('faq-title','${T("Titre de la page")}',FAQ.title)
+      +champ('faq-sub','${T("Sous-titre")}',FAQ.subtitle)
       +'</div></div>';
-    h+='<div class="carte"><div class="entete"><h3>Questions & réponses <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+FAQ.items.length+' entrée(s)</span></h3>'+(RO?'':'<button class="b" id="faq-add">＋ Ajouter</button>')+'</div><div id="faq-liste">';
-    if (!FAQ.items.length) h+='<div class="vide">Aucune question.</div>';
+    h+='<div class="carte"><div class="entete"><h3>${T("Questions & réponses")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+FAQ.items.length+'${T(" entrée(s)")}</span></h3>'+(RO?'':'<button class="b" id="faq-add">${T("＋ Ajouter")}</button>')+'</div><div id="faq-liste">';
+    if (!FAQ.items.length) h+='<div class="vide">${T("Aucune question.")}</div>';
     for (var i=0;i<FAQ.items.length;i++){ var it=FAQ.items[i];
       h+='<div class="qa">'
-        +'<label class="champ"><span class="lbl">Question</span><input aria-label="Question" class="t" data-fq="'+i+'" value="'+esc(it.q)+'"'+(RO?' disabled':'')+'></label>'
-        +'<label class="champ" style="margin:0"><span class="lbl">Réponse</span><textarea aria-label="Réponse" class="t" rows="3" data-fa="'+i+'"'+(RO?' disabled':'')+'>'+esc(it.a)+'</textarea></label>';
+        +'<label class="champ"><span class="lbl">${T("Question")}</span><input aria-label="${T("Question")}" class="t" data-fq="'+i+'" value="'+esc(it.q)+'"'+(RO?' disabled':'')+'></label>'
+        +'<label class="champ" style="margin:0"><span class="lbl">${T("Réponse")}</span><textarea aria-label="${T("Réponse")}" class="t" rows="3" data-fa="'+i+'"'+(RO?' disabled':'')+'>'+esc(it.a)+'</textarea></label>';
       if (!RO) h+='<div class="barre">'
         +(i>0?'<button class="b" data-fup="'+i+'">↑</button>':'')
         +(i<FAQ.items.length-1?'<button class="b" data-fdn="'+i+'">↓</button>':'')
-        +'<button class="b dgr" data-frm="'+i+'">Retirer</button></div>';
+        +'<button class="b dgr" data-frm="'+i+'">${T("Retirer")}</button></div>';
       h+='</div>';
     }
     h+='</div></div>';
@@ -540,39 +577,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   function enregistrerFaq(){ if (RO||OCCUPE) return; syncFaq();
     var items=FAQ.items.filter(function(x){ return String(x.q||'').trim(); }).map(function(x){ return {id:x.id,q:x.q,a:x.a}; });
-    OCCUPE=true; dire('Enregistrement…');
+    OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('pages:faq:ecrire',[{title:FAQ.title,subtitle:FAQ.subtitle,items:items}]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.faq) D.faq=r.faq; FAQ=null; vueFaq(); dire('FAQ enregistrée.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ if (r.faq) D.faq=r.faq; FAQ=null; vueFaq(); dire('${T("FAQ enregistrée.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── CONTACT ──────────────────────────────────────────────────────
   function vueContact(){
     var d=D.contact||{};
     var badge = D.contactNouveaux>0 ? '<span class="badge">'+D.contactNouveaux+'</span>' : (' ('+(D.contactTotal||0)+')');
-    var h='<div class="carte"><div class="entete"><h3>Page Contact</h3><div style="display:flex;gap:.4rem;align-items:center">'
+    var h='<div class="carte"><div class="entete"><h3>${T("Page Contact")}</h3><div style="display:flex;gap:.4rem;align-items:center">'
       +'<button class="b" id="ct-inbox"><span class="ic">📬</span> Messages'+badge+'</button>'+boutonEnr('ctEnr')+'</div></div>'
       +'<div class="grille2">'
-      +champ('ct-title','Titre de la page',d.title||'')
-      +champ('ct-sub','Sous-titre',d.subtitle||'')
-      +champ('ct-email','Courriel de contact',d.email||'')
-      +champ('ct-phone','Téléphone',d.phone||'')
+      +champ('ct-title','${T("Titre de la page")}',d.title||'')
+      +champ('ct-sub','${T("Sous-titre")}',d.subtitle||'')
+      +champ('ct-email','${T("Courriel de contact")}',d.email||'')
+      +champ('ct-phone','${T("Téléphone")}',d.phone||'')
       +champ('ct-addr','Adresse',d.address||'')
-      +champ('ct-hours','Heures d’ouverture',d.hours||'')
+      +champ('ct-hours','${T("Heures d’ouverture")}',d.hours||'')
       +'</div>'
-      +'<label class="champ" style="margin-top:.2rem"><span class="lbl">Texte d’introduction</span><textarea class="t" id="ct-intro" rows="2"'+(RO?' disabled':'')+'>'+esc(d.intro||'')+'</textarea></label>'
+      +'<label class="champ" style="margin-top:.2rem"><span class="lbl">${T("Texte d’introduction")}</span><textarea class="t" id="ct-intro" rows="2"'+(RO?' disabled':'')+'>'+esc(d.intro||'')+'</textarea></label>'
       +'</div>';
     corps.innerHTML=h;
     lierEnr('ctEnr', enregistrerContact);
     document.getElementById('ct-inbox').onclick=ouvrirBoite;
   }
-  function enregistrerContact(){ if (RO||OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
+  function enregistrerContact(){ if (RO||OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
     var d={ title:val('ct-title'), subtitle:val('ct-sub'), email:val('ct-email'), phone:val('ct-phone'), address:val('ct-addr'), hours:val('ct-hours'), intro:val('ct-intro') };
     appeler('pages:contact:ecrire',[d]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D.contact=d; dire('Page Contact enregistrée.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ D.contact=d; dire('${T("Page Contact enregistrée.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function ouvrirBoite(){
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inbox';
-    sur.innerHTML='<div class="boite"><div class="tt"><h3>Messages reçus</h3><button class="mini" id="ib-x">Fermer</button></div><div class="liste" id="ib-liste"><div class="vide charge">Chargement…</div></div></div>';
+    sur.innerHTML='<div class="boite"><div class="tt"><h3>${T("Messages reçus")}</h3><button class="mini" id="ib-x">${T("Fermer")}</button></div><div class="liste" id="ib-liste"><div class="vide charge">${T("Chargement…")}</div></div></div>';
     document.body.appendChild(sur);
     sur.addEventListener('click', function(e){ if (e.target===sur) fermerBoite(); });
     document.getElementById('ib-x').onclick=fermerBoite;
@@ -585,10 +622,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!r||!r.ok){ l.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; return; }
     var m=r.messages||[];
     var tete='<div class="entete" style="margin-bottom:.7rem"><span style="font-size:.82rem;color:var(--tx2)">'+m.length+' message(s)</span>'
-      +(m.length&&!RO?'<button class="b dgr" id="ib-vider">'+(VIDECONF?'✓ Confirmer':'Tout supprimer')+'</button>':'')+'</div>';
-    if (r.etat==='reseau') tete+='<div class="note" style="margin-bottom:.7rem"><span class="ic">⚠</span> Relecture depuis le nuage impossible (réseau) — rien n’est perdu. Rouvrez pour réessayer.</div>';
+      +(m.length&&!RO?'<button class="b dgr" id="ib-vider">'+(VIDECONF?'${T("✓ Confirmer")}':'${T("Tout supprimer")}')+'</button>':'')+'</div>';
+    if (r.etat==='reseau') tete+='<div class="note" style="margin-bottom:.7rem"><span class="ic">⚠</span> ${T("Relecture depuis le nuage impossible (réseau) — rien n’est perdu. Rouvrez pour réessayer.")}</div>';
     var corpsl='';
-    if (!m.length) corpsl='<div class="vide">Aucun message reçu.</div>';
+    if (!m.length) corpsl='<div class="vide">${T("Aucun message reçu.")}</div>';
     for (var i=m.length-1;i>=0;i--){ var s=m[i];
       var dt=''; try{ dt=new Date(s.createdAt).toLocaleDateString('fr-CA'); }catch(e){}
       corpsl+='<div class="mailmsg"><div class="hh"><div><b>'+esc(s.name)+'</b> <a href="mailto:'+esc(s.email)+'">'+esc(s.email)+'</a></div>'
@@ -601,14 +638,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var vd=document.getElementById('ib-vider'); if (vd) vd.onclick=function(){ if (VIDECONF){ viderBoite(); } else { VIDECONF=true; peindreBoite(r); } };
     var dels=l.querySelectorAll('[data-mdel]'); for (var d=0;d<dels.length;d++) dels[d].onclick=function(){ supprimerMsg(this.getAttribute('data-mdel')); };
   }
-  function supprimerMsg(id){ appeler('pages:inbox:supprimer',[id]).then(function(r){ if (r&&r.ok){ appeler('pages:inbox',[]).then(peindreBoite); recharger('', ''); } else dire('Échec : '+expliquer(r), 'err'); }); }
-  function viderBoite(){ appeler('pages:inbox:vider',[]).then(function(r){ if (r&&r.ok){ VIDECONF=false; appeler('pages:inbox',[]).then(peindreBoite); recharger('Boîte vidée.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); }); }
+  function supprimerMsg(id){ appeler('pages:inbox:supprimer',[id]).then(function(r){ if (r&&r.ok){ appeler('pages:inbox',[]).then(peindreBoite); recharger('', ''); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); }); }
+  function viderBoite(){ appeler('pages:inbox:vider',[]).then(function(r){ if (r&&r.ok){ VIDECONF=false; appeler('pages:inbox',[]).then(peindreBoite); recharger('${T("Boîte vidée.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); }); }
 
   // ── NOS POLITIQUES — ÉDITEUR RICHE (5b) ──────────────────────────
   var SECS = [
-    { k:'returns',    n:'Retours & échanges' },
-    { k:'shipping',   n:'Expédition & livraison' },
-    { k:'promocodes', n:'Codes promotionnels' }
+    { k:'returns',    n:'${T("Retours & échanges")}' },
+    { k:'shipping',   n:'${T("Expédition & livraison")}' },
+    { k:'promocodes', n:'${T("Codes promotionnels")}' }
   ];
 
   var IC = {
@@ -656,31 +693,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   function edHtml(id,contenu){
     var h='<div class="ed" id="wrap-'+id+'"><div class="barre">'
-      +'<select data-bloc title="Format du paragraphe"><option value="" selected disabled>Format</option>'
-      +'<option value="p">Paragraphe</option><option value="h2">Titre H2</option>'
-      +'<option value="h3">Titre H3</option><option value="blockquote">Citation</option></select>'
-      +'<select data-police title="Police"><option value="" selected disabled>Police</option>'
-      +'<option value="Inter,sans-serif">Inter</option><option value="Georgia,serif">Georgia</option>'
-      +'<option value="Arial,sans-serif">Arial</option><option value="Courier New,monospace">Courier</option></select>'
-      +'<select data-taille title="Taille du texte"><option value="" selected disabled>Taille</option>'
-      +'<option value="0.75rem">Très petit</option><option value="0.875rem">Petit</option>'
-      +'<option value="1rem">Normal</option><option value="1.2rem">Grand</option>'
-      +'<option value="1.5rem">Très grand</option><option value="2rem">Énorme</option></select>'
+      +'<select data-bloc title="${T("Format du paragraphe")}"><option value="" selected disabled>${T("Format")}</option>'
+      +'<option value="p">${T("Paragraphe")}</option><option value="h2">${T("Titre H2")}</option>'
+      +'<option value="h3">${T("Titre H3")}</option><option value="blockquote">${T("Citation")}</option></select>'
+      +'<select data-police title="${T("Police")}"><option value="" selected disabled>${T("Police")}</option>'
+      +'<option value="Inter,sans-serif">${T("Inter")}</option><option value="Georgia,serif">${T("Georgia")}</option>'
+      +'<option value="Arial,sans-serif">${T("Arial")}</option><option value="Courier New,monospace">${T("Courier")}</option></select>'
+      +'<select data-taille title="${T("Taille du texte")}"><option value="" selected disabled>${T("Taille")}</option>'
+      +'<option value="0.75rem">${T("Très petit")}</option><option value="0.875rem">${T("Petit")}</option>'
+      +'<option value="1rem">${T("Normal")}</option><option value="1.2rem">${T("Grand")}</option>'
+      +'<option value="1.5rem">${T("Très grand")}</option><option value="2rem">${T("Énorme")}</option></select>'
       +'<span class="fil"></span>'
-      +edBtn('bold',IC.g,'Gras (Ctrl+B)')+edBtn('italic',IC.i,'Italique (Ctrl+I)')+edBtn('underline',IC.s,'Souligné (Ctrl+U)')
+      +edBtn('bold',IC.g,'${T("Gras (Ctrl+B)")}')+edBtn('italic',IC.i,'${T("Italique (Ctrl+I)")}')+edBtn('underline',IC.s,'${T("Souligné (Ctrl+U)")}')
       +'<span class="fil"></span>'
-      +edBtn('insertUnorderedList',IC.ul,'Liste à puces')+edBtn('insertOrderedList',IC.ol,'Liste numérotée')
+      +edBtn('insertUnorderedList',IC.ul,'${T("Liste à puces")}')+edBtn('insertOrderedList',IC.ol,'${T("Liste numérotée")}')
       +'<span class="fil"></span>'
-      +'<button type="button" data-lien title="Insérer un lien">'+IC.a+'</button>'
-      +edBtn('unlink',IC.na,'Retirer le lien')
-      +edBtn('removeFormat',IC.x,'Effacer la mise en forme')
+      +'<button type="button" data-lien title="${T("Insérer un lien")}">'+IC.a+'</button>'
+      +edBtn('unlink',IC.na,'${T("Retirer le lien")}')
+      +edBtn('removeFormat',IC.x,'${T("Effacer la mise en forme")}')
       +'<span class="fil"></span>'
-      +'<button type="button" data-vars title="Insérer une variable">'+IC.var+' Variables</button>'
-      +'<button type="button" data-img title="Insérer une image">'+IC.img+' Image</button>'
-      +'<button type="button" data-tbl title="Insérer un tableau">'+IC.tb+' Tableau</button>'
+      +'<button type="button" data-vars title="${T("Insérer une variable")}">'+IC.var+' ${T("Variables")}</button>'
+      +'<button type="button" data-img title="${T("Insérer une image")}">'+IC.img+' ${T("Image")}</button>'
+      +'<button type="button" data-tbl title="${T("Insérer un tableau")}">'+IC.tb+' ${T("Tableau")}</button>'
       +'<span class="pousse"></span>'
-      +'<button type="button" data-apercu title="Aperçu avec les variables résolues">'+IC.oe+' Aperçu</button>'
-      +'<button type="button" data-plein title="Plein écran">'+IC.pl+'</button>'
+      +'<button type="button" data-apercu title="${T("Aperçu avec les variables résolues")}">'+IC.oe+' ${T("Aperçu")}</button>'
+      +'<button type="button" data-plein title="${T("Plein écran")}">'+IC.pl+'</button>'
       +'</div>'
       +'<div class="zone" id="'+id+'" contenteditable="'+(RO?'false':'true')+'" spellcheck="false" '
       +'data-vide="Rédigez le contenu de cette section…">'+(contenu||'<p><br></p>')+'</div>'
@@ -730,7 +767,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function edLien(id){
-    demanderTexte('Insérer un lien','Adresse du lien','https://', function(url){
+    demanderTexte('${T("Insérer un lien")}','${T("Adresse du lien")}','https://', function(url){
       if (!url) return;
       var z=edRendre(id); if (!z) return;
       var s=window.getSelection();
@@ -749,7 +786,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // a cette taille.
   function edImage(id,input){
     var f=input && input.files && input.files[0]; if (!f) return;
-    if (f.size>600000){ dire('Image trop grande (600 Ko maximum).', 'err'); return; }
+    if (f.size>600000){ dire('${T("Image trop grande (600 Ko maximum).")}', 'err'); return; }
     var fr=new FileReader();
     fr.onload=function(e){
       var nom=String(f.name||'image').replace(/\.[^.]+$/,'');
@@ -757,7 +794,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var z=edRendre(id); if (!z) return;
       document.execCommand('insertHTML',false,html);
       edGarder(id); marquerSale();
-      dire('Image insérée — elle sera déposée dans le nuage à l’enregistrement.', 'att');
+      dire('${T("Image insérée — elle sera déposée dans le nuage à l’enregistrement.")}', 'att');
     };
     fr.readAsDataURL(f);
   }
@@ -767,7 +804,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var g=document.createElement('div'); g.className='grtb';
     var h='<div class="cases">';
     for (var r=1;r<=8;r++) for (var c=1;c<=10;c++) h+='<div class="c" data-r="'+r+'" data-c="'+c+'"></div>';
-    h+='</div><div class="lgd" id="lgd-tb">Choisissez les dimensions</div>';
+    h+='</div><div class="lgd" id="lgd-tb">${T("Choisissez les dimensions")}</div>';
     g.innerHTML=h;
     document.body.appendChild(g);
     var b=btn.getBoundingClientRect();
@@ -789,7 +826,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   function edPoserTableau(id,lignes,cols){
     var cs='padding:.5rem .75rem;border:1px solid #ddd;text-align:left;';
-    var th='<th style="'+cs+'background:#f5f2ee;font-weight:600">En-tête</th>';
+    var th='<th style="'+cs+'background:#f5f2ee;font-weight:600">'+SZ_DONNEES.tableauEntete+'</th>';
     var td='<td style="'+cs+'">&nbsp;</td>';
     var tete='', ligne='';
     for (var c=0;c<cols;c++){ tete+=th; ligne+=td; }
@@ -831,7 +868,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +'<button data-l="75">75 %</button><button data-l="100">100 %</button>'
       +'<span class="fil"></span>'
       +'<button data-a="left"><span class="ic">⯇</span></button><button data-a="center"><span class="ic">⬍</span></button><button data-a="right"><span class="ic">⯈</span></button>'
-      +'<span class="fil"></span><button class="dgr" data-sup>Supprimer</button>');
+      +'<span class="fil"></span><button class="dgr" data-sup>${T("Supprimer")}</button>');
     IMGSEL=img; img.classList.add('imgsel');
     var ls=f.querySelectorAll('[data-l]');
     for (var i=0;i<ls.length;i++) ls[i].onclick=function(){ img.style.width=this.getAttribute('data-l')+'%'; img.style.height='auto'; marquerSale(); };
@@ -846,9 +883,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function edFlotTableau(cel,id){
     var tr=cel.parentNode, table=cel.closest('table');
     var f=poserFlot(cel,
-      '<button data-lig="+">＋ Ligne</button><button data-lig="-">－ Ligne</button>'
-      +'<span class="fil"></span><button data-col="+">＋ Colonne</button><button data-col="-">－ Colonne</button>'
-      +'<span class="fil"></span><button class="dgr" data-sup>Supprimer le tableau</button>');
+      '<button data-lig="+">${T("＋ Ligne")}</button><button data-lig="-">${T("－ Ligne")}</button>'
+      +'<span class="fil"></span><button data-col="+">${T("＋ Colonne")}</button><button data-col="-">${T("－ Colonne")}</button>'
+      +'<span class="fil"></span><button class="dgr" data-sup>${T("Supprimer le tableau")}</button>');
     f.querySelector('[data-lig="+"]').onclick=function(){
       var n=tr.cloneNode(true);
       var tds=n.querySelectorAll('td,th');
@@ -859,7 +896,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       // reste dans le HTML sans rien montrer, et il devient impossible à
       // reprendre. Pour s en débarrasser, il y a « Supprimer le tableau ».
       var tb=tr.parentNode;
-      if (tb.rows && tb.rows.length<=1){ dire('Un tableau garde au moins une ligne.', 'att'); return; }
+      if (tb.rows && tb.rows.length<=1){ dire('${T("Un tableau garde au moins une ligne.")}', 'att'); return; }
       tr.remove(); fermerFlot(); marquerSale(); };
     f.querySelector('[data-col="+"]').onclick=function(){
       var i=cel.cellIndex, rs=table.rows;
@@ -870,7 +907,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       fermerFlot(); marquerSale(); };
     f.querySelector('[data-col="-"]').onclick=function(){
       var i=cel.cellIndex, rs=table.rows;
-      if (rs[0] && rs[0].cells.length<=1){ dire('Un tableau garde au moins une colonne.', 'att'); return; }
+      if (rs[0] && rs[0].cells.length<=1){ dire('${T("Un tableau garde au moins une colonne.")}', 'att'); return; }
       for (var r=0;r<rs.length;r++){ if (rs[r].cells[i]) rs[r].deleteCell(i); }
       fermerFlot(); marquerSale(); };
     f.querySelector('[data-sup]').onclick=function(){ table.remove(); fermerFlot(); marquerSale(); };
@@ -879,9 +916,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ── Variables ────────────────────────────────────────────────────
   function edVars(id){
     var groupes=D.variables||[];
-    var h='<div class="boite"><div class="tt"><h3>Variables disponibles</h3><button class="mini" id="v-x">Fermer</button></div><div class="liste">'
-      +'<div class="note" style="margin-bottom:.8rem">Elles sont remplacées par la vraie valeur au moment de l’affichage sur la boutique. Cliquez pour insérer à la position du curseur.</div>';
-    if (!groupes.length) h+='<div class="vide">Aucune variable.</div>';
+    var h='<div class="boite"><div class="tt"><h3>${T("Variables disponibles")}</h3><button class="mini" id="v-x">${T("Fermer")}</button></div><div class="liste">'
+      +'<div class="note" style="margin-bottom:.8rem">${T("Elles sont remplacées par la vraie valeur au moment de l’affichage sur la boutique. Cliquez pour insérer à la position du curseur.")}</div>';
+    if (!groupes.length) h+='<div class="vide">${T("Aucune variable.")}</div>';
     for (var i=0;i<groupes.length;i++){
       h+='<div class="vgrp">'+esc(groupes[i].groupe)+'</div>';
       var vs=groupes[i].vars||[];
@@ -910,9 +947,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var z=document.getElementById(id); if (!z) return;
     var brut=z.innerHTML||'';
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-apr';
-    sur.innerHTML='<div class="boite" style="max-width:820px"><div class="tt"><h3>Aperçu du contenu</h3>'
-      +'<button class="mini" id="a-x">Fermer</button></div>'
-      +'<div class="apr" id="a-corps"><div class="vide charge">Résolution des variables…</div></div></div>';
+    sur.innerHTML='<div class="boite" style="max-width:820px"><div class="tt"><h3>${T("Aperçu du contenu")}</h3>'
+      +'<button class="mini" id="a-x">${T("Fermer")}</button></div>'
+      +'<div class="apr" id="a-corps"><div class="vide charge">${T("Résolution des variables…")}</div></div></div>';
     document.body.appendChild(sur);
     sur.addEventListener('click', function(e){ if (e.target===sur) sur.remove(); });
     document.getElementById('a-x').onclick=function(){ sur.remove(); };
@@ -921,7 +958,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // un aperçu qui ment dès que l’un d’eux change.
     appeler('pages:politique:apercu',[brut]).then(function(r){
       var c=document.getElementById('a-corps'); if (!c) return;
-      if (r && r.ok) c.innerHTML=r.html||'<div class="vide">Section vide.</div>';
+      if (r && r.ok) c.innerHTML=r.html||'<div class="vide">${T("Section vide.")}</div>';
       else c.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>';
     });
   }
@@ -933,7 +970,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +'<div class="liste"><label class="champ" style="margin:0"><span class="lbl">'+esc(label)+'</span>'
       +'<input class="t" id="dt-v" value="'+esc(valeur||'')+'"></label>'
       +'<div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem">'
-      +'<button class="b" id="dt-n">Annuler</button><button class="prim" id="dt-o">Insérer</button></div></div></div>';
+      +'<button class="b" id="dt-n">${T("Annuler")}</button><button class="prim" id="dt-o">${T("Insérer")}</button></div></div></div>';
     document.body.appendChild(sur);
     var champ=document.getElementById('dt-v');
     champ.focus(); champ.select();
@@ -965,7 +1002,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var h='';
     for (var i=0;i<SECS.length;i++){ var o=SECS[i];
       h+='<button data-sec="'+o.k+'" class="'+(SECP===o.k?'on':'')+'">'+esc(o.n)
-        +(SALE[o.k]?'<span class="pt" title="Modifications non enregistrées"></span>':'')+'</button>'; }
+        +(SALE[o.k]?'<span class="pt" title="${T("Modifications non enregistrées")}"></span>':'')+'</button>'; }
     el.innerHTML=h;
     var bs=el.querySelectorAll('[data-sec]');
     for (var j=0;j<bs.length;j++) bs[j].onclick=function(){
@@ -979,10 +1016,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var h='<div id="souso" class="souso"></div>'
       +'<div class="carte"><div class="entete"><h3>'+esc(nom)+'</h3>'
       +'<div style="display:flex;gap:.4rem;align-items:center">'
-      +(SALE[SECP]?'<span style="font-size:.76rem;color:var(--tx-jaune)">Modifications non enregistrées</span>':'')
+      +(SALE[SECP]?'<span style="font-size:.76rem;color:var(--tx-jaune)">${T("Modifications non enregistrées")}</span>':'')
       +boutonEnr('polEnr')+'</div></div>'
-      +'<div class="grille2">'+champ('pol-t','Titre de la section',p.title)+champ('pol-s','Sous-titre',p.subtitle)+'</div>'
-      +'<label class="champ" style="margin:0"><span class="lbl">Contenu de la section</span></label>'
+      +'<div class="grille2">'+champ('pol-t','${T("Titre de la section")}',p.title)+champ('pol-s','${T("Sous-titre")}',p.subtitle)+'</div>'
+      +'<label class="champ" style="margin:0"><span class="lbl">${T("Contenu de la section")}</span></label>'
       +edHtml('pol-ed',p.content)
       +'</div>';
     corps.innerHTML=h;
@@ -998,7 +1035,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     syncPol();
     var sec=SECP, p=POL[sec];
     OCCUPE=true;
-    dire('Enregistrement… (dépôt des images dans le nuage si besoin)');
+    dire('${T("Enregistrement… (dépôt des images dans le nuage si besoin)")}');
     appeler('pages:politique:ecrire',[sec,{title:p.title,subtitle:p.subtitle,content:p.content}]).then(function(r){
       OCCUPE=false;
       if (r && r.ok){
@@ -1009,8 +1046,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (D.politiques) D.politiques[sec]=POL[sec];
         SALE[sec]=false;
         if (SECP===sec) vueRetours();
-        dire('Section enregistrée.', 'bon');
-      } else dire('Échec : '+expliquer(r), 'err');
+        dire('${T("Section enregistrée.")}', 'bon');
+      } else dire('${T("Échec : ")}'+expliquer(r), 'err');
     });
   }
 
@@ -1018,31 +1055,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueTailles(){
     if (!GUIDES){ GUIDES=(D.sizeGuides||[]).map(function(g){ return { id:g.id, name:g.name||'', nameEN:g.nameEN||'', headers:(g.headers||[]).slice(), rows:(g.rows||[]).map(function(r){ return r.slice(); }) }; }); }
     var sp=D.sizesPage||{};
-    var h='<div class="carte"><div class="entete"><h3>Guide des tailles</h3>'+boutonEnr('tzEnr')+'</div>'
-      +'<div class="grille2">'+champ('tz-title','Titre de la page',sp.title||'')+champ('tz-sub','Sous-titre',sp.subtitle||'')+'</div>'
-      +'<label class="champ" style="margin:0"><span class="lbl">Texte d’introduction</span><textarea class="t" id="tz-intro" rows="2"'+(RO?' disabled':'')+'>'+esc(sp.intro||'')+'</textarea></label>'
+    var h='<div class="carte"><div class="entete"><h3>${T("Guide des tailles")}</h3>'+boutonEnr('tzEnr')+'</div>'
+      +'<div class="grille2">'+champ('tz-title','${T("Titre de la page")}',sp.title||'')+champ('tz-sub','${T("Sous-titre")}',sp.subtitle||'')+'</div>'
+      +'<label class="champ" style="margin:0"><span class="lbl">${T("Texte d’introduction")}</span><textarea class="t" id="tz-intro" rows="2"'+(RO?' disabled':'')+'>'+esc(sp.intro||'')+'</textarea></label>'
       +'</div>';
     h+='<div id="tz-guides">';
-    if (!GUIDES.length) h+='<div class="vide">Aucun guide.</div>';
+    if (!GUIDES.length) h+='<div class="vide">${T("Aucun guide.")}</div>';
     for (var gi=0; gi<GUIDES.length; gi++){ var g=GUIDES[gi];
       h+='<div class="carte"><div class="entete" style="margin-bottom:.7rem"><div style="display:flex;gap:.4rem;flex:1;flex-wrap:wrap">'
         +'<input aria-label="Nom du guide" class="t" data-gname="'+gi+'" value="'+esc(g.name)+'" placeholder="Nom du guide" style="max-width:280px;font-weight:600"'+(RO?' disabled':'')+'>'
         +'<input aria-label="Nom (EN)" class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="Nom (EN)" style="max-width:240px"'+(RO?' disabled':'')+'></div>'
-        +(RO?'':'<div style="display:flex;gap:.3rem"><button class="b" data-grow="'+gi+'">＋ Ligne</button><button class="b dgr" data-gdel="'+gi+'">Supprimer</button></div>')+'</div>';
+        +(RO?'':'<div style="display:flex;gap:.3rem"><button class="b" data-grow="'+gi+'">${T("＋ Ligne")}</button><button class="b dgr" data-gdel="'+gi+'">${T("Supprimer")}</button></div>')+'</div>';
       h+='<div style="overflow-x:auto"><table class="tb"><thead><tr>';
       /* ⚠ UN TABLEAU DE SAISIE : chaque cellule est un champ, et rien ne les
          nomme puisque les EN-TETES SONT EUX AUSSI des champs. Le nom se compose
          donc de la position — c est le seul repere qui existe ici. */
-      for (var hh=0; hh<g.headers.length; hh++) h+='<th><input class="t" data-gh="'+gi+'-'+hh+'" aria-label="En-tête de la colonne '+(hh+1)+'" value="'+esc(g.headers[hh])+'" style="font-weight:600"'+(RO?' disabled':'')+'></th>';
+      for (var hh=0; hh<g.headers.length; hh++) h+='<th><input class="t" data-gh="'+gi+'-'+hh+'" aria-label="${T("En-tête de la colonne ")}'+(hh+1)+'" value="'+esc(g.headers[hh])+'" style="font-weight:600"'+(RO?' disabled':'')+'></th>';
       h+='<th style="width:30px"></th></tr></thead><tbody>';
       for (var ri=0; ri<g.rows.length; ri++){ h+='<tr>';
-        for (var ci=0; ci<g.rows[ri].length; ci++) h+='<td><input class="t" data-gc="'+gi+'-'+ri+'-'+ci+'" aria-label="Ligne '+(ri+1)+', colonne '+(ci+1)+'" value="'+esc(g.rows[ri][ci])+'"'+(RO?' disabled':'')+'></td>';
+        for (var ci=0; ci<g.rows[ri].length; ci++) h+='<td><input class="t" data-gc="'+gi+'-'+ri+'-'+ci+'" aria-label="${T("Ligne ")}'+(ri+1)+'${T(", colonne ")}'+(ci+1)+'" value="'+esc(g.rows[ri][ci])+'"'+(RO?' disabled':'')+'></td>';
         h+='<td style="text-align:center">'+(RO?'':'<button class="b dgr" data-grrm="'+gi+'-'+ri+'" style="padding:.1rem .4rem">✕</button>')+'</td></tr>';
       }
       h+='</tbody></table></div></div>';
     }
     h+='</div>';
-    if (!RO) h+='<button class="b" id="tz-addguide">＋ Ajouter un guide</button>';
+    if (!RO) h+='<button class="b" id="tz-addguide">${T("＋ Ajouter un guide")}</button>';
     corps.innerHTML=h;
     lierEnr('tzEnr', enregistrerTailles);
     lierTailles();
@@ -1056,7 +1093,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     q('[data-grow]', function(e){ e.onclick=function(){ syncTailles(); var gi=+this.getAttribute('data-grow'); var n=GUIDES[gi].headers.length; var row=[]; for (var i=0;i<n;i++) row.push(''); GUIDES[gi].rows.push(row); vueTailles(); }; });
     q('[data-grrm]', function(e){ e.onclick=function(){ syncTailles(); var p=this.getAttribute('data-grrm').split('-'); GUIDES[+p[0]].rows.splice(+p[1],1); vueTailles(); }; });
     q('[data-gdel]', function(e){ e.onclick=function(){ syncTailles(); GUIDES.splice(+this.getAttribute('data-gdel'),1); vueTailles(); }; });
-    var ag=document.getElementById('tz-addguide'); if (ag) ag.onclick=function(){ syncTailles(); GUIDES.push({ id:null, name:'Nouveau guide', nameEN:'', headers:['Taille','Mesure 1 (cm)','Mesure 2 (cm)'], rows:[['','','']] }); vueTailles(); };
+    var ag=document.getElementById('tz-addguide'); if (ag) ag.onclick=function(){ syncTailles(); GUIDES.push({ id:null, name:SZ_DONNEES.guideNom, nameEN:'', headers:[SZ_DONNEES.guideEntete1,SZ_DONNEES.guideEntete2,SZ_DONNEES.guideEntete3], rows:[['','','']] }); vueTailles(); };
   }
   function syncTailles(){
     var q=function(sel,fn){ var e=corps.querySelectorAll(sel); for (var i=0;i<e.length;i++) fn(e[i]); };
@@ -1068,23 +1105,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function enregistrerTailles(){ if (RO||OCCUPE) return; syncTailles();
     var guides=GUIDES.filter(function(g){ return String(g.name||'').trim(); });
     var page={ title:val('tz-title'), subtitle:val('tz-sub'), intro:val('tz-intro') };
-    OCCUPE=true; dire('Enregistrement…');
+    OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('pages:sizes:ecrire',[{page:page,guides:guides}]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.sizeGuides) D.sizeGuides=r.sizeGuides; D.sizesPage=page; GUIDES=null; vueTailles(); dire('Guide des tailles enregistré.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ if (r.sizeGuides) D.sizeGuides=r.sizeGuides; D.sizesPage=page; GUIDES=null; vueTailles(); dire('${T("Guide des tailles enregistré.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── EN VEDETTE ───────────────────────────────────────────────────
   function vueVedette(){
     var items=D.vedette||[];
-    var h='<div class="carte"><h3>Menu Vêtements — En vedette</h3>'
-      +'<div class="note" style="margin:.6rem 0 1rem">Les 4 sections du méga-menu « Vêtements » sont fixes. Vous pouvez ajouter ou retirer des liens dans la section « En vedette ».</div>';
-    if (!RO) h+='<div class="grille2" style="align-items:end;gap:.6rem"><label class="champ" style="margin:0"><span class="lbl">Libellé</span><input class="t" id="ved-label" placeholder="ex. Meilleures ventes"></label>'
-      +'<div style="display:flex;gap:.5rem;align-items:end"><label class="champ" style="margin:0;flex:1"><span class="lbl">Lien</span><input class="t" id="ved-href" placeholder="ex. #shop?cat=robes"></label><button class="prim" id="ved-add">Ajouter</button></div></div>';
+    var h='<div class="carte"><h3>${T("Menu Vêtements — En vedette")}</h3>'
+      +'<div class="note" style="margin:.6rem 0 1rem">${T("Les 4 sections du méga-menu « Vêtements » sont fixes. Vous pouvez ajouter ou retirer des liens dans la section « En vedette ».")}</div>';
+    if (!RO) h+='<div class="grille2" style="align-items:end;gap:.6rem"><label class="champ" style="margin:0"><span class="lbl">${T("Libellé")}</span><input class="t" id="ved-label" placeholder="${T("ex. Meilleures ventes")}"></label>'
+      +'<div style="display:flex;gap:.5rem;align-items:end"><label class="champ" style="margin:0;flex:1"><span class="lbl">${T("Lien")}</span><input class="t" id="ved-href" placeholder="${T("ex. #shop?cat=robes")}"></label><button class="prim" id="ved-add">${T("Ajouter")}</button></div></div>';
     h+='<div id="ved-liste" style="margin-top:1rem">';
-    if (!items.length) h+='<div class="vide">Aucun lien — la section sera vide dans le menu.</div>';
+    if (!items.length) h+='<div class="vide">${T("Aucun lien — la section sera vide dans le menu.")}</div>';
     for (var i=0;i<items.length;i++){ var it=items[i];
       h+='<div class="lien"><div class="g"><strong>'+esc(it.label)+'</strong><div><code>'+esc(it.href)+'</code></div></div>'
-        +(RO?'':'<button class="b dgr" data-vrm="'+i+'">Retirer</button>')+'</div>';
+        +(RO?'':'<button class="b dgr" data-vrm="'+i+'">${T("Retirer")}</button>')+'</div>';
     }
     h+='</div></div>';
     corps.innerHTML=h;
@@ -1092,22 +1129,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var rms=corps.querySelectorAll('[data-vrm]'); for (var r=0;r<rms.length;r++) rms[r].onclick=function(){ retirerVedette(+this.getAttribute('data-vrm')); };
   }
   function ajouterVedette(){ if (RO||OCCUPE) return; var label=val('ved-label'), href=val('ved-href');
-    if (!label||!href){ dire('Libellé et lien requis.', 'err'); return; }
-    OCCUPE=true; dire('Ajout…');
+    if (!label||!href){ dire('${T("Libellé et lien requis.")}', 'err'); return; }
+    OCCUPE=true; dire('${T("Ajout…")}');
     appeler('pages:vedette:ajouter',[{label:label,href:href}]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D.vedette=r.vedette||[]; vueVedette(); dire('Lien ajouté.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ D.vedette=r.vedette||[]; vueVedette(); dire('${T("Lien ajouté.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
-  function retirerVedette(i){ if (RO||OCCUPE) return; OCCUPE=true; dire('Retrait…');
+  function retirerVedette(i){ if (RO||OCCUPE) return; OCCUPE=true; dire('${T("Retrait…")}');
     appeler('pages:vedette:retirer',[i]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D.vedette=r.vedette||[]; vueVedette(); dire('Lien retiré.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ D.vedette=r.vedette||[]; vueVedette(); dire('${T("Lien retiré.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── COMMUN ───────────────────────────────────────────────────────
   function champ(id,label,v){ return '<label class="champ"><span class="lbl">'+esc(label)+'</span><input class="t" id="'+id+'" value="'+esc(v)+'"'+(RO?' disabled':'')+'></label>'; }
-  function boutonEnr(id){ return RO?'':'<button class="prim" id="'+id+'">Enregistrer</button>'; }
+  function boutonEnr(id){ return RO?'':'<button class="prim" id="'+id+'">${T("Enregistrer")}</button>'; }
   function lierEnr(id, fn){ var b=document.getElementById(id); if (b) b.onclick=fn; }
   function enregistrer(op, args, ok){ if (RO||OCCUPE) return; OCCUPE=true;
-    appeler(op,args).then(function(r){ OCCUPE=false; if (r&&r.ok){ dire(ok, 'bon'); } else { dire('Échec : '+expliquer(r), 'err'); recharger('', ''); } });
+    appeler(op,args).then(function(r){ OCCUPE=false; if (r&&r.ok){ dire(ok, 'bon'); } else { dire('${T("Échec : ")}'+expliquer(r), 'err'); recharger('', ''); } });
   }
 
   function rendre(){
@@ -1125,7 +1162,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('pages:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; RO=!r.peutModifier; if (msg) dire(msg, cl); } });
   }
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('pages:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');

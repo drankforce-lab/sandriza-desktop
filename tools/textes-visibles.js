@@ -99,14 +99,68 @@ const chainesProse = (js) => {
 };
 
 /* Tout ce qu une page engendree affiche, les deux sources reunies. */
+/* ══ LES DONNEES PAR DEFAUT, DECLAREES DANS LA FENETRE ══════════════════════
+ * ⚠⚠⚠ IL MANQUAIT UNE FACON DE DIRE « CECI EST UNE DONNEE ». Le 2026-09-13, en
+ * traduisant `pages`, cinq chaines ont resiste a tout classement :
+ *   · « Foire aux questions » — le titre PAR DEFAUT de la page FAQ ;
+ *   · « Nouveau guide », « Taille », « Mesure 1 (cm) », « Mesure 2 (cm) » — le
+ *     nom et les en-tetes PAR DEFAUT d un guide des tailles.
+ * Elles sont ECRITES dans la base et relues PAR LA CLIENTE sur la boutique. Les
+ * traduire ecrirait de l anglais dans les donnees d une boutique francaise —
+ * c est le cas 2 de `src/langue/index.js`, la faute la plus silencieuse du lot.
+ *
+ * ⚠⚠ ET AUCUN DES TROIS OUTILS NE POUVAIT LE SAVOIR. `banc-langue-donnees`
+ * reconnait `value="…"` et l argument direct d une operation d ecriture ; il
+ * NOMME lui-meme son angle mort : « une chaine qui passe par une variable avant
+ * d etre ecrite ». Le compteur, lui, les reclamait — donc `pages` ne pouvait pas
+ * atteindre zero, et un compteur qui ne peut pas atteindre zero se lit vite
+ * comme « c est normal qu il en reste ».
+ *
+ * ⚠⚠ LE FAUX REMEDE, ET IL FAUT LE NOMMER : une entree qui rend le MEME texte
+ * (« Taille » -> « Taille »). Elle ferait taire le compteur ET laisserait le
+ * poseur envelopper une valeur de donnee — exactement la cle « code » -> « code »
+ * retiree d `invmeta` le meme jour, qui s etait posee neuf fois sur du code sans
+ * qu un seul banc bronche. Une entree dont la valeur egale la cle sur un chemin
+ * d ecriture est un permis de se tromper plus tard.
+ *
+ * ➡ LA DECLARATION : un bloc `var SZ_DONNEES = { … };` dans le script de la
+ * fenetre. Ce qu il contient n est ni traduit, ni compte, ni enveloppable :
+ *   · ici — les textes disparaissent du compteur et du banc du residuel ;
+ *   · `langue-poser` en fait une zone interdite ;
+ *   · `banc-langue-donnees` REFUSE qu un de ces textes ait une entree.
+ * ⚠ LE BLOC EST PLAT, sans accolade imbriquee — la borne `[^{}]*` le dit, et
+ * c est ce qui rend la reconnaissance sure sans analyser du JavaScript. */
+const RE_SZ_DONNEES = /var\s+SZ_DONNEES\s*=\s*\{[^{}]*\}\s*;/g;
+const sansDonneesDeclarees = (s) => String(s)
+  .replace(RE_SZ_DONNEES, (m) => m.replace(/[^\n]/g, ' '));
+
+/* Les textes declares comme DONNEES dans une fenetre — pour les bancs qui
+   doivent les refuser plutot que les ignorer. */
+const donneesDeclarees = (s) => {
+  const out = [];
+  const re = new RegExp(RE_SZ_DONNEES.source, 'g');
+  let b;
+  while ((b = re.exec(String(s)))) {
+    const rs = /'([^'\\\n]*)'|"([^"\\\n]*)"/g;
+    let m;
+    while ((m = rs.exec(b[0]))) {
+      const t = (m[1] !== undefined ? m[1] : m[2]).trim();
+      if (t) out.push(t);
+    }
+  }
+  return out;
+};
+
 const toutLeTexte = (page) => {
-  const out = texteAffiche(page);
+  const propre = sansDonneesDeclarees(page);
+  const out = texteAffiche(propre);
   const re = /<script[^>]*>([\s\S]*?)<\/script>/gi;
   let bloc;
-  while ((bloc = re.exec(page))) {
+  while ((bloc = re.exec(propre))) {
     for (const c of chainesProse(sansCommentaires(bloc[1]))) out.push(c);
   }
   return out;
 };
 
-module.exports = { sansCommentaires, texteVisible, texteAffiche, chainesProse, toutLeTexte, PHRASE };
+module.exports = { sansCommentaires, texteVisible, texteAffiche, chainesProse, toutLeTexte,
+  sansDonneesDeclarees, donneesDeclarees, RE_SZ_DONNEES, PHRASE };

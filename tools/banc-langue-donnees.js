@@ -39,6 +39,7 @@
 const fs = require('fs');
 const path = require('path');
 const LANGUE = require('../src/langue');
+const { donneesDeclarees, RE_SZ_DONNEES } = require('./textes-visibles.js');
 
 const DOS = path.join(__dirname, '..', 'src', 'fenetres');
 
@@ -89,28 +90,76 @@ const protegees = (src) => {
     let a; const rl = /'([^'\\n]{2,120})'/g;
     while ((a = rl.exec(args))) noter(a[1], 'argument de ' + m[1] + ' — ce texte part au serveur');
   }
+
+  /* 4. LES DONNEES PAR DEFAUT DECLAREES (2026-09-13). C est l angle mort que
+        l en-tete de ce banc nommait lui-meme — « une chaine qui passe par une
+        variable avant d etre ecrite ». Une valeur par defaut (le titre d une
+        page FAQ, le nom et les en-tetes d un guide des tailles) n est ni un
+        `value="…"` ni un argument direct : elle est posee dans un objet, puis
+        envoyee bien plus loin. Elle ne se devine pas — elle se DECLARE, dans un
+        bloc `var SZ_DONNEES = { … };` de la fenetre.
+        ⚠⚠ MAIS ON NE REFUSE QUE CE QUI EST *SEULEMENT* UNE DONNEE, et il a fallu
+        le decouvrir tout de suite : dans `pages`, « Taille » est l en-tete par
+        defaut d un guide (donnee) ET le libelle du selecteur de taille du texte
+        dans la barre de l editeur (interface). La meme chaine, deux roles. Une
+        accusation ferme aurait demande de laisser un libelle en francais sur la
+        page anglaise — et un banc qui accuse a tort finit par ne plus etre lu.
+        ⚠ L occurrence DONNEE est deja hors d atteinte : le poseur fait du bloc
+        `SZ_DONNEES` une zone interdite, donc elle ne peut pas etre enveloppee,
+        entree ou pas. Ce qui reste a faire ici, c est DIRE l ambiguite. */
   return out;
+};
+
+/* Les textes declares DONNEE qui n apparaissent QUE la — pour eux, une entree
+   de dictionnaire est du risque pur, et le banc refuse. Ceux qui paraissent
+   aussi ailleurs portent deux roles : on les signale. */
+const donneesSeules = (src) => {
+  const s = nu(src);
+  const dedans = donneesDeclarees(src);
+  const hors = s.replace(new RegExp(RE_SZ_DONNEES.source, 'g'), ' ');
+  const seules = [], doubles = [];
+  for (const t of dedans) (hors.includes(t) ? doubles : seules).push(t);
+  return { seules, doubles };
 };
 
 let mal = 0, fen = 0, prot = 0;
 const accusations = [];
+const ambigus = [];
 
 for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
   const nom = f.replace(/\.js$/, '');
   const src = fs.readFileSync(path.join(DOS, f), 'utf8');
   fen++;
   const p = protegees(src);
+  const { seules, doubles } = donneesSeules(src);
+  for (const t of seules) p.set(t, 'declaree DONNEE dans SZ_DONNEES et nulle part ailleurs');
   prot += p.size;
   for (const [texte, pourquoi] of p) {
     if (!LANGUE.aUneDecision(nom, texte)) continue;
     mal++;
     accusations.push({ nom, texte, pourquoi });
   }
+  /* ⚠ DEUX ROLES POUR LA MEME CHAINE : on le DIT, on ne le refuse pas. Le bloc
+     `SZ_DONNEES` est deja une zone interdite pour le poseur, donc l occurrence
+     DONNEE ne peut pas etre enveloppee ; l autre est un libelle, et un libelle
+     se traduit. Le signalement est la pour qu un humain confirme. */
+  for (const t of doubles) if (LANGUE.aUneDecision(nom, t)) ambigus.push({ nom, texte: t });
 }
 
 console.log('');
 console.log('== LA TRADUCTION NE TOUCHE QUE CE QU ON LIT ==');
 console.log('  ' + fen + ' fenetre(s) · ' + prot + ' chaine(s) qui atteignent un chemin d ecriture');
+
+/* ⚠ LES DEUX ROLES SE DISENT, MEME QUAND TOUT PASSE. Une chaine qui est donnee
+   ici et libelle la est un endroit ou la prochaine relecture peut se tromper :
+   la taire reviendrait a compter sur la memoire de quelqu un. */
+if (ambigus.length) {
+  console.log('');
+  console.log('  ~~   ' + ambigus.length + ' chaine(s) portent DEUX ROLES — donnee declaree ET libelle :');
+  ambigus.forEach((a) => console.log('         ' + a.nom + ' : ' + JSON.stringify(a.texte)));
+  console.log('       L occurrence DONNEE est hors d atteinte (SZ_DONNEES est une zone');
+  console.log('       interdite au poseur) ; l autre est un libelle, et un libelle se traduit.');
+}
 
 /* ⚠ UN BANC QUI NE TROUVE PLUS RIEN A PROTEGER NE DOIT PAS SE TAIRE. Si
    l extraction cassait, le compte tomberait a zero et le vert serait faux. */
