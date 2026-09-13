@@ -7200,7 +7200,10 @@ const CAS_REPRISE = [
     brouillon: {
       'r-statut': 'approuve', 'r-refus': '', 'r-transp': 'postes-canada',
       'r-service': 'expedited', 'r-poids': '0.8',
-      'r-notes': 'Cliente jointe par téléphone, étiquette à émettre.',
+      /* ⚠ « Client », au masculin, et l'accord suit — sa consigne permanente.
+         Le premier jet écrivait « Cliente jointe » : refusé par
+         `banc-francais.js`, jusque dans un jeu d'épreuve. */
+      'r-notes': 'Client joint par téléphone, étiquette à émettre.',
       'r-generer': false,
     },
   },
