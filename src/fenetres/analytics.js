@@ -18,6 +18,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une cle JSON ni un nom
+   propre de Google (voir src/langue/analytics.js). */
+const T = require('../langue').tr('analytics');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -74,14 +79,14 @@ button.prim:disabled{opacity:.5;cursor:default}
 
 function pageAnalytics() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Statistiques — Administration Sandriza</title>
+<title>${T("Statistiques — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.analytics}</span><h1>Statistiques (Google Analytics)</h1>
-  <label class="actif"><input type="checkbox" id="a-enabled"> Actif</label></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.analytics}</span><h1>${T("Statistiques (Google Analytics)")}</h1>
+  <label class="actif"><input type="checkbox" id="a-enabled"> ${T("Actif")}</label></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
+<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-save" disabled>Enregistrer</button></div>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -91,8 +96,8 @@ function pageAnalytics() {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -105,19 +110,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function val(id){ var e=document.getElementById(id); return e ? String(e.value).trim() : ''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    indisponible:"L'administration n'est pas encore chargée dans la fenêtre principale.",
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    json_invalide:'La clé du compte de service n’est pas un JSON valide.',
-    json_incomplet:'La clé JSON doit contenir « client_email » et « private_key ».',
-    nuage:"L'enregistrement dans le nuage a échoué. Réessayez.",
-    echec:"L'opération a échoué.",
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    indisponible:"${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    json_invalide:'${T("La clé du compte de service n’est pas un JSON valide.")}',
+    json_incomplet:'${T("La clé JSON doit contenir « client_email » et « private_key ».")}',
+    nuage:"${T('L\'enregistrement dans le nuage a échoué. Réessayez.')}",
+    echec:"${T('L\'opération a échoué.')}",
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -126,28 +131,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function occuper(o){ OCCUPE = o; bsave.disabled = o || RO; }
 
   function badge(has){
-    return has ? '<span class="etat"><span class="ic">🔒</span> Clé <b>enregistrée</b>. Vide = conservée.</span>'
-               : '<span class="etat non">Aucune clé <b>enregistrée</b>.</span>';
+    return has ? '<span class="etat"><span class="ic">🔒</span>${T(" Clé <b>enregistrée</b>. Vide = conservée.")}</span>'
+               : '<span class="etat non">${T("Aucune clé <b>enregistrée</b>.")}</span>';
   }
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     enabledEl.checked = !!C.enabled; enabledEl.disabled = RO;
     var dis = RO ? ' disabled' : '';
     var h = '<div class="carte"><div class="info">'
-      + '<span class="ic">📊</span> Suit les <b>consultations</b> de la boutique via <b>Google Analytics 4</b>. Prérequis :<br>'
-      + '1. Créer une propriété <b>GA4</b> → noter l’<b>ID de mesure</b> (G-XXXX) et l’<b>ID de propriété</b> (numérique).<br>'
-      + '2. Dans <b>Google Cloud</b> : créer un <b>compte de service</b>, activer l’API « Google Analytics Data », télécharger sa <b>clé JSON</b>.<br>'
-      + '3. Dans GA4 → Admin → Accès à la propriété : ajouter l’e-mail du compte de service comme <b>Lecteur</b>.'
+      + '<span class="ic">📊</span>${T(" Suit les <b>consultations</b> de la boutique via <b>Google Analytics 4</b>. Prérequis :")}<br>'
+      + '${T("1. Créer une propriété <b>GA4</b> → noter l’<b>ID de mesure</b> (G-XXXX) et l’<b>ID de propriété</b> (numérique).")}<br>'
+      + '${T("2. Dans <b>Google Cloud</b> : créer un <b>compte de service</b>, activer l’API « Google Analytics Data », télécharger sa <b>clé JSON</b>.")}<br>'
+      + '${T("3. Dans GA4 → Admin → Accès à la propriété : ajouter l’e-mail du compte de service comme <b>Lecteur</b>.")}'
       + '</div>';
     h += '<div class="gr2">'
-      + '<div class="ch"><label for="a-mid">ID de mesure (balise gtag)</label><input id="a-mid" value="' + esc(C.measurementId||'') + '" placeholder="G-XXXXXXXXXX"' + dis + '></div>'
-      + '<div class="ch"><label for="a-pid">ID de propriété GA4 (numérique)</label><input id="a-pid" value="' + esc(C.propertyId||'') + '" placeholder="123456789"' + dis + '></div>'
+      + '<div class="ch"><label for="a-mid">${T("ID de mesure (balise gtag)")}</label><input id="a-mid" value="' + esc(C.measurementId||'') + '" placeholder="G-XXXXXXXXXX"' + dis + '></div>'
+      + '<div class="ch"><label for="a-pid">${T("ID de propriété GA4 (numérique)")}</label><input id="a-pid" value="' + esc(C.propertyId||'') + '" placeholder="123456789"' + dis + '></div>'
       + '</div>';
-    h += '<div class="ch"><label for="a-sa">Clé du compte de service (JSON)</label>'
-      + '<textarea id="a-sa" rows="5" placeholder="' + (C.hasServiceAccount ? 'inchangée (laisser vide pour conserver la clé existante)' : 'Collez ici tout le contenu du fichier JSON téléchargé de Google Cloud') + '"' + dis + '></textarea>'
+    h += '<div class="ch"><label for="a-sa">${T("Clé du compte de service (JSON)")}</label>'
+      + '<textarea id="a-sa" rows="5" placeholder="' + (C.hasServiceAccount ? '${T("inchangée (laisser vide pour conserver la clé existante)")}' : '${T("Collez ici tout le contenu du fichier JSON téléchargé de Google Cloud")}') + '"' + dis + '></textarea>'
       + badge(!!C.hasServiceAccount)
-      + '<div class="aide">La clé est stockée côté serveur et n’est jamais renvoyée à l’écran.</div></div>';
-    h += '</div><div class="carte"><div class="info" style="margin:0"><span class="ic">📈</span> Le <b>tableau de bord</b> (visiteurs, pages vues, sources…) s’ouvre dans la fenêtre <b>Statistiques</b> (menu Marketing).</div></div>';
+      + '<div class="aide">${T("La clé est stockée côté serveur et n’est jamais renvoyée à l’écran.")}</div></div>';
+    h += '</div><div class="carte"><div class="info" style="margin:0"><span class="ic">📈</span>${T(" Le <b>tableau de bord</b> (visiteurs, pages vues, sources…) s’ouvre dans la fenêtre <b>Statistiques</b> (menu Marketing).")}</div></div>';
     corps.innerHTML = h;
     bsave.disabled = RO || OCCUPE;
   }
@@ -156,19 +161,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function enregistrer(){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Enregistrement…');
+    occuper(true); dire('${T("Enregistrement…")}');
     var saisie = { enabled: !!enabledEl.checked, measurementId: val('a-mid'),
       propertyId: val('a-pid'), serviceAccountJson: val('a-sa') };
     appeler('config:analytics:ecrire', [saisie]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; C = r.cfg || {}; RO = !r.peutModifier; dessiner(); dire('Statistiques enregistrées.', 'bon'); }
+      if (r && r.ok) { D = r; C = r.cfg || {}; RO = !r.peutModifier; dessiner(); dire('${T("Statistiques enregistrées.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
   bsave.onclick = enregistrer;
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:analytics:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; C = r.cfg || {}; RO = !r.peutModifier; dessiner(); dire('');

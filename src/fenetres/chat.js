@@ -29,6 +29,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais l echange, le nom de la
+   visiteuse ni le commentaire qu elle a laisse (voir src/langue/chat.js). */
+const T = require('../langue').tr('chat');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -113,11 +118,11 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 /** Page complète de la fenêtre native « Chat en ligne ». */
 function pageChat() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Chat en ligne — Administration Sandriza</title>
+<title>${T("Chat en ligne — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.chat}</span><h1>Chat en ligne</h1>
+<div class="tete"><span class="ico">${ICO.chat}</span><h1>${T("Chat en ligne")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Chargement… (les conversations se resynchronisent)</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Chargement… (les conversations se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -143,20 +148,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès au chat.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette conversation n’existe plus.',
-    vide:               'Écrivez une réponse avant de l’envoyer.',
-    statut:             'État inconnu.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès au chat.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette conversation n’existe plus.")}',
+    vide:               '${T("Écrivez une réponse avant de l’envoyer.")}',
+    statut:             '${T("État inconnu.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -188,25 +193,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueFile(){
     var rows = filtrees();
     var h = '<div class="barreoutils">'
-      + '<input aria-label="Nom, courriel, téléphone" type="search" id="ch-q" placeholder="Nom, courriel, téléphone…" value="' + esc(Q) + '">'
-      + [['', 'Toutes'], ['pending', 'En attente'], ['open', 'Ouvertes'], ['closed', 'Fermées']]
+      + '<input aria-label="${T("Nom, courriel, téléphone")}" type="search" id="ch-q" placeholder="${T("Nom, courriel, téléphone…")}" value="' + esc(Q) + '">'
+      + [['', '${T("Toutes")}'], ['pending', '${T("En attente")}'], ['open', '${T("Ouvertes")}'], ['closed', '${T("Fermées")}']]
           .map(function(f){
             return '<button class="mini' + (FILTRE === f[0] ? ' actif' : '') + '" data-filtre="' + f[0] + '">'
               + f[1] + (f[0] === 'pending' && D.enAttente
                   ? '<span class="n hi">' + D.enAttente + '</span>' : '') + '</button>';
           }).join('')
       + '<div class="droite"><span>' + rows.length + ' conversation' + (rows.length > 1 ? 's' : '')
-      + (D.horsLigne ? ' · ' + D.horsLigne + ' hors ligne' : '') + '</span></div></div>';
+      + (D.horsLigne ? ' · ' + D.horsLigne + ' ${T("hors ligne")}' : '') + '</span></div></div>';
 
     if (!rows.length) {
-      h += '<div class="vide">' + (Q || FILTRE ? 'Rien ne correspond.' : 'Aucune conversation à traiter.') + '</div>';
+      h += '<div class="vide">' + (Q || FILTRE ? '${T("Rien ne correspond.")}' : '${T("Aucune conversation à traiter.")}') + '</div>';
       return h;
     }
     h += rows.map(function(c){
-      return '<div class="ligne" data-id="' + esc(c.id) + '" title="Ouvrir la conversation">'
+      return '<div class="ligne" data-id="' + esc(c.id) + '" title="${T("Ouvrir la conversation")}">'
         + '<div class="haut"><strong>' + esc(c.nom) + '</strong>'
         + '<span class="pill ' + (TONS[c.statut] || 'neutre') + '">' + esc(c.statutLibelle) + '</span>'
-        + (c.horsLigne ? '<span class="pill neutre">hors ligne</span>' : '')
+        + (c.horsLigne ? '<span class="pill neutre">${T("hors ligne")}</span>' : '')
         + '<span class="droite"><span class="dt">' + esc(c.date) + '</span>'
         + '<div class="dt">' + c.nbMessages + ' message' + (c.nbMessages > 1 ? 's' : '') + '</div></span></div>'
         + '<div class="dt">' + esc(c.courriel || '—')
@@ -219,19 +224,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueSatisfaction(){
     var s = D.satisfaction || {};
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Conversations</div><div class="val">' + (s.total || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Évaluées</div><div class="val">' + (s.rated || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Satisfaites</div><div class="val bon">' + (s.satisfied || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Insatisfaites</div><div class="val err">' + (s.unsatisfied || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Taux</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Conversations")}</div><div class="val">' + (s.total || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Évaluées")}</div><div class="val">' + (s.rated || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Satisfaites")}</div><div class="val bon">' + (s.satisfied || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Insatisfaites")}</div><div class="val err">' + (s.unsatisfied || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Taux")}</div><div class="val">'
       + (s.rate == null ? '—' : s.rate + ' %') + '</div>'
-      + '<div class="sub">' + (s.rate == null ? 'aucune évaluation' : 'des évaluations') + '</div></div>'
+      + '<div class="sub">' + (s.rate == null ? '${T("aucune évaluation")}' : '${T("des évaluations")}') + '</div></div>'
       + '</div>';
 
-    h += '<div class="carte"><h2>Commentaires laissés</h2>';
+    h += '<div class="carte"><h2>${T("Commentaires laissés")}</h2>';
     var cs = s.comments || [];
     if (!cs.length) {
-      h += '<div class="vide">Aucun commentaire pour l’instant.</div>';
+      h += '<div class="vide">${T("Aucun commentaire pour l’instant.")}</div>';
     } else {
       h += cs.map(function(c){
         return '<div style="padding:.35rem 0;border-top:1px solid var(--v055)">'
@@ -252,36 +257,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="voile" id="ch-voile"><div class="boite">'
       + '<h3>' + esc(c.nom)
       + ' <span class="pill ' + (TONS[c.statut] || 'neutre') + '">' + esc(c.statut) + '</span>'
-      + (c.horsLigne ? ' <span class="pill neutre">hors ligne</span>' : '') + '</h3>'
+      + (c.horsLigne ? ' <span class="pill neutre">${T("hors ligne")}</span>' : '') + '</h3>'
       + '<div class="dt" style="margin-bottom:.5rem">' + esc(c.courriel || '—')
       + (c.telephone ? ' · ' + esc(c.telephone) : '')
-      + (c.contactVoulu ? ' · préfère ' + esc(c.contactVoulu === 'phone' ? 'le téléphone' : 'le courriel') : '')
-      + ' · ouverte le ' + esc(c.ouverte) + '</div>';
+      /* Deux phrases ENTIERES : << prefere >> seul ne se traduit pas, il se
+         place — et pas au meme endroit dans toutes les langues. */
+      + (c.contactVoulu
+          ? (c.contactVoulu === 'phone' ? '${T(" · préfère le téléphone")}' : '${T(" · préfère le courriel")}')
+          : '')
+      + '${T(" · ouverte le ")}' + esc(c.ouverte) + '</div>';
 
     h += '<div class="fil" id="ch-fil">';
     if (!c.messages.length) {
-      h += '<div class="vide">Aucun message.</div>';
+      h += '<div class="vide">${T("Aucun message.")}</div>';
     } else {
       h += c.messages.map(function(m){
         var cl = m.qui === 'agent' ? 'agent' : (m.qui === 'bot' || m.qui === 'ai') ? 'bot' : 'visiteur';
         return '<div class="bulle ' + cl + '">' + esc(m.texte)
-          + '<span class="qd">' + (cl === 'agent' ? 'vous' : cl === 'bot' ? 'assistant' : esc(c.nom))
+          + '<span class="qd">' + (cl === 'agent' ? '${T("vous")}' : cl === 'bot' ? '${T("assistant")}' : esc(c.nom))
           + (m.heure ? ' · ' + esc(m.heure) : '') + '</span></div>';
       }).join('');
     }
     h += '</div>';
 
     if (D.peutModifier) {
-      h += '<div style="margin-top:.6rem"><textarea aria-label="Votre réponse" id="ch-reponse" placeholder="Votre réponse…"></textarea></div>'
+      h += '<div style="margin-top:.6rem"><textarea aria-label="${T("Votre réponse")}" id="ch-reponse" placeholder="${T("Votre réponse…")}"></textarea></div>'
         + '<div class="pied-boite">'
-        + '<button class="mini danger" id="ch-suppr">' + (SUPPR_ARME ? 'Confirmer ?' : 'Supprimer') + '</button>'
-        + '<select id="ch-statut" aria-label="Changer l’état de la conversation" style="max-width:11rem">'
-        + '<option value="">Changer l’état…</option>'
-        + '<option value="pending">En attente</option>'
-        + '<option value="open">Ouverte</option>'
-        + '<option value="closed">Fermée</option></select>'
+        + '<button class="mini danger" id="ch-suppr">' + (SUPPR_ARME ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>'
+        + '<select id="ch-statut" aria-label="${T("Changer l’état de la conversation")}" style="max-width:11rem">'
+        + '<option value="">${T("Changer l’état…")}</option>'
+        + '<option value="pending">${T("En attente")}</option>'
+        + '<option value="open">${T("Ouverte")}</option>'
+        + '<option value="closed">${T("Fermée")}</option></select>'
         + '<button class="mini" id="ch-fermer-b">Fermer</button>'
-        + '<button class="mini prim" id="ch-envoyer">Envoyer la réponse</button>'
+        + '<button class="mini prim" id="ch-envoyer">${T("Envoyer la réponse")}</button>'
         + '</div>';
     } else {
       h += '<div class="pied-boite"><button class="mini" id="ch-fermer-b">Fermer</button></div>';
@@ -291,17 +300,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) {
       sous.innerHTML = D.enAttente
-        ? '<span class="pill att">' + D.enAttente + ' en attente</span>'
-        : '<span class="pill bon">rien en attente</span>';
+        ? '<span class="pill att">' + D.enAttente + '${T(" en attente")}</span>'
+        : '<span class="pill bon">${T("rien en attente")}</span>';
     }
     var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'file' ? ' actif' : '') + '" data-onglet="file">Conversations</button>'
-      + '<button class="mini' + (ONGLET === 'satisfaction' ? ' actif' : '') + '" data-onglet="satisfaction">Satisfaction</button>'
-      + '<div class="droite"><span class="dt">Réglages du chat et de l’assistant : '
-      + 'Configuration → Communications → Chat en ligne</span></div></div>';
+      + '<button class="mini' + (ONGLET === 'file' ? ' actif' : '') + '" data-onglet="file">${T("Conversations")}</button>'
+      + '<button class="mini' + (ONGLET === 'satisfaction' ? ' actif' : '') + '" data-onglet="satisfaction">${T("Satisfaction")}</button>'
+      + '<div class="droite"><span class="dt">${T("Réglages du chat et de l’assistant : ")}'
+      + '${T("Configuration → Communications → Chat en ligne")}</span></div></div>';
     h += ONGLET === 'satisfaction' ? vueSatisfaction() : vueFile();
     if (DETAIL) h += boiteDetail();
     corps.innerHTML = h;
@@ -327,7 +336,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('chat:repondre', [DETAIL && DETAIL.id, ta ? ta.value : '']).then(function(r){
         be.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Réponse envoyée à ' + (r.nom || '') + '.', 'bon');
+        dire('${T("Réponse envoyée à ")}' + (r.nom || '') + '.', 'bon');
         rouvrir(DETAIL.id);
       });
     };
@@ -340,7 +349,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('chat:statut', [DETAIL && DETAIL.id, v]).then(function(r){
         st.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Conversation de ' + (r.nom || '') + ' marquée « ' + v + ' ».', 'bon');
+        dire('${T("Conversation de ")}' + (r.nom || '') + '${T(" marquée « ")}' + v + ' ».', 'bon');
         rouvrir(DETAIL.id);
       });
     };
@@ -352,14 +361,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!SUPPR_ARME) {
         SUPPR_ARME = true;
         dessiner();
-        dire('Cliquez « Confirmer ? » pour supprimer — tout l’échange sera perdu.', 'att');
+        dire('${T("Cliquez « Confirmer ? » pour supprimer — tout l’échange sera perdu.")}', 'att');
         return;
       }
       SUPPR_ARME = false;
       appeler('chat:supprimer', [DETAIL && DETAIL.id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
         DETAIL = null;
-        dire('Conversation de ' + (r.nom || '') + ' supprimée.', 'bon');
+        dire('${T("Conversation de ")}' + (r.nom || '') + '${T(" supprimée.")}', 'bon');
         charger();
       });
     };
@@ -402,7 +411,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function charger(){
     appeler('chat:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Chat indisponible', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Chat indisponible")}', expliquer(r)); return; }
       D = r;
       dessiner();
     });
@@ -432,12 +441,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

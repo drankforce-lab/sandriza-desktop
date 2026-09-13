@@ -21,6 +21,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un courriel ni un prenom
+   d abonne (voir src/langue/abonnes.js). */
+const T = require('../langue').tr('abonnes');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -92,11 +97,11 @@ tbody tr:hover td{background:var(--v04)}
 /** Page complète de la fenêtre native « Abonnés de l'infolettre ». */
 function pageAbonnes() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Abonnés de l’infolettre — Administration Sandriza</title>
+<title>${T("Abonnés de l’infolettre — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.newsletter}</span><h1>Abonnés de l’infolettre</h1>
+<div class="tete"><span class="ico">${ICO.newsletter}</span><h1>${T("Abonnés de l’infolettre")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Chargement… (la liste se resynchronise)</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Chargement… (la liste se resynchronise)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -121,20 +126,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à l’infolettre.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cet abonné n’existe plus.',
-    refus:              'Inscription refusée.',
-    vide:               'Collez au moins une adresse.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à l’infolettre.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cet abonné n’existe plus.")}',
+    refus:              '${T("Inscription refusée.")}',
+    vide:               '${T("Collez au moins une adresse.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' ' + esc(String(r.detail).slice(0, 140));
     return t;
   }
@@ -163,74 +168,77 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function boiteAjout(){
     return '<div class="voile" id="ab-voile"><div class="boite">'
-      + '<h3>Ajouter un abonné</h3>'
-      + '<div class="ch"><label for="ab-mail">Courriel</label><input type="email" id="ab-mail" placeholder="marie@exemple.com"></div>'
-      + '<div class="ch"><label for="ab-prenom">Prénom</label><input id="ab-prenom" placeholder="Marie">'
-      + '<span class="aide">Sert à personnaliser les envois.</span></div>'
-      + '<div class="pied-boite"><button class="mini" id="ab-annuler">Annuler</button>'
+      + '<h3>${T("Ajouter un abonné")}</h3>'
+      + '<div class="ch"><label for="ab-mail">${T("Courriel")}</label><input type="email" id="ab-mail" placeholder="${T("marie@exemple.com")}"></div>'
+      + '<div class="ch"><label for="ab-prenom">${T("Prénom")}</label><input id="ab-prenom" placeholder="${T("Marie")}">'
+      + '<span class="aide">${T("Sert à personnaliser les envois.")}</span></div>'
+      + '<div class="pied-boite"><button class="mini" id="ab-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="ab-ajouter">Ajouter</button></div>'
       + '</div></div>';
   }
 
   function boiteImport(){
     return '<div class="voile" id="ab-voile"><div class="boite">'
-      + '<h3>Importer des abonnés</h3>'
-      + '<div class="dt" style="margin-bottom:.4rem">Une adresse par ligne, ou '
-      + '« courriel,prénom ». Les adresses déjà inscrites sont ignorées, pas dupliquées.</div>'
-      + '<textarea id="ab-vrac" aria-label="Liste d’adresses à ajouter, une par ligne" placeholder="marie@exemple.com,Marie'
-      + String.fromCharCode(10) + 'sophie@exemple.com"></textarea>'
-      + '<div class="pied-boite"><button class="mini" id="ab-annuler">Annuler</button>'
+      + '<h3>${T("Importer des abonnés")}</h3>'
+      + '<div class="dt" style="margin-bottom:.4rem">'
+      + '${T("Une adresse par ligne, ou « courriel,prénom ». Les adresses déjà inscrites sont ignorées, pas dupliquées.")}'
+      + '</div>'
+      + '<textarea id="ab-vrac" aria-label="${T("Liste d’adresses à ajouter, une par ligne")}" placeholder="${T("marie@exemple.com,Marie")}'
+      + String.fromCharCode(10) + '${T("sophie@exemple.com")}"></textarea>'
+      + '<div class="pied-boite"><button class="mini" id="ab-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="ab-importer">Importer</button></div>'
       + '</div></div>';
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtres();
-    if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
+    if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Abonnés actifs</div><div class="val bon">'
+      + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
       + (D.actifs || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Désabonnés</div><div class="val neutre">'
+      + '<div class="tuile"><div class="lbl">${T("Désabonnés")}</div><div class="val neutre">'
       + (D.desabonnes || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Au total</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Au total")}</div><div class="val">'
       + ((D.abonnes || []).length) + '</div></div>'
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input aria-label="Courriel ou prénom" type="search" id="ab-q" placeholder="Courriel ou prénom…" value="' + esc(Q) + '">'
-      + [['all', 'Tous'], ['actifs', 'Actifs'], ['retires', 'Désabonnés']].map(function(f){
+      /* ⚠ L etiquette ENTIERE, pas << Courriel >> + un reste : une cle courte
+         posee dans une phrase plus longue laisse l autre moitie en francais. */
+      + '<input aria-label="${T("Courriel ou prénom")}" type="search" id="ab-q" placeholder="${T("Courriel ou prénom…")}" value="' + esc(Q) + '">'
+      + [['all', 'Tous'], ['actifs', 'Actifs'], ['retires', '${T("Désabonnés")}']].map(function(f){
           return '<button class="mini' + (FILTRE === f[0] ? ' actif' : '') + '" data-filtre="' + f[0] + '">'
             + f[1] + '</button>';
         }).join('')
       + '<div class="droite">'
       + (D.peutModifier
           ? '<button class="mini" id="ab-import">Importer</button>'
-            + '<button class="mini prim" id="ab-nouveau">+ Ajouter</button>' : '')
-      + '<span>' + rows.length + ' abonné' + (rows.length > 1 ? 's' : '') + '</span>'
+            + '<button class="mini prim" id="ab-nouveau">${T("+ Ajouter")}</button>' : '')
+      + '<span>' + rows.length + (rows.length > 1 ? '${T(" abonnés")}' : '${T(" abonné")}') + '</span>'
       + '</div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q || FILTRE !== 'all' ? 'Rien ne correspond.' : 'Aucun abonné.') + '</div>';
+      h += '<div class="vide">' + (Q || FILTRE !== 'all' ? '${T("Rien ne correspond.")}' : '${T("Aucun abonné.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>Courriel</th><th>Prénom</th><th>Venu par</th>'
-        + '<th>Inscription</th><th>État</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Courriel")}</th><th>${T("Prénom")}</th><th>${T("Venu par")}</th>'
+        + '<th>${T("Inscription")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(a){
             var gestes = '';
             if (D.peutModifier) {
               gestes = '<button class="mini geste" data-basculer="' + esc(a.id) + '" data-actif="'
-                + (a.actif ? '0' : '1') + '">' + (a.actif ? 'Désabonner' : 'Réactiver') + '</button> '
+                + (a.actif ? '0' : '1') + '">' + (a.actif ? '${T("Désabonner")}' : '${T("Réactiver")}') + '</button> '
                 + '<button class="mini geste danger" data-suppr="' + esc(a.id) + '">'
-                + (SUPPR_ARME === a.id ? 'Confirmer ?' : 'Retirer') + '</button>';
+                + (SUPPR_ARME === a.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>';
             }
             return '<tr><td><strong>' + esc(a.courriel) + '</strong></td>'
               + '<td>' + esc(a.prenom || '—') + '</td>'
               + '<td class="dt">' + esc(a.sourceLibelle) + '</td>'
               + '<td class="dt">' + esc(a.date) + '</td>'
               + '<td><span class="pill ' + (a.actif ? 'bon' : 'neutre') + '">'
-              + (a.actif ? 'Abonné' : 'Désabonné') + '</span>'
+              + (a.actif ? '${T("Abonné")}' : '${T("Désabonné")}') + '</span>'
               + (!a.actif && a.retireLe ? '<div class="dt">le ' + esc(a.retireLe) + '</div>' : '') + '</td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
@@ -261,7 +269,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        refaire l'export. */
     szBrouillonBrancher({
       portee: 'abonnes-import',
-      libelle: 'Une liste a importer',
+      libelle: '${T("Une liste a importer")}',
       ttlMin: 720,
       cle: function(){ return '__new__'; },
       actif: function(){ return BOITE === 'import' && !!document.getElementById('ab-vrac'); },
@@ -288,7 +296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         bAjout.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         BOITE = null;
-        dire(r.reactive ? (r.courriel + ' réactivé.') : (r.courriel + ' ajouté à la liste.'), 'bon');
+        dire(r.reactive ? (r.courriel + '${T(" réactivé.")}') : (r.courriel + '${T(" ajouté à la liste.")}'), 'bon');
         charger();
       });
     };
@@ -306,10 +314,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         BOITE = null;
         /* Le compte rendu distingue les trois cas : << 12 traitees >> ne
            dirait pas ce qui s est passe. */
-        dire(r.ajoutes + ' ajoutée' + (r.ajoutes > 1 ? 's' : '')
-          + (r.deja ? ', ' + r.deja + ' déjà inscrite' + (r.deja > 1 ? 's' : '') : '')
-          + (r.refuses ? ', ' + r.refuses + ' refusée' + (r.refuses > 1 ? 's' : '') : '')
-          + ' sur ' + r.lues + ' ligne' + (r.lues > 1 ? 's' : '') + '.',
+        /* ⚠ Chaque forme est ECRITE EN ENTIER : un << s >> colle a part ne se
+           traduit pas, il se devine — et pas dans toutes les langues. */
+        dire(r.ajoutes + (r.ajoutes > 1 ? '${T(" ajoutées")}' : '${T(" ajoutée")}')
+          + (r.deja ? ', ' + r.deja + (r.deja > 1 ? '${T(" déjà inscrites")}' : '${T(" déjà inscrite")}') : '')
+          + (r.refuses ? ', ' + r.refuses + (r.refuses > 1 ? '${T(" refusées")}' : '${T(" refusée")}') : '')
+          + '${T(" sur ")}' + r.lues + (r.lues > 1 ? '${T(" lignes.")}' : '${T(" ligne.")}'),
           r.refuses ? 'att' : 'bon');
         charger();
       });
@@ -342,7 +352,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       appeler('abonnes:basculer', [bb.getAttribute('data-basculer'), bb.getAttribute('data-actif') === '1'])
         .then(function(r){
           if (!r.ok) { bb.disabled = false; dire(expliquer(r), 'err'); return; }
-          dire(r.courriel + (r.actif ? ' réabonné.' : ' désabonné — la trace du refus est gardée.'), 'bon');
+          dire(r.courriel + (r.actif ? '${T(" réabonné.")}' : '${T(" désabonné — la trace du refus est gardée.")}'), 'bon');
           charger();
         });
       return;
@@ -356,14 +366,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (SUPPR_ARME !== idS) {
         SUPPR_ARME = idS;
         dessiner();
-        dire('Cliquez « Confirmer ? » — le retrait efface aussi la trace du refus. '
-          + 'Pour seulement arrêter les envois, utilisez « Désabonner ».', 'att');
+        dire('${T("Cliquez « Confirmer ? » — le retrait efface aussi la trace du refus. ")}'
+          + '${T("Pour seulement arrêter les envois, utilisez « Désabonner ».")}', 'att');
         return;
       }
       SUPPR_ARME = '';
       appeler('abonnes:supprimer', [idS]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(r.courriel + ' retiré de la liste.', 'bon');
+        dire(r.courriel + '${T(" retiré de la liste.")}', 'bon');
         charger();
       });
       return;
@@ -377,7 +387,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function charger(){
     appeler('abonnes:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Abonnés indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Abonnés indisponibles")}', expliquer(r)); return; }
       D = r;
       dessiner();
     });
@@ -406,12 +416,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

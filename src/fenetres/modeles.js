@@ -29,6 +29,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d un mannequin, ni
+   le libelle d un angle, qui vient du coeur (voir src/langue/modeles.js). */
+const T = require('../langue').tr('modeles');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -97,18 +102,18 @@ button.mini:hover:not(:disabled){background:var(--v10)}
 
 function pageModeles() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Modèles par vue — Administration Sandriza</title>
+<title>${T("Modèles par vue — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.personne}</span><h1>Modèles par vue</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
+<div class="tete"><span class="ico">${ICO.personne}</span><h1>${T("Modèles par vue")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="corps">
-  <div class="sect"><h2>Modèles par vue</h2><span class="tr"></span></div>
+  <div class="sect"><h2>${T("Modèles par vue")}</h2><span class="tr"></span></div>
   
-  <div class="grille" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+  <div class="grille" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 
-  <div class="sect"><h2>Mannequins (habillage IA)</h2><span class="tr"></span></div>
+  <div class="sect"><h2>${T("Mannequins (habillage IA)")}</h2><span class="tr"></span></div>
   
-  <div class="mqs" id="mqs"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+  <div class="mqs" id="mqs"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 </div>
 <input type="file" id="fichier" accept="image/*" style="display:none">
 <input type="file" id="fichier-mq" accept="image/*" style="display:none">
@@ -123,9 +128,9 @@ function pageModeles() {
     if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id = 'sz-detacher'; b.type = 'button'; b.className = 'mini'; t.appendChild(b); }
-    if (actif) { b.textContent = '⧉ Détacher'; b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+    if (actif) { b.textContent = '${T("⧉ Détacher")}'; b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); }; }
-    else { b.textContent = '⚓ Ancrer'; b.title = 'Ramener cet écran dans la fenêtre principale';
+    else { b.textContent = '${T("⚓ Ancrer")}'; b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
@@ -143,22 +148,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule.',
-    indisponible:       "L'administration n'est pas encore chargée dans la fenêtre principale.",
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              "La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    image_invalide:     'Le fichier choisi n’est pas une image.',
-    vue_inconnue:       'Angle de vue inconnu.',
-    introuvable:        'Ce mannequin n’existe plus — rechargez la fenêtre.',
-    nuage:              "Le téléversement a échoué. Réessayez.",
-    echec:              "L'opération a échoué.",
+    session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule.")}',
+    indisponible:       "${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              "${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    image_invalide:     '${T("Le fichier choisi n’est pas une image.")}',
+    vue_inconnue:       '${T("Angle de vue inconnu.")}',
+    introuvable:        '${T("Ce mannequin n’existe plus — rechargez la fenêtre.")}',
+    nuage:              "${T("Le téléversement a échoué. Réessayez.")}",
+    echec:              "${T('L\'opération a échoué.')}",
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -173,7 +178,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var vues = (D && D.vues) || [];
-    if (!vues.length) { grille.innerHTML = '<div class="vide-page">Aucun angle de vue.</div>'; return; }
+    if (!vues.length) { grille.innerHTML = '<div class="vide-page">${T("Aucun angle de vue.")}</div>'; return; }
     var h = '';
     for (var i = 0; i < vues.length; i++) {
       var v = vues[i];
@@ -181,11 +186,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="cadre' + (RO ? ' ro' : '') + '" data-vue="' + esc(v.key) + '">'
         + (v.src
             ? '<img src="' + esc(v.src) + '" alt="' + esc(v.label) + '">'
-              + (RO ? '' : '<div class="surv"><span class="ic">📸</span> Changer</div>')
-            : '<div class="vide"><span class="em"><span class="ic">📸</span></span><span>' + (RO ? 'Non configuré' : 'Cliquer ou glisser') + '</span></div>')
+              + (RO ? '' : '<div class="surv"><span class="ic">📸</span>${T(" Changer")}</div>')
+            : '<div class="vide"><span class="em"><span class="ic">📸</span></span><span>' + (RO ? '${T("Non configuré")}' : '${T("Cliquer ou glisser")}') + '</span></div>')
         + '</div>'
         + '<div class="souspied">'
-        + ((v.src && !RO) ? '<button class="retirer" data-del="' + esc(v.key) + '">✕ Supprimer</button>' : '')
+        + ((v.src && !RO) ? '<button class="retirer" data-del="' + esc(v.key) + '">${T("✕ Supprimer")}</button>' : '')
         + '</div></div>';
     }
     grille.innerHTML = h;
@@ -212,15 +217,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function deposer(f){
     if (RO || OCCUPE || !CIBLE) return;
-    if (String(f.type || '').indexOf('image/') !== 0) { dire('Le fichier choisi n’est pas une image.', 'err'); return; }
-    OCCUPE = true; dire('Lecture de l’image…');
+    if (String(f.type || '').indexOf('image/') !== 0) { dire('${T("Le fichier choisi n’est pas une image.")}', 'err'); return; }
+    OCCUPE = true; dire('${T("Lecture de l’image…")}');
     var fr = new FileReader();
-    fr.onerror = function(){ OCCUPE = false; dire('Lecture du fichier impossible.', 'err'); };
+    fr.onerror = function(){ OCCUPE = false; dire('${T("Lecture du fichier impossible.")}', 'err'); };
     fr.onload = function(){
-      dire('Téléversement…');
+      dire('${T("Téléversement…")}');
       appeler('config:modeles:ecrire', [{ view: CIBLE, dataUrl: String(fr.result || '') }]).then(function(r){
         OCCUPE = false;
-        if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('Modèle enregistré.', 'bon'); }
+        if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Modèle enregistré.")}', 'bon'); }
         else dire(expliquer(r), 'err');
       });
     };
@@ -228,16 +233,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function retirer(vue){
     if (RO || OCCUPE) return;
-    OCCUPE = true; dire('Suppression…');
+    OCCUPE = true; dire('${T("Suppression…")}');
     appeler('config:modeles:retirer', [vue]).then(function(r){
       OCCUPE = false;
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('Modèle retiré.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Modèle retiré.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:modeles:donnees').then(function(r){
       if (!r || !r.ok) { grille.innerHTML = '<div class="vide-page">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; RO = !r.peutModifier; dessiner(); dire('');
@@ -258,7 +263,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // On ne parle de la cle QUE si elle manque : sans elle, l habillage refusera,
       // et le dire ici evite de chercher pourquoi le bouton ne rend rien.
       av.innerHTML = (DM && DM.cleConfiguree === false)
-        ? '<strong style="color:var(--tx-att)"><span class="ic">⚠</span> Aucune clé Fal.ai n’est enregistrée</strong> — l’habillage refusera tant qu’elle n’est pas posée dans Configuration → Clés API.'
+        ? '<strong style="color:var(--tx-att)"><span class="ic">⚠</span>${T(" Aucune clé Fal.ai n’est enregistrée")}</strong>${T(" — l’habillage refusera tant qu’elle n’est pas posée dans Configuration → Clés API.")}'
         : '';
     }
     var l = (DM && DM.mannequins) || [];
@@ -268,15 +273,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="mq"><div class="cd"><img src="' + esc(m.image) + '" alt="' + esc(m.nom) + '"></div>'
         + '<div class="nm" title="' + esc(m.nom) + '">' + esc(m.nom) + '</div>'
         + '<div class="sp">'
-        + (ROM ? '' : '<button class="retirer" data-delmq="' + esc(m.id) + '">✕ Supprimer</button>')
+        + (ROM ? '' : '<button class="retirer" data-delmq="' + esc(m.id) + '">${T("✕ Supprimer")}</button>')
         + '</div></div>';
     }
     if (!ROM) {
       h += '<div class="mq"><div class="ajout" id="mq-plus">'
-        + '<span class="em"><span class="ic">📸</span></span><span>Ajouter un mannequin</span></div>'
-        + '<input aria-label="Nom (ex : Ana)" class="nomq" id="mq-nom" type="text" maxlength="40" placeholder="Nom (ex : Ana)"></div>';
+        + '<span class="em"><span class="ic">📸</span></span><span>${T("Ajouter un mannequin")}</span></div>'
+        + '<input aria-label="${T("Nom (ex : Ana)")}" class="nomq" id="mq-nom" type="text" maxlength="40" placeholder="${T("Nom (ex : Ana)")}"></div>';
     }
-    if (!l.length && ROM) h = '<div class="vide-page">Aucun mannequin enregistré.</div>';
+    if (!l.length && ROM) h = '<div class="vide-page">${T("Aucun mannequin enregistré.")}</div>';
     grilleMq.innerHTML = h;
     brancherMq();
   }
@@ -306,19 +311,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function deposerMq(f){
     if (ROM || OCCUPE_MQ) return;
-    if (String(f.type || '').indexOf('image/') !== 0) { dire('Le fichier choisi n’est pas une image.', 'err'); return; }
+    if (String(f.type || '').indexOf('image/') !== 0) { dire('${T("Le fichier choisi n’est pas une image.")}', 'err'); return; }
     // Le nom est lu MAINTENANT : la tuile est redessinee apres l enregistrement,
     // donc le champ n existera plus quand la reponse arrivera.
     var champ = document.getElementById('mq-nom');
     var nom = champ ? String(champ.value || '').trim() : '';
-    OCCUPE_MQ = true; dire('Lecture de l’image…');
+    OCCUPE_MQ = true; dire('${T("Lecture de l’image…")}');
     var fr = new FileReader();
-    fr.onerror = function(){ OCCUPE_MQ = false; dire('Lecture du fichier impossible.', 'err'); };
+    fr.onerror = function(){ OCCUPE_MQ = false; dire('${T("Lecture du fichier impossible.")}', 'err'); };
     fr.onload = function(){
-      dire('Téléversement…');
+      dire('${T("Téléversement…")}');
       appeler('config:mannequins:ajouter', [{ nom: nom, dataUrl: String(fr.result || '') }]).then(function(r){
         OCCUPE_MQ = false;
-        if (r && r.ok) { DM = r; ROM = !r.peutModifier; dessinerMq(); dire('Mannequin ajouté.', 'bon'); }
+        if (r && r.ok) { DM = r; ROM = !r.peutModifier; dessinerMq(); dire('${T("Mannequin ajouté.")}', 'bon'); }
         else dire(expliquer(r), 'err');
       });
     };
@@ -326,10 +331,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function retirerMq(id){
     if (ROM || OCCUPE_MQ) return;
-    OCCUPE_MQ = true; dire('Suppression…');
+    OCCUPE_MQ = true; dire('${T("Suppression…")}');
     appeler('config:mannequins:retirer', [id]).then(function(r){
       OCCUPE_MQ = false;
-      if (r && r.ok) { DM = r; ROM = !r.peutModifier; dessinerMq(); dire('Mannequin retiré.', 'bon'); }
+      if (r && r.ok) { DM = r; ROM = !r.peutModifier; dessinerMq(); dire('${T("Mannequin retiré.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
