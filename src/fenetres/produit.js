@@ -658,7 +658,7 @@ function pageProduit(id) {
       // champ a la main pour revenir au plein prix — et l on garde un solde qu on
       // ne voulait plus, sans s en apercevoir.
       if (b.classList.contains('on')) { poser('p-solde', ''); majMarge(); return; }
-      poser('p-solde', (pr * (1 - parseInt(b.getAttribute('data-pct'), 10) / 100)).toFixed(2) + ' $');
+      poser('p-solde', szArgentChamp(pr * (1 - parseInt(b.getAttribute('data-pct'), 10) / 100)));
       majMarge();
     });
     document.getElementById('corps').addEventListener('click', function(ev){
@@ -927,7 +927,7 @@ function pageProduit(id) {
   function argentFocus(e){ var n = argentNombre(e.value); e.value = (n === null) ? '' : String(n); }
   function argentBlur(e){
     var n = argentNombre(e.value);
-    e.value = (n === null) ? '' : n.toFixed(2) + ' $';
+    e.value = (n === null) ? '' : szArgentChamp(n);
     majMarge(); Assist.fil();
   }
 
@@ -955,7 +955,7 @@ function pageProduit(id) {
         return '<button type="button" data-pct="' + pct + '"' + (actif ? ' class="on"' : '')
           + (!p || sousCout ? ' disabled' : '')
           + ' title="' + (sousCout ? '${T("sous le coût d’acquisition")}'
-              : (actif ? '${T("recliquez pour retirer le rabais")}' : (sp ? sp.toFixed(2) + ' $' : ''))) + '">'
+              : (actif ? '${T("recliquez pour retirer le rabais")}' : (sp ? szArgentChamp(sp) : ''))) + '">'
           + '-' + pct + '%</button>';
       }).join('');
     }
@@ -1423,9 +1423,9 @@ function pageProduit(id) {
     poser('p-genre', p.genre || ''); poser('p-age', p.ageGroup || '');
     poser('p-style', p.style || ''); poser('p-guide', p.sizeGuideId || '');
     poser('p-etiq', p.tag || ''); poser('p-fourn', p.supplierId || '');
-    poser('p-prix', p.price != null ? p.price.toFixed(2) + ' $' : '');
-    poser('p-solde', p.salePrice != null ? p.salePrice.toFixed(2) + ' $' : '');
-    poser('p-cout', p.acquisitionCost != null ? p.acquisitionCost.toFixed(2) + ' $' : '');
+    poser('p-prix', p.price != null ? szArgentChamp(p.price) : '');
+    poser('p-solde', p.salePrice != null ? szArgentChamp(p.salePrice) : '');
+    poser('p-cout', p.acquisitionCost != null ? szArgentChamp(p.acquisitionCost) : '');
     // Le poids est conserve en KILOGRAMMES : on l affiche en grammes, l unite la
     // plus lisible pour un vetement.
     poser('p-poids', p.weight ? String(Math.round(p.weight * 1000 * 10) / 10) : '');
@@ -1849,9 +1849,14 @@ function pageProduit(id) {
     var x = (CTX.etiquettes || []).find(function(y){ return y.cle === t; });
     return (x && x.libelle) || String(t).replace(/^lbl:/, '');
   }
+  /* ⚠⚠ szArgentChamp ET NON szArgent — LA DIFFERENCE EST LE GROUPEMENT DES
+     MILLIERS. Ces montants-la sont RELUS : argentNombre retire tout ce qui n est
+     pas un chiffre puis remplace la virgule par un point. Sur << $1,234.50 >> ca
+     donnerait << 1.234.50 >>, donc 1,234 $ — un prix divise par mille, sans
+     message d erreur. La forme sans groupement se relit dans les deux langues. */
   function argentTxt(v){
     var n = argentNombre(v);
-    return (n === null) ? '' : n.toFixed(2) + ' $';
+    return (n === null) ? '' : szArgentChamp(n);
   }
   // ⚠ LA MÊME LISTE QUE _PF_CHG_FIELDS DE L'ÉDITEUR DU SITE, VOLONTAIREMENT.
   // Le site n'y résout PAS les libellés du genre, du groupe d'âge, du style ni du

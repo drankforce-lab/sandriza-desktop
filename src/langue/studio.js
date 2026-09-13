@@ -491,8 +491,12 @@ module.exports = {
   'est appliqué au serveur et arrêtera la file s’il est atteint.':
     'is enforced on the server and will stop the queue if it is reached.',
   'Plafond du mois :': 'Cap for the month:',
-  '$ dépensés sur': '$ spent of',
-  '$ — il reste': '$ — remaining',
+  /* ⚠ LE SYMBOLE A QUITTÉ CES DEUX PHRASES (2026-09-13). Elles portaient
+     « $ dépensés sur » et « $ — il reste » : le symbole était DANS le texte,
+     donc toujours APRÈS le nombre — alors qu'en anglais il se pose devant
+     (« $12.50 »). Les trous laissent `szArgentSymbole` le placer. */
+  'de {0} à {1}': 'from {0} to {1}',
+  '{0} dépensés sur {1} — il reste {2}.': '{0} spent of {1} — {2} remaining.',
   'Aucun plafond mensuel n’est posé': 'No monthly cap is set',
   '(fenêtre « Traitements d’image »).': '(« Image processing » window).',
   'Ce lot ne rentre pas dans le plafond.': 'This batch does not fit within the cap.',
@@ -719,5 +723,6 @@ module.exports = {
   'une seule': 'a single',
   'photo': 'photo',
   'appels pour une seule photo': 'calls for a single photo',
-  '$ pour cette': '$ for this'
+  /* ⚠ Sans le « $ » : voir la note de « {0} dépensés sur {1} ». */
+  'pour cette': 'for this'
 };

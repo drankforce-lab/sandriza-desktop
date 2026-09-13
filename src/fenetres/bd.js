@@ -100,13 +100,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function octets(n){
-    n = Number(n) || 0;
-    if (n < 1024) return n + ' o';
-    var u = ['Ko','Mo','Go','To'], i = -1;
-    do { n /= 1024; i++; } while (n >= 1024 && i < u.length - 1);
-    return (n < 10 ? n.toFixed(1) : Math.round(n)) + ' ' + u[i];
-  }
+  /* ⚠ Ko, Mo, Go sont FRANCAIS — l anglais ecrit KB, MB, GB. La recette unique
+     est szOctets, posee par le socle dans les 99 fenetres. */
+  function octets(n){ return szOctets(n); }
 
   var MOTIFS = {
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',

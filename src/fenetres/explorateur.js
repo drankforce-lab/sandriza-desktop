@@ -205,10 +205,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
+  /* ⚠ Le tiret quand il n y a rien reste ICI : c est une decision d affichage
+     propre a cette fenetre, pas une mesure. Le reste vient de szOctets. */
   function poids(n){
     var o = Number(n) || 0;
     if (!o) return '—';
-    return o > 1048576 ? ((o / 1048576).toFixed(1) + ' Mo') : (Math.round(o / 1024) + ' Ko');
+    return szOctets(o);
   }
 
   var MOTIFS = {

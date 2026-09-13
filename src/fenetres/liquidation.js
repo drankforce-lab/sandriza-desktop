@@ -215,7 +215,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function argent(n){ return (Math.round((Number(n)||0)*100)/100).toFixed(2) + ' $'; }
+  /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
+  function argent(n){ return szArgent(n); }
 
   var MOTIFS = {
     session:        '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',

@@ -485,6 +485,20 @@ jobs:
           # seul l'enveloppement retire le texte de la page.
           # ⚠ Premier relevé : 207 textes dans 48 fenêtres, traduction existante.
           node tools/banc-langue-effet.js
+          # ⚠⚠ ET CE QUI N'EST PAS DU TEXTE : LES MESURES. Sa capture du
+          # 2026-09-13 disait « 417 Mo » sur une page anglaise — `Mo`, `Ko`, `Go`
+          # sont FRANÇAIS (l'anglais écrit MB, KB, GB), et le symbole de la
+          # monnaie ne change pas seulement, il CHANGE DE CÔTÉ : « 12,50 $ »
+          # devient « $12.50 ».
+          # ⚠⚠⚠ AUCUN DES BANCS CI-DESSUS NE POUVAIT LE VOIR. Ils relèvent le
+          # TEXTE de la page ; « 417 Mo » n'y est pas — il est FABRIQUÉ à
+          # l'exécution, dans le script, à partir d'un nombre. Le chantier
+          # bilingue était à zéro faute et la page annonçait quand même « Mo ».
+          # ➡ CE QUI EST FABRIQUÉ À L'EXÉCUTION ÉCHAPPE AU RELEVÉ DES TEXTES.
+          # ⚠ Il essaie AUSSI les quatre recettes dans les DEUX langues : sans ça
+          # il ne mesurerait qu'une absence, et retirer `JS_MESURES` du socle le
+          # laisserait vert avec 99 fenêtres incapables d'afficher un montant.
+          node tools/banc-langue-mesures.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de

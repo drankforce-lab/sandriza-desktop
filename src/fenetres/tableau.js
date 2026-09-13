@@ -167,8 +167,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   function fmt(n){
-    try { return (Number(n) || 0).toLocaleString('${LIEU()}', { style: 'currency', currency: 'CAD' }); }
-    catch (e) { return (Number(n) || 0).toFixed(2) + ' $'; }
+    /* ⚠ LE REPLI COLLAIT << $ >> APRES LE NOMBRE, donc du francais sur une page
+       anglaise le jour ou Intl refuse. szArgent (socle) place le symbole du bon
+       cote dans les deux voies — une seule recette, un seul endroit. */
+    return szArgent(n);
   }
   function fmtDate(d){
     try { return new Date(d).toLocaleDateString('${LIEU()}', { year: 'numeric', month: 'short', day: 'numeric' }); }

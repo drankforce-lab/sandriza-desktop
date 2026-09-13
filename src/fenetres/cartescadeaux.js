@@ -135,8 +135,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   function fmt(n){
-    try { return (Number(n) || 0).toLocaleString('${LIEU()}', { style: 'currency', currency: 'CAD' }); }
-    catch (e) { return (Number(n) || 0).toFixed(2) + ' $'; }
+    return szArgent(n);   /* voir szArgent (socle) : le repli aussi place le symbole */
   }
 
   var MOTIFS = {

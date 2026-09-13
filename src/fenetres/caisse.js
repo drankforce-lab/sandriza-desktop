@@ -316,10 +316,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
-  function argent(n){
-    var v = (Math.round((parseFloat(n) || 0) * 100) / 100).toFixed(2);
-    return v.replace('.', '${SEP_DEC()}') + ' $';
-  }
+  /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
+  function argent(n){ return szArgent(n); }
 
   // ⚠ CHAQUE REFUS DU PONT A SA PHRASE. Un ecran muet sur un refus de droit
   // ressemble a une panne, et on cherche au mauvais endroit — chez l imprimante,

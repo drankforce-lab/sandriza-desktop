@@ -1267,8 +1267,85 @@ function szCompte(n, tot, sing, plur){
    réglage aurait marché « sauf pour le socle », c’est-à-dire pour ce que TOUTES
    les fenêtres montrent. Une fonction se réévalue à chaque page bâtie.
    ⚠ Les fenêtres les interpolent donc avec des parenthèses : ${JS_DIRE()}. */
+/* ══ LES MESURES — LA QUATRIÈME PIÈCE QUE LE DICTIONNAIRE N'ATTEINT PAS ══════
+ * ⚠⚠ SA REMARQUE DU 2026-09-13, sur une capture : « 417 Mo ». `Mo`, `Ko`, `Go`
+ * sont des abréviations FRANÇAISES ; l'anglais écrit `MB`, `KB`, `GB`. Elles
+ * étaient écrites en dur dans cinq fenêtres — et aucun dictionnaire ne pouvait
+ * les atteindre, parce qu'elles ne sont pas du texte : elles sont fabriquées
+ * dans le script de la page, à l'exécution, à partir d'un nombre.
+ *
+ * ⚠ LE SYMBOLE DE LA MONNAIE NE SE COLLE PAS NON PLUS. En français-canadien on
+ * écrit « 12,50 $ » ; en anglais canadien, « $12.50 » — le symbole CHANGE DE
+ * CÔTÉ. Vingt-deux fenêtres l'ajoutaient à la main après le nombre. Douze
+ * passaient déjà par `toLocaleString({ style: 'currency' })`, qui place le
+ * symbole tout seul : c'est cette voie-là qui devient la seule.
+ *
+ * ➡ **CE QUI EST FABRIQUÉ À L'EXÉCUTION ÉCHAPPE AU RELEVÉ DES TEXTES.** C'est
+ * la même leçon que `TETE`/`LIEU`/`SEP_DEC` (2026-09-13, en tête de ce
+ * fichier), repayée sur un quatrième terrain : le chantier bilingue pouvait
+ * être à zéro faute et la page anglaise annoncer quand même « 417 Mo ».
+ *
+ * ⚠ DEUX FORMES POUR LA MONNAIE, ET LA SECONDE N'EST PAS UN DOUBLON.
+ * `szArgent` groupe les milliers (« $1,234.50 ») : c'est ce qu'on LIT.
+ * `szArgentChamp` ne groupe pas, parce qu'un CHAMP DE SAISIE est relu par
+ * `parseFloat` après avoir retiré tout ce qui n'est pas un chiffre — et
+ * « 1,234.50 » y deviendrait « 1.234.50 », donc 1,234 $. Le champ de prix des
+ * produits fait exactement ça.
+ *
+ * ⚠ CES FONCTIONS SONT POSÉES DANS LES 99 FENÊTRES (par `JS_DIRE`, que
+ * `JS_SOCLE` inclut) : une fenêtre écrite demain les a sans que personne y
+ * pense. Garde : `tools/banc-langue-mesures.js` refuse qu'une fenêtre
+ * refabrique l'une des deux à la main.
+ * ⚠ AUCUN ACCENT GRAVE ici non plus — le script vit dans un littéral de gabarit. */
+const JS_MESURES = () => {
+  const en = (LANGUE.langueCourante() === 'en');
+  /* ⚠ `o` / `B` : l octet s abrege `o` en francais, `B` (byte) en anglais. */
+  const unites = en ? ['B', 'KB', 'MB', 'GB', 'TB'] : ['o', 'Ko', 'Mo', 'Go', 'To'];
+  /* De quel cote le symbole se pose, une fois pour toutes. `poser(x)` rend le
+     morceau de code JS qui accole le symbole a la variable nommee `x`.
+     ⚠ ECRIT EN CLAIR PLUTOT QU EN UN TOUR DE PASSE-PASSE sur la chaine : un
+     `split`/`join` sur le nom de la variable marcherait et serait illisible — et
+     se casserait au premier renommage, en silence. */
+  const poser = (x) => (en ? "'$' + " + x : x + " + ' $'");
+  const repli = poser('s');
+  return `
+function szArgent(n){
+  var v = Number(n); if (!isFinite(v)) v = 0;
+  try { return v.toLocaleString('${LIEU()}', { style: 'currency', currency: 'CAD' }); }
+  catch (e) {
+    var s = (Math.round(v * 100) / 100).toFixed(2).replace('.', '${SEP_DEC()}');
+    return ${repli};
+  }
+}
+function szArgentChamp(n){
+  var v = Number(n); if (!isFinite(v)) v = 0;
+  var s = (Math.round(v * 100) / 100).toFixed(2).replace('.', '${SEP_DEC()}');
+  return ${repli};
+}
+/* ⚠ POUR UN MONTANT DEJA MIS EN FORME AILLEURS. Le Studio, par exemple, garde
+   TROIS decimales sous la demi-cenne — un detourage coute 0,002 $, et
+   « 0,00 $ » pour cinq cents photos ferait croire a la gratuite. Cette
+   decision-la lui appartient ; seul le cote du symbole vient d ici. */
+function szArgentSymbole(s){
+  var t = String(s == null ? '' : s);
+  return ${poser('t')};
+}
+function szOctets(n){
+  var o = Number(n); if (!isFinite(o) || o < 0) o = 0;
+  var u = ${JSON.stringify(unites)}, i = 0, v = o;
+  while (v >= 1024 && i < u.length - 1) { v = v / 1024; i++; }
+  /* ⚠ LE MEME ARRONDI QU AVANT : une decimale sous dix, entier au-dela. Les
+     cinq fenetres le faisaient deja ainsi — « 417 Mo » sur sa capture. Changer
+     l arrondi en passant aurait fait DEUX modifications la ou il en fallait
+     une, et la seconde n aurait ete demandee par personne. */
+  var d = (i === 0 || v >= 10) ? 0 : 1;
+  return v.toFixed(d).replace('.', '${SEP_DEC()}') + ' ' + u[i];
+}
+`;
+};
+
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
-  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE();
+  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE() + JS_MESURES();
 
 const JS_SOCLE = () => `
 var P = window.szPont;

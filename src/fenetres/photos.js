@@ -485,9 +485,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function poids(n){
     if (!n) return '—';
-    if (n < 1024) return n + ' o';
-    if (n < 1048576) return (n / 1024).toFixed(1) + ' Ko';
-    return (n / 1048576).toFixed(2) + ' Mo';
+    return szOctets(n);
   }
 
   /* ── LE DESSIN ─────────────────────────────────────────────────────────── */

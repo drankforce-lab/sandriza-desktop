@@ -199,8 +199,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var D = null;
   var ANNEE = 0, MOIS = 0, CAT = '';
   function fmtArgent(n){
-    try { return (Number(n)||0).toLocaleString('${LIEU()}', { style:'currency', currency:'CAD' }); }
-    catch(e){ return (Number(n)||0).toFixed(2) + ' $'; }
+    return szArgent(n);   /* voir szArgent (socle) : le repli aussi place le symbole */
   }
   var PAGE = 0;
   var DETAIL = null;         // la depense ouverte (depenses:lire)

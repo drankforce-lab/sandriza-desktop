@@ -172,10 +172,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
-  function argent(n){
-    var v = (Math.round((parseFloat(n) || 0) * 100) / 100).toFixed(2);
-    return v.replace('.', '${SEP_DEC()}') + ' $';
-  }
+  /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
+  function argent(n){ return szArgent(n); }
   function dateFr(iso){
     if (!iso) return '—';
     var d = new Date(iso);

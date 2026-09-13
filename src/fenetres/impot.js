@@ -214,8 +214,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      explication, il ne vide pas l ecran. On ne relit qu au changement d annee. */
   var FRAIS = null, FRAIS_AN = null;
   function fmtArgent(n){
-    try { return (Number(n)||0).toLocaleString('${LIEU()}', { style:'currency', currency:'CAD' }); }
-    catch(e){ return (Number(n)||0).toFixed(2) + ' $'; }
+    return szArgent(n);   /* voir szArgent (socle) : le repli aussi place le symbole */
   }
   var OCCUPE = false;
   /* ⚠ LE PROFIL ET L AIDE-MEMOIRE SE LISENT A PART, ET SEULEMENT QUAND ON

@@ -318,13 +318,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     lier();
   }
 
-  function fmtO(n){
-    if (!n) return '0 o';
-    if (n < 1024) return n + ' o';
-    var u=['Ko','Mo','Go'], i=-1;
-    do { n/=1024; i++; } while (n>=1024 && i<u.length-1);
-    return (n<10 ? n.toFixed(1) : Math.round(n)) + ' ' + u[i];
-  }
+  /* ⚠ C EST LA FENETRE DE SA CAPTURE : << 417 Mo >> sur une page anglaise. Les
+     abreviations d octets sont FRANCAISES ; szOctets (socle) les pose dans la
+     langue de la page. */
+  function fmtO(n){ return szOctets(n); }
 
   function lier(){
     var b;

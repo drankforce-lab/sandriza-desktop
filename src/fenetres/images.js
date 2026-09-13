@@ -114,12 +114,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
 
-  function poids(o){
-    o = Number(o) || 0;
-    if (o >= 1048576) return (o / 1048576).toFixed(1).replace('.', '${SEP_DEC()}') + ' Mo';
-    if (o >= 1024) return Math.round(o / 1024) + ' ko';
-    return o + ' o';
-  }
+  function poids(o){ return szOctets(o); }
 
   var MOTIFS = {
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',

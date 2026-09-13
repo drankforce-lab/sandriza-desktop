@@ -106,9 +106,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var avis  = document.getElementById('msg');
   var MARQUE = { logo: '', nom: '${T("SANDRIZA")}' };
 
-  function fmt(n){
-    return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace('.', '${SEP_DEC()}') + ' $';
-  }
+  /* ⚠ LE SYMBOLE CHANGE DE COTE : << 12,50 $ >> en francais, << $12.50 >> en
+     anglais. szArgent (socle) le place ; le coller apres le nombre etait un
+     choix que la page n avait pas a faire. */
+  function fmt(n){ return szArgent(n); }
   function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
 
   function dire(t){

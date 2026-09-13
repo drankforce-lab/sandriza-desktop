@@ -2892,17 +2892,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             /* Une fourchette quand elle existe : l agrandissement ×4 est ignoré
                au-delà de 1000 px, donc il coûte « au plus » un appel de plus.
                Annoncer un chiffre unique et faux serait pire que la fourchette. */
+            /* ⚠ LA FOURCHETTE EST UNE PHRASE, PAS TROIS MORCEAUX COLLES. « de »
+               et « à » etaient des litteraux nus : aucun dictionnaire ne les
+               atteignait, parce qu ils sont assembles A L EXECUTION et
+               n existent nulle part dans la page au moment ou on la releve.
+               ⚠ split/join et NON replace : un montant anglais commence par
+               << $ >>, et replace lit << $1 >> comme un renvoi de capture. */
             var mt = (r.coutMax > r.coutMin)
-              ? ('de ' + sous(r.coutMin) + ' à ' + sous(r.coutMax) + ' $')
-              : (sous(r.coutMax) + ' $');
+              ? '${T("de {0} à {1}")}'
+                  .split('{0}').join(szArgentSymbole(sous(r.coutMin)))
+                  .split('{1}').join(szArgentSymbole(sous(r.coutMax)))
+              : szArgentSymbole(sous(r.coutMax));
             var app = (r.appelsMax > r.appelsMin)
               ? (r.appelsMin + ' à ' + r.appelsMax) : String(r.appelsMax);
             var h = '<strong>' + nP + ' photo' + (nP > 1 ? 's' : '') + ' · ' + app
               + ' appel' + (r.appelsMax > 1 ? 's' : '') + ' ${T("facturé")}' + (r.appelsMax > 1 ? 's' : '')
               + ' ≈ ' + mt + '</strong>';
             if (bu.actif) {
-              h += '<br>${T("Plafond du mois :")} ' + sous(bu.depense) + ' ${T("$ dépensés sur")} '
-                + sous(bu.mensuel) + ' ${T("$ — il reste")} ' + sous(bu.restant) + ' $.';
+              /* ⚠ LE SYMBOLE ETAIT DANS LA PHRASE TRADUITE (« $ dépensés sur »),
+                 donc COLLE APRES le nombre dans les deux langues. En anglais il
+                 se pose DEVANT : la phrase doit donc porter des trous, pas des
+                 symboles. */
+              h += '<br>${T("Plafond du mois :")} '
+                + '${T("{0} dépensés sur {1} — il reste {2}.")}'
+                    .split('{0}').join(szArgentSymbole(sous(bu.depense)))
+                    .split('{1}').join(szArgentSymbole(sous(bu.mensuel)))
+                    .split('{2}').join(szArgentSymbole(sous(bu.restant)));
             } else {
               h += '<br><span style="color:var(--tx2)">${T("Aucun plafond mensuel n’est posé")} '
                 + '${T("(fenêtre « Traitements d’image »).")}</span>';
@@ -3298,11 +3313,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<p>${T("Ce qu’il consomme, ce sont vos <strong>aperçus du mois</strong> — ")}' + n
             + '${T(" d’un coup — et le résultat sera <strong>filigrané</strong>.")}</p>';
         } else {
-          h += '<p><strong>' + n + ' ${T("appels facturés ≈")} ' + argent(r.coutMax) + ' ${T("$ pour cette")} '
+          h += '<p><strong>' + n + ' ${T("appels facturés ≈")} ' + szArgentSymbole(argent(r.coutMax))
+            + ' ${T("pour cette")} '
             + '${T("photo. Un mannequin virtuel n’en coûterait qu’un seul.")}</p>';
           if (bu.actif) {
-            h += '<p>${T("Plafond du mois :")} ' + argent(bu.depense) + ' ${T("$ dépensés sur")} ' + argent(bu.mensuel)
-              + ' ${T("$ — il reste")} ' + argent(bu.restant) + ' $.</p>';
+            /* Même phrase à trous que plus haut : le symbole change de côté. */
+            h += '<p>${T("Plafond du mois :")} '
+              + '${T("{0} dépensés sur {1} — il reste {2}.")}'
+                  .split('{0}').join(szArgentSymbole(argent(bu.depense)))
+                  .split('{1}').join(szArgentSymbole(argent(bu.mensuel)))
+                  .split('{2}').join(szArgentSymbole(argent(bu.restant)))
+              + '</p>';
           }
         }
         /* ⚠ ON DIT COMMENT REDESCENDRE A UN APPEL, pas seulement combien ça
@@ -3322,7 +3343,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         }
         h += '<div class="fin2"><button id="cd-non">${T("Annuler")}</button>'
           + '<button class="' + (apercu ? 'prim' : 'conf') + '" id="cd-oui">'
-          + (apercu ? '${T("Lancer l’aperçu")}' : '${T("Lancer —")} ' + argent(r.coutMax) + ' $') + '</button></div>';
+          + (apercu ? '${T("Lancer l’aperçu")}'
+              : '${T("Lancer —")} ' + szArgentSymbole(argent(r.coutMax))) + '</button></div>';
         dire('');
         voile(h, function(fermer){
           var non = document.getElementById('cd-non');

@@ -163,7 +163,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
   function plur(n){ return n === 1 ? '' : 's'; }
-  function argent(n){ return (Math.round((Number(n)||0)*100)/100).toFixed(2) + ' $'; }
+  /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
+  function argent(n){ return szArgent(n); }
   function argentK(n){ n = Number(n)||0; return n >= 1000 ? ((n/1000).toFixed(1) + 'k $') : argent(n); }
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
   function chk(id){ var e = document.getElementById(id); return e ? e.checked : false; }

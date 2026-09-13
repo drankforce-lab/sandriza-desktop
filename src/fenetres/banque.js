@@ -194,10 +194,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      par VIRGULE (1,234.56). Les poser a la main demandait donc DEUX regles, et
      la seconde manquait. toLocaleString les tient toutes les deux. */
   function sou(n){
+    /* ⚠ LE SIGNE RESTE DEVANT LE MONTANT ENTIER, symbole compris : en anglais
+       le << $ >> passe devant le nombre, et << − $12.50 >> se lit, alors que
+       << $− 12.50 >> non. Le formatage vient de szArgent (socle). */
     var v = parseFloat(n) || 0;
-    var a = Math.abs(v).toLocaleString('${LIEU()}',
-      { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return (v < 0 ? '− ' : '') + a + ' $';
+    return (v < 0 ? '− ' : '') + szArgent(Math.abs(v));
   }
   function jour(s){
     if (!s) return '—';
