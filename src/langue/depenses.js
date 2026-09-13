@@ -180,6 +180,11 @@ module.exports = {
   'Un domaine complet est accepté et réduit': 'A full domain is accepted and reduced',
   'automatiquement : « render.com », « support@render.com » et « Render » désignent le même fournisseur.':
     'automatically: « render.com », « support@render.com » and « Render » mean the same supplier.',
+  /* ⚠ UN NOM DE DOMAINE NE SE TRADUIT PAS. L entree existe pour que le compteur
+     voie une DECISION : cet exemple reste tel quel dans les deux langues. Il
+     etait invisible aux deux mesures jusqu au 2026-09-13 — voir la fiche de
+     tools/textes-visibles.js. */
+  'ex. render.com': 'ex. render.com',
   '✓ Enregistrer': '✓ Save',
   'Aucun fournisseur ne correspond.': 'No supplier matches.',
   'Fournisseur Catégorie': 'Supplier Category',

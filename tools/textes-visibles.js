@@ -51,6 +51,23 @@ const texteVisible = (s) => {
   let t = s.replace(/<[^>]*>/g, ' ').replace(/<[^>]*$/, ' ');
   const g = t.indexOf('>');                      // le fragment commencait DANS une balise
   if (g >= 0) t = t.slice(g + 1);
+  /* ⚠⚠ ET IL POUVAIT AUSSI COMMENCER DANS UN ATTRIBUT. La source ecrit
+     `value="'+esc(x)+'" placeholder="Bonjour !…"` : la chaine que le decoupeur
+     ramene est `" placeholder="Bonjour !…"`, scaffolding compris. Ce texte-la
+     n a evidemment aucune DECISION dans un dictionnaire — on accusait donc
+     d etre reste francais un texte qu on avait DELIBEREMENT garde francais
+     (l exemple du message d accueil du chat, lu par la cliente). ⚠ On coupe donc
+     le `nom="` de tete : ce qui reste est la valeur de l attribut, et elle, se
+     verifie.
+     ⚠⚠ ET LA BORNE EST ETROITE, PARCE QU UNE BORNE LARGE A ACCUSE AUTRE CHOSE :
+     coupee a n importe quel `="`, la regle transformait le selecteur
+     `input[type="number"], #t-number` en `number"], #t-number` — un texte que
+     plus rien ne reconnaissait comme du code, donc une faute inventee. On
+     n agit donc que si le fragment COMMENCE par le guillemet qui ferme
+     l attribut precedent, suivi d un nom d attribut : c est exactement la forme
+     que produit la coupure, et elle seule. */
+  const a = /^"\s*[A-Za-z-]+="/.exec(t);
+  if (a) t = t.slice(a[0].length).replace(/"\s*$/, '');
   return t.replace(/&[a-z#0-9]{2,8};/gi, ' ').replace(/\s+/g, ' ').trim();
 };
 

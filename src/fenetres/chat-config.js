@@ -31,6 +31,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('chat-config');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -108,15 +112,15 @@ input.t:disabled,textarea.t:disabled{opacity:.45}
 function pageChatConfig(onglet) {
   const ONG0 = (onglet === 'ia') ? 'ia' : 'widget';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Configuration du chat en ligne — Administration Sandriza</title>
+<title>${T("Configuration du chat en ligne — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.chat}</span><h1>Configuration du chat en ligne</h1></div>
+<div class="tete"><span class="ico">${ICO.chat}</span><h1>${T("Configuration du chat en ligne")}</h1></div>
 <div class="ong">
-  <button type="button" id="o-widget" data-onglet="widget">⚙ Widget</button>
-  <button type="button" id="o-ia" data-onglet="ia"><span class="ic">🤖</span> Assistant IA</button>
+  <button type="button" id="o-widget" data-onglet="widget">${T("⚙ Widget")}</button>
+  <button type="button" id="o-ia" data-onglet="ia"><span class="ic">🤖</span> ${T("Assistant IA")}</button>
 </div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter ces réglages, pas les modifier.</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter ces réglages, pas les modifier.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -127,8 +131,8 @@ function pageChatConfig(onglet) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -145,19 +149,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function coche(id){ var e=el(id); return !!(e&&e.checked); }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès au chat en ligne.',
-    indisponible:'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    invalide:'Ce fichier n’est pas une image.',
-    trop_gros:'Image trop lourde : 800 Ko au maximum.',
-    courriel:'Le courriel de notification est mal écrit.',
-    agents:'Il faut au moins un agent portant un nom.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès au chat en ligne.")}',
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    invalide:'${T("Ce fichier n’est pas une image.")}',
+    trop_gros:'${T("Image trop lourde : 800 Ko au maximum.")}',
+    courriel:'${T("Le courriel de notification est mal écrit.")}',
+    agents:'${T("Il faut au moins un agent portant un nom.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(String(r.detail).slice(0,140)):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(String(r.detail).slice(0,140)):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -173,7 +177,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var v = document.querySelectorAll('img.vign');
     for (var i=0;i<v.length;i++) v[i].onerror = function(){
       var s = document.createElement('span');
-      s.className = 'sansph'; s.textContent = '—'; s.title = 'Photo introuvable à cette adresse';
+      s.className = 'sansph'; s.textContent = '—'; s.title = '${T("Photo introuvable à cette adresse")}';
       if (this.parentNode) this.parentNode.replaceChild(s, this);
     };
   }
@@ -192,62 +196,62 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="grille">';
 
-    h += '<div class="carte"><h2>Présence</h2>'
+    h += '<div class="carte"><h2>${T("Présence")}</h2>'
       + '<div class="bascules">'
-      + '<label class="bascule"><input type="checkbox" id="c-actif"'+(d.actif?' checked':'')+dis+'> Actif</label>'
-      + '<label class="bascule"><input type="checkbox" id="c-enligne"'+(d.enLigne?' checked':'')+dis+'> En ligne</label>'
-      + '<label class="bascule"><input type="checkbox" id="c-rotation"'+(d.rotation?' checked':'')+dis+'> Rotation des noms</label>'
+      + '<label class="bascule"><input type="checkbox" id="c-actif"'+(d.actif?' checked':'')+dis+'> ${T("Actif")}</label>'
+      + '<label class="bascule"><input type="checkbox" id="c-enligne"'+(d.enLigne?' checked':'')+dis+'> ${T("En ligne")}</label>'
+      + '<label class="bascule"><input type="checkbox" id="c-rotation"'+(d.rotation?' checked':'')+dis+'> ${T("Rotation des noms")}</label>'
       + '</div>'
-      + '<label class="champ"><span class="lbl">Nom de l’agent</span>'
+      + '<label class="champ"><span class="lbl">${T("Nom de l’agent")}</span>'
       + '<input class="t" id="c-nom" value="'+esc(d.nomAgent||'')+'" placeholder="Support"'+dis+'>'
       + '</label>'
-      + '<label class="champ"><span class="lbl">Courriel d’avis (hors ligne)</span>'
+      + '<label class="champ"><span class="lbl">${T("Courriel d’avis (hors ligne)")}</span>'
       + '<input class="t" id="c-courriel" type="email" value="'+esc(d.courrielAvis||'')+'" placeholder="admin@sandriza.com"'+dis+'>'
-      + '<span class="sub">Prévenu quand quelqu’un laisse un message pendant que le chat est hors ligne. Vide : personne n’est prévenu.</span></label>'
+      + '<span class="sub">${T("Prévenu quand quelqu’un laisse un message pendant que le chat est hors ligne. Vide : personne n’est prévenu.")}</span></label>'
       + '</div>';
 
     /* La photo de l agent fixe et la liste de rotation sont DANS LA MEME
        CARTE : ce sont les deux moities d une seule question — qui repond, et
        avec quel visage. Separees, la premiere laissait une carte presque vide
        a cote d une carte pleine, et rien ne disait qu elles s excluent. */
-    h += '<div class="carte"><h2>Qui répond</h2>'
-      + '<label class="champ"><span class="lbl">Photo de l’agent fixe</span>'
+    h += '<div class="carte"><h2>${T("Qui répond")}</h2>'
+      + '<label class="champ"><span class="lbl">${T("Photo de l’agent fixe")}</span>'
       + '<span class="rang">'
       + (d.photoAgent
           ? '<img class="vign" src="'+esc(d.photoAgent)+'" alt="">'
           : '<span class="sansph"><span class="ic">👤</span></span>')
       + '<input class="t" id="c-photo" value="'+esc(d.photoAgent||'')+'" placeholder="https://…"'+dis+'>'
-      + (RO ? '' : '<button class="b" type="button" id="c-photo-imp"><span class="ic">📁</span> Importer</button>')
+      + (RO ? '' : '<button class="b" type="button" id="c-photo-imp"><span class="ic">📁</span> ${T("Importer")}</button>')
       + '</span>'
-      + '<span class="sub">Servie quand la rotation des noms est <b>désactivée</b>.</span></label>'
+      + '<span class="sub">${T("Servie quand la rotation des noms est <b>désactivée</b>.")}</span></label>'
       + '<input type="file" id="c-photo-f" accept="image/*" hidden>'
-      + '<label class="champ" style="margin-bottom:.35rem"><span class="lbl">Agents de la rotation</span></label>'
-      + '<p class="quoi" style="margin:0 0 .6rem">Chacun a son nom et sa photo. Décoché, un agent est sauté par la rotation sans être perdu.</p>'
+      + '<label class="champ" style="margin-bottom:.35rem"><span class="lbl">${T("Agents de la rotation")}</span></label>'
+      + '<p class="quoi" style="margin:0 0 .6rem">${T("Chacun a son nom et sa photo. Décoché, un agent est sauté par la rotation sans être perdu.")}</p>'
       + '<div id="c-agents"></div>'
-      + (RO ? '' : '<button class="b" type="button" id="c-agent-plus">＋ Ajouter un agent</button>')
+      + (RO ? '' : '<button class="b" type="button" id="c-agent-plus">${T("＋ Ajouter un agent")}</button>')
       + '<input type="file" id="c-agent-f" accept="image/*" hidden>'
       + '</div>';
 
-    h += '<div class="carte large"><h2>Messages</h2>'
-      + '<label class="champ"><span class="lbl">Accueil — français</span>'
-      + '<input class="t" id="c-accueil" value="'+esc(d.accueil||'')+'" placeholder="Bonjour ! Mon nom est {{AGENT}}, comment puis-je vous aider ?"'+dis+'>'
-      + '<span class="sub">Écrivez <b>{{AGENT}}</b> là où le nom de l’agent doit paraître.</span></label>'
-      + '<label class="champ"><span class="lbl">Accueil — anglais</span>'
+    h += '<div class="carte large"><h2>${T("Messages")}</h2>'
+      + '<label class="champ"><span class="lbl">${T("Accueil — français")}</span>'
+      + '<input class="t" id="c-accueil" value="'+esc(d.accueil||'')+'" placeholder="${T("Bonjour ! Mon nom est {{AGENT}}, comment puis-je vous aider ?")}"'+dis+'>'
+      + '<span class="sub">${T("Écrivez <b>{{AGENT}}</b> là où le nom de l’agent doit paraître.")}</span></label>'
+      + '<label class="champ"><span class="lbl">${T("Accueil — anglais")}</span>'
       + '<input class="t" id="c-accueil-en" value="'+esc(d.accueilEN||'')+'" placeholder="Hello! My name is {{AGENT}}, how can I help you today?"'+dis+'></label>'
-      + '<label class="champ"><span class="lbl">Hors ligne — français</span>'
+      + '<label class="champ"><span class="lbl">${T("Hors ligne — français")}</span>'
       + '<textarea class="t" id="c-horsligne"'+dis+'>'+esc(d.horsLigne||'')+'</textarea></label>'
-      + '<label class="champ"><span class="lbl">Hors ligne — anglais</span>'
+      + '<label class="champ"><span class="lbl">${T("Hors ligne — anglais")}</span>'
       + '<textarea class="t" id="c-horsligne-en" placeholder="We are currently offline. Leave us your contact details and we will get back to you as soon as possible."'+dis+'>'+esc(d.horsLigneEN||'')+'</textarea></label>'
       + '</div>';
 
     h += '</div>';
-    if (!RO) h += '<div style="margin-top:1rem"><button class="b prim" type="button" id="c-enr">Enregistrer les réglages du widget</button></div>';
+    if (!RO) h += '<div style="margin-top:1rem"><button class="b prim" type="button" id="c-enr">${T("Enregistrer les réglages du widget")}</button></div>';
     return h;
   }
 
   function dessinerAgents(){
     var z = el('c-agents'); if (!z) return;
-    if (!AGENTS.length) { z.innerHTML = '<div class="vide" style="padding:1rem">Aucun agent. La rotation servira le nom de repli.</div>'; return; }
+    if (!AGENTS.length) { z.innerHTML = '<div class="vide" style="padding:1rem">${T("Aucun agent. La rotation servira le nom de repli.")}</div>'; return; }
     var dis = RO ? ' disabled' : '';
     var h = '';
     for (var i=0;i<AGENTS.length;i++){ var a = AGENTS[i];
@@ -256,12 +260,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            LISTE : ils n ont pas d etiquette, et le lecteur d ecran annoncait
            trois fois « zone de texte » sans dire de quel agent. Le placeholder
            ne compte pas — il disparait des qu on tape. */
-        + '<input type="checkbox" aria-label="Agent actif" data-ag-actif="'+i+'"'+(a.actif?' checked':'')+dis+' style="width:15px;height:15px;accent-color:#c9a97e;flex:0 0 auto">'
-        + '<input class="t nom" aria-label="Nom de l’agent" data-ag-nom="'+i+'" value="'+esc(a.nom)+'" placeholder="Nom"'+dis+'>'
-        + '<input class="t ph" aria-label="URL de la photo de l’agent" data-ag-photo="'+i+'" value="'+esc(a.photo)+'" placeholder="URL de la photo (vide = sans photo)"'+dis+'>'
-        + (RO ? '' : '<button class="mini" type="button" data-ag-imp="'+i+'" title="Importer une photo"><span class="ic">📁</span></button>')
+        + '<input type="checkbox" aria-label="${T("Agent actif")}" data-ag-actif="'+i+'"'+(a.actif?' checked':'')+dis+' style="width:15px;height:15px;accent-color:#c9a97e;flex:0 0 auto">'
+        + '<input class="t nom" aria-label="${T("Nom de l’agent")}" data-ag-nom="'+i+'" value="'+esc(a.nom)+'" placeholder="Nom"'+dis+'>'
+        + '<input class="t ph" aria-label="${T("URL de la photo de l’agent")}" data-ag-photo="'+i+'" value="'+esc(a.photo)+'" placeholder="${T("URL de la photo (vide = sans photo)")}"'+dis+'>'
+        + (RO ? '' : '<button class="mini" type="button" data-ag-imp="'+i+'" title="${T("Importer une photo")}"><span class="ic">📁</span></button>')
         + (a.photo ? '<img class="vign" src="'+esc(a.photo)+'" alt="">' : '<span class="sansph"><span class="ic">👤</span></span>')
-        + (RO ? '' : '<button class="b danger" type="button" data-ag-suppr="'+i+'" title="Retirer cet agent">✕</button>')
+        + (RO ? '' : '<button class="b danger" type="button" data-ag-suppr="'+i+'" title="${T("Retirer cet agent")}">✕</button>')
         + '</div>';
     }
     z.innerHTML = h;
@@ -278,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var c = z.querySelectorAll('[data-ag-actif]');
     for (var k=0;k<c.length;k++) c[k].onchange = function(){ AGENTS[+this.getAttribute('data-ag-actif')].actif = this.checked; };
     var s = z.querySelectorAll('[data-ag-suppr]');
-    for (var m=0;m<s.length;m++) s[m].onclick = function(){ AGENTS.splice(+this.getAttribute('data-ag-suppr'),1); dessinerAgents(); dire('Agent retiré — pensez à enregistrer.', 'att'); };
+    for (var m=0;m<s.length;m++) s[m].onclick = function(){ AGENTS.splice(+this.getAttribute('data-ag-suppr'),1); dessinerAgents(); dire('${T("Agent retiré — pensez à enregistrer.")}', 'att'); };
     var im = z.querySelectorAll('[data-ag-imp]');
     for (var q=0;q<im.length;q++) im[q].onclick = function(){ choisirPhoto(+this.getAttribute('data-ag-imp')); };
   }
@@ -298,18 +302,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function lirePhoto(input){
     var fichier = input && input.files && input.files[0];
     if (!fichier) return;
-    if (fichier.size > 800000) { dire('Image trop lourde : 800 Ko au maximum.', 'err'); return; }
+    if (fichier.size > 800000) { dire('${T("Image trop lourde : 800 Ko au maximum.")}', 'err'); return; }
     var lecteur = new FileReader();
-    lecteur.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
+    lecteur.onerror = function(){ dire('${T("Lecture du fichier impossible.")}', 'err'); };
     lecteur.onload = function(ev){
       if (OCCUPE) return; OCCUPE = true;
-      dire('Envoi de la photo…');
+      dire('${T("Envoi de la photo…")}');
       appeler('chat:cfg:photo', [String(ev.target.result||'')]).then(function(r){
         OCCUPE = false;
-        if (!r || !r.ok) { dire('Échec : '+expliquer(r), 'err'); return; }
+        if (!r || !r.ok) { dire('${T("Échec : ")}'+expliquer(r), 'err'); return; }
         if (CIBLE < 0) { var e = el('c-photo'); if (e) e.value = r.url; }
         else if (AGENTS[CIBLE]) { AGENTS[CIBLE].photo = r.url; dessinerAgents(); }
-        dire('Photo rangée dans le nuage — pensez à enregistrer.', 'att');
+        dire('${T("Photo rangée dans le nuage — pensez à enregistrer.")}', 'att');
       });
     };
     lecteur.readAsDataURL(fichier);
@@ -317,7 +321,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function enregistrerWidget(){
     if (RO || OCCUPE) return; OCCUPE = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('chat:cfg:ecrire', [{
       actif:        coche('c-actif'),
       enLigne:      coche('c-enligne'),
@@ -332,15 +336,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       agents:       AGENTS
     }]).then(function(r){
       OCCUPE = false;
-      if (!r || !r.ok) { dire('Échec : '+expliquer(r), 'err'); return; }
-      poser(r); dessiner(); dire('Réglages du widget enregistrés.', 'bon');
+      if (!r || !r.ok) { dire('${T("Échec : ")}'+expliquer(r), 'err'); return; }
+      poser(r); dessiner(); dire('${T("Réglages du widget enregistrés.")}', 'bon');
     });
   }
 
   /* ── ONGLET ASSISTANT IA ───────────────────────────────────────────────── */
   var SOURCES = [
-    ['produits','Produits et inventaire'], ['collections','Collections'], ['faq','FAQ'],
-    ['retours','Politique de retours'], ['expedition','Politique d’expédition'], ['promotions','Promotions en cours']
+    ['produits','${T("Produits et inventaire")}'], ['collections','${T("Collections")}'], ['faq','FAQ'],
+    ['retours','${T("Politique de retours")}'], ['expedition','${T("Politique d’expédition")}'], ['promotions','${T("Promotions en cours")}']
   ];
 
   function vueIa(){
@@ -349,39 +353,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
 
     h += d.groqPosee
-      ? '<div class="avis ok">Clé Groq en place — modèle <code>'+esc(d.groqModele||'')+'</code>.</div>'
-      : '<div class="avis non">Aucune clé Groq enregistrée : l’assistant ne peut pas répondre. Elle se pose dans <b>Configuration → Clés API</b>.</div>';
+      ? '<div class="avis ok">${T("Clé Groq en place — modèle ")}<code>'+esc(d.groqModele||'')+'</code>.</div>'
+      : '<div class="avis non">${T("Aucune clé Groq enregistrée : l’assistant ne peut pas répondre. Elle se pose dans <b>Configuration → Clés API</b>.")}</div>';
 
     h += '<div class="grille">';
     h += '<div class="carte large">'
-      + '<div class="bascules"><label class="bascule"><input type="checkbox" id="i-actif"'+(ia.active?' checked':'')+dis+'> <b>Activer l’assistant</b></label></div>'
-      + '<label class="champ"><span class="lbl">Ce qu’il a le droit de lire</span></label>'
+      + '<div class="bascules"><label class="bascule"><input type="checkbox" id="i-actif"'+(ia.active?' checked':'')+dis+'> <b>${T("Activer l’assistant")}</b></label></div>'
+      + '<label class="champ"><span class="lbl">${T("Ce qu’il a le droit de lire")}</span></label>'
       + '<div class="sources">';
     for (var i=0;i<SOURCES.length;i++){
       h += '<label><input type="checkbox" id="i-'+SOURCES[i][0]+'"'+(ia[SOURCES[i][0]]?' checked':'')+dis+'> <span>'+esc(SOURCES[i][1])+'</span></label>';
     }
     h += '</div>'
-      + '<label class="champ"><span class="lbl">Règles maison</span>'
-      + '<textarea class="t" id="i-regles" style="min-height:6em" placeholder="Exemple : ne jamais nommer un concurrent. Toujours proposer le programme de fidélité."'+dis+'>'+esc(ia.regles||'')+'</textarea>'
-      + '<span class="sub">Instructions supplémentaires, suivies à chaque réponse.</span></label>'
-      + '<label class="champ"><span class="lbl">Message de passage à l’équipe</span>'
-      + '<input class="t" id="i-transfert" value="'+esc(ia.transfert||'')+'" placeholder="Je transmets votre question à notre équipe. Merci de patienter."'+dis+'>'
-      + '<span class="sub">Affiché quand l’assistant préfère ne pas répondre.</span></label>'
+      + '<label class="champ"><span class="lbl">${T("Règles maison")}</span>'
+      + '<textarea class="t" id="i-regles" style="min-height:6em" placeholder="${T("Exemple : ne jamais nommer un concurrent. Toujours proposer le programme de fidélité.")}"'+dis+'>'+esc(ia.regles||'')+'</textarea>'
+      + '<span class="sub">${T("Instructions supplémentaires, suivies à chaque réponse.")}</span></label>'
+      + '<label class="champ"><span class="lbl">${T("Message de passage à l’équipe")}</span>'
+      + '<input class="t" id="i-transfert" value="'+esc(ia.transfert||'')+'" placeholder="${T("Je transmets votre question à notre équipe. Merci de patienter.")}"'+dis+'>'
+      + '<span class="sub">${T("Affiché quand l’assistant préfère ne pas répondre.")}</span></label>'
       + '</div>';
     h += '</div>';
-    if (!RO) h += '<div style="margin-top:1rem"><button class="b prim" type="button" id="i-enr">Enregistrer l’assistant</button></div>';
+    if (!RO) h += '<div style="margin-top:1rem"><button class="b prim" type="button" id="i-enr">${T("Enregistrer l’assistant")}</button></div>';
     return h;
   }
 
   function enregistrerIa(){
     if (RO || OCCUPE) return; OCCUPE = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     var p = { active: coche('i-actif'), regles: txv('i-regles'), transfert: txv('i-transfert') };
     for (var i=0;i<SOURCES.length;i++) p[SOURCES[i][0]] = coche('i-'+SOURCES[i][0]);
     appeler('chat:cfg:ia', [p]).then(function(r){
       OCCUPE = false;
-      if (!r || !r.ok) { dire('Échec : '+expliquer(r), 'err'); return; }
-      poser(r); dessiner(); dire('Assistant enregistré.', 'bon');
+      if (!r || !r.ok) { dire('${T("Échec : ")}'+expliquer(r), 'err'); return; }
+      poser(r); dessiner(); dire('${T("Assistant enregistré.")}', 'bon');
     });
   }
 
@@ -394,7 +398,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     majOnglets();
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     corps.innerHTML = (ONGLET === 'ia') ? vueIa() : vueWidget();
     if (ONGLET === 'ia') {
       var bi = el('i-enr'); if (bi) bi.onclick = enregistrerIa;
@@ -417,7 +421,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                    accueilEN: txv('c-accueil-en'), horsLigne: txv('c-horsligne'), horsLigneEN: txv('c-horsligne-en') };
       D.photoAgent=etat.photoAgent; D.courrielAvis=etat.courrielAvis; D.accueil=etat.accueil;
       D.accueilEN=etat.accueilEN; D.horsLigne=etat.horsLigne; D.horsLigneEN=etat.horsLigneEN;
-      dessiner(); dire('Rotation modifiée — pensez à enregistrer.', 'att'); };
+      dessiner(); dire('${T("Rotation modifiée — pensez à enregistrer.")}', 'att'); };
   }
 
   var ow = el('o-widget'), oi = el('o-ia');
@@ -425,7 +429,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   if (oi) oi.onclick = function(){ if (ONGLET!=='ia'){ ONGLET='ia'; dessiner(); } };
 
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('chat:cfg:donnees', []).then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       poser(r); dessiner(); dire('');
@@ -438,7 +442,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szRevenir = function(){
     if (OCCUPE) return;
     var a = document.activeElement;
-    if (a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) { dire('Saisie en cours : les réglages ne sont pas rechargés.', 'att'); return; }
+    if (a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) { dire('${T("Saisie en cours : les réglages ne sont pas rechargés.")}', 'att'); return; }
     charger();
   };
   charger();

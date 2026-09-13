@@ -154,6 +154,7 @@ module.exports = {
   'Merci ! Voici un code pour votre prochaine commande.':
     'Merci ! Voici un code pour votre prochaine commande.',
   'Type de la question ': 'Type of question ',
+  'Type de la question': 'Type of question',
   'Obligatoire': 'Required',
   'Un choix par ligne': 'One choice per line',
   'Offrir une récompense pour la réponse': 'Offer a reward for the answer',

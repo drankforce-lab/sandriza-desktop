@@ -291,6 +291,10 @@ module.exports = {
 
   /* ── LES ATTRIBUTS QUI S AFFICHENT, CHACUN AVEC SA CLE ──────────────────── */
   'Corps du courriel de l’étape ': 'Email body of step ',
+  /* La forme RENDUE : l attribut est coupe du numero qui le suit, et l espace
+     de fin part avec. Invisible aux deux mesures jusqu au 2026-09-13 — voir la
+     fiche de tools/textes-visibles.js. */
+  'Corps du courriel de l’étape': 'Email body of step',
   'Délai — jours': 'Delay — days',
   'Délai — heures': 'Delay — hours',
   'Critère': 'Criterion',
@@ -331,6 +335,7 @@ module.exports = {
      ici, et le dictionnaire de la fenetre passe avant le socle. */
   'Retirer ce bloc': 'Remove this block',
   'Ajouter : ': 'Add: ',
+  'Ajouter :': 'Add:',
   'Statut': 'Status',
   'Sujet': 'Subject',
   'Nom de la chaîne': 'Chain name',

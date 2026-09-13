@@ -1339,7 +1339,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     function ligneLieuEdition(l){
       return '<tr style="background:rgba(201,169,126,.08)">'
-        + '<td><input type="text" id="lx-nom" aria-label="${T("Nom du lieu")}" value="' + esc(l ? l.nom : '') + '" placeholder="Ex : Entrepot, Maison"></td>'
+        + '<td><input type="text" id="lx-nom" aria-label="${T("Nom du lieu")}" value="' + esc(l ? l.nom : '') + '" placeholder="${T("Ex : Entrepôt, Maison")}"></td>'
         + '<td colspan="2"><input aria-label="${T("Adresse (optionnel)")}" type="text" id="lx-adr" value="' + esc(l ? l.adresse : '') + '" placeholder="${T("Adresse (optionnel)")}"></td>'
         + '<td class="c" style="white-space:nowrap">'
         + '<button class="mini prim" id="lx-enr" title="${T("Enregistrer (Entrée)")}">✓</button> '

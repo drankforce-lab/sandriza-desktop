@@ -459,6 +459,14 @@ module.exports = {
   'Mettre en vente': 'Put on sale',
   'Nombre de produits par page': 'Products per page',
   'Nom du lieu': 'Location name',
+  /* ⚠⚠ CE PLACEHOLDER ETAIT INVISIBLE AUX DEUX MESURES jusqu au 2026-09-13 : la
+     source ecrit `value="…" placeholder="…"` dans une seule chaine, et le
+     decoupeur ramenait `" placeholder="Ex : Entrepot…"` — un texte qu aucun
+     dictionnaire ne pouvait reconnaitre. Il portait en plus un « Entrepot »
+     SANS ACCENT CIRCONFLEXE, a l ecran, depuis le debut. Les deux sont
+     corriges. Un nom de lieu ne sort pas de l inventaire : son exemple suit la
+     langue du poste. */
+  'Ex : Entrepôt, Maison': 'E.g.: Warehouse, Home',
   'Adresses des demandes en attente': 'Addresses of the pending requests',
   /* ⚠ Les deux raccourcis des lignes de lieu et d entrepot : « Entrée » et
      « Échap » sont les NOMS des touches, et ils changent de nom en anglais. */
