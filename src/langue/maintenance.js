@@ -37,6 +37,11 @@ module.exports = {
   'Aucune session ouverte dans l’application.': 'No session open in the application.',
   'Le serveur refuse : cette action est réservée au super-administrateur.':
     'The server refuses: this action is for the super administrator only.',
+  /* ⚠ Meme 403, autre cause — voir le commentaire jumeau dans presence.js. */
+  'Votre rôle a changé depuis votre connexion : vous n’êtes plus super-administrateur.':
+    'Your role has changed since you signed in: you are no longer a super administrator.',
+  'Reconnectez-vous pour voir vos droits actuels.':
+    'Sign in again to see your current permissions.',
   'Le serveur ne reconnaît plus cette session — reconnectez-vous.':
     'The server no longer recognises this session — sign in again.',
   'La base de données n’a pas répondu.': 'The database did not answer.',

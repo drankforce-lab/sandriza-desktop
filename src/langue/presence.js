@@ -44,6 +44,13 @@ module.exports = {
     '(If you are one, this window’s administration is older than the site.)',
   'Le serveur refuse : cette action est réservée au super-administrateur.':
     'The server refuses: this action is for the super administrator only.',
+  /* ⚠ L AUTRE CAUSE DU MEME 403 : le role a change DEPUIS la connexion. La
+     phrase dit CE QUI A CHANGE et CE QU IL FAUT FAIRE — les deux, parce que
+     « vous n avez pas le droit » enverrait chercher une erreur de clic. */
+  'Votre rôle a changé depuis votre connexion : vous n’êtes plus super-administrateur.':
+    'Your role has changed since you signed in: you are no longer a super administrator.',
+  'Reconnectez-vous pour voir vos droits actuels.':
+    'Sign in again to see your current permissions.',
   'Le serveur ne reconnaît plus cette session — reconnectez-vous.':
     'The server no longer recognises this session — sign in again.',
   'La base de données n’a pas répondu.': 'The database did not answer.',

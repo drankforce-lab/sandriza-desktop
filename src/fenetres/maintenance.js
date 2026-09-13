@@ -145,6 +145,11 @@ function pageMaintenance() {
   var MOTIFS = {
     session:            '${T("Aucune session ouverte dans l’application.")}',
     superadmin_required:'${T("Le serveur refuse : cette action est réservée au super-administrateur.")}',
+    /* ⚠ Meme 403, autre cause : le role a change DEPUIS la connexion. Voir le
+       commentaire jumeau dans presence.js — celle-la se corrige en se
+       reconnectant, pas en cherchant ce qu on a mal clique. */
+    role_perime:        '${T("Votre rôle a changé depuis votre connexion : vous n’êtes plus super-administrateur.")} '
+                        + '${T("Reconnectez-vous pour voir vos droits actuels.")}',
     session_serveur:    '${T("Le serveur ne reconnaît plus cette session — reconnectez-vous.")}',
     indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
