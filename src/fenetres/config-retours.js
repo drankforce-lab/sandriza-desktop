@@ -18,6 +18,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais l adresse de renvoi, qui
+   est IMPRIMEE sur l etiquette (voir src/langue/config-retours.js). */
+const T = require('../langue').tr('config-retours');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -71,13 +76,13 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 
 function pageConfigRetours() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Configuration des retours — Administration Sandriza</title>
+<title>${T("Configuration des retours — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.returns}</span><h1>Configuration des retours</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les réglages, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.returns}</span><h1>${T("Configuration des retours")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les réglages, pas les modifier.")}</div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-save" disabled>Enregistrer</button></div>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -98,12 +103,12 @@ function pageConfigRetours() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -117,19 +122,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : les retours ne peuvent pas être modifiés.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : les retours ne peuvent pas être modifiés.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -161,27 +166,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     if (!d.configuree) {
       h.push('<div class="carte" style="grid-column:1/-1;border-color:rgba(240,180,80,.35);background:rgba(200,140,40,.08)">'
-        + '<div style="font-size:.82rem;color:var(--tx-or2)"><span class="ic">⚠</span> Adresse de retour non configurée — renseignez-la pour pouvoir guider les clients qui renvoient un colis.</div></div>');
+        + '<div style="font-size:.82rem;color:var(--tx-or2)"><span class="ic">⚠</span>${T(" Adresse de retour non configurée — renseignez-la pour pouvoir guider les clients qui renvoient un colis.")}</div></div>');
     }
 
-    h.push('<div class="carte"><h2>Fenêtre de retour</h2>'
-      + '<p class="sous">Compté à partir de la réception de la commande. Doit être un nombre pair.</p>'
-      + '<div class="ch"><label for="f-days">Nombre de jours autorisés pour un retour</label>'
+    h.push('<div class="carte"><h2>${T("Fenêtre de retour")}</h2>'
+      + '<p class="sous">${T("Compté à partir de la réception de la commande. Doit être un nombre pair.")}</p>'
+      + '<div class="ch"><label for="f-days">${T("Nombre de jours autorisés pour un retour")}</label>'
       + '<input id="f-days" type="number" min="2" max="364" step="2" value="' + esc(d.windowDays == null ? '' : d.windowDays) + '"' + dis + '>'
-      + '<div class="aide">La <strong>moitié</strong> (<span id="half">' + esc(half) + '</span> jours) permet le remboursement au moyen d’origine ; au-delà, crédit boutique.</div></div>'
+      + '<div class="aide">${T("La <strong>moitié</strong> (")}<span id="half">' + esc(half) + '</span>${T(" jours) permet le remboursement au moyen d’origine ; au-delà, crédit boutique.")}</div></div>'
       + '<div class="ch" style="margin-top:.85rem"><label class="bascule"><input type="checkbox" id="f-split"' + (d.splitRefundEnabled ? ' checked' : '') + dis + '>'
-      + '<span><strong>Remboursement partiel en crédit boutique</strong>'
-      + '<span class="d">Durant la première moitié : remboursement au moyen d’origine OU crédit boutique, au choix du client. Ensuite : crédit boutique uniquement. S’affiche dans la politique, les factures, le courriel et le portail client.</span></span></label></div></div>');
+      + '<span><strong>${T("Remboursement partiel en crédit boutique")}</strong>'
+      + '<span class="d">${T("Durant la première moitié : remboursement au moyen d’origine OU crédit boutique, au choix du client. Ensuite : crédit boutique uniquement. S’affiche dans la politique, les factures, le courriel et le portail client.")}</span></span></label></div></div>');
 
-    h.push('<div class="carte"><h2>Adresse de renvoi</h2>'
-      + '<p class="sous">L’adresse imprimée sur l’étiquette de retour et citée aux clients.</p>'
+    h.push('<div class="carte"><h2>${T("Adresse de renvoi")}</h2>'
+      + '<p class="sous">${T("L’adresse imprimée sur l’étiquette de retour et citée aux clients.")}</p>'
       + '<div class="gr">'
-      + '<div class="ch plein"><label for="f-name">Nom de l’entreprise</label><input type="text" id="f-name" value="' + esc(d.name) + '"' + dis + '></div>'
-      + '<div class="ch plein"><label for="f-street">Rue</label><input type="text" id="f-street" value="' + esc(d.street) + '"' + dis + '></div>'
-      + '<div class="ch"><label for="f-city">Ville</label><input type="text" id="f-city" value="' + esc(d.city) + '"' + dis + '></div>'
-      + '<div class="ch"><label for="f-province">Province</label><input type="text" id="f-province" value="' + esc(d.province) + '"' + dis + '></div>'
-      + '<div class="ch"><label for="f-postal">Code postal</label><input type="text" id="f-postal" value="' + esc(d.postal) + '"' + dis + '></div>'
-      + '<div class="ch"><label for="f-country">Pays</label><input type="text" id="f-country" value="' + esc(d.country) + '"' + dis + '></div>'
+      + '<div class="ch plein"><label for="f-name">${T("Nom de l’entreprise")}</label><input type="text" id="f-name" value="' + esc(d.name) + '"' + dis + '></div>'
+      + '<div class="ch plein"><label for="f-street">${T("Rue")}</label><input type="text" id="f-street" value="' + esc(d.street) + '"' + dis + '></div>'
+      + '<div class="ch"><label for="f-city">${T("Ville")}</label><input type="text" id="f-city" value="' + esc(d.city) + '"' + dis + '></div>'
+      + '<div class="ch"><label for="f-province">${T("Province")}</label><input type="text" id="f-province" value="' + esc(d.province) + '"' + dis + '></div>'
+      + '<div class="ch"><label for="f-postal">${T("Code postal")}</label><input type="text" id="f-postal" value="' + esc(d.postal) + '"' + dis + '></div>'
+      + '<div class="ch"><label for="f-country">${T("Pays")}</label><input type="text" id="f-country" value="' + esc(d.country) + '"' + dis + '></div>'
       + '</div></div>');
 
     corps.innerHTML = h.join('');
@@ -194,7 +199,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RO || OCCUPE) return;
     var chk = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
     var val = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-    OCCUPE = true; bsave.disabled = true; dire('Enregistrement…');
+    OCCUPE = true; bsave.disabled = true; dire('${T("Enregistrement…")}');
     appeler('config:retours:ecrire', [{
       windowDays: val('f-days'), splitRefundEnabled: chk('f-split'),
       name: val('f-name'), street: val('f-street'), city: val('f-city'),
@@ -202,14 +207,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (r && r.ok) {
         D = r; RO = !r.peutModifier; dessiner();
-        dire(r.ajuste ? 'Enregistré — jours ajustés au pair supérieur (' + r.windowDays + ').' : 'Retours enregistrés.', 'bon');
+        dire(r.ajuste ? '${T("Enregistré — jours ajustés au pair supérieur (")}' + r.windowDays + ').' : '${T("Retours enregistrés.")}', 'bon');
       } else { bsave.disabled = RO; dire(expliquer(r), 'err'); }
     });
   }
   bsave.onclick = enregistrer;
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:retours:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

@@ -22,6 +22,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit — jamais une requete, qui est le
+   mot tape par une cliente (voir src/langue/recherches.js). */
+const T = require('../langue').tr('recherches');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -81,11 +86,11 @@ tbody tr:hover td{background:var(--v04)}
 /** Page complète de la fenêtre native « Recherches sans résultat ». */
 function pageRecherches() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Recherches sans résultat — Administration Sandriza</title>
+<title>${T("Recherches sans résultat — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.loupe}</span><h1>Recherches sans résultat</h1>
+<div class="tete"><span class="ico">${ICO.loupe}</span><h1>${T("Recherches sans résultat")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -108,17 +113,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à ces statistiques.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à ces statistiques.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -142,44 +147,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
     if (sous) sous.textContent = '30 derniers jours';
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Requêtes distinctes</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Requêtes distinctes")}</div><div class="val">'
       + (D.recentes || []).length + '</div><div class="sub">30 derniers jours</div></div>'
-      + '<div class="tuile"><div class="lbl">Recherches en tout</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Recherches en tout")}</div><div class="val">'
       + (D.total || 0) + '</div><div class="sub">toutes occurrences</div></div>'
       + '<div class="tuile"><div class="lbl">Archive</div><div class="val">'
       + (D.archive || []).length + '</div><div class="sub">'
-      + (D.etendue ? esc(D.etendue) : 'aucun mois archivé') + '</div></div>'
+      + (D.etendue ? esc(D.etendue) : '${T("aucun mois archivé")}') + '</div></div>'
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input aria-label="Chercher dans la liste" type="search" id="rs-q" placeholder="Chercher dans la liste…" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Chercher dans la liste")}" type="search" id="rs-q" placeholder="${T("Chercher dans la liste…")}" value="' + esc(Q) + '">'
       + '<div class="droite">'
-      + '<button class="mini" id="rs-vers-journaux" title="Voir ce journal dans le module Journaux"><span class="ic">🔎</span> Dans Journaux</button>'
+      + '<button class="mini" id="rs-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}"><span class="ic">🔎</span>${T(" Dans Journaux")}</button>'
       + (D.peutModifier && (D.recentes || []).length
           ? '<button class="mini danger" id="rs-vider">'
-            + (ARME ? 'Confirmer ?' : 'Vider le détail') + '</button>' : '')
-      + '<span>' + rows.length + ' requête' + (rows.length > 1 ? 's' : '') + '</span>'
+            + (ARME ? '${T("Confirmer ?")}' : '${T("Vider le détail")}') + '</button>' : '')
+      + '<span>' + rows.length + (rows.length > 1 ? '${T(" requêtes")}' : '${T(" requête")}') + '</span>'
       + '</div></div>';
 
-    h += '<div class="carte"><h2>Ce qu’on a cherché sans trouver</h2>';
+    h += '<div class="carte"><h2>${T("Ce qu’on a cherché sans trouver")}</h2>';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q ? 'Rien ne correspond.'
-        : 'Aucune recherche infructueuse dans les 30 derniers jours.') + '</div>';
+      h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
+        : '${T("Aucune recherche infructueuse dans les 30 derniers jours.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>Recherche</th><th class="num">Fois</th>'
-        + '<th>Dernière</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Recherche")}</th><th class="num">${T("Fois")}</th>'
+        + '<th>${T("Dernière")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(x){
             return '<tr><td>' + esc(x.q) + '</td>'
               + '<td class="num">' + x.fois + '</td>'
               + '<td class="dt">' + esc(x.derniere || '—') + '</td>'
               + (D.peutModifier
                   ? '<td class="fin"><button class="mini danger" data-retirer="' + esc(x.q)
-                    + '" title="Traitée — retirer de la liste">&#10005;</button></td>'
+                    + '" title="${T("Traitée — retirer de la liste")}">&#10005;</button></td>'
                   : '') + '</tr>';
           }).join('')
         + '</tbody></table>';
@@ -188,11 +193,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     /* L ARCHIVE : la seule serie qui dise ce qui REVIENT, saison apres saison.
        Une requete vue une fois n y pese rien ; une demande recurrente ressort. */
-    h += '<div class="carte"><h2>Ce qui revient le plus'
-      + (D.etendue ? ' <span class="dt">· archive conservée 5 ans · ' + esc(D.etendue) + '</span>' : '')
+    h += '<div class="carte"><h2>${T("Ce qui revient le plus")}'
+      + (D.etendue ? ' <span class="dt">${T("· archive conservée 5 ans ·")} ' + esc(D.etendue) + '</span>' : '')
       + '</h2>';
     if (!(D.archive || []).length) {
-      h += '<div class="vide">L’archive se remplira au fil des mois.</div>';
+      h += '<div class="vide">${T("L’archive se remplira au fil des mois.")}</div>';
     } else {
       h += '<div>' + D.archive.map(function(a){
         return '<span class="mot">' + esc(a.q) + '<strong>' + a.fois + '</strong></span>';
@@ -212,14 +217,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (bv) bv.onclick = function(){
       if (!ARME) {
         ARME = true; dessiner();
-        dire('Cliquez « Confirmer ? » — seul le détail des 30 jours est effacé ; l’archive reste, '
-          + 'et ce qui reviendra sera réenregistré.', 'att');
+        /* Une phrase ENTIERE dans un seul litteral : coupee en deux, elle se
+           traduirait en deux morceaux qui ne se recollent pas. */
+        dire('${T("Cliquez « Confirmer ? » — seul le détail des 30 jours est effacé ; l’archive reste, et ce qui reviendra sera réenregistré.")}', 'att');
         return;
       }
       ARME = false;
       appeler('recherches:vider', []).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(r.efface + ' requête' + (r.efface > 1 ? 's effacées' : ' effacée') + ' du détail.', 'bon');
+        /* Deux formes ENTIERES : un fragment recolle ne se traduit pas. */
+        dire(r.efface + (r.efface > 1 ? '${T(" requêtes effacées du détail.")}'
+                                      : '${T(" requête effacée du détail.")}'), 'bon');
         charger();
       });
     };
@@ -245,7 +253,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       br.disabled = true;
       appeler('recherches:retirer', [br.getAttribute('data-retirer')]).then(function(r){
         if (!r.ok) { br.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('« ' + (r.q || '') + ' » retirée de la liste.', 'bon');
+        dire('« ' + (r.q || '') + '${T(" » retirée de la liste.")}', 'bon');
         charger();
       });
       return;
@@ -259,7 +267,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function charger(){
     appeler('recherches:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Recherches indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Recherches indisponibles")}', expliquer(r)); return; }
       D = r;
       dessiner();
     });
@@ -288,12 +296,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

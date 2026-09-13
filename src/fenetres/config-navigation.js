@@ -19,6 +19,12 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit ICI — jamais l etiquette ni le
+   lien d un element, qui sont ECRITS DANS LA BOUTIQUE et lus par la cliente
+   (voir src/langue/config-navigation.js). */
+const T = require('../langue').tr('config-navigation');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -87,16 +93,16 @@ button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-sur-ac
 
 function pageConfigNavigation() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Configuration de la navigation — Administration Sandriza</title>
+<title>${T("Configuration de la navigation — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.navmenu}</span><h1>Configuration de la navigation</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter le menu, pas le modifier.</div>
+<div class="tete"><span class="ico">${ICO.navmenu}</span><h1>${T("Configuration de la navigation")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter le menu, pas le modifier.")}</div>
 <div class="barre">
-  <span class="aide"><span class="ic">🔒</span> Les éléments fixes ne se suppriment pas — masquez-les ou ajoutez-leur des sous-menus. « + Ajouter » crée un élément personnalisé.</span>
-  <button class="mini danger" id="b-reset" disabled>Réinitialiser</button>
-  <button class="mini prim" id="b-add" disabled>+ Ajouter un élément</button>
+  <span class="aide"><span class="ic">🔒</span> ${T("Les éléments fixes ne se suppriment pas — masquez-les ou ajoutez-leur des sous-menus. « + Ajouter » crée un élément personnalisé.")}</span>
+  <button class="mini danger" id="b-reset" disabled>${T("Réinitialiser")}</button>
+  <button class="mini prim" id="b-add" disabled>${T("+ Ajouter un élément")}</button>
 </div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -118,16 +124,25 @@ function pageConfigNavigation() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
+  /* ⚠⚠⚠ L ETIQUETTE ET LE LIEN D UN NOUVEL ELEMENT SONT ECRITS DANS LE MENU DU
+     SITE : c est la CLIENTE qui les lit, pas l administration. Les traduire ici
+     poserait un mot anglais dans une boutique francaise, et personne ne saurait
+     d ou il vient. Ce sont des DONNEES, declarees comme telles. */
+  var SZ_DONNEES = {
+    nouveauLibelle: 'Nouveau lien',
+    nouveauLien:    '#shop'
+  };
+
   var corps = document.getElementById('corps');
   var bAdd = document.getElementById('b-add');
   var bReset = document.getElementById('b-reset');
@@ -142,19 +157,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : le menu ne peut pas être modifié.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : le menu ne peut pas être modifié.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -173,10 +188,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     bAdd.disabled = RO || OCCUPE;
     bReset.disabled = RO || OCCUPE;
-    bReset.textContent = RESET ? 'Confirmer ?' : 'Réinitialiser';
+    bReset.textContent = RESET ? '${T("Confirmer ?")}' : '${T("Réinitialiser")}';
     bReset.classList.toggle('arme', !!RESET);
     var l = items();
-    if (!l.length) { corps.innerHTML = '<div class="vide">Aucun élément de menu.</div>'; return; }
+    if (!l.length) { corps.innerHTML = '<div class="vide">${T("Aucun élément de menu.")}</div>'; return; }
     var dis = RO ? ' disabled' : '';
     var h = [];
     for (var i=0;i<l.length;i++) {
@@ -190,17 +205,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         /* ⚠ Le second texte d exemple est un FORMAT (<< #shop ou https://… >>),
            pas une description : repris tel quel il aurait donne un nom absurde.
            Les deux noms disent de quelle entree de menu il s agit. */
-        h.push('<input class="lab" data-field="label" data-id="' + esc(it.id) + '" aria-label="' + esc('Étiquette du menu — ' + (it.label || it.id)) + '" value="' + esc(it.label) + '" placeholder="Étiquette"' + dis + '>');
-        h.push('<input class="href" data-field="href" data-id="' + esc(it.id) + '" aria-label="' + esc('Lien du menu — ' + (it.label || it.id)) + '" value="' + esc(it.href) + '" placeholder="#shop ou https://…"' + dis + '>');
+        h.push('<input class="lab" data-field="label" data-id="' + esc(it.id) + '" aria-label="' + esc('${T("Étiquette du menu — ")}' + (it.label || it.id)) + '" value="' + esc(it.label) + '" placeholder="${T("Étiquette")}"' + dis + '>');
+        h.push('<input class="href" data-field="href" data-id="' + esc(it.id) + '" aria-label="' + esc('${T("Lien du menu — ")}' + (it.label || it.id)) + '" value="' + esc(it.href) + '" placeholder="#shop ou https://…"' + dis + '>');
       }
       h.push('</div><div class="gestes">');
-      h.push('<button class="mini" data-act="up" data-id="' + esc(it.id) + '" title="Monter"' + (i===0||RO?' disabled':'') + '>↑</button>');
-      h.push('<button class="mini" data-act="down" data-id="' + esc(it.id) + '" title="Descendre"' + (i===l.length-1||RO?' disabled':'') + '>↓</button>');
+      h.push('<button class="mini" data-act="up" data-id="' + esc(it.id) + '" title="${T("Monter")}"' + (i===0||RO?' disabled':'') + '>↑</button>');
+      h.push('<button class="mini" data-act="down" data-id="' + esc(it.id) + '" title="${T("Descendre")}"' + (i===l.length-1||RO?' disabled':'') + '>↓</button>');
       h.push('<button class="mini" data-act="toggle" data-id="' + esc(it.id) + '" title="' + (masque?'Afficher':'Masquer') + '"' + dis + '>' + (masque?'<span class="ic">🙈</span>':'<span class="ic">👁</span>') + '</button>');
-      h.push('<button class="mini" data-act="form" data-id="' + esc(it.id) + '"' + dis + '>+ Sous-menu</button>');
+      h.push('<button class="mini" data-act="form" data-id="' + esc(it.id) + '"' + dis + '>${T("+ Sous-menu")}</button>');
       if (!it.fixed) {
         var arme = (SUPPR === it.id);
-        h.push('<button class="mini danger' + (arme?' arme':'') + '" data-act="del" data-id="' + esc(it.id) + '"' + dis + '>' + (arme?'Confirmer ?':'<span class="ic">🗑</span>') + '</button>');
+        h.push('<button class="mini danger' + (arme?' arme':'') + '" data-act="del" data-id="' + esc(it.id) + '"' + dis + '>' + (arme?'${T("Confirmer ?")}':'<span class="ic">🗑</span>') + '</button>');
       }
       h.push('</div></div>');
       // sous-menu existant
@@ -234,15 +249,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cols = (D.collections || []);
     var s = '<div class="form" data-form="' + esc(id) + '">';
     s += '<div class="ch"><label>Type</label><select aria-label="Type" data-typesel="' + esc(id) + '">'
-       + '<option value="custom">Lien personnalisé</option>'
-       + '<option value="category">Catégorie</option>'
+       + '<option value="custom">${T("Lien personnalisé")}</option>'
+       + '<option value="category">${T("Catégorie")}</option>'
        + (cols.length ? '<option value="collection">Collection</option>' : '')
        + '</select></div>';
-    s += '<div class="ch" data-grp="label"><label>Étiquette</label>'
-       + '<input aria-label="Étiquette" data-role="label" placeholder="Nom affiché" style="width:10rem"></div>';
-    s += '<div class="ch" data-grp="href"><label>Lien</label>'
-       + '<input aria-label="Lien" data-role="href" placeholder="#shop?cat=robes" style="width:12rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem"></div>';
-    s += '<div class="ch" data-grp="cat" style="display:none"><label>Catégorie</label><select aria-label="Catégorie" data-role="cat">'
+    s += '<div class="ch" data-grp="label"><label>${T("Étiquette")}</label>'
+       + '<input aria-label="${T("Étiquette")}" data-role="label" placeholder="${T("Nom affiché")}" style="width:10rem"></div>';
+    s += '<div class="ch" data-grp="href"><label>${T("Lien")}</label>'
+       + '<input aria-label="${T("Lien")}" data-role="href" placeholder="#shop?cat=robes" style="width:12rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem"></div>';
+    s += '<div class="ch" data-grp="cat" style="display:none"><label>${T("Catégorie")}</label><select aria-label="${T("Catégorie")}" data-role="cat">'
        + cats.map(function(c){ return '<option value="' + esc(c.key) + '">' + esc(c.label) + '</option>'; }).join('')
        + '</select></div>';
     if (cols.length) {
@@ -251,7 +266,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          + '</select></div>';
     }
     s += '<button class="mini prim" data-act="addchild" data-id="' + esc(id) + '">Ajouter</button>';
-    s += '<button class="mini" data-act="form" data-id="' + esc(id) + '">Annuler</button>';
+    s += '<button class="mini" data-act="form" data-id="' + esc(id) + '">${T("Annuler")}</button>';
     s += '</div>';
     return s;
   }
@@ -279,13 +294,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ── ECRITURE : on porte TOUT le tableau au coeur, qui applique les regles des fixes.
   function ecrire(redraw){
     if (RO || OCCUPE) return;
-    OCCUPE = true; bAdd.disabled = true; bReset.disabled = true; dire('Enregistrement…');
+    OCCUPE = true; bAdd.disabled = true; bReset.disabled = true; dire('${T("Enregistrement…")}');
     appeler('config:nav:ecrire', [items()]).then(function(r){
       OCCUPE = false;
       if (r && r.ok) {
         D = r; RO = !r.peutModifier;
         if (redraw) dessiner(); else { bAdd.disabled = RO; bReset.disabled = RO; }
-        dire('Enregistré.', 'bon');
+        dire('${T("Enregistré.")}', 'bon');
       } else {
         if (redraw) dessiner(); else { bAdd.disabled = RO; bReset.disabled = RO; }
         dire(expliquer(r), 'err');
@@ -295,10 +310,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function reinit(){
     if (RO || OCCUPE) return;
-    OCCUPE = true; bAdd.disabled = true; bReset.disabled = true; dire('Réinitialisation…');
+    OCCUPE = true; bAdd.disabled = true; bReset.disabled = true; dire('${T("Réinitialisation…")}');
     appeler('config:nav:reinit').then(function(r){
       OCCUPE = false; RESET = false;
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('Navigation réinitialisée.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Navigation réinitialisée.")}', 'bon'); }
       else { dessiner(); dire(expliquer(r), 'err'); }
     });
   }
@@ -328,7 +343,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (prevSuppr === id) {
         D.items = items().filter(function(x){ return x.id !== id; });
         ecrire(true);
-      } else { SUPPR = id; dessiner(); dire('Cliquez « Confirmer ? » pour supprimer cet élément.', 'att'); }
+      } else { SUPPR = id; dessiner(); dire('${T("Cliquez « Confirmer ? » pour supprimer cet élément.")}', 'att'); }
     } else if (act === 'delchild') {
       var cid = b.getAttribute('data-cid');
       if (it) { it.children = (it.children || []).filter(function(c){ return c.id !== cid; }); ecrire(true); }
@@ -356,11 +371,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var type = (form.querySelector('select[data-typesel]') || {}).value || 'custom';
     var lab = (form.querySelector('input[data-role="label"]') || {}).value || '';
     lab = lab.trim();
-    if (!lab) { dire('L’étiquette du sous-menu est requise.', 'err'); return; }
+    if (!lab) { dire('${T("L’étiquette du sous-menu est requise.")}', 'err'); return; }
     var href = '';
     if (type === 'custom') {
       href = ((form.querySelector('input[data-role="href"]') || {}).value || '').trim();
-      if (!href) { dire('Le lien du sous-menu est requis.', 'err'); return; }
+      if (!href) { dire('${T("Le lien du sous-menu est requis.")}', 'err'); return; }
     } else if (type === 'category') {
       href = '#shop?cat=' + ((form.querySelector('select[data-role="cat"]') || {}).value || '');
     } else if (type === 'collection') {
@@ -375,18 +390,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   bAdd.onclick = function(){
     if (RO || OCCUPE) return;
     var nid = 'custom_' + Date.now();
-    items().push({ id: nid, label: 'Nouveau lien', href: '#shop', fixed: false, visible: true, children: [] });
+    items().push({ id: nid, label: SZ_DONNEES.nouveauLibelle, href: SZ_DONNEES.nouveauLien,
+      fixed: false, visible: true, children: [] });
     FOCUS_ID = nid;
     ecrire(true);
   };
   bReset.onclick = function(){
     if (RO || OCCUPE) return;
     if (RESET) { reinit(); }
-    else { RESET = true; dessiner(); dire('Cliquez « Confirmer ? » : le menu reprend sa composition d’origine, vos ajouts sont perdus.', 'att'); }
+    else { RESET = true; dessiner(); dire('${T("Cliquez « Confirmer ? » : le menu reprend sa composition d’origine, vos ajouts sont perdus.")}', 'att'); }
   };
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:nav:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>';
