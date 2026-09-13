@@ -29,6 +29,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('transferts');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -140,12 +144,12 @@ function pageTransferts(ouverture) {
   const ouv = (String(ouverture || '') === 'histo') ? 'histo'
             : (String(ouverture || '') === 'neuf') ? 'neuf' : 'transit';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Transferts de stock — Administration Sandriza</title>
+<title>${T("Transferts de stock — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.shipping}</span><h1>Transferts de stock</h1>
+<div class="tete"><span class="ico">${ICO.shipping}</span><h1>${T("Transferts de stock")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -169,7 +173,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function plur(n){ return n > 1 ? 's' : ''; }
   function dateCourte(iso){
     if (!iso) return '';
     try { var d = new Date(iso);
@@ -178,28 +181,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès à l’inventaire.',
-    indisponible:'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    introuvable:'Ce transfert n’existe plus.',
-    produit_disparu:'La fiche produit n’existe plus — le stock ne peut pas être remis.',
-    deja_clos:'Ce transfert est déjà clos.',
-    sans_stock:'Cette variante n’a plus de stock à envoyer.',
-    sans_origine:'Cette variante n’a pas d’emplacement : on ne saurait pas d’où elle part.',
-    destination_inconnue:'Choisissez un entrepôt de destination.',
-    meme_entrepot:'L’origine et la destination sont le même entrepôt.',
-    deja_en_transit:'Un transfert est déjà en cours pour cette variante.',
-    quantite_invalide:'Saisissez une quantité reçue valide.',
-    verrou:'La fiche produit est ouverte par un collègue — réessayez dans un moment.',
-    grille_incomplete:'La fiche produit a changé (tailles ou couleurs). Rouvrez cet écran.',
-    echec:'L’opération a échoué.',
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès à l’inventaire.")}',
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    introuvable:'${T("Ce transfert n’existe plus.")}',
+    produit_disparu:'${T("La fiche produit n’existe plus — le stock ne peut pas être remis.")}',
+    deja_clos:'${T("Ce transfert est déjà clos.")}',
+    sans_stock:'${T("Cette variante n’a plus de stock à envoyer.")}',
+    sans_origine:'${T("Cette variante n’a pas d’emplacement : on ne saurait pas d’où elle part.")}',
+    destination_inconnue:'${T("Choisissez un entrepôt de destination.")}',
+    meme_entrepot:'${T("L’origine et la destination sont le même entrepôt.")}',
+    deja_en_transit:'${T("Un transfert est déjà en cours pour cette variante.")}',
+    quantite_invalide:'${T("Saisissez une quantité reçue valide.")}',
+    verrou:'${T("La fiche produit est ouverte par un collègue — réessayez dans un moment.")}',
+    grille_incomplete:'${T("La fiche produit a changé (tailles ou couleurs). Rouvrez cet écran.")}',
+    echec:'${T("L’opération a échoué.")}',
   };
   function expliquer(r){
-    if (!r) return 'Aucune réponse de la fenêtre principale.';
+    if (!r) return '${T("Aucune réponse de la fenêtre principale.")}';
     if (r.detail) return String(r.detail);
-    if (r.motif === 'plus_que_parti') return 'Vous ne pouvez pas recevoir plus que les ' + r.parti + ' unité' + plur(r.parti) + ' parties.';
-    if (r.motif === 'ecart_sans_motif') return 'Il manque ' + r.ecart + ' unité' + plur(r.ecart) + ' : dites pourquoi avant d’enregistrer.';
-    return MOTIFS[r.motif] || ('Erreur inattendue (' + esc(r.motif || '?') + ').');
+    /* ⚠ LE SINGULIER ET LE PLURIEL, CHACUN ENTIER. << unité >> + << s >> ne
+       laissait au poseur qu un morceau — le meme dans sept phrases d ici. */
+    if (r.motif === 'plus_que_parti') return '${T("Vous ne pouvez pas recevoir plus que les ")}' + r.parti
+      + (r.parti > 1 ? '${T(" unités parties.")}' : '${T(" unité partie.")}');
+    if (r.motif === 'ecart_sans_motif') return '${T("Il manque ")}' + r.ecart
+      + (r.ecart > 1 ? '${T(" unités : dites pourquoi avant d’enregistrer.")}' : '${T(" unité : dites pourquoi avant d’enregistrer.")}');
+    return MOTIFS[r.motif] || ('${T("Erreur inattendue (")}' + esc(r.motif || '?') + ').');
   }
 
   function appeler(op, args){
@@ -228,14 +235,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!D) return;
     var nT = enTransit().length;
     ongletsEl.innerHTML =
-        '<button data-tab="transit" class="' + (TAB==='transit'?'actif':'') + '">En transit'
+        '<button data-tab="transit" class="' + (TAB==='transit'?'actif':'') + '">${T("En transit")}'
       +   (nT ? '<span class="pastille">' + nT + '</span>' : '') + '</button>'
-      + '<button data-tab="histo" class="' + (TAB==='histo'?'actif':'') + '">Historique</button>'
-      + (D.peutEcrire ? '<button data-tab="neuf" class="' + (TAB==='neuf'?'actif':'') + '">Nouveau transfert</button>' : '');
+      + '<button data-tab="histo" class="' + (TAB==='histo'?'actif':'') + '">${T("Historique")}</button>'
+      + (D.peutEcrire ? '<button data-tab="neuf" class="' + (TAB==='neuf'?'actif':'') + '">${T("Nouveau transfert")}</button>' : '');
 
     var ecarts = clos().reduce(function(s,t){ return s + (t.ecart || 0); }, 0);
-    sousEl.textContent = nT + ' en transit'
-      + (ecarts ? '  ·  ' + ecarts + ' unité' + plur(ecarts) + ' d’écart cumulé' : '');
+    sousEl.textContent = nT + '${T(" en transit")}'
+      + (ecarts ? '  ·  ' + ecarts + (ecarts > 1 ? '${T(" unités d’écart cumulé")}' : '${T(" unité d’écart cumulé")}') : '');
 
     if (TAB === 'transit') corps.innerHTML = vueTransit();
     else if (TAB === 'histo') corps.innerHTML = vueHisto();
@@ -264,16 +271,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueTransit(){
     var l = enTransit();
     if (!l.length) {
-      return '<div class="vide">Aucun transfert en cours.'
-        + (D.peutEcrire ? '<br><span class="dt">Onglet <strong>Nouveau transfert</strong> pour en lancer un.</span>' : '')
+      return '<div class="vide">${T("Aucun transfert en cours.")}'
+        + (D.peutEcrire ? '<br><span class="dt">${T("Onglet <strong>Nouveau transfert</strong> pour en lancer un.")}</span>' : '')
         + '</div>';
     }
     /* ⚠ L AVIS EST EN HAUT, PAS DANS UNE INFOBULLE. Pendant le trajet, l article
        est EPUISE sur la boutique : c est exact (il est dans un camion), mais
        quelqu un qui l ignore croira a un defaut. On le dit avant, pas apres. */
-    return '<div class="avis jaune">Les unités en transit sont <strong>retirées du stock vendable</strong> : '
-      + 'l’article s’affiche épuisé sur la boutique le temps du trajet, et les clients inscrits à l’alerte '
-      + '« de retour en stock » sont prévenus à la réception.</div>'
+    return '<div class="avis jaune">${T("Les unités en transit sont <strong>retirées du stock vendable</strong> : ")}'
+      + '${T("l’article s’affiche épuisé sur la boutique le temps du trajet, et les clients inscrits à l’alerte ")}'
+      + '${T("« de retour en stock » sont prévenus à la réception.")}</div>'
       + l.map(carteTransit).join('');
   }
 
@@ -285,14 +292,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   '<span><span class="nom">' + esc(t.nom) + '</span> · ' + esc(t.cle) + '<br>'
       +     '<span class="sku">' + esc(t.sku) + '</span></span>'
       +   trajet(t)
-      +   '<span class="pill transit">en transit</span>'
+      +   '<span class="pill transit">${T("en transit")}</span>'
       +   '<span style="margin-left:auto;display:flex;gap:.4rem">'
-      +     (D.peutEcrire ? '<button class="prim mini" data-rec="' + t.id + '">' + (ouvert ? 'Fermer' : '✓ Recevoir') + '</button>' : '')
-      +     (D.peutEcrire ? '<button class="mini danger" data-ann="' + t.id + '">Annuler</button>' : '')
+      +     (D.peutEcrire ? '<button class="prim mini" data-rec="' + t.id + '">' + (ouvert ? 'Fermer' : '${T("✓ Recevoir")}') + '</button>' : '')
+      +     (D.peutEcrire ? '<button class="mini danger" data-ann="' + t.id + '">${T("Annuler")}</button>' : '')
       +   '</span>'
       + '</div>'
-      + '<div class="dt" style="margin-top:.3rem">Parti le ' + esc(dateCourte(t.partiLe))
-      +   (t.partiPar ? ' par ' + esc(t.partiPar) : '') + (t.note ? ' — ' + esc(t.note) : '') + '</div>'
+      + '<div class="dt" style="margin-top:.3rem">${T("Parti le ")}' + esc(dateCourte(t.partiLe))
+      +   (t.partiPar ? '${T(" par ")}' + esc(t.partiPar) : '') + (t.note ? ' — ' + esc(t.note) : '') + '</div>'
       + (ouvert ? voletRecevoir(t) : '')
       + '</div>';
   }
@@ -303,38 +310,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function voletRecevoir(t){
     return '<div class="recevoir">'
       + '<div class="rangee">'
-      +   '<label for="rq-' + t.id + '">Quantité réellement reçue</label>'
+      +   '<label for="rq-' + t.id + '">${T("Quantité réellement reçue")}</label>'
       +   '<input type="number" id="rq-' + t.id + '" min="0" max="' + t.quantite + '" value="' + t.quantite + '" data-qte="' + t.id + '">'
-      +   '<span class="dt">sur ' + t.quantite + ' partie' + plur(t.quantite) + '</span>'
+      +   '<span class="dt">${T("sur ")}' + t.quantite + (t.quantite > 1 ? '${T(" parties")}' : '${T(" partie")}') + '</span>'
       + '</div>'
       + '<div class="rangee" id="rm-' + t.id + '" style="display:none">'
-      +   '<label for="rmo-' + t.id + '">Motif de l’écart</label>'
-      +   '<select id="rmo-' + t.id + '"><option value="">— choisir —</option>'
+      +   '<label for="rmo-' + t.id + '">${T("Motif de l’écart")}</label>'
+      +   '<select id="rmo-' + t.id + '"><option value="">${T("— choisir —")}</option>'
       +     (D.motifs || []).map(function(m){ return '<option value="' + esc(m.v) + '">' + esc(m.l) + '</option>'; }).join('')
       +   '</select>'
-      +   '<input aria-label="Note (facultative)" type="text" id="rn-' + t.id + '" placeholder="Note (facultative)" style="flex:1;min-width:12rem">'
+      +   '<input aria-label="${T("Note (facultative)")}" type="text" id="rn-' + t.id + '" placeholder="${T("Note (facultative)")}" style="flex:1;min-width:12rem">'
       + '</div>'
       + '<div class="rangee" id="rw-' + t.id + '" style="display:none">'
-      +   '<div class="avis jaune" style="flex:1">Il manque <strong id="re-' + t.id + '">0</strong> unité(s). '
-      +     'Ce manque sera <strong>inscrit au journal</strong> avec son motif — il ne disparaît pas de l’inventaire tout seul.</div>'
+      +   '<div class="avis jaune" style="flex:1">${T("Il manque ")}<strong id="re-' + t.id + '">0</strong>${T(" unité(s). ")}'
+      +     '${T("Ce manque sera <strong>inscrit au journal</strong> avec son motif — il ne disparaît pas de l’inventaire tout seul.")}</div>'
       + '</div>'
       + '<div class="rangee">'
-      +   '<button class="prim" data-recok="' + t.id + '"' + (BUSY ? ' disabled' : '') + '>Enregistrer la réception</button>'
+      +   '<button class="prim" data-recok="' + t.id + '"' + (BUSY ? ' disabled' : '') + '>${T("Enregistrer la réception")}</button>'
       + '</div>'
       + '</div>';
   }
 
   function vueHisto(){
     var l = clos();
-    if (!l.length) return '<div class="vide">Aucun transfert terminé.</div>';
+    if (!l.length) return '<div class="vide">${T("Aucun transfert terminé.")}</div>';
     /* ⚠ L ORDRE DES COLONNES A CHANGE (sa capture du 2026-08-22) : l ETAT vient
        juste apres le trajet, et les trois CHIFFRES sont cote a cote a la fin.
        Parti / recu / ecart se lisent ENSEMBLE ou ne se lisent pas — separes par
        un motif et un etat, l oeil doit sauter par-dessus pour comparer. */
     return '<div class="carte"><table><thead><tr>'
-      + '<th class="art">Article</th><th>Trajet</th><th>État</th>'
-      + '<th class="num">Parti</th><th class="num">Reçu</th><th class="num">Écart</th>'
-      + '<th>Motif</th><th>Le</th>'
+      + '<th class="art">${T("Article")}</th><th>${T("Trajet")}</th><th>${T("État")}</th>'
+      + '<th class="num">${T("Parti")}</th><th class="num">${T("Reçu")}</th><th class="num">${T("Écart")}</th>'
+      + '<th>${T("Motif")}</th><th>${T("Le")}</th>'
       + '</tr></thead><tbody>'
       + l.map(function(t){
           var ec = t.ecart || 0;
@@ -342,7 +349,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td class="art"><span class="nom">' + esc(t.nom) + '</span> · ' + esc(t.cle)
             +   '<br><span class="sku">' + esc(t.sku) + '</span></td>'
             + '<td>' + trajet(t) + '</td>'
-            + '<td><span class="pill ' + esc(t.etat) + '">' + (t.etat === 'recu' ? 'reçu' : 'annulé') + '</span></td>'
+            + '<td><span class="pill ' + esc(t.etat) + '">' + (t.etat === 'recu' ? '${T("reçu")}' : '${T("annulé")}') + '</span></td>'
             + '<td class="num">' + t.quantite + '</td>'
             + '<td class="num">' + (t.quantiteRecue === null ? '—' : t.quantiteRecue) + '</td>'
             + '<td class="num ' + (ec ? 'ecart' : 'ecart0') + '">' + (t.etat === 'annule' ? '—' : (ec ? '−' + ec : '0')) + '</td>'
@@ -357,34 +364,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueNeuf(){
     if (!(D.entrepots || []).length) {
-      return '<div class="vide">Aucun entrepôt n’est configuré.<br>'
-        + '<span class="dt">Créez-en au moins deux dans <strong>Inventaire → Emplacements</strong>.</span></div>';
+      return '<div class="vide">${T("Aucun entrepôt n’est configuré.")}<br>'
+        + '<span class="dt">${T("Créez-en au moins deux dans <strong>Inventaire → Emplacements</strong>.")}</span></div>';
     }
     if ((D.entrepots || []).length < 2) {
-      return '<div class="vide">Un seul entrepôt est configuré.<br>'
-        + '<span class="dt">Un transfert va d’un lieu à un autre : il en faut au moins deux.</span></div>';
+      return '<div class="vide">${T("Un seul entrepôt est configuré.")}<br>'
+        + '<span class="dt">${T("Un transfert va d’un lieu à un autre : il en faut au moins deux.")}</span></div>';
     }
     /* ⚠ CHERCHER PAR NOM SUPPOSE QU ON SAIT LEQUEL ON CHERCHE. Devant les
        etageres, la question est plutot << qu est-ce qui est a la Maison ? >> ou
        << tout ce qui est en Section L >>. D ou les deux filtres, demandes le
        2026-08-22 — ils repondent a la question qu on se pose vraiment. */
-    var haut = '<div class="carte"><h2>Choisir la variante à envoyer</h2>'
+    var haut = '<div class="carte"><h2>${T("Choisir la variante à envoyer")}</h2>'
       + '<div class="ligne">'
-      +   '<select id="f-lieu"><option value="">Tous les lieux</option>'
+      +   '<select id="f-lieu"><option value="">${T("Tous les lieux")}</option>'
       +     (D.lieux || []).map(function(l){
               return '<option value="' + esc(l.id) + '"' + (F_LIEU === l.id ? ' selected' : '') + '>'
                 + esc(l.nom) + '</option>'; }).join('')
-      +     '<option value="_sans"' + (F_LIEU === '_sans' ? ' selected' : '') + '>— sans lieu —</option>'
+      +     '<option value="_sans"' + (F_LIEU === '_sans' ? ' selected' : '') + '>${T("— sans lieu —")}</option>'
       +   '</select>'
-      +   '<input aria-label="Section" type="search" id="f-section" placeholder="Section…" value="' + esc(F_SECTION) + '" style="min-width:9rem">'
-      +   '<input aria-label="Nom, SKU ou taille-couleur" type="search" id="q" placeholder="Nom, SKU ou taille-couleur…" value="' + esc(RECH) + '">'
-      +   '<button class="mini" data-act="chercher">Chercher</button>'
+      +   '<input aria-label="${T("Section")}" type="search" id="f-section" placeholder="${T("Section…")}" value="' + esc(F_SECTION) + '" style="min-width:9rem">'
+      +   '<input aria-label="${T("Nom, SKU ou taille-couleur")}" type="search" id="q" placeholder="${T("Nom, SKU ou taille-couleur…")}" value="' + esc(RECH) + '">'
+      +   '<button class="mini" data-act="chercher">${T("Chercher")}</button>'
       + '</div>'
-      + '<div class="dt" style="margin-top:.4rem">Le transfert emporte <strong>toute</strong> la quantité de la variante.</div></div>';
-    if (!CAND) return haut + '<div class="vide">Lancez une recherche pour voir ce qui peut partir.</div>';
-    if (!CAND.length) return haut + '<div class="vide">Aucune variante avec du stock <em>et</em> un emplacement connu.</div>';
+      + '<div class="dt" style="margin-top:.4rem">${T("Le transfert emporte <strong>toute</strong> la quantité de la variante.")}</div></div>';
+    if (!CAND) return haut + '<div class="vide">${T("Lancez une recherche pour voir ce qui peut partir.")}</div>';
+    if (!CAND.length) return haut + '<div class="vide">${T("Aucune variante avec du stock <em>et</em> un emplacement connu.")}</div>';
     return haut + '<div class="carte"><table><thead><tr>'
-      + '<th>Article</th><th class="num">Qté</th><th>Depuis</th><th>Vers</th><th></th>'
+      + '<th>${T("Article")}</th><th class="num">${T("Qté")}</th><th>${T("Depuis")}</th><th>${T("Vers")}</th><th></th>'
       + '</tr></thead><tbody>'
       + CAND.map(function(c){
           var id = c.productId + '|' + c.cle;
@@ -399,12 +406,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                   ? '<br><span class="dt">' + esc([c.lieuNom, c.section].filter(Boolean).join(' · ')) + '</span>'
                   : '') + '</td>'
             + '<td><select data-vers="' + esc(id) + '"'
-            +   ' aria-label="' + esc('Destination du transfert depuis ' + (c.deNom || '')) + '">'
-            +   '<option value="">— destination —</option>'
+            +   ' aria-label="' + esc('${T("Destination du transfert depuis ")}' + (c.deNom || '')) + '">'
+            +   '<option value="">${T("— destination —")}</option>'
             +   (D.entrepots || []).filter(function(w){ return w.id !== c.de; })
                 .map(function(w){ return '<option value="' + esc(w.id) + '">' + esc(w.code || w.nom) + '</option>'; }).join('')
             + '</select></td>'
-            + '<td class="num"><button class="prim mini" data-part="' + esc(id) + '"' + (BUSY ? ' disabled' : '') + '>Envoyer</button></td>'
+            + '<td class="num"><button class="prim mini" data-part="' + esc(id) + '"' + (BUSY ? ' disabled' : '') + '>${T("Envoyer")}</button></td>'
             + '</tr>';
         }).join('')
       + '</tbody></table></div>';
@@ -418,12 +425,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var fs = document.getElementById('f-section');
     F_LIEU = fl ? fl.value : '';
     F_SECTION = fs ? fs.value : '';
-    dire('Recherche…');
+    dire('${T("Recherche…")}');
     appeler('transfert:candidats', [{ q: RECH, lieuId: F_LIEU, section: F_SECTION }]).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       CAND = r.lignes || [];
       dessiner();
-      dire(CAND.length + ' variante' + plur(CAND.length) + ' peut partir.', CAND.length ? 'bon' : 'att');
+      /* ⚠ Et l accord du verbe suit le nombre — << 3 variantes peut partir >>
+         se lisait ainsi depuis le debut ; la recombinaison l a fait voir. */
+      dire(CAND.length + (CAND.length > 1 ? '${T(" variantes peuvent partir.")}' : '${T(" variante peut partir.")}'),
+        CAND.length ? 'bon' : 'att');
     });
   }
 
@@ -433,14 +443,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var productId = id.slice(0, i), cle = id.slice(i + 1);
     var sel = document.querySelector('[data-vers="' + id.replace(/"/g,'') + '"]');
     var vers = sel ? sel.value : '';
-    if (!vers) { dire('Choisissez d’abord un entrepôt de destination.', 'att'); return; }
+    if (!vers) { dire('${T("Choisissez d’abord un entrepôt de destination.")}', 'att'); return; }
     BUSY = true; dessiner();
-    dire('Envoi en cours…');
+    dire('${T("Envoi en cours…")}');
     appeler('transfert:partir', [{ productId: productId, cle: cle, vers: vers }]).then(function(r){
       BUSY = false;
       if (!r || !r.ok) { dessiner(); dire(expliquer(r), 'err'); return; }
       CAND = null; TAB = 'transit';
-      charger().then(function(){ dire('Transfert lancé — les unités sont en transit.', 'bon'); });
+      charger().then(function(){ dire('${T("Transfert lancé — les unités sont en transit.")}', 'bon'); });
     });
   }
 
@@ -450,7 +460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!t) return;
     var q = document.getElementById('rq-' + id);
     var recue = q ? parseInt(q.value, 10) : NaN;
-    if (!isFinite(recue) || recue < 0) { dire('Saisissez une quantité reçue valide.', 'att'); return; }
+    if (!isFinite(recue) || recue < 0) { dire('${T("Saisissez une quantité reçue valide.")}', 'att'); return; }
     var ecart = t.quantite - recue;
     var mo = document.getElementById('rmo-' + id);
     var no = document.getElementById('rn-' + id);
@@ -459,7 +469,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        refus fait clignoter l ecran sans expliquer OU regarder. Ici on peut poser
        le curseur sur le champ qui manque. */
     if (ecart > 0 && (!mo || !mo.value)) {
-      dire('Il manque ' + ecart + ' unité' + plur(ecart) + ' : choisissez le motif de l’écart.', 'att');
+      dire('${T("Il manque ")}' + ecart
+        + (ecart > 1 ? '${T(" unités : choisissez le motif de l’écart.")}' : '${T(" unité : choisissez le motif de l’écart.")}'), 'att');
       if (mo) mo.focus();
       return;
     }
@@ -473,8 +484,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OUVERT = '';
       charger().then(function(){
         dire(r.ecart
-          ? 'Réception enregistrée — écart de ' + r.ecart + ' unité' + plur(r.ecart) + ', inscrit au journal.'
-          : 'Réception enregistrée — tout est arrivé.', r.ecart ? 'att' : 'bon');
+          ? '${T("Réception enregistrée — écart de ")}' + r.ecart
+            + (r.ecart > 1 ? '${T(" unités, inscrit au journal.")}' : '${T(" unité, inscrit au journal.")}')
+          : '${T("Réception enregistrée — tout est arrivé.")}', r.ecart ? 'att' : 'bon');
       });
     });
   }
@@ -486,7 +498,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       BUSY = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       OUVERT = '';
-      charger().then(function(){ dire('Transfert annulé — le stock est rendu à l’entrepôt d’origine.', 'bon'); });
+      charger().then(function(){ dire('${T("Transfert annulé — le stock est rendu à l’entrepôt d’origine.")}', 'bon'); });
     });
   }
 
@@ -542,12 +554,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

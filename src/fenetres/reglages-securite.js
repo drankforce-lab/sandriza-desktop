@@ -22,6 +22,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('reglages-securite');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -69,11 +73,11 @@ label.case input{width:16px;height:16px;accent-color:#c9a97e}
 
 function pageReglagesSecurite() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Réglages de sécurité — Administration Sandriza</title>
+<title>${T("Réglages de sécurité — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.securite}</span><h1>Réglages de sécurité</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter ces réglages, pas les modifier.</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.securite}</span><h1>${T("Réglages de sécurité")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter ces réglages, pas les modifier.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -84,8 +88,8 @@ function pageReglagesSecurite() {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -98,15 +102,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès aux réglages de sécurité.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès aux réglages de sécurité.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -127,51 +131,51 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var comptes = D.comptes||[];
     var h = '';
 
-    h += '<div class="carte"><div class="entete"><h3><span class="ic">🔑</span> Politique des mots de passe</h3>'
-      + (RO?'':'<button class="prim" id="s-pw">Enregistrer la politique</button>')+'</div>'
-      + '<div class="hint">Ne s’applique pas au super-administrateur.</div>'
+    h += '<div class="carte"><div class="entete"><h3><span class="ic">🔑</span> ${T("Politique des mots de passe")}</h3>'
+      + (RO?'':'<button class="prim" id="s-pw">${T("Enregistrer la politique")}</button>')+'</div>'
+      + '<div class="hint">${T("Ne s’applique pas au super-administrateur.")}</div>'
       + '<div class="cols3">'
-      + '<div><div class="grpH">Expiration</div>'
-      + caseAC('pw-exp-on', 'Activer l’expiration', p.expiryEnabled)
-      + champNum('pw-exp-days', 'Expiration après (jours)', p.expiryDays, 'Ex. : 60 = tous les 2 mois.')
+      + '<div><div class="grpH">${T("Expiration")}</div>'
+      + caseAC('pw-exp-on', '${T("Activer l’expiration")}', p.expiryEnabled)
+      + champNum('pw-exp-days', '${T("Expiration après (jours)")}', p.expiryDays, '${T("Ex. : 60 = tous les 2 mois.")}')
       + '</div>'
-      + '<div><div class="grpH">Complexité</div>'
-      + champNum('pw-min', 'Longueur minimale', p.minLength)
-      + caseAC('pw-up', 'Exiger une majuscule', p.requireUpper)
-      + caseAC('pw-nb', 'Exiger un chiffre', p.requireNumber)
-      + caseAC('pw-sp', 'Exiger un caractère spécial', p.requireSpecial)
-      + champNum('pw-hist', 'Historique (mdp interdits)', p.historyCount, '0 = aucun historique.')
+      + '<div><div class="grpH">${T("Complexité")}</div>'
+      + champNum('pw-min', '${T("Longueur minimale")}', p.minLength)
+      + caseAC('pw-up', '${T("Exiger une majuscule")}', p.requireUpper)
+      + caseAC('pw-nb', '${T("Exiger un chiffre")}', p.requireNumber)
+      + caseAC('pw-sp', '${T("Exiger un caractère spécial")}', p.requireSpecial)
+      + champNum('pw-hist', '${T("Historique (mdp interdits)")}', p.historyCount, '${T("0 = aucun historique.")}')
       + '</div>'
-      + '<div><div class="grpH">Fréquence &amp; verrouillage</div>'
-      + caseAC('pw-rate-on', 'Activer la limite de fréquence', p.changeRateEnabled)
-      + champNum('pw-rate-n', 'Max. de changements…', p.changeRateCount)
-      + champNum('pw-rate-h', '… dans cette fenêtre (heures)', p.changeRateHours)
-      + champNum('pw-lock-h', 'Durée du verrouillage (heures)', p.changeLockHours)
-      + '<label class="champ"><span class="lbl">Notifier (courriel, optionnel)</span>'
-      + '<input class="t" type="email" id="pw-notify" value="'+esc(p.changeLockNotifyEmail||'')+'" placeholder="responsable@exemple.com"'+(RO?' disabled':'')+'></label>'
+      + '<div><div class="grpH">${T("Fréquence &amp; verrouillage")}</div>'
+      + caseAC('pw-rate-on', '${T("Activer la limite de fréquence")}', p.changeRateEnabled)
+      + champNum('pw-rate-n', '${T("Max. de changements…")}', p.changeRateCount)
+      + champNum('pw-rate-h', '${T("… dans cette fenêtre (heures)")}', p.changeRateHours)
+      + champNum('pw-lock-h', '${T("Durée du verrouillage (heures)")}', p.changeLockHours)
+      + '<label class="champ"><span class="lbl">${T("Notifier (courriel, optionnel)")}</span>'
+      + '<input class="t" type="email" id="pw-notify" value="'+esc(p.changeLockNotifyEmail||'')+'" placeholder="${T("responsable@exemple.com")}"'+(RO?' disabled':'')+'></label>'
       + '</div>'
       + '</div></div>';
 
-    h += '<div class="carte"><div class="entete"><h3>⏳ Inactivité &amp; verrouillage de session</h3>'
-      + (RO?'':'<button class="prim" id="s-inact">Enregistrer</button>')+'</div>'
+    h += '<div class="carte"><div class="entete"><h3>${T("⏳ Inactivité &amp; verrouillage de session")}</h3>'
+      + (RO?'':'<button class="prim" id="s-inact">${T("Enregistrer")}</button>')+'</div>'
       + '<div class="cols2">'
-      + '<div><div class="grpH">Portail administration — comptes dormants</div>'
-      + caseAC('in-staff-on', 'Désactiver les comptes inactifs (sauf superadmin)', c.staffEnabled)
-      + champNum('in-staff-d', 'Seuil (jours)', c.staffDays, 'Avertissement 14 jours avant.')
-      + (RO?'':'<button class="b" id="in-staff-run">▶ Vérifier maintenant</button>')
+      + '<div><div class="grpH">${T("Portail administration — comptes dormants")}</div>'
+      + caseAC('in-staff-on', '${T("Désactiver les comptes inactifs (sauf superadmin)")}', c.staffEnabled)
+      + champNum('in-staff-d', '${T("Seuil (jours)")}', c.staffDays, '${T("Avertissement 14 jours avant.")}')
+      + (RO?'':'<button class="b" id="in-staff-run">${T("▶ Vérifier maintenant")}</button>')
       + '</div>'
-      + '<div><div class="grpH">Portail client — comptes dormants</div>'
-      + caseAC('in-cust-on', 'Désactiver les comptes clients inactifs', c.custEnabled)
-      + champNum('in-cust-d', 'Seuil (jours)', c.custDays, 'Avertissement 30 jours avant.')
-      + (RO?'':'<button class="b" id="in-cust-run">▶ Vérifier maintenant</button>')
+      + '<div><div class="grpH">${T("Portail client — comptes dormants")}</div>'
+      + caseAC('in-cust-on', '${T("Désactiver les comptes clients inactifs")}', c.custEnabled)
+      + champNum('in-cust-d', '${T("Seuil (jours)")}', c.custDays, '${T("Avertissement 30 jours avant.")}')
+      + (RO?'':'<button class="b" id="in-cust-run">${T("▶ Vérifier maintenant")}</button>')
       + '</div>'
       + '</div>'
-      + '<div class="grpH" style="margin-top:1rem">Verrouillage de session à l’écran</div>'
+      + '<div class="grpH" style="margin-top:1rem">${T("Verrouillage de session à l’écran")}</div>'
       + ''
       + '<div class="cols3">'
-      + champNum('idle-warn', 'Avertir après (minutes)', c.idleWarnMin||15, 'Défaut : 15.')
-      + champNum('idle-out', 'Décompte avant fermeture (secondes)', c.idleLogoutSec||60, 'Défaut : 60.')
-      + champNum('idle-max', 'Plafond absolu (minutes)', c.idleMaxMin||60, 'Même si un éditeur est ouvert. Défaut : 60.')
+      + champNum('idle-warn', '${T("Avertir après (minutes)")}', c.idleWarnMin||15, '${T("Défaut : 15.")}')
+      + champNum('idle-out', '${T("Décompte avant fermeture (secondes)")}', c.idleLogoutSec||60, '${T("Défaut : 60.")}')
+      + champNum('idle-max', '${T("Plafond absolu (minutes)")}', c.idleMaxMin||60, '${T("Même si un éditeur est ouvert. Défaut : 60.")}')
       + '</div></div>';
 
     var exempts = '';
@@ -181,25 +185,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         exempts += '<label class="case"><input type="checkbox" data-geoex="'+esc(s.id)+'" '+(coche?'checked':'')+(RO?' disabled':'')+'> '
           + esc(s.nom||s.email) + ' <span style="color:var(--tx-gris)">('+esc(s.email)+')</span></label>';
       }
-    } else exempts = '<div class="vide">Aucun compte.</div>';
+    } else exempts = '<div class="vide">${T("Aucun compte.")}</div>';
 
-    h += '<div class="carte"><div class="entete"><h3><span class="ic">🌍</span> Restriction géographique — administration</h3>'
-      + (RO?'':'<button class="prim" id="s-geo">Enregistrer la restriction</button>')+'</div>'
-      + '<div class="hint">N’autorise la connexion au portail d’administration que depuis les pays listés (géolocalisation de l’IP publique). La boutique cliente n’est jamais touchée.</div>'
-      + caseAC('geo-on', 'Activer la restriction géographique', g.enabled)
+    h += '<div class="carte"><div class="entete"><h3><span class="ic">🌍</span> ${T("Restriction géographique — administration")}</h3>'
+      + (RO?'':'<button class="prim" id="s-geo">${T("Enregistrer la restriction")}</button>')+'</div>'
+      + '<div class="hint">${T("N’autorise la connexion au portail d’administration que depuis les pays listés (géolocalisation de l’IP publique). La boutique cliente n’est jamais touchée.")}</div>'
+      + caseAC('geo-on', '${T("Activer la restriction géographique")}', g.enabled)
       + '<div class="cols2" style="margin-top:.6rem">'
       + '<div>'
-      + '<label class="champ"><span class="lbl">Pays autorisés (codes ISO, séparés par des virgules)</span>'
+      + '<label class="champ"><span class="lbl">${T("Pays autorisés (codes ISO, séparés par des virgules)")}</span>'
       + '<input class="t" id="geo-pays" value="'+esc((g.allowedCountries||['CA']).join(', '))+'" placeholder="CA"'+(RO?' disabled':'')+'>'
-      + '<span class="sub">Ex. : CA ou CA, US.</span></label>'
-      + '<label class="champ"><span class="lbl">Adresses IP exclues (une par ligne)</span>'
+      + '<span class="sub">${T("Ex. : CA ou CA, US.")}</span></label>'
+      + '<label class="champ"><span class="lbl">${T("Adresses IP exclues (une par ligne)")}</span>'
       + '<textarea class="t" id="geo-ip" rows="3"'+(RO?' disabled':'')+'>'+esc((g.ipExceptions||[]).join('\\n'))+'</textarea>'
-      + '<span class="sub">Ces IP restent autorisées peu importe le pays.</span></label>'
-      + (RO?'':'<button class="b" id="geo-loc"><span class="ic">🔍</span> Détecter ma localisation actuelle</button>')
+      + '<span class="sub">${T("Ces IP restent autorisées peu importe le pays.")}</span></label>'
+      + (RO?'':'<button class="b" id="geo-loc"><span class="ic">🔍</span> ${T("Détecter ma localisation actuelle")}</button>')
       + '</div>'
-      + '<div><div class="grpH">Comptes exclus de cette restriction</div>'
+      + '<div><div class="grpH">${T("Comptes exclus de cette restriction")}</div>'
       + '<div class="exempts">'+exempts+'</div>'
-      + '<div class="sub" style="margin-top:.4rem;color:var(--tx-gris)">Ces comptes peuvent se connecter depuis n’importe quel pays.</div>'
+      + '<div class="sub" style="margin-top:.4rem;color:var(--tx-gris)">${T("Ces comptes peuvent se connecter depuis n’importe quel pays.")}</div>'
       + '</div>'
       + '</div></div>';
 
@@ -212,13 +216,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     b=document.getElementById('s-pw');    if (b) b.onclick=enrPw;
     b=document.getElementById('s-inact'); if (b) b.onclick=enrInact;
     b=document.getElementById('s-geo');   if (b) b.onclick=enrGeo;
-    b=document.getElementById('in-staff-run'); if (b) b.onclick=function(){ verif('securite:verif:staff','Vérification du personnel…'); };
-    b=document.getElementById('in-cust-run');  if (b) b.onclick=function(){ verif('securite:verif:client','Vérification des clients…'); };
+    b=document.getElementById('in-staff-run'); if (b) b.onclick=function(){ verif('securite:verif:staff','${T("Vérification du personnel…")}'); };
+    b=document.getElementById('in-cust-run');  if (b) b.onclick=function(){ verif('securite:verif:client','${T("Vérification des clients…")}'); };
     b=document.getElementById('geo-loc'); if (b) b.onclick=localiser;
   }
 
   function enrPw(){
-    if (RO||OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
+    if (RO||OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
     var d = {
       expiryEnabled: chkv('pw-exp-on'), expiryDays: numv('pw-exp-days',60),
       minLength: numv('pw-min',8), requireUpper: chkv('pw-up'), requireNumber: chkv('pw-nb'),
@@ -228,22 +232,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       changeLockNotifyEmail: txv('pw-notify').trim()
     };
     appeler('securite:pwpolicy:ecrire',[d]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.pwPolicy) D.pwPolicy=r.pwPolicy; dire('Politique enregistrée.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ if (r.pwPolicy) D.pwPolicy=r.pwPolicy; dire('${T("Politique enregistrée.")}', 'bon'); }
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function enrInact(){
-    if (RO||OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
+    if (RO||OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
     var d = {
       staffEnabled: chkv('in-staff-on'), staffDays: numv('in-staff-d',180),
       custEnabled: chkv('in-cust-on'), custDays: numv('in-cust-d',730),
       idleWarnMin: numv('idle-warn',15), idleLogoutSec: numv('idle-out',60), idleMaxMin: numv('idle-max',60)
     };
     appeler('securite:inactivite:ecrire',[d]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.inactivity) D.inactivity=r.inactivity; dire('Paramètres enregistrés.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ if (r.inactivity) D.inactivity=r.inactivity; dire('${T("Paramètres enregistrés.")}', 'bon'); }
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function enrGeo(){
-    if (RO||OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
+    if (RO||OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
     var pays = txv('geo-pays').split(',').map(function(s){ return s.trim().toUpperCase(); }).filter(Boolean);
     var ips = txv('geo-ip').split('\\n').map(function(s){ return s.trim(); }).filter(Boolean);
     var ex = [];
@@ -251,23 +255,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var i=0;i<cbs.length;i++) if (cbs[i].checked) ex.push(cbs[i].getAttribute('data-geoex'));
     var d = { enabled: chkv('geo-on'), allowedCountries: pays, ipExceptions: ips, exemptStaffIds: ex };
     appeler('securite:geo:ecrire',[d]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.geo) D.geo=r.geo; dire('Restriction enregistrée.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ if (r.geo) D.geo=r.geo; dire('${T("Restriction enregistrée.")}', 'bon'); }
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function verif(op, msg){
     if (RO||OCCUPE) return; OCCUPE=true; dire(msg);
     appeler(op,[]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok) dire('Vérification effectuée.', 'bon'); else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok) dire('${T("Vérification effectuée.")}', 'bon'); else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function localiser(){
-    if (OCCUPE) return; OCCUPE=true; dire('Localisation…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Localisation…")}');
     appeler('securite:geo:malocalisation',[]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok) dire('Votre IP : '+r.ip+' — '+(r.drapeau||'')+' '+(r.pays||'emplacement inconnu'), 'bon');
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok) dire('${T("Votre IP : ")}'+r.ip+' — '+(r.drapeau||'')+' '+(r.pays||'${T("emplacement inconnu")}'), 'bon');
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('securite:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier;

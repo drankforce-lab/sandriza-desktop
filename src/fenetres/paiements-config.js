@@ -21,6 +21,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('paiements-config');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -99,15 +103,15 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 
 function pagePaiementsConfig() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Configuration des paiements — Administration Sandriza</title>
+<title>${T("Configuration des paiements — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.payments}</span><h1>Configuration des paiements</h1>
+<div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Configuration des paiements")}</h1>
   <span class="env" id="env" hidden></span></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les réglages, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les réglages, pas les modifier.")}</div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button id="b-tester">Tester la connexion</button>
-  <button class="prim" id="b-save" disabled>Enregistrer les identifiants</button></div>
+  <button id="b-tester">${T("Tester la connexion")}</button>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer les identifiants")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -130,12 +134,12 @@ function pagePaiementsConfig() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -155,23 +159,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux paiements.',
-    lecture_seule:      'Votre rôle est en lecture seule : les paiements ne peuvent pas être modifiés.',
-    sans_jeton:         'Entrez d’abord un jeton d’accès, puis enregistrez.',
-    api:                'Square a refusé la connexion.',
-    rien_a_ecrire:      'Aucun changement à enregistrer.',
-    indisponible:       'Le module de paiement n’est pas prêt dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux paiements.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : les paiements ne peuvent pas être modifiés.")}',
+    sans_jeton:         '${T("Entrez d’abord un jeton d’accès, puis enregistrez.")}',
+    api:                '${T("Square a refusé la connexion.")}',
+    rien_a_ecrire:      '${T("Aucun changement à enregistrer.")}',
+    indisponible:       '${T("Le module de paiement n’est pas prêt dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    if (m === 'incomplet') return r.message || 'Environnement incomplet.';
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    if (m === 'incomplet') return r.message || '${T("Environnement incomplet.")}';
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -184,10 +188,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var TARIFS = [
-    ['En ligne (carte)', '2,8 % + 0,30 $', 'Par transaction web'],
-    ['En personne (lecteur)', '2,65 %', 'Glissement, puce, sans contact'],
-    ['Saisie manuelle', '3,5 % + 0,15 $', 'Numéro entré à la main'],
-    ['Virement ACH', '1 % (max 10 $)', 'Transfert bancaire']
+    ['${T("En ligne (carte)")}', '2,8 % + 0,30 $', '${T("Par transaction web")}'],
+    ['${T("En personne (lecteur)")}', '2,65 %', '${T("Glissement, puce, sans contact")}'],
+    ['${T("Saisie manuelle")}', '3,5 % + 0,15 $', '${T("Numéro entré à la main")}'],
+    ['${T("Virement ACH")}', '1 % (max 10 $)', '${T("Transfert bancaire")}']
   ];
 
   function envDe(m){ return (D && D[m]) || { appId: '', locId: '', jeton: { defini: false, fin: '' } }; }
@@ -198,78 +202,78 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var d = D || {};
     envEl.hidden = false;
     envEl.className = 'env ' + (d.mode === 'production' ? 'prod' : 'bac');
-    envEl.textContent = d.mode === 'production' ? 'Production — paiements réels' : 'Bac à sable — paiements de test';
+    envEl.textContent = d.mode === 'production' ? '${T("Production — paiements réels")}' : '${T("Bac à sable — paiements de test")}';
 
     var e = envDe(MODE);
     var h = [];
     h.push('<div class="rangee">');
 
     // ── Identifiants ───────────────────────────────────────────────────────
-    h.push('<div class="carte"><h2>Identifiants Square</h2>');
-    h.push('<p class="sous">Chaque environnement garde ses propres identifiants. Le mode enregistré '
-      + 'ne change qu’au moment où vous enregistrez.</p>');
+    h.push('<div class="carte"><h2>${T("Identifiants Square")}</h2>');
+    h.push('<p class="sous">${T("Chaque environnement garde ses propres identifiants. Le mode enregistré ")}'
+      + '${T("ne change qu’au moment où vous enregistrez.")}</p>');
     h.push('<div class="modes">'
       + '<label><input type="radio" name="mode" value="sandbox"' + (MODE !== 'production' ? ' checked' : '')
-      + (RO ? ' disabled' : '') + '> Bac à sable — test</label>'
+      + (RO ? ' disabled' : '') + '> ${T("Bac à sable — test")}</label>'
       + '<label><input type="radio" name="mode" value="production"' + (MODE === 'production' ? ' checked' : '')
-      + (RO ? ' disabled' : '') + '> Production — réel</label></div>');
+      + (RO ? ' disabled' : '') + '> ${T("Production — réel")}</label></div>');
     if (MODE === 'production') {
-      h.push('<div class="note garde">Environnement de production : les paiements sont réels et les '
-        + 'cartes sont débitées.</div>');
+      h.push('<div class="note garde">${T("Environnement de production : les paiements sont réels et les ")}'
+        + '${T("cartes sont débitées.")}</div>');
     }
-    h.push('<div class="ch"><label>Identifiant d’application</label>'
-      + '<input id="f-app" type="text" aria-label="Identifiant d’application" value="' + esc(e.appId) + '" placeholder="sq0idp-…"'
+    h.push('<div class="ch"><label>${T("Identifiant d’application")}</label>'
+      + '<input id="f-app" type="text" aria-label="${T("Identifiant d’application")}" value="' + esc(e.appId) + '" placeholder="sq0idp-…"'
       + (RO ? ' disabled' : '') + '>'
-      + '<div class="aide">Tableau de bord développeur, section Credentials.</div></div>');
-    h.push('<div class="ch"><label>Jeton d’accès</label>'
-      + '<input id="f-jeton" type="password" aria-label="Jeton d’accès" value="" placeholder="' + (e.jeton.defini ? 'inchangé' : 'EAAAl…')
+      + '<div class="aide">${T("Tableau de bord développeur, section Credentials.")}</div></div>');
+    h.push('<div class="ch"><label>${T("Jeton d’accès")}</label>'
+      + '<input id="f-jeton" type="password" aria-label="${T("Jeton d’accès")}" value="" placeholder="' + (e.jeton.defini ? '${T("inchangé")}' : 'EAAAl…')
       + '" autocomplete="off"' + (RO ? ' disabled' : '') + '>'
       + '<div class="jeton' + (e.jeton.defini ? '' : ' non') + '">'
       + (e.jeton.defini
-          ? 'Jeton <b>enregistré</b> (se termine par ' + esc(e.jeton.fin) + '). Laissez le champ vide pour le conserver.'
-          : 'Aucun jeton <b>enregistré</b> pour cet environnement.')
+          ? '${T("Jeton <b>enregistré</b> (se termine par ")}' + esc(e.jeton.fin) + '${T("). Laissez le champ vide pour le conserver.")}'
+          : '${T("Aucun jeton <b>enregistré</b> pour cet environnement.")}')
       + '</div></div>');
-    h.push('<div class="ch"><label>Identifiant d’emplacement</label>'
-      + '<input id="f-loc" type="text" aria-label="Identifiant d’emplacement" value="' + esc(e.locId) + '" placeholder="L…"'
+    h.push('<div class="ch"><label>${T("Identifiant d’emplacement")}</label>'
+      + '<input id="f-loc" type="text" aria-label="${T("Identifiant d’emplacement")}" value="' + esc(e.locId) + '" placeholder="L…"'
       + (RO ? ' disabled' : '') + '>'
-      + '<div class="aide">Testez la connexion pour voir vos emplacements.</div></div>');
+      + '<div class="aide">${T("Testez la connexion pour voir vos emplacements.")}</div></div>');
     h.push('<div class="res" id="res"></div>');
     h.push('</div>');
 
     // ── Où la cliente saisit sa carte ──────────────────────────────────────
-    h.push('<div class="carte"><h2>Où le client saisit sa carte</h2>');
+    h.push('<div class="carte"><h2>${T("Où le client saisit sa carte")}</h2>');
     h.push('');
     h.push('<label class="bascule"><input type="checkbox" id="o-heb"' + (d.hebergee ? ' checked' : '')
-      + (RO ? ' disabled' : '') + '><span><strong>Payer sur la page sécurisée de Square</strong>'
-      + '<span class="d">Le client est dirigé vers Square, paie, puis revient sur un écran d’attente. '
-      + 'Aucun numéro de carte ne passe par notre site.</span></span></label>');
+      + (RO ? ' disabled' : '') + '><span><strong>${T("Payer sur la page sécurisée de Square")}</strong>'
+      + '<span class="d">${T("Le client est dirigé vers Square, paie, puis revient sur un écran d’attente. ")}'
+      + '${T("Aucun numéro de carte ne passe par notre site.")}</span></span></label>');
     h.push('');
     if (d.mode !== 'production') {
       h.push('');
     }
-    h.push('<h2 style="margin-top:1.1rem">Modes de paiement à la caisse</h2>');
+    h.push('<h2 style="margin-top:1.1rem">${T("Modes de paiement à la caisse")}</h2>');
     h.push('<label class="bascule"><input type="checkbox" id="o-after"' + (d.afterpay ? ' checked' : '')
       + (RO ? ' disabled' : '') + '><span><strong>Afterpay</strong>'
-      + '<span class="d">À activer d’abord dans le tableau de bord Square.</span></span></label>');
+      + '<span class="d">${T("À activer d’abord dans le tableau de bord Square.")}</span></span></label>');
     h.push('<label class="bascule"><input type="checkbox" id="o-apple"' + (d.applepay ? ' checked' : '')
-      + (RO ? ' disabled' : '') + '><span><strong>Apple Pay</strong>'
-      + '<span class="d">Visible seulement dans Safari, sur un appareil compatible.</span></span></label>');
+      + (RO ? ' disabled' : '') + '><span><strong>${T("Apple Pay")}</strong>'
+      + '<span class="d">${T("Visible seulement dans Safari, sur un appareil compatible.")}</span></span></label>');
     h.push('<label class="bascule"><input type="checkbox" id="o-express"' + (d.express ? ' checked' : '')
-      + (RO ? ' disabled' : '') + '><span><strong>Paiement express sur la fiche et le panier</strong>'
-      + '<span class="d">Le client paie sans passer par le tunnel de commande. À éprouver en bac à sable '
-      + 'avant de l’offrir.</span></span></label>');
+      + (RO ? ' disabled' : '') + '><span><strong>${T("Paiement express sur la fiche et le panier")}</strong>'
+      + '<span class="d">${T("Le client paie sans passer par le tunnel de commande. À éprouver en bac à sable ")}'
+      + '${T("avant de l’offrir.")}</span></span></label>');
     h.push('<div class="gestes"><button class="prim" id="b-options"' + (RO ? ' disabled' : '')
-      + '>Enregistrer les modes de paiement</button></div>');
+      + '>${T("Enregistrer les modes de paiement")}</button></div>');
     h.push('</div>');
     h.push('</div>');
 
     // ── Tarifs (informatif) ────────────────────────────────────────────────
-    h.push('<div class="carte"><h2>Tarifs Square — Canada</h2><div class="tarifs">');
+    h.push('<div class="carte"><h2>${T("Tarifs Square — Canada")}</h2><div class="tarifs">');
     TARIFS.forEach(function(t){
       h.push('<div class="tarif"><div class="t">' + esc(t[0]) + '</div><div class="r">' + esc(t[1])
         + '</div><div class="n">' + esc(t[2]) + '</div></div>');
     });
-    h.push('</div><p class="sous" style="margin:.7rem 0 0">Tarifs en vigueur au Canada, à vérifier sur '
+    h.push('</div><p class="sous" style="margin:.7rem 0 0">${T("Tarifs en vigueur au Canada, à vérifier sur ")}'
       + 'squareup.com/ca.</p></div>');
 
     corps.innerHTML = h.join('');
@@ -291,9 +295,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     TEST = null;
     dessiner();
     var en = envDe(MODE);
+    /* ⚠⚠ LA PHRASE ENTIERE, PAS LE MOT SEUL. Ecrit
+       << (MODE === 'production' ? 'production' : 'bac à sable') >>, le meme mot
+       servait DEUX FOIS : une fois comme valeur comparee, une fois comme texte
+       affiche. Une cle << production >> se serait posee sur les deux, et c est
+       la COMPARAISON qui serait partie en anglais — le mode se serait choisi
+       tout seul. Ici chaque phrase est complete, et la comparaison reste nue. */
     dire(en.jeton.defini
-      ? 'Identifiants du mode ' + (MODE === 'production' ? 'production' : 'bac à sable') + ' rechargés. Enregistrez pour l’activer.'
-      : 'Aucun identifiant mémorisé pour ce mode. Saisissez-les, puis enregistrez.',
+      ? (MODE === 'production'
+          ? '${T("Identifiants du mode production rechargés. Enregistrez pour l’activer.")}'
+          : '${T("Identifiants du mode bac à sable rechargés. Enregistrez pour l’activer.")}')
+      : '${T("Aucun identifiant mémorisé pour ce mode. Saisissez-les, puis enregistrez.")}',
       en.jeton.defini ? 'att' : 'err');
   }
 
@@ -302,8 +314,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!el || !TEST) return;
     if (TEST.ok) {
       el.className = 'res bon';
-      el.innerHTML = 'Connexion réussie — ' + TEST.emplacements.length + ' emplacement'
-        + (TEST.emplacements.length > 1 ? 's' : '') + ' :<br>'
+      /* ⚠ Le singulier et le pluriel, chacun entier. */
+      el.innerHTML = '${T("Connexion réussie — ")}' + TEST.emplacements.length
+        + (TEST.emplacements.length > 1 ? '${T(" emplacements :")}<br>' : '${T(" emplacement :")}<br>')
         + TEST.emplacements.map(function(l){
             return '<strong>' + esc(l.nom) + '</strong> <span class="id">' + esc(l.id) + '</span>'; }).join('<br>');
     } else {
@@ -323,14 +336,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function enregistrer(){
     if (RO || OCCUPE) return;
     var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-    occuper(true); dire('Enregistrement…');
+    occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:paiements:ecrire', [{ mode: MODE, appId: v('f-app'), locId: v('f-loc'), jeton: v('f-jeton') }])
       .then(function(r){
         occuper(false);
         if (r && r.ok) {
           D = r; RO = !r.peutModifier; MODE = r.mode; TEST = null;
           dessiner();
-          dire('Identifiants enregistrés — environnement ' + (r.mode === 'production' ? 'production' : 'bac à sable') + '.', 'bon');
+          /* ⚠ Meme raison qu au-dessus : la phrase entiere, la comparaison nue. */
+          dire(r.mode === 'production'
+            ? '${T("Identifiants enregistrés — environnement production.")}'
+            : '${T("Identifiants enregistrés — environnement bac à sable.")}', 'bon');
         } else dire(expliquer(r), 'err');
       });
   }
@@ -339,28 +355,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function enregistrerOptions(){
     if (RO || OCCUPE) return;
     var c = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
-    occuper(true); dire('Enregistrement…');
+    occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:paiements:options', [{ hebergee: c('o-heb'), afterpay: c('o-after'),
       applepay: c('o-apple'), express: c('o-express') }]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('Modes de paiement enregistrés.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Modes de paiement enregistrés.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
 
   btest.onclick = function(){
     if (OCCUPE) return;
-    occuper(true); dire('Connexion à Square…');
+    occuper(true); dire('${T("Connexion à Square…")}');
     appeler('config:paiements:tester').then(function(r){
       occuper(false);
       TEST = r;
       montrerTest();
-      dire(r && r.ok ? 'Connexion réussie.' : expliquer(r), r && r.ok ? 'bon' : 'err');
+      dire(r && r.ok ? '${T("Connexion réussie.")}' : expliquer(r), r && r.ok ? 'bon' : 'err');
     });
   };
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:paiements:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

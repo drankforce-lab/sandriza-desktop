@@ -22,6 +22,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('cles');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -88,13 +92,13 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 
 function pageClesConfig() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Clés API — Administration Sandriza</title>
+<title>${T("Clés API — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.cles}</span><h1>Clés API</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les clés, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.cles}</span><h1>${T("Clés API")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les clés, pas les modifier.")}</div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-save" disabled>Enregistrer les clés</button></div>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer les clés")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -117,12 +121,12 @@ function pageClesConfig() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -137,21 +141,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : les clés ne peuvent pas être modifiées.',
-    cle_inconnue:       'Cette clé est inconnue.',
-    rien_a_ecrire:      'Aucun changement à enregistrer.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : les clés ne peuvent pas être modifiées.")}',
+    cle_inconnue:       '${T("Cette clé est inconnue.")}',
+    rien_a_ecrire:      '${T("Aucun changement à enregistrer.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -166,40 +170,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // Les services, et leurs champs. La clef << k >> est celle attendue par le coeur
   // (Admin._clesDonnees / _clesEcrireCoeur / _clesRetirer).
   var SERVICES = [
-    { titre: 'Fal.ai — Génération photo IA',
-      sous: 'Habillage mannequin virtuel (IDM-VTON) sur les vues produit.',
+    { titre: '${T("Fal.ai — Génération photo IA")}',
+      sous: '${T("Habillage mannequin virtuel (IDM-VTON) sur les vues produit.")}',
       lien: ['fal.ai', 'https://fal.ai'],
-      champs: [{ k: 'fal', label: 'Clé API', place: 'xxxxxxxx:xxxx…',
-        aide: 'Gratuit à l’inscription — Dashboard puis API Keys sur fal.ai.' }],
+      champs: [{ k: 'fal', label: '${T("Clé API")}', place: 'xxxxxxxx:xxxx…',
+        aide: '${T("Gratuit à l’inscription — Dashboard puis API Keys sur fal.ai.")}' }],
       solde: true },
-    { titre: 'Photoroom — Retrait du mannequin',
-      sous: 'Le « mannequin fantôme ». Sans clé, la photothèque se rabat sur un détourage par masque.',
+    { titre: '${T("Photoroom — Retrait du mannequin")}',
+      sous: '${T("Le « mannequin fantôme ». Sans clé, la photothèque se rabat sur un détourage par masque.")}',
       lien: ['photoroom.com', 'https://www.photoroom.com/api'],
       champs: [
-        { k: 'photoroom', label: 'Clé de PRODUCTION', place: 'clé de production (sans préfixe)',
-          aide: 'Vrais traitements, pleine qualité, sans filigrane. Exige le plan Plus.' },
-        { k: 'photoroomSandbox', label: 'Clé SANDBOX (aperçus)', place: 'sandbox_… (facultatif)',
-          aide: 'Aperçus gratuits (filigranés, aucun crédit). Vide : dérivée de la clé de production.' }] },
-    { titre: 'Groq — Description IA',
-      sous: 'Génération de descriptions de produits à partir de la photo.',
+        { k: 'photoroom', label: '${T("Clé de PRODUCTION")}', place: '${T("clé de production (sans préfixe)")}',
+          aide: '${T("Vrais traitements, pleine qualité, sans filigrane. Exige le plan Plus.")}' },
+        { k: 'photoroomSandbox', label: '${T("Clé SANDBOX (aperçus)")}', place: '${T("sandbox_… (facultatif)")}',
+          aide: '${T("Aperçus gratuits (filigranés, aucun crédit). Vide : dérivée de la clé de production.")}' }] },
+    { titre: '${T("Groq — Description IA")}',
+      sous: '${T("Génération de descriptions de produits à partir de la photo.")}',
       lien: ['console.groq.com', 'https://console.groq.com/keys'],
-      champs: [{ k: 'groq', label: 'Clé API', place: 'gsk_…',
-        aide: 'Gratuit — modèle llama-3.3-70b-versatile.' }] },
-    { titre: 'Resend — Courriel transactionnel',
-      sous: 'Infolettres, confirmations de commande, cartes-cadeaux.',
+      champs: [{ k: 'groq', label: '${T("Clé API")}', place: 'gsk_…',
+        aide: '${T("Gratuit — modèle llama-3.3-70b-versatile.")}' }] },
+    { titre: '${T("Resend — Courriel transactionnel")}',
+      sous: '${T("Infolettres, confirmations de commande, cartes-cadeaux.")}',
       lien: ['resend.com', 'https://resend.com/api-keys'],
-      champs: [{ k: 'resend', label: 'Clé API', place: 're_…',
-        aide: 'Les paramètres d’expéditeur se règlent dans Newsletter puis Configuration.' }] },
-    { titre: 'Hugging Face — Segmentation vêtement',
-      sous: 'Isole le vêtement avant correction de couleur (exclut peau, visage, cheveux).',
+      champs: [{ k: 'resend', label: '${T("Clé API")}', place: 're_…',
+        aide: '${T("Les paramètres d’expéditeur se règlent dans Newsletter puis Configuration.")}' }] },
+    { titre: '${T("Hugging Face — Segmentation vêtement")}',
+      sous: '${T("Isole le vêtement avant correction de couleur (exclut peau, visage, cheveux).")}',
       lien: ['huggingface.co', 'https://huggingface.co/settings/tokens'],
-      champs: [{ k: 'hf', label: 'Token d’accès', place: 'hf_…',
-        aide: 'Gratuit — Settings, Access Tokens, New token (Read). Modèle segformer_b2_clothes.' }] },
-    { titre: 'Stripe Tax — Taxes internationales',
-      sous: 'Calcul auto de la TVA/TPS à l’international (le Canada garde la table manuelle). Stripe ne perçoit que dans les pays où vous êtes inscrit ; ailleurs 0 (le client paie à la frontière). Ne couvre pas les droits de douane.',
+      champs: [{ k: 'hf', label: '${T("Token d’accès")}', place: 'hf_…',
+        aide: '${T("Gratuit — Settings, Access Tokens, New token (Read). Modèle segformer_b2_clothes.")}' }] },
+    { titre: '${T("Stripe Tax — Taxes internationales")}',
+      sous: '${T("Calcul auto de la TVA/TPS à l’international (le Canada garde la table manuelle). Stripe ne perçoit que dans les pays où vous êtes inscrit ; ailleurs 0 (le client paie à la frontière). Ne couvre pas les droits de douane.")}',
       lien: ['dashboard.stripe.com', 'https://dashboard.stripe.com/tax'],
-      champs: [{ k: 'stripeTax', label: 'Clé secrète Stripe', place: 'rk_… (clé restreinte Tax) ou sk_…',
-        aide: 'Recommandé : une clé RESTREINTE (rk_) limitée à la permission Tax. La clé reste au serveur.' }],
+      champs: [{ k: 'stripeTax', label: '${T("Clé secrète Stripe")}', place: '${T("rk_… (clé restreinte Tax) ou sk_…")}',
+        aide: '${T("Recommandé : une clé RESTREINTE (rk_) limitée à la permission Tax. La clé reste au serveur.")}' }],
       test: true }
   ];
 
@@ -207,7 +211,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var e = (D && D[c.k]) || { defini: false, fin: '' };
     return '<div class="ch"><label for="f-' + c.k + '">' + esc(c.label) + '</label>'
       + '<input id="f-' + c.k + '" type="password" value="" placeholder="'
-      + (e.defini ? 'inchangé' : esc(c.place)) + '" autocomplete="off"'
+      + (e.defini ? '${T("inchangé")}' : esc(c.place)) + '" autocomplete="off"'
       + (RO ? ' disabled' : '') + '>'
       + '<div class="aide">' + esc(c.aide) + '</div>'
       + '<div class="etat' + (e.defini ? '' : ' non') + '" id="etat-' + c.k + '">'
@@ -215,23 +219,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function soldeHtml(){
     var sv = (D && D.falSolde) || '';
-    var maj = (D && D.falSoldeMaj) ? (' — saisi le ' + esc(String(D.falSoldeMaj).slice(0, 10))) : '';
-    return '<div class="ch"><label for="f-falSolde">Solde du compte (saisi à la main)</label>'
+    var maj = (D && D.falSoldeMaj) ? ('${T(" — saisi le ")}' + esc(String(D.falSoldeMaj).slice(0, 10))) : '';
+    return '<div class="ch"><label for="f-falSolde">${T("Solde du compte (saisi à la main)")}</label>'
       + '<input id="f-falSolde" class="solde" type="number" step="0.01" min="0" value="' + esc(sv) + '"'
-      + ' placeholder="ex. 25.00"' + (RO ? ' disabled' : '') + '>'
-      + '<div class="aide">fal.ai n’expose aucun solde par API. La fenêtre Traitements d’image affiche '
-      + 'ce montant et la consommation mesurée depuis' + maj + '. À tenir à jour.</div></div>';
+      + ' placeholder="${T("ex. 25.00")}"' + (RO ? ' disabled' : '') + '>'
+      + '<div class="aide">${T("fal.ai n’expose aucun solde par API. La fenêtre Traitements d’image affiche ")}'
+      + '${T("ce montant et la consommation mesurée depuis")}' + maj + '${T(". À tenir à jour.")}</div></div>';
   }
   function etatInterne(k, e){
-    if (!e.defini) return '<span class="txt">Aucune clé <b>enregistrée</b>.</span>';
+    if (!e.defini) return '<span class="txt">${T("Aucune clé <b>enregistrée</b>.")}</span>';
     if (ARME[k]) {
-      return '<span class="txt">Retirer la clé enregistrée ?</span>'
-        + '<button class="conf" data-conf="' + k + '"' + (RO ? ' disabled' : '') + '>Confirmer le retrait</button>'
-        + '<button class="annu" data-annu="' + k + '">Annuler</button>';
+      return '<span class="txt">${T("Retirer la clé enregistrée ?")}</span>'
+        + '<button class="conf" data-conf="' + k + '"' + (RO ? ' disabled' : '') + '>${T("Confirmer le retrait")}</button>'
+        + '<button class="annu" data-annu="' + k + '">${T("Annuler")}</button>';
     }
-    return '<span class="txt">Clé <b>enregistrée</b> (se termine par ' + esc(e.fin)
-      + '). Laissez le champ vide pour la conserver.</span>'
-      + '<button data-retirer="' + k + '"' + (RO ? ' disabled' : '') + '>Retirer</button>';
+    return '<span class="txt">${T("Clé <b>enregistrée</b> (se termine par ")}' + esc(e.fin)
+      + '${T("). Laissez le champ vide pour la conserver.")}</span>'
+      + '<button data-retirer="' + k + '"' + (RO ? ' disabled' : '') + '>${T("Retirer")}</button>';
   }
 
   function dessiner(){
@@ -245,7 +249,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       s.champs.forEach(function(c){ h.push(champHtml(c)); });
       if (s.solde) h.push(soldeHtml()); // le solde fal.ai, sous sa cle, dans la meme carte
       if (s.test) h.push('<div class="ch"><button id="b-teststripe"' + (RO ? ' disabled' : '')
-        + '>Tester la clé &amp; voir mes inscriptions</button>'
+        + '>${T("Tester la clé &amp; voir mes inscriptions")}</button>'
         + '<div class="etat" id="stripe-res" style="margin-top:.4rem"></div></div>');
       h.push('</div>');
     });
@@ -275,7 +279,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function testerStripe(){
     if (OCCUPE) return;
     var res = document.getElementById('stripe-res');
-    if (res) { res.className = 'etat'; res.innerHTML = '<span class="txt">Test en cours…</span>'; }
+    if (res) { res.className = 'etat'; res.innerHTML = '<span class="txt">${T("Test en cours…")}</span>'; }
     occuper(true);
     appeler('config:cles:teststripe').then(function(r){
       occuper(false);
@@ -296,21 +300,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var enPlus = lst.length - actives.length;
         var txt;
         if (!lst.length) {
-          txt = '✓ Clé valide (' + esc(r.mode) + '). <b>Aucune inscription</b> — '
-              + 'aucune destination hors Canada ne peut être ouverte.';
+          txt = '${T("✓ Clé valide (")}' + esc(r.mode) + '${T("). <b>Aucune inscription</b> — ")}'
+              + '${T("aucune destination hors Canada ne peut être ouverte.")}';
         } else {
-          txt = '✓ Clé valide (' + esc(r.mode) + '). Inscrit dans : <b>' + esc(noms.join(', ')) + '</b>'
-              + (enPlus > 0 ? ' <span style="opacity:.7">(+ ' + enPlus + ' non active'
-                              + (enPlus > 1 ? 's' : '') + ')</span>' : '')
-              + '. <span style="opacity:.75">Les pays desservis se règlent dans '
-              + '<b>Configuration ▸ Livraison</b>.</span>';
+          txt = '${T("✓ Clé valide (")}' + esc(r.mode) + '${T("). Inscrit dans : <b>")}' + esc(noms.join(', ')) + '</b>'
+              /* ⚠ Le singulier et le pluriel, chacun entier. */
+              + (enPlus > 0 ? ' <span style="opacity:.7">(+ ' + enPlus
+                              + (enPlus > 1 ? '${T(" non actives")}' : '${T(" non active")}') + ')</span>' : '')
+              + '. <span style="opacity:.75">${T("Les pays desservis se règlent dans ")}'
+              + '${T("<b>Configuration ▸ Livraison</b>.")}</span>';
         }
         res.className = 'etat';
         res.innerHTML = '<span class="txt">' + txt + '</span>';
       } else {
         res.className = 'etat non';
-        res.innerHTML = '<span class="txt">✗ ' + esc((r && (r.error || r.detail)) || 'Échec du test.')
-          + (r && r.motif === 'non_configure' ? ' (enregistrez la clé d’abord)' : '') + '</span>';
+        res.innerHTML = '<span class="txt">✗ ' + esc((r && (r.error || r.detail)) || '${T("Échec du test.")}')
+          + (r && r.motif === 'non_configure' ? '${T(" (enregistrez la clé d’abord)")}' : '') + '</span>';
       }
     });
   }
@@ -331,12 +336,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     var saisie = { falSolde: v('f-falSolde') };
     SERVICES.forEach(function(s){ s.champs.forEach(function(c){ saisie[c.k] = v('f-' + c.k); }); });
-    occuper(true); dire('Enregistrement…');
+    occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:cles:ecrire', [saisie]).then(function(r){
       occuper(false);
       if (r && r.ok) {
         D = r; RO = !r.peutModifier; ARME = {}; dessiner();
-        dire(r.rien ? 'Aucun changement.' : 'Clés enregistrées.', r.rien ? 'att' : 'bon');
+        dire(r.rien ? '${T("Aucun changement.")}' : '${T("Clés enregistrées.")}', r.rien ? 'att' : 'bon');
       } else dire(expliquer(r), 'err');
     });
   }
@@ -344,16 +349,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function retirer(k){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Retrait…');
+    occuper(true); dire('${T("Retrait…")}');
     appeler('config:cles:retirer', [k]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; ARME = {}; dessiner(); dire('Clé retirée.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; ARME = {}; dessiner(); dire('${T("Clé retirée.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:cles:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
