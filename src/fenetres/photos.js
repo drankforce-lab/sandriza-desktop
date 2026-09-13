@@ -964,7 +964,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var m = Object.keys(A.choix).length;
       h += '<label for="a-nom">${T("Nom du lot")}</label>'
         + '<input id="a-nom" type="text" value="' + esc(A.nom) + '" maxlength="80"'
-        + ' placeholder="ex. Collection printemps">'
+        + ' placeholder="${T("ex. Collection printemps")}">'
         + '<p class="aide">${T("Les photos importées seront nommées « Nom 01 », « Nom 02 »…")} '
         + '${T("Laissé vide, on garde le nom d’origine.")}</p>'
         + '<label style="margin-top:.7rem">${T("Que faut-il en faire&nbsp;?")}</label><div class="but">';

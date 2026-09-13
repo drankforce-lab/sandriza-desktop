@@ -24,6 +24,13 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste, elle ne se traduit pas dans le navigateur.
+   ⚠⚠ ON NE TRADUIT QUE CE QUI SE LIT : le nom d'une photo, son code, le nom du
+   produit lié et le nom d'un lot d'import viennent de la photothèque — ce sont
+   des DONNÉES. Voir l'en-tête de src/langue/explorateur.js. */
+const T = require('../langue').tr('explorateur');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -161,14 +168,14 @@ function pageExplorateur(mode) {
      l enjeu est plus grand encore : ce voile-ci met a jour LA VITRINE. */
   const appliquerTemoin = String(mode || '') === 'appliquer';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Explorateur de photos — Administration Sandriza</title>
+<title>${T("Explorateur de photos — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.explorateur}</span><h1>Explorateur de photos</h1>
+<div class="tete"><span class="ico">${ICO.explorateur}</span><h1>${T("Explorateur de photos")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="barre" id="barre"></div>
 <div class="corps" id="corps">
-  <div class="zone" id="liste"><div class="vide charge">Lecture de la photothèque…</div></div>
-  <div class="apercu" id="apercu"><div class="vide">Cliquez une photo pour la voir ici.</div></div>
+  <div class="zone" id="liste"><div class="vide charge">${T("Lecture de la photothèque…")}</div></div>
+  <div class="apercu" id="apercu"><div class="vide">${T("Cliquez une photo pour la voir ici.")}</div></div>
 </div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="cpt" id="cpt"></span>
@@ -205,20 +212,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application.',
-    droit:              'Votre rôle ne donne pas accès à la photothèque.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    module_photos:      'La photothèque n’a pas pu être chargée.',
-    aucune_photo:       'Aucune photo choisie.',
-    toutes_deja_faites: 'Toutes ces photos ont déjà ce traitement.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la photothèque.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    module_photos:      '${T("La photothèque n’a pas pu être chargée.")}',
+    aucune_photo:       '${T("Aucune photo choisie.")}',
+    toutes_deja_faites: '${T("Toutes ces photos ont déjà ce traitement.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 120)) + ')';
     return t;
   }
@@ -233,29 +240,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ══ LA BARRE ═══════════════════════════════════════════════════════════ */
   function dessinerBarre(){
-    var h = '<input type="search" id="q" aria-label="Rechercher (nom, code, produit, SKU)" placeholder="Rechercher (nom, code, produit, SKU)…" value="'
+    var h = '<input type="search" id="q" aria-label="${T("Rechercher (nom, code, produit, ")}${T("SKU")})" placeholder="${T("Rechercher (nom, code, produit, SKU)…")}" value="'
       + esc(Q) + '">';
     h += (D && D.filtres ? D.filtres : []).map(function(f){
       return '<button class="jeton' + (FILTRES.indexOf(f.cle) >= 0 ? ' on' : '') + '"'
         + ' data-filtre="' + esc(f.cle) + '">' + esc(f.nom) + '</button>'; }).join('');
-    h += '<select id="sans" aria-label="Filtrer les photos sans un traitement donné">'
-      + '<option value="">Traitement — tous</option>'
+    h += '<select id="sans" aria-label="${T("Filtrer les photos sans un traitement donné")}">'
+      + '<option value="">${T("Traitement — tous")}</option>'
       + (D && D.traitements ? D.traitements : []).map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (SANS === t.cle ? ' selected' : '')
-            + '>Sans « ' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
+            + '>${T("Sans « ")}' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
     if (D && (D.lots || []).length) {
-      h += '<select id="lot"><option value="">Tous les lots</option>'
+      h += '<select id="lot"><option value="">${T("Tous les lots")}</option>'
         + D.lots.map(function(l){
             return '<option value="' + esc(l.cle) + '"' + (LOT === l.cle ? ' selected' : '')
               + '>' + esc(l.nom) + '</option>'; }).join('') + '</select>';
     }
-    h += '<select id="tri" aria-label="Ordre de tri">' + [['recent', 'Plus récentes'], ['code', 'Code'], ['name', 'Nom'],
-        ['linked', 'Liées d’abord'], ['size', 'Plus lourdes']].map(function(t){
+    h += '<select id="tri" aria-label="${T("Ordre de tri")}">' + [['recent', '${T("Plus récentes")}'], ['code', '${T("Code")}'], ['name', '${T("Nom")}'],
+        ['linked', '${T("Liées d’abord")}'], ['size', '${T("Plus lourdes")}']].map(function(t){
         return '<option value="' + t[0] + '"' + (TRI === t[0] ? ' selected' : '') + '>'
           + t[1] + '</option>'; }).join('') + '</select>';
     h += '<span class="vues">'
-      + '<button id="v-liste"' + (VUE === 'liste' ? ' class="on"' : '') + ' title="Affichage en liste">☰</button>'
-      + '<button id="v-grille"' + (VUE === 'grille' ? ' class="on"' : '') + ' title="Affichage en vignettes">▦</button>'
+      + '<button id="v-liste"' + (VUE === 'liste' ? ' class="on"' : '') + ' title="${T("Affichage en liste")}">☰</button>'
+      + '<button id="v-grille"' + (VUE === 'grille' ? ' class="on"' : '') + ' title="${T("Affichage en vignettes")}">▦</button>'
       + '</span>';
     barreEl.innerHTML = h;
     brancherBarre();
@@ -293,12 +300,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ LA LISTE ET LA GRILLE ══════════════════════════════════════════════ */
   function pastilles(p){
     var h = '';
-    if ((p.faits || []).length) h += '<span class="pt fait" title="Déjà traitée">✓</span>';
+    if ((p.faits || []).length) h += '<span class="pt fait" title="${T("Déjà traitée")}">✓</span>';
     /* ⚠ LA PASTILLE DIT CE QU ON DEFERAIT, pas seulement qu on peut defaire. Sur
        une photo passee par trois gestes, << annulable >> tout seul laisse
        exactement la question qu on se pose avant de cliquer. */
     if (p.annulable) {
-      h += '<span class="pt ret" title="' + esc((p.annulableRetabli ? 'Rétablir « ' : 'Annuler « ')
+      h += '<span class="pt ret" title="' + esc((p.annulableRetabli ? '${T("Rétablir « ")}' : '${T("Annuler « ")}')
         + nomTraitement(p.annulableQuoi) + ' »') + '">↩</span>';
     }
     /* ⚠ LA FICHE PRODUIT EN RETARD (lot 3f). C est la pastille qui compte le
@@ -306,11 +313,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        d avant le dernier traitement — donc qu on a paye un rendu que personne ne
        voit. Sans elle, rien a l ecran ne le laissait soupconner. */
     if (p.produitEnRetard) {
-      h += '<span class="pt retard" title="La fiche produit montre encore l’image d’avant '
-        + 'le dernier traitement"><span class="ic">⚠</span> fiche</span>';
+      /* ⚠ LA PHRASE D UN SEUL TENANT. Coupee en deux morceaux par la
+         concatenation, elle donnait au poseur des cles generiques (« fiche »,
+         « montre ») qui allaient se poser AILLEURS. Une infobulle est un texte
+         comme un autre : il lui faut SA cle, entiere. */
+      h += '<span class="pt retard" title="${T("La fiche produit montre encore l’image d’avant le dernier traitement")}">'
+        + '<span class="ic">⚠</span>${T(" fiche")}</span>';
     }
-    if (p.isole) h += '<span class="pt" title="Détourée">◇</span>';
-    if (p.lieId) h += '<span class="pt ic" title="' + esc(p.lieNom || 'Produit lié') + '"><span class="ic">🔗</span></span>';
+    if (p.isole) h += '<span class="pt" title="${T("Détourée")}">◇</span>';
+    if (p.lieId) h += '<span class="pt ic" title="' + esc(p.lieNom || '${T("Produit lié")}') + '"><span class="ic">🔗</span></span>';
     return h ? '<span class="pastilles">' + h + '</span>' : '';
   }
 
@@ -324,12 +335,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* Les libelles viennent du serveur quand il les donne (D.traitements), sinon
      de cette table de secours : une pastille qui dirait << fantome >> parlerait
      le langage du code, pas celui de l ecran. */
-  var NOMS_TR = { detourage: 'Détourage', fantome: 'Mannequin retiré',
-    humain: 'Porté par un mannequin', filigrane: 'Filigrane / logo' };
+  var NOMS_TR = { detourage: '${T("Détourage")}', fantome: '${T("Mannequin retiré")}',
+    humain: '${T("Porté par un mannequin")}', filigrane: '${T("Filigrane / logo")}' };
   function nomTraitement(cle){
     var c = String(cle || '');
     var l = ((D && D.traitements) || []).filter(function(t){ return t.cle === c; })[0];
-    return (l && l.nom) || NOMS_TR[c] || c || 'dernier traitement';
+    return (l && l.nom) || NOMS_TR[c] || c || '${T("dernier traitement")}';
   }
 
   function pageCourante(){
@@ -344,10 +355,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function pagerHtml(pc){
     if (pc.pages <= 1) return '';
     return '<div class="pagi"><button class="jeton" id="p-prec"' + (PAGE <= 0 ? ' disabled' : '')
-      + '>‹ Précédent</button><span>Page ' + (PAGE + 1) + ' sur ' + pc.pages
-      + ' — ' + pc.ph.length + ' photo' + (pc.ph.length > 1 ? 's' : '') + '</span>'
+      + '>${T("‹ Précédent")}</button><span>${T("Page")} ' + (PAGE + 1) + '${T(" sur ")}' + pc.pages
+      + ' — ' + pc.ph.length + '${T(" photo")}' + (pc.ph.length > 1 ? 's' : '') + '</span>'
       + '<button class="jeton" id="p-suiv"' + (PAGE >= pc.pages - 1 ? ' disabled' : '')
-      + '>Suivant ›</button></div>';
+      + '>${T("Suivant ›")}</button></div>';
   }
 
   // Toutes les photos de la PAGE sont-elles cochees ? (pour la case d en-tete)
@@ -362,9 +373,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // ⚠ UNE CASE D EN-TETE : cocher toute la page d un geste. Sans elle, la
       // case par ligne n aiderait pas beaucoup sur une page de trente.
       + '<th class="ck"><span class="coche' + (pageToutePrise(pc) ? ' on' : '')
-      + '" id="ck-page" title="Cocher toute la page">' + (pageToutePrise(pc) ? '✓' : '') + '</span></th>'
-      + '<th></th><th>Nom</th><th>Code</th><th>Produit lié</th>'
-      + '<th>État</th><th>Poids</th></tr></thead><tbody>'
+      + '" id="ck-page" title="${T("Cocher toute la page")}">' + (pageToutePrise(pc) ? '✓' : '') + '</span></th>'
+      + '<th></th><th>${T("Nom")}</th><th>${T("Code")}</th><th>${T("Produit lié")}</th>'
+      + '<th>${T("État")}</th><th>${T("Poids")}</th></tr></thead><tbody>'
       + pc.vue.map(function(p, k){
           var i = pc.debut + k;
           return '<tr data-i="' + i + '" data-id="' + esc(p.id) + '"'
@@ -397,18 +408,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function vueVide(){
-    if (D && D.charge === false) return '<div class="vide charge">Lecture de la photothèque…</div>';
+    if (D && D.charge === false) return '<div class="vide charge">${T("Lecture de la photothèque…")}</div>';
     var filtre = Q || FILTRES.length || SANS || LOT;
     return '<div class="vide">' + (filtre
-      ? 'Aucune photo ne correspond à ces critères.'
-      : 'Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.') + '</div>';
+      ? '${T("Aucune photo ne correspond à ces critères.")}'
+      : '${T("Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.")}') + '</div>';
   }
 
   /* ══ L APERCU ═══════════════════════════════════════════════════════════ */
   function dessinerApercu(){
     var p = null;
     ((D && D.photos) || []).forEach(function(x){ if (x.id === COURANT) p = x; });
-    if (!p) { apercuEl.innerHTML = '<div class="vide">Cliquez une photo pour la voir ici.</div>'; return; }
+    if (!p) { apercuEl.innerHTML = '<div class="vide">${T("Cliquez une photo pour la voir ici.")}</div>'; return; }
     var faits = (p.faits || []).map(function(f){
       var n = f;
       ((D && D.traitements) || []).forEach(function(t){ if (t.cle === f) n = t.nom; });
@@ -419,16 +430,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     };
     apercuEl.innerHTML = '<div class="img">'
       + (p.apercu ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '">'
-                  : '<div class="vide charge">Téléversement en cours…</div>')
+                  : '<div class="vide charge">${T("Téléversement en cours…")}</div>')
       + '</div><div class="infos">'
-      + ligne('Nom', p.nom)
-      + ligne('Code', p.code || '—')
-      + ligne('Produit lié', p.lieNom || 'aucun')
-      + (p.lieSku ? ligne('SKU', p.lieSku) : '')
-      + ligne('Traitements', faits || 'aucun')
-      + ligne('Détourée', p.isole ? 'oui' : 'non')
-      + ligne('Poids', poids(p.poids))
-      + (p.lotNom ? ligne('Lot d’import', p.lotNom) : '')
+      + ligne('${T("Nom")}', p.nom)
+      + ligne('${T("Code")}', p.code || '—')
+      + ligne('${T("Produit lié")}', p.lieNom || '${T("aucun")}')
+      + (p.lieSku ? ligne('${T("SKU")}', p.lieSku) : '')
+      + ligne('${T("Traitements")}', faits || '${T("aucun")}')
+      + ligne('${T("Détourée")}', p.isole ? 'oui' : 'non')
+      + ligne('${T("Poids")}', poids(p.poids))
+      + (p.lotNom ? ligne('${T("Lot d’import")}', p.lotNom) : '')
       + '</div>';
   }
 
@@ -523,41 +534,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var gestes = gesteAnnule();
     var quoi = (gestes.length === 1)
       ? ('« <strong>' + esc(nomTraitement(gestes[0])) + '</strong> »')
-      : ('leur <strong>dernier traitement</strong>');
-    voile('<h3>↩ Revenir à l’état précédent</h3>'
-      + '<p>' + k + ' photo' + (k > 1 ? 's' : '') + ' sur ' + ids.length
-      + ' choisie' + (ids.length > 1 ? 's' : '') + ' ' + (k > 1 ? 'retrouveront' : 'retrouvera')
-      + ' l’état d’avant ' + quoi + '.</p>'
-      + '<p><strong>Aucun crédit n’est dépensé</strong> : l’image d’avant est déjà rangée, '
-      + 'on ne fait que la remettre en place.</p>'
-      + '<p>Le geste est <strong>réversible</strong> — le même bouton rétablira ce que vous '
-      + 'venez d’annuler.</p>'
+      : ('${T("leur ")}<strong>${T("dernier traitement")}</strong>');
+    voile('<h3>${T("↩ Revenir à l’état précédent")}</h3>'
+      + '<p>' + k + '${T(" photo")}' + (k > 1 ? 's' : '') + '${T(" sur ")}' + ids.length
+      + '${T(" choisie")}' + (ids.length > 1 ? 's' : '') + ' ' + (k > 1 ? '${T("retrouveront")}' : '${T("retrouvera")}')
+      + ' ${T("l’état d’avant")} ' + quoi + '.</p>'
+      + '<p><strong>${T("Aucun crédit n’est dépensé")}</strong>${T(" : l’image d’avant est déjà rangée, ")}'
+      + '${T("on ne fait que la remettre en place.")}</p>'
+      + '<p>${T("Le geste est ")}<strong>${T("réversible")}</strong>${T(" — le même bouton rétablira ce que ")}${T("vous")} '
+      + '${T("venez d’annuler.")}</p>'
       /* ⚠ CE QU ON NE PEUT PAS DEFAIRE EST DIT AVANT, pas apres coup : une photo
          traitee deux fois n a gardé qu UN état, celui d avant le dernier geste. */
-      + '<p style="color:var(--tx2)">Un seul pas en arrière est conservé par photo : une photo '
-      + 'passée par deux traitements ne remonte qu’au précédent, pas à l’originale.</p>'
+      + '<p style="color:var(--tx2)">${T("Un seul pas en arrière est conservé par photo : une photo")} '
+      + '${T("passée par deux traitements ne remonte qu’au précédent, pas à l’originale.")}</p>'
       + (k < ids.length
-          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + ' photo'
-             + ((ids.length - k) > 1 ? 's n’ont' : ' n’a') + ' rien à annuler et ne bougera'
-             + ((ids.length - k) > 1 ? 'nt' : '') + ' pas.</p>')
+          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + '${T(" photo")}'
+             + ((ids.length - k) > 1 ? '${T("s n’ont")}' : '${T(" n’a")}') + ' ${T("rien à annuler et ne bougera")}'
+             + ((ids.length - k) > 1 ? 'nt' : '') + '${T(" pas.")}</p>')
           : '')
-      + '<div class="fin2"><button id="an-non">Annuler</button>'
-      + '<button class="prim" id="an-oui">Revenir en arrière</button></div>',
+      + '<div class="fin2"><button id="an-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="an-oui">${T("Revenir en arrière")}</button></div>',
       function(fermer){
         var non = document.getElementById('an-non');
         var oui = document.getElementById('an-oui');
         if (non) non.onclick = fermer;
         if (oui) oui.onclick = function(){
           oui.disabled = true;
-          dire('Retour en arrière…');
+          dire('${T("Retour en arrière…")}');
           appeler('photos:annulerLot', [ids]).then(function(r){
             fermer();
             if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-            var m = r.faites + ' photo' + (r.faites > 1 ? 's' : '') + ' revenue'
-              + (r.faites > 1 ? 's' : '') + ' à l’état précédent.';
+            var m = r.faites + '${T(" photo")}' + (r.faites > 1 ? 's' : '') + ' revenue'
+              + (r.faites > 1 ? 's' : '') + ' ${T("à l’état précédent.")}';
             if (r.sansPrecedent) m += ' ' + r.sansPrecedent + ' n’avai'
-              + (r.sansPrecedent > 1 ? 'ent' : 't') + ' rien à annuler.';
-            if (r.echecs && r.echecs.length) m += ' ' + r.echecs.length + ' en échec.';
+              + (r.sansPrecedent > 1 ? 'ent' : 't') + ' ${T("rien à annuler.")}';
+            if (r.echecs && r.echecs.length) m += ' ' + r.echecs.length + ' ${T("en échec.")}';
             dire(m, (r.echecs && r.echecs.length) ? 'att' : 'bon');
             charger();   // les vignettes ont changé : on relit
           });
@@ -587,51 +598,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ids.length) return;
     var k = nAppliquer();
     var r = nEnRetard();
-    voile('<h3><span class="ic">📦</span> Mettre à jour la fiche produit</h3>'
-      + '<p>L’image courante de ' + k + ' photo' + (k > 1 ? 's' : '')
-      + ' sera portée dans la fiche de l’article auquel elle est rattachée.</p>'
+    voile('<h3><span class="ic">📦</span> ${T("Mettre à jour la fiche produit")}</h3>'
+      + '<p>${T("L’image courante de")} ' + k + '${T(" photo")}' + (k > 1 ? 's' : '')
+      + ' ${T("sera portée dans la fiche de l’article auquel elle est rattachée.")}</p>'
       /* ⚠ ON DIT QUE C EST LA VITRINE. Un compte rendu qui parlerait de
          << fiches mises a jour >> laisserait croire a un rangement interne : ce
          qui change ici, c est ce qu une cliente voit sur la boutique. */
-      + '<p><strong>C’est ce que la boutique affichera</strong> — la photo du produit change '
-      + 'pour de bon, en ligne.</p>'
-      + (r ? ('<p style="color:var(--tx-or)">' + r + ' fiche' + (r > 1 ? 's' : '') + ' montre'
-              + (r > 1 ? 'nt' : '') + ' encore l’image d’<strong>avant</strong> le dernier '
-              + 'traitement — c’est justement ce qu’on répare.</p>')
-           : '<p style="color:var(--tx2)">Aucune de ces fiches n’est en retard : elles montrent déjà '
-             + 'l’image courante. Rien ne changera visiblement.</p>')
+      + '<p><strong>${T("C’est ce que la boutique affichera")}</strong>${T(" — la photo du produit change ")}'
+      + '${T("pour de bon, en ligne.")}</p>'
+      /* ⚠ LE SINGULIER ET LE PLURIEL, CHACUN ENTIER. Decoupe en « fiche » + « s »
+         + « montre » + « nt », la phrase ne laissait au poseur que des morceaux
+         generiques, qui se posaient dans d autres phrases. */
+      + (r ? ('<p style="color:var(--tx-or)">' + r
+              + (r > 1 ? '${T(" fiches montrent")}' : '${T(" fiche montre")}')
+              + '${T(" encore l’image d’<strong>avant</strong> le dernier ")}'
+              + '${T("traitement — c’est justement ce qu’on répare.")}</p>')
+           : '<p style="color:var(--tx2)">${T("Aucune de ces fiches n’est en retard : elles montrent déjà")} '
+             + '${T("l’image courante. Rien ne changera visiblement.")}</p>')
       /* ⚠ LE CAS AMBIGU EST ANNONCE AVANT, pas decouvert dans le compte rendu :
          une fiche qui porte plusieurs images et dont on ignore laquelle vient de
          cette photo est REFUSEE, jamais devinee. */
-      + '<p style="color:var(--tx2)">Une photo rattachée avant la version 3.49 dont la fiche porte '
-      + '<strong>plusieurs images</strong> sera laissée de côté : on ne peut pas savoir laquelle '
-      + 'lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre. '
-      + 'Rattachez-la de nouveau pour lever le doute.</p>'
+      + '<p style="color:var(--tx2)">${T("Une photo rattachée avant la version 3.49 dont la fiche porte")} '
+      + '<strong>${T("plusieurs images")}</strong>${T(" sera laissée de côté : on ne peut pas savoir laquelle ")}'
+      + '${T("lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre.")} '
+      + '${T("Rattachez-la de nouveau pour lever le doute.")}</p>'
       + (k < ids.length
-          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + ' photo'
-             + ((ids.length - k) > 1 ? 's ne sont' : ' n’est') + ' rattachée'
-             + ((ids.length - k) > 1 ? 's' : '') + ' à aucun article et ne bougera'
-             + ((ids.length - k) > 1 ? 'nt' : '') + ' pas.</p>')
+          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + '${T(" photo")}'
+             + ((ids.length - k) > 1 ? '${T("s ne sont")}' : '${T(" n’est")}') + '${T(" rattachée")}'
+             + ((ids.length - k) > 1 ? 's' : '') + ' ${T("à aucun article et ne bougera")}'
+             + ((ids.length - k) > 1 ? 'nt' : '') + '${T(" pas.")}</p>')
           : '')
-      + '<div class="fin2"><button id="ap-non">Annuler</button>'
-      + '<button class="prim" id="ap-oui">Mettre à jour la vitrine</button></div>',
+      + '<div class="fin2"><button id="ap-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="ap-oui">${T("Mettre à jour la vitrine")}</button></div>',
       function(fermer){
         var non = document.getElementById('ap-non');
         var oui = document.getElementById('ap-oui');
         if (non) non.onclick = fermer;
         if (oui) oui.onclick = function(){
           oui.disabled = true;
-          dire('Mise à jour des fiches…');
+          dire('${T("Mise à jour des fiches…")}');
           appeler('photos:appliquerLot', [ids]).then(function(res){
             fermer();
             if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
-            var m = res.faites + ' fiche' + (res.faites > 1 ? 's' : '') + ' mise'
-              + (res.faites > 1 ? 's' : '') + ' à jour.';
-            if (res.nonLiees) m += ' ' + res.nonLiees + ' photo'
-              + (res.nonLiees > 1 ? 's non rattachées' : ' non rattachée') + '.';
-            if (res.incertaines) m += ' ' + res.incertaines + ' laissée'
-              + (res.incertaines > 1 ? 's' : '') + ' de côté (plusieurs images, lien incertain).';
-            if (res.echecs && res.echecs.length) m += ' ' + res.echecs.length + ' en échec.';
+            var m = res.faites + (res.faites > 1 ? '${T(" fiches mises à jour.")}' : '${T(" fiche mise à jour.")}');
+            if (res.nonLiees) m += ' ' + res.nonLiees + '${T(" photo")}'
+              + (res.nonLiees > 1 ? '${T("s non rattachées")}' : ' ${T("non rattachée")}') + '.';
+            if (res.incertaines) m += ' ' + res.incertaines + (res.incertaines > 1
+              ? '${T(" laissées de côté (plusieurs images, lien incertain).")}'
+              : '${T(" laissée de côté (plusieurs images, lien incertain).")}');
+            if (res.echecs && res.echecs.length) m += ' ' + res.echecs.length + ' ${T("en échec.")}';
             dire(m, ((res.echecs && res.echecs.length) || res.incertaines) ? 'att' : 'bon');
             charger();
           });
@@ -643,9 +658,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = Object.keys(SEL).length;
     var dispo = (D && D.tousLesIds) ? D.tousLesIds.length : 0;
     cptEl.className = 'cpt' + (n ? ' on' : '');
-    cptEl.textContent = n ? (n + ' sélectionnée' + (n > 1 ? 's' : '')) : 'Aucune sélection';
+    cptEl.textContent = n ? (n + '${T(" sélectionnée")}' + (n > 1 ? 's' : '')) : '${T("Aucune sélection")}';
     actionsEl.innerHTML =
-      '<button class="jeton" id="a-tout"' + (dispo ? '' : ' disabled') + '>Tout (' + dispo + ')</button>'
+      '<button class="jeton" id="a-tout"' + (dispo ? '' : ' disabled') + '>${T("Tout (")}' + dispo + ')</button>'
       + '<button class="jeton" id="a-inv"' + (dispo ? '' : ' disabled') + '>Inverser</button>'
       + '<button class="jeton" id="a-rien"' + (n ? '' : ' disabled') + '>Vider</button>'
       /* ⚠ LE RETOUR EN ARRIERE EST ICI, ET PAS DANS LE STUDIO. Le Studio traite
@@ -653,21 +668,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          photos parties avec la mauvaise mise en scene. On repare la ou l on
          choisit, sur la meme selection qui a servi a lancer le lot. */
       + '<button class="jeton" id="a-annuler"' + (nAnnulables() ? '' : ' disabled')
-      + ' title="Revenir à l’état d’avant le dernier traitement">↩ Annuler ('
+      + ' title="${T("Revenir à l’état d’avant le dernier traitement")}">${T("↩ Annuler (")}'
       + nAnnulables() + ')</button>'
       /* ⚠ LE MOT << VITRINE >> EST SUR LE BOUTON, ET C EST VOULU : ce geste-ci
          ne touche pas a la phototheque, il change ce que la CLIENTE voit. Le
          libelle doit le dire avant le clic, pas le voile apres. */
       + '<button class="jeton" id="a-appliquer"' + (nAppliquer() ? '' : ' disabled')
-      + ' title="Porter l’image courante dans la fiche de l’article — c’est ce que la boutique montrera">'
-      + '<span class="ic">📦</span> Mettre à jour la fiche (' + nAppliquer() + ')</button>'
+      + ' title="${T("Porter l’image courante dans la fiche de l’article — c’est ce que la boutique montrera")}">'
+      + '<span class="ic">📦</span> ${T("Mettre à jour la fiche (")}' + nAppliquer() + ')</button>'
       /* ⚠ ON N EXECUTE PLUS LE LOT ICI (corrige le 2026-08-14, sa demande :
          << la selection doit etre ramenee au studio virtuel et l on execute le
          lot a cet endroit >>). L explorateur CHOISIT, le Studio DECIDE — c est
          la ou l on voit la voie, l ambiance et le modele, donc la ou le choix
          du traitement a du sens. */
       + '<button class="prim" id="a-envoyer"' + (n ? '' : ' disabled') + '>'
-      + '→ Envoyer au Studio' + (n ? ' (' + n + ')' : '') + '</button>';
+      + '${T("→ Envoyer au Studio")}' + (n ? ' (' + n + ')' : '') + '</button>';
     var t = document.getElementById('a-tout');
     if (t) t.onclick = function(){
       ((D && D.tousLesIds) || []).forEach(function(id){ SEL[id] = true; }); dessiner(); };
@@ -689,8 +704,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('panier:poser', [ids]).then(function(r){
         en.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire(r.combien + ' photo' + (r.combien > 1 ? 's' : '') + ' envoyée'
-          + (r.combien > 1 ? 's' : '') + ' au Studio — le traitement se lance là-bas.', 'bon');
+        dire(r.combien + '${T(" photo")}' + (r.combien > 1 ? 's' : '') + '${T(" envoyée")}'
+          + (r.combien > 1 ? 's' : '') + '${T(" au Studio — le traitement se lance là-bas.")}', 'bon');
         /* ⚠ ON FERME, ET C EST LE GESTE JUSTE (demande du 2026-08-14 : << quand
            on fait envoyer au studio ca devrait fermer l explorateur
            automatiquement >>). L explorateur est un SELECTEUR : une fois la
@@ -711,7 +726,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dessinerApercu();
     dessinerPied();
     var s = document.getElementById('sous');
-    if (s && D) s.textContent = (D.trouvees || 0) + ' sur ' + (D.total || 0);
+    if (s && D) s.textContent = (D.trouvees || 0) + '${T(" sur ")}' + (D.total || 0);
     /* ⚠ LA MESURE VIENT APRES LE DESSIN : la hauteur reelle n existe qu une
        fois le tableau dans la page. Le socle ne rappelle que si le compte a
        CHANGE — sinon on redessinerait en boucle. La grille n est pas mesuree

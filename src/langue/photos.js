@@ -245,6 +245,15 @@ module.exports = {
   'gardée(s) car attachée(s) à un article': 'kept because attached to an item',
   'en échec': 'failed',
   'Nom du lot': 'Batch name',
+  /* ⚠ L EXEMPLE DU NOM DE LOT SUIT LA LANGUE DU POSTE. Un nom de lot ne sort
+     pas de l administration — au contraire de l exemple d un badge ou d un
+     bandeau, qui montre ce que la CLIENTE lira et reste donc en francais (voir
+     src/langue/promotions.js). ⚠⚠ Ce texte est reste francais sur la page
+     anglaise jusqu au 2026-09-13 : aucun banc ne le voyait, parce que le mot
+     « printemps » n entrait dans le lexique qu avec le dictionnaire des offres.
+     Le lexique grossit a chaque fenetre traduite, et il decouvre alors des
+     oublis anciens — ce n est pas une regression, c est une vue plus large. */
+  'ex. Collection printemps': 'e.g. Spring collection',
   'Les photos importées seront nommées « Nom 01 », « Nom 02 »…':
     'Imported photos will be named « Name 01 », « Name 02 »…',
   'Laissé vide, on garde le nom d’origine.': 'Left empty, the original name is kept.',

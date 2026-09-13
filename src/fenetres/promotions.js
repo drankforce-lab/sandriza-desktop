@@ -22,6 +22,12 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠⚠ CET ÉCRAN EST DÉJÀ BILINGUE PAR SES CHAMPS : le bandeau et le
+   badge portent chacun « Message » ET « Message (anglais) ». Ce que la cliente
+   lit est traduit À LA MAIN par qui rédige l'offre — ici on ne traduit que les
+   LIBELLES. Voir l'en-tête de src/langue/promotions.js. */
+const T = require('../langue').tr('promotions');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -106,11 +112,11 @@ tbody tr:hover td{background:var(--v04)}
 /** Page complète de la fenêtre native « Offres et annonces ». */
 function pagePromotions() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Offres et annonces — Administration Sandriza</title>
+<title>${T("Offres et annonces — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.promotions}</span><h1>Offres et annonces</h1>
+<div class="tete"><span class="ico">${ICO.promotions}</span><h1>${T("Offres et annonces")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -142,26 +148,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux promotions.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cet élément n’existe plus.',
-    nom:                'Un nom interne est requis.',
-    valeur:             'La valeur du rabais doit être supérieure à zéro.',
-    bogo:               'Quantités « 2 pour 1 » invalides — la quantité gratuite doit être inférieure à la quantité achetée, qui vaut au moins 2.',
-    paliers:            'Ajoutez au moins un palier valable : quantité d’au moins 2, rabais entre 1 et 100 %.',
-    categories:         'Choisissez au moins une catégorie.',
-    produits:           'Choisissez au moins un produit.',
-    message:            'Le message du bandeau est requis.',
-    badge:              'Le texte du badge est requis.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux promotions.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cet élément n’existe plus.")}',
+    nom:                '${T("Un nom interne est requis.")}',
+    valeur:             '${T("La valeur du rabais doit être supérieure à zéro.")}',
+    bogo:               '${T("Quantités « 2 pour 1 » invalides — la quantité gratuite doit être inférieure à la quantité achetée, qui vaut au moins 2.")}',
+    paliers:            '${T("Ajoutez au moins un palier valable : quantité d’au moins 2, rabais entre 1 et 100 %.")}',
+    categories:         '${T("Choisissez au moins une catégorie.")}',
+    produits:           '${T("Choisissez au moins un produit.")}',
+    message:            '${T("Le message du bandeau est requis.")}',
+    badge:              '${T("Le texte du badge est requis.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -192,16 +198,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   /* ── Le choix de la portée : catégories ou produits ── */
   function blocPortee(prefixe, appliqueA, cats){
-    var h = '<div class="ch large"><label>S’applique à</label>'
-      + '<select aria-label="S’applique à" id="' + prefixe + '-appli">'
-      + '<option value="all"' + (appliqueA === 'all' ? ' selected' : '') + '>Tous les produits</option>'
-      + '<option value="category"' + (appliqueA === 'category' ? ' selected' : '') + '>Certaines catégories</option>'
-      + '<option value="products"' + (appliqueA === 'products' ? ' selected' : '') + '>Des produits nommés</option>'
+    var h = '<div class="ch large"><label>${T("S’applique à")}</label>'
+      + '<select aria-label="${T("S’applique à")}" id="' + prefixe + '-appli">'
+      + '<option value="all"' + (appliqueA === 'all' ? ' selected' : '') + '>${T("Tous les produits")}</option>'
+      + '<option value="category"' + (appliqueA === 'category' ? ' selected' : '') + '>${T("Certaines catégories")}</option>'
+      + '<option value="products"' + (appliqueA === 'products' ? ' selected' : '') + '>${T("Des produits nommés")}</option>'
       + '</select></div>';
 
     h += '<div class="ch large" id="' + prefixe + '-bloc-cats"'
       + (appliqueA === 'category' ? '' : ' style="display:none"') + '>'
-      + '<label>Catégories</label><div class="cases">'
+      + '<label>${T("Catégories")}</label><div class="cases">'
       + (D.categories || []).map(function(c){
           return '<label><input type="checkbox" class="' + prefixe + '-cat" value="' + esc(c.cle) + '"'
             + (cats.indexOf(c.cle) >= 0 ? ' checked' : '') + '> ' + esc(c.libelle) + '</label>';
@@ -210,8 +216,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     h += '<div class="ch large" id="' + prefixe + '-bloc-prods"'
       + (appliqueA === 'products' ? '' : ' style="display:none"') + '>'
-      + '<label>Produits <span class="req">*</span></label>'
-      + '<input type="search" id="' + prefixe + '-qprod" aria-label="Chercher un produit par nom ou SKU" placeholder="Chercher un nom ou un SKU…" value="' + esc(QPROD) + '">'
+      + '<label>${T("Produits ")}<span class="req">*</span></label>'
+      + '<input type="search" id="' + prefixe + '-qprod" aria-label="${T("Chercher un produit par nom ou SKU")}" placeholder="${T("Chercher un nom ou un SKU…")}" value="' + esc(QPROD) + '">'
       + '<div class="choix" id="' + prefixe + '-choix">' + listeCatalogue(prefixe) + '</div>'
       + '<span class="aide" id="' + prefixe + '-cpt">' + CHOISIS.length + ' produit'
       + (CHOISIS.length > 1 ? 's choisis' : ' choisi') + '</span></div>';
@@ -231,7 +237,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     });
     // Sans recherche, on ne deverse pas tout le catalogue : les 40 premiers.
     var vus = choisis.concat(q ? reste.slice(0, 120) : reste.slice(0, 40));
-    if (!vus.length) return '<div class="dt">Aucun produit ne correspond.</div>';
+    if (!vus.length) return '<div class="dt">${T("Aucun produit ne correspond.")}</div>';
     return vus.map(function(p){
       return '<label class="lg"><input type="checkbox" class="' + prefixe + '-prod" value="' + esc(p.id) + '"'
         + (CHOISIS.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + esc(p.nom)
@@ -243,82 +249,82 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var o = FORM || {};
     var genre = o.genre || 'percent';
     var h = '<div class="voile" id="pr-voile"><div class="boite">'
-      + '<h3>' + (o.id ? 'Modifier l’offre' : 'Nouvelle offre') + '</h3>'
+      + '<h3>' + (o.id ? '${T("Modifier l’offre")}' : '${T("Nouvelle offre")}') + '</h3>'
       + '<div class="grille">'
-      + '<div class="ch"><label>Nom interne <span class="req">*</span></label>'
-      + '<input id="of-nom" aria-label="Nom interne de l’offre" value="' + esc(o.nom || '') + '" placeholder="Solde du printemps"></div>'
-      + '<div class="ch"><label for="of-actif">Statut</label><select id="of-actif">'
-      + '<option value="1"' + (o.actif !== false ? ' selected' : '') + '>Actif</option>'
-      + '<option value="0"' + (o.actif === false ? ' selected' : '') + '>Inactif</option></select></div>'
-      + '<div class="ch"><label for="of-genre">Type de rabais</label><select id="of-genre">'
-      + '<option value="percent"' + (genre === 'percent' ? ' selected' : '') + '>Pourcentage (%)</option>'
-      + '<option value="fixed"' + (genre === 'fixed' ? ' selected' : '') + '>Montant fixe ($)</option>'
-      + '<option value="bogo"' + (genre === 'bogo' ? ' selected' : '') + '>« 2 pour 1 » (quantité)</option>'
-      + '<option value="tiered"' + (genre === 'tiered' ? ' selected' : '') + '>Paliers de quantité</option>'
+      + '<div class="ch"><label>${T("Nom interne ")}<span class="req">*</span></label>'
+      + '<input id="of-nom" aria-label="${T("Nom interne de l’offre")}" value="' + esc(o.nom || '') + '" placeholder="${T("Solde du printemps")}"></div>'
+      + '<div class="ch"><label for="of-actif">${T("Statut")}</label><select id="of-actif">'
+      + '<option value="1"' + (o.actif !== false ? ' selected' : '') + '>${T("Actif")}</option>'
+      + '<option value="0"' + (o.actif === false ? ' selected' : '') + '>${T("Inactif")}</option></select></div>'
+      + '<div class="ch"><label for="of-genre">${T("Type de rabais")}</label><select id="of-genre">'
+      + '<option value="percent"' + (genre === 'percent' ? ' selected' : '') + '>${T("Pourcentage (%)")}</option>'
+      + '<option value="fixed"' + (genre === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option>'
+      + '<option value="bogo"' + (genre === 'bogo' ? ' selected' : '') + '>${T("« 2 pour 1 » (quantité)")}</option>'
+      + '<option value="tiered"' + (genre === 'tiered' ? ' selected' : '') + '>${T("Paliers de quantité")}</option>'
       + '</select></div>'
       + '<div class="ch" id="of-bloc-val"' + (genre === 'bogo' || genre === 'tiered' ? ' style="display:none"' : '') + '>'
-      + '<label>Valeur <span class="req">*</span></label>'
-      + '<input type="number" id="of-valeur" aria-label="Valeur de l’offre" min="0" step="0.01" value="' + esc(o.valeur || '') + '"></div>'
+      + '<label>${T("Valeur ")}<span class="req">*</span></label>'
+      + '<input type="number" id="of-valeur" aria-label="${T("Valeur de l’offre")}" min="0" step="0.01" value="' + esc(o.valeur || '') + '"></div>'
       + '</div>';
 
     h += '<div id="of-bloc-bogo"' + (genre === 'bogo' ? '' : ' style="display:none"') + '>'
-      + '<h4>« 2 pour 1 »</h4><div class="grille">'
-      + '<div class="ch"><label for="of-bogo-achat">Quantité achetée</label>'
+      + '<h4>${T("« 2 pour 1 »")}</h4><div class="grille">'
+      + '<div class="ch"><label for="of-bogo-achat">${T("Quantité achetée")}</label>'
       + '<input type="number" id="of-bogo-achat" min="2" step="1" value="' + esc(o.bogoAchat || 2) + '"></div>'
-      + '<div class="ch"><label for="of-bogo-gratuit">Quantité gratuite</label>'
+      + '<div class="ch"><label for="of-bogo-gratuit">${T("Quantité gratuite")}</label>'
       + '<input type="number" id="of-bogo-gratuit" min="1" step="1" value="' + esc(o.bogoGratuit || 1) + '">'
-      + '<span class="aide">Doit rester inférieure à la quantité achetée.</span></div>'
+      + '<span class="aide">${T("Doit rester inférieure à la quantité achetée.")}</span></div>'
       + '<div class="ch"><label for="of-parclient">&nbsp;</label><label style="display:inline-flex;align-items:center;gap:.4rem">'
-      + '<input type="checkbox" id="of-parclient"' + (o.parClient ? ' checked' : '') + '> Une fois par client</label></div>'
+      + '<input type="checkbox" id="of-parclient"' + (o.parClient ? ' checked' : '') + '> ${T("Une fois par client")}</label></div>'
       + '</div></div>';
 
     h += '<div id="of-bloc-paliers"' + (genre === 'tiered' ? '' : ' style="display:none"') + '>'
-      + '<h4>Paliers de quantité</h4><div class="paliers" id="of-paliers">' + listePaliers() + '</div>'
-      + '<button class="mini" id="of-palier-plus">+ Ajouter un palier</button></div>';
+      + '<h4>${T("Paliers de quantité")}</h4><div class="paliers" id="of-paliers">' + listePaliers() + '</div>'
+      + '<button class="mini" id="of-palier-plus">${T("+ Ajouter un palier")}</button></div>';
 
-    h += '<h4>Portée</h4><div class="grille">'
+    h += '<h4>${T("Portée")}</h4><div class="grille">'
       + blocPortee('of', o.appliqueA || 'all', o.categoriesChoisies || [])
       + '</div>';
 
-    h += '<h4>Bandeau de la boutique</h4><div class="grille">'
-      + '<div class="ch large"><label for="of-bandeau">Message</label>'
-      + '<input id="of-bandeau" value="' + esc(o.bandeau || '') + '" placeholder="Jusqu’à 30 % sur les robes"></div>'
-      + '<div class="ch large"><label for="of-bandeau-en">Message (anglais)</label>'
+    h += '<h4>${T("Bandeau de la boutique")}</h4><div class="grille">'
+      + '<div class="ch large"><label for="of-bandeau">${T("Message")}</label>'
+      + '<input id="of-bandeau" value="' + esc(o.bandeau || '') + '" placeholder="${T("Jusqu’à 30 % sur les robes")}"></div>'
+      + '<div class="ch large"><label for="of-bandeau-en">${T("Message (anglais)")}</label>'
       + '<input id="of-bandeau-en" value="' + esc(o.bandeauEN || '') + '"></div>'
-      + '<div class="ch"><label for="of-fond">Couleur du fond</label>'
+      + '<div class="ch"><label for="of-fond">${T("Couleur du fond")}</label>'
       + '<input type="color" id="of-fond" value="' + esc(o.bandeauFond || '#1a1a2e') + '"></div>'
-      + '<div class="ch"><label for="of-texte">Couleur du texte</label>'
+      + '<div class="ch"><label for="of-texte">${T("Couleur du texte")}</label>'
       + '<input type="color" id="of-texte" value="' + esc(o.bandeauTexte || '#ffffff') + '"></div>'
-      + '<div class="ch"><label for="of-cta">Texte du bouton</label>'
-      + '<input id="of-cta" value="' + esc(o.bandeauCta || '') + '" placeholder="Voir les articles"></div>'
-      + '<div class="ch"><label for="of-cta-en">Texte du bouton (anglais)</label>'
+      + '<div class="ch"><label for="of-cta">${T("Texte du bouton")}</label>'
+      + '<input id="of-cta" value="' + esc(o.bandeauCta || '') + '" placeholder="${T("Voir les articles")}"></div>'
+      + '<div class="ch"><label for="of-cta-en">${T("Texte du bouton (anglais)")}</label>'
       + '<input id="of-cta-en" value="' + esc(o.bandeauCtaEN || '') + '"></div>'
-      + '<div class="ch"><label for="of-url">Lien du bouton</label>'
+      + '<div class="ch"><label for="of-url">${T("Lien du bouton")}</label>'
       + '<input id="of-url" value="' + esc(o.bandeauUrl || '#shop') + '"></div>'
-      + '<div class="ch"><label for="of-priorite">Priorité d’affichage</label>'
+      + '<div class="ch"><label for="of-priorite">${T("Priorité d’affichage")}</label>'
       + '<input type="number" id="of-priorite" min="1" max="99" value="' + esc(o.priorite || 5) + '"></div>'
-      + '<div class="ch"><label for="of-debut">Début</label><input type="date" id="of-debut" value="' + esc(o.debut || '') + '"></div>'
-      + '<div class="ch"><label for="of-fin">Fin</label><input type="date" id="of-fin" value="' + esc(o.fin || '') + '"></div>'
+      + '<div class="ch"><label for="of-debut">${T("Début")}</label><input type="date" id="of-debut" value="' + esc(o.debut || '') + '"></div>'
+      + '<div class="ch"><label for="of-fin">${T("Fin")}</label><input type="date" id="of-fin" value="' + esc(o.fin || '') + '"></div>'
       + '</div>';
 
-    h += '<div class="pied-boite"><button class="mini" id="pr-annuler">Annuler</button>'
-      + '<button class="mini prim" id="of-enr">' + (o.id ? 'Enregistrer' : 'Créer l’offre') + '</button></div>'
+    h += '<div class="pied-boite"><button class="mini" id="pr-annuler">${T("Annuler")}</button>'
+      + '<button class="mini prim" id="of-enr">' + (o.id ? '${T("Enregistrer")}' : '${T("Créer l’offre")}') + '</button></div>'
       + '</div></div>';
     return h;
   }
 
   function listePaliers(){
-    if (!PALIERS.length) return '<div class="dt">Aucun palier — ajoutez-en au moins un.</div>';
+    if (!PALIERS.length) return '<div class="dt">${T("Aucun palier — ajoutez-en au moins un.")}</div>';
     return PALIERS.map(function(t, i){
-      return '<div class="lg"><span class="dt">à partir de</span>'
+      return '<div class="lg"><span class="dt">${T("à partir de")}</span>'
         /* ⚠ DEUX CHAMPS DANS UNE PHRASE (<< a partir de N articles : P % >>) : les
          mots qui les separent sont du TEXTE, pas des etiquettes. En tabulant, le
          lecteur d ecran annoncait deux fois << nombre >>. */
-      + '<input type="number" min="2" step="1" class="pal-qty" data-i="' + i + '" aria-label="' + esc('Palier ' + (i + 1) + ' — nombre d’articles') + '" value="' + esc(t.qty || '') + '">'
-        + '<span class="dt">articles :</span>'
-        + '<input type="number" min="1" max="100" step="1" class="pal-pct" data-i="' + i + '" aria-label="' + esc('Palier ' + (i + 1) + ' — pourcentage de rabais') + '" value="' + esc(t.percent || '') + '">'
+      + '<input type="number" min="2" step="1" class="pal-qty" data-i="' + i + '" aria-label="' + esc('${T("Palier ")}' + (i + 1) + '${T(" — nombre d’articles")}') + '" value="' + esc(t.qty || '') + '">'
+        + '<span class="dt">${T("articles :")}</span>'
+        + '<input type="number" min="1" max="100" step="1" class="pal-pct" data-i="' + i + '" aria-label="' + esc('${T("Palier ")}' + (i + 1) + '${T(" — pourcentage de rabais")}') + '" value="' + esc(t.percent || '') + '">'
         + '<span class="dt">%</span>'
-        + '<button class="mini danger" data-pal-moins="' + i + '">Retirer</button></div>';
+        + '<button class="mini danger" data-pal-moins="' + i + '">${T("Retirer")}</button></div>';
     }).join('');
   }
 
@@ -326,91 +332,91 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var a = FORM || {};
     var genre = a.genre || 'announcement';
     var h = '<div class="voile" id="pr-voile"><div class="boite">'
-      + '<h3>' + (a.id ? 'Modifier' : 'Nouvelle annonce') + '</h3>'
+      + '<h3>' + (a.id ? '${T("Modifier")}' : '${T("Nouvelle annonce")}') + '</h3>'
       + '<div class="grille">'
-      + '<div class="ch"><label>Nom interne <span class="req">*</span></label>'
-      + '<input id="an-nom" aria-label="Nom interne de l’annonce" value="' + esc(a.nom || '') + '"></div>'
-      + '<div class="ch"><label for="an-genre">Genre</label><select id="an-genre">'
-      + '<option value="announcement"' + (genre === 'announcement' ? ' selected' : '') + '>Bandeau de la boutique</option>'
-      + '<option value="badge"' + (genre === 'badge' ? ' selected' : '') + '>Badge de fiche produit</option>'
+      + '<div class="ch"><label>${T("Nom interne ")}<span class="req">*</span></label>'
+      + '<input id="an-nom" aria-label="${T("Nom interne de l’annonce")}" value="' + esc(a.nom || '') + '"></div>'
+      + '<div class="ch"><label for="an-genre">${T("Genre")}</label><select id="an-genre">'
+      + '<option value="announcement"' + (genre === 'announcement' ? ' selected' : '') + '>${T("Bandeau de la boutique")}</option>'
+      + '<option value="badge"' + (genre === 'badge' ? ' selected' : '') + '>${T("Badge de fiche produit")}</option>'
       + '</select></div>'
-      + '<div class="ch"><label for="an-actif">Statut</label><select id="an-actif">'
-      + '<option value="1"' + (a.actif !== false ? ' selected' : '') + '>Actif</option>'
-      + '<option value="0"' + (a.actif === false ? ' selected' : '') + '>Inactif</option></select></div>'
-      + '<div class="ch"><label for="an-priorite">Priorité</label>'
+      + '<div class="ch"><label for="an-actif">${T("Statut")}</label><select id="an-actif">'
+      + '<option value="1"' + (a.actif !== false ? ' selected' : '') + '>${T("Actif")}</option>'
+      + '<option value="0"' + (a.actif === false ? ' selected' : '') + '>${T("Inactif")}</option></select></div>'
+      + '<div class="ch"><label for="an-priorite">${T("Priorité")}</label>'
       + '<input type="number" id="an-priorite" min="1" max="99" value="' + esc(a.priorite || 5) + '"></div>'
-      + '<div class="ch"><label for="an-debut">Début</label><input type="date" id="an-debut" value="' + esc(a.debut || '') + '"></div>'
-      + '<div class="ch"><label for="an-fin">Fin</label><input type="date" id="an-fin" value="' + esc(a.fin || '') + '"></div>'
+      + '<div class="ch"><label for="an-debut">${T("Début")}</label><input type="date" id="an-debut" value="' + esc(a.debut || '') + '"></div>'
+      + '<div class="ch"><label for="an-fin">${T("Fin")}</label><input type="date" id="an-fin" value="' + esc(a.fin || '') + '"></div>'
       + '</div>';
 
     h += '<div id="an-bloc-bandeau"' + (genre === 'announcement' ? '' : ' style="display:none"') + '>'
-      + '<h4>Bandeau</h4><div class="grille">'
-      + '<div class="ch large"><label>Message <span class="req">*</span></label>'
-      + '<input id="an-message" aria-label="Message de l’annonce" value="' + esc(a.message || '') + '"></div>'
-      + '<div class="ch large"><label for="an-message-en">Message (anglais)</label>'
+      + '<h4>${T("Bandeau")}</h4><div class="grille">'
+      + '<div class="ch large"><label>${T("Message ")}<span class="req">*</span></label>'
+      + '<input id="an-message" aria-label="${T("Message")} de l’annonce" value="' + esc(a.message || '') + '"></div>'
+      + '<div class="ch large"><label for="an-message-en">${T("Message (anglais)")}</label>'
       + '<input id="an-message-en" value="' + esc(a.messageEN || '') + '"></div>'
-      + '<div class="ch"><label for="an-fond">Couleur du fond</label>'
+      + '<div class="ch"><label for="an-fond">${T("Couleur du fond")}</label>'
       + '<input type="color" id="an-fond" value="' + esc(a.fond || '#1a1a2e') + '"></div>'
-      + '<div class="ch"><label for="an-texte">Couleur du texte</label>'
+      + '<div class="ch"><label for="an-texte">${T("Couleur du texte")}</label>'
       + '<input type="color" id="an-texte" value="' + esc(a.texte || '#ffffff') + '"></div>'
-      + '<div class="ch"><label for="an-cta">Texte du bouton</label><input id="an-cta" value="' + esc(a.cta || '') + '"></div>'
-      + '<div class="ch"><label for="an-cta-en">Texte du bouton (anglais)</label><input id="an-cta-en" value="' + esc(a.ctaEN || '') + '"></div>'
-      + '<div class="ch large"><label for="an-url">Lien du bouton</label><input id="an-url" value="' + esc(a.url || '#shop') + '"></div>'
+      + '<div class="ch"><label for="an-cta">${T("Texte du bouton")}</label><input id="an-cta" value="' + esc(a.cta || '') + '"></div>'
+      + '<div class="ch"><label for="an-cta-en">${T("Texte du bouton (anglais)")}</label><input id="an-cta-en" value="' + esc(a.ctaEN || '') + '"></div>'
+      + '<div class="ch large"><label for="an-url">${T("Lien du bouton")}</label><input id="an-url" value="' + esc(a.url || '#shop') + '"></div>'
       + '</div></div>';
 
     h += '<div id="an-bloc-badge"' + (genre === 'badge' ? '' : ' style="display:none"') + '>'
-      + '<h4>Badge</h4><div class="grille">'
-      + '<div class="ch"><label>Texte <span class="req">*</span></label>'
-      + '<input id="an-badge" aria-label="Texte de l’emblème" value="' + esc(a.badge || '') + '" placeholder="Nouveauté"></div>'
-      + '<div class="ch"><label for="an-badge-en">Texte (anglais)</label><input id="an-badge-en" value="' + esc(a.badgeEN || '') + '"></div>'
-      + '<div class="ch"><label for="an-badge-couleur">Couleur</label><select id="an-badge-couleur">'
-      + [['accent', 'Or (accent)'], ['success', 'Vert'], ['error', 'Rouge'], ['info', 'Bleu'], ['warning', 'Orange']]
+      + '<h4>${T("Badge")}</h4><div class="grille">'
+      + '<div class="ch"><label>${T("Texte ")}<span class="req">*</span></label>'
+      + '<input id="an-badge" aria-label="${T("Texte de l’emblème")}" value="' + esc(a.badge || '') + '" placeholder="${T("Nouveauté")}"></div>'
+      + '<div class="ch"><label for="an-badge-en">${T("Texte (anglais)")}</label><input id="an-badge-en" value="' + esc(a.badgeEN || '') + '"></div>'
+      + '<div class="ch"><label for="an-badge-couleur">${T("Couleur")}</label><select id="an-badge-couleur">'
+      + [['accent', '${T("Or (accent)")}'], ['success', '${T("Vert")}'], ['error', '${T("Rouge")}'], ['info', '${T("Bleu")}'], ['warning', '${T("Orange")}']]
           .map(function(c){
             return '<option value="' + c[0] + '"' + ((a.badgeCouleur || 'accent') === c[0] ? ' selected' : '') + '>' + c[1] + '</option>';
           }).join('')
       + '</select></div>'
       + blocPortee('an', a.appliqueA || 'all', a.categoriesChoisies || [])
       + '<div class="ch"><label for="an-expire">&nbsp;</label><label style="display:inline-flex;align-items:center;gap:.4rem">'
-      + '<input type="checkbox" id="an-expire"' + (a.expireAuto ? ' checked' : '') + '> Expire par produit</label></div>'
-      + '<div class="ch"><label for="an-expire-jours">Après (jours)</label>'
+      + '<input type="checkbox" id="an-expire"' + (a.expireAuto ? ' checked' : '') + '> ${T("Expire par produit")}</label></div>'
+      + '<div class="ch"><label for="an-expire-jours">${T("Après (jours)")}</label>'
       + '<input type="number" id="an-expire-jours" min="1" value="' + esc(a.expireJours || 7) + '"></div>'
       + '</div></div>';
 
-    h += '<div class="pied-boite"><button class="mini" id="pr-annuler">Annuler</button>'
-      + '<button class="mini prim" id="an-enr">' + (a.id ? 'Enregistrer' : 'Créer') + '</button></div>'
+    h += '<div class="pied-boite"><button class="mini" id="pr-annuler">${T("Annuler")}</button>'
+      + '<button class="mini prim" id="an-enr">' + (a.id ? '${T("Enregistrer")}' : '${T("Créer")}') + '</button></div>'
       + '</div></div>';
     return h;
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = lignes();
 
     var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'offres' ? ' actif' : '') + '" data-onglet="offres">Offres et rabais</button>'
-      + '<button class="mini' + (ONGLET === 'annonces' ? ' actif' : '') + '" data-onglet="annonces">Annonces et badges</button>'
-      + '<input aria-label="Rechercher" type="search" id="pr-q" placeholder="Rechercher…" value="' + esc(Q) + '">'
+      + '<button class="mini' + (ONGLET === 'offres' ? ' actif' : '') + '" data-onglet="offres">${T("Offres et rabais")}</button>'
+      + '<button class="mini' + (ONGLET === 'annonces' ? ' actif' : '') + '" data-onglet="annonces">${T("Annonces et badges")}</button>'
+      + '<input aria-label="${T("Rechercher")}" type="search" id="pr-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '">'
       + '<div class="droite">'
       + (D.peutModifier ? '<button class="mini prim" id="pr-nouveau">+ '
-          + (ONGLET === 'offres' ? 'Nouvelle offre' : 'Nouvelle annonce') + '</button>' : '')
+          + (ONGLET === 'offres' ? '${T("Nouvelle offre")}' : '${T("Nouvelle annonce")}') + '</button>' : '')
       + '<span>' + rows.length + '</span></div></div>';
 
     if (ONGLET === 'annonces' && D.peutModifier) {
-      h += '<div class="carte"><h2>Défilement du bandeau</h2>'
+      h += '<div class="carte"><h2>${T("Défilement du bandeau")}</h2>'
         + '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">'
-        + '<span class="dt">Quand plusieurs bandeaux sont actifs, ils se succèdent toutes les</span>'
-        + '<input type="number" id="pr-interv" aria-label="Intervalle en secondes" min="2" max="60" style="width:5rem" value="' + esc(D.intervalle || 6) + '">'
+        + '<span class="dt">${T("Quand plusieurs bandeaux sont actifs, ils se succèdent toutes les")}</span>'
+        + '<input type="number" id="pr-interv" aria-label="${T("Intervalle en secondes")}" min="2" max="60" style="width:5rem" value="' + esc(D.intervalle || 6) + '">'
         + '<span class="dt">secondes.</span>'
-        + '<button class="mini" id="pr-interv-enr">Enregistrer</button></div></div>';
+        + '<button class="mini" id="pr-interv-enr">${T("Enregistrer")}</button></div></div>';
     }
 
     h += '<div class="carte">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q ? 'Rien ne correspond.'
-        : ONGLET === 'offres' ? 'Aucune offre. Créez la première.' : 'Aucune annonce. Créez la première.') + '</div>';
+      h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
+        : ONGLET === 'offres' ? '${T("Aucune offre. Créez la première.")}' : '${T("Aucune annonce. Créez la première.")}') + '</div>';
     } else if (ONGLET === 'offres') {
-      h += '<table><thead><tr><th>Nom</th><th>Rabais</th><th>Portée</th><th>Période</th>'
-        + '<th>État</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Rabais")}</th><th>${T("Portée")}</th><th>${T("Période")}</th>'
+        + '<th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(o){
             return '<tr><td><strong>' + esc(o.nom) + '</strong></td>'
               + '<td style="font-weight:700;color:var(--tx-or)">' + esc(o.rabais) + '</td>'
@@ -418,24 +424,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + '<td class="dt">' + (o.debut ? esc(jour(o.debut)) : '—')
               + (o.fin ? ' → ' + esc(jour(o.fin)) : '') + '</td>'
               + '<td><span class="pill ' + (o.enCours ? 'bon' : 'neutre') + '">'
-              + (o.enCours ? 'En cours' : 'Hors service') + '</span></td>'
+              + (o.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes(o) + '</td>' : '') + '</tr>';
           }).join('')
         + '</tbody></table>';
     } else {
-      h += '<table><thead><tr><th>Nom</th><th>Genre</th><th>Contenu</th><th>Priorité</th>'
-        + '<th>Période</th><th>État</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Genre")}</th><th>${T("Contenu")}</th><th>${T("Priorité")}</th>'
+        + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(a){
             return '<tr><td><strong>' + esc(a.nom) + '</strong>'
-              + (a.expireAuto ? '<div class="dt">expire après ' + a.expireJours + ' j par produit</div>' : '') + '</td>'
-              + '<td><span class="pill neutre">' + (a.genre === 'announcement' ? 'Bandeau' : 'Badge') + '</span></td>'
+              + (a.expireAuto ? '<div class="dt">${T("expire après")} ' + a.expireJours + ' j par produit</div>' : '') + '</td>'
+              + '<td><span class="pill neutre">' + (a.genre === 'announcement' ? '${T("Bandeau")}' : '${T("Badge")}') + '</span></td>'
               + '<td class="dt" style="max-width:18rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
               + esc(a.genre === 'announcement' ? a.message : a.badge) + '</td>'
               + '<td>' + a.priorite + '</td>'
               + '<td class="dt">' + (a.debut ? esc(jour(a.debut)) : '—')
               + (a.fin ? ' → ' + esc(jour(a.fin)) : '') + '</td>'
               + '<td><span class="pill ' + (a.enCours ? 'bon' : 'neutre') + '">'
-              + (a.enCours ? 'En cours' : 'Hors service') + '</span></td>'
+              + (a.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes(a) + '</td>' : '') + '</tr>';
           }).join('')
         + '</tbody></table>';
@@ -448,11 +454,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function gestes(x){
-    return '<button class="mini geste" data-modifier="' + esc(x.id) + '">Modifier</button> '
+    return '<button class="mini geste" data-modifier="' + esc(x.id) + '">${T("Modifier")}</button> '
       + '<button class="mini geste" data-basculer="' + esc(x.id) + '">'
-      + (x.actif ? 'Désactiver' : 'Activer') + '</button> '
+      + (x.actif ? '${T("Désactiver")}' : '${T("Activer")}') + '</button> '
       + '<button class="mini geste danger" data-suppr="' + esc(x.id) + '">'
-      + (SUPPR_ARME === x.id ? 'Confirmer ?' : 'Supprimer') + '</button>';
+      + (SUPPR_ARME === x.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
   }
 
   function brancherPortee(prefixe){
@@ -525,7 +531,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   szBrouillonBrancher({
     portee: 'promotion',
-    libelle: 'Une saisie',
+    libelle: '${T("Une saisie")}',
     ttlMin: 720,
     cle: function(){
       if (!FORM) return '';
@@ -588,7 +594,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       appeler('promos:bandeau', [val('pr-interv')]).then(function(r){
         bi.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Défilement réglé à ' + r.intervalle + ' secondes.', 'bon');
+        dire('${T("Défilement réglé à ")}' + r.intervalle + '${T(" secondes.")}', 'bon');
         charger();
       });
     };
@@ -630,7 +636,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
           szBrouillonJeter();
           FORM = null;
-          dire('Offre « ' + r.nom + ' » ' + (r.creation ? 'créée.' : 'mise à jour.'), 'bon');
+          dire('${T("Offre « ")}' + r.nom + '${T(" » ")}' + (r.creation ? '${T("créée.")}' : '${T("mise à jour.")}'), 'bon');
           charger();
         });
       };
@@ -661,7 +667,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
           szBrouillonJeter();
           FORM = null;
-          dire('« ' + r.nom + ' » ' + (r.creation ? 'créée.' : 'mise à jour.'), 'bon');
+          dire('« ' + r.nom + '${T(" » ")}' + (r.creation ? '${T("créée.")}' : '${T("mise à jour.")}'), 'bon');
           charger();
         });
       };
@@ -735,7 +741,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       bb.disabled = true;
       appeler('promos:basculer', [bb.getAttribute('data-basculer')]).then(function(r){
         if (!r.ok) { bb.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('« ' + (r.nom || '') + ' » ' + (r.actif ? 'activée.' : 'désactivée.'), 'bon');
+        dire('« ' + (r.nom || '') + '${T(" » ")}' + (r.actif ? '${T("activée.")}' : '${T("désactivée.")}'), 'bon');
         charger();
       });
       return;
@@ -746,13 +752,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (SUPPR_ARME !== idS) {
         SUPPR_ARME = idS;
         dessiner();
-        dire('Cliquez « Confirmer ? » pour supprimer — la bannière de la boutique sera retirée avec.', 'att');
+        dire('${T("Cliquez « Confirmer ? » pour supprimer — la bannière de la boutique sera retirée avec.")}', 'att');
         return;
       }
       SUPPR_ARME = '';
       appeler('promos:supprimer', [idS]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire('« ' + (r.nom || '') + ' » supprimée.', 'bon');
+        dire('« ' + (r.nom || '') + ' ${T("» supprimée.")}', 'bon');
         charger();
       });
       return;
@@ -762,7 +768,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function charger(){
     appeler(ONGLET === 'offres' ? 'offres:liste' : 'annonces:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Promotions indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Promotions indisponibles")}', expliquer(r)); return; }
       D = r;
       if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
       dessiner();
@@ -792,12 +798,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
