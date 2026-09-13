@@ -1214,7 +1214,13 @@ function szCompte(n, tot, sing, plur){
   n = Number(n) || 0; tot = Number(tot) || 0;
   var mot = (n > 1 ? plur : sing);
   if (!tot || tot <= n) return n + ' ' + mot;
-  return n + ' sur ' + tot + ' ' + plur;
+  /* ⚠ LE << sur >> EST DU TEXTE, ET IL ETAIT RESTE FRANCAIS. Trouve le
+     2026-09-13 en traduisant fidelisation : ce mot de trois lettres n entre pas
+     dans le lexique du banc du residuel (quatre lettres au moins), et le
+     compteur ne lit pas le socle. Il paraissait dans SEPT listes, en anglais
+     comme en francais. Les mots singulier/pluriel, eux, arrivent deja traduits
+     par la fenetre qui appelle. */
+  return n + '${T(" sur ")}' + tot + ' ' + plur;
 }
 `;
 

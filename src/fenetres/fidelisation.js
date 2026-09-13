@@ -23,6 +23,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('fidelisation');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -136,11 +140,11 @@ function pageFidelisation(ouverture) {
   const depart = (['recompenses', 'invitations'].indexOf(ouv) >= 0) ? ouv : 'sondages';
   const editeur = (ouv === 'sondage-nouveau');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Fidélisation et sondages — Administration Sandriza</title>
+<title>${T("Fidélisation et sondages — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.loyalty}</span><h1>Fidélisation et sondages</h1>
+<div class="tete"><span class="ico">${ICO.loyalty}</span><h1>${T("Fidélisation et sondages")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Chargement… (les réponses se resynchronisent)</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Chargement… (les réponses se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -164,20 +168,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la fidélisation.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cet élément n’existe plus.',
-    courriel:           'Adresse courriel invalide.',
-    rien:               'Il n’y a aucune invitation à supprimer.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la fidélisation.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cet élément n’existe plus.")}',
+    courriel:           '${T("Adresse courriel invalide.")}',
+    rien:               '${T("Il n’y a aucune invitation à supprimer.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -197,37 +201,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueSondages(){
     var t = D.tuiles || {};
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Invitations</div><div class="val">' + (t.invitations || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Réponses</div><div class="val bon">' + (t.reponses || 0) + '</div>'
-      + '<div class="sub">taux de ' + (t.taux || 0) + ' %</div></div>'
-      + '<div class="tuile"><div class="lbl">Note moyenne</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Invitations")}</div><div class="val">' + (t.invitations || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Réponses")}</div><div class="val bon">' + (t.reponses || 0) + '</div>'
+      + '<div class="sub">${T("taux de ")}' + (t.taux || 0) + ' %</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Note moyenne")}</div><div class="val">'
       + (t.note == null ? '—' : t.note + ' / 5') + '</div>'
-      + '<div class="sub">' + (t.nbNotes || 0) + ' évaluation' + ((t.nbNotes || 0) > 1 ? 's' : '') + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Codes récompense</div><div class="val">' + (t.codes || 0) + '</div>'
-      + '<div class="sub">' + (t.codesUtilises || 0) + ' utilisé' + ((t.codesUtilises || 0) > 1 ? 's' : '') + '</div></div>'
+      + '<div class="sub">' + (t.nbNotes || 0) + ((t.nbNotes || 0) > 1 ? '${T(" évaluations")}' : '${T(" évaluation")}') + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Codes récompense")}</div><div class="val">' + (t.codes || 0) + '</div>'
+      + '<div class="sub">' + (t.codesUtilises || 0) + ((t.codesUtilises || 0) > 1 ? '${T(" utilisés")}' : '${T(" utilisé")}') + '</div></div>'
       + '</div>';
 
     if (D.peutModifier) {
-      h += '<div class="carte"><h2>Notification des commentaires</h2>'
-        + '<div class="dt" style="margin-bottom:.4rem">Quand un client laisse un commentaire, '
-        + 'il vous est transféré à cette adresse. Laissez vide pour ne rien recevoir.</div>'
+      h += '<div class="carte"><h2>${T("Notification des commentaires")}</h2>'
+        + '<div class="dt" style="margin-bottom:.4rem">${T("Quand un client laisse un commentaire, ")}'
+        + '${T("il vous est transféré à cette adresse. Laissez vide pour ne rien recevoir.")}</div>'
         + '<div style="display:flex;gap:.5rem;flex-wrap:wrap">'
-        + '<input type="email" id="fi-mail" aria-label="Courriel de notification des sondages" style="flex:1 1 16rem" value="' + esc(D.courrielNotification || '') + '" placeholder="sondages@exemple.com">'
-        + '<button class="mini" id="fi-mail-enr">Enregistrer</button></div></div>';
+        + '<input type="email" id="fi-mail" aria-label="${T("Courriel de notification des sondages")}" style="flex:1 1 16rem" value="' + esc(D.courrielNotification || '') + '" placeholder="${T("sondages@exemple.com")}">'
+        + '<button class="mini" id="fi-mail-enr">${T("Enregistrer")}</button></div></div>';
     }
 
-    h += '<div class="carte"><h2>Sondages</h2>';
+    h += '<div class="carte"><h2>${T("Sondages")}</h2>';
     if (!(D.sondages || []).length) {
-      h += '<div class="vide">Aucun sondage configuré.'
+      h += '<div class="vide">${T("Aucun sondage configuré.")}'
         + (D.peutModifier
-            ? '<div style="margin-top:.45rem"><button class="mini prim" id="fi-premier">Créer le premier</button></div>'
+            ? '<div style="margin-top:.45rem"><button class="mini prim" id="fi-premier">${T("Créer le premier")}</button></div>'
             : '') + '</div>';
     } else {
-      h += '<table><thead><tr><th>Nom</th><th>Déclencheur</th><th class="num">Questions</th>'
-        + '<th class="num">Invitations</th><th class="num">Réponses</th><th class="num">Taux</th>'
-        + '<th>Récompense</th><th>État</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Déclencheur")}</th><th class="num">${T("Questions")}</th>'
+        + '<th class="num">${T("Invitations")}</th><th class="num">${T("Réponses")}</th><th class="num">${T("Taux")}</th>'
+        + '<th>${T("Récompense")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + D.sondages.map(function(s){
-            return '<tr data-sondage="' + esc(s.id) + '" title="Voir le dépouillement">'
+            return '<tr data-sondage="' + esc(s.id) + '" title="${T("Voir le dépouillement")}">'
               + '<td><strong>' + esc(s.nom) + '</strong></td>'
               + '<td class="dt">' + esc(s.declencheur) + '</td>'
               + '<td class="num">' + s.nbQuestions + '</td>'
@@ -235,13 +239,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + '<td class="num">' + s.reponses + '</td>'
               + '<td class="num">' + s.taux + ' %</td>'
               + '<td>' + (s.recompense ? '<span class="pill bon">' + esc(s.recompense) + '</span>'
-                                       : '<span class="dt">aucune</span>') + '</td>'
+                                       : '<span class="dt">${T("aucune")}</span>') + '</td>'
               + '<td><span class="pill ' + (s.actif ? 'bon' : 'neutre') + '">'
-              + (s.actif ? 'Actif' : 'Inactif') + '</span></td>'
+              + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></td>'
               + (D.peutModifier
-                  ? '<td class="fin"><button class="mini geste" data-modifier-sondage="' + esc(s.id) + '">Modifier</button> '
+                  ? '<td class="fin"><button class="mini geste" data-modifier-sondage="' + esc(s.id) + '">${T("Modifier")}</button> '
                     + '<button class="mini geste danger" data-suppr-sondage="' + esc(s.id) + '">'
-                    + (ARME === s.id ? 'Confirmer ?' : 'Supprimer') + '</button></td>'
+                    + (ARME === s.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button></td>'
                   : '')
               + '</tr>';
           }).join('')
@@ -267,20 +271,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueRecompenses(){
     var rs = D.recompenses || [];
     var h = '<div class="barreoutils"><div class="droite"><span>'
-      + compte(rs.length, D.recompensesTotal, 'récompense', 'récompenses') + '</span></div></div>';
-    h += '<div class="carte"><h2>Codes de récompense</h2>';
+      + compte(rs.length, D.recompensesTotal, '${T("récompense")}', '${T("récompenses")}') + '</span></div></div>';
+    h += '<div class="carte"><h2>${T("Codes de récompense")}</h2>';
     if (!rs.length) {
-      h += '<div class="vide">Aucune récompense générée pour l’instant.</div>';
+      h += '<div class="vide">${T("Aucune récompense générée pour l’instant.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Code</th><th>Sondage</th><th>Commande</th>'
-        + '<th>Répondu le</th><th>Utilisé</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Code")}</th><th>${T("Sondage")}</th><th>${T("Commande")}</th>'
+        + '<th>${T("Répondu le")}</th><th>${T("Utilisé")}</th></tr></thead><tbody>'
         + rs.map(function(r){
             return '<tr><td><span class="code">' + esc(r.code) + '</span></td>'
               + '<td>' + esc(r.sondage) + '</td>'
               + '<td class="dt">' + esc(r.commande || '—') + '</td>'
               + '<td class="dt">' + esc(r.date) + '</td>'
-              + '<td>' + (r.utilise ? '<span class="pill bon">utilisé</span>'
-                                    : '<span class="pill neutre">non</span>') + '</td></tr>';
+              + '<td>' + (r.utilise ? '<span class="pill bon">${T("utilisé")}</span>'
+                                    : '<span class="pill neutre">${T("non")}</span>') + '</td></tr>';
           }).join('')
         + '</tbody></table>';
     }
@@ -293,25 +297,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var h = '<div class="barreoutils"><div class="droite">'
       + (D.peutModifier && iv.length
           ? '<button class="mini danger" id="fi-vider">'
-            + (ARME === '__invites' ? 'Confirmer ?' : 'Tout supprimer') + '</button>' : '')
-      + '<span>' + compte(iv.length, D.invitationsTotal, 'invitation', 'invitations') + '</span></div></div>';
+            + (ARME === '__invites' ? '${T("Confirmer ?")}' : '${T("Tout supprimer")}') + '</button>' : '')
+      + '<span>' + compte(iv.length, D.invitationsTotal, '${T("invitation")}', '${T("invitations")}') + '</span></div></div>';
     h += '<div class="carte">';
     if (!iv.length) {
-      h += '<div class="vide">Aucune invitation.'
-        + '<div style="margin-top:.35rem">Elles partent d’elles-mêmes à la confirmation d’une commande '
-        + 'ou à son passage en « Livrée ».</div></div>';
+      h += '<div class="vide">${T("Aucune invitation.")}'
+        + '<div style="margin-top:.35rem">${T("Elles partent d’elles-mêmes à la confirmation d’une commande ")}'
+        + '${T("ou à son passage en « Livrée ».")}</div></div>';
     } else {
-      h += '<table><thead><tr><th>Date</th><th>Sondage</th><th>Destinataire</th>'
-        + '<th>Déclencheur</th><th>État</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Sondage")}</th><th>${T("Destinataire")}</th>'
+        + '<th>${T("Déclencheur")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + iv.map(function(i){
             return '<tr><td class="dt">' + esc(i.date) + '</td>'
               + '<td>' + esc(i.sondage) + '</td>'
               + '<td>' + esc(i.courriel || '—') + '</td>'
               + '<td class="dt">' + esc(i.declencheur) + '</td>'
               + '<td><span class="pill ' + (i.repondu ? 'bon' : 'att') + '">'
-              + (i.repondu ? 'Répondu' : 'En attente') + '</span></td>'
+              + (i.repondu ? '${T("Répondu")}' : '${T("En attente")}') + '</span></td>'
               + (D.peutModifier
-                  ? '<td class="fin"><button class="mini geste danger" data-suppr-invite="' + esc(i.id) + '">Supprimer</button></td>'
+                  ? '<td class="fin"><button class="mini geste danger" data-suppr-invite="' + esc(i.id) + '">${T("Supprimer")}</button></td>'
                   : '')
               + '</tr>';
           }).join('')
@@ -336,40 +340,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function boiteEditeur(){
     var e = EDIT;
     var h = '<div class="voile" id="fi-voile-ed"><div class="boite">'
-      + '<h3>' + (e.id ? 'Modifier le sondage' : 'Nouveau sondage') + '</h3>'
-      + '<label class="champ"><span class="lbl">Nom</span>'
-      + '<input class="t" id="sd-nom" value="' + esc(e.nom) + '" placeholder="Satisfaction après livraison"></label>'
-      + '<label class="champ"><span class="lbl">Envoyé quand</span><select class="t" id="sd-decl">'
+      + '<h3>' + (e.id ? '${T("Modifier le sondage")}' : '${T("Nouveau sondage")}') + '</h3>'
+      + '<label class="champ"><span class="lbl">${T("Nom")}</span>'
+      + '<input class="t" id="sd-nom" value="' + esc(e.nom) + '" placeholder="${T("Satisfaction après livraison")}"></label>'
+      + '<label class="champ"><span class="lbl">${T("Envoyé quand")}</span><select class="t" id="sd-decl">'
       + (FORM.declencheurs || []).map(function(d){
           return '<option value="' + esc(d.v) + '"' + (e.declencheur === d.v ? ' selected' : '') + '>'
             + esc(d.l) + '</option>'; }).join('')
       + '</select></label>'
-      + '<label class="champ"><span class="lbl">Texte d’introduction du courriel</span>'
+      + '<label class="champ"><span class="lbl">${T("Texte d’introduction du courriel")}</span>'
       + '<textarea class="t" id="sd-intro" rows="3">' + esc(e.intro) + '</textarea></label>'
       + '<label class="case"><input type="checkbox" id="sd-actif"' + (e.actif ? ' checked' : '')
-      + '> Sondage actif</label>';
+      + '> ${T("Sondage actif")}</label>';
 
-    h += '<div class="qs"><div class="qstitre">Questions<span class="dt">'
+    h += '<div class="qs"><div class="qstitre">${T("Questions")}<span class="dt">'
       + e.questions.length + '</span>'
-      + '<button class="mini" id="sd-q-plus">+ Ajouter une question</button></div>';
+      + '<button class="mini" id="sd-q-plus">${T("+ Ajouter une question")}</button></div>';
     if (!e.questions.length) {
-      h += '<div class="vide" style="padding:.8rem">Aucune question — un sondage vide partirait quand même par courriel.</div>';
+      h += '<div class="vide" style="padding:.8rem">${T("Aucune question — un sondage vide partirait quand même par courriel.")}</div>';
     }
     h += e.questions.map(function(q, i){
       return '<div class="qed">'
-        + '<div class="qedh"><span class="dt">Question ' + (i + 1) + '</span>'
+        + '<div class="qedh"><span class="dt">${T("Question ")}' + (i + 1) + '</span>'
         + '<button class="mini danger" data-q-suppr="' + i + '">✕</button></div>'
-        + '<input aria-label="Que pensez-vous de votre achat ?" class="t" data-q-lib="' + i + '" value="' + esc(q.libelle) + '" placeholder="Que pensez-vous de votre achat ?">'
+        + '<input aria-label="${T("Que pensez-vous de votre achat ?")}" class="t" data-q-lib="' + i + '" value="' + esc(q.libelle) + '" placeholder="${T("Que pensez-vous de votre achat ?")}">'
         + '<div class="qedr"><select class="t" data-q-type="' + i + '"'
-          + ' aria-label="Type de la question ' + (i + 1) + '">'
+          + ' aria-label="${T("Type de la question ")}' + (i + 1) + '">'
         + (FORM.typesQuestion || []).map(function(t){
             return '<option value="' + esc(t.v) + '"' + (q.type === t.v ? ' selected' : '') + '>'
               + esc(t.l) + '</option>'; }).join('')
         + '</select>'
         + '<label class="case"><input type="checkbox" data-q-obl="' + i + '"'
-        + (q.obligatoire ? ' checked' : '') + '> Obligatoire</label></div>'
+        + (q.obligatoire ? ' checked' : '') + '> ${T("Obligatoire")}</label></div>'
         + (q.type === 'choice'
-            ? '<textarea aria-label="Un choix par ligne" class="t" data-q-opt="' + i + '" rows="3" placeholder="Un choix par ligne">'
+            ? '<textarea aria-label="${T("Un choix par ligne")}" class="t" data-q-opt="' + i + '" rows="3" placeholder="${T("Un choix par ligne")}">'
               + esc((q.options || []).join('\\n')) + '</textarea>'
             : '')
         + '</div>';
@@ -378,27 +382,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     var r = e.recompense;
     h += '<label class="case"><input type="checkbox" id="sd-rec"' + (r.active ? ' checked' : '')
-      + '> Offrir une récompense pour la réponse</label>';
+      + '> ${T("Offrir une récompense pour la réponse")}</label>';
     if (r.active) {
       h += '<div class="qedr">'
-        + '<label class="champ" style="flex:1 1 10rem"><span class="lbl">Type</span>'
+        + '<label class="champ" style="flex:1 1 10rem"><span class="lbl">${T("Type")}</span>'
         + '<select class="t" id="sd-rec-type">'
         + (FORM.typesRecompense || []).map(function(t){
             return '<option value="' + esc(t.v) + '"' + (r.type === t.v ? ' selected' : '') + '>'
               + esc(t.l) + '</option>'; }).join('')
         + '</select></label>'
-        + '<label class="champ" style="flex:0 0 7rem"><span class="lbl">Valeur</span>'
+        + '<label class="champ" style="flex:0 0 7rem"><span class="lbl">${T("Valeur")}</span>'
         + '<input class="t" id="sd-rec-val" type="number" min="1" value="' + esc(r.valeur) + '"></label>'
-        + '<label class="champ" style="flex:0 0 8rem"><span class="lbl">Valide (jours)</span>'
+        + '<label class="champ" style="flex:0 0 8rem"><span class="lbl">${T("Valide (jours)")}</span>'
         + '<input class="t" id="sd-rec-j" type="number" min="1" value="' + esc(r.jours) + '"></label>'
         + '</div>'
-        + '<label class="champ"><span class="lbl">Message accompagnant le code</span>'
-        + '<input class="t" id="sd-rec-msg" value="' + esc(r.message) + '" placeholder="Merci ! Voici un code pour votre prochaine commande."></label>';
+        + '<label class="champ"><span class="lbl">${T("Message accompagnant le code")}</span>'
+        + '<input class="t" id="sd-rec-msg" value="' + esc(r.message) + '" placeholder="${T("Merci ! Voici un code pour votre prochaine commande.")}"></label>';
     }
 
     h += '<div class="pied-boite">'
-      + '<button class="mini" id="sd-annuler">Annuler</button>'
-      + '<button class="mini prim" id="sd-enr">' + (e.id ? 'Enregistrer' : 'Créer le sondage') + '</button>'
+      + '<button class="mini" id="sd-annuler">${T("Annuler")}</button>'
+      + '<button class="mini prim" id="sd-enr">' + (e.id ? '${T("Enregistrer")}' : '${T("Créer le sondage")}') + '</button>'
       + '</div></div></div>';
     return h;
   }
@@ -441,7 +445,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       szBrouillonProposer();
     };
     appeler('fidelisation:sondage:form', [id || '']).then(function(r){
-      if (!r || !r.ok) { dire('Éditeur indisponible : ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire('${T("Éditeur indisponible : ")}' + expliquer(r), 'err'); return; }
       FORM = r; apres();
     });
   }
@@ -459,7 +463,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      envoie, donc rien ne peut diverger entre ce qu'on garde et ce qu'on ecrirait. */
   szBrouillonBrancher({
     portee: 'sondage',
-    libelle: 'Un sondage',
+    libelle: '${T("Un sondage")}',
     ttlMin: 720,
     cle: function(){ return EDIT ? ((EDIT.id || '__new__')) : ''; },
     actif: function(){ return !!EDIT && !!document.getElementById('sd-nom'); },
@@ -492,14 +496,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function enregistrerSondage(){
     moissonner();
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('fidelisation:sondage:ecrire', [EDIT]).then(function(r){
-      if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire('${T("Échec : ")}' + expliquer(r), 'err'); return; }
       szBrouillonJeter();
       EDIT = null; FORM = null;
       charger();
-      dire('« ' + r.nom + ' » ' + (r.nouveau ? 'créé' : 'enregistré') + ' — '
-        + r.questions + ' question' + (r.questions > 1 ? 's' : '') + '.', 'bon');
+      dire('« ' + r.nom + ' » ' + (r.nouveau ? '${T("créé")}' : '${T("enregistré")}') + ' — '
+        + r.questions + (r.questions > 1 ? '${T(" questions.")}' : '${T(" question.")}'), 'bon');
     });
   }
 
@@ -508,16 +512,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!s) return '';
     var h = '<div class="voile" id="fi-voile"><div class="boite">'
       + '<h3>' + esc(s.nom)
-      + ' <span class="pill ' + (s.actif ? 'bon' : 'neutre') + '">' + (s.actif ? 'Actif' : 'Inactif') + '</span></h3>'
+      + ' <span class="pill ' + (s.actif ? 'bon' : 'neutre') + '">' + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></h3>'
       + '<div class="dt" style="margin-bottom:.5rem">' + esc(s.declencheur)
-      + ' · ' + s.nbReponses + ' réponse' + (s.nbReponses > 1 ? 's' : '') + '</div>';
+      + ' · ' + s.nbReponses + (s.nbReponses > 1 ? '${T(" réponses")}' : '${T(" réponse")}') + '</div>';
     if (!s.questions.length) {
-      h += '<div class="vide">Ce sondage n’a aucune question.</div>';
+      h += '<div class="vide">${T("Ce sondage n’a aucune question.")}</div>';
     } else {
       h += s.questions.map(function(q){
         var b = '<div class="q"><div class="txt">' + esc(q.texte) + '</div>'
-          + '<div class="dt">' + q.nbReponses + ' réponse' + (q.nbReponses > 1 ? 's' : '')
-          + (q.moyenne != null ? ' · moyenne ' + q.moyenne + ' / 5' : '') + '</div>';
+          + '<div class="dt">' + q.nbReponses + (q.nbReponses > 1 ? '${T(" réponses")}' : '${T(" réponse")}')
+          + (q.moyenne != null ? '${T(" · moyenne ")}' + q.moyenne + ' / 5' : '') + '</div>';
         if (q.textes.length) {
           /* Les mots des clientes, tels qu elles les ont ecrits : c est la
              seule partie d un sondage qui dise pourquoi. */
@@ -534,23 +538,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
 
     var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'sondages' ? ' actif' : '') + '" data-onglet="sondages">Sondages'
+      + '<button class="mini' + (ONGLET === 'sondages' ? ' actif' : '') + '" data-onglet="sondages">${T("Sondages")}'
       + ((D.sondages || []).length ? '<span class="n">' + D.sondages.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'recompenses' ? ' actif' : '') + '" data-onglet="recompenses">Récompenses'
+      + '<button class="mini' + (ONGLET === 'recompenses' ? ' actif' : '') + '" data-onglet="recompenses">${T("Récompenses")}'
       + ((D.recompenses || []).length ? '<span class="n">' + (D.recompensesTotal || D.recompenses.length) + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'invitations' ? ' actif' : '') + '" data-onglet="invitations">Invitations'
+      + '<button class="mini' + (ONGLET === 'invitations' ? ' actif' : '') + '" data-onglet="invitations">${T("Invitations")}'
       + ((D.invitations || []).length ? '<span class="n">' + (D.invitationsTotal || D.invitations.length) + '</span>' : '') + '</button>'
       + '<div class="droite">'
-      + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">+ Nouveau sondage</button>' : '')
+      + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
       + '</div>'
       + '</div>';
 
     h += ONGLET === 'recompenses' ? vueRecompenses()
-       : ONGLET === 'invitations' ? vueInvitations() : vueSondages();
+       : ONGLET === '${T("invitations")}' ? vueInvitations() : vueSondages();
     if (EDIT) h += boiteEditeur();
     else if (DETAIL) h += boiteDetail();
     corps.innerHTML = h;
@@ -565,8 +569,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       appeler('fidelisation:notification', [e ? e.value : '']).then(function(r){
         bm.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire(r.courriel ? 'Les commentaires partiront à ' + r.courriel + '.'
-                        : 'Plus aucune notification de commentaire.', 'bon');
+        dire(r.courriel ? '${T("Les commentaires partiront à ")}' + r.courriel + '.'
+                        : '${T("Plus aucune notification de commentaire.")}', 'bon');
         charger();
       });
     };
@@ -579,13 +583,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (bv) bv.onclick = function(){
       if (ARME !== '__invites') {
         ARME = '__invites'; dessiner();
-        dire('Cliquez « Confirmer ? » — les invitations partent, les réponses déjà reçues restent.', 'att');
+        dire('${T("Cliquez « Confirmer ? » — les invitations partent, les réponses déjà reçues restent.")}', 'att');
         return;
       }
       ARME = '';
       appeler('fidelisation:viderInvites', []).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(r.efface + ' invitation' + (r.efface > 1 ? 's supprimées' : ' supprimée') + '.', 'bon');
+        dire(r.efface + (r.efface > 1 ? '${T(" invitations supprimées.")}' : '${T(" invitation supprimée.")}'), 'bon');
         charger();
       });
     };
@@ -607,16 +611,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          se reconstituent pas. */
       if (ARME !== idS) {
         ARME = idS; dessiner();
-        dire('Cliquez « Confirmer ? » — le sondage et ses '
-          + ((s && s.reponses) || 0) + ' réponse' + (((s && s.reponses) || 0) > 1 ? 's' : '')
-          + ' seront détruits, sans retour possible.', 'att');
+        dire('${T("Cliquez « Confirmer ? » — le sondage et ses ")}'
+          + ((s && s.reponses) || 0)
+          + (((s && s.reponses) || 0) > 1 ? '${T(" réponses seront détruits, sans retour possible.")}'
+                                          : '${T(" réponse seront détruits, sans retour possible.")}'), 'att');
         return;
       }
       ARME = '';
       appeler('fidelisation:supprimerSondage', [idS]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire('« ' + (r.nom || '') + ' » supprimé avec ses ' + r.reponsesPerdues + ' réponse'
-          + (r.reponsesPerdues > 1 ? 's' : '') + '.', 'bon');
+        dire('« ' + (r.nom || '') + '${T(" » supprimé avec ses ")}' + r.reponsesPerdues
+          + (r.reponsesPerdues > 1 ? '${T(" réponses.")}' : '${T(" réponse.")}'), 'bon');
         charger();
       });
       return;
@@ -627,7 +632,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       bi.disabled = true;
       appeler('fidelisation:supprimerInvite', [bi.getAttribute('data-suppr-invite')]).then(function(r){
         if (!r.ok) { bi.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('Invitation à ' + (r.courriel || 'ce client') + ' supprimée.', 'bon');
+        dire('${T("Invitation à ")}' + (r.courriel || '${T("ce client")}') + '${T(" supprimée.")}', 'bon');
         charger();
       });
       return;
@@ -654,7 +659,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       /* ⚠ LE VOILE NE FERME PAS L EDITEUR. Un clic a cote perdrait un sondage
          qu on vient de composer ; le detail, lui, ne contient rien a perdre. */
       if (t.closest('#fi-voile-ed') && !t.closest('.boite')) {
-        dire('Cliquez « Annuler » pour fermer — la saisie serait perdue.', 'att');
+        dire('${T("Cliquez « Annuler » pour fermer — la saisie serait perdue.")}', 'att');
         return;
       }
     }
@@ -692,7 +697,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function charger(){
     appeler('fidelisation:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Fidélisation indisponible', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Fidélisation indisponible")}', expliquer(r)); return; }
       D = r;
       dessiner();
       /* ⚠ Ouverture directe sur l editeur (id d ouverture) : le banc
@@ -725,12 +730,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

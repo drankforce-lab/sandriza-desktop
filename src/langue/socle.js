@@ -168,6 +168,12 @@ module.exports = {
    * seul caractere : une cle avec trois points ne correspondrait a rien. */
 
   /* ── CE QUI EST EN TRAIN DE SE FAIRE ─────────────────────────── */
+  /* ⚠⚠ LE « sur » DE szCompte — « 100 sur 4 500 invitations ». Trouve le
+     2026-09-13 : il n entre pas dans le lexique du banc du residuel (trois
+     lettres, et le lexique commence a quatre), et le compteur ne lit pas le
+     socle. Il paraissait donc dans SEPT listes, en francais sur la page
+     anglaise, sans qu aucune mesure ne le dise. */
+  ' sur ': ' of ',
   'Enregistrement…': 'Saving…',
   'Chargement…': 'Loading…',
   'Lecture…': 'Reading…',
