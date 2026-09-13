@@ -32,6 +32,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('commandes');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -220,7 +224,7 @@ function pageCommandes(mode) {
   // seul du lot. Il porte un trace comme les autres, pas un emoji.
   const icone = (m === 'expeditions') ? ICO.shipping : ICO.orders;
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>${titre} — Administration Sandriza</title>
+<title>${titre} ${T("— Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${icone}</span><h1 id="titre">${titre}</h1>
   <span class="sous" id="sous"></span></div>
@@ -283,24 +287,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux commandes.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    version_coquille:   'Cette version de l’application ne sait pas ouvrir cette fenêtre — quittez et relancez pour la mettre à jour.',
-    introuvable:        'Cette commande n’existe plus.',
-    sans_facture:       'Aucune facture liée à cette commande.',
-    sans_paiement:      'Aucun paiement Square associé à cette commande.',
-    rien_a_rembourser:  'Aucun frais retenu restant à rembourser.',
-    serveur:            'Suppression non confirmée par le serveur — réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux commandes.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    version_coquille:   '${T("Cette version de l’application ne sait pas ouvrir cette fenêtre — quittez et relancez pour la mettre à jour.")}',
+    introuvable:        '${T("Cette commande n’existe plus.")}',
+    sans_facture:       '${T("Aucune facture liée à cette commande.")}',
+    sans_paiement:      '${T("Aucun paiement Square associé à cette commande.")}',
+    rien_a_rembourser:  '${T("Aucun frais retenu restant à rembourser.")}',
+    serveur:            '${T("Suppression non confirmée par le serveur — réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
     if (r && r.detail) return r.detail;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
 
   function appeler(op, args){
@@ -339,8 +343,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var h = '<div class="carte">'
       + '<input id="rech" aria-label="Rechercher une commande" autocomplete="off" placeholder="Numéro de commande, nom, courriel'
-      + (expedition ? ', numéro de suivi' : '') + '…" value="' + esc(F.q) + '">'
-      + '<div class="filtres"><span class="lbl">Statut :</span><span class="jetons">'
+      + (expedition ? '${T(", numéro de suivi")}' : '') + '…" value="' + esc(F.q) + '">'
+      + '<div class="filtres"><span class="lbl">${T("Statut :")}</span><span class="jetons">'
       + ((CTX && CTX.statuts) || []).filter(function(s){
           // Chaque liste ne propose que SES statuts : offrir << Livrée >> dans
           // Commandes donnerait toujours zero resultat, et l on chercherait pourquoi.
@@ -349,15 +353,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         }).map(function(s){
           return '<button class="mini' + (F.statuts.indexOf(s.cle) >= 0 ? ' on' : '')
             + '" data-st="' + esc(s.cle) + '">' + esc(s.libelle) + '</button>'; }).join('')
-      + (F.statuts.length ? '<button class="mini" data-vider="1">Tout afficher</button>' : '')
+      + (F.statuts.length ? '<button class="mini" data-vider="1">${T("Tout afficher")}</button>' : '')
       + '</span>'
       + '<button class="mini prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
       + 'title="N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées">'
-      + 'Prioritaires' + (d && d.prioritairesNonTraitees
-          ? ' · ' + d.prioritairesNonTraitees + ' non traitée' + (d.prioritairesNonTraitees > 1 ? 's' : '')
+      + '${T("Prioritaires")}' + (d && d.prioritairesNonTraitees
+          ? ' · ' + d.prioritairesNonTraitees + ' ${T("non traitée")}' + (d.prioritairesNonTraitees > 1 ? 's' : '')
           : '') + '</button>';
     if (expedition && CTX && (CTX.annees || []).length) {
-      h += '<span class="lbl" style="margin-left:.4rem">Année :</span><select id="f-annee" aria-label="Année">'
+      h += '<span class="lbl" style="margin-left:.4rem">${T("Année :")}</span><select id="f-annee" aria-label="Année">'
         + '<option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>Toutes</option>'
         + CTX.annees.map(function(a){
             return '<option value="' + a + '"' + (String(F.annee) === String(a) ? ' selected' : '')
@@ -369,13 +373,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="carte plein">';
     if (!d || !d.lignes.length) {
       h += '<div class="vide">' + (F.q || F.statuts.length || F.annee !== 'all' || F.prioritaires
-        ? 'Aucune commande ne correspond à ces filtres.'
-        : (expedition ? 'Aucune commande expédiée.' : 'Aucune commande en cours.')) + '</div>';
+        ? '${T("Aucune commande ne correspond à ces filtres.")}'
+        : (expedition ? '${T("Aucune commande expédiée.")}' : '${T("Aucune commande en cours.")}')) + '</div>';
     } else {
       h += '<div class="liste"><table><thead><tr>'
-        + '<th>Commande</th><th>Client</th><th class="c">Date</th>'
+        + '<th>${T("Commande")}</th><th>${T("Client")}</th><th class="c">${T("Date")}</th>'
         + (expedition ? '<th>Suivi</th>' : '<th class="c">Articles</th>')
-        + '<th class="d">Total</th><th class="c">Statut</th><th class="c"></th>'
+        + '<th class="d">${T("Total")}</th><th class="c">${T("Statut")}</th><th class="c"></th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(o){
         // ⚠ Etiquetee mais pas partie : la ligne se teinte. C est l etat qui se
@@ -385,12 +389,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '" style="cursor:pointer" title="Clic : détails · clic droit : changer le statut">'
           + '<td>' + (o.prioritaire ? '<span class="eclair" title="Traitement prioritaire"><span class="ic">⚡</span></span>' : '')
           + '<span class="num">' + esc(o.numero) + '</span>'
-          + (attente ? '<div class="det">étiquette prête</div>' : '') + '</td>'
+          + (attente ? '<div class="det">${T("étiquette prête")}</div>' : '') + '</td>'
           + '<td>' + esc(o.client) + '</td>'
           + '<td class="c det">' + esc(dateCourte(o.date)) + '</td>'
           + (expedition
               ? '<td>' + (o.suivi ? '<span class="num">' + esc(o.suivi) + '</span>'
-                                  : '<span class="det">sans numéro</span>') + '</td>'
+                                  : '<span class="det">${T("sans numéro")}</span>') + '</td>'
               : '<td class="c">' + o.articles + '</td>')
           + '<td class="d">' + argent(o.total) + '</td>'
           + '<td class="c"><span class="et ' + couleurStatut(o.statut) + '">'
@@ -409,7 +413,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
              : (o.enTraitement
                 ? '<button class="mini traite" disabled><span class="ic">🔒</span> En traitement' + (o.par ? ' par ' + esc(o.par) : '') + '</button>'
                 : (CTX.peutEditer
-                   ? '<button class="mini" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)"><span class="ic">📦</span></span> Préparer la commande</button>' : '')))
+                   ? '<button class="mini" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)"><span class="ic">📦</span></span> ${T("Préparer la commande")}</button>' : '')))
           + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -422,10 +426,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           }).join('')
         + '</select><span>par page</span>'
         + '<span class="pos">'
-        + '<button class="mini" id="pg-prec"' + (d.page <= 0 ? ' disabled' : '') + '>← Préc.</button>'
+        + '<button class="mini" id="pg-prec"' + (d.page <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
         + ' ' + (d.page * d.parPage + 1) + '–' + Math.min((d.page + 1) * d.parPage, d.total)
         + ' sur ' + d.total + ' '
-        + '<button class="mini" id="pg-suiv"' + (d.page >= d.pages - 1 ? ' disabled' : '') + '>Suiv. →</button>'
+        + '<button class="mini" id="pg-suiv"' + (d.page >= d.pages - 1 ? ' disabled' : '') + '>${T("Suiv. →")}</button>'
         + '</span></div>';
     }
     h += '</div>';
@@ -461,8 +465,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerDetail(){
     var d = DET;
     if (!d) {
-      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>';
-      actions.innerHTML = SEUL ? '' : '<button id="btn-retour">← Liste</button>';
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>';
+      actions.innerHTML = SEUL ? '' : '<button id="btn-retour">${T("← Liste")}</button>';
       brancherDetail();
       return;
     }
@@ -470,17 +474,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ro = !!VERROU_PAR; // tenue par quelqu un d autre -> LECTURE SEULE
     var h = '';
     if (ro) {
-      h += '<div class="banniere"><span class="ic">🔒</span> En traitement par <strong>' + esc(VERROU_PAR)
-        + '</strong> — changement de statut, remboursement et suppression désactivés '
-        + 'le temps que cette personne termine.</div>';
+      h += '<div class="banniere"><span class="ic">🔒</span> ${T("En traitement par")} <strong>' + esc(VERROU_PAR)
+        + '</strong> ${T("— changement de statut, remboursement et suppression désactivés")} '
+        + '${T("le temps que cette personne termine.")}</div>';
     }
     h += '<div class="carte">'
       + '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
-      + '<strong style="font-size:1rem">Commande <span class="num">' + esc(c.numero) + '</span></strong>';
+      + '<strong style="font-size:1rem">${T("Commande")} <span class="num">' + esc(c.numero) + '</span></strong>';
     if (d.droits.statut && !ro) {
       // ⚠ MEME REGLE QUE LA FICHE DU SITE : ni << En attente >> ni << Annulee >>
       // dans le selecteur, sauf si c est deja le statut courant.
-      h += '<select class="statut" id="det-statut" aria-label="Statut de la commande">'
+      h += '<select class="statut" id="det-statut" aria-label="${T("Statut de")} la commande">'
         + (d.statuts || []).filter(function(x){
             return ['pending', 'cancelled'].indexOf(x.cle) < 0 || x.cle === c.statut;
           }).map(function(x){
@@ -491,15 +495,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<span class="et ' + couleurStatut(c.statut) + '">' + esc(libelleStatut(c.statut)) + '</span>';
     }
     h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> Prioritaire</span>' : '')
-      + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> Remboursée</span>'
+      + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursée")}</span>'
           : (d.remboursements.lignes.length
               ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' remb.</span>' : ''))
       + '<span style="margin-left:auto" class="mut">' + esc(dateCourte(c.creeLe)) + '</span>'
       + '</div>';
     h += '<div class="det2">'
-      + '<div class="bloc"><h3>Client</h3>'
+      + '<div class="bloc"><h3>${T("Client")}</h3>'
       + '<div class="l"><strong>' + esc(c.client.nom || '—') + '</strong>'
-      + '<span class="badge2">' + (c.membre ? 'membre' : 'invité') + '</span>'
+      + '<span class="badge2">' + (c.membre ? 'membre' : '${T("invité")}') + '</span>'
       // Rattacher la commande a un COMPTE : possible meme sur une commande
       // invitee (c est justement le cas a corriger le plus souvent).
       + (d.droits.lier && !ro
@@ -507,27 +511,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + (c.compte ? 'Changer' : 'Lier') + '</button>' : '')
       + '</div>'
       + (c.compte
-          ? '<div class="mut">Compte : <strong style="color:var(--tx-bleute)">' + esc(c.compte.nom) + '</strong></div>'
+          ? '<div class="mut">${T("Compte :")} <strong style="color:var(--tx-bleute)">' + esc(c.compte.nom) + '</strong></div>'
           : '')
       + (c.client.entreprise ? '<div class="l">' + esc(c.client.entreprise) + '</div>' : '')
       + '<div class="mut">' + esc(c.client.courriel) + (c.client.tel ? '<br>' + esc(c.client.tel) : '') + '</div>'
       + '<div class="mut" style="margin-top:.4rem"><span class="ic">💳</span> '
       + (c.paiementSquare ? '<span class="num">' + esc(c.paiementSquare) + '</span>'
-                          : '<span style="color:var(--tx-att)">Commande démo — aucun paiement Square</span>')
+                          : '<span style="color:var(--tx-att)">${T("Commande démo — aucun paiement Square")}</span>')
       + (c.afterpay ? '<span class="badge2">AFTERPAY</span>' : '') + '</div></div>'
       + '<div class="bloc"><h3>Livraison</h3>'
       + '<div class="mut">' + esc(c.adresse.rue) + '<br>'
       + esc(c.adresse.ville) + (c.adresse.province ? ', ' + esc(c.adresse.province) : '')
       + ' ' + esc(c.adresse.cp) + '</div>'
-      + (c.livreLe ? '<div class="mut" style="margin-top:.3rem"><span class="ic">✅</span> Livrée le ' + esc(dateCourte(c.livreLe)) + '</div>' : '')
+      + (c.livreLe ? '<div class="mut" style="margin-top:.3rem"><span class="ic">✅</span> ${T("Livrée le")} ' + esc(dateCourte(c.livreLe)) + '</div>' : '')
       + (c.suivi ? '<div class="mut" style="margin-top:.3rem"><span class="ic">📡</span> <span class="num">' + esc(c.suivi) + '</span>'
           + (c.suiviStatut ? ' — ' + esc(c.suiviStatut)
-            + (c.suiviVerifieLe ? ' (vérifié le ' + esc(dateCourte(c.suiviVerifieLe)) + ')' : '') : '') + '</div>' : '')
+            + (c.suiviVerifieLe ? ' ${T("(vérifié le")} ' + esc(dateCourte(c.suiviVerifieLe)) + ')' : '') : '') + '</div>' : '')
       + '</div></div></div>';
 
     h += '<div class="carte plein"><div class="liste">'
-      + '<table><thead><tr><th>Article</th><th class="c">Taille / Couleur</th>'
-      + '<th class="c">Qté</th><th class="d">Prix</th></tr></thead><tbody>'
+      + '<table><thead><tr><th>${T("Article")}</th><th class="c">${T("Taille / Couleur")}</th>'
+      + '<th class="c">${T("Qté")}</th><th class="d">${T("Prix")}</th></tr></thead><tbody>'
       + d.articles.map(function(a){
           return '<tr><td>' + esc(a.nom)
             + (a.rembourseQte > 0 ? ' <span style="font-size:.7rem;color:var(--tx-att)">(' + a.rembourseQte + ' remb.)</span>' : '')
@@ -543,7 +547,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (t.livraison > 0 ? '<div>Livraison</div>' : '')
       + (t.prioritaire > 0 ? '<div><span class="ic">⚡</span> Traitement prioritaire</div>' : '')
       + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">Coupon</div>' : '')
-      + '<div class="tt">Total</div></div>'
+      + '<div class="tt">${T("Total")}</div></div>'
       + '<div class="d"><div>' + argent(t.sousTotal) + '</div>'
       + t.taxes.map(function(x){ return '<div>' + argent(x.montant) + '</div>'; }).join('')
       + (t.livraison > 0 ? '<div>' + argent(t.livraison) + '</div>' : '')
@@ -553,32 +557,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var rb = d.remboursements;
     if (rb.lignes.length) {
-      h += '<div class="remb"><div class="t">↩ Remboursements émis</div>'
+      h += '<div class="remb"><div class="t">${T("↩ Remboursements émis")}</div>'
         + rb.lignes.map(function(r){
             return '<div class="lg2"><span><strong>' + esc(r.numero) + '</strong> · '
               + esc(dateCourte(r.date)) + ' · <em>' + esc(r.type) + '</em>'
-              + (r.fraisRetenus > 0 ? ' <span style="color:var(--tx-att);font-size:.72rem">(frais retenus : ' + argent(r.fraisRetenus) + ')</span>' : '')
+              + (r.fraisRetenus > 0 ? ' <span style="color:var(--tx-att);font-size:.72rem">${T("(frais retenus :")} ' + argent(r.fraisRetenus) + ')</span>' : '')
               + '</span><span style="font-weight:700;color:var(--tx-att)">−' + argent(r.montant) + '</span></div>'; }).join('');
       if (rb.fraisRetenus > 0) {
-        h += '<div class="fin3" style="color:var(--tx-or2);font-weight:400">Frais de service retenus : <strong>'
+        h += '<div class="fin3" style="color:var(--tx-or2);font-weight:400">${T("Frais de service retenus :")} <strong>'
           + argent(rb.fraisRetenus) + '</strong> '
-          + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> Remboursés au client</span>'
+          + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursés au client")}</span>'
              : rb.fraisRembourses > 0
                ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> Partiel — remb. ' + argent(rb.fraisRembourses) + ' · reste ' + argent(rb.fraisRestants) + '</span>'
-               : '<span class="badge2 or">⏳ Non remboursés</span>') + '</div>';
+               : '<span class="badge2 or">${T("⏳ Non remboursés")}</span>') + '</div>';
       }
-      h += '<div class="fin3">Total remboursé : −' + argent(rb.total)
-        + (rb.complet ? ' <span class="badge2 vertf"><span class="ic">✅</span> Entièrement remboursée</span>' : '') + '</div></div>';
+      h += '<div class="fin3">${T("Total remboursé : −")}' + argent(rb.total)
+        + (rb.complet ? ' <span class="badge2 vertf"><span class="ic">✅</span> ${T("Entièrement remboursée")}</span>' : '') + '</div></div>';
     }
-    if (c.notes) h += '<div class="mut" style="margin-top:.6rem"><strong>Notes :</strong> ' + esc(c.notes) + '</div>';
+    if (c.notes) h += '<div class="mut" style="margin-top:.6rem"><strong>${T("Notes :")}</strong> ' + esc(c.notes) + '</div>';
     h += '</div></div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = (SEUL ? '' : '<button id="btn-retour">← Liste</button>')
+    actions.innerHTML = (SEUL ? '' : '<button id="btn-retour">${T("← Liste")}</button>')
       + (d.droits.bon && !ro ? '<button id="det-bon"><span class="ic">🖨</span> Bon de commande</button>' : '')
       + (c.aFacture ? '<button id="det-fact"><span class="ic">🧾</span> Facture</button>' : '')
       + (d.droits.frais && !ro ? '<button id="det-frais"><span class="ic">💰</span> Frais retenus (' + argent(rb.fraisRestants) + ')</button>' : '')
-      + (d.droits.rembourser && !ro ? '<button id="det-remb">↩ Rembourser</button>' : '')
+      + (d.droits.rembourser && !ro ? '<button id="det-remb">${T("↩ Rembourser")}</button>' : '')
       + (d.droits.supprimer && !ro ? '<button class="danger" id="det-suppr"><span class="ic">🗑</span> Supprimer</button>' : '');
     brancherDetail();
   }
@@ -600,13 +604,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dire('Impression…');
       appeler('commande:bon', [DET_ID]).then(function(z){
         moi.disabled = false;
-        dire(z.ok ? 'Bon de commande envoyé à l’impression.' : expliquer(z), z.ok ? 'bon' : 'err');
+        dire(z.ok ? '${T("Bon de commande envoyé à l’impression.")}' : expliquer(z), z.ok ? 'bon' : 'err');
       });
     };
     var f = document.getElementById('det-fact');
     if (f) f.onclick = function(){
       appeler('commandes:facture', [DET_ID]).then(function(z){
-        dire(z.ok ? (z.web ? 'Facture ouverte dans la fenêtre principale.' : 'Facture ouverte dans sa fenêtre.') : expliquer(z), z.ok ? 'bon' : 'err');
+        dire(z.ok ? (z.web ? '${T("Facture ouverte dans la fenêtre principale.")}' : '${T("Facture ouverte dans sa fenêtre.")}') : expliquer(z), z.ok ? 'bon' : 'err');
       });
     };
     var li = document.getElementById('det-lier');
@@ -619,7 +623,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // le notre d abord, sinon elle se croirait ouverte par quelqu un d autre.
       rendreVerrou();
       appeler('commandes:rembourser', [DET_ID]).then(function(z){
-        dire(z.ok ? 'Remboursement ouvert dans sa fenêtre.' : expliquer(z), z.ok ? 'bon' : 'err');
+        dire(z.ok ? '${T("Remboursement ouvert dans sa fenêtre.")}' : expliquer(z), z.ok ? 'bon' : 'err');
         if (z.ok) retourListe();
         else prendreVerrou(DET_ID); // refus d ouverture : on reprend la fiche
       });
@@ -638,8 +642,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!r.ok) { dire(expliquer(r), 'err'); retourListe(); return; }
       DET = r;
       if (SEUL) {
-        document.getElementById('titre').textContent = 'Commande ' + (r.commande.numero || '');
-        document.title = 'Commande ' + (r.commande.numero || '') + ' — Administration Sandriza';
+        document.getElementById('titre').textContent = '${T("Commande")} ' + (r.commande.numero || '');
+        document.title = '${T("Commande")} ' + (r.commande.numero || '') + ' ${T("— Administration Sandriza")}';
       }
       dessiner();
       prendreVerrou(id);
@@ -664,9 +668,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (v.obtenu) {
         VERROU_PRIS = true; VERROU_PAR = '';
         sous.textContent = v.horsLigne ? 'hors ligne'
-          : 'Section verrouillée en modification par : ' + (v.par || 'vous');
+          : '${T("Section verrouillée en modification par :")} ' + (v.par || 'vous');
       } else {
-        VERROU_PRIS = false; VERROU_PAR = v.parQui || 'quelqu’un d’autre';
+        VERROU_PRIS = false; VERROU_PAR = v.parQui || '${T("quelqu’un d’autre")}';
         sous.textContent = 'en traitement par ' + VERROU_PAR;
       }
       if (VUE === 'detail') dessiner();
@@ -682,7 +686,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (SEUL) { P.fermer(); return; }
     VERROU_PAR = ''; DET = null; DET_ID = '';
     VUE = 'liste';
-    sous.textContent = (CTX && CTX.peutEditer) ? '' : 'Lecture seule';
+    sous.textContent = (CTX && CTX.peutEditer) ? '' : '${T("Lecture seule")}';
     charger(true);
   }
 
@@ -723,12 +727,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -742,16 +746,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (ap.motif !== 'inchange') dire(expliquer(ap), 'err');
         return;
       }
-      var h = '<h3>Changer le statut</h3>'
+      var h = '<h3>${T("Changer le statut")}</h3>'
         + '<p>Passer <strong>' + esc(ap.numero) + '</strong> de « <strong>' + esc(ap.deLibelle)
         + '</strong> » à « <strong>' + esc(ap.aLibelle) + '</strong> » ?</p>'
         + ((ap.implications || []).length
             ? '<ul>' + ap.implications.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '')
         + (ap.peutReinitCourriels
             ? '<label class="rc"><input type="checkbox" id="v-reinit"><span><span class="ic">🧪</span> <strong>Tests</strong> — '
-              + 'réautoriser l’envoi des courriels de cette commande (le client pourra les recevoir '
-              + 'à nouveau). Sinon, la protection anti-doublon reste active.</span></label>' : '')
-        + '<div class="fin2"><button id="v-non">Annuler</button>'
+              + '${T("réautoriser l’envoi des courriels de cette commande (le client pourra les recevoir")} '
+              + '${T("à nouveau). Sinon, la protection anti-doublon reste active.")}</span></label>' : '')
+        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
         + '<button class="prim" id="v-oui">Confirmer</button></div>';
       voile(h, function(fermer){
         document.getElementById('v-non').onclick = fermer;
@@ -761,7 +765,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             // Le passage a << En livraison >> se fait DANS le flux d expedition
             // (transporteur + etiquette), jamais par une simple etiquette de statut.
             fermer();
-            ouvrir('commandes:expedier', id, 'Expédition');
+            ouvrir('commandes:expedier', id, '${T("Expédition")}');
             return;
           }
           var reinit = !!(document.getElementById('v-reinit') && document.getElementById('v-reinit').checked);
@@ -769,10 +773,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             fermer();
             if (!r.ok) {
               dire(r.motif === 'conflit_statut'
-                ? 'Statut déjà changé ailleurs (actuel : ' + (r.actuelLibelle || '?') + ').'
+                ? '${T("Statut déjà changé ailleurs (actuel :")} ' + (r.actuelLibelle || '?') + ').'
                 : expliquer(r), 'err');
             } else if (!r.inchange) {
-              dire('Statut mis à jour.', 'bon');
+              dire('${T("Statut mis à jour.")}', 'bon');
             }
             if (apresOK) apresOK(); else charger(true);
           });
@@ -785,13 +789,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function flowFrais(){
     appeler('commandes:fraisApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
-      voile('<h3>Rembourser les frais de service</h3>'
+      voile('<h3>${T("Rembourser les frais de service")}</h3>'
         + '<p>Rembourser <strong>' + argent(ap.montant) + '</strong> de frais de service retenus '
-        + 'au client via Square ?'
+        + '${T("au client via Square ?")}'
         + (ap.dejaRembourse > 0 ? '<br><span style="color:var(--tx2)">(' + argent(ap.dejaRembourse)
-            + ' déjà remboursés sur ' + argent(ap.totalRetenu) + ' retenus)</span>' : '')
-        + ' <strong>Cette opération est irréversible.</strong></p>'
-        + '<div class="fin2"><button id="v-non">Annuler</button>'
+            + ' ${T("déjà remboursés sur")} ' + argent(ap.totalRetenu) + ' retenus)</span>' : '')
+        + ' <strong>${T("Cette opération est irréversible.")}</strong></p>'
+        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
         + '<button class="prim" id="v-oui">Rembourser</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
@@ -801,10 +805,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               fermer();
               if (!r.ok) { dire(expliquer(r), 'err'); return; }
               var sq = r.square || {};
-              if (sq.etat === 'initie') dire(r.numero + ' — ' + argent(r.montant) + ' de frais de service remboursés via Square.', 'bon');
-              else if (sq.etat === 'echec') dire('Enregistrement local créé mais Square a échoué : ' + (sq.detail || '?'), 'err');
-              else if (sq.etat === 'reseau') dire('Enregistrement local créé mais erreur réseau Square : ' + (sq.detail || '?'), 'err');
-              else dire(r.numero + ' — frais remboursés (aucun jeton Square configuré).', 'att');
+              if (sq.etat === 'initie') dire(r.numero + ' — ' + argent(r.montant) + ' ${T("de frais de service remboursés via Square.")}', 'bon');
+              else if (sq.etat === 'echec') dire('${T("Enregistrement local créé mais Square a échoué :")} ' + (sq.detail || '?'), 'err');
+              else if (sq.etat === 'reseau') dire('${T("Enregistrement local créé mais erreur réseau Square :")} ' + (sq.detail || '?'), 'err');
+              else dire(r.numero + ' ${T("— frais remboursés (aucun jeton Square configuré).")}', 'att');
               rechargerDetail();
             });
           };
@@ -821,16 +825,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('commande:lierApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
       var etat = ap.actuel
-        ? 'actuellement liée à <strong>' + esc(ap.actuel.nom) + '</strong> ('
+        ? '${T("actuellement liée à")} <strong>' + esc(ap.actuel.nom) + '</strong> ('
           + esc(ap.actuel.courriel) + ')'
-        : 'en mode <strong>invité</strong> (aucun compte)';
-      voile('<h3><span class="ic">🔗</span> Rattacher la commande à un client</h3>'
-        + '<p>Commande <strong>' + esc(ap.numero) + '</strong> — ' + etat + '.</p>'
-        + '<label style="font-size:.82rem;color:var(--tx-bleute)">Rechercher un client (nom ou courriel)'
+        : '${T("en mode <strong>invité</strong> (aucun compte)")}';
+      voile('<h3><span class="ic">🔗</span> ${T("Rattacher la commande")} à un client</h3>'
+        + '<p>${T("Commande")} <strong>' + esc(ap.numero) + '</strong> — ' + etat + '.</p>'
+        + '<label style="font-size:.82rem;color:var(--tx-bleute)">${T("Rechercher un client (nom ou courriel)")}'
         + '<input class="rech" id="v-rech" placeholder="ex : marie@example.com" autocomplete="off"></label>'
-        + '<div class="lres" id="v-lres"><div class="rien">Tapez au moins 3 caractères.</div></div>'
+        + '<div class="lres" id="v-lres"><div class="rien">${T("Tapez au moins 3 caractères.")}</div></div>'
         + (ap.actuel
-            ? '<div class="detacher"><button class="danger" id="v-det"><span class="ic">🔓</span> Détacher (remettre en mode invité)</button></div>'
+            ? '<div class="detacher"><button class="danger" id="v-det"><span class="ic">🔓</span> ${T("Détacher (remettre en mode invité)")}</button></div>'
             : '')
         + '<div class="fin2"><button id="v-non">Fermer</button></div>',
         function(fermer){
@@ -838,7 +842,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var zone = document.getElementById('v-lres');
           document.getElementById('v-non').onclick = fermer;
           var det = document.getElementById('v-det');
-          if (det) det.onclick = function(){ confirmerLien(fermer, ap, null, 'invité (aucun compte)'); };
+          if (det) det.onclick = function(){ confirmerLien(fermer, ap, null, '${T("invité (aucun compte)")}'); };
 
           // Anti-rebond : on ne rappelle le pont qu une fois la frappe posee.
           var t = null;
@@ -851,7 +855,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
           function chercher(q){
             if (String(q || '').trim().length < 3) {
-              zone.innerHTML = '<div class="rien">Tapez au moins 3 caractères.</div>';
+              zone.innerHTML = '<div class="rien">${T("Tapez au moins 3 caractères.")}</div>';
               return;
             }
             appeler('commande:lierChercher', [q]).then(function(r){
@@ -860,13 +864,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               // dessine que si le champ contient toujours la meme chose.
               if (champ.value !== q) return;
               var cl = r.clients || [];
-              if (!cl.length) { zone.innerHTML = '<div class="rien">Aucun client trouvé.</div>'; return; }
+              if (!cl.length) { zone.innerHTML = '<div class="rien">${T("Aucun client trouvé.")}</div>'; return; }
               zone.innerHTML = cl.map(function(u){
                 return '<div class="cli" data-cli="' + esc(u.id) + '" data-nom="' + esc(u.nom)
                   + '" data-em="' + esc(u.courriel) + '">'
                   + '<div><div class="nm">' + esc(u.nom) + '</div>'
                   + '<div class="em">' + esc(u.courriel) + '</div></div>'
-                  + '<span class="fl">Lier →</span></div>'; }).join('');
+                  + '<span class="fl">${T("Lier →")}</span></div>'; }).join('');
             });
           }
 
@@ -884,11 +888,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // commande : la facture suit, et les statistiques d achat des DEUX comptes
   // sont recalculees. On le dit avant, pas apres.
   function confirmerLien(fermerListe, ap, clientId, libelle){
-    voile('<h3>Rattacher la commande</h3>'
+    voile('<h3>${T("Rattacher la commande")}</h3>'
       + '<p>Lier <strong>' + esc(ap.numero) + '</strong> à <strong>' + esc(libelle) + '</strong> ?</p>'
-      + '<p style="color:var(--tx2)">La facture associée sera mise à jour et les statistiques '
-      + 'd’achat des comptes concernés recalculées.</p>'
-      + '<div class="fin2"><button id="v2-non">Annuler</button>'
+      + '<p style="color:var(--tx2)">${T("La facture associée sera mise à jour et les statistiques")} '
+      + '${T("d’achat des comptes concernés recalculées.")}</p>'
+      + '<div class="fin2"><button id="v2-non">${T("Annuler")}</button>'
       + '<button class="prim" id="v2-oui">Lier</button></div>',
       function(fermer2){
         document.getElementById('v2-non').onclick = fermer2;
@@ -897,13 +901,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           appeler('commande:lierEcrire', [DET_ID, clientId]).then(function(r){
             fermer2();
             if (!r.ok) {
-              dire(r.motif === 'inchange' ? 'Cette commande est déjà rattachée à ce compte.'
+              dire(r.motif === 'inchange' ? '${T("Cette commande est déjà rattachée à ce compte.")}'
                                           : expliquer(r), r.motif === 'inchange' ? 'att' : 'err');
               return;
             }
             fermerListe();
-            dire(r.invite ? 'Commande détachée — remise en mode invité.'
-                          : 'Commande rattachée à ' + r.nom + '.', 'bon');
+            dire(r.invite ? '${T("Commande détachée — remise en mode invité.")}'
+                          : '${T("Commande rattachée à")} ' + r.nom + '.', 'bon');
             rechargerDetail();
           });
         };
@@ -918,12 +922,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<p><strong>' + esc(ap.numero) + '</strong> — ' + esc(ap.client) + '<br>'
         + '<span style="color:var(--tx2)">' + esc(dateCourte(ap.date)) + ' · ' + argent(ap.total)
         + ' · ' + esc(ap.statutLibelle) + '</span></p>'
-        + '<p style="font-weight:600;margin-top:.6rem">Éléments qui seront supprimés :</p>'
+        + '<p style="font-weight:600;margin-top:.6rem">${T("Éléments qui seront supprimés :")}</p>'
         + '<ul style="padding-left:0">' + (ap.elements || []).map(function(x){
             return '<li class="item">' + esc(x) + '</li>'; }).join('') + '</ul>'
-        + '<p style="color:var(--tx-err);font-weight:600"><span class="ic">⚠</span> Cette action est irréversible.</p>'
-        + '<div class="fin2"><button id="v-non">Annuler</button>'
-        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">Supprimer définitivement</button></div>',
+        + '<p style="color:var(--tx-err);font-weight:600"><span class="ic">⚠</span> ${T("Cette action est irréversible.")}</p>'
+        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">${T("Supprimer définitivement")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){
@@ -931,16 +935,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             appeler('commandes:supprimerEcrire', [DET_ID]).then(function(r){
               fermer();
               var sq = r.square || {};
-              var note = sq.etat === 'initie' ? ' Remboursement Square de ' + argent(sq.montant) + ' initié.'
-                : sq.etat === 'deja' ? ' Déjà entièrement remboursée — rien de plus envoyé à Square.'
-                : sq.etat === 'echec' ? ' Remboursement Square échoué : ' + (sq.detail || '?')
-                : sq.etat === 'reseau' ? ' Erreur réseau Square : ' + (sq.detail || '?') : '';
+              var note = sq.etat === 'initie' ? ' ${T("Remboursement Square de")} ' + argent(sq.montant) + '${T(" initié.")}'
+                : sq.etat === 'deja' ? ' ${T("Déjà entièrement remboursée — rien de plus envoyé à Square.")}'
+                : sq.etat === 'echec' ? ' ${T("Remboursement Square échoué :")} ' + (sq.detail || '?')
+                : sq.etat === 'reseau' ? ' ${T("Erreur réseau Square :")} ' + (sq.detail || '?') : '';
               if (!r.ok) {
-                dire('Suppression non confirmée par le serveur (' + (r.detail || 'erreur inconnue') + ') — réessayez.' + note, 'err');
+                dire('${T("Suppression non confirmée par le serveur (")}' + (r.detail || 'erreur inconnue') + '${T(") — réessayez.")}' + note, 'err');
                 rechargerDetail();
                 return;
               }
-              dire('Commande supprimée — inventaire rétabli.' + note, sq.etat === 'echec' || sq.etat === 'reseau' ? 'att' : 'bon');
+              dire('${T("Commande supprimée — inventaire rétabli.")}' + note, sq.etat === 'echec' || sq.etat === 'reseau' ? 'att' : 'bon');
               retourListe();
             });
           };
@@ -963,13 +967,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     menuEl.className = 'ctx';
     if (o.enTraitement) {
       menuEl.innerHTML = '<div class="t"><span class="ic">🔒</span> ' + esc(o.numero) + '</div>'
-        + '<div class="warn">En traitement par <strong>' + esc(o.par || 'quelqu’un d’autre')
-        + '</strong>.<br>Changement de statut impossible pour l’instant.</div>';
+        + '<div class="warn">${T("En traitement par")} <strong>' + esc(o.par || '${T("quelqu’un d’autre")}')
+        + '${T("</strong>.<br>Changement de statut impossible pour l’instant.")}</div>';
     } else {
       var cibles = ((CTX && CTX.statuts) || []).filter(function(x){
         return ['pending', 'cancelled'].indexOf(x.cle) < 0 && x.cle !== o.statut;
       });
-      menuEl.innerHTML = '<div class="t">Statut de ' + esc(o.numero) + '</div>'
+      menuEl.innerHTML = '<div class="t">${T("Statut de")} ' + esc(o.numero) + '</div>'
         + cibles.map(function(x){
             return '<button data-ctx="' + esc(x.cle) + '"><span class="et ' + couleurStatut(x.cle)
               + '">' + esc(x.libelle) + '</span></button>'; }).join('');
@@ -1044,7 +1048,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (t.closest('[data-prio]')) { F.prioritaires = !F.prioritaires; F.page = 0; dessiner(); charger(); return; }
       var pr = t.closest('[data-prep]');
       if (pr) {
-        ouvrir('commandes:preparer', pr.getAttribute('data-prep'), 'Préparation');
+        ouvrir('commandes:preparer', pr.getAttribute('data-prep'), '${T("Préparation")}');
         // La ligne passe << En traitement >> des que la fenetre a pris son
         // verrou : on recharge sans attendre le prochain battement.
         setTimeout(function(){ charger(); }, 1200);
@@ -1053,7 +1057,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // Le reste de la ligne ouvre le DETAIL — dans SA fenetre native.
       var tr = t.closest('tr[data-id]');
       if (tr) {
-        ouvrir('commandes:ouvrirDetail', tr.getAttribute('data-id'), 'Détail');
+        ouvrir('commandes:ouvrirDetail', tr.getAttribute('data-id'), '${T("Détail")}');
         // Le detail prend le verrou : la ligne passe << En traitement >>.
         setTimeout(function(){ charger(); }, 1200);
       }
@@ -1073,7 +1077,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function ouvrir(op, id, quoi){
     dire('Ouverture…');
     appeler(op, [id]).then(function(r){
-      dire(r.ok ? (quoi + ' ouverte dans sa fenêtre.') : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? (quoi + ' ${T("ouverte dans sa fenêtre.")}') : expliquer(r), r.ok ? 'bon' : 'err');
     });
   }
 
@@ -1110,9 +1114,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function demarrer(){
     appeler('commandes:contexte').then(function(c){
-      if (!c || !c.ok) { vide('Commandes indisponibles', expliquer(c)); return; }
+      if (!c || !c.ok) { vide('${T("Commandes indisponibles")}', expliquer(c)); return; }
       CTX = c;
-      sous.textContent = c.peutEditer ? '' : 'Lecture seule';
+      sous.textContent = c.peutEditer ? '' : '${T("Lecture seule")}';
       if (DET_DEPART) { ouvrirDetail(DET_DEPART); DET_DEPART = ''; return; }
       charger();
     });
