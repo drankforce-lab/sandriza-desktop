@@ -109,6 +109,12 @@ const chainesProse = (js) => {
     if (!/[a-z]/.test(t)) continue;              // que des majuscules : un libelle technique
     if (/^[\w.:\-\/#]+$/.test(t)) continue;      // chemin, selecteur, cle
     if (/===|!==|\|\||&&|\breturn\b|\bfunction\b/.test(t)) continue;   // du code
+    /* ⚠ UNE VALEUR CSS N EST PAS UNE PHRASE, meme si elle a des espaces et des
+       virgules. Mesure du 2026-09-13, dans `apparence` : l ombre du theme choisi
+       (<< 0 0 0 2px @,0 4px 12px rgba(0,0,0,.25) >>) etait comptee comme un
+       texte a traduire. Une valeur d ombre ou de longueur commence par un
+       NOMBRE — jamais une phrase, qui commence par un mot. */
+    if (/^[-.\d]/.test(t) && /\b(?:px|rem|em|%|rgba?\(|hsla?\()/.test(t)) continue;
     if (!PHRASE.test(t)) continue;               // ni majuscule ni ponctuation : un nom
     out.push({ texte: t, index: m.index, ou: 'script' });
   }

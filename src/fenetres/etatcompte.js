@@ -27,6 +27,12 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠⚠ On ne traduit QUE le CADRE — le document lui-meme arrive en HTML
+   tout fait du site, et cette fenetre ne peut pas l atteindre (voir
+   src/langue/etatcompte.js). */
+const T = require('../langue').tr('etatcompte');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -74,15 +80,15 @@ button.prim:hover:not(:disabled){background:#a3824f}
 function pageEtatCompte(userId) {
   const id = JSON.stringify(String(userId || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>État de compte — Administration Sandriza</title>
+<title>${T("État de compte — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.billing}</span><h1>État de compte</h1>
+<div class="tete"><span class="ico">${ICO.billing}</span><h1>${T("État de compte")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied">
   <span class="msg" id="msg"></span>
-  <button id="b-courriel" disabled><span class="ic">✉</span> Envoyer au client</button>
-  <button id="b-imprimer" class="prim" disabled><span class="ic">🖨</span> Imprimer</button>
+  <button id="b-courriel" disabled><span class="ic">✉</span> ${T("Envoyer au client")}</button>
+  <button id="b-imprimer" class="prim" disabled><span class="ic">🖨</span> ${T("Imprimer")}</button>
 </div>
 <script>
 (function(){
@@ -109,20 +115,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux états de compte.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Ce client n’existe plus.',
-    impression:         'L’impression a échoué.',
-    courriel:           'Le courriel n’est pas parti.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux états de compte.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Ce client n’existe plus.")}',
+    impression:         '${T("L’impression a échoué.")}',
+    courriel:           '${T("Le courriel n’est pas parti.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 180)) + ')';
     return t;
   }
@@ -138,7 +144,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function charger(){
     appeler('etat:lire', [ID]).then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="vide"><strong>État de compte indisponible</strong>'
+        corps.innerHTML = '<div class="vide"><strong>${T("État de compte indisponible")}</strong>'
           + '<div style="margin-top:.4rem">' + esc(expliquer(r)) + '</div></div>';
         return;
       }
@@ -149,19 +155,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (sous) {
         sous.innerHTML = esc(r.nom)
           + (r.solde > 0
-              ? ' <span class="pill att">solde ' + fmt(r.solde) + '</span>'
-              : ' <span class="pill bon">compte à jour</span>');
+              ? ' <span class="pill att">${T("solde ")}' + fmt(r.solde) + '</span>'
+              : ' <span class="pill bon">${T("compte à jour")}</span>');
       }
       bImprimer.disabled = false;
       // Sans adresse au dossier, le bouton d envoi reste eteint et le DIT.
       if (r.courriel) {
         bCourriel.disabled = false;
-        bCourriel.title = 'Envoyer cet état de compte à ' + r.courriel;
-        bCourriel.textContent = 'Envoyer à ' + r.courriel;
+        bCourriel.title = '${T("Envoyer cet état de compte à ")}' + r.courriel;
+        bCourriel.textContent = '${T("Envoyer à ")}' + r.courriel;
       } else {
         bCourriel.disabled = true;
-        bCourriel.title = 'Aucune adresse courriel au dossier de ce client';
-        bCourriel.textContent = 'Aucune adresse au dossier';
+        bCourriel.title = '${T("Aucune adresse courriel au dossier de ce client")}';
+        bCourriel.textContent = '${T("Aucune adresse au dossier")}';
       }
       dire('');
     });
@@ -169,10 +175,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   bImprimer.onclick = function(){
     bImprimer.disabled = true;
-    dire('Impression…', 'att');
+    dire('${T("Impression…")}', 'att');
     appeler('etat:imprimer', [ID]).then(function(r){
       bImprimer.disabled = false;
-      dire(r.ok ? 'État de compte envoyé à l’impression.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("État de compte envoyé à l’impression.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
 
@@ -183,18 +189,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!D || !D.courriel) return;
     if (!ARME) {
       ARME = true;
-      bCourriel.textContent = 'Confirmer l’envoi ?';
-      dire('Cliquez de nouveau pour envoyer l’état de compte à ' + D.courriel + '.', 'att');
+      bCourriel.textContent = '${T("Confirmer l’envoi ?")}';
+      dire('${T("Cliquez de nouveau pour envoyer l’état de compte à ")}' + D.courriel + '.', 'att');
       return;
     }
     ARME = false;
     bCourriel.disabled = true;
-    bCourriel.textContent = 'Envoi…';
-    dire('Envoi du courriel…', 'att');
+    bCourriel.textContent = '${T("Envoi…")}';
+    dire('${T("Envoi du courriel…")}', 'att');
     appeler('etat:courriel', [ID, '']).then(function(r){
       bCourriel.disabled = false;
-      bCourriel.textContent = 'Envoyer à ' + D.courriel;
-      dire(r.ok ? 'État de compte envoyé à ' + r.adresse + '.' : expliquer(r), r.ok ? 'bon' : 'err');
+      bCourriel.textContent = '${T("Envoyer à ")}' + D.courriel;
+      dire(r.ok ? '${T("État de compte envoyé à ")}' + r.adresse + '.' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
 
@@ -203,7 +209,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.addEventListener('click', function(ev){
     if (ARME && ev.target !== bCourriel) {
       ARME = false;
-      if (D && D.courriel) bCourriel.textContent = 'Envoyer à ' + D.courriel;
+      if (D && D.courriel) bCourriel.textContent = '${T("Envoyer à ")}' + D.courriel;
       dire('');
     }
   }, true);

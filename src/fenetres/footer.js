@@ -16,6 +16,12 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit ICI — jamais l adresse, le
+   courriel ni les numeros de taxes, qui s affichent au bas de CHAQUE page du
+   site (voir src/langue/footer.js). */
+const T = require('../langue').tr('footer');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -74,13 +80,13 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 
 function pageFooter() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Pied de page — Administration Sandriza</title>
+<title>${T("Pied de page — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.pied}</span><h1>Pied de page</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter le pied de page, pas le modifier.</div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="tete"><span class="ico">${ICO.pied}</span><h1>${T("Pied de page")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter le pied de page, pas le modifier.")}</div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-save" disabled>Enregistrer</button></div>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -103,12 +109,12 @@ function pageFooter() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -122,19 +128,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : le pied de page ne peut pas être modifié.',
-    indisponible:       'La configuration n’est pas prête dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : le pied de page ne peut pas être modifié.")}',
+    indisponible:       '${T("La configuration n’est pas prête dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -157,16 +163,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = [];
     var av = document.getElementById('ro');
     if (av) av.hidden = !RO;
-    h.push('<div class="carte"><h2>Colonne marque</h2>');
-    h.push(champ('fc-tagline', 'Tagline', c.tagline));
-    h.push(champ('fc-address', 'Adresse complète (FR)', c.address));
-    h.push(champ('fc-address-en', 'Adresse complète (EN)', c.addressEN, 'affichée en mode anglais'));
-    h.push('<div class="deux">' + champ('fc-email', 'Courriel de contact', c.email, '', 'email')
-      + champ('fc-phone', 'Téléphone', c.phone) + '</div>');
+    h.push('<div class="carte"><h2>${T("Colonne marque")}</h2>');
+    h.push(champ('fc-tagline', '${T("Tagline")}', c.tagline));
+    h.push(champ('fc-address', '${T("Adresse complète (FR)")}', c.address));
+    h.push(champ('fc-address-en', '${T("Adresse complète (EN)")}', c.addressEN, '${T("affichée en mode anglais")}'));
+    h.push('<div class="deux">' + champ('fc-email', '${T("Courriel de contact")}', c.email, '', 'email')
+      + champ('fc-phone', '${T("Téléphone")}', c.phone) + '</div>');
     h.push('</div>');
-    h.push('<div class="carte"><h2>Copyright et numéros de taxes</h2>');
-    h.push('<div class="deux">' + champ('fc-tps', 'Numéro TPS', c.tps, 'ex. 123456789 RT0001')
-      + champ('fc-tvq', 'Numéro TVQ', c.tvq, 'ex. 9876543210 TQ0001') + '</div>');
+    h.push('<div class="carte"><h2>${T("Copyright et numéros de taxes")}</h2>');
+    h.push('<div class="deux">' + champ('fc-tps', '${T("Numéro TPS")}', c.tps, '${T("ex. 123456789 RT0001")}')
+      + champ('fc-tvq', '${T("Numéro TVQ")}', c.tvq, '${T("ex. 9876543210 TQ0001")}') + '</div>');
     h.push('<div class="apercu" id="apercu"></div></div>');
     corps.innerHTML = h.join('');
     // Aperçu du copyright, mis à jour à la frappe.
@@ -174,7 +180,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var tps = (document.getElementById('fc-tps') || {}).value || '';
       var tvq = (document.getElementById('fc-tvq') || {}).value || '';
       var el = document.getElementById('apercu');
-      if (el) el.textContent = 'Aperçu : © ' + ANNEE + ' ' + MARQUE + '. Tous droits réservés.'
+      if (el) el.textContent = '${T("Aperçu : © ")}' + ANNEE + ' ' + MARQUE + '${T(". Tous droits réservés.")}'
         + (tps ? ' | TPS: ' + tps : '') + (tvq ? ' | TVQ: ' + tvq : '');
     }
     ['fc-tps', 'fc-tvq'].forEach(function(id){
@@ -193,17 +199,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function enregistrer(){
     if (RO) return;
     bsave.disabled = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('config:footer:ecrire', [lire()]).then(function(r){
       bsave.disabled = false;
-      if (r && r.ok) { D = r.cfg || D; dire('Pied de page enregistré.', 'bon'); }
+      if (r && r.ok) { D = r.cfg || D; dire('${T("Pied de page enregistré.")}', 'bon'); }
       else { dire(expliquer(r), 'err'); }
     });
   }
   bsave.onclick = enregistrer;
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:footer:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte pleine"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

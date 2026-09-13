@@ -21,6 +21,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d un theme, qui
+   vient du coeur (voir src/langue/apparence.js). */
+const T = require('../langue').tr('apparence');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -78,11 +83,11 @@ body{background:var(--f-page);color:var(--tx);
 
 function pageApparence() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Thème et apparence — Administration Sandriza</title>
+<title>${T("Thème et apparence — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.apparence}</span><h1>Thème et apparence</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les thèmes, pas les changer.</div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="tete"><span class="ico">${ICO.apparence}</span><h1>${T("Thème et apparence")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les thèmes, pas les changer.")}</div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -106,12 +111,12 @@ function pageApparence() {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -124,21 +129,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : le thème ne peut pas être changé.',
-    theme_inconnu:      'Ce thème n’existe pas dans cette version.',
-    rien_a_ecrire:      'Aucun changement à enregistrer.',
-    indisponible:       'La configuration n’est pas prête dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : le thème ne peut pas être changé.")}',
+    theme_inconnu:      '${T("Ce thème n’existe pas dans cette version.")}',
+    rien_a_ecrire:      '${T("Aucun changement à enregistrer.")}',
+    indisponible:       '${T("La configuration n’est pas prête dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -150,12 +155,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
+  /* ⚠ L OMBRE DU THEME CHOISI EST UNE VALEUR CSS, ECRITE D UN SEUL TENANT.
+     Composee par concatenation autour de la couleur d accent, elle laissait un
+     morceau << ,0 4px 12px rgba(0,0,0,.25) >> que l inventaire de la langue
+     prenait pour une phrase a traduire. Le @ marque la place de la couleur. */
+  var OMBRE_CHOIX = '0 0 0 2px @,0 4px 12px rgba(0,0,0,.25)';
+
   // Une pastille = un bouton. Le champ (adm / store) et l identifiant du theme
   // voyagent en attributs : le gestionnaire est pose UNE fois, apres le dessin.
   function pastille(champ, th, choisi){
     var sel = th.id === choisi;
     var bord = sel ? th.accent : 'transparent';
-    var ombre = sel ? '0 0 0 2px ' + th.accent + ',0 4px 12px rgba(0,0,0,.25)' : '';
+    var ombre = sel ? OMBRE_CHOIX.replace('@', th.accent) : '';
     return '<button type="button" class="th" data-champ="' + esc(champ) + '" data-id="' + esc(th.id) + '"'
       + ' aria-pressed="' + (sel ? 'true' : 'false') + '" title="' + esc(th.label) + '"'
       + (RO ? ' disabled' : '') + '>'
@@ -177,15 +188,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        fait dire << ça ne s applique plus >>. Le jeu de couleurs de
        l application vit maintenant dans le MENU, et il est PAR POSTE — donc il
        n a pas sa place ici, où tout est partagé par toute l équipe. */
-    h.push('<div class="carte"><h2>Panneau d’administration</h2>');
-    h.push('<p>Le jeu de couleurs de l’application a déménagé : <strong>menu '
-      + '« Affichage » → « Jeu de couleurs »</strong>. Il habille les fenêtres '
-      + 'entières — fonds, cartes, boutons, survol et menus — et il est réglé '
-      + '<strong>par poste</strong> : votre choix ne s’impose pas à vos collègues.</p>');
-    h.push('<p class="aide">L’ancien réglage ne teintait que la barre latérale '
-      + 'de l’écran web, qui n’existe plus.</p></div>');
-    h.push('<div class="carte"><h2>Boutique</h2>');
-    h.push('<p>Palette de couleurs vue par la clientèle. Visible immédiatement dans la boutique.</p>');
+    h.push('<div class="carte"><h2>${T("Panneau d’administration")}</h2>');
+    /* Deux paragraphes ENTIERS, chacun dans un seul litteral : coupes, ils se
+       traduiraient en morceaux qui ne se recollent pas. */
+    h.push('<p>'
+      + '${T("Le jeu de couleurs de l’application a déménagé : <strong>menu « Affichage » → « Jeu de couleurs »</strong>. Il habille les fenêtres entières — fonds, cartes, boutons, survol et menus — et il est réglé <strong>par poste</strong> : votre choix ne s’impose pas à vos collègues.")}'
+      + '</p>');
+    h.push('<p class="aide">'
+      + '${T("L’ancien réglage ne teintait que la barre latérale de l’écran web, qui n’existe plus.")}'
+      + '</p></div>');
+    h.push('<div class="carte"><h2>${T("Boutique")}</h2>');
+    h.push('<p>${T("Palette de couleurs vue par la clientèle. Visible immédiatement dans la boutique.")}</p>');
     h.push('<div class="rang">' + (d.storeThemes || []).map(function(t){
       return pastille('store', t, d.store || ''); }).join('') + '</div></div>');
     corps.innerHTML = h.join('');
@@ -203,7 +216,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var saisie = {};
     saisie[champ] = id;
     OCCUPE = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('config:apparence:ecrire', [saisie]).then(function(r){
       OCCUPE = false;
       if (r && r.ok) {
@@ -211,7 +224,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // a partir de ce qu on croyait avoir envoye.
         D = r; RO = !r.peutModifier;
         dessiner();
-        dire('Thème appliqué.', 'bon');
+        dire('${T("Thème appliqué.")}', 'bon');
       } else {
         dire(expliquer(r), 'err');
       }
@@ -219,7 +232,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:apparence:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte pleine"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

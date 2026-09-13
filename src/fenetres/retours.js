@@ -20,6 +20,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le motif, qui est ce que
+   la cliente a ecrit (voir src/langue/retours.js). */
+const T = require('../langue').tr('retours');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -73,11 +78,11 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 /** Page complète de la fenêtre native « Nos Retours ». */
 function pageRetours() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Nos Retours — Administration Sandriza</title>
+<title>${T("Nos Retours — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.returns}</span><h1>Nos Retours</h1>
+<div class="tete"><span class="ico">${ICO.returns}</span><h1>${T("Nos Retours")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Chargement… (les demandes se resynchronisent)</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -92,9 +97,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var Q = '';
 
   var ONGLETS = [
-    ['pending', 'En attente'], ['approved', 'Approuvées'], ['in_transit', 'En transit'],
-    ['expiring_soon', 'Expire bientôt'], ['received', 'Reçues'], ['disputed', 'À analyser'],
-    ['rejected', 'Rejetées'], ['completed', 'Complétées'], ['all', 'Toutes']
+    ['pending', '${T("En attente")}'], ['approved', '${T("Approuvées")}'], ['in_transit', '${T("En transit")}'],
+    ['expiring_soon', '${T("Expire bientôt")}'], ['received', '${T("Reçues")}'], ['disputed', '${T("À analyser")}'],
+    ['rejected', '${T("Rejetées")}'], ['completed', '${T("Complétées")}'], ['all', '${T("Toutes")}']
   ];
   var TONS = { pending: 'att', approved: 'bon', in_transit: 'info', received: 'att',
     refunded: 'bon', completed: 'bon', rejected: 'err', disputed: 'err', awaiting_photo: 'neutre' };
@@ -110,18 +115,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux retours.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette demande n’existe plus.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux retours.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette demande n’existe plus.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -137,7 +142,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="vide charge">Chargement… (les demandes se resynchronisent)</div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div>'; return; }
     var c = D.comptes || {};
     var h = '<div class="barreoutils">'
       + ONGLETS.map(function(o){
@@ -145,28 +150,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           return '<button class="mini' + (ONGLET === o[0] ? ' actif' : '') + '" data-onglet="' + o[0] + '">'
             + o[1] + '<span class="n' + (o[0] === 'pending' && n > 0 ? ' hi' : '') + '">' + n + '</span></button>';
         }).join('')
-      + '<input aria-label="Nom, courriel, n° commande" type="search" id="r-q" placeholder="Nom, courriel, n° commande…" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Nom, courriel, n° commande")}" type="search" id="r-q" placeholder="${T("Nom, courriel, n° commande…")}" value="' + esc(Q) + '">'
       + '</div>';
 
     var rows = D.lignes || [];
     if (!rows.length) {
-      h += '<div class="vide">Aucune demande' + (ONGLET !== 'all' ? ' dans cette catégorie' : '') + '.</div>';
+      /* Deux phrases ENTIERES, pas un fragment recolle. */
+      h += '<div class="vide">'
+        + (ONGLET !== 'all' ? '${T("Aucune demande dans cette catégorie.")}' : '${T("Aucune demande.")}')
+        + '</div>';
     } else {
       h += rows.map(function(r){
         var badges = '<span class="pill ' + (TONS[r.statut] || 'neutre') + '">' + esc(r.statutLibelle) + '</span>';
-        if (r.expireAuto) badges += ' <span class="pill err">Expirée automatiquement</span>';
-        if (r.expireBientot) badges += ' <span class="pill err">⏳ Expire le ' + esc(r.expireLe) + '</span>';
+        if (r.expireAuto) badges += ' <span class="pill err">${T("Expirée automatiquement")}</span>';
+        if (r.expireBientot) badges += ' <span class="pill err">⏳${T(" Expire le ")}' + esc(r.expireLe) + '</span>';
         if (r.suivi) badges += ' <span class="pill neutre"><span class="ic">📦</span> ' + esc(r.suivi) + '</span>';
-        if (r.etiquette === 'reelle') badges += ' <span class="pill info"><span class="ic">🏷️</span> Étiquette réelle</span>';
-        else if (r.etiquette === 'generee') badges += ' <span class="pill info"><span class="ic">🏷️</span> Étiquette générée</span>';
-        if (r.fraisBoutique) badges += ' <span class="pill info">Frais pris en charge</span>';
-        return '<div class="ligne" data-id="' + esc(r.id) + '" title="Ouvrir la demande de retour">'
+        if (r.etiquette === 'reelle') badges += ' <span class="pill info"><span class="ic">🏷️</span>${T(" Étiquette réelle")}</span>';
+        else if (r.etiquette === 'generee') badges += ' <span class="pill info"><span class="ic">🏷️</span>${T(" Étiquette générée")}</span>';
+        if (r.fraisBoutique) badges += ' <span class="pill info">${T("Frais pris en charge")}</span>';
+        return '<div class="ligne" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande de retour")}">'
           + '<div class="gauche">'
           + '<div class="haut"><span class="num">' + esc(r.commande) + '</span>'
           + szVerrouCase('return_reqs', r.id) + badges + '</div>'
           + '<div class="dt"><strong>' + esc(r.client) + '</strong>'
           + (r.courriel ? ' · ' + esc(r.courriel) : '') + '</div>'
-          + '<div class="dt">Motif : ' + esc(r.motif || '–') + '</div>'
+          + '<div class="dt">${T("Motif : ")}' + esc(r.motif || '–') + '</div>'
           + '</div>'
           + '<div class="droite">' + esc(fmtDate(r.date)) + '</div>'
           + '</div>';
@@ -193,9 +201,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('button') || t.closest('input')) return;
     var li = t.closest('.ligne[data-id]');
     if (!li) return;
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler('retours:ouvrir', [li.getAttribute('data-id')]).then(function(r){
-      dire(r.ok ? 'Demande ouverte dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Demande ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
 
@@ -206,7 +214,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('retours:liste', [{ onglet: ONGLET, q: Q }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Retours indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Retours indisponibles")}', expliquer(r)); return; }
       D = r;
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
@@ -251,12 +259,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
