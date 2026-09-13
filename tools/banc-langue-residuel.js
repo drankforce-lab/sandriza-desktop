@@ -80,13 +80,31 @@ const chainesToutes = (js) => {
   return out;
 };
 
+/* ⚠⚠ LES NOMS OFFICIELS QUI RESTENT FRANÇAIS EN ANGLAIS. « Registraire des
+   entreprises du Québec » et « Revenu Québec » s'écrivent ainsi dans les deux
+   langues — y compris dans la documentation de l'ARC. Les traduire ferait
+   chercher un organisme qui n'existe pas sous ce nom-là.
+   ⚠ ON LES RETIRE DU TEXTE AVANT DE L'EXAMINER, on ne met pas la phrase entière
+   hors de portée : « 10 digits · Registraire des entreprises du Québec » doit
+   continuer d'être jugée sur ses AUTRES mots. Exempter la phrase entière
+   reviendrait à s'aveugler sur tout ce qui l'entoure.
+   ⚠ Chaque nom porte sa raison — une liste sans motif devient l'endroit où l'on
+   range ce qu'on n'a pas envie de corriger. */
+const NOMS_OFFICIELS = [
+  ['Registraire des entreprises du Québec', 'le nom officiel de l’organisme, dans les deux langues'],
+  ['Registraire des entreprises', 'idem, forme courte'],
+  ['Revenu Québec', 'son nom officiel en anglais aussi (l’ARC l’écrit ainsi)'],
+];
+const sansNomsOfficiels = (t) => NOMS_OFFICIELS
+  .reduce((s, [nom]) => s.split(nom).join(' '), t);
+
 const exempte = (mot) => EXEMPTE.some(([re]) => re.test(mot));
 
 /* ⚠ UN MOT COLLE A UN CHIFFRE OU A UN POINT EST UN NOM, pas un mot — meme borne
    que `banc-accents-visibles`, et pour la meme raison. */
 const motsFrancais = (t) => {
   const trouves = [];
-  for (const mot of t.split(/[^A-Za-zÀ-ÿŒœ’]+/)) {
+  for (const mot of sansNomsOfficiels(t).split(/[^A-Za-zÀ-ÿŒœ’]+/)) {
     if (!mot || mot.length < 3) continue;
     if (exempte(mot)) continue;
     if (ACCENT.test(mot)) { trouves.push(mot); continue; }

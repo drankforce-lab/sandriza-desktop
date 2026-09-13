@@ -28,6 +28,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('impot');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -185,11 +189,11 @@ function pageImpot(onglet) {
   const ok = ['revenus', 'documents', 'entreprise', 'memo'];
   const depart = (ok.indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'taxes';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Fiscalité et impôt — Administration Sandriza</title>
+<title>${T("Fiscalité et impôt — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.impot}</span><h1>Fiscalité et impôt</h1>
+<div class="tete"><span class="ico">${ICO.impot}</span><h1>${T("Fiscalité et impôt")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -226,18 +230,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la fiscalité.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    document_inconnu:   'Ce document n’existe pas.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la fiscalité.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    document_inconnu:   '${T("Ce document n’existe pas.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 150)) + ')';
     return t;
   }
@@ -258,22 +262,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ⚠ CHACUN DIT A QUOI IL SERT ET A QUI IL VA. Un nom de formulaire seul
      (<< FPZ-500-V >>) ne dit rien a qui ne le manipule pas tous les jours. */
   var DOCS = [
-    { cle: 'tps-trim', trim: true, titre: 'Remise TPS / TVQ — trimestrielle',
-      desc: 'GST34 (ARC) et FPZ-500-V (Revenu Québec) pour un trimestre, avec les crédits sur intrants déjà déduits.' },
-    { cle: 'tps-annuel', trim: false, titre: 'Remise TPS / TVQ — annuelle',
-      desc: 'Le même sommaire pour l’année entière, si votre fréquence de remise est annuelle.' },
-    { cle: 't2125', trim: false, titre: 'T2125 — État des résultats (fédéral)',
-      desc: 'Revenus et dépenses ventilés par ligne fiscale, prêts à reporter dans votre déclaration.' },
-    { cle: 'tp80', trim: false, titre: 'TP-80-V — État des résultats (Québec)',
-      desc: 'L’équivalent québécois, aux mêmes chiffres.' },
-    { cle: 'grand-livre', trim: false, titre: 'Grand livre des ventes',
-      desc: 'Chaque vente de l’année, avec la TPS et la TVQ perçues — le registre que demande un comptable.' },
-    { cle: 'inventaire', trim: false, titre: 'Inventaire de fin d’exercice',
-      desc: 'La valeur du stock à la date de clôture, au coût — nécessaire au calcul du coût des marchandises vendues.' }
+    { cle: 'tps-trim', trim: true, titre: '${T("Remise TPS / TVQ — trimestrielle")}',
+      desc: '${T("GST34 (ARC) et FPZ-500-V (Revenu Québec) pour un trimestre, avec les crédits sur intrants déjà déduits.")}' },
+    { cle: 'tps-annuel', trim: false, titre: '${T("Remise TPS / TVQ — annuelle")}',
+      desc: '${T("Le même sommaire pour l’année entière, si votre fréquence de remise est annuelle.")}' },
+    { cle: 't2125', trim: false, titre: '${T("T2125 — État des résultats (fédéral)")}',
+      desc: '${T("Revenus et dépenses ventilés par ligne fiscale, prêts à reporter dans votre déclaration.")}' },
+    { cle: 'tp80', trim: false, titre: '${T("TP-80-V — État des résultats (Québec)")}',
+      desc: '${T("L’équivalent québécois, aux mêmes chiffres.")}' },
+    { cle: 'grand-livre', trim: false, titre: '${T("Grand livre des ventes")}',
+      desc: '${T("Chaque vente de l’année, avec la TPS et la TVQ perçues — le registre que demande un comptable.")}' },
+    { cle: 'inventaire', trim: false, titre: '${T("Inventaire de fin d’exercice")}',
+      desc: '${T("La valeur du stock à la date de clôture, au coût — nécessaire au calcul du coût des marchandises vendues.")}' }
   ];
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var h = '';
 
     /* ⚠ LE PROFIL INCOMPLET SE DIT EN HAUT, TOUJOURS : un document imprime sans
@@ -286,21 +290,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        endroit ou saisir ce profil etait inatteignable. Rouvert par #33. */
     if (!D.profil.complet && ONGLET !== 'entreprise') {
       h += '<div class="avis"><span class="ic">⚠</span> <strong>Profil d’entreprise incomplet</strong> — il manque le nom, '
-        + 'le NEQ ou vos numéros de TPS/TVQ. Les documents s’imprimeront sans eux, et ils ne '
-        + 'seront pas recevables. <button class="mini" data-onglet="entreprise">Compléter maintenant</button></div>';
+        + '${T("le NEQ ou vos numéros de TPS/TVQ. Les documents s’imprimeront sans eux, et ils ne")} '
+        + '${T("seront pas recevables. ")}<button class="mini" data-onglet="entreprise">${T("Compléter maintenant")}</button></div>';
     }
 
     h += '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'taxes' ? ' actif' : '') + '" data-onglet="taxes">TPS / TVQ</button>'
       + '<button class="mini' + (ONGLET === 'revenus' ? ' actif' : '') + '" data-onglet="revenus">Revenus</button>'
       + '<button class="mini' + (ONGLET === 'documents' ? ' actif' : '') + '" data-onglet="documents">Documents</button>'
-      + '<button class="mini' + (ONGLET === 'entreprise' ? ' actif' : '') + '" data-onglet="entreprise">Mon entreprise'
+      + '<button class="mini' + (ONGLET === 'entreprise' ? ' actif' : '') + '" data-onglet="entreprise">${T("Mon entreprise")}'
       + (D.profil.complet ? '' : '<span class="n hi">!</span>') + '</button>'
-      + '<button class="mini' + (ONGLET === 'memo' ? ' actif' : '') + '" data-onglet="memo">Aide-mémoire</button>'
+      + '<button class="mini' + (ONGLET === 'memo' ? ' actif' : '') + '" data-onglet="memo">${T("Aide-mémoire")}</button>'
       /* Le choix d annee n a aucun sens sur le profil ni sur l aide-memoire :
          l un decrit l entreprise, l autre le calendrier a venir. */
       + ((ONGLET === 'entreprise' || ONGLET === 'memo') ? ''
-          : '<select id="i-annee" aria-label="Année d’imposition">' + (D.annees || []).map(function(a){
+          : '<select id="i-annee" aria-label="${T("Année d’imposition")}">' + (D.annees || []).map(function(a){
               return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>'
                 + a + '</option>'; }).join('') + '</select>')
       + '<span class="droite">' + esc(D.profil.nom || 'entreprise sans nom') + '</span>'
@@ -326,9 +330,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ⚠ AUCUN FORMAT N EST REFUSE : un NEQ que le Registraire accepte et que nous
      refuserions empecherait de travailler pour rien. On SIGNALE ce qui manque. */
   var LIENS_OFFICIELS = [
-    ['https://www.registreentreprises.gouv.qc.ca', 'Registraire des entreprises (REQ)'],
-    ['https://www.canada.ca/fr/agence-revenu/services/services-electroniques/services-electroniques-entreprises/mon-dossier-entreprise.html', 'Mon dossier d’entreprise — ARC'],
-    ['https://rqen.revenuquebec.ca', 'Mon dossier — Revenu Québec']
+    ['https://www.registreentreprises.gouv.qc.ca', '${T("Registraire des entreprises (REQ)")}'],
+    ['https://www.canada.ca/fr/agence-revenu/services/services-electroniques/services-electroniques-entreprises/mon-dossier-entreprise.html', '${T("Mon dossier d’entreprise — ARC")}'],
+    ['https://rqen.revenuquebec.ca', '${T("Mon dossier — Revenu Québec")}']
   ];
 
   function champ(id, lbl, val, aide, mono, obligatoire){
@@ -340,12 +344,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function vueEntreprise(){
-    if (!PROFIL) return '<div class="vide charge">Lecture du profil…</div>';
+    if (!PROFIL) return '<div class="vide charge">${T("Lecture du profil…")}</div>';
     var p = PROFIL.profil || {};
     var h = '<div class="avis ' + (PROFIL.complet ? 'bon' : '') + '">'
       + (PROFIL.complet
-          ? 'Profil complet — vos documents fiscaux se remplissent tout seuls.'
-          : 'Il manque le nom, le NEQ ou vos numéros de taxes. Les documents s’imprimeront sans eux, et ils ne seront pas recevables.')
+          ? '${T("Profil complet — vos documents fiscaux se remplissent tout seuls.")}'
+          : '${T("Il manque le nom, le NEQ ou vos numéros de taxes. Les documents s’imprimeront sans eux, et ils ne seront pas recevables.")}')
       + '</div>';
 
     h += '<div class="grillecfg">';
@@ -354,10 +358,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          forme BRUTE du stockage (name / tpsNo / sinBn), alors que la liste du
          haut d ecran, elle, est francisee (D.profil.nom). Deux formes voisines
          dans la meme fenetre : la raison sociale est arrivee VIDE au 1er rendu. */
-      + champ('e-nom', 'Raison sociale', p.name, '', false, true)
-      + champ('e-neq', 'NEQ — Numéro d’entreprise du Québec', p.neq, '10 chiffres · Registraire des entreprises du Québec', true, true)
-      + champ('e-ne', 'Numéro d’entreprise ARC (NE)', p.sinBn, '9 chiffres · Agence du revenu du Canada', true, false)
-      + '<label class="champ"><span class="lbl">Type d’entreprise</span>'
+      + champ('e-nom', '${T("Raison sociale")}', p.name, '', false, true)
+      + champ('e-neq', '${T("NEQ — Numéro d’entreprise du Québec")}', p.neq, '${T("10 chiffres · Registraire des entreprises du Québec")}', true, true)
+      + champ('e-ne', '${T("Numéro d’entreprise ARC (NE)")}', p.sinBn, '${T("9 chiffres · Agence du revenu du Canada")}', true, false)
+      + '<label class="champ"><span class="lbl">${T("Type d’entreprise")}</span>'
       + '<select class="t" id="e-type"' + (RO ? ' disabled' : '') + '>'
       + ((PROFIL && PROFIL.types) || []).map(function(t){
           return '<option value="' + esc(t.v) + '"' + (p.type === t.v ? ' selected' : '') + '>'
@@ -365,22 +369,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</select></label>'
       + '</div>';
 
-    h += '<div class="carte"><h2>Numéros d’inscription aux taxes</h2>'
-      + champ('e-tps', 'TPS / TVH (GST/HST)', p.tpsNo, 'Format : 123456789 RT0001 · ARC', true, true)
-      + champ('e-tvq', 'TVQ', p.tvqNo, 'Format : 1234567890 TQ0001 · Revenu Québec', true, true)
+    h += '<div class="carte"><h2>${T("Numéros d’inscription aux taxes")}</h2>'
+      + champ('e-tps', 'TPS / TVH (GST/HST)', p.tpsNo, '${T("Format : 123456789 RT0001 · ARC")}', true, true)
+      + champ('e-tvq', 'TVQ', p.tvqNo, '${T("Format : 1234567890 TQ0001 · Revenu Québec")}', true, true)
       + '</div>';
 
-    h += '<div class="carte large"><h2>Coordonnées</h2>'
+    h += '<div class="carte large"><h2>${T("Coordonnées")}</h2>'
       + '<div class="deux">'
       + champ('e-adresse', 'Adresse', p.address, '', false, false)
       + champ('e-ville', 'Ville', p.city, '', false, false)
-      + champ('e-cp', 'Code postal', p.postal, '', true, false)
-      + champ('e-tel', 'Téléphone', p.phone, '', false, false)
-      + champ('e-courriel', 'Courriel professionnel', p.email, '', false, false)
+      + champ('e-cp', '${T("Code postal")}', p.postal, '', true, false)
+      + champ('e-tel', '${T("Téléphone")}', p.phone, '', false, false)
+      + champ('e-courriel', '${T("Courriel professionnel")}', p.email, '', false, false)
       + '</div></div>';
     h += '</div>';
 
-    if (!RO) h += '<div style="margin-top:1rem"><button class="mini prim" id="e-enr">Enregistrer le profil</button></div>';
+    if (!RO) h += '<div style="margin-top:1rem"><button class="mini prim" id="e-enr">${T("Enregistrer le profil")}</button></div>';
 
     h += '<div class="liens">' + LIENS_OFFICIELS.map(function(l){
       return '<a href="' + esc(l[0]) + '" target="_blank" rel="noopener"><span class="ic">🔗</span> ' + esc(l[1]) + '</a>';
@@ -400,34 +404,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function vueMemo(){
-    if (!MEMO) return '<div class="vide charge">Lecture de l’aide-mémoire…</div>';
+    if (!MEMO) return '<div class="vide charge">${T("Lecture de l’aide-mémoire…")}</div>';
     var h = '<div class="grillecfg">';
-    h += '<div class="carte"><h2>Dates limites — ' + esc(MEMO.annee) + ' / ' + esc(MEMO.annee + 1) + '</h2>'
-      + '<div class="sstitre">Remises TPS / TVQ (trimestriel)</div>'
+    h += '<div class="carte"><h2>${T("Dates limites —")} ' + esc(MEMO.annee) + ' / ' + esc(MEMO.annee + 1) + '</h2>'
+      + '<div class="sstitre">${T("Remises TPS / TVQ (trimestriel)")}</div>'
       + (MEMO.remises || []).map(jourLigne).join('')
-      + '<div class="sstitre">Déclarations de revenus</div>'
+      + '<div class="sstitre">${T("Déclarations de revenus")}</div>'
       + (MEMO.declarations || []).map(jourLigne).join('')
       + '</div>';
 
-    h += '<div class="carte"><h2>Déductions — boutique en ligne</h2>'
+    h += '<div class="carte"><h2>${T("Déductions — boutique en ligne")}</h2>'
       + (MEMO.deductions || []).map(function(d){
           return '<div class="ded"><strong><span class="ic">☑</span> ' + esc(d.libelle) + '</strong>'
             + '<span class="dt">' + esc(d.detail) + '</span></div>'; }).join('')
       + '</div>';
 
-    h += '<div class="carte large"><h2>Formulaires de référence</h2>'
+    h += '<div class="carte large"><h2>${T("Formulaires de référence")}</h2>'
       + (MEMO.formulaires || []).map(function(f){
           return '<div class="form"><span class="code">' + esc(f.code) + '</span>'
             + '<span class="dt">' + esc(f.quoi) + '</span>'
             + (f.lien
-                ? '<a class="mini" href="' + esc(f.lien) + '" target="_blank" rel="noopener">Site officiel</a>'
-                : '<button class="mini" data-onglet="documents">Onglet Documents</button>')
+                ? '<a class="mini" href="' + esc(f.lien) + '" target="_blank" rel="noopener">${T("Site officiel")}</a>'
+                : '<button class="mini" data-onglet="documents">${T("Onglet Documents")}</button>')
             + '</div>'; }).join('')
       + '</div>';
     h += '</div>';
 
-    h += '<div class="avis"><span class="ic">💬</span> <strong>À titre indicatif seulement.</strong> Les lois fiscales changent '
-      + 'chaque année : faites confirmer votre situation par un comptable agréé. Les chiffres viennent '
+    h += '<div class="avis"><span class="ic">💬</span> ${T("<strong>À titre indicatif seulement.</strong> Les lois fiscales changent ")}'
+      + '${T("chaque année : faites confirmer votre situation par un comptable agréé. Les chiffres viennent")} '
       + 'des ventes de ' + esc(MEMO.marque) + '.</div>';
     return h;
   }
@@ -435,10 +439,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueTaxes(){
     var t = D.taxes;
     var h = '<div class="stats">'
-      + tuile(t.ventesNettes, 'Ventes nettes taxables', t.nbCommandes + ' commande' + (t.nbCommandes > 1 ? 's' : ''), '')
-      + tuile(t.tps, 'TPS perçue (5 %)', 'à remettre — ARC', '')
-      + tuile(t.tvq, 'TVQ perçue (9,975 %)', 'à remettre — Revenu Québec', '')
-      + tuile(t.totalRemettre, 'Net à remettre', t.enFaveur ? 'remboursement en votre faveur' : 'après crédits sur intrants',
+      + tuile(t.ventesNettes, '${T("Ventes nettes taxables")}', t.nbCommandes + ' commande' + (t.nbCommandes > 1 ? 's' : ''), '')
+      + tuile(t.tps, '${T("TPS perçue (5 %)")}', '${T("à remettre — ARC")}', '')
+      + tuile(t.tvq, '${T("TVQ perçue (9,975 %)")}', '${T("à remettre — Revenu Québec")}', '')
+      + tuile(t.totalRemettre, '${T("Net à remettre")}', t.enFaveur ? 'remboursement en votre faveur' : '${T("après crédits sur intrants")}',
           t.enFaveur ? 'ok' : 'du')
       + '</div>';
 
@@ -446,10 +450,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        quand on demarre : sous 30 000 $, l inscription n est pas obligatoire. */
     h += '<div class="avis ' + (t.souSeuil ? 'bon' : '') + '">'
       + (t.souSeuil
-          ? ('Vos ventes (' + esc(t.ventesNettes) + ') sont sous le seuil de ' + esc(t.seuil)
-             + ' : l’inscription aux taxes n’est pas obligatoire. À confirmer avec votre comptable.')
-          : ('Vos ventes dépassent le seuil de ' + esc(t.seuil)
-             + ' : l’inscription aux taxes est obligatoire, et les remises doivent être faites régulièrement.'))
+          ? ('${T("Vos ventes (")}' + esc(t.ventesNettes) + ') sont sous le seuil de ' + esc(t.seuil)
+             + ' ${T(": l’inscription aux taxes n’est pas obligatoire. À confirmer avec votre comptable.")}')
+          : ('${T("Vos ventes dépassent le seuil de")} ' + esc(t.seuil)
+             + ' ${T(": l’inscription aux taxes est obligatoire, et les remises doivent être faites régulièrement.")}'))
       + '</div>';
 
     /* ── FRAIS STRIPE TAX — ARRIVE DES DEPENSES LE 2026-09-08 ────────────────
@@ -468,18 +472,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        s affiche. */
     if (FRAIS !== null) {
       h += '<div class="frais">'
-        + '<div class="ft">Frais Stripe Tax ' + esc(String(FRAIS.annee || ANNEE)) + '</div>';
+        + '<div class="ft">${T("Frais Stripe Tax")} ' + esc(String(FRAIS.annee || ANNEE)) + '</div>';
       if (FRAIS.erreur) {
         h += '<div class="fx">' + esc(FRAIS.erreur) + '</div>';
       } else if (!FRAIS.transactions) {
-        h += '<div class="fx">Aucune transaction facturée cette année.</div>';
+        h += '<div class="fx">${T("Aucune transaction facturée cette année.")}</div>';
       } else {
         h += '<div class="fv">' + esc(fmtArgent(FRAIS.total)) + '</div>'
           + '<div class="fx">' + FRAIS.transactions + ' transaction'
-          + (FRAIS.transactions > 1 ? 's' : '') + ' facturée'
-          + (FRAIS.transactions > 1 ? 's' : '') + ' par Stripe. '
-          + '<b>Notre décompte</b> : à confronter à la facture Stripe avant de le '
-          + 'saisir en dépense. Rien n’est enregistré automatiquement.</div>';
+          + (FRAIS.transactions > 1 ? 's' : '') + ' ${T("facturée")}'
+          + (FRAIS.transactions > 1 ? 's' : '') + ' ${T("par Stripe.")} '
+          + '${T("<b>Notre décompte</b> : à confronter à la facture Stripe avant de le ")}'
+          + '${T("saisir en dépense. Rien n’est enregistré automatiquement.")}</div>';
         if ((FRAIS.mois || []).length) {
           h += '<div class="fm">' + FRAIS.mois.map(function(m){
             return '<span>' + esc(m.mois) + ' · ' + esc(fmtArgent(m.total)) + '</span>';
@@ -491,57 +495,57 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     if (t.nbRemb) {
       h += '<div class="aide">↩ ' + t.nbRemb + ' remboursement' + (t.nbRemb > 1 ? 's' : '')
-        + ' déduit' + (t.nbRemb > 1 ? 's' : '') + ' de ces chiffres : −' + esc(t.rembSousTotal)
-        + ' taxable, −' + esc(t.rembTps) + ' TPS, −' + esc(t.rembTvq) + ' TVQ.</div>';
+        + ' ${T("déduit")}' + (t.nbRemb > 1 ? 's' : '') + ' ${T("de ces chiffres : −")}' + esc(t.rembSousTotal)
+        + ' ${T("taxable, −")}' + esc(t.rembTps) + ' TPS, −' + esc(t.rembTvq) + ' TVQ.</div>';
     }
 
     if ((t.pst || []).length) {
       /* ⚠ LA PST NE SE DECLARE PAS SUR LES MEMES FORMULAIRES : elle se remet a
          CHAQUE province de destination. La taire ferait croire a une remise
          complete alors qu il en manque une par province. */
-      h += '<div class="avis info"><span class="ic">🏛</span> <strong>Taxes provinciales perçues (PST / RST)</strong> — '
-        + 'à remettre à CHAQUE province séparément, elles ne sont ni dans les chiffres '
-        + 'ci-dessus ni dans GST34 / FPZ-500-V :<br>'
+      h += '<div class="avis info"><span class="ic">🏛</span> ${T("<strong>Taxes provinciales perçues (PST / RST)</strong> — ")}'
+        + '${T("à remettre à CHAQUE province séparément, elles ne sont ni dans les chiffres")} '
+        + '${T("ci-dessus ni dans GST34 / FPZ-500-V :")}<br>'
         + t.pst.map(function(p){
             return '<span class="pill">' + esc(p.province) + ' : ' + esc(p.montant) + '</span>'; }).join('')
       + '</div>';
     }
 
-    h += '<div class="carte"><h2>Taxe nette à remettre <span class="n">après crédits sur intrants (CTI / RTI)</span></h2>'
+    h += '<div class="carte"><h2>Taxe nette ${T("à remettre")} <span class="n">${T("après crédits sur intrants")} (CTI / RTI)</span></h2>'
       + '<table><thead><tr><th></th><th style="text-align:right">TPS</th>'
       + '<th style="text-align:right">TVQ</th><th style="text-align:right">Total</th></tr></thead><tbody>'
-      + '<tr><td>Taxes perçues sur les ventes</td><td class="arg">' + esc(t.tps)
+      + '<tr><td>${T("Taxes perçues sur les ventes")}</td><td class="arg">' + esc(t.tps)
       + '</td><td class="arg">' + esc(t.tvq) + '</td><td class="arg">' + esc(t.total) + '</td></tr>'
-      + '<tr class="credit"><td>Moins : taxes payées sur les dépenses</td><td class="arg">−' + esc(t.cti)
+      + '<tr class="credit"><td>${T("Moins : taxes payées sur les dépenses")}</td><td class="arg">−' + esc(t.cti)
       + '</td><td class="arg">−' + esc(t.rti) + '</td><td class="arg">−' + esc(t.ctiTotal) + '</td></tr>'
-      + '<tr class="total"><td>Net à remettre</td><td class="arg">' + esc(t.tpsRemettre)
+      + '<tr class="total"><td>${T("Net à remettre")}</td><td class="arg">' + esc(t.tpsRemettre)
       + '</td><td class="arg">' + esc(t.tvqRemettre) + '</td><td class="arg">'
       + esc(t.totalRemettre) + '</td></tr>'
       + '</tbody></table>'
       + '<div class="aide" style="margin-top:.4rem">'
       + (t.aucunCredit
-          ? 'Aucune taxe payée sur des dépenses n’est saisie — vos crédits sur intrants sont donc à zéro. Saisissez vos dépenses avec leur TPS et leur TVQ pour les récupérer.'
-          : 'Un montant négatif est un remboursement de taxe en votre faveur, pas une erreur.')
+          ? '${T("Aucune taxe payée sur des dépenses n’est saisie — vos crédits sur intrants sont donc à zéro. Saisissez vos dépenses avec leur TPS et leur TVQ pour les récupérer.")}'
+          : '${T("Un montant négatif est un remboursement de taxe en votre faveur, pas une erreur.")}')
       + '</div></div>';
 
-    h += '<div class="carte"><h2>Résumé trimestriel <span class="n">fréquence de remise habituelle d’une PME</span></h2>'
-      + '<table><thead><tr><th>Trimestre</th><th style="text-align:right">Ventes nettes</th>'
+    h += '<div class="carte"><h2>${T("Résumé trimestriel")} <span class="n">${T("fréquence de remise habituelle d’une PME")}</span></h2>'
+      + '<table><thead><tr><th>${T("Trimestre")}</th><th style="text-align:right">${T("Ventes nettes")}</th>'
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
-      + '<th style="text-align:right">À remettre</th><th style="text-align:right">Cmdes</th></tr></thead><tbody>'
+      + '<th style="text-align:right">${T("À remettre")}</th><th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
       + (t.trimestres || []).map(function(q){
           return '<tr><td>' + esc(q.libelle) + '</td><td class="arg">' + esc(q.net)
             + '</td><td class="arg">' + esc(q.tps) + '</td><td class="arg">' + esc(q.tvq)
             + '</td><td class="arg">' + esc(q.total) + '</td><td class="arg">' + q.n + '</td></tr>';
         }).join('')
-      + '<tr class="total"><td>Année ' + D.annee + '</td><td class="arg">' + esc(t.ventesNettes)
+      + '<tr class="total"><td>${T("Année")} ' + D.annee + '</td><td class="arg">' + esc(t.ventesNettes)
       + '</td><td class="arg">' + esc(t.tps) + '</td><td class="arg">' + esc(t.tvq)
       + '</td><td class="arg">' + esc(t.total) + '</td><td class="arg">' + t.nbCommandes + '</td></tr>'
       + '</tbody></table></div>';
 
-    h += '<div class="carte"><h2>Détail mensuel</h2>'
-      + '<table><thead><tr><th>Mois</th><th style="text-align:right">Ventes nettes</th>'
+    h += '<div class="carte"><h2>${T("Détail mensuel")}</h2>'
+      + '<table><thead><tr><th>${T("Mois")}</th><th style="text-align:right">${T("Ventes nettes")}</th>'
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
-      + '<th style="text-align:right">Cmdes</th></tr></thead><tbody>'
+      + '<th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
       + (t.mensuel || []).map(function(m){
           return '<tr><td>' + esc(m.mois) + '</td><td class="arg">' + esc(m.net)
             + '</td><td class="arg">' + esc(m.tps) + '</td><td class="arg">' + esc(m.tvq)
@@ -552,27 +556,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueRevenus(){
     var r = D.revenus;
-    var h = '<div class="carte"><h2>État des résultats <span class="n">T2125 fédéral · TP-80-V Québec</span></h2>'
-      + rang('Ventes brutes de marchandises', r.brut, 'ligne 8000')
-      + rang('Remises et coupons', '−' + r.remises, '')
-      + (r.nbRemb ? rang('Remboursements émis', '−' + r.rembourse, r.nbRemb + ' remb.') : '')
-      + rang('Revenus d’expédition facturés', r.livraison, 'ligne 8290')
-      + rang('Revenus nets d’entreprise', r.totalRevenus, 'ligne 8299', true)
-      + rang('Total des dépenses', '−' + r.depenses, 'section Dépenses')
-      + rang(r.perte ? 'Perte nette d’entreprise' : 'Bénéfice net d’entreprise', r.benefice, 'ligne 9946', true)
+    var h = '<div class="carte"><h2>${T("État des résultats")} <span class="n">${T("T2125 fédéral · TP-80-V Québec")}</span></h2>'
+      + rang('${T("Ventes brutes de marchandises")}', r.brut, 'ligne 8000')
+      + rang('${T("Remises et coupons")}', '−' + r.remises, '')
+      + (r.nbRemb ? rang('${T("Remboursements émis")}', '−' + r.rembourse, r.nbRemb + ' remb.') : '')
+      + rang('${T("Revenus d’expédition facturés")}', r.livraison, 'ligne 8290')
+      + rang('${T("Revenus nets d’entreprise")}', r.totalRevenus, 'ligne 8299', true)
+      + rang('${T("Total des dépenses")}', '−' + r.depenses, '${T("section Dépenses")}')
+      + rang(r.perte ? '${T("Perte nette d’entreprise")}' : '${T("Bénéfice net d’entreprise")}', r.benefice, 'ligne 9946', true)
       + '</div>';
 
     if (D.square) {
-      h += '<div class="carte"><h2>Encaissements réels <span class="n">Square</span></h2>'
-        + rang('Revenu brut encaissé', D.square.brut, D.square.n + ' transaction' + (D.square.n > 1 ? 's' : ''))
-        + rang('Frais de traitement', '−' + D.square.frais, 'déductibles · ligne 8710')
-        + rang('Revenu net après frais', D.square.net, '', true)
+      h += '<div class="carte"><h2>${T("Encaissements réels ")}<span class="n">Square</span></h2>'
+        + rang('${T("Revenu brut encaissé")}', D.square.brut, D.square.n + ' transaction' + (D.square.n > 1 ? 's' : ''))
+        + rang('${T("Frais de traitement")}', '−' + D.square.frais, '${T("déductibles · ligne 8710")}')
+        + rang('${T("Revenu net après frais")}', D.square.net, '', true)
         + '</div>';
     }
 
     if ((r.categories || []).length) {
-      h += '<div class="carte"><h2>Dépenses par ligne fiscale</h2><table><thead><tr>'
-        + '<th>Catégorie</th><th>Ligne</th><th style="text-align:right">Montant</th>'
+      h += '<div class="carte"><h2>${T("Dépenses par ligne fiscale")}</h2><table><thead><tr>'
+        + '<th>${T("Catégorie")}</th><th>${T("Ligne")}</th><th style="text-align:right">${T("Montant")}</th>'
         + '</tr></thead><tbody>'
         + r.categories.map(function(c){
             return '<tr><td>' + esc(c.libelle) + '</td><td>' + esc(c.ligne)
@@ -580,12 +584,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<tr class="total"><td colspan="2">Total</td><td class="arg">' + esc(r.depenses)
         + '</td></tr></tbody></table></div>';
     } else {
-      h += '<div class="aide">Aucune dépense saisie pour ' + D.annee
-        + ' — le bénéfice net ci-dessus ne tient donc compte d’aucune déduction.</div>';
+      h += '<div class="aide">${T("Aucune dépense saisie pour")} ' + D.annee
+        + ' ${T("— le bénéfice net ci-dessus ne tient donc compte d’aucune déduction.")}</div>';
     }
 
     var mx = r.maxMois || 1;
-    h += '<div class="carte"><h2>Ventes nettes par mois</h2>'
+    h += '<div class="carte"><h2>${T("Ventes nettes par mois")}</h2>'
       + '<div class="graphe">' + (r.mensuel || []).map(function(m){
           var p = Math.max(2, Math.round((m.brutN / mx) * 100));
           return '<div class="b" style="height:' + p + '%" title="' + esc(m.mois) + ' : '
@@ -597,9 +601,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueDocuments(){
     var h = '';
-    h += '<div class="carte"><h2>Trimestre <span class="n">pour les documents trimestriels</span></h2>'
+    h += '<div class="carte"><h2>${T("Trimestre")} <span class="n">${T("pour les documents trimestriels")}</span></h2>'
       + '<div class="barreoutils">'
-      + ['T1 — jan · mar', 'T2 — avr · juin', 'T3 — juil · sep', 'T4 — oct · déc'].map(function(l, i){
+      + ['${T("T1 — jan · mar")}', '${T("T2 — avr · juin")}', '${T("T3 — juil · sep")}', '${T("T4 — oct · déc")}'].map(function(l, i){
           return '<button class="mini' + (TRIM === i ? ' actif' : '') + '" data-trim="' + i + '">'
             + l + '</button>'; }).join('')
       + '</div></div>';
@@ -610,9 +614,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + (OCCUPE ? ' disabled' : '') + '>Ouvrir'
           + (d.trim ? ' — T' + (TRIM + 1) : '') + '</button></div></div>';
       }).join('') + '</div>';
-    h += '<div class="aide">Le <strong>profil d’entreprise</strong> (nom, NEQ, numéros de TPS et '
-      + 'de TVQ, adresse) se remplit à l’écran de la fenêtre principale — c’est lui qui garnit '
-      + 'l’en-tête de ces documents.</div>';
+    h += '<div class="aide">${T("Le <strong>profil d’entreprise</strong> (nom, NEQ, numéros de TPS et ")}'
+      + '${T("de TVQ, adresse) se remplit à l’écran de la fenêtre principale — c’est lui qui garnit")} '
+      + '${T("l’en-tête de ces documents.")}</div>';
     return h;
   }
 
@@ -647,13 +651,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       phone: v('e-tel'), email: v('e-courriel')
     }]).then(function(r){
       OCCUPE = false;
-      if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
       PROFIL = r; RO = !r.peutEcrire;
       /* On relit le reste : l en-tete et l avis << profil incomplet >> viennent
          de l op impot:donnees, ils mentiraient sinon jusqu au prochain passage. */
       charger();
-      dire(r.complet ? 'Profil enregistré — vos documents seront complets.'
-                     : 'Profil enregistré, mais il manque encore le nom, le NEQ ou un numéro de taxe.',
+      dire(r.complet ? '${T("Profil enregistré — vos documents seront complets.")}'
+                     : '${T("Profil enregistré, mais il manque encore le nom, le NEQ ou un numéro de taxe.")}',
         r.complet ? 'bon' : 'att');
     });
   }
@@ -664,7 +668,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function chargerOnglet(){
     if (ONGLET === 'entreprise' && !PROFIL) {
       appeler('impot:profil', []).then(function(r){
-        if (!r || !r.ok) { dire('Profil illisible : ' + expliquer(r), 'err'); return; }
+        if (!r || !r.ok) { dire('${T("Profil illisible :")} ' + expliquer(r), 'err'); return; }
         PROFIL = r; RO = !r.peutEcrire;
         if (ONGLET === 'entreprise') dessiner();
       });
@@ -672,7 +676,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (ONGLET === 'memo' && !MEMO) {
       appeler('impot:memo', []).then(function(r){
-        if (!r || !r.ok) { dire('Aide-mémoire illisible : ' + expliquer(r), 'err'); return; }
+        if (!r || !r.ok) { dire('${T("Aide-mémoire illisible :")} ' + expliquer(r), 'err'); return; }
         MEMO = r;
         if (ONGLET === 'memo') dessiner();
       });
@@ -704,10 +708,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (dc) {
       if (OCCUPE) return;
       OCCUPE = true; dessiner();
-      dire('Composition du document…');
+      dire('${T("Composition du document…")}');
       appeler('impot:document', [dc.getAttribute('data-doc'), D.annee, TRIM]).then(function(r){
         OCCUPE = false; dessiner();
-        dire(r.ok ? 'Document ouvert dans la fenêtre principale — prêt à imprimer.' : expliquer(r),
+        dire(r.ok ? '${T("Document ouvert dans la fenêtre principale — prêt à imprimer.")}' : expliquer(r),
           r.ok ? 'bon' : 'err');
       });
     }
@@ -719,11 +723,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     enCours = true;
     appeler('impot:donnees', [{ annee: ANNEE, onglet: ONGLET }]).then(function(r){
       enCours = false;
-      if (!r || !r.ok) { vide('Fiscalité indisponible', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Fiscalité indisponible")}', expliquer(r)); return; }
       D = r;
       ANNEE = D.annee;
       var s = document.getElementById('sous');
-      if (s) s.textContent = D.annee + ' · ' + D.taxes.totalRemettre + ' à remettre';
+      if (s) s.textContent = D.annee + ' · ' + D.taxes.totalRemettre + ' ${T("à remettre")}';
       dessiner();
       chargerOnglet();
     });
@@ -748,12 +752,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
