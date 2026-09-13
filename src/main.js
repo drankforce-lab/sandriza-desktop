@@ -2582,7 +2582,7 @@ ipcMain.handle('fenetre:commande', (e, id) => {
      injecter du script avant `did-finish-load` ne trouverait rien. */
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Préparation de commande', pageCommande(String(id || '')),
+  const win = ouvrirNative(cle, 'Préparation de commande', () => pageCommande(String(id || '')),
     { width: 880, height: 700, minHeight: 520 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2597,7 +2597,7 @@ ipcMain.handle('fenetre:commande', (e, id) => {
    et deux courriels au client. */
 ipcMain.handle('fenetre:expedition', (e, id) => {
   const cle = 'expedition-' + String(id || '').replace(/[^\w-]/g, '');
-  ouvrirNative(cle, 'Expédier une commande', pageExpedition(String(id || '')),
+  ouvrirNative(cle, 'Expédier une commande', () => pageExpedition(String(id || '')),
     { width: 780, height: 720, minWidth: 620, minHeight: 520 });
   return true;
 });
@@ -2609,7 +2609,7 @@ ipcMain.handle('fenetre:retour', (e, id) => {
   const cle = 'retour-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Demande de retour', pageRetour(String(id || '')),
+  const win = ouvrirNative(cle, 'Demande de retour', () => pageRetour(String(id || '')),
     { width: 860, height: 760, minWidth: 680, minHeight: 540 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2624,7 +2624,7 @@ ipcMain.handle('fenetre:remboursement', (e, id) => {
   const cle = 'remboursement-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Remboursement', pageRemboursement(String(id || '')),
+  const win = ouvrirNative(cle, 'Remboursement', () => pageRemboursement(String(id || '')),
     { width: 760, height: 740, minWidth: 620, minHeight: 520 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2639,7 +2639,7 @@ ipcMain.handle('fenetre:produit', (e, id) => {
   // Sans identifiant, c'est le << Nouveau produit >> du menu : meme cle que lui,
   // pour ne pas ouvrir deux assistants vierges concurrents.
   const cle = brut ? 'produit-' + brut.replace(/[^\w-]/g, '') : 'produit';
-  ouvrirNative(cle, brut ? 'Produit' : 'Nouveau produit', pageProduit(brut),
+  ouvrirNative(cle, brut ? 'Produit' : 'Nouveau produit', () => pageProduit(brut),
     { width: 980, height: 860, minHeight: 520 });
   // Pas de szRevenir ici : l'assistant Produit ne sait pas encore se replacer.
   // Reutilisee, la fenetre revient simplement au premier plan.
@@ -2658,7 +2658,7 @@ ipcMain.handle('fenetre:promoEditeur', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
   const cle = 'promo-editeur-' + brut.replace(/[^\w-]/g, '');
-  ouvrirNative(cle, 'Editeur visuel', pagePromoEditeur(brut),
+  ouvrirNative(cle, 'Editeur visuel', () => pagePromoEditeur(brut),
     { width: 1120, height: 780, minHeight: 520 });
   return true;
 });
@@ -2670,7 +2670,7 @@ ipcMain.handle('fenetre:etatcompte', (e, id) => {
   const cle = 'etatcompte-' + brut.replace(/[^0-9A-Za-z_-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'État de compte', pageEtatCompte(brut),
+  const win = ouvrirNative(cle, 'État de compte', () => pageEtatCompte(brut),
     { width: 900, height: 840, minWidth: 640, minHeight: 520 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2685,7 +2685,7 @@ ipcMain.handle('fenetre:facture', (e, id) => {
   const cle = 'facture-' + brut.replace(/[^0-9A-Za-z_-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Facture', pageFacture(brut),
+  const win = ouvrirNative(cle, 'Facture', () => pageFacture(brut),
     { width: 920, height: 820, minWidth: 680, minHeight: 520 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2701,14 +2701,14 @@ ipcMain.handle('fenetre:facture', (e, id) => {
 ipcMain.handle('fenetre:collection', (e, id) => {
   const brut = String(id || '');
   const cle = brut ? 'collection-' + brut.replace(/[^\w-]/g, '') : 'collection';
-  ouvrirNative(cle, brut ? 'Collection' : 'Nouvelle collection', pageCollection(brut),
+  ouvrirNative(cle, brut ? 'Collection' : 'Nouvelle collection', () => pageCollection(brut),
     { width: 860, height: 640, minHeight: 480 });
   return true;
 });
 ipcMain.handle('fenetre:fournisseur', (e, id) => {
   const brut = String(id || '');
   const cle = brut ? 'fournisseur-' + brut.replace(/[^\w-]/g, '') : 'fournisseur';
-  ouvrirNative(cle, brut ? 'Fournisseur' : 'Nouveau fournisseur', pageFournisseur(brut),
+  ouvrirNative(cle, brut ? 'Fournisseur' : 'Nouveau fournisseur', () => pageFournisseur(brut),
     { width: 820, height: 620, minHeight: 460 });
   return true;
 });
@@ -2718,7 +2718,7 @@ ipcMain.handle('fenetre:fournisseur', (e, id) => {
 ipcMain.handle('fenetre:factures', () => {
   const _avant = fenetresNatives.get('factures');
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative('factures', 'Factures', pageFactures(''),
+  const win = ouvrirNative('factures', 'Factures', () => pageFactures(''),
     { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2734,7 +2734,7 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
   const cle = 'cmd-detail-' + brut.replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Détail de commande', pageCommandes('commandes@' + brut),
+  const win = ouvrirNative(cle, 'Détail de commande', () => pageCommandes('commandes@' + brut),
     /* PLUS GRANDE DEPUIS LE 2026-09-04, sur sa capture : << quand on clique sur
        la fenetre de details d une commande c est trop petit >>. A 780 px de haut,
        le bloc des totaux etait COUPE en plein milieu et la carte des articles
@@ -2784,7 +2784,7 @@ ipcMain.handle('fenetre:maintenance', () => {
 });
 
 ipcMain.handle('fenetre:explorateur', () => {
-  const win = ouvrirNative('explorateur', 'Explorateur de photos', pageExplorateur(),
+  const win = ouvrirNative('explorateur', 'Explorateur de photos', () => pageExplorateur(),
     { width: 1180, height: 720, minWidth: 900, minHeight: 520 });
   if (win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2796,7 +2796,7 @@ ipcMain.handle('fenetre:client', (e, id) => {
   const cle = 'client-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Fiche client', pageClient(String(id || '')),
+  const win = ouvrirNative(cle, 'Fiche client', () => pageClient(String(id || '')),
     { width: 720, height: 720, minWidth: 600, minHeight: 500 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -3584,7 +3584,14 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
        de suite le fond du theme courant : meme si elle parait un instant vide,
        elle parait de la bonne couleur. */
     try { view.setBackgroundColor((_modele && _modele.sombre) ? '#0e1522' : '#f4f2ec'); } catch {}
-    view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(defs[c][1]()));
+    /* ⚠⚠ LA RECETTE, RETENUE (2026-09-13). Sa demande : « si on change de langue
+       via ce menu là, les pages ouvertes doivent se recharger dans la bonne
+       langue ». Une page `data:` déjà assemblée ne se retraduit pas — il faut
+       pouvoir la REFABRIQUER, donc garder la fabrique et non son résultat.
+       C'était nommé comme un chantier à part dans `appliquerLangue` ; c'est
+       trois lignes ici parce que la fabrique existait déjà. */
+    a.refaire = defs[c][1];
+    view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(a.refaire()));
     /* ON ATTEND LE CHARGEMENT AVANT DE LA MONTRER (2026-09-04). Sa remarque :
        << rajoute des visuels de transition dans les changements de menu pour ne
        pas avoir l impression d avoir des flashs >>. Le flash etait ici, et il
@@ -4015,7 +4022,19 @@ const brancherGardeBrouillon = (win, wc) => {
 };
 
 const fenetresNatives = new Map();
-const ouvrirNative = (cle, titre, html, opts = {}) => {
+/* ⚠⚠ `page` EST UNE CHAÎNE **OU** UNE FABRIQUE (2026-09-13). Une fabrique laisse
+   REFABRIQUER la page — c'est ce qu'exige le changement de langue à chaud
+   (« les pages ouvertes doivent se recharger dans la bonne langue »). Une page
+   `data:` déjà assemblée, elle, ne se retraduit pas : la coquille n'en garde
+   pas la recette, et c'était écrit noir sur blanc dans `appliquerLangue` comme
+   une limite assumée.
+   ⚠ LES DEUX FORMES SONT ACCEPTÉES À DESSEIN : les appels qui passent encore
+   une chaîne continuent de marcher, ils ne savent simplement pas se refaire —
+   et `_refabriquerToutesLesFenetres` le DIT plutôt que de les rater en
+   silence. */
+const ouvrirNative = (cle, titre, page, opts = {}) => {
+  const refaire = (typeof page === 'function') ? page : null;
+  const html = refaire ? refaire() : page;
   const deja = fenetresNatives.get(cle);
   if (deja && !deja.isDestroyed()) { if (deja.isMinimized()) deja.restore(); deja.focus(); return deja; }
   const b = (reglages.get('fenetres') || {})[cle] || {};
@@ -4064,6 +4083,8 @@ const ouvrirNative = (cle, titre, html, opts = {}) => {
     },
   });
   fenetresNatives.set(cle, win);
+  /* La recette, portée par la fenêtre : voir la fiche de `ouvrirNative`. */
+  win._szRefaire = refaire;
   /* Retenu MAINTENANT : sur `closed`, `win.webContents` est déjà détruit et lire
      son `id` lèverait — on ne pourrait donc plus retirer le drapeau. */
   const wcId = win.webContents.id;
@@ -5173,7 +5194,7 @@ const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageConnexion } = require('./fenetres/connexion');
 const { pageMaj } = require('./fenetres/maj');
 const { pageDeconnexion } = require('./fenetres/deconnexion');
-const { MENU_EN, trMenu, trItems, menusAvecLangue } = require('./menu-langue');
+const { MENU_EN, MENU_APP_EN, trMenu, origineMenu, trItems, menusAvecLangue } = require('./menu-langue');
 /* ⚠⚠ LA LANGUE DES FENÊTRES SE POSE ICI, AVANT QUE LA PAGE NE SOIT BÂTIE. Les
    gabarits résolvent leurs textes À LA GÉNÉRATION (voir `src/langue/index.js`) :
    une fenêtre naît donc en anglais, au lieu de paraître en français puis de se
@@ -5276,7 +5297,7 @@ const actionApp = (nom, arg) => {
        coquille. Il n a pas encore remplace la fenetre principale — il le DIT a
        l ecran, et c est en le regardant qu on decide de la bascule. */
     case 'cadre':
-      ouvrirNative('cadre', 'Cadre de l administration', pageCadre(),
+      ouvrirNative('cadre', 'Cadre de l administration', () => pageCadre(),
         { width: 1180, height: 760, minWidth: 900, minHeight: 560 });
       break;
     /* ⚠ Les quatre onglets de Configuration natifs ne s'ouvrent PLUS ici :
@@ -5284,13 +5305,13 @@ const actionApp = (nom, arg) => {
        plus bas), a la demande du 2026-08-10 — « fais attention de creer les
        fenetres en mode ancrable ». */
     case 'fournisseur-nouveau':
-      ouvrirNative('fournisseur', 'Nouveau fournisseur', pageFournisseur(''), { width: 820, height: 620, minHeight: 460 });
+      ouvrirNative('fournisseur', 'Nouveau fournisseur', () => pageFournisseur(''), { width: 820, height: 620, minHeight: 460 });
       break;
     case 'collection-nouvelle':
-      ouvrirNative('collection', 'Nouvelle collection', pageCollection(''), { width: 860, height: 640, minHeight: 480 });
+      ouvrirNative('collection', 'Nouvelle collection', () => pageCollection(''), { width: 860, height: 640, minHeight: 480 });
       break;
     case 'produit-nouveau':
-      ouvrirNative('produit', 'Nouveau produit', pageProduit(''), { width: 980, height: 860, minHeight: 520 });
+      ouvrirNative('produit', 'Nouveau produit', () => pageProduit(''), { width: 980, height: 860, minHeight: 520 });
       break;
     // ⚠ L AFFICHAGE CLIENT EST FAIT POUR ÊTRE POSÉ SUR UN SECOND ÉCRAN, face à la
     // cliente. D'où une fenêtre plus grande et une hauteur minimale généreuse : le
@@ -5305,7 +5326,7 @@ const actionApp = (nom, arg) => {
     // #37 : 'caisse' est désormais ANCRABLE — traité par le bloc d'ancrage
     // plus bas (dock:naviguer vers la section 'pos'), plus de fenêtre autonome.
     case 'affichage-client':
-      ouvrirNative('pos-client', 'Affichage client', pageAffichage(),
+      ouvrirNative('pos-client', 'Affichage client', () => pageAffichage(),
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
       break;
     /* ⚠ TOUS LES ECRANS ANCRABLES DU MENU PASSENT PAR LE FLUX D ANCRAGE
@@ -5362,7 +5383,7 @@ const actionApp = (nom, arg) => {
     case 'verrous': {
       const _avV = fenetresNatives.get('verrous');
       const _reuV = !!(_avV && !_avV.isDestroyed());
-      const winV = ouvrirNative('verrous', 'Verrous', pageVerrous(),
+      const winV = ouvrirNative('verrous', 'Verrous', () => pageVerrous(),
         { width: 900, height: 660, minWidth: 680, minHeight: 440 });
       if (_reuV && winV && !winV.isDestroyed()) {
         winV.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -5403,7 +5424,7 @@ const actionApp = (nom, arg) => {
     case 'maintenance': {
       const _avM = fenetresNatives.get('maintenance');
       const _reuM = !!(_avM && !_avM.isDestroyed());
-      const winM = ouvrirNative('maintenance', 'Mode usage exclusif', pageMaintenance(),
+      const winM = ouvrirNative('maintenance', 'Mode usage exclusif', () => pageMaintenance(),
         { width: 640, height: 620, minWidth: 520, minHeight: 460 });
       /* ⚠ ON RELIT EN LA RAMENANT AU PREMIER PLAN : quelqu'un a pu lever le mode
          ailleurs pendant qu'elle était derrière. C'est le seul rafraîchissement
@@ -5416,7 +5437,7 @@ const actionApp = (nom, arg) => {
     case 'presence': {
       const _avP = fenetresNatives.get('presence');
       const _reuP = !!(_avP && !_avP.isDestroyed());
-      const winP = ouvrirNative('presence', 'Personnel connecté', pagePresence(),
+      const winP = ouvrirNative('presence', 'Personnel connecté', () => pagePresence(),
         { width: 860, height: 620, minWidth: 680, minHeight: 420 });
       if (_reuP && winP && !winP.isDestroyed()) {
         winP.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -5430,7 +5451,7 @@ const actionApp = (nom, arg) => {
     case 'notes': {
       const _avN = fenetresNatives.get('notes');
       const _reuN = !!(_avN && !_avN.isDestroyed());
-      const winN = ouvrirNative('notes', 'Notes des mises à jour', pageNotes(),
+      const winN = ouvrirNative('notes', 'Notes des mises à jour', () => pageNotes(),
         { width: 760, height: 680, minWidth: 560, minHeight: 460 });
       if (_reuN && winN && !winN.isDestroyed()) {
         winN.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -5724,8 +5745,14 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
   const _brut = String(label || '');
   let m = _cherche(_brut);
   if (!m) {
-    const orig = Object.keys(MENU_EN).find((k) => MENU_EN[k] === _brut);
-    if (orig) m = _cherche(orig);
+    /* ⚠⚠ LA RECHERCHE INVERSE COUVRE LES **DEUX** TABLES DEPUIS LE 2026-09-13.
+       Elle ne lisait que MENU_EN — les quatorze entrées de l'écran de connexion.
+       Or la barre du site affiche maintenant TOUS ses intitulés traduits : un
+       clic sur « Shop » renvoyait « Shop », introuvable dans un modèle qui ne
+       connaît que « Boutique ». Le menu se serait tu, exactement comme en
+       5.28.0. `origineMenu` vit dans `menu-langue.js` pour être éprouvable. */
+    const orig = origineMenu(_brut);
+    if (orig !== _brut) m = _cherche(orig);
   }
   if (!m || !(m.items || []).length) return;
   clearTimeout(panneauFermeT); panneauFermeT = null; panneauSurvole = false;
@@ -5792,19 +5819,20 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
   if (panneauSale || !panneauPret) {
     panneauSale = false; panneauPret = false;
     panneauWin.webContents.once('did-finish-load', () => { panneauPret = true; montrer(); });
-    /* ⚠ LE PANNEAU EST TRADUIT QUAND IL EST OUVERT DEPUIS L ÉCRAN DE CONNEXION
-       (sa demande du 2026-09-11 : « traduire les menus aussi »). Ailleurs, il
-       reste tel que le site l'envoie — la traduction intégrale est le chantier
-       gardé pour la fin, et changer le menu de toute l'application au passage
-       serait faire autre chose que ce qu'il a demandé.
+    /* ⚠⚠ LE PANNEAU EST TRADUIT PARTOUT DEPUIS LE 2026-09-13 — sa demande, mot
+       pour mot : « si je change la langue dans l'affichage le menu doit aussi
+       être en anglais ».
+       ⚠ IL NE L'ÉTAIT QU'À LA CONNEXION, et c'était écrit ici comme une limite
+       assumée : « la traduction intégrale est le chantier gardé pour la fin ».
+       Le chantier a eu lieu ; la limite n'a plus de raison d'être, et elle
+       laissait un menu FRANÇAIS au-dessus d'écrans anglais.
        ⚠ `panneauSale` EST POSÉ PLUS BAS DÈS QUE LE CONTEXTE CHANGE : cette page
        est mise en cache et seulement RÉAFFICHÉE aux ouvertures suivantes. Sans
        ça, le premier panneau ouvert figerait sa langue pour toute la session —
        exactement le genre de défaut qu'on ne voit qu'en changeant de langue
        APRÈS avoir ouvert un menu. */
-    const _cnx = !!(vueConnexion && e.sender === vueConnexion.webContents);
     panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
-      menus: _cnx ? _trItems(_menusLangue()) : _menusLangue(),
+      menus: _trItems(_menusLangue()),
       cssRail: _modele.cssRail || '', sombre: !!_modele.sombre,
     })));
   } else {
@@ -6045,26 +6073,122 @@ ipcMain.handle('langue:lire', () => {
   try { return (reglages.get('langue') === 'en') ? 'en' : 'fr'; }
   catch (e) { return 'fr'; }
 });
+
+/* ══ LA LANGUE DU MENU, SERVIE AU SITE ══════════════════════════════════════
+ * ⚠⚠ SA DEMANDE DU 2026-09-13 : « si je change la langue dans l'affichage le
+ * menu doit aussi être en anglais ». Le menu NATIF et le PANNEAU obéissent
+ * depuis `_menusLangue()` — mais LA BARRE QU'IL VOIT est dessinée par le SITE
+ * (`assets/js/appbar.js`, `#sz-menubar`), pas par la coquille. Elle restait
+ * donc entièrement française au-dessus d'écrans anglais.
+ *
+ * ⚠ POURQUOI LA TABLE VOYAGE AU LIEU D'ÊTRE LUE SUR PLACE : `preload.js`
+ * tourne en BAC À SABLE (`sandbox: true`, voir la fenêtre principale) — il n'a
+ * ni `require` ni accès au disque. Il ne peut donc pas charger
+ * `menu-langue.js`. Le seul chemin est ce verbe-ci.
+ * ⚠ ET LA TABLE RESTE LA SEULE : on envoie une COPIE de celle de la coquille,
+ * on n'en écrit pas une seconde dans le site. Deux tables finiraient par
+ * diverger, et la divergence ne ressemble jamais à sa cause.
+ *
+ * ⚠ EN FRANÇAIS ON ENVOIE UNE TABLE VIDE, à dessein : le site applique alors
+ * l'identité sans avoir à connaître la règle « le français est le passe-droit ».
+ * Une seule décision, prise ici. */
+ipcMain.handle('menu:langue', () => {
+  const l = _langueCourante();
+  return { langue: l, table: (l === 'en') ? { ...MENU_EN, ...MENU_APP_EN } : {} };
+});
 /* ⚠⚠ UN SEUL VERBE POUR LES DEUX PORTES : l ecran de connexion (par
    `langue:ecrire`) et le menu Affichage (par `actionApp`). Il etait tentant
    d ecrire deux fois trois lignes ; deux chemins pour le meme reglage finissent
    toujours par diverger, et la divergence ne ressemble jamais a sa cause.
    ⚠ IL REPOSE AUSSI LE MENU ET SALIT LE PANNEAU EN CACHE : sans ca la coche
    resterait sur l ancienne langue jusqu au prochain changement de contexte. */
+/* ══ REFABRIQUER CE QUI EST DÉJÀ OUVERT ═════════════════════════════════════
+ * ⚠⚠ SA DEMANDE DU 2026-09-13 : « si on change de langue via ce menu là, les
+ * pages ouvertes doivent se recharger dans la bonne langue ».
+ * C'était une limite ASSUMÉE, écrite ici même et annoncée dans la note de la
+ * 5.47.0 : « les fenêtres déjà ouvertes gardent leur langue ». Sa capture de
+ * l'écran Commandes l'a montrée pour ce qu'elle est — un écran ENTIÈREMENT
+ * français, jusqu'à « Détacher » qui vient du socle, au milieu d'une
+ * application anglaise. Le fichier n'était pas en cause : il rend bien en
+ * anglais. La page avait simplement été assemblée avant la bascule.
+ *
+ * ⚠⚠⚠ ET UNE SAISIE EN COURS NE SE JETTE PAS. Dix-huit fenêtres portent un
+ * brouillon. Recharger sans prévenir effacerait le travail de quelqu'un —
+ * exactement la perte que tout le mécanisme de brouillon existe pour éviter.
+ * On demande donc À CHAQUE PAGE d'écrire son brouillon MAINTENANT
+ * (`szBrouillonMaintenant`, la même porte que le bouton X), on attend, puis on
+ * refabrique. La saisie revient par la boîte « Une saisie non terminée ».
+ * ⚠ Une page qui ne répond pas ne bloque personne : on refabrique quand même
+ * après le délai. Une fenêtre figée ne doit pas retenir le réglage de langue —
+ * c'est la leçon de `banc-brouillon-garde` : trop strict est pire.
+ *
+ * ⚠ CE QUI NE SE REFABRIQUE PAS LE DIT. Les ouvertures qui passent encore une
+ * CHAÎNE à `ouvrirNative` n'ont pas de recette ; elles sont comptées et
+ * journalisées, pas ignorées en silence. */
+const _refabriquerToutesLesFenetres = () => {
+  let faites = 0, sansRecette = 0;
+
+  const refaireUne = (wc, refaire, quoi) => {
+    /* ⚠ UNE PAGE DISPARUE N EST PAS UNE PAGE SANS RECETTE : on ne la compte
+       nulle part, sans quoi le journal accuserait une ouverture correcte. */
+    if (!wc || wc.isDestroyed()) return;
+    if (typeof refaire !== 'function') { sansRecette++; return; }
+    faites++;
+    const poser = () => {
+      try {
+        if (wc.isDestroyed()) return;
+        wc.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(refaire()));
+      } catch (er) { cnxDire('refabrication impossible (' + quoi + ') : ' + ((er && er.message) || er)); }
+    };
+    /* On écrit le brouillon D ABORD, et on ne part pas sans avoir attendu. */
+    let parti = false;
+    const allerY = () => { if (!parti) { parti = true; poser(); } };
+    try {
+      wc.executeJavaScript('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null', true)
+        .then(allerY, allerY);
+    } catch (er) { allerY(); }
+    setTimeout(allerY, 900);
+  };
+
+  try {
+    for (const [cle, a] of ancrees) {
+      if (!a) continue;
+      refaireUne(a.view && a.view.webContents, a.refaire, 'ancrée ' + cle);
+    }
+  } catch (er) {}
+  try {
+    for (const [cle, w] of fenetresNatives) {
+      if (!w || w.isDestroyed()) continue;
+      refaireUne(w.webContents, w._szRefaire, 'fenêtre ' + cle);
+    }
+  } catch (er) {}
+
+  cnxDire('langue : ' + faites + ' page(s) refabriquee(s)'
+    + (sansRecette ? ', ' + sansRecette + ' SANS RECETTE (elles gardent leur langue)' : ''));
+};
+
 const appliquerLangue = (l) => {
   const v = (String(l || '') === 'en') ? 'en' : 'fr';
   try { reglages.set('langue', v); } catch (er) {}
-  /* ⚠ ET LES FENÊTRES SUIVANTES NAÎTRONT DANS CETTE LANGUE. ⚠⚠ CELLES DÉJÀ
-     OUVERTES GARDENT LA LEUR, et c’est dit ici plutôt que découvert : leur page
-     est une adresse `data:` déjà assemblée, la coquille n’en garde pas la
-     recette. Les refabriquer demanderait de retenir les arguments de chaque
-     ouverture — c’est un chantier à part, pas un effet de bord à improviser ici. */
   poserLangueFenetres(v);
+  /* ⚠ APRÈS `poserLangueFenetres`, JAMAIS AVANT : les fabriques lisent la langue
+     courante au moment où elles s'exécutent. */
+  try { _refabriquerToutesLesFenetres(); } catch (er) {}
   /* ⚠⚠ LE PANNEAU EST MIS EN CACHE ENTRE DEUX OUVERTURES : sans ce drapeau, la
      coche resterait sur l’ancienne langue jusqu’au prochain changement de
      contexte — un réglage qui a pris effet mais que le menu dément. */
   panneauSale = true;
   try { buildMenu(); } catch (er) {}
+  /* ⚠⚠ ET LA BARRE VISIBLE, QUI N'EST PAS À NOUS. Elle est dessinée par le
+     SITE (`appbar.js`) : la coquille ne peut que lui DIRE que la langue a
+     changé, à charge pour lui de relire la table et de se redessiner.
+     ⚠ Sans cette ligne, la barre ne suivrait qu'au prochain rechargement de la
+     page — soit, pour quelqu'un qui travaille, jamais. */
+  try {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('menu:langue:changee', v);
+    }
+  } catch (er) {}
   cnxDire('langue reglee : ' + v);
   return v;
 };
@@ -6168,7 +6292,10 @@ const _sansPseudo = (menus) => (menus || []).filter((m) => m && !String(m.label 
    rien n appelle se lit comme une fonction, et on batit dessus. */
 
 const buildMenu = () => {
-  const template = _sansPseudo(_menusLangue())
+  /* ⚠ TRADUIT AUSSI (2026-09-13). Ce menu-ci est MASQUÉ sous Windows — il ne
+     sert qu'à porter Ctrl+1…5 — mais il paraît sur macOS et à l'Alt. Le laisser
+     français faisait de lui la dernière surface à ne pas suivre le réglage. */
+  const template = _trItems(_sansPseudo(_menusLangue()))
     .map((m) => ({ label: m.label, submenu: versTemplateNatif(m.items || []) }))
     .filter((m) => m.submenu.length);
   // Tant que le site n'a rien envoyé, un minimum : sans menu du tout, plus aucun
@@ -6220,7 +6347,12 @@ const fermerPalette = () => {
 const majPalette = () => {
   const cfg = reglages.lire();
   const desc = {
-    menus: _sansPseudo(_modele.menus),
+    /* ⚠ TRADUITE COMME LES DEUX AUTRES (2026-09-13). Elle servait `_modele.menus`
+       BRUT : le menu posé sur un second écran restait français pendant que la
+       barre et le panneau passaient à l'anglais. Trois surfaces pour un seul
+       menu, et c'est toujours celle qu'on regarde le moins qui garde la vieille
+       langue. */
+    menus: _trItems(_sansPseudo(_menusLangue())),
     version: app.getVersion(),
     taille: cfg.menuTaille,
     sombre: !!_modele.sombre,

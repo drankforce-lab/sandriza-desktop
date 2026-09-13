@@ -42,7 +42,7 @@ if (!fs.existsSync(APPBAR)) {
    fonction qui s'en sert. Sortie dans `src/menu-langue.js`, on la charge — et on
    peut enfin vérifier qu'elle est APPLIQUÉE, pas seulement remplie. C'est ce qui
    manquait quand le menu est sorti à moitié traduit. */
-const { MENU_EN, trItems } = require('../src/menu-langue');
+const { MENU_EN, MENU_APP_EN, trItems, trMenu, origineMenu } = require('../src/menu-langue');
 const traduits = new Set(Object.keys(MENU_EN));
 if (traduits.size < 5) {
   console.error('✗ seulement ' + traduits.size + ' entrée(s) lue(s) dans MENU_EN — '
@@ -84,6 +84,100 @@ if (libres.size < 5) {
 const MENUS = ['Fichier', 'Affichage', 'Aide'];
 
 const fautes = [];
+
+/* ══ ET TOUT LE MENU DE SESSION — LA BARRE QU'IL VOIT EN TRAVAILLANT ════════
+   ⚠⚠ SA DEMANDE DU 2026-09-13 : « si je change la langue dans l'affichage le
+   menu doit aussi être en anglais ». Jusque-là, seules les DIX entrées libres
+   étaient gardées ici. Le reste — plus de cent intitulés, tout ce qu'on voit
+   une fois connecté — n'était confronté à RIEN : `appbar.js` pouvait en
+   ajouter, en renommer, en retirer, la coquille n'en savait jamais rien.
+
+   ⚠ MÊME MÉCANIQUE, MÊME EXIGENCE, DANS LES DEUX SENS : la source reste
+   `appbar.js`, MENU_APP_EN doit la couvrir exactement. Une entrée nouvelle
+   sans traduction FAIT ÉCHOUER ce banc ; une traduction dont l'entrée a disparu
+   aussi.
+
+   ⚠ LES SIX JEUX DE COULEURS SONT RELEVÉS À PART : ils viennent d'une table
+   (`THEMES_COULEUR`) et pas d'un `label:` écrit à la main. Un relevé qui ne
+   lirait que `label:` les aurait laissés français dans un sous-menu anglais —
+   et personne ne les aurait vus, parce qu'ils sont à deux niveaux de
+   profondeur. */
+{
+  const tous = new Set();
+  {
+    const rx = /label:\s*'((?:[^'\\]|\\.)*)'/g;
+    let m; while ((m = rx.exec(src))) tous.add(m[1].replace(/\\'/g, "'"));
+  }
+  /* La table des jeux de couleurs : `['cle', 'Nom affiché'], …`. */
+  {
+    const bloc = /THEMES_COULEUR\s*=\s*\[([\s\S]*?)\]\s*;/.exec(src);
+    if (!bloc) {
+      fautes.push('la table THEMES_COULEUR est introuvable dans appbar.js — '
+        + 'le relevé des jeux de couleurs ne prouve plus rien');
+    } else {
+      const rx = /\[\s*'(?:[^'\\]|\\.)*'\s*,\s*'((?:[^'\\]|\\.)*)'\s*\]/g;
+      let m, n = 0;
+      while ((m = rx.exec(bloc[1]))) { tous.add(m[1].replace(/\\'/g, "'")); n++; }
+      if (n < 2) {
+        fautes.push('seulement ' + n + ' jeu(x) de couleurs relevé(s) — '
+          + 'le motif de lecture de THEMES_COULEUR ne marche plus');
+      }
+    }
+  }
+
+  /* Ce qui n'apparaît qu'une fois connecté : tout le reste, moins les entrées
+     libres (gardées par MENU_EN) et les pseudo-menus `__compte` / `__reg`, qui
+     ne sont pas des intitulés mais des marqueurs. */
+  const session = [...tous].filter((x) => !libres.has(x) && !x.startsWith('__'));
+  if (session.length < 50) {
+    console.error('✗ seulement ' + session.length + ' intitulé(s) de session relevé(s) dans '
+      + 'appbar.js — le motif de lecture ne marche plus, ce banc ne prouverait rien.');
+    process.exit(1);
+  }
+
+  const app = new Set(Object.keys(MENU_APP_EN));
+  for (const k of session) {
+    /* Les trois intitulés de menu vivent dans MENU_EN : ils paraissent AVANT la
+       session comme après, et une clé en double finit toujours par diverger. */
+    if (MENUS.indexOf(k) >= 0) continue;
+    if (!app.has(k)) {
+      fautes.push('« ' + k + ' » paraît dans la barre une fois connecté et n’a pas de '
+        + 'traduction dans MENU_APP_EN — elle s’affichera en français dans un menu anglais');
+    }
+  }
+  for (const k of app) {
+    if (!tous.has(k)) {
+      fautes.push('MENU_APP_EN traduit « ' + k + ' » qui n’est plus un intitulé '
+        + 'd’appbar.js — ligne morte, ou entrée renommée d’un seul côté');
+    }
+  }
+  /* ⚠ ET LA TRADUCTION EST-ELLE APPLIQUÉE ? Même leçon qu'en 5.28.0 : une table
+     complète ne dit rien du code qui s'en sert. `trMenu` lit DEUX tables
+     maintenant, et l'ordre entre elles est une décision — on l'éprouve. */
+  if (trMenu('Boutique', 'en') !== 'Shop') {
+    fautes.push('trMenu() ne consulte pas MENU_APP_EN : « Boutique » reste « '
+      + trMenu('Boutique', 'en') + ' »');
+  }
+  if (trMenu('Boutique', 'fr') !== 'Boutique') {
+    fautes.push('trMenu(…, "fr") traduit quand même — le français doit être le passe-droit');
+  }
+  /* ⚠ ET LE CHEMIN DE RETOUR, sans lequel LE MENU DEVIENT MUET : la barre du
+     site envoie un intitulé, la coquille doit retrouver le menu d'origine. */
+  if (origineMenu('Shop') !== 'Boutique') {
+    fautes.push('origineMenu("Shop") rend « ' + origineMenu('Shop') + ' » : la coquille ne '
+      + 'retrouvera pas le menu dans son modèle, et le panneau ne s’ouvrira pas');
+  }
+  if (origineMenu('Boutique') !== 'Boutique') {
+    fautes.push('origineMenu() abîme un intitulé d’origine — il doit le rendre tel quel');
+  }
+  /* ⚠ UNE VALEUR IDENTIQUE À SA CLÉ NE DOIT PAS ENTRER DANS LA TABLE INVERSE :
+     elle s’y retrouverait elle-même et masquerait une vraie entrée. */
+  if (origineMenu('Photos') !== 'Photos') {
+    fautes.push('origineMenu("Photos") rend « ' + origineMenu('Photos') + ' » — une valeur '
+      + 'identique à sa clé a été inscrite dans la table inverse');
+  }
+}
+
 for (const k of [...libres, ...MENUS]) {
   if (!traduits.has(k)) {
     fautes.push('« ' + k + " » paraît à l’écran de connexion (entrée libre) et n’a pas "
@@ -216,9 +310,14 @@ for (const k of traduits) {
 }
 
 if (fautes.length) {
-  console.error('✗ la traduction du menu de connexion a ' + fautes.length + ' trou(s) :');
+  console.error('✗ la traduction du menu a ' + fautes.length + ' trou(s) :');
   fautes.forEach((x) => console.error('   — ' + x));
   process.exit(1);
 }
-console.log('✓ les ' + libres.size + ' entrées libres du site et les ' + MENUS.length
-  + ' menus qui les portent ont tous leur traduction.');
+/* ⚠ LE VERDICT DIT CE QU'IL A REGARDÉ, ET COMBIEN. Il n'annonçait que les
+   entrées libres alors qu'il garde maintenant tout le menu : un banc qui
+   sous-déclare sa portée laisse croire à un trou là où il n'y en a pas — et,
+   le jour où il en reste un, empêche de voir qu'il n'a rien regardé. */
+console.log('✓ ' + libres.size + ' entrée(s) libre(s) + ' + Object.keys(MENU_APP_EN).length
+  + ' intitulé(s) de session + les ' + MENUS.length + ' menus qui les portent : '
+  + 'tous traduits, appliqués, et retrouvables en sens inverse.');

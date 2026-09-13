@@ -67,6 +67,22 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // Le site pousse son modèle de menu : la coquille en tire ses RACCOURCIS
   // CLAVIER et la fenêtre détachée. Une seule source, jamais deux listes.
   menuModele: (m) => ipcRenderer.invoke('menu:modele', m || {}),
+  /* ⚠⚠ LA LANGUE DU MENU, ET SA TABLE (2026-09-13). Sa demande : « si je change
+     la langue dans l'affichage le menu doit aussi être en anglais ». La barre
+     est dessinée par le SITE ; il lui faut donc de quoi traduire.
+     ⚠ LA TABLE VOYAGE PARCE QUE CE PRÉCHARGEMENT NE PEUT PAS LA LIRE : il
+     tourne en bac à sable (`sandbox: true`), sans `require` ni disque — la même
+     contrainte qui fait voyager la version et le nom du poste par `process.argv`.
+     Elle reste écrite une seule fois, dans `src/menu-langue.js`.
+     ⚠ EN FRANÇAIS LA TABLE EST VIDE : la décision « le français est le
+     passe-droit » est prise dans la coquille, une seule fois. */
+  menuLangue: () => ipcRenderer.invoke('menu:langue').catch(() => null),
+  /* La coquille prévient quand la langue change — sinon la barre ne suivrait
+     qu'au prochain rechargement de la page, c'est-à-dire jamais. */
+  surMenuLangue: (cb) => {
+    if (typeof cb !== 'function') return;
+    ipcRenderer.on('menu:langue:changee', (_e, l) => { try { cb(String(l || 'fr')); } catch (er) {} });
+  },
   // Le theme (jour/nuit) A L INSTANT de la bascule — sans attendre le
   // battement du modele du menu (plusieurs secondes de retard sinon).
   themeChange: (sombre) => ipcRenderer.send('theme:changer', !!sombre),

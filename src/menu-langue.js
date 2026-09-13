@@ -46,12 +46,194 @@ const MENU_EN = {
   'À propos': 'About',
 };
 
+/* ══ ET TOUT LE RESTE DU MENU — CELUI QU'ON NE VOIT QU'UNE FOIS CONNECTÉ ═════
+ * ⚠⚠ SA DEMANDE DU 2026-09-13, mot pour mot : « si je change la langue dans
+ * l'affichage le menu doit aussi être en anglais ». Jusqu'ici la traduction du
+ * menu s'arrêtait à l'écran de CONNEXION — quatorze intitulés — et la note
+ * ci-dessus le disait comme une limite assumée : « la traduction intégrale est
+ * le chantier qu'il a demandé de garder pour la fin ». Le chantier a eu lieu
+ * (98 fenêtres, 2026-09-13) ; la limite laissait une barre ENTIÈREMENT
+ * FRANÇAISE au-dessus d'écrans anglais, ce qui est exactement ce qu'il a
+ * montré en capture.
+ *
+ * ⚠ POURQUOI DEUX TABLES ET PAS UNE. `banc-menu-langue` confronte MENU_EN aux
+ * entrées que le site marque `libre`, DANS LES DEUX SENS : une clé qui n'est
+ * plus libre y est refusée comme ligne morte. Fondre les deux listes ferait
+ * sauter ce contrôle-là pour tout le monde. Séparées, chacune garde sa source :
+ * MENU_EN ↔ les entrées libres, MENU_APP_EN ↔ tous les autres intitulés
+ * d'`appbar.js`. Le banc tient les deux, dans les deux sens.
+ *
+ * ⚠ LES TROIS INTITULÉS DE MENU (Fichier, Affichage, Aide) RESTENT DANS
+ * MENU_EN : ils paraissent AVANT la session comme après, et une clé en double
+ * finit toujours par diverger.
+ *
+ * ⚠ LA TRADUCTION RESTE DANS LA COQUILLE. Le site est en français-canadien de
+ * bout en bout (c'est écrit dans son CLAUDE.md) ; c'est l'APPLICATION qui est
+ * bilingue. Traduire à la source changerait la langue du site en production
+ * pour un réglage qui n'appartient qu'au poste de travail.
+ *
+ * ⚠ UNE VALEUR IDENTIQUE À SA CLÉ EST UNE DÉCISION, PAS UN OUBLI : « Photos »,
+ * « Marketing », « Collections », « Configuration » et « Catalogue » s'écrivent
+ * pareil, et « ? » est un signe. Elles sont écrites en toutes lettres plutôt
+ * qu'omises, sinon le banc ne saurait pas les distinguer d'un trou. */
+const MENU_APP_EN = {
+  '?': '?',
+  'Abonnés de l’infolettre': 'Newsletter subscribers',
+  'Accès utilisateurs': 'User access',
+  'Agrandir le menu': 'Enlarge the menu',
+  'Ancrer en haut': 'Dock at the top',
+  'Ancrer à droite': 'Dock at the right',
+  'Ancrer à gauche': 'Dock at the left',
+  'Apparence': 'Appearance',
+  'Archives': 'Archives',
+  'Attributs produits': 'Product attributes',
+  'Automatisations': 'Automations',
+  'Avis produits': 'Product reviews',
+  'Base de données': 'Database',
+  'Boutique': 'Shop',
+  'Cadre de l’administration (aperçu)': 'Administration frame (preview)',
+  'Cadre natif : allumer / éteindre (redémarre)': 'Native frame: on / off (restarts)',
+  'Campagnes et chaînes': 'Campaigns and sequences',
+  'Cartes-cadeaux': 'Gift cards',
+  'Catalogue': 'Catalogue',
+  'Centre d’impression': 'Print centre',
+  'Changer le dossier des exports…': 'Change the exports folder…',
+  'Chat en ligne': 'Live chat',
+  'Clients': 'Customers',
+  'Clés API': 'API keys',
+  'Collections': 'Collections',
+  'Commandes': 'Orders',
+  'Communications': 'Communications',
+  'Comptabilité': 'Accounting',
+  'Configuration': 'Configuration',
+  'Configuration de la livraison': 'Shipping configuration',
+  'Configuration des paiements': 'Payment configuration',
+  'Configuration des retours': 'Returns configuration',
+  'Coupons': 'Coupons',
+  'Dossier des exports': 'Exports folder',
+  'Déconnexion': 'Sign out',
+  'Démarrer avec Windows': 'Start with Windows',
+  'Dépenses': 'Expenses',
+  'Expéditions': 'Shipments',
+  'Factures': 'Invoices',
+  'Fenêtre séparée (autre écran)': 'Separate window (other screen)',
+  'Fidélisation': 'Loyalty',
+  'Fiscalité et impôt': 'Taxation and income tax',
+  'Fournisseurs': 'Suppliers',
+  'Gabarits courriel': 'Email templates',
+  'Gestion des taxes': 'Tax management',
+  'Heures d’ouverture': 'Opening hours',
+  'Icônes personnalisées': 'Custom icons',
+  'Images des produits': 'Product images',
+  'Import / Export du catalogue': 'Catalogue import / export',
+  'Impression codes-barres': 'Barcode printing',
+  'Imprimantes': 'Printers',
+  'Incidents de sécurité': 'Security incidents',
+  'Infolettre': 'Newsletter',
+  'Inventaire': 'Inventory',
+  'Jeu de couleurs': 'Colour scheme',
+  'Journal d’envoi': 'Send log',
+  'Journaux': 'Logs',
+  'Lien comptable': 'Accounting link',
+  'Liquidation / Vente finale': 'Clearance / Final sale',
+  'Liste noire': 'Blacklist',
+  'Livraison': 'Shipping',
+  'Logos et marque': 'Logos and branding',
+  'Logothèque': 'Logo library',
+  'Marketing': 'Marketing',
+  'Messagerie clients': 'Customer messages',
+  'Mode lancement': 'Launch mode',
+  'Modèles par vue': 'Templates by view',
+  'Mon profil': 'My profile',
+  'Navigation (menu boutique)': 'Navigation (shop menu)',
+  'Notes des mises à jour…': 'Release notes…',
+  'Nouveau fournisseur': 'New supplier',
+  'Nouveau produit': 'New product',
+  'Nouvelle collection': 'New collection',
+  'Offres et annonces': 'Offers and announcements',
+  'Outils de développement': 'Developer tools',
+  'Page d’accueil': 'Home page',
+  'Pages du site': 'Site pages',
+  'Paiement & taxes': 'Payment & taxes',
+  'Paiements Square': 'Square payments',
+  'Personnel connecté': 'Staff signed in',
+  'Photos': 'Photos',
+  'Pied de page': 'Footer',
+  'Position du menu': 'Menu position',
+  'Produits en vente': 'Products on sale',
+  'Publicité ciblée et statistiques': 'Targeted advertising and statistics',
+  'Ramassages et rapport': 'Pickups and report',
+  'Recherches sans résultat': 'Searches with no result',
+  'Recommandations': 'Recommendations',
+  'Remboursements': 'Refunds',
+  'Retours': 'Returns',
+  'Réduire le menu': 'Shrink the menu',
+  'Réglages de sécurité': 'Security settings',
+  'Réseaux sociaux': 'Social networks',
+  'Sauvegarde': 'Backup',
+  'Statistiques': 'Statistics',
+  'Statistiques (Google Analytics)': 'Statistics (Google Analytics)',
+  'Studio virtuel': 'Virtual studio',
+  'Sécurité': 'Security',
+  'Tableau de bord': 'Dashboard',
+  'Taille par défaut': 'Default size',
+  'Thème et apparence': 'Theme and appearance',
+  'Thème sombre': 'Dark theme',
+  'Transferts de stock': 'Stock transfers',
+  'Transporteurs': 'Carriers',
+  'Téléphonie': 'Telephony',
+  'Veille des commandes (icône)': 'Order watch (icon)',
+  'Vente au comptoir': 'Counter sale',
+  'Verrous (fiches en cours)': 'Locks (records in progress)',
+  /* ⚠ LES SIX JEUX DE COULEURS viennent d'une TABLE d'`appbar.js`
+     (`THEMES_COULEUR`) et non d'un `label:` écrit à la main — c'est pour ça que
+     le banc les relève séparément. Sans ça ils seraient restés français dans un
+     sous-menu anglais, invisibles à tout relevé qui ne lirait que `label:`. */
+  'Doré (défaut)': 'Gold (default)',
+  'Océan': 'Ocean',
+  'Violet': 'Purple',
+  'Ardoise': 'Slate',
+  'Graphite': 'Graphite',
+  'Émeraude': 'Emerald',
+};
+
 /** Un intitulé, traduit si la table le connaît. Sinon il reste tel quel : une
  *  entrée ajoutée demain s'affichera dans sa langue d'origine plutôt que de
  *  disparaître. C'est le banc qui refuse ce silence-là, pas le code. */
 const trMenu = (x, langue) => {
   if (langue !== 'en') return x;
-  return Object.prototype.hasOwnProperty.call(MENU_EN, x) ? MENU_EN[x] : x;
+  if (Object.prototype.hasOwnProperty.call(MENU_EN, x)) return MENU_EN[x];
+  /* ⚠ MENU_EN D'ABORD, TOUJOURS : les trois intitulés de menu y vivent, et une
+     clé lue dans deux tables doit avoir un ordre écrit plutôt que subi. */
+  return Object.prototype.hasOwnProperty.call(MENU_APP_EN, x) ? MENU_APP_EN[x] : x;
+};
+
+/** L'intitulé D'ORIGINE d'un intitulé traduit — ou lui-même s'il n'en est pas un.
+ *
+ *  ⚠⚠ SANS ÇA, LE MENU DEVIENT MUET, et c'est une panne déjà vécue (5.28.0) :
+ *  la barre affiche « Shop », le clic renvoie « Shop » à la coquille, qui
+ *  cherche un menu nommé « Shop » dans un modèle qui ne connaît que
+ *  « Boutique » — elle ne trouve rien, et ne dit rien. Le menu ne s'ouvre pas,
+ *  et la cause ne ressemble pas à l'effet.
+ *
+ *  ⚠ LA TABLE INVERSE SE CONSTRUIT UNE FOIS, PAS À CHAQUE CLIC : un parcours
+ *  linéaire de 127 entrées à chaque survol de menu se paierait à l'écran.
+ *  ⚠ MENU_EN D'ABORD, comme dans `trMenu` — même ordre, même raison. */
+const _INVERSE = (() => {
+  const inv = Object.create(null);
+  for (const t of [MENU_APP_EN, MENU_EN]) {
+    for (const k of Object.keys(t)) {
+      /* ⚠ UNE VALEUR IDENTIQUE À SA CLÉ (« Photos », « ? ») NE S'INSCRIT PAS :
+         elle se retrouverait toute seule, et elle masquerait une vraie entrée
+         portant ce nom. */
+      if (t[k] !== k) inv[t[k]] = k;
+    }
+  }
+  return inv;
+})();
+const origineMenu = (x) => {
+  const s = String(x == null ? '' : x);
+  return Object.prototype.hasOwnProperty.call(_INVERSE, s) ? _INVERSE[s] : s;
 };
 
 /** Un modèle de menu, traduit à TOUS ses niveaux.
@@ -115,4 +297,6 @@ const menusAvecLangue = (menus, langue) => {
   });
 };
 
-module.exports = { MENU_EN, trMenu, trItems, menusAvecLangue, LANGUES };
+module.exports = {
+  MENU_EN, MENU_APP_EN, trMenu, origineMenu, trItems, menusAvecLangue, LANGUES,
+};
