@@ -23,6 +23,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('invmeta');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -69,7 +73,7 @@ thead th{text-align:left;padding:.28rem .45rem;font-size:.66rem;text-transform:u
 tbody td{padding:.32rem .45rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v03)}
 tr.edit td{background:rgba(201,169,126,.09)}
-code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
+${T("code")}{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .mono{font-family:Consolas,monospace}
 .chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;width:100%;padding:.45rem .5rem;
   border:1px solid var(--v16);border-radius:10px;background:var(--v03);min-height:44px}
@@ -138,12 +142,12 @@ function pageInvMeta(ouverture) {
   const ouvreAttr = (ouv === 'attr-nouveau');
   const ouvreCat = (ouv === 'cat-nouvelle');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Attributs produits — Administration Sandriza</title>
-<style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.invmeta}</span><h1>Attributs produits</h1>
+<title>${T("Attributs produits — Administration Sandriza")}</title>
+<${T("style")}>${CSS}${CSS_JOUR}</${T("style")}></head><body>
+<div class="tete"><span class="ico">${ICO.invmeta}</span><h1>${T("Attributs produits")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -162,9 +166,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var CVARIANTS = null;    // variantes proposees par la recherche couleur
   var EDITCOLOR = null;    // { nom, hex } — surcouche edition couleur perso
 
-  var LIBELLES = { sizes:'Tailles', genres:'Genres', ageGroups:'Groupes d’âge', styles:'Styles',
-    colors:'Couleurs', labels:'Étiquettes', categories:'Catégories', reachat:'Réachat' };
-  var ATTRLBL = { genres:'genre', ageGroups:'groupe d’âge', styles:'style' };
+  var LIBELLES = { sizes:'${T("Tailles")}', genres:'${T("Genres")}', ageGroups:'${T("Groupes d’âge")}', styles:'${T("Styles")}',
+    colors:'${T("Couleurs")}', labels:'${T("Étiquettes")}', categories:'${T("Catégories")}', reachat:'${T("Réachat")}' };
+  var ATTRLBL = { genres:'${T("genre")}', ageGroups:'${T("groupe d’âge")}', styles:'${T("style")}' };
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -173,20 +177,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne permet pas cette modification.',
-    indisponible:'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    incomplet:'Remplissez les champs requis.', existe:'Cet élément existe déjà.',
-    integree:'C’est déjà une couleur intégrée.', hex:'Format hex invalide (ex : #FF6B6B).',
-    nom:'Nom requis.', vide:'Champ vide.', slug:'Identifiant (slug) requis.',
-    code:'Le code SKU doit faire au moins 2 lettres.', seuil:'Seuil invalide.',
-    limite:'Limite invalide (minimum 1).', introuvable:'Élément introuvable.',
-    type:'Type inconnu.', bord:'Déjà à l’extrémité.', echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne permet pas cette modification.")}',
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    incomplet:'${T("Remplissez les champs requis.")}', existe:'${T("Cet élément existe déjà.")}',
+    integree:'${T("C’est déjà une couleur intégrée.")}', hex:'${T("Format hex invalide (ex : #FF6B6B).")}',
+    nom:'${T("Nom requis.")}', vide:'${T("Champ vide.")}', slug:'${T("Identifiant (slug) requis.")}',
+    ${T("code")}:'${T("Le code SKU doit faire au moins 2 lettres.")}', seuil:'${T("Seuil invalide.")}',
+    limite:'${T("Limite invalide (minimum 1).")}', introuvable:'${T("Élément introuvable.")}',
+    type:'${T("Type inconnu.")}', bord:'${T("Déjà à l’extrémité.")}', echec:'${T("L’opération a échoué.")}'
   };
   function expliquer(r){
-    if (!r) return 'Aucune réponse de la fenêtre principale.';
-    if (r.motif === 'utilise') return r.used + ' produit' + plur(r.used) + ' utilisent encore cette valeur — retirez-la d’abord des produits concernés.';
-    if (r.motif === 'conflit') return 'Le code « ' + r.code + ' » est déjà pris par « ' + r.autre + ' ». Choisissez-en un autre.';
+    if (!r) return '${T("Aucune réponse de la fenêtre principale.")}';
+    if (r.motif === 'utilise') return r.used + ' ${T("produit")}' + plur(r.used) + ' ${T("utilisent encore cette valeur — retirez-la d’abord des produits concernés.")}';
+    if (r.motif === 'conflit') return '${T("Le code «")} ' + r.code + ' ${T("» est déjà pris par «")} ' + r.autre + ' ${T("». Choisissez-en un autre.")}';
     if (r.detail) return String(r.detail);
     return MOTIFS[r.motif] || MOTIFS.echec;
   }
@@ -198,14 +202,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function charger(){
     return appeler('invmeta:donnees', {}).then(function(r){
-      if (!r || !r.ok) { vide('Attributs indisponibles', expliquer(r)); return false; }
+      if (!r || !r.ok) { vide('${T("Attributs indisponibles")}', expliquer(r)); return false; }
       D = r; return true;
     });
   }
   function vide(titre, detail){
     ongletsEl.innerHTML = '';
-    corps.innerHTML = '<div class="vide"><div style="font:700 1.3rem/1 Georgia,serif;color:var(--tx-creme)">'
-      + esc(titre) + '</div><div style="margin-top:.35rem">' + esc(detail || '') + '</div></div>';
+    corps.innerHTML = '<div class="vide"><div ${T("style")}="font:700 1.3rem/1 Georgia,serif;color:var(--tx-creme)">'
+      + esc(titre) + '</div><div ${T("style")}="margin-top:.35rem">' + esc(detail || '') + '</div></div>';
   }
   // Recharge puis redessine — après chaque écriture.
   function relire(){ return charger().then(function(ok){ if (ok) dessiner(); return ok; }); }
@@ -228,14 +232,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ ONGLET TAILLES ════════════════════════════════════════════════════════ */
   function vueSizes(){
     var chips = D.sizes.map(function(s){
-      var lock = s.used > 0 ? '<span class="lock" title="Utilisée par ' + s.used + ' produit' + plur(s.used) + '"><span class="ic">🔒</span></span>' : '';
-      var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? 'Utilisée — suppression bloquée' : 'Retirer') + '">×</button>' : '';
+      var lock = s.used > 0 ? '<span class="lock" title="Utilisée par ' + s.used + ' ${T("produit")}' + plur(s.used) + '"><span class="ic">🔒</span></span>' : '';
+      var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? '${T("Utilisée — suppression bloquée")}' : 'Retirer') + '">×</button>' : '';
       return '<span class="chip">' + esc(s.nom) + lock + x + '</span>';
     }).join('');
-    var inp = D.peut.edit ? '<input id="sz-input" aria-label="Ajouter une taille" placeholder="' + (D.sizes.length ? 'Ajouter une taille…' : 'Ex : 46, OS, 2XL…') + '" autocomplete="off">' : '';
-    return '<p class="aide">Ces tailles s’affichent dans le formulaire d’édition des produits.</p>'
+    var inp = D.peut.edit ? '<input id="sz-input" aria-label="Ajouter une taille" placeholder="' + (D.sizes.length ? '${T("Ajouter une taille…")}' : '${T("Ex : 46, OS, 2XL…")}') + '" autocomplete="off">' : '';
+    return '<p class="aide">${T("Ces tailles s’affichent dans le formulaire d’édition des produits.")}</p>'
       + '<div class="chips">' + chips + inp + '</div>'
-      + (D.peut.edit ? '<div class="aide" style="margin:.5rem 0 0">Tapez une taille puis <strong>Entrée</strong> ou <strong>,</strong> — ou collez-en plusieurs séparées par des virgules. <strong>Retour arrière</strong> (champ vide) retire la dernière.</div>' : '');
+      + (D.peut.edit ? '<div class="aide" ${T("style")}="margin:.5rem 0 0">${T("Tapez une taille puis <strong>Entrée</strong> ou <strong>,</strong> — ou collez-en plusieurs séparées par des virgules. <strong>Retour arrière</strong> (champ vide) retire la dernière.")}</div>' : '');
   }
 
   /* ══ ONGLETS GENRES / GROUPES D ÂGE / STYLES ═══════════════════════════════ */
@@ -243,22 +247,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var items = D[type] || [];
     var addRow = (ADDING === type) ? '<tr class="edit">'
       + '<td><input aria-label="clé (ex: sport-luxe)" class="tinp mono" id="at-key" placeholder="clé (ex: sport-luxe)"></td>'
-      + '<td><input aria-label="Étiquette FR" class="tinp" id="at-fr" placeholder="Étiquette FR"></td>'
-      + '<td><input aria-label="Étiquette EN" class="tinp" id="at-en" placeholder="Étiquette EN"></td>'
-      + '<td style="text-align:right"><button class="ic prim" data-attrsave="' + type + '">✓</button> '
+      + '<td><input aria-label="${T("Étiquette FR")}" class="tinp" id="at-fr" placeholder="${T("Étiquette FR")}"></td>'
+      + '<td><input aria-label="${T("Étiquette EN")}" class="tinp" id="at-en" placeholder="${T("Étiquette EN")}"></td>'
+      + '<td ${T("style")}="text-align:right"><button class="ic prim" data-attrsave="' + type + '">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(it){
-      var rm = D.peut.edit ? '<button class="mini danger" data-attrrm="' + type + '|' + esc(it.key) + '" title="' + (it.used > 0 ? it.used + ' produit(s) — bloqué' : 'Supprimer') + '">Retirer</button>' : '';
-      return '<tr><td><code>' + esc(it.key) + '</code>' + (it.used > 0 ? ' <span class="pill used">' + it.used + '×</span>' : '') + '</td>'
-        + '<td style="font-weight:500">' + esc(it.label) + '</td>'
-        + '<td style="color:var(--tx2)">' + esc(it.labelEN || '') + '</td>'
-        + '<td style="text-align:right">' + rm + '</td></tr>';
+      var rm = D.peut.edit ? '<button class="mini danger" data-attrrm="' + type + '|' + esc(it.key) + '" title="' + (it.used > 0 ? it.used + ' ${T("produit(s) — bloqué")}' : 'Supprimer') + '">Retirer</button>' : '';
+      return '<tr><td><${T("code")}>' + esc(it.key) + '</${T("code")}>' + (it.used > 0 ? ' <span class="pill used">' + it.used + '×</span>' : '') + '</td>'
+        + '<td ${T("style")}="font-weight:500">' + esc(it.label) + '</td>'
+        + '<td ${T("style")}="color:var(--tx2)">' + esc(it.labelEN || '') + '</td>'
+        + '<td ${T("style")}="text-align:right">' + rm + '</td></tr>';
     }).join('');
-    var empty = (!items.length && ADDING !== type) ? '<tr><td colspan="4" class="vide">Aucun élément — cliquez sur + pour en ajouter.</td></tr>' : '';
+    var empty = (!items.length && ADDING !== type) ? '<tr><td colspan="4" class="vide">${T("Aucun élément — cliquez sur + pour en ajouter.")}</td></tr>' : '';
     var plus = (D.peut.edit && ADDING !== type) ? '<button class="ic plus" data-attradd="' + type + '" title="Ajouter">＋</button>' : '';
-    return '<p class="aide">Utilisés comme filtres dans la boutique et dans le formulaire produit.</p>'
-      + '<div class="carte"><table><thead><tr><th>Clé interne</th><th>Étiquette FR</th><th>Étiquette EN</th>'
-      + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
+    return '<p class="aide">${T("Utilisés comme filtres dans la boutique et dans le formulaire produit.")}</p>'
+      + '<div class="carte"><table><thead><tr><th>${T("Clé interne")}</th><th>${T("Étiquette FR")}</th><th>${T("Étiquette EN")}</th>'
+      + '<th ${T("style")}="width:90px;text-align:right">' + plus + '</th></tr></thead>'
       + '<tbody>' + addRow + empty + rows + '</tbody></table></div>';
   }
 
@@ -266,69 +270,69 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueLabels(){
     var items = D.labels || [];
     var addRow = (ADDING === 'labels') ? '<tr class="edit">'
-      + '<td style="color:var(--tx2);font-size:.78rem">aperçu à l’ajout</td>'
-      + '<td><input aria-label="Nom FR (ex: Coup de cœur)" class="tinp" id="lb-fr" placeholder="Nom FR (ex: Coup de cœur)"></td>'
-      + '<td><input aria-label="Nom EN" class="tinp" id="lb-en" placeholder="Nom EN"></td>'
-      + '<td><input type="color" id="lb-color" aria-label="Couleur de l’étiquette" value="#c0392b" style="width:44px;height:32px;padding:2px"></td>'
-      + '<td style="text-align:right"><button class="ic prim" data-labelsave="1">✓</button> '
+      + '<td ${T("style")}="color:var(--tx2);font-size:.78rem">${T("aperçu à l’ajout")}</td>'
+      + '<td><input aria-label="${T("Nom FR")} (ex: Coup de cœur)" class="tinp" id="lb-fr" placeholder="${T("Nom FR")} (ex: Coup de cœur)"></td>'
+      + '<td><input aria-label="${T("Nom EN")}" class="tinp" id="lb-en" placeholder="${T("Nom EN")}"></td>'
+      + '<td><input type="color" id="lb-color" aria-label="${T("Couleur")} de l’étiquette" value="#c0392b" ${T("style")}="width:44px;height:32px;padding:2px"></td>'
+      + '<td ${T("style")}="text-align:right"><button class="ic prim" data-labelsave="1">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(l){
-      var rm = D.peut.edit ? '<button class="mini danger" data-labelrm="' + esc(l.key) + '" title="' + (l.used > 0 ? l.used + ' produit(s) — bloqué' : 'Supprimer') + '">Retirer</button>' : '';
-      return '<tr><td><span class="badge" style="background:' + esc(l.color) + ';color:' + esc(l.textColor) + '">' + esc(l.label) + '</span></td>'
-        + '<td style="font-weight:500">' + esc(l.label) + (l.used > 0 ? ' <span class="pill used">' + l.used + '×</span>' : '') + '</td>'
-        + '<td style="color:var(--tx2)">' + esc(l.labelEN || '') + '</td>'
-        + '<td><code>' + esc(l.color) + '</code></td>'
-        + '<td style="text-align:right">' + rm + '</td></tr>';
+      var rm = D.peut.edit ? '<button class="mini danger" data-labelrm="' + esc(l.key) + '" title="' + (l.used > 0 ? l.used + ' ${T("produit(s) — bloqué")}' : 'Supprimer') + '">Retirer</button>' : '';
+      return '<tr><td><span class="badge" ${T("style")}="background:' + esc(l.color) + ';color:' + esc(l.textColor) + '">' + esc(l.label) + '</span></td>'
+        + '<td ${T("style")}="font-weight:500">' + esc(l.label) + (l.used > 0 ? ' <span class="pill used">' + l.used + '×</span>' : '') + '</td>'
+        + '<td ${T("style")}="color:var(--tx2)">' + esc(l.labelEN || '') + '</td>'
+        + '<td><${T("code")}>' + esc(l.color) + '</${T("code")}></td>'
+        + '<td ${T("style")}="text-align:right">' + rm + '</td></tr>';
     }).join('');
-    var empty = (!items.length && ADDING !== 'labels') ? '<tr><td colspan="5" class="vide">Aucune étiquette — cliquez sur + pour en ajouter.</td></tr>' : '';
+    var empty = (!items.length && ADDING !== 'labels') ? '<tr><td colspan="5" class="vide">${T("Aucune étiquette — cliquez sur + pour en ajouter.")}</td></tr>' : '';
     var plus = (D.peut.edit && ADDING !== 'labels') ? '<button class="ic plus" data-attradd="labels" title="Ajouter">＋</button>' : '';
     return ''
-      + '<div class="carte"><table><thead><tr><th>Aperçu</th><th>Nom FR</th><th>Nom EN</th><th>Couleur</th>'
-      + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
+      + '<div class="carte"><table><thead><tr><th>${T("Aperçu")}</th><th>${T("Nom FR")}</th><th>${T("Nom EN")}</th><th>${T("Couleur")}</th>'
+      + '<th ${T("style")}="width:90px;text-align:right">' + plus + '</th></tr></thead>'
       + '<tbody>' + addRow + empty + rows + '</tbody></table></div>';
   }
 
   /* ══ ONGLET COULEURS ═══════════════════════════════════════════════════════ */
   function secAdd(){
     return '<div class="rangee">'
-      + '<div class="champ"><label for="inv-color-name">Nom</label><input id="inv-color-name" placeholder="Ex: corail rosé" style="width:170px"></div>'
-      + '<div class="champ"><label for="inv-color-hex">Valeur hex</label><div style="display:flex;gap:.35rem;align-items:center">'
-      +   '<input id="inv-color-hex" placeholder="#FF6B6B" class="mono" style="width:105px">'
-      +   '<input type="color" id="inv-color-picker" aria-label="Choisir la couleur au nuancier" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
-      + '<div class="champ"><label>Ou chercher par nom</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> Chercher</button></div>'
+      + '<div class="champ"><label for="inv-color-name">Nom</label><input id="inv-color-name" placeholder="Ex: corail rosé" ${T("style")}="width:170px"></div>'
+      + '<div class="champ"><label for="inv-color-hex">${T("Valeur hex")}</label><div ${T("style")}="display:flex;gap:.35rem;align-items:center">'
+      +   '<input id="inv-color-hex" placeholder="#FF6B6B" class="mono" ${T("style")}="width:105px">'
+      +   '<input type="color" id="inv-color-picker" aria-label="Choisir la couleur au nuancier" value="#FF6B6B" data-syncHex="1" ${T("style")}="width:38px;height:34px;padding:2px"></div></div>'
+      + '<div class="champ"><label>${T("Ou chercher par nom")}</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> Chercher</button></div>'
       + '</div>'
-      + (CVARIANTS && CVARIANTS.length ? '<div style="margin-top:.6rem"><div class="aide" style="margin:0 0 .35rem">' + CVARIANTS.length + ' variante' + plur(CVARIANTS.length) + ' — cliquez pour choisir</div><div class="swatches">'
-          + CVARIANTS.map(function(v){ return '<button class="sw" data-pick="' + esc(v.nom) + '|' + esc(v.hex) + '"><span class="pt" style="background:' + esc(v.hex) + '"></span><span class="nm">' + esc(v.nom) + '</span></button>'; }).join('')
+      + (CVARIANTS && CVARIANTS.length ? '<div ${T("style")}="margin-top:.6rem"><div class="aide" ${T("style")}="margin:0 0 .35rem">' + CVARIANTS.length + ' variante' + plur(CVARIANTS.length) + ' ${T("— cliquez pour choisir")}</div><div class="swatches">'
+          + CVARIANTS.map(function(v){ return '<button class="sw" data-pick="' + esc(v.nom) + '|' + esc(v.hex) + '"><span class="pt" ${T("style")}="background:' + esc(v.hex) + '"></span><span class="nm">' + esc(v.nom) + '</span></button>'; }).join('')
           + '</div></div>' : '')
-      + '<div style="margin-top:.7rem"><button class="prim" data-act="coloradd">+ Ajouter la couleur</button></div>';
+      + '<div ${T("style")}="margin-top:.7rem"><button class="prim" data-act="coloradd">${T("+ Ajouter la couleur")}</button></div>';
   }
   function secCodes(){
-    var alerte = D.conflits.length ? '<div class="alerte"><span class="ic">⚠</span> <strong>' + D.conflits.length + ' code' + plur(D.conflits.length) + ' porté' + plur(D.conflits.length) + ' par plusieurs couleurs</strong> — '
-      + D.conflits.map(function(c){ return '<code>' + esc(c.code) + '</code> : ' + esc(c.noms.join(', ')); }).join(' · ')
-      + '. Ces variantes partagent le même code-barres.</div>' : '';
-    var bouton = D.suggestions.length ? '<div style="margin-bottom:.7rem"><button class="prim" data-act="codesassign">Attribuer des codes courts (' + D.suggestions.length + ')</button> '
-      + '<span class="aide" style="display:inline">Deux caractères distincts. Les codes déjà fixés ne bougent pas.</span></div>' : '';
+    var alerte = D.conflits.length ? '<div class="alerte"><span class="ic">⚠</span> <strong>' + D.conflits.length + ' ${T("code")}' + plur(D.conflits.length) + ' ${T("porté")}' + plur(D.conflits.length) + '${T(" par plusieurs couleurs</strong> — ")}'
+      + D.conflits.map(function(c){ return '<${T("code")}>' + esc(c.code) + '</${T("code")}> : ' + esc(c.noms.join(', ')); }).join(' · ')
+      + '${T(". Ces variantes partagent le même code-barres.")}</div>' : '';
+    var bouton = D.suggestions.length ? '<div ${T("style")}="margin-bottom:.7rem"><button class="prim" data-act="codesassign">${T("Attribuer des codes courts (")}' + D.suggestions.length + ')</button> '
+      + '<span class="aide" ${T("style")}="display:inline">${T("Deux caractères distincts. Les codes déjà fixés ne bougent pas.")}</span></div>' : '';
     var rows = D.codes.length ? D.codes.map(function(c){
       var autoTag = c.hasCode ? '' : ' <span class="pill auto">AUTO</span>';
       var ro = D.peut.edit ? '' : ' disabled';
-      var save = D.peut.edit ? '<button class="mini" data-codesave="' + esc(c.nom) + '" title="Enregistrer"><span class="ic">💾</span></button>' : '';
-      return '<div class="cc"><span class="pt pastille" style="background:' + esc(c.hex) + ';width:22px;height:22px"></span>'
+      var save = D.peut.edit ? '<button class="mini" data-codesave="' + esc(c.nom) + '" title="${T("Enregistrer")}"><span class="ic">💾</span></button>' : '';
+      return '<div class="cc"><span class="pt pastille" ${T("style")}="background:' + esc(c.hex) + ';width:22px;height:22px"></span>'
         + '<span class="nm">' + esc(c.nom) + autoTag + '</span>'
-        + '<span class="mono" style="color:var(--tx2);font-size:.72rem">…-<strong style="color:var(--tx-creme)">' + esc(c.code) + '</strong></span>'
-        + '<input id="cc-' + esc(c.nom) + '" aria-label="' + esc('Code SKU de ' + c.nom) + '" value="' + esc(c.code) + '" maxlength="6"' + ro + '>'
+        + '<span class="mono" ${T("style")}="color:var(--tx2);font-size:.72rem">…-<strong ${T("style")}="color:var(--tx-creme)">' + esc(c.code) + '</strong></span>'
+        + '<input id="cc-' + esc(c.nom) + '" aria-label="' + esc('${T("Code SKU de")} ' + c.nom) + '" value="' + esc(c.code) + '" maxlength="6"' + ro + '>'
         + save + '</div>';
-    }).join('') : '<p class="aide" style="margin:0">Aucune couleur utilisée par un produit pour l’instant.</p>';
+    }).join('') : '<p class="aide" ${T("style")}="margin:0">${T("Aucune couleur utilisée par un produit pour l’instant.")}</p>';
     return ''
       + alerte + bouton + rows;
   }
   function secCustom(){
-    if (!D.custom.length) return '<p class="aide" style="margin:0">Aucune couleur personnalisée. Ajoutez-en via « Ajouter une nouvelle couleur ».</p>';
+    if (!D.custom.length) return '<p class="aide" ${T("style")}="margin:0">${T("Aucune couleur personnalisée. Ajoutez-en via « Ajouter une nouvelle couleur ».")}</p>';
     return D.custom.map(function(c){
-      var use = c.used > 0 ? '<span class="pill used">' + c.used + ' produit' + plur(c.used) + '</span>' : '<span class="pill no">non utilisée</span>';
-      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span> Modifier</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? 'utilisée — bloqué' : 'Supprimer') + '">Supprimer</button>' : '';
-      return '<div class="cust"><span class="pastille" style="' + (c.gradient ? 'border-radius:4px;' : '') + 'background:' + esc(c.hex) + '"></span>'
+      var use = c.used > 0 ? '<span class="pill used">' + c.used + ' ${T("produit")}' + plur(c.used) + '</span>' : '<span class="pill no">${T("non utilisée")}</span>';
+      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span> Modifier</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? '${T("utilisée — bloqué")}' : 'Supprimer') + '">Supprimer</button>' : '';
+      return '<div class="cust"><span class="pastille" ${T("style")}="' + (c.gradient ? 'border-radius:4px;' : '') + 'background:' + esc(c.hex) + '"></span>'
         + '<span class="nm">' + esc(c.nom) + '</span>' + use
-        + '<span class="mono" style="color:var(--tx2);font-size:.72rem">' + (c.gradient ? 'dégradé' : esc(c.hex)) + '</span>' + act + '</div>';
+        + '<span class="mono" ${T("style")}="color:var(--tx2);font-size:.72rem">' + (c.gradient ? '${T("dégradé")}' : esc(c.hex)) + '</span>' + act + '</div>';
     }).join('');
   }
   function secBuiltin(){
@@ -340,19 +344,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var dispo = D.builtin.length - used;
     var fbtn = function(v, txt){ return '<button class="mini ' + (CFILTER === v ? 'actif' : '') + '" data-cfilter="' + v + '">' + txt + '</button>'; };
     var sw = list.map(function(c){
-      return '<button class="sw" data-pick="' + esc(c.nom) + '|' + esc(c.hex) + '" title="' + esc(c.nom) + (c.used ? ' — ' + c.used + ' produit' + plur(c.used) : ' — non utilisée') + '"' + (c.used ? '' : ' style="opacity:.55"') + '>'
-        + '<span class="pt" style="background:' + esc(c.hex) + '"></span><span class="nm">' + esc(c.nom) + '</span>'
-        + (c.used ? '<span class="pill used" style="font-size:.55rem">' + c.used + '×</span>' : '') + '</button>';
+      return '<button class="sw" data-pick="' + esc(c.nom) + '|' + esc(c.hex) + '" title="' + esc(c.nom) + (c.used ? ' — ' + c.used + ' ${T("produit")}' + plur(c.used) : ' ${T("— non utilisée")}') + '"' + (c.used ? '' : ' ${T("style")}="opacity:.55"') + '>'
+        + '<span class="pt" ${T("style")}="background:' + esc(c.hex) + '"></span><span class="nm">' + esc(c.nom) + '</span>'
+        + (c.used ? '<span class="pill used" ${T("style")}="font-size:.55rem">' + c.used + '×</span>' : '') + '</button>';
     }).join('');
-    return '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">'
-      + '<span class="aide" style="margin:0">' + used + ' utilisée' + plur(used) + ' · ' + dispo + ' disponible' + plur(dispo) + '</span>'
-      + '<span>' + fbtn('all', 'Toutes') + ' ' + fbtn('used', 'Utilisées (' + used + ')') + ' ' + fbtn('unused', 'Non (' + dispo + ')') + '</span></div>'
-      + '<div class="aide" style="margin:0 0 .5rem">Cliquez une couleur pour la sélectionner dans le formulaire d’ajout.</div>'
+    return '<div ${T("style")}="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">'
+      + '<span class="aide" ${T("style")}="margin:0">' + used + ' ${T("utilisée")}' + plur(used) + ' · ' + dispo + ' ${T("disponible")}' + plur(dispo) + '</span>'
+      + '<span>' + fbtn('all', 'Toutes') + ' ' + fbtn('used', '${T("Utilisées (")}' + used + ')') + ' ' + fbtn('unused', 'Non (' + dispo + ')') + '</span></div>'
+      + '<div class="aide" ${T("style")}="margin:0 0 .5rem">${T("Cliquez une couleur pour la sélectionner dans le formulaire d’ajout.")}</div>'
       + '<div class="swatches">' + sw + '</div>';
   }
   function vueColors(){
-    var titres = { add:'Ajouter une nouvelle couleur', codes:'Codes couleur — SKU de variante',
-      custom:'Couleurs personnalisées (' + D.custom.length + ')', builtin:'Couleurs intégrées (' + D.builtin.length + ')' };
+    var titres = { add:'${T("Ajouter une nouvelle couleur")}', codes:'${T("Codes couleur — SKU de variante")}',
+      custom:'${T("Couleurs personnalisées (")}' + D.custom.length + ')', builtin:'${T("Couleurs intégrées (")}' + D.builtin.length + ')' };
     var inner = { add:secAdd, codes:secCodes, custom:secCustom, builtin:secBuiltin };
     var order = D.colOrder;
     return order.map(function(k, i){
@@ -372,19 +376,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function catEditRow(cat){
     var isNew = !cat;
     return '<tr class="edit">'
-      + '<td><input type="color" id="ic-color" aria-label="Couleur de la catégorie" value="' + (cat ? esc(cat.color) : '#888888') + '" style="width:38px;height:30px;padding:2px"></td>'
-      + '<td><input aria-label="Nom FR" class="tinp" id="ic-name" value="' + (cat ? esc(cat.name) : '') + '" placeholder="Nom FR"></td>'
-      + '<td><input aria-label="Nom EN" class="tinp" id="ic-nameen" value="' + (cat ? esc(cat.nameEN) : '') + '" placeholder="Nom EN"></td>'
-      + '<td><input aria-label="slug" class="tinp mono" id="ic-key" value="' + (cat ? esc(cat.catKey) : '') + '" placeholder="slug"' + (isNew ? '' : ' readonly style="opacity:.55"') + '></td>'
-      + '<td><input aria-label="ROB" class="tinp mono" id="ic-code" value="' + (cat ? esc(cat.code) : '') + '" maxlength="6" placeholder="ROB" style="width:76px;text-transform:uppercase;font-weight:700"></td>'
+      + '<td><input type="color" id="ic-color" aria-label="${T("Couleur")} de la catégorie" value="' + (cat ? esc(cat.color) : '#888888') + '" ${T("style")}="width:38px;height:30px;padding:2px"></td>'
+      + '<td><input aria-label="${T("Nom FR")}" class="tinp" id="ic-name" value="' + (cat ? esc(cat.name) : '') + '" placeholder="${T("Nom FR")}"></td>'
+      + '<td><input aria-label="${T("Nom EN")}" class="tinp" id="ic-nameen" value="' + (cat ? esc(cat.nameEN) : '') + '" placeholder="${T("Nom EN")}"></td>'
+      + '<td><input aria-label="slug" class="tinp mono" id="ic-key" value="' + (cat ? esc(cat.catKey) : '') + '" placeholder="slug"' + (isNew ? '' : ' readonly ${T("style")}="opacity:.55"') + '></td>'
+      + '<td><input aria-label="ROB" class="tinp mono" id="ic-${T("code")}" value="' + (cat ? esc(cat.code) : '') + '" maxlength="6" placeholder="ROB" ${T("style")}="width:76px;text-transform:uppercase;font-weight:700"></td>'
       /* ⚠ DEUX CASES QUI S EXCLUENT, dans deux colonnes voisines : sans nom, le
          lecteur d ecran annonce << case a cocher, cochee >> deux fois de suite,
          et l on ne sait pas laquelle des deux on vient de decocher. Le nom
          reprend l en-tete de sa colonne (IA, Photos). */
-      + '<td style="text-align:center"><input type="checkbox" id="ic-ai" aria-label="Traitement par IA" ' + (!cat || cat.aiOn ? 'checked' : '') + ' data-excl="simple"></td>'
-      + '<td style="text-align:center"><input type="checkbox" id="ic-simple" aria-label="Photos simples" ' + (cat && cat.simpleOn ? 'checked' : '') + ' data-excl="ai"></td>'
-      + '<td style="text-align:center;color:var(--tx2)">' + (isNew ? '—' : cat.used) + '</td>'
-      + '<td style="text-align:right"><button class="ic prim" data-catsave="' + (cat ? esc(cat.id) : '') + '">✓</button> '
+      + '<td ${T("style")}="text-align:center"><input type="checkbox" id="ic-ai" aria-label="Traitement par IA" ' + (!cat || cat.aiOn ? 'checked' : '') + ' data-excl="simple"></td>'
+      + '<td ${T("style")}="text-align:center"><input type="checkbox" id="ic-simple" aria-label="Photos simples" ' + (cat && cat.simpleOn ? 'checked' : '') + ' data-excl="ai"></td>'
+      + '<td ${T("style")}="text-align:center;color:var(--tx2)">' + (isNew ? '—' : cat.used) + '</td>'
+      + '<td ${T("style")}="text-align:right"><button class="ic prim" data-catsave="' + (cat ? esc(cat.id) : '') + '">✓</button> '
       + '<button class="ic" data-catcancel="1">×</button></td></tr>';
   }
   function vueCategories(){
@@ -392,24 +396,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
       var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✏</span></button>' : '';
-      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' produit(s) — bloqué' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '';
-      return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
-        + '<td style="font-weight:600">' + esc(c.name) + '</td>'
-        + '<td style="color:var(--tx2)">' + esc(c.nameEN || '—') + '</td>'
-        + '<td><code>' + esc(c.catKey) + '</code></td>'
-        + '<td><span class="mono" style="font-weight:700;background:rgba(150,130,105,.18);padding:.1rem .45rem;border-radius:4px">' + esc(c.code) + '</span></td>'
-        + '<td style="text-align:center">' + (c.aiOn ? '<span style="color:var(--tx-or)" title="Canvas auto"><span class="ic">⚡</span></span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
-        + '<td style="text-align:center">' + (c.simpleOn ? '<span style="color:var(--tx-or)">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
-        + '<td style="text-align:center">' + c.used + '</td>'
-        + '<td style="text-align:right">' + edit + del + '</td></tr>';
+      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' ${T("produit(s) — bloqué")}' : 'Supprimer') + '"><span class="ic">🗑</span></button>' : '';
+      return '<tr><td><span class="pastille" ${T("style")}="background:' + esc(c.color) + '"></span></td>'
+        + '<td ${T("style")}="font-weight:600">' + esc(c.name) + '</td>'
+        + '<td ${T("style")}="color:var(--tx2)">' + esc(c.nameEN || '—') + '</td>'
+        + '<td><${T("code")}>' + esc(c.catKey) + '</${T("code")}></td>'
+        + '<td><span class="mono" ${T("style")}="font-weight:700;background:rgba(150,130,105,.18);padding:.1rem .45rem;border-radius:4px">' + esc(c.code) + '</span></td>'
+        + '<td ${T("style")}="text-align:center">' + (c.aiOn ? '<span ${T("style")}="color:var(--tx-or)" title="Canvas auto"><span class="ic">⚡</span></span>' : '<span ${T("style")}="color:var(--tx2)">—</span>') + '</td>'
+        + '<td ${T("style")}="text-align:center">' + (c.simpleOn ? '<span ${T("style")}="color:var(--tx-or)">✓</span>' : '<span ${T("style")}="color:var(--tx2)">—</span>') + '</td>'
+        + '<td ${T("style")}="text-align:center">' + c.used + '</td>'
+        + '<td ${T("style")}="text-align:right">' + edit + del + '</td></tr>';
     }).join('');
-    var empty = (!cats.length && CATEDIT !== '__new__') ? '<tr><td colspan="9" class="vide">Aucune catégorie — cliquez sur + pour en créer une.</td></tr>' : '';
+    var empty = (!cats.length && CATEDIT !== '__new__') ? '<tr><td colspan="9" class="vide">${T("Aucune catégorie — cliquez sur + pour en créer une.")}</td></tr>' : '';
     var plus = (D.peut.ajout && CATEDIT !== '__new__') ? '<button class="ic plus" data-catadd="1" title="Ajouter">＋</button>' : '';
     return ''
-      + '<div class="carte" style="overflow-x:auto"><table><thead><tr>'
-      + '<th>Couleur</th><th>Nom affiché</th><th>Nom EN</th><th>Slug</th><th>Code SKU</th>'
-      + '<th style="text-align:center">IA</th><th style="text-align:center">Photos</th><th style="text-align:center">Produits</th>'
-      + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
+      + '<div class="carte" ${T("style")}="overflow-x:auto"><table><thead><tr>'
+      + '<th>${T("Couleur")}</th><th>${T("Nom affiché")}</th><th>${T("Nom EN")}</th><th>${T("Slug")}</th><th>${T("Code SKU")}</th>'
+      + '<th ${T("style")}="text-align:center">IA</th><th ${T("style")}="text-align:center">Photos</th><th ${T("style")}="text-align:center">Produits</th>'
+      + '<th ${T("style")}="width:90px;text-align:right">' + plus + '</th></tr></thead>'
       + '<tbody>' + (CATEDIT === '__new__' ? catEditRow(null) : '') + empty + rows + '</tbody></table></div>';
   }
 
@@ -417,23 +421,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueReachat(){
     var r = D.reachat, ro = D.peut.edit ? '' : ' disabled';
     return ''
-      + '<div class="champ" style="max-width:220px"><label for="rc-low">Seuil général</label>'
-      + '<input type="number" min="0" step="1" id="rc-low" value="' + r.lowStockDefault + '"' + ro + ' style="width:100%"></div>'
-      + '<div class="avis" style="margin:.7rem 0">Le seuil se règle à trois niveaux, <strong>le plus précis l’emporte</strong> : exception sur la variante, sinon seuil du produit, sinon celui-ci.<br>'
-      + 'Actuellement : <strong>' + r.regles + '</strong> produit' + (r.regles > 1 ? 's ont' : ' a') + ' son propre seuil, <strong>' + r.exceptions + '</strong> variante' + (r.exceptions > 1 ? 's font' : ' fait') + ' exception.</div>'
-      + (D.peut.edit ? '<button class="prim" data-act="reachatlow">Enregistrer le seuil</button>' : '')
-      + '<hr style="border:none;border-top:1px solid var(--v10);margin:1.3rem 0">'
+      + '<div class="champ" ${T("style")}="max-width:220px"><label for="rc-low">${T("Seuil général")}</label>'
+      + '<input type="number" min="0" step="1" id="rc-low" value="' + r.lowStockDefault + '"' + ro + ' ${T("style")}="width:100%"></div>'
+      + '<div class="avis" ${T("style")}="margin:.7rem 0">${T("Le seuil se règle à trois niveaux, <strong>le plus précis l’emporte</strong> : exception sur la variante, sinon seuil du produit, sinon celui-ci.")}<br>'
+      + '${T("Actuellement :")} <strong>' + r.regles + '</strong> ${T("produit")}' + (r.regles > 1 ? 's ont' : ' a') + ' ${T("son propre seuil,")} <strong>' + r.exceptions + '</strong> variante' + (r.exceptions > 1 ? 's font' : ' fait') + ' exception.</div>'
+      + (D.peut.edit ? '<button class="prim" data-act="reachatlow">${T("Enregistrer le seuil")}</button>' : '')
+      + '<hr ${T("style")}="border:none;border-top:1px solid var(--v10);margin:1.3rem 0">'
       + ''
-      + '<div class="champ" style="max-width:220px"><label for="rc-buymax">Limite d’achat par commande</label>'
-      + '<input type="number" min="1" step="1" id="rc-buymax" value="' + r.buyMax + '"' + ro + ' style="width:100%"></div>'
-      + (D.peut.edit ? '<button class="prim" style="margin-top:.7rem" data-act="reachatbuymax">Enregistrer la limite</button>' : '');
+      + '<div class="champ" ${T("style")}="max-width:220px"><label for="rc-buymax">${T("Limite d’achat par commande")}</label>'
+      + '<input type="number" min="1" step="1" id="rc-buymax" value="' + r.buyMax + '"' + ro + ' ${T("style")}="width:100%"></div>'
+      + (D.peut.edit ? '<button class="prim" ${T("style")}="margin-top:.7rem" data-act="reachatbuymax">${T("Enregistrer la limite")}</button>' : '');
   }
 
   /* ══ DESSIN ════════════════════════════════════════════════════════════════ */
   function dessiner(){
     if (!D) return;
     dessinerOnglets();
-    sous.textContent = D.peut.edit ? '' : 'Lecture seule';
+    sous.textContent = D.peut.edit ? '' : '${T("Lecture seule")}';
     var h;
     if (TAB === 'sizes') h = vueSizes();
     else if (TAB === 'genres' || TAB === 'ageGroups' || TAB === 'styles') h = vueAttr(TAB);
@@ -447,59 +451,59 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (sz) sz.focus();
   }
   function vueEditColor(){
-    return '<div class="voile" id="ec-voile"><div class="boite"><h3>Modifier la couleur</h3>'
-      + '<div class="champ" style="margin-bottom:.6rem"><label for="ec-name">Nom</label><input id="ec-name" value="' + esc(EDITCOLOR.nom) + '" style="width:100%"></div>'
-      + '<div class="champ"><label for="ec-hex">Valeur hex</label><div style="display:flex;gap:.4rem;align-items:center">'
-      +   '<input id="ec-hex" value="' + esc(EDITCOLOR.hex) + '" class="mono" style="flex:1">'
-      +   '<input type="color" id="ec-picker" aria-label="Choisir la couleur au nuancier" value="' + (EDITCOLOR.hex.charAt(0) === '#' && EDITCOLOR.hex.length <= 7 ? esc(EDITCOLOR.hex) : '#000000') + '" data-syncEc="1" style="width:38px;height:34px;padding:2px"></div></div>'
-      + '<div class="pied-boite"><button data-eccancel="1">Annuler</button><button class="prim" data-ecsave="1">Enregistrer</button></div></div></div>';
+    return '<div class="voile" id="ec-voile"><div class="boite"><h3>${T("Modifier la couleur")}</h3>'
+      + '<div class="champ" ${T("style")}="margin-bottom:.6rem"><label for="ec-name">Nom</label><input id="ec-name" value="' + esc(EDITCOLOR.nom) + '" ${T("style")}="width:100%"></div>'
+      + '<div class="champ"><label for="ec-hex">${T("Valeur hex")}</label><div ${T("style")}="display:flex;gap:.4rem;align-items:center">'
+      +   '<input id="ec-hex" value="' + esc(EDITCOLOR.hex) + '" class="mono" ${T("style")}="flex:1">'
+      +   '<input type="color" id="ec-picker" aria-label="Choisir la couleur au nuancier" value="' + (EDITCOLOR.hex.charAt(0) === '#' && EDITCOLOR.hex.length <= 7 ? esc(EDITCOLOR.hex) : '#000000') + '" data-syncEc="1" ${T("style")}="width:38px;height:34px;padding:2px"></div></div>'
+      + '<div class="pied-boite"><button data-eccancel="1">${T("Annuler")}</button><button class="prim" data-ecsave="1">${T("Enregistrer")}</button></div></div></div>';
   }
 
   /* ══ GESTES ════════════════════════════════════════════════════════════════ */
   function addSize(){
     var v = val('sz-input');
     if (!v.trim()) return;
-    ecrire('invmeta:sizeAdd', { text: v }, function(r){ return r.added ? (r.added > 1 ? r.added + ' tailles ajoutées.' : 'Taille ajoutée.') : 'Cette taille existe déjà.'; });
+    ecrire('invmeta:sizeAdd', { text: v }, function(r){ return r.added ? (r.added > 1 ? r.added + ' ${T("tailles ajoutées.")}' : '${T("Taille ajoutée.")}') : '${T("Cette taille existe déjà.")}'; });
   }
   function saveAttr(type){
-    ecrire('invmeta:attrAdd', { type: type, key: val('at-key'), label: val('at-fr'), labelEN: val('at-en') }, function(){ ADDING = null; return 'Attribut ajouté.'; });
+    ecrire('invmeta:attrAdd', { type: type, key: val('at-key'), label: val('at-fr'), labelEN: val('at-en') }, function(){ ADDING = null; return '${T("Attribut ajouté.")}'; });
   }
   function saveLabel(){
-    ecrire('invmeta:labelAdd', { fr: val('lb-fr'), en: val('lb-en'), color: val('lb-color') }, function(){ ADDING = null; return 'Étiquette ajoutée.'; });
+    ecrire('invmeta:labelAdd', { fr: val('lb-fr'), en: val('lb-en'), color: val('lb-color') }, function(){ ADDING = null; return '${T("Étiquette ajoutée.")}'; });
   }
   function addColor(){
-    ecrire('invmeta:colorAdd', { name: val('inv-color-name'), hex: val('inv-color-hex') }, function(r){ CVARIANTS = null; return 'Couleur « ' + r.nom + ' » ajoutée.'; });
+    ecrire('invmeta:colorAdd', { name: val('inv-color-name'), hex: val('inv-color-hex') }, function(r){ CVARIANTS = null; return '${T("Couleur «")} ' + r.nom + ' ${T("» ajoutée.")}'; });
   }
   function searchColor(){
     var nm = val('inv-color-name');
-    if (!nm.trim()) { dire('Entrez un nom de couleur d’abord.', 'att'); return; }
+    if (!nm.trim()) { dire('${T("Entrez un nom de couleur d’abord.")}', 'att'); return; }
     appeler('invmeta:colorSearch', { name: nm }).then(function(r){
-      if (!r || !r.ok) { CVARIANTS = null; dire('Couleur non trouvée. Entrez la valeur hex à la main.', 'err'); dessiner(); return; }
-      if (r.variants) { CVARIANTS = r.variants; dessiner(); dire(r.variants.length + ' variante' + plur(r.variants.length) + ' — cliquez pour choisir.', 'bon'); return; }
+      if (!r || !r.ok) { CVARIANTS = null; dire('${T("Couleur non trouvée. Entrez la valeur hex à la main.")}', 'err'); dessiner(); return; }
+      if (r.variants) { CVARIANTS = r.variants; dessiner(); dire(r.variants.length + ' variante' + plur(r.variants.length) + ' ${T("— cliquez pour choisir.")}', 'bon'); return; }
       CVARIANTS = null;
       var hx = document.getElementById('inv-color-hex'); if (hx) hx.value = r.hex;
       var pk = document.getElementById('inv-color-picker'); if (pk) { try { pk.value = r.hex; } catch(e){} }
-      dire('Couleur trouvée : ' + r.hex + (r.source ? ' (' + r.source + ')' : ''), 'bon');
+      dire('${T("Couleur trouvée :")} ' + r.hex + (r.source ? ' (' + r.source + ')' : ''), 'bon');
     });
   }
   function saveCode(nm){
     var el = document.getElementById('cc-' + nm);
-    ecrire('invmeta:codeSave', { name: nm, code: el ? el.value : '' }, function(r){ return 'Code « ' + r.code + ' » enregistré pour « ' + r.nom + ' ».'; });
+    ecrire('invmeta:codeSave', { name: nm, ${T("code")}: el ? el.value : '' }, function(r){ return '${T("Code «")} ' + r.code + ' ${T("» enregistré pour «")} ' + r.nom + ' ».'; });
   }
   function saveEditColor(){
-    ecrire('invmeta:colorEdit', { original: EDITCOLOR.nom, name: val('ec-name'), hex: val('ec-hex') }, function(){ EDITCOLOR = null; return 'Couleur mise à jour.'; });
+    ecrire('invmeta:colorEdit', { original: EDITCOLOR.nom, name: val('ec-name'), hex: val('ec-hex') }, function(){ EDITCOLOR = null; return '${T("Couleur mise à jour.")}'; });
   }
   function saveCat(id){
     ecrire('invmeta:catSave', {
-      id: id, name: val('ic-name'), nameEN: val('ic-nameen'), catKey: val('ic-key'), code: val('ic-code'),
+      id: id, name: val('ic-name'), nameEN: val('ic-nameen'), catKey: val('ic-key'), ${T("code")}: val('ic-${T("code")}'),
       color: val('ic-color'),
       aiOn: (function(){ var e = document.getElementById('ic-ai'); return e ? e.checked : true; })(),
       simpleOn: (function(){ var e = document.getElementById('ic-simple'); return e ? e.checked : false; })(),
-    }, function(r){ CATEDIT = null; return r.cree ? ('Catégorie « ' + r.name + ' » créée (' + r.code + ').') : 'Catégorie mise à jour.'; });
+    }, function(r){ CATEDIT = null; return r.cree ? ('${T("Catégorie «")} ' + r.name + ' ${T("» créée (")}' + r.code + ').') : '${T("Catégorie mise à jour.")}'; });
   }
   function saveReachat(which){
     var arg = which === 'low' ? { lowStockDefault: val('rc-low') } : { buyMax: val('rc-buymax') };
-    ecrire('invmeta:reachatSave', arg, function(){ return which === 'low' ? 'Seuil enregistré.' : 'Limite enregistrée.'; });
+    ecrire('invmeta:reachatSave', arg, function(){ return which === 'low' ? '${T("Seuil enregistré.")}' : '${T("Limite enregistrée.")}'; });
   }
 
   /* ══ ÉCOUTEURS ═════════════════════════════════════════════════════════════ */
@@ -514,20 +518,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     if (g('data-tab')) { TAB = g('data-tab'); ADDING = null; CATEDIT = null; CVARIANTS = null; dessiner(); return; }
-    if (g('data-sizerm')) { ecrire('invmeta:sizeRemove', { sz: g('data-sizerm') }, function(){ return 'Taille retirée.'; }); return; }
+    if (g('data-sizerm')) { ecrire('invmeta:sizeRemove', { sz: g('data-sizerm') }, function(){ return '${T("Taille retirée.")}'; }); return; }
     if (g('data-attradd')) { ADDING = g('data-attradd'); dessiner(); var f = document.getElementById(ADDING === 'labels' ? 'lb-fr' : 'at-key'); if (f) f.focus(); return; }
     if (g('data-attrcancel')) { ADDING = null; dessiner(); return; }
     if (g('data-attrsave')) { saveAttr(g('data-attrsave')); return; }
-    if (g('data-attrrm')) { var p = g('data-attrrm').split('|'); ecrire('invmeta:attrRemove', { type: p[0], key: p[1] }, function(){ return 'Attribut supprimé.'; }); return; }
+    if (g('data-attrrm')) { var p = g('data-attrrm').split('|'); ecrire('invmeta:attrRemove', { type: p[0], key: p[1] }, function(){ return '${T("Attribut supprimé.")}'; }); return; }
     if (g('data-labelsave')) { saveLabel(); return; }
-    if (g('data-labelrm')) { ecrire('invmeta:labelRemove', { key: g('data-labelrm') }, function(){ return 'Étiquette supprimée.'; }); return; }
+    if (g('data-labelrm')) { ecrire('invmeta:labelRemove', { key: g('data-labelrm') }, function(){ return '${T("Étiquette supprimée.")}'; }); return; }
     if (g('data-act') === 'coloradd') { addColor(); return; }
     if (g('data-act') === 'colorsearch') { searchColor(); return; }
-    if (g('data-act') === 'codesassign') { ecrire('invmeta:codesAssign', {}, function(r){ return r.n + ' code' + plur(r.n) + ' enregistré' + plur(r.n) + '.'; }); return; }
+    if (g('data-act') === 'codesassign') { ecrire('invmeta:codesAssign', {}, function(r){ return r.n + ' ${T("code")}' + plur(r.n) + ' ${T("enregistré")}' + plur(r.n) + '.'; }); return; }
     if (g('data-codesave')) { saveCode(g('data-codesave')); return; }
     if (g('data-coloredit')) { var cp = g('data-coloredit').split('|'); EDITCOLOR = { nom: cp[0], hex: cp[1] }; dessiner(); return; }
-    if (g('data-colorrm')) { ecrire('invmeta:colorRemove', { name: g('data-colorrm') }, function(){ return 'Couleur supprimée.'; }); return; }
-    if (g('data-pick')) { var pk = g('data-pick').split('|'); var nEl = document.getElementById('inv-color-name'); var hEl = document.getElementById('inv-color-hex'); var pEl = document.getElementById('inv-color-picker'); if (nEl) nEl.value = pk[0]; if (hEl) hEl.value = pk[1]; if (pEl) { try { pEl.value = pk[1]; } catch(er){} } CVARIANTS = null; dire('« ' + pk[0] + ' » sélectionnée.', 'bon'); return; }
+    if (g('data-colorrm')) { ecrire('invmeta:colorRemove', { name: g('data-colorrm') }, function(){ return '${T("Couleur supprimée.")}'; }); return; }
+    if (g('data-pick')) { var pk = g('data-pick').split('|'); var nEl = document.getElementById('inv-color-name'); var hEl = document.getElementById('inv-color-hex'); var pEl = document.getElementById('inv-color-picker'); if (nEl) nEl.value = pk[0]; if (hEl) hEl.value = pk[1]; if (pEl) { try { pEl.value = pk[1]; } catch(er){} } CVARIANTS = null; dire('« ' + pk[0] + ' ${T("» sélectionnée.")}', 'bon'); return; }
     if (g('data-cfilter')) { CFILTER = g('data-cfilter'); dessiner(); return; }
     if (g('data-coltoggle')) { appeler('invmeta:colToggle', { key: g('data-coltoggle') }).then(relire); return; }
     if (g('data-colmove')) { var mv = g('data-colmove').split('|'); appeler('invmeta:colMove', { key: mv[0], dir: parseInt(mv[1], 10) }).then(function(r){ if (r && r.ok) relire(); }); return; }
@@ -535,7 +539,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (g('data-catedit')) { CATEDIT = g('data-catedit'); dessiner(); var ce = document.getElementById('ic-name'); if (ce) { ce.focus(); ce.select(); } return; }
     if (g('data-catcancel')) { CATEDIT = null; dessiner(); return; }
     if (g('data-catsave') !== null && g('data-catsave') !== undefined) { saveCat(g('data-catsave')); return; }
-    if (g('data-catdel')) { ecrire('invmeta:catDelete', { id: g('data-catdel') }, function(r){ return 'Catégorie « ' + r.name + ' » supprimée.'; }); return; }
+    if (g('data-catdel')) { ecrire('invmeta:catDelete', { id: g('data-catdel') }, function(r){ return '${T("Catégorie «")} ' + r.name + ' ${T("» supprimée.")}'; }); return; }
     if (g('data-act') === 'reachatlow') { saveReachat('low'); return; }
     if (g('data-act') === 'reachatbuymax') { saveReachat('buymax'); return; }
   });
@@ -546,7 +550,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       else if (e.key === 'Backspace' && !e.target.value && D && D.sizes.length && D.peut.edit) {
         e.preventDefault();
         var last = D.sizes[D.sizes.length - 1];
-        ecrire('invmeta:sizeRemove', { sz: last.nom }, function(){ return 'Taille retirée.'; });
+        ecrire('invmeta:sizeRemove', { sz: last.nom }, function(){ return '${T("Taille retirée.")}'; });
       }
       return;
     }
