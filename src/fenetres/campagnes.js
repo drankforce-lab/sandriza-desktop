@@ -28,6 +28,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('campagnes');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -178,11 +182,11 @@ function pageCampagnes(ongletDepart) {
   const dep = (base === 'chaines') ? 'chaines'
             : (base === 'segments') ? 'segments' : 'campagnes';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Campagnes et chaînes — Administration Sandriza</title>
+<title>${T("Campagnes et chaînes — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.newsletter}</span><h1>Campagnes et chaînes</h1>
+<div class="tete"><span class="ico">${ICO.newsletter}</span><h1>${T("Campagnes et chaînes")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -234,22 +238,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      liste de champs par type tient dans dix lignes, alors que neuf rendus
      separes en feraient deux cents — et l on en oublierait un a chaque ajout. */
   var BCHAMPS = {
-    heading:      [['text', 'Titre', 'texte'], ['size', 'Taille', 'choix:h1=Grand,h2=Moyen'],
-                   ['align', 'Alignement', 'choix:left=Gauche,center=Centre,right=Droite'],
-                   ['color', 'Couleur', 'couleur']],
-    text:         [['content', 'Texte', 'long'],
-                   ['align', 'Alignement', 'choix:left=Gauche,center=Centre,right=Droite']],
-    button:       [['text', 'Libellé', 'texte'], ['url', 'Lien', 'texte'],
-                   ['bgColor', 'Fond', 'couleur'], ['textColor', 'Texte', 'couleur'],
-                   ['align', 'Alignement', 'choix:left=Gauche,center=Centre,right=Droite']],
+    heading:      [['text', '${T("Titre")}', 'texte'], ['size', '${T("Taille")}', '${T("choix:h1=Grand,h2=Moyen")}'],
+                   ['align', '${T("Alignement")}', '${T("choix:left=Gauche,center=Centre,right=Droite")}'],
+                   ['color', '${T("Couleur")}', 'couleur']],
+    text:         [['content', '${T("Texte")}', 'long'],
+                   ['align', '${T("Alignement")}', '${T("choix:left=Gauche,center=Centre,right=Droite")}']],
+    button:       [['text', '${T("Libellé")}', 'texte'], ['url', '${T("Lien")}', 'texte'],
+                   ['bgColor', '${T("Fond")}', 'couleur'], ['textColor', '${T("Texte")}', 'couleur'],
+                   ['align', '${T("Alignement")}', '${T("choix:left=Gauche,center=Centre,right=Droite")}']],
     divider:      [],
-    spacer:       [['height', 'Hauteur (px)', 'nombre']],
-    codeBox:      [['label', 'Intitulé', 'texte'], ['code', 'Code', 'texte'],
-                   ['note', 'Note', 'texte']],
-    discountHero: [['subtitle', 'Sur-titre', 'texte'], ['percent', 'Pourcentage', 'texte'],
-                   ['label2', 'Sous-titre', 'texte']],
-    highlightBox: [['title', 'Titre', 'texte'], ['desc', 'Description', 'texte'],
-                   ['code', 'Code (facultatif)', 'texte'], ['icon', 'Pictogramme', 'texte']],
+    spacer:       [['height', '${T("Hauteur (px)")}', 'nombre']],
+    codeBox:      [['label', '${T("Intitulé")}', 'texte'], ['code', '${T("Code")}', 'texte'],
+                   ['note', '${T("Note")}', 'texte']],
+    discountHero: [['subtitle', '${T("Sur-titre")}', 'texte'], ['percent', '${T("Pourcentage")}', 'texte'],
+                   ['label2', '${T("Sous-titre")}', 'texte']],
+    highlightBox: [['title', '${T("Titre")}', 'texte'], ['desc', '${T("Description")}', 'texte'],
+                   ['code', '${T("Code (facultatif)")}', 'texte'], ['icon', '${T("Pictogramme")}', 'texte']],
     rawHtml:      [['content', 'HTML', 'long']]
   };
 
@@ -288,7 +292,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + esc(t.label) + '"><span class="ic">' + esc(t.icone) + '</span> ' + esc(t.label) + '</button>';
     }).join('') + '</div>';
     if (!BLOCS.length) {
-      return pal + '<div class="bvide">Aucun bloc. Ajoutez-en un ci-dessus, ou chargez un modèle.</div>';
+      return pal + '<div class="bvide">${T("Aucun bloc. Ajoutez-en un ci-dessus, ou chargez un modèle.")}</div>';
     }
     var cartes = BLOCS.map(function(b, i){
       var t = typeDe(b.type);
@@ -374,24 +378,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à l’infolettre.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps. L’envoi peut avoir continué : vérifiez le journal d’envoi avant de recommencer.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cet élément n’existe plus.',
-    deja_envoyee:       'Cette campagne est déjà partie. Une campagne ne s’envoie pas deux fois.',
-    resend_absent:      'Aucune clé Resend n’est configurée : rien ne peut partir. Écran Infolettre, onglet Configuration.',
-    envois_suspendus:   'Les « Séquences automatisées » sont en pause dans les contrôles d’envoi. Traiter maintenant abandonnerait les inscriptions sans rien envoyer.',
-    rien_en_attente:    'Aucune inscription en attente.',
-    rien_echu:          'Des inscriptions attendent, mais aucune étape n’est échue : leur délai n’est pas écoulé.',
-    refus:              'L’envoi a été refusé.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à l’infolettre.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps. L’envoi peut avoir continué : vérifiez le journal d’envoi avant de recommencer.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cet élément n’existe plus.")}',
+    deja_envoyee:       '${T("Cette campagne est déjà partie. Une campagne ne s’envoie pas deux fois.")}',
+    resend_absent:      '${T("Aucune clé Resend n’est configurée : rien ne peut partir. Écran Infolettre, onglet Configuration.")}',
+    envois_suspendus:   '${T("Les « Séquences automatisées » sont en pause dans les contrôles d’envoi. Traiter maintenant abandonnerait les inscriptions sans rien envoyer.")}',
+    rien_en_attente:    '${T("Aucune inscription en attente.")}',
+    rien_echu:          '${T("Des inscriptions attendent, mais aucune étape n’est échue : leur délai n’est pas écoulé.")}',
+    refus:              '${T("L’envoi a été refusé.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' ' + esc(String(r.detail).slice(0, 160));
     return t;
   }
@@ -411,7 +415,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function onglets(){
     return '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'campagnes' ? ' actif' : '') + '" data-onglet="campagnes">Campagnes</button>'
-      + '<button class="mini' + (ONGLET === 'chaines' ? ' actif' : '') + '" data-onglet="chaines">Chaînes automatisées</button>'
+      + '<button class="mini' + (ONGLET === 'chaines' ? ' actif' : '') + '" data-onglet="chaines">${T("Chaînes automatisées")}</button>'
       + '<button class="mini' + (ONGLET === 'segments' ? ' actif' : '') + '" data-onglet="segments">Segments</button>'
       // ⚠ LA RECHERCHE N EST PLUS ICI (demande du 2026-08-14 : << pas beau a
       // cote des onglets >>). Elle vit desormais dans la barre qui surplombe
@@ -441,13 +445,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     '{{premierProduit}}', '{{lienPanier}}', '{{lienBoutique}}'];
 
   function ligneVars(liste, note){
-    return '<div class="vars">Variables : '
+    return '<div class="vars">${T("Variables :")} '
       + liste.map(function(v){ return '<code>' + esc(v) + '</code>'; }).join(' ')
       + (note ? '<br>' + note : '') + '</div>';
   }
 
   function choixModeles(id, modeles){
-    return '<select id="' + id + '"><option value="">Charger un modèle…</option>'
+    return '<select id="' + id + '"><option value="">${T("Charger un modèle…")}</option>'
       + (modeles || []).map(function(m){
           return '<option value="' + esc(m.cle) + '">' + esc(m.nom) + '</option>'; }).join('')
       + '</select>';
@@ -457,10 +461,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var f = FORM, d = f.d, c = d.campagne || {};
     var h = '<div class="carte form">'
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
-      + (f.id ? 'Modifier la campagne' : 'Nouvelle campagne') + '</h3>'
+      + (f.id ? '${T("Modifier la campagne")}' : '${T("Nouvelle campagne")}') + '</h3>'
       + '<div class="rang">'
-      + '<div class="champ"><span class="lbl">Nom interne</span>'
-      + '<input id="f-nom" aria-label="Nom interne" value="' + esc(c.nom || '') + '" placeholder="Infolettre de septembre"></div>'
+      + '<div class="champ"><span class="lbl">${T("Nom interne")}</span>'
+      + '<input id="f-nom" aria-label="${T("Nom interne")}" value="' + esc(c.nom || '') + '" placeholder="Infolettre de septembre"></div>'
       // ⚠ CHAQUE SEGMENT MONTRE SA PORTEE : on choisit en voyant combien de
       // personnes il atteint MAINTENANT, pas en devinant. Un segment a 0 se
       // remarque avant l envoi, pas apres.
@@ -468,33 +472,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          relier. On pose un NOM sur le champ plutot que de convertir le span —
          le rendu de ces fenetres ne peut pas etre verifie sur son poste
          (aucun banc qui ouvre un navigateur), et un nom ne deplace rien. */
-      + '<div class="champ"><span class="lbl">Segment</span><select id="f-seg" aria-label="Segment">'
+      + '<div class="champ"><span class="lbl">${T("Segment")}</span><select id="f-seg" aria-label="${T("Segment")}">'
       + (d.segments || []).map(function(s){
           return '<option value="' + esc(s.cle) + '"' + ((c.segment || 'all') === s.cle ? ' selected' : '')
             + '>' + esc(s.nom) + ' (' + (s.compte || 0) + ')' + '</option>';
         }).join('') + '</select>'
       + '<span class="aide" id="f-seg-quoi"></span></div></div>'
-      + '<div class="champ"><span class="lbl">Sujet du courriel</span>'
-      + '<input id="f-suj" aria-label="Sujet du courriel" value="' + esc(c.sujet || '') + '" placeholder="Nos nouveautés sont arrivées !"></div>'
+      + '<div class="champ"><span class="lbl">${T("Sujet du courriel")}</span>'
+      + '<input id="f-suj" aria-label="${T("Sujet du courriel")}" value="' + esc(c.sujet || '') + '" placeholder="Nos nouveautés sont arrivées !"></div>'
       + '<div class="rang">'
-      + '<div class="champ"><span class="lbl">Canal d’envoi</span><select id="f-canal" aria-label="Canal d’envoi">'
+      + '<div class="champ"><span class="lbl">${T("Canal d’envoi")}</span><select id="f-canal" aria-label="${T("Canal d’envoi")}">'
       + (d.canaux || []).map(function(x){
           return '<option value="' + esc(x.cle) + '"' + ((c.canal || 'email') === x.cle ? ' selected' : '')
             + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></div>'
-      + '<div class="champ"><span class="lbl">Destinataires SMS</span>'
+      + '<div class="champ"><span class="lbl">${T("Destinataires SMS")}</span>'
       + '<div class="aide" style="padding-top:.35rem">' + (d.smsDestinataires || 0)
-      + ' client(s) ayant consenti, avec un téléphone.'
-      + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> Téléphonie non configurée : l’envoi SMS échouera.</span>')
+      + ' ${T("client(s) ayant consenti, avec un téléphone.")}'
+      + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> ${T("Téléphonie non configurée : l’envoi SMS échouera.")}</span>')
       + '</div></div></div>'
-      + '<div class="champ" id="f-sms-bloc"><span class="lbl">Message texte (SMS)</span>'
-      + '<textarea id="f-sms" aria-label="Message texte (SMS)" class="sms" maxlength="480" placeholder="SANDRIZA : nos nouveautés sont arrivées !">'
+      + '<div class="champ" id="f-sms-bloc"><span class="lbl">${T("Message texte (SMS)")}</span>'
+      + '<textarea id="f-sms" aria-label="${T("Message texte (SMS)")}" class="sms" maxlength="480" placeholder="SANDRIZA : nos nouveautés sont arrivées !">'
       + esc(c.sms || '') + '</textarea>'
       + '<div class="aide"><span id="f-sms-n">0</span>/480 · Variable : <code>{{firstName}}</code>. '
-      + 'Twilio gère STOP et AIDE automatiquement.</div></div>'
-      + '<div class="champ"><span class="lbl">Corps du courriel</span>'
+      + '${T("Twilio gère STOP et AIDE automatiquement.")}</div></div>'
+      + '<div class="champ"><span class="lbl">${T("Corps du courriel")}</span>'
       + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('f-tpl', d.modeles)
       + '<button class="mini" id="f-charger">Charger</button>'
-      + '<button class="mini" id="f-apercu">Aperçu</button></div>'
+      + '<button class="mini" id="f-apercu">${T("Aperçu")}</button></div>'
       /* ⚠ DEUX MODES, ET LE VISUEL EST LE DEFAUT. Le mode HTML reste : c est le
          seul moyen de coller un gabarit venu d ailleurs, et de relire ce qui
          part vraiment. Basculer vers HTML CONVERTIT les blocs ; revenir au
@@ -509,12 +513,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + (BMODE === 'visuel' ? ' style="display:none"' : '') + '>' + esc(c.html || '') + '</textarea>'
       + ligneVars(VARS_CAMP) + '</div>'
       + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
-      + '<div class="chrome"><span class="ic">✉</span> Aperçu — marie@example.com</div>'
+      + '<div class="chrome"><span class="ic">✉</span> ${T("Aperçu — marie@example.com")}</div>'
       + '<iframe id="f-frame" sandbox=""></iframe></div>'
-      + '<div class="fin3"><span class="gauche aide">Enregistrée en <strong>brouillon</strong> : '
-      + 'rien ne part tant que vous n’appuyez pas sur « Envoyer ».</span>'
-      + '<button id="f-annuler">Annuler</button>'
-      + '<button class="prim" id="f-ok">Enregistrer</button></div></div>';
+      + '<div class="fin3"><span class="gauche aide">${T("Enregistrée en <strong>brouillon</strong> : ")}'
+      + '${T("rien ne part tant que vous n’appuyez pas sur « Envoyer ».")}</span>'
+      + '<button id="f-annuler">${T("Annuler")}</button>'
+      + '<button class="prim" id="f-ok">${T("Enregistrer")}</button></div></div>';
     return h;
   }
 
@@ -522,63 +526,63 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var f = FORM, d = f.d, ch = d.chaine || {};
     var h = '<div class="carte form">'
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
-      + (f.id ? 'Modifier la chaîne' : 'Nouvelle chaîne') + '</h3>'
+      + (f.id ? '${T("Modifier la chaîne")}' : '${T("Nouvelle chaîne")}') + '</h3>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">Nom</span>'
       + '<input id="f-nom" aria-label="Nom de la chaîne" value="' + esc(ch.nom || '') + '" placeholder="Bienvenue en trois temps"></div>'
-      + '<div class="champ"><span class="lbl">Déclencheur</span><select id="f-decl" aria-label="Déclencheur">'
+      + '<div class="champ"><span class="lbl">${T("Déclencheur")}</span><select id="f-decl" aria-label="${T("Déclencheur")}">'
       + (d.declencheurs || []).map(function(x){
           return '<option value="' + esc(x.cle) + '"'
             + ((ch.declencheur || 'subscribe') === x.cle ? ' selected' : '') + '>'
             + esc(x.nom) + '</option>'; }).join('') + '</select></div></div>'
       + '<div class="rang">'
-      + '<div class="champ"><span class="lbl">Description</span>'
-      + '<input id="f-desc" aria-label="Description" value="' + esc(ch.description || '') + '"></div>'
+      + '<div class="champ"><span class="lbl">${T("Description")}</span>'
+      + '<input id="f-desc" aria-label="${T("Description")}" value="' + esc(ch.description || '') + '"></div>'
       + '<div class="champ"><span class="lbl">Statut</span><select id="f-statut" aria-label="Statut">'
-      + '<option value="active"' + (ch.statut !== 'paused' ? ' selected' : '') + '>Active</option>'
+      + '<option value="active"' + (ch.statut !== 'paused' ? ' selected' : '') + '>${T("Active")}</option>'
       + '<option value="paused"' + (ch.statut === 'paused' ? ' selected' : '') + '>Suspendue</option>'
       + '</select></div></div>'
       + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
-      + '<strong style="font-size:.8rem">Étapes</strong>'
-      + '<button class="mini" id="f-etape-plus">+ Ajouter une étape</button></div>'
+      + '<strong style="font-size:.8rem">${T("Étapes")}</strong>'
+      + '<button class="mini" id="f-etape-plus">${T("+ Ajouter une étape")}</button></div>'
       + '<div id="f-etapes">' + vueEtapes() + '</div>'
-      + ligneVars(VARS_CHAINE, 'Les variables de panier ne se remplissent que dans une chaîne '
-          + 'dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.')
+      + ligneVars(VARS_CHAINE, '${T("Les variables de panier ne se remplissent que dans une chaîne")} '
+          + '${T("dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.")}')
       + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
-      + '<div class="chrome"><span class="ic">✉</span> Aperçu — marie@example.com</div>'
+      + '<div class="chrome"><span class="ic">✉</span> ${T("Aperçu — marie@example.com")}</div>'
       + '<iframe id="f-frame" sandbox=""></iframe></div>'
-      + '<div class="fin3"><button id="f-annuler">Annuler</button>'
-      + '<button class="prim" id="f-ok">Enregistrer</button></div></div>';
+      + '<div class="fin3"><button id="f-annuler">${T("Annuler")}</button>'
+      + '<button class="prim" id="f-ok">${T("Enregistrer")}</button></div></div>';
     return h;
   }
 
   function vueEtapes(){
     var et = ETAPES || [];
     if (!et.length) {
-      return '<div class="vide" style="padding:.9rem">Aucune étape : cette chaîne n’enverrait rien. '
-        + 'Cliquez « + Ajouter une étape ».</div>';
+      return '<div class="vide" style="padding:.9rem">${T("Aucune étape : cette chaîne n’enverrait rien.")} '
+        + '${T("Cliquez « + Ajouter une étape ».")}</div>';
     }
     var mods = (FORM && FORM.d && FORM.d.modeles) || [];
     return et.map(function(s, i){
-      return '<div class="etapef"><div class="tete2"><strong>Étape ' + (i + 1) + '</strong>'
+      return '<div class="etapef"><div class="tete2"><strong>${T("Étape")} ' + (i + 1) + '</strong>'
         + '<div class="gestes">'
         + (i > 0 ? '<button class="mini" data-mont="' + i + '" title="Monter">↑</button>' : '')
         + (i < et.length - 1 ? '<button class="mini" data-desc="' + i + '" title="Descendre">↓</button>' : '')
         + '<button class="mini danger" data-etsup="' + i + '">Retirer</button></div></div>'
-        + '<div class="rang"><div class="champ"><span class="lbl">Délai depuis le déclenchement</span>'
+        + '<div class="rang"><div class="champ"><span class="lbl">${T("Délai depuis le déclenchement")}</span>'
         /* ⚠ DEUX CHAMPS POUR UN SEUL LIBELLE (<< Delai depuis le declenchement >>)
          et les mots << jours >> / << heures >> ne sont que du texte entre eux :
          en tabulant, le lecteur d ecran annoncait deux fois << nombre >>. */
-      + '<div class="duo"><input type="number" min="0" id="e-j-' + i + '" aria-label="Délai — jours" value="' + (s.jours || 0)
-        + '"><span>jours</span><input type="number" min="0" max="23" id="e-h-' + i + '" aria-label="Délai — heures" value="'
+      + '<div class="duo"><input type="number" min="0" id="e-j-' + i + '" aria-label="${T("Délai — jours")}" value="' + (s.jours || 0)
+        + '"><span>jours</span><input type="number" min="0" max="23" id="e-h-' + i + '" aria-label="${T("Délai — heures")}" value="'
         + (s.heures || 0) + '"><span>heures</span></div></div>'
         + '<div class="champ"><span class="lbl">Sujet</span>'
         + '<input aria-label="Sujet" id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'
-        + '<div class="champ"><span class="lbl">Corps du courriel (HTML)</span>'
+        + '<div class="champ"><span class="lbl">${T("Corps du courriel (HTML)")}</span>'
         + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('e-t-' + i, mods)
         + '<button class="mini" data-etcharger="' + i + '">Charger</button>'
-        + '<button class="mini" data-etapercu="' + i + '">Aperçu</button></div>'
-        + '<textarea id="e-b-' + i + '" aria-label="Corps du courriel de l’étape ' + (i + 1) + '" spellcheck="false">' + esc(s.html || '') + '</textarea></div>'
+        + '<button class="mini" data-etapercu="' + i + '">${T("Aperçu")}</button></div>'
+        + '<textarea id="e-b-' + i + '" aria-label="${T("Corps du courriel de l’étape ")}' + (i + 1) + '" spellcheck="false">' + esc(s.html || '') + '</textarea></div>'
         + '</div>';
     }).join('');
   }
@@ -609,7 +613,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function chargerBlocsCatalogue(){
     appeler('nl:blocsCatalogue', []).then(function(r){
       if (!r || !r.ok) {
-        dire('Les types de blocs n’ont pas pu être lus — le mode HTML reste disponible.', 'att');
+        dire('${T("Les types de blocs n’ont pas pu être lus — le mode HTML reste disponible.")}', 'att');
         return;
       }
       BTYPES = r.types || [];
@@ -628,7 +632,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
            : (type === 'segment') ? 'segments:donnees' : 'campagnes:form';
     appeler(op, [id || '']).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      if (!r.peutModifier) { dire('Vous êtes en consultation seulement.', 'err'); return; }
+      if (!r.peutModifier) { dire('${T("Vous êtes en consultation seulement.")}', 'err'); return; }
       FORM = { type: type, id: id || '', d: r };
       /* ⚠ LES BLOCS PARTENT DU HTML EXISTANT, dans un bloc << HTML libre >>.
          Une campagne deja ecrite n a pas de blocs : la deviner en la decoupant
@@ -682,7 +686,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   szBrouillonBrancher({
     portee: 'campagne',
-    libelle: 'Une saisie',
+    libelle: '${T("Une saisie")}',
     ttlMin: 720,
     cle: function(){ return FORM ? (FORM.type + ':' + (FORM.id || '__new__')) : ''; },
     actif: function(){ return !!FORM && !!document.getElementById('f-nom'); },
@@ -736,7 +740,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var bloc = document.getElementById('f-apercu-bloc');
     var cadre = document.getElementById('f-frame');
     if (!bloc || !cadre) return;
-    dire('Construction de l’aperçu…');
+    dire('${T("Construction de l’aperçu…")}');
     appeler('nl:apercu', [html]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       bloc.style.display = '';
@@ -758,7 +762,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          On convertit donc d abord, puis on repasse par ici. */
       if (BMODE === 'visuel') {
         if (b) b.disabled = true;
-        dire('Assemblage du courriel…');
+        dire('${T("Assemblage du courriel…")}');
         blocsVersHtml(function(htm){
           var ta = document.getElementById('f-html');
           if (ta) ta.value = htm;
@@ -770,10 +774,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       }
       var data = { nom: g('f-nom').trim(), sujet: g('f-suj').trim(), segment: g('f-seg'),
         canal: g('f-canal'), sms: g('f-sms').trim(), html: g('f-html') };
-      if (!data.nom) { dire('Le nom interne est requis.', 'err'); return; }
-      if (!data.sujet) { dire('Le sujet est requis.', 'err'); return; }
+      if (!data.nom) { dire('${T("Le nom interne est requis.")}', 'err'); return; }
+      if (!data.sujet) { dire('${T("Le sujet est requis.")}', 'err'); return; }
       if ((data.canal === 'sms' || data.canal === 'both') && !data.sms) {
-        dire('Le message texte est requis pour ce canal.', 'err'); return;
+        dire('${T("Le message texte est requis pour ce canal.")}', 'err'); return;
       }
       if (b) b.disabled = true;
       dire('Enregistrement…');
@@ -783,7 +787,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         /* Jeter AVANT de fermer : fermerForm ecrit le brouillon, et il reecrirait
            par-dessus celui qu on vient de jeter. */
         szBrouillonJeter();
-        dire(esc(r.nom) + (r.cree ? ' créée' : ' mise à jour') + ' — en brouillon.', 'bon');
+        dire(esc(r.nom) + (r.cree ? ' ${T("créée")}' : ' ${T("mise à jour")}') + ' ${T("— en brouillon.")}', 'bon');
         fermerForm();
       });
       return;
@@ -791,10 +795,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     releverEtapes();
     var dch = { nom: g('f-nom').trim(), description: g('f-desc').trim(),
       declencheur: g('f-decl'), statut: g('f-statut'), etapes: ETAPES || [] };
-    if (!dch.nom) { dire('Le nom est requis.', 'err'); return; }
-    if (!dch.etapes.length) { dire('Ajoutez au moins une étape.', 'err'); return; }
+    if (!dch.nom) { dire('${T("Le nom est requis.")}', 'err'); return; }
+    if (!dch.etapes.length) { dire('${T("Ajoutez au moins une étape.")}', 'err'); return; }
     if (dch.etapes.some(function(s){ return !String(s.sujet || '').trim(); })) {
-      dire('Chaque étape doit avoir un sujet.', 'err'); return;
+      dire('${T("Chaque étape doit avoir un sujet.")}', 'err'); return;
     }
     if (b) b.disabled = true;
     dire('Enregistrement…');
@@ -802,8 +806,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       szBrouillonJeter();
-      dire(esc(r.nom) + (r.cree ? ' créée' : ' mise à jour') + ' — '
-        + pluriel(r.etapes, 'étape') + '.', 'bon');
+      dire(esc(r.nom) + (r.cree ? ' ${T("créée")}' : ' ${T("mise à jour")}') + ' — '
+        + pluriel(r.etapes, '${T("étape")}') + '.', 'bon');
       fermerForm();
     });
   }
@@ -874,7 +878,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         BLOCS = htm.trim() ? [{ type: 'rawHtml', content: htm }] : [];
         BMODE = 'visuel';
         majMode(); majBlocs();
-        dire('Mode visuel. Le HTML est rangé dans un bloc « HTML libre ».', 'att');
+        dire('${T("Mode visuel. Le HTML est rangé dans un bloc « HTML libre ».")}', 'att');
       };
       if (bh) bh.onclick = function(){
         if (BMODE === 'html') return;
@@ -882,7 +886,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           if (ta) ta.value = htm;
           BMODE = 'html';
           majMode();
-          dire('Mode HTML — c’est exactement ce qui partira.', 'att');
+          dire('${T("Mode HTML — c’est exactement ce qui partira.")}', 'att');
         });
       };
       majMode();
@@ -891,7 +895,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var ch = document.getElementById('f-charger');
       if (ch) ch.onclick = function(){
         var cle = document.getElementById('f-tpl').value;
-        if (!cle) { dire('Choisissez un modèle.', 'att'); return; }
+        if (!cle) { dire('${T("Choisissez un modèle.")}', 'att'); return; }
         /* ⚠ EN MODE VISUEL, ON CHARGE LES BLOCS DU MODELE, pas son HTML. Charger
            le HTML puis le ranger dans un bloc << HTML libre >> donnerait un
            modele qu on ne peut plus modifier bloc par bloc — c est-a-dire tout
@@ -899,7 +903,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (BMODE === 'visuel' && BMODELES[cle]) {
           BLOCS = JSON.parse(JSON.stringify(BMODELES[cle]));
           majBlocs();
-          dire('Modèle chargé en blocs — ajustez-les à votre guise.', 'bon');
+          dire('${T("Modèle chargé en blocs — ajustez-les à votre guise.")}', 'bon');
           return;
         }
         appeler('nl:modele', [cle]).then(function(r){
@@ -907,7 +911,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           document.getElementById('f-html').value = r.html;
           var s = document.getElementById('f-suj');
           if (s && !s.value.trim()) s.value = r.sujet;
-          dire('Modèle « ' + esc(r.nom) + ' » chargé.', 'bon');
+          dire('${T("Modèle «")} ' + esc(r.nom) + ' ${T("» chargé.")}', 'bon');
         });
       };
       var ap = document.getElementById('f-apercu');
@@ -937,30 +941,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      actives — il n ajoute jamais personne (consentement, LCAP / Loi 25). */
   function vueSegments(){
     var D = DS;
-    if (!D) return '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>';
+    if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Abonnés actifs</div><div class="val bon">'
-      + (D.abonnesActifs || 0) + '</div><div class="dt">le point de départ</div></div>'
-      + '<div class="tuile"><div class="lbl">Segments composés</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
+      + (D.abonnesActifs || 0) + '</div><div class="dt">${T("le point de départ")}</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Segments composés")}</div><div class="val">'
       + (D.segments || []).length + '</div></div></div>';
 
-    h += '<div class="avis att">Un segment ne fait que <strong>restreindre</strong> la liste '
-      + 'des abonnées actives : il ne peut jamais joindre quelqu’un qui n’a pas consenti '
-      + 'à recevoir l’infolettre.</div>';
+    h += '<div class="avis att">${T("Un segment ne fait que <strong>restreindre</strong> la liste ")}'
+      + '${T("des abonnées actives : il ne peut jamais joindre quelqu’un qui n’a pas consenti")} '
+      + '${T("à recevoir l’infolettre.")}</div>';
 
     if (D.peutModifier) {
       h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvseg">'
-        + '+ Nouveau segment</button></div>';
+        + '${T("+ Nouveau segment")}</button></div>';
     }
 
     if (!(D.segments || []).length) {
-      h += '<div class="carte"><div class="vide">Aucun segment composé. Les campagnes '
-        + 'disposent tout de même de « Tous les abonnés » et « Clients avec commandes ».</div></div>';
+      h += '<div class="carte"><div class="vide">${T("Aucun segment composé. Les campagnes")} '
+        + '${T("disposent tout de même de « Tous les abonnés » et « Clients avec commandes ».")}</div></div>';
       return h + renvoi();
     }
 
-    h += '<div class="carte"><table><thead><tr><th>Segment</th><th>Critères</th>'
-      + '<th class="num">Portée</th><th class="num">Utilisé par</th>'
+    h += '<div class="carte"><table><thead><tr><th>${T("Segment")}</th><th>${T("Critères")}</th>'
+      + '<th class="num">${T("Portée")}</th><th class="num">${T("Utilisé par")}</th>'
       + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
       + D.segments.map(function(s){
           var gestes = '';
@@ -968,7 +972,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             gestes += '<button class="mini geste" data-segmodif="' + esc(s.id) + '">Modifier</button> ';
             var armeS = (ARME === 'segsup:' + s.id);
             gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-segsup="'
-              + esc(s.id) + '">' + (armeS ? 'Confirmer ?' : 'Supprimer') + '</button>';
+              + esc(s.id) + '">' + (armeS ? '${T("Confirmer ?")}' : 'Supprimer') + '</button>';
           }
           return '<tr><td><strong>' + esc(s.nom) + '</strong></td>'
             + '<td class="dt">' + esc(s.phrase || '—') + '</td>'
@@ -985,19 +989,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var f = FORM, d = f.d;
     return '<div class="carte form">'
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
-      + (f.id ? 'Modifier le segment' : 'Nouveau segment') + '</h3>'
-      + '<div class="champ"><span class="lbl">Nom du segment</span>'
-      + '<input id="f-nom" aria-label="Nom du segment" value="' + esc(f.nom || '') + '" placeholder="Clients robes, 300 $ et plus"></div>'
+      + (f.id ? '${T("Modifier le segment")}' : '${T("Nouveau segment")}') + '</h3>'
+      + '<div class="champ"><span class="lbl">${T("Nom du segment")}</span>'
+      + '<input id="f-nom" aria-label="${T("Nom du segment")}" value="' + esc(f.nom || '') + '" placeholder="Clients robes, 300 $ et plus"></div>'
       + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
-      + '<strong style="font-size:.8rem">Critères</strong>'
-      + '<span class="dt">toutes ces conditions doivent être remplies</span>'
-      + '<button class="mini" id="f-crit-plus">+ Ajouter un critère</button></div>'
+      + '<strong style="font-size:.8rem">${T("Critères")}</strong>'
+      + '<span class="dt">${T("toutes ces conditions doivent être remplies")}</span>'
+      + '<button class="mini" id="f-crit-plus">${T("+ Ajouter un critère")}</button></div>'
       + '<div id="f-criteres">' + vueCriteres() + '</div>'
-      + '<div class="portee" id="f-portee">Portée : <strong id="f-portee-n">—</strong> '
-      + 'sur ' + (d.abonnesActifs || 0) + ' abonnées actives '
+      + '<div class="portee" id="f-portee">${T("Portée : ")}<strong id="f-portee-n">—</strong> '
+      + 'sur ' + (d.abonnesActifs || 0) + ' ${T("abonnées actives")} '
       + '<button class="mini" id="f-compter">Compter</button></div>'
-      + '<div class="fin3"><button id="f-annuler">Annuler</button>'
-      + '<button class="prim" id="f-ok">Enregistrer</button></div></div>';
+      + '<div class="fin3"><button id="f-annuler">${T("Annuler")}</button>'
+      + '<button class="prim" id="f-ok">${T("Enregistrer")}</button></div></div>';
   }
 
   function champDef(cle){
@@ -1034,19 +1038,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueCriteres(){
     var cr = CRITERES || [];
     if (!cr.length) {
-      return '<div class="vide" style="padding:.9rem">Aucun critère : ce segment vaudrait '
-        + '« tous les abonnés ». Ajoutez-en au moins un.</div>';
+      return '<div class="vide" style="padding:.9rem">${T("Aucun critère : ce segment vaudrait")} '
+        + '${T("« tous les abonnés ». Ajoutez-en au moins un.")}</div>';
     }
     var champs = (FORM.d && FORM.d.champs) || [];
     return cr.map(function(c, i){
       var def = champDef(c.champ) || { ops: [] };
       return '<div class="critere">'
         + '<select id="c-c-' + i + '" data-critchamp="' + i + '"'
-          + ' aria-label="Critère ' + (i + 1) + ' — champ">'
+          + ' aria-label="${T("Critère")} ' + (i + 1) + ' — champ">'
         + champs.map(function(x){
             return '<option value="' + esc(x.cle) + '"' + (x.cle === c.champ ? ' selected' : '')
               + '>' + esc(x.nom) + '</option>'; }).join('') + '</select>'
-        + '<select id="c-o-' + i + '" aria-label="Critère ' + (i + 1) + ' — opérateur">'
+        + '<select id="c-o-' + i + '" aria-label="${T("Critère")} ' + (i + 1) + ' — opérateur">'
         + (def.ops || []).map(function(o){
             return '<option value="' + esc(o.cle) + '"' + (o.cle === c.op ? ' selected' : '')
               + '>' + esc(o.nom) + '</option>'; }).join('') + '</select>'
@@ -1082,24 +1086,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!r.ok) { dire(expliquer(r), 'err'); if (p) p.textContent = '—'; return; }
       if (p) p.textContent = String(r.compte);
       dire(r.compte === 0
-        ? 'Aucune abonnée ne correspond : ce segment n’enverrait rien.'
-        : pluriel(r.compte, 'abonnée') + ' sur ' + r.total + '.', r.compte === 0 ? 'att' : 'bon');
+        ? '${T("Aucune abonnée ne correspond : ce segment n’enverrait rien.")}'
+        : pluriel(r.compte, '${T("abonnée")}') + ' sur ' + r.total + '.', r.compte === 0 ? 'att' : 'bon');
     });
   }
 
   function soumettreSegment(){
     releverCriteres();
     var nom = (document.getElementById('f-nom').value || '').trim();
-    if (!nom) { dire('Le nom est requis.', 'err'); return; }
-    if (!(CRITERES || []).length) { dire('Ajoutez au moins un critère.', 'err'); return; }
+    if (!nom) { dire('${T("Le nom est requis.")}', 'err'); return; }
+    if (!(CRITERES || []).length) { dire('${T("Ajoutez au moins un critère.")}', 'err'); return; }
     var b = document.getElementById('f-ok');
     if (b) b.disabled = true;
     dire('Enregistrement…');
     appeler('segments:ecrire', [FORM.id, { nom: nom, criteres: CRITERES }]).then(function(r){
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(esc(r.nom) + (r.cree ? ' créé' : ' mis à jour') + ' — ' + pluriel(r.compte, 'abonnée') + '.'
-        + (r.nuage ? '' : ' Enregistré sur ce poste seulement — le nuage n’a pas confirmé.'),
+      dire(esc(r.nom) + (r.cree ? ' ${T("créé")}' : ' ${T("mis à jour")}') + ' — ' + pluriel(r.compte, '${T("abonnée")}') + '.'
+        + (r.nuage ? '' : ' ${T("Enregistré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
         r.nuage ? 'bon' : 'att');
       szBrouillonJeter();
       fermerForm();
@@ -1109,7 +1113,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   /* ══ ONGLET CAMPAGNES ═══════════════════════════════════════════════════ */
   function vueCampagnes(){
     var D = DC;
-    if (!D) return '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>';
+    if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
     var q = Q.trim().toLowerCase();
     var rows = (D.campagnes || []).filter(function(c){
       if (!q) return true;
@@ -1117,43 +1121,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     });
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Abonnés actifs</div><div class="val bon">'
+      + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
       + (D.abonnesActifs || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">Brouillons</div><div class="val neutre">'
       + (D.brouillons || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Campagnes parties</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Campagnes parties")}</div><div class="val">'
       + (D.envoyees || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Courriels partis</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Courriels partis")}</div><div class="val">'
       + (D.courrielsEnvoyes || 0) + '</div>'
-      + (D.courrielsEchoues ? '<div class="dt">' + pluriel(D.courrielsEchoues, 'échec') + '</div>' : '')
+      + (D.courrielsEchoues ? '<div class="dt">' + pluriel(D.courrielsEchoues, '${T("échec")}') + '</div>' : '')
       + '</div></div>';
 
     /* Ce qui empeche un envoi, ou le detourne, se dit AVANT le clic. */
     if (!D.resendPret) {
-      h += '<div class="avis mal">Aucune clé Resend n’est configurée : <strong>rien ne peut partir</strong>. '
-        + 'Écran Infolettre → Configuration, dans la fenêtre principale.</div>';
+      h += '<div class="avis mal">${T("Aucune clé Resend n’est configurée : <strong>rien ne peut partir</strong>. ")}'
+        + '${T("Écran Infolettre → Configuration, dans la fenêtre principale.")}</div>';
     } else if (D.modeTest) {
-      h += '<div class="avis att">Mode test allumé : les courriels partiront <strong>uniquement</strong> à '
-        + esc(D.courrielTest) + ', et la campagne restera en brouillon. Les SMS, eux, ne partent pas du tout.</div>';
+      h += '<div class="avis att">${T("Mode test allumé : les courriels partiront <strong>uniquement</strong> à ")}'
+        + esc(D.courrielTest) + '${T(", et la campagne restera en brouillon. Les SMS, eux, ne partent pas du tout.")}</div>';
     }
     if (D.resendPret && D.expediteur) {
-      h += '<div class="dt">Expéditeur : ' + esc(D.expediteur) + '</div>';
+      h += '<div class="dt">${T("Expéditeur :")} ' + esc(D.expediteur) + '</div>';
     }
 
     // La barre qui surplombe la LISTE : creation a gauche, recherche a droite,
     // juste au-dessus de ce sur quoi elles agissent.
     h += '<div class="barreoutils">'
-      + (D.peutModifier ? '<button class="mini prim" id="cp-nouvelle">+ Nouvelle campagne</button>' : '')
+      + (D.peutModifier ? '<button class="mini prim" id="cp-nouvelle">${T("+ Nouvelle campagne")}</button>' : '')
       + '<div class="droite"><input type="search" id="cp-q" aria-label="Nom ou sujet" placeholder="Nom ou sujet…" value="'
       + esc(Q) + '"></div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {
-      h += '<div class="vide">' + (q ? 'Rien ne correspond.'
-        : 'Aucune campagne pour l’instant. Cliquez « + Nouvelle campagne ».') + '</div>';
+      h += '<div class="vide">' + (q ? '${T("Rien ne correspond.")}'
+        : '${T("Aucune campagne pour l’instant. Cliquez « + Nouvelle campagne ».")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>Campagne</th><th>Envoyé à</th><th>Canal</th>'
-        + '<th class="num">Destinataires</th><th>État</th><th class="num">Partis / échecs</th>'
+      h += '<table><thead><tr><th>${T("Campagne")}</th><th>${T("Envoyé à")}</th><th>${T("Canal")}</th>'
+        + '<th class="num">${T("Destinataires")}</th><th>${T("État")}</th><th class="num">${T("Partis / échecs")}</th>'
         + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(c){
             var gestes = '';
@@ -1166,11 +1170,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
                 var armeE = (ARME === 'env:' + c.id);
                 gestes += '<button class="mini geste' + (armeE ? ' arme' : ' prim') + '" data-envoyer="'
                   + esc(c.id) + '"' + (D.resendPret || c.canal === 'sms' ? '' : ' disabled')
-                  + '>' + (armeE ? 'Confirmer l’envoi ?' : 'Envoyer') + '</button> ';
+                  + '>' + (armeE ? '${T("Confirmer l’envoi ?")}' : 'Envoyer') + '</button> ';
               }
               var armeS = (ARME === 'sup:' + c.id);
               gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
-                + esc(c.id) + '">' + (armeS ? 'Confirmer ?' : 'Supprimer') + '</button>';
+                + esc(c.id) + '">' + (armeS ? '${T("Confirmer ?")}' : 'Supprimer') + '</button>';
             }
             return '<tr><td><strong>' + esc(c.nom) + '</strong>'
               + '<div class="dt">' + esc(c.sujet) + '</div></td>'
@@ -1194,43 +1198,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   /* ══ ONGLET CHAINES ═════════════════════════════════════════════════════ */
   function vueChaines(){
     var D = DH;
-    if (!D) return '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>';
+    if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Chaînes actives</div><div class="val bon">'
+      + '<div class="tuile"><div class="lbl">${T("Chaînes actives")}</div><div class="val bon">'
       + (D.actives || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Inscriptions en cours</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Inscriptions en cours")}</div><div class="val">'
       + (D.enAttente || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Étapes échues</div><div class="val '
+      + '<div class="tuile"><div class="lbl">${T("Étapes échues")}</div><div class="val '
       + (D.dues ? 'att' : 'neutre') + '">' + (D.dues || 0) + '</div>'
-      + '<div class="dt">prêtes à partir</div></div>'
+      + '<div class="dt">${T("prêtes à partir")}</div></div>'
       + '</div>';
 
     if (!D.envoisPermis) {
-      h += '<div class="avis mal">Les « Séquences automatisées » sont <strong>en pause</strong> dans les '
-        + 'contrôles d’envoi (écran Infolettre → Configuration). Aucune étape ne partira, et les traiter '
-        + 'dans cet état abandonnerait les inscriptions sans rien envoyer.</div>';
+      h += '<div class="avis mal">${T("Les « Séquences automatisées » sont <strong>en pause</strong> dans les ")}'
+        + '${T("contrôles d’envoi (écran Infolettre → Configuration). Aucune étape ne partira, et les traiter")} '
+        + '${T("dans cet état abandonnerait les inscriptions sans rien envoyer.")}</div>';
     }
 
     if (D.peutModifier) {
       var armeT = (ARME === 'traiter');
       h += '<div class="barreoutils"><button class="mini' + (armeT ? ' arme' : ' prim') + '" id="cp-traiter"'
         + ((!D.dues || !D.envoisPermis) ? ' disabled' : '') + '>'
-        + (armeT ? 'Confirmer — envoyer ' + pluriel(D.dues || 0, 'étape') + ' ?' : 'Traiter les étapes échues')
+        + (armeT ? '${T("Confirmer — envoyer")} ' + pluriel(D.dues || 0, '${T("étape")}') + ' ?' : '${T("Traiter les étapes échues")}')
         + '</button>'
         + '<div class="droite">' + (D.dues
-            ? pluriel(D.dues, 'étape') + ' échue' + ((D.dues > 1) ? 's' : '')
-            : 'Rien d’échu pour l’instant') + '</div></div>';
+            ? pluriel(D.dues, '${T("étape")}') + ' ${T("échue")}' + ((D.dues > 1) ? 's' : '')
+            : '${T("Rien d’échu pour l’instant")}') + '</div></div>';
     }
 
     if (D.peutModifier) {
       h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvchaine">'
-        + '+ Nouvelle chaîne</button></div>';
+        + '${T("+ Nouvelle chaîne")}</button></div>';
     }
 
     if (!(D.chaines || []).length) {
-      h += '<div class="carte"><div class="vide">Aucune chaîne pour l’instant. '
-        + 'Cliquez « + Nouvelle chaîne ».</div></div>';
+      h += '<div class="carte"><div class="vide">${T("Aucune chaîne pour l’instant.")} '
+        + '${T("Cliquez « + Nouvelle chaîne ».")}</div></div>';
     } else {
       h += (D.chaines || []).map(function(ch){
         var gestes = '';
@@ -1239,27 +1243,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           var armeB = (ARME === 'bas:' + ch.id);
           gestes += '<button class="mini geste' + (armeB ? ' arme' : '') + '" data-basculer="' + esc(ch.id)
             + '" data-active="' + (ch.active ? '0' : '1') + '">'
-            + (armeB ? 'Confirmer ?' : (ch.active ? 'Suspendre' : 'Activer')) + '</button>';
+            + (armeB ? '${T("Confirmer ?")}' : (ch.active ? 'Suspendre' : 'Activer')) + '</button>';
           var armeS = (ARME === 'chsup:' + ch.id);
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-chsuppr="'
-            + esc(ch.id) + '">' + (armeS ? 'Confirmer ?' : 'Supprimer') + '</button>';
+            + esc(ch.id) + '">' + (armeS ? '${T("Confirmer ?")}' : 'Supprimer') + '</button>';
         }
         return '<div class="carte chaine">'
           + '<div class="entete"><div><h3>' + esc(ch.nom) + '</h3>'
           + (ch.description ? '<div class="desc">' + esc(ch.description) + '</div>' : '') + '</div>'
           + '<span class="pill ' + (ch.active ? 'bon' : 'neutre') + '">'
-          + (ch.active ? 'Active' : 'Suspendue') + '</span>'
+          + (ch.active ? '${T("Active")}' : 'Suspendue') + '</span>'
           + '<span class="pill acc">' + esc(ch.declencheurLibelle) + '</span>'
           + '<div class="gestes">' + gestes + '</div></div>'
-          + '<div class="compte">' + pluriel((ch.etapes || []).length, 'étape') + ' · '
-          + ch.inscriptionsActives + ' en cours · ' + ch.inscriptionsFinies + ' terminée'
+          + '<div class="compte">' + pluriel((ch.etapes || []).length, '${T("étape")}') + ' · '
+          + ch.inscriptionsActives + ' en cours · ' + ch.inscriptionsFinies + ' ${T("terminée")}'
           + (ch.inscriptionsFinies > 1 ? 's' : '') + '</div>'
           + ((ch.etapes || []).length
               ? '<div class="etapes">' + ch.etapes.map(function(e){
                   return '<div class="etape"><span class="no">' + e.no + '.</span> '
                     + esc(e.delai) + '<div class="suj">' + esc(e.sujet) + '</div></div>';
                 }).join('') + '</div>'
-              : '<div class="dt">Aucune étape : cette chaîne n’enverra rien.</div>')
+              : '<div class="dt">${T("Aucune étape : cette chaîne n’enverra rien.")}</div>')
           + '</div>';
       }).join('');
     }
@@ -1302,21 +1306,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (ARME !== 'traiter') {
         ARME = 'traiter';
         dessiner();
-        dire('Ces étapes partiront pour de bon, par courriel. Cliquez pour confirmer.', 'att');
+        dire('${T("Ces étapes partiront pour de bon, par courriel. Cliquez pour confirmer.")}', 'att');
         return;
       }
       ARME = '';
       OCCUPE = true;
       bt.disabled = true;
-      bt.textContent = 'Envoi en cours…';
-      dire('Envoi des étapes échues… ne fermez pas cette fenêtre.', 'att');
+      bt.textContent = '${T("Envoi en cours…")}';
+      dire('${T("Envoi des étapes échues… ne fermez pas cette fenêtre.")}', 'att');
       appeler('chaines:traiter', []).then(function(r){
         OCCUPE = false;
         if (!r.ok) { dire(expliquer(r), 'err'); charger(); return; }
         /* Le verdict dit ce qui est PARTI, pas ce qui a ete tente. */
         dire(pluriel(r.envoyes, 'courriel') + ' parti' + (r.envoyes > 1 ? 's' : '')
-          + (r.echecs ? ', ' + pluriel(r.echecs, 'échec') : '')
-          + ' sur ' + pluriel(r.traitees, 'étape') + ' traitée' + (r.traitees > 1 ? 's' : '') + '.',
+          + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}') : '')
+          + ' sur ' + pluriel(r.traitees, '${T("étape")}') + ' ${T("traitée")}' + (r.traitees > 1 ? 's' : '') + '.',
           r.echecs ? 'att' : 'bon');
         charger();
       });
@@ -1371,14 +1375,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (etc) {
         var ic = etc.getAttribute('data-etcharger');
         var sel = document.getElementById('e-t-' + ic);
-        if (!sel || !sel.value) { dire('Choisissez un modèle.', 'att'); return; }
+        if (!sel || !sel.value) { dire('${T("Choisissez un modèle.")}', 'att'); return; }
         appeler('nl:modele', [sel.value]).then(function(r){
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
           var b2 = document.getElementById('e-b-' + ic);
           if (b2) b2.value = r.html;
           var s2 = document.getElementById('e-s-' + ic);
           if (s2 && !s2.value.trim()) s2.value = r.sujet;
-          dire('Modèle « ' + esc(r.nom) + ' » chargé dans l’étape ' + (parseInt(ic, 10) + 1) + '.', 'bon');
+          dire('${T("Modèle «")} ' + esc(r.nom) + ' ${T("» chargé dans l’étape")} ' + (parseInt(ic, 10) + 1) + '.', 'bon');
         });
         return;
       }
@@ -1404,8 +1408,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (ARME !== 'segsup:' + idSg) {
         ARME = 'segsup:' + idSg;
         dessiner();
-        dire('Cliquez « Confirmer ? » — le segment disparaît. Les campagnes qui '
-          + 's’en servent doivent d’abord en choisir un autre.', 'att');
+        dire('${T("Cliquez « Confirmer ? » — le segment disparaît. Les campagnes qui")} '
+          + '${T("s’en servent doivent d’abord en choisir un autre.")}', 'att');
         return;
       }
       ARME = '';
@@ -1414,14 +1418,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           // ⚠ Le refus le plus utile : on NOMME les campagnes qui bloquent,
           // sinon il faudrait les chercher une par une.
           dire(r.motif === 'utilise'
-            ? ('Impossible : ' + pluriel(r.combien, 'campagne') + ' s’en sert encore ('
-               + (r.campagnes || []).join(', ') + '). Changez leur segment d’abord.')
+            ? ('${T("Impossible :")} ' + pluriel(r.combien, 'campagne') + ' ${T("s’en sert encore (")}'
+               + (r.campagnes || []).join(', ') + '${T("). Changez leur segment d’abord.")}')
             : expliquer(r), 'err');
           dessiner();
           return;
         }
-        dire(esc(r.nom) + ' supprimé.'
-          + (r.nuage ? '' : ' Retiré sur ce poste seulement — le nuage n’a pas confirmé.'),
+        dire(esc(r.nom) + ' ${T("supprimé.")}'
+          + (r.nuage ? '' : ' ${T("Retiré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
           r.nuage ? 'bon' : 'att');
         charger();
       });
@@ -1446,21 +1450,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
                 + (camp.canal === 'both' ? ' et ' + (DC.smsDestinataires || 0) + ' SMS' : '')))
           : 'les destinataires';
         dire((DC && DC.modeTest)
-          ? ('Mode test : un seul courriel partira, à ' + (DC.courrielTest || 'l’adresse de test') + '.')
-          : ('Cliquez pour confirmer : ' + combien + ' vont partir, sans retour possible.'), 'att');
+          ? ('${T("Mode test : un seul courriel partira, à")} ' + (DC.courrielTest || '${T("l’adresse de test")}') + '.')
+          : ('${T("Cliquez pour confirmer :")} ' + combien + ' ${T("vont partir, sans retour possible.")}'), 'att');
         return;
       }
       ARME = '';
       OCCUPE = true;
       be.disabled = true;
       be.textContent = 'Envoi…';
-      dire('Envoi en cours… ne fermez pas cette fenêtre.', 'att');
+      dire('${T("Envoi en cours… ne fermez pas cette fenêtre.")}', 'att');
       appeler('campagnes:envoyer', [idE]).then(function(r){
         OCCUPE = false;
         if (!r.ok) { dire(expliquer(r), 'err'); charger(); return; }
-        dire(esc(r.nom) + ' — ' + pluriel(r.envoyes, 'envoi') + ' réussi' + (r.envoyes > 1 ? 's' : '')
-          + (r.echecs ? ', ' + pluriel(r.echecs, 'échec') : '')
-          + (r.modeTest ? ' (mode test : la campagne reste en brouillon).' : '.'),
+        dire(esc(r.nom) + ' — ' + pluriel(r.envoyes, '${T("envoi")}') + ' ${T("réussi")}' + (r.envoyes > 1 ? 's' : '')
+          + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}') : '')
+          + (r.modeTest ? ' ${T("(mode test : la campagne reste en brouillon).")}' : '.'),
           r.echecs ? 'att' : 'bon');
         charger();
       });
@@ -1473,13 +1477,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (ARME !== 'sup:' + idS) {
         ARME = 'sup:' + idS;
         dessiner();
-        dire('Cliquez « Confirmer ? » — la campagne et ses images sont supprimées pour de bon.', 'att');
+        dire('${T("Cliquez « Confirmer ? » — la campagne et ses images sont supprimées pour de bon.")}', 'att');
         return;
       }
       ARME = '';
       appeler('campagnes:supprimer', [idS]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(esc(r.nom) + ' supprimée.', 'bon');
+        dire(esc(r.nom) + ' ${T("supprimée.")}', 'bon');
         charger();
       });
       return;
@@ -1497,17 +1501,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!versActive && enCours && ARME !== 'bas:' + idB) {
         ARME = 'bas:' + idB;
         dessiner();
-        dire('Suspendre abandonnera ' + pluriel(enCours, 'inscription') + ' en cours : '
+        dire('${T("Suspendre abandonnera")} ' + pluriel(enCours, '${T("inscription")}') + ' ${T("en cours :")} '
           + (enCours > 1 ? 'ces personnes ne recevront jamais' : 'cette personne ne recevra jamais')
-          + ' la suite de la séquence. Cliquez pour confirmer.', 'att');
+          + ' ${T("la suite de la séquence. Cliquez pour confirmer.")}', 'att');
         return;
       }
       ARME = '';
       bb.disabled = true;
       appeler('chaines:basculer', [idB, versActive]).then(function(r){
         if (!r.ok) { bb.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire(esc(r.nom) + (r.active ? ' est active.' : ' est suspendue.')
-          + (r.nuage ? '' : ' Enregistré sur ce poste seulement — le nuage n’a pas confirmé.'),
+        dire(esc(r.nom) + (r.active ? ' ${T("est active.")}' : ' ${T("est suspendue.")}')
+          + (r.nuage ? '' : ' ${T("Enregistré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
           r.nuage ? 'bon' : 'att');
         charger();
       });
@@ -1521,17 +1525,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (ARME !== 'chsup:' + idC) {
         ARME = 'chsup:' + idC;
         dessiner();
-        dire('Cliquez « Confirmer ? » — la chaîne, ses étapes et '
-          + pluriel(chS ? chS.inscriptionsActives : 0, 'inscription') + ' en cours disparaissent.', 'att');
+        dire('${T("Cliquez « Confirmer ? » — la chaîne, ses étapes et")} '
+          + pluriel(chS ? chS.inscriptionsActives : 0, '${T("inscription")}') + ' ${T("en cours disparaissent.")}', 'att');
         return;
       }
       ARME = '';
       appeler('chaines:supprimer', [idC]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(esc(r.nom) + ' supprimée'
-          + (r.perdues ? ' — ' + pluriel(r.perdues, 'inscription') + ' abandonnée'
+        dire(esc(r.nom) + ' ${T("supprimée")}'
+          + (r.perdues ? ' — ' + pluriel(r.perdues, '${T("inscription")}') + ' ${T("abandonnée")}'
              + (r.perdues > 1 ? 's' : '') + '.' : '.')
-          + (r.nuage ? '' : ' Retiré sur ce poste seulement — le nuage n’a pas confirmé.'),
+          + (r.nuage ? '' : ' ${T("Retiré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
           r.nuage ? 'bon' : 'att');
         charger();
       });
@@ -1564,7 +1568,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function charger(){
     if (ONGLET === 'segments') {
       appeler('segments:donnees', []).then(function(r){
-        if (!r || !r.ok) { vide('Segments indisponibles', expliquer(r)); return; }
+        if (!r || !r.ok) { vide('${T("Segments indisponibles")}', expliquer(r)); return; }
         DS = r;
         dessiner();
       });
@@ -1573,7 +1577,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var op = (ONGLET === 'chaines') ? 'chaines:liste' : 'campagnes:liste';
     appeler(op, []).then(function(r){
       if (!r || !r.ok) {
-        vide(ONGLET === 'chaines' ? 'Chaînes indisponibles' : 'Campagnes indisponibles', expliquer(r));
+        vide(ONGLET === 'chaines' ? '${T("Chaînes indisponibles")}' : '${T("Campagnes indisponibles")}', expliquer(r));
         return;
       }
       if (ONGLET === 'chaines') DH = r; else DC = r;
@@ -1606,12 +1610,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -1620,7 +1624,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (ev.key === 'Escape') {
       ev.preventDefault();
       /* ⚠ Un envoi en cours ne se ferme pas d un coup d Echap. */
-      if (OCCUPE) { dire('Un envoi est en cours : attendez le compte rendu.', 'att'); return; }
+      if (OCCUPE) { dire('${T("Un envoi est en cours : attendez le compte rendu.")}', 'att'); return; }
       // ⚠ Echap ferme le FORMULAIRE avant la fenetre : sinon une frappe de trop
       // ferait disparaitre tout ce qui vient d etre saisi.
       if (FORM) { fermerForm(); return; }

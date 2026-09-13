@@ -90,8 +90,16 @@ const aTraduire = (t) => {
   if (/^(?:(?:repeating-)?(?:linear|radial|conic)-gradient|url|calc|var|rgba?|hsla?)\(/.test(t)) return false;
   const parts = t.split(',').map((p) => p.trim());
   const UNE_PART = /^[a-z][\w-]*$|^[a-z][\w-]*\[[^\]]+\]$|^\[[^\]]+\]$|^[.#][\w-]+$/;
+  /* ⚠⚠ ET QUAND AUCUNE PART NE PORTE DE SIGNE : `button, input, select, label`
+     (campagnes) est un selecteur, « rouge, vert, bleu » n en est pas un — et
+     rien ne les distingue, SAUF que les premiers sont des NOMS DE BALISES. La
+     liste est FERMEE, donc sure : on la nomme plutot que de deviner. */
+  const BALISES = new Set(['a', 'button', 'input', 'select', 'label', 'textarea', 'option',
+    'div', 'span', 'p', 'li', 'ul', 'ol', 'table', 'tr', 'td', 'th', 'tbody', 'thead',
+    'form', 'img', 'svg', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section', 'header',
+    'footer', 'nav', 'main', 'canvas', 'video', 'audio', 'iframe', 'details', 'summary']);
   if (parts.length > 1 && parts.every((p) => UNE_PART.test(p))
-      && parts.some((p) => /[[.#]/.test(p))) return false;
+      && (parts.some((p) => /[[.#]/.test(p)) || parts.every((p) => BALISES.has(p)))) return false;
   return true;
 };
 
