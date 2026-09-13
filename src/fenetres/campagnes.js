@@ -573,8 +573,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         /* ⚠ DEUX CHAMPS POUR UN SEUL LIBELLE (<< Delai depuis le declenchement >>)
          et les mots << jours >> / << heures >> ne sont que du texte entre eux :
          en tabulant, le lecteur d ecran annoncait deux fois << nombre >>. */
-      + '<div class="duo"><input type="number" min="0" id="e-j-' + i + '" aria-label="${T("Délai — jours")}" value="' + (s.jours || 0)
-        + '"><span>${T("jours")}</span><input type="number" min="0" max="23" id="e-h-' + i + '" aria-label="${T("Délai — heures")}" value="'
+      /* Un attribut par litteral : colles, l etiquette et la valeur se lisent
+         comme un seul texte, et l inventaire ne sait plus ou l une finit. */
+      + '<div class="duo"><input type="number" min="0" id="e-j-' + i + '"'
+        + ' aria-label="${T("Délai — jours")}"'
+        + ' value="' + (s.jours || 0)
+        + '"><span>${T("jours")}</span><input type="number" min="0" max="23" id="e-h-' + i + '"'
+        + ' aria-label="${T("Délai — heures")}"'
+        + ' value="'
         + (s.heures || 0) + '"><span>${T("heures")}</span></div></div>'
         + '<div class="champ"><span class="lbl">${T("Sujet")}</span>'
         + '<input aria-label="${T("Sujet")}" id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'

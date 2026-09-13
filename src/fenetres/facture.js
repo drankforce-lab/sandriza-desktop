@@ -20,6 +20,10 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/facture.js). */
+const T = require('../langue').tr('facture');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -76,9 +80,9 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 function pageFacture(invId) {
   const depart = JSON.stringify(String(invId || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Facture — Administration Sandriza</title>
+<title>${T("Facture — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.billing}</span><h1 id="titre">Facture</h1>
+<div class="tete"><span class="ico">${ICO.billing}</span><h1 id="titre">${T("Facture")}</h1>
   <span class="sous" id="sous"></span>
   <span class="actions" id="actions"></span></div>
 <div class="corps" id="corps"></div>
@@ -102,20 +106,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux factures.',
-    indisponible:       'Le module de facturation n’est pas encore chargé dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette facture n’existe plus.',
-    impression:         'L’impression a échoué.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux factures.")}',
+    indisponible:       '${T("Le module de facturation n’est pas encore chargé dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette facture n’existe plus.")}',
+    impression:         '${T("L’impression a échoué.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'impression' && r.detail) return MOTIFS.impression + ' ' + esc(r.detail);
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
 
   function appeler(op, args){
@@ -134,7 +138,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // resolues voyagent avec lui — c est ce qui garantit LA meme facture.
     corps.innerHTML = '<style>' + (d.css || '') + '</style>'
       + '<div class="papier">' + (d.html || '') + '</div>';
-    actions.innerHTML = '<button class="prim" id="btn-imp"><span class="ic">🖨</span> Imprimer</button>';
+    actions.innerHTML = '<button class="prim" id="btn-imp"><span class="ic">🖨</span>${T(" Imprimer")}</button>';
     var b = document.getElementById('btn-imp');
     if (b) b.onclick = imprimer;
   }
@@ -147,20 +151,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function imprimer(){
     var b = document.getElementById('btn-imp');
     if (b) b.disabled = true;
-    dire('Impression…');
+    dire('${T("Impression…")}');
     // Le chemin du SITE : imprimante « Factures » du poste, verdict reel.
     appeler('facture:imprimer', [ID]).then(function(r){
       if (b) b.disabled = false;
-      dire(r.ok ? 'Facture envoyée à l’impression.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Facture envoyée à l’impression.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   }
 
   function charger(){
-    chargement('Chargement…');
+    chargement('${T("Chargement…")}');
     appeler('facture:lire', [ID]).then(function(r){
       if (!r.ok) { chargement(expliquer(r)); dire(expliquer(r), 'err'); return; }
-      document.getElementById('titre').textContent = 'Facture ' + (r.numero || '');
-      document.title = 'Facture ' + (r.numero || '') + ' — Administration Sandriza';
+      document.getElementById('titre').textContent = '${T("Facture ")}' + (r.numero || '');
+      document.title = '${T("Facture ")}' + (r.numero || '') + '${T(" — Administration Sandriza")}';
       dire('');
       dessiner(r);
     });

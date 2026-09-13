@@ -19,6 +19,10 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/clients.js). */
+const T = require('../langue').tr('clients');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -75,11 +79,11 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 /** Page complète de la fenêtre native « Clients ». */
 function pageClients() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Clients — Administration Sandriza</title>
+<title>${T("Clients — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.customers}</span><h1>Clients</h1>
+<div class="tete"><span class="ico">${ICO.customers}</span><h1>${T("Clients")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -107,18 +111,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux clients.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette fiche n’existe plus.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux clients.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette fiche n’existe plus.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -134,34 +138,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var c = D.comptes || {};
     var onglets = [
-      ['active', 'Actifs', c.actifs || 0],
-      ['inactive', 'Inactifs', c.inactifs || 0],
-      ['deleted', 'Supprimés', c.supprimes || 0]
+      ['active', '${T("Actifs")}', c.actifs || 0],
+      ['inactive', '${T("Inactifs")}', c.inactifs || 0],
+      ['deleted', '${T("Supprimés")}', c.supprimes || 0]
     ];
     var h = '<div class="barreoutils">'
       + onglets.map(function(o){
           return '<button class="mini' + (ONGLET === o[0] ? ' actif' : '') + '" data-onglet="' + o[0] + '">'
             + o[1] + ' (' + o[2] + ')</button>';
         }).join('')
-      + '<input aria-label="Nom ou courriel" type="search" id="c-q" placeholder="Nom ou courriel…" value="' + esc(Q) + '">'
+      /* ⚠ L etiquette ENTIERE : une cle courte posee dans une phrase plus
+         longue laisse l autre moitie en francais. */
+      + '<input aria-label="${T("Nom ou courriel")}" type="search" id="c-q" placeholder="${T("Nom ou courriel…")}" value="' + esc(Q) + '">'
       + '<span class="droite">' + (D.total || 0) + ' client' + (D.total > 1 ? 's' : '') + '</span>'
       + '</div>';
 
     h += '<div class="carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
-      h += '<div class="vide">Aucun client ne correspond.</div>';
+      h += '<div class="vide">${T("Aucun client ne correspond.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Nom</th><th>Courriel</th>'
-        + '<th style="text-align:center">Commandes</th><th style="text-align:right">Achat total</th>'
+      h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Courriel")}</th>'
+        + '<th style="text-align:center">${T("Commandes")}</th><th style="text-align:right">${T("Achat total")}</th>'
         + '<th>Statut</th></tr></thead><tbody>'
         + rows.map(function(r){
-            var st = r.supprime ? '<span class="pill neutre">Supprimé</span>'
+            var st = r.supprime ? '<span class="pill neutre">${T("Supprimé")}</span>'
               : (r.actif ? '<span class="pill bon">Actif</span>' : '<span class="pill neutre">Inactif</span>');
-            return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la fiche client">'
+            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche client")}">'
               // ⚠ LE CADENAS EST SUR LA LIGNE, pas seulement dans la fiche ouverte.
         // Sans lui, un collegue devait CLIQUER pour decouvrir que la fiche
         // etait prise — l information existait, mais pas la ou l on regarde.
@@ -210,9 +216,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('button') || t.closest('input')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler('clients:ouvrir', [tr.getAttribute('data-id')]).then(function(r){
-      dire(r.ok ? 'Fiche client ouverte dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Fiche client ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
 
@@ -223,7 +229,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('clients:liste', [{ onglet: ONGLET, q: Q, page: PAGE, taille: TAILLE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Clients indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Clients indisponibles")}', expliquer(r)); return; }
       D = r;
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
@@ -268,12 +274,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

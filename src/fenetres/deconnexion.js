@@ -35,6 +35,10 @@
 
 const { JS_DIRE, CSS_JOUR } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/deconnexion.js). */
+const T = require('../langue').tr('deconnexion');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -97,14 +101,14 @@ function pageDeconnexion(arg) {
      redimensionnable, et sa carte remplit deja tout — proposer d << occuper
      toute la fenetre >> n y veut rien dire. Sa remarque du 2026-09-12. */
   return `<!doctype html><html lang="fr" data-sans-plein><head><meta charset="utf-8">
-<title>Déconnexion</title>
+<title>${T("Déconnexion")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete">
   <span class="rond"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
     stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"
     ><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"
     /><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
-  <h1>Déconnexion</h1>
+  <h1>${T("Déconnexion")}</h1>
 </div>
 <div class="corps" id="corps"></div>
 <div class="pied" id="pied"></div>
@@ -125,17 +129,19 @@ ${JS_DIRE()}
      convention de toutes les autres fenetres de ce dossier, et elle existe pour
      que chacune soit EPROUVABLE. */
   var qui = D.nom
-    ? ('<p class="qui">Session ouverte au nom de <b>' + D.nom + '</b>'
+    ? ('<p class="qui">${T("Session ouverte au nom de ")}<b>' + D.nom + '</b>'
       + (D.role ? (' — ' + D.role) : '') + '.</p>')
     : '';
   document.getElementById('corps').innerHTML =
-    '<p class="q">Voulez-vous vraiment vous déconnecter ?</p>' + qui
-    + '<p class="note">Le travail non enregistré sera perdu. Ce poste restera '
-    + 'ouvert : seule la session se ferme.</p>';
+    '<p class="q">${T("Voulez-vous vraiment vous déconnecter ?")}</p>' + qui
+    /* Une phrase ENTIERE dans un seul litteral. */
+    + '<p class="note">'
+    + '${T("Le travail non enregistré sera perdu. Ce poste restera ouvert : seule la session se ferme.")}'
+    + '</p>';
   document.getElementById('pied').innerHTML =
     '<span class="msg" id="msg"></span><span class="ecart"></span>'
-    + '<button type="button" id="non">Annuler</button>'
-    + '<button type="button" id="oui" class="prim">Se déconnecter</button>';
+    + '<button type="button" id="non">${T("Annuler")}</button>'
+    + '<button type="button" id="oui" class="prim">${T("Se déconnecter")}</button>';
 
   /* ⚠ UNE SEULE REPONSE, ET LA FERMETURE EN EST UNE. Sans ce drapeau, fermer la
      fenetre APRES avoir clique enverrait un second message — et cote site, une
@@ -152,8 +158,8 @@ ${JS_DIRE()}
          boutons redeviennent utiles, et on DIT pourquoi. Un bouton qui a l air
          de ne rien faire est le pire des trois. */
       repondu = false;
-      szDire('La reponse n a pas pu partir (' + ((e && e.message) || e)
-        + ') — fermez cette fenêtre et réessayez.', 'err');
+      szDire('${T("La réponse n’a pas pu partir (")}' + ((e && e.message) || e)
+        + '${T(") — fermez cette fenêtre et réessayez.")}', 'err');
     }
   }
 

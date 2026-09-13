@@ -34,6 +34,10 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/affichage.js). */
+const T = require('../langue').tr('affichage');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -87,10 +91,10 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 /** Page complète de l'affichage client. */
 function pageAffichage() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Affichage client</title>
+<title>${T("Affichage client")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete" id="tete"><div class="nom">SANDRIZA</div>
-  <div class="sous">Votre commande</div></div>
+<div class="tete" id="tete"><div class="nom">${T("SANDRIZA")}</div>
+  <div class="sous">${T("Votre commande")}</div></div>
 <div class="corps" id="corps"></div>
 <div class="avis" id="msg"></div>
 <script>
@@ -100,7 +104,7 @@ function pageAffichage() {
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var avis  = document.getElementById('msg');
-  var MARQUE = { logo: '', nom: 'SANDRIZA' };
+  var MARQUE = { logo: '', nom: '${T("SANDRIZA")}' };
 
   function fmt(n){
     return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' $';
@@ -117,14 +121,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var g = MARQUE.logo
       ? '<img src="' + esc(MARQUE.logo) + '" alt="">'
       : '<div class="nom">' + esc(MARQUE.nom) + '</div>';
-    t.innerHTML = g + '<div class="sous">Votre commande</div>';
+    t.innerHTML = g + '<div class="sous">${T("Votre commande")}</div>';
   }
 
   function accueil(){
     return '<div class="vide">'
       + (MARQUE.logo ? '<img src="' + esc(MARQUE.logo) + '" alt="">'
                      : '<div class="nom">' + esc(MARQUE.nom) + '</div>')
-      + '<div class="msg">Bienvenue. Votre commande s’affichera ici.</div></div>';
+      + '<div class="msg">${T("Bienvenue. Votre commande s’affichera ici.")}</div></div>';
   }
 
   var dernierNb = 0;
@@ -152,7 +156,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     h.push('</div><div class="bas">');
     if (t.sousTotal != null) h.push('<div class="sl"><span>Sous-total</span><b>' + fmt(t.sousTotal) + '</b></div>');
-    if (t.rabais)    h.push('<div class="sl"><span>Rabais</span><b>− ' + fmt(t.rabais) + '</b></div>');
+    if (t.rabais)    h.push('<div class="sl"><span>${T("Rabais")}</span><b>− ' + fmt(t.rabais) + '</b></div>');
     if (t.livraison) h.push('<div class="sl"><span>Livraison</span><b>' + fmt(t.livraison) + '</b></div>');
     (t.taxes || []).forEach(function(x){
       h.push('<div class="sl"><span>' + esc(x.nom) + '</span><b>' + fmt(x.montant) + '</b></div>');
@@ -174,7 +178,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!r || !r.ok) {
         // ⚠ ON LE DIT. Sans cet avis, la cliente verrait << Bienvenue >> et la
         // caissiere croirait l afficheur branche alors qu il ne recoit rien.
-        dire('Pas encore relié à la caisse');
+        dire('${T("Pas encore relié à la caisse")}');
         return;
       }
       dire('');
@@ -193,7 +197,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dessiner(etat);
     });
   } else {
-    dire('Cette version de l’application ne relaie pas la caisse');
+    dire('${T("Cette version de l’application ne relaie pas la caisse")}');
   }
 
   initial();

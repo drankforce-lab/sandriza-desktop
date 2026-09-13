@@ -17,6 +17,10 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/collections.js). */
+const T = require('../langue').tr('collections');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -66,11 +70,11 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 /** Page complète de la fenêtre native « Nos Collections ». */
 function pageCollections() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Nos Collections — Administration Sandriza</title>
+<title>${T("Nos Collections — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.collections}</span><h1>Nos Collections</h1>
+<div class="tete"><span class="ico">${ICO.collections}</span><h1>${T("Nos Collections")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -90,18 +94,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux collections.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette collection n’existe plus.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux collections.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette collection n’existe plus.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -117,20 +121,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = D.lignes || [];
     var h = '<div class="barreoutils">'
       + '<span>' + rows.length + ' collection' + (rows.length > 1 ? 's' : '') + '</span>'
-      + '<span class="droite"><button class="prim" id="col-nouvelle">+ Nouvelle collection</button></span>'
+      + '<span class="droite"><button class="prim" id="col-nouvelle">${T("+ Nouvelle collection")}</button></span>'
       + '</div>';
     h += '<div class="carte">';
     if (!rows.length) {
-      h += '<div class="vide">Pas de collection en ce moment.</div>';
+      h += '<div class="vide">${T("Pas de collection en ce moment.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Collection</th><th>Saison</th>'
-        + '<th style="text-align:center">Articles</th><th>Statut</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Collection")}</th><th>${T("Saison")}</th>'
+        + '<th style="text-align:center">${T("Articles")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
-            return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la collection">'
+            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la collection")}">'
               + '<td><span class="num">' + esc(r.nom) + '</span>'
               + szVerrouCase('collections', r.id)
               + (r.description ? '<div class="dt">' + esc(r.description).slice(0, 120) + '</div>' : '') + '</td>'
@@ -147,9 +151,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var nv = document.getElementById('col-nouvelle');
     if (nv) nv.onclick = function(){
-      dire('Ouverture…');
+      dire('${T("Ouverture…")}');
       appeler('collections:nouvelle', []).then(function(r){
-        dire(r.ok ? 'Assistant de collection ouvert dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Assistant de collection ouvert dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
   }
@@ -160,15 +164,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('button')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler('collections:ouvrir', [tr.getAttribute('data-id')]).then(function(r){
-      dire(r.ok ? 'Collection ouverte dans son assistant.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Collection ouverte dans son assistant.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
 
   function charger(){
     appeler('collections:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Collections indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Collections indisponibles")}', expliquer(r)); return; }
       D = r;
       dire('');
       dessiner();
@@ -195,12 +199,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

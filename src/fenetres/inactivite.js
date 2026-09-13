@@ -29,6 +29,10 @@
 
 const { JS_DIRE, CSS_JOUR } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/inactivite.js). */
+const T = require('../langue').tr('inactivite');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -71,14 +75,14 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 function pageInactivite(secondes) {
   const total = Math.max(5, parseInt(secondes, 10) || 60);
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Déconnexion imminente</title>
+<title>${T("Déconnexion imminente")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><h1>Déconnexion imminente</h1></div>
+<div class="tete"><h1>${T("Déconnexion imminente")}</h1></div>
 <div class="corps" id="corps"></div>
 <div class="pied">
-  <button class="dgr" id="b-fermer">Se déconnecter</button>
+  <button class="dgr" id="b-fermer">${T("Se déconnecter")}</button>
   <span class="msg" id="msg"></span>
-  <button class="prim" id="b-rester">✓ Rester connecté</button>
+  <button class="prim" id="b-rester">${T("✓ Rester connecté")}</button>
 </div>
 <script>
 (function(){
@@ -96,8 +100,8 @@ ${JS_DIRE()}
   document.getElementById('corps').innerHTML =
     '<div class="anneau" id="anneau"><span id="n">' + TOTAL + '</span></div>'
     + '<div class="txt">'
-    + '<p>Vous n’avez rien fait depuis un moment.</p>'
-    + '<p class="sec">Votre session d’administration se fermera à la fin du décompte.</p>'
+    + '<p>${T("Vous n’avez rien fait depuis un moment.")}</p>'
+    + '<p class="sec">${T("Votre session d’administration se fermera à la fin du décompte.")}</p>'
     + '</div>';
 
   var n = document.getElementById('n');
@@ -125,21 +129,21 @@ ${JS_DIRE()}
     try { p = P.appeler(op); } catch (e) { p = null; }
     if (!p || typeof p.then !== 'function') {
       b1.disabled = false; b2.disabled = false;
-      szDire('La fenêtre principale ne répond pas.', 'err');
+      szDire('${T("La fenêtre principale ne répond pas.")}', 'err');
       return;
     }
     p.then(function(r){
       if (r && r.ok) return;                 // le site refermera cette fenetre
       b1.disabled = false; b2.disabled = false;
-      szDire((r && r.motif) ? ('Refusé (' + r.motif + ').') : 'L’opération a échoué.', 'err');
+      szDire((r && r.motif) ? ('${T("Refusé (")}' + r.motif + ').') : '${T("L’opération a échoué.")}', 'err');
     }).catch(function(){
       b1.disabled = false; b2.disabled = false;
-      szDire('L’opération a échoué.', 'err');
+      szDire('${T("L’opération a échoué.")}', 'err');
     });
   }
 
-  document.getElementById('b-rester').onclick = function(){ agir('session:rester', 'Prolongation…'); };
-  document.getElementById('b-fermer').onclick = function(){ agir('session:fermer', 'Fermeture…'); };
+  document.getElementById('b-rester').onclick = function(){ agir('session:rester', '${T("Prolongation…")}'); };
+  document.getElementById('b-fermer').onclick = function(){ agir('session:fermer', '${T("Fermeture…")}'); };
   document.getElementById('b-rester').focus();
 })();
 </script></body></html>`;

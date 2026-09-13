@@ -35,10 +35,15 @@
  *   · les DONNEES (noms de produits, notes) : ce n est pas de l interface ;
  *   · ce que le SERVEUR renvoie.
  *
- * ⚠ IL N ECHOUE PAS TANT QUE LE CHANTIER N EST PAS DECLARE FINI. Un rouge
- * permanent pendant des semaines finit par être contourné, et emporte avec lui
- * les 22 autres bancs. Il INVENTORIE, et le nombre doit descendre.
- * `SZ_BILINGUE_FINI=1` le transforme en barrière le jour où c est vrai.
+ * ⚠⚠ IL EST UNE BARRIERE DEPUIS LE 2026-09-13, ET CE JOUR-LA EST ARRIVE.
+ * Pendant tout le chantier il n a fait qu INVENTORIER, et c etait la bonne
+ * decision : un rouge permanent pendant des semaines finit par être contourné,
+ * et emporte avec lui les 27 autres bancs. Le nombre est descendu de 938 à 0,
+ * et les 98 fenêtres sont complètes — un texte neuf sans décision est donc
+ * maintenant une REGRESSION, pas un reste de chantier.
+ * ➡ `SZ_BILINGUE_FINI=0` le ramène à l inventaire, pour le jour où un lot de
+ * fenêtres neuves arrive d un coup et qu on veut voir le nombre descendre
+ * plutôt que buter sur un refus à chaque enregistrement.
  *
  *   node tools/banc-langue-fenetres.js            l inventaire
  *   node tools/banc-langue-fenetres.js <fenetre>  ce qui manque a une fenetre
@@ -223,10 +228,12 @@ if (restants.length > 15) console.log('    ... et ' + (restants.length - 15) + '
 console.log('');
 console.log('  node tools/banc-langue-fenetres.js <fenetre>   pour la liste d une fenetre');
 
-if (process.env.SZ_BILINGUE_FINI === '1') {
+if (process.env.SZ_BILINGUE_FINI !== '0') {
   if (aFaire) {
     console.log('');
-    console.log('>>> ' + aFaire + ' texte(s) NON traduit(s) alors que le chantier est DECLARE FINI');
+    console.log('>>> ' + aFaire + ' texte(s) NON traduit(s) alors que le chantier est FINI');
+    console.log('    Un texte visible sans decision est une REGRESSION : lui donner son');
+    console.log('    entree dans src/langue/, ou le declarer DONNEE (SZ_DONNEES).');
     process.exit(1);
   }
   console.log('');
@@ -234,4 +241,4 @@ if (process.env.SZ_BILINGUE_FINI === '1') {
   process.exit(0);
 }
 console.log('');
-console.log('>>> inventaire seulement — le chantier n est pas declare fini (SZ_BILINGUE_FINI=1 pour verrouiller)');
+console.log('>>> inventaire seulement — barriere levee a la main (SZ_BILINGUE_FINI=0)');
