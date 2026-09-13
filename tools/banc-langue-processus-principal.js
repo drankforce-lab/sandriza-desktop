@@ -78,6 +78,27 @@ const TABLES = [
     sources: ['src/main.js'],
     plancher: 15,
   },
+  {
+    nom: 'veilleur',
+    titre: 'LE MENU DE LA ZONE DE NOTIFICATION',
+    /* ⚠⚠ TROISIEME TABLE, AJOUTEE LE 2026-09-13 — ET C EST L UTILISATEUR QUI A
+       DU LA DEMANDER : << n oublie pas de traduire le menu contextuel de
+       l application aussi >>. Le menu de l icone etait FRANCAIS EN ENTIER,
+       apres un chantier bilingue declare fini sur 98 fenetres.
+       ⚠ POURQUOI PERSONNE NE L A VU : tous les bancs de langue parcourent
+       `src/fenetres/`. Ce module n est pas une fenetre, et son menu est bati
+       par `Menu.buildFromTemplate` — jamais en HTML. Rien a dessiner, rien a
+       relire.
+       ➡ UNE SURFACE QUI N EST PAS UNE FENETRE N EST DANS LE CHAMP D AUCUN BANC
+         QUI PARCOURT LES FENETRES. C est mot pour mot la lecon en tete de ce
+         fichier — celle qui a coute << A propos >> — et elle vient de se
+         repayer sur une surface d un autre genre.
+       ⚠ `TV(...)` a son propre prefixe, comme `TA` : deux tables d un meme
+       depot ne doivent pas se prendre l une pour l autre. */
+    appel: /\bTV\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/g,
+    sources: ['src/veilleur.js'],
+    plancher: 15,
+  },
 ];
 
 const sansCommentaires = (s) => s

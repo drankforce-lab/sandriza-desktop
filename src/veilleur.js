@@ -75,6 +75,20 @@ const { APP_KEY } = require('./cle-app');
 // même patron que `brouillon-garde.js`. Voir son en-tête : c'est la pièce dont
 // l'erreur est muette.
 const { curseurSuivant, aAnnoncer } = require('./veilleur-curseur');
+/* ⚠⚠ SA DEMANDE DU 2026-09-13 : « n'oublie pas de traduire le menu contextuel
+   de l'application aussi ». C'est celui de l'icône de la zone de notification,
+   et il était FRANÇAIS EN ENTIER — pas un seul appel de traduction.
+   ⚠ LE CHANTIER BILINGUE L'A MANQUÉ POUR UNE RAISON DE STRUCTURE : tous les
+   bancs de langue parcourent `src/fenetres/`. Ce module-ci n'est pas une
+   fenêtre, et son menu est bâti par `Menu.buildFromTemplate`, jamais en HTML —
+   il n'y avait rien à dessiner, rien à relire, personne pour s'en plaindre.
+   ➡ UNE SURFACE QUI N'EST PAS UNE FENÊTRE N'EST DANS LE CHAMP D'AUCUN BANC QUI
+     PARCOURT LES FENÊTRES.
+   ⚠ RÉSOLU À L'APPEL, PAS AU CHARGEMENT : ce menu est REBÂTI à chaque
+   `majTray()`. Une constante de module figerait la langue du premier require,
+   et l'icône garderait le français jusqu'au redémarrage — exactement la faute
+   que les blocs du socle évitent en étant des fonctions. */
+const TV = require('./langue').tr('veilleur');
 /* ⚠ `demarrage-auto` N'EST PLUS REQUIS ICI (2026-09-08) : la bascule « Démarrer
    le veilleur avec Windows » et son entrée de registre propre existaient parce
    que DEUX processus voulaient deux entrées sous deux noms. Il n'y en a plus
@@ -437,11 +451,11 @@ async function unTour() {
   // l'erreur ne se voit pas.
   for (const a of aAnnoncer(d)) {
     if (a.type === 'commande') {
-      toast(pluriel(a.n, 'nouvelle commande', 'nouvelles commandes'),
-        'Ouvrez l’administration pour la traiter.', 'commande');
+      toast(pluriel(a.n, TV('nouvelle commande'), TV('nouvelles commandes')),
+        TV('Ouvrez l’administration pour la traiter.'), 'commande');
     } else {
-      toast(pluriel(a.n, 'nouvelle demande de retour', 'nouvelles demandes de retour'),
-        'Ouvrez l’administration pour la traiter.', 'retour');
+      toast(pluriel(a.n, TV('nouvelle demande de retour'), TV('nouvelles demandes de retour')),
+        TV('Ouvrez l’administration pour la traiter.'), 'retour');
     }
   }
 
@@ -470,27 +484,45 @@ function ordonnancer() {
  * n'est arrivé : sans une ligne d'état, il est impossible de faire la différence,
  * et on découvre la panne le jour où une commande a dormi trois jours.
  */
-const MOTIFS = {
-  // ⚠ « sans_cle » ne devrait jamais paraître : la clé est embarquée dans
-  // l'application. Si elle manque, c'est la construction qui est en faute, pas
-  // le poste — et il faut le DIRE plutôt que de laisser un veilleur muet.
-  sans_cle: 'Cette version de l’application n’a pas de clé (défaut de construction)',
-  refus: 'Le serveur a refusé cette version de l’application',
-  // ⚠ 2026-09-09, avec le portage macOS : le système refuse les notifications.
-  // La veille TOURNE et le son part — c'est l'affichage qui manque. Le dire
-  // évite de chercher une panne de réseau là où il y a un réglage de système
-  // (et, sur macOS, une application non signée).
-  sans_notif: 'Le système refuse les notifications (les sons et la liste ci-dessous fonctionnent)',
-  base_injoignable: 'Base de données injoignable',
-  delai: 'Le serveur n’a pas répondu à temps',
-  reseau: 'Réseau indisponible',
-};
+/* ⚠⚠ UNE FONCTION, PAS UNE TABLE — ET C'EST LE BANC QUI L'A EXIGÉ (2026-09-13).
+   Premier jet : la table gardait ses phrases françaises et `ligneEtat` appelait
+   `TV(MOTIFS[code])`. Ça traduisait bien, et `banc-langue-processus-principal` a
+   refusé — à raison : il relève les appels ÉCRITS, et un `TV(variable)` n'est
+   vérifiable par personne. Les six phrases seraient restées « des entrées que
+   personne ne demande », donc indistinguables de lignes mortes.
+   ➡ **UN APPEL DYNAMIQUE EST UN APPEL QU'AUCUN RELEVÉ NE PEUT SUIVRE.** Écrits
+   en toutes lettres ci-dessous, les six sont gardés dans les deux sens.
+   ⚠ ET C'EST UNE FONCTION, pas une constante : une constante de module figerait
+   la langue du premier `require`, et l'icône garderait le français jusqu'au
+   redémarrage. Même raison que les blocs du socle. */
+function motifPhrase(code) {
+  switch (String(code || '')) {
+    // ⚠ « sans_cle » ne devrait jamais paraître : la clé est embarquée dans
+    // l'application. Si elle manque, c'est la construction qui est en faute, pas
+    // le poste — et il faut le DIRE plutôt que de laisser un veilleur muet.
+    case 'sans_cle': return TV('Cette version de l’application n’a pas de clé (défaut de construction)');
+    case 'refus': return TV('Le serveur a refusé cette version de l’application');
+    // ⚠ 2026-09-09, avec le portage macOS : le système refuse les notifications.
+    // La veille TOURNE et le son part — c'est l'affichage qui manque. Le dire
+    // évite de chercher une panne de réseau là où il y a un réglage de système
+    // (et, sur macOS, une application non signée).
+    case 'sans_notif': return TV('Le système refuse les notifications (les sons et la liste ci-dessous fonctionnent)');
+    case 'base_injoignable': return TV('Base de données injoignable');
+    case 'delai': return TV('Le serveur n’a pas répondu à temps');
+    case 'reseau': return TV('Réseau indisponible');
+    // ⚠ UN MOTIF INCONNU RESSORT TEL QUEL : mieux vaut un code brut affiché
+    // qu'une ligne d'état vide, qui se lit comme un veilleur muet.
+    default: return String(code || '');
+  }
+}
 
 function ligneEtat() {
   const e = lireEtat();
-  if (!e.actif) return 'En pause';
-  if (dernierEchec) return '⚠ ' + (MOTIFS[dernierEchec] || dernierEchec);
-  return 'À l’écoute des commandes et des retours';
+  if (!e.actif) return TV('En pause');
+  /* ⚠ TRADUIT A L USAGE : la ligne d etat se recompose a chaque `majTray()`,
+     donc elle suit un changement de langue sans redemarrage. */
+  if (dernierEchec) return '⚠ ' + motifPhrase(dernierEchec);
+  return TV('À l’écoute des commandes et des retours');
 }
 
 /* ══ LE SOUS-MENU DES DERNIÈRES NOTIFICATIONS (2026-09-09) ═══════════════════
@@ -559,7 +591,7 @@ function _sousMenuNotifs() {
      de connexion. On dit l ETAT du mecanisme, jamais son contenu.
      ⚠ Desactivee, comme la ligne d etat : c est une phrase, pas une porte. */
   if (_connecteHote && !_connecteHote()) {
-    return [{ label: 'Veille active — connectez-vous pour voir les notifications',
+    return [{ label: TV('Veille active — connectez-vous pour voir les notifications'),
       enabled: false }];
   }
   const liste = (lireEtat().notifs || []).filter((n) => n && n.titre);
@@ -567,16 +599,16 @@ function _sousMenuNotifs() {
     // ⚠ ON MONTRE L'ENTRÉE MÊME VIDE, désactivée. La faire disparaître laisserait
     // « je n'ai rien reçu » et « cette version ne garde pas de liste »
     // indiscernables — deux réponses très différentes à la même question.
-    return [{ label: 'Dernières notifications', enabled: false }];
+    return [{ label: TV('Dernières notifications'), enabled: false }];
   }
   return [{
-    label: 'Dernières notifications (' + liste.length + ')',
+    label: TV('{0} dernières notifications').split('{0}').join(liste.length),
     submenu: liste.map((n) => ({
       label: (_NOTIF_ICO[n.type] || '•') + '  ' + _quandCourt(n.t) + ' — ' + n.titre,
       click: ouvrirAdministration,
     })).concat([
       { type: 'separator' },
-      { label: 'Effacer la liste', click: () => { ecrireEtat({ notifs: [] }); majTray(); } },
+      { label: TV('Effacer la liste'), click: () => { ecrireEtat({ notifs: [] }); majTray(); } },
     ]),
   }];
 }
@@ -584,7 +616,7 @@ function _sousMenuNotifs() {
 function majTray() {
   if (!tray) return;
   const e = lireEtat();
-  try { tray.setToolTip('Veilleur SANDRIZA — ' + ligneEtat()); } catch {}
+  try { tray.setToolTip(TV('Veilleur SANDRIZA — ') + ligneEtat()); } catch {}
   const menu = Menu.buildFromTemplate([
     { label: ligneEtat(), enabled: false },
     { type: 'separator' },
@@ -595,7 +627,7 @@ function majTray() {
     ..._sousMenuNotifs(),
     { type: 'separator' },
     {
-      label: e.actif ? 'Mettre en pause' : 'Reprendre la veille',
+      label: e.actif ? TV('Mettre en pause') : TV('Reprendre la veille'),
       click: () => {
         ecrireEtat({ actif: !e.actif });
         pasErreur = 0; dernierEchec = '';
@@ -603,7 +635,7 @@ function majTray() {
         if (!e.actif) { ordonnancer(); unTour().catch(() => {}); }
       },
     },
-    { label: 'Vérifier maintenant', enabled: e.actif, click: () => {
+    { label: TV('Vérifier maintenant'), enabled: e.actif, click: () => {
       // ⚠ On efface le recul accumulé : demander explicitement une vérification,
       // c'est dire « la situation a changé ». Sans ça, le clic vérifiait bien,
       // mais le tour suivant restait à dix minutes.
@@ -619,10 +651,10 @@ function majTray() {
          La seconde, plus terre à terre : c'est le SEUL moyen de vérifier que le
          son fonctionne sans attendre une vraie commande. Un veilleur muet et un
          veilleur devant qui rien ne s'est passé se ressemblent trop. */
-      label: 'Essayer les deux sons',
+      label: TV('Essayer les deux sons'),
       submenu: [
-        { label: 'Son d’une commande (monte)', click: () => jouer('commande') },
-        { label: 'Son d’un retour (descend)', click: () => jouer('retour') },
+        { label: TV('Son d’une commande (monte)'), click: () => jouer('commande') },
+        { label: TV('Son d’un retour (descend)'), click: () => jouer('retour') },
       ],
     },
     { type: 'separator' },
@@ -630,7 +662,7 @@ function majTray() {
        c'est le geste qu'on vient chercher neuf fois sur dix, et c'est aussi
        celui qui ne marchait pas. Windows met l'entrée par défaut en gras et
        l'associe au double-clic. */
-    { label: 'Ouvrir l’administration', default: true, click: ouvrirAdministration },
+    { label: TV('Ouvrir l’administration'), default: true, click: ouvrirAdministration },
     /* ══ PERSONNEL CONNECTÉ — SUPER-ADMINISTRATEUR SEULEMENT (2026-09-09) ═════
        La dernière partie de sa demande du 2026-09-08 : « le menu de l'icône doit
        encore porter : voir les connectés · déconnecter à distance · envoyer un
@@ -657,7 +689,7 @@ function majTray() {
        (`case 'presence'` dans turso-proxy.php) : une requête forgée ne passe par
        aucun menu. C'est l'autre bout dont il parlait. */
     ...(_presenceHote && _estSuperHote && _estSuperHote()
-      ? [{ label: 'Personnel connecté…', click: () => { try { _presenceHote(); } catch {} } }]
+      ? [{ label: TV('Personnel connecté…'), click: () => { try { _presenceHote(); } catch {} } }]
       : []),
     /* ⚠⚠ LA DÉCONNEXION EST ICI PARCE QU'IL L'A DEMANDÉE (2026-09-08) : « dans le
        menu contextuel de l'icône on devrait pouvoir se déconnecter ». Elle passe
@@ -673,7 +705,7 @@ function majTray() {
        ouvrirait la confirmation `Admin._confirmLogout()` dans une page qui n'a
        pas d'`Admin` — donc rien du tout, en silence. */
     ...((_deconnecterHote && (!_connecteHote || _connecteHote()))
-      ? [{ label: 'Déconnexion…', click: () => { try { _deconnecterHote(); } catch {} } }] : []),
+      ? [{ label: TV('Déconnexion…'), click: () => { try { _deconnecterHote(); } catch {} } }] : []),
     { type: 'separator' },
     /* ⚠⚠ « QUITTER » QUITTE TOUT MAINTENANT, ET LE LIBELLÉ LE DIT. Avant, cette
        entrée faisait `app.exit(0)` sur un processus SÉPARÉ : elle ne tuait que la
@@ -682,7 +714,7 @@ function majTray() {
        pire genre : celui qui fait perdre le travail en cours.
        ⚠ Elle passe par l'hôte, jamais par `app.exit(0)` : main.js doit pouvoir
        refuser (mise à jour en cours) et poser la question des brouillons. */
-    { label: 'Quitter l’application', click: () => { if (_quitterHote) { try { _quitterHote(); } catch {} } } },
+    { label: TV('Quitter l’application'), click: () => { if (_quitterHote) { try { _quitterHote(); } catch {} } } },
   ]);
   tray.setContextMenu(menu);
 }
