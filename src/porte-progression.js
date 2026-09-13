@@ -22,13 +22,29 @@
  * vitesse est un nombre fini et franchement positif — sinon on la tait, ce qui
  * est toujours mieux qu'un chiffre absurde.
  */
-const _moFr = (n) => (n / 1048576).toFixed(1).replace('.', ',');
+/* ⚠⚠ LA LANGUE : sa demande du 2026-09-12, « les écrans de chargement aussi
+   devront être traduits ». C'est le SEUL écran que la coquille dessine pendant
+   qu'une mise à jour s'installe — celui qu'on lit justement parce qu'on ne peut
+   rien faire d'autre. */
+const T = require('./langue').tr('porte');
+const { langueCourante } = require('./langue');
+
+/* ⚠⚠ LE SÉPARATEUR DÉCIMAL NE PASSE PAS PAR LE DICTIONNAIRE, ET J'AI PAYÉ
+   L'ESSAI. `T(fr)` rend la CLÉ telle quelle en français — c'est tout son
+   principe : la page naît en français sans dictionnaire. Une entrée
+   `'__decimale__'` ressortait donc littéralement, et l'écran affichait
+   « 2__decimale__5 Mo ». Le banc l'a dit au premier essai.
+   ➡ Une règle de LOCALE (séparateur, ordre de date, unité) n'est pas une
+   traduction : elle se lit dans la langue COURANTE, pas dans une table de
+   phrases. « 43,0 MB remaining » se lit mal, et « Mo » n'est pas « MB ». */
+const _moFr = (n) => (n / 1048576).toFixed(1)
+  .replace('.', langueCourante() === 'en' ? '.' : ',');
 
 const _dureeFr = (s) => {
   if (!Number.isFinite(s) || s < 0) return '';
-  if (s < 60) return 'environ ' + Math.max(1, Math.round(s)) + ' s';
-  if (s < 3600) return 'environ ' + Math.round(s / 60) + ' min';
-  return 'plus d’une heure';
+  if (s < 60) return T('environ {0} s', Math.max(1, Math.round(s)));
+  if (s < 3600) return T('environ {0} min', Math.round(s / 60));
+  return T('plus d’une heure');
 };
 
 const texteProgression = (p) => {
@@ -37,17 +53,17 @@ const texteProgression = (p) => {
 
   if (p && p.total > 0 && Number.isFinite(p.transferred)) {
     const reste = Math.max(0, p.total - p.transferred);
-    h += '<div class="dl-mo">' + _moFr(reste) + ' Mo restants '
-       + '<span style="opacity:.6">sur ' + _moFr(p.total) + ' Mo</span></div>';
+    h += '<div class="dl-mo">' + T('{0} Mo restants', _moFr(reste)) + ' '
+       + '<span style="opacity:.6">' + T('sur {0} Mo', _moFr(p.total)) + '</span></div>';
 
     const v = p.bytesPerSecond;
     if (Number.isFinite(v) && v > 1024) {
       const t = _dureeFr(reste / v);
-      h += '<div class="dl-vit">' + _moFr(v) + ' Mo/s' + (t ? ' · ' + t : '') + '</div>';
+      h += '<div class="dl-vit">' + T('{0} Mo/s', _moFr(v)) + (t ? ' · ' + t : '') + '</div>';
     }
   }
 
-  h += '<div class="dl-fin">L’application redémarrera à la fin.</div>';
+  h += '<div class="dl-fin">' + T('L’application redémarrera à la fin.') + '</div>';
   return h;
 };
 

@@ -1320,7 +1320,7 @@ const createWindow = () => {
      une animation qui pretend un avancement qu on ignore.
      << Un instant... >> ne disait rien et n avait pas de barre : la charte le
      relevait comme le defaut A5. */
-  mainWindow.loadURL(portePage('Démarrage', 'Préparation de l’application…', 8)).catch(() => {});
+  mainWindow.loadURL(portePage(TP('Démarrage'), TP('Préparation de l’application…'), 8)).catch(() => {});
 
   // Réapplique la préférence de masquage de la barre latérale à chaque chargement,
   // et remet le menu en accord avec l'état de session de la page qui vient de
@@ -1595,10 +1595,13 @@ const majBoutonsFermeture = () => {
 // la protection tuerait précisément ce qu'elle protège.
 let _quitAutorise = false;
 
-const MSG_MAJ_T = 'Mise à jour en cours';
-const MSG_MAJ_D = 'L’application ne peut pas être fermée pendant l’installation d’une '
-  + 'mise à jour : le paquet est en cours d’écriture, et l’interrompre laisserait une '
-  + 'installation incomplète.\n\nElle redémarrera toute seule dès que ce sera terminé.';
+/* ⚠⚠ DES VERBES, PAS DES CONSTANTES. Une constante de module est evaluee UNE
+   FOIS au premier require : un T() ecrit dedans figerait la langue du
+   demarrage, et le reglage marcherait « sauf pour ces deux messages-la ».
+   C est le piege deja paye sur les blocs du socle, le 2026-09-12. */
+const MSG_MAJ_T = () => TP('Mise à jour en cours');
+const MSG_MAJ_D = () => TP('L’application ne peut pas être fermée pendant l’installation d’une mise à jour : le paquet est en cours d’écriture, et l’interrompre laisserait une installation incomplète.')
+  + '\n\n' + TP('Elle redémarrera toute seule dès que ce sera terminé.');
 
 // ⚠ ON NE SE CONTENTE PAS D'IGNORER LE GESTE. Un bouton qui ne fait rien est un
 // défaut qu'on ne peut pas diagnostiquer : on clique plus fort, puis on tue le
@@ -1624,10 +1627,10 @@ const refuserFermeture = () => {
   const t = Date.now();
   if (t - _avisMajLe < 2500) return;
   _avisMajLe = t;
-  if (_porteActive) { montrerPorte(MSG_MAJ_T, MSG_MAJ_D.replace(/\n\n/g, '<br><br>')); return; }
+  if (_porteActive) { montrerPorte(MSG_MAJ_T(), MSG_MAJ_D().replace(/\n\n/g, '<br><br>')); return; }
   try {
     dialog.showMessageBox(mainWindow && !mainWindow.isDestroyed() ? mainWindow : null, {
-      type: 'warning', title: MSG_MAJ_T, message: MSG_MAJ_T, detail: MSG_MAJ_D, buttons: ['Compris'],
+      type: 'warning', title: MSG_MAJ_T(), message: MSG_MAJ_T(), detail: MSG_MAJ_D(), buttons: [TP('Compris')],
     });
   } catch {}
 };
@@ -1665,11 +1668,17 @@ const porteMarque = () => {
     titre:   th.titleColor || '#f5e6d0',
     sous:    th.subtitleColor || 'rgba(236,229,217,0.92)',
     nom:     m.nom || 'SANDRIZA',
-    sousTitre: th.subtitleText || 'Panneau d’administration',
+    sousTitre: th.subtitleText || TP('Panneau d’administration'),
     lettre:  m.lettre || 'S',
     logo:    m.logo || '',
   };
 };
+
+/* ⚠⚠ LES ECRANS DE CHARGEMENT SONT TRADUITS EUX AUSSI (sa demande du
+   2026-09-12 : « les ecrans de chargement aussi devront etre traduits »).
+   Ce sont les SEULS que la coquille dessine avant que le site n existe —
+   ceux qu on lit justement parce qu on ne peut rien faire d autre. */
+const TP = require('./langue').tr('porte');
 
 const portePage = (titre, message, progression) => {
   const b = porteMarque();
@@ -1774,7 +1783,7 @@ const portePage = (titre, message, progression) => {
   const jauge = (progression === undefined) ? '<div class="pulse"></div>' : barre;
 
   const html = ''
-    + '<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>' + b.nom + '</title>'
+    + '<!doctype html><html lang="' + require('./langue').langueCourante() + '"><head><meta charset="utf-8"><title>' + b.nom + '</title>'
     + '<style>' + css + '</style></head><body><div class="split">'
     + '<aside class="brand">'
     +   '<span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>'
@@ -1786,11 +1795,11 @@ const portePage = (titre, message, progression) => {
     +     '<div class="eyebrow"><span class="line"></span><span>' + b.sousTitre + '</span></div>'
     +   '</div></aside>'
     + '<main class="panel"><div class="wrap">'
-    +   '<span class="kicker">Mise à jour</span>'
+    +   '<span class="kicker">' + TP('Mise à jour') + '</span>'
     +   '<div class="h1">' + titre + '</div>'
     +   '<div class="sub">' + message + '</div>'
     +   jauge
-    +   '<div class="ver">Administration ' + b.nom + ' · version ' + app.getVersion() + '</div>'
+    +   '<div class="ver">' + TP('Administration {0} · version {1}', b.nom, app.getVersion()) + '</div>'
     + '</div></main></div></body></html>';
 
   return 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
@@ -4538,7 +4547,7 @@ const ouvrirAdmin = () => {
      ⚠ FILET DE 900 ms : si la porte ne rend jamais, on part quand meme. Sans lui,
      l administration ne s ouvrirait PLUS - et ce fichier dit lui-meme que si la
      porte n appelle pas ceci, l admin ne s ouvre pas. */
-  montrerPorte('Ouverture de l’administration', 'Chargement des écrans…', 92);
+  montrerPorte(TP('Ouverture de l’administration'), TP('Chargement des écrans…'), 92);
   let parti = false;
   const partir = () => {
     if (parti) return;
@@ -4792,7 +4801,7 @@ const getUpdater = () => {
       majBoutonsFermeture();
       _majDernierOctet = Date.now();
       if (!_porteActive) return;
-      montrerPorte('Téléchargement en cours', texteProgression(p), Math.round(p && p.percent ? p.percent : 0));
+      montrerPorte(TP('Téléchargement en cours'), texteProgression(p), Math.round(p && p.percent ? p.percent : 0));
     });
 
     // ⚠ L'EN-TÊTE D'APPLICATION EST INDISPENSABLE ICI.
@@ -4824,9 +4833,9 @@ const getUpdater = () => {
       // sens tout le mécanisme, puisqu'il suffirait de cliquer à côté pour
       // travailler sur une version périmée.)
       if (_porteActive) {
-        montrerPorte('Installation',
-          'La version ' + version + ' est prête.<br>'
-          + '<span style="opacity:.7">L’application redémarre, puis reprend où vous en étiez.</span>',
+        montrerPorte(TP('Installation'),
+          TP('La version {0} est prête.', version) + '<br>'
+          + '<span style="opacity:.7">' + TP('L’application redémarre, puis reprend où vous en étiez.') + '</span>',
           100);
         _porteActive = false;
         // On reste en zone critique : le redémarrage part dans 1,6 s et il ne doit
@@ -4980,7 +4989,7 @@ const PORTE_DELAI_MS = 20000; // au-delà, on considère la vérification imposs
 const verifierAuLancement = async () => {
   _porteActive = true;
   _majDispo = false;
-  montrerPorte('Vérification des mises à jour', 'Quelques secondes, le temps d’interroger le serveur.', 35);
+  montrerPorte(TP('Vérification des mises à jour'), TP('Quelques secondes, le temps d’interroger le serveur.'), 35);
 
   // En développement (npm start), il n'y a ni paquet ni flux : on ouvre.
   if (!app.isPackaged) { ouvrirAdmin(); return; }
@@ -4999,9 +5008,9 @@ const verifierAuLancement = async () => {
     if (tranche || !_porteActive) return;
     tranche = true;
     _updBusy = false;
-    montrerPorte('Vérification impossible',
-      'Le serveur de mise à jour n’a pas répondu.<br>'
-      + '<span style="opacity:.7">Ouverture de l’administration dans un instant.</span>');
+    montrerPorte(TP('Vérification impossible'),
+      TP('Le serveur de mise à jour n’a pas répondu.') + '<br>'
+      + '<span style="opacity:.7">' + TP('Ouverture de l’administration dans un instant.') + '</span>');
     setTimeout(ouvrirAdmin, 1800);
   }, PORTE_DELAI_MS);
 
@@ -5014,14 +5023,14 @@ const verifierAuLancement = async () => {
     if (!_majDispo) { _updBusy = false; ouvrirAdmin(); return; }
 
     if (process.platform === 'darwin') {
-      montrerPorte('Nouvelle version disponible',
-        'Une version plus récente existe. Sur macOS, la mise à jour se fait à la main tant que l’application n’est pas signée.');
+      montrerPorte(TP('Nouvelle version disponible'),
+        TP('Une version plus récente existe. Sur macOS, la mise à jour se fait à la main tant que l’application n’est pas signée.'));
       await dialog.showMessageBox(mainWindow, {
         type: 'info',
-        buttons: ['Continuer'],
-        title: 'Mise à jour disponible',
-        message: 'Une version plus récente d’Administration Sandriza est disponible.',
-        detail: 'Sur macOS, téléchargez-la et réinstallez-la manuellement. L’installation automatique exige une application signée.',
+        buttons: [TP('Continuer')],
+        title: TP('Mise à jour disponible'),
+        message: TP('Une version plus récente d’Administration Sandriza est disponible.'),
+        detail: TP('Sur macOS, téléchargez-la et réinstallez-la manuellement. L’installation automatique exige une application signée.'),
       });
       _updBusy = false;
       ouvrirAdmin();
@@ -5030,8 +5039,8 @@ const verifierAuLancement = async () => {
 
     // Windows : l'écran reste, le téléchargement est déjà parti (autoDownload).
     // `update-downloaded` prendra le relais et redémarrera l'application.
-    montrerPorte('Nouvelle version disponible',
-      '<span style="opacity:.7;white-space:nowrap">L’application redémarrera dès qu’elle sera prête.</span>');
+    montrerPorte(TP('Nouvelle version disponible'),
+      '<span style="opacity:.7;white-space:nowrap">' + TP('L’application redémarrera dès qu’elle sera prête.') + '</span>');
   } catch (err) {
     if (tranche) return;
     tranche = true;
@@ -5040,8 +5049,8 @@ const verifierAuLancement = async () => {
     // Le gestionnaire `error` d'electron-updater a déjà pu proposer Réessayer /
     // Continuer. S'il ne s'est pas déclenché, on ne laisse pas la porte close.
     if (_porteActive) {
-      montrerPorte('Vérification impossible',
-        'Impossible de joindre le serveur de mise à jour. Ouverture de l’administration…');
+      montrerPorte(TP('Vérification impossible'),
+        TP('Impossible de joindre le serveur de mise à jour. Ouverture de l’administration…'));
       setTimeout(ouvrirAdmin, 1800);
     }
   }

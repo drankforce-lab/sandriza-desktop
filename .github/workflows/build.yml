@@ -426,6 +426,18 @@ jobs:
       # trouvait quelque chose à chaque fois. Au premier passage : 34 textes
       # français dans 7 fenêtres déclarées TERMINÉES.
           node tools/banc-langue-residuel.js
+      # ⚠⚠ ET LES ECRANS DE CHARGEMENT, que NI le compteur NI le résiduel ne
+      # voient : ils sont bâtis dans `main.js`, le processus principal, qu'aucun
+      # banc ne peut faire tourner sans lancer toute l'application. C'était le
+      # seul endroit de la coquille où une phrase pouvait rester française sans
+      # que rien ne le dise — et ce sont les pires à laisser ainsi : ils
+      # paraissent au démarrage, pendant le téléchargement et pendant
+      # l'INSTALLATION, quand on ne peut rien faire d'autre que les lire.
+      # ⚠ Il vérifie dans les DEUX sens (texte sans traduction, entrée qui dort)
+      # et compare les `{0}` : un chiffre présent en français et absent en
+      # anglais donnerait une phrase à trou. Il a trouvé un oubli dès sa
+      # première exécution.
+          node tools/banc-langue-porte.js
           node tools/banc-veilleur.js
           node tools/banc-porte-progression.js
           # ⚠ CELUI-CI GARDE UNE CHAÎNE DE QUATRE MORCEAUX que rien d'autre ne
