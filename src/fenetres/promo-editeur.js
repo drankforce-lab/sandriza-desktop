@@ -69,7 +69,7 @@
  * ce n'est plus un problème d'échappement, c'est du français fautif à l'écran.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -289,7 +289,7 @@ function pagePromoEditeur(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var ID = '${cible}';
   var M = null;          // le modele, tel qu il voyage
   var SEL = '';          // id de l element choisi ; vide = le MODELE lui-meme
@@ -358,7 +358,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      borne a l enregistrement, pas a l affichage, pour ne pas deplacer sous les
      doigts un element qu on est en train de tirer. */
   function borner(v, min, max){ return Math.max(min, Math.min(max, v)); }
-  function salir(){ SALE = true; bEnr.disabled = false; }
+  /* ⚠ UN SEUL POINT D ENTREE POUR << QUELQUE CHOSE A CHANGE >>, et c est ce qui
+     rend le brouillon sur : tout geste de l editeur passe par ici, donc aucun ne
+     peut etre oublie. szBrouillonPoser differe l ecriture — on ne renvoie pas
+     le modele au pont a chaque pixel d un glisser. */
+  function salir(){ SALE = true; bEnr.disabled = false; szBrouillonPoser(); }
 
   /* ══ L HISTORIQUE ════════════════════════════════════════════════════════
      ⚠ ON GARDE DES CHAINES, PAS DES OBJETS. Un instantane qui partagerait ses
@@ -831,8 +835,56 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       /* Une premiere repeinture pose les reperes : l image rendue par modeleLire
          n en porte aucun, et la zone sure est allumee par defaut. */
       repeindreBientot();
+      /* ⚠⚠ LA REPRISE, APRES QUE LE MODELE SOIT LA. Proposer avant, ce serait
+         offrir de reprendre un travail puis l ecraser par la lecture du site. */
+      szBrouillonProposer().then(function(repris){
+        if (repris) { dessiner(); repeindreBientot(); }
+      });
     });
   }
+
+  /* ══ LE BROUILLON — CE QUI MANQUAIT POUR QU ON OSE ESSAYER ════════════════
+   * ⚠⚠⚠ CETTE FENETRE N EN AVAIT AUCUN, SEULE DES DIX-NEUF. Dix-huit fenetres
+   * gardent la saisie en cours ; celle-ci, ou l on DESSINE — on place, on
+   * redimensionne, on choisit des polices et des teintes pendant de longues
+   * minutes — perdait tout a la fermeture. C est ce qui rendait la tache #84
+   * intestable : on n investit pas une heure de mise en page dans une fenetre
+   * qui peut la jeter.
+   *
+   * ⚠⚠ ET LE RISQUE VENAIT D AUGMENTER LE 2026-09-13 : depuis que changer de
+   * langue REFABRIQUE les fenetres ouvertes, cette fenetre-ci se rechargeait
+   * sans que rien ne soit ecrit — szBrouillonMaintenant n existait pas, la
+   * promesse echouait, et on rechargeait quand meme. Une commodite ajoutee
+   * d un cote devient une perte de travail de l autre quand une fenetre
+   * manque a l appel.
+   *
+   * ⚠ M EST LE BROUILLON, tel quel : c est le modele que l on ecrit. Pas de
+   * relevé du DOM ici (szBrouillonDuDom) — l etat de cette fenetre n est pas
+   * dans ses champs, il est dans l objet.
+   * ⚠ rempli EST SALE, et rien d autre : un modele ouvert sans un seul
+   * geste n est pas un travail en cours, et proposer de le << reprendre >>
+   * apprendrait a repondre non sans lire. */
+  szBrouillonBrancher({
+    portee: 'promo-modele',
+    libelle: '${T("Une mise en page")}',
+    ttlMin: 720,
+    cle: function(){ return ID || '__new__'; },
+    actif: function(){ return !!M; },
+    rempli: function(){ return !!SALE; },
+    valeurs: function(){ return M; },
+    remplir: function(v){
+      if (!v) return;
+      M = v;
+      SEL = '';
+      SALE = true;
+      if (bEnr) bEnr.disabled = false;
+      /* ⚠ L HISTORIQUE NE SE REPREND PAS. Un Ctrl+Z apres une reprise doit
+         ramener a la mise en page REPRISE, pas a un etat d une session
+         precedente que personne ne reconnaitrait. */
+      HIST = []; REFAIRE = []; boutonsHist();
+    },
+  });
+  szBrouillonEcouter();
 
   /* ══ ENREGISTREMENT ══════════════════════════════════════════════════════
      ⚠ ON RELIT APRES AVOIR ECRIT, et ce n est pas de la prudence de principe :
@@ -853,6 +905,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('promo:modeleEcrire', [ID, M]).then(function(r){
       if (!r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
       SALE = false;
+      /* ⚠ LE BROUILLON PART AVEC L ENREGISTREMENT : le garder proposerait de
+         << reprendre >> un travail qui est deja dans la fiche, et on finirait
+         par ecraser une version plus recente avec une plus ancienne. */
+      szBrouillonJeter();
       dire('${T("Enregistré —")} ' + r.elements + ' ${T("élément(s).")}', 'bon');
       var garde = SEL;
       charger();

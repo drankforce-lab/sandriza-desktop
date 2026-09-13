@@ -31,6 +31,11 @@ module.exports = {
   /* ── L EN-TETE ET LES GESTES ────────────────────────────────────────────── */
   'Éditeur visuel — Administration Sandriza': 'Visual editor — Sandriza Administration',
   'Éditeur visuel': 'Visual editor',
+  /* ⚠ LE LIBELLÉ DE LA BOÎTE DE REPRISE. Chaque fenêtre écrit le sien :
+     « une saisie » ne dirait rien de ce qu on retrouve dans celle-ci, où ce
+     qui se perd est une MISE EN PAGE — des positions, des tailles, des
+     polices — et pas des champs remplis. */
+  'Une mise en page': 'A layout',
   '↶ Annuler': '↶ Undo',
   '↷ Refaire': '↷ Redo',
   '↻ Recharger': '↻ Reload',

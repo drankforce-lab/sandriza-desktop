@@ -7195,6 +7195,28 @@ const CAS_REPRISE = [
     },
   },
   {
+    /* ⚠⚠ L ÉDITEUR VISUEL — AJOUTÉ LE 2026-09-13, ET IL N AVAIT AUCUN
+       BROUILLON, seul des dix-neuf. C est la fenêtre où l on DESSINE : on
+       place, on redimensionne, on choisit des polices pendant de longues
+       minutes — et tout partait à la fermeture. C est ce qui rendait la tâche
+       #84 intestable : on n investit pas une heure de mise en page dans une
+       fenêtre qui peut la jeter.
+       ⚠ SON BROUILLON N EST PAS UN RELEVÉ DE CHAMPS : l état de cette fenêtre
+       est le MODÈLE lui-même. Le brouillon est donc l objet, pas une liste de
+       `f-…`. C est le premier de cette table dans ce cas, et c est pour ça que
+       le contenu ci-dessous ressemble à une fiche plutôt qu à un formulaire. */
+    fichier: 'promo-editeur.js', depuis: 'modèle garni, aperçu peint',
+    quoi: 'Une mise en page',
+    brouillon: {
+      id: 'pp1', name: 'Étiquette prix — collection été', type: 'label',
+      w: 2, h: 1, shape: 'rect', corner: 0.08, safe: 0.06,
+      elements: [
+        { id: 'e1', kind: 'text', name: 'Titre', text: 'SANDRIZA',
+          xPct: 12, yPct: 14, wPct: 76, hPct: 28 },
+      ],
+    },
+  },
+  {
     fichier: 'retour.js', depuis: 'photo manquante', quoi: 'Une modification de cette demande',
     /* BR_CHAMPS de retour.js, plus `r-generer` déclaré à part. */
     brouillon: {
