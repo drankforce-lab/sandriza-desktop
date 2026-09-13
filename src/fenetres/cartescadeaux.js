@@ -22,6 +22,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('cartescadeaux');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -103,11 +107,11 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
 /** Page complète de la fenêtre native « Cartes-cadeaux ». */
 function pageCartesCadeaux() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Cartes-cadeaux — Administration Sandriza</title>
+<title>${T("Cartes-cadeaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.giftcards}</span><h1>Cartes-cadeaux</h1>
+<div class="tete"><span class="ico">${ICO.giftcards}</span><h1>${T("Cartes-cadeaux")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Chargement… (les cartes se resynchronisent)</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Chargement… (les cartes se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -136,20 +140,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux cartes-cadeaux.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette carte n’existe plus.',
-    montant:            'Le montant doit être d’au moins 1 $.',
-    destinataire:       'Le nom et un courriel valide du destinataire sont requis.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux cartes-cadeaux.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette carte n’existe plus.")}',
+    montant:            '${T("Le montant doit être d’au moins 1 $.")}',
+    destinataire:       '${T("Le nom et un courriel valide du destinataire sont requis.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -180,49 +184,49 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function boiteCreer(){
     return '<div class="voile" id="cc-voile"><div class="boite">'
-      + '<h3>Créer une carte-cadeau</h3>'
+      + '<h3>${T("Créer une carte-cadeau")}</h3>'
       + '<div class="grille">'
-      + '<div class="ch"><label>Montant <span class="req">*</span></label>'
+      + '<div class="ch"><label>${T("Montant")} <span class="req">*</span></label>'
       /* ⚠ L etiquette porte un <span class="req">*</span> : elle N EST PAS un
          texte pur, et aucune lecture par motif ne pouvait la reprendre. Le nom
          est ecrit ici, sans l asterisque — << obligatoire >> se dit au champ par
          l attribut required, pas dans son nom. */
-      + '<input type="number" id="cc-montant" aria-label="Montant" min="1" max="5000" step="0.01" placeholder="50.00"></div>'
-      + '<div class="ch"><label for="cc-statut">Statut</label><select id="cc-statut">'
-      + '<option value="active">Active (prête à utiliser)</option>'
-      + '<option value="pending">En attente d’activation</option></select></div>'
-      + '<div class="ch"><label>Nom du destinataire <span class="req">*</span></label>'
-      + '<input id="cc-dest" aria-label="Nom du destinataire" placeholder="Marie"></div>'
-      + '<div class="ch"><label>Courriel du destinataire <span class="req">*</span></label>'
-      + '<input type="email" id="cc-mail" aria-label="Courriel du destinataire" placeholder="marie@exemple.com"></div>'
-      + '<div class="ch"><label for="cc-exp">Expéditeur</label><input id="cc-exp" placeholder="la boutique"></div>'
-      + '<div class="ch"><label for="cc-note">Note interne</label><input id="cc-note" placeholder="Cadeau, correction…"></div>'
+      + '<input type="number" id="cc-montant" aria-label="${T("Montant")}" min="1" max="5000" step="0.01" placeholder="50.00"></div>'
+      + '<div class="ch"><label for="cc-statut">${T("Statut")}</label><select id="cc-statut">'
+      + '<option value="active">${T("Active (prête à utiliser)")}</option>'
+      + '<option value="pending">${T("En attente d’activation")}</option></select></div>'
+      + '<div class="ch"><label>${T("Nom du destinataire")} <span class="req">*</span></label>'
+      + '<input id="cc-dest" aria-label="${T("Nom du destinataire")}" placeholder="${T("Marie")}"></div>'
+      + '<div class="ch"><label>${T("Courriel du destinataire")} <span class="req">*</span></label>'
+      + '<input type="email" id="cc-mail" aria-label="${T("Courriel du destinataire")}" placeholder="${T("marie@exemple.com")}"></div>'
+      + '<div class="ch"><label for="cc-exp">${T("Expéditeur")}</label><input id="cc-exp" placeholder="${T("la boutique")}"></div>'
+      + '<div class="ch"><label for="cc-note">${T("Note interne")}</label><input id="cc-note" placeholder="${T("Cadeau, correction…")}"></div>'
       + '</div>'
-      + '<div class="pied-boite"><button class="mini" id="cc-annuler">Annuler</button>'
-      + '<button class="mini prim" id="cc-creer">Créer la carte</button></div>'
+      + '<div class="pied-boite"><button class="mini" id="cc-annuler">${T("Annuler")}</button>'
+      + '<button class="mini prim" id="cc-creer">${T("Créer la carte")}</button></div>'
       + '</div></div>';
   }
 
   function boiteRecompense(){
     var c = D.recompense || {};
     return '<div class="voile" id="cc-voile"><div class="boite">'
-      + '<h3>Récompense à l’achat d’une carte</h3>'
+      + '<h3>${T("Récompense à l’achat d’une carte")}</h3>'
       + '<div style="font-size:.8rem;color:var(--tx2);margin-bottom:.6rem">'
-      + 'Un code promotionnel est remis à qui achète une carte-cadeau.</div>'
+      + '${T("Un code promotionnel est remis à qui achète une carte-cadeau.")}</div>'
       + '<div class="grille">'
-      + '<div class="ch"><label for="cc-r-on">Activer</label><select id="cc-r-on">'
-      + '<option value="1"' + (c.enabled ? ' selected' : '') + '>Oui</option>'
-      + '<option value="0"' + (!c.enabled ? ' selected' : '') + '>Non</option></select></div>'
-      + '<div class="ch"><label for="cc-r-type">Type</label><select id="cc-r-type">'
-      + '<option value="percent"' + ((c.type || 'percent') === 'percent' ? ' selected' : '') + '>Pourcentage (%)</option>'
-      + '<option value="fixed"' + (c.type === 'fixed' ? ' selected' : '') + '>Montant fixe ($)</option></select></div>'
-      + '<div class="ch"><label for="cc-r-val">Valeur</label>'
+      + '<div class="ch"><label for="cc-r-on">${T("Activer")}</label><select id="cc-r-on">'
+      + '<option value="1"' + (c.enabled ? ' selected' : '') + '>${T("Oui")}</option>'
+      + '<option value="0"' + (!c.enabled ? ' selected' : '') + '>${T("Non")}</option></select></div>'
+      + '<div class="ch"><label for="cc-r-type">${T("Type")}</label><select id="cc-r-type">'
+      + '<option value="percent"' + ((c.type || 'percent') === 'percent' ? ' selected' : '') + '>${T("Pourcentage (%)")}</option>'
+      + '<option value="fixed"' + (c.type === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option></select></div>'
+      + '<div class="ch"><label for="cc-r-val">${T("Valeur")}</label>'
       + '<input type="number" id="cc-r-val" min="1" value="' + esc(c.value || 10) + '"></div>'
-      + '<div class="ch"><label for="cc-r-exp">Validité du code (jours)</label>'
+      + '<div class="ch"><label for="cc-r-exp">${T("Validité du code (jours)")}</label>'
       + '<input type="number" id="cc-r-exp" min="1" value="' + esc(c.expiryDays || 30) + '"></div>'
       + '</div>'
-      + '<div class="pied-boite"><button class="mini" id="cc-annuler">Annuler</button>'
-      + '<button class="mini prim" id="cc-r-enr">Enregistrer</button></div>'
+      + '<div class="pied-boite"><button class="mini" id="cc-annuler">${T("Annuler")}</button>'
+      + '<button class="mini prim" id="cc-r-enr">${T("Enregistrer")}</button></div>'
       + '</div></div>';
   }
 
@@ -232,36 +236,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var h = '<div class="voile" id="cc-voile"><div class="boite">'
       + '<h3><span class="code">' + esc(g.code) + '</span>'
       + '<span class="pill ' + (TONS[g.statut] || 'neutre') + '">'
-      + esc({ active: 'Active', used: 'Utilisée', expired: 'Expirée', pending: 'Activation requise' }[g.statut] || g.statut)
+      + esc({ active: '${T("Active")}', used: '${T("Utilisée")}', expired: '${T("Expirée")}', pending: '${T("Activation requise")}' }[g.statut] || g.statut)
       + '</span></h3>'
       + '<div class="grille" style="margin-bottom:.6rem">'
-      + '<div class="ch"><label>Destinataire</label><div>' + esc(g.destinataire || '—')
+      + '<div class="ch"><label>${T("Destinataire")}</label><div>' + esc(g.destinataire || '—')
       + '<div class="dt">' + esc(g.courriel || '') + '</div></div></div>'
-      + '<div class="ch"><label>Expéditeur</label><div>' + esc(g.expediteur || '—') + '</div></div>'
-      + '<div class="ch"><label>Valeur initiale</label><div>' + fmt(g.initial) + '</div></div>'
-      + '<div class="ch"><label>Solde restant</label>'
+      + '<div class="ch"><label>${T("Expéditeur")}</label><div>' + esc(g.expediteur || '—') + '</div></div>'
+      + '<div class="ch"><label>${T("Valeur initiale")}</label><div>' + fmt(g.initial) + '</div></div>'
+      + '<div class="ch"><label>${T("Solde restant")}</label>'
       + '<div style="font-weight:800;color:' + (g.solde > 0 ? 'var(--tx-ok)' : 'var(--tx2)') + '">'
       + fmt(g.solde) + '</div></div>'
-      + '<div class="ch"><label>Émise le</label><div>' + esc(g.date) + '</div></div>'
+      + '<div class="ch"><label>${T("Émise le")}</label><div>' + esc(g.date) + '</div></div>'
       + '</div>';
     if (g.message) {
-      h += '<div class="ch"><label>Message</label><div style="font-style:italic;color:var(--tx2)">'
+      h += '<div class="ch"><label>${T("Message")}</label><div style="font-style:italic;color:var(--tx2)">'
         + esc(g.message) + '</div></div>';
     }
     if (g.note) {
-      h += '<div class="ch" style="margin-top:.4rem"><label>Note interne</label><div>' + esc(g.note) + '</div></div>';
+      h += '<div class="ch" style="margin-top:.4rem"><label>${T("Note interne")}</label><div>' + esc(g.note) + '</div></div>';
     }
     if (g.statut === 'pending') {
-      h += '<div class="avis">En attente d’activation — un courriel est parti'
-        + (g.courrielExpediteur ? ' à ' + esc(g.courrielExpediteur) : '')
-        + '. Si l’acheteur ne l’a jamais reçu, activez la carte à la main ci-dessous.</div>';
+      h += '<div class="avis">${T("En attente d’activation — un courriel est parti")}'
+        + (g.courrielExpediteur ? '${T(" à ")}' + esc(g.courrielExpediteur) : '')
+        + '${T(". Si l’acheteur ne l’a jamais reçu, activez la carte à la main ci-dessous.")}</div>';
     }
-    h += '<h3 style="margin-top:.9rem;font-size:.9rem">Historique d’utilisation</h3>';
+    h += '<h3 style="margin-top:.9rem;font-size:.9rem">${T("Historique d’utilisation")}</h3>';
     if (!g.transactions.length) {
-      h += '<div class="vide" style="padding:.7rem">Carte jamais utilisée.</div>';
+      h += '<div class="vide" style="padding:.7rem">${T("Carte jamais utilisée.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Date</th><th>Commande</th>'
-        + '<th class="num">Montant</th><th class="num">Solde après</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Commande")}</th>'
+        + '<th class="num">${T("Montant")}</th><th class="num">${T("Solde après")}</th></tr></thead><tbody>'
         + g.transactions.map(function(x){
             return '<tr><td>' + esc(x.date) + '</td><td>' + esc(x.commande || '—') + '</td>'
               + '<td class="num" style="color:var(--tx-err)">−' + fmt(x.montant) + '</td>'
@@ -271,49 +275,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     h += '<div class="pied-boite">'
       + (g.statut === 'pending' && D.peutModifier
-          ? '<button class="mini prim" id="cc-activer">Activer à la main</button>' : '')
+          ? '<button class="mini prim" id="cc-activer">${T("Activer à la main")}</button>' : '')
       + '<button class="mini" id="cc-annuler">Fermer</button></div>'
       + '</div></div>';
     return h;
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
     var t = D.tuiles;
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">Cartes actives</div><div class="val">' + t.actives
-      + '</div><div class="sub">' + t.total + ' au total</div></div>'
-      + '<div class="tuile"><div class="lbl">Solde en circulation</div><div class="val bon">'
-      + fmt(t.enCirculation) + '</div><div class="sub">sur ' + fmt(t.emis) + ' émis</div></div>'
-      + '<div class="tuile"><div class="lbl">Entièrement utilisées</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Cartes actives")}</div><div class="val">' + t.actives
+      + '</div><div class="sub">' + t.total + '${T(" au total")}</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Solde en circulation")}</div><div class="val bon">'
+      + fmt(t.enCirculation) + '</div><div class="sub">${T("sur ")}' + fmt(t.emis) + '${T(" émis")}</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Entièrement utilisées")}</div><div class="val">'
       + t.utilisees + '</div></div>'
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input aria-label="Code, destinataire, courriel" type="search" id="cc-q" placeholder="Code, destinataire, courriel…" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Code, destinataire, courriel")}" type="search" id="cc-q" placeholder="${T("Code, destinataire, courriel…")}" value="' + esc(Q) + '">'
       + '<select id="cc-f-statut">'
-      + '<option value="">Tous les statuts</option>'
-      + '<option value="active"' + (STATUT === 'active' ? ' selected' : '') + '>Actives</option>'
-      + '<option value="pending"' + (STATUT === 'pending' ? ' selected' : '') + '>Activation requise</option>'
-      + '<option value="used"' + (STATUT === 'used' ? ' selected' : '') + '>Utilisées</option>'
-      + '<option value="expired"' + (STATUT === 'expired' ? ' selected' : '') + '>Expirées</option>'
+      + '<option value="">${T("Tous les statuts")}</option>'
+      + '<option value="active"' + (STATUT === 'active' ? ' selected' : '') + '>${T("Actives")}</option>'
+      + '<option value="pending"' + (STATUT === 'pending' ? ' selected' : '') + '>${T("Activation requise")}</option>'
+      + '<option value="used"' + (STATUT === 'used' ? ' selected' : '') + '>${T("Utilisées")}</option>'
+      + '<option value="expired"' + (STATUT === 'expired' ? ' selected' : '') + '>${T("Expirées")}</option>'
       + '</select>'
       + '<div class="droite">'
-      + '<button class="mini" id="cc-recompense">Récompense à l’achat</button>'
-      + (D.peutModifier ? '<button class="mini prim" id="cc-nouvelle">+ Créer une carte</button>' : '')
-      + '<span>' + rows.length + ' carte' + (rows.length > 1 ? 's' : '') + '</span>'
+      + '<button class="mini" id="cc-recompense">${T("Récompense à l’achat")}</button>'
+      + (D.peutModifier ? '<button class="mini prim" id="cc-nouvelle">${T("+ Créer une carte")}</button>' : '')
+      /* ⚠ Le singulier et le pluriel, chacun entier. */
+      + '<span>' + rows.length + (rows.length > 1 ? '${T(" cartes")}' : '${T(" carte")}') + '</span>'
       + '</div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q || STATUT ? 'Rien ne correspond.' : 'Aucune carte-cadeau.') + '</div>';
+      h += '<div class="vide">' + (Q || STATUT ? '${T("Rien ne correspond.")}' : '${T("Aucune carte-cadeau.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>Code</th><th>Destinataire</th><th class="num">Valeur</th>'
-        + '<th class="num">Solde</th><th>Acheteur</th><th>Date</th><th>Statut</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Code")}</th><th>${T("Destinataire")}</th><th class="num">${T("Valeur")}</th>'
+        + '<th class="num">${T("Solde")}</th><th>${T("Acheteur")}</th><th>${T("Date")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(g){
-            return '<tr data-id="' + esc(g.id) + '" title="Voir le détail">'
+            return '<tr data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'
               + '<td><span class="code">' + esc(g.code) + '</span></td>'
               + '<td>' + esc(g.destinataire || '—') + '<div class="dt">' + esc(g.courriel || '') + '</div></td>'
               + '<td class="num">' + fmt(g.initial) + '</td>'
@@ -322,7 +327,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + '<td>' + esc(g.expediteur || '—') + '</td>'
               + '<td class="dt">' + esc(g.date) + '</td>'
               + '<td><span class="pill ' + (TONS[g.statut] || 'neutre') + '">' + esc(g.statutLibelle) + '</span>'
-              + (g.courrielEnvoye ? ' <span class="pill neutre">courriel ✓</span>' : '') + '</td></tr>';
+              + (g.courrielEnvoye ? ' <span class="pill neutre">${T("courriel ✓")}</span>' : '') + '</td></tr>';
           }).join('')
         + '</tbody></table>';
     }
@@ -365,7 +370,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         szBrouillonJeter();
         BOITE = null;
-        dire('Carte créée — code ' + r.code + '.', 'bon');
+        dire('${T("Carte créée — code ")}' + r.code + '.', 'bon');
         charger();
       });
     };
@@ -382,7 +387,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         bre.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         BOITE = null;
-        dire('Récompense enregistrée.', 'bon');
+        dire('${T("Récompense enregistrée.")}', 'bon');
         charger();
       });
     };
@@ -394,7 +399,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         bac.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         BOITE = null;
-        dire('Carte ' + (r.code || '') + ' activée.', 'bon');
+        dire('${T("Carte ")}' + (r.code || '') + '${T(" activée.")}', 'bon');
         charger();
       });
     };
@@ -412,7 +417,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var BR_CHAMPS = ['cc-montant', 'cc-statut', 'cc-dest', 'cc-mail', 'cc-exp', 'cc-note'];
   szBrouillonBrancher({
     portee: 'cartecadeau',
-    libelle: 'Une carte-cadeau',
+    libelle: '${T("Une carte-cadeau")}',
     ttlMin: 720,
     cle: function(){ return '__new__'; },
     actif: function(){ return BOITE === 'creer'; },
@@ -461,7 +466,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function charger(){
     appeler('cartescadeaux:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Cartes-cadeaux indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Cartes-cadeaux indisponibles")}', expliquer(r)); return; }
       D = r;
       if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
       dessiner();
@@ -491,12 +496,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
