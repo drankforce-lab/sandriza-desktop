@@ -17,7 +17,7 @@
  * est-ce que quelqu'un d'autre tient cette fiche.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO, TETE } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -26,7 +26,7 @@ const T = require('../langue').tr('fournisseur');
 /** Page complète de l'assistant. `id` vide = création. */
 function pageFournisseur(id) {
   const ident = JSON.stringify(String(id || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Fournisseur — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.suppliers}</span><h1 id="titre">${T("Fournisseur")}</h1>

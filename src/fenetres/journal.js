@@ -16,7 +16,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un destinataire, une
@@ -82,7 +82,7 @@ tbody tr:hover td{background:var(--v04)}
 
 /** Page complète de la fenêtre native « Journal d'envoi ». */
 function pageJournal() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Journal d’envoi — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.journaux}</span><h1>${T("Journal d’envoi")}</h1>

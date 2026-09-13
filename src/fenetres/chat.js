@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais l echange, le nom de la
@@ -117,7 +117,7 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 
 /** Page complète de la fenêtre native « Chat en ligne ». */
 function pageChat() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Chat en ligne — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.chat}</span><h1>${T("Chat en ligne")}</h1>

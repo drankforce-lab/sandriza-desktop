@@ -19,7 +19,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un jeton, ni le nom et
@@ -75,7 +75,7 @@ input.t:focus{outline:none;border-color:#c9a97e}
 `;
 
 function pageSociauxConfig() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Configuration des réseaux sociaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.social}</span><h1>${T("Configuration des réseaux sociaux")}</h1></div>

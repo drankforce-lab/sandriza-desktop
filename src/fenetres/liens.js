@@ -33,7 +33,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠⚠ Deux choses ne s'adoucissent pas ici : « Il ne sera plus jamais
    affiché » (la base ne garde que l'empreinte du mot de passe) et l'AVIS DE LA
@@ -120,7 +120,7 @@ tbody tr:hover td{background:var(--v03)}
  */
 function pageLiens(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Liens d’installation — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.lien}</span><h1>${T("Liens d’installation")}</h1>
@@ -201,13 +201,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!iso) return '—';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return esc(iso);
-    return d.toLocaleString('fr-CA', { dateStyle: 'medium', timeStyle: 'short' });
+    return d.toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' });
   }
   function jour(iso){
     if (!iso) return '—';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return esc(iso);
-    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
   }
   function nomCompte(id){
     if (!id) return '';

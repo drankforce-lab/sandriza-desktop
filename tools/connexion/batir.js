@@ -1690,6 +1690,13 @@ p("    } else { fini(); }");
 p("  }");
 p("");
 p("  function chargerSuite(){");
+p("    /* ⚠⚠ LA PAGE DECLARE SA LANGUE DES LE PREMIER DESSIN. Le changement de");
+p("       langue le faisait deja (basculerLangue), mais pas l OUVERTURE : un poste");
+p("       regle en anglais ouvrait donc un ecran anglais annonce << fr >> aux");
+p("       lecteurs d ecran, et le restait tant que personne ne cliquait FR/EN.");
+p("       ⚠ C est ici et pas dans << charger >>, pour couvrir AUSSI le cas ou le");
+p("       reglage ne repond pas — on reste en francais, et on le declare. */");
+p("    try { document.documentElement.lang = LANGUE; } catch (e) {}");
 p("    appeler('connexion:contexte').then(function(r){");
 p("      CTX = (r && r.ok && r.theme && r.marque) ? r : REPLI;");
 p("      if (CTX === REPLI) szDire(T('Décor par défaut — la fenêtre principale n’a pas répondu.'), 'att');");
@@ -1740,7 +1747,18 @@ p("}");
 p("");
 p("module.exports = { pageConnexion };");
 
-function JS_DIRE_PLACEHOLDER() { return '${JS_DIRE}'; }
+/* ⚠⚠⚠ LES PARENTHESES SONT LE TOUT DE CETTE LIGNE, ET LE GENERATEUR LES AVAIT
+   PERDUES. `JS_DIRE` est une FONCTION (elle l est devenue quand le socle a dû
+   cesser de figer la langue du premier `require`). Sans les parentheses, le
+   gabarit interpole le TEXTE DE LA FONCTION au lieu de son resultat : `szDire`
+   n est jamais defini, et l ecran de connexion meurt a la premiere phrase de
+   repli — « szDire is not defined ».
+   ⚠ Le fichier engendre avait ete corrige A LA MAIN ; le generateur, lui, est
+   reste faux. La faute ne se voyait donc QUE le jour où quelqu un relançait
+   `node tools/connexion/batir.js` — c est-à-dire exactement quand on croit ne
+   rien risquer. Trouvee le 2026-09-13 par `verifier-fenetres`, qui EXECUTE la
+   page au lieu de la lire. */
+function JS_DIRE_PLACEHOLDER() { return '${JS_DIRE()}'; }
 
 /* ⚠⚠ LE GARDE QUI M A MANQUE SEPT FOIS, ET IL COMPTE AU LIEU DE FAIRE
    CONFIANCE. Un accent grave dans la portion de script referme le gabarit, et

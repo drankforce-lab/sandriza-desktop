@@ -31,7 +31,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU, et à rien d'autre.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE, LIEU } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -247,7 +247,7 @@ const CSS_PROPRE = `
 /** Page complète de l'assistant. `id` vide = création. */
 function pageProduit(id) {
   const ident = JSON.stringify(String(id || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Produit — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.products}</span><h1 id="titre">${T("Produit")}</h1>
@@ -1906,11 +1906,11 @@ function pageProduit(id) {
     return 'il y a ' + h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');
   }
   function dateLongue(ts){
-    try { return new Date(ts).toLocaleString('fr-CA', { dateStyle: 'long', timeStyle: 'short' }); }
+    try { return new Date(ts).toLocaleString('${LIEU()}', { dateStyle: 'long', timeStyle: 'short' }); }
     catch (e) { return String(ts); }
   }
   function dateCourte(ts){
-    try { return new Date(ts).toLocaleString('fr-CA', { dateStyle: 'medium', timeStyle: 'short' }); }
+    try { return new Date(ts).toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' }); }
     catch (e) { return String(ts); }
   }
 

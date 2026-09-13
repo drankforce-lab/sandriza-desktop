@@ -37,7 +37,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -533,7 +533,7 @@ function pageStudio(mode) {
   const filTemoin = String(mode || '') === 'filigrane';
   // Les recettes : la barre se voit toujours, le voile d enregistrement non.
   const rcTemoin = String(mode || '') === 'recettes';
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Studio virtuel — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>${T("Studio virtuel")}</h1>
@@ -2853,7 +2853,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            « 0,00 $ » pour cinq cents photos ferait croire à la gratuité. */
         var sous = function(v){
           var n = Number(v || 0);
-          return (n > 0 && n < 0.01 ? n.toFixed(3) : n.toFixed(2)).replace('.', ',');
+          return (n > 0 && n < 0.01 ? n.toFixed(3) : n.toFixed(2)).replace('.', '${SEP_DEC()}');
         };
         var majEstimation = function(){
           var z = document.getElementById('lot-estim');
@@ -3258,7 +3258,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
      ⚠ UNE ESTIMATION QUI ECHOUE NE BLOQUE PAS. On n interdit pas un rendu parce
      qu on n a pas su le chiffrer : on passe, et le pied de page le dit. */
-  function argent(n){ return (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', ','); }
+  function argent(n){ return (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', '${SEP_DEC()}'); }
 
   // Ce qui cause les appels supplementaires, dit dans les mots de l ecran.
   function causesAppels(){

@@ -29,7 +29,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ On ne traduit QUE ce qui se lit — le nom d'une conciliation, les
    descriptions des lignes du relevé et les notes sont saisis par la
@@ -128,7 +128,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
  */
 function pageBanque(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Conciliation bancaire — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.bankrec}</span><h1>${T("Conciliation bancaire")}</h1>
@@ -189,16 +189,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var ONGLETS = [['releve', '${T("Relevé bancaire")}'], ['depots', '${T("Dépôts et sorties")}'],
                  ['appariement', '${T("Appariement")}'], ['resume', '${T("Résumé")}']];
 
+  /* ⚠⚠ LES DEUX SEPARATEURS D UN MONTANT CHANGENT AVEC LE LIEU, pas seulement
+     la virgule decimale : le francais groupe par ESPACE (1 234,56) et l anglais
+     par VIRGULE (1,234.56). Les poser a la main demandait donc DEUX regles, et
+     la seconde manquait. toLocaleString les tient toutes les deux. */
   function sou(n){
     var v = parseFloat(n) || 0;
-    var a = Math.abs(v).toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ' ').replace('.', ',');
+    var a = Math.abs(v).toLocaleString('${LIEU()}',
+      { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return (v < 0 ? '− ' : '') + a + ' $';
   }
   function jour(s){
     if (!s) return '—';
     var d = new Date(s);
     if (isNaN(d.getTime())) return esc(s);
-    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -706,7 +711,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function creer(){
     // ⚠ Aucun prompt() : l ancien ecran en posait un, et une boite du systeme
     // bloque le processus. Le nom se corrige de toute facon en deux clics.
-    var nom = 'Conciliation ' + new Date().toLocaleDateString('fr-CA');
+    /* ⚠ Le nom PAR DEFAUT d une conciliation : c est une DONNEE, enregistree et
+       relue. Il suit quand meme le poste, parce qu il ne sort pas de la
+       comptabilite — et la date, elle, suit le lieu comme partout ailleurs. */
+    var nom = '${T("Conciliation ")}' + new Date().toLocaleDateString('${LIEU()}');
     dire('${T("Création…")}');
     appeler('banque:creer', [ANNEE, nom]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }

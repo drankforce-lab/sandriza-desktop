@@ -28,7 +28,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent grave dans la portion script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur enregistrable,
    et la NOTE d'une sauvegarde en est une. ⚠⚠⚠ Les deux mots de confirmation
@@ -159,7 +159,7 @@ function pageSauvegarde(ouverture) {
   var REST0 = '', SUPP0 = '';
   if (brut.indexOf('restaurer-') === 0) REST0 = brut.slice(10).replace(/[^A-Za-z0-9_.:/-]/g, '');
   else if (brut.indexOf('supprimer-') === 0) SUPP0 = brut.slice(10).replace(/[^A-Za-z0-9_.:/-]/g, '');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Sauvegarde &amp; Restauration — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.sauvegarde}</span><h1>${T("Sauvegarde &amp; Restauration")}</h1></div>

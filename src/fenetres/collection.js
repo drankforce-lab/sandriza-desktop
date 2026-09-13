@@ -20,7 +20,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO, TETE } = require('./socle');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom, la description ni
@@ -39,7 +39,7 @@ const CSS_PROPRE = `
 /** Page complète de l'assistant. `id` vide = création. */
 function pageCollection(id) {
   const ident = JSON.stringify(String(id || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Collection — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.collections}</span><h1 id="titre">${T("Collection")}</h1>

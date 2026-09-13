@@ -56,7 +56,7 @@
  * Il n'est simplement plus AFFICHÉ ici.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -234,7 +234,7 @@ html.jour .ferr{color:#9b1c1c;background:#fdecec;border-color:#f3b9b9}
 `;
 
 function pageProfil() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Mon profil — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.staffaccess}</span><h1>${T("Mon profil")}</h1></div>
@@ -277,7 +277,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
-  function fmtTs(iso){ if (!iso) return '—'; try { return new Date(iso).toLocaleString('fr-CA', { dateStyle:'medium', timeStyle:'short' }); } catch(e){ return '—'; } }
+  function fmtTs(iso){ if (!iso) return '—'; try { return new Date(iso).toLocaleString('${LIEU()}', { dateStyle:'medium', timeStyle:'short' }); } catch(e){ return '—'; } }
   function qOpts(sel, exclu){
     var l = D.questions || [], o = '<option value="">${T("— Choisir —")}</option>';
     for (var i=0;i<l.length;i++){

@@ -23,7 +23,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -334,7 +334,7 @@ html.jour .asst .pi{background:#faf8f3}
 
 /** Page complète de la fenêtre native « Photos ». */
 function pagePhotos() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Photos — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Photos")}</h1>
@@ -867,7 +867,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ms) return '—';
     var d = new Date(ms);
     if (isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   function assistHtml(){
@@ -999,7 +999,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (A.tri === 'date') l.sort(function(a, b){ return (b.modifie || 0) - (a.modifie || 0); });
     else if (A.tri === 'date-vieux') l.sort(function(a, b){ return (a.modifie || 0) - (b.modifie || 0); });
     else if (A.tri === 'poids') l.sort(function(a, b){ return (b.octets || 0) - (a.octets || 0); });
-    else l.sort(function(a, b){ return String(a.nom).localeCompare(String(b.nom), 'fr'); });
+    else l.sort(function(a, b){ return String(a.nom).localeCompare(String(b.nom), '${LIEU()}'); });
     return l;
   }
 
@@ -2107,7 +2107,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* ⚠ MEME UN GLISSER-DEPOSER EST UN LOT. Sans cela, l historique ne montrerait
        que les imports passes par l assistant, et l on ne pourrait pas defaire un
        depot fait a la main — c est-a-dire le plus courant. */
-    appeler('lot:ouvrir', [LOT_NOM || ('${T("Import du")} ' + new Date().toLocaleDateString('fr-CA')), 'fichiers']);
+    appeler('lot:ouvrir', [LOT_NOM || ('${T("Import du")} ' + new Date().toLocaleDateString('${LIEU()}')), 'fichiers']);
     suiviOuvrir(liste.map(function(f, i){ return nommer(f, i); }),
       (LOT_NOM ? ('${T("Import ·")} ' + LOT_NOM) : 'Import') + ' · ' + liste.length + ' photo(s)');
     var faites = 0, doubles = 0, refuses = 0, echoues = 0;

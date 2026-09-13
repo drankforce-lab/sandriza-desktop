@@ -25,7 +25,7 @@
  * l'IIFE — concaténation par + comme dans liens.js.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -106,7 +106,7 @@ tbody tr:hover td{background:var(--v03)}
  */
 function pageComptable(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Liens comptables — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.acctlink}</span><h1>${T("Liens comptables")}</h1>
@@ -164,13 +164,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!iso) return '—';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return esc(iso);
-    return d.toLocaleString('fr-CA', { dateStyle: 'medium', timeStyle: 'short' });
+    return d.toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' });
   }
   function jour(iso){
     if (!iso) return '—';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return esc(iso);
-    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
   }
   function copierChamp(champ, bouton){
     champ.select();

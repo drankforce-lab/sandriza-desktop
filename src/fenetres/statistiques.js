@@ -25,7 +25,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -103,7 +103,7 @@ tbody tr:hover td{background:var(--v04)}
 /** Page complète de la fenêtre native « Statistiques ». */
 function pageStatistiques(ongletDepart) {
   const dep = (ongletDepart === 'tel') ? 'tel' : 'ga';
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Statistiques — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.mktstats}</span><h1>${T("Statistiques")}</h1>
@@ -129,7 +129,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function nb(n){ return Number(n || 0).toLocaleString('fr-CA'); }
+  function nb(n){ return Number(n || 0).toLocaleString('${LIEU()}'); }
   function heure(){
     var d = new Date();
     return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');

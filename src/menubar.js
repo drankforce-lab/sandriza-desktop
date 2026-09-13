@@ -20,13 +20,20 @@
  * côté serait coupé par le bord de la fenêtre.
  */
 
+/* ⚠ LA LANGUE DE LA PAGE, PAS SON TEXTE. Le contenu de ces deux pages arrive
+   DÉJÀ traduit — `main.js` passe les entrées par `trItems` avant de les envoyer.
+   Seul l'attribut `lang` restait figé à « fr », et c'est lui, pas le texte, que
+   lisent la coupure des mots, le correcteur et le lecteur d'écran : un menu
+   anglais annoncé français se fait épeler à la française. */
+const LANG = () => { try { return require('./langue').langueCourante(); } catch (e) { return 'fr'; } };
+
 /** Page complète de la fenêtre détachée. */
 function pageDetachee(desc) {
   const menus = desc.menus || [];
   const css = desc.cssRail || '';
   const sombre = !!desc.sombre;
 
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `<!doctype html><html lang="${LANG()}"><head><meta charset="utf-8">
 <title>Menu — Administration Sandriza</title>
 <style>
 html,body{margin:0;height:100%;overflow:hidden}
@@ -151,7 +158,7 @@ function pagePanneau(desc) {
      doublait l'échelle (« c'est beaucoup trop gros »). Le facteur de zoom de
      la fenêtre principale est posé par la coquille (setZoomFactor), pour que
      panneau et barre paraissent à la même taille. */
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `<!doctype html><html lang="${LANG()}"><head><meta charset="utf-8">
 <style>
 html,body{margin:0;overflow:hidden}
 /* ⚠ FENETRE TRANSPARENTE : chaque panneau porte SON fond, sa bordure et son

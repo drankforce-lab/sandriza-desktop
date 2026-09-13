@@ -26,7 +26,7 @@
  * pages auraient compté pour zéro — un colis déclaré vérifié sans l'être.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -62,7 +62,7 @@ const CSS_PROPRE = `
 /** Page complète de l'assistant. `id` = commande à préparer. */
 function pageCommande(id) {
   const ident = JSON.stringify(String(id || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Préparation — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.orders}</span><h1 id="titre">${T("Préparation")}</h1>

@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -139,7 +139,7 @@ function pageFidelisation(ouverture) {
   const ouv = String(ouverture || '');
   const depart = (['recompenses', 'invitations'].indexOf(ouv) >= 0) ? ouv : 'sondages';
   const editeur = (ouv === 'sondage-nouveau');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Fidélisation et sondages — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.loyalty}</span><h1>${T("Fidélisation et sondages")}</h1>

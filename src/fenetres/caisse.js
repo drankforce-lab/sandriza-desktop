@@ -31,7 +31,7 @@
  * projet, dont deux fois dans un commentaire.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -216,7 +216,7 @@ function pageCaisse(mode) {
      pendant deux versions. Ce mode pose un compte rendu temoin, inerte : aucun
      appel, aucune vente. La coquille ne l ouvre jamais. */
   const attenteTemoin = String(mode || '') === 'attente';
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Vente au comptoir — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Vente au comptoir")}</h1>
@@ -318,7 +318,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
   function argent(n){
     var v = (Math.round((parseFloat(n) || 0) * 100) / 100).toFixed(2);
-    return v.replace('.', ',') + ' $';
+    return v.replace('.', '${SEP_DEC()}') + ' $';
   }
 
   // ⚠ CHAQUE REFUS DU PONT A SA PHRASE. Un ecran muet sur un refus de droit

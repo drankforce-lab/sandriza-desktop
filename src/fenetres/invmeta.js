@@ -22,7 +22,7 @@
  * COMPRIS : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -141,7 +141,7 @@ function pageInvMeta(ouverture) {
     : (ONGLETS.indexOf(ouv) >= 0 ? ouv : 'sizes');
   const ouvreAttr = (ouv === 'attr-nouveau');
   const ouvreCat = (ouv === 'cat-nouvelle');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Attributs produits — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.invmeta}</span><h1>${T("Attributs produits")}</h1>

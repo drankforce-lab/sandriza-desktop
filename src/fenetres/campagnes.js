@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -181,7 +181,7 @@ function pageCampagnes(ongletDepart) {
   const base = neuf ? brut.slice(0, brut.indexOf(':neuve')) : brut;
   const dep = (base === 'chaines') ? 'chaines'
             : (base === 'segments') ? 'segments' : 'campagnes';
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Campagnes et chaînes — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.newsletter}</span><h1>${T("Campagnes et chaînes")}</h1>

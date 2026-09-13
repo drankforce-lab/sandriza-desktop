@@ -24,7 +24,7 @@
  * ⚠ Aucun caractère accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -148,7 +148,7 @@ function pageIncidents(ouverture) {
   var EDIT0 = '', VUE0 = '';
   if (!NOUV0 && brut.indexOf('inc-') === 0) EDIT0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, '');
   else if (brut.indexOf('vue-') === 0) VUE0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, '');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Incidents de sécurité — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.secincident}</span><h1>${T("Incidents de sécurité")}</h1></div>

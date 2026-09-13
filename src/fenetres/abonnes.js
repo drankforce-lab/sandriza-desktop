@@ -19,7 +19,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un courriel ni un prenom
@@ -96,7 +96,7 @@ tbody tr:hover td{background:var(--v04)}
 
 /** Page complète de la fenêtre native « Abonnés de l'infolettre ». */
 function pageAbonnes() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Abonnés de l’infolettre — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.newsletter}</span><h1>${T("Abonnés de l’infolettre")}</h1>

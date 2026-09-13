@@ -12,7 +12,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère ` dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -57,7 +57,7 @@ button.bsc:disabled{opacity:.5;cursor:default}
 `;
 
 function pageLancement() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Mode lancement — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.fusee}</span><h1>${T("Mode lancement")}</h1></div>

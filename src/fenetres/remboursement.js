@@ -21,7 +21,7 @@
  * COMPRIS — dixième rappel du projet.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable, et le MOTIF d'un remboursement en est une (voir
@@ -106,7 +106,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 /** Page complète de la fenêtre native « Remboursement ». `id` = commande. */
 function pageRemboursement(id) {
   const depart = JSON.stringify(String(id || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Remboursement — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.refunds}</span><h1 id="titre">${T("Remboursement")}</h1>
@@ -140,7 +140,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
   function argent(n){
     var v = (Math.round((parseFloat(n) || 0) * 100) / 100).toFixed(2);
-    return v.replace('.', ',') + ' $';
+    return v.replace('.', '${SEP_DEC()}') + ' $';
   }
   function cle(a){ return a.productId + '|' + a.taille + '|' + a.couleur; }
 

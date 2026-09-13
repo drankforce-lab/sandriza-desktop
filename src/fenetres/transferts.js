@@ -28,7 +28,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -143,7 +143,7 @@ td.quand .qui{color:var(--tx2);font-size:.72rem}
 function pageTransferts(ouverture) {
   const ouv = (String(ouverture || '') === 'histo') ? 'histo'
             : (String(ouverture || '') === 'neuf') ? 'neuf' : 'transit';
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Transferts de stock — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1>${T("Transferts de stock")}</h1>
@@ -176,7 +176,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dateCourte(iso){
     if (!iso) return '';
     try { var d = new Date(iso);
-      return d.toLocaleDateString('fr-CA') + ' ' + d.toLocaleTimeString('fr-CA', {hour:'2-digit',minute:'2-digit'}); }
+      return d.toLocaleDateString('${LIEU()}') + ' ' + d.toLocaleTimeString('${LIEU()}', {hour:'2-digit',minute:'2-digit'}); }
     catch(e){ return String(iso).slice(0,16).replace('T',' '); }
   }
 

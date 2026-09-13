@@ -20,7 +20,7 @@
  * on croirait l'imprimante prête alors que rien n'a été vérifié.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -85,7 +85,7 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 
 /** Page complète de la fenêtre native « Imprimantes ». */
 function pageImprimantes() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Imprimantes — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.imprimante}</span><h1>${T("Imprimantes")}</h1>
@@ -127,7 +127,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var JOURNAL = [];
   var rendu = false;
   function noter(t){
-    JOURNAL.push(new Date().toLocaleTimeString('fr-CA') + ' — ' + t);
+    JOURNAL.push(new Date().toLocaleTimeString('${LIEU()}') + ' — ' + t);
     var z = document.getElementById('diag');
     if (z) z.textContent = JOURNAL.join(SAUT);
   }

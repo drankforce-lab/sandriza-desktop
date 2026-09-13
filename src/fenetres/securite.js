@@ -24,7 +24,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -150,7 +150,7 @@ function pageSecurite(onglet) {
   var UOUV0 = '', MOUV0 = '';
   if (brut.indexOf('user-') === 0) UOUV0 = brut.slice(5).replace(/[^A-Za-z0-9_-]/g, '');
   else if (brut.indexOf('mfa-') === 0) MOUV0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, '');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Accès Utilisateurs — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.acces}</span><h1>${T("Accès Utilisateurs")}</h1></div>
@@ -202,7 +202,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
-  function fmtTs(iso){ if (!iso) return '${T("Jamais connecté")}'; try { return new Date(iso).toLocaleString('fr-CA'); } catch(e){ return '—'; } }
+  function fmtTs(iso){ if (!iso) return '${T("Jamais connecté")}'; try { return new Date(iso).toLocaleString('${LIEU()}'); } catch(e){ return '—'; } }
   // Les initiales : deux lettres au plus, prises sur le nom, sinon le courriel.
   function initiales(s){
     var src = String(s.nom || s.email || '?').trim();

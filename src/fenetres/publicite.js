@@ -21,7 +21,7 @@
  * compris : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ Le MESSAGE d'une campagne est PUBLIÉ sur les réseaux et envoyé par
    infolettre : c'est de la donnée, et son exemple reste en français. Le NOM de
@@ -129,7 +129,7 @@ function pagePublicite(ouverture) {
   const ONGLETS = ['overview', 'segments', 'promos', 'social', 'campaigns', 'satisfaction'];
   const tabDepart = ouv === 'camp-nouvelle' ? 'campaigns' : (ONGLETS.indexOf(ouv) >= 0 ? ouv : 'overview');
   const ouvreForm = (ouv === 'camp-nouvelle');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Publicité ciblée — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.mktstats}</span><h1>${T("Publicité ciblée &amp; analytique")}</h1><span class="sous" id="sous"></span></div>

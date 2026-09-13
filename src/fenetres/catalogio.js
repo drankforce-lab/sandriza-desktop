@@ -33,7 +33,7 @@
  * jamais avec un accent grave.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -185,7 +185,7 @@ function pageCatalogio(ouverture) {
   const ouvApercu = (ouv === 'apercu');
   const ouvConfirmer = (ouv === 'confirmer');
   const ouvRapport = (ouv === 'rapport');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Import / Export — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.catalogio}</span><h1>${T("Import / Export de la boutique")}</h1>

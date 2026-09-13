@@ -43,7 +43,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent-grave dans la portion script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠⚠ CET ÉCRAN ÉDITE CE QUE LA CLIENTE LIT : la frontière entre
    l'interface et la donnée y passe au milieu de la même phrase. Ce qui est une
@@ -228,7 +228,7 @@ function pagePages(onglet) {
   if (brut.indexOf('custom-') === 0) { CPOUV0 = brut.slice(7).replace(/[^A-Za-z0-9_-]/g,''); brut = 'list'; }
   const ONGLET0 = (['list','faq','contact','retours','tailles','vedette'].indexOf(brut) >= 0)
     ? brut : 'list';
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Pages du site — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.pages}</span><h1>${T("Pages du site")}</h1></div>
@@ -627,7 +627,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var corpsl='';
     if (!m.length) corpsl='<div class="vide">${T("Aucun message reçu.")}</div>';
     for (var i=m.length-1;i>=0;i--){ var s=m[i];
-      var dt=''; try{ dt=new Date(s.createdAt).toLocaleDateString('fr-CA'); }catch(e){}
+      var dt=''; try{ dt=new Date(s.createdAt).toLocaleDateString('${LIEU()}'); }catch(e){}
       corpsl+='<div class="mailmsg"><div class="hh"><div><b>'+esc(s.name)+'</b> <a href="mailto:'+esc(s.email)+'">'+esc(s.email)+'</a></div>'
         +'<div style="display:flex;gap:.5rem;align-items:center">'+(s.status==='new'?'<span class="pastille" style="background:rgba(234,179,8,.2);color:#e0b93a">Nouveau</span>':'')
         +'<span style="font-size:.76rem;color:var(--tx2)">'+esc(dt)+'</span>'+(RO?'':'<button class="mini" data-mdel="'+esc(s.id)+'">✕</button>')+'</div></div>'

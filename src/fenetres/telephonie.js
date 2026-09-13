@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -132,7 +132,7 @@ button.prim:disabled{opacity:.5;cursor:default}
 `;
 
 function pageTelephonie() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Téléphonie — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.telephone}</span><h1>${T("Téléphonie")}</h1>
@@ -217,7 +217,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function soldeCadUsd(usdStr){
     var usd = Number(usdStr);
     if (!isFinite(usd)) return String(usdStr || '');
-    var cad = (usd * USD_CAD).toFixed(2).replace('.', ',');
+    var cad = (usd * USD_CAD).toFixed(2).replace('.', '${SEP_DEC()}');
     return '≈ ' + cad + ' $ CA (' + String(usdStr) + ' USD)';
   }
 

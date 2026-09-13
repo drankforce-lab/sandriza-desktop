@@ -41,7 +41,7 @@
  * pair.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -124,7 +124,7 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:top
 
 /** Page complète de la fenêtre native « Personnel connecté ». */
 function pagePresence() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Personnel connecté — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.staffaccess}</span><h1>${T("Personnel connecté")}</h1>
@@ -151,7 +151,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function fdate(ts){ if (!ts) return ''; try { return new Date(ts).toLocaleString('fr-CA'); } catch (e) { return ''; } }
+  function fdate(ts){ if (!ts) return ''; try { return new Date(ts).toLocaleString('${LIEU()}'); } catch (e) { return ''; } }
 
   /* << vu il y a … >> en mots, pas en secondes. 340 s ne se lit pas ; << il y a
      6 min >> se lit. Au-dela d une heure on donne l heure de l horloge : << il y

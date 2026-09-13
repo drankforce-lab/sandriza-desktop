@@ -206,6 +206,10 @@ module.exports = {
     'Click « Confirm? » to delete this reconciliation. The bank transactions themselves stay untouched.',
   'Conciliation supprimée.': 'Reconciliation deleted.',
   'Conciliation créée.': 'Reconciliation created.',
+  /* Le NOM PAR DEFAUT d une conciliation, suivi de la date du jour. C est une
+     donnee enregistree, mais qui ne sort pas de la comptabilite : elle suit
+     donc la langue du poste, comme le nom interne d un coupon. */
+  'Conciliation ': 'Reconciliation ',
   'Ligne enregistrée.': 'Line saved.',
   ' ligne': ' line',
   ' importée': ' imported',

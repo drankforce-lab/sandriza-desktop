@@ -33,7 +33,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_DIRE, CSS_JOUR, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/deconnexion.js). */
@@ -100,7 +100,7 @@ function pageDeconnexion(arg) {
      socle pose partout ailleurs. Elle fait 560 x 340, elle n est pas
      redimensionnable, et sa carte remplit deja tout — proposer d << occuper
      toute la fenetre >> n y veut rien dire. Sa remarque du 2026-09-12. */
-  return `<!doctype html><html lang="fr" data-sans-plein><head><meta charset="utf-8">
+  return `${TETE('data-sans-plein')}
 <title>${T("Déconnexion")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete">

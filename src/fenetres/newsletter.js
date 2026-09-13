@@ -17,7 +17,7 @@
  * compris : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ Le contenu de l'offre de bienvenue (titre, sous-titre, bouton,
    mention légale) est TAPÉ ici et LU PAR LA VISITEUSE : c'est de la donnée, pas
@@ -116,7 +116,7 @@ function pageNewsletter(ouverture) {
   const ouv = String(ouverture || '');
   const tabDepart = (ouv === 'config' || ouv === 'offer') ? ouv : (ouv === 'apercu' ? 'offer' : 'dashboard');
   const ouvreApercu = (ouv === 'apercu');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Infolettre — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.newsletter}</span><h1>${T("Infolettre")}</h1><span class="sous" id="sous"></span></div>

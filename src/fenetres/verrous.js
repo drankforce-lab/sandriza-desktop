@@ -25,7 +25,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d une section, le
@@ -83,7 +83,7 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 
 /** Page complète de la fenêtre native « Verrous ». */
 function pageVerrous() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Verrous — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.verrou}</span><h1>${T("Verrous")}</h1>
@@ -108,7 +108,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function fdate(ts){ if (!ts) return ''; try { return new Date(ts).toLocaleString('fr-CA'); } catch (e) { return ''; } }
+  function fdate(ts){ if (!ts) return ''; try { return new Date(ts).toLocaleString('${LIEU()}'); } catch (e) { return ''; } }
 
   var MOTIFS = {
     session:            '${T("Aucune session ouverte dans l’application.")}',

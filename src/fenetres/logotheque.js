@@ -14,7 +14,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -84,7 +84,7 @@ label.upl{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
 `;
 
 function pageLogotheque() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Logothèque — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Logothèque")}</h1><span class="droite"></span></div>
@@ -116,7 +116,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function fr(v){ return (Math.round(v*100)/100).toString().replace('.', ','); }
+  function fr(v){ return (Math.round(v*100)/100).toString().replace('.', '${SEP_DEC()}'); }
   function num(v, d){ var n = parseFloat(v); return isFinite(n) ? n : d; }
 
   var MOTIFS = {

@@ -31,7 +31,7 @@
  * menu entière.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -228,7 +228,7 @@ function pageCommandes(mode) {
   // ⚠ CE FICHIER DESSINE DEUX ECRANS, et son pictogramme est donc CALCULE — le
   // seul du lot. Il porte un trace comme les autres, pas un emoji.
   const icone = (m === 'expeditions') ? ICO.shipping : ICO.orders;
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${titre} ${T("— Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${icone}</span><h1 id="titre">${titre}</h1>
@@ -282,13 +282,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
   function argent(n){
     var v = (Math.round((parseFloat(n) || 0) * 100) / 100).toFixed(2);
-    return v.replace('.', ',') + ' $';
+    return v.replace('.', '${SEP_DEC()}') + ' $';
   }
   function dateCourte(iso){
     if (!iso) return '—';
     var d = new Date(iso);
     if (isNaN(d)) return '—';
-    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+    return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
   var MOTIFS = {

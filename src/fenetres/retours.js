@@ -18,7 +18,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le motif, qui est ce que
@@ -77,7 +77,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 
 /** Page complète de la fenêtre native « Nos Retours ». */
 function pageRetours() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Nos Retours — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.returns}</span><h1>${T("Nos Retours")}</h1>
@@ -111,7 +111,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   function fmtDate(d){
-    try { return new Date(d).toLocaleDateString('fr-CA'); } catch (e) { return String(d || ''); }
+    try { return new Date(d).toLocaleDateString('${LIEU()}'); } catch (e) { return String(d || ''); }
   }
 
   var MOTIFS = {

@@ -444,6 +444,21 @@ jobs:
           # trouvait quelque chose à chaque fois. Au premier passage : 34 textes
           # français dans 7 fenêtres déclarées TERMINÉES.
           node tools/banc-langue-residuel.js
+          # ⚠⚠ ET CELUI-CI GARDE CE QU'AUCUN DICTIONNAIRE NE PEUT ATTEINDRE, parce
+          # que CE NE SONT PAS DES TEXTES : l'attribut `lang` de la page, le lieu
+          # passé à `toLocaleString`, la virgule décimale posée à la main. Les 98
+          # fenêtres ont été traduites 7 847 fois, les DEUX mesures sont à zéro —
+          # et les 98 écrivaient encore `<html lang="fr">` en dur. Un défaut qui
+          # vit hors du champ des deux mesures n'est signalé par rien.
+          # ⚠ Ce que ça coûte, puisque « l'anglais s'affiche quand même » : le
+          # navigateur coupe les mots à la française, le correcteur souligne tout
+          # l'anglais, le lecteur d'écran l'ÉPELLE avec un accent français — et
+          # `.replace('.', ',')` fait lire un nombre FAUX (1,234 se lit
+          # mille-deux-cent-trente-quatre en anglais).
+          # ⚠ Ses trois exceptions portent chacune leur raison, et celle de
+          # `connexion.js` est une CONDITION que le banc vérifie vraiment.
+          # Éprouvé par une panne provoquée, une par motif.
+          node tools/banc-langue-page.js
           # ⚠⚠ ET LES ECRANS DE CHARGEMENT, que NI le compteur NI le résiduel ne
           # voient : ils sont bâtis dans `main.js`, le processus principal, qu'aucun
           # banc ne peut faire tourner sans lancer toute l'application. C'était le

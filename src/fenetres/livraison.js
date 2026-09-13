@@ -14,7 +14,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d un pays ou d un
@@ -102,7 +102,7 @@ table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:#c9a97e;curs
 `;
 
 function pageLivraison() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Configuration de la livraison — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1>${T("Configuration de la livraison")}</h1></div>
@@ -267,7 +267,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + ' aria-label="' + esc('${T("Livrer vers ")}' + (p.nom || p.code)) + '"'
         + (p.livre ? ' checked' : '') + dis + '></td></tr>';
     };
-    var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('fr-CA') : '${T("jamais")}';
+    var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('${LIEU()}') : '${T("jamais")}';
     return '<div class="carte large"><h2>${T("Pays desservis")}</h2>'
       + ''
       + '<div class="pbarre">'

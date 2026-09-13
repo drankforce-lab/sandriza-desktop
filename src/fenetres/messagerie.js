@@ -18,7 +18,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le message de la cliente
@@ -95,7 +95,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 
 /** Page complète de la fenêtre native « Messagerie clients ». */
 function pageMessagerie() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Messagerie clients — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.support}</span><h1>${T("Messagerie clients")}</h1>

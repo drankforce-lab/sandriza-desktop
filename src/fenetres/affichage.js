@@ -32,7 +32,7 @@
  * (tools/verifier-fenetres.js) le vérifie avant chaque publication.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, TETE, SEP_DEC } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/affichage.js). */
@@ -90,7 +90,7 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 
 /** Page complète de l'affichage client. */
 function pageAffichage() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Affichage client")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete" id="tete"><div class="nom">${T("SANDRIZA")}</div>
@@ -107,7 +107,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var MARQUE = { logo: '', nom: '${T("SANDRIZA")}' };
 
   function fmt(n){
-    return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' $';
+    return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace('.', '${SEP_DEC()}') + ' $';
   }
   function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
 

@@ -17,7 +17,7 @@
  * COMPRIS — onzième rappel du projet.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -104,7 +104,7 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 /** Page complète de la fenêtre native « Fiche client ». `id` = client. */
 function pageClient(id) {
   const depart = JSON.stringify(String(id || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Fiche client — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="av" id="t-av">?</span>
@@ -137,12 +137,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
   function argent(n){
     var v = (Math.round((parseFloat(n) || 0) * 100) / 100).toFixed(2);
-    return v.replace('.', ',') + ' $';
+    return v.replace('.', '${SEP_DEC()}') + ' $';
   }
   function dateFr(iso){
     if (!iso) return '—';
     var d = new Date(iso);
-    return isNaN(d) ? '—' : d.toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+    return isNaN(d) ? '—' : d.toLocaleDateString('${LIEU()}', { year: 'numeric', month: 'short', day: 'numeric' });
   }
 
   var MOTIFS = {

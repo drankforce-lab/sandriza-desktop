@@ -21,7 +21,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -106,7 +106,7 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
 
 /** Page complète de la fenêtre native « Cartes-cadeaux ». */
 function pageCartesCadeaux() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Cartes-cadeaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.giftcards}</span><h1>${T("Cartes-cadeaux")}</h1>
@@ -135,7 +135,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   function fmt(n){
-    try { return (Number(n) || 0).toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' }); }
+    try { return (Number(n) || 0).toLocaleString('${LIEU()}', { style: 'currency', currency: 'CAD' }); }
     catch (e) { return (Number(n) || 0).toFixed(2) + ' $'; }
   }
 

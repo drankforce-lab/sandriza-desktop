@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_DIRE, CSS_JOUR, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/inactivite.js). */
@@ -74,7 +74,7 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
  */
 function pageInactivite(secondes) {
   const total = Math.max(5, parseInt(secondes, 10) || 60);
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Déconnexion imminente")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><h1>${T("Déconnexion imminente")}</h1></div>

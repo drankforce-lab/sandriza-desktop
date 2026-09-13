@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un numero de facture, un
@@ -101,7 +101,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 
 /** Page complète de la fenêtre native « Factures ». */
 function pageFactures() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Factures — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.billing}</span><h1>${T("Factures")}</h1>
@@ -134,12 +134,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   function fmt(n){
-    try { return (Number(n) || 0).toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' }); }
+    try { return (Number(n) || 0).toLocaleString('${LIEU()}', { style: 'currency', currency: 'CAD' }); }
     catch (e) { return (Number(n) || 0).toFixed(2) + ' $'; }
   }
   function fmtDate(d){
     if (!d) return '';
-    try { return new Date(d).toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' }); }
+    try { return new Date(d).toLocaleDateString('${LIEU()}', { year: 'numeric', month: 'short', day: 'numeric' }); }
     catch (e) { return String(d || ''); }
   }
 

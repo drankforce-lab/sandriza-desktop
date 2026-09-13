@@ -28,7 +28,7 @@
  * jour — et une fois en emportant la barre de menu entière.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -133,7 +133,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 /** Page complète de la fenêtre native « Expédier une commande ». */
 function pageExpedition(id) {
   const depart = JSON.stringify(String(id || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Expédier une commande — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1 id="titre">${T("Expédier une commande")}</h1>

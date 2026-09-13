@@ -44,7 +44,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_DIRE, CSS_JOUR } = require('./socle.js');
+const { JS_DIRE, CSS_JOUR, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le numero de version, qui
@@ -121,7 +121,7 @@ function pageMaj(arg) {
   const ecran = bouts[0] === 'compte' ? 'compte' : 'proposition';
   const version = (bouts[1] || '').replace(/[^0-9a-zA-Z.\-]/g, '');
   const secondes = Math.max(5, Math.min(600, parseInt(bouts[2], 10) || 30));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Mise à jour")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body class="${ecran === 'compte' ? 'presse' : ''}">
 <div class="tete"><h1 id="titre"></h1></div>

@@ -18,7 +18,7 @@
  * referme la chaîne et casse toute la fenêtre.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/facture.js). */
@@ -79,7 +79,7 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 /** Page complète de la fenêtre native « Facture ». `invId` est obligatoire. */
 function pageFacture(invId) {
   const depart = JSON.stringify(String(invId || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Facture — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.billing}</span><h1 id="titre">${T("Facture")}</h1>

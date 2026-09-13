@@ -20,7 +20,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit — jamais une requete, qui est le
@@ -85,7 +85,7 @@ tbody tr:hover td{background:var(--v04)}
 
 /** Page complète de la fenêtre native « Recherches sans résultat ». */
 function pageRecherches() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Recherches sans résultat — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.loupe}</span><h1>${T("Recherches sans résultat")}</h1>

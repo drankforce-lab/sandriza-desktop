@@ -17,7 +17,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit ICI — jamais l etiquette ni le
@@ -92,7 +92,7 @@ button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-sur-ac
 `;
 
 function pageConfigNavigation() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Configuration de la navigation — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.navmenu}</span><h1>${T("Configuration de la navigation")}</h1></div>

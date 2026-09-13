@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -188,7 +188,7 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 function pageImpot(onglet) {
   const ok = ['revenus', 'documents', 'entreprise', 'memo'];
   const depart = (ok.indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'taxes';
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Fiscalité et impôt — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.impot}</span><h1>${T("Fiscalité et impôt")}</h1>
@@ -214,7 +214,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      explication, il ne vide pas l ecran. On ne relit qu au changement d annee. */
   var FRAIS = null, FRAIS_AN = null;
   function fmtArgent(n){
-    try { return (Number(n)||0).toLocaleString('fr-CA', { style:'currency', currency:'CAD' }); }
+    try { return (Number(n)||0).toLocaleString('${LIEU()}', { style:'currency', currency:'CAD' }); }
     catch(e){ return (Number(n)||0).toFixed(2) + ' $'; }
   }
   var OCCUPE = false;

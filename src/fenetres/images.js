@@ -26,7 +26,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d une fiche, son
@@ -87,7 +87,7 @@ button.prim:disabled{opacity:.5;cursor:default}
 `;
 
 function pageImages() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Images des produits — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Images des produits")}</h1></div>
@@ -116,7 +116,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function poids(o){
     o = Number(o) || 0;
-    if (o >= 1048576) return (o / 1048576).toFixed(1).replace('.', ',') + ' Mo';
+    if (o >= 1048576) return (o / 1048576).toFixed(1).replace('.', '${SEP_DEC()}') + ' Mo';
     if (o >= 1024) return Math.round(o / 1024) + ' ko';
     return o + ' o';
   }

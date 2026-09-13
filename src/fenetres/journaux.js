@@ -22,7 +22,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent grave dans la portion script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ On ne traduit QUE ce qui se lit — les adresses IP, les noms
    d'imprimante, les termes cherchés et le détail d'une entrée viennent du
@@ -87,7 +87,7 @@ function pageJournaux(onglet) {
   var RQINIT0 = '';
   if (brut.indexOf('q-') === 0) { RQINIT0 = brut.slice(2).replace(/[^A-Za-z0-9._@-]/g, ''); brut = 'recherche'; }
   const ONGLET0 = (['recherche','acces','automatisations','impressions','sms','comptable','recherches','jserreurs'].indexOf(brut) >= 0) ? brut : 'acces';
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Journaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.journaux}</span><h1>${T("Journaux")}</h1></div>
@@ -140,7 +140,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function fdate(ts){ if (!ts) return '—'; try { return new Date(ts).toLocaleString('fr-CA'); } catch(e){ return '—'; } }
+  function fdate(ts){ if (!ts) return '—'; try { return new Date(ts).toLocaleString('${LIEU()}'); } catch(e){ return '—'; } }
 
   var MOTIFS = {
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',

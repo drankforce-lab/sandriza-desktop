@@ -1643,6 +1643,13 @@ ${JS_DIRE()}
   }
 
   function chargerSuite(){
+    /* ⚠⚠ LA PAGE DECLARE SA LANGUE DES LE PREMIER DESSIN. Le changement de
+       langue le faisait deja (basculerLangue), mais pas l OUVERTURE : un poste
+       regle en anglais ouvrait donc un ecran anglais annonce << fr >> aux
+       lecteurs d ecran, et le restait tant que personne ne cliquait FR/EN.
+       ⚠ C est ici et pas dans << charger >>, pour couvrir AUSSI le cas ou le
+       reglage ne repond pas — on reste en francais, et on le declare. */
+    try { document.documentElement.lang = LANGUE; } catch (e) {}
     appeler('connexion:contexte').then(function(r){
       CTX = (r && r.ok && r.theme && r.marque) ? r : REPLI;
       if (CTX === REPLI) szDire(T('Décor par défaut — la fenêtre principale n’a pas répondu.'), 'att');

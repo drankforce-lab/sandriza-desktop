@@ -24,7 +24,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -105,7 +105,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 /** @param {string} ouverture '' (consommation) ou 'historique' */
 function pageFal(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Traitements d’image — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.cerveau}</span><h1>${T("Traitements d’image")}</h1>
@@ -174,23 +174,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   function sous_(v){
     var n = Number(v) || 0;
-    return (n < 1 ? n.toFixed(3) : n.toFixed(2)).replace('.', ',') + ' $ US';
+    return (n < 1 ? n.toFixed(3) : n.toFixed(2)).replace('.', '${SEP_DEC()}') + ' $ US';
   }
   function quand(iso){
     if (!iso) return '—';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return esc(iso);
-    return d.toLocaleString('fr-CA', { dateStyle: 'medium', timeStyle: 'short' });
+    return d.toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' });
   }
   function jourCourt(iso){
     if (!iso) return '';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return esc(iso);
-    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
   }
   function duree(ms){
     var n = Number(ms) || 0;
-    return n >= 1000 ? (Math.round(n / 100) / 10).toString().replace('.', ',') + ' s' : n + ' ms';
+    return n >= 1000 ? (Math.round(n / 100) / 10).toString().replace('.', '${SEP_DEC()}') + ' s' : n + ' ms';
   }
 
   /* La carte des CRÉDITS PHOTOROOM — le fournisseur principal du retrait et de
@@ -503,7 +503,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      menu d'opération a le foyer, on saute ce tour — sinon la frappe serait
      avalée. */
   function _horoNow(){
-    try { return new Date().toLocaleString('fr-CA', { dateStyle: 'short', timeStyle: 'short' }); }
+    try { return new Date().toLocaleString('${LIEU()}', { dateStyle: 'short', timeStyle: 'short' }); }
     catch (e) { return ''; }
   }
   /* La signature dit « quelque chose a-t-il bougé ». ⚠ LE PLAFOND EN FAIT PARTIE :

@@ -16,7 +16,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ On ne traduit QUE ce qui se lit — le CONTENU des notes vient du site
    et reste tel qu’il a été écrit. */
@@ -74,7 +74,7 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 
 /** Page complète de la fenêtre native « Notes des mises à jour ». */
 function pageNotes() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T('Notes des mises à jour — Administration Sandriza')}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.note}</span><h1>${T('Notes des mises à jour')}</h1>

@@ -17,7 +17,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit — jamais [icon:xxx], qui est un
@@ -115,7 +115,7 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 `;
 
 function pageIcones() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Icônes personnalisées — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Icônes personnalisées")}</h1>

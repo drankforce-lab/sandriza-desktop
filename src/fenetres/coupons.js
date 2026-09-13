@@ -20,7 +20,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -100,7 +100,7 @@ tbody tr:hover td{background:var(--v04)}
 
 /** Page complète de la fenêtre native « Coupons ». */
 function pageCoupons() {
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Coupons — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.promotions}</span><h1>${T("Coupons")}</h1>
@@ -129,12 +129,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   function fmt(n){
-    try { return (Number(n) || 0).toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' }); }
+    try { return (Number(n) || 0).toLocaleString('${LIEU()}', { style: 'currency', currency: 'CAD' }); }
     catch (e) { return (Number(n) || 0).toFixed(2) + ' $'; }
   }
   function jour(d){
     if (!d) return '';
-    try { return new Date(d).toLocaleDateString('fr-CA'); } catch (e) { return String(d); }
+    try { return new Date(d).toLocaleDateString('${LIEU()}'); } catch (e) { return String(d); }
   }
 
   var MOTIFS = {

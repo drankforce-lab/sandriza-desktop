@@ -7,7 +7,36 @@
    occurrences. Voir `src/langue/index.js` pour les trois décisions du chantier.
    ⚠ C’est aussi POURQUOI les blocs ci-dessous sont des FONCTIONS : une constante
    de module figerait la langue du premier `require`. */
-const T = require('../langue').tr('socle');
+const LANGUE = require('../langue');
+const T = LANGUE.tr('socle');
+
+/* ══ CE QUI N EST PAS DU TEXTE, ET QUE LE DICTIONNAIRE NE PEUT PAS ATTEINDRE ══
+ * ⚠⚠⚠ UNE PAGE DECLARE SA LANGUE, ET CE N EST PAS UNE PHRASE. Les 99 fenetres
+ * ecrivaient `<html lang="fr">` EN DUR : le chantier bilingue pouvait donc etre
+ * fini a 100 %, chaque texte traduit, et la page ANGLAISE annoncait quand meme
+ * le francais. Ce que ca casse n est pas visible a l oeil : un lecteur d ecran
+ * prononce l anglais avec la phonetique francaise, la cesure se fait selon les
+ * regles francaises, et le correcteur du champ de saisie corrige en francais.
+ *
+ * ⚠⚠ LA MEME CHOSE POUR LE LIEU. `toLocaleDateString('fr-CA')` et
+ * `toLocaleString('fr-CA', { style: 'currency' })` etaient ecrits en dur dans
+ * 34 fenetres : les dates et les montants restaient quebecois sur une page
+ * anglaise — « 12,50 $ » la ou il faut « $12.50 ». Et douze fenetres forcaient
+ * la virgule decimale a la main (`.replace('.', ',')`).
+ *
+ * ➡ TROIS PIECES, UNE SEULE PLACE. Elles sont des FONCTIONS pour la meme raison
+ * que les blocs ci-dessous : une constante de module figerait la langue du
+ * premier `require`. Garde : `banc-langue-page.js` refuse qu une fenetre
+ * reecrive l une des trois a la main.
+ */
+const TETE = (attrs) =>
+  '<!doctype html><html lang="' + LANGUE.langueCourante() + '"'
+  + (attrs ? ' ' + attrs : '') + '><head><meta charset="utf-8">';
+const LIEU = () => (LANGUE.langueCourante() === 'en' ? 'en-CA' : 'fr-CA');
+/* ⚠ En anglais, remplacer le point PAR LE POINT : le geste devient un
+   non-geste, et le site d appel n a pas besoin de savoir dans quelle langue
+   il tourne. */
+const SEP_DEC = () => (LANGUE.langueCourante() === 'en' ? '.' : ',');
 
 /*
  * SOCLE COMMUN DES FENÊTRES NATIVES
@@ -2367,4 +2396,6 @@ const CSS_ETATS = `
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS,
   CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS,
-  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_THEMES, ICO };
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_THEMES, ICO,
+  /* La page, pas son texte : voir l en-tete de ce fichier. */
+  TETE, LIEU, SEP_DEC };

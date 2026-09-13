@@ -41,7 +41,7 @@
  * referme la chaîne et casse toute la fenêtre. C'est arrivé six fois ici.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -253,7 +253,7 @@ button.vert:hover:not(:disabled){background:#22c55e;border-color:#22c55e}
  *  produit directement. */
 function pageInventaire(id) {
   const depart = JSON.stringify(String(id || ''));
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+  return `${TETE()}
 <title>${T("Inventaire — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.inventory}</span><h1 id="titre">${T("Inventaire")}</h1>
@@ -1278,7 +1278,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
         h += '<tr>'
-          + '<td>' + new Date(l.date).toLocaleDateString('fr-CA') + '</td>'
+          + '<td>' + new Date(l.date).toLocaleDateString('${LIEU()}') + '</td>'
           + '<td><span class="code">' + esc(l.commande) + '</span></td>'
           + '<td>' + esc(l.nom) + '</td>'
           + '<td class="c">' + l.qte + '</td>'
