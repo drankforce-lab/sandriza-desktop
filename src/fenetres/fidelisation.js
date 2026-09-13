@@ -532,7 +532,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         return b + '</div>';
       }).join('');
     }
-    h += '<div class="pied-boite"><button class="mini" id="fi-fermer">Fermer</button></div>'
+    h += '<div class="pied-boite"><button class="mini" id="fi-fermer">${T("Fermer")}</button></div>'
       + '</div></div>';
     return h;
   }

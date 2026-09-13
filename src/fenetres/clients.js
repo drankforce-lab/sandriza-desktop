@@ -163,10 +163,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Courriel")}</th>'
         + '<th style="text-align:center">${T("Commandes")}</th><th style="text-align:right">${T("Achat total")}</th>'
-        + '<th>Statut</th></tr></thead><tbody>'
+        + '<th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var st = r.supprime ? '<span class="pill neutre">${T("Supprimé")}</span>'
-              : (r.actif ? '<span class="pill bon">Actif</span>' : '<span class="pill neutre">Inactif</span>');
+              : (r.actif ? '<span class="pill bon">${T("Actif")}</span>' : '<span class="pill neutre">${T("Inactif")}</span>');
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche client")}">'
               // ⚠ LE CADENAS EST SUR LA LIGNE, pas seulement dans la fiche ouverte.
         // Sans lui, un collegue devait CLIQUER pour decouvrir que la fiche

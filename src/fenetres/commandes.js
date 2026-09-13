@@ -367,7 +367,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           : '') + '</button>';
     if (expedition && CTX && (CTX.annees || []).length) {
       h += '<span class="lbl" style="margin-left:.4rem">${T("Année :")}</span><select id="f-annee" aria-label="${T("Année")}">'
-        + '<option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>Toutes</option>'
+        + '<option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>${T("Toutes")}</option>'
         + CTX.annees.map(function(a){
             return '<option value="' + a + '"' + (String(F.annee) === String(a) ? ' selected' : '')
               + '>' + a + '</option>'; }).join('')
@@ -383,7 +383,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h += '<div class="liste"><table><thead><tr>'
         + '<th>${T("Commande")}</th><th>${T("Client")}</th><th class="c">${T("Date")}</th>'
-        + (expedition ? '<th>Suivi</th>' : '<th class="c">Articles</th>')
+        + (expedition ? '<th>${T("Suivi")}</th>' : '<th class="c">${T("Articles")}</th>')
         + '<th class="d">${T("Total")}</th><th class="c">${T("Statut")}</th><th class="c"></th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(o){
@@ -423,13 +423,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
       h += '</tbody></table></div>';
 
-      h += '<div class="pagi"><span>Afficher</span>'
+      h += '<div class="pagi"><span>${T("Afficher")}</span>'
         + '<select id="pg-taille" aria-label="${T("Nombre de commandes par page")}">'
         + '<option value="auto"' + (F.auto ? ' selected' : '') + '>Auto</option>'
         + [10, 20, 50, 100].map(function(n){
             return '<option value="' + n + '"' + (!F.auto && F.parPage === n ? ' selected' : '') + '>' + n + '</option>';
           }).join('')
-        + '</select><span>par page</span>'
+        + '</select><span>${T("par page")}</span>'
         + '<span class="pos">'
         + '<button class="mini" id="pg-prec"' + (d.page <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
         + ' ' + (d.page * d.parPage + 1) + '–' + Math.min((d.page + 1) * d.parPage, d.total)
@@ -524,7 +524,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (c.paiementSquare ? '<span class="num">' + esc(c.paiementSquare) + '</span>'
                           : '<span style="color:var(--tx-att)">${T("Commande démo — aucun paiement Square")}</span>')
       + (c.afterpay ? '<span class="badge2">AFTERPAY</span>' : '') + '</div></div>'
-      + '<div class="bloc"><h3>Livraison</h3>'
+      + '<div class="bloc"><h3>${T("Livraison")}</h3>'
       + '<div class="mut">' + esc(c.adresse.rue) + '<br>'
       + esc(c.adresse.ville) + (c.adresse.province ? ', ' + esc(c.adresse.province) : '')
       + ' ' + esc(c.adresse.cp) + '</div>'
@@ -547,9 +547,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var t = d.totaux;
     h += '<div class="totaux"><div>'
-      + '<div>Sous-total</div>'
+      + '<div>${T("Sous-total")}</div>'
       + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + (Math.round(x.taux * 1000000) / 10000) + ' %)</div>'; }).join('')
-      + (t.livraison > 0 ? '<div>Livraison</div>' : '')
+      + (t.livraison > 0 ? '<div>${T("Livraison")}</div>' : '')
       + (t.prioritaire > 0 ? '<div><span class="ic">⚡</span> ${T("Traitement prioritaire")}</div>' : '')
       + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">Coupon</div>' : '')
       + '<div class="tt">${T("Total")}</div></div>'
@@ -573,7 +573,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + argent(rb.fraisRetenus) + '</strong> '
           + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursés au client")}</span>'
              : rb.fraisRembourses > 0
-               ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> ${T("Partiel — remb.")} ' + argent(rb.fraisRembourses) + ' · reste ' + argent(rb.fraisRestants) + '</span>'
+               ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> ${T("Partiel — remb.")} ' + argent(rb.fraisRembourses) + ' ${T("· reste")} ' + argent(rb.fraisRestants) + '</span>'
                : '<span class="badge2 or">${T("⏳ Non remboursés")}</span>') + '</div>';
       }
       h += '<div class="fin3">${T("Total remboursé : −")}' + argent(rb.total)
@@ -676,7 +676,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}');
       } else {
         VERROU_PRIS = false; VERROU_PAR = v.parQui || '${T("quelqu’un d’autre")}';
-        sous.textContent = 'en traitement par ' + VERROU_PAR;
+        sous.textContent = '${T("en traitement par")} ' + VERROU_PAR;
       }
       if (VUE === 'detail') dessiner();
     });
@@ -761,7 +761,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '${T("réautoriser l’envoi des courriels de cette commande (le client pourra les recevoir")} '
               + '${T("à nouveau). Sinon, la protection anti-doublon reste active.")}</span></label>' : '')
         + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="prim" id="v-oui">Confirmer</button></div>';
+        + '<button class="prim" id="v-oui">${T("Confirmer")}</button></div>';
       voile(h, function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
@@ -795,13 +795,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('commandes:fraisApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
       voile('<h3>${T("Rembourser les frais de service")}</h3>'
-        + '<p>Rembourser <strong>' + argent(ap.montant) + '</strong> de frais de service retenus '
+        + '<p>${T("Rembourser")} <strong>' + argent(ap.montant) + '</strong> ${T("de frais de service retenus")} '
         + '${T("au client via Square ?")}'
         + (ap.dejaRembourse > 0 ? '<br><span style="color:var(--tx2)">(' + argent(ap.dejaRembourse)
             + ' ${T("déjà remboursés sur")} ' + argent(ap.totalRetenu) + ' retenus)</span>' : '')
         + ' <strong>${T("Cette opération est irréversible.")}</strong></p>'
         + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="prim" id="v-oui">Rembourser</button></div>',
+        + '<button class="prim" id="v-oui">${T("Rembourser")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){

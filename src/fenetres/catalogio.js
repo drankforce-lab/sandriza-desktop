@@ -469,8 +469,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span>Page ' + (LIGNES.page + 1) + ' / ' + LIGNES.pages + '</span>'
         + '<button class="mini" data-page="' + (LIGNES.page + 1) + '"' + (LIGNES.page >= LIGNES.pages - 1 ? ' disabled' : '') + '>${T("Suivant →")}</button>';
     }
-    return '<div class="pager"><span class="gauche">Afficher '
-      + '<select id="taille" aria-label="${T("Nombre de lignes par page")}">' + opts + '</select> par page · '
+    return '<div class="pager"><span class="gauche">${T("Afficher")} '
+      + '<select id="taille" aria-label="${T("Nombre de lignes par page")}">' + opts + '</select> ${T("par page ·")} '
       + LIGNES.total + ' ligne' + plur(LIGNES.total) + '</span>' + nav + '</div>';
   }
   function vueApercu(){
@@ -513,7 +513,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +     '<tbody>' + lignes + '</tbody></table>' + pager()
       + '</div>'
       + '<div class="barre">'
-      +   '<button class="prim" ' + ((c.creation + c.maj) ? '' : 'disabled') + ' data-act="confirmer">Appliquer '
+      +   '<button class="prim" ' + ((c.creation + c.maj) ? '' : 'disabled') + ' data-act="confirmer">${T("Appliquer")} '
       +     (c.creation + c.maj) + ' changement' + plur(c.creation + c.maj) + '</button>'
       +   '<span class="compte">${T("Les lignes en erreur et inchangées sont ignorées. Aucun produit n’est supprimé,")} '
       +     '${T("et aucun produit absent du fichier n’est touché.")}</span>'
@@ -583,7 +583,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   '${T("qu’un collègue est en train de modifier sera refusée et listée à la fin.")}</div>'
       + '<div class="pied-boite">'
       +   '<button class="gauche" data-conf="annuler">${T("Annuler")}</button>'
-      +   '<button class="prim" data-conf="appliquer">Appliquer</button>'
+      +   '<button class="prim" data-conf="appliquer">${T("Appliquer")}</button>'
       + '</div>'
       + '</div></div>';
   }
@@ -652,7 +652,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          ⚠ Et le message nomme le dossier RÉEL, pas « dossier Exports » : c est
          la phrase qui trompait dès qu un dossier personnel était réglé. */
       relireDossier().then(function(){
-        var ou = (DOSSIER && DOSSIER.dir) ? DOSSIER.dir : 'le dossier des exports';
+        var ou = (DOSSIER && DOSSIER.dir) ? DOSSIER.dir : '${T("le dossier des exports")}';
         dire(quoi + ' ${T("enregistré :")} ' + r.nom + ' ${T("— dans")} ' + ou + '.'
           + ((DOSSIER && DOSSIER.repli) ? ' ${T("Votre dossier ne répondait pas.")}' : ''),
           (DOSSIER && DOSSIER.repli) ? 'att' : 'bon');
@@ -688,7 +688,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var m = r && r.motif;
       if (m === 'annule') return;                       // il a fermé la boîte : rien à dire
       if (m === 'lecture_seule') {
-        dire('${T("Impossible d’écrire dans")} ' + ((r && r.chemin) || 'ce dossier')
+        dire('${T("Impossible d’écrire dans")} ' + ((r && r.chemin) || '${T("ce dossier")}')
           + '${T(". Le dossier n’a pas été changé — choisissez-en un autre,")} '
           + '${T("ou demandez les droits d’écriture sur celui-là.")}', 'err');
         return;

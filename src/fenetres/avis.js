@@ -269,9 +269,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="grille">'
       + '<div><div class="l">${T("Client")}</div><div class="v">' + esc(r.client)
       + (r.verifie ? ' <span class="pill bon">${T("vérifié")}</span>' : '') + '</div></div>'
-      + (r.commande ? '<div><div class="l">Commande</div><div class="v">' + esc(r.commande) + '</div></div>' : '')
+      + (r.commande ? '<div><div class="l">${T("Commande")}</div><div class="v">' + esc(r.commande) + '</div></div>' : '')
       + (r.taille ? '<div><div class="l">${T("Taille achetée")}</div><div class="v">' + esc(r.taille) + '</div></div>' : '')
-      + '<div><div class="l">Langue</div><div class="v">' + esc(r.langue) + '</div></div>'
+      + '<div><div class="l">${T("Langue")}</div><div class="v">' + esc(r.langue) + '</div></div>'
       + '<div><div class="l">${T("Déposé le")}</div><div class="v">' + esc(r.date) + '</div></div>'
       + (r.approuveLe ? '<div><div class="l">${T("Approuvé le")}</div><div class="v">' + esc(r.approuveLe) + '</div></div>' : '')
       + (r.photos ? '<div><div class="l">Photos</div><div class="v">' + r.photos + '</div></div>' : '')
@@ -297,7 +297,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             }).join('') + '</div>'
           : '')
       + (r.titre ? '<div style="font-weight:700;margin-bottom:.35rem">' + esc(r.titre) + '</div>' : '')
-      + '<div class="texte">' + esc(r.texte || '(aucun texte)') + '</div>'
+      + '<div class="texte">' + esc(r.texte || '${T("(aucun texte)")}') + '</div>'
       + (r.reponse
           ? '<div class="reponse"><div class="dt" style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
             + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
@@ -320,7 +320,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           ? '<button id="a-masquer">' + (r.statut === 'hidden' ? '<span class="ic">👁</span>${T(" Republier")}' : '<span class="ic">🙈</span>${T(" Masquer")}') + '</button>'
           : '')
       + (r.statut === 'pending' ? '<button class="prim" id="a-approuver">${T("✓ Approuver")}</button>' : '')
-      + '<button id="a-fermer">Fermer</button>'
+      + '<button id="a-fermer">${T("Fermer")}</button>'
       + '</div></div></div>';
     return h;
   }

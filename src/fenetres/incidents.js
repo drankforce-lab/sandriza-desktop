@@ -316,7 +316,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<span class="msgsur" id="a-msg"></span>'
       + (ETAPE<dernier
           ? '<button class="prim" id="a-suiv">${T("Suivant →")}</button>'
-          : (RO ? '<button class="b" id="a-fermer2">Fermer</button>'
+          : (RO ? '<button class="b" id="a-fermer2">${T("Fermer")}</button>'
                 : '<button class="prim" id="a-enr">✓ '+(EDITID?'${T("Enregistrer les modifications")}':'${T("Enregistrer")}')+'</button>'));
   }
 
@@ -370,7 +370,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inc';
     sur.innerHTML = '<div class="boite"><div class="tt"><h3><span class="ic">🛡</span> '+(id?'${T("Modifier l’incident")}':'${T("Consigner un incident")}')+'</h3>'
       + '<div><button class="sz-btnplein" id="a-plein" title="${T("Occuper toute la fenêtre")}">${T("⛶ Plein écran")}</button>'
-      + '<button class="mini" id="a-x">Fermer</button></div></div>'
+      + '<button class="mini" id="a-x">${T("Fermer")}</button></div></div>'
       + '<div class="liste">'
       + '<p class="loi" style="margin:0 0 1rem">${T("Registre des incidents de sécurité (Loi 25) — parcourez les étapes ; seule la <b>date de prise de connaissance</b> est obligatoire.")}</p>'
       + '<div class="ferr" id="a-err"></div>'
@@ -479,10 +479,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     sur.innerHTML = '<div class="boite" style="max-width:720px"><div class="tt">'
       + '<h3>${T("Incident — ")}'+esc(inc.knownAt||'')+' '+pilRisque(inc.seriousRisk)+'</h3>'
       + '<div><button class="sz-btnplein" id="v-plein" title="${T("Occuper toute la fenêtre")}">${T("⛶ Plein écran")}</button>'
-      + '<button class="mini" id="v-x">Fermer</button></div></div>'
+      + '<button class="mini" id="v-x">${T("Fermer")}</button></div></div>'
       + '<div class="liste fiche">'+h+'</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
-      + '<button class="b" id="v-fermer">Fermer</button>'
+      + '<button class="b" id="v-fermer">${T("Fermer")}</button>'
       + (D.peutModifier ? '<button class="prim" id="v-edit"><span class="ic">✏</span>${T(" Modifier")}</button>' : '')
       + '</div></div>';
     document.body.appendChild(sur);

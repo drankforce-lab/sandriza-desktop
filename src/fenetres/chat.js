@@ -289,11 +289,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<option value="pending">${T("En attente")}</option>'
         + '<option value="open">${T("Ouverte")}</option>'
         + '<option value="closed">${T("Fermée")}</option></select>'
-        + '<button class="mini" id="ch-fermer-b">Fermer</button>'
+        + '<button class="mini" id="ch-fermer-b">${T("Fermer")}</button>'
         + '<button class="mini prim" id="ch-envoyer">${T("Envoyer la réponse")}</button>'
         + '</div>';
     } else {
-      h += '<div class="pied-boite"><button class="mini" id="ch-fermer-b">Fermer</button></div>';
+      h += '<div class="pied-boite"><button class="mini" id="ch-fermer-b">${T("Fermer")}</button></div>';
     }
     h += '</div></div>';
     return h;

@@ -233,7 +233,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<button id="b-zip">${T("Archive de l’année")}</button>'
       + '<button id="b-recharger">${T("Recharger")}</button></span></div>');
 
-    h.push('<div class="carte"><h2>Conciliations ' + ANNEE + '</h2>');
+    h.push('<div class="carte"><h2>${T("Conciliations")} ' + ANNEE + '</h2>');
     if (!(D.liste || []).length) {
       h.push('<div class="vide">${T("Aucune conciliation pour cette année.")}</div>');
     } else {
@@ -509,7 +509,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '</div>');
 
     if (!D.verrouille && D.peutEcrire) {
-      h.push('<div class="carte"><h2>Clore</h2>'
+      h.push('<div class="carte"><h2>${T("Clore")}</h2>'
         + '<div class="barreoutils">'
         + '<button id="r-completer">${T("Marquer complétée")}</button>'
         + '<button class="prim' + (s.isBalanced ? '' : ' ') + '" id="r-verrouiller">'
@@ -778,7 +778,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (REC && !r.rec) { REC = ''; }
       sous.textContent = (r.liste || []).length + ' conciliation'
         + ((r.liste || []).length > 1 ? 's' : '') + ' · ' + ANNEE
-        + (r.peutEcrire ? '' : ' · lecture seule');
+        + (r.peutEcrire ? '' : ' ${T("· lecture seule")}');
       // L etat d ouverture : on ouvre le PREMIER rapprochement sur l onglet
       // demande. Sans lui, aucun jeu d essai ne dessinerait jamais les trois
       // autres onglets — ils ne s atteignent qu au clic.

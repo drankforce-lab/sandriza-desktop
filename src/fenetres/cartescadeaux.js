@@ -276,7 +276,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     h += '<div class="pied-boite">'
       + (g.statut === 'pending' && D.peutModifier
           ? '<button class="mini prim" id="cc-activer">${T("Activer à la main")}</button>' : '')
-      + '<button class="mini" id="cc-annuler">Fermer</button></div>'
+      + '<button class="mini" id="cc-annuler">${T("Fermer")}</button></div>'
       + '</div></div>';
     return h;
   }

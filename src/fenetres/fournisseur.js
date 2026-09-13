@@ -87,21 +87,21 @@ function pageFournisseur(id) {
       + ch('f-web', '${T("Site web")}', { placeholder: 'https://…' })
       + '</div></div></div>');
 
-    h.push('<div class="etape"><div class="carte"><h2>Adresse</h2><div class="grille">'
+    h.push('<div class="etape"><div class="carte"><h2>${T("Adresse")}</h2><div class="grille">'
       + ch('f-rue', 'Rue', { large: true })
       + ch('f-ville', 'Ville')
       + sel('f-prov', 'Province', CTX.provinces)
       + ch('f-cp', '${T("Code postal")}', { placeholder: 'G1H 1T4' })
       + '</div></div></div>');
 
-    h.push('<div class="etape"><div class="carte"><h2>Approvisionnement</h2>'
+    h.push('<div class="etape"><div class="carte"><h2>${T("Approvisionnement")}</h2>'
       + '<div class="ch large" style="margin-bottom:.65rem"><label>${T("Catégories fournies")}</label><div class="cases">'
       + CTX.categories.map(function(c){
           return '<label><input type="checkbox" class="f-cat" value="' + esc(c.cle) + '">' + esc(c.libelle) + '</label>';
         }).join('')
       + '</div></div><div class="grille">'
       + sel('f-delai', '${T("Délai de livraison moyen")}', CTX.delais)
-      + '<div class="ch"><label for="f-actif">Statut</label><select id="f-actif">'
+      + '<div class="ch"><label for="f-actif">${T("Statut")}</label><select id="f-actif">'
       + '<option value="1">${T("Actif")}</option><option value="0">${T("Inactif")}</option></select></div>'
       + ch('f-notes', '${T("Notes internes")}', { multi: true, large: true, rows: 3 })
       + '</div></div></div>');
@@ -127,8 +127,8 @@ function pageFournisseur(id) {
 
     Assist.poser([
       { t: 'Identification', obl: ['f-nom'] },
-      { t: 'Adresse',        obl: [] },
-      { t: 'Approvisionnement', obl: [] }
+      { t: '${T("Adresse")}',        obl: [] },
+      { t: '${T("Approvisionnement")}', obl: [] }
     ]);
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);

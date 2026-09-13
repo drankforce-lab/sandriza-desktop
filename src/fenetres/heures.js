@@ -153,7 +153,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h.push('<div class="chef"><div><strong>${T("Afficher les heures dans le pied de page")}</strong>'
       + '<p>${T("Statut « ouvert / fermé » calculé en temps réel à l’heure de l’Est.")}</p></div>'
       + '<label class="bascule"><input type="checkbox" id="h-on"' + (CFG && CFG.enabled ? ' checked' : '')
-      + (RO ? ' disabled' : '') + '> Afficher</label></div>');
+      + (RO ? ' disabled' : '') + '> ${T("Afficher")}</label></div>');
     h.push('<table><thead><tr><th>${T("Jour")}</th><th>${T("Ouverture")}</th><th>${T("Fermeture")}</th>'
       + '<th class="c">${T("Fermé ce jour")}</th></tr></thead><tbody>');
     JOURS.forEach(function(nom, i){

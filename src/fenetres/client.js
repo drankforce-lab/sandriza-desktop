@@ -205,20 +205,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dessinerFiche(){
     var c = R.client, a = c.adresse;
     var h = '<div class="carte"><div class="tuiles">'
-      + '<div class="tuile"><div class="k">Commandes</div><div class="v">' + R.stats.commandes + '</div></div>'
-      + '<div class="tuile"><div class="k">Retours</div><div class="v"' + (R.stats.retours ? ' style="color:var(--tx-f6a5a5)"' : '') + '>' + R.stats.retours + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Commandes")}</div><div class="v">' + R.stats.commandes + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Retours")}</div><div class="v"' + (R.stats.retours ? ' style="color:var(--tx-f6a5a5)"' : '') + '>' + R.stats.retours + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Total dépensé")}</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v" style="font-size:.92rem">' + esc(dateFr(c.inscritLe)) + '</div></div>'
       + '</div></div>';
     h += '<div class="carte"><h2>${T("Coordonnées")}</h2>'
       + (c.tel ? '<div class="ligne"><span class="k">${T("Téléphone")}</span><span>' + esc(c.tel) + '</span></div>' : '')
-      + '<div class="ligne"><span class="k">Adresse</span><span style="text-align:right">'
+      + '<div class="ligne"><span class="k">${T("Adresse")}</span><span style="text-align:right">'
       + esc([a.rue, a.ville, a.province, a.codePostal, a.pays].filter(Boolean).join(', ') || '—') + '</span></div>'
       + '<div class="ligne"><span class="k">${T("Langue des courriels")}</span><span>' + (c.langue === 'en' ? 'English' : 'Français') + '</span></div>'
       + (c.supprime && c.supprimeLe ? '<div class="ligne"><span class="k">${T("Supprimé le")}</span><span>' + esc(dateFr(c.supprimeLe)) + '</span></div>' : '')
       + '</div>';
     h += '<div class="carte"><h2>${T("Commandes récentes")} <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">— '
-      + R.stats.commandes + ' au total</span></h2>'
+      + R.stats.commandes + ' ${T("au total")}</span></h2>'
       + (R.dernieres.length
         ? R.dernieres.map(function(o){
             return '<div class="cmd"><span class="num">' + esc(o.numero) + '</span>'
@@ -262,7 +262,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '</div></div>';
     h += '<div class="carte"><h2>${T("Adresse de livraison")}</h2><div class="r2">'
       + '<div class="ch large"><label for="e-rue">Rue</label><input id="e-rue" value="' + esc(a.rue) + '"></div>'
-      + '<div class="ch"><label for="e-ville">Ville</label><input id="e-ville" value="' + esc(a.ville) + '"></div>'
+      + '<div class="ch"><label for="e-ville">${T("Ville")}</label><input id="e-ville" value="' + esc(a.ville) + '"></div>'
       + '<div class="ch"><label for="e-prov">Province</label><select id="e-prov">'
       + R.provinces.map(function(p){ return '<option value="' + p + '"' + (p === a.province ? ' selected' : '') + '>' + p + '</option>'; }).join('')
       + '</select></div>'
@@ -343,7 +343,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var pg = document.getElementById('btn-purger');
     if (pg) pg.onclick = function(){
       voile('<h3><span class="ic">⚠</span> ${T("Supprimer définitivement ?")}</h3>'
-        + '<p>Effacer <strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + '${T(") de la base ?")}</p>'
+        + '<p>${T("Effacer")} <strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + '${T(") de la base ?")}</p>'
         + '<p style="color:var(--tx-f6a5a5)">${T("Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.")}</p>'
         + '<p class="aide"><span class="ic">✅</span> ${T("Ce compte n’a aucune commande — rien de comptable n’est perdu.")}</p>'
         + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'

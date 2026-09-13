@@ -215,7 +215,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + (r.telephone ? '<div class="dt">' + esc(r.telephone) + '</div>' : '') + '</td>'
               + '<td>' + ((r.categories || []).map(function(c){
                   return '<span class="pill neutre">' + esc(c) + '</span>'; }).join('') || '—') + '</td>'
-              + '<td>' + (r.actif ? '<span class="pill bon">Actif</span>' : '<span class="pill neutre">Inactif</span>') + '</td>'
+              + '<td>' + (r.actif ? '<span class="pill bon">${T("Actif")}</span>' : '<span class="pill neutre">${T("Inactif")}</span>') + '</td>'
               /* ⚠ ARME EN DEUX CLICS, comme partout ailleurs : une fiche
                  supprimee ne se reconstitue pas, et la ligne entiere est deja
                  cliquable pour OUVRIR — un bouton a un seul clic juste a cote

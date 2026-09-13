@@ -155,9 +155,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="p">' + fmt((l.price || 0) * (l.quantity || 1)) + '</div></div>');
     });
     h.push('</div><div class="bas">');
-    if (t.sousTotal != null) h.push('<div class="sl"><span>Sous-total</span><b>' + fmt(t.sousTotal) + '</b></div>');
+    if (t.sousTotal != null) h.push('<div class="sl"><span>${T("Sous-total")}</span><b>' + fmt(t.sousTotal) + '</b></div>');
     if (t.rabais)    h.push('<div class="sl"><span>${T("Rabais")}</span><b>− ' + fmt(t.rabais) + '</b></div>');
-    if (t.livraison) h.push('<div class="sl"><span>Livraison</span><b>' + fmt(t.livraison) + '</b></div>');
+    if (t.livraison) h.push('<div class="sl"><span>${T("Livraison")}</span><b>' + fmt(t.livraison) + '</b></div>');
     (t.taxes || []).forEach(function(x){
       h.push('<div class="sl"><span>' + esc(x.nom) + '</span><b>' + fmt(x.montant) + '</b></div>');
     });

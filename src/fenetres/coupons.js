@@ -213,7 +213,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="cases">'
       + '<label><input type="checkbox" id="cp-per"' + (c.parClient ? ' checked' : '') + '> ${T("Une seule fois par client")}</label>'
       + '<label><input type="checkbox" id="cp-onsale"' + (c.cumulSolde ? ' checked' : '') + '> ${T("Cumulable avec les soldes et promotions")}</label>'
-      + '<label><input type="checkbox" id="cp-act"' + (c.actif !== false ? ' checked' : '') + '> Actif</label>'
+      + '<label><input type="checkbox" id="cp-act"' + (c.actif !== false ? ' checked' : '') + '> ${T("Actif")}</label>'
       + '</div>'
       + '<div class="pied-boite"><button class="mini" id="cp-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="cp-enr">' + (creation ? '${T("Créer le coupon")}' : '${T("Enregistrer")}') + '</button></div>'
@@ -226,7 +226,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     var h = '<div class="barreoutils">'
       + '<input aria-label="${T("Code ou nom")}" type="search" id="cp-q" placeholder="${T("Code ou nom…")}" value="' + esc(Q) + '">'
-      + '<button class="mini' + (ETAT === '' ? ' actif' : '') + '" data-etat="">Tous</button>'
+      + '<button class="mini' + (ETAT === '' ? ' actif' : '') + '" data-etat="">${T("Tous")}</button>'
       + '<button class="mini' + (ETAT === 'actifs' ? ' actif' : '') + '" data-etat="actifs">${T("En cours")}</button>'
       + '<button class="mini' + (ETAT === 'inactifs' ? ' actif' : '') + '" data-etat="inactifs">${T("Hors service")}</button>'
       + '<div class="droite">'

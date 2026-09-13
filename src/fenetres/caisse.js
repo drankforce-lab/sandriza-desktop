@@ -396,7 +396,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         : '${T("Aucun article — scannez un code-barres pour commencer.")}') + '</div>';
       return;
     }
-    var h = '<div class="l"><span>Sous-total</span><span>' + argent(TOT.sousTotal) + '</span></div>';
+    var h = '<div class="l"><span>${T("Sous-total")}</span><span>' + argent(TOT.sousTotal) + '</span></div>';
     if (TOT.rabais > 0) h += '<div class="l bon"><span>${T("Rabais")}</span><span>-' + argent(TOT.rabais) + '</span></div>';
     if (TOT.livraison > 0) h += '<div class="l"><span>${T("Livraison")}</span><span>' + argent(TOT.livraison) + '</span></div>';
     (TOT.taxes || []).forEach(function(x){
@@ -524,7 +524,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }).join('');
       return '<div class="art"><div class="nom">' + esc(a.nom)
         + (a.code ? '<span class="code">' + esc(a.code) + '</span>' : '') + '</div>'
-        + '<div class="vars">' + (vars || '<span class="q">aucune variante</span>') + '</div></div>';
+        + '<div class="vars">' + (vars || '<span class="q">${T("aucune variante")}</span>') + '</div></div>';
     }).join('') + '</div>';
   }
 
@@ -548,8 +548,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         document.getElementById('c-res').innerHTML = l.length
           ? '<div class="liste-cli">' + l.map(function(u){
               return '<div class="cli" data-uid="' + esc(u.id) + '">'
-                + '<strong>' + esc(u.nom || '(sans nom)') + '</strong>'
-                + '<span class="m"> · ' + esc(u.courriel || 'sans courriel')
+                + '<strong>' + esc(u.nom || '${T("(sans nom)")}') + '</strong>'
+                + '<span class="m"> · ' + esc(u.courriel || '${T("sans courriel")}')
                 + (u.commandes > 0 ? ' · ' + u.commandes + ' commande(s)' : '') + '</span></div>';
             }).join('') + '</div>'
           : '';
@@ -679,7 +679,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     v.className = 'voile';
     v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '<span class="ic">🔗</span> ${T("Vente")}${T(" en attente de paiement")}'
       : '${T("Vente enregistrée")}') + '</h3>' + lignes + lien + avis
-      + '<div class="fin"><button class="prim" id="btn-ok">Continuer</button></div></div>';
+      + '<div class="fin"><button class="prim" id="btn-ok">${T("Continuer")}</button></div></div>';
     document.body.appendChild(v);
     /* ⚠ LE VERDICT EST DIT DANS LES MOTS DE CET ECRAN, pas herite du site : le
        coeur rend un etat (paye / annule / insuffisant / attente), et c est ici
@@ -762,7 +762,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       remplirListe('v-paie', r.paiements, 'terminal');
       remplirListe('v-remise', r.remises, 'courriel');
       document.getElementById('sous').textContent = r.par
-        ? (r.par + (r.peutVendre ? '' : ' · lecture seule')) : '';
+        ? (r.par + (r.peutVendre ? '' : ' ${T("· lecture seule")}')) : '';
       if (!r.peutVendre) dire('${T("Votre rôle ne permet pas d’enregistrer une vente.")}', 'att');
       dessinerLignes(); dessinerTotaux(); majBouton();
       var s = document.getElementById('scan');

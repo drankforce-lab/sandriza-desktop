@@ -173,7 +173,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="ch"><label for="ab-prenom">${T("Prénom")}</label><input id="ab-prenom" placeholder="${T("Marie")}">'
       + '<span class="aide">${T("Sert à personnaliser les envois.")}</span></div>'
       + '<div class="pied-boite"><button class="mini" id="ab-annuler">${T("Annuler")}</button>'
-      + '<button class="mini prim" id="ab-ajouter">Ajouter</button></div>'
+      + '<button class="mini prim" id="ab-ajouter">${T("Ajouter")}</button></div>'
       + '</div></div>';
   }
 
@@ -186,7 +186,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<textarea id="ab-vrac" aria-label="${T("Liste d’adresses à ajouter, une par ligne")}" placeholder="${T("marie@exemple.com,Marie")}'
       + String.fromCharCode(10) + '${T("sophie@exemple.com")}"></textarea>'
       + '<div class="pied-boite"><button class="mini" id="ab-annuler">${T("Annuler")}</button>'
-      + '<button class="mini prim" id="ab-importer">Importer</button></div>'
+      + '<button class="mini prim" id="ab-importer">${T("Importer")}</button></div>'
       + '</div></div>';
   }
 
@@ -214,7 +214,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         }).join('')
       + '<div class="droite">'
       + (D.peutModifier
-          ? '<button class="mini" id="ab-import">Importer</button>'
+          ? '<button class="mini" id="ab-import">${T("Importer")}</button>'
             + '<button class="mini prim" id="ab-nouveau">${T("+ Ajouter")}</button>' : '')
       + '<span>' + rows.length + (rows.length > 1 ? '${T(" abonnés")}' : '${T(" abonné")}') + '</span>'
       + '</div></div>';

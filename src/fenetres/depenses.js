@@ -283,7 +283,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="barreoutils">'
       + '<button class="mini' + (VUE === 'depenses' ? ' actif' : '') + '" data-vue="depenses">${T("Dépenses")}</button>'
-      + '<button class="mini' + (VUE === 'annuaire' ? ' actif' : '') + '" data-vue="annuaire">Fournisseurs</button>'
+      + '<button class="mini' + (VUE === 'annuaire' ? ' actif' : '') + '" data-vue="annuaire">${T("Fournisseurs")}</button>'
       + '</div>';
 
     if (VUE === 'annuaire') { h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); return; }
@@ -316,7 +316,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="s"><div class="n">' + esc(D.totalTps) + '</div><div class="l">${T("TPS payée")}</div>'
       + '<div class="sub">${T("crédit sur intrants")}</div></div>'
       + '<div class="s"><div class="n">' + esc(D.totalTvq) + '</div><div class="l">${T("TVQ payée")}</div>'
-      + '<div class="sub">remboursement sur intrants</div></div>'
+      + '<div class="sub">${T("remboursement sur intrants")}</div></div>'
       + '<div class="s"><div class="n">' + D.nombre + '</div><div class="l">${T("Dépenses")}</div>'
       + '<div class="sub">' + esc(D.periode) + '</div></div>'
       + '</div>';
@@ -494,7 +494,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div><div class="l">${T("Date")}</div><div class="v">' + esc(e.dateFr) + '</div></div>'
       + '<div><div class="l">${T("Mode de paiement")}</div><div class="v">' + esc(e.paiementLbl) + '</div></div>'
       + '</div>'
-      + '<div class="texte">' + esc(e.description || '(aucune description)') + '</div>';
+      + '<div class="texte">' + esc(e.description || '${T("(aucune description)")}') + '</div>';
 
     if (e.aTaxes) {
       h += '<div class="carte" style="margin-top:.6rem">'
@@ -527,7 +527,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button>' : '')
       + (e.aRecu ? '<button id="d-recu"><span class="ic">📎</span> ${T("Ouvrir le reçu")}</button>' : '')
       + (D.peutModifier ? '<button class="prim" id="d-modifier"><span class="ic">✎</span> ${T("Modifier")}</button>' : '')
-      + '<button id="d-fermer">Fermer</button>'
+      + '<button id="d-fermer">${T("Fermer")}</button>'
       + '</div>';
     if (SUPPR_ARME) {
       h += '<div class="aide" style="margin-top:.5rem">${T("Elle disparaît de la comptabilité et des")} '
@@ -632,7 +632,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return h;
     }
     h += '<div class="pied-boite">'
-      + '<button id="f-annuler">Fermer</button>'
+      + '<button id="f-annuler">${T("Fermer")}</button>'
       + '<button class="prim" id="f-ok"' + (OCCUPE ? ' disabled' : '') + '>'
       + (neuf ? '${T("+ Ajouter la dépense")}' : '${T("✓ Enregistrer")}') + '</button>'
       + '</div></div></div>';
@@ -778,7 +778,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           FORM.lectureErr = !r.verifie;
           var dd = (r.depuisDocument || []);
           FORM.lecture = (r.verifie
-              ? ('${T("✓ Lu directement dans le document :")} ' + esc(dd.join(', ') || 'les montants') + '.')
+              ? ('${T("✓ Lu directement dans le document :")} ' + esc(dd.join(', ') || '${T("les montants")}') + '.')
               : '${T("Aucun texte à lire dans ce document (photo ou numérisation) : tout vient de la lecture automatique. Vérifiez CHAQUE champ.")}')
             + (r.modeleEcarte
                 ? ' ${T("La lecture automatique a été écartée (elle ne correspondait pas au document) — complétez la description et la catégorie.")}'

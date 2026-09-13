@@ -414,7 +414,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function onglets(){
     return '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'campagnes' ? ' actif' : '') + '" data-onglet="campagnes">Campagnes</button>'
+      + '<button class="mini' + (ONGLET === 'campagnes' ? ' actif' : '') + '" data-onglet="campagnes">${T("Campagnes")}</button>'
       + '<button class="mini' + (ONGLET === 'chaines' ? ' actif' : '') + '" data-onglet="chaines">${T("Chaînes automatisées")}</button>'
       + '<button class="mini' + (ONGLET === 'segments' ? ' actif' : '') + '" data-onglet="segments">Segments</button>'
       // ⚠ LA RECHERCHE N EST PLUS ICI (demande du 2026-08-14 : << pas beau a
@@ -504,7 +504,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          part vraiment. Basculer vers HTML CONVERTIT les blocs ; revenir au
          visuel remet le HTML dans un bloc << HTML libre >>, sans rien perdre. */
       + '<div class="bqbar">'
-      + '<button class="mini' + (BMODE === 'visuel' ? ' on' : '') + '" id="f-m-vis">Visuel</button>'
+      + '<button class="mini' + (BMODE === 'visuel' ? ' on' : '') + '" id="f-m-vis">${T("Visuel")}</button>'
       + '<button class="mini' + (BMODE === 'html' ? ' on' : '') + '" id="f-m-htm">HTML</button>'
       + '</div>'
       + '<div id="f-blocs"' + (BMODE === 'visuel' ? '' : ' style="display:none"') + '>'
@@ -528,7 +528,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
       + (f.id ? '${T("Modifier la chaîne")}' : '${T("Nouvelle chaîne")}') + '</h3>'
       + '<div class="rang">'
-      + '<div class="champ"><span class="lbl">Nom</span>'
+      + '<div class="champ"><span class="lbl">${T("Nom")}</span>'
       + '<input id="f-nom" aria-label="${T("Nom de la chaîne")}" value="' + esc(ch.nom || '') + '" placeholder="${T("Bienvenue en trois temps")}"></div>'
       + '<div class="champ"><span class="lbl">${T("Déclencheur")}</span><select id="f-decl" aria-label="${T("Déclencheur")}">'
       + (d.declencheurs || []).map(function(x){
@@ -1005,7 +1005,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div id="f-criteres">' + vueCriteres() + '</div>'
       + '<div class="portee" id="f-portee">${T("Portée : ")}<strong id="f-portee-n">—</strong> '
       + 'sur ' + (d.abonnesActifs || 0) + ' ${T("abonnées actives")} '
-      + '<button class="mini" id="f-compter">Compter</button></div>'
+      + '<button class="mini" id="f-compter">${T("Compter")}</button></div>'
       + '<div class="fin3"><button id="f-annuler">${T("Annuler")}</button>'
       + '<button class="prim" id="f-ok">${T("Enregistrer")}</button></div></div>';
   }
@@ -1035,8 +1035,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     if (def.type === 'booleen') {
       var oui = (c.valeur === true || c.valeur === 'true');
-      return '<select id="' + id + '"><option value="true"' + (oui ? ' selected' : '') + '>Oui</option>'
-        + '<option value="false"' + (oui ? '' : ' selected') + '>Non</option></select>';
+      return '<select id="' + id + '"><option value="true"' + (oui ? ' selected' : '') + '>${T("Oui")}</option>'
+        + '<option value="false"' + (oui ? '' : ' selected') + '>${T("Non")}</option></select>';
     }
     return '<input id="' + id + '" value="' + esc(c.valeur) + '">';
   }
@@ -1129,7 +1129,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var h = '<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
       + (D.abonnesActifs || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Brouillons</div><div class="val neutre">'
+      + '<div class="tuile"><div class="lbl">${T("Brouillons")}</div><div class="val neutre">'
       + (D.brouillons || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Campagnes parties")}</div><div class="val">'
       + (D.envoyees || 0) + '</div></div>'
@@ -1262,7 +1262,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<span class="pill acc">' + esc(ch.declencheurLibelle) + '</span>'
           + '<div class="gestes">' + gestes + '</div></div>'
           + '<div class="compte">' + pluriel((ch.etapes || []).length, '${T("étape")}') + ' · '
-          + ch.inscriptionsActives + ' en cours · ' + ch.inscriptionsFinies + ' ${T("terminée")}'
+          + ch.inscriptionsActives + ' ${T("en cours ·")} ' + ch.inscriptionsFinies + ' ${T("terminée")}'
           + (ch.inscriptionsFinies > 1 ? 's' : '') + '</div>'
           + ((ch.etapes || []).length
               ? '<div class="etapes">' + ch.etapes.map(function(e){
@@ -1454,7 +1454,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           ? (camp.canal === 'sms' ? ((DC.smsDestinataires || 0) + ' SMS')
              : (pluriel(camp.destinataires, 'courriel')
                 + (camp.canal === 'both' ? ' et ' + (DC.smsDestinataires || 0) + ' SMS' : '')))
-          : 'les destinataires';
+          : '${T("les destinataires")}';
         dire((DC && DC.modeTest)
           ? ('${T("Mode test : un seul courriel partira, à")} ' + (DC.courrielTest || '${T("l’adresse de test")}') + '.')
           : ('${T("Cliquez pour confirmer :")} ' + combien + ' ${T("vont partir, sans retour possible.")}'), 'att');
@@ -1508,7 +1508,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         ARME = 'bas:' + idB;
         dessiner();
         dire('${T("Suspendre abandonnera")} ' + pluriel(enCours, '${T("inscription")}') + ' ${T("en cours :")} '
-          + (enCours > 1 ? 'ces personnes ne recevront jamais' : 'cette personne ne recevra jamais')
+          + (enCours > 1 ? '${T("ces personnes ne recevront jamais")}' : '${T("cette personne ne recevra jamais")}')
           + ' ${T("la suite de la séquence. Cliquez pour confirmer.")}', 'att');
         return;
       }

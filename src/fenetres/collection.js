@@ -160,7 +160,7 @@ function pageCollection(id) {
     Assist.poser([
       { t: '${T("La collection")}', obl: ['c-nom'] },
       { t: 'Image',         obl: [] },
-      { t: 'Produits',      obl: [] }
+      { t: '${T("Produits")}',      obl: [] }
     ], function(i){ if (i === 2 && PAGI) PAGI.dessiner(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);

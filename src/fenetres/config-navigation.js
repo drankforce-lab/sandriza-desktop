@@ -221,7 +221,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // sous-menu existant
       var enfants = (it.children || []);
       if (enfants.length) {
-        h.push('<div class="sous"><div class="tt">Sous-menu</div>');
+        h.push('<div class="sous"><div class="tt">${T("Sous-menu")}</div>');
         for (var j=0;j<enfants.length;j++) {
           var c = enfants[j];
           h.push('<div class="enf"><span class="fl">↳</span><span class="el">' + esc(c.label) + '</span>'
@@ -265,7 +265,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          + cols.map(function(c){ return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>'; }).join('')
          + '</select></div>';
     }
-    s += '<button class="mini prim" data-act="addchild" data-id="' + esc(id) + '">Ajouter</button>';
+    s += '<button class="mini prim" data-act="addchild" data-id="' + esc(id) + '">${T("Ajouter")}</button>';
     s += '<button class="mini" data-act="form" data-id="' + esc(id) + '">${T("Annuler")}</button>';
     s += '</div>';
     return s;

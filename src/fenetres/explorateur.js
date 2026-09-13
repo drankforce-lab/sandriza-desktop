@@ -661,8 +661,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     cptEl.textContent = n ? (n + '${T(" sélectionnée")}' + (n > 1 ? 's' : '')) : '${T("Aucune sélection")}';
     actionsEl.innerHTML =
       '<button class="jeton" id="a-tout"' + (dispo ? '' : ' disabled') + '>${T("Tout (")}' + dispo + ')</button>'
-      + '<button class="jeton" id="a-inv"' + (dispo ? '' : ' disabled') + '>Inverser</button>'
-      + '<button class="jeton" id="a-rien"' + (n ? '' : ' disabled') + '>Vider</button>'
+      + '<button class="jeton" id="a-inv"' + (dispo ? '' : ' disabled') + '>${T("Inverser")}</button>'
+      + '<button class="jeton" id="a-rien"' + (n ? '' : ' disabled') + '>${T("Vider")}</button>'
       /* ⚠ LE RETOUR EN ARRIERE EST ICI, ET PAS DANS LE STUDIO. Le Studio traite
          UNE photo a la fois ; le cas qui a motive ce lot-ci, c est cinq cents
          photos parties avec la mauvaise mise en scene. On repare la ou l on

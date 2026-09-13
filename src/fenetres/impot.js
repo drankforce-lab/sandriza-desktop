@@ -296,7 +296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'taxes' ? ' actif' : '') + '" data-onglet="taxes">TPS / TVQ</button>'
-      + '<button class="mini' + (ONGLET === 'revenus' ? ' actif' : '') + '" data-onglet="revenus">Revenus</button>'
+      + '<button class="mini' + (ONGLET === 'revenus' ? ' actif' : '') + '" data-onglet="revenus">${T("Revenus")}</button>'
       + '<button class="mini' + (ONGLET === 'documents' ? ' actif' : '') + '" data-onglet="documents">Documents</button>'
       + '<button class="mini' + (ONGLET === 'entreprise' ? ' actif' : '') + '" data-onglet="entreprise">${T("Mon entreprise")}'
       + (D.profil.complet ? '' : '<span class="n hi">!</span>') + '</button>'
@@ -307,7 +307,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           : '<select id="i-annee" aria-label="${T("Année d’imposition")}">' + (D.annees || []).map(function(a){
               return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>'
                 + a + '</option>'; }).join('') + '</select>')
-      + '<span class="droite">' + esc(D.profil.nom || 'entreprise sans nom') + '</span>'
+      + '<span class="droite">' + esc(D.profil.nom || '${T("entreprise sans nom")}') + '</span>'
       + '</div>';
 
     if (ONGLET === 'revenus') h += vueRevenus();
@@ -432,7 +432,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="avis"><span class="ic">💬</span> ${T("<strong>À titre indicatif seulement.</strong> Les lois fiscales changent ")}'
       + '${T("chaque année : faites confirmer votre situation par un comptable agréé. Les chiffres viennent")} '
-      + 'des ventes de ' + esc(MEMO.marque) + '.</div>';
+      + '${T("des ventes de")} ' + esc(MEMO.marque) + '.</div>';
     return h;
   }
 
@@ -442,7 +442,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + tuile(t.ventesNettes, '${T("Ventes nettes taxables")}', t.nbCommandes + ' commande' + (t.nbCommandes > 1 ? 's' : ''), '')
       + tuile(t.tps, '${T("TPS perçue (5 %)")}', '${T("à remettre — ARC")}', '')
       + tuile(t.tvq, '${T("TVQ perçue (9,975 %)")}', '${T("à remettre — Revenu Québec")}', '')
-      + tuile(t.totalRemettre, '${T("Net à remettre")}', t.enFaveur ? 'remboursement en votre faveur' : '${T("après crédits sur intrants")}',
+      + tuile(t.totalRemettre, '${T("Net à remettre")}', t.enFaveur ? '${T("remboursement en votre faveur")}' : '${T("après crédits sur intrants")}',
           t.enFaveur ? 'ok' : 'du')
       + '</div>';
 
@@ -450,7 +450,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        quand on demarre : sous 30 000 $, l inscription n est pas obligatoire. */
     h += '<div class="avis ' + (t.souSeuil ? 'bon' : '') + '">'
       + (t.souSeuil
-          ? ('${T("Vos ventes (")}' + esc(t.ventesNettes) + ') sont sous le seuil de ' + esc(t.seuil)
+          ? ('${T("Vos ventes (")}' + esc(t.ventesNettes) + '${T(") sont sous le seuil de")} ' + esc(t.seuil)
              + ' ${T(": l’inscription aux taxes n’est pas obligatoire. À confirmer avec votre comptable.")}')
           : ('${T("Vos ventes dépassent le seuil de")} ' + esc(t.seuil)
              + ' ${T(": l’inscription aux taxes est obligatoire, et les remises doivent être faites régulièrement.")}'))
