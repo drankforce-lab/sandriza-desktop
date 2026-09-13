@@ -15,6 +15,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('logotheque');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -81,11 +85,11 @@ label.upl{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
 
 function pageLogotheque() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Logothèque — Administration Sandriza</title>
+<title>${T("Logothèque — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.image}</span><h1>Logothèque</h1><span class="droite"></span></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Logothèque")}</h1><span class="droite"></span></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
+<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <input type="file" id="fichier" accept="image/*" style="display:none">
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
@@ -97,8 +101,8 @@ function pageLogotheque() {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -108,7 +112,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var IMP = null;          // etat du recadrage en cours
   var DELCONF = '';        // id en attente de confirmation de suppression
   var MAXPX = 1400;
-  var RATIOS = [['1:1',1,1],['4:3',4,3],['3:2',3,2],['2:1',2,1],['16:9',16,9],['3:4',3,4],['libre',0,0]];
+  var RATIOS = [['1:1',1,1],['4:3',4,3],['3:2',3,2],['2:1',2,1],['16:9',16,9],['3:4',3,4],['${T("libre")}',0,0]];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -116,20 +120,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function num(v, d){ var n = parseFloat(v); return isFinite(n) ? n : d; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    indisponible:"L'administration n'est pas encore chargée dans la fenêtre principale.",
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    image_invalide:'Le fichier choisi n’est pas une image.',
-    nom_requis:'Le nom est requis.',
-    introuvable:'Cette image n’existe plus.',
-    nuage:'Le téléversement a échoué. Réessayez.',
-    echec:"L'opération a échoué.",
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    indisponible:"${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    image_invalide:'${T("Le fichier choisi n’est pas une image.")}',
+    nom_requis:'${T("Le nom est requis.")}',
+    introuvable:'${T("Cette image n’existe plus.")}',
+    nuage:'${T("Le téléversement a échoué. Réessayez.")}',
+    echec:"${T('L\'opération a échoué.')}",
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -151,38 +155,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      hexadecimale, et la bordure serait devenue invalide, donc invisible. Un
      trait a 33 % d opacite n a pas besoin de reprise ; le texte, si. */
   function quality(dpi){
-    return dpi>=300 ? {lbl:'Excellent pour l’impression',c:'var(--tx-ok)',b:'#4ade8055'}
-         : dpi>=200 ? {lbl:'Correct pour l’impression',c:'var(--tx-jaune)',b:'#facc1555'}
-                    : {lbl:'Insuffisant pour l’impression',c:'var(--tx-err)',b:'#f8717155'};
+    return dpi>=300 ? {lbl:'${T("Excellent pour l’impression")}',c:'var(--tx-ok)',b:'#4ade8055'}
+         : dpi>=200 ? {lbl:'${T("Correct pour l’impression")}',c:'var(--tx-jaune)',b:'#facc1555'}
+                    : {lbl:'${T("Insuffisant pour l’impression")}',c:'var(--tx-err)',b:'#f8717155'};
   }
 
   // ── LISTE ───────────────────────────────────────────────────────────────────
   function carteHtml(l){
     var q = l.dpi ? quality(l.dpi) : null;
-    var meta = '<span>' + (l.w && l.h ? l.w + ' × ' + l.h + ' px' : 'dimensions ?') + '</span>'
+    var meta = '<span>' + (l.w && l.h ? l.w + ' × ' + l.h + ' px' : '${T("dimensions ?")}') + '</span>'
       + (l.w && l.h ? '<span>' + ratioLbl(l.w, l.h) + '</span>' : '')
-      + (l.alpha ? '<span>transparent</span>' : '');
+      + (l.alpha ? '<span>${T("transparent")}</span>' : '');
     var editing = (DELCONF === '') ? false : false; // (rename gere par data-ren)
     return '<div class="lcard" data-card="' + esc(l.id) + '">'
       + '<div class="th"><img src="' + esc(l.url) + '" alt="' + esc(l.name) + '" loading="lazy"></div>'
       + '<div class="bd">'
-      + '<div class="nm" data-nm="' + esc(l.id) + '" title="' + esc(l.name) + '">' + esc(l.name || 'Sans nom') + '</div>'
+      + '<div class="nm" data-nm="' + esc(l.id) + '" title="' + esc(l.name) + '">' + esc(l.name || '${T("Sans nom")}') + '</div>'
       + '<div class="mt">' + meta + '</div>'
-      + (l.printW ? '<div class="pr" style="border-color:' + q.b + ';color:' + q.c + '">' + fr(l.printW) + ' × ' + fr(l.printH) + ' po · ' + l.dpi + ' dpi</div>' : '')
+      + (l.printW ? '<div class="pr" style="border-color:' + q.b + ';color:' + q.c + '">' + fr(l.printW) + ' × ' + fr(l.printH) + '${T(" po")} · ' + l.dpi + ' dpi</div>' : '')
       + (RO ? '' : '<div class="acts">'
-        + '<button class="b" type="button" data-ren="' + esc(l.id) + '" title="Renommer"><span class="ic">✎</span></button>'
-        + '<button class="b" type="button" data-cp="' + esc(l.id) + '" title="Copier l’adresse"><span class="ic">🔗</span></button>'
-        + '<button class="b dgr" type="button" data-del="' + esc(l.id) + '" title="Retirer">' + (DELCONF === l.id ? '✓?' : '<span class="ic">🗑</span>') + '</button>'
+        + '<button class="b" type="button" data-ren="' + esc(l.id) + '" title="${T("Renommer")}"><span class="ic">✎</span></button>'
+        + '<button class="b" type="button" data-cp="' + esc(l.id) + '" title="${T("Copier l’adresse")}"><span class="ic">🔗</span></button>'
+        + '<button class="b dgr" type="button" data-del="' + esc(l.id) + '" title="${T("Retirer")}">' + (DELCONF === l.id ? '✓?' : '<span class="ic">🗑</span>') + '</button>'
         + '</div>')
       + '</div></div>';
   }
   function listeHtml(){
     var logos = (D && D.logos) || [];
     var h = '<div class="barre">'
-      + (RO ? '' : '<label class="prim upl"><span class="ic">⭱</span> Téléverser une image<input type="file" accept="image/*" id="upl-input" style="display:none"></label>')
-      + '<span style="font-size:.78rem;color:var(--tx2)">Les dimensions vous seront présentées avant l’envoi. Stockage Cloudflare R2, réutilisable partout.</span></div>';
+      + (RO ? '' : '<label class="prim upl"><span class="ic">⭱</span>${T(" Téléverser une image")}<input type="file" accept="image/*" id="upl-input" style="display:none"></label>')
+      + '<span style="font-size:.78rem;color:var(--tx2)">${T("Les dimensions vous seront présentées avant l’envoi. Stockage Cloudflare R2, réutilisable partout.")}</span></div>';
     h += logos.length ? ('<div class="grille">' + logos.map(carteHtml).join('') + '</div>')
-      : '<div class="vide">Aucune image dans la logothèque.' + (RO ? '' : ' Téléversez-en une ci-dessus.') + '</div>';
+      : '<div class="vide">${T("Aucune image dans la logothèque.")}' + (RO ? '' : '${T(" Téléversez-en une ci-dessus.")}') + '</div>';
     return h;
   }
 
@@ -223,14 +227,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var printW = num((document.getElementById('lg-printw')||{}).value, 0);
       var dpi = printW > 0 ? Math.round(p.cw/printW) : 0;
       var q = dpi ? quality(dpi) : null;
-      out.innerHTML = '<div class="row"><span>Image produite</span><strong>' + p.cw + ' × ' + p.ch + ' px</strong></div>'
-        + '<div class="row"><span>Rapport</span><strong>' + ratioLbl(p.cw, p.ch) + '</strong></div>'
-        + (p.cropped ? '<div class="row"><span>Recadrage</span><strong>centré, ' + Math.round((1-(p.sw*p.sh)/(st.natW*st.natH))*100) + ' % retiré</strong></div>' : '')
-        + (p.padded ? '<div class="row"><span>Ajustement</span><strong>marges transparentes</strong></div>' : '')
+      out.innerHTML = '<div class="row"><span>${T("Image produite")}</span><strong>' + p.cw + ' × ' + p.ch + ' px</strong></div>'
+        + '<div class="row"><span>${T("Rapport")}</span><strong>' + ratioLbl(p.cw, p.ch) + '</strong></div>'
+        + (p.cropped ? '<div class="row"><span>${T("Recadrage")}</span><strong>${T("centré, ")}' + Math.round((1-(p.sw*p.sh)/(st.natW*st.natH))*100) + '${T(" % retiré")}</strong></div>' : '')
+        + (p.padded ? '<div class="row"><span>${T("Ajustement")}</span><strong>${T("marges transparentes")}</strong></div>' : '')
         + (printW > 0
-            ? '<div class="row"><span>Taille prévue</span><strong>' + fr(printW) + ' × ' + fr(printW/(p.cw/p.ch)) + ' po</strong></div>'
-              + '<div class="row"><span>Résolution</span><strong style="color:' + q.c + '">' + dpi + ' dpi — ' + q.lbl + '</strong></div>'
-            : '<div class="row"><span>Taille d’impression</span><strong>non précisée</strong></div>');
+            ? '<div class="row"><span>${T("Taille prévue")}</span><strong>' + fr(printW) + ' × ' + fr(printW/(p.cw/p.ch)) + '${T(" po")}</strong></div>'
+              + '<div class="row"><span>${T("Résolution")}</span><strong style="color:' + q.c + '">' + dpi + ' dpi — ' + q.lbl + '</strong></div>'
+            : '<div class="row"><span>${T("Taille d’impression")}</span><strong>${T("non précisée")}</strong></div>');
     }
   }
   function importHtml(){
@@ -239,27 +243,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ratioBtn = function(r){ return '<button type="button" data-ratio="' + r[1] + ',' + r[2] + '" class="' + ((st.ratio[0]===r[1]&&st.ratio[1]===r[2])?'on':'') + '">' + esc(r[0]) + '</button>'; };
     return '<div class="imp">'
       + '<div class="carte">'
-      +   '<div class="h">Détecté dans le fichier</div><div class="det">'
-      +     '<div class="row"><span>Dimensions</span><strong>' + st.natW + ' × ' + st.natH + ' px</strong></div>'
-      +     '<div class="row"><span>Rapport</span><strong>' + ratioLbl(st.natW, st.natH) + ' · ' + (Math.abs(st.natW-st.natH)<2?'carré':st.natW>st.natH?'paysage':'portrait') + '</strong></div>'
-      +     '<div class="row"><span>Transparence</span><strong>' + (st.alpha?'oui':'non') + '</strong></div>'
-      +     '<div class="row"><span>Fichier</span><strong>' + esc(st.mime.replace('image/','').toUpperCase()) + ' · ' + Math.max(1,Math.round(st.bytes/1024)) + ' Ko</strong></div>'
+      +   '<div class="h">${T("Détecté dans le fichier")}</div><div class="det">'
+      +     '<div class="row"><span>${T("Dimensions")}</span><strong>' + st.natW + ' × ' + st.natH + ' px</strong></div>'
+      +     '<div class="row"><span>${T("Rapport")}</span><strong>' + ratioLbl(st.natW, st.natH) + ' · ' + (Math.abs(st.natW-st.natH)<2?'${T("carré")}':st.natW>st.natH?'${T("paysage")}':'${T("portrait")}') + '</strong></div>'
+      +     '<div class="row"><span>${T("Transparence")}</span><strong>' + (st.alpha?'${T("oui")}':'${T("non")}') + '</strong></div>'
+      +     '<div class="row"><span>${T("Fichier")}</span><strong>' + esc(st.mime.replace('image/','').toUpperCase()) + ' · ' + Math.max(1,Math.round(st.bytes/1024)) + ' Ko</strong></div>'
       +   '</div>'
-      +   '<div class="h" style="margin-top:1rem">Aperçu du résultat</div>'
+      +   '<div class="h" style="margin-top:1rem">${T("Aperçu du résultat")}</div>'
       +   '<div class="prevbox"><canvas id="lg-canvas"></canvas></div>'
       +   '<div class="det" id="lg-out" style="margin-top:.6rem"></div>'
       + '</div>'
       + '<div class="carte">'
-      +   '<div class="ch"><label for="lg-name">Nom</label><input id="lg-name" value="' + esc(st.name) + '" placeholder="Nom du logo ou de l’image"></div>'
-      +   '<div class="h">Format</div><div class="modes">' + modeBtn('keep','Conserver') + modeBtn('crop','Rogner') + modeBtn('fit','Ajuster (marges)') + '</div>'
-      +   '<div id="lg-ratios" style="' + (st.mode==='keep'?'display:none':'') + '"><div class="h">Rapport visé</div><div class="rrow">' + RATIOS.map(ratioBtn).join('') + '</div>'
-      +     '<p class="hint">« Rogner » coupe au centre pour atteindre le rapport (rien n’est déformé). « Ajuster » n’enlève rien et complète avec des marges transparentes.</p></div>'
-      +   '<div class="h">Taille d’impression prévue</div><div class="deux">'
-      +     '<div class="ch"><label for="lg-printw">Largeur (po)</label><input id="lg-printw" type="number" step="0.05" min="0" value="" placeholder="ex. 2"></div>'
-      +     '<div class="ch"><label for="lg-maxw">Largeur max (px)</label><input id="lg-maxw" type="number" step="50" min="0" max="' + MAXPX + '" value="" placeholder="' + MAXPX + '"></div>'
+      +   '<div class="ch"><label for="lg-name">${T("Nom")}</label><input id="lg-name" value="' + esc(st.name) + '" placeholder="${T("Nom du logo ou de l’image")}"></div>'
+      +   '<div class="h">${T("Format")}</div><div class="modes">' + modeBtn('keep','${T("Conserver")}') + modeBtn('crop','${T("Rogner")}') + modeBtn('fit','${T("Ajuster (marges)")}') + '</div>'
+      +   '<div id="lg-ratios" style="' + (st.mode==='keep'?'display:none':'') + '"><div class="h">${T("Rapport visé")}</div><div class="rrow">' + RATIOS.map(ratioBtn).join('') + '</div>'
+      +     '<p class="hint">${T("« Rogner » coupe au centre pour atteindre le rapport (rien n’est déformé). « Ajuster » n’enlève rien et complète avec des marges transparentes.")}</p></div>'
+      +   '<div class="h">${T("Taille d’impression prévue")}</div><div class="deux">'
+      +     '<div class="ch"><label for="lg-printw">${T("Largeur (po)")}</label><input id="lg-printw" type="number" step="0.05" min="0" value="" placeholder="${T("ex. 2")}"></div>'
+      +     '<div class="ch"><label for="lg-maxw">${T("Largeur max (px)")}</label><input id="lg-maxw" type="number" step="50" min="0" max="' + MAXPX + '" value="" placeholder="' + MAXPX + '"></div>'
       +   '</div>'
       +   ''
-      +   '<div style="display:flex;gap:.6rem;margin-top:.3rem"><button class="prim" id="lg-ok">Confirmer et téléverser</button><button class="b" id="lg-cancel">Annuler</button></div>'
+      +   '<div style="display:flex;gap:.6rem;margin-top:.3rem"><button class="prim" id="lg-ok">${T("Confirmer et téléverser")}</button><button class="b" id="lg-cancel">${T("Annuler")}</button></div>'
       + '</div></div>';
   }
 
@@ -290,14 +294,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function ouvrirImport(f){
     if (RO) return;
-    if (String(f.type||'').indexOf('image/') !== 0) { dire('Le fichier choisi n’est pas une image.', 'err'); return; }
-    dire('Lecture de l’image…');
+    if (String(f.type||'').indexOf('image/') !== 0) { dire('${T("Le fichier choisi n’est pas une image.")}', 'err'); return; }
+    dire('${T("Lecture de l’image…")}');
     var fr2 = new FileReader();
-    fr2.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
+    fr2.onerror = function(){ dire('${T("Lecture du fichier impossible.")}', 'err'); };
     fr2.onload = function(){
       var dataUrl = String(fr2.result||'');
       var im = new Image();
-      im.onerror = function(){ dire('Ce fichier n’est pas une image lisible.', 'err'); };
+      im.onerror = function(){ dire('${T("Ce fichier n’est pas une image lisible.")}', 'err'); };
       im.onload = function(){
         IMP = { dataUrl: dataUrl, img: im, name: (f.name||'image').replace(/\.[a-z0-9]+$/i, ''),
           natW: im.naturalWidth||im.width, natH: im.naturalHeight||im.height, bytes: f.size||0, mime: f.type||'image/*',
@@ -332,10 +336,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var meta = { name: name, w: p.cw, h: p.ch, alpha: IMP.alpha,
       printW: printW>0?printW:0, printH: printW>0?(printW/(p.cw/p.ch)):0,
       dpi: printW>0?Math.round(p.cw/printW):0, mode: IMP.mode, srcW: IMP.natW, srcH: IMP.natH };
-    occuper(true); dire('Téléversement…');
+    occuper(true); dire('${T("Téléversement…")}');
     appeler('config:logotheque:ajouter', [{ dataUrl: dataUrl, meta: meta }]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; IMP=null; VUE='liste'; dessiner(); dire('Image ajoutée (' + meta.w + ' × ' + meta.h + ' px).', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; IMP=null; VUE='liste'; dessiner(); dire('${T("Image ajoutée (")}' + meta.w + ' × ' + meta.h + ' px).', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
@@ -345,34 +349,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var nm = corps.querySelector('[data-nm="' + id.replace(/"/g,'') + '"]');
     if (!nm) return;
     var cur = l.name || '';
-    nm.innerHTML = '<input class="nmedit" id="ren-inp" aria-label="Nouveau nom du logo" value="' + esc(cur) + '">';
+    nm.innerHTML = '<input class="nmedit" id="ren-inp" aria-label="${T("Nouveau nom du logo")}" value="' + esc(cur) + '">';
     var inp = document.getElementById('ren-inp'); if (!inp) return;
     inp.focus(); try { inp.select(); } catch(e){}
     var fini = false;
     var valider = function(){ if (fini) return; fini = true; var v=(inp.value||'').trim(); if (!v || v===cur) { dessiner(); return; }
       occuper(true); dire('Renommage…');
       appeler('config:logotheque:renommer', [{ id: id, name: v }]).then(function(r){ occuper(false);
-        if (r && r.ok) { D=r; RO=!r.peutModifier; dessiner(); dire('Renommé.', 'bon'); } else { dessiner(); dire(expliquer(r), 'err'); } }); };
+        if (r && r.ok) { D=r; RO=!r.peutModifier; dessiner(); dire('${T("Renommé.")}', 'bon'); } else { dessiner(); dire(expliquer(r), 'err'); } }); };
     inp.onblur = valider;
     inp.onkeydown = function(e){ if (e.key==='Enter'){ e.preventDefault(); valider(); } else if (e.key==='Escape'){ fini=true; dessiner(); } };
   }
   function retirer(id){
     if (OCCUPE) return;
-    occuper(true); dire('Retrait…');
+    occuper(true); dire('${T("Retrait…")}');
     appeler('config:logotheque:retirer', [id]).then(function(r){ occuper(false);
-      if (r && r.ok) { D=r; RO=!r.peutModifier; dessiner(); dire('Image retirée.', 'bon'); } else dire(expliquer(r), 'err'); });
+      if (r && r.ok) { D=r; RO=!r.peutModifier; dessiner(); dire('${T("Image retirée.")}', 'bon'); } else dire(expliquer(r), 'err'); });
   }
   function copier(id){
     var l = (D.logos||[]).find(function(x){ return x.id===id; }); if (!l) return;
     var ok = false;
     try { var ta = document.createElement('textarea'); ta.value = l.url; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); document.body.removeChild(ta); } catch(e){ ok = false; }
-    dire(ok ? 'Adresse copiée.' : l.url, ok ? 'bon' : 'att');
+    dire(ok ? '${T("Adresse copiée.")}' : l.url, ok ? 'bon' : 'att');
   }
 
   fichier.onchange = function(){ var f=fichier.files&&fichier.files[0]; fichier.value=''; if (f) ouvrirImport(f); };
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:logotheque:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; RO = !r.peutModifier; VUE='liste'; dessiner(); dire('');

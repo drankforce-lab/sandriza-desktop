@@ -17,6 +17,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('bd');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -72,11 +76,11 @@ button.prim:disabled{opacity:.5;cursor:default}
 
 function pageBd() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Base de données — Administration Sandriza</title>
+<title>${T("Base de données — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.nuage}</span><h1>Base de données</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.nuage}</span><h1>${T("Base de données")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
+<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -87,8 +91,8 @@ function pageBd() {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -105,17 +109,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    indisponible:"L'administration n'est pas encore chargée dans la fenêtre principale.",
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    r2_indispo:'Le stockage R2 n’est pas disponible.',
-    echec:"L'opération a échoué.",
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    indisponible:"${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    r2_indispo:'${T("Le stockage R2 n’est pas disponible.")}',
+    echec:"${T('L\'opération a échoué.')}",
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -131,34 +135,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="sous">' + esc(sous) + '</div></div>';
   }
   function stockHtml(){
-    if (STOCK === null) return '<div class="vide charge">Lecture de l’occupation…</div>';
+    if (STOCK === null) return '<div class="vide charge">${T("Lecture de l’occupation…")}</div>';
     if (STOCK.erreur) return '<div class="vide">' + esc(STOCK.erreur) + '</div>';
     var h = '<div class="stock">';
-    if (STOCK.turso && STOCK.turso.bytes != null) h += jauge('Turso (base de données)', 'Produits, commandes, clients, dépenses…', STOCK.turso.bytes, STOCK.turso.limit);
-    if (STOCK.r2 && STOCK.r2.bytes != null) h += jauge('Cloudflare R2 (fichiers)', 'Reçus, photos, logos, documents, sauvegardes…', STOCK.r2.bytes, STOCK.r2.limit);
-    else h += '<div class="jauge"><div class="sous"><span class="ic">📦</span> Cloudflare R2 : en attente de connexion.</div></div>';
+    if (STOCK.turso && STOCK.turso.bytes != null) h += jauge('${T("Turso (base de données)")}', '${T("Produits, commandes, clients, dépenses…")}', STOCK.turso.bytes, STOCK.turso.limit);
+    if (STOCK.r2 && STOCK.r2.bytes != null) h += jauge('${T("Cloudflare R2 (fichiers)")}', '${T("Reçus, photos, logos, documents, sauvegardes…")}', STOCK.r2.bytes, STOCK.r2.limit);
+    else h += '<div class="jauge"><div class="sous"><span class="ic">📦</span>${T(" Cloudflare R2 : en attente de connexion.")}</div></div>';
     return h + '</div>';
   }
 
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var dis = RO ? ' disabled' : '';
-    var h = '<div class="carte"><div class="stitre"><span class="ic">☁</span> Turso Cloud DB</div>'
-      + '<div class="info">Toute la configuration (thèmes, logos, clés API, navigation, profil…) est '
-      + 'synchronisée vers Turso à <b>chaque sauvegarde</b>. Ces boutons servent à forcer une synchronisation, '
-      + 'par exemple après avoir vidé le cache du navigateur.</div>'
+    var h = '<div class="carte"><div class="stitre"><span class="ic">☁</span>${T(" Turso Cloud DB")}</div>'
+      + '<div class="info">${T("Toute la configuration (thèmes, logos, clés API, navigation, profil…) est ")}'
+      + '${T("synchronisée vers Turso à <b>chaque sauvegarde</b>. Ces boutons servent à forcer une synchronisation, ")}'
+      + '${T("par exemple après avoir vidé le cache du navigateur.")}</div>'
       + '<div class="gestes">'
-      + '<button class="prim" type="button" data-act="pousser"' + dis + '>↑ Pousser tout vers Turso</button>'
-      + '<button class="b" type="button" data-act="restaurer"' + dis + '>' + (CONF === 'restaurer' ? 'Confirmer la restauration ?' : '↓ Restaurer depuis Turso') + '</button>'
-      + '<button class="b" type="button" data-act="tester">Tester la connexion</button>'
-      + '<button class="b" type="button" data-act="migrer"' + dis + '>' + (CONF === 'migrer' ? 'Confirmer la migration ?' : '↦ Migrer les images vers R2') + '</button>'
+      + '<button class="prim" type="button" data-act="pousser"' + dis + '>${T("↑ Pousser tout vers Turso")}</button>'
+      + '<button class="b" type="button" data-act="restaurer"' + dis + '>' + (CONF === 'restaurer' ? '${T("Confirmer la restauration ?")}' : '${T("↓ Restaurer depuis Turso")}') + '</button>'
+      + '<button class="b" type="button" data-act="tester">${T("Tester la connexion")}</button>'
+      + '<button class="b" type="button" data-act="migrer"' + dis + '>' + (CONF === 'migrer' ? '${T("Confirmer la migration ?")}' : '${T("↦ Migrer les images vers R2")}') + '</button>'
       + '</div>'
-      + '<div class="info" style="margin:0"><b>Pousser</b> : envoie toutes les configs locales vers Turso. '
-      + '<b>Restaurer</b> : recharge depuis Turso puis recharge la fenêtre principale (utile après un vidage de cache). '
-      + '<b>Migrer</b> : déplace vers R2 les images encore stockées en base64 (à lancer une fois).</div></div>';
-    h += '<div class="carte"><div class="stitre">Occupation du stockage</div>' + stockHtml() + '</div>';
+      + '<div class="info" style="margin:0">${T("<b>Pousser</b> : envoie toutes les configs locales vers Turso. ")}'
+      + '${T("<b>Restaurer</b> : recharge depuis Turso puis recharge la fenêtre principale (utile après un vidage de cache). ")}'
+      + '${T("<b>Migrer</b> : déplace vers R2 les images encore stockées en base64 (à lancer une fois).")}</div></div>';
+    h += '<div class="carte"><div class="stitre">${T("Occupation du stockage")}</div>' + stockHtml() + '</div>';
     var cles = (D && D.cles) || [];
-    h += '<div class="carte"><div class="stitre">Clés synchronisées (' + cles.length + ')</div>'
+    h += '<div class="carte"><div class="stitre">${T("Clés synchronisées (")}' + cles.length + ')</div>'
       + '<div class="cles">' + cles.map(function(k){ return '<code>' + esc(k) + '</code>'; }).join('') + '</div></div>';
     corps.innerHTML = h;
     brancher();
@@ -180,41 +184,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
   }
   function tester(){
-    dire('Test de la connexion…');
-    appeler('config:bd:tester').then(function(r){ dire(r && r.ok ? 'Connexion Turso OK.' : ('Échec : ' + expliquer(r)), r && r.ok ? 'bon' : 'err'); });
+    dire('${T("Test de la connexion…")}');
+    appeler('config:bd:tester').then(function(r){ dire(r && r.ok ? '${T("Connexion Turso OK.")}' : ('${T("Échec : ")}' + expliquer(r)), r && r.ok ? 'bon' : 'err'); });
   }
   function pousser(){
-    occuper(true); dessiner(); dire('Synchronisation vers Turso…');
+    occuper(true); dessiner(); dire('${T("Synchronisation vers Turso…")}');
     appeler('config:bd:pousser').then(function(r){
       occuper(false); dessiner();
-      if (r && r.ok) dire(r.pousse + ' clé(s) poussée(s)' + (r.retenu ? ' — ' + r.retenu + ' gérée(s) entrée par entrée par le serveur.' : '.'), 'bon');
-      else dire('Échec : ' + expliquer(r), 'err');
+      if (r && r.ok) dire(r.pousse + '${T(" clé(s) poussée(s)")}' + (r.retenu ? ' — ' + r.retenu + '${T(" gérée(s) entrée par entrée par le serveur.")}' : '.'), 'bon');
+      else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
   function restaurer(){
-    occuper(true); dessiner(); dire('Restauration depuis Turso…');
+    occuper(true); dessiner(); dire('${T("Restauration depuis Turso…")}');
     appeler('config:bd:restaurer').then(function(r){
-      if (r && r.ok) dire('Restauré — la fenêtre principale se recharge…', 'bon');
-      else { occuper(false); dessiner(); dire('Échec : ' + expliquer(r), 'err'); }
+      if (r && r.ok) dire('${T("Restauré — la fenêtre principale se recharge…")}', 'bon');
+      else { occuper(false); dessiner(); dire('${T("Échec : ")}' + expliquer(r), 'err'); }
     });
   }
   function migrer(){
-    occuper(true); dessiner(); dire('Migration des images vers R2… (peut durer)');
+    occuper(true); dessiner(); dire('${T("Migration des images vers R2… (peut durer)")}');
     appeler('config:bd:migrer').then(function(r){
       occuper(false); dessiner();
-      if (r && r.ok) { dire('Migration terminée : ' + (r.migrated || 0) + ' image(s) déplacée(s)' + (r.errors ? ', ' + r.errors + ' erreur(s).' : '.'), r.errors ? 'att' : 'bon'); chargerStock(); }
-      else dire('Échec : ' + expliquer(r), 'err');
+      if (r && r.ok) { dire('${T("Migration terminée : ")}' + (r.migrated || 0) + '${T(" image(s) déplacée(s)")}' + (r.errors ? ', ' + r.errors + '${T(" erreur(s).")}' : '.'), r.errors ? 'att' : 'bon'); chargerStock(); }
+      else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
   function chargerStock(){
     appeler('config:bd:stockage').then(function(r){
-      STOCK = (r && r.ok) ? r : { erreur: 'Occupation indisponible pour le moment.' };
+      STOCK = (r && r.ok) ? r : { erreur: '${T("Occupation indisponible pour le moment.")}' };
       dessiner();
     });
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:bd:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; RO = !r.peutModifier; dessiner(); dire('');
