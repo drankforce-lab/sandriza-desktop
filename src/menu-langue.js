@@ -236,6 +236,34 @@ const origineMenu = (x) => {
   return Object.prototype.hasOwnProperty.call(_INVERSE, s) ? _INVERSE[s] : s;
 };
 
+/** L'intitulé tel que LE PANNEAU le connaît, quel que soit celui qu'on reçoit.
+ *
+ *  ⚠⚠⚠ CE PONT EXISTE PARCE QUE JE L'AI CASSÉ (2026-09-13). En traduisant le
+ *  panneau, sa page s'est mise à ne connaître que « Shop », « Accounting »,
+ *  « View » — tandis que la barre du site continuait d'envoyer « Boutique »,
+ *  « Comptabilité », « Affichage ». On demandait donc à une page qui ne connaît
+ *  que l'anglais de montrer un menu français : elle ne trouvait rien, et ne
+ *  disait rien. Ses mots : « le menu ne marche pas en anglais, quand on clique
+ *  rien ne se passe », puis « certains menus genre File, Accounting, Shop, View
+ *  et Help » — exactement ceux dont l'intitulé CHANGE en traduction. Les autres
+ *  (Marketing, Configuration, Catalogue) marchaient, ce qui rendait la panne
+ *  partielle, donc plus difficile à nommer.
+ *
+ *  ➡ **TRADUIRE UN CÔTÉ D'UNE CORRESPONDANCE, C'EST LA ROMPRE.**
+ *
+ *  ⚠ DEUX TEMPS, ET LES DEUX SONT NÉCESSAIRES : on ramène d'abord à l'ORIGINE
+ *  (la barre du site envoie le nom d'origine ; le cadre natif, lui, envoie ce
+ *  qu'il AFFICHE), puis on traduit vers la langue du panneau. Ça tient donc
+ *  quelle que soit l'entrée, et c'est ce qui fait qu'on n'a pas à savoir QUI
+ *  appelle.
+ *
+ *  ⚠ ET C'EST ICI, PAS DANS `main.js` : enfoui là-bas, ce raccord ne pouvait
+ *  être éprouvé qu'en lançant Electron et en cliquant un menu — c'est-à-dire
+ *  par personne. C'est la leçon écrite en tête de ce fichier, et la panne qu'on
+ *  vient de payer en est la démonstration. `banc-menu-langue` l'essaie
+ *  maintenant dans les deux langues et sur les deux formes d'entrée. */
+const pourLePanneau = (label, langue) => trMenu(origineMenu(label), langue);
+
 /** Un modèle de menu, traduit à TOUS ses niveaux.
  *  ⚠⚠ `items` ET `sub` : c'est l'oubli de `items` qui a produit un menu à
  *  moitié traduit en 5.28.0. Un parcours d'arbre qui ne suit qu'une branche sur
@@ -298,5 +326,6 @@ const menusAvecLangue = (menus, langue) => {
 };
 
 module.exports = {
-  MENU_EN, MENU_APP_EN, trMenu, origineMenu, trItems, menusAvecLangue, LANGUES,
+  MENU_EN, MENU_APP_EN, trMenu, origineMenu, pourLePanneau, trItems,
+  menusAvecLangue, LANGUES,
 };

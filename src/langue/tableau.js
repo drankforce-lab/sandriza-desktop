@@ -42,6 +42,13 @@ module.exports = {
   'Factures en retard': 'Overdue invoices',
   'Incidents ouverts': 'Open incidents',
   'Dernière sauvegarde': 'Last backup',
+  /* ⚠ L AGE DE LA SAUVEGARDE — sa capture du 2026-09-13 : « 4 jours » sous
+     « LAST BACKUP ». Fragments courts et en minuscules : le relevé du résiduel
+     les écarte, parce que c est la forme d un identifiant de code. */
+  'aujourd’hui': 'today',
+  'hier': 'yesterday',
+  '{0} jours': '{0} days',
+  'jamais': 'never',
   'lecture en cours…': 'reading…',
   /* ⚠ Ce texte parait quand AUCUNE sauvegarde n existe : c est un avertissement,
      pas un etat neutre. « unprotected » le dit sans dramatiser. */

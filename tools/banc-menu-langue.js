@@ -42,7 +42,8 @@ if (!fs.existsSync(APPBAR)) {
    fonction qui s'en sert. Sortie dans `src/menu-langue.js`, on la charge — et on
    peut enfin vérifier qu'elle est APPLIQUÉE, pas seulement remplie. C'est ce qui
    manquait quand le menu est sorti à moitié traduit. */
-const { MENU_EN, MENU_APP_EN, trItems, trMenu, origineMenu } = require('../src/menu-langue');
+const { MENU_EN, MENU_APP_EN, trItems, trMenu, origineMenu, pourLePanneau,
+  menusAvecLangue: _mal } = require('../src/menu-langue');
 const traduits = new Set(Object.keys(MENU_EN));
 if (traduits.size < 5) {
   console.error('✗ seulement ' + traduits.size + ' entrée(s) lue(s) dans MENU_EN — '
@@ -307,6 +308,56 @@ for (const k of traduits) {
   const n = deux.reduce((k, m) => k
     + ((m.items || []).filter((it) => it && it.label === 'Langue / Language').length), 0);
   if (n !== 1) fautes.push('le bascule est greffé ' + n + ' fois au lieu d’une');
+}
+
+/* ══ LE RACCORD BARRE → PANNEAU, CELUI QUI A RENDU LE MENU MUET ═════════════
+   ⚠⚠⚠ SA PANNE DU 2026-09-13 : « le menu ne marche pas en anglais, quand on
+   clique rien ne se passe », puis « certains menus genre File, Accounting,
+   Shop, View et Help ». Exactement ceux dont l intitulé CHANGE en traduction —
+   Marketing et Configuration, identiques dans les deux langues, marchaient. Une
+   panne PARTIELLE, donc plus difficile à nommer qu une panne franche.
+
+   La cause : la page du panneau a été traduite (elle ne connaît plus que
+   « Shop »), et on continuait de lui demander « Boutique ».
+   ➡ **TRADUIRE UN CÔTÉ D UNE CORRESPONDANCE, C EST LA ROMPRE.**
+
+   ⚠ AUCUN BANC NE POUVAIT LE VOIR : le raccord vivait dans `main.js`, entre un
+   `executeJavaScript` et une page `data:`. Sorti dans `pourLePanneau`, il
+   s éprouve ici — c est la leçon en tête de `menu-langue.js`, et c est la
+   deuxième fois qu elle se paie sur CE fichier.
+
+   ⚠ ON EXIGE LES DEUX FORMES D ENTRÉE, parce qu il y a deux appelants : la
+   barre du SITE envoie l intitulé d ORIGINE, le CADRE natif envoie ce qu il
+   AFFICHE. Un pont qui ne tiendrait que d un côté serait muet pour l autre. */
+{
+  const modele = [
+    { label: 'Fichier', items: [{ label: 'Quitter', app: 'quit' }] },
+    { label: 'Boutique', items: [{ label: 'Commandes', section: 'orders' }] },
+    { label: 'Affichage', items: [{ label: 'Recharger', app: 'reload' }] },
+    { label: 'Marketing', items: [{ label: 'Coupons', section: 'coupons' }] },
+  ];
+  for (const l of ['fr', 'en']) {
+    /* Les intitulés QUE LA PAGE DU PANNEAU CONNAÎT — bâtis exactement comme
+       `menu:panneau` les bâtit (`_trItems(_menusLangue())`). */
+    const connus = new Set(trItems(_mal(modele, l), l).map((m) => m.label));
+    for (const m of modele) {
+      /* Les deux appelants : le site (origine) et le cadre (ce qu il affiche). */
+      for (const envoye of [m.label, trMenu(m.label, l)]) {
+        const vu = pourLePanneau(envoye, l);
+        if (!connus.has(vu)) {
+          fautes.push('[' + l + '] la barre envoie « ' + envoye + ' » → le panneau reçoit « '
+            + vu + ' », qui ne figure pas parmi ses menus (' + [...connus].join(', ')
+            + ') — le clic serait MUET');
+        }
+      }
+    }
+  }
+  /* ⚠ ET CE QU ON NE CONNAÎT PAS RESSORT TEL QUEL : un menu ajouté demain ne
+     doit pas devenir une chaîne vide, sinon il serait muet lui aussi. */
+  if (pourLePanneau('Menu inconnu', 'en') !== 'Menu inconnu') {
+    fautes.push('pourLePanneau abîme un intitulé qu’il ne connaît pas : « '
+      + pourLePanneau('Menu inconnu', 'en') + ' »');
+  }
 }
 
 if (fautes.length) {

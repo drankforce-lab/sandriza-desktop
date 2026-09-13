@@ -5268,7 +5268,8 @@ const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageConnexion } = require('./fenetres/connexion');
 const { pageMaj } = require('./fenetres/maj');
 const { pageDeconnexion } = require('./fenetres/deconnexion');
-const { MENU_EN, MENU_APP_EN, trMenu, origineMenu, trItems, menusAvecLangue } = require('./menu-langue');
+const { MENU_EN, MENU_APP_EN, trMenu, origineMenu, pourLePanneau, trItems,
+  menusAvecLangue } = require('./menu-langue');
 /* ⚠⚠ LA LANGUE DES FENÊTRES SE POSE ICI, AVANT QUE LA PAGE NE SOIT BÂTIE. Les
    gabarits résolvent leurs textes À LA GÉNÉRATION (voir `src/langue/index.js`) :
    une fenêtre naît donc en anglais, au lieu de paraître en français puis de se
@@ -5880,8 +5881,24 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
   // aucun zoom ajoute dans la page, voir pagePanneau).
   const montrer = () => {
     try { panneauWin.webContents.setZoomFactor(f); } catch {}
+    /* ⚠⚠⚠ LE PANNEAU NE CONNAÎT QUE LES INTITULÉS **TRADUITS**, et c'est le
+       défaut que j'ai introduit le 2026-09-13 en traduisant le panneau.
+       Sa page est bâtie avec `_trItems(…)` : en anglais, ses menus s'appellent
+       « Shop », « Catalogue », « Accounting ». Or `label` est ce que la BARRE a
+       envoyé — le nom d'ORIGINE, « Boutique ». On demandait donc à une page qui
+       ne connaît que « Shop » de montrer « Boutique » : elle ne trouvait rien,
+       et ne disait rien. Ses mots : « le menu ne marche pas en anglais, quand
+       on clique rien ne se passe ».
+       ➡ **TRADUIRE UN CÔTÉ D'UNE CORRESPONDANCE, C'EST LA ROMPRE.** La leçon
+       était écrite vingt lignes plus haut (la panne de la 5.28.0) et je l'ai
+       refaite en sens inverse : là-bas la barre parlait anglais et le modèle
+       français ; ici le modèle parle anglais et la barre envoie du français.
+       ⚠ ON NORMALISE EN DEUX TEMPS — vers l'origine, puis vers la langue du
+       panneau — pour que ça tienne QUEL QUE SOIT ce que la barre envoie : le
+       site envoie l'original, le cadre natif envoie ce qu'il affiche. */
+    const _pourLePanneau = pourLePanneau(String(label || ''), _langueCourante());
     panneauWin.webContents.executeJavaScript(
-      'window.montrer && window.montrer(' + JSON.stringify(String(label || '')) + ');', true).catch(() => {});
+      'window.montrer && window.montrer(' + JSON.stringify(_pourLePanneau) + ');', true).catch(() => {});
     try { panneauWin.showInactive(); } catch {}
   };
   /* ⚠ LA PAGE (tous les menus) N EST CHARGEE QU UNE FOIS — la recharger a

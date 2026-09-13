@@ -257,13 +257,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return tuile('sauvegarde', '${T("Dernière sauvegarde")}', '—', '', esc(SAUV.erreur), 'att');
     }
     if (SAUV.aucune) {
-      return tuile('sauvegarde', '${T("Dernière sauvegarde")}', 'jamais', 'err',
+      return tuile('sauvegarde', '${T("Dernière sauvegarde")}', '${T("jamais")}', 'err',
         '${T("la base n’est pas protégée")}', 'att');
     }
     var j = SAUV.jours;
     // « jours » en toutes lettres (sa demande) : un « j » collé au chiffre se
     // lit mal dans une grande valeur, et rien n oblige a abreger ici.
-    var val = (j === 0) ? 'aujourd’hui' : (j === 1 ? 'hier' : j + ' jours');
+    /* ⚠⚠ CES QUATRE-LA ETAIENT DES LITTERAUX NUS — sa capture du 2026-09-13 :
+       << 4 jours >> sous un en-tete LAST BACKUP. Le releve du residuel ne les a
+       pas vus : ce sont des fragments COURTS et EN MINUSCULES, la forme meme
+       que ses heuristiques ecartent pour ne pas confondre du texte avec un
+       identifiant de code. Et << jamais >> etait la valeur d une tuile.
+       ⚠ LES DEUX ALTERNATIVES EN ENTIER : en anglais le pluriel ne se fabrique
+       pas toujours en ajoutant une lettre, et un << s >> colle a part ne passe
+       par aucun dictionnaire. */
+    var val = (j === 0) ? '${T("aujourd’hui")}'
+      : (j === 1 ? '${T("hier")}'
+        : '${T("{0} jours")}'.split('{0}').join(j));
     var ton = (j > 30) ? 'err' : (j > 7 ? 'att' : '');
     var sous = esc(SAUV.quand) + (SAUV.taille ? ' · ' + esc(SAUV.taille) : '');
     return tuile('sauvegarde', '${T("Dernière sauvegarde")}', val, ton, sous, (j > 7 ? 'att' : ''));
