@@ -56,6 +56,20 @@ const FAUTIFS = [
   'etiquetee', 'entree', 'entrees', 'donnee', 'donnees', 'annee', 'annees',
   'periode', 'periodes', 'procedure', 'reference', 'references',
   'telephone', 'etape', 'etapes', 'achete', 'achetee', 'creee', 'creees',
+  /* ⚠⚠ AJOUTS DU 2026-09-13 — TROISIEME OCCURRENCE DE LA MEME FAUTE. Le rapport
+     d integrite de `sauvegarde.js` etait ecrit en francais SANS ACCENTS
+     (« Verification de l integrite », « Restauration refusee », « Rien n a ete
+     touche »), sur l ecran le plus destructeur du projet. Ce banc etait vert :
+     aucun de ces mots-la n etait dans la liste.
+     ⚠ CHACUN EST VERIFIE CONTRE L ANGLAIS avant d entrer — c est la regle de
+     l en-tete, et elle coute cher a oublier. « verification », « restauration »,
+     « operation », « application », « version » sont des mots ANGLAIS : ils
+     n entrent PAS, meme s ils manquaient d accent ici. On perd ces cas-la, et
+     c est le bon compromis : un banc qui accuse une chaine juste finit
+     desactive, et alors il ne trouve plus rien du tout. */
+  'integrite', 'refusee', 'refusees', 'verifiee', 'verifiees',
+  'controle', 'controles', 'repondu', 'retablie', 'retablies', 'ramenee',
+  'sauvegardee', 'sauvegardees', 'terminee', 'terminees',
 ];
 /* ⚠ LES DEUX BORNES SONT ÉCRITES EN CLAIR. Ma première version les fabriquait
    en découpant une chaîne (BORD.slice(29)) : illisible, et fausse — la

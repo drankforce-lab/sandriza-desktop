@@ -29,6 +29,12 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur enregistrable,
+   et la NOTE d'une sauvegarde en est une. ⚠⚠⚠ Les deux mots de confirmation
+   (RESTAURER, DÉTRUIRE) sont LUS **ET** COMPARÉS : voir le bloc qui les nomme
+   dans le script, et l'en-tête de src/langue/sauvegarde.js. */
+const T = require('../langue').tr('sauvegarde');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -154,11 +160,11 @@ function pageSauvegarde(ouverture) {
   if (brut.indexOf('restaurer-') === 0) REST0 = brut.slice(10).replace(/[^A-Za-z0-9_.:/-]/g, '');
   else if (brut.indexOf('supprimer-') === 0) SUPP0 = brut.slice(10).replace(/[^A-Za-z0-9_.:/-]/g, '');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Sauvegarde &amp; Restauration — Administration Sandriza</title>
+<title>${T("Sauvegarde &amp; Restauration — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.sauvegarde}</span><h1>Sauvegarde &amp; Restauration</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : créer, restaurer, supprimer et purger sont réservés au super-administrateur.</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.sauvegarde}</span><h1>${T("Sauvegarde &amp; Restauration")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : créer, restaurer, supprimer et purger sont réservés au super-administrateur.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -169,13 +175,29 @@ function pageSauvegarde(ouverture) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var D = null, RO = true, OCCUPE = false, FIGE = false;
   var CREER = '${CREER0}', REST = '${REST0}', SUPP = '${SUPP0}';
+
+  /* ══ LES DEUX MOTS DE CONFIRMATION — ET POURQUOI ILS VIVENT ICI ═══════════
+     ⚠⚠⚠ CE SONT LES SEULS TEXTES DE L APPLICATION QUI SONT LUS **ET** COMPARES.
+     L ecran demande de TAPER le mot, puis compare la saisie a une chaine. Si la
+     traduction ne touche que l invite, la comparaison ne correspond plus jamais
+     et l anglophone ne peut NI RESTAURER NI SUPPRIMER — sur l ecran le plus
+     destructeur du projet, et sans aucun message pour l expliquer.
+     ⚠ Ils sont donc nommes UNE fois, et l invite, l exemple du champ et la
+     comparaison lisent tous les trois la MEME variable. Traduire l un sans
+     l autre devient impossible : c est la seule facon de ne pas se tromper.
+     ⚠ La tolerance sans accent de DETRUIRE est gardee : refuser DETRUIRE parce
+     qu il manque un accent serait un piege, pas un garde-fou. En anglais les
+     deux formes rendent le meme mot, ce qui est sans danger. */
+  var MOT_RESTAURER = '${T("RESTAURER")}';
+  var MOT_DETRUIRE = '${T("DÉTRUIRE")}';
+  var MOT_DETRUIRE_SANS_ACCENT = '${T("DETRUIRE")}';
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   // Le message va DANS la surcouche quand il y en a une d'ouverte.
@@ -187,15 +209,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès aux sauvegardes.',
-    indisponible:'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès aux sauvegardes.")}',
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?'${T(" — ")}'+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -209,31 +231,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="entete">'
       + ''
       + '<div class="outils">'
-      + (D.peutEcrire ? '<button class="prim" id="s-nouveau">＋ Créer une sauvegarde</button>' : '')
-      + '<button class="b" id="s-refresh">↻ Actualiser</button>'
-      + (D.peutEcrire ? '<button class="b dgr" id="s-purger"><span class="ic">🗑</span> Purger (&gt; '+(D.retentionMois||12)+' mois)</button>' : '')
+      + (D.peutEcrire ? '<button class="prim" id="s-nouveau">${T("＋ Créer une sauvegarde")}</button>' : '')
+      + '<button class="b" id="s-refresh">${T("↻ Actualiser")}</button>'
+      + (D.peutEcrire ? '<button class="b dgr" id="s-purger"><span class="ic">🗑</span> ${T("Purger (&gt; ")}'+(D.retentionMois||12)+'${T(" mois)")}</button>' : '')
       + '</div></div>';
 
     h += '<div class="stat-grid">'
-      + '<div class="stat"><div class="l">Sauvegardes</div><div class="v">'+l.length+'</div><div class="s">rétention '+(D.retentionMois||12)+' mois</div></div>'
-      + '<div class="stat"><div class="l">La plus récente</div><div class="v" style="font-size:1.05rem;color:'+(l.length?'var(--tx-ok2)':'var(--tx-att)')+'">'+(l.length?esc(l[0].quand):'aucune')+'</div><div class="s">'+(l.length?esc(l[0].taille):'le registre est vide')+'</div></div>'
-      + '<div class="stat"><div class="l">Espace occupé</div><div class="v" style="font-size:1.3rem">'+fmtO(octets)+'</div><div class="s">dans Cloudflare R2</div></div>'
+      + '<div class="stat"><div class="l">${T("Sauvegardes")}</div><div class="v">'+l.length+'</div><div class="s">${T("rétention ")}'+(D.retentionMois||12)+'${T(" mois")}</div></div>'
+      + '<div class="stat"><div class="l">${T("La plus récente")}</div><div class="v" style="font-size:1.05rem;color:'+(l.length?'var(--tx-ok2)':'var(--tx-att)')+'">'+(l.length?esc(l[0].quand):'${T("aucune")}')+'</div><div class="s">'+(l.length?esc(l[0].taille):'${T("le registre est vide")}')+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Espace occupé")}</div><div class="v" style="font-size:1.3rem">'+fmtO(octets)+'</div><div class="s">${T("dans Cloudflare R2")}</div></div>'
       + '</div>';
 
     if (!l.length){
-      h += '<div class="carte"><div class="vide">Aucune sauvegarde.<br>'
-        + (D.peutEcrire ? 'Cliquez « Créer une sauvegarde » pour en générer une.' : 'Seul le super-administrateur peut en créer une.')
+      h += '<div class="carte"><div class="vide">${T("Aucune sauvegarde.")}<br>'
+        + (D.peutEcrire ? '${T("Cliquez « Créer une sauvegarde » pour en générer une.")}' : '${T("Seul le super-administrateur peut en créer une.")}')
         + '</div></div>';
       corps.innerHTML = h; lier(); return;
     }
 
     h += '<div class="carte" style="padding:0;overflow-x:auto"><table class="tb"><thead><tr>'
-      + '<th>Date</th><th>Contenu</th><th>Application</th><th style="text-align:center">Objets R2</th><th>Taille</th><th>Note</th><th></th>'
+      + '<th>${T("Date")}</th><th>${T("Contenu")}</th><th>${T("Application")}</th><th style="text-align:center">${T("Objets R2")}</th><th>${T("Taille")}</th><th>${T("Note")}</th><th></th>'
       + '</tr></thead><tbody>';
     for (var i=0;i<l.length;i++){ var b=l[i];
       h += '<tr><td style="white-space:nowrap;font-weight:600">'+esc(b.quand)
         + (b.commit?'<div class="mono">'+esc(b.commit)+'</div>':'')+'</td>'
-        + '<td>'+b.total+' enreg.<div style="font-size:.72rem;color:var(--tx-gris)">'+b.produits+' produits · '+b.commandes+' cmd · '+b.factures+' fact.</div></td>'
+        + '<td>'+b.total+'${T(" enreg.")}<div style="font-size:.72rem;color:var(--tx-gris)">'+b.produits+'${T(" produits · ")}'+b.commandes+'${T(" cmd · ")}'+b.factures+'${T(" fact.")}</div></td>'
         /* ⚠ L APPLICATION CONSERVEE AVEC CETTE SAUVEGARDE (2026-09-08, sur sa
            demande). Trois etats, et les trois doivent se distinguer d un coup
            d oeil :
@@ -252,10 +274,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         +   (b.appVersion
               ? '<b>' + esc(b.appVersion) + '</b>'
                 + '<div style="font-size:.72rem;color:var(--tx-gris)">'
-                + (b.appFichiers || 0) + ' installateur' + ((b.appFichiers || 0) > 1 ? 's' : '')
-                + ' conservé' + ((b.appFichiers || 0) > 1 ? 's' : '') + '</div>'
+                + (b.appFichiers || 0) + '${T(" installateur")}' + ((b.appFichiers || 0) > 1 ? 's' : '')
+                + '${T(" conservé")}' + ((b.appFichiers || 0) > 1 ? 's' : '') + '</div>'
                 + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">' + esc(b.appErreur) + '</div>' : '')
-              : '<span style="color:var(--tx-gris);font-size:.78rem">non conservée</span>'
+              : '<span style="color:var(--tx-gris);font-size:.78rem">${T("non conservée")}</span>'
                 + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">' + esc(b.appErreur) + '</div>' : ''))
         + '</td>'
         + '<td style="text-align:center">'+(b.r2Objects==null?'—':b.r2Objects)+'</td>'
@@ -276,19 +298,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            pour de vieilles sauvegardes dont on ne sait rien serait pire qu une
            mention honnete — c est la lecon du 2026-09-08, la meme semaine. */
         + '<td style="white-space:nowrap">'
-        +   (b.tailleAuMoins ? 'au moins ' : '') + esc(b.taille)
+        +   (b.tailleAuMoins ? '${T("au moins ")}' : '') + esc(b.taille)
         +   (b.tailleIncomplete
-              ? '<div style="font-size:.7rem;color:var(--tx-att)">base seule — installateurs non comptés</div>'
+              ? '<div style="font-size:.7rem;color:var(--tx-att)">${T("base seule — installateurs non comptés")}</div>'
               : (b.tailleApp
                   ? '<div style="font-size:.7rem;color:var(--tx-gris)">'
-                    + esc(b.tailleBase) + ' de base + ' + esc(b.tailleApp) + ' d’application</div>'
+                    + esc(b.tailleBase) + '${T(" de base + ")}' + esc(b.tailleApp) + '${T(" d’application")}</div>'
                   : ''))
         + '</td>'
         + '<td style="color:var(--tx2)">'+esc(b.note||'—')+'</td>'
         + '<td class="acts">'
-        + '<button class="b" data-dl="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="Télécharger le fichier chiffré">⬇ Télécharger</button>'
-        + (D.peutEcrire ? '<button class="b att" data-rest="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="Réécrire la base à partir de cette sauvegarde">↩ Restaurer</button>' : '')
-        + (D.peutEcrire ? '<button class="b dgr" data-del="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="Supprimer définitivement cette sauvegarde"><span class="ic">🗑</span> Supprimer</button>' : '')
+        + '<button class="b" data-dl="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Télécharger le fichier chiffré")}">${T("⬇ Télécharger")}</button>'
+        + (D.peutEcrire ? '<button class="b att" data-rest="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Réécrire la base à partir de cette sauvegarde")}">${T("↩ Restaurer")}</button>' : '')
+        + (D.peutEcrire ? '<button class="b dgr" data-del="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Supprimer définitivement cette sauvegarde")}"><span class="ic">🗑</span> ${T("Supprimer")}</button>' : '')
         + '</td></tr>';
     }
     h += '</tbody></table></div>';
@@ -307,7 +329,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function lier(){
     var b;
     b=document.getElementById('s-nouveau'); if (b) b.onclick=ouvrirCreer;
-    b=document.getElementById('s-refresh'); if (b) b.onclick=function(){ recharger('Liste actualisée.', 'bon'); };
+    b=document.getElementById('s-refresh'); if (b) b.onclick=function(){ recharger('${T("Liste actualisée.")}', 'bon'); };
     b=document.getElementById('s-purger');  if (b) b.onclick=ouvrirPurge;
     var ds=corps.querySelectorAll('[data-dl]');
     for (var i=0;i<ds.length;i++) ds[i].onclick=function(){ telecharger(this.getAttribute('data-dl'), this.getAttribute('data-id')); };
@@ -350,7 +372,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       b.disabled = !!on;
       /* Le titre DIT pourquoi le bouton ne repond pas. Un bouton grise sans
          explication se clique deux fois, puis on cherche la panne ailleurs. */
-      if (on) b.title = 'Indisponible pendant l’opération en cours';
+      if (on) b.title = '${T("Indisponible pendant l’opération en cours")}';
       else b.removeAttribute('title');
     });
   }
@@ -359,7 +381,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-s';
     sur.innerHTML = '<div class="boite"'+(largeur?' style="max-width:'+largeur+'"':'')+'>'
       + '<div class="tt"><h3>'+titre+'</h3>'
-      + '<div><button class="sz-btnplein" id="s-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
+      + '<div><button class="sz-btnplein" id="s-plein" title="${T("Occuper toute la fenêtre")}">${T("⛶ Plein écran")}</button>'
       + '<button class="mini" id="s-x">Fermer</button></div></div>'
       + '<div class="liste">'+corpsH+'</div>'
       + '<div class="tt" style="border-bottom:0;border-top:1px solid var(--v08)">'
@@ -374,20 +396,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ── Créer ────────────────────────────────────────────────────────
   function ouvrirCreer(){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
-    ouvrirSur('Nouvelle sauvegarde',
-      '<p class="quoi" style="margin:0 0 1rem">Ajoutez une <b>note</b> pour reconnaître cette sauvegarde plus tard — c’est facultatif. L’opération dompe toute la base, elle peut prendre un moment.</p>'
-      + '<label class="champ"><span class="lbl">Note (facultatif)</span>'
-      + '<input class="t" id="s-note" maxlength="200" placeholder="Ex. : avant mise à jour">'
-      + '<span class="sub">200 caractères au plus.</span></label>'
+    ouvrirSur('${T("Nouvelle sauvegarde")}',
+      '<p class="quoi" style="margin:0 0 1rem">${T("Ajoutez une ")}<b>${T("note")}</b>${T(" pour reconnaître cette sauvegarde plus tard — c’est facultatif. L’opération dompe toute la base, elle peut prendre un moment.")}</p>'
+      + '<label class="champ"><span class="lbl">${T("Note (facultatif)")}</span>'
+      + '<input class="t" id="s-note" maxlength="200" placeholder="${T("Ex. : avant mise à jour")}">'
+      + '<span class="sub">${T("200 caractères au plus.")}</span></label>'
       /* La zone d avancement, VIDE au depart : elle n a rien a dire avant qu on
          clique. Une barre a 0 % affichee d avance ferait croire qu une operation
          est deja commencee — et sur un ecran de sauvegarde, c est exactement le
          doute qu il ne faut pas semer. */
       + '<div class="prog" id="s-prog"></div>',
-      '<button class="b" id="s-annuler">Annuler</button><button class="prim" id="s-go"><span class="ic">💾</span> Créer la sauvegarde</button>');
+      '<button class="b" id="s-annuler">${T("Annuler")}</button><button class="prim" id="s-go"><span class="ic">💾</span> ${T("Créer la sauvegarde")}</button>');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=creer;
-    var n=document.getElementById('s-note'); if (n) try { n.focus(); } catch(e){}
+    var n=document.getElementById('s-${T("note")}'); if (n) try { n.focus(); } catch(e){}
   }
   /* ══ OU EN EST LA SAUVEGARDE — sa demande du 2026-09-09 ════════════════════
      Ses mots : << un pourcentage et un avancement de la sauvegarde, exemple
@@ -420,12 +442,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* Le detail d une etape divisible — les installateurs. C est la plus longue,
        et sans son compte la barre resterait immobile a 33 % pendant l essentiel
        de l attente, donc indiscernable d une operation bloquee. */
-    var sur = (p.sur && p.de) ? (' — ' + p.de + ' sur ' + p.sur) : '';
+    var sur = (p.sur && p.de) ? ('${T(" — ")}' + p.de + '${T(" sur ")}' + p.sur) : '';
     z.innerHTML = '<div class="pg-t">' + esc(p.libelle || '') + esc(sur) + '</div>'
       + '<div class="pg-b"><i style="width:' + pct + '%"></i></div>'
       + '<div class="pg-p">' + pct + ' %'
-      + '<span class="pg-e">etape ' + (parseInt(p.rang, 10) || 1)
-      + ' sur ' + (parseInt(p.total, 10) || 6) + '</span></div>';
+      + '<span class="pg-e">${T("étape ")}' + (parseInt(p.rang, 10) || 1)
+      + '${T(" sur ")}' + (parseInt(p.total, 10) || 6) + '</span></div>';
   }
   function suivreProgres(jeton){
     arreterProgres();
@@ -449,17 +471,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        du 2026-09-09 : << desactive le bouton fermer pendant la sauvegarde au
        lieu de l ecrire >>. Voir la fonction de verrouillage plus haut. */
     verrouSur(true);
-    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='Sauvegarde en cours…'; }
+    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='${T("Sauvegarde en cours…")}'; }
     var jeton = jetonProgres();
     /* La zone d avancement remplace la phrase << ne fermez pas cette fenetre >>,
        qui occupait la ligne d etat — donc qui prenait la place de ce que cette
        ligne sert a dire : ou en est l operation. */
     var z = document.getElementById('s-prog');
-    if (z) z.innerHTML = '<div class="pg-t">Preparation…</div>'
+    if (z) z.innerHTML = '<div class="pg-t">${T("Préparation…")}</div>'
       + '<div class="pg-b"><i style="width:0%"></i></div>';
     dire('');
     suivreProgres(jeton);
-    appeler('sauvegarde:creer',[txv('s-note'), jeton]).then(function(r){ OCCUPE=false;
+    appeler('sauvegarde:creer',[txv('s-${T("note")}'), jeton]).then(function(r){ OCCUPE=false;
       arreterProgres();
       if (r&&r.ok){
         fermerSur(); D=r; RO=!r.peutEcrire; vueListe();
@@ -469,12 +491,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            quelqu un regarde. Le decouvrir le jour d une restauration serait le
            pire des deux. */
         if (r.appErreur) {
-          dire('Sauvegarde créée ('+(r.taille||'')+') — mais l’application n’a pas été conservée : '+r.appErreur, 'att');
+          dire('${T("Sauvegarde créée (")}'+(r.taille||'')+'${T(") — mais l’application n’a pas été conservée : ")}'+r.appErreur, 'att');
         } else if (r.appVersion) {
-          dire('Sauvegarde créée ('+(r.taille||'')+') — application '+r.appVersion
-            + ' conservée ('+(r.appFichiers||0)+' installateur'+((r.appFichiers||0)>1?'s':'')+').', 'bon');
+          dire('${T("Sauvegarde créée (")}'+(r.taille||'')+'${T(") — application ")}'+r.appVersion
+            + '${T(" conservée (")}'+(r.appFichiers||0)+'${T(" installateur")}'+((r.appFichiers||0)>1?'s':'')+').', 'bon');
         } else {
-          dire('Sauvegarde créée ('+(r.taille||'')+').', 'bon');
+          dire('${T("Sauvegarde créée (")}'+(r.taille||'')+').', 'bon');
         }
       }
       else {
@@ -488,34 +510,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            c est la rassurante qu on croit. */
         verrouSur(false);
         var zp = document.getElementById('s-prog'); if (zp) zp.innerHTML = '';
-        if (go){ go.disabled=false; go.textContent='Créer la sauvegarde'; }
-        dire('Échec : '+expliquer(r), 'err');
+        if (go){ go.disabled=false; go.textContent='${T("Créer la sauvegarde")}'; }
+        dire('${T("Échec : ")}'+expliquer(r), 'err');
       }
     });
   }
 
   // ── Télécharger ──────────────────────────────────────────────────
   function telecharger(encKey, id){
-    if (OCCUPE) return; OCCUPE=true; dire('Préparation du fichier…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Préparation du fichier…")}');
     appeler('sauvegarde:telecharger',[encKey, id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok) dire('Fichier chiffré téléchargé — gardez-le en lieu sûr. Il est illisible sans la clé du serveur.', 'bon');
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok) dire('${T("Fichier chiffré téléchargé — gardez-le en lieu sûr. Il est illisible sans la clé du serveur.")}', 'bon');
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── Restaurer (confirmation écrite) ──────────────────────────────
   function ouvrirRestaurer(encKey, id){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
-    ouvrirSur('↩ Restaurer la base de données',
-      '<div class="garde jaune"><span class="ic">⚠</span> Cette opération <b>réécrit</b> les données actuelles de Turso avec le contenu de la sauvegarde <b>'+esc(id)+'</b>. Les enregistrements portant le même identifiant seront écrasés. Elle ne supprime pas ce qui a été créé après la sauvegarde.</div>'
-      + '<label class="champ"><span class="lbl">Pour confirmer, tapez RESTAURER</span>'
-      + '<input class="t" id="s-conf" autocomplete="off" placeholder="RESTAURER"></label>'
+    ouvrirSur('${T("↩ Restaurer la base de données")}',
+      '<div class="garde jaune"><span class="ic">⚠</span> ${T("Cette opération ")}<b>${T("réécrit")}</b>${T(" les données actuelles de Turso avec le contenu de la sauvegarde ")}<b>'+esc(id)+'</b>${T(". Les enregistrements portant le même identifiant seront écrasés. Elle ne supprime pas ce qui a été créé après la sauvegarde.")}</div>'
+      + '<label class="champ"><span class="lbl">${T("Pour confirmer, tapez ")}' + MOT_RESTAURER + '</span>'
+      + '<input class="t" id="s-conf" autocomplete="off" placeholder="' + MOT_RESTAURER + '"></label>'
       /* Sa demande du 2026-09-09 : << le processus de restauration doit etre
          suivi etape par etape et vu a l ecran comme quand on fait la
          sauvegarde >>. Meme zone, meme mecanisme, meme sondage — on ne pose
          pas un second affichage d avancement a cote du premier. */
       + '<div class="intg" id="s-intg"></div>'
       + '<div class="prog" id="s-prog"></div>',
-      '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go" disabled>Restaurer maintenant</button>');
+      '<button class="b" id="s-annuler">${T("Annuler")}</button><button class="b dgr" id="s-go" disabled>${T("Restaurer maintenant")}</button>');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=function(){ restaurer(encKey); };
     var c=document.getElementById('s-conf'); if (c) c.oninput=function(){ c.classList.remove('manque'); };
@@ -537,7 +559,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var PICTO_INTG = { bon: '\u2713', faute: '\u2717', note: '!' };
   function verifierIntegrite(encKey){
     var z = document.getElementById('s-intg');
-    if (z) z.innerHTML = '<div class="ch">Verification de l integrite de la sauvegarde...</div>';
+    /* ⚠⚠ LES ACCENTS SE PORTENT ICI, ET C EST LA TROISIEME FOIS DU DEPOT. La
+       consigne de l en-tete dit « aucun accent grave » — c est le caractere qui
+       referme le gabarit, PAS les lettres accentuees. Ce bloc-ci etait parti en
+       francais sans accents (« Verification de l integrite »), comme profil.js
+       en 2026-08-19 et promo-editeur.js en 2026-09-11. Le banc des accents
+       visibles ne le voyait pas : sa liste de mots ne connaissait ni
+       « integrite » ni « refusee ». Ils y sont maintenant. */
+    if (z) z.innerHTML = '<div class="ch">${T("Vérification de l’intégrité de la sauvegarde…")}</div>';
     appeler('sauvegarde:integrite',[encKey]).then(function(r){
       var z2 = document.getElementById('s-intg');
       var go = document.getElementById('s-go');
@@ -547,47 +576,47 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          pour la meme raison et pas avec le meme geste ensuite. Les confondre
          ferait annoncer << sauvegarde corrompue >> sur une coupure de reseau. */
       if (!r || !r.ok) {
-        z2.innerHTML = '<div class="ch ko">Verification impossible</div>'
+        z2.innerHTML = '<div class="ch ko">${T("Vérification impossible")}</div>'
           + '<div class="it ko"><span class="p">' + PICTO_INTG.faute + '</span>'
-          + '<span class="n">Le controle n a pas pu etre fait</span>'
+          + '<span class="n">${T("Le contrôle n’a pas pu être fait")}</span>'
           + '<span class="d">' + esc(expliquer(r)) + '</span></div>';
         return;
       }
       var g = r.integrite;
       if (!g || !g.controles) {
-        z2.innerHTML = '<div class="ch ko">Verification impossible</div>'
+        z2.innerHTML = '<div class="ch ko">${T("Vérification impossible")}</div>'
           + '<div class="it ko"><span class="p">' + PICTO_INTG.faute + '</span>'
-          + '<span class="n">Rapport illisible</span>'
-          + '<span class="d">le serveur a repondu sans rapport d integrite</span></div>';
+          + '<span class="n">${T("Rapport illisible")}</span>'
+          + '<span class="d">${T("le serveur a répondu sans rapport d’intégrité")}</span></div>';
         return;
       }
       var h = g.ok
-        ? '<div class="ch">Sauvegarde verifiee' + (g.lignes ? ' \u2014 ' + g.lignes + ' enregistrement(s)' : '') + '</div>'
-        : '<div class="ch ko">Restauration refusee \u2014 cette sauvegarde ne peut pas etre restauree</div>';
+        ? '<div class="ch">${T("Sauvegarde vérifiée")}' + (g.lignes ? '${T(" — ")}' + g.lignes + '${T(" enregistrement(s)")}' : '') + '</div>'
+        : '<div class="ch ko">${T("Restauration refusée — cette sauvegarde ne peut pas être restaurée")}</div>';
       for (var i=0;i<g.controles.length;i++){
         var c = g.controles[i];
-        var cl = c.etat === 'faute' ? ' ko' : (c.etat === 'note' ? ' note' : '');
+        var cl = c.etat === 'faute' ? ' ko' : (c.etat === '${T("note")}' ? ' ${T("note")}' : '');
         h += '<div class="it' + cl + '"><span class="p">'
           + (PICTO_INTG[c.etat] || '\u00b7') + '</span>'
           + '<span class="n">' + esc(c.nom) + '</span>'
           + '<span class="d">' + esc(c.detail) + '</span></div>';
       }
       if (!g.ok) h += '<div class="it note"><span class="p">\u00b7</span>'
-        + '<span class="n">Rien n a ete touche</span>'
-        + '<span class="d">aucune donnée modifiée, aucune session fermée</span></div>';
+        + '<span class="n">${T("Rien n’a été touché")}</span>'
+        + '<span class="d">${T("aucune donnée modifiée, aucune session fermée")}</span></div>';
       z2.innerHTML = h;
       /* ⚠ ON N ALLUME QUE SUR UN VERDICT FRANCHEMENT BON. !g.ok et l absence de
          verdict mènent au même endroit : eteint. */
       if (go && g.ok) go.disabled = false;
-      if (!g.ok) dire('Restauration refusee : ' + (g.fautes && g.fautes[0] ? g.fautes[0] : 'sauvegarde inutilisable'), 'err');
+      if (!g.ok) dire('${T("Restauration refusée : ")}' + (g.fautes && g.fautes[0] ? g.fautes[0] : '${T("sauvegarde inutilisable")}'), 'err');
     });
   }
   function restaurer(encKey){
     if (OCCUPE) return;
     var c=document.getElementById('s-conf');
-    if (!c || c.value.trim().toUpperCase() !== 'RESTAURER'){
+    if (!c || c.value.trim().toUpperCase() !== MOT_RESTAURER){
       if (c) c.classList.add('manque');
-      dire('Tapez RESTAURER pour confirmer.', 'att'); return;
+      dire('${T("Tapez ")}' + MOT_RESTAURER + '${T(" pour confirmer.")}', 'att'); return;
     }
     OCCUPE=true;
     /* ⚠ MEME VERROU QUE LA SAUVEGARDE, ET ICI IL COMPTE ENCORE PLUS : une
@@ -598,10 +627,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        la restauration en arriere aurait ete garder le defaut a l endroit ou il
        coute le plus cher. */
     verrouSur(true);
-    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='Restauration…'; }
+    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='${T("Restauration…")}'; }
     var jeton = jetonProgres();
     var zr = document.getElementById('s-prog');
-    if (zr) zr.innerHTML = '<div class="pg-t">Preparation…</div>'
+    if (zr) zr.innerHTML = '<div class="pg-t">${T("Préparation…")}</div>'
       + '<div class="pg-b"><i style="width:0%"></i></div>';
     dire('');
     suivreProgres(jeton);
@@ -628,20 +657,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var appTxt = '';
         if (r && r.app) {
           appTxt = r.app.ok
-            ? ('<br>Application ramenee a la version <b>' + esc(r.app.version) + '</b>.')
-            : ('<br><span style="color:var(--tx-att)">Version de l application NON retablie : '
+            ? ('<br>${T("Application ramenée à la version ")}<b>' + esc(r.app.version) + '</b>.')
+            : ('<br><span style="color:var(--tx-att)">${T("Version de l’application NON rétablie : ")}'
                + esc(r.app.erreur || '') + '</span>');
         }
-        corps.innerHTML = '<div class="carte"><div class="vide"><span class="ic">✅</span> Restauration terminée — <b>'+(r.total||0)+'</b> enregistrements rétablis.'
-          + ((r && r.sessionsFermees) ? '<br>' + r.sessionsFermees + ' session(s) fermée(s) pendant l opération.' : '')
+        corps.innerHTML = '<div class="carte"><div class="vide"><span class="ic">✅</span> ${T("Restauration terminée — ")}<b>'+(r.total||0)+'</b>${T(" enregistrements rétablis.")}'
+          + ((r && r.sessionsFermees) ? '<br>' + r.sessionsFermees + '${T(" session(s) fermée(s) pendant l’opération.")}' : '')
           + appTxt
-          + (fil.encKey ? '<br><br><b>Retour en arrière possible</b> — l état d avant cette restauration a été sauvegardé sous <span class="mono">' + esc(fil.id) + '</span>.' : '')
-          + '<br><br>La fenêtre principale se recharge pour relire la base. Patientez quelques secondes, puis cliquez « ↻ Actualiser ».'
-          + '<br><br><button class="b" id="s-reprendre">↻ Actualiser</button>'
-          + (fil.encKey ? ' <button class="b att" id="s-retour" disabled>↩ Revenir à l état d avant</button>' : '')
+          + (fil.encKey ? '<br><br><b>${T("Retour en arrière possible")}</b>${T(" — l’état d’avant cette restauration a été sauvegardé sous ")}<span class="mono">' + esc(fil.id) + '</span>.' : '')
+          + '<br><br>${T("La fenêtre principale se recharge pour relire la base. Patientez quelques secondes, puis cliquez « ↻ Actualiser ».")}'
+          + '<br><br><button class="b" id="s-reprendre">${T("↻ Actualiser")}</button>'
+          + (fil.encKey ? ' <button class="b att" id="s-retour" disabled>${T("↩ Revenir à l’état d’avant")}</button>' : '')
           + '</div></div>';
         var rb=document.getElementById('s-reprendre');
-        if (rb) rb.onclick=function(){ FIGE=false; recharger('Liste actualisée.', 'bon'); };
+        if (rb) rb.onclick=function(){ FIGE=false; recharger('${T("Liste actualisée.")}', 'bon'); };
         /* ⚠⚠ LE BOUTON DE RETOUR ATTEND QUE LA PAGE SOIT REVENUE, ET C EST LA
            MEME RAISON QUI FAIT ECRIRE << patientez >> juste au-dessus : le
            coeur programme un rechargement de la fenetre principale deux
@@ -653,14 +682,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            donc eteint, en disant pourquoi, et il s allume quand c est vrai. */
         var rt=document.getElementById('s-retour');
         if (rt) {
-          rt.title='Disponible dès que la fenêtre principale a fini de se recharger.';
+          rt.title='${T("Disponible dès que la fenêtre principale a fini de se recharger.")}';
           setTimeout(function(){
             if (!rt) return;
             rt.disabled=false; rt.title='';
             rt.onclick=function(){ FIGE=false; ouvrirRestaurer(fil.encKey, fil.id); };
           }, 8000);
         }
-        dire('Restauration terminée ('+(r.total||0)+' enregistrements).', 'bon');
+        dire('${T("Restauration terminée (")}'+(r.total||0)+'${T(" enregistrements).")}', 'bon');
       } else {
         // ⚠ On rend les sorties : sinon la surcouche reste incondamnable sur un
         // echec, et cette fenetre n a pas de touche Echap pour s en sortir.
@@ -670,8 +699,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            L echec vient donc d ailleurs — reseau, delai, refus serveur — et
            reessayer a un sens. Le laisser eteint enfermerait dans une surcouche
            sans issue, ce que cette fenetre n a pas de touche Echap pour quitter. */
-        if (go){ go.disabled=false; go.textContent='Restaurer maintenant'; }
-        dire('Échec : '+expliquer(r), 'err');
+        if (go){ go.disabled=false; go.textContent='${T("Restaurer maintenant")}'; }
+        dire('${T("Échec : ")}'+expliquer(r), 'err');
       }
     });
   }
@@ -679,11 +708,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ── Supprimer (confirmation écrite) ──────────────────────────────
   function ouvrirSupprimer(encKey, id){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
-    ouvrirSur('Supprimer la sauvegarde',
-      '<div class="garde rouge"><span class="ic">⚠</span> Cette action supprime <b>définitivement</b> la sauvegarde <b>'+esc(id)+'</b> de Cloudflare R2. Elle sera <b>irrécupérable</b>.</div>'
-      + '<label class="champ"><span class="lbl">Pour confirmer, tapez DÉTRUIRE</span>'
-      + '<input class="t" id="s-conf" autocomplete="off" placeholder="DÉTRUIRE"></label>',
-      '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go">Supprimer définitivement</button>');
+    ouvrirSur('${T("Supprimer la sauvegarde")}',
+      '<div class="garde rouge"><span class="ic">⚠</span> ${T("Cette action supprime ")}<b>${T("définitivement")}</b>${T(" la sauvegarde ")}<b>'+esc(id)+'</b>${T(" de Cloudflare R2. Elle sera ")}<b>${T("irrécupérable")}</b>.</div>'
+      + '<label class="champ"><span class="lbl">${T("Pour confirmer, tapez ")}' + MOT_DETRUIRE + '</span>'
+      + '<input class="t" id="s-conf" autocomplete="off" placeholder="' + MOT_DETRUIRE + '"></label>',
+      '<button class="b" id="s-annuler">${T("Annuler")}</button><button class="b dgr" id="s-go">${T("Supprimer définitivement")}</button>');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=function(){ supprimer(encKey); };
     var c=document.getElementById('s-conf'); if (c) c.oninput=function(){ c.classList.remove('manque'); };
@@ -694,43 +723,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // On accepte la saisie sans accent : refuser DETRUIRE parce qu'il manque un
     // accent serait un piège, pas un garde-fou.
     var v = c ? c.value.trim().toUpperCase() : '';
-    if (v !== 'DÉTRUIRE' && v !== 'DETRUIRE'){
+    if (v !== MOT_DETRUIRE && v !== MOT_DETRUIRE_SANS_ACCENT){
       if (c) c.classList.add('manque');
-      dire('Tapez DÉTRUIRE pour confirmer.', 'att'); return;
+      dire('${T("Tapez ")}' + MOT_DETRUIRE + '${T(" pour confirmer.")}', 'att'); return;
     }
     OCCUPE=true;
-    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='⏳ Suppression…'; }
+    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='${T("⏳ Suppression…")}'; }
     appeler('sauvegarde:supprimer',[encKey]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ fermerSur(); D=r; RO=!r.peutEcrire; vueListe(); dire('Sauvegarde supprimée.', 'bon'); }
-      else { if (go){ go.disabled=false; go.textContent='Supprimer définitivement'; } dire('Échec : '+expliquer(r), 'err'); }
+      if (r&&r.ok){ fermerSur(); D=r; RO=!r.peutEcrire; vueListe(); dire('${T("Sauvegarde supprimée.")}', 'bon'); }
+      else { if (go){ go.disabled=false; go.textContent='${T("Supprimer définitivement")}'; } dire('${T("Échec : ")}'+expliquer(r), 'err'); }
     });
   }
 
   // ── Purge (rétention) ────────────────────────────────────────────
   function ouvrirPurge(){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
-    ouvrirSur('Purger les vieilles sauvegardes',
-      '<div class="garde rouge"><span class="ic">⚠</span> Toutes les sauvegardes de plus de <b>'+(D.retentionMois||12)+' mois</b> sont détruites de Cloudflare R2. <b>Irréversible.</b></div>'
-      + '<p class="quoi" style="margin:0">Les sauvegardes plus récentes ne sont pas touchées.</p>',
-      '<button class="b" id="s-annuler">Annuler</button><button class="b dgr" id="s-go">Purger</button>', '520px');
+    ouvrirSur('${T("Purger les vieilles sauvegardes")}',
+      '<div class="garde rouge"><span class="ic">⚠</span> ${T("Toutes les sauvegardes de plus de ")}<b>'+(D.retentionMois||12)+'${T(" mois")}</b>${T(" sont détruites de Cloudflare R2. ")}<b>${T("Irréversible.")}</b></div>'
+      + '<p class="quoi" style="margin:0">${T("Les sauvegardes plus récentes ne sont pas touchées.")}</p>',
+      '<button class="b" id="s-annuler">${T("Annuler")}</button><button class="b dgr" id="s-go">${T("Purger")}</button>', '520px');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=purger;
   }
   function purger(){
     if (OCCUPE) return; OCCUPE=true;
-    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='⏳ Purge…'; }
+    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='${T("⏳ Purge…")}'; }
     appeler('sauvegarde:purger',[]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ fermerSur(); D=r; RO=!r.peutEcrire; vueListe();
-        dire(r.retirees ? (r.retirees+' sauvegarde(s) supprimée(s).') : 'Aucune sauvegarde à purger.', 'bon'); }
-      else { if (go){ go.disabled=false; go.textContent='Purger'; } dire('Échec : '+expliquer(r), 'err'); }
+        dire(r.retirees ? (r.retirees+'${T(" sauvegarde(s) supprimée(s).")}') : '${T("Aucune sauvegarde à purger.")}', 'bon'); }
+      else { if (go){ go.disabled=false; go.textContent='${T("Purger")}'; } dire('${T("Échec : ")}'+expliquer(r), 'err'); }
     });
   }
 
   function recharger(msg, cl){
-    if (OCCUPE) return; OCCUPE=true; dire('Lecture…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Lecture…")}');
     appeler('sauvegarde:donnees',[]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ D=r; RO=!r.peutEcrire; rendre(); if (msg) dire(msg, cl); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   function rendre(){
@@ -739,7 +768,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('sauvegarde:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutEcrire; rendre(); dire('');
