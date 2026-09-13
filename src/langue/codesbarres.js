@@ -96,6 +96,19 @@ module.exports = {
   'Confirmer ?': 'Confirm?',
   '🗑 Vider': '🗑 Empty',
   'Vider': 'Empty',
+  /* ── LA PLANCHE D ESSAI (2026-09-13) ────────────────────────────────────────
+     ⚠ « planche » se dit « test sheet » : c est la feuille qu on imprime pour
+     eprouver un reglage, pas une « board ». */
+  'Imprimer une planche d’essai': 'Print a test sheet',
+  'Trois codes d’essai autour de la limite de lisibilité de cette imprimante. Le dernier ne doit PAS se scanner : c’est ce qui vous dit où est la limite. Aucun produit n’est touché.':
+    'Three test codes around this printer’s readability limit. The last one must NOT scan: that is what tells you where the limit is. No product is touched.',
+  'Préparation de la planche d’essai…': 'Preparing the test sheet…',
+  '{0} étiquettes d’essai envoyées — {1} po, {2} ppp, limite {3} modules.':
+    '{0} test labels sent — {1} in, {2} dpi, limit {3} modules.',
+  'Aucun code trop long n’a pu être fabriqué : cette étiquette est large.':
+    'No over-long code could be built: this label is a wide one.',
+  'Étiquette trop étroite : à {0} po et {1} ppp, même le code le plus court ({2} modules) dépasse la limite de {3}. Aucun code-barres ne se scannera sur ce format.':
+    'Label too narrow: at {0} in and {1} dpi, even the shortest code ({2} modules) is over the limit of {3}. No barcode will scan on this format.',
   '🖨 Imprimer ': '🖨 Print ',
   '🖨 Imprimer': '🖨 Print',
   'Imprimer ': 'Print ',

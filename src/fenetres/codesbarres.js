@@ -238,7 +238,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (VIDER_ARME ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span> ${T("Vider")}') + '</button>'
       + '<button class="prim" id="cb-imprimer" style="flex:1"' + (FILE.length ? '' : ' disabled') + '><span class="ic">🖨</span> ${T("Imprimer ")}'
       + (etiquettes ? etiquettes + (etiquettes > 1 ? '${T(" étiquettes")}' : '${T(" étiquette")}') : '') + '</button>'
-      + '</div></div>';
+      + '</div>'
+      /* ⚠⚠ LA PLANCHE D ESSAI, ET ELLE N EST PAS UN GADGET. Eprouver
+         l imprimante demandait jusqu ici de mettre de VRAIS produits en file et
+         d imprimer de vraies etiquettes de marchandise — personne ne fait ca
+         pour verifier un reglage, et l essai restait a faire indefiniment.
+         ⚠ ELLE NE TOUCHE AUCUN PRODUIT : trois codes fabriques, choisis AUTOUR
+         DE LA LIMITE de lisibilite de ce poste (voir plancheEssai). Le
+         troisieme ne doit PAS se scanner — c est le resultat le plus utile.
+         ⚠ EN DEHORS DE LA FILE, et volontairement : elle ne s ajoute pas au
+         travail en cours, elle ne le vide pas non plus. */
+      + '<div style="margin-top:.55rem;border-top:1px solid var(--v07);padding-top:.55rem">'
+      + '<button id="cb-planche" style="width:100%"><span class="ic">📏</span> '
+      + '${T("Imprimer une planche d’essai")}</button>'
+      + '<div style="font-size:.7rem;color:var(--tx2);margin-top:.3rem;line-height:1.5">'
+      + '${T("Trois codes d’essai autour de la limite de lisibilité de cette imprimante. Le dernier ne doit PAS se scanner : c’est ce qui vous dit où est la limite. Aucun produit n’est touché.")}'
+      + '</div></div>'
+      + '</div>';
     return h;
   }
 
@@ -333,6 +349,53 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     };
     var imp = document.getElementById('cb-imprimer');
     if (imp) imp.onclick = imprimer;
+    var pl = document.getElementById('cb-planche');
+    if (pl) pl.onclick = planche;
+  }
+
+  /* ⚠ LA PLANCHE PASSE PAR LA MEME VOIE D IMPRESSION QUE TOUT LE RESTE
+     (stock:etiquettes) : une seconde voie d impression serait une seconde
+     facon de se tromper, et celle qu on eprouve ne serait plus celle qui sert.
+     ⚠ ET ELLE NE PASSE PAS PAR LE GARDE-FOU DE LISIBILITE : il refuserait le
+     troisieme code, qui est la EXPRES pour ne pas se scanner. */
+  function planche(){
+    var b = document.getElementById('cb-planche');
+    if (b) b.disabled = true;
+    dire('${T("Préparation de la planche d’essai…")}');
+    appeler('etiquettes:planche', []).then(function(p){
+      /* ⚠ UNE ETIQUETTE TROP ETROITE N EST PAS UNE PANNE, C EST UN VERDICT.
+         Meme le code le plus court n y tiendrait pas : on le DIT, plutot que
+         d imprimer une planche qui se contredirait ligne apres ligne. */
+      if (p && p.ok && p.tropEtroit) {
+        if (b) b.disabled = false;
+        dire('${T("Étiquette trop étroite : à {0} po et {1} ppp, même le code le plus court ({2} modules) dépasse la limite de {3}. Aucun code-barres ne se scannera sur ce format.")}'
+            .split('{0}').join(p.largeurPo).split('{1}').join(p.dpi)
+            .split('{2}').join(p.modulesMini).split('{3}').join(p.limiteModules), 'err');
+        return;
+      }
+      if (!p || !p.ok || !(p.items || []).length) {
+        if (b) b.disabled = false;
+        dire(expliquer(p), 'err');
+        return;
+      }
+      appeler('stock:etiquettes', [p.items]).then(function(r){
+        if (b) b.disabled = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        /* ⚠ ON DIT LES CHIFFRES DE CE POSTE — largeur, resolution, limite. Une
+           planche qui sort sans eux laisse deviner ce qu on vient de mesurer.
+           ⚠⚠ UNE PHRASE A TROUS, PAS DES MORCEAUX COLLES. Ecrite en fragments
+           (<< po · >>, << ppp · limite >>, << modules >>), elle aurait demande
+           quatre entrees de dictionnaire qui ne veulent rien dire seules — et
+           l ordre des mots n est pas le meme d une langue a l autre. */
+        dire('${T("{0} étiquettes d’essai envoyées — {1} po, {2} ppp, limite {3} modules.")}'
+            .split('{0}').join(p.items.length)
+            .split('{1}').join(p.largeurPo)
+            .split('{2}').join(p.dpi)
+            .split('{3}').join(p.limiteModules)
+          + (p.sansTropLong ? ' ${T("Aucun code trop long n’a pu être fabriqué : cette étiquette est large.")}' : ''),
+          'bon');
+      });
+    });
   }
 
   function brancher(){

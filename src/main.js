@@ -2232,6 +2232,10 @@ const OPS_PONT = new Set([
   // invisible d ici : des etiquettes qui ne se scannent pas partaient sans
   // que personne ne voie rien (vecu a l entrepot).
   'etiquettes:lisibilite',
+  /* La PLANCHE D ESSAI : trois codes choisis autour de la limite de lisibilite
+     du poste. Elle COMPOSE, elle n imprime pas — l impression reste
+     `stock:etiquettes`, et c est voulu : une seule voie qui imprime. */
+  'etiquettes:planche',
   // Le cadenas SUR LA LIGNE d une liste (#22). Sonde toutes les ~3 s, pour
   // qu un collegue voie qu une fiche est prise SANS avoir a l ouvrir.
   'verrous:liste',
