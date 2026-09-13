@@ -17,6 +17,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('gabarits');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -82,7 +86,7 @@ body{background:var(--f-page);color:var(--tx);
 .tbl td{padding:.4rem .6rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 .tbl td .mod{color:var(--tx2)}
 .tbl select{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-page);border:1px solid var(--v12);border-radius:7px;padding:.3rem .4rem}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-${T("pied")})}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);
@@ -102,13 +106,13 @@ button.prim:disabled{opacity:.5;cursor:default}
 
 function pageGabarits(ouverture) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Gabarits courriel — Administration Sandriza</title>
+<title>${T("Gabarits courriel — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.gabarit}</span><h1>Gabarits courriel</h1><span class="droite"></span></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.gabarit}</span><h1>${T("Gabarits courriel")}</h1><span class="droite"></span></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
+<div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-nouveau" style="display:none">+ Nouveau gabarit</button></div>
+  <button class="prim" id="b-nouveau" style="display:none">${T("+ Nouveau gabarit")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -118,9 +122,9 @@ function pageGabarits(ouverture) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id = 'sz-detacher'; b.type = 'button'; b.className = 'mini'; t.appendChild(b); }
-    if (actif) { b.textContent = '⧉ Détacher'; b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+    if (actif) { b.textContent = '${T("⧉ Détacher")}'; b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); }; }
-    else { b.textContent = '⚓ Ancrer'; b.title = 'Ramener cet écran dans la fenêtre principale';
+    else { b.textContent = '${T("⚓ Ancrer")}'; b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
@@ -140,21 +144,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function chk(id){ var e = document.getElementById(id); return !!(e && e.checked); }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    indisponible:"L'administration n'est pas encore chargée dans la fenêtre principale.",
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    nom_requis:'Le nom du gabarit est requis.',
-    introuvable:'Ce gabarit n’existe plus.',
-    defaut_protege:'Le gabarit « Défaut » ne peut pas être supprimé.',
-    echec:"L'opération a échoué.",
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    indisponible:"${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nom_requis:'${T("Le nom du gabarit est requis.")}',
+    introuvable:'${T("Ce gabarit n’existe plus.")}',
+    defaut_protege:'${T("Le gabarit « Défaut » ne peut pas être supprimé.")}',
+    echec:"${T('L\'opération a échoué.')}",
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').')) + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').')) + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
     var p;
@@ -176,76 +180,76 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        sans dire de quelle couleur il s agit. */
     return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><div class="coul">'
       + '<input type="color" id="' + id + '" value="' + esc(v) + '"' + (RO ? ' disabled' : '') + '>'
-      + '<input type="text" id="' + id + '-t" aria-label="' + esc(label) + ' — code hexadécimal" value="' + esc(v) + '"' + (RO ? ' disabled' : '') + '></div></div>';
+      + '<input type="text" id="' + id + '-t" aria-label="' + esc(label) + '${T(" — code hexadécimal")}" value="' + esc(v) + '"' + (RO ? ' disabled' : '') + '></div></div>';
   }
   function editeurHtml(){
     var t = (EDIT ? gabParId(EDIT) : null) || { name: '', headerBgFrom: '#1a1a2e', headerBgTo: '#2d1b69',
       headerSubtitle: '', footerBg: '#1a1a2e', footerTextColor: '#c4a882', animated: false, gifBanner: false };
     var brand = (D && D.marque) || 'SANDRIZA';
-    var h = '<div class="carte edit"><div class="stitre">' + (EDIT ? 'Modifier — ' + esc(t.name || '') : 'Nouveau gabarit') + '</div>';
-    h += '<div class="ch"><label for="g-name">Nom du gabarit</label><input type="text" id="g-name" value="' + esc(t.name || '') + '"' + (RO ? ' disabled' : '') + '></div>';
-    h += '<div class="gr2">' + coulChamp('g-hfrom', 'En-tête : couleur de départ', t.headerBgFrom || '#1a1a2e')
-      + coulChamp('g-hto', 'En-tête : couleur de fin', t.headerBgTo || '#2d1b69') + '</div>';
-    h += '<div class="ch"><label for="g-sub">Sous-titre (vide = tagline du pied de page)</label>'
-      + '<input type="text" id="g-sub" value="' + esc(t.headerSubtitle || '') + '" placeholder="ÉLÉGANCE · RAFFINEMENT · STYLE"' + (RO ? ' disabled' : '') + '></div>';
+    var h = '<div class="carte edit"><div class="stitre">' + (EDIT ? '${T("Modifier — ")}' + esc(t.name || '') : '${T("Nouveau gabarit")}') + '</div>';
+    h += '<div class="ch"><label for="g-name">${T("Nom du gabarit")}</label><input type="text" id="g-name" value="' + esc(t.name || '') + '"' + (RO ? ' disabled' : '') + '></div>';
+    h += '<div class="gr2">' + coulChamp('g-hfrom', '${T("En-tête : couleur de départ")}', t.headerBgFrom || '#1a1a2e')
+      + coulChamp('g-hto', '${T("En-tête : couleur de fin")}', t.headerBgTo || '#2d1b69') + '</div>';
+    h += '<div class="ch"><label for="g-sub">${T("Sous-titre (vide = tagline du pied de page)")}</label>'
+      + '<input type="text" id="g-sub" value="' + esc(t.headerSubtitle || '') + '" placeholder="${T("ÉLÉGANCE · RAFFINEMENT · STYLE")}"' + (RO ? ' disabled' : '') + '></div>';
     h += '<label class="bascule"><input type="checkbox" id="g-anim"' + (t.animated ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
-      + '<span><span class="t"><span class="ic">✨</span> Effet animé CSS (en-tête &amp; pied)</span><br><span class="d">Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.</span></span></label>';
+      + '<span><span class="t"><span class="ic">✨</span>${T(" Effet animé CSS (en-tête &amp; pied)")}</span><br><span class="d">${T("Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.")}</span></span></label>';
     h += '<label class="bascule"><input type="checkbox" id="g-gif"' + (t.gifBanner ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
-      + '<span><span class="t"><span class="ic">🖼️</span> Bannière animée GIF (compatible Gmail)</span><br><span class="d">Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.</span></span></label>';
-    h += '<div class="gr2">' + coulChamp('g-fbg', 'Pied : couleur de fond', t.footerBg || '#1a1a2e')
-      + coulChamp('g-fcol', 'Pied : couleur du texte', t.footerTextColor || '#c4a882') + '</div>';
+      + '<span><span class="t"><span class="ic">🖼️</span>${T(" Bannière animée GIF (compatible Gmail)")}</span><br><span class="d">${T("Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.")}</span></span></label>';
+    h += '<div class="gr2">' + coulChamp('g-fbg', '${T("Pied : couleur de fond")}', t.footerBg || '#1a1a2e')
+      + coulChamp('g-fcol', '${T("Pied : couleur du texte")}', t.footerTextColor || '#c4a882') + '</div>';
     // Aperçu CSS
     h += '<div class="apercu" id="g-prev">'
       + '<div class="head" id="g-prev-head"><div class="ti">' + esc(brand.toUpperCase()) + '</div><div class="su" id="g-prev-sub"></div></div>'
-      + '<div class="body">…contenu du courriel…</div>'
+      + '<div class="body">${T("…contenu du courriel…")}</div>'
       + '<div class="foot" id="g-prev-foot"><div class="cp" id="g-prev-cp">© ' + esc(brand) + '.</div></div></div>';
     // Aperçu GIF (relayé)
     h += '<div class="gifwrap" id="g-gifwrap" style="display:' + (t.gifBanner ? 'block' : 'none') + '">'
-      + '<div class="lg"><span class="ic">🖼️</span> Aperçu de la bannière GIF <button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
-      + '<img id="g-gifimg" alt="Aperçu bannière"></div>';
+      + '<div class="lg"><span class="ic">🖼️</span>${T(" Aperçu de la bannière GIF ")}<button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
+      + '<img id="g-gifimg" alt="${T("Aperçu bannière")}"></div>';
     if (!RO) {
       h += '<div style="display:flex;gap:.6rem;margin-top:.3rem">'
-        + '<button class="prim" id="g-save"><span class="ic">💾</span> Enregistrer</button>'
-        + '<button class="b" id="g-cancel">Annuler</button></div>';
+        + '<button class="prim" id="g-save"><span class="ic">💾</span>${T(" Enregistrer")}</button>'
+        + '<button class="b" id="g-cancel">${T("Annuler")}</button></div>';
     } else {
-      h += '<div style="margin-top:.3rem"><button class="b" id="g-cancel">← Retour</button></div>';
+      h += '<div style="margin-top:.3rem"><button class="b" id="g-cancel">${T("← Retour")}</button></div>';
     }
     return h + '</div>';
   }
   function listeHtml(){
     var g = (D && D.gabarits) || [];
-    var h = '<div class="carte"><div class="stitre"><span class="ic">🎨</span> Gabarits disponibles</div><div class="sdesc">Le style (couleurs, sous-titre, bannière) partagé par les courriels.</div>';
+    var h = '<div class="carte"><div class="stitre"><span class="ic">🎨</span>${T(" Gabarits disponibles")}</div><div class="sdesc">${T("Le style (couleurs, sous-titre, bannière) partagé par les courriels.")}</div>';
     for (var i = 0; i < g.length; i++) {
       var t = g[i];
-      h += '<div class="ligne"><div class="nom">' + esc(t.name) + (t.id === 'default' ? '<span class="def">(défaut)</span>' : '')
+      h += '<div class="ligne"><div class="nom">' + esc(t.name) + (t.id === 'default' ? '<span class="def">${T("(défaut)")}</span>' : '')
         + '<div class="swatch"><div class="b1" style="background:linear-gradient(90deg,' + esc(t.headerBgFrom) + ',' + esc(t.headerBgTo) + ')"></div>'
-        + '<span class="lb">en-tête</span><div class="b2" style="background:' + esc(t.footerBg) + '"></div><span class="lb">pied</span></div></div>'
+        + '<span class="lb">${T("en-tête")}</span><div class="b2" style="background:' + esc(t.footerBg) + '"></div><span class="lb">${T("pied")}</span></div></div>'
         + '<div style="display:flex;gap:.35rem">'
-        + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✏</span> Modifier</button>'
-        + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span> Copier</button>')
-        + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? 'Confirmer ?' : '<span class="ic">🗑</span>') + '</button>') : '')
+        + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✏</span>${T(" Modifier")}</button>'
+        + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span>${T(" Copier")}</button>')
+        + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>') + '</button>') : '')
         + '</div></div>';
     }
     h += '</div>';
     // Attributions
     var fns = (D && D.fonctions) || [];
     var opts = g.map(function(t){ return { id: t.id, name: t.name }; });
-    h += '<div class="carte"><div class="stitre"><span class="ic">📋</span> Attribution par module / fonction</div><div class="sdesc">Choisissez quel gabarit s’applique à chaque type de courriel.</div>';
-    h += '<table class="tbl"><thead><tr><th>Module</th><th>Fonction</th><th>Gabarit</th></tr></thead><tbody>';
+    h += '<div class="carte"><div class="stitre"><span class="ic">📋</span>${T(" Attribution par module / fonction")}</div><div class="sdesc">${T("Choisissez quel gabarit s’applique à chaque type de courriel.")}</div>';
+    h += '<table class="tbl"><thead><tr><th>${T("Module")}</th><th>${T("Fonction")}</th><th>${T("Gabarit")}</th></tr></thead><tbody>';
     for (var j = 0; j < fns.length; j++) {
       var f = fns[j], cur = (D.attributions && D.attributions[f.key]) || 'default';
       /* ⚠ Meme motif que la matrice des droits : le module et la fonction sont
          dans les deux premieres cellules, << Gabarit >> dans l en-tete. En
          tabulant, le lecteur d ecran n annonce ni l un ni l autre. */
       var sel = '<select data-assign="' + esc(f.key) + '"'
-        + ' aria-label="' + esc('Gabarit de ' + f.label + ' — ' + f.module) + '"'
+        + ' aria-label="' + esc('${T("Gabarit de ")}' + f.label + ' — ' + f.module) + '"'
         + (RO ? ' disabled' : '') + '>';
       for (var k = 0; k < opts.length; k++) sel += '<option value="' + esc(opts[k].id) + '"' + (cur === opts[k].id ? ' selected' : '') + '>' + esc(opts[k].name) + '</option>';
       sel += '</select>';
       h += '<tr><td class="mod">' + esc(f.module) + '</td><td>' + esc(f.label) + '</td><td>' + sel + '</td></tr>';
     }
     h += '</tbody></table>';
-    if (!RO) h += '<div style="margin-top:.8rem"><button class="prim" id="g-assign-save"><span class="ic">💾</span> Enregistrer les attributions</button></div>';
+    if (!RO) h += '<div style="margin-top:.8rem"><button class="prim" id="g-assign-save"><span class="ic">💾</span>${T(" Enregistrer les attributions")}</button></div>';
     return h + '</div>';
   }
 
@@ -303,7 +307,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('config:gabarits:gifApercu', [{ h1: val('g-hfrom'), h2: val('g-hto'), tc: val('g-fcol'),
       brand: (D && D.marque) || 'SANDRIZA', sub: sub }]).then(function(r){
       if (r && r.ok && r.dataUrl) img.src = r.dataUrl;
-      else { img.removeAttribute('src'); dire('Aperçu GIF indisponible : ' + expliquer(r), 'att'); }
+      else { img.removeAttribute('src'); dire('${T("Aperçu GIF indisponible : ")}' + expliquer(r), 'att'); }
     });
   }
 
@@ -316,11 +320,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function enregistrer(){
     if (RO || OCCUPE) return;
-    if (!val('g-name').trim()) { dire('Le nom du gabarit est requis.', 'err'); return; }
-    occuper(true); dire('Enregistrement…');
+    if (!val('g-name').trim()) { dire('${T("Le nom du gabarit est requis.")}', 'err'); return; }
+    occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:gabarits:ecrire', [saisieEditeur()]).then(function(r){
       occuper(false);
-      if (r && r.ok) { adopter(r); EDIT = null; dessiner(); dire('Gabarit enregistré.', 'bon'); }
+      if (r && r.ok) { adopter(r); EDIT = null; dessiner(); dire('${T("Gabarit enregistré.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
@@ -329,16 +333,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     occuper(true); dire('Duplication…');
     appeler('config:gabarits:copier', [id]).then(function(r){
       occuper(false);
-      if (r && r.ok) { adopter(r); EDIT = r.id || null; dessiner(); dire('Gabarit dupliqué.', 'bon'); }
+      if (r && r.ok) { adopter(r); EDIT = r.id || null; dessiner(); dire('${T("Gabarit dupliqué.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
   function supprimer(id){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Suppression…');
+    occuper(true); dire('${T("Suppression…")}');
     appeler('config:gabarits:supprimer', [id]).then(function(r){
       occuper(false);
-      if (r && r.ok) { adopter(r); dessiner(); dire('Gabarit supprimé — attributions au défaut.', 'bon'); }
+      if (r && r.ok) { adopter(r); dessiner(); dire('${T("Gabarit supprimé — attributions au défaut.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
@@ -347,10 +351,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var map = {};
     var sels = corps.querySelectorAll('[data-assign]');
     for (var i = 0; i < sels.length; i++) map[sels[i].getAttribute('data-assign')] = sels[i].value;
-    occuper(true); dire('Enregistrement des attributions…');
+    occuper(true); dire('${T("Enregistrement des attributions…")}');
     appeler('config:gabarits:attributions', [map]).then(function(r){
       occuper(false);
-      if (r && r.ok) { adopter(r); dessiner(); dire('Attributions enregistrées.', 'bon'); }
+      if (r && r.ok) { adopter(r); dessiner(); dire('${T("Attributions enregistrées.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
@@ -358,7 +362,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   bnouveau.onclick = function(){ if (RO) return; DELCONF = ''; EDIT = ''; dessiner(); dire(''); };
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:gabarits:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       adopter(r); EDIT = (OUVERTURE && gabParId(OUVERTURE)) ? OUVERTURE : null; dessiner(); dire('');

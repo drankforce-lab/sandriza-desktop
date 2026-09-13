@@ -17,6 +17,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('accueil');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -83,12 +87,12 @@ button.prim:disabled{opacity:.5;cursor:default}
 
 function pageAccueil(ouverture) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Page d’accueil — Administration Sandriza</title>
+<title>${T("Page d’accueil — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.homepage}</span><h1>Page d’accueil</h1>
-  <span class="droite"><button class="mini" id="b-reinit" hidden>Réinitialiser</button></span></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div id="corps"><div class="sz-squel tuiles" role="status" aria-label="Chargement du tableau de bord"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sz-squel"><i></i><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.homepage}</span><h1>${T("Page d’accueil")}</h1>
+  <span class="droite"><button class="mini" id="b-reinit" hidden>${T("Réinitialiser")}</button></span></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel tuiles" role="status" aria-label="${T("Chargement du tableau de bord")}"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sz-squel"><i></i><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -99,8 +103,8 @@ function pageAccueil(ouverture) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='.4rem'; document.querySelector('.tete .droite').appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
@@ -111,9 +115,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var OUVERTURE = ${JSON.stringify(String(ouverture || ''))};
   var EDIT = null;      // id du bloc en cours d'édition (ou null)
   var SLIDES = [];      // diapos héro en cours d'édition
+
+  /* ⚠⚠⚠ CE QUI EST ECRIT DANS LA PAGE D ACCUEIL DE LA BOUTIQUE, PAS DANS
+     L INTERFACE. Ces deux textes sont les valeurs PAR DEFAUT d une diapo neuve :
+     des qu on enregistre, ils partent dans la configuration et la CLIENTE les
+     lit sur la page d accueil. Les traduire ecrirait « New slide » et
+     « Discover » dans une boutique francaise — la faute la plus silencieuse du
+     lot, parce qu elle ne se decouvre qu en relisant la base.
+     ⚠ Mesure du 2026-09-13 : le poseur avait deja enveloppe << Nouvelle diapo >>
+     avant cette declaration. Le nom SZ_DONNEES est reconnu par trois outils — le
+     compteur et le banc du residuel les ecartent, le poseur en fait une zone
+     interdite, et banc-langue-donnees REFUSE qu un de ces textes ait une entree
+     de dictionnaire. Voir la fiche de tools/textes-visibles.js. */
+  var SZ_DONNEES = {
+    diapoTitre: 'Nouvelle diapo',
+    diapoBouton: 'Découvrir'
+  };
   var CONF_REINIT = false;
 
-  var EFFETS = [['fade','Fondu (Fade)'],['slide','Glissement (Slide)'],['zoom','Zoom (Ken Burns)']];
+  var EFFETS = [['fade','${T("Fondu (Fade)")}'],['slide','${T("Glissement (Slide)")}'],['zoom','${T("Zoom (Ken Burns)")}']];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -121,16 +141,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function chk(id){ var e=document.getElementById(id); return !!(e && e.checked); }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    indisponible:"L'administration n'est pas encore chargée dans la fenêtre principale.",
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:"L'opération a échoué.",
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    indisponible:"${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:"${T('L\'opération a échoué.')}",
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -146,26 +166,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ── ENVOI (tableau entier) ──────────────────────────────────────────────────
   function adopter(r){ D=r; BLOCS = (r.blocs||[]).slice(); RO = !r.peutModifier; GRADS = r.gradients || GRADS; }
   function ecrire(apres){
-    occuper(true); dire('Enregistrement…');
+    occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:accueil:ecrire', [BLOCS]).then(function(r){
       occuper(false);
-      if (r && r.ok) { adopter(r); if (apres) apres(); dessiner(); dire('Page d’accueil enregistrée.', 'bon'); }
+      if (r && r.ok) { adopter(r); if (apres) apres(); dessiner(); dire('${T("Page d’accueil enregistrée.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
 
   // ── LISTE DES BLOCS ───────────────────────────────────────────────────────
   function listeHtml(){
-    var h = '<div class="carte"><div class="stitre">Ordre et visibilité</div>'
-      + '<div class="sdesc">↑ ↓ pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.</div>';
+    var h = '<div class="carte"><div class="stitre">${T("Ordre et visibilité")}</div>'
+      + '<div class="sdesc">${T("↑ ↓ pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.")}</div>';
     BLOCS.forEach(function(b, i){
       h += '<div class="bloc' + (b.visible ? '' : ' off') + '">'
         + '<span class="em">' + esc(b.icon) + '</span>'
-        + '<div class="nom"><b>' + esc(b.label) + '</b>' + (b.visible ? '' : '<span class="masq">(masqué)</span>')
+        + '<div class="nom"><b>' + esc(b.label) + '</b>' + (b.visible ? '' : '<span class="masq">${T("(masqué)")}</span>')
         + '<div class="d">' + esc(b.desc) + '</div></div>'
         + '<div class="actes">'
-        + '<button class="b" type="button" data-ed="' + esc(b.id) + '" title="Modifier"><span class="ic">✏</span></button>'
-        + (RO ? '' : '<button class="b" type="button" data-vis="' + esc(b.id) + '" title="' + (b.visible ? 'Masquer' : 'Afficher') + '">' + (b.visible ? '<span class="ic">👁</span>' : '<span class="ic">🚫</span>') + '</button>'
+        + '<button class="b" type="button" data-ed="' + esc(b.id) + '" title="${T("Modifier")}"><span class="ic">✏</span></button>'
+        + (RO ? '' : '<button class="b" type="button" data-vis="' + esc(b.id) + '" title="' + (b.visible ? '${T("Masquer")}' : '${T("Afficher")}') + '">' + (b.visible ? '<span class="ic">👁</span>' : '<span class="ic">🚫</span>') + '</button>'
           + '<button class="b" type="button" data-up="' + esc(b.id) + '"' + (i===0?' disabled':'') + '>↑</button>'
           + '<button class="b" type="button" data-down="' + esc(b.id) + '"' + (i===BLOCS.length-1?' disabled':'') + '>↓</button>')
         + '</div></div>';
@@ -186,53 +206,53 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function diapoHtml(s, i){
     var opts = GRADS.map(function(g, gi){ return '<option value="' + gi + '"' + ((s.gradient||gradVal(0))===g.value?' selected':'') + '>' + esc(g.label) + '</option>'; }).join('');
     return '<div class="diapo"><div class="tete2">'
-      + '<div class="apercu" style="' + swatch(s) + '"><span style="position:absolute;inset:0;background:rgba(0,0,0,' + (s.overlay!=null?s.overlay:0) + ')"></span><span class="t">' + esc(s.title||('Diapo '+(i+1))) + '</span></div>'
-      + '<span class="nm">Diapo ' + (i+1) + '</span>'
+      + '<div class="apercu" style="' + swatch(s) + '"><span style="position:absolute;inset:0;background:rgba(0,0,0,' + (s.overlay!=null?s.overlay:0) + ')"></span><span class="t">' + esc(s.title||('${T("Diapo ")}'+(i+1))) + '</span></div>'
+      + '<span class="nm">${T("Diapo ")}' + (i+1) + '</span>'
       + (RO ? '' : '<button class="b" type="button" data-sup="' + i + '"' + (i===0?' disabled':'') + '>↑</button>'
         + '<button class="b" type="button" data-sdn="' + i + '"' + (i===SLIDES.length-1?' disabled':'') + '>↓</button>'
         + '<button class="b dgr" type="button" data-sdel="' + i + '"><span class="ic">🗑</span></button>')
       + '</div>'
       + '<div class="gr2">'
-      + '<div class="ch"><label>Image URL (vide = dégradé)</label><input aria-label="Image URL (vide = dégradé)" data-sf="image" data-si="' + i + '" value="' + esc(s.image||'') + '" placeholder="https://…"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Dégradé de fond</label><select aria-label="Dégradé de fond" data-sf="grad" data-si="' + i + '"' + (RO?' disabled':'') + '>' + opts + '</select></div>'
+      + '<div class="ch"><label>${T("Image URL (vide = dégradé)")}</label><input aria-label="${T("Image URL (vide = dégradé)")}" data-sf="image" data-si="' + i + '" value="' + esc(s.image||'') + '" placeholder="https://…"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>${T("Dégradé de fond")}</label><select aria-label="${T("Dégradé de fond")}" data-sf="grad" data-si="' + i + '"' + (RO?' disabled':'') + '>' + opts + '</select></div>'
       + '</div>'
-      + '<div class="ch"><label>Opacité du voile noir (0 = aucun, 0.7 = sombre)</label><input aria-label="Opacité du voile noir (0 = aucun, 0.7 = sombre)" type="number" min="0" max="1" step="0.05" data-sf="overlay" data-si="' + i + '" value="' + (s.overlay!=null?s.overlay:0.4) + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>${T("Opacité du voile noir (0 = aucun, 0.7 = sombre)")}</label><input aria-label="${T("Opacité du voile noir (0 = aucun, 0.7 = sombre)")}" type="number" min="0" max="1" step="0.05" data-sf="overlay" data-si="' + i + '" value="' + (s.overlay!=null?s.overlay:0.4) + '"' + (RO?' disabled':'') + '></div>'
       + '<div class="gr2">'
-      + '<div class="ch"><label>Texte chapeau</label><input aria-label="Texte chapeau" data-sf="eyebrow" data-si="' + i + '" value="' + esc(s.eyebrow||'') + '"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Titre principal</label><input aria-label="Titre principal" data-sf="title" data-si="' + i + '" value="' + esc(s.title||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>${T("Texte chapeau")}</label><input aria-label="${T("Texte chapeau")}" data-sf="eyebrow" data-si="' + i + '" value="' + esc(s.eyebrow||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>${T("Titre principal")}</label><input aria-label="${T("Titre principal")}" data-sf="title" data-si="' + i + '" value="' + esc(s.title||'') + '"' + (RO?' disabled':'') + '></div>'
       + '</div>'
-      + '<div class="ch"><label>Sous-titre</label><textarea aria-label="Sous-titre" data-sf="subtitle" data-si="' + i + '" rows="2"' + (RO?' disabled':'') + '>' + esc(s.subtitle||'') + '</textarea></div>'
+      + '<div class="ch"><label>${T("Sous-titre")}</label><textarea aria-label="${T("Sous-titre")}" data-sf="subtitle" data-si="' + i + '" rows="2"' + (RO?' disabled':'') + '>' + esc(s.subtitle||'') + '</textarea></div>'
       + '<div class="gr4">'
-      + '<div class="ch"><label>Bouton 1 — Texte</label><input aria-label="Bouton 1 — Texte" data-sf="cta1Text" data-si="' + i + '" value="' + esc(s.cta1Text||'') + '"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Bouton 1 — Lien</label><input aria-label="Bouton 1 — Lien" data-sf="cta1Href" data-si="' + i + '" value="' + esc(s.cta1Href||'') + '"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Bouton 2 — Texte (opt.)</label><input aria-label="Bouton 2 — Texte (opt.)" data-sf="cta2Text" data-si="' + i + '" value="' + esc(s.cta2Text||'') + '"' + (RO?' disabled':'') + '></div>'
-      + '<div class="ch"><label>Bouton 2 — Lien</label><input aria-label="Bouton 2 — Lien" data-sf="cta2Href" data-si="' + i + '" value="' + esc(s.cta2Href||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>${T("Bouton 1 — Texte")}</label><input aria-label="${T("Bouton 1 — Texte")}" data-sf="cta1Text" data-si="' + i + '" value="' + esc(s.cta1Text||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>${T("Bouton 1 — Lien")}</label><input aria-label="${T("Bouton 1 — Lien")}" data-sf="cta1Href" data-si="' + i + '" value="' + esc(s.cta1Href||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>${T("Bouton 2 — Texte (opt.)")}</label><input aria-label="${T("Bouton 2 — Texte (opt.)")}" data-sf="cta2Text" data-si="' + i + '" value="' + esc(s.cta2Text||'') + '"' + (RO?' disabled':'') + '></div>'
+      + '<div class="ch"><label>${T("Bouton 2 — Lien")}</label><input aria-label="${T("Bouton 2 — Lien")}" data-sf="cta2Href" data-si="' + i + '" value="' + esc(s.cta2Href||'') + '"' + (RO?' disabled':'') + '></div>'
       + '</div></div>';
   }
-  function slidesListHtml(){ return SLIDES.map(diapoHtml).join('') || '<div class="vide">Aucune diapo.</div>'; }
+  function slidesListHtml(){ return SLIDES.map(diapoHtml).join('') || '<div class="vide">${T("Aucune diapo.")}</div>'; }
 
   function editeurHtml(){
     var b = BLOCS.filter(function(x){ return x.id === EDIT; })[0]; if (!b) { EDIT=null; return listeHtml(); }
     var c = b.content || {};
-    var h = '<div class="carte edit"><div class="stitre">Modifier : ' + esc(b.label) + '</div>';
+    var h = '<div class="carte edit"><div class="stitre">${T("Modifier : ")}' + esc(b.label) + '</div>';
     if (b.id === 'hero') {
       h += '<div class="gr2">'
-        + '<div class="ch"><label for="a-effect">Effet de transition</label><select id="a-effect"' + (RO?' disabled':'') + '>'
+        + '<div class="ch"><label for="a-effect">${T("Effet de transition")}</label><select id="a-effect"' + (RO?' disabled':'') + '>'
         + EFFETS.map(function(e){ return '<option value="' + e[0] + '"' + ((c.sliderEffect||'fade')===e[0]?' selected':'') + '>' + esc(e[1]) + '</option>'; }).join('') + '</select></div>'
-        + '<div class="ch"><label for="a-interval">Intervalle (secondes)</label><input type="number" min="2" max="30" id="a-interval" value="' + (c.sliderInterval||6) + '"' + (RO?' disabled':'') + '></div></div>'
-        + '<label class="ch" style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a-autoplay"' + (c.sliderAutoplay!==false?' checked':'') + (RO?' disabled':'') + ' style="width:auto;accent-color:#c9a97e"> Lecture automatique</label>'
-        + '<div style="display:flex;align-items:center;justify-content:space-between;margin:.4rem 0 .5rem"><b style="font-size:.82rem">Diapos <span id="a-scount">(' + SLIDES.length + ')</span></b>'
-        + (RO ? '' : '<button class="b" type="button" id="a-sadd">+ Ajouter une diapo</button>') + '</div>'
+        + '<div class="ch"><label for="a-interval">${T("Intervalle (secondes)")}</label><input type="number" min="2" max="30" id="a-interval" value="' + (c.sliderInterval||6) + '"' + (RO?' disabled':'') + '></div></div>'
+        + '<label class="ch" style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a-autoplay"' + (c.sliderAutoplay!==false?' checked':'') + (RO?' disabled':'') + ' style="width:auto;accent-color:#c9a97e"> ${T("Lecture automatique")}</label>'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin:.4rem 0 .5rem"><b style="font-size:.82rem">${T("Diapos ")}<span id="a-scount">(' + SLIDES.length + ')</span></b>'
+        + (RO ? '' : '<button class="b" type="button" id="a-sadd">${T("+ Ajouter une diapo")}</button>') + '</div>'
         + '<div id="a-slides">' + slidesListHtml() + '</div>';
     } else if (b.id === 'banner') {
-      h += chTexte('a-eyebrow','Texte chapeau', c.eyebrow) + chTexte('a-title','Titre', c.title)
-        + chAire('a-subtitle','Sous-titre', c.subtitle)
-        + '<div class="gr2">' + chTexte('a-ctat','Bouton — Texte', c.ctaText) + chTexte('a-ctah','Bouton — Lien', c.ctaHref||'#shop') + '</div>';
+      h += chTexte('a-eyebrow','${T("Texte chapeau")}', c.eyebrow) + chTexte('a-title','${T("Titre")}', c.title)
+        + chAire('a-subtitle','${T("Sous-titre")}', c.subtitle)
+        + '<div class="gr2">' + chTexte('a-ctat','${T("Bouton — Texte")}', c.ctaText) + chTexte('a-ctah','${T("Bouton — Lien")}', c.ctaHref||'#shop') + '</div>';
     } else {
-      h += chTexte('a-eyebrow','Texte chapeau', c.eyebrow) + chTexte('a-title','Titre de section', c.title);
+      h += chTexte('a-eyebrow','${T("Texte chapeau")}', c.eyebrow) + chTexte('a-title','${T("Titre de section")}', c.title);
     }
-    if (!RO) h += '<div style="display:flex;gap:.6rem;margin-top:.6rem"><button class="prim" id="a-save">Enregistrer</button><button class="b" id="a-cancel">Annuler</button></div>';
-    else h += '<div style="margin-top:.6rem"><button class="b" id="a-cancel">← Retour</button></div>';
+    if (!RO) h += '<div style="display:flex;gap:.6rem;margin-top:.6rem"><button class="prim" id="a-save">${T("Enregistrer")}</button><button class="b" id="a-cancel">${T("Annuler")}</button></div>';
+    else h += '<div style="margin-top:.6rem"><button class="b" id="a-cancel">${T("← Retour")}</button></div>';
     return h + '</div>';
   }
 
@@ -281,7 +301,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (id === 'hero') {
       var c = b.content || {};
       SLIDES = (c.slides && c.slides.length) ? JSON.parse(JSON.stringify(c.slides))
-        : [{ id:'s1', image:'', gradient:gradVal(0), overlay:0.15, eyebrow:'', title:'Nouvelle diapo', subtitle:'', cta1Text:'Découvrir', cta1Href:'#shop', cta2Text:'', cta2Href:'' }];
+        : [{ id:'s1', image:'', gradient:gradVal(0), overlay:0.15, eyebrow:'', title:SZ_DONNEES.diapoTitre, subtitle:'', cta1Text:SZ_DONNEES.diapoBouton, cta1Href:'#shop', cta2Text:'', cta2Href:'' }];
     }
     dessiner(); dire('');
     /* Apres le dessin : la boite de reprise remplit des champs et la liste des
@@ -303,7 +323,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var cn = document.getElementById('a-scount'); if (cn) cn.textContent = '(' + SLIDES.length + ')';
     brancher();
   }
-  function ajouterDiapo(){ lireDiapos(); SLIDES.push({ id:'s'+SLIDES.length+'_'+SLIDES.length, image:'', gradient:gradVal(SLIDES.length % Math.max(1,GRADS.length)), overlay:0.15, eyebrow:'', title:'Nouvelle diapo', subtitle:'', cta1Text:'Découvrir', cta1Href:'#shop', cta2Text:'', cta2Href:'' }); rafraichirDiapos(); }
+  function ajouterDiapo(){ lireDiapos(); SLIDES.push({ id:'s'+SLIDES.length+'_'+SLIDES.length, image:'', gradient:gradVal(SLIDES.length % Math.max(1,GRADS.length)), overlay:0.15, eyebrow:'', title:SZ_DONNEES.diapoTitre, subtitle:'', cta1Text:SZ_DONNEES.diapoBouton, cta1Href:'#shop', cta2Text:'', cta2Href:'' }); rafraichirDiapos(); }
   function bougerDiapo(i, dir){ lireDiapos(); var ni=i+dir; if(ni<0||ni>=SLIDES.length)return; var t=SLIDES[i]; SLIDES[i]=SLIDES[ni]; SLIDES[ni]=t; rafraichirDiapos(); }
 
   /* == LE BROUILLON DES BLOCS DE LA PAGE D'ACCUEIL ==========================
@@ -337,7 +357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   szBrouillonBrancher({
     portee: 'accueil-bloc',
-    libelle: 'Une modification de ce bloc',
+    libelle: '${T("Une modification de ce bloc")}',
     ttlMin: 720,
     cle: function(){ return EDIT ? ('b:' + EDIT) : ''; },
     actif: function(){ return !!EDIT && !RO && !!document.getElementById('a-save'); },
@@ -414,16 +434,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   breinit.onclick = function(){
     if (RO || OCCUPE) return;
-    if (!CONF_REINIT) { CONF_REINIT = true; breinit.textContent='Confirmer ?'; setTimeout(function(){ CONF_REINIT=false; breinit.textContent='Réinitialiser'; }, 5000); return; }
-    CONF_REINIT = false; breinit.textContent='Réinitialiser';
-    occuper(true); dire('Réinitialisation…');
+    if (!CONF_REINIT) { CONF_REINIT = true; breinit.textContent='${T("Confirmer ?")}'; setTimeout(function(){ CONF_REINIT=false; breinit.textContent='${T("Réinitialiser")}'; }, 5000); return; }
+    CONF_REINIT = false; breinit.textContent='${T("Réinitialiser")}';
+    occuper(true); dire('${T("Réinitialisation…")}');
     appeler('config:accueil:reinit').then(function(r){ occuper(false);
-      if (r && r.ok) { adopter(r); EDIT=null; dessiner(); dire('Blocs réinitialisés.', 'bon'); }
+      if (r && r.ok) { adopter(r); EDIT=null; dessiner(); dire('${T("Blocs réinitialisés.")}', 'bon'); }
       else dire(expliquer(r), 'err'); });
   };
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:accueil:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       adopter(r);
