@@ -21,6 +21,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('coupons');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -97,11 +101,11 @@ tbody tr:hover td{background:var(--v04)}
 /** Page complète de la fenêtre native « Coupons ». */
 function pageCoupons() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Coupons — Administration Sandriza</title>
+<title>${T("Coupons — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.promotions}</span><h1>Coupons</h1>
+<div class="tete"><span class="ico">${ICO.promotions}</span><h1>${T("Coupons")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -134,20 +138,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux promotions.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Ce coupon n’existe plus.',
-    doublon:            'Ce code est déjà pris par un autre coupon.',
-    valeur:             'Un code et une valeur supérieure à zéro sont requis.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux promotions.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Ce coupon n’existe plus.")}',
+    doublon:            '${T("Ce code est déjà pris par un autre coupon.")}',
+    valeur:             '${T("Un code et une valeur supérieure à zéro sont requis.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -179,81 +183,85 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var creation = !c.id;
     var type = c.type || 'percent';
     return '<div class="voile" id="cp-voile"><div class="boite">'
-      + '<h3>' + (creation ? 'Nouveau coupon' : 'Modifier le coupon') + '</h3>'
+      + '<h3>' + (creation ? '${T("Nouveau coupon")}' : '${T("Modifier le coupon")}') + '</h3>'
       + '<div class="grille">'
-      + '<div class="ch"><label>Code <span class="req">*</span></label>'
-      + '<input id="cp-code" aria-label="Code du coupon" value="' + esc(c.code || '') + '" placeholder="PROMO20" '
+      + '<div class="ch"><label>${T("Code ")}<span class="req">*</span></label>'
+      + '<input id="cp-code" aria-label="${T("Code du coupon")}" value="' + esc(c.code || '') + '" placeholder="${T("PROMO20")}" '
       + 'style="font-family:Courier New,monospace;letter-spacing:1px;text-transform:uppercase">'
-      + '<span class="aide">Ce que le client tape au paiement.</span></div>'
-      + '<div class="ch"><label for="cp-nom">Nom interne</label>'
-      + '<input id="cp-nom" value="' + esc(c.nom || '') + '" placeholder="Promo printemps"></div>'
-      + '<div class="ch"><label for="cp-type">Type de réduction</label><select id="cp-type">'
-      + '<option value="percent"' + (type === 'percent' ? ' selected' : '') + '>Pourcentage (%)</option>'
-      + '<option value="fixed"' + (type === 'fixed' ? ' selected' : '') + '>Montant fixe ($)</option>'
-      + '<option value="freeshipping"' + (type === 'freeshipping' ? ' selected' : '') + '>Livraison gratuite</option>'
+      + '<span class="aide">${T("Ce que le client tape au paiement.")}</span></div>'
+      + '<div class="ch"><label for="cp-nom">${T("Nom interne")}</label>'
+      + '<input id="cp-nom" value="' + esc(c.nom || '') + '" placeholder="${T("Promo printemps")}"></div>'
+      + '<div class="ch"><label for="cp-type">${T("Type de réduction")}</label><select id="cp-type">'
+      + '<option value="percent"' + (type === 'percent' ? ' selected' : '') + '>${T("Pourcentage (%)")}</option>'
+      + '<option value="fixed"' + (type === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option>'
+      + '<option value="freeshipping"' + (type === 'freeshipping' ? ' selected' : '') + '>${T("Livraison gratuite")}</option>'
       + '</select></div>'
       + '<div class="ch" id="cp-ch-val"' + (type === 'freeshipping' ? ' style="display:none"' : '') + '>'
-      + '<label>Valeur <span class="req">*</span></label>'
-      + '<input type="number" id="cp-val" aria-label="Valeur du coupon" min="0" step="0.01" value="' + esc(type === 'freeshipping' ? '' : (c.valeur != null ? c.valeur : '')) + '"></div>'
-      + '<div class="ch"><label for="cp-min">Sous-total minimum</label>'
+      + '<label>${T("Valeur ")}<span class="req">*</span></label>'
+      /* ⚠ LA PHRASE ENTIERE : deux cles voisines (<< Valeur >> et << coupon >>)
+         avaient laisse le << du >> nu au milieu, et le banc sur-code a lu un
+         morceau de nom. Un nom accessible se traduit d un seul tenant. */
+      + '<input type="number" id="cp-val" aria-label="${T("Valeur du coupon")}" min="0" step="0.01" value="' + esc(type === 'freeshipping' ? '' : (c.valeur != null ? c.valeur : '')) + '"></div>'
+      + '<div class="ch"><label for="cp-min">${T("Sous-total minimum")}</label>'
       + '<input type="number" id="cp-min" min="0" step="0.01" value="' + esc(c.minimum || 0) + '">'
-      + '<span class="aide">0 = aucun minimum.</span></div>'
-      + '<div class="ch"><label for="cp-max">Nombre d’utilisations maximum</label>'
-      + '<input type="number" id="cp-max" min="0" step="1" value="' + esc(c.maximum || '') + '" placeholder="illimité"></div>'
-      + '<div class="ch"><label for="cp-sd">Début</label><input type="date" id="cp-sd" value="' + esc(c.debut || '') + '"></div>'
-      + '<div class="ch"><label for="cp-ed">Fin</label><input type="date" id="cp-ed" value="' + esc(c.fin || '') + '"></div>'
+      + '<span class="aide">${T("0 = aucun minimum.")}</span></div>'
+      + '<div class="ch"><label for="cp-max">${T("Nombre d’utilisations maximum")}</label>'
+      + '<input type="number" id="cp-max" min="0" step="1" value="' + esc(c.maximum || '') + '" placeholder="${T("illimité")}"></div>'
+      + '<div class="ch"><label for="cp-sd">${T("Début")}</label><input type="date" id="cp-sd" value="' + esc(c.debut || '') + '"></div>'
+      + '<div class="ch"><label for="cp-ed">${T("Fin")}</label><input type="date" id="cp-ed" value="' + esc(c.fin || '') + '"></div>'
       + '</div>'
       + '<div class="cases">'
-      + '<label><input type="checkbox" id="cp-per"' + (c.parClient ? ' checked' : '') + '> Une seule fois par client</label>'
-      + '<label><input type="checkbox" id="cp-onsale"' + (c.cumulSolde ? ' checked' : '') + '> Cumulable avec les soldes et promotions</label>'
+      + '<label><input type="checkbox" id="cp-per"' + (c.parClient ? ' checked' : '') + '> ${T("Une seule fois par client")}</label>'
+      + '<label><input type="checkbox" id="cp-onsale"' + (c.cumulSolde ? ' checked' : '') + '> ${T("Cumulable avec les soldes et promotions")}</label>'
       + '<label><input type="checkbox" id="cp-act"' + (c.actif !== false ? ' checked' : '') + '> Actif</label>'
       + '</div>'
-      + '<div class="pied-boite"><button class="mini" id="cp-annuler">Annuler</button>'
-      + '<button class="mini prim" id="cp-enr">' + (creation ? 'Créer le coupon' : 'Enregistrer') + '</button></div>'
+      + '<div class="pied-boite"><button class="mini" id="cp-annuler">${T("Annuler")}</button>'
+      + '<button class="mini prim" id="cp-enr">' + (creation ? '${T("Créer le coupon")}' : '${T("Enregistrer")}') + '</button></div>'
       + '</div></div>';
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtres();
 
     var h = '<div class="barreoutils">'
-      + '<input aria-label="Code ou nom" type="search" id="cp-q" placeholder="Code ou nom…" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Code ou nom")}" type="search" id="cp-q" placeholder="${T("Code ou nom…")}" value="' + esc(Q) + '">'
       + '<button class="mini' + (ETAT === '' ? ' actif' : '') + '" data-etat="">Tous</button>'
-      + '<button class="mini' + (ETAT === 'actifs' ? ' actif' : '') + '" data-etat="actifs">En cours</button>'
-      + '<button class="mini' + (ETAT === 'inactifs' ? ' actif' : '') + '" data-etat="inactifs">Hors service</button>'
+      + '<button class="mini' + (ETAT === 'actifs' ? ' actif' : '') + '" data-etat="actifs">${T("En cours")}</button>'
+      + '<button class="mini' + (ETAT === 'inactifs' ? ' actif' : '') + '" data-etat="inactifs">${T("Hors service")}</button>'
       + '<div class="droite">'
-      + (D.peutModifier ? '<button class="mini prim" id="cp-nouveau">+ Nouveau coupon</button>' : '')
-      + '<span>' + rows.length + ' coupon' + (rows.length > 1 ? 's' : '') + '</span>'
+      + (D.peutModifier ? '<button class="mini prim" id="cp-nouveau">${T("+ Nouveau coupon")}</button>' : '')
+      /* ⚠ Le singulier et le pluriel, chacun entier. */
+      + '<span>' + rows.length + (rows.length > 1 ? '${T(" coupons")}' : '${T(" coupon")}') + '</span>'
       + '</div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q || ETAT ? 'Rien ne correspond.' : 'Aucun coupon. Créez le premier.') + '</div>';
+      h += '<div class="vide">' + (Q || ETAT ? '${T("Rien ne correspond.")}' : '${T("Aucun coupon. Créez le premier.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>Code</th><th>Nom</th><th>Réduction</th>'
-        + '<th class="num">Minimum</th><th>Cumul soldes</th><th class="num">Utilisations</th>'
-        + '<th>Période</th><th>État</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Code")}</th><th>${T("Nom")}</th><th>${T("Réduction")}</th>'
+        + '<th class="num">${T("Minimum")}</th><th>${T("Cumul soldes")}</th><th class="num">${T("Utilisations")}</th>'
+        + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(c){
             var gestes = '';
             if (D.peutModifier) {
-              gestes = '<button class="mini geste" data-modifier="' + esc(c.id) + '">Modifier</button> '
+              gestes = '<button class="mini geste" data-modifier="' + esc(c.id) + '">${T("Modifier")}</button> '
                 + '<button class="mini geste" data-basculer="' + esc(c.id) + '">'
-                + (c.actif ? 'Désactiver' : 'Activer') + '</button> '
+                + (c.actif ? '${T("Désactiver")}' : '${T("Activer")}') + '</button> '
                 + '<button class="mini geste danger" data-suppr="' + esc(c.id) + '">'
-                + (SUPPR_ARME === c.id ? 'Confirmer ?' : 'Supprimer') + '</button>';
+                + (SUPPR_ARME === c.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
             }
             return '<tr><td><span class="code">' + esc(c.code) + '</span></td>'
               + '<td>' + esc(c.nom || '—') + '</td>'
               + '<td style="font-weight:700;color:var(--tx-or)">' + esc(c.reduction) + '</td>'
               + '<td class="num">' + (c.minimum ? fmt(c.minimum) : '—') + '</td>'
-              + '<td>' + (c.cumulSolde ? '<span class="pill bon">autorisé</span>'
-                                       : '<span class="pill neutre">refusé</span>') + '</td>'
+              + '<td>' + (c.cumulSolde ? '<span class="pill bon">${T("autorisé")}</span>'
+                                       : '<span class="pill neutre">${T("refusé")}</span>') + '</td>'
               + '<td class="num">' + c.utilise + (c.maximum ? ' / ' + c.maximum : ' / ∞') + '</td>'
               + '<td class="dt">' + (c.debut ? esc(jour(c.debut)) : '—')
               + (c.fin ? ' → ' + esc(jour(c.fin)) : '') + '</td>'
               + '<td><span class="pill ' + (c.enCours ? 'bon' : 'neutre') + '">'
-              + (c.enCours ? 'En cours' : 'Hors service') + '</span></td>'
+              + (c.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
         + '</tbody></table>';
@@ -302,7 +310,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         /* Le brouillon meurt a l enregistrement reussi, pas avant. */
         szBrouillonJeter();
         FORM = null;
-        dire('Coupon ' + r.code + (r.creation ? ' créé.' : ' mis à jour.'), 'bon');
+        dire('Coupon ' + r.code + (r.creation ? '${T(" créé.")}' : '${T(" mis à jour.")}'), 'bon');
         charger();
       });
     };
@@ -319,7 +327,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var BR_CASES = ['cp-per', 'cp-onsale', 'cp-act'];
   szBrouillonBrancher({
     portee: 'coupon',
-    libelle: 'Un coupon',
+    libelle: '${T("Un coupon")}',
     ttlMin: 720,
     cle: function(){ return FORM ? (FORM.id ? ('c:' + FORM.id) : '__new__') : ''; },
     actif: function(){ return !!FORM; },
@@ -374,7 +382,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       bb.disabled = true;
       appeler('coupons:basculer', [bb.getAttribute('data-basculer')]).then(function(r){
         if (!r.ok) { bb.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('Coupon ' + (r.code || '') + (r.actif ? ' activé.' : ' désactivé.'), 'bon');
+        dire('${T("Coupon ")}' + (r.code || '') + (r.actif ? '${T(" activé.")}' : '${T(" désactivé.")}'), 'bon');
         charger();
       });
       return;
@@ -389,13 +397,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (SUPPR_ARME !== idS) {
         SUPPR_ARME = idS;
         dessiner();
-        dire('Cliquez « Confirmer ? » pour supprimer — les commandes déjà réglées gardent leur réduction.', 'att');
+        dire('${T("Cliquez « Confirmer ? » pour supprimer — les commandes déjà réglées gardent leur réduction.")}', 'att');
         return;
       }
       SUPPR_ARME = '';
       appeler('coupons:supprimer', [idS]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire('Coupon ' + (r.code || '') + ' supprimé.', 'bon');
+        dire('${T("Coupon ")}' + (r.code || '') + '${T(" supprimé.")}', 'bon');
         charger();
       });
       return;
@@ -406,7 +414,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function charger(){
     appeler('coupons:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Coupons indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Coupons indisponibles")}', expliquer(r)); return; }
       D = r;
       if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
       dessiner();
@@ -436,12 +444,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

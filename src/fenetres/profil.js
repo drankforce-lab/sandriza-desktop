@@ -57,6 +57,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('profil');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -231,10 +235,10 @@ html.jour .ferr{color:#9b1c1c;background:#fdecec;border-color:#f3b9b9}
 
 function pageProfil() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Mon profil — Administration Sandriza</title>
+<title>${T("Mon profil — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.staffaccess}</span><h1>Mon profil</h1></div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.staffaccess}</span><h1>${T("Mon profil")}</h1></div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -245,8 +249,8 @@ function pageProfil() {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -257,16 +261,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    invalide:'Saisie invalide.',
-    refus:'Le serveur a refusé la modification.',
-    indisponible:'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    invalide:'${T("Saisie invalide.")}',
+    refus:'${T("Le serveur a refusé la modification.")}',
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -275,7 +279,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function fmtTs(iso){ if (!iso) return '—'; try { return new Date(iso).toLocaleString('fr-CA', { dateStyle:'medium', timeStyle:'short' }); } catch(e){ return '—'; } }
   function qOpts(sel, exclu){
-    var l = D.questions || [], o = '<option value="">— Choisir —</option>';
+    var l = D.questions || [], o = '<option value="">${T("— Choisir —")}</option>';
     for (var i=0;i<l.length;i++){
       if (exclu && l[i] === exclu) continue;
       o += '<option value="'+esc(l[i])+'"'+(sel===l[i]?' selected':'')+'>'+esc(l[i])+'</option>';
@@ -330,29 +334,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var qOk = !!D.questionsPosees;
     return '<div class="cote">'
       + '<div class="carte">'
-        + '<h4>Votre compte</h4>'
+        + '<h4>${T("Votre compte")}</h4>'
         + '<div class="faits">'
           + (D.courriel ? '<div class="fait"><span class="k">Courriel</span>'
               + '<span class="v">' + esc(D.courriel) + '</span></div>' : '')
           + (D.identifiant ? '<div class="fait"><span class="k">Identifiant</span>'
               + '<span class="v">@' + esc(D.identifiant) + '</span></div>' : '')
-          + '<div class="fait"><span class="k">Rôle</span>'
+          + '<div class="fait"><span class="k">${T("Rôle")}</span>'
             + '<span class="v">' + esc(D.role) + '</span></div>'
-          + '<div class="fait"><span class="k">Dernière connexion</span>'
+          + '<div class="fait"><span class="k">${T("Dernière connexion")}</span>'
             + '<span class="v">' + esc(fmtTs(D.derniereConnexion)) + '</span></div>'
         + '</div>'
       + '</div>'
       + '<div class="carte">'
-        + '<h4>Ce qui protège votre compte</h4>'
+        + '<h4>${T("Ce qui protège votre compte")}</h4>'
         + '<div class="prot">'
           + '<div class="l"><span class="pill bon">Actif</span><span class="t">'
-            + '<b>Mot de passe</b><span>Vérifié par le serveur à chaque connexion.</span>'
+            + '${T("<b>Mot de passe</b><span>Vérifié par le serveur à chaque connexion.</span>")}'
             + '</span></div>'
           + '<div class="l">'
-            + (qOk ? '<span class="pill bon">Prêtes</span>' : '<span class="pill att">Absentes</span>')
-            + '<span class="t"><b>Questions de sécurité</b><span>'
-            + (qOk ? 'Elles permettront de retrouver votre accès si vous perdez votre mot de passe.'
-                   : 'Sans elles, votre compte ne pourra pas être récupéré par cette voie.')
+            + (qOk ? '<span class="pill bon">${T("Prêtes")}</span>' : '<span class="pill att">${T("Absentes")}</span>')
+            + '<span class="t"><b>${T("Questions de sécurité")}</b><span>'
+            + (qOk ? '${T("Elles permettront de retrouver votre accès si vous perdez votre mot de passe.")}'
+                   : '${T("Sans elles, votre compte ne pourra pas être récupéré par cette voie.")}')
             + '</span></span></div>'
         + '</div>'
       + '</div>'
@@ -362,13 +366,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function barreOnglets(){
     var etat = D.questionsPosees
       ? '<span class="pill bon">✓</span>'
-      : '<span class="pill att">À faire</span>';
+      : '<span class="pill att">${T("À faire")}</span>';
     return '<div class="onglets" role="tablist">'
       + '<button type="button" class="onglet' + (ONGLET === 'pw' ? ' on' : '') + '"'
-        + ' data-ong="pw" role="tab" aria-selected="' + (ONGLET === 'pw') + '">Mot de passe</button>'
+        + ' data-ong="pw" role="tab" aria-selected="' + (ONGLET === 'pw') + '">${T("Mot de passe")}</button>'
       + '<button type="button" class="onglet' + (ONGLET === 'q' ? ' on' : '') + '"'
         + ' data-ong="q" role="tab" aria-selected="' + (ONGLET === 'q') + '">'
-        + 'Questions de sécurité' + etat + '</button>'
+        + '${T("Questions de sécurité")}' + etat + '</button>'
       + '</div>';
   }
 
@@ -380,7 +384,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="zsaisie">'
         + '<input class="t" type="password" id="' + id + '" autocomplete="' + autoc + '">'
         + '<button type="button" class="oeil" data-oeil="' + id + '"'
-          + ' title="Afficher le mot de passe" aria-label="Afficher le mot de passe">o</button>'
+          + ' title="${T("Afficher le mot de passe")}" aria-label="${T("Afficher le mot de passe")}">o</button>'
       + '</span>'
       + (aide ? '<span class="sub">' + aide + '</span>' : '')
       + '</label>';
@@ -388,21 +392,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function panneauMotDePasse(){
     return '<div class="carte">'
-      + '<h3>Changer le mot de passe</h3>'
-      + '<p class="intro">Le mot de passe <b>actuel</b> est vérifié par le serveur, pas par cette fenêtre.</p>'
+      + '<h3>${T("Changer le mot de passe")}</h3>'
+      + '<p class="intro">${T("Le mot de passe <b>actuel</b> est vérifié par le serveur, pas par cette fenêtre.")}</p>'
       + '<div class="mince">'
-      + champMdp('p-cur', 'Mot de passe actuel', 'current-password', '')
-      + champMdp('p-new', 'Nouveau mot de passe', 'new-password',
-          'Huit caractères au moins. Un mot de passe déjà utilisé sera refusé.')
+      + champMdp('p-cur', '${T("Mot de passe actuel")}', 'current-password', '')
+      + champMdp('p-new', '${T("Nouveau mot de passe")}', 'new-password',
+          '${T("Huit caractères au moins. Un mot de passe déjà utilisé sera refusé.")}')
       /* ⚠ LA JAUGE EST INDICATIVE, ET ELLE LE DIT. C est le serveur qui accepte
          ou refuse ; une jauge qui aurait l air de decider ferait croire qu un
          mot de passe << fort >> passera forcement. */
       + '<div class="jauge" id="p-jauge"><i></i><i></i><i></i><i></i></div>'
-      + '<div class="jmot" id="p-jmot">Indication de robustesse</div>'
+      + '<div class="jmot" id="p-jmot">${T("Indication de robustesse")}</div>'
       + champMdp('p-cnf', 'Confirmer', 'new-password', '')
       + '<div class="ferr" id="p-err" role="alert"></div>'
       + '<div class="actions">'
-        + '<button class="prim" id="p-go">Enregistrer le nouveau mot de passe</button>'
+        + '<button class="prim" id="p-go">${T("Enregistrer le nouveau mot de passe")}</button>'
       + '</div>'
       + '</div></div>';
   }
@@ -423,20 +427,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (v.length >= 16 && varietes >= 3) n++;
     return Math.max(1, Math.min(4, n));
   }
-  var MOTS_FORCE = ['', 'Court', 'Correct', 'Bon', 'Excellent'];
+  var MOTS_FORCE = ['', '${T("Court")}', '${T("Correct")}', '${T("Bon")}', '${T("Excellent")}'];
 
   function panneauQuestions(){
     return '<div class="carte">'
-      + '<h3>Questions de sécurité</h3>'
+      + '<h3>${T("Questions de sécurité")}</h3>'
       + ''
       + '<div class="cols2">'
-      + '<label class="champ"><span class="lbl">Question 1</span><select class="t" id="q-q1">' + qOpts(D.q1, D.q2) + '</select></label>'
-      + '<label class="champ"><span class="lbl">Réponse 1</span><input class="t" id="q-a1" autocomplete="off"></label>'
-      + '<label class="champ"><span class="lbl">Question 2</span><select class="t" id="q-q2">' + qOpts(D.q2, D.q1) + '</select></label>'
-      + '<label class="champ"><span class="lbl">Réponse 2</span><input class="t" id="q-a2" autocomplete="off"></label>'
+      + '<label class="champ"><span class="lbl">${T("Question 1")}</span><select class="t" id="q-q1">' + qOpts(D.q1, D.q2) + '</select></label>'
+      + '<label class="champ"><span class="lbl">${T("Réponse 1")}</span><input class="t" id="q-a1" autocomplete="off"></label>'
+      + '<label class="champ"><span class="lbl">${T("Question 2")}</span><select class="t" id="q-q2">' + qOpts(D.q2, D.q1) + '</select></label>'
+      + '<label class="champ"><span class="lbl">${T("Réponse 2")}</span><input class="t" id="q-a2" autocomplete="off"></label>'
       + '</div>'
       + '<div class="ferr" id="q-err" role="alert"></div>'
-      + '<button class="prim" id="q-go">Enregistrer les questions</button></div>';
+      + '<button class="prim" id="q-go">${T("Enregistrer les questions")}</button></div>';
   }
 
   function dessiner(){
@@ -475,7 +479,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var montre = champ.type === 'password';
           champ.type = montre ? 'text' : 'password';
           this.textContent = montre ? '-' : 'o';
-          var t = montre ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
+          var t = montre ? '${T("Masquer le mot de passe")}' : '${T("Afficher le mot de passe")}';
           this.title = t; this.setAttribute('aria-label', t);
         };
       }
@@ -485,8 +489,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         nouveau.oninput = function(){
           var n = forceMdp(this.value);
           jauge.className = 'jauge' + (n ? ' n' + n : '');
-          jmot.textContent = n ? MOTS_FORCE[n] + ' — indication, le serveur décide'
-                               : 'Indication de robustesse';
+          jmot.textContent = n ? MOTS_FORCE[n] + '${T(" — indication, le serveur décide")}'
+                               : '${T("Indication de robustesse")}';
         };
       }
     }
@@ -505,20 +509,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function motDePasse(){
-    if (OCCUPE) return; OCCUPE=true; ferr('p-err',''); dire('Vérification…');
+    if (OCCUPE) return; OCCUPE=true; ferr('p-err',''); dire('${T("Vérification…")}');
     appeler('profil:motdepasse',[txv('p-cur'), txv('p-new'), txv('p-cnf')]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ ONGLET='pw'; dire('Mot de passe modifié.', 'bon'); charger(); }
+      if (r&&r.ok){ ONGLET='pw'; dire('${T("Mot de passe modifié.")}', 'bon'); charger(); }
       else ferr('p-err', expliquer(r)); });
   }
   function questions(){
-    if (OCCUPE) return; OCCUPE=true; ferr('q-err',''); dire('Enregistrement…');
+    if (OCCUPE) return; OCCUPE=true; ferr('q-err',''); dire('${T("Enregistrement…")}');
     appeler('profil:questions',[txv('q-q1'), txv('q-a1'), txv('q-q2'), txv('q-a2')]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ if (r.nom) D=r; ONGLET='q'; dessiner(); dire('Questions de sécurité enregistrées.', 'bon'); }
+      if (r&&r.ok){ if (r.nom) D=r; ONGLET='q'; dessiner(); dire('${T("Questions de sécurité enregistrées.")}', 'bon'); }
       else ferr('q-err', expliquer(r)); });
   }
 
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('profil:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; dessiner(); dire('');
