@@ -253,5 +253,11 @@ module.exports = {
     'No link — the section will be empty in the menu.',
   'Libellé et lien requis.': 'Label and link required.',
   'Lien ajouté.': 'Link added.',
-  'Lien retiré.': 'Link removed.'
+  'Lien retiré.': 'Link removed.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ───────────────────────────────────────────
+     ⚠ « FAQ » est le sigle de l'ONGLET, pas le titre par défaut de la page —
+     celui-là est une DONNÉE, déclarée dans SZ_DONNEES et laissée intacte. */
+  'FAQ': 'FAQ',
+  'Nouveau': 'New'
 };

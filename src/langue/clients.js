@@ -44,5 +44,11 @@ module.exports = {
 
   /* ── LE VERDICT ─────────────────────────────────────────────────────────── */
   'Fiche client ouverte dans sa fenêtre.':
-    'Customer record opened in its own window.'
+    'Customer record opened in its own window.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Statut': 'Status',
+  'Actif': 'Active',
+  'Inactif': 'Inactive',
+  'Page': 'Page'
 };

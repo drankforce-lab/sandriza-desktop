@@ -76,4 +76,8 @@ module.exports = {
   'Tri panier ✓': 'Basket sort ✓',
   '🛒 Trier par panier': '🛒 Sort by basket',
   'Trier par panier': 'Sort by basket',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Rupture': 'Out of stock',
+  'Page': 'Page',
 };

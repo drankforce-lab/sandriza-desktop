@@ -112,5 +112,8 @@ module.exports = {
   ' réactivée — de retour dans les commandes actives pour 45 jours.':
     ' brought back — in the active orders again for 45 days.',
   'réactivée — de retour dans les commandes actives pour 45 jours.':
-    'brought back — in the active orders again for 45 days.'
+    'brought back — in the active orders again for 45 days.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Page': 'Page'
 };

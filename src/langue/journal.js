@@ -60,5 +60,8 @@ module.exports = {
   ' entrée effacée.': ' entry cleared.',
   ' entrées effacées.': ' entries cleared.',
   'entrée effacée.': 'entry cleared.',
-  'entrées effacées.': 'entries cleared.'
+  'entrées effacées.': 'entries cleared.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Partis': 'Gone'
 };

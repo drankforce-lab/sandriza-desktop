@@ -474,5 +474,12 @@ module.exports = {
   'Annuler (Échap)': 'Cancel (Esc)',
   /* ⚠ Le compte de la vente finale en lot : « 3 produit(s). » restait derriere
      un T() pose sur la seule moitie qui precede. */
-  'produit(s).': 'product(s).'
+  'produit(s).': 'product(s).',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Afficher': 'Show',
+  'Auto': 'Auto',
+  'Page': 'Page',
+  'Rupture': 'Out of stock',
+  'L’emplacement': 'The location'
 };

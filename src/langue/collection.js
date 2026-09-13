@@ -87,5 +87,10 @@ module.exports = {
   'Enregistré.': 'Saved.',
   /* ⚠ Ce n est pas un refus de droit : la fiche est ouverte sur un autre poste. */
   'Enregistrement bloqué : cette fiche est ouverte ailleurs.':
-    'Saving blocked: this record is open somewhere else.'
+    'Saving blocked: this record is open somewhere else.',
+
+  /* ── LES MOTS SEULS (2026-09-13) — les étapes de l'assistant. */
+  'Description': 'Description',
+  'Image': 'Image',
+  'Produits': 'Products'
 };

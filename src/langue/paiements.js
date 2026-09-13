@@ -162,5 +162,9 @@ module.exports = {
   ' remboursement': ' refund',
   ' et ': ' and ',
   ' relus chez Square.': ' read again from Square.',
-  'relus chez Square.': 'read again from Square.'
+  'relus chez Square.': 'read again from Square.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Total': 'Total',
+  'Système': 'System'
 };

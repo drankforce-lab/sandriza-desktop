@@ -265,5 +265,8 @@ module.exports = {
   '⧉ Détacher': '⧉ Detach',
   'Ouvrir cet écran dans sa propre fenêtre': 'Open this screen in its own window',
   '⚓ Ancrer': '⚓ Dock',
-  'Ramener cet écran dans la fenêtre principale': 'Bring this screen back into the main window'
+  'Ramener cet écran dans la fenêtre principale': 'Bring this screen back into the main window',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Fermer': 'Close'
 };

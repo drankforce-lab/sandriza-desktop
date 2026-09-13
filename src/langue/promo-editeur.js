@@ -301,5 +301,21 @@ module.exports = {
      traduisant ferait imprimer une planche d etiquettes inutilisable. */
   'Ce code ne se lira pas au lecteur': 'This code will not scan',
   'Verrouillé': 'Locked',
-  'Ajout…': 'Adding…'
+  'Ajout…': 'Adding…',
+
+  /* ── LES MOTS SEULS (2026-09-13) — les onglets et les sections de l'éditeur.
+     Invisibles aux deux mesures : un seul mot, et aucun accent. */
+  'Fond': 'Background',
+  'Ajustement': 'Fit',
+  'Police': 'Font',
+  'Style': 'Style',
+  'Alignement': 'Alignment',
+  'Casse': 'Case',
+  'Recadrage': 'Crop',
+  'Orientation': 'Orientation',
+  'Masque': 'Mask',
+  'Retouche': 'Retouch',
+  'Contenu': 'Content',
+  'Nom': 'Name',
+  'Dupliquer': 'Duplicate'
 };

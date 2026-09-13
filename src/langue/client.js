@@ -140,4 +140,17 @@ module.exports = {
 
   /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
   'Min. 6 caractères': 'Min. 6 characters',
+
+  /* ── LES MOTS SEULS (2026-09-13) — onglets et étiquettes de la fiche.
+     ⚠ « English » n'est PAS ici : c'est la langue du client, une DONNÉE de sa
+     fiche, et elle s'écrit dans sa propre langue des deux côtés. */
+  'Commandes': 'Orders',
+  'Retours': 'Returns',
+  'Adresse': 'Address',
+  'Nom': 'Name',
+  'Rue': 'Street',
+  'Ville': 'City',
+  'Province': 'Province',
+  'Pays': 'Country',
+  'Effacer': 'Clear',
 };

@@ -232,7 +232,7 @@ module.exports = {
      n a qu UN nom (au contraire d une categorie, qui en a deux), et ce nom-la
      paraît sur la fiche produit que la cliente lit. Un exemple anglais
      apprendrait a nommer les couleurs en anglais dans une boutique francaise. */
-  'Ex: corail rosé': 'Ex: corail rosé'
+  'Ex: corail rosé': 'Ex: corail rosé',
   /* ⚠⚠⚠ « code » -> « code » A ETE RETIREE LE 2026-09-13, ET C EST LA CLE QU IL
      NE FAUT PAS REMETTRE. Elle rendait le MEME mot : elle ne changeait donc rien
      a l ecran, ni en francais ni en anglais, et aucun des 28 bancs ne pouvait la
@@ -248,4 +248,10 @@ module.exports = {
      si le banc du residuel l exige — et il ne l exige que pour un mot qu il
      accuserait, ce qui n est pas le cas ici (« code » parait dans les valeurs
      anglaises du dictionnaire, donc le lexique l ecarte tout seul). */
+
+  /* ── LE MOT SEUL (2026-09-13) ──────────────────────────────────────────────
+     La pastille posée sur une variante sans code-barres propre. Le mot est le
+     même dans les deux langues ; l'entrée existe pour que ce soit une DÉCISION,
+     puisque le compteur voit maintenant les mots seuls. */
+  'AUTO': 'AUTO',
 };

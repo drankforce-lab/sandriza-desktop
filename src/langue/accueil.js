@@ -99,5 +99,8 @@ module.exports = {
   'Réinitialisation…': 'Resetting…',
   'Page d’accueil enregistrée.': 'Home page saved.',
   'Blocs réinitialisés.': 'Blocks reset.',
-  'Une modification de ce bloc': 'A change to this block'
+  'Une modification de ce bloc': 'A change to this block',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Diapo': 'Slide'
 };

@@ -97,5 +97,10 @@ module.exports = {
 
   /* ── LES VERDICTS ───────────────────────────────────────────────────────── */
   'Mot de passe modifié.': 'Password changed.',
-  'Questions de sécurité enregistrées.': 'Security questions saved.'
+  'Questions de sécurité enregistrées.': 'Security questions saved.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Courriel': 'Email',
+  'Identifiant': 'Username',
+  'Actif': 'Active'
 };

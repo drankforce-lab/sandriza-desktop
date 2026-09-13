@@ -131,5 +131,15 @@ module.exports = {
   'Code postal (sans espace)': 'Postal code (no space)',
 
   /* ── LES VERDICTS ───────────────────────────────────────────────────────── */
-  'Transporteurs enregistrés.': 'Carriers saved.'
+  'Transporteurs enregistrés.': 'Carriers saved.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ───────────────────────────────────────────
+     ⚠ CE SONT DES NOMS D'ENTREPRISES : ils s'écrivent pareil dans les deux
+     langues et ne se traduisent JAMAIS. L'entrée existe pour que ce soit une
+     décision écrite, pas un oubli — c'est la seule façon de distinguer les
+     deux. */
+  'Purolator': 'Purolator',
+  'FedEx': 'FedEx',
+  'UPS': 'UPS',
+  'Canpar': 'Canpar'
 };

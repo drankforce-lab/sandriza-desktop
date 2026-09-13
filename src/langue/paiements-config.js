@@ -154,5 +154,8 @@ module.exports = {
   ' emplacements :': ' locations:',
   ' emplacement :': ' location:',
   'emplacements :': 'locations:',
-  'emplacement :': 'location:'
+  'emplacement :': 'location:',
+
+  /* ── LES MOTS SEULS (2026-09-13) — nom de produit Square, identique. */
+  'Afterpay': 'Afterpay'
 };

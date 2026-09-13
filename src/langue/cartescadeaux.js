@@ -132,5 +132,8 @@ module.exports = {
   'Carte ': 'Card ',
   ' activée.': ' activated.',
   'activée.': 'activated.',
-  'Une carte-cadeau': 'A gift card'
+  'Une carte-cadeau': 'A gift card',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Fermer': 'Close'
 };

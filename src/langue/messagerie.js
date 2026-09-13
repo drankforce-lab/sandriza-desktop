@@ -89,5 +89,12 @@ module.exports = {
   'Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.':
     'Answered requests are deleted past this delay. Pending requests never are.',
   'Conservation enregistrée.': 'Retention saved.',
-  'Valeur entre 1 et 120 mois.': 'Value between 1 and 120 months.'
+  'Valeur entre 1 et 120 mois.': 'Value between 1 and 120 months.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Toutes': 'All',
+  'Client': 'Customer',
+  'Courriel': 'Email',
+  'Raison': 'Reason',
+  'Fermer': 'Close'
 };

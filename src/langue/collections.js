@@ -41,5 +41,9 @@ module.exports = {
   'Assistant de collection ouvert dans sa fenêtre.':
     'Collection assistant opened in its own window.',
   'Collection ouverte dans son assistant.':
-    'Collection opened in its assistant.'
+    'Collection opened in its assistant.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Active': 'Active',
+  'Inactive': 'Inactive'
 };

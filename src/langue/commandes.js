@@ -238,5 +238,27 @@ module.exports = {
   'Facture': 'Invoice',
   'Frais retenus (': 'Fees kept (',
   'Partiel — remb.': 'Partial — refunded',
-  'remb.)': 'refunded)'
+  'remb.)': 'refunded)',
+
+  /* ── LES MOTS SEULS (2026-09-13) ──────────────────────────────────────────
+     ⚠ Ils étaient invisibles aux DEUX mesures : le compteur écartait tout texte
+     d'un seul mot (« pas de la prose »), et le résiduel cherche un accent — la
+     plupart n'en portent aucun. Son signalement, capture à l'appui. */
+  'Toutes': 'All',
+  'Suivi': 'Tracking',
+  'Articles': 'Items',
+  'Afficher': 'Show',
+  'Auto': 'Auto',
+  /* ⚠ Nom de produit Square : il s'écrit pareil dans les deux langues. L'entrée
+     existe quand même — sans elle, on ne distingue pas « traduit et identique »
+     de « oublié ». */
+  'AFTERPAY': 'AFTERPAY',
+  'Livraison': 'Shipping',
+  'Sous-total': 'Subtotal',
+  'Coupon': 'Coupon',
+  'Passer': 'Skip',
+  'Confirmer': 'Confirm',
+  'Rembourser': 'Refund',
+  'Fermer': 'Close',
+  'Lier': 'Link'
 };

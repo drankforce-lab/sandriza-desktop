@@ -97,15 +97,63 @@ const texteAffiche = (page) => {
   return out;
 };
 
+/* ══ LE MOT SEUL — LE DISCRIMINATEUR QUI MANQUAIT ══════════════════════════
+ * ⚠⚠⚠ SON SIGNALEMENT DU 2026-09-13, CAPTURE A L APPUI : « il manque plein de
+ * traduction encore ». Sur l ecran ANGLAIS du Studio virtuel : « Ambiance »,
+ * « Agrandissement », « PROFIL », « Explorateur ». Le compteur annoncait ZERO.
+ *
+ * LA CAUSE TIENT EN UNE LIGNE, ecrite ici : `if (!/\s/.test(t)) continue;` —
+ * << un seul mot : pas de la prose >>. Elle ecarte TOUT texte visible d un seul
+ * mot. Et le banc du residuel ne les rattrape pas non plus : sa signature est
+ * l ACCENT, et aucun de ces quatre-la n en porte un.
+ * ⚠ La question << qui LIT cette chaine ? >> etait notee comme << non faite a
+ * dessein >>. Elle vient de couter 257 mots visibles sans traduction, dans 73
+ * fenetres sur 99 — soit les trois quarts du parc.
+ *
+ * ⚠ POURQUOI LA LIGNE EXISTAIT, ET ELLE AVAIT SA RAISON. Un mot seul dans un
+ * script est presque toujours un IDENTIFIANT : `'flex'`, `'click'`, `'div'`,
+ * une cle, un nom de classe. Les prendre pour du texte, c est le banc qui crie
+ * sur du code — la faute payee au premier jet de cette extraction (1596
+ * accusations). On ne retire donc pas la borne : ON LA REMPLACE PAR UNE
+ * QUESTION PLUS PRECISE — non pas << est-ce une phrase ? >> mais
+ * << cette chaine est-elle AFFICHEE ? >>. Deux signatures, et deux seulement :
+ *
+ *   1. ELLE EST COLLEE A DU BALISAGE que le script ecrit lui-meme :
+ *      `'>Agrandissement</div>'`, `'<span>Ambiance'`. Ce qui est entre deux
+ *      chevrons est lu par quelqu un, par construction.
+ *   2. ELLE EST LA VALEUR D UNE PROPRIETE DE LIBELLE : `t:`, `titre:`,
+ *      `label:`, `libelle:`, `nom:`, `texte:`, `placeholder:`. C est la forme
+ *      des tables d onglets et d etapes — `{ cle: 'ambiance', t: 'Ambiance' }`,
+ *      celle-la meme qu il a vue a l ecran.
+ *
+ * ⚠ ET LA MAJUSCULE INITIALE EST EXIGEE. Un libelle commence par une majuscule ;
+ * une cle technique, presque jamais (`'ambiance'` est la CLE, `'Ambiance'` est
+ * le LIBELLE, et ils sont cote a cote sur la meme ligne). C est ce qui separe
+ * les deux sans rien savoir du JavaScript.
+ */
+const CLES_LIBELLE = /\b(?:t|titre|title|label|libelle|nom|texte|legende|placeholder|aria)\s*:\s*$/;
+const MOT_AFFICHE  = /^[A-ZÀ-ÖØ-Þ]/;
+
 /* Les chaines du script qui ressemblent a de la prose. */
 const chainesProse = (js) => {
   const out = [];
   const re = /'([^'\\\n]*)'|"([^"\\\n]*)"/g;
   let m;
   while ((m = re.exec(js))) {
-    const t = texteVisible(m[1] !== undefined ? m[1] : m[2]);
+    const brut = m[1] !== undefined ? m[1] : m[2];
+    const t = texteVisible(brut);
+    if (t.length < 3) continue;
+    if (!/\s/.test(t)) {
+      /* UN SEUL MOT — il ne passe que s il porte une des deux signatures. */
+      if (t.length < 3 || t.length > 30) continue;
+      if (!MOT_AFFICHE.test(t)) continue;
+      const colleAuBalisage = /[<>]/.test(brut);
+      const valeurDeLibelle = CLES_LIBELLE.test(js.slice(Math.max(0, m.index - 40), m.index));
+      if (!colleAuBalisage && !valeurDeLibelle) continue;
+      out.push({ texte: t, index: m.index, ou: 'script' });
+      continue;
+    }
     if (t.length < 6) continue;
-    if (!/\s/.test(t)) continue;                 // un seul mot : pas de la prose
     if (!/[a-z]/.test(t)) continue;              // que des majuscules : un libelle technique
     if (/^[\w.:\-\/#]+$/.test(t)) continue;      // chemin, selecteur, cle
     if (/===|!==|\|\||&&|\breturn\b|\bfunction\b/.test(t)) continue;   // du code

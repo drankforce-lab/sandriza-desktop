@@ -221,5 +221,10 @@ module.exports = {
   'Document téléchargé depuis la fenêtre principale.':
     'Document downloaded from the main window.',
   'entrée': 'entry',
-  'entrées': 'entries'
+  'entrées': 'entries',
+
+  /* ── LES MOTS SEULS (2026-09-13) ───────────────────────────────────────────
+     ⚠ « SMS » est le même sigle dans les deux langues. */
+  'SMS': 'SMS',
+  'Page': 'Page'
 };

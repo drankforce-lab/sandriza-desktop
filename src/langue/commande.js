@@ -196,5 +196,8 @@ module.exports = {
   'incomplet': 'incomplete',
   '— INCOMPLET': '— INCOMPLETE',
   'aucun': 'none',
-  'sur': 'of'
+  'sur': 'of',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Service': 'Service'
 };

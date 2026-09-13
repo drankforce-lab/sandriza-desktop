@@ -225,5 +225,9 @@ module.exports = {
     ' to the Studio — the treatment starts there.',
   'au Studio — le traitement se lance là-bas.':
     'to the Studio — the treatment starts there.',
-  'Annuler': 'Cancel'
+  'Annuler': 'Cancel',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Inverser': 'Invert',
+  'Vider': 'Clear'
 };

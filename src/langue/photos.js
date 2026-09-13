@@ -501,5 +501,21 @@ module.exports = {
   'Enregistré dans le dossier des exports (': 'Saved to the exports folder (',
   'Retrait…': 'Removing…',
   'retirée de la médiathèque': 'removed from the media library',
-  '— la fiche de l’article garde son image.': '— the item’s sheet keeps its image.'
+  '— la fiche de l’article garde son image.': '— the item’s sheet keeps its image.',
+
+  /* ── LES MOTS SEULS (2026-09-13) — onglets, colonnes et sections.
+     Invisibles aux deux mesures : un seul mot, et aucun accent. */
+  'Lots': 'Batches',
+  'Actions': 'Actions',
+  'Page': 'Page',
+  'Fermer': 'Close',
+  'Mannequin': 'Model',
+  'Pose': 'Pose',
+  /* Nom du service, suivi du point de la phrase où il paraît. */
+  'Photoroom.': 'Photoroom.',
+  'Inspecteur': 'Inspector',
+  'Traitements': 'Treatments',
+  'Article': 'Item',
+  'Fond': 'Background',
+  'Transparent': 'Transparent'
 };

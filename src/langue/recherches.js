@@ -84,5 +84,8 @@ module.exports = {
   'requêtes effacées du détail.': 'queries cleared from the detail.',
   /* ⚠ La requete precede, entre guillemets : seule la suite se lit. */
   ' » retirée de la liste.': ' » removed from the list.',
-  '» retirée de la liste.': '» removed from the list.'
+  '» retirée de la liste.': '» removed from the list.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Archive': 'Archive'
 };

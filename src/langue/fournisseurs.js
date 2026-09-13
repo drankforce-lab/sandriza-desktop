@@ -85,5 +85,9 @@ module.exports = {
   ' produit reste sans fournisseur.': ' product stays without a supplier.',
   ' produits restent sans fournisseur.': ' products stay without a supplier.',
   'produit reste sans fournisseur.': 'product stays without a supplier.',
-  'produits restent sans fournisseur.': 'products stay without a supplier.'
+  'produits restent sans fournisseur.': 'products stay without a supplier.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Actif': 'Active',
+  'Inactif': 'Inactive'
 };

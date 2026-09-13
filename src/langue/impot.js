@@ -265,4 +265,16 @@ module.exports = {
   'Taxe nette': 'Net tax',
   'Profil d’entreprise incomplet': 'Business profile incomplete',
   '— il manque le nom, ': '— the name is missing, ',
+
+  /* ── LES MOTS SEULS (2026-09-13) — onglets et en-têtes.
+     ⚠ TPS et TVQ sont les noms LÉGAUX des taxes québécoises : ils ne se
+     traduisent pas, même en anglais. L'entrée existe pour que ce soit une
+     décision, pas un oubli. */
+  'Revenus': 'Revenue',
+  'Documents': 'Documents',
+  'Identification': 'Identification',
+  'TPS': 'TPS',
+  'TVQ.': 'TVQ.',
+  'Total': 'Total',
+  'Ouvrir': 'Open',
 };

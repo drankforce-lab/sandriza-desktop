@@ -202,5 +202,10 @@ module.exports = {
   '— liquidation.': '— clearance.',
   '— vente finale.': '— final sale.',
   'régime retiré': 'regime removed',
-  'Retrait…': 'Removing…'
+  'Retrait…': 'Removing…',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Page': 'Page',
+  'Afficher': 'Show',
+  'Choisis': 'Selected'
 };

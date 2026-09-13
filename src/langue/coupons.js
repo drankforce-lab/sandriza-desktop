@@ -115,5 +115,9 @@ module.exports = {
   ' créé.': ' created.',
   'créé.': 'created.',
   ' mis à jour.': ' updated.',
-  'mis à jour.': 'updated.'
+  'mis à jour.': 'updated.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Actif': 'Active',
+  'Tous': 'All'
 };

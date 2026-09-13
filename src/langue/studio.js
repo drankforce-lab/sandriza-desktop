@@ -678,5 +678,28 @@ module.exports = {
      l un ni l autre ne sort de l administration : ils suivent la langue du
      poste. */
   'Ex. : Collection automne — plage dorée': 'Ex.: Autumn collection — golden beach',
-  'Collection automne — détourage': 'Autumn collection — cutout'
+  'Collection automne — détourage': 'Autumn collection — cutout',
+
+  /* ── LES MOTS SEULS (2026-09-13) ──────────────────────────────────────────
+     ⚠⚠ CE SONT CEUX DE SA CAPTURE. Les étapes de la colonne de gauche vivent
+     dans une TABLE du script — `{ cle: 'ambiance', t: 'Ambiance' }` — et le
+     script les injecte à l'exécution : elles ne paraissent donc pas dans la
+     page engendrée, que lit le compteur. Aucune ne porte d'accent, donc le
+     résiduel ne les voyait pas non plus. « Ambiance » et « Agrandissement »
+     s'affichaient en français sur l'écran anglais. */
+  'Pose': 'Pose',
+  'Neutre': 'Neutral',
+  'Graine': 'Seed',
+  'Agrandissement': 'Upscale',
+  'Photo': 'Photo',
+  /* ⚠ « Ambiance » EXISTE en anglais et s'y écrit pareil — mais l'entrée doit
+     exister quand même : sans elle, rien ne distingue « décidé, et identique »
+     de « oublié », et c'est précisément ce qui l'a laissé passer. */
+  'Ambiance': 'Ambiance',
+  'Ombres': 'Shadows',
+  'Profil': 'Profile',
+  'Recadrer': 'Crop',
+  'Marges': 'Margins',
+  'Inverser': 'Invert',
+  'Vider': 'Clear'
 };

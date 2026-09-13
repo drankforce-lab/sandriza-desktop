@@ -94,5 +94,8 @@ module.exports = {
   'Entrée ajoutée.': 'Entry added.',
   'Entrée retirée.': 'Entry removed.',
   'Échec : ': 'Failed: ',
-  'Échec :': 'Failed:'
+  'Échec :': 'Failed:',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Ajouter': 'Add'
 };

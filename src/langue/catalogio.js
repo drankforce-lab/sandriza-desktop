@@ -302,4 +302,11 @@ module.exports = {
   /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
   'Changer…': 'Change…',
   ' en erreur : ': ' in error: ',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Page': 'Page',
+  'Afficher': 'Show',
+  'Appliquer': 'Apply',
+  'Les': 'The',
+  'Fichier': 'File',
 };

@@ -38,5 +38,10 @@ module.exports = {
    * ⚠⚠ Pas encore, ou jamais. Voir l en-tete. */
   'Pas encore relié à la caisse': 'Not linked to the till yet',
   'Cette version de l’application ne relaie pas la caisse':
-    'This version of the application does not relay the till'
+    'This version of the application does not relay the till',
+
+  /* ── LES MOTS SEULS (2026-09-13) — le pied du ticket de caisse. */
+  'Sous-total': 'Subtotal',
+  'Livraison': 'Shipping',
+  'Total': 'Total',
 };

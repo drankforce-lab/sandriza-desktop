@@ -158,4 +158,8 @@ module.exports = {
   '📋 Copier': '📋 Copy',
   'Copier': 'Copy',
   ' en attente de paiement': ' awaiting payment',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Sous-total': 'Subtotal',
+  'Continuer': 'Continue',
 };

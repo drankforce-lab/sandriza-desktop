@@ -66,5 +66,11 @@ module.exports = {
     'Click « Confirm? »: the menu goes back to its original make-up, your additions are lost.',
   'Réinitialisation…': 'Resetting…',
   'Navigation réinitialisée.': 'Navigation reset.',
-  'Enregistré.': 'Saved.'
+  'Enregistré.': 'Saved.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Sous-menu': 'Submenu',
+  'Type': 'Type',
+  'Collection': 'Collection',
+  'Ajouter': 'Add'
 };

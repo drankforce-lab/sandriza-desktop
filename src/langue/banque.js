@@ -215,5 +215,9 @@ module.exports = {
   ' importée': ' imported',
   'Rien de neuf à importer — tout y était déjà.': 'Nothing new to import — it was all there already.',
   'Préparation du document…': 'Preparing the document…',
-  'Document préparé dans la fenêtre principale.': 'Document prepared in the main window.'
+  'Document préparé dans la fenêtre principale.': 'Document prepared in the main window.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Conciliations': 'Reconciliations',
+  'Clore': 'Close out'
 };

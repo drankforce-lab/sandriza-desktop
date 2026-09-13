@@ -114,5 +114,8 @@ module.exports = {
   'Incident consigné au registre.': 'Incident recorded in the register.',
   'Incident mis à jour.': 'Incident updated.',
   'Retrait…': 'Removing…',
-  'Entrée retirée du registre.': 'Entry removed from the register.'
+  'Entrée retirée du registre.': 'Entry removed from the register.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Fermer': 'Close'
 };

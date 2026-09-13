@@ -95,5 +95,8 @@ module.exports = {
   'Code copié :': 'Code copied:',
   'Icône ajoutée : ': 'Icon added: ',
   'Icône ajoutée :': 'Icon added:',
-  'Icône supprimée.': 'Icon deleted.'
+  'Icône supprimée.': 'Icon deleted.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Nom': 'Name'
 };

@@ -272,4 +272,12 @@ module.exports = {
   'Convertir les montants saisis depuis le dollar US, au taux de la date': 'Convert the amounts entered from US dollars, at the rate of the date',
   'Annuaire ouvert en modification par': 'Directory open for editing by',
   'Facture en ': 'Invoice in ',
+
+  /* ── LES MOTS SEULS (2026-09-13) ───────────────────────────────────────────
+     ⚠ « USD » et « USD→CAD » sont des codes de devise ISO : les mêmes partout. */
+  'Fournisseurs': 'Suppliers',
+  'USD': 'USD',
+  'USD→CAD': 'USD→CAD',
+  'Page': 'Page',
+  'Fermer': 'Close',
 };

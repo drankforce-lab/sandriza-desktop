@@ -72,5 +72,8 @@ module.exports = {
   'Fermé le': 'Closed on',
 
   /* ── LE VERDICT ─────────────────────────────────────────────────────────── */
-  'Heures enregistrées.': 'Hours saved.'
+  'Heures enregistrées.': 'Hours saved.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Afficher': 'Show'
 };

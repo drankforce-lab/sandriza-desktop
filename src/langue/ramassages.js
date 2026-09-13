@@ -98,4 +98,8 @@ module.exports = {
   'Ramassages': 'Pickups',
   'Rapport transporteurs': 'Carrier report',
   'Planifier un ramassage': 'Schedule a pickup',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Fermer': 'Close',
+  'TOTAL': 'TOTAL',
 };

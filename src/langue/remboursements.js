@@ -96,5 +96,10 @@ module.exports = {
   'Ce remboursement n’est rattaché à aucune commande.':
     'This refund is not attached to any order.',
   'Ouverture de la commande…': 'Opening the order…',
-  'Commande ouverte.': 'Order opened.'
+  'Commande ouverte.': 'Order opened.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Page': 'Page',
+  'Frais': 'Fees',
+  'Total': 'Total'
 };

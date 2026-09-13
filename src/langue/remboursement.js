@@ -178,5 +178,8 @@ module.exports = {
   /* ── LES ECRANS VIDES ET LE VERROU ──────────────────────────────────────── */
   'Remboursement indisponible': 'Refund unavailable',
   'Cette commande est ouverte ailleurs — remboursement bloqué.':
-    'This order is open elsewhere — refund blocked.'
+    'This order is open elsewhere — refund blocked.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Rembourser': 'Refund'
 };

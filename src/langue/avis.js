@@ -115,5 +115,12 @@ module.exports = {
   'Avis masqué.': 'Review hidden.',
   'Avis supprimé définitivement.': 'Review deleted for good.',
   'Retrait…': 'Removing…',
-  'Réponse enregistrée.': 'Answer saved.'
+  'Réponse enregistrée.': 'Answer saved.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Page': 'Page',
+  'Commande': 'Order',
+  'Langue': 'Language',
+  'Photos': 'Photos',
+  'Fermer': 'Close'
 };

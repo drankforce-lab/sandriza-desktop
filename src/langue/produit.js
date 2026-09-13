@@ -419,5 +419,16 @@ module.exports = {
   'La photothèque est vide.': 'The media library is empty.',
   'Elle se remplit par Catalogue → Photos , dans la fenêtre principale,':
     'It fills up through Catalogue → Photos , in the main window,',
-  '📂 Importer de l’ordinateur…': '📂 Import from the computer…'
+  '📂 Importer de l’ordinateur…': '📂 Import from the computer…',
+
+  /* ── LES MOTS SEULS (2026-09-13) — sections et onglets de la fiche produit. */
+  'Identification': 'Identification',
+  'Description': 'Description',
+  'Prix': 'Price',
+  'Ajouter': 'Add',
+  'Photos': 'Photos',
+  'Retours': 'Returns',
+  'Photo': 'Photo',
+  'Stock': 'Stock',
+  'Fermer': 'Close'
 };

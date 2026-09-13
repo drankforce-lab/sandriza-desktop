@@ -161,5 +161,8 @@ module.exports = {
 
   /* ⚠ LE NOM DE PRODUIT D ESSAI EST UNE DONNEE : il ne se traduit pas. L entree
      existe pour que le compteur voie une DECISION, pas un oubli. */
-  'Robe Élégance mi-longue': 'Robe Élégance mi-longue'
+  'Robe Élégance mi-longue': 'Robe Élégance mi-longue',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Page': 'Page'
 };

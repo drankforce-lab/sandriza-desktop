@@ -363,5 +363,17 @@ module.exports = {
   'Bienvenue en trois temps': 'Welcome in three steps',
   'Clients robes, 300 $ et plus': 'Dress customers, $300 and up',
   'Nos nouveautés sont arrivées !': 'Nos nouveautés sont arrivées !',
-  'SANDRIZA : nos nouveautés sont arrivées !': 'SANDRIZA : nos nouveautés sont arrivées !'
+  'SANDRIZA : nos nouveautés sont arrivées !': 'SANDRIZA : nos nouveautés sont arrivées !',
+
+  /* ── LES MOTS SEULS (2026-09-13) — onglets et boutons, invisibles aux deux
+     mesures : un seul mot, et pas d'accent. */
+  'Campagnes': 'Campaigns',
+  'Segments': 'Segments',
+  'Visuel': 'Visual',
+  'HTML': 'HTML',
+  'Nom': 'Name',
+  'Compter': 'Count',
+  'Oui': 'Yes',
+  'Non': 'No',
+  'Brouillons': 'Drafts'
 };

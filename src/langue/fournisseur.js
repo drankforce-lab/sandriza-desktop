@@ -47,4 +47,10 @@ module.exports = {
   /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
   'Actif': 'Active',
   'Inactif': 'Inactive',
+
+  /* ── LES MOTS SEULS (2026-09-13) — les sections de la fiche. */
+  'Identification': 'Identification',
+  'Adresse': 'Address',
+  'Approvisionnement': 'Supply',
+  'Statut': 'Status',
 };

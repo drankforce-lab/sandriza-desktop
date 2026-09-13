@@ -94,5 +94,8 @@ module.exports = {
   'Facture ouverte dans sa fenêtre.': 'Invoice opened in its own window.',
   /* ⚠⚠⚠ RETIREE DE PARTOUT, Y COMPRIS DU COMPTE CLIENT. Voir l en-tete. */
   'Cliquez « Confirmer ? » pour supprimer définitivement — la facture sera retirée de partout, y compris du compte client.':
-    'Click « Confirm? » to delete for good — the invoice will be removed from everywhere, including the customer statement.'
+    'Click « Confirm? » to delete for good — the invoice will be removed from everywhere, including the customer statement.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Page': 'Page'
 };

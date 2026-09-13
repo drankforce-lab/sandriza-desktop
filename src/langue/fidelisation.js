@@ -195,5 +195,9 @@ module.exports = {
   ' » supprimé avec ses ': ' » deleted with its ',
   '» supprimé avec ses': '» deleted with its',
   ' réponses.': ' answers.',
-  ' réponse.': ' answer.'
+  ' réponse.': ' answer.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Question': 'Question',
+  'Fermer': 'Close'
 };

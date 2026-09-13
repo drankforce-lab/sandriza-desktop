@@ -234,5 +234,9 @@ module.exports = {
     'of access. People are told so on the link page, before any',
   'téléchargement, comme l’exige la Loi 25.': 'download, as Law 25 requires.',
 
-  'Version publiée :': 'Published version:'
+  'Version publiée :': 'Published version:',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Journal': 'Log',
+  'Fermer': 'Close'
 };

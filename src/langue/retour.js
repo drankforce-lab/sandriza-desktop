@@ -286,4 +286,12 @@ module.exports = {
   'Demande': 'Request',
   '🔁 Renvoyer au client': '🔁 Send back to the customer',
   'Renvoyer au client': 'Send back to the customer',
+
+  /* ── LES MOTS SEULS (2026-09-13) — étiquettes de l'assistant de retour. */
+  'Client': 'Customer',
+  'Courriel': 'Email',
+  'Motif': 'Reason',
+  'Transporteur': 'Carrier',
+  'Statut': 'Status',
+  'Fermer': 'Close',
 };

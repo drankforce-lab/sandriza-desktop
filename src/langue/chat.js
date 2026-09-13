@@ -106,5 +106,8 @@ module.exports = {
   ' supprimée.': ' deleted.',
   /* ⚠⚠ TOUT L ECHANGE SERA PERDU. Voir l en-tete. */
   'Cliquez « Confirmer ? » pour supprimer — tout l’échange sera perdu.':
-    'Click « Confirm? » to delete — the whole exchange will be lost.'
+    'Click « Confirm? » to delete — the whole exchange will be lost.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Fermer': 'Close'
 };

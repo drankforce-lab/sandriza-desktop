@@ -224,4 +224,14 @@ module.exports = {
   'Largeur en pouces': 'Width in inches',
   ' de planche': ' for the sheet',
   'Rendu…': 'Rendering…',
+
+  /* ── LES MOTS SEULS (2026-09-13) — colonnes, menus et formes. */
+  'Actions': 'Actions',
+  'Imprimer': 'Print',
+  'Dupliquer': 'Duplicate',
+  'Page': 'Page',
+  'Type': 'Type',
+  'Forme': 'Shape',
+  'Rond': 'Round',
+  'Fermer': 'Close',
 };

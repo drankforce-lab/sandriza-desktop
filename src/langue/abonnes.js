@@ -121,5 +121,9 @@ module.exports = {
   ' refusée': ' refused',
   ' refusées': ' refused',
   ' ligne.': ' line.',
-  ' lignes.': ' lines.'
+  ' lignes.': ' lines.',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Ajouter': 'Add',
+  'Importer': 'Import'
 };

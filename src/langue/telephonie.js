@@ -263,4 +263,11 @@ module.exports = {
   'Voir les SMS dans le module Journaux': 'See the texts in the Logs module',
   'Votre message': 'Your message',
   'Votre message…': 'Your message…',
+
+  /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
+  'Copier': 'Copy',
+  'Action': 'Action',
+  'Rediriger': 'Forward',
+  'Messagerie': 'Voicemail',
+  'Envoyer': 'Send',
 };
