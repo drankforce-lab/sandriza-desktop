@@ -217,9 +217,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).join('') : '<tr><td colspan="6" class="vide">${T("Aucune commande.")}</td></tr>';
     return '<div class="tuiles">'
       + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu total")}</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + D.orderCount + ' commande' + plur(D.orderCount) + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">🎯</span> ${T("Revenu promo")}</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '% des commandes</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🎯</span> ${T("Revenu promo")}</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '${T("% des commandes")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Clients actifs")}</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' inscrits</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">🛒</span> ${T("Panier moyen")}</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">par commande</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🛒</span> ${T("Panier moyen")}</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">${T("par commande")}</div></div>'
       + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + ' sur 5' : '') + '</div></div>' : '')
       + '</div>'
       + '<div class="deux">'
@@ -267,7 +267,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).join('') : '<tr><td colspan="8" class="vide">${T("Aucune promotion.")}</td></tr>';
     return '<div class="tuiles">'
       + '<div class="tuile"><div class="k"><span class="ic">📣</span> ${T("Promotions")}</div><div class="v">' + t.count + '</div><div class="z">' + t.active + ' active' + plur(t.active) + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">📦</span> ${T("Cmd sous promo")}</div><div class="v">' + t.promoOrders + '</div><div class="z">' + t.promoConvRate + '% des cmd</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">📦</span> ${T("Cmd sous promo")}</div><div class="v">' + t.promoOrders + '</div><div class="z">' + t.promoConvRate + '${T("% des cmd")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu (promo)")}</div><div class="v">' + argentK(t.totalPromoRev) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🎁</span> ${T("Économies accordées")}</div><div class="v">' + argentK(t.totalSavings) + '</div></div>'
       + '</div>'
@@ -359,7 +359,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="carte" style="grid-column:span 2"><h2>${T("Répartition des évaluations")}</h2>'
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> ${T("Satisfaits")}</div>' + bar(D.satisfied, D.rated, '#4ade80')
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> ${T("Insatisfaits")}</div>' + bar(D.unsatisfied, D.rated, '#f87171')
-      +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + '${T(" éval. sur ")}' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '% de couverture)</div></div>'
+      +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + '${T(" éval. sur ")}' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '${T("% de couverture)")}</div></div>'
       + '</div>' + comments;
   }
 

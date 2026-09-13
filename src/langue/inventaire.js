@@ -484,7 +484,9 @@ module.exports = {
   'L’emplacement': 'The location',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'sous leur seuil': 'below their threshold',
+  /* ⚠ Les deux alternatives EN ENTIER, plus de « s » collé. */
+  'variantes sous leur seuil': 'variants below their threshold',
+  'variante sous son seuil': 'variant below its threshold',
   'par page': 'per page',
   'produits au total': 'products in total',
   'tout est au-dessus du seuil ✓': 'everything is above the threshold ✓',

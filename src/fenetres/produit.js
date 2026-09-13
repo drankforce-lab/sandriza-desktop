@@ -410,7 +410,7 @@ function pageProduit(id) {
             { v: 'Solde', l: 'Solde' }].concat(opt(CTX.etiquettes, 'cle', 'libelle')))
       + sel('p-fourn', 'Fournisseur', rien.concat(opt(CTX.fournisseurs, 'id', 'nom')))
       + '</div></div>'
-      + '<div class="carte"><h2>Prix</h2>'
+      + '<div class="carte"><h2>${T("Prix")}</h2>'
       + '<div class="prixgrille">'
       + ch('p-prix', '${T("Prix de vente ($)")}', { requis: true, argent: true })
       + '<div class="ch"><label for="p-solde">${T("Prix soldé ($)")}'
@@ -438,7 +438,7 @@ function pageProduit(id) {
       // ajouter, du referentiel ou hors referentiel.
       + '<div class="rech" style="margin-bottom:.4rem;position:relative">'
       + '<input aria-label="${T("Chercher une couleur, ou en saisir une nouvelle")}" id="p-coul-libre" autocomplete="off" placeholder="${T("Chercher une couleur, ou en saisir une nouvelle…")}">'
-      + '<button type="button" id="p-coul-add">Ajouter</button>'
+      + '<button type="button" id="p-coul-add">${T("Ajouter")}</button>'
       + '<div id="p-coul-sug"></div></div>'
       + '<div class="jetons" id="p-couleurs"></div>'
       + '<div class="aide" id="p-coul-vide" style="margin-top:.3rem">${T("Aucune couleur choisie.")}</div>'
@@ -499,7 +499,7 @@ function pageProduit(id) {
       + '<option value="liq"><span class="ic">🟡</span> ${T("Liquidation")}</option>'
       + '<option value="final"><span class="ic">🔴</span> ${T("Vente finale")}</option>'
       + '</select></div>'
-      + '<div class="ch"><label for="p-retours">Retours</label>'
+      + '<div class="ch"><label for="p-retours">${T("Retours")}</label>'
       + '<select id="p-retours">'
       + '<option value="ok"><span class="ic">✅</span> ${T("Acceptés")}</option>'
       + '<option value="aucun"><span class="ic">🚫</span> ${T("Aucun retour")}</option>'
@@ -955,7 +955,7 @@ function pageProduit(id) {
         return '<button type="button" data-pct="' + pct + '"' + (actif ? ' class="on"' : '')
           + (!p || sousCout ? ' disabled' : '')
           + ' title="' + (sousCout ? '${T("sous le coût d’acquisition")}'
-              : (actif ? 'recliquez pour retirer le rabais' : (sp ? sp.toFixed(2) + ' $' : ''))) + '">'
+              : (actif ? '${T("recliquez pour retirer le rabais")}' : (sp ? sp.toFixed(2) + ' $' : ''))) + '">'
           + '-' + pct + '%</button>';
       }).join('');
     }
@@ -1554,7 +1554,7 @@ function pageProduit(id) {
       + '<button type="button" id="ap-detail">${T("Page produit")}</button></div>'
       + '<div id="ap-zone" style="background:#f6f4ef;border-radius:10px;padding:.85rem;'
       + 'color:#1a1a1a;max-height:62vh;overflow-y:auto"></div>'
-      + '<div class="pied2"><button type="button" id="ap-non">Fermer</button></div></div>';
+      + '<div class="pied2"><button type="button" id="ap-non">${T("Fermer")}</button></div></div>';
     document.body.appendChild(v);
     function peindre(){
       var c = document.getElementById('ap-card'), d = document.getElementById('ap-detail');
@@ -1672,7 +1672,7 @@ function pageProduit(id) {
       + '<input id="ia-desc" type="text" placeholder="${T("Ex : robe fleurie été")}"></div></div>'
       + '<div id="ia-zone" style="background:var(--f-0f1826);border-radius:10px;min-height:10rem;'
       + 'display:flex;align-items:center;justify-content:center;overflow:hidden"></div>'
-      + '<div class="pied2"><button type="button" id="ia-non">Fermer</button>'
+      + '<div class="pied2"><button type="button" id="ia-non">${T("Fermer")}</button>'
       + '<button type="button" id="ia-gen"><span class="ic">✨</span> ${T("Générer")}</button>'
       + '<button type="button" class="prim" id="ia-oui" disabled>${T("✓ Utiliser cette photo")}</button></div></div>';
     document.body.appendChild(v);
@@ -1996,7 +1996,7 @@ function pageProduit(id) {
     v.innerHTML = '<div class="boite" style="max-width:640px">'
       + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> ${T("Modifications de cette fiche")}</h3>'
       + '<div class="jrn" id="jrn-corps"></div>'
-      + '<div class="pied2"><button type="button" id="jrn-non">Fermer</button></div></div>';
+      + '<div class="pied2"><button type="button" id="jrn-non">${T("Fermer")}</button></div></div>';
     document.body.appendChild(v);
     dessinerJournal();
     document.getElementById('jrn-non').onclick = function(){ v.remove(); };
@@ -2022,7 +2022,7 @@ function pageProduit(id) {
     v.innerHTML = '<div class="boite" style="max-width:640px">'
       + '<h3 style="color:var(--tx-creme)"><span class="ic">🕘</span> ${T("Historique complet")}</h3>'
       + '<div class="jrn" id="hist-corps"><div class="fin">${T("Lecture…")}</div></div>'
-      + '<div class="pied2"><button type="button" id="hist-non">Fermer</button></div></div>';
+      + '<div class="pied2"><button type="button" id="hist-non">${T("Fermer")}</button></div></div>';
     document.body.appendChild(v);
     document.getElementById('hist-non').onclick = function(){ v.remove(); };
     v.addEventListener('click', function(ev){ if (ev.target === v) v.remove(); });

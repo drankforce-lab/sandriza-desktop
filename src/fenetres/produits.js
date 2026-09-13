@@ -145,7 +145,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function pilStock(r){
-    if (r.stockTotal === 0) return '<span class="pill err" title="${T("Aucune unité en stock")}">Rupture</span>';
+    if (r.stockTotal === 0) return '<span class="pill err" title="${T("Aucune unité en stock")}">${T("Rupture")}</span>';
     if (r.variantesBas > 0) return '<span class="pill att" title="' + esc(r.bassesDetail) + '">'
       + r.variantesBas + ' ${T("cat. à commander")}</span>';
     return '<span class="pill bon">${T("Seuil non atteint")}</span>';
@@ -176,7 +176,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + 'title="${T("Mettre en premier les produits présents dans des paniers actifs")}">'
       + (TRI === 'cart' ? '<span class="ic">🛒</span> ${T("Tri panier ✓")}' : '<span class="ic">🛒</span> ${T("Trier par panier")}') + '</button>'
       + '<span class="droite">' + (D.total || 0) + ' produit' + (D.total > 1 ? 's' : '')
-      + ' · ' + (D.stats && D.stats.ruptures || 0) + ' en rupture'
+      + ' · ' + (D.stats && D.stats.ruptures || 0) + ' ${T("en rupture")}'
       + '<button class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></span>'
       + '</div>';
 

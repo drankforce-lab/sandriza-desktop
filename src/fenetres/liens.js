@@ -269,7 +269,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
                 : '<button class="mini dgr" data-supprimer="' + esc(l.id) + '" '
                   + 'title="${T("Retirer de la liste — le journal de ses accès est conservé")}">'
                   + (ARME === 'sup:' + l.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>') + '</button> ')
-            + '<button class="mini" data-journal="' + esc(l.id) + '">Journal</button>'
+            + '<button class="mini" data-journal="' + esc(l.id) + '">${T("Journal")}</button>'
           + '</td></tr>');
         if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
         if (l.revoqueLe) {
@@ -383,7 +383,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + '')
       + '<div class="barreoutils" style="margin-top:.5rem">'
       + '<button class="prim" id="n-envoyer">${T("Envoyer")}</button>'
-      + '<span class="droite"><button id="n-fermer">Fermer</button></span></div>'
+      + '<span class="droite"><button id="n-fermer">${T("Fermer")}</button></span></div>'
       + '</div>';
   }
 

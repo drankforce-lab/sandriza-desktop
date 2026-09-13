@@ -513,7 +513,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // invitee (c est justement le cas a corriger le plus souvent).
       + (d.droits.lier && !ro
           ? '<button class="mini" id="det-lier" title="${T("Rattacher cette commande à un compte client")}"><span class="ic">🔗</span> '
-            + (c.compte ? 'Changer' : 'Lier') + '</button>' : '')
+            + (c.compte ? '${T("Changer")}' : '${T("Lier")}') + '</button>' : '')
       + '</div>'
       + (c.compte
           ? '<div class="mut">${T("Compte :")} <strong style="color:var(--tx-bleute)">' + esc(c.compte.nom) + '</strong></div>'
@@ -752,7 +752,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       var h = '<h3>${T("Changer le statut")}</h3>'
-        + '<p>Passer <strong>' + esc(ap.numero) + '</strong> de « <strong>' + esc(ap.deLibelle)
+        + '<p>${T("Passer")} <strong>' + esc(ap.numero) + '</strong> de « <strong>' + esc(ap.deLibelle)
         + '</strong> » à « <strong>' + esc(ap.aLibelle) + '</strong> » ?</p>'
         + ((ap.implications || []).length
             ? '<ul>' + ap.implications.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '')
@@ -841,7 +841,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (ap.actuel
             ? '<div class="detacher"><button class="danger" id="v-det"><span class="ic">🔓</span> ${T("Détacher (remettre en mode invité)")}</button></div>'
             : '')
-        + '<div class="fin2"><button id="v-non">Fermer</button></div>',
+        + '<div class="fin2"><button id="v-non">${T("Fermer")}</button></div>',
         function(fermer){
           var champ = document.getElementById('v-rech');
           var zone = document.getElementById('v-lres');
@@ -894,11 +894,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // sont recalculees. On le dit avant, pas apres.
   function confirmerLien(fermerListe, ap, clientId, libelle){
     voile('<h3>${T("Rattacher la commande")}</h3>'
-      + '<p>Lier <strong>' + esc(ap.numero) + '</strong> à <strong>' + esc(libelle) + '</strong> ?</p>'
+      + '<p>${T("Lier")} <strong>' + esc(ap.numero) + '</strong> à <strong>' + esc(libelle) + '</strong> ?</p>'
       + '<p style="color:var(--tx2)">${T("La facture associée sera mise à jour et les statistiques")} '
       + '${T("d’achat des comptes concernés recalculées.")}</p>'
       + '<div class="fin2"><button id="v2-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v2-oui">Lier</button></div>',
+      + '<button class="prim" id="v2-oui">${T("Lier")}</button></div>',
       function(fermer2){
         document.getElementById('v2-non').onclick = fermer2;
         document.getElementById('v2-oui').onclick = function(){

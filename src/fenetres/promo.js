@@ -345,9 +345,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td style="text-align:center">' + r.elements + '</td>'
               + '<td class="dt">' + dateFr(r.modifie) + '</td>'
               + '<td style="text-align:right;white-space:nowrap">'
-              + '<button class="mini" data-imprimer="' + esc(r.id) + '">Imprimer</button> '
+              + '<button class="mini" data-imprimer="' + esc(r.id) + '">${T("Imprimer")}</button> '
               + '<button class="mini" data-editeur="' + esc(r.id) + '">${T("Éditeur")}</button>'
-              + (ro ? '' : ' <button class="mini" data-dup="' + esc(r.id) + '">Dupliquer</button>'
+              + (ro ? '' : ' <button class="mini" data-dup="' + esc(r.id) + '">${T("Dupliquer")}</button>'
                   + ' <button class="mini danger" data-suppr="' + esc(r.id) + '">'
                   + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '✕') + '</button>')
               + '</td></tr>';
@@ -379,9 +379,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<div class="champ"><label for="f-type">Type</label><select id="f-type">'
           + '<option value="label">${T("Étiquette")}</option><option value="stick">${T("Autocollant")}</option>'
           + '<option value="card">${T("Carte d’affaires")}</option></select></div>'
-          + '<div class="champ"><label for="f-forme">Forme</label><select id="f-forme">'
+          + '<div class="champ"><label for="f-forme">${T("Forme")}</label><select id="f-forme">'
           + '<option value="rect">${T("Rectangle")}</option><option value="square">${T("Carré")}</option>'
-          + '<option value="circle">Rond</option></select></div>'
+          + '<option value="circle">${T("Rond")}</option></select></div>'
           + '<div class="champ"><label id="f-lw">${T("Largeur (po)")}</label>'
           + '<input type="number" id="f-w" aria-label="${T("Largeur en pouces")}" step="0.1" min="0.4" value="2"></div>'
           + '<div class="champ" id="f-boxh"><label for="f-h">${T("Hauteur (po)")}</label>'
@@ -524,7 +524,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="pc" id="sv-pc">0 %</span>'
       + '<span id="sv-r">' + esc(nom || '') + '</span>'
       + '<span class="bt"><button class="mini dgr" id="sv-a">${T("Arrêter")}</button>'
-      + '<button class="mini" id="sv-x">Fermer</button></span></div>';
+      + '<button class="mini" id="sv-x">${T("Fermer")}</button></span></div>';
     document.body.appendChild(d);
     PANNEAU = d;
     var x = document.getElementById('sv-x');

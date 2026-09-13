@@ -532,7 +532,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td style="word-break:break-all"><code>' + esc(x.src) + '</code></td><td class="rouge">' + esc(x.msg) + '</td></tr>'; }).join('')
         + '</tbody></table></div>' : '';
     var noteCrees = r.crees
-      ? '<div class="avis" style="margin-top:.8rem">Les ' + r.crees + ' produit' + plur(r.crees)
+      ? '<div class="avis" style="margin-top:.8rem">${T("Les")} ' + r.crees + ' produit' + plur(r.crees)
         + '${T(" créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire</strong>. Ajoutez leurs photos, puis mettez-les en vente.")}</div>' : '';
     var noteHist = r.histEchecs
       ? '<div class="avis" style="margin-top:.8rem">' + r.histEchecs + ' modification' + plur(r.histEchecs)
@@ -572,12 +572,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var c = IMP.compte, inv = IMP.feuille === 'inventaire', parts = [];
     if (c.creation) parts.push('<li><strong>' + c.creation + '</strong> produit' + plur(c.creation) + ' <strong>${T("créé")}' + plur(c.creation) + '</strong> ${T("— hors vente, à relire et publier ensuite")}</li>');
     if (c.maj) parts.push('<li><strong>' + c.maj + '</strong> ' + (inv ? 'variante' + plur(c.maj) : 'fiche' + plur(c.maj)) + ' <strong>${T("modifiée")}' + plur(c.maj) + '</strong></li>');
-    if (IMP.nbPhotos) parts.push('<li><strong>' + IMP.nbPhotos + '</strong> photo' + plur(IMP.nbPhotos) + ' <strong>${T("téléchargée")}' + plur(IMP.nbPhotos) + '</strong> ${T("depuis des sites externes et copiée")}' + plur(IMP.nbPhotos) + ' dans votre stockage</li>');
+    if (IMP.nbPhotos) parts.push('<li><strong>' + IMP.nbPhotos + '</strong> photo' + plur(IMP.nbPhotos) + ' <strong>${T("téléchargée")}' + plur(IMP.nbPhotos) + '</strong> ${T("depuis des sites externes et copiée")}' + plur(IMP.nbPhotos) + ' ${T("dans votre stockage")}</li>');
     if (c.inchange) parts.push('<li>' + c.inchange + ' ligne' + plur(c.inchange) + ' identique' + plur(c.inchange) + ' ${T(": rien ne sera écrit")}</li>');
     if (c.erreur) parts.push('<li>' + c.erreur + ' ligne' + plur(c.erreur) + '${T(" en erreur : ")}<strong>${T("ignorée")}' + plur(c.erreur) + '</strong></li>');
     return '<div class="voile" id="conf-voile"><div class="boite">'
       + '<h3>${T("Appliquer l’import")}</h3>'
-      + '<p style="margin:0 0 .6rem;font-size:.86rem">Fichier <strong>' + esc(IMP.fichier) + '</strong> ${T("— feuille")} ' + esc(IMP.feuille) + '.</p>'
+      + '<p style="margin:0 0 .6rem;font-size:.86rem">${T("Fichier")} <strong>' + esc(IMP.fichier) + '</strong> ${T("— feuille")} ' + esc(IMP.feuille) + '.</p>'
       + '<ul>' + parts.join('') + '</ul>'
       + '<div class="gare">${T("Aucun produit absent du fichier n’est touché, et rien n’est supprimé. Une fiche")} '
       +   '${T("qu’un collègue est en train de modifier sera refusée et listée à la fin.")}</div>'

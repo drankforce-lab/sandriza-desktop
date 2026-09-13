@@ -544,7 +544,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           : '')
       + '<button class="mini" id="p-lots"' + (D.total ? '' : ' disabled')
       + ' title="' + (D.total ? '${T("Historique des lots importés")}'
-                             : '${T("Aucune photo : il n’y a pas encore de lot")}') + '">Lots</button>'
+                             : '${T("Aucune photo : il n’y a pas encore de lot")}') + '">${T("Lots")}</button>'
       /* ⚠ PLUS DE BOUTON « Traitements IA » ICI (2026-08-10) : c'est un JOURNAL,
          et les journaux ne s'ouvrent plus depuis d'autres fenêtres — ils vivront
          dans la fenêtre Journaux unifiée (palier 5). L'écran reste accessible par
@@ -576,7 +576,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ro && !D.total) {
       h += '<div class="depot" id="p-depot">'
         + '<div class="gros">${T("Glissez-déposez vos photos ici")}</div>'
-        + '<div class="pt">ou cliquez pour choisir des fichiers'
+        + '<div class="pt">${T("ou cliquez pour choisir des fichiers")}'
         + (D.bureau ? ' ${T("· ou « Clé USB »")}' : '') + '</div></div>';
     }
 
@@ -801,7 +801,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     h += '</div><div class="pi"><span class="aide">${T("Un lot est un import.")} '
       + '${T("Le retirer défait cet import d’un geste.")}</span>'
-      + '<span class="dr"><button class="prim" id="l-fermer">Fermer</button></span>'
+      + '<span class="dr"><button class="prim" id="l-fermer">${T("Fermer")}</button></span>'
       + '</div></div></div>';
     return h;
   }
@@ -1149,7 +1149,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
       var f = fichiers[k];
       var nom = titres[k];
-      suiviLigne(k, 'cours', 'en cours');
+      suiviLigne(k, 'cours', '${T("en cours")}');
 
       var apresImport = function(id){
         suiviEtapes(k, [{ nom: 'import', ok: true },
@@ -1209,7 +1209,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
              TRAITE quand meme si son traitement manque. C est exactement le cas
              ou l on reimporte une carte pour rattraper ce qui n avait pas ete
              fait la premiere fois. */
-          suiviEtapes(k, [{ nom: 'reconnue au contenu', ok: true, chiffre: r.code || '' }]);
+          suiviEtapes(k, [{ nom: '${T("reconnue au contenu")}', ok: true, chiffre: r.code || '' }]);
           apresImport((r.photo && r.photo.id) || '');
           return;
         }
@@ -1433,7 +1433,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       /* ⚠ L ETIQUETTE ETAIT LA, ET ELLE NE SERVAIT A RIEN AU LECTEUR D ECRAN :
          sans lien, un <label> voisin est du texte, pas un nom. Le nom passe par
          la fabrique (dernier argument) — voir le commentaire de liste_. */
-      + '<div class="ch"><label>Mannequin</label>' + liste_('sc-mod', MODELES_SC, 'sophia', 'Mannequin') + '</div>'
+      + '<div class="ch"><label>${T("Mannequin")}</label>' + liste_('sc-mod', MODELES_SC, 'sophia', '${T("Mannequin")}') + '</div>'
       + '<div class="ch"><label>Pose</label>' + liste_('sc-pose', POSES_SC, '34turn', 'Pose') + '</div>'
       + '<div class="ch"><label>${T("Décor")}</label>' + liste_('sc-dec', DECORS_SC, 'studio', '${T("Décor")}') + '</div>'
       + '<div class="ch"><label><input type="checkbox" id="sc-sourire" checked> '
@@ -1562,7 +1562,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span style="font-size:.74rem;color:var(--tx2)">${T("gratuit · filigrané · aucun crédit réel")}</span>'
       + '<button id="apr-x" style="margin-left:auto;font:inherit;color:var(--tx);'
       + 'background:var(--v06);border:1px solid var(--v18);'
-      + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">Fermer</button></div>'
+      + 'border-radius:8px;padding:.35rem .7rem;cursor:pointer">${T("Fermer")}</button></div>'
       // ⚠ auto-FIT + justify-content:center : une seule photo s'affiche GRANDE et
       // CENTRÉE (auto-fill la collait en haut à gauche, minuscule) ; un lot reste
       // une grille centrée de vignettes larges.
@@ -1677,7 +1677,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (k >= ids.length) {
         liberer();
         var t = faites + ' ${T("traitée")}' + (faites > 1 ? 's' : '');
-        if (replis) t += ' · ' + replis + ' en repli local';
+        if (replis) t += ' · ' + replis + ' ${T("en repli local")}';
         if (echecs) t += ' · ' + echecs + ' ${T("en échec")}';
         if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
         suiviFin(t + '.', abandon ? (nomLot + ' interrompu') : (nomLot + ' ${T("terminé")}'));
@@ -1687,7 +1687,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         charger();
         return;
       }
-      suiviLigne(k, 'cours', 'en cours');
+      suiviLigne(k, 'cours', '${T("en cours")}');
       suiviEtapes(k, [{ nom: '${T("envoi au modèle")}', etat: 'encours' }]);
       occuper('Traitement ' + (k + 1) + ' / ' + ids.length + '…');
       appeler('photos:traiter', [ids[k], quoi, scene || {}]).then(function(r){
@@ -1741,7 +1741,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         charger();
         return;
       }
-      suiviLigne(k, 'cours', 'en cours');
+      suiviLigne(k, 'cours', '${T("en cours")}');
       appeler('photos:pivoter', [ids[k], 90]).then(function(r){
         if (r && r.ok) {
           faits++;
@@ -1778,7 +1778,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      « isolée » quel que soit le traitement subi : on retirait un mannequin et
      l'écran continuait de parler de détourage. Un verdict doit nommer ce qui a
      eu lieu, sinon il ne vaut rien comme verdict. */
-  var NOM_TRAIT = { detourage: '${T("détourée")}', fantome: 'sans mannequin', humain: 'sur mannequin' };
+  var NOM_TRAIT = { detourage: '${T("détourée")}', fantome: '${T("sans mannequin")}', humain: '${T("sur mannequin")}' };
   function traits(r){ return (r.faits || []).map(function(f){ return NOM_TRAIT[f] || f; }); }
 
   function etat(r){
@@ -1848,7 +1848,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        laisser bouger casserait la seule chose qui relie tout cela. */
     var h = '<div class="voile" id="p-voile"><div class="boite">'
       + '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem">'
-      + '<span class="dt" style="flex:1 1 auto">Inspecteur</span>'
+      + '<span class="dt" style="flex:1 1 auto">${T("Inspecteur")}</span>'
       + '<button class="mini" id="p-fermer-insp" title="${T("Fermer le panneau")}">✕</button></div>'
       + '<h3><span class="num">' + esc(r.code) + '</span> '
       + (ro ? esc(r.nom)
@@ -1864,14 +1864,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="grille">'
       + '<div><div class="l">${T("Poids rangé")}</div><div class="v">' + gain(r) + '</div></div>'
       + (r.poidsSrc ? '<div><div class="l">${T("Avant compression")}</div><div class="v">' + poids(r.poidsSrc) + '</div></div>' : '')
-      + '<div><div class="l">Traitements</div><div class="v">'
+      + '<div><div class="l">${T("Traitements")}</div><div class="v">'
       + (traits(r).join(' · ') || (r.isole ? '${T("détourée")}' : 'aucun')) + '</div></div>'
-      + (r.lieId ? '<div><div class="l">Article</div><div class="v">' + esc(r.lieNom)
+      + (r.lieId ? '<div><div class="l">${T("Article")}</div><div class="v">' + esc(r.lieNom)
           + (r.lieSku ? ' · ' + esc(r.lieSku) : '') + '</div></div>' : '')
       + '</div>';
 
     if (!ro && r.isole && (D.fonds || []).length) {
-      h += '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)">Fond</div>'
+      h += '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)">${T("Fond")}</div>'
         + '<div class="jetons">'
         + '<button data-fond="__transp" class="' + (!r.fond || r.fond === '__transp' ? 'on' : '') + '">Transparent</button>'
         + D.fonds.map(function(f){
@@ -1896,7 +1896,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (ro || r.isole ? '' : '<button class="prim" id="p-isoler"><span class="ic">✂</span> ${T("Isoler le vêtement")}</button>')
       + (ro ? '' : '<button class="' + (r.isole ? 'prim' : '') + '" id="p-attacher">'
           + (ATTACHE ? '${T("Annuler l’attache")}' : '${T("Attacher à un article")}') + '</button>')
-      + '<button id="p-fermer">Fermer</button>'
+      + '<button id="p-fermer">${T("Fermer")}</button>'
       + '</div>';
 
     if (SUPPR_ARME_INSP) {
@@ -1980,7 +1980,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="lst" id="sv-l">'
       + noms.map(function(n, i){
           return '<div class="lg" id="sv-' + i + '"><span class="nm">' + esc(n)
-            + '</span><span class="et attente">en attente</span>'
+            + '</span><span class="et attente">${T("en attente")}</span>'
             + '<span class="ep" id="sv-e-' + i + '"></span></div>';
         }).join('')
       + '</div><div class="pd" id="sv-p">'
@@ -1988,7 +1988,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="pc" id="sv-pc">0 %</span><span id="sv-r">${T("Préparation…")}</span>'
       + '<span class="bt">'
       + '<button class="mini dgr" id="sv-a">${T("Annuler")}</button>'
-      + '<button class="mini" id="sv-x">Fermer</button></span></div>';
+      + '<button class="mini" id="sv-x">${T("Fermer")}</button></span></div>';
     document.body.appendChild(d);
     SUIVI = d;
     var x = document.getElementById('sv-x');
@@ -2146,7 +2146,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         suiviLigne(k, 'echec', 'trop lourde');
         suite(k + 1); return;
       }
-      suiviLigne(k, 'cours', 'en cours');
+      suiviLigne(k, 'cours', '${T("en cours")}');
       suiviEtapes(k, [{ nom: 'lecture', etat: 'encours' }]);
       // Chaque fichier relance le chien de garde : c est le TRAVAIL qui doit
       // avancer, pas l ensemble qui doit tenir dans une minute.
@@ -2174,7 +2174,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           }
           if (r && r.ok && r.doublon) {
             suiviEtapes(k, [{ nom: 'lecture', ok: true, chiffre: poids(f.size) },
-                            { nom: 'reconnue au contenu', ok: true, chiffre: r.code || '' }]);
+                            { nom: '${T("reconnue au contenu")}', ok: true, chiffre: r.code || '' }]);
             /* ⚠ RECONNUE A SON CONTENU, PAS A SON NOM — et l on donne le CODE de
                celle qui existe deja : << deja presente >> tout court n aide
                personne a la retrouver. */
@@ -2515,7 +2515,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           charger();
           return;
         }
-        suiviLigne(k, 'cours', 'en cours');
+        suiviLigne(k, 'cours', '${T("en cours")}');
         appeler('photos:supprimer', [ids[k]]).then(function(r){
           if (r && r.ok) { faits++; delete CHOIX[ids[k]]; suiviLigne(k, 'faite', '${T("retirée")}'); }
           else {
@@ -2630,14 +2630,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             charger();
             return;
           }
-          suiviLigne(k, 'cours', 'en cours');
+          suiviLigne(k, 'cours', '${T("en cours")}');
           suiviEtapes(k, [{ nom: 'fiche', etat: 'encours' }]);
           occuper('Retrait ' + (k + 1) + ' / ' + l.length + '…');
           appeler('photos:supprimer', [l[k].id]).then(function(r){
             if (r && r.ok) {
               faits++;
               suiviLigne(k, 'faite', '${T("retirée")}');
-              suiviEtapes(k, [{ nom: 'fiche', ok: true }, { nom: 'images du stockage', ok: true }]);
+              suiviEtapes(k, [{ nom: 'fiche', ok: true }, { nom: '${T("images du stockage")}', ok: true }]);
             } else {
               rates++;
               suiviLigne(k, 'echec', '${T("refusée")}');

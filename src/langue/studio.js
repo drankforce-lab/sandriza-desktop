@@ -709,7 +709,15 @@ module.exports = {
   'la pose du mannequin': 'the model’s pose',
   'le mannequin choisi': 'the chosen model',
   'en lot': 'in batch',
-  'en traitement': 'processing',
+  /* ⚠ Les deux alternatives EN ENTIER, plus de « s » collé. */
+  'photo en traitement': 'photo processing',
+  'photos en traitement': 'photos processing',
+  /* ⚠ LES DEUX FORMES. La SOURCE coupe la phrase avec un <em> ; la page RENDUE
+     la lit d'un seul tenant. Le poseur voit la première, le compteur la
+     seconde — il faut les deux. */
+  'appels pour': 'calls for',
+  'une seule': 'a single',
+  'photo': 'photo',
   'appels pour une seule photo': 'calls for a single photo',
   '$ pour cette': '$ for this'
 };

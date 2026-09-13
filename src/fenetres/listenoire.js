@@ -151,7 +151,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       h += '<label class="champ"><span class="lbl">${T("Note (facultatif)")}</span><input class="t" id="l-note" placeholder="${T("Raison, numéro de commande…")}"></label>'
         + '</div><div class="pied2"><button class="b" id="l-annuler">${T("Annuler")}</button>'
-        + '<button class="prim" id="l-ajouter">Ajouter</button></div></div>';
+        + '<button class="prim" id="l-ajouter">${T("Ajouter")}</button></div></div>';
     }
 
     if (!l.length) {

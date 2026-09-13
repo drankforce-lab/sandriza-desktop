@@ -584,7 +584,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
     h += '<div class="bloc"><label>${T("Nom du modèle")}</label>'
       + '<input type="text" data-mtxt="name" value="' + esc(M.name || '') + '"></div>';
-    h += '<div class="bloc"><label>Fond</label>'
+    h += '<div class="bloc"><label>${T("Fond")}</label>'
       + segment('bg:type', [['solid', '${T("Uni")}'], ['gradient', '${T("Dégradé")}'], ['image', '${T("Image")}']], type) + '</div>';
     if (type === 'gradient') {
       h += couleur('from', '${T("Départ du dégradé")}', b.from || '#ffffff', 'btxt');
@@ -599,7 +599,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</div>'
         + '<div class="note">${T("Les images viennent de la logothèque. Pour en déposer une nouvelle,")}'
         + ' ${T("le sélecteur ouvre la fenêtre Logothèque.")}</div></div>';
-      h += '<div class="bloc"><label>Ajustement</label>'
+      h += '<div class="bloc"><label>${T("Ajustement")}</label>'
         + segment('bg:fit', [['cover', '${T("Remplir")}'], ['contain', '${T("Contenir")}']], b.fit || 'cover') + '</div>';
     } else {
       h += couleur('color', '${T("Couleur du fond")}', b.color || '#ffffff', 'btxt', '${T("Notation CSS : #ffffff, rgb(…), ou un nom.")}');
@@ -636,7 +636,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function propTexte(el){
     var h = '';
     h += '<div class="bloc"><label>${T("Texte")}</label><textarea data-txt="text">' + esc(el.text || '') + '</textarea></div>';
-    h += '<div class="bloc"><label>Police</label><select data-sel-champ="font">'
+    h += '<div class="bloc"><label>${T("Police")}</label><select data-sel-champ="font">'
       + POLICES.map(function(f){
           return '<option value="' + esc(f) + '"' + (el.font === f ? ' selected' : '') + '>' + esc(f) + '</option>'; }).join('')
       + '</select></div>';
@@ -651,12 +651,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + champNum('ls', '${T("Interlettre")}', el, .01)
       + champNum('lh', '${T("Interligne")}', el, .05) + '</div></div>';
     h += couleur('color', '${T("Couleur")}', el.color, 'txt', '${T("Notation CSS : #111827, rgb(…), ou un nom.")}');
-    h += '<div class="bloc"><label>Alignement</label>'
+    h += '<div class="bloc"><label>${T("Alignement")}</label>'
       + segment('el:align', [['left', '${T("Gauche")}'], ['center', '${T("Centre")}'], ['right', '${T("Droite")}']], el.align || 'left')
       + '<div style="margin-top:.3rem">'
       + segment('el:valign', [['top', '${T("Haut")}'], ['middle', '${T("Milieu")}'], ['bottom', '${T("Bas")}']], el.valign || 'middle')
       + '</div></div>';
-    h += '<div class="bloc"><label>Casse</label>'
+    h += '<div class="bloc"><label>${T("Casse")}</label>'
       + segment('el:caps', [['none', 'Aa'], ['upper', 'AA'], ['lower', 'aa'], ['title', 'Aa Aa']], el.caps || 'none')
       + '</div>';
     /* ⚠ LA COURBURE N EST PAS UN ORNEMENT : sans elle, un autocollant ROND ne se
@@ -678,9 +678,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="acts"><button class="btn" type="button" data-choisir="element">${T("Choisir une image…")}</button>'
       + (el.src ? '<button class="btn danger" type="button" data-img-retirer="1">${T("Retirer")}</button>' : '')
       + '</div></div>';
-    h += '<div class="bloc"><label>Ajustement</label>'
+    h += '<div class="bloc"><label>${T("Ajustement")}</label>'
       + segment('el:fit', [['contain', '${T("Contenir")}'], ['cover', '${T("Remplir")}']], el.fit || 'contain') + '</div>';
-    h += '<div class="bloc"><label>Recadrage</label><div class="rang">'
+    h += '<div class="bloc"><label>${T("Recadrage")}</label><div class="rang">'
       + champNum('zoom', '${T("Zoom")}', el, .05) + champNum('ox', '${T("Décalage X")}', el, .05)
       + champNum('oy', '${T("Décalage Y")}', el, .05) + '</div>'
       + '<div class="note">${T("Zoom 1 = image entière. Le décalage va de −1 à 1.")}</div></div>';
@@ -689,12 +689,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + bascule('el:flipV', '${T("⇅ Retourner")}', !!el.flipV)
       + '<button class="btn" type="button" data-rot90="1" title="${T("Pivoter d’un quart de tour")}">↻ 90°</button>'
       + '</div></div>';
-    h += '<div class="bloc"><label>Masque</label>'
+    h += '<div class="bloc"><label>${T("Masque")}</label>'
       + segment('el:mask', [['none', '${T("Aucun")}'], ['circle', '${T("Cercle")}']], el.mask || 'none')
       + (el.mask === 'circle' ? '' : '<div class="rang" style="margin-top:.3rem">'
           + champNum('corner', '${T("Coins arrondis (%)")}', el, 1) + '</div>')
       + '</div>';
-    h += '<div class="bloc"><label>Retouche</label><div class="rang">'
+    h += '<div class="bloc"><label>${T("Retouche")}</label><div class="rang">'
       + champNum('bright', '${T("Luminosité")}', el, 1) + champNum('contrast', '${T("Contraste")}', el, 1) + '</div>'
       + '<div class="rang" style="margin-top:.3rem">'
       + champNum('sat', '${T("Saturation")}', el, 1) + champNum('gray', '${T("Noir et blanc")}', el, 1)
@@ -706,7 +706,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function propCodeBarres(el){
     var h = '';
-    h += '<div class="bloc"><label>Contenu</label><input type="text" data-txt="text" value="' + esc(el.text || '') + '">'
+    h += '<div class="bloc"><label>${T("Contenu")}</label><input type="text" data-txt="text" value="' + esc(el.text || '') + '">'
       + (CODES[el.id] === false
           ? '<div class="avert">${T("Attention : ce contenu ne s’encode pas en Code 128. Le code se dessinera,")}'
             + ' ${T("mais aucun lecteur ne le lira. Lettres, chiffres et ponctuation ASCII seulement.")}</div>'
@@ -743,7 +743,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessinerPropElement(el){
     var h = '';
-    h += '<div class="bloc"><label>Nom</label><input type="text" data-txt="name" value="' + esc(el.name || '') + '"></div>';
+    h += '<div class="bloc"><label>${T("Nom")}</label><input type="text" data-txt="name" value="' + esc(el.name || '') + '"></div>';
     if (el.kind === 'text') h += propTexte(el);
     else if (el.kind === 'image') h += propImage(el);
     else if (el.kind === 'barcode') h += propCodeBarres(el);
@@ -776,7 +776,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="btn" type="button" data-ordre="-1">${T("↓ Reculer")}</button>'
       + '</div><div class="note">${T("Le dernier de la pile est celui qui se dessine par-dessus les autres.")}</div></div>';
     h += '<div class="bloc"><label>${T("Cet élément")}</label><div class="acts">'
-      + '<button class="btn" type="button" data-dupliquer="1">Dupliquer</button>'
+      + '<button class="btn" type="button" data-dupliquer="1">${T("Dupliquer")}</button>'
       + '<button class="btn danger" type="button" data-supprimer="1">${T("Supprimer")}</button>'
       + '</div><div class="note">'
       + '${T("Une suppression s’annule (Ctrl+Z) tant que la fenêtre reste ouverte.")}'

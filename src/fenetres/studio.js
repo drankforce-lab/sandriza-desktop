@@ -1796,7 +1796,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dessiner();
     var m = '${T("Profil «")} ' + x.nom +' ${T("» appliqué.")}';
     if (perdus.length) {
-      dire(m + ' ' + perdus.join(' et ') + ' de ce profil '
+      dire(m + ' ' + perdus.join(' et ') + ' ${T("de ce profil")} '
         + (perdus.length > 1 ? '${T("n’existent plus")}' : '${T("n’existe plus")}')
         + ' ${T("— ce réglage est resté au défaut.")}', 'att');
     } else {
@@ -2007,10 +2007,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     'shadow.spreadOverride': '${T("l’étendue de l’ombre")}',
     'shadow.directionOverride': '${T("la direction de l’ombre")}',
     'shadow.subjectPoseOverride': '${T("la pose du sujet pour l’ombre")}',
-    'virtualModel.pose': 'la pose du mannequin',
+    'virtualModel.pose': '${T("la pose du mannequin")}',
     'virtualModel.prompt': '${T("l’expression et les précisions libres")}',
     'virtualModel.scene.preset.name': '${T("le décor du mannequin")}',
-    'virtualModel.model.preset.name': 'le mannequin choisi'
+    'virtualModel.model.preset.name': '${T("le mannequin choisi")}'
   };
   function ignoresLisible(s){
     var l = String(s || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
@@ -2799,7 +2799,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</select><div class="aidep">${T("Il pose d’un coup la voie, l’ambiance, le mannequin, la")} '
         + '${T("pose, les réglages avancés et le filigrane de ce lot.")}</div></div>')
       : '';
-    voile('<h3>${T("⚙ Traiter")} ' + nP + ' photo' + (nP > 1 ? 's' : '') + ' en lot</h3>'
+    voile('<h3>${T("⚙ Traiter")} ' + nP + ' '
+      + (nP > 1 ? '${T("photos en lot")}' : '${T("photo en lot")}') + '</h3>'
       + rcListe
       + '<div class="ch"><label for="lot-quoi">${T("Traitement à appliquer")}</label>'
       + '<select id="lot-quoi">' + opts.map(function(t){
@@ -2963,7 +2964,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               return;
             }
             SEL = {};
-            dire(r.nom + ' — ' + r.total + ' photo' + (r.total > 1 ? 's' : '') + ' en traitement'
+            dire(r.nom + ' — ' + r.total + ' '
+              + (r.total > 1 ? '${T("photos en traitement")}' : '${T("photo en traitement")}')
               + (r.ignorees ? ' (' + r.ignorees + ' ${T("déjà faite")}' + (r.ignorees > 1 ? 's' : '') + '${T(", écartée")}' + (r.ignorees > 1 ? 's' : '') + ')' : '')
               + '${T(". Suivez-le en bas de n’importe quel écran.")}', 'bon');
             PICKER = false;
@@ -3285,13 +3287,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var causes = causesAppels();
         var bu = r.budget || {};
         var h = '<h3>' + (apercu ? '<span class="ic">👁</span> ${T("Aperçu —")} ' : '')
-      + n + ' appels pour <em>une seule</em> photo</h3>';
+      /* ⚠ LE <em> COUPAIT LA PHRASE EN TROIS, et c est la FORME SOURCE contre la
+         FORME RENDUE : le poseur cherche << appels pour >>, << une seule >> et
+         << photo >> separement, la page rendue lit << appels pour une seule
+         photo >> d un seul tenant. On enveloppe les DEUX morceaux de part et
+         d autre, en gardant l emphase. */
+      + n + ' ${T("appels pour")} <em>${T("une seule")}</em> ${T("photo")}</h3>';
         if (apercu) {
           h += ''
             + '<p>${T("Ce qu’il consomme, ce sont vos <strong>aperçus du mois</strong> — ")}' + n
             + '${T(" d’un coup — et le résultat sera <strong>filigrané</strong>.")}</p>';
         } else {
-          h += '<p><strong>' + n + ' ${T("appels facturés ≈")} ' + argent(r.coutMax) + ' $</strong> pour cette '
+          h += '<p><strong>' + n + ' ${T("appels facturés ≈")} ' + argent(r.coutMax) + ' ${T("$ pour cette")} '
             + '${T("photo. Un mannequin virtuel n’en coûterait qu’un seul.")}</p>';
           if (bu.actif) {
             h += '<p>${T("Plafond du mois :")} ' + argent(bu.depense) + ' ${T("$ dépensés sur")} ' + argent(bu.mensuel)

@@ -336,9 +336,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="carte">'
         + '<h4>${T("Votre compte")}</h4>'
         + '<div class="faits">'
-          + (D.courriel ? '<div class="fait"><span class="k">Courriel</span>'
+          + (D.courriel ? '<div class="fait"><span class="k">${T("Courriel")}</span>'
               + '<span class="v">' + esc(D.courriel) + '</span></div>' : '')
-          + (D.identifiant ? '<div class="fait"><span class="k">Identifiant</span>'
+          + (D.identifiant ? '<div class="fait"><span class="k">${T("Identifiant")}</span>'
               + '<span class="v">@' + esc(D.identifiant) + '</span></div>' : '')
           + '<div class="fait"><span class="k">${T("Rôle")}</span>'
             + '<span class="v">' + esc(D.role) + '</span></div>'
@@ -349,7 +349,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="carte">'
         + '<h4>${T("Ce qui protège votre compte")}</h4>'
         + '<div class="prot">'
-          + '<div class="l"><span class="pill bon">Actif</span><span class="t">'
+          + '<div class="l"><span class="pill bon">${T("Actif")}</span><span class="t">'
             + '${T("<b>Mot de passe</b><span>Vérifié par le serveur à chaque connexion.</span>")}'
             + '</span></div>'
           + '<div class="l">'

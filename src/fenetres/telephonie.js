@@ -355,7 +355,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     return '<div class="ch"><label>' + esc(titre) + '</label>'
       + '<div class="crochet"><code id="' + id + '">' + esc(url) + '</code>'
-      + '<button type="button" class="mini" data-copier="' + id + '">Copier</button></div></div>';
+      + '<button type="button" class="mini" data-copier="' + id + '">${T("Copier")}</button></div></div>';
   }
 
   function panAccueil(){
@@ -393,9 +393,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="ch" style="margin:0"><label>${T("Libellé FR")}</label><input aria-label="${T("Libellé FR")}" data-mf="label" style="width:9rem" value="' + esc(o.label || '') + '"' + (RO ? ' disabled' : '') + '></div>'
       + '<div class="ch" style="margin:0"><label>${T("Libellé EN")}</label><input aria-label="${T("Libellé EN")}" data-mf="labelEN" style="width:9rem" value="' + esc(o.labelEN || '') + '"' + (RO ? ' disabled' : '') + '></div>'
       + '<div class="ch" style="margin:0"><label>Action</label><select aria-label="Action" data-mf="action"' + (RO ? ' disabled' : '') + '>'
-        + '<option value="forward"' + (o.action === 'forward' ? ' selected' : '') + '>Rediriger</option>'
+        + '<option value="forward"' + (o.action === 'forward' ? ' selected' : '') + '>${T("Rediriger")}</option>'
         + '<option value="queue"' + (o.action === 'queue' ? ' selected' : '') + '>${T("File d’attente")}</option>'
-        + '<option value="voicemail"' + (o.action === 'voicemail' ? ' selected' : '') + '>Messagerie</option>'
+        + '<option value="voicemail"' + (o.action === 'voicemail' ? ' selected' : '') + '>${T("Messagerie")}</option>'
         + '<option value="message"' + (o.action === 'message' ? ' selected' : '') + '>${T("Message vocal")}</option>'
         + '<option value="repeat"' + (o.action === 'repeat' ? ' selected' : '') + '>${T("Répéter l’accueil")}</option></select></div>'
       + '<div class="ch" style="margin:0"><label>${T("Numéro (Rediriger / File)")}</label><input aria-label="${T("Numéro (Rediriger / File)")}" data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
@@ -460,7 +460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="smsbox">'
       + '<input aria-label="+1" class="to" id="t-sms-to" placeholder="+1…"' + (RO ? ' disabled' : '') + '>'
       + '<input aria-label="${T("Votre message")}" class="body" id="t-sms-body" placeholder="${T("Votre message…")}"' + (RO ? ' disabled' : '') + '>'
-      + '<button class="b" type="button" id="t-sms-send"' + (RO ? ' disabled' : '') + '>Envoyer</button></div>';
+      + '<button class="b" type="button" id="t-sms-send"' + (RO ? ' disabled' : '') + '>${T("Envoyer")}</button></div>';
     h += '<div class="liste" id="t-sms-inbox"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>';
     return h;
   }
@@ -680,7 +680,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       soldeEl.textContent = (cur === 'USD') ? soldeCadUsd(b.balance) : (String(b.balance) + ' ' + cur);
     } else soldeEl.textContent = '—';
     var qw = (typeof RESUME.queueWaiting === 'number') ? RESUME.queueWaiting : 0;
-    qliveEl.innerHTML = (qw > 0) ? '<span class="qlive">⏳ ' + qw + ' en attente</span>' : '';
+    qliveEl.innerHTML = (qw > 0) ? '<span class="qlive">⏳ ' + qw + ' ${T("en attente")}</span>' : '';
   }
   function chargerResume(){
     soldeEl.textContent = '…';

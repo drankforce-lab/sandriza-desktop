@@ -93,6 +93,11 @@ module.exports = {
   '🛠 Pris en charge par la boutique (défaut / erreur)':
     '🛠 Covered by the shop (defect / error)',
   '📦 À la charge du client': '📦 Paid by the customer',
+  /* ⚠ LES DEUX FORMES. La SOURCE écrit `${T("Articles")}` puis un « — » dans un
+     <span> voisin ; la page RENDUE les lit d'un seul tenant. Le compteur voit la
+     seconde, le poseur la première — il faut les deux, et c'est la distinction
+     source/rendu déjà connue du dépôt. */
+  'Articles': 'Items',
   'Articles —': 'Items —',
   'Photo de l’article': 'Photo of the item',
   '⏳ Le client n’a pas encore téléversé de photo — la demande n’est pas actionnable.':

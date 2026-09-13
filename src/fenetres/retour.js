@@ -289,11 +289,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dessinerDemande(){
     var d = R.demande;
     var h = '<div class="carte"><h2>${T("Demande")} <span class="note">— ' + esc(d.commande)
-      + ' · soumise le ' + esc(dateFr(d.creeLe)) + '</span></h2>'
+      + ' ${T("· soumise le")} ' + esc(dateFr(d.creeLe)) + '</span></h2>'
       + '<div class="info">'
-      + '<div><div class="k">Client</div><div class="v">' + esc(d.client || '—') + '</div></div>'
-      + '<div><div class="k">Courriel</div><div class="v">' + esc(d.courriel || '—') + '</div></div>'
-      + '<div class="large"><div class="k">Motif</div><div class="v">' + esc(d.motif || '—') + '</div></div>'
+      + '<div><div class="k">${T("Client")}</div><div class="v">' + esc(d.client || '—') + '</div></div>'
+      + '<div><div class="k">${T("Courriel")}</div><div class="v">' + esc(d.courriel || '—') + '</div></div>'
+      + '<div class="large"><div class="k">${T("Motif")}</div><div class="v">' + esc(d.motif || '—') + '</div></div>'
       + (d.description ? '<div class="large"><div class="k">${T("Description du client")}</div><div class="v" style="white-space:pre-wrap;font-weight:400">' + esc(d.description) + '</div></div>' : '')
       + (d.modeRemboursement ? '<div class="large"><div class="k">${T("Mode communiqué au client")}</div><div class="v">'
           + (d.modeRemboursement === 'creditOnly' ? '${T("Crédit boutique uniquement")}' : '${T("Moyen original ou crédit, au choix")}')
@@ -303,7 +303,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '</div></div>';
 
     // Articles
-    h += '<div class="carte"><h2>Articles <span class="note">— ' + R.articles.length + '</span></h2>'
+    h += '<div class="carte"><h2>${T("Articles")} <span class="note">— ' + R.articles.length + '</span></h2>'
       + R.articles.map(function(a){
           return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
             + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—')
@@ -319,7 +319,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     if (d.suivi) {
       h += '<div class="carte"><h2>${T("Retour expédié par le client")}</h2>'
-        + '<div class="info"><div><div class="k">Transporteur</div><div class="v">' + esc(d.suiviTransporteur || '—') + '</div></div>'
+        + '<div class="info"><div><div class="k">${T("Transporteur")}</div><div class="v">' + esc(d.suiviTransporteur || '—') + '</div></div>'
         + '<div><div class="k">${T("Numéro de suivi")}</div><div class="v" style="font-family:ui-monospace,monospace">' + esc(d.suivi) + '</div></div></div></div>';
     }
 
@@ -344,7 +344,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         ? '${T("Pas de changement de statut tant que la photo n’est pas fournie — seules les notes s’enregistrent.")}'
         : '${T("Dossier ")}' + (d.statut === 'refunded' ? '${T("remboursé")}' : '${T("complété")}') + ' ${T("— seules les notes s’enregistrent.")}') + '</div>';
     } else {
-      h += '<div class="r2"><div class="ch"><label for="r-statut">Statut</label><select id="r-statut">'
+      h += '<div class="r2"><div class="ch"><label for="r-statut">${T("Statut")}</label><select id="r-statut">'
         + ['pending','approved','rejected','in_transit','received','refunded','completed'].map(function(s){
             return '<option value="' + s + '"' + (d.statut === s ? ' selected' : '') + '>' + esc(STATUTS[s] || s) + '</option>'; }).join('')
         + '</select></div><div class="ch" id="z-refus" style="' + (d.statut === 'rejected' ? '' : 'display:none') + '">'
@@ -359,7 +359,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + (d.etiquetteReelle ? '${T("réelle Postes Canada — la régénérer sera FACTURÉ une seconde fois")}' : '${T("PDF interne")}')
             + (d.suivi ? ' · suivi ' + esc(d.suivi) : '') + ').</div>' : '')
         + '<div class="r3" style="margin-top:.45rem">'
-        + '<div class="ch"><label for="r-transp">Transporteur</label><select id="r-transp">'
+        + '<div class="ch"><label for="r-transp">${T("Transporteur")}</label><select id="r-transp">'
         + R.etiquette.transporteurs.map(function(t){
             return '<option value="' + esc(t.cle) + '"' + (t.cle === (d.etiquetteTransporteur || 'postes-canada') ? ' selected' : '') + '>' + esc(t.nom) + '</option>'; }).join('')
         + '</select></div>'
@@ -660,7 +660,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     voile('<h3><span class="ic">👁</span> ${T("Étiquette de retour")}</h3>'
       + '<iframe src="data:application/pdf;base64,' + b64 + '" '
       + 'style="width:100%;height:52vh;border:1px solid var(--v14);border-radius:8px;background:#3c3c3c"></iframe>'
-      + '<div class="fin2"><button id="v-non">Fermer</button></div>',
+      + '<div class="fin2"><button id="v-non">${T("Fermer")}</button></div>',
       function(fermer){ document.getElementById('v-non').onclick = fermer; });
   }
 
@@ -787,7 +787,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
       if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
-      sous.textContent = 'ouvert par ' + (v.parQui || '${T("quelqu’un d’autre")}');
+      sous.textContent = '${T("ouvert par")} ' + (v.parQui || '${T("quelqu’un d’autre")}');
       dire('${T("Ce dossier est déjà ouvert ailleurs — lecture seule conseillée.")}', 'att');
     });
   }

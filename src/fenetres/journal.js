@@ -149,7 +149,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Envois enregistrés")}</div><div class="val">'
       + (D.total || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Partis</div><div class="val bon">'
+      + '<div class="tuile"><div class="lbl">${T("Partis")}</div><div class="val bon">'
       + (D.envoyes || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Échecs")}</div><div class="val err">'
       + (D.echecs || 0) + '</div></div>'

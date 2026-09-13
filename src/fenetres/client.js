@@ -256,18 +256,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var c = R.client, a = c.adresse;
     var h = '<div class="carte"><h2>${T("Identité")}</h2><div class="r2">'
       + '<div class="ch"><label for="e-prenom">${T("Prénom")}</label><input id="e-prenom" value="' + esc(c.prenom) + '"></div>'
-      + '<div class="ch"><label for="e-nom">Nom</label><input id="e-nom" value="' + esc(c.nom) + '"></div>'
+      + '<div class="ch"><label for="e-nom">${T("Nom")}</label><input id="e-nom" value="' + esc(c.nom) + '"></div>'
       + '<div class="ch"><label for="e-courriel">${T("Adresse courriel")}</label><input id="e-courriel" inputmode="email" value="' + esc(c.courriel) + '"></div>'
       + '<div class="ch"><label for="e-tel">${T("Téléphone")}</label><input id="e-tel" inputmode="tel" value="' + esc(c.tel) + '"></div>'
       + '</div></div>';
     h += '<div class="carte"><h2>${T("Adresse de livraison")}</h2><div class="r2">'
-      + '<div class="ch large"><label for="e-rue">Rue</label><input id="e-rue" value="' + esc(a.rue) + '"></div>'
+      + '<div class="ch large"><label for="e-rue">${T("Rue")}</label><input id="e-rue" value="' + esc(a.rue) + '"></div>'
       + '<div class="ch"><label for="e-ville">${T("Ville")}</label><input id="e-ville" value="' + esc(a.ville) + '"></div>'
       + '<div class="ch"><label for="e-prov">Province</label><select id="e-prov">'
       + R.provinces.map(function(p){ return '<option value="' + p + '"' + (p === a.province ? ' selected' : '') + '>' + p + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="ch"><label for="e-postal">${T("Code postal")}</label><input id="e-postal" value="' + esc(a.codePostal) + '"></div>'
-      + '<div class="ch"><label for="e-pays">Pays</label><input id="e-pays" value="' + esc(a.pays) + '"></div>'
+      + '<div class="ch"><label for="e-pays">${T("Pays")}</label><input id="e-pays" value="' + esc(a.pays) + '"></div>'
       + '<div class="ch large"><label for="e-langue">${T("Langue des courriels")}</label><select id="e-langue">'
       + '<option value="fr"' + (c.langue !== 'en' ? ' selected' : '') + '><span class="ic">🇫🇷</span> ${T("Français (par défaut)")}</option>'
       + '<option value="en"' + (c.langue === 'en' ? ' selected' : '') + '><span class="ic">🇬🇧</span> English</option>'

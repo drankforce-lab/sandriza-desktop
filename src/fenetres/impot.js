@@ -513,7 +513,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="carte"><h2>${T("Taxe nette")} ${T("à remettre")} <span class="n">${T("après crédits sur intrants")} (CTI / RTI)</span></h2>'
       + '<table><thead><tr><th></th><th style="text-align:right">TPS</th>'
-      + '<th style="text-align:right">TVQ</th><th style="text-align:right">Total</th></tr></thead><tbody>'
+      + '<th style="text-align:right">TVQ</th><th style="text-align:right">${T("Total")}</th></tr></thead><tbody>'
       + '<tr><td>${T("Taxes perçues sur les ventes")}</td><td class="arg">' + esc(t.tps)
       + '</td><td class="arg">' + esc(t.tvq) + '</td><td class="arg">' + esc(t.total) + '</td></tr>'
       + '<tr class="credit"><td>${T("Moins : taxes payées sur les dépenses")}</td><td class="arg">−' + esc(t.cti)
@@ -611,7 +611,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return '<div class="doc"><div class="t">' + esc(d.titre) + '</div>'
           + '<div class="d">' + esc(d.desc) + '</div>'
           + '<div class="b"><button class="prim" data-doc="' + esc(d.cle) + '"'
-          + (OCCUPE ? ' disabled' : '') + '>Ouvrir'
+          + (OCCUPE ? ' disabled' : '') + '>${T("Ouvrir")}'
           + (d.trim ? ' — T' + (TRIM + 1) : '') + '</button></div></div>';
       }).join('') + '</div>';
     h += '<div class="aide">${T("Le <strong>profil d’entreprise</strong> (nom, NEQ, numéros de TPS et ")}'

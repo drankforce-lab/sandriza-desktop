@@ -474,6 +474,17 @@ jobs:
           # `connexion.js` est une CONDITION que le banc vérifie vraiment.
           # Éprouvé par une panne provoquée, une par motif.
           node tools/banc-langue-page.js
+          # ⚠⚠⚠ ET CELUI-CI EST LA MESURE QUI NE PEUT PAS MENTIR — il existe parce
+          # que j'ai fait TAIRE une mesure sans rien traduire (2026-09-13). Après
+          # son signalement, 113 entrées de dictionnaire ajoutées : le compteur est
+          # passé à ZÉRO, et la page anglaise était TOUJOURS EN FRANÇAIS.
+          # ⚠ UNE ENTRÉE DE DICTIONNAIRE NE TRADUIT RIEN SI LA SOURCE N'APPELLE PAS
+          # T(). Le compteur demande « une décision existe-t-elle ? » ; celui-ci
+          # dessine la page ANGLAISE et refuse tout texte visible qui est encore
+          # une clé française. Ajouter une entrée de plus ne le fait pas taire :
+          # seul l'enveloppement retire le texte de la page.
+          # ⚠ Premier relevé : 207 textes dans 48 fenêtres, traduction existante.
+          node tools/banc-langue-effet.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de

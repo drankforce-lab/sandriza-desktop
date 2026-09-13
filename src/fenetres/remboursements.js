@@ -210,7 +210,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function typePastille(t){
     if (t === 'credit') return '<span class="pill info">${T("Crédit")}</span>';
-    if (t === 'fees_refund') return '<span class="pill att">Frais</span>';
+    if (t === 'fees_refund') return '<span class="pill att">${T("Frais")}</span>';
     return '<span class="pill neutre">${T("Moyen original")}</span>';
   }
   function tableRemb(rows){

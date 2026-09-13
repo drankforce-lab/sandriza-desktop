@@ -433,7 +433,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(a){
             return '<tr><td><strong>' + esc(a.nom) + '</strong>'
-              + (a.expireAuto ? '<div class="dt">${T("expire après")} ' + a.expireJours + ' j par produit</div>' : '') + '</td>'
+              + (a.expireAuto ? '<div class="dt">${T("expire après")} ' + a.expireJours + ' ${T("j par produit")}</div>' : '') + '</td>'
               + '<td><span class="pill neutre">' + (a.genre === 'announcement' ? '${T("Bandeau")}' : '${T("Badge")}') + '</span></td>'
               + '<td class="dt" style="max-width:18rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
               + esc(a.genre === 'announcement' ? a.message : a.badge) + '</td>'

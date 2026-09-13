@@ -221,7 +221,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!p.total) {
       h += '<div class="vide">${T("Aucun colis à ramasser pour l’instant.")}<br>'
         + '${T("Une commande doit être marquée Expédiée et avoir un numéro de suivi.")}</div>'
-        + '<div class="pied-boite"><button id="rm-p-annuler">Fermer</button></div></div></div>';
+        + '<div class="pied-boite"><button id="rm-p-annuler">${T("Fermer")}</button></div></div></div>';
       return h;
     }
     h += '<div class="dt"><span class="ic" aria-hidden="true">📅</span>${T(" Prévu le ")}<strong>' + esc(p.date) + '</strong>${T(", entre 09 h et 17 h")}'

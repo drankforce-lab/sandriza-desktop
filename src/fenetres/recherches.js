@@ -149,13 +149,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
-    if (sous) sous.textContent = '30 derniers jours';
+    if (sous) sous.textContent = '${T("30 derniers jours")}';
 
     var h = '<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Requêtes distinctes")}</div><div class="val">'
-      + (D.recentes || []).length + '</div><div class="sub">30 derniers jours</div></div>'
+      + (D.recentes || []).length + '</div><div class="sub">${T("30 derniers jours")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Recherches en tout")}</div><div class="val">'
-      + (D.total || 0) + '</div><div class="sub">toutes occurrences</div></div>'
+      + (D.total || 0) + '</div><div class="sub">${T("toutes occurrences")}</div></div>'
       + '<div class="tuile"><div class="lbl">Archive</div><div class="val">'
       + (D.archive || []).length + '</div><div class="sub">'
       + (D.etendue ? esc(D.etendue) : '${T("aucun mois archivé")}') + '</div></div>'

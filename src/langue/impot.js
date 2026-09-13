@@ -145,7 +145,12 @@ module.exports = {
   /* ⚠ CTI / RTI sont les sigles FRANCAIS ; en anglais ce sont ITC / ITR. */
   'Taxe nette à remettre après crédits sur intrants (CTI / RTI)':
     'Net tax to remit after input tax credits (ITC / ITR)',
-  'TVQ Total': 'QST Total',
+  /* ⚠ FORME RENDUE de deux cellules voisines. « TVQ » est le nom LÉGAL de la
+     taxe québécoise et ne se traduit pas — l'entrée est donc identique, et c'est
+     une DÉCISION, pas un oubli. Elle disait « QST » avant le 2026-09-13 : le
+     sigle anglais existe, mais ce n'est pas celui des formulaires de Revenu
+     Québec, que cet écran sert à remplir. */
+  'TVQ Total': 'TVQ Total',
   'Taxes perçues sur les ventes': 'Taxes collected on sales',
   'Moins : taxes payées sur les dépenses −': 'Less: taxes paid on expenses −',
   'Aucune taxe payée sur des dépenses n’est saisie — vos crédits sur intrants sont donc à zéro. Saisissez vos dépenses avec leur TPS et leur TVQ pour les récupérer.':

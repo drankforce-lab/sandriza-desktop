@@ -445,8 +445,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="carte plein"><h2>' + (enRecherche
         ? '${T("Résultats")} <span class="note">— ' + lignes.length + ' ${T("produit")}' + (lignes.length > 1 ? 's' : '') + '</span>'
-        : '${T("À réapprovisionner")} <span class="note">— ' + lignes.length + ' ${T("variante")}'
-          + (lignes.length > 1 ? 's' : '') + ' sous leur seuil</span>') + '</h2>';
+        /* ⚠ LES DEUX ALTERNATIVES EN ENTIER, plus de << s >> colle : c est la
+           faute qui donnait << 11 variantes to restock >> sur sa capture. */
+        : '${T("À réapprovisionner")} <span class="note">— ' + lignes.length + ' '
+          + (lignes.length > 1 ? '${T("variantes sous leur seuil")}' : '${T("variante sous son seuil")}')
+          + '</span>') + '</h2>';
 
     if (!lignes.length) {
       h += '<div class="vide">' + (enRecherche
@@ -568,12 +571,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '</tbody></table></div>';
 
       h += '<div class="pagi">'
-        + '<span>Afficher</span><select id="pg-taille" aria-label="${T("Nombre de lignes par page")}">'
+        + '<span>${T("Afficher")}</span><select id="pg-taille" aria-label="${T("Nombre de lignes par page")}">'
         + '<option value="auto"' + (GRILLE_AUTO ? ' selected' : '') + '>Auto</option>'
         + [5, 10, 25, 50, 9999].map(function(n){
             return '<option value="' + n + '"' + (!GRILLE_AUTO && TAILLE_PAGE === n ? ' selected' : '') + '>'
               + (n === 9999 ? 'Tout' : n) + '</option>'; }).join('')
-        + '</select><span>par page</span>'
+        + '</select><span>${T("par page")}</span>'
         + '<span class="pos">'
         + (pages > 1
             ? '<button class="mini" id="pg-prec"' + (PAGE <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
@@ -798,7 +801,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function pilule(l){
     if (!l.sku) return '<span class="pill neutre">${T("Non inventorié (sans SKU)")}</span>';
-    if (l.unites === 0) return '<span class="pill rup">Rupture</span>';
+    if (l.unites === 0) return '<span class="pill rup">${T("Rupture")}</span>';
     if (l.basses > 0) return '<span class="pill bas">' + l.basses + ' ${T("à commander")}</span>';
     return '<span class="pill ok">${T("Seuil non atteint")}</span>';
   }
@@ -812,17 +815,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     var st = d.stats;
     var h = '<div class="tuiles">'
-      + tuile('${T("Produits inventoriés")}', st.inventories, st.total + ' produits au total', '')
+      + tuile('${T("Produits inventoriés")}', st.inventories, st.total + ' ${T("produits au total")}', '')
       + tuile('${T("Sans code SKU")}', st.sansSku,
           st.sansSku > 0 ? '${T("non disponibles à l’achat")}' : '${T("tous assignés ✓")}',
           st.sansSku > 0 ? 'att' : 'bon')
       + tuile('${T("En rupture")}', st.rupture, 'inventaire = 0', st.rupture > 0 ? 'err' : 'bon',
           st.rupture > 0 ? 'rupture' : '')
       + tuile('${T("À réapprovisionner")}', st.aCommander,
-          st.aCommander ? '${T("voir l’onglet Réapprovisionnement")}' : 'tout est au-dessus du seuil ✓',
+          st.aCommander ? '${T("voir l’onglet Réapprovisionnement")}' : '${T("tout est au-dessus du seuil ✓")}',
           st.aCommander ? 'att' : 'bon',
           st.aCommander > 0 ? 'reappro' : '')
-      + tuile('${T("Unités en inventaire")}', st.unites, 'toutes variantes', '')
+      + tuile('${T("Unités en inventaire")}', st.unites, '${T("toutes variantes")}', '')
       + '</div>';
 
     // ⚠ LES DEUX BANDEAUX DE L ECRAN DU SITE, repris au mot — et comme lui, ils
@@ -924,11 +927,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var debut = d.page * d.parPage + 1;
       var fin = Math.min((d.page + 1) * d.parPage, d.total);
       h += '<div class="pagi">'
-        + '<span>Afficher</span><select id="fp-taille" aria-label="${T("Nombre de produits par page")}">'
+        + '<span>${T("Afficher")}</span><select id="fp-taille" aria-label="${T("Nombre de produits par page")}">'
         + '<option value="auto"' + (FP.auto ? ' selected' : '') + '>Auto</option>'
         + [10, 25, 50, 100].map(function(n){
             return '<option value="' + n + '"' + (!FP.auto && FP.parPage === n ? ' selected' : '') + '>' + n + '</option>'; }).join('')
-        + '</select><span>par page</span>'
+        + '</select><span>${T("par page")}</span>'
         + '<span class="pos">' + debut + '–' + fin + ' sur ' + d.total + ' '
         + (d.pages > 1
             ? '<button class="mini" id="fp-prec"' + (d.page <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
@@ -1209,9 +1212,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         ? '<label style="display:flex;align-items:flex-start;gap:.5rem;margin-top:.6rem;'
           + 'font-size:.83rem;cursor:pointer;text-align:left">'
           + '<input type="checkbox" id="v-ph" style="width:auto;margin-top:.2rem">'
-          + '<span>${T("Retirer aussi")} ' + (photos.length > 1 ? 'ses ' + photos.length + ' photos' : 'sa photo')
+          + '<span>${T("Retirer aussi")} ' + (photos.length > 1 ? 'ses ' + photos.length + ' ${T("photos")}' : '${T("sa photo")}')
           + ' ${T("de la photothèque (")}' + photos.map(function(x){ return esc(x.code); }).join(', ') + '). '
-          + '${T("Sans cette case,")} ' + (photos.length > 1 ? 'elles y restent' : 'elle y reste')
+          + '${T("Sans cette case,")} ' + (photos.length > 1 ? '${T("elles y restent")}' : '${T("elle y reste")}')
           + ' ${T("pour servir à d’autres fiches.")}</span></label>'
         : '';
       voile('<h3>${T("Supprimer de l’inventaire")}</h3>'
@@ -1615,7 +1618,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // reassigne d abord. Le pont refuse aussi — ceci n est que le recit.
     if (w.usage > 0) {
       voile('<h3>${T("Suppression impossible")}</h3>'
-        + '<p>L’emplacement <strong>' + esc(w.code) + '</strong> ${T("est utilisé par")} <strong>'
+        + '<p>${T("L’emplacement")} <strong>' + esc(w.code) + '</strong> ${T("est utilisé par")} <strong>'
         + w.usage + ' ${T("variante(s)</strong> de produit.")}</p>'
         + '<p style="color:var(--tx2);font-size:.8rem">${T("Réassignez ces variantes à un autre")} '
         + '${T("emplacement avant de supprimer celui-ci.")}</p>'
@@ -1837,7 +1840,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<div class="rangee"><span>' + esc(nommer(c.cle)) + '</span><strong>' + c.actuel + '</strong></div>';
     }).join('');
     voile('<h3><span class="ic">⚠</span> ${T("Inventaire non enregistré")}</h3>'
-      + '<p>${T("Un collègue vient de modifier")} ' + ((r.conflits || []).length > 1 ? 'ces variantes' : 'cette ${T("variante")}')
+      + '<p>${T("Un collègue vient de modifier")} ' + ((r.conflits || []).length > 1 ? '${T("ces variantes")}' : '${T("cette variante")}')
       + '. <strong>${T("Rien n’a été écrit.")}</strong></p>'
       + lignes
       + '<p style="color:var(--tx2);font-size:.8rem">${T("La grille est rechargée avec les quantités à jour :")} '

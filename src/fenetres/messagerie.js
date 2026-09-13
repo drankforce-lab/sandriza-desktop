@@ -173,7 +173,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="mini' + (ONGLET === 'answered' ? ' actif' : '') + '" data-onglet="answered">'
       + '<span class="ic">📁</span>${T(" Archive")}<span class="n">' + (c.repondues || 0) + '</span></button>'
       + '<button class="mini' + (ONGLET === 'all' ? ' actif' : '') + '" data-onglet="all">'
-      + 'Toutes<span class="n">' + (c.toutes || 0) + '</span></button>'
+      + '${T("Toutes")}<span class="n">' + (c.toutes || 0) + '</span></button>'
       + '</div>';
 
     var rows = D.lignes || [];
@@ -205,15 +205,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="voile" id="m-voile"><div class="boite">'
       + '<h3>' + pastille(r.statut) + ' ' + esc(r.commande) + '</h3>'
       + '<div class="grille">'
-      + '<div><div class="l">Client</div><div class="v">' + esc(r.client) + '</div></div>'
-      + '<div><div class="l">Courriel</div><div class="v">' + esc(r.courriel || '–') + '</div></div>'
-      + '<div><div class="l">Raison</div><div class="v">' + esc(r.raison || '–') + '</div></div>'
+      + '<div><div class="l">${T("Client")}</div><div class="v">' + esc(r.client) + '</div></div>'
+      + '<div><div class="l">${T("Courriel")}</div><div class="v">' + esc(r.courriel || '–') + '</div></div>'
+      + '<div><div class="l">${T("Raison")}</div><div class="v">' + esc(r.raison || '–') + '</div></div>'
       + '<div><div class="l">${T("Déposée le")}</div><div class="v">' + esc(r.date) + '</div></div>'
       + (r.reponduLe ? '<div><div class="l">${T("Répondu le")}</div><div class="v">' + esc(r.reponduLe) + '</div></div>' : '')
       + '</div>'
       + '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);'
       + 'margin-bottom:.25rem">${T("Message du client")}</div>'
-      + '<div class="texte">' + esc(r.message || '(aucun message)') + '</div>'
+      + '<div class="texte">' + esc(r.message || '${T("(aucun message)")}') + '</div>'
       + (r.reponse && r.statut === 'answered'
           ? '<div class="reponse"><div style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
             + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
@@ -225,7 +225,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<textarea aria-label="${T("Rédigez votre réponse")}" id="m-reptxt" placeholder="${T("Rédigez votre réponse…")}">' + esc(r.reponse || '') + '</textarea></div>'
       + '<div class="pied-boite">'
       + '<button class="danger" id="m-supprimer">' + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button>'
-      + '<button id="m-fermer">Fermer</button>'
+      + '<button id="m-fermer">${T("Fermer")}</button>'
       + '<button class="prim" id="m-envoyer"><span class="ic">📨</span>${T(" Envoyer la réponse")}</button>'
       + '</div></div></div>';
   }

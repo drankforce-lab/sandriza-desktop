@@ -382,7 +382,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     sur.innerHTML = '<div class="boite"'+(largeur?' style="max-width:'+largeur+'"':'')+'>'
       + '<div class="tt"><h3>'+titre+'</h3>'
       + '<div><button class="sz-btnplein" id="s-plein" title="${T("Occuper toute la fenêtre")}">${T("⛶ Plein écran")}</button>'
-      + '<button class="mini" id="s-x">Fermer</button></div></div>'
+      + '<button class="mini" id="s-x">${T("Fermer")}</button></div></div>'
       + '<div class="liste">'+corpsH+'</div>'
       + '<div class="tt" style="border-bottom:0;border-top:1px solid var(--v08)">'
       + '<div class="nav"><span class="msgsur" id="s-msg"></span>'+piedH+'</div></div></div>';
