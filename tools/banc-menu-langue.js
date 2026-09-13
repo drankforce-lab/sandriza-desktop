@@ -149,6 +149,71 @@ for (const k of traduits) {
   }
 }
 
+/* ══ LE BASCULE FR / EN GREFFÉ DANS LE MENU AFFICHAGE ══════════════════════
+   Sa demande du 2026-09-12 : « un toggle FR/EN dans un endroit discret ».
+   ⚠ Il est éprouvé ICI parce qu'il vit dans `menu-langue.js` et non dans
+   `main.js` : six cas en trente lignes, là où il aurait fallu lancer Electron
+   et ouvrir un panneau. C'est exactement la raison pour laquelle ce
+   fichier-là existe — la leçon est écrite en tête. */
+{
+  const { menusAvecLangue } = require('../src/menu-langue');
+  const base = [
+    { label: 'Fichier',   items: [{ label: 'Quitter', app: 'quit' }] },
+    { label: 'Affichage', items: [{ label: 'Recharger', app: 'reload' }] },
+    { label: 'Aide',      items: [{ label: 'À propos', app: 'about' }] },
+  ];
+  const trouver = (ms) => ((ms.find((m) => m.label === 'Affichage') || { items: [] }).items || [])
+    .find((it) => it && it.label === 'Langue / Language');
+
+  // 1. L'entrée est là, dans le menu Affichage.
+  const fr = menusAvecLangue(base, 'fr');
+  const e = trouver(fr);
+  if (!e) {
+    fautes.push('menusAvecLangue() n’ajoute pas « Langue / Language » au menu Affichage');
+  } else if (!Array.isArray(e.sub) || e.sub.length !== 2) {
+    fautes.push('le bascule n’offre pas DEUX langues');
+  } else {
+    // 2. La coche suit la langue — dans les DEUX sens.
+    const coche = (ms) => ((trouver(ms).sub || []).find((x) => x.coche) || {}).label;
+    if (coche(fr) !== 'Français') {
+      fautes.push('en français la coche est sur « ' + coche(fr) +' » au lieu de « Français »');
+    }
+    const en = menusAvecLangue(base, 'en');
+    if (coche(en) !== 'English') {
+      fautes.push('en anglais la coche est sur « ' + coche(en) + ' » au lieu de « English »');
+    }
+    // 3. Les verbes — sans eux le clic serait MUET.
+    const apps = (e.sub || []).map((x) => x.app).sort().join(',');
+    if (apps !== 'langue-en,langue-fr') {
+      fautes.push('les verbes du bascule sont « ' + apps + ' » : `actionApp` ne les connaîtra pas');
+    }
+  }
+
+  /* 4. ⚠ LE MODÈLE PAS ENCORE ARRIVÉ : on n’invente PAS de menu. Une entrée
+     seule dans une barre vide serait pire que pas d’entrée du tout. */
+  if (JSON.stringify(menusAvecLangue([], 'fr')) !== '[]') {
+    fautes.push('menusAvecLangue([]) invente un menu — un modèle vide doit rester vide');
+  }
+  const sansAff = [{ label: 'Fichier', items: [{ label: 'Quitter' }] }];
+  if (JSON.stringify(menusAvecLangue(sansAff, 'fr')) !== JSON.stringify(sansAff)) {
+    fautes.push('sans menu Affichage le modèle est MODIFIÉ — il doit rester tel quel');
+  }
+
+  /* 5. ⚠ L’INTITULÉ TRADUIT : l’écran de connexion affiche « View ». Sans ce
+     filet, le bascule y serait introuvable. */
+  const vue = [{ label: 'View', items: [{ label: 'Reload' }] }];
+  const g = ((menusAvecLangue(vue, 'en')[0] || {}).items || [])
+    .find((it) => it && it.label === 'Langue / Language');
+  if (!g) fautes.push('le menu « View » (intitulé traduit) ne reçoit pas le bascule');
+
+  /* 6. ⚠ ON NE GREFFE QU’UNE FOIS, même si deux menus portaient le nom : un
+     réglage en double finit par se contredire. */
+  const deux = menusAvecLangue(base.concat([{ label: 'Affichage', items: [] }]), 'fr');
+  const n = deux.reduce((k, m) => k
+    + ((m.items || []).filter((it) => it && it.label === 'Langue / Language').length), 0);
+  if (n !== 1) fautes.push('le bascule est greffé ' + n + ' fois au lieu d’une');
+}
+
 if (fautes.length) {
   console.error('✗ la traduction du menu de connexion a ' + fautes.length + ' trou(s) :');
   fautes.forEach((x) => console.error('   — ' + x));

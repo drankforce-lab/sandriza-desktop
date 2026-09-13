@@ -5158,7 +5158,7 @@ const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageConnexion } = require('./fenetres/connexion');
 const { pageMaj } = require('./fenetres/maj');
 const { pageDeconnexion } = require('./fenetres/deconnexion');
-const { MENU_EN, trMenu, trItems } = require('./menu-langue');
+const { MENU_EN, trMenu, trItems, menusAvecLangue } = require('./menu-langue');
 /* ⚠⚠ LA LANGUE DES FENÊTRES SE POSE ICI, AVANT QUE LA PAGE NE SOIT BÂTIE. Les
    gabarits résolvent leurs textes À LA GÉNÉRATION (voir `src/langue/index.js`) :
    une fenêtre naît donc en anglais, au lieu de paraître en français puis de se
@@ -5205,6 +5205,12 @@ const actionApp = (nom, arg) => {
        « Quitter » qui réduit l'application serait exactement le genre de
        mensonge qui fait chercher un processus dans le gestionnaire des tâches.
        Le refus pendant une mise à jour est dans `quitterVraiment`. */
+    /* ⚠⚠ LE BASCULE DE LANGUE PASSE PAR LE MEME VERBE QUE L ECRAN DE CONNEXION
+       (`appliquerLangue`) — pas une seconde implementation. Deux chemins pour
+       le meme reglage finissent par ne plus faire la meme chose, et c est la
+       lecon de ce depot sur les mecanismes reinventes. */
+    case 'langue-fr':   appliquerLangue('fr'); break;
+    case 'langue-en':   appliquerLangue('en'); break;
     case 'quit':        quitterVraiment(); break;
     case 'minimize':    if (mainWindow) mainWindow.minimize(); break;
     case 'reload':      if (wc) wc.reload(); break;
@@ -5676,6 +5682,16 @@ const _peutOuvrirPanneau = (e) => {
   return false;
 };
 
+/* ⚠ LE BASCULE FR / EN VIT DANS `menu-langue.js`, PAS ICI — c est la leçon de
+   la 5.28.0, ecrite en tete de ce fichier-la : un morceau de logique qu on ne
+   peut pas eprouver sans lancer toute l application finit par n etre eprouve
+   par personne. Ici on ne fait que lui donner la langue courante. */
+const _menusLangue = () => {
+  let l = 'fr';
+  try { l = require('./langue').langueCourante(); } catch (e) {}
+  return menusAvecLangue(_modele.menus || [], l);
+};
+
 ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
   if (!_peutOuvrirPanneau(e)) return;
   /* ⚠⚠ ON RETROUVE LE MENU PAR SON INTITULÉ TRADUIT *OU* D ORIGINE, et ce
@@ -5688,7 +5704,8 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
      changement de langue). Celle-ci est le FILET : une désynchronisation ne
      doit pas se solder par un menu mort, parce qu un menu mort ne ressemble pas
      à sa cause et coûte un aller-retour complet pour être compris. */
-  const _cherche = (x) => (_modele.menus || []).find((mm) => mm && mm.label === x);
+  const _menus = _menusLangue();
+  const _cherche = (x) => _menus.find((mm) => mm && mm.label === x);
   const _brut = String(label || '');
   let m = _cherche(_brut);
   if (!m) {
@@ -5772,7 +5789,7 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
        APRÈS avoir ouvert un menu. */
     const _cnx = !!(vueConnexion && e.sender === vueConnexion.webContents);
     panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
-      menus: _cnx ? _trItems(_modele.menus || []) : (_modele.menus || []),
+      menus: _cnx ? _trItems(_menusLangue()) : _menusLangue(),
       cssRail: _modele.cssRail || '', sombre: !!_modele.sombre,
     })));
   } else {
@@ -6013,7 +6030,13 @@ ipcMain.handle('langue:lire', () => {
   try { return (reglages.get('langue') === 'en') ? 'en' : 'fr'; }
   catch (e) { return 'fr'; }
 });
-ipcMain.handle('langue:ecrire', (e, l) => {
+/* ⚠⚠ UN SEUL VERBE POUR LES DEUX PORTES : l ecran de connexion (par
+   `langue:ecrire`) et le menu Affichage (par `actionApp`). Il etait tentant
+   d ecrire deux fois trois lignes ; deux chemins pour le meme reglage finissent
+   toujours par diverger, et la divergence ne ressemble jamais a sa cause.
+   ⚠ IL REPOSE AUSSI LE MENU ET SALIT LE PANNEAU EN CACHE : sans ca la coche
+   resterait sur l ancienne langue jusqu au prochain changement de contexte. */
+const appliquerLangue = (l) => {
   const v = (String(l || '') === 'en') ? 'en' : 'fr';
   try { reglages.set('langue', v); } catch (er) {}
   /* ⚠ ET LES FENÊTRES SUIVANTES NAÎTRONT DANS CETTE LANGUE. ⚠⚠ CELLES DÉJÀ
@@ -6022,9 +6045,20 @@ ipcMain.handle('langue:ecrire', (e, l) => {
      recette. Les refabriquer demanderait de retenir les arguments de chaque
      ouverture — c’est un chantier à part, pas un effet de bord à improviser ici. */
   poserLangueFenetres(v);
+  /* ⚠⚠ LE PANNEAU EST MIS EN CACHE ENTRE DEUX OUVERTURES : sans ce drapeau, la
+     coche resterait sur l’ancienne langue jusqu’au prochain changement de
+     contexte — un réglage qui a pris effet mais que le menu dément. */
+  panneauSale = true;
+  try { buildMenu(); } catch (er) {}
   cnxDire('langue reglee : ' + v);
   return v;
-});
+};
+
+/* ⚠ L’ÉCRAN DE CONNEXION PASSE PAR LA MÊME PORTE. Cette poignée ne fait plus
+   que déléguer : elle avait sa propre copie des trois gestes, et c’est
+   exactement ainsi que deux chemins pour un même réglage se mettent à diverger.
+   ⚠ Le menu Affichage, lui, entre par `actionApp` — même verbe, même effet. */
+ipcMain.handle('langue:ecrire', (e, l) => appliquerLangue(l));
 
 /* ══════════════════════════════════════════════════════════════════════════
    LE MENU DE L ÉCRAN DE CONNEXION, DANS LA LANGUE CHOISIE
@@ -6119,7 +6153,7 @@ const _sansPseudo = (menus) => (menus || []).filter((m) => m && !String(m.label 
    rien n appelle se lit comme une fonction, et on batit dessus. */
 
 const buildMenu = () => {
-  const template = _sansPseudo(_modele.menus)
+  const template = _sansPseudo(_menusLangue())
     .map((m) => ({ label: m.label, submenu: versTemplateNatif(m.items || []) }))
     .filter((m) => m.submenu.length);
   // Tant que le site n'a rien envoyé, un minimum : sans menu du tout, plus aucun

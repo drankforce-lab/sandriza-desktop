@@ -66,4 +66,53 @@ const trItems = (items, langue) => (items || []).map((it) => {
   return n;
 });
 
-module.exports = { MENU_EN, trMenu, trItems };
+/* ══ LE BASCULE FR / EN, GREFFÉ DANS LE MENU AFFICHAGE ══════════════════════
+   Sa demande du 2026-09-12 : « il faut mettre un toggle FR/EN disponible dans
+   l'application dans un endroit discret ». Son choix parmi trois : le menu
+   Affichage — là où l'on cherche un réglage, sans rien prendre à l'écran.
+
+   ⚠⚠ LA COQUILLE LE GREFFE ELLE-MÊME, LE SITE N'EN SAIT RIEN. Le modèle de menu
+   vient de `appbar.js` ; y ajouter l'entrée aurait demandé de toucher le dépôt
+   du SITE et de déployer en production pour un réglage qui n'appartient qu'à
+   l'application. La barre visible est peinte par la coquille à partir de ce
+   modèle : on greffe donc en copie, à l'affichage.
+
+   ⚠⚠⚠ ET CE CODE VIT ICI, PAS DANS `main.js` — c'est la leçon écrite en tête de
+   ce fichier, payée en 5.28.0 : « un morceau de logique qu'on ne peut pas
+   éprouver sans lancer toute l'application finit par n'être éprouvé par
+   personne ». La langue courante arrive donc en ARGUMENT plutôt que d'être lue
+   ici : la fonction devient pure, et `banc-menu-langue` l'essaie en trois
+   lignes, dans les deux langues et sur un menu absent. */
+const LANGUES = [
+  { cle: 'fr', label: 'Français' },
+  { cle: 'en', label: 'English' },
+];
+
+/** Le modèle, avec « Langue / Language » ajouté au menu Affichage.
+ *  ⚠ LA COCHE SE CALCULE À CHAQUE APPEL, jamais une fois pour toutes : le
+ *  modèle est gardé en cache entre deux ouvertures du panneau, et une coche
+ *  figée montrerait « Français » coché après être passé en anglais — un défaut
+ *  qu'on ne voit qu'en changeant de langue APRÈS avoir ouvert un menu.
+ *  ⚠ Le menu se reconnaît par son intitulé d'ORIGINE *ou* TRADUIT : l'écran de
+ *  connexion affiche « View ». Même filet que `menu:panneau`.
+ *  ⚠ SI AUCUN MENU AFFICHAGE N'EXISTE (modèle pas encore arrivé), on rend le
+ *  modèle TEL QUEL — on n'invente pas un menu. Une entrée seule dans une barre
+ *  vide serait pire que pas d'entrée du tout. */
+const menusAvecLangue = (menus, langue) => {
+  const cour = (String(langue || '') === 'en') ? 'en' : 'fr';
+  let greffe = false;
+  return (menus || []).map((m) => {
+    if (greffe || !m || !Array.isArray(m.items)) return m;
+    const lbl = String(m.label || '');
+    if (lbl !== 'Affichage' && lbl !== MENU_EN['Affichage']) return m;
+    greffe = true;
+    return { ...m, items: m.items.concat([
+      { sep: true },
+      { label: 'Langue / Language', sub: LANGUES.map((l) => ({
+        label: l.label, app: 'langue-' + l.cle, coche: cour === l.cle,
+      })) },
+    ]) };
+  });
+};
+
+module.exports = { MENU_EN, trMenu, trItems, menusAvecLangue, LANGUES };
