@@ -30,6 +30,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('promo');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -161,11 +165,11 @@ function pagePromo(onglet) {
   const depart = (['modeles', 'impression', 'formats'].indexOf(String(onglet || '')) >= 0)
     ? String(onglet) : 'modeles';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Centre d’impression — Administration Sandriza</title>
+<title>${T("Centre d’impression — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.promoprint}</span><h1>Centre d’impression</h1>
+<div class="tete"><span class="ico">${ICO.promoprint}</span><h1>${T("Centre d’impression")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -197,28 +201,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès au Centre d’impression.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    module_promo:       'Le Centre d’impression n’a pas pu être chargé dans la fenêtre principale. Rechargez-la (Ctrl+R).',
-    introuvable:        'Ce modèle n’existe plus.',
-    format_introuvable: 'Ce format n’existe plus.',
-    nom_requis:         'Donnez un nom au format.',
-    dimensions:         'Dimensions invalides — en pouces, au moins 0,2.',
-    agent_absent:       'Le programme d’impression n’est pas disponible sur ce poste.',
-    imprimante:         'L’imprimante d’étiquettes n’est pas prête.',
-    image_illisible:    'Une image de ce modèle n’est pas lisible par le navigateur : rien n’a été imprimé. Réenregistrez-la depuis la logothèque (écran web), puis réessayez.',
-    envoi:              'L’envoi à l’imprimante a échoué.',
-    aucune_planche:     'Aucun gabarit de planche ne correspond à ce format.',
-    planche:            'La planche n’a pas pu être générée.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès au Centre d’impression.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    module_promo:       '${T("Le Centre d’impression n’a pas pu être chargé dans la fenêtre principale. Rechargez-la (Ctrl+R).")}',
+    introuvable:        '${T("Ce modèle n’existe plus.")}',
+    format_introuvable: '${T("Ce format n’existe plus.")}',
+    nom_requis:         '${T("Donnez un nom au format.")}',
+    dimensions:         '${T("Dimensions invalides — en pouces, au moins 0,2.")}',
+    agent_absent:       '${T("Le programme d’impression n’est pas disponible sur ce poste.")}',
+    imprimante:         '${T("L’imprimante d’étiquettes n’est pas prête.")}',
+    image_illisible:    '${T("Une image de ce modèle n’est pas lisible par le navigateur : rien n’a été imprimé. Réenregistrez-la depuis la logothèque (écran web), puis réessayez.")}',
+    envoi:              '${T("L’envoi à l’imprimante a échoué.")}',
+    aucune_planche:     '${T("Aucun gabarit de planche ne correspond à ce format.")}',
+    planche:            '${T("La planche n’a pas pu être générée.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail && m !== 'image_illisible') t += ' (' + esc(String(r.detail).slice(0, 160)) + ')';
     return t;
   }
@@ -248,25 +252,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── LE DESSIN ─────────────────────────────────────────────────────────── */
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var ro = !D.peutModifier;
     var k = D.kpis || {};
     var h = '';
 
     if (ro) {
-      h += '<div class="avis"><span class="ic">👁</span> Lecture seule — votre rôle permet de consulter, pas de modifier ni d’imprimer.</div>';
+      h += '<div class="avis"><span class="ic">👁</span> ${T("Lecture seule — votre rôle permet de consulter, pas de modifier ni d’imprimer.")}</div>';
     }
 
     h += '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'modeles' ? ' actif' : '') + '" data-onglet="modeles">Modèles<span></span></button>'
-      + '<button class="mini' + (ONGLET === 'impression' ? ' actif' : '') + '" data-onglet="impression">Impression par lot</button>'
-      + '<button class="mini' + (ONGLET === 'formats' ? ' actif' : '') + '" data-onglet="formats">Formats</button>'
-      + '<span class="droite">' + (k.imprimees || 0) + ' étiquette' + ((k.imprimees || 0) > 1 ? 's' : '') + ' imprimée' + ((k.imprimees || 0) > 1 ? 's' : '') + '</span>'
+      + '<button class="mini' + (ONGLET === 'modeles' ? ' actif' : '') + '" data-onglet="modeles">${T("Modèles")}<span></span></button>'
+      + '<button class="mini' + (ONGLET === 'impression' ? ' actif' : '') + '" data-onglet="impression">${T("Impression par lot")}</button>'
+      + '<button class="mini' + (ONGLET === 'formats' ? ' actif' : '') + '" data-onglet="formats">${T("Formats")}</button>'
+      + '<span class="droite">' + (k.imprimees || 0) + ' ${T("étiquette")}' + ((k.imprimees || 0) > 1 ? 's' : '') + ' ${T("imprimée")}' + ((k.imprimees || 0) > 1 ? 's' : '') + '</span>'
       + '</div>';
 
     h += '<div class="stats">'
-      + tuile(k.modeles, 'modèles') + tuile(k.formats, 'formats')
-      + tuile(k.logos, 'logos') + tuile(D.trouves, 'affichés')
+      + tuile(k.modeles, '${T("modèles")}') + tuile(k.formats, 'formats')
+      + tuile(k.logos, 'logos') + tuile(D.trouves, '${T("affichés")}')
       + '</div>';
 
     if (ONGLET === 'modeles') h += vueModeles(ro);
@@ -276,9 +280,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* ⚠ CE QUI N EST PAS ICI EST DIT ICI (regle de la 2.0.0 : une fenetre au
        perimetre partiel annonce ou trouver le reste). */
     h += '<div class="aide" style="padding:.2rem .1rem">'
-      + 'La <strong>mise en page d’un modèle</strong> et la <strong>logothèque</strong> '
-      + 'restent à l’écran Catalogue → Centre d’impression de la fenêtre principale : '
-      + 'ce sont des éditeurs visuels. Le bouton « Ouvrir l’éditeur » vous y mène.'
+      + '${T("La <strong>mise en page d’un modèle</strong> et la <strong>logothèque</strong> ")}'
+      + '${T("restent à l’écran Catalogue → Centre d’impression de la fenêtre principale :")} '
+      + '${T("ce sont des éditeurs visuels. Le bouton « Ouvrir l’éditeur » vous y mène.")}'
       + '</div>';
 
     corps.innerHTML = h;
@@ -298,14 +302,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueModeles(ro){
     var h = '<div class="barreoutils" style="margin-top:.1rem">'
-      + '<input aria-label="Nom ou format (3 car. min.)" type="search" id="p-q" placeholder="Nom ou format (3 car. min.)" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Nom")} ou format (3 car. min.)" type="search" id="p-q" placeholder="${T("Nom")} ou format (3 car. min.)" value="' + esc(Q) + '">'
       + '<select id="p-tri" aria-label="Ordre de tri">'
-      + '<option value="updated"' + (TRI === 'updated' ? ' selected' : '') + '>Modifié récemment</option>'
-      + '<option value="name"' + (TRI === 'name' ? ' selected' : '') + '>Nom</option>'
-      + '<option value="size"' + (TRI === 'size' ? ' selected' : '') + '>Format</option>'
+      + '<option value="updated"' + (TRI === 'updated' ? ' selected' : '') + '>${T("Modifié récemment")}</option>'
+      + '<option value="name"' + (TRI === 'name' ? ' selected' : '') + '>${T("Nom")}</option>'
+      + '<option value="size"' + (TRI === 'size' ? ' selected' : '') + '>${T("Format")}</option>'
       + '</select>'
       + (ro ? '' : '<button class="' + (NOUVMOD ? 'actif' : 'prim') + '" id="p-newmod-btn" style="margin-left:auto">'
-          + (NOUVMOD ? 'Annuler' : '＋ Nouveau modèle') + '</button>')
+          + (NOUVMOD ? '${T("Annuler")}' : '${T("＋ Nouveau modèle")}') + '</button>')
       + '</div>';
 
     // Un nouveau modèle part TOUJOURS d'un format (il calibre l'imprimante) : on
@@ -313,24 +317,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ro && NOUVMOD) {
       var fmts = D.formats || [];
       h += '<div class="carte" style="margin-bottom:.6rem"><div class="deux">'
-        + '<div class="champ"><label for="p-newmod-fmt">Format du nouveau modèle</label><select id="p-newmod-fmt">'
+        + '<div class="champ"><label for="p-newmod-fmt">${T("Format du nouveau modèle")}</label><select id="p-newmod-fmt">'
         + fmts.map(function(x){ return '<option value="' + esc(x.cle) + '">' + esc(x.nom) + ' — ' + esc(x.dim) + '</option>'; }).join('')
         + '</select></div>'
-        + '<div class="champ" style="align-self:end"><button class="prim" id="p-newmod-ok">Créer et ouvrir l’éditeur</button></div>'
+        + '<div class="champ" style="align-self:end"><button class="prim" id="p-newmod-ok">${T("Créer et ouvrir l’éditeur")}</button></div>'
         + '</div>'
-        + '<div class="aide">Besoin d’un autre gabarit ? Ajoutez un format dans l’onglet <strong>Formats</strong>.</div></div>';
+        + '<div class="aide">${T("Besoin d’un autre gabarit ? Ajoutez un format dans l’onglet <strong>Formats</strong>.")}</div></div>';
     }
 
     h += '<div class="carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">' + (!D.charge
-        ? 'Lecture des modèles…'
-        : (D.total ? 'Aucun modèle ne correspond.'
-                   : 'Aucun modèle. Créez-en un depuis l’onglet Formats.')) + '</div>';
+        ? '${T("Lecture des modèles…")}'
+        : (D.total ? '${T("Aucun modèle ne correspond.")}'
+                   : '${T("Aucun modèle. Créez-en un depuis l’onglet Formats.")}')) + '</div>';
     } else {
-      h += '<table><thead><tr><th>Aperçu</th><th>Nom</th><th>Format</th>'
-        + '<th style="text-align:center">Éléments</th><th>Modifié</th>'
+      h += '<table><thead><tr><th>${T("Aperçu")}</th><th>${T("Nom")}</th><th>${T("Format")}</th>'
+        + '<th style="text-align:center">${T("Éléments")}</th><th>${T("Modifié")}</th>'
         + '<th style="text-align:right">Actions</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-mod="' + esc(r.id) + '">'
@@ -342,10 +346,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td class="dt">' + dateFr(r.modifie) + '</td>'
               + '<td style="text-align:right;white-space:nowrap">'
               + '<button class="mini" data-imprimer="' + esc(r.id) + '">Imprimer</button> '
-              + '<button class="mini" data-editeur="' + esc(r.id) + '">Éditeur</button>'
+              + '<button class="mini" data-editeur="' + esc(r.id) + '">${T("Éditeur")}</button>'
               + (ro ? '' : ' <button class="mini" data-dup="' + esc(r.id) + '">Dupliquer</button>'
                   + ' <button class="mini danger" data-suppr="' + esc(r.id) + '">'
-                  + (SUPPR_ARME === r.id ? 'Confirmer ?' : '✕') + '</button>')
+                  + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '✕') + '</button>')
               + '</td></tr>';
           }).join('')
         + '</tbody></table>';
@@ -363,43 +367,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueFormats(ro){
     var f = D.formats || [];
-    var h = '<div class="carte"><h2>Formats disponibles</h2>';
+    var h = '<div class="carte"><h2>${T("Formats disponibles")}</h2>';
     if (!ro) {
       h += '<div class="barreoutils" style="margin-bottom:.5rem">'
         + '<button class="' + (NOUVEAU ? 'actif' : 'prim') + '" id="p-fmtnouv">'
-        + (NOUVEAU ? 'Annuler' : '＋ Ajouter un format') + '</button></div>';
+        + (NOUVEAU ? '${T("Annuler")}' : '${T("＋ Ajouter un format")}') + '</button></div>';
       if (NOUVEAU) {
         h += '<div class="carte" style="margin-bottom:.6rem">'
           + '<div class="deux">'
-          + '<div class="champ"><label for="f-nom">Nom</label><input type="text" id="f-nom" placeholder="ex. Étiquette bijou"></div>'
+          + '<div class="champ"><label for="f-nom">${T("Nom")}</label><input type="text" id="f-nom" placeholder="ex. ${T("Étiquette")} bijou"></div>'
           + '<div class="champ"><label for="f-type">Type</label><select id="f-type">'
-          + '<option value="label">Étiquette</option><option value="stick">Autocollant</option>'
-          + '<option value="card">Carte d’affaires</option></select></div>'
+          + '<option value="label">${T("Étiquette")}</option><option value="stick">${T("Autocollant")}</option>'
+          + '<option value="card">${T("Carte d’affaires")}</option></select></div>'
           + '<div class="champ"><label for="f-forme">Forme</label><select id="f-forme">'
-          + '<option value="rect">Rectangle</option><option value="square">Carré</option>'
+          + '<option value="rect">${T("Rectangle")}</option><option value="square">${T("Carré")}</option>'
           + '<option value="circle">Rond</option></select></div>'
-          + '<div class="champ"><label id="f-lw">Largeur (po)</label>'
+          + '<div class="champ"><label id="f-lw">${T("Largeur (po)")}</label>'
           + '<input type="number" id="f-w" aria-label="Largeur en pouces" step="0.1" min="0.4" value="2"></div>'
-          + '<div class="champ" id="f-boxh"><label for="f-h">Hauteur (po)</label>'
+          + '<div class="champ" id="f-boxh"><label for="f-h">${T("Hauteur (po)")}</label>'
           + '<input type="number" id="f-h" step="0.1" min="0.4" value="1"></div>'
           + '</div>'
-          + '<div class="aide" style="margin-bottom:.5rem">C’est ce format qui calibrera '
-          + 'l’imprimante d’étiquettes au moment d’imprimer.</div>'
-          + '<button class="prim" id="p-fmtok">Enregistrer le format</button></div>';
+          + '<div class="aide" style="margin-bottom:.5rem">${T("C’est ce format qui calibrera")} '
+          + '${T("l’imprimante d’étiquettes au moment d’imprimer.")}</div>'
+          + '<button class="prim" id="p-fmtok">${T("Enregistrer le format")}</button></div>';
       }
     }
-    h += '<table><thead><tr><th>Nom</th><th>Dimensions</th><th>Origine</th><th>Planche</th>'
+    h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Dimensions")}</th><th>${T("Origine")}</th><th>${T("Planche")}</th>'
       + '<th style="text-align:right">Actions</th></tr></thead><tbody>'
       + f.map(function(x){
           return '<tr>'
             + '<td><span class="num">' + esc(x.nom) + '</span><div class="dt">' + esc(x.type) + '</div></td>'
             + '<td><span class="pill neutre">' + esc(x.dim) + '</span></td>'
-            + '<td class="dt">' + (x.perso ? 'personnalisé' : 'standard') + '</td>'
+            + '<td class="dt">' + (x.perso ? '${T("personnalisé")}' : '${T("standard")}') + '</td>'
             + '<td class="dt">' + (x.planches ? x.planches + ' gabarit' + (x.planches > 1 ? 's' : '') + ' Avery' : 'impression directe') + '</td>'
             + '<td style="text-align:right;white-space:nowrap">'
-            + (ro ? '' : '<button class="mini" data-creer="' + esc(x.cle) + '">Créer un modèle</button>'
+            + (ro ? '' : '<button class="mini" data-creer="' + esc(x.cle) + '">${T("Créer un modèle")}</button>'
                 + (x.perso ? ' <button class="mini danger" data-fmtsuppr="' + esc(x.id) + '">'
-                    + (FMT_ARME === x.id ? 'Confirmer ?' : '✕') + '</button>' : ''))
+                    + (FMT_ARME === x.id ? '${T("Confirmer ?")}' : '✕') + '</button>' : ''))
             + '</td></tr>';
         }).join('')
       + '</tbody></table></div>';
@@ -409,8 +413,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueImpression(ro){
     var l = D.lignes || [];
     if (!D.total) {
-      return '<div class="carte"><div class="vide">Aucun modèle à imprimer. '
-        + 'Créez-en un depuis l’onglet Formats.</div></div>';
+      return '<div class="carte"><div class="vide">${T("Aucun modèle à imprimer.")} '
+        + '${T("Créez-en un depuis l’onglet Formats.")}</div></div>';
     }
     var cible = ligneCible();
     var opts = l.map(function(r){
@@ -422,12 +426,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="deux">';
 
     //  ── Colonne 1 : le travail ──
-    h += '<div class="carte"><h2>Impression directe — imprimante d’étiquettes</h2>'
-      + '<div class="champ"><label for="p-cible">Modèle</label><select id="p-cible">' + opts + '</select>'
-      + (l.length < D.total ? '<div class="aide">Seuls les modèles de la page affichée sont listés — '
-          + 'changez de page dans l’onglet Modèles pour en atteindre d’autres.</div>' : '')
+    h += '<div class="carte"><h2>${T("Impression directe — imprimante d’étiquettes")}</h2>'
+      + '<div class="champ"><label for="p-cible">${T("Modèle")}</label><select id="p-cible">' + opts + '</select>'
+      + (l.length < D.total ? '<div class="aide">${T("Seuls les modèles de la page affichée sont listés —")} '
+          + '${T("changez de page dans l’onglet Modèles pour en atteindre d’autres.")}</div>' : '')
       + '</div>'
-      + '<div class="champ"><label for="p-qte">Quantité</label>'
+      + '<div class="champ"><label for="p-qte">${T("Quantité")}</label>'
       + '<input type="number" id="p-qte" min="1" max="5000" value="' + QTE + '">'
       + '<div class="rapide">' + rapides.map(function(n){
           return '<button class="mini" data-qte="' + n + '">' + n + '</button>'; }).join('') + '</div></div>';
@@ -435,69 +439,69 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // L état de l imprimante : un tiret tant qu on ne sait pas, jamais une
     // affirmation qu on dementira 100 ms plus tard.
     h += '<div style="margin:.5rem 0">'
-      + rang('Format du modèle', cible ? (cible.dim + (cible.rond ? ' (rond)' : '')) : '—')
-      + rang('Imprimante', IMPR ? (IMPR.imprimante || 'non détectée') : '—')
-      + rang('Résolution détectée', IMPR ? (IMPR.dpi + ' dpi') : '—')
-      + rang('Rendu envoyé', CAL ? CAL.rendu : '—')
+      + rang('${T("Format du modèle")}', cible ? (cible.dim + (cible.rond ? ' (rond)' : '')) : '—')
+      + rang('Imprimante', IMPR ? (IMPR.imprimante || '${T("non détectée")}') : '—')
+      + rang('${T("Résolution détectée")}', IMPR ? (IMPR.dpi + ' dpi') : '—')
+      + rang('${T("Rendu envoyé")}', CAL ? CAL.rendu : '—')
       + '</div>';
 
     if (IMPR && !IMPR.prete) {
       h += '<div class="avis" style="margin-bottom:.5rem">' + esc(IMPR.message || MOTIFS.imprimante) + '</div>';
     }
     if (cible && !cible.rendable) {
-      h += '<div class="avis" style="margin-bottom:.5rem">Une image de ce modèle n’est pas lisible '
-        + 'par le navigateur : l’impression échouera. Réenregistrez-la depuis la logothèque '
-        + '(écran web), puis revenez.</div>';
+      h += '<div class="avis" style="margin-bottom:.5rem">${T("Une image de ce modèle n’est pas lisible")} '
+        + '${T("par le navigateur : l’impression échouera. Réenregistrez-la depuis la logothèque")} '
+        + '${T("(écran web), puis revenez.")}</div>';
     }
 
     if (!ro && CAL) {
-      h += '<div class="carte" style="margin-bottom:.5rem"><h2>Ajustement fin (si l’étiquette sort décalée)</h2>'
+      h += '<div class="carte" style="margin-bottom:.5rem"><h2>${T("Ajustement fin (si l’étiquette sort décalée)")}</h2>'
         + '<div class="cal3">'
-        + '<div class="champ"><label for="c-scale">Échelle (%)</label><input type="number" id="c-scale" step="0.5" min="80" max="120" value="' + CAL.echelle + '"></div>'
-        + '<div class="champ"><label for="c-x">Décalage X (mm)</label><input type="number" id="c-x" step="0.5" min="-10" max="10" value="' + CAL.decX + '"></div>'
-        + '<div class="champ"><label for="c-y">Décalage Y (mm)</label><input type="number" id="c-y" step="0.5" min="-10" max="10" value="' + CAL.decY + '"></div>'
-        + '</div><div class="aide">Retenu <strong>par imprimante et par format</strong>, dans votre profil.</div></div>';
+        + '<div class="champ"><label for="c-scale">${T("Échelle (%)")}</label><input type="number" id="c-scale" step="0.5" min="80" max="120" value="' + CAL.echelle + '"></div>'
+        + '<div class="champ"><label for="c-x">${T("Décalage X (mm)")}</label><input type="number" id="c-x" step="0.5" min="-10" max="10" value="' + CAL.decX + '"></div>'
+        + '<div class="champ"><label for="c-y">${T("Décalage Y (mm)")}</label><input type="number" id="c-y" step="0.5" min="-10" max="10" value="' + CAL.decY + '"></div>'
+        + '</div><div class="aide">${T("Retenu <strong>par imprimante et par format</strong>, dans votre profil.")}</div></div>';
     }
 
     if (JOB) {
       var pct = Math.round(JOB.faites / JOB.total * 100);
-      h += '<div><div class="rang"><span>Impression en cours</span><strong>'
+      h += '<div><div class="rang"><span>${T("Impression en cours")}</span><strong>'
         + JOB.faites + ' / ' + JOB.total + '</strong></div>'
         + '<div class="barre"><i style="width:' + pct + '%"></i></div>'
-        + '<button class="danger" id="p-arret">' + (JOB.arret ? 'Arrêt demandé…' : 'Arrêter') + '</button></div>';
+        + '<button class="danger" id="p-arret">' + (JOB.arret ? '${T("Arrêt demandé…")}' : '${T("Arrêter")}') + '</button></div>';
     } else if (!ro) {
       h += '<div class="barreoutils">'
-        + '<button class="prim" id="p-lancer"' + (EN_COURS ? ' disabled' : '') + '>Lancer l’impression</button>'
-        + '<button id="p-test"' + (EN_COURS ? ' disabled' : '') + '>Imprimer 1 test</button>'
-        + '<button id="p-relire">Relire l’imprimante</button>'
+        + '<button class="prim" id="p-lancer"' + (EN_COURS ? ' disabled' : '') + '>${T("Lancer l’impression")}</button>'
+        + '<button id="p-test"' + (EN_COURS ? ' disabled' : '') + '>${T("Imprimer 1 test")}</button>'
+        + '<button id="p-relire">${T("Relire l’imprimante")}</button>'
         + '</div>';
     }
     h += '</div>';
 
     //  ── Colonne 2 : aperçu et planche ──
-    h += '<div class="carte"><h2>Aperçu — ce qui sera imprimé</h2>'
+    h += '<div class="carte"><h2>${T("Aperçu — ce qui sera imprimé")}</h2>'
       + '<div class="gapercu">'
       + (APERCU && APERCU.image ? '<img src="' + esc(APERCU.image) + '" alt="">'
           : '<span class="aide" style="text-align:center;color:#6b7280">'
-            + (APERCU ? 'Ce modèle n’a pas pu être rendu.' : 'Rendu…') + '</span>')
+            + (APERCU ? '${T("Ce modèle n’a pas pu être rendu.")}' : 'Rendu…') + '</span>')
       + '</div>'
-      + '<div class="aide" style="text-align:center;margin-top:.4rem">Rendu identique à l’impression (même moteur).</div>';
+      + '<div class="aide" style="text-align:center;margin-top:.4rem">${T("Rendu identique à l’impression (même moteur).")}</div>';
 
     var pl = (APERCU && APERCU.planches) || [];
     h += '<div style="border-top:1px solid var(--v08);margin:.7rem 0 .5rem"></div>'
-      + '<h2>Planche sur feuille Lettre (imprimante ordinaire)</h2>';
+      + '<h2>${T("Planche sur feuille Lettre (imprimante ordinaire)")}</h2>';
     if (!pl.length) {
-      h += '<div class="aide">Aucun gabarit Avery ne correspond exactement à ce format. '
-        + 'L’impression directe sur l’imprimante d’étiquettes reste la voie recommandée.</div>';
+      h += '<div class="aide">${T("Aucun gabarit Avery ne correspond exactement à ce format.")} '
+        + '${T("L’impression directe sur l’imprimante d’étiquettes reste la voie recommandée.")}</div>';
     } else {
-      h += '<div class="champ"><select id="p-planche" aria-label="Modèle de planche">'
+      h += '<div class="champ"><select id="p-planche" aria-label="${T("Modèle")} de planche">'
         + pl.map(function(t){
             return '<option value="' + esc(t.id) + '"' + (PLANCHE === t.id ? ' selected' : '') + '>'
               + esc(t.nom) + '</option>'; }).join('')
         + '</select></div>'
-        + '<button id="p-genplanche"' + (ro ? ' disabled' : '') + '>Générer la planche</button>'
-        + '<div class="aide" style="margin-top:.35rem">Elle s’ouvre dans la fenêtre principale : '
-        + 'c’est une page à imprimer par le navigateur.</div>';
+        + '<button id="p-genplanche"' + (ro ? ' disabled' : '') + '>${T("Générer la planche")}</button>'
+        + '<div class="aide" style="margin-top:.35rem">${T("Elle s’ouvre dans la fenêtre principale :")} '
+        + '${T("c’est une page à imprimer par le navigateur.")}</div>';
     }
     h += '</div></div>';
     return h;
@@ -514,12 +518,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     suiviFermer();
     var d = document.createElement('div');
     d.className = 'suivi';
-    d.innerHTML = '<div class="st"><span id="sv-t">Impression en cours</span>'
+    d.innerHTML = '<div class="st"><span id="sv-t">${T("Impression en cours")}</span>'
       + '<span class="n" id="sv-n">0 / ' + total + '</span></div>'
       + '<div class="pd"><div class="jauge"><i id="sv-j" style="width:0%"></i></div>'
       + '<span class="pc" id="sv-pc">0 %</span>'
       + '<span id="sv-r">' + esc(nom || '') + '</span>'
-      + '<span class="bt"><button class="mini dgr" id="sv-a">Arrêter</button>'
+      + '<span class="bt"><button class="mini dgr" id="sv-a">${T("Arrêter")}</button>'
       + '<button class="mini" id="sv-x">Fermer</button></span></div>';
     document.body.appendChild(d);
     PANNEAU = d;
@@ -531,8 +535,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       a.disabled = true;
       if (PANNEAU) PANNEAU.className = 'suivi arret';
       var r = document.getElementById('sv-r');
-      if (r) r.textContent = 'Arrêt demandé — le lot déjà envoyé sortira quand même.';
-      dire('Arrêt demandé. Le lot déjà parti à l’imprimante sortira ; les suivants sont abandonnés.', 'att');
+      if (r) r.textContent = '${T("Arrêt demandé — le lot déjà envoyé sortira quand même.")}';
+      dire('${T("Arrêt demandé. Le lot déjà parti à l’imprimante sortira ; les suivants sont abandonnés.")}', 'att');
     };
   }
   function suiviFermer(){
@@ -561,10 +565,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── L IMPRESSION, LOT PAR LOT ─────────────────────────────────────────── */
   function lancer(total){
-    if (!CIBLE) { dire('Choisissez un modèle.', 'att'); return; }
+    if (!CIBLE) { dire('${T("Choisissez un modèle.")}', 'att'); return; }
     /* ⚠ ON NE REFUSE PAS EN SILENCE : un bouton qui ne fait rien passe pour
        casse, un bouton qui dit pourquoi passe pour occupe. */
-    if (EN_COURS) { dire('Une impression est déjà en cours — attendez-la ou arrêtez-la.', 'att'); return; }
+    if (EN_COURS) { dire('${T("Une impression est déjà en cours — attendez-la ou arrêtez-la.")}', 'att'); return; }
     EN_COURS = true;
     JOB = { faites: 0, total: total, arret: false };
     var nomModele = '';
@@ -578,8 +582,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!EN_COURS) return;
       EN_COURS = false; JOB = null;
       dessiner();
-      suiviFin('Sans réponse', 'La fenêtre principale n’a pas répondu. Des étiquettes ont peut-être été imprimées — vérifiez l’imprimante.');
-      dire('Aucune réponse pour cette impression. Vérifiez l’imprimante avant de relancer.', 'err');
+      suiviFin('${T("Sans réponse")}', '${T("La fenêtre principale n’a pas répondu. Des étiquettes ont peut-être été imprimées — vérifiez l’imprimante.")}');
+      dire('${T("Aucune réponse pour cette impression. Vérifiez l’imprimante avant de relancer.")}', 'err');
     }, 240000);
     var fini = function(){ clearTimeout(veille); EN_COURS = false; JOB = null; dessiner(); };
 
@@ -587,27 +591,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (JOB.arret || JOB.faites >= JOB.total) {
         var faites = JOB.faites, arrete = JOB.arret;
         fini();
-        suiviFin(arrete ? 'Impression arrêtée' : 'Impression terminée',
-          faites + ' / ' + total + ' étiquette' + (total > 1 ? 's' : '') + '.');
+        suiviFin(arrete ? '${T("Impression arrêtée")}' : '${T("Impression terminée")}',
+          faites + ' / ' + total + ' ${T("étiquette")}' + (total > 1 ? 's' : '') + '.');
         if (!arrete) setTimeout(suiviFermer, 2500);
         dire(arrete
-          ? ('Impression arrêtée après ' + faites + ' / ' + total + ' étiquette' + (total > 1 ? 's' : '') + '.')
-          : (faites + ' étiquette' + (faites > 1 ? 's' : '') + ' envoyée' + (faites > 1 ? 's' : '')
+          ? ('${T("Impression arrêtée après")} ' + faites + ' / ' + total + ' ${T("étiquette")}' + (total > 1 ? 's' : '') + '.')
+          : (faites + ' ${T("étiquette")}' + (faites > 1 ? 's' : '') + ' ${T("envoyée")}' + (faites > 1 ? 's' : '')
              + ' à ' + ((IMPR && IMPR.imprimante) || 'l’imprimante') + '.'),
           arrete ? 'att' : 'bon');
         charger();
         return;
       }
       var n = Math.min(25, JOB.total - JOB.faites);
-      suiviAvance(JOB.faites, JOB.total, 'Lot de ' + n + ' en cours d’envoi…');
+      suiviAvance(JOB.faites, JOB.total, '${T("Lot de")} ' + n + ' ${T("en cours d’envoi…")}');
       dire('Impression ' + (JOB.faites + n) + ' / ' + JOB.total + '…');
       appeler('promo:lot', [CIBLE, n]).then(function(r){
         if (!r.ok) {
           var faites = JOB.faites;
           fini();
-          suiviFin('Impression interrompue',
-            expliquer(r) + (faites ? ' — ' + faites + ' déjà envoyée(s).' : ''));
-          dire(expliquer(r) + (faites ? ' — ' + faites + ' étiquette(s) déjà envoyée(s).' : ''), 'err');
+          suiviFin('${T("Impression interrompue")}',
+            expliquer(r) + (faites ? ' — ' + faites + ' ${T("déjà envoyée(s).")}' : ''));
+          dire(expliquer(r) + (faites ? ' — ' + faites + ' ${T("étiquette(s) déjà envoyée(s).")}' : ''), 'err');
           lireImprimante();
           return;
         }
@@ -652,7 +656,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var test = document.getElementById('p-test');
     if (test) test.onclick = function(){ lancer(1); };
     var relire = document.getElementById('p-relire');
-    if (relire) relire.onclick = function(){ dire('Lecture de l’imprimante…'); lireImprimante(true); };
+    if (relire) relire.onclick = function(){ dire('${T("Lecture de l’imprimante…")}'); lireImprimante(true); };
     var arret = document.getElementById('p-arret');
     if (arret) arret.onclick = function(){ if (JOB) { JOB.arret = true; dessiner(); } };
 
@@ -661,11 +665,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var s = document.getElementById('p-planche');
       var id = s ? s.value : '';
       PLANCHE = id;
-      dire('Génération de la planche…');
+      dire('${T("Génération de la planche…")}');
       appeler('promo:planche', [CIBLE, id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Planche « ' + r.planche + ' » ouverte dans la fenêtre principale ('
-          + r.parFeuille + ' par feuille).', 'bon');
+        dire('${T("Planche «")} ' + r.planche + ' ${T("» ouverte dans la fenêtre principale (")}'
+          + r.parFeuille + ' ${T("par feuille).")}', 'bon');
       });
     };
 
@@ -676,7 +680,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var champ = id === 'c-scale' ? 'scale' : (id === 'c-x' ? 'offX' : 'offY');
         appeler('promo:calibrer', [CIBLE, champ, e.value]).then(function(r){
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
-          CAL = r; dessiner(); dire('Calibration enregistrée.', 'bon');
+          CAL = r; dessiner(); dire('${T("Calibration enregistrée.")}', 'bon');
         });
       };
     });
@@ -687,8 +691,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (forme) forme.onchange = function(){
       var lw = document.getElementById('f-lw');
       var bh = document.getElementById('f-boxh');
-      if (lw) lw.textContent = forme.value === 'circle' ? 'Diamètre (po)'
-        : (forme.value === 'square' ? 'Côté (po)' : 'Largeur (po)');
+      if (lw) lw.textContent = forme.value === 'circle' ? '${T("Diamètre (po)")}'
+        : (forme.value === 'square' ? '${T("Côté (po)")}' : '${T("Largeur (po)")}');
       if (bh) bh.style.display = (forme.value === 'rect') ? '' : 'none';
     };
     var fok = document.getElementById('p-fmtok');
@@ -698,7 +702,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('promo:formatEcrire', [{ nom: g('f-nom'), type: g('f-type'), forme: g('f-forme'),
         w: g('f-w'), h: g('f-h') }]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Format « ' + r.nom + ' » enregistré (' + r.dim + ').', 'bon');
+        dire('${T("Format «")} ' + r.nom + ' ${T("» enregistré (")}' + r.dim + ').', 'bon');
         NOUVEAU = false;
         charger();
       });
@@ -744,25 +748,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          << la fenetre n a pas pu s ouvrir >>, jamais sur un refus — sans quoi le
          bouton cesserait d agir sans rien dire, le defaut qui a coute quatre
          versions sur l ecran de connexion. */
-      dire('Ouverture de l’éditeur…');
+      dire('${T("Ouverture de l’éditeur…")}');
       var natif = null;
       try { natif = (P && P.ouvrirPromoEditeur) ? P.ouvrirPromoEditeur(idE) : null; }
       catch (e) { natif = null; }
       if (natif && typeof natif.then === 'function') {
         natif.then(function(ok){
-          if (ok) { dire('Éditeur ouvert dans sa fenêtre.', 'bon'); return; }
+          if (ok) { dire('${T("Éditeur ouvert dans sa fenêtre.")}', 'bon'); return; }
           appeler('promo:editeur', [idE]).then(function(r){
-            dire(r.ok ? ('« ' + r.nom +' » ouvert dans la fenêtre principale.') : expliquer(r), r.ok ? 'bon' : 'err');
+            dire(r.ok ? ('« ' + r.nom +' ${T("» ouvert dans la fenêtre principale.")}') : expliquer(r), r.ok ? 'bon' : 'err');
           });
         }).catch(function(){
           appeler('promo:editeur', [idE]).then(function(r){
-            dire(r.ok ? ('« ' + r.nom +' » ouvert dans la fenêtre principale.') : expliquer(r), r.ok ? 'bon' : 'err');
+            dire(r.ok ? ('« ' + r.nom +' ${T("» ouvert dans la fenêtre principale.")}') : expliquer(r), r.ok ? 'bon' : 'err');
           });
         });
         return;
       }
       appeler('promo:editeur', [idE]).then(function(r){
-        dire(r.ok ? ('« ' + r.nom +' » ouvert dans la fenêtre principale.') : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? ('« ' + r.nom +' ${T("» ouvert dans la fenêtre principale.")}') : expliquer(r), r.ok ? 'bon' : 'err');
       });
       return;
     }
@@ -771,7 +775,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dire('Duplication…');
       appeler('promo:dupliquer', [du.getAttribute('data-dup')]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('« ' + r.nom + ' » créé.', 'bon');
+        dire('« ' + r.nom + ' ${T("» créé.")}', 'bon');
         charger();
       });
       return;
@@ -788,7 +792,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       SUPPR_ARME = '';
       appeler('promo:supprimer', [idS]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('« ' + r.nom + ' » (' + r.dim + ') supprimé. Les impressions déjà faites ne sont pas touchées.', 'bon');
+        dire('« ' + r.nom + ' » (' + r.dim + '${T(") supprimé. Les impressions déjà faites ne sont pas touchées.")}', 'bon');
         if (CIBLE === idS) { CIBLE = ''; APERCU = null; }
         charger();
       });
@@ -798,12 +802,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#p-newmod-ok')) {
       var selNm = document.getElementById('p-newmod-fmt');
       var cleNm = selNm ? selNm.value : '';
-      if (!cleNm) { dire('Choisissez un format.', 'att'); return; }
-      dire('Création…');
+      if (!cleNm) { dire('${T("Choisissez un format.")}', 'att'); return; }
+      dire('${T("Création…")}');
       appeler('promo:nouveau', [cleNm]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         NOUVMOD = false;
-        dire('« ' + r.nom + ' » créé — ouvrez l’éditeur pour le mettre en page.', 'bon');
+        dire('« ' + r.nom + ' ${T("» créé — ouvrez l’éditeur pour le mettre en page.")}', 'bon');
         ONGLET = 'modeles';
         charger();
       });
@@ -811,10 +815,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     var cr = t.closest('[data-creer]');
     if (cr) {
-      dire('Création…');
+      dire('${T("Création…")}');
       appeler('promo:nouveau', [cr.getAttribute('data-creer')]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('« ' + r.nom + ' » créé — ouvrez l’éditeur pour le mettre en page.', 'bon');
+        dire('« ' + r.nom + ' ${T("» créé — ouvrez l’éditeur pour le mettre en page.")}', 'bon');
         ONGLET = 'modeles';
         charger();
       });
@@ -831,7 +835,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       FMT_ARME = '';
       appeler('promo:formatSupprimer', [idF]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('Format « ' + r.nom + ' » retiré. Les modèles déjà créés ne changent pas.', 'bon');
+        dire('${T("Format «")} ' + r.nom + ' ${T("» retiré. Les modèles déjà créés ne changent pas.")}', 'bon');
         charger();
       });
       return;
@@ -870,7 +874,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).then(function(c){
       if (c && c.ok) CAL = c;
       if (ONGLET === 'impression' && !JOB) dessiner();
-      if (annonce) dire(IMPR && IMPR.prete ? ('Prête — ' + IMPR.imprimante + '.') : (IMPR ? IMPR.message : ''),
+      if (annonce) dire(IMPR && IMPR.prete ? ('${T("Prête —")} ' + IMPR.imprimante + '.') : (IMPR ? IMPR.message : ''),
         IMPR && IMPR.prete ? 'bon' : 'att');
     });
   }
@@ -882,11 +886,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('promo:donnees', [{ q: Q, tri: TRI, page: PAGE, taille: 12 }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Centre d’impression indisponible', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Centre d’impression indisponible")}', expliquer(r)); return; }
       D = r;
       if (!CIBLE && (D.lignes || []).length) CIBLE = D.lignes[0].id;
       var s = document.getElementById('sous');
-      if (s) s.textContent = (D.kpis && D.kpis.modeles || 0) + ' modèle'
+      if (s) s.textContent = (D.kpis && D.kpis.modeles || 0) + ' ${T("modèle")}'
         + ((D.kpis && D.kpis.modeles || 0) > 1 ? 's' : '');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
@@ -931,12 +935,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -946,7 +950,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ev.preventDefault();
       /* ⚠ On ne ferme PAS pendant un lot : l impression continuerait sans que
          personne ne puisse plus l arreter ni voir son verdict. */
-      if (JOB) { JOB.arret = true; dessiner(); dire('Arrêt demandé.', 'att'); return; }
+      if (JOB) { JOB.arret = true; dessiner(); dire('${T("Arrêt demandé.")}', 'att'); return; }
       P.fermer();
     }
   });
