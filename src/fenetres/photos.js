@@ -553,10 +553,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</span></div>';
 
     h += '<div class="etat">'
-      + '<b>' + D.trouvees + '</b> ${T("affichée")}' + (D.trouvees > 1 ? 's' : '')
+      + '<b>' + D.trouvees + '</b> ' + (D.trouvees > 1 ? '${T("affichées")}' : '${T("affichée")}')
       + ' sur <b>' + D.total + '</b>'
-      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.isolees + '</b> ${T("isolée")}' + (D.isolees > 1 ? 's' : '')
-      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.liees + '</b> ${T("attachée")}' + (D.liees > 1 ? 's' : '')
+      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.isolees + '</b> '
+      + (D.isolees > 1 ? '${T("isolées")}' : '${T("isolée")}')
+      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.liees + '</b> '
+      + (D.liees > 1 ? '${T("attachées")}' : '${T("attachée")}')
       + '<span class="sp" aria-hidden="true">·</span> ' + poids(D.poidsTotal) + ' ${T("rangés")}'
       /* ⚠⚠ DEUX CHIFFRES DIFFERENTS, ET C EST VOULU. << rangés >> additionne le
          poids inscrit sur chaque fiche ; << dans R2 >> est ce que le stockage
@@ -713,10 +715,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function espaceTexte(e){
     var t = 'R2 : <b>' + poids(e.octets) + '</b>';
     if (!e.complet) t = '${T("R2 : <b>au moins ")}' + poids(e.octets) + '</b>';
-    t += ' <span class="pt">(' + e.objets + ' objet' + (e.objets > 1 ? 's' : '');
+    t += ' <span class="pt">(' + e.objets + ' ' + (e.objets > 1 ? '${T("objets")}' : '${T("objet")}');
     if (e.orphelins && e.orphelins.sur && e.orphelins.objets) {
-      t += '${T(", dont")} <b class="att">' + e.orphelins.objets + ' orphelin'
-        + (e.orphelins.objets > 1 ? 's' : '') + ' — ' + poids(e.orphelins.octets) + '</b>';
+      t += '${T(", dont")} <b class="att">' + e.orphelins.objets + ' '
+        + (e.orphelins.objets > 1 ? '${T("orphelins")}' : '${T("orphelin")}')
+        + ' — ' + poids(e.orphelins.octets) + '</b>';
     }
     t += ')</span>';
     return t;
@@ -742,7 +745,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function lotsHtml(){
     var h = '<div class="asst"><div class="bo">'
       + '<div class="tt"><h3>${T("Lots importés")}</h3>'
-      + '<span class="pas">' + LOTS.length + ' lot' + (LOTS.length > 1 ? 's' : '') + '</span></div>'
+      + '<span class="pas">' + LOTS.length + ' '
+      + (LOTS.length > 1 ? '${T("lots")}' : '${T("lot")}') + '</span></div>'
       + '<div class="co">';
     /* ⚠⚠ LE DIAGNOSTIC EST DANS LE PANNEAU, PAS DANS LE BANDEAU DU BAS. Un
        message qu on ne voit pas ne diagnostique rien — et le bandeau s efface au
@@ -898,8 +902,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         A.sources.forEach(function(x){
           h += '<div class="l' + (A.lecteur === x.lecteur ? ' on' : '') + '" data-src="' + esc(x.lecteur) + '">'
             + '<b>${T("Clé")} ' + esc(x.lecteur) + '</b>'
-            + '<span class="aide">' + x.photos.length + ' photo' + (x.photos.length > 1 ? 's' : '')
-            + ' lisible' + (x.photos.length > 1 ? 's' : '') + '</span></div>';
+            + '<span class="aide">' + x.photos.length + ' '
+            + (x.photos.length > 1 ? '${T("photos lisibles")}' : '${T("photo lisible")}')
+            + '</span></div>';
         });
       }
       h += '</div>';
@@ -932,8 +937,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<button class="mini" id="a-rien">${T("Tout décocher")}</button>'
         + '<span class="droite">'
         + '<span id="a-apercus" class="aide"></span>'
-        + '<b id="a-nb">' + n + '</b> sur ' + A.fichiers.length + ' choisie'
-        + (n > 1 ? 's' : '') + '</span></div>';
+        + '<b id="a-nb">' + n + '</b> sur ' + A.fichiers.length + ' '
+        + (n > 1 ? '${T("choisies")}' : '${T("choisie")}') + '</span></div>';
       if (!A.fichiers.length) h += '<div class="vide">${T("Cette source ne contient aucune photo lisible.")}</div>';
       else {
         h += '<div class="pl">';
@@ -978,7 +983,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '${T("la personne est engendrée.")}<br>'
         + '${T("<b>Ce qui est déjà fait n’est pas refait</b> : une étape déjà présente est sautée, ")}'
         + '${T("et la raison est inscrite au suivi et au journal.")}</div>'
-        + '<p class="aide"><b>' + m + '</b> photo' + (m > 1 ? 's' : '') + ' ${T("à traiter.")}</p>';
+        + '<p class="aide"><b>' + m + '</b> ' + (m > 1 ? '${T("photos")}' : '${T("photo")}')
+        + ' ${T("à traiter.")}</p>';
     }
 
     h += '</div><div class="pi">'
@@ -1134,10 +1140,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (k >= fichiers.length) {
         appeler('lot:clore', []);
         liberer();
-        var t = faites + ' ${T("traitée")}' + (faites > 1 ? 's' : '');
+        var t = faites + ' ' + (faites > 1 ? '${T("traitées")}' : '${T("traitée")}');
         if (sautees) t += ' · ' + sautees + ' ${T("déjà à jour")}';
         if (echecs) t += ' · ' + echecs + ' ${T("en échec")}';
-        if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+        if (abandon) t += ' · ' + abandon + ' ' + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
         suiviFin(t + '.', abandon ? (libelle + ' interrompu') : (libelle + ' ${T("terminé")}'));
         if (!echecs && !abandon) suiviAutoFermer(3000);
         dire(t + '.', echecs ? 'att' : 'bon');
@@ -1380,7 +1386,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = RETRAIT_IDS ? RETRAIT_IDS.length : 0;
     return '<div class="asst"><div class="bo">'
       + '<div class="tt"><h3>${T("Retrait du mannequin")}</h3>'
-      + '<span class="pas">' + n + ' photo' + (n > 1 ? 's' : '') + '</span></div>'
+      + '<span class="pas">' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</span></div>'
       + '<div class="co">'
       + ''
       + '<div class="aide" style="margin-top:.5rem;color:var(--tx-or2)">${T("Chaque photo coûte")} '
@@ -1389,8 +1395,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>'
       + '<div class="pied"><button id="rt-non">${T("Annuler")}</button>'
       + '<button id="rt-apercu" title="${T("Voir le rendu filigrané, gratuit")}"><span class="ic">👁</span> ${T("Voir un aperçu")}</button>'
-      + '<button class="prim" id="rt-go">${T("Lancer le retrait sur")} ' + n + ' photo'
-      + (n > 1 ? 's' : '') + '</button>'
+      + '<button class="prim" id="rt-go">${T("Lancer le retrait sur")} ' + n + ' '
+      + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</button>'
       + '</div></div></div>';
   }
 
@@ -1426,7 +1432,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = SCENE_IDS ? SCENE_IDS.length : 0;
     return '<div class="asst"><div class="bo">'
       + '<div class="tt"><h3>${T("Mise en scène")}</h3>'
-      + '<span class="pas">' + n + ' photo' + (n > 1 ? 's' : '') + '</span></div>'
+      + '<span class="pas">' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</span></div>'
       + '<div class="co">'
       /* ⚠ L ETIQUETTE ETAIT LA, ET ELLE NE SERVAIT A RIEN AU LECTEUR D ECRAN :
          sans lien, un <label> voisin est du texte, pas un nom. Le nom passe par
@@ -1452,15 +1458,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>'
       + '<div class="pied"><button id="sc-non">${T("Annuler")}</button>'
       + '<button id="sc-apercu" title="${T("Voir un aperçu filigrané et gratuit avec ces réglages")}"><span class="ic">👁</span> ${T("Voir un aperçu")}</button>'
-      + '<button class="prim" id="sc-go">${T("Lancer sur")} ' + n + ' photo' + (n > 1 ? 's' : '') + '</button>'
+      + '<button class="prim" id="sc-go">${T("Lancer sur")} ' + n + ' '
+      + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</button>'
       + '</div></div></div>';
   }
 
   function barreLot(){
     var n = nbChoisies();
     if (!n || !D.peutModifier) return '';
-    return '<div class="lot"><span class="cnt">' + n + ' photo' + (n > 1 ? 's' : '')
-      + ' choisie' + (n > 1 ? 's' : '') + '</span>'
+    return '<div class="lot"><span class="cnt">' + n + ' '
+      + (n > 1 ? '${T("photos choisies")}' : '${T("photo choisie")}') + '</span>'
       + TRAITEMENTS_LOT.map(function(l){
           return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
         }).join('')
@@ -1490,7 +1497,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var liste = noms.length
       ? '<ul style="margin:.55rem 0 0;padding-left:1.1rem;color:var(--tx-gris2);font-size:.8rem;line-height:1.6">'
         + noms.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join('')
-        + (reste > 0 ? '<li>et ' + reste + ' autre' + (reste > 1 ? 's' : '') + '…</li>' : '')
+        + (reste > 0 ? '<li>' + (reste > 1 ? '${T("et {0} autres…")}' : '${T("et {0} autre…")}')
+            .split('{0}').join(reste) + '</li>' : '')
         + '</ul>'
       : '';
     var v = document.createElement('div');
@@ -1503,8 +1511,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-or2)">'
       + '${T("Des photos ont déjà été facturées")}</h2>'
       + '<p style="margin:0;color:var(--tx);font-size:.86rem;line-height:1.6"><b>' + n
-      + '</b> photo' + (n > 1 ? 's' : '') + ' sur ' + total + ' '
-      + (n > 1 ? 'ont' : 'a') + ' ${T("déjà coûté un crédit Photoroom. Les relancer")} '
+      + '</b> ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + ' sur ' + total + ' '
+      + (n > 1 ? '${T("ont")}' : '${T("a")}') + ' ${T("déjà coûté un crédit Photoroom. Les relancer")} '
       + '${T("entraînera de nouveaux frais.")}</p>' + liste
       + '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">'
       + '<button id="frais-non" style="font:inherit;color:var(--tx);'
@@ -1659,7 +1667,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     var nomLot = { detourage: '${T("Détourage")}', fantome: '${T("Retrait du mannequin")}',
                    humain: '${T("Mise sur un mannequin")}' }[quoi] || 'Traitement';
-    occuper(nomLot + ' de ' + ids.length + ' photo' + (ids.length > 1 ? 's' : '') + '…');
+    occuper(nomLot + ' de ' + ids.length + ' '
+      + (ids.length > 1 ? '${T("photos")}' : '${T("photo")}') + '…');
     suiviOuvrir(titres, nomLot + ' · ' + ids.length + ' photo(s)');
     var faites = 0, echecs = 0, replis = 0, abandon = 0;
     var suite = function(k){
@@ -1674,10 +1683,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       if (k >= ids.length) {
         liberer();
-        var t = faites + ' ${T("traitée")}' + (faites > 1 ? 's' : '');
+        var t = faites + ' ' + (faites > 1 ? '${T("traitées")}' : '${T("traitée")}');
         if (replis) t += ' · ' + replis + ' ${T("en repli local")}';
         if (echecs) t += ' · ' + echecs + ' ${T("en échec")}';
-        if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+        if (abandon) t += ' · ' + abandon + ' ' + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
         suiviFin(t + '.', abandon ? (nomLot + ' interrompu') : (nomLot + ' ${T("terminé")}'));
         if (!echecs && !replis && !abandon) suiviAutoFermer(2500);
         dire(t + '.', echecs ? 'att' : 'bon');
@@ -1729,10 +1738,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       if (k >= ids.length) {
         liberer();
-        var t = faits + ' ${T("pivotée")}' + (faits > 1 ? 's' : '');
+        var t = faits + ' ' + (faits > 1 ? '${T("pivotées")}' : '${T("pivotée")}');
         if (perdus) t += ' · ' + perdus + ' ${T("traitement(s) à refaire")}';
         if (rates) t += ' · ' + rates + ' ${T("en échec")}';
-        if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+        if (abandon) t += ' · ' + abandon + ' ' + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
         suiviFin(t + '.', abandon ? '${T("Rotation interrompue")}' : '${T("Rotation terminée")}');
         if (!rates && !abandon) suiviAutoFermer(2500);
         dire(t + '.', rates ? 'att' : 'bon');
@@ -2122,11 +2131,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (k >= liste.length) {
         appeler('lot:clore', []);
         liberer();
-        var t = faites + ' ${T("importée")}' + (faites > 1 ? 's' : '');
-        if (doubles) t += ' · ' + doubles + ' ${T("déjà présente")}' + (doubles > 1 ? 's' : '');
-        if (refuses) t += ' · ' + refuses + ' trop lourde' + (refuses > 1 ? 's' : '');
+        var t = faites + ' ' + (faites > 1 ? '${T("importées")}' : '${T("importée")}');
+        if (doubles) t += ' · ' + doubles + ' '
+          + (doubles > 1 ? '${T("déjà présentes")}' : '${T("déjà présente")}');
+        if (refuses) t += ' · ' + refuses + ' '
+          + (refuses > 1 ? '${T("trop lourdes")}' : '${T("trop lourde")}');
         if (echoues) t += ' · ' + echoues + ' ${T("en échec")}';
-        if (abandonnees) t += ' · ' + abandonnees + ' ${T("abandonnée")}' + (abandonnees > 1 ? 's' : '');
+        if (abandonnees) t += ' · ' + abandonnees + ' '
+        + (abandonnees > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
         suiviFin(t + '.', abandonnees ? '${T("Import interrompu")}' : '${T("Import terminé")}');
         /* ⚠ IL SE FERME TOUT SEUL QUAND TOUT EST PASSE (demande du 2026-08-09) :
            il n y a rien a y lire, et un panneau qui reste apres coup encombre.
@@ -2504,9 +2516,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         }
         if (k >= ids.length) {
           liberer();
-          var t = faits + ' ${T("retirée")}' + (faits > 1 ? 's' : '');
-          if (rates) t += ' · ' + rates + ' ${T("refusée")}' + (rates > 1 ? 's' : '');
-          if (abandon) t += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+          var t = faits + ' ' + (faits > 1 ? '${T("retirées")}' : '${T("retirée")}');
+          if (rates) t += ' · ' + rates + ' ' + (rates > 1 ? '${T("refusées")}' : '${T("refusée")}');
+          if (abandon) t += ' · ' + abandon + ' ' + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
           suiviFin(t + '.', abandon ? '${T("Suppression interrompue")}' : '${T("Suppression terminée")}');
           if (!rates && !abandon) suiviAutoFermer(2500);
           dire(t + '.', rates ? 'att' : 'bon');
@@ -2575,9 +2587,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         liberer();
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         if (!r.trouvees) { dire('${T("Aucune photo trouvée sur une clé USB.")}', 'att'); return; }
-        var t = r.importees + ' photo' + (r.importees > 1 ? 's' : '') + ' ${T("importée")}'
-          + (r.importees > 1 ? 's' : '') + ' ${T("depuis la clé")} ' + (r.lecteur || 'USB');
-        if (r.doublons) t += ' · ' + r.doublons + ' ${T("déjà présente")}' + (r.doublons > 1 ? 's' : '');
+        var t = r.importees + ' '
+          + (r.importees > 1 ? '${T("photos importées")}' : '${T("photo importée")}')
+          + ' ${T("depuis la clé")} ' + (r.lecteur || 'USB');
+        if (r.doublons) t += ' · ' + r.doublons + ' '
+          + (r.doublons > 1 ? '${T("déjà présentes")}' : '${T("déjà présente")}');
         if (r.echecs) t += ' · ' + r.echecs + ' ${T("en échec")}';
         dire(t + '.', r.importees ? 'bon' : 'att');
         charger();
@@ -2618,9 +2632,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           }
           if (k >= l.length) {
             liberer();
-            var m = faits + ' ${T("retirée")}' + (faits > 1 ? 's' : '');
-            if (rates) m += ' · ' + rates + ' ${T("refusée")}' + (rates > 1 ? 's' : '');
-            if (abandon) m += ' · ' + abandon + ' ${T("abandonnée")}' + (abandon > 1 ? 's' : '');
+            var m = faits + ' ' + (faits > 1 ? '${T("retirées")}' : '${T("retirée")}');
+            if (rates) m += ' · ' + rates + ' ' + (rates > 1 ? '${T("refusées")}' : '${T("refusée")}');
+            if (abandon) m += ' · ' + abandon + ' '
+              + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
             suiviFin(m + '.', abandon ? '${T("Vidage interrompu")}' : '${T("Vidage terminé")}');
             if (!rates && !abandon) suiviAutoFermer(2500);
             dire(m + '${T(". Les fiches produits gardent leurs images.")}', rates ? 'att' : 'bon');
@@ -2825,7 +2840,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (maj) DETAIL = maj;
       }
       var s = document.getElementById('sous');
-      if (s) s.textContent = D.total + ' photo' + (D.total > 1 ? 's' : '') + ' · ' + poids(D.poidsTotal);
+      if (s) s.textContent = D.total + ' ' + (D.total > 1 ? '${T("photos")}' : '${T("photo")}')
+      + ' · ' + poids(D.poidsTotal);
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
     });

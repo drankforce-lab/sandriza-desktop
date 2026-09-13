@@ -652,7 +652,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (pages > 1) {
         h.push('<div class="pagi"><button class="mini" id="j-prec"' + (JPAGE <= 0 ? ' disabled' : '')
           + '>${T("‹ Précédent")}</button><span>${T("Page")} ' + (JPAGE + 1) + ' sur ' + pages
-          + ' — ' + tot + '${T(" événement")}' + (tot > 1 ? 's' : '') + '</span>'
+          + ' — ' + tot + ' ' + (tot > 1 ? '${T("événements")}' : '${T("événement")}') + '</span>'
           + '<button class="mini" id="j-suiv"' + (JPAGE >= pages - 1 ? ' disabled' : '')
           + '>${T("Suivant ›")}</button></div>');
       }
@@ -743,7 +743,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (p && p.ok) { ETAT.version = p.version || ''; ETAT.paquets = p.paquets || []; }
       var actifs = ETAT.liens.filter(function(x){ return x.etat === 'actif'; }).length;
       sous.textContent = (ETAT.version ? ('${T("Version publiée :")} ' + ETAT.version + ' · ') : '')
-        + actifs + ' lien' + (actifs > 1 ? 's' : '') + ' actif' + (actifs > 1 ? 's' : '');
+        + actifs + ' ' + (actifs > 1 ? '${T("liens actifs")}' : '${T("lien actif")}');
       dessinerLiens();
       if (dire_le) dire('');
     });

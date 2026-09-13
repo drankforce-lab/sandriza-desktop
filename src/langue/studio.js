@@ -29,6 +29,22 @@
  */
 
 module.exports = {
+  /* ⚠ Les deux reglages a curseur — trouves par banc-libelle-argument. */
+  'Douceur': 'Softness',
+  'Marge': 'Margin',
+  /* ⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'photos': 'photos',
+  'échecs': 'failures',
+  'venue de l’explorateur': 'from the explorer',
+  'venues de l’explorateur': 'from the explorer',
+  'format enregistré': 'format saved',
+  'formats enregistrés': 'formats saved',
+  'photo choisie': 'photo chosen',
+  'photos choisies': 'photos chosen',
+  'appel facturé': 'billed call',
+  'appels facturés': 'billed calls',
+  'déjà faite, écartée': 'already done, skipped',
+  'déjà faites, écartées': 'already done, skipped',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Studio virtuel — Administration Sandriza': 'Virtual Studio — Sandriza Administration',
   'Studio virtuel': 'Virtual Studio',

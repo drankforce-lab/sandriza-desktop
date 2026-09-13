@@ -27,6 +27,9 @@
  */
 
 module.exports = {
+  /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */
+  'unité': 'unit',
+  'unités': 'units',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Remboursement — Administration Sandriza': 'Refund — Sandriza Administration',
   'Remboursement': 'Refund',

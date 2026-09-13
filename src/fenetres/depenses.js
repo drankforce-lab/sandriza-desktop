@@ -306,7 +306,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               ? '${T("Déposez une facture : elle est lue automatiquement, et vous vérifiez les champs avant d’enregistrer.")}'
               : '${T("Déposez une facture : elle sera jointe comme reçu. La lecture automatique demande une clé (Configuration → Clés API).")}')
           + '">${T("Glissez une facture ici")}</div>' : '')
-      + '<span class="droite">' + D.nombre + ' ${T("dépense")}' + (D.nombre > 1 ? 's' : '') + '</span>'
+      + '<span class="droite">' + D.nombre + ' '
+      + (D.nombre > 1 ? '${T("dépenses")}' : '${T("dépense")}') + '</span>'
       + '</div>';
 
     h += '<div class="stats">'
@@ -416,7 +417,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<input aria-label="${T("Domaine, nom ou catégorie")}" type="search" id="a-q" placeholder="${T("Domaine, nom ou catégorie…")}" value="' + esc(ANN_Q) + '">'
       + ((ro || (VERROU && !VERROU.obtenu)) ? ''
           : '<button class="prim" id="a-nouveau">${T("＋ Ajouter un fournisseur")}</button>')
-      + '<span class="droite">' + ANN.trouves + ' ${T("affiché")}' + (ANN.trouves > 1 ? 's' : '') + '</span>'
+      + '<span class="droite">' + ANN.trouves + ' '
+      + (ANN.trouves > 1 ? '${T("affichés")}' : '${T("affiché")}') + '</span>'
       + '</div>';
 
     if (ANN_FORM) {

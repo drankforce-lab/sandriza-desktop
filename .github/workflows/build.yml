@@ -520,6 +520,35 @@ jobs:
           # DEUX SENS, et le banc vérifie AUSSI que ce que szLibelle ne connaît
           # pas ressort mot pour mot : ces champs portent aussi des données.
           node tools/banc-langue-libelles.js
+          # ⚠⚠⚠ ET LE PLURIEL FABRIQUÉ EN AJOUTANT UNE LETTRE. Sa capture du
+          # 2026-09-13 : « 11 variantes to restock ». La fenêtre écrivait
+          # `T("variante") + (n > 1 ? 's' : '')` — le mot passe par le
+          # dictionnaire, le « s » est collé APRÈS, en dur, dans la page.
+          # ➡ EN ANGLAIS LE PLURIEL N'EST PAS TOUJOURS UNE LETTRE DE PLUS
+          # (« failure » → « failures », mais « photo lisible » → « readable
+          # photos » déplace le mot, et « step due » → « steps due » met le
+          # « s » au PREMIER mot). Les DEUX formes s'écrivent en entier.
+          # ⚠ AUCUN AUTRE BANC NE POUVAIT LE VOIR : `banc-langue-appels` trouve
+          # l'entrée « variante » et dit vrai ; le résiduel ne voit qu'un « s »
+          # sans accent. La faute est dans la CONCATÉNATION, pas dans les mots —
+          # et personne ne regardait la concaténation. 139 occurrences, 29
+          # fenêtres, toutes corrigées le jour où le banc a existé.
+          node tools/banc-pluriel-colle.js
+          # ⚠⚠⚠ ET LE LIBELLE PASSÉ EN ARGUMENT. Sa capture du 2026-09-13,
+          # fenêtre « New product » : la page entière en anglais, et au milieu
+          # « Marque », « Fournisseur », « Ex : 350 ». Les DEUX bancs de langue
+          # annonçaient ZÉRO sur cette fenêtre, et tous les deux disaient vrai.
+          # ➡ `textes-visibles.js` ne reconnaît QUE deux signatures : collé à du
+          # balisage, ou valeur d'une propriété `label:`. Or la fenêtre fabrique
+          # ses champs avec ses propres fonctions — `ch('p-marque', 'Marque')` —
+          # et un mot en DEUXIÈME ARGUMENT n'a aucune des deux. Il s'affiche
+          # quand même : c'est la fonction qui le pose dans le <label>.
+          # ⚠ SIXIÈME FOIS QUE LE DÉFAUT EST EXACTEMENT LÀ OÙ AUCUN BANC NE
+          # REGARDE. La réponse est la même qu'aux cinq précédentes : élargir le
+          # terrain, pas mieux relire. Ce banc suit le texte jusqu'à la FONCTION
+          # qui l'écrit. 20 libellés, 12 fenêtres, dont le bouton de `retour.js`
+          # qui disait « Rembourser » — celui qui sort de l'argent.
+          node tools/banc-libelle-argument.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de

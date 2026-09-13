@@ -24,6 +24,25 @@
  */
 
 module.exports = {
+  /* ⚠⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. La fenetre
+     ne colle plus de « s » a un mot traduit : elle CHOISIT entre deux phrases
+     ecrites ici, parce qu en anglais le pluriel n est pas une lettre de plus. */
+  'photo': 'photo',
+  'photos': 'photos',
+  'choisie': 'chosen',
+  'choisies': 'chosen',
+  'photo revenue': 'photo returned',
+  'photos revenues': 'photos returned',
+  'n’avait rien à annuler.': 'had nothing to undo.',
+  'n’avaient rien à annuler.': 'had nothing to undo.',
+  'photo n’est rattachée à aucun article et ne bougera pas.':
+    'photo is attached to no item and will not move.',
+  'photos ne sont rattachées à aucun article et ne bougeront pas.':
+    'photos are attached to no item and will not move.',
+  'sélectionnée': 'selected',
+  'sélectionnées': 'selected',
+  'photo envoyée': 'photo sent',
+  'photos envoyées': 'photos sent',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Explorateur de photos — Administration Sandriza':
     'Photo browser — Sandriza Administration',

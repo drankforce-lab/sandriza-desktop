@@ -31,6 +31,33 @@
  */
 
 module.exports = {
+  /* ⚠⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. La fenetre
+     ne colle plus de « s » : elle CHOISIT entre deux phrases ecrites ici, parce
+     qu en anglais le pluriel n est pas toujours une lettre de plus. */
+  'étape': 'step',
+  'étapes': 'steps',
+  'étape échue': 'step due',
+  'étapes échues': 'steps due',
+  'étape traitée': 'step processed',
+  'étapes traitées': 'steps processed',
+  'campagne': 'campaign',
+  'campagnes': 'campaigns',
+  'abonnée': 'subscriber',
+  'abonnées': 'subscribers',
+  'échec': 'failure',
+  'échecs': 'failures',
+  'terminée': 'finished',
+  'terminées': 'finished',
+  'courriel': 'email',
+  'courriels': 'emails',
+  'courriel parti': 'email sent',
+  'courriels partis': 'emails sent',
+  'envoi réussi': 'successful send',
+  'envois réussis': 'successful sends',
+  'inscription': 'enrolment',
+  'inscriptions': 'enrolments',
+  'inscription abandonnée': 'enrolment dropped',
+  'inscriptions abandonnées': 'enrolments dropped',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Campagnes et chaînes — Administration Sandriza':
     'Campaigns and sequences — Sandriza Administration',

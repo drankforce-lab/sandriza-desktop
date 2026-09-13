@@ -13,6 +13,9 @@
  */
 
 module.exports = {
+  /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */
+  'produit': 'product',
+  'produits': 'products',
   'Produits en vente — Administration Sandriza': 'Products for sale — Sandriza Administration',
   'Produits en vente': 'Products for sale',
   'Produits indisponibles': 'Products unavailable',

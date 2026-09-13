@@ -173,6 +173,10 @@ module.exports = {
   'Révocation…': 'Revoking…',
   ' événement': ' event',
   'événement': 'event',
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'événements': 'events',
+  'lien actif': 'active link',
+  'liens actifs': 'active links',
   /* ⚠ L EXEMPLE D UNE ADRESSE : il ne designe personne, il montre la forme. */
   'personne@exemple.com': 'someone@example.com',
 

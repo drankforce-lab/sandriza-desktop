@@ -375,8 +375,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="carte large"><h2>${T("Coordonnées")}</h2>'
       + '<div class="deux">'
-      + champ('e-adresse', 'Adresse', p.address, '', false, false)
-      + champ('e-ville', 'Ville', p.city, '', false, false)
+      + champ('e-adresse', '${T("Adresse")}', p.address, '', false, false)
+      + champ('e-ville', '${T("Ville")}', p.city, '', false, false)
       + champ('e-cp', '${T("Code postal")}', p.postal, '', true, false)
       + champ('e-tel', '${T("Téléphone")}', p.phone, '', false, false)
       + champ('e-courriel', '${T("Courriel professionnel")}', p.email, '', false, false)
@@ -438,7 +438,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueTaxes(){
     var t = D.taxes;
     var h = '<div class="stats">'
-      + tuile(t.ventesNettes, '${T("Ventes nettes taxables")}', t.nbCommandes + ' commande' + (t.nbCommandes > 1 ? 's' : ''), '')
+      + tuile(t.ventesNettes, '${T("Ventes nettes taxables")}', t.nbCommandes + ' ' + (t.nbCommandes > 1 ? '${T("commandes")}' : '${T("commande")}'), '')
       + tuile(t.tps, '${T("TPS perçue (5 %)")}', '${T("à remettre — ARC")}', '')
       + tuile(t.tvq, '${T("TVQ perçue (9,975 %)")}', '${T("à remettre — Revenu Québec")}', '')
       + tuile(t.totalRemettre, '${T("Net à remettre")}', t.enFaveur ? '${T("remboursement en votre faveur")}' : '${T("après crédits sur intrants")}',
@@ -478,9 +478,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         h += '<div class="fx">${T("Aucune transaction facturée cette année.")}</div>';
       } else {
         h += '<div class="fv">' + esc(fmtArgent(FRAIS.total)) + '</div>'
-          + '<div class="fx">' + FRAIS.transactions + ' transaction'
-          + (FRAIS.transactions > 1 ? 's' : '') + ' ${T("facturée")}'
-          + (FRAIS.transactions > 1 ? 's' : '') + ' ${T("par Stripe.")} '
+          + '<div class="fx">' + FRAIS.transactions + ' '
+          + (FRAIS.transactions > 1 ? '${T("transactions facturées")}' : '${T("transaction facturée")}')
+          + ' ${T("par Stripe.")} '
           + '${T("<b>Notre décompte</b> : à confronter à la facture Stripe avant de le ")}'
           + '${T("saisir en dépense. Rien n’est enregistré automatiquement.")}</div>';
         if ((FRAIS.mois || []).length) {
@@ -493,8 +493,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
 
     if (t.nbRemb) {
-      h += '<div class="aide">↩ ' + t.nbRemb + ' remboursement' + (t.nbRemb > 1 ? 's' : '')
-        + ' ${T("déduit")}' + (t.nbRemb > 1 ? 's' : '') + ' ${T("de ces chiffres : −")}' + esc(t.rembSousTotal)
+      h += '<div class="aide">↩ ' + t.nbRemb + ' '
+        + (t.nbRemb > 1 ? '${T("remboursements déduits")}' : '${T("remboursement déduit")}')
+        + ' ${T("de ces chiffres : −")}' + esc(t.rembSousTotal)
         + ' ${T("taxable, −")}' + esc(t.rembTps) + ' TPS, −' + esc(t.rembTvq) + ' TVQ.</div>';
     }
 
@@ -567,7 +568,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     if (D.square) {
       h += '<div class="carte"><h2>${T("Encaissements réels ")}<span class="n">Square</span></h2>'
-        + rang('${T("Revenu brut encaissé")}', D.square.brut, D.square.n + ' transaction' + (D.square.n > 1 ? 's' : ''))
+        + rang('${T("Revenu brut encaissé")}', D.square.brut, D.square.n + ' ' + (D.square.n > 1 ? '${T("transactions")}' : '${T("transaction")}'))
         + rang('${T("Frais de traitement")}', '−' + D.square.frais, '${T("déductibles · ligne 8710")}')
         + rang('${T("Revenu net après frais")}', D.square.net, '', true)
         + '</div>';

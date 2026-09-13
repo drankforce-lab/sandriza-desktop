@@ -274,8 +274,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         +   (b.appVersion
               ? '<b>' + esc(b.appVersion) + '</b>'
                 + '<div style="font-size:.72rem;color:var(--tx-gris)">'
-                + (b.appFichiers || 0) + '${T(" installateur")}' + ((b.appFichiers || 0) > 1 ? 's' : '')
-                + '${T(" conservé")}' + ((b.appFichiers || 0) > 1 ? 's' : '') + '</div>'
+                /* ⚠ UNE PHRASE A TROU : le nom ET son participe s accordent
+                   ensemble, et l anglais ne les accorde pas du tout. Deux
+                   << s >> colles auraient fait deux fautes au lieu d une. */
+                + ((b.appFichiers || 0) > 1
+                    ? '${T("{0} installateurs conservés")}' : '${T("{0} installateur conservé")}')
+                  .split('{0}').join(b.appFichiers || 0) + '</div>'
                 + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">' + esc(b.appErreur) + '</div>' : '')
               : '<span style="color:var(--tx-gris);font-size:.78rem">${T("non conservée")}</span>'
                 + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">' + esc(b.appErreur) + '</div>' : ''))
@@ -491,7 +495,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           dire('${T("Sauvegarde créée (")}'+(r.taille||'')+'${T(") — mais l’application n’a pas été conservée : ")}'+r.appErreur, 'att');
         } else if (r.appVersion) {
           dire('${T("Sauvegarde créée (")}'+(r.taille||'')+'${T(") — application ")}'+r.appVersion
-            + '${T(" conservée (")}'+(r.appFichiers||0)+'${T(" installateur")}'+((r.appFichiers||0)>1?'s':'')+').', 'bon');
+            + ' ' + (((r.appFichiers || 0) > 1)
+                ? '${T("conservée ({0} installateurs).")}' : '${T("conservée ({0} installateur).")}')
+              .split('{0}').join(r.appFichiers || 0), 'bon');
         } else {
           dire('${T("Sauvegarde créée (")}'+(r.taille||'')+').', 'bon');
         }

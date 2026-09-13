@@ -444,7 +444,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>';
 
     h += '<div class="carte plein"><h2>' + (enRecherche
-        ? '${T("Résultats")} <span class="note">— ' + lignes.length + ' ${T("produit")}' + (lignes.length > 1 ? 's' : '') + '</span>'
+        ? '${T("Résultats")} <span class="note">— ' + lignes.length + ' '
+          + (lignes.length > 1 ? '${T("produits")}' : '${T("produit")}') + '</span>'
         /* ⚠ LES DEUX ALTERNATIVES EN ENTIER, plus de << s >> colle : c est la
            faute qui donnait << 11 variantes to restock >> sur sa capture. */
         : '${T("À réapprovisionner")} <span class="note">— ' + lignes.length + ' '
@@ -464,8 +465,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<span class="principal"><strong>' + esc(a.nom) + '</strong>'
             + (a.code ? ' <span class="code">' + esc(a.code) + '</span>' : '')
             + '</span>'
-            + '<span class="fin">' + a.unites + ' ${T("unité")}' + (a.unites > 1 ? 's' : '')
-            + ' · ' + a.variantes + ' ${T("variante")}' + (a.variantes > 1 ? 's' : '')
+            + '<span class="fin">' + a.unites + ' ' + (a.unites > 1 ? '${T("unités")}' : '${T("unité")}')
+            + ' · ' + a.variantes + ' ' + (a.variantes > 1 ? '${T("variantes")}' : '${T("variante")}')
             + (a.alertes ? ' · <span class="q bas">' + a.alertes + ' ${T("à commander")}</span>' : '')
             + '</span></div>';
         });
@@ -523,7 +524,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="carte plein">';
     h += '<h2>' + esc(PROD.nom)
       + (PROD.sku ? ' <span class="note">— ' + esc(PROD.sku) + '</span>' : '')
-      + ' <span class="note">· ' + VARS.length + ' ${T("variante")}' + (VARS.length > 1 ? 's' : '')
+      + ' <span class="note">· ' + VARS.length + ' '
+      + (VARS.length > 1 ? '${T("variantes")}' : '${T("variante")}')
       + '</span></h2>';
 
     h += dessinerFiltres();
@@ -582,7 +584,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             ? '<button class="mini" id="pg-prec"' + (PAGE <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
               + ' Page <strong>' + (PAGE + 1) + '</strong> / ' + pages + ' '
               + '<button class="mini" id="pg-suiv"' + (PAGE >= pages - 1 ? ' disabled' : '') + '>${T("Suiv. →")}</button>'
-            : lot.length + ' ${T("variante")}' + (lot.length > 1 ? 's' : ''))
+            : lot.length + ' ' + (lot.length > 1 ? '${T("variantes")}' : '${T("variante")}'))
         + '</span></div>';
     }
 
@@ -665,8 +667,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // champs. C etait deja la promesse de l ecran du site, elle est tenue ici par
     // construction et non par precaution.
     var h = '<div class="filtres"><span class="lbl">${T("Filtrer :")}</span>'
-      + menu('couleur', 'Couleur', couleurs, FILTRE.couleur)
-      + menu('taille', 'Taille', tailles, FILTRE.taille) + '</div>';
+      + menu('couleur', '${T("Couleur")}', couleurs, FILTRE.couleur)
+      + menu('taille', '${T("Taille")}', tailles, FILTRE.taille) + '</div>';
     // Les index servent au clic (voir brancherProduit) : on les retient.
     window._fCouleurs = couleurs; window._fTailles = tailles;
     return h;
@@ -849,8 +851,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var nCoches = Object.keys(COCHES).length;
       h += '<div class="lot">'
         + '<label><input type="checkbox" id="lot-page"> ${T("Toute la page")}</label>'
-        + '<span>' + nCoches + ' ${T("produit")}' + (nCoches > 1 ? 's' : '') + ' ${T("sélectionné")}'
-        + (nCoches > 1 ? 's' : '') + '</span>'
+        + '<span>' + nCoches + ' '
+        + (nCoches > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}') + '</span>'
         + '<span style="flex:1 1 auto"></span>'
         + '<button class="mini rouge" id="lot-app"><span class="ic">🔴</span> ${T("Appliquer vente finale")}</button>'
         + '<button class="mini vert" id="lot-ret"><span class="ic">✅</span> ${T("Retirer vente finale")}</button>'
@@ -913,7 +915,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td class="c">' + l.tailles + '</td>'
           + '<td class="c">' + l.couleurs + '</td>'
           + '<td><b' + (l.unites === 0 ? ' style="color:var(--tx-err)"' : '') + '>' + l.unites + '</b> '
-          +   '${T("unité")}' + (l.unites > 1 ? 's' : '') + ' ' + pilule(l) + '</td>'
+          +   (l.unites > 1 ? '${T("unités")}' : '${T("unité")}') + ' ' + pilule(l) + '</td>'
           + '<td class="c" style="white-space:nowrap">'
           +   '<button class="mini" data-inv="' + esc(l.id) + '" title="${T("Gérer l’inventaire")}"><span class="ic">📦</span> ${T("Inventaire")}</button> '
           +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="${T("Assigner un SKU")}"><span class="ic">🏷</span> SKU</button> ' : '')
@@ -1066,7 +1068,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // suffit — redessiner ferait perdre la position de defilement.
         var lot = corps.querySelector('.lot span:nth-child(2)');
         var nc = Object.keys(COCHES).length;
-        if (lot) lot.textContent = nc + ' ${T("produit")}' + (nc > 1 ? 's' : '') + ' ${T("sélectionné")}' + (nc > 1 ? 's' : '');
+        if (lot) lot.textContent = nc + ' '
+          + (nc > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}');
       }
     };
     corps.onclick = function(ev){
@@ -1108,7 +1111,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           if (cc) cc.checked = !!COCHES[lid];
           var lot = corps.querySelector('.lot span:nth-child(2)');
           var nc = Object.keys(COCHES).length;
-          if (lot) lot.textContent = nc + ' ${T("produit")}' + (nc > 1 ? 's' : '') + ' ${T("sélectionné")}' + (nc > 1 ? 's' : '');
+          if (lot) lot.textContent = nc + ' '
+            + (nc > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}');
           return;
         }
         // Le geste principal de la ligne : MODIFIER la fiche. En lecture seule
@@ -1266,8 +1270,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           return '<option value="' + a + '"' + (String(DMG_AN) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
       + '</select>'
       + '<button class="mini" id="dmg-imp"><span class="ic">🖨</span> ${T("Imprimer le rapport")}</button>'
-      + '<span class="droite aide"><span class="ic">🔧</span> <b>' + d.totalQte + '</b> article' + (d.totalQte > 1 ? 's' : '')
-      + ' ${T("endommagé")}' + (d.totalQte > 1 ? 's' : '') + ' · <span class="ic">💸</span> <b>' + d.totalValeur.toFixed(2)
+      + '<span class="droite aide"><span class="ic">🔧</span> <b>' + d.totalQte + '</b> '
+      + (d.totalQte > 1 ? '${T("articles endommagés")}' : '${T("article endommagé")}')
+      + ' · <span class="ic">💸</span> <b>' + d.totalValeur.toFixed(2)
       + ' $</b> ${T("valeur perdue (avant taxes)")}</span>'
       + '</div>';
 
@@ -1868,18 +1873,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '${T("(Configuration puis Infolettre). Les demandes restent en attente.")}</p>'
         + '<textarea rows="2" readonly aria-label="${T("Adresses des demandes en attente")}">' + esc(c.adresses.join(', ')) + '</textarea>';
     } else if (c) {
-      h += '<p style="color:var(--tx-ok)"><span class="ic">✉</span> ' + c.envoyes + ' ${T("courriel")}' + (c.envoyes > 1 ? 's' : '')
-        + ' ${T("de retour en inventaire envoyé")}' + (c.envoyes > 1 ? 's' : '')
-        + (c.echecs ? ', <span style="color:var(--tx-err)">' + c.echecs + ' ${T("échec")}'
-            + (c.echecs > 1 ? 's' : '') + '</span>' : '') + '.</p>';
+      h += '<p style="color:var(--tx-ok)"><span class="ic">✉</span> ' + c.envoyes + ' '
+        + (c.envoyes > 1
+            ? '${T("courriels de retour en inventaire envoyés")}'
+            : '${T("courriel de retour en inventaire envoyé")}')
+        + (c.echecs ? ', <span style="color:var(--tx-err)">' + c.echecs + ' '
+            + (c.echecs > 1 ? '${T("échecs")}' : '${T("échec")}') + '</span>' : '') + '.</p>';
     }
     var etiq = r.etiquettes || [];
     var total = 0;
     etiq.forEach(function(it){ total += (parseInt(it.qty, 10) || 0); });
     if (etiq.length) {
       h += '<p>${T("Imprimer les étiquettes code-barres selon les quantités saisies ?")} '
-        + '<strong>' + total + '</strong> ${T("étiquette")}' + (total > 1 ? 's' : '')
-        + '${T(" pour ")}' + etiq.length + ' ${T("variante")}' + (etiq.length > 1 ? 's' : '') + '.</p>';
+        + '<strong>' + total + '</strong> ' + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}')
+        + '${T(" pour ")}' + etiq.length + ' '
+        + (etiq.length > 1 ? '${T("variantes")}' : '${T("variante")}') + '.</p>';
     }
     h += '<div class="fin2">'
       + (etiq.length ? '<button id="v-plus-tard">${T("Plus tard")}</button>'
@@ -1948,8 +1956,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     if (!items.length) { dire('${T("Aucune variante en stock à imprimer.")}', 'att'); return; }
     voile('<h3><span class="ic">🏷</span> ${T("Imprimer les étiquettes")}</h3>'
-      + '<p>${T("Imprimer")} <strong>' + total + '</strong> ${T("étiquette")}' + (total > 1 ? 's' : '')
-      + '${T(" pour ")}' + items.length + ' ${T("variante")}' + (items.length > 1 ? 's' : '') + ' ${T("en stock ?")}</p>'
+      + '<p>${T("Imprimer")} <strong>' + total + '</strong> ' + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}')
+      + '${T(" pour ")}' + items.length + ' '
+      + (items.length > 1 ? '${T("variantes")}' : '${T("variante")}') + ' ${T("en stock ?")}</p>'
       + '<p style="color:var(--tx2);font-size:.8rem">${T("Quantités telles qu’elles sont saisies à l’écran,")} '
       + '${T("même si l’inventaire n’est pas encore enregistré.")}</p>'
       + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'

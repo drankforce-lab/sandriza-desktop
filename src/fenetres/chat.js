@@ -200,7 +200,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + f[1] + (f[0] === 'pending' && D.enAttente
                   ? '<span class="n hi">' + D.enAttente + '</span>' : '') + '</button>';
           }).join('')
-      + '<div class="droite"><span>' + rows.length + ' conversation' + (rows.length > 1 ? 's' : '')
+      + '<div class="droite"><span>' + rows.length + ' '
+      + (rows.length > 1 ? '${T("conversations")}' : '${T("conversation")}')
       + (D.horsLigne ? ' · ' + D.horsLigne + ' ${T("hors ligne")}' : '') + '</span></div></div>';
 
     if (!rows.length) {
@@ -213,7 +214,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span class="pill ' + (TONS[c.statut] || 'neutre') + '">' + esc(c.statutLibelle) + '</span>'
         + (c.horsLigne ? '<span class="pill neutre">${T("hors ligne")}</span>' : '')
         + '<span class="droite"><span class="dt">' + esc(c.date) + '</span>'
-        + '<div class="dt">' + c.nbMessages + ' message' + (c.nbMessages > 1 ? 's' : '') + '</div></span></div>'
+        + '<div class="dt">' + c.nbMessages + ' '
+        + (c.nbMessages > 1 ? '${T("messages")}' : '${T("message")}') + '</div></span></div>'
         + '<div class="dt">' + esc(c.courriel || '—')
         + (c.telephone ? ' · ' + esc(c.telephone) : '') + '</div>'
         + '</div>';
@@ -242,7 +244,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return '<div style="padding:.35rem 0;border-top:1px solid var(--v055)">'
           + '<span class="pill ' + (c.score === true ? 'bon' : 'err') + '">'
           + (c.score === true ? 'satisfait' : 'insatisfait') + '</span> '
-          + '<strong>' + esc(c.name || 'Visiteur') + '</strong>'
+          + '<strong>' + esc(c.name || '${T("Visiteur")}') + '</strong>'
           + '<div style="font-size:.86rem;white-space:pre-wrap;overflow-wrap:anywhere">'
           + esc(c.comment || '') + '</div></div>';
       }).join('');

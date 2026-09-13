@@ -593,7 +593,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +champ('ct-sub','${T("Sous-titre")}',d.subtitle||'')
       +champ('ct-email','${T("Courriel de contact")}',d.email||'')
       +champ('ct-phone','${T("Téléphone")}',d.phone||'')
-      +champ('ct-addr','Adresse',d.address||'')
+      +champ('ct-addr','${T("Adresse")}',d.address||'')
       +champ('ct-hours','${T("Heures d’ouverture")}',d.hours||'')
       +'</div>'
       +'<label class="champ" style="margin-top:.2rem"><span class="lbl">${T("Texte d’introduction")}</span><textarea class="t" id="ct-intro" rows="2"'+(RO?' disabled':'')+'>'+esc(d.intro||'')+'</textarea></label>'

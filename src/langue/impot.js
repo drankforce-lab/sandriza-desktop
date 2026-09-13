@@ -37,6 +37,15 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'commande': 'order',
+  'commandes': 'orders',
+  'transaction': 'transaction',
+  'transactions': 'transactions',
+  'transaction facturée': 'transaction billed',
+  'transactions facturées': 'transactions billed',
+  'remboursement déduit': 'refund deducted',
+  'remboursements déduits': 'refunds deducted',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Fiscalité et impôt — Administration Sandriza': 'Tax and income tax — Sandriza Administration',
   'Fiscalité et impôt': 'Tax and income tax',

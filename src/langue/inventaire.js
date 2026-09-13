@@ -19,6 +19,20 @@
  */
 
 module.exports = {
+  /* ⚠⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. C est ici
+     que sa capture montrait « 11 variantes to restock » : un « s » colle a un
+     mot deja traduit ne fait pas un pluriel anglais. */
+  'produits': 'products',
+  'unités': 'units',
+  'variantes': 'variants',
+  'produit sélectionné': 'product selected',
+  'produits sélectionnés': 'products selected',
+  'article endommagé': 'damaged item',
+  'articles endommagés': 'damaged items',
+  'courriel de retour en inventaire envoyé': 'back-in-stock email sent',
+  'courriels de retour en inventaire envoyés': 'back-in-stock emails sent',
+  'échecs': 'failures',
+  'étiquettes': 'labels',
   'Inventaire — Administration Sandriza': 'Inventory — Sandriza Administration',
   'Inventaire': 'Inventory',
   /* ⚠ EN MINUSCULES : c est un fragment de phrase, pas un titre. Le relevé par

@@ -25,6 +25,8 @@
  */
 
 module.exports = {
+  /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */
+  'contacts': 'contacts',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Publicité ciblée — Administration Sandriza': 'Targeted advertising — Sandriza Administration',
   /* ⚠ La source ecrit l esperluette ECHAPPEE ; la forme rendue la perd. */

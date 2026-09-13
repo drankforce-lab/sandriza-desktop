@@ -347,6 +347,8 @@ ${JS_DIRE()}
       "Clé copiée (sans les espaces).": "Key copied (without the spaces).",
       "La copie a échoué — recopiez la clé à la main.": "Copy failed — type the key by hand.",
       "L’opération a échoué.": "The operation failed.",
+      "Attention — il vous reste <strong>{0}</strong> tentative avant un verrouillage de 15 minutes.": "Careful — you have <strong>{0}</strong> attempt left before a 15-minute lockout.",
+      "Attention — il vous reste <strong>{0}</strong> tentatives avant un verrouillage de 15 minutes.": "Careful — you have <strong>{0}</strong> attempts left before a 15-minute lockout.",
       "motif.vide": "Username and password are required.",
       "motif.captcha": "Please complete the security check.",
       "motif.verrou": "Account locked — try again in a few minutes.",
@@ -1088,9 +1090,12 @@ ${JS_DIRE()}
     z.className = 'cx-err on' + (r && r.ton === 'orange' ? ' orange' : (r && r.ton === 'sombre' ? ' sombre' : ''));
     var txt = esc(TM(r) || T('L’opération a échoué.'));
     if (r && typeof r.restant === 'number' && r.restant > 0) {
-      txt += '<br><span style="font-size:0.78rem">Attention — il vous reste <strong>' + r.restant
-        + '</strong> tentative' + (r.restant > 1 ? 's' : '')
-        + ' avant un verrouillage de 15 minutes.</span>';
+      txt += '<br><span style="font-size:0.78rem">'
+        + (r.restant > 1
+            ? T('Attention — il vous reste <strong>{0}</strong> tentatives avant un verrouillage de 15 minutes.')
+            : T('Attention — il vous reste <strong>{0}</strong> tentative avant un verrouillage de 15 minutes.')
+          ).split('{0}').join(r.restant)
+        + '</span>';
     }
     z.innerHTML = txt;
   }

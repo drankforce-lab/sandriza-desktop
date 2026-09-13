@@ -731,7 +731,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + '<p style="color:var(--tx-att)">${T("Un remboursement ne s’annule pas d’un clic.")}</p>'
           : '<p>${T("Aucun remboursement ne sera émis ici — le règlement s’est fait autrement (échange, crédit déjà émis…).")}</p>')
       + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="paie" id="v-oui">' + (statutFinal === 'refunded' ? 'Rembourser' : 'Clore') + '</button></div>',
+      + '<button class="paie" id="v-oui">'
+      + (statutFinal === 'refunded' ? '${T("Rembourser")}' : '${T("Clore")}') + '</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){

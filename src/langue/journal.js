@@ -16,6 +16,9 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`. */
+  'ligne': 'row',
+  'lignes': 'rows',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Journal d’envoi — Administration Sandriza':
     'Sending log — Sandriza Administration',

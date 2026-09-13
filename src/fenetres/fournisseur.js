@@ -81,15 +81,15 @@ function pageFournisseur(id) {
     var h = [];
     h.push('<div class="etape"><div class="carte"><h2>Identification</h2><div class="grille">'
       + ch('f-nom', '${T("Nom du fournisseur")}', { requis: true, large: true })
-      + ch('f-contact', 'Personne-ressource')
-      + ch('f-courriel', 'Courriel', { type: 'email' })
+      + ch('f-contact', '${T("Personne-ressource")}')
+      + ch('f-courriel', '${T("Courriel")}', { type: 'email' })
       + ch('f-tel', '${T("Téléphone")}', { type: 'tel' })
       + ch('f-web', '${T("Site web")}', { placeholder: 'https://…' })
       + '</div></div></div>');
 
     h.push('<div class="etape"><div class="carte"><h2>${T("Adresse")}</h2><div class="grille">'
-      + ch('f-rue', 'Rue', { large: true })
-      + ch('f-ville', 'Ville')
+      + ch('f-rue', '${T("Rue")}', { large: true })
+      + ch('f-ville', '${T("Ville")}')
       + sel('f-prov', 'Province', CTX.provinces)
       + ch('f-cp', '${T("Code postal")}', { placeholder: 'G1H 1T4' })
       + '</div></div></div>');

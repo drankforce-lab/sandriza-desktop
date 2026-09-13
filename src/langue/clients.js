@@ -15,6 +15,10 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`.
+     ⚠ ET AU MASCULIN : le client est toujours au masculin dans ce dépôt. */
+  'client': 'customer',
+  'clients': 'customers',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Clients — Administration Sandriza': 'Customers — Sandriza Administration',
   'Clients': 'Customers',

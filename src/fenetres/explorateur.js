@@ -358,7 +358,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (pc.pages <= 1) return '';
     return '<div class="pagi"><button class="jeton" id="p-prec"' + (PAGE <= 0 ? ' disabled' : '')
       + '>${T("‹ Précédent")}</button><span>${T("Page")} ' + (PAGE + 1) + '${T(" sur ")}' + pc.pages
-      + ' — ' + pc.ph.length + '${T(" photo")}' + (pc.ph.length > 1 ? 's' : '') + '</span>'
+      + ' — ' + pc.ph.length + ' ' + (pc.ph.length > 1 ? '${T("photos")}' : '${T("photo")}') + '</span>'
       + '<button class="jeton" id="p-suiv"' + (PAGE >= pc.pages - 1 ? ' disabled' : '')
       + '>${T("Suivant ›")}</button></div>';
   }
@@ -538,8 +538,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ? ('« <strong>' + esc(nomTraitement(gestes[0])) + '</strong> »')
       : ('${T("leur ")}<strong>${T("dernier traitement")}</strong>');
     voile('<h3>${T("↩ Revenir à l’état précédent")}</h3>'
-      + '<p>' + k + '${T(" photo")}' + (k > 1 ? 's' : '') + '${T(" sur ")}' + ids.length
-      + '${T(" choisie")}' + (ids.length > 1 ? 's' : '') + ' ' + (k > 1 ? '${T("retrouveront")}' : '${T("retrouvera")}')
+      + '<p>' + k + ' ' + (k > 1 ? '${T("photos")}' : '${T("photo")}') + '${T(" sur ")}' + ids.length
+      + ' ' + (ids.length > 1 ? '${T("choisies")}' : '${T("choisie")}')
+      + ' ' + (k > 1 ? '${T("retrouveront")}' : '${T("retrouvera")}')
       + ' ${T("l’état d’avant")} ' + quoi + '.</p>'
       + '<p><strong>${T("Aucun crédit n’est dépensé")}</strong>${T(" : l’image d’avant est déjà rangée, ")}'
       + '${T("on ne fait que la remettre en place.")}</p>'
@@ -566,10 +567,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           appeler('photos:annulerLot', [ids]).then(function(r){
             fermer();
             if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-            var m = r.faites + '${T(" photo")}' + (r.faites > 1 ? 's' : '') + ' revenue'
-              + (r.faites > 1 ? 's' : '') + ' ${T("à l’état précédent.")}';
-            if (r.sansPrecedent) m += ' ' + r.sansPrecedent + ' n’avai'
-              + (r.sansPrecedent > 1 ? 'ent' : 't') + ' ${T("rien à annuler.")}';
+            var m = r.faites + ' '
+              + (r.faites > 1 ? '${T("photos revenues")}' : '${T("photo revenue")}')
+              + ' ${T("à l’état précédent.")}';
+            if (r.sansPrecedent) m += ' ' + r.sansPrecedent + ' '
+              + (r.sansPrecedent > 1 ? '${T("n’avaient rien à annuler.")}' : '${T("n’avait rien à annuler.")}');
             if (r.echecs && r.echecs.length) m += ' ' + r.echecs.length + ' ${T("en échec.")}';
             dire(m, (r.echecs && r.echecs.length) ? 'att' : 'bon');
             charger();   // les vignettes ont changé : on relit
@@ -601,7 +603,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var k = nAppliquer();
     var r = nEnRetard();
     voile('<h3><span class="ic">📦</span> ${T("Mettre à jour la fiche produit")}</h3>'
-      + '<p>${T("L’image courante de")} ' + k + '${T(" photo")}' + (k > 1 ? 's' : '')
+      + '<p>${T("L’image courante de")} ' + k + ' ' + (k > 1 ? '${T("photos")}' : '${T("photo")}')
       + ' ${T("sera portée dans la fiche de l’article auquel elle est rattachée.")}</p>'
       /* ⚠ ON DIT QUE C EST LA VITRINE. Un compte rendu qui parlerait de
          << fiches mises a jour >> laisserait croire a un rangement interne : ce
@@ -625,10 +627,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '${T("lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre.")} '
       + '${T("Rattachez-la de nouveau pour lever le doute.")}</p>'
       + (k < ids.length
-          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + '${T(" photo")}'
-             + ((ids.length - k) > 1 ? '${T("s ne sont")}' : '${T(" n’est")}') + '${T(" rattachée")}'
-             + ((ids.length - k) > 1 ? 's' : '') + ' ${T("à aucun article et ne bougera")}'
-             + ((ids.length - k) > 1 ? 'nt' : '') + '${T(" pas.")}</p>')
+          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + ' '
+             + ((ids.length - k) > 1
+                 ? '${T("photos ne sont rattachées à aucun article et ne bougeront pas.")}'
+                 : '${T("photo n’est rattachée à aucun article et ne bougera pas.")}') + '</p>')
           : '')
       + '<div class="fin2"><button id="ap-non">${T("Annuler")}</button>'
       + '<button class="prim" id="ap-oui">${T("Mettre à jour la vitrine")}</button></div>',
@@ -660,7 +662,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = Object.keys(SEL).length;
     var dispo = (D && D.tousLesIds) ? D.tousLesIds.length : 0;
     cptEl.className = 'cpt' + (n ? ' on' : '');
-    cptEl.textContent = n ? (n + '${T(" sélectionnée")}' + (n > 1 ? 's' : '')) : '${T("Aucune sélection")}';
+    cptEl.textContent = n
+      ? (n + ' ' + (n > 1 ? '${T("sélectionnées")}' : '${T("sélectionnée")}'))
+      : '${T("Aucune sélection")}';
     actionsEl.innerHTML =
       '<button class="jeton" id="a-tout"' + (dispo ? '' : ' disabled') + '>${T("Tout (")}' + dispo + ')</button>'
       + '<button class="jeton" id="a-inv"' + (dispo ? '' : ' disabled') + '>${T("Inverser")}</button>'
@@ -706,8 +710,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('panier:poser', [ids]).then(function(r){
         en.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire(r.combien + '${T(" photo")}' + (r.combien > 1 ? 's' : '') + '${T(" envoyée")}'
-          + (r.combien > 1 ? 's' : '') + '${T(" au Studio — le traitement se lance là-bas.")}', 'bon');
+        dire(r.combien + ' '
+          + (r.combien > 1 ? '${T("photos envoyées")}' : '${T("photo envoyée")}')
+          + '${T(" au Studio — le traitement se lance là-bas.")}', 'bon');
         /* ⚠ ON FERME, ET C EST LE GESTE JUSTE (demande du 2026-08-14 : << quand
            on fait envoyer au studio ca devrait fermer l explorateur
            automatiquement >>). L explorateur est un SELECTEUR : une fois la

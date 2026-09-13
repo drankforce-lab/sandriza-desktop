@@ -286,7 +286,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     var h = '<h2>${T("Totaux")} <span class="note">${T("— calculés par le site")}</span></h2>'
-      + '<div class="l"><span>${T("Sous-total (")}' + TOT.nbArticles + '${T(" unité")}' + (TOT.nbArticles > 1 ? 's' : '') + ')</span><span>' + argent(TOT.sousTotal) + '</span></div>';
+      + '<div class="l"><span>${T("Sous-total (")}' + TOT.nbArticles + ' '
+      + (TOT.nbArticles > 1 ? '${T("unités")}' : '${T("unité")}')
+      + ')</span><span>' + argent(TOT.sousTotal) + '</span></div>';
     if (TOT.livraison > 0) h += '<div class="l"><span>${T("Livraison")}</span><span>' + argent(TOT.livraison) + '</span></div>';
     (TOT.taxes || []).forEach(function(t){
       h += '<div class="l"><span>' + esc(t.nom) + ' (' + (Math.round(t.taux * 1000000) / 10000) + ' %)</span><span>' + argent(t.montant) + '</span></div>';
@@ -409,7 +411,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!String(s.motif || '').trim()) { dire(MOTIFS.motif_requis, 'err'); return; }
     var enCredit = s.methode !== 'original';
     voile('<h3><span class="ic">💳</span> ${T("Confirmer le remboursement ?")}</h3>'
-      + '<p>' + TOT.nbArticles + '${T(" unité")}' + (TOT.nbArticles > 1 ? 's' : '')
+      + '<p>' + TOT.nbArticles + ' '
+      + (TOT.nbArticles > 1 ? '${T("unités")}' : '${T("unité")}')
       + (TOT.livraison > 0 ? '${T(" + livraison")}' : '') + '${T(" — total ")}<strong>' + argent(TOT.total) + '</strong>'
       + (TOT.retenu ? '${T(", net au client ")}<strong>' + argent(TOT.net) + '</strong>${T(" (frais ")}' + argent(TOT.frais) + '${T(" retenus)")}' : '')
       + '</p><p>${T("Méthode : ")}<strong>' + (enCredit ? '${T("crédit boutique (n’expire jamais)")}' : '${T("moyen de paiement original — Square")}') + '</strong></p>'

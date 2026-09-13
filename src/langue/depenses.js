@@ -21,6 +21,8 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'affichés': 'shown',
   'Dépenses d’entreprise — Administration Sandriza': 'Business expenses — Sandriza Administration',
   'Dépenses d’entreprise': 'Business expenses',
   'Dépenses indisponibles': 'Expenses unavailable',
@@ -257,6 +259,7 @@ module.exports = {
   'Dépenses': 'Expenses',
   'Dépense': 'Expense',
   'dépense': 'expense',
+  'dépenses': 'expenses',
   'Importer une facture': 'Import an invoice',
   'livrés': 'delivered',
   'livré': 'delivered',

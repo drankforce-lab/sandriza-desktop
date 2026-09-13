@@ -323,7 +323,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="gr2">'
       + texteHtml('t-number', '${T("Numéro Twilio")}', C.twilioNumber, '+1 514 555 0123', true)
       + selectHtml('t-langmode', '${T("Mode de langue")}', C.langMode || 'fr', [
-          ['fr', 'Français'], ['en', 'Anglais'],
+          // ⚠ LA CLE RESTE 'fr'/'en' — elle part chez Twilio. Seul le LIBELLE
+          // suit la langue du poste : ici on ne choisit pas la langue de
+          // l application, on decrit celle que le TELEPHONE parlera, et cette
+          // description se lit dans la langue de celui qui la regle.
+          ['fr', '${T("Français")}'], ['en', '${T("Anglais")}'],
           ['bilingual', '${T("Bilingue (FR + EN)")}'], ['select', "${T('Français d\'abord, anglais sur le #')}"]]) + '</div>';
     h += '<div class="gr2">'
       + selectHtml('t-voice-fr', '${T("Voix française (fr-CA)")}', C.voiceFr || 'Polly.Gabrielle-Neural', VOIX_FR)
@@ -625,7 +629,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RESUME.erreur) { box.innerHTML = '<div class="vide">' + esc(RESUME.erreur) + '</div>'; return; }
     var vms = RESUME.voicemails || [];
     var nonlus = 0; for (var k = 0; k < vms.length; k++) if (!vms[k].read) nonlus++;
-    if (badge) badge.innerHTML = nonlus ? '<span class="qlive">' + nonlus + ' non lu' + (nonlus > 1 ? 's' : '') + '</span>' : '';
+    if (badge) badge.innerHTML = nonlus ? '<span class="qlive">' + nonlus + ' ' + (nonlus > 1 ? '${T("non lus")}' : '${T("non lu")}') + '</span>' : '';
     if (!vms.length) { box.innerHTML = '<div class="vide">${T("Aucun message vocal.")}</div>'; return; }
     var h = '';
     for (var i = 0; i < vms.length; i++) {
@@ -650,7 +654,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RESUME.erreur) { box.innerHTML = '<div class="vide">' + esc(RESUME.erreur) + '</div>'; return; }
     var sms = RESUME.sms || [];
     var nonlus = 0; for (var k = 0; k < sms.length; k++) if (sms[k].direction === 'inbound' && !sms[k].read) nonlus++;
-    if (badge) badge.innerHTML = nonlus ? '<span class="qlive">' + nonlus + ' non lu' + (nonlus > 1 ? 's' : '') + '</span>' : '';
+    if (badge) badge.innerHTML = nonlus ? '<span class="qlive">' + nonlus + ' ' + (nonlus > 1 ? '${T("non lus")}' : '${T("non lu")}') + '</span>' : '';
     if (!sms.length) { box.innerHTML = '<div class="vide">${T("Aucun SMS.")}</div>'; return; }
     var h = '';
     for (var i = 0; i < sms.length; i++) {

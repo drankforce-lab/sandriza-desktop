@@ -152,7 +152,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       /* ⚠ L etiquette ENTIERE : une cle courte posee dans une phrase plus
          longue laisse l autre moitie en francais. */
       + '<input aria-label="${T("Nom ou courriel")}" type="search" id="c-q" placeholder="${T("Nom ou courriel…")}" value="' + esc(Q) + '">'
-      + '<span class="droite">' + (D.total || 0) + ' client' + (D.total > 1 ? 's' : '') + '</span>'
+      + '<span class="droite">' + (D.total || 0) + ' '
+      + (D.total > 1 ? '${T("clients")}' : '${T("client")}') + '</span>'
       + '</div>';
 
     h += '<div class="carte">';

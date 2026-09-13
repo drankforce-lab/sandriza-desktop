@@ -29,6 +29,12 @@
  */
 
 module.exports = {
+  /* ⚠⚠ LES DEUX LIBELLES DU BOUTON QUI TRANCHE. « Rembourser » sort de
+     l argent, « Clore » n en sort pas — les confondre en anglais couterait
+     cher. Trouves par banc-libelle-argument : ils passaient en argument a
+     `voile()`, donc aucun banc ne les voyait. */
+  'Rembourser': 'Refund',
+  'Clore': 'Close',
   /* ── L EN-TETE ET LES ETATS ─────────────────────────────────────────────── */
   'Demande de retour — Administration Sandriza': 'Return request — Sandriza Administration',
   'Demande de retour': 'Return request',

@@ -33,6 +33,11 @@
  */
 
 module.exports = {
+  /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */
+  '{0} installateur conservé': '{0} installer kept',
+  '{0} installateurs conservés': '{0} installers kept',
+  'conservée ({0} installateur).': 'kept ({0} installer).',
+  'conservée ({0} installateurs).': 'kept ({0} installers).',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   /* ⚠ La source ecrit l esperluette ECHAPPEE (`&amp;`) : c est elle que le
      poseur cherche, et la forme rendue (« Sauvegarde & Restauration ») que le

@@ -161,7 +161,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="droite">'
       + (D.peutModifier && (D.total || 0)
           ? '<button class="mini danger" id="jo-vider">' + (ARME ? '${T("Confirmer ?")}' : '${T("Effacer le journal")}') + '</button>' : '')
-      + '<span>' + rows.length + ' ligne' + (rows.length > 1 ? 's' : '') + '</span></div></div>';
+      + '<span>' + rows.length + ' '
+      + (rows.length > 1 ? '${T("lignes")}' : '${T("ligne")}') + '</span></div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {

@@ -124,7 +124,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = D.lignes || [];
     var h = '<div class="barreoutils">'
-      + '<span>' + rows.length + ' collection' + (rows.length > 1 ? 's' : '') + '</span>'
+      + '<span>' + rows.length + ' '
+      + (rows.length > 1 ? '${T("collections")}' : '${T("collection")}') + '</span>'
       + '<span class="droite"><button class="prim" id="col-nouvelle">${T("+ Nouvelle collection")}</button></span>'
       + '</div>';
     h += '<div class="carte">';

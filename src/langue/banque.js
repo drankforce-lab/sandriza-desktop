@@ -40,6 +40,13 @@ module.exports = {
   'Le module de conciliation n’est pas chargé dans la fenêtre principale.':
     'The reconciliation module is not loaded in the main window.',
   'Cette conciliation n’existe plus.': 'This reconciliation no longer exists.',
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'transaction': 'transaction',
+  'transactions': 'transactions',
+  'conciliation': 'reconciliation',
+  'conciliations': 'reconciliations',
+  'ligne importée': 'imported row',
+  'lignes importées': 'imported rows',
   'Cette conciliation est verrouillée : elle ne peut plus être modifiée.':
     'This reconciliation is locked: it can no longer be changed.',
   'Aucune transaction Square en mémoire pour cette année. Chargez-les d’abord depuis l’écran Paiements.':

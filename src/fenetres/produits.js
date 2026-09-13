@@ -174,7 +174,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="mini' + (TRI === 'cart' ? ' actif' : '') + '" id="p-tri" '
       + 'title="${T("Mettre en premier les produits présents dans des paniers actifs")}">'
       + (TRI === 'cart' ? '<span class="ic">🛒</span> ${T("Tri panier ✓")}' : '<span class="ic">🛒</span> ${T("Trier par panier")}') + '</button>'
-      + '<span class="droite">' + (D.total || 0) + ' produit' + (D.total > 1 ? 's' : '')
+      + '<span class="droite">' + (D.total || 0) + ' '
+      + (D.total > 1 ? '${T("produits")}' : '${T("produit")}')
       + ' · ' + (D.stats && D.stats.ruptures || 0) + ' ${T("en rupture")}'
       + '<button class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></span>'
       + '</div>';

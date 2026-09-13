@@ -1104,11 +1104,22 @@ function szBrouillonQuelqueChose(v, champs){
   return false;
 }
 
+/* ⚠⚠ QUATRE PHRASES ECRITES EN ENTIER, PAS DEUX RADICAUX PLUS UN << s >>.
+   Ces deux lignes etaient des litteraux NUS doublement fautifs : pas traduits,
+   et pluralises en ajoutant une lettre. En francais ca marche ; en anglais le
+   pluriel ne se fabrique pas toujours ainsi, et un << s >> colle a part ne
+   passe par aucun dictionnaire.
+   ⚠ ELLES PARAISSENT DANS LES DIX-NEUF FENETRES qui gardent un brouillon —
+   c est la duree que lit la boite << Une saisie non terminee >>. */
 function _brIlYa(min){
   var m = Math.max(1, Math.round(min || 1));
-  if (m < 60) return 'il y a ' + m + ' minute' + (m > 1 ? 's' : '');
+  if (m < 60) {
+    return (m > 1 ? '${T("il y a {0} minutes")}' : '${T("il y a {0} minute")}')
+      .split('{0}').join(m);
+  }
   var h = Math.round(m / 60);
-  return 'il y a ' + h + ' heure' + (h > 1 ? 's' : '');
+  return (h > 1 ? '${T("il y a {0} heures")}' : '${T("il y a {0} heure")}')
+    .split('{0}').join(h);
 }
 
 /* ══ LA QUESTION DE LA FERMETURE, DESSINEE ICI ════════════════════

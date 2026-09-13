@@ -395,7 +395,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var seg = val('cf-seg');
     appeler('analytics:audience', { seg:seg }).then(function(r){
       var el = document.getElementById('cf-aud');
-      if (el && r && r.ok) el.textContent = r.count + ' ${T("contact")}' + (r.count !== 1 ? 's' : '');
+      if (el && r && r.ok) el.textContent = r.count + ' '
+        + (r.count !== 1 ? '${T("contacts")}' : '${T("contact")}');
     });
   }
   function enregistrerCamp(launch){

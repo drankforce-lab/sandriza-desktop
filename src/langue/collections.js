@@ -16,6 +16,9 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`. */
+  'collection': 'collection',
+  'collections': 'collections',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Nos Collections — Administration Sandriza':
     'Our Collections — Sandriza Administration',

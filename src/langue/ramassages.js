@@ -17,6 +17,10 @@
  */
 
 module.exports = {
+  'Ramassage': 'Pickup',
+  'colis': 'parcels',
+  /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */
+  'expéditions': 'shipments',
   'Ramassages et rapport — Administration Sandriza': 'Pickups and report — Sandriza Administration',
   'Ramassages et rapport': 'Pickups and report',
   'Expéditions indisponibles': 'Shipments unavailable',

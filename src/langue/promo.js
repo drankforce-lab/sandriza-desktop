@@ -23,6 +23,16 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'étiquettes': 'labels',
+  'étiquette imprimée': 'label printed',
+  'étiquettes imprimées': 'labels printed',
+  'étiquette envoyée': 'label sent',
+  'étiquettes envoyées': 'labels sent',
+  'gabarit Avery': 'Avery template',
+  'gabarits Avery': 'Avery templates',
+  'impression directe': 'direct printing',
+  'l’imprimante': 'the printer',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Centre d’impression — Administration Sandriza': 'Print Centre — Sandriza Administration',
   'Centre d’impression': 'Print Centre',

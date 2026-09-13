@@ -603,6 +603,9 @@ p("      \"La fenêtre principale ne répond pas.\": \"The main window is not an
 p("      \"Clé copiée (sans les espaces).\": \"Key copied (without the spaces).\",");
 p("      \"La copie a échoué — recopiez la clé à la main.\": \"Copy failed — type the key by hand.\",");
 p("      \"L’opération a échoué.\": \"The operation failed.\",");
+/* ⚠ LES DEUX ALTERNATIVES DU PLURIEL, EN ENTIER — voir banc-pluriel-colle.js. */
+p("      \"Attention — il vous reste <strong>{0}</strong> tentative avant un verrouillage de 15 minutes.\": \"Careful — you have <strong>{0}</strong> attempt left before a 15-minute lockout.\",");
+p("      \"Attention — il vous reste <strong>{0}</strong> tentatives avant un verrouillage de 15 minutes.\": \"Careful — you have <strong>{0}</strong> attempts left before a 15-minute lockout.\",");
 p("      \"motif.vide\": \"Username and password are required.\",");
 p("      \"motif.captcha\": \"Please complete the security check.\",");
 p("      \"motif.verrou\": \"Account locked — try again in a few minutes.\",");
@@ -1129,9 +1132,16 @@ p("    if (!z) return;");
 p("    z.className = 'cx-err on' + (r && r.ton === 'orange' ? ' orange' : (r && r.ton === 'sombre' ? ' sombre' : ''));");
 p("    var txt = esc(TM(r) || T('L’opération a échoué.'));");
 p("    if (r && typeof r.restant === 'number' && r.restant > 0) {");
-p("      txt += '<br><span style=\"font-size:0.78rem\">Attention — il vous reste <strong>' + r.restant");
-p("        + '</strong> tentative' + (r.restant > 1 ? 's' : '')");
-p("        + ' avant un verrouillage de 15 minutes.</span>';");
+/* ⚠⚠ UNE PHRASE ENTIERE, PAS UN RADICAL PLUS UN << s >> (2026-09-13). Elle
+   etait NUE et collee : pas traduite, et pluralisee en ajoutant une lettre.
+   En anglais le pluriel ne se fabrique pas toujours ainsi, et un << s >> ajoute
+   a cote ne passe par aucun dictionnaire. Voir tools/banc-pluriel-colle.js. */
+p("      txt += '<br><span style=\"font-size:0.78rem\">'");
+p("        + (r.restant > 1");
+p("            ? T('Attention — il vous reste <strong>{0}</strong> tentatives avant un verrouillage de 15 minutes.')");
+p("            : T('Attention — il vous reste <strong>{0}</strong> tentative avant un verrouillage de 15 minutes.')");
+p("          ).split('{0}').join(r.restant)");
+p("        + '</span>';");
 p("    }");
 p("    z.innerHTML = txt;");
 p("  }");

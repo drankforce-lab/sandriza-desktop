@@ -265,7 +265,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="mini' + (ONGLET === 'modeles' ? ' actif' : '') + '" data-onglet="modeles">${T("Modèles")}<span></span></button>'
       + '<button class="mini' + (ONGLET === 'impression' ? ' actif' : '') + '" data-onglet="impression">${T("Impression par lot")}</button>'
       + '<button class="mini' + (ONGLET === 'formats' ? ' actif' : '') + '" data-onglet="formats">${T("Formats")}</button>'
-      + '<span class="droite">' + (k.imprimees || 0) + ' ${T("étiquette")}' + ((k.imprimees || 0) > 1 ? 's' : '') + ' ${T("imprimée")}' + ((k.imprimees || 0) > 1 ? 's' : '') + '</span>'
+      + '<span class="droite">' + (k.imprimees || 0) + ' '
+      + ((k.imprimees || 0) > 1 ? '${T("étiquettes imprimées")}' : '${T("étiquette imprimée")}') + '</span>'
       + '</div>';
 
     h += '<div class="stats">'
@@ -399,7 +400,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td><span class="num">' + esc(x.nom) + '</span><div class="dt">' + esc(x.type) + '</div></td>'
             + '<td><span class="pill neutre">' + esc(x.dim) + '</span></td>'
             + '<td class="dt">' + (x.perso ? '${T("personnalisé")}' : '${T("standard")}') + '</td>'
-            + '<td class="dt">' + (x.planches ? x.planches + ' gabarit' + (x.planches > 1 ? 's' : '') + ' Avery' : 'impression directe') + '</td>'
+            + '<td class="dt">' + (x.planches
+                ? x.planches + ' ' + (x.planches > 1 ? '${T("gabarits Avery")}' : '${T("gabarit Avery")}')
+                : '${T("impression directe")}') + '</td>'
             + '<td style="text-align:right;white-space:nowrap">'
             + (ro ? '' : '<button class="mini" data-creer="' + esc(x.cle) + '">${T("Créer un modèle")}</button>'
                 + (x.perso ? ' <button class="mini danger" data-fmtsuppr="' + esc(x.id) + '">'
@@ -440,7 +443,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // affirmation qu on dementira 100 ms plus tard.
     h += '<div style="margin:.5rem 0">'
       + rang('${T("Format du modèle")}', cible ? (cible.dim + (cible.rond ? ' (rond)' : '')) : '—')
-      + rang('Imprimante', IMPR ? (IMPR.imprimante || '${T("non détectée")}') : '—')
+      + rang('${T("Imprimante")}', IMPR ? (IMPR.imprimante || '${T("non détectée")}') : '—')
       + rang('${T("Résolution détectée")}', IMPR ? (IMPR.dpi + ' dpi') : '—')
       + rang('${T("Rendu envoyé")}', CAL ? CAL.rendu : '—')
       + '</div>';
@@ -592,19 +595,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var faites = JOB.faites, arrete = JOB.arret;
         fini();
         suiviFin(arrete ? '${T("Impression arrêtée")}' : '${T("Impression terminée")}',
-          faites + ' / ' + total + ' ${T("étiquette")}' + (total > 1 ? 's' : '') + '.');
+          faites + ' / ' + total + ' ' + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}') + '.');
         if (!arrete) setTimeout(suiviFermer, 2500);
         dire(arrete
-          ? ('${T("Impression arrêtée après")} ' + faites + ' / ' + total + ' ${T("étiquette")}' + (total > 1 ? 's' : '') + '.')
-          : (faites + ' ${T("étiquette")}' + (faites > 1 ? 's' : '') + ' ${T("envoyée")}' + (faites > 1 ? 's' : '')
-             + ' à ' + ((IMPR && IMPR.imprimante) || 'l’imprimante') + '.'),
+          ? ('${T("Impression arrêtée après")} ' + faites + ' / ' + total + ' '
+             + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}') + '.')
+          : (faites + ' ' + (faites > 1 ? '${T("étiquettes envoyées")}' : '${T("étiquette envoyée")}')
+             + ' à ' + ((IMPR && IMPR.imprimante) || '${T("l’imprimante")}') + '.'),
           arrete ? 'att' : 'bon');
         charger();
         return;
       }
       var n = Math.min(25, JOB.total - JOB.faites);
       suiviAvance(JOB.faites, JOB.total, '${T("Lot de")} ' + n + ' ${T("en cours d’envoi…")}');
-      dire('Impression ' + (JOB.faites + n) + ' / ' + JOB.total + '…');
+      dire('${T("Impression")} ' + (JOB.faites + n) + ' / ' + JOB.total + '…');
       appeler('promo:lot', [CIBLE, n]).then(function(r){
         if (!r.ok) {
           var faites = JOB.faites;
@@ -890,8 +894,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       D = r;
       if (!CIBLE && (D.lignes || []).length) CIBLE = D.lignes[0].id;
       var s = document.getElementById('sous');
-      if (s) s.textContent = (D.kpis && D.kpis.modeles || 0) + ' ${T("modèle")}'
-        + ((D.kpis && D.kpis.modeles || 0) > 1 ? 's' : '');
+      if (s) s.textContent = (D.kpis && D.kpis.modeles || 0) + ' '
+        + ((D.kpis && D.kpis.modeles || 0) > 1 ? '${T("modèles")}' : '${T("modèle")}');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
     });

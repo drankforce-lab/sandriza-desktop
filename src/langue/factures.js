@@ -26,6 +26,9 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`. */
+  'facture': 'invoice',
+  'factures': 'invoices',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Factures — Administration Sandriza': 'Invoices — Sandriza Administration',
   'Factures': 'Invoices',

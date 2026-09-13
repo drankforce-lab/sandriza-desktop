@@ -27,6 +27,7 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Configuration de la livraison — Administration Sandriza':
     'Shipping configuration — Sandriza Administration',
@@ -80,6 +81,8 @@ module.exports = {
   '↻ Relire Stripe': '↻ Read Stripe again',
   ' pays inscrit': ' registered country',
   ' pays inscrits': ' registered countries',
+  'pays inscrit': 'registered country',
+  'pays inscrits': 'registered countries',
   ' · dernière lecture : ': ' · last read: ',
   '· dernière lecture :': '· last read:',
   'jamais': 'never',

@@ -21,6 +21,11 @@
  */
 
 module.exports = {
+  /* ⚠ L EXEMPLE du champ suit la langue du poste ; ce qu on TAPE reste de la
+     donnee. « Solde » est le LIBELLE de l etiquette — sa VALEUR, elle, reste
+     'Solde' et part telle quelle dans la fiche. */
+  'Ex : 350': 'E.g. 350',
+  'En solde': 'On sale',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Produit — Administration Sandriza': 'Product — Sandriza Administration',
   'Produit': 'Product',
@@ -256,6 +261,9 @@ module.exports = {
     'No change since opening, and none saved',
   'dans les dernières 24 h. 🕘 Tout l’historique': 'in the last 24 h. 🕘 Full history',
   'Aucune modification.': 'No change.',
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'modification': 'change',
+  'modifications': 'changes',
   'Historique indisponible :': 'History unavailable:',
   '. Rien n’est perdu — réessayez une fois reconnecté.':
     '. Nothing is lost — try again once signed in.',

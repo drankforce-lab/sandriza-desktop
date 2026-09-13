@@ -637,7 +637,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     lignes += rangee('Commande', esc(r.numero || '—'));
     lignes += rangee('${T("Total")}', argent(r.total));
     if (r.enAttente) {
-      lignes += rangee('Paiement', '<span style="color:var(--tx-att)">${T("en attente — lien à envoyer")}</span>');
+      lignes += rangee('${T("Paiement")}', '<span style="color:var(--tx-att)">${T("en attente — lien à envoyer")}</span>');
     } else {
       lignes += rangee('${T("Stock décompté")}', r.stockOk ? 'oui'
         : '<strong style="color:var(--tx-err)">${T("NON — à vérifier")}</strong>');

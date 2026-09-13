@@ -344,7 +344,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         return '<div style="border-top:1px solid var(--v055);padding:.4rem 0">'
           + '<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
           + '<strong>' + esc(l.nom) + '</strong>'
-          + '<span class="dt">' + l.lies.length + '${T(" article")}' + (l.lies.length > 1 ? 's' : '') + '</span>'
+          + '<span class="dt">' + l.lies.length + ' '
+          + (l.lies.length > 1 ? '${T("articles")}' : '${T("article")}') + '</span>'
           + (D.peutModifier
               ? '<button class="mini geste" style="margin-left:auto" data-modifier-liaison="' + esc(l.id) + '">${T("Modifier")}</button>'
               : '') + '</div>'
@@ -684,8 +685,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '${T("Sans style, tous les articles actifs sont proposés.")}</div>';
     h += '</div>';
 
-    h += '<div class="carte"><h2>${T("2 · Articles")}<span class="n">' + LOOK.length + ' retenu'
-      + (LOOK.length > 1 ? 's' : '') + '</span></h2>'
+    h += '<div class="carte"><h2>${T("2 · Articles")}<span class="n">' + LOOK.length + ' '
+      + (LOOK.length > 1 ? '${T("retenus")}' : '${T("retenu")}') + '</span></h2>'
       + '<div class="styles" style="margin-bottom:.45rem">'
       + '<button class="sty' + (CATF === 'all' ? ' actif' : '') + '" data-catf="all">${T("Toutes")}</button>'
       + (AGEN.categories || []).map(function(c){

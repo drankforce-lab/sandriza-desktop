@@ -18,6 +18,37 @@
  */
 
 module.exports = {
+  /* ══ LES MOTS DE FORMULAIRE, ECRITS UNE FOIS (2026-09-13) ═════════════════
+   * ⚠⚠ TROUVES PAR `banc-libelle-argument`, LE 36e BANC. Ils etaient passes en
+   * ARGUMENT a la fonction qui fabrique le champ — `ch('f-ville', 'Ville')` —
+   * donc colles a aucune balise, valeur d aucune propriete `label:`, et pour
+   * cette raison invisibles aux deux bancs de langue qui existaient.
+   * ⚠ ILS SONT ICI ET PAS DANS CHAQUE FENETRE parce qu ils paraissent dans
+   * plusieurs : « Ville » est dans le fournisseur, l impot et les pages. Les
+   * recopier, ce serait trois occasions de les faire diverger. */
+  'Adresse': 'Address',
+  'Ville': 'City',
+  'Rue': 'Street',
+  'Courriel': 'Email',
+  'Confirmer': 'Confirm',
+  'Paiement': 'Payment',
+  'Personne-ressource': 'Contact person',
+  'Couleur': 'Colour',
+  'Taille': 'Size',
+  'Marque': 'Brand',
+  'Fournisseur': 'Supplier',
+  'Imprimante': 'Printer',
+  'Impression': 'Printing',
+
+  /* ── L AGE D UN BROUILLON — LES QUATRE FORMES, EN ENTIER ─────────────────
+     ⚠ Elles paraissent dans les DIX-NEUF fenetres qui gardent une saisie.
+     ⚠ ET LES DEUX ALTERNATIVES SONT ECRITES : le pluriel ne se fabrique pas en
+     ajoutant une lettre — c est la doctrine du depot, et elle etait enfreinte
+     139 fois avant que `banc-pluriel-colle` ne la mesure. */
+  'il y a {0} minute': '{0} minute ago',
+  'il y a {0} minutes': '{0} minutes ago',
+  'il y a {0} heure': '{0} hour ago',
+  'il y a {0} heures': '{0} hours ago',
   /* ── LA BARRE DE TITRE ET LES BOUTONS DE FENETRE ────────────────────────── */
   '⤡ Réduire': '⤡ Restore',
   '⛶ Plein écran': '⛶ Full screen',

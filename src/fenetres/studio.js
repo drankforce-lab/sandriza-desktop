@@ -939,7 +939,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span>' + (x.etat === 'encours' && x.courant
             ? ('Photo ' + (fait + 1) + ' sur ' + x.total + ' — ' + esc(x.courant.nom))
             : (fait + ' sur ' + x.total)) + '</span>'
-        + (x.echecs ? '<span class="mal">' + x.echecs + ' ${T("échec")}' + (x.echecs > 1 ? 's' : '') + '</span>' : '')
+        + (x.echecs ? '<span class="mal">' + x.echecs + ' '
+            + (x.echecs > 1 ? '${T("échecs")}' : '${T("échec")}') + '</span>' : '')
         + '<span class="droite">' + g + '</span></div>'
         + (x.echecs && x.detailEchecs.length
             ? '<div class="lote">' + x.detailEchecs.map(function(e){
@@ -1000,8 +1001,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!PANIER.length) return '';
     var n = PANIER.length;
     return '<div class="panier"><div class="pt">'
-      + '<strong>' + n + ' photo' + (n > 1 ? 's' : '') + '</strong> '
-      + '<span class="dt">venue' + (n > 1 ? 's' : '') + ' ${T("de l’explorateur")}</span>'
+      + '<strong>' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</strong> '
+      + '<span class="dt">' + (n > 1 ? '${T("venues de l’explorateur")}' : '${T("venue de l’explorateur")}') + '</span>'
       + '<button class="mini" id="pn-vider" title="${T("Oublier cette sélection")}">✕</button></div>'
       + '<div class="pv">' + PANIER.slice(0, 8).map(function(p){
           return p.apercu ? '<img src="' + esc(p.apercu) + '" alt="" loading="lazy">'
@@ -1321,7 +1322,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '${T("siens</strong> — ce n’est pas un mélange des deux.")}</span></span></label>');
       if (AV.ombreActive) {
         h.push(chRange('av-oi', '${T("Intensité")}', AV.ombreIntensite));
-        h.push(chRange('av-od', 'Douceur', AV.ombreDouceur));
+        h.push(chRange('av-od', '${T("Douceur")}', AV.ombreDouceur));
         h.push(chSel('av-oe', '${T("Étendue")}', OMBRE_ETENDUES, AV.ombreEtendue, ''));
         h.push(chSel('av-odir', '${T("Direction de la lumière")}', OMBRE_DIRS, AV.ombreDirection, ''));
         h.push(chSel('av-op', '${T("Pose du sujet")}',
@@ -1405,7 +1406,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="avsec">${T("Taille et discrétion")}</div>';
     h += chRange2('fil-taille', '${T("Largeur du logo")}', FIL.taille, 5, 60, 1, ' ${T("% de l’image")}');
     h += chRange2('fil-op', '${T("Opacité")}', Math.round(FIL.opacite * 100), 5, 100, 5, ' %');
-    h += chRange2('fil-marge', 'Marge', FIL.marge, 0, 15, 1, ' %');
+    h += chRange2('fil-marge', '${T("Marge")}', FIL.marge, 0, 15, 1, ' %');
     h += '<div class="avun"><div class="fbar">'
       + '<button class="prim" id="fil-go"' + ((RESULT && lg && !RO) ? '' : ' disabled') + '>'
       + '${T("Appliquer au résultat")}</button>'
@@ -2189,7 +2190,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         occuper(false);
         peindreResultat();
         dire(rate
-          ? (faits + ' format' + (faits > 1 ? 's' : '') + ' ${T("enregistré")}' + (faits > 1 ? 's' : '')
+          ? (faits + ' ' + (faits > 1 ? '${T("formats enregistrés")}' : '${T("format enregistré")}')
              + ', ' + rate + ' ${T("en échec.")}')
           : (faits + ' ${T("formats enregistrés dans la photothèque.")}'), rate ? 'att' : 'bon');
         return;
@@ -2624,7 +2625,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = Object.keys(SEL).length;
     var dispo = (PH_META && PH_META.tousLesIds) ? PH_META.tousLesIds.length : 0;
     return '<div class="phsel">'
-      + '<span class="cpt' + (n ? ' on' : '') + '">' + (n ? n + ' photo' + (n > 1 ? 's' : '') + ' choisie' + (n > 1 ? 's' : '') : '${T("Aucune sélection")}') + '</span>'
+      + '<span class="cpt' + (n ? ' on' : '') + '">'
+      + (n ? n + ' ' + (n > 1 ? '${T("photos choisies")}' : '${T("photo choisie")}') : '${T("Aucune sélection")}')
+      + '</span>'
       + '<button class="jeton" id="ph-tout"' + (dispo ? '' : ' disabled') + '>${T("Tout sélectionner (")}' + dispo + ')</button>'
       + '<button class="jeton" id="ph-inv"' + (dispo ? '' : ' disabled') + '>${T("Inverser")}</button>'
       + '<button class="jeton" id="ph-rien"' + (n ? '' : ' disabled') + '>${T("Vider")}</button>'
@@ -2869,7 +2872,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
              afficher << coût non estimé >> sur un traitement qui est GRATUIT —
              une inquiétude fabriquée de toutes pièces. */
           if (quoi === 'filigrane') {
-            z.innerHTML = '<strong>' + nP + ' photo' + (nP > 1 ? 's' : '')
+            z.innerHTML = '<strong>' + nP + ' ' + (nP > 1 ? '${T("photos")}' : '${T("photo")}')
               + ' ${T("· aucun appel facturé")}</strong><br>${T("Le filigrane est posé dans l’application,")} '
               + '${T("au canevas : il ne coûte rien et n’entame pas le plafond mensuel.")}';
             if (b) b.disabled = false;
@@ -2905,8 +2908,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               : szArgentSymbole(sous(r.coutMax));
             var app = (r.appelsMax > r.appelsMin)
               ? (r.appelsMin + ' à ' + r.appelsMax) : String(r.appelsMax);
-            var h = '<strong>' + nP + ' photo' + (nP > 1 ? 's' : '') + ' · ' + app
-              + ' appel' + (r.appelsMax > 1 ? 's' : '') + ' ${T("facturé")}' + (r.appelsMax > 1 ? 's' : '')
+            var h = '<strong>' + nP + ' ' + (nP > 1 ? '${T("photos")}' : '${T("photo")}') + ' · ' + app
+              + ' ' + (r.appelsMax > 1 ? '${T("appels facturés")}' : '${T("appel facturé")}')
               + ' ≈ ' + mt + '</strong>';
             if (bu.actif) {
               /* ⚠ LE SYMBOLE ETAIT DANS LA PHRASE TRADUITE (« $ dépensés sur »),
@@ -2981,7 +2984,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             SEL = {};
             dire(r.nom + ' — ' + r.total + ' '
               + (r.total > 1 ? '${T("photos en traitement")}' : '${T("photo en traitement")}')
-              + (r.ignorees ? ' (' + r.ignorees + ' ${T("déjà faite")}' + (r.ignorees > 1 ? 's' : '') + '${T(", écartée")}' + (r.ignorees > 1 ? 's' : '') + ')' : '')
+              + (r.ignorees ? ' (' + r.ignorees + ' '
+                  + (r.ignorees > 1 ? '${T("déjà faites, écartées")}' : '${T("déjà faite, écartée")}') + ')' : '')
               + '${T(". Suivez-le en bas de n’importe quel écran.")}', 'bon');
             PICKER = false;
             LOTS_VUE = true;

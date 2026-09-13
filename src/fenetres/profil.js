@@ -403,7 +403,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          mot de passe << fort >> passera forcement. */
       + '<div class="jauge" id="p-jauge"><i></i><i></i><i></i><i></i></div>'
       + '<div class="jmot" id="p-jmot">${T("Indication de robustesse")}</div>'
-      + champMdp('p-cnf', 'Confirmer', 'new-password', '')
+      + champMdp('p-cnf', '${T("Confirmer")}', 'new-password', '')
       + '<div class="ferr" id="p-err" role="alert"></div>'
       + '<div class="actions">'
         + '<button class="prim" id="p-go">${T("Enregistrer le nouveau mot de passe")}</button>'

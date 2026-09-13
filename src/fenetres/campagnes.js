@@ -370,7 +370,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function pluriel(n, mot){ return n + ' ' + mot + (n > 1 ? 's' : ''); }
+  // ⚠ LES DEUX FORMES EN ENTIER. La version d avant collait un « s » au mot
+  // recu — ce qui marche en francais et FAUX en anglais (« echecs » n est pas
+  // « failures », « inscription » ne fait pas « inscriptions »). Le pluriel se
+  // choisit ici entre deux phrases deja traduites, jamais en ajoutant une
+  // lettre. Voir tools/banc-pluriel-colle.js.
+  function pluriel(n, un, plu){ return n + ' ' + (n > 1 ? plu : un); }
 
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
@@ -813,7 +818,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       szBrouillonJeter();
       dire(esc(r.nom) + (r.cree ? ' ${T("créée")}' : ' ${T("mise à jour")}') + ' — '
-        + pluriel(r.etapes, '${T("étape")}') + '.', 'bon');
+        + pluriel(r.etapes, '${T("étape")}', '${T("étapes")}') + '.', 'bon');
       fermerForm();
     });
   }
@@ -984,7 +989,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + '<td class="dt">' + esc(s.phrase || '—') + '</td>'
             + '<td class="num"><span class="pill ' + (s.compte ? 'bon' : 'neutre') + '">'
             + s.compte + '</span></td>'
-            + '<td class="num dt">' + (s.utilisePar ? pluriel(s.utilisePar, 'campagne') : '—') + '</td>'
+            + '<td class="num dt">' + (s.utilisePar ? pluriel(s.utilisePar, '${T("campagne")}', '${T("campagnes")}') : '—') + '</td>'
             + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
         }).join('')
       + '</tbody></table></div>';
@@ -1093,7 +1098,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (p) p.textContent = String(r.compte);
       dire(r.compte === 0
         ? '${T("Aucune abonnée ne correspond : ce segment n’enverrait rien.")}'
-        : pluriel(r.compte, '${T("abonnée")}') + ' sur ' + r.total + '.', r.compte === 0 ? 'att' : 'bon');
+        : pluriel(r.compte, '${T("abonnée")}', '${T("abonnées")}') + ' sur ' + r.total + '.', r.compte === 0 ? 'att' : 'bon');
     });
   }
 
@@ -1108,7 +1113,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('segments:ecrire', [FORM.id, { nom: nom, criteres: CRITERES }]).then(function(r){
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(esc(r.nom) + (r.cree ? ' ${T("créé")}' : ' ${T("mis à jour")}') + ' — ' + pluriel(r.compte, '${T("abonnée")}') + '.'
+      dire(esc(r.nom) + (r.cree ? ' ${T("créé")}' : ' ${T("mis à jour")}') + ' — ' + pluriel(r.compte, '${T("abonnée")}', '${T("abonnées")}') + '.'
         + (r.nuage ? '' : ' ${T("Enregistré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
         r.nuage ? 'bon' : 'att');
       szBrouillonJeter();
@@ -1135,7 +1140,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + (D.envoyees || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Courriels partis")}</div><div class="val">'
       + (D.courrielsEnvoyes || 0) + '</div>'
-      + (D.courrielsEchoues ? '<div class="dt">' + pluriel(D.courrielsEchoues, '${T("échec")}') + '</div>' : '')
+      + (D.courrielsEchoues ? '<div class="dt">' + pluriel(D.courrielsEchoues, '${T("échec")}', '${T("échecs")}') + '</div>' : '')
       + '</div></div>';
 
     /* Ce qui empeche un envoi, ou le detourne, se dit AVANT le clic. */
@@ -1226,10 +1231,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var armeT = (ARME === 'traiter');
       h += '<div class="barreoutils"><button class="mini' + (armeT ? ' arme' : ' prim') + '" id="cp-traiter"'
         + ((!D.dues || !D.envoisPermis) ? ' disabled' : '') + '>'
-        + (armeT ? '${T("Confirmer — envoyer")} ' + pluriel(D.dues || 0, '${T("étape")}') + ' ?' : '${T("Traiter les étapes échues")}')
+        + (armeT ? '${T("Confirmer — envoyer")} ' + pluriel(D.dues || 0, '${T("étape")}', '${T("étapes")}') + ' ?' : '${T("Traiter les étapes échues")}')
         + '</button>'
         + '<div class="droite">' + (D.dues
-            ? pluriel(D.dues, '${T("étape")}') + ' ${T("échue")}' + ((D.dues > 1) ? 's' : '')
+            ? pluriel(D.dues, '${T("étape échue")}', '${T("étapes échues")}')
             : '${T("Rien d’échu pour l’instant")}') + '</div></div>';
     }
 
@@ -1261,9 +1266,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + (ch.active ? '${T("Active")}' : '${T("Suspendue")}') + '</span>'
           + '<span class="pill acc">' + esc(ch.declencheurLibelle) + '</span>'
           + '<div class="gestes">' + gestes + '</div></div>'
-          + '<div class="compte">' + pluriel((ch.etapes || []).length, '${T("étape")}') + ' · '
-          + ch.inscriptionsActives + ' ${T("en cours ·")} ' + ch.inscriptionsFinies + ' ${T("terminée")}'
-          + (ch.inscriptionsFinies > 1 ? 's' : '') + '</div>'
+          + '<div class="compte">' + pluriel((ch.etapes || []).length, '${T("étape")}', '${T("étapes")}') + ' · '
+          + ch.inscriptionsActives + ' ${T("en cours ·")} '
+          + pluriel(ch.inscriptionsFinies, '${T("terminée")}', '${T("terminées")}') + '</div>'
           + ((ch.etapes || []).length
               ? '<div class="etapes">' + ch.etapes.map(function(e){
                   return '<div class="etape"><span class="no">' + e.no + '.</span> '
@@ -1324,9 +1329,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         OCCUPE = false;
         if (!r.ok) { dire(expliquer(r), 'err'); charger(); return; }
         /* Le verdict dit ce qui est PARTI, pas ce qui a ete tente. */
-        dire(pluriel(r.envoyes, 'courriel') + ' parti' + (r.envoyes > 1 ? 's' : '')
-          + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}') : '')
-          + ' sur ' + pluriel(r.traitees, '${T("étape")}') + ' ${T("traitée")}' + (r.traitees > 1 ? 's' : '') + '.',
+        dire(pluriel(r.envoyes, '${T("courriel parti")}', '${T("courriels partis")}')
+          + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}', '${T("échecs")}') : '')
+          + ' sur ' + pluriel(r.traitees, '${T("étape traitée")}', '${T("étapes traitées")}') + '.',
           r.echecs ? 'att' : 'bon');
         charger();
       });
@@ -1424,7 +1429,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           // ⚠ Le refus le plus utile : on NOMME les campagnes qui bloquent,
           // sinon il faudrait les chercher une par une.
           dire(r.motif === 'utilise'
-            ? ('${T("Impossible :")} ' + pluriel(r.combien, 'campagne') + ' ${T("s’en sert encore (")}'
+            ? ('${T("Impossible :")} ' + pluriel(r.combien, '${T("campagne")}', '${T("campagnes")}') + ' ${T("s’en sert encore (")}'
                + (r.campagnes || []).join(', ') + '${T("). Changez leur segment d’abord.")}')
             : expliquer(r), 'err');
           dessiner();
@@ -1452,7 +1457,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
            occasion de se raviser, et rien ne se rattrape apres. */
         var combien = camp
           ? (camp.canal === 'sms' ? ((DC.smsDestinataires || 0) + ' SMS')
-             : (pluriel(camp.destinataires, 'courriel')
+             : (pluriel(camp.destinataires, '${T("courriel")}', '${T("courriels")}')
                 + (camp.canal === 'both' ? ' et ' + (DC.smsDestinataires || 0) + ' SMS' : '')))
           : '${T("les destinataires")}';
         dire((DC && DC.modeTest)
@@ -1468,8 +1473,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       appeler('campagnes:envoyer', [idE]).then(function(r){
         OCCUPE = false;
         if (!r.ok) { dire(expliquer(r), 'err'); charger(); return; }
-        dire(esc(r.nom) + ' — ' + pluriel(r.envoyes, '${T("envoi")}') + ' ${T("réussi")}' + (r.envoyes > 1 ? 's' : '')
-          + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}') : '')
+        dire(esc(r.nom) + ' — ' + pluriel(r.envoyes, '${T("envoi réussi")}', '${T("envois réussis")}')
+          + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}', '${T("échecs")}') : '')
           + (r.modeTest ? ' ${T("(mode test : la campagne reste en brouillon).")}' : '.'),
           r.echecs ? 'att' : 'bon');
         charger();
@@ -1507,7 +1512,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!versActive && enCours && ARME !== 'bas:' + idB) {
         ARME = 'bas:' + idB;
         dessiner();
-        dire('${T("Suspendre abandonnera")} ' + pluriel(enCours, '${T("inscription")}') + ' ${T("en cours :")} '
+        dire('${T("Suspendre abandonnera")} ' + pluriel(enCours, '${T("inscription")}', '${T("inscriptions")}') + ' ${T("en cours :")} '
           + (enCours > 1 ? '${T("ces personnes ne recevront jamais")}' : '${T("cette personne ne recevra jamais")}')
           + ' ${T("la suite de la séquence. Cliquez pour confirmer.")}', 'att');
         return;
@@ -1532,15 +1537,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         ARME = 'chsup:' + idC;
         dessiner();
         dire('${T("Cliquez « Confirmer ? » — la chaîne, ses étapes et")} '
-          + pluriel(chS ? chS.inscriptionsActives : 0, '${T("inscription")}') + ' ${T("en cours disparaissent.")}', 'att');
+          + pluriel(chS ? chS.inscriptionsActives : 0, '${T("inscription")}', '${T("inscriptions")}') + ' ${T("en cours disparaissent.")}', 'att');
         return;
       }
       ARME = '';
       appeler('chaines:supprimer', [idC]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
         dire(esc(r.nom) + ' ${T("supprimée")}'
-          + (r.perdues ? ' — ' + pluriel(r.perdues, '${T("inscription")}') + ' ${T("abandonnée")}'
-             + (r.perdues > 1 ? 's' : '') + '.' : '.')
+          + (r.perdues ? ' — ' + pluriel(r.perdues, '${T("inscription abandonnée")}', '${T("inscriptions abandonnées")}') + '.' : '.')
           + (r.nuage ? '' : ' ${T("Retiré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
           r.nuage ? 'bon' : 'att');
         charger();

@@ -374,7 +374,7 @@ function pageProduit(id) {
     // 1 — Identité ET classement (fusionnées : elles décrivent la même chose,
     // et les séparer obligeait à un aller-retour pour une poignée de listes).
     h.push('<div class="etape">'
-      + '<div class="carte"><h2>Identification</h2><div class="grille">'
+      + '<div class="carte"><h2>${T("Identification")}</h2><div class="grille">'
       + ch('p-nom', '${T("Nom du produit")}', { requis: true, large: true, placeholder: '${T("Ex : Robe fleurie été")}' })
       + sel('p-cat', '${T("Catégorie")}', rien.concat(opt(CTX.categories, 'cle', 'libelle')), { requis: true })
       // ⚠ LE SKU EST VISIBLE, en lecture seule. Un code attribué « quelque part
@@ -383,15 +383,15 @@ function pageProduit(id) {
       + '<div class="ch"><label for="p-sku">${T("Code (SKU)")}</label>'
       + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
       + 'background:var(--f-pied);color:var(--tx-or)" placeholder="${T("choisissez une catégorie")}"></div>'
-      + ch('p-marque', 'Marque')
+      + ch('p-marque', '${T("Marque")}')
       // Le poids appartient a l identite du vetement, pas au prix : c est une
       // caracteristique de l article, et il tenait seul dans une carte entiere.
       + '<div class="ch"><label for="p-poids">${T("Poids unitaire ")}<span class="req">*</span></label>'
-      + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0" placeholder="Ex : 350">'
+      + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0" placeholder="${T("Ex : 350")}">'
       + '<select id="p-unite" aria-label="${T("Unité du poids")}"><option value="g">g</option><option value="kg">kg</option>'
       + '<option value="lb">lb</option></select></div>'
       + '<div class="aide" style="margin-top:.2rem">${T("Sert au calcul des frais d’expédition.")}</div></div>'
-      + '<div class="ch large"><label for="p-desc">Description'
+      + '<div class="ch large"><label for="p-desc">${T("Description")}'
       + '<span id="p-desc-etat" style="float:right;color:var(--tx2);font-size:.72rem"></span></label>'
       + '<textarea id="p-desc" rows="3"></textarea>'
       // La redaction par IA passe par le PONT : la fenetre envoie la photo et les
@@ -406,9 +406,20 @@ function pageProduit(id) {
       + sel('p-age', '${T("Groupe d’âge")}', rien.concat(opt(CTX.groupesAge, 'cle', 'libelle')))
       + sel('p-style', '${T("Style")}', rien.concat(opt(CTX.styles, 'cle', 'libelle')))
       + sel('p-guide', '${T("Guide des tailles")}', rien.concat(opt(CTX.guides, 'id', 'nom')))
-      + sel('p-etiq', '${T("Étiquette")}', [{ v: '', l: '${T("Aucune")}' }, { v: '${T("Populaire")}', l: '${T("Populaire")}' },
-            { v: 'Solde', l: 'Solde' }].concat(opt(CTX.etiquettes, 'cle', 'libelle')))
-      + sel('p-fourn', 'Fournisseur', rien.concat(opt(CTX.fournisseurs, 'id', 'nom')))
+      // ⚠⚠ LA VALEUR N EST PAS TRADUITE, LE LIBELLE L EST. Ce qui part dans
+      // le champ v est ECRIT dans la fiche et relu par le site ; le traduire ferait
+      // enregistrer « Popular » depuis un poste anglais et « Populaire »
+      // depuis un poste francais, pour la meme etiquette. On ne traduit que
+      // ce qui se lit.
+      + sel('p-etiq', '${T("Étiquette")}', [{ v: '', l: '${T("Aucune")}' }, { v: 'Populaire', l: '${T("Populaire")}' },
+            // ⚠ LE LIBELLE NE REPREND PAS LE MOT DE LA VALEUR, ET C EST VOULU.
+            // La valeur est posee telle quelle dans le champ plus bas, quand le
+            // prix solde passe sous le prix de vente : c est de la DONNEE. Une
+            // entree de dictionnaire portant ce mot le rendrait traduisible
+            // PARTOUT, y compris la ou il s ecrit — banc-langue-donnees le
+            // refuse, et il a raison. Le libelle porte donc sa propre phrase.
+            { v: 'Solde', l: '${T("En solde")}' }].concat(opt(CTX.etiquettes, 'cle', 'libelle')))
+      + sel('p-fourn', '${T("Fournisseur")}', rien.concat(opt(CTX.fournisseurs, 'id', 'nom')))
       + '</div></div>'
       + '<div class="carte"><h2>${T("Prix")}</h2>'
       + '<div class="prixgrille">'
@@ -2052,8 +2063,8 @@ function pageProduit(id) {
         + '${T("jusqu’au retrait de l’article, archivées par année, purgées au-delà de 5 ans.")}</div>'
         + ans.map(function(a){
             var l = parAn[a];
-            return '<div class="an">' + esc(a) + ' · ' + l.length + ' modification'
-              + (l.length > 1 ? 's' : '') + '</div>'
+            return '<div class="an">' + esc(a) + ' · ' + l.length + ' '
+              + (l.length > 1 ? '${T("modifications")}' : '${T("modification")}') + '</div>'
               + l.map(function(e){
                   return '<div class="bl"><div class="qd"><span>' + esc(dateCourte(e.ts)) + '</span>'
                     + (e.par ? '<span>par ' + esc(e.par) + '</span>' : '') + '</div>'

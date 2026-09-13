@@ -27,6 +27,11 @@
  */
 
 module.exports = {
+  /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */
+  'article': 'item',
+  'articles': 'items',
+  'retenu': 'kept',
+  'retenus': 'kept',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Recommandations — Administration Sandriza': 'Recommendations — Sandriza Administration',
   'Recommandations': 'Recommendations',

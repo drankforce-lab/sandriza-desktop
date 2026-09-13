@@ -27,6 +27,15 @@
  */
 
 module.exports = {
+  /* ⚠ Le nom de repli quand la personne n en a pas donne — trouve par
+     banc-libelle-argument : il passait en argument a `esc()`. */
+  'Visiteur': 'Visitor',
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER : le pluriel ne se fabrique pas en
+     ajoutant une lettre. Voir `tools/banc-pluriel-colle.js`. */
+  'conversation': 'conversation',
+  'conversations': 'conversations',
+  'message': 'message',
+  'messages': 'messages',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Chat en ligne — Administration Sandriza': 'Live chat — Sandriza Administration',
   'Chat en ligne': 'Live chat',

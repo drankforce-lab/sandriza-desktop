@@ -361,7 +361,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="mini prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
       + 'title="${T("N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées")}">'
       + '${T("Prioritaires")}' + (d && d.prioritairesNonTraitees
-          ? ' · ' + d.prioritairesNonTraitees + ' ${T("non traitée")}' + (d.prioritairesNonTraitees > 1 ? 's' : '')
+          ? ' · ' + d.prioritairesNonTraitees + ' '
+            + (d.prioritairesNonTraitees > 1 ? '${T("non traitées")}' : '${T("non traitée")}')
           : '') + '</button>';
     if (expedition && CTX && (CTX.annees || []).length) {
       h += '<span class="lbl" style="margin-left:.4rem">${T("Année :")}</span><select id="f-annee" aria-label="${T("Année")}">'

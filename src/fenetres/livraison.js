@@ -324,7 +324,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       PAYS = r; dessiner();
-      dire(r.nbInscrits ? (r.nbInscrits + '${T(" pays inscrit")}' + (r.nbInscrits > 1 ? 's' : '') + '.')
+      dire(r.nbInscrits ? (r.nbInscrits + ' '
+        + (r.nbInscrits > 1 ? '${T("pays inscrits")}' : '${T("pays inscrit")}') + '.')
                         : '${T("Aucune inscription active dans Stripe.")}', r.nbInscrits ? 'bon' : 'att');
     });
   }

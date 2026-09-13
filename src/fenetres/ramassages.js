@@ -253,7 +253,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       corps.innerHTML = h;
       return;
     }
-    h += '<div class="carte"><h2>${T("Par transporteur —")} ' + RAP.total + ' ${T("expédition")}' + (RAP.total > 1 ? 's' : '') + '</h2>'
+    h += '<div class="carte"><h2>${T("Par transporteur —")} ' + RAP.total + ' '
+      + (RAP.total > 1 ? '${T("expéditions")}' : '${T("expédition")}') + '</h2>'
       + '<table><thead><tr><th>${T("Transporteur")}</th><th style="text-align:center">${T("Colis")}</th>'
       + '<th style="text-align:right">${T("Total frais")}</th><th style="text-align:right">${T("Moy. par colis")}</th></tr></thead><tbody>'
       + (RAP.transporteurs || []).map(function(t){
@@ -318,7 +319,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           env.disabled = false;
           return;
         }
-        dire('Ramassage ' + r.date + ' — ' + r.total + ' colis'
+        dire('${T("Ramassage")} ' + r.date + ' — ' + r.total + ' ${T("colis")}'
           + ((r.parties || []).length ? ' · ' + r.parties.join(' · ') : ''), r.echec ? 'err' : 'bon');
         PLAN = null;
         charger();

@@ -28,6 +28,14 @@
  */
 
 module.exports = {
+  /* ⚠ LA LANGUE QUE LE TELEPHONE PARLERA — pas celle de l application. Le
+     reglage se lit dans la langue de celui qui le regle ; la cle envoyee a
+     Twilio reste 'fr' / 'en'. */
+  'Français': 'French',
+  'Anglais': 'English',
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'non lu': 'unread',
+  'non lus': 'unread',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Téléphonie — Administration Sandriza': 'Telephony — Sandriza Administration',
   'Téléphonie': 'Telephony',

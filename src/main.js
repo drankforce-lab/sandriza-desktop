@@ -1850,6 +1850,16 @@ let aproposWin = null;
    ➡ Un compte exhaustif ne l est que sur le terrain qu il enumere. */
 const TA = require('./langue').tr('apropos');
 
+/* ⚠⚠⚠ LE TITRE DE LA FENETRE — celui que Windows peint dans la barre de titre,
+   la barre des taches et l Alt-Tab. Il est pose par `ouvrirNative(cle, titre,…)`
+   AVANT que la page existe : aucune traduction de la page ne l atteint. Sa
+   capture du 2026-09-13 montrait « New product » DANS la fenetre et « Nouveau
+   produit » SUR la fenetre, sur la meme image.
+   ⚠ Les appels restent LITTERAUX (`TF('Nouveau produit')`, jamais `TF(x)`) :
+   c est ce qui permet a `banc-langue-processus-principal` d exiger l entree.
+   Voir src/langue/titres.js. */
+const TF = require('./langue').tr('titres');
+
 const infosApropos = () => {
   const cfg = reglages.lire();
   const sys = process.platform === 'win32' ? 'Windows'
@@ -2586,7 +2596,7 @@ ipcMain.handle('fenetre:commande', (e, id) => {
      injecter du script avant `did-finish-load` ne trouverait rien. */
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Préparation de commande', () => pageCommande(String(id || '')),
+  const win = ouvrirNative(cle, TF('Préparation de commande'), () => pageCommande(String(id || '')),
     { width: 880, height: 700, minHeight: 520 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2601,7 +2611,7 @@ ipcMain.handle('fenetre:commande', (e, id) => {
    et deux courriels au client. */
 ipcMain.handle('fenetre:expedition', (e, id) => {
   const cle = 'expedition-' + String(id || '').replace(/[^\w-]/g, '');
-  ouvrirNative(cle, 'Expédier une commande', () => pageExpedition(String(id || '')),
+  ouvrirNative(cle, TF('Expédier une commande'), () => pageExpedition(String(id || '')),
     { width: 780, height: 720, minWidth: 620, minHeight: 520 });
   return true;
 });
@@ -2613,7 +2623,7 @@ ipcMain.handle('fenetre:retour', (e, id) => {
   const cle = 'retour-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Demande de retour', () => pageRetour(String(id || '')),
+  const win = ouvrirNative(cle, TF('Demande de retour'), () => pageRetour(String(id || '')),
     { width: 860, height: 760, minWidth: 680, minHeight: 540 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2628,7 +2638,7 @@ ipcMain.handle('fenetre:remboursement', (e, id) => {
   const cle = 'remboursement-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Remboursement', () => pageRemboursement(String(id || '')),
+  const win = ouvrirNative(cle, TF('Remboursement'), () => pageRemboursement(String(id || '')),
     { width: 760, height: 740, minWidth: 620, minHeight: 520 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2643,7 +2653,7 @@ ipcMain.handle('fenetre:produit', (e, id) => {
   // Sans identifiant, c'est le << Nouveau produit >> du menu : meme cle que lui,
   // pour ne pas ouvrir deux assistants vierges concurrents.
   const cle = brut ? 'produit-' + brut.replace(/[^\w-]/g, '') : 'produit';
-  ouvrirNative(cle, brut ? 'Produit' : 'Nouveau produit', () => pageProduit(brut),
+  ouvrirNative(cle, brut ? TF('Produit') : TF('Nouveau produit'), () => pageProduit(brut),
     { width: 980, height: 860, minHeight: 520 });
   // Pas de szRevenir ici : l'assistant Produit ne sait pas encore se replacer.
   // Reutilisee, la fenetre revient simplement au premier plan.
@@ -2662,7 +2672,7 @@ ipcMain.handle('fenetre:promoEditeur', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
   const cle = 'promo-editeur-' + brut.replace(/[^\w-]/g, '');
-  ouvrirNative(cle, 'Editeur visuel', () => pagePromoEditeur(brut),
+  ouvrirNative(cle, TF('Editeur visuel'), () => pagePromoEditeur(brut),
     { width: 1120, height: 780, minHeight: 520 });
   return true;
 });
@@ -2674,7 +2684,7 @@ ipcMain.handle('fenetre:etatcompte', (e, id) => {
   const cle = 'etatcompte-' + brut.replace(/[^0-9A-Za-z_-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'État de compte', () => pageEtatCompte(brut),
+  const win = ouvrirNative(cle, TF('État de compte'), () => pageEtatCompte(brut),
     { width: 900, height: 840, minWidth: 640, minHeight: 520 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2689,7 +2699,7 @@ ipcMain.handle('fenetre:facture', (e, id) => {
   const cle = 'facture-' + brut.replace(/[^0-9A-Za-z_-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Facture', () => pageFacture(brut),
+  const win = ouvrirNative(cle, TF('Facture'), () => pageFacture(brut),
     { width: 920, height: 820, minWidth: 680, minHeight: 520 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2705,14 +2715,14 @@ ipcMain.handle('fenetre:facture', (e, id) => {
 ipcMain.handle('fenetre:collection', (e, id) => {
   const brut = String(id || '');
   const cle = brut ? 'collection-' + brut.replace(/[^\w-]/g, '') : 'collection';
-  ouvrirNative(cle, brut ? 'Collection' : 'Nouvelle collection', () => pageCollection(brut),
+  ouvrirNative(cle, brut ? TF('Collection') : TF('Nouvelle collection'), () => pageCollection(brut),
     { width: 860, height: 640, minHeight: 480 });
   return true;
 });
 ipcMain.handle('fenetre:fournisseur', (e, id) => {
   const brut = String(id || '');
   const cle = brut ? 'fournisseur-' + brut.replace(/[^\w-]/g, '') : 'fournisseur';
-  ouvrirNative(cle, brut ? 'Fournisseur' : 'Nouveau fournisseur', () => pageFournisseur(brut),
+  ouvrirNative(cle, brut ? TF('Fournisseur') : TF('Nouveau fournisseur'), () => pageFournisseur(brut),
     { width: 820, height: 620, minHeight: 460 });
   return true;
 });
@@ -2722,7 +2732,7 @@ ipcMain.handle('fenetre:fournisseur', (e, id) => {
 ipcMain.handle('fenetre:factures', () => {
   const _avant = fenetresNatives.get('factures');
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative('factures', 'Factures', () => pageFactures(''),
+  const win = ouvrirNative('factures', TF('Factures'), () => pageFactures(''),
     { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2738,7 +2748,7 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
   const cle = 'cmd-detail-' + brut.replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Détail de commande', () => pageCommandes('commandes@' + brut),
+  const win = ouvrirNative(cle, TF('Détail de commande'), () => pageCommandes('commandes@' + brut),
     /* PLUS GRANDE DEPUIS LE 2026-09-04, sur sa capture : << quand on clique sur
        la fenetre de details d une commande c est trop petit >>. A 780 px de haut,
        le bloc des totaux etait COUPE en plein milieu et la carte des articles
@@ -2788,7 +2798,7 @@ ipcMain.handle('fenetre:maintenance', () => {
 });
 
 ipcMain.handle('fenetre:explorateur', () => {
-  const win = ouvrirNative('explorateur', 'Explorateur de photos', () => pageExplorateur(),
+  const win = ouvrirNative('explorateur', TF('Explorateur de photos'), () => pageExplorateur(),
     { width: 1180, height: 720, minWidth: 900, minHeight: 520 });
   if (win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -2800,7 +2810,7 @@ ipcMain.handle('fenetre:client', (e, id) => {
   const cle = 'client-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, 'Fiche client', () => pageClient(String(id || '')),
+  const win = ouvrirNative(cle, TF('Fiche client'), () => pageClient(String(id || '')),
     { width: 720, height: 720, minWidth: 600, minHeight: 500 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -5376,7 +5386,7 @@ const actionApp = (nom, arg) => {
        coquille. Il n a pas encore remplace la fenetre principale — il le DIT a
        l ecran, et c est en le regardant qu on decide de la bascule. */
     case 'cadre':
-      ouvrirNative('cadre', 'Cadre de l administration', () => pageCadre(),
+      ouvrirNative('cadre', TF('Cadre de l administration'), () => pageCadre(),
         { width: 1180, height: 760, minWidth: 900, minHeight: 560 });
       break;
     /* ⚠ Les quatre onglets de Configuration natifs ne s'ouvrent PLUS ici :
@@ -5384,13 +5394,13 @@ const actionApp = (nom, arg) => {
        plus bas), a la demande du 2026-08-10 — « fais attention de creer les
        fenetres en mode ancrable ». */
     case 'fournisseur-nouveau':
-      ouvrirNative('fournisseur', 'Nouveau fournisseur', () => pageFournisseur(''), { width: 820, height: 620, minHeight: 460 });
+      ouvrirNative('fournisseur', TF('Nouveau fournisseur'), () => pageFournisseur(''), { width: 820, height: 620, minHeight: 460 });
       break;
     case 'collection-nouvelle':
-      ouvrirNative('collection', 'Nouvelle collection', () => pageCollection(''), { width: 860, height: 640, minHeight: 480 });
+      ouvrirNative('collection', TF('Nouvelle collection'), () => pageCollection(''), { width: 860, height: 640, minHeight: 480 });
       break;
     case 'produit-nouveau':
-      ouvrirNative('produit', 'Nouveau produit', () => pageProduit(''), { width: 980, height: 860, minHeight: 520 });
+      ouvrirNative('produit', TF('Nouveau produit'), () => pageProduit(''), { width: 980, height: 860, minHeight: 520 });
       break;
     // ⚠ L AFFICHAGE CLIENT EST FAIT POUR ÊTRE POSÉ SUR UN SECOND ÉCRAN, face à la
     // cliente. D'où une fenêtre plus grande et une hauteur minimale généreuse : le
@@ -5405,7 +5415,7 @@ const actionApp = (nom, arg) => {
     // #37 : 'caisse' est désormais ANCRABLE — traité par le bloc d'ancrage
     // plus bas (dock:naviguer vers la section 'pos'), plus de fenêtre autonome.
     case 'affichage-client':
-      ouvrirNative('pos-client', 'Affichage client', () => pageAffichage(),
+      ouvrirNative('pos-client', TF('Affichage client'), () => pageAffichage(),
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
       break;
     /* ⚠ TOUS LES ECRANS ANCRABLES DU MENU PASSENT PAR LE FLUX D ANCRAGE
@@ -5462,7 +5472,7 @@ const actionApp = (nom, arg) => {
     case 'verrous': {
       const _avV = fenetresNatives.get('verrous');
       const _reuV = !!(_avV && !_avV.isDestroyed());
-      const winV = ouvrirNative('verrous', 'Verrous', () => pageVerrous(),
+      const winV = ouvrirNative('verrous', TF('Verrous'), () => pageVerrous(),
         { width: 900, height: 660, minWidth: 680, minHeight: 440 });
       if (_reuV && winV && !winV.isDestroyed()) {
         winV.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -5503,7 +5513,7 @@ const actionApp = (nom, arg) => {
     case 'maintenance': {
       const _avM = fenetresNatives.get('maintenance');
       const _reuM = !!(_avM && !_avM.isDestroyed());
-      const winM = ouvrirNative('maintenance', 'Mode usage exclusif', () => pageMaintenance(),
+      const winM = ouvrirNative('maintenance', TF('Mode usage exclusif'), () => pageMaintenance(),
         { width: 640, height: 620, minWidth: 520, minHeight: 460 });
       /* ⚠ ON RELIT EN LA RAMENANT AU PREMIER PLAN : quelqu'un a pu lever le mode
          ailleurs pendant qu'elle était derrière. C'est le seul rafraîchissement
@@ -5516,7 +5526,7 @@ const actionApp = (nom, arg) => {
     case 'presence': {
       const _avP = fenetresNatives.get('presence');
       const _reuP = !!(_avP && !_avP.isDestroyed());
-      const winP = ouvrirNative('presence', 'Personnel connecté', () => pagePresence(),
+      const winP = ouvrirNative('presence', TF('Personnel connecté'), () => pagePresence(),
         { width: 860, height: 620, minWidth: 680, minHeight: 420 });
       if (_reuP && winP && !winP.isDestroyed()) {
         winP.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
@@ -5530,7 +5540,7 @@ const actionApp = (nom, arg) => {
     case 'notes': {
       const _avN = fenetresNatives.get('notes');
       const _reuN = !!(_avN && !_avN.isDestroyed());
-      const winN = ouvrirNative('notes', 'Notes des mises à jour', () => pageNotes(),
+      const winN = ouvrirNative('notes', TF('Notes des mises à jour'), () => pageNotes(),
         { width: 760, height: 680, minWidth: 560, minHeight: 460 });
       if (_reuN && winN && !winN.isDestroyed()) {
         winN.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});

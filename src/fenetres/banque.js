@@ -377,7 +377,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<button class="prim" id="v-ajouter">${T("+ Ligne")}</button></span>')
       + '</div>');
     h.push('<p class="aide">${T("Square en mémoire pour")} ' + ANNEE + '&nbsp;: ' + (sq.nbTx || 0)
-      + ' transaction' + ((sq.nbTx || 0) > 1 ? 's' : '') + ' · brut ' + sou(sq.brut)
+      + ' ' + ((sq.nbTx || 0) > 1 ? '${T("transactions")}' : '${T("transaction")}') + ' · brut ' + sou(sq.brut)
       + ' · frais ' + sou(sq.frais) + ' · net ' + sou(sq.net) + '.</p>');
     if (EDIT_V !== null) h.push(formVersement());
     if (!r.squarePayouts.length) {
@@ -750,7 +750,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler('banque:importer', [ANNEE, REC, quoi]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(r.ajoutes
-        ? (r.ajoutes + '${T(" ligne")}' + (r.ajoutes > 1 ? 's' : '') + '${T(" importée")}' + (r.ajoutes > 1 ? 's' : '') + '.')
+        ? (r.ajoutes + ' ' + (r.ajoutes > 1 ? '${T("lignes importées")}' : '${T("ligne importée")}') + '.')
         : '${T("Rien de neuf à importer — tout y était déjà.")}', r.ajoutes ? 'bon' : 'att');
       charger();
     });
@@ -777,8 +777,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       D = r;
       ANNEE = r.annee;
       if (REC && !r.rec) { REC = ''; }
-      sous.textContent = (r.liste || []).length + ' conciliation'
-        + ((r.liste || []).length > 1 ? 's' : '') + ' · ' + ANNEE
+      sous.textContent = (r.liste || []).length + ' '
+        + ((r.liste || []).length > 1 ? '${T("conciliations")}' : '${T("conciliation")}') + ' · ' + ANNEE
         + (r.peutEcrire ? '' : ' ${T("· lecture seule")}');
       // L etat d ouverture : on ouvre le PREMIER rapprochement sur l onglet
       // demande. Sans lui, aucun jeu d essai ne dessinerait jamais les trois

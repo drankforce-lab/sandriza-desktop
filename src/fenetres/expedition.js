@@ -236,7 +236,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>';
 
     h += '<div class="carte"><h2>${T("Commande")} <span class="note">— ' + esc(c.numero)
-      + ' · ' + c.articles + '${T(" article")}' + (c.articles > 1 ? 's' : '') + '</span></h2>'
+      + ' · ' + c.articles + ' '
+      + (c.articles > 1 ? '${T("articles")}' : '${T("article")}') + '</span></h2>'
       + '<div class="adresse"><div class="nom">' + esc(d.nom || '${T("Destinataire")}') + '</div>'
       + '<div class="det">' + esc(d.rue) + '<br>' + esc(d.ville) + ', ' + esc(d.province)
       + ' ' + esc(d.codePostal) + (d.tel ? ' · ' + esc(d.tel) : '') + '</div></div>';

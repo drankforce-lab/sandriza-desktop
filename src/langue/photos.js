@@ -29,6 +29,45 @@
  */
 
 module.exports = {
+  /* ⚠⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'photo': 'photo',
+  'photos': 'photos',
+  'affichées': 'shown',
+  'isolées': 'unattached',
+  'attachées': 'attached',
+  'objet': 'object',
+  'objets': 'objects',
+  'orphelin': 'orphan',
+  'orphelins': 'orphans',
+  'lot': 'batch',
+  'lots': 'batches',
+  'photo lisible': 'readable photo',
+  'photos lisibles': 'readable photos',
+  'choisie': 'chosen',
+  'choisies': 'chosen',
+  'photo choisie': 'photo chosen',
+  'photos choisies': 'photos chosen',
+  'traitées': 'processed',
+  'abandonnées': 'abandoned',
+  /* ⚠ Le trou {0} porte le NOMBRE : la phrase est traduite en entier, le
+     chiffre est pose dedans. Coller « et » + n + « autres » remettrait de
+     l ordre des mots francais dans une phrase anglaise. */
+  'et {0} autre…': 'and {0} more…',
+  'et {0} autres…': 'and {0} more…',
+  /* ⚠ L accord du VERBE suit le nombre lui aussi — « 1 photo has », « 3 photos
+     have ». C est la meme faute que le « s » colle, sur le verbe. */
+  'a': 'has',
+  'ont': 'have',
+  'pivotées': 'rotated',
+  'importée': 'imported',
+  'importées': 'imported',
+  'photo importée': 'photo imported',
+  'photos importées': 'photos imported',
+  'déjà présentes': 'already there',
+  'trop lourde': 'too large',
+  'trop lourdes': 'too large',
+  'retirées': 'removed',
+  'refusées': 'refused',
   /* ── L EN-TETE ET LES REFUS ─────────────────────────────────────────────── */
   'Photos — Administration Sandriza': 'Photos — Sandriza Administration',
   'Photos': 'Photos',

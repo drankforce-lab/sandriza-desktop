@@ -26,6 +26,10 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js.
+     ⚠ ET LA MEME TRADUCTION QUE LE SINGULIER plus bas (« not processed ») :
+     deux rendus differents du meme mot se liraient comme deux notions. */
+  'non traitées': 'not processed',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Commandes — Administration Sandriza': 'Orders — Sandriza Administration',
   'Commandes': 'Orders',

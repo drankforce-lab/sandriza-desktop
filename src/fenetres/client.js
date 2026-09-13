@@ -222,7 +222,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             return '<div class="cmd"><span class="num">' + esc(o.numero) + '</span>'
               + '<div class="d"></div><span class="fin">' + esc(dateFr(o.date)) + ' · ' + argent(o.total) + '</span></div>'; }).join('')
           + (R.stats.commandes > 6 ? '<div class="aide" style="text-align:center;padding-top:.35rem">+ '
-            + (R.stats.commandes - 6) + ' autre' + (R.stats.commandes - 6 > 1 ? 's' : '')
+            + (R.stats.commandes - 6) + ' '
+            + (R.stats.commandes - 6 > 1 ? '${T("autres")}' : '${T("autre")}')
             + ' ${T("— voir la fenêtre Commandes")}</div>' : '')
         : '<div class="aide">${T("Aucune commande.")}</div>')
       + '</div>';

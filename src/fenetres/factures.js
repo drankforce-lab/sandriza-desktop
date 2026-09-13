@@ -223,7 +223,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</select>'
       + '<span class="droite">'
       + (CLIENTS.length ? '<button class="mini" id="f-etat">${T("État de compte client")}</button>' : '')
-      + rows.length + ' facture' + (rows.length > 1 ? 's' : '') + '</span>'
+      + rows.length + ' '
+      + (rows.length > 1 ? '${T("factures")}' : '${T("facture")}') + '</span>'
       + '</div>';
 
     h += '<div class="carte">';

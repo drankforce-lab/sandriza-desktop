@@ -18,6 +18,9 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'autres': 'others',
+  'autre': 'other',
   'Fiche client — Administration Sandriza': 'Customer record — Sandriza Administration',
   'Fiche client': 'Customer record',
   'Fiche indisponible': 'Record unavailable',

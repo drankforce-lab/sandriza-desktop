@@ -32,6 +32,7 @@
  */
 
 module.exports = {
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Expédier une commande — Administration Sandriza': 'Ship an order — Sandriza Administration',
   'Expédier une commande': 'Ship an order',
@@ -96,6 +97,9 @@ module.exports = {
   ' — non configuré': ' — not configured',
   '— non configuré': '— not configured',
   'Poids du colis (kg)': 'Parcel weight (kg)',
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'article': 'item',
+  'articles': 'items',
 
   /* ⚠⚠ LE POIDS FIXE LE PRIX — l avertissement est coupe par le pictogramme. */
   'Certains articles n’ont pas de poids configuré — estimation à ':
