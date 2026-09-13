@@ -42,6 +42,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('presence');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -121,11 +125,11 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:top
 /** Page complète de la fenêtre native « Personnel connecté ». */
 function pagePresence() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Personnel connecté — Administration Sandriza</title>
+<title>${T("Personnel connecté — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.staffaccess}</span><h1>Personnel connecté</h1>
+<div class="tete"><span class="ico">${ICO.staffaccess}</span><h1>${T("Personnel connecté")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Lecture des sessions…</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Lecture des sessions…")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -154,14 +158,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      a 7 h >> oblige a faire le calcul de tete. */
   function depuis(sec){
     if (sec === null || sec === undefined) return '';
-    if (sec < 15) return 'a l instant';
-    if (sec < 90) return 'il y a ' + Math.round(sec) + ' s';
-    if (sec < 3600) return 'il y a ' + Math.round(sec / 60) + ' min';
-    return 'il y a ' + Math.round(sec / 3600) + ' h';
+    if (sec < 15) return '${T("à l’instant")}';
+    if (sec < 90) return '${T("il y a ")}' + Math.round(sec) + ' s';
+    if (sec < 3600) return '${T("il y a ")}' + Math.round(sec / 60) + ' min';
+    return '${T("il y a ")}' + Math.round(sec / 3600) + ' h';
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application.',
+    session:            '${T("Aucune session ouverte dans l’application.")}',
     /* ⚠⚠ DEUX CAUSES NE PEUVENT PAS PORTER LA MEME PHRASE — corrige le
        2026-09-09, apres son signalement << pourquoi je ne vois pas ma session
        active ? ca devrait >>.
@@ -174,19 +178,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        ⚠ Le motif << droit >> N EXISTE PLUS COTE PAGE : le pre-controle qui le produisait est
        retire (voir admin.js). Le motif reste ici au cas ou une version plus
        ancienne du site le renvoie encore — et il DIT qu il vient de la page. */
-    droit:              'La page a refusé : elle ne vous voit pas comme super-administrateur. '
-                        + '(Si vous l’êtes, l’administration de cette fenêtre est plus ancienne que le site.)',
-    superadmin_required:'Le serveur refuse : cette action est réservée au super-administrateur.',
-    session_serveur:    'Le serveur ne reconnaît plus cette session — reconnectez-vous.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    base_injoignable:   'La base de données n’a pas répondu.',
-    parametre:          'Demande incomplète.',
-    trop_long:          'Le message dépasse ' + MAX + ' caractères.',
-    soi_meme:           'Pour vous déconnecter vous-même, utilisez Fichier → Déconnexion : elle prévient de ce qu’elle emporte.',
-    echec:              'L’opération a échoué.'
+    droit:              '${T("La page a refusé : elle ne vous voit pas comme super-administrateur.")} '
+                        + '${T("(Si vous l’êtes, l’administration de cette fenêtre est plus ancienne que le site.)")}',
+    superadmin_required:'${T("Le serveur refuse : cette action est réservée au super-administrateur.")}',
+    session_serveur:    '${T("Le serveur ne reconnaît plus cette session — reconnectez-vous.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    base_injoignable:   '${T("La base de données n’a pas répondu.")}',
+    parametre:          '${T("Demande incomplète.")}',
+    trop_long:          '${T("Le message dépasse ")}' + MAX + '${T(" caractères.")}',
+    soi_meme:           '${T("Pour vous déconnecter vous-même, utilisez Fichier → Déconnexion : elle prévient de ce qu’elle emporte.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   /* ⚠⚠ UN REFUS DIT CE QUE LA PAGE VOIT (2026-09-09). Il a signale un refus, et
      sa capture ne permettait pas de savoir d ou il venait : la page ? le
@@ -199,7 +203,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      code est pour moi quand il m envoie une capture. */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 120)) + ')';
     return t;
   }
@@ -207,10 +211,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!r) return '';
     var v = r.vu || null;
     var bouts = [];
-    if (r.motif) bouts.push('motif : ' + esc(r.motif));
+    if (r.motif) bouts.push('${T("motif : ")}' + esc(r.motif));
     if (v) {
-      bouts.push('jeton de session dans la page : ' + (v.session ? 'oui' : 'NON'));
-      bouts.push('rôle vu par la page : ' + esc(v.role || '(aucun)'));
+      bouts.push('${T("jeton de session dans la page : ")}' + (v.session ? 'oui' : 'NON'));
+      bouts.push('${T("rôle vu par la page : ")}' + esc(v.role || '(aucun)'));
     }
     if (!bouts.length) return '';
     /* ⚠⚠ PAS D OPACITE ICI, ET C EST LE BANC AU RENDU QUI L A TROUVE. Le
@@ -251,35 +255,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function ligne(s){
     var moi = !!s.moi;
     var etat = s.frais
-      ? '<span class="pill bon">a l ecran</span>'
+      ? '<span class="pill bon">${T("à l’écran")}</span>'
       : '<span class="pill att">' + esc(depuis(s.vuDepuisSec)) + '</span>';
     /* ⚠ AUCUN BOUTON SUR SA PROPRE LIGNE, et pas seulement grise : le serveur
        refuse de toute facon (motif soi_meme), donc un bouton la serait une
        porte qui ne mene nulle part. On dit << vous >> et on s arrete la. */
     var actions = moi
-      ? '<span class="sub mut">vous</span>'
-      : '<button class="mini" data-ecrire="' + esc(s.staffId) + '">Message…</button>'
+      ? '<span class="sub mut">${T("vous")}</span>'
+      : '<button class="mini" data-ecrire="' + esc(s.staffId) + '">${T("Message…")}</button>'
         + ' <button class="mini dgr" data-dec="' + esc(s.staffId) + '">'
-        + (CONF === s.staffId ? 'Confirmer la déconnexion' : 'Déconnecter') + '</button>';
+        + (CONF === s.staffId ? '${T("Confirmer la déconnexion")}' : '${T("Déconnecter")}') + '</button>';
     var h = '<tr><td><strong>' + esc(s.nom || '—') + '</strong>'
       + (moi ? '' : '')
       + (s.courriel ? '<div class="sub">' + esc(s.courriel) + '</div>' : '')
       + '</td>'
       + '<td><span class="pill neutre">' + esc(s.role || '—') + '</span></td>'
       + '<td>' + etat
-      + (s.vu ? '<div class="sub">' + esc(fdate(s.vu)) + '</div>' : '<div class="sub mut">pas encore vu</div>')
+      + (s.vu ? '<div class="sub">' + esc(fdate(s.vu)) + '</div>' : '<div class="sub mut">${T("pas encore vu")}</div>')
       + '</td>'
       + '<td style="white-space:nowrap"><div class="sub">' + esc(fdate(s.depuis)) + '</div></td>'
       + '<td style="text-align:right;white-space:nowrap">' + actions + '</td></tr>';
     if (ECRIS === s.staffId) {
       var t = BROUILLON[s.staffId] || '';
       h += '<tr><td colspan="5"><div class="ecrire">'
-        + '<label for="p-texte">Message a ' + esc(s.nom || 'cette personne')
-        + ' — il s affichera sur son ecran dans quelques secondes.</label>'
+        + '<label for="p-texte">${T("Message à ")}' + esc(s.nom || '${T("cette personne")}')
+        + '${T(" — il s’affichera sur son écran dans quelques secondes.")}</label>'
         + '<textarea id="p-texte" maxlength="' + MAX + '" '
-        + 'placeholder="Ce que vous voulez lui dire.">' + esc(t) + '</textarea>'
-        + '<div class="pieds"><button class="mini" id="p-envoyer">Envoyer</button>'
-        + '<button class="mini" id="p-annuler">Annuler</button>'
+        + 'placeholder="${T("Ce que vous voulez lui dire.")}">' + esc(t) + '</textarea>'
+        + '<div class="pieds"><button class="mini" id="p-envoyer">${T("Envoyer")}</button>'
+        + '<button class="mini" id="p-annuler">${T("Annuler")}</button>'
         + '<span class="cpt" id="p-cpt"></span></div>'
         + '</div></td></tr>';
     }
@@ -287,34 +291,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (SESS === null) { corps.innerHTML = '<div class="vide charge">Lecture des sessions…</div>'; return; }
+    if (SESS === null) { corps.innerHTML = '<div class="vide charge">${T("Lecture des sessions…")}</div>'; return; }
+    /* ⚠ Le singulier et le pluriel, chacun entier. */
     sousEl.textContent = SESS.length
-      ? (SESS.length + ' session' + (SESS.length > 1 ? 's' : '') + ' ouverte' + (SESS.length > 1 ? 's' : ''))
-      : 'personne n est connecte';
+      ? (SESS.length + (SESS.length > 1 ? '${T(" sessions ouvertes")}' : '${T(" session ouverte")}'))
+      : '${T("personne n’est connecté")}';
 
-    var h = '<div class="barre"><button class="mini" id="p-reload">Actualiser</button></div>';
+    var h = '<div class="barre"><button class="mini" id="p-reload">${T("Actualiser")}</button></div>';
 
     /* ⚠ CETTE NOTE RESTE, contrairement a celles qu on a retirees ailleurs. Les
        exposes retires expliquaient a quelqu un un mecanisme qu il avait sous les
        yeux (<< ce que vous regardez >>). Celle-ci previent d une CONSEQUENCE
        avant le geste qui la provoque, et elle nomme la limite de ce que l ecran
        peut savoir. Les deux sont utiles au moment ou on les lit. */
+    /* ⚠⚠ LES ACCENTS SONT DES TEXTES VISIBLES, pas du code. Toute cette note
+       s affichait NUE — << Deconnecter quelqu un >>, << A l ecran >>,
+       << manifeste >>, << connectee >> — et la fenetre en portait une quinzaine
+       d autres. Corrige le 2026-09-13, en la traduisant : c est la quatrieme
+       fenetre du depot ou le francais lui-meme etait a relire d abord. */
     h += '<div class="note">'
-      + '<strong>Deconnecter quelqu un coupe sa session sans lui demander</strong> : '
-      + 'son travail non enregistre est perdu, et ses fiches ouvertes se liberent. '
-      + 'Deux clics sont demandes.<br>'
-      + '<strong>« A l ecran »</strong> veut dire que le poste s est manifeste il y a '
-      + 'moins de ' + FRAIS + ' s. Une fenêtre réduite dans la zone de notification '
-      + 'se manifeste moins souvent : la personne reste connectee et joignable, '
-      + 'seul son dernier passage recule.'
+      + '${T("<strong>Déconnecter quelqu’un coupe sa session sans lui demander</strong> : ")}'
+      + '${T("son travail non enregistré est perdu, et ses fiches ouvertes se libèrent. ")}'
+      + '${T("Deux clics sont demandés.")}<br>'
+      + '${T("<strong>« À l’écran »</strong> veut dire que le poste s’est manifesté il y a ")}'
+      + '${T("moins de ")}' + FRAIS + ' ${T("s. Une fenêtre réduite dans la zone de notification ")}'
+      + '${T("se manifeste moins souvent : la personne reste connectée et joignable, ")}'
+      + '${T("seul son dernier passage recule.")}'
       + '</div>';
 
-    h += '<div class="carte"><h3>Sessions ouvertes (' + SESS.length + ')</h3>';
+    h += '<div class="carte"><h3>${T("Sessions ouvertes (")}' + SESS.length + ')</h3>';
     if (!SESS.length) {
-      h += '<div class="vide">Personne n est connecte en ce moment.</div>';
+      h += '<div class="vide">${T("Personne n’est connecté en ce moment.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Personne</th><th>Role</th><th>Dernier passage</th>'
-        + '<th>Connecte depuis</th><th></th></tr></thead><tbody>';
+      h += '<table><thead><tr><th>${T("Personne")}</th><th>${T("Rôle")}</th><th>${T("Dernier passage")}</th>'
+        + '<th>${T("Connecté depuis")}</th><th></th></tr></thead><tbody>';
       for (var i = 0; i < SESS.length; i++) h += ligne(SESS[i]);
       h += '</tbody></table>';
     }
@@ -346,7 +356,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           CONF = id;
           retenirBrouillon();
           dessiner();
-          dire('Cliquez encore pour deconnecter cette personne.', 'att');
+          dire('${T("Cliquez encore pour déconnecter cette personne.")}', 'att');
         }
       };
     }
@@ -390,9 +400,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ta) return;
     var t = ta.value.trim();
     var cible = ECRIS;
-    if (!t) { dire('Le message est vide.', 'att'); ta.focus(); return; }
-    if (t.length > MAX) { dire('Le message depasse ' + MAX + ' caracteres.', 'err'); return; }
-    OCC = true; dire('Envoi…');
+    if (!t) { dire('${T("Le message est vide.")}', 'att'); ta.focus(); return; }
+    if (t.length > MAX) { dire('${T("Le message dépasse ")}' + MAX + '${T(" caractères.")}', 'err'); return; }
+    OCC = true; dire('${T("Envoi…")}');
     appeler('presence:message', [cible, t]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -407,8 +417,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          jusqu a une minute si sa fenetre est reduite : le systeme ralentit les
          minuteurs des fenetres cachees). Annoncer << envoye >> ferait croire a
          une remise immediate et douter du mecanisme cinq secondes plus tard. */
-      dire('Message deposé pour ' + (r.nom || 'cette personne')
-        + ' — il s affichera sur son ecran dans quelques secondes.', 'bon');
+      dire('${T("Message déposé pour ")}' + (r.nom || '${T("cette personne")}')
+        + '${T(" — il s’affichera sur son écran dans quelques secondes.")}', 'bon');
     });
   }
 
@@ -417,7 +427,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('presence:deconnecter', [id]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire((r.nom || 'La personne') + ' est deconnectee.', 'bon');
+      dire((r.nom || '${T("La personne")}') + '${T(" est déconnectée.")}', 'bon');
       charger(true);
     });
   }
