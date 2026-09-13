@@ -24,6 +24,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('recommandations');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -129,11 +133,11 @@ function pageRecommandations(onglet) {
   const depart = (['liaisons', 'stats', 'agencement'].indexOf(String(onglet || '')) >= 0)
     ? String(onglet) : 'regles';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Recommandations — Administration Sandriza</title>
+<title>${T("Recommandations — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.reco}</span><h1>Recommandations</h1>
+<div class="tete"><span class="ico">${ICO.reco}</span><h1>${T("Recommandations")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -171,21 +175,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux recommandations.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cet élément n’existe plus.',
-    nom:                'Le nom interne est requis.',
-    titre:              'Le titre affiché est requis.',
-    bord:               'Cette règle est déjà au bout de la liste.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux recommandations.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cet élément n’existe plus.")}',
+    nom:                '${T("Le nom interne est requis.")}',
+    titre:              '${T("Le titre affiché est requis.")}',
+    bord:               '${T("Cette règle est déjà au bout de la liste.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -208,24 +212,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var f = REG_FORM, creer = f.mode === 'creer', r = f.r || {};
     var sur = (r.surBrut && r.surBrut.length) ? r.surBrut : ['product'];
     var typeSel = creer
-      ? '<label class="champ"><span class="lbl">Type de règle</span><select class="t" id="reg-type">'
+      ? '<label class="champ"><span class="lbl">${T("Type de règle")}</span><select class="t" id="reg-type">'
         + (D.types || []).map(function(ty){ return '<option value="' + esc(ty.v) + '">' + esc(ty.l) + '</option>'; }).join('')
         + '</select></label>'
       : '';
-    return '<div class="carte"><h2>' + (creer ? 'Nouvelle règle' : 'Modifier la règle') + '</h2>'
-      + '<label class="champ"><span class="lbl">Nom interne *</span><input class="t" id="reg-nom" placeholder="Ex : Accessoires tendance" value="' + esc(creer ? '' : (r.nom || '')) + '"></label>'
+    return '<div class="carte"><h2>' + (creer ? '${T("Nouvelle règle")}' : '${T("Modifier la règle")}') + '</h2>'
+      + '<label class="champ"><span class="lbl">${T("Nom interne *")}</span><input class="t" id="reg-nom" placeholder="${T("Ex : Accessoires tendance")}" value="' + esc(creer ? '' : (r.nom || '')) + '"></label>'
       + typeSel
-      + '<label class="champ"><span class="lbl">Titre affiché *</span><input class="t" id="reg-titre" placeholder="Ex : Vous aimerez aussi" value="' + esc(creer ? '' : (r.titre || '')) + '"></label>'
-      + '<label class="champ"><span class="lbl">Sous-titre (optionnel)</span><input class="t" id="reg-sous" placeholder="Description courte" value="' + esc(creer ? '' : (r.soustitre || '')) + '"></label>'
-      + '<label class="champ"><span class="lbl">Articles max (1 à 16)</span><input class="t" type="number" id="reg-max" min="1" max="16" value="' + esc(creer ? '4' : String(r.max || 4)) + '" style="max-width:120px"></label>'
-      + '<div class="lbl" style="margin:.35rem 0 .2rem">Afficher sur</div>'
+      + '<label class="champ"><span class="lbl">${T("Titre affiché *")}</span><input class="t" id="reg-titre" placeholder="${T("Ex : Vous aimerez aussi")}" value="' + esc(creer ? '' : (r.titre || '')) + '"></label>'
+      + '<label class="champ"><span class="lbl">${T("Sous-titre (optionnel)")}</span><input class="t" id="reg-sous" placeholder="${T("Description courte")}" value="' + esc(creer ? '' : (r.soustitre || '')) + '"></label>'
+      + '<label class="champ"><span class="lbl">${T("Articles max (1 à 16)")}</span><input class="t" type="number" id="reg-max" min="1" max="16" value="' + esc(creer ? '4' : String(r.max || 4)) + '" style="max-width:120px"></label>'
+      + '<div class="lbl" style="margin:.35rem 0 .2rem">${T("Afficher sur")}</div>'
       + '<div class="styles">'
-      + '<label class="case"><input type="checkbox" id="reg-on-product"' + (sur.indexOf('product') >= 0 ? ' checked' : '') + '> Fiche produit</label>'
-      + '<label class="case"><input type="checkbox" id="reg-on-cart"' + (sur.indexOf('cart') >= 0 ? ' checked' : '') + '> Panier</label>'
-      + '<label class="case"><input type="checkbox" id="reg-on-home"' + (sur.indexOf('home') >= 0 ? ' checked' : '') + '> Accueil</label>'
+      + '<label class="case"><input type="checkbox" id="reg-on-product"' + (sur.indexOf('product') >= 0 ? ' checked' : '') + '> ${T("Fiche produit")}</label>'
+      + '<label class="case"><input type="checkbox" id="reg-on-cart"' + (sur.indexOf('cart') >= 0 ? ' checked' : '') + '> ${T("Panier")}</label>'
+      + '<label class="case"><input type="checkbox" id="reg-on-home"' + (sur.indexOf('home') >= 0 ? ' checked' : '') + '> ${T("Accueil")}</label>'
       + '</div>'
-      + '<div class="pied-boite"><button class="mini" id="reg-annuler">Annuler</button> '
-      + '<button class="mini prim" id="reg-ok">' + (creer ? 'Créer la règle' : 'Enregistrer') + '</button></div>'
+      + '<div class="pied-boite"><button class="mini" id="reg-annuler">${T("Annuler")}</button> '
+      + '<button class="mini prim" id="reg-ok">' + (creer ? '${T("Créer la règle")}' : '${T("Enregistrer")}') + '</button></div>'
       + '</div>';
   }
 
@@ -234,27 +238,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var creer = REG_FORM.mode === 'creer';
     var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     var ck = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
-    if (!g('reg-nom').trim())   { dire('Le nom interne est requis.', 'err'); return; }
-    if (!g('reg-titre').trim()) { dire('Le titre affiché est requis.', 'err'); return; }
+    if (!g('reg-nom').trim())   { dire('${T("Le nom interne est requis.")}', 'err'); return; }
+    if (!g('reg-titre').trim()) { dire('${T("Le titre affiché est requis.")}', 'err'); return; }
     var on = [];
     if (ck('reg-on-product')) on.push('product');
     if (ck('reg-on-cart'))    on.push('cart');
     if (ck('reg-on-home'))     on.push('home');
     var payload = { name: g('reg-nom'), title: g('reg-titre'), subtitle: g('reg-sous'), max: g('reg-max'), on: on };
     var btn = document.getElementById('reg-ok'); if (btn) btn.disabled = true;
-    dire(creer ? 'Création…' : 'Enregistrement…');
+    dire(creer ? '${T("Création…")}' : '${T("Enregistrement…")}');
     if (creer) {
       payload.type = g('reg-type');
       appeler('reco:creer', [payload]).then(function(r){
-        if (!r || !r.ok) { if (btn) btn.disabled = false; dire('Échec : ' + expliquer(r), 'err'); return; }
+        if (!r || !r.ok) { if (btn) btn.disabled = false; dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
         /* ⚠ LE BROUILLON MEURT ICI, et seulement ici : le garder ferait
            concurrence a la fiche enregistree sans qu on sache laquelle fait foi. */
-        szBrouillonJeter(); REG_FORM = null; charger(); dire('Règle « ' + (r.nom || '') + ' » créée.', 'bon');
+        szBrouillonJeter(); REG_FORM = null; charger(); dire('${T("Règle «")} ' + (r.nom || '') + ' ${T("» créée.")}', 'bon');
       });
     } else {
       appeler('reco:editer', [REG_FORM.r.id, payload]).then(function(r){
-        if (!r || !r.ok) { if (btn) btn.disabled = false; dire('Échec : ' + expliquer(r), 'err'); return; }
-        szBrouillonJeter(); REG_FORM = null; charger(); dire('Règle mise à jour.', 'bon');
+        if (!r || !r.ok) { if (btn) btn.disabled = false; dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
+        szBrouillonJeter(); REG_FORM = null; charger(); dire('${T("Règle mise à jour.")}', 'bon');
       });
     }
   }
@@ -262,34 +266,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueRegles(){
     var h = '';
     if (REG_FORM) h += formulaireRegle();
-    h += '<div class="carte"><h2>Ordre d’affichage</h2>'
-      + '<div class="dt" style="margin-bottom:.45rem">Une règle plus haute passe avant : '
-      + 'c’est elle que le client voit en premier sur une fiche.</div>'
+    h += '<div class="carte"><h2>${T("Ordre d’affichage")}</h2>'
+      + '<div class="dt" style="margin-bottom:.45rem">${T("Une règle plus haute passe avant :")} '
+      + '${T("c’est elle que le client voit en premier sur une fiche.")}</div>'
       + (D.peutModifier && !REG_FORM
-          ? '<div style="margin:0 0 .7rem"><button class="mini prim" id="reg-nouvelle">+ Nouvelle règle</button></div>'
+          ? '<div style="margin:0 0 .7rem"><button class="mini prim" id="reg-nouvelle">${T("+ Nouvelle règle")}</button></div>'
           : '');
     if (!(D.regles || []).length) {
-      h += '<div class="vide">Aucune règle pour l’instant'
-        + (D.peutModifier ? ' — utilisez « + Nouvelle règle » ci-dessus pour en créer une.' : '.') + '</div>';
+      h += '<div class="vide">${T("Aucune règle pour l’instant")}'
+        + (D.peutModifier ? ' ${T("— utilisez « + Nouvelle règle » ci-dessus pour en créer une.")}' : '.') + '</div>';
     } else {
-      h += '<table><thead><tr><th></th><th>Règle</th><th>Type</th><th>Affichée sur</th>'
-        + '<th class="num">Max</th><th>État</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th></th><th>${T("Règle")}</th><th>${T("Type")}</th><th>${T("Affichée sur")}</th>'
+        + '<th class="num">Max</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + D.regles.map(function(r, i){
             var gestes = '';
             if (D.peutModifier) {
               gestes = '<button class="mini geste" data-monter="' + esc(r.id) + '"'
-                + (r.premiere ? ' disabled' : '') + ' title="Monter">&#9650;</button> '
+                + (r.premiere ? ' disabled' : '') + ' title="${T("Monter")}">&#9650;</button> '
                 + '<button class="mini geste" data-descendre="' + esc(r.id) + '"'
-                + (r.derniere ? ' disabled' : '') + ' title="Descendre">&#9660;</button> '
+                + (r.derniere ? ' disabled' : '') + ' title="${T("Descendre")}">&#9660;</button> '
                 + '<button class="mini geste" data-basculer="' + esc(r.id) + '" data-actif="'
-                + (r.active ? '0' : '1') + '">' + (r.active ? 'Désactiver' : 'Activer') + '</button> '
-                + '<button class="mini geste" data-editer="' + esc(r.id) + '">Modifier</button> '
+                + (r.active ? '0' : '1') + '">' + (r.active ? '${T("Désactiver")}' : '${T("Activer")}') + '</button> '
+                + '<button class="mini geste" data-editer="' + esc(r.id) + '">${T("Modifier")}</button> '
                 + '<button class="mini geste danger" data-suppr="' + esc(r.id) + '" data-defaut="'
-                + (r.pardefaut ? '1' : '0') + '">' + (ARME === r.id ? 'Confirmer ?' : 'Supprimer') + '</button>';
+                + (r.pardefaut ? '1' : '0') + '">' + (ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
             }
             return '<tr><td class="rang">' + (i + 1) + '</td>'
               + '<td><strong>' + esc(r.nom) + '</strong>'
-              + (r.pardefaut ? ' <span class="pill neutre">par défaut</span>' : '') + '</td>'
+              + (r.pardefaut ? ' <span class="pill neutre">${T("par défaut")}</span>' : '') + '</td>'
               + '<td class="dt">' + esc(r.typeLibelle) + '</td>'
               + '<td>' + (r.ou.length
                   ? r.ou.map(function(x){ return '<span class="pill neutre">' + esc(x) + '</span>'; }).join('')
@@ -306,15 +310,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     /* Les regles par defaut RETIREES : sans cette liste on les croirait
        perdues, alors qu elles se restaurent d un clic. */
     if ((D.supprimees || []).length) {
-      h += '<div class="carte"><h2>Règles par défaut retirées</h2>'
-        + '<div class="dt" style="margin-bottom:.4rem">Elles ne sont pas détruites : '
-        + 'vous pouvez les remettre en service.</div>'
+      h += '<div class="carte"><h2>${T("Règles par défaut retirées")}</h2>'
+        + '<div class="dt" style="margin-bottom:.4rem">${T("Elles ne sont pas détruites :")} '
+        + '${T("vous pouvez les remettre en service.")}</div>'
         + D.supprimees.map(function(s){
             return '<div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0">'
               + '<strong>' + esc(s.nom) + '</strong>'
               + '<span class="dt">' + esc(s.typeLibelle) + '</span>'
               + (D.peutModifier
-                  ? '<button class="mini geste" style="margin-left:auto" data-restaurer="' + esc(s.id) + '">Restaurer</button>'
+                  ? '<button class="mini geste" style="margin-left:auto" data-restaurer="' + esc(s.id) + '">${T("Restaurer")}</button>'
                   : '') + '</div>';
           }).join('')
         + '</div>';
@@ -325,24 +329,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueLiaisons(){
     var ls = D.liaisons || [];
     var h = '<div class="barreoutils">'
-      + (D.peutModifier ? '<button class="mini prim" id="rc-lier">Associer des produits</button>' : '')
+      + (D.peutModifier ? '<button class="mini prim" id="rc-lier">${T("Associer des produits")}</button>' : '')
       + '<div class="droite">'
       + (D.peutModifier && ls.length
           ? '<button class="mini danger" id="rc-vider">'
-            + (ARME === '__liaisons' ? 'Confirmer ?' : 'Tout effacer') + '</button>' : '')
-      + '<span>' + ls.length + ' produit' + (ls.length > 1 ? 's liés' : ' lié') + '</span></div></div>';
+            + (ARME === '__liaisons' ? '${T("Confirmer ?")}' : '${T("Tout effacer")}') + '</button>' : '')
+      + '<span>' + ls.length + '${T(" produit")}' + (ls.length > 1 ? '${T("s liés")}' : '${T(" lié")}') + '</span></div></div>';
     h += '<div class="carte">';
     if (!ls.length) {
-      h += '<div class="vide">Aucune liaison manuelle.'
-        + '<div style="margin-top:.35rem">Les recommandations automatiques s’appliquent seules.</div></div>';
+      h += '<div class="vide">${T("Aucune liaison manuelle.")}'
+        + '<div style="margin-top:.35rem">${T("Les recommandations automatiques s’appliquent seules.")}</div></div>';
     } else {
       h += ls.map(function(l){
         return '<div style="border-top:1px solid var(--v055);padding:.4rem 0">'
           + '<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
           + '<strong>' + esc(l.nom) + '</strong>'
-          + '<span class="dt">' + l.lies.length + ' article' + (l.lies.length > 1 ? 's' : '') + '</span>'
+          + '<span class="dt">' + l.lies.length + '${T(" article")}' + (l.lies.length > 1 ? 's' : '') + '</span>'
           + (D.peutModifier
-              ? '<button class="mini geste" style="margin-left:auto" data-modifier-liaison="' + esc(l.id) + '">Modifier</button>'
+              ? '<button class="mini geste" style="margin-left:auto" data-modifier-liaison="' + esc(l.id) + '">${T("Modifier")}</button>'
               : '') + '</div>'
           + '<div class="dt" style="margin-top:.15rem">'
           + l.lies.map(function(x){ return esc(x.nom); }).join(' · ') + '</div></div>';
@@ -353,14 +357,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function vueStats(){
-    if (!STATS) return '<div class="vide charge">Chargement des statistiques…</div>';
+    if (!STATS) return '<div class="vide charge">${T("Chargement des statistiques…")}</div>';
     var max = 0;
     (STATS.regles || []).forEach(function(r){ if (r.couverture > max) max = r.couverture; });
-    var h = '<div class="carte"><h2>Couverture des règles</h2>';
+    var h = '<div class="carte"><h2>${T("Couverture des règles")}</h2>';
     if (!(STATS.regles || []).length) {
-      h += '<div class="vide">Aucune règle.</div>';
+      h += '<div class="vide">${T("Aucune règle.")}</div>';
     } else {
-      h += '<table><thead><tr><th>Règle</th><th>État</th><th class="num">Articles couverts</th>'
+      h += '<table><thead><tr><th>${T("Règle")}</th><th>${T("État")}</th><th class="num">${T("Articles couverts")}</th>'
         + '<th style="width:40%"></th></tr></thead><tbody>'
         + STATS.regles.map(function(r){
             var pc = max ? Math.round(r.couverture / max * 100) : 0;
@@ -374,11 +378,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     h += '</div>';
 
-    h += '<div class="carte"><h2>Articles les plus demandés</h2>';
+    h += '<div class="carte"><h2>${T("Articles les plus demandés")}</h2>';
     if (!(STATS.populaires || []).length) {
-      h += '<div class="vide">Pas encore assez de commandes pour en tirer un classement.</div>';
+      h += '<div class="vide">${T("Pas encore assez de commandes pour en tirer un classement.")}</div>';
     } else {
-      h += '<table><thead><tr><th></th><th>Article</th><th class="num">Score</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th></th><th>${T("Article")}</th><th class="num">${T("Score")}</th></tr></thead><tbody>'
         + STATS.populaires.map(function(p, i){
             return '<tr><td class="rang">' + (i + 1) + '</td><td>' + esc(p.nom) + '</td>'
               + '<td class="num">' + p.score + '</td></tr>';
@@ -403,37 +407,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var vus = choisis.concat(q ? reste.slice(0, 120) : reste.slice(0, 40));
 
     return '<div class="voile" id="rc-voile"><div class="boite">'
-      + '<h3>' + (L.nom ? 'Articles liés à « ' + esc(L.nom) + ' »' : 'Associer des produits') + '</h3>'
+      + '<h3>' + (L.nom ? '${T("Articles liés à «")} ' + esc(L.nom) + ' »' : '${T("Associer des produits")}') + '</h3>'
       + (L.id ? '' : '<div class="ch" style="margin-bottom:.5rem"><select id="rc-source" aria-label="Produit source">'
-          + '<option value="">— Choisir le produit source —</option>'
+          + '<option value="">${T("— Choisir le produit source —")}</option>'
           + tout.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.nom) + '</option>'; }).join('')
           + '</select></div>')
-      + '<input aria-label="Chercher un nom ou un SKU" type="search" id="rc-qprod" placeholder="Chercher un nom ou un SKU…" value="' + esc(QPROD) + '" style="margin-bottom:.4rem">'
+      + '<input aria-label="${T("Chercher un nom ou un SKU")}" type="search" id="rc-qprod" placeholder="${T("Chercher un nom ou un SKU…")}" value="' + esc(QPROD) + '" style="margin-bottom:.4rem">'
       + '<div class="choix" id="rc-choix">'
       + (vus.length ? vus.map(function(p){
           return '<label><input type="checkbox" class="rc-p" value="' + esc(p.id) + '"'
             + (L.choisis.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + esc(p.nom)
             + '<span class="sku">' + esc(p.sku || '') + '</span></label>';
-        }).join('') : '<div class="dt">Aucun produit ne correspond.</div>')
+        }).join('') : '<div class="dt">${T("Aucun produit ne correspond.")}</div>')
       + '</div>'
       + '<div class="dt" style="margin-top:.35rem" id="rc-cpt">' + L.choisis.length
-      + ' article' + (L.choisis.length > 1 ? 's choisis' : ' choisi') + '</div>'
-      + '<div class="pied-boite"><button class="mini" id="rc-annuler">Annuler</button>'
-      + '<button class="mini prim" id="rc-enr">Enregistrer</button></div>'
+      + '${T(" article")}' + (L.choisis.length > 1 ? '${T("s choisis")}' : '${T(" choisi")}') + '</div>'
+      + '<div class="pied-boite"><button class="mini" id="rc-annuler">${T("Annuler")}</button>'
+      + '<button class="mini prim" id="rc-enr">${T("Enregistrer")}</button></div>'
       + '</div></div>';
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
 
     var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'regles' ? ' actif' : '') + '" data-onglet="regles">Règles'
+      + '<button class="mini' + (ONGLET === 'regles' ? ' actif' : '') + '" data-onglet="regles">${T("Règles")}'
       + ((D.regles || []).length ? '<span class="n">' + D.regles.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'liaisons' ? ' actif' : '') + '" data-onglet="liaisons">Liaisons manuelles'
+      + '<button class="mini' + (ONGLET === 'liaisons' ? ' actif' : '') + '" data-onglet="liaisons">${T("Liaisons manuelles")}'
       + ((D.liaisons || []).length ? '<span class="n">' + D.liaisons.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'stats' ? ' actif' : '') + '" data-onglet="stats">Statistiques</button>'
-      + '<button class="mini' + (ONGLET === 'agencement' ? ' actif' : '') + '" data-onglet="agencement">Générateur d’agencement'
+      + '<button class="mini' + (ONGLET === 'stats' ? ' actif' : '') + '" data-onglet="stats">${T("Statistiques")}</button>'
+      + '<button class="mini' + (ONGLET === 'agencement' ? ' actif' : '') + '" data-onglet="agencement">${T("Générateur d’agencement")}'
       + (LOOK.length ? '<span class="n hi">' + LOOK.length + '</span>' : '') + '</button>'
       + '</div>';
 
@@ -482,21 +486,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (cb.checked && i < 0) LIAISON.choisis.push(cb.value);
         if (!cb.checked && i >= 0) LIAISON.choisis.splice(i, 1);
         var c = document.getElementById('rc-cpt');
-        if (c) c.textContent = LIAISON.choisis.length + ' article'
-          + (LIAISON.choisis.length > 1 ? 's choisis' : ' choisi');
+        if (c) c.textContent = LIAISON.choisis.length + '${T(" article")}'
+          + (LIAISON.choisis.length > 1 ? '${T("s choisis")}' : '${T(" choisi")}');
       };
     });
 
     var be = document.getElementById('rc-enr');
     if (be) be.onclick = function(){
-      if (!LIAISON || !LIAISON.id) { dire('Choisissez d’abord le produit source.', 'err'); return; }
+      if (!LIAISON || !LIAISON.id) { dire('${T("Choisissez d’abord le produit source.")}', 'err'); return; }
       be.disabled = true;
       appeler('reco:liaisons', [LIAISON.id, LIAISON.choisis]).then(function(r){
         be.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         LIAISON = null;
-        dire(r.nb ? ('« ' + r.nom + ' » : ' + r.nb + ' article' + (r.nb > 1 ? 's liés.' : ' lié.'))
-                  : ('Liaisons de « ' + r.nom + ' » retirées.'), 'bon');
+        dire(r.nb ? ('« ' + r.nom + ' » : ' + r.nb + '${T(" article")}' + (r.nb > 1 ? '${T("s liés.")}' : '${T(" lié.")}'))
+                  : ('${T("Liaisons de «")} ' + r.nom + ' ${T("» retirées.")}'), 'bon');
         charger();
       });
     };
@@ -505,14 +509,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (bv) bv.onclick = function(){
       if (ARME !== '__liaisons') {
         ARME = '__liaisons'; dessiner();
-        dire('Cliquez « Confirmer ? » — tous les rapprochements faits à la main seront perdus, '
-          + 'les recommandations automatiques reprennent seules.', 'att');
+        dire('${T("Cliquez « Confirmer ? » — tous les rapprochements faits à la main seront perdus,")} '
+          + '${T("les recommandations automatiques reprennent seules.")}', 'att');
         return;
       }
       ARME = '';
       appeler('reco:viderLiaisons', []).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(r.efface + ' liaison' + (r.efface > 1 ? 's effacées' : ' effacée') + '.', 'bon');
+        dire(r.efface + '${T(" liaison")}' + (r.efface > 1 ? '${T("s effacées")}' : '${T(" effacée")}') + '.', 'bon');
         charger();
       });
     };
@@ -581,7 +585,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       appeler('reco:deplacer', [b.getAttribute(bm ? 'data-monter' : 'data-descendre'), bm ? -1 : 1])
         .then(function(r){
           if (!r.ok) { b.disabled = false; dire(expliquer(r), 'err'); return; }
-          dire('Ordre modifié — « ' + (r.nom || '') + ' » a changé de place.', 'bon');
+          dire('${T("Ordre modifié — «")} ' + (r.nom || '') + ' ${T("» a changé de place.")}', 'bon');
           charger();
         });
       return;
@@ -593,7 +597,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       appeler('reco:basculer', [bb.getAttribute('data-basculer'), bb.getAttribute('data-actif') === '1'])
         .then(function(r){
           if (!r.ok) { bb.disabled = false; dire(expliquer(r), 'err'); return; }
-          dire('« ' + (r.nom || '') + ' » ' + (r.active ? 'activée.' : 'désactivée.'), 'bon');
+          dire('« ' + (r.nom || '') + ' » ' + (r.active ? '${T("activée.")}' : '${T("désactivée.")}'), 'bon');
           charger();
         });
       return;
@@ -606,15 +610,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (ARME !== idS) {
         ARME = idS; dessiner();
         dire(pard
-          ? 'Cliquez « Confirmer ? » — cette règle par défaut sera retirée, mais vous pourrez la restaurer.'
-          : 'Cliquez « Confirmer ? » pour supprimer cette règle.', 'att');
+          ? '${T("Cliquez « Confirmer ? » — cette règle par défaut sera retirée, mais vous pourrez la restaurer.")}'
+          : '${T("Cliquez « Confirmer ? » pour supprimer cette règle.")}', 'att');
         return;
       }
       ARME = '';
       appeler('reco:supprimer', [idS, pard]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire('« ' + (r.nom || '') + ' » supprimée'
-          + (r.restaurable ? ' — restaurable plus bas.' : '.'), 'bon');
+        dire('« ' + (r.nom || '') + ' ${T("» supprimée")}'
+          + (r.restaurable ? ' ${T("— restaurable plus bas.")}' : '.'), 'bon');
         charger();
       });
       return;
@@ -625,7 +629,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       br.disabled = true;
       appeler('reco:restaurer', [br.getAttribute('data-restaurer')]).then(function(r){
         if (!r.ok) { br.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('« ' + (r.nom || '') + ' » remise en service.', 'bon');
+        dire('« ' + (r.nom || '') + ' ${T("» remise en service.")}', 'bon');
         charger();
       });
       return;
@@ -651,7 +655,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function charger(){
     appeler('reco:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Recommandations indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Recommandations indisponibles")}', expliquer(r)); return; }
       D = r;
       if (ONGLET === 'stats') { chargerStats(); return; }
       dessiner();
@@ -663,34 +667,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      Trois temps, dans l ordre ou on travaille : choisir un STYLE (qui filtre le
      catalogue), cocher les ARTICLES, nommer et publier. */
   function vueAgencement(){
-    if (!AGEN) return '<div class="carte"><div class="vide charge">Lecture du catalogue…</div></div>';
-    var h = '<div class="carte"><h2>1 · Style</h2>'
+    if (!AGEN) return '<div class="carte"><div class="vide charge">${T("Lecture du catalogue…")}</div></div>';
+    var h = '<div class="carte"><h2>${T("1 · Style")}</h2>'
       + '<div class="styles">'
       + (AGEN.styles || []).map(function(s){
           return '<button class="sty' + (STYLE === s.v ? ' actif' : '') + '" data-style="' + esc(s.v) + '">'
             + esc(s.icone) + ' ' + esc(s.nom) + '</button>';
         }).join('')
-      + (STYLE ? '<button class="mini" id="ag-reinit">✕ Réinitialiser</button>' : '')
+      + (STYLE ? '<button class="mini" id="ag-reinit">${T("✕ Réinitialiser")}</button>' : '')
       + '</div>';
     var S = (AGEN.styles || []).find(function(x){ return x.v === STYLE; });
     h += S
       ? '<div class="dt" style="margin-top:.45rem"><strong>' + esc(S.quoi) + '</strong>'
-        + '<div>Recette : ' + esc(S.recette) + ' · Catégories : ' + esc(S.categories.join(', ')) + '</div></div>'
-      : '<div class="dt" style="margin-top:.45rem">Choisissez un style pour filtrer le catalogue. '
-        + 'Sans style, tous les articles actifs sont proposés.</div>';
+        + '<div>${T("Recette :")} ' + esc(S.recette) + ' ${T("· Catégories :")} ' + esc(S.categories.join(', ')) + '</div></div>'
+      : '<div class="dt" style="margin-top:.45rem">${T("Choisissez un style pour filtrer le catalogue.")} '
+        + '${T("Sans style, tous les articles actifs sont proposés.")}</div>';
     h += '</div>';
 
-    h += '<div class="carte"><h2>2 · Articles<span class="n">' + LOOK.length + ' retenu'
+    h += '<div class="carte"><h2>${T("2 · Articles")}<span class="n">' + LOOK.length + ' retenu'
       + (LOOK.length > 1 ? 's' : '') + '</span></h2>'
       + '<div class="styles" style="margin-bottom:.45rem">'
-      + '<button class="sty' + (CATF === 'all' ? ' actif' : '') + '" data-catf="all">Toutes</button>'
+      + '<button class="sty' + (CATF === 'all' ? ' actif' : '') + '" data-catf="all">${T("Toutes")}</button>'
       + (AGEN.categories || []).map(function(c){
           return '<button class="sty' + (CATF === c.v ? ' actif' : '') + '" data-catf="' + esc(c.v) + '">'
             + esc(c.l) + '</button>'; }).join('')
       + '</div>';
     var liste = (AGEN.produits || []).filter(function(p){ return CATF === 'all' || p.categorie === CATF; });
     if (!liste.length) {
-      h += '<div class="vide">Aucun article actif dans cette catégorie.</div>';
+      h += '<div class="vide">${T("Aucun article actif dans cette catégorie.")}</div>';
     } else {
       h += '<div class="choix" style="max-height:22rem">' + liste.map(function(p){
         return '<label><input type="checkbox" data-look="' + esc(p.id) + '"'
@@ -703,30 +707,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     var total = (AGEN.produits || []).filter(function(p){ return LOOK.indexOf(p.id) >= 0; })
       .reduce(function(s, p){ return s + p.prix; }, 0);
-    h += '<div class="carte"><h2>3 · Publier<span class="n">' + total.toFixed(2) + ' $ au total</span></h2>';
+    h += '<div class="carte"><h2>${T("3 · Publier")}<span class="n">' + total.toFixed(2) + '${T(" $ au total")}</span></h2>';
     if (!AGEN.peutEcrire) {
-      h += '<div class="vide">Consultation seulement.</div></div>';
+      h += '<div class="vide">${T("Consultation seulement.")}</div></div>';
       return h;
     }
-    h += '<label class="champ"><span class="lbl">Nom de la suggestion</span>'
+    h += '<label class="champ"><span class="lbl">${T("Nom de la suggestion")}</span>'
       + '<input class="t" id="ag-nom" placeholder="Look d’automne" value=""></label>'
       + '<div class="styles">'
-      + '<label class="case"><input type="checkbox" id="ag-produit" checked> Sur les fiches produit</label>'
-      + '<label class="case"><input type="checkbox" id="ag-panier"> Dans le panier</label>'
+      + '<label class="case"><input type="checkbox" id="ag-produit" checked> ${T("Sur les fiches produit")}</label>'
+      + '<label class="case"><input type="checkbox" id="ag-panier"> ${T("Dans le panier")}</label>'
       + '</div>'
       /* ⚠ ON DIT LE MINIMUM AVANT LE CLIC, pas apres : une suggestion d une
          seule piece renverrait le client vers le produit qu il regarde deja. */
-      + '<div class="dt" style="margin-top:.4rem">Deux articles au minimum — chaque pièce du look sera '
-      + 'liée à toutes les autres.</div>'
+      + '<div class="dt" style="margin-top:.4rem">${T("Deux articles au minimum — chaque pièce du look sera")} '
+      + '${T("liée à toutes les autres.")}</div>'
       + '<div class="pied-boite"><button class="mini prim" id="ag-publier"'
-      + (LOOK.length < 2 ? ' disabled' : '') + '>Publier la suggestion</button></div>'
+      + (LOOK.length < 2 ? ' disabled' : '') + '>${T("Publier la suggestion")}</button></div>'
       + '</div>';
     return h;
   }
 
   function chargerAgencement(){
     appeler('reco:agencement', [STYLE || '']).then(function(r){
-      if (!r || !r.ok) { dire('Catalogue illisible : ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire('${T("Catalogue illisible :")} ' + expliquer(r), 'err'); return; }
       AGEN = r;
       if (ONGLET === 'agencement') dessiner();
     });
@@ -739,18 +743,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var cc = document.getElementById('ag-panier');
     if (cp && cp.checked) ou.push('product');
     if (cc && cc.checked) ou.push('cart');
-    dire('Publication…');
+    dire('${T("Publication…")}');
     appeler('reco:agencement:publier', [{
       nom: n ? n.value : '', style: STYLE || '', articles: LOOK, afficher: ou
     }]).then(function(r){
-      if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
       LOOK = []; STYLE = null; CATF = 'all'; AGEN = null;
       chargerAgencement();
       /* On revient aux REGLES : la suggestion vient d y naitre, et c est la
          qu on verifie qu elle est bien en place. */
       ONGLET = 'regles';
       charger();
-      dire('« ' + r.nom + ' » publiée — ' + r.pieces + ' pièces, visible sur ' + r.ou + '.', 'bon');
+      dire('« ' + r.nom + ' ${T("» publiée —")} ' + r.pieces + ' ${T("pièces, visible sur")} ' + r.ou + '.', 'bon');
     });
   }
 
@@ -772,7 +776,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var _brCases = ['reg-on-product', 'reg-on-cart', 'reg-on-home'];
   szBrouillonBrancher({
     portee: 'reco-regle',
-    libelle: 'Une r\u00e8gle de recommandation',
+    libelle: '${T("Une règle de recommandation")}',
     ttlMin: 720,
     cle: function(){
       if (!REG_FORM) return '';
@@ -842,12 +846,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
