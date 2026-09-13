@@ -26,6 +26,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('statistiques');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -100,11 +104,11 @@ tbody tr:hover td{background:var(--v04)}
 function pageStatistiques(ongletDepart) {
   const dep = (ongletDepart === 'tel') ? 'tel' : 'ga';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Statistiques — Administration Sandriza</title>
+<title>${T("Statistiques — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.mktstats}</span><h1>Statistiques</h1>
+<div class="tete"><span class="ico">${ICO.mktstats}</span><h1>${T("Statistiques")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -137,24 +141,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux statistiques.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'Le service n’a pas répondu à temps. Réessayez : les chiffres affichés sont ceux de la dernière lecture réussie.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    ga_desactive:       'Le suivi Google Analytics est désactivé. Configuration → Statistiques, dans la fenêtre principale.',
-    ga_sans_propriete:  'Aucun identifiant de propriété GA4 n’est renseigné. Configuration → Statistiques.',
-    ga_sans_cle:        'Aucune clé de compte de service Google n’est enregistrée. Configuration → Statistiques.',
-    tel_desactive:      'La téléphonie est désactivée. Configuration → Téléphonie, dans la fenêtre principale.',
-    tel_sans_compte:    'Aucun compte Twilio n’est enregistré. Configuration → Téléphonie.',
-    reseau:             'Le service n’a pas pu être joint.',
-    refus:              'Le service a refusé la demande.',
-    echec:              'La lecture a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux statistiques.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("Le service n’a pas répondu à temps. Réessayez : les chiffres affichés sont ceux de la dernière lecture réussie.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    ga_desactive:       '${T("Le suivi Google Analytics est désactivé. Configuration → Statistiques, dans la fenêtre principale.")}',
+    ga_sans_propriete:  '${T("Aucun identifiant de propriété GA4 n’est renseigné. Configuration → Statistiques.")}',
+    ga_sans_cle:        '${T("Aucune clé de compte de service Google n’est enregistrée. Configuration → Statistiques.")}',
+    tel_desactive:      '${T("La téléphonie est désactivée. Configuration → Téléphonie, dans la fenêtre principale.")}',
+    tel_sans_compte:    '${T("Aucun compte Twilio n’est enregistré. Configuration → Téléphonie.")}',
+    reseau:             '${T("Le service n’a pas pu être joint.")}',
+    refus:              '${T("Le service a refusé la demande.")}',
+    echec:              '${T("La lecture a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' ' + esc(String(r.detail).slice(0, 160));
     return t;
   }
@@ -179,24 +183,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function onglets(){
     var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'ga' ? ' actif' : '') + '" data-onglet="ga">Google Analytics</button>'
-      + '<button class="mini' + (ONGLET === 'tel' ? ' actif' : '') + '" data-onglet="tel">Téléphonie</button>';
+      + '<button class="mini' + (ONGLET === 'ga' ? ' actif' : '') + '" data-onglet="ga">${T("Google Analytics")}</button>'
+      + '<button class="mini' + (ONGLET === 'tel' ? ' actif' : '') + '" data-onglet="tel">${T("Téléphonie")}</button>';
     if (ONGLET === 'ga') {
-      h += [['7d', '7 jours'], ['30d', '30 jours'], ['90d', '90 jours']].map(function(p){
+      h += [['7d', '${T("7 jours")}'], ['30d', '${T("30 jours")}'], ['90d', '${T("90 jours")}']].map(function(p){
         return '<button class="mini' + (PLAGE === p[0] ? ' actif' : '') + '" data-plage="' + p[0] + '">'
           + p[1] + '</button>';
       }).join('');
     } else {
-      h += [[7, '7 jours'], [30, '30 jours'], [90, '90 jours']].map(function(p){
+      h += [[7, '${T("7 jours")}'], [30, '${T("30 jours")}'], [90, '${T("90 jours")}']].map(function(p){
         return '<button class="mini' + (JOURS === p[0] ? ' actif' : '') + '" data-jours="' + p[0] + '">'
           + p[1] + '</button>';
       }).join('');
     }
     var lu = (ONGLET === 'ga') ? LUGA : LUTEL;
     h += '<div class="droite">'
-      + (lu ? '<span>lu à ' + esc(lu) + '</span>' : '')
+      + (lu ? '<span>${T("lu à ")}' + esc(lu) + '</span>' : '')
       + '<button class="mini" id="st-relire"' + (CHARGE ? ' disabled' : '') + '>'
-      + (CHARGE ? 'Lecture…' : '↻ Relire') + '</button>'
+      + (CHARGE ? '${T("Lecture…")}' : '${T("↻ Relire")}') + '</button>'
       + '</div></div>';
     return h;
   }
@@ -213,7 +217,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* Le graphique : des barres proportionnelles au plus haut jour. Le maximum
      est ECRIT au-dessus — une barre sans echelle ne dit rien. */
   function graphique(serie, cle, mot){
-    if (!serie || !serie.length) return '<div class="vide">Aucune donnée sur la période.</div>';
+    if (!serie || !serie.length) return '<div class="vide">${T("Aucune donnée sur la période.")}</div>';
     var max = 1, i;
     for (i = 0; i < serie.length; i++) if (Number(serie[i][cle]) > max) max = Number(serie[i][cle]);
     var cols = serie.map(function(s){
@@ -222,7 +226,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<div class="col" style="height:' + h + '%" title="' + esc(s.date) + ' — '
         + nb(v) + ' ' + esc(mot) + '"></div>';
     }).join('');
-    return '<div class="gmax">Maximum : ' + nb(max) + ' ' + esc(mot) + ' en une journée</div>'
+    return '<div class="gmax">${T("Maximum : ")}' + nb(max) + ' ' + esc(mot) + '${T(" en une journée")}</div>'
       + '<div class="graph">' + cols + '</div>';
   }
 
@@ -243,20 +247,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
     if (AVGA) h += '<div class="avis att">' + AVGA + '</div>';
     if (!DGA) {
-      return h + (AVGA ? '' : '<div class="vide charge">Lecture des statistiques…</div>');
+      return h + (AVGA ? '' : '<div class="vide charge">${T("Lecture des statistiques…")}</div>');
     }
     var t = DGA.totaux;
-    h += '<div class="tuiles">' + tuile('Visiteurs', nb(t.visiteurs), 'or')
-      + tuile('Sessions', nb(t.sessions), 'or')
-      + tuile('Pages vues', nb(t.pagesVues), 'or') + '</div>';
+    h += '<div class="tuiles">' + tuile('${T("Visiteurs")}', nb(t.visiteurs), 'or')
+      + tuile('${T("Sessions")}', nb(t.sessions), 'or')
+      + tuile('${T("Pages vues")}', nb(t.pagesVues), 'or') + '</div>';
     if (DGA.engagement) {
-      h += '<div class="tuiles">' + tuile('Durée moy. session', DGA.engagement.dureeMoyenne)
-        + tuile('Taux de rebond', DGA.engagement.rebond)
-        + tuile('Pages / session', DGA.engagement.pagesParSession)
-        + tuile('Taux d’engagement', DGA.engagement.engagement) + '</div>';
+      h += '<div class="tuiles">' + tuile('${T("Durée moy. session")}', DGA.engagement.dureeMoyenne)
+        + tuile('${T("Taux de rebond")}', DGA.engagement.rebond)
+        + tuile('${T("Pages / session")}', DGA.engagement.pagesParSession)
+        + tuile('${T("Taux d’engagement")}', DGA.engagement.engagement) + '</div>';
     }
-    h += '<div class="carte"><h3><span class="ic">📈</span> Pages vues par jour — ' + esc(DGA.plageLibelle) + '</h3>'
-      + graphique(DGA.serie, 'vues', 'pages vues') + '</div>';
+    h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Pages vues par jour — ")}' + esc(DGA.plageLibelle) + '</h3>'
+      + graphique(DGA.serie, 'vues', '${T("pages vues")}') + '</div>';
 
     var pages = (DGA.pages || []).length
       ? DGA.pages.map(function(p){
@@ -265,15 +269,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '</td><td class="num">' + nb(p.vues) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="2" class="dt" style="text-align:center">—</td></tr>';
-    h += '<div class="carte"><h3><span class="ic">🔝</span> Pages populaires</h3><table><thead><tr><th>Page</th>'
-      + '<th class="num">Vues</th></tr></thead><tbody>' + pages + '</tbody></table></div>';
+    h += '<div class="carte"><h3><span class="ic">🔝</span>${T(" Pages populaires")}</h3><table><thead><tr><th>${T("Page")}</th>'
+      + '<th class="num">${T("Vues")}</th></tr></thead><tbody>' + pages + '</tbody></table></div>';
 
     h += '<div class="grilles">'
-      + tableau('Pays', 'Pays', 'Visiteurs', DGA.pays, 'nom', 'visiteurs')
-      + tableau('Villes', 'Ville', 'Visiteurs', DGA.villes, 'nom', 'visiteurs')
-      + tableau('Appareils', 'Type', 'Visiteurs', DGA.appareils, 'nom', 'visiteurs')
-      + tableau('Sources de trafic', 'Canal', 'Sessions', DGA.sources, 'nom', 'sessions')
-      + tableau('Nouveaux / connus', 'Type', 'Visiteurs', DGA.nouveauxConnus, 'nom', 'visiteurs')
+      + tableau('${T("Pays")}', '${T("Pays")}', '${T("Visiteurs")}', DGA.pays, 'nom', 'visiteurs')
+      + tableau('${T("Villes")}', '${T("Ville")}', '${T("Visiteurs")}', DGA.villes, 'nom', 'visiteurs')
+      + tableau('${T("Appareils")}', '${T("Type")}', '${T("Visiteurs")}', DGA.appareils, 'nom', 'visiteurs')
+      + tableau('${T("Sources de trafic")}', '${T("Canal")}', '${T("Sessions")}', DGA.sources, 'nom', 'sessions')
+      + tableau('${T("Nouveaux / connus")}', '${T("Type")}', '${T("Visiteurs")}', DGA.nouveauxConnus, 'nom', 'visiteurs')
       + '</div>';
     return h;
   }
@@ -283,26 +287,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
     if (AVTEL) h += '<div class="avis att">' + AVTEL + '</div>';
     if (!DTEL) {
-      return h + (AVTEL ? '' : '<div class="vide charge">Lecture des appels…</div>');
+      return h + (AVTEL ? '' : '<div class="vide charge">${T("Lecture des appels…")}</div>');
     }
     var t = DTEL.totaux;
     /* ⚠ Le solde prepaye : quand il tombe a zero, la ligne cesse de repondre.
        Absent, on le DIT — un solde vide n est pas un solde nul. */
     h += '<div class="avis' + (DTEL.solde ? ' att' : ' mal') + '" style="display:flex;'
       + 'justify-content:space-between;gap:1rem;flex-wrap:wrap">'
-      + '<span><span class="ic">📞</span> Appels des <strong>' + DTEL.jours + ' derniers jours</strong>. '
-      + 'Coûts en dollars US, la devise de facturation.</span>'
-      + '<span>' + (DTEL.solde ? '<span class="ic">💰</span> Solde restant : <strong>' + esc(DTEL.solde) + '</strong>'
-                               : 'Solde indisponible') + '</span></div>';
-    h += '<div class="tuiles">' + tuile('Appels', nb(t.appels), 'or')
-      + tuile('Entrants', nb(t.entrants))
-      + tuile('Répondus', nb(t.repondus), 'bon')
-      + tuile('Manqués', nb(t.manques), t.manques ? 'mal' : '')
-      + tuile('Minutes', nb(t.minutes))
-      + tuile('Durée moy.', t.dureeMoyenne)
-      + tuile('Coût total', t.cout, 'att') + '</div>';
-    h += '<div class="carte"><h3><span class="ic">📈</span> Appels par jour</h3>'
-      + graphique(DTEL.serie, 'appels', 'appels') + '</div>';
+      + '<span><span class="ic">📞</span>${T(" Appels des <strong>")}' + DTEL.jours + '${T(" derniers jours</strong>. ")}'
+      + '${T("Coûts en dollars US, la devise de facturation.")}</span>'
+      + '<span>' + (DTEL.solde ? '<span class="ic">💰</span>${T(" Solde restant : <strong>")}' + esc(DTEL.solde) + '</strong>'
+                               : '${T("Solde indisponible")}') + '</span></div>';
+    h += '<div class="tuiles">' + tuile('${T("Appels")}', nb(t.appels), 'or')
+      + tuile('${T("Entrants")}', nb(t.entrants))
+      + tuile('${T("Répondus")}', nb(t.repondus), 'bon')
+      + tuile('${T("Manqués")}', nb(t.manques), t.manques ? 'mal' : '')
+      + tuile('${T("Minutes")}', nb(t.minutes))
+      + tuile('${T("Durée moy.")}', t.dureeMoyenne)
+      + tuile('${T("Coût total")}', t.cout, 'att') + '</div>';
+    h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Appels par jour")}</h3>'
+      + graphique(DTEL.serie, '${T("appels")}', '${T("appels")}') + '</div>';
 
     var rows = (DTEL.appels || []).length
       ? DTEL.appels.map(function(c){
@@ -311,10 +315,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td class="num">' + esc(c.cout || '—') + '</td>'
             + '<td class="dt">' + esc(c.date) + '</td></tr>';
         }).join('')
-      : '<tr><td colspan="6" class="dt" style="text-align:center">Aucun appel.</td></tr>';
-    h += '<div class="carte"><h3><span class="ic">📋</span> Appels récents</h3><table><thead><tr><th>Appelant</th>'
-      + '<th>Sens</th><th>Statut</th><th class="num">Durée</th><th class="num">Coût</th>'
-      + '<th>Date</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      : '<tr><td colspan="6" class="dt" style="text-align:center">${T("Aucun appel.")}</td></tr>';
+    h += '<div class="carte"><h3><span class="ic">📋</span>${T(" Appels récents")}</h3><table><thead><tr><th>${T("Appelant")}</th>'
+      + '<th>${T("Sens")}</th><th>${T("Statut")}</th><th class="num">${T("Durée")}</th><th class="num">${T("Coût")}</th>'
+      + '<th>${T("Date")}</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     return h;
   }
 
@@ -337,7 +341,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (pourGa) { DGA = r; LUGA = heure(); AVGA = ''; }
         else        { DTEL = r; LUTEL = heure(); AVTEL = ''; }
         dessiner();
-        if (demande) dire('Chiffres à jour.', 'bon');
+        if (demande) dire('${T("Chiffres à jour.")}', 'bon');
         return;
       }
       var texte = expliquer(r);
@@ -347,7 +351,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (pourGa) { DGA = null; AVGA = texte; } else { DTEL = null; AVTEL = texte; }
       } else {
         var vieux = pourGa ? LUGA : LUTEL;
-        var suffixe = vieux ? (' Les chiffres affichés sont ceux de ' + vieux + '.') : '';
+        var suffixe = vieux ? ('${T(" Les chiffres affichés sont ceux de ")}' + vieux + '.') : '';
         if (pourGa) AVGA = texte + suffixe; else AVTEL = texte + suffixe;
       }
       dessiner();
@@ -393,12 +397,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -407,7 +411,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
   });
 
-  if (sous) sous.textContent = 'chiffres demandés à Google et à Twilio';
+  if (sous) sous.textContent = '${T("chiffres demandés à Google et à Twilio")}';
   charger(false);
 })();
 </script>

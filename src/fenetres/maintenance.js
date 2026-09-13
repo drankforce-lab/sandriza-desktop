@@ -46,6 +46,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('maintenance');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -104,11 +108,11 @@ input.manque{border-color:var(--tx-err)}
 /** Page complète de la fenêtre native « Mode usage exclusif ». */
 function pageMaintenance() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Mode usage exclusif — Administration Sandriza</title>
+<title>${T("Mode usage exclusif — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.verrou}</span><h1>Mode usage exclusif</h1>
+<div class="tete"><span class="ico">${ICO.verrou}</span><h1>${T("Mode usage exclusif")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Lecture de l’état…</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Lecture de l’état…")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -139,16 +143,16 @@ function pageMaintenance() {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application.',
-    superadmin_required:'Le serveur refuse : cette action est réservée au super-administrateur.',
-    session_serveur:    'Le serveur ne reconnaît plus cette session — reconnectez-vous.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    base_injoignable:   'La base de données n’a pas répondu.',
-    parametre:          'Demande incomplète.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application.")}',
+    superadmin_required:'${T("Le serveur refuse : cette action est réservée au super-administrateur.")}',
+    session_serveur:    '${T("Le serveur ne reconnaît plus cette session — reconnectez-vous.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    base_injoignable:   '${T("La base de données n’a pas répondu.")}',
+    parametre:          '${T("Demande incomplète.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   /* Le code du motif est ecrit AUSSI, en petit : le libelle est pour lui, le
      code est pour moi quand il m envoie une capture. Meme regle que la fenetre
@@ -156,7 +160,7 @@ function pageMaintenance() {
      cycle construction + publication + installation. */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
     return t;
   }
@@ -173,27 +177,27 @@ function pageMaintenance() {
   var MX = null;
 
   function dessiner(){
-    if (!MX) { corps.innerHTML = '<div class="vide charge">Lecture de l’état…</div>'; return; }
+    if (!MX) { corps.innerHTML = '<div class="vide charge">${T("Lecture de l’état…")}</div>'; return; }
 
     if (!MX.ok) {
       sousEl.textContent = '';
       corps.innerHTML = '<div class="carte"><div class="vide">'
         + '<span class="ic">\\u26a0</span>' + expliquer(MX)
-        + '<div class="diag">motif : ' + esc((MX && MX.motif) || '?') + '</div>'
+        + '<div class="diag">${T("motif : ")}' + esc((MX && MX.motif) || '?') + '</div>'
         + '</div></div>';
       return;
     }
 
     if (MX.actif) {
-      sousEl.textContent = 'actif';
+      sousEl.textContent = '${T("actif")}';
       corps.innerHTML = '<div class="carte on">'
-        + '<h3><span>\\u{1F512}</span><span>Le mode est ACTIF</span></h3>'
+        + '<h3><span>\\u{1F512}</span><span>${T("Le mode est ACTIF")}</span></h3>'
         + '<div class="expl">' + esc(MX.phrase || '') + '<br><br>'
-        + 'Personne ne peut se connecter, sauf '
-        + (MX.moi ? '<strong>vous</strong> (vous l’avez activé)' : 'la personne qui l’a activé')
-        + '. Vous pouvez vous déconnecter et vous reconnecter sans problème.'
-        + (MX.moi ? '' : '<br><br><strong>Attention :</strong> ce mode a été activé par quelqu’un d’autre. '
-            + 'Le lever rouvre les connexions pendant qu’il travaille peut-être dessus.')
+        + '${T("Personne ne peut se connecter, sauf ")}'
+        + (MX.moi ? '${T("<strong>vous</strong> (vous l’avez activé)")}' : '${T("la personne qui l’a activé")}')
+        + '${T(". Vous pouvez vous déconnecter et vous reconnecter sans problème.")}'
+        + (MX.moi ? '' : '<br><br>${T("<strong>Attention :</strong> ce mode a été activé par quelqu’un d’autre. ")}'
+            + '${T("Le lever rouvre les connexions pendant qu’il travaille peut-être dessus.")}')
         + '</div>'
         /* ══ PROLONGER, SANS RELANCER — sa demande du 2026-09-10 ══════════════
            « Je préfère que ça se lève automatiquement, et de toute façon si j ai
@@ -212,53 +216,53 @@ function pageMaintenance() {
            ⚠ ET SI LA FIN EST DÉJÀ PASSÉE, on repart de maintenant : sinon << +1 h >>
            sur une période finie depuis deux heures rendrait une fin encore dans
            le passé, donc un refus incompréhensible. */
-        + '<div class="champ"><label for="mx-fin2">Prolonger jusqu’à</label>'
+        + '<div class="champ"><label for="mx-fin2">${T("Prolonger jusqu’à")}</label>'
         + '<input type="datetime-local" id="mx-fin2" value="' + esc(mxLocal(mxBase())) + '"></div>'
         + '<div class="pieds">'
-        + '<button id="mx-p1" data-h="1">+ 1 h</button>'
-        + '<button id="mx-p2" data-h="2">+ 2 h</button>'
-        + '<button id="mx-p4" data-h="4">+ 4 h</button>'
-        + '<button class="prim" id="mx-prolonger">Prolonger</button>'
+        + '<button id="mx-p1" data-h="1">${T("+ 1 h")}</button>'
+        + '<button id="mx-p2" data-h="2">${T("+ 2 h")}</button>'
+        + '<button id="mx-p4" data-h="4">${T("+ 4 h")}</button>'
+        + '<button class="prim" id="mx-prolonger">${T("Prolonger")}</button>'
         + '</div>'
-        + '<div class="avert"><strong>Le mode se lève tout seul à l’heure de fin.</strong> '
-        + 'Aucun geste à faire — les connexions rouvrent à la seconde dite, sur tous les '
-        + 'postes, sans que personne ait à fermer ou rouvrir l’application.<br>'
-        + 'Depuis l’écran de connexion, <strong>Ctrl + Maj + 0</strong> demande le NIP '
-        + 'et lève la maintenance immédiatement.</div>'
-        + '<div class="pieds"><button class="dgr" id="mx-lever">Lever maintenant</button>'
-        + '<button id="mx-fermer">Fermer</button></div>'
+        + '<div class="avert">${T("<strong>Le mode se lève tout seul à l’heure de fin.</strong> ")}'
+        + '${T("Aucun geste à faire — les connexions rouvrent à la seconde dite, sur tous les ")}'
+        + '${T("postes, sans que personne ait à fermer ou rouvrir l’application.")}<br>'
+        + '${T("Depuis l’écran de connexion, <strong>Ctrl + Maj + 0</strong> demande le NIP ")}'
+        + '${T("et lève la maintenance immédiatement.")}</div>'
+        + '<div class="pieds"><button class="dgr" id="mx-lever">${T("Lever maintenant")}</button>'
+        + '<button id="mx-fermer">${T("Fermer")}</button></div>'
         + '</div>';
       brancher();
       return;
     }
 
-    sousEl.textContent = 'inactif';
+    sousEl.textContent = '${T("inactif")}';
     corps.innerHTML = '<div class="carte">'
-      + '<h3><span>\\u{1F512}</span><span>Activer le mode</span></h3>'
-      + '<div class="expl">Personne d’autre ne pourra se connecter, et une bannière annoncera '
-      + 'la période sur l’écran de connexion de tous les postes. '
-      + '<strong>Vous resterez le seul à pouvoir entrer</strong>, même après vous être '
-      + 'déconnecté.</div>'
+      + '<h3><span>\\u{1F512}</span><span>${T("Activer le mode")}</span></h3>'
+      + '<div class="expl">${T("Personne d’autre ne pourra se connecter, et une bannière annoncera ")}'
+      + '${T("la période sur l’écran de connexion de tous les postes. ")}'
+      + '${T("<strong>Vous resterez le seul à pouvoir entrer</strong>, même après vous être ")}'
+      + '${T("déconnecté.")}</div>'
       + '<div class="grille">'
-      + '<div><label for="mx-debut">Début de la période</label>'
+      + '<div><label for="mx-debut">${T("Début de la période")}</label>'
       + '<input type="datetime-local" id="mx-debut"></div>'
-      + '<div><label for="mx-fin">Fin de la période</label>'
+      + '<div><label for="mx-fin">${T("Fin de la période")}</label>'
       + '<input type="datetime-local" id="mx-fin"></div>'
       + '</div>'
-      + '<div class="champ"><label for="mx-msg">Message ajouté à la bannière (facultatif)</label>'
+      + '<div class="champ"><label for="mx-msg">${T("Message ajouté à la bannière (facultatif)")}</label>'
       + '<input type="text" id="mx-msg" maxlength="300" '
-      + 'placeholder="Ex. : mise à jour du système de facturation."></div>'
-      + '<div class="champ"><label for="mx-nip">NIP de désactivation d’urgence '
-      + '(' + (MX.nipMin || 6) + ' à ' + (MX.nipMax || 12) + ' chiffres)</label>'
+      + 'placeholder="${T("Ex. : mise à jour du système de facturation.")}"></div>'
+      + '<div class="champ"><label for="mx-nip">${T("NIP de désactivation d’urgence ")}'
+      + '(' + (MX.nipMin || 6) + '${T(" à ")}' + (MX.nipMax || 12) + '${T(" chiffres)")}</label>'
       + '<input type="password" id="mx-nip" inputmode="numeric" autocomplete="new-password" '
       + 'maxlength="' + (MX.nipMax || 12) + '"></div>'
-      + '<div class="avert"><strong>Notez ce NIP ailleurs.</strong> Il se saisit depuis l’écran '
-      + 'de connexion avec <strong>Ctrl + Maj + 0</strong>, et il lève la maintenance '
-      + 'immédiatement.<br>'
-      + '<strong>Le mode se lève tout seul à l’heure de fin</strong> — vous pourrez le '
-      + 'prolonger en cours de route sans le relancer, et sans changer ce NIP.</div>'
-      + '<div class="pieds"><button class="prim" id="mx-poser">Activer le mode</button>'
-      + '<button id="mx-fermer">Annuler</button></div>'
+      + '<div class="avert">${T("<strong>Notez ce NIP ailleurs.</strong> Il se saisit depuis l’écran ")}'
+      + '${T("de connexion avec <strong>Ctrl + Maj + 0</strong>, et il lève la maintenance ")}'
+      + '${T("immédiatement.")}<br>'
+      + '${T("<strong>Le mode se lève tout seul à l’heure de fin</strong> — vous pourrez le ")}'
+      + '${T("prolonger en cours de route sans le relancer, et sans changer ce NIP.")}</div>'
+      + '<div class="pieds"><button class="prim" id="mx-poser">${T("Activer le mode")}</button>'
+      + '<button id="mx-fermer">${T("Annuler")}</button></div>'
       + '</div>';
     brancher();
     var d = document.getElementById('mx-debut');
@@ -317,23 +321,23 @@ function pageMaintenance() {
     /* ⚠ ON MONTRE LE CHAMP FAUTIF, PAS SEULEMENT LA PHRASE. Devant quatre
        champs, savoir POURQUOI ne suffit pas : il faut savoir LEQUEL. */
     [d, f, n].forEach(function(e){ e.classList.remove('manque'); });
-    if (!d.value) { d.classList.add('manque'); d.focus(); dire('Indiquez le début de la période.', 'att'); return; }
-    if (!f.value) { f.classList.add('manque'); f.focus(); dire('Indiquez la fin de la période.', 'att'); return; }
+    if (!d.value) { d.classList.add('manque'); d.focus(); dire('${T("Indiquez le début de la période.")}', 'att'); return; }
+    if (!f.value) { f.classList.add('manque'); f.focus(); dire('${T("Indiquez la fin de la période.")}', 'att'); return; }
     var min = MX.nipMin || 6, max = MX.nipMax || 12;
     if (!new RegExp('^[0-9]{' + min + ',' + max + '}$').test(n.value || '')) {
       n.classList.add('manque'); n.focus();
-      dire('Le NIP doit compter de ' + min + ' à ' + max + ' chiffres.', 'att');
+      dire('${T("Le NIP doit compter de ")}' + min + '${T(" à ")}' + max + '${T(" chiffres.")}', 'att');
       return;
     }
     var b = document.getElementById('mx-poser');
     if (b) b.disabled = true;
-    dire('Activation…');
+    dire('${T("Activation…")}');
     appeler('maintenance:ecrire',['poser', { debut: d.value, fin: f.value,
       message: m ? m.value : '', nip: n.value }]).then(function(r){
       var b2 = document.getElementById('mx-poser');
       if (b2) b2.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Mode activé. Personne d’autre ne peut se connecter.', 'bon');
+      dire('${T("Mode activé. Personne d’autre ne peut se connecter.")}', 'bon');
       /* ⚠ LE TABLEAU DE BORD DOIT LE SAVOIR TOUT DE SUITE : c est lui qui porte
          le bouton, et son libelle change avec l etat. Sans cet avis, il
          annoncerait << inactif >> jusqu a sa prochaine ouverture. */
@@ -346,15 +350,15 @@ function pageMaintenance() {
     var f = document.getElementById('mx-fin2');
     if (!f) return;
     f.classList.remove('manque');
-    if (!f.value) { f.classList.add('manque'); f.focus(); dire('Indiquez la nouvelle heure de fin.', 'att'); return; }
+    if (!f.value) { f.classList.add('manque'); f.focus(); dire('${T("Indiquez la nouvelle heure de fin.")}', 'att'); return; }
     if (Date.parse(f.value) <= Date.now()) {
       f.classList.add('manque'); f.focus();
-      dire('Cette heure est déjà passée.', 'att');
+      dire('${T("Cette heure est déjà passée.")}', 'att');
       return;
     }
     var b = document.getElementById('mx-prolonger');
     if (b) b.disabled = true;
-    dire('Prolongation…');
+    dire('${T("Prolongation…")}');
     /* ⚠ ON N ENVOIE QUE LA FIN. Le NIP, l initiateur et le compte de tentatives
        restent ceux du mode en cours — c est tout le sens de << sans devoir
        relancer >> : le NIP noté ailleurs reste valable. */
@@ -362,7 +366,7 @@ function pageMaintenance() {
       var b2 = document.getElementById('mx-prolonger');
       if (b2) b2.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Maintenance prolongée. Le NIP n’a pas changé.', 'bon');
+      dire('${T("Maintenance prolongée. Le NIP n’a pas changé.")}', 'bon');
       try { P.appeler('tableau:rafraichirMaintenance'); } catch (e) {}
       charger();
     });
@@ -371,12 +375,12 @@ function pageMaintenance() {
   function lever(){
     var l = document.getElementById('mx-lever');
     if (l) l.disabled = true;
-    dire('Levée…');
+    dire('${T("Levée…")}');
     appeler('maintenance:ecrire',['lever', {}]).then(function(r){
       var l2 = document.getElementById('mx-lever');
       if (l2) l2.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Mode levé. Les connexions sont de nouveau possibles.', 'bon');
+      dire('${T("Mode levé. Les connexions sont de nouveau possibles.")}', 'bon');
       try { P.appeler('tableau:rafraichirMaintenance'); } catch (e) {}
       charger();
     });
