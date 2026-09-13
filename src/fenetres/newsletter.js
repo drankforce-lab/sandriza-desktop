@@ -18,6 +18,11 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠ Le contenu de l'offre de bienvenue (titre, sous-titre, bouton,
+   mention légale) est TAPÉ ici et LU PAR LA VISITEUSE : c'est de la donnée, pas
+   de l'interface. Le texte de repli de l'aperçu est déclaré dans `SZ_DONNEES`. */
+const T = require('../langue').tr('newsletter');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -112,11 +117,11 @@ function pageNewsletter(ouverture) {
   const tabDepart = (ouv === 'config' || ouv === 'offer') ? ouv : (ouv === 'apercu' ? 'offer' : 'dashboard');
   const ouvreApercu = (ouv === 'apercu');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Infolettre — Administration Sandriza</title>
+<title>${T("Infolettre — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.newsletter}</span><h1>Infolettre</h1><span class="sous" id="sous"></span></div>
+<div class="tete"><span class="ico">${ICO.newsletter}</span><h1>${T("Infolettre")}</h1><span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -129,6 +134,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   var TAB = '${tabDepart}';
   var D = null;          // donnees de l onglet courant
+
+  /* ⚠⚠ CE QUI EST UNE DONNEE, PAS DE L INTERFACE. L apercu du popup doit montrer
+     ce que la VISITEUSE verra — et elle lit le francais. Ce texte de repli n est
+     pas un libelle de l administration : le traduire ferait mentir l apercu.
+     Voir la fiche de tools/textes-visibles.js. */
+  var SZ_DONNEES = {
+    offreBoutonDefaut: 'JE M’INSCRIS'
+  };
   var PEUT = { vue:true, edit:false };
   var APERCU = false;    // surcouche apercu du popup
 
@@ -140,18 +153,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function chk(id){ var e = document.getElementById(id); return e ? e.checked : false; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne permet pas cette modification.',
-    indisponible:'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    format:'Format d’image invalide.', echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne permet pas cette modification.")}',
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    format:'${T("Format d’image invalide.")}', echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ if (!r) return 'Aucune réponse de la fenêtre principale.'; if (r.detail) return String(r.detail); return MOTIFS[r.motif] || MOTIFS.echec; }
+  function expliquer(r){ if (!r) return '${T("Aucune réponse de la fenêtre principale.")}'; if (r.detail) return String(r.detail); return MOTIFS[r.motif] || MOTIFS.echec; }
   function appeler(op, arg){ if (!P || !P.appeler) return Promise.resolve({ ok:false, motif:'indisponible' }); return P.appeler(op, arg).catch(function(){ return { ok:false, motif:'echec' }; }); }
 
   var OPTAB = { dashboard:'newsletter:dash', config:'newsletter:cfgDonnees', offer:'newsletter:offerDonnees' };
   function charger(){
     return appeler(OPTAB[TAB], {}).then(function(r){
-      if (!r || !r.ok) { vide('Infolettre indisponible', expliquer(r)); return false; }
+      if (!r || !r.ok) { vide('${T("Infolettre indisponible")}', expliquer(r)); return false; }
       D = r; if (r.peut) PEUT = r.peut; return true;
     });
   }
@@ -162,50 +175,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function relire(){ return charger().then(function(ok){ if (ok) dessiner(); return ok; }); }
 
   function dessinerOnglets(){
-    ongletsEl.innerHTML = [['dashboard','Tableau de bord'],['config','⚙ Configuration'],['offer','Offre bienvenue']]
+    ongletsEl.innerHTML = [['dashboard','${T("Tableau de bord")}'],['config','${T("⚙ Configuration")}'],['offer','${T("Offre bienvenue")}']]
       .map(function(t){ return '<button data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'actif' : '') + '">' + t[1] + '</button>'; }).join('');
   }
 
   /* ══ TABLEAU DE BORD ═══════════════════════════════════════════════════════ */
   function vueDash(){
     if (!D.hasKey) {
-      return '<div class="setup"><div class="em"><span class="ic">📧</span></div><h2 style="margin:0 0 .5rem">Configurer Resend</h2>'
-        + '<p style="margin:0 0 1rem">Configurez votre clé API Resend pour commencer à envoyer des infolettres.</p>'
-        + '<button class="prim" data-tab="config">Configurer maintenant →</button></div>';
+      return '<div class="setup"><div class="em"><span class="ic">📧</span></div><h2 style="margin:0 0 .5rem">${T("Configurer Resend")}</h2>'
+        + '<p style="margin:0 0 1rem">${T("Configurez votre clé API Resend pour commencer à envoyer des infolettres.")}</p>'
+        + '<button class="prim" data-tab="config">${T("Configurer maintenant →")}</button></div>';
     }
     var recents = D.recents.length ? D.recents.map(function(c){
-      var st = c.status === 'sent' ? '<span class="badge ok">Envoyée</span>' : c.status === 'sending' ? '<span class="badge warn">En cours</span>' : '<span class="badge draft">Brouillon</span>';
+      var st = c.status === 'sent' ? '<span class="badge ok">${T("Envoyée")}</span>' : c.status === 'sending' ? '<span class="badge warn">${T("En cours")}</span>' : '<span class="badge draft">${T("Brouillon")}</span>';
       return '<tr><td><strong>' + esc(c.name) + '</strong><div style="font-size:.72rem;color:var(--tx2)">' + esc(c.sentAt || '—') + '</div></td>'
         + '<td>' + c.sent + (c.failed ? ' / <span style="color:var(--tx-err)">' + c.failed + '</span>' : '') + '</td><td>' + st + '</td></tr>';
-    }).join('') : '<tr><td colspan="3" class="vide">Aucune campagne</td></tr>';
+    }).join('') : '<tr><td colspan="3" class="vide">${T("Aucune campagne")}</td></tr>';
     var srcs = D.sources.length ? D.sources.map(function(s){
       return '<div class="src"><div class="l"><span>' + esc(s.label) + '</span><span style="font-weight:600">' + s.count + '</span></div>'
         + '<div class="bar"><div style="width:' + s.pct + '%"></div></div></div>';
-    }).join('') : '<p style="color:var(--tx2);font-size:.85rem">Aucun abonné encore.</p>';
+    }).join('') : '<p style="color:var(--tx2);font-size:.85rem">${T("Aucun abonné encore.")}</p>';
     return '<div class="tuiles">'
-      + '<div class="tuile"><div class="k"><span class="ic">👥</span> Abonnés actifs</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + ' désabonné' + plur(D.unsub) + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">📣</span> Campagnes envoyées</div><div class="v">' + D.sentCamps + '</div><div class="z">' + D.draftCamps + ' en brouillon</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">✉</span> Courriels envoyés</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + ' échoué' + plur(D.failedSent) + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">🔗</span> Chaînes actives</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + ' étape' + plur(D.pendingSteps) + ' en attente</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Abonnés actifs")}</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + '${T(" désabonné")}' + plur(D.unsub) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">📣</span> ${T("Campagnes envoyées")}</div><div class="v">' + D.sentCamps + '</div><div class="z">' + D.draftCamps + '${T(" en brouillon")}</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">✉</span> ${T("Courriels envoyés")}</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + '${T(" échoué")}' + plur(D.failedSent) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🔗</span> ${T("Chaînes actives")}</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + '${T(" étape")}' + plur(D.pendingSteps) + '${T(" en attente</div>")}</div>'
       + '</div>'
-      + (PEUT.edit ? '<div><button class="ghost mini" data-act="chains">⚙ Traiter les chaînes (' + D.pendingSteps + ')</button></div>' : '')
+      + (PEUT.edit ? '<div><button class="ghost mini" data-act="chains">${T("⚙ Traiter les chaînes (")}' + D.pendingSteps + ')</button></div>' : '')
       + '<div class="deux">'
-      +   '<div class="carte"><h2>Campagnes récentes</h2><table><thead><tr><th>Campagne</th><th>Envoyés</th><th>Statut</th></tr></thead><tbody>' + recents + '</tbody></table></div>'
-      +   '<div class="carte"><h2>Sources d’abonnés</h2>' + srcs + '</div>'
+      +   '<div class="carte"><h2>${T("Campagnes récentes")}</h2><table><thead><tr><th>${T("Campagne")}</th><th>${T("Envoyés")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recents + '</tbody></table></div>'
+      +   '<div class="carte"><h2>${T("Sources d’abonnés")}</h2>' + srcs + '</div>'
       + '</div>';
   }
 
   /* ══ CONFIGURATION ═════════════════════════════════════════════════════════ */
   var SERVICES = [
-    { key:'orderConfirmation', label:'Confirmation de commande', desc:'Envoyé au client après chaque commande réussie.' },
-    { key:'shipping', label:'Expédition / suivi', desc:'Envoyé lors du marquage « Expédiée ».' },
-    { key:'delivery', label:'Confirmation de livraison', desc:'Envoyé dès que le transporteur confirme la livraison.' },
-    { key:'welcomeOffer', label:'Offre de bienvenue', desc:'Code de réduction envoyé à l’inscription.' },
-    { key:'giftCard', label:'Carte-cadeau', desc:'Livraison par courriel lors de l’achat.' },
-    { key:'chatOffline', label:'Message hors-ligne (chat)', desc:'Avis admin quand un visiteur écrit hors-ligne.' },
-    { key:'passwordReset', label:'Réinitialisation de mot de passe', desc:'Avis de sécurité après un changement.' },
-    { key:'chains', label:'Séquences automatisées', desc:'Étapes des chaînes d’automation.' },
-    { key:'supportTicket', label:'Demande de support client', desc:'Avis à support@ et réponse au client.' },
+    { key:'orderConfirmation', label:'${T("Confirmation de commande")}', desc:'${T("Envoyé au client après chaque commande réussie.")}' },
+    { key:'shipping', label:'${T("Expédition / suivi")}', desc:'${T("Envoyé lors du marquage « Expédiée ».")}' },
+    { key:'delivery', label:'${T("Confirmation de livraison")}', desc:'${T("Envoyé dès que le transporteur confirme la livraison.")}' },
+    { key:'welcomeOffer', label:'${T("Offre de bienvenue")}', desc:'${T("Code de réduction envoyé à l’inscription.")}' },
+    { key:'giftCard', label:'${T("Carte-cadeau")}', desc:'${T("Livraison par courriel lors de l’achat.")}' },
+    { key:'chatOffline', label:'${T("Message hors-ligne (chat)")}', desc:'${T("Avis admin quand un visiteur écrit hors-ligne.")}' },
+    { key:'passwordReset', label:'${T("Réinitialisation de mot de passe")}', desc:'${T("Avis de sécurité après un changement.")}' },
+    { key:'chains', label:'${T("Séquences automatisées")}', desc:'${T("Étapes des chaînes d’automation.")}' },
+    { key:'supportTicket', label:'${T("Demande de support client")}', desc:'${T("Avis à support@ et réponse au client.")}' },
   ];
   function bascule(id, on){
     return '<label class="bascule"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + (PEUT.edit ? '' : ' disabled') + '><span class="piste"></span><span class="pouce"></span></label>';
@@ -219,30 +232,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<div class="ctrl"><div><div class="t">' + esc(s.label) + '</div><div class="d">' + esc(s.desc) + '</div></div>' + bascule('nl-ctrl-' + s.key, D.controls[s.key] !== false) + '</div>';
     }).join('');
     var cleField = PEUT.edit
-      ? ligneChamp('Clé API Resend *', 'nl-key', c.apiKey, 'password', 'Créez votre clé sur <strong>resend.com/api-keys</strong>')
-      : '<div class="champ"><label>Clé API Resend</label><input aria-label="Clé API Resend" value="' + (c.hasKey ? '••••••••••••' : '') + '" readonly></div>';
+      ? ligneChamp('${T("Clé API Resend *")}', 'nl-key', c.apiKey, 'password', '${T("Créez votre clé sur ")}<strong>resend.com/api-keys</strong>')
+      : '<div class="champ"><label>${T("Clé API Resend")}</label><input aria-label="${T("Clé API Resend")}" value="' + (c.hasKey ? '••••••••••••' : '') + '" readonly></div>';
     return '<div class="deux">'
-      + '<div class="carte"><h2><span class="ic">🔑</span> API Resend</h2>'
+      + '<div class="carte"><h2><span class="ic">🔑</span> ${T("API Resend")}</h2>'
       +   cleField
-      +   ligneChamp('Courriel expéditeur *', 'nl-from-e', c.fromEmail, 'email', 'Le domaine doit être vérifié dans Resend')
-      +   ligneChamp('Nom expéditeur', 'nl-from-n', c.fromName)
-      +   ligneChamp('Répondre à (optionnel)', 'nl-reply', c.replyTo, 'email')
+      +   ligneChamp('${T("Courriel expéditeur *")}', 'nl-from-e', c.fromEmail, 'email', '${T("Le domaine doit être vérifié dans Resend")}')
+      +   ligneChamp('${T("Nom expéditeur")}', 'nl-from-n', c.fromName)
+      +   ligneChamp('${T("Répondre à (optionnel)")}', 'nl-reply', c.replyTo, 'email')
       +   '<hr class="sep">'
-      +   ligneChamp('Nom de l’entreprise', 'nl-co-name', c.companyName)
-      +   ligneChamp('Adresse (pied de page)', 'nl-co-addr', c.companyAddress)
-      +   ligneChamp('Lien site web (pied de page)', 'nl-website-url', c.websiteUrl, 'url')
+      +   ligneChamp('${T("Nom de l’entreprise")}', 'nl-co-name', c.companyName)
+      +   ligneChamp('${T("Adresse (pied de page)")}', 'nl-co-addr', c.companyAddress)
+      +   ligneChamp('${T("Lien site web (pied de page)")}', 'nl-website-url', c.websiteUrl, 'url')
       +   '<hr class="sep">'
-      +   ligneChamp('Courriel expéditeur — transactionnel', 'nl-trans-from-e', c.fromEmailTransactional, 'email', 'Expédition, cartes-cadeaux, alertes. Vide = courriel infolettre.')
-      +   ligneChamp('Nom expéditeur — transactionnel', 'nl-trans-from-n', c.fromNameTransactional)
+      +   ligneChamp('${T("Courriel expéditeur — transactionnel")}', 'nl-trans-from-e', c.fromEmailTransactional, 'email', '${T("Expédition, cartes-cadeaux, alertes. Vide = courriel infolettre.")}')
+      +   ligneChamp('${T("Nom expéditeur — transactionnel")}', 'nl-trans-from-n', c.fromNameTransactional)
       +   '<hr class="sep">'
-      +   '<div class="ctrl" style="border:none;padding:.2rem 0"><div><div class="t">Mode test</div><div class="d">Envoyer uniquement à l’adresse de test.</div></div>' + bascule('nl-testmode', c.testMode) + '</div>'
-      +   ligneChamp('Courriel de test', 'nl-test-e', c.testEmail, 'email')
-      +   (PEUT.edit ? '<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem"><button class="prim" data-act="cfgsave">Enregistrer</button><button class="ghost" data-act="testconn">Envoyer un courriel de test</button></div>' : '')
+      +   '<div class="ctrl" style="border:none;padding:.2rem 0"><div><div class="t">${T("Mode test")}</div><div class="d">${T("Envoyer uniquement à l’adresse de test.")}</div></div>' + bascule('nl-testmode', c.testMode) + '</div>'
+      +   ligneChamp('${T("Courriel de test")}', 'nl-test-e', c.testEmail, 'email')
+      +   (PEUT.edit ? '<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem"><button class="prim" data-act="cfgsave">${T("Enregistrer")}</button><button class="ghost" data-act="testconn">${T("Envoyer un courriel de test")}</button></div>' : '')
       + '</div>'
-      + '<div class="carte"><h2><span class="ic">🔕</span> Contrôle des envois par courriel</h2>'
-      +   '<p class="hint" style="margin:0 0 .6rem">Un service désactivé ne consomme pas de quota Resend.</p>'
+      + '<div class="carte"><h2><span class="ic">🔕</span> ${T("Contrôle des envois par courriel")}</h2>'
+      +   '<p class="hint" style="margin:0 0 .6rem">${T("Un service désactivé ne consomme pas de quota Resend.")}</p>'
       +   ctrls
-      +   (PEUT.edit ? '<div style="margin-top:.7rem"><button class="prim" data-act="ctrlsave">Enregistrer les contrôles</button></div>' : '')
+      +   (PEUT.edit ? '<div style="margin-top:.7rem"><button class="prim" data-act="ctrlsave">${T("Enregistrer les contrôles")}</button></div>' : '')
       + '</div>'
       + '</div>';
   }
@@ -251,36 +264,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueOffer(){
     var c = D.cfg;
     var stats = D.stats ? '<div class="tuiles" style="margin-bottom:.8rem">'
-      + '<div class="tuile"><div class="k">Codes générés</div><div class="v">' + D.stats.total + '</div></div>'
-      + '<div class="tuile"><div class="k">Codes utilisés</div><div class="v" style="color:var(--tx-ok)">' + D.stats.used + '</div></div>'
-      + '<div class="tuile"><div class="k">En attente</div><div class="v" style="color:var(--tx-att)">' + D.stats.active + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Codes générés")}</div><div class="v">' + D.stats.total + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Codes utilisés")}</div><div class="v" style="color:var(--tx-ok)">' + D.stats.used + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("En attente")}</div><div class="v" style="color:var(--tx-att)">' + D.stats.active + '</div></div>'
       + '</div>' : '';
-    var img = c.imageUrl ? '<img class="apercu-img" src="' + esc(c.imageUrl) + '" alt="Aperçu">' : '';
+    var img = c.imageUrl ? '<img class="apercu-img" src="' + esc(c.imageUrl) + '" alt="${T("Aperçu")}">' : '';
     var ro = PEUT.edit ? '' : ' readonly';
     return '<div class="carte">'
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">'
-      +   '<div><h2 style="margin:0 0 .2rem">Widget Offre de bienvenue</h2><div class="hint" style="margin:0">Bouton <span class="ic">🎁</span> flottant + popup — suit le visiteur sur tout le site.</div></div>'
-      +   '<div style="display:flex;align-items:center;gap:.5rem"><span class="hint" style="margin:0">Actif</span>' + bascule('offer-enabled', c.enabled) + '</div>'
+      +   '<div><h2 style="margin:0 0 .2rem">${T("Widget Offre de bienvenue")}</h2><div class="hint" style="margin:0">${T("Bouton ")}<span class="ic">🎁</span>${T(" flottant + popup — suit le visiteur sur tout le site.")}</div></div>'
+      +   '<div style="display:flex;align-items:center;gap:.5rem"><span class="hint" style="margin:0">${T("Actif")}</span>' + bascule('offer-enabled', c.enabled) + '</div>'
       + '</div>'
-      + (D.done ? '<div class="hint" style="color:#86efac;margin:0 0 .8rem">✓ Un visiteur a déjà soumis ce widget. Utilisez « Réinitialiser » pour re-tester.</div>' : '')
+      + (D.done ? '<div class="hint" style="color:#86efac;margin:0 0 .8rem">${T("✓ Un visiteur a déjà soumis ce widget. Utilisez « Réinitialiser » pour re-tester.")}</div>' : '')
       + stats
       + '<div class="deux">'
-      +   '<div class="champ"><label for="offer-title">Titre (saut de ligne = ↵)</label><textarea id="offer-title" rows="2"' + ro + '>' + esc(c.title) + '</textarea></div>'
-      +   '<div class="champ"><label>Image côté gauche</label>' + img
-      +     (PEUT.edit ? '<label style="display:inline-block;margin-bottom:.4rem"><span class="ghost mini" style="display:inline-block;padding:.16rem .5rem;border:1px solid var(--v16);border-radius:8px"><span class="ic">📁</span> Choisir une photo</span><input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
-      +     '<input id="offer-img" value="' + esc(c.imageUrl) + '" placeholder="https://… ou coller une URL"' + ro + '>'
-      +     '<div class="hint">700 × 900 px recommandé (portrait). Max 600 Ko.</div></div>'
+      +   '<div class="champ"><label for="offer-title">${T("Titre (saut de ligne = ↵)")}</label><textarea id="offer-title" rows="2"' + ro + '>' + esc(c.title) + '</textarea></div>'
+      +   '<div class="champ"><label>${T("Image côté gauche")}</label>' + img
+      +     (PEUT.edit ? '<label style="display:inline-block;margin-bottom:.4rem"><span class="ghost mini" style="display:inline-block;padding:.16rem .5rem;border:1px solid var(--v16);border-radius:8px"><span class="ic">📁</span> ${T("Choisir une photo")}</span><input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
+      +     '<input id="offer-img" value="' + esc(c.imageUrl) + '" placeholder="${T("https://… ou coller une URL")}"' + ro + '>'
+      +     '<div class="hint">${T("700 × 900 px recommandé (portrait). Max 600 Ko.")}</div></div>'
       + '</div>'
-      + '<div class="champ"><label for="offer-sub">Sous-titre</label><input id="offer-sub" value="' + esc(c.subtitle) + '"' + ro + '></div>'
+      + '<div class="champ"><label for="offer-sub">${T("Sous-titre")}</label><input id="offer-sub" value="' + esc(c.subtitle) + '"' + ro + '></div>'
       + '<div class="deux">'
-      +   '<div class="champ"><label for="offer-cta">Texte du bouton</label><input id="offer-cta" value="' + esc(c.cta) + '"' + ro + '></div>'
-      +   '<div class="champ"><label for="offer-discount">Valeur de réduction (%)</label><input id="offer-discount" type="number" min="1" max="100" value="' + (c.discountValue || 10) + '"' + ro + '><div class="hint">Un code unique WB-XXXXXX par client, valide 1 commande, expire 30 j.</div></div>'
+      +   '<div class="champ"><label for="offer-cta">${T("Texte du bouton")}</label><input id="offer-cta" value="' + esc(c.cta) + '"' + ro + '></div>'
+      +   '<div class="champ"><label for="offer-discount">${T("Valeur de réduction (%)")}</label><input id="offer-discount" type="number" min="1" max="100" value="' + (c.discountValue || 10) + '"' + ro + '><div class="hint">${T("Un code unique WB-XXXXXX par client, valide 1 commande, expire 30 j.")}</div></div>'
       + '</div>'
-      + '<div class="champ"><label for="offer-legal">Mention légale</label><input id="offer-legal" value="' + esc(c.legal) + '"' + ro + '></div>'
+      + '<div class="champ"><label for="offer-legal">${T("Mention légale")}</label><input id="offer-legal" value="' + esc(c.legal) + '"' + ro + '></div>'
       + '<div style="display:flex;gap:.6rem;flex-wrap:wrap">'
-      +   (PEUT.edit ? '<button class="prim" data-act="offersave">Enregistrer</button>' : '')
-      +   '<button class="ghost" data-act="apercu">Aperçu du popup</button>'
-      +   (PEUT.edit ? '<button class="ghost mini" data-act="offerreset" style="color:var(--tx-or)">↺ Réinitialiser pour re-tester</button>' : '')
+      +   (PEUT.edit ? '<button class="prim" data-act="offersave">${T("Enregistrer")}</button>' : '')
+      +   '<button class="ghost" data-act="apercu">${T("Aperçu du popup")}</button>'
+      +   (PEUT.edit ? '<button class="ghost mini" data-act="offerreset" style="color:var(--tx-or)">${T("↺ Réinitialiser pour re-tester")}</button>' : '')
       + '</div>'
       + '</div>';
   }
@@ -292,7 +305,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="g" style="' + bg + '"></div>'
       + '<div class="d"><div class="titre">' + esc(c.title || '') + '</div>'
       +   '<div class="st">' + esc(c.subtitle || '') + '</div>'
-      +   '<button class="cta">' + esc(c.cta || 'JE M’INSCRIS') + '</button>'
+      +   '<button class="cta">' + esc(c.cta || SZ_DONNEES.offreBoutonDefaut) + '</button>'
       +   '<div class="lg">' + esc(c.legal || '') + '</div></div>'
       + '</div></div>';
   }
@@ -301,7 +314,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     if (!D) return;
     dessinerOnglets();
-    sous.textContent = PEUT.edit ? '' : 'Lecture seule';
+    sous.textContent = PEUT.edit ? '' : '${T("Lecture seule")}';
     var h = TAB === 'config' ? vueConfig() : TAB === 'offer' ? vueOffer() : vueDash();
     if (APERCU && TAB === 'offer') h += vueApercu();
     corps.innerHTML = h;
@@ -318,25 +331,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       fromEmailTransactional: val('nl-trans-from-e'), fromNameTransactional: val('nl-trans-from-n'),
       testMode: chk('nl-testmode'), testEmail: val('nl-test-e'),
     };
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('newsletter:cfgEcrire', d).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      relire().then(function(){ dire('Configuration enregistrée.', 'bon'); });
+      relire().then(function(){ dire('${T("Configuration enregistrée.")}', 'bon'); });
     });
   }
   function saveCtrls(){
     var ctrl = {};
     SERVICES.forEach(function(s){ ctrl[s.key] = chk('nl-ctrl-' + s.key); });
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('newsletter:controls', { controls: ctrl }).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Contrôles d’envoi enregistrés.', 'bon');
+      dire('${T("Contrôles d’envoi enregistrés.")}', 'bon');
     });
   }
   function testConn(){
-    dire('Envoi du courriel de test…');
+    dire('${T("Envoi du courriel de test…")}');
     appeler('newsletter:testConn', {}).then(function(r){
-      if (r && r.ok) dire('Courriel de test envoyé.', 'bon');
+      if (r && r.ok) dire('${T("Courriel de test envoyé.")}', 'bon');
       else dire(expliquer(r), 'err');
     });
   }
@@ -345,25 +358,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       enabled: chk('offer-enabled'), title: val('offer-title'), subtitle: val('offer-sub'),
       cta: val('offer-cta'), legal: val('offer-legal'), imageUrl: val('offer-img'), discountValue: val('offer-discount'),
     };
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('newsletter:offerEcrire', d).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      relire().then(function(){ dire('Configuration enregistrée.', 'bon'); });
+      relire().then(function(){ dire('${T("Configuration enregistrée.")}', 'bon'); });
     });
   }
   function televerserImage(file){
-    if (file.size > 600000) { dire('Image trop grande (max 600 Ko).', 'err'); return; }
+    if (file.size > 600000) { dire('${T("Image trop grande (max 600 Ko).")}', 'err'); return; }
     var fr = new FileReader();
-    fr.onerror = function(){ dire('Lecture de l’image impossible.', 'err'); };
+    fr.onerror = function(){ dire('${T("Lecture de l’image impossible.")}', 'err'); };
     fr.onload = function(){
-      dire('Téléversement…');
+      dire('${T("Téléversement…")}');
       appeler('newsletter:offerImage', { dataUrl: fr.result }).then(function(r){
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
         var inp = document.getElementById('offer-img'); if (inp) inp.value = r.url;
         var prev = document.querySelector('.apercu-img');
-        if (!prev) { var box = inp && inp.parentNode; if (box) box.insertAdjacentHTML('afterbegin', '<img class="apercu-img" src="' + r.url.replace(/"/g, '&quot;') + '" alt="Aperçu">'); }
+        if (!prev) { var box = inp && inp.parentNode; if (box) box.insertAdjacentHTML('afterbegin', '<img class="apercu-img" src="' + r.url.replace(/"/g, '&quot;') + '" alt="${T("Aperçu")}">'); }
         else prev.src = r.url;
-        dire('Photo importée — cliquez Enregistrer.', 'bon');
+        dire('${T("Photo importée — cliquez Enregistrer.")}', 'bon');
       });
     };
     fr.readAsDataURL(file);
@@ -371,15 +384,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function resetOffer(){
     appeler('newsletter:offerReset', {}).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      relire().then(function(){ dire('Réinitialisé.', 'bon'); });
+      relire().then(function(){ dire('${T("Réinitialisé.")}', 'bon'); });
     });
   }
   function traiterChaines(){
-    dire('Traitement des chaînes…');
+    dire('${T("Traitement des chaînes…")}');
     appeler('newsletter:processChains', {}).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      if (r.rien) { dire('Aucune étape en attente.', 'att'); return; }
-      relire().then(function(){ dire(r.sent + ' envoyé' + plur(r.sent) + (r.failed ? ', ' + r.failed + ' échec' + plur(r.failed) : '') + '.', 'bon'); });
+      if (r.rien) { dire('${T("Aucune étape en attente.")}', 'att'); return; }
+      relire().then(function(){ dire(r.sent + '${T(" envoyé")}' + plur(r.sent) + (r.failed ? ', ' + r.failed + '${T(" échec")}' + plur(r.failed) : '') + '.', 'bon'); });
     });
   }
 
