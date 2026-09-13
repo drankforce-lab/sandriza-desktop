@@ -23,6 +23,11 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
+   poste. ⚠⚠ On ne traduit QUE ce qui se lit — les adresses IP, les noms
+   d'imprimante, les termes cherchés et le détail d'une entrée viennent du
+   journal lui-même, et ne passent jamais par le dictionnaire. */
+const T = require('../langue').tr('journaux');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -83,11 +88,11 @@ function pageJournaux(onglet) {
   if (brut.indexOf('q-') === 0) { RQINIT0 = brut.slice(2).replace(/[^A-Za-z0-9._@-]/g, ''); brut = 'recherche'; }
   const ONGLET0 = (['recherche','acces','automatisations','impressions','sms','comptable','recherches','jserreurs'].indexOf(brut) >= 0) ? brut : 'acces';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Journaux — Administration Sandriza</title>
+<title>${T("Journaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.journaux}</span><h1>Journaux</h1></div>
+<div class="tete"><span class="ico">${ICO.journaux}</span><h1>${T("Journaux")}</h1></div>
 <div class="onglets" id="onglets"></div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -98,8 +103,8 @@ function pageJournaux(onglet) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
   // Aller directement à un onglet quand la fenêtre est DÉJÀ ouverte (lien de
   // retour depuis une autre fenêtre — #7 7b-2c).
@@ -130,7 +135,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','Recherche'], ['acces','Accès'], ['automatisations','Automatisations'], ['impressions','Impressions'], ['sms','SMS'], ['comptable','Accès aux liens'], ['recherches','Sans résultat'], ['jserreurs','Erreurs des clients'] ];
+  var ONGLETS = [ ['recherche','${T("Recherche")}'], ['acces','${T("Accès")}'], ['automatisations','${T("Automatisations")}'], ['impressions','${T("Impressions")}'], ['sms','SMS'], ['comptable','${T("Accès aux liens")}'], ['recherches','${T("Sans résultat")}'], ['jserreurs','${T("Erreurs des clients")}'] ];
   var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -138,14 +143,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function fdate(ts){ if (!ts) return '—'; try { return new Date(ts).toLocaleString('fr-CA'); } catch(e){ return '—'; } }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès aux journaux.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès aux journaux.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -165,7 +170,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     b.id = 'j-verrous'; b.type = 'button'; b.className = 'mini';
     b.style.marginLeft = '.6rem';
     b.textContent = 'Verrous';
-    b.title = 'Qui tient une fiche en ce moment (ecran a part, en direct)';
+    b.title = '${T("Qui tient une fiche en ce moment (ecran a part, en direct)")}';
     b.onclick = function(){ if (P && P.ouvrirModule) P.ouvrirModule('verrous'); };
     var d = document.getElementById('sz-detacher');
     if (d) t.insertBefore(b, d); else t.appendChild(b);
@@ -183,10 +188,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ── Recherche inter-journaux ─────────────────────────────────────
   function vueRecherche(){
     var h = '<div class="carte"><div class="barre">'
-      + '<input aria-label="Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)" class="t" id="r-q" placeholder="Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)" value="'+esc(RQ)+'" style="flex:1;min-width:220px">'
-      + '<button class="b" id="r-go"><span class="ic">🔎</span> Rechercher</button></div>'
-      + '<div class="sub">Le terme est cherché dans tous les champs de chaque journal (accès, automatisations, impressions). Minimum 2 caractères.</div>'
-      + '<div id="r-res">'+(RRES ? resultatsHtml() : '<div class="vide">Tapez un terme puis « Rechercher ».</div>')+'</div></div>';
+      + '<input aria-label="${T("Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)")}" class="t" id="r-q" placeholder="${T("Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)")}" value="'+esc(RQ)+'" style="flex:1;min-width:220px">'
+      + '<button class="b" id="r-go"><span class="ic">🔎</span> ${T("Rechercher")}</button></div>'
+      + '<div class="sub">${T("Le terme est cherché dans tous les champs de chaque journal (accès, automatisations, impressions). Minimum 2 caractères.")}</div>'
+      + '<div id="r-res">'+(RRES ? resultatsHtml() : '<div class="vide">${T("Tapez un terme puis « Rechercher ».")}</div>')+'</div></div>';
     corps.innerHTML = h;
     var q=document.getElementById('r-q');
     var go=document.getElementById('r-go');
@@ -199,7 +204,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var q=document.getElementById('r-q'); RQ=q?String(q.value||''):RQ;
     var ql = RQ.trim().toLowerCase();
     if (ql.length < 2){ RRES={ tropCourt:true, groupes:[], total:0 }; peindreResultats(); return; }
-    if (OCCUPE) return; OCCUPE=true; dire('Recherche dans tous les journaux…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Recherche dans tous les journaux…")}');
     // Journaux LOCAUX (accès, automatisations, impressions, sans résultat) par le
     // cœur ; journaux SERVEUR (SMS, comptable) récupérés puis filtrés ici — pour
     // que « une IP » ressorte VRAIMENT de tous les journaux.
@@ -216,22 +221,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (cpR && cpR.ok){
           var cp=(cpR.journal||[]).filter(function(e){ return matchAny(ql,[e.canal,e.genre,e.ip,e.lienId,e.detail,e.qui,e.au]); })
             .map(function(e){ return { au:e.au, canal:e.canal, genre:e.genre, ip:e.ip, lienId:e.lienId, detail:e.detail, qui:e.qui }; });
-          if (cp.length){ groupes.push({ cle:'comptable', label:'Accès comptables', onglet:'comptable', total:cp.length, entrees:cp.slice(0,200) }); total+=cp.length; }
+          if (cp.length){ groupes.push({ cle:'comptable', label:'${T("Accès comptables")}', onglet:'comptable', total:cp.length, entrees:cp.slice(0,200) }); total+=cp.length; }
         }
         OCCUPE=false; RRES={ ok:true, q:RQ, total:total, groupes:groupes }; peindreResultats();
-        dire(total?(total+' résultat(s) dans tous les journaux.'):'Aucun résultat.', 'bon');
+        dire(total?(total+' ${T("résultat(s) dans tous les journaux.")}'):'${T("Aucun résultat.")}', 'bon');
       });
-    }).catch(function(){ OCCUPE=false; dire('Échec de la recherche.', 'err'); });
+    }).catch(function(){ OCCUPE=false; dire('${T("Échec de la recherche.")}', 'err'); });
   }
   function peindreResultats(){ var el=document.getElementById('r-res'); if (el) el.innerHTML=resultatsHtml(); brancherResultats(); }
   function resultatsHtml(){
-    if (RRES && RRES.tropCourt) return '<div class="vide">Entrez au moins 2 caractères.</div>';
+    if (RRES && RRES.tropCourt) return '<div class="vide">${T("Entrez au moins 2 caractères.")}</div>';
     var groupes = (RRES&&RRES.groupes)||[];
-    if (!groupes.length) return '<div class="vide">Aucun résultat pour « '+esc(RRES?RRES.q:'')+' ».</div>';
+    if (!groupes.length) return '<div class="vide">${T("Aucun résultat pour «")} '+esc(RRES?RRES.q:'')+' ».</div>';
     var h='';
     for (var g=0;g<groupes.length;g++){ var grp=groupes[g], e=grp.entrees||[];
       h += '<div class="barre" style="margin:.9rem 0 .3rem"><strong>'+esc(grp.label)+' <span class="mut">('+(grp.total||e.length)+')</span></strong>'
-        + '<span class="pousse"></span><button class="b" data-goto="'+esc(grp.onglet)+'">Ouvrir cet onglet</button></div>';
+        + '<span class="pousse"></span><button class="b" data-goto="'+esc(grp.onglet)+'">${T("Ouvrir cet onglet")}</button></div>';
       h += '<table class="tb"><tbody>';
       for (var i=0;i<e.length;i++){ var x=e[i];
         if (grp.cle==='acces'){
@@ -246,11 +251,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+' fois</td><td class="mut">'+esc(x.derniere||'—')+'</td></tr>';
         } else if (grp.cle==='sms'){
           var ent=(x.direction==='inbound');
-          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.date))+'</td><td>'+(ent?'⬇ Reçu':'⬆ Envoyé')+'</td><td class="mono">'+esc(x.from||'')+'</td><td class="mono">'+esc(x.to||'')+'</td><td>'+esc(x.body||'')+'</td></tr>';
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.date))+'</td><td>'+(ent?'${T("⬇ Reçu")}':'${T("⬆ Envoyé")}')+'</td><td class="mono">'+esc(x.from||'')+'</td><td class="mono">'+esc(x.to||'')+'</td><td>'+esc(x.body||'')+'</td></tr>';
         } else if (grp.cle==='comptable'){
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.au))+'</td><td>'+esc(CANAUX[x.canal]||x.canal||'')+'</td><td>'+esc(EVEN[x.genre]||x.genre||'')+'</td><td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.detail||'')+'</td></tr>';
         } else {
-          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill err">Échec</span>':'<span class="pill bon">Imprimé</span>')+'</td></tr>';
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill err">${T("Échec")}</span>':'<span class="pill bon">${T("Imprimé")}</span>')+'</td></tr>';
         }
       }
       h += '</tbody></table>';
@@ -272,30 +277,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      Les classes .pill.bon/.att/.err/.info sont definies dans le socle pour les
      DEUX modes : la pastille n a plus qu a dire ce qu elle EST. */
   var TYPE = {
-    login_ok:{k:'bon',l:'✓ Connexion'},
-    login_fail:{k:'err',l:'✗ Échec'},
-    logout:{k:'info',l:'⏻ Déconnexion'},
-    mfa_fail:{k:'att',l:'MFA échoué'},
-    mfa_timeout:{k:'att',l:'⏱ MFA expiré'},
-    action:{k:'info',l:'⚙ Action'},
-    login_blocked_geo:{k:'err',l:'Bloqué (géo)'}
+    login_ok:{k:'bon',l:'${T("✓ Connexion")}'},
+    login_fail:{k:'err',l:'${T("✗ Échec")}'},
+    logout:{k:'info',l:'${T("⏻ Déconnexion")}'},
+    mfa_fail:{k:'att',l:'${T("MFA échoué")}'},
+    mfa_timeout:{k:'att',l:'${T("⏱ MFA expiré")}'},
+    action:{k:'info',l:'${T("⚙ Action")}'},
+    login_blocked_geo:{k:'err',l:'${T("Bloqué (géo)")}'}
   };
   function drapeau(cc){ if (!cc||cc.length!==2) return ''; try { return String.fromCodePoint.apply(null,cc.toUpperCase().split('').map(function(x){return 127397+x.charCodeAt(0);})); } catch(e){ return ''; } }
   function vueAcces(){
     var st = D.stats||{}, rows = D.acces||[];
     var h = '';
     if (!D.statsHidden) h += '<div class="stat-grid">'
-      + '<div class="stat"><div class="l">Connexions auj.</div><div class="v" style="color:var(--tx-ok2)">'+(st.loginOk||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Échecs auj.</div><div class="v" style="color:var(--tx-err2)">'+(st.loginFail||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Échecs MFA</div><div class="v" style="color:var(--tx-att)">'+(st.mfaFail||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Bloqués géo</div><div class="v" style="color:var(--tx-fda4af)">'+(st.geoBlocked||0)+'</div></div>'
-      + '<div class="stat"><div class="l">IPs uniques</div><div class="v">'+(st.ips||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Connexions auj.")}</div><div class="v" style="color:var(--tx-ok2)">'+(st.loginOk||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Échecs auj.")}</div><div class="v" style="color:var(--tx-err2)">'+(st.loginFail||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Échecs MFA")}</div><div class="v" style="color:var(--tx-att)">'+(st.mfaFail||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Bloqués géo")}</div><div class="v" style="color:var(--tx-fda4af)">'+(st.geoBlocked||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("IPs uniques")}</div><div class="v">'+(st.ips||0)+'</div></div>'
       + '</div>';
-    h += '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.accesTotal, 'entrée', 'entrées')+' · conservation 30 jours</span><span class="pousse"></span>'
-      + '<button class="b" id="a-stats">'+(D.statsHidden?'Afficher les stats':'Masquer les stats')+'</button>'
-      + (D.peutModifier?'<button class="b" id="a-purge">Purger anciens</button>':'')
-      + '<button class="b" id="a-csv">Exporter CSV</button></div>'
-      + '<div class="liste"><table class="tb"><thead><tr><th>Date</th><th>Type</th><th>Utilisateur</th><th>IP</th><th>Pays</th><th>Action</th></tr></thead><tbody>';
+    h += '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.accesTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
+      + '<button class="b" id="a-stats">'+(D.statsHidden?'${T("Afficher les stats")}':'${T("Masquer les stats")}')+'</button>'
+      + (D.peutModifier?'<button class="b" id="a-purge">${T("Purger anciens")}</button>':'')
+      + '<button class="b" id="a-csv">${T("Exporter CSV")}</button></div>'
+      + '<div class="liste"><table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Type")}</th><th>${T("Utilisateur")}</th><th>IP</th><th>${T("Pays")}</th><th>${T("Action")}</th></tr></thead><tbody>';
     /* ── PAGINATION AUTO (#31) ────────────────────────────────────────────
        Le journal des accès déversait ses trente jours d'un coup. Le nombre de
        lignes se MESURE maintenant sur la hauteur réelle de la fenêtre. */
@@ -303,7 +308,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (AC_PAGE >= apages) AC_PAGE = apages - 1;
     if (AC_PAGE < 0) AC_PAGE = 0;
     var avue = rows.slice(AC_PAGE * AC_PARPAGE, AC_PAGE * AC_PARPAGE + AC_PARPAGE);
-    if (!avue.length) h += '<tr><td colspan="6" class="vide">Aucun journal.</td></tr>';
+    if (!avue.length) h += '<tr><td colspan="6" class="vide">${T("Aucun journal.")}</td></tr>';
     for (var i=0;i<avue.length;i++){ var l=avue[i]; var t=TYPE[l.type]||{bg:'var(--v06)',c:'var(--tx2)',l:l.type};
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(l.ts))+'</td>'
         + '<td><span class="pill '+(t.k||'')+'">'+esc(t.l)+'</span></td>'
@@ -314,9 +319,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     h += '</tbody></table></div>';
     if (apages > 1) {
-      h += '<div class="pagi"><button class="mini" id="ac-prec"'+(AC_PAGE<=0?' disabled':'')+'>‹ Précédent</button>'
+      h += '<div class="pagi"><button class="mini" id="ac-prec"'+(AC_PAGE<=0?' disabled':'')+'>${T("‹ Précédent")}</button>'
         + '<span>Page '+(AC_PAGE+1)+' sur '+apages+'</span>'
-        + '<button class="mini" id="ac-suiv"'+(AC_PAGE>=apages-1?' disabled':'')+'>Suivant ›</button></div>';
+        + '<button class="mini" id="ac-suiv"'+(AC_PAGE>=apages-1?' disabled':'')+'>${T("Suivant ›")}</button></div>';
     }
     h += '</div>';
     corps.innerHTML = h;
@@ -329,15 +334,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   // ── Automatisations ──────────────────────────────────────────────
-  var SECT = { orders:'Livraison', stats:'Statistiques', marketing:'Marketing', staff:'Mot de passe',
-    'returns-mgmt':'↩ Retours', sociaux:'Réseaux sociaux', newsletter:'Infolettre', systeme:'Entretien', app:'Application' };
+  var SECT = { orders:'${T("Livraison")}', stats:'${T("Statistiques")}', marketing:'${T("Marketing")}', staff:'${T("Mot de passe")}',
+    'returns-mgmt':'${T("↩ Retours")}', sociaux:'${T("Réseaux sociaux")}', newsletter:'Infolettre', systeme:'${T("Entretien")}', app:'${T("Application")}' };
   function vueAuto(){
     var rows = D.automations||[];
-    var h = '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.autoTotal, 'entrée', 'entrées')+' · conservation 30 jours</span><span class="pousse"></span>'
-      + (D.peutModifier?'<button class="b" id="au-purge">Purger anciens</button>':'')
-      + '<button class="b" id="au-csv">Exporter CSV</button></div>'
-      + '<table class="tb"><thead><tr><th>Date</th><th>Automatisation</th><th>Action / Détail</th></tr></thead><tbody>';
-    if (!rows.length) h += '<tr><td colspan="3" class="vide">Aucune action automatisée.</td></tr>';
+    var h = '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.autoTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
+      + (D.peutModifier?'<button class="b" id="au-purge">${T("Purger anciens")}</button>':'')
+      + '<button class="b" id="au-csv">${T("Exporter CSV")}</button></div>'
+      + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Automatisation")}</th><th>${T("Action / Détail")}</th></tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="3" class="vide">${T("Aucune action automatisée.")}</td></tr>';
     for (var i=0;i<rows.length;i++){ var l=rows[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(l.ts))+'</td>'
         + '<td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(SECT[l.section]||l.section||'—')+'</span></td>'
@@ -359,7 +364,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   // ── Impressions ──────────────────────────────────────────────────
-  var VIA = { agent:'Agent (sans dialogue)', navigateur:'Navigateur', bluetooth:'Bluetooth' };
+  var VIA = { agent:'${T("Agent (sans dialogue)")}', navigateur:'${T("Navigateur")}', bluetooth:'${T("Bluetooth")}' };
   function vuePrints(){
     var all = D.prints||[], kinds = D.printKinds||[];
     var rows = all;
@@ -374,21 +379,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        additionner les copies d'un travail qu'on n'a pas reçu. Un nombre qu'on ne
        peut pas connaître ne s'invente pas — il se laisse tel quel. */
     var kpis = '<div class="kpis"><div class="kpi"><div class="v">'+(D.printsTotal||all.length)+'</div><div class="l">travaux (30 j)</div></div>'
-      + '<div class="kpi"><div class="v">'+totalDocs+'</div><div class="l">documents imprimés</div></div></div>';
+      + '<div class="kpi"><div class="v">'+totalDocs+'</div><div class="l">${T("documents imprimés")}</div></div></div>';
     var kLbl = {}; for (var z=0;z<kinds.length;z++) kLbl[kinds[z].key]=kinds[z].label;
-    var typeOpts = '<option value="all"'+(PF_TYPE==='all'?' selected':'')+'>Tous les types</option>';
+    var typeOpts = '<option value="all"'+(PF_TYPE==='all'?' selected':'')+'>${T("Tous les types")}</option>';
     for (var t=0;t<kinds.length;t++) typeOpts += '<option value="'+esc(kinds[t].key)+'"'+(PF_TYPE===kinds[t].key?' selected':'')+'>'+esc(kinds[t].label)+'</option>';
     var viaKeys = ['all','agent','navigateur','bluetooth'];
-    var viaOpts = ''; for (var v=0;v<viaKeys.length;v++) viaOpts += '<option value="'+viaKeys[v]+'"'+(PF_VIA===viaKeys[v]?' selected':'')+'>'+(viaKeys[v]==='all'?'Toutes les voies':VIA[viaKeys[v]])+'</option>';
+    var viaOpts = ''; for (var v=0;v<viaKeys.length;v++) viaOpts += '<option value="'+viaKeys[v]+'"'+(PF_VIA===viaKeys[v]?' selected':'')+'>'+(viaKeys[v]==='all'?'${T("Toutes les voies")}':VIA[viaKeys[v]])+'</option>';
 
     var h = kpis + '<div class="carte"><div class="barre">'
-      + '<select class="t" id="p-type" aria-label="Filtrer par type de document">'+typeOpts+'</select>'
-      + '<select class="t" id="p-via" aria-label="Filtrer par voie d’impression">'+viaOpts+'</select><span class="pousse"></span>'
-      + '<span class="sub">Rétention 30 jours</span>'
-      + (D.peutModifier?'<button class="b" id="p-purge">Appliquer la purge</button>':'')
-      + '<button class="b" id="p-csv">Exporter CSV</button></div>'
-      + '<table class="tb"><thead><tr><th>Date</th><th>Type</th><th>Document</th><th>Qté</th><th>Imprimante</th><th>Par</th><th>État</th></tr></thead><tbody>';
-    if (!rows.length) h += '<tr><td colspan="7" class="vide">'+(all.length?'Aucune impression ne correspond à ces filtres.':'Aucune impression depuis 30 jours.')+'</td></tr>';
+      + '<select class="t" id="p-type" aria-label="${T("Filtrer par type de document")}">'+typeOpts+'</select>'
+      + '<select class="t" id="p-via" aria-label="${T("Filtrer par voie d’impression")}">'+viaOpts+'</select><span class="pousse"></span>'
+      + '<span class="sub">${T("Rétention 30 jours")}</span>'
+      + (D.peutModifier?'<button class="b" id="p-purge">${T("Appliquer la purge")}</button>':'')
+      + '<button class="b" id="p-csv">${T("Exporter CSV")}</button></div>'
+      + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Type")}</th><th>${T("Document")}</th><th>${T("Qté")}</th><th>${T("Imprimante")}</th><th>${T("Par")}</th><th>${T("État")}</th></tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="7" class="vide">'+(all.length?'${T("Aucune impression ne correspond à ces filtres.")}':'${T("Aucune impression depuis 30 jours.")}')+'</td></tr>';
     for (var i=0;i<rows.length;i++){ var r=rows[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(r.at))+'</td>'
         + '<td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(r.kindLabel||r.kind)+'</span></td>'
@@ -396,7 +401,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td style="text-align:center"><strong>'+esc(r.qty||1)+'</strong></td>'
         + '<td>'+esc(r.printer||'—')+'<div class="sub">'+esc(VIA[r.via]||r.via||'')+'</div></td>'
         + '<td class="sub">'+esc(r.who||'—')+(r.poste?'<div class="sub">poste '+esc(r.poste)+'</div>':'')+'</td>'
-        + '<td>'+(r.ok===false?'<span class="pill err" title="'+esc(r.note||'')+'">Échec</span>':'<span class="pill bon">Imprimé</span>')+'</td></tr>';
+        + '<td>'+(r.ok===false?'<span class="pill err" title="'+esc(r.note||'')+'">${T("Échec")}</span>':'<span class="pill bon">${T("Imprimé")}</span>')+'</td></tr>';
     }
     h += '</tbody></table></div>';
     corps.innerHTML = h;
@@ -409,20 +414,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ── SMS (#7 Lot 7b-2 — lecture serveur) ──────────────────────────
   function vueSms(){
     if (SMS_D===null){
-      corps.innerHTML='<div class="vide charge">Lecture des SMS…</div>'; OCCUPE=true;
+      corps.innerHTML='<div class="vide charge">${T("Lecture des SMS…")}</div>'; OCCUPE=true;
       appeler('journal:sms',[]).then(function(r){ OCCUPE=false;
         if (r&&r.ok){ SMS_D=r.sms||[]; if (ONGLET==='sms') vueSms(); }
-        else { SMS_D=[]; if (ONGLET==='sms') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
+        else { SMS_D=[]; if (ONGLET==='sms') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>'; dire('${T("Échec : ")}'+expliquer(r), 'err'); } });
       return;
     }
     var rows = SMS_D;
-    var h = '<div class="note">ℹ Les SMS reçus et envoyés (Twilio). Leur gestion complète (répondre, marquer lu, supprimer) reste dans <b>Communications → Téléphonie</b>.</div>'
-      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' message(s)</span><span class="pousse"></span><button class="b" id="sms-reload"><span class="ic">🔄</span> Actualiser</button></div>'
-      + '<table class="tb"><thead><tr><th>Date</th><th>Sens</th><th>De</th><th>À</th><th>Message</th></tr></thead><tbody>';
-    if (!rows.length) h += '<tr><td colspan="5" class="vide">Aucun SMS.</td></tr>';
+    var h = '<div class="note">ℹ ${T("Les SMS reçus et envoyés (Twilio). Leur gestion complète (répondre, marquer lu, supprimer) reste dans ")}<b>${T("Communications → Téléphonie")}</b>.</div>'
+      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+'${T(" message(s)")}</span><span class="pousse"></span><button class="b" id="sms-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
+      + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Sens")}</th><th>${T("De")}</th><th>${T("À")}</th><th>${T("Message")}</th></tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="5" class="vide">${T("Aucun SMS.")}</td></tr>';
     for (var i=0;i<rows.length;i++){ var s=rows[i]; var ent=(s.direction==='inbound');
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(s.date))+'</td>'
-        + '<td><span class="pill" style="background:'+(ent?'rgba(14,165,233,.18)':'rgba(22,163,74,.2)')+';color:'+(ent?'var(--tx-bleu)':'var(--tx-ok2)')+'">'+(ent?'⬇ Reçu':'⬆ Envoyé')+'</span></td>'
+        + '<td><span class="pill" style="background:'+(ent?'rgba(14,165,233,.18)':'rgba(22,163,74,.2)')+';color:'+(ent?'var(--tx-bleu)':'var(--tx-ok2)')+'">'+(ent?'${T("⬇ Reçu")}':'${T("⬆ Envoyé")}')+'</span></td>'
         + '<td class="mono">'+esc(s.from||'—')+'</td><td class="mono">'+esc(s.to||'—')+'</td>'
         + '<td>'+esc(s.body||'')+'</td></tr>';
     }
@@ -432,8 +437,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   // ── Accès comptables (#7 Lot 7b-2 — reutilise liens:journal) ─────
-  var CANAUX = { telechargement:'Installation', comptable:'Comptable', courriel:'Courriel' };
-  var EVEN = { visite:'Visite', refuse:'Refusé', ouvert:'Ouvert', classeur:'Classeur ouvert', cree:'Créé', revoque:'Révoqué', telecharge:'Téléchargé', envoye:'Courriel envoyé' };
+  var CANAUX = { telechargement:'${T("Installation")}', comptable:'${T("Comptable")}', courriel:'${T("Courriel")}' };
+  var EVEN = { visite:'${T("Visite")}', refuse:'${T("Refusé")}', ouvert:'${T("Ouvert")}', classeur:'${T("Classeur ouvert")}', cree:'${T("Créé")}', revoque:'${T("Révoqué")}', telecharge:'${T("Téléchargé")}', envoye:'${T("Courriel envoyé")}' };
   /* ══ ACCÈS AUX LIENS — LE JOURNAL UNIFIÉ (#31) ═══════════════════════════
      Sa demande : « les journaux des accès lien devraient aussi être unifiés
      sur journal ». Ils l'étaient déjà à moitié — cet onglet lisait bien TOUS
@@ -450,10 +455,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueComptable(){
     if (COMPTA_D===null){
-      corps.innerHTML='<div class="vide charge">Lecture du journal des accès…</div>'; OCCUPE=true;
+      corps.innerHTML='<div class="vide charge">${T("Lecture du journal des accès…")}</div>'; OCCUPE=true;
       appeler('liens:journal',[{canal:CP_CANAL}]).then(function(r){ OCCUPE=false;
         if (r&&r.ok){ COMPTA_D=r.evenements||[]; if (ONGLET==='comptable') vueComptable(); }
-        else { COMPTA_D=[]; if (ONGLET==='comptable') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>'; dire('Échec : '+expliquer(r), 'err'); } });
+        else { COMPTA_D=[]; if (ONGLET==='comptable') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>'; dire('${T("Échec : ")}'+expliquer(r), 'err'); } });
       return;
     }
     var rows = COMPTA_D;
@@ -463,15 +468,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var vue = rows.slice(CP_PAGE * CP_PARPAGE, CP_PAGE * CP_PARPAGE + CP_PARPAGE);
     var h = ''
       + '<div class="carte"><div class="barre">'
-      + '<select id="cp-canal"><option value="">Tous les canaux</option>'
-      + '<option value="installation"' + (CP_CANAL==='installation'?' selected':'') + '>Installation</option>'
-      + '<option value="comptable"' + (CP_CANAL==='comptable'?' selected':'') + '>Comptable</option>'
-      + '<option value="courriel"' + (CP_CANAL==='courriel'?' selected':'') + '>Courriel</option>'
+      + '<select id="cp-canal"><option value="">${T("Tous les canaux")}</option>'
+      + '<option value="installation"' + (CP_CANAL==='installation'?' selected':'') + '>${T("Installation")}</option>'
+      + '<option value="comptable"' + (CP_CANAL==='comptable'?' selected':'') + '>${T("Comptable")}</option>'
+      + '<option value="courriel"' + (CP_CANAL==='courriel'?' selected':'') + '>${T("Courriel")}</option>'
       + '</select>'
-      + '<span class="sub">'+rows.length+' événement(s)</span><span class="pousse"></span>'
-      + '<button class="b" id="cp-reload"><span class="ic">🔄</span> Actualiser</button></div>'
-      + '<div class="liste"><table class="tb"><thead><tr><th>Quand</th><th>Canal</th><th>Événement</th><th>IP</th><th>Lien</th><th>Détail</th></tr></thead><tbody>';
-    if (!vue.length) h += '<tr><td colspan="6" class="vide">Aucun événement.</td></tr>';
+      + '<span class="sub">'+rows.length+'${T(" événement(s)")}</span><span class="pousse"></span>'
+      + '<button class="b" id="cp-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
+      + '<div class="liste"><table class="tb"><thead><tr><th>${T("Quand")}</th><th>${T("Canal")}</th><th>${T("Événement")}</th><th>IP</th><th>${T("Lien")}</th><th>${T("Détail")}</th></tr></thead><tbody>';
+    if (!vue.length) h += '<tr><td colspan="6" class="vide">${T("Aucun événement.")}</td></tr>';
     for (var i=0;i<vue.length;i++){ var e=vue[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(e.au))+'</td>'
         + '<td>'+esc(CANAUX[e.canal]||e.canal||'—')+'</td><td>'+esc(EVEN[e.genre]||e.genre||'—')+'</td>'
@@ -480,9 +485,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     h += '</tbody></table></div>';
     if (pages > 1) {
-      h += '<div class="pagi"><button class="mini" id="cp-prec"'+(CP_PAGE<=0?' disabled':'')+'>‹ Précédent</button>'
+      h += '<div class="pagi"><button class="mini" id="cp-prec"'+(CP_PAGE<=0?' disabled':'')+'>${T("‹ Précédent")}</button>'
         + '<span>Page '+(CP_PAGE+1)+' sur '+pages+'</span>'
-        + '<button class="mini" id="cp-suiv"'+(CP_PAGE>=pages-1?' disabled':'')+'>Suivant ›</button></div>';
+        + '<button class="mini" id="cp-suiv"'+(CP_PAGE>=pages-1?' disabled':'')+'>${T("Suivant ›")}</button></div>';
     }
     h += '</div>';
     corps.innerHTML = h;
@@ -502,9 +507,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueRecherchesRatees(){
     var rows = D.recherches||[];
     var h = ''
-      + '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.recherchesTotal, 'terme distinct', 'termes distincts')+'</span></div>'
-      + '<table class="tb"><thead><tr><th>Terme cherché</th><th style="text-align:center">Fois</th><th>Dernière fois</th></tr></thead><tbody>';
-    if (!rows.length) h += '<tr><td colspan="3" class="vide">Aucune recherche sans résultat.</td></tr>';
+      + '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.recherchesTotal, '${T("terme distinct")}', '${T("termes distincts")}')+'</span></div>'
+      + '<table class="tb"><thead><tr><th>${T("Terme cherché")}</th><th style="text-align:center">${T("Fois")}</th><th>${T("Dernière fois")}</th></tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="3" class="vide">${T("Aucune recherche sans résultat.")}</td></tr>';
     for (var i=0;i<rows.length;i++){ var x=rows[i];
       h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+'</td><td class="mut">'+esc(x.derniere||'—')+'</td></tr>';
     }
@@ -533,26 +538,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          300 : on lisait « 300 défauts distincts » sur un site qui en avait mille.
          La pastille des non vus, elle, se compte désormais sur TOUT — sinon elle
          cessait de monter au moment exact où la situation empirait. */
-      +   '<span class="sub">' + szCompte(rows.length, D.jsErreursTotal, 'défaut distinct', 'défauts distincts')
+      +   '<span class="sub">' + szCompte(rows.length, D.jsErreursTotal, '${T("défaut distinct")}', '${T("défauts distincts")}')
       +     (neuves ? ' · <b style="color:var(--tx-att)">' + neuves + ' non vu(s)</b>' : '') + '</span>'
-      +   (D.peutModifier && neuves ? '<button class="mini" id="js-vues">Tout marquer comme vu</button>' : '')
+      +   (D.peutModifier && neuves ? '<button class="mini" id="js-vues">${T("Tout marquer comme vu")}</button>' : '')
       +   (D.peutModifier && rows.length
             ? '<button class="mini" id="js-purge"' + (JS_ARME ? ' style="border-color:rgba(239,68,68,.6);color:var(--tx-err)"' : '') + '>'
-              + (JS_ARME ? 'Confirmer — vider définitivement' : 'Vider') + '</button>'
+              + (JS_ARME ? '${T("Confirmer — vider définitivement")}' : '${T("Vider")}') + '</button>'
             : '')
       + '</div>'
       + '<table class="tb"><thead><tr>'
-      +   '<th>Erreur</th><th>Fichier</th><th style="text-align:center">Fois</th>'
-      +   '<th>Où</th><th>Dernière fois</th>'
+      +   '<th>${T("Erreur")}</th><th>${T("Fichier")}</th><th style="text-align:center">${T("Fois")}</th>'
+      +   '<th>${T("Où")}</th><th>${T("Dernière fois")}</th>'
       + '</tr></thead><tbody>';
     if (!rows.length) {
-      h += '<tr><td colspan="5" class="vide">Aucune erreur rapportée. '
-        + 'C’est la bonne nouvelle — mais elle ne vaut que depuis la mise en place de ce journal.</td></tr>';
+      h += '<tr><td colspan="5" class="vide">${T("Aucune erreur rapportée.")} '
+        + '${T("C’est la bonne nouvelle — mais elle ne vaut que depuis la mise en place de ce journal.")}</td></tr>';
     }
     for (var i = 0; i < rows.length; i++) {
       var x = rows[i];
-      var genre = x.genre === 'ressource' ? 'chargement'
-                : x.genre === 'promesse' ? '⏳ promesse' : 'erreur';
+      var genre = x.genre === 'ressource' ? '${T("chargement")}'
+                : x.genre === 'promesse' ? '${T("⏳ promesse")}' : '${T("erreur")}';
       h += '<tr' + (x.vu ? ' style="opacity:.62"' : '') + '>'
         + '<td><strong>' + esc(x.message) + '</strong>'
         +   '<div class="mut" style="font-size:.72rem">' + genre
@@ -579,11 +584,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function jsVues(){
-    if (OCCUPE) return; OCCUPE = true; dire('Marquage…');
+    if (OCCUPE) return; OCCUPE = true; dire('${T("Marquage…")}');
     appeler('journal:jsErreursVues', [null]).then(function(r){
       OCCUPE = false;
-      if (r && r.ok) recharger((r.n || 0) + ' erreur(s) marquée(s) comme vue(s).', 'bon');
-      else dire('Échec : ' + expliquer(r), 'err');
+      if (r && r.ok) recharger((r.n || 0) + ' ${T("erreur(s) marquée(s) comme vue(s).")}', 'bon');
+      else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
   /* ⚠⚠ VIDER EFFACE POUR TOUT LE MONDE, ET LES COMPTEURS AVEC — c est pour ca
@@ -602,14 +607,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!JS_ARME) {
       JS_ARME = true;
       vueJsErreurs();
-      dire('Cliquez de nouveau pour vider — les compteurs ne se reconstituent pas.', 'att');
+      dire('${T("Cliquez de nouveau pour vider — les compteurs ne se reconstituent pas.")}', 'att');
       return;
     }
-    JS_ARME = false; OCCUPE = true; dire('Vidage…');
+    JS_ARME = false; OCCUPE = true; dire('${T("Vidage…")}');
     appeler('journal:jsErreursPurger', []).then(function(r){
       OCCUPE = false;
-      if (r && r.ok) recharger('Journal vidé — ' + (r.efface || 0) + ' effacée(s).', 'bon');
-      else dire('Échec : ' + expliquer(r), 'err');
+      if (r && r.ok) recharger('${T("Journal vidé — ")}' + (r.efface || 0) + ' ${T("effacée(s).")}', 'bon');
+      else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
 
@@ -617,17 +622,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function basculerStats(){
     if (OCCUPE) return; OCCUPE=true;
     appeler('journal:stats',[!D.statsHidden]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D.statsHidden=r.statsHidden; vueAcces(); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ D.statsHidden=r.statsHidden; vueAcces(); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function purger(op){
-    if (OCCUPE) return; OCCUPE=true; dire('Purge…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Purge…")}');
     appeler(op,[]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ recharger('Purge faite — '+(r.conserves||0)+' conservée(s).', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ recharger('${T("Purge faite — ")}'+(r.conserves||0)+' ${T("conservée(s).")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function exporter(op){
-    if (OCCUPE) return; OCCUPE=true; dire('Préparation du document…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Préparation du document…")}');
     appeler(op,[]).then(function(r){ OCCUPE=false;
-      dire(r&&r.ok ? 'Document téléchargé depuis la fenêtre principale.' : 'Échec : '+expliquer(r), r&&r.ok?'bon':'err'); });
+      dire(r&&r.ok ? '${T("Document téléchargé depuis la fenêtre principale.")}' : '${T("Échec : ")}'+expliquer(r), r&&r.ok?'bon':'err'); });
   }
   function rendre(){
     tabs();
@@ -645,7 +650,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('journal:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; rendre(); } if (msg) dire(msg, cl); });
   }
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('journal:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; rendre(); dire('');
