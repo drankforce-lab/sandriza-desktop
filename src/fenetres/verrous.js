@@ -27,6 +27,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d une section, le
+   libelle d une fiche ni le nom de qui la tient (voir src/langue/verrous.js). */
+const T = require('../langue').tr('verrous');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -79,11 +84,11 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 /** Page complète de la fenêtre native « Verrous ». */
 function pageVerrous() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Verrous — Administration Sandriza</title>
+<title>${T("Verrous — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.verrou}</span><h1>Verrous</h1>
+<div class="tete"><span class="ico">${ICO.verrou}</span><h1>${T("Verrous")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Lecture des verrous…</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Lecture des verrous…")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -106,17 +111,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function fdate(ts){ if (!ts) return ''; try { return new Date(ts).toLocaleString('fr-CA'); } catch (e) { return ''; } }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application.',
-    droit:              'Seul un super-administrateur peut voir et forcer les verrous.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application.")}',
+    droit:              '${T("Seul un super-administrateur peut voir et forcer les verrous.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 120)) + ')';
     return t;
   }
@@ -131,37 +136,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function tableau(liste, vide){
     if (!liste.length) return '<div class="vide">' + vide + '</div>';
-    var h = '<table><thead><tr><th>Section</th><th>Enregistrement</th><th>Détenu par</th>'
-      + '<th>Depuis</th><th>État</th>' + (PEUT ? '<th></th>' : '') + '</tr></thead><tbody>';
+    var h = '<table><thead><tr><th>${T("Section")}</th><th>${T("Enregistrement")}</th><th>${T("Détenu par")}</th>'
+      + '<th>${T("Depuis")}</th><th>${T("État")}</th>' + (PEUT ? '<th></th>' : '') + '</tr></thead><tbody>';
     for (var i = 0; i < liste.length; i++) {
       var l = liste[i];
       var mort = l.expired || l.sessionAlive === false;
-      var motif = l.expired ? 'Périmé' : (l.sessionAlive === false ? 'Session fermée' : '');
+      var motif = l.expired ? '${T("Périmé")}' : (l.sessionAlive === false ? '${T("Session fermée")}' : '');
       var cle = l.scope + SEP + l.id;
       h += '<tr><td><strong>' + esc(l.scopeLabel || l.scope) + '</strong>'
         + '<div class="sub mono">' + esc(l.scope) + '</div></td>'
-        + '<td>' + (l.label ? '<strong>' + esc(l.label) + '</strong>' : '<em class="mut">sans libellé</em>')
+        + '<td>' + (l.label ? '<strong>' + esc(l.label) + '</strong>' : '<em class="mut">${T("sans libellé")}</em>')
         + '<div class="sub mono">' + esc(l.id) + '</div></td>'
-        + '<td>' + esc(l.who || '—') + (l.mine ? ' <span class="pill moi">vous</span>' : '') + '</td>'
+        + '<td>' + esc(l.who || '—') + (l.mine ? ' <span class="pill moi">${T("vous")}</span>' : '') + '</td>'
         + '<td style="white-space:nowrap">' + esc(l.age || '')
         + '<div class="sub">' + esc(l.since ? fdate(l.since) : '') + '</div></td>'
         + '<td>' + (mort
             ? '<span class="pill mort">' + esc(motif) + '</span>'
-            : '<span class="pill vif">actif · ' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
+            : '<span class="pill vif">${T("actif · ")}' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
         + (PEUT ? '<td style="text-align:right"><button class="mini dgr" data-unl="' + esc(cle) + '">'
-            + (CONF === cle ? '✓ Confirmer' : '<span class="ic" aria-hidden="true">🔓</span> Déverrouiller') + '</button></td>' : '')
+            + (CONF === cle ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Déverrouiller")}') + '</button></td>' : '')
         + '</tr>';
     }
     return h + '</tbody></table>';
   }
 
   function dessiner(){
-    if (VERR === null) { corps.innerHTML = '<div class="vide charge">Lecture des verrous…</div>'; return; }
+    if (VERR === null) { corps.innerHTML = '<div class="vide charge">${T("Lecture des verrous…")}</div>'; return; }
     var actifs = VERR.filter(function(l){ return !l.expired && l.sessionAlive !== false; });
     var morts = VERR.filter(function(l){ return l.expired || l.sessionAlive === false; });
+    /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
     sousEl.textContent = actifs.length
-      ? (actifs.length + ' fiche' + (actifs.length > 1 ? 's' : '') + ' en cours de modification')
-      : 'personne ne tient de fiche';
+      ? (actifs.length + (actifs.length > 1 ? '${T(" fiches en cours de modification")}'
+                                            : '${T(" fiche en cours de modification")}'))
+      : '${T("personne ne tient de fiche")}';
 
     /* ⚠ L'EXPOSÉ EST PARTI (2026-09-06), L'AVERTISSEMENT RESTE. Le jumeau web
        (staff.js) a subi le même retrait le même jour : « Ce que vous regardez »
@@ -171,18 +178,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        ça, c'est utile au moment où on le lit. */
     var h = '';
 
-    h += '<div class="barre"><button class="mini" id="v-reload"><span class="ic">🔄</span> Actualiser</button>'
+    h += '<div class="barre"><button class="mini" id="v-reload"><span class="ic">🔄</span>${T(" Actualiser")}</button>'
       + (VERR.length && PEUT
           ? '<button class="mini dgr" id="v-all">'
-            + (CONF === 'tout' ? '✓ Confirmer — tout déverrouiller'
-                               : '<span class="ic" aria-hidden="true">🔓</span> Tout déverrouiller (' + VERR.length + ')') + '</button>'
+            + (CONF === 'tout' ? '${T("✓ Confirmer — tout déverrouiller")}'
+                               : '<span class="ic" aria-hidden="true">🔓</span>${T(" Tout déverrouiller (")}' + VERR.length + ')') + '</button>'
           : '') + '</div>';
 
-    h += '<div class="carte"><h3>Verrous actifs (' + actifs.length + ')</h3>'
-      + tableau(actifs, 'Aucun verrou actif — personne ne tient de fiche en ce moment.') + '</div>';
-    h += '<div class="carte"><h3>Verrous éteints (' + morts.length + ')</h3>'
-      + '<div class="sub" style="margin:0 0 .5rem">Ne bloquent personne — affichés pour information.</div>'
-      + tableau(morts, 'Aucun.') + '</div>';
+    h += '<div class="carte"><h3>${T("Verrous actifs (")}' + actifs.length + ')</h3>'
+      + tableau(actifs, '${T("Aucun verrou actif — personne ne tient de fiche en ce moment.")}') + '</div>';
+    h += '<div class="carte"><h3>${T("Verrous éteints (")}' + morts.length + ')</h3>'
+      + '<div class="sub" style="margin:0 0 .5rem">${T("Ne bloquent personne — affichés pour information.")}</div>'
+      + tableau(morts, '${T("Aucun.")}') + '</div>';
 
     corps.innerHTML = h;
     var vr = document.getElementById('v-reload');
@@ -190,33 +197,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var va = document.getElementById('v-all');
     if (va) va.onclick = function(){
       if (CONF === 'tout') { CONF = ''; deverrouillerTout(); }
-      else { CONF = 'tout'; dessiner(); dire('Cliquez encore pour tout déverrouiller.', 'att'); }
+      else { CONF = 'tout'; dessiner(); dire('${T("Cliquez encore pour tout déverrouiller.")}', 'att'); }
     };
     var us = corps.querySelectorAll('[data-unl]');
     for (var u = 0; u < us.length; u++) {
       us[u].onclick = function(){
         var cle = this.getAttribute('data-unl');
         if (CONF === cle) { CONF = ''; var p = cle.split(SEP); deverrouiller(p[0], p[1]); }
-        else { CONF = cle; dessiner(); dire('Cliquez encore pour forcer ce déverrouillage.', 'att'); }
+        else { CONF = cle; dessiner(); dire('${T("Cliquez encore pour forcer ce déverrouillage.")}', 'att'); }
       };
     }
   }
 
   function deverrouiller(scope, id){
-    if (OCC) return; OCC = true; dire('Déverrouillage…');
+    if (OCC) return; OCC = true; dire('${T("Déverrouillage…")}');
     appeler('journal:deverrouiller', [scope, id]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Verrou libéré.', 'bon');
+      dire('${T("Verrou libéré.")}', 'bon');
       charger(true);
     });
   }
   function deverrouillerTout(){
-    if (OCC) return; OCC = true; dire('Libération de tous les verrous…');
+    if (OCC) return; OCC = true; dire('${T("Libération de tous les verrous…")}');
     appeler('journal:deverrouiller:tout', []).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Verrous libérés.', 'bon');
+      dire('${T("Verrous libérés.")}', 'bon');
       charger(true);
     });
   }

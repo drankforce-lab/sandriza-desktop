@@ -17,6 +17,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais la valeur d une entree,
+   qui est comparee A LA CAISSE (voir src/langue/listenoire.js). */
+const T = require('../langue').tr('listenoire');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -73,11 +78,11 @@ code{font-family:Consolas,monospace;font-size:.82rem;background:var(--v05);paddi
 function pageListeNoire(ouverture) {
   var AJOUT0 = String(ouverture || '') === 'ajout' ? '1' : '';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Liste noire — Administration Sandriza</title>
+<title>${T("Liste noire — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.blacklist}</span><h1>Liste noire</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter la liste, pas la modifier.</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.blacklist}</span><h1>${T("Liste noire")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter la liste, pas la modifier.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -88,8 +93,8 @@ function pageListeNoire(ouverture) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -104,17 +109,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès à la liste noire.',
-    invalide:'Saisie invalide.',
-    doublon:'Cette valeur est déjà dans la liste.',
-    introuvable:'Entrée introuvable.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès à la liste noire.")}',
+    invalide:'${T("Saisie invalide.")}',
+    doublon:'${T("Cette valeur est déjà dans la liste.")}',
+    introuvable:'${T("Entrée introuvable.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -124,36 +129,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     var l = D.entrees || [];
     var h = '<div class="entete">'
-      + '<p class="quoi">Une commande dont le <b>courriel</b>, le <b>code postal</b> ou l’<b>adresse de livraison</b> figure ici est refusée à la caisse. Retirer une entrée redonne le droit de commander.</p>'
-      + (D.peutAjouter && !AJOUT ? '<button class="prim" id="l-nouveau">＋ Ajouter une entrée</button>' : '')
+      + '<p class="quoi">${T("Une commande dont le <b>courriel</b>, le <b>code postal</b> ou l’<b>adresse de livraison</b> figure ici est refusée à la caisse. Retirer une entrée redonne le droit de commander.")}</p>'
+      + (D.peutAjouter && !AJOUT ? '<button class="prim" id="l-nouveau">${T("＋ Ajouter une entrée")}</button>' : '')
       + '</div>';
 
     if (AJOUT && D.peutAjouter) {
       h += '<div class="carte ajout"><div class="cols">'
-        + '<label class="champ"><span class="lbl">Type</span><select class="t" id="l-type">'
-        + '<option value="email"'+(TYPE==='email'?' selected':'')+'>Courriel</option>'
-        + '<option value="postal"'+(TYPE==='postal'?' selected':'')+'>Code postal</option>'
-        + '<option value="address"'+(TYPE==='address'?' selected':'')+'>Adresse de livraison</option>'
+        + '<label class="champ"><span class="lbl">${T("Type")}</span><select class="t" id="l-type">'
+        + '<option value="email"'+(TYPE==='email'?' selected':'')+'>${T("Courriel")}</option>'
+        + '<option value="postal"'+(TYPE==='postal'?' selected':'')+'>${T("Code postal")}</option>'
+        + '<option value="address"'+(TYPE==='address'?' selected':'')+'>${T("Adresse de livraison")}</option>'
         + '</select></label>';
       if (TYPE === 'address') {
-        h += '<label class="champ" style="position:relative"><span class="lbl">Rue</span>'
-          + '<input class="t" id="l-valeur" placeholder="1234 rue Principale" autocomplete="off">'
+        h += '<label class="champ" style="position:relative"><span class="lbl">${T("Rue")}</span>'
+          + '<input class="t" id="l-valeur" placeholder="${T("1234 rue Principale")}" autocomplete="off">'
           + '<div class="sug" id="l-sug"></div></label>'
-          + '<label class="champ"><span class="lbl">Ville</span><input class="t" id="l-ville" placeholder="Québec"></label>';
+          + '<label class="champ"><span class="lbl">${T("Ville")}</span><input class="t" id="l-ville" placeholder="${T("Québec")}"></label>';
       } else {
-        h += '<label class="champ"><span class="lbl">Valeur</span><input class="t" id="l-valeur" placeholder="'
-          + (TYPE==='postal' ? 'G1H 1T4' : 'client@exemple.com') + '"></label>';
+        h += '<label class="champ"><span class="lbl">${T("Valeur")}</span><input class="t" id="l-valeur" placeholder="'
+          + (TYPE==='postal' ? '${T("G1H 1T4")}' : '${T("client@exemple.com")}') + '"></label>';
       }
-      h += '<label class="champ"><span class="lbl">Note (facultatif)</span><input class="t" id="l-note" placeholder="Raison, numéro de commande…"></label>'
-        + '</div><div class="pied2"><button class="b" id="l-annuler">Annuler</button>'
+      h += '<label class="champ"><span class="lbl">${T("Note (facultatif)")}</span><input class="t" id="l-note" placeholder="${T("Raison, numéro de commande…")}"></label>'
+        + '</div><div class="pied2"><button class="b" id="l-annuler">${T("Annuler")}</button>'
         + '<button class="prim" id="l-ajouter">Ajouter</button></div></div>';
     }
 
     if (!l.length) {
-      h += '<div class="carte"><div class="vide">Aucune entrée.<br>C’est la bonne nouvelle — la liste ne sert qu’à écarter ce qui pose problème.</div></div>';
+      h += '<div class="carte"><div class="vide">${T("Aucune entrée.<br>C’est la bonne nouvelle — la liste ne sert qu’à écarter ce qui pose problème.")}</div></div>';
     } else {
       h += '<div class="carte" style="padding:0;overflow-x:auto"><table class="tb"><thead><tr>'
-        + '<th>Type</th><th>Valeur</th><th>Note</th><th>Ajouté le</th>'
+        + '<th>${T("Type")}</th><th>${T("Valeur")}</th><th>${T("Note")}</th><th>${T("Ajouté le")}</th>'
         + (D.peutRetirer ? '<th></th>' : '') + '</tr></thead><tbody>';
       for (var i=0;i<l.length;i++){ var e=l[i];
         h += '<tr><td style="white-space:nowrap">'+esc(e.typeLabel)+'</td>'
@@ -161,7 +166,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td style="color:var(--tx2)">'+esc(e.note||'—')+'</td>'
           + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(e.quand)+'</td>'
           + (D.peutRetirer ? '<td class="acts"><button class="b dgr" data-del="'+esc(e.id)+'">'
-              +(DELID===e.id?'✓ Confirmer':'Retirer')+'</button></td>' : '')
+              +(DELID===e.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button></td>' : '')
           + '</tr>';
       }
       h += '</tbody></table></div>';
@@ -185,7 +190,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var i=0;i<ds.length;i++) ds[i].onclick=function(){
       var id=this.getAttribute('data-del');
       if (DELID===id){ DELID=''; retirer(id); }
-      else { DELID=id; dessiner(); dire('Cliquez encore pour retirer — cette adresse pourra de nouveau commander.', 'att'); }
+      else { DELID=id; dessiner(); dire('${T("Cliquez encore pour retirer — cette adresse pourra de nouveau commander.")}', 'att'); }
     };
     brancherSuggestions();
   }
@@ -206,12 +211,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       SUG_TIMER = setTimeout(function(){
         appeler('adresse:suggerer',[q]).then(function(r){
           if (!r || !r.ok || !r.suggestions || !r.suggestions.length) {
-            sug.innerHTML = '<div class="sug-vide">Aucun résultat — vérifiez l’adresse</div>'; sug.style.display='block'; return;
+            sug.innerHTML = '<div class="sug-vide">${T("Aucun résultat — vérifiez l’adresse")}</div>'; sug.style.display='block'; return;
           }
           sug.innerHTML = r.suggestions.map(function(s,idx){
             return '<div class="sug-it" data-i="'+idx+'"><div class="r">'+esc(s.rue||s.ville||'—')
               + '</div><div class="v">'+esc(s.label||'')+'</div></div>';
-          }).join('') + '<div class="sug-src">'+(r.source==='mapbox'?'<span class="ic">🗺️</span> Mapbox':'<span class="ic">🌍</span> OpenStreetMap')+'</div>';
+          }).join('') + '<div class="sug-src">'+(r.source==='mapbox'?'<span class="ic">🗺️</span>${T(" Mapbox")}':'<span class="ic">🌍</span>${T(" OpenStreetMap")}')+'</div>';
           sug.style.display='block';
           var its = sug.querySelectorAll('.sug-it');
           for (var k=0;k<its.length;k++) its[k].onmousedown=function(e){
@@ -229,20 +234,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function ajouter(){
-    if (OCCUPE) return; OCCUPE=true; dire('Ajout…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Ajout…")}');
     appeler('listenoire:ajouter',[TYPE, txv('l-valeur'), txv('l-ville'), txv('l-note')]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D=r; RO=!r.peutAjouter; AJOUT=false; DELID=''; dessiner(); dire('Entrée ajoutée.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ D=r; RO=!r.peutAjouter; AJOUT=false; DELID=''; dessiner(); dire('${T("Entrée ajoutée.")}', 'bon'); }
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function retirer(id){
-    if (OCCUPE) return; OCCUPE=true; dire('Retrait…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Retrait…")}');
     appeler('listenoire:retirer',[id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D=r; DELID=''; dessiner(); dire('Entrée retirée.', 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ D=r; DELID=''; dessiner(); dire('${T("Entrée retirée.")}', 'bon'); }
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('listenoire:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutAjouter;

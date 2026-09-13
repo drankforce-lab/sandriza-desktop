@@ -17,6 +17,12 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit — jamais l URL a configurer, ni le
+   nom et la frequence d une tache, qui viennent du coeur (voir
+   src/langue/automations.js). */
+const T = require('../langue').tr('automations');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -75,12 +81,12 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 
 function pageAutomations() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Automatisations — Administration Sandriza</title>
+<title>${T("Automatisations — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.config}</span><h1>Automatisations</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
+<div class="tete"><span class="ico">${ICO.config}</span><h1>${T("Automatisations")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -96,8 +102,8 @@ function pageAutomations() {
         + 'border:1px solid var(--v16);border-radius:7px;background:var(--v05);'
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto;-webkit-user-select:none;user-select:none');
       t.appendChild(b); }
-    if (actif) { b.textContent = '⧉ Détacher'; b.onclick = function(){ if (P && P.detacher) P.detacher(); }; }
-    else { b.textContent = '⚓ Ancrer'; b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
+    if (actif) { b.textContent = '${T("⧉ Détacher")}'; b.onclick = function(){ if (P && P.detacher) P.detacher(); }; }
+    else { b.textContent = '${T("⚓ Ancrer")}'; b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -108,18 +114,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session: 'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit: 'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule: 'Votre rôle est en lecture seule.',
-    introuvable: 'Cette tâche n’existe plus.',
-    indisponible: 'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible: 'La fenêtre principale ne répond pas.',
-    delai: 'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec: 'L’opération a échoué.'
+    session: '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit: '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule: '${T("Votre rôle est en lecture seule.")}',
+    introuvable: '${T("Cette tâche n’existe plus.")}',
+    indisponible: '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible: '${T("La fenêtre principale ne répond pas.")}',
+    delai: '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec: '${T("L’opération a échoué.")}'
   };
   function expliquer(r){ var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').')) + (r && r.detail ? ' (' + esc(r.detail) + ')' : ''); }
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').')) + (r && r.detail ? ' (' + esc(r.detail) + ')' : ''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args || [])); }
     catch (e) { return Promise.resolve({ ok: false, motif: 'pont_indisponible' }); }
@@ -130,9 +136,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
 
   function badgeDest(rec){
-    if (rec === 'perStaff')    return '<span class="pill">à chaque membre concerné</span>';
-    if (rec === 'perCustomer') return '<span class="pill">au client concerné</span>';
-    if (rec === 'none')        return '<span class="pill">aucun courriel</span>';
+    if (rec === 'perStaff')    return '<span class="pill">${T("à chaque membre concerné")}</span>';
+    if (rec === 'perCustomer') return '<span class="pill">${T("au client concerné")}</span>';
+    if (rec === 'none')        return '<span class="pill">${T("aucun courriel")}</span>';
     return '';
   }
 
@@ -141,24 +147,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="nom">' + esc(j.name) + '</span>'
       + '<span class="pill">' + esc(j.schedule) + '</span>' + badgeDest(j.recipient) + '</div>';
     h += '<p class="desc">' + esc(j.desc) + '</p>';
-    if (j.recommendation) h += '<div class="reco"><span class="ic">💡</span> Fréquence recommandée : ' + esc(j.recommendation) + '</div>';
+    if (j.recommendation) h += '<div class="reco"><span class="ic">💡</span>${T(" Fréquence recommandée : ")}' + esc(j.recommendation) + '</div>';
     if (j.recipient === 'single') {
-      h += '<div class="rangee"><div class="ch"><label>Courriel destinataire</label>'
-        + '<input id="em-' + j.key + '" aria-label="Courriel destinataire" value="' + esc(j.email) + '" placeholder="Vide = courriel professionnel"'
+      h += '<div class="rangee"><div class="ch"><label>${T("Courriel destinataire")}</label>'
+        /* Un attribut par litteral : colles, l etiquette et la valeur se lisent
+           comme un seul texte, et l inventaire ne sait plus ou l une finit. */
+        + '<input id="em-' + j.key + '"'
+        + ' aria-label="${T("Courriel destinataire")}"'
+        + ' value="' + esc(j.email) + '"'
+        + ' placeholder="${T("Vide = courriel professionnel")}"'
         + (RO ? ' disabled' : '') + '></div>'
-        + '<button class="prim" data-email="' + j.key + '"' + (RO ? ' disabled' : '') + '>Enregistrer</button></div>';
+        + '<button class="prim" data-email="' + j.key + '"' + (RO ? ' disabled' : '') + '>${T("Enregistrer")}</button></div>';
     }
     if (j.key === 'stats' && D.statsMetrics && D.statsMetrics.length) {
-      h += '<div class="metriques"><div class="t"><span class="ic">📋</span> Métriques du courriel</div>'
-        + '<div class="s">Cochez ce que vous voulez recevoir (données de la veille).</div><div class="mgrille">'
+      h += '<div class="metriques"><div class="t"><span class="ic">📋</span>${T(" Métriques du courriel")}</div>'
+        + '<div class="s">${T("Cochez ce que vous voulez recevoir (données de la veille).")}</div><div class="mgrille">'
         + D.statsMetrics.map(function(m){ return '<label><input type="checkbox" id="mt-' + m.key + '"'
             + (m.actif ? ' checked' : '') + (RO ? ' disabled' : '') + '> ' + esc(m.label) + '</label>'; }).join('')
-        + '</div><button class="prim" id="b-stats"' + (RO ? ' disabled' : '') + '>Enregistrer les métriques</button></div>';
+        + '</div><button class="prim" id="b-stats"' + (RO ? ' disabled' : '') + '>${T("Enregistrer les métriques")}</button></div>';
     }
-    h += '<div class="rangee" style="margin:0"><div class="ch plein"><label>URL à configurer ('
+    h += '<div class="rangee" style="margin:0"><div class="ch plein"><label>${T("URL à configurer (")}'
       + esc(String(j.schedule).toLowerCase()) + ')</label>'
-      + '<input class="mono" aria-label="Adresse de rappel à copier" readonly value="' + esc(j.url) + '" data-url="1"></div>'
-      + '<button data-copier="' + esc(j.url) + '"><span class="ic">📋</span> Copier</button></div>';
+      + '<input class="mono" aria-label="${T("Adresse de rappel à copier")}" readonly value="' + esc(j.url) + '" data-url="1"></div>'
+      + '<button data-copier="' + esc(j.url) + '"><span class="ic">📋</span>${T(" Copier")}</button></div>';
     return h + '</div>';
   }
 
@@ -166,7 +177,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var jobs = (D && D.jobs) || [];
     corps.innerHTML = jobs.length ? jobs.map(carteHtml).join('')
-      : '<div class="carte"><div class="vide">Aucune tâche.</div></div>';
+      : '<div class="carte"><div class="vide">${T("Aucune tâche.")}</div></div>';
     brancher();
   }
 
@@ -184,18 +195,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function copier(url){
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(function(){ dire('URL copiée.', 'bon'); },
-          function(){ dire('Copie impossible — sélectionnez et copiez à la main.', 'att'); });
-      } else { dire('Sélectionnez le champ et copiez à la main.', 'att'); }
-    } catch (e) { dire('Copie impossible.', 'err'); }
+        navigator.clipboard.writeText(url).then(function(){ dire('${T("URL copiée.")}', 'bon'); },
+          function(){ dire('${T("Copie impossible — sélectionnez et copiez à la main.")}', 'att'); });
+      } else { dire('${T("Sélectionnez le champ et copiez à la main.")}', 'att'); }
+    } catch (e) { dire('${T("Copie impossible.")}', 'err'); }
   }
 
   function enregistrerEmail(key){
     if (RO || OCCUPE) return;
-    OCCUPE = true; dire('Enregistrement…');
+    OCCUPE = true; dire('${T("Enregistrement…")}');
     appeler('config:automations:email', [{ key: key, email: val('em-' + key) }]).then(function(r){
       OCCUPE = false;
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dire('Courriel enregistré.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dire('${T("Courriel enregistré.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
@@ -204,16 +215,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RO || OCCUPE) return;
     var actifs = {};
     (D.statsMetrics || []).forEach(function(m){ var e = document.getElementById('mt-' + m.key); actifs[m.key] = !!(e && e.checked); });
-    OCCUPE = true; dire('Enregistrement…');
+    OCCUPE = true; dire('${T("Enregistrement…")}');
     appeler('config:automations:stats', [actifs]).then(function(r){
       OCCUPE = false;
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dire('Métriques enregistrées.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dire('${T("Métriques enregistrées.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:automations:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';

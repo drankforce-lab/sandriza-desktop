@@ -24,6 +24,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un numero de facture, un
+   nom de client ni un montant (voir src/langue/factures.js). */
+const T = require('../langue').tr('factures');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -97,11 +102,11 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 /** Page complète de la fenêtre native « Factures ». */
 function pageFactures() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Factures — Administration Sandriza</title>
+<title>${T("Factures — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.billing}</span><h1>Factures</h1>
+<div class="tete"><span class="ico">${ICO.billing}</span><h1>${T("Factures")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -139,18 +144,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux factures.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette facture n’existe plus.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux factures.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette facture n’existe plus.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -182,7 +187,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!LIGNES) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!LIGNES) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
     var pages = Math.max(1, Math.ceil(rows.length / PAR_PAGE));
     var p = Math.min(Math.max(0, PAGE), pages - 1);
@@ -198,43 +203,47 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       };
       var nbR = TUILES.nbRemboursements || 0;
       h += '<div class="tuiles">'
-        + tuile('Total facturé', fmt(TUILES.total), '')
-        + tuile('Encaissé', fmt(TUILES.encaisse), 'bon')
-        + tuile('À recevoir', fmt(TUILES.aRecevoir), 'att')
-        + tuile('Remboursé', fmt(TUILES.rembourse), 'att', nbR + ' remboursement' + (nbR > 1 ? 's' : ''))
-        + tuile('Dépenses ' + (TUILES.annee || ''), fmt(TUILES.depenses), 'err')
-        + tuile('Nb factures', String(TUILES.nb || 0), '')
+        + tuile('${T("Total facturé")}', fmt(TUILES.total), '')
+        + tuile('${T("Encaissé")}', fmt(TUILES.encaisse), 'bon')
+        + tuile('${T("À recevoir")}', fmt(TUILES.aRecevoir), 'att')
+        /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
+        + tuile('${T("Remboursé")}', fmt(TUILES.rembourse), 'att',
+            nbR + (nbR > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}'))
+        + tuile('${T("Dépenses ")}' + (TUILES.annee || ''), fmt(TUILES.depenses), 'err')
+        + tuile('${T("Nb factures")}', String(TUILES.nb || 0), '')
         + '</div>';
     }
     h += '<div class="barreoutils">'
-      + '<input aria-label="Numéro, commande ou client" type="search" id="f-q" placeholder="Numéro, commande ou client…" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Numéro, commande ou client")}" type="search" id="f-q" placeholder="${T("Numéro, commande ou client…")}" value="' + esc(Q) + '">'
       + '<select id="f-statut">'
-      + '<option value=""' + (STATUT === '' ? ' selected' : '') + '>Tous les statuts</option>'
-      + '<option value="paid"' + (STATUT === 'paid' ? ' selected' : '') + '>Payée</option>'
-      + '<option value="unpaid"' + (STATUT === 'unpaid' ? ' selected' : '') + '>Non payée</option>'
-      + '<option value="overdue"' + (STATUT === 'overdue' ? ' selected' : '') + '>En retard</option>'
-      + '<option value="cancelled"' + (STATUT === 'cancelled' ? ' selected' : '') + '>Annulée</option>'
+      + '<option value=""' + (STATUT === '' ? ' selected' : '') + '>${T("Tous les statuts")}</option>'
+      + '<option value="paid"' + (STATUT === 'paid' ? ' selected' : '') + '>${T("Payée")}</option>'
+      + '<option value="unpaid"' + (STATUT === 'unpaid' ? ' selected' : '') + '>${T("Non payée")}</option>'
+      + '<option value="overdue"' + (STATUT === 'overdue' ? ' selected' : '') + '>${T("En retard")}</option>'
+      + '<option value="cancelled"' + (STATUT === 'cancelled' ? ' selected' : '') + '>${T("Annulée")}</option>'
       + '</select>'
       + '<span class="droite">'
-      + (CLIENTS.length ? '<button class="mini" id="f-etat">État de compte client</button>' : '')
+      + (CLIENTS.length ? '<button class="mini" id="f-etat">${T("État de compte client")}</button>' : '')
       + rows.length + ' facture' + (rows.length > 1 ? 's' : '') + '</span>'
       + '</div>';
 
     h += '<div class="carte">';
     if (!vue.length) {
-      h += '<div class="vide">Aucune facture ne correspond.</div>';
+      h += '<div class="vide">${T("Aucune facture ne correspond.")}</div>';
     } else {
       var avecGestes = PEUT_ENC || PEUT_SUP;
-      h += '<table><thead><tr><th>Numéro</th><th>Commande</th><th>Client</th>'
-        + '<th>Échéance</th><th>Total</th><th>Statut</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Numéro")}</th><th>${T("Commande")}</th><th>${T("Client")}</th>'
+        + '<th>${T("Échéance")}</th><th>${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             var gestes = '';
             if (PEUT_ENC) {
-              if (r.statut === 'unpaid' || r.statut === 'overdue') gestes += '<button class="mini geste bon" data-payer="' + esc(r.id) + '" title="Marquer la facture comme payée">Payée</button> ';
-              else if (r.statut === 'paid') gestes += '<button class="mini geste" data-depayer="' + esc(r.id) + '" title="Annuler le statut de paiement">Annuler</button> ';
+              if (r.statut === 'unpaid' || r.statut === 'overdue') gestes += '<button class="mini geste bon" data-payer="' + esc(r.id) + '" title="${T("Marquer la facture comme payée")}">${T("Payée")}</button> ';
+              /* ⚠ L infobulle ENTIERE : une cle courte posee dans une phrase
+                 plus longue laisse l autre moitie en francais. */
+              else if (r.statut === 'paid') gestes += '<button class="mini geste" data-depayer="' + esc(r.id) + '" title="${T("Annuler le statut de paiement")}">${T("Annuler")}</button> ';
             }
-            if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + (SUPPR_ARME === r.id ? 'Confirmer ?' : 'Supprimer') + '</button>';
-            return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la facture">'
+            if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la facture")}">'
               // ⚠ Le cadenas d une facture est celui de SA COMMANDE : c est
               // elle qui se verrouille (detail, expedition, remboursement).
               + '<td><span class="num">' + esc(r.numero) + '</span>'
@@ -251,7 +260,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (pages > 1) {
         h += '<div class="pagi">'
           + '<button class="mini" id="f-prec"' + (p <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>Page ' + (p + 1) + ' / ' + pages + '</span>'
+          + '<span>${T("Page ")}' + (p + 1) + ' / ' + pages + '</span>'
           + '<button class="mini" id="f-suiv"' + (p >= pages - 1 ? ' disabled' : '') + '>▶</button>'
           + '</div>';
       }
@@ -260,15 +269,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     if (ETAT_OUVERT) {
       h += '<div class="voile" id="f-voile"><div class="boite">'
-        + '<h3>État de compte client</h3>'
-        + '<select id="f-client" aria-label="Client de la facture">'
-        + '<option value="">— Choisir un client —</option>'
+        + '<h3>${T("État de compte client")}</h3>'
+        + '<select id="f-client" aria-label="${T("Client de la facture")}">'
+        + '<option value="">${T("— Choisir un client —")}</option>'
         + CLIENTS.map(function(c){
             return '<option value="' + esc(c.id) + '">' + esc(c.nom) + ' (' + esc(c.courriel) + ')</option>';
           }).join('')
         + '</select>'
-        + '<div class="pied-boite"><button class="mini" id="f-etat-annuler">Annuler</button>'
-        + '<button class="mini geste bon" id="f-etat-generer">Générer l’état</button></div>'
+        + '<div class="pied-boite"><button class="mini" id="f-etat-annuler">${T("Annuler")}</button>'
+        + '<button class="mini geste bon" id="f-etat-generer">${T("Générer l’état")}</button></div>'
         + '</div></div>';
     }
     corps.innerHTML = h;
@@ -282,11 +291,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (beg) beg.onclick = function(){
       var sel = document.getElementById('f-client');
       var v = sel ? sel.value : '';
-      if (!v) { dire('Choisissez un client.', 'err'); return; }
+      if (!v) { dire('${T("Choisissez un client.")}', 'err'); return; }
       beg.disabled = true;
       appeler('factures:etat', [v]).then(function(r){
         ETAT_OUVERT = false; dessiner();
-        dire(r.ok ? 'État de compte envoyé à l’impression (fenêtre principale).' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("État de compte envoyé à l’impression (fenêtre principale).")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
     var vo = document.getElementById('f-voile');
@@ -328,7 +337,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       bpay.disabled = true;
       appeler('factures:payer', [bpay.getAttribute('data-payer'), true]).then(function(r){
         if (!r.ok) { bpay.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('Facture ' + (r.num || '') + ' marquée comme payée.', 'bon');
+        dire('${T("Facture ")}' + (r.num || '') + '${T(" marquée comme payée.")}', 'bon');
         charger();
       });
       return;
@@ -339,7 +348,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       bdep.disabled = true;
       appeler('factures:payer', [bdep.getAttribute('data-depayer'), false]).then(function(r){
         if (!r.ok) { bdep.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('Statut de paiement annulé pour ' + (r.num || 'la facture') + '.', 'bon');
+        dire('${T("Statut de paiement annulé pour ")}' + (r.num || '${T("la facture")}') + '.', 'bon');
         charger();
       });
       return;
@@ -353,13 +362,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (SUPPR_ARME !== idS) {
         SUPPR_ARME = idS;
         dessiner();
-        dire('Cliquez « Confirmer ? » pour supprimer définitivement — la facture sera retirée de partout, y compris du compte client.', 'att');
+        dire('${T("Cliquez « Confirmer ? » pour supprimer définitivement — la facture sera retirée de partout, y compris du compte client.")}', 'att');
         return;
       }
       SUPPR_ARME = '';
       appeler('factures:supprimer', [idS]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire('Facture ' + (r.num || '') + ' supprimée.', 'bon');
+        dire('${T("Facture ")}' + (r.num || '') + '${T(" supprimée.")}', 'bon');
         charger();
       });
       return;
@@ -368,15 +377,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler('factures:ouvrir', [tr.getAttribute('data-id')]).then(function(r){
-      dire(r.ok ? 'Facture ouverte dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Facture ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
 
   function charger(){
     appeler('factures:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Factures indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Factures indisponibles")}', expliquer(r)); return; }
       LIGNES = r.lignes || [];
       TUILES = r.tuiles || null;
       PEUT_ENC = !!r.peutEncaisser;
@@ -414,12 +423,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

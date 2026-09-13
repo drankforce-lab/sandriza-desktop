@@ -20,6 +20,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un numero, un nom de
+   cliente ni un montant (voir src/langue/remboursements.js). */
+const T = require('../langue').tr('remboursements');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -98,11 +103,11 @@ tr.eteint td{opacity:.55}
 function pageRemboursements(onglet) {
   const depart = (String(onglet || '') === 'credits') ? 'credits' : 'remboursements';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Remboursements et crédits — Administration Sandriza</title>
+<title>${T("Remboursements et crédits — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.refunds}</span><h1>Remboursements et crédits</h1>
+<div class="tete"><span class="ico">${ICO.refunds}</span><h1>${T("Remboursements et crédits")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -121,18 +126,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux remboursements.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette commande n’existe plus.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux remboursements.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette commande n’existe plus.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 150)) + ')';
     return t;
   }
@@ -150,14 +155,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var t = D.tuiles || {}, c = D.comptes || {};
     var h = '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'remboursements' ? ' actif' : '') + '" data-onglet="remboursements">'
-      + 'Remboursements<span class="n">' + (c.remboursements || 0) + '</span></button>'
+      + '${T("Remboursements")}<span class="n">' + (c.remboursements || 0) + '</span></button>'
       + '<button class="mini' + (ONGLET === 'credits' ? ' actif' : '') + '" data-onglet="credits">'
-      + 'Crédits boutique<span class="n">' + (c.credits || 0) + '</span></button>'
-      + '<input aria-label="Numéro, commande, client" type="search" id="r-q" placeholder="Numéro, commande, client…" value="' + esc(Q) + '">'
+      + '${T("Crédits boutique")}<span class="n">' + (c.credits || 0) + '</span></button>'
+      + '<input aria-label="${T("Numéro, commande, client")}" type="search" id="r-q" placeholder="${T("Numéro, commande, client…")}" value="' + esc(Q) + '">'
       + '</div>';
 
     /* ⚠ QUATRE CHIFFRES QUI NE DISENT PAS LA MEME CHOSE. << Rembourse >> est de
@@ -166,29 +171,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        dire ni pour la caisse ni pour le comptable. */
     h += '<div class="stats">'
       + '<div class="s"><div class="n sort">' + esc(t.rembourse) + '</div>'
-      + '<div class="l">Total remboursé</div><div class="sub">' + (t.nbRemb || 0)
-      + ' remboursement' + ((t.nbRemb || 0) > 1 ? 's' : '') + '</div></div>'
+      /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
+      + '<div class="l">${T("Total remboursé")}</div><div class="sub">' + (t.nbRemb || 0)
+      + ((t.nbRemb || 0) > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}') + '</div></div>'
       + '<div class="s"><div class="n">' + esc(t.emis) + '</div>'
-      + '<div class="l">Crédits émis</div><div class="sub">' + (t.nbCredits || 0)
-      + ' crédit' + ((t.nbCredits || 0) > 1 ? 's' : '') + '</div></div>'
+      + '<div class="l">${T("Crédits émis")}</div><div class="sub">' + (t.nbCredits || 0)
+      + ((t.nbCredits || 0) > 1 ? '${T(" crédits")}' : '${T(" crédit")}') + '</div></div>'
       + '<div class="s"><div class="n">' + esc(t.utilise) + '</div>'
-      + '<div class="l">Crédits utilisés</div><div class="sub">déjà dépensés</div></div>'
+      + '<div class="l">${T("Crédits utilisés")}</div><div class="sub">${T("déjà dépensés")}</div></div>'
       + '<div class="s"><div class="n du">' + esc(t.solde) + '</div>'
-      + '<div class="l">Solde à honorer</div><div class="sub">passif · ' + (t.nbActifs || 0)
-      + ' actif' + ((t.nbActifs || 0) > 1 ? 's' : '') + '</div></div>'
+      + '<div class="l">${T("Solde à honorer")}</div><div class="sub">${T("passif · ")}' + (t.nbActifs || 0)
+      + ((t.nbActifs || 0) > 1 ? '${T(" actifs")}' : '${T(" actif")}') + '</div></div>'
       + '</div>';
 
     h += '<div class="carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">' + (ONGLET === 'credits'
-        ? 'Aucun crédit boutique.' : 'Aucun remboursement.') + '</div>';
+        ? '${T("Aucun crédit boutique.")}' : '${T("Aucun remboursement.")}') + '</div>';
     } else {
       h += (ONGLET === 'credits' ? tableCredits(rows) : tableRemb(rows));
       if ((D.pages || 1) > 1) {
         h += '<div class="pagi">'
           + '<button class="mini" id="r-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
+          + '<span>${T("Page ")}' + (D.page + 1) + ' / ' + D.pages + '</span>'
           + '<button class="mini" id="r-suiv"' + (D.page >= D.pages - 1 ? ' disabled' : '') + '>▶</button>'
           + '</div>';
       }
@@ -203,17 +209,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function typePastille(t){
-    if (t === 'credit') return '<span class="pill info">Crédit</span>';
+    if (t === 'credit') return '<span class="pill info">${T("Crédit")}</span>';
     if (t === 'fees_refund') return '<span class="pill att">Frais</span>';
-    return '<span class="pill neutre">Moyen original</span>';
+    return '<span class="pill neutre">${T("Moyen original")}</span>';
   }
   function tableRemb(rows){
-    return '<table><thead><tr><th>N°</th><th>Date</th><th>Commande</th><th>Client</th>'
-      + '<th>Mode</th><th>Motif</th><th style="text-align:right">Sous-total</th>'
+    return '<table><thead><tr><th>${T("N°")}</th><th>${T("Date")}</th><th>${T("Commande")}</th><th>${T("Client")}</th>'
+      + '<th>${T("Mode")}</th><th>${T("Motif")}</th><th style="text-align:right">${T("Sous-total")}</th>'
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">Total</th></tr></thead><tbody>'
       + rows.map(function(r){
-          return '<tr data-cmd="' + esc(r.commandeId) + '" title="Ouvrir la commande">'
+          return '<tr data-cmd="' + esc(r.commandeId) + '" title="${T("Ouvrir la commande")}">'
             // ⚠ LE VERROU EST CELUI DE LA COMMANDE, pas du remboursement : la
             // fenetre de remboursement verrouille la COMMANDE (deux personnes
             // qui remboursent la meme, c est un double remboursement). Un
@@ -234,10 +240,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         }).join('') + '</tbody></table>';
   }
   function tableCredits(rows){
-    var STATUT = { actif: ['bon', 'Actif'], epuise: ['neutre', 'Épuisé'], expire: ['neutre', 'Expiré'] };
-    return '<table><thead><tr><th>N°</th><th>Client</th><th>Émis le</th><th>Expiration</th>'
-      + '<th style="text-align:right">Montant</th><th style="text-align:right">Utilisé</th>'
-      + '<th style="text-align:right">Solde</th><th>Statut</th></tr></thead><tbody>'
+    var STATUT = { actif: ['bon', 'Actif'], epuise: ['neutre', '${T("Épuisé")}'], expire: ['neutre', '${T("Expiré")}'] };
+    return '<table><thead><tr><th>${T("N°")}</th><th>${T("Client")}</th><th>${T("Émis le")}</th><th>${T("Expiration")}</th>'
+      + '<th style="text-align:right">${T("Montant")}</th><th style="text-align:right">${T("Utilisé")}</th>'
+      + '<th style="text-align:right">${T("Solde")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
       + rows.map(function(c){
           var st = STATUT[c.statut] || STATUT.actif;
           return '<tr class="' + (c.statut === 'expire' ? 'eteint' : '') + '">'
@@ -284,10 +290,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var tr = t.closest('tr[data-cmd]');
     if (tr) {
       var id = tr.getAttribute('data-cmd');
-      if (!id) { dire('Ce remboursement n’est rattaché à aucune commande.', 'att'); return; }
-      dire('Ouverture de la commande…');
+      if (!id) { dire('${T("Ce remboursement n’est rattaché à aucune commande.")}', 'att'); return; }
+      dire('${T("Ouverture de la commande…")}');
       appeler('remboursements:ouvrir', [id]).then(function(r){
-        dire(r.ok ? 'Commande ouverte.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Commande ouverte.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     }
   };
@@ -299,12 +305,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('remboursements:liste', [{ onglet: ONGLET, q: Q, page: PAGE, taille: 25 }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Remboursements indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Remboursements indisponibles")}', expliquer(r)); return; }
       D = r;
       ONGLET = D.onglet;
       var s = document.getElementById('sous');
-      if (s) s.textContent = (D.tuiles || {}).rembourse + ' remboursés · '
-        + (D.tuiles || {}).solde + ' à honorer';
+      if (s) s.textContent = (D.tuiles || {}).rembourse + '${T(" remboursés · ")}'
+        + (D.tuiles || {}).solde + '${T(" à honorer")}';
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
     });
@@ -345,12 +351,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
