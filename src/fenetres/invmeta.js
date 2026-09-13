@@ -73,7 +73,7 @@ thead th{text-align:left;padding:.28rem .45rem;font-size:.66rem;text-transform:u
 tbody td{padding:.32rem .45rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v03)}
 tr.edit td{background:rgba(201,169,126,.09)}
-${T("code")}{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
+code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .mono{font-family:Consolas,monospace}
 .chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;width:100%;padding:.45rem .5rem;
   border:1px solid var(--v16);border-radius:10px;background:var(--v03);min-height:44px}
@@ -143,7 +143,7 @@ function pageInvMeta(ouverture) {
   const ouvreCat = (ouv === 'cat-nouvelle');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <title>${T("Attributs produits — Administration Sandriza")}</title>
-<${T("style")}>${CSS}${CSS_JOUR}</${T("style")}></head><body>
+<style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.invmeta}</span><h1>${T("Attributs produits")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
@@ -183,7 +183,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     incomplet:'${T("Remplissez les champs requis.")}', existe:'${T("Cet élément existe déjà.")}',
     integree:'${T("C’est déjà une couleur intégrée.")}', hex:'${T("Format hex invalide (ex : #FF6B6B).")}',
     nom:'${T("Nom requis.")}', vide:'${T("Champ vide.")}', slug:'${T("Identifiant (slug) requis.")}',
-    ${T("code")}:'${T("Le code SKU doit faire au moins 2 lettres.")}', seuil:'${T("Seuil invalide.")}',
+    code:'${T("Le code SKU doit faire au moins 2 lettres.")}', seuil:'${T("Seuil invalide.")}',
     limite:'${T("Limite invalide (minimum 1).")}', introuvable:'${T("Élément introuvable.")}',
     type:'${T("Type inconnu.")}', bord:'${T("Déjà à l’extrémité.")}', echec:'${T("L’opération a échoué.")}'
   };
@@ -253,7 +253,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(it){
       var rm = D.peut.edit ? '<button class="mini danger" data-attrrm="' + type + '|' + esc(it.key) + '" title="' + (it.used > 0 ? it.used + ' ${T("produit(s) — bloqué")}' : '${T("Supprimer")}') + '">${T("Retirer")}</button>' : '';
-      return '<tr><td><${T("code")}>' + esc(it.key) + '</${T("code")}>' + (it.used > 0 ? ' <span class="pill used">' + it.used + '×</span>' : '') + '</td>'
+      return '<tr><td><code>' + esc(it.key) + '</code>' + (it.used > 0 ? ' <span class="pill used">' + it.used + '×</span>' : '') + '</td>'
         + '<td style="font-weight:500">' + esc(it.label) + '</td>'
         + '<td style="color:var(--tx2)">' + esc(it.labelEN || '') + '</td>'
         + '<td style="text-align:right">' + rm + '</td></tr>';
@@ -281,7 +281,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<tr><td><span class="badge" style="background:' + esc(l.color) + ';color:' + esc(l.textColor) + '">' + esc(l.label) + '</span></td>'
         + '<td style="font-weight:500">' + esc(l.label) + (l.used > 0 ? ' <span class="pill used">' + l.used + '×</span>' : '') + '</td>'
         + '<td style="color:var(--tx2)">' + esc(l.labelEN || '') + '</td>'
-        + '<td><${T("code")}>' + esc(l.color) + '</${T("code")}></td>'
+        + '<td><code>' + esc(l.color) + '</code></td>'
         + '<td style="text-align:right">' + rm + '</td></tr>';
     }).join('');
     var empty = (!items.length && ADDING !== 'labels') ? '<tr><td colspan="5" class="vide">${T("Aucune étiquette — cliquez sur + pour en ajouter.")}</td></tr>' : '';
@@ -307,8 +307,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div style="margin-top:.7rem"><button class="prim" data-act="coloradd">${T("+ Ajouter la couleur")}</button></div>';
   }
   function secCodes(){
-    var alerte = D.conflits.length ? '<div class="alerte"><span class="ic">⚠</span> <strong>' + D.conflits.length + ' ${T("code")}' + plur(D.conflits.length) + ' ${T("porté")}' + plur(D.conflits.length) + '${T(" par plusieurs couleurs</strong> — ")}'
-      + D.conflits.map(function(c){ return '<${T("code")}>' + esc(c.code) + '</${T("code")}> : ' + esc(c.noms.join(', ')); }).join(' · ')
+    var alerte = D.conflits.length ? '<div class="alerte"><span class="ic">⚠</span> <strong>' + D.conflits.length + ' code' + plur(D.conflits.length) + ' ${T("porté")}' + plur(D.conflits.length) + '${T(" par plusieurs couleurs</strong> — ")}'
+      + D.conflits.map(function(c){ return '<code>' + esc(c.code) + '</code> : ' + esc(c.noms.join(', ')); }).join(' · ')
       + '${T(". Ces variantes partagent le même code-barres.")}</div>' : '';
     var bouton = D.suggestions.length ? '<div style="margin-bottom:.7rem"><button class="prim" data-act="codesassign">${T("Attribuer des codes courts (")}' + D.suggestions.length + ')</button> '
       + '<span class="aide" style="display:inline">${T("Deux caractères distincts. Les codes déjà fixés ne bougent pas.")}</span></div>' : '';
@@ -380,7 +380,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<td><input aria-label="${T("Nom FR")}" class="tinp" id="ic-name" value="' + (cat ? esc(cat.name) : '') + '" placeholder="${T("Nom FR")}"></td>'
       + '<td><input aria-label="${T("Nom EN")}" class="tinp" id="ic-nameen" value="' + (cat ? esc(cat.nameEN) : '') + '" placeholder="${T("Nom EN")}"></td>'
       + '<td><input aria-label="slug" class="tinp mono" id="ic-key" value="' + (cat ? esc(cat.catKey) : '') + '" placeholder="slug"' + (isNew ? '' : ' readonly style="opacity:.55"') + '></td>'
-      + '<td><input aria-label="ROB" class="tinp mono" id="ic-${T("code")}" value="' + (cat ? esc(cat.code) : '') + '" maxlength="6" placeholder="ROB" style="width:76px;text-transform:uppercase;font-weight:700"></td>'
+      + '<td><input aria-label="ROB" class="tinp mono" id="ic-code" value="' + (cat ? esc(cat.code) : '') + '" maxlength="6" placeholder="ROB" style="width:76px;text-transform:uppercase;font-weight:700"></td>'
       /* ⚠ DEUX CASES QUI S EXCLUENT, dans deux colonnes voisines : sans nom, le
          lecteur d ecran annonce << case a cocher, cochee >> deux fois de suite,
          et l on ne sait pas laquelle des deux on vient de decocher. Le nom
@@ -400,7 +400,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
         + '<td style="font-weight:600">' + esc(c.name) + '</td>'
         + '<td style="color:var(--tx2)">' + esc(c.nameEN || '—') + '</td>'
-        + '<td><${T("code")}>' + esc(c.catKey) + '</${T("code")}></td>'
+        + '<td><code>' + esc(c.catKey) + '</code></td>'
         + '<td><span class="mono" style="font-weight:700;background:rgba(150,130,105,.18);padding:.1rem .45rem;border-radius:4px">' + esc(c.code) + '</span></td>'
         + '<td style="text-align:center">' + (c.aiOn ? '<span style="color:var(--tx-or)" title="Canvas auto"><span class="ic">⚡</span></span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td style="text-align:center">' + (c.simpleOn ? '<span style="color:var(--tx-or)">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
@@ -488,14 +488,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function saveCode(nm){
     var el = document.getElementById('cc-' + nm);
-    ecrire('invmeta:codeSave', { name: nm, ${T("code")}: el ? el.value : '' }, function(r){ return '${T("Code «")} ' + r.code + ' ${T("» enregistré pour «")} ' + r.nom + ' ».'; });
+    /* ⚠ « code » EST LE NOM DU CHAMP QUI PART PAR LE PONT, pas un texte. Il s etait
+       enveloppe d un T() : en anglais l objet serait parti avec un autre nom et
+       le code SKU ne se serait jamais enregistre, EN ANGLAIS SEULEMENT.
+       ⚠ Et l entree qui le permettait etait « code » -> « code » : une valeur
+       egale a sa cle ne change RIEN a l ecran, donc rien ne la signale. Elle a
+       ete retiree du dictionnaire — c est la seule facon qu elle ne revienne
+       pas se poser a la prochaine execution du poseur. */
+    ecrire('invmeta:codeSave', { name: nm, code: el ? el.value : '' }, function(r){ return '${T("Code «")} ' + r.code + ' ${T("» enregistré pour «")} ' + r.nom + ' ».'; });
   }
   function saveEditColor(){
     ecrire('invmeta:colorEdit', { original: EDITCOLOR.nom, name: val('ec-name'), hex: val('ec-hex') }, function(){ EDITCOLOR = null; return '${T("Couleur mise à jour.")}'; });
   }
   function saveCat(id){
     ecrire('invmeta:catSave', {
-      id: id, name: val('ic-name'), nameEN: val('ic-nameen'), catKey: val('ic-key'), ${T("code")}: val('ic-${T("code")}'),
+      /* ⚠⚠ DEUX FOIS DU CODE SUR LA MEME LIGNE : le NOM du champ envoye par le
+         pont, et l IDENTIFIANT de l element « ic-code ». Enveloppes tous les deux,
+         la categorie serait repartie sans son code SKU — en anglais seulement. */
+      id: id, name: val('ic-name'), nameEN: val('ic-nameen'), catKey: val('ic-key'), code: val('ic-code'),
       color: val('ic-color'),
       aiOn: (function(){ var e = document.getElementById('ic-ai'); return e ? e.checked : true; })(),
       simpleOn: (function(){ var e = document.getElementById('ic-simple'); return e ? e.checked : false; })(),
@@ -527,7 +537,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (g('data-labelrm')) { ecrire('invmeta:labelRemove', { key: g('data-labelrm') }, function(){ return '${T("Étiquette supprimée.")}'; }); return; }
     if (g('data-act') === 'coloradd') { addColor(); return; }
     if (g('data-act') === 'colorsearch') { searchColor(); return; }
-    if (g('data-act') === 'codesassign') { ecrire('invmeta:codesAssign', {}, function(r){ return r.n + ' ${T("code")}' + plur(r.n) + ' ${T("enregistré")}' + plur(r.n) + '.'; }); return; }
+    if (g('data-act') === 'codesassign') { ecrire('invmeta:codesAssign', {}, function(r){ return r.n + ' code' + plur(r.n) + ' ${T("enregistré")}' + plur(r.n) + '.'; }); return; }
     if (g('data-codesave')) { saveCode(g('data-codesave')); return; }
     if (g('data-coloredit')) { var cp = g('data-coloredit').split('|'); EDITCOLOR = { nom: cp[0], hex: cp[1] }; dessiner(); return; }
     if (g('data-colorrm')) { ecrire('invmeta:colorRemove', { name: g('data-colorrm') }, function(){ return '${T("Couleur supprimée.")}'; }); return; }

@@ -40,6 +40,32 @@
  *      66 attributs deviennent inconnus et la mise en page tombe EN ANGLAIS
  *      SEULEMENT. Meme famille que « Date », et decouverte de la meme facon :
  *      en REGARDANT, pas en faisant confiance au vert.
+ *   6. NOM DE PROPRIETE        `{ ${T("jours")}: 0 }` — la troisieme fois que
+ *      la MEME faute revient sous un autre visage. Mesure du 2026-09-13 : les
+ *      mots « jours » et « heures » sont affiches dans `campagnes` (`<span>jours
+ *      </span>`), ils meritent donc une entree — et cette entree s est aussitot
+ *      posee sur `ETAPES.push({ sujet:'', html:'', jours: …, heures: 0 })`. En
+ *      anglais l objet se serait appele `{ days: …, hours: 0 }` et les etapes de
+ *      la chaine auraient perdu leur delai, EN ANGLAIS SEULEMENT. Ce banc-ci
+ *      etait VERT dessus, et les 28 aussi.
+ *      ⚠ La signature ne peut pas etre le seul `:` — « Total : 12 » en porte un.
+ *      C est le `:` PRECEDE de `{` ou de `,` : la seule chose qui s ecrit ainsi
+ *      est un nom de propriete. Un texte affiche, lui, vit dans une chaine, et
+ *      son voisin de gauche est un guillemet, jamais une accolade.
+ *   7. NOM DE BALISE           `<${T("code")}>…</${T("code")}>` — la 6 a mene a
+ *      celle-ci : en retirant les trois `code:` d invmeta, on a vu que la MEME
+ *      cle etait aussi posee sur la balise `<code>`, six fois. Un texte affiche
+ *      a toujours `>` a sa gauche, jamais `<`.
+ *   8. SELECTEUR CSS           `${T("code")}{font:…}` — et la septieme a mene a
+ *      la huitieme : la meme cle ouvrait une REGLE DE STYLE dans le bloc CSS de
+ *      la fenetre. Traduite autrement, la regle designe une balise qui n existe
+ *      pas et la mise en forme disparait, EN ANGLAIS SEULEMENT. Un texte
+ *      affiche n est jamais suivi d une accolade ouvrante.
+ *      ⚠ LA MORALE DES TROIS : `'code': 'code'` etait une entree qui rendait le
+ *      MEME mot. Elle n a donc RIEN change a l ecran — ni en francais, ni en
+ *      anglais — et c est exactement pour ca qu elle a pu se poser NEUF fois sur
+ *      du code sans qu un seul des 28 bancs bronche. Une entree dont la valeur
+ *      egale la cle ne se voit que par ce qu elle casse ailleurs.
  * Les 3 et 4 sont deja refusees par le poseur ; on les mesure quand meme, parce
  * qu un garde qui vit dans l outil ne couvre que ce que l outil a ecrit — une
  * enveloppe posee A LA MAIN ne passe par aucun outil.
@@ -71,6 +97,9 @@ const ENVELOPPE = /\$\{T\((?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\)\}/g;
 
 const IDENT = /[A-Za-z0-9_$]/;
 const MOT_CLE = /(?:^|[^A-Za-z0-9_$])(?:new|typeof|instanceof|void|delete)\s+$/;
+/* Ce qui ouvre un nom de propriete : une accolade, ou la virgule qui separe
+   deux entrees. ⚠ Le `:` seul ne suffit pas — « Total : 12 » en porte un. */
+const OUVRE_OBJET = /[{,]\s*$/;
 
 const fautes = [];
 let fenetres = 0, enveloppes = 0;
@@ -107,6 +136,11 @@ for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
     else if (MOT_CLE.test(s.slice(Math.max(0, i - 12), i))) raison = 'precedee d un mot-cle qui attend une expression';
     else if (apres === '.') raison = 'suivie d un point — c est un acces de membre';
     else if (apres === '=') raison = 'suivie d un = — c est un nom d attribut, pas un texte';
+    else if (apres === ':' && OUVRE_OBJET.test(s.slice(Math.max(0, i - 40), i)))
+      raison = 'suivie d un : apres { ou , — c est un NOM DE PROPRIETE, pas un texte';
+    else if (avant === '<' || s.slice(Math.max(0, i - 2), i) === '</')
+      raison = 'precedee d un < — c est un NOM DE BALISE, pas un texte';
+    else if (apres === '{') raison = 'suivie d une accolade — c est un SELECTEUR CSS, pas un texte';
     else if (IDENT.test(avant) || IDENT.test(apres)) raison = 'collee a un identifiant — c est un morceau de nom';
     if (!raison) continue;
     const ligne = s.slice(0, i).split('\n').length;

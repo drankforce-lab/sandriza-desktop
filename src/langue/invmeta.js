@@ -191,6 +191,20 @@ module.exports = {
   'utilisée': 'in use',
   'disponible': 'available',
   'enregistré': 'saved',
-  'produit': 'product',
-  'code': 'code'
+  'produit': 'product'
+  /* ⚠⚠⚠ « code » -> « code » A ETE RETIREE LE 2026-09-13, ET C EST LA CLE QU IL
+     NE FAUT PAS REMETTRE. Elle rendait le MEME mot : elle ne changeait donc rien
+     a l ecran, ni en francais ni en anglais, et aucun des 28 bancs ne pouvait la
+     voir. Pendant ce temps le poseur l avait posee NEUF fois, et pas une seule
+     sur du texte : un SELECTEUR CSS (`code{font:…}`), six NOMS DE BALISE
+     (`<code>…</code>`), l IDENTIFIANT d un champ (`id="ic-code"`), et trois NOMS
+     DE PROPRIETE dont un qui part par le pont (`{ name, code }` de
+     `invmeta:codeSave`). Le jour ou quelqu un aurait ecrit une autre valeur : la
+     mise en forme tombe, les balises deviennent inconnues, le champ ne se relit
+     plus et le code SKU ne s enregistre plus — EN ANGLAIS SEULEMENT.
+     ⚠ Le mot « code » s ecrit pareil dans les deux langues : il n a jamais eu
+     besoin d entree. Une entree dont la valeur egale la cle ne se justifie que
+     si le banc du residuel l exige — et il ne l exige que pour un mot qu il
+     accuserait, ce qui n est pas le cas ici (« code » parait dans les valeurs
+     anglaises du dictionnaire, donc le lexique l ecarte tout seul). */
 };

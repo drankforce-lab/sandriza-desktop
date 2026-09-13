@@ -153,5 +153,48 @@ module.exports = {
   'Étiquette': 'Label',
   'Expédition': 'Shipping',
   'Récapitulatif': 'Summary',
-  'Numéro': 'Number'
+  'Numéro': 'Number',
+
+  /* ── LA FORME DE LA SOURCE, A COTE DE LA FORME RENDUE ──────────────────────
+     ⚠⚠ LES DEUX SE VALENT ET NE SERVENT PAS AU MEME. Les cles a pictogramme
+     ci-dessus (« 🖨 Bon de commande », « 🧾 Bordereau », « ⚡ Prioritaire »,
+     « 🚀 Preparation de la commande », « 🖨 Oui, imprimer le bon ») sont la forme
+     RENDUE : c est ce que le compteur interroge, et il annoncait donc zero. Mais
+     dans la source le signe vit dans son propre `<span class="ic">`, et une cle
+     ne traverse jamais un attribut : le poseur ne les a JAMAIS trouvees, et ces
+     cinq textes sont restes en francais sur la page anglaise. On ecrit donc
+     AUSSI la forme que la source contient — celle qui commence apres le </span>. */
+  'Prioritaire': 'Priority',
+  'Bon de commande': 'Picking slip',
+  'Bordereau': 'Packing slip',
+  'Oui, imprimer le bon': 'Yes, print the slip',
+  'Préparation de la commande': 'Order preparation',
+
+  /* ── LES ATTRIBUTS ECRITS DANS LE SCRIPT ────────────────────────────────────
+     ⚠ Cette fenetre fabrique son HTML DANS le script : ses `aria-label` et ses
+     `placeholder` n etaient lus par aucun banc avant le 2026-09-12. Le champ de
+     scan est le premier que la preparatrice voit, et il etait en francais. */
+  'Scannez le code-barres de l’article': 'Scan the item’s barcode',
+  'Scannez le code-barres de l’article…': 'Scan the item’s barcode…',
+  'Filtrer': 'Filter',
+  'Filtrer…': 'Filter…',
+  'rempli par l’étiquette': 'filled in by the label',
+
+  /* ── LE RECAPITULATIF, ET LES MOTS QU AUCUN BANC NE POUVAIT VOIR ────────────
+     ⚠⚠ CE BLOC-CI N ETAIT SIGNALE PAR RIEN. Le banc du residuel ecarte les
+     chaines d UN SEUL MOT (`'Commande'`, `'Client'`, `'Transporteur'`, `'aucun'`)
+     parce qu elles ressemblent a des cles techniques, et son lexique ignore les
+     mots de MOINS DE QUATRE LETTRES (`sur`). Le recapitulatif de l etape 3 se
+     lisait donc, EN ANGLAIS : « Commande / Client / Verification : 3 sur 5 —
+     INCOMPLET / Transporteur / Tracking number : aucun ».
+     ⚠ « sur » se traduit seul parce que l ordre des mots ne change pas :
+     « 3 sur 5 unites confirmees » → « 3 of 5 units confirmed ». */
+  'Commande': 'Order',
+  'Client': 'Customer',
+  'Transporteur': 'Carrier',
+  'colis complet': 'parcel complete',
+  'incomplet': 'incomplete',
+  '— INCOMPLET': '— INCOMPLETE',
+  'aucun': 'none',
+  'sur': 'of'
 };

@@ -288,7 +288,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function blocsHtml(){
     var pal = '<div class="bqbar">' + BTYPES.map(function(t){
-      return '<button class="mini" data-bajout="' + esc(t.cle) + '" title="Ajouter : '
+      return '<button class="mini" data-bajout="' + esc(t.cle) + '" title="${T("Ajouter : ")}'
         + esc(t.label) + '"><span class="ic">' + esc(t.icone) + '</span> ' + esc(t.label) + '</button>';
     }).join('') + '</div>';
     if (!BLOCS.length) {
@@ -305,7 +305,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + ' title="${T("Monter")}">\u2191</button>'
         + '<button class="mini" data-bbas="' + i + '"' + (i === BLOCS.length - 1 ? ' disabled' : '')
         + ' title="${T("Descendre")}">\u2193</button>'
-        + '<button class="mini" data-bsupp="' + i + '" title="${T("Retirer")} ce bloc">\u2715</button></div>'
+        + '<button class="mini" data-bsupp="' + i + '" title="${T("Retirer ce bloc")}">\u2715</button></div>'
         + (champs ? '<div class="bg">' + champs + '</div>' : '')
         + '</div>';
     }).join('');
@@ -464,7 +464,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + (f.id ? '${T("Modifier la campagne")}' : '${T("Nouvelle campagne")}') + '</h3>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">${T("Nom interne")}</span>'
-      + '<input id="f-nom" aria-label="${T("Nom interne")}" value="' + esc(c.nom || '') + '" placeholder="Infolettre de septembre"></div>'
+      + '<input id="f-nom" aria-label="${T("Nom interne")}" value="' + esc(c.nom || '') + '" placeholder="${T("Infolettre de septembre")}"></div>'
       // ⚠ CHAQUE SEGMENT MONTRE SA PORTEE : on choisit en voyant combien de
       // personnes il atteint MAINTENANT, pas en devinant. Un segment a 0 se
       // remarque avant l envoi, pas apres.
@@ -479,7 +479,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         }).join('') + '</select>'
       + '<span class="aide" id="f-seg-quoi"></span></div></div>'
       + '<div class="champ"><span class="lbl">${T("Sujet du courriel")}</span>'
-      + '<input id="f-suj" aria-label="${T("Sujet du courriel")}" value="' + esc(c.sujet || '') + '" placeholder="Nos nouveautés sont arrivées !"></div>'
+      + '<input id="f-suj" aria-label="${T("Sujet du courriel")}" value="' + esc(c.sujet || '') + '" placeholder="${T("Nos nouveautés sont arrivées !")}"></div>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">${T("Canal d’envoi")}</span><select id="f-canal" aria-label="${T("Canal d’envoi")}">'
       + (d.canaux || []).map(function(x){
@@ -491,13 +491,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> ${T("Téléphonie non configurée : l’envoi SMS échouera.")}</span>')
       + '</div></div></div>'
       + '<div class="champ" id="f-sms-bloc"><span class="lbl">${T("Message texte (SMS)")}</span>'
-      + '<textarea id="f-sms" aria-label="${T("Message texte (SMS)")}" class="sms" maxlength="480" placeholder="SANDRIZA : nos nouveautés sont arrivées !">'
+      + '<textarea id="f-sms" aria-label="${T("Message texte (SMS)")}" class="sms" maxlength="480" placeholder="${T("SANDRIZA : nos nouveautés sont arrivées !")}">'
       + esc(c.sms || '') + '</textarea>'
       + '<div class="aide"><span id="f-sms-n">0</span>/480 · Variable : <code>{{firstName}}</code>. '
       + '${T("Twilio gère STOP et AIDE automatiquement.")}</div></div>'
       + '<div class="champ"><span class="lbl">${T("Corps du courriel")}</span>'
       + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('f-tpl', d.modeles)
-      + '<button class="mini" id="f-charger">Charger</button>'
+      + '<button class="mini" id="f-charger">${T("Charger")}</button>'
       + '<button class="mini" id="f-apercu">${T("Aperçu")}</button></div>'
       /* ⚠ DEUX MODES, ET LE VISUEL EST LE DEFAUT. Le mode HTML reste : c est le
          seul moyen de coller un gabarit venu d ailleurs, et de relire ce qui
@@ -529,7 +529,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + (f.id ? '${T("Modifier la chaîne")}' : '${T("Nouvelle chaîne")}') + '</h3>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">Nom</span>'
-      + '<input id="f-nom" aria-label="Nom de la chaîne" value="' + esc(ch.nom || '') + '" placeholder="Bienvenue en trois temps"></div>'
+      + '<input id="f-nom" aria-label="${T("Nom de la chaîne")}" value="' + esc(ch.nom || '') + '" placeholder="${T("Bienvenue en trois temps")}"></div>'
       + '<div class="champ"><span class="lbl">${T("Déclencheur")}</span><select id="f-decl" aria-label="${T("Déclencheur")}">'
       + (d.declencheurs || []).map(function(x){
           return '<option value="' + esc(x.cle) + '"'
@@ -538,9 +538,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">${T("Description")}</span>'
       + '<input id="f-desc" aria-label="${T("Description")}" value="' + esc(ch.description || '') + '"></div>'
-      + '<div class="champ"><span class="lbl">Statut</span><select id="f-statut" aria-label="Statut">'
+      + '<div class="champ"><span class="lbl">${T("Statut")}</span><select id="f-statut" aria-label="${T("Statut")}">'
       + '<option value="active"' + (ch.statut !== 'paused' ? ' selected' : '') + '>${T("Active")}</option>'
-      + '<option value="paused"' + (ch.statut === 'paused' ? ' selected' : '') + '>Suspendue</option>'
+      + '<option value="paused"' + (ch.statut === 'paused' ? ' selected' : '') + '>${T("Suspendue")}</option>'
       + '</select></div></div>'
       + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
       + '<strong style="font-size:.8rem">${T("Étapes")}</strong>'
@@ -574,13 +574,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          et les mots << jours >> / << heures >> ne sont que du texte entre eux :
          en tabulant, le lecteur d ecran annoncait deux fois << nombre >>. */
       + '<div class="duo"><input type="number" min="0" id="e-j-' + i + '" aria-label="${T("Délai — jours")}" value="' + (s.jours || 0)
-        + '"><span>jours</span><input type="number" min="0" max="23" id="e-h-' + i + '" aria-label="${T("Délai — heures")}" value="'
-        + (s.heures || 0) + '"><span>heures</span></div></div>'
-        + '<div class="champ"><span class="lbl">Sujet</span>'
-        + '<input aria-label="Sujet" id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'
+        + '"><span>${T("jours")}</span><input type="number" min="0" max="23" id="e-h-' + i + '" aria-label="${T("Délai — heures")}" value="'
+        + (s.heures || 0) + '"><span>${T("heures")}</span></div></div>'
+        + '<div class="champ"><span class="lbl">${T("Sujet")}</span>'
+        + '<input aria-label="${T("Sujet")}" id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'
         + '<div class="champ"><span class="lbl">${T("Corps du courriel (HTML)")}</span>'
         + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('e-t-' + i, mods)
-        + '<button class="mini" data-etcharger="' + i + '">Charger</button>'
+        + '<button class="mini" data-etcharger="' + i + '">${T("Charger")}</button>'
         + '<button class="mini" data-etapercu="' + i + '">${T("Aperçu")}</button></div>'
         + '<textarea id="e-b-' + i + '" aria-label="${T("Corps du courriel de l’étape ")}' + (i + 1) + '" spellcheck="false">' + esc(s.html || '') + '</textarea></div>'
         + '</div>';
@@ -991,7 +991,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
       + (f.id ? '${T("Modifier le segment")}' : '${T("Nouveau segment")}') + '</h3>'
       + '<div class="champ"><span class="lbl">${T("Nom du segment")}</span>'
-      + '<input id="f-nom" aria-label="${T("Nom du segment")}" value="' + esc(f.nom || '') + '" placeholder="Clients robes, 300 $ et plus"></div>'
+      + '<input id="f-nom" aria-label="${T("Nom du segment")}" value="' + esc(f.nom || '') + '" placeholder="${T("Clients robes, 300 $ et plus")}"></div>'
       + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
       + '<strong style="font-size:.8rem">${T("Critères")}</strong>'
       + '<span class="dt">${T("toutes ces conditions doivent être remplies")}</span>'
@@ -1148,7 +1148,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // juste au-dessus de ce sur quoi elles agissent.
     h += '<div class="barreoutils">'
       + (D.peutModifier ? '<button class="mini prim" id="cp-nouvelle">${T("+ Nouvelle campagne")}</button>' : '')
-      + '<div class="droite"><input type="search" id="cp-q" aria-label="Nom ou sujet" placeholder="Nom ou sujet…" value="'
+      + '<div class="droite"><input type="search" id="cp-q" aria-label="${T("Nom ou sujet")}" placeholder="${T("Nom ou sujet…")}" value="'
       + esc(Q) + '"></div></div>';
 
     h += '<div class="carte">';
@@ -1252,7 +1252,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<div class="entete"><div><h3>' + esc(ch.nom) + '</h3>'
           + (ch.description ? '<div class="desc">' + esc(ch.description) + '</div>' : '') + '</div>'
           + '<span class="pill ' + (ch.active ? 'bon' : 'neutre') + '">'
-          + (ch.active ? '${T("Active")}' : 'Suspendue') + '</span>'
+          + (ch.active ? '${T("Active")}' : '${T("Suspendue")}') + '</span>'
           + '<span class="pill acc">' + esc(ch.declencheurLibelle) + '</span>'
           + '<div class="gestes">' + gestes + '</div></div>'
           + '<div class="compte">' + pluriel((ch.etapes || []).length, '${T("étape")}') + ' · '

@@ -130,7 +130,7 @@ function pageCommande(id) {
     var h = [];
     var enTete = '<div class="entete"><span class="num">' + esc(CMD.numero) + '</span>'
       + (CMD.prioritaire ? '<span style="font-size:.76rem;background:#7c2d12;color:#fdba74;'
-          + 'border-radius:99px;padding:.12rem .55rem;font-weight:700"><span class="ic" aria-hidden="true">⚡</span> Prioritaire</span>' : '')
+          + 'border-radius:99px;padding:.12rem .55rem;font-weight:700"><span class="ic" aria-hidden="true">⚡</span> ${T("Prioritaire")}</span>' : '')
       + '<span class="cli">' + esc(CMD.client) + '</span>'
       + '<span class="adr">' + esc(CMD.adresse) + '</span>'
       + (CMD.notes ? '<span class="adr" style="color:var(--tx-or2)"><span class="ic">📝</span> ' + esc(CMD.notes) + '</span>' : '')
@@ -147,21 +147,21 @@ function pageCommande(id) {
     h.push('<div class="etape"><div class="carte plein" id="c-zone2">' + enTete
       + '<h2>${T("Vérification du colis")}</h2>'
       + '<div class="etat"><span class="gros" id="c-prog">0</span>'
-      + '<span style="color:var(--tx2)">sur ' + attendus() + ' ${T("unités confirmées")}</span></div>'
+      + '<span style="color:var(--tx2)">${T("sur")} ' + attendus() + ' ${T("unités confirmées")}</span></div>'
       + '<div class="barre"><span id="c-barre"></span></div>'
       /* ⚠ LE CHAMP DE SCAN, ET IL EST EN PREMIER. On verifie un colis un lecteur
          a la main, sans regarder l ecran : le champ doit avoir le focus, avaler
          le retour du lecteur, se vider et le reprendre aussitot. Un champ qu il
          faut recliquer entre deux articles rend le lecteur inutile. */
       + '<div class="rech" style="margin-bottom:.35rem">'
-      + '<input aria-label="Scannez le code-barres de l’article" id="c-scan" placeholder="Scannez le code-barres de l’article…" autocomplete="off">'
+      + '<input aria-label="${T("Scannez le code-barres de l’article")}" id="c-scan" placeholder="${T("Scannez le code-barres de l’article…")}" autocomplete="off">'
       + '</div>'
       + '<div id="c-scan-msg" style="min-height:1.2em;font-size:.8rem;color:var(--tx2);margin-bottom:.4rem"></div>'
-      + '<div class="rech"><input aria-label="Filtrer" placeholder="Filtrer…"><span class="cpt" id="c-cpt2"></span></div>'
+      + '<div class="rech"><input aria-label="${T("Filtrer")}" placeholder="${T("Filtrer…")}"><span class="cpt" id="c-cpt2"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div>'
       + '<div style="margin-top:.6rem;display:flex;gap:.45rem;flex-wrap:wrap">'
-      + '<button type="button" id="c-bon"><span class="ic">🖨</span> Bon de commande</button>'
-      + '<button type="button" id="c-colis"><span class="ic">🧾</span> Bordereau</button>'
+      + '<button type="button" id="c-bon"><span class="ic">🖨</span> ${T("Bon de commande")}</button>'
+      + '<button type="button" id="c-colis"><span class="ic">🧾</span> ${T("Bordereau")}</button>'
       + '</div></div></div>');
 
     /* 2 — Étiquette. ⚠ ELLE SE FABRIQUE ICI, DANS L ASSISTANT (2026-08-07).
@@ -179,7 +179,7 @@ function pageCommande(id) {
          services) : on le marque dans la liste. Avant, un transporteur sans
          identifiants s offrait comme les autres, on preparait le colis, et l on
          ne l apprenait qu a l achat de l etiquette. */
-      + '<div class="ch"><label for="c-transp">Transporteur</label><select id="c-transp">'
+      + '<div class="ch"><label for="c-transp">${T("Transporteur")}</label><select id="c-transp">'
       + CTX.transporteurs.map(function(t){
           return '<option value="' + esc(t.cle) + '">' + esc(t.nom)
             + (t.pret === false ? ' ${T("— non configuré")}' : '') + '</option>'; }).join('')
@@ -194,7 +194,7 @@ function pageCommande(id) {
       + '<div class="aide" id="c-poids-note" style="margin-top:.4rem"></div>'
       + '</div>'
       + '<div class="carte plein"><h2>${T("Numéro de suivi")}</h2><div class="duo">'
-      + '<div class="ch"><label for="c-suivi">${T("Numéro")}</label><input id="c-suivi" placeholder="rempli par l’étiquette"></div>'
+      + '<div class="ch"><label for="c-suivi">${T("Numéro")}</label><input id="c-suivi" placeholder="${T("rempli par l’étiquette")}"></div>'
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.85rem;margin-top:.7rem;cursor:pointer">'
       + '<input type="checkbox" id="c-sans"> ${T("Expédier sans numéro de suivi")}</label>'
@@ -236,7 +236,7 @@ function pageCommande(id) {
          pas etre disponible tant que la verification n est pas complete >>. */
       { t: '${T("Vérification")}', obl: [],
         fait: toutVerifie,
-        refus: function(){ return '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' sur ' + attendus() + ' ${T("unités confirmées.")}'; } },
+        refus: function(){ return '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ${T("unités confirmées.")}'; } },
       /* ⚠ << suivi rempli OU envoi sans numero assume >>. L ancienne forme
          (obl: c-suivi) rendait l etape Expedition INATTEIGNABLE pour une remise
          en main propre : la case cochee ne remplit aucun champ, et le fil comme
@@ -299,7 +299,7 @@ function pageCommande(id) {
       },
       surMaj: function(){
         var c = document.getElementById('c-cpt2');
-        if (c) c.textContent = toutVerifie() ? 'colis complet' : 'incomplet';
+        if (c) c.textContent = toutVerifie() ? '${T("colis complet")}' : '${T("incomplet")}';
       }
     });
     PAGI2.tout = CMD.articles;
@@ -328,12 +328,12 @@ function pageCommande(id) {
     }
     var t = (CTX.transporteurs.find(function(x){ return x.cle === val('c-transp'); }) || {}).nom || val('c-transp');
     var complet = toutVerifie();
-    z.innerHTML = lg('Commande', esc(CMD.numero))
-      + lg('Client', esc(CMD.client))
-      + lg('${T("Vérification")}', complet ? 'colis complet' : (comptes() + ' sur ' + attendus() + ' — INCOMPLET'), !complet)
-      + lg('Transporteur', esc(t))
+    z.innerHTML = lg('${T("Commande")}', esc(CMD.numero))
+      + lg('${T("Client")}', esc(CMD.client))
+      + lg('${T("Vérification")}', complet ? '${T("colis complet")}' : (comptes() + ' ${T("sur")} ' + attendus() + ' ${T("— INCOMPLET")}'), !complet)
+      + lg('${T("Transporteur")}', esc(t))
       + lg('${T("Numéro de suivi")}', val('c-suivi') ? esc(val('c-suivi'))
-            : (coché('c-sans') ? '${T("aucun — assumé")}' : 'aucun'), !val('c-suivi') && !coché('c-sans'));
+            : (coché('c-sans') ? '${T("aucun — assumé")}' : '${T("aucun")}'), !val('c-suivi') && !coché('c-sans'));
   }
 
   function brancher(){
@@ -387,7 +387,10 @@ function pageCommande(id) {
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
     v.innerHTML = '<div style="background:var(--f-carte);border:1px solid var(--v12);'
       + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%">'
-      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif"><span class="ic">🚀</span> ${T("Préparation")} de la commande '
+      /* ⚠ LA PHRASE ENTIERE, PAS « Préparation » PUIS « de la commande ». La
+         moitie longue etait restee en francais derriere un T() pose sur le seul
+         premier mot — « Preparation de la commande » a l ecran anglais. */
+      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif"><span class="ic">🚀</span> ${T("Préparation de la commande")} '
       + esc(CMD.numero) + '</h3>'
       + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
           ? '${T("Cette commande est déjà en préparation.")}'
@@ -397,7 +400,7 @@ function pageCommande(id) {
           : '${T("Pour débuter, désirez-vous imprimer un ")}<strong>${T("bon de commande")}</strong> ?') + '</p>'
       + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
       + '<button type="button" id="bc-non">${T("Non, continuer sans imprimer")}</button>'
-      + '<button type="button" class="prim" id="bc-oui"><span class="ic">🖨</span> Oui, imprimer le bon</button>'
+      + '<button type="button" class="prim" id="bc-oui"><span class="ic">🖨</span> ${T("Oui, imprimer le bon")}</button>'
       + '</div></div>';
     document.body.appendChild(v);
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
@@ -734,7 +737,7 @@ function pageCommande(id) {
     var pourquoi = '';
     if (LECTURE) pourquoi = '${T("Commande en traitement ailleurs — lecture seule.")}';
     else if (!CTX || !CTX.peutExpedier) pourquoi = '${T("Votre rôle ne permet pas d’expédier.")}';
-    else if (!verifOk) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' sur ' + attendus() + ' ${T("unités confirmées.")}';
+    else if (!verifOk) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ${T("unités confirmées.")}';
     else if (!etiqOk) pourquoi = '${T("Générez l’étiquette (étape 2), ou cochez « Expédier sans numéro de suivi ».")}';
     bEnr.title = pourquoi || '${T("Marquer la commande expédiée et prévenir le client")}';
     return pourquoi;

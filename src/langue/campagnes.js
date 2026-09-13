@@ -323,5 +323,40 @@ module.exports = {
   'réussi': 'succeeded',
   'abandonnée': 'dropped',
   'envoi': 'send',
-  'inscription': 'enrolment'
+  'inscription': 'enrolment',
+
+  /* ── LES MOTS NUS DE LA PAGE ANGLAISE (banc-langue-residuel) ───────────────
+     ⚠ « Retirer » vient du socle, mais la source ecrit « ${T("Retirer")} ce
+     bloc » : la moitie longue restait en francais. La phrase entiere se traduit
+     ici, et le dictionnaire de la fenetre passe avant le socle. */
+  'Retirer ce bloc': 'Remove this block',
+  'Ajouter : ': 'Add: ',
+  'Statut': 'Status',
+  'Sujet': 'Subject',
+  'Nom de la chaîne': 'Chain name',
+  'Nom ou sujet': 'Name or subject',
+  'Nom ou sujet…': 'Name or subject…',
+  'Suspendue': 'Paused',
+  'Charger': 'Load',
+  'jours': 'days',
+  'heures': 'hours',
+
+  /* ══ LES EXEMPLES DE CHAMP — ET LA QUESTION QUI LES TRANCHE ════════════════
+   * ⚠⚠ « QUI LIT CE QUE L ON TAPE ICI ? », et la reponse n est pas la meme d un
+   * champ a l autre du MEME ecran. Un exemple sert a montrer la forme du texte
+   * attendu : s il est dans une autre langue que celle du texte attendu, il
+   * enseigne la mauvaise chose.
+   *   · « Nom interne », « Nom du segment », « Nom de la chaine » ne sortent
+   *     jamais de l administration — leur exemple suit la langue du poste ;
+   *   · le SUJET DU COURRIEL et le MESSAGE TEXTE partent chez la cliente. Leur
+   *     exemple reste EN FRANCAIS, sinon on apprend a l administratrice
+   *     anglophone a ecrire en anglais a une clientele qui lit le francais.
+   * ⚠ Une entree qui rend le MEME texte est une DECISION, pas un oubli — et le
+   * banc l honore seulement si elle est ECRITE. Sans ces deux lignes, les deux
+   * exemples ci-dessous seraient comptes comme des fautes. */
+  'Infolettre de septembre': 'September newsletter',
+  'Bienvenue en trois temps': 'Welcome in three steps',
+  'Clients robes, 300 $ et plus': 'Dress customers, $300 and up',
+  'Nos nouveautés sont arrivées !': 'Nos nouveautés sont arrivées !',
+  'SANDRIZA : nos nouveautés sont arrivées !': 'SANDRIZA : nos nouveautés sont arrivées !'
 };
