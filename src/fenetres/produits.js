@@ -145,7 +145,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function pilStock(r){
-    if (r.stockTotal === 0) return '<span class="pill err" title="Aucune unité en stock">Rupture</span>';
+    if (r.stockTotal === 0) return '<span class="pill err" title="${T("Aucune unité en stock")}">Rupture</span>';
     if (r.variantesBas > 0) return '<span class="pill att" title="' + esc(r.bassesDetail) + '">'
       + r.variantesBas + ' ${T("cat. à commander")}</span>';
     return '<span class="pill bon">${T("Seuil non atteint")}</span>';
@@ -154,7 +154,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var h = '<div class="barreoutils">'
-      + '<input aria-label="Rechercher un produit" type="search" id="p-q" placeholder="Rechercher un produit…" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Rechercher un produit")}" type="search" id="p-q" placeholder="${T("Rechercher un produit…")}" value="' + esc(Q) + '">'
       + '<select id="p-cat"><option value="">${T("Toutes les catégories")}</option>'
       + (D.cats || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(c.nom) + '</option>';
@@ -165,16 +165,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           return '<option value="' + esc(t) + '"' + (TAG === t ? ' selected' : '') + '>' + esc(t) + '</option>';
         }).join('')
       + (D.aFinal ? '<option value="__final__"' + (TAG === '__final__' ? ' selected' : '') + '><span class="ic">🔴</span> ${T("Vente finale")}</option>' : '')
-      + (D.aLiq ? '<option value="__liq__"' + (TAG === '__liq__' ? ' selected' : '') + '><span class="ic">🟡</span> Liquidation</option>' : '')
+      + (D.aLiq ? '<option value="__liq__"' + (TAG === '__liq__' ? ' selected' : '') + '><span class="ic">🟡</span> ${T("Liquidation")}</option>' : '')
       + '</select>'
       + '<select id="p-stock">'
       + '<option value=""' + (STOCK === '' ? ' selected' : '') + '>${T("Tout l’inventaire")}</option>'
-      + '<option value="low"' + (STOCK === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> À commander</option>'
+      + '<option value="low"' + (STOCK === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> ${T("À commander")}</option>'
       + '<option value="ok"' + (STOCK === 'ok' ? ' selected' : '') + '>${T("✓ Seuil non atteint")}</option>'
       + '</select>'
       + '<button class="mini' + (TRI === 'cart' ? ' actif' : '') + '" id="p-tri" '
-      + 'title="Mettre en premier les produits présents dans des paniers actifs">'
-      + (TRI === 'cart' ? '<span class="ic">🛒</span> Tri panier ✓' : '<span class="ic">🛒</span> Trier par panier') + '</button>'
+      + 'title="${T("Mettre en premier les produits présents dans des paniers actifs")}">'
+      + (TRI === 'cart' ? '<span class="ic">🛒</span> ${T("Tri panier ✓")}' : '<span class="ic">🛒</span> ${T("Trier par panier")}') + '</button>'
       + '<span class="droite">' + (D.total || 0) + ' produit' + (D.total > 1 ? 's' : '')
       + ' · ' + (D.stats && D.stats.ruptures || 0) + ' en rupture'
       + '<button class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></span>'
@@ -190,12 +190,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + rows.map(function(r){
             var badges = '';
             if (r.finalSale && !r.liquidation) badges += ' <span class="pill err">${T("Vente finale")}</span>';
-            if (r.liquidation) badges += ' <span class="pill att">Liquidation</span>';
+            if (r.liquidation) badges += ' <span class="pill att">${T("Liquidation")}</span>';
             var prix = r.solde
               ? '<span class="prixbarre">' + esc(fmt(r.prix)) + '</span>' + esc(fmt(r.solde))
                 + ' <span class="pill err">-' + Math.round((1 - r.solde / (r.prix || 1)) * 100) + '%</span>'
               : esc(fmt(r.prix));
-            return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la fiche">'
+            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche")}">'
               + '<td><span class="num">' + esc(r.nom) + '</span>'
               + szVerrouCase('products', r.id) + badges + '</td>'
               + '<td>' + esc(r.categorie || '—') + '</td>'

@@ -256,5 +256,15 @@ module.exports = {
   'livrés': 'delivered',
   'livré': 'delivered',
   'affiché': 'shown',
-  'ajouté': 'added'
+  'ajouté': 'added',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Filtrer par année': 'Filter by year',
+  'Voir le détail': 'See the detail',
+  'Domaine, nom ou catégorie': 'Domain, name or category',
+  'Domaine, nom ou catégorie…': 'Domain, name or category…',
+  'Ex : Publicité Meta juillet': 'E.g. Meta advertising July',
+  'Convertir les montants saisis depuis le dollar US, au taux de la date': 'Convert the amounts entered from US dollars, at the rate of the date',
+  'Annuaire ouvert en modification par': 'Directory open for editing by',
+  'Facture en ': 'Invoice in ',
 };

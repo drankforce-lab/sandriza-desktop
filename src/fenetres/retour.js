@@ -288,7 +288,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function dessinerDemande(){
     var d = R.demande;
-    var h = '<div class="carte"><h2>Demande <span class="note">— ' + esc(d.commande)
+    var h = '<div class="carte"><h2>${T("Demande")} <span class="note">— ' + esc(d.commande)
       + ' · soumise le ' + esc(dateFr(d.creeLe)) + '</span></h2>'
       + '<div class="info">'
       + '<div><div class="k">Client</div><div class="v">' + esc(d.client || '—') + '</div></div>'
@@ -349,7 +349,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             return '<option value="' + s + '"' + (d.statut === s ? ' selected' : '') + '>' + esc(STATUTS[s] || s) + '</option>'; }).join('')
         + '</select></div><div class="ch" id="z-refus" style="' + (d.statut === 'rejected' ? '' : 'display:none') + '">'
         + '<label for="r-refus">${T("Note de refus — visible au client")}</label>'
-        + '<input id="r-refus" value="' + esc(d.noteRefus) + '" placeholder="Expliquez la raison du refus…"></div></div>';
+        + '<input id="r-refus" value="' + esc(d.noteRefus) + '" placeholder="${T("Expliquez la raison du refus…")}"></div></div>';
 
       // Etiquette de retour — visible quand on approuve.
       h += '<div id="z-etiq" style="' + (d.statut === 'approved' ? '' : 'display:none') + ';margin-top:.55rem;'
@@ -389,7 +389,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var boutons = '';
     if (d.aUneEtiquette) {
       boutons += '<button id="btn-apercu"><span class="ic">👁</span> ${T("Étiquette")}</button>';
-      if (R.peutEcrire) boutons += '<button id="btn-renvoyer"><span class="ic">🔁</span> Renvoyer au client</button>';
+      if (R.peutEcrire) boutons += '<button id="btn-renvoyer"><span class="ic">🔁</span> ${T("Renvoyer au client")}</button>';
     }
     /* ⚠ HORS DU BLOC CI-DESSUS, ET C EST TOUT L INTERET. Le recours sert quand
        le PDF local a disparu — s il etait range sous aUneEtiquette, le bouton
@@ -397,7 +397,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        L envoi, lui, existe toujours chez Postes Canada : on redemande l imprime,
        on n en commande pas un second (ce qui serait FACTURE). */
     if (d.aUnEnvoiCP && R.peutEcrire) {
-      boutons += '<button id="btn-reprendre" title="Redemande le PDF de l’envoi déjà créé chez Postes Canada. Aucun nouvel envoi n’est commandé, rien n’est facturé.">'
+      boutons += '<button id="btn-reprendre" title="${T("Redemande le PDF de l’envoi déjà créé chez Postes Canada. Aucun nouvel envoi n’est commandé, rien n’est facturé.")}">'
         + '<span class="ic">📥</span> ' + (d.aUneEtiquette ? '${T("Reprendre chez Postes Canada")}' : '${T("Reprendre l’étiquette")}') + '</button>';
     }
     if (R.peutEcrire && d.statut === 'in_transit') boutons += '<button id="btn-recu"><span class="ic">📬</span> ${T("Marquer reçu")}</button>';
@@ -428,7 +428,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + '</select></div>'
             + '<div class="ch" data-raison-z="' + i + '" style="' + (dec.backToStock ? 'display:none;' : '') + 'margin:.25rem 0 .1rem">'
             + '<label>${T("Raison (obligatoire)")}</label>'
-            + '<input aria-label="${T("Raison (obligatoire)")}" data-raison="' + i + '" value="' + esc(dec.reason) + '" placeholder="Ex : article endommagé, article porté…"></div>';
+            + '<input aria-label="${T("Raison (obligatoire)")}" data-raison="' + i + '" value="' + esc(dec.reason) + '" placeholder="${T("Ex : article endommagé, article porté…")}"></div>';
         }).join('')
       + '</div>';
     h += '<div class="carte"><h2>${T("Réexpédition au client ")}<span class="note">${T("— échange ou renvoi")}</span></h2>'
@@ -480,7 +480,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '</div>';
     }
     h += '<div class="carte"><h2>${T("Résolution finale")}</h2>'
-      + '<select id="g-statut" aria-label="Issue du retour"><option value="refunded">${T("Remboursée")}</option>'
+      + '<select id="g-statut" aria-label="${T("Issue du retour")}"><option value="refunded">${T("Remboursée")}</option>'
       + '<option value="completed">${T("Complétée (échange / crédit — aucun remboursement émis ici)")}</option></select>'
       + '<div class="jetons">' + (R.modeles || []).map(function(m, i){
           return '<button type="button" data-modele="' + i + '">' + esc(m) + '</button>'; }).join('') + '</div>'
@@ -633,7 +633,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function marquerRecu(){
     voile('<h3><span class="ic">📬</span> ${T("Réception du colis")}</h3><p>${T("Confirmer la réception du colis de retour en entrepôt ?")}</p>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button><button class="prim" id="v-oui">Confirmer</button></div>',
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button><button class="prim" id="v-oui">${T("Confirmer")}</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){

@@ -275,5 +275,15 @@ module.exports = {
   'Dossier ': 'File ',
   'remboursé': 'refunded',
   'complété': 'completed',
-  'Le dossier doit être approuvé ou reçu': 'The file must be approved or received'
+  'Le dossier doit être approuvé ou reçu': 'The file must be approved or received',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Confirmer': 'Confirm',
+  'Expliquez la raison du refus…': 'Explain the reason for the refusal…',
+  'Redemande le PDF de l’envoi déjà créé chez Postes Canada. Aucun nouvel envoi n’est commandé, rien n’est facturé.': 'Asks Canada Post again for the PDF of the shipment already created. No new shipment is ordered, nothing is charged.',
+  'Ex : article endommagé, article porté…': 'E.g. damaged item, worn item…',
+  'Issue du retour': 'Outcome of the return',
+  'Demande': 'Request',
+  '🔁 Renvoyer au client': '🔁 Send back to the customer',
+  'Renvoyer au client': 'Send back to the customer',
 };

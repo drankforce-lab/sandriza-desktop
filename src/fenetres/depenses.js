@@ -289,7 +289,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'annuaire') { h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); return; }
 
     h += '<div class="barreoutils">'
-      + '<select id="d-annee" aria-label="Filtrer par année">' + (D.annees || []).map(function(a){
+      + '<select id="d-annee" aria-label="${T("Filtrer par année")}">' + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>' + a + '</option>';
         }).join('') + '</select>'
       + '<select id="d-mois"><option value="0"' + (!D.mois ? ' selected' : '') + '>${T("Tous les mois")}</option>'
@@ -346,7 +346,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<th>${T("Paiement")}</th><th style="text-align:right">${T("Montant")}</th>'
         + '<th style="text-align:right">${T("Taxes")}</th><th style="text-align:center">${T("Reçu")}</th></tr></thead><tbody>'
         + rows.map(function(r){
-            return '<tr data-id="' + esc(r.id) + '" title="Voir le détail">'
+            return '<tr data-id="' + esc(r.id) + '" title="${T("Voir le détail")}">'
               + '<td class="dt" style="white-space:nowrap">' + esc(r.dateFr) + '</td>'
               + '<td>' + esc(r.categorieLbl)
               + (r.ligne ? ' <span class="dt">· L.' + esc(r.ligne) + '</span>' : '') + '</td>'
@@ -398,7 +398,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
 
     if (VERROU && !VERROU.obtenu) {
-      h += '<div class="avis"><span class="ic">🔒</span> Annuaire ouvert en modification par <strong>'
+      h += '<div class="avis"><span class="ic">🔒</span> ${T("Annuaire ouvert en modification par")} <strong>'
         + esc(VERROU.parQui || '${T("un collègue")}') + '</strong> ${T("— vous pouvez le consulter,")} '
         + '${T("pas le corriger. Deux corrections en même temps, c’est la dernière qui gagne")} '
         + '${T("sans que la première le sache.")}</div>';
@@ -414,7 +414,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input aria-label="Domaine, nom ou catégorie" type="search" id="a-q" placeholder="Domaine, nom ou catégorie…" value="' + esc(ANN_Q) + '">'
+      + '<input aria-label="${T("Domaine, nom ou catégorie")}" type="search" id="a-q" placeholder="${T("Domaine, nom ou catégorie…")}" value="' + esc(ANN_Q) + '">'
       + ((ro || (VERROU && !VERROU.obtenu)) ? ''
           : '<button class="prim" id="a-nouveau">${T("＋ Ajouter un fournisseur")}</button>')
       + '<span class="droite">' + ANN.trouves + ' ${T("affiché")}' + (ANN.trouves > 1 ? 's' : '') + '</span>'
@@ -580,7 +580,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
       + '</select></div>'
       + champ('${T("Description")}', '<input type="text" id="f-desc" value="' + esc(f.description)
-          + '" placeholder="Ex : Publicité Meta juillet">', 'f-desc')
+          + '" placeholder="${T("Ex : Publicité Meta juillet")}">', 'f-desc')
       + champ('${T("Fournisseur")}', '<input type="text" id="f-four" value="' + esc(f.fournisseur)
           + '" placeholder="Ex : Meta Platforms">', 'f-four')
       + '<div class="bloc-montants"><div class="trois">'
@@ -596,7 +596,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          seule facon de verifier une conversion, et c est aussi ce qu on relit
          quand on corrige une taxe que la lecture a manquee. */
       + (f.origine
-          ? '<div class="aide" style="margin-top:.35rem;color:var(--tx-bleu)"><span class="ic">💵</span> Facture en '
+          ? '<div class="aide" style="margin-top:.35rem;color:var(--tx-bleu)"><span class="ic">💵</span> ${T("Facture en ")}'
             + esc(f.origine.devise || 'USD') + ' ${T("— original :")} '
             + [['montant', 'montant'], ['tps', 'TPS'], ['tvq', 'TVQ']].map(function(p){
                 var v = f.origine[p[0]];
@@ -612,7 +612,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '${T("« Montant » puis « Calc. taxes » pour en déduire la TPS et la TVQ.")} '
       + '${T("Une facture en dollars US se convertit avec « ⇄ Convertir ».")}</div>'
       + '<div class="barreoutils" style="margin-top:.4rem">'
-      + '<button id="f-convertir" title="Convertir les montants saisis depuis le dollar US, au taux de la date">'
+      + '<button id="f-convertir" title="${T("Convertir les montants saisis depuis le dollar US, au taux de la date")}">'
       + '${T("⇄ Convertir depuis USD")}</button></div></div>'
       + '<div class="champ large"><label>${T("Reçu (image ou PDF — facultatif)")}</label>'
       + '<button id="f-recu">' + (f.recu ? '${T("✓ Reçu joint — remplacer")}' : '<span class="ic">📎</span> ${T("Joindre un reçu")}') + '</button></div>'

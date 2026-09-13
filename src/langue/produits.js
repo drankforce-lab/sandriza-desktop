@@ -61,4 +61,19 @@ module.exports = {
   'Prix': 'Price',
   'Inventaire': 'Inventory',
   'Paniers': 'Carts',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Aucune unité en stock': 'No unit in stock',
+  'Rechercher un produit': 'Search for a product',
+  'Rechercher un produit…': 'Search for a product…',
+  'Mettre en premier les produits présents dans des paniers actifs': 'Put the products sitting in active baskets first',
+  'Ouvrir la fiche': 'Open the record',
+  '🟡 Liquidation': '🟡 Clearance',
+  'Liquidation': 'Clearance',
+  '⚠ À commander': '⚠ To order',
+  'À commander': 'To order',
+  '🛒 Tri panier ✓': '🛒 Basket sort ✓',
+  'Tri panier ✓': 'Basket sort ✓',
+  '🛒 Trier par panier': '🛒 Sort by basket',
+  'Trier par panier': 'Sort by basket',
 };

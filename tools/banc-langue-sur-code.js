@@ -32,6 +32,14 @@
  *      `instanceof`, `void`, `delete` attendent une EXPRESSION.
  *   3. SUIVI D UN POINT        `${T("Date")}.now()` — un acces de membre.
  *   4. COLLE A UN IDENTIFIANT  `szBrouillon${T("Jeter")}` — un morceau de nom.
+ *   5. SUIVI D UN `=`          `${T("style")}="width:44px"` — un NOM
+ *      D ATTRIBUT, ou une affectation. Mesure du 2026-09-12 : la cle « style »
+ *      (le libelle de l onglet Styles) s etait posee 66 fois sur l attribut
+ *      `style` d invmeta. « style » se traduisant par « style », les deux pages
+ *      etaient justes et les 28 bancs verts ; le jour ou la traduction change,
+ *      66 attributs deviennent inconnus et la mise en page tombe EN ANGLAIS
+ *      SEULEMENT. Meme famille que « Date », et decouverte de la meme facon :
+ *      en REGARDANT, pas en faisant confiance au vert.
  * Les 3 et 4 sont deja refusees par le poseur ; on les mesure quand meme, parce
  * qu un garde qui vit dans l outil ne couvre que ce que l outil a ecrit — une
  * enveloppe posee A LA MAIN ne passe par aucun outil.
@@ -98,6 +106,7 @@ for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
     if (apres === '(') raison = 'suivie d une parenthese — on l appelle ou on la construit';
     else if (MOT_CLE.test(s.slice(Math.max(0, i - 12), i))) raison = 'precedee d un mot-cle qui attend une expression';
     else if (apres === '.') raison = 'suivie d un point — c est un acces de membre';
+    else if (apres === '=') raison = 'suivie d un = — c est un nom d attribut, pas un texte';
     else if (IDENT.test(avant) || IDENT.test(apres)) raison = 'collee a un identifiant — c est un morceau de nom';
     if (!raison) continue;
     const ligne = s.slice(0, i).split('\n').length;
