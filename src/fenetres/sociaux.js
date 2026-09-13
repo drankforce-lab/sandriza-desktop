@@ -27,6 +27,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('sociaux');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -117,11 +121,11 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
 function pageSociaux(onglet) {
   const depart = (['historique', 'patrons'].indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'file';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Réseaux sociaux — Administration Sandriza</title>
+<title>${T("Réseaux sociaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.social}</span><h1>Réseaux sociaux</h1>
+<div class="tete"><span class="ico">${ICO.social}</span><h1>${T("Réseaux sociaux")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -145,20 +149,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux réseaux sociaux.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette publication n’existe plus.',
-    file_vide:          'Il n’y a rien à publier.',
-    publication:        'La publication a échoué.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux réseaux sociaux.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette publication n’existe plus.")}',
+    file_vide:          '${T("Il n’y a rien à publier.")}',
+    publication:        '${T("La publication a échoué.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 160)) + ')';
     return t;
   }
@@ -175,13 +179,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
-  var LIB = { published: 'Publiée', partial: 'Partielle', failed: 'Échouée',
-              skipped: 'Ignorée', pending: 'En attente' };
+  var LIB = { published: '${T("Publiée")}', partial: '${T("Partielle")}', failed: '${T("Échouée")}',
+              skipped: '${T("Ignorée")}', pending: '${T("En attente")}' };
   var TONS = { published: 'bon', partial: 'att', failed: 'err',
                skipped: 'neutre', pending: 'att' };
 
   function reseaux(list){
-    if (!list.length) return '<span class="dt">aucun réseau</span>';
+    if (!list.length) return '<span class="dt">${T("aucun réseau")}</span>';
     return '<span class="res">' + list.map(function(r){
       return '<span title="' + esc(r.nom) + '">' + esc(r.icone || r.nom) + '</span>';
     }).join('') + '</span>';
@@ -200,15 +204,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function entree(e, avecGestes){
     var h = '<div class="entree"><div class="haut">'
-      + '<strong>' + esc(e.patron || 'Publication') + '</strong>'
+      + '<strong>' + esc(e.patron || '${T("Publication")}') + '</strong>'
       + '<span class="pill ' + (TONS[e.statut] || 'neutre') + '">' + esc(LIB[e.statut] || e.statut) + '</span>'
       + reseaux(e.reseaux || [])
-      + (e.image ? '<span class="pill neutre">image</span>' : '')
+      + (e.image ? '<span class="pill neutre">${T("image")}</span>' : '')
       + '<span class="droite">';
     if (avecGestes && D.peutModifier) {
       h += '<button class="mini geste prim" data-publier="' + esc(e.id) + '">'
-        + (ARME === e.id ? 'Confirmer l’envoi ?' : 'Publier') + '</button>'
-        + '<button class="mini geste" data-ignorer="' + esc(e.id) + '">Ignorer</button>';
+        + (ARME === e.id ? '${T("Confirmer l’envoi ?")}' : '${T("Publier")}') + '</button>'
+        + '<button class="mini geste" data-ignorer="' + esc(e.id) + '">${T("Ignorer")}</button>';
     }
     h += '<span class="dt">' + esc(e.partie || e.creee) + '</span>'
       + '</span></div>'
@@ -233,20 +237,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var PAT_ARME = '';     // suppression armee
 
   function vuePatrons(){
-    if (!PAT) return '<div class="carte"><div class="vide charge">Lecture des patrons…</div></div>';
+    if (!PAT) return '<div class="carte"><div class="vide charge">${T("Lecture des patrons…")}</div></div>';
     if (EDIT) return vuePatronEditeur();
     var l = PAT.patrons || [];
     var h = '<div class="carte">';
     if (PAT.peutEcrire) {
       h += '<div style="text-align:right;margin-bottom:.4rem">'
-        + '<button class="mini prim" id="pa-nouveau">+ Nouveau patron</button></div>';
+        + '<button class="mini prim" id="pa-nouveau">${T("+ Nouveau patron")}</button></div>';
     }
-    if (!l.length) { h += '<div class="vide">Aucun patron.</div></div>'; return h; }
+    if (!l.length) { h += '<div class="vide">${T("Aucun patron.")}</div></div>'; return h; }
     h += l.map(function(p){
       return '<div class="entree">'
         + '<div class="haut"><strong>' + esc(p.nom) + '</strong>'
-        + '<span class="pill ' + (p.actif ? 'bon' : 'neutre') + '">' + (p.actif ? 'actif' : 'inactif') + '</span>'
-        + (p.defaut ? '<span class="pill neutre">fourni</span>' : '')
+        + '<span class="pill ' + (p.actif ? 'bon' : 'neutre') + '">' + (p.actif ? '${T("actif")}' : '${T("inactif")}') + '</span>'
+        + (p.defaut ? '<span class="pill neutre">${T("fourni")}</span>' : '')
         + '<span class="droite"><span class="dt">' + esc(p.declencheurLibelle) + '</span></span></div>'
         + '<div class="dt" style="white-space:pre-wrap;overflow-wrap:anywhere">'
         /* ⚠ DOUBLE ANTISLASH OBLIGATOIRE : ce script vit dans un litteral de
@@ -257,17 +261,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + (String(p.gabarit).length > 120 ? '…' : '') + '</div>'
         + '<div class="dt">' + (p.reseaux.length
             ? p.reseaux.map(function(r){ return '<span class="pill neutre">' + esc(r) + '</span>'; }).join('')
-            : '<span class="pill neutre">aucun réseau</span>')
+            : '<span class="pill neutre">${T("aucun réseau")}</span>')
           + (p.motsCles.length ? ' <span class="dt">#' + p.motsCles.map(esc).join(' #') + '</span>' : '')
           + '</div>'
         + '<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.3rem">'
-        + '<button class="mini" data-apercu="' + esc(p.id) + '">Aperçu</button>'
+        + '<button class="mini" data-apercu="' + esc(p.id) + '">${T("Aperçu")}</button>'
         + (PAT.peutEcrire
-            ? '<button class="mini" data-modifier="' + esc(p.id) + '">Modifier</button>'
-              + '<button class="mini" data-bascule="' + esc(p.id) + '">' + (p.actif ? 'Désactiver' : 'Activer') + '</button>'
+            ? '<button class="mini" data-modifier="' + esc(p.id) + '">${T("Modifier")}</button>'
+              + '<button class="mini" data-bascule="' + esc(p.id) + '">' + (p.actif ? '${T("Désactiver")}' : '${T("Activer")}') + '</button>'
               + (p.defaut ? ''
                   : '<button class="mini danger" data-patsuppr="' + esc(p.id) + '">'
-                    + (PAT_ARME === p.id ? 'Confirmer ?' : 'Supprimer') + '</button>')
+                    + (PAT_ARME === p.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>')
             : '')
         + '</div></div>';
     }).join('');
@@ -282,33 +286,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!p) { EDIT = null; return vuePatrons(); }
     var h = '<div class="carte">'
       + '<div class="haut" style="margin-bottom:.5rem"><strong>'
-      + (EDIT === 'nouveau' ? 'Nouveau patron' : 'Modifier « ' + esc(p.nom) + ' »') + '</strong></div>'
-      + '<label class="champ"><span class="lbl">Nom du patron</span>'
-      + '<input class="t" id="pa-nom" value="' + esc(p.nom) + '" placeholder="Annonce d’un nouveau produit"></label>'
-      + '<label class="champ"><span class="lbl">Déclencheur</span><select class="t" id="pa-decl">'
+      + (EDIT === 'nouveau' ? '${T("Nouveau patron")}' : '${T("Modifier « ")}' + esc(p.nom) + ' »') + '</strong></div>'
+      + '<label class="champ"><span class="lbl">${T("Nom du patron")}</span>'
+      + '<input class="t" id="pa-nom" value="' + esc(p.nom) + '" placeholder="${T("Annonce d’un nouveau produit")}"></label>'
+      + '<label class="champ"><span class="lbl">${T("Déclencheur")}</span><select class="t" id="pa-decl">'
       + (PAT.declencheurs || []).map(function(d){
           return '<option value="' + esc(d.v) + '"' + (p.declencheur === d.v ? ' selected' : '') + '>'
             + esc(d.l) + '</option>'; }).join('')
       + '</select></label>'
-      + '<label class="champ"><span class="lbl">Réseaux</span><span class="cases">'
+      + '<label class="champ"><span class="lbl">${T("Réseaux")}</span><span class="cases">'
       + (PAT.reseaux || []).map(function(r){
           return '<label class="case"><input type="checkbox" data-net="' + esc(r.v) + '"'
             + (p.reseaux.indexOf(r.v) >= 0 ? ' checked' : '') + '> ' + esc(r.icone) + ' ' + esc(r.l) + '</label>';
         }).join('')
       + '</span></label>'
-      + '<label class="champ"><span class="lbl">Texte publié</span>'
+      + '<label class="champ"><span class="lbl">${T("Texte publié")}</span>'
       + '<textarea class="t" id="pa-gab" rows="5">' + esc(p.gabarit) + '</textarea>'
-      + '<span class="sub">Variables : '
+      + '<span class="sub">${T("Variables : ")}'
       + (PAT.variables || []).map(function(v){ return esc(v.v) + ' (' + esc(v.l) + ')'; }).join(' · ')
       + '</span></label>'
-      + '<label class="champ"><span class="lbl">Mots-clics</span>'
-      + '<input class="t" id="pa-tags" value="' + esc(p.motsCles.join(', ')) + '" placeholder="mode, quebec, nouveaute">'
-      + '<span class="sub">Séparés par des virgules, sans le croisillon.</span></label>'
+      + '<label class="champ"><span class="lbl">${T("Mots-clics")}</span>'
+      + '<input class="t" id="pa-tags" value="' + esc(p.motsCles.join(', ')) + '" placeholder="${T("mode, quebec, nouveaute")}">'
+      + '<span class="sub">${T("Séparés par des virgules, sans le croisillon.")}</span></label>'
       + '<label class="case"><input type="checkbox" id="pa-img"' + (p.image ? ' checked' : '')
-      + '> Joindre l’image du produit</label>'
+      + '> ${T("Joindre l’image du produit")}</label>'
       + '<div style="display:flex;gap:.4rem;margin-top:.7rem">'
-      + '<button class="mini prim" id="pa-enr">Enregistrer</button>'
-      + '<button class="mini" id="pa-annuler">Annuler</button></div>'
+      + '<button class="mini prim" id="pa-enr">${T("Enregistrer")}</button>'
+      + '<button class="mini" id="pa-annuler">${T("Annuler")}</button></div>'
       + '</div>';
     return h;
   }
@@ -342,7 +346,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   szBrouillonBrancher({
     portee: 'patron-social',
-    libelle: 'Un patron de publication',
+    libelle: '${T("Un patron de publication")}',
     ttlMin: 720,
     cle: function(){ return EDIT ? (EDIT === 'nouveau' ? '__new__' : ('p:' + EDIT)) : ''; },
     actif: function(){ return !!EDIT && !!document.getElementById('pa-nom'); },
@@ -370,15 +374,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var cs = document.querySelectorAll('[data-net]');
     for (var i = 0; i < cs.length; i++) if (cs[i].checked) nets.push(cs[i].getAttribute('data-net'));
     var img = document.getElementById('pa-img');
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('patrons:ecrire', [{
       id: EDIT === 'nouveau' ? '' : EDIT,
       nom: v('pa-nom'), gabarit: v('pa-gab'), declencheur: v('pa-decl'),
       reseaux: nets, motsCles: v('pa-tags'), image: !!(img && img.checked)
     }]).then(function(r){
-      if (!r || !r.ok) { dire('Échec : ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire('${T("Échec : ")}' + expliquer(r), 'err'); return; }
       szBrouillonJeter(); PAT = r; EDIT = null; dessiner();
-      dire('Patron enregistré.', 'bon');
+      dire('${T("Patron enregistré.")}', 'bon');
     });
   }
 
@@ -387,48 +391,48 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function chargerPatrons(){
     if (PAT) return;
     appeler('patrons:liste', []).then(function(r){
-      if (!r || !r.ok) { dire('Patrons illisibles : ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dire('${T("Patrons illisibles : ")}' + expliquer(r), 'err'); return; }
       PAT = r;
       if (ONGLET === 'patrons') dessiner();
     });
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var t = D.tuiles || {};
     if (sous) {
       sous.innerHTML = (D.reseauxActifs || []).length
         ? (D.reseauxActifs || []).map(function(r){
             return '<span title="' + esc(r.nom) + '">' + esc(r.icone || '') + '</span>';
           }).join(' ')
-        : '<span class="pill neutre">aucun réseau branché</span>';
+        : '<span class="pill neutre">${T("aucun réseau branché")}</span>';
     }
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">En attente</div><div class="val att">' + (t.enAttente || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Publiées</div><div class="val bon">' + (t.publiees || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Échouées</div><div class="val err">' + (t.echouees || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">Ignorées</div><div class="val">' + (t.ignorees || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("En attente")}</div><div class="val att">' + (t.enAttente || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Publiées")}</div><div class="val bon">' + (t.publiees || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Échouées")}</div><div class="val err">' + (t.echouees || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Ignorées")}</div><div class="val">' + (t.ignorees || 0) + '</div></div>'
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'file' ? ' actif' : '') + '" data-onglet="file">File d’attente'
+      + '<button class="mini' + (ONGLET === 'file' ? ' actif' : '') + '" data-onglet="file">${T("File d’attente")}'
       + ((D.file || []).length ? '<span class="n hi">' + D.file.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'historique' ? ' actif' : '') + '" data-onglet="historique">Historique'
+      + '<button class="mini' + (ONGLET === 'historique' ? ' actif' : '') + '" data-onglet="historique">${T("Historique")}'
       + ((D.historique || []).length ? '<span class="n">' + D.historique.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'patrons' ? ' actif' : '') + '" data-onglet="patrons">Patrons'
+      + '<button class="mini' + (ONGLET === 'patrons' ? ' actif' : '') + '" data-onglet="patrons">${T("Patrons")}'
       + (PAT && (PAT.patrons || []).length
           ? '<span class="n">' + PAT.patrons.filter(function(p){ return p.actif; }).length + '</span>' : '')
       + '</button>'
-      + '<div class="droite"><span class="dt">Comptes et jetons des réseaux : '
-      + 'Configuration → Communications → Réseaux sociaux</span>';
+      + '<div class="droite"><span class="dt">${T("Comptes et jetons des réseaux : ")}'
+      + '${T("Configuration → Communications → Réseaux sociaux")}</span>';
     if (ONGLET === 'file' && D.peutModifier && (D.file || []).length) {
       h += '<button class="mini prim" id="so-tout"' + (OCCUPE ? ' disabled' : '') + '>'
-        + (OCCUPE ? 'Publication…' : (ARME === '__tout' ? 'Confirmer — tout publier ?' : 'Tout publier')) + '</button>';
+        + (OCCUPE ? '${T("Publication…")}' : (ARME === '__tout' ? '${T("Confirmer — tout publier ?")}' : '${T("Tout publier")}')) + '</button>';
     }
     if (ONGLET === 'historique' && D.peutModifier && (D.historique || []).length) {
       h += '<button class="mini danger" id="so-vider">'
-        + (ARME === '__vider' ? 'Confirmer ?' : 'Vider le journal') + '</button>';
+        + (ARME === '__vider' ? '${T("Confirmer ?")}' : '${T("Vider le journal")}') + '</button>';
     }
     h += '</div></div>';
 
@@ -439,7 +443,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h += '<div class="carte">';
       if (!pile.length) {
         h += '<div class="vide">' + (ONGLET === 'file'
-          ? 'Aucune publication en attente.' : 'Rien au journal pour l’instant.') + '</div>';
+          ? '${T("Aucune publication en attente.")}' : '${T("Rien au journal pour l’instant.")}') + '</div>';
       } else {
         h += pile.map(function(e){ return entree(e, ONGLET === 'file'); }).join('');
       }
@@ -453,18 +457,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (bt) bt.onclick = function(){
       if (ARME !== '__tout') {
         ARME = '__tout'; dessiner();
-        dire('Cliquez de nouveau pour publier toute la file — les messages partent chez les réseaux et ne se rattrapent pas.', 'att');
+        dire('${T("Cliquez de nouveau pour publier toute la file — les messages partent chez les réseaux et ne se rattrapent pas.")}', 'att');
         return;
       }
       ARME = ''; OCCUPE = true; dessiner();
-      dire('Publication de la file…', 'att');
+      dire('${T("Publication de la file…")}', 'att');
       appeler('sociaux:publierTout', []).then(function(r){
         OCCUPE = false;
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        var bilan = r.completes + ' publiée' + (r.completes > 1 ? 's' : '')
-          + (r.partielles ? ', ' + r.partielles + ' partielle' + (r.partielles > 1 ? 's' : '') : '')
-          + (r.echecs ? ', ' + r.echecs + ' en échec' : '')
-          + ' sur ' + r.tentees + '.';
+        /* ⚠ Le singulier et le pluriel, chacun entier. */
+        var bilan = r.completes + (r.completes > 1 ? '${T(" publiées")}' : '${T(" publiée")}')
+          + (r.partielles ? ', ' + r.partielles + (r.partielles > 1 ? '${T(" partielles")}' : '${T(" partielle")}') : '')
+          + (r.echecs ? ', ' + r.echecs + '${T(" en échec")}' : '')
+          + '${T(" sur ")}' + r.tentees + '.';
         dire(bilan, (r.partielles || r.echecs) ? 'att' : 'bon');
         ONGLET = 'historique';
         charger();
@@ -475,13 +480,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (bv) bv.onclick = function(){
       if (ARME !== '__vider') {
         ARME = '__vider'; dessiner();
-        dire('Cliquez « Confirmer ? » — le journal est effacé, mais les publications restent en ligne sur les réseaux.', 'att');
+        dire('${T("Cliquez « Confirmer ? » — le journal est effacé, mais les publications restent en ligne sur les réseaux.")}', 'att');
         return;
       }
       ARME = '';
       appeler('sociaux:viderHistorique', []).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(r.efface + ' entrée' + (r.efface > 1 ? 's effacées' : ' effacée') + ' du journal.', 'bon');
+        dire(r.efface + (r.efface > 1 ? '${T(" entrées effacées du journal.")}' : '${T(" entrée effacée du journal.")}'), 'bon');
         charger();
       });
     };
@@ -503,8 +508,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var cur = (PAT.patrons || []).find(function(x){ return x.id === idB; });
       dire('…');
       appeler('patrons:basculer', [idB, !(cur && cur.actif)]).then(function(r){
-        if (!r || !r.ok) { dire('Echec : ' + expliquer(r), 'err'); return; }
-        PAT = r; dessiner(); dire(cur && cur.actif ? 'Patron desactive.' : 'Patron active.', 'bon');
+        /* ⚠ LES ACCENTS SONT DES TEXTES VISIBLES, pas du code : « Echec »,
+           « desactive », « active », « supprime » s affichaient nus dans le
+           bandeau. Corrige le 2026-09-13, en traduisant la fenetre. */
+        if (!r || !r.ok) { dire('${T("Échec : ")}' + expliquer(r), 'err'); return; }
+        PAT = r; dessiner(); dire(cur && cur.actif ? '${T("Patron désactivé.")}' : '${T("Patron activé.")}', 'bon');
       });
       return;
     }
@@ -513,36 +521,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var idS = ps.getAttribute('data-patsuppr');
       if (PAT_ARME !== idS) {
         PAT_ARME = idS; dessiner();
-        dire('Recliquez pour confirmer — le gabarit disparaît. Les publications déjà faites ne bougent pas.', 'att');
+        dire('${T("Recliquez pour confirmer — le gabarit disparaît. Les publications déjà faites ne bougent pas.")}', 'att');
         return;
       }
       PAT_ARME = '';
       appeler('patrons:supprimer', [idS]).then(function(r){
-        if (!r || !r.ok) { dessiner(); dire('Echec : ' + expliquer(r), 'err'); return; }
-        PAT = r; dessiner(); dire('Patron supprime.', 'bon');
+        if (!r || !r.ok) { dessiner(); dire('${T("Échec : ")}' + expliquer(r), 'err'); return; }
+        PAT = r; dessiner(); dire('${T("Patron supprimé.")}', 'bon');
       });
       return;
     }
     var pa = t.closest('[data-apercu]');
     if (pa) {
-      dire('Composition de l’aperçu…');
+      dire('${T("Composition de l’aperçu…")}');
       appeler('patrons:apercu', [pa.getAttribute('data-apercu')]).then(function(r){
-        if (!r || !r.ok) { dire('Echec : ' + expliquer(r), 'err'); return; }
+        if (!r || !r.ok) { dire('${T("Échec : ")}' + expliquer(r), 'err'); return; }
         /* ⚠ L APERCU SE LIT DANS L ECRAN, pas dans le bandeau : un texte de
            publication tient sur plusieurs lignes, et le bandeau en montrerait
            la premiere moitie avec des points de suspension. */
         var z = document.createElement('div');
         z.className = 'carte';
         z.style.marginTop = '.5rem';
-        z.innerHTML = '<div class="haut"><strong>Aperçu — ' + esc(r.nom) + '</strong>'
+        z.innerHTML = '<div class="haut"><strong>${T("Aperçu — ")}' + esc(r.nom) + '</strong>'
           + '<span class="droite"><span class="dt">'
-          + (r.produit ? 'exemple : ' + esc(r.produit) : 'aucun produit actif pour l’exemple')
+          + (r.produit ? '${T("exemple : ")}' + esc(r.produit) : '${T("aucun produit actif pour l’exemple")}')
           + '</span></span></div>'
           + '<div class="dt" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85rem;color:var(--tx)">'
           + esc(r.texte) + '</div>'
           + '<div class="dt" style="margin-top:.3rem">' + (r.reseaux.length
               ? r.reseaux.map(function(x){ return '<span class="pill neutre">' + esc(x) + '</span>'; }).join('')
-              : '<span class="pill att">aucun réseau — ce patron ne publiera nulle part</span>') + '</div>';
+              : '<span class="pill att">${T("aucun réseau — ce patron ne publiera nulle part")}</span>') + '</div>';
         var anc = pa.closest('.entree');
         if (anc && anc.parentNode) anc.parentNode.insertBefore(z, anc.nextSibling);
         dire('');
@@ -556,20 +564,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       /* ARME EN DEUX CLICS : le message part a l exterieur et ne revient pas. */
       if (ARME !== idP) {
         ARME = idP; dessiner();
-        dire('Cliquez « Confirmer l’envoi ? » — la publication part chez les réseaux et ne se rattrape pas.', 'att');
+        dire('${T("Cliquez « Confirmer l’envoi ? » — la publication part chez les réseaux et ne se rattrape pas.")}', 'att');
         return;
       }
       ARME = '';
       bp.disabled = true;
-      dire('Publication…', 'att');
+      dire('${T("Publication…")}', 'att');
       appeler('sociaux:publier', [idP]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
         if (r.complet) {
-          dire('« ' + (r.patron || '') + ' » publiée sur tous les réseaux.', 'bon');
+          dire('« ' + (r.patron || '') + '${T(" » publiée sur tous les réseaux.")}', 'bon');
         } else {
           var rates = (r.resultats || []).filter(function(x){ return !x.ok; })
             .map(function(x){ return x.reseau; }).join(', ');
-          dire('Envoi partiel — ' + (rates || 'un réseau') + ' n’a pas reçu la publication. Voir le journal.', 'att');
+          dire('${T("Envoi partiel — ")}' + (rates || '${T("un réseau")}') + '${T(" n’a pas reçu la publication. Voir le journal.")}', 'att');
         }
         charger();
       });
@@ -582,7 +590,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       bi.disabled = true;
       appeler('sociaux:ignorer', [bi.getAttribute('data-ignorer')]).then(function(r){
         if (!r.ok) { bi.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('« ' + (r.patron || '') + ' » retirée de la file.', 'bon');
+        dire('« ' + (r.patron || '') + '${T(" » retirée de la file.")}', 'bon');
         charger();
       });
       return;
@@ -600,7 +608,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function charger(){
     appeler('sociaux:liste', []).then(function(r){
-      if (!r || !r.ok) { vide('Réseaux sociaux indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Réseaux sociaux indisponibles")}', expliquer(r)); return; }
       D = r;
       dessiner();
       if (ONGLET === 'patrons') chargerPatrons();
@@ -610,8 +618,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   window.szActualiser = function(){ if (!OCCUPE && !ARME) charger(); };
   window.szRevenir = function(){ if (!OCCUPE) charger(); };
 
-  /* ── MODE ANCRE ── Le meme bouton que les autres ecrans. */
-  window.szModeAncre = function(actif){
+  /* ── MODE ANCRE ── Le meme bouton que les autres ecrans.
+     ⚠⚠ LE PARAMETRE NE S APPELLE PLUS << actif >> ICI, ET C EST DELIBERE. Le
+     dictionnaire de cette fenetre traduit le mot << actif >> (la pastille d un
+     patron), et le poseur l a enveloppe DANS LE NOM DU PARAMETRE et DANS LA
+     CONDITION — le nom du parametre est devenu une enveloppe. La page francaise restait
+     identique — T rend le meme mot — donc rien ne criait ; en anglais, le
+     parametre se serait appele << active >> et la condition aurait lu une
+     variable qui n existe pas. Un nom de code ne doit jamais pouvoir etre une
+     cle de dictionnaire. */
+  window.szModeAncre = function(estAncree){
     var t = document.querySelector('.tete');
     if (!t) return;
     var b = document.getElementById('sz-detacher');
@@ -624,13 +640,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + 'color:var(--tx);cursor:pointer;flex:0 0 auto');
       t.appendChild(b);
     }
-    if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+    if (estAncree) {
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

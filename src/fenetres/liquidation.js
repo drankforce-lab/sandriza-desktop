@@ -33,6 +33,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('liquidation');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -186,11 +190,11 @@ function pageLiquidation(ouverture) {
   const ouvreResume = (ouv === 'lot-resume');
   const ouvreCat = (ouv === 'categories');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Liquidation / Vente finale — Administration Sandriza</title>
+<title>${T("Liquidation / Vente finale — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.liquidation}</span><h1>Liquidation / Vente finale</h1>
+<div class="tete"><span class="ico">${ICO.liquidation}</span><h1>${T("Liquidation / Vente finale")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -214,18 +218,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function argent(n){ return (Math.round((Number(n)||0)*100)/100).toFixed(2) + ' $'; }
 
   var MOTIFS = {
-    session:        'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:          'Votre rôle ne donne pas accès à cette opération.',
-    indisponible:   'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    introuvable:    'Ce produit n’existe plus.',
-    aucun_produit:  'Aucun produit choisi.',
-    aucune_categorie:'Aucune catégorie choisie.',
-    dates_requises: 'Indiquez la date de début et celle de fin.',
-    dates_inversees:'La date de fin doit venir après celle de début.',
-    echec:          'L’opération a échoué.'
+    session:        '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:          '${T("Votre rôle ne donne pas accès à cette opération.")}',
+    indisponible:   '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    introuvable:    '${T("Ce produit n’existe plus.")}',
+    aucun_produit:  '${T("Aucun produit choisi.")}',
+    aucune_categorie:'${T("Aucune catégorie choisie.")}',
+    dates_requises: '${T("Indiquez la date de début et celle de fin.")}',
+    dates_inversees:'${T("La date de fin doit venir après celle de début.")}',
+    echec:          '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
-    if (!r) return 'Aucune réponse de la fenêtre principale.';
+    if (!r) return '${T("Aucune réponse de la fenêtre principale.")}';
     return MOTIFS[r.motif] || (r.detail ? String(r.detail) : MOTIFS.echec);
   }
 
@@ -238,7 +242,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function charger(){
     return appeler('liquidation:donnees', { q:Q, pageLiq:PLIQ, pageFinale:PFIN, taille:TAILLE })
       .then(function(r){
-        if (!r || !r.ok) { vide('Liquidation indisponible', expliquer(r)); return false; }
+        if (!r || !r.ok) { vide('${T("Liquidation indisponible")}', expliquer(r)); return false; }
         D = r; PLIQ = r.liq.page; PFIN = r.finale.page;
         return true;
       });
@@ -255,12 +259,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var geste = '';
     if (D.peut.edition) {
       geste = arme
-        ? '<button class="geste danger" data-confirmer="' + esc(l.id) + '">✓ Confirmer le retrait</button>'
-        : '<button class="geste" data-retirer="' + esc(l.id) + '" title="Ramener au régime normal">✕ Retirer</button>';
+        ? '<button class="geste danger" data-confirmer="' + esc(l.id) + '">${T("✓ Confirmer le retrait")}</button>'
+        : '<button class="geste" data-retirer="' + esc(l.id) + '" title="${T("Ramener au régime normal")}">${T("✕ Retirer")}</button>';
     }
     var quand = l.au
-      ? '<span class="pill neutre" title="La boutique annonce cette date au client">jusqu’au ' + esc(l.au) + '</span>'
-      : '<span class="dt">jusqu’à épuisement</span>';
+      ? '<span class="pill neutre" title="${T("La boutique annonce cette date au client")}">${T("jusqu’au ")}' + esc(l.au) + '</span>'
+      : '<span class="dt">${T("jusqu’à épuisement")}</span>';
     return '<tr>'
       + '<td><span class="pastille" style="background:' + esc(l.couleur) + '"></span>'
       +   '<strong>' + esc(l.nom) + '</strong>'
@@ -279,21 +283,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var nav = '';
     if (g.pages > 1) {
       nav = '<button class="mini" data-page="' + quel + ':' + (g.page - 1) + '"'
-        + (g.page === 0 ? ' disabled' : '') + '>← Précédent</button>'
-        + '<span>Page ' + (g.page + 1) + ' / ' + g.pages + '</span>'
+        + (g.page === 0 ? ' disabled' : '') + '>${T("← Précédent")}</button>'
+        + '<span>${T("Page ")}' + (g.page + 1) + ' / ' + g.pages + '</span>'
         + '<button class="mini" data-page="' + quel + ':' + (g.page + 1) + '"'
-        + (g.page >= g.pages - 1 ? ' disabled' : '') + '>Suivant →</button>';
+        + (g.page >= g.pages - 1 ? ' disabled' : '') + '>${T("Suivant →")}</button>';
     }
-    return '<div class="pager"><span class="gauche">Afficher '
-      + '<select id="taille" aria-label="Nombre de produits par page">' + opts + '</select> par page · ' + g.total + ' produit'
-      + (g.total === 1 ? '' : 's') + '</span>' + nav + '</div>';
+    return '<div class="pager"><span class="gauche">${T("Afficher ")}'
+      + '<select id="taille" aria-label="${T("Nombre de produits par page")}">' + opts + '</select>${T(" par page · ")}' + g.total
+      + (g.total === 1 ? '${T(" produit")}' : '${T(" produits")}') + '</span>' + nav + '</div>';
   }
 
   function carte(quel, titre, sousTitre, g){
     var accent = quel === 'liq' ? '#d97706' : '#dc2626';
     var corpsCarte = g.lignes.length
-      ? '<table><thead><tr><th>Produit</th><th>Durée</th><th class="num">Stock</th>'
-        + '<th class="num">Prix</th><th></th></tr></thead><tbody>'
+      ? '<table><thead><tr><th>${T("Produit")}</th><th>${T("Durée")}</th><th class="num">${T("Stock")}</th>'
+        + '<th class="num">${T("Prix")}</th><th></th></tr></thead><tbody>'
         + g.lignes.map(ligneProduit).join('') + '</tbody></table>' + pager(g, quel)
       : '<div class="vide">' + esc(sousTitre.vide) + '</div>';
     return '<div class="carte"><h2><span class="pt" style="background:' + accent + '"></span>'
@@ -303,57 +307,57 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var TEXTES = {
-    liq:   { texte:'Prix réduits pour écouler le stock — aucun retour possible.',
-             vide:'Aucun produit en liquidation.' },
-    final: { texte:'Aucun retour ni échange accepté sur ces produits.',
-             vide:'Aucun produit en vente finale.' }
+    liq:   { texte:'${T("Prix réduits pour écouler le stock — aucun retour possible.")}',
+             vide:'${T("Aucun produit en liquidation.")}' },
+    final: { texte:'${T("Aucun retour ni échange accepté sur ces produits.")}',
+             vide:'${T("Aucun produit en vente finale.")}' }
   };
 
   function dessiner(){
     if (!D) return;
     var c = D.compteurs;
-    sous.textContent = (c.liquidation + c.finale) + ' produit'
-      + ((c.liquidation + c.finale) === 1 ? '' : 's') + ' hors régime normal';
+    sous.textContent = (c.liquidation + c.finale)
+      + ((c.liquidation + c.finale) === 1 ? '${T(" produit hors régime normal")}' : '${T(" produits hors régime normal")}');
 
     var h = '<div class="tuiles">'
-      + '<div class="tuile liq"><div class="lbl"><span class="ic">🟡</span> En liquidation</div><div class="val">'
-      +   c.liquidation + '</div><div class="sub">produit' + (c.liquidation === 1 ? '' : 's') + '</div></div>'
-      + '<div class="tuile vfin"><div class="lbl"><span class="ic">🔴</span> En vente finale</div><div class="val">'
-      +   c.finale + '</div><div class="sub">produit' + (c.finale === 1 ? '' : 's') + '</div></div>'
+      + '<div class="tuile liq"><div class="lbl"><span class="ic">🟡</span> ${T("En liquidation")}</div><div class="val">'
+      +   c.liquidation + '</div><div class="sub">' + (c.liquidation === 1 ? '${T("produit")}' : '${T("produits")}') + '</div></div>'
+      + '<div class="tuile vfin"><div class="lbl"><span class="ic">🔴</span> ${T("En vente finale")}</div><div class="val">'
+      +   c.finale + '</div><div class="sub">' + (c.finale === 1 ? '${T("produit")}' : '${T("produits")}') + '</div></div>'
       + '</div>';
 
     h += '<div class="barreoutils">'
-      + '<input class="rech" id="rech" type="search" aria-label="Rechercher un produit (nom, SKU, catégorie)" placeholder="Rechercher un produit (nom, SKU, catégorie) — les deux régimes…" value="'
+      + '<input class="rech" id="rech" type="search" aria-label="${T("Rechercher un produit (nom, SKU, catégorie)")}" placeholder="${T("Rechercher un produit (nom, SKU, catégorie) — les deux régimes…")}" value="'
       +   esc(Q) + '">';
     if (D.peut.ajout) {
-      h += '<button class="geste" data-ouvrir="lot">＋ Ajouter en lot</button>'
-        +  '<button class="geste" data-ouvrir="cat">＋ Par catégorie</button>';
+      h += '<button class="geste" data-ouvrir="lot">${T("＋ Ajouter en lot")}</button>'
+        +  '<button class="geste" data-ouvrir="cat">${T("＋ Par catégorie")}</button>';
     }
     h += '</div>';
 
     if (!D.peut.ajout && !D.peut.edition) {
-      h += '<div class="avis">Lecture seule : votre rôle ne permet ni de mettre des produits '
-        +  'en liquidation ou en vente finale, ni de les en retirer.</div>';
+      h += '<div class="avis">${T("Lecture seule : votre rôle ne permet ni de mettre des produits ")}'
+        +  '${T("en liquidation ou en vente finale, ni de les en retirer.")}</div>';
     }
 
     if (Q) {
       /* ⚠ LA RECHERCHE MONTRE LES DEUX REGIMES, en groupes distincts : on cherche
          un produit sans savoir dans lequel il a ete mis. */
-      h += '<div class="dt">Résultats pour « <strong>' + esc(Q) + '</strong> » — '
-        + (D.liq.total + D.finale.total) + ' produit'
-        + ((D.liq.total + D.finale.total) === 1 ? '' : 's') + '.</div>'
-        + carte('liq', 'Liquidation', { texte:TEXTES.liq.texte, vide:'Aucun résultat en liquidation.' }, D.liq)
-        + carte('final', 'Vente finale', { texte:TEXTES.final.texte, vide:'Aucun résultat en vente finale.' }, D.finale);
+      h += '<div class="dt">${T("Résultats pour « ")}<strong>' + esc(Q) + '</strong> » — '
+        + (D.liq.total + D.finale.total)
+        + ((D.liq.total + D.finale.total) === 1 ? '${T(" produit.")}' : '${T(" produits.")}') + '</div>'
+        + carte('liq', '${T("Liquidation")}', { texte:TEXTES.liq.texte, vide:'${T("Aucun résultat en liquidation.")}' }, D.liq)
+        + carte('final', '${T("Vente finale")}', { texte:TEXTES.final.texte, vide:'${T("Aucun résultat en vente finale.")}' }, D.finale);
     } else {
       h += '<div class="barreoutils">'
-        + '<button class="geste' + (ONGLET === 'liq' ? ' actif' : '') + '" data-onglet="liq"><span class="ic">🟡</span> Liquidation'
+        + '<button class="geste' + (ONGLET === 'liq' ? ' actif' : '') + '" data-onglet="liq"><span class="ic">🟡</span> ${T("Liquidation")}'
         +   '<span class="n">' + c.liquidation + '</span></button>'
-        + '<button class="geste' + (ONGLET === 'final' ? ' actif' : '') + '" data-onglet="final"><span class="ic">🔴</span> Vente finale'
+        + '<button class="geste' + (ONGLET === 'final' ? ' actif' : '') + '" data-onglet="final"><span class="ic">🔴</span> ${T("Vente finale")}'
         +   '<span class="n">' + c.finale + '</span></button>'
         + '</div>';
       h += (ONGLET === 'liq')
-        ? carte('liq', 'Liquidation', TEXTES.liq, D.liq)
-        : carte('final', 'Vente finale', TEXTES.final, D.finale);
+        ? carte('liq', '${T("Liquidation")}', TEXTES.liq, D.liq)
+        : carte('final', '${T("Vente finale")}', TEXTES.final, D.finale);
     }
 
     /* ⚠ UNE SEULE ECRITURE, surcouches comprises : les ajouter apres coup
@@ -394,13 +398,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ══ RETIRER (arme en deux clics) ══════════════════════════════════════════ */
   function retirer(id){
-    dire('Retrait…');
+    dire('${T("Retrait…")}');
     appeler('liquidation:retirer', id).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       ARME = '';
       return charger().then(function(ok){
         if (ok) dessiner();
-        dire('Retiré de la ' + (r.etait === 'liquidation' ? 'liquidation' : 'vente finale') + '.', 'bon');
+        /* ⚠⚠ LA PHRASE ENTIERE DANS CHAQUE BRANCHE. Ecrit
+           << r.etait === 'liquidation' ? 'liquidation' : … >>, le meme mot etait
+           a la fois LA VALEUR COMPAREE et LE MOT AFFICHE : une cle
+           << liquidation >> se serait posee sur les deux, et aussi sur le nom d
+           operation << liquidation:retirer >> deux lignes plus haut. */
+        dire(r.etait === 'liquidation' ? '${T("Retiré de la liquidation.")}' : '${T("Retiré de la vente finale.")}', 'bon');
       });
     });
   }
@@ -439,22 +448,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).join('');
     var lignes = d.lignes.length ? d.lignes.map(function(l){
       var pris = !!LOT.choix[l.id];
-      var deja = l.regime === 'liq_no' ? '<span class="pill liq"><span class="ic">🟡</span> déjà</span>'
-        : l.regime === 'final' ? '<span class="pill vfin"><span class="ic">🔴</span> déjà</span>' : '';
+      var deja = l.regime === 'liq_no' ? '<span class="pill liq"><span class="ic">🟡</span> ${T("déjà")}</span>'
+        : l.regime === 'final' ? '<span class="pill vfin"><span class="ic">🔴</span> ${T("déjà")}</span>' : '';
       return '<label class="case' + (pris ? ' pris' : '') + '">'
         + '<input type="checkbox" data-lotprod="' + esc(l.id) + '"' + (pris ? ' checked' : '') + '>'
         + '<span class="pastille" style="background:' + esc(l.couleur) + '"></span>'
         + '<span class="nom">' + esc(l.nom) + '</span>'
         + '<span class="app">' + esc(l.categorie) + (l.sku ? ' · ' + esc(l.sku) : '') + ' ' + deja + '</span>'
         + '</label>';
-    }).join('') : '<div class="vide">Aucun produit trouvé.</div>';
+    }).join('') : '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     var nav = d.pages > 1
-      ? '<div class="pager"><span class="gauche">' + d.total + ' produit' + (d.total === 1 ? '' : 's') + '</span>'
+      ? '<div class="pager"><span class="gauche">' + d.total + (d.total === 1 ? '${T(" produit")}' : '${T(" produits")}') + '</span>'
         + '<button class="mini" data-lotpage="' + (d.page - 1) + '"' + (d.page === 0 ? ' disabled' : '') + '>←</button>'
-        + '<span>Page ' + (d.page + 1) + ' / ' + d.pages + '</span>'
+        + '<span>${T("Page ")}' + (d.page + 1) + ' / ' + d.pages + '</span>'
         + '<button class="mini" data-lotpage="' + (d.page + 1) + '"'
         + (d.page >= d.pages - 1 ? ' disabled' : '') + '>→</button></div>'
-      : '<div class="pager"><span class="gauche">' + d.total + ' produit' + (d.total === 1 ? '' : 's') + '</span></div>';
+      : '<div class="pager"><span class="gauche">' + d.total + (d.total === 1 ? '${T(" produit")}' : '${T(" produits")}') + '</span></div>';
 
     var mode = function(v, txt){
       return '<label class="mode' + (LOT.mode === v ? ' pris' : '') + '">'
@@ -464,8 +473,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var choisis = LOT.ordre.length ? LOT.ordre.map(function(id){
       var it = LOT.choix[id];
       return '<div class="choisi"><span class="nom">' + esc(it.nom) + '</span>'
-        + '<button class="mini" data-lototer="' + esc(id) + '" title="Enlever de la sélection">✕</button></div>';
-    }).join('') : '<div class="vide" style="padding:.8rem">Cochez des produits à gauche.</div>';
+        + '<button class="mini" data-lototer="' + esc(id) + '" title="${T("Enlever de la sélection")}">✕</button></div>';
+    }).join('') : '<div class="vide" style="padding:.8rem">${T("Cochez des produits à gauche.")}</div>';
 
     /* ⚠ CHAQUE MORCEAU CONDITIONNEL DANS SA VARIABLE, jamais un ternaire a cheval
        sur plusieurs lignes de concatenation. Deux fautes s y sont glissees en
@@ -473,8 +482,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        est une faute de syntaxe. Et comme tout ce script vit dans un litteral de
        gabarit, un controle de syntaxe du FICHIER ne voit NI l un NI l autre :
        la fenetre serait restee blanche, sans un mot. */
-    var btnRien = LOT.ordre.length ? '<button class="mini" data-lotrien="1">Tout décocher</button>' : '';
-    var btnCatsRien = LOT.cats.length ? '<button class="mini" data-lotcatrien="1">Toutes</button>' : '';
+    var btnRien = LOT.ordre.length ? '<button class="mini" data-lotrien="1">${T("Tout décocher")}</button>' : '';
+    var btnCatsRien = LOT.cats.length ? '<button class="mini" data-lotcatrien="1">${T("Toutes")}</button>' : '';
     var barreCats = pilCats
       ? '<div class="barreoutils" style="margin-bottom:.45rem">' + pilCats + btnCatsRien + '</div>'
       : '';
@@ -482,39 +491,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var chkPer = (LOT.duree === 'period') ? ' checked' : '';
     var blocDates = (LOT.duree === 'period')
       ? '<div class="dates">'
-        + '<div><label for="lot-du">Du</label><input type="date" id="lot-du" value="' + esc(LOT.du) + '"></div>'
-        + '<div><label for="lot-au">Au</label><input type="date" id="lot-au" value="' + esc(LOT.au) + '"></div>'
+        + '<div><label for="lot-du">${T("Du")}</label><input type="date" id="lot-du" value="' + esc(LOT.du) + '"></div>'
+        + '<div><label for="lot-au">${T("Au")}</label><input type="date" id="lot-au" value="' + esc(LOT.au) + '"></div>'
         + '</div>'
       : '';
     return '<div class="voile" id="lot-voile"><div class="boite">'
-      + '<h3>＋ Mettre des produits en régime<span class="dt" style="margin-left:auto">étape 1 sur 2</span></h3>'
+      + '<h3>${T("＋ Mettre des produits en régime")}<span class="dt" style="margin-left:auto">${T("étape 1 sur 2")}</span></h3>'
       + '<div class="deux">'
-      +   '<div class="col"><div class="bloc"><div class="titre">Les produits</div>'
+      +   '<div class="col"><div class="bloc"><div class="titre">${T("Les produits")}</div>'
       +     '<div class="barreoutils" style="margin-bottom:.45rem">'
-      +       '<input aria-label="Nom, SKU" class="rech" id="lot-rech" type="search" placeholder="Nom, SKU…" value="' + esc(LOT.q) + '">'
-      +       '<button class="mini" data-lottout="1">Tout cocher <span class="n">' + d.total + '</span></button>'
+      +       '<input aria-label="${T("Nom, SKU")}" class="rech" id="lot-rech" type="search" placeholder="${T("Nom, SKU…")}" value="' + esc(LOT.q) + '">'
+      +       '<button class="mini" data-lottout="1">${T("Tout cocher ")}<span class="n">' + d.total + '</span></button>'
       +       btnRien
       +     '</div>'
       +     barreCats
       +     '<div class="liste">' + lignes + '</div>' + nav
       +   '</div></div>'
-      +   '<div class="col"><div class="bloc"><div class="titre">Le régime</div>'
+      +   '<div class="col"><div class="bloc"><div class="titre">${T("Le régime")}</div>'
       +     '<div style="display:flex;flex-direction:column;gap:.35rem">'
-      +       mode('liq_no', 'Liquidation') + mode('final', 'Vente finale')
+      +       mode('liq_no', '${T("Liquidation")}') + mode('final', '${T("Vente finale")}')
       +     '</div>'
-      +     '<div class="titre" style="margin:.7rem 0 .4rem">Durée</div>'
+      +     '<div class="titre" style="margin:.7rem 0 .4rem">${T("Durée")}</div>'
       +     '<label class="duree"><input type="radio" name="lot-duree" data-lotduree="depletion"'
-      +       chkDep + '> Jusqu’à épuisement de l’inventaire</label>'
+      +       chkDep + '> ${T("Jusqu’à épuisement de l’inventaire")}</label>'
       +     '<label class="duree" style="margin-top:.25rem"><input type="radio" name="lot-duree" data-lotduree="period"'
-      +       chkPer + '> Période fixe</label>'
+      +       chkPer + '> ${T("Période fixe")}</label>'
       +     blocDates
-      +     '<div class="titre" style="margin:.7rem 0 .4rem">Choisis <span class="n">' + LOT.ordre.length + '</span></div>'
+      +     '<div class="titre" style="margin:.7rem 0 .4rem">${T("Choisis ")}<span class="n">' + LOT.ordre.length + '</span></div>'
       +     '<div class="liste" style="max-height:11rem">' + choisis + '</div>'
       +   '</div></div>'
       + '</div>'
       + '<div class="pied-boite">'
-      +   '<button class="gauche" data-lotfermer="1">Annuler</button>'
-      +   '<button class="prim" data-lotsuite="1"' + (LOT.ordre.length ? '' : ' disabled') + '>Continuer →</button>'
+      +   '<button class="gauche" data-lotfermer="1">${T("Annuler")}</button>'
+      +   '<button class="prim" data-lotsuite="1"' + (LOT.ordre.length ? '' : ' disabled') + '>${T("Continuer →")}</button>'
       + '</div>'
       + '</div></div>';
   }
@@ -522,30 +531,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueLotResume(){
     var estLiq = LOT.mode === 'liq_no';
     var quand = LOT.duree === 'period'
-      ? 'Du ' + esc(LOT.du) + ' au ' + esc(LOT.au)
-      : 'Jusqu’à épuisement de l’inventaire';
+      ? '${T("Du ")}' + esc(LOT.du) + '${T(" au ")}' + esc(LOT.au)
+      : '${T("Jusqu’à épuisement de l’inventaire")}';
     var liste = LOT.ordre.map(function(id){
       return '<div class="choisi"><span class="nom">' + esc(LOT.choix[id].nom) + '</span></div>'; }).join('');
     return '<div class="voile" id="lot-voile"><div class="boite etroite">'
-      + '<h3>Résumé avant d’appliquer<span class="dt" style="margin-left:auto">étape 2 sur 2</span></h3>'
+      + '<h3>${T("Résumé avant d’appliquer")}<span class="dt" style="margin-left:auto">${T("étape 2 sur 2")}</span></h3>'
       + '<div class="resume ' + (estLiq ? 'liq' : 'vfin') + '">'
-      +   '<div class="quoi">' + (estLiq ? '<span class="ic">🟡</span> Liquidation — aucun retour' : '<span class="ic">🔴</span> Vente finale — aucun retour') + '</div>'
+      +   '<div class="quoi">' + (estLiq ? '<span class="ic">🟡</span> ${T("Liquidation — aucun retour")}' : '<span class="ic">🔴</span> ${T("Vente finale — aucun retour")}') + '</div>'
       +   '<div class="quand">⏳ ' + quand + '</div></div>'
       + '<div class="titre" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin:0 0 .4rem">'
-      +   LOT.ordre.length + ' produit' + (LOT.ordre.length === 1 ? '' : 's') + ' qui changent de régime</div>'
+      +   LOT.ordre.length + (LOT.ordre.length === 1 ? '${T(" produit qui change de régime")}' : '${T(" produits qui changent de régime")}') + '</div>'
       + '<div class="liste">' + liste + '</div>'
-      + '<div class="gare"><span class="ic">⚠</span> Ces produits n’accepteront plus de retour, et la boutique l’annoncera sur '
-      +   'leur fiche. Vous pourrez les retirer un par un depuis cet écran.</div>'
+      + '<div class="gare"><span class="ic">⚠</span> ${T("Ces produits n’accepteront plus de retour, et la boutique l’annoncera sur ")}'
+      +   '${T("leur fiche. Vous pourrez les retirer un par un depuis cet écran.")}</div>'
       + '<div class="pied-boite">'
-      +   '<button class="gauche" data-lotretour="1">← Modifier la sélection</button>'
-      +   '<button data-lotfermer="1">Annuler</button>'
-      +   '<button class="prim" data-lotappliquer="1"><span class="ic">✅</span> Appliquer</button>'
+      +   '<button class="gauche" data-lotretour="1">${T("← Modifier la sélection")}</button>'
+      +   '<button data-lotfermer="1">${T("Annuler")}</button>'
+      +   '<button class="prim" data-lotappliquer="1"><span class="ic">✅</span> ${T("Appliquer")}</button>'
       + '</div>'
       + '</div></div>';
   }
 
   function appliquerLot(){
-    dire('Application…');
+    dire('${T("Application…")}');
     appeler('liquidation:lot', { ids:LOT.ordre, mode:LOT.mode, duree:LOT.duree, du:LOT.du, au:LOT.au })
       .then(function(r){
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
@@ -554,8 +563,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         ONGLET = (r.mode === 'liq_no') ? 'liq' : 'final';
         return charger().then(function(ok){
           if (ok) dessiner();
-          dire(n + ' produit' + (n === 1 ? '' : 's') + ' en '
-            + (r.mode === 'liq_no' ? 'liquidation' : 'vente finale') + '.', 'bon');
+          /* ⚠ Le singulier, le pluriel et le regime : chacun entier. */
+          dire(n + (n === 1 ? '${T(" produit")}' : '${T(" produits")}')
+            + (r.mode === 'liq_no' ? '${T(" en liquidation.")}' : '${T(" en vente finale.")}'), 'bon');
         });
       });
   }
@@ -588,31 +598,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var lignes = cs.length ? cs.map(function(c){
       var pris = !!CAT.pris[c.cle];
       var deja = [];
-      if (c.liq) deja.push(c.liq + ' en liquidation');
-      if (c.finale) deja.push(c.finale + ' en vente finale');
+      if (c.liq) deja.push(c.liq + '${T(" en liquidation")}');
+      if (c.finale) deja.push(c.finale + '${T(" en vente finale")}');
       return '<label class="case' + (pris ? ' pris' : '') + '">'
         + '<input type="checkbox" data-catcle="' + esc(c.cle) + '"' + (pris ? ' checked' : '') + '>'
         + '<span class="pastille" style="background:' + esc(c.couleur) + '"></span>'
         + '<span class="nom">' + esc(c.nom) + '</span>'
-        + '<span class="app">' + c.produits + ' produit' + (c.produits === 1 ? '' : 's')
+        + '<span class="app">' + c.produits + (c.produits === 1 ? '${T(" produit")}' : '${T(" produits")}')
         + (deja.length ? ' · ' + esc(deja.join(' · ')) : '') + '</span>'
         + '</label>';
-    }).join('') : '<div class="vide">Aucune catégorie trouvée.</div>';
+    }).join('') : '<div class="vide">${T("Aucune catégorie trouvée.")}</div>';
     var n = nbCatPris();
     return '<div class="voile" id="cat-voile"><div class="boite etroite">'
-      + '<h3>＋ Par catégorie</h3>'
-      + '<div class="dt" style="margin:-.35rem 0 .55rem">Choisissez le régime, puis les catégories à y placer. '
-      +   'Les produits concernés sont ceux qui s’y trouvent <strong>maintenant</strong>.</div>'
+      + '<h3>${T("＋ Par catégorie")}</h3>'
+      + '<div class="dt" style="margin:-.35rem 0 .55rem">${T("Choisissez le régime, puis les catégories à y placer. ")}'
+      +   '${T("Les produits concernés sont ceux qui s’y trouvent <strong>maintenant</strong>.")}</div>'
       + '<div style="display:flex;gap:.5rem;margin-bottom:.6rem;flex-wrap:wrap">'
-      +   mode('liq_no', '<span class="ic">🟡</span> Liquidation') + mode('final', '<span class="ic">🔴</span> Vente finale') + '</div>'
+      +   mode('liq_no', '<span class="ic">🟡</span> ${T("Liquidation")}') + mode('final', '<span class="ic">🔴</span> ${T("Vente finale")}') + '</div>'
       + '<div class="barreoutils" style="margin-bottom:.5rem">'
-      +   '<input aria-label="Rechercher une catégorie" class="rech" id="cat-rech" type="search" placeholder="Rechercher une catégorie…" value="' + esc(CAT.q) + '">'
-      +   fil('', 'Toutes') + fil('liq', '<span class="ic">🟡</span> déjà') + fil('final', '<span class="ic">🔴</span> déjà') + '</div>'
+      +   '<input aria-label="${T("Rechercher une catégorie")}" class="rech" id="cat-rech" type="search" placeholder="${T("Rechercher une catégorie…")}" value="' + esc(CAT.q) + '">'
+      +   fil('', '${T("Toutes")}') + fil('liq', '<span class="ic">🟡</span> ${T("déjà")}') + fil('final', '<span class="ic">🔴</span> ${T("déjà")}') + '</div>'
       + '<div class="liste">' + lignes + '</div>'
       + '<div class="pied-boite">'
-      +   '<button class="gauche" data-catfermer="1">Annuler</button>'
-      +   '<button class="danger" data-catappliquer="normal"' + (n ? '' : ' disabled') + '>Retirer du régime</button>'
-      +   '<button class="prim" data-catappliquer="mode"' + (n ? '' : ' disabled') + '>Appliquer'
+      +   '<button class="gauche" data-catfermer="1">${T("Annuler")}</button>'
+      +   '<button class="danger" data-catappliquer="normal"' + (n ? '' : ' disabled') + '>${T("Retirer du régime")}</button>'
+      +   '<button class="prim" data-catappliquer="mode"' + (n ? '' : ' disabled') + '>${T("Appliquer")}'
       +     '<span class="n">' + n + '</span></button>'
       + '</div>'
       + '</div></div>';
@@ -621,7 +631,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function appliquerCat(quoi){
     var cles = Object.keys(CAT.pris);
     var mode = (quoi === 'normal') ? 'normal' : CAT.mode;
-    dire('Application…');
+    dire('${T("Application…")}');
     appeler('liquidation:parCategorie', { cats:cles, mode:mode }).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       var n = r.n, nc = r.cats;
@@ -629,10 +639,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (mode !== 'normal') ONGLET = (mode === 'liq_no') ? 'liq' : 'final';
       return charger().then(function(ok){
         if (ok) dessiner();
-        var quoiTxt = mode === 'normal' ? 'régime retiré'
-          : mode === 'liq_no' ? 'liquidation' : 'vente finale';
-        dire(n + ' produit' + (n === 1 ? '' : 's') + ' dans ' + nc + ' catégorie'
-          + (nc === 1 ? '' : 's') + ' — ' + quoiTxt + '.', 'bon');
+        /* ⚠ Meme raison : la phrase entiere, jamais le mot du regime seul. */
+        var quoiTxt = mode === 'normal' ? '${T(" — régime retiré.")}'
+          : mode === 'liq_no' ? '${T(" — liquidation.")}' : '${T(" — vente finale.")}';
+        dire(n + (n === 1 ? '${T(" produit dans ")}' : '${T(" produits dans ")}') + nc
+          + (nc === 1 ? '${T(" catégorie")}' : '${T(" catégories")}') + quoiTxt, 'bon');
       });
     });
   }
@@ -747,7 +758,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var connus = {};
     (LOT.data.lignes || []).forEach(function(l){ connus[l.id] = l.nom; });
     (LOT.data.ids || []).forEach(function(id){
-      if (!LOT.choix[id]) { LOT.choix[id] = { nom: connus[id] || ('produit ' + id) }; LOT.ordre.push(id); }
+      if (!LOT.choix[id]) { LOT.choix[id] = { nom: connus[id] || ('${T("produit")} ' + id) }; LOT.ordre.push(id); }
     });
     dessiner();
   }

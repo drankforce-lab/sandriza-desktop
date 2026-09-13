@@ -115,6 +115,36 @@ const APRES_EGAL = /=\s*$/;
 /* Ce qui ouvre un nom de propriete : une accolade, ou la virgule qui separe
    deux entrees. ⚠ Le `:` seul ne suffit pas — « Total : 12 » en porte un. */
 const OUVRE_OBJET = /[{,]\s*$/;
+/* ⚠⚠⚠ ONZIEME SIGNATURE — UNE PARENTHESE QUI N EST PAS DANS UNE CHAINE.
+   Mesure du 2026-09-13, dans `sociaux` : la cle « actif » (la pastille d un
+   patron de publication) s est posee sur le NOM DU PARAMETRE et sur la
+   CONDITION du bouton d ancrage :
+       window.szModeAncre = function(${T("actif")}){ … if (${T("actif")}) {
+   Les dix signatures d avant ne voyaient rien : ni `(`-devant, ni `=`, ni
+   identifiant colle. Et la page FRANCAISE restait juste — T rend le meme mot —
+   donc les deux mesures de langue annonçaient zero. En anglais, le parametre se
+   serait appele `active` et la condition aurait lu une variable inexistante :
+   le bouton d ancrage mort, EN ANGLAIS SEULEMENT.
+   ⚠ Ce qui distingue : UN TEXTE AFFICHE VIT TOUJOURS DANS UNE CHAINE. On ne
+   regarde donc pas le caractere d avant — il ment : `' (${T("sautée")})'` a lui
+   aussi une parenthese devant, et c est du texte. On relit la LIGNE depuis son
+   debut et on demande si, arrive a l enveloppe, un guillemet est encore ouvert.
+   ⚠ Sur-refuser est sans danger ; ce banc l a redit cinq fois. Mais accuser du
+   travail juste fait cesser de lire un banc — d ou la relecture de la ligne
+   plutot qu une regle a un caractere. */
+const PARENTHESE_AVANT = /\(\s*$/;
+const dansUneChaine = (ligne) => {
+  let q = '';
+  for (let k = 0; k < ligne.length; k++) {
+    const c = ligne[k];
+    if (q) {
+      if (c === '\\') { k++; continue; }
+      if (c === q) q = '';
+    } else if (c === '"' || c === "'") q = c;
+  }
+  return !!q;
+};
+const debutDeLigne = (s, i) => { const n = s.lastIndexOf('\n', i - 1); return s.slice(n + 1, i); };
 
 const fautes = [];
 let fenetres = 0, enveloppes = 0;
@@ -158,6 +188,9 @@ for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
     else if (apres === '{') raison = 'suivie d une accolade — c est un SELECTEUR CSS, pas un texte';
     else if (APRES_EGAL.test(s.slice(Math.max(0, i - 12), i)))
       raison = 'precedee d un = — c est une valeur affectee ou comparee, pas un texte';
+    else if (PARENTHESE_AVANT.test(s.slice(Math.max(0, i - 12), i))
+             && !dansUneChaine(debutDeLigne(s, i)))
+      raison = 'precedee d une parenthese HORS CHAINE — nom de parametre ou condition, pas un texte';
     else if (IDENT.test(avant) || IDENT.test(apres)) raison = 'collee a un identifiant — c est un morceau de nom';
     if (!raison) continue;
     const ligne = s.slice(0, i).split('\n').length;
