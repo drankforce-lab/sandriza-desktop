@@ -25,6 +25,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('fal');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -102,15 +106,15 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 function pageFal(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Traitements d’image — Administration Sandriza</title>
+<title>${T("Traitements d’image — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.cerveau}</span><h1>Traitements d’image</h1>
+<div class="tete"><span class="ico">${ICO.cerveau}</span><h1>${T("Traitements d’image")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets">
-  <button id="o-conso" class="on">Consommation</button>
-  <button id="o-hist">Historique</button>
+  <button id="o-conso" class="on">${T("Consommation")}</button>
+  <button id="o-hist">${T("Historique")}</button>
 </div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -120,8 +124,8 @@ function pageFal(ouverture) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -138,16 +142,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:              'La lecture a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:              '${T("La lecture a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -164,9 +168,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      separement est ce qui permet de voir OU l argent passe — et, le jour ou le
      resultat decoit, laquelle des trois etapes a mal travaille. */
   var GESTES = {
-    detourage: 'Détourage', masque: 'Repérage du vêtement',
-    fantome: 'Mannequin retiré',
-    humain: 'Porté par un mannequin', essayage: 'Essayage virtuel'
+    detourage: '${T("Détourage")}', masque: '${T("Repérage du vêtement")}',
+    fantome: '${T("Mannequin retiré")}',
+    humain: '${T("Porté par un mannequin")}', essayage: '${T("Essayage virtuel")}'
   };
   function sous_(v){
     var n = Number(v) || 0;
@@ -197,18 +201,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var reel;
     if (PR && PR.compte && PR.compte.available != null) {
       var c = PR.compte;
-      reel = '<div class="t"><div class="l">Crédits Photoroom (réels)</div><div class="n">'
+      reel = '<div class="t"><div class="l">${T("Crédits Photoroom (réels)")}</div><div class="n">'
         + c.available + (c.subscription != null ? ' <span class="s">/ ' + c.subscription + '</span>' : '')
-        + '</div><div class="s">' + (c.plan ? 'offre ' + esc(c.plan) + ' · ' : '')
-        + 'lus en direct de Photoroom</div></div>';
+        + '</div><div class="s">' + (c.plan ? '${T("offre ")}' + esc(c.plan) + ' · ' : '')
+        + '${T("lus en direct de Photoroom")}</div></div>';
     } else {
-      reel = '<div class="t"><div class="l">Crédits Photoroom (réels)</div><div class="n">—</div>'
-        + '<div class="s">' + (PR ? 'indisponible (clé de production requise)' : 'non lu') + '</div></div>';
+      reel = '<div class="t"><div class="l">${T("Crédits Photoroom (réels)")}</div><div class="n">—</div>'
+        + '<div class="s">' + (PR ? '${T("indisponible (clé de production requise)")}' : '${T("non lu")}') + '</div></div>';
     }
     var sb = (PR && PR.sandbox) ? PR.sandbox : { utilise: 0, quotaMois: 1000 };
-    var sand = '<div class="t"><div class="l">Aperçus sandbox</div><div class="n">'
+    var sand = '<div class="t"><div class="l">${T("Aperçus sandbox")}</div><div class="n">'
       + (sb.utilise || 0) + ' <span class="s">/ ' + (sb.quotaMois || 1000) + '</span></div>'
-      + '<div class="s">ce mois · estimé · filigrané</div></div>';
+      + '<div class="s">${T("ce mois · estimé · filigrané")}</div></div>';
     /* fal.ai : un SOLDE RESTANT, comme Photoroom, mais calculé — fal n'expose
        aucun solde par API. Restant = montant saisi en Configuration MOINS la
        consommation mesurée depuis la saisie ; il diminue donc à chaque traitement
@@ -217,14 +221,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var reste = solde - conso; if (reste < 0) { reste = 0; }
     var fal;
     if (solde > 0) {
-      fal = '<div class="t"><div class="l">Solde fal.ai (restant)</div><div class="n">' + sous_(reste)
-        + '</div><div class="s">' + (D.soldeDate ? 'saisi le ' + esc(jourCourt(D.soldeDate)) + ' · ' : '')
-        + 'diminue à chaque traitement</div></div>';
+      fal = '<div class="t"><div class="l">${T("Solde fal.ai (restant)")}</div><div class="n">' + sous_(reste)
+        + '</div><div class="s">' + (D.soldeDate ? '${T("saisi le ")}' + esc(jourCourt(D.soldeDate)) + ' · ' : '')
+        + '${T("diminue à chaque traitement")}</div></div>';
     } else {
-      fal = '<div class="t"><div class="l">Solde fal.ai (restant)</div><div class="n">—</div>'
-        + '<div class="s">à saisir en Configuration</div></div>';
+      fal = '<div class="t"><div class="l">${T("Solde fal.ai (restant)")}</div><div class="n">—</div>'
+        + '<div class="s">${T("à saisir en Configuration")}</div></div>';
     }
-    return '<div class="carte"><h2>Crédits &amp; solde</h2><div class="tuiles">'
+    return '<div class="carte"><h2>${T("Crédits &amp; solde")}</h2><div class="tuiles">'
       + reel + sand + fal + '</div></div>';
   }
 
@@ -249,27 +253,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* La jauge change de couleur AVANT d être pleine : découvrir le plafond au
        moment où la file s arrête, c est le découvrir trop tard. */
     var teinte = pct >= 100 ? '#e08a8a' : pct >= 80 ? '#d8b57a' : '#6ea8a1';
-    var h = '<div class="carte"><h2>Plafond mensuel de dépense</h2>';
+    var h = '<div class="carte"><h2>${T("Plafond mensuel de dépense")}</h2>';
     h += '';
     h += '<label class="rc" style="display:flex;gap:.5rem;align-items:center;margin:.6rem 0">'
       + '<input type="checkbox" id="pl-actif"' + (b.actif ? ' checked' : '') + '> '
-      + '<span><strong>Appliquer un plafond mensuel</strong></span></label>';
-    h += '<div class="ch" style="max-width:16rem"><label for="pl-montant">Montant autorisé par mois ($US)</label>'
+      + '<span><strong>${T("Appliquer un plafond mensuel")}</strong></span></label>';
+    h += '<div class="ch" style="max-width:16rem"><label for="pl-montant">${T("Montant autorisé par mois ($US)")}</label>'
       + '<input id="pl-montant" type="number" min="0" step="1" value="'
       + (Number(b.mensuel) || 0) + '"></div>';
     if (b.actif && b.mensuel > 0) {
       h += '<div style="margin:.8rem 0 .2rem;height:.5rem;border-radius:99px;background:#22303f;overflow:hidden">'
         + '<i style="display:block;height:100%;width:' + pct + '%;background:' + teinte + '"></i></div>'
-        + '<p class="dt">' + sous_(b.depense) + ' dépensés sur ' + sous_(b.mensuel)
-        + ' pour ' + esc(b.mois || '') + ' — il reste <strong>' + sous_(b.restant) + '</strong>.</p>';
+        + '<p class="dt">' + sous_(b.depense) + '${T(" dépensés sur ")}' + sous_(b.mensuel)
+        + '${T(" pour ")}' + esc(b.mois || '') + '${T(" — il reste ")}<strong>' + sous_(b.restant) + '</strong>.</p>';
     } else if (b.actif) {
-      h += '<p class="dt" style="color:#e08a8a">Plafond actif mais fixé à 0 : <strong>tout traitement '
-        + 'payant est refusé</strong>. Posez un montant, ou décochez.</p>';
+      h += '<p class="dt" style="color:#e08a8a">${T("Plafond actif mais fixé à 0 : <strong>tout traitement ")}'
+        + '${T("payant est refusé</strong>. Posez un montant, ou décochez.")}</p>';
     } else {
-      h += '<p class="dt">' + sous_(b.depense) + ' dépensés ce mois-ci (' + esc(b.mois || '')
-        + '). Aucun plafond n’est appliqué : rien n’arrêtera un lot.</p>';
+      h += '<p class="dt">' + sous_(b.depense) + '${T(" dépensés ce mois-ci (")}' + esc(b.mois || '')
+        + '${T("). Aucun plafond n’est appliqué : rien n’arrêtera un lot.")}</p>';
     }
-    h += '<div class="fin2" style="margin-top:.6rem"><button class="prim" id="pl-poser">Enregistrer le plafond</button>'
+    h += '<div class="fin2" style="margin-top:.6rem"><button class="prim" id="pl-poser">${T("Enregistrer le plafond")}</button>'
       + ' <span id="pl-dit" class="dt"></span></div>';
     return h + '</div>';
   }
@@ -279,7 +283,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      dernière fois, sinon un écran figé passerait pour à jour. */
   function ligneMaj(){
     return '<div class="barreoutils"><span class="droite" style="font-size:.74rem;color:var(--tx2)">'
-      + '<span id="maj">' + (MAJ ? 'Dernière actualisation le ' + esc(MAJ) : 'Actualisation…') + '</span>'
+      + '<span id="maj">' + (MAJ ? '${T("Dernière actualisation le ")}' + esc(MAJ) : '${T("Actualisation…")}') + '</span>'
       + '</span></div>';
   }
 
@@ -295,13 +299,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var echecs = (D.appels || 0) - reussis;
 
     h.push('<div class="tuiles">'
-      + '<div class="t"><div class="l">Consommation totale</div><div class="n">' + sous_(D.total) + '</div>'
-      + '<div class="s">depuis le début du suivi</div></div>'
-      + '<div class="t"><div class="l">Appels</div><div class="n">' + (D.appels || 0) + '</div>'
-      + '<div class="s">' + reussis + ' réussis · ' + echecs + ' en échec</div></div>'
-      + '<div class="t"><div class="l">Coût moyen</div><div class="n">'
+      + '<div class="t"><div class="l">${T("Consommation totale")}</div><div class="n">' + sous_(D.total) + '</div>'
+      + '<div class="s">${T("depuis le début du suivi")}</div></div>'
+      + '<div class="t"><div class="l">${T("Appels")}</div><div class="n">' + (D.appels || 0) + '</div>'
+      + '<div class="s">' + reussis + '${T(" réussis · ")}' + echecs + '${T(" en échec")}</div></div>'
+      + '<div class="t"><div class="l">${T("Coût moyen")}</div><div class="n">'
       + sous_((D.appels ? (D.total / D.appels) : 0)) + '</div>'
-      + '<div class="s">par appel</div></div>'
+      + '<div class="s">${T("par appel")}</div></div>'
       + '</div>');
 
     // Les trente derniers jours
@@ -309,23 +313,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (j.length) {
       var max = 0;
       j.forEach(function(x){ if (x.cout > max) max = x.cout; });
-      h.push('<div class="carte"><h2>Trente derniers jours</h2><div class="jours">'
+      h.push('<div class="carte"><h2>${T("Trente derniers jours")}</h2><div class="jours">'
         + j.map(function(x){
             var ht = max ? Math.max(3, Math.round(x.cout * 100 / max)) : 3;
             return '<div class="b" style="height:' + ht + '%" title="' + esc(x.jour) + ' · '
-              + x.appels + ' appel(s) · ' + sous_(x.cout) + '"></div>';
+              + x.appels + '${T(" appel(s) · ")}' + sous_(x.cout) + '"></div>';
           }).join('')
-        + '</div><p class="dt">Du ' + esc(j[0].jour) + ' au ' + esc(j[j.length - 1].jour)
-        + '. Survolez une barre pour le détail du jour.</p></div>');
+        + '</div><p class="dt">${T("Du ")}' + esc(j[0].jour) + '${T(" au ")}' + esc(j[j.length - 1].jour)
+        + '${T(". Survolez une barre pour le détail du jour.")}</p></div>');
     }
 
-    h.push('<div class="carte"><h2>Par traitement</h2>');
+    h.push('<div class="carte"><h2>${T("Par traitement")}</h2>');
     if (!(D.parModele || []).length) {
-      h.push('<div class="vide">Aucun traitement n’a encore été lancé.</div>');
+      h.push('<div class="vide">${T("Aucun traitement n’a encore été lancé.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>Traitement</th><th>Modèle</th><th class="num">Appels</th>'
-        + '<th class="num">Réussis</th><th class="num">Coût</th><th class="num">Unitaire</th>'
-        + '<th>Prix</th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("Traitement")}</th><th>${T("Modèle")}</th><th class="num">${T("Appels")}</th>'
+        + '<th class="num">${T("Réussis")}</th><th class="num">${T("Coût")}</th><th class="num">${T("Unitaire")}</th>'
+        + '<th>${T("Prix")}</th></tr></thead><tbody>');
       D.parModele.forEach(function(m){
         var mesure = m.coutsReels >= m.appels;
         h.push('<tr>'
@@ -336,7 +340,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td class="num">' + sous_(m.cout) + '</td>'
           + '<td class="num">' + sous_(m.appels ? (m.cout / m.appels) : 0) + '</td>'
           + '<td><span class="pill ' + (mesure ? 'ok' : 'g') + '">'
-          + (mesure ? 'mesuré' : (m.coutsReels ? 'partiel' : 'estimé')) + '</span></td>'
+          + (mesure ? '${T("mesuré")}' : (m.coutsReels ? '${T("partiel")}' : '${T("estimé")}')) + '</span></td>'
           + '</tr>');
       });
       h.push('</tbody></table>');
@@ -362,7 +366,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function lignesHist(){
     var arr = evtsFiltres();
-    if (!arr.length) { return '<tr><td colspan="8" class="vide">Aucun appel pour ce filtre.</td></tr>'; }
+    if (!arr.length) { return '<tr><td colspan="8" class="vide">${T("Aucun appel pour ce filtre.")}</td></tr>'; }
     var out = [];
     arr.forEach(function(e){
       var prov = evtProv(e);
@@ -377,10 +381,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td>' + photo + '</td>'
         + '<td class="dt">' + esc(e.qui || '—') + '</td>'
         + '<td class="num">' + duree(e.ms) + '</td>'
-        + '<td class="num">' + sous_(e.cout) + (e.coutReel ? '' : ' <span class="dt">est.</span>') + '</td>'
+        + '<td class="num">' + sous_(e.cout) + (e.coutReel ? '' : ' <span class="dt">${T("est.")}</span>') + '</td>'
         + '<td>' + (e.ok
-            ? (e.apercu ? '<span class="pill apr">Aperçu gratuit</span>' : '<span class="pill ok">réussi</span>')
-            : '<span class="pill non">échec</span>') + '</td>'
+            ? (e.apercu ? '<span class="pill apr">${T("Aperçu gratuit")}</span>' : '<span class="pill ok">${T("réussi")}</span>')
+            : '<span class="pill non">${T("échec")}</span>') + '</td>'
         + '</tr>'
         // ⚠ LE MESSAGE D ERREUR EST RENDU TEL QUEL : << echec >> tout court n aide
         // personne ; << credit epuise >> ou << cle invalide >> se reglent vite.
@@ -393,17 +397,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var opt = function(v, t){ return '<option value="' + v + '"' + (FILT_PROV === v ? ' selected' : '') + '>' + t + '</option>'; };
     var h = [];
     h.push('<div class="barreoutils">'
-      + '<select id="h-prov" aria-label="Filtrer par service">'
-      + opt('tous', 'Toutes les opérations') + opt('fal', 'Fal.ai') + opt('photoroom', 'Photoroom') + '</select>'
-      + '<input id="h-q" type="search" aria-label="Filtrer par photo" placeholder="Filtrer par photo (nom ou PH-000000)" value="' + esc(FILT_Q || '')
+      + '<select id="h-prov" aria-label="${T("Filtrer par service")}">'
+      + opt('tous', '${T("Toutes les opérations")}') + opt('fal', 'Fal.ai') + opt('photoroom', 'Photoroom') + '</select>'
+      + '<input id="h-q" type="search" aria-label="${T("Filtrer par photo")}" placeholder="${T("Filtrer par photo (nom ou PH-000000)")}" value="' + esc(FILT_Q || '')
       + '" style="flex:1;min-width:13rem;background:var(--v05);color:var(--tx);'
       + 'border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem;font:inherit">'
       + '<span class="droite" style="font-size:.74rem;color:var(--tx2)"><span id="maj">'
-      + (MAJ ? 'Dernière actualisation le ' + esc(MAJ) : 'Actualisation…') + '</span></span></div>');
-    h.push('<div class="carte"><h2>Cinq cents derniers appels</h2>');
-    h.push('<table><thead><tr><th>Quand</th><th>Opération</th><th>Traitement</th>'
-      + '<th>Photo</th><th>Par</th><th class="num">Durée</th><th class="num">Coût</th>'
-      + '<th>État</th></tr></thead><tbody id="h-body">' + lignesHist() + '</tbody></table>');
+      + (MAJ ? '${T("Dernière actualisation le ")}' + esc(MAJ) : '${T("Actualisation…")}') + '</span></span></div>');
+    h.push('<div class="carte"><h2>${T("Cinq cents derniers appels")}</h2>');
+    h.push('<table><thead><tr><th>${T("Quand")}</th><th>${T("Opération")}</th><th>${T("Traitement")}</th>'
+      + '<th>${T("Photo")}</th><th>${T("Par")}</th><th class="num">${T("Durée")}</th><th class="num">${T("Coût")}</th>'
+      + '<th>${T("État")}</th></tr></thead><tbody id="h-body">' + lignesHist() + '</tbody></table>');
     h.push('</div>');
     return h.join('');
   }
@@ -428,11 +432,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          il ne doit pas s obtenir par un champ laissé vide. */
       if (actif && mensuel <= 0) {
         if (dt) { dt.style.color = '#e08a8a';
-          dt.textContent = 'Un plafond actif à 0 $ refuse tout traitement. Posez un montant, ou décochez.'; }
+          dt.textContent = '${T("Un plafond actif à 0 $ refuse tout traitement. Posez un montant, ou décochez.")}'; }
         return;
       }
       bt.disabled = true;
-      if (dt) { dt.style.color = ''; dt.textContent = 'Enregistrement…'; }
+      if (dt) { dt.style.color = ''; dt.textContent = '${T("Enregistrement…")}'; }
       appeler('fal:plafondPoser', [{ actif: actif, mensuel: mensuel }]).then(function(r){
         bt.disabled = false;
         if (!r || !r.ok) {
@@ -440,7 +444,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           dire(expliquer(r), 'err');
           return;
         }
-        dire('Plafond enregistré.', 'bon');
+        dire('${T("Plafond enregistré.")}', 'bon');
         /* ⚠ ON RECHARGE : la jauge se calcule sur la dépense du mois, que seul le
            relais connaît. La redessiner sur la valeur qu on vient de taper
            afficherait un restant inventé. */
@@ -466,7 +470,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.getElementById('o-hist').onclick = function(){ VUE = 'hist'; charger(false); };
 
   function charger(dit){
-    if (dit) dire('Lecture…');
+    if (dit) dire('${T("Lecture…")}');
     Promise.all([
       appeler('fal:suivi', [VUE === 'hist' ? 'journal' : 'resume']),
       appeler('photoroom:compte')
@@ -481,7 +485,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       D = r;
       MAJ = _horoNow();
-      sous.textContent = (D.appels || 0) + ' appel' + ((D.appels || 0) > 1 ? 's' : '')
+      /* ⚠ Le singulier et le pluriel, chacun entier. */
+      sous.textContent = (D.appels || 0) + ((D.appels || 0) > 1 ? '${T(" appels")}' : '${T(" appel")}')
         + ' · ' + sous_(D.total);
       dessiner();
       if (dit) dire('');
@@ -537,7 +542,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           charger(false);   // rechargement complet et silencieux (journal si historique)
         } else {
           var el = document.getElementById('maj');
-          if (el) el.textContent = 'Dernière actualisation le ' + MAJ;
+          if (el) el.textContent = '${T("Dernière actualisation le ")}' + MAJ;
         }
       });
     }, 5000);

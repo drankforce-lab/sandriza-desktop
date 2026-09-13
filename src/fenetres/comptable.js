@@ -26,6 +26,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('comptable');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -103,15 +107,15 @@ tbody tr:hover td{background:var(--v03)}
 function pageComptable(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Liens comptables — Administration Sandriza</title>
+<title>${T("Liens comptables — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.acctlink}</span><h1>Liens comptables</h1>
+<div class="tete"><span class="ico">${ICO.acctlink}</span><h1>${T("Liens comptables")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="onglets">
-  <button id="o-partages" class="on">Exercices partagés</button>
-  <button id="o-carnet">Carnet des comptables</button>
+  <button id="o-partages" class="on">${T("Exercices partagés")}</button>
+  <button id="o-carnet">${T("Carnet des comptables")}</button>
 </div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -127,17 +131,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Seul un super-administrateur peut remettre l’exercice à un comptable.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Seul un super-administrateur peut remettre l’exercice à un comptable.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var base = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var base = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     return base + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -174,8 +178,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // son origine est nulle, donc l API moderne du presse-papiers y est refusee.
     var fait = false;
     try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
-    bouton.textContent = fait ? '✓ Copié' : 'Ctrl+C';
-    setTimeout(function(){ bouton.textContent = 'Copier'; }, 2500);
+    bouton.textContent = fait ? '${T("✓ Copié")}' : 'Ctrl+C';
+    setTimeout(function(){ bouton.textContent = '${T("Copier")}'; }, 2500);
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -183,27 +187,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ════════════════════════════════════════════════════════════════════════
   function dessinerPartages(){
     var h = [];
-    h.push('<div class="barreoutils"><button class="prim" id="b-nouveau">+ Nouveau lien de l’exercice</button>'
-      + '<span class="droite"><button id="b-recharger">Recharger</button></span></div>');
+    h.push('<div class="barreoutils"><button class="prim" id="b-nouveau">${T("+ Nouveau lien de l’exercice")}</button>'
+      + '<span class="droite"><button id="b-recharger">${T("Recharger")}</button></span></div>');
 
     if (ETAT.avert) {
       h.push('<div class="carte" style="border-color:rgba(234,179,8,.4)"><div class="dt">'
-        + 'Le carnet est affiché, mais le registre des liens distants n’a pas répondu : '
+        + '${T("Le carnet est affiché, mais le registre des liens distants n’a pas répondu : ")}'
         + esc(ETAT.avert) + '</div></div>');
     }
     if (ETAT.neuf) h.push(carteNeuf());
     if (ETAT.formulaire) h.push(formulaire());
 
-    h.push('<div class="carte"><h2>Liens de l’exercice en cours</h2>');
+    h.push('<div class="carte"><h2>${T("Liens de l’exercice en cours")}</h2>');
     if (!ETAT.partages.length) {
-      h.push('<div class="vide">Aucun exercice n’a encore été partagé.</div>');
+      h.push('<div class="vide">${T("Aucun exercice n’a encore été partagé.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>État</th><th>Exercice</th><th>Destinataires</th>'
-        + '<th>Créé</th><th>Échéance</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("État")}</th><th>${T("Exercice")}</th><th>${T("Destinataires")}</th>'
+        + '<th>${T("Créé")}</th><th>${T("Échéance")}</th><th></th></tr></thead><tbody>');
       ETAT.partages.forEach(function(p){
         var etat = p.expire ? 'expire' : 'actif';
         h.push('<tr>'
-          + '<td><span class="pill ' + etat + '">' + (p.expire ? 'Expiré' : 'Actif') + '</span></td>'
+          + '<td><span class="pill ' + etat + '">' + (p.expire ? '${T("Expiré")}' : '${T("Actif")}') + '</span></td>'
           + '<td>' + esc(p.label || p.periode || '—') + '</td>'
           + '<td class="dt">' + esc(p.destinataire || '—') + '</td>'
           + '<td>' + jour(p.creeLe) + '</td>'
@@ -211,7 +215,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-copier="' + esc(p.url) + '"><span class="ic">📋</span></button> '
             + '<button class="mini dgr" data-revoquer="' + esc(p.token) + '">'
-            + (ARME_REV === p.token ? 'Confirmer ?' : 'Révoquer') + '</button>'
+            + (ARME_REV === p.token ? '${T("Confirmer ?")}' : '${T("Révoquer")}') + '</button>'
           + '</td></tr>');
       });
       h.push('</tbody></table>');
@@ -226,12 +230,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var n = ETAT.neuf;
     var envoyes = (n.envoyes || []);
     var rates = (n.rates || []);
-    return '<div class="carte neuf"><h2>Lien de l’exercice ' + esc(String(n.annee || '')) + '</h2>'
-      + '<label for="n-url">Adresse à remettre au comptable</label>'
+    return '<div class="carte neuf"><h2>${T("Lien de l’exercice ")}' + esc(String(n.annee || '')) + '</h2>'
+      + '<label for="n-url">${T("Adresse à remettre au comptable")}</label>'
       + '<input id="n-url" type="text" readonly value="' + esc(n.url) + '">'
-      + '<div class="barreoutils" style="margin-top:.4rem"><button id="n-copier"><span class="ic">📋</span> Copier</button>'
-      + '<span class="aide">Échéance le ' + jour(n.expireLe) + '</span></div>'
-      + '<label style="margin-top:.6rem">Mot de passe d’ouverture</label>'
+      + '<div class="barreoutils" style="margin-top:.4rem"><button id="n-copier"><span class="ic">📋</span> ${T("Copier")}</button>'
+      + '<span class="aide">${T("Échéance le ")}' + jour(n.expireLe) + '</span></div>'
+      + '<label style="margin-top:.6rem">${T("Mot de passe d’ouverture")}</label>'
       + '<div class="gros" id="n-mdp-vue">' + esc(n.motDePasse || '') + '</div>'
       /* ⚠ CE CHAMP N EST PAS CACHE, IL EST SEULEMENT HORS DE L ECRAN. Il ne sert
          qu a la copie dans le presse-papiers, et left:-9999px — contrairement a
@@ -241,16 +245,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          parcours de tabulation. */
       + '<input id="n-mdp" type="text" readonly aria-hidden="true" tabindex="-1" value="' + esc(n.motDePasse || '') + '" style="position:absolute;left:-9999px">'
       + '<div class="barreoutils" style="margin-top:.4rem">'
-      + '<button id="n-copier-mdp"><span class="ic">📋</span> Copier le mot de passe</button></div>'
-      + '<p class="aide"><strong>Il ne sera plus jamais affiché</strong> — le serveur n’en garde '
-      + 'aucune copie en clair, c’est lui qui déchiffre le rapport. Notez-le ou transmettez-le '
-      + 'maintenant, de préférence par un autre canal que le lien.</p>'
+      + '<button id="n-copier-mdp"><span class="ic">📋</span> ${T("Copier le mot de passe")}</button></div>'
+      + '<p class="aide"><strong>${T("Il ne sera plus jamais affiché")}</strong>${T(" — le serveur n’en garde ")}'
+      + '${T("aucune copie en clair, c’est lui qui déchiffre le rapport. Notez-le ou transmettez-le ")}'
+      + '${T("maintenant, de préférence par un autre canal que le lien.")}</p>'
       + (envoyes.length
-          ? '<p class="aide">Courriel envoyé à : ' + esc(envoyes.join(', ')) + '.</p>' : '')
+          ? '<p class="aide">${T("Courriel envoyé à : ")}' + esc(envoyes.join(', ')) + '.</p>' : '')
       + (rates.length
-          ? '<p class="aide" style="color:var(--tx-jaune)">Envoi refusé pour : ' + esc(rates.join(', ')) + '.</p>' : '')
+          ? '<p class="aide" style="color:var(--tx-jaune)">${T("Envoi refusé pour : ")}' + esc(rates.join(', ')) + '.</p>' : '')
       + '<div class="barreoutils" style="margin-top:.5rem">'
-      + '<span class="droite"><button id="n-fermer">Fermer</button></span></div>'
+      + '<span class="droite"><button id="n-fermer">${T("Fermer")}</button></span></div>'
       + '</div>';
   }
 
@@ -263,26 +267,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           return '<label><input type="checkbox" class="rcpt" value="' + esc(c.email) + '">'
             + esc(c.name || c.email) + (c.firm ? ' <span class="dt">(' + esc(c.firm) + ')</span>' : '') + '</label>';
         }).join('') + '</div>'
-      : '<p class="aide">Le carnet est vide — ajoutez un comptable dans l’onglet Carnet, ou saisissez '
-        + 'une adresse ci-dessous.</p>';
-    return '<div class="carte"><h2>Nouveau lien de l’exercice</h2>'
+      : '<p class="aide">${T("Le carnet est vide — ajoutez un comptable dans l’onglet Carnet, ou saisissez ")}'
+        + '${T("une adresse ci-dessous.")}</p>';
+    return '<div class="carte"><h2>${T("Nouveau lien de l’exercice")}</h2>'
       + '<div class="duo">'
-      + '<div><label for="f-annee">Exercice</label><select id="f-annee">' + opAns + '</select></div>'
-      + '<div><label for="f-duree">Validité</label><select id="f-duree">'
-      + '<option value="24">24 heures</option><option value="72">3 jours</option>'
-      + '<option value="168" selected>7 jours</option><option value="336">14 jours</option>'
-      + '<option value="720">30 jours</option></select></div>'
+      + '<div><label for="f-annee">${T("Exercice")}</label><select id="f-annee">' + opAns + '</select></div>'
+      + '<div><label for="f-duree">${T("Validité")}</label><select id="f-duree">'
+      + '<option value="24">${T("24 heures")}</option><option value="72">${T("3 jours")}</option>'
+      + '<option value="168" selected>${T("7 jours")}</option><option value="336">${T("14 jours")}</option>'
+      + '<option value="720">${T("30 jours")}</option></select></div>'
       + '</div>'
-      + '<label style="margin-top:.5rem">Destinataires (dans le carnet)</label>'
+      + '<label style="margin-top:.5rem">${T("Destinataires (dans le carnet)")}</label>'
       + carnet
-      + '<label for="f-manuel" style="margin-top:.5rem">Ajouter une adresse</label>'
-      + '<input id="f-manuel" type="email" placeholder="facultatif — comptable@cabinet.com">'
-      + '<p class="aide">Un mot de passe d’ouverture est engendré au hasard : il ne sera affiché '
-      + 'qu’une seule fois, juste après la création. Le lien peut être créé sans destinataire (à '
-      + 'remettre à la main), ou envoyé par courriel à ceux qui sont choisis.</p>'
+      + '<label for="f-manuel" style="margin-top:.5rem">${T("Ajouter une adresse")}</label>'
+      + '<input id="f-manuel" type="email" placeholder="${T("facultatif — comptable@cabinet.com")}">'
+      + '<p class="aide">${T("Un mot de passe d’ouverture est engendré au hasard : il ne sera affiché ")}'
+      + '${T("qu’une seule fois, juste après la création. Le lien peut être créé sans destinataire (à ")}'
+      + '${T("remettre à la main), ou envoyé par courriel à ceux qui sont choisis.")}</p>'
       + '<div class="barreoutils" style="margin-top:.5rem">'
-      + '<button class="prim" id="f-creer">Fabriquer</button>'
-      + '<span class="droite"><button id="f-annuler">Annuler</button></span></div>'
+      + '<button class="prim" id="f-creer">${T("Fabriquer")}</button>'
+      + '<span class="droite"><button id="f-annuler">${T("Annuler")}</button></span></div>'
       + '</div>';
   }
 
@@ -313,7 +317,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         var fait = false;
         try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
         z.remove();
-        dire(fait ? 'Adresse copiée.' : 'Copie refusée par le système.', fait ? 'bon' : 'err');
+        dire(fait ? '${T("Adresse copiée.")}' : '${T("Copie refusée par le système.")}', fait ? 'bon' : 'err');
       };
     });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-revoquer]'), function(b){
@@ -330,7 +334,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     Array.prototype.forEach.call(corps.querySelectorAll('input.rcpt:checked'), function(x){ dest.push(x.value); });
     if (man && man.value.trim()) dest.push(man.value.trim());
     b.disabled = true;
-    dire('Fabrication du lien de l’exercice…');
+    dire('${T("Fabrication du lien de l’exercice…")}');
     appeler('comptable:creer', [{
       annee: an ? parseInt(an.value, 10) : 0,
       heures: du ? parseInt(du.value, 10) : 168,
@@ -341,7 +345,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       ETAT.neuf = { url: r.url, motDePasse: r.motDePasse, expireLe: r.expireLe,
                     annee: r.annee, envoyes: r.envoyes || [], rates: r.rates || [] };
       ETAT.formulaire = false;
-      dire('Lien fabriqué.' + ((r.rates && r.rates.length) ? ' Certains courriels ont été refusés.' : ''),
+      dire('${T("Lien fabriqué.")}' + ((r.rates && r.rates.length) ? ' ${T("Certains courriels ont été refusés.")}' : ''),
         (r.rates && r.rates.length) ? 'att' : 'bon');
       charger(false);
     });
@@ -354,14 +358,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (ARME_REV !== token) {
       ARME_REV = token;
       dessinerPartages();
-      dire('Cliquez « Confirmer ? » pour révoquer — le lien cessera aussitôt de fonctionner pour tous les destinataires.', 'att');
+      dire('${T("Cliquez « Confirmer ? » pour révoquer — le lien cessera aussitôt de fonctionner pour tous les destinataires.")}', 'att');
       return;
     }
     ARME_REV = '';
-    dire('Révocation…');
+    dire('${T("Révocation…")}');
     appeler('comptable:revoquer', [token]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('Lien révoqué.', 'bon');
+      dire('${T("Lien révoqué.")}', 'bon');
       charger(false);
     });
   }
@@ -371,17 +375,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ════════════════════════════════════════════════════════════════════════
   function dessinerCarnet(){
     var h = [];
-    h.push('<div class="barreoutils"><button class="prim" id="c-ajouter">+ Ajouter un comptable</button>'
-      + '<span class="droite"><button id="c-recharger">Recharger</button></span></div>');
+    h.push('<div class="barreoutils"><button class="prim" id="c-ajouter">${T("+ Ajouter un comptable")}</button>'
+      + '<span class="droite"><button id="c-recharger">${T("Recharger")}</button></span></div>');
 
     if (ETAT.contactForm) h.push(contactForm());
 
-    h.push('<div class="carte"><h2>Carnet</h2>');
+    h.push('<div class="carte"><h2>${T("Carnet")}</h2>');
     if (!ETAT.contacts.length) {
-      h.push('<div class="vide">Le carnet est vide.</div>');
+      h.push('<div class="vide">${T("Le carnet est vide.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>Nom</th><th>Cabinet</th><th>Courriel</th>'
-        + '<th>Téléphone</th><th>Note</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("Nom")}</th><th>${T("Cabinet")}</th><th>${T("Courriel")}</th>'
+        + '<th>${T("Téléphone")}</th><th>${T("Note")}</th><th></th></tr></thead><tbody>');
       ETAT.contacts.forEach(function(c){
         h.push('<tr>'
           + '<td>' + esc(c.name || '—') + '</td>'
@@ -390,9 +394,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<td>' + esc(c.phone || '') + '</td>'
           + '<td class="dt">' + esc(c.note || '') + '</td>'
           + '<td style="white-space:nowrap">'
-            + '<button class="mini" data-modifier="' + esc(c.email) + '">Modifier</button> '
+            + '<button class="mini" data-modifier="' + esc(c.email) + '">${T("Modifier")}</button> '
             + '<button class="mini dgr" data-retirer="' + esc(c.email) + '">'
-            + (ARME_CT === c.email ? 'Confirmer ?' : 'Retirer') + '</button>'
+            + (ARME_CT === c.email ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>'
           + '</td></tr>');
       });
       h.push('</tbody></table>');
@@ -412,26 +416,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     c = c || { name: '', firm: '', email: '', phone: '', note: '' };
     var fige = ETAT.edition ? ' readonly' : '';
-    return '<div class="carte"><h2>' + (ETAT.edition ? 'Modifier le comptable' : 'Nouveau comptable') + '</h2>'
+    return '<div class="carte"><h2>' + (ETAT.edition ? '${T("Modifier le comptable")}' : '${T("Nouveau comptable")}') + '</h2>'
       + '<div class="duo">'
-      + '<div><label for="ct-name">Nom</label><input id="ct-name" type="text" value="' + esc(c.name) + '"></div>'
-      + '<div><label for="ct-firm">Cabinet</label><input id="ct-firm" type="text" value="' + esc(c.firm) + '"></div>'
+      + '<div><label for="ct-name">${T("Nom")}</label><input id="ct-name" type="text" value="' + esc(c.name) + '"></div>'
+      + '<div><label for="ct-firm">${T("Cabinet")}</label><input id="ct-firm" type="text" value="' + esc(c.firm) + '"></div>'
       + '</div>'
       + '<div class="duo">'
-      + '<div><label for="ct-email">Courriel</label><input id="ct-email" type="email" value="' + esc(c.email) + '"' + fige + '></div>'
-      + '<div><label for="ct-phone">Téléphone</label><input id="ct-phone" type="tel" value="' + esc(c.phone) + '"></div>'
+      + '<div><label for="ct-email">${T("Courriel")}</label><input id="ct-email" type="email" value="' + esc(c.email) + '"' + fige + '></div>'
+      + '<div><label for="ct-phone">${T("Téléphone")}</label><input id="ct-phone" type="tel" value="' + esc(c.phone) + '"></div>'
       + '</div>'
       // rows="3" POSÉ LE 2026-08-21 : sans lui, cette zone tombait sur le
       // plancher partagé de la feuille de style (textarea{min-height:2.6rem}),
       // soit deux lignes — on écrivait une note de contact dans une fente. C'est
       // la SEULE zone de texte des fenêtres où personne n'avait choisi : partout
       // ailleurs le rows est explicite, donc voulu.
-      + '<label for="ct-note">Note</label><textarea id="ct-note" rows="3">' + esc(c.note) + '</textarea>'
-      + (ETAT.edition ? '<p class="aide">Le courriel est la clé du contact : pour le changer, retirez '
-          + 'ce contact et créez-en un nouveau.</p>' : '')
+      + '<label for="ct-note">${T("Note")}</label><textarea id="ct-note" rows="3">' + esc(c.note) + '</textarea>'
+      + (ETAT.edition ? '<p class="aide">${T("Le courriel est la clé du contact : pour le changer, retirez ")}'
+          + '${T("ce contact et créez-en un nouveau.")}</p>' : '')
       + '<div class="barreoutils" style="margin-top:.5rem">'
-      + '<button class="prim" id="ct-enregistrer">Enregistrer</button>'
-      + '<span class="droite"><button id="ct-annuler">Annuler</button></span></div>'
+      + '<button class="prim" id="ct-enregistrer">${T("Enregistrer")}</button>'
+      + '<span class="droite"><button id="ct-annuler">${T("Annuler")}</button></span></div>'
       + '</div>';
   }
 
@@ -444,7 +448,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var BR_CHAMPS = ['ct-name', 'ct-firm', 'ct-email', 'ct-phone', 'ct-note'];
   szBrouillonBrancher({
     portee: 'comptable-carnet',
-    libelle: 'Une fiche de comptable',
+    libelle: '${T("Une fiche de comptable")}',
     ttlMin: 720,
     cle: function(){ return (ETAT && ETAT.edition) ? ('c:' + ETAT.edition) : '__new__'; },
     actif: function(){ return !!(ETAT && ETAT.contactForm) && !!document.getElementById('ct-name'); },
@@ -497,9 +501,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       phone: (document.getElementById('ct-phone') || {}).value || '',
       note:  (document.getElementById('ct-note')  || {}).value || ''
     };
-    if (!contact.email.trim()) { dire('Indiquez un courriel — c’est la clé du contact.', 'err'); return; }
+    if (!contact.email.trim()) { dire('${T("Indiquez un courriel — c’est la clé du contact.")}', 'err'); return; }
     b.disabled = true;
-    dire('Enregistrement…');
+    dire('${T("Enregistrement…")}');
     appeler('comptable:contact', [contact]).then(function(r){
       b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -508,7 +512,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          ferait concurrence a la fiche enregistree. */
       szBrouillonJeter();
       ETAT.contactForm = false; ETAT.edition = '';
-      dire('Comptable enregistré.', 'bon');
+      dire('${T("Comptable enregistré.")}', 'bon');
       majSous();
       dessinerCarnet();
     });
@@ -518,15 +522,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (ARME_CT !== email) {
       ARME_CT = email;
       dessinerCarnet();
-      dire('Cliquez « Confirmer ? » pour retirer ce comptable du carnet.', 'att');
+      dire('${T("Cliquez « Confirmer ? » pour retirer ce comptable du carnet.")}', 'att');
       return;
     }
     ARME_CT = '';
-    dire('Retrait…');
+    dire('${T("Retrait…")}');
     appeler('comptable:contact-retirer', [email]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       if (r.contacts) ETAT.contacts = r.contacts;
-      dire('Comptable retiré du carnet.', 'bon');
+      dire('${T("Comptable retiré du carnet.")}', 'bon');
       majSous();
       dessinerCarnet();
     });
@@ -546,8 +550,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function majSous(){
     var actifs = ETAT.partages.filter(function(p){ return !p.expire; }).length;
-    sous.textContent = actifs + ' lien' + (actifs > 1 ? 's' : '') + ' actif' + (actifs > 1 ? 's' : '')
-      + ' · ' + ETAT.contacts.length + ' comptable' + (ETAT.contacts.length > 1 ? 's' : '');
+    /* ⚠ Le singulier et le pluriel, chacun entier : coupes en morceaux, ils ne
+       laissaient au poseur que des bouts de mots. */
+    sous.textContent = actifs + (actifs > 1 ? '${T(" liens actifs")}' : '${T(" lien actif")}')
+      + ' · ' + ETAT.contacts.length
+      + (ETAT.contacts.length > 1 ? '${T(" comptables")}' : '${T(" comptable")}');
   }
 
   function redessiner(){
@@ -555,7 +562,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function charger(dire_le){
-    if (dire_le) dire('Lecture…');
+    if (dire_le) dire('${T("Lecture…")}');
     appeler('comptable:donnees').then(function(r){
       if (!r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
