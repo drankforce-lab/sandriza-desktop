@@ -5558,8 +5558,17 @@ const actionApp = (nom, arg) => {
        un reglage qui n agit qu au prochain lancement, sans le dire, se lit comme
        un bouton qui ne fait rien.
        ⚠ ET C EST UN ALLER-RETOUR, pas un aller simple : la meme entree l eteint.
-       C est ce qui rend l essai sans risque — il l allume, il regarde, il
-       l eteint si ca ne va pas. */
+       ⚠⚠⚠ MAIS CETTE PHRASE A LONGTEMPS DIT << C EST CE QUI REND L ESSAI SANS
+       RISQUE >>, ET C ETAIT FAUX. Le cadre RECOUVRE la page du site — or c est
+       elle qui dessine le menu ou vit cette entree. Si la barre du cadre ne
+       vient pas (le modele tarde, la session n est pas ouverte), il ne reste ni
+       administration NI moyen de revenir. C est exactement ce qui est arrive le
+       2026-09-12, et c est pour ca que personne n a ose refaire l essai depuis.
+       ➡ UNE PORTE DE SORTIE QUI PASSE PAR LA PIECE QU ON VEUT QUITTER N EN EST
+         PAS UNE.
+       ⚠ L ESSAI EST SANS RISQUE DEPUIS LE 2026-09-13, ET PAS GRACE A CETTE
+       ENTREE : le cadre porte son PROPRE bouton << Revenir au mode classique >>
+       (voir `cadre:eteindre`), qui ne depend d aucun menu. */
     case 'cadre-bascule': {
       const _cn = !cadreNatifAllume();
       reglages.set('cadreNatif', _cn);
@@ -6309,6 +6318,26 @@ const _langueCourante = () => {
 };
 const _trMenu = (x) => trMenu(x, _langueCourante());
 const _trItems = (items) => trItems(items, _langueCourante());
+
+/* ⚠⚠⚠ LA SORTIE DE SECOURS DU CADRE — voir la fiche de `cadreEteindre` dans
+   `pont-preload.js`. L interrupteur vit dans le menu, le cadre recouvre la page
+   qui dessine ce menu, et la barre du cadre depend d un modele qui peut ne
+   jamais arriver. Sans cette porte-ci, un cadre sans barre laisse le poste sans
+   administration ET sans retour — vecu le 2026-09-12.
+   ⚠ ON N ACCEPTE QUE DE LA VUE DU CADRE : `_deLaPrincipale` accepterait aussi
+   le site, qui n a aucune raison d eteindre ce reglage.
+   ⚠ ON POSE LE REGLAGE AVANT DE RELANCER : si la relance echoue, le prochain
+   lancement est deja le bon. L inverse laisserait le poste coince une fois de
+   plus, ce qui est exactement ce que cette porte existe pour empecher. */
+ipcMain.handle('cadre:eteindre', (e) => {
+  try {
+    if (!_vivant(vueCadre) || e.sender !== vueCadre.webContents) return false;
+  } catch (er) { return false; }
+  try { reglages.set('cadreNatif', false); } catch (er) {}
+  cnxDire('cadre natif ETEINT depuis le cadre lui-meme — relance');
+  try { app.relaunch(); app.exit(0); } catch (er) {}
+  return true;
+});
 
 ipcMain.handle('cnxmenu:labels', () => {
   try {

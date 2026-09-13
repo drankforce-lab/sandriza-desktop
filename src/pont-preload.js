@@ -142,6 +142,22 @@ contextBridge.exposeInMainWorld('szPont', {
      seconde copie du menu est exactement ce que `src/menubar.js` raconte avoir
      payé. */
   menuLabels: () => ipcRenderer.invoke('cnxmenu:labels').catch(() => []),
+  /* ⚠⚠⚠ LA SORTIE DE SECOURS DU CADRE (2026-09-13), ET ELLE NE DEPEND D AUCUN
+     MENU. L interrupteur `cadreNatif` s eteint par l entree << Cadre natif :
+     allumer / eteindre >> du menu Affichage — et `actionApp` affirme en
+     commentaire que l essai est << sans risque >> puisque la meme entree
+     l eteint. C EST FAUX QUAND LA BARRE NE VIENT PAS : le cadre recouvre la
+     page du site, la barre est dessinee a partir d un modele qui peut tarder ou
+     ne jamais arriver, et l interrupteur vit DANS cette barre. Vecu le
+     2026-09-12 : plus d administration du tout au lancement, et plus rien pour
+     revenir en arriere.
+     ➡ UNE PORTE DE SORTIE QUI PASSE PAR LA PIECE QU ON VEUT QUITTER N EST PAS
+       UNE PORTE DE SORTIE.
+     ⚠ UN VERBE ETROIT PLUTOT QU UN PASSE-PLAT VERS `actionApp` : celui-ci ne
+     sait faire qu UNE chose, et le processus principal ne l accepte que de la
+     vue du cadre. Un passe-plat generique laisserait n importe quelle fenetre
+     native declencher n importe quelle action de l application. */
+  cadreEteindre: () => ipcRenderer.invoke('cadre:eteindre').catch(() => false),
   /* ⚠ LE PANNEAU FLOTTANT, PAS LE MENU DU SYSTÈME. Le second s ouvrait bien
      au-dessus de la vue native, mais il PREND LA SOURIS : une fois ouvert,
      glisser sur l intitulé voisin ne faisait plus rien. Le panneau, lui, est une

@@ -135,7 +135,15 @@ function pageCadre() {
 <div class="tete"><span class="ico">${ICO.tableau || ''}</span>
   <div class="barre" id="barre" role="menubar"></div>
   <span class="sous" id="sous"></span>
-  <span class="fin"><button class="btn" id="b-mesurer" type="button">${T("↻ Remesurer")}</button></span></div>
+  <span class="fin"><button class="btn" id="b-mesurer" type="button">${T("↻ Remesurer")}</button>
+    <!-- ⚠⚠⚠ LA SORTIE DE SECOURS, ET ELLE EST ICI PARCE QUE LE MENU PEUT
+         MANQUER. L'interrupteur du cadre vit dans le menu Affichage ; ce cadre
+         recouvre la page qui dessine ce menu, et sa propre barre dépend d'un
+         modèle qui peut tarder ou ne jamais venir. Le 2026-09-12, il n'est
+         resté ni administration ni moyen de revenir.
+         ➡ UNE PORTE DE SORTIE QUI PASSE PAR LA PIÈCE QU'ON VEUT QUITTER N'EN
+           EST PAS UNE. Ce bouton ne dépend de rien d'autre que de lui-même. -->
+    <button class="btn" id="b-classique" type="button">${T("← Revenir au mode classique")}</button></span></div>
 <div id="ancrage" class="zone">
   <div class="carte" id="corps">
     <h2>${T("Cette zone est la place d’un écran")}</h2>
@@ -259,12 +267,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).catch(function(){});
   }
   barrePoser();
-  /* Le modele vient de la page principale : il peut arriver en retard. On
-     redemande UNE fois, pas en boucle — un sondage permanent pour une barre de
-     menus serait hors de proportion. */
-  setTimeout(barrePoser, 2000);
+  /* ⚠⚠ ON REDEMANDE JUSQU A CE QUE LE MODELE ARRIVE, PLUS << UNE FOIS >>.
+     L ancienne note disait : << on redemande UNE fois, pas en boucle — un
+     sondage permanent pour une barre de menus serait hors de proportion >>.
+     La proportion est la bonne question, la conclusion etait fausse : le modele
+     vient de la page principale, qui doit d abord CHARGER LE SITE et OUVRIR UNE
+     SESSION. Deux secondes ne suffisent pas a un poste qui demarre, et une
+     barre absente n est pas un detail — c est toute la navigation, et
+     l interrupteur qui ramene au mode classique.
+     ⚠ CE N EST PAS UN SONDAGE PERMANENT : barrePoser s arrete au premier
+     succes (BARRE_FAITE), et le compteur borne les essais a une minute. On
+     paie douze appels dans le pire des cas — celui ou l ecran est inutilisable.
+     ⚠ ET LE BOUTON DE SORTIE, LUI, NE DEPEND DE RIEN DE TOUT CA. */
+  var BARRE_ESSAIS = 0;
+  var BARRE_MINUTERIE = setInterval(function(){
+    if (BARRE_FAITE || ++BARRE_ESSAIS > 12) { clearInterval(BARRE_MINUTERIE); return; }
+    barrePoser();
+  }, 5000);
 
   document.getElementById('b-mesurer').addEventListener('click', mesurerZone);
+  /* ⚠ ON ARME EN DEUX TEMPS, comme toute action qui redemarre l application :
+     un clic distrait ne doit pas fermer la fenetre de quelqu un. */
+  var CLASSIQUE_ARME = false;
+  document.getElementById('b-classique').addEventListener('click', function(){
+    if (!CLASSIQUE_ARME) {
+      CLASSIQUE_ARME = true;
+      this.textContent = '${T("Confirmer — l’application redémarre")}';
+      szDire('${T("Cliquez de nouveau pour revenir au mode classique.")}', 'att');
+      setTimeout(function(){
+        var b = document.getElementById('b-classique');
+        if (b && CLASSIQUE_ARME) { CLASSIQUE_ARME = false; b.textContent = '${T("← Revenir au mode classique")}'; }
+      }, 6000);
+      return;
+    }
+    szDire('${T("Retour au mode classique…")}', '');
+    if (P && P.cadreEteindre) P.cadreEteindre();
+  });
   /* ⚠ LA ZONE SE REMESURE AU REDIMENSIONNEMENT : ses pixels dependent de la
      fenetre, et un nombre fige serait faux des le premier coin tire. */
   window.addEventListener('resize', mesurerZone);

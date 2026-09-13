@@ -24,6 +24,13 @@ module.exports = {
   'Cadre de l’administration — Sandriza': 'Administration frame — Sandriza',
   ' Remesurer': ' Measure again',
   '↻ Remesurer': '↻ Measure again',
+  /* ⚠⚠ LA SORTIE DE SECOURS (2026-09-13). Elle doit se lire dans les DEUX
+     langues, et pour la meilleure des raisons : c est le bouton qu on cherche
+     quand plus rien d autre ne repond. */
+  '← Revenir au mode classique': '← Back to the classic mode',
+  'Confirmer — l’application redémarre': 'Confirm — the application restarts',
+  'Cliquez de nouveau pour revenir au mode classique.': 'Click again to go back to the classic mode.',
+  'Retour au mode classique…': 'Going back to the classic mode…',
 
   /* ══ CE QUE LA ZONE EST ════════════════════════════════════════════════════ */
   'Cette zone est la place d’un écran': 'This area is the place of a screen',
