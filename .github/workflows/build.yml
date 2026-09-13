@@ -644,16 +644,42 @@ jobs:
             dist/*.blockmap
             dist/latest*.yml
 
-  recapitulatif:
+  # ⚠⚠⚠ LE NOM DE CE TRAVAIL EST LE MESSAGE, ET C'EST DÉLIBÉRÉ (2026-09-13).
+  # Il s'appelait `recapitulatif`, et son résumé disait DÉJÀ tout ce qu'il faut
+  # faire ensuite — run_id et version compris. Ça n'a servi à rien : sept
+  # versions ont été construites dans la même journée sans qu'aucune soit
+  # publiée, et l'utilisateur les a toutes réclamées une par une en montrant un
+  # écran resté sur la 5.47.0.
+  # ⚠ LA CAUSE N'EST PAS L'ABSENCE DE CONSIGNE, C'EST L'ENDROIT. On lit la LISTE
+  # DES TRAVAUX et leur verdict ; on n'ouvre pas le résumé d'une exécution
+  # verte. « recapitulatif : success » se lit comme « c'est livré ». Le nom
+  # ci-dessous ne peut pas se lire comme ça.
+  # ➡ **UNE CONSIGNE RANGÉE LÀ OÙ PERSONNE NE REGARDE N'EST PAS UNE CONSIGNE.**
+  # ⚠ POURQUOI PAS D'ENCHAÎNEMENT AUTOMATIQUE : publier exige les clés du bucket
+  # R2, qui porte aussi les SAUVEGARDES, les PHOTOS et les EXPORTS COMPTABLES.
+  # Elles ne quittent pas le dépôt privé — c'est écrit en tête du workflow
+  # « Publier ». Ce dépôt-ci est public : un jeton d'écriture posé ici pour
+  # déclencher l'autre serait exactement ce que ce cloisonnement évite.
+  a-publier-a-la-main:
     needs: [windows, macos]
     if: always() && !cancelled() && needs.windows.result == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Quoi faire ensuite
+      - name: Construit mais PAS publié
         run: |
-          echo "## Construction ${{ inputs.version }} terminée" >> $GITHUB_STEP_SUMMARY
+          # ⚠ UNE ANNOTATION, PAS SEULEMENT UN RÉSUMÉ : elle remonte dans
+          # `gh run view` et en tête de la page de l'exécution.
+          echo "::notice title=PAS ENCORE PUBLIÉ::${{ inputs.version }} est construite mais N'EST PAS distribuée. Dépôt privé Sandriza → Actions → « Publier l'application de bureau » → run_id=${{ github.run_id }}, version=${{ inputs.version }}"
+          echo "## ⚠ ${{ inputs.version }} est CONSTRUITE, mais PAS PUBLIÉE" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Les paquets sont en artéfacts de **cette exécution** (\`${{ github.run_id }}\`)." >> $GITHUB_STEP_SUMMARY
+          echo "Tant que l'étape ci-dessous n'est pas faite, **aucun poste ne recevra cette version** :" >> $GITHUB_STEP_SUMMARY
+          echo "l'application lit son flux sur \`adm.sandriza.com/update/…\`, alimenté depuis R2 par le dépôt privé." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Pour les publier : dépôt privé **Sandriza** → Actions → " >> $GITHUB_STEP_SUMMARY
-          echo "**Publier l'application de bureau** → \`run_id = ${{ github.run_id }}\`, \`version = ${{ inputs.version }}\`." >> $GITHUB_STEP_SUMMARY
+          echo "Dépôt privé **Sandriza** → Actions → **Publier l'application de bureau** →" >> $GITHUB_STEP_SUMMARY
+          echo "\`run_id = ${{ github.run_id }}\`, \`version = ${{ inputs.version }}\`." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "En ligne de commande :" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "gh workflow run \"Publier l'application de bureau\" --repo drankforce-lab/Sandriza \\\\" >> $GITHUB_STEP_SUMMARY
+          echo "  --ref main -f run_id=${{ github.run_id }} -f version=${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
