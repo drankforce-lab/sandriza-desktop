@@ -36,6 +36,17 @@
  * l'application — et c'est précisément l'un d'eux qui portait le défaut de la
  * reprise de fiche client.
  *
+ * ⚠⚠ MAIS « HORS DE SA PORTÉE » SE MESURE, IL NE S'AFFIRME PAS. Ce même
+ * paragraphe a longtemps porté une phrase FAUSSE : que `fournisseur.js` et
+ * `collection.js` étaient « les SEULES » fenêtres dont la boîte de reprise
+ * d'une saisie soit atteignable sans clic. On les a donc crues seules, et
+ * dix-sept boîtes sur dix-huit n'ont été dessinées par rien pendant un mois.
+ * La mesure du 2026-09-13 — injecter un brouillon dans les 367 cas et regarder
+ * lesquels dessinent la boîte — en compte HUIT. Quatre fois plus.
+ * ➡ Une limite écrite dans un commentaire donne surtout une raison de ne pas
+ *   chercher. Quand la mesure est à portée de main, c'est elle qui décide —
+ *   et `banc-brouillon-reprise.js` la refait maintenant à chaque passage.
+ *
  * Pour couvrir une fenêtre de plus : ajouter son fichier ici, avec les réponses
  * de ses opérations. Le contrôle s'y applique aussitôt.
  *
@@ -188,7 +199,28 @@ const BLOCS_CATALOGUE = { ok: true,
     ],
   } };
 
-module.exports = {
+/* ══ LA REPRISE D'UNE SAISIE — LA PIÈCE COMMUNE ════════════════════════════
+ * La forme vient de `brouillonLire` dans `assets/js/pont.js` :
+ * { ok, brouillon, ts, profil, ilYaMin }.
+ *
+ * ⚠ `profil` compte AUTANT que `brouillon`, et pour une autre raison. Sans
+ * lui, `_BR_PROFIL` n'est jamais posé dans `socle.js` — or c'est la seule
+ * chose qui dira OÙ écrire si la session tombe ensuite. Un faux pont qui rend
+ * `{ ok:true }` tout nu laisse donc DEUX chemins non éprouvés, pas un.
+ *
+ * ⚠ 47 minutes : assez pour que `_brIlYa` compose « il y a 47 minutes »
+ * plutôt qu'une de ses formes courtes. C'est ce que les cas exigent — sans
+ * cette vérification, on laisserait passer une durée affichée à vide.
+ */
+const REPRISE = { ok: true, profil: 'drankforce@gmail.com', ts: 1757000000000, ilYaMin: 47 };
+
+/* ⚠ LE CHEMIN « RIEN À REPRENDRE », AVEC SA VRAIE FORME — et il n'est pas
+   équivalent à l'absence de réponse. Sans cette ligne, le faux pont rend
+   `{ ok:true }` : assez pour que la fenêtre n'affiche rien, mais SANS
+   `profil`. Le calme est le même, la couverture non. */
+const RIEN_A_REPRENDRE = { ok: true, brouillon: null, profil: 'drankforce@gmail.com' };
+
+const JEU = {
   'imprimantes.js': {
     'imprimantes:etat': {
       // ⚠ `natif: true` EST LE CAS RÉEL, et le jeu d'essai doit être le cas réel.
@@ -378,11 +410,7 @@ module.exports = {
         },
         // Aucun identifiant : le site rend une fiche NULLE, pas une erreur.
         'fournisseur:lire': { ok: true, fiche: null },
-        /* ⚠ LE CHEMIN « RIEN À REPRENDRE », AVEC SA VRAIE FORME. Sans cette
-           ligne, le faux pont rendait `{ ok:true }` — assez pour que la fenêtre
-           n’affiche rien, mais SANS `profil`, donc `_BR_PROFIL` n’était jamais
-           posé. Or c’est lui qui dit OÙ écrire si la session tombe ensuite. */
-        'brouillon:lire': { ok: true, brouillon: null, profil: 'drankforce@gmail.com' },
+        'brouillon:lire': RIEN_A_REPRENDRE,
         'fournisseur:enregistrer': { ok: true, modifie: false },
         'verrou:prendre': VERROU,
         identite: IDENTITE,
@@ -424,72 +452,10 @@ module.exports = {
         identite: IDENTITE,
       },
     },
-    /* ⚠⚠ LA BOÎTE DE REPRISE D’UNE SAISIE — ELLE N’ÉTAIT DESSINÉE PAR AUCUN BANC.
-       `brouillon:lire` n’avait aucune réponse prévue ; le faux pont rend alors
-       `{ ok:true }`, donc `r.brouillon` était `undefined` et `szBrouillonProposer`
-       sortait par `return false` — SANS ERREUR, SANS RIEN AFFICHER. Dix-huit
-       fenêtres branchent ce mécanisme, et sa boîte n’a jamais été mesurée : ni sa
-       couleur, ni ses accents, ni le fait qu’elle se dessine encore.
-       ⚠ CE CAS-CI EST LE SEUL QUI Y MÈNE SANS SIMULER DE CLIC. Presque toutes les
-       fenêtres appellent `szBrouillonProposer()` depuis l’ouverture d’un éditeur,
-       c’est-à-dire derrière un geste que ce contrôle ne joue pas ; `fournisseur.js`
-       et `collection.js` l’appellent dans `charger()`, AU CHARGEMENT. C’est pour
-       cela que le cas vit ICI et pas ailleurs — le déplacer le rendrait muet.
-       ⚠ La forme vient de `brouillonLire` dans `assets/js/pont.js` (chaîne 6456) :
-       { ok, brouillon, ts, profil, ilYaMin }. Les champs sont ceux de BR_CHAMPS
-       dans `fournisseur.js`, plus `_cats` que la fenêtre ajoute elle-même. */
-    {
-      nom: 'reprise d’une saisie en cours',
-      id: '',
-      /* ⚠ SANS `exige`, CE CAS NE PROUVERAIT RIEN. Le défaut qu’il vient combler
-         est précisément une boîte qui NE SE DESSINE PAS sans rien casser : si
-         `szBrouillonProposer` ressortait un jour par `return false`, le cas
-         resterait vert et l’on aurait de nouveau un jeu d’épreuve qui ne mesure
-         que son propre passage. On exige donc le TEXTE de la boîte.
-         ⚠ Le « il y a 47 minutes » vérifie EN PLUS que `ilYaMin` a été composé :
-         sans lui, exiger le titre laisserait passer une durée affichée à vide. */
-      exige: ['Une saisie non terminée', 'il y a 47 minutes', 'Repartir à neuf'],
-      reponses: {
-        'fournisseur:contexte': {
-          ok: true,
-          categories: [
-            { cle: 'robes', libelle: 'Robes' },
-            { cle: 'hauts', libelle: 'Hauts' },
-            { cle: 'chaussures', libelle: 'Chaussures' },
-          ],
-          delais: ['1-3 jours', '4-7 jours', '1-2 semaines', '2-4 semaines', '1-2 mois', '2 mois et plus'],
-          provinces: ['QC', 'ON', 'NB', 'NS', 'PE', 'NL', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU'],
-          peutAjouter: true, peutModifier: true,
-        },
-        'fournisseur:lire': { ok: true, fiche: null },
-        'brouillon:lire': {
-          ok: true,
-          profil: 'drankforce@gmail.com',
-          ts: 1757000000000,
-          /* 47 minutes : assez pour que `_brIlYa` compose « il y a 47 minutes »
-             plutôt que l’une de ses formes courtes. */
-          ilYaMin: 47,
-          brouillon: {
-            'f-nom': 'Tissages du Saguenay',
-            'f-contact': 'Renée Bouchard',
-            'f-courriel': 'renee@tissages-saguenay.ca',
-            'f-tel': '418 555-0199',
-            'f-web': '',
-            'f-rue': '14 rue des Métiers',
-            'f-ville': 'Chicoutimi',
-            'f-prov': 'QC',
-            'f-cp': 'G7H 1X2',
-            'f-delai': '2-4 semaines',
-            'f-actif': true,
-            'f-notes': 'Devis reçu, à confirmer.',
-            _cats: ['hauts'],
-          },
-        },
-        'fournisseur:enregistrer': { ok: true, modifie: false },
-        'verrou:prendre': VERROU,
-        identite: IDENTITE,
-      },
-    },
+    /* ⚠ LE CAS « reprise d’une saisie en cours » DE CETTE FENÊTRE NE VIT PLUS
+       ICI : il est DÉRIVÉ, en bas de ce fichier, dans la table `CAS_REPRISE`.
+       Il y a été déplacé le 2026-09-13, avec sept autres — voir le long
+       commentaire de cette table pour la raison, qui en vaut la peine. */
   ],
 
   // ── COLLECTION ────────────────────────────────────────────────────────────
@@ -7110,3 +7076,156 @@ function _produitContexte() {
     peutAjouter: true, peutModifier: true,
   };
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * LES CAS DE REPRISE D'UNE SAISIE — DÉRIVÉS, ET NON RECOPIÉS
+ * ══════════════════════════════════════════════════════════════════════════
+ * ⚠⚠ CE QUI A ÉTÉ MESURÉ LE 2026-09-13, ET QUI A SURPRIS. Dix-huit fenêtres
+ * branchent le mécanisme de brouillon. Sur les 367 cas de ce fichier, DEUX
+ * répondaient à `brouillon:lire`, et la boîte de reprise n'était dessinée que
+ * dans UNE fenêtre : `fournisseur.js`. Les dix-sept autres passaient au vert
+ * sans que leur boîte existe.
+ *
+ * ⚠⚠⚠ ET LE COMMENTAIRE QUI GARDAIT CETTE ZONE ÉTAIT FAUX. Il affirmait que
+ * `fournisseur.js` et `collection.js` étaient « les SEULES » à appeler
+ * `szBrouillonProposer()` au chargement, donc les seules atteignables sans
+ * simuler de clic. La mesure — donner un brouillon à chacun des 367 cas et
+ * regarder lesquels dessinent la boîte — en compte HUIT :
+ *   accueil · campagnes · collection · fidelisation · fournisseur ·
+ *   incidents · pages · retour
+ * Quatre fois plus. C'est cette phrase-là qui a gelé la couverture : elle
+ * donnait une raison de ne pas chercher.
+ * ➡ Une limite ÉCRITE dans un commentaire n'est pas une limite MESURÉE. Quand
+ *   la mesure est à portée de main, c'est elle qui décide.
+ *
+ * ══ POURQUOI DÉRIVÉS PLUTÔT QUE RECOPIÉS ═══════════════════════════════════
+ * Un cas de reprise, c'est un cas qui dessine DÉJÀ, plus une réponse de plus.
+ * Recopier ses quarante lignes de réponses ferait huit paires de jumeaux qui
+ * divergeraient au premier changement du site — et le jumeau périmé serait
+ * celui qu'on ne relit jamais, puisqu'il passe. On part donc du cas d'origine,
+ * NOMMÉ ici : s'il est renommé ou retiré, ce fichier LÈVE au chargement plutôt
+ * que de perdre le cas en silence.
+ *
+ * ⚠ `exige` EST CE QUI REND CES CAS UTILES. Le défaut qu'ils comblent est
+ * précisément une boîte qui NE SE DESSINE PAS sans rien casser : si
+ * `szBrouillonProposer` ressortait un jour par `return false`, tout resterait
+ * vert. On exige donc le TEXTE de la boîte, son libellé PROPRE à la fenêtre
+ * (chacune écrit le sien), et « il y a 47 minutes » — qui vérifie en plus que
+ * `ilYaMin` a été composé, sans quoi une durée affichée à vide passerait.
+ *
+ * ⚠ LES CHAMPS DU BROUILLON SONT CEUX DE LA FENÊTRE, relevés dans sa
+ * configuration `szBrouillonBrancher` — pas inventés. Ils ne sont relus que si
+ * l'on clique « Reprendre », geste que ce contrôle ne joue pas ; ils sont là
+ * pour que le cas reste une DESCRIPTION juste du brouillon réel.
+ */
+const CAS_REPRISE = [
+  {
+    fichier: 'accueil.js', depuis: 'éditeur héro', quoi: 'Une modification de ce bloc',
+    /* BR_HERO dans accueil.js : l'éditeur du héro ne garde que ces deux-là. */
+    brouillon: { 'a-effect': 'fondu', 'a-interval': '6' },
+  },
+  {
+    fichier: 'campagnes.js', depuis: 'formulaire — nouvelle campagne', quoi: 'Une saisie',
+    /* brChampsForm() hors chaîne et hors segment, plus `_type`, `_bmode` et
+       `_blocs` que la fenêtre ajoute elle-même dans `valeurs`. */
+    brouillon: {
+      'f-nom': 'Rentrée — laines',
+      'f-suj': 'Les laines sont arrivées',
+      'f-seg': 'seg_0001', 'f-canal': 'courriel', 'f-sms': '', 'f-html': '',
+      _type: 'campagne', _bmode: 'blocs',
+      _blocs: [{ type: 'heading', text: 'Les laines sont arrivées', size: 'h1', align: 'center', color: '#111111' }],
+    },
+  },
+  {
+    fichier: 'collection.js', depuis: 'création', quoi: 'Une collection',
+    brouillon: {
+      'c-nom': 'Hiver — mailles', 'c-desc': 'Cachemire et alpaga.',
+      'c-saison': 'hiver', 'c-annee': '2026', 'c-actif': true,
+    },
+  },
+  {
+    fichier: 'fidelisation.js', depuis: 'editeur de sondage', quoi: 'Un sondage',
+    /* ⚠ CELLE-CI NE GARDE PAS DES CHAMPS MAIS SON MODÈLE : `valeurs` rend
+       `{ _edit: … }`, une copie de l'objet en cours d'édition. Le brouillon
+       doit donc avoir CETTE forme-là, pas une liste d'identifiants. */
+    brouillon: {
+      _edit: {
+        id: '', nom: 'Après-achat — hiver', intro: 'Deux questions, trente secondes.',
+        questions: [{ id: '', type: 'rating', libelle: 'Comment avez-vous trouvé la livraison ?', obligatoire: true, options: [] }],
+      },
+    },
+  },
+  {
+    fichier: 'fournisseur.js', depuis: 'création', quoi: 'Une fiche de fournisseur',
+    /* BR_CHAMPS de fournisseur.js, plus `_cats` que la fenêtre ajoute. */
+    brouillon: {
+      'f-nom': 'Tissages du Saguenay',
+      'f-contact': 'Renée Bouchard',
+      'f-courriel': 'renee@tissages-saguenay.ca',
+      'f-tel': '418 555-0199',
+      'f-web': '',
+      'f-rue': '14 rue des Métiers',
+      'f-ville': 'Chicoutimi',
+      'f-prov': 'QC',
+      'f-cp': 'G7H 1X2',
+      'f-delai': '2-4 semaines',
+      'f-actif': true,
+      'f-notes': 'Devis reçu, à confirmer.',
+      _cats: ['hauts'],
+    },
+  },
+  {
+    fichier: 'incidents.js', depuis: 'assistant — nouveau', quoi: 'Un incident',
+    /* brIds() compose `f-` + la clé de chaque champ des étapes que le site
+       rend : ce sont donc celles du jeu de réponses, pas une liste fixe. */
+    brouillon: {
+      'f-ref': 'INC-2026-004',
+      'f-occurredAt': '2026-09-02',
+      'f-knownAt': '2026-09-03',
+      'f-incidentType': 'acces',
+    },
+  },
+  {
+    fichier: 'pages.js', depuis: 'page perso — nouvelle', quoi: 'Une page',
+    /* BR_CHAMPS de pages.js, plus `cp-foot` déclaré à part dans `valeurs`. */
+    brouillon: {
+      'cp-title': 'Nos ateliers', 'cp-slug': 'nos-ateliers',
+      'cp-sub': 'Où et comment nous cousons', 'cp-flabel': 'Ateliers',
+      'cp-foot': '<p>Visites sur rendez-vous.</p>',
+    },
+  },
+  {
+    fichier: 'retour.js', depuis: 'photo manquante', quoi: 'Une modification de cette demande',
+    /* BR_CHAMPS de retour.js, plus `r-generer` déclaré à part. */
+    brouillon: {
+      'r-statut': 'approuve', 'r-refus': '', 'r-transp': 'postes-canada',
+      'r-service': 'expedited', 'r-poids': '0.8',
+      'r-notes': 'Cliente jointe par téléphone, étiquette à émettre.',
+      'r-generer': false,
+    },
+  },
+];
+
+for (const c of CAS_REPRISE) {
+  const liste = JEU[c.fichier];
+  /* ⚠ ON LÈVE PLUTÔT QUE DE PERDRE LE CAS. Un `find` qui rend `undefined`
+     donnerait un cas de reprise sans réponses : la fenêtre partirait par son
+     chemin « indisponible », le contrôle resterait vert, et l'on aurait de
+     nouveau un jeu d'épreuve qui ne mesure que son propre passage. */
+  if (!Array.isArray(liste))
+    throw new Error('CAS_REPRISE : ' + c.fichier + ' n’a pas de liste de cas dans ce fichier.');
+  const base = liste.find((x) => x.nom === c.depuis);
+  if (!base)
+    throw new Error('CAS_REPRISE : le cas « ' + c.depuis + ' » de ' + c.fichier
+      + ' n’existe plus — le cas de reprise en dérive et ne peut pas être bâti.');
+  liste.push({
+    nom: 'reprise d’une saisie en cours',
+    id: base.id,
+    exige: ['Une saisie non terminée', c.quoi, 'il y a 47 minutes', 'Repartir à neuf'],
+    reponses: Object.assign({}, base.reponses, {
+      'brouillon:lire': Object.assign({}, REPRISE, { brouillon: c.brouillon }),
+    }),
+  });
+}
+
+module.exports = JEU;

@@ -388,6 +388,21 @@ jobs:
           node tools/verifier-mise-en-page.js
           node tools/banc-dossier-exports.js
           node tools/banc-brouillon-garde.js
+          # ⚠⚠ ET CELUI-CI GARDE UNE BOÎTE QUI NE SE DESSINE PAS SANS RIEN CASSER.
+          # `szBrouillonProposer` sort par `return false` quand la réponse n'a pas
+          # de brouillon : aucune erreur, aucune trace, un écran normal. Dix-huit
+          # fenêtres branchent ce mécanisme et, le 2026-09-13, sa boîte n'était
+          # dessinée que dans UNE — les dix-sept autres passaient au vert.
+          # ⚠⚠⚠ CE QUI AVAIT GELÉ LA COUVERTURE ÉTAIT UN COMMENTAIRE : le jeu
+          # d'épreuve affirmait que deux fenêtres seulement étaient atteignables
+          # sans simuler de clic. La mesure en compte HUIT. Une limite écrite
+          # n'est pas une limite mesurée — elle donne surtout une raison de ne
+          # pas chercher.
+          # ⚠ Ce banc ne DÉDUIT donc rien : pour chaque fenêtre déclarée « hors
+          # de portée », il rejoue tous ses cas en injectant un brouillon et
+          # refuse si la boîte paraît. Une déclaration qui se vérifie toute
+          # seule ne peut pas pourrir. 40 cas rejoués, en moins d'une seconde.
+          node tools/banc-brouillon-reprise.js
           node tools/banc-contraste-jour.js
           node tools/banc-pictogrammes.js
           node tools/banc-jetons.js
