@@ -32,6 +32,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('codesbarres');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -124,11 +128,11 @@ function pageCodesbarres(mode) {
      exactement le defaut qu on est en train de corriger. */
   const essai = String(mode || '') === 'lisibilite';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Impression de codes-barres — Administration Sandriza</title>
+<title>${T("Impression de codes-barres — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.barcode}</span><h1>Impression de codes-barres</h1>
+<div class="tete"><span class="ico">${ICO.barcode}</span><h1>${T("Impression de codes-barres")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -158,23 +162,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à l’inventaire.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette fiche n’existe plus.',
-    sans_sku:           'Ce produit n’a pas de SKU — assignez-lui un SKU d’abord.',
-    agent_absent:       'L’impression n’est pas disponible dans la fenêtre principale.',
-    aucune_etiquette:   'La file d’impression est vide.',
-    imprimante:         'Aucune imprimante d’étiquettes prête. Vérifiez Configuration → Imprimantes.',
-    impression:         'L’impression a échoué. Vérifiez l’imprimante, puis réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à l’inventaire.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette fiche n’existe plus.")}',
+    sans_sku:           '${T("Ce produit n’a pas de SKU — assignez-lui un SKU d’abord.")}',
+    agent_absent:       '${T("L’impression n’est pas disponible dans la fenêtre principale.")}',
+    aucune_etiquette:   '${T("La file d’impression est vide.")}',
+    imprimante:         '${T("Aucune imprimante d’étiquettes prête. Vérifiez Configuration → Imprimantes.")}',
+    impression:         '${T("L’impression a échoué. Vérifiez l’imprimante, puis réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 120)) + ')';
     return t;
   }
@@ -192,70 +196,82 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function fileHtml(){
-    var lignes = FILE.length;
+    /* ⚠⚠⚠ CES VARIABLES NE S APPELLENT PLUS << lignes >> NI << produits >>, ET
+       C EST DELIBERE. Ce sont aussi les MOTS AFFICHES sous les trois compteurs :
+       le poseur a donc enveloppe le NOM DE CODE dans sa declaration meme,
+       et le banc sur-code l a refuse (11e signature). La page francaise serait
+       restee juste, T rendant le meme mot ; en anglais la variable se serait
+       appelee << lines >> et la fenetre serait morte. Un nom de code ne doit
+       jamais pouvoir etre une cle de dictionnaire. */
+    var nbLignes = FILE.length;
     var etiquettes = FILE.reduce(function(n, it){ return n + (parseInt(it.qty, 10) || 0); }, 0);
-    var produits = {};
-    FILE.forEach(function(it){ produits[it.pid] = true; });
-    var h = '<div class="carte"><h2>File d’impression</h2>'
+    var parProduit = {};
+    FILE.forEach(function(it){ parProduit[it.pid] = true; });
+    var h = '<div class="carte"><h2>${T("File d’impression")}</h2>'
       + '<div class="stats">'
-      + '<div class="s"><div class="n">' + Object.keys(produits).length + '</div><div class="l">produit' + (Object.keys(produits).length > 1 ? 's' : '') + '</div></div>'
-      + '<div class="s"><div class="n">' + lignes + '</div><div class="l">ligne' + (lignes > 1 ? 's' : '') + '</div></div>'
-      + '<div class="s"><div class="n">' + etiquettes + '</div><div class="l">étiquette' + (etiquettes > 1 ? 's' : '') + '</div></div>'
+      /* ⚠ Le singulier et le pluriel, chacun entier : coupes en morceaux, ils ne
+         laissaient au poseur que des bouts de mots. */
+      + '<div class="s"><div class="n">' + Object.keys(parProduit).length + '</div><div class="l">'
+      + (Object.keys(parProduit).length > 1 ? '${T("produits")}' : '${T("produit")}') + '</div></div>'
+      + '<div class="s"><div class="n">' + nbLignes + '</div><div class="l">'
+      + (nbLignes > 1 ? '${T("lignes")}' : '${T("ligne")}') + '</div></div>'
+      + '<div class="s"><div class="n">' + etiquettes + '</div><div class="l">'
+      + (etiquettes > 1 ? '${T("étiquettes")}' : '${T("étiquette")}') + '</div></div>'
       + '</div>';
     if (!FILE.length) {
-      h += '<div class="vide">Rien à imprimer. Choisissez des variantes à gauche.</div>';
+      h += '<div class="vide">${T("Rien à imprimer. Choisissez des variantes à gauche.")}</div>';
     } else {
       h += FILE.map(function(it, i){
         return '<div class="fileligne">'
           + '<div class="info"><div class="dt"><strong>' + esc(it.name) + '</strong></div>'
           + '<div class="dt">' + esc(it.size) + ' / ' + esc(it.color)
           + ' · <span class="sku">' + esc(it.sku) + '</span></div></div>'
-          + '<button class="mini" data-fmoins="' + i + '" title="Moins">−</button>'
+          + '<button class="mini" data-fmoins="' + i + '" title="${T("Moins")}">−</button>'
           + '<span style="min-width:1.8rem;text-align:center;font-weight:800">' + it.qty + '</span>'
-          + '<button class="mini" data-fplus="' + i + '" title="Plus">+</button>'
-          + '<button class="mini" data-fret="' + i + '" title="Retirer">✕</button>'
+          + '<button class="mini" data-fplus="' + i + '" title="${T("Plus")}">+</button>'
+          + '<button class="mini" data-fret="' + i + '" title="${T("Retirer")}">✕</button>'
           + '</div>';
       }).join('');
     }
     h += '<div style="display:flex;gap:.5rem;margin-top:.6rem">'
       + '<button class="danger" id="cb-vider"' + (FILE.length ? '' : ' disabled') + '>'
-      + (VIDER_ARME ? 'Confirmer ?' : '<span class="ic">🗑</span> Vider') + '</button>'
-      + '<button class="prim" id="cb-imprimer" style="flex:1"' + (FILE.length ? '' : ' disabled') + '><span class="ic">🖨</span> Imprimer '
-      + (etiquettes ? etiquettes + ' étiquette' + (etiquettes > 1 ? 's' : '') : '') + '</button>'
+      + (VIDER_ARME ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span> ${T("Vider")}') + '</button>'
+      + '<button class="prim" id="cb-imprimer" style="flex:1"' + (FILE.length ? '' : ' disabled') + '><span class="ic">🖨</span> ${T("Imprimer ")}'
+      + (etiquettes ? etiquettes + (etiquettes > 1 ? '${T(" étiquettes")}' : '${T(" étiquette")}') : '') + '</button>'
       + '</div></div>';
     return h;
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var h = '<div class="barreoutils">'
-      + '<input aria-label="Nom ou SKU" type="search" id="cb-q" placeholder="Nom ou SKU…" value="' + esc(Q) + '">'
-      + '<select id="cb-cat"><option value="">Toutes les catégories</option>'
+      + '<input aria-label="${T("Nom ou SKU")}" type="search" id="cb-q" placeholder="${T("Nom ou SKU…")}" value="' + esc(Q) + '">'
+      + '<select id="cb-cat"><option value="">${T("Toutes les catégories")}</option>'
       + (D.cats || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(c.nom) + '</option>';
         }).join('')
       + '</select>'
-      + '<span class="droite">' + (D.total || 0) + ' produit' + (D.total > 1 ? 's' : '') + '</span>'
+      + '<span class="droite">' + (D.total || 0) + (D.total > 1 ? '${T(" produits")}' : '${T(" produit")}') + '</span>'
       + '</div>';
 
     h += '<div class="deux"><div class="principal"><div class="carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
-      h += '<div class="vide">Aucun produit trouvé.</div>';
+      h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
-      h += '<table><thead><tr><th>SKU</th><th>Produit</th><th>Catégorie</th>'
-        + '<th>Stock</th><th style="text-align:right">Ajouter</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("SKU")}</th><th>${T("Produit")}</th><th>${T("Catégorie")}</th>'
+        + '<th>${T("Stock")}</th><th style="text-align:right">${T("Ajouter")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var actions = r.sku
-              ? '<button class="mini" data-choisir="' + esc(r.id) + '"><span class="ic">🏷️</span> Étiquettes</button>'
-                + (r.stock > 0 ? ' <button class="mini" data-toutstock="' + esc(r.id) + '" title="Ajouter toutes les variantes en stock (quantité = stock)">+ Stock</button>' : '')
-              : '<span class="dt">SKU requis</span>';
+              ? '<button class="mini" data-choisir="' + esc(r.id) + '"><span class="ic">🏷️</span> ${T("Étiquettes")}</button>'
+                + (r.stock > 0 ? ' <button class="mini" data-toutstock="' + esc(r.id) + '" title="${T("Ajouter toutes les variantes en stock (quantité = stock)")}">${T("+ Stock")}</button>' : '')
+              : '<span class="dt">${T("SKU requis")}</span>';
             return '<tr>'
-              + '<td>' + (r.sku ? '<span class="sku">' + esc(r.sku) + '</span>' : '<span class="dt">sans SKU</span>') + '</td>'
+              + '<td>' + (r.sku ? '<span class="sku">' + esc(r.sku) + '</span>' : '<span class="dt">${T("sans SKU")}</span>') + '</td>'
               + '<td><span class="num">' + esc(r.nom) + '</span></td>'
               + '<td>' + esc(r.categorie || '—') + '</td>'
-              + '<td>' + r.stock + ' ' + (r.stock === 0 ? '<span class="pill err">Rupture</span>'
-                : r.bas ? '<span class="pill att">bas</span>' : '') + '</td>'
+              + '<td>' + r.stock + ' ' + (r.stock === 0 ? '<span class="pill err">${T("Rupture")}</span>'
+                : r.bas ? '<span class="pill att">${T("bas")}</span>' : '') + '</td>'
               + '<td style="text-align:right;white-space:nowrap">' + actions + '</td>'
               + '</tr>';
           }).join('')
@@ -263,7 +279,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if ((D.pages || 1) > 1) {
         h += '<div class="pagi">'
           + '<button class="mini" id="cb-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
+          + '<span>${T("Page ")}' + (D.page + 1) + ' / ' + D.pages + '</span>'
           + '<button class="mini" id="cb-suiv"' + (D.page >= D.pages - 1 ? ' disabled' : '') + '>▶</button>'
           + '</div>';
       }
@@ -272,7 +288,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     if (PICKER) {
       h += '<div class="voile" id="cb-voile"><div class="boite">'
-        + '<h3><span class="ic">🏷️</span> ' + esc(PICKER.nom) + ' — choisir les variantes</h3>'
+        + '<h3><span class="ic">🏷️</span> ' + esc(PICKER.nom) + '${T(" — choisir les variantes")}</h3>'
         + '<div class="rangs">'
         + PICKER.variantes.map(function(v, i){
             var deja = null;
@@ -282,15 +298,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<label><input type="checkbox" data-vcoche="' + i + '"' + ((deja || v.stock > 0) ? ' checked' : '') + '>'
               + '<span>' + esc(v.taille) + ' / ' + esc(v.couleur) + '</span>'
               + '<span class="sku">' + esc(v.sku) + '</span>'
-              + '<span class="dt">stock : ' + v.stock + '</span></label>'
+              + '<span class="dt">${T("stock : ")}' + v.stock + '</span></label>'
               + '<input type="number" min="1" value="' + qte + '" data-vqte="' + i + '"'
-      +   ' aria-label="' + esc('Quantité à imprimer — ' + (v.taille || '') + ' / ' + (v.couleur || '')) + '">'
+      +   ' aria-label="' + esc('${T("Quantité à imprimer — ")}' + (v.taille || '') + ' / ' + (v.couleur || '')) + '">'
               + '</div>';
           }).join('')
         + '</div>'
         + '<div class="pied-boite">'
-        + '<button id="cb-p-annuler">Annuler</button>'
-        + '<button class="prim" id="cb-p-ajouter">➕ Ajouter à la file</button>'
+        + '<button id="cb-p-annuler">${T("Annuler")}</button>'
+        + '<button class="prim" id="cb-p-ajouter">${T("➕ Ajouter à la file")}</button>'
         + '</div></div></div>';
     }
     corps.innerHTML = h;
@@ -313,7 +329,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       VIDER_ARME = false; FILE = []; redessinerFile();
-      dire('File vidée.');
+      dire('${T("File vidée.")}');
     };
     var imp = document.getElementById('cb-imprimer');
     if (imp) imp.onclick = imprimer;
@@ -359,8 +375,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* Le choix des variantes. toutStock = le raccourci << + Stock >> : toutes
      les variantes en stock partent dans la file, quantite = stock, sans boite. */
   function ouvrirPicker(pid, toutStock){
-    dire('Lecture des variantes…');
-    appeler('codesbarres:produit', [pid]).then(function(r){
+    dire('${T("Lecture des variantes…")}');
+    appeler('codesbarres:${T("produit")}', [pid]).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       dire('');
       if (toutStock) {
@@ -373,7 +389,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           else FILE.push({ pid: r.id, sku: v.sku, name: r.nom, size: v.taille, color: v.couleur, qty: v.stock });
           ajouts++;
         });
-        if (!ajouts) { dire('Aucune variante en stock pour ce produit.', 'err'); return; }
+        if (!ajouts) { dire('${T("Aucune variante en stock pour ce produit.")}', 'err'); return; }
         redessinerFile();
         return;
       }
@@ -399,7 +415,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     PICKER = null;
     dessiner();
-    if (!ajouts) dire('Aucune variante cochée avec une quantité au-dessus de zéro.', 'err');
+    if (!ajouts) dire('${T("Aucune variante cochée avec une quantité au-dessus de zéro.")}', 'err');
   }
 
   /* Une surcouche jetable, posee dans le corps du document. La surcouche du
@@ -425,11 +441,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!FILE.length) return;
     var imp = document.getElementById('cb-imprimer');
     if (imp) imp.disabled = true;
-    dire('Vérification de la lisibilité…');
+    dire('${T("Vérification de la lisibilité…")}');
     appeler('etiquettes:lisibilite', [FILE.slice()]).then(function(v){
       // ⚠ Un controle qui ECHOUE ne doit pas bloquer l impression : ce serait
       // remplacer un defaut rare par une panne totale. On le dit, et on passe.
-      if (!v || !v.ok) { dire('Lisibilité non vérifiable — impression lancée.', 'att'); lancer(); return; }
+      if (!v || !v.ok) { dire('${T("Lisibilité non vérifiable — impression lancée.")}', 'att'); lancer(); return; }
       if (!(v.problemes || []).length) { lancer(); return; }
       avertirLisibilite(v);
     });
@@ -437,29 +453,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function avertirLisibilite(v){
     var p = v.problemes;
-    var h = '<h3 style="color:var(--tx-att)"><span class="ic">⚠</span> Ces codes ne se scanneront pas</h3>'
-      + '<p>Sur une étiquette de <strong>' + v.largeurPo + ' po</strong> à <strong>'
-      + v.dpi + ' ppp</strong>, ' + (p.length > 1 ? 'ces codes sont' : 'ce code est')
-      + ' trop long' + (p.length > 1 ? 's' : '') + ' : la barre la plus fine tomberait à '
-      + '<strong>1 point</strong>, sous le seuil de lecture des lecteurs. '
-      + 'L’étiquette s’imprimera correctement — mais elle ne se lira pas.</p>'
+    var h = '<h3 style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Ces codes ne se scanneront pas")}</h3>'
+      + '<p>${T("Sur une étiquette de <strong>")}' + v.largeurPo + '${T(" po</strong> à <strong>")}'
+      + v.dpi + '${T(" ppp</strong>, ")}' + (p.length > 1 ? '${T("ces codes sont trop longs")}' : '${T("ce code est trop long")}')
+      + '${T(" : la barre la plus fine tomberait à ")}'
+      + '${T("<strong>1 point</strong>, sous le seuil de lecture des lecteurs. ")}'
+      + '${T("L’étiquette s’imprimera correctement — mais elle ne se lira pas.")}</p>'
       + '<ul style="padding-left:0">' + p.map(function(x){
           return '<li class="item"><strong>' + esc(x.sku) + '</strong>'
             + (x.nom ? ' — ' + esc(x.nom) : '')
-            + '<br><span style="color:var(--tx2)">' + x.modules + ' modules · il faudrait une '
-            + 'étiquette d’au moins ' + x.largeurMiniPo + ' po</span></li>'; }).join('')
+            + '<br><span style="color:var(--tx2)">' + x.modules + '${T(" modules · il faudrait une ")}'
+            + '${T("étiquette d’au moins ")}' + x.largeurMiniPo + '${T(" po")}</span></li>'; }).join('')
       + '</ul>'
-      + '<p style="color:var(--tx2)">Deux leviers : raccourcir le <strong>code couleur</strong> '
-      + '(Inventaire → Attributs → Couleurs) ou passer à une étiquette plus large. '
-      + 'Une imprimante 300 ppp règle aussi le cas.</p>'
-      + '<div class="pied-boite"><button id="v-non">Annuler</button>'
-      + '<button id="v-oui">Imprimer quand même</button></div>';
+      + '<p style="color:var(--tx2)">${T("Deux leviers : raccourcir le <strong>code couleur</strong> ")}'
+      + '${T("(Inventaire → Attributs → Couleurs) ou passer à une étiquette plus large. ")}'
+      + '${T("Une imprimante 300 ppp règle aussi le cas.")}</p>'
+      + '<div class="pied-boite"><button id="v-non">${T("Annuler")}</button>'
+      + '<button id="v-oui">${T("Imprimer quand même")}</button></div>';
     voile(h, function(fermer){
       document.getElementById('v-non').onclick = function(){
         fermer();
         var b = document.getElementById('cb-imprimer');
         if (b) b.disabled = false;
-        dire('Impression annulée.', 'att');
+        dire('${T("Impression annulée.")}', 'att');
       };
       // ⚠ PAS la classe << prim >> sur ce bouton-la : imprimer quand meme est
       // le choix par defaut de personne. Annuler doit rester le geste facile.
@@ -469,7 +485,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function lancer(){
     var total = FILE.reduce(function(n, it){ return n + (parseInt(it.qty, 10) || 0); }, 0);
-    dire('Impression de ' + total + ' étiquette' + (total > 1 ? 's' : '') + '…');
+    dire('${T("Impression de ")}' + total + (total > 1 ? '${T(" étiquettes…")}' : '${T(" étiquette…")}'));
     var imp = document.getElementById('cb-imprimer');
     if (imp) imp.disabled = true;
     appeler('stock:etiquettes', [FILE.slice()]).then(function(r){
@@ -479,10 +495,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // (controle contourne, ou un cas que le calcul n avait pas vu), on le
         // DIT ici. Cet avertissement se perdait dans la fenetre principale.
         var av = r.avertissements || [];
-        dire(n + ' étiquette' + (n > 1 ? 's' : '') + ' envoyée' + (n > 1 ? 's' : '')
-          + (r.imprimante ? ' à « ' + r.imprimante + ' »' : '') + '.'
-          + (av.length ? ' ' + esc(av[0].sku) + ' ne se scannera pas ('
-             + av[0].points + ' point par barre).' : ''), av.length ? 'att' : 'bon');
+        dire(n + (n > 1 ? '${T(" étiquettes envoyées")}' : '${T(" étiquette envoyée")}')
+          + (r.imprimante ? '${T(" à « ")}' + r.imprimante + ' »' : '') + '.'
+          + (av.length ? ' ' + esc(av[0].sku) + '${T(" ne se scannera pas (")}'
+             + av[0].points + '${T(" point par barre).")}' : ''), av.length ? 'att' : 'bon');
         FILE = [];
         redessinerFile();
       } else {
@@ -499,7 +515,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('codesbarres:liste', [{ q: Q, cat: CAT, page: PAGE, taille: TAILLE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Codes-barres indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Codes-barres indisponibles")}', expliquer(r)); return; }
       D = r;
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
@@ -546,12 +562,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -570,7 +586,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // Ouverture directe sur le garde-fou, avec une file d essai : la surcouche
   // ne s atteint autrement qu apres avoir coche des variantes et clique.
   if (ESSAI_LISIBILITE) {
-    FILE = [{ pid: 'prod_1', sku: 'ROB-0001-XXL-BOURGOGNE', name: 'Robe Élégance mi-longue',
+    FILE = [{ pid: 'prod_1', sku: 'ROB-0001-XXL-BOURGOGNE', name: '${T("Robe Élégance mi-longue")}',
               size: 'XXL', color: 'Bourgogne', qty: 3 }];
     imprimer();
   }
