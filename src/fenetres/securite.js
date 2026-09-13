@@ -25,6 +25,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('securite');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -147,11 +151,11 @@ function pageSecurite(onglet) {
   if (brut.indexOf('user-') === 0) UOUV0 = brut.slice(5).replace(/[^A-Za-z0-9_-]/g, '');
   else if (brut.indexOf('mfa-') === 0) MOUV0 = brut.slice(4).replace(/[^A-Za-z0-9_-]/g, '');
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Accès Utilisateurs — Administration Sandriza</title>
+<title>${T("Accès Utilisateurs — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.acces}</span><h1>Accès Utilisateurs</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les comptes, pas les modifier.</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.acces}</span><h1>${T("Accès Utilisateurs")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les comptes, pas les modifier.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -162,8 +166,8 @@ function pageSecurite(onglet) {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -180,25 +184,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès aux comptes du personnel.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    invalide:'Formulaire invalide.',
-    introuvable:'Compte introuvable.',
-    refus:'Action refusée par le serveur.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès aux comptes du personnel.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    invalide:'${T("Formulaire invalide.")}',
+    introuvable:'${T("Compte introuvable.")}',
+    refus:'${T("Action refusée par le serveur.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
-  function fmtTs(iso){ if (!iso) return 'Jamais connecté'; try { return new Date(iso).toLocaleString('fr-CA'); } catch(e){ return '—'; } }
+  function fmtTs(iso){ if (!iso) return '${T("Jamais connecté")}'; try { return new Date(iso).toLocaleString('fr-CA'); } catch(e){ return '—'; } }
   // Les initiales : deux lettres au plus, prises sur le nom, sinon le courriel.
   function initiales(s){
     var src = String(s.nom || s.email || '?').trim();
@@ -213,14 +217,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var superActifs = 0; for (var k=0;k<comptes.length;k++) if (comptes[k].estSuper && comptes[k].active) superActifs++;
 
     var h = '<div class="entete">'
-      + '<input aria-label="Rechercher un nom, un courriel, un rôle" class="recherche" id="u-q" placeholder="Rechercher un nom, un courriel, un rôle…" value="'+esc(FILTRE)+'">'
-      + (D.peutModifier ? '<button class="prim" id="u-nouveau">＋ Créer un accès</button>' : '')
+      + '<input aria-label="${T("Rechercher un nom, un courriel, un rôle")}" class="recherche" id="u-q" placeholder="${T("Rechercher un nom, un courriel, un rôle…")}" value="'+esc(FILTRE)+'">'
+      + (D.peutModifier ? '<button class="prim" id="u-nouveau">${T("＋ Créer un accès")}</button>' : '')
       + '</div>';
 
     h += '<div class="stat-grid">'
-      + '<div class="stat"><div class="l">Comptes</div><div class="v">'+(st.total||0)+'</div></div>'
-      + '<div class="stat"><div class="l">Actifs</div><div class="v" style="color:var(--tx-ok2)">'+(st.actifs||0)+'</div></div>'
-      + '<div class="stat"><div class="l">MFA activé</div><div class="v" style="color:var(--tx-bleu)">'+(st.mfa||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Comptes")}</div><div class="v">'+(st.total||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Actifs")}</div><div class="v" style="color:var(--tx-ok2)">'+(st.actifs||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("MFA activé")}</div><div class="v" style="color:var(--tx-bleu)">'+(st.mfa||0)+'</div></div>'
       + '</div>';
 
     var q = FILTRE.trim().toLowerCase();
@@ -230,31 +234,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
 
     if (!comptes.length) {
-      h += '<div class="vide">Aucun compte du personnel.</div>';
+      h += '<div class="vide">${T("Aucun compte du personnel.")}</div>';
     } else if (!vus.length) {
-      h += '<div class="vide">Aucun compte ne correspond à « '+esc(FILTRE)+' ».</div>';
+      h += '<div class="vide">${T("Aucun compte ne correspond à « ")}'+esc(FILTRE)+' ».</div>';
     } else {
       h += '<div class="fiches">';
       for (var i=0;i<vus.length;i++){ var s=vus[i];
         var peutSuppr = !s.estMoi && (!s.estSuper || superActifs > 1);
         var etats = '<span class="pill role">'+esc(s.roleLabel||s.role||'—')+'</span>'
-          + (s.active ? '<span class="pill on">Actif</span>' : '<span class="pill off">Désactivé</span>')
+          + (s.active ? '<span class="pill on">${T("Actif")}</span>' : '<span class="pill off">${T("Désactivé")}</span>')
           + (s.mfaEnabled ? '<span class="pill mfa">MFA ✓</span>'
-             : (s.requireMfaSetup ? '<span class="pill warn">MFA à configurer</span>'
-             : (s.mfaExempt ? '<span class="pill warn">MFA exempté</span>' : '')))
-          + (s.estMoi ? '<span class="pill moi">vous</span>' : '');
+             : (s.requireMfaSetup ? '<span class="pill warn">${T("MFA à configurer")}</span>'
+             : (s.mfaExempt ? '<span class="pill warn">${T("MFA exempté")}</span>' : '')))
+          + (s.estMoi ? '<span class="pill moi">${T("vous")}</span>' : '');
         h += '<div class="fiche'+(s.active?'':' inactif')+'">'
           + '<div class="haut"><div class="jeton">'+esc(initiales(s))+'</div>'
           + '<div class="qui"><div class="nom">'+esc(s.nom||'—')+'</div>'
           + '<div class="coord">'+(s.username?'@'+esc(s.username)+' · ':'')+esc(s.email||'')+'</div></div></div>'
           + '<div class="etats">'+etats+'</div>'
-          + '<div class="quand">'+esc(fmtTs(s.derniereConnexion))+' · '+(s.nbConnexions||0)+' connexion'+((s.nbConnexions||0)>1?'s':'')+'</div>';
+          /* ⚠ Le singulier et le pluriel, chacun entier : coupe en << connexion >>
+             + << s >>, le compte ne laissait qu un morceau a traduire. */
+          + '<div class="quand">'+esc(fmtTs(s.derniereConnexion))+' · '+(s.nbConnexions||0)
+          + ((s.nbConnexions||0)>1?'${T(" connexions")}':'${T(" connexion")}')+'</div>';
         if (D.peutModifier){
           h += '<div class="barre">'
-            + '<button class="b" data-edit="'+esc(s.id)+'"><span class="ic">✏</span> Modifier</button>'
-            + '<button class="b" data-mfa="'+esc(s.id)+'" title="Gérer l’authentification à deux facteurs"><span class="ic">🔐</span> MFA</button>'
-            + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="Renvoyer un mot de passe temporaire par courriel"><span class="ic">📧</span> Renvoyer</button>' : '')
-            + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'✓ Confirmer':'Supprimer')+'</button>' : '')
+            + '<button class="b" data-edit="'+esc(s.id)+'"><span class="ic">✏</span> ${T("Modifier")}</button>'
+            + '<button class="b" data-mfa="'+esc(s.id)+'" title="${T("Gérer l’authentification à deux facteurs")}"><span class="ic">🔐</span> MFA</button>'
+            + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="${T("Renvoyer un mot de passe temporaire par courriel")}"><span class="ic">📧</span> ${T("Renvoyer")}</button>' : '')
+            + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'${T("✓ Confirmer")}':'${T("Supprimer")}')+'</button>' : '')
             + '</div>';
         }
         h += '</div>';
@@ -274,21 +281,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var mfas=corps.querySelectorAll('[data-mfa]'); for (var mm=0;mm<mfas.length;mm++) mfas[mm].onclick=function(){ ouvrirMfa(this.getAttribute('data-mfa')); };
     var invs=corps.querySelectorAll('[data-invite]'); for (var v=0;v<invs.length;v++) invs[v].onclick=function(){ inviterCompte(this.getAttribute('data-invite')); };
     var dels=corps.querySelectorAll('[data-del]'); for (var d=0;d<dels.length;d++) dels[d].onclick=function(){ var id=this.getAttribute('data-del');
-      if (DELU===id){ DELU=''; supprimerCompte(id); } else { DELU=id; vueUsers(); dire('Cliquez encore pour supprimer ce compte.', 'att'); } };
+      if (DELU===id){ DELU=''; supprimerCompte(id); } else { DELU=id; vueUsers(); dire('${T("Cliquez encore pour supprimer ce compte.")}', 'att'); } };
   }
 
   // ── ÉDITEUR DE COMPTE (à onglets) ────────────────────────────────
   function ouvrirEditeurCompte(id){
-    if (OCCUPE) return; OCCUPE=true; dire('Ouverture…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Ouverture…")}');
     appeler('securite:form',[id||'']).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ dire(''); ONGED='identite'; dessinerEditeurCompte(r); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ dire(''); ONGED='identite'; dessinerEditeurCompte(r); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function fermerEditeurCompte(){ szPleinReinit(); var s=document.getElementById('sur-u'); if (s) s.remove(); }
 
   function permMatrice(F){
     var acts = F.actions||[], lbls = F.actionLabels||{}, model = F.permModel||[];
     var eff = (F.compte&&F.compte.effectivePerms)||[];
-    var h = '<table class="permtb"><thead><tr><th class="mod">Module</th>';
+    var h = '<table class="permtb"><thead><tr><th class="mod">${T("Module")}</th>';
     for (var a=0;a<acts.length;a++) h += '<th>'+esc(lbls[acts[a]]||acts[a])+'</th>';
     h += '</tr></thead><tbody>';
     for (var g=0;g<model.length;g++){ var grp=model[g];
@@ -319,50 +326,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var roles = F.roles||[];
     var roleOpts=''; for (var i=0;i<roles.length;i++) roleOpts += '<option value="'+esc(roles[i].key)+'"'+((c.role||'admin')===roles[i].key?' selected':'')+'>'+esc(roles[i].icon||'')+' '+esc(roles[i].label)+'</option>';
     var qs = F.questions||[];
-    var qOpts=function(sel){ var o='<option value="">— Choisir —</option>'; for (var i=0;i<qs.length;i++) o+='<option value="'+esc(qs[i])+'"'+(sel===qs[i]?' selected':'')+'>'+esc(qs[i])+'</option>'; return o; };
+    var qOpts=function(sel){ var o='<option value="">${T("— Choisir —")}</option>'; for (var i=0;i<qs.length;i++) o+='<option value="'+esc(qs[i])+'"'+(sel===qs[i]?' selected':'')+'>'+esc(qs[i])+'</option>'; return o; };
     var ansSet = !!c.securityAnswersSet;
 
     var ONG = [
-      ['identite', 'Identité'],
-      ['acces', 'Accès'],
-      ['questions', 'Questions' + (nouv ? '' : (ansSet ? ' ✓' : ''))],
-      ['perms', '⚙ Permissions']
+      ['identite', '${T("Identité")}'],
+      ['acces', '${T("Accès")}'],
+      ['questions', '${T("Questions")}' + (nouv ? '' : (ansSet ? ' ✓' : ''))],
+      ['perms', '${T("⚙ Permissions")}']
     ];
     var tabs = '';
     for (var t=0;t<ONG.length;t++) tabs += '<button data-ong="'+ONG[t][0]+'" class="'+(ONGED===ONG[t][0]?'on':'')+'">'+esc(ONG[t][1])+'</button>';
 
-    var volIdentite = '<p class="aideOng">Qui est cette personne. Le <b>nom d’utilisateur</b> lui sert à se connecter ; le courriel reçoit l’invitation et les avis de sécurité.</p>'
+    var volIdentite = '<p class="aideOng">${T("Qui est cette personne. Le <b>nom d’utilisateur</b> lui sert à se connecter ; le courriel reçoit l’invitation et les avis de sécurité.")}</p>'
       + '<div class="cols2">'
-      + '<label class="champ"><span class="lbl">Prénom</span><input class="t" id="u-first" value="'+esc(c.firstName||'')+'"></label>'
-      + '<label class="champ"><span class="lbl">Nom</span><input class="t" id="u-last" value="'+esc(c.lastName||'')+'"></label>'
-      + '<label class="champ"><span class="lbl">Nom d’utilisateur</span><input class="t" id="u-username" value="'+esc(c.username||'')+'" placeholder="ex : marie_b">'
-      + '<span class="sub">Minuscules, chiffres, tiret et soulignement.</span></label>'
-      + '<label class="champ"><span class="lbl">Courriel'+(nouv?' <span class="req">*</span>':' (non modifiable)')+'</span>'
+      + '<label class="champ"><span class="lbl">${T("Prénom")}</span><input class="t" id="u-first" value="'+esc(c.firstName||'')+'"></label>'
+      + '<label class="champ"><span class="lbl">${T("Nom")}</span><input class="t" id="u-last" value="'+esc(c.lastName||'')+'"></label>'
+      + '<label class="champ"><span class="lbl">${T("Nom d’utilisateur")}</span><input class="t" id="u-username" value="'+esc(c.username||'')+'" placeholder="${T("ex : marie_b")}">'
+      + '<span class="sub">${T("Minuscules, chiffres, tiret et soulignement.")}</span></label>'
+      + '<label class="champ"><span class="lbl">${T("Courriel")}'+(nouv?' <span class="req">*</span>':'${T(" (non modifiable)")}')+'</span>'
       + '<input class="t" type="email" id="u-email" value="'+esc(c.email||'')+'"'+(nouv?'':' readonly style="opacity:.7"')+'></label>'
       + '</div>';
 
-    var volAcces = '<p class="aideOng">Ce que cette personne peut faire, et comment elle prouve son identité.</p>'
+    var volAcces = '<p class="aideOng">${T("Ce que cette personne peut faire, et comment elle prouve son identité.")}</p>'
       + '<div class="cols2">'
-      + '<label class="champ"><span class="lbl">Rôle</span><select class="t" id="u-role">'+roleOpts+'</select>'
-      + '<span class="sub">Le rôle coche les permissions par défaut. L’onglet <b>Permissions</b> permet de s’en écarter.</span></label>'
-      + '<label class="champ"><span class="lbl">'+(nouv?'Mot de passe':'Nouveau mot de passe')+'</span>'
-      + '<input class="t" type="password" id="u-pw" autocomplete="new-password" placeholder="'+(nouv?'laisser vide = généré et envoyé par courriel':'laisser vide = inchangé')+'">'
-      + '<span class="sub">'+(nouv?'Vide : un mot de passe temporaire est créé et envoyé.':'Vide : le mot de passe actuel est conservé.')+'</span></label>'
+      + '<label class="champ"><span class="lbl">${T("Rôle")}</span><select class="t" id="u-role">'+roleOpts+'</select>'
+      + '<span class="sub">${T("Le rôle coche les permissions par défaut. L’onglet <b>Permissions</b> permet de s’en écarter.")}</span></label>'
+      + '<label class="champ"><span class="lbl">'+(nouv?'${T("Mot de passe")}':'${T("Nouveau mot de passe")}')+'</span>'
+      + '<input class="t" type="password" id="u-pw" autocomplete="new-password" placeholder="'+(nouv?'${T("laisser vide = généré et envoyé par courriel")}':'${T("laisser vide = inchangé")}')+'">'
+      + '<span class="sub">'+(nouv?'${T("Vide : un mot de passe temporaire est créé et envoyé.")}':'${T("Vide : le mot de passe actuel est conservé.")}')+'</span></label>'
       + '</div>'
       + '<label class="case"><input type="checkbox" id="u-active" '+(c.active!==false?'checked':'')+'>'
-      + '<span>Compte actif<span class="quoi">Décoché, la personne ne peut plus se connecter — sans que le compte ni son historique soient supprimés.</span></span></label>'
+      + '<span>${T("Compte actif")}<span class="quoi">${T("Décoché, la personne ne peut plus se connecter — sans que le compte ni son historique soient supprimés.")}</span></span></label>'
       + '<label class="case"><input type="checkbox" id="u-reqmfa" '+(c.requireMfaSetup&&!c.mfaEnabled?'checked':'')+'>'
-      + '<span>Exiger la configuration MFA à la 1<sup>re</sup> connexion<span class="quoi">Elle devra lier une application d’authentification avant d’accéder à l’administration.</span></span></label>'
+      + '<span>${T("Exiger la configuration MFA à la 1<sup>re</sup> connexion")}<span class="quoi">${T("Elle devra lier une application d’authentification avant d’accéder à l’administration.")}</span></span></label>'
       + '<label class="case"><input type="checkbox" id="u-exempt" '+(c.mfaExempt?'checked':'')+'>'
-      + '<span>Exempté de MFA<span class="quoi">À réserver aux cas où le second facteur est impossible : c’est un rempart en moins.</span></span></label>';
+      + '<span>${T("Exempté de MFA")}<span class="quoi">${T("À réserver aux cas où le second facteur est impossible : c’est un rempart en moins.")}</span></span></label>';
 
     var volQuestions = ''
       + (nouv ? '' : '')
       + '<div class="cols2">'
-      + '<label class="champ"><span class="lbl">Question 1</span><select class="t" id="u-q1">'+qOpts(c.securityQ1||'')+'</select></label>'
-      + '<label class="champ"><span class="lbl">Réponse 1</span><input class="t" id="u-a1" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
-      + '<label class="champ"><span class="lbl">Question 2</span><select class="t" id="u-q2">'+qOpts(c.securityQ2||'')+'</select></label>'
-      + '<label class="champ"><span class="lbl">Réponse 2</span><input class="t" id="u-a2" autocomplete="off" placeholder="'+(ansSet?'Inchangée':'Réponse')+'"></label>'
+      + '<label class="champ"><span class="lbl">${T("Question 1")}</span><select class="t" id="u-q1">'+qOpts(c.securityQ1||'')+'</select></label>'
+      + '<label class="champ"><span class="lbl">${T("Réponse 1")}</span><input class="t" id="u-a1" autocomplete="off" placeholder="'+(ansSet?'${T("Inchangée")}':'${T("Réponse")}')+'"></label>'
+      + '<label class="champ"><span class="lbl">${T("Question 2")}</span><select class="t" id="u-q2">'+qOpts(c.securityQ2||'')+'</select></label>'
+      + '<label class="champ"><span class="lbl">${T("Réponse 2")}</span><input class="t" id="u-a2" autocomplete="off" placeholder="'+(ansSet?'${T("Inchangée")}':'${T("Réponse")}')+'"></label>'
       + '</div>';
 
     var volPerms = ''
@@ -370,9 +377,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-u';
     sur.innerHTML = '<div class="boite">'
-      + '<div class="tt"><h3>'+(nouv?'＋ Créer un accès':esc(((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email||'Compte'))+'</h3>'
-      + '<div><button class="sz-btnplein" id="u-plein" title="Occuper toute la fenêtre">⛶ Plein écran</button>'
-      + '<button class="mini" id="u-x">Fermer</button></div></div>'
+      + '<div class="tt"><h3>'+(nouv?'${T("＋ Créer un accès")}':esc(((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email||'${T("Compte")}'))+'</h3>'
+      + '<div><button class="sz-btnplein" id="u-plein" title="${T("Occuper toute la fenêtre")}">${T("⛶ Plein écran")}</button>'
+      + '<button class="mini" id="u-x">${T("Fermer")}</button></div></div>'
       + '<div class="ongEd" id="u-ong">'+tabs+'</div>'
       + '<div class="liste">'
       + '<div class="ferr" id="u-err"></div>'
@@ -382,8 +389,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="vol'+(ONGED==='perms'?' on':'')+'" data-vol="perms">'+volPerms+'</div>'
       + '</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
-      + '<button class="b" id="u-annuler">Annuler</button>'
-      + '<button class="prim" id="u-enr">'+(nouv?'Créer le compte':'Enregistrer')+'</button></div></div>';
+      + '<button class="b" id="u-annuler">${T("Annuler")}</button>'
+      + '<button class="prim" id="u-enr">'+(nouv?'${T("Créer le compte")}':'${T("Enregistrer")}')+'</button></div></div>';
     document.body.appendChild(sur);
 
     document.getElementById('u-x').onclick=fermerEditeurCompte;
@@ -410,7 +417,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var perms=(def&&def.permissions)||[];
       var cbs=document.querySelectorAll('#u-perms [data-perm]');
       for (var j3=0;j3<cbs.length;j3++) cbs[j3].checked = perms.indexOf(cbs[j3].getAttribute('data-perm'))>=0;
-      dire('Permissions replacées sur celles du rôle.', 'att');
+      dire('${T("Permissions replacées sur celles du rôle.")}', 'att');
     };
   }
 
@@ -441,50 +448,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       securityQ1: txv('u-q1').trim(), securityA1: txv('u-a1').trim(),
       securityQ2: txv('u-q2').trim(), securityA2: txv('u-a2').trim()
     };
-    if (!d.email) { ferr('Le courriel est obligatoire.', 'identite'); return; }
-    OCCUPE=true; dire('Enregistrement…');
+    if (!d.email) { ferr('${T("Le courriel est obligatoire.")}', 'identite'); return; }
+    OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('securite:compte:ecrire',[id||'', d]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){
         fermerEditeurCompte();
         var msg = (r.mode==='create')
-          ? ('Compte créé.' + (r.courrielEnvoye ? ' Courriel d’accueil envoyé à '+(r.courriel||'')+'.' : (r.tempPassword ? ' Mot de passe temporaire : '+r.tempPassword+' (courriel non envoyé).' : ' (courriel non envoyé).')))
-          : 'Compte modifié.';
+          ? ('${T("Compte créé.")}' + (r.courrielEnvoye ? '${T(" Courriel d’accueil envoyé à ")}'+(r.courriel||'')+'.' : (r.tempPassword ? '${T(" Mot de passe temporaire : ")}'+r.tempPassword+'${T(" (courriel non envoyé).")}' : '${T(" (courriel non envoyé).")}')))
+          : '${T("Compte modifié.")}';
         recharger(msg, 'bon');
       } else ferr(expliquer(r), 'identite');
     });
   }
   function supprimerCompte(id){
-    if (OCCUPE) return; OCCUPE=true; dire('Suppression…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Suppression…")}');
     appeler('securite:compte:supprimer',[id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok) recharger('Compte supprimé.', 'bon'); else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok) recharger('${T("Compte supprimé.")}', 'bon'); else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function inviterCompte(id){
-    if (OCCUPE) return; OCCUPE=true; dire('Envoi de l’invitation…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Envoi de l’invitation…")}');
     appeler('securite:compte:invitation',[id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok) dire('Invitation renvoyée à '+(r.email||'')+'.', 'bon'); else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok) dire('${T("Invitation renvoyée à ")}'+(r.email||'')+'.', 'bon'); else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── MFA — activation TOTP / exemption / désactivation ────────────
   function ouvrirMfa(id){
-    if (OCCUPE) return; OCCUPE=true; dire('Lecture MFA…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Lecture MFA…")}');
     appeler('securite:mfa:etat',[id]).then(function(r){ OCCUPE=false;
-      if (!r||!r.ok){ dire('Échec : '+expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ dire('${T("Échec : ")}'+expliquer(r), 'err'); return; }
       if (r.mfaEnabled){ dire(''); dessinerMfaGerer(id, r); }
-      else { OCCUPE=true; dire('Préparation de la liaison…');
+      else { OCCUPE=true; dire('${T("Préparation de la liaison…")}');
         appeler('securite:mfa:init',[id]).then(function(r2){ OCCUPE=false;
-          if (r2&&r2.ok){ dire(''); dessinerMfaSetup(id, r2); } else dire('Échec : '+expliquer(r2), 'err'); }); }
+          if (r2&&r2.ok){ dire(''); dessinerMfaSetup(id, r2); } else dire('${T("Échec : ")}'+expliquer(r2), 'err'); }); }
     });
   }
   function fermerMfa(){ szPleinReinit(); var s=document.getElementById('sur-mfa'); if (s) s.remove(); }
   function dessinerMfaGerer(id, e){
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
-    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> MFA — '+esc(e.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
+    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> MFA — '+esc(e.nom||'')+'</h3><button class="mini" id="m-x">${T("Fermer")}</button></div>'
       + '<div class="liste">'
-      + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:var(--tx-ok2)"><span class="ic">✅</span> Authentification à deux facteurs activée pour ce compte.</div>'
-      + '<label class="case"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><b>Exempter ce compte</b><span class="quoi">Connexion autorisée sans code — un rempart en moins.</span></span></label>'
+      + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:var(--tx-ok2)"><span class="ic">✅</span> ${T("Authentification à deux facteurs activée pour ce compte.")}</div>'
+      + '<label class="case"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><b>${T("Exempter ce compte")}</b><span class="quoi">${T("Connexion autorisée sans code — un rempart en moins.")}</span></span></label>'
       + '</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
-      + '<button class="b" id="m-annuler">Annuler</button><button class="b dgr" id="m-off">Désactiver MFA</button><button class="prim" id="m-save">Enregistrer</button></div></div>';
+      + '<button class="b" id="m-annuler">${T("Annuler")}</button><button class="b dgr" id="m-off">${T("Désactiver MFA")}</button><button class="prim" id="m-save">${T("Enregistrer")}</button></div></div>';
     document.body.appendChild(sur);
     document.getElementById('m-x').onclick=fermerMfa;
     document.getElementById('m-annuler').onclick=fermerMfa;
@@ -493,9 +500,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function dessinerMfaSetup(id, s){
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
-    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> Activer MFA — '+esc(s.nom||'')+'</h3><button class="mini" id="m-x">Fermer</button></div>'
+    sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> ${T("Activer MFA — ")}'+esc(s.nom||'')+'</h3><button class="mini" id="m-x">${T("Fermer")}</button></div>'
       + '<div class="liste">'
-      + '<p class="aideOng"><b>Étape 1</b> — Scannez le QR avec Google Authenticator, Authy ou une application TOTP compatible, ou entrez la clé manuellement.</p>'
+      + '<p class="aideOng">${T("<b>Étape 1</b> — Scannez le QR avec Google Authenticator, Authy ou une application TOTP compatible, ou entrez la clé manuellement.")}</p>'
       + '<div style="text-align:center;background:var(--f-pied);padding:1rem;border-radius:9px;margin:.6rem 0">'
       /* ⚠⚠ LE DESSIN, PLUS L ADRESSE (2026-09-11). Cette image venait de
          api.qrserver.com avec l URI otpauth COMPLETE dans son adresse — donc le
@@ -507,16 +514,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div id="m-qr" style="width:190px;height:190px;border-radius:8px;background:#fff;overflow:hidden">'
       + (s.qrSvg || '') + '</div></div>'
       + '<div style="text-align:center;background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;padding:.6rem">'
-      + '<div class="sub" style="color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;font-size:.72rem">Clé secrète (saisie manuelle)</div>'
+      + '<div class="sub" style="color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;font-size:.72rem">${T("Clé secrète (saisie manuelle)")}</div>'
       + '<code style="font-size:.9rem;letter-spacing:.12em;word-break:break-all;color:var(--tx)">'+esc(s.secretGroupe||s.secret||'')+'</code>'
-      + '<div style="font-size:.72rem;color:var(--tx-gris)">Base32 · SHA-1 · 6 chiffres · 30 s</div></div>'
-      + '<label class="champ" style="margin-top:.9rem"><span class="lbl">Étape 2 — Code à 6 chiffres</span>'
+      + '<div style="font-size:.72rem;color:var(--tx-gris)">${T("Base32 · SHA-1 · 6 chiffres · 30 s")}</div></div>'
+      + '<label class="champ" style="margin-top:.9rem"><span class="lbl">${T("Étape 2 — Code à 6 chiffres")}</span>'
       + '<input class="t" id="m-code" inputmode="numeric" maxlength="6" placeholder="000000" style="font-family:monospace;letter-spacing:.3em;text-align:center;font-size:1.2rem"></label>'
       + '<div class="ferr" id="m-err"></div>'
-      + '<label class="case"><input type="checkbox" id="m-exempt" '+(s.mfaExempt?'checked':'')+'> <span>Exempter ce compte<span class="quoi">Activer sans l’exiger à la connexion.</span></span></label>'
+      + '<label class="case"><input type="checkbox" id="m-exempt" '+(s.mfaExempt?'checked':'')+'> <span>${T("Exempter ce compte")}<span class="quoi">${T("Activer sans l’exiger à la connexion.")}</span></span></label>'
       + '</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
-      + '<button class="b" id="m-annuler">Annuler</button><button class="prim" id="m-activer">✓ Activer MFA</button></div></div>';
+      + '<button class="b" id="m-annuler">${T("Annuler")}</button><button class="prim" id="m-activer">${T("✓ Activer MFA")}</button></div></div>';
     document.body.appendChild(sur);
     document.getElementById('m-x').onclick=fermerMfa;
     document.getElementById('m-annuler').onclick=fermerMfa;
@@ -529,22 +536,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        c est elle la voie sure, et elle ne sort pas du poste. */
   }
   function mfaExempter(id, exempt){
-    if (OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('securite:mfa:exempter',[id, exempt]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ fermerMfa(); recharger(exempt?'Compte exempté de MFA.':'Exemption retirée.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ fermerMfa(); recharger(exempt?'${T("Compte exempté de MFA.")}':'${T("Exemption retirée.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function mfaDesactiver(id){
-    if (OCCUPE) return; OCCUPE=true; dire('Désactivation…');
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Désactivation…")}');
     appeler('securite:mfa:desactiver',[id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ fermerMfa(); recharger('MFA désactivé.', 'bon'); } else dire('Échec : '+expliquer(r), 'err'); });
+      if (r&&r.ok){ fermerMfa(); recharger('${T("MFA désactivé.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function mfaConfirmer(id){
     if (OCCUPE) return;
     var code=txv('m-code'), exempt=chkv('m-exempt');
-    OCCUPE=true; dire('Vérification du code…');
+    OCCUPE=true; dire('${T("Vérification du code…")}');
     appeler('securite:mfa:confirmer',[id, code, exempt]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ fermerMfa(); recharger('MFA activé.', 'bon'); }
-      else { var e=document.getElementById('m-err'); if (e){ e.textContent=expliquer(r); e.style.display='block'; } dire('Échec : '+expliquer(r), 'err'); } });
+      if (r&&r.ok){ fermerMfa(); recharger('${T("MFA activé.")}', 'bon'); }
+      else { var e=document.getElementById('m-err'); if (e){ e.textContent=expliquer(r); e.style.display='block'; } dire('${T("Échec : ")}'+expliquer(r), 'err'); } });
   }
 
   function recharger(msg, cl){
@@ -559,7 +566,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('securite:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');

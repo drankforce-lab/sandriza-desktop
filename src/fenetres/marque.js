@@ -21,6 +21,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('marque');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -135,15 +139,15 @@ const ONGLETS_VALIDES = ['marque', 'logos', 'connexion'];
 function pageMarque(onglet) {
   const depart = ONGLETS_VALIDES.indexOf(String(onglet || '')) >= 0 ? String(onglet) : 'marque';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Logos et marque — Administration Sandriza</title>
+<title>${T("Logos et marque — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.image}</span><h1>Logos et marque</h1></div>
+<div class="tete"><span class="ico">${ICO.image}</span><h1>${T("Logos et marque")}</h1></div>
 <div class="onglets" id="onglets"></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les logos, pas les modifier.</div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les logos, pas les modifier.")}</div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button id="b-reinit" disabled>Réinitialiser</button>
-  <button class="prim" id="b-save" disabled>Enregistrer</button></div>
+  <button id="b-reinit" disabled>${T("Réinitialiser")}</button>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -166,12 +170,12 @@ function pageMarque(onglet) {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -189,24 +193,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : les logos ne peuvent pas être modifiés.',
-    depot:              'Le dépôt du logo dans le stockage a échoué. Rien n’a été modifié.',
-    pas_une_image:      'Ce fichier n’est pas une image.',
-    logo_inconnu:       'Ce type de logo n’existe pas dans cette version.',
-    quoi_inconnu:       'Cette remise à zéro n’existe pas dans cette version.',
-    rien_a_ecrire:      'Aucun changement à enregistrer.',
-    indisponible:       'La configuration n’est pas prête dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'L’enregistrement dans le nuage a échoué. Réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : les logos ne peuvent pas être modifiés.")}',
+    depot:              '${T("Le dépôt du logo dans le stockage a échoué. Rien n’a été modifié.")}',
+    pas_une_image:      '${T("Ce fichier n’est pas une image.")}',
+    logo_inconnu:       '${T("Ce type de logo n’existe pas dans cette version.")}',
+    quoi_inconnu:       '${T("Cette remise à zéro n’existe pas dans cette version.")}',
+    rien_a_ecrire:      '${T("Aucun changement à enregistrer.")}',
+    indisponible:       '${T("La configuration n’est pas prête dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -222,12 +226,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ⚠ Le fond compte : un logo blanc sur fond blanc parait absent. Chacun est
      montre sur le fond ou il servira vraiment. */
   var LOGOS = [
-    { t:'store',          nom:'Boutique — FR',    aide:'Barre de navigation et connexion client.', fond:'#f5f2ec' },
-    { t:'store_en',       nom:'Boutique — EN',    aide:'Utilise le logo français si vide.',         fond:'#f5f2ec' },
-    { t:'admin',          nom:'Barre latérale',   aide:'Remplace l’icône lettre si défini.',        fond:'#1a2035' },
-    { t:'login',          nom:'Connexion du personnel', aide:'Indépendant de la barre latérale.',   fond:'#0f172a' },
-    { t:'transparent',    nom:'Sans fond — FR',   aide:'Factures et courriels.',                    fond:'#f9f5ee' },
-    { t:'transparent_en', nom:'Sans fond — EN',   aide:'Utilise le logo français si vide.',         fond:'#f9f5ee' }
+    { t:'store',          nom:'${T("Boutique — FR")}',    aide:'${T("Barre de navigation et connexion client.")}', fond:'#f5f2ec' },
+    { t:'store_en',       nom:'${T("Boutique — EN")}',    aide:'${T("Utilise le logo français si vide.")}',         fond:'#f5f2ec' },
+    { t:'admin',          nom:'${T("Barre latérale")}',   aide:'${T("Remplace l’icône lettre si défini.")}',        fond:'#1a2035' },
+    { t:'login',          nom:'${T("Connexion du personnel")}', aide:'${T("Indépendant de la barre latérale.")}',   fond:'#0f172a' },
+    { t:'transparent',    nom:'${T("Sans fond — FR")}',   aide:'${T("Factures et courriels.")}',                    fond:'#f9f5ee' },
+    { t:'transparent_en', nom:'${T("Sans fond — EN")}',   aide:'${T("Utilise le logo français si vide.")}',         fond:'#f9f5ee' }
   ];
 
   // Valeur d un champ, quel que soit son type. Absent = chaine vide.
@@ -248,29 +252,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerMarque(){
     var m = (D && D.marque) || {}, g = m.gradient || {};
     var h = [];
-    h.push('<div class="carte"><h2>Identité</h2>');
-    h.push('<p class="sous">Le nom et les slogans repris partout : boutique, courriels, documents.</p>');
-    h.push(champ('m-name', 'Nom de marque', m.name));
-    h.push('<div class="deux">' + champ('m-slogan', 'Slogan — FR', m.slogan, 'sous le nom, dans la barre')
-      + champ('m-slogan-en', 'Slogan — EN', m.sloganEN) + '</div>');
-    h.push(champ('m-sub', 'Sous-titre de la connexion client', m.sub));
-    h.push(champ('m-letter', 'Lettre de l’icône', m.letter, '1 ou 2 caractères, si aucun logo'));
+    h.push('<div class="carte"><h2>${T("Identité")}</h2>');
+    h.push('<p class="sous">${T("Le nom et les slogans repris partout : boutique, courriels, documents.")}</p>');
+    h.push(champ('m-name', '${T("Nom de marque")}', m.name));
+    h.push('<div class="deux">' + champ('m-slogan', '${T("Slogan — FR")}', m.slogan, '${T("sous le nom, dans la barre")}')
+      + champ('m-slogan-en', '${T("Slogan — EN")}', m.sloganEN) + '</div>');
+    h.push(champ('m-sub', '${T("Sous-titre de la connexion client")}', m.sub));
+    h.push(champ('m-letter', '${T("Lettre de l’icône")}', m.letter, '${T("1 ou 2 caractères, si aucun logo")}'));
     h.push('</div>');
-    h.push('<div class="carte"><h2>Dégradé sur le nom</h2>');
-    h.push('<p class="sous">Appliqué au nom de marque quand aucun logo d’image ne le remplace.</p>');
+    h.push('<div class="carte"><h2>${T("Dégradé sur le nom")}</h2>');
+    h.push('<p class="sous">${T("Appliqué au nom de marque quand aucun logo d’image ne le remplace.")}</p>');
     h.push('<label class="bascule"><input type="checkbox" id="m-grad"' + (g.enabled ? ' checked' : '')
-      + (RO ? ' disabled' : '') + '> Colorer le nom en dégradé</label>');
+      + (RO ? ' disabled' : '') + '> ${T("Colorer le nom en dégradé")}</label>');
     h.push('<div class="trois" id="m-grad-opts" style="margin-top:.7rem'
       + (g.enabled ? '' : ';display:none') + '">');
-    h.push(couleur('m-grad-from', 'Couleur A', g.from));
-    h.push(couleur('m-grad-to', 'Couleur B', g.to));
-    h.push('<div class="ch"><label for="m-grad-dir">Direction</label><select id="m-grad-dir"' + (RO ? ' disabled' : '') + '>'
-      + ['135deg,↗ Diagonale', '90deg,→ Horizontale', '180deg,↓ Verticale'].map(function(o){
-          var p = o.split(','); return '<option value="' + p[0] + '"'
+    h.push(couleur('m-grad-from', '${T("Couleur A")}', g.from));
+    h.push(couleur('m-grad-to', '${T("Couleur B")}', g.to));
+    h.push('<div class="ch"><label for="m-grad-dir">${T("Direction")}</label><select id="m-grad-dir"' + (RO ? ' disabled' : '') + '>'
+      /* ⚠⚠ LA VALEUR ET L ETIQUETTE SEPAREES, ET C EST VOLONTAIRE. Ecrites dans
+         une seule chaine (<< 135deg,↗ Diagonale >>) puis coupees au virgule,
+         elles ne faisaient qu un texte pour qui traduit : une traduction du
+         mauvais cote et c est << 135deg >> qui partait dans la base, donc un
+         degrade qui ne s affiche plus. Ce qui se LIT est a droite ; ce qui
+         s ECRIT est a gauche, et ne se traduit jamais. */
+      + [['135deg', '${T("↗ Diagonale")}'], ['90deg', '${T("→ Horizontale")}'], ['180deg', '${T("↓ Verticale")}']].map(function(p){
+          return '<option value="' + p[0] + '"'
             + ((g.dir || '135deg') === p[0] ? ' selected' : '') + '>' + esc(p[1]) + '</option>'; }).join('')
       + '</select></div>');
     h.push('</div></div>');
-    h.push('<div class="carte"><h2>Aperçu</h2><div id="m-apercu"></div></div>');
+    h.push('<div class="carte"><h2>${T("Aperçu")}</h2><div id="m-apercu"></div></div>');
     corps.innerHTML = h.join('');
     var gb = document.getElementById('m-grad');
     if (gb) gb.onchange = function(){
@@ -311,8 +321,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── ONGLET 2 : les logos ────────────────────────────────────────────── */
   function dessinerLogos(){
-    var h = ['<div class="carte pleine"><h2>Les six logos</h2>'];
-    h.push('<p class="sous">Un logo choisi n’est déposé qu’à l’enregistrement. PNG ou SVG, fond transparent recommandé.</p>');
+    var h = ['<div class="carte pleine"><h2>${T("Les six logos")}</h2>'];
+    h.push('<p class="sous">${T("Un logo choisi n’est déposé qu’à l’enregistrement. PNG ou SVG, fond transparent recommandé.")}</p>');
     h.push('<div class="logos">');
     LOGOS.forEach(function(L){
       var src = logoActuel(L.t);
@@ -320,12 +330,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h.push('<div class="logo">');
       h.push('<div class="vig" style="background:' + esc(L.fond) + '">'
         + (src ? '<img src="' + esc(src) + '" alt="">'
-               : '<span class="rien">Aucun logo</span>') + '</div>');
-      h.push('<div><p class="nom">' + esc(L.nom) + (enAttente ? ' <span class="att">· en attente</span>' : '')
+               : '<span class="rien">${T("Aucun logo")}</span>') + '</div>');
+      h.push('<div><p class="nom">' + esc(L.nom) + (enAttente ? ' <span class="att">${T("· en attente")}</span>' : '')
         + '</p><p class="aide">' + esc(L.aide) + '</p><div class="gestes">');
-      h.push('<button class="pt" data-choisir="' + esc(L.t) + '"' + (RO ? ' disabled' : '') + '>Choisir un fichier…</button>');
-      if (enAttente) h.push('<button class="pt" data-annuler="' + esc(L.t) + '">Annuler ce choix</button>');
-      else if (src) h.push('<button class="pt dgr" data-effacer="' + esc(L.t) + '"' + (RO ? ' disabled' : '') + '>✕ Supprimer</button>');
+      h.push('<button class="pt" data-choisir="' + esc(L.t) + '"' + (RO ? ' disabled' : '') + '>${T("Choisir un fichier…")}</button>');
+      if (enAttente) h.push('<button class="pt" data-annuler="' + esc(L.t) + '">${T("Annuler ce choix")}</button>');
+      else if (src) h.push('<button class="pt dgr" data-effacer="' + esc(L.t) + '"' + (RO ? ' disabled' : '') + '>${T("✕ Supprimer")}</button>');
       h.push('</div></div></div>');
     });
     h.push('</div></div>');
@@ -337,7 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var i = 0; i < bs.length; i++) bs[i].onclick = function(e){ choisirFichier(e.currentTarget.getAttribute('data-choisir')); };
     var an = corps.querySelectorAll('[data-annuler]');
     for (var j = 0; j < an.length; j++) an[j].onclick = function(e){
-      delete ENATTENTE[e.currentTarget.getAttribute('data-annuler')]; dessiner(); dire('Choix annulé.'); };
+      delete ENATTENTE[e.currentTarget.getAttribute('data-annuler')]; dessiner(); dire('${T("Choix annulé.")}'); };
     var ef = corps.querySelectorAll('[data-effacer]');
     for (var k = 0; k < ef.length; k++) ef[k].onclick = function(e){ effacerLogo(e.currentTarget.getAttribute('data-effacer')); };
   }
@@ -353,9 +363,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       r.onload = function(){
         ENATTENTE[type] = String(r.result || '');
         dessiner();
-        dire('Logo prêt. Il partira à l’enregistrement.', 'att');
+        dire('${T("Logo prêt. Il partira à l’enregistrement.")}', 'att');
       };
-      r.onerror = function(){ dire('Ce fichier n’a pas pu être lu.', 'err'); };
+      r.onerror = function(){ dire('${T("Ce fichier n’a pas pu être lu.")}', 'err'); };
       r.readAsDataURL(f);
     };
     inp.click();
@@ -363,10 +373,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function effacerLogo(type){
     if (RO) return;
     occuper(true);
-    dire('Suppression…');
+    dire('${T("Suppression…")}');
     appeler('config:marque:ecrire', [{ logosEffaces: [type] }]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('Logo supprimé.', 'bon'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Logo supprimé.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
@@ -375,24 +385,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerConnexion(){
     var c = (D && D.clientLogin) || {}, t = (D && D.loginTheme) || {};
     var h = [];
-    h.push('<div class="carte"><h2>Connexion de la clientèle</h2>');
-    h.push('<p class="sous">Couleurs de l’en-tête de la page de connexion de la boutique.</p>');
-    h.push('<div class="trois">' + couleur('c-from', 'Fond — couleur A', c.bgFrom)
-      + couleur('c-to', 'Fond — couleur B', c.bgTo)
-      + couleur('c-text', 'Texte', c.textColor) + '</div>');
+    h.push('<div class="carte"><h2>${T("Connexion de la clientèle")}</h2>');
+    h.push('<p class="sous">${T("Couleurs de l’en-tête de la page de connexion de la boutique.")}</p>');
+    h.push('<div class="trois">' + couleur('c-from', '${T("Fond — couleur A")}', c.bgFrom)
+      + couleur('c-to', '${T("Fond — couleur B")}', c.bgTo)
+      + couleur('c-text', '${T("Texte")}', c.textColor) + '</div>');
     h.push('<div id="c-apercu" style="margin-top:.6rem"></div></div>');
-    h.push('<div class="carte"><h2>Connexion du personnel</h2>');
-    h.push('<p class="sous">La page par laquelle on entre dans l’administration.</p>');
-    h.push(champ('t-sub', 'Sous-titre', t.subtitleText));
-    h.push('<div class="trois">' + couleur('t-bg-from', 'Fond — couleur A', t.bgFrom)
-      + couleur('t-bg-mid', 'Fond — couleur B', t.bgMid)
-      + couleur('t-card', 'Fond de la carte', t.cardBg) + '</div>');
-    h.push('<div class="trois">' + couleur('t-logo-from', 'Icône — couleur A', t.logoGradFrom)
-      + couleur('t-logo-to', 'Icône — couleur B', t.logoGradTo)
-      + couleur('t-title', 'Couleur du titre', t.titleColor) + '</div>');
-    h.push('<div class="trois">' + couleur('t-btn-from', 'Bouton — couleur A', t.btnGradFrom)
-      + couleur('t-btn-to', 'Bouton — couleur B', t.btnGradTo)
-      + couleur('t-sub-col', 'Couleur du sous-titre', t.subtitleColor) + '</div>');
+    h.push('<div class="carte"><h2>${T("Connexion du personnel")}</h2>');
+    h.push('<p class="sous">${T("La page par laquelle on entre dans l’administration.")}</p>');
+    h.push(champ('t-sub', '${T("Sous-titre")}', t.subtitleText));
+    h.push('<div class="trois">' + couleur('t-bg-from', '${T("Fond — couleur A")}', t.bgFrom)
+      + couleur('t-bg-mid', '${T("Fond — couleur B")}', t.bgMid)
+      + couleur('t-card', '${T("Fond de la carte")}', t.cardBg) + '</div>');
+    h.push('<div class="trois">' + couleur('t-logo-from', '${T("Icône — couleur A")}', t.logoGradFrom)
+      + couleur('t-logo-to', '${T("Icône — couleur B")}', t.logoGradTo)
+      + couleur('t-title', '${T("Couleur du titre")}', t.titleColor) + '</div>');
+    h.push('<div class="trois">' + couleur('t-btn-from', '${T("Bouton — couleur A")}', t.btnGradFrom)
+      + couleur('t-btn-to', '${T("Bouton — couleur B")}', t.btnGradTo)
+      + couleur('t-sub-col', '${T("Couleur du sous-titre")}', t.subtitleColor) + '</div>');
     h.push('<div id="t-apercu" style="margin-top:.6rem"></div></div>');
     corps.innerHTML = h.join('');
     ['c-from', 'c-to', 'c-text'].forEach(function(id){
@@ -428,17 +438,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="tt" style="color:' + esc(v('t-title')) + '">' + esc(m.name || 'SANDRIZA') + '</div>';
     h += '<div class="ss" style="color:' + esc(v('t-sub-col')) + '">' + esc(v('t-sub')) + '</div>';
     h += '<div class="cadre" style="background:' + esc(v('t-card')) + ';border:1px solid var(--v18)">'
-      + '<div class="champ">utilisateur</div><div class="champ">••••••••</div>'
-      + '<div class="bt" style="background:linear-gradient(135deg,' + v('t-btn-from') + ',' + v('t-btn-to') + ')">Se connecter</div>'
+      + '<div class="champ">${T("utilisateur")}</div><div class="champ">••••••••</div>'
+      + '<div class="bt" style="background:linear-gradient(135deg,' + v('t-btn-from') + ',' + v('t-btn-to') + ')">${T("Se connecter")}</div>'
       + '</div></div>';
     el.innerHTML = h;
   }
 
   /* ── Coquille : onglets, pied, lecture, ecriture ─────────────────────── */
   var ONGLETS = [
-    { k:'marque',   lib:'Marque' },
-    { k:'logos',    lib:'Logos' },
-    { k:'connexion', lib:'Pages de connexion' }
+    { k:'marque',   lib:'${T("Marque")}' },
+    { k:'logos',    lib:'${T("Logos")}' },
+    { k:'connexion', lib:'${T("Pages de connexion")}' }
   ];
   function dessinerOnglets(){
     ongl.innerHTML = ONGLETS.map(function(o){
@@ -484,7 +494,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else dessinerConnexion();
     bsave.disabled = RO;
     breinit.disabled = RO;
-    breinit.textContent = ONGLET === 'connexion' ? 'Réinitialiser les couleurs' : 'Réinitialiser';
+    breinit.textContent = ONGLET === 'connexion' ? '${T("Réinitialiser les couleurs")}' : '${T("Réinitialiser")}';
   }
   function occuper(o){
     bsave.disabled = o || RO;
@@ -498,14 +508,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = Object.keys(ENATTENTE).length;
     if (n) saisie.logosNouveaux = ENATTENTE;
     occuper(true);
-    dire(n ? 'Dépôt de ' + n + ' logo' + (n > 1 ? 's' : '') + '…' : 'Enregistrement…');
+    /* ⚠ LE SINGULIER ET LE PLURIEL, CHACUN ENTIER : coupe en << logo >> + << s >>,
+       le message ne laissait que des morceaux a traduire. */
+    dire(n ? (n > 1 ? '${T("Dépôt de ")}' + n + '${T(" logos…")}' : '${T("Dépôt de ")}' + n + '${T(" logo…")}') : '${T("Enregistrement…")}');
     appeler('config:marque:ecrire', [saisie]).then(function(r){
       occuper(false);
       if (r && r.ok) {
         ENATTENTE = {};
         D = r; RO = !r.peutModifier;
         dessiner();
-        dire('Logos et marque enregistrés.', 'bon');
+        dire('${T("Logos et marque enregistrés.")}', 'bon');
       } else {
         // ⚠ On GARDE les choix en attente : un depot refuse ne doit pas faire
         // perdre le fichier que la personne vient de choisir.
@@ -519,20 +531,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RO) return;
     var quoi = ONGLET === 'connexion' ? 'theme' : 'logos';
     occuper(true);
-    dire('Remise à zéro…');
+    dire('${T("Remise à zéro…")}');
     appeler('config:marque:reinit', [quoi]).then(function(r){
       occuper(false);
       if (r && r.ok) {
         if (quoi === 'logos') ENATTENTE = {};
         D = r; RO = !r.peutModifier;
         dessiner();
-        dire(quoi === 'theme' ? 'Couleurs de connexion réinitialisées.' : 'Marque et logos réinitialisés.', 'bon');
+        dire(quoi === 'theme' ? '${T("Couleurs de connexion réinitialisées.")}' : '${T("Marque et logos réinitialisés.")}', 'bon');
       } else dire(expliquer(r), 'err');
     });
   };
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:marque:donnees').then(function(r){
       if (!r || !r.ok) {
         ongl.innerHTML = '';
