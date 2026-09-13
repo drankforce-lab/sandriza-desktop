@@ -21,6 +21,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un jeton, ni le nom et
+   l aide d un reseau, qui viennent du coeur (voir src/langue/sociaux-config.js). */
+const T = require('../langue').tr('sociaux-config');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -71,11 +76,11 @@ input.t:focus{outline:none;border-color:#c9a97e}
 
 function pageSociauxConfig() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Configuration des réseaux sociaux — Administration Sandriza</title>
+<title>${T("Configuration des réseaux sociaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.social}</span><h1>Configuration des réseaux sociaux</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter ces réglages, pas les modifier.</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.social}</span><h1>${T("Configuration des réseaux sociaux")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter ces réglages, pas les modifier.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -86,8 +91,8 @@ function pageSociauxConfig() {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -98,18 +103,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès aux réseaux sociaux.',
-    indisponible:'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    invalide:'Renseignement manquant ou invalide.',
-    refus:'Le réseau a refusé la connexion.',
-    reseau:'Le réseau social est injoignable.',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    echec:'L’opération a échoué.'
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès aux réseaux sociaux.")}',
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    invalide:'${T("Renseignement manquant ou invalide.")}',
+    refus:'${T("Le réseau a refusé la connexion.")}',
+    reseau:'${T("Le réseau social est injoignable.")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -121,24 +126,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
 
     h += '<label class="auto"><input type="checkbox" id="s-auto" '+(D.autoPublication?'checked':'')+(RO?' disabled':'')+'>'
-      + '<span><b>Publier automatiquement la file, une fois par jour</b> — décoché, la file attend une publication manuelle.</span></label>';
+      + '<span>${T("<b>Publier automatiquement la file, une fois par jour</b> — décoché, la file attend une publication manuelle.")}</span></label>';
 
     h += '<div class="grille">';
     for (var i=0;i<l.length;i++){ var r=l[i];
       h += '<div class="res'+(r.actif?' on':'')+'">'
         + '<div class="haut"><div class="nom">'+esc(r.nom)+'</div>'
-        + (r.jetonPose ? '<span class="pill ok">Jeton en place</span>' : '<span class="pill non">Aucun jeton</span>')
-        + '<label class="bascule"><input type="checkbox" data-actif="'+esc(r.cle)+'" '+(r.actif?'checked':'')+(RO?' disabled':'')+'> Activer</label>'
+        + (r.jetonPose ? '<span class="pill ok">${T("Jeton en place")}</span>' : '<span class="pill non">${T("Aucun jeton")}</span>')
+        + '<label class="bascule"><input type="checkbox" data-actif="'+esc(r.cle)+'" '+(r.actif?'checked':'')+(RO?' disabled':'')+'> ${T("Activer")}</label>'
         + '</div>'
-        + '<label class="champ"><span class="lbl">Jeton d’accès</span>'
+        + '<label class="champ"><span class="lbl">${T("Jeton d’accès")}</span>'
         + '<span class="rang"><input class="t" type="password" id="tok-'+esc(r.cle)+'" autocomplete="new-password" placeholder="'
-        + (r.jetonPose ? 'laisser vide = jeton conservé' : 'coller le jeton ici') + '"'+(RO?' disabled':'')+'>'
-        + (RO?'':'<button class="b" data-tok="'+esc(r.cle)+'">Enregistrer</button>')+'</span>'
+        + (r.jetonPose ? '${T("laisser vide = jeton conservé")}' : '${T("coller le jeton ici")}') + '"'+(RO?' disabled':'')+'>'
+        + (RO?'':'<button class="b" data-tok="'+esc(r.cle)+'">${T("Enregistrer")}</button>')+'</span>'
         + '<span class="sub">'+esc(r.aide)+'</span></label>'
         + '<label class="champ"><span class="lbl">'+esc(r.extraLabel)+'</span>'
-        + '<span class="rang"><input class="t" id="ext-'+esc(r.cle)+'" value="'+esc(r.extraValeur)+'" placeholder="identifiant numérique"'+(RO?' disabled':'')+'>'
-        + (RO?'':'<button class="b" data-ext="'+esc(r.cle)+'">Enregistrer</button>')+'</span></label>'
-        + (r.testable && r.jetonPose ? '<button class="b" data-test="'+esc(r.cle)+'"><span class="ic">🔗</span> Tester la connexion</button>' : '')
+        + '<span class="rang"><input class="t" id="ext-'+esc(r.cle)+'" value="'+esc(r.extraValeur)+'" placeholder="${T("identifiant numérique")}"'+(RO?' disabled':'')+'>'
+        + (RO?'':'<button class="b" data-ext="'+esc(r.cle)+'">${T("Enregistrer")}</button>')+'</span></label>'
+        + (r.testable && r.jetonPose ? '<button class="b" data-test="'+esc(r.cle)+'"><span class="ic">🔗</span>${T(" Tester la connexion")}</button>' : '')
         + '</div>';
     }
     h += '</div>';
@@ -148,45 +153,45 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function lier(){
     var a=document.getElementById('s-auto');
-    if (a) a.onchange=function(){ ecrire('', 'auto', a.checked, 'Publication automatique enregistrée.'); };
+    if (a) a.onchange=function(){ ecrire('', 'auto', a.checked, '${T("Publication automatique enregistrée.")}'); };
     var bs=corps.querySelectorAll('[data-actif]');
     for (var i=0;i<bs.length;i++) bs[i].onchange=function(){
-      ecrire(this.getAttribute('data-actif'), 'actif', this.checked, 'Réseau mis à jour.'); };
+      ecrire(this.getAttribute('data-actif'), 'actif', this.checked, '${T("Réseau mis à jour.")}'); };
     var ts=corps.querySelectorAll('[data-tok]');
     for (var j=0;j<ts.length;j++) ts[j].onclick=function(){
       var k=this.getAttribute('data-tok'), v=txv('tok-'+k);
       /* ⚠ VIDE = ON CONSERVE. Enregistrer un champ vide effacerait le jeton en
          place sans que personne l ait demande — et la publication s arreterait
          en silence. Pour retirer un jeton, on desactive le reseau. */
-      if (!v.trim()) { dire('Champ vide : le jeton en place est conservé.', 'att'); return; }
-      ecrire(k, 'token', v, 'Jeton enregistré.'); };
+      if (!v.trim()) { dire('${T("Champ vide : le jeton en place est conservé.")}', 'att'); return; }
+      ecrire(k, 'token', v, '${T("Jeton enregistré.")}'); };
     var es=corps.querySelectorAll('[data-ext]');
     for (var k2=0;k2<es.length;k2++) es[k2].onclick=function(){
       var k=this.getAttribute('data-ext');
-      ecrire(k, 'extra', txv('ext-'+k), 'Identifiant enregistré.'); };
+      ecrire(k, 'extra', txv('ext-'+k), '${T("Identifiant enregistré.")}'); };
     var ss=corps.querySelectorAll('[data-test]');
     for (var m=0;m<ss.length;m++) ss[m].onclick=function(){ tester(this.getAttribute('data-test'), this); };
   }
 
   function ecrire(net, champ, valeur, bon){
-    if (RO || OCCUPE) return; OCCUPE=true; dire('Enregistrement…');
+    if (RO || OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('sociaux:config:ecrire',[net, champ, valeur]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ D=r; RO=!r.peutEcrire; dessiner(); dire(bon, 'bon'); }
-      else dire('Échec : '+expliquer(r), 'err'); });
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   function tester(net, bouton){
     if (OCCUPE) return; OCCUPE=true;
-    if (bouton){ bouton.disabled=true; bouton.textContent='⏳ Test…'; }
-    dire('Interrogation du réseau…');
+    if (bouton){ bouton.disabled=true; bouton.textContent='${T("⏳ Test…")}'; }
+    dire('${T("Interrogation du réseau…")}');
     appeler('sociaux:config:tester',[net]).then(function(r){ OCCUPE=false;
-      if (bouton){ bouton.disabled=false; bouton.textContent='Tester la connexion'; }
-      if (r&&r.ok) dire('Connecté — '+esc(r.quoi||''), 'bon');
-      else dire('Échec : '+expliquer(r), 'err'); });
+      if (bouton){ bouton.disabled=false; bouton.textContent='${T("Tester la connexion")}'; }
+      if (r&&r.ok) dire('${T("Connecté — ")}'+esc(r.quoi||''), 'bon');
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   function charger(){
-    dire('Chargement…');
+    dire('${T("Chargement…")}');
     appeler('sociaux:config:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutEcrire;

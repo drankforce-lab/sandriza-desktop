@@ -22,6 +22,11 @@
 
 const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO } = require('./socle');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom, la description ni
+   la saison d une collection (voir src/langue/collection.js). */
+const T = require('../langue').tr('collection');
+
 const CSS_PROPRE = `
 .photo{display:flex;gap:.85rem;align-items:flex-start}
 .photo .vign{flex:0 0 auto;width:140px;height:140px;border-radius:10px;
@@ -35,18 +40,18 @@ const CSS_PROPRE = `
 function pageCollection(id) {
   const ident = JSON.stringify(String(id || ''));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Collection — Administration Sandriza</title>
+<title>${T("Collection — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.collections}</span><h1 id="titre">Collection</h1>
+<div class="tete"><span class="ico">${ICO.collections}</span><h1 id="titre">${T("Collection")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions">
-    <button id="btn-prec">Précédent</button>
-    <button id="btn-suiv">Suivant</button>
-    <button id="btn-annuler">Annuler</button>
-    <button id="btn-enr" class="prim" disabled>Enregistrer</button>
+    <button id="btn-prec">${T("Précédent")}</button>
+    <button id="btn-suiv">${T("Suivant")}</button>
+    <button id="btn-annuler">${T("Annuler")}</button>
+    <button id="btn-enr" class="prim" disabled>${T("Enregistrer")}</button>
   </span></div>
 <script>
 (function(){
@@ -75,32 +80,33 @@ function pageCollection(id) {
   function dessiner(fiche){
     var h = [];
 
-    h.push('<div class="etape"><div class="carte"><h2>La collection</h2><div class="grille">'
+    h.push('<div class="etape"><div class="carte"><h2>${T("La collection")}</h2><div class="grille">'
       + '<div class="ch large"><label for="c-nom">Nom <span class="req">*</span></label><input id="c-nom"></div>'
       + '<div class="ch large"><label for="c-desc">Description</label>'
       + '<textarea id="c-desc" rows="4"></textarea>'
       + '<div style="margin-top:.35rem">'
-      + '<button type="button" id="c-ia"><span class="ic">✨</span> Rédiger avec l’IA</button></div></div>'
-      + '<div class="ch"><label for="c-saison">Saison</label><select id="c-saison">'
+      + '<button type="button" id="c-ia"><span class="ic">✨</span>${T(" Rédiger avec l’IA")}</button></div></div>'
+      + '<div class="ch"><label for="c-saison">${T("Saison")}</label><select id="c-saison">'
       + CTX.saisons.map(function(s){ return '<option value="' + esc(s) + '">' + (s ? esc(s) : '—') + '</option>'; }).join('')
       + '</select></div>'
-      + '<div class="ch"><label for="c-annee">Année</label><select id="c-annee">'
+      + '<div class="ch"><label for="c-annee">${T("Année")}</label><select id="c-annee">'
       + CTX.annees.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('')
       + '</select></div>'
-      + '<div class="ch"><label for="c-actif">Statut</label><select id="c-actif">'
-      + '<option value="1">Active</option><option value="0">Inactive</option></select></div>'
+      + '<div class="ch"><label for="c-actif">${T("Statut")}</label><select id="c-actif">'
+      + '<option value="1">${T("Active")}</option><option value="0">${T("Inactive")}</option></select></div>'
       + '</div></div></div>');
 
-    h.push('<div class="etape"><div class="carte"><h2>Image de couverture</h2><div class="photo">'
-      + '<div class="vign" id="c-vign">aucune image</div><div class="cmd">'
+    h.push('<div class="etape"><div class="carte"><h2>${T("Image de couverture")}</h2><div class="photo">'
+      + '<div class="vign" id="c-vign">${T("aucune image")}</div><div class="cmd">'
       + '<input type="file" id="c-fichier" accept="image/*">'
-      + '<button type="button" id="c-vider">Retirer l’image</button>'
-      + '<div class="aide">L’image est déposée dans le stockage au moment de l’enregistrement, '
-      + 'comme partout ailleurs dans l’administration. Maximum 8 Mo.</div>'
+      + '<button type="button" id="c-vider">${T("Retirer l’image")}</button>'
+      + '<div class="aide">'
+      + '${T("L’image est déposée dans le stockage au moment de l’enregistrement, comme partout ailleurs dans l’administration. Maximum 8 Mo.")}'
+      + '</div>'
       + '</div></div></div></div>');
 
-    h.push('<div class="etape"><div class="carte plein" id="c-zone"><h2>Produits de la collection</h2>'
-      + '<div class="rech"><input aria-label="Filtrer par nom" placeholder="Filtrer par nom…"><span class="cpt" id="c-cpt"></span></div>'
+    h.push('<div class="etape"><div class="carte plein" id="c-zone"><h2>${T("Produits de la collection")}</h2>'
+      + '<div class="rech"><input aria-label="${T("Filtrer par nom")}" placeholder="${T("Filtrer par nom…")}"><span class="cpt" id="c-cpt"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
 
     document.getElementById('corps').innerHTML = h.join('');
@@ -152,13 +158,13 @@ function pageCollection(id) {
     });
 
     Assist.poser([
-      { t: 'La collection', obl: ['c-nom'] },
+      { t: '${T("La collection")}', obl: ['c-nom'] },
       { t: 'Image',         obl: [] },
       { t: 'Produits',      obl: [] }
     ], function(i){ if (i === 2 && PAGI) PAGI.dessiner(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
-    if (bEnr.disabled) dire('Consultation seulement — votre rôle ne permet pas d’enregistrer.', 'att');
+    if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
   }
 
   // Le bouton n a de sens qu avec une image : le service la regarde. On le DIT
@@ -168,23 +174,23 @@ function pageCollection(id) {
     if (!b) return;
     b.disabled = !IMAGE;
     b.title = IMAGE
-      ? 'Analyse l’image de couverture et propose une description.'
-      : 'Ajoutez d’abord une image à l’étape « Image » : le service la regarde.';
+      ? '${T("Analyse l’image de couverture et propose une description.")}'
+      : '${T("Ajoutez d’abord une image à l’étape « Image » : le service la regarde.")}';
   }
   function rediger(){
     var b = document.getElementById('c-ia');
-    b.disabled = true; dire('Rédaction en cours…');
+    b.disabled = true; dire('${T("Rédaction en cours…")}');
     P.appeler('collection:decrire', { nom: val('c-nom'), imageDataUrl: IMAGE }).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
       poser('c-desc', r.texte);
-      dire('Description rédigée — relisez-la avant d’enregistrer.', 'bon');
+      dire('${T("Description rédigée — relisez-la avant d’enregistrer.")}', 'bon');
     });
   }
 
   function montrerImage(src){
     var v = document.getElementById('c-vign'); if (!v) return;
-    v.innerHTML = src ? '<img src="' + esc(src) + '" alt="">' : 'aucune image';
+    v.innerHTML = src ? '<img src="' + esc(src) + '" alt="">' : '${T("aucune image")}';
   }
 
   // ⚠ UNE BORNE SUR LA TAILLE, ET ELLE EST DITE. Sans elle, une photo d appareil
@@ -194,12 +200,12 @@ function pageCollection(id) {
   function lireFichier(){
     var f = this.files && this.files[0]; if (!f) return;
     if (f.size > MAX_MO * 1024 * 1024) {
-      dire('Image trop lourde (' + Math.round(f.size / 1048576) + ' Mo). Maximum ' + MAX_MO + ' Mo.', 'err');
+      dire('${T("Image trop lourde (")}' + Math.round(f.size / 1048576) + '${T(" Mo). Maximum ")}' + MAX_MO + ' Mo.', 'err');
       this.value = ''; return;
     }
     var l = new FileReader();
     l.onload = function(){ IMAGE = String(l.result || ''); montrerImage(IMAGE); dire(''); majIa(); };
-    l.onerror = function(){ dire('Lecture du fichier impossible.', 'err'); };
+    l.onerror = function(){ dire('${T("Lecture du fichier impossible.")}', 'err'); };
     l.readAsDataURL(f);
   }
 
@@ -215,20 +221,20 @@ function pageCollection(id) {
          signe ; celle-ci etait la seule a diverger, cachee au banc des
          pictogrammes par le faux commentaire qu ouvrait le type de fichier
          accepte par le selecteur d image, 110 lignes plus haut. */
-      if (v.obtenu) { sous.textContent = v.horsLigne ? 'hors ligne' : 'Section verrouillée en modification par : ' + (v.par || 'vous'); return; }
-      sous.textContent = 'ouverte par ' + (v.parQui || 'quelqu’un d’autre');
+      if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
+      sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       bEnr.disabled = true;
-      dire('Enregistrement bloqué : cette fiche est ouverte ailleurs.', 'err');
+      dire('${T("Enregistrement bloqué : cette fiche est ouverte ailleurs.")}', 'err');
     });
   }
 
   function charger(){
     P.appeler('collection:contexte').then(function(c){
-      if (!c || !c.ok) { vide('Formulaire indisponible', expliquer(c)); return; }
+      if (!c || !c.ok) { vide('${T("Formulaire indisponible")}', expliquer(c)); return; }
       CTX = c;
       return P.appeler('collection:lire', ID).then(function(r){
-        if (!r || !r.ok) { vide('Fiche indisponible', expliquer(r)); return; }
-        document.getElementById('titre').textContent = ID ? 'Modifier la collection' : 'Nouvelle collection';
+        if (!r || !r.ok) { vide('${T("Fiche indisponible")}', expliquer(r)); return; }
+        document.getElementById('titre').textContent = ID ? '${T("Modifier la collection")}' : '${T("Nouvelle collection")}';
         dessiner(r.fiche);
         szBrouillonProposer();
         return verrou();
@@ -252,7 +258,7 @@ function pageCollection(id) {
   var BR_CHAMPS = ['c-nom', 'c-desc', 'c-saison', 'c-annee', 'c-actif'];
   szBrouillonBrancher({
     portee: 'collection',
-    libelle: ID ? 'Une modification de cette collection' : 'Une collection',
+    libelle: ID ? '${T("Une modification de cette collection")}' : '${T("Une collection")}',
     ttlMin: 720,
     cle: function(){ return ID ? ('col:' + ID) : '__new__'; },
     actif: function(){ return !!document.getElementById('c-nom'); },
@@ -284,7 +290,7 @@ function pageCollection(id) {
   function enregistrer(){
     if (!Assist.toutValide()) return;
     bEnr.disabled = true;
-    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? 'Dépôt de l’image et enregistrement…' : 'Enregistrement…');
+    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de l’image et enregistrement…")}' : '${T("Enregistrement…")}');
     P.appeler('collection:enregistrer', ID, {
       name: val('c-nom').trim(),
       description: val('c-desc'),
@@ -296,7 +302,7 @@ function pageCollection(id) {
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
       szBrouillonJeter();
-      dire('Enregistré.', 'bon');
+      dire('${T("Enregistré.")}', 'bon');
       setTimeout(function(){ P.fermer(); }, 550);
     });
   }

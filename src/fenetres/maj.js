@@ -46,6 +46,11 @@
 
 const { JS_DIRE, CSS_JOUR } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le numero de version, qui
+   vient de la coquille (voir src/langue/maj.js). */
+const T = require('../langue').tr('maj');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -117,7 +122,7 @@ function pageMaj(arg) {
   const version = (bouts[1] || '').replace(/[^0-9a-zA-Z.\-]/g, '');
   const secondes = Math.max(5, Math.min(600, parseInt(bouts[2], 10) || 30));
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Mise à jour</title>
+<title>${T("Mise à jour")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body class="${ecran === 'compte' ? 'presse' : ''}">
 <div class="tete"><h1 id="titre"></h1></div>
 <div class="corps" id="corps"></div>
@@ -148,7 +153,7 @@ ${JS_DIRE()}
     try { pr = P.majDecision(heures); } catch (e) { pr = null; }
     if (!pr || typeof pr.then !== 'function') {
       return Promise.resolve({ ok: false, motif: 'indisponible',
-        message: 'Ce poste ne sait pas planifier une mise a jour.' });
+        message: '${T("Ce poste ne sait pas planifier une mise à jour.")}' });
     }
     return pr.then(function(r){ return r || { ok: false, motif: 'vide' }; })
       .catch(function(e){ return { ok: false, motif: 'echec',
@@ -161,29 +166,31 @@ ${JS_DIRE()}
      2026-09-09 : son << Plus tard >> ne menait a rien, aucune suite, aucune
      echeance. On demande MAINTENANT quand. */
   function dessinerProposition(){
-    el('titre').textContent = 'Mise à jour disponible';
+    el('titre').textContent = '${T("Mise à jour disponible")}';
     el('corps').innerHTML =
       '<div class="ver"><span class="pill">' + esc(VERSION || '?') + '</span>'
-      + '<div class="txt"><b>Cette version est téléchargée et prête.</b>'
-      + '<span>L’installation redémarre l’application.</span></div></div>'
-      + '<p>Vous pouvez l’installer tout de suite, ou choisir un moment plus '
-      + 'tard dans la journée. Votre travail en cours n’est pas touché tant que '
-      + 'vous n’avez pas décidé.</p>'
+      + '<div class="txt"><b>${T("Cette version est téléchargée et prête.")}</b>'
+      + '<span>${T("L’installation redémarre l’application.")}</span></div></div>'
+      /* Un PARAGRAPHE ENTIER dans un seul litteral : coupe en trois, il se
+         traduirait en trois morceaux qui ne se recollent pas. */
+      + '<p>'
+      + '${T("Vous pouvez l’installer tout de suite, ou choisir un moment plus tard dans la journée. Votre travail en cours n’est pas touché tant que vous n’avez pas décidé.")}'
+      + '</p>'
       + '<div class="bloc" id="zone-heures" hidden>'
-      + '<div class="t">Installer dans</div>'
+      + '<div class="t">${T("Installer dans")}</div>'
       + '<div class="heures">'
-      + '<button data-h="2">2 heures</button>'
-      + '<button data-h="4">4 heures</button>'
-      + '<button data-h="8">8 heures</button>'
+      + '<button data-h="2">${T("2 heures")}</button>'
+      + '<button data-h="4">${T("4 heures")}</button>'
+      + '<button data-h="8">${T("8 heures")}</button>'
       + '</div>'
-      + '<p class="fine" style="margin:.6rem 0 0">À l’heure choisie, un compte à '
-      + 'rebours de 30 secondes s’affichera avant le redémarrage — le temps '
-      + 'd’enregistrer ce qui est ouvert.</p>'
+      + '<p class="fine" style="margin:.6rem 0 0">'
+      + '${T("À l’heure choisie, un compte à rebours de 30 secondes s’affichera avant le redémarrage — le temps d’enregistrer ce qui est ouvert.")}'
+      + '</p>'
       + '</div>';
     el('pied').innerHTML =
-      '<button id="b-tard">Plus tard…</button>'
+      '<button id="b-tard">${T("Plus tard…")}</button>'
       + '<span class="ecart"></span>'
-      + '<button class="prim" id="b-maintenant">Installer maintenant</button>'
+      + '<button class="prim" id="b-maintenant">${T("Installer maintenant")}</button>'
       + '<span class="msg" id="msg"></span>';
     brancherProposition();
   }
@@ -200,7 +207,7 @@ ${JS_DIRE()}
       t.disabled = true;
       var b = z.querySelector('button');
       if (b) b.focus();
-      szDire('Choisissez dans combien de temps.');
+      szDire('${T("Choisissez dans combien de temps.")}');
     };
     var m = el('b-maintenant');
     if (m) m.onclick = function(){ envoyer(0, m); };
@@ -222,24 +229,24 @@ ${JS_DIRE()}
   function envoyer(heures, bouton){
     var tous = document.querySelectorAll('button');
     for (var i = 0; i < tous.length; i++) tous[i].disabled = true;
-    if (bouton) bouton.textContent = heures ? 'Planification…' : 'Installation…';
-    szDire(heures ? 'Planification…' : 'Préparation de l’installation…');
+    if (bouton) bouton.textContent = heures ? '${T("Planification…")}' : '${T("Installation…")}';
+    szDire(heures ? '${T("Planification…")}' : '${T("Préparation de l’installation…")}');
     decider(heures).then(function(r){
       if (r && r.ok) {
         if (!heures) {
           /* L application va redemarrer : on n a rien d autre a dire, et
              surtout rien a reactiver. */
-          szDire('L’application redémarre…', 'bon');
+          szDire('${T("L’application redémarre…")}', 'bon');
           return;
         }
-        szDire('Planifié. La fenêtre se ferme.', 'bon');
+        szDire('${T("Planifié. La fenêtre se ferme.")}', 'bon');
         setTimeout(function(){ try { P.fermer(); } catch (e) {} }, 900);
         return;
       }
       for (var j = 0; j < tous.length; j++) tous[j].disabled = false;
       var t2 = el('b-tard'); if (t2) t2.disabled = true;   // le choix reste ouvert
-      if (bouton) bouton.textContent = heures ? (heures + ' heures') : 'Installer maintenant';
-      szDire((r && r.message) || ('Refusé (' + ((r && r.motif) || 'inconnu') + ').'), 'err');
+      if (bouton) bouton.textContent = heures ? (heures + '${T(" heures")}') : '${T("Installer maintenant")}';
+      szDire((r && r.message) || ('${T("Refusé (")}' + ((r && r.motif) || 'inconnu') + ').'), 'err');
     });
   }
 
@@ -251,24 +258,25 @@ ${JS_DIRE()}
      ⚠ << Redemarrer maintenant >> existe, lui, parce qu il fait vraiment
      quelque chose : il n attend pas les trente secondes. */
   function dessinerCompte(){
-    el('titre').textContent = 'Redémarrage dans ' + TOTAL + ' secondes';
+    el('titre').textContent = '${T("Redémarrage dans ")}' + TOTAL + '${T(" secondes")}';
     el('corps').innerHTML =
       '<div class="ligne">'
       + '<div class="anneau" id="anneau"><span id="n">' + TOTAL + '</span></div>'
       + '<div class="txt">'
-      + '<p style="margin:0 0 .3rem"><strong>La version ' + esc(VERSION || '?')
-      + ' s’installe.</strong></p>'
-      + '<p class="fine" style="margin:0">Enregistrez ce qui est ouvert. '
-      + 'L’application va redémarrer d’elle-même.</p>'
+      + '<p style="margin:0 0 .3rem"><strong>${T("La version ")}' + esc(VERSION || '?')
+      + '${T(" s’installe.")}</strong></p>'
+      + '<p class="fine" style="margin:0">'
+      + '${T("Enregistrez ce qui est ouvert. L’application va redémarrer d’elle-même.")}'
+      + '</p>'
       + '</div></div>';
     el('pied').innerHTML =
       '<span class="ecart"></span>'
-      + '<button class="prim" id="b-vite">Redémarrer maintenant</button>'
+      + '<button class="prim" id="b-vite">${T("Redémarrer maintenant")}</button>'
       + '<span class="msg" id="msg"></span>';
     var v = el('b-vite');
     if (v) v.onclick = function(){
       v.disabled = true;
-      szDire('Redémarrage…');
+      szDire('${T("Redémarrage…")}');
       decider(0);
     };
     demarrerTic();
@@ -282,7 +290,8 @@ ${JS_DIRE()}
       var n = el('n');
       if (n) n.textContent = s;
       var t = el('titre');
-      if (t) t.textContent = 'Redémarrage dans ' + s + ' seconde' + (s === 1 ? '' : 's');
+      /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
+      if (t) t.textContent = '${T("Redémarrage dans ")}' + s + (s === 1 ? '${T(" seconde")}' : '${T(" secondes")}');
       var a = el('anneau');
       var pct = Math.max(0, Math.min(100, (reste / (TOTAL * 1000)) * 100));
       if (a) a.style.background = 'conic-gradient(#ef4444 ' + pct + '%,var(--v10) 0)';

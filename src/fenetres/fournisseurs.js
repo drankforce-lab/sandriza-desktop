@@ -17,6 +17,11 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
 
+/* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
+   langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom, le contact ni les
+   categories d un fournisseur (voir src/langue/fournisseurs.js). */
+const T = require('../langue').tr('fournisseurs');
+
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -80,11 +85,11 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 /** Page complète de la fenêtre native « Fournisseurs ». */
 function pageFournisseurs() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Fournisseurs — Administration Sandriza</title>
+<title>${T("Fournisseurs — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.suppliers}</span><h1>Fournisseurs</h1>
+<div class="tete"><span class="ico">${ICO.suppliers}</span><h1>${T("Fournisseurs")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -105,18 +110,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux fournisseurs.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    introuvable:        'Cette fiche n’existe plus.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux fournisseurs.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    introuvable:        '${T("Cette fiche n’existe plus.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -141,20 +146,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueRepertoire(){
     var d = REP;
     var h = '<div class="barreoutils">'
-      + '<button class="mini" id="rep-retour">← Mes fournisseurs</button>'
-      + '<input aria-label="Nom, description, ville" type="search" id="rep-q" placeholder="Nom, description, ville…" value="' + esc(REP_Q) + '">'
-      + '<select id="rep-cat"><option value="">Toutes catégories</option>'
+      + '<button class="mini" id="rep-retour">${T("← Mes fournisseurs")}</button>'
+      + '<input aria-label="${T("Nom, description, ville")}" type="search" id="rep-q" placeholder="${T("Nom, description, ville…")}" value="' + esc(REP_Q) + '">'
+      + '<select id="rep-cat"><option value="">${T("Toutes catégories")}</option>'
       + (d.cats || []).map(function(c){
           return '<option value="' + esc(c) + '"' + (REP_CAT === c ? ' selected' : '') + '>'
             + esc(c) + '</option>'; }).join('') + '</select>'
-      + '<select id="rep-pays"><option value="">Tous les pays</option>'
+      + '<select id="rep-pays"><option value="">${T("Tous les pays")}</option>'
       + (d.pays || []).map(function(p){
           return '<option value="' + esc(p.cle) + '"' + (REP_PAYS === p.cle ? ' selected' : '') + '>'
             + esc(p.nom) + '</option>'; }).join('') + '</select>'
-      + '<span class="droite">' + (d.entrees || []).length + ' sur ' + (d.total || 0) + '</span></div>';
+      + '<span class="droite">' + (d.entrees || []).length + '${T(" sur ")}' + (d.total || 0) + '</span></div>';
 
     if (!(d.entrees || []).length) {
-      return h + '<div class="carte"><div class="vide">Aucun résultat pour cette recherche.</div></div>';
+      return h + '<div class="carte"><div class="vide">${T("Aucun résultat pour cette recherche.")}</div></div>';
     }
     h += '<div class="repgrille">' + d.entrees.map(function(s){
       return '<div class="repcarte">'
@@ -168,16 +173,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="repfin">'
         // ⚠ Deja present : on le DIT au lieu d offrir un bouton qui refuse.
         + (s.dejaAjoute
-            ? '<span class="pill bon">Déjà dans vos fournisseurs</span>'
+            ? '<span class="pill bon">${T("Déjà dans vos fournisseurs")}</span>'
             : (d.peutAjouter
-                ? '<button class="mini prim" data-repadd="' + esc(s.nom) + '">+ Ajouter</button>'
-                : '<span class="dt">consultation seulement</span>'))
+                ? '<button class="mini prim" data-repadd="' + esc(s.nom) + '">${T("+ Ajouter")}</button>'
+                : '<span class="dt">${T("consultation seulement")}</span>'))
         + '</div></div>'; }).join('') + '</div>';
     return h;
   }
 
   function chargerRepertoire(){
-    dire('Lecture du répertoire…');
+    dire('${T("Lecture du répertoire…")}');
     appeler('repertoire:donnees', [REP_Q, REP_CAT, REP_PAYS]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       REP = r; dire(''); dessiner();
@@ -186,22 +191,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     if (REP) { corps.innerHTML = vueRepertoire(); brancherRepertoire(); return; }
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = D.lignes || [];
     var h = '<div class="barreoutils">'
-      + '<input aria-label="Nom, contact ou courriel" type="search" id="f-q" placeholder="Nom, contact ou courriel…" value="' + esc(Q) + '">'
-      + '<span class="droite">' + (D.total || 0) + ' au total'
-      + '<button class="mini" id="f-repertoire" title="Un carnet de grossistes connus, à ajouter en un clic"><span class="ic">🔎</span> Répertoire</button>'
-      + '<button class="prim" id="f-nouveau">+ Nouveau fournisseur</button></span>'
+      + '<input aria-label="${T("Nom, contact ou courriel")}" type="search" id="f-q" placeholder="${T("Nom, contact ou courriel…")}" value="' + esc(Q) + '">'
+      + '<span class="droite">' + (D.total || 0) + '${T(" au total")}'
+      + '<button class="mini" id="f-repertoire" title="${T("Un carnet de grossistes connus, à ajouter en un clic")}"><span class="ic">🔎</span>${T(" Répertoire")}</button>'
+      + '<button class="prim" id="f-nouveau">${T("+ Nouveau fournisseur")}</button></span>'
       + '</div>';
     h += '<div class="carte">';
     if (!rows.length) {
-      h += '<div class="vide">' + (D.total ? 'Aucun résultat.' : 'Aucun fournisseur — créez-en un pour commencer.') + '</div>';
+      h += '<div class="vide">' + (D.total ? '${T("Aucun résultat.")}' : '${T("Aucun fournisseur — créez-en un pour commencer.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>Fournisseur</th><th>Contact</th><th>Courriel / Tél.</th>'
-        + '<th>Catégories</th><th>Statut</th>' + (D.peutSupprimer ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Contact")}</th><th>${T("Courriel / Tél.")}</th>'
+        + '<th>${T("Catégories")}</th><th>${T("Statut")}</th>' + (D.peutSupprimer ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(r){
-            return '<tr data-id="' + esc(r.id) + '" title="Ouvrir la fiche fournisseur">'
+            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche fournisseur")}">'
               + '<td><span class="num">' + esc(r.nom) + '</span>'
               + szVerrouCase('suppliers', r.id)
               + (r.site ? '<div class="dt">' + esc(r.site) + '</div>' : '') + '</td>'
@@ -217,7 +222,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                  serait un piege. */
               + (D.peutSupprimer
                   ? '<td style="text-align:right"><button class="mini danger" data-suppr="' + esc(r.id) + '">'
-                    + (SUPPR_ARME === r.id ? 'Confirmer ?' : 'Supprimer') + '</button></td>'
+                    + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button></td>'
                   : '')
               + '</tr>';
           }).join('')
@@ -237,9 +242,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     var nv = document.getElementById('f-nouveau');
     if (nv) nv.onclick = function(){
-      dire('Ouverture…');
+      dire('${T("Ouverture…")}');
       appeler('fournisseurs:nouveau', []).then(function(r){
-        dire(r.ok ? 'Assistant fournisseur ouvert dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+        dire(r.ok ? '${T("Assistant fournisseur ouvert dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
     var rp = document.getElementById('f-repertoire');
@@ -275,10 +280,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (!r.ok) {
           ra.disabled = false;
           dire(r.motif === 'deja_present'
-            ? (esc(nom) + ' est déjà dans vos fournisseurs.') : expliquer(r), 'err');
+            ? (esc(nom) + '${T(" est déjà dans vos fournisseurs.")}') : expliquer(r), 'err');
           return;
         }
-        dire(esc(r.nom) + ' ajouté à vos fournisseurs.', 'bon');
+        dire(esc(r.nom) + '${T(" ajouté à vos fournisseurs.")}', 'bon');
         chargerRepertoire();   // la carte passe a << Deja dans vos fournisseurs >>
       });
       return;
@@ -289,9 +294,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('button') || t.closest('input')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
-    dire('Ouverture…');
+    dire('${T("Ouverture…")}');
     appeler('fournisseurs:ouvrir', [tr.getAttribute('data-id')]).then(function(r){
-      dire(r.ok ? 'Fiche fournisseur ouverte dans sa fenêtre.' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? '${T("Fiche fournisseur ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
 
@@ -305,19 +310,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function supprimer(id){
     if (SUPPR_ARME !== id) {
       SUPPR_ARME = id; dessiner();
-      dire('Recliquez pour confirmer — la fiche disparait, les produits rattaches restent sans fournisseur.', 'att');
+      dire('${T("Recliquez pour confirmer — la fiche disparaît, les produits rattachés restent sans fournisseur.")}', 'att');
       return;
     }
     SUPPR_ARME = null;
-    dire('Suppression…');
+    dire('${T("Suppression…")}');
     appeler('fournisseurs:supprimer', [id]).then(function(r){
-      if (!r || !r.ok) { dessiner(); dire('Echec : ' + expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { dessiner(); dire('${T("Échec : ")}' + expliquer(r), 'err'); return; }
       charger();
       /* ⚠ PAS DE esc() DANS UN MESSAGE : szDire ecrit en textContent, donc un
          nom echappe s afficherait avec ses entites en toutes lettres. */
-      dire('« ' + (r.nom || '') + ' » supprime.'
-        + (r.rattaches ? ' ' + r.rattaches + ' produit' + (r.rattaches > 1 ? 's' : '')
-            + ' restent sans fournisseur.' : ''), 'bon');
+      /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
+      dire('« ' + (r.nom || '') + '${T(" » supprimé.")}'
+        + (r.rattaches ? ' ' + r.rattaches
+            + (r.rattaches > 1 ? '${T(" produits restent sans fournisseur.")}'
+                               : '${T(" produit reste sans fournisseur.")}') : ''), 'bon');
     });
   }
 
@@ -328,7 +335,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('fournisseurs:liste', [{ q: Q }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
-      if (!r || !r.ok) { vide('Fournisseurs indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Fournisseurs indisponibles")}', expliquer(r)); return; }
       D = r;
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
@@ -374,12 +381,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
