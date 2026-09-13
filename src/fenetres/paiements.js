@@ -22,6 +22,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('paiements');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -92,11 +96,11 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:mid
 /** Page complète de la fenêtre native « Paiements Square ». */
 function pagePaiements() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Paiements Square — Administration Sandriza</title>
+<title>${T("Paiements Square — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.payments}</span><h1>Paiements Square</h1>
+<div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Paiements Square")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -125,21 +129,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function signe(n){ return (Number(n) >= 0 ? '+' : '') + fmt(n); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès aux paiements.',
-    indisponible:       'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    non_configure:      'La connexion Square n’est pas configurée (Configuration → Paiement).',
-    production:         'Réservé au bac à sable — on ne masque pas des paiements réels.',
-    rien_en_cache:      'Aucune transaction en mémoire à masquer.',
-    square:             'Square n’a pas répondu.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès aux paiements.")}',
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    non_configure:      '${T("La connexion Square n’est pas configurée (Configuration → Paiement).")}',
+    production:         '${T("Réservé au bac à sable — on ne masque pas des paiements réels.")}',
+    rien_en_cache:      '${T("Aucune transaction en mémoire à masquer.")}',
+    square:             '${T("Square n’a pas répondu.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').');
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 160)) + ')';
     return t;
   }
@@ -164,22 +168,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function barre(){
     var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'transactions' ? ' actif' : '') + '" data-onglet="transactions">Transactions</button>'
-      + '<button class="mini' + (ONGLET === 'reconciliation' ? ' actif' : '') + '" data-onglet="reconciliation">Réconciliation</button>'
-      + '<select id="p-annee" title="Année">'
+      + '<button class="mini' + (ONGLET === 'transactions' ? ' actif' : '') + '" data-onglet="transactions">${T("Transactions")}</button>'
+      + '<button class="mini' + (ONGLET === 'reconciliation' ? ' actif' : '') + '" data-onglet="reconciliation">${T("Réconciliation")}</button>'
+      + '<select id="p-annee" title="${T("Année")}">'
       + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (a === D.annee ? ' selected' : '') + '>' + a + '</option>';
         }).join('')
       + '</select>'
       + '<div class="droite">';
     if (D.bacASable && D.masquees) {
-      h += '<button class="mini" id="p-reafficher" title="Réafficher les transactions masquées (bac à sable seulement)">↺ Réafficher (' + D.masquees + ')</button>';
+      h += '<button class="mini" id="p-reafficher" title="${T("Réafficher les transactions masquées (bac à sable seulement)")}">${T("↺ Réafficher (")}' + D.masquees + ')</button>';
     }
     if (D.bacASable && D.charge && D.tuiles && D.tuiles.nb > 0) {
-      h += '<button class="mini danger" id="p-masquer" title="Masquer ces transactions d’essai — bac à sable seulement">Masquer tout</button>';
+      h += '<button class="mini danger" id="p-masquer" title="${T("Masquer ces transactions d’essai — bac à sable seulement")}">${T("Masquer tout")}</button>';
     }
     h += '<button class="mini prim" id="p-charger"' + (OCCUPE ? ' disabled' : '') + '>'
-      + (OCCUPE ? 'Lecture chez Square…' : (D.charge ? '↻ Actualiser' : '⬇ Charger les transactions'))
+      + (OCCUPE ? '${T("Lecture chez Square…")}' : (D.charge ? '${T("↻ Actualiser")}' : '${T("⬇ Charger les transactions")}'))
       + '</button>';
     h += '</div></div>';
     return h;
@@ -190,20 +194,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var t = D.tuiles;
     if (t) {
       h += '<div class="tuiles">'
-        + tuile('Transactions', String(t.nb), '', 'complétées · ' + D.annee)
-        + tuile('Revenu brut', fmt(t.brut), '', 'avant frais')
-        + tuile('Frais Square', fmt(t.frais), 'err',
-            t.fraisRecuperes > 0 ? ('dont ' + fmt(t.fraisRecuperes) + ' récupérés · nets ' + fmt(t.fraisNets)) : 'déductibles d’impôt')
-        + tuile('Revenu net', fmt(t.net), 'bon', 'après remb. et frais nets')
+        + tuile('${T("Transactions")}', String(t.nb), '', '${T("complétées · ")}' + D.annee)
+        + tuile('${T("Revenu brut")}', fmt(t.brut), '', '${T("avant frais")}')
+        + tuile('${T("Frais Square")}', fmt(t.frais), 'err',
+            t.fraisRecuperes > 0 ? ('${T("dont ")}' + fmt(t.fraisRecuperes) + '${T(" récupérés · nets ")}' + fmt(t.fraisNets)) : '${T("déductibles d’impôt")}')
+        + tuile('${T("Revenu net")}', fmt(t.net), 'bon', '${T("après remb. et frais nets")}')
         + '</div>';
     }
 
-    h += '<div class="carte"><h2>Transactions — ' + D.annee + '</h2>';
+    h += '<div class="carte"><h2>${T("Transactions — ")}' + D.annee + '</h2>';
     if (!D.paiements.length) {
-      h += '<div class="vide">Aucune transaction pour ' + D.annee + '.</div>';
+      h += '<div class="vide">${T("Aucune transaction pour ")}' + D.annee + '.</div>';
     } else {
-      h += '<table><thead><tr><th>Date</th><th>Réf. Square</th><th>Mode de paiement</th>'
-        + '<th class="num">Brut</th><th class="num">Frais</th><th class="num">Net reçu</th></tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Réf. Square")}</th><th>${T("Mode de paiement")}</th>'
+        + '<th class="num">${T("Brut")}</th><th class="num">${T("Frais")}</th><th class="num">${T("Net reçu")}</th></tr></thead><tbody>'
         + D.paiements.map(function(p){
             return '<tr><td style="white-space:nowrap">' + esc(p.date) + '</td>'
               + '<td class="ref">' + esc(p.ref) + '</td>'
@@ -212,7 +216,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td class="num err">' + (p.frais > 0 ? '−' + fmt(p.frais) : '—') + '</td>'
               + '<td class="num bon">' + fmt(p.net) + '</td></tr>';
           }).join('')
-        + '<tr class="tot"><td colspan="3">Total ' + D.annee + '</td>'
+        + '<tr class="tot"><td colspan="3">${T("Total ")}' + D.annee + '</td>'
         + '<td class="num">' + fmt(t.brut) + '</td>'
         + '<td class="num err">−' + fmt(t.frais) + '</td>'
         + '<td class="num bon">' + fmt(t.net + t.rembourse) + '</td></tr>'
@@ -221,19 +225,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '</div>';
 
     if (D.remboursements.length) {
-      h += '<div class="carte"><h2>Remboursements — ' + D.annee
+      h += '<div class="carte"><h2>${T("Remboursements — ")}' + D.annee
         + ' <span class="pill neutre">' + D.remboursements.length + '</span></h2>'
-        + '<table><thead><tr><th>Date</th><th>Réf.</th><th>Paiement d’origine</th><th>Motif</th>'
-        + '<th class="num">Montant</th></tr></thead><tbody>'
+        + '<table><thead><tr><th>${T("Date")}</th><th>${T("Réf.")}</th><th>${T("Paiement d’origine")}</th><th>${T("Motif")}</th>'
+        + '<th class="num">${T("Montant")}</th></tr></thead><tbody>'
         + D.remboursements.map(function(r){
             return '<tr><td style="white-space:nowrap">' + esc(r.date) + '</td>'
               + '<td class="ref">' + esc(r.ref) + '</td>'
               + '<td class="ref">' + esc(r.paiement) + '</td>'
               + '<td>' + esc(r.motif || '—')
-              + (r.enAttente ? ' <span class="pill att">en attente</span>' : '') + '</td>'
+              + (r.enAttente ? ' <span class="pill att">${T("en attente")}</span>' : '') + '</td>'
               + '<td class="num err">−' + fmt(r.montant) + '</td></tr>';
           }).join('')
-        + '<tr class="tot"><td colspan="4">Total des remboursements</td>'
+        + '<tr class="tot"><td colspan="4">${T("Total des remboursements")}</td>'
         + '<td class="num err">−' + fmt(t.rembourse) + '</td></tr>'
         + '</tbody></table></div>';
     }
@@ -242,34 +246,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueReconciliation(){
     var R = D.reconciliation;
-    if (!R) return '<div class="vide">Chargez d’abord les transactions, dans l’onglet Transactions.</div>';
+    if (!R) return '<div class="vide">${T("Chargez d’abord les transactions, dans l’onglet Transactions.")}</div>';
     var ton = R.equilibre ? 'bon' : 'att';
     var h = '<div class="tuiles">'
-      + tuile('Commandes ' + esc(R.marque), String(R.nbCommandes), '', 'non annulées · ' + D.annee)
-      + tuile('Transactions Square', String(R.nbSquare)
-          + (R.nbRemboursementsSquare ? ' / ' + R.nbRemboursementsSquare + ' remb.' : ''), '', 'complétées · ' + D.annee)
-      + tuile('Écart', fmt(Math.abs(R.ecart)), ton, R.equilibre ? 'Équilibré' : 'Vérification requise')
+      + tuile('${T("Commandes ")}' + esc(R.marque), String(R.nbCommandes), '', '${T("non annulées · ")}' + D.annee)
+      + tuile('${T("Transactions Square")}', String(R.nbSquare)
+          + (R.nbRemboursementsSquare ? ' / ' + R.nbRemboursementsSquare + '${T(" remb.")}' : ''), '', '${T("complétées · ")}' + D.annee)
+      + tuile('${T("Écart")}', fmt(Math.abs(R.ecart)), ton, R.equilibre ? '${T("Équilibré")}' : '${T("Vérification requise")}')
       + '</div>';
 
-    h += '<div class="carte"><h2>Comparaison système et Square — ' + D.annee + '</h2>'
-      + '<table><thead><tr><th>Source</th><th class="num">Brut</th><th class="num">Remboursements</th>'
-      + '<th class="num">Frais Square</th><th class="num">Net</th><th class="num">Nb</th></tr></thead><tbody>'
-      + '<tr><td style="font-weight:600">Système ' + esc(R.marque) + '</td>'
+    h += '<div class="carte"><h2>${T("Comparaison système et Square — ")}' + D.annee + '</h2>'
+      + '<table><thead><tr><th>${T("Source")}</th><th class="num">${T("Brut")}</th><th class="num">${T("Remboursements")}</th>'
+      + '<th class="num">${T("Frais Square")}</th><th class="num">${T("Net")}</th><th class="num">${T("Nb")}</th></tr></thead><tbody>'
+      + '<tr><td style="font-weight:600">${T("Système ")}' + esc(R.marque) + '</td>'
       + '<td class="num">' + fmt(R.site.brut) + '</td>'
       + '<td class="num err">' + (R.site.rembourse > 0 ? '−' + fmt(R.site.rembourse) : '—') + '</td>'
       + '<td class="num err">' + ((R.site.fraisRetenus > 0 || R.site.fraisRembourses > 0)
           ? ((R.site.fraisRetenus > 0 ? '−' + fmt(R.site.fraisRetenus) : '')
-            + (R.site.fraisRembourses > 0 ? '<div style="font-size:.85em">−' + fmt(R.site.fraisRembourses) + ' remb.</div>' : ''))
+            + (R.site.fraisRembourses > 0 ? '<div style="font-size:.85em">−' + fmt(R.site.fraisRembourses) + '${T(" remb.")}</div>' : ''))
           : '—') + '</td>'
       + '<td class="num" style="font-weight:800">' + fmt(R.site.net) + '</td>'
       + '<td class="num">' + R.nbCommandes + '</td></tr>'
-      + '<tr><td style="font-weight:600">Square (données réelles)</td>'
+      + '<tr><td style="font-weight:600">${T("Square (données réelles)")}</td>'
       + '<td class="num">' + fmt(R.square.brut) + '</td>'
       + '<td class="num err">' + (R.square.rembourse > 0 ? '−' + fmt(R.square.rembourse) : '—') + '</td>'
       + '<td class="num err">' + (R.square.frais > 0 ? '−' + fmt(R.square.frais) : '—') + '</td>'
       + '<td class="num bon" style="font-weight:800">' + fmt(R.square.net) + '</td>'
       + '<td class="num">' + R.nbSquare + '</td></tr>'
-      + '<tr class="tot"><td>Écart</td>'
+      + '<tr class="tot"><td>${T("Écart")}</td>'
       + '<td class="num ' + ton + '">' + signe(R.square.brut - R.site.brut) + '</td>'
       + '<td class="num">' + signe(R.square.rembourse - R.site.rembourse) + '</td>'
       + '<td class="num">' + signe(-R.square.frais + (R.site.fraisRetenus + R.site.fraisRembourses)) + '</td>'
@@ -278,33 +282,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</tbody></table></div>';
 
     h += R.equilibre
-      ? '<div class="avis bon"><strong class="bon">Réconciliation équilibrée</strong> — les montants de Square et ceux du système correspondent (écart de moins d’un dollar).</div>'
-      : '<div class="avis att"><strong class="att">Écart de ' + fmt(Math.abs(R.ecart)) + '</strong> — causes possibles : '
-        + 'transactions faites hors du système, remboursements partiels, paiements par carte-cadeau, '
-        + 'ou commandes réglées par un autre moyen.</div>';
+      ? '<div class="avis bon"><strong class="bon">${T("Réconciliation équilibrée")}</strong>${T(" — les montants de Square et ceux du système correspondent (écart de moins d’un dollar).")}</div>'
+      : '<div class="avis att"><strong class="att">${T("Écart de ")}' + fmt(Math.abs(R.ecart)) + '</strong>${T(" — causes possibles : ")}'
+        + '${T("transactions faites hors du système, remboursements partiels, paiements par carte-cadeau, ")}'
+        + '${T("ou commandes réglées par un autre moyen.")}</div>';
     return h;
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div>'; return; }
+    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) {
       sous.innerHTML = D.connecte
-        ? '<span class="pill bon">' + (D.mode === 'production' ? 'Production' : 'Bac à sable') + '</span>'
-        : '<span class="pill neutre">non configuré</span>';
+        ? '<span class="pill bon">' + (D.mode === 'production' ? '${T("Production")}' : '${T("Bac à sable")}') + '</span>'
+        : '<span class="pill neutre">${T("non configuré")}</span>';
     }
     if (!D.connecte) {
       corps.innerHTML = '<div class="vide"><div class="gros"><span class="ic">🔑</span></div>'
-        + 'Configurez d’abord la connexion Square dans <strong>Configuration → Paiement</strong>, '
-        + 'dans la fenêtre principale.</div>';
+        + '${T("Configurez d’abord la connexion Square dans <strong>Configuration → Paiement</strong>, ")}'
+        + '${T("dans la fenêtre principale.")}</div>';
       return;
     }
 
     var h = barre();
     if (!D.charge && !OCCUPE) {
-      h += '<div class="vide">Aucune donnée pour ' + D.annee + '.'
-        + '<div style="margin-top:.4rem">Cliquez « Charger les transactions » pour les lire chez Square.</div></div>';
+      h += '<div class="vide">${T("Aucune donnée pour ")}' + D.annee + '.'
+        + '<div style="margin-top:.4rem">${T("Cliquez « Charger les transactions » pour les lire chez Square.")}</div></div>';
     } else if (OCCUPE && !D.charge) {
-      h += '<div class="vide charge">Lecture des paiements et des remboursements chez Square pour ' + D.annee + '…</div>';
+      h += '<div class="vide charge">${T("Lecture des paiements et des remboursements chez Square pour ")}' + D.annee + '…</div>';
     } else {
       h += ONGLET === 'reconciliation' ? vueReconciliation() : vueTransactions();
     }
@@ -319,7 +323,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       bm.disabled = true;
       appeler('paiements:masquer', [D.annee]).then(function(r){
         if (!r.ok) { bm.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire(r.nb + ' entrée' + (r.nb > 1 ? 's masquées' : ' masquée') + '.', 'bon');
+        /* ⚠ Le singulier et le pluriel, chacun entier. */
+        dire(r.nb + (r.nb > 1 ? '${T(" entrées masquées.")}' : '${T(" entrée masquée.")}'), 'bon');
         charger();
       });
     };
@@ -328,7 +333,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       br.disabled = true;
       appeler('paiements:reafficher', []).then(function(r){
         if (!r.ok) { br.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire(r.nb + ' entrée' + (r.nb > 1 ? 's de nouveau visibles' : ' de nouveau visible') + '.', 'bon');
+        dire(r.nb + (r.nb > 1 ? '${T(" entrées de nouveau visibles.")}' : '${T(" entrée de nouveau visible.")}'), 'bon');
         charger();
       });
     };
@@ -337,7 +342,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function chercherChezSquare(){
     if (OCCUPE) return;
     OCCUPE = true;
-    dire('Lecture chez Square…', 'att');
+    dire('${T("Lecture chez Square…")}', 'att');
     dessiner();
     appeler('paiements:charger', [D ? D.annee : ANNEE]).then(function(r){
       OCCUPE = false;
@@ -349,16 +354,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         dessiner();
         return;
       }
-      dire(r.nb + ' paiement' + (r.nb > 1 ? 's' : '')
-        + (r.nbRemboursements ? ' et ' + r.nbRemboursements + ' remboursement' + (r.nbRemboursements > 1 ? 's' : '') : '')
-        + ' relus chez Square.', 'bon');
+      dire(r.nb + (r.nb > 1 ? '${T(" paiements")}' : '${T(" paiement")}')
+        + (r.nbRemboursements
+            ? '${T(" et ")}' + r.nbRemboursements
+              + (r.nbRemboursements > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}')
+            : '')
+        + '${T(" relus chez Square.")}', 'bon');
       charger();
     });
   }
 
   function charger(){
     appeler('paiements:lire', [ANNEE || undefined]).then(function(r){
-      if (!r || !r.ok) { vide('Paiements indisponibles', expliquer(r)); return; }
+      if (!r || !r.ok) { vide('${T("Paiements indisponibles")}', expliquer(r)); return; }
       D = r;
       ANNEE = r.annee;
       dessiner();
@@ -383,12 +391,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };

@@ -181,6 +181,14 @@ const PAS_DU_TEXTE = [
   /^https?:\/\//i,                             // une adresse
   /^[\w-]+\[[^\]]*\]$/,                        // balise[attribut]
   /['"]\s*\+|\+\s*['"]|\besc\(/,               // un MORCEAU DE CODE, pas une phrase
+  /* ⚠ UNE DECLARATION DE STYLE N EST PAS UNE PHRASE. Le banc reclamait la
+     traduction de
+     `background:var(--f-pied);border:1px solid var(--v12);border-radius:8px;`
+     (imprimantes) : le nom de la variable CSS `--f-pied` porte un mot du
+     lexique. La signature est nette et une phrase francaise n en porte pas :
+     un appel `var(--…)`, ou une suite `propriete:valeur;` repetee. */
+  /var\(--/,                                   // une valeur CSS
+  /^(?:[a-z-]+\s*:[^;:]*;\s*){2,}$/i,          // plusieurs declarations de style
 ];
 
 /* ⚠ UNE ADRESSE N EST PAS DU TEXTE, mais la phrase qui l entoure, si. Meme

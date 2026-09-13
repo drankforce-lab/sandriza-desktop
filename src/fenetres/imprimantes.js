@@ -21,6 +21,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('imprimantes');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -82,13 +86,13 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 /** Page complète de la fenêtre native « Imprimantes ». */
 function pageImprimantes() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Imprimantes — Administration Sandriza</title>
+<title>${T("Imprimantes — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.imprimante}</span><h1>Imprimantes</h1>
+<div class="tete"><span class="ico">${ICO.imprimante}</span><h1>${T("Imprimantes")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">Lecture de l’état…</div></div>
+<div class="corps" id="corps"><div class="vide charge">${T("Lecture de l’état…")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <span><button id="btn-relire">Actualiser</button>
+  <span><button id="btn-relire">${T("Actualiser")}</button>
   </span></div>
 <script>
 (function(){
@@ -129,7 +133,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function montrerJournal(titre){
     corps.innerHTML = '<div class="vide"><div class="gros">' + esc(titre) + '</div>'
-      + '<div style="font-size:.82rem;margin-bottom:.6rem">Ce que la fenêtre a pu faire, étape par étape :</div>'
+      + '<div style="font-size:.82rem;margin-bottom:.6rem">${T("Ce que la fenêtre a pu faire, étape par étape :")}</div>'
       + '<pre id="diag" style="text-align:left;white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;'
       + 'background:var(--f-pied);border:1px solid var(--v12);border-radius:8px;padding:.7rem .8rem;'
       + 'max-width:52rem;color:var(--tx-bleute)">' + esc(JOURNAL.join(SAUT)) + '</pre></div>';
@@ -138,16 +142,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ecouteurs, un defaut de script laissait la fenetre sur son message initial —
   // exactement ce qu on a vu pendant quatre versions.
   window.onerror = function(m, src, l, c){
-    noter('ERREUR : ' + m + ' (ligne ' + l + ')');
-    montrerJournal('Une erreur a interrompu la fenêtre');
+    noter('${T("ERREUR : ")}' + m + '${T(" (ligne ")}' + l + ')');
+    montrerJournal('${T("Une erreur a interrompu la fenêtre")}');
     return true;
   };
   window.addEventListener('unhandledrejection', function(ev){
-    noter('PROMESSE REJETEE : ' + ((ev.reason && ev.reason.message) || ev.reason));
-    montrerJournal('Une opération a échoué');
+    noter('${T("PROMESSE REJETEE : ")}' + ((ev.reason && ev.reason.message) || ev.reason));
+    montrerJournal('${T("Une opération a échoué")}');
   });
-  noter('page chargée');
-  noter('pont : ' + (P ? 'présent' : 'ABSENT') + (P && P.appeler ? ', appeler présent' : ', appeler ABSENT'));
+  noter('${T("page chargée")}');
+  noter('${T("pont : ")}' + (P ? '${T("présent")}' : '${T("ABSENT")}') + (P && P.appeler ? '${T(", appeler présent")}' : '${T(", appeler ABSENT")}'));
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
 
@@ -155,19 +159,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // Un ecran d imprimantes qui affiche « pret » faute de reponse est pire
   // qu un ecran vide — on lance une impression en croyant que c est verifie.
   var MOTIFS = {
-    session:        'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:          'Votre rôle ne donne pas accès à la configuration des imprimantes.',
-    agent_absent:   'L’agent d’impression n’est pas joignable sur ce poste.',
-    indisponible:   'L’administration n’est pas encore chargée dans la fenêtre principale.',
-    pont_indisponible: 'La fenêtre principale ne répond pas.',
+    session:        '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:          '${T("Votre rôle ne donne pas accès à la configuration des imprimantes.")}',
+    agent_absent:   '${T("L’agent d’impression n’est pas joignable sur ce poste.")}',
+    indisponible:   '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
+    pont_indisponible: '${T("La fenêtre principale ne répond pas.")}',
     // ⚠ Cette fenêtre a sa PROPRE table de motifs (elle n'utilise pas le socle) :
     // un motif ajouté au socle doit aussi l'être ici, sinon il s'affiche comme
     // « Erreur inattendue » — c'est-à-dire comme rien.
-    delai:          'La fenêtre principale n’a pas répondu à temps. « Actualiser » pour réessayer ; si cela persiste, rechargez la fenêtre principale (Ctrl+R).',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    echec:          'L’opération a échoué.'
+    delai:          '${T("La fenêtre principale n’a pas répondu à temps. « Actualiser » pour réessayer ; si cela persiste, rechargez la fenêtre principale (Ctrl+R).")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    echec:          '${T("L’opération a échoué.")}'
   };
-  function expliquer(m){ return MOTIFS[m] || 'Erreur inattendue (' + esc(m || '?') + ').'; }
+  function expliquer(m){ return MOTIFS[m] || '${T("Erreur inattendue (")}' + esc(m || '?') + ').'; }
 
   function vide(titre, detail){
     corps.innerHTML = '<div class="vide"><div class="gros">' + esc(titre) + '</div>'
@@ -175,15 +179,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function fmtFormat(l, h){
-    if (!l || !h) return 'format non défini';
-    return 'format ' + l + ' × ' + h + ' po';
+    if (!l || !h) return '${T("format non défini")}';
+    return '${T("format ")}' + l + ' × ' + h + '${T(" po")}';
   }
 
   function dessiner(e){
     var dispo = e.disponible;
     var etatPastille = dispo
-      ? '<span class="pastille ok">détecté</span>'
-      : '<span class="pastille non">absent</span>';
+      ? '<span class="pastille ok">${T("détecté")}</span>'
+      : '<span class="pastille non">${T("absent")}</span>';
     var aJour = !e.versionDisponible || e.version === e.versionDisponible;
     var h = [];
 
@@ -197,17 +201,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // Releve par l utilisateur le 2026-08-07. Cette fenetre ne s ouvre QUE dans
     // l application : la carte n a donc aucun cas ou elle serait vraie.
     if (!e.natif) {
-      h.push('<div class="carte"><h2>Agent d’impression de ce poste</h2>');
-      h.push('<div class="lg"><div class="k">État</div><div class="v">' + etatPastille + '</div></div>');
+      h.push('<div class="carte"><h2>${T("Agent d’impression de ce poste")}</h2>');
+      h.push('<div class="lg"><div class="k">${T("État")}</div><div class="v">' + etatPastille + '</div></div>');
       if (dispo) {
-        h.push('<div class="lg"><div class="k">Ordinateur</div><div class="v">' + (esc(e.poste) || '—') + '</div></div>');
-        h.push('<div class="lg"><div class="k">Version installée</div><div class="v">' + (esc(e.version) || '—')
-          + (aJour ? ' <span class="pastille ok">à jour</span>'
-                   : ' <span class="pastille att">' + esc(e.versionDisponible) + ' disponible</span>') + '</div></div>');
-        h.push('<div class="lg"><div class="k">Aide PDF</div><div class="v">'
+        h.push('<div class="lg"><div class="k">${T("Ordinateur")}</div><div class="v">' + (esc(e.poste) || '—') + '</div></div>');
+        h.push('<div class="lg"><div class="k">${T("Version installée")}</div><div class="v">' + (esc(e.version) || '—')
+          + (aJour ? ' <span class="pastille ok">${T("à jour")}</span>'
+                   : ' <span class="pastille att">' + esc(e.versionDisponible) + '${T(" disponible")}</span>') + '</div></div>');
+        h.push('<div class="lg"><div class="k">${T("Aide PDF")}</div><div class="v">'
           + (e.aidePdf
-              ? '<span class="pastille ok">' + (esc(e.aidePdfNom) || 'présente') + '</span>'
-              : '<span class="pastille att">absente</span> <span style="color:var(--tx2);font-size:.8rem">— requise pour les étiquettes d’expédition, qui arrivent en PDF du transporteur.</span>')
+              ? '<span class="pastille ok">' + (esc(e.aidePdfNom) || '${T("présente")}') + '</span>'
+              : '<span class="pastille att">${T("absente")}</span> <span style="color:var(--tx2);font-size:.8rem">${T("— requise pour les étiquettes d’expédition, qui arrivent en PDF du transporteur.")}</span>')
           + '</div></div>');
       }
       h.push('</div>');
@@ -216,12 +220,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ ON NOMME LE POSTE. La configuration est PAR POSTE (elle vit dans le profil,
     // mais rangee par ordinateur) : sans cette mention, une imprimante differente
     // d un poste a l autre passe pour une configuration perdue.
-    h.push('<div class="carte"><h2>Association par service — ce poste'
+    h.push('<div class="carte"><h2>${T("Association par service — ce poste")}'
       + (e.poste6 ? ' <span class="note" style="font-weight:400;text-transform:none;'
           + 'letter-spacing:0;color:var(--tx3)">(' + esc(e.poste6) + ')</span>' : '')
       + '</h2>');
     if (!e.services || !e.services.length) {
-      h.push('<div class="lg"><div class="v" style="color:var(--tx2)">Aucun service à associer.</div></div>');
+      h.push('<div class="lg"><div class="v" style="color:var(--tx2)">${T("Aucun service à associer.")}</div></div>');
     } else {
       // ⚠ UNE LISTE DEROULANTE, PLUS UN BOUTON QUI OUVRE UNE BOITE AILLEURS.
       // << Choisir… >> deleguait la selection a la fenetre PRINCIPALE : on quittait
@@ -250,37 +254,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       e.services.forEach(function(s){
         var opts = '';
         if (!IMPRS) {
-          opts = '<option value="">Liste non chargée…</option>';
+          opts = '<option value="">${T("Liste non chargée…")}</option>';
         } else {
           var reelles = IMPRS.filter(function(p){ return !p.virtuelle; });
           var virt    = IMPRS.filter(function(p){ return p.virtuelle; });
           var ligne = function(p, choisie){
             return '<option value="' + esc(p.nom) + '"' + (p.nom === choisie ? ' selected' : '') + '>'
-              + esc(p.nom) + (p.defaut ? ' (par défaut)' : '') + '</option>';
+              + esc(p.nom) + (p.defaut ? '${T(" (par défaut)")}' : '') + '</option>';
           };
-          opts = '<option value="">— aucune —</option>';
+          opts = '<option value="">${T("— aucune —")}</option>';
           // ⚠ Une imprimante ASSOCIEE mais ABSENTE de la liste doit rester visible,
           // sinon on croirait qu elle a ete effacee alors qu elle est seulement
           // eteinte ou debranchee — et l enregistrer a nouveau la remplacerait.
           var connue = IMPRS.some(function(p){ return p.nom === s.imprimante; });
           if (s.imprimante && !connue) {
-            opts += '<option value="' + esc(s.imprimante) + '" selected>' + esc(s.imprimante) + ' (hors ligne)</option>';
+            opts += '<option value="' + esc(s.imprimante) + '" selected>' + esc(s.imprimante) + '${T(" (hors ligne)")}</option>';
           }
           opts += reelles.map(function(p){ return ligne(p, s.imprimante); }).join('');
           if (virt.length) {
-            opts += '<optgroup label="Sorties virtuelles (n’impriment sur rien)">'
+            opts += '<optgroup label="${T("Sorties virtuelles (n’impriment sur rien)")}">'
               + virt.map(function(p){ return ligne(p, s.imprimante); }).join('') + '</optgroup>';
           }
         }
         h.push('<div class="svc"><div class="d">'
           + '<div class="n">' + esc(s.titre) + '</div>'
           + '<div class="m">' + esc(fmtFormat(s.largeurPo, s.hauteurPo))
-          + (s.imprimante ? '' : ' · <span class="att">aucune imprimante choisie</span>') + '</div>'
+          + (s.imprimante ? '' : ' · <span class="att">${T("aucune imprimante choisie")}</span>') + '</div>'
           + '<select data-svc="' + esc(s.cle) + '"'
-          + ' aria-label="' + esc('Imprimante pour ' + s.titre) + '"'
+          + ' aria-label="' + esc('${T("Imprimante pour ")}' + s.titre) + '"'
           + (dispo && IMPRS ? '' : ' disabled') + '>' + opts + '</select>'
           + '</div><div class="a">'
-          + '<button data-tester="' + esc(s.cle) + '"' + (dispo && s.imprimante ? '' : ' disabled') + '>Test d’impression</button>'
+          + '<button data-tester="' + esc(s.cle) + '"' + (dispo && s.imprimante ? '' : ' disabled') + '>${T("Test d’impression")}</button>'
           + '</div></div>');
       });
     }
@@ -288,8 +292,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     corps.innerHTML = h.join('');
     // ⚠ MEME LA LIGNE D ETAT DISAIT << agent detecte >> EN MODE APPLICATION. Retirer
     // la carte et laisser ce libelle-la aurait garde le mensonge, juste plus petit.
-    sous.textContent = e.natif ? 'impression par l’application'
-      : (dispo ? 'agent détecté' : 'agent absent');
+    sous.textContent = e.natif ? '${T("impression par l’application")}'
+      : (dispo ? '${T("agent détecté")}' : '${T("agent absent")}');
   }
 
   // ⚠ LA LISTE DES IMPRIMANTES EST LUE UNE FOIS, PAS A CHAQUE REDESSIN.
@@ -309,10 +313,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // arriere-plan, et les menus se remplissent quand elle est la.
   var enCours = false;
   function relire(){
-    if (enCours) { noter('relire ignoré : une lecture est déjà en cours'); return; }
+    if (enCours) { noter('${T("relire ignoré : une lecture est déjà en cours")}'); return; }
     enCours = true;
-    dire('Lecture…');
-    noter('appel de imprimantes:etat…');
+    dire('${T("Lecture…")}');
+    noter('${T("appel de imprimantes:etat…")}');
     // ⚠ ON JOURNALISE LES TROIS ISSUES : la reponse, le refus, et l exception
     // synchrone. C est la troisieme qui nous a echappe pendant quatre versions —
     // un « then » ne rattrape pas une erreur levee AVANT lui.
@@ -320,24 +324,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     try { p = P.appeler('imprimantes:etat'); }
     catch (e) {
       enCours = false;
-      noter('APPEL IMPOSSIBLE : ' + (e && e.message));
-      montrerJournal('Le pont a refusé l’appel');
+      noter('${T("APPEL IMPOSSIBLE : ")}' + (e && e.message));
+      montrerJournal('${T("Le pont a refusé l’appel")}');
       return;
     }
     if (!p || typeof p.then !== 'function') {
       enCours = false;
-      noter('le pont n’a pas rendu de promesse (type ' + typeof p + ')');
-      montrerJournal('Réponse inattendue du pont');
+      noter('${T("le pont n’a pas rendu de promesse (type ")}' + typeof p + ')');
+      montrerJournal('${T("Réponse inattendue du pont")}');
       return;
     }
     p.then(function(r){
       enCours = false;
-      noter('réponse reçue : ' + (r ? ('ok=' + r.ok + (r.motif ? ' motif=' + r.motif : '')) : 'vide'));
-      if (!r || !r.ok) { sous.textContent = ''; vide('État indisponible', expliquer(r && r.motif)); dire(''); return; }
+      noter('${T("réponse reçue : ")}' + (r ? ('ok=' + r.ok + (r.motif ? ' motif=' + r.motif : '')) : '${T("vide")}'));
+      if (!r || !r.ok) { sous.textContent = ''; vide('${T("État indisponible")}', expliquer(r && r.motif)); dire(''); return; }
       rendu = true;
       DERNIER = r;
       dessiner(r);
-      dire(IMPRS ? '' : 'Liste des imprimantes : lecture en cours…');
+      dire(IMPRS ? '' : '${T("Liste des imprimantes : lecture en cours…")}');
     // ⚠⚠ UN RATTRAPAGE CHAINE, ET NON UN SECOND ARGUMENT — CETTE NUANCE A CACHE LA
     // PANNE CI-DESSUS PENDANT QUATRE VERSIONS. Le second argument de then ne
     // rattrape que le REJET de la promesse d avant ; ce que le PREMIER argument
@@ -346,8 +350,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // rattrapage couvre les deux : le refus du pont ET un defaut de notre dessin.
     }).catch(function(e){
       enCours = false;
-      noter('ECHEC : ' + ((e && e.message) || e));
-      montrerJournal('L’appel au pont, ou le dessin, a échoué');
+      noter('${T("ECHEC : ")}' + ((e && e.message) || e));
+      montrerJournal('${T("L’appel au pont, ou le dessin, a échoué")}');
     });
   }
 
@@ -356,8 +360,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // message d attente. Trois secondes, parce que l usager a demande cinq au pire.
   setTimeout(function(){
     if (rendu) return;
-    noter('rien n’est arrivé après 3 s — le pont ne répond pas');
-    montrerJournal('La fenêtre n’a pas reçu de réponse');
+    noter('${T("rien n’est arrivé après 3 s — le pont ne répond pas")}');
+    montrerJournal('${T("La fenêtre n’a pas reçu de réponse")}');
   }, 3000);
 
   // Le dernier etat lu, pour redessiner quand la liste arrive sans redemander
@@ -375,7 +379,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var minuterie = setTimeout(function(){
       if (fini) return;
       fini = true; listeEnCours = false;
-      dire('Liste des imprimantes trop longue à lire — « Actualiser » pour réessayer.', 'att');
+      dire('${T("Liste des imprimantes trop longue à lire — « Actualiser » pour réessayer.")}', 'att');
     }, 12000);
     P.appeler('imprimantes:liste').then(function(l){
       if (fini) return;
@@ -383,7 +387,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!l || !l.ok) {
         // Un echec de liste n empeche PAS d utiliser l ecran : les associations
         // existantes restent visibles, et le test reste possible.
-        dire('Liste des imprimantes indisponible : ' + expliquer(l && l.motif), 'att');
+        dire('${T("Liste des imprimantes indisponible : ")}' + expliquer(l && l.motif), 'att');
         return;
       }
       IMPRS = l.imprimantes || [];
@@ -399,12 +403,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var b = ev.target.closest('button'); if (!b || b.disabled) return;
     var t = b.getAttribute('data-tester');
     if (t) {
-      dire('Envoi du test…');
+      dire('${T("Envoi du test…")}');
       b.disabled = true;
       P.appeler('imprimantes:tester', t).then(function(r){
         b.disabled = false;
         if (!r || !r.ok) { dire(expliquer(r && r.motif), 'err'); return; }
-        dire('Test envoyé à l’imprimante.', 'bon');
+        dire('${T("Test envoyé à l’imprimante.")}', 'bon');
       });
     }
   });
@@ -418,12 +422,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cle = s.getAttribute('data-svc');
     var nom = s.value;
     s.disabled = true;
-    dire(nom ? 'Association…' : 'Retrait de l’association…');
+    dire(nom ? '${T("Association…")}' : '${T("Retrait de l’association…")}');
     P.appeler('imprimantes:definir', cle, nom).then(function(r){
       s.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r && r.motif), 'err'); relire(); return; }
       relire();
-      dire(nom ? 'Imprimante associée.' : 'Association retirée.', 'bon');
+      dire(nom ? '${T("Imprimante associée.")}' : '${T("Association retirée.")}', 'bon');
     });
   });
 
