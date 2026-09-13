@@ -13,6 +13,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('lancement');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -54,11 +58,11 @@ button.bsc:disabled{opacity:.5;cursor:default}
 
 function pageLancement() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Mode lancement — Administration Sandriza</title>
+<title>${T("Mode lancement — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.fusee}</span><h1>Mode lancement</h1></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter, pas modifier.</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="tete"><span class="ico">${ICO.fusee}</span><h1>${T("Mode lancement")}</h1></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
+<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -69,8 +73,8 @@ function pageLancement() {
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
     if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='.4rem'; t.appendChild(b); }
-    if (actif) { b.textContent='⧉ Détacher'; b.title='Ouvrir cet écran dans sa propre fenêtre'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
-    else { b.textContent='⚓ Ancrer'; b.title='Ramener cet écran dans la fenêtre principale'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
+    if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
+    else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
@@ -80,18 +84,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:'Aucune session ouverte. Connectez-vous dans la fenêtre principale.',
-    droit:'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:'Votre rôle est en lecture seule.',
-    indisponible:'État du serveur indisponible (endpoint injoignable).',
-    pont_indisponible:'La fenêtre principale ne répond pas.',
-    delai:"La fenêtre principale n'a pas répondu à temps.",
-    operation_inconnue:'Cette version de l’application ne connaît pas cette opération.',
-    refus:'Le serveur a refusé le changement.',
-    reseau:'Erreur réseau en joignant le serveur.',
-    echec:"L'opération a échoué.",
+    session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+    droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:'${T("Votre rôle est en lecture seule.")}',
+    indisponible:'${T("État du serveur indisponible (endpoint injoignable).")}',
+    pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
+    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
+    refus:'${T("Le serveur a refusé le changement.")}',
+    reseau:'${T("Erreur réseau en joignant le serveur.")}',
+    echec:"${T('L\'opération a échoué.')}",
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('Erreur inattendue ('+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -105,36 +109,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var enLigne = !!D.enLigne;
     var coul = enLigne ? '#16a34a' : '#d97706';
     var fond = enLigne ? 'rgba(22,163,74,.08)' : 'rgba(217,119,6,.08)';
-    var lbl = enLigne ? 'En ligne' : 'Pré-lancement';
-    var ds = enLigne ? 'Le site est visible par les moteurs de recherche et les visiteurs.'
-                     : 'Le site est protégé contre l’indexation. Seules les personnes ayant le lien direct peuvent le visiter.';
-    var btnTxt = enLigne ? 'Repasser en pré-lancement' : (CONF ? 'Confirmer le lancement PUBLIC ?' : 'Lancer le site au public');
+    var lbl = enLigne ? '${T("En ligne")}' : '${T("Pré-lancement")}';
+    var ds = enLigne ? '${T("Le site est visible par les moteurs de recherche et les visiteurs.")}'
+                     : '${T("Le site est protégé contre l’indexation. Seules les personnes ayant le lien direct peuvent le visiter.")}';
+    var btnTxt = enLigne ? '${T("Repasser en pré-lancement")}' : (CONF ? '${T("Confirmer le lancement PUBLIC ?")}' : '${T("Lancer le site au public")}');
     var btnCoul = enLigne ? '#ef4444' : (CONF ? '#b91c1c' : '#16a34a');
 
     var src;
-    if (!D.coherent && D.envPresente) src = '<div class="src err">✗ Incohérence : la variable Render <code>ELG_LAUNCHED=' + esc(D.envValeur) + '</code> dit le contraire de l’état actuel. Le prochain déploiement suivra la variable.</div>';
-    else if (D.envPresente) src = '<div class="src ok"><span class="ic">🔗</span> État piloté par la variable Render <code>ELG_LAUNCHED=' + esc(D.envValeur) + '</code> — il survit aux déploiements.</div>';
-    else src = '<div class="src warn"><span class="ic">⚠</span> Aucune variable <code>ELG_LAUNCHED</code> dans Render : l’état actuel est un simple fichier, effacé au prochain déploiement. Ajoutez-la dans Render pour le rendre durable.</div>';
+    if (!D.coherent && D.envPresente) src = '<div class="src err">${T("✗ Incohérence : la variable Render <code>ELG_LAUNCHED=")}' + esc(D.envValeur) + '${T("</code> dit le contraire de l’état actuel. Le prochain déploiement suivra la variable.")}</div>';
+    else if (D.envPresente) src = '<div class="src ok"><span class="ic">🔗</span>${T(" État piloté par la variable Render <code>ELG_LAUNCHED=")}' + esc(D.envValeur) + '${T("</code> — il survit aux déploiements.")}</div>';
+    else src = '<div class="src warn"><span class="ic">⚠</span>${T(" Aucune variable <code>ELG_LAUNCHED</code> dans Render : l’état actuel est un simple fichier, effacé au prochain déploiement. Ajoutez-la dans Render pour le rendre durable.")}</div>';
 
     var h = '<div class="etat" style="border-color:' + coul + ';background:' + fond + '">'
       + '<div class="rangee"><div class="g"><div class="lg" style="color:' + coul + '">' + lbl + '</div><div class="ds">' + ds + '</div></div>'
       + (RO ? '' : '<button class="bsc" id="b-bascule" style="background:' + btnCoul + '">' + esc(btnTxt) + '</button>')
       + '</div>' + src + '</div>';
 
-    h += '<div class="h4">Mesures de protection</div><div class="prot">'
-      + protLigne('robots.txt', 'servi par Cloudflare, pas par ce site : ce bouton ne le change pas')
-      + protLigne('X-Robots-Tag HTTP', enLigne ? 'en-tête retiré' : 'noindex, nofollow sur toutes les pages')
-      + protLigne('Meta robots HTML', enLigne ? 'balise retirée' : 'noindex dans chaque page')
-      + protLigne('En-têtes de sécurité', 'X-Frame-Options, CSP, XSS-Protection (toujours actifs)')
-      + protLigne('Fichiers sensibles', '.env, Dockerfile, CLAUDE.md inaccessibles (toujours actif)')
+    h += '<div class="h4">${T("Mesures de protection")}</div><div class="prot">'
+      + protLigne('robots.txt', '${T("servi par Cloudflare, pas par ce site : ce bouton ne le change pas")}')
+      + protLigne('${T("X-Robots-Tag HTTP")}', enLigne ? '${T("en-tête retiré")}' : '${T("noindex, nofollow sur toutes les pages")}')
+      + protLigne('${T("Meta robots HTML")}', enLigne ? '${T("balise retirée")}' : '${T("noindex dans chaque page")}')
+      + protLigne('${T("En-têtes de sécurité")}', '${T("X-Frame-Options, CSP, XSS-Protection (toujours actifs)")}')
+      + protLigne('${T("Fichiers sensibles")}', '${T(".env, Dockerfile, CLAUDE.md inaccessibles (toujours actif)")}')
       + '</div>';
 
-    h += '<div class="info"><b>ℹ Comment fonctionne le bouton.</b> Il crée ou supprime un fichier '
-      + '<code>launch.flag</code> sur le serveur, qui pilote l’en-tête <code>X-Robots-Tag</code> et la balise '
-      + '<code>meta robots</code> — effet immédiat, sans redéploiement. <b>Mais l’état durable, c’est la variable '
-      + 'Render <code>ELG_LAUNCHED</code></b> : chaque déploiement reconstruit le serveur et repose le drapeau selon '
-      + 'elle. Pour lancer <b>pour de bon</b> : <code>ELG_LAUNCHED=1</code> dans Render. Sans elle, le défaut est '
-      + '« pré-lancement ».</div>';
+    h += '<div class="info"><b>${T("ℹ Comment fonctionne le bouton.")}</b>${T(" Il crée ou supprime un fichier ")}'
+      + '${T("<code>launch.flag</code> sur le serveur, qui pilote l’en-tête <code>X-Robots-Tag</code> et la balise ")}'
+      + '${T("<code>meta robots</code> — effet immédiat, sans redéploiement. <b>Mais l’état durable, c’est la variable ")}'
+      + '${T("Render <code>ELG_LAUNCHED</code></b> : chaque déploiement reconstruit le serveur et repose le drapeau selon ")}'
+      + '${T("elle. Pour lancer <b>pour de bon</b> : <code>ELG_LAUNCHED=1</code> dans Render. Sans elle, le défaut est ")}'
+      + '${T("« pré-lancement ».")}</div>';
 
     corps.innerHTML = h;
     var b = document.getElementById('b-bascule');
@@ -148,7 +152,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // PASSER EN LIGNE : garde absolue → confirmation en deux temps.
     if (!CONF) {
       CONF = true; dessiner();
-      dire('Cliquez encore pour rendre le site PUBLIC et indexable.', 'att');
+      dire('${T("Cliquez encore pour rendre le site PUBLIC et indexable.")}', 'att');
       setTimeout(function(){ if (CONF) { CONF = false; dessiner(); } }, 6000);
       return;
     }
@@ -156,18 +160,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     basculer('launch');
   }
   function basculer(action){
-    OCCUPE = true; dire(action === 'launch' ? 'Lancement…' : 'Retour en pré-lancement…');
+    OCCUPE = true; dire(action === 'launch' ? '${T("Lancement…")}' : '${T("Retour en pré-lancement…")}');
     appeler('config:lancement:basculer', [action]).then(function(r){
       OCCUPE = false;
       if (r && r.ok) {
         D = r; RO = !r.peutModifier; dessiner();
-        dire(r.enLigne ? 'Site EN LIGNE au public.' : 'Mode pré-lancement activé.', r.enLigne ? 'att' : 'bon');
-      } else dire('Échec : ' + expliquer(r), 'err');
+        dire(r.enLigne ? '${T("Site EN LIGNE au public.")}' : '${T("Mode pré-lancement activé.")}', r.enLigne ? 'att' : 'bon');
+      } else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
 
   function charger(){
-    dire('Lecture de l’état du serveur…');
+    dire('${T("Lecture de l’état du serveur…")}');
     appeler('config:lancement:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; RO = !r.peutModifier; CONF = false; dessiner(); dire('');

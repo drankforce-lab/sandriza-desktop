@@ -20,6 +20,10 @@
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO } = require('./socle.js');
+/* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
+   langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
+   enregistrable (voir src/langue/index.js). */
+const T = require('../langue').tr('taxes');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -96,15 +100,15 @@ function pageTaxes(ouverture) {
   const ecartsDepart = o === 'ecarts' ? 'true' : 'false';
   const ajoutDepart = o === 'pays' ? 'true' : 'false';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Gestion des taxes — Administration Sandriza</title>
+<title>${T("Gestion des taxes — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.argent}</span><h1>Gestion des taxes</h1>
+<div class="tete"><span class="ico">${ICO.argent}</span><h1>${T("Gestion des taxes")}</h1>
   <span class="rev" id="rev"></span></div>
-<div class="ro" id="ro" hidden>Lecture seule : vous pouvez consulter les taux, pas les modifier.</div>
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="Chargement en cours"><i></i><i></i><i></i></div></div></div>
+<div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les taux, pas les modifier.")}</div>
+<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button id="b-verifier">Comparer à la référence</button>
-  <button class="prim" id="b-save" disabled>Enregistrer les taux</button></div>
+  <button id="b-verifier">${T("Comparer à la référence")}</button>
+  <button class="prim" id="b-save" disabled>${T("Enregistrer les taux")}</button></div>
 <script>
 (function(){
   'use strict';
@@ -127,12 +131,12 @@ function pageTaxes(ouverture) {
       t.appendChild(b);
     }
     if (actif) {
-      b.textContent = '⧉ Détacher';
-      b.title = 'Ouvrir cet écran dans sa propre fenêtre';
+      b.textContent = '${T("⧉ Détacher")}';
+      b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}';
       b.onclick = function(){ if (P && P.detacher) P.detacher(); };
     } else {
-      b.textContent = '⚓ Ancrer';
-      b.title = 'Ramener cet écran dans la fenêtre principale';
+      b.textContent = '${T("⚓ Ancrer")}';
+      b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
@@ -148,28 +152,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
-    session:            'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.',
-    droit:              'Votre rôle ne donne pas accès à la configuration.',
-    lecture_seule:      'Votre rôle est en lecture seule : les taux ne peuvent pas être modifiés.',
-    pays_requis:        'Code de pays requis (deux lettres, par exemple US).',
-    taux_invalide:      'Ce taux n’est pas un nombre valide.',
-    introuvable:        'Ce pays n’est plus dans la grille.',
-    indisponible:       'La configuration n’est pas prête dans la fenêtre principale.',
-    pont_indisponible:  'La fenêtre principale ne répond pas.',
-    delai:              'La fenêtre principale n’a pas répondu à temps.',
-    operation_inconnue: 'Cette version de l’application ne connaît pas cette opération.',
-    nuage:              'Taux NON enregistrés. Rien n’a été modifié — réessayez.',
-    echec:              'L’opération a échoué.'
+    session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
+    droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
+    lecture_seule:      '${T("Votre rôle est en lecture seule : les taux ne peuvent pas être modifiés.")}',
+    pays_requis:        '${T("Code de pays requis (deux lettres, par exemple US).")}',
+    taux_invalide:      '${T("Ce taux n’est pas un nombre valide.")}',
+    introuvable:        '${T("Ce pays n’est plus dans la grille.")}',
+    indisponible:       '${T("La configuration n’est pas prête dans la fenêtre principale.")}',
+    pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
+    nuage:              '${T("Taux NON enregistrés. Rien n’a été modifié — réessayez.")}',
+    echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
     var m = r && r.motif;
     if (m === 'concurrence') {
-      return 'Taux NON enregistrés : la grille a changé'
-        + (r.par ? ' par ' + esc(r.par) : '')
-        + (r.le ? ' (révision du ' + esc(r.le) + ')' : '')
-        + ' pendant votre saisie. La grille affichée vient d’être rechargée — refaites vos changements.';
+      return '${T("Taux NON enregistrés : la grille a changé")}'
+        + (r.par ? '${T(" par ")}' + esc(r.par) : '')
+        + (r.le ? '${T(" (révision du ")}' + esc(r.le) + ')' : '')
+        + '${T(" pendant votre saisie. La grille affichée vient d’être rechargée — refaites vos changements.")}';
     }
-    return (MOTIFS[m] || ('Erreur inattendue (' + esc(m || '?') + ').'))
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
       + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
   }
   function appeler(op, args){
@@ -192,13 +196,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function champNom(cle, i, val, prov){
     return '<input type="text" class="nom" data-c="' + esc(cle) + '" data-i="' + i
       + '" data-f="name" value="' + esc(val) + '" aria-label="'
-      + esc('Nom de la composante ' + (i + 1) + ' — ' + (prov || cle)) + '"'
+      + esc('${T("Nom de la composante ")}' + (i + 1) + ' — ' + (prov || cle)) + '"'
       + (RO ? ' disabled' : '') + '>';
   }
   function champTaux(cle, i, val, prov, nom){
     return '<input type="number" step="0.001" min="0" class="taux" data-c="' + esc(cle) + '" data-i="' + i
       + '" data-f="pct" value="' + esc(val == null ? '' : val) + '" aria-label="'
-      + esc('Taux en pourcentage de ' + (nom || ('la composante ' + (i + 1))) + ' — ' + (prov || cle)) + '"'
+      + esc('${T("Taux en pourcentage de ")}' + (nom || ('${T("la composante ")}' + (i + 1))) + ' — ' + (prov || cle)) + '"'
       + (RO ? ' disabled' : '') + '>';
   }
 
@@ -207,12 +211,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (av) av.hidden = !RO;
     var d = D || {};
     rev.textContent = d.lastReviewed
-      ? ('Dernière révision : ' + d.lastReviewed + (d.updatedBy ? ' · ' + d.updatedBy : '')) : '';
+      ? ('${T("Dernière révision : ")}' + d.lastReviewed + (d.updatedBy ? ' · ' + d.updatedBy : '')) : '';
     var h = [];
 
     // ── Canada ─────────────────────────────────────────────────────────────
-    h.push('<div class="carte"><h2>Canada — par province de livraison</h2>');
-    h.push('<table><thead><tr><th>Province ou territoire</th><th>Composantes — nom, taux, organisme</th></tr></thead><tbody>');
+    h.push('<div class="carte"><h2>${T("Canada — par province de livraison")}</h2>');
+    h.push('<table><thead><tr><th>${T("Province ou territoire")}</th><th>${T("Composantes — nom, taux, organisme")}</th></tr></thead><tbody>');
     (d.provinces || []).forEach(function(p){
       h.push('<tr><td class="prov">' + esc(p.code) + '<div class="n">' + esc(p.nom) + '</div></td><td>');
       if (!p.composantes.length) h.push('<span style="color:var(--tx3)">—</span>');
@@ -220,34 +224,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var prov = (p.nom || p.code);
         h.push('<span class="comp">' + champNom('ca:' + p.code, i, c.name, prov)
           + champTaux('ca:' + p.code, i, c.pct, prov, c.name)
-          + '<span class="org">% · remis à ' + esc(c.remitTo || '—') + '</span></span>');
+          + '<span class="org">${T("% · remis à ")}' + esc(c.remitTo || '—') + '</span></span>');
       });
       h.push('</td></tr>');
     });
     h.push('</tbody></table>');
-    h.push('<div class="gestes"><button id="b-reinit"' + (RO ? ' disabled' : '') + '>Réinitialiser aux défauts</button></div>');
+    h.push('<div class="gestes"><button id="b-reinit"' + (RO ? ' disabled' : '') + '>${T("Réinitialiser aux défauts")}</button></div>');
     h.push('</div>');
 
     // ── Écarts avec la référence (seulement si on a demandé la comparaison) ──
     if (ECARTS) {
       var ec = d.ecarts || [];
-      h.push('<div class="carte"><h2>Comparaison aux taux de référence</h2>');
+      h.push('<div class="carte"><h2>${T("Comparaison aux taux de référence")}</h2>');
       if (!ec.length) {
-        h.push('<div class="vide">Vos taux correspondent à la référence.</div>');
+        h.push('<div class="vide">${T("Vos taux correspondent à la référence.")}</div>');
       } else {
-        h.push('<div class="avis">Appliquer remplace les composantes canadiennes par les taux de référence. '
-          + 'N’appliquez pas si vous avez ajusté un taux selon vos inscriptions.</div>');
-        h.push('<table class="ec"><thead><tr><th>Prov.</th><th>Taxe</th><th style="text-align:right">Vos taux</th>'
-          + '<th style="text-align:right">Référence</th></tr></thead><tbody>');
+        h.push('<div class="avis">${T("Appliquer remplace les composantes canadiennes par les taux de référence. ")}'
+          + '${T("N’appliquez pas si vous avez ajusté un taux selon vos inscriptions.")}</div>');
+        h.push('<table class="ec"><thead><tr><th>${T("Prov.")}</th><th>${T("Taxe")}</th><th style="text-align:right">${T("Vos taux")}</th>'
+          + '<th style="text-align:right">${T("Référence")}</th></tr></thead><tbody>');
         ec.forEach(function(x){
           h.push('<tr><td style="font-weight:700">' + esc(x.prov) + '</td><td>' + esc(x.nom)
             + ' <span style="color:var(--tx3)">(' + esc(x.code) + ')</span></td>'
-            + '<td class="av">' + (x.actuel == null ? 'absent' : x.actuel + ' %') + '</td>'
-            + '<td class="ap">' + (x.reference == null ? 'à retirer' : x.reference + ' %') + '</td></tr>');
+            + '<td class="av">' + (x.actuel == null ? '${T("absent")}' : x.actuel + ' %') + '</td>'
+            + '<td class="ap">' + (x.reference == null ? '${T("à retirer")}' : x.reference + ' %') + '</td></tr>');
         });
         h.push('</tbody></table>');
         h.push('<div class="gestes"><button class="prim" id="b-appliquer"' + (RO ? ' disabled' : '')
-          + '>Appliquer la référence</button><button id="b-fermer-ecarts">Fermer</button></div>');
+          + '>${T("Appliquer la référence")}</button><button id="b-fermer-ecarts">${T("Fermer")}</button></div>');
       }
       h.push('</div>');
     }
@@ -256,13 +260,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ Table manuelle RETIRÉE (2026-08-12) : Stripe Tax calcule la taxe
     // internationale à la caisse, selon la destination et les inscriptions réelles.
     // Une table saisie à la main ferait double emploi (et pourrait diverger).
-    h.push('<div class="carte"><h2>International</h2>'
-      + '<div class="avis">Les taxes internationales sont <strong>gérées automatiquement par Stripe Tax</strong> : '
-      + 'le taux exact est calculé <strong>à la caisse</strong> selon la destination, à partir de vos inscriptions '
-      + 'fiscales réelles — plus rien à saisir ici.<br>'
-      + '• Les <strong>pays et États desservis</strong> se règlent dans <strong>Livraison ▸ Pays desservis</strong> '
-      + '(lus en direct chez Stripe).<br>'
-      + '• La <strong>clé Stripe Tax</strong> se règle dans <strong>Clés API</strong>.</div></div>');
+    h.push('<div class="carte"><h2>${T("International")}</h2>'
+      + '<div class="avis">${T("Les taxes internationales sont <strong>gérées automatiquement par Stripe Tax</strong> : ")}'
+      + '${T("le taux exact est calculé <strong>à la caisse</strong> selon la destination, à partir de vos inscriptions ")}'
+      + '${T("fiscales réelles — plus rien à saisir ici.")}<br>'
+      + '${T("• Les <strong>pays et États desservis</strong> se règlent dans <strong>Livraison ▸ Pays desservis</strong> ")}'
+      + '${T("(lus en direct chez Stripe).")}<br>'
+      + '${T("• La <strong>clé Stripe Tax</strong> se règle dans <strong>Clés API</strong>.")}</div></div>');
 
     corps.innerHTML = h.join('');
     brancher();
@@ -328,48 +332,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function enregistrer(){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Enregistrement…');
-    appeler('config:taxes:ecrire', [lire()]).then(function(r){ verdict(r, 'Taux enregistrés.'); });
+    occuper(true); dire('${T("Enregistrement…")}');
+    appeler('config:taxes:ecrire', [lire()]).then(function(r){ verdict(r, '${T("Taux enregistrés.")}'); });
   }
   bsave.onclick = enregistrer;
 
   function reinit(){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Réinitialisation…');
-    appeler('config:taxes:reinit').then(function(r){ verdict(r, 'Taux réinitialisés aux valeurs par défaut.'); });
+    occuper(true); dire('${T("Réinitialisation…")}');
+    appeler('config:taxes:reinit').then(function(r){ verdict(r, '${T("Taux réinitialisés aux valeurs par défaut.")}'); });
   }
   function appliquer(){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Application de la référence…');
-    appeler('config:taxes:reference').then(function(r){ ECARTS = false; verdict(r, 'Taux mis à jour selon la référence.'); });
+    occuper(true); dire('${T("Application de la référence…")}');
+    appeler('config:taxes:reference').then(function(r){ ECARTS = false; verdict(r, '${T("Taux mis à jour selon la référence.")}'); });
   }
   bver.onclick = function(){
     if (OCCUPE) return;
     var ec = (D && D.ecarts) || [];
-    if (ec.length) { ECARTS = true; dessiner(); dire(ec.length + ' écart' + (ec.length > 1 ? 's' : '') + ' avec la référence.', 'att'); return; }
-    if (RO) { dire('Vos taux correspondent à la référence.', 'bon'); return; }
-    occuper(true); dire('Marquage de la révision…');
-    appeler('config:taxes:revision').then(function(r){ verdict(r, 'Vos taux correspondent à la référence. Date de révision actualisée.'); });
+    /* ⚠ Le singulier et le pluriel, chacun entier. */
+    if (ec.length) {
+      ECARTS = true; dessiner();
+      dire(ec.length + (ec.length > 1 ? '${T(" écarts")}' : '${T(" écart")}')
+        + '${T(" avec la référence.")}', 'att');
+      return;
+    }
+    if (RO) { dire('${T("Vos taux correspondent à la référence.")}', 'bon'); return; }
+    occuper(true); dire('${T("Marquage de la révision…")}');
+    appeler('config:taxes:revision').then(function(r){ verdict(r, '${T("Vos taux correspondent à la référence. Date de révision actualisée.")}'); });
   };
   function ajouterPays(){
     if (RO || OCCUPE) return;
     var cc = (document.getElementById('a-cc') || {}).value || '';
     var nom = (document.getElementById('a-nom') || {}).value || '';
     var pct = (document.getElementById('a-pct') || {}).value || '';
-    occuper(true); dire('Ajout du pays…');
+    occuper(true); dire('${T("Ajout du pays…")}');
     appeler('config:taxes:pays', [{ cc: cc, nom: nom, pct: pct }]).then(function(r){
       if (r && r.ok) AJOUT = false;
-      verdict(r, 'Pays ajouté.');
+      verdict(r, '${T("Pays ajouté.")}');
     });
   }
   function oterPays(cc){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Retrait…');
-    appeler('config:taxes:paysoter', [cc]).then(function(r){ verdict(r, 'Pays ' + cc + ' retiré.'); });
+    occuper(true); dire('${T("Retrait…")}');
+    appeler('config:taxes:paysoter', [cc]).then(function(r){
+      verdict(r, '${T("Pays ")}' + cc + '${T(" retiré.")}'); });
   }
 
   function charger(){
-    dire('Lecture…');
+    dire('${T("Lecture…")}');
     appeler('config:taxes:donnees').then(function(r){
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
