@@ -42,5 +42,9 @@ module.exports = {
 
   /* ── LA LONGUE TRAINE (voir banc-langue-residuel) ───────────────────────── */
   'Téléphone': 'Phone',
-  'Enregistré.': 'Saved.'
+  'Enregistré.': 'Saved.',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Actif': 'Active',
+  'Inactif': 'Inactive',
 };

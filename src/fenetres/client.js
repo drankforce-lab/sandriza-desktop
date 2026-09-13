@@ -276,7 +276,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     h += '<div class="carte"><h2>${T("Mot de passe")}</h2>'
       + '<div style="display:flex;gap:.45rem;align-items:flex-end">'
       + '<div class="ch" style="flex:1"><label for="e-mdp">${T("Nouveau (laisser vide = inchangé)")}</label>'
-      + '<input id="e-mdp" type="password" placeholder="Min. 6 caractères" autocomplete="new-password"></div>'
+      + '<input id="e-mdp" type="password" placeholder="${T("Min. 6 caractères")}" autocomplete="new-password"></div>'
       + '<button class="mini" id="btn-voir" title="${T("Afficher / masquer")}"><span class="ic">👁</span></button>'
       + '<button class="mini" id="btn-gen"><span class="ic">🎲</span> ${T("Générer")}</button>'
       + '</div>'

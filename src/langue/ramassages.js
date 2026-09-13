@@ -90,5 +90,12 @@ module.exports = {
   'Livrée': 'Delivered',
   'Expédiée': 'Shipped',
   'expédition': 'shipment',
-  'ramassé': 'picked up'
+  'ramassé': 'picked up',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Le choix des colis, de la date et du poids se fait dans la fenêtre principale': 'The parcels, the date and the weight are chosen in the main window',
+  'Poids estimé par colis en kilogrammes': 'Estimated weight per parcel in kilograms',
+  'Ramassages': 'Pickups',
+  'Rapport transporteurs': 'Carrier report',
+  'Planifier un ramassage': 'Schedule a pickup',
 };

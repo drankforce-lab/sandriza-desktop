@@ -112,5 +112,11 @@ module.exports = {
 
   /* ── LA LONGUE TRAINE (voir banc-langue-residuel) ───────────────────────── */
   'remboursés': 'refunded',
-  'impayés': 'unpaid'
+  'impayés': 'unpaid',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Afficher ou masquer des tuiles': 'Show or hide tiles',
+  'Empecher toute autre connexion pendant une maintenance': 'Prevent anyone else from signing in during maintenance',
+  'Mode exclusif : ACTIF': 'Exclusive mode: ON',
+  'Mode exclusif': 'Exclusive mode',
 };

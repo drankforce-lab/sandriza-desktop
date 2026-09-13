@@ -293,7 +293,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '${T("votre choix est gardé et redeviendra effectif dès qu’il réapparaîtra.")}</div>'
           : '')
       +   '<div class="dbtns">'
-      +     '<button class="ghost mini" data-act="dosschoisir">Changer…</button>'
+      +     '<button class="ghost mini" data-act="dosschoisir">${T("Changer…")}</button>'
       +     (perso ? '<button class="ghost mini" data-act="dossdefaut">${T("Revenir au dossier standard")}</button>' : '')
       +   '</div>'
       + '</div>';
@@ -574,7 +574,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (c.maj) parts.push('<li><strong>' + c.maj + '</strong> ' + (inv ? 'variante' + plur(c.maj) : 'fiche' + plur(c.maj)) + ' <strong>${T("modifiée")}' + plur(c.maj) + '</strong></li>');
     if (IMP.nbPhotos) parts.push('<li><strong>' + IMP.nbPhotos + '</strong> photo' + plur(IMP.nbPhotos) + ' <strong>${T("téléchargée")}' + plur(IMP.nbPhotos) + '</strong> ${T("depuis des sites externes et copiée")}' + plur(IMP.nbPhotos) + ' dans votre stockage</li>');
     if (c.inchange) parts.push('<li>' + c.inchange + ' ligne' + plur(c.inchange) + ' identique' + plur(c.inchange) + ' ${T(": rien ne sera écrit")}</li>');
-    if (c.erreur) parts.push('<li>' + c.erreur + ' ligne' + plur(c.erreur) + ' en erreur : <strong>${T("ignorée")}' + plur(c.erreur) + '</strong></li>');
+    if (c.erreur) parts.push('<li>' + c.erreur + ' ligne' + plur(c.erreur) + '${T(" en erreur : ")}<strong>${T("ignorée")}' + plur(c.erreur) + '</strong></li>');
     return '<div class="voile" id="conf-voile"><div class="boite">'
       + '<h3>${T("Appliquer l’import")}</h3>'
       + '<p style="margin:0 0 .6rem;font-size:.86rem">Fichier <strong>' + esc(IMP.fichier) + '</strong> ${T("— feuille")} ' + esc(IMP.feuille) + '.</p>'

@@ -136,5 +136,8 @@ module.exports = {
   'Coordonnées': 'Contact details',
   'Téléphone': 'Phone',
   'Identité': 'Identity',
-  'Prénom': 'First name'
+  'Prénom': 'First name',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Min. 6 caractères': 'Min. 6 characters',
 };

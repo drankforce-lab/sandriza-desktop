@@ -255,5 +255,12 @@ module.exports = {
   'Aucun secret <b>enregistré</b>.': 'No secret <b>saved</b>.',
   /* ⚠ Celui-la est un EXEMPLE d adresse, pas une donnee : il montre la forme
      d un courriel. On le rend dans la forme anglaise usuelle. */
-  'vous@exemple.com': 'you@example.com'
+  'vous@exemple.com': 'you@example.com',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Solde&nbsp;:': 'Balance:',
+  'Touche': 'Key',
+  'Voir les SMS dans le module Journaux': 'See the texts in the Logs module',
+  'Votre message': 'Your message',
+  'Votre message…': 'Your message…',
 };

@@ -259,5 +259,10 @@ module.exports = {
   /* ⚠ Le <strong> tombe sur « profil d’entreprise » seul : on garde la phrase
      entière, gras compris. La forme rendue ne dit pas où sont les balises. */
   'Le <strong>profil d’entreprise</strong> (nom, NEQ, numéros de TPS et ':
-    'The <strong>business profile</strong> (name, NEQ, GST and '
+    'The <strong>business profile</strong> (name, NEQ, GST and ',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Taxe nette': 'Net tax',
+  'Profil d’entreprise incomplet': 'Business profile incomplete',
+  '— il manque le nom, ': '— the name is missing, ',
 };

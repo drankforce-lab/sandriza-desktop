@@ -653,8 +653,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var lien = '';
     if (r.enAttente) {
       lien = r.lien && r.lien.url
-        ? '<div class="lien"><input id="lien-url" aria-label="Lien de paiement à copier" readonly value="' + esc(r.lien.url) + '">'
-          + '<button class="mini" id="btn-copier"><span class="ic">📋</span> Copier</button>'
+        ? '<div class="lien"><input id="lien-url" aria-label="${T("Lien de paiement à copier")}" readonly value="' + esc(r.lien.url) + '">'
+          + '<button class="mini" id="btn-copier"><span class="ic">📋</span> ${T("Copier")}</button>'
           /* ⚠ LE RECOURS QUAND LA CONFIRMATION AUTOMATIQUE N ARRIVE PAS. Le
              client ferme son onglet, le retour rate : la vente est PAYEE chez
              Square et la facture reste impayee chez nous. Sans ce bouton, il n y
@@ -677,7 +677,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var v = document.createElement('div');
     v.className = 'voile';
-    v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '<span class="ic">🔗</span> ${T("Vente")} en attente de paiement'
+    v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '<span class="ic">🔗</span> ${T("Vente")}${T(" en attente de paiement")}'
       : '${T("Vente enregistrée")}') + '</h3>' + lignes + lien + avis
       + '<div class="fin"><button class="prim" id="btn-ok">Continuer</button></div></div>';
     document.body.appendChild(v);

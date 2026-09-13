@@ -102,7 +102,7 @@ function pageFournisseur(id) {
       + '</div></div><div class="grille">'
       + sel('f-delai', '${T("Délai de livraison moyen")}', CTX.delais)
       + '<div class="ch"><label for="f-actif">Statut</label><select id="f-actif">'
-      + '<option value="1">Actif</option><option value="0">Inactif</option></select></div>'
+      + '<option value="1">${T("Actif")}</option><option value="0">${T("Inactif")}</option></select></div>'
       + ch('f-notes', '${T("Notes internes")}', { multi: true, large: true, rows: 3 })
       + '</div></div></div>');
 

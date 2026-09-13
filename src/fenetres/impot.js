@@ -289,7 +289,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        bloque net : la fenetre refuse les documents sans profil, et le seul
        endroit ou saisir ce profil etait inatteignable. Rouvert par #33. */
     if (!D.profil.complet && ONGLET !== 'entreprise') {
-      h += '<div class="avis"><span class="ic">⚠</span> <strong>Profil d’entreprise incomplet</strong> — il manque le nom, '
+      h += '<div class="avis"><span class="ic">⚠</span> <strong>${T("Profil d’entreprise incomplet")}</strong> ${T("— il manque le nom, ")}'
         + '${T("le NEQ ou vos numéros de TPS/TVQ. Les documents s’imprimeront sans eux, et ils ne")} '
         + '${T("seront pas recevables. ")}<button class="mini" data-onglet="entreprise">${T("Compléter maintenant")}</button></div>';
     }
@@ -511,7 +511,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>';
     }
 
-    h += '<div class="carte"><h2>Taxe nette ${T("à remettre")} <span class="n">${T("après crédits sur intrants")} (CTI / RTI)</span></h2>'
+    h += '<div class="carte"><h2>${T("Taxe nette")} ${T("à remettre")} <span class="n">${T("après crédits sur intrants")} (CTI / RTI)</span></h2>'
       + '<table><thead><tr><th></th><th style="text-align:right">TPS</th>'
       + '<th style="text-align:right">TVQ</th><th style="text-align:right">Total</th></tr></thead><tbody>'
       + '<tr><td>${T("Taxes perçues sur les ventes")}</td><td class="arg">' + esc(t.tps)

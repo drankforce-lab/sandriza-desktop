@@ -151,5 +151,11 @@ module.exports = {
      `banc-langue-residuel` les voit. Tous verifies un par un : ce sont des
      textes AFFICHES, pas des etats enregistres. */
   'Aucun en stock': 'None in stock',
-  'confirmé': 'confirmed'
+  'confirmé': 'confirmed',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE (attributs, moities de phrase) ──── */
+  'Lien de paiement à copier': 'Payment link to copy',
+  '📋 Copier': '📋 Copy',
+  'Copier': 'Copy',
+  ' en attente de paiement': ' awaiting payment',
 };

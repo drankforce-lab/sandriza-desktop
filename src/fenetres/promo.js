@@ -383,7 +383,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<option value="rect">${T("Rectangle")}</option><option value="square">${T("Carré")}</option>'
           + '<option value="circle">Rond</option></select></div>'
           + '<div class="champ"><label id="f-lw">${T("Largeur (po)")}</label>'
-          + '<input type="number" id="f-w" aria-label="Largeur en pouces" step="0.1" min="0.4" value="2"></div>'
+          + '<input type="number" id="f-w" aria-label="${T("Largeur en pouces")}" step="0.1" min="0.4" value="2"></div>'
           + '<div class="champ" id="f-boxh"><label for="f-h">${T("Hauteur (po)")}</label>'
           + '<input type="number" id="f-h" step="0.1" min="0.4" value="1"></div>'
           + '</div>'
@@ -483,7 +483,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="gapercu">'
       + (APERCU && APERCU.image ? '<img src="' + esc(APERCU.image) + '" alt="">'
           : '<span class="aide" style="text-align:center;color:#6b7280">'
-            + (APERCU ? '${T("Ce modèle n’a pas pu être rendu.")}' : 'Rendu…') + '</span>')
+            + (APERCU ? '${T("Ce modèle n’a pas pu être rendu.")}' : '${T("Rendu…")}') + '</span>')
       + '</div>'
       + '<div class="aide" style="text-align:center;margin-top:.4rem">${T("Rendu identique à l’impression (même moteur).")}</div>';
 
@@ -494,7 +494,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="aide">${T("Aucun gabarit Avery ne correspond exactement à ce format.")} '
         + '${T("L’impression directe sur l’imprimante d’étiquettes reste la voie recommandée.")}</div>';
     } else {
-      h += '<div class="champ"><select id="p-planche" aria-label="${T("Modèle")} de planche">'
+      h += '<div class="champ"><select id="p-planche" aria-label="${T("Modèle")}${T(" de planche")}">'
         + pl.map(function(t){
             return '<option value="' + esc(t.id) + '"' + (PLANCHE === t.id ? ' selected' : '') + '>'
               + esc(t.nom) + '</option>'; }).join('')

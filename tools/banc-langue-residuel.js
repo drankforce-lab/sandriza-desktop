@@ -141,23 +141,27 @@ const LEXIQUE = (() => {
  * ⚠ LES CHIFFRES NE SE REMONTENT JAMAIS. Si une ligne doit grandir, c est qu on
  * a ajoute du francais : c est la faute qu il faut corriger, pas le plafond. */
 const DETTE = new Map([
-  ['caisse', 3], ['campagnes', 15], ['catalogio', 2], ['client', 1],
-  ['commande', 11], ['commandes', 20], ['depenses', 8], ['fournisseur', 1],
-  ['impot', 3], ['inventaire', 18], ['invmeta', 12], ['photos', 19],
-  ['produit', 18], ['produits', 9], ['promo', 3], ['promo-editeur', 13],
-  ['ramassages', 5], ['retour', 8], ['studio', 17], ['tableau', 4],
-  ['telephonie', 6],
+  ['campagnes', 12], ['commande', 11], ['commandes', 19], ['depenses', 8],
+  ['inventaire', 16], ['invmeta', 11], ['photos', 18], ['produit', 14],
+  ['produits', 9], ['promo-editeur', 13], ['retour', 7], ['studio', 17],
 ]);
 
 /* ⚠ CE QUI N EST PAS DU TEXTE, meme quand ca porte des mots francais : un
    selecteur (`[data-onglet]`, `.ligne[data-v]`), un attribut technique
    (`class="fait"`), une adresse. Les accuser noierait le signal. */
 const PAS_DU_TEXTE = [
-  /^[.#\[]/,                                   // un selecteur
+  /^[.#[]/,                                    // un selecteur
   /^[a-z-]+="[^"]*"$/i,                        // un attribut nu
   /^https?:\/\//i,                             // une adresse
   /^[\w-]+\[[^\]]*\]$/,                        // balise[attribut]
+  /['"]\s*\+|\+\s*['"]|\besc\(/,               // un MORCEAU DE CODE, pas une phrase
 ];
+
+/* ⚠ UNE ADRESSE N EST PAS DU TEXTE, mais la phrase qui l entoure, si. Meme
+   traitement que les noms officiels : on RETIRE l adresse et l on juge le
+   reste, plutot que de mettre la phrase entiere hors de portee. C est ce qui
+   faisait crier « musique » dans `placeholder="https://…/musique.mp3"`. */
+const sansAdresses = (t) => t.replace(/\bhttps?:\/\/\S+/gi, ' ');
 
 const ACCENT = /[àâäçéèêëîïôöùûüÿœæÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸŒÆ]/;
 
@@ -201,7 +205,7 @@ const exempte = (mot) => EXEMPTE.some(([re]) => re.test(mot));
    que `banc-accents-visibles`, et pour la meme raison. */
 const motsFrancais = (t) => {
   const trouves = [];
-  for (const mot of sansNomsOfficiels(t).split(/[^A-Za-zÀ-ÿŒœ’]+/)) {
+  for (const mot of sansAdresses(sansNomsOfficiels(t)).split(/[^A-Za-zÀ-ÿŒœ’]+/)) {
     if (!mot || mot.length < 3) continue;
     if (exempte(mot)) continue;
     if (ACCENT.test(mot)) { trouves.push(mot); continue; }
@@ -239,6 +243,31 @@ const traduites = fs.readdirSync(DICOS)
   .filter((n) => n !== 'connexion')
   .filter((n) => fs.existsSync(path.join(DOS, n + '.js')))
   .sort();
+
+/* ⚠⚠⚠ UN DICTIONNAIRE QUI NE SE CHARGE PAS EST INVISIBLE, ET C EST LE PIRE DES
+ * DEUX MONDES. `index.js` attrape l erreur de `require` et rend `null` — a
+ * dessein, pour qu une fenetre sans dictionnaire ne fasse pas tomber
+ * l application. Mais du coup une virgule oubliee ne se distingue pas d un
+ * fichier absent : la fenetre repasse « pas encore traduite », le compteur la
+ * range dans le chantier qui reste, ce banc l ecarte, et TOUT EST VERT pendant
+ * que la fenetre est repartie en francais.
+ * ⚠⚠ Mesure du 2026-09-12 : neuf dictionnaires d un coup, par une virgule
+ * manquante avant un bloc ajoute. Aucun des 28 bancs n a bronche.
+ * ⚠ Le fichier EXISTE : c est la seule difference qu il faut savoir lire. */
+const casses = [];
+for (const f of fs.readdirSync(DICOS).filter((x) => x.endsWith('.js'))) {
+  try { require(path.join(DICOS, f)); }
+  catch (e) { casses.push([f, String(e.message).split('\n')[0]]); }
+}
+if (casses.length) {
+  console.log('');
+  console.log('  NON  ' + casses.length + ' dictionnaire(s) ne se chargent pas :');
+  casses.forEach(([f, m]) => console.log('         src/langue/' + f + ' : ' + m));
+  console.log('');
+  console.log('>>> une fenetre dont le dictionnaire est casse repasse EN FRANCAIS');
+  console.log('    sans qu aucun banc ne le dise — le fichier existe, il ne se lit pas.');
+  process.exit(1);
+}
 
 const parFenetre = [];
 let lues = 0;

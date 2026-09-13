@@ -136,7 +136,7 @@ function pageTelephonie() {
 <title>${T("Téléphonie — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.telephone}</span><h1>${T("Téléphonie")}</h1>
-  <span class="solde">Solde&nbsp;: <b id="t-solde">…</b></span>
+  <span class="solde">${T("Solde&nbsp;:")} <b id="t-solde">…</b></span>
   <span id="t-qlive"></span>
   <a class="credit" href="https://console.twilio.com/us1/billing/manage-billing/billing-overview" target="_blank" rel="noopener">${T("Crédits")}</a>
   <button class="mini" id="t-refresh" title="${T("Actualiser le solde, la file et les messages")}">↻</button>
@@ -389,7 +389,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     o = o || {};
     var m = o.message || {};
     var h = '<div class="mrow" data-mrow="' + i + '"><div class="l1">'
-      + '<div class="ch" style="margin:0"><label>Touche</label><input aria-label="Touche" data-mf="digit" style="width:4rem" value="' + esc(o.digit || '') + '"' + (RO ? ' disabled' : '') + '></div>'
+      + '<div class="ch" style="margin:0"><label>${T("Touche")}</label><input aria-label="${T("Touche")}" data-mf="digit" style="width:4rem" value="' + esc(o.digit || '') + '"' + (RO ? ' disabled' : '') + '></div>'
       + '<div class="ch" style="margin:0"><label>${T("Libellé FR")}</label><input aria-label="${T("Libellé FR")}" data-mf="label" style="width:9rem" value="' + esc(o.label || '') + '"' + (RO ? ' disabled' : '') + '></div>'
       + '<div class="ch" style="margin:0"><label>${T("Libellé EN")}</label><input aria-label="${T("Libellé EN")}" data-mf="labelEN" style="width:9rem" value="' + esc(o.labelEN || '') + '"' + (RO ? ' disabled' : '') + '></div>'
       + '<div class="ch" style="margin:0"><label>Action</label><select aria-label="Action" data-mf="action"' + (RO ? ' disabled' : '') + '>'
@@ -456,10 +456,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + taHtml('t-sms-fr', '${T("Réponse automatique (FR)")}', ar.fr, '${T("Merci pour votre message, nous vous répondrons bientôt.")}')
       + taHtml('t-sms-en', '${T("Réponse automatique (EN)")}', ar.en, "${T('Thanks for your message, we\'ll reply soon.')}") + '</div>';
     h += texteHtml('t-sms-email', '${T("Courriel de notification des SMS reçus")}', sms.notifyEmail, '${T("vous@exemple.com")}');
-    h += '</div><div class="carte"><div class="stitre"><span class="ic">💬</span> ${T("Messages SMS")} <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="Voir les SMS dans le module Journaux" style="float:right;font-size:.76rem"><span class="ic">🔎</span> ${T("Dans Journaux")}</button></div>';
+    h += '</div><div class="carte"><div class="stitre"><span class="ic">💬</span> ${T("Messages SMS")} <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="${T("Voir les SMS dans le module Journaux")}" style="float:right;font-size:.76rem"><span class="ic">🔎</span> ${T("Dans Journaux")}</button></div>';
     h += '<div class="smsbox">'
       + '<input aria-label="+1" class="to" id="t-sms-to" placeholder="+1…"' + (RO ? ' disabled' : '') + '>'
-      + '<input aria-label="Votre message" class="body" id="t-sms-body" placeholder="Votre message…"' + (RO ? ' disabled' : '') + '>'
+      + '<input aria-label="${T("Votre message")}" class="body" id="t-sms-body" placeholder="${T("Votre message…")}"' + (RO ? ' disabled' : '') + '>'
       + '<button class="b" type="button" id="t-sms-send"' + (RO ? ' disabled' : '') + '>Envoyer</button></div>';
     h += '<div class="liste" id="t-sms-inbox"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>';
     return h;

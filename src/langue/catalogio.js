@@ -297,5 +297,9 @@ module.exports = {
     ' created are <strong>not for sale</strong>: they are waiting in <strong>Inventory</strong>. Add their photos, then put them on sale.',
   'hors vente': 'not for sale',
   'Modèle ': 'Template ',
-  'refusée': 'refused'
+  'refusée': 'refused',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Changer…': 'Change…',
+  ' en erreur : ': ' in error: ',
 };

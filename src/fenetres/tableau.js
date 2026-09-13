@@ -355,11 +355,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (String(ANNEE) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
       + '</select>'
-      + '<button class="mini" id="tb-tuiles" title="Afficher ou masquer des tuiles">${T("⚙ Tuiles")}</button>'
+      + '<button class="mini" id="tb-tuiles" title="${T("Afficher ou masquer des tuiles")}">${T("⚙ Tuiles")}</button>'
       + ((MX && MX.ok)
           ? '<button class="mini' + (MX.actif ? ' att' : '') + '" id="tb-mx" '
-            + 'title="Empecher toute autre connexion pendant une maintenance">'
-            + (MX.actif ? '\u{1F512} Mode exclusif : ACTIF' : '\u{1F512} Mode exclusif\u2026')
+            + 'title="${T("Empecher toute autre connexion pendant une maintenance")}">'
+            + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}\u2026')
             + '</button>'
           : '')
       + '<span class="droite">' + esc(new Date().toLocaleDateString('fr-CA',

@@ -171,12 +171,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function barre(){
     return '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'ramassages' ? ' actif' : '') + '" data-onglet="ramassages"><span class="ic" aria-hidden="true">📅</span> Ramassages</button>'
-      + '<button class="mini' + (ONGLET === 'rapport' ? ' actif' : '') + '" data-onglet="rapport"><span class="ic">📊</span> Rapport transporteurs</button>'
+      + '<button class="mini' + (ONGLET === 'ramassages' ? ' actif' : '') + '" data-onglet="ramassages"><span class="ic" aria-hidden="true">📅</span> ${T("Ramassages")}</button>'
+      + '<button class="mini' + (ONGLET === 'rapport' ? ' actif' : '') + '" data-onglet="rapport"><span class="ic">📊</span> ${T("Rapport transporteurs")}</button>'
       + (ONGLET === 'ramassages'
           ? '<span class="droite"><button class="prim" id="rm-planifier" '
-            + 'title="Le choix des colis, de la date et du poids se fait dans la fenêtre principale">'
-            + '<span class="ic">📦</span> Planifier un ramassage</button></span>'
+            + 'title="${T("Le choix des colis, de la date et du poids se fait dans la fenêtre principale")}">'
+            + '<span class="ic">📦</span> ${T("Planifier un ramassage")}</button></span>'
           : '')
       + '</div>';
   }
@@ -237,7 +237,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).join('');
     h += '<div class="champs">'
       + '<div><div class="l">${T("Poids estimé par colis (kg)")}</div>'
-      + '<input type="number" id="rm-p-poids" aria-label="Poids estimé par colis en kilogrammes" value="0.5" min="0.05" step="0.05"></div>'
+      + '<input type="number" id="rm-p-poids" aria-label="${T("Poids estimé par colis en kilogrammes")}" value="0.5" min="0.05" step="0.05"></div>'
       + '<div><div class="l">${T("Endroit du ramassage")}</div>'
       + '<input type="text" id="rm-p-endroit" aria-label="${T("Endroit du ramassage")}" value="Porte principale"></div>'
       + '</div>'

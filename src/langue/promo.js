@@ -218,5 +218,10 @@ module.exports = {
   'affichés': 'shown',
   'étiquette': 'label',
   'imprimée': 'printed',
-  'envoyée': 'sent'
+  'envoyée': 'sent',
+
+  /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
+  'Largeur en pouces': 'Width in inches',
+  ' de planche': ' for the sheet',
+  'Rendu…': 'Rendering…',
 };
