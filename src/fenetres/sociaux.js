@@ -108,18 +108,50 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
+/* ══ L EPINGLE PINTEREST (#115, 2026-09-14) ═════════════════════════════════
+   Deux colonnes : ce qu on ecrit a gauche, ce que Pinterest montrera a droite.
+   ⚠ L APERCU GARDE SON RAPPORT 2:3 PAR aspect-ratio, ET PAS PAR UNE HAUTEUR EN
+   PIXELS. Pinterest ne montre en entier que ce format ; un apercu qui mentirait
+   d un cheveu sur la proportion ferait valider un cadrage qui sera rogne.
+   ⚠ AUCUNE OPACITE SUR UN TEXTE (lecon du 2026-09-14) : --tx2 est mesure. */
+.epg{display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:.9rem;align-items:start}
+@media (max-width:52rem){.epg{grid-template-columns:minmax(0,1fr)}}
+.epg .cg,.epg .cd{display:flex;flex-direction:column;gap:.5rem;min-width:0}
+.epia{border:1px solid var(--v16);border-radius:9px;background:var(--v05);padding:.55rem .65rem}
+.epia .tt{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+.epia .tt .ic{font-size:.85rem}
+.epia .tt b{font:700 .8rem/1.2 system-ui;flex:1 1 auto;min-width:0}
+.epia .tt button{font-size:.72rem;padding:.2rem .5rem;border-radius:7px}
+.epg .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:.35rem;margin-bottom:.35rem}
+.epg .plein{grid-column:1/-1}
+.epg label{font-size:.7rem;color:var(--tx2);display:block;margin-bottom:.1rem}
+.epg input,.epg select,.epg textarea{width:100%;font-size:.8rem;padding:.26rem .4rem}
+.epg textarea{font-family:inherit;min-height:3.2rem}
+.epg .pied{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.epg .pied .aide{color:var(--tx2);font-size:.72rem;margin-left:auto}
+.epg .cnt{font-size:.68rem;color:var(--tx2);text-align:right}
+.epg .cnt.trop{color:var(--tx-err)}
+.epvue{border:1px solid var(--v16);border-radius:9px;overflow:hidden;background:#F8F6F3;
+  aspect-ratio:2/3;display:flex;align-items:center;justify-content:center}
+.epvue img{display:block;width:100%;height:100%;object-fit:contain}
+.epvue .rien{font-size:.76rem;color:#4A4A4A;padding:1rem;text-align:center}
+.epinfo{font-size:.7rem;color:var(--tx2);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
 /**
  * Page complète de la fenêtre native « Réseaux sociaux ».
- * `onglet` = 'historique' ou 'patrons' pour ouvrir directement dessus.
+ * `onglet` = 'historique', 'patrons' ou 'epingle' pour ouvrir directement dessus.
  * ⚠ Sans ce paramètre, le garde-fou ne verrait QUE la file : il ne simule aucun
  * clic, et l'onglet des patrons — celui qui avait disparu — resterait dans
  * l'ombre exactement comme avant.
+ * ⚠ `epingle` y est entré le 2026-09-14 EN MÊME TEMPS QUE L'ONGLET, et pas
+ * après : un onglet qu'aucun banc n'ouvre est un onglet dont on n'apprend la
+ * panne que par lui.
  */
 function pageSociaux(onglet) {
-  const depart = (['historique', 'patrons'].indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'file';
+  const depart = (['historique', 'patrons', 'epingle'].indexOf(String(onglet || '')) >= 0)
+    ? String(onglet) : 'file';
   return `${TETE()}
 <title>${T("Réseaux sociaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -235,6 +267,309 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   var PAT = null;        // patrons:liste
   var EDIT = null;       // patron en cours d edition, ou 'nouveau'
   var PAT_ARME = '';     // suppression armee
+
+  /* ══ L EPINGLE PINTEREST (#115, 2026-09-14) ═══════════════════════════════
+     Sa demande, dans ses mots : << le plus important pinterest >>.
+
+     ⚠⚠ ET C EST LE RESEAU QUI RESSEMBLE LE MOINS AUX AUTRES. Une publication
+     Facebook est un texte avec une image en piece jointe ; une epingle est une
+     IMAGE, verticale, dont le texte fait partie du dessin. Pinterest est un
+     MOTEUR DE RECHERCHE, pas un fil : une epingle se retrouve six mois plus
+     tard par ses MOTS, pas par sa date. C est pourquoi cet onglet ecrit trois
+     choses a la fois — le texte peint dans l image, le titre, et une
+     description faite pour etre CHERCHEE.
+
+     ⚠⚠ LA FENETRE NE PEINT PAS L EPINGLE. Elle envoie un modele et recoit une
+     image : seule la page du site a l origine du stockage, et un canevas qui
+     dessinerait ici une photo de produit serait TEINT — l apercu marcherait,
+     l export echouerait, et l erreur parlerait de securite au lieu d image.
+     C est mot pour mot la lecon de l editeur d objets promotionnels.
+
+     ⚠⚠ TOUT CE QUE L IA ECRIT EST DANS UN CHAMP, PAS DANS UN BLOC DE TEXTE.
+     Sa demande vaut ici comme pour le courriel : << je dois etre en mesure
+     d apporter des modifications >>. Chaque champ redessine l apercu — on voit
+     donc ce qu on change pendant qu on le change, au lieu de deviner. */
+  var EPD = null;        // nl:epingleDonnees
+  var EP = null;         // le modele en cours : { produitId, sur, gros, sous, titre, description, alt, motsCles, lien }
+  var EPIMG = '';        // la derniere image rendue (data URL)
+  var EPMODE = 'simple'; // simple | avance
+  var EPOCC = false;     // un appel IA est en cours
+  var EPRENDU = false;   // un rendu est en cours
+  var EPETAT = null;     // nl:iaEtat — cle posee ? plafond ?
+  var EPMINUT = null;    // le rendu differe apres une frappe
+
+  function epVide(){
+    return { produitId: '', sur: '', gros: '', sous: '', titre: '', description: '',
+             alt: '', motsCles: [], lien: (EPD && EPD.siteUrl) || '' };
+  }
+  function epProduit(){
+    if (!EPD || !EP || !EP.produitId) return null;
+    var l = EPD.produits || [];
+    for (var i = 0; i < l.length; i++) { if (l[i].id === EP.produitId) return l[i]; }
+    return null;
+  }
+  /* Le modele envoye au rendu. ⚠ La PHOTO et le nom de l entreprise viennent du
+     coeur, pas de la fenetre : deux sources feraient deux epingles differentes
+     selon l ecran qui les a composees. */
+  function epModeleRendu(){
+    var p = epProduit();
+    return { photo: p ? p.photo : '', entreprise: (EPD && EPD.entreprise) || '',
+             sur: EP.sur, gros: EP.gros, sous: EP.sous };
+  }
+
+  function epDemanderRendu(){
+    if (!EP || EPRENDU) return;
+    EPRENDU = true;
+    appeler('nl:epingleRendu', [epModeleRendu()]).then(function(r){
+      EPRENDU = false;
+      if (r && r.ok) { EPIMG = r.image || ''; epMajVue(); }
+      else { EPIMG = ''; epMajVue(); if (r && r.motif) dire(epExpliquer(r), 'err'); }
+    });
+  }
+  /* ⚠ LE RENDU EST DIFFERE, PAS IMMEDIAT. Chaque frappe demanderait sinon une
+     image de 1000 x 1500 a la page principale — des dizaines d allers-retours
+     pour taper un titre, et un apercu qui saccade a chaque lettre. */
+  function epRenduBientot(){
+    if (EPMINUT) clearTimeout(EPMINUT);
+    EPMINUT = setTimeout(function(){ EPMINUT = null; epDemanderRendu(); }, 400);
+  }
+
+  function epMajVue(){
+    var z = document.getElementById('ep-vue');
+    if (!z) return;
+    z.innerHTML = EPIMG
+      ? '<img src="' + esc(EPIMG) + '" alt="${T("Aperçu de l’épingle")}">'
+      : '<div class="rien">' + (EPRENDU ? '${T("Rendu…")}' : '${T("Choisissez un produit, ou écrivez une accroche.")}') + '</div>';
+  }
+
+  function epChoix(id, lib, opts, val){
+    var o = opts.map(function(q){
+      return '<option value="' + esc(q[0]) + '"' + (q[0] === val ? ' selected' : '') + '>' + esc(q[1]) + '</option>';
+    }).join('');
+    return '<div><label for="' + id + '">' + esc(lib) + '</label>'
+      + '<select id="' + id + '">' + o + '</select></div>';
+  }
+  /* Un champ du modele, avec son compteur quand Pinterest impose une borne.
+     ⚠ LE COMPTEUR N EST PAS DU DECOR : Pinterest COUPE un titre a 100
+     caracteres et une description a 500. Sans le chiffre a l ecran, on
+     s en apercoit apres publication, sur l epingle des autres. */
+  function epChamp(cle, lib, max, longue){
+    var id = 'ep-' + cle, v = String((EP && EP[cle]) || '');
+    var n = v.length, trop = (max && n > max);
+    var corps2 = longue
+      ? '<textarea id="' + id + '" data-epc="' + cle + '">' + esc(v) + '</textarea>'
+      : '<input id="' + id + '" data-epc="' + cle + '" value="' + esc(v) + '">';
+    return '<div class="plein"><label for="' + id + '">' + esc(lib) + '</label>' + corps2
+      + (max ? '<div class="cnt' + (trop ? ' trop' : '') + '" id="' + id + '-n">'
+               + n + ' / ' + max + '</div>' : '')
+      + '</div>';
+  }
+
+  function vueEpingle(){
+    if (!EPD) return '<div class="carte"><div class="vide charge">${T("Lecture du catalogue…")}</div></div>';
+    if (!EP) EP = epVide();
+    var pret = !!(EPETAT && EPETAT.clePosee);
+    var h = '<div class="epg"><div class="cg">';
+
+    // ── Le panneau d ecriture IA ──────────────────────────────────────────
+    h += '<div class="epia" id="ep-ia"><div class="tt"><span class="ic">✶</span>'
+      + '<b>${T("Écrire l’épingle avec l’IA")}</b>'
+      + '<button class="mini' + (EPMODE === 'simple' ? ' actif' : '') + '" id="ep-simple">${T("Simple")}</button>'
+      + '<button class="mini' + (EPMODE === 'avance' ? ' actif' : '') + '" id="ep-avance">${T("Avancé")}</button>'
+      + '</div>';
+    if (EPETAT && !pret) {
+      h += '<div class="vide">${T("Aucune clé d’écriture IA n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.")}</div>';
+    } else {
+      var opts = [['', '${T("— aucun produit —")}']].concat((EPD.produits || []).map(function(p){
+        return [p.id, p.nom + (p.categorie ? ' · ' + p.categorie : '')];
+      }));
+      h += '<div class="g">' + epChoix('ep-prod', '${T("Produit mis en avant")}', opts, EP.produitId) + '</div>'
+        + '<div class="g"><div class="plein"><label for="ep-but">${T("Que faut-il annoncer ?")}</label>'
+        + '<input id="ep-but" placeholder="${T("ex. la coupe et la matière de ce manteau, pour l’automne")}"></div></div>';
+      if (EPMODE === 'avance') {
+        h += '<div class="g">'
+          + epChoix('ep-ton', '${T("Ton")}', [['chaleureux', '${T("Chaleureux")}'], ['elegant', '${T("Élégant")}'],
+              ['enjoue', '${T("Enjoué")}'], ['urgent', '${T("Pressant")}']], 'elegant')
+          + epChoix('ep-langue', '${T("Langue")}', [['fr', '${T("Français")}'], ['en', '${T("Anglais")}']], 'fr')
+          + '</div><div class="g"><div class="plein">'
+          + '<label for="ep-plus">${T("Consignes supplémentaires")}</label>'
+          + '<textarea id="ep-plus" rows="2" placeholder="${T("ex. viser la recherche « manteau de laine Québec »")}"></textarea>'
+          + '</div></div>';
+      }
+      h += '<div class="pied"><button class="mini prim" id="ep-go"' + (EPOCC ? ' disabled' : '') + '>'
+        + (EPOCC ? '${T("Rédaction…")}' : '${T("Rédiger l’épingle")}') + '</button>'
+        + '<span class="aide">' + esc(epSousBudget()) + '</span></div>';
+    }
+    h += '</div>';
+
+    // ── Le modele, entierement modifiable ─────────────────────────────────
+    h += '<div class="carte"><div class="g">'
+      + epChamp('sur', '${T("Sur-titre (dans l’image)")}', 0, false)
+      + epChamp('gros', '${T("Accroche (dans l’image)")}', 0, false)
+      + epChamp('sous', '${T("Précision (dans l’image)")}', 0, false)
+      + epChamp('titre', '${T("Titre de l’épingle")}', 100, false)
+      + epChamp('description', '${T("Description (elle sert à être trouvée)")}', 500, true)
+      + epChamp('alt', '${T("Texte de remplacement de l’image")}', 0, true)
+      + epChamp('lien', '${T("Lien de destination")}', 0, false)
+      + '</div>';
+    if ((EP.motsCles || []).length) {
+      h += '<div class="epinfo">${T("Mots de recherche : ")}' + esc(EP.motsCles.join(' · ')) + '</div>';
+    }
+    h += '</div></div>';
+
+    // ── L apercu, au format que Pinterest montre ──────────────────────────
+    h += '<div class="cd"><div class="epvue" id="ep-vue"></div>'
+      + '<div class="epinfo">1000 &times; 1500 ${T("px · format 2:3, le seul que Pinterest montre en entier")}</div>'
+      + '<div class="pied"><button class="mini prim" id="ep-enr"' + (EPIMG ? '' : ' disabled') + '>'
+      + '${T("Enregistrer l’épingle")}</button>'
+      + '<button class="mini" id="ep-copier">${T("Copier le texte")}</button></div>'
+      + '<div class="pied"><button class="mini" id="ep-dossier">${T("Ouvrir le dossier des exports")}</button></div>'
+      + '<textarea id="ep-presse" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;top:0;width:1px;height:1px"></textarea>'
+      + '</div></div>';
+    return h;
+  }
+
+  function epSousBudget(){
+    if (!EPETAT || !EPETAT.budget) return '';
+    var p = Number(EPETAT.budget.plafond || 0), d = Number(EPETAT.budget.depense || 0);
+    if (!p) return szArgent(d) + ' ${T(" ce mois-ci (aucun plafond)")}';
+    return szArgent(d) + ' ${T(" sur ")}' + szArgent(p) + ' ${T(" ce mois-ci")}';
+  }
+
+  function epExpliquer(r){
+    var m = (r && (r.motif || r.error)) || '';
+    if (m === 'budget') return r.error || '${T("Le plafond mensuel d’écriture IA est atteint. Il se règle dans Configuration ▸ Clés API.")}';
+    if (m === 'sans_but') return '${T("Dites d’abord ce qu’il faut annoncer.")}';
+    if (m === 'epingle_vide') return '${T("Le modèle n’a produit ni titre ni accroche. Reformulez la demande.")}';
+    if (m === 'canevas_teint') return r.detail || '${T("Cette photo ne peut pas être relue pour l’export.")}';
+    if (m === 'json_illisible') return '${T("La réponse du modèle n’a pas pu être lue. Réessayez.")}';
+    if (m === 'lecture_seule') return '${T("Vous n’avez pas le droit de composer des publications.")}';
+    if (m === 'injoignable') return '${T("La passerelle d’écriture IA est injoignable.")}';
+    return (r && r.error) || MOTIFS[m] || '${T("La rédaction a échoué.")}';
+  }
+
+  function epRediger(){
+    var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var but = v('ep-but').trim();
+    if (!but) { dire('${T("Dites d’abord ce qu’il faut annoncer.")}', 'att'); return; }
+    var p = epProduit();
+    var d = { but: but, ton: v('ep-ton') || 'elegant', langue: v('ep-langue') || 'fr',
+      consignesLibres: v('ep-plus') || '',
+      produit: p ? { nom: p.nom, categorie: p.categorie, prix: p.prix } : null };
+    EPOCC = true; dessiner();
+    dire('${T("Rédaction en cours — cela prend une dizaine de secondes.")}');
+    appeler('nl:iaEpingle', [d]).then(function(r){
+      EPOCC = false;
+      if (!r || !r.ok) { dessiner(); dire(epExpliquer(r), 'err'); return; }
+      if (r.budget) { EPETAT = EPETAT || {}; EPETAT.budget = r.budget; EPETAT.clePosee = true; }
+      var im = r.image || {};
+      EP.sur = im.sur || ''; EP.gros = im.gros || ''; EP.sous = im.sous || '';
+      EP.titre = r.titre || ''; EP.description = r.description || '';
+      EP.alt = r.altTexte || ''; EP.motsCles = r.motsCles || [];
+      /* ⚠ LE LIEN N EST PAS ECRIT PAR L IA. Une adresse inventee par un modele
+         menerait quelque part — et sur Pinterest, ou l epingle vit des annees,
+         personne ne verifierait jamais. Il vient du catalogue, ou du site. */
+      if (p && p.lien) EP.lien = p.lien;
+      else if (!EP.lien) EP.lien = EPD.siteUrl || '';
+      dessiner();
+      epDemanderRendu();
+      dire('${T("Épingle rédigée : ")}' + (r.cout ? szArgent(r.cout) : '${T("prête")}'), 'bon');
+    });
+  }
+
+  function epEnregistrer(){
+    if (!EPIMG) { dire('${T("Aucune image à enregistrer.")}', 'att'); return; }
+    /* ⚠⚠ L IMAGE ET SON TEXTE PARTENT ENSEMBLE, EN DEUX FICHIERS D UN SEUL
+       GESTE. Une epingle sans sa description est a moitie faite : il faudrait
+       revenir la recopier a la main au moment de la deposer sur Pinterest, et
+       c est exactement la ou l on colle n importe quoi pour en finir. */
+    var base = 'epingle-' + new Date().toISOString().slice(0, 10) + '-'
+      + String(Date.now()).slice(-5);
+    var texte = [EP.titre, '', EP.description, '',
+      '${T("Lien : ")}' + EP.lien,
+      '${T("Texte de remplacement : ")}' + EP.alt,
+      (EP.motsCles || []).length ? ('${T("Mots de recherche : ")}' + EP.motsCles.join(', ')) : ''
+    ].filter(function(x){ return x !== ''; }).join('\\n');
+    P.enregistrerExport(base + '.png', EPIMG).then(function(r1){
+      if (!r1 || !r1.ok) { dire('${T("L’image n’a pas pu être enregistrée.")}', 'err'); return; }
+      P.enregistrerExport(base + '.txt', texte).then(function(r2){
+        dire((r2 && r2.ok)
+          ? ('${T("Enregistré : ")}' + esc(base) + '${T(".png et .txt")}')
+          : '${T("Image enregistrée, mais pas son texte.")}', (r2 && r2.ok) ? 'bon' : 'att');
+      });
+    });
+  }
+
+  function epCopier(){
+    var ta = document.getElementById('ep-presse');
+    if (!ta) return;
+    ta.value = [EP.titre, '', EP.description, '', EP.lien].join('\\n');
+    ta.select();
+    // execCommand ET NON navigator.clipboard : la fenetre est chargee en data:,
+    // son origine est nulle, donc l API moderne du presse-papiers y est refusee.
+    var fait = false;
+    try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
+    dire(fait ? '${T("Titre, description et lien copiés.")}' : '${T("Copie refusée — utilisez Ctrl+C.")}',
+      fait ? 'bon' : 'att');
+  }
+
+  function brancherEpingle(){
+    var b;
+    b = document.getElementById('ep-simple');
+    if (b) b.onclick = function(){ EPMODE = 'simple'; dessiner(); };
+    b = document.getElementById('ep-avance');
+    if (b) b.onclick = function(){ EPMODE = 'avance'; dessiner(); };
+    b = document.getElementById('ep-go');
+    if (b) b.onclick = epRediger;
+    b = document.getElementById('ep-enr');
+    if (b) b.onclick = epEnregistrer;
+    b = document.getElementById('ep-copier');
+    if (b) b.onclick = epCopier;
+    b = document.getElementById('ep-dossier');
+    if (b) b.onclick = function(){ P.ouvrirDossierExports(); };
+    var sel = document.getElementById('ep-prod');
+    if (sel) sel.onchange = function(){
+      EP.produitId = sel.value;
+      var p = epProduit();
+      if (p && p.lien) { EP.lien = p.lien; var li = document.getElementById('ep-lien'); if (li) li.value = EP.lien; }
+      epDemanderRendu();
+    };
+    /* ⚠ ON NE REDESSINE PAS LE FORMULAIRE A CHAQUE FRAPPE : le champ perdrait
+       le curseur au milieu d un mot. On met a jour le modele, le compteur et
+       l apercu — trois choses qui ne touchent pas le champ ou l on tape. */
+    var zone = document.getElementById('corps');
+    (zone ? zone.querySelectorAll('[data-epc]') : []).forEach(function(el){
+      el.oninput = function(){
+        var cle = el.getAttribute('data-epc');
+        EP[cle] = el.value;
+        var cnt = document.getElementById('ep-' + cle + '-n');
+        if (cnt) {
+          var max = (cle === 'titre') ? 100 : (cle === 'description' ? 500 : 0);
+          if (max) {
+            cnt.textContent = el.value.length + ' / ' + max;
+            cnt.className = 'cnt' + (el.value.length > max ? ' trop' : '');
+          }
+        }
+        if (cle === 'sur' || cle === 'gros' || cle === 'sous') epRenduBientot();
+      };
+    });
+    epMajVue();
+  }
+
+  function chargerEpingle(){
+    if (EPD) return;
+    appeler('nl:epingleDonnees', []).then(function(r){
+      EPD = (r && r.ok) ? r : { produits: [], siteUrl: '', entreprise: '' };
+      if (!EP) EP = epVide();
+      if (ONGLET === 'epingle') dessiner();
+    });
+    if (!EPETAT) {
+      appeler('nl:iaEtat', []).then(function(r){
+        EPETAT = (r && r.ok) ? r : { clePosee: false, budget: {} };
+        if (ONGLET === 'epingle') dessiner();
+      });
+    }
+  }
 
   function vuePatrons(){
     if (!PAT) return '<div class="carte"><div class="vide charge">${T("Lecture des patrons…")}</div></div>';
@@ -427,6 +762,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + (PAT && (PAT.patrons || []).length
           ? '<span class="n">' + PAT.patrons.filter(function(p){ return p.actif; }).length + '</span>' : '')
       + '</button>'
+      /* ⚠ L EPINGLE EST UN ONGLET, PAS UNE FENETRE A PART. Elle vit ou vivent
+         deja les publications : on compose, on regarde la file juste a cote.
+         Une fenetre separee aurait demande son entree de menu, son droit et son
+         lexique — pour le meme sujet, a un clic d ici. */
+      + '<button class="mini' + (ONGLET === 'epingle' ? ' actif' : '') + '" data-onglet="epingle">'
+      + '${T("Épingle Pinterest")}</button>'
       + '<div class="droite"><span class="dt">${T("Comptes et jetons des réseaux : ")}'
       + '${T("Configuration → Communications → Réseaux sociaux")}</span>';
     if (ONGLET === 'file' && D.peutModifier && (D.file || []).length) {
@@ -441,6 +782,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
 
     if (ONGLET === 'patrons') {
       h += vuePatrons();
+    } else if (ONGLET === 'epingle') {
+      h += vueEpingle();
     } else {
       var pile = ONGLET === 'file' ? (D.file || []) : (D.historique || []);
       h += '<div class="carte">';
@@ -455,6 +798,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
 
     corps.innerHTML = h;
     if (ONGLET === 'patrons') brancherPatrons();
+    if (ONGLET === 'epingle') brancherEpingle();
 
     var bt = document.getElementById('so-tout');
     if (bt) bt.onclick = function(){
@@ -501,7 +845,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
 
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; PAT_ARME = ''; EDIT = null;
-      dessiner(); if (ONGLET === 'patrons') chargerPatrons(); return; }
+      dessiner();
+      if (ONGLET === 'patrons') chargerPatrons();
+      if (ONGLET === 'epingle') chargerEpingle();
+      return; }
 
     var pm = t.closest('[data-modifier]');
     if (pm) { EDIT = pm.getAttribute('data-modifier'); dessiner(); szBrouillonProposer(); return; }
@@ -615,6 +962,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       D = r;
       dessiner();
       if (ONGLET === 'patrons') chargerPatrons();
+      if (ONGLET === 'epingle') chargerEpingle();
     });
   }
 

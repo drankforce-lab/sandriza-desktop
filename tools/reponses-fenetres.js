@@ -4446,6 +4446,52 @@ const JEU = {
               declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
               reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
           ] }, { peutEcrire: false }) } },
+    /* ══ L EPINGLE PINTEREST (#115, 2026-09-14) ═══════════════════════════════
+       ⚠ TROIS CAS, ET LE TROISIEME EST CELUI QUI COMPTE. L onglet se dessine
+       avant d avoir sa cle, avec sa cle, et une fois REDIGE — c est le dernier
+       qui remplit les champs, pose l apercu et active le bouton d export. Un
+       banc qui ne verrait que la carte vide validerait un onglet dont la moitie
+       du code ne s execute jamais. */
+    { nom: 'epingle sans cle', id: 'epingle', reponses: { identite: IDENTITE,
+      'sociaux:liste': { ok: true, peutModifier: true, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
+        reseauxActifs: [], file: [], historique: [] },
+      'nl:iaEtat': { ok: true, clePosee: false, budget: {}, modeles: [] },
+      'nl:epingleDonnees': { ok: true, peutModifier: true, siteUrl: 'https://www.sandriza.com/',
+        entreprise: 'SANDRIZA', format: { largeur: 1000, hauteur: 1500 },
+        produits: [{ id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
+          photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' }] } } },
+    { nom: 'epingle vierge', id: 'epingle', reponses: { identite: IDENTITE,
+      'sociaux:liste': { ok: true, peutModifier: true, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
+        reseauxActifs: [], file: [], historique: [] },
+      'nl:iaEtat': { ok: true, clePosee: true, budget: { plafond: 25, depense: 3.4 },
+        modeles: ['claude-sonnet-5'] },
+      'nl:epingleDonnees': { ok: true, peutModifier: true, siteUrl: 'https://www.sandriza.com/',
+        entreprise: 'SANDRIZA', format: { largeur: 1000, hauteur: 1500 },
+        produits: [
+          { id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
+            photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' },
+          { id: 'p2', nom: 'Robe Solstice', categorie: 'robes', prix: 189,
+            photo: '', lien: 'https://www.sandriza.com/#product?id=p2' }] },
+      'nl:epingleRendu': { ok: true, largeur: 1000, hauteur: 1500, photoPosee: false,
+        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' } } },
+    { nom: 'epingle redigee', id: 'epingle', reponses: { identite: IDENTITE,
+      'sociaux:liste': { ok: true, peutModifier: true, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
+        reseauxActifs: [], file: [], historique: [] },
+      'nl:iaEtat': { ok: true, clePosee: true, budget: { plafond: 25, depense: 3.4 },
+        modeles: ['claude-sonnet-5'] },
+      'nl:epingleDonnees': { ok: true, peutModifier: true, siteUrl: 'https://www.sandriza.com/',
+        entreprise: 'SANDRIZA', format: { largeur: 1000, hauteur: 1500 },
+        produits: [{ id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
+          photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' }] },
+      'nl:iaEpingle': { ok: true, titre: 'Le manteau de laine qui traverse l automne',
+        description: 'Un manteau de laine coupe droite, col montant, pense pour les matins frais '
+          + 'de septembre a novembre. Se porte sur une robe comme sur un jean.',
+        altTexte: 'Un manteau de laine beige porte ouvert sur une robe sombre.',
+        motsCles: ['manteau de laine', 'mode automne quebec', 'manteau beige femme'],
+        image: { sur: 'Nouveaute', gros: 'La laine qui tient l automne', sous: 'Coupe droite, col montant' },
+        cout: 0.014, budget: { plafond: 25, depense: 3.414 }, modele: 'claude-sonnet-5', ms: 4200 },
+      'nl:epingleRendu': { ok: true, largeur: 1000, hauteur: 1500, photoPosee: true,
+        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' } } },
     {
       // ⚠ FORME REELLE de sociaux:liste (coeur Social._sociauxDonnees).
       nom: 'file et historique',

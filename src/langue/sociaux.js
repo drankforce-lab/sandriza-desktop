@@ -161,5 +161,88 @@ module.exports = {
   'exemple :': 'example:',
   'aucun produit actif pour l’exemple': 'no active product for the example',
   'aucun réseau — ce patron ne publiera nulle part':
-    'no network — this template will post nowhere'
+    'no network — this template will post nowhere',
+
+  /* ══ L EPINGLE PINTEREST (#115, 2026-09-14) ═══════════════════════════════
+     ⚠ << Épingle >> se dit << Pin >> : c est le mot de Pinterest lui-meme, pas
+     une traduction libre. Un anglophone qui lirait << Pinterest clip >> ne
+     reconnaitrait pas l objet qu il manipule tous les jours.
+     ⚠ << Description (elle sert à être trouvée) >> garde sa parenthese dans les
+     deux langues, et ce n est pas du bavardage : c est la seule phrase de
+     l ecran qui dit POURQUOI cette description n est pas un texte de magazine.
+     Pinterest est un moteur de recherche ; qui l ignore ecrit joli et n est
+     jamais trouve.
+     ⚠ Les DIMENSIONS ne se traduisent pas (1000 x 1500), et << px >> non plus. */
+  'Épingle Pinterest': 'Pinterest pin',
+  'Écrire l’épingle avec l’IA': 'Write the pin with AI',
+  'Simple': 'Simple',
+  'Avancé': 'Advanced',
+  'Lecture du catalogue…': 'Reading the catalogue…',
+  'Produit mis en avant': 'Featured product',
+  '— aucun produit —': '— no product —',
+  'Que faut-il annoncer ?': 'What should it announce?',
+  'ex. la coupe et la matière de ce manteau, pour l’automne':
+    'e.g. the cut and the fabric of this coat, for the fall',
+  'Ton': 'Tone',
+  'Chaleureux': 'Warm',
+  'Élégant': 'Elegant',
+  'Enjoué': 'Playful',
+  'Pressant': 'Urgent',
+  'Langue': 'Language',
+  'Français': 'French',
+  'Anglais': 'English',
+  'Consignes supplémentaires': 'Extra instructions',
+  'ex. viser la recherche « manteau de laine Québec »':
+    'e.g. aim for the search “wool coat Quebec”',
+  'Rédiger l’épingle': 'Write the pin',
+  'Rédaction…': 'Writing…',
+  'Rédaction en cours — cela prend une dizaine de secondes.':
+    'Writing under way — this takes about ten seconds.',
+  'Épingle rédigée : ': 'Pin written: ',
+  'prête': 'ready',
+  ' ce mois-ci': ' this month',
+  ' ce mois-ci (aucun plafond)': ' this month (no ceiling)',
+
+  'Sur-titre (dans l’image)': 'Kicker (in the image)',
+  'Accroche (dans l’image)': 'Headline (in the image)',
+  'Précision (dans l’image)': 'Detail (in the image)',
+  'Titre de l’épingle': 'Pin title',
+  'Description (elle sert à être trouvée)': 'Description (it is what gets you found)',
+  'Texte de remplacement de l’image': 'Image alternative text',
+  'Lien de destination': 'Destination link',
+  'Mots de recherche : ': 'Search words: ',
+
+  'Aperçu de l’épingle': 'Pin preview',
+  'Rendu…': 'Rendering…',
+  'Choisissez un produit, ou écrivez une accroche.': 'Choose a product, or write a headline.',
+  'px · format 2:3, le seul que Pinterest montre en entier':
+    'px · 2:3, the only format Pinterest shows in full',
+  'Enregistrer l’épingle': 'Save the pin',
+  'Copier le texte': 'Copy the text',
+  'Ouvrir le dossier des exports': 'Open the exports folder',
+  'Enregistré : ': 'Saved: ',
+  '.png et .txt': '.png and .txt',
+  'Lien : ': 'Link: ',
+  'Texte de remplacement : ': 'Alternative text: ',
+  'Titre, description et lien copiés.': 'Title, description and link copied.',
+  'Copie refusée — utilisez Ctrl+C.': 'Copy refused — use Ctrl+C.',
+  'Aucune image à enregistrer.': 'No image to save.',
+  'L’image n’a pas pu être enregistrée.': 'The image could not be saved.',
+  'Image enregistrée, mais pas son texte.': 'Image saved, but not its text.',
+
+  'Dites d’abord ce qu’il faut annoncer.': 'First say what it should announce.',
+  'Aucune clé d’écriture IA n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.':
+    'No AI writing key is saved. It is set in Configuration ▸ API keys.',
+  'Le plafond mensuel d’écriture IA est atteint. Il se règle dans Configuration ▸ Clés API.':
+    'The monthly AI writing ceiling has been reached. It is set in Configuration ▸ API keys.',
+  'Le modèle n’a produit ni titre ni accroche. Reformulez la demande.':
+    'The model produced neither a title nor a headline. Reword the request.',
+  'Cette photo ne peut pas être relue pour l’export.':
+    'This photo cannot be read back for the export.',
+  'La réponse du modèle n’a pas pu être lue. Réessayez.':
+    'The model’s answer could not be read. Try again.',
+  'Vous n’avez pas le droit de composer des publications.':
+    'You are not allowed to compose posts.',
+  'La passerelle d’écriture IA est injoignable.': 'The AI writing gateway cannot be reached.',
+  'La rédaction a échoué.': 'The writing failed.'
 };
