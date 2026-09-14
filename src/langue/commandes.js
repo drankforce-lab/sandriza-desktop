@@ -275,5 +275,16 @@ module.exports = {
   'par page': 'per page',
   '· reste': '· left',
   'en traitement par': 'being edited by',
-  'de frais de service retenus': 'of service fees kept'
+  'de frais de service retenus': 'of service fees kept',
+
+  /* ── LE BOUTON DE LA CORBEILLE (#113, 2026-09-14) ───────────────────────────
+     ⚠ Sa demande : pas d entree de menu, un petit bouton ici. C est donc la
+     SEULE porte de cet ecran — un libelle vague lui aurait coute son unique
+     chance d etre trouve.
+     ⚠ << Recycle bin >> et non << Trash >> : c est un endroit d ou l on
+     RESSORT. << Trash >> dit ce qui est jete ; toute la raison d etre de cet
+     ecran est qu on peut reprendre ce qui y est. */
+  'Corbeille': 'Recycle bin',
+  'Voir les commandes supprimées et les remettre en place':
+    'View deleted orders and restore them'
 };

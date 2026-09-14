@@ -5813,7 +5813,14 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
 // NATIF : c est la SEULE porte d import d une image, et l editeur doit pouvoir
 // l ouvrir. Sans elle, son bouton << Importer >> serait muet — et un bouton
 // muet se lit comme une fonction cassee, pas comme une fonction absente.
-const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents', 'config-logotheque'];
+/* ⚠ 'corbeille' Y EST DEPUIS LE 2026-09-14, ET C EST SA SEULE PORTE. Il a
+   demande de retirer l entree de menu : << met pas un lien dans les menu pour
+   la corbeille, juste mettre un petit bouton dans la page des commande
+   directement >>. La corbeille s ouvre donc UNIQUEMENT depuis la fenetre
+   Commandes, par ce canal — c est la bonne place : on la cherche au moment ou
+   l on vient de comprendre qu on a supprime la mauvaise ligne, sans quitter des
+   yeux l ecran d ou l on vient. */
+const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;

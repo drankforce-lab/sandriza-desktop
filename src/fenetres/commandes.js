@@ -79,6 +79,12 @@ button.traite{background:#78350f;color:#fde68a;border-color:#b45309;
   cursor:not-allowed;opacity:1}
 
 .filtres{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;margin-top:.45rem}
+/* ⚠ LE BOUTON DE LA CORBEILLE EST POUSSE A DROITE, ET DISCRET (#113). Sa
+   demande : << juste mettre un petit bouton dans la page des commande >>. Il
+   n est pas un filtre — le mettre au milieu des jetons de statut le ferait lire
+   comme une vue de plus, alors qu il ouvre un AUTRE ecran. */
+.filtres .corb{margin-left:auto;font-size:.74rem;padding:.1rem .5rem;color:var(--tx2)}
+.filtres .corb:hover:not(:disabled){color:var(--tx)}
 .filtres .lbl{font-size:.72rem;color:var(--tx2)}
 .filtres select{width:auto}
 .jetons{display:flex;gap:.28rem;flex-wrap:wrap}
@@ -364,6 +370,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           ? ' · ' + d.prioritairesNonTraitees + ' '
             + (d.prioritairesNonTraitees > 1 ? '${T("non traitées")}' : '${T("non traitée")}')
           : '') + '</button>';
+    /* ⚠⚠ LA CORBEILLE S OUVRE D ICI, ET DE NULLE PART AILLEURS (#113, sa demande
+       du 2026-09-14 : << met pas un lien dans les menu pour la corbeille, juste
+       mettre un petit bouton dans la page des commande directement >>).
+       ⚠ C EST LA BONNE PLACE, et pas seulement parce qu il l a demandee : on ne
+       cherche pas une corbeille << quelque part >>, on la cherche A L INSTANT ou
+       l on vient de comprendre qu on a supprime la mauvaise ligne — donc sans
+       quitter des yeux la liste d ou l on vient.
+       ⚠ SEULEMENT DANS << Commandes >>, pas dans << Expeditions >> : cette
+       fenetre sert les deux listes, et on ne supprime pas une commande depuis
+       l ecran d expedition. Un bouton qui ne sert jamais la ou il est finit par
+       ne plus etre lu la ou il sert.
+       ⚠ IL PARAIT POUR QUICONQUE VOIT LES COMMANDES. Remettre en place et purger
+       exigent orders:delete, et ces gardes-la sont dans le pont ; masquer le
+       bouton a qui ne peut pas restaurer l empecherait de CONSTATER qu une
+       commande a ete supprimee — ce qui est precisement ce qu on veut pouvoir
+       voir. La fenetre le dit alors en clair. */
+    if (!expedition) {
+      h += '<button class="mini corb" id="c-corbeille" '
+        + 'title="${T("Voir les commandes supprimées et les remettre en place")}">'
+        + '${T("Corbeille")}</button>';
+    }
     if (expedition && CTX && (CTX.annees || []).length) {
       h += '<span class="lbl" style="margin-left:.4rem">${T("Année :")}</span><select id="f-annee" aria-label="${T("Année")}">'
         + '<option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>${T("Toutes")}</option>'
@@ -1025,6 +1052,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     var an = document.getElementById('f-annee');
     if (an) an.onchange = function(){ F.annee = this.value; F.page = 0; charger(); };
+    /* ⚠ ON PASSE PAR << ouvrirModule >> ET NON PAR UNE OUVERTURE DIRECTE : une
+       fenetre ne choisit pas ce qu elle ouvre dans l application, elle le NOMME,
+       et le processus principal filtre le nom contre sa liste blanche (voir
+       _MODULES_OUVRABLES dans main.js). Meme chemin que le bouton
+       << Verrous >> des Journaux. */
+    var cb = document.getElementById('c-corbeille');
+    if (cb) cb.onclick = function(){
+      if (P && P.ouvrirModule) P.ouvrirModule('corbeille');
+    };
     var pt = document.getElementById('pg-taille');
     if (pt) pt.onchange = function(){
       if (this.value === 'auto') { F.auto = true; F.page = 0; dessiner(); listeAutoAjuste(); }

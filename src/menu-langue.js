@@ -103,10 +103,12 @@ const MENU_APP_EN = {
   'Clés API': 'API keys',
   'Collections': 'Collections',
   'Commandes': 'Orders',
-  /* ⚠ « Recycle bin » et non « Trash » : c est un endroit d où l on RESSORT.
-     « Trash » dit ce qui est jeté, « recycle bin » dit ce qu on peut reprendre —
-     et c est toute la raison d être de cet écran (#113). */
-  'Corbeille des commandes': 'Order recycle bin',
+  /* ⚠ PAS D ENTREE << Corbeille des commandes >> ICI. Elle a paru une heure au
+     menu le 2026-09-14 ; il a demande de l en retirer et de joindre l ecran par
+     un bouton de la fenetre Commandes. Le titre de la fenetre, lui, est traduit
+     dans src/langue/corbeille.js — cette table-ci ne sert qu aux INTITULES DE
+     LA BARRE, et une cle que plus aucun intitule ne demande est refusee par
+     `banc-menu-langue`, a juste titre. */
   'Communications': 'Communications',
   'Comptabilité': 'Accounting',
   'Configuration': 'Configuration',
