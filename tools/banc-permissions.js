@@ -56,6 +56,9 @@ const _nu = (s) => s
 const staff = _nu(lire('staff.js'));
 const appbar = _nu(lire('appbar.js'));
 const admin = _nu(lire('admin.js'));
+/* ⚠ AJOUTÉ LE 2026-09-14 : le PONT est la QUATRIÈME liste, et c'était le trou.
+   Voir l'étape 5 plus bas. */
+const pont = _nu(lire('pont.js'));
 
 /* ── 1. LE MODÈLE : les modules déclarés et leurs actions ─────────────────── */
 const bloc = /const\s+PERMISSION_DEFS\s*=\s*\{([\s\S]*?)\n\s*\};/.exec(staff);
@@ -123,6 +126,55 @@ const fautes = [];
     if (JETONS.has(j)) continue;
     fautes.push('une garde exige « ' + j + " », qui n'existe pas au modèle — "
       + 'personne ne peut l’obtenir, donc cet écran refuse TOUJOURS');
+  }
+}
+
+/* ── 3 bis. LE PONT — LA QUATRIÈME LISTE, ET LE TROU DU 2026-09-14 ─────────
+   ⚠⚠⚠ CE BANC A ÉTÉ VERT SUR UNE PANNE COMPLÈTE, ET IL FAUT DIRE POURQUOI.
+   Le 2026-09-13 (#103), `config` a été découpé en cinq. Le modèle a suivi, le
+   menu a suivi, `_hp(…)` d'admin.js a suivi — mais les 42 gardes de `pont.js`,
+   que ce banc NE LISAIT PAS, sont restées sur `_droit('config')`.
+
+   Or `config` n'existe plus au modèle. `hasPermission` répondait donc FAUX à
+   TOUT LE MONDE, sauf au super-administrateur (qui sort avant toute lecture) :
+   une vingtaine d'écrans de configuration s'ouvraient sur un refus, et le seul
+   compte qui ne le voyait pas était celui qui fait les essais. Découvert le
+   2026-09-14 en reliant chaque entrée de menu au cœur que sa fenêtre appelle.
+
+   ⚠ Le pont est une garde AU MÊME TITRE que `_hp(…)` : c'est lui qui refuse
+   pour toutes les fenêtres natives. L'oublier, c'est ne garder que la moitié
+   des refus — et la moitié qu'on oublie est celle qui casse en silence. */
+{
+  const vus = new Set();
+  const rx = /\b_droit\(\s*'([^']+)'/g;
+  let m;
+  while ((m = rx.exec(pont))) vus.add(m[1]);
+  for (const j of vus) {
+    if (JETONS.has(j)) continue;
+    fautes.push('le PONT exige « ' + j + " », qui n'existe pas au modèle — "
+      + 'personne ne peut l’obtenir, donc cette fenêtre refuse TOUJOURS '
+      + '(sauf au super-administrateur, le seul qui ne le verra jamais)');
+  }
+}
+
+/* ── 3 ter. LE DROIT PASSÉ EN ARGUMENT, dans le menu ──────────────────────
+   ⚠ `S(libelle, section, perm)` et `X(libelle, expr, perm)` passent le droit en
+   TROISIÈME ARGUMENT : l'étape 2 ne connaît que `perm:` et les sautait toutes.
+   « Traitements d'image (Fal.ai) » a gardé `'config'` un jour de trop pour cette
+   seule raison — et un jeton inconnu est traité comme ACCORDÉ, donc l'entrée
+   paraissait POUR TOUT LE MONDE.
+   ⚠ C'est le défaut du 2026-09-13 (le libellé en argument), sur un autre champ :
+   la même faute revient dès qu'une valeur cesse d'être nommée. */
+{
+  const vus = new Set();
+  const rx = /\b[SX]\(\s*'[^']*'\s*,\s*'[^']*'\s*,\s*'([^']+)'/g;
+  let m;
+  while ((m = rx.exec(appbar))) vus.add(m[1]);
+  for (const j of vus) {
+    if (JETONS.has(j)) continue;
+    fautes.push('le menu masque sur « ' + j + " » (droit passé en ARGUMENT), "
+      + "qui n'existe pas au modèle — une permission inconnue est traitée comme "
+      + 'ACCORDÉE : l’entrée paraît pour tout le monde');
   }
 }
 

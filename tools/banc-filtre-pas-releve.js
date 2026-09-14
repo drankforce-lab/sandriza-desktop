@@ -91,6 +91,25 @@ dire(gardee('baisse'),
   'la DETTE QUI RECULE ne se conclut pas sous filtre',
   'un compteur plus bas sous filtre dit qu on a peint moins, pas qu on a corrige');
 
+/* ── 2 bis. ⚠⚠ ET LES THEMES — LA DIMENSION QUE LE FILTRE NE COUVRE PAS.
+   Pose le 2026-09-14. Le banc declare lui-meme les six THEMES comme son angle
+   mort n. 5, puis concluait << plus rencontres NULLE PART dans un releve
+   COMPLET >> sur un passage qui n en avait peint AUCUN. Les deux gardes du
+   dessus n y pouvaient rien : un thème non demande ne fait echouer aucun rendu
+   (donc `manquants` reste a zero) et n est pas un filtre de fenetre.
+   ⚠ Un thème ne repeint pas qu une teinte d accent, il change les surfaces :
+   une paire eteinte en jour/nuit peut etre la seule chose qui garde un texte
+   lisible en `ardoise`. La ligne retiree, plus rien ne le garde — et cela ne se
+   voit pas le jour meme. */
+/* ⚠ LA BORNE DE MOT N EST PAS UN DETAIL : sans `\b`, `!TOUS_THEMES` correspond
+   aussi a `!TOUS_THEMES_AUTRE_CHOSE`. La panne provoquee du 2026-09-14 est
+   passee VERTE la premiere fois pour cette seule raison — un garde qui accepte
+   un prefixe ne garde pas le nom qu il croit garder. */
+dire(/eteintes\.length && !TOUS_THEMES\b/.test(nu),
+  'la DETTE ETEINTE ne se conclut pas sans les THEMES',
+  'sans ce garde, il propose de retirer des lignes qui gardent une couleur dans '
+  + 'un des six themes, jamais peints par defaut');
+
 const iVerdict = nu.indexOf('if (mal === 0)');
 dire(iVerdict > 0 && nu.indexOf('FILTRE_FENETRE', iVerdict) > 0,
   'le verdict final NOMME le filtre',

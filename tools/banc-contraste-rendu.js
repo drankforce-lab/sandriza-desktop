@@ -975,9 +975,32 @@ function rapport(lignes, quoi, adresses, sansJeu, echecs, lotsMorts, budgetDepas
     console.log('   des fenêtres. Une clé « plus rencontrée » est ici une clé NON CHERCHÉE.');
     console.log('   → relancer SANS filtre avant de toucher contraste-rendu-declare.js.');
     console.log('');
+  } else if (eteintes.length && !TOUS_THEMES) {
+    /* ⚠⚠ LA TROISIÈME GARDE, POSÉE LE 2026-09-14 — ET LE BANC SE CONTREDISAIT.
+       Il déclare lui-même les six THÈMES comme son angle mort n° 5, puis
+       concluait « plus rencontrés NULLE PART dans un relevé COMPLET » sur un
+       passage qui n'en avait mesuré AUCUN. Les deux gardes du dessus attrapent
+       un rendu qui a ÉCHOUÉ et un filtre de fenêtre ; un thème non demandé
+       n'est ni l'un ni l'autre — il ne fait rien échouer, il n'est simplement
+       jamais peint.
+       ⚠ Un thème ne repeint pas qu'une teinte d'accent : il change les surfaces.
+       Une paire éteinte en jour/nuit peut très bien être la seule chose qui
+       garde un texte lisible en `ardoise`. Retirer sa ligne ne se voit pas le
+       jour même — elle revient en rouge la fois d'après, sur une construction
+       qui n'a rien à voir.
+       ⚠ C'est MOT POUR MOT la faute que les deux gardes du dessus décrivent :
+       « une conclusion juste appuyée sur une preuve qui ne prouvait rien ».
+       Elle avait seulement une dimension de plus. */
+    console.log(`—— ${eteintes.length} ligne(s) ne sont plus rencontrées, MAIS LES THÈMES N'ONT PAS ÉTÉ MESURÉS ——`);
+    console.log('   Ce passage n\'a peint que jour/nuit. Une clé « plus rencontrée » est ici');
+    console.log('   une clé NON CHERCHÉE dans les six thèmes — et un thème change les surfaces,');
+    console.log('   pas seulement une teinte d\'accent.');
+    console.log('   → relancer avec `--themes` avant de toucher contraste-rendu-declare.js.');
+    console.log('');
   } else if (eteintes.length) {
     console.log(`── DETTE ÉTEINTE — ${eteintes.length} ligne(s) à retirer de contraste-rendu-declare.js ──`);
-    console.log('   Ces couples ne sont plus rencontrés NULLE PART dans un relevé COMPLET.');
+    console.log('   Ces couples ne sont plus rencontrés NULLE PART dans un relevé COMPLET,');
+    console.log('   LES SIX THÈMES COMPRIS.');
     console.log('   C\'est la preuve qui manquait pour retirer la ligne sans se fier à sa mémoire.');
     eteintes.slice(0, 40).forEach((c) => console.log(`   ✔ ${c}`));
     if (eteintes.length > 40) console.log(`   … et ${eteintes.length - 40} autre(s).`);
