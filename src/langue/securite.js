@@ -29,6 +29,96 @@
  */
 
 module.exports = {
+  /* ══════════════════════════════════════════════════════════════════════════
+   * LA REFONTE DU 2026-09-13 (sa demande #103)
+   * ══════════════════════════════════════════════════════════════════════════
+   * ⚠⚠ LES PHRASES QUI DISENT CE QU ON RISQUE se traduisent en entier, avec leur
+   * consequence. « Exempté » ne previent pas ; « un rempart en moins » previent.
+   * C est la moitie du texte qui fait qu on n accorde pas trop par precaution.
+   */
+
+  /* ── LA BARRE DE FILTRES ET LA LISTE ────────────────────────────────────── */
+  'Comptes du personnel': 'Staff accounts',
+  'Tous les rôles': 'All roles',
+  'Filtrer par rôle': 'Filter by role',
+  'Ordre de tri': 'Sort order',
+  'Fiches': 'Cards',
+  'Liste': 'List',
+  'État': 'State',
+  'Désactivés': 'Disabled',
+  'Activé': 'On',
+  'Absent': 'None',
+  'Exempté': 'Exempt',
+  'Par nom': 'By name',
+  'Par rôle': 'By role',
+  'Connexion la plus récente': 'Most recent sign-in',
+  'Nombre de connexions': 'Number of sign-ins',
+  '✕ Tout effacer': '✕ Clear all',
+  'Comptes affichés': 'Accounts shown',
+  'sur ': 'of ',
+  ' au total': ' in total',
+  'Super-administrateurs': 'Super administrators',
+  /* ⚠ CETTE LIGNE EST UN AVERTISSEMENT, PAS UN COMPTE RENDU. Un seul
+     super-administrateur actif, c est une seule porte : s il perd son acces,
+     plus personne ne peut en rouvrir une. */
+  'un seul actif — aucune marge': 'only one active — no margin',
+  'Aucun compte ne correspond à ces filtres.': 'No account matches these filters.',
+  'Personne': 'Person',
+  'Dernière connexion': 'Last sign-in',
+
+  /* ── L ASSISTANT DE CREATION ────────────────────────────────────────────── */
+  'Sécurité': 'Security',
+  'Droits': 'Permissions',
+  'Récapitulatif': 'Summary',
+  '← Précédent': '← Back',
+  'Suivant →': 'Next →',
+  'Simple': 'Simple',
+  'Avancé': 'Advanced',
+  'Le rôle décide seul': 'The role decides on its own',
+  'Ajouter la matrice des droits et les questions de secours':
+    'Add the permission grid and the recovery questions',
+  'Il ne pourra plus être modifié après la création.': 'It cannot be changed after creation.',
+  'Le rôle décrit le <b>métier</b> de la personne et coche les droits qui vont avec. C’est la seule question à laquelle il faut répondre neuf fois sur dix.':
+    'The role describes the person’s <b>job</b> and ticks the permissions that go with it. Nine times out of ten it is the only question to answer.',
+  'En mode <b>simple</b>, le rôle décide seul. Passez en <b>avancé</b> (en haut à droite) pour ajouter ou retirer un droit précis.':
+    'In <b>simple</b> mode the role decides on its own. Switch to <b>advanced</b> (top right) to add or remove one specific permission.',
+  'Comment cette personne prouve son identité, et si son compte est utilisable dès maintenant.':
+    'How this person proves who they are, and whether the account works right away.',
+  'Vide : un mot de passe temporaire est créé et envoyé au courriel indiqué.':
+    'Empty: a temporary password is created and sent to the email given.',
+  'Les droits cochés par le rôle, et ce que vous en changez. Le <b>?</b> devant un module explique ce qu’il ouvre.':
+    'The permissions ticked by the role, and what you change. The <b>?</b> before a module explains what it opens.',
+  'Relisez avant de créer. C’est la seule étape où l’on voit d’un coup ce que ce compte pourra faire.':
+    'Read it over before creating. This is the only step that shows at a glance what this account will be able to do.',
+  ' droits accordés par défaut': ' permissions granted by default',
+  ' droits cochés': ' permissions ticked',
+  ' droits': ' permissions',
+  ' (modifiés à la main)': ' (changed by hand)',
+  ' (ceux du rôle)': ' (those of the role)',
+  'Replacer sur le rôle': 'Reset to the role',
+  'Droits replacés sur ceux du rôle.': 'Permissions reset to those of the role.',
+  'Choisi ici': 'Chosen here',
+  'Généré et envoyé par courriel': 'Generated and sent by email',
+  'Actif dès la création': 'Active as soon as it is created',
+  'Créé désactivé': 'Created disabled',
+  'Exempté — un rempart en moins': 'Exempt — one safeguard fewer',
+  'Exigé à la 1re connexion': 'Required at first sign-in',
+  'Facultatif': 'Optional',
+  'Ce compte recevra des droits sensibles :': 'This account will receive sensitive permissions:',
+  'Choisissez un rôle.': 'Choose a role.',
+  'Ce courriel ne ressemble pas à une adresse.': 'This email does not look like an address.',
+  'Création du compte…': 'Creating the account…',
+
+  /* ── LA MATRICE ─────────────────────────────────────────────────────────── */
+  'Ce que ce droit ouvre': 'What this permission opens',
+  'Droit sensible': 'Sensitive permission',
+  /* ⚠ LE TROU {0} PORTE LE PICTOGRAMME, qui est pose par la fenetre dans une
+     classe ic. La phrase reste entiere des deux cotes. */
+  'Le <b>?</b> devant un module explique ce que le droit ouvre. Le signe {0} marque ce qui coûte cher si on se trompe.':
+    'The <b>?</b> before a module explains what the permission opens. The {0} sign marks what costs dearly if you get it wrong.',
+  '<b>Questions de secours</b> — elles servent à rouvrir le compte si le mot de passe est perdu. Facultatives, mais sans elles la seule issue est de recréer le compte.':
+    '<b>Recovery questions</b> — they reopen the account if the password is lost. Optional, but without them the only way out is to create the account again.',
+
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Accès Utilisateurs — Administration Sandriza': 'User access — Sandriza Administration',
   'Accès Utilisateurs': 'User access',

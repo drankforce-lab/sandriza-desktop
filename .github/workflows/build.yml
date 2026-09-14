@@ -562,6 +562,24 @@ jobs:
           # a bien lu cette ligne, a traduit ce qui ressemblait à du texte, et a
           # laissé ce qui ressemblait à un attribut.
           node tools/banc-attribut-coupe.js
+          # ⚠⚠⚠ ET LES PERMISSIONS, QUI VIVENT À TROIS ENDROITS. Le modèle
+          # (`PERMISSION_DEFS`, staff.js) dit quels droits existent ; le masquage
+          # (`perm:`, appbar.js) décide si une entrée de menu paraît ; la garde
+          # (`_hp(…)`, admin.js) REFUSE — et c'est la seule des trois qui
+          # protège. Les trois peuvent diverger en silence, dans les deux sens :
+          #   · un jeton masqué absent du modèle → `permOk()` répond « inconnu,
+          #     donc autorisé » : l'entrée paraît POUR TOUT LE MONDE ;
+          #   · un jeton gardé absent du modèle → personne ne peut l'obtenir,
+          #     donc l'écran refuse TOUJOURS, même au bon rôle.
+          # ⚠ Né du découpage de `config` (2026-09-13, #103) : un seul droit
+          # ouvrait 28 entrées de menu — les clés de paiement et la base de
+          # données au même rang que le pied de page. Le découper voulait dire
+          # toucher 71 gardes et 28 entrées ; sans mesure, une seule oubliée
+          # aurait laissé une porte ouverte sans que rien ne le dise.
+          # ⚠ Il exige aussi que CHAQUE module porte sa `desc` : une case qu'on
+          # coche sans savoir ce qu'elle ouvre est la façon la plus ordinaire
+          # d'accorder trop.
+          node tools/banc-permissions.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de

@@ -165,6 +165,37 @@ for (const t of tables) {
     }
   }
 }
+/* ── 7. LE MODÈLE DES PERMISSIONS (refonte #103, 2026-09-13). ──────────────
+   ⚠⚠ QUATRE TABLES, ET AUCUNE N A LA FORME DES SIX RÈGLES CI-DESSUS.
+   `PERMISSION_DEFS` et `ROLES` portent des `label:` et des `desc:` ;
+   `_SEC_PERM_GROUPS` porte les titres de groupe ; `ACTION_LABELS` porte
+   « Voir / Ajouter / Modifier / Supprimer ». Tout cela traverse le pont
+   (`_secPermModel`, `_secRolesListe`) et s'affiche dans la fenêtre des accès —
+   donc tout cela doit être traduit, et rien ne le réclamait.
+   ⚠ LA DESCRIPTION COMPTE AUTANT QUE LE LIBELLÉ, et c'est contre-intuitif : un
+   nom de module ne prévient de rien, la description dit ce que le droit OUVRE.
+   Laissée en français sur une page anglaise, l'infobulle devient inutile à la
+   personne à qui elle est destinée. */
+{
+  const bornes = [
+    /const\s+PERMISSION_DEFS\s*=\s*\{([\s\S]*?)\n\s*\};/,
+    /const\s+ROLES\s*=\s*\{([\s\S]*?)\n\s*\};/,
+    /const\s+_SEC_PERM_GROUPS\s*=\s*\[([\s\S]*?)\n\s*\];/,
+    /const\s+ACTION_LABELS\s*=\s*\{([^}]*)\}/,
+  ];
+  for (const b of bornes) {
+    const m = b.exec(src);
+    if (!m) continue;
+    const rx = /\b(?:label|desc)\s*:\s*\n?\s*'((?:[^'\\]|\\.)*)'/g;
+    let n; while ((n = rx.exec(m[1]))) attendus.add(n[1].replace(/\\'/g, "'"));
+    /* ACTION_LABELS pose ses valeurs sans clé nommée `label` : `view: 'Voir'`. */
+    if (b === bornes[3]) {
+      const rx2 = /:\s*'((?:[^'\\]|\\.)*)'/g;
+      let p; while ((p = rx2.exec(m[1]))) attendus.add(p[1].replace(/\\'/g, "'"));
+    }
+  }
+}
+
 /* ── 6. LE GENRE D UN ENVOI, calculé à la volée. ───────────────────────────
    ⚠ `genre: x === 'campaign' ? 'Campagne' : 'Chaîne'` — deux phrases posées
    dans un ternaire, sur un champ qui n existe que pour être affiché. */

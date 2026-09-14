@@ -3337,11 +3337,19 @@ const _traduireLibelles = (x, prof) => {
      ⚠ ET C EST POURQUOI ON EXIGE LA PRESENCE DE `cle`. Un `nom` tout seul peut
      etre le nom d une personne, d un produit, d un fournisseur : de la donnee.
      C est la cle a cote qui prouve que le texte n est qu un affichage. */
-  const coupleCodeTexte = Object.prototype.hasOwnProperty.call(x, 'cle')
-    && typeof x.cle === 'string';
+  /* ⚠ `key` COMPTE AUTANT QUE `cle`. Le site ecrit les deux selon l endroit :
+     les jetons de filtre arrivent en { cle, nom }, le modele des permissions en
+     { key, label, desc }. C est la meme forme — un code qui repart, un texte qui
+     se lit — et la refuser sur un nom anglais laisserait la moitie du modele des
+     ACCES en francais sur une page anglaise (refonte #103, 2026-09-13). */
+  const coupleCodeTexte = (typeof x.cle === 'string') || (typeof x.key === 'string');
   for (const k of Object.keys(x)) {
     if (/[Ll]ibelle$/.test(k)) x[k] = _unLibelle(x[k]);
-    else if (coupleCodeTexte && (k === 'nom' || k === 'label' || k === 'titre')) x[k] = _unLibelle(x[k]);
+    /* ⚠⚠ `desc` EST AUSSI DU TEXTE QUI SE LIT, et c est meme le plus important
+       de cet ecran : c est la phrase qui dit CE QU UN DROIT OUVRE. La laisser
+       en francais rendrait l infobulle inutile a qui travaille en anglais —
+       c est-a-dire exactement la personne a qui elle est destinee. */
+    else if (coupleCodeTexte && (k === 'nom' || k === 'label' || k === 'titre' || k === 'desc')) x[k] = _unLibelle(x[k]);
     /* ⚠⚠ `genre` EST TOUJOURS UN LIBELLE, JAMAIS UNE DONNEE. Le site le CALCULE
        a l envoi (`l.type === 'campaign' ? 'Campagne' : 'Chaîne'`) : il n est
        lu nulle part, ecrit nulle part, et n existe que pour etre affiche. Sa

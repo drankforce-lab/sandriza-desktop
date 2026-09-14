@@ -211,4 +211,14 @@ const LIBELLES_EN = {
   'Clients avec commandes': 'Customers with orders',
 };
 
-module.exports = { LIBELLES_EN };
+/* ══ LE MODÈLE DES PERMISSIONS VIENT DE SON PROPRE FICHIER ══════════════════
+ * ⚠ POURQUOI IL N'EST PAS ÉCRIT ICI. La refonte des accès (#103, 2026-09-13) a
+ * ajouté 37 modules et 10 rôles, chacun avec un LIBELLÉ et une DESCRIPTION
+ * entière — près de cent entrées, dont certaines font trois lignes. Les mêler
+ * aux pastilles de statut et aux modes de paiement rendrait les deux illisibles.
+ * ⚠ LA FUSION SE FAIT ICI, ET DANS CE SENS : une entrée de ce fichier gagne sur
+ * celle du modèle des permissions. Un mot comme « Modifier » existe des deux
+ * côtés ; c'est la table historique qui tranche, pour ne pas qu'un ajout au
+ * modèle change en silence un libellé qui paraît ailleurs depuis des mois. */
+const { PERMISSIONS_EN } = require('./permissions.js');
+module.exports = { LIBELLES_EN: Object.assign({}, PERMISSIONS_EN, LIBELLES_EN) };
