@@ -102,12 +102,9 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .vues button{font:inherit;font-size:.75rem;border:0;border-radius:6px;padding:.26rem .6rem;background:none;color:var(--tx2);cursor:pointer}
 .vues button.on{background:var(--v12);color:var(--tx);font-weight:700}
 
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin:0 0 1.1rem}
-@media(max-width:820px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
-.stat{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:.75rem .9rem}
-.stat .l{font-size:.7rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em}
-.stat .v{font:700 1.5rem/1.1 Georgia,serif;margin-top:.2rem}
-.stat .z{font-size:.7rem;color:var(--tx-gris);margin-top:.1rem}
+/* ⚠ Les regles de la bande de compteurs (stat-grid, stat) sont parties avec elle
+   le 2026-09-14, a sa demande. Une feuille qui garde le dessin d un bloc retire
+   fait croire, a la relecture, que le bloc existe encore quelque part. */
 
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .pill.on{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
@@ -140,7 +137,9 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .fiche .coord{font-size:.75rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fiche .etats{display:flex;gap:.32rem;flex-wrap:wrap;align-items:center}
 .fiche .quand{font-size:.74rem;color:var(--tx-gris)}
-.fiche .barre{display:flex;gap:.35rem;flex-wrap:wrap;border-top:1px solid var(--v07);padding-top:.65rem;margin-top:auto}
+/* ⚠ Meme geste dans la vue en fiches : .35rem serrait trop, et c est la meme
+   barre d actions avec le meme bouton rouge au bout. */
+.fiche .barre{display:flex;gap:.5rem;flex-wrap:wrap;border-top:1px solid var(--v07);padding-top:.65rem;margin-top:auto}
 .fiche .barre .b{font-size:.76rem;padding:.3rem .62rem}
 
 .tbl{width:100%;border-collapse:collapse;font-size:.84rem}
@@ -155,6 +154,13 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .tbl .dt{color:var(--tx2);font-size:.78rem;white-space:nowrap}
 .tbl .act{text-align:right;white-space:nowrap}
 .tbl .act .mini{margin-left:.2rem}
+/* ⚠ LES BOUTONS DE LA LIGNE SE TOUCHAIENT — sa demande du 2026-09-14. Seul
+   la classe mini portait un ecart ; les boutons d action sont des b, donc ils
+   n en avaient AUCUN et se collaient les uns aux autres. Trois cibles
+   cliquables sans separation, dont une qui SUPPRIME, c est une erreur de clic
+   qui attend. L ecart se pose ENTRE eux (selecteur de fratrie) et non sur
+   chacun, pour ne pas decaler la colonne vers la gauche. */
+.tbl .act .b + .b{margin-left:.45rem}
 
 .vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem;line-height:1.7}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -420,20 +426,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function filtreActif(){ return !!(F.q.trim() || F.role || F.etat || F.mfa); }
 
+  /* ⚠⚠ UN COMPTE DÉSACTIVÉ NE PARLE PLUS DE CONNEXION — sa demande du
+     2026-09-14, capture à l'appui : « si un compte est désactivé les options MFA
+     ne doivent plus vivre... et les boutons aussi ».
+     Il a raison, et c'est plus qu'une question d'encombrement : un compte
+     désactivé NE PEUT PAS SE CONNECTER. Tout ce qui décrit ou règle sa façon de
+     se connecter décrit donc quelque chose qui n'arrivera pas.
+       · « MFA ✓ » sur un compte éteint fait croire qu'il est protégé — il n'est
+         pas protégé, il est ABSENT, et ce sont deux états très différents ;
+       · « MFA exempté » annonce une dérogation à une porte qui ne s'ouvre pas ;
+       · le bouton MFA règle une authentification qui ne sera jamais demandée ;
+       · « Renvoyer » envoie un mot de passe temporaire à quelqu'un qui ne pourra
+         pas s'en servir. Celui-là n'est pas seulement inutile : il fait partir un
+         vrai courriel, avec un vrai secret dedans, vers un compte fermé.
+     ⚠ CE QUI RESTE : « Modifier » (c'est par là qu'on le réactive) et
+     « Supprimer ». Ce sont les deux seuls gestes qui aient un sens sur un compte
+     éteint — et les retirer enfermerait le compte dans son état. */
   function etatsDe(s){
     return '<span class="pill role">'+esc(s.roleLabel||s.role||'—')+'</span>'
       + (s.active ? '<span class="pill on">${T("Actif")}</span>' : '<span class="pill off">${T("Désactivé")}</span>')
-      + (s.mfaEnabled ? '<span class="pill mfa">MFA ✓</span>'
+      + (!s.active ? ''
+         : (s.mfaEnabled ? '<span class="pill mfa">MFA ✓</span>'
          : (s.requireMfaSetup ? '<span class="pill warn">${T("MFA à configurer")}</span>'
-         : (s.mfaExempt ? '<span class="pill warn">${T("MFA exempté")}</span>' : '')))
+         : (s.mfaExempt ? '<span class="pill warn">${T("MFA exempté")}</span>' : ''))))
       + (s.estMoi ? '<span class="pill moi">${T("vous")}</span>' : '');
   }
 
   function gestesDe(s, superActifs){
     var peutSuppr = !s.estMoi && (!s.estSuper || superActifs > 1);
     return '<button class="b" data-edit="'+esc(s.id)+'"><span class="ic">✏</span> ${T("Modifier")}</button>'
-      + '<button class="b" data-mfa="'+esc(s.id)+'" title="${T("Gérer l’authentification à deux facteurs")}"><span class="ic">🔐</span> MFA</button>'
-      + (!s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="${T("Renvoyer un mot de passe temporaire par courriel")}"><span class="ic">📧</span> ${T("Renvoyer")}</button>' : '')
+      + (s.active ? '<button class="b" data-mfa="'+esc(s.id)+'" title="${T("Gérer l’authentification à deux facteurs")}"><span class="ic">🔐</span> MFA</button>' : '')
+      + (s.active && !s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="${T("Renvoyer un mot de passe temporaire par courriel")}"><span class="ic">📧</span> ${T("Renvoyer")}</button>' : '')
       + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'${T("✓ Confirmer")}':'${T("Supprimer")}')+'</button>' : '');
   }
 
@@ -473,19 +496,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (filtreActif() ? '<button class="jeton" id="f-vider">${T("✕ Tout effacer")}</button>' : '')
       + '</div>';
 
-    /* ⚠⚠ LES COMPTEURS COMPTENT CE QUI EST MONTRE, et la ligne du dessous le
-       dit quand un filtre est posé. Un compteur qui affiche « 3 » pendant qu un
-       filtre en cache douze est un chiffre qui ment. */
-    var nActifs=0, nMfa=0, nSuper=0;
-    for (var i0=0;i0<vus.length;i0++){ if (vus[i0].active) nActifs++; if (vus[i0].mfaEnabled) nMfa++; if (vus[i0].estSuper) nSuper++; }
-    var sousT = filtreActif() ? ('${T("sur ")}'+comptes.length+'${T(" au total")}') : '';
-    h += '<div class="stat-grid">'
-      + '<div class="stat"><div class="l">${T("Comptes affichés")}</div><div class="v">'+vus.length+'</div><div class="z">'+sousT+'</div></div>'
-      + '<div class="stat"><div class="l">${T("Actifs")}</div><div class="v" style="color:var(--tx-ok2)">'+nActifs+'</div></div>'
-      + '<div class="stat"><div class="l">${T("MFA activé")}</div><div class="v" style="color:var(--tx-bleu)">'+nMfa+'</div></div>'
-      + '<div class="stat"><div class="l">${T("Super-administrateurs")}</div><div class="v">'+nSuper+'</div>'
-      + '<div class="z">'+(superActifs<2?'${T("un seul actif — aucune marge")}':'')+'</div></div>'
-      + '</div>';
+    /* ⚠ LA BANDE DE COMPTEURS EST RETIREE — SA DEMANDE DU 2026-09-14, capture a
+       l appui (<< retire ca ici dans acces utilisateur >>). Elle affichait
+       Comptes affiches / Actifs / MFA active / Super-administrateurs.
+       ⚠ CE QU ELLE PORTAIT ET QUI N EST PAS PERDU : l avertissement
+       << un seul actif — aucune marge >>. Le garde-fou ne tenait PAS a ce texte
+       mais au bouton lui-meme — gestesDe() n affiche << Supprimer >> sur un
+       super-administrateur que si superActifs > 1. Retirer la bande ne retire
+       donc aucune protection ; elle ne faisait que la commenter.
+       ⚠ superActifs reste calcule plus haut : il sert a gestesDe(). */
 
     if (!comptes.length) {
       h += '<div class="vide">${T("Aucun compte du personnel.")}</div>';
