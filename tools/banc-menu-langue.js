@@ -253,19 +253,26 @@ for (const k of traduits) {
    fichier-là existe — la leçon est écrite en tête. */
 {
   const { menusAvecLangue } = require('../src/menu-langue');
+  /* ⚠ LA GREFFE VISE « RÉGLAGES » DEPUIS LE 2026-09-14, plus « Affichage ».
+     Le menu a été scindé sur sa demande : « Affichage » ne garde que ce qui
+     change la VUE de l'instant, tout ce qui se règle une fois vit dans
+     « Réglages » — et la langue est un réglage. Ce banc suit le déménagement ;
+     sans ça il garderait l'ANCIENNE vérité, ce qui est pire qu'aucun banc :
+     il refuserait la bonne version. */
   const base = [
     { label: 'Fichier',   items: [{ label: 'Quitter', app: 'quit' }] },
     { label: 'Affichage', items: [{ label: 'Recharger', app: 'reload' }] },
+    { label: 'Réglages',  items: [{ label: 'Thème sombre' }] },
     { label: 'Aide',      items: [{ label: 'À propos', app: 'about' }] },
   ];
-  const trouver = (ms) => ((ms.find((m) => m.label === 'Affichage') || { items: [] }).items || [])
+  const trouver = (ms) => ((ms.find((m) => m.label === 'Réglages') || { items: [] }).items || [])
     .find((it) => it && it.label === 'Langue / Language');
 
-  // 1. L'entrée est là, dans le menu Affichage.
+  // 1. L'entrée est là, dans le menu Réglages.
   const fr = menusAvecLangue(base, 'fr');
   const e = trouver(fr);
   if (!e) {
-    fautes.push('menusAvecLangue() n’ajoute pas « Langue / Language » au menu Affichage');
+    fautes.push('menusAvecLangue() n’ajoute pas « Langue / Language » au menu Réglages');
   } else if (!Array.isArray(e.sub) || e.sub.length !== 2) {
     fautes.push('le bascule n’offre pas DEUX langues');
   } else {
@@ -292,19 +299,20 @@ for (const k of traduits) {
   }
   const sansAff = [{ label: 'Fichier', items: [{ label: 'Quitter' }] }];
   if (JSON.stringify(menusAvecLangue(sansAff, 'fr')) !== JSON.stringify(sansAff)) {
-    fautes.push('sans menu Affichage le modèle est MODIFIÉ — il doit rester tel quel');
+    fautes.push('sans menu Réglages le modèle est MODIFIÉ — il doit rester tel quel');
   }
 
-  /* 5. ⚠ L’INTITULÉ TRADUIT : l’écran de connexion affiche « View ». Sans ce
-     filet, le bascule y serait introuvable. */
-  const vue = [{ label: 'View', items: [{ label: 'Reload' }] }];
+  /* 5. ⚠ L’INTITULÉ TRADUIT : une barre déjà en anglais affiche « Settings ».
+     Sans ce filet, le bascule y serait introuvable — et c'est précisément par
+     là qu'on revient au français. */
+  const vue = [{ label: 'Settings', items: [{ label: 'Dark theme' }] }];
   const g = ((menusAvecLangue(vue, 'en')[0] || {}).items || [])
     .find((it) => it && it.label === 'Langue / Language');
-  if (!g) fautes.push('le menu « View » (intitulé traduit) ne reçoit pas le bascule');
+  if (!g) fautes.push('le menu « Settings » (intitulé traduit) ne reçoit pas le bascule');
 
   /* 6. ⚠ ON NE GREFFE QU’UNE FOIS, même si deux menus portaient le nom : un
      réglage en double finit par se contredire. */
-  const deux = menusAvecLangue(base.concat([{ label: 'Affichage', items: [] }]), 'fr');
+  const deux = menusAvecLangue(base.concat([{ label: 'Réglages', items: [] }]), 'fr');
   const n = deux.reduce((k, m) => k
     + ((m.items || []).filter((it) => it && it.label === 'Langue / Language').length), 0);
   if (n !== 1) fautes.push('le bascule est greffé ' + n + ' fois au lieu d’une');

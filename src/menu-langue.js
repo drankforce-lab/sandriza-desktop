@@ -167,6 +167,11 @@ const MENU_APP_EN = {
   'Remboursements': 'Refunds',
   'Retours': 'Returns',
   'Réduire le menu': 'Shrink the menu',
+  /* ⚠ MENU NEUF LE 2026-09-14 : « Affichage » ne garde que ce qui change la VUE
+     de l instant, tout ce qui se regle une fois vit ici. C est le menu de
+     PREMIER NIVEAU, a ne pas confondre avec << Reglages de securite >>
+     juste en dessous, qui est un ECRAN. */
+  'Réglages': 'Settings',
   'Réglages de sécurité': 'Security settings',
   'Réseaux sociaux': 'Social networks',
   'Sauvegarde': 'Backup',
@@ -313,7 +318,20 @@ const menusAvecLangue = (menus, langue) => {
   return (menus || []).map((m) => {
     if (greffe || !m || !Array.isArray(m.items)) return m;
     const lbl = String(m.label || '');
-    if (lbl !== 'Affichage' && lbl !== MENU_EN['Affichage']) return m;
+    /* ⚠ LA GREFFE A SUIVI LE DÉMÉNAGEMENT (2026-09-14). « Langue / Language »
+       était accroché à « Affichage » ; les réglages ont leur menu depuis, et la
+       langue en est un. Laisser la greffe sur « Affichage » l'aurait remise
+       au milieu de commandes de vue — et, pire, elle aurait suivi un menu qui
+       ne porte plus aucun réglage : on l'y chercherait sans la trouver. */
+    /* ⚠ LES DEUX TABLES, ET C'EST UNE VRAIE DISTINCTION. `MENU_EN` traduit les
+       intitulés visibles SANS session (écran de connexion) ; `MENU_APP_EN` ceux
+       de la barre une fois connecté. « Réglages » n'existe qu'une fois
+       connecté, donc il vit dans la seconde. Ne consulter que `MENU_EN` laissait
+       la comparaison sur `undefined` : la greffe ne trouvait rien sur une barre
+       déjà en anglais, et la langue devenait irrattrapable depuis le menu —
+       c'est-à-dire exactement le chemin du RETOUR au français. */
+    const enAnglais = MENU_APP_EN['Réglages'] || MENU_EN['Réglages'];
+    if (lbl !== 'Réglages' && lbl !== enAnglais) return m;
     greffe = true;
     return { ...m, items: m.items.concat([
       { sep: true },
