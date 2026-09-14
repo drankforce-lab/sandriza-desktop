@@ -2267,7 +2267,7 @@ const OPS_PONT = new Set([
   /* L editeur par blocs de la fenetre Campagnes (3.53.0). ⚠ La mise en page du
      courriel reste cote site : la fenetre envoie des BLOCS et recoit du HTML. */
   'nl:blocsCatalogue', 'nl:blocsHtml', 'nl:iaRediger', 'nl:iaEtat',
-  'nl:epingleDonnees', 'nl:iaEpingle', 'nl:epingleRendu',
+  'nl:epingleDonnees', 'nl:iaEpingle', 'nl:epingleRendu', 'nl:publicationCourriel',
   // Segments d envoi composables : le menu << Segment >> d une campagne lisait
   // deux entrees ECRITES EN DUR. segments:apercu compte SANS enregistrer, pour
   // voir la portee d une recette pendant qu on l ecrit.
@@ -3165,6 +3165,11 @@ const LIMITES_PONT = {
      la photo du produit depuis le stockage — d ou 30 s et non 15. Lire le
      catalogue des produits est une simple lecture. */
   'nl:iaEpingle': 120000, 'nl:epingleRendu': 30000, 'nl:epingleDonnees': 20000,
+  /* ⚠ 90 s POUR L ENVOI : le message emporte jusqu a six images de 1080 x 1920
+     en pieces jointes, et c est le TELEVERSEMENT qui prend le temps, pas le
+     fournisseur. Un plafond court ferait dire << aucune reponse >> pendant que
+     le courriel, lui, part — et l on cliquerait une deuxieme fois. */
+  'nl:publicationCourriel': 90000,
   /* Compter un segment relit TOUTES les commandes pour batir le profil de
      chaque abonnee : plus long qu une simple lecture de config. */
   'segments:donnees': 30000, 'segments:apercu': 30000,

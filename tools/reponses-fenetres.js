@@ -4484,6 +4484,18 @@ const JEU = {
         entreprise: 'SANDRIZA', reseaux: RESEAUX_PUB,
         produits: [{ id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
           photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' }] } } },
+    /* ⚠ SANS CLE RESEND, L ENVOI EST REFUSE AVANT LE CLIC — le champ et le
+       bouton sont inertes et un avis le dit. C est la seule branche ou l ecran
+       montre ce refus-la : sans ce cas, elle ne se dessinerait dans aucun banc. */
+    { nom: 'epingle sans resend', id: 'epingle', reponses: { identite: IDENTITE,
+      'sociaux:liste': { ok: true, peutModifier: true, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
+        reseauxActifs: [], file: [], historique: [] },
+      'nl:iaEtat': { ok: true, clePosee: true, budget: { plafond: 25, depense: 3.4 }, modeles: [] },
+      'nl:epingleDonnees': { ok: true, peutModifier: true, siteUrl: 'https://www.sandriza.com/',
+        entreprise: 'SANDRIZA', reseaux: RESEAUX_PUB,
+        courrielDefaut: '', resendPret: false,
+        produits: [{ id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
+          photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' }] } } },
     { nom: 'epingle vierge', id: 'epingle', reponses: { identite: IDENTITE,
       'sociaux:liste': { ok: true, peutModifier: true, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
         reseauxActifs: [], file: [], historique: [] },
@@ -4505,8 +4517,10 @@ const JEU = {
         modeles: ['claude-sonnet-5'] },
       'nl:epingleDonnees': { ok: true, peutModifier: true, siteUrl: 'https://www.sandriza.com/',
         entreprise: 'SANDRIZA', reseaux: RESEAUX_PUB,
+        courrielDefaut: 'brigitte@sandriza.com', resendPret: true,
         produits: [{ id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
           photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' }] },
+      'nl:publicationCourriel': { ok: true, id: 'em_1', destinataires: 1, images: 4 },
       'nl:iaEpingle': { ok: true, titre: 'Le manteau de laine qui traverse l automne',
         description: 'Un manteau de laine coupe droite, col montant, pense pour les matins frais '
           + 'de septembre a novembre. Se porte sur une robe comme sur un jean.',

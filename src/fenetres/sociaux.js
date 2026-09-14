@@ -138,6 +138,11 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .epvue img{display:block;width:100%;height:100%;object-fit:contain}
 .epvue .rien{font-size:.76rem;color:#4A4A4A;padding:1rem;text-align:center}
 .epinfo{font-size:.7rem;color:var(--tx2);text-align:center}
+.epenv{border-top:1px solid var(--v12);padding-top:.5rem;margin-top:.2rem;
+  display:grid;grid-template-columns:1fr auto;gap:.35rem;align-items:end}
+.epenv label{grid-column:1/-1;font-size:.7rem;color:var(--tx2);display:block;margin-bottom:.1rem}
+.epenv input{width:100%;font-size:.8rem;padding:.26rem .4rem}
+.epenv .epinfo{grid-column:1/-1;text-align:left}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -520,6 +525,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '${T("Enregistrer la publication")}</button>'
       + '<button class="mini" id="ep-copier">${T("Copier le texte")}</button></div>'
       + '<div class="pied"><button class="mini" id="ep-dossier">${T("Ouvrir le dossier des exports")}</button></div>'
+      /* ⚠⚠ L ENVOI PAR COURRIEL N EST PAS UN CONFORT, C EST LE SEUL PONT VERS LE
+         TELEPHONE. Instagram et TikTok ne se publient pas depuis un navigateur
+         de bureau : il faut que l image ARRIVE sur l appareil. On compose ici,
+         on s envoie le tout, on ouvre le message sur le telephone, on enregistre
+         les images et l on colle le texte. Sans ce bouton, deux des quatre
+         reseaux s arretaient dans un dossier que le telephone ne voit pas. */
+      + '<div class="epenv"><label for="ep-a">${T("Envoyer par courriel")}</label>'
+      + '<input id="ep-a" type="email" value="' + esc((EPD && EPD.courrielDefaut) || '')
+      + '" placeholder="${T("votre@courriel.com")}"'
+      + ((EPD && EPD.resendPret === false) ? ' disabled' : '') + '>'
+      + '<button class="mini" id="ep-envoi"'
+      + ((EPIMG && !(EPD && EPD.resendPret === false)) ? '' : ' disabled')
+      + '>${T("Envoyer")}</button>'
+      + ((EPD && EPD.resendPret === false)
+          ? '<div class="epinfo">${T("Aucune clé Resend : l’envoi de courriel n’est pas configuré.")}</div>'
+          : '<div class="epinfo">${T("Les images partent en pièces jointes, à enregistrer sur le téléphone.")}</div>')
+      + '</div>'
       + '<textarea id="ep-presse" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;top:0;width:1px;height:1px"></textarea>'
       + '</div></div>';
     return h;
@@ -538,6 +560,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (m === 'sans_but') return '${T("Dites d’abord ce qu’il faut annoncer.")}';
     if (m === 'epingle_vide') return '${T("Le modèle n’a rien produit d’utilisable. Reformulez la demande.")}';
     if (m === 'canevas_teint') return r.detail || '${T("Cette photo ne peut pas être relue pour l’export.")}';
+    /* ⚠ LES QUATRE REFUS DE L ENVOI DISENT CHACUN QUOI FAIRE. << Echec de
+       l envoi >> pour les quatre ferait chercher la panne dans le reseau alors
+       qu il suffit parfois de retirer deux diapos ou de poser une cle. */
+    if (m === 'sans_destinataire') return '${T("Indiquez une adresse courriel.")}';
+    if (m === 'adresse') return '${T("Cette adresse ne ressemble pas à une adresse courriel : ")}' + esc(r.detail || '');
+    if (m === 'resend_absent') return '${T("Aucune clé Resend n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.")}';
+    if (m === 'sans_image') return '${T("Aucune image à envoyer.")}';
+    if (m === 'trop_lourd') return '${T("Le message est trop lourd (")}' + esc(r.detail || '')
+      + '${T("). Retirez des diapos, ou envoyez-les en deux fois.")}';
+    if (m === 'envoi') return '${T("L’envoi a échoué : ")}' + esc(r.detail || '');
     if (m === 'json_illisible') return '${T("La réponse du modèle n’a pas pu être lue. Réessayez.")}';
     if (m === 'lecture_seule') return '${T("Vous n’avez pas le droit de composer des publications.")}';
     if (m === 'injoignable') return '${T("La passerelle d’écriture IA est injoignable.")}';
@@ -599,38 +631,85 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       (F.cle === 'pinterest' && (EP.motsCles || []).length)
         ? ('${T("Mots de recherche : ")}' + EP.motsCles.join(', ')) : ''
     ].filter(function(x){ return x !== '' && x !== null; }).join('\\n');
-    /* ⚠⚠ TOUTES LES DIAPOS PARTENT, PAS SEULEMENT CELLE QU ON REGARDE. Une
-       suite TikTok exportee a une image est un travail a refaire cinq fois —
-       et c est la faute qu on ne voit qu en ouvrant le dossier, une fois
-       l ecran ferme. On les PEINT donc ici, une par une : elles ne sont pas
-       toutes en memoire, puisque l apercu ne rend que la diapo regardee.
-       ⚠ Numerotees sur 2 chiffres : sans ca, le dossier range 10 avant 2. */
-    var n = (EP.diapos || []).length;
-    var faites = 0, rates = 0;
-    var suivante = function(i){
-      if (i >= n) {
-        P.enregistrerExport(base + '.txt', texte).then(function(r2){
-          var bon = faites > 0 && !rates && r2 && r2.ok;
-          dire(bon
-            ? ('${T("Enregistré : ")}' + faites + ' ${T("image(s) et le texte")}')
-            : (faites
-                ? ('${T("Enregistré partiellement : ")}' + faites + ' ${T("image(s) sur ")}' + n)
-                : '${T("L’image n’a pas pu être enregistrée.")}'),
-            bon ? 'bon' : (faites ? 'att' : 'err'));
-        });
-        return;
-      }
-      appeler('nl:epingleRendu', [epModeleRendu(i)]).then(function(r){
-        if (!r || !r.ok || !r.image) { rates++; suivante(i + 1); return; }
-        var nom = base + (n > 1 ? ('-' + (i < 9 ? '0' : '') + (i + 1)) : '') + '.png';
-        P.enregistrerExport(nom, r.image).then(function(rr){
-          if (rr && rr.ok) faites++; else rates++;
-          suivante(i + 1);
+    dire('${T("Enregistrement…")}');
+    epPeindreTout(base, function(images, rates){
+      if (!images.length) { dire('${T("L’image n’a pas pu être enregistrée.")}', 'err'); return; }
+      var faites = 0, restant = images.length;
+      images.forEach(function(im){
+        P.enregistrerExport(im.nom, im.dataUrl).then(function(rr){
+          if (rr && rr.ok) faites++;
+          if (--restant > 0) return;
+          P.enregistrerExport(base + '.txt', texte).then(function(r2){
+            var n = (EP.diapos || []).length;
+            var bon = faites === n && !rates && r2 && r2.ok;
+            dire(bon
+              ? ('${T("Enregistré : ")}' + faites + ' ${T("image(s) et le texte")}')
+              : ('${T("Enregistré partiellement : ")}' + faites + ' ${T("image(s) sur ")}' + n),
+              bon ? 'bon' : 'att');
+          });
         });
       });
+    });
+  }
+
+  /* ⚠⚠ UNE SEULE ROUTINE PEINT LA SUITE, POUR L EXPORT COMME POUR LE COURRIEL.
+     Les deux ont besoin de TOUTES les diapos — l apercu, lui, n en rend qu une.
+     Ecrire la boucle deux fois, c etait la certitude qu un jour l export en
+     sorte six et le courriel cinq, sans que rien ne s en plaigne.
+     ⚠ Numerotees sur 2 chiffres : sans ca, le dossier range 10 avant 2. */
+  function epPeindreTout(base, apres){
+    var n = (EP.diapos || []).length;
+    var images = [], rates = 0, reste = n;
+    if (!n) { apres([], 0); return; }
+    var poser = function(i, dataUrl){
+      if (dataUrl) {
+        images.push({ i: i, nom: base + (n > 1 ? ('-' + (i < 9 ? '0' : '') + (i + 1)) : '') + '.png',
+                      dataUrl: dataUrl });
+      } else { rates++; }
+      if (--reste > 0) return;
+      // Remises dans l ordre : les rendus reviennent comme ils veulent.
+      images.sort(function(a, b){ return a.i - b.i; });
+      apres(images, rates);
     };
-    dire('${T("Enregistrement…")}');
-    suivante(0);
+    for (var i = 0; i < n; i++) {
+      (function(k){
+        appeler('nl:epingleRendu', [epModeleRendu(k)]).then(function(r){
+          poser(k, (r && r.ok && r.image) ? r.image : '');
+        });
+      })(i);
+    }
+  }
+
+  function epEnvoyer(){
+    var ch = document.getElementById('ep-a');
+    var a = ch ? String(ch.value || '').trim() : '';
+    if (!a) { dire('${T("Indiquez une adresse courriel.")}', 'att'); return; }
+    var F = epFiche();
+    var base = F.cle + '-' + new Date().toISOString().slice(0, 10);
+    var clics = (F.cle === 'pinterest') ? ''
+      : (EP.motsCles || []).map(function(m){ return '#' + m; }).join(' ');
+    /* ⚠ LE TEXTE ENVOYE EST CELUI QU ON COLLERA, exactement — c est un bloc a
+       copier d un geste sur le telephone, pas une fiche a relire. */
+    var texte = [EP.titre, EP.titre ? '' : null, EP.description,
+      clics ? '' : null, clics,
+      F.lienCliquable ? '' : null, F.lienCliquable ? EP.lien : null]
+      .filter(function(x){ return x !== null; }).join('\\n');
+    var b = document.getElementById('ep-envoi');
+    if (b) b.disabled = true;
+    dire('${T("Préparation des images…")}');
+    epPeindreTout(base, function(images, rates){
+      if (!images.length) { if (b) b.disabled = false; dire('${T("Aucune image à envoyer.")}', 'err'); return; }
+      dire('${T("Envoi…")}');
+      appeler('nl:publicationCourriel', [{ reseau: F.cle, a: a, texte: texte,
+        note: EP.alt || '', images: images }]).then(function(r){
+        if (b) b.disabled = false;
+        if (r && r.ok) {
+          dire('${T("Envoyé à ")}' + esc(a) + ' ${T("· ")}' + r.images + ' ${T("image(s)")}'
+            + (rates ? (' ${T(" — ")}' + rates + ' ${T("non rendue(s)")}') : ''),
+            rates ? 'att' : 'bon');
+        } else dire(epExpliquer(r), 'err');
+      });
+    });
   }
 
   function epCopier(){
@@ -710,6 +789,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (b) b.onclick = epCopier;
     b = document.getElementById('ep-dossier');
     if (b) b.onclick = function(){ P.ouvrirDossierExports(); };
+    b = document.getElementById('ep-envoi');
+    if (b) b.onclick = epEnvoyer;
     var sel = document.getElementById('ep-prod');
     if (sel) sel.onchange = function(){
       EP.produitId = sel.value;

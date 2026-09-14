@@ -218,6 +218,39 @@ module.exports = {
      phrase doit le dire assez fort pour qu on rouvre le dossier. */
   'Enregistré partiellement : ': 'Partly saved: ',
   'image(s) sur ': 'image(s) out of ',
+
+  /* ── L ENVOI PAR COURRIEL (#115) ────────────────────────────────────────── */
+  /* ⚠ << à enregistrer sur le téléphone >> est la phrase la plus utile de
+     l ecran, et elle doit rester aussi concrete en anglais : elle dit POURQUOI
+     les images sont en pieces jointes plutot que dans le corps du message.
+     Instagram et TikTok ne se publient pas depuis un ordinateur ; ce courriel
+     est le pont. */
+  'Envoyer par courriel': 'Send by email',
+  'Envoyer': 'Send',
+  'votre@courriel.com': 'your@email.com',
+  'Les images partent en pièces jointes, à enregistrer sur le téléphone.':
+    'The images go as attachments, to be saved on the phone.',
+  'Aucune clé Resend : l’envoi de courriel n’est pas configuré.':
+    'No Resend key: email sending is not configured.',
+  'Préparation des images…': 'Preparing the images…',
+  'Envoi…': 'Sending…',
+  'Envoyé à ': 'Sent to ',
+  'image(s)': 'image(s)',
+  'non rendue(s)': 'not rendered',
+  '· ': '· ',
+  'Indiquez une adresse courriel.': 'Enter an email address.',
+  'Cette adresse ne ressemble pas à une adresse courriel : ':
+    'This does not look like an email address: ',
+  'Aucune clé Resend n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.':
+    'No Resend key is saved. It is set in Configuration ▸ API keys.',
+  'Aucune image à envoyer.': 'No image to send.',
+  'Le message est trop lourd (': 'The message is too heavy (',
+  '). Retirez des diapos, ou envoyez-les en deux fois.':
+    '). Remove some slides, or send them in two goes.',
+  'L’envoi a échoué : ': 'Sending failed: ',
+  // ⚠ Le séparateur : sans entrée, le relevé le compte comme du français resté
+  // sur la page anglaise. Il ne change pas de forme, il doit quand même être là.
+  ' — ': ' — ',
   'Simple': 'Simple',
   'Avancé': 'Advanced',
   'Lecture du catalogue…': 'Reading the catalogue…',
