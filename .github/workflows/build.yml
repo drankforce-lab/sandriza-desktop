@@ -632,6 +632,20 @@ jobs:
           # nomme lit vraiment le fichier. Une couverture affirmee et fausse est
           # pire que pas de couverture : on cesse de regarder.
           node tools/banc-surface-hors-fenetre.js
+          # ⚠⚠ TOUTE VUE ANCRÉE PORTE-T-ELLE SA RECETTE ? (2026-09-14)
+          # Il l'a signalé lui-même : « quand je change pour le français le
+          # tableau de bord ne change pas de langue ». Le mécanisme qui fait
+          # suivre la langue aux écrans DÉJÀ OUVERTS (#96) refait chaque vue
+          # ancrée en appelant `a.refaire()` — et le tableau de bord était
+          # enregistré SANS cette propriété. Il était donc compté « sans
+          # recette » et gardait sa langue, en silence. Le journal le disait ;
+          # personne ne lit le journal.
+          # ⚠ Aucun banc de langue ne pouvait le voir : `tableau.js` rend très
+          # bien en anglais. Ce n'est pas la page qui était en cause, c'est le
+          # fait qu'on ne la REDEMANDAIT jamais. Et les bancs au rendu dessinent
+          # une page NEUVE, donc déjà dans la bonne langue — le défaut n'existe
+          # qu'en CHANGEANT de langue sur une page posée.
+          node tools/banc-recette-ancree.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de

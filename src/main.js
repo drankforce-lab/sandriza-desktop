@@ -6665,7 +6665,20 @@ if (!app.requestSingleInstanceLock()) {
           preload: path.join(__dirname, 'pont-preload.js'),
           contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
         } });
-        ancrees.set('tableau', { view, fenetre: null });
+        /* ⚠⚠ `refaire` — OUBLIÉ JUSQU'AU 2026-09-14, ET C'EST LA FAUTE QU'IL A
+           SIGNALÉE : « quand je change pour le français le tableau de bord ne
+           change pas de langue ».
+           `_refabriquerToutesLesFenetres()` refait chaque vue ancrée en appelant
+           `a.refaire()`. Sans cette propriété, la vue est comptée « SANS
+           RECETTE » et GARDE SA LANGUE — silencieusement. Le tableau de bord
+           était donc le SEUL écran à ne pas suivre, et c'est celui que tout le
+           monde a sous les yeux en permanence.
+           ⚠ POURQUOI LUI SEUL : le chemin d'ancrage ordinaire (`dockOuvrir`)
+           pose `a.refaire = defs[c][1]` en même temps qu'il crée la vue. Celle-ci
+           est créée À LA MAIN au démarrage, pour être prête avant le premier
+           clic — et la recette a été oubliée en chemin. Une seconde façon de
+           faire la même chose finit toujours par en oublier un morceau. */
+        ancrees.set('tableau', { view, fenetre: null, refaire: () => pageTableau() });
         view.webContents.on('did-finish-load', () => {
           view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
           appliquerTheme(view.webContents);
