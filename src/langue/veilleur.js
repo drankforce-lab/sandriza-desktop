@@ -62,7 +62,21 @@ module.exports = {
   'Veille active — connectez-vous pour voir les notifications':
     'Watch is on — sign in to see the notifications',
   'Dernières notifications': 'Latest notifications',
-  '{0} dernières notifications': 'Latest notifications ({0})',
+  /* ⚠ « {0} dernières notifications » EST PARTI LE 2026-09-14 (#124), et c'est
+     le banc qui l'a signalé : plus personne ne le demandait. C'était le titre du
+     sous-menu qui portait TOUTE la liste — il a disparu avec lui, les trois
+     dernières étant maintenant à plat dans le menu. Une entrée de dictionnaire
+     que personne ne demande est du poids mort qui donne l'illusion d'un écran
+     traduit. */
+  /* ⚠ LE TITRE DIT LA DURÉE, PAS SEULEMENT « HISTORIQUE » (#124). « History »
+     tout court laisserait croire qu'on garde tout depuis toujours — et l'on
+     chercherait un mois plus tard une notification effacée depuis trois
+     semaines, en croyant à une panne. Les deux langues doivent porter le
+     nombre de jours. */
+  'Historique des {0} derniers jours': 'History of the last {0} days',
+  /* La pastille de l'icône, dans l'infobulle. ⚠ « non vue(s) » et non « nouvelles » :
+     une commande peut être arrivée hier et n'avoir toujours pas été regardée. */
+  '{0} non vue(s)': '{0} unseen',
   'Effacer la liste': 'Clear the list',
 
   /* ── Les commandes du menu ──────────────────────────────────────────────── */

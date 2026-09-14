@@ -133,4 +133,77 @@ function depuisQuand(debutIso, maintenantIso) {
   return { unite: 'jour', n: Math.floor(h / 24) };
 }
 
-module.exports = { curseurSuivant, aAnnoncer, majEchec, depuisQuand };
+/* ══ L'HISTORIQUE DES NOTIFICATIONS — GARDER 7 JOURS, PUIS OUBLIER ════════════
+ * Sa demande du 2026-09-14 : « cela doit être conservé que 7 jours, ensuite il
+ * doit s'effacer seul ».
+ *
+ * ⚠⚠ POURQUOI CETTE DÉCISION EST ICI, DANS LE MODULE PUR, ET PAS DANS
+ * `veilleur.js`. Une purge est le genre de mécanisme qui cesse de fonctionner
+ * SANS RIEN DIRE : il ne lève pas, il n'affiche rien, il ne fait simplement plus
+ * son travail — et l'on ne s'en aperçoit que le jour où le fichier a grossi
+ * pendant six mois, ou, pire, le jour où il a effacé ce qu'il fallait garder.
+ * Une purge qu'aucun banc n'éprouve est une purge qu'on croit sur parole.
+ * Ici, elle est une fonction sans horloge, sans disque et sans Electron : on lui
+ * donne une liste et un instant, elle rend une liste. `banc-veilleur.js` la met
+ * à l'épreuve avec des dates choisies.
+ *
+ * ⚠ LE PLAFOND EN NOMBRE RESTE, DERRIÈRE LA DATE. Sept jours de veille normale,
+ * c'est quelques dizaines de lignes ; sept jours d'un site qui s'emballe, ou
+ * d'une boucle d'erreur, c'en est des milliers — et ce fichier est réécrit à
+ * chaque tour de veille. La date décide de ce qu'on garde, le plafond empêche
+ * l'accident.
+ *
+ * ⚠ ON NE JETTE PAS UNE LIGNE DONT LA DATE EST ILLISIBLE. Elle vient d'une
+ * version antérieure, ou d'un fichier abîmé : la traiter comme « vieille » la
+ * ferait disparaître silencieusement, ce qui est exactement le défaut qu'on
+ * cherche à éviter. Elle est gardée, et elle sortira par le plafond.
+ */
+const NOTIFS_JOURS = 7;
+const NOTIFS_PLAFOND = 200;
+
+function purgerNotifs(liste, maintenantIso, jours, plafond) {
+  const n = Date.parse(String(maintenantIso || ''));
+  const j = Number.isFinite(jours) ? jours : NOTIFS_JOURS;
+  const max = Number.isFinite(plafond) ? plafond : NOTIFS_PLAFOND;
+  const src = Array.isArray(liste) ? liste : [];
+  const limite = Number.isFinite(n) ? (n - j * 86400000) : null;
+  const gardees = src.filter((x) => {
+    if (!x || typeof x !== 'object') return false;
+    if (limite === null) return true;          // instant illisible : on ne purge rien
+    const t = Date.parse(String(x.t || ''));
+    if (!Number.isFinite(t)) return true;      // date illisible : on garde (voir l'en-tête)
+    return t >= limite;
+  });
+  /* ⚠ LES PLUS RÉCENTES D'ABORD, ET C'EST LE PLAFOND QUI L'EXIGE. La liste est
+     déjà tenue dans cet ordre (`unshift`), mais si elle ne l'était pas, couper
+     à 200 jetterait les nouvelles au lieu des vieilles. On trie donc avant de
+     couper, plutôt que de faire confiance à l'ordre d'arrivée. */
+  gardees.sort((a, b) => (Date.parse(String(b.t || '')) || 0) - (Date.parse(String(a.t || '')) || 0));
+  return gardees.slice(0, max);
+}
+
+/* ══ CE QUI SE VOIT TOUT DE SUITE, ET CE QUI EST DERRIÈRE ════════════════════
+ * Sa demande : « toujours placer les dernières notifications au plus haut et
+ * visible ; pour voir les autres on doit appuyer sur historique des 7 derniers
+ * jours ».
+ *
+ * ⚠⚠ ET C'EST L'INVERSE DE CE QUI EXISTAIT. Tout l'historique vivait dans UN
+ * sous-menu : pour savoir s'il était arrivé une commande, il fallait ouvrir le
+ * menu, viser une ligne, attendre que le sous-menu se déplie. Trois gestes pour
+ * une question qu'on se pose en passant devant l'écran. Les dernières sont
+ * maintenant À PLAT dans le menu — on les lit sans rien ouvrir.
+ *
+ * ⚠ TROIS, ET PAS DIX. Un menu de zone de notification qui déroule dix lignes
+ * d'historique repousse « Ouvrir l'administration » hors de portée du regard,
+ * et c'est le geste qu'on vient chercher neuf fois sur dix.
+ */
+const NOTIFS_EN_TETE = 3;
+
+function partagerNotifs(liste, enTete) {
+  const src = Array.isArray(liste) ? liste.filter((x) => x && x.titre) : [];
+  const k = Number.isFinite(enTete) ? enTete : NOTIFS_EN_TETE;
+  return { tete: src.slice(0, k), reste: src.slice(k) };
+}
+
+module.exports = { curseurSuivant, aAnnoncer, majEchec, depuisQuand,
+                   purgerNotifs, partagerNotifs, NOTIFS_JOURS, NOTIFS_PLAFOND, NOTIFS_EN_TETE };

@@ -21,7 +21,8 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { curseurSuivant, aAnnoncer, majEchec, depuisQuand } = require('../src/veilleur-curseur');
+const { curseurSuivant, aAnnoncer, majEchec, depuisQuand,
+        purgerNotifs, partagerNotifs } = require('../src/veilleur-curseur');
 
 let vert = 0;
 const cas = (nom, fn) => {
@@ -336,6 +337,110 @@ cas('la ligne d’état lit le DISQUE avant la mémoire', () => {
   const c = _corps('ligneEtat');
   assert.ok(c && c.indexOf('echecMotif') >= 0,
     'ligneEtat() ne lit que `dernierEchec` : au redémarrage elle dirait « à l’écoute » sur une veille morte');
+});
+
+console.log('\n── L’HISTORIQUE : 7 JOURS, PUIS L’OUBLI (#124) ──────────────');
+
+/* ⚠⚠ UNE PURGE EST LE MÉCANISME QUI CESSE DE MARCHER SANS RIEN DIRE. Elle ne
+   lève pas, elle n'affiche rien : elle ne fait simplement plus son travail. On
+   ne s'en aperçoit que six mois plus tard, sur un fichier devenu énorme — ou,
+   pire, le jour où elle a effacé ce qu'il fallait garder. D'où ces cas. */
+const J = (n) => new Date(Date.parse('2026-09-14T12:00:00.000Z') - n * 86400000).toISOString();
+const MAINTENANT = '2026-09-14T12:00:00.000Z';
+
+cas('purge : ce qui a plus de 7 jours part, le reste demeure', () => {
+  const l = [
+    { t: J(0), titre: 'aujourd’hui' },
+    { t: J(3), titre: 'il y a trois jours' },
+    { t: J(6.9), titre: 'juste sous la limite' },
+    { t: J(7.1), titre: 'juste au-delà' },
+    { t: J(40), titre: 'le mois dernier' },
+  ];
+  const r = purgerNotifs(l, MAINTENANT);
+  assert.deepStrictEqual(r.map((x) => x.titre),
+    ['aujourd’hui', 'il y a trois jours', 'juste sous la limite']);
+});
+
+/* ⚠ LE CAS QUI COMPTE AUTANT QUE L'AUTRE : une purge qui garde tout serait
+   inutile, mais une purge qui jette tout serait pire — et les deux passent un
+   banc qui ne mesure que « la liste a rétréci ». */
+cas('purge : rien à jeter, rien n’est jeté', () => {
+  const l = [{ t: J(1), titre: 'hier' }, { t: J(2), titre: 'avant-hier' }];
+  assert.strictEqual(purgerNotifs(l, MAINTENANT).length, 2);
+});
+
+cas('purge : une date ILLISIBLE est gardée, pas effacée en douce', () => {
+  const l = [{ t: 'pas une date', titre: 'venue d’une version antérieure' },
+             { t: J(40), titre: 'vieille et lisible' }];
+  const r = purgerNotifs(l, MAINTENANT);
+  assert.deepStrictEqual(r.map((x) => x.titre), ['venue d’une version antérieure']);
+});
+
+cas('purge : un INSTANT illisible ne déclenche aucune purge', () => {
+  const l = [{ t: J(40), titre: 'vieille' }, { t: J(0), titre: 'neuve' }];
+  assert.strictEqual(purgerNotifs(l, 'pas une date').length, 2,
+    'sans horloge fiable, on préfère garder trop que jeter à tort');
+});
+
+cas('purge : le plafond coupe les VIEILLES, jamais les neuves', () => {
+  const l = [];
+  for (let i = 0; i < 50; i++) l.push({ t: J(i / 24), titre: 'n' + i });  // i heures
+  const r = purgerNotifs(l, MAINTENANT, 7, 10);
+  assert.strictEqual(r.length, 10);
+  assert.strictEqual(r[0].titre, 'n0', 'la plus récente doit survivre');
+  assert.strictEqual(r[9].titre, 'n9');
+});
+
+cas('purge : même sur une liste DÉSORDONNÉE, le plafond garde les récentes', () => {
+  const l = [{ t: J(30), titre: 'vieille' }, { t: J(0), titre: 'neuve' }, { t: J(5), titre: 'moyenne' }];
+  const r = purgerNotifs(l, MAINTENANT, 7, 2);
+  assert.deepStrictEqual(r.map((x) => x.titre), ['neuve', 'moyenne'],
+    'trier avant de couper, sinon l’ordre d’arrivée décide de ce qu’on perd');
+});
+
+cas('purge : une liste absente ou abîmée ne fait pas tomber le veilleur', () => {
+  assert.deepStrictEqual(purgerNotifs(null, MAINTENANT), []);
+  assert.deepStrictEqual(purgerNotifs([null, 'x', 3], MAINTENANT), []);
+});
+
+console.log('\n── LES DERNIÈRES EN HAUT, LE RESTE DERRIÈRE (#124) ──────────');
+
+cas('partage : trois en tête, le reste dans l’historique', () => {
+  const l = [1, 2, 3, 4, 5].map((i) => ({ t: J(i / 24), titre: 'n' + i }));
+  const r = partagerNotifs(l);
+  assert.deepStrictEqual(r.tete.map((x) => x.titre), ['n1', 'n2', 'n3']);
+  assert.deepStrictEqual(r.reste.map((x) => x.titre), ['n4', 'n5']);
+});
+
+cas('partage : moins de trois, il n’y a rien derrière', () => {
+  const r = partagerNotifs([{ t: J(0), titre: 'seule' }]);
+  assert.deepStrictEqual(r.tete.map((x) => x.titre), ['seule']);
+  assert.strictEqual(r.reste.length, 0, 'un sous-menu vide dirait qu’il y a quelque chose à voir');
+});
+
+cas('partage : les lignes sans titre sont écartées des deux côtés', () => {
+  const r = partagerNotifs([{ t: J(0) }, { t: J(1), titre: 'vraie' }]);
+  assert.deepStrictEqual(r.tete.map((x) => x.titre), ['vraie']);
+});
+
+/* ⚠ LE CÂBLAGE, ENCORE : la règle peut être juste et n'être appelée par
+   personne — c'est ce qui est arrivé à la boîte de reprise (#81), et c'est
+   aussi ce qui guette une purge écrite mais jamais branchée. */
+cas('veilleur.js PURGE vraiment en écrivant l’historique', () => {
+  const c = _corps('_noter');
+  assert.ok(c && c.indexOf('purgerNotifs') >= 0,
+    '_noter() n’appelle pas purgerNotifs : la liste grossirait sans fin');
+});
+cas('le menu de l’icône PARTAGE vraiment la liste', () => {
+  const c = _corps('_sousMenuNotifs');
+  assert.ok(c && c.indexOf('partagerNotifs') >= 0,
+    '_sousMenuNotifs() ne partage pas : tout resterait dans un sous-menu');
+});
+cas('la pastille de l’icône s’éteint quand on regarde', () => {
+  const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'veilleur.js'), 'utf8');
+  assert.ok(/tray\.on\(\s*['"]right-click['"]/.test(src),
+    'rien n’écoute le clic droit : la pastille resterait allumée pour toujours');
+  assert.ok(src.indexOf('nonVus') >= 0, 'aucun compteur de non-vus : la pastille ne saurait pas quoi dire');
 });
 
 console.log('\n' + (process.exitCode ? '✗ DES CAS ONT ÉCHOUÉ' : '✓ ' + vert + ' cas verts') + '\n');

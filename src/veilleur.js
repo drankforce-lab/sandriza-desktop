@@ -74,7 +74,8 @@ const { APP_KEY } = require('./cle-app');
 // La DÉCISION du curseur vit à part, sans Electron, pour être éprouvable —
 // même patron que `brouillon-garde.js`. Voir son en-tête : c'est la pièce dont
 // l'erreur est muette.
-const { curseurSuivant, aAnnoncer, majEchec, depuisQuand } = require('./veilleur-curseur');
+const { curseurSuivant, aAnnoncer, majEchec, depuisQuand,
+        purgerNotifs, partagerNotifs, NOTIFS_JOURS } = require('./veilleur-curseur');
 /* ⚠⚠ SA DEMANDE DU 2026-09-13 : « n'oublie pas de traduire le menu contextuel
    de l'application aussi ». C'est celui de l'icône de la zone de notification,
    et il était FRANÇAIS EN ENTIER — pas un seul appel de traduction.
@@ -191,6 +192,13 @@ const NOTIFS_MAX = 20;
 const ETAT_DEFAUT = {
   actif: true, depuis: null, pid: null, vu: null, notifs: [],
   echecDepuis: null, echecMotif: '', succes: null,
+  /* ⚠ `nonVus` — LA PASTILLE DE L'ICÔNE (#124, 2026-09-14). Sa demande : « si de
+     nouvelles commandes arrivent, que l'icône passe avec un petit indicateur
+     pour nous mentionner qu'il y a du nouveau ».
+     ⚠ IL EST DANS LE FICHIER D'ÉTAT, donc il survit à un redémarrage — et c'est
+     la moitié de l'intérêt : une commande arrivée pendant la nuit doit encore se
+     signaler au matin, sur une application qu'on vient de rouvrir. */
+  nonVus: 0,
 };
 const cheminEtat = () => path.join(app.getPath('userData'), 'veilleur-etat.json');
 
@@ -255,9 +263,65 @@ function ouvrirHautParleur() {
       // bruit, et le menu le dira.
     }
   }
-  const page = '<!doctype html><meta charset="utf-8"><title>son</title>' + audios;
+  /* ⚠⚠ L'ICÔNE VOYAGE AVEC LES SONS, ET CE N'EST PAS UN BRICOLAGE (#124).
+     Il faut poser une PASTILLE sur l'icône de la zone de notification. Le
+     processus principal d'Electron ne sait pas dessiner : `nativeImage` charge
+     et redimensionne, il ne peint pas. Deux solutions existaient — livrer une
+     seconde image toute faite, ou peindre. La seconde gagne, parce qu'une image
+     jumelle dérive : on retouche l'icône, on oublie sa version pastillée, et
+     l'icône change d'allure selon qu'il y a du nouveau ou non.
+     ⚠ On peint donc DANS cette page, qui existe déjà et qui a un canevas. */
+  let img = '';
+  try {
+    img = '<img id="_ico" src="data:image/png;base64,'
+      + fs.readFileSync(ICON_PATH).toString('base64') + '">';
+  } catch { /* icône illisible : la pastille ne se posera pas, l'icône reste nue */ }
+  const page = '<!doctype html><meta charset="utf-8"><title>son</title>' + audios + img;
   hautParleur.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(page));
   return hautParleur;
+}
+
+/* L'icône avec sa pastille, peinte une fois et gardée.
+   ⚠ UNE SEULE FOIS : `nativeImage.createFromDataURL` est peu coûteux, mais
+   repeindre à chaque tour de veille ferait un aller-retour vers un rendu toutes
+   les soixante secondes pour une image qui ne change jamais. */
+let _iconePastille = null;
+function poserIconePastille() {
+  if (_iconePastille) return Promise.resolve(_iconePastille);
+  return new Promise((resolve) => {
+    let w;
+    try { w = ouvrirHautParleur(); } catch { return resolve(null); }
+    const peindre = () => {
+      w.webContents.executeJavaScript(
+        '(() => { const i = document.getElementById("_ico");'
+        + ' if (!i || !i.naturalWidth) return "";'
+        + ' const c = document.createElement("canvas");'
+        + ' c.width = i.naturalWidth; c.height = i.naturalHeight;'
+        + ' const x = c.getContext("2d"); x.drawImage(i, 0, 0);'
+        /* ⚠ LA PASTILLE EN BAS À DROITE, AVEC UN LISERÉ CLAIR. L'icône se pose
+           sur une barre des tâches qui peut être sombre OU claire selon le
+           thème du poste : un point rouge nu se perd sur un fond rouge sombre,
+           et un liseré blanc le détache dans les deux cas. Le même raisonnement
+           que le bandeau crème des publications — on ne maîtrise pas le fond. */
+        + ' const r = Math.max(3, Math.round(c.width * 0.22));'
+        + ' const cx = c.width - r - 1, cy = c.height - r - 1;'
+        + ' x.beginPath(); x.arc(cx, cy, r + Math.max(1, r * 0.28), 0, 6.2832);'
+        + ' x.fillStyle = "#FFFFFF"; x.fill();'
+        + ' x.beginPath(); x.arc(cx, cy, r, 0, 6.2832);'
+        + ' x.fillStyle = "#D7263D"; x.fill();'
+        + ' try { return c.toDataURL("image/png"); } catch (e) { return ""; } })();', true
+      ).then((url) => {
+        if (!url) return resolve(null);
+        try { _iconePastille = nativeImage.createFromDataURL(url); } catch { _iconePastille = null; }
+        resolve(_iconePastille);
+      }).catch(() => resolve(null));
+    };
+    /* ⚠ ON ATTEND LE CHARGEMENT. `executeJavaScript` sur une page qui n'a pas
+       fini de charger trouve un document vide : l'image serait absente et l'on
+       conclurait que l'icône est illisible. */
+    if (w.webContents.isLoading()) w.webContents.once('did-finish-load', peindre);
+    else peindre();
+  });
 }
 
 function jouer(nom) {
@@ -291,7 +355,20 @@ function _noter(titre, type) {
     const e = lireEtat();
     const liste = Array.isArray(e.notifs) ? e.notifs.slice() : [];
     liste.unshift({ t: new Date().toISOString(), titre: String(titre || ''), type: String(type || '') });
-    ecrireEtat({ notifs: liste.slice(0, NOTIFS_MAX) });
+    /* ⚠⚠ LA PURGE DES 7 JOURS SE FAIT ICI, À L'ÉCRITURE (#124, sa demande :
+       « cela doit être conservé que 7 jours, ensuite il doit s'effacer seul »).
+       À l'écriture, et pas sur une minuterie : une minuterie ne tourne que si
+       l'application tourne, et c'est précisément le poste laissé éteint deux
+       semaines qui garderait tout. Ici, la première notification au retour fait
+       le ménage — et s'il n'en arrive aucune, il n'y a rien à nettoyer.
+       ⚠ La règle vit dans `veilleur-curseur.js`, où `banc-veilleur.js`
+       l'éprouve : une purge qu'aucun banc ne mesure est une purge qu'on croit
+       sur parole, et elle cesserait de fonctionner sans un bruit. */
+    ecrireEtat({ notifs: purgerNotifs(liste, new Date().toISOString()),
+                 /* ⚠ LE COMPTEUR DE NON-VUS, c'est ce que porte la pastille. Il
+                    monte ici et ne redescend qu'au regard (voir `tray.on`). */
+                 nonVus: (Number(e.nonVus) || 0) + 1 });
+    majTray();
   } catch { /* disque plein : le toast part quand même, c'est lui qui compte */ }
 }
 
@@ -310,11 +387,28 @@ function toast(titre, corps, sonNom) {
        d'état du menu de l'icône : « je sonne mais je ne peux pas afficher » est
        une information, « rien ne se passe » n'en est pas une. */
     if (!Notification.isSupported()) { dernierEchec = 'sans_notif'; majTray(); return; }
+    /* ⚠⚠ « GROSSIR LE TOAST » (#124, 2026-09-14) — ET CE QUI EST VRAIMENT
+       POSSIBLE. Sa demande : « j'aimerais que tu grossisses le toast quand on
+       reçoit une nouvelle commande ». Il faut le dire net : la TAILLE d'une
+       notification appartient au système, pas à nous. Windows la dessine, et
+       aucune ligne de code ici ne peut lui donner deux centimètres de plus.
+       Ce qu'on peut faire, et qui répond au vrai besoin — « je ne l'ai pas
+       vue » — tient en trois points :
+         · `timeoutType: 'never'` : elle ne s'efface PLUS toute seule au bout de
+           huit secondes. Elle reste jusqu'à ce qu'on la ferme. C'est le seul
+           réglage qui change quelque chose à « je n'étais pas devant l'écran ».
+         · `urgency: 'critical'` (Linux) : même intention là où ça existe.
+         · le TITRE porte le nombre, en gros, parce que c'est la seule ligne que
+           le système affiche en gras.
+       ⚠ Et la PASTILLE de l'icône est la vraie réponse au reste : elle, elle
+       attend indéfiniment. */
     const n = new Notification({
       title: titre,
       body: corps,
       icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
       silent: true,
+      timeoutType: 'never',
+      urgency: 'critical',
     });
     /* Un clic ouvre l'administration : une notification qu'on ne peut pas suivre
        oblige à retrouver l'application à la main, et on a déjà oublié pourquoi.
@@ -638,29 +732,75 @@ function _sousMenuNotifs() {
     return [{ label: TV('Veille active — connectez-vous pour voir les notifications'),
       enabled: false }];
   }
-  const liste = (lireEtat().notifs || []).filter((n) => n && n.titre);
+  /* ⚠⚠ ON PURGE AUSSI À LA LECTURE (#124). L'écriture purge déjà, mais elle
+     n'a lieu qu'à l'arrivée d'une notification : sur une semaine calme, le menu
+     montrerait encore des lignes de plus de sept jours. La règle doit tenir même
+     quand rien n'arrive — c'est justement le cas où l'on regarde la liste. */
+  const liste = purgerNotifs(lireEtat().notifs || [], new Date().toISOString())
+    .filter((n) => n && n.titre);
   if (!liste.length) {
     // ⚠ ON MONTRE L'ENTRÉE MÊME VIDE, désactivée. La faire disparaître laisserait
     // « je n'ai rien reçu » et « cette version ne garde pas de liste »
     // indiscernables — deux réponses très différentes à la même question.
     return [{ label: TV('Dernières notifications'), enabled: false }];
   }
-  return [{
-    label: TV('{0} dernières notifications').split('{0}').join(liste.length),
-    submenu: liste.map((n) => ({
-      label: (_NOTIF_ICO[n.type] || '•') + '  ' + _quandCourt(n.t) + ' — ' + n.titre,
-      click: ouvrirAdministration,
-    })).concat([
-      { type: 'separator' },
-      { label: TV('Effacer la liste'), click: () => { ecrireEtat({ notifs: [] }); majTray(); } },
-    ]),
-  }];
+  /* ══ LES DERNIÈRES À PLAT, LE RESTE DERRIÈRE (#124, 2026-09-14) ════════════
+     Sa demande : « toujours placer les dernières notifications au plus haut et
+     visible ; pour voir les autres on doit appuyer sur historique des 7 derniers
+     jours ».
+     ⚠⚠ ET C'EST L'INVERSE DE CE QUI EXISTAIT. Tout vivait dans UN sous-menu :
+     pour savoir s'il était arrivé une commande, il fallait ouvrir le menu, viser
+     une ligne, attendre le dépliage. Trois gestes pour une question qu'on se
+     pose en passant devant l'écran. */
+  const ligne = (n) => ({
+    label: (_NOTIF_ICO[n.type] || '•') + '  ' + _quandCourt(n.t) + ' — ' + n.titre,
+    click: ouvrirAdministration,
+  });
+  const { tete, reste } = partagerNotifs(liste);
+  const items = tete.map(ligne);
+  if (reste.length) {
+    items.push({
+      /* ⚠ LE TITRE DIT LA DURÉE, PAS SEULEMENT « HISTORIQUE ». « Historique »
+         tout court laisse croire qu'on garde tout depuis toujours — et l'on
+         chercherait un mois plus tard une commande effacée depuis trois
+         semaines, en croyant à une panne. */
+      label: TV('Historique des {0} derniers jours').split('{0}').join(NOTIFS_JOURS),
+      submenu: reste.map(ligne),
+    });
+  }
+  items.push({ label: TV('Effacer la liste'),
+    click: () => { ecrireEtat({ notifs: [], nonVus: 0 }); majTray(); } });
+  return items;
 }
 
 function majTray() {
   if (!tray) return;
   const e = lireEtat();
-  try { tray.setToolTip(TV('Veilleur SANDRIZA — ') + ligneEtat()); } catch {}
+  /* ⚠⚠ LA PASTILLE (#124). L'icône porte un point rouge tant qu'il reste des
+     notifications non regardées. Elle répond à une question qu'on se pose sans
+     s'arrêter : « est-ce qu'il s'est passé quelque chose ? » — et à laquelle le
+     toast, parti depuis huit secondes, ne répond plus.
+     ⚠ La peinture est asynchrone (elle passe par un rendu) et l'on ne l'attend
+     PAS : le menu se construit tout de suite, l'image se pose quand elle est
+     prête. Attendre ferait un menu qui met un instant à s'ouvrir — pour un
+     point. */
+  try {
+    if ((Number(e.nonVus) || 0) > 0) {
+      poserIconePastille().then((img) => {
+        // ⚠ On revérifie l'état : la pastille a pu s'éteindre pendant la peinture.
+        if (img && tray && !tray.isDestroyed() && (Number(lireEtat().nonVus) || 0) > 0) {
+          try { tray.setImage(img); } catch {}
+        }
+      }).catch(() => {});
+    } else if (!tray.isDestroyed()) {
+      try { tray.setImage(ICON_PATH); } catch {}
+    }
+  } catch {}
+  try {
+    tray.setToolTip(TV('Veilleur SANDRIZA — ') + ligneEtat()
+      + ((Number(e.nonVus) || 0) > 0
+          ? (' · ' + TV('{0} non vue(s)').split('{0}').join(Number(e.nonVus) || 0)) : ''));
+  } catch {}
   const menu = Menu.buildFromTemplate([
     { label: ligneEtat(), enabled: false },
     { type: 'separator' },
@@ -871,6 +1011,30 @@ function attacher(hote) {
   // Double-clic : le geste que tout le monde essaie en premier, et celui qui ne
   // marchait pas. Il montre la fenêtre, il ne lance plus rien.
   tray.on('double-click', ouvrirAdministration);
+
+  /* ══ LA PASTILLE S'ÉTEINT QUAND ON REGARDE (#124, 2026-09-14) ══════════════
+     ⚠⚠ ET C'EST LA QUESTION QU'IL FALLAIT TRANCHER : quand est-ce « vu » ?
+     Trois réponses possibles — à l'ouverture de l'administration, au clic sur
+     la notification, ou à l'ouverture du menu de l'icône. C'est la TROISIÈME.
+     La pastille ne dit pas « il y a du travail à faire », elle dit « il s'est
+     passé quelque chose que tu n'as pas encore lu » : elle s'éteint donc à
+     l'instant où l'on LIT, pas à l'instant où l'on agit. L'éteindre à
+     l'ouverture de l'administration l'aurait effacée sans que personne n'ait vu
+     ce qui est arrivé pendant la nuit.
+     ⚠ `right-click` ET `click` : sur Windows le menu s'ouvre au clic droit, mais
+     le clic gauche fait aussi apparaître l'icône dans le débordement — et sur
+     macOS un simple clic ouvre le menu. Écouter un seul des deux laisserait la
+     pastille allumée sur l'une des deux plateformes.
+     ⚠ On n'observe PAS l'ouverture du menu elle-même : Electron ne l'annonce
+     pas quand il est posé par `setContextMenu`. Ces deux événements sont ce
+     qu'on a, et ils arrivent juste avant. */
+  const vu = () => {
+    if ((Number(lireEtat().nonVus) || 0) === 0) return;
+    ecrireEtat({ nonVus: 0 });
+    majTray();
+  };
+  tray.on('right-click', vu);
+  tray.on('click', vu);
 
   ordonnancer();
   unTour().catch(() => {});
