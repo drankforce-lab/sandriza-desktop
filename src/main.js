@@ -2266,7 +2266,7 @@ const OPS_PONT = new Set([
   'nl:modele', 'nl:apercu',
   /* L editeur par blocs de la fenetre Campagnes (3.53.0). ⚠ La mise en page du
      courriel reste cote site : la fenetre envoie des BLOCS et recoit du HTML. */
-  'nl:blocsCatalogue', 'nl:blocsHtml',
+  'nl:blocsCatalogue', 'nl:blocsHtml', 'nl:iaRediger', 'nl:iaEtat',
   // Segments d envoi composables : le menu << Segment >> d une campagne lisait
   // deux entrees ECRITES EN DUR. segments:apercu compte SANS enregistrer, pour
   // voir la portee d une recette pendant qu on l ecrit.
@@ -3151,6 +3151,14 @@ const LIMITES_PONT = {
   /* Le catalogue des blocs est une lecture ; la conversion blocs -> HTML est un
      assemblage de chaines, sans reseau ni image. Deux operations legeres. */
   'nl:blocsCatalogue': 15000, 'nl:blocsHtml': 15000,
+  /* ⚠ 120 s POUR L ECRITURE IA, ET CE N EST PAS DE LA GENEROSITE. Le chemin fait
+     trois sauts : la page appelle notre passerelle, qui lit la cle en base, puis
+     interroge le fournisseur — dont la reponse arrive JETON PAR JETON et dont le
+     minuteur interne est deja de 90 s. Un plafond plus court ici ferait dire
+     << aucune reponse >> a la fenetre pendant que l appel, lui, aboutit et se
+     FACTURE : on paierait un texte qu on ne verrait jamais. L etat, lui, est une
+     simple lecture du journal. */
+  'nl:iaRediger': 120000, 'nl:iaEtat': 20000,
   /* Compter un segment relit TOUTES les commandes pour batir le profil de
      chaque abonnee : plus long qu une simple lecture de config. */
   'segments:donnees': 30000, 'segments:apercu': 30000,

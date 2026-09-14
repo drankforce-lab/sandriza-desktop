@@ -408,5 +408,69 @@ module.exports = {
   'en cours ·': 'under way ·',
   'les destinataires': 'the recipients',
   'ces personnes ne recevront jamais': 'these people will never receive',
-  'cette personne ne recevra jamais': 'this person will never receive'
+  'cette personne ne recevra jamais': 'this person will never receive',
+
+  /* ══ L ECRITURE PUBLICITAIRE IA (#115, 2026-09-14) ════════════════════════
+     ⚠ << Rédiger >> et non << Générer >>. En anglais, << Write >> et non
+     << Generate >>. Ce qui sort d ici est un BROUILLON qu on relit, qu on
+     deplace et qu on corrige dans l editeur juste en dessous ; << générer >>
+     ferait croire a un resultat fini qu on envoie tel quel — et c est
+     exactement ce qu il ne faut pas faire d un texte ecrit par une machine et
+     signe de la boutique.
+     ⚠ << Plafond >> reste << ceiling >>, comme dans l ecran des cles : un
+     budget se depasse, un plafond arrete. */
+  'Écrire avec l’IA': 'Write with AI',
+  'Simple': 'Simple',
+  'Avancé': 'Advanced',
+  'Que faut-il annoncer ?': 'What should it announce?',
+  'ex. l’arrivée de la collection d’automne, avec 15 % sur les manteaux':
+    'e.g. the arrival of the fall collection, with 15% off coats',
+  'Ton': 'Tone',
+  'Chaleureux': 'Warm',
+  'Élégant': 'Elegant',
+  'Enjoué': 'Playful',
+  'Pressant': 'Urgent',
+  'Langue': 'Language',
+  'Français': 'French',
+  'Anglais': 'English',
+  'Longueur': 'Length',
+  'Courte': 'Short',
+  'Moyenne': 'Medium',
+  'Longue': 'Long',
+  'Contenu du site': 'Site content',
+  'Produits et promotions': 'Products and promotions',
+  'Produits seulement': 'Products only',
+  'Ne rien joindre': 'Attach nothing',
+  'Consignes supplémentaires': 'Extra instructions',
+  'ex. ne pas parler de livraison gratuite ; mentionner la boutique de Québec':
+    'e.g. do not mention free shipping; mention the Quebec City shop',
+  'Où placer le texte rédigé': 'Where to put the written text',
+  'Remplacer le corps': 'Replace the body',
+  'Ajouter à la suite': 'Add after',
+  'Rédiger': 'Write',
+  'Rédaction…': 'Writing…',
+  'Rédaction en cours — cela prend une dizaine de secondes.':
+    'Writing under way — this takes about ten seconds.',
+  'Rédigé : ': 'Written: ',
+  'bloc(s)': 'block(s)',
+  'écarté(s), hors catalogue': 'set aside, outside the catalogue',
+  ' ce mois-ci': ' this month',
+  ' ce mois-ci (aucun plafond)': ' this month (no ceiling)',
+  'Aucune clé d’écriture IA n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.':
+    'No AI writing key is saved. It is set in Configuration ▸ API keys.',
+  'Dites d’abord ce qu’il faut annoncer.': 'First say what it should announce.',
+  'Le plafond mensuel d’écriture IA est atteint. Il se règle dans Configuration ▸ Clés API.':
+    'The monthly AI writing ceiling has been reached. It is set in Configuration ▸ API keys.',
+  'Le modèle n’a rien produit d’utilisable. Reformulez la demande.':
+    'The model produced nothing usable. Reword the request.',
+  'La réponse du modèle n’a pas pu être lue. Réessayez.':
+    'The model’s answer could not be read. Try again.',
+  'Vous n’avez pas le droit de modifier les campagnes.':
+    'You are not allowed to change campaigns.',
+  'La passerelle d’écriture IA est injoignable.': 'The AI writing gateway cannot be reached.',
+  'La rédaction a échoué.': 'The writing failed.',
+  /* ⚠ LES DEUX SEPARATEURS. Ils ne sont pas du decor : sans entree, le releve
+     les compte comme du francais laisse sur la page anglaise. */
+  ' — ': ' — ',
+  ' · ': ' · '
 };

@@ -138,6 +138,29 @@ tbody tr:hover td{background:var(--v04)}
 .bloc input[type=color]{padding:.1rem;height:1.7rem}
 .bvide{padding:1rem;text-align:center;color:var(--tx2);font-size:.8rem;
   border:1.5px dashed var(--v16);border-radius:9px}
+/* ══ L ECRITURE PUBLICITAIRE IA (#115) ═════════════════════════════════════
+   Le panneau est AU-DESSUS des blocs, pas a cote : ce qu il produit tombe
+   juste en dessous, et l ordre de lecture dit l ordre des gestes.
+   ⚠ AUCUNE OPACITE SUR UN TEXTE ICI. C est la lecon du 2026-09-14 : un
+   << color:var(--tx3) + opacity:.75 >> compose une couleur qu aucune ligne
+   n ecrit, et le juge de contrastes l a refusee a 4.20 sur 4.5. On prend
+   --tx2, qui est mesure. */
+.iabloc{border:1px solid var(--v16);border-radius:9px;background:var(--v05);
+  padding:.55rem .65rem;margin:.35rem 0 .5rem}
+.iabloc .iatt{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+.iabloc .iatt .ic{font-size:.85rem}
+.iabloc .iatt b{font:700 .8rem/1.2 system-ui;flex:1 1 auto;min-width:0}
+.iabloc .iatt button{font-size:.72rem;padding:.2rem .5rem;border-radius:7px}
+.iabloc .iag{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));
+  gap:.35rem;margin-bottom:.35rem}
+.iabloc .iaplein{grid-column:1/-1}
+.iabloc label{font-size:.7rem;color:var(--tx2);display:block;margin-bottom:.1rem}
+.iabloc input,.iabloc select,.iabloc textarea{width:100%;font-size:.8rem;padding:.26rem .4rem}
+.iabloc textarea{font-family:inherit;min-height:2.6rem}
+.iabloc .iapied{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.iabloc .iapied select{width:auto;font-size:.74rem}
+.iabloc .iapied .aide{color:var(--tx2);font-size:.72rem;margin-left:auto}
+.iabloc .iaavis{font-size:.76rem;color:var(--tx2);padding:.3rem 0}
 .apercu{border:1px solid var(--v14);border-radius:9px;overflow:hidden;
   margin-top:.4rem;background:#fff}
 .apercu .chrome{background:var(--f-0f1826);color:var(--tx2);font-size:.7rem;padding:.24rem .55rem;
@@ -319,6 +342,170 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (!z) return;
     z.innerHTML = blocsHtml();
     brancherBlocs();
+  }
+
+  /* ══ L ECRITURE PUBLICITAIRE IA (#115, 2026-09-14) ═════════════════════════
+     Sa demande : << il faut vraiment que cet outil soit avec un mode simple et
+     un mode avance >>, et << je dois etre en mesure d apporter des modifications
+     ou des deplacements dans les contenus generes >>.
+
+     ⚠⚠ LES DEUX MODES NE SONT PAS DEUX OUTILS. Le mode simple ne cache pas des
+     reglages : il en POSE. Ton chaleureux, francais, longueur moyenne, produits
+     et promotions du site — ce sont les memes valeurs que le mode avance montre,
+     avec les memes commandes derriere. Faire deux chemins separes, ce serait
+     deux comportements a tenir d accord, et le simple finirait par ne plus faire
+     ce que l avance annonce.
+     ⚠⚠ ET L IA NE REMPLACE PAS L EDITEUR : elle le REMPLIT. Ce qui revient, ce
+     sont des BLOCS — ils tombent dans les cartes ci-dessous avec leurs fleches,
+     leur croix et leurs champs. Tout est modifiable et deplacable a la minute ou
+     ca arrive. C est pour cela que le coeur rend des blocs et non du HTML.
+     ⚠ LE CHOIX << remplacer / ajouter a la suite >> EXISTE PARCE QU UN CLIC NE
+     DOIT PAS EFFACER UNE HEURE DE TRAVAIL. Sans lui, rediger sur une campagne
+     deja ecrite la jetterait sans rien demander. */
+  var IAMODE = 'simple';     // simple | avance
+  var IAETAT = null;         // { clePosee, budget:{plafond,depense}, modeles }
+  var IAOCC = false;         // un appel est en cours
+
+  function iaSousBudget(){
+    if (!IAETAT || !IAETAT.budget) return '';
+    var p = Number(IAETAT.budget.plafond || 0), d = Number(IAETAT.budget.depense || 0);
+    if (!p) return szArgent(d) + ' ${T(" ce mois-ci (aucun plafond)")}';
+    return szArgent(d) + ' ${T(" sur ")}' + szArgent(p) + ' ${T(" ce mois-ci")}';
+  }
+
+  function iaChoix(id, lib, opts, val){
+    var o = opts.map(function(q){
+      return '<option value="' + esc(q[0]) + '"' + (q[0] === val ? ' selected' : '') + '>' + esc(q[1]) + '</option>';
+    }).join('');
+    return '<div><label for="' + id + '">' + esc(lib) + '</label>'
+      + '<select id="' + id + '">' + o + '</select></div>';
+  }
+
+  /* ⚠ LE CONTENANT RESTE, SEUL LE CONTENU SE REPEINT. Cette fonction ne rend
+     que l INTERIEUR de la carte : le <div id="f-ia"> est pose une fois par le
+     formulaire. La premiere ecriture remplacait le noeud entier
+     (<< parentNode.replaceChild >>) et le banc l a refusee — a raison : un noeud
+     qu on remplace peut ne plus avoir de parent, et c est exactement le patron
+     que << majBlocs >> evite depuis toujours en repeignant << innerHTML >>. */
+  function iaPanneauHtml(){
+    /* ⚠ L ETAT EST DEMANDE AVANT LE CLIC, pas apres. Sans cle posee, on le dit
+       ici et l on renvoie a l ecran ou elle se pose — plutot que de laisser
+       ecrire une demande, attendre, et apprendre ensuite qu il n y a pas de cle. */
+    var pret = !!(IAETAT && IAETAT.clePosee);
+    var h = '<div class="iatt"><span class="ic">✶</span><b>${T("Écrire avec l’IA")}</b>'
+      + '<button class="mini' + (IAMODE === 'simple' ? ' on' : '') + '" id="f-ia-simple">${T("Simple")}</button>'
+      + '<button class="mini' + (IAMODE === 'avance' ? ' on' : '') + '" id="f-ia-avance">${T("Avancé")}</button>'
+      + '</div>';
+    if (IAETAT && !pret) {
+      return h + '<div class="iaavis">${T("Aucune clé d’écriture IA n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.")}</div>';
+    }
+    h += '<div class="iag"><div class="iaplein"><label for="f-ia-but">${T("Que faut-il annoncer ?")}</label>'
+      + '<input id="f-ia-but" placeholder="${T("ex. l’arrivée de la collection d’automne, avec 15 % sur les manteaux")}"></div></div>';
+    if (IAMODE === 'avance') {
+      h += '<div class="iag">'
+        + iaChoix('f-ia-ton', '${T("Ton")}', [['chaleureux', '${T("Chaleureux")}'], ['elegant', '${T("Élégant")}'],
+            ['enjoue', '${T("Enjoué")}'], ['urgent', '${T("Pressant")}']], 'chaleureux')
+        + iaChoix('f-ia-langue', '${T("Langue")}', [['fr', '${T("Français")}'], ['en', '${T("Anglais")}']], 'fr')
+        + iaChoix('f-ia-long', '${T("Longueur")}', [['court', '${T("Courte")}'], ['moyen', '${T("Moyenne")}'],
+            ['long', '${T("Longue")}']], 'moyen')
+        + iaChoix('f-ia-src', '${T("Contenu du site")}', [['tout', '${T("Produits et promotions")}'],
+            ['produits', '${T("Produits seulement")}'], ['rien', '${T("Ne rien joindre")}']], 'tout')
+        + '</div>'
+        + '<div class="iag"><div class="iaplein"><label for="f-ia-plus">${T("Consignes supplémentaires")}</label>'
+        + '<textarea id="f-ia-plus" rows="2" placeholder="${T("ex. ne pas parler de livraison gratuite ; mentionner la boutique de Québec")}"></textarea></div></div>';
+    }
+    h += '<div class="iapied">'
+      + '<select id="f-ia-quoi" aria-label="${T("Où placer le texte rédigé")}">'
+      + '<option value="remplacer">${T("Remplacer le corps")}</option>'
+      + '<option value="suite">${T("Ajouter à la suite")}</option></select>'
+      + '<button class="mini prim" id="f-ia-go"' + (IAOCC ? ' disabled' : '') + '>'
+      + (IAOCC ? '${T("Rédaction…")}' : '${T("Rédiger")}') + '</button>'
+      + '<span class="aide" id="f-ia-etat">' + esc(iaSousBudget()) + '</span>'
+      + '</div>';
+    return h;
+  }
+
+  /* Ne repeint QUE le panneau : un redessin du formulaire perdrait le sujet et
+     le segment deja saisis.
+     ⚠ ET LA DEMANDE DEJA ECRITE EST GARDEE A LA MAIN. Passer de << Simple >> a
+     << Avancé >> repeint le champ : sans cette mise de cote, la phrase qu on
+     vient de taper disparaitrait au moment precis ou l on cherche a la preciser. */
+  function majIa(){
+    var z = document.getElementById('f-ia');
+    if (!z) return;
+    var but = document.getElementById('f-ia-but');
+    var garde = but ? but.value : '';
+    z.innerHTML = iaPanneauHtml();
+    var b2 = document.getElementById('f-ia-but');
+    if (b2 && garde) b2.value = garde;
+    brancherIa();
+  }
+
+  function iaDemander(){
+    var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var but = v('f-ia-but').trim();
+    if (!but) { dire('${T("Dites d’abord ce qu’il faut annoncer.")}', 'att'); return; }
+    var src = v('f-ia-src') || 'tout';
+    var d = { but: but,
+      ton: v('f-ia-ton') || 'chaleureux',
+      langue: v('f-ia-langue') || 'fr',
+      longueur: v('f-ia-long') || 'moyen',
+      produits: src !== 'rien',
+      promotions: src === 'tout',
+      consignesLibres: v('f-ia-plus') || '' };
+    var suite = (v('f-ia-quoi') === 'suite');
+    IAOCC = true; majIa();
+    dire('${T("Rédaction en cours — cela prend une dizaine de secondes.")}');
+    appeler('nl:iaRediger', [d]).then(function(r){
+      IAOCC = false;
+      if (!r || !r.ok) { majIa(); dire(iaExpliquer(r), 'err'); return; }
+      if (r.budget) { IAETAT = IAETAT || {}; IAETAT.budget = r.budget; IAETAT.clePosee = true; }
+      BLOCS = suite ? BLOCS.concat(r.blocs) : r.blocs.slice();
+      /* ⚠ LE MODE VISUEL EST RETABLI : les blocs venus d ici ne se voient pas en
+         mode HTML, et l on croirait que rien n est arrive. */
+      if (BMODE !== 'visuel') { BMODE = 'visuel'; dessiner(); }
+      else { majIa(); majBlocs(); }
+      // Le sujet n est pose que s il est VIDE : il a pu etre ecrit a la main, et
+      // l IA n a pas a l ecraser.
+      var su = document.getElementById('f-suj');
+      if (su && !su.value.trim() && r.sujet) su.value = r.sujet;
+      var mot = '${T("Rédigé : ")}' + r.blocs.length + ' ${T("bloc(s)")}'
+        + (r.jetes ? (' ${T(" — ")}' + r.jetes + ' ${T("écarté(s), hors catalogue")}') : '')
+        + (r.cout ? (' ${T(" · ")}' + szArgent(r.cout)) : '');
+      dire(mot, 'bon');
+    });
+  }
+
+  /* ⚠ LES MOTIFS DE LA PASSERELLE SE LISENT ICI, ET CHACUN DIT QUOI FAIRE. Un
+     << Erreur inattendue >> sur un plafond atteint enverrait chercher la panne
+     dans le reseau alors qu il suffit de relever un chiffre. */
+  function iaExpliquer(r){
+    var m = (r && (r.motif || r.error)) || '';
+    if (m === 'budget') return r.error || '${T("Le plafond mensuel d’écriture IA est atteint. Il se règle dans Configuration ▸ Clés API.")}';
+    if (m === 'sans_but') return '${T("Dites d’abord ce qu’il faut annoncer.")}';
+    if (m === 'aucun_bloc') return '${T("Le modèle n’a rien produit d’utilisable. Reformulez la demande.")}';
+    if (m === 'json_illisible') return '${T("La réponse du modèle n’a pas pu être lue. Réessayez.")}';
+    if (m === 'lecture_seule') return '${T("Vous n’avez pas le droit de modifier les campagnes.")}';
+    if (m === 'injoignable') return '${T("La passerelle d’écriture IA est injoignable.")}';
+    return (r && r.error) || '${T("La rédaction a échoué.")}';
+  }
+
+  function brancherIa(){
+    var b;
+    b = document.getElementById('f-ia-simple');
+    if (b) b.onclick = function(){ IAMODE = 'simple'; majIa(); };
+    b = document.getElementById('f-ia-avance');
+    if (b) b.onclick = function(){ IAMODE = 'avance'; majIa(); };
+    b = document.getElementById('f-ia-go');
+    if (b) b.onclick = iaDemander;
+  }
+
+  // L etat de l ecriture IA, demande une fois par ouverture du formulaire.
+  function iaCharger(){
+    appeler('nl:iaEtat', []).then(function(r){
+      IAETAT = (r && r.ok) ? r : { clePosee: false, budget: {} };
+      majIa();
+    });
   }
 
   /* ⚠ ON DEMANDE LE HTML AU SITE, on ne le fabrique pas. */
@@ -508,6 +695,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
          seul moyen de coller un gabarit venu d ailleurs, et de relire ce qui
          part vraiment. Basculer vers HTML CONVERTIT les blocs ; revenir au
          visuel remet le HTML dans un bloc << HTML libre >>, sans rien perdre. */
+      + '<div class="iabloc" id="f-ia">' + iaPanneauHtml() + '</div>'
       + '<div class="bqbar">'
       + '<button class="mini' + (BMODE === 'visuel' ? ' on' : '') + '" id="f-m-vis">${T("Visuel")}</button>'
       + '<button class="mini' + (BMODE === 'html' ? ' on' : '') + '" id="f-m-htm">HTML</button>'
@@ -902,6 +1090,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       };
       majMode();
       brancherBlocs();
+      brancherIa();
+      /* ⚠ L ETAT DE L IA N EST DEMANDE QU UNE FOIS PAR OUVERTURE. Le redemander
+         a chaque redessin du panneau ferait un appel reseau par clic sur
+         << Avancé >>, pour une reponse qui ne change pas. */
+      if (!IAETAT) iaCharger();
 
       var ch = document.getElementById('f-charger');
       if (ch) ch.onclick = function(){
