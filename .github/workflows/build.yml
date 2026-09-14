@@ -619,6 +619,19 @@ jobs:
           # ⚠ Une entrée ABSENTE se remarque ; une entrée qui OUVRE LE VIDE se
           # prend pour une panne, et on la cherche ailleurs.
           node tools/banc-entree-morte.js
+          # ⚠⚠ CE QUI PARLE SANS ETRE UNE FENETRE (#99, 2026-09-14).
+          # Presque tous les bancs de langue, de contraste et de rendu lisent
+          # `src/fenetres/` — la ou vivent 98 ecrans sur 99. Tombe donc dehors
+          # tout ce qui parle a quelqu un SANS etre une page : une boite de
+          # dialogue, une notification, un menu, une infobulle. Aucun rendu ne
+          # peut les relire, et un verdict vert ne dit jamais ou s arrete le
+          # terrain balaye — la lecon payee neuf fois le 2026-09-13.
+          # ⚠ Il ne juge pas les textes : il dit QUI est charge de les mesurer,
+          # exige que chaque famille soit declaree AVEC SON COMPTE (un appel
+          # ajoute fait echouer, donc force la question), et VERIFIE que le banc
+          # nomme lit vraiment le fichier. Une couverture affirmee et fausse est
+          # pire que pas de couverture : on cesse de regarder.
+          node tools/banc-surface-hors-fenetre.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de
