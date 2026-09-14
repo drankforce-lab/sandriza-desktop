@@ -764,10 +764,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function recharger(msg, cl){
     appeler('journal:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; rendre(); } if (msg) dire(msg, cl); });
   }
+  /* ⚠⚠ LE REPLI DU MARKETING — 2026-09-14, #106b, ET SANS LUI L'ENTREE EST MORTE.
+     Depuis que le menu ouvre les Journaux a << newsletter >> autant qu a
+     << staff >>, quelqu un qui ne fait QUE du marketing arrive ici. Or
+     journal:donnees exige la lecture de securite : il lui repond << droit >>,
+     et la ligne d avant sortait SANS jamais appeler rendre() — donc sans
+     tabs(). Cette personne voyait une fenetre vide, pas meme un onglet, et son
+     PROPRE journal d envoi restait inatteignable. Une entree de menu qui ouvre
+     le vide est pire que pas d entree du tout.
+     ⚠ ON NE MONTRE QUE << Journal d envoi >>, et c est sa regle : invisible
+     plutot que grise. Les huit autres onglets sont gardes par _secLire() ou
+     staff ; les afficher pour qu ils refusent un a un apprendrait a l equipe
+     qu un pouvoir existe et qu elle ne l a pas.
+     ⚠ vueEnvois() NE LIT PAS D — elle ne depend que de journal:liste, qui exige
+     newsletter. Le repli tient donc debout sans D.
+     ⚠ SEUL LE MOTIF << droit >> replie. Une panne de reseau ou une session
+     perdue doit se dire telle quelle : la deguiser en question de permission
+     enverrait chercher un droit qui n a jamais manque. */
+  function replierSurEnvois(){
+    ONGLETS = [ ['envois','${T("Journal d’envoi")}'] ];
+    ONGLET = 'envois';
+    rendre();
+    dire('');
+  }
   function charger(){
     dire('${T("Chargement…")}');
     appeler('journal:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){
+        if (r && r.motif === 'droit') { replierSurEnvois(); return; }
+        corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; rendre(); dire('');
     });
   }

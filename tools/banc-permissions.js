@@ -89,6 +89,20 @@ const fautes = [];
 /* ── 2. LE MASQUAGE : chaque `perm:` du menu existe-t-il ? ────────────────── */
 {
   const vus = new Set();
+  /* ⚠ DEUX FORMES DEPUIS LE 2026-09-14 (#106b) : `perm: 'staff'` et
+     `perm: ['staff','newsletter']`. Le relevé ne lisait QUE la première — la
+     forme à plusieurs jetons ne correspondait à rien, donc le banc la SAUTAIT
+     en silence et son verdict restait vert. Une faute de frappe dans le tableau
+     serait passée, et `permOk()` aurait ouvert l'entrée à tout le monde : très
+     exactement la faute que cette étape existe pour attraper.
+     ⚠ On relève d'abord le tableau ENTIER, puis chaque jeton qu'il contient. */
+  const rxListe = /\bperm:\s*\[([^\]]*)\]/g;
+  let mL;
+  while ((mL = rxListe.exec(appbar))) {
+    const rxJeton = /'([^']+)'/g;
+    let mJ;
+    while ((mJ = rxJeton.exec(mL[1]))) vus.add(mJ[1]);
+  }
   const rx = /\bperm:\s*'([^']+)'/g;
   let m;
   while ((m = rx.exec(appbar))) vus.add(m[1]);

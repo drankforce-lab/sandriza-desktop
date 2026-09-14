@@ -580,6 +580,21 @@ jobs:
           # coche sans savoir ce qu'elle ouvre est la façon la plus ordinaire
           # d'accorder trop.
           node tools/banc-permissions.js
+          # ⚠⚠ UNE ENTRÉE À PLUSIEURS DROITS OUVRE-T-ELLE UNE FENÊTRE VIVANTE ?
+          # Né le 2026-09-14 (#106b) d'une faute commise le jour même : l'entrée
+          # « Journaux » est passée à `perm: ['staff','newsletter']` pour rendre
+          # au marketing SON journal d'envoi — et la fenêtre était MORTE pour
+          # lui. Son `charger()` appelle `journal:donnees`, gardé par la lecture
+          # de sécurité ; le refus sortait SANS appeler `rendre()`, donc sans
+          # `tabs()` : une fenêtre vide, pas même un onglet.
+          # ⚠ Rien ne le voyait : `banc-permissions` compare les trois listes, et
+          # elles s'accordaient — `staff` et `newsletter` existent tous les deux.
+          # Les bancs de rendu ouvrent tout en super-administrateur, pour qui
+          # aucun cœur ne refuse. La faute n'était ni dans le menu ni dans la
+          # fenêtre, mais dans L'ÉCART ENTRE LES DEUX.
+          # ⚠ Une entrée ABSENTE se remarque ; une entrée qui OUVRE LE VIDE se
+          # prend pour une panne, et on la cherche ailleurs.
+          node tools/banc-entree-morte.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de
