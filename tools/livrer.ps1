@@ -80,6 +80,55 @@ function Slug($chemin) {
 $slugApp  = Slug $racine
 $slugSite = Slug $Site
 
+<#
+ ⚠⚠⚠ TROUVER L EXECUTION QU ON VIENT DE LANCER — ET LA FAUTE QUE CA A COUTE.
+ `gh workflow run` ne rend PAS le numero d execution : il faut le retrouver.
+ Premiere ecriture (5.67.0) : on filtrait sur `createdAt >= maintenant`, puis on
+ prenait la PLUS ANCIENNE des candidates. Resultat : le script a suivi une
+ construction VIEILLE DE TROIS HEURES, l a trouvee verte, et a lance la
+ publication avec SON numero — c est-a-dire les paquets de la 5.66.0 sous
+ l etiquette 5.67.0.
+
+ ⚠ CE QUI A SAUVE LA MISE, ET CE N EST PAS CE SCRIPT : le travail de publication
+ a son propre garde (<< cette execution ne porte AUCUN arteface >>) et a refuse
+ avant de toucher R2. Sans lui, la mauvaise version partait.
+
+ ⚠ LA CAUSE : `ConvertFrom-Json` convertit deja les dates ISO en [datetime]
+ LOCALE ; y appliquer `.ToUniversalTime()` decale une seconde fois, et toutes les
+ executions recentes passaient le filtre. On ne compare donc plus des dates du
+ tout — on compare les CHAINES ISO, qui se trient dans l ordre chronologique par
+ construction, en lisant `--jq` (du texte brut, jamais reinterprete).
+
+ ⚠ ET DEUX GARDES DE PLUS, parce qu une comparaison juste peut redevenir fausse :
+   . on prend la PLUS RECENTE, pas la plus ancienne ;
+   . on EXIGE qu elle soit `queued` ou `in_progress`. Une execution qu on vient
+     de lancer ne peut pas etre deja terminee — si elle l est, c est qu on
+     regarde la mauvaise, et il vaut mille fois mieux s arreter.
+#>
+function TrouverExecution($slug, $nomTravail, $isoAvant) {
+  foreach ($essai in 1..20) {
+    Start-Sleep -Seconds 3
+    $lignes = & gh run list --repo $slug --workflow $nomTravail --event workflow_dispatch `
+      --limit 10 --jq '.[] | "\(.createdAt)|\(.databaseId)|\(.status)"' --json createdAt,databaseId,status
+    if ($LASTEXITCODE -ne 0 -or -not $lignes) { continue }
+    $cands = @($lignes | Where-Object { $_ } | ForEach-Object {
+      $p = $_ -split '\|'
+      if ($p.Count -ge 3 -and $p[0] -ge $isoAvant) {
+        [pscustomobject]@{ iso = $p[0]; id = $p[1]; etat = $p[2] }
+      }
+    })
+    if (-not $cands) { continue }
+    $c = ($cands | Sort-Object iso -Descending)[0]
+    if ($c.etat -notin @('queued', 'in_progress', 'requested', 'waiting', 'pending')) {
+      Mauvais ("l'execution trouvee ($($c.id)) est deja << $($c.etat) >> — " +
+        "on ne vient pas de la lancer. Rien n'est livre : suivre la mauvaise execution, " +
+        "c'est publier les paquets d'une autre version.")
+    }
+    return $c.id
+  }
+  return $null
+}
+
 # ── 0. LE PALIER DE VERSION ─────────────────────────────────────────────────
 # ⚠ C'est l'oubli le plus banal : on lance la construction avec le numero
 # suivant, et package.json porte encore le precedent. Le travail le refuse deja
@@ -152,18 +201,11 @@ Etape "4. Construire (depot public $slugApp)"
 # declenchement, puis on cherche la premiere execution `workflow_dispatch` creee
 # APRES. Prendre simplement << la plus recente >> attraperait celle d'avant si
 # GitHub tarde a la creer.
-$avant = (Get-Date).ToUniversalTime().AddSeconds(-5)
+$avant = (Get-Date).ToUniversalTime().AddSeconds(-10).ToString('yyyy-MM-ddTHH:mm:ssZ')
 & gh workflow run 'Construire' --repo $slugApp --ref main -f version=$Version
 if ($LASTEXITCODE -ne 0) { Mauvais "le declenchement de << Construire >> a echoue" }
 
-$idConstruction = $null
-foreach ($essai in 1..20) {
-  Start-Sleep -Seconds 3
-  $brut = (& gh run list --repo $slugApp --workflow 'Construire' --event workflow_dispatch --limit 5 --json databaseId,createdAt)
-  if ($LASTEXITCODE -ne 0 -or -not $brut) { continue }
-  $cands = $brut | ConvertFrom-Json | Where-Object { [datetime]::Parse($_.createdAt).ToUniversalTime() -ge $avant }
-  if ($cands) { $idConstruction = ($cands | Sort-Object createdAt | Select-Object -First 1).databaseId; break }
-}
+$idConstruction = TrouverExecution $slugApp 'Construire' $avant
 if (-not $idConstruction) { Mauvais "execution de << Construire >> introuvable apres 60 s" }
 Bon "construction $idConstruction lancee"
 Note "suivi : https://github.com/$slugApp/actions/runs/$idConstruction"
@@ -203,18 +245,11 @@ Bon "construction entierement verte"
 
 # ── 5. PUBLIER — L'ETAPE OUBLIEE SEPT FOIS ──────────────────────────────────
 Etape "5. Publier (depot prive $slugSite)"
-$avant2 = (Get-Date).ToUniversalTime().AddSeconds(-5)
+$avant2 = (Get-Date).ToUniversalTime().AddSeconds(-10).ToString('yyyy-MM-ddTHH:mm:ssZ')
 & gh workflow run "Publier l'application de bureau" --repo $slugSite --ref main -f run_id=$idConstruction -f version=$Version
 if ($LASTEXITCODE -ne 0) { Mauvais "le declenchement de << Publier >> a echoue — les paquets existent mais ne sont ALLES NULLE PART" }
 
-$idPublication = $null
-foreach ($essai in 1..20) {
-  Start-Sleep -Seconds 3
-  $brut = (& gh run list --repo $slugSite --workflow "Publier l'application de bureau" --event workflow_dispatch --limit 5 --json databaseId,createdAt)
-  if ($LASTEXITCODE -ne 0 -or -not $brut) { continue }
-  $cands = $brut | ConvertFrom-Json | Where-Object { [datetime]::Parse($_.createdAt).ToUniversalTime() -ge $avant2 }
-  if ($cands) { $idPublication = ($cands | Sort-Object createdAt | Select-Object -First 1).databaseId; break }
-}
+$idPublication = TrouverExecution $slugSite "Publier l'application de bureau" $avant2
 if (-not $idPublication) { Mauvais "execution de << Publier >> introuvable — verifier a la main, les paquets sont construits" }
 Bon "publication $idPublication lancee"
 
