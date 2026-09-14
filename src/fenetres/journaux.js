@@ -86,7 +86,13 @@ function pageJournaux(onglet) {
   // 'q-<terme>' ouvre l'onglet Recherche et lance la recherche du terme.
   var RQINIT0 = '';
   if (brut.indexOf('q-') === 0) { RQINIT0 = brut.slice(2).replace(/[^A-Za-z0-9._@-]/g, ''); brut = 'recherche'; }
-  const ONGLET0 = (['recherche','acces','automatisations','impressions','sms','comptable','recherches','jserreurs'].indexOf(brut) >= 0) ? brut : 'acces';
+  /* ⚠ 'journal' EST ENCORE ACCEPTÉ ET MÈNE À L'ONGLET DES ENVOIS. C'était le
+     nom de la fenêtre qui a été repliée ici le 2026-09-13 : un raccourci, un
+     signet ou une coquille plus ancienne peut encore le passer, et tomber sur
+     l'onglet « Accès » sans explication serait pire que d'arriver au bon
+     endroit. Même égard que pour 'securite' dans la fenêtre des accès. */
+  if (brut === 'journal') brut = 'envois';
+  const ONGLET0 = (['recherche','acces','automatisations','envois','impressions','sms','comptable','recherches','jserreurs'].indexOf(brut) >= 0) ? brut : 'acces';
   return `${TETE()}
 <title>${T("Journaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -135,8 +141,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var RQ = '', RRES = null;   // recherche inter-journaux : terme + résultats
   var RQINIT = '${RQINIT0}';  // terme à lancer automatiquement à l'ouverture (banc)
 
-  var ONGLETS = [ ['recherche','${T("Recherche")}'], ['acces','${T("Accès")}'], ['automatisations','${T("Automatisations")}'], ['impressions','${T("Impressions")}'], ['sms','SMS'], ['comptable','${T("Accès aux liens")}'], ['recherches','${T("Sans résultat")}'], ['jserreurs','${T("Erreurs des clients")}'] ];
+  /* ⚠⚠ « JOURNAL D'ENVOI » A REJOINT CETTE FENÊTRE LE 2026-09-13, à sa demande :
+     « cela devrait aller dans les journaux et avoir sa propre onglet aussi et
+     disparaître de marketing ». Il avait un écran à lui sous Marketing — et
+     c'était bien un JOURNAL : qui a reçu quoi, quand, et si c'est parti. Le
+     chercher ailleurs que dans les journaux était une devinette de plus.
+     ⚠ IL EST PLACÉ APRÈS « Automatisations » et non en fin de liste : les deux
+     racontent la même histoire (ce que la boutique a envoyé toute seule), et
+     on passe de l'un à l'autre en enquêtant. */
+  var ONGLETS = [ ['recherche','${T("Recherche")}'], ['acces','${T("Accès")}'], ['automatisations','${T("Automatisations")}'], ['envois','${T("Journal d’envoi")}'], ['impressions','${T("Impressions")}'], ['sms','SMS'], ['comptable','${T("Accès aux liens")}'], ['recherches','${T("Sans résultat")}'], ['jserreurs','${T("Erreurs des clients")}'] ];
   var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
+  /* ⚠ L'ÉTAT DU JOURNAL D'ENVOI, chargé à la visite de l'onglet comme les deux
+     ci-dessus : le coeur journal:liste exige le droit newsletter, qui n'est
+     pas celui qui ouvre cette fenêtre. On ne va donc pas le chercher tant que
+     personne ne l'a demandé — sinon chaque ouverture des Journaux commencerait
+     par un refus inscrit nulle part. */
+  var ENV_D = null;
+  var ENV_Q = '', ENV_ECHECS = false, ENV_ARME = false;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -436,6 +457,99 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var rl=document.getElementById('sms-reload'); if (rl) rl.onclick=function(){ SMS_D=null; vueSms(); };
   }
 
+  /* ══ JOURNAL D'ENVOI (venu de sa fenêtre propre, 2026-09-13) ═══════════════
+     ⚠⚠ C'EST LA SEULE PIÈCE qui permette de répondre à « je n'ai jamais reçu
+     votre courriel ». Les échecs sont donc comptés à part et gardent leur
+     message d'erreur : un journal qui ne montrerait que les succès ne servirait
+     à rien le jour où ça rate. */
+  function vueEnvois(){
+    if (ENV_D===null){
+      corps.innerHTML='<div class="vide charge">${T("Lecture du journal d’envoi…")}</div>'; OCCUPE=true;
+      appeler('journal:liste',[]).then(function(r){ OCCUPE=false;
+        if (r&&r.ok){ ENV_D=r; if (ONGLET==='envois') vueEnvois(); }
+        else {
+          ENV_D=false;
+          /* ⚠ LE REFUS EST EXPLIQUE, PAS AVALE. Ce journal exige le droit
+             newsletter, que quelqu un qui ouvre les Journaux peut ne pas
+             avoir : un onglet vide sans raison ferait croire a une panne. */
+          if (ONGLET==='envois') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>';
+          dire('${T("Échec : ")}'+expliquer(r), 'err');
+        } });
+      return;
+    }
+    if (ENV_D===false){ corps.innerHTML='<div class="carte"><div class="vide">${T("Journal d’envoi indisponible.")}</div></div>'; return; }
+
+    var q = ENV_Q.trim().toLowerCase();
+    var rows = (ENV_D.lignes || []).filter(function(l){
+      if (ENV_ECHECS && l.envoye) return false;
+      if (!q) return true;
+      return (String(l.courriel) + ' ' + String(l.reference)).toLowerCase().indexOf(q) !== -1;
+    });
+
+    var h = '<div class="kpis">'
+      + '<div class="kpi"><div class="l">${T("Envois enregistrés")}</div><div class="v">'+(ENV_D.total||0)+'</div></div>'
+      + '<div class="kpi"><div class="l">${T("Partis")}</div><div class="v" style="color:var(--tx-ok2)">'+(ENV_D.envoyes||0)+'</div></div>'
+      + '<div class="kpi"><div class="l">${T("Échecs")}</div><div class="v" style="color:var(--tx-err2)">'+(ENV_D.echecs||0)+'</div></div>'
+      + '</div>'
+      + '<div class="carte"><div class="barre">'
+      + '<input aria-label="${T("Adresse ou campagne")}" class="t" type="search" id="env-q" placeholder="${T("Adresse ou campagne…")}" value="'+esc(ENV_Q)+'" style="flex:1;min-width:200px">'
+      + '<button class="mini'+(ENV_ECHECS?' actif':'')+'" id="env-echecs">${T("Échecs seulement")}</button>'
+      + '<span class="pousse"></span>'
+      + '<span class="sub">'+rows.length+' '+(rows.length>1?'${T("lignes")}':'${T("ligne")}')+'</span>'
+      + (ENV_D.peutModifier && (ENV_D.total||0)
+          ? '<button class="b dgr" id="env-vider">'+(ENV_ARME?'${T("Confirmer ?")}':'${T("Effacer le journal")}')+'</button>' : '')
+      + '<button class="b" id="env-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>';
+
+    if (!rows.length) {
+      h += '<div class="vide">'+((ENV_Q||ENV_ECHECS)?'${T("Rien ne correspond.")}':'${T("Aucun envoi enregistré.")}')+'</div>';
+    } else {
+      h += '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Genre")}</th><th>${T("Référence")}</th>'
+        + '<th>${T("Destinataire")}</th><th>${T("Résultat")}</th><th>${T("Détail")}</th></tr></thead><tbody>';
+      for (var i=0;i<rows.length;i++){ var l=rows[i];
+        h += '<tr><td class="mut" style="white-space:nowrap">'+esc(l.date)+'</td>'
+          + '<td><span class="pill" style="background:var(--v10);color:var(--tx2)">'+esc(l.genre)+'</span></td>'
+          + '<td>'+esc(l.reference || '—')+'</td>'
+          + '<td>'+esc(l.courriel)+'</td>'
+          + '<td><span class="pill" style="background:'+(l.envoye?'rgba(22,163,74,.2)':'rgba(220,38,38,.18)')
+          +   ';color:'+(l.envoye?'var(--tx-ok2)':'var(--tx-err2)')+'">'
+          + (l.envoye ? '${T("Parti")}' : '${T("Échec")}')+'</span>'
+          + (l.test ? ' <span class="pill" style="background:rgba(234,179,8,.18);color:var(--tx-att)">test</span>' : '')+'</td>'
+          /* Le detail porte l identifiant Resend (preuve d envoi) OU le message
+             d erreur : c est ce qui permet de repondre a << je n ai rien recu >>. */
+          + '<td class="sub" title="'+esc(l.detail || '')+'">'+esc(l.detail || '—')+'</td></tr>';
+      }
+      h += '</tbody></table>';
+    }
+    h += '</div>';
+    corps.innerHTML = h;
+
+    /* ⚠ LE CHAMP GARDE LE CURSEUR : redessiner a chaque frappe le remettrait au
+       debut, et l on taperait << marie >> pour obtenir << eiram >>. */
+    var qe=document.getElementById('env-q');
+    if (qe) qe.oninput=function(){
+      ENV_Q=this.value; var pos=this.selectionStart; ENV_ARME=false; vueEnvois();
+      var n=document.getElementById('env-q'); if (n){ n.focus({preventScroll:true}); try { n.setSelectionRange(pos,pos); } catch(e){} }
+    };
+    var be=document.getElementById('env-echecs'); if (be) be.onclick=function(){ ENV_ECHECS=!ENV_ECHECS; ENV_ARME=false; vueEnvois(); };
+    var rl=document.getElementById('env-reload'); if (rl) rl.onclick=function(){ ENV_D=null; ENV_ARME=false; vueEnvois(); };
+    var bv=document.getElementById('env-vider');
+    if (bv) bv.onclick=function(){
+      if (!ENV_ARME){
+        ENV_ARME=true; vueEnvois();
+        /* Une phrase ENTIERE dans un seul litteral. */
+        dire('${T("Cliquez « Confirmer ? » — le journal est effacé, et avec lui la preuve de ce qui est parti. Les envois eux-mêmes ne sont pas annulés.")}', 'att');
+        return;
+      }
+      ENV_ARME=false;
+      appeler('journal:vider',[]).then(function(r){
+        if (!r.ok){ dire(expliquer(r), 'err'); vueEnvois(); return; }
+        /* Deux formes ENTIERES : un fragment recolle ne se traduit pas. */
+        dire(r.efface + (r.efface > 1 ? '${T(" entrées effacées.")}' : '${T(" entrée effacée.")}'), 'bon');
+        ENV_D=null; vueEnvois();
+      });
+    };
+  }
+
   // ── Accès comptables (#7 Lot 7b-2 — reutilise liens:journal) ─────
   var CANAUX = { telechargement:'${T("Installation")}', comptable:'${T("Comptable")}', courriel:'${T("Courriel")}' };
   var EVEN = { visite:'${T("Visite")}', refuse:'${T("Refusé")}', ouvert:'${T("Ouvert")}', classeur:'${T("Classeur ouvert")}', cree:'${T("Créé")}', revoque:'${T("Révoqué")}', telecharge:'${T("Téléchargé")}', envoye:'${T("Courriel envoyé")}' };
@@ -639,6 +753,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     boutonVerrous();
     if (ONGLET==='recherche') vueRecherche();
     else if (ONGLET==='automatisations') vueAuto();
+    else if (ONGLET==='envois') vueEnvois();
     else if (ONGLET==='impressions') vuePrints();
     else if (ONGLET==='sms') vueSms();
     else if (ONGLET==='comptable') vueComptable();

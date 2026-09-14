@@ -132,7 +132,6 @@ const MENU_APP_EN = {
   'Infolettre': 'Newsletter',
   'Inventaire': 'Inventory',
   'Jeu de couleurs': 'Colour scheme',
-  'Journal d’envoi': 'Send log',
   'Journaux': 'Logs',
   'Lien comptable': 'Accounting link',
   'Liquidation / Vente finale': 'Clearance / Final sale',

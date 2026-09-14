@@ -27,6 +27,42 @@
  */
 
 module.exports = {
+  /* ══ L ONGLET « JOURNAL D ENVOI » (venu de sa fenetre propre, 2026-09-13) ══
+   * ⚠⚠ CE JOURNAL REPOND A UNE SEULE QUESTION, et elle vaut de l argent :
+   * « je n ai jamais recu votre courriel ». Les echecs sont comptes a part et
+   * gardent leur message d erreur — un journal qui ne montrerait que les succes
+   * ne servirait a rien le jour ou ca rate. La traduction doit garder cette
+   * nettete : « Parti » et « Echec » se lisent d un coup d oeil.
+   * ⚠ LE DESTINATAIRE, LA REFERENCE ET LE DETAIL rendu par le service ne sont
+   * PAS traduits : ce sont des donnees, relues quand quelqu un conteste. */
+  'Journal d’envoi': 'Send log',
+  'Lecture du journal d’envoi…': 'Reading the send log…',
+  'Journal d’envoi indisponible.': 'Send log unavailable.',
+  'Envois enregistrés': 'Sends recorded',
+  'Partis': 'Sent',
+  'Parti': 'Sent',
+  'Échecs': 'Failures',
+  'Adresse ou campagne': 'Address or campaign',
+  'Adresse ou campagne…': 'Address or campaign…',
+  'Échecs seulement': 'Failures only',
+  'Effacer le journal': 'Clear the log',
+  'Rien ne correspond.': 'Nothing matches.',
+  'Aucun envoi enregistré.': 'No send recorded.',
+  'Genre': 'Kind',
+  'Référence': 'Reference',
+  'Destinataire': 'Recipient',
+  'Résultat': 'Result',
+  /* ⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. */
+  'ligne': 'row',
+  'lignes': 'rows',
+  ' entrée effacée.': ' entry cleared.',
+  ' entrées effacées.': ' entries cleared.',
+  /* ⚠⚠ LA PHRASE QUI DIT CE QU ON PERD, en entier. Effacer le journal n annule
+     aucun envoi — il efface la PREUVE de ce qui est parti. Les deux moities
+     comptent, et la seconde rassure autant que la premiere avertit. */
+  'Cliquez « Confirmer ? » — le journal est effacé, et avec lui la preuve de ce qui est parti. Les envois eux-mêmes ne sont pas annulés.':
+    'Click “Confirm?” — the log is cleared, and with it the proof of what went out. The sends themselves are not cancelled.',
+
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Journaux — Administration Sandriza': 'Logs — Sandriza Administration',
   'Journaux': 'Logs',

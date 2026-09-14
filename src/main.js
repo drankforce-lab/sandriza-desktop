@@ -3491,7 +3491,11 @@ const PAGES_ANCRABLES = () => ({
   transferts: ['Transferts de stock', () => pageTransferts()],
   images: ['Images des produits', () => pageImages()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
-  journal: ['Journal d’envoi', () => pageJournal()],
+  /* ⚠⚠ `journal` NE S'OUVRE PLUS SEUL — il est devenu un ONGLET des Journaux
+     (2026-09-13, sa demande). L'entrée reste, et c'est délibéré : un raccourci,
+     un signet ou une version antérieure de la page peuvent encore le demander.
+     Elle mène désormais au bon onglet plutôt qu'à un écran disparu. */
+  journal: ['Journaux', () => pageJournaux('journal')],
   campagnes: ['Campagnes et chaînes', () => pageCampagnes()],
   statistiques: ['Statistiques', () => pageStatistiques()],
   photos: ['Photos', () => pagePhotos()],
@@ -5290,7 +5294,6 @@ const { pageRecherches } = require('./fenetres/recherches');
 const { pageTransferts } = require('./fenetres/transferts');
 const { pageImages } = require('./fenetres/images');
 const { pageAbonnes } = require('./fenetres/abonnes');
-const { pageJournal } = require('./fenetres/journal');
 const { pageCampagnes } = require('./fenetres/campagnes');
 const { pageStatistiques } = require('./fenetres/statistiques');
 const { pagePhotos } = require('./fenetres/photos');
