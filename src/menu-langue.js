@@ -89,6 +89,10 @@ const MENU_APP_EN = {
   'Attributs produits': 'Product attributes',
   'Automatisations': 'Automations',
   'Avis produits': 'Product reviews',
+  /* ⚠ << Status bar >> est le terme CONVENU dans les logiciels de bureau ; c est
+     ainsi qu on la cherche. Le rappel de sa place est garde entre parentheses
+     des deux cotes, parce que c est ce qui la distingue de la barre de menus. */
+  'Barre d’état (bas de l’écran)': 'Status bar (bottom of the screen)',
   'Base de données': 'Database',
   'Boutique': 'Shop',
   'Cadre de l’administration (aperçu)': 'Administration frame (preview)',
@@ -319,22 +323,26 @@ const LANGUES = [
  *  ⚠ SI AUCUN MENU AFFICHAGE N'EXISTE (modèle pas encore arrivé), on rend le
  *  modèle TEL QUEL — on n'invente pas un menu. Une entrée seule dans une barre
  *  vide serait pire que pas d'entrée du tout. */
-/* ⚠⚠ LES DEUX MENUS D'ACCUEIL DE LA LANGUE, DANS CET ORDRE — ET LE SECOND EST
-   UN FILET, PAS UNE PRÉFÉRENCE.
-   « Langue / Language » a suivi les réglages : greffée sur « Affichage »
-   jusqu'au 2026-09-14, puis sur le menu « Réglages » du matin, puis ICI sur
-   « Configuration » quand il a demandé de replier l'un dans l'autre (« met le
-   menu réglages directement dans les configurations »). La langue est un
-   réglage du POSTE : sa place est avec le démarrage, la veille et le thème.
-   ⚠⚠ MAIS « CONFIGURATION » N'EXISTE PAS À L'ÉCRAN DE CONNEXION. Aucune de ses
-   entrées n'est `libre`, donc le site le retire du modèle tant que personne
-   n'est connecté — et la barre ne garde que Fichier, Affichage et Aide. Sans
-   ce repli, changer la langue serait devenu IMPOSSIBLE avant d'ouvrir une
-   session : c'est-à-dire précisément sur l'écran dont il avait demandé la
-   traduction le 2026-09-11. « Affichage », lui, est là avant comme après.
-   ➡ Déplacer une commande dans un menu mieux rangé, c'est aussi hériter des
-   conditions de VISIBILITÉ de ce menu-là. */
-const CIBLES_LANGUE = ['Configuration', 'Affichage'];
+/* ⚠⚠ LA LANGUE VIT DANS « AFFICHAGE », ET C'EST SA DÉCISION (2026-09-14, le
+   soir) : « la langue doit rester dans le menu Affichage, et non
+   Configuration ».
+   Elle y était depuis le 2026-09-12. Elle a suivi les réglages du poste quand
+   ils ont quitté « Affichage » le matin — d'abord dans un menu « Réglages »
+   neuf, puis dans « Configuration » quand il a demandé de replier l'un dans
+   l'autre. Il la ramène, et il a raison sur les deux plans :
+   ⚠ LE SENS : changer de langue, ce n'est pas configurer la boutique, c'est
+   changer CE QU'ON VOIT. C'est exactement la définition qu'il a donnée
+   d'« Affichage » le matin même — « ce qui change la vue de l'instant ».
+   ⚠ LA VISIBILITÉ, et c'est le plus fort : « Configuration » n'a AUCUNE entrée
+   `libre`, donc le site le retire du modèle tant que personne n'est connecté.
+   La langue s'y retrouvait enfermée derrière la session — sur l'écran même dont
+   il avait demandé la traduction le 2026-09-11. Il avait fallu lui ajouter un
+   repli sur « Affichage » pour réparer ça. « Affichage » étant là AVANT comme
+   APRÈS, la cible unique suffit : le repli disparaît avec le problème qu'il
+   rattrapait.
+   ➡ Une commande qu'on range ailleurs hérite des conditions de VISIBILITÉ de
+   son nouveau menu. C'est la leçon, et elle a coûté un aller-retour. */
+const CIBLES_LANGUE = ['Affichage'];
 
 /* Les intitulés sous lesquels un menu peut se présenter : son nom d'origine, et
    sa traduction s'il en a une. `MENU_EN` traduit ce qui paraît SANS session,

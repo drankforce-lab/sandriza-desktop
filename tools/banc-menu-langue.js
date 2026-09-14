@@ -253,17 +253,19 @@ for (const k of traduits) {
    fichier-là existe — la leçon est écrite en tête. */
 {
   const { menusAvecLangue } = require('../src/menu-langue');
-  /* ⚠ LA GREFFE VISE « CONFIGURATION » DEPUIS LE 2026-09-14 (soir), avec
-     « Affichage » EN REPLI. Le matin, le menu avait été scindé et la langue
-     était partie dans un menu « Réglages » tout neuf ; le soir il a demandé de
-     replier ce menu-là dans « Configuration » (« Configuration » et
-     « Réglages » côte à côte, ce sont deux mots pour la même chose). Ce banc
-     suit le déménagement ; sans ça il garderait l'ANCIENNE vérité, ce qui est
-     pire qu'aucun banc : il refuserait la bonne version.
-     ⚠⚠ ET LE REPLI EST ÉPROUVÉ (cas 7). « Configuration » n'a AUCUNE entrée
-     `libre` : le site le retire du modèle tant que personne n'est connecté.
-     Sans repli, la langue devenait inatteignable à l'écran de CONNEXION —
-     l'écran même dont il avait demandé la traduction le 2026-09-11. */
+  /* ⚠ LA GREFFE VISE « AFFICHAGE », ET ELLE Y EST REVENUE LE 2026-09-14 AU SOIR,
+     sur sa demande : « la langue doit rester dans le menu Affichage, et non
+     Configuration ». Elle avait suivi les réglages du poste le matin (menu
+     « Réglages » neuf, puis « Configuration » quand il a demandé de replier
+     l'un dans l'autre). Ce banc suit le déménagement — et le retour ; sans ça
+     il garderait l'ANCIENNE vérité, ce qui est pire qu'aucun banc : il
+     refuserait la bonne version.
+     ⚠⚠ ET LE REPLI SUR « Affichage » A DISPARU AVEC LE PROBLÈME QU'IL
+     RATTRAPAIT. Il avait fallu l'ajouter parce que « Configuration » n'a aucune
+     entrée `libre` : le site la retire du modèle hors session, et la langue s'y
+     retrouvait enfermée — sur l'écran même dont il avait demandé la traduction.
+     « Affichage » étant là AVANT comme APRÈS, la cible unique suffit. Le cas 7
+     l'éprouve : à l'écran de connexion, la greffe doit être là. */
   const base = [
     { label: 'Fichier',       items: [{ label: 'Quitter', app: 'quit' }] },
     { label: 'Configuration', items: [{ label: 'Thème sombre' }] },
@@ -272,13 +274,13 @@ for (const k of traduits) {
   ];
   const trouverDans = (ms, nom) => ((ms.find((m) => m.label === nom) || { items: [] }).items || [])
     .find((it) => it && it.label === 'Langue / Language');
-  const trouver = (ms) => trouverDans(ms, 'Configuration');
+  const trouver = (ms) => trouverDans(ms, 'Affichage');
 
-  // 1. L'entrée est là, dans le menu Configuration.
+  // 1. L'entrée est là, dans le menu Affichage.
   const fr = menusAvecLangue(base, 'fr');
   const e = trouver(fr);
   if (!e) {
-    fautes.push('menusAvecLangue() n’ajoute pas « Langue / Language » au menu Configuration');
+    fautes.push('menusAvecLangue() n’ajoute pas « Langue / Language » au menu Affichage');
   } else if (!Array.isArray(e.sub) || e.sub.length !== 2) {
     fautes.push('le bascule n’offre pas DEUX langues');
   } else {
@@ -305,7 +307,7 @@ for (const k of traduits) {
   }
   const sansAff = [{ label: 'Fichier', items: [{ label: 'Quitter' }] }];
   if (JSON.stringify(menusAvecLangue(sansAff, 'fr')) !== JSON.stringify(sansAff)) {
-    fautes.push('sans Configuration NI Affichage le modèle est MODIFIÉ — il doit rester tel quel');
+    fautes.push('sans menu Affichage le modèle est MODIFIÉ — il doit rester tel quel');
   }
 
   /* 5. ⚠ L’INTITULÉ TRADUIT : une barre déjà en anglais affiche « View ».
@@ -318,16 +320,19 @@ for (const k of traduits) {
 
   /* 6. ⚠ ON NE GREFFE QU’UNE FOIS, même si deux menus portaient le nom : un
      réglage en double finit par se contredire. */
-  const deux = menusAvecLangue(base.concat([{ label: 'Configuration', items: [] }]), 'fr');
+  const deux = menusAvecLangue(base.concat([{ label: 'Affichage', items: [] }]), 'fr');
   const n = deux.reduce((k, m) => k
     + ((m.items || []).filter((it) => it && it.label === 'Langue / Language').length), 0);
   if (n !== 1) fautes.push('le bascule est greffé ' + n + ' fois au lieu d’une');
 
-  /* 7. ⚠⚠ L'ÉCRAN DE CONNEXION — LE CAS QUI A MOTIVÉ LE REPLI.
+  /* 7. ⚠⚠ L'ÉCRAN DE CONNEXION — LE CAS QUI A COÛTÉ UN ALLER-RETOUR.
      Là, le modèle ne porte QUE les entrées `libre` : Fichier, Affichage, Aide.
-     « Configuration » a disparu. Le bascule doit alors se greffer sur
-     « Affichage », sans quoi on ne peut plus changer la langue avant d'ouvrir
-     une session — et c'est l'écran dont il avait demandé la traduction. */
+     « Configuration » n'y est pas — aucune de ses entrées n'est `libre`. C'est
+     ce qui a rendu la langue inatteignable le temps qu'elle y a séjourné, sur
+     l'écran même dont il avait demandé la traduction le 2026-09-11.
+     ⚠ CE CAS RESTE, ET IL EST PLUS IMPORTANT QUE JAMAIS : il éprouve que la
+     langue se trouve AVANT d'ouvrir une session. Si quelqu'un la redéplaçait
+     un jour vers un menu réservé aux sessions, c'est lui qui le dirait. */
   const connexion = [
     { label: 'Fichier',   items: [{ label: 'Quitter', app: 'quit' }] },
     { label: 'Affichage', items: [{ label: 'Recharger', app: 'reload' }] },
@@ -335,14 +340,15 @@ for (const k of traduits) {
   ];
   const cx = menusAvecLangue(connexion, 'fr');
   if (!trouverDans(cx, 'Affichage')) {
-    fautes.push('à l’écran de connexion (pas de Configuration) le bascule ne se greffe PAS sur Affichage');
+    fautes.push('à l’écran de connexion le bascule ne se greffe PAS sur Affichage — la langue y serait inatteignable');
   }
 
-  /* 8. ⚠ ET IL NE SE GREFFE PAS SUR LES DEUX. Une fois connecté, « Affichage »
-     ne doit rien recevoir : deux portes pour le même réglage, c'est deux coches
-     à tenir d'accord. */
-  if (trouverDans(fr, 'Affichage')) {
-    fautes.push('le bascule est AUSSI greffé sur Affichage alors que Configuration existe');
+  /* 8. ⚠ ET IL NE VA PAS DANS « CONFIGURATION ». Il y a séjourné une journée
+     (2026-09-14) ; il a demandé qu'il revienne dans « Affichage ». Deux portes
+     pour le même réglage, ce serait deux coches à tenir d'accord — et la
+     seconde vivrait derrière la session. */
+  if (trouverDans(fr, 'Configuration')) {
+    fautes.push('le bascule est greffé sur Configuration : sa place est Affichage (sa demande du 2026-09-14)');
   }
 }
 
