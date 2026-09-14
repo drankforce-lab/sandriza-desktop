@@ -262,9 +262,17 @@ if (($brut | ConvertFrom-Json).conclusion -ne 'success') {
 
 # ⚠ CONSTRUIRE N'EST PAS PUBLIER, ET PUBLIER N'EST PAS DEPOSER : on lit le
 # manifeste dans le journal plutot que de croire le verdict.
+# ⚠ `-match` SUR UN TABLEAU EST UN FILTRE, PAS UNE COMPARAISON — et il ne remplit
+#   PAS `$Matches`. La premiere ecriture lisait donc `$Matches[1]` d'un tour
+#   precedent (ou vide), et annonçait << le manifeste annonce , pas 5.67.0 >> sur
+#   une publication parfaitement reussie. Une faute fantome, encore : on cherche
+#   dans le manifeste, et il est juste. `Select-String` prend un texte, pas un
+#   tableau de lignes.
 $journal = (& gh run view $idPublication --repo $slugSite --log) 2>$null
-if ($journal -match '\{"version":"([0-9.]+)"') {
-  if ($Matches[1] -ne $Version) { Mauvais "le manifeste annonce $($Matches[1]), pas $Version" }
+$trouve = ($journal -join "`n" | Select-String -Pattern '\{"version":"([0-9.]+)"' -AllMatches)
+if ($trouve -and $trouve.Matches.Count -gt 0) {
+  $vu = $trouve.Matches[0].Groups[1].Value
+  if ($vu -ne $Version) { Mauvais "le manifeste annonce $vu, pas $Version" }
   Bon "manifeste ecrit : version $Version"
 } else {
   Note "manifeste introuvable dans le journal — a verifier a la main"
