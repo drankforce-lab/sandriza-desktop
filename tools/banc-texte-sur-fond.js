@@ -62,7 +62,9 @@ const MONO = require('./fenetres-mono-mode.js');
 }
 
 const SEUIL = 4.5;
-const PAGE = '#f4f2ec';
+/* Le fond de la page dans chaque mode — il sert de dernier recours pour composer
+   une couche translucide dont on ne connait pas le fond exact. */
+const PAGE = { jour: '#f4f2ec', nuit: '#0e1522' };
 const LISTE = process.argv.indexOf('--liste') >= 0;
 
 const hx = (h) => {
@@ -89,11 +91,41 @@ function poser(couche, fond) {
   return st([0, 1, 2].map((i) => parseFloat(m[i + 1]) * a + f[i] * (1 - a)));
 }
 
-const defauts = [];
-let regardees = 0;
+const defauts = { jour: [], nuit: [] };
+const regardees = { jour: 0, nuit: 0 };
 
+/* ══ LES DEUX MODES, ET C EST LE SECOND QUI MANQUAIT (2026-09-14) ═══════════
+ * ⚠⚠ CE BANC NE MESURAIT QUE LE JOUR — comme `banc-contraste-jour` et
+ * `banc-fonds-jour`. Or LE MODE PAR DEFAUT EST LA NUIT : rien, sur ce poste, ne
+ * regardait le mode dans lequel l application tourne reellement. Le seul qui le
+ * faisait etait le travail `contrastes`, sur GitHub, APRES le push.
+ * ⚠ RELEVE QUI L A MONTRE : sur les 40 dernieres executions, 5 echecs sur 6
+ * venaient de `contrastes`, tous de vraies couleurs, toutes en NUIT. Et l une
+ * d elles — #3F4855 sur #C9A97E, 4.17 — a echoue QUATRE FOIS : la meme couleur
+ * repoussee sans lire le journal.
+ * ⚠ LE PIEGE EXACT QU IL FERME : une reprise `html.jour` ajoutee pour corriger
+ * le jour laisse la nuit en l etat. Le banc devenait vert, la faute restait.
+ *
+ * CE QUI CHANGE D UN MODE A L AUTRE :
+ *   jetons   : le jour applique les reprises `html.jour`, la nuit ne lit que :root
+ *   reprises : le jour les applique au texte et au fond, la nuit les ignore
+ *   regles   : la nuit ecarte purement les regles `html.jour`
+ *   fond sombre : le jour le laisse a `banc-fonds-jour` ; la nuit mesure TOUT,
+ *                 parce qu aucun autre banc ne couvre ce terrain-la
+ *   mono-mode : le jour les ecarte (elles ne basculent jamais) ; LA NUIT LES
+ *               INCLUT — c est le seul mode ou elles existent, donc le seul ou
+ *               elles peuvent etre mesurees. Les ecarter des deux passages
+ *               reviendrait a ne jamais les regarder du tout.
+ *
+ * ⚠ CE BANC NE REMPLACE PAS LE PASSAGE AU RENDU. Il ne voit qu un couple ECRIT
+ * DANS LA MEME REGLE : un fond herite, un fond `transparent` ou une couleur
+ * posee par JavaScript lui echappent — et c est precisement ce qui a fait
+ * tomber la 5.71.0 (un bouton en fond transparent). Le juge reste `contrastes`,
+ * qui mesure la page assemblee. Celui-ci est un filet AMONT pour le cas courant.
+ */
+for (const mode of ['jour', 'nuit']) {
 for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js') && n !== 'socle.js')) {
-  if (MONO.estMonoMode(f)) continue;
+  if (mode === 'jour' && MONO.estMonoMode(f)) continue;
   const mod = require(path.join(DOSSIER, f));
   const fabrique = Object.values(mod).find((v) => typeof v === 'function');
   if (!fabrique) continue;
@@ -107,20 +139,24 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js') && n !==
   if (!css.trim()) continue;
   css = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
-  /* Les jetons, en valeur de JOUR : ce que html.jour redefinit l'emporte sur
-     :root, qui sert de valeur par defaut pour ce que le jour ne reprend pas. */
-  const jour = {};
+  /* Les jetons du mode demande. EN JOUR : ce que html.jour redefinit l'emporte
+     sur :root, qui sert de valeur par defaut pour ce que le jour ne reprend pas.
+     EN NUIT : on ne lit QUE :root — appliquer les reprises de jour reviendrait a
+     mesurer un mode qui n existe pas. */
+  const jetons = {};
   const regles = [];
   for (const bout of css.split('}')) {
     const i = bout.indexOf('{');
     if (i < 0) continue;
     const sel = bout.slice(0, i).replace(/\s+/g, ' ').trim();
     const corps = bout.slice(i + 1);
-    if (/^html\.jour(\[|$|\s)/.test(sel) || sel === ':root' || sel === 'html') {
+    const estRepriseJour = /^html\.jour(\[|$|\s)/.test(sel);
+    if (mode === 'nuit' && estRepriseJour) continue;   // la regle entiere est ecartee
+    if (estRepriseJour || sel === ':root' || sel === 'html') {
       let d;
       const rxd = /(--[\w-]+)\s*:\s*([^;]+)/g;
       while ((d = rxd.exec(corps))) {
-        if (/^html\.jour/.test(sel) || !(d[1] in jour)) jour[d[1]] = d[2].trim();
+        if (estRepriseJour || !(d[1] in jetons)) jetons[d[1]] = d[2].trim();
       }
     }
     regles.push([sel, corps]);
@@ -132,8 +168,8 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js') && n !==
     let n = 0;
     while (/^var\(\s*(--[\w-]+)/.test(x) && n++ < 5) {
       const nom = /^var\(\s*(--[\w-]+)/.exec(x)[1];
-      if (!(nom in jour)) return null;
-      x = jour[nom].trim();
+      if (!(nom in jetons)) return null;
+      x = jetons[nom].trim();
     }
     if (/^#[0-9a-fA-F]{3,6}$/.test(x)) return x;
     if (/^rgba?\(/.test(x)) return poser(x, fond);
@@ -141,17 +177,21 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js') && n !==
   };
 
   /* Les reprises de jour, indexees BRANCHE PAR BRANCHE : un selecteur multiple
-     cherche sur sa chaine entiere ne se retrouve jamais. */
+     cherche sur sa chaine entiere ne se retrouve jamais.
+     ⚠ EN NUIT ELLES RESTENT VIDES : les regles `html.jour` ont deja ete ecartees
+     plus haut, et les appliquer decrirait un mode qui n existe pas. */
   const fondJour = {};
   const txtJour = {};
-  for (const [sel, corps] of regles) {
-    if (!/^html\.jour/.test(sel)) continue;
-    const b = /background(?:-color)?\s*:\s*([^;]+)/.exec(corps);
-    const c = /(?:^|[;{\s])color\s*:\s*([^;]+)/.exec(corps);
-    for (const p of sel.split(',')) {
-      const n = p.trim().replace(/^html\.jour\s*/, '');
-      if (b) fondJour[n] = b[1].trim();
-      if (c) txtJour[n] = c[1].trim();
+  if (mode === 'jour') {
+    for (const [sel, corps] of regles) {
+      if (!/^html\.jour/.test(sel)) continue;
+      const b = /background(?:-color)?\s*:\s*([^;]+)/.exec(corps);
+      const c = /(?:^|[;{\s])color\s*:\s*([^;]+)/.exec(corps);
+      for (const p of sel.split(',')) {
+        const n = p.trim().replace(/^html\.jour\s*/, '');
+        if (b) fondJour[n] = b[1].trim();
+        if (c) txtJour[n] = c[1].trim();
+      }
     }
   }
 
@@ -168,29 +208,88 @@ for (const f of fs.readdirSync(DOSSIER).filter((n) => n.endsWith('.js') && n !==
     const bRaw = (estJour ? null : (fondJour[nu] || fondJour[sel] || fondJour[b1]))
               || (/background(?:-color)?\s*:\s*([^;]+)/.exec(corps) || [])[1];
     if (!bRaw) continue;
-    const fond = val(bRaw, PAGE);
+    const fond = val(bRaw, PAGE[mode]);
     if (!fond) continue;
     const txt = val(brut, fond);
     if (!txt) continue;
-    regardees++;
-    if (lum(hx(fond)) <= 0.4) continue;            // fond sombre : banc-fonds-jour
+    regardees[mode]++;
+    /* ⚠ EN JOUR SEULEMENT : un fond reste sombre appartient a `banc-fonds-jour`.
+       EN NUIT on mesure TOUT — aucun autre banc ne couvre ce terrain, et c est
+       justement sur fond sombre que vivent les fautes de nuit. */
+    if (mode === 'jour' && lum(hx(fond)) <= 0.4) continue;
     const r = ratio(txt, fond);
     if (r >= SEUIL) continue;
-    defauts.push('  ' + f.padEnd(22) + nu.slice(0, 40).padEnd(40)
+    defauts[mode].push('  ' + f.padEnd(22) + nu.slice(0, 40).padEnd(40)
       + ' texte ' + txt + ' sur ' + fond + '  ratio ' + r.toFixed(2));
   }
 }
+}
 
-const u = [...new Set(defauts)];
-if (u.length) {
-  console.log('ECHEC  ' + u.length + ' couple(s) texte/fond sous ' + SEUIL + ' en mode jour :');
+const uJour = [...new Set(defauts.jour)];
+const uNuit = [...new Set(defauts.nuit)];
+
+const dire = (mode, u) => {
+  if (!u.length) return;
+  console.log('ECHEC  ' + u.length + ' couple(s) texte/fond sous ' + SEUIL + ' en mode ' + mode + ' :');
   console.log(u.slice(0, LISTE ? 999 : 20).join('\n'));
   if (!LISTE && u.length > 20) console.log('  ... ' + (u.length - 20) + ' autres (--liste)');
   console.log('');
-  console.log('  Le texte est illisible sur le fond de son PROPRE element. Ajouter une');
+};
+
+dire('jour', uJour);
+
+/* ══ LE MODE NUIT PASSE PAR UN PLAFOND, ET C EST DELIBERE ═══════════════════
+ * ⚠⚠ AU MOMENT OU CE PASSAGE EST NE, `contrastes` — le banc qui mesure la page
+ * ASSEMBLEE dans un navigateur — EST VERT, et ce releve-ci compte 10 couples.
+ * Les deux ne peuvent pas avoir raison ensemble, et c est le RENDU qui tranche :
+ * une couleur ne se deduit pas du CSS. Un element jamais visible, un texte
+ * grand ou gras (seuil 3.0), un fond pose par JavaScript : ce releve ne voit
+ * rien de tout ca.
+ * ⚠ ET CE POSTE NE PEUT PAS TRANCHER : `banc-contraste-rendu` lance Chrome des
+ * dizaines de fois et a fait tomber l affichage de la machine deux fois. Il ne
+ * tourne QUE sur GitHub. Accuser dix regles sans les avoir mesurees serait
+ * refaire les << 55 fautes >> de la premiere version du banc au rendu.
+ * ➡ LE PLAFOND FAIT DONC UNE SEULE CHOSE, ET ELLE SUFFIT : il refuse la
+ *   ONZIEME. Une couleur de nuit ajoutee demain est arretee ICI, en quelques
+ *   millisecondes, au lieu d aller echouer sur GitHub quatre minutes plus tard.
+ *   C est ce qui est arrive cinq fois sur six en septembre. */
+const PLAFOND = require('./texte-sur-fond-declare.js').NUIT_PLAFOND;
+if (uNuit.length > PLAFOND) {
+  dire('nuit', uNuit);
+  console.log('  NON  le plafond declare est ' + PLAFOND + ' — la dette de NUIT gagne du terrain.');
+} else if (uNuit.length) {
+  /* ⚠ LA LISTE S IMPRIME MEME SOUS LE PLAFOND. Un plafond muet devient une
+     dette invisible, et l on finit par lire << c est normal qu il en reste >>. */
+  console.log('  --   ' + uNuit.length + ' couple(s) de NUIT sous le seuil, dans le plafond declare ('
+    + PLAFOND + ') — a regler au rendu, voir #121 :');
+  console.log(uNuit.slice(0, LISTE ? 999 : 12).join('\n'));
+  if (!LISTE && uNuit.length > 12) console.log('  ... ' + (uNuit.length - 12) + ' autres (--liste)');
+  if (uNuit.length < PLAFOND) {
+    console.log('  --   plafond ' + PLAFOND + ' : resserrer a ' + uNuit.length
+      + ' dans tools/texte-sur-fond-declare.js');
+  }
+  console.log('');
+}
+
+if (uJour.length) {
+  console.log('  JOUR — le texte est illisible sur le fond de son PROPRE element. Ajouter une');
   console.log('  reprise `html.jour <selecteur>{color:...}` — en assombrissant la couleur');
   console.log('  d origine du minimum necessaire, sa teinte conservee. Le bloc');
   console.log('  CSS_JOUR_TEXTES de socle.js est fait pour ca, et vient en dernier.');
-  process.exit(1);
+  console.log('');
 }
-console.log('OK  ' + regardees + ' couples texte/fond mesures : tous lisibles en mode jour.');
+if (uNuit.length > PLAFOND) {
+  /* ⚠ ON NE PROPOSE PAS DE REPRISE `html.jour` ICI, ET C EST TOUT L INTERET :
+     la faute est dans la regle D ORIGINE, celle qui vaut pour le mode par
+     defaut. Une reprise de jour l aurait masquee dans un seul mode — c est
+     exactement ainsi que ces couples sont arrives jusqu a GitHub. */
+  console.log('  NUIT — la faute est dans la regle elle-meme, pas dans une reprise :');
+  console.log('  c est le mode PAR DEFAUT. Corriger la couleur a la source, ou le fond.');
+  console.log('  ⚠ N ajoutez PAS de reprise `html.jour` : elle corrigerait le jour et');
+  console.log('  laisserait la nuit en l etat — la faute a corriger.');
+  console.log('');
+}
+if (uJour.length || uNuit.length > PLAFOND) process.exit(1);
+
+console.log('OK  ' + regardees.jour + ' couples mesures en jour, ' + regardees.nuit
+  + ' en nuit : aucun nouveau couple illisible.');
