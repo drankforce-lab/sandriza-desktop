@@ -294,7 +294,12 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
  * Changer la teinte ferait un ecran qui ne se ressemble plus d un mode a
  * l autre, et l on ne saurait plus lequel est le bon. */
 html.jour .init{color:#5c4620}
-html.jour .chemin .pas .n{color:#3f4855}
+/* ⚠ 2026-09-14 : #3f4855 donnait 4.17 sur l or #c9a97e de l etape EN COURS, sous
+   le seuil de 4.5. Le banc au rendu le disait depuis la premiere construction du
+   2026-09-12 (#103) — et CINQ versions sont parties par-dessus ce rouge, parce
+   que -SansRendu ne regarde pas ce terrain et que personne n a ouvert le travail
+   des contrastes. Teinte conservee, clarte descendue : 5.02. */
+html.jour .chemin .pas .n{color:#343c47}
 html.jour .chemin .pas.faite .n{color:#25563a}
 html.jour .expl.on{color:#5c4620}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
