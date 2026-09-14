@@ -859,13 +859,28 @@ function pageProduit(id) {
     var c = CTX.couleurs.find(function(x){ return x.nom === nom; });
     return (c && c.hex) || '#888';
   }
+  /* ══ LE NOM D UNE COULEUR A DEUX FACES, ET UNE SEULE SE TRADUIT ═══════════
+     ⚠⚠⚠ Sa capture du 2026-09-13 : un tableau << SIZE / COLOUR >> dont les
+     lignes disaient << XS / rouge >>. La couleur est a la fois une DONNEE et
+     un TEXTE :
+       · ce que CHOIX garde, ce qui compose la cle de stock (XS-rouge) et ce
+         qui repart au site est la DONNEE — elle ne bouge JAMAIS ;
+       · ce qui s affiche est le LIBELLE, que la coquille a traduit en chemin.
+     Traduire la donnee scinderait l inventaire en silence : XS-rouge et XS-red
+     deviendraient deux variantes.
+     ⚠ UNE COULEUR AJOUTEE A LA MAIN n est pas au lexique : elle ressort telle
+     qu elle a ete tapee, dans les deux langues. C est le mot de la boutique. */
+  function couleurLue(nom){
+    var c = CTX.couleurs.find(function(x){ return x.nom === nom; });
+    return (c && c.libelle) || nom;
+  }
   function dessinerJetons(){
     var z = document.getElementById('p-couleurs');
     if (!z) return;
     z.innerHTML = CHOIX.map(function(n){
       return '<span class="jeton on" data-c="' + esc(n) + '">'
         + '<span class="pt" style="background:' + esc(teinte(n)) + '"></span>'
-        + esc(n) + '<span class="x" data-coulretire="' + esc(n) + '">×</span></span>';
+        + esc(couleurLue(n)) + '<span class="x" data-coulretire="' + esc(n) + '">×</span></span>';
     }).join('');
     var v = document.getElementById('p-coul-vide');
     if (v) v.style.display = CHOIX.length ? 'none' : '';
@@ -901,17 +916,24 @@ function pageProduit(id) {
     var z = document.getElementById('p-coul-sug');
     if (!z) return;
     if (!q) { cacherSug(); return; }
-    SUG = CTX.couleurs.filter(function(c){ return c.nom.toLowerCase().indexOf(q) >= 0; })
-      .sort(function(a, b){
-        return (a.nom.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.nom.toLowerCase().indexOf(q) === 0 ? 0 : 1);
-      }).slice(0, 40);
+    /* ⚠ ON CHERCHE DANS LES DEUX NOMS, et c est necessaire : sur un poste
+       anglais la liste affiche << red >>, donc c est << red >> qu on tape. Ne
+       chercher que dans la donnee ferait une recherche qui ne trouve pas ce
+       qu elle montre. On garde aussi le francais — le meme poste peut recevoir
+       un code d article ou une consigne ecrite dans l autre langue. */
+    var _cherchable = function(c){ return (c.nom + ' ' + (c.libelle || '')).toLowerCase(); };
+    var _debut = function(c){
+      return (c.nom.toLowerCase().indexOf(q) === 0 || String(c.libelle || '').toLowerCase().indexOf(q) === 0) ? 0 : 1;
+    };
+    SUG = CTX.couleurs.filter(function(c){ return _cherchable(c).indexOf(q) >= 0; })
+      .sort(function(a, b){ return _debut(a) - _debut(b); }).slice(0, 40);
     if (!SUG.length) { cacherSug(); return; }
     SUGi = 0;
     z.innerHTML = SUG.map(function(c, i){
       var deja = CHOIX.indexOf(c.nom) >= 0;
       return '<div class="s' + (i === 0 ? ' vis' : '') + '" data-sug="' + esc(c.nom) + '">'
         + '<span class="pt" style="background:' + esc(c.hex || '#888') + '"></span>'
-        + '<span style="text-transform:capitalize">' + esc(c.nom) + '</span>'
+        + '<span style="text-transform:capitalize">' + esc(c.libelle || c.nom) + '</span>'
         + (deja ? '<span class="deja">${T("déjà choisie")}</span>' : '') + '</div>';
     }).join('');
     z.classList.add('on');
@@ -1361,13 +1383,13 @@ function pageProduit(id) {
           var manque = (q > 0 && CTX.entrepots.length && !lo);
           return '<div class="lgstk' + (q > 0 ? ' enstock' : '') + '">'
             + '<span class="c1">' + esc(x.taille) + '</span>'
-            + '<span class="c2">' + esc(x.couleur) + '</span>'
+            + '<span class="c2">' + esc(couleurLue(x.couleur)) + '</span>'
             + '<span class="c3"><input class="q" type="number" min="0" step="1" placeholder="0"'
-      + ' aria-label="' + esc('${T("Quantité —")} ' + x.taille + ' / ' + x.couleur) + '"'
+      + ' aria-label="' + esc('${T("Quantité —")} ' + x.taille + ' / ' + couleurLue(x.couleur)) + '"'
             + ' data-cle="' + esc(x.cle) + '" value="' + esc(q) + '">' + alerteSeuil(q) + '</span>'
             + (CTX.entrepots.length
                 ? '<span class="c4"><select class="loc' + (manque ? ' manque' : '') + '" data-cle="' + esc(x.cle) + '"'
-                  + ' aria-label="' + esc('${T("Emplacement —")} ' + x.taille + ' / ' + x.couleur) + '">'
+                  + ' aria-label="' + esc('${T("Emplacement —")} ' + x.taille + ' / ' + couleurLue(x.couleur)) + '">'
                   + '<option value="">${T("Choisir l’emplacement")}</option>'
                   + CTX.entrepots.map(function(w){
                       return '<option value="' + esc(w.id) + '"' + (lo === w.id ? ' selected' : '') + '>' + esc(w.nom) + '</option>';

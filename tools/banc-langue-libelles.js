@@ -196,6 +196,24 @@ for (const t of tables) {
   }
 }
 
+/* ── 8. LES 247 NOMS DE COULEUR (2026-09-13). ──────────────────────────────
+   ⚠⚠ SA CAPTURE : un tableau « SIZE / COLOUR » dont les lignes disaient
+   « XS / rouge ». La palette vit dans `_COLOR_MAP` (shop.js) — une table de
+   247 noms français associés à leur teinte — et le site envoie chaque nom en
+   DEUX exemplaires : `nom` (la donnée, clé de stock, jamais traduite) et
+   `libelle` / `couleurLibelle` (ce qui s'affiche).
+   ⚠ C'EST LA TABLE SOURCE QU'ON RELÈVE, pas les envois : les envois posent une
+   variable, la table pose les 247 noms en toutes lettres.
+   ⚠ UNE COULEUR AJOUTÉE À LA MAIN par la boutique (`customColors`) n'est pas
+   dans cette table et n'a pas à être traduite — c'est le mot de la boutique. */
+{
+  const m = /const\s+_COLOR_MAP\s*=\s*\{([\s\S]*?)\n\s*\};/.exec(src);
+  if (m) {
+    const rx = /(['"])((?:(?!\1)[^\\]|\\.)*)\1\s*:\s*'#/g;
+    let n; while ((n = rx.exec(m[1]))) attendus.add(n[2].replace(/\\'/g, "'"));
+  }
+}
+
 /* ── 6. LE GENRE D UN ENVOI, calculé à la volée. ───────────────────────────
    ⚠ `genre: x === 'campaign' ? 'Campagne' : 'Chaîne'` — deux phrases posées
    dans un ternaire, sur un champ qui n existe que pour être affiché. */

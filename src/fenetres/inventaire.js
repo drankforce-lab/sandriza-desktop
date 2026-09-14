@@ -476,7 +476,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         lignes.forEach(function(r){
           h += '<div class="lg" data-pid="' + esc(r.produitId) + '">'
             + '<span class="principal"><strong>' + esc(r.nom) + '</strong>'
-            + ' <span class="det">' + esc(r.taille) + ' / ' + esc(r.couleur) + '</span>'
+            /* ⚠ LE LIBELLE S AFFICHE, LA DONNEE RESTE — voir la fiche de
+               src/langue/couleurs.js. Le repli sur la donnee couvre une couleur
+               ajoutee a la main, qui n a pas de traduction et n en aura pas. */
+            + ' <span class="det">' + esc(r.taille) + ' / ' + esc(r.couleurLibelle || r.couleur) + '</span>'
             + (r.sku ? ' <span class="code">' + esc(r.sku) + '</span>' : '')
             + '</span>'
             + '<span class="fin"><span class="q ' + (r.rupture ? 'rup' : 'bas') + '">' + r.qte
@@ -546,11 +549,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td><span class="var">'
           +   '<span class="pastille' + (deg ? ' deg' : '') + '" style="background:'
           +   esc(v.teinte || '#ccc') + '"></span>'
-          +   '<span class="nom">' + esc(v.taille) + ' / ' + esc(v.couleur) + '</span></span></td>'
+          +   '<span class="nom">' + esc(v.taille) + ' / ' + esc(v.couleurLibelle || v.couleur) + '</span></span></td>'
           + '<td>' + (v.sku ? '<span class="code">' + esc(v.sku) + '</span>'
                             : '<span class="rien">—</span>') + '</td>'
           + '<td class="q"><input type="number" min="0" data-q="' + i + '" value="' + (parseInt(v.qte, 10) || 0) + '"'
-      +   ' aria-label="' + esc('${T("Quantité —")} ' + v.taille + ' / ' + v.couleur) + '"></td>'
+      +   ' aria-label="' + esc('${T("Quantité —")} ' + v.taille + ' / ' + (v.couleurLibelle || v.couleur)) + '"></td>'
           // ⚠ TEXTE DE REMPLACEMENT = LE SEUIL HERITE, jamais une valeur posee dans
           // le champ : la poser en ferait une EXCEPTION que vider n effacerait plus.
           + '<td class="s"><input type="number" min="0" data-s="' + i + '" value="' + esc(v.seuil)
@@ -558,7 +561,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           +   '" title="${T("Seuil de cette variante — vide = celui du produit")}"'
           +   (v.seuil === '' ? ' style="opacity:.6"' : '') + '></td>'
           + '<td class="e"><select data-e="' + i + '"'
-          +   ' aria-label="' + esc('${T("Emplacement —")} ' + v.taille + ' / ' + v.couleur) + '"'
+          +   ' aria-label="' + esc('${T("Emplacement —")} ' + v.taille + ' / ' + (v.couleurLibelle || v.couleur)) + '"'
           +   (manqueLieu ? ' class="manque"' : '') + '>'
           +   '<option value="">—</option>'
           +   ENTREPOTS.map(function(w){
@@ -639,12 +642,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessinerFiltres(){
-    var couleurs = [], tailles = [];
+    var couleurs = [], tailles = [], LUES = {};
     VARS.forEach(function(v){
       if (couleurs.indexOf(v.couleur) < 0) couleurs.push(v.couleur);
       if (tailles.indexOf(v.taille) < 0) tailles.push(v.taille);
+      /* ⚠ LA CORRESPONDANCE DONNEE → LIBELLE, prise sur les variantes elles
+         memes. Le filtre COMPARE sur la donnee et AFFICHE le
+         libelle : cocher << Red >> doit selectionner les variantes << rouge >>,
+         sans quoi le filtre ne retiendrait plus rien sur un poste anglais. */
+      if (v.couleurLibelle) LUES[v.couleur] = v.couleurLibelle;
     });
-    function menu(type, libelle, toutes, choisies){
+    var couleurLue = function(n){ return LUES[n] || n; };
+    /* ⚠ LE DERNIER ARGUMENT TRADUIT CE QUI S AFFICHE, PAS CE QUI EST COCHE. Sans lui, ce menu
+       montrerait la donnee brute — et c est exactement ce que sa capture du
+       2026-09-13 reprochait au tableau des variantes. */
+    function menu(type, libelle, toutes, choisies, lu){
+      var _lu = lu || function(x){ return x; };
       if (toutes.length < 2) return '';
       var ouvert = FILTRE.menu === type;
       var h = '<div class="menu">';
@@ -657,7 +670,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (choisies.length) h += '<button class="mini" data-vider="' + type + '" style="width:100%;margin-bottom:.2rem">${T("Tout afficher")}</button>';
         toutes.forEach(function(v, k){
           h += '<label><input type="checkbox" data-f="' + type + '" data-fi="' + k + '"'
-            + (choisies.indexOf(v) >= 0 ? ' checked' : '') + '><span>' + esc(v) + '</span></label>';
+            + (choisies.indexOf(v) >= 0 ? ' checked' : '') + '><span>' + esc(_lu(v)) + '</span></label>';
         });
         h += '</div>';
       }
@@ -667,7 +680,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // champs. C etait deja la promesse de l ecran du site, elle est tenue ici par
     // construction et non par precaution.
     var h = '<div class="filtres"><span class="lbl">${T("Filtrer :")}</span>'
-      + menu('couleur', '${T("Couleur")}', couleurs, FILTRE.couleur)
+      + menu('couleur', '${T("Couleur")}', couleurs, FILTRE.couleur, couleurLue)
       + menu('taille', '${T("Taille")}', tailles, FILTRE.taille) + '</div>';
     // Les index servent au clic (voir brancherProduit) : on les retient.
     window._fCouleurs = couleurs; window._fTailles = tailles;

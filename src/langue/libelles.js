@@ -221,4 +221,10 @@ const LIBELLES_EN = {
  * côtés ; c'est la table historique qui tranche, pour ne pas qu'un ajout au
  * modèle change en silence un libellé qui paraît ailleurs depuis des mois. */
 const { PERMISSIONS_EN } = require('./permissions.js');
-module.exports = { LIBELLES_EN: Object.assign({}, PERMISSIONS_EN, LIBELLES_EN) };
+/* ══ ET LES 247 NOMS DE COULEUR ═════════════════════════════════════════════
+ * ⚠ MÊME RAISON QU'AU-DESSUS : une palette entière noyée entre les pastilles de
+ * statut rendrait les deux illisibles. Elle a son fichier, avec sa fiche — et
+ * cette fiche explique la seule chose qui compte : le nom de couleur est à la
+ * fois une DONNÉE (clé de stock) et un TEXTE, et seul le second passe ici. */
+const { COULEURS_EN } = require('./couleurs.js');
+module.exports = { LIBELLES_EN: Object.assign({}, COULEURS_EN, PERMISSIONS_EN, LIBELLES_EN) };
