@@ -114,16 +114,33 @@ foreach ($d in @(@{n='application'; p=$racine; s=$slugApp}, @{n='site'; p=$Site;
 if ($SansControles) {
   Note "etapes 2 et 3 sautees (-SansControles) : les bancs et le verifier n'ont PAS ete relances"
 } else {
+  # ⚠⚠ CHAQUE CONTROLE TOURNE DEPUIS SON PROPRE DEPOT, ET CE N'EST PAS UN DETAIL.
+  # Premiere execution reelle (5.67.0) : `verifier.ps1` a rendu DEUX fautes qui
+  # n'existaient pas — << une section ne declare pas sa couverture >> et << il
+  # reste des traces du panneau web >>. Les deux controles passent en isolation.
+  # La cause : ce script etait lance depuis le depot de l'APPLICATION, et le
+  # dossier courant restait le sien ; plusieurs bancs du site lisent des chemins
+  # relatifs au dossier courant, pas a leur propre emplacement. Ils relevaient
+  # donc le mauvais depot, et annonçaient des manques parfaitement reels... dans
+  # un depot qui n'est pas le leur.
+  # ⚠ UNE FAUTE FANTOME EST PIRE QU'UN SILENCE : on la cherche dans le code, et
+  # elle n'y est pas. Push-Location / Pop-Location, et le probleme disparait.
   Etape "2. Les bancs de l'application"
-  & node (Join-Path $racine 'tools\bancs.js')
-  if ($LASTEXITCODE -ne 0) { Mauvais "un banc refuse — rien n'est livre" }
+  Push-Location $racine
+  try {
+    & node (Join-Path $racine 'tools\bancs.js')
+    if ($LASTEXITCODE -ne 0) { Mauvais "un banc refuse — rien n'est livre" }
+  } finally { Pop-Location }
   Bon "les bancs passent"
 
   Etape "3. Le controle avant deploiement (site)"
-  $args3 = @('-File', (Join-Path $Site 'tools\check\verifier.ps1'))
-  if ($SansRendu) { $args3 += '-SansRendu' }
-  & pwsh @args3
-  if ($LASTEXITCODE -ne 0) { Mauvais "verifier.ps1 refuse — rien n'est livre" }
+  Push-Location $Site
+  try {
+    $args3 = @('-File', (Join-Path $Site 'tools\check\verifier.ps1'))
+    if ($SansRendu) { $args3 += '-SansRendu' }
+    & pwsh @args3
+    if ($LASTEXITCODE -ne 0) { Mauvais "verifier.ps1 refuse — rien n'est livre" }
+  } finally { Pop-Location }
   Bon "le controle avant deploiement passe"
   if ($SansRendu) { Note "-SansRendu : les contrastes au rendu n'ont PAS ete mesures ici. C'est l'etape 4 qui les lira." }
 }
