@@ -1723,10 +1723,25 @@ const CSS_JOUR = `
    ont ete retirees en 3.53.0 : la meme decision ecrite 86 fois, c est 85 endroits
    qu on oubliera. CSS_JOUR est appende APRES le CSS de chaque fenetre, donc il
    commande. */
+/* ⚠⚠ CINQUIEME PASSE, 2026-09-14 — SA DEMANDE, CAPTURE A L APPUI : << tu vas
+   changer la police ici, mais une police plus droite et epaisse >>.
+   << SzTitre >> a un dessin arrondi, presque manuscrit, et ne porte qu une
+   graisse (400). Sur un titre d ecran d administration, il se lit comme une
+   note prise a la main au-dessus d un tableau de chiffres.
+   ➡ On passe a la fonte de l INTERFACE du systeme, en 700 : droite, epaisse, et
+   dessinee pour etre lue petite a l ecran — ce qu une fonte de titre arrondie
+   n est pas.
+   ⚠ ON NE DEMANDE PAS UNE GRAISSE QUE LA FONTE N A PAS. Mettre 700 sur SzTitre
+   aurait donne un GRAS SYNTHETIQUE — les traits epaissis par le moteur, pas par
+   le dessinateur : c est plus epais et c est plus laid. Changer de fonte est la
+   seule facon d avoir une vraie graisse.
+   ⚠ LE @font-face RESTE EN PLACE, et verifier-fenetres continue de le garder :
+   la fonte est achetee et embarquee, la retirer serait une autre decision que
+   celle qu il a prise. Elle n est simplement plus employee par le titre. */
 .tete h1{margin:0;
-  font-family:"SzTitre","Segoe UI Variable Display","Segoe UI",Georgia,serif;
-  font-size:1.3rem;font-weight:400;line-height:1.3;
-  letter-spacing:0;text-transform:none;
+  font-family:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:1.3rem;font-weight:700;line-height:1.3;
+  letter-spacing:.005em;text-transform:none;
   color:var(--tx-blanc)}
 /* Les jetons de texte, version JOUR. Voir la fiche dans CSS_SOCLE. html.jour
    (element + classe) l emporte sur :root, et CSS_JOUR est appende APRES le CSS

@@ -93,8 +93,16 @@ function pageAffichage() {
   return `${TETE()}
 <title>${T("Affichage client")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete" id="tete"><div class="nom">${T("SANDRIZA")}</div>
-  <div class="sous">${T("Votre commande")}</div></div>
+<!-- ⚠ PLUS DE LOGO DANS L EN-TETE — sa demande du 2026-09-14, capture a l appui :
+     << retire le logo dans le coin en haut a gauche, c est de la repetition >>.
+     L ecran d accueil porte deja la marque, EN GRAND et au centre : la repeter
+     en petit dans le coin ne dit rien de plus, et c est la premiere chose que
+     la cliente voit.
+     ⚠ CE QUE CA IMPLIQUE, ET IL FAUT LE DIRE : pendant une commande, l ecran
+     d accueil laisse la place aux articles — il n y a donc plus de marque du
+     tout a ce moment-la. C est assume : devant le comptoir, la cliente sait
+     chez qui elle est ; l en-tete lui sert a savoir ce qu elle regarde. -->
+<div class="tete" id="tete"><div class="sous">${T("Votre commande")}</div></div>
 <div class="corps" id="corps"></div>
 <div class="avis" id="msg"></div>
 <script>
@@ -117,12 +125,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     avis.classList.toggle('on', !!t);
   }
 
+  /* ⚠ L EN-TETE NE PORTE PLUS LA MARQUE (2026-09-14) — voir le commentaire du
+     gabarit plus haut. Elle reste chargee dans MARQUE parce que l ECRAN D
+     ACCUEIL s en sert, lui, et c est la qu elle a sa place : en grand, au
+     centre, quand il n y a rien d autre a montrer. */
   function enTete(){
     var t = document.getElementById('tete');
-    var g = MARQUE.logo
-      ? '<img src="' + esc(MARQUE.logo) + '" alt="">'
-      : '<div class="nom">' + esc(MARQUE.nom) + '</div>';
-    t.innerHTML = g + '<div class="sous">${T("Votre commande")}</div>';
+    t.innerHTML = '<div class="sous">${T("Votre commande")}</div>';
   }
 
   function accueil(){
