@@ -204,6 +204,20 @@ module.exports = {
   'Ce réseau ne rend pas les liens cliquables : mettez l’adresse dans la bio du compte.':
     'This network does not make links clickable: put the address in the account bio.',
   'Lien : à mettre dans la bio du compte': 'Link: to be put in the account bio',
+
+  /* ── LA SUITE DE DIAPOS (#115 — TikTok) ─────────────────────────────────── */
+  /* ⚠ << Diapo >> se dit << Slide >>, et c est le mot que TikTok emploie
+     lui-meme dans les deux langues. << Sheet >> ou << Frame >> ferait chercher
+     un objet qui n existe pas dans l application ou l on va deposer le travail. */
+  'Diapo ': 'Slide ',
+  'Ajouter une diapo': 'Add a slide',
+  'Retirer cette diapo': 'Remove this slide',
+  'image(s) et le texte': 'image(s) and the text',
+  /* ⚠ << Enregistré partiellement >> N EST PAS UN SUCCES QU ON NUANCE : une
+     suite exportee a trois images sur cinq est un travail a refaire, et la
+     phrase doit le dire assez fort pour qu on rouvre le dossier. */
+  'Enregistré partiellement : ': 'Partly saved: ',
+  'image(s) sur ': 'image(s) out of ',
   'Simple': 'Simple',
   'Avancé': 'Advanced',
   'Lecture du catalogue…': 'Reading the catalogue…',

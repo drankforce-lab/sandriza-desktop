@@ -311,9 +311,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   var EPETAT = null;     // nl:iaEtat — cle posee ? plafond ?
   var EPMINUT = null;    // le rendu differe apres une frappe
 
+  /* ⚠⚠ LE MODELE PORTE UNE SUITE DE DIAPOS, MEME QUAND IL N EN A QU UNE.
+     TikTok publie plusieurs images ; les trois autres une seule. Ecrire << si
+     tiktok, alors une boucle >> aurait mis ce << si >> dans l edition, dans le
+     rendu, dans l apercu et dans l export — quatre endroits a tenir d accord.
+     Ici, tout le monde a une liste ; elle est simplement longue de un. */
   function epVide(){
-    return { produitId: '', sur: '', gros: '', sous: '', titre: '', description: '',
-             alt: '', motsCles: [], lien: (EPD && EPD.siteUrl) || '' };
+    return { produitId: '', diapos: [{ sur: '', gros: '', sous: '' }], iDia: 0,
+             titre: '', description: '', alt: '', motsCles: [],
+             lien: (EPD && EPD.siteUrl) || '' };
+  }
+  // La diapo en cours d edition — jamais nulle, meme sur un modele abime.
+  function epDia(){
+    if (!EP.diapos || !EP.diapos.length) EP.diapos = [{ sur: '', gros: '', sous: '' }];
+    if (EP.iDia >= EP.diapos.length || EP.iDia < 0) EP.iDia = 0;
+    return EP.diapos[EP.iDia];
   }
   function epProduit(){
     if (!EPD || !EP || !EP.produitId) return null;
@@ -324,10 +336,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   /* Le modele envoye au rendu. ⚠ La PHOTO et le nom de l entreprise viennent du
      coeur, pas de la fenetre : deux sources feraient deux epingles differentes
      selon l ecran qui les a composees. */
-  function epModeleRendu(){
+  function epModeleRendu(i){
     var p = epProduit();
+    var n = (typeof i === 'number') ? i : EP.iDia;
+    var d = (EP.diapos && EP.diapos[n]) || { sur: '', gros: '', sous: '' };
     return { reseau: EPRES, photo: p ? p.photo : '', entreprise: (EPD && EPD.entreprise) || '',
-             sur: EP.sur, gros: EP.gros, sous: EP.sous };
+             sur: d.sur, gros: d.gros, sous: d.sous,
+             no: n + 1, total: (EP.diapos || []).length };
   }
   // La fiche du reseau choisi, telle que le coeur la decrit.
   function epFiche(){
@@ -337,6 +352,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
              titre: 100, description: 500, lienCliquable: true };
   }
 
+  /* ⚠ ON NE REND QUE LA DIAPO REGARDEE, pas les six. Peindre toute la suite a
+     chaque frappe ferait six images de 1080 x 1920 par lettre tapee. Les autres
+     se peignent au moment ou on les regarde, et TOUTES a l export — la seule
+     fois ou l on en a vraiment besoin. */
   function epDemanderRendu(){
     if (!EP || EPRENDU) return;
     EPRENDU = true;
@@ -374,8 +393,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
      caracteres chez Pinterest, une legende a 2000 chez Instagram. Sans le
      chiffre a l ecran, on s en apercoit apres publication, chez les autres.
      ⚠ La borne vient de la fiche du reseau, jamais d un nombre ecrit ici. */
+  // Les trois lignes PEINTES vivent dans la diapo regardee ; le reste (titre,
+  // texte, lien) appartient a la publication entiere. Une seule fonction sait
+  // ou chercher, pour que l edition et le rendu ne divergent jamais.
+  var EP_LIGNES = { sur: 1, gros: 1, sous: 1 };
+  function epLire(cle){
+    if (EP_LIGNES[cle]) return String(epDia()[cle] || '');
+    return String((EP && EP[cle]) || '');
+  }
+  function epEcrire(cle, v){
+    if (EP_LIGNES[cle]) { epDia()[cle] = v; return; }
+    EP[cle] = v;
+  }
   function epChamp(cle, lib, max, longue){
-    var id = 'ep-' + cle, v = String((EP && EP[cle]) || '');
+    var id = 'ep-' + cle, v = epLire(cle);
     var n = v.length, trop = (max && n > max);
     var corps2 = longue
       ? '<textarea id="' + id + '" data-epc="' + cle + '">' + esc(v) + '</textarea>'
@@ -433,7 +464,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
 
     // ── Le modele, entierement modifiable ─────────────────────────────────
     var F = epFiche();
-    h += '<div class="carte"><div class="g">'
+    var multi = (F.diapos && F.diapos[1] > 1);
+    h += '<div class="carte">';
+    /* ⚠ LA BANDE DES DIAPOS N APPARAIT QUE LA OU IL Y EN A PLUSIEURS. Sur
+       Pinterest, un bandeau << Diapo 1 sur 1 >> avec un bouton << ajouter >>
+       ferait croire qu on peut publier une suite la ou le reseau n en veut pas. */
+    if (multi) {
+      h += '<div class="bqbar">'
+        + (EP.diapos || []).map(function(d, i){
+            return '<button class="mini' + (i === EP.iDia ? ' actif' : '') + '" data-epdia="' + i + '">'
+              + (i + 1) + '</button>';
+          }).join('')
+        + ((EP.diapos || []).length < F.diapos[1]
+            ? '<button class="mini" id="ep-dia-plus" title="${T("Ajouter une diapo")}">+</button>' : '')
+        + ((EP.diapos || []).length > 1
+            ? '<button class="mini" id="ep-dia-moins" title="${T("Retirer cette diapo")}">✕</button>' : '')
+        + '<span class="aide" style="margin-left:auto">${T("Diapo ")}' + (EP.iDia + 1)
+        + '${T(" sur ")}' + (EP.diapos || []).length + '</span>'
+        + '</div>';
+    }
+    h += '<div class="g">'
       + epChamp('sur', '${T("Sur-titre (dans l’image)")}', 0, false)
       + epChamp('gros', '${T("Accroche (dans l’image)")}', 0, false)
       + epChamp('sous', '${T("Précision (dans l’image)")}', 0, false)
@@ -508,8 +558,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       EPOCC = false;
       if (!r || !r.ok) { dessiner(); dire(epExpliquer(r), 'err'); return; }
       if (r.budget) { EPETAT = EPETAT || {}; EPETAT.budget = r.budget; EPETAT.clePosee = true; }
-      var im = r.image || {};
-      EP.sur = im.sur || ''; EP.gros = im.gros || ''; EP.sous = im.sous || '';
+      EP.diapos = (r.diapos && r.diapos.length) ? r.diapos : [{ sur: '', gros: '', sous: '' }];
+      EP.iDia = 0;
       EP.titre = r.titre || ''; EP.description = r.description || '';
       EP.alt = r.altTexte || ''; EP.motsCles = r.motsCles || [];
       /* ⚠ LE LIEN N EST PAS ECRIT PAR L IA. Une adresse inventee par un modele
@@ -549,14 +599,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       (F.cle === 'pinterest' && (EP.motsCles || []).length)
         ? ('${T("Mots de recherche : ")}' + EP.motsCles.join(', ')) : ''
     ].filter(function(x){ return x !== '' && x !== null; }).join('\\n');
-    P.enregistrerExport(base + '.png', EPIMG).then(function(r1){
-      if (!r1 || !r1.ok) { dire('${T("L’image n’a pas pu être enregistrée.")}', 'err'); return; }
-      P.enregistrerExport(base + '.txt', texte).then(function(r2){
-        dire((r2 && r2.ok)
-          ? ('${T("Enregistré : ")}' + esc(base) + '${T(".png et .txt")}')
-          : '${T("Image enregistrée, mais pas son texte.")}', (r2 && r2.ok) ? 'bon' : 'att');
+    /* ⚠⚠ TOUTES LES DIAPOS PARTENT, PAS SEULEMENT CELLE QU ON REGARDE. Une
+       suite TikTok exportee a une image est un travail a refaire cinq fois —
+       et c est la faute qu on ne voit qu en ouvrant le dossier, une fois
+       l ecran ferme. On les PEINT donc ici, une par une : elles ne sont pas
+       toutes en memoire, puisque l apercu ne rend que la diapo regardee.
+       ⚠ Numerotees sur 2 chiffres : sans ca, le dossier range 10 avant 2. */
+    var n = (EP.diapos || []).length;
+    var faites = 0, rates = 0;
+    var suivante = function(i){
+      if (i >= n) {
+        P.enregistrerExport(base + '.txt', texte).then(function(r2){
+          var bon = faites > 0 && !rates && r2 && r2.ok;
+          dire(bon
+            ? ('${T("Enregistré : ")}' + faites + ' ${T("image(s) et le texte")}')
+            : (faites
+                ? ('${T("Enregistré partiellement : ")}' + faites + ' ${T("image(s) sur ")}' + n)
+                : '${T("L’image n’a pas pu être enregistrée.")}'),
+            bon ? 'bon' : (faites ? 'att' : 'err'));
+        });
+        return;
+      }
+      appeler('nl:epingleRendu', [epModeleRendu(i)]).then(function(r){
+        if (!r || !r.ok || !r.image) { rates++; suivante(i + 1); return; }
+        var nom = base + (n > 1 ? ('-' + (i < 9 ? '0' : '') + (i + 1)) : '') + '.png';
+        P.enregistrerExport(nom, r.image).then(function(rr){
+          if (rr && rr.ok) faites++; else rates++;
+          suivante(i + 1);
+        });
       });
-    });
+    };
+    dire('${T("Enregistrement…")}');
+    suivante(0);
   }
 
   function epCopier(){
@@ -599,6 +673,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         epDemanderRendu();
       };
     });
+    // La bande des diapos : changer, ajouter, retirer.
+    var zdia = document.getElementById('corps');
+    (zdia ? zdia.querySelectorAll('[data-epdia]') : []).forEach(function(el){
+      el.onclick = function(){
+        var i = Number(el.getAttribute('data-epdia'));
+        if (i === EP.iDia) return;
+        EP.iDia = i; EPIMG = ''; dessiner(); epDemanderRendu();
+      };
+    });
+    b = document.getElementById('ep-dia-plus');
+    if (b) b.onclick = function(){
+      EP.diapos.push({ sur: '', gros: '', sous: '' });
+      EP.iDia = EP.diapos.length - 1; EPIMG = ''; dessiner(); epDemanderRendu();
+    };
+    b = document.getElementById('ep-dia-moins');
+    if (b) b.onclick = function(){
+      /* ⚠ ON NE DESCEND JAMAIS SOUS UNE DIAPO : une publication sans image n est
+         pas une publication, et l ecran n aurait plus rien a montrer. Le bouton
+         disparait deja a une seule, mais la garde est ecrite ici aussi — un
+         bouton qu on croit absent revient toujours un jour. */
+      if (EP.diapos.length <= 1) return;
+      EP.diapos.splice(EP.iDia, 1);
+      if (EP.iDia >= EP.diapos.length) EP.iDia = EP.diapos.length - 1;
+      EPIMG = ''; dessiner(); epDemanderRendu();
+    };
     b = document.getElementById('ep-simple');
     if (b) b.onclick = function(){ EPMODE = 'simple'; dessiner(); };
     b = document.getElementById('ep-avance');
@@ -625,7 +724,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     (zone ? zone.querySelectorAll('[data-epc]') : []).forEach(function(el){
       el.oninput = function(){
         var cle = el.getAttribute('data-epc');
-        EP[cle] = el.value;
+        epEcrire(cle, el.value);
         var cnt = document.getElementById('ep-' + cle + '-n');
         if (cnt) {
           /* ⚠ LA BORNE VIENT DE LA FICHE DU RESEAU, jamais d un nombre ecrit

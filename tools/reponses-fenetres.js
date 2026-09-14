@@ -127,11 +127,17 @@ const IDENTITE = { ok: true, nom: 'Brigitte Brousseau', role: 'Administratrice' 
    Pinterest validerait un ecran dont cette branche ne s execute jamais. */
 const RESEAUX_PUB = [
   { cle: 'pinterest', nom: 'Pinterest', largeur: 1000, hauteur: 1500,
-    titre: 100, description: 300, lienCliquable: true },
+    titre: 100, description: 300, lienCliquable: true, diapos: [1, 1] },
   { cle: 'instagram', nom: 'Instagram', largeur: 1080, hauteur: 1350,
-    titre: 0, description: 2000, lienCliquable: false },
+    titre: 0, description: 2000, lienCliquable: false, diapos: [1, 1] },
   { cle: 'facebook', nom: 'Facebook', largeur: 1200, hauteur: 630,
-    titre: 0, description: 1200, lienCliquable: true },
+    titre: 0, description: 1200, lienCliquable: true, diapos: [1, 1] },
+  /* ⚠ TIKTOK EST LE SEUL A PLUSIEURS DIAPOS (#115) : il est ici pour que
+     l ecran dessine sa bande de diapos, ses boutons + et ✕, et son compteur
+     << Diapo 2 sur 4 >>. Sans lui dans le harnais, toute cette moitie du code
+     ne s executerait dans aucun banc. */
+  { cle: 'tiktok', nom: 'TikTok', largeur: 1080, hauteur: 1920,
+    titre: 0, description: 2000, lienCliquable: false, diapos: [3, 6] },
 ];
 
 /* Jeu commun aux deux cas de SEGMENTS (liste et constructeur). Il porte les
@@ -4506,7 +4512,15 @@ const JEU = {
           + 'de septembre a novembre. Se porte sur une robe comme sur un jean.',
         altTexte: 'Un manteau de laine beige porte ouvert sur une robe sombre.',
         motsCles: ['manteau de laine', 'mode automne quebec', 'manteau beige femme'],
-        image: { sur: 'Nouveaute', gros: 'La laine qui tient l automne', sous: 'Coupe droite, col montant' },
+        /* ⚠ QUATRE DIAPOS, PAS UNE. Le harnais doit exercer la bande, ses
+           boutons et son compteur : un cas a une seule diapo validerait un
+           ecran dont la moitie ne se dessine jamais. */
+        diapos: [
+          { sur: 'Nouveaute', gros: 'La laine qui tient l automne', sous: 'Coupe droite, col montant' },
+          { sur: 'La matiere', gros: 'Laine vierge, doublure satin', sous: 'Chaud sans etre lourd' },
+          { sur: 'Le porter', gros: 'Sur une robe comme sur un jean', sous: 'Du bureau au samedi' },
+          { sur: '', gros: 'A voir en boutique', sous: 'Lien dans la bio' }
+        ],
         cout: 0.014, budget: { plafond: 25, depense: 3.414 }, modele: 'claude-sonnet-5', ms: 4200 },
       'nl:epingleRendu': { ok: true, largeur: 1000, hauteur: 1500, photoPosee: true,
         image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' } } },
