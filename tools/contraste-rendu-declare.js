@@ -170,8 +170,14 @@ module.exports = {
     '#746845 sur #EEE6D5 @4.5': 2,
     // 4.44 · div.etat > div.src.warn « Aucune variable dans Render : l’état act » · lancement/jour
     '#80680B sur #F2E8DA @4.5': 1,
-    // 4.46 · div.haut > div.jeton « BB » · securite/jour securite_c1/jour securite_c2/jour
-    '#5E656B sur #E5DFD4 @4.5': 6,
+    // ⚠ LIGNE RETIRÉE LE 2026-09-14 (#108) : « #5E656B sur #E5DFD4 @4.5 », 6
+    //   endroits — le jeton d'initiales de l'écran des accès. Elle a disparu
+    //   avec la refonte de cet écran (#103).
+    //   ⚠ RETIRÉE SUR UNE PREUVE, PAS SUR UN SOUVENIR : un relevé complet
+    //   `--themes` (372 scénarios, 98 fenêtres, 2 modes ET les six thèmes) ne la
+    //   rencontre NULLE PART. Le relevé quotidien ne peint aucun thème et ne
+    //   pouvait donc pas conclure — c'est pour ça que le banc refuse désormais
+    //   d'annoncer une dette éteinte sans `--themes`.
     // 4.47 · div.cadre > div.bt « Se connecter » · marque_c2/nuit
     '#FFFFFF sur #6366F1 @4.5': 1,
     // 4.48 · div.pas > span.fait « 1 · Étiquette ✓ » · expedition_c1/jour
