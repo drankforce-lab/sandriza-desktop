@@ -74,7 +74,7 @@ const { APP_KEY } = require('./cle-app');
 // La DÉCISION du curseur vit à part, sans Electron, pour être éprouvable —
 // même patron que `brouillon-garde.js`. Voir son en-tête : c'est la pièce dont
 // l'erreur est muette.
-const { curseurSuivant, aAnnoncer } = require('./veilleur-curseur');
+const { curseurSuivant, aAnnoncer, majEchec, depuisQuand } = require('./veilleur-curseur');
 /* ⚠⚠ SA DEMANDE DU 2026-09-13 : « n'oublie pas de traduire le menu contextuel
    de l'application aussi ». C'est celui de l'icône de la zone de notification,
    et il était FRANÇAIS EN ENTIER — pas un seul appel de traduction.
@@ -184,7 +184,14 @@ let pasErreur = 0;            // nombre d'échecs d'affilée (pour espacer)
    jamais qui, jamais combien d'argent. C'est la règle de ce fichier depuis le
    début, et elle vaut d'autant plus pour ce qui se garde sur le disque. */
 const NOTIFS_MAX = 20;
-const ETAT_DEFAUT = { actif: true, depuis: null, pid: null, vu: null, notifs: [] };
+/* ⚠ `echecDepuis` / `echecMotif` / `succes` — #100, 2026-09-14. Ils répondent à
+   « depuis quand ça ne marche pas », que l'état en mémoire ne pouvait pas dire :
+   il repartait vierge à chaque démarrage. Voir `majEchec` dans
+   `veilleur-curseur.js`, où la décision est éprouvée. */
+const ETAT_DEFAUT = {
+  actif: true, depuis: null, pid: null, vu: null, notifs: [],
+  echecDepuis: null, echecMotif: '', succes: null,
+};
 const cheminEtat = () => path.join(app.getPath('userData'), 'veilleur-etat.json');
 
 function lireEtat() {
@@ -429,6 +436,11 @@ async function unTour() {
   if (!lireEtat().actif) return;
 
   const res = await interroger();
+  /* ⚠ ÉCRIT À CHAQUE TOUR, RÉUSSI OU NON (#100). C'est ce qui survit au
+     redémarrage : sans cette ligne, « depuis quand » repart de zéro chaque fois
+     que l'application se relance — et une veille morte depuis mardi se présente
+     comme une panne qui vient d'arriver. */
+  ecrireEtat(majEchec(lireEtat(), res, new Date().toISOString()));
   if (!res.ok) {
     dernierEchec = res.motif;
     /* ⚠ ON N'ESPACE QUE SUR CE QUI PEUT S'ARRANGER TOUT SEUL. Un réseau absent,
@@ -516,11 +528,43 @@ function motifPhrase(code) {
   }
 }
 
+/* ⚠ EN MOTS, PAS EN HORODATAGE (#100). « en échec depuis 2026-09-11T14:02:33Z »
+   demande de faire une soustraction dans sa tête, sur une icône qu'on survole
+   une seconde. « depuis 3 jours » se lit sans compter, et c'est la seule chose
+   qu'on vient chercher : est-ce que j'attends, ou est-ce que j'agis ? */
+/* ⚠ DES PHRASES ENTIÈRES, PAS DES MORCEAUX. Premier jet : `TV('depuis ') + n +
+   TV('minutes')`. Ça traduit mot à mot et se casse à la première langue qui ne
+   met pas les mots dans cet ordre — c'est exactement la faute des pluriels
+   collés du 2026-09-13. Le nombre entre par `{0}`, la phrase reste une phrase. */
+function _depuisPhrase(debut) {
+  const d = depuisQuand(debut, new Date().toISOString());
+  if (!d) return '';
+  if (d.unite === 'minute' && d.n === 0) return ' ' + TV('(à l’instant)');
+  const n = d.n;
+  /* ⚠ LES APPELS SONT ÉCRITS EN CLAIR, pas construits dans une variable. Premier
+     jet : `TV(cle)` avec `cle` calculée juste avant — le relevé de
+     `banc-langue-processus-principal` ne lit que les `TV('…')` LITTÉRAUX, il a
+     donc déclaré mes six entrées « que personne ne demande ». Une clé calculée
+     est invisible au relevé : c'est la faute du libellé passé en argument
+     (2026-09-13), sous un autre visage. */
+  let p;
+  if (d.unite === 'minute')     p = n > 1 ? TV('depuis {0} minutes') : TV('depuis {0} minute');
+  else if (d.unite === 'heure') p = n > 1 ? TV('depuis {0} heures')  : TV('depuis {0} heure');
+  else                          p = n > 1 ? TV('depuis {0} jours')   : TV('depuis {0} jour');
+  return ' (' + p.split('{0}').join(String(n)) + ')';
+}
+
 function ligneEtat() {
   const e = lireEtat();
   if (!e.actif) return TV('En pause');
   /* ⚠ TRADUIT A L USAGE : la ligne d etat se recompose a chaque `majTray()`,
      donc elle suit un changement de langue sans redemarrage. */
+  /* ⚠⚠ LE DISQUE AVANT LA MÉMOIRE (#100). `dernierEchec` est vide au démarrage,
+     même quand la veille est en panne depuis des jours : l'état persisté est le
+     SEUL qui traverse un redémarrage. On le consulte donc en premier, et la
+     mémoire ne sert qu'aux motifs qui ne s'écrivent pas (comme `sans_notif`,
+     posé par le système et non par un tour de veille). */
+  if (e.echecMotif) return '⚠ ' + motifPhrase(e.echecMotif) + _depuisPhrase(e.echecDepuis);
   if (dernierEchec) return '⚠ ' + motifPhrase(dernierEchec);
   return TV('À l’écoute des commandes et des retours');
 }
@@ -629,7 +673,12 @@ function majTray() {
     {
       label: e.actif ? TV('Mettre en pause') : TV('Reprendre la veille'),
       click: () => {
-        ecrireEtat({ actif: !e.actif });
+        /* ⚠ LA PAUSE INTERROMPT LA SÉRIE D'ÉCHECS (#100). Pendant une pause, la
+           veille n'essaie même pas : compter ce temps dans « en échec depuis »
+           ferait dire « depuis 3 jours » à une veille mise en pause vendredi et
+           reprise lundi. On repart donc d'une ardoise propre — et le tour qui
+           suit immédiatement écrira la vérité du moment. */
+        ecrireEtat({ actif: !e.actif, echecDepuis: null, echecMotif: '' });
         pasErreur = 0; dernierEchec = '';
         majTray();
         if (!e.actif) { ordonnancer(); unTour().catch(() => {}); }

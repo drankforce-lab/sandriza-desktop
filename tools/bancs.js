@@ -45,6 +45,35 @@ try {
   process.exit(1);
 }
 
+/* ⚠⚠ LES BANCS QUI OUVRENT CHROME EN RAFALE NE TOURNENT JAMAIS ICI — 2026-09-14.
+   Ce lanceur est fait pour etre lance A LA MAIN, sur SON poste. `banc-contraste-
+   rendu.js` ouvre Chrome des dizaines de fois : le 2026-09-05 il a epuise la
+   memoire de sa machine et FAIT TOMBER L AFFICHAGE, deux fois, deux redemarrages
+   en catastrophe. Il a sa place dans le travail `contrastes` de build.yml, sur
+   un runner — pas ici.
+
+   ⚠ CE QUI RENDAIT LA PROTECTION FRAGILE, ET POURQUOI ELLE EST ECRITE MAINTENANT.
+   Rien ne l excluait : il restait dehors seulement parce que sa commande etait
+   ecrite `run: node tools/...` sur UNE ligne, et que le motif de lecture ci-dessus
+   exige `node` EN DEBUT de ligne. Le 2026-09-14, en passant cette etape en bloc
+   `run: |` pour une option, la commande a commence la ligne — et le banc est
+   entre dans la rafale locale. Le compte est passe de 39 a 40 : c est ce chiffre,
+   et rien d autre, qui l a trahi.
+   ➡ Une protection qui tient a la MISE EN FORME d une ligne de YAML n est pas une
+   protection. Elle est ecrite ici, en toutes lettres, avec sa raison. */
+const JAMAIS_LOCAL = new Set(['tools/banc-contraste-rendu.js']);
+{
+  const ecartes = bancs.filter((b) => JAMAIS_LOCAL.has(b));
+  if (ecartes.length) {
+    bancs = bancs.filter((b) => !JAMAIS_LOCAL.has(b));
+    for (const e of ecartes) {
+      console.log('  --   ' + e + ' : ECARTE de la rafale locale (il ouvre Chrome des');
+      console.log('       dizaines de fois). Il tourne dans le travail `contrastes` de build.yml.');
+    }
+    console.log('');
+  }
+}
+
 if (bancs.length < 5) {
   console.log('ECHEC  ' + bancs.length + ' banc(s) trouve(s) dans build.yml — le motif de lecture ne marche plus,');
   console.log('       et un lanceur qui ne trouve rien repondrait << tout va bien >> sur un depot casse.');

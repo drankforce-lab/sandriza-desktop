@@ -21,7 +21,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { curseurSuivant, aAnnoncer } = require('../src/veilleur-curseur');
+const { curseurSuivant, aAnnoncer, majEchec, depuisQuand } = require('../src/veilleur-curseur');
 
 let vert = 0;
 const cas = (nom, fn) => {
@@ -263,4 +263,79 @@ cas('temoin : le garde REFUSE un unTour() qui consulterait la session', () => {
   for (const mot of _INTERDITS) if (faux.indexOf(mot) >= 0) vu = true;
   assert.ok(vu, 'le garde laisse passer une consultation de session : il ne prouve rien');
 });
+/* ══ DEPUIS QUAND ÇA NE MARCHE PAS — #100, 2026-09-14 ═══════════════════════
+ * ⚠ CE QUI RENDAIT LA FAUTE MUETTE : la ligne d'état disait bien « ⚠ Réseau
+ * indisponible », donc tout semblait signalé. Ce qu'elle ne disait pas, c'est
+ * DEPUIS QUAND — et `dernierEchec` ne vivait qu'en mémoire, donc chaque
+ * redémarrage remettait une veille morte depuis mardi à l'air d'une panne
+ * fraîche. Deux situations très différentes, la même phrase.
+ * ⚠ CES CAS SONT ICI PARCE QU'ILS PEUVENT TOUS ÉCHOUER : chacun distingue la
+ * bonne règle de l'écriture naïve qu'on ferait d'instinct. */
+console.log('\n── DEPUIS QUAND ÇA NE MARCHE PAS ────────────────────────────');
+
+const M = (s) => '2026-09-11T0' + s + ':00:00.000Z';
+
+cas('un succès efface la série et note la date', () => {
+  const p = majEchec({ echecDepuis: M(1), echecMotif: 'reseau', succes: null }, { ok: true }, M(5));
+  assert.strictEqual(p.echecDepuis, null);
+  assert.strictEqual(p.echecMotif, '');
+  assert.strictEqual(p.succes, M(5));
+});
+
+cas('le PREMIER échec pose le début de la série', () => {
+  const p = majEchec({ echecDepuis: null, echecMotif: '', succes: M(1) }, { ok: false, motif: 'reseau' }, M(2));
+  assert.strictEqual(p.echecDepuis, M(2));
+  assert.strictEqual(p.echecMotif, 'reseau');
+});
+
+/* ⚠⚠ LE CAS QUI COMPTE, et l'écriture naïve que j'ai failli faire :
+   `echecDepuis: maintenant` à chaque tour raté. Elle passe tous les autres cas
+   et ment sur le seul qui intéresse — une panne qui dure paraîtrait neuve à
+   chaque minute. */
+cas('un échec qui DURE ne repousse pas le début', () => {
+  const p = majEchec({ echecDepuis: M(2), echecMotif: 'reseau', succes: M(1) }, { ok: false, motif: 'reseau' }, M(9));
+  assert.strictEqual(p.echecDepuis, M(2), 'le début a été repoussé : une panne qui dure paraîtrait neuve');
+});
+
+cas('le motif CHANGE mais la panne est la même : le début ne bouge pas', () => {
+  const p = majEchec({ echecDepuis: M(2), echecMotif: 'reseau', succes: M(1) }, { ok: false, motif: 'delai' }, M(9));
+  assert.strictEqual(p.echecDepuis, M(2));
+  assert.strictEqual(p.echecMotif, 'delai', 'le motif courant doit suivre, lui');
+});
+
+cas('le dernier succès SURVIT à la série d’échecs', () => {
+  const p = majEchec({ echecDepuis: M(2), echecMotif: 'reseau', succes: M(1) }, { ok: false, motif: 'reseau' }, M(9));
+  assert.strictEqual(p.succes, M(1), 'sans lui, « jusqu’à quand ça marchait » est perdu');
+});
+
+cas('durée : moins d’une minute ne prétend pas à une minute', () => {
+  assert.deepStrictEqual(depuisQuand('2026-09-11T01:00:00Z', '2026-09-11T01:00:30Z'), { unite: 'minute', n: 0 });
+});
+cas('durée : minutes, heures, jours', () => {
+  assert.deepStrictEqual(depuisQuand('2026-09-11T01:00:00Z', '2026-09-11T01:45:00Z'), { unite: 'minute', n: 45 });
+  assert.deepStrictEqual(depuisQuand('2026-09-11T01:00:00Z', '2026-09-11T06:00:00Z'), { unite: 'heure',  n: 5 });
+  assert.deepStrictEqual(depuisQuand('2026-09-11T01:00:00Z', '2026-09-14T01:00:00Z'), { unite: 'jour',   n: 3 });
+});
+
+/* ⚠ UNE DATE ILLISIBLE NE DOIT PAS FABRIQUER DE PHRASE. « depuis Invalid Date »
+   ferait douter du reste de la ligne d'état — mieux vaut ne rien dire. */
+cas('durée : rien à dire sur une date absente, illisible, ou à l’envers', () => {
+  assert.strictEqual(depuisQuand(null, M(5)), null);
+  assert.strictEqual(depuisQuand('pas une date', M(5)), null);
+  assert.strictEqual(depuisQuand(M(9), M(1)), null, 'une fin avant le début : on se tait');
+});
+
+/* ⚠ ET LE CÂBLAGE : la règle peut être juste et n'être appelée par personne.
+   C'est exactement ce qui est arrivé à la boîte de reprise (#81). */
+cas('veilleur.js ÉCRIT l’état à chaque tour, réussi ou non', () => {
+  const c = _corps('unTour');
+  assert.ok(c && /ecrireEtat\(\s*majEchec\(/.test(c),
+    'unTour() n’appelle plus majEchec : rien ne survivrait au redémarrage');
+});
+cas('la ligne d’état lit le DISQUE avant la mémoire', () => {
+  const c = _corps('ligneEtat');
+  assert.ok(c && c.indexOf('echecMotif') >= 0,
+    'ligneEtat() ne lit que `dernierEchec` : au redémarrage elle dirait « à l’écoute » sur une veille morte');
+});
+
 console.log('\n' + (process.exitCode ? '✗ DES CAS ONT ÉCHOUÉ' : '✓ ' + vert + ' cas verts') + '\n');

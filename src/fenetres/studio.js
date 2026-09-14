@@ -2855,9 +2855,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         /* Un montant en français : « 12,50 », jamais « 12.50 ». ⚠ Sous la
            demi-cenne on garde trois décimales — un détourage coûte 0,002 $, et
            « 0,00 $ » pour cinq cents photos ferait croire à la gratuité. */
+        /* ⚠ LA DECISION DES TROIS DECIMALES RESTE ICI — elle appartient a cet
+           ecran. Ce qui part vers la piece commune, c est le GROUPEMENT et le
+           separateur, qui appartiennent a la langue (#102). */
         var sous = function(v){
           var n = Number(v || 0);
-          return (n > 0 && n < 0.01 ? n.toFixed(3) : n.toFixed(2)).replace('.', '${SEP_DEC()}');
+          return szArgentNombre(n, (n > 0 && n < 0.01) ? 3 : 2);
         };
         var majEstimation = function(){
           var z = document.getElementById('lot-estim');
@@ -3279,7 +3282,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
      ⚠ UNE ESTIMATION QUI ECHOUE NE BLOQUE PAS. On n interdit pas un rendu parce
      qu on n a pas su le chiffrer : on passe, et le pied de page le dit. */
-  function argent(n){ return (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', '${SEP_DEC()}'); }
+  /* ⚠ PASSE PAR LA PIECE COMMUNE DEPUIS LE 2026-09-14 (#102). Recompose a la
+     main, ce montant perdait le GROUPEMENT DES MILLIERS : « 1234,50 $ » ici,
+     « 1 234,50 $ » partout ailleurs. Le separateur decimal, lui, etait bon —
+     c est ce qui rendait l ecart invisible a la relecture. */
+  function argent(n){ return szArgentNombre(n, 2); }
 
   // Ce qui cause les appels supplementaires, dit dans les mots de l ecran.
   function causesAppels(){

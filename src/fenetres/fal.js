@@ -172,9 +172,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     fantome: '${T("Mannequin retiré")}',
     humain: '${T("Porté par un mannequin")}', essayage: '${T("Essayage virtuel")}'
   };
+  /* ⚠ DEUX FAUTES CORRIGEES LE 2026-09-14 (#102), les memes qu au Studio :
+     le montant etait recompose a la main — donc SANS groupement des milliers —
+     et le « $ » etait colle APRES meme en anglais, ou il se pose DEVANT.
+     ⚠ LES TROIS DECIMALES SOUS UN DOLLAR RESTENT : un traitement coute des
+     fractions de cent, et arrondir a deux ferait lire « 0,00 $ ». Cette
+     decision appartient a cet ecran ; le groupement appartient a la langue. */
   function sous_(v){
     var n = Number(v) || 0;
-    return (n < 1 ? n.toFixed(3) : n.toFixed(2)).replace('.', '${SEP_DEC()}') + ' $ US';
+    return szArgentSymbole(szArgentNombre(n, n < 1 ? 3 : 2)) + ' US';
   }
   function quand(iso){
     if (!iso) return '—';

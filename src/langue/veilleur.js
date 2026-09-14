@@ -32,6 +32,19 @@ module.exports = {
   'À l’écoute des commandes et des retours': 'Listening for orders and returns',
   'Veilleur SANDRIZA — ': 'SANDRIZA watcher — ',
 
+  /* ── DEPUIS QUAND ÇA NE MARCHE PAS (#100, 2026-09-14) ───────────────────
+     ⚠ DES PHRASES ENTIÈRES, avec le nombre en `{0}`. Traduire « depuis »,
+     « 3 » et « jours » séparément marche en français et en anglais par
+     coïncidence, et casse à la première langue qui range les mots autrement.
+     C'est la leçon des 139 pluriels collés du 2026-09-13. */
+  '(à l’instant)': '(just now)',
+  'depuis {0} minute': 'for {0} minute',
+  'depuis {0} minutes': 'for {0} minutes',
+  'depuis {0} heure': 'for {0} hour',
+  'depuis {0} heures': 'for {0} hours',
+  'depuis {0} jour': 'for {0} day',
+  'depuis {0} jours': 'for {0} days',
+
   /* ── Les motifs d'un veilleur qui ne peut pas travailler ────────────────
      ⚠ ILS DISENT QUOI FAIRE, PAS SEULEMENT CE QUI NE VA PAS — la traduction
      doit garder cette qualité, sinon elle rend le message inutile. */

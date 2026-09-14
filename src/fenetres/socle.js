@@ -1341,6 +1341,28 @@ function szArgentSymbole(s){
   var t = String(s == null ? '' : s);
   return ${poser('t')};
 }
+/* ⚠⚠ LE NOMBRE SEUL, GROUPE — POSE LE 2026-09-14 (#102).
+   Le Studio et la telephonie recomposaient leur montant a la main :
+   << toFixed(2).replace('.', ',') >>. Le separateur decimal etait bon, et c est
+   ce qui rendait la faute invisible — mais le GROUPEMENT DES MILLIERS manquait.
+   << szArgent >> rend « 1 234,50 $ » ; la version a la main rendait
+   « 1234,50 $ ». Deux ecrans voisins, deux ecritures du meme montant.
+   ⚠ POURQUOI PAS << szArgent >> DIRECTEMENT : le Studio garde TROIS decimales
+   sous la demi-cenne (un detourage coute 0,002 $), et << style:'currency' >> en
+   impose deux. On separe donc ce qui appartient a la langue — groupement et
+   separateur — de ce qui appartient a l ecran : le nombre de decimales.
+   ⚠ SANS SYMBOLE : le cote du « $ » change avec la langue, et c est le travail
+   de << szArgentSymbole >>. Deux pieces, deux questions. */
+function szArgentNombre(n, dec){
+  var v = Number(n); if (!isFinite(v)) v = 0;
+  var d = (dec === 0 || dec) ? Number(dec) : 2;
+  if (!isFinite(d) || d < 0 || d > 6) d = 2;
+  try {
+    return v.toLocaleString('${LIEU()}', { minimumFractionDigits: d, maximumFractionDigits: d });
+  } catch (e) {
+    return v.toFixed(d).replace('.', '${SEP_DEC()}');
+  }
+}
 function szOctets(n){
   var o = Number(n); if (!isFinite(o) || o < 0) o = 0;
   var u = ${JSON.stringify(unites)}, i = 0, v = o;

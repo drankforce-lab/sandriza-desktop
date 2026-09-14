@@ -217,8 +217,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function soldeCadUsd(usdStr){
     var usd = Number(usdStr);
     if (!isFinite(usd)) return String(usdStr || '');
-    var cad = (usd * USD_CAD).toFixed(2).replace('.', '${SEP_DEC()}');
-    return '≈ ' + cad + ' $ CA (' + String(usdStr) + ' USD)';
+    /* ⚠ DEUX FAUTES CORRIGEES LE 2026-09-14 (#102) : le montant etait recompose
+       a la main, donc SANS groupement des milliers ; et le « $ » etait colle
+       APRES meme en anglais, ou il se pose DEVANT. Les deux pieces communes
+       repondent chacune a une question — le nombre, puis le cote du symbole. */
+    var cad = szArgentSymbole(szArgentNombre(usd * USD_CAD, 2));
+    return '≈ ' + cad + ' CA (' + String(usdStr) + ' USD)';
   }
 
   // Masque de numéro NANP : chiffres seulement, affiché (418) 858-0455 ; stocké en

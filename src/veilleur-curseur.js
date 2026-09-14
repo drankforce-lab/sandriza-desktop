@@ -78,4 +78,59 @@ function aAnnoncer(rep) {
   return out;
 }
 
-module.exports = { curseurSuivant, aAnnoncer };
+/* ══ DEPUIS QUAND ÇA NE MARCHE PLUS — #100, 2026-09-14 ═══════════════════════
+ * ⚠⚠ CE QUI MANQUAIT, ET CE QUE ÇA COÛTAIT. La ligne d'état disait BIEN que la
+ * veille était en échec — mais `dernierEchec` ne vivait QU'EN MÉMOIRE. Donc :
+ *   · au redémarrage de l'application, l'ardoise était effacée. Une veille en
+ *     panne depuis trois jours repartait en disant « à l'écoute » jusqu'au tour
+ *     suivant, puis « réseau indisponible » — comme si ça venait d'arriver ;
+ *   · et même sans redémarrage, « ⚠ Réseau indisponible » ne dit pas si c'est
+ *     depuis deux minutes (on attend) ou depuis mardi (les commandes se sont
+ *     empilées sans un son). C'est la MÊME phrase pour deux situations qui
+ *     n'appellent pas du tout le même geste.
+ *
+ * ➡ Trois choses se gardent donc sur le disque : le DÉBUT de la série d'échecs
+ *   en cours, son motif courant, et la date du DERNIER SUCCÈS.
+ *
+ * ⚠ LE DÉBUT NE BOUGE PAS QUAND LE MOTIF CHANGE. Un réseau qui tombe, puis un
+ * serveur qui refuse, puis un délai dépassé : c'est UNE panne qui dure, pas
+ * trois pannes courtes. Remettre le compteur à zéro à chaque changement de
+ * motif ferait dire « depuis 30 secondes » à une veille morte depuis mardi —
+ * exactement le mensonge qu'on vient corriger.
+ *
+ * ⚠ ET LE DERNIER SUCCÈS SE GARDE MÊME PENDANT L'ÉCHEC : c'est lui qui répond
+ * « jusqu'à quand ça marchait », quand le début de la série ne suffit pas (une
+ * application éteinte tout le week-end n'a pas « échoué » pendant ce temps).
+ */
+function majEchec(etat, res, maintenant) {
+  const e = etat || {};
+  const t = String(maintenant || '');
+  if (res && res.ok) return { succes: t, echecDepuis: null, echecMotif: '' };
+  const motif = String((res && res.motif) || '');
+  return {
+    succes: e.succes || null,
+    echecDepuis: e.echecDepuis || t,   // ⚠ le PREMIER, pas le dernier
+    echecMotif: motif,
+  };
+}
+
+/* Combien de temps sépare deux instants, en mots — pour la ligne d'état.
+ * ⚠ ON NE DESCEND PAS SOUS LA MINUTE. « depuis 3 secondes » sur une icône qu'on
+ * regarde une fois par heure n'apprend rien, et donne une précision que la
+ * cadence du veilleur (une minute) ne porte pas.
+ * ⚠ RIEN N'EST RENDU POUR UN DÉBUT ABSENT OU ILLISIBLE : mieux vaut « ⚠ Réseau
+ * indisponible » tout court qu'un « depuis Invalid Date » qui fait douter du
+ * reste de la ligne. */
+function depuisQuand(debutIso, maintenantIso) {
+  const a = Date.parse(String(debutIso || ''));
+  const b = Date.parse(String(maintenantIso || ''));
+  if (!Number.isFinite(a) || !Number.isFinite(b) || b < a) return null;
+  const min = Math.floor((b - a) / 60000);
+  if (min < 1)   return { unite: 'minute', n: 0 };
+  if (min < 60)  return { unite: 'minute', n: min };
+  const h = Math.floor(min / 60);
+  if (h < 24)    return { unite: 'heure', n: h };
+  return { unite: 'jour', n: Math.floor(h / 24) };
+}
+
+module.exports = { curseurSuivant, aAnnoncer, majEchec, depuisQuand };

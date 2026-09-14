@@ -71,6 +71,23 @@ const FAUTES = [
     rx: /\+\s*['"]\s?\$['"]|['"]\s\$['"]\s*[;,)+]/, sauf: /szArgent/ },
   { quoi: 'une mise en forme de monnaie refabriquee au lieu de `szArgent`',
     rx: /style\s*:\s*['"]currency['"]/, sauf: null },
+  /* ⚠⚠ AJOUTE LE 2026-09-14 (#102), ET VOICI CE QUI LE RENDAIT INVISIBLE.
+     Le Studio et la telephonie ecrivaient `toFixed(2).replace('.', ',')`. Le
+     SEPARATEUR DECIMAL etait bon — c est tout ce qu on relit — mais le
+     GROUPEMENT DES MILLIERS manquait : « 1234,50 $ » sur un ecran, « 1 234,50 $ »
+     sur le voisin. Les deux regles du dessus ne voyaient rien : il n y avait ni
+     symbole colle, ni `style:'currency'`. La faute etait dans le NOMBRE.
+     ➡ `szArgentNombre(n, decimales)` groupe et choisit le separateur ; le
+     nombre de decimales reste a l ecran qui appelle (le Studio en garde TROIS
+     sous la demi-cenne).
+     ⚠ LE MOTIF ACCEPTE LES DEUX ECRITURES, et la seconde m avait echappe :
+       a.toFixed(2).replace('.', …)
+       (x ? a.toFixed(3) : a.toFixed(2)).replace('.', …)   <- le `.replace` porte
+                                                              sur la PARENTHESE.
+     Chercher `toFixed(2).replace` collés n aurait attrape que la premiere —
+     meme lecon que l attribut coupe du 2026-09-13. */
+  { quoi: 'un montant recompose a la main au lieu de `szArgentNombre` (le groupement des milliers est perdu)',
+    rx: /\.toFixed\(\s*\d+\s*\)[^;\n]*\.replace\(\s*['"]\./, sauf: null },
 ];
 
 /* ⚠ `socle.js` EST LA SEULE PLACE OU CES FORMES ONT LE DROIT D EXISTER : c est
@@ -116,7 +133,7 @@ for (const l of ['fr', 'en']) {
   delete require.cache[require.resolve('../src/fenetres/socle.js')];
   const S = require('../src/fenetres/socle.js');
   const js = S.JS_SOCLE ? S.JS_SOCLE() : '';
-  for (const nom of ['szArgent', 'szArgentChamp', 'szArgentSymbole', 'szOctets']) {
+  for (const nom of ['szArgent', 'szArgentChamp', 'szArgentSymbole', 'szArgentNombre', 'szOctets']) {
     if (js.indexOf('function ' + nom + '(') < 0) {
       essais.push('[' + l + '] `' + nom + '` n est pas posee dans les fenetres — '
         + 'aucune ne saurait plus afficher un montant ni un poids');
@@ -128,7 +145,8 @@ for (const l of ['fr', 'en']) {
     // eslint-disable-next-line no-new-func
     F = new Function(js.slice(js.indexOf('function szArgent('))
       + '\nreturn { szArgent: szArgent, szArgentChamp: szArgentChamp,'
-      + ' szArgentSymbole: szArgentSymbole, szOctets: szOctets };')();
+      + ' szArgentSymbole: szArgentSymbole, szArgentNombre: szArgentNombre,'
+      + ' szOctets: szOctets };')();
   } catch (e) {
     essais.push('[' + l + '] les recettes ne s executent pas : ' + e.message);
   }
@@ -157,6 +175,34 @@ for (const l of ['fr', 'en']) {
   if (en ? a.indexOf('$') !== 0 : a.indexOf('$') !== a.length - 1) {
     essais.push('[' + l + '] szArgent(1234.5) rend ' + JSON.stringify(a)
       + ' : le symbole n est pas du bon cote');
+  }
+
+  /* ══ `szArgentNombre` — LE NOMBRE SEUL, GROUPE (#102) ═════════════════════
+     ⚠ C EST LE GROUPEMENT QU ON EPROUVE, parce que c est LUI qui manquait : le
+     separateur decimal, lui, etait deja bon dans les versions a la main — et
+     c est pour ca que personne ne voyait la difference en relisant. */
+  const g = F.szArgentNombre(1234.5, 2);
+  if (!/\d/.test(g) || g.replace(/[^\d]/g, '') !== '123450') {
+    essais.push('[' + l + '] szArgentNombre(1234.5, 2) rend ' + JSON.stringify(g)
+      + ' : ce ne sont plus les memes chiffres');
+  }
+  /* ⚠ ON NE FIGE PAS LE CARACTERE DE GROUPEMENT (espace fine, insecable,
+     virgule : cela depend d ICU) — on exige qu il y en ait UN, c est-a-dire
+     qu au moins un caractere separe les milliers des centaines. */
+  if (g.length <= '1234.50'.length) {
+    essais.push('[' + l + '] szArgentNombre(1234.5, 2) rend ' + JSON.stringify(g)
+      + ' : aucun groupement des milliers — c est exactement la faute de #102');
+  }
+  /* ⚠ ET IL NE POSE AUCUN SYMBOLE : le cote du « $ » est le travail de
+     `szArgentSymbole`. Deux pieces, deux questions. */
+  if (g.indexOf('$') >= 0) {
+    essais.push('[' + l + '] szArgentNombre pose un symbole : ce n est pas son role');
+  }
+  /* Les trois decimales du Studio et de Fal.ai passent bien. */
+  const t = F.szArgentNombre(0.002, 3);
+  if (t.replace(/[^\d]/g, '') !== '0002') {
+    essais.push('[' + l + '] szArgentNombre(0.002, 3) rend ' + JSON.stringify(t)
+      + ' : les trois decimales sont perdues, « 0,00 $ » ferait croire a la gratuite');
   }
 }
 L.poserLangue('fr');

@@ -40,6 +40,11 @@ on:
         type: boolean
         required: true
         default: false
+      avec_themes:
+        description: "Mesurer AUSSI les six thèmes de l'administration ? (relevé complet, ~15 min — nécessaire seulement pour retirer une ligne de contraste-rendu-declare.js)"
+        type: boolean
+        required: false
+        default: false
 
 # Aucun droit n'est nécessaire : on ne touche ni au dépôt, ni aux releases.
 permissions:
@@ -125,10 +130,29 @@ jobs:
       # vue en lecture seule. On garde donc les 339 scenarios en 2 modes, et les
       # six themes restent a la main (`--themes`).
       # ⚠ Ce choix est ecrit ici parce qu'il se defend, pas parce qu'il va de soi.
+      # ⚠⚠ `avec_themes` — AJOUTE LE 2026-09-14 (#108), ET VOICI POURQUOI.
+      # Le banc annonce les lignes de `contraste-rendu-declare.js` qui ne sont
+      # << plus rencontrees NULLE PART dans un releve COMPLET >> et propose de
+      # les retirer. Or ce passage-ci ne peint AUCUN des six themes — il le dit
+      # lui-meme, les themes sont son angle mort n. 5. Une paire eteinte en
+      # jour/nuit peut etre la seule chose qui garde un texte lisible en
+      # `ardoise` : la retirer ne se voit pas le jour meme, et revient en rouge
+      # une construction plus tard, sur un chantier sans rapport.
+      # ➡ Le banc REFUSE desormais de conclure sans `--themes`. Cette entree
+      # permet de lui donner le releve complet quand on veut retirer une ligne,
+      # sans imposer le quart d'heure a chaque construction.
       - name: Contrastes des fenetres, mesures au rendu (339 scenarios x 2 modes)
         env:
-          SZ_CONTRASTE_BUDGET_MS: '900000'
-        run: node tools/banc-contraste-rendu.js
+          SZ_CONTRASTE_BUDGET_MS: '1500000'
+        # ⚠⚠ UNE SEULE LIGNE, ET CE N'EST PAS UN DETAIL DE STYLE. `tools/bancs.js`
+        # lit la liste des bancs DANS CE FICHIER, avec le motif `^\s*node tools/`.
+        # Ecrite en bloc `run: |`, la commande commence la ligne — et ce banc-ci,
+        # qui ouvre Chrome des dizaines de fois, se retrouvait dans la rafale
+        # LOCALE. C'est exactement ce qui a fait tomber l'affichage de son poste
+        # deux fois le 2026-09-05. Sur `run:` d'une ligne, le motif ne mord pas.
+        # (Fait et defait le 2026-09-14 : le compte est passe de 39 a 40 bancs,
+        # et c'est ce chiffre qui l'a trahi.)
+        run: node tools/banc-contraste-rendu.js ${{ inputs.avec_themes && '--themes' || '' }}
 
   windows:
     needs: menage
