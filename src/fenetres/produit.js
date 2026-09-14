@@ -1337,7 +1337,7 @@ function pageProduit(id) {
   function alerteSeuil(q){
     var s = parseInt(val('p-seuil'), 10);
     if (!(s > 0) || !(q > 0) || q >= s) return '';
-    return '<span class="al" title="Sous le seuil d’alerte (' + s + '). '
+    return '<span class="al" title="${T("Sous le seuil d’alerte")} (' + s + '). '
       + '${T("Il en manque")} ' + (s - q) + ' pour l’atteindre."><span class="ic">⚠</span></span>';
   }
 

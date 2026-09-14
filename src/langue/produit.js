@@ -26,6 +26,7 @@ module.exports = {
      'Solde' et part telle quelle dans la fiche. */
   'Ex : 350': 'E.g. 350',
   'En solde': 'On sale',
+  'Sous le seuil d’alerte': 'Below the alert threshold',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Produit — Administration Sandriza': 'Product — Sandriza Administration',
   'Produit': 'Product',

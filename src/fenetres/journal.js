@@ -176,7 +176,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td>' + esc(l.reference || '—') + '</td>'
               + '<td>' + esc(l.courriel) + '</td>'
               + '<td><span class="pill ' + (l.envoye ? 'bon' : 'err') + '">'
-              + (l.envoye ? 'Parti' : '${T("Échec")}') + '</span>'
+              + (l.envoye ? '${T("Parti")}' : '${T("Échec")}') + '</span>'
               + (l.test ? ' <span class="pill att">test</span>' : '') + '</td>'
               /* Le detail porte l identifiant Resend (preuve d envoi) OU le
                  message d erreur : c est ce qui permet de repondre a

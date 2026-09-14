@@ -16,6 +16,8 @@
  */
 
 module.exports = {
+  /* ⚠ Le verdict d une ligne : le contraire de « Échec », qui etait deja la. */
+  'Parti': 'Sent',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`. */
   'ligne': 'row',
   'lignes': 'rows',

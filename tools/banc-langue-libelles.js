@@ -61,7 +61,25 @@ const _nu = (s) => s
   .replace(/(^|[\s;{}(),=])\/\*[\s\S]*?\*\//g, (m, p) => p + ' ')
   .split('\n').map((l) => l.replace(/(^|[^:])\/\/.*$/, '$1')).join('\n');
 
-const src = ['admin.js', 'pont.js']
+/* ══ LE CHAMP BALAYE — ELARGI LE 2026-09-13 ════════════════════════════════
+ * ⚠⚠⚠ DEUX FICHIERS, ET LE SITE EN A QUARANTE. Ce banc ne lisait que
+ * `admin.js` et `pont.js`. Sa capture du jour, Studio virtuel : sept jetons de
+ * filtre en francais sur un ecran anglais, envoyes par `photos.js` ; journal
+ * d envoi : la colonne « Genre » remplie de « Chaîne », envoye par
+ * `newsletter.js`. Le banc n a rien dit — il ne regardait pas la.
+ * ⚠ PIRE QUE LE SILENCE : il a ACCUSE le lexique. Les sept entrees ajoutees
+ * pour corriger la capture ont ete signalees comme « le site n envoie plus ca
+ * — ligne morte ». Un banc dont le champ est trop etroit ne se contente pas de
+ * rater la faute : il declare morte la correction.
+ * ➡ NEUVIEME FOIS QUE LE DEFAUT EST HORS DU TERRAIN BALAYE. On lit desormais
+ *   TOUT ce que le site peut renvoyer par le pont. */
+const SRC_SITE = fs.readdirSync(SITE)
+  .filter((f) => f.endsWith('.js'))
+  /* ⚠ Les fichiers minifies ou empaquetes n ont pas de libelles a nous : les
+     lire ferait du bruit sans rien garder. */
+  .filter((f) => !/\.min\.js$/.test(f))
+  .sort();
+const src = SRC_SITE
   .map((f) => _nu(fs.readFileSync(path.join(SITE, f), 'utf8'))).join('\n');
 
 /* ── 1. Les TABLES citées par un champ `xxxLibelle: TABLE[…]`. ───────────── */
@@ -72,7 +90,18 @@ const tables = new Set();
   let m; while ((m = rx.exec(src))) tables.add(m[1]);
 }
 for (const t of tables) {
-  const b = new RegExp('const\\s+' + t + '\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*;', 'm').exec(src);
+  let nomTable = t;
+  /* ⚠ L ALIAS LOCAL, ET POURQUOI IL FAUT LE SUIVRE. `livechat.js` ecrit
+     `const st = _STATUS[s.status] || _STATUS.closed;` puis `statutLibelle:
+     st[0]`. La table citee s appelle donc `st` — un nom qui n existe nulle
+     part comme table. Sans cette resolution, le banc annoncait « table
+     introuvable, le releve ne prouve plus rien » : un ECHEC franc, mais sur la
+     mauvaise cause, et qui masquait les vrais trous derriere lui. */
+  {
+    const al = new RegExp('const\\s+' + t + '\\s*=\\s*([A-Za-z_$][A-Za-z0-9_$]*)\\s*\\[', 'm').exec(src);
+    if (al) nomTable = al[1];
+  }
+  const b = new RegExp('const\\s+' + nomTable + '\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*;', 'm').exec(src);
   if (!b) {
     fautes.push('la table `' + t + '` est citée comme source de libellés mais '
       + 'introuvable — le relevé ne prouve plus rien pour elle');
@@ -113,6 +142,37 @@ for (const t of tables) {
   let m; while ((m = rx.exec(src))) {
     const rx2 = /'((?:[^'\\]|\\.)*)'/g;
     let n; while ((n = rx2.exec(m[1]))) attendus.add(n[1].replace(/\\'/g, "'"));
+  }
+}
+/* ── 5. LE COUPLE « CODE + TEXTE » : `{ cle, nom }`. ───────────────────────
+   ⚠⚠ LA FORME QUI A ECHAPPE A TOUT LE MONDE. Le site envoie ses jetons de
+   filtre en `Object.entries(TABLE).map(([cle, nom]) => ({ cle, nom }))` — pas
+   un `libelle:` en vue, donc invisible aux quatre relevés ci-dessus. Sa
+   capture du 2026-09-13 montrait les sept jetons du Studio en français.
+   ⚠ ON RELEVE LA TABLE SOURCE, pas la destructuration : c est là que les
+   phrases sont écrites en toutes lettres. La condition est la présence du
+   couple `([cle, nom])` ou `({ cle, nom })` quelque part dans le fichier —
+   sinon on prendrait toute table de chaînes du site pour des libellés. */
+{
+  const rx = /\(\s*\[\s*cle\s*,\s*(?:nom|label|titre)\s*\]\s*\)\s*=>\s*\(\s*\{\s*cle\s*,/g;
+  if (rx.test(src)) {
+    const rxT = /Object\.entries\(\s*([A-Z_][A-Z0-9_]*)\s*\)\s*\.map\(\s*\(\s*\[\s*cle\s*,\s*(?:nom|label|titre)\s*\]/g;
+    let m; while ((m = rxT.exec(src))) {
+      const b = new RegExp('const\\s+' + m[1] + '\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*;', 'm').exec(src);
+      if (!b) continue;
+      const rx2 = /:\s*'((?:[^'\\]|\\.)*)'/g;
+      let n; while ((n = rx2.exec(b[1]))) attendus.add(n[1].replace(/\\'/g, "'"));
+    }
+  }
+}
+/* ── 6. LE GENRE D UN ENVOI, calculé à la volée. ───────────────────────────
+   ⚠ `genre: x === 'campaign' ? 'Campagne' : 'Chaîne'` — deux phrases posées
+   dans un ternaire, sur un champ qui n existe que pour être affiché. */
+{
+  const rx = /\bgenre\s*:\s*[^,;\n]*?'((?:[^'\\]|\\.)*)'\s*:\s*'((?:[^'\\]|\\.)*)'/g;
+  let m; while ((m = rx.exec(src))) {
+    attendus.add(m[1].replace(/\\'/g, "'"));
+    attendus.add(m[2].replace(/\\'/g, "'"));
   }
 }
 

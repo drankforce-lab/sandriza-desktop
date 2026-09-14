@@ -877,8 +877,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var pas = function(n){ return '<b' + (A.etape === n ? ' class="on"' : '') + '>' + n + '</b>'; };
     var h = '<div class="asst"><div class="bo">'
       + '<div class="tt"><h3>${T("Traitement en lot")}</h3>'
-      + '<span class="pas">' + pas(1) + '<span>source</span>' + pas(2) + '<span>choix</span>'
-      + pas(3) + '<span>traitement</span></span>'
+      /* ⚠ TROIS MOTS EN MINUSCULE, ET C EST CE QUI LES A SAUVES DU RELEVE.
+         Le releve des textes visibles exige une MAJUSCULE initiale pour
+         distinguer un libelle d une cle technique — la regle vaut pour une
+         propriete ou la cle et le libelle sont cote a cote sur la meme ligne.
+         Elle ne vaut PAS entre deux chevrons : ce qui est ecrit la est lu,
+         majuscule ou pas. Sa capture du 2026-09-13 : << 1 source 2 choix
+         3 traitement >> sur un ecran entierement anglais. */
+      + '<span class="pas">' + pas(1) + '<span>${T("source")}</span>' + pas(2) + '<span>${T("choix")}</span>'
+      + pas(3) + '<span>${T("traitement")}</span></span>'
       /* ⚠ VRAI PLEIN ECRAN DU SYSTEME, pas une classe CSS qui etire un panneau :
          on ouvre cet ecran pour VOIR les photos, et une planche de soixante-six
          vignettes gagne plus a la place qu a n importe quel reglage. */

@@ -549,6 +549,19 @@ jobs:
           # qui l'écrit. 20 libellés, 12 fenêtres, dont le bouton de `retour.js`
           # qui disait « Rembourser » — celui qui sort de l'argent.
           node tools/banc-libelle-argument.js
+          # ⚠⚠⚠ ET L'ATTRIBUT COUPÉ PAR UNE CONCATÉNATION. Sa capture du
+          # 2026-09-13, fenêtre « Orders » : tout en anglais — titre, colonnes,
+          # jetons, bouton — et le champ de recherche qui dit « Numéro de
+          # commande, nom, courriel… ». Le relevé cherche
+          # `placeholder\s*=\s*"([^"<>]+)"`, une expression qui ne peut pas
+          # franchir une concaténation. Or la source OUVRE l'attribut sur une
+          # ligne et le FERME deux lignes plus bas, la valeur étant fabriquée
+          # entre les deux. Le relevé ne voyait donc aucun attribut du tout :
+          # ni complet, ni incomplet — RIEN. Et un rien ne se signale pas.
+          # ⚠ La moitié de cette valeur était traduite, juste à côté : quelqu'un
+          # a bien lu cette ligne, a traduit ce qui ressemblait à du texte, et a
+          # laissé ce qui ressemblait à un attribut.
+          node tools/banc-attribut-coupe.js
           # ⚠⚠ ET LES ÉCRANS BÂTIS DANS LE PROCESSUS PRINCIPAL, que NI le compteur
           # NI le résiduel ne voient : ils sont dans `main.js`, qu'aucun banc ne peut
           # faire tourner sans lancer toute l'application. C'est le seul endroit de

@@ -345,7 +345,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var expedition = MODE === 'expeditions';
 
     var h = '<div class="carte">'
-      + '<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="Numéro de commande, nom, courriel'
+      + '<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
       + (expedition ? '${T(", numéro de suivi")}' : '') + '…" value="' + esc(F.q) + '">'
       + '<div class="filtres"><span class="lbl">${T("Statut :")}</span><span class="jetons">'
       + ((CTX && CTX.statuts) || []).filter(function(s){

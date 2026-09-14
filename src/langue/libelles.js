@@ -107,6 +107,108 @@ const LIBELLES_EN = {
   /* ── Boutons de la boîte de mise à jour ─────────────────────────────── */
   'Installer maintenant': 'Install now',
   'Plus tard': 'Later',
+
+  /* ══ LES JETONS DE FILTRE DU STUDIO (sa capture du 2026-09-13) ═══════════
+     ⚠⚠ Sept jetons français sur un écran entièrement anglais. Ils viennent de
+     `EXPL_FILTRES` dans le site (assets/js/photos.js) et arrivent en
+     `{ cle, nom }` : la CLÉ repart au site quand on choisit le jeton, le NOM
+     ne fait que s'afficher. On ne traduit donc que le second — voir la règle
+     du couple code + texte dans `_traduireLibelles` (main.js). */
+  'A déjà reçu un traitement': 'Already processed',
+  'Jamais traitée': 'Never processed',
+  'Détourée (fond transparent)': 'Cut out (transparent background)',
+  'Fond d’origine': 'Original background',
+  'Rattachée à un produit': 'Attached to a product',
+  'Aucun produit': 'No product',
+  'Téléversement en cours': 'Uploading',
+
+  /* ══ LE GENRE D'UN ENVOI (journal d'envoi) ═══════════════════════════════
+     ⚠ Le site le CALCULE à l'envoi : il n'est ni lu ni écrit ailleurs, il
+     n'existe que pour la colonne « Genre ». */
+  'Campagne': 'Campaign',
+  'Chaîne': 'Sequence',
+
+  /* ══════════════════════════════════════════════════════════════════════════
+   * LES 44 LIBELLÉS TROUVÉS LE 2026-09-13 EN ÉLARGISSANT LE CHAMP DU BANC
+   * ══════════════════════════════════════════════════════════════════════════
+   * ⚠⚠⚠ ILS ÉTAIENT LÀ DEPUIS TOUJOURS. `banc-langue-libelles` ne lisait que
+   * `admin.js` et `pont.js` — deux fichiers sur quarante. Le jour où il a lu
+   * tout le site, il est passé de 39 libellés relevés à 92, et 44 d'un coup
+   * n'avaient aucune traduction. Aucune capture ne les avait montrés parce
+   * qu'il faut ouvrir le bon écran avec les bonnes données pour les voir.
+   * ➡ UN BANC NE PROUVE RIEN AU-DELÀ DU TERRAIN QU'IL BALAIE, et son verdict
+   *   vert ne dit pas où s'arrête ce terrain. */
+
+  /* ── D'où vient un abonné (infolettre) ─────────────────────────────────── */
+  'Pied de page': 'Footer',
+  'Commande': 'Order',
+  'Ajouté à la main': 'Added manually',
+  'Import': 'Import',
+
+  /* ── Le canal d'une campagne ───────────────────────────────────────────── */
+  'Courriel': 'Email',
+  'Courriel + SMS': 'Email + SMS',
+  'SMS': 'SMS',
+
+  /* ── L'état d'une campagne ─────────────────────────────────────────────── */
+  'Brouillon': 'Draft',
+  'En cours': 'In progress',
+  'Envoyée': 'Sent',
+
+  /* ── Le déclencheur d'une chaîne ───────────────────────────────────────── */
+  'Nouvel abonné': 'New subscriber',
+  'Après achat': 'After purchase',
+  'Panier abandonné': 'Abandoned cart',
+  'Nouvelle collection': 'New collection',
+  'Manuel': 'Manual',
+
+  /* ── LES CATÉGORIES DE LA BOUTIQUE ─────────────────────────────────────
+     ⚠⚠ CE SONT DES LIBELLÉS, PAS LA DONNÉE. La donnée est la clé — `robes`,
+     `hauts`, `pantalons` — et elle ne bouge pas : c'est elle qui est écrite
+     sur le produit et lue par la boutique. Le nom affiché à côté, lui, se lit
+     dans la langue du poste. */
+  'Robes': 'Dresses',
+  'Hauts & Blouses': 'Tops & Blouses',
+  'Pantalons & Jeans': 'Trousers & Jeans',
+  'Jupes': 'Skirts',
+  'Manteaux & Vestes': 'Coats & Jackets',
+  'Chaussures': 'Shoes',
+  'Accessoires': 'Accessories',
+
+  /* ── L'état d'une carte-cadeau ─────────────────────────────────────────── */
+  'Active': 'Active',
+  'Utilisée': 'Used',
+  'Expirée': 'Expired',
+  'Activation requise': 'Activation required',
+
+  /* ── Les deux façons de rendre l'argent ────────────────────────────────── */
+  'Crédit boutique': 'Store credit',
+  'Frais de service': 'Service fee',
+
+  /* ── Ce qui déclenche une publication sociale ──────────────────────────── */
+  '🆕 Nouveau produit ajouté': '🆕 New product added',
+  '📦 Nouvelle collection créée': '📦 New collection created',
+  '🏷 Nouvelle promotion activée': '🏷 New promotion activated',
+  '✋ Publication manuelle': '✋ Manual post',
+  '⏰ Publication planifiée': '⏰ Scheduled post',
+
+  /* ── Les traitements du Studio ─────────────────────────────────────────── */
+  'Détourage': 'Background removal',
+  'Mannequin retiré': 'Model removed',
+  'Porté par un mannequin': 'Worn by a model',
+  'Filigrane / logo': 'Watermark / logo',
+
+  /* ── LES SEGMENTS DE CLIENTÈLE ─────────────────────────────────────────
+     ⚠ LE CLIENT EST AU MASCULIN — la règle du dépôt, gardée par
+     `banc-francais.js`. L'anglais n'a pas le problème, mais la clé française
+     doit rester juste : c'est elle qu'on relit. */
+  'Prospect (aucun achat)': 'Prospect (no purchase)',
+  'Nouveau (1 commande)': 'New (1 order)',
+  'Régulier (2 à 4 commandes)': 'Regular (2 to 4 orders)',
+  'VIP (5+ commandes ou 500 $+)': 'VIP (5+ orders or $500+)',
+  'Inactif (aucun achat depuis 90 j)': 'Inactive (no purchase in 90 days)',
+  'Tous les abonnés': 'All subscribers',
+  'Clients avec commandes': 'Customers with orders',
 };
 
 module.exports = { LIBELLES_EN };

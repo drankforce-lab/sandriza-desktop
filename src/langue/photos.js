@@ -29,6 +29,13 @@
  */
 
 module.exports = {
+  /* ⚠⚠ LES TROIS ETAPES DE L ASSISTANT, EN MINUSCULE — et c est ce qui les
+     avait sauvees du releve, qui exige une majuscule initiale pour distinguer
+     un libelle d une cle. Entre deux chevrons, la majuscule ne prouve rien :
+     ce qui est ecrit la est lu. */
+  'source': 'source',
+  'choix': 'choice',
+  'traitement': 'processing',
   /* ⚠⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. */
   'photo': 'photo',
   'photos': 'photos',

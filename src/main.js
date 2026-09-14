@@ -1658,6 +1658,23 @@ const refuserFermeture = () => {
 // la page d'administration à chaque chargement réussi et on la garde dans les
 // réglages du poste. Au tout premier lancement, avant toute connexion, on
 // retombe sur les mêmes valeurs par défaut que le site.
+/* Le defaut francais, ecrit UNE fois : il sert a la fois de repli et de
+   signature pour reconnaitre « ce n est pas un choix, c est le defaut ». */
+const PORTE_SOUS_DEFAUT = 'Panneau d’administration';
+const _sousTitrePorte = (pose) => {
+  const v = String(pose == null ? '' : pose).trim();
+  /* ⚠ L apostrophe droite ET la courbe : le theme a pu etre ecrit par un ecran
+     qui n emploie pas la meme. Les confondre laisserait passer le defaut. */
+  const nu = v.replace(/['’]/g, '’');
+  /* ⚠⚠ L APPEL RESTE LITTERAL, ET CE N EST PAS UNE COQUETTERIE. `TP(CONSTANTE)`
+     marchait, et `banc-langue-processus-principal` l a refuse : une entree que
+     personne ne demande EN TOUTES LETTRES est indistinguable d une ligne morte,
+     et le jour ou quelqu un fait le menage elle part avec les vraies. C est la
+     meme regle qui avait converti la table des motifs du veilleur en switch. */
+  if (!v || nu === PORTE_SOUS_DEFAUT) return TP('Panneau d’administration');
+  return v;
+};
+
 const porteMarque = () => {
   const m = reglages.get('marque') || {};
   const th = m.theme || {};
@@ -1668,7 +1685,17 @@ const porteMarque = () => {
     titre:   th.titleColor || '#f5e6d0',
     sous:    th.subtitleColor || 'rgba(236,229,217,0.92)',
     nom:     m.nom || 'SANDRIZA',
-    sousTitre: th.subtitleText || TP('Panneau d’administration'),
+    /* ⚠⚠⚠ LE SOUS-TITRE PAR DEFAUT, DEGUISE EN REGLAGE. Sa capture du
+       2026-09-13 : tout l ecran de mise a jour en anglais, et
+       « PANNEAU D ADMINISTRATION » en francais au milieu. La traduction
+       existait, l appel aussi — mais `th.subtitleText` passe AVANT, et il
+       contient la valeur par defaut, recopiee dans le theme a un moment ou
+       personne ne l a choisie. Un reglage qui n a jamais ete decide n est pas
+       un reglage : c est le defaut, et le defaut suit la langue.
+       ⚠ CE QU IL A VRAIMENT TAPE EST RESPECTE : on ne traduit que si le texte
+       enregistre est MOT POUR MOT le defaut francais. Un sous-titre choisi,
+       meme francais, reste tel quel — c est sa marque, pas notre libelle. */
+    sousTitre: _sousTitrePorte(th.subtitleText),
     lettre:  m.lettre || 'S',
     logo:    m.logo || '',
   };
@@ -3297,8 +3324,33 @@ const _traduireLibelles = (x, prof) => {
      PRINCIPAL — donc toute l'application, pas seulement une fenêtre. */
   if (p > 8 || x === null || typeof x !== 'object') return x;
   if (Array.isArray(x)) { for (let i = 0; i < x.length; i++) x[i] = _traduireLibelles(x[i], p + 1); return x; }
+  /* ⚠⚠⚠ LE COUPLE << CODE + TEXTE >>, ET POURQUOI IL EST SUR. Sa capture du
+     2026-09-13, Studio virtuel : sept jetons de filtre en francais
+     (<< Jamais traitée >>, << Détourée (fond transparent) >>…) sur un ecran
+     anglais. Ils viennent du SITE, qui les envoie en  { cle, nom }  — et la
+     regle d ici ne regardait que les cles finissant par << Libelle >>.
+     ⚠ CE QUI REND LA TRADUCTION SANS RISQUE ICI : l objet porte les DEUX
+     faces d une meme chose. `cle` est ce qui est RENVOYE au site quand on
+     choisit le jeton ; `nom` est ce qui est LU a l ecran. Traduire `nom`
+     pendant que `cle` reste intacte, c est exactement la doctrine — on ne
+     traduit que ce qui se lit, jamais ce qui s ecrit.
+     ⚠ ET C EST POURQUOI ON EXIGE LA PRESENCE DE `cle`. Un `nom` tout seul peut
+     etre le nom d une personne, d un produit, d un fournisseur : de la donnee.
+     C est la cle a cote qui prouve que le texte n est qu un affichage. */
+  const coupleCodeTexte = Object.prototype.hasOwnProperty.call(x, 'cle')
+    && typeof x.cle === 'string';
   for (const k of Object.keys(x)) {
     if (/[Ll]ibelle$/.test(k)) x[k] = _unLibelle(x[k]);
+    else if (coupleCodeTexte && (k === 'nom' || k === 'label' || k === 'titre')) x[k] = _unLibelle(x[k]);
+    /* ⚠⚠ `genre` EST TOUJOURS UN LIBELLE, JAMAIS UNE DONNEE. Le site le CALCULE
+       a l envoi (`l.type === 'campaign' ? 'Campagne' : 'Chaîne'`) : il n est
+       lu nulle part, ecrit nulle part, et n existe que pour etre affiche. Sa
+       capture du 2026-09-13, journal d envoi : la colonne KIND en anglais et
+       cinq << Chaîne >> dessous.
+       ⚠ ET LA TRADUCTION NE PEUT RIEN CASSER MEME SI JE ME TROMPE : `_unLibelle`
+       ne remplace QUE ce que le lexique connait mot pour mot, et seulement en
+       anglais. Un `genre` inattendu ressort intact. */
+    else if (k === 'genre') x[k] = _unLibelle(x[k]);
     else x[k] = _traduireLibelles(x[k], p + 1);
   }
   return x;

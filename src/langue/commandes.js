@@ -26,6 +26,10 @@
  */
 
 module.exports = {
+  /* ⚠ L EXEMPLE du champ de recherche. Il ouvrait un attribut sur une ligne et
+     le fermait deux lignes plus bas : aucun releve ne le voyait — voir
+     tools/banc-attribut-coupe.js. */
+  'Numéro de commande, nom, courriel': 'Order number, name, email',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js.
      ⚠ ET LA MEME TRADUCTION QUE LE SINGULIER plus bas (« not processed ») :
      deux rendus differents du meme mot se liraient comme deux notions. */
