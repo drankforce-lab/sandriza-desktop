@@ -120,6 +120,20 @@ const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAA
 const VERROU = { ok: true, obtenu: true, horsLigne: false, parQui: '' };
 const IDENTITE = { ok: true, nom: 'Brigitte Brousseau', role: 'Administratrice' };
 
+/* La table des reseaux, telle que `nl:epingleDonnees` la rend (#115).
+   ⚠ LES TROIS SONT PRESENTS, ET PAS SEULEMENT LE PREMIER. Instagram y est pour
+   son `lienCliquable: false` : c est le SEUL cas ou l ecran doit retirer le
+   champ du lien et poser un avis a la place. Un harnais qui n aurait que
+   Pinterest validerait un ecran dont cette branche ne s execute jamais. */
+const RESEAUX_PUB = [
+  { cle: 'pinterest', nom: 'Pinterest', largeur: 1000, hauteur: 1500,
+    titre: 100, description: 300, lienCliquable: true },
+  { cle: 'instagram', nom: 'Instagram', largeur: 1080, hauteur: 1350,
+    titre: 0, description: 2000, lienCliquable: false },
+  { cle: 'facebook', nom: 'Facebook', largeur: 1200, hauteur: 630,
+    titre: 0, description: 1200, lienCliquable: true },
+];
+
 /* Jeu commun aux deux cas de SEGMENTS (liste et constructeur). Il porte les
    CHAMPS avec leur `type` — c'est lui qui décide du contrôle de valeur dessiné
    (nombre, catégorie, segment automatique, oui/non, texte) — et deux segments
@@ -4446,7 +4460,11 @@ const JEU = {
               declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
               reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
           ] }, { peutEcrire: false }) } },
-    /* ══ L EPINGLE PINTEREST (#115, 2026-09-14) ═══════════════════════════════
+    /* ══ LES PUBLICATIONS SOCIALES (#115, 2026-09-14) ═════════════════════════
+       ⚠ LA TABLE DES RESEAUX EST LA FORME EXACTE que rend le coeur : format,
+       bornes, et le droit de poser un lien. La fenetre s en sert pour dessiner
+       l apercu au bon rapport et pour ses compteurs — un harnais qui la
+       simplifierait validerait un ecran qui ne verra jamais ces donnees-la.
        ⚠ TROIS CAS, ET LE TROISIEME EST CELUI QUI COMPTE. L onglet se dessine
        avant d avoir sa cle, avec sa cle, et une fois REDIGE — c est le dernier
        qui remplit les champs, pose l apercu et active le bouton d export. Un
@@ -4457,7 +4475,7 @@ const JEU = {
         reseauxActifs: [], file: [], historique: [] },
       'nl:iaEtat': { ok: true, clePosee: false, budget: {}, modeles: [] },
       'nl:epingleDonnees': { ok: true, peutModifier: true, siteUrl: 'https://www.sandriza.com/',
-        entreprise: 'SANDRIZA', format: { largeur: 1000, hauteur: 1500 },
+        entreprise: 'SANDRIZA', reseaux: RESEAUX_PUB,
         produits: [{ id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
           photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' }] } } },
     { nom: 'epingle vierge', id: 'epingle', reponses: { identite: IDENTITE,
@@ -4466,7 +4484,7 @@ const JEU = {
       'nl:iaEtat': { ok: true, clePosee: true, budget: { plafond: 25, depense: 3.4 },
         modeles: ['claude-sonnet-5'] },
       'nl:epingleDonnees': { ok: true, peutModifier: true, siteUrl: 'https://www.sandriza.com/',
-        entreprise: 'SANDRIZA', format: { largeur: 1000, hauteur: 1500 },
+        entreprise: 'SANDRIZA', reseaux: RESEAUX_PUB,
         produits: [
           { id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
             photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' },
@@ -4480,7 +4498,7 @@ const JEU = {
       'nl:iaEtat': { ok: true, clePosee: true, budget: { plafond: 25, depense: 3.4 },
         modeles: ['claude-sonnet-5'] },
       'nl:epingleDonnees': { ok: true, peutModifier: true, siteUrl: 'https://www.sandriza.com/',
-        entreprise: 'SANDRIZA', format: { largeur: 1000, hauteur: 1500 },
+        entreprise: 'SANDRIZA', reseaux: RESEAUX_PUB,
         produits: [{ id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
           photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' }] },
       'nl:iaEpingle': { ok: true, titre: 'Le manteau de laine qui traverse l automne',

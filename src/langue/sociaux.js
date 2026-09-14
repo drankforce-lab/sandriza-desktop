@@ -175,6 +175,35 @@ module.exports = {
      ⚠ Les DIMENSIONS ne se traduisent pas (1000 x 1500), et << px >> non plus. */
   'Épingle Pinterest': 'Pinterest pin',
   'Écrire l’épingle avec l’IA': 'Write the pin with AI',
+
+  /* ── LE CHOIX DU RESEAU (#115 — Facebook et Instagram) ──────────────────── */
+  /* ⚠ LES NOMS DES RESEAUX NE SE TRADUISENT PAS : Pinterest, Instagram et
+     Facebook s appellent pareil dans les deux langues, et ils viennent du coeur
+     comme des DONNEES, pas comme des textes.
+     ⚠ << Mots-clics >> est le terme quebecois pour hashtags — il reste, et son
+     equivalent anglais est bien << hashtags >>, pas << key words >> : ce sont
+     deux objets differents, et Pinterest emploie les seconds la ou Instagram
+     emploie les premiers. C est justement pour ca que l ecran change de mot
+     selon le reseau. */
+  'Publication IA': 'AI post',
+  'Écrire avec l’IA pour ': 'Write with AI for ',
+  'Rédiger': 'Write',
+  'Publication rédigée : ': 'Post written: ',
+  'Texte de la publication': 'Post text',
+  'Mots-clics : ': 'Hashtags: ',
+  'Aperçu de la publication': 'Post preview',
+  'Enregistrer la publication': 'Save the post',
+  'Texte de la publication copié.': 'Post text copied.',
+  'px · le format que ': 'px · the format ',
+  ' montre en entier': ' shows in full',
+  'Le modèle n’a rien produit d’utilisable. Reformulez la demande.':
+    'The model produced nothing usable. Reword the request.',
+  /* ⚠ LA PHRASE QUI EVITE UNE VRAIE FAUTE : Instagram ne rend AUCUNE adresse
+     cliquable dans une legende. Ecrire << cliquez ici >> y envoie les gens
+     taper une adresse a la main, ou renoncer. L anglais doit le dire aussi net. */
+  'Ce réseau ne rend pas les liens cliquables : mettez l’adresse dans la bio du compte.':
+    'This network does not make links clickable: put the address in the account bio.',
+  'Lien : à mettre dans la bio du compte': 'Link: to be put in the account bio',
   'Simple': 'Simple',
   'Avancé': 'Advanced',
   'Lecture du catalogue…': 'Reading the catalogue…',

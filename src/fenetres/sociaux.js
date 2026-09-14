@@ -110,9 +110,11 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 /* ══ L EPINGLE PINTEREST (#115, 2026-09-14) ═════════════════════════════════
    Deux colonnes : ce qu on ecrit a gauche, ce que Pinterest montrera a droite.
-   ⚠ L APERCU GARDE SON RAPPORT 2:3 PAR aspect-ratio, ET PAS PAR UNE HAUTEUR EN
-   PIXELS. Pinterest ne montre en entier que ce format ; un apercu qui mentirait
-   d un cheveu sur la proportion ferait valider un cadrage qui sera rogne.
+   ⚠ L APERCU GARDE SON RAPPORT PAR aspect-ratio, ET PAS PAR UNE HAUTEUR EN
+   PIXELS — et ce rapport est POSE EN LIGNE, depuis la fiche du reseau choisi.
+   Chaque reseau ne montre en entier qu un format ; un apercu qui mentirait d un
+   cheveu sur la proportion ferait valider un cadrage qui sera rogne. Le 2:3
+   ci-dessous n est que le defaut, celui de Pinterest.
    ⚠ AUCUNE OPACITE SUR UN TEXTE (lecon du 2026-09-14) : --tx2 est mesure. */
 .epg{display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:.9rem;align-items:start}
 @media (max-width:52rem){.epg{grid-template-columns:minmax(0,1fr)}}
@@ -289,6 +291,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
      Sa demande vaut ici comme pour le courriel : << je dois etre en mesure
      d apporter des modifications >>. Chaque champ redessine l apercu — on voit
      donc ce qu on change pendant qu on le change, au lieu de deviner. */
+  /* ⚠⚠ UN CHOIX DE RESEAU, PAS TROIS ONGLETS (#115, Facebook et Instagram).
+     Sa demande dit exactement la forme : << si je choisis Facebook ca me genere
+     un post […] meme chose pour Instagram, et le plus important Pinterest >>.
+     C est UN flux dont la SORTIE s adapte, pas trois outils cote a cote. Trois
+     onglets auraient fait retaper la meme demande trois fois pour la meme
+     annonce — et auraient invite a trois bouts de code qui divergent.
+     ⚠ Le format, les bornes et le droit de poser un lien viennent du COEUR
+     (nl:epingleDonnees rend la table des reseaux). Les recopier ici ferait deux
+     verites : le jour ou Instagram change de format, l apercu mentirait sur ce
+     que l export produit. */
+  var EPRES = 'pinterest'; // pinterest | instagram | facebook
   var EPD = null;        // nl:epingleDonnees
   var EP = null;         // le modele en cours : { produitId, sur, gros, sous, titre, description, alt, motsCles, lien }
   var EPIMG = '';        // la derniere image rendue (data URL)
@@ -313,8 +326,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
      selon l ecran qui les a composees. */
   function epModeleRendu(){
     var p = epProduit();
-    return { photo: p ? p.photo : '', entreprise: (EPD && EPD.entreprise) || '',
+    return { reseau: EPRES, photo: p ? p.photo : '', entreprise: (EPD && EPD.entreprise) || '',
              sur: EP.sur, gros: EP.gros, sous: EP.sous };
+  }
+  // La fiche du reseau choisi, telle que le coeur la decrit.
+  function epFiche(){
+    var l = (EPD && EPD.reseaux) || [];
+    for (var i = 0; i < l.length; i++) { if (l[i].cle === EPRES) return l[i]; }
+    return { cle: EPRES, nom: EPRES, largeur: 1000, hauteur: 1500,
+             titre: 100, description: 500, lienCliquable: true };
   }
 
   function epDemanderRendu(){
@@ -338,7 +358,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var z = document.getElementById('ep-vue');
     if (!z) return;
     z.innerHTML = EPIMG
-      ? '<img src="' + esc(EPIMG) + '" alt="${T("Aperçu de l’épingle")}">'
+      ? '<img src="' + esc(EPIMG) + '" alt="${T("Aperçu de la publication")}">'
       : '<div class="rien">' + (EPRENDU ? '${T("Rendu…")}' : '${T("Choisissez un produit, ou écrivez une accroche.")}') + '</div>';
   }
 
@@ -349,10 +369,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     return '<div><label for="' + id + '">' + esc(lib) + '</label>'
       + '<select id="' + id + '">' + o + '</select></div>';
   }
-  /* Un champ du modele, avec son compteur quand Pinterest impose une borne.
-     ⚠ LE COMPTEUR N EST PAS DU DECOR : Pinterest COUPE un titre a 100
-     caracteres et une description a 500. Sans le chiffre a l ecran, on
-     s en apercoit apres publication, sur l epingle des autres. */
+  /* Un champ du modele, avec son compteur quand le reseau impose une borne.
+     ⚠ LE COMPTEUR N EST PAS DU DECOR : chaque reseau COUPE — un titre a 100
+     caracteres chez Pinterest, une legende a 2000 chez Instagram. Sans le
+     chiffre a l ecran, on s en apercoit apres publication, chez les autres.
+     ⚠ La borne vient de la fiche du reseau, jamais d un nombre ecrit ici. */
   function epChamp(cle, lib, max, longue){
     var id = 'ep-' + cle, v = String((EP && EP[cle]) || '');
     var n = v.length, trop = (max && n > max);
@@ -371,9 +392,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var pret = !!(EPETAT && EPETAT.clePosee);
     var h = '<div class="epg"><div class="cg">';
 
+    // ── Le choix du reseau : la MEME demande, une sortie differente ────────
+    h += '<div class="bqbar" style="margin-bottom:.5rem">'
+      + (EPD.reseaux || []).map(function(r){
+          return '<button class="mini' + (r.cle === EPRES ? ' actif' : '') + '" data-epres="'
+            + esc(r.cle) + '">' + esc(r.nom) + '</button>';
+        }).join('')
+      + '</div>';
+
     // ── Le panneau d ecriture IA ──────────────────────────────────────────
     h += '<div class="epia" id="ep-ia"><div class="tt"><span class="ic">✶</span>'
-      + '<b>${T("Écrire l’épingle avec l’IA")}</b>'
+      + '<b>${T("Écrire avec l’IA pour ")}' + esc(epFiche().nom) + '</b>'
       + '<button class="mini' + (EPMODE === 'simple' ? ' actif' : '') + '" id="ep-simple">${T("Simple")}</button>'
       + '<button class="mini' + (EPMODE === 'avance' ? ' actif' : '') + '" id="ep-avance">${T("Avancé")}</button>'
       + '</div>';
@@ -397,31 +426,48 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
           + '</div></div>';
       }
       h += '<div class="pied"><button class="mini prim" id="ep-go"' + (EPOCC ? ' disabled' : '') + '>'
-        + (EPOCC ? '${T("Rédaction…")}' : '${T("Rédiger l’épingle")}') + '</button>'
+        + (EPOCC ? '${T("Rédaction…")}' : '${T("Rédiger")}') + '</button>'
         + '<span class="aide">' + esc(epSousBudget()) + '</span></div>';
     }
     h += '</div>';
 
     // ── Le modele, entierement modifiable ─────────────────────────────────
+    var F = epFiche();
     h += '<div class="carte"><div class="g">'
       + epChamp('sur', '${T("Sur-titre (dans l’image)")}', 0, false)
       + epChamp('gros', '${T("Accroche (dans l’image)")}', 0, false)
       + epChamp('sous', '${T("Précision (dans l’image)")}', 0, false)
-      + epChamp('titre', '${T("Titre de l’épingle")}', 100, false)
-      + epChamp('description', '${T("Description (elle sert à être trouvée)")}', 500, true)
+      /* ⚠ LE TITRE N EXISTE QUE CHEZ PINTEREST. Facebook et Instagram n en ont
+         pas : dessiner un champ vide qui ne part nulle part ferait ecrire un
+         titre que personne ne verra jamais. La fiche du reseau le dit (0). */
+      + (F.titre ? epChamp('titre', '${T("Titre de l’épingle")}', F.titre, false) : '')
+      + epChamp('description', F.cle === 'pinterest'
+          ? '${T("Description (elle sert à être trouvée)")}'
+          : '${T("Texte de la publication")}', F.description, true)
       + epChamp('alt', '${T("Texte de remplacement de l’image")}', 0, true)
-      + epChamp('lien', '${T("Lien de destination")}', 0, false)
+      /* ⚠⚠ ET LE LIEN DISPARAIT LA OU IL NE CLIQUE PAS. Instagram ne rend
+         AUCUNE adresse cliquable dans une legende : laisser le champ inviterait
+         a coller une adresse que personne ne peut suivre — on renvoie vers le
+         lien de la bio, et on le DIT. */
+      + (F.lienCliquable ? epChamp('lien', '${T("Lien de destination")}', 0, false) : '')
       + '</div>';
+    if (!F.lienCliquable) {
+      h += '<div class="epinfo">${T("Ce réseau ne rend pas les liens cliquables : mettez l’adresse dans la bio du compte.")}</div>';
+    }
     if ((EP.motsCles || []).length) {
-      h += '<div class="epinfo">${T("Mots de recherche : ")}' + esc(EP.motsCles.join(' · ')) + '</div>';
+      h += '<div class="epinfo">' + (F.cle === 'pinterest'
+            ? '${T("Mots de recherche : ")}' : '${T("Mots-clics : ")}')
+        + esc(EP.motsCles.map(function(m){ return F.cle === 'pinterest' ? m : ('#' + m); }).join(' ')) + '</div>';
     }
     h += '</div></div>';
 
-    // ── L apercu, au format que Pinterest montre ──────────────────────────
-    h += '<div class="cd"><div class="epvue" id="ep-vue"></div>'
-      + '<div class="epinfo">1000 &times; 1500 ${T("px · format 2:3, le seul que Pinterest montre en entier")}</div>'
+    // ── L apercu, au format que CE reseau-la montre ───────────────────────
+    h += '<div class="cd"><div class="epvue" id="ep-vue" style="aspect-ratio:'
+      + F.largeur + '/' + F.hauteur + '"></div>'
+      + '<div class="epinfo">' + F.largeur + ' &times; ' + F.hauteur + ' ${T("px · le format que ")}'
+      + esc(F.nom) + '${T(" montre en entier")}</div>'
       + '<div class="pied"><button class="mini prim" id="ep-enr"' + (EPIMG ? '' : ' disabled') + '>'
-      + '${T("Enregistrer l’épingle")}</button>'
+      + '${T("Enregistrer la publication")}</button>'
       + '<button class="mini" id="ep-copier">${T("Copier le texte")}</button></div>'
       + '<div class="pied"><button class="mini" id="ep-dossier">${T("Ouvrir le dossier des exports")}</button></div>'
       + '<textarea id="ep-presse" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;top:0;width:1px;height:1px"></textarea>'
@@ -440,7 +486,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var m = (r && (r.motif || r.error)) || '';
     if (m === 'budget') return r.error || '${T("Le plafond mensuel d’écriture IA est atteint. Il se règle dans Configuration ▸ Clés API.")}';
     if (m === 'sans_but') return '${T("Dites d’abord ce qu’il faut annoncer.")}';
-    if (m === 'epingle_vide') return '${T("Le modèle n’a produit ni titre ni accroche. Reformulez la demande.")}';
+    if (m === 'epingle_vide') return '${T("Le modèle n’a rien produit d’utilisable. Reformulez la demande.")}';
     if (m === 'canevas_teint') return r.detail || '${T("Cette photo ne peut pas être relue pour l’export.")}';
     if (m === 'json_illisible') return '${T("La réponse du modèle n’a pas pu être lue. Réessayez.")}';
     if (m === 'lecture_seule') return '${T("Vous n’avez pas le droit de composer des publications.")}';
@@ -453,7 +499,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var but = v('ep-but').trim();
     if (!but) { dire('${T("Dites d’abord ce qu’il faut annoncer.")}', 'att'); return; }
     var p = epProduit();
-    var d = { but: but, ton: v('ep-ton') || 'elegant', langue: v('ep-langue') || 'fr',
+    var d = { reseau: EPRES, but: but, ton: v('ep-ton') || 'elegant', langue: v('ep-langue') || 'fr',
       consignesLibres: v('ep-plus') || '',
       produit: p ? { nom: p.nom, categorie: p.categorie, prix: p.prix } : null };
     EPOCC = true; dessiner();
@@ -473,23 +519,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       else if (!EP.lien) EP.lien = EPD.siteUrl || '';
       dessiner();
       epDemanderRendu();
-      dire('${T("Épingle rédigée : ")}' + (r.cout ? szArgent(r.cout) : '${T("prête")}'), 'bon');
+      dire('${T("Publication rédigée : ")}' + (r.cout ? szArgent(r.cout) : '${T("prête")}'), 'bon');
     });
   }
 
   function epEnregistrer(){
     if (!EPIMG) { dire('${T("Aucune image à enregistrer.")}', 'att'); return; }
     /* ⚠⚠ L IMAGE ET SON TEXTE PARTENT ENSEMBLE, EN DEUX FICHIERS D UN SEUL
-       GESTE. Une epingle sans sa description est a moitie faite : il faudrait
-       revenir la recopier a la main au moment de la deposer sur Pinterest, et
-       c est exactement la ou l on colle n importe quoi pour en finir. */
-    var base = 'epingle-' + new Date().toISOString().slice(0, 10) + '-'
+       GESTE. Une publication sans son texte est a moitie faite : il faudrait
+       revenir le recopier a la main au moment de la deposer sur le reseau, et
+       c est exactement la ou l on colle n importe quoi pour en finir.
+       ⚠ LE NOM DU FICHIER PORTE LE RESEAU : trois epingles du meme jour dans le
+       meme dossier, et l on ne sait plus laquelle va ou. */
+    var F = epFiche();
+    var base = F.cle + '-' + new Date().toISOString().slice(0, 10) + '-'
       + String(Date.now()).slice(-5);
-    var texte = [EP.titre, '', EP.description, '',
-      '${T("Lien : ")}' + EP.lien,
+    /* ⚠ LE TEXTE EXPORTE EST CELUI QU ON COLLE, PAS UNE FICHE. Les mots-clics
+       sont donc DANS le texte, a la fin — comme ils doivent l etre sur le
+       reseau — et non sur une ligne intitulee. Le reste (lien, texte de
+       remplacement) vient apres une separation, pour ne pas etre colle par
+       megarde dans la legende. */
+    var clics = (EP.motsCles || []).length
+      ? (F.cle === 'pinterest' ? '' : EP.motsCles.map(function(m){ return '#' + m; }).join(' '))
+      : '';
+    var texte = [EP.titre, EP.titre ? '' : null, EP.description, clics ? '' : null, clics,
+      '', '---',
+      F.lienCliquable ? ('${T("Lien : ")}' + EP.lien) : '${T("Lien : à mettre dans la bio du compte")}',
       '${T("Texte de remplacement : ")}' + EP.alt,
-      (EP.motsCles || []).length ? ('${T("Mots de recherche : ")}' + EP.motsCles.join(', ')) : ''
-    ].filter(function(x){ return x !== ''; }).join('\\n');
+      (F.cle === 'pinterest' && (EP.motsCles || []).length)
+        ? ('${T("Mots de recherche : ")}' + EP.motsCles.join(', ')) : ''
+    ].filter(function(x){ return x !== '' && x !== null; }).join('\\n');
     P.enregistrerExport(base + '.png', EPIMG).then(function(r1){
       if (!r1 || !r1.ok) { dire('${T("L’image n’a pas pu être enregistrée.")}', 'err'); return; }
       P.enregistrerExport(base + '.txt', texte).then(function(r2){
@@ -503,18 +562,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   function epCopier(){
     var ta = document.getElementById('ep-presse');
     if (!ta) return;
-    ta.value = [EP.titre, '', EP.description, '', EP.lien].join('\\n');
+    /* ⚠ ON COPIE CE QUI SE COLLE, ET RIEN D AUTRE. Le presse-papiers sert a
+       deposer la legende sur le reseau : y glisser le texte de remplacement ou
+       une etiquette << Lien : >> ferait coller ces mots-la dans la publication.
+       Le LIEN n y entre que la ou il clique. */
+    var F = epFiche();
+    var clics = (F.cle === 'pinterest') ? ''
+      : (EP.motsCles || []).map(function(m){ return '#' + m; }).join(' ');
+    ta.value = [EP.titre, EP.titre ? '' : null, EP.description,
+      clics ? '' : null, clics,
+      F.lienCliquable ? '' : null, F.lienCliquable ? EP.lien : null]
+      .filter(function(x){ return x !== null; }).join('\\n');
     ta.select();
     // execCommand ET NON navigator.clipboard : la fenetre est chargee en data:,
     // son origine est nulle, donc l API moderne du presse-papiers y est refusee.
     var fait = false;
     try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
-    dire(fait ? '${T("Titre, description et lien copiés.")}' : '${T("Copie refusée — utilisez Ctrl+C.")}',
+    dire(fait ? '${T("Texte de la publication copié.")}' : '${T("Copie refusée — utilisez Ctrl+C.")}',
       fait ? 'bon' : 'att');
   }
 
   function brancherEpingle(){
     var b;
+    /* ⚠ CHANGER DE RESEAU NE JETTE PAS CE QUI EST ECRIT. On garde le modele et
+       l on redemande seulement l image au bon format : la meme annonce sert aux
+       trois, et c est tout l interet d un choix de sortie plutot que de trois
+       outils. Le texte, lui, se reecrit d un clic sur << Rédiger >> si l on veut
+       qu il colle vraiment aux usages du reseau choisi. */
+    var zres = document.getElementById('corps');
+    (zres ? zres.querySelectorAll('[data-epres]') : []).forEach(function(el){
+      el.onclick = function(){
+        var cle = el.getAttribute('data-epres');
+        if (cle === EPRES) return;
+        EPRES = cle; EPIMG = '';
+        dessiner();
+        epDemanderRendu();
+      };
+    });
     b = document.getElementById('ep-simple');
     if (b) b.onclick = function(){ EPMODE = 'simple'; dessiner(); };
     b = document.getElementById('ep-avance');
@@ -544,7 +628,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         EP[cle] = el.value;
         var cnt = document.getElementById('ep-' + cle + '-n');
         if (cnt) {
-          var max = (cle === 'titre') ? 100 : (cle === 'description' ? 500 : 0);
+          /* ⚠ LA BORNE VIENT DE LA FICHE DU RESEAU, jamais d un nombre ecrit
+             ici : 100 et 500 etaient ceux de Pinterest, et le compteur aurait
+             menti sur Instagram (2000) des le premier essai. */
+          var fx = epFiche();
+          var max = (cle === 'titre') ? fx.titre : (cle === 'description' ? fx.description : 0);
           if (max) {
             cnt.textContent = el.value.length + ' / ' + max;
             cnt.className = 'cnt' + (el.value.length > max ? ' trop' : '');
@@ -767,7 +855,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
          Une fenetre separee aurait demande son entree de menu, son droit et son
          lexique — pour le meme sujet, a un clic d ici. */
       + '<button class="mini' + (ONGLET === 'epingle' ? ' actif' : '') + '" data-onglet="epingle">'
-      + '${T("Épingle Pinterest")}</button>'
+      + '${T("Publication IA")}</button>'
       + '<div class="droite"><span class="dt">${T("Comptes et jetons des réseaux : ")}'
       + '${T("Configuration → Communications → Réseaux sociaux")}</span>';
     if (ONGLET === 'file' && D.peutModifier && (D.file || []).length) {
