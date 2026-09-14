@@ -2592,13 +2592,24 @@ const CSS_ETATS = `
  */
 const CSS_TUILES = `
 .szbd{flex:0 0 auto;display:flex;flex-direction:column;gap:.3rem}
+/* ⚠⚠ PAS D OPACITE SUR CE BOUTON, ET C EST UNE CORRECTION MESUREE.
+   Il portait color:var(--tx3) avec opacity:.75 — ce qui se COMPOSE : la couleur
+   reellement peinte devenait #6E7A8A sur #0E1522, soit un contraste de 4.20, et
+   #707D8E sur #16202F, soit 3.91. Sous le seuil de 4.5, dans 62 rendus.
+   ⚠ C EST LE TRAVAIL << contrastes >> QUI L A DIT, apres le push, et il a REFUSE
+   LA PUBLICATION. Rien ici ne se voyait a l oeil : un gris pale sur fond sombre
+   a l air discret, pas illisible. Une couleur ne se deduit pas, elle se mesure
+   dans la page assemblee.
+   ⚠ L OPACITE EST LE PIEGE, pas la teinte. Elle donne une couleur qu AUCUNE
+   ligne du fichier n ecrit : on relit var(--tx3) et on croit lire #8e9cad.
+   La discretion vient maintenant du CORPS et du POIDS, pas d un voile. */
 .szbd-b{align-self:flex-end;font:inherit;font-size:.68rem;line-height:1.25;
-  cursor:pointer;color:var(--tx3);background:transparent;border:0;
-  border-radius:7px;padding:.12rem .4rem;opacity:.75}
-.szbd-b:hover{opacity:1;color:var(--tx);background:var(--v08)}
-.szbd-b:focus-visible{outline:1px solid #c9a97e;outline-offset:1px;opacity:1}
+  cursor:pointer;color:var(--tx2);background:transparent;border:0;
+  border-radius:7px;padding:.12rem .4rem}
+.szbd-b:hover{color:var(--tx);background:var(--v08)}
+.szbd-b:focus-visible{outline:1px solid #c9a97e;outline-offset:1px}
 .szbd.szplie>.szbd-c{display:none}
-.szbd.szplie>.szbd-b{align-self:stretch;text-align:left;opacity:.9;
+.szbd.szplie>.szbd-b{align-self:stretch;text-align:left;
   color:var(--tx2);border:1px dashed var(--v12);padding:.24rem .55rem}
 `;
 

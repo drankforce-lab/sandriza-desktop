@@ -63,7 +63,16 @@ input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:#c9a97e}
-#rech{font-size:1rem;padding:.45rem .6rem}
+/* ⚠ LE CHAMP DE RECHERCHE NE PREND PLUS TOUTE LA LARGEUR (sa demande du
+   2026-09-14 : << reduit le champ des recherche ici ses trop gros >>).
+   Il heritait du 100% des champs et portait un corps de 1rem : sur un ecran
+   large, une boite de deux mille pixels pour un numero de commande de huit
+   caracteres. La cible la plus grande de l ecran servait la saisie la plus
+   courte.
+   ⚠ UN PLAFOND (max-width) ET NON UNE LARGEUR FIXE : cette fenetre s ancre aussi
+   sur un flanc, ou une largeur fixe deborderait. Le 100% reste donc actif en
+   dessous du plafond, et la boite se retrecit toute seule. */
+#rech{font-size:.9rem;padding:.3rem .55rem;max-width:26rem}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
   border:1px solid var(--v16);background:var(--v05);
