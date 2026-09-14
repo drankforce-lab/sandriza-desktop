@@ -19,7 +19,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un courriel ni un prenom
@@ -107,7 +107,7 @@ function pageAbonnes() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -195,14 +195,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var rows = filtres();
     if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
 
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
       + (D.actifs || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Désabonnés")}</div><div class="val neutre">'
       + (D.desabonnes || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Au total")}</div><div class="val">'
       + ((D.abonnes || []).length) + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     h += '<div class="barreoutils">'
       /* ⚠ L etiquette ENTIERE, pas << Courriel >> + un reste : une cle courte

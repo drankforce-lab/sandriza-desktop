@@ -32,7 +32,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -200,7 +200,7 @@ function pageLiquidation(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
 
@@ -320,12 +320,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     sous.textContent = (c.liquidation + c.finale)
       + ((c.liquidation + c.finale) === 1 ? '${T(" produit hors régime normal")}' : '${T(" produits hors régime normal")}');
 
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile liq"><div class="lbl"><span class="ic">🟡</span> ${T("En liquidation")}</div><div class="val">'
       +   c.liquidation + '</div><div class="sub">' + (c.liquidation === 1 ? '${T("produit")}' : '${T("produits")}') + '</div></div>'
       + '<div class="tuile vfin"><div class="lbl"><span class="ic">🔴</span> ${T("En vente finale")}</div><div class="val">'
       +   c.finale + '</div><div class="sub">' + (c.finale === 1 ? '${T("produit")}' : '${T("produits")}') + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     h += '<div class="barreoutils">'
       + '<input class="rech" id="rech" type="search" aria-label="${T("Rechercher un produit (nom, SKU, catégorie)")}" placeholder="${T("Rechercher un produit (nom, SKU, catégorie) — les deux régimes…")}" value="'

@@ -21,7 +21,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -117,7 +117,7 @@ function pageCartesCadeaux() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -285,14 +285,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var rows = filtrees();
     var t = D.tuiles;
 
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Cartes actives")}</div><div class="val">' + t.actives
       + '</div><div class="sub">' + t.total + '${T(" au total")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Solde en circulation")}</div><div class="val bon">'
       + fmt(t.enCirculation) + '</div><div class="sub">${T("sur ")}' + fmt(t.emis) + '${T(" émis")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Entièrement utilisées")}</div><div class="val">'
       + t.utilisees + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     h += '<div class="barreoutils">'
       + '<input aria-label="${T("Code, destinataire, courriel")}" type="search" id="cc-q" placeholder="${T("Code, destinataire, courriel…")}" value="' + esc(Q) + '">'

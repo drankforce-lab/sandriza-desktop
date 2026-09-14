@@ -33,7 +33,7 @@
  * jamais avec un accent grave.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -197,7 +197,7 @@ function pageCatalogio(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   var corps   = document.getElementById('corps');
   var sous    = document.getElementById('sous');
   var ongletsEl = document.getElementById('onglets');
@@ -495,12 +495,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   '<button class="ghost mini" data-act="reinit">${T("Choisir un autre fichier")}</button>'
       + '</div>'
       + noteIgn + notePhoto
-      + '<div class="tuiles" style="margin-bottom:.2rem">'
+      /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit
+         tel quel, la piece commune y ajoute le bouton de repli et l etat retenu
+         pour ce poste. Voir JS_TUILES dans socle.js. */
+      + szTuiles('<div class="tuiles" style="margin-bottom:.2rem">'
       +   '<div class="tuile"><div class="k">${T("À créer")}</div><div class="v">' + c.creation + '</div><div class="z">${T("hors vente")}</div></div>'
       +   '<div class="tuile"><div class="k">${T("À modifier")}</div><div class="v">' + c.maj + '</div><div class="z">' + (inv ? 'variantes' : 'fiches') + '</div></div>'
       +   '<div class="tuile"><div class="k">${T("Inchangées")}</div><div class="v">' + c.inchange + '</div><div class="z">${T("rien à écrire")}</div></div>'
       +   '<div class="tuile' + (c.erreur ? ' err' : '') + '"><div class="k">${T("Erreurs")}</div><div class="v">' + c.erreur + '</div><div class="z">${T("ignorées")}</div></div>'
-      + '</div>'
+      + '</div>')
       + '<div class="carte">'
       +   '<div class="filtres">'
       +     filtres.map(function(f){ return '<button class="mini ' + (FILTRE === f[0] ? 'actif' : '')
@@ -552,12 +555,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td class="rouge">' + esc(c.msg) + '</td></tr>'; }).join('')
         + '</tbody></table></div>' : '';
     return ''
-      + '<div class="tuiles">'
+      + szTuiles('<div class="tuiles">'
       +   '<div class="tuile"><div class="k">${T("Créés")}</div><div class="v">' + r.crees + '</div></div>'
       +   '<div class="tuile"><div class="k">${T("Modifiés")}</div><div class="v">' + r.majs + '</div></div>'
       +   cartesPhoto
       +   '<div class="tuile' + (refus ? ' err' : '') + '"><div class="k">${T("Refusés")}</div><div class="v">' + refus + '</div></div>'
-      + '</div>'
+      + '</div>')
       + tblPhotos + noteCrees + noteHist + blocNotifs + tblRefus
       + '<div class="barre">'
       +   '<button class="prim" data-act="reinit">${T("Importer un autre fichier")}</button>'

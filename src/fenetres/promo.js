@@ -29,7 +29,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -175,7 +175,7 @@ function pagePromo(onglet) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
   var corps = document.getElementById('corps');
 
   var D = null;
@@ -269,10 +269,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + ((k.imprimees || 0) > 1 ? '${T("étiquettes imprimées")}' : '${T("étiquette imprimée")}') + '</span>'
       + '</div>';
 
-    h += '<div class="stats">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    h += szTuiles('<div class="stats">'
       + tuile(k.modeles, '${T("modèles")}') + tuile(k.formats, 'formats')
       + tuile(k.logos, 'logos') + tuile(D.trouves, '${T("affichés")}')
-      + '</div>';
+      + '</div>');
 
     if (ONGLET === 'modeles') h += vueModeles(ro);
     else if (ONGLET === 'formats') h += vueFormats(ro);

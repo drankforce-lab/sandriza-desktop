@@ -193,6 +193,16 @@ contextBridge.exposeInMainWorld('szPont', {
      vers le principal, y compris ceux de la fenêtre principale). */
   brouillonSale: (on) => ipcRenderer.send('pont:brouillonSale', !!on),
 
+  /* ⚠ LE REPLI DU BANDEAU DE TOTAUX (2026-09-14) — un réglage de POSTE, donc il
+     va dans `reglages.json` et non en Turso : c'est la hauteur de l'écran qui
+     décide, et l'écran du comptoir n'est pas celui du bureau.
+     ⚠ `send` ET NON `invoke` : la page a déjà replié le bandeau quand elle
+     appelle. Attendre une réponse pour un changement de classe déjà fait
+     n'ajouterait qu'une promesse à tenir — et, si le disque refuse, le pire est
+     que le bandeau revienne à la prochaine ouverture.
+     ⚠ Canal ÉTROIT : une clé et un booléen, validés côté principal. */
+  tuilesMasquer: (cle, off) => ipcRenderer.send('vue:tuiles', String(cle || ''), !!off),
+
   // ⚠ LE PLEIN ÉCRAN EST UNE ACTION DE FENÊTRE, PAS UNE DONNÉE. Il ne passe donc
   // pas par `appeler` : cette voie-là mène aux données du site et à sa session,
   // et y mêler le pilotage de la fenêtre brouillerait ce qu'elle protège.

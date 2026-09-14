@@ -21,7 +21,7 @@
  * compris : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ Le MESSAGE d'une campagne est PUBLIÉ sur les réseaux et envoyé par
    infolettre : c'est de la donnée, et son exemple reste en français. Le NOM de
@@ -140,7 +140,7 @@ function pagePublicite(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
   var ongletsEl = document.getElementById('onglets');
@@ -216,13 +216,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td class="num" style="font-weight:700">' + argent(o.total) + '</td>'
         + '<td><span class="badge ' + st[0] + '">' + esc(st[1]) + '</span></td></tr>';
     }).join('') : '<tr><td colspan="6" class="vide">${T("Aucune commande.")}</td></tr>';
-    return '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Les TROIS bandeaux de cette fenetre partagent la meme cle et se
+       replient ensemble. Voir JS_TUILES dans socle.js. */
+    return szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu total")}</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + D.orderCount + ' commande' + plur(D.orderCount) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🎯</span> ${T("Revenu promo")}</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '${T("% des commandes")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Clients actifs")}</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' inscrits</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🛒</span> ${T("Panier moyen")}</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">${T("par commande")}</div></div>'
       + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + ' sur 5' : '') + '</div></div>' : '')
-      + '</div>'
+      + '</div>')
       + '<div class="deux">'
       +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:#c9a97e"></i>${T("Total")}</span><span><i style="background:#dc2626;opacity:.7"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
       +   '<div class="carte"><h2><span class="ic">🏆</span> ${T("Top 5 produits")}</h2>' + tops + '</div>'
@@ -266,12 +270,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td class="num" style="color:var(--tx-err2)">' + (p.savings > 0 ? '-' + argent(p.savings) : '—') + '</td>'
         + '<td><span class="badge ' + (p.active ? 'ok' : 'def') + '">' + (p.active ? 'Actif' : 'Inactif') + '</span></td></tr>';
     }).join('') : '<tr><td colspan="8" class="vide">${T("Aucune promotion.")}</td></tr>';
-    return '<div class="tuiles">'
+    return szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="k"><span class="ic">📣</span> ${T("Promotions")}</div><div class="v">' + t.count + '</div><div class="z">' + t.active + ' active' + plur(t.active) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">📦</span> ${T("Cmd sous promo")}</div><div class="v">' + t.promoOrders + '</div><div class="z">' + t.promoConvRate + '${T("% des cmd")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu (promo)")}</div><div class="v">' + argentK(t.totalPromoRev) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🎁</span> ${T("Économies accordées")}</div><div class="v">' + argentK(t.totalSavings) + '</div></div>'
-      + '</div>'
+      + '</div>')
       + '<div class="carte"><h2>${T("Toutes les offres")} &amp; ${T("coupons")}</h2><table><thead><tr><th>${T("Nom")}</th><th>${T("Type")}</th><th>${T("Rabais")}</th><th>${T("Portée")}</th><th class="ctr">${T("Cmd")}</th><th class="num">${T("Revenu")}</th><th class="num">${T("Économies")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
 
@@ -355,13 +359,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--v055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
     }).join('') + '</div>' : '';
-    return '<div class="tuiles">'
+    return szTuiles('<div class="tuiles">'
       + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + D.rate + '%</div><div class="z">${T("Taux de satisfaction")}</div></div>'
       + '<div class="carte" style="grid-column:span 2"><h2>${T("Répartition des évaluations")}</h2>'
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> ${T("Satisfaits")}</div>' + bar(D.satisfied, D.rated, '#4ade80')
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> ${T("Insatisfaits")}</div>' + bar(D.unsatisfied, D.rated, '#f87171')
       +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + '${T(" éval. sur ")}' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '${T("% de couverture)")}</div></div>'
-      + '</div>' + comments;
+      + '</div>') + comments;
   }
 
   /* ══ DESSIN ════════════════════════════════════════════════════════════════ */

@@ -67,6 +67,20 @@ const DEFAUTS = {
      dont la valeur par défaut oblige à un geste de plus pour obtenir le
      comportement évident est un réglage mal posé. */
   veilleurAvecApp: true,
+  /* Les BANDEAUX DE TUILES CHIFFRÉES qu'on a choisi de masquer, par fenêtre :
+     `{ remboursements: true, factures: true }`. Absent = visible.
+     ⚠ SA DEMANDE DU 2026-09-14 : « partout où tu as ces tuiles, je dois pouvoir
+     les retirer au besoin en les masquant ». Elles occupent le haut de l'écran
+     en permanence alors qu'on ne les lit qu'une fois de temps en temps ; sur un
+     petit écran, elles poussent la table hors de vue.
+     ⚠ ET C'EST BIEN UN RÉGLAGE DE POSTE, comme la place du menu : c'est la
+     HAUTEUR DE L'ÉCRAN qui décide. L'écran du comptoir n'est pas celui du
+     bureau, et une préférence synchronisée replierait les totaux du bureau
+     parce qu'on les a repliés au comptoir.
+     ⚠ ON NE GARDE QUE LES « MASQUÉS » : une fenêtre absente de la table est
+     visible. Écrire `false` partout ferait grossir le fichier d'une ligne par
+     fenêtre pour dire « rien de spécial ». */
+  tuilesMasquees: {},
 };
 
 let _cache = null;

@@ -240,4 +240,15 @@ module.exports = {
      séparément plutôt que d'inventer une phrase à trous. */
   '· vous seriez en lecture seule': '· you would be read-only',
   'en file': 'queued',
+
+  /* ── LE REPLI DES BANDEAUX DE TUILES (2026-09-14) ──────────────────────────
+     ⚠ ILS SONT ICI, PAS DANS LES 26 DICTIONNAIRES DE FENÊTRES qui portent un
+     bandeau. Le mécanisme est commun (voir `JS_TUILES` dans socle.js) ; deux
+     phrases recopiées vingt-six fois auraient fini par diverger — c'est
+     exactement comme ça que `.tuiles`, `.stats` et `.stat-grid` sont devenus
+     trois noms pour le même objet.
+     ⚠ « Totaux » et non « Statistiques » : ces tuiles additionnent (total
+     remboursé, crédits émis, solde à honorer). « Stats » disait autre chose. */
+  'Masquer les totaux': 'Hide the totals',
+  'Afficher les totaux': 'Show the totals',
 };

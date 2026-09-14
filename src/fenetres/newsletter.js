@@ -17,7 +17,7 @@
  * compris : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ Le contenu de l'offre de bienvenue (titre, sous-titre, bouton,
    mention légale) est TAPÉ ici et LU PAR LA VISITEUSE : c'est de la donnée, pas
@@ -127,7 +127,7 @@ function pageNewsletter(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
   var ongletsEl = document.getElementById('onglets');
@@ -195,12 +195,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<div class="src"><div class="l"><span>' + esc(s.label) + '</span><span style="font-weight:600">' + s.count + '</span></div>'
         + '<div class="bar"><div style="width:' + s.pct + '%"></div></div></div>';
     }).join('') : '<p style="color:var(--tx2);font-size:.85rem">${T("Aucun abonné encore.")}</p>';
-    return '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    return szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Abonnés actifs")}</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + '${T(" désabonné")}' + plur(D.unsub) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">📣</span> ${T("Campagnes envoyées")}</div><div class="v">' + D.sentCamps + '</div><div class="z">' + D.draftCamps + '${T(" en brouillon")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">✉</span> ${T("Courriels envoyés")}</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + '${T(" échoué")}' + plur(D.failedSent) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🔗</span> ${T("Chaînes actives")}</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + '${T(" étape")}' + plur(D.pendingSteps) + '${T(" en attente</div>")}</div>'
-      + '</div>'
+      + '</div>')
       + (PEUT.edit ? '<div><button class="ghost mini" data-act="chains">${T("⚙ Traiter les chaînes (")}' + D.pendingSteps + ')</button></div>' : '')
       + '<div class="deux">'
       +   '<div class="carte"><h2>${T("Campagnes récentes")}</h2><table><thead><tr><th>${T("Campagne")}</th><th>${T("Envoyés")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recents + '</tbody></table></div>'
@@ -263,11 +266,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ OFFRE DE BIENVENUE ════════════════════════════════════════════════════ */
   function vueOffer(){
     var c = D.cfg;
-    var stats = D.stats ? '<div class="tuiles" style="margin-bottom:.8rem">'
+    var stats = D.stats ? szTuiles('<div class="tuiles" style="margin-bottom:.8rem">'
       + '<div class="tuile"><div class="k">${T("Codes générés")}</div><div class="v">' + D.stats.total + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Codes utilisés")}</div><div class="v" style="color:var(--tx-ok)">' + D.stats.used + '</div></div>'
       + '<div class="tuile"><div class="k">${T("En attente")}</div><div class="v" style="color:var(--tx-att)">' + D.stats.active + '</div></div>'
-      + '</div>' : '';
+      + '</div>') : '';
     var img = c.imageUrl ? '<img class="apercu-img" src="' + esc(c.imageUrl) + '" alt="${T("Aperçu")}">' : '';
     var ro = PEUT.edit ? '' : ' readonly';
     return '<div class="carte">'

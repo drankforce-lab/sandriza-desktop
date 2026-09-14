@@ -17,7 +17,7 @@
  * COMPRIS — onzième rappel du projet.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, TETE, LIEU, SEP_DEC } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -118,7 +118,7 @@ function pageClient(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');
@@ -202,12 +202,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function dessinerFiche(){
     var c = R.client, a = c.adresse;
-    var h = '<div class="carte"><div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="carte"><div class="tuiles">'
       + '<div class="tuile"><div class="k">${T("Commandes")}</div><div class="v">' + R.stats.commandes + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Retours")}</div><div class="v"' + (R.stats.retours ? ' style="color:var(--tx-f6a5a5)"' : '') + '>' + R.stats.retours + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Total dépensé")}</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v" style="font-size:.92rem">' + esc(dateFr(c.inscritLe)) + '</div></div>'
-      + '</div></div>';
+      + '</div></div>');
     h += '<div class="carte"><h2>${T("Coordonnées")}</h2>'
       + (c.tel ? '<div class="ligne"><span class="k">${T("Téléphone")}</span><span>' + esc(c.tel) + '</span></div>' : '')
       + '<div class="ligne"><span class="k">${T("Adresse")}</span><span style="text-align:right">'

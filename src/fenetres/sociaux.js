@@ -26,7 +26,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -131,7 +131,7 @@ function pageSociaux(onglet) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -408,12 +408,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         : '<span class="pill neutre">${T("aucun réseau branché")}</span>';
     }
 
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("En attente")}</div><div class="val att">' + (t.enAttente || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Publiées")}</div><div class="val bon">' + (t.publiees || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Échouées")}</div><div class="val err">' + (t.echouees || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Ignorées")}</div><div class="val">' + (t.ignorees || 0) + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     h += '<div class="barreoutils">'
       + '<button class="mini' + (ONGLET === 'file' ? ' actif' : '') + '" data-onglet="file">${T("File d’attente")}'

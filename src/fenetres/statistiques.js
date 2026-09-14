@@ -25,7 +25,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -114,7 +114,7 @@ function pageStatistiques(ongletDepart) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -250,14 +250,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return h + (AVGA ? '' : '<div class="vide charge">${T("Lecture des statistiques…")}</div>');
     }
     var t = DGA.totaux;
-    h += '<div class="tuiles">' + tuile('${T("Visiteurs")}', nb(t.visiteurs), 'or')
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Les TROIS bandeaux de cette fenetre partagent la meme cle et se
+       replient ensemble. Voir JS_TUILES dans socle.js. */
+    h += szTuiles('<div class="tuiles">' + tuile('${T("Visiteurs")}', nb(t.visiteurs), 'or')
       + tuile('${T("Sessions")}', nb(t.sessions), 'or')
-      + tuile('${T("Pages vues")}', nb(t.pagesVues), 'or') + '</div>';
+      + tuile('${T("Pages vues")}', nb(t.pagesVues), 'or') + '</div>');
     if (DGA.engagement) {
-      h += '<div class="tuiles">' + tuile('${T("Durée moy. session")}', DGA.engagement.dureeMoyenne)
+      h += szTuiles('<div class="tuiles">' + tuile('${T("Durée moy. session")}', DGA.engagement.dureeMoyenne)
         + tuile('${T("Taux de rebond")}', DGA.engagement.rebond)
         + tuile('${T("Pages / session")}', DGA.engagement.pagesParSession)
-        + tuile('${T("Taux d’engagement")}', DGA.engagement.engagement) + '</div>';
+        + tuile('${T("Taux d’engagement")}', DGA.engagement.engagement) + '</div>');
     }
     h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Pages vues par jour — ")}' + esc(DGA.plageLibelle) + '</h3>'
       + graphique(DGA.serie, 'vues', '${T("pages vues")}') + '</div>';
@@ -298,13 +302,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '${T("Coûts en dollars US, la devise de facturation.")}</span>'
       + '<span>' + (DTEL.solde ? '<span class="ic">💰</span>${T(" Solde restant : <strong>")}' + esc(DTEL.solde) + '</strong>'
                                : '${T("Solde indisponible")}') + '</span></div>';
-    h += '<div class="tuiles">' + tuile('${T("Appels")}', nb(t.appels), 'or')
+    h += szTuiles('<div class="tuiles">' + tuile('${T("Appels")}', nb(t.appels), 'or')
       + tuile('${T("Entrants")}', nb(t.entrants))
       + tuile('${T("Répondus")}', nb(t.repondus), 'bon')
       + tuile('${T("Manqués")}', nb(t.manques), t.manques ? 'mal' : '')
       + tuile('${T("Minutes")}', nb(t.minutes))
       + tuile('${T("Durée moy.")}', t.dureeMoyenne)
-      + tuile('${T("Coût total")}', t.cout, 'att') + '</div>';
+      + tuile('${T("Coût total")}', t.cout, 'att') + '</div>');
     h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Appels par jour")}</h3>'
       + graphique(DTEL.serie, '${T("appels")}', '${T("appels")}') + '</div>';
 

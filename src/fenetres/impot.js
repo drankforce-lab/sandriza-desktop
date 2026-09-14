@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -199,7 +199,7 @@ function pageImpot(onglet) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
   var corps = document.getElementById('corps');
 
   var D = null;
@@ -437,13 +437,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueTaxes(){
     var t = D.taxes;
-    var h = '<div class="stats">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="stats">'
       + tuile(t.ventesNettes, '${T("Ventes nettes taxables")}', t.nbCommandes + ' ' + (t.nbCommandes > 1 ? '${T("commandes")}' : '${T("commande")}'), '')
       + tuile(t.tps, '${T("TPS perçue (5 %)")}', '${T("à remettre — ARC")}', '')
       + tuile(t.tvq, '${T("TVQ perçue (9,975 %)")}', '${T("à remettre — Revenu Québec")}', '')
       + tuile(t.totalRemettre, '${T("Net à remettre")}', t.enFaveur ? '${T("remboursement en votre faveur")}' : '${T("après crédits sur intrants")}',
           t.enFaveur ? 'ok' : 'du')
-      + '</div>';
+      + '</div>');
 
     /* ⚠ LE SEUIL DE PETIT FOURNISSEUR EST LA PREMIERE QUESTION qu on se pose
        quand on demarre : sous 30 000 $, l inscription n est pas obligatoire. */

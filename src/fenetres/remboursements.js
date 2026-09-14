@@ -18,7 +18,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un numero, un nom de
@@ -113,7 +113,7 @@ function pageRemboursements(onglet) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   var corps = document.getElementById('corps');
 
   var D = null;
@@ -169,7 +169,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        l argent SORTI ; << Solde a honorer >> est de l argent qu on DOIT ENCORE.
        Les melanger dans un total unique donnerait un chiffre qui ne veut rien
        dire ni pour la caisse ni pour le comptable. */
-    h += '<div class="stats">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    h += szTuiles('<div class="stats">'
       + '<div class="s"><div class="n sort">' + esc(t.rembourse) + '</div>'
       /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
       + '<div class="l">${T("Total remboursé")}</div><div class="sub">' + (t.nbRemb || 0)
@@ -182,7 +185,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="s"><div class="n du">' + esc(t.solde) + '</div>'
       + '<div class="l">${T("Solde à honorer")}</div><div class="sub">${T("passif · ")}' + (t.nbActifs || 0)
       + ((t.nbActifs || 0) > 1 ? '${T(" actifs")}' : '${T(" actif")}') + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     h += '<div class="carte">';
     var rows = D.lignes || [];

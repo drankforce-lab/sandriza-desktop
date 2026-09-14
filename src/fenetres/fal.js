@@ -24,7 +24,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -127,7 +127,7 @@ function pageFal(ouverture) {
     if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var VUE = ${dep} === 'historique' ? 'hist' : 'conso';
@@ -234,8 +234,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       fal = '<div class="t"><div class="l">${T("Solde fal.ai (restant)")}</div><div class="n">—</div>'
         + '<div class="s">${T("à saisir en Configuration")}</div></div>';
     }
-    return '<div class="carte"><h2>${T("Crédits &amp; solde")}</h2><div class="tuiles">'
-      + reel + sand + fal + '</div></div>';
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    return '<div class="carte"><h2>${T("Crédits &amp; solde")}</h2>'
+      + szTuiles('<div class="tuiles">' + reel + sand + fal + '</div>') + '</div>';
   }
 
   /* ══ LE PLAFOND MENSUEL DE DÉPENSE (lot 2 du #29) ═════════════════════════
@@ -304,7 +307,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     (D.parModele || []).forEach(function(m){ reussis += m.reussis; });
     var echecs = (D.appels || 0) - reussis;
 
-    h.push('<div class="tuiles">'
+    h.push(szTuiles('<div class="tuiles">'
       + '<div class="t"><div class="l">${T("Consommation totale")}</div><div class="n">' + sous_(D.total) + '</div>'
       + '<div class="s">${T("depuis le début du suivi")}</div></div>'
       + '<div class="t"><div class="l">${T("Appels")}</div><div class="n">' + (D.appels || 0) + '</div>'
@@ -312,7 +315,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="t"><div class="l">${T("Coût moyen")}</div><div class="n">'
       + sous_((D.appels ? (D.total / D.appels) : 0)) + '</div>'
       + '<div class="s">${T("par appel")}</div></div>'
-      + '</div>');
+      + '</div>'));
 
     // Les trente derniers jours
     var j = (D.parJour || []).slice().reverse();

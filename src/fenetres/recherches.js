@@ -20,7 +20,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit — jamais une requete, qui est le
@@ -96,7 +96,7 @@ function pageRecherches() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -151,7 +151,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var rows = filtrees();
     if (sous) sous.textContent = '${T("30 derniers jours")}';
 
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Requêtes distinctes")}</div><div class="val">'
       + (D.recentes || []).length + '</div><div class="sub">${T("30 derniers jours")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Recherches en tout")}</div><div class="val">'
@@ -159,7 +162,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="tuile"><div class="lbl">Archive</div><div class="val">'
       + (D.archive || []).length + '</div><div class="sub">'
       + (D.etendue ? esc(D.etendue) : '${T("aucun mois archivé")}') + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     h += '<div class="barreoutils">'
       + '<input aria-label="${T("Chercher dans la liste")}" type="search" id="rs-q" placeholder="${T("Chercher dans la liste…")}" value="' + esc(Q) + '">'

@@ -3905,6 +3905,23 @@ ipcMain.handle('dock:ancrer', (e) => {
   return false;
 });
 
+/* ⚠ LE REPLI DU BANDEAU DE TOTAUX (2026-09-14) — sa demande : << partout ou tu
+   a ses tuiles, je doit pouvoir les retirer au besoin en les masquant >>.
+   ⚠ ON NE GARDE QUE LES MASQUES : replier ecrit la cle, deplier la RETIRE. Un
+   `false` par fenetre ferait grossir reglages.json d une ligne par ecran pour
+   dire << rien de special >>, et la table ne dirait plus d un coup d oeil ce qui
+   est effectivement replie.
+   ⚠ LA CLE EST VALIDEE ICI. Le canal est etroit (une chaine, un booleen) mais
+   il vient d une PAGE : une cle avec des points ou des crochets finirait dans
+   un JSON qu on relit ensuite les yeux fermes. */
+ipcMain.on('vue:tuiles', (e, cle, off) => {
+  const c = String(cle || '').trim();
+  if (!c || !/^[a-z0-9_-]{1,40}$/i.test(c)) return;
+  const t = { ...(reglages.lire().tuilesMasquees || {}) };
+  if (off) t[c] = true; else delete t[c];
+  reglages.ecrire({ tuilesMasquees: t });
+});
+
 ipcMain.on('pont:fermer', (e) => {
   // Une vue ANCREE qui << ferme >> (Echap) se cache — fermer la fenetre
   // principale a sa place serait la pire des surprises.

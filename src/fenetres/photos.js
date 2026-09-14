@@ -72,10 +72,15 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .depot .gros{font-size:.95rem;font-weight:600;color:var(--tx)}
 .depot .pt{font-size:.76rem}
 
-.stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 7rem;background:var(--v04);border-radius:9px;padding:.4rem .6rem}
-.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
-.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+/* ── LE BANDEAU DE TUILES A ETE RETIRE LE 2026-09-14 ──────────────────────
+   Trouve par l audit des bandeaux (sa demande : << partout ou tu a ses tuiles,
+   je doit pouvoir les retirer au besoin >>). Ici il n y avait RIEN A RETIRER :
+   les quatre regles .stats vivaient encore, avec leur fabrique << tuile(n, l) >>
+   juste en dessous, et personne ne les appelait — aucun class="stats" dans la
+   page. Du decor pour une piece absente.
+   ⚠ C EST LE RELEVE QUI L A VU, pas l oeil : on ne remarque pas l absence d un
+   bandeau qu on n a jamais vu. Un audit qui ne cherche que ce qui existe ne
+   trouve jamais ce qui a ete a moitie retire. */
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
@@ -1778,9 +1783,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function opt(v, l){
     return '<option value="' + v + '"' + (TRI === v ? ' selected' : '') + '>' + l + '</option>';
   }
-  function tuile(n, l){
-    return '<div class="s"><div class="n">' + (n || 0) + '</div><div class="l">' + l + '</div></div>';
-  }
+  /* ⚠ LA FABRIQUE << tuile(n, l) >> A ETE RETIREE LE 2026-09-14 : elle fabriquait une tuile du
+     bandeau .stats, et ce bandeau n existait plus (voir la note dans le CSS).
+     Une fabrique que personne n appelle finit par etre recopiee ailleurs comme
+     si elle servait. */
 
   function vignette(r){
     if (r.apercu) return '<div class="vign"><img src="' + esc(r.apercu) + '" alt=""></div>';

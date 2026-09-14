@@ -23,7 +23,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -193,7 +193,7 @@ function pageDepenses(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   var corps = document.getElementById('corps');
 
   var D = null;
@@ -310,7 +310,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (D.nombre > 1 ? '${T("dépenses")}' : '${T("dépense")}') + '</span>'
       + '</div>';
 
-    h += '<div class="stats">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Les DEUX bandeaux de cette fenetre partagent la meme cle et se
+       replient ensemble. Voir JS_TUILES dans socle.js. */
+    h += szTuiles('<div class="stats">'
       + '<div class="s"><div class="n">' + esc(D.total) + '</div><div class="l">${T("Total —")} ' + esc(D.periode) + '</div>'
       + '<div class="sub">${T("hors taxes, déductible")}</div></div>'
       + '<div class="s"><div class="n">' + esc(D.totalTps) + '</div><div class="l">${T("TPS payée")}</div>'
@@ -319,7 +323,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="sub">${T("remboursement sur intrants")}</div></div>'
       + '<div class="s"><div class="n">' + D.nombre + '</div><div class="l">${T("Dépenses")}</div>'
       + '<div class="sub">' + esc(D.periode) + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     /* ── FRAIS STRIPE TAX (#22) — PARTI VERS L IMPOT LE 2026-09-08 ───────────
        Ses mots : << cela a rien a voir dans les depenses, cela devrait plutot
@@ -404,14 +408,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '${T("sans que la première le sache.")}</div>';
     }
 
-    h += '<div class="stats">'
+    h += szTuiles('<div class="stats">'
       + '<div class="s"><div class="n">' + ANN.total + '</div><div class="l">fournisseurs</div>'
       + '<div class="sub">${T("reconnus d’emblée")}</div></div>'
       + '<div class="s"><div class="n">' + ANN.integres + '</div><div class="l">${T("livrés")}</div>'
       + '<div class="sub">${T("avec l’application")}</div></div>'
       + '<div class="s"><div class="n">' + ANN.appris + '</div><div class="l">vos corrections</div>'
       + '<div class="sub">elles priment</div></div>'
-      + '</div>';
+      + '</div>');
 
     h += '<div class="barreoutils">'
       + '<input aria-label="${T("Domaine, nom ou catégorie")}" type="search" id="a-q" placeholder="${T("Domaine, nom ou catégorie…")}" value="' + esc(ANN_Q) + '">'

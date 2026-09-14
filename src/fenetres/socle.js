@@ -2546,8 +2546,125 @@ const CSS_ETATS = `
 }
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS,
-  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_THEMES, ICO,
+/* ══════════════════════════════════════════════════════════════════════════════
+ * LES BANDEAUX DE TUILES CHIFFREES SE MASQUENT — SA DEMANDE DU 2026-09-14
+ * ══════════════════════════════════════════════════════════════════════════════
+ * << nouvelle audit partout ou tu a ses tuiles, je doit pouvoir les retirer au
+ * besoin en les masquant >>, puis << et passe toute les fenetre >>.
+ *
+ * ⚠⚠ POURQUOI UNE PIECE COMMUNE PLUTOT QUE 26 BOUTONS. Le bandeau existe dans
+ * 26 fenetres et son nom de classe a DERIVE en chemin : .tuiles/.tuile ici,
+ * .stats/.s la, .stat-grid/.stat ailleurs. C est le meme objet, recopie puis
+ * renomme. Ecrire le masquage 26 fois aurait fige cette derive pour de bon —
+ * et la 27e fenetre serait arrivee sans, comme la barre laterale est arrivee
+ * sans son interrupteur.
+ *
+ * ⚠⚠ LE BOUTON EST TOUJOURS RENDU, MASQUE COMME VISIBLE. C est le chemin du
+ * RETOUR. Une commande qui se masque elle-meme est une commande a sens unique :
+ * la lecon est ecrite deux fois dans ce depot — la barre laterale retiree en
+ * 2026-08-17, dont le seul controle disparaissait avec elle, et l interrupteur
+ * de la veille, qu on ne peut pas ranger dans le menu de l icone qu il retire.
+ *
+ * ⚠ LE BANDEAU EST DESSINE MEME QUAND IL EST MASQUE, et cache en CSS. On aurait
+ * pu ne pas l ecrire du tout ; il aurait alors fallu REDESSINER tout l ecran
+ * pour le faire revenir, donc connaitre le nom de la fonction de redessin de
+ * chacune des 26 fenetres. Les chiffres arrivent de toute facon avec la reponse :
+ * ce qu on economiserait, c est quelques centaines d octets de HTML, contre 26
+ * raccords a tenir. La bascule est donc un simple changement de classe.
+ *
+ * ⚠ L ETAT EST CUIT A LA GENERATION (voir plus bas _tuilesOff) : la page NAIT
+ * repliee. Le lire dans la page aurait montre les tuiles une demi-seconde puis
+ * les aurait escamotees — exactement ce qu on reproche aux traductions faites
+ * apres coup.
+ *
+ * ⚠ REGLAGE DE POSTE, dans reglages.json : c est la HAUTEUR DE L ECRAN qui
+ * decide, et l ecran du comptoir n est pas celui du bureau.
+ *
+ * MODE D EMPLOI, dans la fenetre :
+ *   const { JS_TUILES } = require('./socle.js');
+ *   ... + JS_TUILES('remboursements') + ...      // dans la portion de script
+ *   h += szTuiles('<div class="stats">' + ... + '</div>');   // au lieu de h +=
+ */
+const CSS_TUILES = `
+.szbd{flex:0 0 auto;display:flex;flex-direction:column;gap:.3rem}
+.szbd-b{align-self:flex-end;font:inherit;font-size:.68rem;line-height:1.25;
+  cursor:pointer;color:var(--tx3);background:transparent;border:0;
+  border-radius:7px;padding:.12rem .4rem;opacity:.75}
+.szbd-b:hover{opacity:1;color:var(--tx);background:var(--v08)}
+.szbd-b:focus-visible{outline:1px solid #c9a97e;outline-offset:1px;opacity:1}
+.szbd.szplie>.szbd-c{display:none}
+.szbd.szplie>.szbd-b{align-self:stretch;text-align:left;opacity:.9;
+  color:var(--tx2);border:1px dashed var(--v12);padding:.24rem .55rem}
+`;
+
+/* L etat, lu dans les reglages du poste AU MOMENT DE FABRIQUER LA PAGE.
+   ⚠ LE `try` N EST PAS DE LA PRUDENCE DECORATIVE : `reglages.js` demande
+   `app.getPath('userData')` a Electron, et les 41 bancs tournent en Node nu, ou
+   `app` n existe pas. Sans lui, exiger un bandeau masquable ferait tomber tous
+   les bancs qui fabriquent une fenetre. En banc, rien n est masque — et tout ce
+   qui etait vrai le reste. */
+const _tuilesOff = (cle) => {
+  try {
+    const t = require('../reglages').lire().tuilesMasquees || {};
+    return !!t[String(cle || '')];
+  } catch (e) { return false; }
+};
+
+const JS_TUILES = (cle) => `
+var _SZBD_CLE = ${JSON.stringify(String(cle || ''))};
+var _SZBD_OFF = ${_tuilesOff(cle) ? 'true' : 'false'};
+var _SZBD_MASQ = ${JSON.stringify(T('Masquer les totaux'))};
+var _SZBD_AFF = ${JSON.stringify(T('Afficher les totaux'))};
+var _SZBD_ECOUTE = false;
+
+/* Enveloppe un bandeau de tuiles. Rend TOUJOURS le bouton. */
+function szTuiles(html){
+  szTuilesEcouter();
+  return '<div class="szbd' + (_SZBD_OFF ? ' szplie' : '') + '">'
+    + '<div class="szbd-c">' + html + '</div>'
+    + '<button type="button" class="szbd-b">'
+    + (_SZBD_OFF ? _SZBD_AFF : _SZBD_MASQ) + '</button></div>';
+}
+
+function szTuilesMasque(){ return _SZBD_OFF; }
+
+/* ⚠ DELEGUE SUR document : ces ecrans se redessinent entierement a chaque
+   filtre, et un ecouteur pose sur le bouton mourrait au premier redessin. */
+function szTuilesEcouter(){
+  if (_SZBD_ECOUTE) return;
+  _SZBD_ECOUTE = true;
+  document.addEventListener('click', function(e){
+    var b = (e.target && e.target.closest) ? e.target.closest('.szbd-b') : null;
+    if (!b) return;
+    e.preventDefault();
+    _SZBD_OFF = !_SZBD_OFF;
+    /* ⚠ TOUS LES BANDEAUX DE LA FENETRE, PAS SEULEMENT CELUI QU ON A CLIQUE.
+       Sept fenetres en portent plusieurs (Campagnes et Publicite en ont trois,
+       un par onglet). Un seul etat, une seule cle : ne redessiner que le bouton
+       clique aurait laisse les autres afficher le contraire de ce qui est
+       enregistre, jusqu au prochain redessin. */
+    var envs = document.querySelectorAll('.szbd');
+    for (var i = 0; i < envs.length; i++) {
+      envs[i].className = 'szbd' + (_SZBD_OFF ? ' szplie' : '');
+    }
+    var bs = document.querySelectorAll('.szbd-b');
+    for (var j = 0; j < bs.length; j++) {
+      bs[j].textContent = _SZBD_OFF ? _SZBD_AFF : _SZBD_MASQ;
+    }
+    /* ⚠ ON N ATTEND PAS LA REPONSE. L ecran a deja bouge ; si l ecriture
+       echoue, le pire est que le bandeau revienne a la prochaine ouverture —
+       et faire patienter quelqu un devant un repli de tuiles serait absurde. */
+    try {
+      if (window.szPont && window.szPont.tuilesMasquer) {
+        window.szPont.tuilesMasquer(_SZBD_CLE, _SZBD_OFF);
+      }
+    } catch (er) {}
+  });
+}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES,
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };

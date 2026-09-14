@@ -21,7 +21,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -106,7 +106,7 @@ function pagePaiements() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -192,13 +192,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
     var t = D.tuiles;
     if (t) {
-      h += '<div class="tuiles">'
+      /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit
+         tel quel, la piece commune y ajoute le bouton de repli et l etat retenu
+         pour ce poste. Voir JS_TUILES dans socle.js. */
+      h += szTuiles('<div class="tuiles">'
         + tuile('${T("Transactions")}', String(t.nb), '', '${T("complétées · ")}' + D.annee)
         + tuile('${T("Revenu brut")}', fmt(t.brut), '', '${T("avant frais")}')
         + tuile('${T("Frais Square")}', fmt(t.frais), 'err',
             t.fraisRecuperes > 0 ? ('${T("dont ")}' + fmt(t.fraisRecuperes) + '${T(" récupérés · nets ")}' + fmt(t.fraisNets)) : '${T("déductibles d’impôt")}')
         + tuile('${T("Revenu net")}', fmt(t.net), 'bon', '${T("après remb. et frais nets")}')
-        + '</div>';
+        + '</div>');
     }
 
     h += '<div class="carte"><h2>${T("Transactions — ")}' + D.annee + '</h2>';
@@ -247,12 +250,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var R = D.reconciliation;
     if (!R) return '<div class="vide">${T("Chargez d’abord les transactions, dans l’onglet Transactions.")}</div>';
     var ton = R.equilibre ? 'bon' : 'att';
-    var h = '<div class="tuiles">'
+    var h = szTuiles('<div class="tuiles">'
       + tuile('${T("Commandes ")}' + esc(R.marque), String(R.nbCommandes), '', '${T("non annulées · ")}' + D.annee)
       + tuile('${T("Transactions Square")}', String(R.nbSquare)
           + (R.nbRemboursementsSquare ? ' / ' + R.nbRemboursementsSquare + '${T(" remb.")}' : ''), '', '${T("complétées · ")}' + D.annee)
       + tuile('${T("Écart")}', fmt(Math.abs(R.ecart)), ton, R.equilibre ? '${T("Équilibré")}' : '${T("Vérification requise")}')
-      + '</div>';
+      + '</div>');
 
     h += '<div class="carte"><h2>${T("Comparaison système et Square — ")}' + D.annee + '</h2>'
       + '<table><thead><tr><th>${T("Source")}</th><th class="num">${T("Brut")}</th><th class="num">${T("Remboursements")}</th>'

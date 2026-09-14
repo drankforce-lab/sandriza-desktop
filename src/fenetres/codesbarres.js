@@ -31,7 +31,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -138,7 +138,7 @@ function pageCodesbarres(mode) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -207,8 +207,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var etiquettes = FILE.reduce(function(n, it){ return n + (parseInt(it.qty, 10) || 0); }, 0);
     var parProduit = {};
     FILE.forEach(function(it){ parProduit[it.pid] = true; });
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
     var h = '<div class="carte"><h2>${T("File d’impression")}</h2>'
-      + '<div class="stats">'
+      + szTuiles('<div class="stats">'
       /* ⚠ Le singulier et le pluriel, chacun entier : coupes en morceaux, ils ne
          laissaient au poseur que des bouts de mots. */
       + '<div class="s"><div class="n">' + Object.keys(parProduit).length + '</div><div class="l">'
@@ -217,7 +220,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (nbLignes > 1 ? '${T("lignes")}' : '${T("ligne")}') + '</div></div>'
       + '<div class="s"><div class="n">' + etiquettes + '</div><div class="l">'
       + (etiquettes > 1 ? '${T("étiquettes")}' : '${T("étiquette")}') + '</div></div>'
-      + '</div>';
+      + '</div>');
     if (!FILE.length) {
       h += '<div class="vide">${T("Rien à imprimer. Choisissez des variantes à gauche.")}</div>';
     } else {

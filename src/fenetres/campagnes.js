@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -192,7 +192,7 @@ function pageCampagnes(ongletDepart) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -953,11 +953,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueSegments(){
     var D = DS;
     if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Les TROIS bandeaux de cette fenetre partagent la meme cle et se
+       replient ensemble. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
       + (D.abonnesActifs || 0) + '</div><div class="dt">${T("le point de départ")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Segments composés")}</div><div class="val">'
-      + (D.segments || []).length + '</div></div></div>';
+      + (D.segments || []).length + '</div></div></div>');
 
     h += '<div class="avis att">${T("Un segment ne fait que <strong>restreindre</strong> la liste ")}'
       + '${T("des abonnées actives : il ne peut jamais joindre quelqu’un qui n’a pas consenti")} '
@@ -1131,7 +1135,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return (String(c.nom) + ' ' + String(c.sujet)).toLowerCase().indexOf(q) !== -1;
     });
 
-    var h = '<div class="tuiles">'
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
       + (D.abonnesActifs || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Brouillons")}</div><div class="val neutre">'
@@ -1141,7 +1145,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="tuile"><div class="lbl">${T("Courriels partis")}</div><div class="val">'
       + (D.courrielsEnvoyes || 0) + '</div>'
       + (D.courrielsEchoues ? '<div class="dt">' + pluriel(D.courrielsEchoues, '${T("échec")}', '${T("échecs")}') + '</div>' : '')
-      + '</div></div>';
+      + '</div></div>');
 
     /* Ce qui empeche un envoi, ou le detourne, se dit AVANT le clic. */
     if (!D.resendPret) {
@@ -1211,7 +1215,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var D = DH;
     if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
 
-    var h = '<div class="tuiles">'
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Chaînes actives")}</div><div class="val bon">'
       + (D.actives || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Inscriptions en cours")}</div><div class="val">'
@@ -1219,7 +1223,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="tuile"><div class="lbl">${T("Étapes échues")}</div><div class="val '
       + (D.dues ? 'att' : 'neutre') + '">' + (D.dues || 0) + '</div>'
       + '<div class="dt">${T("prêtes à partir")}</div></div>'
-      + '</div>';
+      + '</div>');
 
     if (!D.envoisPermis) {
       h += '<div class="avis mal">${T("Les « Séquences automatisées » sont <strong>en pause</strong> dans les ")}'

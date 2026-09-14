@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais l echange, le nom de la
@@ -128,7 +128,7 @@ function pageChat() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -225,7 +225,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vueSatisfaction(){
     var s = D.satisfaction || {};
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Conversations")}</div><div class="val">' + (s.total || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Évaluées")}</div><div class="val">' + (s.rated || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Satisfaites")}</div><div class="val bon">' + (s.satisfied || 0) + '</div></div>'
@@ -233,7 +236,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="tuile"><div class="lbl">${T("Taux")}</div><div class="val">'
       + (s.rate == null ? '—' : s.rate + ' %') + '</div>'
       + '<div class="sub">' + (s.rate == null ? '${T("aucune évaluation")}' : '${T("des évaluations")}') + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     h += '<div class="carte"><h2>${T("Commentaires laissés")}</h2>';
     var cs = s.comments || [];

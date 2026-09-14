@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -150,7 +150,7 @@ function pageFidelisation(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -200,7 +200,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function vueSondages(){
     var t = D.tuiles || {};
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Invitations")}</div><div class="val">' + (t.invitations || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Réponses")}</div><div class="val bon">' + (t.reponses || 0) + '</div>'
       + '<div class="sub">${T("taux de ")}' + (t.taux || 0) + ' %</div></div>'
@@ -209,7 +212,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="sub">' + (t.nbNotes || 0) + ((t.nbNotes || 0) > 1 ? '${T(" évaluations")}' : '${T(" évaluation")}') + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Codes récompense")}</div><div class="val">' + (t.codes || 0) + '</div>'
       + '<div class="sub">' + (t.codesUtilises || 0) + ((t.codesUtilises || 0) > 1 ? '${T(" utilisés")}' : '${T(" utilisé")}') + '</div></div>'
-      + '</div>';
+      + '</div>');
 
     if (D.peutModifier) {
       h += '<div class="carte"><h2>${T("Notification des commentaires")}</h2>'

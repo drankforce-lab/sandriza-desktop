@@ -28,7 +28,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent grave dans la portion script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur enregistrable,
    et la NOTE d'une sauvegarde en est une. ⚠⚠⚠ Les deux mots de confirmation
@@ -178,7 +178,7 @@ function pageSauvegarde(ouverture) {
     if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
   var corps = document.getElementById('corps');
   var D = null, RO = true, OCCUPE = false, FIGE = false;
   var CREER = '${CREER0}', REST = '${REST0}', SUPP = '${SUPP0}';
@@ -236,11 +236,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (D.peutEcrire ? '<button class="b dgr" id="s-purger"><span class="ic">🗑</span> ${T("Purger (&gt; ")}'+(D.retentionMois||12)+'${T(" mois)")}</button>' : '')
       + '</div></div>';
 
-    h += '<div class="stat-grid">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    h += szTuiles('<div class="stat-grid">'
       + '<div class="stat"><div class="l">${T("Sauvegardes")}</div><div class="v">'+l.length+'</div><div class="s">${T("rétention ")}'+(D.retentionMois||12)+'${T(" mois")}</div></div>'
       + '<div class="stat"><div class="l">${T("La plus récente")}</div><div class="v" style="font-size:1.05rem;color:'+(l.length?'var(--tx-ok2)':'var(--tx-att)')+'">'+(l.length?esc(l[0].quand):'${T("aucune")}')+'</div><div class="s">'+(l.length?esc(l[0].taille):'${T("le registre est vide")}')+'</div></div>'
       + '<div class="stat"><div class="l">${T("Espace occupé")}</div><div class="v" style="font-size:1.3rem">'+fmtO(octets)+'</div><div class="s">${T("dans Cloudflare R2")}</div></div>'
-      + '</div>';
+      + '</div>');
 
     if (!l.length){
       h += '<div class="carte"><div class="vide">${T("Aucune sauvegarde.")}<br>'

@@ -24,7 +24,7 @@
  * ⚠ Aucun caractère accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -167,7 +167,7 @@ function pageIncidents(ouverture) {
     if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
   var corps = document.getElementById('corps');
   var D = null, RO = false, OCCUPE = false;
   var NOUV = '${NOUV0}', EDIT = '${EDIT0}', VUE = '${VUE0}';
@@ -223,12 +223,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<p class="loi">${T("La <b>Loi 25</b> impose de consigner <b>tout</b> incident de confidentialité — même sans risque de préjudice sérieux — et de pouvoir remettre ce registre à la <b>Commission d’accès à l’information</b> sur demande. Chaque entrée est conservée <b>cinq ans</b> après la prise de connaissance, puis retirée d’elle-même. Ce registre n’est pas public.")}</p>'
       + (D.peutModifier ? '<button class="prim" id="i-nouveau">${T("＋ Consigner un incident")}</button>' : '')
       + '</div>';
-    h += '<div class="stat-grid">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    h += szTuiles('<div class="stat-grid">'
       + '<div class="stat"><div class="l">${T("Au registre")}</div><div class="v">'+(st.total||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("Dossiers ouverts")}</div><div class="v" style="color:var(--tx-att)">'+(st.ouverts||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("Préjudice sérieux")}</div><div class="v" style="color:var(--tx-err2)">'+(st.serieux||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("Avis CAI à faire")}</div><div class="v" style="color:var(--tx-err2)">'+(st.caiAFaire||0)+'</div></div>'
-      + '</div>';
+      + '</div>');
 
     if (!lg.length){
       h += '<div class="carte"><div class="vide">${T("Aucun incident consigné.")}<br>${T("C’est la bonne nouvelle — le registre doit tout de même exister et être tenu à jour.")}</div></div>';

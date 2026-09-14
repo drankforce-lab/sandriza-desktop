@@ -697,6 +697,12 @@ jobs:
           # noir dans la zone de notification (2026-09-06) — et personne ne
           # pouvait le voir avant un build, une publication et une installation.
           node tools/banc-ressources-empaquetees.js
+          # ⚠ CELUI-CI GARDE UNE COMMANDE QUI, SI ELLE MANQUE, NE LÈVE RIEN :
+          # le bandeau de tuiles chiffrées a été recopié dans 26 fenêtres sous
+          # trois noms de classe différents. La 27ᵉ sera copiée elle aussi, et
+          # elle arrivera sans bouton de repli si personne ne le réclame — comme
+          # « Afficher la barre latérale » a disparu sans que rien ne le dise.
+          node tools/banc-tuiles-masquables.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

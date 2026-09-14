@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un numero de facture, un
@@ -112,7 +112,7 @@ function pageFactures() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -201,7 +201,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
       };
       var nbR = TUILES.nbRemboursements || 0;
-      h += '<div class="tuiles">'
+      /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit
+         tel quel, la piece commune y ajoute le bouton de repli et l etat retenu
+         pour ce poste. Voir JS_TUILES dans socle.js. */
+      h += szTuiles('<div class="tuiles">'
         + tuile('${T("Total facturé")}', fmt(TUILES.total), '')
         + tuile('${T("Encaissé")}', fmt(TUILES.encaisse), 'bon')
         + tuile('${T("À recevoir")}', fmt(TUILES.aRecevoir), 'att')
@@ -210,7 +213,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             nbR + (nbR > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}'))
         + tuile('${T("Dépenses ")}' + (TUILES.annee || ''), fmt(TUILES.depenses), 'err')
         + tuile('${T("Nb factures")}', String(TUILES.nb || 0), '')
-        + '</div>';
+        + '</div>');
     }
     h += '<div class="barreoutils">'
       + '<input aria-label="${T("Numéro, commande ou client")}" type="search" id="f-q" placeholder="${T("Numéro, commande ou client…")}" value="' + esc(Q) + '">'

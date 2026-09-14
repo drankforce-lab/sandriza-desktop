@@ -41,7 +41,7 @@
  * referme la chaîne et casse toute la fenêtre. C'est arrivé six fois ici.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -266,7 +266,7 @@ function pageInventaire(id) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');
@@ -829,7 +829,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     var st = d.stats;
-    var h = '<div class="tuiles">'
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Voir JS_TUILES dans socle.js. */
+    var h = szTuiles('<div class="tuiles">'
       + tuile('${T("Produits inventoriés")}', st.inventories, st.total + ' ${T("produits au total")}', '')
       + tuile('${T("Sans code SKU")}', st.sansSku,
           st.sansSku > 0 ? '${T("non disponibles à l’achat")}' : '${T("tous assignés ✓")}',
@@ -841,7 +844,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           st.aCommander ? 'att' : 'bon',
           st.aCommander > 0 ? 'reappro' : '')
       + tuile('${T("Unités en inventaire")}', st.unites, '${T("toutes variantes")}', '')
-      + '</div>';
+      + '</div>');
 
     // ⚠ LES DEUX BANDEAUX DE L ECRAN DU SITE, repris au mot — et comme lui, ils
     // disparaissent d eux-memes une fois la reprise faite.
