@@ -77,6 +77,15 @@ module.exports = {
   'Gratuit — modèle llama-3.3-70b-versatile.':
     'Free — llama-3.3-70b-versatile model.',
 
+  /* ⚠ « La clé reste au serveur » n est pas une formule de politesse ici : c est
+     la seule cle de la maison qui ne descend JAMAIS dans l application. La phrase
+     anglaise doit dire la meme chose aussi platement. */
+  'Anthropic — Écriture publicitaire IA': 'Anthropic — AI ad writing',
+  'Rédige les courriels et les publications à partir du contenu du site. Facturé au texte produit : le plafond mensuel ci-dessous est la seule limite de dépense.':
+    'Writes the emails and the posts from the site content. Billed by the text produced: the monthly ceiling below is the only spending limit.',
+  'Payant à l’usage. La clé reste au serveur : elle n’est jamais recopiée dans l’application.':
+    'Paid per use. The key stays on the server: it is never copied into the application.',
+
   'Resend — Courriel transactionnel': 'Resend — Transactional email',
   'Infolettres, confirmations de commande, cartes-cadeaux.':
     'Newsletters, order confirmations, gift cards.',
@@ -108,6 +117,19 @@ module.exports = {
   'fal.ai n’expose aucun solde par API. La fenêtre Traitements d’image affiche':
     'fal.ai exposes no balance through its API. The Image treatments window shows',
   'ce montant et la consommation mesurée depuis': 'this amount and the usage measured since',
+
+  /* ── LE PLAFOND MENSUEL DE L ECRITURE IA ────────────────────────────────── */
+  /* ⚠ Ce n est PAS un solde a tenir a jour comme celui de fal.ai juste au-dessus :
+     c est une borne que la passerelle lit AVANT chaque appel. « Plafond » et non
+     « budget », dans les deux langues : un budget se depasse, un plafond arrete. */
+  'Plafond de dépense par mois ($ US)': 'Spending ceiling per month (US$)',
+  'ex. 25': 'e.g. 25',
+  'Vérifié avant chaque appel : une fois le plafond atteint, l’écriture IA s’arrête ':
+    'Checked before every call: once the ceiling is reached, AI writing stops ',
+  'Vérifié avant chaque appel : une fois le plafond atteint, l’écriture IA s’arrête':
+    'Checked before every call: once the ceiling is reached, AI writing stops',
+  'd’elle-même jusqu’au mois suivant. 0 lève la limite.':
+    'on its own until the next month. 0 lifts the limit.',
   ' — saisi le ': ' — entered on ',
   '— saisi le': '— entered on',
   '. À tenir à jour.': '. To be kept up to date.',

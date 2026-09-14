@@ -189,6 +189,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       lien: ['console.groq.com', 'https://console.groq.com/keys'],
       champs: [{ k: 'groq', label: '${T("Clé API")}', place: 'gsk_…',
         aide: '${T("Gratuit — modèle llama-3.3-70b-versatile.")}' }] },
+    /* Anthropic : la SEULE cle de la maison qui ne descend jamais dans la page.
+       Elle monte au nuage et n en revient pas ; ia-texte-proxy.php la lit au
+       serveur. L ecran n en connait que les quatre derniers caracteres, assez
+       pour dire << celle-ci est bien la bonne >>, rien pour s en servir. */
+    { titre: '${T("Anthropic — Écriture publicitaire IA")}',
+      sous: '${T("Rédige les courriels et les publications à partir du contenu du site. Facturé au texte produit : le plafond mensuel ci-dessous est la seule limite de dépense.")}',
+      lien: ['console.anthropic.com', 'https://console.anthropic.com/settings/keys'],
+      champs: [{ k: 'iaTexte', label: '${T("Clé API")}', place: 'sk-ant-…',
+        aide: '${T("Payant à l’usage. La clé reste au serveur : elle n’est jamais recopiée dans l’application.")}' }],
+      budget: true },
     { titre: '${T("Resend — Courriel transactionnel")}',
       sous: '${T("Infolettres, confirmations de commande, cartes-cadeaux.")}',
       lien: ['resend.com', 'https://resend.com/api-keys'],
@@ -226,6 +236,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="aide">${T("fal.ai n’expose aucun solde par API. La fenêtre Traitements d’image affiche ")}'
       + '${T("ce montant et la consommation mesurée depuis")}' + maj + '${T(". À tenir à jour.")}</div></div>';
   }
+  /* Le plafond mensuel de l ecriture IA. Ce n est pas un solde a tenir a jour
+     comme celui de fal.ai : c est une BORNE, et la passerelle la lit AVANT
+     chaque appel. Depassee, elle repond 402 et n appelle rien. Vide = 25 $. */
+  function budgetHtml(){
+    var bv = (D && D.iaBudget) || '';
+    return '<div class="ch"><label for="f-iaBudget">${T("Plafond de dépense par mois ($ US)")}</label>'
+      + '<input id="f-iaBudget" class="solde" type="number" step="1" min="0" value="' + esc(bv) + '"'
+      + ' placeholder="${T("ex. 25")}"' + (RO ? ' disabled' : '') + '>'
+      + '<div class="aide">${T("Vérifié avant chaque appel : une fois le plafond atteint, l’écriture IA s’arrête ")}'
+      + '${T("d’elle-même jusqu’au mois suivant. 0 lève la limite.")}</div></div>';
+  }
   function etatInterne(k, e){
     if (!e.defini) return '<span class="txt">${T("Aucune clé <b>enregistrée</b>.")}</span>';
     if (ARME[k]) {
@@ -248,6 +269,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h.push('<p class="sous">' + esc(s.sous) + '</p>');
       s.champs.forEach(function(c){ h.push(champHtml(c)); });
       if (s.solde) h.push(soldeHtml()); // le solde fal.ai, sous sa cle, dans la meme carte
+      if (s.budget) h.push(budgetHtml()); // le plafond IA, sous sa cle, meme principe
       if (s.test) h.push('<div class="ch"><button id="b-teststripe"' + (RO ? ' disabled' : '')
         + '>${T("Tester la clé &amp; voir mes inscriptions")}</button>'
         + '<div class="etat" id="stripe-res" style="margin-top:.4rem"></div></div>');
@@ -334,7 +356,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function enregistrer(){
     if (RO || OCCUPE) return;
     var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-    var saisie = { falSolde: v('f-falSolde') };
+    var saisie = { falSolde: v('f-falSolde'), iaBudget: v('f-iaBudget') };
     SERVICES.forEach(function(s){ s.champs.forEach(function(c){ saisie[c.k] = v('f-' + c.k); }); });
     occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:cles:ecrire', [saisie]).then(function(r){
