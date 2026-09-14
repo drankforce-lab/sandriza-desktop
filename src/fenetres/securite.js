@@ -152,6 +152,24 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .tbl .nm{display:flex;align-items:center;gap:.55rem;min-width:0}
 .tbl .nm b{font-weight:700}
 .tbl .dt{color:var(--tx2);font-size:.78rem;white-space:nowrap}
+/* ══ LE MENU DU CLIC DROIT (#110, 2026-09-14) ══════════════════════════════
+   Sa demande : agir sur un compte sans traverser la ligne jusqu au bout. Il est
+   POSE EN ABSOLU dans la page — pas dans la ligne — pour ne pas etre rogne par
+   le debordement du tableau, qui est la faute classique de ce genre de menu.
+   ⚠ Il se ferme au clic ailleurs, a la molette et a Echap : un menu qui reste
+   ouvert pendant qu on fait autre chose finit par recevoir un clic qu on ne lui
+   destinait pas — et une de ses entrees SUPPRIME. */
+.ctx{position:fixed;z-index:60;min-width:13rem;background:var(--f-carte);
+  border:1px solid var(--v16);border-radius:10px;padding:.3rem;
+  box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.ctx .tt{font-size:.7rem;color:var(--tx2);padding:.3rem .55rem .35rem;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctx button{display:block;width:100%;text-align:left;font:inherit;font-size:.82rem;
+  border:0;border-radius:7px;padding:.4rem .55rem;background:none;color:var(--tx);cursor:pointer}
+.ctx button:hover{background:var(--v09)}
+.ctx button.dgr{color:var(--tx-f6a6a6)}
+.ctx button.dgr:hover{background:rgba(248,113,113,.16)}
+.ctx .trait{height:1px;background:var(--v08);margin:.25rem .3rem}
 .tbl .act{text-align:right;white-space:nowrap}
 .tbl .act .mini{margin-left:.2rem}
 /* ⚠ LES BOUTONS DE LA LIGNE SE TOUCHAIENT — sa demande du 2026-09-14. Seul
@@ -452,6 +470,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (s.estMoi ? '<span class="pill moi">${T("vous")}</span>' : '');
   }
 
+  /* ══ BASCULER L'ÉTAT D'UN COMPTE (#110) ═══════════════════════════════════
+     ⚠ IL PASSE PAR UN CŒUR DÉDIÉ, securite:compte:actif, et surtout PAS par
+     l'écriture de compte : celle-ci reconstruit la fiche depuis sa charge utile,
+     et la ligne de la liste ne porte ni les noms séparés ni les permissions —
+     un « Désactiver » câblé dessus aurait effacé les droits personnalisés.
+     ⚠ LES REFUS SONT TRADUITS ICI, pas au cœur : le cœur rend un motif nommé
+     (soi, dernier_super) justement pour que la phrase naisse du côté qui
+     connaît la langue de la page. */
+  function basculerActif(id, vise){
+    if (OCCUPE) return;
+    OCCUPE = true;
+    dire(vise ? '${T("Activation…")}' : '${T("Désactivation…")}');
+    appeler('securite:compte:actif', [id, !!vise]).then(function(r){
+      OCCUPE = false;
+      if (r && r.ok) { recharger(vise ? '${T("Compte activé.")}' : '${T("Compte désactivé.")}', 'bon'); return; }
+      var m = r && r.motif;
+      if (m === 'soi') { dire('${T("Vous ne pouvez pas désactiver votre propre compte.")}', 'err'); return; }
+      if (m === 'dernier_super') { dire('${T("Impossible de désactiver le dernier super-administrateur actif.")}', 'err'); return; }
+      dire('${T("Échec : ")}' + expliquer(r), 'err');
+    });
+  }
+
   function gestesDe(s, superActifs){
     var peutSuppr = !s.estMoi && (!s.estSuper || superActifs > 1);
     return '<button class="b" data-edit="'+esc(s.id)+'"><span class="ic">✏</span> ${T("Modifier")}</button>'
@@ -515,7 +555,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<th>${T("Personne")}</th><th>${T("Rôle")}</th><th>${T("État")}</th>'
         + '<th>${T("Dernière connexion")}</th><th></th></tr></thead><tbody>';
       for (var t=0;t<vus.length;t++){ var u=vus[t];
-        h += '<tr class="'+(u.active?'':'inactif')+'">'
+        h += '<tr class="'+(u.active?'':'inactif')+'" data-ligne="'+esc(u.id)+'">'
           + '<td><div class="nm"><span class="init">'+esc(initiales(u))+'</span>'
           + '<span style="min-width:0"><b>'+esc(u.nom||'—')+'</b>'
           + '<div class="dt">'+(u.username?'@'+esc(u.username)+' · ':'')+esc(u.email||'')+'</div></span></div></td>'
@@ -530,7 +570,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h += '<div class="fiches">';
       for (var i=0;i<vus.length;i++){ var s=vus[i];
-        h += '<div class="fiche'+(s.active?'':' inactif')+'">'
+        h += '<div class="fiche'+(s.active?'':' inactif')+'" data-ligne="'+esc(s.id)+'">'
           + '<div class="haut"><div class="init">'+esc(initiales(s))+'</div>'
           + '<div class="qui"><div class="nom">'+esc(s.nom||'—')+'</div>'
           + '<div class="coord">'+(s.username?'@'+esc(s.username)+' · ':'')+esc(s.email||'')+'</div></div></div>'
@@ -572,7 +612,102 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var invs=corps.querySelectorAll('[data-invite]'); for (var v=0;v<invs.length;v++) invs[v].onclick=function(){ inviterCompte(this.getAttribute('data-invite')); };
     var dels=corps.querySelectorAll('[data-del]'); for (var d=0;d<dels.length;d++) dels[d].onclick=function(){ var id=this.getAttribute('data-del');
       if (DELU===id){ DELU=''; supprimerCompte(id); } else { DELU=id; vueUsers(); dire('${T("Cliquez encore pour supprimer ce compte.")}', 'att'); } };
+
+    /* ══ LE CLIC DROIT SUR UNE LIGNE (#110) ═══════════════════════════════════
+       ⚠ IL N OFFRE QUE CE QUE LA LIGNE OFFRE DEJA, aux memes conditions : un
+       menu contextuel qui pourrait faire ce que les boutons refusent serait une
+       porte derobee. Un compte eteint n y montre donc ni MFA ni invitation, et
+       << Supprimer >> n y parait que si le bouton parait — memes gardes, meme
+       calcul du nombre de super-administrateurs actifs.
+       ⚠ IL NE SE POSE QUE SI L ON PEUT MODIFIER : sans ce droit, la liste est en
+       lecture, et un menu d actions sur une lecture ne promet que des refus. */
+    if (D.peutModifier) {
+      var lignes = corps.querySelectorAll('[data-ligne]');
+      for (var L=0; L<lignes.length; L++) {
+        lignes[L].addEventListener('contextmenu', function(ev){
+          ev.preventDefault();
+          ouvrirCtx(this.getAttribute('data-ligne'), ev.clientX, ev.clientY);
+        });
+      }
+    }
   }
+
+  /* Le menu du clic droit. Un seul a la fois — on retire le precedent avant d en
+     poser un autre, sinon deux menus se superposent sur deux clics rapides. */
+  function fermerCtx(){
+    var v = document.getElementById('sz-ctx');
+    if (v && v.parentNode) v.parentNode.removeChild(v);
+  }
+
+  function ouvrirCtx(id, x, y){
+    fermerCtx();
+    var comptes = (D && D.comptes) || [];
+    var s = null;
+    for (var i=0;i<comptes.length;i++) if (comptes[i].id === id) { s = comptes[i]; break; }
+    if (!s) return;
+    var superActifs = 0;
+    for (var k=0;k<comptes.length;k++) if (comptes[k].estSuper && comptes[k].active) superActifs++;
+    var peutSuppr = !s.estMoi && (!s.estSuper || superActifs > 1);
+    /* ⚠ MEME REGLE QUE LE COEUR, pour ne pas proposer un geste qu il refusera :
+       on ne s eteint pas soi-meme, et pas le dernier super-administrateur actif.
+       Une entree qui promet puis se dedit est pire qu une entree absente. */
+    var peutEteindre = s.active && !s.estMoi && (!s.estSuper || superActifs > 1);
+
+    var h = '<div class="tt">' + esc(s.nom || s.email || '') + '</div>'
+      + '<button data-c="edit">${T("Modifier le compte…")}</button>'
+      + '<button data-c="perms">${T("Gérer ses accès…")}</button>';
+    if (s.active) {
+      h += '<button data-c="mfa">${T("Gérer le MFA…")}</button>';
+      if (!s.estSuper) h += '<button data-c="invite">${T("Renvoyer l’invitation")}</button>';
+    }
+    h += '<div class="trait"></div>';
+    if (s.active) {
+      h += '<button data-c="off"' + (peutEteindre ? '' : ' disabled style="opacity:.45;cursor:default"')
+        + '>${T("Désactiver le compte")}</button>';
+    } else {
+      h += '<button data-c="on">${T("Activer le compte")}</button>';
+    }
+    if (peutSuppr) h += '<button class="dgr" data-c="del">${T("Supprimer le compte…")}</button>';
+
+    var m = document.createElement('div');
+    m.className = 'ctx'; m.id = 'sz-ctx'; m.innerHTML = h;
+    document.body.appendChild(m);
+
+    /* ⚠ ON LE REPLIE DANS L ECRAN APRES L AVOIR POSE : sa hauteur depend de ses
+       entrees, qui dependent du compte. Calculer avant de mesurer donnerait un
+       menu a moitie hors de la fenetre sur la derniere ligne de la liste. */
+    var r = m.getBoundingClientRect();
+    var gx = Math.min(x, window.innerWidth  - r.width  - 8);
+    var gy = Math.min(y, window.innerHeight - r.height - 8);
+    m.style.left = Math.max(8, gx) + 'px';
+    m.style.top  = Math.max(8, gy) + 'px';
+
+    var bs = m.querySelectorAll('button');
+    for (var b=0;b<bs.length;b++) bs[b].onclick = function(){
+      if (this.disabled) return;
+      var quoi = this.getAttribute('data-c');
+      fermerCtx();
+      if (quoi === 'edit')   { ouvrirEditeurCompte(id); return; }
+      if (quoi === 'perms')  { ouvrirEditeurCompte(id, 'droits'); return; }
+      if (quoi === 'mfa')    { ouvrirMfa(id); return; }
+      if (quoi === 'invite') { inviterCompte(id); return; }
+      if (quoi === 'on')     { basculerActif(id, true); return; }
+      if (quoi === 'off')    { basculerActif(id, false); return; }
+      /* ⚠ LA SUPPRESSION GARDE SA CONFIRMATION EN DEUX TEMPS, celle du bouton :
+         un menu contextuel rend le geste plus rapide, pas plus definitif. */
+      if (quoi === 'del')    { DELU = id; vueUsers(); dire('${T("Cliquez « Supprimer » encore une fois pour confirmer.")}', 'att'); }
+    };
+  }
+
+  /* ⚠ TROIS FACONS DE LE REFERMER, et c est deliberé : un menu qui reste ouvert
+     pendant qu on fait autre chose finit par recevoir un clic qu on ne lui
+     destinait pas — et une de ses entrees supprime un compte. */
+  document.addEventListener('click', function(e){
+    var v = document.getElementById('sz-ctx');
+    if (v && !v.contains(e.target)) fermerCtx();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') fermerCtx(); });
+  window.addEventListener('wheel', fermerCtx, { passive: true });
 
   /* ══ LA MATRICE DES DROITS, AVEC SES EXPLICATIONS ══════════════════════════
      ⚠⚠ CHAQUE MODULE PORTE UN BOUTON QUI DEPLIE SA DESCRIPTION. Le modele la
@@ -933,10 +1068,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   // ── ÉDITEUR DE COMPTE (à onglets) ────────────────────────────────
-  function ouvrirEditeurCompte(id){
+  /* ⚠ UN SECOND ARGUMENT, AJOUTE LE 2026-09-14 (#110) : le clic droit propose << Gerer ses
+     acces >>, qui doit ouvrir l editeur DIRECTEMENT sur les droits — sinon
+     l entree ne fait pas ce qu elle annonce, elle ouvre juste une fiche.
+     ⚠ ON REPLIE SUR L IDENTITE SI L ONGLET N EXISTE PAS. << Droits >> ne parait
+     qu en mode AVANCE (voir la barre d onglets) : demande en mode simple, il
+     laisserait un editeur sans onglet actif, donc un corps vide. Un repli vaut
+     mieux qu un ecran blanc. */
+  function ouvrirEditeurCompte(id, onglet){
     if (OCCUPE) return; OCCUPE=true; dire('${T("Ouverture…")}');
     appeler('securite:form',[id||'']).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ dire(''); ONGED='identite'; dessinerEditeurCompte(r); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
+      if (r&&r.ok){ dire('');
+        ONGED = (onglet === 'droits' && MODE === 'avance') ? 'droits' : 'identite';
+        dessinerEditeurCompte(r); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function fermerEditeurCompte(){ szPleinReinit(); var s=document.getElementById('sur-u'); if (s) s.remove(); }
 

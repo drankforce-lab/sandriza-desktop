@@ -249,6 +249,29 @@ module.exports = {
   'Invitation renvoyée à ': 'Invitation resent to ',
   'Invitation renvoyée à': 'Invitation resent to',
 
+  /* ══ LE MENU DU CLIC DROIT SUR UNE LIGNE (#110, 2026-09-14) ════════════════
+     ⚠ ECRIT EN MEME TEMPS QUE L ECRAN, sa consigne du meme jour : le bilingue
+     n est pas une finition, c est une condition d ecriture. */
+  'Activation…': 'Turning on…',
+  'Compte activé.': 'Account turned on.',
+  'Compte désactivé.': 'Account turned off.',
+  /* ⚠ LES DEUX REFUS SONT DES PHRASES ENTIERES, pas des morceaux : ils disent ce
+     qui est refuse ET pourquoi, parce qu un compte qu on n arrive pas a eteindre
+     sans explication se lit comme une panne. */
+  'Vous ne pouvez pas désactiver votre propre compte.':
+    'You cannot turn off your own account.',
+  'Impossible de désactiver le dernier super-administrateur actif.':
+    'The last active super administrator cannot be turned off.',
+  'Modifier le compte…': 'Edit the account…',
+  'Gérer ses accès…': 'Manage their access…',
+  'Gérer le MFA…': 'Manage MFA…',
+  'Renvoyer l’invitation': 'Resend the invitation',
+  'Désactiver le compte': 'Turn the account off',
+  'Activer le compte': 'Turn the account on',
+  'Supprimer le compte…': 'Delete the account…',
+  'Cliquez « Supprimer » encore une fois pour confirmer.':
+    'Click “Delete” once more to confirm.',
+
   /* ══ LE SECOND FACTEUR ═════════════════════════════════════════════════════ */
   'Lecture MFA…': 'Reading MFA…',
   'Préparation de la liaison…': 'Preparing the link…',

@@ -2453,7 +2453,12 @@ const OPS_PONT = new Set([
   'securite:verif:staff', 'securite:verif:client',
   // Gestion des comptes (2.66.0, #6 Lot B1) — creation/edition + permissions +
   // suppression + invitation. Le MFA reste au repli web jusqu au Lot B2.
-  'securite:form', 'securite:compte:ecrire', 'securite:compte:supprimer', 'securite:compte:invitation',
+  'securite:form', 'securite:compte:ecrire', 'securite:compte:supprimer',
+  /* ⚠ #110, 2026-09-14 : basculer l'état d'un compte depuis le clic droit. Il ne
+     remplace PAS `securite:compte:ecrire` — celui-là reconstruit la fiche depuis
+     sa charge utile, et la ligne de la liste ne porte ni les noms séparés ni les
+     permissions. L'y câbler aurait effacé les droits personnalisés en silence. */
+  'securite:compte:actif', 'securite:compte:invitation',
   // MFA (2.67.0, #6 Lot B2) — activation TOTP, exemption, desactivation.
   'securite:mfa:etat', 'securite:mfa:init', 'securite:mfa:confirmer', 'securite:mfa:exempter', 'securite:mfa:desactiver',
   // Journaux (2.68.0, #7 Lot 7a) — acces / automatisations / impressions / verrous.
@@ -2994,7 +2999,10 @@ const LIMITES_PONT = {
   'securite:verif:staff': 120000, 'securite:verif:client': 120000,
   /* Gestion des comptes : ecriture et invitation ENVOIENT un courriel (creation /
      reenvoi) et fabriquent un lien d installation cote serveur -> plafonds larges. */
-  'securite:form': 40000, 'securite:compte:ecrire': 60000, 'securite:compte:supprimer': 30000, 'securite:compte:invitation': 60000,
+  'securite:form': 40000, 'securite:compte:ecrire': 60000, 'securite:compte:supprimer': 30000,
+  /* ⚠ 30 s comme la suppression : c'est une écriture courte d'un seul champ,
+     pas un formulaire complet. */
+  'securite:compte:actif': 30000, 'securite:compte:invitation': 60000,
   'securite:mfa:etat': 20000, 'securite:mfa:init': 30000, 'securite:mfa:confirmer': 30000, 'securite:mfa:exempter': 20000, 'securite:mfa:desactiver': 20000,
   /* Journaux : lecture locale rapide ; les verrous et le deverrouillage passent
      par le serveur (lock_admin). */
