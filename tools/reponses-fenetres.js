@@ -3688,6 +3688,112 @@ const JEU = {
     },
   ],
 
+  /* ══ CORBEILLE DES COMMANDES (#113) ═══════════════════════════════════════
+     ⚠ FORME REELLE de commandes:corbeille:liste et :fiche (coeurs
+     Admin._corbeilleListeCoeur / _corbeilleFicheCoeur).
+     ⚠ LE PREMIER JEU PORTE UN DOSSIER DONT LE REMBOURSEMENT SQUARE EST PARTI :
+     c est le cas qui doit se voir, pas celui qui se voit facilement. Un jeu
+     d essai qui ne montre que le cas simple laisse le cas grave sans image. */
+  'corbeille.js': [
+    {
+      nom: 'deux dossiers, dont un deja rembourse',
+      id: '',
+      reponses: {
+        'commandes:corbeille:liste': {
+          ok: true, peutRestaurer: true,
+          dossiers: [
+            {
+              id: 'corb_0002', orderId: 'ord_0207', orderNumber: 'CMD-0207',
+              supprimeeLe: '2026-09-14T15:12:00.000Z', parNom: 'Bruno Brousseau',
+              motif: '', client: 'Jean Tremblay', total: 189.75, dejaPresente: false,
+              pieces: { factures: 1, remboursements: 1, credits: 2, retours: 1, billets: 0, lignesStock: 2 },
+              squareRembourse: true, squareMontant: 149.75,
+            },
+            {
+              id: 'corb_0001', orderId: 'ord_0198', orderNumber: 'CMD-0198',
+              supprimeeLe: '2026-09-12T09:40:00.000Z', parNom: 'Bruno Brousseau',
+              motif: 'doublon', client: 'Marie Gagnon', total: 62.10, dejaPresente: true,
+              pieces: { factures: 1, remboursements: 0, credits: 0, retours: 0, billets: 0, lignesStock: 1 },
+              squareRembourse: false, squareMontant: 0,
+            },
+          ],
+        },
+        'commandes:corbeille:fiche': {
+          ok: true, peutRestaurer: true, dejaPresente: false,
+          dossier: {
+            id: 'corb_0002', orderId: 'ord_0207', orderNumber: 'CMD-0207',
+            supprimeeLe: '2026-09-14T15:12:00.000Z',
+            parNom: 'Bruno Brousseau', parCourriel: 'b@sandriza.com', motif: '',
+            commande: {
+              id: 'ord_0207', orderNumber: 'CMD-0207', total: 189.75,
+              createdAt: '2026-09-02T14:05:00.000Z',
+              shipping: { firstName: 'Jean', lastName: 'Tremblay', email: 'jean@example.com' },
+              items: [{ productId: 'prd_0031', size: 'M', color: 'noir', quantity: 1 },
+                      { productId: 'prd_0044', size: 'L', color: 'ivoire', quantity: 2 }],
+            },
+            factures: [{ id: 'inv_0155' }],
+            remboursements: [{ id: 'rfd_0042' }],
+            creditsNes: [{ id: 'crd_0018' }],
+            creditsUtilises: [{ id: 'crd_0009' }],
+            billets: [],
+            retoursActifs: [{ id: 'ret_0021' }],
+            retoursArchives: [],
+            stock: [{ productId: 'prd_0031', cle: 'M-noir', avant: 3, apres: 4, quantite: 1 },
+                    { productId: 'prd_0044', cle: 'L-ivoire', avant: 0, apres: 2, quantite: 2 }],
+            square: { etat: 'initie', montant: 149.75 },
+          },
+        },
+        'commandes:corbeille:restaurer': {
+          ok: true,
+          rapport: {
+            orderNumber: 'CMD-0207',
+            remis: { commande: 1, factures: 1, remboursements: 1, creditsRecrees: 1,
+                     creditsRepris: 1, billets: 0, retoursActifs: 1, retoursArchives: 0,
+                     stock: 3, lignesStock: 2 },
+            manque: [{ quoi: 'square', montant: 149.75 }],
+          },
+        },
+        'commandes:corbeille:purger': { ok: true, photos: 1 },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'corbeille vide',
+      id: '',
+      reponses: {
+        'commandes:corbeille:liste': { ok: true, peutRestaurer: true, dossiers: [] },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠ LECTURE SEULE : le role voit la corbeille mais ne peut ni remettre ni
+         purger. L ecran doit alors ne montrer AUCUN bouton d action, et le dire. */
+      nom: 'consultation seulement',
+      id: '',
+      reponses: {
+        'commandes:corbeille:liste': {
+          ok: true, peutRestaurer: false,
+          dossiers: [{
+            id: 'corb_0002', orderId: 'ord_0207', orderNumber: 'CMD-0207',
+            supprimeeLe: '2026-09-14T15:12:00.000Z', parNom: 'Bruno Brousseau',
+            motif: '', client: 'Jean Tremblay', total: 189.75, dejaPresente: false,
+            pieces: { factures: 1, remboursements: 0, credits: 0, retours: 0, billets: 0, lignesStock: 1 },
+            squareRembourse: false, squareMontant: 0,
+          }],
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'refus de droit',
+      id: '',
+      reponses: {
+        'commandes:corbeille:liste': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   'recherches.js': [
     {
       // ⚠ FORME REELLE de recherches:liste (coeur Admin._recherchesDonnees).

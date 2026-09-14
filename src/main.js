@@ -2117,6 +2117,13 @@ const OPS_PONT = new Set([
   // frais retenus, renvoi vers Remboursement, facture dans la fenetre principale.
   'commandes:detail', 'commandes:statutApercu', 'commandes:statutEcrire',
   'commandes:supprimerApercu', 'commandes:supprimerEcrire',
+  /* ⚠ LA CORBEILLE DES COMMANDES (#113, 2026-09-14) — sa demande : << si il y a
+     une commande effacer par erreur ou pourra la restaure >>. Supprimer depose
+     desormais un DOSSIER complet ; ces quatre ops le lisent, le remettent en
+     place ou le purgent. LIRE demande orders:view, REMETTRE et PURGER demandent
+     orders:delete (voir les gardes dans pont.js). */
+  'commandes:corbeille:liste', 'commandes:corbeille:fiche',
+  'commandes:corbeille:restaurer', 'commandes:corbeille:purger',
   // Rattacher la commande a un compte client (ou la detacher) : la fenetre
   // cherche AVANT d ecrire, d ou trois ops. L ecran web n avait pas de jumeau.
   'commande:lierApercu', 'commande:lierChercher', 'commande:lierEcrire',
@@ -2893,6 +2900,10 @@ const LIMITES_PONT = {
   // De l'argent chez Square : un remboursement lent n'est pas un remboursement
   // rate — le couper a 8 s en ferait un << echec >> qui a pourtant paye.
   'remboursement:ecrire': 45000, 'commandes:supprimerEcrire': 45000,
+  /* ⚠ AUSSI LONG QUE LA SUPPRESSION : remettre une commande en place réécrit
+     la commande, ses factures, ses remboursements, ses crédits, ses billets et
+     ses retours — c'est la même cascade, dans l'autre sens. */
+  'commandes:corbeille:restaurer': 45000,
   'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,
   /* ⚠⚠ LES TRAITEMENTS D IMAGE PAR MODELE, ET C EST LA CAUSE DE << modele
      delai >> (signale le 2026-08-09 sur un retrait de mannequin). Ces
@@ -3282,6 +3293,8 @@ const actualiserFenetres = (cles, sender) => {
 const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
   'commande:statut', 'commande:prete', 'commande:expedier',
   'commandes:statutEcrire', 'commandes:supprimerEcrire', 'commandes:fraisEcrire',
+  // Remettre une commande en place la fait revenir dans les chiffres du jour.
+  'commandes:corbeille:restaurer',
   'expedition:confirmer', 'retour:enregistrer', 'retour:recu', 'retour:litige',
   'client:ecrire', 'client:purger', 'client:restaurer',
   'archives:reactiver', 'factures:payer', 'factures:supprimer',
@@ -3496,6 +3509,11 @@ const PAGES_ANCRABLES = () => ({
   publicite: ['Publicité ciblée', () => pagePublicite('')],
   recommandations: ['Recommandations', () => pageRecommandations('')],
   recherches: ['Recherches sans résultat', () => pageRecherches()],
+  /* ⚠ LA CORBEILLE DES COMMANDES (#113) — l'écran SANS LEQUEL le dossier de
+     suppression serait parfaitement conservé et parfaitement inatteignable.
+     Ancrable comme les autres écrans de liste : sa section hôte n'existe pas
+     côté site, elle s'ouvrira donc détachée — ce qui est le repli prévu. */
+  corbeille: ['Corbeille des commandes', () => pageCorbeille()],
   transferts: ['Transferts de stock', () => pageTransferts()],
   images: ['Images des produits', () => pageImages()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
@@ -5316,6 +5334,7 @@ const { pageNewsletter } = require('./fenetres/newsletter');
 const { pagePublicite } = require('./fenetres/publicite');
 const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
+const { pageCorbeille } = require('./fenetres/corbeille');
 const { pageTransferts } = require('./fenetres/transferts');
 const { pageImages } = require('./fenetres/images');
 const { pageAbonnes } = require('./fenetres/abonnes');
@@ -5525,6 +5544,7 @@ const actionApp = (nom, arg) => {
     case 'newsletter':
     case 'publicite':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
+    case 'corbeille':
     // Ancrable depuis 4.11.0, sur sa demande. Sa section hote cote site
     // n existe que pour porter la zone (voir _DOCKABLES dans admin.js).
     case 'transferts':
