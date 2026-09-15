@@ -703,6 +703,14 @@ jobs:
           # elle arrivera sans bouton de repli si personne ne le réclame — comme
           # « Afficher la barre latérale » a disparu sans que rien ne le dise.
           node tools/banc-tuiles-masquables.js
+          # ⚠⚠ CELUI-CI SUIT UN CHEMIN QUE PERSONNE NE SUIVAIT, ET LE DÉFAUT A
+          # ÉTÉ SIGNALÉ DEUX FOIS : le bouton « Corbeille » des commandes ne
+          # faisait RIEN. Elle était rangée avec les écrans ANCRABLES, qui
+          # demandent au SITE de naviguer vers une section du même nom — et
+          # aucune section « corbeille » n'existe côté site. Le message partait,
+          # personne ne l'attendait, rien n'arrivait : pas d'erreur, pas de
+          # fenêtre, pas un mot. Le bouton a l'air cassé, le code a l'air juste.
+          node tools/banc-modules-ouvrables.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

@@ -3558,8 +3558,15 @@ const PAGES_ANCRABLES = () => ({
   recherches: ['Recherches sans résultat', () => pageRecherches()],
   /* ⚠ LA CORBEILLE DES COMMANDES (#113) — l'écran SANS LEQUEL le dossier de
      suppression serait parfaitement conservé et parfaitement inatteignable.
-     Ancrable comme les autres écrans de liste : sa section hôte n'existe pas
-     côté site, elle s'ouvrira donc détachée — ce qui est le repli prévu. */
+     ⚠⚠ CE COMMENTAIRE A PORTÉ UNE CROYANCE FAUSSE JUSQU'AU 2026-09-14, et c'est
+     elle qui a rendu le bouton muet (#126). Il disait : « sa section hôte
+     n'existe pas côté site, elle s'ouvrira donc détachée — ce qui est le repli
+     prévu ». IL N'Y A PAS DE REPLI. Sans section hôte, le chemin ancrable envoie
+     `dock:naviguer` au site, le site ne trouve rien, et il ne se passe
+     RIEN — pas une fenêtre détachée, pas un message.
+     ➡ Elle reste déclarée ici pour que le bouton « ancrer » fonctionne si on le
+     veut un jour, exactement comme `verrous` et `presence` ; son OUVERTURE, elle,
+     passe par son propre `case` dans `actionApp`, qui ouvre une vraie fenêtre. */
   corbeille: ['Corbeille des commandes', () => pageCorbeille()],
   transferts: ['Transferts de stock', () => pageTransferts()],
   images: ['Images des produits', () => pageImages()],
@@ -5591,7 +5598,6 @@ const actionApp = (nom, arg) => {
     case 'newsletter':
     case 'publicite':
     case 'recommandations': case 'recherches': case 'abonnes': case 'journal':
-    case 'corbeille':
     // Ancrable depuis 4.11.0, sur sa demande. Sa section hote cote site
     // n existe que pour porter la zone (voir _DOCKABLES dans admin.js).
     case 'transferts':
@@ -5624,6 +5630,32 @@ const actionApp = (nom, arg) => {
        Il reste declare dans PAGES_ANCRABLES pour que le bouton << ancrer >>
        fonctionne si on le veut dans la fenetre principale — meme montage que
        l explorateur de photos. */
+    /* ⚠⚠⚠ LA CORBEILLE EST UNE FENETRE A PART, ET ELLE ETAIT DANS LA MAUVAISE
+       BRANCHE — LE BOUTON NE FAISAIT RIEN (#126, 2026-09-14).
+       Elle etait rangee avec les ecrans ANCRABLES, qui font tous la meme chose :
+       << dock:naviguer >> vers une section du SITE portant le meme nom. Or il
+       n existe AUCUNE section << corbeille >> cote site — c est un ecran ne
+       natif, sans jumeau web, exactement comme << verrous >> juste en dessous.
+       Le message partait, le site ne trouvait rien, et le bouton restait muet.
+
+       ⚠⚠ ET LE PIEGE ETAIT ECRIT, A TROIS LIGNES D ICI, DEPUIS #35 : << passe
+       par la, le clic de menu n aurait rien ouvert du tout >>. Je l ai lu, j ai
+       range la corbeille juste au-dessus, et je ne me suis pas demande si elle
+       avait un jumeau. Il me l avait signale UNE PREMIERE FOIS (<< le menu
+       corbeille ne marche pas >>) : j avais alors deplace le declencheur — du
+       menu vers un bouton — sans jamais suivre le chemin jusqu au bout. On ne
+       repare pas un bouton muet en changeant l endroit ou l on appuie.
+       ➡ Un banc suit maintenant ce chemin : `banc-modules-ouvrables.js`. */
+    case 'corbeille': {
+      const _avC = fenetresNatives.get('corbeille');
+      const _reuC = !!(_avC && !_avC.isDestroyed());
+      const winC = ouvrirNative('corbeille', TF('Corbeille des commandes'), () => pageCorbeille(),
+        { width: 1040, height: 720, minWidth: 720, minHeight: 480 });
+      if (_reuC && winC && !winC.isDestroyed()) {
+        winC.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
     case 'verrous': {
       const _avV = fenetresNatives.get('verrous');
       const _reuV = !!(_avV && !_avV.isDestroyed());
