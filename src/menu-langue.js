@@ -128,6 +128,18 @@ const MENU_APP_EN = {
   'Factures': 'Invoices',
   'Fenêtre séparée (autre écran)': 'Separate window (other screen)',
   'Fidélisation': 'Loyalty',
+
+  /* ── ÉDITION PUBLICITAIRE (2026-09-14) ──────────────────────────────────────
+     ⚠ « Édition » se dit « Ad studio » et non « Advertising edition » : en
+     anglais, « edition » est un TIRAGE (la 3e édition d'un livre), pas l'action
+     d'éditer. Et « studio » est le mot que les outils de ce domaine emploient
+     tous — c'est celui qu'on cherchera.
+     ⚠ « Plafond » reste « ceiling », comme dans l'écran des clés : un budget se
+     dépasse, un plafond arrête. */
+  'Édition publicitaire': 'Ad studio',
+  'Publication pour les réseaux sociaux': 'Social media post',
+  'Courriel publicitaire': 'Marketing email',
+  'Clé et plafond de dépense IA': 'AI key and spending ceiling',
   'Fiscalité et impôt': 'Taxation and income tax',
   'Fournisseurs': 'Suppliers',
   'Gabarits courriel': 'Email templates',
