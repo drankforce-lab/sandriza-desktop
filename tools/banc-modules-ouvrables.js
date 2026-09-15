@@ -105,9 +105,32 @@ if (fs.existsSync(adminJs)) {
   hotes = mD ? (sansCommentaires(mD[1]).match(/'([^']+)'/g) || []).map((s) => s.slice(1, -1)) : [];
 }
 
+/* ⚠⚠ SANS LE SITE, ON NE CONCLUT PAS — MAIS ON NE TOMBE PAS NON PLUS.
+   Ce banc a fait ROUGIR la construction de la 5.73.0 la première fois qu'il a
+   tourné : il sortait 2 (« site introuvable »), et GitHub lit tout code non nul
+   comme un échec. Or sur la machine de construction, seul le dépôt de la
+   coquille est présent — c'est normal, et ce n'est pas une faute du code.
+   ⚠ `verifier.ps1` sait lire un 2 comme « sauté » ; une étape de CI, non. Le 2
+   était donc juste dans un contexte et faux dans l'autre.
+   ➡ On mesure alors ce qu'on PEUT mesurer (la fenêtre native), on NOMME ce
+   qu'on n'a pas regardé, et l'on sort 0. La moitié manquante est couverte là où
+   les deux dépôts existent : le poste, avant chaque livraison.
+   ⚠ ET LE VERDICT NE SIGNE PAS UNE PHRASE DE COUVERTURE COMPLÈTE — c'est la
+   règle des filtres de `banc-contraste-rendu` : un passage partiel dit ce qu'il
+   n'a pas peint plutôt que d'annoncer le vert du tout. */
 if (hotes === null) {
-  console.log('\n  --   site introuvable — la moitié « section hôte » n’a PAS été vérifiée\n');
-  process.exit(2);
+  console.log('\n  --   site introuvable : la moitié « section hôte » n’a PAS été regardée.');
+  console.log('       Ce qui suit ne juge donc QUE les fenêtres natives.\n');
+  let muets = 0;
+  for (const nom of modules) {
+    const natif = ouvreEnNatif(nom);
+    console.log((natif ? '  OK   ' : '  ?    ') + nom + ' : '
+      + (natif ? 'fenêtre native' : 'pas de fenêtre native — dépend d’une section hôte, NON VÉRIFIÉE ici'));
+    if (!natif) muets++;
+  }
+  console.log('\n>>> ' + (modules.length - muets) + ' module(s) sur ' + modules.length
+    + ' ouvrent une fenêtre native · les ' + muets + ' autres n’ont PAS été jugés (site absent)\n');
+  process.exit(0);
 }
 dit(hotes.length > 0, hotes.length + ' section(s) hôte(s) déclarée(s) côté site');
 
