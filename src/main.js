@@ -1492,11 +1492,39 @@ const createWindow = () => {
      ⚠ `resize` ET `maximize`/`unmaximize` : sur Windows, maximiser n'émet pas
      toujours `resize` avant que la taille de contenu soit à jour. Les trois
      appellent la même fonction, qui est idempotente. */
-  mainWindow.on('resize', poserVueConnexion);
-  mainWindow.on('maximize', poserVueConnexion);
-  mainWindow.on('unmaximize', poserVueConnexion);
-  mainWindow.on('enter-full-screen', poserVueConnexion);
-  mainWindow.on('leave-full-screen', poserVueConnexion);
+  /* ⚠⚠⚠ ET LES VUES ANCRÉES SUIVENT AUSSI — ELLES NE LE FAISAIENT PAS (#127,
+     2026-09-14). Sa capture : agrandir, et la vue couvre TOUT, menu compris ;
+     on ne peut plus ni réduire ni ouvrir un menu. Enfermé.
+     Ces cinq lignes reposaient la vue de CONNEXION et elle seule. Les vues
+     ancrées, elles, n'attendaient que le rectangle envoyé par la page — et sur
+     Windows, maximiser n'émet pas toujours `resize` dans la page avant que la
+     taille de contenu soit à jour. La page mesurait donc au mauvais instant, ou
+     ne mesurait pas du tout, et PERSONNE ne revenait sur le sujet.
+     ⚠ ON REDEMANDE LA MESURE À LA PAGE, on ne la calcule pas ici. La coquille ne
+     sait pas où finit la barre de menus — c'est la page qui la dessine. Lui
+     inventer un rectangle serait une deuxième vérité, exactement ce que la note
+     de `dock:zone` interdit. */
+  const suivreLeCadre = () => {
+    poserVueConnexion();
+    reposerAncrees();
+    /* ⚠ ON PARLE AU SITE PAR `siteWC()`, PAS PAR `mainWindow.webContents` —
+       `banc-couture-cadre` l'a refusé, et il a raison : le jour où le cadre
+       porte la page, `mainWindow.webContents` n'est plus celui qui dessine
+       l'administration, et ce rappel s'adresserait à la mauvaise page. */
+    try {
+      const wc = siteWC();
+      if (wc && !wc.isDestroyed()) {
+        wc.executeJavaScript(
+          'window.Admin && Admin._dockZonePousser && Admin._dockZonePousser();', true
+        ).catch(() => {});
+      }
+    } catch (e) {}
+  };
+  mainWindow.on('resize', suivreLeCadre);
+  mainWindow.on('maximize', suivreLeCadre);
+  mainWindow.on('unmaximize', suivreLeCadre);
+  mainWindow.on('enter-full-screen', suivreLeCadre);
+  mainWindow.on('leave-full-screen', suivreLeCadre);
   /* ⚠ ET ON LA RETIRE AVEC LA FENÊTRE : une vue dont le parent meurt garde son
      processus de rendu et ses minuteries. */
   mainWindow.on('closed', () => { connexionRetirer(); mainWindow = null; });
