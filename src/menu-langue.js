@@ -141,6 +141,7 @@ const MENU_APP_EN = {
   'Courriel publicitaire': 'Marketing email',
   'Clé et plafond de dépense IA': 'AI key and spending ceiling',
   'Fiscalité et impôt': 'Taxation and income tax',
+  'Rapports et budget': 'Reports and budget',
   'Fournisseurs': 'Suppliers',
   'Gabarits courriel': 'Email templates',
   'Gestion des taxes': 'Tax management',

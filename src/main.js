@@ -2609,6 +2609,11 @@ const OPS_PONT = new Set([
   // redessiner ici voudrait dire les ecrire deux fois, et deux formulaires
   // fiscaux qui divergent, c est une declaration fausse.
   'impot:donnees', 'impot:document',
+  // Rapports comptables et budget (fenetre Comptabilite, #116 phase 1).
+  // ⚠ LA FENETRE NE CALCULE RIEN : une seule porte de lecture, qui rend les
+  // resultats, la comparaison pluriannuelle, le budget et ses ecarts d un coup.
+  // Deux portes pour la meme donnee, ce sont deux reponses qui divergent.
+  'compta:donnees', 'compta:budgetEcrire',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -3162,6 +3167,12 @@ const LIMITES_PONT = {
      allers-retours reseau, pas une ecriture locale. */
   'fournisseurs:supprimer': 30000, 'avis:photoRetirer': 60000,
   'impot:profil': 20000, 'impot:profil:ecrire': 30000, 'impot:memo': 20000,
+  /* ⚠ 30 s POUR LE RAPPORT, ET CE N EST PAS DE LA PRUDENCE : il peut porter
+     jusqu a DIX exercices, et chacun relit toutes les commandes, tous les
+     remboursements et toutes les depenses de son annee. Le delai par defaut
+     couperait une demande legitime et l ecran dirait << la fenetre principale
+     n a pas repondu a temps >> pour un calcul qui allait aboutir. */
+  'compta:donnees': 30000, 'compta:budgetEcrire': 20000,
   /* Un repli : une lecture ou une ecriture d un seul booleen dans le profil. */
   'ui:repli': 15000,
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
@@ -3583,6 +3594,7 @@ const PAGES_ANCRABLES = () => ({
   depenses: ['Dépenses d’entreprise', () => pageDepenses()],
   remboursements: ['Remboursements et crédits', () => pageRemboursements()],
   impot: ['Fiscalité et impôt', () => pageImpot()],
+  compta: ['Rapports et budget', () => pageComptabilite()],
   liens: ['Liens d’installation', () => pageLiens('')],
   comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
@@ -5401,6 +5413,7 @@ const { pageCadre } = require('./fenetres/cadre');
 const { pageDepenses } = require('./fenetres/depenses');
 const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
+const { pageComptabilite } = require('./fenetres/comptabilite');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -5605,7 +5618,7 @@ const actionApp = (nom, arg) => {
     case 'images':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':
-    case 'comptable': case 'bankrec': case 'fal-suivi':
+    case 'comptable': case 'bankrec': case 'fal-suivi': case 'compta':
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':

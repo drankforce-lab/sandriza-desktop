@@ -156,6 +156,14 @@ const PERMISSIONS_EN = {
   'Les rapports de taxes (TPS/TVQ), les revenus et les documents fiscaux de fin d’année.':
     'Sales tax reports (GST/QST), revenue, and the year-end tax documents.',
 
+  /* ⚠ DROIT DISTINCT DE << Fiscalité et impôt >>, et la description le dit :
+     celui-ci montre la SANTÉ FINANCIÈRE complète en un écran, pas un formulaire
+     à remplir. La traduction garde l avertissement — c est lui qui empêche de
+     l accorder << au cas où >>. */
+  'Rapports et budget': 'Reports and budget',
+  'Les rapports sur une ou plusieurs années (état des résultats, marge, comparaison d’un exercice à l’autre) et la <b>gestion budgétaire</b>. <b>Voir</b> montre le chiffre d’affaires, la marge et le résultat net ; <b>Modifier</b> pose le budget de l’année. ⚠ Ce droit met sous les yeux la santé financière complète de l’entreprise, en un seul écran — c’est plus que ce que montre n’importe quelle autre section prise séparément.':
+    'Reports over one or several fiscal years (income statement, gross profit, year-over-year comparison) and <b>budget management</b>. <b>View</b> shows turnover, gross profit and net income; <b>Edit</b> sets the budget for the year. ⚠ This permission puts the complete financial health of the business in front of someone, on a single screen — more than any other section shows on its own.',
+
   'Dépenses': 'Expenses',
   'La saisie des dépenses déductibles et de leurs reçus. Ce qui est inscrit ici se retrouve dans la déclaration.':
     'Entering deductible expenses and their receipts. What is recorded here ends up in the tax return.',
