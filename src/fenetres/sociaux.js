@@ -157,8 +157,18 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
  * panne que par lui.
  */
 function pageSociaux(onglet) {
-  const depart = (['historique', 'patrons', 'epingle'].indexOf(String(onglet || '')) >= 0)
-    ? String(onglet) : 'file';
+  /* ⚠⚠ « PUBLICATION IA » EST L'ONGLET PAR DÉFAUT DEPUIS LE 2026-09-14, à sa
+     demande. Et ce n'est pas un raccourci de confort : cette fenêtre a changé de
+     métier. La FILE d'attente était sa raison d'être quand elle ne servait qu'à
+     pousser des publications déjà écrites ailleurs ; depuis que l'écriture se
+     fait ICI, on l'ouvre pour CRÉER neuf fois sur dix. Un écran s'ouvre sur ce
+     qu'on vient y faire, pas sur ce qu'il faisait avant.
+     ⚠ ÇA VAUT POUR LES DEUX PORTES — le menu « Édition publicitaire » et
+     l'entrée « Réseaux sociaux » de Marketing mènent à la MÊME fenêtre, et il
+     n'y en a qu'une. Lui donner deux onglets de départ selon l'entrée
+     emprunterait deux vérités pour un seul écran ; la file reste à un clic. */
+  const depart = (['historique', 'patrons', 'file', 'epingle'].indexOf(String(onglet || '')) >= 0)
+    ? String(onglet) : 'epingle';
   return `${TETE()}
 <title>${T("Réseaux sociaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>

@@ -4540,8 +4540,15 @@ const JEU = {
         image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' } } },
     {
       // ⚠ FORME REELLE de sociaux:liste (coeur Social._sociauxDonnees).
+      /* ⚠⚠ L ONGLET EST NOMME DEPUIS LE 2026-09-14, ET C EST UNE COUVERTURE
+         QU ON A FAILLI PERDRE EN SILENCE. Ce cas avait `id: ''` : il exercait la
+         FILE parce que la file etait le defaut. Le jour ou << Publication IA >>
+         est devenue l onglet de depart, ce meme cas s est mis a dessiner l ecran
+         de publication — et plus aucun cas ne peignait la file. Rien n aurait
+         echoue : le banc serait reste vert sur un ecran qu il ne regarde plus.
+         ➡ Un cas qui depend d un DEFAUT ne mesure pas ce qu il croit. */
       nom: 'file et historique',
-      id: '',
+      id: 'file',
       reponses: {
         'sociaux:liste': {
           ok: true, peutModifier: true,
