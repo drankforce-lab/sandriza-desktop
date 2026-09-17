@@ -235,9 +235,41 @@ button.rouge{background:#dc2626;border-color:#dc2626;color:var(--tx-sur-accent);
    (html.jour button, specificite 0,1,2) et l'emporte sur button.rouge
    (0,1,1). Sans cette ligne, ce bouton perd sa couleur en plein jour. */
 html.jour button.rouge{background:#dc2626;color:#fff;border-color:#dc2626}
+/* ⚠ LE VERT AUSSI, ET POUR LA MÊME RAISON QUE LE ROUGE JUSTE AU-DESSUS. La
+   reprise générique du mode jour repeint TOUT bouton en blanc ; sans cette
+   ligne, le bouton qui VALIDE perdrait sa couleur en plein jour et deviendrait
+   identique à celui qui annule. Une couleur qui porte un sens doit survivre au
+   changement de mode.
+   ⚠ Le texte passe par le jeton d accent (blanc dans les deux modes), pas par
+   une couleur en dur : le relevé du mode jour compte les couleurs écrites à la
+   main, et une de plus serait une dette de plus pour rien. */
+html.jour button.vert{background:#15803d;border-color:#15803d;color:var(--tx-sur-accent)}
+html.jour button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
 button.rouge:hover:not(:disabled){background:#ef4444;border-color:#ef4444}
-button.vert{background:#16a34a;border-color:#16a34a;color:var(--tx-blanc);font-weight:600}
-button.vert:hover:not(:disabled){background:#22c55e;border-color:#22c55e}
+/* ⚠⚠ LE VERT A FONCÉ — #122, mesuré au rendu le 2026-09-17. Blanc sur #16a34a
+   donne 3,30, sous le seuil de 4,5 d un texte de 14 px en 600 (600 n est PAS
+   gras au sens WCAG : il faut 700, et 18,66 px). #15803d donne 5,02.
+   ⚠⚠ ET LE SURVOL ÉTAIT PIRE QUE LE REPOS — 2,28 sur #22c55e. C est le piège de
+   ce genre de correction : on règle l état au repos, on laisse l état qu on
+   déclenche en visant le bouton. Le survol FONCE désormais (#166534, 7,13) au
+   lieu d éclaircir ; le changement reste franc, et il va dans le bon sens.
+   ⚠ L un des DEUX vrais défauts sur les dix relevés en mode nuit. */
+/* ⚠⚠⚠ ET LE JETON A CHANGÉ AUSSI — UN DÉFAUT PRÉEXISTANT QUE CETTE CORRECTION A
+   MIS AU JOUR. Le texte était << var(--tx-blanc) >>, et ce jeton VAUT #1d2433
+   EN MODE JOUR : le bouton vert y portait du texte SOMBRE sur du vert, dans les
+   deux fenêtres, depuis toujours. Personne ne l avait vu parce que le fond, lui,
+   est en dur et ne bascule pas — c est le TEXTE qui bougeait tout seul.
+   ⚠ << --tx-sur-accent >> vaut #ffffff dans LES DEUX modes : c est le jeton fait
+   pour du texte posé sur une couleur d accent. << --tx-blanc >> est fait pour du
+   texte qui doit s inverser avec le fond de la fenêtre — ce n est pas le cas ici.
+   ➡ Deux jetons dont le nom se ressemble et dont le rôle est opposé : on lit ce
+     qu ils VALENT dans les deux modes, jamais ce que leur nom suggère.
+   ⚠⚠ ET L ACCENT GRAVE A REFERMÉ CE GABARIT — NEUVIÈME FOIS, dans ce commentaire
+   même, en citant deux noms de jetons. Sept bancs sont devenus rouges d un coup.
+   Le garde n est pas la consigne : c est de relancer les bancs après avoir
+   écrit. */
+button.vert{background:#15803d;border-color:#15803d;color:var(--tx-sur-accent);font-weight:600}
+button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
 
 .toolbar{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
   margin-bottom:.45rem}

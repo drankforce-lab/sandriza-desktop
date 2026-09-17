@@ -31,6 +31,13 @@ module.exports = {
     'commandes.js': { '.badge2.vertf': '#166534', '.banniere': '#7f1d1d', '.ctx .warn': '#7f1d1d' },
     'config-navigation.js': { 'button.danger.arme': '#7f1d1d' },
     'explorateur.js': { '.prim': '#8f6f42' },
+    /* ⚠ `button.vert` N EST PAS ICI, ET C EST LE BON CHOIX — appris le
+       2026-09-17 (#122). Il a d abord été déclaré ici ; le banc l a refusé comme
+       PÉRIMÉ, et il avait raison : la dispense n est pas la bonne réponse quand
+       la règle peut recevoir sa VRAIE reprise. `inventaire.js` lui donne donc un
+       `html.jour button.vert`, exactement comme `button.rouge` à côté.
+       ➡ Une dispense est pour ce qu on ne PEUT pas reprendre ; pas pour ce qu on
+         n a pas repris. */
     'inventaire.js': { '.badge.finale': '#dc2626' },
     'invmeta.js': { 'button.ic.plus': '#8f6f42' },
     'newsletter.js': { '.pop .cta': '#8f6f42' },

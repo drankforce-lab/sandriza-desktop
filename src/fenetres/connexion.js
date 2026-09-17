@@ -211,8 +211,16 @@ body.cx-abarre #corps{padding-top:32px;box-sizing:border-box}
   border:1px solid rgba(196,154,108,0.22)}
 .cx-voie b{display:block;font-size:0.82rem;color:#6b4a20;margin-bottom:0.15rem}
 .cx-voie span{font-size:0.78rem;color:#7a6652;line-height:1.5}
+/* ⚠⚠ LE NUMÉRO EST SOMBRE SUR L OR, PAS BLANC — #122, mesuré au rendu le
+   2026-09-17. Blanc sur #C49A6C donne 2,57 : le chiffre s efface dans sa
+   pastille, et c est le repère qui dit à quelle étape on en est. #1a1208 donne
+   7,22, et c est exactement le couple que la charte emploie déjà pour son
+   bouton principal (fond or, texte presque noir) — on ne change pas la couleur
+   de la pastille, on rend son chiffre lisible.
+   ⚠ C est l un des DEUX vrais défauts sur les dix relevés : les huit autres
+   étaient des faux positifs, mesurés contre un fond qu ils n ont jamais. */
 .cx-voie .n{flex:0 0 auto;width:22px;height:22px;border-radius:50%;
-  background:#C49A6C;color:#fff;font:700 0.72rem/22px inherit;text-align:center}
+  background:#C49A6C;color:#1a1208;font:700 0.72rem/22px inherit;text-align:center}
 .cx-ver{margin-top:1.6rem;font-size:0.72rem;letter-spacing:0.06em;
   color:rgba(243,237,227,0.62)}
 .cx-msg{width:100%;max-width:400px;margin:0.9rem auto 0;min-height:1.1rem;text-align:center}
