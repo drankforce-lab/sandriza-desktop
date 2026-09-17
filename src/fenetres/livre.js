@@ -372,10 +372,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     var j = (D.journal || []);
     if (!j.length) return '<div class="vide">${T("Aucune écriture pour cet exercice.")}</div>';
     var lignes = j.map(function(e){
+      /* ⚠⚠ LE TOTAL EST PORTÉ DANS LES DEUX COLONNES, ET C EST UNE CORRECTION
+         VENUE DE LA CAPTURE. Il n était que dans DEBIT : la ligne se lisait
+         << debit 5 000, credit rien >>, c est-a-dire une ecriture bancale — sur
+         un ecran dont tout le propos est que les deux colonnes s equilibrent.
+         Elles sont EGALES par construction ; les montrer toutes les deux dit la
+         verite et redit la regle a chaque ligne.
+         ⚠ Aucun banc ne pouvait l attraper : le texte etait juste, seule la
+         COLONNE etait fausse. C est l image qui l a montre. */
       var h = '<tr class="ecr"><td>' + esc(e.date) + '</td><td>' + esc(e.libelle)
             + ' <span class="pill ' + (e.source === 'manuelle' ? 'man' : 'g') + '">'
             + esc(SOURCES[e.source] || e.source || '') + '</span></td>'
-            + '<td class="n">' + argent(e.total) + '</td><td class="n"></td></tr>';
+            + '<td class="n">' + argent(e.total) + '</td>'
+            + '<td class="n">' + argent(e.total) + '</td></tr>';
       h += (e.lignes || []).map(function(l){
         return '<tr class="ligne"><td></td><td>' + esc(l.compte) + ' — ' + esc(nomCompte(l.compte))
              + '</td><td class="n">' + (l.debit ? argent(l.debit) : '')
@@ -557,8 +566,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
       + '<thead><tr><th>${T("Date")}</th><th>${T("Libellé / compte")}</th>'
       + '<th class="n">${T("Débit")}</th><th class="n">${T("Crédit")}</th><th></th></tr></thead><tbody>';
     man.forEach(function(e){
+      /* ⚠ Les deux colonnes, comme au journal — voir la note de vueJournal. */
       h += '<tr class="ecr"><td>' + esc(e.date) + '</td><td>' + esc(e.libelle) + '</td>'
-         + '<td class="n">' + argent(e.total) + '</td><td class="n"></td><td class="n">'
+         + '<td class="n">' + argent(e.total) + '</td>'
+         + '<td class="n">' + argent(e.total) + '</td><td class="n">'
          + (RO ? '' : '<button class="mini danger" data-sup="' + esc(e.ref) + '">${T("Supprimer")}</button>')
          + '</td></tr>';
       h += (e.lignes || []).map(function(l){
