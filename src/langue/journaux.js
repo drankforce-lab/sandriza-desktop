@@ -112,8 +112,11 @@ module.exports = {
   'Bloqués géo': 'Geo blocked',
   'IPs uniques': 'Unique IPs',
   ' · conservation 30 jours': ' · kept 30 days',
-  'Afficher les stats': 'Show the stats',
-  'Masquer les stats': 'Hide the stats',
+  /* ⚠ << Afficher / Masquer les stats >> sont PARTIES le 2026-09-17 (#119) : le
+     bandeau passe par la pièce commune, qui porte ses propres intitulés
+     (<< Masquer les totaux >>, traduits une seule fois dans le socle). Une
+     traduction dont le texte n existe plus ne se voit pas — elle se contente
+     d occuper la place et de faire croire que la fenêtre dit encore ça. */
   'Purger anciens': 'Purge old ones',
   'Exporter CSV': 'Export CSV',
   'Date': 'Date',

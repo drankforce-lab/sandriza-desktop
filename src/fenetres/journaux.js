@@ -22,7 +22,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent grave dans la portion script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ On ne traduit QUE ce qui se lit — les adresses IP, les noms
    d'imprimante, les termes cherchés et le détail d'une entrée viennent du
@@ -118,7 +118,7 @@ function pageJournaux(onglet) {
     if (['recherche','acces','automatisations','impressions','sms','comptable','recherches','jserreurs'].indexOf(String(t||'')) < 0) return;
     ONGLET = String(t); rendre();
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
   var corps = document.getElementById('corps');
   /* ⚠⚠ IL Y AVAIT ICI UN cpt(n, tot) QUI DISAIT EXACTEMENT << 300 sur 5 000 >>,
      ET PERSONNE NE L APPELAIT. Ecrit avec la bonne intention, jamais branche :
@@ -310,15 +310,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueAcces(){
     var st = D.stats||{}, rows = D.acces||[];
     var h = '';
-    if (!D.statsHidden) h += '<div class="stat-grid">'
+    /* ⚠⚠ LE BANDEAU PASSE PAR LA PIÈCE COMMUNE (#119, 2026-09-17). Il avait son
+       repli à lui : un bouton << Masquer les stats >>, un aller-retour par le
+       pont, et un réglage enregistré PAR PERSONNE. C était le seul des
+       vingt-huit à faire autrement, et une exception qu on ne peut pas
+       expliquer se lit comme un oubli.
+       ⚠ CE QUE ÇA CHANGE, ET IL FAUT LE DIRE : le réglage suit désormais LE
+       POSTE, plus la personne. C est le choix de la pièce commune (#114), et il
+       se défend — la question que règle un repli de tuiles est LA HAUTEUR DE
+       L ÉCRAN, qui appartient à la machine. Le réglage enregistré se perd une
+       fois ; le bandeau reparaît, et se replie d un clic. */
+    h += szTuiles('<div class="stat-grid">'
       + '<div class="stat"><div class="l">${T("Connexions auj.")}</div><div class="v" style="color:var(--tx-ok2)">'+(st.loginOk||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("Échecs auj.")}</div><div class="v" style="color:var(--tx-err2)">'+(st.loginFail||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("Échecs MFA")}</div><div class="v" style="color:var(--tx-att)">'+(st.mfaFail||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("Bloqués géo")}</div><div class="v" style="color:var(--tx-fda4af)">'+(st.geoBlocked||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("IPs uniques")}</div><div class="v">'+(st.ips||0)+'</div></div>'
-      + '</div>';
+      + '</div>');
     h += '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.accesTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
-      + '<button class="b" id="a-stats">'+(D.statsHidden?'${T("Afficher les stats")}':'${T("Masquer les stats")}')+'</button>'
+      /* ⚠ LE BOUTON << Masquer les stats >> EST PARTI D ICI : la pièce commune
+         dessine le sien, sur le bandeau lui-même, comme dans les vingt-sept
+         autres fenêtres. En garder un second aurait fait DEUX boutons pour un
+         seul repli, dont un qui ne se serait plus mis à jour. */
       + (D.peutModifier?'<button class="b" id="a-purge">${T("Purger anciens")}</button>':'')
       + '<button class="b" id="a-csv">${T("Exporter CSV")}</button></div>'
       + '<div class="liste"><table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Type")}</th><th>${T("Utilisateur")}</th><th>IP</th><th>${T("Pays")}</th><th>${T("Action")}</th></tr></thead><tbody>';
@@ -346,7 +359,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     h += '</div>';
     corps.innerHTML = h;
-    var bs=document.getElementById('a-stats'); if (bs) bs.onclick=basculerStats;
+    /* ⚠ Plus d écouteur pour le repli : la pièce commune DÉLÈGUE sur
+       << document >>, précisément parce que cet écran se redessine en entier à
+       chaque filtre et qu un écouteur posé sur le bouton mourrait au premier
+       redessin. C est écrit dans << JS_TUILES >>, et c est vrai ici. */
     var bp=document.getElementById('a-purge'); if (bp) bp.onclick=function(){ purger('journal:purger:acces'); };
     var bc=document.getElementById('a-csv'); if (bc) bc.onclick=function(){ exporter('journal:export:acces'); };
     var ap=document.getElementById('ac-prec'); if (ap) ap.onclick=function(){ AC_PAGE=Math.max(0,AC_PAGE-1); vueAcces(); };
@@ -733,11 +749,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   // ── Actions ──────────────────────────────────────────────────────
-  function basculerStats(){
-    if (OCCUPE) return; OCCUPE=true;
-    appeler('journal:stats',[!D.statsHidden]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D.statsHidden=r.statsHidden; vueAcces(); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
-  }
+  /* ⚠ << basculerStats >> EST PARTIE (#119) : la pièce commune fait le repli, et
+     elle l enregistre AU POSTE, sans aller-retour par le pont. Un verbe que
+     plus rien n appelle se lit comme une fonction, et on bâtit dessus.
+     ⚠⚠ L OP << journal:stats >> DU SITE, ELLE, RESTE — et ce n est pas un oubli :
+     une coquille ≤ 6.2.0 l appelle encore, et le site se déploie AVANT que les
+     postes se mettent à jour. La retirer aujourd hui ferait répondre
+     << opération inconnue >> à un bouton qui existe toujours chez lui. Elle
+     partira quand la 6.3.0 sera partout. */
   function purger(op){
     if (OCCUPE) return; OCCUPE=true; dire('${T("Purge…")}');
     appeler(op,[]).then(function(r){ OCCUPE=false;
