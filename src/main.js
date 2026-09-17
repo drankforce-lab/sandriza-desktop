@@ -2623,6 +2623,12 @@ const OPS_PONT = new Set([
   // du site repere les ops de LECTURE par leur nom (/(liste|donnees|etat|stats)$/).
   // Baptisee <<compta:livre>>, cette porte n aurait ete exercee par RIEN.
   'compta:livreDonnees', 'compta:ecritureAjouter', 'compta:ecritureSupprimer',
+  // L imprime du livre : journal, grand livre, balance, bilan.
+  // ⚠ LA FENETRE COMMANDE, ELLE NE COMPOSE PAS. Le document est bati et ouvert
+  // par la fenetre principale — meme patron que `impot:document`. Le redessiner
+  // ici, ce serait l ecrire deux fois, et deux versions d un livre de comptes
+  // qui divergent, c est un document qu on remet a un comptable et qui ment.
+  'compta:livreDocument',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -3188,6 +3194,8 @@ const LIMITES_PONT = {
      raison : le delai par defaut couperait un calcul qui allait aboutir. */
   'compta:livreDonnees': 30000,
   'compta:ecritureAjouter': 20000, 'compta:ecritureSupprimer': 20000,
+  /* L imprime relit tout l exercice ET compose plusieurs pages de HTML. */
+  'compta:livreDocument': 30000,
   /* Un repli : une lecture ou une ecriture d un seul booleen dans le profil. */
   'ui:repli': 15000,
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,

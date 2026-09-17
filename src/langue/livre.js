@@ -178,4 +178,19 @@ module.exports = {
   'Une écriture en partie double garde au moins deux lignes.': 'A double-entry record keeps at least two lines.',
   'Écriture enregistrée.': 'Entry saved.',
   'Écriture supprimée.': 'Entry deleted.',
+
+  /* ── L'impression (#128, volet 3/n) ─────────────────────────────────────
+     ⚠ L'intitulé du bouton se COMPOSE : « Imprimer » + le nom du document de
+     l'onglet. Les quatre noms sont donc en MINUSCULE et avec leur article —
+     « Imprimer le grand livre », « Imprimer la balance ». En anglais l'article
+     disparaît, et c'est normal : « Print the general ledger » se dit « Print
+     general ledger ». Traduire mot à mot aurait donné « Print the balance »,
+     qui se lit « imprimer LE SOLDE ». */
+  'Imprimer': 'Print',
+  'le journal': 'journal',
+  'le grand livre': 'general ledger',
+  'la balance': 'trial balance',
+  'le bilan': 'balance sheet',
+  'Le document s’ouvre dans la fenêtre principale…': 'The document is opening in the main window…',
+  'Document ouvert dans la fenêtre principale.': 'Document opened in the main window.',
 };

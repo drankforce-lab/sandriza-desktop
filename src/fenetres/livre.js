@@ -250,6 +250,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     ['bilan',      '${T("Bilan")}'],
     ['ecritures',  '${T("Écritures manuelles")}']
   ];
+  /* Quel document sort de quel onglet. ⚠ << Écritures manuelles >> n en a pas :
+     elles sont DANS le journal, et un imprimé qui ne porterait qu elles se
+     lirait comme un livre — or il n en serait que le quart. */
+  var IMPRIMABLE = {
+    journal:    ['livre-journal',  '${T("le journal")}'],
+    grandlivre: ['livre-grand',    '${T("le grand livre")}'],
+    balance:    ['livre-balance',  '${T("la balance")}'],
+    bilan:      ['livre-bilan',    '${T("le bilan")}']
+  };
+
   function onglets(){
     elOnglets.innerHTML = ONGLETS.map(function(o){
       return '<button data-o="' + o[0] + '"' + (ONGLET === o[0] ? ' class="on"' : '') + '>'
@@ -270,6 +280,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
                    + '${T("1er janv. au 31 déc.")} ' + a + '</option>';
             }).join('')
           + '</select><span class="droite">';
+    /* ⚠⚠ ON IMPRIME L ONGLET QU ON REGARDE, PAS << le livre >>. Un seul bouton
+       qui sortirait les quatre documents d un coup obligerait a jeter trois
+       liasses pour en garder une — et un comptable ne demande pas << le livre >>,
+       il demande LE GRAND LIVRE, ou LA BALANCE. Le bouton dit donc ce qu il va
+       sortir : son intitule change avec l onglet. */
+    if (IMPRIMABLE[ONGLET]) {
+      h += '<button class="mini" id="imprimer">${T("Imprimer")} ' + esc(IMPRIMABLE[ONGLET][1]) + '</button>';
+    }
     if (ONGLET === 'ecritures' && !RO) {
       h += '<button class="prim" id="neuve">${T("Nouvelle écriture")}</button>';
     }
@@ -279,6 +297,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     if (sel) sel.onchange = function(){ ANNEE = parseInt(sel.value, 10); charger(); };
     var nv = document.getElementById('neuve');
     if (nv) nv.onclick = function(){ SAISIE = ecritureNeuve(); dessiner(); };
+    var im = document.getElementById('imprimer');
+    if (im) im.onclick = function(){
+      var d = IMPRIMABLE[ONGLET];
+      im.disabled = true;
+      /* ⚠ LE DOCUMENT S OUVRE DANS LA FENETRE PRINCIPALE, pas ici — c est le
+         patron << fenetre pilote >>. On le DIT, sinon le clic parait sans effet :
+         l imprime paraitra derriere, dans une autre fenetre. */
+      szDire('${T("Le document s’ouvre dans la fenêtre principale…")}', '');
+      appeler('compta:livreDocument', [d[0], ANNEE]).then(function(r){
+        im.disabled = false;
+        if (!r || !r.ok) { szDire(expliquer(r), 'err'); return; }
+        szDire('${T("Document ouvert dans la fenêtre principale.")}', 'bon');
+      });
+    };
   }
 
   /* ══ LE RAPPROCHEMENT — LA PREMIÈRE CHOSE QU'ON VOIT ═════════════════════
