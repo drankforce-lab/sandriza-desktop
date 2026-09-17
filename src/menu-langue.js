@@ -157,6 +157,9 @@ const MENU_APP_EN = {
   'Jeu de couleurs': 'Colour scheme',
   'Journaux': 'Logs',
   'Lien comptable': 'Accounting link',
+  // Livre de comptes (#128 phase 2). ⚠ PAS << Accounts book >> : le terme
+  // normalise est << General ledger >>, le meme que l onglet de la fenetre.
+  'Livre de comptes': 'General ledger',
   'Liquidation / Vente finale': 'Clearance / Final sale',
   'Liste noire': 'Blacklist',
   'Livraison': 'Shipping',

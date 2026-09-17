@@ -2614,6 +2614,15 @@ const OPS_PONT = new Set([
   // resultats, la comparaison pluriannuelle, le budget et ses ecarts d un coup.
   // Deux portes pour la meme donnee, ce sont deux reponses qui divergent.
   'compta:donnees', 'compta:budgetEcrire',
+  // Livre de comptes en partie double (fenetre Livre, #128 phase 2).
+  // ⚠ LA FENETRE NE CALCULE RIEN NON PLUS : une seule porte de lecture, qui rend
+  // le journal, le grand livre, la balance, le bilan ET le rapprochement avec le
+  // moteur des rapports. Deux portes pour la meme donnee, ce sont deux reponses
+  // qui divergent — et sur un livre de comptes, elles divergeraient en silence.
+  // ⚠⚠ ELLE SE NOMME <<livreDonnees>> ET PAS <<livre>> : l etape 2 du verificateur
+  // du site repere les ops de LECTURE par leur nom (/(liste|donnees|etat|stats)$/).
+  // Baptisee <<compta:livre>>, cette porte n aurait ete exercee par RIEN.
+  'compta:livreDonnees', 'compta:ecritureAjouter', 'compta:ecritureSupprimer',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -3173,6 +3182,12 @@ const LIMITES_PONT = {
      couperait une demande legitime et l ecran dirait << la fenetre principale
      n a pas repondu a temps >> pour un calcul qui allait aboutir. */
   'compta:donnees': 30000, 'compta:budgetEcrire': 20000,
+  /* Le livre RECONSTRUIT toutes ses ecritures a chaque lecture — une par
+     commande, par remboursement et par depense de l annee — puis les range en
+     comptes. C est le meme ordre de grandeur que le rapport, et pour la meme
+     raison : le delai par defaut couperait un calcul qui allait aboutir. */
+  'compta:livreDonnees': 30000,
+  'compta:ecritureAjouter': 20000, 'compta:ecritureSupprimer': 20000,
   /* Un repli : une lecture ou une ecriture d un seul booleen dans le profil. */
   'ui:repli': 15000,
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
@@ -3595,6 +3610,7 @@ const PAGES_ANCRABLES = () => ({
   remboursements: ['Remboursements et crédits', () => pageRemboursements()],
   impot: ['Fiscalité et impôt', () => pageImpot()],
   compta: ['Rapports et budget', () => pageComptabilite()],
+  livre: ['Livre de comptes', () => pageLivre()],
   liens: ['Liens d’installation', () => pageLiens('')],
   comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
@@ -5414,6 +5430,7 @@ const { pageDepenses } = require('./fenetres/depenses');
 const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
 const { pageComptabilite } = require('./fenetres/comptabilite');
+const { pageLivre } = require('./fenetres/livre');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -5619,6 +5636,9 @@ const actionApp = (nom, arg) => {
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
     case 'depenses': case 'remboursements': case 'impot': case 'liens':
     case 'comptable': case 'bankrec': case 'fal-suivi': case 'compta':
+    // Livre de comptes (#128 phase 2) : meme cas que <<compta>>, nee native,
+    // sa section hote cote site n existe que pour porter la zone d ancrage.
+    case 'livre':
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes':
     case 'config-paiements': case 'config-cles': case 'studio':
