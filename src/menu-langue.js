@@ -146,6 +146,7 @@ const MENU_APP_EN = {
   'Gabarits courriel': 'Email templates',
   'Gestion des taxes': 'Tax management',
   'Conformité internationale': 'International compliance',
+  'Compte de paiement': 'Payment account',
   'Heures d’ouverture': 'Opening hours',
   'Icônes personnalisées': 'Custom icons',
   'Images des produits': 'Product images',
