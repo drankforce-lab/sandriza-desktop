@@ -6773,9 +6773,27 @@ const dessinerMenus = () => { buildMenu(); appliquerModeMenu(); };
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on('second-instance', () => {
-    if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); }
-  });
+  /* ⚠⚠ LE RACCOURCI DU BUREAU NE FAISAIT RIEN (2026-09-18, sa demande) :
+     « si l'application a été fermée même si le veilleur est toujours actif et
+     l'application en zone d'état, que si on double-clique à nouveau sur le
+     raccourci du bureau l'application se rouvre automatiquement, car pour le
+     moment il ne fait rien ».
+     LA CAUSE, ET ELLE EST ÉCRITE PLUS HAUT DANS CE FICHIER : ce gestionnaire
+     était une SECONDE COPIE, appauvrie, de `montrerAdministration` — « deux
+     chemins vers la même fenêtre, et deux chemins finissent par diverger ».
+     Ils ont divergé, et il manquait les deux gestes qui comptent :
+       · pas de `show()` — or le X CACHE la fenêtre (voir le `close` plus haut) :
+         elle existe, n'est pas détruite, n'est pas réduite. `focus()` sur une
+         fenêtre cachée ne montre RIEN. C'est exactement « il ne fait rien ».
+       · pas de `createWindow()` — quand la fenêtre a bel et bien été DÉTRUITE
+         (sortie de secours du garde des brouillons) et que la veille garde le
+         processus vivant sans fenêtre, `if (mainWindow)` est faux et la seconde
+         instance repartait en silence.
+     ➡ ON N'EN RÉÉCRIT PAS UNE TROISIÈME : on appelle la porte de l'icône, celle
+       qui marche déjà (« sa marche bien », ses mots). Sans raison : cliquer le
+       raccourci de l'application et arriver sur son écran de connexion n'a rien
+       d'inexpliqué — le toast est là pour le clic sur une NOTIFICATION. */
+  app.on('second-instance', () => { montrerAdministration(); });
 
   /* ⚠ QUIRK WINDOWS (releve DEUX FOIS le 2026-08-09, fenetre A propos —
      qui n est PAS une fenetre ouvrirNative, d ou le premier correctif rate) :

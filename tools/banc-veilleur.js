@@ -443,4 +443,95 @@ cas('la pastille de l’icône s’éteint quand on regarde', () => {
   assert.ok(src.indexOf('nonVus') >= 0, 'aucun compteur de non-vus : la pastille ne saurait pas quoi dire');
 });
 
+console.log('\n── LA PORTE DU RACCOURCI DU BUREAU (2026-09-18) ─────────────');
+
+/* ⚠⚠ LE DÉFAUT QU'IL A SIGNALÉ, ET IL NE FAISAIT AUCUN BRUIT. Application
+   fermée par le X pendant que la veille tourne : elle est CACHÉE, pas détruite.
+   Double-clic sur le raccourci du bureau → Windows lève `second-instance` → et
+   le gestionnaire faisait `restore()` + `focus()`. Or une fenêtre cachée n'est
+   ni détruite ni réduite : `restore()` ne s'applique pas, et `focus()` sur une
+   fenêtre cachée ne MONTRE RIEN. Le raccourci ne faisait rien, en silence, et
+   rien ne pouvait le dire — c'est un geste d'utilisateur, pas un chemin de code.
+
+   LA CAUSE PROFONDE ÉTAIT DÉJÀ ÉCRITE DANS `main.js`, au-dessus de
+   `montrerAdministration` : « deux chemins vers la même fenêtre, et deux
+   chemins finissent par diverger ». Ils ont divergé. Le correctif n'en écrit
+   pas un troisième : il fait passer le raccourci par la porte de l'icône.
+
+   ⚠ CE GARDE LIT LA SOURCE, et voici ce que ça vaut : `main.js` charge Electron
+   et ouvre une fenêtre, on ne peut pas l'exécuter ici. Il ne prouve pas que le
+   raccourci rouvre l'application — il prouve que les DEUX portes n'ont pas
+   recommencé à diverger, ce qui est précisément la faute payée. */
+const _srcM = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8');
+
+// Le corps accolé qui SUIT un marqueur — du `{` à l'accolade de même niveau.
+const _corpsApres = (src, marqueur) => {
+  const i = src.indexOf(marqueur);
+  if (i < 0) return null;
+  const d = src.indexOf('{', i);
+  if (d < 0) return null;
+  let n = 0;
+  for (let k = d; k < src.length; k++) {
+    if (src[k] === '{') n++;
+    else if (src[k] === '}') { n--; if (!n) return src.slice(d, k + 1); }
+  }
+  return null;
+};
+
+const _MARQUE_2E = "app.on('second-instance'";
+const _MARQUE_MONTRER = 'const montrerAdministration =';
+
+cas('le raccourci du bureau passe par la porte de l’icône', () => {
+  const c = _corpsApres(_srcM, _MARQUE_2E);
+  assert.ok(c, 'aucun gestionnaire `second-instance` : le raccourci ne fait plus rien du tout');
+  assert.ok(c.indexOf('montrerAdministration') >= 0,
+    'le gestionnaire `second-instance` n’appelle pas montrerAdministration : '
+    + 'c’est une seconde porte, et c’est en divergeant qu’elle a cessé de montrer la fenêtre');
+});
+
+cas('la porte commune MONTRE (et pas seulement `focus`)', () => {
+  const c = _corpsApres(_srcM, _MARQUE_MONTRER);
+  assert.ok(c, 'montrerAdministration introuvable');
+  assert.ok(/\.show\(\)/.test(c),
+    'montrerAdministration ne fait plus `show()` : une fenêtre CACHÉE par le X resterait invisible, '
+    + 'et l’icône comme le raccourci paraîtraient morts');
+});
+
+cas('la porte commune RECRÉE la fenêtre quand elle a été détruite', () => {
+  const c = _corpsApres(_srcM, _MARQUE_MONTRER);
+  assert.ok(c && c.indexOf('createWindow()') >= 0,
+    'montrerAdministration ne recrée pas la fenêtre : après la sortie de secours du garde des '
+    + 'brouillons, la veille garde le processus vivant SANS fenêtre, et plus rien ne peut la rouvrir');
+  assert.ok(c && /isDestroyed\(\)/.test(c),
+    'montrerAdministration ne teste pas isDestroyed() : `mainWindow` survit à sa destruction dans '
+    + 'certains chemins, et on appellerait show() sur un cadavre');
+});
+
+console.log('\n── PANNES PROVOQUÉES — LA PORTE DU RACCOURCI ────────────────');
+
+/* ⚠ Sans ceci, les trois cas ci-dessus seraient satisfaits par la version
+   FAUTIVE aussi bien que par la bonne — et ne mesureraient rien. On rejoue donc
+   le gestionnaire exact d'avant le 2026-09-18, et on exige qu'il soit REFUSÉ. */
+const _AVANT = "app.on('second-instance', () => {\n"
+  + '    if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); }\n'
+  + '  });';
+
+cas('PANNE : l’ancien gestionnaire (restore + focus, sans show) est REFUSÉ', () => {
+  const c = _corpsApres(_AVANT, _MARQUE_2E);
+  assert.ok(c, 'la panne provoquée ne se lit même pas — le banc ne prouverait rien');
+  assert.ok(c.indexOf('montrerAdministration') < 0,
+    'le banc accepterait l’ancien gestionnaire : il est décoratif');
+});
+
+cas('PANNE : une porte commune sans `show()` est REFUSÉE', () => {
+  const faux = 'const montrerAdministration = () => {\n'
+    + '  if (!mainWindow || mainWindow.isDestroyed()) { createWindow(); return; }\n'
+    + '  if (mainWindow.isMinimized()) mainWindow.restore();\n'
+    + '  mainWindow.focus();\n'
+    + '};';
+  const c = _corpsApres(faux, _MARQUE_MONTRER);
+  assert.ok(c, 'la panne provoquée ne se lit même pas');
+  assert.ok(!/\.show\(\)/.test(c), 'le banc accepterait une porte qui ne montre rien');
+});
+
 console.log('\n' + (process.exitCode ? '✗ DES CAS ONT ÉCHOUÉ' : '✓ ' + vert + ' cas verts') + '\n');
