@@ -2441,6 +2441,7 @@ const OPS_PONT = new Set([
   'config:marque:donnees', 'config:marque:ecrire', 'config:marque:reinit',
   'config:icones:donnees', 'config:icones:ajouter', 'config:icones:supprimer',
   'config:icones:ico', 'config:icones:convertir',
+  'config:conformite:donnees', 'config:conformite:ecrire',
   'config:taxes:donnees', 'config:taxes:ecrire', 'config:taxes:reinit',
   'config:taxes:reference', 'config:taxes:revision', 'config:taxes:pays', 'config:taxes:paysoter',
   'config:paiements:donnees', 'config:paiements:ecrire', 'config:paiements:options',
@@ -3010,6 +3011,8 @@ const LIMITES_PONT = {
   'config:icones:donnees': 15000, 'config:icones:ajouter': 90000,
   'config:icones:supprimer': 30000, 'config:icones:ico': 60000, 'config:icones:convertir': 90000,
   // Chaque ecriture de taux fait un compare-et-ecris cote serveur.
+  // #117 — le registre de conformite : meme compare-et-ecris cote serveur.
+  'config:conformite:donnees': 15000, 'config:conformite:ecrire': 30000,
   'config:taxes:donnees': 15000, 'config:taxes:ecrire': 30000, 'config:taxes:reinit': 30000,
   'config:taxes:reference': 30000, 'config:taxes:revision': 30000,
   'config:taxes:pays': 30000, 'config:taxes:paysoter': 30000,
@@ -3637,6 +3640,7 @@ const PAGES_ANCRABLES = () => ({
   'config-marque': ['Logos et marque', () => pageMarque()],
   'config-icones': ['Icônes personnalisées', () => pageIcones()],
   'config-taxes': ['Gestion des taxes', () => pageTaxes()],
+  'config-conformite': ['Conformité internationale', () => pageConformite()],
   'config-paiements': ['Configuration des paiements', () => pagePaiementsConfig()],
   'config-cles': ['Clés API', () => pageClesConfig()],
   'config-livraison': ['Configuration de la livraison', () => pageLivraison()],
@@ -5450,6 +5454,7 @@ const { pageApparence } = require('./fenetres/apparence');
 const { pageMarque } = require('./fenetres/marque');
 const { pageIcones } = require('./fenetres/icones');
 const { pageTaxes } = require('./fenetres/taxes');
+const { pageConformite } = require('./fenetres/conformite');
 const { pagePaiementsConfig } = require('./fenetres/paiements-config');
 const { pageClesConfig } = require('./fenetres/cles');
 const { pageStudio } = require('./fenetres/studio');
@@ -5648,7 +5653,7 @@ const actionApp = (nom, arg) => {
     // sa section hote cote site n existe que pour porter la zone d ancrage.
     case 'livre':
     case 'config-heures': case 'config-footer': case 'config-apparence':
-    case 'config-marque': case 'config-icones': case 'config-taxes':
+    case 'config-marque': case 'config-icones': case 'config-taxes': case 'config-conformite':
     case 'config-paiements': case 'config-cles': case 'studio':
     case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
