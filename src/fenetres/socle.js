@@ -1466,6 +1466,82 @@ function szPied(compte, gestes){
     + '</div>';
 }
 
+/* ══ szCSV — LE TABLEAU, EN FICHIER ═══════════════════════════════════════
+   szCSV(entetes, lignes) rend le texte d un CSV. entetes = tableau de titres,
+   lignes = tableau de tableaux de valeurs.
+
+   ⚠ LE BOM EN TETE, ET CE N EST PAS DECORATIF : sans lui, Excel lit un fichier
+   UTF-8 comme du latin-1 et toutes les accentuees sortent en charabia. C est le
+   premier reproche qu on entend sur un export, et il n a rien a voir avec les
+   donnees. bankrec.js le pose deja ; on fait pareil.
+
+   ⚠ LA VIRGULE COMME SEPARATEUR, comme bankrec.js — et pas le point-virgule,
+   meme si c est la convention d Excel en francais. DEUX conventions d export
+   dans la meme application seraient pires qu une seule imparfaite : le comptable
+   en apprend UNE.
+
+   ⚠ TOUT EST ENTRE GUILLEMETS, et les guillemets internes doubles. Un nom de
+   fournisseur contenant une virgule decalerait sinon toutes les colonnes a
+   partir de lui — et ca ne se voit qu une fois le fichier ouvert. */
+function szCSV(entetes, lignes){
+  var q = function(v){
+    if (v == null) return '""';
+    return '"' + String(v).split('"').join('""') + '"';
+  };
+  var out = '\\ufeff';
+  if (entetes && entetes.length) out += entetes.map(q).join(',') + '\\n';
+  (lignes || []).forEach(function(l){ out += (l || []).map(q).join(',') + '\\n'; });
+  return out;
+}
+
+/* ══ szExporter — ECRIRE LE FICHIER, ET DIRE OU IL EST ALLE ═══════════════
+   szExporter(nom, contenu, quoi) ecrit dans le dossier des exports et annonce
+   le resultat par dire(). quoi = ce qu on a exporte, deja traduit chez
+   l appelant (<< La liste >>, << Le journal >>...).
+
+   ⚠⚠ CE VERBE EXISTAIT DEJA DANS LA COQUILLE et DEUX fenetres sur 102 s en
+   servaient (catalogio, sociaux). Ce n est donc pas une capacite qu on ajoute,
+   c est une capacite qu on RAMENE au socle — la difference compte : rien de
+   neuf n est a eprouver cote coquille.
+
+   ⚠ LE REPLI DE LA VIEILLE COQUILLE EST OBLIGATOIRE. Le site se met a jour
+   avant l application : une fenetre peut appeler un verbe que la coquille
+   installee ne connait pas encore. Sans ce test, le bouton ne ferait RIEN et
+   personne ne saurait pourquoi. catalogio le fait deja, mot pour mot.
+
+   ⚠ ON NOMME LE DOSSIER REEL, PAS << le dossier des exports >>. C est la
+   phrase qui trompait des qu un dossier personnel etait regle. Et on relit le
+   dossier APRES l ecriture : le repli se decide au moment d ecrire, pas au
+   dernier dessin. */
+function szExporter(nom, contenu, quoi){
+  var P0 = window.szPont;
+  if (!P0 || !P0.enregistrerExport) {
+    szDire('${T("Cette version de l’application ne sait pas encore écrire le fichier ici.")} '
+      + '${T("Fermez et relancez l’application : elle se met à jour au démarrage.")}', 'err');
+    return Promise.resolve(false);
+  }
+  if (!nom || contenu == null) {
+    szDire('${T("Rien à exporter.")}', 'att');
+    return Promise.resolve(false);
+  }
+  return P0.enregistrerExport(nom, contenu).then(function(res){
+    if (!res || !res.ok) {
+      szDire('${T("Écriture impossible :")} ' + ((res && res.error) || '?'), 'err');
+      return false;
+    }
+    var fin = function(d){
+      var ou = (d && d.dir) ? d.dir : '${T("le dossier des exports")}';
+      szDire((quoi || '${T("Le fichier")}') + ' ${T("enregistré :")} ' + nom
+        + ' ${T("— dans")} ' + ou + '.'
+        + ((d && d.repli) ? ' ${T("Votre dossier ne répondait pas.")}' : ''),
+        (d && d.repli) ? 'att' : 'bon');
+      return true;
+    };
+    if (!P0.dossierExports) return fin(null);
+    return P0.dossierExports().then(fin).catch(function(){ return fin(null); });
+  });
+}
+
 /* ⚠ EXPOSITION GARDEE, ET UN BANC L A EXIGEE. Le banc des mesures de langue
    execute les recettes du socle DANS NODE, ou window n existe pas : une
    affectation nue au premier niveau leve << window is not defined >> et
@@ -1475,6 +1551,8 @@ try {
   if (typeof window !== 'undefined') {
     window.szTransition = szTransition;
     window.szPied = szPied;
+    window.szCSV = szCSV;
+    window.szExporter = szExporter;
   }
 } catch (e) {}
 `;

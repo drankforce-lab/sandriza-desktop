@@ -247,7 +247,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         rows.length === (D.total || rows.length)
           ? rows.length + ' ' + (rows.length > 1 ? '${T("fournisseurs")}' : '${T("fournisseur")}')
           : rows.length + '${T(" sur ")}' + (D.total || 0),
-        '<button class="mini" id="f-repertoire2"><span class="ic">🔎</span>${T(" Répertoire")}</button>'
+        '<button class="mini" id="f-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>'
+        + '<button class="mini" id="f-repertoire2"><span class="ic">🔎</span>${T(" Répertoire")}</button>'
         + '<button class="mini" id="f-nouveau2">${T("+ Nouveau fournisseur")}</button>');
     }
     corps.innerHTML = h;
@@ -279,6 +280,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ['f-repertoire', 'f-repertoire2'].forEach(function(id){
       var b = document.getElementById(id); if (b) b.onclick = ouvrirRepertoire;
     });
+
+    /* ⚠⚠ ON EXPORTE CE QUI EST À L'ÉCRAN, PAS LA BASE ENTIÈRE. Si une recherche
+       filtre la liste, le fichier porte le résultat filtré — c'est ce que la
+       personne voit et ce qu'elle croit demander. Exporter silencieusement les
+       400 fournisseurs alors que l'écran en montre 3 serait la pire des
+       surprises : un fichier qui ne ressemble pas à l'écran d'où il sort.
+       ⚠ Et le nom du fichier PORTE LA DATE : deux exports du même écran à deux
+       jours d'intervalle ne doivent pas s'écraser l'un l'autre. */
+    var ex = document.getElementById('f-exporter');
+    if (ex) ex.onclick = function(){
+      var lignes = (D.lignes || []).map(function(r){
+        return [r.nom || '', r.contact || '', r.courriel || '', r.telephone || '',
+          (r.categories || []).join(' · '),
+          r.actif ? '${T("Actif")}' : '${T("Inactif")}', r.site || ''];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Fournisseur")}', '${T("Contact")}', '${T("Courriel")}',
+        '${T("Téléphone")}', '${T("Catégories")}', '${T("Statut")}', '${T("Site")}'], lignes);
+      var jour = new Date().toISOString().slice(0, 10);
+      szExporter('fournisseurs-' + jour + '.csv', csv, '${T("La liste des fournisseurs")}');
+    };
   }
 
   function brancherRepertoire(){

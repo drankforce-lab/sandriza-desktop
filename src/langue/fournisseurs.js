@@ -29,6 +29,13 @@ module.exports = {
      aucune des deux langues, et le banc des pluriels le refuse — a raison :
      c est la forme qu on ecrit quand on ne veut pas choisir.
      ⚠ Minuscules : le mot suit un nombre dans une phrase, il ne commence rien. */
+  /* ── L EXPORT DE LA LISTE (2026-09-19) ─────────────────────────────────
+     Les en-tetes du fichier. ⚠ Ils NE SONT PAS les memes que ceux du tableau
+     a l ecran : la colonne << Courriel / Tel. >> y tient deux donnees, alors
+     qu un CSV les veut separees. Un fichier n est pas une capture d ecran. */
+  'Téléphone': 'Phone',
+  'Site': 'Website',
+  'La liste des fournisseurs': 'The supplier list',
   'fournisseur': 'supplier',
   'fournisseurs': 'suppliers',
   'Fournisseurs indisponibles': 'Suppliers unavailable',

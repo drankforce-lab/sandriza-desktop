@@ -251,4 +251,27 @@ module.exports = {
      remboursé, crédits émis, solde à honorer). « Stats » disait autre chose. */
   'Masquer les totaux': 'Hide the totals',
   'Afficher les totaux': 'Show the totals',
+  /* ── L EXPORT, RAMENE AU SOCLE (2026-09-19) ──────────────────────────────
+     ⚠⚠ CES PHRASES EXISTAIENT DEJA — dans le dictionnaire de catalogio, la
+     fenetre qui savait exporter. Quand `szExporter` est descendu au socle,
+     elles sont sorties EN FRANCAIS sur la page anglaise : `T()` appele depuis
+     le socle consulte le dictionnaire DU SOCLE, jamais celui de la fenetre
+     qui affiche la page. C est le banc des effets de langue qui l a dit —
+     << leur traduction existe deja >>, et c etait vrai : ailleurs.
+     ➡ UN VERBE QUI DESCEND AU SOCLE EMMENE SES MOTS AVEC LUI. */
+  'Cette version de l’application ne sait pas encore écrire le fichier ici.':
+    'This version of the application cannot write the file here yet.',
+  'Fermez et relancez l’application : elle se met à jour au démarrage.':
+    'Close and restart the application: it updates itself on startup.',
+  'Rien à exporter.': 'Nothing to export.',
+  /* ⚠ AU SOCLE, et pas dans une fenetre : ce libelle va paraitre dans le pied
+     de CHAQUE liste. Une entree par fenetre serait 102 entrees a tenir
+     d accord, et c est celle qu on oublie qui sortirait en francais. */
+  ' Exporter': ' Export',
+  'Écriture impossible :': 'Could not write:',
+  'le dossier des exports': 'the exports folder',
+  'Le fichier': 'The file',
+  'enregistré :': 'saved:',
+  '— dans': '— in',
+  'Votre dossier ne répondait pas.': 'Your folder was not responding.',
 };
